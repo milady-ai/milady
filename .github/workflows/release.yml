@@ -59,12 +59,12 @@ jobs:
       matrix:
         platform:
           - name: macOS (Intel)
-            runner: macos-13
+            runner: macos-14
             electron-args: --mac --x64
             artifact-glob: "*.dmg"
             artifact-name: macos-x64
           - name: macOS (Apple Silicon)
-            runner: macos-latest
+            runner: macos-14
             electron-args: --mac --arm64
             artifact-glob: "*.dmg"
             artifact-name: macos-arm64
@@ -94,7 +94,7 @@ jobs:
           bun-version: latest
 
       - name: Install root dependencies
-        run: bun install
+        run: npm ci
 
       - name: Build core
         run: |
@@ -113,7 +113,7 @@ jobs:
         working-directory: apps/app
 
       - name: Install Electron dependencies
-        run: bun install
+        run: npm ci || npm install
         working-directory: apps/app/electron
 
       - name: Build Electron app
