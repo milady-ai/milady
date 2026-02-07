@@ -123,97 +123,23 @@ export interface ExtensionStatus {
   extensionPath: string | null;
 }
 
-// ---------------------------------------------------------------------------
-// Wallet / Inventory types
-// ---------------------------------------------------------------------------
+// Wallet types
 
-export interface WalletAddresses {
-  evmAddress: string | null;
-  solanaAddress: string | null;
-}
-
-export interface EvmTokenBalance {
-  symbol: string;
-  name: string;
-  contractAddress: string;
-  balance: string;
-  decimals: number;
-  valueUsd: string;
-  logoUrl: string;
-}
-
-export interface EvmChainBalance {
-  chain: string;
-  chainId: number;
-  nativeBalance: string;
-  nativeSymbol: string;
-  nativeValueUsd: string;
-  tokens: EvmTokenBalance[];
-}
-
-export interface SolanaTokenBalance {
-  symbol: string;
-  name: string;
-  mint: string;
-  balance: string;
-  decimals: number;
-  valueUsd: string;
-  logoUrl: string;
-}
-
+export interface WalletAddresses { evmAddress: string | null; solanaAddress: string | null }
+export interface EvmTokenBalance { symbol: string; name: string; contractAddress: string; balance: string; decimals: number; valueUsd: string; logoUrl: string }
+export interface EvmChainBalance { chain: string; chainId: number; nativeBalance: string; nativeSymbol: string; nativeValueUsd: string; tokens: EvmTokenBalance[] }
+export interface SolanaTokenBalance { symbol: string; name: string; mint: string; balance: string; decimals: number; valueUsd: string; logoUrl: string }
 export interface WalletBalancesResponse {
-  evm: {
-    address: string;
-    chains: EvmChainBalance[];
-  } | null;
-  solana: {
-    address: string;
-    solBalance: string;
-    solValueUsd: string;
-    tokens: SolanaTokenBalance[];
-  } | null;
+  evm: { address: string; chains: EvmChainBalance[] } | null;
+  solana: { address: string; solBalance: string; solValueUsd: string; tokens: SolanaTokenBalance[] } | null;
 }
+export interface EvmNft { contractAddress: string; tokenId: string; name: string; description: string; imageUrl: string; collectionName: string; tokenType: string }
+export interface SolanaNft { mint: string; name: string; description: string; imageUrl: string; collectionName: string }
+export interface WalletNftsResponse { evm: Array<{ chain: string; nfts: EvmNft[] }>; solana: { nfts: SolanaNft[] } | null }
+export interface WalletConfigStatus { alchemyKeySet: boolean; heliusKeySet: boolean; birdeyeKeySet: boolean; evmChains: string[]; evmAddress: string | null; solanaAddress: string | null }
+export interface WalletExportResult { evm: { privateKey: string; address: string | null } | null; solana: { privateKey: string; address: string | null } | null }
 
-export interface EvmNft {
-  contractAddress: string;
-  tokenId: string;
-  name: string;
-  description: string;
-  imageUrl: string;
-  collectionName: string;
-  tokenType: string;
-}
-
-export interface SolanaNft {
-  mint: string;
-  name: string;
-  description: string;
-  imageUrl: string;
-  collectionName: string;
-}
-
-export interface WalletNftsResponse {
-  evm: Array<{ chain: string; nfts: EvmNft[] }>;
-  solana: { nfts: SolanaNft[] } | null;
-}
-
-export interface WalletConfigStatus {
-  alchemyKeySet: boolean;
-  heliusKeySet: boolean;
-  birdeyeKeySet: boolean;
-  evmChains: string[];
-  evmAddress: string | null;
-  solanaAddress: string | null;
-}
-
-export interface WalletExportResult {
-  evm: { privateKey: string; address: string | null } | null;
-  solana: { privateKey: string; address: string | null } | null;
-}
-
-// ---------------------------------------------------------------------------
-// WebSocket event handler
-// ---------------------------------------------------------------------------
+// WebSocket
 
 export type WsEventHandler = (data: Record<string, unknown>) => void;
 
@@ -359,39 +285,16 @@ export class MilaidyClient {
     return this.fetch("/api/extension/status");
   }
 
-  // --- Wallet / Inventory ---
+  // Wallet
 
-  async getWalletAddresses(): Promise<WalletAddresses> {
-    return this.fetch("/api/wallet/addresses");
-  }
+  async getWalletAddresses(): Promise<WalletAddresses> { return this.fetch("/api/wallet/addresses"); }
+  async getWalletBalances(): Promise<WalletBalancesResponse> { return this.fetch("/api/wallet/balances"); }
+  async getWalletNfts(): Promise<WalletNftsResponse> { return this.fetch("/api/wallet/nfts"); }
+  async getWalletConfig(): Promise<WalletConfigStatus> { return this.fetch("/api/wallet/config"); }
+  async updateWalletConfig(config: Record<string, string>): Promise<{ ok: boolean }> { return this.fetch("/api/wallet/config", { method: "PUT", body: JSON.stringify(config) }); }
+  async exportWalletKeys(): Promise<WalletExportResult> { return this.fetch("/api/wallet/export", { method: "POST", body: JSON.stringify({ confirm: true }) }); }
 
-  async getWalletBalances(): Promise<WalletBalancesResponse> {
-    return this.fetch("/api/wallet/balances");
-  }
-
-  async getWalletNfts(): Promise<WalletNftsResponse> {
-    return this.fetch("/api/wallet/nfts");
-  }
-
-  async getWalletConfig(): Promise<WalletConfigStatus> {
-    return this.fetch("/api/wallet/config");
-  }
-
-  async updateWalletConfig(config: Record<string, string>): Promise<{ ok: boolean }> {
-    return this.fetch("/api/wallet/config", {
-      method: "PUT",
-      body: JSON.stringify(config),
-    });
-  }
-
-  async exportWalletKeys(): Promise<WalletExportResult> {
-    return this.fetch("/api/wallet/export", {
-      method: "POST",
-      body: JSON.stringify({ confirm: true }),
-    });
-  }
-
-  // --- WebSocket ---
+  // WebSocket
 
   connectWs(): void {
     if (this.ws?.readyState === WebSocket.OPEN) return;
