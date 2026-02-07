@@ -110,7 +110,11 @@ jobs:
         run: node scripts/ui.js build
 
       - name: Install Capacitor app dependencies
-        run: npm install --no-audit --no-fund
+        run: bun install
+        working-directory: apps/app
+
+      - name: Build Capacitor plugins
+        run: bun run plugin:build
         working-directory: apps/app
 
       - name: Build Capacitor app
