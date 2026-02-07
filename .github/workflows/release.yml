@@ -109,16 +109,16 @@ jobs:
       - name: Build UI
         run: node scripts/ui.js build
 
+      - name: Install Capacitor app dependencies
+        run: bun install
+        working-directory: apps/app
+
       - name: Build Capacitor plugins
-        run: |
-          for d in gateway swabble camera screencapture canvas desktop location talkmode agent; do
-            echo "[plugin:$d] building..."
-            cd plugins/$d && npm run build && cd ../..
-          done
+        run: bun run plugin:build
         working-directory: apps/app
         shell: bash
 
-      - name: Install Capacitor app dependencies
+      - name: Refresh Capacitor app dependencies
         run: bun install
         working-directory: apps/app
 
