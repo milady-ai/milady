@@ -15,6 +15,34 @@ published to npm with the `next` dist-tag and proper `dist/` contents.
 
 ---
 
+## Re-enabled on 2026-02-07 (second batch)
+
+6 additional plugins from the "still disabled" list have been resolved.
+
+### Already working (no fix needed)
+
+These 3 plugins were listed as disabled but were actually already enabled in
+`CORE_PLUGINS` and import correctly at runtime:
+
+| Plugin | Status | Notes |
+|--------|--------|-------|
+| `@elizaos/plugin-browser` | Working | `2.0.0-alpha.4` — `dist/index.js` present, imports OK |
+| `@elizaos/plugin-code` | Working | `2.0.0-alpha.3` — `dist/index.js` present, imports OK |
+| `@elizaos/plugin-vision` | Working | `2.0.0-alpha.3` — `dist/index.js` present, imports OK (tfjs falls back to cpu backend) |
+
+### Fixed and re-published
+
+These 3 plugins had genuine issues that were fixed, rebuilt, and published as
+`2.0.0-alpha.5` (next):
+
+| Plugin | Root Cause | Fix Applied |
+|--------|-----------|-------------|
+| `@elizaos/plugin-form` | Build used `runBuild` helper (unreachable `build-utils`) producing `dist/node/index.node.js` but `package.json` pointed to `dist/index.js` | Rewrote `build.ts` to use direct `Bun.build` → outputs `dist/index.js`; version bumped to `2.0.0-alpha.5` |
+| `@elizaos/plugin-goals` | `requireProviderSpec("goals")` called with lowercase `"goals"` but spec defines `name: "GOALS"` — case-sensitive Map lookup fails | Changed to `requireProviderSpec("GOALS")` in `providers/goals.ts`; version bumped to `2.0.0-alpha.5` |
+| `@elizaos/plugin-scheduling` | Build used `runBuild` with `outdir: "../dist"` writing JS to parent dir; only a `.d.ts` stub ended up in the published `dist/` | Rewrote `build.ts` to use direct `Bun.build` with `outdir: "dist"`; version bumped to `2.0.0-alpha.5` |
+
+---
+
 ## Remaining overrides
 
 ### `@elizaos/plugin-cli` override (kept)
@@ -29,14 +57,14 @@ The override ensures all transitive references resolve to the `next` tag:
 
 ### `@elizaos/computeruse` override (resolved)
 
-`@elizaos/computeruse` (the native napi-rs addon) is now published to npm (v0.24.22+).
-The override pins the minimum version to satisfy `@elizaos/plugin-computeruse`'s peer
-dependency (`>=0.24.20`). On macOS ARM64, the native `@elizaos/computeruse-darwin-arm64`
-binary is installed automatically. Other platforms fall back to MCP mode until their
-platform packages are published via the `release-computeruse-npm` workflow in `eliza/.github/workflows/`.
+`@elizaos/computeruse` (the native napi-rs addon) is now published to npm on the `next`
+dist-tag, aligned with the monorepo `2.0.0-alpha.x` versioning and managed by lerna.
+On macOS ARM64, the native `@elizaos/computeruse-darwin-arm64` binary is installed
+automatically. Other platforms fall back to MCP mode until their platform packages
+are published via the `release-computeruse-npm` workflow in `eliza/.github/workflows/`.
 
 ```json
-"@elizaos/computeruse": ">=0.24.22"
+"@elizaos/computeruse": "next"
 ```
 
 ---
@@ -71,15 +99,6 @@ New CLI commands:
 
 ---
 
-## Still disabled (other reasons — not in original list)
+## Still disabled
 
-These plugins remain commented out in `CORE_PLUGINS` for reasons unrelated to npm resolution:
-
-| Plugin | Reason |
-|--------|--------|
-| `@elizaos/plugin-form` | Published without `dist/` — npm package is empty |
-| `@elizaos/plugin-browser` | Stale `workspace:*` dep on `@elizaos/plugin-cli` causes missing export |
-| `@elizaos/plugin-code` | Spec name mismatch (`coderStatusProvider` vs `CODER_STATUS`) in published package |
-| `@elizaos/plugin-goals` | `actions.json` has placeholder data — missing CANCEL_GOAL, CREATE_GOAL, etc. |
-| `@elizaos/plugin-scheduling` | Published without `dist/` — npm package is empty |
-| `@elizaos/plugin-vision` | `@tensorflow/tfjs-node` native addon fails to build on macOS |
+**None.** All previously-disabled plugins have been resolved and re-enabled.

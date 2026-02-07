@@ -1335,7 +1335,7 @@ export class MilaidyApp extends LitElement {
 
   private renderOnboardingWelcome() {
     return html`
-      <img class="onboarding-avatar" src="/pfp.png" alt="milAIdy" />
+      <img class="onboarding-avatar" src="/pfp.jpg" alt="milAIdy" />
       <h1 class="onboarding-welcome-title">Welcome to milAIdy!</h1>
       <p class="onboarding-welcome-sub">The agent of choice for network spiritualists</p>
       <button class="btn" @click=${this.handleOnboardingNext}>Continue</button>
@@ -1344,7 +1344,7 @@ export class MilaidyApp extends LitElement {
 
   private renderOnboardingName(opts: OnboardingOptions) {
     return html`
-      <img class="onboarding-avatar" src="/pfp.png" alt="milAIdy" style="width:100px;height:100px;" />
+      <img class="onboarding-avatar" src="/pfp.jpg" alt="milAIdy" style="width:100px;height:100px;" />
       <div class="onboarding-speech">errr, what was my name again...?</div>
       <div class="onboarding-options">
         ${opts.names.map(
@@ -1394,7 +1394,7 @@ export class MilaidyApp extends LitElement {
 
   private renderOnboardingStyle(opts: OnboardingOptions) {
     return html`
-      <img class="onboarding-avatar" src="/pfp.png" alt="milAIdy" style="width:100px;height:100px;" />
+      <img class="onboarding-avatar" src="/pfp.jpg" alt="milAIdy" style="width:100px;height:100px;" />
       <div class="onboarding-speech">so what's the vibe here?</div>
       <div class="onboarding-options">
         ${opts.styles.map(
@@ -1422,7 +1422,7 @@ export class MilaidyApp extends LitElement {
     const needsKey = selected && selected.envKey && selected.id !== "elizacloud" && selected.id !== "ollama";
 
     return html`
-      <img class="onboarding-avatar" src="/pfp.png" alt="milAIdy" style="width:100px;height:100px;" />
+      <img class="onboarding-avatar" src="/pfp.jpg" alt="milAIdy" style="width:100px;height:100px;" />
       <div class="onboarding-speech">which AI provider do you want to use?</div>
       <div class="onboarding-options">
         ${opts.providers.map(

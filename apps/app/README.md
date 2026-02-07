@@ -1,331 +1,132 @@
-# Milaidy Capacitor App
+<p align="center">
+  <img src="../ui/public/pfp.jpg" alt="Milaidy" width="120" />
+</p>
 
-A unified cross-platform application built with Capacitor, supporting iOS, Android, macOS, Linux, and Windows.
+<h1 align="center">Milaidy</h1>
 
-## Architecture
+<p align="center">
+  <em>cute agents for the acceleration</em>
+</p>
 
-This application uses Capacitor as the cross-platform runtime, enabling deployment to:
+<p align="center">
+  <a href="https://github.com/milady-ai/milaidy/actions/workflows/release.yml"><img src="https://github.com/milady-ai/milaidy/actions/workflows/release.yml/badge.svg" alt="Build & Release" /></a>
+  <a href="https://github.com/milady-ai/milaidy/actions/workflows/test.yml"><img src="https://github.com/milady-ai/milaidy/actions/workflows/test.yml/badge.svg" alt="Tests" /></a>
+  <a href="https://www.npmjs.com/package/milaidy"><img src="https://img.shields.io/npm/v/milaidy" alt="npm version" /></a>
+  <a href="https://github.com/milady-ai/milaidy/blob/main/LICENSE"><img src="https://img.shields.io/github/license/milady-ai/milaidy" alt="License" /></a>
+</p>
 
-- **iOS** - Native via Capacitor iOS
-- **Android** - Native via Capacitor Android
-- **macOS/Linux/Windows** - Desktop via Capacitor Electron
+<p align="center">
+  <a href="https://milady.ai">milady.ai</a>
+</p>
 
-The web UI from `milaidy/apps/ui` is integrated and enhanced with native capabilities through custom Capacitor plugins.
+---
 
-## Custom Plugins
+A personal AI assistant you run on your own devices, built on [ElizaOS](https://github.com/elizaos). Cross-platform — macOS, Windows, Linux, iOS, and Android.
 
-### Gateway Plugin (`@milaidy/capacitor-gateway`)
+## Install
 
-WebSocket connectivity to the Milaidy Gateway for agent communication.
+### One-line install (recommended)
 
-```typescript
-import { Gateway } from '@milaidy/capacitor-gateway';
+macOS / Linux / WSL:
 
-// Connect to gateway
-await Gateway.connect({ url: 'wss://gateway.example.com' });
-
-// Send RPC request
-const response = await Gateway.rpc({
-  method: 'agent.invoke',
-  params: { prompt: 'Hello' }
-});
-
-// Listen for events
-Gateway.addListener('message', (event) => {
-  console.log('Received:', event.data);
-});
+```bash
+curl -fsSL https://milady-ai.github.io/milaidy/install.sh | bash
 ```
 
-### Swabble Voice Plugin (`@milaidy/capacitor-swabble`)
+Windows (PowerShell):
 
-Voice wake word detection and speech-to-text.
-
-```typescript
-import { Swabble } from '@milaidy/capacitor-swabble';
-
-// Start listening with wake word triggers
-await Swabble.start({
-  config: {
-    triggers: ['milaidy'],
-    minPostTriggerGap: 0.45,
-    minCommandLength: 1,
-    locale: 'en-US'
-  }
-});
-
-// Listen for wake word detection
-Swabble.addListener('wakeWord', (event) => {
-  console.log(`Wake word: ${event.wakeWord}`);
-  console.log(`Command: ${event.command}`);
-});
-
-// Listen for transcripts
-Swabble.addListener('transcript', (event) => {
-  console.log(`Transcript: ${event.transcript}`);
-});
+```powershell
+irm https://milady-ai.github.io/milaidy/install.ps1 | iex
 ```
 
-### Camera Plugin (`@milaidy/capacitor-camera`)
+### npm / npx
 
-Photo and video capture with advanced controls.
-
-```typescript
-import { Camera } from '@milaidy/capacitor-camera';
-
-// Get available cameras
-const { devices } = await Camera.getDevices();
-
-// Start camera preview
-await Camera.startPreview({
-  element: document.getElementById('preview'),
-  direction: 'back',
-  resolution: { width: 1920, height: 1080 }
-});
-
-// Capture photo
-const photo = await Camera.capturePhoto({
-  quality: 90,
-  format: 'jpeg'
-});
-
-// Start/stop video recording
-await Camera.startRecording({ quality: 'high', audio: true });
-const video = await Camera.stopRecording();
+```bash
+npm install -g milaidy
+# or run without installing
+npx milaidy
+# or with bun
+bunx milaidy
 ```
 
-### Screen Capture Plugin (`@milaidy/capacitor-screencapture`)
+Then run setup:
 
-Screen recording and screenshots.
-
-```typescript
-import { ScreenCapture } from '@milaidy/capacitor-screencapture';
-
-// Capture screenshot
-const screenshot = await ScreenCapture.captureScreenshot({
-  format: 'png',
-  quality: 100
-});
-
-// Start screen recording
-await ScreenCapture.startRecording({
-  quality: 'high',
-  captureAudio: true,
-  captureMicrophone: false
-});
-
-// Stop and get recording
-const recording = await ScreenCapture.stopRecording();
+```bash
+milaidy setup
 ```
 
-### Canvas Plugin (`@milaidy/capacitor-canvas`)
+### Download the App
 
-A2UI integration and canvas rendering for agent-controlled UI.
+Desktop and mobile builds are available on the [Releases](https://github.com/milady-ai/milaidy/releases) page:
 
-```typescript
-import { Canvas } from '@milaidy/capacitor-canvas';
+| Platform | Format |
+|---|---|
+| macOS (Apple Silicon) | `.dmg` |
+| macOS (Intel) | `.dmg` |
+| Windows | `.exe` installer |
+| Linux | `.AppImage`, `.deb` |
+| iOS | App Store (coming soon) |
+| Android | Play Store (coming soon) |
 
-// Create canvas
-const { canvasId } = await Canvas.create({
-  size: { width: 800, height: 600 },
-  backgroundColor: { r: 255, g: 255, b: 255 }
-});
+## Quick Start
 
-// Attach to DOM
-await Canvas.attach({
-  canvasId,
-  element: document.getElementById('canvas-container')
-});
-
-// Draw shapes
-await Canvas.drawRect({
-  canvasId,
-  rect: { x: 100, y: 100, width: 200, height: 150 },
-  fill: { color: { r: 66, g: 133, b: 244 } },
-  cornerRadius: 8
-});
-
-// Draw text
-await Canvas.drawText({
-  canvasId,
-  text: 'Hello World',
-  position: { x: 150, y: 200 },
-  style: { font: 'Arial', size: 24, color: '#333' }
-});
-
-// Export to image
-const image = await Canvas.toImage({ canvasId, format: 'png' });
-```
-
-### Desktop Plugin (`@milaidy/capacitor-desktop`)
-
-Desktop-specific features for Electron (system tray, global shortcuts, auto-launch).
-
-```typescript
-import { Desktop } from '@milaidy/capacitor-desktop';
-
-// Create system tray
-await Desktop.createTray({
-  icon: '/assets/tray-icon.png',
-  tooltip: 'Milaidy',
-  menu: [
-    { id: 'show', label: 'Show Window' },
-    { id: 'separator', type: 'separator' },
-    { id: 'quit', label: 'Quit' }
-  ]
-});
-
-// Register global shortcut
-await Desktop.registerShortcut({
-  id: 'toggle',
-  accelerator: 'CommandOrControl+Shift+O'
-});
-
-Desktop.addListener('shortcutPressed', (event) => {
-  if (event.id === 'toggle') {
-    Desktop.showWindow();
-  }
-});
-
-// Enable auto-launch
-await Desktop.setAutoLaunch({
-  enabled: true,
-  openAsHidden: true
-});
-```
-
-## Project Structure
-
-```
-milaidy/apps/app/
-├── src/
-│   ├── main.ts           # Main entry point
-│   └── bridge/           # Capacitor bridge utilities
-├── plugins/
-│   ├── gateway/          # Gateway WebSocket plugin
-│   ├── swabble/          # Voice wake plugin
-│   ├── camera/           # Camera plugin
-│   ├── screencapture/    # Screen capture plugin
-│   ├── canvas/           # Canvas rendering plugin
-│   └── desktop/          # Desktop features plugin
-├── ios/                  # iOS native project
-├── android/              # Android native project
-├── index.html            # HTML entry point
-├── vite.config.ts        # Vite build config
-├── capacitor.config.ts   # Capacitor config
-└── package.json
+```bash
+milaidy onboard --install-daemon
+milaidy agent --message "hello" --thinking high
 ```
 
 ## Development
 
-### Prerequisites
-
-- Node.js 18+
-- Bun (recommended) or npm
-- For iOS: macOS with Xcode 15+
-- For Android: Android Studio with SDK 34+
-- For Desktop: Electron (via @capacitor-community/electron)
+**Prerequisites:** Node.js >= 22, bun
 
 ### Setup
 
 ```bash
-# Install dependencies
+git clone https://github.com/milady-ai/milaidy.git
+cd milaidy
+
+pnpm install
+pnpm build
+```
+
+### Run the App (Desktop)
+
+```bash
+cd apps/app
 bun install
-
-# Build plugins
-bun run plugin:build
-
-# Build web assets
-bun run build
-```
-
-### Running on iOS
-
-```bash
-# Sync and open Xcode
-bun run ios
-```
-
-### Running on Android
-
-```bash
-# Sync and open Android Studio
-bun run android
-```
-
-### Running on Desktop (Electron)
-
-```bash
-# Sync and open Electron
+bun run build:electron
 bun run electron
 ```
 
-### Development Server
+### Dev Server
 
 ```bash
-# Start Vite dev server
+cd apps/app
 bun run dev
 ```
 
-## Building for Production
+### Mobile
 
-### iOS
+```bash
+# iOS (requires macOS + Xcode 15+)
+bun run ios
 
-1. Open Xcode: `bun run cap:open:ios`
-2. Select your signing team
-3. Archive and distribute
-
-### Android
-
-1. Open Android Studio: `bun run cap:open:android`
-2. Build > Generate Signed Bundle/APK
-
-### Desktop
-
-1. Configure electron-builder in the electron folder
-2. Build using `npx electron-builder`
-
-## Configuration
-
-### Capacitor Config (`capacitor.config.ts`)
-
-```typescript
-const config: CapacitorConfig = {
-  appId: 'com.miladyai.milaidy',
-  appName: 'Milaidy',
-  webDir: 'dist',
-  server: {
-    hostname: 'milaidy.local',
-    androidScheme: 'https',
-    iosScheme: 'milaidy'
-  },
-  plugins: {
-    // Plugin-specific configuration
-  }
-};
+# Android (requires Android Studio + SDK 34+)
+bun run android
 ```
 
-### Environment Variables
+### Build Plugins
 
-Create a `.env` file for configuration:
-
-```env
-VITE_GATEWAY_URL=wss://gateway.milady.ai
-VITE_API_KEY=your-api-key
+```bash
+bun run plugin:build
 ```
 
-## Permissions
+### Tests
 
-### iOS (Info.plist)
-
-- `NSMicrophoneUsageDescription` - For voice wake and video recording
-- `NSCameraUsageDescription` - For camera access
-- `NSSpeechRecognitionUsageDescription` - For speech recognition
-
-### Android (AndroidManifest.xml)
-
-- `RECORD_AUDIO` - For voice wake and video recording
-- `CAMERA` - For camera access
-- `INTERNET` - For gateway connection
+```bash
+# from repo root
+pnpm test
+```
 
 ## License
 

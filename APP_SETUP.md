@@ -76,7 +76,7 @@ Go to your repo Settings > Secrets and variables > Actions > New repository secr
 - `CSC_KEY_PASSWORD` -- the password you set when exporting the `.p12`
 - `APPLE_ID` -- `shawmakesmusic@gmail.com`
 - `APPLE_APP_SPECIFIC_PASSWORD` -- the app-specific password from Step 4
-- `APPLE_TEAM_ID` -- `CWQ8H2Y2YW`
+- `APPLE_TEAM_ID` -- `25877RY2EH`
 
 ---
 
@@ -124,7 +124,7 @@ No code signing required. AppImage and .deb targets work as-is.
 ## iOS -- App Store
 
 The bundle ID `com.miladyai.milaidy` is already registered in the Apple Developer portal.
-The Xcode project is configured with `DEVELOPMENT_TEAM = CWQ8H2Y2YW` and automatic signing.
+The Xcode project is configured with `DEVELOPMENT_TEAM = 25877RY2EH` and automatic signing.
 
 ### Build and Upload
 
@@ -242,7 +242,7 @@ Add these at **Settings > Secrets and variables > Actions** in the `milady-ai/mi
 | `CSC_KEY_PASSWORD` | Password for the `.p12` |
 | `APPLE_ID` | `shawmakesmusic@gmail.com` |
 | `APPLE_APP_SPECIFIC_PASSWORD` | App-specific password from appleid.apple.com |
-| `APPLE_TEAM_ID` | `CWQ8H2Y2YW` |
+| `APPLE_TEAM_ID` | `25877RY2EH` |
 
 ### Windows Signing (optional)
 
@@ -283,7 +283,7 @@ export CSC_LINK="$(base64 -i ~/path/to/milaidy-mac-cert.p12 | tr -d '\n')"
 export CSC_KEY_PASSWORD="your-password"
 export APPLE_ID="shawmakesmusic@gmail.com"
 export APPLE_APP_SPECIFIC_PASSWORD="xxxx-xxxx-xxxx-xxxx"
-export APPLE_TEAM_ID="CWQ8H2Y2YW"
+export APPLE_TEAM_ID="25877RY2EH"
 
 # Build and package
 cd apps/app
@@ -363,7 +363,7 @@ Without an EV cert, SmartScreen reputation builds over time. Users click "More i
 Verify `ANDROID_KEY_ALIAS` matches the alias from keytool (default: `milaidy`).
 
 ### iOS "No signing certificate found"
-Open Xcode > Preferences > Accounts, ensure your Apple ID is added and team `CWQ8H2Y2YW` is visible. Click Manage Certificates.
+Open Xcode > Preferences > Accounts, ensure your Apple ID is added and team `25877RY2EH` is visible. Click Manage Certificates.
 
 ### Build fails on GitHub Actions
 Check that all required secrets are set. Missing secrets result in empty env vars which cause electron-builder to skip signing silently (macOS builds will still produce DMGs, just unsigned).
