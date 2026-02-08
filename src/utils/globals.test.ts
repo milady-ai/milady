@@ -1,5 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { isTruthyEnvValue, isVerbose, isYes, logVerbose, setVerbose, setYes } from "./globals.js";
+import {
+  isTruthyEnvValue,
+  isVerbose,
+  isYes,
+  logVerbose,
+  setVerbose,
+  setYes,
+} from "./globals.js";
 
 describe("globals", () => {
   afterEach(() => {
@@ -29,19 +36,31 @@ describe("globals", () => {
 });
 
 describe("isTruthyEnvValue", () => {
-  it.each(["true", "TRUE", "True", "1", "yes", "YES", "on", "ON"])(
-    "returns true for %j",
-    (value) => {
-      expect(isTruthyEnvValue(value)).toBe(true);
-    },
-  );
+  it.each([
+    "true",
+    "TRUE",
+    "True",
+    "1",
+    "yes",
+    "YES",
+    "on",
+    "ON",
+  ])("returns true for %j", (value) => {
+    expect(isTruthyEnvValue(value)).toBe(true);
+  });
 
-  it.each(["false", "0", "no", "off", "", "maybe", "2", undefined])(
-    "returns false for %j",
-    (value) => {
-      expect(isTruthyEnvValue(value)).toBe(false);
-    },
-  );
+  it.each([
+    "false",
+    "0",
+    "no",
+    "off",
+    "",
+    "maybe",
+    "2",
+    undefined,
+  ])("returns false for %j", (value) => {
+    expect(isTruthyEnvValue(value)).toBe(false);
+  });
 
   it("trims whitespace", () => {
     expect(isTruthyEnvValue("  true  ")).toBe(true);

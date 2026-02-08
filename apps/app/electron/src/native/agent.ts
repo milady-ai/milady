@@ -13,7 +13,7 @@
  * remote — it simply connects to `http://localhost:{port}`.
  */
 
-import { ipcMain, BrowserWindow } from "electron";
+import { ipcMain, BrowserWindow, app } from "electron";
 import type { IpcMainInvokeEvent } from "electron";
 import path from "path";
 import type { IpcValue } from "./ipc-types";
@@ -72,10 +72,14 @@ export class AgentManager {
     this.sendToRenderer("agent:status", this.status);
 
     try {
-      // Resolve the milaidy dist relative to the compiled electron output.
-      // At runtime __dirname = electron/build/src/native/
-      // milaidy dist  = packages/milaidy/dist/  (6 levels up)
-      const milaidyDist = path.resolve(__dirname, "../../../../../../dist");
+      // Resolve the milaidy dist.
+      // In dev: __dirname = electron/build/src/native/ → 6 levels up to milaidy root/dist
+      // In packaged app: extraResources copies dist/ to Resources/milaidy-dist/
+      const milaidyDist = app.isPackaged
+        ? path.join(process.resourcesPath, "milaidy-dist")
+        : path.resolve(__dirname, "../../../../../../dist");
+
+      console.log(`[Agent] Resolved milaidy dist: ${milaidyDist} (packaged: ${app.isPackaged})`);
 
       // 1. Start the ElizaOS runtime in headless mode
       const elizaModule = await dynamicImport(path.join(milaidyDist, "eliza.js"));

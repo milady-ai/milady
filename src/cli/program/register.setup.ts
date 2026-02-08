@@ -1,6 +1,6 @@
 import type { Command } from "commander";
-import { theme } from "../../terminal/theme.js";
 import { formatDocsLink } from "../../terminal/links.js";
+import { theme } from "../../terminal/theme.js";
 import { runCommandWithRuntime } from "../cli-utils.js";
 
 const defaultRuntime = { error: console.error, exit: process.exit };
@@ -18,10 +18,8 @@ export function registerSetupCommand(program: Command) {
     .action(async (opts: { workspace?: string }) => {
       await runCommandWithRuntime(defaultRuntime, async () => {
         const { loadMilaidyConfig } = await import("../../config/config.js");
-        const {
-          ensureAgentWorkspace,
-          resolveDefaultAgentWorkspaceDir,
-        } = await import("../../providers/workspace.js");
+        const { ensureAgentWorkspace, resolveDefaultAgentWorkspaceDir } =
+          await import("../../providers/workspace.js");
 
         let config: Record<string, unknown> = {};
         try {
@@ -32,16 +30,27 @@ export function registerSetupCommand(program: Command) {
           if (code === "ENOENT") {
             console.log(`${theme.muted("→")} No config found, using defaults`);
           } else {
-            console.error(`${theme.error("✗")} Config load failed: ${err instanceof Error ? err.message : String(err)}`);
+            console.error(
+              `${theme.error("✗")} Config load failed: ${err instanceof Error ? err.message : String(err)}`,
+            );
             console.log(`${theme.muted("→")} Continuing with defaults`);
           }
         }
 
-        const agents = config.agents as Record<string, Record<string, string>> | undefined;
+        const agents = config.agents as
+          | Record<string, Record<string, string>>
+          | undefined;
         const workspaceDir =
-          opts.workspace ?? agents?.defaults?.workspace ?? resolveDefaultAgentWorkspaceDir();
-        await ensureAgentWorkspace({ dir: workspaceDir, ensureBootstrapFiles: true });
-        console.log(`${theme.success("✓")} Agent workspace ready: ${workspaceDir}`);
+          opts.workspace ??
+          agents?.defaults?.workspace ??
+          resolveDefaultAgentWorkspaceDir();
+        await ensureAgentWorkspace({
+          dir: workspaceDir,
+          ensureBootstrapFiles: true,
+        });
+        console.log(
+          `${theme.success("✓")} Agent workspace ready: ${workspaceDir}`,
+        );
         console.log(`\n${theme.success("Setup complete.")}`);
       });
     });

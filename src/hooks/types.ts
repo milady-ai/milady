@@ -84,7 +84,11 @@ export interface ParsedHookFrontmatter {
 }
 
 /** Hook source type. */
-export type HookSource = "milaidy-bundled" | "milaidy-managed" | "milaidy-workspace" | "milaidy-plugin";
+export type HookSource =
+  | "milaidy-bundled"
+  | "milaidy-managed"
+  | "milaidy-workspace"
+  | "milaidy-plugin";
 
 /** A discovered hook. */
 export interface Hook {

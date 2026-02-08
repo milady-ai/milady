@@ -9,7 +9,10 @@ const CLI_NAME = resolveCliName();
 const EXAMPLES = [
   ["milaidy start", "Start the agent runtime."],
   ["milaidy dashboard", "Open the Control UI in your browser."],
-  ["milaidy setup", "Initialize ~/.milaidy/milaidy.json and the agent workspace."],
+  [
+    "milaidy setup",
+    "Initialize ~/.milaidy/milaidy.json and the agent workspace.",
+  ],
   ["milaidy config get agents.defaults.model.primary", "Read a config value."],
   ["milaidy models", "Show configured model providers."],
   ["milaidy plugins list", "List available plugins."],
@@ -58,7 +61,8 @@ export function configureProgramHelp(program: Command, programVersion: string) {
   });
 
   const fmtExamples = EXAMPLES.map(
-    ([cmd, desc]) => `  ${theme.command(replaceCliName(cmd, CLI_NAME))}\n    ${theme.muted(desc)}`,
+    ([cmd, desc]) =>
+      `  ${theme.command(replaceCliName(cmd, CLI_NAME))}\n    ${theme.muted(desc)}`,
   ).join("\n");
 
   program.addHelpText("afterAll", ({ command }) => {

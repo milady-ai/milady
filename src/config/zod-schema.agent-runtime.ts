@@ -50,7 +50,11 @@ export const HeartbeatSchema = z
       return;
     }
     const timePattern = /^([01]\d|2[0-3]|24):([0-5]\d)$/;
-    const validateTime = (raw: string | undefined, opts: { allow24: boolean }, path: string) => {
+    const validateTime = (
+      raw: string | undefined,
+      opts: { allow24: boolean },
+      path: string,
+    ) => {
       if (!raw) {
         return;
       }
@@ -160,15 +164,22 @@ const ToolPolicyBaseSchema = z
   })
   .strict();
 
-export const ToolPolicySchema = ToolPolicyBaseSchema.superRefine((value, ctx) => {
-  if (value.allow && value.allow.length > 0 && value.alsoAllow && value.alsoAllow.length > 0) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message:
-        "tools policy cannot set both allow and alsoAllow in the same scope (merge alsoAllow into allow, or remove allow and use profile + alsoAllow)",
-    });
-  }
-}).optional();
+export const ToolPolicySchema = ToolPolicyBaseSchema.superRefine(
+  (value, ctx) => {
+    if (
+      value.allow &&
+      value.allow.length > 0 &&
+      value.alsoAllow &&
+      value.alsoAllow.length > 0
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          "tools policy cannot set both allow and alsoAllow in the same scope (merge alsoAllow into allow, or remove allow and use profile + alsoAllow)",
+      });
+    }
+  },
+).optional();
 
 export const ToolsWebSearchSchema = z
   .object({
@@ -212,7 +223,12 @@ export const ToolsWebSchema = z
   .optional();
 
 export const ToolProfileSchema = z
-  .union([z.literal("minimal"), z.literal("coding"), z.literal("messaging"), z.literal("full")])
+  .union([
+    z.literal("minimal"),
+    z.literal("coding"),
+    z.literal("messaging"),
+    z.literal("full"),
+  ])
   .optional();
 
 export const ToolPolicyWithProfileSchema = z
@@ -224,7 +240,12 @@ export const ToolPolicyWithProfileSchema = z
   })
   .strict()
   .superRefine((value, ctx) => {
-    if (value.allow && value.allow.length > 0 && value.alsoAllow && value.alsoAllow.length > 0) {
+    if (
+      value.allow &&
+      value.allow.length > 0 &&
+      value.alsoAllow &&
+      value.alsoAllow.length > 0
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
@@ -240,10 +261,18 @@ export const ElevatedAllowFromSchema = z
 
 export const AgentSandboxSchema = z
   .object({
-    mode: z.union([z.literal("off"), z.literal("non-main"), z.literal("all")]).optional(),
-    workspaceAccess: z.union([z.literal("none"), z.literal("ro"), z.literal("rw")]).optional(),
-    sessionToolsVisibility: z.union([z.literal("spawned"), z.literal("all")]).optional(),
-    scope: z.union([z.literal("session"), z.literal("agent"), z.literal("shared")]).optional(),
+    mode: z
+      .union([z.literal("off"), z.literal("non-main"), z.literal("all")])
+      .optional(),
+    workspaceAccess: z
+      .union([z.literal("none"), z.literal("ro"), z.literal("rw")])
+      .optional(),
+    sessionToolsVisibility: z
+      .union([z.literal("spawned"), z.literal("all")])
+      .optional(),
+    scope: z
+      .union([z.literal("session"), z.literal("agent"), z.literal("shared")])
+      .optional(),
     perSession: z.boolean().optional(),
     workspaceRoot: z.string().optional(),
     docker: SandboxDockerSchema,
@@ -299,7 +328,12 @@ export const AgentToolsSchema = z
   })
   .strict()
   .superRefine((value, ctx) => {
-    if (value.allow && value.allow.length > 0 && value.alsoAllow && value.alsoAllow.length > 0) {
+    if (
+      value.allow &&
+      value.allow.length > 0 &&
+      value.alsoAllow &&
+      value.alsoAllow.length > 0
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
@@ -312,7 +346,9 @@ export const AgentToolsSchema = z
 export const MemorySearchSchema = z
   .object({
     enabled: z.boolean().optional(),
-    sources: z.array(z.union([z.literal("memory"), z.literal("sessions")])).optional(),
+    sources: z
+      .array(z.union([z.literal("memory"), z.literal("sessions")]))
+      .optional(),
     extraPaths: z.array(z.string()).optional(),
     experimental: z
       .object({
@@ -320,7 +356,9 @@ export const MemorySearchSchema = z
       })
       .strict()
       .optional(),
-    provider: z.union([z.literal("openai"), z.literal("local"), z.literal("gemini")]).optional(),
+    provider: z
+      .union([z.literal("openai"), z.literal("local"), z.literal("gemini")])
+      .optional(),
     remote: z
       .object({
         baseUrl: z.string().optional(),
@@ -340,7 +378,12 @@ export const MemorySearchSchema = z
       .strict()
       .optional(),
     fallback: z
-      .union([z.literal("openai"), z.literal("gemini"), z.literal("local"), z.literal("none")])
+      .union([
+        z.literal("openai"),
+        z.literal("gemini"),
+        z.literal("local"),
+        z.literal("none"),
+      ])
       .optional(),
     model: z.string().optional(),
     local: z
@@ -548,7 +591,12 @@ export const ToolsSchema = z
   })
   .strict()
   .superRefine((value, ctx) => {
-    if (value.allow && value.allow.length > 0 && value.alsoAllow && value.alsoAllow.length > 0) {
+    if (
+      value.allow &&
+      value.allow.length > 0 &&
+      value.alsoAllow &&
+      value.alsoAllow.length > 0
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
@@ -591,7 +639,9 @@ export const AgentDefaultsSchema = z
     skipBootstrap: z.boolean().optional(),
     bootstrapMaxChars: z.number().int().positive().optional(),
     userTimezone: z.string().optional(),
-    timeFormat: z.union([z.literal("auto"), z.literal("12"), z.literal("24")]).optional(),
+    timeFormat: z
+      .union([z.literal("auto"), z.literal("12"), z.literal("24")])
+      .optional(),
     envelopeTimezone: z.string().optional(),
     envelopeTimestamp: z.union([z.literal("on"), z.literal("off")]).optional(),
     envelopeElapsed: z.union([z.literal("on"), z.literal("off")]).optional(),
@@ -633,7 +683,9 @@ export const AgentDefaultsSchema = z
       .optional(),
     compaction: z
       .object({
-        mode: z.union([z.literal("default"), z.literal("safeguard")]).optional(),
+        mode: z
+          .union([z.literal("default"), z.literal("safeguard")])
+          .optional(),
         reserveTokensFloor: z.number().int().nonnegative().optional(),
         maxHistoryShare: z.number().min(0.1).max(0.9).optional(),
         memoryFlush: z
@@ -658,12 +710,23 @@ export const AgentDefaultsSchema = z
         z.literal("xhigh"),
       ])
       .optional(),
-    verboseDefault: z.union([z.literal("off"), z.literal("on"), z.literal("full")]).optional(),
-    elevatedDefault: z
-      .union([z.literal("off"), z.literal("on"), z.literal("ask"), z.literal("full")])
+    verboseDefault: z
+      .union([z.literal("off"), z.literal("on"), z.literal("full")])
       .optional(),
-    blockStreamingDefault: z.union([z.literal("off"), z.literal("on")]).optional(),
-    blockStreamingBreak: z.union([z.literal("text_end"), z.literal("message_end")]).optional(),
+    elevatedDefault: z
+      .union([
+        z.literal("off"),
+        z.literal("on"),
+        z.literal("ask"),
+        z.literal("full"),
+      ])
+      .optional(),
+    blockStreamingDefault: z
+      .union([z.literal("off"), z.literal("on")])
+      .optional(),
+    blockStreamingBreak: z
+      .union([z.literal("text_end"), z.literal("message_end")])
+      .optional(),
     blockStreamingChunk: BlockStreamingChunkSchema.optional(),
     blockStreamingCoalesce: BlockStreamingCoalesceSchema.optional(),
     humanDelay: HumanDelaySchema.optional(),
@@ -701,10 +764,22 @@ export const AgentDefaultsSchema = z
       .optional(),
     sandbox: z
       .object({
-        mode: z.union([z.literal("off"), z.literal("non-main"), z.literal("all")]).optional(),
-        workspaceAccess: z.union([z.literal("none"), z.literal("ro"), z.literal("rw")]).optional(),
-        sessionToolsVisibility: z.union([z.literal("spawned"), z.literal("all")]).optional(),
-        scope: z.union([z.literal("session"), z.literal("agent"), z.literal("shared")]).optional(),
+        mode: z
+          .union([z.literal("off"), z.literal("non-main"), z.literal("all")])
+          .optional(),
+        workspaceAccess: z
+          .union([z.literal("none"), z.literal("ro"), z.literal("rw")])
+          .optional(),
+        sessionToolsVisibility: z
+          .union([z.literal("spawned"), z.literal("all")])
+          .optional(),
+        scope: z
+          .union([
+            z.literal("session"),
+            z.literal("agent"),
+            z.literal("shared"),
+          ])
+          .optional(),
         perSession: z.boolean().optional(),
         workspaceRoot: z.string().optional(),
         docker: SandboxDockerSchema,

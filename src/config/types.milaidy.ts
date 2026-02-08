@@ -186,6 +186,10 @@ export type ModelsConfig = {
   mode?: "merge" | "replace";
   providers?: Record<string, ModelProviderConfig>;
   bedrockDiscovery?: BedrockDiscoveryConfig;
+  /** Selected small model ID for fast tasks (e.g. "claude-haiku"). Set during onboarding. */
+  small?: string;
+  /** Selected large model ID for complex reasoning (e.g. "claude-sonnet-4-5"). Set during onboarding. */
+  large?: string;
 };
 
 // --- Cron types (merged from types.cron.ts) ---
@@ -247,7 +251,14 @@ export type ApprovalsConfig = {
 export type LoggingConfig = {
   level?: "silent" | "fatal" | "error" | "warn" | "info" | "debug" | "trace";
   file?: string;
-  consoleLevel?: "silent" | "fatal" | "error" | "warn" | "info" | "debug" | "trace";
+  consoleLevel?:
+    | "silent"
+    | "fatal"
+    | "error"
+    | "warn"
+    | "info"
+    | "debug"
+    | "trace";
   consoleStyle?: "pretty" | "compact" | "json";
   /** Redact sensitive tokens in tool summaries. Default: "tools". */
   redactSensitive?: "off" | "tools";
@@ -348,6 +359,41 @@ export type MemoryQmdLimitsConfig = {
   timeoutMs?: number;
 };
 
+// --- Database types ---
+
+export type DatabaseProviderType = "pglite" | "postgres";
+
+export type PgliteConfig = {
+  /** Custom PGLite data directory. Default: ~/.milaidy/workspace/.eliza/.elizadb */
+  dataDir?: string;
+};
+
+export type PostgresCredentials = {
+  /** Full PostgreSQL connection string. Takes precedence over individual fields. */
+  connectionString?: string;
+  /** PostgreSQL host. Default: localhost */
+  host?: string;
+  /** PostgreSQL port. Default: 5432 */
+  port?: number;
+  /** Database name. */
+  database?: string;
+  /** Database user. */
+  user?: string;
+  /** Database password. */
+  password?: string;
+  /** Enable SSL connection. Default: false */
+  ssl?: boolean;
+};
+
+export type DatabaseConfig = {
+  /** Active database provider. Default: "pglite". */
+  provider?: DatabaseProviderType;
+  /** PGLite (local embedded Postgres) configuration. */
+  pglite?: PgliteConfig;
+  /** Remote PostgreSQL configuration. */
+  postgres?: PostgresCredentials;
+};
+
 // --- Plugins types (merged from types.plugins.ts) ---
 
 export type PluginEntryConfig = {
@@ -423,6 +469,8 @@ export type CloudContainerDefaults = {
 export type CloudConfig = {
   /** Enable ElizaCloud integration. Default: false. */
   enabled?: boolean;
+  /** Selected cloud provider ID (e.g. "elizacloud"). Set during onboarding. */
+  provider?: string;
   /** ElizaCloud API base URL. Default: https://www.elizacloud.ai/api/v1 */
   baseUrl?: string;
   /** Cached API key (stored encrypted via gateway auth). */
@@ -437,6 +485,18 @@ export type CloudConfig = {
   backup?: CloudBackupConfig;
   /** Default container settings for new cloud deployments. */
   container?: CloudContainerDefaults;
+};
+
+/** x402 HTTP payment protocol configuration. */
+export type X402Config = {
+  enabled?: boolean;
+  privateKey?: string;
+  network?: string;
+  payTo?: string;
+  facilitatorUrl?: string;
+  maxPaymentUsd?: number;
+  maxTotalUsd?: number;
+  dbPath?: string;
 };
 
 export type MilaidyConfig = {
@@ -482,6 +542,8 @@ export type MilaidyConfig = {
   ui?: {
     /** Accent color for Milaidy UI chrome (hex). */
     seamColor?: string;
+    /** User's preferred color scheme. Set during onboarding. */
+    theme?: "light" | "dark";
     assistant?: {
       /** Assistant display name for UI surfaces. */
       name?: string;
@@ -510,10 +572,16 @@ export type MilaidyConfig = {
   talk?: TalkConfig;
   gateway?: GatewayConfig;
   memory?: MemoryConfig;
+  /** Database provider and connection configuration (local-only feature). */
+  database?: DatabaseConfig;
   /** ElizaCloud integration for remote agent provisioning and inference. */
   cloud?: CloudConfig;
+  x402?: X402Config;
   /** Feature flags for plugin auto-enable. */
-  features?: Record<string, boolean | { enabled?: boolean; [k: string]: unknown }>;
+  features?: Record<
+    string,
+    boolean | { enabled?: boolean; [k: string]: unknown }
+  >;
 };
 
 export type ConfigValidationIssue = {

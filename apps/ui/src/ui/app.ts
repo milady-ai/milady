@@ -17,6 +17,7 @@ import {
   type InstalledMarketplaceSkill,
   type LogEntry,
   type OnboardingOptions,
+  type InventoryProviderOption,
   type ExtensionStatus,
   type WalletAddresses,
   type WalletBalancesResponse,
@@ -36,13 +37,16 @@ import {
   type McpServerStatus,
 } from "./api-client.js";
 import { tabFromPath, pathForTab, type Tab, TAB_GROUPS, titleForTab } from "./navigation.js";
+import "./database-viewer.js";
 
 const CHAT_STORAGE_KEY = "milaidy:chatMessages";
+const THEME_STORAGE_KEY = "milaidy:theme";
 
 @customElement("milaidy-app")
 export class MilaidyApp extends LitElement {
   // --- State ---
   @state() tab: Tab = "chat";
+  @state() isDarkMode: boolean = false;
   @state() connected = false;
   @state() agentStatus: AgentStatus | null = null;
   @state() onboardingComplete = false;
@@ -51,7 +55,7 @@ export class MilaidyApp extends LitElement {
   @state() chatInput = "";
   @state() chatSending = false;
   @state() plugins: PluginInfo[] = [];
-  @state() pluginFilter: "all" | "ai-provider" | "connector" | "database" | "feature" = "all";
+  @state() pluginFilter: "all" | "store" | "ai-provider" | "connector" | "database" | "feature" = "all";
   @state() pluginSearch = "";
   @state() pluginSettingsOpen: Set<string> = new Set();
   @state() marketplacePlugins: RegistryPluginInfo[] = [];
@@ -111,6 +115,12 @@ export class MilaidyApp extends LitElement {
   @state() skillsMarketplaceApiKeySaving = false;
   @state() skillToggleAction = "";
   @state() logs: LogEntry[] = [];
+  @state() authRequired = false;
+  @state() pairingEnabled = false;
+  @state() pairingExpiresAt: number | null = null;
+  @state() pairingCodeInput = "";
+  @state() pairingError: string | null = null;
+  @state() pairingBusy = false;
 
   private nativeListenerHandles: Array<{ remove: () => Promise<void> }> = [];
   private actionNoticeTimer: number | null = null;
@@ -120,6 +130,14 @@ export class MilaidyApp extends LitElement {
   @state() extensionChecking = false;
 
   // Wallet / Inventory state
+
+  // Cloud state
+  @state() cloudConnected = false;
+  @state() cloudCredits: number | null = null;
+  @state() cloudCreditsLow = false;
+  @state() cloudCreditsCritical = false;
+  @state() cloudTopUpUrl = "https://www.elizacloud.ai/dashboard/billing";
+  private cloudPollInterval: ReturnType<typeof setInterval> | null = null;
   @state() walletAddresses: WalletAddresses | null = null;
   @state() walletConfig: WalletConfigStatus | null = null;
   @state() walletBalances: WalletBalancesResponse | null = null;
@@ -133,11 +151,55 @@ export class MilaidyApp extends LitElement {
   @state() inventorySort: "chain" | "symbol" | "value" = "value";
   @state() walletError: string | null = null;
 
+  // Plugin Store state
+  @state() storePlugins: RegistryPlugin[] = [];
+  @state() storeSearch = "";
+  @state() storeFilter: "all" | "installed" | "ai-provider" | "connector" | "feature" = "all";
+  @state() storeShowBundled = false;
+  @state() storeLoading = false;
+  @state() storeInstalling: Set<string> = new Set();
+  @state() storeUninstalling: Set<string> = new Set();
+  @state() storeError: string | null = null;
+  @state() storeDetailPlugin: RegistryPlugin | null = null;
+
+  // Store sub-tab: plugins vs skills
+  @state() storeSubTab: "plugins" | "skills" = "plugins";
+
+  // Skill Catalog state
+  @state() catalogSkills: CatalogSkill[] = [];
+  @state() catalogTotal = 0;
+  @state() catalogPage = 1;
+  @state() catalogTotalPages = 1;
+  @state() catalogSort: "downloads" | "stars" | "updated" | "name" = "downloads";
+  @state() catalogSearch = "";
+  @state() catalogLoading = false;
+  @state() catalogError: string | null = null;
+  @state() catalogDetailSkill: CatalogSkill | null = null;
+  @state() catalogInstalling: Set<string> = new Set();
+  @state() catalogUninstalling: Set<string> = new Set();
+
+  // Agent export/import state
+  @state() exportBusy = false;
+  @state() exportPassword = "";
+  @state() exportIncludeLogs = false;
+  @state() exportError: string | null = null;
+  @state() exportSuccess: string | null = null;
+  @state() importBusy = false;
+  @state() importPassword = "";
+  @state() importFile: File | null = null;
+  @state() importError: string | null = null;
+  @state() importSuccess: string | null = null;
+
   // Onboarding wizard state
-  @state() onboardingStep = 0;
+  @state() onboardingStep: "welcome" | "name" | "style" | "theme" | "runMode" | "cloudProvider" | "modelSelection" | "llmProvider" | "inventorySetup" = "welcome";
   @state() onboardingOptions: OnboardingOptions | null = null;
   @state() onboardingName = "";
   @state() onboardingStyle = "";
+  @state() onboardingTheme: "light" | "dark" = "light";
+  @state() onboardingRunMode: "local" | "cloud" | "" = "";
+  @state() onboardingCloudProvider = "";
+  @state() onboardingSmallModel = "claude-haiku";
+  @state() onboardingLargeModel = "claude-sonnet-4-5";
   @state() onboardingProvider = "";
   @state() onboardingApiKey = "";
   @state() onboardingTelegramToken = "";
@@ -146,8 +208,10 @@ export class MilaidyApp extends LitElement {
 
   static styles = css`
     :host {
-      display: block;
-      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
       font-family: var(--font-body);
       color: var(--text);
       background: var(--bg);
@@ -155,9 +219,59 @@ export class MilaidyApp extends LitElement {
 
     /* Layout */
     .app-shell {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
       max-width: 900px;
       margin: 0 auto;
       padding: 0 20px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .pairing-shell {
+      max-width: 560px;
+      margin: 60px auto;
+      padding: 24px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 10px;
+    }
+
+    .pairing-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-strong);
+    }
+
+    .pairing-sub {
+      color: var(--muted);
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+
+    .pairing-input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-muted);
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .pairing-actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .pairing-error {
+      margin-top: 10px;
+      color: #c94f4f;
+      font-size: 13px;
     }
 
     /* Header */
@@ -213,6 +327,29 @@ export class MilaidyApp extends LitElement {
     .lifecycle-btn:hover {
       border-color: var(--accent);
       color: var(--accent);
+    }
+
+    /* Theme toggle */
+    .theme-toggle {
+      padding: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      transition: all var(--duration-fast) ease;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .theme-toggle:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
     }
 
     /* Wallet icon */
@@ -283,6 +420,20 @@ export class MilaidyApp extends LitElement {
       font-family: var(--mono);
     }
 
+
+    /* Cloud credit badge */
+    .credit-badge-wrapper { display: inline-flex; }
+    .credit-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px; border: 1px solid var(--border);
+      background: var(--bg); font-family: var(--mono);
+      font-size: 12px; line-height: 1; text-decoration: none;
+      color: var(--fg); transition: border-color 0.15s, color 0.15s;
+    }
+    .credit-badge:hover { border-color: var(--accent); color: var(--accent); }
+    .credit-badge.credit-ok { border-color: #2d8a4e; color: #2d8a4e; }
+    .credit-badge.credit-low { border-color: #b8860b; color: #b8860b; }
+    .credit-badge.credit-critical { border-color: #c0392b; color: #c0392b; }
     .copy-btn {
       padding: 2px 6px;
       border: 1px solid var(--border);
@@ -579,8 +730,20 @@ export class MilaidyApp extends LitElement {
 
     /* Main content */
     main {
+      flex: 1;
+      min-height: 0;
       padding: 24px 0;
-      min-height: 60vh;
+      overflow-y: auto;
+    }
+
+    /* When chat is active, main becomes a flex column so chat-container fills it
+       and only .chat-messages scrolls — no double scrollbar */
+    main.chat-active {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding-top: 12px;
+      padding-bottom: 0;
     }
 
     h2 {
@@ -596,11 +759,9 @@ export class MilaidyApp extends LitElement {
       margin-bottom: 20px;
     }
 
-    /* Footer */
+    /* Footer (removed) */
     footer {
-      border-top: 1px solid var(--border);
-      padding: 16px 0;
-      font-size: 12px;
+      display: none;
       color: var(--muted);
       text-align: center;
     }
@@ -722,6 +883,40 @@ export class MilaidyApp extends LitElement {
       outline: none;
     }
 
+    .onboarding-options-scroll {
+      max-height: 300px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .theme-option {
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .inventory-chain-block {
+      margin-bottom: 12px;
+    }
+
+    .inventory-chain-block:last-child {
+      margin-bottom: 0;
+    }
+
+    @media (max-width: 768px) {
+      .onboarding {
+        margin: 20px auto;
+        padding: 0 8px;
+      }
+
+      .onboarding-options-scroll {
+        max-height: 240px;
+      }
+
+      .onboarding-avatar {
+        width: 80px !important;
+        height: 80px !important;
+      }
+    }
+
     .btn {
       padding: 8px 24px;
       border: 1px solid var(--accent);
@@ -762,8 +957,8 @@ export class MilaidyApp extends LitElement {
     .chat-container {
       display: flex;
       flex-direction: column;
-      height: calc(100vh - 200px);
-      min-height: 400px;
+      flex: 1;
+      min-height: 0;
     }
 
     .chat-header-row {
@@ -870,6 +1065,13 @@ export class MilaidyApp extends LitElement {
       color: var(--muted);
     }
 
+    /* Plugin list container - scrollable wrapper */
+    .plugins-scroll-container {
+      overflow-y: auto;
+      max-height: calc(100vh - 380px);
+      margin-top: 16px;
+    }
+
     /* Plugin list */
     .plugin-list {
       display: flex;
@@ -962,12 +1164,238 @@ export class MilaidyApp extends LitElement {
       border: 1px solid var(--border);
     }
 
-    .plugin-settings-body input {
+    .plugin-settings-body input,
+    .plugin-settings-body select {
       padding: 6px 10px;
       border: 1px solid var(--border);
       background: var(--card);
+      color: var(--text);
       font-size: 12px;
       font-family: var(--mono);
+    }
+    .plugin-settings-body select {
+      cursor: pointer;
+      appearance: auto;
+    }
+
+    /* Plugin Store */
+    .store-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    .store-card {
+      border: 1px solid var(--border);
+      background: var(--card);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color 0.15s ease;
+    }
+
+    .store-card:hover {
+      border-color: var(--accent);
+    }
+
+    .store-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .store-card-name {
+      font-weight: bold;
+      font-size: 13px;
+      word-break: break-all;
+    }
+
+    .store-card-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .store-card-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .store-card-meta .meta-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .store-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    .store-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 10px;
+      font-family: var(--mono);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .store-badge.installed {
+      color: var(--ok);
+      border-color: var(--ok);
+      background: rgba(46, 204, 113, 0.08);
+    }
+
+    .store-badge.loaded {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: rgba(var(--accent-rgb, 100, 100, 255), 0.08);
+    }
+
+    .store-install-btn {
+      padding: 4px 14px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: var(--accent-foreground);
+      cursor: pointer;
+      font-size: 11px;
+      font-family: var(--mono);
+      transition: all 0.15s ease;
+    }
+
+    .store-install-btn:hover:not(:disabled) {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    .store-install-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .store-install-btn.uninstall {
+      background: transparent;
+      color: var(--danger, #e74c3c);
+      border-color: var(--danger, #e74c3c);
+    }
+
+    .store-install-btn.uninstall:hover:not(:disabled) {
+      background: rgba(231, 76, 60, 0.08);
+    }
+
+    .store-install-btn.installing {
+      background: var(--bg-muted);
+      border-color: var(--border);
+      color: var(--muted);
+    }
+
+    .store-topics {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .store-topic {
+      display: inline-block;
+      padding: 1px 6px;
+      font-size: 10px;
+      border-radius: 8px;
+      background: var(--bg-muted);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .store-detail-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .store-detail-panel {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      max-width: 560px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    .store-detail-panel h3 {
+      margin: 0 0 4px 0;
+      font-size: 18px;
+    }
+
+    .store-detail-panel .detail-desc {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .store-detail-panel .detail-row {
+      display: flex;
+      gap: 8px;
+      font-size: 12px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .store-detail-panel .detail-label {
+      color: var(--muted);
+      min-width: 80px;
+      font-weight: 600;
+    }
+
+    .store-detail-panel .detail-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .store-summary-bar {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 10px 16px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      font-size: 12px;
+    }
+
+    .store-summary-stat {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .store-summary-stat .stat-value {
+      font-weight: bold;
+      font-family: var(--mono);
+    }
+
+    .store-summary-stat .stat-label {
+      color: var(--muted);
     }
 
     /* Logs */
@@ -996,6 +1424,7 @@ export class MilaidyApp extends LitElement {
 
   connectedCallback(): void {
     super.connectedCallback();
+    this.initializeTheme();
     this.initializeApp();
     window.addEventListener("popstate", this.handlePopState);
     window.addEventListener("keydown", this.handleGlobalKeydown);
@@ -1036,6 +1465,15 @@ export class MilaidyApp extends LitElement {
     let serverReady = false;
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       try {
+        const auth = await client.getAuthStatus();
+        if (auth.required && !client.hasToken()) {
+          this.authRequired = true;
+          this.pairingEnabled = auth.pairingEnabled;
+          this.pairingExpiresAt = auth.expiresAt;
+          serverReady = true;
+          break;
+        }
+
         const { complete } = await client.getOnboardingStatus();
         this.onboardingComplete = complete;
         if (!complete) {
@@ -1062,10 +1500,14 @@ export class MilaidyApp extends LitElement {
     }
     this.onboardingLoading = false;
 
+    if (this.authRequired) {
+      return;
+    }
+
     // Restore persisted chat messages
     this.loadChatMessages();
 
-    // Connect WebSocket
+    // Connect WebSocket for real-time status updates
     client.connectWs();
     client.onWsEvent("status", (data) => {
       this.agentStatus = data as unknown as AgentStatus;
@@ -1090,6 +1532,10 @@ export class MilaidyApp extends LitElement {
       // Wallet may not be configured yet
     }
 
+
+    // Load cloud credit status and start polling
+    this.pollCloudCredits();
+    this.cloudPollInterval = setInterval(() => this.pollCloudCredits(), 60_000);
     // Load tab from URL and trigger data loading for it
     const tab = tabFromPath(window.location.pathname);
     if (tab) {
@@ -1128,6 +1574,832 @@ export class MilaidyApp extends LitElement {
       const { plugins } = await client.getPlugins();
       this.plugins = plugins;
     } catch { /* ignore */ }
+  }
+
+  // --- Plugin Store ---
+
+  private async loadStore(): Promise<void> {
+    this.storeLoading = true;
+    this.storeError = null;
+    try {
+      const { plugins } = await client.getRegistryPlugins();
+      this.storePlugins = plugins;
+    } catch (err) {
+      this.storeError = `Failed to load plugin registry: ${err instanceof Error ? err.message : "network error"}`;
+    }
+    this.storeLoading = false;
+
+    // Also load skill catalog if not already loaded
+    if (this.catalogSkills.length === 0 && !this.catalogLoading) {
+      this.loadCatalog();
+    }
+  }
+
+  private async handleStoreInstall(pluginName: string): Promise<void> {
+    const next = new Set(this.storeInstalling);
+    next.add(pluginName);
+    this.storeInstalling = next;
+    this.storeError = null;
+
+    try {
+      const result = await client.installRegistryPlugin(pluginName);
+      if (!result.ok) {
+        this.storeError = result.error ?? `Failed to install ${pluginName}`;
+      } else {
+        // Refresh the store list to update installed status
+        await this.loadStore();
+        // Also refresh the plugins manager view
+        this.loadPlugins();
+      }
+    } catch (err) {
+      this.storeError = `Install failed: ${err instanceof Error ? err.message : "network error"}`;
+    }
+
+    const done = new Set(this.storeInstalling);
+    done.delete(pluginName);
+    this.storeInstalling = done;
+  }
+
+  private async handleStoreUninstall(pluginName: string): Promise<void> {
+    const confirmed = window.confirm(
+      `Uninstall ${pluginName}?\n\nThis will remove the plugin and restart the agent.`,
+    );
+    if (!confirmed) return;
+
+    const next = new Set(this.storeUninstalling);
+    next.add(pluginName);
+    this.storeUninstalling = next;
+    this.storeError = null;
+
+    try {
+      const result = await client.uninstallRegistryPlugin(pluginName);
+      if (!result.ok) {
+        this.storeError = result.error ?? `Failed to uninstall ${pluginName}`;
+      } else {
+        await this.loadStore();
+        this.loadPlugins();
+      }
+    } catch (err) {
+      this.storeError = `Uninstall failed: ${err instanceof Error ? err.message : "network error"}`;
+    }
+
+    const done = new Set(this.storeUninstalling);
+    done.delete(pluginName);
+    this.storeUninstalling = done;
+  }
+
+  private async handleStoreRefresh(): Promise<void> {
+    this.storeLoading = true;
+    this.storeError = null;
+    try {
+      await client.refreshRegistry();
+      await this.loadStore();
+    } catch (err) {
+      this.storeError = `Refresh failed: ${err instanceof Error ? err.message : "network error"}`;
+      this.storeLoading = false;
+    }
+  }
+
+  // --- Skill Catalog ---
+
+  private async loadCatalog(): Promise<void> {
+    this.catalogLoading = true;
+    this.catalogError = null;
+    try {
+      if (this.catalogSearch) {
+        const { results } = await client.searchSkillCatalog(this.catalogSearch, 50);
+        // Convert search results into CatalogSkill-like objects for unified rendering
+        this.catalogSkills = results.map((r) => ({
+          slug: r.slug,
+          displayName: r.displayName,
+          summary: r.summary,
+          tags: r.latestVersion ? { latest: r.latestVersion } : {},
+          stats: {
+            comments: 0,
+            downloads: r.downloads,
+            installsAllTime: r.installs,
+            installsCurrent: 0,
+            stars: r.stars,
+            versions: 0,
+          },
+          createdAt: 0,
+          updatedAt: 0,
+          latestVersion: r.latestVersion
+            ? { version: r.latestVersion, createdAt: 0, changelog: "" }
+            : null,
+        }));
+        this.catalogTotal = results.length;
+        this.catalogTotalPages = 1;
+        this.catalogPage = 1;
+      } else {
+        const data = await client.getSkillCatalog({
+          page: this.catalogPage,
+          perPage: 50,
+          sort: this.catalogSort,
+        });
+        this.catalogSkills = data.skills;
+        this.catalogTotal = data.total;
+        this.catalogPage = data.page;
+        this.catalogTotalPages = data.totalPages;
+      }
+    } catch (err) {
+      this.catalogError = `Failed to load skill catalog: ${err instanceof Error ? err.message : "network error"}`;
+    }
+    this.catalogLoading = false;
+  }
+
+  private async handleCatalogRefresh(): Promise<void> {
+    this.catalogLoading = true;
+    this.catalogError = null;
+    try {
+      await client.refreshSkillCatalog();
+      await this.loadCatalog();
+    } catch (err) {
+      this.catalogError = `Refresh failed: ${err instanceof Error ? err.message : "network error"}`;
+      this.catalogLoading = false;
+    }
+  }
+
+  private handleCatalogSearch(): void {
+    this.catalogPage = 1;
+    this.loadCatalog();
+  }
+
+  private handleCatalogPageChange(page: number): void {
+    this.catalogPage = page;
+    this.loadCatalog();
+  }
+
+  private handleCatalogSortChange(sort: "downloads" | "stars" | "updated" | "name"): void {
+    this.catalogSort = sort;
+    this.catalogPage = 1;
+    this.loadCatalog();
+  }
+
+  private async handleCatalogInstall(slug: string): Promise<void> {
+    const next = new Set(this.catalogInstalling);
+    next.add(slug);
+    this.catalogInstalling = next;
+    this.catalogError = null;
+
+    try {
+      const result = await client.installCatalogSkill(slug);
+      if (!result.ok) {
+        this.catalogError = result.message ?? `Failed to install ${slug}`;
+      } else {
+        // Update the local skill's installed flag
+        this.catalogSkills = this.catalogSkills.map((s) =>
+          s.slug === slug ? { ...s, installed: true } : s,
+        );
+        // Also update the detail panel if open
+        if (this.catalogDetailSkill?.slug === slug) {
+          this.catalogDetailSkill = { ...this.catalogDetailSkill, installed: true };
+        }
+        // Refresh the installed skills list
+        this.loadSkills();
+      }
+    } catch (err) {
+      this.catalogError = `Install failed: ${err instanceof Error ? err.message : "network error"}`;
+    }
+
+    const done = new Set(this.catalogInstalling);
+    done.delete(slug);
+    this.catalogInstalling = done;
+  }
+
+  private async handleCatalogUninstall(slug: string): Promise<void> {
+    const confirmed = window.confirm(
+      `Uninstall skill "${slug}"?\n\nThis will remove the skill from the agent.`,
+    );
+    if (!confirmed) return;
+
+    const next = new Set(this.catalogUninstalling);
+    next.add(slug);
+    this.catalogUninstalling = next;
+    this.catalogError = null;
+
+    try {
+      const result = await client.uninstallCatalogSkill(slug);
+      if (!result.ok) {
+        this.catalogError = result.message ?? `Failed to uninstall ${slug}`;
+      } else {
+        // Update local state
+        this.catalogSkills = this.catalogSkills.map((s) =>
+          s.slug === slug ? { ...s, installed: false } : s,
+        );
+        if (this.catalogDetailSkill?.slug === slug) {
+          this.catalogDetailSkill = { ...this.catalogDetailSkill, installed: false };
+        }
+        this.loadSkills();
+      }
+    } catch (err) {
+      this.catalogError = `Uninstall failed: ${err instanceof Error ? err.message : "network error"}`;
+    }
+
+    const done = new Set(this.catalogUninstalling);
+    done.delete(slug);
+    this.catalogUninstalling = done;
+  }
+
+  private categorizeStorePlugin(name: string): string {
+    const aiProviders = ["openai", "anthropic", "groq", "xai", "ollama", "openrouter", "google", "deepseek", "mistral", "together", "cohere", "perplexity", "qwen", "minimax"];
+    const connectors = ["discord", "telegram", "slack", "whatsapp", "signal", "imessage", "bluebubbles", "msteams", "mattermost", "google-chat", "farcaster", "lens", "twitter", "nostr", "matrix", "feishu"];
+    const lower = name.toLowerCase();
+    if (aiProviders.some(p => lower.includes(p))) return "ai-provider";
+    if (connectors.some(c => lower.includes(c))) return "connector";
+    return "feature";
+  }
+
+  private renderStore() {
+    return html`
+      <h2>Store</h2>
+      <p class="subtitle">Browse, search, and install plugins and skills.</p>
+
+      <!-- Sub-tab toggle: Plugins / Skills -->
+      <div style="display:flex;gap:0;margin-bottom:16px;border:1px solid var(--border);width:fit-content;">
+        <button
+          style="
+            padding:6px 20px;font-size:13px;font-family:var(--mono);
+            border:none;cursor:pointer;
+            background:${this.storeSubTab === "plugins" ? "var(--accent)" : "var(--bg)"};
+            color:${this.storeSubTab === "plugins" ? "var(--accent-foreground)" : "var(--text)"};
+          "
+          @click=${() => { this.storeSubTab = "plugins"; }}
+        >Plugins ${this.storePlugins.length > 0 ? html`<span style="font-size:10px;opacity:0.7;">(${this.storePlugins.length})</span>` : ""}</button>
+        <button
+          style="
+            padding:6px 20px;font-size:13px;font-family:var(--mono);
+            border:none;border-left:1px solid var(--border);cursor:pointer;
+            background:${this.storeSubTab === "skills" ? "var(--accent)" : "var(--bg)"};
+            color:${this.storeSubTab === "skills" ? "var(--accent-foreground)" : "var(--text)"};
+          "
+          @click=${() => { this.storeSubTab = "skills"; if (this.catalogSkills.length === 0) this.loadCatalog(); }}
+        >Skills ${this.catalogTotal > 0 ? html`<span style="font-size:10px;opacity:0.7;">(${this.catalogTotal.toLocaleString()})</span>` : ""}</button>
+      </div>
+
+      ${this.storeSubTab === "plugins" ? this.renderStorePlugins() : this.renderStoreCatalog()}
+    `;
+  }
+
+  private renderStorePlugins() {
+    const searchLower = this.storeSearch.toLowerCase();
+
+    // Base pool: hide bundled plugins unless toggled on or searching
+    const pool = this.storeShowBundled
+      ? this.storePlugins
+      : this.storePlugins.filter((p) => !p.bundled || p.installed);
+
+    const filtered = pool.filter((p) => {
+      // Category filter
+      if (this.storeFilter === "installed" && !p.installed) return false;
+      if (this.storeFilter === "ai-provider" && this.categorizeStorePlugin(p.name) !== "ai-provider") return false;
+      if (this.storeFilter === "connector" && this.categorizeStorePlugin(p.name) !== "connector") return false;
+      if (this.storeFilter === "feature" && this.categorizeStorePlugin(p.name) !== "feature") return false;
+      // Search filter
+      if (searchLower) {
+        const matchesName = p.name.toLowerCase().includes(searchLower);
+        const matchesDesc = (p.description ?? "").toLowerCase().includes(searchLower);
+        const matchesTopic = p.topics.some(t => t.toLowerCase().includes(searchLower));
+        if (!matchesName && !matchesDesc && !matchesTopic) return false;
+      }
+      return true;
+    });
+
+    const communityPlugins = this.storePlugins.filter((p) => !p.bundled);
+    const bundledCount = this.storePlugins.filter((p) => p.bundled).length;
+    const installedCount = this.storePlugins.filter(p => p.installed).length;
+    const loadedCount = this.storePlugins.filter(p => p.loaded).length;
+
+    const categories = ["all", "installed", "ai-provider", "connector", "feature"] as const;
+    const categoryLabels: Record<string, string> = {
+      "all": "All",
+      "installed": "Installed",
+      "ai-provider": "AI Providers",
+      "connector": "Connectors",
+      "feature": "Features",
+    };
+
+    const categoryCount = (cat: string): number => {
+      if (cat === "all") return pool.length;
+      if (cat === "installed") return pool.filter((p) => p.installed).length;
+      return pool.filter((p) => this.categorizeStorePlugin(p.name) === cat).length;
+    };
+
+    return html`
+
+      ${this.storeError ? html`
+        <div style="margin-bottom:12px;padding:10px 14px;border:1px solid var(--danger, #e74c3c);background:rgba(231,76,60,0.06);font-size:12px;color:var(--danger, #e74c3c);">
+          ${this.storeError}
+          <button style="float:right;background:none;border:none;color:var(--danger, #e74c3c);cursor:pointer;font-size:14px;" @click=${() => { this.storeError = null; }}>✕</button>
+        </div>
+      ` : ""}
+
+      <div class="store-summary-bar">
+        <div class="store-summary-stat">
+          <span class="stat-value">${communityPlugins.length}</span>
+          <span class="stat-label">community</span>
+        </div>
+        <div class="store-summary-stat">
+          <span class="stat-value" style="color:var(--ok);">${installedCount}</span>
+          <span class="stat-label">installed</span>
+        </div>
+        <div class="store-summary-stat">
+          <span class="stat-value" style="color:var(--accent);">${loadedCount}</span>
+          <span class="stat-label">active</span>
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+          <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted);cursor:pointer;user-select:none;">
+            <input
+              type="checkbox"
+              .checked=${this.storeShowBundled}
+              @change=${(e: Event) => { this.storeShowBundled = (e.target as HTMLInputElement).checked; }}
+              style="cursor:pointer;"
+            />
+            Show bundled (${bundledCount})
+          </label>
+          <button class="btn" style="font-size:11px;padding:3px 10px;margin:0;" @click=${this.handleStoreRefresh} ?disabled=${this.storeLoading}>
+            ${this.storeLoading ? "Refreshing..." : "Refresh"}
+          </button>
+        </div>
+      </div>
+
+      <input
+        class="plugin-search"
+        type="text"
+        placeholder="Search plugins by name, description, or topic..."
+        .value=${this.storeSearch}
+        @input=${(e: Event) => { this.storeSearch = (e.target as HTMLInputElement).value; }}
+      />
+
+      <div class="plugin-filters" style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">
+        ${categories.map(
+          (cat) => html`
+            <button
+              class="filter-btn ${this.storeFilter === cat ? "active" : ""}"
+              @click=${() => { this.storeFilter = cat; }}
+              style="
+                padding: 4px 12px;
+                border-radius: 12px;
+                border: 1px solid var(--border);
+                background: ${this.storeFilter === cat ? "var(--accent)" : "var(--surface)"};
+                color: ${this.storeFilter === cat ? "#fff" : "var(--text)"};
+                cursor: pointer;
+                font-size: 12px;
+              "
+            >${categoryLabels[cat]} (${categoryCount(cat)})</button>
+          `,
+        )}
+      </div>
+
+      ${this.storeLoading && this.storePlugins.length === 0
+        ? html`<div class="empty-state">Loading plugin registry...</div>`
+        : filtered.length === 0
+          ? html`<div class="empty-state">${this.storeSearch ? "No plugins match your search." : "No plugins in this category."}</div>`
+          : html`
+              <div class="store-grid">
+                ${filtered.map((p) => this.renderStoreCard(p))}
+              </div>
+            `
+      }
+
+      ${this.storeDetailPlugin ? this.renderStoreDetail(this.storeDetailPlugin) : ""}
+    `;
+  }
+
+  private renderStoreCard(p: RegistryPlugin) {
+    const installing = this.storeInstalling.has(p.name);
+    const uninstalling = this.storeUninstalling.has(p.name);
+    const version = p.npm.v2Version || p.npm.v1Version || p.npm.v0Version;
+    const category = this.categorizeStorePlugin(p.name);
+
+    return html`
+      <div class="store-card">
+        <div class="store-card-header">
+          <div style="flex:1;min-width:0;">
+            <div class="store-card-name">${p.name.replace("@elizaos/plugin-", "")}</div>
+            <div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-top:2px;">${p.name}</div>
+          </div>
+          <div style="display:flex;gap:4px;flex-shrink:0;">
+            ${p.bundled ? html`<span class="store-badge" style="color:var(--muted);border-color:var(--border);">bundled</span>` : ""}
+            ${p.loaded ? html`<span class="store-badge loaded">active</span>` : ""}
+            ${p.installed ? html`<span class="store-badge installed">installed</span>` : ""}
+          </div>
+        </div>
+
+        <div class="store-card-desc">${p.description || "No description available."}</div>
+
+        <div class="store-card-meta">
+          ${version ? html`<span class="meta-item"><span>v${version}</span></span>` : ""}
+          ${p.stars > 0 ? html`<span class="meta-item">★ ${p.stars}</span>` : ""}
+          <span class="meta-item" style="padding:1px 6px;border-radius:8px;background:var(--bg-muted);border:1px solid var(--border);">${
+            category === "ai-provider" ? "ai provider"
+            : category === "connector" ? "connector"
+            : "feature"
+          }</span>
+        </div>
+
+        ${p.topics.length > 0 ? html`
+          <div class="store-topics">
+            ${p.topics.slice(0, 4).map(t => html`<span class="store-topic">${t}</span>`)}
+            ${p.topics.length > 4 ? html`<span class="store-topic">+${p.topics.length - 4}</span>` : ""}
+          </div>
+        ` : ""}
+
+        <div class="store-card-footer">
+          <button
+            style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;padding:0;text-decoration:underline;"
+            @click=${() => { this.storeDetailPlugin = p; }}
+          >Details</button>
+
+          ${p.installed
+            ? html`
+                <button
+                  class="store-install-btn uninstall"
+                  @click=${() => this.handleStoreUninstall(p.name)}
+                  ?disabled=${uninstalling}
+                >${uninstalling ? "Removing..." : "Uninstall"}</button>
+              `
+            : html`
+                <button
+                  class="store-install-btn ${installing ? "installing" : ""}"
+                  @click=${() => this.handleStoreInstall(p.name)}
+                  ?disabled=${installing}
+                >${installing ? "Installing..." : "Install"}</button>
+              `
+          }
+        </div>
+      </div>
+    `;
+  }
+
+  private renderStoreDetail(p: RegistryPlugin) {
+    const installing = this.storeInstalling.has(p.name);
+    const uninstalling = this.storeUninstalling.has(p.name);
+    const version = p.npm.v2Version || p.npm.v1Version || p.npm.v0Version;
+    const supported: string[] = [];
+    if (p.supports.v0) supported.push("v0");
+    if (p.supports.v1) supported.push("v1");
+    if (p.supports.v2) supported.push("v2");
+
+    return html`
+      <div class="store-detail-overlay" @click=${(e: Event) => {
+        if ((e.target as HTMLElement).classList.contains("store-detail-overlay")) {
+          this.storeDetailPlugin = null;
+        }
+      }}>
+        <div class="store-detail-panel">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+            <div>
+              <h3>${p.name}</h3>
+              <div style="display:flex;gap:4px;margin-top:4px;">
+                ${p.loaded ? html`<span class="store-badge loaded">active</span>` : ""}
+                ${p.installed ? html`<span class="store-badge installed">installed${p.installedVersion ? ` v${p.installedVersion}` : ""}</span>` : ""}
+              </div>
+            </div>
+            <button
+              style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:4px;"
+              @click=${() => { this.storeDetailPlugin = null; }}
+            >✕</button>
+          </div>
+
+          <div class="detail-desc">${p.description || "No description available."}</div>
+
+          <div class="detail-row">
+            <span class="detail-label">Package</span>
+            <span style="font-family:var(--mono);font-size:12px;">${p.npm.package || p.name}</span>
+          </div>
+          ${version ? html`
+            <div class="detail-row">
+              <span class="detail-label">Version</span>
+              <span>${version}</span>
+            </div>
+          ` : ""}
+          <div class="detail-row">
+            <span class="detail-label">Repository</span>
+            <a href="https://github.com/${p.gitRepo}" target="_blank" rel="noopener" style="color:var(--accent);font-size:12px;">${p.gitRepo}</a>
+          </div>
+          ${p.homepage ? html`
+            <div class="detail-row">
+              <span class="detail-label">Homepage</span>
+              <a href="${p.homepage}" target="_blank" rel="noopener" style="color:var(--accent);font-size:12px;">${p.homepage}</a>
+            </div>
+          ` : ""}
+          <div class="detail-row">
+            <span class="detail-label">Language</span>
+            <span>${p.language}</span>
+          </div>
+          ${p.stars > 0 ? html`
+            <div class="detail-row">
+              <span class="detail-label">Stars</span>
+              <span>★ ${p.stars.toLocaleString()}</span>
+            </div>
+          ` : ""}
+          ${supported.length > 0 ? html`
+            <div class="detail-row">
+              <span class="detail-label">Supports</span>
+              <span>${supported.join(", ")}</span>
+            </div>
+          ` : ""}
+          ${p.topics.length > 0 ? html`
+            <div class="detail-row" style="border-bottom:none;">
+              <span class="detail-label">Topics</span>
+              <div class="store-topics">${p.topics.map(t => html`<span class="store-topic">${t}</span>`)}</div>
+            </div>
+          ` : ""}
+
+          <div class="detail-actions">
+            ${p.installed
+              ? html`
+                  <button
+                    class="store-install-btn uninstall"
+                    @click=${() => this.handleStoreUninstall(p.name)}
+                    ?disabled=${uninstalling}
+                  >${uninstalling ? "Removing..." : "Uninstall"}</button>
+                `
+              : html`
+                  <button
+                    class="store-install-btn ${installing ? "installing" : ""}"
+                    @click=${() => this.handleStoreInstall(p.name)}
+                    ?disabled=${installing}
+                  >${installing ? "Install Plugin" : "Install Plugin"}</button>
+                `
+            }
+            <button
+              class="btn btn-outline"
+              style="font-size:11px;padding:4px 14px;margin:0;"
+              @click=${() => { this.storeDetailPlugin = null; }}
+            >Close</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  private renderStoreCatalog() {
+    const sortOptions = [
+      { key: "downloads" as const, label: "Downloads" },
+      { key: "stars" as const, label: "Stars" },
+      { key: "updated" as const, label: "Recent" },
+      { key: "name" as const, label: "Name" },
+    ];
+
+    return html`
+      ${this.catalogError ? html`
+        <div style="margin-bottom:12px;padding:10px 14px;border:1px solid var(--danger, #e74c3c);background:rgba(231,76,60,0.06);font-size:12px;color:var(--danger, #e74c3c);">
+          ${this.catalogError}
+          <button style="float:right;background:none;border:none;color:var(--danger, #e74c3c);cursor:pointer;font-size:14px;" @click=${() => { this.catalogError = null; }}>✕</button>
+        </div>
+      ` : ""}
+
+      <div class="store-summary-bar">
+        <div class="store-summary-stat">
+          <span class="stat-value">${this.catalogTotal.toLocaleString()}</span>
+          <span class="stat-label">skills available</span>
+        </div>
+        <div style="margin-left:auto;">
+          <button class="btn" style="font-size:11px;padding:3px 10px;margin:0;" @click=${this.handleCatalogRefresh} ?disabled=${this.catalogLoading}>
+            ${this.catalogLoading ? "Refreshing..." : "Refresh"}
+          </button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">
+        <input
+          class="plugin-search"
+          type="text"
+          placeholder="Search skills by name or description..."
+          style="margin-bottom:0;flex:1;"
+          .value=${this.catalogSearch}
+          @input=${(e: Event) => { this.catalogSearch = (e.target as HTMLInputElement).value; }}
+          @keydown=${(e: KeyboardEvent) => { if (e.key === "Enter") this.handleCatalogSearch(); }}
+        />
+        <button class="btn" style="font-size:12px;padding:6px 14px;margin:0;white-space:nowrap;" @click=${this.handleCatalogSearch}>
+          Search
+        </button>
+      </div>
+
+      ${!this.catalogSearch ? html`
+        <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+          <span style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;">Sort:</span>
+          ${sortOptions.map(
+            (opt) => html`
+              <button
+                style="
+                  padding:4px 12px;border-radius:12px;border:1px solid var(--border);cursor:pointer;font-size:12px;
+                  background:${this.catalogSort === opt.key ? "var(--accent)" : "var(--surface)"};
+                  color:${this.catalogSort === opt.key ? "#fff" : "var(--text)"};
+                "
+                @click=${() => this.handleCatalogSortChange(opt.key)}
+              >${opt.label}</button>
+            `,
+          )}
+        </div>
+      ` : ""}
+
+      ${this.catalogLoading && this.catalogSkills.length === 0
+        ? html`<div class="empty-state">Loading skill catalog...</div>`
+        : this.catalogSkills.length === 0
+          ? html`<div class="empty-state">${this.catalogSearch ? "No skills match your search." : "No skills available."}</div>`
+          : html`
+              <div class="store-grid">
+                ${this.catalogSkills.map((s) => this.renderCatalogCard(s))}
+              </div>
+            `
+      }
+
+      ${!this.catalogSearch && this.catalogTotalPages > 1 ? html`
+        <div style="display:flex;justify-content:center;gap:8px;margin-top:16px;align-items:center;">
+          <button
+            class="lifecycle-btn"
+            style="font-size:12px;"
+            ?disabled=${this.catalogPage <= 1}
+            @click=${() => this.handleCatalogPageChange(this.catalogPage - 1)}
+          >← Prev</button>
+          <span style="font-size:12px;color:var(--muted);font-family:var(--mono);">
+            ${this.catalogPage} / ${this.catalogTotalPages}
+          </span>
+          <button
+            class="lifecycle-btn"
+            style="font-size:12px;"
+            ?disabled=${this.catalogPage >= this.catalogTotalPages}
+            @click=${() => this.handleCatalogPageChange(this.catalogPage + 1)}
+          >Next →</button>
+        </div>
+      ` : ""}
+
+      ${this.catalogDetailSkill ? this.renderCatalogDetail(this.catalogDetailSkill) : ""}
+    `;
+  }
+
+  private renderCatalogCard(s: CatalogSkill) {
+    const version = s.latestVersion?.version ?? s.tags?.latest;
+    const downloads = s.stats.downloads;
+    const stars = s.stats.stars;
+    const installs = s.stats.installsAllTime;
+    const installing = this.catalogInstalling.has(s.slug);
+    const uninstalling = this.catalogUninstalling.has(s.slug);
+
+    return html`
+      <div class="store-card">
+        <div class="store-card-header">
+          <div style="flex:1;min-width:0;">
+            <div class="store-card-name">${s.displayName || s.slug}</div>
+            <div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-top:2px;">${s.slug}</div>
+          </div>
+          ${s.installed ? html`<span class="store-badge installed">installed</span>` : ""}
+        </div>
+
+        <div class="store-card-desc">${s.summary || "No description available."}</div>
+
+        <div class="store-card-meta">
+          ${version ? html`<span class="meta-item">v${version}</span>` : ""}
+          ${downloads > 0 ? html`<span class="meta-item">⬇ ${downloads.toLocaleString()}</span>` : ""}
+          ${stars > 0 ? html`<span class="meta-item">★ ${stars}</span>` : ""}
+          ${installs > 0 ? html`<span class="meta-item">📦 ${installs.toLocaleString()} installs</span>` : ""}
+        </div>
+
+        <div class="store-card-footer">
+          <button
+            style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;padding:0;text-decoration:underline;"
+            @click=${() => { this.catalogDetailSkill = s; }}
+          >Details</button>
+
+          ${s.installed
+            ? html`
+                <button
+                  class="store-install-btn uninstall"
+                  @click=${() => this.handleCatalogUninstall(s.slug)}
+                  ?disabled=${uninstalling}
+                >${uninstalling ? "Removing..." : "Uninstall"}</button>
+              `
+            : html`
+                <button
+                  class="store-install-btn ${installing ? "installing" : ""}"
+                  @click=${() => this.handleCatalogInstall(s.slug)}
+                  ?disabled=${installing}
+                >${installing ? "Installing..." : "Install"}</button>
+              `
+          }
+        </div>
+      </div>
+    `;
+  }
+
+  private renderCatalogDetail(s: CatalogSkill) {
+    const version = s.latestVersion?.version ?? s.tags?.latest;
+    const tags = Object.entries(s.tags).filter(([k]) => k !== "latest");
+    const installing = this.catalogInstalling.has(s.slug);
+    const uninstalling = this.catalogUninstalling.has(s.slug);
+
+    return html`
+      <div class="store-detail-overlay" @click=${(e: Event) => {
+        if ((e.target as HTMLElement).classList.contains("store-detail-overlay")) {
+          this.catalogDetailSkill = null;
+        }
+      }}>
+        <div class="store-detail-panel">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+            <div>
+              <h3>${s.displayName || s.slug}</h3>
+              <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+                <span style="font-size:11px;color:var(--muted);font-family:var(--mono);">${s.slug}</span>
+                ${s.installed ? html`<span class="store-badge installed">installed</span>` : ""}
+              </div>
+            </div>
+            <button
+              style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:4px;"
+              @click=${() => { this.catalogDetailSkill = null; }}
+            >✕</button>
+          </div>
+
+          <div class="detail-desc">${s.summary || "No description available."}</div>
+
+          ${version ? html`
+            <div class="detail-row">
+              <span class="detail-label">Version</span>
+              <span>${version}</span>
+            </div>
+          ` : ""}
+          <div class="detail-row">
+            <span class="detail-label">Downloads</span>
+            <span>⬇ ${s.stats.downloads.toLocaleString()}</span>
+          </div>
+          ${s.stats.stars > 0 ? html`
+            <div class="detail-row">
+              <span class="detail-label">Stars</span>
+              <span>★ ${s.stats.stars}</span>
+            </div>
+          ` : ""}
+          ${s.stats.installsAllTime > 0 ? html`
+            <div class="detail-row">
+              <span class="detail-label">Installs</span>
+              <span>${s.stats.installsAllTime.toLocaleString()} all-time</span>
+            </div>
+          ` : ""}
+          ${s.stats.versions > 0 ? html`
+            <div class="detail-row">
+              <span class="detail-label">Versions</span>
+              <span>${s.stats.versions}</span>
+            </div>
+          ` : ""}
+          ${s.stats.comments > 0 ? html`
+            <div class="detail-row">
+              <span class="detail-label">Comments</span>
+              <span>${s.stats.comments}</span>
+            </div>
+          ` : ""}
+          ${s.createdAt ? html`
+            <div class="detail-row">
+              <span class="detail-label">Created</span>
+              <span>${new Date(s.createdAt).toLocaleDateString()}</span>
+            </div>
+          ` : ""}
+          ${s.updatedAt ? html`
+            <div class="detail-row">
+              <span class="detail-label">Updated</span>
+              <span>${new Date(s.updatedAt).toLocaleDateString()}</span>
+            </div>
+          ` : ""}
+          ${tags.length > 0 ? html`
+            <div class="detail-row" style="border-bottom:none;">
+              <span class="detail-label">Tags</span>
+              <div class="store-topics">${tags.map(([k, v]) => html`<span class="store-topic">${k}: ${v}</span>`)}</div>
+            </div>
+          ` : ""}
+
+          ${s.latestVersion?.changelog ? html`
+            <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);">
+              <div style="font-weight:600;font-size:12px;margin-bottom:6px;color:var(--text-strong);">Changelog</div>
+              <div style="font-size:12px;color:var(--muted);line-height:1.6;white-space:pre-wrap;max-height:200px;overflow-y:auto;">${s.latestVersion.changelog}</div>
+            </div>
+          ` : ""}
+
+          <div class="detail-actions">
+            ${s.installed
+              ? html`
+                  <button
+                    class="store-install-btn uninstall"
+                    @click=${() => this.handleCatalogUninstall(s.slug)}
+                    ?disabled=${uninstalling}
+                  >${uninstalling ? "Removing..." : "Uninstall"}</button>
+                `
+              : html`
+                  <button
+                    class="store-install-btn ${installing ? "installing" : ""}"
+                    @click=${() => this.handleCatalogInstall(s.slug)}
+                    ?disabled=${installing}
+                  >${installing ? "Install Skill" : "Install Skill"}</button>
+                `
+            }
+            <button
+              class="btn btn-outline"
+              style="font-size:11px;padding:4px 14px;margin:0;"
+              @click=${() => { this.catalogDetailSkill = null; }}
+            >Close</button>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   private async loadSkills(): Promise<void> {
@@ -2290,9 +3562,14 @@ export class MilaidyApp extends LitElement {
       // Reset local UI state and show onboarding
       this.agentStatus = null;
       this.onboardingComplete = false;
-      this.onboardingStep = 0;
+      this.onboardingStep = "welcome";
       this.onboardingName = "";
       this.onboardingStyle = "";
+      this.onboardingTheme = this.isDarkMode ? "dark" : "light";
+      this.onboardingRunMode = "";
+      this.onboardingCloudProvider = "";
+      this.onboardingSmallModel = "claude-haiku";
+      this.onboardingLargeModel = "claude-sonnet-4-5";
       this.onboardingProvider = "";
       this.onboardingApiKey = "";
       this.onboardingTelegramToken = "";
@@ -2311,6 +3588,73 @@ export class MilaidyApp extends LitElement {
       } catch { /* ignore */ }
     } catch {
       window.alert("Reset failed. Check the console for details.");
+    }
+  }
+
+  // --- Agent Export / Import ---
+
+  private async handleAgentExport(): Promise<void> {
+    if (this.exportBusy || this.exportPassword.length < 4) return;
+
+    this.exportBusy = true;
+    this.exportError = null;
+    this.exportSuccess = null;
+
+    try {
+      const resp = await client.exportAgent(this.exportPassword, this.exportIncludeLogs);
+
+      const blob = await resp.blob();
+      const disposition = resp.headers.get("Content-Disposition") ?? "";
+      const filenameMatch = /filename="?([^"]+)"?/.exec(disposition);
+      const filename = filenameMatch?.[1] ?? "agent-export.eliza-agent";
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      this.exportSuccess = `Exported successfully (${(blob.size / 1024).toFixed(0)} KB)`;
+      this.exportPassword = "";
+    } catch (err) {
+      this.exportError = err instanceof Error ? err.message : "Export failed";
+    } finally {
+      this.exportBusy = false;
+    }
+  }
+
+  private async handleAgentImport(): Promise<void> {
+    if (this.importBusy || !this.importFile || this.importPassword.length < 4) return;
+
+    this.importBusy = true;
+    this.importError = null;
+    this.importSuccess = null;
+
+    try {
+      const fileBuffer = await this.importFile.arrayBuffer();
+      const result = await client.importAgent(this.importPassword, fileBuffer);
+
+      const counts = result.counts;
+      const summary = [
+        counts.memories ? `${counts.memories} memories` : null,
+        counts.entities ? `${counts.entities} entities` : null,
+        counts.rooms ? `${counts.rooms} rooms` : null,
+        counts.relationships ? `${counts.relationships} relationships` : null,
+        counts.worlds ? `${counts.worlds} worlds` : null,
+        counts.tasks ? `${counts.tasks} tasks` : null,
+        counts.logs ? `${counts.logs} logs` : null,
+      ].filter(Boolean).join(", ");
+
+      this.importSuccess = `Imported "${result.agentName}" successfully: ${summary || "no data"}. Restart the agent to activate.`;
+      this.importPassword = "";
+      this.importFile = null;
+    } catch (err) {
+      this.importError = err instanceof Error ? err.message : "Import failed";
+    } finally {
+      this.importBusy = false;
     }
   }
 
@@ -2410,19 +3754,115 @@ export class MilaidyApp extends LitElement {
 
   // --- Onboarding ---
 
+  /** Detect if running on a mobile device (Capacitor native or small screen). */
+  private detectMobile(): boolean {
+    const cap = (window as Record<string, unknown>).Capacitor as Record<string, unknown> | undefined;
+    if (cap && typeof cap.getPlatform === "function") {
+      const platform = (cap.getPlatform as () => string)();
+      if (platform === "ios" || platform === "android") return true;
+    }
+    return window.matchMedia("(max-width: 768px)").matches;
+  }
+
   private async handleOnboardingNext(): Promise<void> {
-    this.onboardingStep += 1;
+    const opts = this.onboardingOptions;
+    switch (this.onboardingStep) {
+      case "welcome":
+        this.onboardingStep = "name";
+        break;
+      case "name":
+        this.onboardingStep = "style";
+        break;
+      case "style":
+        this.onboardingStep = "theme";
+        break;
+      case "theme": {
+        this.isDarkMode = this.onboardingTheme === "dark";
+        this.updateThemeAttribute();
+        localStorage.setItem(THEME_STORAGE_KEY, this.onboardingTheme);
+        if (this.isMobileDevice) {
+          this.onboardingRunMode = "cloud";
+          if (opts && opts.cloudProviders.length === 1) {
+            this.onboardingCloudProvider = opts.cloudProviders[0].id;
+            this.onboardingStep = "modelSelection";
+          } else {
+            this.onboardingStep = "cloudProvider";
+          }
+        } else {
+          this.onboardingStep = "runMode";
+        }
+        break;
+      }
+      case "runMode":
+        if (this.onboardingRunMode === "cloud") {
+          if (opts && opts.cloudProviders.length === 1) {
+            this.onboardingCloudProvider = opts.cloudProviders[0].id;
+            this.onboardingStep = "modelSelection";
+          } else {
+            this.onboardingStep = "cloudProvider";
+          }
+        } else {
+          this.onboardingStep = "llmProvider";
+        }
+        break;
+      case "cloudProvider":
+        this.onboardingStep = "modelSelection";
+        break;
+      case "modelSelection":
+        await this.handleOnboardingFinish();
+        break;
+      case "llmProvider":
+        this.onboardingStep = "inventorySetup";
+        break;
+      case "inventorySetup":
+        await this.handleOnboardingFinish();
+        break;
+    }
+  }
+
+  private handleOnboardingBack(): void {
+    switch (this.onboardingStep) {
+      case "name":
+        this.onboardingStep = "welcome";
+        break;
+      case "style":
+        this.onboardingStep = "name";
+        break;
+      case "theme":
+        this.onboardingStep = "style";
+        break;
+      case "runMode":
+        this.onboardingStep = "theme";
+        break;
+      case "cloudProvider":
+        this.onboardingStep = this.isMobileDevice ? "theme" : "runMode";
+        break;
+      case "modelSelection":
+        if (this.onboardingOptions && this.onboardingOptions.cloudProviders.length > 1) {
+          this.onboardingStep = "cloudProvider";
+        } else {
+          this.onboardingStep = this.isMobileDevice ? "theme" : "runMode";
+        }
+        break;
+      case "llmProvider":
+        this.onboardingStep = "runMode";
+        break;
+      case "inventorySetup":
+        this.onboardingStep = "llmProvider";
+        break;
+    }
   }
 
   private async handleOnboardingFinish(): Promise<void> {
     if (!this.onboardingOptions) return;
 
+    // Find the style the user selected during onboarding
     const style = this.onboardingOptions.styles.find(
       (s) => s.catchphrase === this.onboardingStyle,
     );
 
     const systemPrompt = style?.system
-      ? style.system.replace(/\{name\}/g, this.onboardingName)
+      ? style.system.replace(/\{\{name\}\}/g, this.onboardingName)
       : `You are ${this.onboardingName}, an autonomous AI agent powered by ElizaOS. ${this.onboardingOptions.sharedStyleRules}`;
 
     await client.submitOnboarding({
@@ -2442,11 +3882,11 @@ export class MilaidyApp extends LitElement {
 
     this.onboardingComplete = true;
 
-    // Restart the agent so the runtime picks up the new config
-    // (name, provider keys, etc.) that was just saved by submitOnboarding.
     try {
       this.agentStatus = await client.restartAgent();
-    } catch { /* ignore */ }
+    } catch {
+      // Agent restart may fail if not yet running — non-fatal
+    }
   }
 
   // --- Render ---
@@ -2504,6 +3944,10 @@ export class MilaidyApp extends LitElement {
       return html`<div class="app-shell"><div class="empty-state">Loading...</div></div>`;
     }
 
+    if (this.authRequired) {
+      return this.renderPairing();
+    }
+
     if (!this.onboardingComplete) {
       return this.renderOnboarding();
     }
@@ -2519,8 +3963,107 @@ export class MilaidyApp extends LitElement {
             `
         : ""}
         ${this.renderNav()}
-        <main>${this.renderView()}</main>
-        <footer>milaidy</footer>
+        <main class=${this.tab === "chat" ? "chat-active" : ""}>${this.renderView()}</main>
+      </div>
+    `;
+  }
+
+  private async handlePairingSubmit(): Promise<void> {
+    const code = this.pairingCodeInput.trim();
+    if (!code) {
+      this.pairingError = "Enter the pairing code from the server logs.";
+      return;
+    }
+    this.pairingError = null;
+    this.pairingBusy = true;
+    try {
+      const { token } = await client.pair(code);
+      client.setToken(token);
+      window.location.reload();
+    } catch (err) {
+      const status = (err as { status?: number }).status;
+      if (status === 410) {
+        this.pairingError = "Pairing code expired. Check logs for a new code.";
+      } else if (status === 429) {
+        this.pairingError = "Too many attempts. Try again later.";
+      } else {
+        this.pairingError = "Pairing failed. Check the code and try again.";
+      }
+    } finally {
+      this.pairingBusy = false;
+    }
+  }
+
+  private renderPairing() {
+    const expires =
+      this.pairingExpiresAt ? Math.max(0, Math.round((this.pairingExpiresAt - Date.now()) / 60000)) : null;
+    return html`
+      <div class="app-shell">
+        <div class="pairing-shell">
+          <div class="pairing-title">Pair This UI</div>
+          <div class="pairing-sub">
+            ${this.pairingEnabled
+              ? html`Enter the pairing code printed in the Milaidy server logs.${expires != null
+                ? html` Code expires in about ${expires} minute${expires === 1 ? "" : "s"}.` : ""}`
+              : html`Pairing is disabled. Set <code>MILAIDY_PAIRING_DISABLED</code> to <code>0</code> to enable pairing.`}
+          </div>
+          <input
+            class="pairing-input"
+            .value=${this.pairingCodeInput}
+            placeholder="XXXX-XXXX"
+            @input=${(e: Event) => { this.pairingCodeInput = (e.target as HTMLInputElement).value; }}
+          />
+          <div class="pairing-actions">
+            <button class="lifecycle-btn" @click=${this.handlePairingSubmit} ?disabled=${this.pairingBusy}>
+              ${this.pairingBusy ? "Pairing..." : "Pair"}
+            </button>
+
+  private async pollCloudCredits(): Promise<void> {
+    const cloudStatus = await client.getCloudStatus().catch(() => null);
+    if (!cloudStatus) return;
+    this.cloudConnected = cloudStatus.connected;
+    if (cloudStatus.topUpUrl) this.cloudTopUpUrl = cloudStatus.topUpUrl;
+    if (cloudStatus.connected) {
+      const credits = await client.getCloudCredits().catch(() => null);
+      if (credits) {
+        this.cloudCredits = credits.balance;
+        this.cloudCreditsLow = credits.low ?? false;
+        this.cloudCreditsCritical = credits.critical ?? false;
+        if (credits.topUpUrl) this.cloudTopUpUrl = credits.topUpUrl;
+      }
+    }
+  }
+
+  private renderCloudCreditBadge() {
+    if (!this.cloudConnected || this.cloudCredits === null) return html``;
+    const formatted = `$${this.cloudCredits.toFixed(2)}`;
+    const colorClass = this.cloudCreditsCritical
+      ? "credit-critical"
+      : this.cloudCreditsLow
+        ? "credit-low"
+        : "credit-ok";
+    return html`
+      <div class="credit-badge-wrapper">
+        <a
+          class="credit-badge ${colorClass}"
+          href=${this.cloudTopUpUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="ElizaCloud credits"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/>
+            <path d="M12 18V6"/>
+          </svg>
+          <span>${formatted}</span>
+        </a>
+      </div>
+    `;
+  }
+          </div>
+          ${this.pairingError ? html`<div class="pairing-error">${this.pairingError}</div>` : null}
+        </div>
       </div>
       ${this.renderCommandPalette()}
     `;
@@ -2536,8 +4079,11 @@ export class MilaidyApp extends LitElement {
         <div style="display:flex;align-items:center;gap:12px;">
           <span class="logo">${name}</span>
           ${this.renderWalletIcon()}
+          ${this.renderCloudCreditBadge()}
         </div>
-        <div class="status-bar">
+        <div style="display:flex;align-items:center;gap:12px;">
+          ${this.renderThemeToggle()}
+          <div class="status-bar">
           <span class="status-pill ${state}">${state}</span>
           ${state === "not_started" || state === "stopped"
         ? html`<button class="lifecycle-btn" @click=${this.handleStart}>Start</button>`
@@ -2553,6 +4099,27 @@ export class MilaidyApp extends LitElement {
           <button class="lifecycle-btn" @click=${this.openCommandPalette} title="Command palette (Cmd/Ctrl+K)">Cmd+K</button>
         </div>
       </header>
+    `;
+  }
+
+  private renderThemeToggle() {
+    return html`
+      <button
+        class="theme-toggle"
+        @click=${this.toggleTheme}
+        title=${this.isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+        aria-label=${this.isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+      >
+        ${this.isDarkMode 
+          ? html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"/>
+              <path d="m12 1 1.5 1.5M12 1l-1.5 1.5M21 12l-1.5 1.5M21 12l1.5 1.5M12 21l-1.5-1.5M12 21l1.5-1.5M3 12l1.5-1.5M3 12l-1.5-1.5"/>
+            </svg>` 
+          : html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>`
+        }
+      </button>
     `;
   }
 
@@ -2644,6 +4211,7 @@ export class MilaidyApp extends LitElement {
       case "plugins": return this.renderPlugins();
       case "marketplace": return this.renderMarketplace();
       case "skills": return this.renderSkills();
+      case "database": return this.renderDatabase();
       case "config": return this.renderConfig();
       case "logs": return this.renderLogs();
       default: return this.renderChat();
@@ -3497,18 +5065,31 @@ export class MilaidyApp extends LitElement {
   }
 
   private renderPlugins() {
-    const categories = ["all", "ai-provider", "connector", "database", "feature"] as const;
+    const categories = ["all", "store", "ai-provider", "connector", "database", "feature"] as const;
     const categoryLabels: Record<string, string> = {
       "all": "All",
+      "store": "From Store",
       "ai-provider": "AI Provider",
       "connector": "Connector",
-      "database": "Database",
       "feature": "Feature",
     };
 
+    // Filter by view mode first
+    let pluginsByMode = this.plugins;
+    if (this.pluginViewMode === "active") {
+      pluginsByMode = this.plugins.filter((p) => p.isActive);
+    } else if (this.pluginViewMode === "core") {
+      pluginsByMode = this.plugins.filter((p) => p.isCore);
+    }
+
     const searchLower = this.pluginSearch.toLowerCase();
     const filtered = this.plugins.filter((p) => {
-      const matchesCategory = this.pluginFilter === "all" || p.category === this.pluginFilter;
+      // Database plugins are managed via the dedicated Database tab
+      if (p.category === "database") return false;
+      const matchesCategory =
+        this.pluginFilter === "all"
+        || (this.pluginFilter === "store" && p.source === "store")
+        || (this.pluginFilter !== "store" && p.category === this.pluginFilter);
       const matchesSearch = !searchLower
         || p.name.toLowerCase().includes(searchLower)
         || (p.description ?? "").toLowerCase().includes(searchLower)
@@ -3535,13 +5116,62 @@ export class MilaidyApp extends LitElement {
         </button>
       </div>
 
-      <input
-        class="plugin-search"
-        type="text"
-        placeholder="Search plugins by name or description..."
-        .value=${this.pluginSearch}
-        @input=${(e: Event) => { this.pluginSearch = (e.target as HTMLInputElement).value; }}
-      />
+    return html`
+      <div style="flex-shrink: 0;">
+        <h2>Plugins</h2>
+        <p class="subtitle">Manage plugins and integrations. ${this.plugins.length} plugins discovered.</p>
+
+        <!-- View Mode Tabs -->
+        <div style="display:flex;gap:8px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:8px;">
+          <button
+            class="view-mode-tab ${this.pluginViewMode === "active" ? "active" : ""}"
+            @click=${() => { this.pluginViewMode = "active"; }}
+            style="
+              padding: 8px 16px;
+              border: none;
+              background: ${this.pluginViewMode === "active" ? "var(--accent)" : "transparent"};
+              color: ${this.pluginViewMode === "active" ? "#fff" : "var(--text)"};
+              cursor: pointer;
+              font-weight: ${this.pluginViewMode === "active" ? "600" : "400"};
+              border-radius: 6px;
+              transition: all 0.2s;
+            "
+          >
+            Active (${activeCount})
+          </button>
+          <button
+            class="view-mode-tab ${this.pluginViewMode === "core" ? "active" : ""}"
+            @click=${() => { this.pluginViewMode = "core"; }}
+            style="
+              padding: 8px 16px;
+              border: none;
+              background: ${this.pluginViewMode === "core" ? "var(--accent)" : "transparent"};
+              color: ${this.pluginViewMode === "core" ? "#fff" : "var(--text)"};
+              cursor: pointer;
+              font-weight: ${this.pluginViewMode === "core" ? "600" : "400"};
+              border-radius: 6px;
+              transition: all 0.2s;
+            "
+          >
+            Core (${coreCount})
+          </button>
+          <button
+            class="view-mode-tab ${this.pluginViewMode === "all" ? "active" : ""}"
+            @click=${() => { this.pluginViewMode = "all"; }}
+            style="
+              padding: 8px 16px;
+              border: none;
+              background: ${this.pluginViewMode === "all" ? "var(--accent)" : "transparent"};
+              color: ${this.pluginViewMode === "all" ? "#fff" : "var(--text)"};
+              cursor: pointer;
+              font-weight: ${this.pluginViewMode === "all" ? "600" : "400"};
+              border-radius: 6px;
+              transition: all 0.2s;
+            "
+          >
+            All (${this.plugins.length})
+          </button>
+        </div>
 
       <div class="plugin-filters" style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">
         ${categories.map(
@@ -3559,15 +5189,41 @@ export class MilaidyApp extends LitElement {
                 cursor: pointer;
                 font-size: 12px;
               "
-            >${cat === "all" ? `All (${this.plugins.length})` : `${categoryLabels[cat]} (${this.plugins.filter((p) => p.category === cat).length})`}</button>
+            >${cat === "all"
+              ? `All (${this.plugins.length})`
+              : cat === "store"
+                ? `${categoryLabels[cat]} (${this.plugins.filter((p) => p.source === "store").length})`
+                : `${categoryLabels[cat]} (${this.plugins.filter((p) => p.category === cat).length})`}</button>
           `,
     )}
       </div>
 
-      ${filtered.length === 0
-        ? html`<div class="empty-state">${this.pluginSearch ? "No plugins match your search." : "No plugins in this category."}</div>`
-        : html`
-            <div class="plugin-list">
+      <div class="plugins-scroll-container">
+        <div class="plugin-filters" style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">
+          ${categories.map(
+            (cat) => html`
+              <button
+                class="filter-btn ${this.pluginFilter === cat ? "active" : ""}"
+                data-category=${cat}
+                @click=${() => { this.pluginFilter = cat; }}
+                style="
+                  padding: 4px 12px;
+                  border-radius: 12px;
+                  border: 1px solid var(--border);
+                  background: ${this.pluginFilter === cat ? "var(--accent)" : "var(--surface)"};
+                  color: ${this.pluginFilter === cat ? "#fff" : "var(--text)"};
+                  cursor: pointer;
+                  font-size: 12px;
+                "
+              >${cat === "all" ? `All (${this.plugins.length})` : `${categoryLabels[cat]} (${this.plugins.filter((p) => p.category === cat).length})`}</button>
+            `,
+          )}
+        </div>
+
+        ${filtered.length === 0
+          ? html`<div class="empty-state">${this.pluginSearch ? "No plugins match your search." : "No plugins in this category."}</div>`
+          : html`
+              <div class="plugin-list">
               ${filtered.map((p) => {
           const hasParams = p.parameters && p.parameters.length > 0;
           const allParamsSet = hasParams ? p.parameters.every((param) => param.isSet) : true;
@@ -3579,7 +5235,7 @@ export class MilaidyApp extends LitElement {
                   <div class="plugin-item" data-plugin-id=${p.id} style="flex-direction:column;align-items:stretch;">
                     <div style="display:flex;justify-content:space-between;align-items:center;">
                       <div style="flex:1;min-width:0;">
-                        <div style="display:flex;align-items:center;gap:8px;">
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                           <div class="plugin-name">${p.name}</div>
                           <span style="font-size:10px;padding:2px 6px;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:var(--muted);">${p.category === "ai-provider" ? "ai provider"
               : p.category === "connector" ? "connector"
@@ -3641,12 +5297,25 @@ export class MilaidyApp extends LitElement {
                                           ${param.isSet ? html`<span style="font-size:10px;color:#2ecc71;">set</span>` : ""}
                                         </div>
                                         <div style="color:var(--muted);font-size:11px;padding-left:12px;">${param.description}${param.default ? ` (default: ${param.default})` : ""}</div>
-                                        <input
-                                          type="${param.sensitive ? "password" : "text"}"
-                                          .value=${param.isSet && !param.sensitive ? (param.currentValue ?? "") : (param.isSet ? "" : (param.default ?? ""))}
-                                          placeholder="${param.sensitive && param.isSet ? "********  (already set, leave blank to keep)" : "Enter value..."}"
-                                          data-plugin-param="${p.id}:${param.key}"
-                                        />
+                                        ${param.options && param.options.length > 0
+                                          ? html`
+                                            <select
+                                              data-plugin-param="${p.id}:${param.key}"
+                                              .value=${param.isSet && param.currentValue ? param.currentValue : (param.default ?? "")}
+                                            >
+                                              <option value="" ?selected=${!param.isSet && !param.default}>Select a model...</option>
+                                              ${param.options.map(
+                                                (opt: string) => html`<option value=${opt} ?selected=${(param.isSet ? param.currentValue : param.default) === opt}>${opt}</option>`,
+                                              )}
+                                            </select>`
+                                          : html`
+                                            <input
+                                              type="${param.sensitive ? "password" : "text"}"
+                                              .value=${param.isSet && !param.sensitive ? (param.currentValue ?? "") : (param.isSet ? "" : (param.default ?? ""))}
+                                              placeholder="${param.sensitive && param.isSet ? "********  (already set, leave blank to keep)" : "Enter value..."}"
+                                              data-plugin-param="${p.id}:${param.key}"
+                                            />`
+                                        }
                                       </div>
                                     `,
                   )}
@@ -3692,15 +5361,15 @@ export class MilaidyApp extends LitElement {
   }
 
   private async handlePluginConfigSave(pluginId: string): Promise<void> {
-    // Collect all input values for this plugin from the DOM
-    const inputs = this.shadowRoot?.querySelectorAll(`input[data-plugin-param^="${pluginId}:"]`);
+    // Collect all input and select values for this plugin from the DOM
+    const inputs = this.shadowRoot?.querySelectorAll(`input[data-plugin-param^="${pluginId}:"], select[data-plugin-param^="${pluginId}:"]`);
     if (!inputs) return;
 
     const config: Record<string, string> = {};
     for (const input of inputs) {
       const attr = input.getAttribute("data-plugin-param") ?? "";
       const key = attr.split(":").slice(1).join(":");
-      const value = (input as HTMLInputElement).value.trim();
+      const value = (input as HTMLInputElement | HTMLSelectElement).value.trim();
       if (value) {
         config[key] = value;
       }
@@ -3746,6 +5415,36 @@ export class MilaidyApp extends LitElement {
         this.requestUpdate();
         this.setActionNotice(`${plugin.name} ${enabled ? "enabled" : "disabled"}.`, "success");
       }
+
+      // Refresh plugins after a delay to show updated runtime state
+      // The runtime restarts in background, so we poll to catch when it's done
+      const pollForRuntimeUpdate = async (attempts = 0) => {
+        if (attempts >= 5) return; // Stop after 5 attempts (10 seconds total)
+
+        await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait 2s
+
+        try {
+          const { plugins } = await client.getPlugins();
+          this.plugins = plugins;
+          this.requestUpdate();
+
+          // Check if the plugin's isActive state matches enabled state
+          const updatedPlugin = plugins.find((p) => p.id === pluginId);
+          if (updatedPlugin && updatedPlugin.isActive === enabled) {
+            // Runtime has updated successfully - stop polling
+            console.log(`Plugin ${pluginId} is now ${enabled ? 'active' : 'inactive'}`);
+            return;
+          }
+
+          // Keep polling if state hasn't updated yet
+          await pollForRuntimeUpdate(attempts + 1);
+        } catch (err) {
+          console.error("Failed to refresh plugins:", err);
+        }
+      };
+
+      // Start polling in background
+      pollForRuntimeUpdate();
     } catch (err) {
       console.error("Failed to toggle plugin:", err);
       this.setActionNotice(`Failed to update plugin: ${err instanceof Error ? err.message : "unknown error"}`, "error", 3800);
@@ -4045,7 +5744,7 @@ export class MilaidyApp extends LitElement {
           <p>Alchemy provides EVM chain data (Ethereum, Base, Arbitrum, Optimism, Polygon).</p>
           <ol>
             <li>Go to <a href="https://dashboard.alchemy.com/signup" target="_blank" rel="noopener">dashboard.alchemy.com</a> and create a free account</li>
-            <li>In your dashboard, click <strong>"Create new app"</strong></li>
+            <li>Create an app, then go to its <strong>Networks</strong> tab and enable: Ethereum, Base, Arbitrum, Optimism, Polygon</li>
             <li>Copy the <strong>API Key</strong> from your app settings</li>
             <li>Paste it below</li>
           </ol>
@@ -4168,7 +5867,7 @@ export class MilaidyApp extends LitElement {
 
     if (b.evm) {
       for (const chain of b.evm.chains) {
-        // Native token
+        if (chain.error) continue; // Skip errored chains — shown separately
         rows.push({
           chain: chain.chain,
           symbol: chain.nativeSymbol,
@@ -4177,7 +5876,6 @@ export class MilaidyApp extends LitElement {
           valueUsd: Number.parseFloat(chain.nativeValueUsd) || 0,
           balanceRaw: Number.parseFloat(chain.nativeBalance) || 0,
         });
-        // ERC-20s
         for (const t of chain.tokens) {
           rows.push({
             chain: chain.chain,
@@ -4247,6 +5945,9 @@ export class MilaidyApp extends LitElement {
       `;
     }
 
+    // Collect per-chain errors so the user knows why some chains are missing
+    const chainErrors = (this.walletBalances?.evm?.chains ?? []).filter(c => c.error);
+
     return html`
       <div class="token-table-wrap">
         <table class="token-table">
@@ -4282,6 +5983,16 @@ export class MilaidyApp extends LitElement {
           </tbody>
         </table>
       </div>
+      ${chainErrors.length > 0 ? html`
+        <div style="margin-top:8px;font-size:11px;color:var(--muted);">
+          ${chainErrors.map(c => html`
+            <div style="padding:2px 0;">
+              <span class="chain-icon ${this.chainIcon(c.chain).cls}" style="width:12px;height:12px;line-height:12px;font-size:7px;vertical-align:middle;">${this.chainIcon(c.chain).code}</span>
+              ${c.chain}: ${c.error?.includes("not enabled") ? html`Not enabled in Alchemy &mdash; <a href="https://dashboard.alchemy.com/" target="_blank" rel="noopener" style="color:var(--accent);">enable it</a>` : c.error}
+            </div>
+          `)}
+        </div>
+      ` : ""}
     `;
   }
 
@@ -4351,6 +6062,10 @@ export class MilaidyApp extends LitElement {
   // ═══════════════════════════════════════════════════════════════════════
   // Config
   // ═══════════════════════════════════════════════════════════════════════
+
+  private renderDatabase() {
+    return html`<milaidy-database @request-restart=${() => this.handleRestart()}></milaidy-database>`;
+  }
 
   private renderConfig() {
     const ext = this.extensionStatus;
@@ -4520,6 +6235,88 @@ export class MilaidyApp extends LitElement {
                   style="align-self:flex-end;font-size:11px;padding:4px 14px;margin-top:4px;">
             ${this.walletApiKeySaving ? "Saving..." : "Save API Keys"}
           </button>
+        </div>
+      </div>
+
+      <!-- Agent Export / Import Section -->
+      <div style="margin-top:24px;padding:16px;border:1px solid var(--border);background:var(--card);">
+        <div style="margin-bottom:16px;">
+          <div style="font-weight:bold;font-size:14px;">Agent Export / Import</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">
+            Migrate your entire agent (character, memories, chats, secrets, relationships) to another machine.
+            The export is password-encrypted.
+          </div>
+        </div>
+
+        <!-- Export -->
+        <div style="padding:12px;border:1px solid var(--border);background:var(--bg-muted);margin-bottom:12px;">
+          <div style="font-weight:bold;font-size:13px;margin-bottom:8px;">Export Agent</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input
+                type="password"
+                placeholder="Encryption password (min 4 characters)"
+                .value=${this.exportPassword}
+                @input=${(e: Event) => { this.exportPassword = (e.target as HTMLInputElement).value; }}
+                style="flex:1;padding:6px 10px;border:1px solid var(--border);background:var(--card);font-size:12px;font-family:var(--mono);"
+              />
+              <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted);white-space:nowrap;">
+                <input
+                  type="checkbox"
+                  .checked=${this.exportIncludeLogs}
+                  @change=${(e: Event) => { this.exportIncludeLogs = (e.target as HTMLInputElement).checked; }}
+                />
+                Include logs
+              </label>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <button
+                class="btn"
+                style="font-size:12px;padding:6px 16px;"
+                ?disabled=${this.exportBusy || this.exportPassword.length < 4}
+                @click=${() => this.handleAgentExport()}
+              >${this.exportBusy ? "Exporting..." : "Download Export"}</button>
+              ${this.exportError ? html`<span style="font-size:11px;color:var(--danger, #e74c3c);">${this.exportError}</span>` : ""}
+              ${this.exportSuccess ? html`<span style="font-size:11px;color:var(--ok, #16a34a);">${this.exportSuccess}</span>` : ""}
+            </div>
+          </div>
+        </div>
+
+        <!-- Import -->
+        <div style="padding:12px;border:1px solid var(--border);background:var(--bg-muted);">
+          <div style="font-weight:bold;font-size:13px;margin-bottom:8px;">Import Agent</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input
+                type="file"
+                accept=".eliza-agent"
+                @change=${(e: Event) => {
+                  const input = e.target as HTMLInputElement;
+                  this.importFile = input.files?.[0] ?? null;
+                  this.importError = null;
+                  this.importSuccess = null;
+                }}
+                style="flex:1;font-size:12px;"
+              />
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input
+                type="password"
+                placeholder="Decryption password"
+                .value=${this.importPassword}
+                @input=${(e: Event) => { this.importPassword = (e.target as HTMLInputElement).value; }}
+                style="flex:1;padding:6px 10px;border:1px solid var(--border);background:var(--card);font-size:12px;font-family:var(--mono);"
+              />
+              <button
+                class="btn"
+                style="font-size:12px;padding:6px 16px;"
+                ?disabled=${this.importBusy || !this.importFile || this.importPassword.length < 4}
+                @click=${() => this.handleAgentImport()}
+              >${this.importBusy ? "Importing..." : "Import Agent"}</button>
+            </div>
+            ${this.importError ? html`<div style="font-size:11px;color:var(--danger, #e74c3c);margin-top:4px;">${this.importError}</div>` : ""}
+            ${this.importSuccess ? html`<div style="font-size:11px;color:var(--ok, #16a34a);margin-top:4px;">${this.importSuccess}</div>` : ""}
+          </div>
         </div>
       </div>
 
@@ -4699,11 +6496,14 @@ export class MilaidyApp extends LitElement {
           />
         </div>
       </div>
-      <button
-        class="btn"
-        @click=${this.handleOnboardingNext}
-        ?disabled=${!this.onboardingName.trim()}
-      >Next</button>
+      <div class="btn-row">
+        <button class="btn btn-outline" @click=${() => this.handleOnboardingBack()}>Back</button>
+        <button
+          class="btn"
+          @click=${this.handleOnboardingNext}
+          ?disabled=${!this.onboardingName.trim()}
+        >Next</button>
+      </div>
     `;
   }
 
@@ -4724,22 +6524,159 @@ export class MilaidyApp extends LitElement {
           `,
     )}
       </div>
-      <button
-        class="btn"
-        @click=${this.handleOnboardingNext}
-        ?disabled=${!this.onboardingStyle}
-      >Next</button>
+      <div class="btn-row">
+        <button class="btn btn-outline" @click=${() => this.handleOnboardingBack()}>Back</button>
+        <button
+          class="btn"
+          @click=${this.handleOnboardingNext}
+          ?disabled=${!this.onboardingStyle}
+        >Next</button>
+      </div>
     `;
   }
 
-  private renderOnboardingProvider(opts: OnboardingOptions) {
+  private renderOnboardingTheme() {
+    return html`
+      <img class="onboarding-avatar" src="/pfp.jpg" alt="milAIdy" style="width:100px;height:100px;" />
+      <div class="onboarding-speech">do you prefer it light or dark?</div>
+      <div class="onboarding-options" style="flex-direction:row;gap:12px;">
+        <div
+          class="onboarding-option theme-option ${this.onboardingTheme === "light" ? "selected" : ""}"
+          @click=${() => { this.onboardingTheme = "light"; }}
+          style="flex:1;text-align:center;padding:20px 16px;"
+        >
+          <div style="font-size:28px;margin-bottom:8px;">&#9728;</div>
+          <div class="label">Light</div>
+        </div>
+        <div
+          class="onboarding-option theme-option ${this.onboardingTheme === "dark" ? "selected" : ""}"
+          @click=${() => { this.onboardingTheme = "dark"; }}
+          style="flex:1;text-align:center;padding:20px 16px;"
+        >
+          <div style="font-size:28px;margin-bottom:8px;">&#9790;</div>
+          <div class="label">Dark</div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline" @click=${() => this.handleOnboardingBack()}>Back</button>
+        <button class="btn" @click=${this.handleOnboardingNext}>Next</button>
+      </div>
+    `;
+  }
+
+  private renderOnboardingRunMode() {
+    return html`
+      <img class="onboarding-avatar" src="/pfp.jpg" alt="milAIdy" style="width:100px;height:100px;" />
+      <div class="onboarding-speech">where should I run?</div>
+      <div class="onboarding-options">
+        <div
+          class="onboarding-option ${this.onboardingRunMode === "local" ? "selected" : ""}"
+          @click=${() => { this.onboardingRunMode = "local"; }}
+        >
+          <div class="label">Local</div>
+          <div class="hint">Run on this device. You configure your own LLM provider and wallets.</div>
+        </div>
+        <div
+          class="onboarding-option ${this.onboardingRunMode === "cloud" ? "selected" : ""}"
+          @click=${() => { this.onboardingRunMode = "cloud"; }}
+        >
+          <div class="label">Cloud</div>
+          <div class="hint">Run in the cloud. Wallets, LLMs, and RPCs managed for you.</div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline" @click=${() => this.handleOnboardingBack()}>Back</button>
+        <button
+          class="btn"
+          @click=${this.handleOnboardingNext}
+          ?disabled=${!this.onboardingRunMode}
+        >Next</button>
+      </div>
+    `;
+  }
+
+  private renderOnboardingCloudProvider(opts: OnboardingOptions) {
+    return html`
+      <img class="onboarding-avatar" src="/pfp.jpg" alt="milAIdy" style="width:100px;height:100px;" />
+      <div class="onboarding-speech">which cloud provider?</div>
+      <div class="onboarding-options">
+        ${opts.cloudProviders.map(
+          (cp) => html`
+            <div
+              class="onboarding-option ${this.onboardingCloudProvider === cp.id ? "selected" : ""}"
+              @click=${() => { this.onboardingCloudProvider = cp.id; }}
+            >
+              <div class="label">${cp.name}</div>
+              <div class="hint">${cp.description}</div>
+            </div>
+          `,
+        )}
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline" @click=${() => this.handleOnboardingBack()}>Back</button>
+        <button
+          class="btn"
+          @click=${this.handleOnboardingNext}
+          ?disabled=${!this.onboardingCloudProvider}
+        >Next</button>
+      </div>
+    `;
+  }
+
+  private renderOnboardingModelSelection(opts: OnboardingOptions) {
+    return html`
+      <img class="onboarding-avatar" src="/pfp.jpg" alt="milAIdy" style="width:100px;height:100px;" />
+      <div class="onboarding-speech">pick your models</div>
+
+      <div style="text-align:left;margin-bottom:16px;">
+        <label style="font-size:13px;font-weight:bold;color:var(--text-strong);display:block;margin-bottom:8px;">Small Model <span style="font-weight:normal;color:var(--muted);">(fast tasks)</span></label>
+        <div class="onboarding-options">
+          ${opts.models.small.map(
+            (m) => html`
+              <div
+                class="onboarding-option ${this.onboardingSmallModel === m.id ? "selected" : ""}"
+                @click=${() => { this.onboardingSmallModel = m.id; }}
+              >
+                <div class="label">${m.name}</div>
+                <div class="hint">${m.description}</div>
+              </div>
+            `,
+          )}
+        </div>
+      </div>
+
+      <div style="text-align:left;margin-bottom:8px;">
+        <label style="font-size:13px;font-weight:bold;color:var(--text-strong);display:block;margin-bottom:8px;">Large Model <span style="font-weight:normal;color:var(--muted);">(complex reasoning)</span></label>
+        <div class="onboarding-options">
+          ${opts.models.large.map(
+            (m) => html`
+              <div
+                class="onboarding-option ${this.onboardingLargeModel === m.id ? "selected" : ""}"
+                @click=${() => { this.onboardingLargeModel = m.id; }}
+              >
+                <div class="label">${m.name}</div>
+                <div class="hint">${m.description}</div>
+              </div>
+            `,
+          )}
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-outline" @click=${() => this.handleOnboardingBack()}>Back</button>
+        <button class="btn" @click=${this.handleOnboardingNext}>Finish</button>
+      </div>
+    `;
+  }
+
+  private renderOnboardingLlmProvider(opts: OnboardingOptions) {
     const selected = opts.providers.find((p) => p.id === this.onboardingProvider);
     const needsKey = selected && selected.envKey && selected.id !== "elizacloud" && selected.id !== "ollama";
 
     return html`
       <img class="onboarding-avatar" src="/pfp.jpg" alt="milAIdy" style="width:100px;height:100px;" />
       <div class="onboarding-speech">which AI provider do you want to use?</div>
-      <div class="onboarding-options">
+      <div class="onboarding-options onboarding-options-scroll">
         ${opts.providers.map(
       (provider) => html`
             <div
@@ -4763,11 +6700,14 @@ export class MilaidyApp extends LitElement {
             />
           `
         : ""}
-      <button
-        class="btn"
-        @click=${this.handleOnboardingNext}
-        ?disabled=${!this.onboardingProvider || (needsKey && !this.onboardingApiKey.trim())}
-      >Next</button>
+      <div class="btn-row">
+        <button class="btn btn-outline" @click=${() => this.handleOnboardingBack()}>Back</button>
+        <button
+          class="btn"
+          @click=${this.handleOnboardingNext}
+          ?disabled=${!this.onboardingProvider || (needsKey && !this.onboardingApiKey.trim())}
+        >Next</button>
+      </div>
     `;
   }
 
@@ -4803,36 +6743,100 @@ export class MilaidyApp extends LitElement {
 
   private renderOnboardingChannels() {
     return html`
-      <h1>Connect to messaging</h1>
-      <p>Optionally connect Telegram and/or Discord. You can skip this.</p>
+      <img class="onboarding-avatar" src="/pfp.jpg" alt="milAIdy" style="width:100px;height:100px;" />
+      <div class="onboarding-speech">want to set up wallets?</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Select which chains to enable and pick an RPC provider for each. You can skip this and set it up later.</p>
 
-      <div style="text-align: left; margin-bottom: 16px;">
-        <label style="font-size: 13px; color: var(--muted-strong);">Telegram Bot Token</label>
-        <input
-          class="onboarding-input"
-          type="password"
-          placeholder="Paste token from @BotFather"
-          .value=${this.onboardingTelegramToken}
-          @input=${(e: Event) => { this.onboardingTelegramToken = (e.target as HTMLInputElement).value; }}
-        />
-      </div>
-
-      <div style="text-align: left; margin-bottom: 16px;">
-        <label style="font-size: 13px; color: var(--muted-strong);">Discord Bot Token</label>
-        <input
-          class="onboarding-input"
-          type="password"
-          placeholder="Paste token from Discord Developer Portal"
-          .value=${this.onboardingDiscordToken}
-          @input=${(e: Event) => { this.onboardingDiscordToken = (e.target as HTMLInputElement).value; }}
-        />
+      <div class="onboarding-options onboarding-options-scroll" style="text-align:left;">
+        ${opts.inventoryProviders.map(
+          (inv: InventoryProviderOption) => html`
+            <div class="inventory-chain-block">
+              <div
+                class="onboarding-option ${this.onboardingSelectedChains.has(inv.id) ? "selected" : ""}"
+                @click=${() => {
+                  const next = new Set(this.onboardingSelectedChains);
+                  if (next.has(inv.id)) { next.delete(inv.id); } else { next.add(inv.id); }
+                  this.onboardingSelectedChains = next;
+                }}
+              >
+                <div class="label">${inv.name}</div>
+                <div class="hint">${inv.description}</div>
+              </div>
+              ${this.onboardingSelectedChains.has(inv.id) ? html`
+                <div style="margin-top:8px;margin-left:16px;">
+                  <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;">RPC Provider</label>
+                  <div class="onboarding-options" style="margin-top:4px;gap:4px;">
+                    ${inv.rpcProviders.map(
+                      (rpc) => html`
+                        <div
+                          class="onboarding-option ${(this.onboardingRpcSelections[inv.id] || "elizacloud") === rpc.id ? "selected" : ""}"
+                          @click=${() => { this.onboardingRpcSelections = { ...this.onboardingRpcSelections, [inv.id]: rpc.id }; }}
+                          style="padding:8px 12px;"
+                        >
+                          <div class="label" style="font-size:13px;">${rpc.name}</div>
+                          <div class="hint">${rpc.description}</div>
+                        </div>
+                      `,
+                    )}
+                  </div>
+                  ${(() => {
+                    const selRpc = inv.rpcProviders.find((r) => r.id === (this.onboardingRpcSelections[inv.id] || "elizacloud"));
+                    if (selRpc && selRpc.requiresKey) {
+                      const keyId = `${inv.id}:${selRpc.id}`;
+                      return html`
+                        <input
+                          class="onboarding-input"
+                          type="password"
+                          placeholder="${selRpc.name} API Key"
+                          .value=${this.onboardingRpcKeys[keyId] || ""}
+                          @input=${(e: Event) => { this.onboardingRpcKeys = { ...this.onboardingRpcKeys, [keyId]: (e.target as HTMLInputElement).value }; }}
+                          style="margin-top:6px;"
+                        />
+                      `;
+                    }
+                    return "";
+                  })()}
+                </div>
+              ` : ""}
+            </div>
+          `,
+        )}
       </div>
 
       <div class="btn-row">
-        <button class="btn btn-outline" @click=${this.handleOnboardingFinish}>Skip</button>
-        <button class="btn" @click=${this.handleOnboardingFinish}>Finish</button>
+        <button class="btn btn-outline" @click=${() => this.handleOnboardingBack()}>Back</button>
+        <button class="btn btn-outline" @click=${() => this.handleOnboardingFinish()}>Skip</button>
+        <button class="btn" @click=${this.handleOnboardingNext}>Finish</button>
       </div>
     `;
+  }
+
+  // --- Theme Management ---
+
+  private initializeTheme(): void {
+    // Load theme preference from localStorage
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    if (savedTheme === "dark" || savedTheme === "light") {
+      this.isDarkMode = savedTheme === "dark";
+      this.onboardingTheme = savedTheme;
+    } else {
+      // Detect system preference if no saved preference
+      this.isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      this.onboardingTheme = this.isDarkMode ? "dark" : "light";
+    }
+    this.updateThemeAttribute();
+    // Detect mobile device for onboarding flow
+    this.isMobileDevice = this.detectMobile();
+  }
+
+  private updateThemeAttribute(): void {
+    document.documentElement.setAttribute('data-theme', this.isDarkMode ? 'dark' : 'light');
+  }
+
+  private toggleTheme(): void {
+    this.isDarkMode = !this.isDarkMode;
+    this.updateThemeAttribute();
+    localStorage.setItem(THEME_STORAGE_KEY, this.isDarkMode ? "dark" : "light");
   }
 }
 

@@ -12,42 +12,42 @@
  *   - Context validation via Zod schemas
  *   - Workspace provider coding agent enrichment
  */
-import { describe, it, expect, beforeEach } from "vitest";
-import {
-  CodingAgentContextSchema,
-  CodingIterationSchema,
-  HumanFeedbackSchema,
-  CommandResultSchema,
-  CapturedErrorSchema,
-  FileOperationSchema,
-  ConnectorConfigSchema,
-  InteractionModeSchema,
-  ConnectorTypeSchema,
-  validateCodingAgentContext,
-  validateCodingIteration,
-  validateHumanFeedback,
-  validateConnectorConfig,
-  createCodingAgentContext,
-  hasReachedMaxIterations,
-  isLastIterationClean,
-  getUnresolvedErrors,
-  addIteration,
-  injectFeedback,
-  shouldContinueLoop,
-  type CodingAgentContext,
-  type CodingIteration,
-  type HumanFeedback,
-  type CapturedError,
-  type CommandResult,
-  type ConnectorConfig,
-  type InteractionMode,
-} from "./coding-agent-context.js";
+import { beforeEach, describe, expect, it } from "vitest";
+import type { WorkspaceBootstrapFile } from "../providers/workspace.js";
 import {
   buildCodingAgentSummary,
-  truncate,
   buildContext,
+  truncate,
 } from "../providers/workspace-provider.js";
-import type { WorkspaceBootstrapFile } from "../providers/workspace.js";
+import {
+  addIteration,
+  type CapturedError,
+  CapturedErrorSchema,
+  type CodingAgentContext,
+  CodingAgentContextSchema,
+  type CodingIteration,
+  CodingIterationSchema,
+  type CommandResult,
+  CommandResultSchema,
+  type ConnectorConfig,
+  ConnectorConfigSchema,
+  ConnectorTypeSchema,
+  createCodingAgentContext,
+  FileOperationSchema,
+  getUnresolvedErrors,
+  type HumanFeedback,
+  HumanFeedbackSchema,
+  hasReachedMaxIterations,
+  type InteractionMode,
+  InteractionModeSchema,
+  injectFeedback,
+  isLastIterationClean,
+  shouldContinueLoop,
+  validateCodingAgentContext,
+  validateCodingIteration,
+  validateConnectorConfig,
+  validateHumanFeedback,
+} from "./coding-agent-context.js";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -57,7 +57,9 @@ function nowMs(): number {
   return Date.now();
 }
 
-function makeIteration(overrides: Partial<CodingIteration> = {}): CodingIteration {
+function makeIteration(
+  overrides: Partial<CodingIteration> = {},
+): CodingIteration {
   return {
     index: 0,
     startedAt: nowMs(),
@@ -83,7 +85,9 @@ function makeError(overrides: Partial<CapturedError> = {}): CapturedError {
   };
 }
 
-function makeCommandResult(overrides: Partial<CommandResult> = {}): CommandResult {
+function makeCommandResult(
+  overrides: Partial<CommandResult> = {},
+): CommandResult {
   return {
     command: "tsc --noEmit",
     exitCode: 0,
@@ -105,7 +109,9 @@ function makeFeedback(overrides: Partial<HumanFeedback> = {}): HumanFeedback {
   };
 }
 
-function makeContext(overrides: Partial<CodingAgentContext> = {}): CodingAgentContext {
+function makeContext(
+  overrides: Partial<CodingAgentContext> = {},
+): CodingAgentContext {
   return {
     sessionId: "test-session-1",
     taskDescription: "Implement a REST API endpoint",
@@ -153,7 +159,7 @@ describe("Coding Agent — Code Generation Flow", () => {
       iterations: [
         makeIteration({
           index: 0,
-          generatedCode: 'function quicksort(arr) { /* ... */ }',
+          generatedCode: "function quicksort(arr) { /* ... */ }",
           fileOperations: [
             { type: "write", target: "src/quicksort.ts", size: 512 },
           ],
@@ -289,7 +295,12 @@ describe("Coding Agent — Execution and Error Capture", () => {
   it("records errors in an iteration alongside commands", () => {
     const iteration = makeIteration({
       commandResults: [
-        makeCommandResult({ command: "tsc --noEmit", exitCode: 1, success: false, stderr: "TS2345" }),
+        makeCommandResult({
+          command: "tsc --noEmit",
+          exitCode: 1,
+          success: false,
+          stderr: "TS2345",
+        }),
       ],
       errors: [
         makeError({ category: "compile", message: "Type error in handler" }),
@@ -335,18 +346,24 @@ describe("Coding Agent — Iterative Self-Correction Loop", () => {
     let ctx = makeContext();
 
     // Iteration 0: initial code with errors
-    ctx = addIteration(ctx, makeIteration({
-      index: 0,
-      errors: [makeError({ message: "Missing import" })],
-    }));
+    ctx = addIteration(
+      ctx,
+      makeIteration({
+        index: 0,
+        errors: [makeError({ message: "Missing import" })],
+      }),
+    );
 
     // Iteration 1: self-correction attempt
-    ctx = addIteration(ctx, makeIteration({
-      index: 1,
-      selfCorrected: true,
-      errors: [],
-      summary: "Added missing import statement",
-    }));
+    ctx = addIteration(
+      ctx,
+      makeIteration({
+        index: 1,
+        selfCorrected: true,
+        errors: [],
+        summary: "Added missing import statement",
+      }),
+    );
 
     expect(ctx.iterations).toHaveLength(2);
     expect(ctx.iterations[0]?.errors).toHaveLength(1);
@@ -367,9 +384,7 @@ describe("Coding Agent — Iterative Self-Correction Loop", () => {
 
   it("detects when last iteration has errors", () => {
     const ctx = makeContext({
-      iterations: [
-        makeIteration({ index: 0, errors: [makeError()] }),
-      ],
+      iterations: [makeIteration({ index: 0, errors: [makeError()] })],
     });
 
     expect(isLastIterationClean(ctx)).toBe(false);
@@ -399,9 +414,7 @@ describe("Coding Agent — Iterative Self-Correction Loop", () => {
   it("continues when errors remain and iterations left", () => {
     const ctx = makeContext({
       maxIterations: 10,
-      iterations: [
-        makeIteration({ index: 0, errors: [makeError()] }),
-      ],
+      iterations: [makeIteration({ index: 0, errors: [makeError()] })],
     });
 
     const decision = shouldContinueLoop(ctx);
@@ -440,39 +453,66 @@ describe("Coding Agent — Iterative Self-Correction Loop", () => {
     });
 
     // Iteration 0: Initial attempt — type error found
-    ctx = addIteration(ctx, makeIteration({
-      index: 0,
-      commandResults: [
-        makeCommandResult({ command: "tsc --noEmit", exitCode: 1, success: false }),
-      ],
-      errors: [
-        makeError({ category: "compile", message: "Type 'string' not assignable to 'number'" }),
-      ],
-    }));
+    ctx = addIteration(
+      ctx,
+      makeIteration({
+        index: 0,
+        commandResults: [
+          makeCommandResult({
+            command: "tsc --noEmit",
+            exitCode: 1,
+            success: false,
+          }),
+        ],
+        errors: [
+          makeError({
+            category: "compile",
+            message: "Type 'string' not assignable to 'number'",
+          }),
+        ],
+      }),
+    );
     expect(shouldContinueLoop(ctx).shouldContinue).toBe(true);
 
     // Iteration 1: Self-correction — different error emerges
-    ctx = addIteration(ctx, makeIteration({
-      index: 1,
-      selfCorrected: false,
-      commandResults: [
-        makeCommandResult({ command: "tsc --noEmit", exitCode: 1, success: false }),
-      ],
-      errors: [
-        makeError({ category: "compile", message: "Property 'id' does not exist" }),
-      ],
-    }));
+    ctx = addIteration(
+      ctx,
+      makeIteration({
+        index: 1,
+        selfCorrected: false,
+        commandResults: [
+          makeCommandResult({
+            command: "tsc --noEmit",
+            exitCode: 1,
+            success: false,
+          }),
+        ],
+        errors: [
+          makeError({
+            category: "compile",
+            message: "Property 'id' does not exist",
+          }),
+        ],
+      }),
+    );
     expect(shouldContinueLoop(ctx).shouldContinue).toBe(true);
 
     // Iteration 2: Final fix — clean build
-    ctx = addIteration(ctx, makeIteration({
-      index: 2,
-      selfCorrected: true,
-      commandResults: [
-        makeCommandResult({ command: "tsc --noEmit", exitCode: 0, success: true }),
-      ],
-      errors: [],
-    }));
+    ctx = addIteration(
+      ctx,
+      makeIteration({
+        index: 2,
+        selfCorrected: true,
+        commandResults: [
+          makeCommandResult({
+            command: "tsc --noEmit",
+            exitCode: 0,
+            success: true,
+          }),
+        ],
+        errors: [],
+      }),
+    );
     expect(shouldContinueLoop(ctx).shouldContinue).toBe(false);
     expect(ctx.iterations).toHaveLength(3);
   });
@@ -522,9 +562,18 @@ describe("Coding Agent — Human-in-the-Loop Feedback", () => {
 
   it("preserves all feedback history across injections", () => {
     let ctx = makeContext();
-    ctx = injectFeedback(ctx, makeFeedback({ id: "fb-1", text: "Use TypeScript strict mode" }));
-    ctx = injectFeedback(ctx, makeFeedback({ id: "fb-2", text: "Add error handling" }));
-    ctx = injectFeedback(ctx, makeFeedback({ id: "fb-3", text: "Include unit tests" }));
+    ctx = injectFeedback(
+      ctx,
+      makeFeedback({ id: "fb-1", text: "Use TypeScript strict mode" }),
+    );
+    ctx = injectFeedback(
+      ctx,
+      makeFeedback({ id: "fb-2", text: "Add error handling" }),
+    );
+    ctx = injectFeedback(
+      ctx,
+      makeFeedback({ id: "fb-3", text: "Include unit tests" }),
+    );
 
     expect(ctx.allFeedback).toHaveLength(3);
     expect(ctx.allFeedback[0]?.id).toBe("fb-1");
@@ -536,11 +585,14 @@ describe("Coding Agent — Human-in-the-Loop Feedback", () => {
       iterations: [makeIteration({ errors: [makeError()] })],
     });
 
-    ctx = injectFeedback(ctx, makeFeedback({
-      id: "fb-reject",
-      text: "This approach is wrong, please stop",
-      type: "rejection",
-    }));
+    ctx = injectFeedback(
+      ctx,
+      makeFeedback({
+        id: "fb-reject",
+        text: "This approach is wrong, please stop",
+        type: "rejection",
+      }),
+    );
 
     const decision = shouldContinueLoop(ctx);
     expect(decision.shouldContinue).toBe(false);
@@ -552,11 +604,14 @@ describe("Coding Agent — Human-in-the-Loop Feedback", () => {
       iterations: [makeIteration({ errors: [makeError()] })],
     });
 
-    ctx = injectFeedback(ctx, makeFeedback({
-      id: "fb-correct",
-      text: "Use a different algorithm instead",
-      type: "correction",
-    }));
+    ctx = injectFeedback(
+      ctx,
+      makeFeedback({
+        id: "fb-correct",
+        text: "Use a different algorithm instead",
+        type: "correction",
+      }),
+    );
 
     const decision = shouldContinueLoop(ctx);
     expect(decision.shouldContinue).toBe(true);
@@ -632,7 +687,11 @@ describe("Coding Agent — Mixed Interaction Modes", () => {
   });
 
   it("validates all interaction modes", () => {
-    const modes: InteractionMode[] = ["fully-automated", "human-in-the-loop", "manual-guidance"];
+    const modes: InteractionMode[] = [
+      "fully-automated",
+      "human-in-the-loop",
+      "manual-guidance",
+    ];
     for (const mode of modes) {
       const result = InteractionModeSchema.safeParse(mode);
       expect(result.success).toBe(true);
@@ -651,11 +710,14 @@ describe("Coding Agent — Mixed Interaction Modes", () => {
     ctx = addIteration(ctx, makeIteration({ index: 0, errors: [makeError()] }));
 
     // User injects guidance — conceptually switching to manual guidance
-    ctx = injectFeedback(ctx, makeFeedback({
-      id: "fb-switch",
-      text: "Let me guide you through the rest",
-      type: "guidance",
-    }));
+    ctx = injectFeedback(
+      ctx,
+      makeFeedback({
+        id: "fb-switch",
+        text: "Let me guide you through the rest",
+        type: "guidance",
+      }),
+    );
 
     // Update mode
     ctx = { ...ctx, interactionMode: "manual-guidance" };
@@ -676,7 +738,9 @@ describe("Coding Agent — Mixed Interaction Modes", () => {
     // Default should be fully-automated
     expect(ctx.interactionMode).toBe("fully-automated");
 
-    const validated = validateCodingAgentContext(ctx as Record<string, unknown>);
+    const validated = validateCodingAgentContext(
+      ctx as Record<string, unknown>,
+    );
     expect(validated.ok).toBe(true);
   });
 });
@@ -749,7 +813,13 @@ describe("Coding Agent — Connector Support", () => {
   });
 
   it("validates all connector types", () => {
-    const types = ["local-fs", "git-repo", "api", "browser", "sandbox"] as const;
+    const types = [
+      "local-fs",
+      "git-repo",
+      "api",
+      "browser",
+      "sandbox",
+    ] as const;
     for (const t of types) {
       const result = ConnectorTypeSchema.safeParse(t);
       expect(result.success).toBe(true);
@@ -828,7 +898,9 @@ describe("Coding Agent — Context Validation", () => {
           index: 0,
           commandResults: [makeCommandResult()],
           errors: [makeError()],
-          fileOperations: [{ type: "write", target: "src/index.ts", size: 100 }],
+          fileOperations: [
+            { type: "write", target: "src/index.ts", size: 100 },
+          ],
           feedback: [makeFeedback()],
         }),
       ],
@@ -844,7 +916,9 @@ describe("Coding Agent — Context Validation", () => {
     const result = validateCodingAgentContext(ctx as Record<string, unknown>);
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.errors.some((e) => e.path.includes("sessionId"))).toBe(true);
+      expect(result.errors.some((e) => e.path.includes("sessionId"))).toBe(
+        true,
+      );
     }
   });
 
@@ -976,7 +1050,12 @@ describe("Workspace Provider — Coding Agent Summary", () => {
       iterations: [
         makeIteration({
           errors: [
-            makeError({ category: "compile", message: "Missing semicolon", filePath: "src/app.ts", line: 10 }),
+            makeError({
+              category: "compile",
+              message: "Missing semicolon",
+              filePath: "src/app.ts",
+              line: 10,
+            }),
           ],
         }),
       ],
@@ -992,9 +1071,7 @@ describe("Workspace Provider — Coding Agent Summary", () => {
   it("includes pending human feedback", () => {
     const iterationStart = nowMs() - 5000;
     const ctx = makeContext({
-      iterations: [
-        makeIteration({ startedAt: iterationStart }),
-      ],
+      iterations: [makeIteration({ startedAt: iterationStart })],
       allFeedback: [
         makeFeedback({
           id: "fb-sum-1",
@@ -1017,7 +1094,11 @@ describe("Workspace Provider — Coding Agent Summary", () => {
         makeIteration({
           commandResults: [
             makeCommandResult({ command: "npm test", success: true }),
-            makeCommandResult({ command: "tsc --noEmit", success: false, exitCode: 1 }),
+            makeCommandResult({
+              command: "tsc --noEmit",
+              success: false,
+              exitCode: 1,
+            }),
           ],
         }),
       ],
@@ -1033,7 +1114,11 @@ describe("Workspace Provider — Coding Agent Summary", () => {
 
   it("shows connector unavailable status", () => {
     const ctx = makeContext({
-      connector: { type: "api", basePath: "https://api.test.com", available: false },
+      connector: {
+        type: "api",
+        basePath: "https://api.test.com",
+        available: false,
+      },
     });
 
     const summary = buildCodingAgentSummary(ctx);
@@ -1162,61 +1247,95 @@ describe("Coding Agent — Full Loop Integration", () => {
     expect(shouldContinueLoop(ctx).shouldContinue).toBe(true);
 
     // Step 2: First iteration — code generation with compile error
-    ctx = addIteration(ctx, makeIteration({
-      index: 0,
-      generatedCode: `
+    ctx = addIteration(
+      ctx,
+      makeIteration({
+        index: 0,
+        generatedCode: `
         export class UserService {
           create(name: string) { return { id: 1, name }; }
           get(id: number) { return null; }
         }
       `,
-      fileOperations: [
-        { type: "write", target: "src/services/user.ts", size: 150 },
-        { type: "write", target: "src/services/user.test.ts", size: 200 },
-      ],
-      commandResults: [
-        makeCommandResult({ command: "tsc --noEmit", exitCode: 1, success: false, stderr: "TS2322: Type 'null' not assignable" }),
-      ],
-      errors: [
-        makeError({ category: "compile", message: "Type 'null' is not assignable to type 'User'" }),
-      ],
-    }));
+        fileOperations: [
+          { type: "write", target: "src/services/user.ts", size: 150 },
+          { type: "write", target: "src/services/user.test.ts", size: 200 },
+        ],
+        commandResults: [
+          makeCommandResult({
+            command: "tsc --noEmit",
+            exitCode: 1,
+            success: false,
+            stderr: "TS2322: Type 'null' not assignable",
+          }),
+        ],
+        errors: [
+          makeError({
+            category: "compile",
+            message: "Type 'null' is not assignable to type 'User'",
+          }),
+        ],
+      }),
+    );
 
     expect(shouldContinueLoop(ctx).shouldContinue).toBe(true);
     expect(getUnresolvedErrors(ctx)).toHaveLength(1);
 
     // Step 3: Self-correction — fix type error, tests fail
-    ctx = addIteration(ctx, makeIteration({
-      index: 1,
-      selfCorrected: false,
-      fileOperations: [
-        { type: "edit", target: "src/services/user.ts" },
-      ],
-      commandResults: [
-        makeCommandResult({ command: "tsc --noEmit", exitCode: 0, success: true }),
-        makeCommandResult({ command: "npm test", exitCode: 1, success: false, stderr: "FAIL src/services/user.test.ts" }),
-      ],
-      errors: [
-        makeError({ category: "test", message: "Expected user.id to be defined" }),
-      ],
-    }));
+    ctx = addIteration(
+      ctx,
+      makeIteration({
+        index: 1,
+        selfCorrected: false,
+        fileOperations: [{ type: "edit", target: "src/services/user.ts" }],
+        commandResults: [
+          makeCommandResult({
+            command: "tsc --noEmit",
+            exitCode: 0,
+            success: true,
+          }),
+          makeCommandResult({
+            command: "npm test",
+            exitCode: 1,
+            success: false,
+            stderr: "FAIL src/services/user.test.ts",
+          }),
+        ],
+        errors: [
+          makeError({
+            category: "test",
+            message: "Expected user.id to be defined",
+          }),
+        ],
+      }),
+    );
 
     expect(shouldContinueLoop(ctx).shouldContinue).toBe(true);
 
     // Step 4: Fix test — all clean
-    ctx = addIteration(ctx, makeIteration({
-      index: 2,
-      selfCorrected: true,
-      fileOperations: [
-        { type: "edit", target: "src/services/user.test.ts" },
-      ],
-      commandResults: [
-        makeCommandResult({ command: "tsc --noEmit", exitCode: 0, success: true }),
-        makeCommandResult({ command: "npm test", exitCode: 0, success: true, stdout: "PASS" }),
-      ],
-      errors: [],
-      summary: "Fixed test assertions and type error. All tests pass.",
-    }));
+    ctx = addIteration(
+      ctx,
+      makeIteration({
+        index: 2,
+        selfCorrected: true,
+        fileOperations: [{ type: "edit", target: "src/services/user.test.ts" }],
+        commandResults: [
+          makeCommandResult({
+            command: "tsc --noEmit",
+            exitCode: 0,
+            success: true,
+          }),
+          makeCommandResult({
+            command: "npm test",
+            exitCode: 0,
+            success: true,
+            stdout: "PASS",
+          }),
+        ],
+        errors: [],
+        summary: "Fixed test assertions and type error. All tests pass.",
+      }),
+    );
 
     expect(shouldContinueLoop(ctx).shouldContinue).toBe(false);
     expect(isLastIterationClean(ctx)).toBe(true);
@@ -1241,23 +1360,33 @@ describe("Coding Agent — Full Loop Integration", () => {
     });
 
     // Iteration 0: Initial generation (started in the past)
-    ctx = addIteration(ctx, makeIteration({
-      index: 0,
-      startedAt: iterationTime,
-      completedAt: iterationTime + 2000,
-      commandResults: [
-        makeCommandResult({ command: "tsc --noEmit", exitCode: 0, success: true }),
-      ],
-      errors: [],
-    }));
+    ctx = addIteration(
+      ctx,
+      makeIteration({
+        index: 0,
+        startedAt: iterationTime,
+        completedAt: iterationTime + 2000,
+        commandResults: [
+          makeCommandResult({
+            command: "tsc --noEmit",
+            exitCode: 0,
+            success: true,
+          }),
+        ],
+        errors: [],
+      }),
+    );
 
     // User provides feedback AFTER the iteration started
-    ctx = injectFeedback(ctx, makeFeedback({
-      id: "hitl-fb-1",
-      timestamp: nowMs(), // Now — clearly after the iteration
-      text: "Good start, but please add input validation using zod",
-      type: "guidance",
-    }));
+    ctx = injectFeedback(
+      ctx,
+      makeFeedback({
+        id: "hitl-fb-1",
+        timestamp: nowMs(), // Now — clearly after the iteration
+        text: "Good start, but please add input validation using zod",
+        type: "guidance",
+      }),
+    );
 
     // The user feedback doesn't trigger errors, so the loop would stop.
     // But in a real implementation, the orchestrator would see the pending
@@ -1293,17 +1422,20 @@ describe("Coding Agent — Full Loop Integration", () => {
       },
     };
 
-    ctx = addIteration(ctx, makeIteration({
-      index: 0,
-      fileOperations: [
-        { type: "read", target: "package.json" },
-        { type: "edit", target: "src/bug.ts" },
-      ],
-      commandResults: [
-        makeCommandResult({ command: "git diff", success: true }),
-      ],
-      errors: [],
-    }));
+    ctx = addIteration(
+      ctx,
+      makeIteration({
+        index: 0,
+        fileOperations: [
+          { type: "read", target: "package.json" },
+          { type: "edit", target: "src/bug.ts" },
+        ],
+        commandResults: [
+          makeCommandResult({ command: "git diff", success: true }),
+        ],
+        errors: [],
+      }),
+    );
 
     expect(ctx.connector.type).toBe("local-fs");
     expect(isLastIterationClean(ctx)).toBe(true);
@@ -1338,10 +1470,13 @@ describe("Coding Agent — Edge Cases", () => {
   it("handles large iteration counts", () => {
     let ctx = makeContext({ maxIterations: 100 });
     for (let i = 0; i < 50; i++) {
-      ctx = addIteration(ctx, makeIteration({
-        index: i,
-        errors: [makeError()],
-      }));
+      ctx = addIteration(
+        ctx,
+        makeIteration({
+          index: i,
+          errors: [makeError()],
+        }),
+      );
     }
 
     expect(ctx.iterations).toHaveLength(50);

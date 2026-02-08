@@ -87,7 +87,10 @@ export function parseCliProfileArgs(argv: string[]): CliProfileParseResult {
   return { ok: true, profile, argv: out };
 }
 
-function resolveProfileStateDir(profile: string, homedir: () => string): string {
+function resolveProfileStateDir(
+  profile: string,
+  homedir: () => string,
+): string {
   const suffix = profile.toLowerCase() === "default" ? "" : `-${profile}`;
   return path.join(homedir(), `.milaidy${suffix}`);
 }
@@ -107,7 +110,8 @@ export function applyCliProfileEnv(params: {
   // Convenience only: fill defaults, never override explicit env values.
   env.MILAIDY_PROFILE = profile;
 
-  const stateDir = env.MILAIDY_STATE_DIR?.trim() || resolveProfileStateDir(profile, homedir);
+  const stateDir =
+    env.MILAIDY_STATE_DIR?.trim() || resolveProfileStateDir(profile, homedir);
   if (!env.MILAIDY_STATE_DIR?.trim()) {
     env.MILAIDY_STATE_DIR = stateDir;
   }

@@ -2,9 +2,9 @@
   "name": "@milaidy/capacitor-canvas",
   "version": "1.0.0",
   "description": "Milaidy Canvas Plugin for Capacitor - A2UI integration and canvas rendering",
-  "main": "dist/plugin.cjs.js",
-  "module": "dist/esm/index.js",
-  "types": "dist/esm/index.d.ts",
+  "main": "./dist/plugin.cjs.js",
+  "module": "./src/index.ts",
+  "types": "./dist/plugin.d.ts",
   "unpkg": "dist/plugin.js",
   "files": [
     "android/src/main/",

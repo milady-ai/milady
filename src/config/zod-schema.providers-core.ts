@@ -21,9 +21,17 @@ import {
   requireOpenAllowFrom,
 } from "./zod-schema.core.js";
 
-const ToolPolicyBySenderSchema = z.record(z.string(), ToolPolicySchema).optional();
+const ToolPolicyBySenderSchema = z
+  .record(z.string(), ToolPolicySchema)
+  .optional();
 
-const TelegramInlineButtonsScopeSchema = z.enum(["off", "dm", "group", "all", "allowlist"]);
+const TelegramInlineButtonsScopeSchema = z.enum([
+  "off",
+  "dm",
+  "group",
+  "all",
+  "allowlist",
+]);
 
 const TelegramCapabilitiesSchema = z.union([
   z.array(z.string()),
@@ -110,7 +118,10 @@ export const TelegramAccountSchemaBase = z
     blockStreaming: z.boolean().optional(),
     draftChunk: BlockStreamingChunkSchema.optional(),
     blockStreamingCoalesce: BlockStreamingCoalesceSchema.optional(),
-    streamMode: z.enum(["off", "partial", "block"]).optional().default("partial"),
+    streamMode: z
+      .enum(["off", "partial", "block"])
+      .optional()
+      .default("partial"),
     mediaMaxMb: z.number().positive().optional(),
     timeoutSeconds: z.number().int().positive().optional(),
     retry: RetryConfigSchema,
@@ -140,17 +151,19 @@ export const TelegramAccountSchemaBase = z
   })
   .strict();
 
-export const TelegramAccountSchema = TelegramAccountSchemaBase.superRefine((value, ctx) => {
-  requireOpenAllowFrom({
-    policy: value.dmPolicy,
-    allowFrom: value.allowFrom,
-    ctx,
-    path: ["allowFrom"],
-    message:
-      'channels.telegram.dmPolicy="open" requires channels.telegram.allowFrom to include "*"',
-  });
-  validateTelegramCustomCommands(value, ctx);
-});
+export const TelegramAccountSchema = TelegramAccountSchemaBase.superRefine(
+  (value, ctx) => {
+    requireOpenAllowFrom({
+      policy: value.dmPolicy,
+      allowFrom: value.allowFrom,
+      ctx,
+      path: ["allowFrom"],
+      message:
+        'channels.telegram.dmPolicy="open" requires channels.telegram.allowFrom to include "*"',
+    });
+    validateTelegramCustomCommands(value, ctx);
+  },
+);
 
 export const TelegramConfigSchema = TelegramAccountSchemaBase.extend({
   accounts: z.record(z.string(), TelegramAccountSchema.optional()).optional(),
@@ -165,13 +178,15 @@ export const TelegramConfigSchema = TelegramAccountSchemaBase.extend({
   });
   validateTelegramCustomCommands(value, ctx);
 
-  const baseWebhookUrl = typeof value.webhookUrl === "string" ? value.webhookUrl.trim() : "";
+  const baseWebhookUrl =
+    typeof value.webhookUrl === "string" ? value.webhookUrl.trim() : "";
   const baseWebhookSecret =
     typeof value.webhookSecret === "string" ? value.webhookSecret.trim() : "";
   if (baseWebhookUrl && !baseWebhookSecret) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "channels.telegram.webhookUrl requires channels.telegram.webhookSecret",
+      message:
+        "channels.telegram.webhookUrl requires channels.telegram.webhookSecret",
       path: ["webhookSecret"],
     });
   }
@@ -191,7 +206,9 @@ export const TelegramConfigSchema = TelegramAccountSchemaBase.extend({
       continue;
     }
     const accountSecret =
-      typeof account.webhookSecret === "string" ? account.webhookSecret.trim() : "";
+      typeof account.webhookSecret === "string"
+        ? account.webhookSecret.trim()
+        : "";
     if (!accountSecret && !baseWebhookSecret) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -243,9 +260,13 @@ export const DiscordGuildSchema = z
     requireMention: z.boolean().optional(),
     tools: ToolPolicySchema,
     toolsBySender: ToolPolicyBySenderSchema,
-    reactionNotifications: z.enum(["off", "own", "all", "allowlist"]).optional(),
+    reactionNotifications: z
+      .enum(["off", "own", "all", "allowlist"])
+      .optional(),
     users: z.array(z.union([z.string(), z.number()])).optional(),
-    channels: z.record(z.string(), DiscordGuildChannelSchema.optional()).optional(),
+    channels: z
+      .record(z.string(), DiscordGuildChannelSchema.optional())
+      .optional(),
   })
   .strict();
 
@@ -367,7 +388,9 @@ export const GoogleChatAccountSchema = z
     groupPolicy: GroupPolicySchema.optional().default("allowlist"),
     groupAllowFrom: z.array(z.union([z.string(), z.number()])).optional(),
     groups: z.record(z.string(), GoogleChatGroupSchema.optional()).optional(),
-    serviceAccount: z.union([z.string(), z.record(z.string(), z.unknown())]).optional(),
+    serviceAccount: z
+      .union([z.string(), z.record(z.string(), z.unknown())])
+      .optional(),
     serviceAccountFile: z.string().optional(),
     audienceType: z.enum(["app-url", "project-number"]).optional(),
     audience: z.string().optional(),
@@ -475,7 +498,9 @@ export const SlackAccountSchema = z
     blockStreaming: z.boolean().optional(),
     blockStreamingCoalesce: BlockStreamingCoalesceSchema.optional(),
     mediaMaxMb: z.number().positive().optional(),
-    reactionNotifications: z.enum(["off", "own", "all", "allowlist"]).optional(),
+    reactionNotifications: z
+      .enum(["off", "own", "all", "allowlist"])
+      .optional(),
     reactionAllowlist: z.array(z.union([z.string(), z.number()])).optional(),
     replyToMode: ReplyToModeSchema.optional(),
     replyToModeByChatType: SlackReplyToModeByChatTypeSchema.optional(),
@@ -518,7 +543,8 @@ export const SlackConfigSchema = SlackAccountSchema.extend({
   if (baseMode === "http" && !value.signingSecret) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: 'channels.slack.mode="http" requires channels.slack.signingSecret',
+      message:
+        'channels.slack.mode="http" requires channels.slack.signingSecret',
       path: ["signingSecret"],
     });
   }
@@ -562,7 +588,9 @@ export const SignalAccountSchemaBase = z
     cliPath: ExecutableTokenSchema.optional(),
     autoStart: z.boolean().optional(),
     startupTimeoutMs: z.number().int().min(1000).max(120000).optional(),
-    receiveMode: z.union([z.literal("on-start"), z.literal("manual")]).optional(),
+    receiveMode: z
+      .union([z.literal("on-start"), z.literal("manual")])
+      .optional(),
     ignoreAttachments: z.boolean().optional(),
     ignoreStories: z.boolean().optional(),
     sendReadReceipts: z.boolean().optional(),
@@ -578,7 +606,9 @@ export const SignalAccountSchemaBase = z
     blockStreaming: z.boolean().optional(),
     blockStreamingCoalesce: BlockStreamingCoalesceSchema.optional(),
     mediaMaxMb: z.number().int().positive().optional(),
-    reactionNotifications: z.enum(["off", "own", "all", "allowlist"]).optional(),
+    reactionNotifications: z
+      .enum(["off", "own", "all", "allowlist"])
+      .optional(),
     reactionAllowlist: z.array(z.union([z.string(), z.number()])).optional(),
     actions: z
       .object({
@@ -591,15 +621,18 @@ export const SignalAccountSchemaBase = z
   })
   .strict();
 
-export const SignalAccountSchema = SignalAccountSchemaBase.superRefine((value, ctx) => {
-  requireOpenAllowFrom({
-    policy: value.dmPolicy,
-    allowFrom: value.allowFrom,
-    ctx,
-    path: ["allowFrom"],
-    message: 'channels.signal.dmPolicy="open" requires channels.signal.allowFrom to include "*"',
-  });
-});
+export const SignalAccountSchema = SignalAccountSchemaBase.superRefine(
+  (value, ctx) => {
+    requireOpenAllowFrom({
+      policy: value.dmPolicy,
+      allowFrom: value.allowFrom,
+      ctx,
+      path: ["allowFrom"],
+      message:
+        'channels.signal.dmPolicy="open" requires channels.signal.allowFrom to include "*"',
+    });
+  },
+);
 
 export const SignalConfigSchema = SignalAccountSchemaBase.extend({
   accounts: z.record(z.string(), SignalAccountSchema.optional()).optional(),
@@ -609,7 +642,8 @@ export const SignalConfigSchema = SignalAccountSchemaBase.extend({
     allowFrom: value.allowFrom,
     ctx,
     path: ["allowFrom"],
-    message: 'channels.signal.dmPolicy="open" requires channels.signal.allowFrom to include "*"',
+    message:
+      'channels.signal.dmPolicy="open" requires channels.signal.allowFrom to include "*"',
   });
 });
 
@@ -623,7 +657,9 @@ export const IMessageAccountSchemaBase = z
     cliPath: ExecutableTokenSchema.optional(),
     dbPath: z.string().optional(),
     remoteHost: z.string().optional(),
-    service: z.union([z.literal("imessage"), z.literal("sms"), z.literal("auto")]).optional(),
+    service: z
+      .union([z.literal("imessage"), z.literal("sms"), z.literal("auto")])
+      .optional(),
     region: z.string().optional(),
     dmPolicy: DmPolicySchema.optional().default("pairing"),
     allowFrom: z.array(z.union([z.string(), z.number()])).optional(),
@@ -655,16 +691,18 @@ export const IMessageAccountSchemaBase = z
   })
   .strict();
 
-export const IMessageAccountSchema = IMessageAccountSchemaBase.superRefine((value, ctx) => {
-  requireOpenAllowFrom({
-    policy: value.dmPolicy,
-    allowFrom: value.allowFrom,
-    ctx,
-    path: ["allowFrom"],
-    message:
-      'channels.imessage.dmPolicy="open" requires channels.imessage.allowFrom to include "*"',
-  });
-});
+export const IMessageAccountSchema = IMessageAccountSchemaBase.superRefine(
+  (value, ctx) => {
+    requireOpenAllowFrom({
+      policy: value.dmPolicy,
+      allowFrom: value.allowFrom,
+      ctx,
+      path: ["allowFrom"],
+      message:
+        'channels.imessage.dmPolicy="open" requires channels.imessage.allowFrom to include "*"',
+    });
+  },
+);
 
 export const IMessageConfigSchema = IMessageAccountSchemaBase.extend({
   accounts: z.record(z.string(), IMessageAccountSchema.optional()).optional(),
@@ -729,23 +767,29 @@ export const BlueBubblesAccountSchemaBase = z
     sendReadReceipts: z.boolean().optional(),
     blockStreaming: z.boolean().optional(),
     blockStreamingCoalesce: BlockStreamingCoalesceSchema.optional(),
-    groups: z.record(z.string(), BlueBubblesGroupConfigSchema.optional()).optional(),
+    groups: z
+      .record(z.string(), BlueBubblesGroupConfigSchema.optional())
+      .optional(),
     heartbeat: ChannelHeartbeatVisibilitySchema,
   })
   .strict();
 
-export const BlueBubblesAccountSchema = BlueBubblesAccountSchemaBase.superRefine((value, ctx) => {
-  requireOpenAllowFrom({
-    policy: value.dmPolicy,
-    allowFrom: value.allowFrom,
-    ctx,
-    path: ["allowFrom"],
-    message: 'channels.bluebubbles.accounts.*.dmPolicy="open" requires allowFrom to include "*"',
+export const BlueBubblesAccountSchema =
+  BlueBubblesAccountSchemaBase.superRefine((value, ctx) => {
+    requireOpenAllowFrom({
+      policy: value.dmPolicy,
+      allowFrom: value.allowFrom,
+      ctx,
+      path: ["allowFrom"],
+      message:
+        'channels.bluebubbles.accounts.*.dmPolicy="open" requires allowFrom to include "*"',
+    });
   });
-});
 
 export const BlueBubblesConfigSchema = BlueBubblesAccountSchemaBase.extend({
-  accounts: z.record(z.string(), BlueBubblesAccountSchema.optional()).optional(),
+  accounts: z
+    .record(z.string(), BlueBubblesAccountSchema.optional())
+    .optional(),
   actions: BlueBubblesActionSchema,
 }).superRefine((value, ctx) => {
   requireOpenAllowFrom({
@@ -867,7 +911,10 @@ export const WhatsAppAccountSchema = z
       .object({
         emoji: z.string().optional(),
         direct: z.boolean().optional().default(true),
-        group: z.enum(["always", "mentions", "never"]).optional().default("mentions"),
+        group: z
+          .enum(["always", "mentions", "never"])
+          .optional()
+          .default("mentions"),
       })
       .strict()
       .optional(),
@@ -879,14 +926,17 @@ export const WhatsAppAccountSchema = z
     if (value.dmPolicy !== "open") {
       return;
     }
-    const allow = (value.allowFrom ?? []).map((v) => String(v).trim()).filter(Boolean);
+    const allow = (value.allowFrom ?? [])
+      .map((v) => String(v).trim())
+      .filter(Boolean);
     if (allow.includes("*")) {
       return;
     }
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ["allowFrom"],
-      message: 'channels.whatsapp.accounts.*.dmPolicy="open" requires allowFrom to include "*"',
+      message:
+        'channels.whatsapp.accounts.*.dmPolicy="open" requires allowFrom to include "*"',
     });
   });
 
@@ -936,7 +986,10 @@ export const WhatsAppConfigSchema = z
       .object({
         emoji: z.string().optional(),
         direct: z.boolean().optional().default(true),
-        group: z.enum(["always", "mentions", "never"]).optional().default("mentions"),
+        group: z
+          .enum(["always", "mentions", "never"])
+          .optional()
+          .default("mentions"),
       })
       .strict()
       .optional(),
@@ -948,7 +1001,9 @@ export const WhatsAppConfigSchema = z
     if (value.dmPolicy !== "open") {
       return;
     }
-    const allow = (value.allowFrom ?? []).map((v) => String(v).trim()).filter(Boolean);
+    const allow = (value.allowFrom ?? [])
+      .map((v) => String(v).trim())
+      .filter(Boolean);
     if (allow.includes("*")) {
       return;
     }

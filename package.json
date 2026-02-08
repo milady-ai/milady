@@ -1,6 +1,6 @@
 {
   "name": "milaidy",
-  "version": "2.0.0-alpha.6",
+  "version": "2.0.0-alpha.7",
   "description": "cute agents for the acceleration",
   "keywords": [],
   "license": "MIT",
@@ -108,7 +108,7 @@
     "@elizaos/plugin-experience": "next",
     "@elizaos/plugin-form": "next",
     "@elizaos/plugin-goals": "next",
-    "@elizaos/plugin-google-genai": "next",
+    "@elizaos/plugin-google-genai": "2.0.0-alpha.3",
     "@elizaos/plugin-groq": "next",
     "@elizaos/plugin-imessage": "next",
     "@elizaos/plugin-knowledge": "next",
@@ -116,9 +116,9 @@
     "@elizaos/plugin-mattermost": "next",
     "@elizaos/plugin-mcp": "next",
     "@elizaos/plugin-msteams": "next",
-    "@elizaos/plugin-ollama": "next",
-    "@elizaos/plugin-openai": "next",
-    "@elizaos/plugin-openrouter": "next",
+    "@elizaos/plugin-ollama": "2.0.0-alpha.3",
+    "@elizaos/plugin-openai": "2.0.0-alpha.3",
+    "@elizaos/plugin-openrouter": "2.0.0-alpha.3",
     "@elizaos/plugin-pdf": "next",
     "@elizaos/plugin-personality": "next",
     "@elizaos/plugin-plugin-manager": "next",
@@ -138,10 +138,13 @@
     "@elizaos/plugin-xai": "next",
     "@elizaos/skills": "next",
     "@elizaos/tui": "next",
+    "@homunculuslabs/plugin-zai": "2.0.0-alpha.1",
+    "@noble/curves": "^2.0.1",
     "chalk": "^5.6.2",
     "commander": "^14.0.3",
     "dotenv": "^17.2.3",
     "json5": "^2.2.3",
+    "ws": "^8.19.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -149,6 +152,7 @@
     "@lit-labs/signals": "^0.2.0",
     "@lit/context": "^1.1.6",
     "@types/node": "^25.2.0",
+    "@types/ws": "^8.18.1",
     "@typescript/native-preview": "7.0.0-dev.20260202.1",
     "@vitest/coverage-v8": "^4.0.18",
     "lit": "^3.3.2",
@@ -169,7 +173,10 @@
     "node": ">=22.12.0"
   },
   "trustedDependencies": [
+    "@lydell/node-pty",
+    "@whiskeysockets/baileys",
     "esbuild",
-    "protobufjs"
+    "protobufjs",
+    "sharp"
   ]
 }

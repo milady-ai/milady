@@ -9,25 +9,27 @@
  *   - API server is available in both CLI and headless modes
  *   - Config env vars are applied identically
  */
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { MilaidyConfig } from "./config/config.js";
+// Shared presets used by both CLI and API server
+import { SHARED_STYLE_RULES, STYLE_PRESETS } from "./onboarding-presets.js";
 import {
-  collectPluginNames,
   applyChannelSecretsToEnv,
   applyCloudConfigToEnv,
   buildCharacterFromConfig,
+  collectPluginNames,
   resolvePrimaryModel,
 } from "./runtime/eliza.js";
-
-// Shared presets used by both CLI and API server
-import { STYLE_PRESETS, SHARED_STYLE_RULES } from "./onboarding-presets.js";
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
 /** Save and restore a set of env keys around each test. */
-function envSnapshot(keys: string[]): { save: () => void; restore: () => void } {
+function envSnapshot(keys: string[]): {
+  save: () => void;
+  restore: () => void;
+} {
   const saved = new Map<string, string | undefined>();
   return {
     save() {
@@ -75,7 +77,9 @@ describe("onboarding presets parity (CLI ↔ GUI)", () => {
 
   it("every preset uses {{name}} placeholder in bio and system", () => {
     for (const preset of STYLE_PRESETS) {
-      const hasBioPlaceholder = preset.bio.some((line) => line.includes("{{name}}"));
+      const hasBioPlaceholder = preset.bio.some((line) =>
+        line.includes("{{name}}"),
+      );
       expect(hasBioPlaceholder).toBe(true);
       expect(preset.system).toContain("{{name}}");
     }
@@ -115,7 +119,10 @@ describe("plugin loading parity across modes", () => {
     "OLLAMA_BASE_URL", "ELIZAOS_CLOUD_API_KEY", "ELIZAOS_CLOUD_ENABLED",
   ];
   const snap = envSnapshot(envKeys);
-  beforeEach(() => { snap.save(); for (const k of envKeys) delete process.env[k]; });
+  beforeEach(() => {
+    snap.save();
+    for (const k of envKeys) delete process.env[k];
+  });
   afterEach(() => snap.restore());
 
   it("same core plugins are always loaded regardless of config", () => {
@@ -221,11 +228,15 @@ describe("plugin loading parity across modes", () => {
   it("cloud plugin loads consistently from config or env", () => {
     // From config
     const config1 = { cloud: { enabled: true } } as MilaidyConfig;
-    expect(collectPluginNames(config1).has("@elizaos/plugin-elizacloud")).toBe(true);
+    expect(collectPluginNames(config1).has("@elizaos/plugin-elizacloud")).toBe(
+      true,
+    );
 
     // From env
     process.env.ELIZAOS_CLOUD_API_KEY = "ck-test";
-    expect(collectPluginNames({} as MilaidyConfig).has("@elizaos/plugin-elizacloud")).toBe(true);
+    expect(
+      collectPluginNames({} as MilaidyConfig).has("@elizaos/plugin-elizacloud"),
+    ).toBe(true);
   });
 });
 
@@ -235,13 +246,21 @@ describe("plugin loading parity across modes", () => {
 
 describe("config env propagation parity", () => {
   const envKeys = [
-    "DISCORD_BOT_TOKEN", "TELEGRAM_BOT_TOKEN",
-    "SLACK_BOT_TOKEN", "SLACK_APP_TOKEN",
-    "ELIZAOS_CLOUD_ENABLED", "ELIZAOS_CLOUD_API_KEY", "ELIZAOS_CLOUD_BASE_URL",
-    "ANTHROPIC_API_KEY", "OPENAI_API_KEY",
+    "DISCORD_BOT_TOKEN",
+    "TELEGRAM_BOT_TOKEN",
+    "SLACK_BOT_TOKEN",
+    "SLACK_APP_TOKEN",
+    "ELIZAOS_CLOUD_ENABLED",
+    "ELIZAOS_CLOUD_API_KEY",
+    "ELIZAOS_CLOUD_BASE_URL",
+    "ANTHROPIC_API_KEY",
+    "OPENAI_API_KEY",
   ];
   const snap = envSnapshot(envKeys);
-  beforeEach(() => { snap.save(); for (const k of envKeys) delete process.env[k]; });
+  beforeEach(() => {
+    snap.save();
+    for (const k of envKeys) delete process.env[k];
+  });
   afterEach(() => snap.restore());
 
   it("channel secrets are applied from config to env identically", () => {
@@ -262,7 +281,11 @@ describe("config env propagation parity", () => {
 
   it("cloud config is applied from config to env identically", () => {
     const config = {
-      cloud: { enabled: true, apiKey: "ck-123", baseUrl: "https://cloud.example" },
+      cloud: {
+        enabled: true,
+        apiKey: "ck-123",
+        baseUrl: "https://cloud.example",
+      },
     } as MilaidyConfig;
 
     applyCloudConfigToEnv(config);
@@ -275,7 +298,9 @@ describe("config env propagation parity", () => {
     process.env.TELEGRAM_BOT_TOKEN = "already-set";
     process.env.ELIZAOS_CLOUD_API_KEY = "existing";
 
-    applyChannelSecretsToEnv({ channels: { telegram: { botToken: "new" } } } as MilaidyConfig);
+    applyChannelSecretsToEnv({
+      channels: { telegram: { botToken: "new" } },
+    } as MilaidyConfig);
     applyCloudConfigToEnv({ cloud: { apiKey: "new-key" } } as MilaidyConfig);
 
     expect(process.env.TELEGRAM_BOT_TOKEN).toBe("already-set");
@@ -290,18 +315,25 @@ describe("config env propagation parity", () => {
 describe("character building parity", () => {
   const envKeys = ["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GROQ_API_KEY"];
   const snap = envSnapshot(envKeys);
-  beforeEach(() => { snap.save(); for (const k of envKeys) delete process.env[k]; });
+  beforeEach(() => {
+    snap.save();
+    for (const k of envKeys) delete process.env[k];
+  });
   afterEach(() => snap.restore());
 
   it("character name resolves identically regardless of config shape", () => {
     // Name from agents.list
     expect(
-      buildCharacterFromConfig({ agents: { list: [{ id: "main", name: "Sakuya" }] } } as MilaidyConfig).name,
+      buildCharacterFromConfig({
+        agents: { list: [{ id: "main", name: "Sakuya" }] },
+      } as MilaidyConfig).name,
     ).toBe("Sakuya");
 
     // Name from ui.assistant
     expect(
-      buildCharacterFromConfig({ ui: { assistant: { name: "Reimu" } } } as unknown as MilaidyConfig).name,
+      buildCharacterFromConfig({
+        ui: { assistant: { name: "Reimu" } },
+      } as unknown as MilaidyConfig).name,
     ).toBe("Reimu");
 
     // Default fallback
@@ -336,13 +368,17 @@ describe("character building parity", () => {
 
 describe("model resolution parity", () => {
   it("returns primary model from config consistently", () => {
-    const config = { agents: { defaults: { model: { primary: "claude-4-opus" } } } } as MilaidyConfig;
+    const config = {
+      agents: { defaults: { model: { primary: "claude-4-opus" } } },
+    } as MilaidyConfig;
     expect(resolvePrimaryModel(config)).toBe("claude-4-opus");
   });
 
   it("returns undefined when no model configured", () => {
     expect(resolvePrimaryModel({} as MilaidyConfig)).toBeUndefined();
-    expect(resolvePrimaryModel({ agents: { defaults: {} } } as MilaidyConfig)).toBeUndefined();
+    expect(
+      resolvePrimaryModel({ agents: { defaults: {} } } as MilaidyConfig),
+    ).toBeUndefined();
   });
 });
 
@@ -381,7 +417,9 @@ describe("startEliza module availability", () => {
 
 describe("config path consistency across modes", () => {
   it("resolveConfigPath uses same default path in all modes", async () => {
-    const { resolveConfigPath, resolveStateDir } = await import("./config/paths.js");
+    const { resolveConfigPath, resolveStateDir } = await import(
+      "./config/paths.js"
+    );
 
     // With no env overrides, all modes resolve the same path
     const env = {} as NodeJS.ProcessEnv;
@@ -389,20 +427,26 @@ describe("config path consistency across modes", () => {
     const stateDir = resolveStateDir(env, homedir);
     const configPath = resolveConfigPath(env, stateDir);
 
-    expect(configPath).toBe("/mock/home/.milaidy/milaidy.json");
-    expect(stateDir).toBe("/mock/home/.milaidy");
+    // Normalize for cross-platform: backslashes → slashes, strip Windows drive prefix
+    const norm = (p: string) => p.replace(/\\/g, "/").replace(/^[A-Z]:/i, "");
+    expect(norm(configPath)).toBe("/mock/home/.milaidy/milaidy.json");
+    expect(norm(stateDir)).toBe("/mock/home/.milaidy");
   });
 
   it("MILAIDY_STATE_DIR override is respected consistently", async () => {
-    const { resolveConfigPath, resolveStateDir } = await import("./config/paths.js");
+    const { resolveConfigPath, resolveStateDir } = await import(
+      "./config/paths.js"
+    );
 
     const env = { MILAIDY_STATE_DIR: "/custom/state" } as NodeJS.ProcessEnv;
     const homedir = () => "/mock/home";
     const stateDir = resolveStateDir(env, homedir);
     const configPath = resolveConfigPath(env, stateDir);
 
-    expect(stateDir).toBe("/custom/state");
-    expect(configPath).toBe("/custom/state/milaidy.json");
+    // Normalize for cross-platform: backslashes → slashes, strip Windows drive prefix
+    const norm = (p: string) => p.replace(/\\/g, "/").replace(/^[A-Z]:/i, "");
+    expect(norm(stateDir)).toBe("/custom/state");
+    expect(norm(configPath)).toBe("/custom/state/milaidy.json");
   });
 });
 
@@ -417,7 +461,9 @@ describe("restart mechanism parity", () => {
   });
 
   it("setRestartHandler replaces the default handler", async () => {
-    const { setRestartHandler, requestRestart } = await import("./runtime/restart.js");
+    const { setRestartHandler, requestRestart } = await import(
+      "./runtime/restart.js"
+    );
 
     let called = false;
     let calledReason: string | undefined;

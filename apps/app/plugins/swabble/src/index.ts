@@ -4,7 +4,7 @@ import type { SwabblePlugin } from "./definitions";
 
 const electronModulePath = "../electron/src/index";
 
-const Swabble = registerPlugin<SwabblePlugin>("Swabble", {
+export const Swabble = registerPlugin<SwabblePlugin>("Swabble", {
   web: () => import("./web").then((m) => new m.SwabbleWeb()),
   electron: () => {
     // Use Electron-specific implementation for macOS/Windows/Linux
@@ -17,4 +17,3 @@ const Swabble = registerPlugin<SwabblePlugin>("Swabble", {
 });
 
 export * from "./definitions";
-export { Swabble };

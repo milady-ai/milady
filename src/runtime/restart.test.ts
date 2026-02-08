@@ -4,11 +4,11 @@
  * Validates the pluggable handler system without actually exiting the process
  * or starting a runtime.
  */
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   RESTART_EXIT_CODE,
-  setRestartHandler,
   requestRestart,
+  setRestartHandler,
 } from "./restart.js";
 
 describe("restart", () => {

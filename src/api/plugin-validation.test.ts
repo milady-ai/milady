@@ -4,16 +4,23 @@
  * Tests the validatePluginConfig() function: required parameter checks,
  * API key format validation, default-value handling, and edge cases.
  */
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { validatePluginConfig, type PluginParamInfo } from "./plugin-validation.js";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import {
+  type PluginParamInfo,
+  validatePluginConfig,
+} from "./plugin-validation.js";
 
 describe("validatePluginConfig", () => {
   // Save and restore env vars
   const savedEnv: Record<string, string | undefined> = {};
   const envKeysToClean = [
-    "ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GROQ_API_KEY",
-    "DISCORD_BOT_TOKEN", "DISCORD_APPLICATION_ID",
-    "TELEGRAM_BOT_TOKEN", "SLACK_BOT_TOKEN",
+    "ANTHROPIC_API_KEY",
+    "OPENAI_API_KEY",
+    "GROQ_API_KEY",
+    "DISCORD_BOT_TOKEN",
+    "DISCORD_APPLICATION_ID",
+    "TELEGRAM_BOT_TOKEN",
+    "SLACK_BOT_TOKEN",
     "SOME_API_KEY",
   ];
 
@@ -40,54 +47,128 @@ describe("validatePluginConfig", () => {
 
   describe("required parameters", () => {
     const anthropicParams: PluginParamInfo[] = [
-      { key: "ANTHROPIC_API_KEY", required: true, sensitive: true, type: "string", description: "API key" },
-      { key: "ANTHROPIC_SMALL_MODEL", required: false, sensitive: false, type: "string", description: "Small model", default: "claude-3-5-haiku-20241022" },
+      {
+        key: "ANTHROPIC_API_KEY",
+        required: true,
+        sensitive: true,
+        type: "string",
+        description: "API key",
+      },
+      {
+        key: "ANTHROPIC_SMALL_MODEL",
+        required: false,
+        sensitive: false,
+        type: "string",
+        description: "Small model",
+        default: "claude-3-5-haiku-20241022",
+      },
     ];
 
     it("fails when required param is missing", () => {
-      const result = validatePluginConfig("anthropic", "ai-provider", "ANTHROPIC_API_KEY", ["ANTHROPIC_API_KEY"], undefined, anthropicParams);
+      const result = validatePluginConfig(
+        "anthropic",
+        "ai-provider",
+        "ANTHROPIC_API_KEY",
+        ["ANTHROPIC_API_KEY"],
+        undefined,
+        anthropicParams,
+      );
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.field === "ANTHROPIC_API_KEY")).toBe(true);
+      expect(result.errors.some((e) => e.field === "ANTHROPIC_API_KEY")).toBe(
+        true,
+      );
     });
 
     it("passes when required param is set in env", () => {
       process.env.ANTHROPIC_API_KEY = "sk-ant-test-1234567890abcdef";
-      const result = validatePluginConfig("anthropic", "ai-provider", "ANTHROPIC_API_KEY", ["ANTHROPIC_API_KEY"], undefined, anthropicParams);
+      const result = validatePluginConfig(
+        "anthropic",
+        "ai-provider",
+        "ANTHROPIC_API_KEY",
+        ["ANTHROPIC_API_KEY"],
+        undefined,
+        anthropicParams,
+      );
       expect(result.valid).toBe(true);
       expect(result.errors).toEqual([]);
     });
 
     it("passes when required param is in provided config", () => {
-      const result = validatePluginConfig("anthropic", "ai-provider", "ANTHROPIC_API_KEY", ["ANTHROPIC_API_KEY"],
-        { ANTHROPIC_API_KEY: "sk-ant-test-1234567890abcdef" }, anthropicParams);
+      const result = validatePluginConfig(
+        "anthropic",
+        "ai-provider",
+        "ANTHROPIC_API_KEY",
+        ["ANTHROPIC_API_KEY"],
+        { ANTHROPIC_API_KEY: "sk-ant-test-1234567890abcdef" },
+        anthropicParams,
+      );
       expect(result.valid).toBe(true);
     });
 
     it("optional param without value does not cause error", () => {
       process.env.ANTHROPIC_API_KEY = "sk-ant-test-1234567890abcdef";
-      const result = validatePluginConfig("anthropic", "ai-provider", "ANTHROPIC_API_KEY", ["ANTHROPIC_API_KEY", "ANTHROPIC_SMALL_MODEL"], undefined, anthropicParams);
+      const result = validatePluginConfig(
+        "anthropic",
+        "ai-provider",
+        "ANTHROPIC_API_KEY",
+        ["ANTHROPIC_API_KEY", "ANTHROPIC_SMALL_MODEL"],
+        undefined,
+        anthropicParams,
+      );
       expect(result.valid).toBe(true);
       // Optional with default should not produce warning either when not set
     });
 
     it("required param with default produces warning not error", () => {
       const params: PluginParamInfo[] = [
-        { key: "MY_KEY", required: true, sensitive: false, type: "string", description: "A key", default: "fallback-value" },
+        {
+          key: "MY_KEY",
+          required: true,
+          sensitive: false,
+          type: "string",
+          description: "A key",
+          default: "fallback-value",
+        },
       ];
-      const result = validatePluginConfig("test-plugin", "feature", null, ["MY_KEY"], undefined, params);
+      const result = validatePluginConfig(
+        "test-plugin",
+        "feature",
+        null,
+        ["MY_KEY"],
+        undefined,
+        params,
+      );
       expect(result.valid).toBe(true); // valid because default exists
-      expect(result.warnings.some((w) => w.field === "MY_KEY" && w.message.includes("default"))).toBe(true);
+      expect(
+        result.warnings.some(
+          (w) => w.field === "MY_KEY" && w.message.includes("default"),
+        ),
+      ).toBe(true);
     });
 
     it("empty string is treated as not set", () => {
       process.env.ANTHROPIC_API_KEY = "";
-      const result = validatePluginConfig("anthropic", "ai-provider", "ANTHROPIC_API_KEY", ["ANTHROPIC_API_KEY"], undefined, anthropicParams);
+      const result = validatePluginConfig(
+        "anthropic",
+        "ai-provider",
+        "ANTHROPIC_API_KEY",
+        ["ANTHROPIC_API_KEY"],
+        undefined,
+        anthropicParams,
+      );
       expect(result.valid).toBe(false);
     });
 
     it("whitespace-only is treated as not set", () => {
       process.env.ANTHROPIC_API_KEY = "   ";
-      const result = validatePluginConfig("anthropic", "ai-provider", "ANTHROPIC_API_KEY", ["ANTHROPIC_API_KEY"], undefined, anthropicParams);
+      const result = validatePluginConfig(
+        "anthropic",
+        "ai-provider",
+        "ANTHROPIC_API_KEY",
+        ["ANTHROPIC_API_KEY"],
+        undefined,
+        anthropicParams,
+      );
       expect(result.valid).toBe(false);
     });
   });
@@ -98,22 +179,58 @@ describe("validatePluginConfig", () => {
 
   describe("multi-param plugins", () => {
     const discordParams: PluginParamInfo[] = [
-      { key: "DISCORD_API_TOKEN", required: true, sensitive: true, type: "string", description: "Discord bot token" },
-      { key: "DISCORD_APPLICATION_ID", required: true, sensitive: false, type: "string", description: "Discord app ID" },
-      { key: "CHANNEL_IDS", required: false, sensitive: false, type: "string", description: "Channel IDs" },
+      {
+        key: "DISCORD_API_TOKEN",
+        required: true,
+        sensitive: true,
+        type: "string",
+        description: "Discord bot token",
+      },
+      {
+        key: "DISCORD_APPLICATION_ID",
+        required: true,
+        sensitive: false,
+        type: "string",
+        description: "Discord app ID",
+      },
+      {
+        key: "CHANNEL_IDS",
+        required: false,
+        sensitive: false,
+        type: "string",
+        description: "Channel IDs",
+      },
     ];
 
     it("fails when both required params missing", () => {
-      const result = validatePluginConfig("discord", "connector", "DISCORD_API_TOKEN", ["DISCORD_API_TOKEN", "DISCORD_APPLICATION_ID"], undefined, discordParams);
+      const result = validatePluginConfig(
+        "discord",
+        "connector",
+        "DISCORD_API_TOKEN",
+        ["DISCORD_API_TOKEN", "DISCORD_APPLICATION_ID"],
+        undefined,
+        discordParams,
+      );
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBe(2);
-      expect(result.errors.some((e) => e.field === "DISCORD_API_TOKEN")).toBe(true);
-      expect(result.errors.some((e) => e.field === "DISCORD_APPLICATION_ID")).toBe(true);
+      expect(result.errors.some((e) => e.field === "DISCORD_API_TOKEN")).toBe(
+        true,
+      );
+      expect(
+        result.errors.some((e) => e.field === "DISCORD_APPLICATION_ID"),
+      ).toBe(true);
     });
 
     it("fails when one required param missing", () => {
       process.env.DISCORD_API_TOKEN = "MTE1MDY2NjQwOTA3MTQzODg5MA.token";
-      const result = validatePluginConfig("discord", "connector", "DISCORD_API_TOKEN", ["DISCORD_API_TOKEN", "DISCORD_APPLICATION_ID"], undefined, discordParams);
+      const result = validatePluginConfig(
+        "discord",
+        "connector",
+        "DISCORD_API_TOKEN",
+        ["DISCORD_API_TOKEN", "DISCORD_APPLICATION_ID"],
+        undefined,
+        discordParams,
+      );
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBe(1);
       expect(result.errors[0].field).toBe("DISCORD_APPLICATION_ID");
@@ -122,7 +239,14 @@ describe("validatePluginConfig", () => {
     it("passes when all required params set", () => {
       process.env.DISCORD_API_TOKEN = "MTE1MDY2NjQwOTA3MTQzODg5MA.token";
       process.env.DISCORD_APPLICATION_ID = "1150666409071438890";
-      const result = validatePluginConfig("discord", "connector", "DISCORD_API_TOKEN", ["DISCORD_API_TOKEN", "DISCORD_APPLICATION_ID"], undefined, discordParams);
+      const result = validatePluginConfig(
+        "discord",
+        "connector",
+        "DISCORD_API_TOKEN",
+        ["DISCORD_API_TOKEN", "DISCORD_APPLICATION_ID"],
+        undefined,
+        discordParams,
+      );
       expect(result.valid).toBe(true);
     });
 
@@ -130,7 +254,14 @@ describe("validatePluginConfig", () => {
       process.env.DISCORD_API_TOKEN = "MTE1MDY2NjQwOTA3MTQzODg5MA.token";
       process.env.DISCORD_APPLICATION_ID = "1150666409071438890";
       // CHANNEL_IDS not set — should still be valid
-      const result = validatePluginConfig("discord", "connector", "DISCORD_API_TOKEN", ["DISCORD_API_TOKEN", "DISCORD_APPLICATION_ID", "CHANNEL_IDS"], undefined, discordParams);
+      const result = validatePluginConfig(
+        "discord",
+        "connector",
+        "DISCORD_API_TOKEN",
+        ["DISCORD_API_TOKEN", "DISCORD_APPLICATION_ID", "CHANNEL_IDS"],
+        undefined,
+        discordParams,
+      );
       expect(result.valid).toBe(true);
     });
   });
@@ -141,26 +272,59 @@ describe("validatePluginConfig", () => {
 
   describe("API key format checks", () => {
     const params: PluginParamInfo[] = [
-      { key: "ANTHROPIC_API_KEY", required: true, sensitive: true, type: "string", description: "API key" },
+      {
+        key: "ANTHROPIC_API_KEY",
+        required: true,
+        sensitive: true,
+        type: "string",
+        description: "API key",
+      },
     ];
 
     it("warns on wrong prefix for Anthropic", () => {
       process.env.ANTHROPIC_API_KEY = "wrong-prefix-1234567890abcdef";
-      const result = validatePluginConfig("anthropic", "ai-provider", "ANTHROPIC_API_KEY", ["ANTHROPIC_API_KEY"], undefined, params);
+      const result = validatePluginConfig(
+        "anthropic",
+        "ai-provider",
+        "ANTHROPIC_API_KEY",
+        ["ANTHROPIC_API_KEY"],
+        undefined,
+        params,
+      );
       expect(result.valid).toBe(true); // warning, not error
-      expect(result.warnings.some((w) => w.message.includes("sk-ant-"))).toBe(true);
+      expect(result.warnings.some((w) => w.message.includes("sk-ant-"))).toBe(
+        true,
+      );
     });
 
     it("no warning when prefix is correct", () => {
       process.env.ANTHROPIC_API_KEY = "sk-ant-api03-abcdefg1234567890";
-      const result = validatePluginConfig("anthropic", "ai-provider", "ANTHROPIC_API_KEY", ["ANTHROPIC_API_KEY"], undefined, params);
-      expect(result.warnings.filter((w) => w.field === "ANTHROPIC_API_KEY")).toEqual([]);
+      const result = validatePluginConfig(
+        "anthropic",
+        "ai-provider",
+        "ANTHROPIC_API_KEY",
+        ["ANTHROPIC_API_KEY"],
+        undefined,
+        params,
+      );
+      expect(
+        result.warnings.filter((w) => w.field === "ANTHROPIC_API_KEY"),
+      ).toEqual([]);
     });
 
     it("warns on short sensitive key", () => {
       process.env.ANTHROPIC_API_KEY = "sk-ant-x";
-      const result = validatePluginConfig("anthropic", "ai-provider", "ANTHROPIC_API_KEY", ["ANTHROPIC_API_KEY"], undefined, params);
-      expect(result.warnings.some((w) => w.message.includes("short"))).toBe(true);
+      const result = validatePluginConfig(
+        "anthropic",
+        "ai-provider",
+        "ANTHROPIC_API_KEY",
+        ["ANTHROPIC_API_KEY"],
+        undefined,
+        params,
+      );
+      expect(result.warnings.some((w) => w.message.includes("short"))).toBe(
+        true,
+      );
     });
   });
 
@@ -170,14 +334,24 @@ describe("validatePluginConfig", () => {
 
   describe("fallback without param definitions", () => {
     it("checks envKey when no paramDefs provided", () => {
-      const result = validatePluginConfig("some-feature", "feature", "SOME_API_KEY", ["SOME_API_KEY"]);
+      const result = validatePluginConfig(
+        "some-feature",
+        "feature",
+        "SOME_API_KEY",
+        ["SOME_API_KEY"],
+      );
       expect(result.valid).toBe(false);
       expect(result.errors.some((e) => e.field === "SOME_API_KEY")).toBe(true);
     });
 
     it("passes when envKey is set and no paramDefs", () => {
       process.env.SOME_API_KEY = "test-value-1234567890";
-      const result = validatePluginConfig("some-feature", "feature", "SOME_API_KEY", ["SOME_API_KEY"]);
+      const result = validatePluginConfig(
+        "some-feature",
+        "feature",
+        "SOME_API_KEY",
+        ["SOME_API_KEY"],
+      );
       expect(result.valid).toBe(true);
     });
 
@@ -201,9 +375,22 @@ describe("validatePluginConfig", () => {
 
     it("errors have field and message", () => {
       const params: PluginParamInfo[] = [
-        { key: "MISSING_KEY", required: true, sensitive: false, type: "string", description: "Required" },
+        {
+          key: "MISSING_KEY",
+          required: true,
+          sensitive: false,
+          type: "string",
+          description: "Required",
+        },
       ];
-      const result = validatePluginConfig("test", "feature", null, ["MISSING_KEY"], undefined, params);
+      const result = validatePluginConfig(
+        "test",
+        "feature",
+        null,
+        ["MISSING_KEY"],
+        undefined,
+        params,
+      );
       expect(result.errors[0]).toHaveProperty("field");
       expect(result.errors[0]).toHaveProperty("message");
     });

@@ -1,5 +1,5 @@
-import { resolveCommitHash } from "./git-commit.js";
 import { isRich, theme } from "../terminal/theme.js";
+import { resolveCommitHash } from "./git-commit.js";
 
 type BannerOptions = {
   env?: NodeJS.ProcessEnv;
@@ -10,7 +10,10 @@ type BannerOptions = {
 
 let bannerEmitted = false;
 
-export function formatCliBannerLine(version: string, options: BannerOptions = {}): string {
+export function formatCliBannerLine(
+  version: string,
+  options: BannerOptions = {},
+): string {
   const commit = options.commit ?? resolveCommitHash({ env: options.env });
   const commitLabel = commit ?? "unknown";
   const rich = options.richTty ?? isRich();

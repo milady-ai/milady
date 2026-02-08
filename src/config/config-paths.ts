@@ -29,7 +29,11 @@ export function parseConfigPath(raw: string): {
   return { ok: true, path: parts };
 }
 
-export function setConfigValueAtPath(root: PathNode, path: string[], value: unknown): void {
+export function setConfigValueAtPath(
+  root: PathNode,
+  path: string[],
+  value: unknown,
+): void {
   let cursor: PathNode = root;
   for (let idx = 0; idx < path.length - 1; idx += 1) {
     const key = path[idx];
@@ -42,7 +46,10 @@ export function setConfigValueAtPath(root: PathNode, path: string[], value: unkn
   cursor[path[path.length - 1]] = value;
 }
 
-export function unsetConfigValueAtPath(root: PathNode, path: string[]): boolean {
+export function unsetConfigValueAtPath(
+  root: PathNode,
+  path: string[],
+): boolean {
   const stack: Array<{ node: PathNode; key: string }> = [];
   let cursor: PathNode = root;
   for (let idx = 0; idx < path.length - 1; idx += 1) {

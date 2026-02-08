@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import JSON5 from "json5";
-import { resolveConfigPath } from "./paths.js";
-import { resolveConfigIncludes } from "./includes.js";
 import { collectConfigEnvVars } from "./env-vars.js";
+import { resolveConfigIncludes } from "./includes.js";
+import { resolveConfigPath } from "./paths.js";
 import type { MilaidyConfig } from "./types.js";
 
 export * from "./types.js";

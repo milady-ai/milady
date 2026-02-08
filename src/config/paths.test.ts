@@ -2,8 +2,8 @@ import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
-  resolveDefaultConfigCandidates,
   resolveConfigPath,
+  resolveDefaultConfigCandidates,
   resolveOAuthDir,
   resolveOAuthPath,
   resolveStateDir,
@@ -17,7 +17,9 @@ describe("oauth paths", () => {
       MILAIDY_STATE_DIR: "/custom/state",
     } as NodeJS.ProcessEnv;
 
-    expect(resolveOAuthDir(env, "/custom/state")).toBe(path.resolve("/custom/oauth"));
+    expect(resolveOAuthDir(env, "/custom/state")).toBe(
+      path.resolve("/custom/oauth"),
+    );
     expect(resolveOAuthPath(env, "/custom/state")).toBe(
       path.join(path.resolve("/custom/oauth"), "oauth.json"),
     );
@@ -28,7 +30,9 @@ describe("oauth paths", () => {
       MILAIDY_STATE_DIR: "/custom/state",
     } as NodeJS.ProcessEnv;
 
-    expect(resolveOAuthDir(env, "/custom/state")).toBe(path.join("/custom/state", "credentials"));
+    expect(resolveOAuthDir(env, "/custom/state")).toBe(
+      path.join("/custom/state", "credentials"),
+    );
     expect(resolveOAuthPath(env, "/custom/state")).toBe(
       path.join("/custom/state", "credentials", "oauth.json"),
     );
@@ -41,12 +45,17 @@ describe("state + config path candidates", () => {
       MILAIDY_STATE_DIR: "/new/state",
     } as NodeJS.ProcessEnv;
 
-    expect(resolveStateDir(env, () => "/home/test")).toBe(path.resolve("/new/state"));
+    expect(resolveStateDir(env, () => "/home/test")).toBe(
+      path.resolve("/new/state"),
+    );
   });
 
   it("returns only milaidy.json in .milaidy directory", () => {
     const home = "/home/test";
-    const candidates = resolveDefaultConfigCandidates({} as NodeJS.ProcessEnv, () => home);
+    const candidates = resolveDefaultConfigCandidates(
+      {} as NodeJS.ProcessEnv,
+      () => home,
+    );
     const expected = [path.join(home, ".milaidy", "milaidy.json")];
     expect(candidates).toEqual(expected);
   });
@@ -78,7 +87,9 @@ describe("resolveUserPath", () => {
   });
 
   it("expands ~/ to home dir", () => {
-    expect(resolveUserPath("~/milaidy")).toBe(path.resolve(os.homedir(), "milaidy"));
+    expect(resolveUserPath("~/milaidy")).toBe(
+      path.resolve(os.homedir(), "milaidy"),
+    );
   });
 
   it("expands ~\\ (Windows separator) to home dir", () => {
@@ -100,7 +111,9 @@ describe("resolveUserPath", () => {
   });
 
   it("resolves absolute paths as-is", () => {
-    expect(resolveUserPath("/usr/local/bin")).toBe(path.resolve("/usr/local/bin"));
+    expect(resolveUserPath("/usr/local/bin")).toBe(
+      path.resolve("/usr/local/bin"),
+    );
   });
 
   it("does NOT expand ~user (only bare ~ or ~/)", () => {
@@ -109,13 +122,17 @@ describe("resolveUserPath", () => {
   });
 
   it("trims leading/trailing whitespace", () => {
-    expect(resolveUserPath("  ~/foo  ")).toBe(path.resolve(os.homedir(), "foo"));
+    expect(resolveUserPath("  ~/foo  ")).toBe(
+      path.resolve(os.homedir(), "foo"),
+    );
   });
 });
 
 describe("resolveConfigPath", () => {
   it("respects MILAIDY_CONFIG_PATH env override", () => {
-    const env = { MILAIDY_CONFIG_PATH: "/custom/config.json" } as NodeJS.ProcessEnv;
+    const env = {
+      MILAIDY_CONFIG_PATH: "/custom/config.json",
+    } as NodeJS.ProcessEnv;
     const result = resolveConfigPath(env);
     expect(result).toBe(path.resolve("/custom/config.json"));
   });
@@ -139,11 +156,16 @@ describe("resolveDefaultConfigCandidates", () => {
   it("uses MILAIDY_STATE_DIR when MILAIDY_CONFIG_PATH is not set", () => {
     const env = { MILAIDY_STATE_DIR: "/custom/state" } as NodeJS.ProcessEnv;
     const candidates = resolveDefaultConfigCandidates(env, () => "/home/test");
-    expect(candidates).toEqual([path.join(path.resolve("/custom/state"), "milaidy.json")]);
+    expect(candidates).toEqual([
+      path.join(path.resolve("/custom/state"), "milaidy.json"),
+    ]);
   });
 
   it("ignores whitespace-only env overrides", () => {
-    const env = { MILAIDY_CONFIG_PATH: "  ", MILAIDY_STATE_DIR: "  " } as NodeJS.ProcessEnv;
+    const env = {
+      MILAIDY_CONFIG_PATH: "  ",
+      MILAIDY_STATE_DIR: "  ",
+    } as NodeJS.ProcessEnv;
     const home = "/home/test";
     const candidates = resolveDefaultConfigCandidates(env, () => home);
     expect(candidates).toEqual([path.join(home, ".milaidy", "milaidy.json")]);

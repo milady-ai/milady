@@ -163,9 +163,7 @@ function formatContextAsText(ctx: BenchmarkContext): string {
   }
 
   if (ctx.actionSpace && ctx.actionSpace.length > 0) {
-    sections.push(
-      `\n## Available Actions\n${ctx.actionSpace.join(", ")}`,
-    );
+    sections.push(`\n## Available Actions\n${ctx.actionSpace.join(", ")}`);
   }
 
   // Tau-bench: tools
@@ -173,7 +171,9 @@ function formatContextAsText(ctx: BenchmarkContext): string {
     const toolLines = ctx.tools.map((t) => {
       const name = t.name ?? "unknown";
       const desc = t.description ?? "";
-      const params = t.parameters ? JSON.stringify(t.parameters, null, 2) : "{}";
+      const params = t.parameters
+        ? JSON.stringify(t.parameters, null, 2)
+        : "{}";
       return `- **${name}**: ${desc}\n  Parameters: ${params}`;
     });
     sections.push(`\n## Available Tools\n${toolLines.join("\n")}`);
@@ -181,7 +181,8 @@ function formatContextAsText(ctx: BenchmarkContext): string {
 
   // Mind2Web: HTML + elements
   if (ctx.html) {
-    const preview = ctx.html.length > 3000 ? ctx.html.slice(0, 3000) + "\n..." : ctx.html;
+    const preview =
+      ctx.html.length > 3000 ? ctx.html.slice(0, 3000) + "\n..." : ctx.html;
     sections.push(`\n## Page HTML\n\`\`\`html\n${preview}\n\`\`\``);
   }
 
@@ -197,9 +198,7 @@ function formatContextAsText(ctx: BenchmarkContext): string {
               .join(" ")
           : "";
       const text =
-        typeof el.text_content === "string"
-          ? el.text_content.slice(0, 50)
-          : "";
+        typeof el.text_content === "string" ? el.text_content.slice(0, 50) : "";
       return `[${id}] <${tag} ${attrs}> ${text}`;
     });
     sections.push(`\n## Available Elements\n${elemLines.join("\n")}`);
@@ -343,7 +342,10 @@ export function createBenchmarkPlugin(): Plugin {
               const p = opts.parameters as Record<string, unknown>;
               // If it's a protobuf Struct with .fields, extract values
               if ("fields" in p && typeof p.fields === "object") {
-                const fields = p.fields as Record<string, { stringValue?: string; numberValue?: number }>;
+                const fields = p.fields as Record<
+                  string,
+                  { stringValue?: string; numberValue?: number }
+                >;
                 for (const [k, v] of Object.entries(fields)) {
                   params[k] = v?.stringValue ?? v?.numberValue ?? v;
                 }
@@ -356,13 +358,20 @@ export function createBenchmarkPlugin(): Plugin {
           console.log("[BENCHMARK_ACTION] params:", JSON.stringify(params));
 
           _capturedAction = {
-            command: typeof params.command === "string" ? params.command : undefined,
-            toolName: typeof params.tool_name === "string" ? params.tool_name : undefined,
+            command:
+              typeof params.command === "string" ? params.command : undefined,
+            toolName:
+              typeof params.tool_name === "string"
+                ? params.tool_name
+                : undefined,
             arguments:
               typeof params.arguments === "string"
                 ? (() => {
                     try {
-                      return JSON.parse(params.arguments as string) as Record<string, unknown>;
+                      return JSON.parse(params.arguments as string) as Record<
+                        string,
+                        unknown
+                      >;
                     } catch {
                       logger.warn(
                         `[BENCHMARK_ACTION] Failed to parse arguments as JSON: ${params.arguments}`,
@@ -370,12 +379,18 @@ export function createBenchmarkPlugin(): Plugin {
                       return { _raw: params.arguments as string };
                     }
                   })()
-                : typeof params.arguments === "object" && params.arguments !== null
+                : typeof params.arguments === "object" &&
+                    params.arguments !== null
                   ? (params.arguments as Record<string, unknown>)
                   : undefined,
-            operation: typeof params.operation === "string" ? params.operation : undefined,
+            operation:
+              typeof params.operation === "string"
+                ? params.operation
+                : undefined,
             elementId:
-              typeof params.element_id === "string" ? params.element_id : undefined,
+              typeof params.element_id === "string"
+                ? params.element_id
+                : undefined,
             value: typeof params.value === "string" ? params.value : undefined,
           };
 

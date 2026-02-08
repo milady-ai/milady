@@ -1,10 +1,9 @@
+import { spawn } from "node:child_process";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { isSubagentSessionKey } from "@elizaos/core";
 import { resolveUserPath } from "../config/paths.js";
-
-import { spawn } from "node:child_process";
 
 export interface RunCommandResult {
   code: number;
@@ -80,7 +79,6 @@ export function runCommandWithTimeout(
     });
   });
 }
-
 
 export function resolveDefaultAgentWorkspaceDir(
   env: NodeJS.ProcessEnv = process.env,
@@ -233,7 +231,9 @@ async function hasGitRepo(dir: string): Promise<boolean> {
 
 async function isGitAvailable(): Promise<boolean> {
   try {
-    const result = await runCommandWithTimeout(["git", "--version"], { timeoutMs: 2_000 });
+    const result = await runCommandWithTimeout(["git", "--version"], {
+      timeoutMs: 2_000,
+    });
     return result.code === 0;
   } catch {
     return false;
@@ -251,7 +251,10 @@ async function ensureGitRepo(dir: string, isBrandNewWorkspace: boolean) {
     return;
   }
   try {
-    await runCommandWithTimeout(["git", "init"], { cwd: dir, timeoutMs: 10_000 });
+    await runCommandWithTimeout(["git", "init"], {
+      cwd: dir,
+      timeoutMs: 10_000,
+    });
   } catch {
     // Ignore git init failures; workspace creation should still succeed.
   }
@@ -269,7 +272,9 @@ export async function ensureAgentWorkspace(params?: {
   heartbeatPath?: string;
   bootstrapPath?: string;
 }> {
-  const rawDir = params?.dir?.trim() ? params.dir.trim() : DEFAULT_AGENT_WORKSPACE_DIR;
+  const rawDir = params?.dir?.trim()
+    ? params.dir.trim()
+    : DEFAULT_AGENT_WORKSPACE_DIR;
   const dir = resolveUserPath(rawDir);
   await fs.mkdir(dir, { recursive: true });
 
@@ -285,7 +290,13 @@ export async function ensureAgentWorkspace(params?: {
   const bootstrapPath = path.join(dir, DEFAULT_BOOTSTRAP_FILENAME);
 
   const isBrandNewWorkspace = await (async () => {
-    const paths = [agentsPath, toolsPath, identityPath, userPath, heartbeatPath];
+    const paths = [
+      agentsPath,
+      toolsPath,
+      identityPath,
+      userPath,
+      heartbeatPath,
+    ];
     const existing = await Promise.all(
       paths.map(async (p) => {
         try {
@@ -337,7 +348,8 @@ async function resolveMemoryBootstrapEntries(
     DEFAULT_MEMORY_FILENAME,
     DEFAULT_MEMORY_ALT_FILENAME,
   ];
-  const entries: Array<{ name: WorkspaceBootstrapFileName; filePath: string }> = [];
+  const entries: Array<{ name: WorkspaceBootstrapFileName; filePath: string }> =
+    [];
   for (const name of candidates) {
     const filePath = path.join(resolvedDir, name);
     try {
@@ -352,7 +364,8 @@ async function resolveMemoryBootstrapEntries(
   }
 
   const seen = new Set<string>();
-  const deduped: Array<{ name: WorkspaceBootstrapFileName; filePath: string }> = [];
+  const deduped: Array<{ name: WorkspaceBootstrapFileName; filePath: string }> =
+    [];
   for (const entry of entries) {
     let key = entry.filePath;
     try {
@@ -367,7 +380,9 @@ async function resolveMemoryBootstrapEntries(
   return deduped;
 }
 
-export async function loadWorkspaceBootstrapFiles(dir: string): Promise<WorkspaceBootstrapFile[]> {
+export async function loadWorkspaceBootstrapFiles(
+  dir: string,
+): Promise<WorkspaceBootstrapFile[]> {
   const resolvedDir = resolveUserPath(dir);
 
   const entries: Array<{
@@ -406,7 +421,12 @@ export async function loadWorkspaceBootstrapFiles(dir: string): Promise<Workspac
     entries.map(async (entry): Promise<WorkspaceBootstrapFile> => {
       try {
         const content = await fs.readFile(entry.filePath, "utf-8");
-        return { name: entry.name, path: entry.filePath, content, missing: false };
+        return {
+          name: entry.name,
+          path: entry.filePath,
+          content,
+          missing: false,
+        };
       } catch {
         return { name: entry.name, path: entry.filePath, missing: true };
       }
@@ -415,7 +435,10 @@ export async function loadWorkspaceBootstrapFiles(dir: string): Promise<Workspac
   return result;
 }
 
-const SUBAGENT_BOOTSTRAP_ALLOWLIST = new Set([DEFAULT_AGENTS_FILENAME, DEFAULT_TOOLS_FILENAME]);
+const SUBAGENT_BOOTSTRAP_ALLOWLIST = new Set([
+  DEFAULT_AGENTS_FILENAME,
+  DEFAULT_TOOLS_FILENAME,
+]);
 
 export function filterBootstrapFilesForSession(
   files: WorkspaceBootstrapFile[],

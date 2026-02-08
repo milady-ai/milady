@@ -1,7 +1,11 @@
 import type { Command } from "commander";
 import { theme } from "../../terminal/theme.js";
 
-async function isPortListening(port: number, host = "127.0.0.1", timeoutMs = 800): Promise<boolean> {
+async function isPortListening(
+  port: number,
+  host = "127.0.0.1",
+  timeoutMs = 800,
+): Promise<boolean> {
   const net = await import("node:net");
   return new Promise<boolean>((resolve) => {
     const socket = new net.Socket();
@@ -48,9 +52,10 @@ export function registerDashboardCommand(program: Command) {
     .option("--url <url>", "Server URL (overrides --port)")
     .action(async (opts: { port?: string; url?: string }) => {
       const rawPort = Number(opts.port ?? DEFAULT_PORT);
-      const port = Number.isFinite(rawPort) && rawPort > 0 && rawPort <= 65535
-        ? rawPort
-        : DEFAULT_PORT;
+      const port =
+        Number.isFinite(rawPort) && rawPort > 0 && rawPort <= 65535
+          ? rawPort
+          : DEFAULT_PORT;
 
       if (opts.url) {
         console.log(`${theme.muted("→")} Opening Control UI: ${opts.url}`);
@@ -67,7 +72,9 @@ export function registerDashboardCommand(program: Command) {
 
       if (await isPortListening(CONTROL_UI_DEV_PORT)) {
         const url = `http://localhost:${CONTROL_UI_DEV_PORT}`;
-        console.log(`${theme.muted("→")} Opening Control UI (dev server): ${url}`);
+        console.log(
+          `${theme.muted("→")} Opening Control UI (dev server): ${url}`,
+        );
         openInBrowser(url);
         return;
       }
@@ -78,7 +85,9 @@ export function registerDashboardCommand(program: Command) {
 
       const path = await import("node:path");
       const fs = await import("node:fs");
-      const { resolveMilaidyPackageRootSync } = await import("../../utils/milaidy-root.js");
+      const { resolveMilaidyPackageRootSync } = await import(
+        "../../utils/milaidy-root.js"
+      );
 
       const pkgRoot = resolveMilaidyPackageRootSync({
         cwd: process.cwd(),
@@ -94,9 +103,19 @@ export function registerDashboardCommand(program: Command) {
 
       const uiDir = path.join(pkgRoot, "apps", "ui");
       if (!fs.existsSync(path.join(uiDir, "package.json"))) {
-        console.log(theme.error("Control UI is not available in this installation."));
-        console.log(theme.muted("The Control UI dev server requires a development checkout."));
-        console.log(theme.muted("Start the agent with `milaidy start` and use the API at http://localhost:31337"));
+        console.log(
+          theme.error("Control UI is not available in this installation."),
+        );
+        console.log(
+          theme.muted(
+            "The Control UI dev server requires a development checkout.",
+          ),
+        );
+        console.log(
+          theme.muted(
+            "Start the agent with `milaidy start` and use the API at http://localhost:31337",
+          ),
+        );
         process.exitCode = 1;
         return;
       }
@@ -132,7 +151,9 @@ export function registerDashboardCommand(program: Command) {
       });
 
       child.on("error", (err) => {
-        console.log(theme.error(`Failed to start UI dev server: ${err.message}`));
+        console.log(
+          theme.error(`Failed to start UI dev server: ${err.message}`),
+        );
         process.exitCode = 1;
       });
 

@@ -29,7 +29,10 @@ export async function runCli(argv: string[] = process.argv) {
   const program = buildProgram();
 
   process.on("unhandledRejection", (reason) => {
-    console.error("[milaidy] Unhandled rejection:", formatUncaughtError(reason));
+    console.error(
+      "[milaidy] Unhandled rejection:",
+      formatUncaughtError(reason),
+    );
     process.exit(1);
   });
 
@@ -40,7 +43,9 @@ export async function runCli(argv: string[] = process.argv) {
 
   const primary = getPrimaryCommand(argv);
   if (primary && !hasHelpOrVersion(argv)) {
-    const { registerSubCliByName } = await import("./program/register.subclis.js");
+    const { registerSubCliByName } = await import(
+      "./program/register.subclis.js"
+    );
     await registerSubCliByName(program, primary);
   }
 

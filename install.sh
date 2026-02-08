@@ -23,6 +23,12 @@
 #   MILAIDY_VERSION=<ver>        Install a specific version (default: latest)
 #   MILAIDY_LOCAL_TARBALL=<path> Install from a local .tgz (dev/testing)
 #   MILAIDY_NONINTERACTIVE=1     Skip all prompts (assume yes)
+#
+# Desktop app install:
+#   curl -fsSL https://get.milady.ai | bash -s -- --desktop
+#
+#   This downloads the latest Milaidy.app from GitHub Releases and copies
+#   it to /Applications (macOS only).
 
 set -euo pipefail
 
@@ -579,6 +585,138 @@ install_milaidy() {
   fi
 }
 
+# ── Desktop app install (macOS) ──────────────────────────────────────────────
+
+GITHUB_REPO="milady-ai/milaidy"
+
+install_desktop_app() {
+  step "Installing Milaidy desktop app"
+
+  if [[ "$DETECTED_OS" != "macos" ]]; then
+    error "Desktop app install via this script is only supported on macOS."
+    error "For Windows, download the .exe from:"
+    error "  https://github.com/${GITHUB_REPO}/releases/latest"
+    exit 1
+  fi
+
+  local version="${MILAIDY_VERSION:-latest}"
+  local arch="$DETECTED_ARCH"
+  local dmg_pattern
+
+  # Determine which DMG to download based on architecture
+  if [[ "$arch" == "arm64" ]]; then
+    dmg_pattern="arm64"
+  else
+    dmg_pattern="x64"
+  fi
+
+  info "Detecting latest release..."
+
+  local release_url
+  if [[ "$version" == "latest" ]]; then
+    release_url="https://api.github.com/repos/${GITHUB_REPO}/releases/latest"
+  else
+    release_url="https://api.github.com/repos/${GITHUB_REPO}/releases/tags/v${version}"
+  fi
+
+  local release_json
+  release_json="$(fetch_url "$release_url" 2>/dev/null)" || {
+    error "Failed to fetch release info from GitHub."
+    error "Check https://github.com/${GITHUB_REPO}/releases"
+    exit 1
+  }
+
+  # Extract DMG download URL matching our architecture
+  local dmg_url
+  dmg_url="$(printf '%s' "$release_json" \
+    | grep -o '"browser_download_url":\s*"[^"]*\.dmg"' \
+    | grep -i "$dmg_pattern" \
+    | head -1 \
+    | sed 's/"browser_download_url":\s*"//;s/"$//')"
+
+  if [[ -z "$dmg_url" ]]; then
+    # Fallback: try any DMG
+    dmg_url="$(printf '%s' "$release_json" \
+      | grep -o '"browser_download_url":\s*"[^"]*\.dmg"' \
+      | head -1 \
+      | sed 's/"browser_download_url":\s*"//;s/"$//')"
+  fi
+
+  if [[ -z "$dmg_url" ]]; then
+    error "No .dmg found in the release assets."
+    error "Download manually from: https://github.com/${GITHUB_REPO}/releases/latest"
+    exit 1
+  fi
+
+  local dmg_name
+  dmg_name="$(basename "$dmg_url")"
+  local tmpdir
+  tmpdir="$(mktemp -d)"
+  local dmg_path="${tmpdir}/${dmg_name}"
+
+  info "Downloading ${dmg_name}..."
+  if [[ "$FETCH_CMD" == "curl" ]]; then
+    curl -fSL --progress-bar -o "$dmg_path" "$dmg_url"
+  else
+    wget --show-progress -qO "$dmg_path" "$dmg_url"
+  fi
+
+  info "Mounting DMG..."
+  local mount_point
+  mount_point="$(hdiutil attach "$dmg_path" -nobrowse -noautoopen 2>/dev/null \
+    | tail -1 | awk '{print $NF}')" || {
+    # Sometimes the mount point path has spaces
+    mount_point="$(hdiutil attach "$dmg_path" -nobrowse -noautoopen 2>/dev/null \
+      | grep '/Volumes/' | sed 's/.*\(\/Volumes\/.*\)/\1/')"
+  }
+
+  if [[ -z "$mount_point" ]] || [[ ! -d "$mount_point" ]]; then
+    error "Failed to mount DMG."
+    rm -rf "$tmpdir"
+    exit 1
+  fi
+
+  # Find the .app bundle in the mounted volume
+  local app_path
+  app_path="$(find "$mount_point" -maxdepth 1 -name '*.app' -print -quit 2>/dev/null)"
+
+  if [[ -z "$app_path" ]]; then
+    error "No .app bundle found in the DMG."
+    hdiutil detach "$mount_point" -quiet 2>/dev/null || true
+    rm -rf "$tmpdir"
+    exit 1
+  fi
+
+  local app_name
+  app_name="$(basename "$app_path")"
+
+  # Remove existing version if present
+  if [[ -d "/Applications/${app_name}" ]]; then
+    warn "Removing existing /Applications/${app_name}..."
+    rm -rf "/Applications/${app_name}" 2>/dev/null || {
+      info "Need admin privileges to replace existing app..."
+      sudo rm -rf "/Applications/${app_name}"
+    }
+  fi
+
+  info "Copying ${app_name} to /Applications..."
+  cp -R "$app_path" /Applications/ 2>/dev/null || {
+    info "Need admin privileges to copy to /Applications..."
+    sudo cp -R "$app_path" /Applications/
+  }
+
+  # Remove quarantine attribute so Gatekeeper doesn't block it
+  xattr -cr "/Applications/${app_name}" 2>/dev/null || \
+    sudo xattr -cr "/Applications/${app_name}" 2>/dev/null || true
+
+  # Clean up
+  hdiutil detach "$mount_point" -quiet 2>/dev/null || true
+  rm -rf "$tmpdir"
+
+  success "${app_name} installed to /Applications"
+  info "You can launch it from Spotlight or your Applications folder."
+}
+
 # ── Post-install setup ───────────────────────────────────────────────────────
 
 run_setup() {
@@ -601,8 +739,37 @@ main() {
   printf "${BOLD}${CYAN}  +--------------------------------------+${RESET}\n"
   printf "\n"
 
+  # Parse arguments
+  local install_desktop=false
+  for arg in "$@"; do
+    case "$arg" in
+      --desktop) install_desktop=true ;;
+      --help|-h)
+        printf "Usage: install.sh [--desktop]\n\n"
+        printf "  ${CYAN}--desktop${RESET}   Download and install the Milaidy desktop app (macOS)\n"
+        printf "  ${DIM}(no flag)${RESET}   Install the milaidy CLI via npm/bun\n\n"
+        exit 0
+        ;;
+    esac
+  done
+
   detect_fetch
   detect_system
+
+  # ── Desktop app install path ─────────────────────────────────────────────
+  if [[ "$install_desktop" == "true" ]]; then
+    install_desktop_app
+
+    printf "\n"
+    printf "${BOLD}${GREEN}  ======================================${RESET}\n"
+    printf "${BOLD}${GREEN}  Desktop app installed!${RESET}\n"
+    printf "${BOLD}${GREEN}  ======================================${RESET}\n"
+    printf "\n"
+    printf "  Open Milaidy from your Applications folder or Spotlight.\n\n"
+    exit 0
+  fi
+
+  # ── CLI install path ─────────────────────────────────────────────────────
 
   # If on Windows but NOT in a bash-capable shell, direct to PowerShell script
   if [[ "$DETECTED_OS" == "windows" && -z "$DETECTED_ENV" ]]; then

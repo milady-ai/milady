@@ -1,5 +1,5 @@
-import process from "node:process";
 import { createRequire } from "node:module";
+import process from "node:process";
 
 declare const __MILAIDY_VERSION__: string | undefined;
 
@@ -15,7 +15,11 @@ function readVersionFromPackageJson(): string | null {
 }
 
 function readVersionFromBuildInfo(): string | null {
-  for (const candidate of ["../../build-info.json", "../build-info.json", "./build-info.json"]) {
+  for (const candidate of [
+    "../../build-info.json",
+    "../build-info.json",
+    "./build-info.json",
+  ]) {
     try {
       const info = require(candidate) as { version?: string };
       if (info.version) return info.version;

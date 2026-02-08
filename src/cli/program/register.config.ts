@@ -32,7 +32,11 @@ export function registerConfigCli(program: Command) {
       if (value === undefined) {
         console.log(`${theme.muted("(not set)")}`);
       } else {
-        console.log(typeof value === "object" ? JSON.stringify(value, null, 2) : String(value));
+        console.log(
+          typeof value === "object"
+            ? JSON.stringify(value, null, 2)
+            : String(value),
+        );
       }
     });
 

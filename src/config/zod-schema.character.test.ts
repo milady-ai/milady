@@ -5,7 +5,7 @@
  * validated: correct shapes pass, invalid shapes are rejected,
  * and edge cases are handled.
  */
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { CharacterSchema } from "./zod-schema.js";
 
 describe("CharacterSchema", () => {
@@ -71,7 +71,9 @@ describe("CharacterSchema", () => {
       name: "",
     });
     expect(result.success).toBe(false);
-    expect(result.error?.issues.some((i) => i.path.includes("name"))).toBe(true);
+    expect(result.error?.issues.some((i) => i.path.includes("name"))).toBe(
+      true,
+    );
   });
 
   it("rejects name longer than 100 characters", () => {
@@ -143,9 +145,7 @@ describe("CharacterSchema", () => {
 
   it("rejects messageExamples with empty examples array", () => {
     const result = CharacterSchema.safeParse({
-      messageExamples: [
-        { examples: [] },
-      ],
+      messageExamples: [{ examples: [] }],
     });
     expect(result.success).toBe(false);
   });
@@ -154,9 +154,7 @@ describe("CharacterSchema", () => {
     const result = CharacterSchema.safeParse({
       messageExamples: [
         {
-          examples: [
-            { name: "", content: { text: "hello" } },
-          ],
+          examples: [{ name: "", content: { text: "hello" } }],
         },
       ],
     });
@@ -167,9 +165,7 @@ describe("CharacterSchema", () => {
     const result = CharacterSchema.safeParse({
       messageExamples: [
         {
-          examples: [
-            { name: "User", content: { text: "" } },
-          ],
+          examples: [{ name: "User", content: { text: "" } }],
         },
       ],
     });

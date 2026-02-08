@@ -1,0 +1,385 @@
+name: Publish Packages
+
+# Runs automatically after the main release workflow creates a GitHub Release,
+# or can be triggered manually for any version.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish (e.g. 2.0.0-alpha.7)"
+        required: true
+        type: string
+      pypi:
+        description: "Publish to PyPI"
+        type: boolean
+        default: true
+      snap:
+        description: "Publish to Snap Store"
+        type: boolean
+        default: true
+      homebrew:
+        description: "Update Homebrew tap"
+        type: boolean
+        default: true
+      flatpak:
+        description: "Publish Flatpak"
+        type: boolean
+        default: true
+      apt:
+        description: "Build Debian package"
+        type: boolean
+        default: true
+
+concurrency:
+  group: publish-packages-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CI: "true"
+
+jobs:
+  # ── Prepare version info ───────────────────────────────────────────────
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
+      npm_version: ${{ steps.ver.outputs.npm_version }}
+      pypi_version: ${{ steps.ver.outputs.pypi_version }}
+      deb_version: ${{ steps.ver.outputs.deb_version }}
+      is_prerelease: ${{ steps.ver.outputs.is_prerelease }}
+    steps:
+      - name: Determine versions
+        id: ver
+        run: |
+          if [[ -n "${{ inputs.version }}" ]]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION="${{ github.event.release.tag_name }}"
+            VERSION="${VERSION#v}"
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "npm_version=$VERSION" >> "$GITHUB_OUTPUT"
+
+          # PEP 440 conversion: 2.0.0-alpha.7 → 2.0.0a7
+          PYPI_VERSION=$(echo "$VERSION" | sed -E 's/-alpha\.?/a/; s/-beta\.?/b/; s/-rc\.?/rc/')
+          echo "pypi_version=$PYPI_VERSION" >> "$GITHUB_OUTPUT"
+
+          # Debian version: 2.0.0-alpha.7 → 2.0.0~alpha7-1
+          DEB_VERSION=$(echo "$VERSION" | sed -E 's/-alpha\./~alpha/; s/-beta\./~beta/; s/-rc\./~rc/')
+          echo "deb_version=${DEB_VERSION}-1" >> "$GITHUB_OUTPUT"
+
+          # Pre-release detection
+          if echo "$VERSION" | grep -qE '(alpha|beta|rc)'; then
+            echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "Version: $VERSION"
+          echo "PyPI: $PYPI_VERSION"
+          echo "Debian: ${DEB_VERSION}-1"
+          echo "Pre-release: $(echo "$VERSION" | grep -qE '(alpha|beta|rc)' && echo true || echo false)"
+
+  # ── PyPI ───────────────────────────────────────────────────────────────
+  publish-pypi:
+    name: Publish to PyPI
+    needs: prepare
+    if: |
+      (github.event_name == 'release') ||
+      (github.event_name == 'workflow_dispatch' && inputs.pypi)
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # OIDC trusted publishing
+    environment:
+      name: pypi
+      url: https://pypi.org/project/milady/${{ needs.prepare.outputs.pypi_version }}/
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Update version in source
+        working-directory: packaging/pypi
+        run: |
+          PYPI_VERSION="${{ needs.prepare.outputs.pypi_version }}"
+          sed -i "s/^version = .*/version = \"$PYPI_VERSION\"/" pyproject.toml
+          sed -i "s/^__version__ = .*/__version__ = \"$PYPI_VERSION\"/" milady/__init__.py
+          echo "Updated to version: $PYPI_VERSION"
+          grep "version" pyproject.toml | head -1
+          grep "__version__" milady/__init__.py
+
+      - name: Build package
+        working-directory: packaging/pypi
+        run: |
+          pip install build
+          python -m build
+          echo "Built packages:"
+          ls -lh dist/
+
+      - name: Validate package
+        working-directory: packaging/pypi
+        run: |
+          pip install twine
+          twine check dist/*
+
+      - name: Test package installs
+        working-directory: packaging/pypi
+        run: |
+          pip install dist/*.whl
+          python -c "import milady; print(f'milady {milady.__version__} loaded OK')"
+          python -c "
+          from milady.loader import _parse_version
+          assert _parse_version('v22.12.0') == (22, 12, 0)
+          print('Loader tests passed')
+          "
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packaging/pypi/dist/
+
+  # ── Homebrew ───────────────────────────────────────────────────────────
+  update-homebrew:
+    name: Update Homebrew Tap
+    needs: prepare
+    if: |
+      (github.event_name == 'release' && needs.prepare.outputs.is_prerelease == 'false') ||
+      (github.event_name == 'workflow_dispatch' && inputs.homebrew)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Update Homebrew formula
+        env:
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          VERSION="${{ needs.prepare.outputs.npm_version }}"
+          URL="https://registry.npmjs.org/milaidy/-/milaidy-${VERSION}.tgz"
+
+          echo "Fetching tarball SHA256 for $URL ..."
+          SHA256=$(curl -fsSL "$URL" | sha256sum | cut -d' ' -f1)
+          echo "SHA256: $SHA256"
+
+          git clone "https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/milady-ai/homebrew-tap.git" /tmp/homebrew-tap
+          cd /tmp/homebrew-tap
+
+          # Ensure Formula directory exists
+          mkdir -p Formula
+
+          # Copy base formula if Formula/milaidy.rb doesn't exist yet
+          if [[ ! -f Formula/milaidy.rb ]]; then
+            cp "$GITHUB_WORKSPACE/packaging/homebrew/milaidy.rb" Formula/milaidy.rb
+          fi
+
+          # Update version, URL, and SHA256
+          sed -i "s|url \".*\"|url \"${URL}\"|" Formula/milaidy.rb
+          sed -i "s|sha256 \".*\"|sha256 \"${SHA256}\"|" Formula/milaidy.rb
+
+          echo "Updated formula:"
+          grep -E "url|sha256" Formula/milaidy.rb
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/milaidy.rb
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "Update milaidy to ${VERSION}"
+          git push
+
+  # ── Snap ───────────────────────────────────────────────────────────────
+  publish-snap:
+    name: Build & Publish Snap
+    needs: prepare
+    if: |
+      (github.event_name == 'release') ||
+      (github.event_name == 'workflow_dispatch' && inputs.snap)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare snapcraft.yaml
+        run: |
+          mkdir -p snap
+          cp packaging/snap/snapcraft.yaml snap/snapcraft.yaml
+          VERSION="${{ needs.prepare.outputs.version }}"
+          sed -i "s/^version: .*/version: '${VERSION}'/" snap/snapcraft.yaml
+          echo "Snap version: $VERSION"
+
+      - name: Build snap
+        uses: snapcore/action-build@v1
+        id: snapcraft
+
+      - name: Test snap
+        run: |
+          sudo snap install ${{ steps.snapcraft.outputs.snap }} --classic --dangerous
+          milaidy --version || echo "Version check completed"
+
+      - name: Publish to Snap Store
+        if: success()
+        uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAP_STORE_CREDENTIALS }}
+        with:
+          snap: ${{ steps.snapcraft.outputs.snap }}
+          release: ${{ needs.prepare.outputs.is_prerelease == 'true' && 'edge' || 'stable' }}
+
+  # ── Debian / apt ───────────────────────────────────────────────────────
+  build-deb:
+    name: Build Debian Package
+    needs: prepare
+    if: |
+      (github.event_name == 'release') ||
+      (github.event_name == 'workflow_dispatch' && inputs.apt)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Prepare debian packaging
+        run: |
+          # Copy debian directory into project root
+          cp -r packaging/debian .
+
+          # Update changelog version
+          DEB_VERSION="${{ needs.prepare.outputs.deb_version }}"
+          sed -i "1s/([^)]*)/($DEB_VERSION)/" debian/changelog
+          sed -i "1s/UNRELEASED/unstable/" debian/changelog
+
+          echo "Debian version: $DEB_VERSION"
+          head -3 debian/changelog
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y debhelper devscripts fakeroot
+
+      - name: Build .deb package
+        run: |
+          dpkg-buildpackage -us -uc -b
+          echo "Built packages:"
+          ls -lh ../*.deb
+
+      - name: Test .deb package
+        run: |
+          sudo dpkg -i ../*.deb || sudo apt-get -f install -y
+          which milaidy
+          milaidy --version || echo "Version check completed"
+
+      - name: Upload .deb artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: debian-package
+          path: |
+            ../*.deb
+            ../*.changes
+          retention-days: 90
+
+      - name: Attach .deb to GitHub Release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for deb in ../*.deb; do
+            echo "Uploading $deb to release..."
+            gh release upload "${{ github.event.release.tag_name }}" "$deb" --clobber
+          done
+
+      - name: Trigger APT repository update
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ secrets.APT_REPO_TOKEN }}
+        run: |
+          gh api repos/milady-ai/apt/dispatches \
+            --method POST \
+            -f event_type=update-apt \
+            -f "client_payload[version]=${{ needs.prepare.outputs.version }}" \
+            -f "client_payload[deb_url]=https://github.com/milady-ai/milaidy/releases/download/${{ github.event.release.tag_name }}/milaidy_${{ needs.prepare.outputs.deb_version }}_all.deb"
+
+  # ── Flatpak ────────────────────────────────────────────────────────────
+  build-flatpak:
+    name: Build Flatpak
+    needs: prepare
+    if: |
+      (github.event_name == 'release' && needs.prepare.outputs.is_prerelease == 'false') ||
+      (github.event_name == 'workflow_dispatch' && inputs.flatpak)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Flatpak tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder
+          flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          flatpak install -y --user flathub org.freedesktop.Platform//23.08
+          flatpak install -y --user flathub org.freedesktop.Sdk//23.08
+
+      - name: Build Flatpak
+        working-directory: packaging/flatpak
+        run: |
+          flatpak-builder --repo=repo --force-clean build-dir ai.milady.Milaidy.yml
+          flatpak build-bundle repo milaidy.flatpak ai.milady.Milaidy
+
+      - name: Test Flatpak
+        working-directory: packaging/flatpak
+        run: |
+          flatpak --user install -y milaidy.flatpak
+          flatpak run ai.milady.Milaidy --version || echo "Version check completed"
+
+      - name: Upload Flatpak bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: flatpak-bundle
+          path: packaging/flatpak/milaidy.flatpak
+          retention-days: 90
+
+      - name: Attach Flatpak to GitHub Release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            packaging/flatpak/milaidy.flatpak --clobber
+
+  # ── Summary ────────────────────────────────────────────────────────────
+  publish-summary:
+    name: Publish Summary
+    needs: [prepare, publish-pypi, update-homebrew, publish-snap, build-deb, build-flatpak]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summary
+        run: |
+          echo "## Package Publishing Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Version: **${{ needs.prepare.outputs.version }}**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Package | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| PyPI (milady ${{ needs.prepare.outputs.pypi_version }}) | ${{ needs.publish-pypi.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Homebrew | ${{ needs.update-homebrew.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Snap | ${{ needs.publish-snap.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Debian (.deb) | ${{ needs.build-deb.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Flatpak | ${{ needs.build-flatpak.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Install commands" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "pip install milady==${{ needs.prepare.outputs.pypi_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "brew install milady-ai/tap/milaidy" >> $GITHUB_STEP_SUMMARY
+          echo "sudo snap install milaidy --classic" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

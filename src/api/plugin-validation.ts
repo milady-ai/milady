@@ -52,7 +52,9 @@ export interface PluginParamInfo {
 // API key prefix patterns for format validation
 // ---------------------------------------------------------------------------
 
-const KEY_PREFIX_HINTS: Readonly<Record<string, { prefix: string; label: string }>> = {
+const KEY_PREFIX_HINTS: Readonly<
+  Record<string, { prefix: string; label: string }>
+> = {
   ANTHROPIC_API_KEY: { prefix: "sk-ant-", label: "Anthropic" },
   OPENAI_API_KEY: { prefix: "sk-", label: "OpenAI" },
   GROQ_API_KEY: { prefix: "gsk_", label: "Groq" },
@@ -133,7 +135,10 @@ export function validatePluginConfig(
     // Fallback: no param definitions, but we know the primary env key
     const currentValue = providedConfig?.[envKey] ?? process.env[envKey];
     if (!currentValue || !currentValue.trim()) {
-      errors.push({ field: envKey, message: `${envKey} is required but not set` });
+      errors.push({
+        field: envKey,
+        message: `${envKey} is required but not set`,
+      });
     } else {
       const hint = KEY_PREFIX_HINTS[envKey];
       if (hint && !currentValue.startsWith(hint.prefix)) {
@@ -183,7 +188,11 @@ export function validateRuntimeContext(
   const emptyFields: string[] = [];
   const nonSerializableFields: string[] = [];
 
-  function walk(obj: Record<string, unknown>, prefix: string, depth: number): void {
+  function walk(
+    obj: Record<string, unknown>,
+    prefix: string,
+    depth: number,
+  ): void {
     if (depth > maxDepth) return;
 
     for (const [key, value] of Object.entries(obj)) {
@@ -294,20 +303,28 @@ export function debugLogResolvedContext(
 
   const validation = validateRuntimeContext(context);
   if (validation.valid && validation.serializable) {
-    log("[milaidy:debug] Context validation: ✓ PASS (all fields valid, serializable)");
+    log(
+      "[milaidy:debug] Context validation: ✓ PASS (all fields valid, serializable)",
+    );
   } else {
     log("[milaidy:debug] Context validation: ✗ ISSUES DETECTED");
     if (validation.nullFields.length > 0) {
       log(`[milaidy:debug]   null fields: ${validation.nullFields.join(", ")}`);
     }
     if (validation.undefinedFields.length > 0) {
-      log(`[milaidy:debug]   undefined fields: ${validation.undefinedFields.join(", ")}`);
+      log(
+        `[milaidy:debug]   undefined fields: ${validation.undefinedFields.join(", ")}`,
+      );
     }
     if (validation.emptyFields.length > 0) {
-      log(`[milaidy:debug]   empty fields: ${validation.emptyFields.join(", ")}`);
+      log(
+        `[milaidy:debug]   empty fields: ${validation.emptyFields.join(", ")}`,
+      );
     }
     if (validation.nonSerializableFields.length > 0) {
-      log(`[milaidy:debug]   non-serializable fields: ${validation.nonSerializableFields.join(", ")}`);
+      log(
+        `[milaidy:debug]   non-serializable fields: ${validation.nonSerializableFields.join(", ")}`,
+      );
     }
   }
   log("[milaidy:debug] ══════════════════════════════════════════════");

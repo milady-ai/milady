@@ -2,7 +2,10 @@ export type DurationMsParseOptions = {
   defaultUnit?: "ms" | "s" | "m" | "h" | "d";
 };
 
-export function parseDurationMs(raw: string, opts?: DurationMsParseOptions): number {
+export function parseDurationMs(
+  raw: string,
+  opts?: DurationMsParseOptions,
+): number {
   const trimmed = String(raw ?? "")
     .trim()
     .toLowerCase();
@@ -20,7 +23,12 @@ export function parseDurationMs(raw: string, opts?: DurationMsParseOptions): num
     throw new Error(`invalid duration: ${raw}`);
   }
 
-  const unit = (m[2] ?? opts?.defaultUnit ?? "ms") as "ms" | "s" | "m" | "h" | "d";
+  const unit = (m[2] ?? opts?.defaultUnit ?? "ms") as
+    | "ms"
+    | "s"
+    | "m"
+    | "h"
+    | "d";
   const multiplier =
     unit === "ms"
       ? 1

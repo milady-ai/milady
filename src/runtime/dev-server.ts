@@ -9,10 +9,10 @@
  *        (or via the dev script: bun run dev)
  */
 import process from "node:process";
-import { logger } from "@elizaos/core";
 import type { AgentRuntime } from "@elizaos/core";
-import { startEliza } from "./eliza.js";
+import { logger } from "@elizaos/core";
 import { startApiServer } from "../api/server.js";
+import { startEliza } from "./eliza.js";
 import { setRestartHandler } from "./restart.js";
 
 // Load .env files for parity with CLI mode (which loads via run-main.ts).
@@ -46,7 +46,9 @@ async function createRuntime(): Promise<AgentRuntime> {
     try {
       await currentRuntime.stop();
     } catch (err) {
-      logger.warn(`[milaidy] Error stopping old runtime: ${err instanceof Error ? err.message : err}`);
+      logger.warn(
+        `[milaidy] Error stopping old runtime: ${err instanceof Error ? err.message : err}`,
+      );
     }
     currentRuntime = null;
   }
@@ -77,13 +79,17 @@ async function handleRestart(reason?: string): Promise<void> {
   }
 
   if (isRestarting) {
-    logger.warn("[milaidy] Restart already in progress, skipping duplicate request");
+    logger.warn(
+      "[milaidy] Restart already in progress, skipping duplicate request",
+    );
     return;
   }
 
   isRestarting = true;
   try {
-    logger.info(`[milaidy] Restart requested${reason ? ` (${reason})` : ""} — bouncing runtime…`);
+    logger.info(
+      `[milaidy] Restart requested${reason ? ` (${reason})` : ""} — bouncing runtime…`,
+    );
 
     const rt = await createRuntime();
     const agentName = rt.character.name ?? "Milaidy";
@@ -114,7 +120,9 @@ async function shutdown(): Promise<void> {
     try {
       await currentRuntime.stop();
     } catch (err) {
-      logger.warn(`[milaidy] Error stopping runtime during shutdown: ${err instanceof Error ? err.message : err}`);
+      logger.warn(
+        `[milaidy] Error stopping runtime during shutdown: ${err instanceof Error ? err.message : err}`,
+      );
     }
     currentRuntime = null;
   }
@@ -155,7 +163,10 @@ main().catch((err: unknown) => {
   const error = err instanceof Error ? err : new Error(String(err));
   console.error("[milaidy] Fatal error:", error.stack ?? error.message);
   if (error.cause) {
-    const cause = error.cause instanceof Error ? error.cause : new Error(String(error.cause));
+    const cause =
+      error.cause instanceof Error
+        ? error.cause
+        : new Error(String(error.cause));
     console.error("[milaidy] Caused by:", cause.stack ?? cause.message);
   }
   process.exit(1);

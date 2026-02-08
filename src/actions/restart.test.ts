@@ -3,10 +3,11 @@
  *
  * Uses a mock handler so the tests don't actually exit or restart anything.
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import type { ActionResult, Memory } from "@elizaos/core";
-import { restartAction } from "./restart.js";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { setRestartHandler } from "../runtime/restart.js";
+import { restartAction } from "./restart.js";
 
 // --- Mock runtime & message ------------------------------------------------
 

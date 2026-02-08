@@ -5,8 +5,19 @@
  * ElizaOS rooms: per-agent UUIDs via createUniqueUuid(runtime, channelId)
  */
 
-import type { IAgentRuntime, Memory, State, Provider, ProviderResult, Room } from "@elizaos/core";
-import { buildAgentMainSessionKey, parseAgentSessionKey, ChannelType } from "@elizaos/core";
+import type {
+  IAgentRuntime,
+  Memory,
+  Provider,
+  ProviderResult,
+  Room,
+  State,
+} from "@elizaos/core";
+import {
+  buildAgentMainSessionKey,
+  ChannelType,
+  parseAgentSessionKey,
+} from "@elizaos/core";
 
 /**
  * Resolve an Milaidy session key from an ElizaOS room.
@@ -33,7 +44,9 @@ export function resolveSessionKeyFromRoom(
   return meta?.threadId ? `${base}:thread:${meta.threadId}` : base;
 }
 
-export function createSessionKeyProvider(options?: { defaultAgentId?: string }): Provider {
+export function createSessionKeyProvider(options?: {
+  defaultAgentId?: string;
+}): Provider {
   const agentId = options?.defaultAgentId ?? "main";
 
   return {
@@ -42,9 +55,14 @@ export function createSessionKeyProvider(options?: { defaultAgentId?: string }):
     dynamic: true,
     position: 5,
 
-    async get(runtime: IAgentRuntime, message: Memory, _state: State): Promise<ProviderResult> {
+    async get(
+      runtime: IAgentRuntime,
+      message: Memory,
+      _state: State,
+    ): Promise<ProviderResult> {
       const meta = (message.metadata ?? {}) as Record<string, unknown>;
-      const existing = typeof meta.sessionKey === "string" ? meta.sessionKey : undefined;
+      const existing =
+        typeof meta.sessionKey === "string" ? meta.sessionKey : undefined;
 
       if (existing) {
         const parsed = parseAgentSessionKey(existing);
@@ -58,13 +76,19 @@ export function createSessionKeyProvider(options?: { defaultAgentId?: string }):
       const room = await runtime.getRoom(message.roomId);
       if (!room) {
         const key = buildAgentMainSessionKey({ agentId, mainKey: "main" });
-        return { text: `Session: ${key}`, values: { sessionKey: key }, data: { sessionKey: key } };
+        return {
+          text: `Session: ${key}`,
+          values: { sessionKey: key },
+          data: { sessionKey: key },
+        };
       }
 
       const key = resolveSessionKeyFromRoom(agentId, room, {
         threadId: typeof meta.threadId === "string" ? meta.threadId : undefined,
         groupId: typeof meta.groupId === "string" ? meta.groupId : undefined,
-        channel: (typeof meta.channel === "string" ? meta.channel : undefined) ?? room.source,
+        channel:
+          (typeof meta.channel === "string" ? meta.channel : undefined) ??
+          room.source,
       });
 
       return {

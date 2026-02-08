@@ -1,6 +1,6 @@
 import type { Command } from "commander";
-import { theme } from "../../terminal/theme.js";
 import { formatDocsLink } from "../../terminal/links.js";
+import { theme } from "../../terminal/theme.js";
 import { runCommandWithRuntime } from "../cli-utils.js";
 
 const defaultRuntime = { error: console.error, exit: process.exit };
@@ -23,8 +23,5 @@ export function registerStartCommand(program: Command) {
     )
     .action(startAction);
 
-  program
-    .command("run")
-    .description("Alias for start")
-    .action(startAction);
+  program.command("run").description("Alias for start").action(startAction);
 }

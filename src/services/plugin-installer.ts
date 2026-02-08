@@ -21,15 +21,15 @@
  * @module services/plugin-installer
  */
 
+import { exec } from "node:child_process";
+import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import fs from "node:fs/promises";
-import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import { logger } from "@elizaos/core";
-import { getPluginInfo, type RegistryPluginInfo } from "./registry-client.js";
 import { loadMilaidyConfig, saveMilaidyConfig } from "../config/config.js";
 import { requestRestart } from "../runtime/restart.js";
+import { getPluginInfo, type RegistryPluginInfo } from "./registry-client.js";
 
 const execAsync = promisify(exec);
 
@@ -41,7 +41,7 @@ const execAsync = promisify(exec);
 const VALID_PACKAGE_NAME = /^(@[a-zA-Z0-9][\w.-]*\/)?[a-zA-Z0-9][\w.-]*$/;
 
 /** Version strings: semver, dist-tags, git refs. Conservative allowlist. */
-const VALID_VERSION = /^[a-zA-Z0-9][\w.+\-]*$/;
+const VALID_VERSION = /^[a-zA-Z0-9][\w.+-]*$/;
 
 /** Git branch names: alphanumeric, hyphens, slashes, dots. No shell metacharacters. */
 const VALID_BRANCH = /^[a-zA-Z0-9][\w./-]*$/;
@@ -82,7 +82,9 @@ let installLock: Promise<void> = Promise.resolve();
 function serialise<T>(fn: () => Promise<T>): Promise<T> {
   const prev = installLock;
   let resolve: () => void;
-  installLock = new Promise<void>((r) => { resolve = r; });
+  installLock = new Promise<void>((r) => {
+    resolve = r;
+  });
   return prev.then(fn).finally(() => resolve!());
 }
 
@@ -132,6 +134,13 @@ function pluginsBaseDir(): string {
   const stateDir = process.env.MILAIDY_STATE_DIR?.trim();
   const base = stateDir || path.join(os.homedir(), ".milaidy");
   return path.join(base, "plugins", "installed");
+}
+
+function isWithinPluginsDir(targetPath: string): boolean {
+  const base = path.resolve(pluginsBaseDir());
+  const resolved = path.resolve(targetPath);
+  if (resolved === base) return false;
+  return resolved.startsWith(`${base}${path.sep}`);
 }
 
 function sanitisePackageName(name: string): string {
@@ -214,7 +223,10 @@ async function _installPlugin(
   try {
     await fs.access(targetPkgPath);
   } catch {
-    await fs.writeFile(targetPkgPath, JSON.stringify({ private: true, dependencies: {} }, null, 2));
+    await fs.writeFile(
+      targetPkgPath,
+      JSON.stringify({ private: true, dependencies: {} }, null, 2),
+    );
   }
 
   // Try npm install; fall back to git clone
@@ -227,15 +239,26 @@ async function _installPlugin(
     await runPackageInstall(pm, canonicalName, npmVersion, targetDir);
 
     // Read the actual installed version from node_modules
-    const installedPkgPath = path.join(targetDir, "node_modules", ...canonicalName.split("/"), "package.json");
+    const installedPkgPath = path.join(
+      targetDir,
+      "node_modules",
+      ...canonicalName.split("/"),
+      "package.json",
+    );
     try {
-      const pkg = JSON.parse(await fs.readFile(installedPkgPath, "utf-8")) as { version?: string };
+      const pkg = JSON.parse(await fs.readFile(installedPkgPath, "utf-8")) as {
+        version?: string;
+      };
       if (typeof pkg.version === "string" && pkg.version.length > 0) {
         installedVersion = pkg.version;
       }
-    } catch { /* keep requested version */ }
+    } catch {
+      /* keep requested version */
+    }
   } catch (npmErr) {
-    logger.warn(`[plugin-installer] npm failed for ${canonicalName}: ${npmErr instanceof Error ? npmErr.message : String(npmErr)}`);
+    logger.warn(
+      `[plugin-installer] npm failed for ${canonicalName}: ${npmErr instanceof Error ? npmErr.message : String(npmErr)}`,
+    );
     emit("downloading", `npm failed, cloning from ${info.gitUrl}...`);
 
     try {
@@ -245,7 +268,14 @@ async function _installPlugin(
     } catch (gitErr) {
       const msg = gitErr instanceof Error ? gitErr.message : String(gitErr);
       emit("error", `Installation failed: ${msg}`);
-      return { success: false, pluginName: canonicalName, version: "", installPath: targetDir, requiresRestart: false, error: msg };
+      return {
+        success: false,
+        pluginName: canonicalName,
+        version: "",
+        installPath: targetDir,
+        requiresRestart: false,
+        error: msg,
+      };
     }
   }
 
@@ -276,7 +306,10 @@ async function _installPlugin(
     installedAt: new Date().toISOString(),
   });
 
-  emit("complete", `${canonicalName}@${installedVersion} installed successfully`);
+  emit(
+    "complete",
+    `${canonicalName}@${installedVersion} installed successfully`,
+  );
 
   return {
     success: true,
@@ -337,14 +370,25 @@ async function _uninstallPlugin(pluginName: string): Promise<UninstallResult> {
   }
 
   const record = installs[pluginName];
-  const dirToRemove = record.installPath || pluginDir(pluginName);
+  const candidatePath = record.installPath || pluginDir(pluginName);
+
+  if (!isWithinPluginsDir(candidatePath)) {
+    return {
+      success: false,
+      pluginName,
+      requiresRestart: false,
+      error: `Refusing to remove plugin outside ${pluginsBaseDir()}`,
+    };
+  }
+
+  const dirToRemove = candidatePath;
 
   // Remove from disk
   try {
     await fs.rm(dirToRemove, { recursive: true, force: true });
   } catch (err) {
     logger.warn(
-      `[plugin-installer] Could not remove ${dirToRemove}: ${err instanceof Error ? err.message : String(err)}`
+      `[plugin-installer] Could not remove ${dirToRemove}: ${err instanceof Error ? err.message : String(err)}`,
     );
   }
 
@@ -362,7 +406,9 @@ async function _uninstallPlugin(pluginName: string): Promise<UninstallResult> {
 /**
  * Uninstall a plugin and restart the agent.
  */
-export async function uninstallAndRestart(pluginName: string): Promise<UninstallResult> {
+export async function uninstallAndRestart(
+  pluginName: string,
+): Promise<UninstallResult> {
   const result = await uninstallPlugin(pluginName);
 
   if (result.success && result.requiresRestart) {
@@ -414,6 +460,7 @@ async function gitCloneInstall(
   try {
     await execAsync(
       `git clone --branch "${branch}" --single-branch --depth 1 "${info.gitUrl}" "${tempDir}"`,
+      { env: { ...process.env, GIT_TERMINAL_PROMPT: "0" } },
     );
 
     onProgress?.({
@@ -431,7 +478,9 @@ async function gitCloneInstall(
     try {
       await fs.access(tsDir);
       await execAsync(`${pm} run build`, { cwd: tsDir }).catch(() => {
-        logger.warn(`[plugin-installer] build step failed for ${info.name}, continuing...`);
+        logger.warn(
+          `[plugin-installer] build step failed for ${info.name}, continuing...`,
+        );
       });
       // Copy built typescript dir as the install target
       await fs.cp(tsDir, targetDir, { recursive: true });
@@ -457,7 +506,11 @@ async function resolveEntryPoint(
   packageName: string,
 ): Promise<string | null> {
   // npm layout: node_modules/@scope/package/
-  const nmPath = path.join(targetDir, "node_modules", ...packageName.split("/"));
+  const nmPath = path.join(
+    targetDir,
+    "node_modules",
+    ...packageName.split("/"),
+  );
   try {
     await fs.access(nmPath);
     return nmPath;

@@ -3,10 +3,10 @@
  */
 
 import { existsSync } from "node:fs";
-import { delimiter } from "node:path";
 import { platform } from "node:os";
-import type { MilaidyHookMetadata } from "./types.js";
+import { delimiter } from "node:path";
 import type { HookConfig, InternalHooksConfig } from "../config/types.hooks.js";
+import type { MilaidyHookMetadata } from "./types.js";
 
 function binaryExists(name: string): boolean {
   const pathDirs = (process.env.PATH ?? "").split(delimiter);
@@ -23,7 +23,11 @@ function resolveConfigPath(
   const parts = pathStr.split(".");
   let current: unknown = config;
   for (const part of parts) {
-    if (current === null || current === undefined || typeof current !== "object") {
+    if (
+      current === null ||
+      current === undefined ||
+      typeof current !== "object"
+    ) {
       return undefined;
     }
     current = (current as Record<string, unknown>)[part];
@@ -36,7 +40,13 @@ function isConfigPathTruthy(
   pathStr: string,
 ): boolean {
   const value = resolveConfigPath(config, pathStr);
-  return value !== undefined && value !== null && value !== false && value !== "" && value !== 0;
+  return (
+    value !== undefined &&
+    value !== null &&
+    value !== false &&
+    value !== "" &&
+    value !== 0
+  );
 }
 
 export interface EligibilityResult {
@@ -61,7 +71,9 @@ export function checkEligibility(
 
   if (metadata.os && metadata.os.length > 0) {
     if (!metadata.os.includes(platform())) {
-      missing.push(`OS: requires ${metadata.os.join("|")}, current: ${platform()}`);
+      missing.push(
+        `OS: requires ${metadata.os.join("|")}, current: ${platform()}`,
+      );
     }
   }
 
@@ -111,4 +123,3 @@ export function resolveHookConfig(
 ): HookConfig | undefined {
   return internalConfig?.entries?.[hookKey];
 }
-

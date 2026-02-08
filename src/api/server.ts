@@ -5,45 +5,52 @@
  * ElizaOS AgentRuntime. Default port: 2138. In dev mode, the Vite UI
  * dev server proxies /api and /ws here (see scripts/dev-ui.mjs).
  */
-import http from "node:http";
-import fs from "node:fs";
-import path from "node:path";
+
 import crypto from "node:crypto";
+import fs from "node:fs";
+import http from "node:http";
+import path from "node:path";
+import { WebSocketServer, type WebSocket } from "ws";
 import {
-  AgentRuntime,
+  type AgentRuntime,
   ChannelType,
+  type Content,
   createMessageMemory,
   logger,
   stringToUuid,
-  type Content,
   type UUID,
 } from "@elizaos/core";
 import {
-  loadMilaidyConfig,
-  saveMilaidyConfig,
   configFileExists,
+  loadMilaidyConfig,
   type MilaidyConfig,
+  saveMilaidyConfig,
 } from "../config/config.js";
-import { CharacterSchema } from "../config/zod-schema.js";
-import {
-  resolveDefaultAgentWorkspaceDir,
-} from "../providers/workspace.js";
 import { resolveStateDir } from "../config/paths.js";
-import { validatePluginConfig, type PluginParamInfo } from "./plugin-validation.js";
+import { CharacterSchema } from "../config/zod-schema.js";
+import { resolveDefaultAgentWorkspaceDir } from "../providers/workspace.js";
+import { CloudManager } from "../cloud/cloud-manager.js";
+import { handleCloudRoute, type CloudRouteState } from "./cloud-routes.js";
 import {
-  generateWalletKeys,
-  generateWalletForChain,
-  importWallet,
-  validatePrivateKey,
-  getWalletAddresses,
+  type PluginParamInfo,
+  validatePluginConfig,
+} from "./plugin-validation.js";
+import {
+  exportAgent,
+  importAgent,
+  estimateExportSize,
+  AgentExportError,
+} from "../services/agent-export.js";
+import { handleDatabaseRoute } from "./database.js";
+import {
   fetchEvmBalances,
   fetchEvmNfts,
   fetchSolanaBalances,
   fetchSolanaNfts,
   type WalletBalancesResponse,
-  type WalletNftsResponse,
-  type WalletConfigStatus,
   type WalletChain,
+  type WalletConfigStatus,
+  type WalletNftsResponse,
 } from "./wallet.js";
 
 // ---------------------------------------------------------------------------
@@ -58,7 +65,9 @@ interface AutonomyServiceLike {
 }
 
 /** Helper to retrieve the AutonomyService from a runtime (may be null). */
-function getAutonomySvc(runtime: AgentRuntime | null): AutonomyServiceLike | null {
+function getAutonomySvc(
+  runtime: AgentRuntime | null,
+): AutonomyServiceLike | null {
   if (!runtime) return null;
   return runtime.getService("AUTONOMY") as AutonomyServiceLike | null;
 }
@@ -268,7 +277,13 @@ function buildShareSuggestedPrompt(data: {
 interface ServerState {
   runtime: AgentRuntime | null;
   config: MilaidyConfig;
-  agentState: "not_started" | "running" | "paused" | "stopped" | "restarting" | "error";
+  agentState:
+    | "not_started"
+    | "running"
+    | "paused"
+    | "stopped"
+    | "restarting"
+    | "error";
   agentName: string;
   model: string | undefined;
   startedAt: number | undefined;
@@ -305,6 +320,8 @@ interface PluginParamDef {
   required: boolean;
   sensitive: boolean;
   default?: string;
+  /** Predefined options for dropdown selection (e.g. model names). */
+  options?: string[];
   /** Current value from process.env (masked if sensitive). */
   currentValue: string | null;
   /** Whether a value is currently set in the environment. */
@@ -319,10 +336,14 @@ interface PluginEntry {
   configured: boolean;
   envKey: string | null;
   category: "ai-provider" | "connector" | "database" | "feature";
+  /** Where the plugin comes from: "bundled" (ships with Milaidy) or "store" (user-installed from registry). */
+  source: "bundled" | "store";
   configKeys: string[];
   parameters: PluginParamDef[];
   validationErrors: Array<{ field: string; message: string }>;
   validationWarnings: Array<{ field: string; message: string }>;
+  isCore?: boolean; // True if plugin is in CORE_PLUGINS (essential for app)
+  isActive?: boolean; // True if plugin is currently loaded in runtime
 }
 
 interface SkillEntry {
@@ -349,9 +370,14 @@ function findOwnPackageRoot(startDir: string): string {
     const pkgPath = path.join(dir, "package.json");
     if (fs.existsSync(pkgPath)) {
       try {
-        const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8")) as Record<string, unknown>;
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8")) as Record<
+          string,
+          unknown
+        >;
         if (pkg.name === "milaidy") return dir;
-      } catch { /* keep searching */ }
+      } catch {
+        /* keep searching */
+      }
     }
     const parent = path.dirname(dir);
     if (parent === dir) break;
@@ -410,7 +436,14 @@ function buildParamDefs(
       required: Boolean(def.required),
       sensitive,
       default: def.default as string | undefined,
-      currentValue: isSet ? (sensitive ? maskValue(envValue!) : envValue!) : null,
+      options: Array.isArray(def.options)
+        ? (def.options as string[])
+        : undefined,
+      currentValue: isSet
+        ? sensitive
+          ? maskValue(envValue ?? "")
+          : (envValue ?? null)
+        : null,
       isSet,
     };
   });
@@ -437,6 +470,88 @@ function sanitizePluginIndexEntry(entry: PluginIndexEntry): PluginIndexEntry {
  * Discover available plugins from the bundled plugins.json manifest.
  * Falls back to filesystem scanning for monorepo development.
  */
+/**
+ * Build PluginEntry records for user-installed plugins (from the Store).
+ * These are tracked in config.plugins.installs and loaded at runtime,
+ * but don't appear in the bundled plugins.json manifest.
+ *
+ * We read the installed plugin's package.json to extract metadata
+ * (name, description, parameters) so they show up in the Plugins Manager
+ * with the same level of detail as bundled plugins.
+ */
+function discoverInstalledPlugins(
+  config: MilaidyConfig,
+  bundledIds: Set<string>,
+): PluginEntry[] {
+  const installs = config.plugins?.installs;
+  if (!installs || typeof installs !== "object") return [];
+
+  const entries: PluginEntry[] = [];
+
+  for (const [packageName, record] of Object.entries(installs)) {
+    // Derive a short id from the package name (e.g. "@elizaos/plugin-foo" → "foo")
+    const id = packageName
+      .replace(/^@[^/]+\/plugin-/, "")
+      .replace(/^@[^/]+\//, "")
+      .replace(/^plugin-/, "");
+
+    // Skip if it's already covered by the bundled manifest
+    if (bundledIds.has(id)) continue;
+
+    const category = categorizePlugin(id);
+    const installPath = record.installPath;
+
+    // Try to read the plugin's package.json for metadata
+    let name = packageName;
+    let description = `Installed from registry (v${record.version ?? "unknown"})`;
+
+    if (installPath) {
+      // Check npm layout first, then direct layout
+      const candidates = [
+        path.join(
+          installPath,
+          "node_modules",
+          ...packageName.split("/"),
+          "package.json",
+        ),
+        path.join(installPath, "package.json"),
+      ];
+      for (const pkgPath of candidates) {
+        try {
+          if (fs.existsSync(pkgPath)) {
+            const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8")) as {
+              name?: string;
+              description?: string;
+            };
+            if (pkg.name) name = pkg.name;
+            if (pkg.description) description = pkg.description;
+            break;
+          }
+        } catch {
+          // ignore read errors
+        }
+      }
+    }
+
+    entries.push({
+      id,
+      name,
+      description,
+      enabled: false, // Will be updated against the runtime below
+      configured: true,
+      envKey: null,
+      category,
+      source: "store",
+      configKeys: [],
+      parameters: [],
+      validationErrors: [],
+      validationWarnings: [],
+    });
+  }
+
+  return entries.sort((a, b) => a.name.localeCompare(b.name));
+}
+
 function discoverPluginsFromManifest(): PluginEntry[] {
   const thisDir =
     import.meta.dirname ?? path.dirname(new URL(import.meta.url).pathname);
@@ -458,41 +573,81 @@ function discoverPluginsFromManifest(): PluginEntry[] {
         }));
         const validation = validatePluginConfig(p.id, category, envKey, p.configKeys, undefined, paramInfos);
 
-        return {
-          id: p.id,
-          name: p.name,
-          description: p.description,
-          enabled: false,
-          configured,
-          envKey,
-          category,
-          configKeys: p.configKeys,
-          parameters,
-          validationErrors: validation.errors,
-          validationWarnings: validation.warnings,
-        };
-      }).sort((a, b) => a.name.localeCompare(b.name));
+          return {
+            id: p.id,
+            name: p.name,
+            description: p.description,
+            enabled: false,
+            configured,
+            envKey,
+            category,
+            source: "bundled" as const,
+            configKeys: p.configKeys,
+            parameters,
+            validationErrors: validation.errors,
+            validationWarnings: validation.warnings,
+          };
+        })
+        .sort((a, b) => a.name.localeCompare(b.name));
     } catch (err) {
-      logger.debug(`[milaidy-api] Failed to read plugins.json: ${err instanceof Error ? err.message : err}`);
+      logger.debug(
+        `[milaidy-api] Failed to read plugins.json: ${err instanceof Error ? err.message : err}`,
+      );
     }
   }
 
   // Fallback: no manifest found
-  logger.debug("[milaidy-api] plugins.json not found — run `npm run generate:plugins`");
+  logger.debug(
+    "[milaidy-api] plugins.json not found — run `npm run generate:plugins`",
+  );
   return [];
 }
 
-function categorizePlugin(id: string): "ai-provider" | "connector" | "database" | "feature" {
+function categorizePlugin(
+  id: string,
+): "ai-provider" | "connector" | "database" | "feature" {
   const aiProviders = [
-    "openai", "anthropic", "groq", "xai", "ollama", "openrouter",
-    "google-genai", "local-ai", "vercel-ai-gateway", "deepseek",
-    "together", "mistral", "cohere", "perplexity", "qwen", "minimax",
+    "openai",
+    "anthropic",
+    "groq",
+    "xai",
+    "ollama",
+    "openrouter",
+    "google-genai",
+    "local-ai",
+    "vercel-ai-gateway",
+    "deepseek",
+    "together",
+    "mistral",
+    "cohere",
+    "perplexity",
+    "qwen",
+    "minimax",
+    "zai",
   ];
   const connectors = [
-    "telegram", "discord", "slack", "whatsapp", "signal", "imessage",
-    "bluebubbles", "farcaster", "bluesky", "matrix", "nostr", "msteams",
-    "mattermost", "google-chat", "feishu", "line", "zalo", "zalouser",
-    "tlon", "twitch", "nextcloud-talk", "instagram",
+    "telegram",
+    "discord",
+    "slack",
+    "whatsapp",
+    "signal",
+    "imessage",
+    "bluebubbles",
+    "farcaster",
+    "bluesky",
+    "matrix",
+    "nostr",
+    "msteams",
+    "mattermost",
+    "google-chat",
+    "feishu",
+    "line",
+    "zalo",
+    "zalouser",
+    "tlon",
+    "twitch",
+    "nextcloud-talk",
+    "instagram",
   ];
   const databases = ["sql", "localdb", "inmemorydb"];
 
@@ -516,10 +671,14 @@ type SkillPreferencesMap = Record<string, boolean>;
  * Load persisted skill preferences from the agent's database.
  * Returns an empty map when the runtime or database isn't available.
  */
-async function loadSkillPreferences(runtime: AgentRuntime | null): Promise<SkillPreferencesMap> {
+async function loadSkillPreferences(
+  runtime: AgentRuntime | null,
+): Promise<SkillPreferencesMap> {
   if (!runtime) return {};
   try {
-    const prefs = await runtime.getCache<SkillPreferencesMap>(SKILL_PREFS_CACHE_KEY);
+    const prefs = await runtime.getCache<SkillPreferencesMap>(
+      SKILL_PREFS_CACHE_KEY,
+    );
     return prefs ?? {};
   } catch {
     return {};
@@ -529,11 +688,16 @@ async function loadSkillPreferences(runtime: AgentRuntime | null): Promise<Skill
 /**
  * Persist skill preferences to the agent's database.
  */
-async function saveSkillPreferences(runtime: AgentRuntime, prefs: SkillPreferencesMap): Promise<void> {
+async function saveSkillPreferences(
+  runtime: AgentRuntime,
+  prefs: SkillPreferencesMap,
+): Promise<void> {
   try {
     await runtime.setCache(SKILL_PREFS_CACHE_KEY, prefs);
   } catch (err) {
-    logger.debug(`[milaidy-api] Failed to save skill preferences: ${err instanceof Error ? err.message : err}`);
+    logger.debug(
+      `[milaidy-api] Failed to save skill preferences: ${err instanceof Error ? err.message : err}`,
+    );
   }
 }
 
@@ -596,7 +760,14 @@ async function discoverSkills(
       const service = runtime.getService("AGENT_SKILLS_SERVICE");
       // eslint-disable-next-line -- runtime service is loosely typed; cast via unknown
       const svc = service as unknown as
-        | { getLoadedSkills?: () => Array<{ slug: string; name: string; description: string; source: string }> }
+        | {
+            getLoadedSkills?: () => Array<{
+              slug: string;
+              name: string;
+              description: string;
+              source: string;
+            }>;
+          }
         | undefined;
       if (svc && typeof svc.getLoadedSkills === "function") {
         const loadedSkills = svc.getLoadedSkills();
@@ -613,7 +784,9 @@ async function discoverSkills(
         }
       }
     } catch {
-      logger.debug("[milaidy-api] AgentSkillsService not available, falling back to filesystem scan");
+      logger.debug(
+        "[milaidy-api] AgentSkillsService not available, falling back to filesystem scan",
+      );
     }
   }
 
@@ -629,7 +802,9 @@ async function discoverSkills(
       skillsDirs.push(bundledDir);
     }
   } catch {
-    logger.debug("[milaidy-api] @elizaos/skills not available for skill discovery");
+    logger.debug(
+      "[milaidy-api] @elizaos/skills not available for skill discovery",
+    );
   }
 
   // Workspace-local skills
@@ -659,11 +834,23 @@ async function discoverSkills(
 /**
  * Recursively scan a directory for SKILL.md files, applying config filtering.
  */
-function scanSkillsDir(dir: string, skills: SkillEntry[], seen: Set<string>, config: MilaidyConfig, dbPrefs: SkillPreferencesMap): void {
+function scanSkillsDir(
+  dir: string,
+  skills: SkillEntry[],
+  seen: Set<string>,
+  config: MilaidyConfig,
+  dbPrefs: SkillPreferencesMap,
+): void {
   if (!fs.existsSync(dir)) return;
 
   for (const entry of fs.readdirSync(dir)) {
-    if (entry.startsWith(".") || entry === "node_modules" || entry === "src" || entry === "dist") continue;
+    if (
+      entry.startsWith(".") ||
+      entry === "node_modules" ||
+      entry === "src" ||
+      entry === "dist"
+    )
+      continue;
 
     const entryPath = path.join(dir, entry);
     let stat: fs.Stats;
@@ -692,8 +879,10 @@ function scanSkillsDir(dir: string, skills: SkillEntry[], seen: Set<string>, con
           const fmBlock = fmMatch[1];
           const nameMatch = /^name:\s*(.+)$/m.exec(fmBlock);
           const descMatch = /^description:\s*(.+)$/m.exec(fmBlock);
-          if (nameMatch) skillName = nameMatch[1].trim().replace(/^["']|["']$/g, "");
-          if (descMatch) description = descMatch[1].trim().replace(/^["']|["']$/g, "");
+          if (nameMatch)
+            skillName = nameMatch[1].trim().replace(/^["']|["']$/g, "");
+          if (descMatch)
+            description = descMatch[1].trim().replace(/^["']|["']$/g, "");
         }
 
         // Fallback to heading / first paragraph
@@ -701,7 +890,12 @@ function scanSkillsDir(dir: string, skills: SkillEntry[], seen: Set<string>, con
           const lines = content.split("\n");
           const heading = lines.find((l) => l.trim().startsWith("#"));
           if (heading) skillName = heading.replace(/^#+\s*/, "").trim();
-          const descLine = lines.find((l) => l.trim() && !l.trim().startsWith("#") && !l.trim().startsWith("---"));
+          const descLine = lines.find(
+            (l) =>
+              l.trim() &&
+              !l.trim().startsWith("#") &&
+              !l.trim().startsWith("---"),
+          );
           description = descLine?.trim() ?? "";
         }
 
@@ -711,7 +905,9 @@ function scanSkillsDir(dir: string, skills: SkillEntry[], seen: Set<string>, con
           description: description.slice(0, 200),
           enabled: resolveSkillEnabled(entry, config, dbPrefs),
         });
-      } catch { /* skip unreadable */ }
+      } catch {
+        /* skip unreadable */
+      }
     } else {
       // Recurse into subdirectories for nested skill groups
       scanSkillsDir(entryPath, skills, seen, config, dbPrefs);
@@ -725,6 +921,7 @@ function scanSkillsDir(dir: string, skills: SkillEntry[], seen: Set<string>, con
 
 /** Maximum request body size (1 MB) — prevents memory-based DoS. */
 const MAX_BODY_BYTES = 1_048_576;
+const MAX_IMPORT_BYTES = 512 * 1_048_576; // 512 MB for agent imports
 
 function readBody(req: http.IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -734,12 +931,43 @@ function readBody(req: http.IncomingMessage): Promise<string> {
       totalBytes += c.length;
       if (totalBytes > MAX_BODY_BYTES) {
         req.destroy();
-        reject(new Error(`Request body exceeds maximum size (${MAX_BODY_BYTES} bytes)`));
+        reject(
+          new Error(
+            `Request body exceeds maximum size (${MAX_BODY_BYTES} bytes)`,
+          ),
+        );
         return;
       }
       chunks.push(c);
     });
     req.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
+    req.on("error", reject);
+  });
+}
+
+/**
+ * Read raw binary request body with a configurable size limit.
+ * Used for agent import file uploads.
+ */
+function readRawBody(
+  req: http.IncomingMessage,
+  maxBytes: number,
+): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    let totalBytes = 0;
+    req.on("data", (c: Buffer) => {
+      totalBytes += c.length;
+      if (totalBytes > maxBytes) {
+        req.destroy();
+        reject(
+          new Error(`Request body exceeds maximum size (${maxBytes} bytes)`),
+        );
+        return;
+      }
+      chunks.push(c);
+    });
+    req.on("end", () => resolve(Buffer.concat(chunks)));
     req.on("error", reject);
   });
 }
@@ -756,7 +984,8 @@ async function readJsonBody<T = Record<string, unknown>>(
   try {
     raw = await readBody(req);
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Failed to read request body";
+    const msg =
+      err instanceof Error ? err.message : "Failed to read request body";
     error(res, msg, 413);
     return null;
   }
@@ -999,6 +1228,143 @@ interface RequestContext {
   onRestart: (() => Promise<AgentRuntime | null>) | null;
 }
 
+const LOCAL_ORIGIN_RE = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i;
+const APP_ORIGIN_RE =
+  /^(capacitor|capacitor-electron|app):\/\/(localhost|-)?$/i;
+
+function resolveCorsOrigin(origin?: string): string | null {
+  if (!origin) return null;
+  const trimmed = origin.trim();
+  if (!trimmed) return null;
+
+  // Explicit allowlist via env (comma-separated)
+  const extra = process.env.MILAIDY_ALLOWED_ORIGINS;
+  if (extra) {
+    const allow = extra
+      .split(",")
+      .map((v) => v.trim())
+      .filter(Boolean);
+    if (allow.includes(trimmed)) return trimmed;
+  }
+
+  if (LOCAL_ORIGIN_RE.test(trimmed)) return trimmed;
+  if (APP_ORIGIN_RE.test(trimmed)) return trimmed;
+  if (trimmed === "null" && process.env.MILAIDY_ALLOW_NULL_ORIGIN === "1")
+    return "null";
+  return null;
+}
+
+function applyCors(
+  req: http.IncomingMessage,
+  res: http.ServerResponse,
+): boolean {
+  const origin =
+    typeof req.headers.origin === "string" ? req.headers.origin : undefined;
+  const allowed = resolveCorsOrigin(origin);
+
+  if (origin && !allowed) return false;
+
+  if (allowed) {
+    res.setHeader("Access-Control-Allow-Origin", allowed);
+    res.setHeader("Vary", "Origin");
+    res.setHeader(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, DELETE, OPTIONS",
+    );
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization, X-Milaidy-Token, X-Api-Key",
+    );
+  }
+
+  return true;
+}
+
+const PAIRING_TTL_MS = 10 * 60 * 1000;
+const PAIRING_WINDOW_MS = 10 * 60 * 1000;
+const PAIRING_MAX_ATTEMPTS = 5;
+const PAIRING_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+let pairingCode: string | null = null;
+let pairingExpiresAt = 0;
+const pairingAttempts = new Map<string, { count: number; resetAt: number }>();
+
+function pairingEnabled(): boolean {
+  return (
+    Boolean(process.env.MILAIDY_API_TOKEN?.trim()) &&
+    process.env.MILAIDY_PAIRING_DISABLED !== "1"
+  );
+}
+
+function normalizePairingCode(code: string): string {
+  return code.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+}
+
+function generatePairingCode(): string {
+  const bytes = crypto.randomBytes(8);
+  let raw = "";
+  for (let i = 0; i < bytes.length; i++) {
+    raw += PAIRING_ALPHABET[bytes[i] % PAIRING_ALPHABET.length];
+  }
+  return `${raw.slice(0, 4)}-${raw.slice(4, 8)}`;
+}
+
+function ensurePairingCode(): string | null {
+  if (!pairingEnabled()) return null;
+  const now = Date.now();
+  if (!pairingCode || now > pairingExpiresAt) {
+    pairingCode = generatePairingCode();
+    pairingExpiresAt = now + PAIRING_TTL_MS;
+    logger.warn(
+      `[milaidy-api] Pairing code: ${pairingCode} (valid for 10 minutes)`,
+    );
+  }
+  return pairingCode;
+}
+
+function rateLimitPairing(ip: string | null): boolean {
+  const key = ip ?? "unknown";
+  const now = Date.now();
+  const current = pairingAttempts.get(key);
+  if (!current || now > current.resetAt) {
+    pairingAttempts.set(key, { count: 1, resetAt: now + PAIRING_WINDOW_MS });
+    return true;
+  }
+  if (current.count >= PAIRING_MAX_ATTEMPTS) return false;
+  current.count += 1;
+  return true;
+}
+
+function extractAuthToken(req: http.IncomingMessage): string | null {
+  const auth =
+    typeof req.headers.authorization === "string"
+      ? req.headers.authorization.trim()
+      : "";
+  if (auth) {
+    const match = /^Bearer\s+(.+)$/i.exec(auth);
+    if (match?.[1]) return match[1].trim();
+  }
+
+  const header =
+    (typeof req.headers["x-milaidy-token"] === "string" &&
+      req.headers["x-milaidy-token"]) ||
+    (typeof req.headers["x-api-key"] === "string" && req.headers["x-api-key"]);
+  if (typeof header === "string" && header.trim()) return header.trim();
+
+  return null;
+}
+
+function isAuthorized(req: http.IncomingMessage): boolean {
+  const expected = process.env.MILAIDY_API_TOKEN?.trim();
+  if (!expected) return true;
+  const provided = extractAuthToken(req);
+  if (!provided) return false;
+  const a = Buffer.from(expected, "utf8");
+  const b = Buffer.from(provided, "utf8");
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
+}
+
 async function handleRequest(
   req: http.IncomingMessage,
   res: http.ServerResponse,
@@ -1006,8 +1372,22 @@ async function handleRequest(
   ctx?: RequestContext,
 ): Promise<void> {
   const method = req.method ?? "GET";
-  const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
+  const url = new URL(
+    req.url ?? "/",
+    `http://${req.headers.host ?? "localhost"}`,
+  );
   const pathname = url.pathname;
+  const isAuthEndpoint = pathname.startsWith("/api/auth/");
+
+  if (!applyCors(req, res)) {
+    json(res, { error: "Origin not allowed" }, 403);
+    return;
+  }
+
+  if (method !== "OPTIONS" && !isAuthEndpoint && !isAuthorized(req)) {
+    json(res, { error: "Unauthorized" }, 401);
+    return;
+  }
 
   // CORS preflight
   if (method === "OPTIONS") {
@@ -1020,15 +1400,86 @@ async function handleRequest(
     return;
   }
 
+  // ── GET /api/auth/status ───────────────────────────────────────────────
+  if (method === "GET" && pathname === "/api/auth/status") {
+    const required = Boolean(process.env.MILAIDY_API_TOKEN?.trim());
+    const enabled = pairingEnabled();
+    if (enabled) ensurePairingCode();
+    json(res, {
+      required,
+      pairingEnabled: enabled,
+      expiresAt: enabled ? pairingExpiresAt : null,
+    });
+    return;
+  }
+
+  // ── POST /api/auth/pair ────────────────────────────────────────────────
+  if (method === "POST" && pathname === "/api/auth/pair") {
+    const body = await readJsonBody<{ code?: string }>(req, res);
+    if (!body) return;
+
+    const token = process.env.MILAIDY_API_TOKEN?.trim();
+    if (!token) {
+      error(res, "Pairing not enabled", 400);
+      return;
+    }
+    if (!pairingEnabled()) {
+      error(res, "Pairing disabled", 403);
+      return;
+    }
+    if (!rateLimitPairing(req.socket.remoteAddress ?? null)) {
+      error(res, "Too many attempts. Try again later.", 429);
+      return;
+    }
+
+    const provided = normalizePairingCode(body.code ?? "");
+    const current = ensurePairingCode();
+    if (!current || Date.now() > pairingExpiresAt) {
+      ensurePairingCode();
+      error(
+        res,
+        "Pairing code expired. Check server logs for a new code.",
+        410,
+      );
+      return;
+    }
+
+    const expected = normalizePairingCode(current);
+    const a = Buffer.from(expected, "utf8");
+    const b = Buffer.from(provided, "utf8");
+    if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
+      error(res, "Invalid pairing code", 403);
+      return;
+    }
+
+    pairingCode = null;
+    pairingExpiresAt = 0;
+    json(res, { token });
+    return;
+  }
+
   // ── GET /api/status ─────────────────────────────────────────────────────
   if (method === "GET" && pathname === "/api/status") {
     const uptime = state.startedAt ? Date.now() - state.startedAt : undefined;
+
+    // Cloud mode: report cloud connection status alongside local state
+    const cloudProxy = state.cloudManager?.getProxy();
+    const runMode = cloudProxy ? "cloud" : "local";
+    const cloudStatus = state.cloudManager
+      ? {
+          connectionStatus: state.cloudManager.getStatus(),
+          activeAgentId: state.cloudManager.getActiveAgentId(),
+        }
+      : undefined;
+
     json(res, {
-      state: state.agentState,
-      agentName: state.agentName,
-      model: state.model,
+      state: cloudProxy ? "running" : state.agentState,
+      agentName: cloudProxy ? cloudProxy.agentName : state.agentName,
+      model: cloudProxy ? "cloud" : state.model,
       uptime,
       startedAt: state.startedAt,
+      runMode,
+      cloud: cloudStatus,
     });
     return;
   }
@@ -1046,6 +1497,9 @@ async function handleRequest(
       names: pickRandomNames(6),
       styles: STYLE_PRESETS,
       providers: getProviderOptions(),
+      cloudProviders: getCloudProviderOptions(),
+      models: getModelOptions(),
+      inventoryProviders: getInventoryProviderOptions(),
       sharedStyleRules: "Keep responses brief. Be helpful and concise.",
     });
     return;
@@ -1055,6 +1509,21 @@ async function handleRequest(
   if (method === "POST" && pathname === "/api/onboarding") {
     const body = await readJsonBody(req, res);
     if (!body) return;
+
+    // ── Validate required fields ──────────────────────────────────────────
+    if (!body.name || typeof body.name !== "string" || !body.name.trim()) {
+      error(res, "Missing or invalid agent name", 400);
+      return;
+    }
+    if (body.theme && body.theme !== "light" && body.theme !== "dark") {
+      error(res, "Invalid theme: must be 'light' or 'dark'", 400);
+      return;
+    }
+    if (body.runMode && body.runMode !== "local" && body.runMode !== "cloud") {
+      error(res, "Invalid runMode: must be 'local' or 'cloud'", 400);
+      return;
+    }
+
     const config = state.config;
 
     if (!config.agents) config.agents = {};
@@ -1066,7 +1535,7 @@ async function handleRequest(
       config.agents.list.push({ id: "main", default: true });
     }
     const agent = config.agents.list[0] as Record<string, unknown>;
-    agent.name = body.name;
+    agent.name = (body.name as string).trim();
     agent.workspace = resolveDefaultAgentWorkspaceDir();
     if (body.bio) agent.bio = body.bio;
     if (body.systemPrompt) agent.system = body.systemPrompt;
@@ -1075,24 +1544,65 @@ async function handleRequest(
     if (body.topics) agent.topics = body.topics;
     if (body.messageExamples) agent.messageExamples = body.messageExamples;
 
-    if (body.provider && body.providerApiKey) {
-      if (!config.env) config.env = {};
-      const providerOpt = getProviderOptions().find((p) => p.id === body.provider);
-      if (providerOpt?.envKey) {
-        (config.env as Record<string, string>)[providerOpt.envKey] = body.providerApiKey as string;
-        process.env[providerOpt.envKey] = body.providerApiKey as string;
+    // ── Theme preference ──────────────────────────────────────────────────
+    if (body.theme) {
+      if (!config.ui) config.ui = {};
+      config.ui.theme = body.theme as "light" | "dark";
+    }
+
+    // ── Run mode & cloud configuration ────────────────────────────────────
+    const runMode = (body.runMode as string) || "local";
+    if (!config.cloud) config.cloud = {};
+    config.cloud.enabled = runMode === "cloud";
+
+    if (runMode === "cloud") {
+      if (body.cloudProvider) {
+        config.cloud.provider = body.cloudProvider as string;
+      }
+      if (body.smallModel) {
+        if (!config.models) config.models = {};
+        config.models.small = body.smallModel as string;
+      }
+      if (body.largeModel) {
+        if (!config.models) config.models = {};
+        config.models.large = body.largeModel as string;
       }
     }
 
-    if (body.telegramBotToken) {
-      if (!config.env) config.env = {};
-      (config.env as Record<string, string>).TELEGRAM_BOT_TOKEN = body.telegramBotToken as string;
-      process.env.TELEGRAM_BOT_TOKEN = body.telegramBotToken as string;
+    // ── Local LLM provider ────────────────────────────────────────────────
+    if (runMode === "local" && body.provider) {
+      if (body.providerApiKey) {
+        if (!config.env) config.env = {};
+        const providerOpt = getProviderOptions().find(
+          (p) => p.id === body.provider,
+        );
+        if (providerOpt?.envKey) {
+          (config.env as Record<string, string>)[providerOpt.envKey] =
+            body.providerApiKey as string;
+          process.env[providerOpt.envKey] = body.providerApiKey as string;
+        }
+      }
     }
-    if (body.discordBotToken) {
+
+    // ── Inventory / RPC providers ─────────────────────────────────────────
+    if (Array.isArray(body.inventoryProviders)) {
       if (!config.env) config.env = {};
-      (config.env as Record<string, string>).DISCORD_API_TOKEN = body.discordBotToken as string;
-      process.env.DISCORD_API_TOKEN = body.discordBotToken as string;
+      const allInventory = getInventoryProviderOptions();
+      for (const inv of body.inventoryProviders as Array<{
+        chain: string;
+        rpcProvider: string;
+        rpcApiKey?: string;
+      }>) {
+        const chainDef = allInventory.find((ip) => ip.id === inv.chain);
+        if (!chainDef) continue;
+        const rpcDef = chainDef.rpcProviders.find(
+          (rp) => rp.id === inv.rpcProvider,
+        );
+        if (rpcDef?.envKey && inv.rpcApiKey) {
+          (config.env as Record<string, string>)[rpcDef.envKey] = inv.rpcApiKey;
+          process.env[rpcDef.envKey] = inv.rpcApiKey;
+        }
+      }
     }
     if (body.skillsmpApiKey) {
       if (!config.env) config.env = {};
@@ -1107,16 +1617,22 @@ async function handleRequest(
 
         if (!process.env.EVM_PRIVATE_KEY) {
           if (!config.env) config.env = {};
-          (config.env as Record<string, string>).EVM_PRIVATE_KEY = walletKeys.evmPrivateKey;
+          (config.env as Record<string, string>).EVM_PRIVATE_KEY =
+            walletKeys.evmPrivateKey;
           process.env.EVM_PRIVATE_KEY = walletKeys.evmPrivateKey;
-          logger.info(`[milaidy-api] Generated EVM wallet: ${walletKeys.evmAddress}`);
+          logger.info(
+            `[milaidy-api] Generated EVM wallet: ${walletKeys.evmAddress}`,
+          );
         }
 
         if (!process.env.SOLANA_PRIVATE_KEY) {
           if (!config.env) config.env = {};
-          (config.env as Record<string, string>).SOLANA_PRIVATE_KEY = walletKeys.solanaPrivateKey;
+          (config.env as Record<string, string>).SOLANA_PRIVATE_KEY =
+            walletKeys.solanaPrivateKey;
           process.env.SOLANA_PRIVATE_KEY = walletKeys.solanaPrivateKey;
-          logger.info(`[milaidy-api] Generated Solana wallet: ${walletKeys.solanaAddress}`);
+          logger.info(
+            `[milaidy-api] Generated Solana wallet: ${walletKeys.solanaAddress}`,
+          );
         }
       } catch (err) {
         logger.warn(`[milaidy-api] Failed to generate wallet keys: ${err}`);
@@ -1125,7 +1641,18 @@ async function handleRequest(
 
     state.config = config;
     state.agentName = (body.name as string) ?? state.agentName;
-    saveMilaidyConfig(config);
+    try {
+      saveMilaidyConfig(config);
+    } catch (err) {
+      logger.error(
+        `[milaidy-api] Failed to save config after onboarding: ${err}`,
+      );
+      error(res, "Failed to save configuration", 500);
+      return;
+    }
+    logger.info(
+      `[milaidy-api] Onboarding complete for agent "${body.name}" (mode: ${(body.runMode as string) || "local"})`,
+    );
     json(res, { ok: true });
     return;
   }
@@ -1135,7 +1662,12 @@ async function handleRequest(
     state.agentState = "running";
     state.startedAt = Date.now();
     const detectedModel = state.runtime
-      ? (state.runtime.plugins.find((p) => p.name.includes("anthropic") || p.name.includes("openai") || p.name.includes("groq"))?.name ?? "unknown")
+      ? (state.runtime.plugins.find(
+          (p) =>
+            p.name.includes("anthropic") ||
+            p.name.includes("openai") ||
+            p.name.includes("groq"),
+        )?.name ?? "unknown")
       : "unknown";
     state.model = detectedModel;
 
@@ -1165,7 +1697,10 @@ async function handleRequest(
     state.agentState = "stopped";
     state.startedAt = undefined;
     state.model = undefined;
-    json(res, { ok: true, status: { state: state.agentState, agentName: state.agentName } });
+    json(res, {
+      ok: true,
+      status: { state: state.agentState, agentName: state.agentName },
+    });
     return;
   }
 
@@ -1212,7 +1747,11 @@ async function handleRequest(
   // ── POST /api/agent/restart ────────────────────────────────────────────
   if (method === "POST" && pathname === "/api/agent/restart") {
     if (!ctx?.onRestart) {
-      error(res, "Restart is not supported in this mode (no restart handler registered)", 501);
+      error(
+        res,
+        "Restart is not supported in this mode (no restart handler registered)",
+        501,
+      );
       return;
     }
 
@@ -1233,12 +1772,20 @@ async function handleRequest(
         state.startedAt = Date.now();
         json(res, {
           ok: true,
-          status: { state: state.agentState, agentName: state.agentName, startedAt: state.startedAt },
+          status: {
+            state: state.agentState,
+            agentName: state.agentName,
+            startedAt: state.startedAt,
+          },
         });
       } else {
         // Restore previous state instead of permanently stuck in "error"
         state.agentState = previousState;
-        error(res, "Restart handler returned null — runtime failed to re-initialize", 500);
+        error(
+          res,
+          "Restart handler returned null — runtime failed to re-initialize",
+          500,
+        );
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -1258,8 +1805,11 @@ async function handleRequest(
         try {
           await state.runtime.stop();
         } catch (stopErr) {
-          const msg = stopErr instanceof Error ? stopErr.message : String(stopErr);
-          logger.warn(`[milaidy-api] Error stopping runtime during reset: ${msg}`);
+          const msg =
+            stopErr instanceof Error ? stopErr.message : String(stopErr);
+          logger.warn(
+            `[milaidy-api] Error stopping runtime during reset: ${msg}`,
+          );
         }
         state.runtime = null;
       }
@@ -1285,6 +1835,142 @@ async function handleRequest(
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       error(res, `Reset failed: ${msg}`, 500);
+    }
+    return;
+  }
+
+  // ── POST /api/agent/export ─────────────────────────────────────────────
+  // Export the entire agent as a password-encrypted binary file.
+  if (method === "POST" && pathname === "/api/agent/export") {
+    if (!state.runtime) {
+      error(res, "Agent is not running — start it before exporting.", 503);
+      return;
+    }
+
+    const body = await readJsonBody<{
+      password?: string;
+      includeLogs?: boolean;
+    }>(req, res);
+    if (!body) return;
+
+    if (
+      !body.password ||
+      typeof body.password !== "string" ||
+      body.password.length < 4
+    ) {
+      error(res, "A password of at least 4 characters is required.", 400);
+      return;
+    }
+
+    try {
+      const fileBuffer = await exportAgent(state.runtime, body.password, {
+        includeLogs: body.includeLogs === true,
+      });
+
+      const agentName = (state.runtime.character.name ?? "agent")
+        .replace(/[^a-zA-Z0-9_-]/g, "_")
+        .toLowerCase();
+      const timestamp = new Date()
+        .toISOString()
+        .replace(/[:.]/g, "-")
+        .slice(0, 19);
+      const filename = `${agentName}-${timestamp}.eliza-agent`;
+
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "application/octet-stream");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${filename}"`,
+      );
+      res.setHeader("Content-Length", fileBuffer.length);
+      res.end(fileBuffer);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (err instanceof AgentExportError) {
+        error(res, msg, 400);
+      } else {
+        error(res, `Export failed: ${msg}`, 500);
+      }
+    }
+    return;
+  }
+
+  // ── GET /api/agent/export/estimate ─────────────────────────────────────────
+  // Get an estimate of the export size before downloading.
+  if (method === "GET" && pathname === "/api/agent/export/estimate") {
+    if (!state.runtime) {
+      error(res, "Agent is not running.", 503);
+      return;
+    }
+
+    try {
+      const estimate = await estimateExportSize(state.runtime);
+      json(res, estimate);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      error(res, `Estimate failed: ${msg}`, 500);
+    }
+    return;
+  }
+
+  // ── POST /api/agent/import ─────────────────────────────────────────────
+  // Import an agent from a password-encrypted .eliza-agent file.
+  if (method === "POST" && pathname === "/api/agent/import") {
+    if (!state.runtime) {
+      error(res, "Agent is not running — start it before importing.", 503);
+      return;
+    }
+
+    let rawBody: Buffer;
+    try {
+      rawBody = await readRawBody(req, MAX_IMPORT_BYTES);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      error(res, msg, 413);
+      return;
+    }
+
+    if (rawBody.length < 5) {
+      error(
+        res,
+        "Request body is too small — expected password + file data.",
+        400,
+      );
+      return;
+    }
+
+    // Parse binary envelope: [4 bytes password length][password][file data]
+    const passwordLength = rawBody.readUInt32BE(0);
+    if (passwordLength < 4 || passwordLength > 1024) {
+      error(res, "Invalid password length in request envelope.", 400);
+      return;
+    }
+    if (rawBody.length < 4 + passwordLength + 1) {
+      error(
+        res,
+        "Request body is incomplete — missing file data after password.",
+        400,
+      );
+      return;
+    }
+
+    const password = rawBody.subarray(4, 4 + passwordLength).toString("utf-8");
+    const fileBuffer = rawBody.subarray(4 + passwordLength);
+
+    try {
+      const result = await importAgent(
+        state.runtime,
+        fileBuffer as Buffer,
+        password,
+      );
+      json(res, result);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (err instanceof AgentExportError) {
+        error(res, msg, 400);
+      } else {
+        error(res, `Import failed: ${msg}`, 500);
+      }
     }
     return;
   }
@@ -1833,12 +2519,17 @@ async function handleRequest(
     if (state.runtime) {
       const c = state.runtime.character;
       if (body.name != null) c.name = body.name as string;
-      if (body.bio != null) c.bio = Array.isArray(body.bio) ? body.bio as string[] : [String(body.bio)];
+      if (body.bio != null)
+        c.bio = Array.isArray(body.bio)
+          ? (body.bio as string[])
+          : [String(body.bio)];
       if (body.system != null) c.system = body.system as string;
       if (body.adjectives != null) c.adjectives = body.adjectives as string[];
       if (body.topics != null) c.topics = body.topics as string[];
-      if (body.style != null) c.style = body.style as NonNullable<typeof c.style>;
-      if (body.postExamples != null) c.postExamples = body.postExamples as string[];
+      if (body.style != null)
+        c.style = body.style as NonNullable<typeof c.style>;
+      if (body.postExamples != null)
+        c.postExamples = body.postExamples as string[];
     }
     if (body.name) {
       state.agentName = body.name as string;
@@ -1873,43 +2564,88 @@ async function handleRequest(
 
   // ── GET /api/plugins ────────────────────────────────────────────────────
   if (method === "GET" && pathname === "/api/plugins") {
+    // Re-read config from disk so we pick up plugins installed since server start.
+    // The install endpoint writes to milaidy.json but state.config is only loaded
+    // once at server startup, so it would be stale without this refresh.
+    let freshConfig: MilaidyConfig;
+    try {
+      freshConfig = loadMilaidyConfig();
+    } catch {
+      freshConfig = state.config;
+    }
+
+    // Merge user-installed plugins into the list (they don't exist in plugins.json)
+    const bundledIds = new Set(state.plugins.map((p) => p.id));
+    const installedEntries = discoverInstalledPlugins(freshConfig, bundledIds);
+    const allPlugins = [...state.plugins, ...installedEntries];
+
     // Update enabled status from runtime (if available)
     if (state.runtime) {
       const loadedNames = state.runtime.plugins.map((p) => p.name);
-      for (const plugin of state.plugins) {
+      for (const plugin of allPlugins) {
         const suffix = `plugin-${plugin.id}`;
-        plugin.enabled = loadedNames.some(
-          (name) => name === plugin.id || name === suffix || name.endsWith(`/${suffix}`),
+        const packageName = `@elizaos/plugin-${plugin.id}`;
+        const isLoaded = loadedNames.some(
+          (name) => {
+            // Check various name formats
+            return name === plugin.id
+              || name === suffix
+              || name === packageName
+              || name.endsWith(`/${suffix}`)
+              || name.includes(plugin.id);
+          },
         );
+        plugin.enabled = isLoaded;
+        plugin.isActive = isLoaded; // Mark as active if currently loaded in runtime
+
+        if (isLoaded) {
+          logger.debug(`[milaidy-api] Plugin ${plugin.id} is active`);
+        }
       }
     }
 
     // Always refresh current env values and re-validate
-    for (const plugin of state.plugins) {
+    for (const plugin of allPlugins) {
       for (const param of plugin.parameters) {
         const envValue = process.env[param.key];
         param.isSet = Boolean(envValue && envValue.trim());
         param.currentValue = param.isSet
-          ? (param.sensitive ? maskValue(envValue!) : envValue!)
+          ? param.sensitive
+            ? maskValue(envValue!)
+            : envValue!
           : null;
       }
       const paramInfos: PluginParamInfo[] = plugin.parameters.map((p) => ({
-        key: p.key, required: p.required, sensitive: p.sensitive,
-        type: p.type, description: p.description, default: p.default,
+        key: p.key,
+        required: p.required,
+        sensitive: p.sensitive,
+        type: p.type,
+        description: p.description,
+        default: p.default,
       }));
-      const validation = validatePluginConfig(plugin.id, plugin.category, plugin.envKey, plugin.configKeys, undefined, paramInfos);
+      const validation = validatePluginConfig(
+        plugin.id,
+        plugin.category,
+        plugin.envKey,
+        plugin.configKeys,
+        undefined,
+        paramInfos,
+      );
       plugin.validationErrors = validation.errors;
       plugin.validationWarnings = validation.warnings;
     }
 
-    json(res, { plugins: state.plugins });
+    json(res, { plugins: allPlugins });
     return;
   }
 
   // ── PUT /api/plugins/:id ────────────────────────────────────────────────
   if (method === "PUT" && pathname.startsWith("/api/plugins/")) {
     const pluginId = pathname.slice("/api/plugins/".length);
-    const body = await readJsonBody<{ enabled?: boolean; config?: Record<string, string> }>(req, res);
+    const body = await readJsonBody<{
+      enabled?: boolean;
+      config?: Record<string, string>;
+    }>(req, res);
     if (!body) return;
 
     const plugin = state.plugins.find((p) => p.id === pluginId);
@@ -1918,21 +2654,111 @@ async function handleRequest(
       return;
     }
 
+    // Handle plugin enable/disable with hot-reload
     if (body.enabled !== undefined) {
       plugin.enabled = body.enabled;
+
+      // Update config.plugins.allow to control which plugins load on next restart
+      const pluginPackageName = `@elizaos/plugin-${pluginId}`;
+
+      if (!state.config.plugins) {
+        state.config.plugins = {};
+      }
+      if (!state.config.plugins.allow) {
+        // Initialize with currently loaded plugins
+        if (state.runtime) {
+          // Normalize all plugin names to @elizaos/plugin-* format
+          state.config.plugins.allow = state.runtime.plugins
+            .map((p) => {
+              const name = p.name;
+              // If already in full package format, keep it
+              if (name.startsWith("@elizaos/plugin-")) {
+                return name;
+              }
+              // Otherwise, convert short name to full package name
+              return `@elizaos/plugin-${name}`;
+            })
+            .filter((name) => {
+              // Filter out internal pseudo-plugins that aren't real npm packages
+              const internalPlugins = [
+                "@elizaos/plugin-bootstrap",
+                "@elizaos/plugin-milaidy",
+              ];
+              return !internalPlugins.includes(name);
+            });
+        } else {
+          // Fallback to CORE_PLUGINS if runtime not available
+          const { CORE_PLUGINS } = await import("../runtime/eliza.js");
+          state.config.plugins.allow = [...CORE_PLUGINS];
+        }
+      }
+
+      // Add or remove plugin from allow list
+      if (body.enabled) {
+        if (!state.config.plugins.allow.includes(pluginPackageName)) {
+          state.config.plugins.allow.push(pluginPackageName);
+          logger.info(`[milaidy-api] Enabled plugin: ${pluginPackageName}`);
+        }
+      } else {
+        state.config.plugins.allow = state.config.plugins.allow.filter(
+          (p) => p !== pluginPackageName
+        );
+        logger.info(`[milaidy-api] Disabled plugin: ${pluginPackageName}`);
+      }
+
+      // Save config with updated plugin list
+      try {
+        saveMilaidyConfig(state.config);
+        logger.info(`[milaidy-api] Saved plugin configuration`);
+      } catch (err) {
+        logger.warn(`[milaidy-api] Failed to save config: ${err instanceof Error ? err.message : String(err)}`);
+      }
+
+      // Trigger runtime restart to apply plugin changes
+      if (ctx?.onRestart) {
+        const onRestartFn = ctx.onRestart;
+        logger.info(`[milaidy-api] Restarting runtime to apply plugin changes...`);
+        setImmediate(async () => {
+          try {
+            const newRuntime = await onRestartFn();
+            if (newRuntime) {
+              state.runtime = newRuntime;
+              state.agentState = "running";
+              logger.info(`[milaidy-api] Runtime restarted successfully with updated plugins`);
+            }
+          } catch (err) {
+            logger.error(`[milaidy-api] Runtime restart failed: ${err instanceof Error ? err.message : String(err)}`);
+            state.agentState = "not_started";
+          }
+        });
+      }
     }
     if (body.config) {
-      const pluginParamInfos: PluginParamInfo[] = plugin.parameters.map((p) => ({
-        key: p.key, required: p.required, sensitive: p.sensitive,
-        type: p.type, description: p.description, default: p.default,
-      }));
+      const pluginParamInfos: PluginParamInfo[] = plugin.parameters.map(
+        (p) => ({
+          key: p.key,
+          required: p.required,
+          sensitive: p.sensitive,
+          type: p.type,
+          description: p.description,
+          default: p.default,
+        }),
+      );
       const configValidation = validatePluginConfig(
-        pluginId, plugin.category, plugin.envKey,
-        Object.keys(body.config), body.config, pluginParamInfos,
+        pluginId,
+        plugin.category,
+        plugin.envKey,
+        Object.keys(body.config),
+        body.config,
+        pluginParamInfos,
       );
 
       if (!configValidation.valid) {
-        json(res, { ok: false, plugin, validationErrors: configValidation.errors }, 422);
+        json(
+          res,
+          { ok: false, plugin, validationErrors: configValidation.errors },
+          422,
+        );
         return;
       }
 
@@ -1946,12 +2772,80 @@ async function handleRequest(
 
     // Refresh validation
     const refreshParamInfos: PluginParamInfo[] = plugin.parameters.map((p) => ({
-      key: p.key, required: p.required, sensitive: p.sensitive,
-      type: p.type, description: p.description, default: p.default,
+      key: p.key,
+      required: p.required,
+      sensitive: p.sensitive,
+      type: p.type,
+      description: p.description,
+      default: p.default,
     }));
-    const updated = validatePluginConfig(pluginId, plugin.category, plugin.envKey, plugin.configKeys, undefined, refreshParamInfos);
+    const updated = validatePluginConfig(
+      pluginId,
+      plugin.category,
+      plugin.envKey,
+      plugin.configKeys,
+      undefined,
+      refreshParamInfos,
+    );
     plugin.validationErrors = updated.errors;
     plugin.validationWarnings = updated.warnings;
+
+    // Update config.plugins.allow for hot-reload
+    if (body.enabled !== undefined) {
+      const packageName = `@elizaos/plugin-${pluginId}`;
+
+      // Initialize plugins.allow if it doesn't exist
+      if (!state.config.plugins) {
+        state.config.plugins = {};
+      }
+      if (!state.config.plugins.allow) {
+        state.config.plugins.allow = [];
+      }
+
+      const allowList = state.config.plugins.allow as string[];
+      const index = allowList.indexOf(packageName);
+
+      if (body.enabled && index === -1) {
+        // Add plugin to allow list
+        allowList.push(packageName);
+        addLog("info", `Enabled plugin: ${packageName}`, "milaidy-api");
+      } else if (!body.enabled && index !== -1) {
+        // Remove plugin from allow list
+        allowList.splice(index, 1);
+        addLog("info", `Disabled plugin: ${packageName}`, "milaidy-api");
+      }
+
+      // Save updated config
+      try {
+        saveMilaidyConfig(state.config);
+      } catch (err) {
+        logger.warn(
+          `[milaidy-api] Failed to save config: ${err instanceof Error ? err.message : err}`,
+        );
+      }
+
+      // Trigger runtime restart if available
+      if (callCtx.onRestart) {
+        addLog("info", "Triggering runtime restart...", "milaidy-api");
+        callCtx
+          .onRestart()
+          .then((newRuntime) => {
+            if (newRuntime) {
+              updateRuntime(newRuntime);
+              addLog("info", "Runtime restarted successfully", "milaidy-api");
+            } else {
+              addLog("warn", "Runtime restart returned null", "milaidy-api");
+            }
+          })
+          .catch((err) => {
+            addLog(
+              "error",
+              `Runtime restart failed: ${err instanceof Error ? err.message : err}`,
+              "milaidy-api",
+            );
+          });
+      }
+    }
 
     json(res, { ok: true, plugin });
     return;
@@ -1978,14 +2872,24 @@ async function handleRequest(
 
       json(res, { count: enriched.length, plugins: enriched });
     } catch (err) {
-      error(res, `Failed to fetch registry: ${err instanceof Error ? err.message : String(err)}`, 502);
+      error(
+        res,
+        `Failed to fetch registry: ${err instanceof Error ? err.message : String(err)}`,
+        502,
+      );
     }
     return;
   }
 
   // ── GET /api/registry/plugins/:name ─────────────────────────────────────
-  if (method === "GET" && pathname.startsWith("/api/registry/plugins/") && pathname.length > "/api/registry/plugins/".length) {
-    const name = decodeURIComponent(pathname.slice("/api/registry/plugins/".length));
+  if (
+    method === "GET" &&
+    pathname.startsWith("/api/registry/plugins/") &&
+    pathname.length > "/api/registry/plugins/".length
+  ) {
+    const name = decodeURIComponent(
+      pathname.slice("/api/registry/plugins/".length),
+    );
     const { getPluginInfo } = await import("../services/registry-client.js");
     const { listInstalledPlugins } = await import("../services/plugin-installer.js");
 
@@ -2000,7 +2904,11 @@ async function handleRequest(
       const enriched = await enrichRegistryPlugin(info as RegistryPluginLike, installedSet.has(info.name), true);
       json(res, { plugin: enriched });
     } catch (err) {
-      error(res, `Failed to look up plugin: ${err instanceof Error ? err.message : String(err)}`, 502);
+      error(
+        res,
+        `Failed to look up plugin: ${err instanceof Error ? err.message : String(err)}`,
+        502,
+      );
     }
     return;
   }
@@ -2017,11 +2925,17 @@ async function handleRequest(
 
     try {
       const limitParam = url.searchParams.get("limit");
-      const limit = limitParam ? Math.min(Math.max(Number(limitParam), 1), 50) : 15;
+      const limit = limitParam
+        ? Math.min(Math.max(Number(limitParam), 1), 50)
+        : 15;
       const results = await searchPlugins(query, limit);
       json(res, { query, count: results.length, results });
     } catch (err) {
-      error(res, `Search failed: ${err instanceof Error ? err.message : String(err)}`, 502);
+      error(
+        res,
+        `Search failed: ${err instanceof Error ? err.message : String(err)}`,
+        502,
+      );
     }
     return;
   }
@@ -2034,7 +2948,11 @@ async function handleRequest(
       const registry = await refreshRegistry();
       json(res, { ok: true, count: registry.size });
     } catch (err) {
-      error(res, `Refresh failed: ${err instanceof Error ? err.message : String(err)}`, 502);
+      error(
+        res,
+        `Refresh failed: ${err instanceof Error ? err.message : String(err)}`,
+        502,
+      );
     }
     return;
   }
@@ -2042,7 +2960,10 @@ async function handleRequest(
   // ── POST /api/plugins/install ───────────────────────────────────────────
   // Install a plugin from the registry and restart the agent.
   if (method === "POST" && pathname === "/api/plugins/install") {
-    const body = await readJsonBody<{ name: string; autoRestart?: boolean }>(req, res);
+    const body = await readJsonBody<{ name: string; autoRestart?: boolean }>(
+      req,
+      res,
+    );
     if (!body) return;
     const pluginName = body.name?.trim();
 
@@ -2068,8 +2989,12 @@ async function handleRequest(
         const { requestRestart } = await import("../runtime/restart.js");
         // Defer the restart so the HTTP response is sent first
         setTimeout(() => {
-          Promise.resolve(requestRestart(`Plugin ${result.pluginName} installed`)).catch((err) => {
-            logger.error(`[api] Restart after install failed: ${err instanceof Error ? err.message : String(err)}`);
+          Promise.resolve(
+            requestRestart(`Plugin ${result.pluginName} installed`),
+          ).catch((err) => {
+            logger.error(
+              `[api] Restart after install failed: ${err instanceof Error ? err.message : String(err)}`,
+            );
           });
         }, 500);
       }
@@ -2087,14 +3012,21 @@ async function handleRequest(
           : `${result.pluginName} installed.`,
       });
     } catch (err) {
-      error(res, `Install failed: ${err instanceof Error ? err.message : String(err)}`, 500);
+      error(
+        res,
+        `Install failed: ${err instanceof Error ? err.message : String(err)}`,
+        500,
+      );
     }
     return;
   }
 
   // ── POST /api/plugins/uninstall ─────────────────────────────────────────
   if (method === "POST" && pathname === "/api/plugins/uninstall") {
-    const body = await readJsonBody<{ name: string; autoRestart?: boolean }>(req, res);
+    const body = await readJsonBody<{ name: string; autoRestart?: boolean }>(
+      req,
+      res,
+    );
     if (!body) return;
     const pluginName = body.name?.trim();
 
@@ -2116,8 +3048,12 @@ async function handleRequest(
       if (body.autoRestart !== false && result.requiresRestart) {
         const { requestRestart } = await import("../runtime/restart.js");
         setTimeout(() => {
-          Promise.resolve(requestRestart(`Plugin ${pluginName} uninstalled`)).catch((err) => {
-            logger.error(`[api] Restart after uninstall failed: ${err instanceof Error ? err.message : String(err)}`);
+          Promise.resolve(
+            requestRestart(`Plugin ${pluginName} uninstalled`),
+          ).catch((err) => {
+            logger.error(
+              `[api] Restart after uninstall failed: ${err instanceof Error ? err.message : String(err)}`,
+            );
           });
         }, 500);
       }
@@ -2131,7 +3067,11 @@ async function handleRequest(
           : `${pluginName} uninstalled.`,
       });
     } catch (err) {
-      error(res, `Uninstall failed: ${err instanceof Error ? err.message : String(err)}`, 500);
+      error(
+        res,
+        `Uninstall failed: ${err instanceof Error ? err.message : String(err)}`,
+        500,
+      );
     }
     return;
   }
@@ -2139,13 +3079,321 @@ async function handleRequest(
   // ── GET /api/plugins/installed ──────────────────────────────────────────
   // List plugins that were installed from the registry at runtime.
   if (method === "GET" && pathname === "/api/plugins/installed") {
-    const { listInstalledPlugins } = await import("../services/plugin-installer.js");
+    const { listInstalledPlugins } = await import(
+      "../services/plugin-installer.js"
+    );
 
     try {
       const installed = await listInstalledPlugins();
       json(res, { count: installed.length, plugins: installed });
     } catch (err) {
-      error(res, `Failed to list installed plugins: ${err instanceof Error ? err.message : String(err)}`, 500);
+      error(
+        res,
+        `Failed to list installed plugins: ${err instanceof Error ? err.message : String(err)}`,
+        500,
+      );
+    }
+    return;
+  }
+
+  // ── GET /api/skills/catalog ───────────────────────────────────────────
+  // Browse the full skill catalog (paginated).
+  if (method === "GET" && pathname === "/api/skills/catalog") {
+    try {
+      const { getCatalogSkills } = await import(
+        "../services/skill-catalog-client.js"
+      );
+      const all = await getCatalogSkills();
+      const page = Math.max(1, Number(url.searchParams.get("page")) || 1);
+      const perPage = Math.min(
+        100,
+        Math.max(1, Number(url.searchParams.get("perPage")) || 50),
+      );
+      const sort = url.searchParams.get("sort") ?? "downloads";
+      const sorted = [...all];
+      if (sort === "downloads")
+        sorted.sort(
+          (a, b) =>
+            b.stats.downloads - a.stats.downloads || b.updatedAt - a.updatedAt,
+        );
+      else if (sort === "stars")
+        sorted.sort(
+          (a, b) => b.stats.stars - a.stats.stars || b.updatedAt - a.updatedAt,
+        );
+      else if (sort === "updated")
+        sorted.sort((a, b) => b.updatedAt - a.updatedAt);
+      else if (sort === "name")
+        sorted.sort((a, b) =>
+          (a.displayName ?? a.slug).localeCompare(b.displayName ?? b.slug),
+        );
+
+      // Resolve installed status from the AgentSkillsService
+      const installedSlugs = new Set<string>();
+      if (state.runtime) {
+        try {
+          const svc = state.runtime.getService("AGENT_SKILLS_SERVICE") as
+            | {
+                getLoadedSkills?: () => Array<{ slug: string; source: string }>;
+              }
+            | undefined;
+          if (svc && typeof svc.getLoadedSkills === "function") {
+            for (const s of svc.getLoadedSkills()) {
+              installedSlugs.add(s.slug);
+            }
+          }
+        } catch {
+          /* service may not be available */
+        }
+      }
+      // Also check locally discovered skills
+      for (const s of state.skills) {
+        installedSlugs.add(s.id);
+      }
+
+      const start = (page - 1) * perPage;
+      const skills = sorted.slice(start, start + perPage).map((s) => ({
+        ...s,
+        installed: installedSlugs.has(s.slug),
+      }));
+      json(res, {
+        total: all.length,
+        page,
+        perPage,
+        totalPages: Math.ceil(all.length / perPage),
+        installedCount: installedSlugs.size,
+        skills,
+      });
+    } catch (err) {
+      error(
+        res,
+        `Failed to load skill catalog: ${err instanceof Error ? err.message : String(err)}`,
+        500,
+      );
+    }
+    return;
+  }
+
+  // ── GET /api/skills/catalog/search ─────────────────────────────────────
+  if (method === "GET" && pathname === "/api/skills/catalog/search") {
+    const q = url.searchParams.get("q");
+    if (!q) {
+      error(res, "Missing query parameter ?q=", 400);
+      return;
+    }
+    try {
+      const { searchCatalogSkills } = await import(
+        "../services/skill-catalog-client.js"
+      );
+      const limit = Math.min(
+        100,
+        Math.max(1, Number(url.searchParams.get("limit")) || 30),
+      );
+      const results = await searchCatalogSkills(q, limit);
+      json(res, { query: q, count: results.length, results });
+    } catch (err) {
+      error(
+        res,
+        `Skill catalog search failed: ${err instanceof Error ? err.message : String(err)}`,
+        500,
+      );
+    }
+    return;
+  }
+
+  // ── GET /api/skills/catalog/:slug ──────────────────────────────────────
+  if (method === "GET" && pathname.startsWith("/api/skills/catalog/")) {
+    const slug = decodeURIComponent(
+      pathname.slice("/api/skills/catalog/".length),
+    );
+    // Exclude "search" which is handled above
+    if (slug && slug !== "search") {
+      try {
+        const { getCatalogSkill } = await import(
+          "../services/skill-catalog-client.js"
+        );
+        const skill = await getCatalogSkill(slug);
+        if (!skill) {
+          error(res, `Skill "${slug}" not found in catalog`, 404);
+          return;
+        }
+        json(res, { skill });
+      } catch (err) {
+        error(
+          res,
+          `Failed to fetch skill: ${err instanceof Error ? err.message : String(err)}`,
+          500,
+        );
+      }
+      return;
+    }
+  }
+
+  // ── POST /api/skills/catalog/refresh ───────────────────────────────────
+  if (method === "POST" && pathname === "/api/skills/catalog/refresh") {
+    try {
+      const { refreshCatalog } = await import(
+        "../services/skill-catalog-client.js"
+      );
+      const skills = await refreshCatalog();
+      json(res, { ok: true, count: skills.length });
+    } catch (err) {
+      error(
+        res,
+        `Catalog refresh failed: ${err instanceof Error ? err.message : String(err)}`,
+        500,
+      );
+    }
+    return;
+  }
+
+  // ── POST /api/skills/catalog/install ───────────────────────────────────
+  if (method === "POST" && pathname === "/api/skills/catalog/install") {
+    const body = await readJsonBody<{ slug: string; version?: string }>(
+      req,
+      res,
+    );
+    if (!body) return;
+    if (!body.slug) {
+      error(res, "Missing required field: slug", 400);
+      return;
+    }
+
+    if (!state.runtime) {
+      error(res, "Agent runtime not available — start the agent first", 503);
+      return;
+    }
+
+    try {
+      // eslint-disable-next-line -- service is loosely typed; cast via unknown
+      const service = state.runtime.getService("AGENT_SKILLS_SERVICE") as
+        | {
+            install?: (
+              slug: string,
+              opts?: { version?: string; force?: boolean },
+            ) => Promise<boolean>;
+            isInstalled?: (slug: string) => Promise<boolean>;
+          }
+        | undefined;
+
+      if (!service || typeof service.install !== "function") {
+        error(
+          res,
+          "AgentSkillsService not available — ensure @elizaos/plugin-agent-skills is loaded",
+          501,
+        );
+        return;
+      }
+
+      const alreadyInstalled =
+        typeof service.isInstalled === "function"
+          ? await service.isInstalled(body.slug)
+          : false;
+
+      if (alreadyInstalled) {
+        json(res, {
+          ok: true,
+          slug: body.slug,
+          message: `Skill "${body.slug}" is already installed`,
+          alreadyInstalled: true,
+        });
+        return;
+      }
+
+      const success = await service.install(body.slug, {
+        version: body.version,
+      });
+
+      if (success) {
+        // Refresh the skills list so the UI picks up the new skill
+        const workspaceDir =
+          state.config.agents?.defaults?.workspace ??
+          resolveDefaultAgentWorkspaceDir();
+        state.skills = await discoverSkills(
+          workspaceDir,
+          state.config,
+          state.runtime,
+        );
+
+        json(res, {
+          ok: true,
+          slug: body.slug,
+          message: `Skill "${body.slug}" installed successfully`,
+        });
+      } else {
+        error(res, `Failed to install skill "${body.slug}"`, 500);
+      }
+    } catch (err) {
+      error(
+        res,
+        `Skill install failed: ${err instanceof Error ? err.message : String(err)}`,
+        500,
+      );
+    }
+    return;
+  }
+
+  // ── POST /api/skills/catalog/uninstall ─────────────────────────────────
+  if (method === "POST" && pathname === "/api/skills/catalog/uninstall") {
+    const body = await readJsonBody<{ slug: string }>(req, res);
+    if (!body) return;
+    if (!body.slug) {
+      error(res, "Missing required field: slug", 400);
+      return;
+    }
+
+    if (!state.runtime) {
+      error(res, "Agent runtime not available — start the agent first", 503);
+      return;
+    }
+
+    try {
+      // eslint-disable-next-line -- service is loosely typed; cast via unknown
+      const service = state.runtime.getService("AGENT_SKILLS_SERVICE") as
+        | {
+            uninstall?: (slug: string) => Promise<boolean>;
+          }
+        | undefined;
+
+      if (!service || typeof service.uninstall !== "function") {
+        error(
+          res,
+          "AgentSkillsService not available — ensure @elizaos/plugin-agent-skills is loaded",
+          501,
+        );
+        return;
+      }
+
+      const success = await service.uninstall(body.slug);
+
+      if (success) {
+        // Refresh the skills list
+        const workspaceDir =
+          state.config.agents?.defaults?.workspace ??
+          resolveDefaultAgentWorkspaceDir();
+        state.skills = await discoverSkills(
+          workspaceDir,
+          state.config,
+          state.runtime,
+        );
+
+        json(res, {
+          ok: true,
+          slug: body.slug,
+          message: `Skill "${body.slug}" uninstalled successfully`,
+        });
+      } else {
+        error(
+          res,
+          `Failed to uninstall skill "${body.slug}" — it may be a bundled skill`,
+          400,
+        );
+      }
+    } catch (err) {
+      error(
+        res,
+        `Skill uninstall failed: ${err instanceof Error ? err.message : String(err)}`,
+        500,
+      );
     }
     return;
   }
@@ -2159,11 +3407,21 @@ async function handleRequest(
   // ── POST /api/skills/refresh ──────────────────────────────────────────
   if (method === "POST" && pathname === "/api/skills/refresh") {
     try {
-      const workspaceDir = state.config.agents?.defaults?.workspace ?? resolveDefaultAgentWorkspaceDir();
-      state.skills = await discoverSkills(workspaceDir, state.config, state.runtime);
+      const workspaceDir =
+        state.config.agents?.defaults?.workspace ??
+        resolveDefaultAgentWorkspaceDir();
+      state.skills = await discoverSkills(
+        workspaceDir,
+        state.config,
+        state.runtime,
+      );
       json(res, { ok: true, skills: state.skills });
     } catch (err) {
-      error(res, `Failed to refresh skills: ${err instanceof Error ? err.message : err}`, 500);
+      error(
+        res,
+        `Failed to refresh skills: ${err instanceof Error ? err.message : err}`,
+        500,
+      );
     }
     return;
   }
@@ -2556,7 +3814,8 @@ async function handleRequest(
     let entries = state.logBuffer;
 
     const sourceFilter = url.searchParams.get("source");
-    if (sourceFilter) entries = entries.filter((e) => e.source === sourceFilter);
+    if (sourceFilter)
+      entries = entries.filter((e) => e.source === sourceFilter);
 
     const levelFilter = url.searchParams.get("level");
     if (levelFilter) entries = entries.filter((e) => e.level === levelFilter);
@@ -2564,7 +3823,8 @@ async function handleRequest(
     const sinceFilter = url.searchParams.get("since");
     if (sinceFilter) {
       const sinceTs = Number(sinceFilter);
-      if (!Number.isNaN(sinceTs)) entries = entries.filter((e) => e.timestamp >= sinceTs);
+      if (!Number.isNaN(sinceTs))
+        entries = entries.filter((e) => e.timestamp >= sinceTs);
     }
 
     const sources = [...new Set(state.logBuffer.map((e) => e.source))].sort();
@@ -2591,7 +3851,13 @@ async function handleRequest(
     let extensionPath: string | null = null;
     try {
       const serverDir = path.dirname(new URL(import.meta.url).pathname);
-      extensionPath = path.resolve(serverDir, "..", "..", "apps", "chrome-extension");
+      extensionPath = path.resolve(
+        serverDir,
+        "..",
+        "..",
+        "apps",
+        "chrome-extension",
+      );
       if (!fs.existsSync(extensionPath)) extensionPath = null;
     } catch {
       // ignore
@@ -2631,7 +3897,10 @@ async function handleRequest(
 
     if (addrs.solanaAddress && heliusKey) {
       try {
-        const solData = await fetchSolanaBalances(addrs.solanaAddress, heliusKey);
+        const solData = await fetchSolanaBalances(
+          addrs.solanaAddress,
+          heliusKey,
+        );
         result.solana = { address: addrs.solanaAddress, ...solData };
       } catch (err) {
         logger.warn(`[wallet] Solana balance fetch failed: ${err}`);
@@ -2674,7 +3943,10 @@ async function handleRequest(
   // ── POST /api/wallet/import ──────────────────────────────────────────
   // Import a wallet by providing a private key + chain.
   if (method === "POST" && pathname === "/api/wallet/import") {
-    const body = await readJsonBody<{ chain?: string; privateKey?: string }>(req, res);
+    const body = await readJsonBody<{ chain?: string; privateKey?: string }>(
+      req,
+      res,
+    );
     if (!body) return;
 
     if (!body.privateKey?.trim()) {
@@ -2687,7 +3959,10 @@ async function handleRequest(
     if (body.chain === "evm" || body.chain === "solana") {
       chain = body.chain;
     } else if (body.chain) {
-      error(res, `Unsupported chain: ${body.chain}. Must be "evm" or "solana".`);
+      error(
+        res,
+        `Unsupported chain: ${body.chain}. Must be "evm" or "solana".`,
+      );
       return;
     } else {
       // Auto-detect from key format
@@ -2705,7 +3980,8 @@ async function handleRequest(
     // Persist to config.env so it survives restarts
     if (!state.config.env) state.config.env = {};
     const envKey = chain === "evm" ? "EVM_PRIVATE_KEY" : "SOLANA_PRIVATE_KEY";
-    (state.config.env as Record<string, string>)[envKey] = process.env[envKey]!;
+    (state.config.env as Record<string, string>)[envKey] =
+      process.env[envKey] ?? "";
 
     try {
       saveMilaidyConfig(state.config);
@@ -2731,7 +4007,10 @@ async function handleRequest(
     const validChains: Array<WalletChain | "both"> = ["evm", "solana", "both"];
 
     if (chain && !validChains.includes(chain as WalletChain | "both")) {
-      error(res, `Unsupported chain: ${chain}. Must be "evm", "solana", or "both".`);
+      error(
+        res,
+        `Unsupported chain: ${chain}. Must be "evm", "solana", or "both".`,
+      );
       return;
     }
 
@@ -2744,7 +4023,8 @@ async function handleRequest(
     if (targetChain === "both" || targetChain === "evm") {
       const result = generateWalletForChain("evm");
       process.env.EVM_PRIVATE_KEY = result.privateKey;
-      (state.config.env as Record<string, string>).EVM_PRIVATE_KEY = result.privateKey;
+      (state.config.env as Record<string, string>).EVM_PRIVATE_KEY =
+        result.privateKey;
       generated.push({ chain: "evm", address: result.address });
       logger.info(`[milaidy-api] Generated EVM wallet: ${result.address}`);
     }
@@ -2752,7 +4032,8 @@ async function handleRequest(
     if (targetChain === "both" || targetChain === "solana") {
       const result = generateWalletForChain("solana");
       process.env.SOLANA_PRIVATE_KEY = result.privateKey;
-      (state.config.env as Record<string, string>).SOLANA_PRIVATE_KEY = result.privateKey;
+      (state.config.env as Record<string, string>).SOLANA_PRIVATE_KEY =
+        result.privateKey;
       generated.push({ chain: "solana", address: result.address });
       logger.info(`[milaidy-api] Generated Solana wallet: ${result.address}`);
     }
@@ -2786,7 +4067,11 @@ async function handleRequest(
   if (method === "PUT" && pathname === "/api/wallet/config") {
     const body = await readJsonBody<Record<string, string>>(req, res);
     if (!body) return;
-    const allowedKeys = ["ALCHEMY_API_KEY", "HELIUS_API_KEY", "BIRDEYE_API_KEY"];
+    const allowedKeys = [
+      "ALCHEMY_API_KEY",
+      "HELIUS_API_KEY",
+      "BIRDEYE_API_KEY",
+    ];
 
     if (!state.config.env) state.config.env = {};
 
@@ -2840,7 +4125,9 @@ async function handleRequest(
 
     json(res, {
       evm: evmKey ? { privateKey: evmKey, address: addrs.evmAddress } : null,
-      solana: solKey ? { privateKey: solKey, address: addrs.solanaAddress } : null,
+      solana: solKey
+        ? { privateKey: solKey, address: addrs.solanaAddress }
+        : null,
     });
     return;
   }
@@ -2865,11 +4152,68 @@ async function handleRequest(
     return;
   }
 
+  // ── Cloud routes (/api/cloud/*) ─────────────────────────────────────────
+  if (pathname.startsWith("/api/cloud/")) {
+    const cloudState: CloudRouteState = {
+      config: state.config,
+      cloudManager: state.cloudManager,
+    };
+    const handled = await handleCloudRoute(
+      req,
+      res,
+      pathname,
+      method,
+      cloudState,
+    );
+    if (handled) return;
+  }
+
   // ── POST /api/chat ──────────────────────────────────────────────────────
   // Routes messages through the full ElizaOS message pipeline so the agent
   // has conversation memory, context, and always responds (DM + client_chat
   // bypass the shouldRespond LLM evaluation).
+  //
+  // Cloud mode: when a cloud proxy is active, messages are forwarded to the
+  // remote sandbox instead of the local runtime.  Supports SSE streaming
+  // when the client sends Accept: text/event-stream.
   if (method === "POST" && pathname === "/api/chat") {
+    // ── Cloud proxy path ───────────────────────────────────────────────
+    const proxy = state.cloudManager?.getProxy();
+    if (proxy) {
+      const body = await readJsonBody<{ text?: string }>(req, res);
+      if (!body) return;
+      if (!body.text?.trim()) {
+        error(res, "text is required");
+        return;
+      }
+
+      const wantsStream = (req.headers.accept ?? "").includes(
+        "text/event-stream",
+      );
+
+      if (wantsStream) {
+        res.writeHead(200, {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache, no-transform",
+          Connection: "keep-alive",
+          "X-Accel-Buffering": "no",
+        });
+
+        for await (const chunk of proxy.handleChatMessageStream(
+          body.text.trim(),
+        )) {
+          res.write(`data: ${JSON.stringify({ text: chunk })}\n\n`);
+        }
+        res.write(`event: done\ndata: {}\n\n`);
+        res.end();
+      } else {
+        const responseText = await proxy.handleChatMessage(body.text.trim());
+        json(res, { text: responseText, agentName: proxy.agentName });
+      }
+      return;
+    }
+
+    // ── Local runtime path (existing code below) ───────────────────────
     const body = await readJsonBody<{ text?: string }>(req, res);
     if (!body) return;
     if (!body.text?.trim()) {
@@ -2928,7 +4272,10 @@ async function handleRequest(
         },
       );
 
-      json(res, { text: responseText || "(no response)", agentName: state.agentName });
+      json(res, {
+        text: responseText || "(no response)",
+        agentName: state.agentName,
+      });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "generation failed";
       error(res, msg, 500);
@@ -2936,6 +4283,82 @@ async function handleRequest(
     return;
   }
 
+  // ── Database management API ─────────────────────────────────────────────
+  if (pathname.startsWith("/api/database/")) {
+    const handled = await handleDatabaseRoute(
+      req,
+      res,
+      state.runtime,
+      pathname,
+    );
+    if (handled) return;
+  }
+
+  // ── GET /api/cloud/status ─────────────────────────────────────────────
+  if (method === "GET" && pathname === "/api/cloud/status") {
+    const rt = state.runtime;
+    if (!rt) {
+      json(res, { connected: false, reason: "runtime_not_started" });
+      return;
+    }
+    const cloudAuth = rt.getService("CLOUD_AUTH") as {
+      isAuthenticated: () => boolean;
+      getUserId: () => string | undefined;
+      getOrganizationId: () => string | undefined;
+    } | null;
+    if (!cloudAuth || !cloudAuth.isAuthenticated()) {
+      json(res, { connected: false, reason: "not_authenticated" });
+      return;
+    }
+    json(res, {
+      connected: true,
+      userId: cloudAuth.getUserId(),
+      organizationId: cloudAuth.getOrganizationId(),
+      topUpUrl: "https://www.elizacloud.ai/dashboard/billing",
+    });
+    return;
+  }
+
+  // ── GET /api/cloud/credits ──────────────────────────────────────────────
+  if (method === "GET" && pathname === "/api/cloud/credits") {
+    const rt = state.runtime;
+    if (!rt) {
+      json(res, { balance: null, connected: false });
+      return;
+    }
+    const cloudAuth = rt.getService("CLOUD_AUTH") as {
+      isAuthenticated: () => boolean;
+      getClient: () => { get: <T>(path: string) => Promise<T> };
+    } | null;
+    if (!cloudAuth || !cloudAuth.isAuthenticated()) {
+      json(res, { balance: null, connected: false });
+      return;
+    }
+    let balance: number;
+    const client = cloudAuth.getClient();
+    try {
+      const creditResponse = await client.get<{
+        success: boolean;
+        data: { balance: number; currency: string };
+      }>("/credits/balance");
+      balance = creditResponse.data.balance;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "cloud API unreachable";
+      logger.warn(`[cloud/credits] Failed to fetch balance: ${msg}`);
+      json(res, { balance: null, connected: true, error: msg });
+      return;
+    }
+    const low = balance < 2.0;
+    const critical = balance < 0.5;
+    json(res, {
+      connected: true,
+      balance,
+      low,
+      critical,
+      topUpUrl: "https://www.elizacloud.ai/dashboard/billing",
+    });
+    return;
+  }
   // ── Fallback ────────────────────────────────────────────────────────────
   error(res, "Not found", 404);
 }
@@ -2953,27 +4376,40 @@ export async function startApiServer(opts?: {
    * If omitted the endpoint returns 501 (not supported in this mode).
    */
   onRestart?: () => Promise<AgentRuntime | null>;
-}): Promise<{ port: number; close: () => Promise<void>; updateRuntime: (rt: AgentRuntime) => void }> {
+}): Promise<{
+  port: number;
+  close: () => Promise<void>;
+  updateRuntime: (rt: AgentRuntime) => void;
+}> {
   const port = opts?.port ?? 2138;
+  const host =
+    (process.env.MILAIDY_API_BIND ?? "127.0.0.1").trim() || "127.0.0.1";
 
   let config: MilaidyConfig;
   try {
     config = loadMilaidyConfig();
   } catch (err) {
-    logger.warn(`[milaidy-api] Failed to load config, starting with defaults: ${err instanceof Error ? err.message : err}`);
+    logger.warn(
+      `[milaidy-api] Failed to load config, starting with defaults: ${err instanceof Error ? err.message : err}`,
+    );
     config = {} as MilaidyConfig;
   }
 
   const plugins = discoverPluginsFromManifest();
-  const workspaceDir = config.agents?.defaults?.workspace ?? resolveDefaultAgentWorkspaceDir();
-  const skills = await discoverSkills(workspaceDir, config, opts?.runtime ?? null);
+  const workspaceDir =
+    config.agents?.defaults?.workspace ?? resolveDefaultAgentWorkspaceDir();
+  const skills = await discoverSkills(
+    workspaceDir,
+    config,
+    opts?.runtime ?? null,
+  );
 
   const hasRuntime = opts?.runtime != null;
   const agentName = hasRuntime
     ? (opts.runtime!.character.name ?? "Milaidy")
-    : (config.agents?.list?.[0]?.name
-      ?? config.ui?.assistant?.name
-      ?? "Milaidy");
+    : (config.agents?.list?.[0]?.name ??
+      config.ui?.assistant?.name ??
+      "Milaidy");
 
   const state: ServerState = {
     runtime: opts?.runtime ?? null,
@@ -2990,17 +4426,37 @@ export async function startApiServer(opts?: {
     shareInbox: [],
   };
 
+  // ── Cloud Manager initialisation ──────────────────────────────────────
+  if (config.cloud?.enabled && config.cloud?.apiKey) {
+    const mgr = new CloudManager(config.cloud, {
+      onStatusChange: (s) => {
+        addLog("info", `Cloud connection status: ${s}`, "cloud");
+      },
+    });
+    mgr.init();
+    state.cloudManager = mgr;
+    addLog("info", "Cloud manager initialised (ELIZA Cloud enabled)", "cloud");
+  }
+
   const addLog = (level: string, message: string, source = "system") => {
     let resolvedSource = source;
     if (source === "auto" || source === "system") {
       const bracketMatch = /^\[([^\]]+)\]\s*/.exec(message);
       if (bracketMatch) resolvedSource = bracketMatch[1];
     }
-    state.logBuffer.push({ timestamp: Date.now(), level, message, source: resolvedSource });
+    state.logBuffer.push({
+      timestamp: Date.now(),
+      level,
+      message,
+      source: resolvedSource,
+    });
     if (state.logBuffer.length > 1000) state.logBuffer.shift();
   };
 
-  addLog("info", `Discovered ${plugins.length} plugins, ${skills.length} skills`);
+  addLog(
+    "info",
+    `Discovered ${plugins.length} plugins, ${skills.length} skills`,
+  );
 
   // ── Intercept runtime logger so all plugin/autonomy logs appear in the UI ─
   // Guard against double-patching: if the logger was already patched (e.g.
@@ -3017,7 +4473,7 @@ export async function startApiServer(opts?: {
     for (const lvl of LEVELS) {
       const original = rtLogger[lvl].bind(rtLogger);
       // pino signature: logger.info(obj, msg) or logger.info(msg)
-      const patched: typeof rtLogger[typeof lvl] = (
+      const patched: (typeof rtLogger)[typeof lvl] = (
         ...args: Parameters<typeof original>
       ) => {
         let msg = "";
@@ -3036,7 +4492,11 @@ export async function startApiServer(opts?: {
     }
 
     (rtLogger as Record<string, unknown>)[PATCHED_MARKER] = true;
-    addLog("info", "Runtime logger connected — logs will stream to the UI", "system");
+    addLog(
+      "info",
+      "Runtime logger connected — logs will stream to the UI",
+      "system",
+    );
   }
 
   // Autonomy is managed by the core AutonomyService + TaskService.
@@ -3044,7 +4504,11 @@ export async function startApiServer(opts?: {
   // TaskService picks up and executes on its 1 s polling interval.
   // enableAutonomy: true on the runtime auto-creates the task during init.
   if (opts?.runtime) {
-    addLog("info", "Autonomy is always enabled — managed by the core task system", "autonomy");
+    addLog(
+      "info",
+      "Autonomy is always enabled — managed by the core task system",
+      "autonomy",
+    );
   }
 
   // Store the restart callback on the state so the route handler can access it.
@@ -3060,6 +4524,111 @@ export async function startApiServer(opts?: {
     }
   });
 
+  // ── WebSocket Server ─────────────────────────────────────────────────────
+  const wss = new WebSocketServer({ noServer: true });
+  const wsClients = new Set<WebSocket>();
+
+  // Handle upgrade requests for WebSocket
+  server.on("upgrade", (request, socket, head) => {
+    try {
+      const { pathname } = new URL(
+        request.url ?? "/",
+        `http://${request.headers.host}`,
+      );
+      if (pathname === "/ws") {
+        wss.handleUpgrade(request, socket, head, (ws) => {
+          wss.emit("connection", ws, request);
+        });
+      } else {
+        socket.destroy();
+      }
+    } catch (err) {
+      logger.error(
+        `[milaidy-api] WebSocket upgrade error: ${err instanceof Error ? err.message : err}`,
+      );
+      socket.destroy();
+    }
+  });
+
+  // Handle WebSocket connections
+  wss.on("connection", (ws: WebSocket) => {
+    wsClients.add(ws);
+    addLog("info", "WebSocket client connected", "websocket");
+
+    // Send initial status
+    try {
+      ws.send(
+        JSON.stringify({
+          type: "status",
+          data: {
+            agentState: state.agentState,
+            agentName: state.agentName,
+            model: state.model,
+            startedAt: state.startedAt,
+          },
+        }),
+      );
+    } catch (err) {
+      logger.error(
+        `[milaidy-api] WebSocket send error: ${err instanceof Error ? err.message : err}`,
+      );
+    }
+
+    ws.on("message", (data) => {
+      try {
+        const msg = JSON.parse(data.toString());
+        if (msg.type === "ping") {
+          ws.send(JSON.stringify({ type: "pong" }));
+        }
+      } catch (err) {
+        logger.error(
+          `[milaidy-api] WebSocket message error: ${err instanceof Error ? err.message : err}`,
+        );
+      }
+    });
+
+    ws.on("close", () => {
+      wsClients.delete(ws);
+      addLog("info", "WebSocket client disconnected", "websocket");
+    });
+
+    ws.on("error", (err) => {
+      logger.error(
+        `[milaidy-api] WebSocket error: ${err instanceof Error ? err.message : err}`,
+      );
+      wsClients.delete(ws);
+    });
+  });
+
+  // Broadcast status to all connected WebSocket clients
+  const broadcastStatus = () => {
+    const statusData = {
+      type: "status",
+      data: {
+        agentState: state.agentState,
+        agentName: state.agentName,
+        model: state.model,
+        startedAt: state.startedAt,
+      },
+    };
+    const message = JSON.stringify(statusData);
+    for (const client of wsClients) {
+      if (client.readyState === 1) {
+        // OPEN
+        try {
+          client.send(message);
+        } catch (err) {
+          logger.error(
+            `[milaidy-api] WebSocket broadcast error: ${err instanceof Error ? err.message : err}`,
+          );
+        }
+      }
+    }
+  };
+
+  // Broadcast status every 5 seconds
+  const statusInterval = setInterval(broadcastStatus, 5000);
+
   /** Hot-swap the runtime reference (used after an in-process restart). */
   const updateRuntime = (rt: AgentRuntime): void => {
     state.runtime = rt;
@@ -3067,17 +4636,31 @@ export async function startApiServer(opts?: {
     state.agentName = rt.character.name ?? "Milaidy";
     state.startedAt = Date.now();
     addLog("info", `Runtime restarted — agent: ${state.agentName}`, "system");
+    // Broadcast status update immediately after restart
+    broadcastStatus();
   };
 
   return new Promise((resolve) => {
-    server.listen(port, () => {
+    server.listen(port, host, () => {
       const addr = server.address();
       const actualPort = typeof addr === "object" && addr ? addr.port : port;
-      addLog("info", `API server listening on http://localhost:${actualPort}`);
-      logger.info(`[milaidy-api] Listening on http://localhost:${actualPort}`);
+      const displayHost =
+        typeof addr === "object" && addr ? addr.address : host;
+      addLog(
+        "info",
+        `API server listening on http://${displayHost}:${actualPort}`,
+      );
+      logger.info(
+        `[milaidy-api] Listening on http://${displayHost}:${actualPort}`,
+      );
       resolve({
         port: actualPort,
-        close: () => new Promise<void>((r) => { server.close(() => r()); }),
+        close: () =>
+          new Promise<void>((r) => {
+            clearInterval(statusInterval);
+            wss.close();
+            server.close(() => r());
+          }),
         updateRuntime,
       });
     });

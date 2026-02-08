@@ -12,6 +12,7 @@ const CHANNEL_IDS = [
   "msteams",
   "googlechat",
 ] as const;
+
 import { MilaidySchema } from "./zod-schema.js";
 
 export type ConfigUiHint = {
@@ -44,7 +45,10 @@ export type PluginUiMetadata = {
   description?: string;
   configUiHints?: Record<
     string,
-    Pick<ConfigUiHint, "label" | "help" | "advanced" | "sensitive" | "placeholder">
+    Pick<
+      ConfigUiHint,
+      "label" | "help" | "advanced" | "sensitive" | "placeholder"
+    >
   >;
   configSchema?: JsonSchemaNode;
 };
@@ -194,8 +198,10 @@ const FIELD_LABELS: Record<string, string> = {
   "tools.exec.pathPrepend": "Exec PATH Prepend",
   "tools.exec.safeBins": "Exec Safe Bins",
   "tools.message.allowCrossContextSend": "Allow Cross-Context Messaging",
-  "tools.message.crossContext.allowWithinProvider": "Allow Cross-Context (Same Provider)",
-  "tools.message.crossContext.allowAcrossProviders": "Allow Cross-Context (Across Providers)",
+  "tools.message.crossContext.allowWithinProvider":
+    "Allow Cross-Context (Same Provider)",
+  "tools.message.crossContext.allowAcrossProviders":
+    "Allow Cross-Context (Across Providers)",
   "tools.message.crossContext.marker.enabled": "Cross-Context Marker",
   "tools.message.crossContext.marker.prefix": "Cross-Context Marker Prefix",
   "tools.message.crossContext.marker.suffix": "Cross-Context Marker Suffix",
@@ -216,8 +222,10 @@ const FIELD_LABELS: Record<string, string> = {
   "gateway.controlUi.root": "Control UI Assets Root",
   "gateway.controlUi.allowedOrigins": "Control UI Allowed Origins",
   "gateway.controlUi.allowInsecureAuth": "Allow Insecure Control UI Auth",
-  "gateway.controlUi.dangerouslyDisableDeviceAuth": "Dangerously Disable Control UI Device Auth",
-  "gateway.http.endpoints.chatCompletions.enabled": "OpenAI Chat Completions Endpoint",
+  "gateway.controlUi.dangerouslyDisableDeviceAuth":
+    "Dangerously Disable Control UI Device Auth",
+  "gateway.http.endpoints.chatCompletions.enabled":
+    "OpenAI Chat Completions Endpoint",
   "gateway.reload.mode": "Config Reload Mode",
   "gateway.reload.debounceMs": "Config Reload Debounce (ms)",
   "gateway.nodes.browser.mode": "Gateway Node Browser Mode",
@@ -244,30 +252,40 @@ const FIELD_LABELS: Record<string, string> = {
   "agents.defaults.memorySearch.remote.baseUrl": "Remote Embedding Base URL",
   "agents.defaults.memorySearch.remote.apiKey": "Remote Embedding API Key",
   "agents.defaults.memorySearch.remote.headers": "Remote Embedding Headers",
-  "agents.defaults.memorySearch.remote.batch.concurrency": "Remote Batch Concurrency",
+  "agents.defaults.memorySearch.remote.batch.concurrency":
+    "Remote Batch Concurrency",
   "agents.defaults.memorySearch.model": "Memory Search Model",
   "agents.defaults.memorySearch.fallback": "Memory Search Fallback",
   "agents.defaults.memorySearch.local.modelPath": "Local Embedding Model Path",
   "agents.defaults.memorySearch.store.path": "Memory Search Index Path",
-  "agents.defaults.memorySearch.store.vector.enabled": "Memory Search Vector Index",
-  "agents.defaults.memorySearch.store.vector.extensionPath": "Memory Search Vector Extension Path",
+  "agents.defaults.memorySearch.store.vector.enabled":
+    "Memory Search Vector Index",
+  "agents.defaults.memorySearch.store.vector.extensionPath":
+    "Memory Search Vector Extension Path",
   "agents.defaults.memorySearch.chunking.tokens": "Memory Chunk Tokens",
-  "agents.defaults.memorySearch.chunking.overlap": "Memory Chunk Overlap Tokens",
+  "agents.defaults.memorySearch.chunking.overlap":
+    "Memory Chunk Overlap Tokens",
   "agents.defaults.memorySearch.sync.onSessionStart": "Index on Session Start",
   "agents.defaults.memorySearch.sync.onSearch": "Index on Search (Lazy)",
   "agents.defaults.memorySearch.sync.watch": "Watch Memory Files",
-  "agents.defaults.memorySearch.sync.watchDebounceMs": "Memory Watch Debounce (ms)",
-  "agents.defaults.memorySearch.sync.sessions.deltaBytes": "Session Delta Bytes",
-  "agents.defaults.memorySearch.sync.sessions.deltaMessages": "Session Delta Messages",
+  "agents.defaults.memorySearch.sync.watchDebounceMs":
+    "Memory Watch Debounce (ms)",
+  "agents.defaults.memorySearch.sync.sessions.deltaBytes":
+    "Session Delta Bytes",
+  "agents.defaults.memorySearch.sync.sessions.deltaMessages":
+    "Session Delta Messages",
   "agents.defaults.memorySearch.query.maxResults": "Memory Search Max Results",
   "agents.defaults.memorySearch.query.minScore": "Memory Search Min Score",
   "agents.defaults.memorySearch.query.hybrid.enabled": "Memory Search Hybrid",
-  "agents.defaults.memorySearch.query.hybrid.vectorWeight": "Memory Search Vector Weight",
-  "agents.defaults.memorySearch.query.hybrid.textWeight": "Memory Search Text Weight",
+  "agents.defaults.memorySearch.query.hybrid.vectorWeight":
+    "Memory Search Vector Weight",
+  "agents.defaults.memorySearch.query.hybrid.textWeight":
+    "Memory Search Text Weight",
   "agents.defaults.memorySearch.query.hybrid.candidateMultiplier":
     "Memory Search Hybrid Candidate Multiplier",
   "agents.defaults.memorySearch.cache.enabled": "Memory Search Embedding Cache",
-  "agents.defaults.memorySearch.cache.maxEntries": "Memory Search Embedding Cache Max Entries",
+  "agents.defaults.memorySearch.cache.maxEntries":
+    "Memory Search Embedding Cache Max Entries",
   memory: "Memory",
   "memory.backend": "Memory Backend",
   "memory.citations": "Memory Citations Mode",
@@ -342,7 +360,8 @@ const FIELD_LABELS: Record<string, string> = {
   "channels.telegram.streamMode": "Telegram Draft Stream Mode",
   "channels.telegram.draftChunk.minChars": "Telegram Draft Chunk Min Chars",
   "channels.telegram.draftChunk.maxChars": "Telegram Draft Chunk Max Chars",
-  "channels.telegram.draftChunk.breakPreference": "Telegram Draft Chunk Break Preference",
+  "channels.telegram.draftChunk.breakPreference":
+    "Telegram Draft Chunk Break Preference",
   "channels.telegram.retry.attempts": "Telegram Retry Attempts",
   "channels.telegram.retry.minDelayMs": "Telegram Retry Min Delay (ms)",
   "channels.telegram.retry.maxDelayMs": "Telegram Retry Max Delay (ms)",
@@ -406,14 +425,17 @@ const FIELD_LABELS: Record<string, string> = {
 const FIELD_HELP: Record<string, string> = {
   "meta.lastTouchedVersion": "Auto-set when Milaidy writes the config.",
   "meta.lastTouchedAt": "ISO timestamp of the last config write (auto-set).",
-  "update.channel": 'Update channel for git + npm installs ("stable", "beta", or "dev").',
-  "update.checkOnStart": "Check for npm updates when the gateway starts (default: true).",
+  "update.channel":
+    'Update channel for git + npm installs ("stable", "beta", or "dev").',
+  "update.checkOnStart":
+    "Check for npm updates when the gateway starts (default: true).",
   "gateway.remote.url": "Remote Gateway WebSocket URL (ws:// or wss://).",
   "gateway.remote.tlsFingerprint":
     "Expected sha256 TLS fingerprint for the remote gateway (pin to avoid MITM).",
   "gateway.remote.sshTarget":
     "Remote gateway over SSH (tunnels the gateway port to localhost). Format: user@host or user@host:port.",
-  "gateway.remote.sshIdentity": "Optional SSH identity file path (passed to ssh -i).",
+  "gateway.remote.sshIdentity":
+    "Optional SSH identity file path (passed to ssh -i).",
   "agents.list.*.skills":
     "Optional allowlist of skills for this agent (omit = all skills; empty = no skills).",
   "agents.list[].skills":
@@ -437,16 +459,20 @@ const FIELD_HELP: Record<string, string> = {
     "DANGEROUS. Disable Control UI device identity checks (token/password only).",
   "gateway.http.endpoints.chatCompletions.enabled":
     "Enable the OpenAI-compatible `POST /v1/chat/completions` endpoint (default: false).",
-  "gateway.reload.mode": 'Hot reload strategy for config changes ("hybrid" recommended).',
-  "gateway.reload.debounceMs": "Debounce window (ms) before applying config changes.",
+  "gateway.reload.mode":
+    'Hot reload strategy for config changes ("hybrid" recommended).',
+  "gateway.reload.debounceMs":
+    "Debounce window (ms) before applying config changes.",
   "gateway.nodes.browser.mode":
     'Node browser routing ("auto" = pick single connected browser node, "manual" = require node param, "off" = disable).',
-  "gateway.nodes.browser.node": "Pin browser routing to a specific node id or name (optional).",
+  "gateway.nodes.browser.node":
+    "Pin browser routing to a specific node id or name (optional).",
   "gateway.nodes.allowCommands":
     "Extra node.invoke commands to allow beyond the gateway defaults (array of command strings).",
   "gateway.nodes.denyCommands":
     "Commands to block even if present in node claims or default allowlist.",
-  "nodeHost.browserProxy.enabled": "Expose the local browser control server via node proxy.",
+  "nodeHost.browserProxy.enabled":
+    "Expose the local browser control server via node proxy.",
   "nodeHost.browserProxy.allowProfiles":
     "Optional allowlist of browser profile names exposed via the node proxy.",
   "diagnostics.flags":
@@ -457,15 +483,18 @@ const FIELD_HELP: Record<string, string> = {
     "JSONL output path for cache trace logs (default: $MILAIDY_STATE_DIR/logs/cache-trace.jsonl).",
   "diagnostics.cacheTrace.includeMessages":
     "Include full message payloads in trace output (default: true).",
-  "diagnostics.cacheTrace.includePrompt": "Include prompt text in trace output (default: true).",
-  "diagnostics.cacheTrace.includeSystem": "Include system prompt in trace output (default: true).",
+  "diagnostics.cacheTrace.includePrompt":
+    "Include prompt text in trace output (default: true).",
+  "diagnostics.cacheTrace.includeSystem":
+    "Include system prompt in trace output (default: true).",
   "tools.exec.applyPatch.enabled":
     "Experimental. Enables apply_patch for OpenAI models when allowed by tool policy.",
   "tools.exec.applyPatch.allowModels":
     'Optional allowlist of model ids (e.g. "gpt-5.2" or "openai/gpt-5.2").',
   "tools.exec.notifyOnExit":
     "When true (default), backgrounded exec sessions enqueue a system event and request a heartbeat on exit.",
-  "tools.exec.pathPrepend": "Directories to prepend to PATH for exec runs (gateway/sandbox).",
+  "tools.exec.pathPrepend":
+    "Directories to prepend to PATH for exec runs (gateway/sandbox).",
   "tools.exec.safeBins":
     "Allow stdin-only safe binaries to run without explicit allowlist entries.",
   "tools.message.allowCrossContextSend":
@@ -481,37 +510,50 @@ const FIELD_HELP: Record<string, string> = {
   "tools.message.crossContext.marker.suffix":
     'Text suffix for cross-context markers (supports "{channel}").',
   "tools.message.broadcast.enabled": "Enable broadcast action (default: true).",
-  "tools.web.search.enabled": "Enable the web_search tool (requires a provider API key).",
+  "tools.web.search.enabled":
+    "Enable the web_search tool (requires a provider API key).",
   "tools.web.search.provider": 'Search provider ("brave" or "perplexity").',
-  "tools.web.search.apiKey": "Brave Search API key (fallback: BRAVE_API_KEY env var).",
+  "tools.web.search.apiKey":
+    "Brave Search API key (fallback: BRAVE_API_KEY env var).",
   "tools.web.search.maxResults": "Default number of results to return (1-10).",
-  "tools.web.search.timeoutSeconds": "Timeout in seconds for web_search requests.",
-  "tools.web.search.cacheTtlMinutes": "Cache TTL in minutes for web_search results.",
+  "tools.web.search.timeoutSeconds":
+    "Timeout in seconds for web_search requests.",
+  "tools.web.search.cacheTtlMinutes":
+    "Cache TTL in minutes for web_search results.",
   "tools.web.search.perplexity.apiKey":
     "Perplexity or OpenRouter API key (fallback: PERPLEXITY_API_KEY or OPENROUTER_API_KEY env var).",
   "tools.web.search.perplexity.baseUrl":
     "Perplexity base URL override (default: https://openrouter.ai/api/v1 or https://api.perplexity.ai).",
   "tools.web.search.perplexity.model":
     'Perplexity model override (default: "perplexity/sonar-pro").',
-  "tools.web.fetch.enabled": "Enable the web_fetch tool (lightweight HTTP fetch).",
-  "tools.web.fetch.maxChars": "Max characters returned by web_fetch (truncated).",
+  "tools.web.fetch.enabled":
+    "Enable the web_fetch tool (lightweight HTTP fetch).",
+  "tools.web.fetch.maxChars":
+    "Max characters returned by web_fetch (truncated).",
   "tools.web.fetch.maxCharsCap":
     "Hard cap for web_fetch maxChars (applies to config and tool calls).",
-  "tools.web.fetch.timeoutSeconds": "Timeout in seconds for web_fetch requests.",
-  "tools.web.fetch.cacheTtlMinutes": "Cache TTL in minutes for web_fetch results.",
-  "tools.web.fetch.maxRedirects": "Maximum redirects allowed for web_fetch (default: 3).",
-  "tools.web.fetch.userAgent": "Override User-Agent header for web_fetch requests.",
+  "tools.web.fetch.timeoutSeconds":
+    "Timeout in seconds for web_fetch requests.",
+  "tools.web.fetch.cacheTtlMinutes":
+    "Cache TTL in minutes for web_fetch results.",
+  "tools.web.fetch.maxRedirects":
+    "Maximum redirects allowed for web_fetch (default: 3).",
+  "tools.web.fetch.userAgent":
+    "Override User-Agent header for web_fetch requests.",
   "tools.web.fetch.readability":
     "Use Readability to extract main content from HTML (fallbacks to basic HTML cleanup).",
-  "tools.web.fetch.firecrawl.enabled": "Enable Firecrawl fallback for web_fetch (if configured).",
-  "tools.web.fetch.firecrawl.apiKey": "Firecrawl API key (fallback: FIRECRAWL_API_KEY env var).",
+  "tools.web.fetch.firecrawl.enabled":
+    "Enable Firecrawl fallback for web_fetch (if configured).",
+  "tools.web.fetch.firecrawl.apiKey":
+    "Firecrawl API key (fallback: FIRECRAWL_API_KEY env var).",
   "tools.web.fetch.firecrawl.baseUrl":
     "Firecrawl base URL (e.g. https://api.firecrawl.dev or custom endpoint).",
   "tools.web.fetch.firecrawl.onlyMainContent":
     "When true, Firecrawl returns only the main content (default: true).",
   "tools.web.fetch.firecrawl.maxAgeMs":
     "Firecrawl maxAge (ms) for cached results when supported by the API.",
-  "tools.web.fetch.firecrawl.timeoutSeconds": "Timeout in seconds for Firecrawl requests.",
+  "tools.web.fetch.firecrawl.timeoutSeconds":
+    "Timeout in seconds for Firecrawl requests.",
   "channels.slack.allowBots":
     "Allow bot-authored messages to trigger Slack replies (default: false).",
   "channels.slack.thread.historyScope":
@@ -524,17 +566,21 @@ const FIELD_HELP: Record<string, string> = {
     "Base URL for your Mattermost server (e.g., https://chat.example.com).",
   "channels.mattermost.chatmode":
     'Reply to channel messages on mention ("oncall"), on trigger chars (">" or "!") ("onchar"), or on every message ("onmessage").',
-  "channels.mattermost.oncharPrefixes": 'Trigger prefixes for onchar mode (default: [">", "!"]).',
+  "channels.mattermost.oncharPrefixes":
+    'Trigger prefixes for onchar mode (default: [">", "!"]).',
   "channels.mattermost.requireMention":
     "Require @mention in channels before responding (default: true).",
   "auth.profiles": "Named auth profiles (provider + mode + optional email).",
-  "auth.order": "Ordered auth profile IDs per provider (used for automatic failover).",
+  "auth.order":
+    "Ordered auth profile IDs per provider (used for automatic failover).",
   "auth.cooldowns.billingBackoffHours":
     "Base backoff (hours) when a profile fails due to billing/insufficient credits (default: 5).",
   "auth.cooldowns.billingBackoffHoursByProvider":
     "Optional per-provider overrides for billing backoff (hours).",
-  "auth.cooldowns.billingMaxHours": "Cap (hours) for billing backoff (default: 24).",
-  "auth.cooldowns.failureWindowHours": "Failure window (hours) for backoff counters (default: 24).",
+  "auth.cooldowns.billingMaxHours":
+    "Cap (hours) for billing backoff (default: 24).",
+  "auth.cooldowns.failureWindowHours":
+    "Failure window (hours) for backoff counters (default: 24).",
   "agents.defaults.bootstrapMaxChars":
     "Max characters of each workspace bootstrap file injected into the system prompt before truncation (default: 20000).",
   "agents.defaults.repoRoot":
@@ -543,8 +589,10 @@ const FIELD_HELP: Record<string, string> = {
     'Timezone for message envelopes ("utc", "local", "user", or an IANA timezone string).',
   "agents.defaults.envelopeTimestamp":
     'Include absolute timestamps in message envelopes ("on" or "off").',
-  "agents.defaults.envelopeElapsed": 'Include elapsed time in message envelopes ("on" or "off").',
-  "agents.defaults.models": "Configured model catalog (keys are full provider/model IDs).",
+  "agents.defaults.envelopeElapsed":
+    'Include elapsed time in message envelopes ("on" or "off").',
+  "agents.defaults.models":
+    "Configured model catalog (keys are full provider/model IDs).",
   "agents.defaults.memorySearch":
     "Vector search over MEMORY.md and memory/*.md (per-agent overrides supported).",
   "agents.defaults.memorySearch.sources":
@@ -553,10 +601,12 @@ const FIELD_HELP: Record<string, string> = {
     "Extra paths to include in memory search (directories or .md files; relative paths resolved from workspace).",
   "agents.defaults.memorySearch.experimental.sessionMemory":
     "Enable experimental session transcript indexing for memory search (default: false).",
-  "agents.defaults.memorySearch.provider": 'Embedding provider ("openai", "gemini", or "local").',
+  "agents.defaults.memorySearch.provider":
+    'Embedding provider ("openai", "gemini", or "local").',
   "agents.defaults.memorySearch.remote.baseUrl":
     "Custom base URL for remote embeddings (OpenAI-compatible proxies or Gemini overrides).",
-  "agents.defaults.memorySearch.remote.apiKey": "Custom API key for the remote embedding provider.",
+  "agents.defaults.memorySearch.remote.apiKey":
+    "Custom API key for the remote embedding provider.",
   "agents.defaults.memorySearch.remote.headers":
     "Extra headers for remote embeddings (merged; remote overrides OpenAI headers).",
   "agents.defaults.memorySearch.remote.batch.enabled":
@@ -590,7 +640,8 @@ const FIELD_HELP: Record<string, string> = {
   "agents.defaults.memorySearch.cache.enabled":
     "Cache chunk embeddings in SQLite to speed up reindexing and frequent updates (default: true).",
   memory: "Memory backend configuration (global).",
-  "memory.backend": 'Memory backend ("builtin" for Milaidy embeddings, "qmd" for QMD sidecar).',
+  "memory.backend":
+    'Memory backend ("builtin" for Milaidy embeddings, "qmd" for QMD sidecar).',
   "memory.citations": 'Default citation behavior ("auto", "on", or "off").',
   "memory.qmd.command": "Path to the qmd binary (default: resolves from PATH).",
   "memory.qmd.includeDefaultMemory":
@@ -598,7 +649,8 @@ const FIELD_HELP: Record<string, string> = {
   "memory.qmd.paths":
     "Additional directories/files to index with QMD (path + optional glob pattern).",
   "memory.qmd.paths.path": "Absolute or ~-relative path to index via QMD.",
-  "memory.qmd.paths.pattern": "Glob pattern relative to the path root (default: **/*.md).",
+  "memory.qmd.paths.pattern":
+    "Glob pattern relative to the path root (default: **/*.md).",
   "memory.qmd.paths.name":
     "Optional stable name for the QMD collection (default derived from path).",
   "memory.qmd.sessions.enabled":
@@ -611,42 +663,55 @@ const FIELD_HELP: Record<string, string> = {
     "How often the QMD sidecar refreshes indexes (duration string, default: 5m).",
   "memory.qmd.update.debounceMs":
     "Minimum delay between successive QMD refresh runs (default: 15000).",
-  "memory.qmd.update.onBoot": "Run QMD update once on gateway startup (default: true).",
+  "memory.qmd.update.onBoot":
+    "Run QMD update once on gateway startup (default: true).",
   "memory.qmd.update.embedInterval":
     "How often QMD embeddings are refreshed (duration string, default: 60m). Set to 0 to disable periodic embed.",
-  "memory.qmd.limits.maxResults": "Max QMD results returned to the agent loop (default: 6).",
-  "memory.qmd.limits.maxSnippetChars": "Max characters per snippet pulled from QMD (default: 700).",
-  "memory.qmd.limits.maxInjectedChars": "Max total characters injected from QMD hits per turn.",
-  "memory.qmd.limits.timeoutMs": "Per-query timeout for QMD searches (default: 4000).",
+  "memory.qmd.limits.maxResults":
+    "Max QMD results returned to the agent loop (default: 6).",
+  "memory.qmd.limits.maxSnippetChars":
+    "Max characters per snippet pulled from QMD (default: 700).",
+  "memory.qmd.limits.maxInjectedChars":
+    "Max total characters injected from QMD hits per turn.",
+  "memory.qmd.limits.timeoutMs":
+    "Per-query timeout for QMD searches (default: 4000).",
   "memory.qmd.scope":
     "Session/channel scope for QMD recall (same syntax as session.sendPolicy; default: direct-only).",
   "agents.defaults.memorySearch.cache.maxEntries":
     "Optional cap on cached embeddings (best-effort).",
   "agents.defaults.memorySearch.sync.onSearch":
     "Lazy sync: schedule a reindex on search after changes.",
-  "agents.defaults.memorySearch.sync.watch": "Watch memory files for changes (chokidar).",
+  "agents.defaults.memorySearch.sync.watch":
+    "Watch memory files for changes (chokidar).",
   "agents.defaults.memorySearch.sync.sessions.deltaBytes":
     "Minimum appended bytes before session transcripts trigger reindex (default: 100000).",
   "agents.defaults.memorySearch.sync.sessions.deltaMessages":
     "Minimum appended JSONL lines before session transcripts trigger reindex (default: 50).",
   "plugins.enabled": "Enable plugin/extension loading (default: true).",
-  "plugins.allow": "Optional allowlist of plugin ids; when set, only listed plugins load.",
+  "plugins.allow":
+    "Optional allowlist of plugin ids; when set, only listed plugins load.",
   "plugins.deny": "Optional denylist of plugin ids; deny wins over allowlist.",
   "plugins.load.paths": "Additional plugin files or directories to load.",
   "plugins.slots": "Select which plugins own exclusive slots (memory, etc.).",
   "plugins.slots.memory":
     'Select the active memory plugin by id, or "none" to disable memory plugins.',
-  "plugins.entries": "Per-plugin settings keyed by plugin id (enable/disable + config payloads).",
-  "plugins.entries.*.enabled": "Overrides plugin enable/disable for this entry (restart required).",
-  "plugins.entries.*.config": "Plugin-defined config payload (schema is provided by the plugin).",
+  "plugins.entries":
+    "Per-plugin settings keyed by plugin id (enable/disable + config payloads).",
+  "plugins.entries.*.enabled":
+    "Overrides plugin enable/disable for this entry (restart required).",
+  "plugins.entries.*.config":
+    "Plugin-defined config payload (schema is provided by the plugin).",
   "plugins.installs":
     "CLI-managed install metadata (used by `milaidy plugins update` to locate install sources).",
   "plugins.installs.*.source": 'Install source ("npm", "archive", or "path").',
-  "plugins.installs.*.spec": "Original npm spec used for install (if source is npm).",
-  "plugins.installs.*.sourcePath": "Original archive/path used for install (if any).",
+  "plugins.installs.*.spec":
+    "Original npm spec used for install (if source is npm).",
+  "plugins.installs.*.sourcePath":
+    "Original archive/path used for install (if any).",
   "plugins.installs.*.installPath":
     "Resolved install directory (usually ~/.milaidy/plugins/<id>).",
-  "plugins.installs.*.version": "Version recorded at install time (if available).",
+  "plugins.installs.*.version":
+    "Version recorded at install time (if available).",
   "plugins.installs.*.installedAt": "ISO timestamp of last install/update.",
   "agents.list.*.identity.avatar":
     "Agent avatar (workspace-relative path, http(s) URL, or data URI).",
@@ -655,11 +720,16 @@ const FIELD_HELP: Record<string, string> = {
     "Ordered fallback models (provider/model). Used when the primary model fails.",
   "agents.defaults.imageModel.primary":
     "Optional image model (provider/model) used when the primary model lacks image input.",
-  "agents.defaults.imageModel.fallbacks": "Ordered fallback image models (provider/model).",
-  "agents.defaults.cliBackends": "Optional CLI backends for text-only fallback (claude-cli, etc.).",
-  "agents.defaults.humanDelay.mode": 'Delay style for block replies ("off", "natural", "custom").',
-  "agents.defaults.humanDelay.minMs": "Minimum delay in ms for custom humanDelay (default: 800).",
-  "agents.defaults.humanDelay.maxMs": "Maximum delay in ms for custom humanDelay (default: 2500).",
+  "agents.defaults.imageModel.fallbacks":
+    "Ordered fallback image models (provider/model).",
+  "agents.defaults.cliBackends":
+    "Optional CLI backends for text-only fallback (claude-cli, etc.).",
+  "agents.defaults.humanDelay.mode":
+    'Delay style for block replies ("off", "natural", "custom").',
+  "agents.defaults.humanDelay.minMs":
+    "Minimum delay in ms for custom humanDelay (default: 800).",
+  "agents.defaults.humanDelay.maxMs":
+    "Maximum delay in ms for custom humanDelay (default: 2500).",
   "commands.native":
     "Register native commands with channels that support it (Discord/Slack/Telegram).",
   "commands.nativeSkills":
@@ -669,10 +739,14 @@ const FIELD_HELP: Record<string, string> = {
     "Allow bash chat command (`!`; `/bash` alias) to run host shell commands (default: false; requires tools.elevated).",
   "commands.bashForegroundMs":
     "How long bash waits before backgrounding (default: 2000; 0 backgrounds immediately).",
-  "commands.config": "Allow /config chat command to read/write config on disk (default: false).",
-  "commands.debug": "Allow /debug chat command for runtime-only overrides (default: false).",
-  "commands.restart": "Allow /restart and gateway restart tool actions (default: false).",
-  "commands.useAccessGroups": "Enforce access-group allowlists/policies for commands.",
+  "commands.config":
+    "Allow /config chat command to read/write config on disk (default: false).",
+  "commands.debug":
+    "Allow /debug chat command for runtime-only overrides (default: false).",
+  "commands.restart":
+    "Allow /restart and gateway restart tool actions (default: false).",
+  "commands.useAccessGroups":
+    "Enforce access-group allowlists/policies for commands.",
   "session.dmScope":
     'DM session scoping: "main" keeps continuity; "per-peer", "per-channel-peer", or "per-account-channel-peer" isolates DM history (recommended for shared inboxes/multi-account).',
   "session.identityLinks":
@@ -693,20 +767,24 @@ const FIELD_HELP: Record<string, string> = {
     "Allow iMessage to write config in response to channel events/commands (default: true).",
   "channels.msteams.configWrites":
     "Allow Microsoft Teams to write config in response to channel events/commands (default: true).",
-  "channels.discord.commands.native": 'Override native commands for Discord (bool or "auto").',
+  "channels.discord.commands.native":
+    'Override native commands for Discord (bool or "auto").',
   "channels.discord.commands.nativeSkills":
     'Override native skill commands for Discord (bool or "auto").',
-  "channels.telegram.commands.native": 'Override native commands for Telegram (bool or "auto").',
+  "channels.telegram.commands.native":
+    'Override native commands for Telegram (bool or "auto").',
   "channels.telegram.commands.nativeSkills":
     'Override native skill commands for Telegram (bool or "auto").',
-  "channels.slack.commands.native": 'Override native commands for Slack (bool or "auto").',
+  "channels.slack.commands.native":
+    'Override native commands for Slack (bool or "auto").',
   "channels.slack.commands.nativeSkills":
     'Override native skill commands for Slack (bool or "auto").',
   "session.agentToAgent.maxPingPongTurns":
     "Max reply-back turns between requester and target (0–5).",
   "channels.telegram.customCommands":
     "Additional Telegram bot menu commands (merged with native; conflicts ignored).",
-  "messages.ackReaction": "Emoji reaction used to acknowledge inbound messages (empty disables).",
+  "messages.ackReaction":
+    "Emoji reaction used to acknowledge inbound messages (empty disables).",
   "messages.ackReactionScope":
     'When to send ack reactions ("group-mentions", "group-all", "direct", "all").',
   "messages.inbound.debounceMs":
@@ -723,17 +801,20 @@ const FIELD_HELP: Record<string, string> = {
     "Preferred breakpoints for Telegram draft chunks (paragraph | newline | sentence). Default: paragraph.",
   "channels.telegram.retry.attempts":
     "Max retry attempts for outbound Telegram API calls (default: 3).",
-  "channels.telegram.retry.minDelayMs": "Minimum retry delay in ms for Telegram outbound calls.",
+  "channels.telegram.retry.minDelayMs":
+    "Minimum retry delay in ms for Telegram outbound calls.",
   "channels.telegram.retry.maxDelayMs":
     "Maximum retry delay cap in ms for Telegram outbound calls.",
-  "channels.telegram.retry.jitter": "Jitter factor (0-1) applied to Telegram retry delays.",
+  "channels.telegram.retry.jitter":
+    "Jitter factor (0-1) applied to Telegram retry delays.",
   "channels.telegram.network.autoSelectFamily":
     "Override Node autoSelectFamily for Telegram (true=enable, false=disable).",
   "channels.telegram.timeoutSeconds":
     "Max seconds before Telegram API requests are aborted (default: 500 per grammY).",
   "channels.whatsapp.dmPolicy":
     'Direct message access control ("pairing" recommended). "open" requires channels.whatsapp.allowFrom=["*"].',
-  "channels.whatsapp.selfChatMode": "Same-phone setup (bot uses your personal WhatsApp number).",
+  "channels.whatsapp.selfChatMode":
+    "Same-phone setup (bot uses your personal WhatsApp number).",
   "channels.whatsapp.debounceMs":
     "Debounce window (ms) for batching rapid consecutive messages from the same sender (0 to disable).",
   "channels.signal.dmPolicy":
@@ -746,10 +827,14 @@ const FIELD_HELP: Record<string, string> = {
     'Direct message access control ("pairing" recommended). "open" requires channels.discord.dm.allowFrom=["*"].',
   "channels.discord.retry.attempts":
     "Max retry attempts for outbound Discord API calls (default: 3).",
-  "channels.discord.retry.minDelayMs": "Minimum retry delay in ms for Discord outbound calls.",
-  "channels.discord.retry.maxDelayMs": "Maximum retry delay cap in ms for Discord outbound calls.",
-  "channels.discord.retry.jitter": "Jitter factor (0-1) applied to Discord retry delays.",
-  "channels.discord.maxLinesPerMessage": "Soft max line count per Discord message (default: 17).",
+  "channels.discord.retry.minDelayMs":
+    "Minimum retry delay in ms for Discord outbound calls.",
+  "channels.discord.retry.maxDelayMs":
+    "Maximum retry delay cap in ms for Discord outbound calls.",
+  "channels.discord.retry.jitter":
+    "Jitter factor (0-1) applied to Discord retry delays.",
+  "channels.discord.maxLinesPerMessage":
+    "Soft max line count per Discord message (default: 17).",
   "channels.discord.intents.presence":
     "Enable the Guild Presences privileged intent. Must also be enabled in the Discord Developer Portal. Allows tracking user activities (e.g. Spotify). Default: false.",
   "channels.discord.intents.guildMembers":
@@ -808,8 +893,14 @@ function isObjectSchema(schema: JsonSchemaObject): boolean {
   return Boolean(schema.properties || schema.additionalProperties);
 }
 
-function mergeObjectSchema(base: JsonSchemaObject, extension: JsonSchemaObject): JsonSchemaObject {
-  const mergedRequired = new Set<string>([...(base.required ?? []), ...(extension.required ?? [])]);
+function mergeObjectSchema(
+  base: JsonSchemaObject,
+  extension: JsonSchemaObject,
+): JsonSchemaObject {
+  const mergedRequired = new Set<string>([
+    ...(base.required ?? []),
+    ...(extension.required ?? []),
+  ]);
   const merged: JsonSchemaObject = {
     ...base,
     ...extension,
@@ -821,7 +912,8 @@ function mergeObjectSchema(base: JsonSchemaObject, extension: JsonSchemaObject):
   if (mergedRequired.size > 0) {
     merged.required = Array.from(mergedRequired);
   }
-  const additional = extension.additionalProperties ?? base.additionalProperties;
+  const additional =
+    extension.additionalProperties ?? base.additionalProperties;
   if (additional !== undefined) {
     merged.additionalProperties = additional;
   }
@@ -862,7 +954,10 @@ function applySensitiveHints(hints: ConfigUiHints): ConfigUiHints {
   return next;
 }
 
-function applyPluginHints(hints: ConfigUiHints, plugins: PluginUiMetadata[]): ConfigUiHints {
+function applyPluginHints(
+  hints: ConfigUiHints,
+  plugins: PluginUiMetadata[],
+): ConfigUiHints {
   const next: ConfigUiHints = { ...hints };
   for (const plugin of plugins) {
     const id = plugin.id.trim();
@@ -905,7 +1000,10 @@ function applyPluginHints(hints: ConfigUiHints, plugins: PluginUiMetadata[]): Co
   return next;
 }
 
-function applyChannelHints(hints: ConfigUiHints, channels: ChannelUiMetadata[]): ConfigUiHints {
+function applyChannelHints(
+  hints: ConfigUiHints,
+  channels: ChannelUiMetadata[],
+): ConfigUiHints {
   const next: ConfigUiHints = { ...hints };
   for (const channel of channels) {
     const id = channel.id.trim();
@@ -966,9 +1064,14 @@ function applyHeartbeatTargetHints(
 ): ConfigUiHints {
   const next: ConfigUiHints = { ...hints };
   const channelList = listHeartbeatTargetChannels(channels);
-  const channelHelp = channelList.length ? ` Known channels: ${channelList.join(", ")}.` : "";
+  const channelHelp = channelList.length
+    ? ` Known channels: ${channelList.join(", ")}.`
+    : "";
   const help = `Delivery target ("last", "none", or a channel id).${channelHelp}`;
-  const paths = ["agents.defaults.heartbeat.target", "agents.list.*.heartbeat.target"];
+  const paths = [
+    "agents.defaults.heartbeat.target",
+    "agents.list.*.heartbeat.target",
+  ];
   for (const path of paths) {
     const current = next[path] ?? {};
     next[path] = {
@@ -980,7 +1083,10 @@ function applyHeartbeatTargetHints(
   return next;
 }
 
-function applyPluginSchemas(schema: ConfigSchema, plugins: PluginUiMetadata[]): ConfigSchema {
+function applyPluginSchemas(
+  schema: ConfigSchema,
+  plugins: PluginUiMetadata[],
+): ConfigSchema {
   const next = cloneSchema(schema);
   const root = asSchemaObject(next);
   const pluginsNode = asSchemaObject(root?.properties?.plugins);
@@ -1000,7 +1106,8 @@ function applyPluginSchemas(schema: ConfigSchema, plugins: PluginUiMetadata[]): 
     const entrySchema = entryBase
       ? cloneSchema(entryBase)
       : ({ type: "object" } as JsonSchemaObject);
-    const entryObject = asSchemaObject(entrySchema) ?? ({ type: "object" } as JsonSchemaObject);
+    const entryObject =
+      asSchemaObject(entrySchema) ?? ({ type: "object" } as JsonSchemaObject);
     const baseConfigSchema = asSchemaObject(entryObject.properties?.config);
     const pluginSchema = asSchemaObject(plugin.configSchema);
     const nextConfigSchema =
@@ -1021,7 +1128,10 @@ function applyPluginSchemas(schema: ConfigSchema, plugins: PluginUiMetadata[]): 
   return next;
 }
 
-function applyChannelSchemas(schema: ConfigSchema, channels: ChannelUiMetadata[]): ConfigSchema {
+function applyChannelSchemas(
+  schema: ConfigSchema,
+  channels: ChannelUiMetadata[],
+): ConfigSchema {
   const next = cloneSchema(schema);
   const root = asSchemaObject(next);
   const channelsNode = asSchemaObject(root?.properties?.channels);
@@ -1037,7 +1147,12 @@ function applyChannelSchemas(schema: ConfigSchema, channels: ChannelUiMetadata[]
     }
     const existing = asSchemaObject(channelProps[channel.id]);
     const incoming = asSchemaObject(channel.configSchema);
-    if (existing && incoming && isObjectSchema(existing) && isObjectSchema(incoming)) {
+    if (
+      existing &&
+      incoming &&
+      isObjectSchema(existing) &&
+      isObjectSchema(incoming)
+    ) {
       channelProps[channel.id] = mergeObjectSchema(existing, incoming);
     } else {
       channelProps[channel.id] = cloneSchema(channel.configSchema);
@@ -1100,7 +1215,10 @@ export function buildConfigSchema(params?: {
       channels,
     ),
   );
-  const mergedSchema = applyChannelSchemas(applyPluginSchemas(base.schema, plugins), channels);
+  const mergedSchema = applyChannelSchemas(
+    applyPluginSchemas(base.schema, plugins),
+    channels,
+  );
   return {
     ...base,
     schema: mergedSchema,

@@ -41,6 +41,7 @@ const PROVIDER_PLUGINS: Record<string, string> = {
   xai: "@elizaos/plugin-xai",
   openrouter: "@elizaos/plugin-openrouter",
   ollama: "@elizaos/plugin-ollama",
+  zai: "@homunculuslabs/plugin-zai",
   deepseek: "@elizaos/plugin-deepseek",
   together: "@elizaos/plugin-together",
   mistral: "@elizaos/plugin-mistral",
@@ -62,6 +63,7 @@ export const AUTH_PROVIDER_PLUGINS: Record<string, string> = {
   GROK_API_KEY: "@elizaos/plugin-xai",
   OPENROUTER_API_KEY: "@elizaos/plugin-openrouter",
   OLLAMA_BASE_URL: "@elizaos/plugin-ollama",
+  ZAI_API_KEY: "@homunculuslabs/plugin-zai",
   DEEPSEEK_API_KEY: "@elizaos/plugin-deepseek",
   TOGETHER_API_KEY: "@elizaos/plugin-together",
   MISTRAL_API_KEY: "@elizaos/plugin-mistral",
@@ -85,9 +87,13 @@ const FEATURE_PLUGINS: Record<string, string> = {
   personality: "@elizaos/plugin-personality",
   experience: "@elizaos/plugin-experience",
   form: "@elizaos/plugin-form",
+  x402: "@elizaos/plugin-x402",
 };
 
-function isChannelConfigured(channelName: string, channelConfig: unknown): boolean {
+function isChannelConfigured(
+  channelName: string,
+  channelConfig: unknown,
+): boolean {
   if (!channelConfig || typeof channelConfig !== "object") {
     return false;
   }
@@ -141,47 +147,80 @@ export function applyPluginAutoEnable(
 
   // Channels
   if (updatedConfig.channels) {
-    for (const [channelName, channelConfig] of Object.entries(updatedConfig.channels)) {
+    for (const [channelName, channelConfig] of Object.entries(
+      updatedConfig.channels,
+    )) {
       const pluginName = CHANNEL_PLUGINS[channelName];
       if (!pluginName) continue;
       if (!isChannelConfigured(channelName, channelConfig)) continue;
       if (pluginsConfig.entries[channelName]?.enabled === false) continue;
-      addToAllowlist(pluginsConfig.allow, pluginName, channelName, changes, `channel: ${channelName}`);
+      addToAllowlist(
+        pluginsConfig.allow,
+        pluginName,
+        channelName,
+        changes,
+        `channel: ${channelName}`,
+      );
     }
   }
 
   // Auth profiles
   if (updatedConfig.auth?.profiles) {
-    for (const [profileKey, profile] of Object.entries(updatedConfig.auth.profiles)) {
+    for (const [profileKey, profile] of Object.entries(
+      updatedConfig.auth.profiles,
+    )) {
       const provider = profile.provider;
       if (!provider) continue;
       const pluginName = PROVIDER_PLUGINS[provider];
       if (!pluginName) continue;
-      addToAllowlist(pluginsConfig.allow, pluginName, provider, changes, `auth profile: ${profileKey}`);
+      addToAllowlist(
+        pluginsConfig.allow,
+        pluginName,
+        provider,
+        changes,
+        `auth profile: ${profileKey}`,
+      );
     }
   }
 
   // Env var API keys
   for (const [envKey, pluginName] of Object.entries(AUTH_PROVIDER_PLUGINS)) {
     const envValue = env[envKey];
-    if (!envValue || typeof envValue !== "string" || envValue.trim() === "") continue;
+    if (!envValue || typeof envValue !== "string" || envValue.trim() === "")
+      continue;
     const pluginId = pluginName.replace("@elizaos/plugin-", "");
     if (pluginsConfig.entries[pluginId]?.enabled === false) continue;
-    addToAllowlist(pluginsConfig.allow, pluginName, pluginId, changes, `env: ${envKey}`);
+    addToAllowlist(
+      pluginsConfig.allow,
+      pluginName,
+      pluginId,
+      changes,
+      `env: ${envKey}`,
+    );
   }
 
   // Feature flags
   if (updatedConfig.features) {
-    for (const [featureName, featureConfig] of Object.entries(updatedConfig.features)) {
+    for (const [featureName, featureConfig] of Object.entries(
+      updatedConfig.features,
+    )) {
       const pluginName = FEATURE_PLUGINS[featureName];
       if (!pluginName) continue;
-      const isEnabled = featureConfig === true ||
-        (typeof featureConfig === "object" && featureConfig !== null &&
+      const isEnabled =
+        featureConfig === true ||
+        (typeof featureConfig === "object" &&
+          featureConfig !== null &&
           featureConfig.enabled !== false);
       if (!isEnabled) continue;
       const pluginId = pluginName.replace("@elizaos/plugin-", "");
       if (pluginsConfig.entries[pluginId]?.enabled === false) continue;
-      addToAllowlist(pluginsConfig.allow, pluginName, pluginId, changes, `feature: ${featureName}`);
+      addToAllowlist(
+        pluginsConfig.allow,
+        pluginName,
+        pluginId,
+        changes,
+        `feature: ${featureName}`,
+      );
     }
   }
 
@@ -190,7 +229,13 @@ export function applyPluginAutoEnable(
   if (hooksConfig && hooksConfig.enabled !== false && hooksConfig.token) {
     const webhooksPlugin = FEATURE_PLUGINS.webhooks;
     if (webhooksPlugin) {
-      addToAllowlist(pluginsConfig.allow, webhooksPlugin, webhooksPlugin.replace("@elizaos/plugin-", ""), changes, "hooks.token");
+      addToAllowlist(
+        pluginsConfig.allow,
+        webhooksPlugin,
+        webhooksPlugin.replace("@elizaos/plugin-", ""),
+        changes,
+        "hooks.token",
+      );
     }
   }
   if (hooksConfig) {
@@ -198,7 +243,13 @@ export function applyPluginAutoEnable(
     if (gmailConfig?.account?.trim()) {
       const gmailPlugin = FEATURE_PLUGINS.gmailWatch;
       if (gmailPlugin) {
-        addToAllowlist(pluginsConfig.allow, gmailPlugin, gmailPlugin.replace("@elizaos/plugin-", ""), changes, "hooks.gmail.account");
+        addToAllowlist(
+          pluginsConfig.allow,
+          gmailPlugin,
+          gmailPlugin.replace("@elizaos/plugin-", ""),
+          changes,
+          "hooks.gmail.account",
+        );
       }
     }
   }

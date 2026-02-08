@@ -1,6 +1,8 @@
 import type { MilaidyConfig } from "./types.js";
 
-export function collectConfigEnvVars(cfg?: MilaidyConfig): Record<string, string> {
+export function collectConfigEnvVars(
+  cfg?: MilaidyConfig,
+): Record<string, string> {
   const envConfig = cfg?.env;
   if (!envConfig) {
     return {};

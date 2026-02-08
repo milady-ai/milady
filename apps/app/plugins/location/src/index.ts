@@ -4,7 +4,7 @@ import type { LocationPlugin } from "./definitions";
 
 const electronModulePath = "../electron/src/index";
 
-const Location = registerPlugin<LocationPlugin>("MilaidyLocation", {
+export const Location = registerPlugin<LocationPlugin>("MilaidyLocation", {
   web: () => import("./web").then((m) => new m.LocationWeb()),
   electron: () => {
     // Use Electron-specific implementation for macOS/Windows/Linux
@@ -17,4 +17,3 @@ const Location = registerPlugin<LocationPlugin>("MilaidyLocation", {
 });
 
 export * from "./definitions";
-export { Location };

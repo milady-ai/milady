@@ -16,8 +16,8 @@
  */
 
 import crypto from "node:crypto";
-import { logger } from "@elizaos/core";
 import type { Action, HandlerOptions, Memory, UUID } from "@elizaos/core";
+import { logger } from "@elizaos/core";
 import { requestRestart } from "../runtime/restart.js";
 
 /** Small delay (ms) before restarting so the response has time to flush. */
@@ -52,9 +52,7 @@ export const restartAction: Action = {
     const reason =
       typeof params?.reason === "string" ? params.reason : undefined;
 
-    const restartText = reason
-      ? `Restarting… (${reason})`
-      : "Restarting…";
+    const restartText = reason ? `Restarting… (${reason})` : "Restarting…";
 
     logger.info(`[milaidy] ${restartText}`);
 

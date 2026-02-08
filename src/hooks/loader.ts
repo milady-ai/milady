@@ -9,10 +9,10 @@
 import { pathToFileURL } from "node:url";
 import { logger } from "@elizaos/core";
 import type { InternalHooksConfig } from "../config/types.hooks.js";
-import type { HookEntry, HookHandler } from "./types.js";
-import { discoverHooks, type DiscoveryOptions } from "./discovery.js";
+import { type DiscoveryOptions, discoverHooks } from "./discovery.js";
 import { checkEligibility, resolveHookConfig } from "./eligibility.js";
-import { registerHook, clearHooks } from "./registry.js";
+import { clearHooks, registerHook } from "./registry.js";
+import type { HookEntry, HookHandler } from "./types.js";
 
 // ---------- Dynamic Handler Loading ----------
 
@@ -80,7 +80,13 @@ export async function loadHooks(
   // Check if hooks are enabled
   if (internalConfig?.enabled === false) {
     logger.info("[hooks] Internal hooks disabled");
-    return { discovered: 0, eligible: 0, registered: 0, skipped: [], failed: [] };
+    return {
+      discovered: 0,
+      eligible: 0,
+      registered: 0,
+      skipped: [],
+      failed: [],
+    };
   }
 
   // Clear existing hooks (for reload)
@@ -143,9 +149,7 @@ export async function loadHooks(
     // Register for all configured events
     const events = entry.metadata?.events ?? [];
     if (events.length === 0) {
-      logger.warn(
-        `[hooks] Hook "${entry.hook.name}" has no events configured`,
-      );
+      logger.warn(`[hooks] Hook "${entry.hook.name}" has no events configured`);
       result.skipped.push(`${entry.hook.name}: no events`);
       continue;
     }

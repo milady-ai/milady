@@ -18,7 +18,9 @@ function resolveGitHead(startDir: string): string | null {
         return path.join(gitPath, "HEAD");
       }
       if (stat.isFile()) {
-        const match = fs.readFileSync(gitPath, "utf-8").match(/gitdir:\s*(.+)/i);
+        const match = fs
+          .readFileSync(gitPath, "utf-8")
+          .match(/gitdir:\s*(.+)/i);
         if (match?.[1]) {
           return path.join(path.resolve(current, match[1].trim()), "HEAD");
         }
@@ -36,7 +38,10 @@ function resolveGitHead(startDir: string): string | null {
 function readCommitFromPackageJson(): string | null {
   try {
     const req = createRequire(import.meta.url);
-    const pkg = req("../../package.json") as { gitHead?: string; githead?: string };
+    const pkg = req("../../package.json") as {
+      gitHead?: string;
+      githead?: string;
+    };
     return formatCommit(pkg.gitHead ?? pkg.githead);
   } catch {
     return null;
@@ -72,7 +77,9 @@ function readCommitFromGitHead(cwd: string): string | null {
 
 let cachedCommit: string | null | undefined;
 
-export function resolveCommitHash(options: { cwd?: string; env?: NodeJS.ProcessEnv } = {}): string | null {
+export function resolveCommitHash(
+  options: { cwd?: string; env?: NodeJS.ProcessEnv } = {},
+): string | null {
   if (cachedCommit !== undefined) return cachedCommit;
 
   const env = options.env ?? process.env;
@@ -82,7 +89,13 @@ export function resolveCommitHash(options: { cwd?: string; env?: NodeJS.ProcessE
     formatCommit(envCommit) ??
     readCommitFromBuildInfo() ??
     readCommitFromPackageJson() ??
-    (() => { try { return readCommitFromGitHead(options.cwd ?? process.cwd()); } catch { return null; } })();
+    (() => {
+      try {
+        return readCommitFromGitHead(options.cwd ?? process.cwd());
+      } catch {
+        return null;
+      }
+    })();
 
   return cachedCommit;
 }

@@ -19,29 +19,29 @@ import process from "node:process";
 import {
   AgentRuntime,
   ChannelType,
+  type Character,
   createCharacter,
   createMessageMemory,
   logger,
-  stringToUuid,
-  type Character,
   type Plugin,
+  stringToUuid,
   type UUID,
 } from "@elizaos/core";
 
 import { loadMilaidyConfig, type MilaidyConfig } from "../config/config.js";
-import { createMilaidyPlugin } from "../runtime/milaidy-plugin.js";
 import {
   ensureAgentWorkspace,
   resolveDefaultAgentWorkspaceDir,
 } from "../providers/workspace.js";
+import { createMilaidyPlugin } from "../runtime/milaidy-plugin.js";
 
 import {
-  createBenchmarkPlugin,
-  setBenchmarkContext,
-  getCapturedAction,
-  clearCapturedAction,
   BENCHMARK_MESSAGE_TEMPLATE,
   type BenchmarkContext,
+  clearCapturedAction,
+  createBenchmarkPlugin,
+  getCapturedAction,
+  setBenchmarkContext,
 } from "./plugin.js";
 
 // ---------------------------------------------------------------------------
@@ -142,7 +142,8 @@ async function resolveModelPlugins(): Promise<Plugin[]> {
 
 function buildBenchmarkCharacter(config: MilaidyConfig): Character {
   const name = config.agents?.list?.[0]?.name ?? "Milaidy";
-  const bio = "An AI assistant powered by Milaidy and ElizaOS, executing benchmark tasks with precision.";
+  const bio =
+    "An AI assistant powered by Milaidy and ElizaOS, executing benchmark tasks with precision.";
 
   // Collect API secrets from env — must match PROVIDER_PLUGIN_MAP keys
   const secretKeys = [
@@ -203,11 +204,13 @@ async function createBenchmarkRuntime(
     config.agents?.defaults?.workspace ?? resolveDefaultAgentWorkspaceDir();
   // Skip bootstrap files for benchmarks — the benchmark plugin provides all
   // context and the templates may not be present in development layouts.
-  await ensureAgentWorkspace({ dir: workspaceDir, ensureBootstrapFiles: false });
+  await ensureAgentWorkspace({
+    dir: workspaceDir,
+    ensureBootstrapFiles: false,
+  });
 
   // Create plugins
-  const agentId =
-    character.name?.toLowerCase().replace(/\s+/g, "-") ?? "main";
+  const agentId = character.name?.toLowerCase().replace(/\s+/g, "-") ?? "main";
   const milaidyPlugin = createMilaidyPlugin({
     workspaceDir,
     bootstrapMaxChars: config.agents?.defaults?.bootstrapMaxChars,
@@ -382,7 +385,9 @@ async function main(): Promise<void> {
         }
 
         // Create a fresh room for the new task
-        currentRoomId = stringToUuid(`bench-${body.task_id}-${crypto.randomUUID()}`);
+        currentRoomId = stringToUuid(
+          `bench-${body.task_id}-${crypto.randomUUID()}`,
+        );
         await ensureRoom(currentRoomId);
 
         // Clear benchmark state
@@ -444,7 +449,11 @@ async function main(): Promise<void> {
             }
             // Also capture the full content object for XML extraction
             const rawContent = JSON.stringify(content ?? {});
-            if (rawContent.includes("tool_name") || rawContent.includes("command") || rawContent.includes("operation")) {
+            if (
+              rawContent.includes("tool_name") ||
+              rawContent.includes("command") ||
+              rawContent.includes("operation")
+            ) {
               callbackTexts.push(rawContent);
             }
             return [];

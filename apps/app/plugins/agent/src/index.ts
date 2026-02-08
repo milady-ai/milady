@@ -1,11 +1,10 @@
 import { registerPlugin } from "@capacitor/core";
 import type { AgentPlugin } from "./definitions";
 
-const Agent = registerPlugin<AgentPlugin>("Agent", {
+export const Agent = registerPlugin<AgentPlugin>("Agent", {
   web: () => import("./web").then((m) => new m.AgentWeb()),
   // Electron uses IPC via the preload bridge (agent:start, agent:stop, etc.)
   // iOS/Android will use the web fallback (HTTP to API server) for now
 });
 
 export * from "./definitions";
-export { Agent };

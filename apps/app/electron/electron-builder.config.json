@@ -10,6 +10,13 @@
     "capacitor.config.*",
     "app/**/*"
   ],
+  "extraResources": [
+    {
+      "from": "../../../dist",
+      "to": "milaidy-dist",
+      "filter": ["**/*.js", "package.json"]
+    }
+  ],
   "publish": {
     "provider": "github",
     "owner": "milady-ai",
@@ -25,7 +32,6 @@
     "icon": "assets/appIcon.ico",
     "signingHashAlgorithms": ["sha256"],
     "azureSignOptions": {
-      "publisherName": "Milady AI",
       "endpoint": "https://eus.codesigning.azure.net/",
       "certificateProfileName": "milaidy-code-sign",
       "codeSigningAccountName": "milaidy"
@@ -33,15 +39,30 @@
   },
   "mac": {
     "category": "public.app-category.productivity",
-    "target": ["dmg", "zip"],
+    "target": [
+      { "target": "dmg", "arch": ["x64", "arm64"] },
+      { "target": "zip", "arch": ["x64", "arm64"] }
+    ],
     "icon": "assets/appIcon.png",
     "hardenedRuntime": true,
     "gatekeeperAssess": false,
     "entitlements": "entitlements.mac.plist",
-    "entitlementsInherit": "entitlements.mac.plist"
+    "entitlementsInherit": "entitlements.mac.plist",
+    "notarize": true
   },
   "dmg": {
-    "sign": false
+    "sign": false,
+    "format": "UDZO",
+    "background": "assets/dmg-background.png",
+    "iconSize": 80,
+    "window": {
+      "width": 660,
+      "height": 400
+    },
+    "contents": [
+      { "x": 170, "y": 195, "type": "file" },
+      { "x": 490, "y": 195, "type": "link", "path": "/Applications" }
+    ]
   },
   "linux": {
     "target": [

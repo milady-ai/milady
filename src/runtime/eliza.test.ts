@@ -5,18 +5,19 @@
  * cloud config propagation, character building, and model resolution
  * WITHOUT starting a runtime.
  */
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+
+import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import fs from "node:fs/promises";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { MilaidyConfig } from "../config/config.js";
 import {
-  collectPluginNames,
   applyChannelSecretsToEnv,
   applyCloudConfigToEnv,
   buildCharacterFromConfig,
-  resolvePrimaryModel,
+  collectPluginNames,
   resolvePackageEntry,
+  resolvePrimaryModel,
 } from "./eliza.js";
 
 // ---------------------------------------------------------------------------
@@ -24,7 +25,10 @@ import {
 // ---------------------------------------------------------------------------
 
 /** Save and restore a set of env keys around each test. */
-function envSnapshot(keys: string[]): { save: () => void; restore: () => void } {
+function envSnapshot(keys: string[]): {
+  save: () => void;
+  restore: () => void;
+} {
   const saved = new Map<string, string | undefined>();
   return {
     save() {
@@ -50,7 +54,10 @@ describe("collectPluginNames", () => {
     "ELIZAOS_CLOUD_API_KEY", "ELIZAOS_CLOUD_ENABLED",
   ];
   const snap = envSnapshot(envKeys);
-  beforeEach(() => { snap.save(); for (const k of envKeys) delete process.env[k]; });
+  beforeEach(() => {
+    snap.save();
+    for (const k of envKeys) delete process.env[k];
+  });
   afterEach(() => snap.restore());
 
   it("includes all core plugins for an empty config", () => {
@@ -77,7 +84,9 @@ describe("collectPluginNames", () => {
   });
 
   it("adds channel plugins when config.channels is populated", () => {
-    const config = { channels: { telegram: { botToken: "tok" }, discord: { token: "tok" } } } as MilaidyConfig;
+    const config = {
+      channels: { telegram: { botToken: "tok" }, discord: { token: "tok" } },
+    } as MilaidyConfig;
     const names = collectPluginNames(config);
     expect(names.has("@elizaos/plugin-telegram")).toBe(true);
     expect(names.has("@elizaos/plugin-discord")).toBe(true);
@@ -105,7 +114,9 @@ describe("collectPluginNames", () => {
   it("respects feature flags in config.features", () => {
     // OPTIONAL_PLUGIN_MAP is empty, so features won't add anything currently.
     // But the function should not crash on arbitrary features.
-    const config = { features: { someFeature: true, another: { enabled: false } } } as unknown as MilaidyConfig;
+    const config = {
+      features: { someFeature: true, another: { enabled: false } },
+    } as unknown as MilaidyConfig;
     expect(() => collectPluginNames(config)).not.toThrow();
   });
 
@@ -117,13 +128,15 @@ describe("collectPluginNames", () => {
         installs: {
           "@elizaos/plugin-weather": {
             source: "npm",
-            installPath: "/home/user/.milaidy/plugins/installed/_elizaos_plugin-weather",
+            installPath:
+              "/home/user/.milaidy/plugins/installed/_elizaos_plugin-weather",
             version: "1.0.0",
             installedAt: "2026-02-07T00:00:00Z",
           },
           "@elizaos/plugin-custom": {
             source: "npm",
-            installPath: "/home/user/.milaidy/plugins/installed/_elizaos_plugin-custom",
+            installPath:
+              "/home/user/.milaidy/plugins/installed/_elizaos_plugin-custom",
             version: "2.0.0",
             installedAt: "2026-02-07T00:00:00Z",
           },
@@ -198,32 +211,46 @@ describe("collectPluginNames", () => {
 
 describe("applyChannelSecretsToEnv", () => {
   const envKeys = [
-    "DISCORD_BOT_TOKEN", "TELEGRAM_BOT_TOKEN",
-    "SLACK_BOT_TOKEN", "SLACK_APP_TOKEN", "SLACK_USER_TOKEN",
+    "DISCORD_BOT_TOKEN",
+    "TELEGRAM_BOT_TOKEN",
+    "SLACK_BOT_TOKEN",
+    "SLACK_APP_TOKEN",
+    "SLACK_USER_TOKEN",
     "SIGNAL_ACCOUNT",
-    "MSTEAMS_APP_ID", "MSTEAMS_APP_PASSWORD",
-    "MATTERMOST_BOT_TOKEN", "MATTERMOST_BASE_URL",
+    "MSTEAMS_APP_ID",
+    "MSTEAMS_APP_PASSWORD",
+    "MATTERMOST_BOT_TOKEN",
+    "MATTERMOST_BASE_URL",
     "GOOGLE_CHAT_SERVICE_ACCOUNT_KEY",
   ];
   const snap = envSnapshot(envKeys);
-  beforeEach(() => { snap.save(); for (const k of envKeys) delete process.env[k]; });
+  beforeEach(() => {
+    snap.save();
+    for (const k of envKeys) delete process.env[k];
+  });
   afterEach(() => snap.restore());
 
   it("copies Discord token from config to env", () => {
-    const config = { channels: { discord: { token: "discord-tok-123" } } } as MilaidyConfig;
+    const config = {
+      channels: { discord: { token: "discord-tok-123" } },
+    } as MilaidyConfig;
     applyChannelSecretsToEnv(config);
     expect(process.env.DISCORD_BOT_TOKEN).toBe("discord-tok-123");
   });
 
   it("copies Telegram botToken from config to env", () => {
-    const config = { channels: { telegram: { botToken: "tg-tok-456" } } } as MilaidyConfig;
+    const config = {
+      channels: { telegram: { botToken: "tg-tok-456" } },
+    } as MilaidyConfig;
     applyChannelSecretsToEnv(config);
     expect(process.env.TELEGRAM_BOT_TOKEN).toBe("tg-tok-456");
   });
 
   it("copies all Slack tokens from config to env", () => {
     const config = {
-      channels: { slack: { botToken: "xoxb-1", appToken: "xapp-1", userToken: "xoxp-1" } },
+      channels: {
+        slack: { botToken: "xoxb-1", appToken: "xapp-1", userToken: "xoxp-1" },
+      },
     } as MilaidyConfig;
     applyChannelSecretsToEnv(config);
     expect(process.env.SLACK_BOT_TOKEN).toBe("xoxb-1");
@@ -233,7 +260,9 @@ describe("applyChannelSecretsToEnv", () => {
 
   it("does not overwrite existing env values", () => {
     process.env.TELEGRAM_BOT_TOKEN = "already-set";
-    const config = { channels: { telegram: { botToken: "new-tok" } } } as MilaidyConfig;
+    const config = {
+      channels: { telegram: { botToken: "new-tok" } },
+    } as MilaidyConfig;
     applyChannelSecretsToEnv(config);
     expect(process.env.TELEGRAM_BOT_TOKEN).toBe("already-set");
   });
@@ -249,7 +278,9 @@ describe("applyChannelSecretsToEnv", () => {
   });
 
   it("handles unknown channel names gracefully", () => {
-    const config = { channels: { unknownChannel: { token: "tok" } } } as unknown as MilaidyConfig;
+    const config = {
+      channels: { unknownChannel: { token: "tok" } },
+    } as unknown as MilaidyConfig;
     expect(() => applyChannelSecretsToEnv(config)).not.toThrow();
   });
 });
@@ -259,13 +290,22 @@ describe("applyChannelSecretsToEnv", () => {
 // ---------------------------------------------------------------------------
 
 describe("applyCloudConfigToEnv", () => {
-  const envKeys = ["ELIZAOS_CLOUD_ENABLED", "ELIZAOS_CLOUD_API_KEY", "ELIZAOS_CLOUD_BASE_URL"];
+  const envKeys = [
+    "ELIZAOS_CLOUD_ENABLED",
+    "ELIZAOS_CLOUD_API_KEY",
+    "ELIZAOS_CLOUD_BASE_URL",
+  ];
   const snap = envSnapshot(envKeys);
-  beforeEach(() => { snap.save(); for (const k of envKeys) delete process.env[k]; });
+  beforeEach(() => {
+    snap.save();
+    for (const k of envKeys) delete process.env[k];
+  });
   afterEach(() => snap.restore());
 
   it("sets cloud env vars from config", () => {
-    const config = { cloud: { enabled: true, apiKey: "ck-123", baseUrl: "https://cloud.test" } } as MilaidyConfig;
+    const config = {
+      cloud: { enabled: true, apiKey: "ck-123", baseUrl: "https://cloud.test" },
+    } as MilaidyConfig;
     applyCloudConfigToEnv(config);
     expect(process.env.ELIZAOS_CLOUD_ENABLED).toBe("true");
     expect(process.env.ELIZAOS_CLOUD_API_KEY).toBe("ck-123");
@@ -291,17 +331,24 @@ describe("applyCloudConfigToEnv", () => {
 describe("buildCharacterFromConfig", () => {
   const envKeys = ["ANTHROPIC_API_KEY", "OPENAI_API_KEY"];
   const snap = envSnapshot(envKeys);
-  beforeEach(() => { snap.save(); for (const k of envKeys) delete process.env[k]; });
+  beforeEach(() => {
+    snap.save();
+    for (const k of envKeys) delete process.env[k];
+  });
   afterEach(() => snap.restore());
 
   it("uses agent name from agents.list", () => {
-    const config = { agents: { list: [{ id: "main", name: "Sakuya" }] } } as MilaidyConfig;
+    const config = {
+      agents: { list: [{ id: "main", name: "Sakuya" }] },
+    } as MilaidyConfig;
     const char = buildCharacterFromConfig(config);
     expect(char.name).toBe("Sakuya");
   });
 
   it("falls back to config.ui.assistant.name", () => {
-    const config = { ui: { assistant: { name: "Reimu" } } } as unknown as MilaidyConfig;
+    const config = {
+      ui: { assistant: { name: "Reimu" } },
+    } as unknown as MilaidyConfig;
     const char = buildCharacterFromConfig(config);
     expect(char.name).toBe("Reimu");
   });
@@ -326,7 +373,9 @@ describe("buildCharacterFromConfig", () => {
   });
 
   it("uses default bio and system prompt (character data lives in DB)", () => {
-    const config = { agents: { list: [{ id: "main", name: "Test" }] } } as MilaidyConfig;
+    const config = {
+      agents: { list: [{ id: "main", name: "Test" }] },
+    } as MilaidyConfig;
     const char = buildCharacterFromConfig(config);
     const bioText = Array.isArray(char.bio) ? char.bio.join(" ") : char.bio;
     expect(bioText).toContain("AI assistant");
@@ -336,7 +385,9 @@ describe("buildCharacterFromConfig", () => {
   // ── Default template fields (character data is in the DB) ────────────
 
   it("uses default bio with {{name}} placeholder", () => {
-    const config = { agents: { list: [{ id: "main", name: "Sakuya" }] } } as MilaidyConfig;
+    const config = {
+      agents: { list: [{ id: "main", name: "Sakuya" }] },
+    } as MilaidyConfig;
     const char = buildCharacterFromConfig(config);
     expect(Array.isArray(char.bio)).toBe(true);
     const bioArr = char.bio as string[];
@@ -344,7 +395,9 @@ describe("buildCharacterFromConfig", () => {
   });
 
   it("uses default system prompt with {{name}} placeholder", () => {
-    const config = { agents: { list: [{ id: "main", name: "Sakuya" }] } } as MilaidyConfig;
+    const config = {
+      agents: { list: [{ id: "main", name: "Sakuya" }] },
+    } as MilaidyConfig;
     const char = buildCharacterFromConfig(config);
     expect(char.system).toContain("{{name}}");
   });
@@ -395,12 +448,16 @@ describe("resolvePrimaryModel", () => {
   });
 
   it("returns the primary model when configured", () => {
-    const config = { agents: { defaults: { model: { primary: "gpt-5" } } } } as MilaidyConfig;
+    const config = {
+      agents: { defaults: { model: { primary: "gpt-5" } } },
+    } as MilaidyConfig;
     expect(resolvePrimaryModel(config)).toBe("gpt-5");
   });
 
   it("returns undefined when model has no primary", () => {
-    const config = { agents: { defaults: { model: { fallbacks: ["gpt-5-mini"] } } } } as unknown as MilaidyConfig;
+    const config = {
+      agents: { defaults: { model: { fallbacks: ["gpt-5-mini"] } } },
+    } as unknown as MilaidyConfig;
     expect(resolvePrimaryModel(config)).toBeUndefined();
   });
 });
@@ -423,7 +480,10 @@ describe("resolvePackageEntry", () => {
   it("resolves entry from package.json main field", async () => {
     const pkgRoot = path.join(tmpDir, "plugin-a");
     await fs.mkdir(path.join(pkgRoot, "dist"), { recursive: true });
-    await fs.writeFile(path.join(pkgRoot, "dist", "index.js"), "export default {}");
+    await fs.writeFile(
+      path.join(pkgRoot, "dist", "index.js"),
+      "export default {}",
+    );
     await fs.writeFile(
       path.join(pkgRoot, "package.json"),
       JSON.stringify({ main: "./dist/index.js" }),
@@ -436,7 +496,10 @@ describe("resolvePackageEntry", () => {
   it("resolves entry from package.json exports string", async () => {
     const pkgRoot = path.join(tmpDir, "plugin-b");
     await fs.mkdir(path.join(pkgRoot, "lib"), { recursive: true });
-    await fs.writeFile(path.join(pkgRoot, "lib", "main.js"), "export default {}");
+    await fs.writeFile(
+      path.join(pkgRoot, "lib", "main.js"),
+      "export default {}",
+    );
     await fs.writeFile(
       path.join(pkgRoot, "package.json"),
       JSON.stringify({ exports: "./lib/main.js" }),
@@ -449,7 +512,10 @@ describe("resolvePackageEntry", () => {
   it("resolves entry from package.json exports map (dot entry)", async () => {
     const pkgRoot = path.join(tmpDir, "plugin-c");
     await fs.mkdir(path.join(pkgRoot, "dist"), { recursive: true });
-    await fs.writeFile(path.join(pkgRoot, "dist", "index.js"), "export default {}");
+    await fs.writeFile(
+      path.join(pkgRoot, "dist", "index.js"),
+      "export default {}",
+    );
     await fs.writeFile(
       path.join(pkgRoot, "package.json"),
       JSON.stringify({
@@ -466,7 +532,10 @@ describe("resolvePackageEntry", () => {
   it("resolves entry from exports dot-string shorthand", async () => {
     const pkgRoot = path.join(tmpDir, "plugin-d");
     await fs.mkdir(path.join(pkgRoot, "out"), { recursive: true });
-    await fs.writeFile(path.join(pkgRoot, "out", "mod.js"), "export default {}");
+    await fs.writeFile(
+      path.join(pkgRoot, "out", "mod.js"),
+      "export default {}",
+    );
     await fs.writeFile(
       path.join(pkgRoot, "package.json"),
       JSON.stringify({ exports: { ".": "./out/mod.js" } }),

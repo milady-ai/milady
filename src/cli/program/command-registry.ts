@@ -6,7 +6,10 @@ import { registerSetupCommand } from "./register.setup.js";
 import { registerStartCommand } from "./register.start.js";
 import { registerSubCliCommands } from "./register.subclis.js";
 
-export function registerProgramCommands(program: Command, argv: string[] = process.argv) {
+export function registerProgramCommands(
+  program: Command,
+  argv: string[] = process.argv,
+) {
   registerStartCommand(program);
   registerSetupCommand(program);
   registerConfigureCommand(program);

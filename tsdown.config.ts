@@ -16,17 +16,20 @@ export default defineConfig([
     env,
     fixedExtension: false,
     platform: "node",
+    inlineOnly: false,
   },
   {
     entry: "src/runtime/eliza.ts",
     env,
     fixedExtension: false,
     platform: "node",
+    inlineOnly: false,
   },
   {
     entry: "src/api/server.ts",
     env,
     fixedExtension: false,
     platform: "node",
+    inlineOnly: false,
   },
 ]);

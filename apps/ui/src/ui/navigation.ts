@@ -17,6 +17,7 @@ const TAB_PATHS: Record<Tab, string> = {
   plugins: "/plugins",
   marketplace: "/marketplace",
   skills: "/skills",
+  database: "/database",
   config: "/config",
   logs: "/logs",
 };
@@ -69,6 +70,7 @@ export function titleForTab(tab: Tab): string {
     case "plugins": return "Plugins";
     case "marketplace": return "Marketplace";
     case "skills": return "Skills";
+    case "database": return "Database";
     case "config": return "Config";
     case "logs": return "Logs";
     default: return "Milaidy";
@@ -83,6 +85,7 @@ export function subtitleForTab(tab: Tab): string {
     case "plugins": return "Manage plugins and integrations.";
     case "marketplace": return "Install and review community plugins.";
     case "skills": return "View available skills.";
+    case "database": return "Browse, edit, and configure your database.";
     case "config": return "Agent settings and configuration.";
     case "logs": return "View agent logs.";
     default: return "";

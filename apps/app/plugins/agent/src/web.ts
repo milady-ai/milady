@@ -21,6 +21,21 @@ export class AgentWeb extends WebPlugin implements AgentPlugin {
     return typeof global === "string" ? global : "";
   }
 
+  private apiToken(): string | null {
+    const global = typeof window !== "undefined"
+      ? (window as unknown as Record<string, unknown>).__MILAIDY_API_TOKEN__
+      : undefined;
+    if (typeof global === "string" && global.trim()) return global.trim();
+    if (typeof window === "undefined") return null;
+    const stored = window.sessionStorage.getItem("milaidy_api_token");
+    return stored && stored.trim() ? stored.trim() : null;
+  }
+
+  private authHeaders(): Record<string, string> {
+    const token = this.apiToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
   /** True when we can reach the API via HTTP. */
   private canReachApi(): boolean {
     const base = this.apiBase();
@@ -35,7 +50,10 @@ export class AgentWeb extends WebPlugin implements AgentPlugin {
     if (!this.canReachApi()) {
       return { state: "not_started", agentName: null, port: null, startedAt: null, error: "No API endpoint" };
     }
-    const res = await fetch(`${this.apiBase()}/api/agent/start`, { method: "POST" });
+    const res = await fetch(`${this.apiBase()}/api/agent/start`, {
+      method: "POST",
+      headers: this.authHeaders(),
+    });
     const data = await res.json();
     return data.status ?? data;
   }
@@ -44,7 +62,10 @@ export class AgentWeb extends WebPlugin implements AgentPlugin {
     if (!this.canReachApi()) {
       return { ok: false };
     }
-    const res = await fetch(`${this.apiBase()}/api/agent/stop`, { method: "POST" });
+    const res = await fetch(`${this.apiBase()}/api/agent/stop`, {
+      method: "POST",
+      headers: this.authHeaders(),
+    });
     return res.json();
   }
 
@@ -52,7 +73,9 @@ export class AgentWeb extends WebPlugin implements AgentPlugin {
     if (!this.canReachApi()) {
       return { state: "not_started", agentName: null, port: null, startedAt: null, error: "No API endpoint" };
     }
-    const res = await fetch(`${this.apiBase()}/api/status`);
+    const res = await fetch(`${this.apiBase()}/api/status`, {
+      headers: this.authHeaders(),
+    });
     return res.json();
   }
 
@@ -62,7 +85,7 @@ export class AgentWeb extends WebPlugin implements AgentPlugin {
     }
     const res = await fetch(`${this.apiBase()}/api/chat`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...this.authHeaders() },
       body: JSON.stringify({ text: options.text }),
     });
     return res.json();

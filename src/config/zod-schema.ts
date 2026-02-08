@@ -11,7 +11,11 @@ import {
   ModelsConfigSchema,
   TranscribeAudioSchema,
 } from "./zod-schema.core.js";
-import { HookMappingSchema, HooksGmailSchema, InternalHooksSchema } from "./zod-schema.hooks.js";
+import {
+  HookMappingSchema,
+  HooksGmailSchema,
+  InternalHooksSchema,
+} from "./zod-schema.hooks.js";
 import {
   BlueBubblesConfigSchema,
   DiscordConfigSchema,
@@ -51,7 +55,11 @@ const BindingsSchema = z
             accountId: z.string().optional(),
             peer: z
               .object({
-                kind: z.union([z.literal("dm"), z.literal("group"), z.literal("channel")]),
+                kind: z.union([
+                  z.literal("dm"),
+                  z.literal("group"),
+                  z.literal("channel"),
+                ]),
                 id: z.string(),
               })
               .strict()
@@ -95,7 +103,9 @@ const ExecApprovalForwardTargetSchema = z
 const ExecApprovalForwardingSchema = z
   .object({
     enabled: z.boolean().optional(),
-    mode: z.union([z.literal("session"), z.literal("targets"), z.literal("both")]).optional(),
+    mode: z
+      .union([z.literal("session"), z.literal("targets"), z.literal("both")])
+      .optional(),
     agentFilter: z.array(z.string()).optional(),
     sessionFilter: z.array(z.string()).optional(),
     targets: z.array(ExecApprovalForwardTargetSchema).optional(),
@@ -203,7 +213,9 @@ const MemoryQmdSchema = z
 const MemorySchema = z
   .object({
     backend: z.union([z.literal("builtin"), z.literal("qmd")]).optional(),
-    citations: z.union([z.literal("auto"), z.literal("on"), z.literal("off")]).optional(),
+    citations: z
+      .union([z.literal("auto"), z.literal("on"), z.literal("off")])
+      .optional(),
     qmd: MemoryQmdSchema.optional(),
   })
   .strict()
@@ -285,7 +297,9 @@ export const MilaidySchema = z
         lastRunVersion: z.string().optional(),
         lastRunCommit: z.string().optional(),
         lastRunCommand: z.string().optional(),
-        lastRunMode: z.union([z.literal("local"), z.literal("remote")]).optional(),
+        lastRunMode: z
+          .union([z.literal("local"), z.literal("remote")])
+          .optional(),
       })
       .strict()
       .optional(),
@@ -297,7 +311,9 @@ export const MilaidySchema = z
           .object({
             enabled: z.boolean().optional(),
             endpoint: z.string().optional(),
-            protocol: z.union([z.literal("http/protobuf"), z.literal("grpc")]).optional(),
+            protocol: z
+              .union([z.literal("http/protobuf"), z.literal("grpc")])
+              .optional(),
             headers: z.record(z.string(), z.string()).optional(),
             serviceName: z.string().optional(),
             traces: z.boolean().optional(),
@@ -349,14 +365,18 @@ export const MilaidySchema = z
         consoleStyle: z
           .union([z.literal("pretty"), z.literal("compact"), z.literal("json")])
           .optional(),
-        redactSensitive: z.union([z.literal("off"), z.literal("tools")]).optional(),
+        redactSensitive: z
+          .union([z.literal("off"), z.literal("tools")])
+          .optional(),
         redactPatterns: z.array(z.string()).optional(),
       })
       .strict()
       .optional(),
     update: z
       .object({
-        channel: z.union([z.literal("stable"), z.literal("beta"), z.literal("dev")]).optional(),
+        channel: z
+          .union([z.literal("stable"), z.literal("beta"), z.literal("dev")])
+          .optional(),
         checkOnStart: z.boolean().optional(),
       })
       .strict()
@@ -379,12 +399,17 @@ export const MilaidySchema = z
           .record(
             z
               .string()
-              .regex(/^[a-z0-9-]+$/, "Profile names must be alphanumeric with hyphens only"),
+              .regex(
+                /^[a-z0-9-]+$/,
+                "Profile names must be alphanumeric with hyphens only",
+              ),
             z
               .object({
                 cdpPort: z.number().int().min(1).max(65535).optional(),
                 cdpUrl: z.string().optional(),
-                driver: z.union([z.literal("cdp"), z.literal("extension")]).optional(),
+                driver: z
+                  .union([z.literal("cdp"), z.literal("extension")])
+                  .optional(),
                 color: HexColorSchema,
               })
               .strict()
@@ -417,7 +442,11 @@ export const MilaidySchema = z
             z
               .object({
                 provider: z.string(),
-                mode: z.union([z.literal("api_key"), z.literal("oauth"), z.literal("token")]),
+                mode: z.union([
+                  z.literal("api_key"),
+                  z.literal("oauth"),
+                  z.literal("token"),
+                ]),
                 email: z.string().optional(),
               })
               .strict(),
@@ -427,7 +456,9 @@ export const MilaidySchema = z
         cooldowns: z
           .object({
             billingBackoffHours: z.number().positive().optional(),
-            billingBackoffHoursByProvider: z.record(z.string(), z.number().positive()).optional(),
+            billingBackoffHoursByProvider: z
+              .record(z.string(), z.number().positive())
+              .optional(),
             billingMaxHours: z.number().positive().optional(),
             failureWindowHours: z.number().positive().optional(),
           })
@@ -547,7 +578,9 @@ export const MilaidySchema = z
           .optional(),
         auth: z
           .object({
-            mode: z.union([z.literal("token"), z.literal("password")]).optional(),
+            mode: z
+              .union([z.literal("token"), z.literal("password")])
+              .optional(),
             token: z.string().optional(),
             password: z.string().optional(),
             allowTailscale: z.boolean().optional(),
@@ -557,7 +590,13 @@ export const MilaidySchema = z
         trustedProxies: z.array(z.string()).optional(),
         tailscale: z
           .object({
-            mode: z.union([z.literal("off"), z.literal("serve"), z.literal("funnel")]).optional(),
+            mode: z
+              .union([
+                z.literal("off"),
+                z.literal("serve"),
+                z.literal("funnel"),
+              ])
+              .optional(),
             resetOnExit: z.boolean().optional(),
           })
           .strict()
@@ -565,7 +604,9 @@ export const MilaidySchema = z
         remote: z
           .object({
             url: z.string().optional(),
-            transport: z.union([z.literal("ssh"), z.literal("direct")]).optional(),
+            transport: z
+              .union([z.literal("ssh"), z.literal("direct")])
+              .optional(),
             token: z.string().optional(),
             password: z.string().optional(),
             tlsFingerprint: z.string().optional(),
@@ -623,7 +664,11 @@ export const MilaidySchema = z
                           .object({
                             maxPages: z.number().int().positive().optional(),
                             maxPixels: z.number().int().positive().optional(),
-                            minTextChars: z.number().int().nonnegative().optional(),
+                            minTextChars: z
+                              .number()
+                              .int()
+                              .nonnegative()
+                              .optional(),
                           })
                           .strict()
                           .optional(),
@@ -654,7 +699,11 @@ export const MilaidySchema = z
             browser: z
               .object({
                 mode: z
-                  .union([z.literal("auto"), z.literal("manual"), z.literal("off")])
+                  .union([
+                    z.literal("auto"),
+                    z.literal("manual"),
+                    z.literal("off"),
+                  ])
                   .optional(),
                 node: z.string().optional(),
               })
@@ -685,7 +734,12 @@ export const MilaidySchema = z
           .object({
             preferBrew: z.boolean().optional(),
             nodeManager: z
-              .union([z.literal("npm"), z.literal("pnpm"), z.literal("yarn"), z.literal("bun")])
+              .union([
+                z.literal("npm"),
+                z.literal("pnpm"),
+                z.literal("yarn"),
+                z.literal("bun"),
+              ])
               .optional(),
           })
           .strict()
@@ -739,7 +793,11 @@ export const MilaidySchema = z
             z.string(),
             z
               .object({
-                source: z.union([z.literal("npm"), z.literal("archive"), z.literal("path")]),
+                source: z.union([
+                  z.literal("npm"),
+                  z.literal("archive"),
+                  z.literal("path"),
+                ]),
                 spec: z.string().optional(),
                 sourcePath: z.string().optional(),
                 installPath: z.string().optional(),

@@ -3,9 +3,9 @@
  * Later sources win on name conflicts.
  */
 
-import { readFile, readdir, stat } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { readdir, readFile, stat } from "node:fs/promises";
 import { homedir } from "node:os";
+import { join, resolve } from "node:path";
 import { logger } from "@elizaos/core";
 import type {
   Hook,
@@ -45,7 +45,9 @@ function parseFrontmatter(content: string): ParsedHookFrontmatter | null {
         try {
           const metaStart = fmBlock.indexOf("metadata:");
           if (metaStart !== -1) {
-            const metaRest = fmBlock.slice(metaStart + "metadata:".length).trim();
+            const metaRest = fmBlock
+              .slice(metaStart + "metadata:".length)
+              .trim();
             const jsonMatch = metaRest.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
               result.metadata = JSON.parse(jsonMatch[0]);
@@ -65,7 +67,9 @@ function parseFrontmatter(content: string): ParsedHookFrontmatter | null {
   return result.name ? result : null;
 }
 
-function extractMetadata(frontmatter: ParsedHookFrontmatter): MilaidyHookMetadata | undefined {
+function extractMetadata(
+  frontmatter: ParsedHookFrontmatter,
+): MilaidyHookMetadata | undefined {
   const milaidy = frontmatter.metadata?.milaidy;
   if (!milaidy) return undefined;
 
@@ -198,7 +202,10 @@ export async function discoverHooks(
   }
 
   if (options.bundledDir) {
-    for (const entry of await scanHooksDir(options.bundledDir, "milaidy-bundled")) {
+    for (const entry of await scanHooksDir(
+      options.bundledDir,
+      "milaidy-bundled",
+    )) {
       seen.set(entry.hook.name, entry);
     }
   }

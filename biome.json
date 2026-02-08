@@ -1,6 +1,5 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.3.14/schema.json",
-  "extends": ["../biome.json"],
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -9,17 +8,18 @@
   "files": {
     "ignoreUnknown": true,
     "maxSize": 1048576,
-    "ignore": [
-      "apps/",
-      "assets/",
-      "dist/",
-      "docs/_layouts/",
-      "node_modules/",
-      "patches/",
-      "pnpm-lock.yaml",
-      "skills/",
-      "Swabble/",
-      "vendor/"
+    "includes": [
+      "**",
+      "!apps/**",
+      "!assets/**",
+      "!dist/**",
+      "!docs/_layouts/**",
+      "!node_modules/**",
+      "!patches/**",
+      "!pnpm-lock.yaml",
+      "!skills/**",
+      "!Swabble/**",
+      "!vendor/**"
     ]
   },
   "assist": {

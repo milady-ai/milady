@@ -34,12 +34,18 @@ describe("isSafeExecutableValue", () => {
   });
 
   describe("accepts safe bare executable names", () => {
-    it.each(["python3", "node", "ffmpeg", "my-tool", "my_tool", "my.tool", "tool+extra", "a"])(
-      "accepts %j",
-      (input) => {
-        expect(isSafeExecutableValue(input)).toBe(true);
-      },
-    );
+    it.each([
+      "python3",
+      "node",
+      "ffmpeg",
+      "my-tool",
+      "my_tool",
+      "my.tool",
+      "tool+extra",
+      "a",
+    ])("accepts %j", (input) => {
+      expect(isSafeExecutableValue(input)).toBe(true);
+    });
   });
 
   describe("accepts path-like values", () => {
@@ -72,11 +78,14 @@ describe("isSafeExecutableValue", () => {
   });
 
   describe("rejects bare names with invalid characters", () => {
-    it.each(["name with space", "hello world", "foo@bar", "x#y", "a%b"])(
-      "rejects %j",
-      (input) => {
-        expect(isSafeExecutableValue(input)).toBe(false);
-      },
-    );
+    it.each([
+      "name with space",
+      "hello world",
+      "foo@bar",
+      "x#y",
+      "a%b",
+    ])("rejects %j", (input) => {
+      expect(isSafeExecutableValue(input)).toBe(false);
+    });
   });
 });

@@ -17,7 +17,10 @@ function setProcessTitleForCommand(actionCommand: Command) {
   process.title = `${cliName}-${name}`;
 }
 
-export function registerPreActionHooks(program: Command, programVersion: string) {
+export function registerPreActionHooks(
+  program: Command,
+  programVersion: string,
+) {
   program.hook("preAction", async (_thisCommand, actionCommand) => {
     setProcessTitleForCommand(actionCommand);
     const argv = process.argv;

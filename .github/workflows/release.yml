@@ -106,6 +106,7 @@ jobs:
         run: |
           bunx tsdown
           node --import tsx scripts/write-build-info.ts
+          echo '{"type":"module"}' > dist/package.json
 
       - name: Build UI
         run: node scripts/ui.js build
@@ -144,8 +145,8 @@ jobs:
         working-directory: apps/app/electron
 
       # ── Code signing & notarization ────────────────────────────────────
-      # macOS: electron-builder auto-notarizes when hardenedRuntime is true
-      # and the APPLE_ID / APPLE_APP_SPECIFIC_PASSWORD env vars are set.
+      # macOS: electron-builder v25+ notarizes via the "notarize": true
+      # config in electron-builder.config.json when these env vars are set.
       #
       # Required GitHub Secrets for Gatekeeper-clean macOS builds:
       #   CSC_LINK                     – base64-encoded .p12 signing certificate
@@ -154,24 +155,20 @@ jobs:
       #   APPLE_APP_SPECIFIC_PASSWORD  – app-specific password (appleid.apple.com)
       #   APPLE_TEAM_ID                – Apple Developer Team ID
       #
-      # Windows signing via Azure Trusted Signing ($10/mo managed service):
+      # Windows signing via Azure Trusted Signing:
       #   AZURE_TENANT_ID              – Azure AD (Entra ID) tenant/directory ID
       #   AZURE_CLIENT_ID              – App Registration application (client) ID
       #   AZURE_CLIENT_SECRET          – App Registration client secret value
-      #   The azureSignOptions in electron-builder.config.json point to the
-      #   Trusted Signing account + certificate profile. electron-builder
-      #   auto-detects Azure signing when these env vars are set.
       #
-      # If secrets are not set, builds will still succeed but won't be
-      # signed/notarized (Gatekeeper will show warnings on macOS,
-      # SmartScreen will warn on Windows).
+      # If secrets are not set or signing fails, builds still produce
+      # unsigned installers (Gatekeeper/SmartScreen will show warnings).
       - name: Package desktop app
         run: |
           # Unset empty signing env vars — electron-builder treats "" as an invalid file path
           [ -z "$CSC_LINK" ] && unset CSC_LINK CSC_KEY_PASSWORD
           [ -z "$APPLE_ID" ] && unset APPLE_ID APPLE_APP_SPECIFIC_PASSWORD APPLE_TEAM_ID
           [ -z "$AZURE_TENANT_ID" ] && unset AZURE_TENANT_ID AZURE_CLIENT_ID AZURE_CLIENT_SECRET
-          bunx electron-builder build ${{ matrix.platform.electron-args }} -c ./electron-builder.config.json
+          bunx electron-builder build ${{ matrix.platform.electron-args }} -c ./electron-builder.config.json -p never
         working-directory: apps/app/electron
         shell: bash
         env:
@@ -185,7 +182,22 @@ jobs:
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
 
+      # If signing failed, retry without signing so we still get an unsigned artifact
+      - name: Package desktop app (unsigned fallback)
+        if: failure()
+        run: |
+          echo "⚠️  Signing failed — building unsigned fallback"
+          rm -rf dist/win-unpacked dist/mac dist/mac-arm64 dist/linux-unpacked 2>/dev/null || true
+          unset CSC_LINK CSC_KEY_PASSWORD APPLE_ID APPLE_APP_SPECIFIC_PASSWORD APPLE_TEAM_ID
+          unset AZURE_TENANT_ID AZURE_CLIENT_ID AZURE_CLIENT_SECRET
+          CSC_IDENTITY_AUTO_DISCOVERY=false bunx electron-builder build ${{ matrix.platform.electron-args }} -c ./electron-builder.config.json -p never
+        working-directory: apps/app/electron
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Upload build artifacts
+        if: "!cancelled()"
         uses: actions/upload-artifact@v4
         with:
           name: desktop-${{ matrix.platform.artifact-name }}
@@ -195,12 +207,16 @@ jobs:
             apps/app/electron/dist/*.exe
             apps/app/electron/dist/*.AppImage
             apps/app/electron/dist/*.deb
-          if-no-files-found: error
+            apps/app/electron/dist/*.yml
+            apps/app/electron/dist/*.blockmap
+          if-no-files-found: warn
           retention-days: 30
 
   release:
     name: Create Release
     needs: [prepare, build-desktop]
+    # Run even if some builds failed — release whatever succeeded
+    if: "!cancelled()"
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -214,9 +230,10 @@ jobs:
           path: release-artifacts
           pattern: desktop-*
           merge-multiple: false
+        continue-on-error: true
 
       - name: List artifacts
-        run: find release-artifacts -type f | sort
+        run: find release-artifacts -type f | sort 2>/dev/null || echo "No artifacts found"
 
       - name: Collect release files
         run: |
@@ -226,12 +243,26 @@ jobs:
             -name "*.zip" -o \
             -name "*.exe" -o \
             -name "*.AppImage" -o \
-            -name "*.deb" \
-          \) -exec cp {} release-files/ \;
+            -name "*.deb" -o \
+            -name "*.yml" -o \
+            -name "*.blockmap" \
+          \) -exec cp {} release-files/ \; 2>/dev/null || true
           echo "Release files:"
-          ls -lh release-files/
+          ls -lh release-files/ 2>/dev/null || echo "No release files"
+
+      - name: Check for releasable files
+        id: check
+        run: |
+          count=$(find release-files -type f \( -name "*.dmg" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" \) 2>/dev/null | wc -l)
+          echo "file_count=$count" >> "$GITHUB_OUTPUT"
+          if [ "$count" -eq 0 ]; then
+            echo "::warning::No installer files found — skipping release creation"
+          else
+            echo "Found $count installer file(s) to release"
+          fi
 
       - name: Generate checksums
+        if: steps.check.outputs.file_count != '0'
         run: |
           cd release-files
           sha256sum * > SHA256SUMS.txt
@@ -239,6 +270,7 @@ jobs:
           cat SHA256SUMS.txt
 
       - name: Create GitHub Release
+        if: steps.check.outputs.file_count != '0'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.prepare.outputs.tag }}

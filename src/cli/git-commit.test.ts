@@ -65,7 +65,10 @@ describe("resolveCommitHash", () => {
         await fs.mkdir(gitDir, { recursive: true });
         await fs.writeFile(path.join(gitDir, "HEAD"), "abc1234567890def\n");
 
-        const result = await freshResolveCommitHash({ cwd: tmp, env: {} as NodeJS.ProcessEnv });
+        const result = await freshResolveCommitHash({
+          cwd: tmp,
+          env: {} as NodeJS.ProcessEnv,
+        });
         expect(result).toBe("abc1234");
       } finally {
         await fs.rm(tmp, { recursive: true, force: true });
@@ -81,7 +84,10 @@ describe("resolveCommitHash", () => {
         await fs.writeFile(path.join(gitDir, "HEAD"), "ref: refs/heads/main\n");
         await fs.writeFile(path.join(refsDir, "main"), "deadbeef1234567\n");
 
-        const result = await freshResolveCommitHash({ cwd: tmp, env: {} as NodeJS.ProcessEnv });
+        const result = await freshResolveCommitHash({
+          cwd: tmp,
+          env: {} as NodeJS.ProcessEnv,
+        });
         expect(result).toBe("deadbee");
       } finally {
         await fs.rm(tmp, { recursive: true, force: true });
@@ -96,7 +102,10 @@ describe("resolveCommitHash", () => {
         await fs.writeFile(path.join(realGitDir, "HEAD"), "cafe123456789ab\n");
         await fs.writeFile(path.join(tmp, ".git"), `gitdir: ${realGitDir}\n`);
 
-        const result = await freshResolveCommitHash({ cwd: tmp, env: {} as NodeJS.ProcessEnv });
+        const result = await freshResolveCommitHash({
+          cwd: tmp,
+          env: {} as NodeJS.ProcessEnv,
+        });
         expect(result).toBe("cafe123");
       } finally {
         await fs.rm(tmp, { recursive: true, force: true });
@@ -112,7 +121,10 @@ describe("resolveCommitHash", () => {
         const nested = path.join(tmp, "a", "b", "c");
         await fs.mkdir(nested, { recursive: true });
 
-        const result = await freshResolveCommitHash({ cwd: nested, env: {} as NodeJS.ProcessEnv });
+        const result = await freshResolveCommitHash({
+          cwd: nested,
+          env: {} as NodeJS.ProcessEnv,
+        });
         expect(result).toBe("bbb1234");
       } finally {
         await fs.rm(tmp, { recursive: true, force: true });
@@ -124,7 +136,10 @@ describe("resolveCommitHash", () => {
     it("returns null when no git info is available", async () => {
       const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "milaidy-git-"));
       try {
-        const result = await freshResolveCommitHash({ cwd: tmp, env: {} as NodeJS.ProcessEnv });
+        const result = await freshResolveCommitHash({
+          cwd: tmp,
+          env: {} as NodeJS.ProcessEnv,
+        });
         expect(result).toBeNull();
       } finally {
         await fs.rm(tmp, { recursive: true, force: true });
@@ -138,7 +153,10 @@ describe("resolveCommitHash", () => {
         await fs.mkdir(gitDir, { recursive: true });
         await fs.writeFile(path.join(gitDir, "HEAD"), "  \n");
 
-        const result = await freshResolveCommitHash({ cwd: tmp, env: {} as NodeJS.ProcessEnv });
+        const result = await freshResolveCommitHash({
+          cwd: tmp,
+          env: {} as NodeJS.ProcessEnv,
+        });
         expect(result).toBeNull();
       } finally {
         await fs.rm(tmp, { recursive: true, force: true });
@@ -168,7 +186,10 @@ describe("resolveCommitHash", () => {
 
     it("GIT_COMMIT takes priority over GIT_SHA", async () => {
       const result = await freshResolveCommitHash({
-        env: { GIT_COMMIT: "commit1234567", GIT_SHA: "sha1234567890" } as NodeJS.ProcessEnv,
+        env: {
+          GIT_COMMIT: "commit1234567",
+          GIT_SHA: "sha1234567890",
+        } as NodeJS.ProcessEnv,
       });
       expect(result).toBe("commit1");
     });
@@ -178,8 +199,12 @@ describe("resolveCommitHash", () => {
     it("returns the same cached value on repeated calls", async () => {
       vi.resetModules();
       const mod = await import("./git-commit.js");
-      const first = mod.resolveCommitHash({ env: { GIT_COMMIT: "cached1" } as NodeJS.ProcessEnv });
-      const second = mod.resolveCommitHash({ env: { GIT_COMMIT: "different" } as NodeJS.ProcessEnv });
+      const first = mod.resolveCommitHash({
+        env: { GIT_COMMIT: "cached1" } as NodeJS.ProcessEnv,
+      });
+      const second = mod.resolveCommitHash({
+        env: { GIT_COMMIT: "different" } as NodeJS.ProcessEnv,
+      });
       expect(first).toBe("cached1");
       expect(second).toBe("cached1");
     });

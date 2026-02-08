@@ -412,3 +412,94 @@ test.describe("Config — private key export", () => {
     await expect(page.locator(".key-export-box")).not.toBeVisible();
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Edge cases — partial config, EVM-only, error states
+// ═══════════════════════════════════════════════════════════════════════════
+
+test.describe("Inventory — EVM only (no Helius key)", () => {
+  test("shows EVM tokens but no Solana section when only Alchemy is configured", async ({ page }) => {
+    await mockApi(page, { walletConfig: { alchemyKeySet: true, heliusKeySet: false } });
+    await page.goto("/");
+    await page.locator("a").filter({ hasText: "Inventory" }).click();
+    await page.waitForTimeout(1500);
+
+    // Should show EVM tokens (ETH row exists)
+    await expect(page.locator(".token-table tbody tr").filter({ hasText: "ETH" }).first()).toBeVisible();
+    // No SOL row since Helius is not set
+    const solRows = page.locator(".token-table tbody tr").filter({ hasText: "SOL" }).filter({ hasText: "Solana" });
+    expect(await solRows.count()).toBe(0);
+  });
+});
+
+test.describe("Inventory — Solana only (no Alchemy key)", () => {
+  test("shows Solana tokens but no EVM section when only Helius is configured", async ({ page }) => {
+    await mockApi(page, { walletConfig: { alchemyKeySet: false, heliusKeySet: true } });
+    await page.goto("/");
+    await page.locator("a").filter({ hasText: "Inventory" }).click();
+    await page.waitForTimeout(1500);
+
+    // Should show SOL row
+    await expect(page.locator(".token-table tbody tr").filter({ hasText: "SOL" }).first()).toBeVisible();
+    // No Ethereum chain rows
+    const ethRows = page.locator(".token-table tbody tr").filter({ hasText: "Ethereum" });
+    expect(await ethRows.count()).toBe(0);
+  });
+});
+
+test.describe("Header — EVM-only wallet address", () => {
+  test("shows only EVM address in tooltip when Solana is null", async ({ page }) => {
+    await mockApi(page, {
+      walletAddresses: { evmAddress: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", solanaAddress: null },
+    });
+    await page.goto("/");
+    await page.waitForTimeout(500);
+
+    const walletWrapper = page.locator(".wallet-wrapper");
+    await walletWrapper.hover();
+    await page.waitForTimeout(300);
+
+    await expect(page.locator("text=EVM")).toBeVisible();
+    // SOL label should not appear
+    await expect(page.locator(".wallet-addr-row").filter({ hasText: "SOL" })).not.toBeVisible();
+    // Only one copy button
+    const copyButtons = page.locator(".wallet-tooltip .copy-btn");
+    await expect(copyButtons).toHaveCount(1);
+  });
+});
+
+test.describe("Config — API keys show 'set' when configured", () => {
+  test("shows 'set' labels when keys are configured", async ({ page }) => {
+    await mockApi(page, { walletConfig: { alchemyKeySet: true, heliusKeySet: true, birdeyeKeySet: true } });
+    await page.goto("/");
+    await page.locator("a").filter({ hasText: "Config" }).click();
+    await page.waitForTimeout(500);
+
+    // All three keys should show "set"
+    const setLabels = page.locator("text=set").filter({ hasNotText: "not set" });
+    expect(await setLabels.count()).toBeGreaterThanOrEqual(3);
+  });
+});
+
+test.describe("Inventory — empty wallet", () => {
+  test("shows empty state when API keys are set but wallet has no tokens", async ({ page }) => {
+    // Override balance mock to return empty
+    await mockApi(page, { walletConfig: { alchemyKeySet: true, heliusKeySet: true } });
+
+    // Override the balance endpoint to return empty data
+    await page.route("**/api/wallet/balances", async (route) => {
+      await route.fulfill({
+        status: 200, contentType: "application/json",
+        body: JSON.stringify({ evm: { address: "0xtest", chains: [] }, solana: { address: "test", solBalance: "0", solValueUsd: "0", tokens: [] } }),
+      });
+    });
+
+    await page.goto("/");
+    await page.locator("a").filter({ hasText: "Inventory" }).click();
+    await page.waitForTimeout(1500);
+
+    // Should show the table but with just SOL native row
+    const tableWrap = page.locator(".token-table-wrap");
+    await expect(tableWrap).toBeVisible();
+  });
+});

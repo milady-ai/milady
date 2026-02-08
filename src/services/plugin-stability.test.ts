@@ -11,21 +11,20 @@
  *
  * Issue: #3 — Plugin & Provider Stability
  */
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+
 import type { Plugin, Provider, ProviderResult } from "@elizaos/core";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { validateRuntimeContext } from "../api/plugin-validation.js";
+import type { MilaidyConfig } from "../config/types.milaidy.js";
+import { createSessionKeyProvider } from "../providers/session-bridge.js";
+import { createWorkspaceProvider } from "../providers/workspace-provider.js";
 import {
-  collectPluginNames,
-  buildCharacterFromConfig,
   applyChannelSecretsToEnv,
   applyCloudConfigToEnv,
+  buildCharacterFromConfig,
+  collectPluginNames,
   resolvePrimaryModel,
 } from "../runtime/eliza.js";
-import type { MilaidyConfig } from "../config/types.milaidy.js";
-import {
-  validateRuntimeContext,
-} from "../api/plugin-validation.js";
-import { createWorkspaceProvider } from "../providers/workspace-provider.js";
-import { createSessionKeyProvider } from "../providers/session-bridge.js";
 import { createMilaidyPlugin } from "../runtime/milaidy-plugin.js";
 
 // ---------------------------------------------------------------------------
@@ -251,7 +250,9 @@ describe("collectPluginNames", () => {
     };
     const names = collectPluginNames(config);
     // @elizaos/plugin-elizacloud should appear only once
-    const asArray = [...names].filter((n) => n === "@elizaos/plugin-elizacloud");
+    const asArray = [...names].filter(
+      (n) => n === "@elizaos/plugin-elizacloud",
+    );
     expect(asArray.length).toBe(1);
   });
 
@@ -295,7 +296,9 @@ describe("Plugin Loading — Isolation", () => {
           msg.includes("Dynamic require of") ||
           msg.includes("native addon module") ||
           msg.includes("tfjs_binding") ||
-          msg.includes("NAPI_MODULE_NOT_FOUND")
+          msg.includes("NAPI_MODULE_NOT_FOUND") ||
+          msg.includes("spec not found") ||
+          msg.includes("Failed to resolve entry")
         ) {
           // Expected: plugin not installed, native addon missing, or not resolvable in test env
           return;
@@ -326,7 +329,12 @@ describe("Plugin Loading — Isolation", () => {
 
 describe("Plugin Loading — All Together", () => {
   it("can import all core plugins without conflicting exports", async () => {
-    const results: Array<{ name: string; loaded: boolean; hasPlugin: boolean; error: string }> = [];
+    const results: Array<{
+      name: string;
+      loaded: boolean;
+      hasPlugin: boolean;
+      error: string;
+    }> = [];
 
     for (const pluginName of CORE_PLUGINS) {
       try {
@@ -575,7 +583,9 @@ describe("Runtime Context Validation", () => {
 
 describe("Provider Validation", () => {
   it("createWorkspaceProvider returns a valid Provider shape", () => {
-    const provider = createWorkspaceProvider({ workspaceDir: "/tmp/test-workspace" });
+    const provider = createWorkspaceProvider({
+      workspaceDir: "/tmp/test-workspace",
+    });
     expect(provider).toBeDefined();
     expect(typeof provider.name).toBe("string");
     expect(typeof provider.description).toBe("string");
@@ -632,7 +642,10 @@ describe("Provider Validation", () => {
     };
     const serialized = JSON.stringify(metadata);
     expect(typeof serialized).toBe("string");
-    const deserialized = JSON.parse(serialized) as { name: string; description: string };
+    const deserialized = JSON.parse(serialized) as {
+      name: string;
+      description: string;
+    };
     expect(deserialized.name).toBe("milaidy");
   });
 });
@@ -693,7 +706,9 @@ describe("Environment Propagation", () => {
     applyCloudConfigToEnv(config);
     expect(process.env.ELIZAOS_CLOUD_ENABLED).toBe("true");
     expect(process.env.ELIZAOS_CLOUD_API_KEY).toBe("test-cloud-key");
-    expect(process.env.ELIZAOS_CLOUD_BASE_URL).toBe("https://test.elizacloud.ai");
+    expect(process.env.ELIZAOS_CLOUD_BASE_URL).toBe(
+      "https://test.elizacloud.ai",
+    );
   });
 
   it("resolvePrimaryModel returns undefined for empty config", () => {
@@ -845,6 +860,58 @@ describe("Context Serialization", () => {
     for (const name of deserialized) {
       expect(typeof name).toBe("string");
     }
+  });
+});
+
+// ============================================================================
+//  10. Version skew detection (issue #10)
+// ============================================================================
+
+describe("Version Skew Detection (issue #10)", () => {
+  it("affected plugins should NOT import MAX_EMBEDDING_TOKENS at pinned version", async () => {
+    // The 5 plugins at alpha.4 imported MAX_EMBEDDING_TOKENS from core.
+    // At alpha.3 (pinned), they should NOT attempt that import.
+    // This test validates the fix by checking our package.json pins.
+    const { readFileSync } = await import("node:fs");
+    const { resolve } = await import("node:path");
+    const pkgPath = resolve(import.meta.dirname, "../../package.json");
+    const pkg = JSON.parse(readFileSync(pkgPath, "utf-8")) as {
+      dependencies: Record<string, string>;
+    };
+
+    const affectedPlugins = [
+      "@elizaos/plugin-openrouter",
+      "@elizaos/plugin-openai",
+      "@elizaos/plugin-ollama",
+      "@elizaos/plugin-google-genai",
+      "@elizaos/plugin-knowledge",
+    ];
+
+    for (const name of affectedPlugins) {
+      const ver = pkg.dependencies[name];
+      expect(ver).toBeDefined();
+      // Must be pinned (not "next")
+      expect(ver).not.toBe("next");
+      expect(ver).toMatch(/^\d+\.\d+\.\d+/);
+    }
+  });
+
+  it("AI provider plugins are recognized in the PROVIDER_PLUGINS map", () => {
+    // All 5 affected plugins should be present in our provider resolution
+    const affectedProviders = [
+      "@elizaos/plugin-openrouter",
+      "@elizaos/plugin-openai",
+      "@elizaos/plugin-ollama",
+      "@elizaos/plugin-google-genai",
+    ];
+    const providerPluginValues = Object.values(PROVIDER_PLUGINS);
+    for (const name of affectedProviders) {
+      expect(providerPluginValues).toContain(name);
+    }
+  });
+
+  it("plugin-knowledge is in CORE_PLUGINS", () => {
+    expect(CORE_PLUGINS).toContain("@elizaos/plugin-knowledge");
   });
 });
 

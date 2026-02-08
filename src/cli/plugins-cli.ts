@@ -1,5 +1,5 @@
-import type { Command } from "commander";
 import chalk from "chalk";
+import type { Command } from "commander";
 
 /**
  * Normalize a user-provided plugin name to its fully-qualified form.
@@ -12,7 +12,12 @@ function normalizePluginName(name: string): string {
   return `@elizaos/plugin-${name}`;
 }
 
-function clampInt(raw: string, min: number, max: number, fallback: number): number {
+function clampInt(
+  raw: string,
+  min: number,
+  max: number,
+  fallback: number,
+): number {
   const parsed = Number.parseInt(raw, 10);
   if (!Number.isFinite(parsed)) {
     return fallback;
@@ -23,7 +28,9 @@ function clampInt(raw: string, min: number, max: number, fallback: number): numb
 export function registerPluginsCli(program: Command): void {
   const pluginsCommand = program
     .command("plugins")
-    .description("Browse, search, install, and manage ElizaOS plugins from the registry");
+    .description(
+      "Browse, search, install, and manage ElizaOS plugins from the registry",
+    );
 
   // ── list ─────────────────────────────────────────────────────────────
   pluginsCommand
@@ -32,9 +39,16 @@ export function registerPluginsCli(program: Command): void {
     .option("-q, --query <query>", "Filter plugins by name or keyword")
     .option("-l, --limit <number>", "Max results to show", "30")
     .action(async (opts: { query?: string; limit: string }) => {
-      const { getRegistryPlugins, searchPlugins } = await import("../services/registry-client.js");
+      const { getRegistryPlugins, searchPlugins } = await import(
+        "../services/registry-client.js"
+      );
+      const { listInstalledPlugins } = await import(
+        "../services/plugin-installer.js"
+      );
 
       const limit = clampInt(opts.limit, 1, 500, 30);
+      const installed = await listInstalledPlugins();
+      const installedNames = new Set(installed.map((p) => p.name));
 
       if (opts.query) {
         const results = await searchPlugins(opts.query, limit);
@@ -44,22 +58,34 @@ export function registerPluginsCli(program: Command): void {
           return;
         }
 
-        console.log(`\n${chalk.bold(`Found ${results.length} plugins matching "${opts.query}":`)}\n`);
+        console.log(
+          `\n${chalk.bold(`Found ${results.length} plugins matching "${opts.query}":`)}\n`,
+        );
         for (const r of results) {
           const versionBadges: string[] = [];
           if (r.supports.v0) versionBadges.push("v0");
           if (r.supports.v1) versionBadges.push("v1");
           if (r.supports.v2) versionBadges.push("v2");
 
-          console.log(`  ${chalk.cyan(r.name)} ${r.latestVersion ? chalk.dim(`v${r.latestVersion}`) : ""}`);
+          const badge = installedNames.has(r.name)
+            ? chalk.green(" ✓ installed")
+            : "";
+
+          console.log(
+            `  ${chalk.cyan(r.name)} ${r.latestVersion ? chalk.dim(`v${r.latestVersion}`) : ""}${badge}`,
+          );
           if (r.description) {
             console.log(`    ${r.description}`);
           }
           if (r.tags.length > 0) {
-            console.log(`    ${chalk.dim(`tags: ${r.tags.slice(0, 5).join(", ")}`)}`);
+            console.log(
+              `    ${chalk.dim(`tags: ${r.tags.slice(0, 5).join(", ")}`)}`,
+            );
           }
           if (versionBadges.length > 0) {
-            console.log(`    ${chalk.dim(`supports: ${versionBadges.join(", ")}`)}`);
+            console.log(
+              `    ${chalk.dim(`supports: ${versionBadges.join(", ")}`)}`,
+            );
           }
           console.log();
         }
@@ -67,7 +93,12 @@ export function registerPluginsCli(program: Command): void {
         const registry = await getRegistryPlugins();
         const all = Array.from(registry.values());
 
-        console.log(`\n${chalk.bold(`${all.length} plugins available in registry:`)}\n`);
+        const installedCount = all.filter((p) =>
+          installedNames.has(p.name),
+        ).length;
+        console.log(
+          `\n${chalk.bold(`${all.length} plugins available in registry`)}${installedCount > 0 ? chalk.green(` (${installedCount} installed)`) : ""}${chalk.bold(":")}\n`,
+        );
 
         const sorted = all
           .sort((a, b) => a.name.localeCompare(b.name))
@@ -75,18 +106,29 @@ export function registerPluginsCli(program: Command): void {
 
         for (const plugin of sorted) {
           const desc = plugin.description ? ` — ${plugin.description}` : "";
-          console.log(`  ${chalk.cyan(plugin.name)}${chalk.dim(desc)}`);
+          const badge = installedNames.has(plugin.name)
+            ? chalk.green(" ✓")
+            : "";
+          console.log(`  ${chalk.cyan(plugin.name)}${badge}${chalk.dim(desc)}`);
         }
 
         if (all.length > limit) {
-          console.log(chalk.dim(`\n  ... and ${all.length - limit} more (use --limit to show more)`));
+          console.log(
+            chalk.dim(
+              `\n  ... and ${all.length - limit} more (use --limit to show more)`,
+            ),
+          );
         }
 
         console.log();
       }
 
-      console.log(chalk.dim("Install a plugin: milaidy plugins install <name>"));
-      console.log(chalk.dim("Search:           milaidy plugins list -q <keyword>"));
+      console.log(
+        chalk.dim("Install a plugin: milaidy plugins install <name>"),
+      );
+      console.log(
+        chalk.dim("Search:           milaidy plugins list -q <keyword>"),
+      );
       console.log();
     });
 
@@ -106,11 +148,15 @@ export function registerPluginsCli(program: Command): void {
         return;
       }
 
-      console.log(`\n${chalk.bold(`${results.length} results for "${query}":`)}\n`);
+      console.log(
+        `\n${chalk.bold(`${results.length} results for "${query}":`)}\n`,
+      );
 
       for (const r of results) {
         const match = (r.score * 100).toFixed(0);
-        console.log(`  ${chalk.cyan(r.name)} ${chalk.dim(`(${match}% match)`)}`);
+        console.log(
+          `  ${chalk.cyan(r.name)} ${chalk.dim(`(${match}% match)`)}`,
+        );
         if (r.description) {
           console.log(`    ${r.description}`);
         }
@@ -134,7 +180,11 @@ export function registerPluginsCli(program: Command): void {
 
       if (!info) {
         console.log(`\n${chalk.red("Not found:")} ${normalizedName}`);
-        console.log(chalk.dim("Run 'milaidy plugins search <keyword>' to find plugins.\n"));
+        console.log(
+          chalk.dim(
+            "Run 'milaidy plugins search <keyword>' to find plugins.\n",
+          ),
+        );
         return;
       }
 
@@ -146,7 +196,9 @@ export function registerPluginsCli(program: Command): void {
         console.log(`\n  ${info.description}`);
       }
 
-      console.log(`\n  ${chalk.dim("Repository:")}  https://github.com/${info.gitRepo}`);
+      console.log(
+        `\n  ${chalk.dim("Repository:")}  https://github.com/${info.gitRepo}`,
+      );
       if (info.homepage) {
         console.log(`  ${chalk.dim("Homepage:")}    ${info.homepage}`);
       }
@@ -173,7 +225,9 @@ export function registerPluginsCli(program: Command): void {
         console.log(`  ${chalk.dim("Supports:")}    ${supported.join(", ")}`);
       }
 
-      console.log(`\n  Install: ${chalk.cyan(`milaidy plugins install ${info.name}`)}\n`);
+      console.log(
+        `\n  Install: ${chalk.cyan(`milaidy plugins install ${info.name}`)}\n`,
+      );
     });
 
   // ── install ──────────────────────────────────────────────────────────
@@ -182,13 +236,18 @@ export function registerPluginsCli(program: Command): void {
     .description("Install a plugin from the registry")
     .option("--no-restart", "Install without restarting the agent")
     .action(async (name: string, opts: { restart: boolean }) => {
-      const { installPlugin, installAndRestart } = await import("../services/plugin-installer.js");
+      const { installPlugin, installAndRestart } = await import(
+        "../services/plugin-installer.js"
+      );
 
       const normalizedName = normalizePluginName(name);
 
       console.log(`\nInstalling ${chalk.cyan(normalizedName)}...\n`);
 
-      const progressHandler = (progress: { phase: string; message: string }) => {
+      const progressHandler = (progress: {
+        phase: string;
+        message: string;
+      }) => {
         console.log(`  [${progress.phase}] ${progress.message}`);
       };
 
@@ -197,11 +256,17 @@ export function registerPluginsCli(program: Command): void {
         : await installPlugin(normalizedName, progressHandler);
 
       if (result.success) {
-        console.log(`\n${chalk.green("Success!")} ${result.pluginName}@${result.version} installed.`);
+        console.log(
+          `\n${chalk.green("Success!")} ${result.pluginName}@${result.version} installed.`,
+        );
         if (result.requiresRestart && !opts.restart) {
-          console.log(chalk.yellow("\nRestart your agent to load the new plugin."));
+          console.log(
+            chalk.yellow("\nRestart your agent to load the new plugin."),
+          );
         } else if (result.requiresRestart) {
-          console.log(chalk.dim("Agent is restarting to load the new plugin..."));
+          console.log(
+            chalk.dim("Agent is restarting to load the new plugin..."),
+          );
         }
       } else {
         console.log(`\n${chalk.red("Failed:")} ${result.error}`);
@@ -216,7 +281,9 @@ export function registerPluginsCli(program: Command): void {
     .description("Uninstall a user-installed plugin")
     .option("--no-restart", "Uninstall without restarting the agent")
     .action(async (name: string, opts: { restart: boolean }) => {
-      const { uninstallPlugin, uninstallAndRestart } = await import("../services/plugin-installer.js");
+      const { uninstallPlugin, uninstallAndRestart } = await import(
+        "../services/plugin-installer.js"
+      );
 
       console.log(`\nUninstalling ${chalk.cyan(name)}...\n`);
 
@@ -225,7 +292,9 @@ export function registerPluginsCli(program: Command): void {
         : await uninstallPlugin(name);
 
       if (result.success) {
-        console.log(`${chalk.green("Success!")} ${result.pluginName} uninstalled.`);
+        console.log(
+          `${chalk.green("Success!")} ${result.pluginName} uninstalled.`,
+        );
         if (result.requiresRestart && !opts.restart) {
           console.log(chalk.yellow("\nRestart your agent to apply changes."));
         }
@@ -241,7 +310,9 @@ export function registerPluginsCli(program: Command): void {
     .command("installed")
     .description("List plugins installed from the registry")
     .action(async () => {
-      const { listInstalledPlugins } = await import("../services/plugin-installer.js");
+      const { listInstalledPlugins } = await import(
+        "../services/plugin-installer.js"
+      );
 
       const plugins = await listInstalledPlugins();
 
@@ -251,7 +322,9 @@ export function registerPluginsCli(program: Command): void {
         return;
       }
 
-      console.log(`\n${chalk.bold(`${plugins.length} user-installed plugins:`)}\n`);
+      console.log(
+        `\n${chalk.bold(`${plugins.length} user-installed plugins:`)}\n`,
+      );
       for (const p of plugins) {
         console.log(`  ${chalk.cyan(p.name)} ${chalk.dim(`v${p.version}`)}`);
         console.log(`    ${chalk.dim(`installed: ${p.installedAt}`)}`);
@@ -265,7 +338,9 @@ export function registerPluginsCli(program: Command): void {
     .command("refresh")
     .description("Force-refresh the plugin registry cache")
     .action(async () => {
-      const { refreshRegistry } = await import("../services/registry-client.js");
+      const { refreshRegistry } = await import(
+        "../services/registry-client.js"
+      );
 
       console.log("\nRefreshing registry cache...");
       const registry = await refreshRegistry();

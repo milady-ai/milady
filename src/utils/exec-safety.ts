@@ -11,7 +11,9 @@ function isLikelyPath(value: string): boolean {
   );
 }
 
-export function isSafeExecutableValue(value: string | null | undefined): boolean {
+export function isSafeExecutableValue(
+  value: string | null | undefined,
+): boolean {
   const trimmed = value?.trim();
   if (!trimmed) return false;
   if (UNSAFE_CHARS.test(trimmed)) return false;

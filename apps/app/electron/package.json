@@ -1,6 +1,6 @@
 {
   "name": "Milaidy",
-  "version": "2.0.0-alpha.6",
+  "version": "2.0.0-alpha.7",
   "description": "Cute agents for the acceleration",
   "homepage": "https://github.com/milady-ai/milaidy",
   "author": {
@@ -15,10 +15,11 @@
   "main": "build/src/index.js",
   "scripts": {
     "build": "tsc && electron-rebuild",
+    "build:whisper": "bash ./scripts/build-whisper-universal.sh",
     "electron:start-live": "node ./live-runner.js",
     "electron:start": "bun run build && electron --inspect=5858 ./",
-    "electron:pack": "bun run build && electron-builder build --dir -c ./electron-builder.config.json",
-    "electron:make": "bun run build && electron-builder build -c ./electron-builder.config.json -p always"
+    "electron:pack": "bun run build && bun run build:whisper && electron-builder build --dir -c ./electron-builder.config.json",
+    "electron:make": "bun run build && bun run build:whisper && electron-builder build -c ./electron-builder.config.json -p always"
   },
   "dependencies": {
     "@capacitor-community/electron": "^5.0.0",
@@ -33,7 +34,7 @@
   },
   "devDependencies": {
     "electron": "^26.6.10",
-    "electron-builder": "~23.6.0",
+    "electron-builder": "^25.1.8",
     "electron-rebuild": "^3.2.9",
     "typescript": "^5.0.4"
   },

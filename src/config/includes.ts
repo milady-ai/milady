@@ -7,9 +7,9 @@
  * ```
  */
 
-import JSON5 from "json5";
 import fs from "node:fs";
 import path from "node:path";
+import JSON5 from "json5";
 import { isPlainObject } from "./object-utils.js";
 
 export const INCLUDE_KEY = "$include";
@@ -33,7 +33,10 @@ export class ConfigIncludeError extends Error {
 
 export class CircularIncludeError extends ConfigIncludeError {
   constructor(public readonly chain: string[]) {
-    super(`Circular include detected: ${chain.join(" -> ")}`, chain[chain.length - 1]);
+    super(
+      `Circular include detected: ${chain.join(" -> ")}`,
+      chain[chain.length - 1],
+    );
     this.name = "CircularIncludeError";
   }
 }
@@ -45,7 +48,8 @@ export function deepMerge(target: unknown, source: unknown): unknown {
   if (isPlainObject(target) && isPlainObject(source)) {
     const result: Record<string, unknown> = { ...target };
     for (const key of Object.keys(source)) {
-      result[key] = key in result ? deepMerge(result[key], source[key]) : source[key];
+      result[key] =
+        key in result ? deepMerge(result[key], source[key]) : source[key];
     }
     return result;
   }

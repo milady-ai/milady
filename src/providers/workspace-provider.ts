@@ -7,14 +7,20 @@
  * feedback) so the LLM has full awareness during the autonomous coding loop.
  */
 
-import type { IAgentRuntime, Memory, State, Provider, ProviderResult } from "@elizaos/core";
+import type {
+  IAgentRuntime,
+  Memory,
+  Provider,
+  ProviderResult,
+  State,
+} from "@elizaos/core";
+import type { CodingAgentContext } from "../services/coding-agent-context.js";
 import {
-  loadWorkspaceBootstrapFiles,
-  filterBootstrapFilesForSession,
   DEFAULT_AGENT_WORKSPACE_DIR,
+  filterBootstrapFilesForSession,
+  loadWorkspaceBootstrapFiles,
   type WorkspaceBootstrapFile,
 } from "./workspace.js";
-import type { CodingAgentContext } from "../services/coding-agent-context.js";
 
 const DEFAULT_MAX_CHARS = 20_000;
 /** Hard cap on total workspace context to prevent prompt explosion. */
@@ -22,7 +28,10 @@ const MAX_TOTAL_WORKSPACE_CHARS = 100_000;
 const CACHE_TTL_MS = 60_000;
 
 // Per-workspace cache so multi-agent doesn't thrash.
-const cache = new Map<string, { files: WorkspaceBootstrapFile[]; at: number }>();
+const cache = new Map<
+  string,
+  { files: WorkspaceBootstrapFile[]; at: number }
+>();
 /** Maximum number of workspace directories to cache simultaneously. */
 const MAX_CACHE_ENTRIES = 20;
 
@@ -53,7 +62,10 @@ export function truncate(content: string, max: number): string {
 }
 
 /** @internal Exported for testing. */
-export function buildContext(files: WorkspaceBootstrapFile[], maxChars: number): string {
+export function buildContext(
+  files: WorkspaceBootstrapFile[],
+  maxChars: number,
+): string {
   const sections: string[] = [];
   let totalChars = 0;
   for (const f of files) {
@@ -64,7 +76,10 @@ export function buildContext(files: WorkspaceBootstrapFile[], maxChars: number):
     const tag = text.length > trimmed.length ? " [TRUNCATED]" : "";
     const section = `### ${f.name}${tag}\n\n${text}`;
     // Stop adding files if the total would exceed the hard cap
-    if (totalChars + section.length > MAX_TOTAL_WORKSPACE_CHARS && sections.length > 0) {
+    if (
+      totalChars + section.length > MAX_TOTAL_WORKSPACE_CHARS &&
+      sections.length > 0
+    ) {
       break;
     }
     sections.push(section);
@@ -95,9 +110,13 @@ export function buildCodingAgentSummary(ctx: CodingAgentContext): string {
   lines.push("");
   lines.push(`- **Task:** ${ctx.taskDescription}`);
   lines.push(`- **Working Directory:** ${ctx.workingDirectory}`);
-  lines.push(`- **Connector:** ${ctx.connector.type} (${ctx.connector.available ? "available" : "unavailable"})`);
+  lines.push(
+    `- **Connector:** ${ctx.connector.type} (${ctx.connector.available ? "available" : "unavailable"})`,
+  );
   lines.push(`- **Mode:** ${ctx.interactionMode}`);
-  lines.push(`- **Iterations:** ${ctx.iterations.length} / ${ctx.maxIterations}`);
+  lines.push(
+    `- **Iterations:** ${ctx.iterations.length} / ${ctx.maxIterations}`,
+  );
   lines.push(`- **Active:** ${ctx.active ? "yes" : "no"}`);
 
   // Recent errors from the last iteration
@@ -152,7 +171,10 @@ function extractCodingAgentContext(message: Memory): CodingAgentContext | null {
 
   // Lightweight duck-type check — full validation happens in the service layer
   const ctx = codingCtx as Record<string, unknown>;
-  if (typeof ctx.sessionId !== "string" || typeof ctx.taskDescription !== "string") {
+  if (
+    typeof ctx.sessionId !== "string" ||
+    typeof ctx.taskDescription !== "string"
+  ) {
     return null;
   }
 
@@ -168,14 +190,20 @@ export function createWorkspaceProvider(options?: {
 
   return {
     name: "workspaceContext",
-    description: "Workspace bootstrap files (AGENTS.md, TOOLS.md, IDENTITY.md, etc.) and coding agent context",
+    description:
+      "Workspace bootstrap files (AGENTS.md, TOOLS.md, IDENTITY.md, etc.) and coding agent context",
     position: 10,
 
-    async get(_runtime: IAgentRuntime, message: Memory, _state: State): Promise<ProviderResult> {
+    async get(
+      _runtime: IAgentRuntime,
+      message: Memory,
+      _state: State,
+    ): Promise<ProviderResult> {
       try {
         const allFiles = await getFiles(dir);
         const meta = message.metadata as Record<string, unknown> | undefined;
-        const sessionKey = typeof meta?.sessionKey === "string" ? meta.sessionKey : undefined;
+        const sessionKey =
+          typeof meta?.sessionKey === "string" ? meta.sessionKey : undefined;
         const files = filterBootstrapFilesForSession(allFiles, sessionKey);
         let text = buildContext(files, maxChars);
 
@@ -202,4 +230,3 @@ export function createWorkspaceProvider(options?: {
     },
   };
 }
-

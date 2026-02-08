@@ -1,6 +1,10 @@
 import type { Command } from "commander";
 import { isTruthyEnvValue } from "../../utils/globals.js";
-import { buildParseArgv, getPrimaryCommand, hasHelpOrVersion } from "../argv.js";
+import {
+  buildParseArgv,
+  getPrimaryCommand,
+  hasHelpOrVersion,
+} from "../argv.js";
 
 function resolveActionArgs(command: Command | undefined): string[] {
   return command?.args ?? [];
@@ -39,7 +43,10 @@ function removeCommand(program: Command, command: Command) {
   }
 }
 
-export async function registerSubCliByName(program: Command, name: string): Promise<boolean> {
+export async function registerSubCliByName(
+  program: Command,
+  name: string,
+): Promise<boolean> {
   const entry = entries.find((e) => e.name === name);
   if (!entry) {
     return false;
@@ -53,7 +60,9 @@ export async function registerSubCliByName(program: Command, name: string): Prom
 }
 
 function registerLazyCommand(program: Command, entry: SubCliEntry) {
-  const placeholder = program.command(entry.name).description(entry.description);
+  const placeholder = program
+    .command(entry.name)
+    .description(entry.description);
   placeholder.allowUnknownOption(true);
   placeholder.allowExcessArguments(true);
   placeholder.action(async (...actionArgs) => {
@@ -75,8 +84,13 @@ function registerLazyCommand(program: Command, entry: SubCliEntry) {
   });
 }
 
-export function registerSubCliCommands(program: Command, argv: string[] = process.argv) {
-  const eagerAll = isTruthyEnvValue(process.env.MILAIDY_DISABLE_LAZY_SUBCOMMANDS);
+export function registerSubCliCommands(
+  program: Command,
+  argv: string[] = process.argv,
+) {
+  const eagerAll = isTruthyEnvValue(
+    process.env.MILAIDY_DISABLE_LAZY_SUBCOMMANDS,
+  );
 
   if (eagerAll) {
     for (const entry of entries) {

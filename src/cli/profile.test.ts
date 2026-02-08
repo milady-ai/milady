@@ -16,7 +16,13 @@ describe("parseCliProfileArgs", () => {
       throw new Error(res.error);
     }
     expect(res.profile).toBeNull();
-    expect(res.argv).toEqual(["node", "milaidy", "plugins", "--dev", "--allow-unconfigured"]);
+    expect(res.argv).toEqual([
+      "node",
+      "milaidy",
+      "plugins",
+      "--dev",
+      "--allow-unconfigured",
+    ]);
   });
 
   it("still accepts global --dev before subcommand", () => {
@@ -29,7 +35,13 @@ describe("parseCliProfileArgs", () => {
   });
 
   it("parses --profile value and strips it", () => {
-    const res = parseCliProfileArgs(["node", "milaidy", "--profile", "work", "start"]);
+    const res = parseCliProfileArgs([
+      "node",
+      "milaidy",
+      "--profile",
+      "work",
+      "start",
+    ]);
     if (!res.ok) {
       throw new Error(res.error);
     }
@@ -43,12 +55,26 @@ describe("parseCliProfileArgs", () => {
   });
 
   it("rejects combining --dev with --profile (dev first)", () => {
-    const res = parseCliProfileArgs(["node", "milaidy", "--dev", "--profile", "work", "start"]);
+    const res = parseCliProfileArgs([
+      "node",
+      "milaidy",
+      "--dev",
+      "--profile",
+      "work",
+      "start",
+    ]);
     expect(res.ok).toBe(false);
   });
 
   it("rejects combining --dev with --profile (profile first)", () => {
-    const res = parseCliProfileArgs(["node", "milaidy", "--profile", "work", "--dev", "start"]);
+    const res = parseCliProfileArgs([
+      "node",
+      "milaidy",
+      "--profile",
+      "work",
+      "--dev",
+      "start",
+    ]);
     expect(res.ok).toBe(false);
   });
 });
@@ -64,7 +90,9 @@ describe("applyCliProfileEnv", () => {
     const expectedStateDir = path.join("/home/peter", ".milaidy-dev");
     expect(env.MILAIDY_PROFILE).toBe("dev");
     expect(env.MILAIDY_STATE_DIR).toBe(expectedStateDir);
-    expect(env.MILAIDY_CONFIG_PATH).toBe(path.join(expectedStateDir, "milaidy.json"));
+    expect(env.MILAIDY_CONFIG_PATH).toBe(
+      path.join(expectedStateDir, "milaidy.json"),
+    );
     expect(env.MILAIDY_GATEWAY_PORT).toBe("19001");
   });
 
@@ -86,49 +114,57 @@ describe("applyCliProfileEnv", () => {
 
 describe("formatCliCommand", () => {
   it("returns command unchanged when no profile is set", () => {
-    expect(formatCliCommand("milaidy setup --fix", {})).toBe("milaidy setup --fix");
+    expect(formatCliCommand("milaidy setup --fix", {})).toBe(
+      "milaidy setup --fix",
+    );
   });
 
   it("returns command unchanged when profile is default", () => {
-    expect(formatCliCommand("milaidy setup --fix", { MILAIDY_PROFILE: "default" })).toBe(
-      "milaidy setup --fix",
-    );
+    expect(
+      formatCliCommand("milaidy setup --fix", { MILAIDY_PROFILE: "default" }),
+    ).toBe("milaidy setup --fix");
   });
 
   it("returns command unchanged when profile is Default (case-insensitive)", () => {
-    expect(formatCliCommand("milaidy setup --fix", { MILAIDY_PROFILE: "Default" })).toBe(
-      "milaidy setup --fix",
-    );
+    expect(
+      formatCliCommand("milaidy setup --fix", { MILAIDY_PROFILE: "Default" }),
+    ).toBe("milaidy setup --fix");
   });
 
   it("returns command unchanged when profile is invalid", () => {
-    expect(formatCliCommand("milaidy setup --fix", { MILAIDY_PROFILE: "bad profile" })).toBe(
-      "milaidy setup --fix",
-    );
+    expect(
+      formatCliCommand("milaidy setup --fix", {
+        MILAIDY_PROFILE: "bad profile",
+      }),
+    ).toBe("milaidy setup --fix");
   });
 
   it("returns command unchanged when --profile is already present", () => {
     expect(
-      formatCliCommand("milaidy --profile work setup --fix", { MILAIDY_PROFILE: "work" }),
+      formatCliCommand("milaidy --profile work setup --fix", {
+        MILAIDY_PROFILE: "work",
+      }),
     ).toBe("milaidy --profile work setup --fix");
   });
 
   it("returns command unchanged when --dev is already present", () => {
-    expect(formatCliCommand("milaidy --dev setup", { MILAIDY_PROFILE: "dev" })).toBe(
-      "milaidy --dev setup",
-    );
+    expect(
+      formatCliCommand("milaidy --dev setup", { MILAIDY_PROFILE: "dev" }),
+    ).toBe("milaidy --dev setup");
   });
 
   it("inserts --profile flag when profile is set", () => {
-    expect(formatCliCommand("milaidy setup --fix", { MILAIDY_PROFILE: "work" })).toBe(
-      "milaidy --profile work setup --fix",
-    );
+    expect(
+      formatCliCommand("milaidy setup --fix", { MILAIDY_PROFILE: "work" }),
+    ).toBe("milaidy --profile work setup --fix");
   });
 
   it("trims whitespace from profile", () => {
-    expect(formatCliCommand("milaidy setup --fix", { MILAIDY_PROFILE: "  jbmilaidy  " })).toBe(
-      "milaidy --profile jbmilaidy setup --fix",
-    );
+    expect(
+      formatCliCommand("milaidy setup --fix", {
+        MILAIDY_PROFILE: "  jbmilaidy  ",
+      }),
+    ).toBe("milaidy --profile jbmilaidy setup --fix");
   });
 
   it("handles command with no args after milaidy", () => {
@@ -138,8 +174,8 @@ describe("formatCliCommand", () => {
   });
 
   it("handles pnpm wrapper", () => {
-    expect(formatCliCommand("pnpm milaidy setup", { MILAIDY_PROFILE: "work" })).toBe(
-      "pnpm milaidy --profile work setup",
-    );
+    expect(
+      formatCliCommand("pnpm milaidy setup", { MILAIDY_PROFILE: "work" }),
+    ).toBe("pnpm milaidy --profile work setup");
   });
 });

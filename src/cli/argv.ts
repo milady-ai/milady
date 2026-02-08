@@ -40,7 +40,10 @@ export function hasFlag(argv: string[], name: string): boolean {
   return false;
 }
 
-export function getFlagValue(argv: string[], name: string): string | null | undefined {
+export function getFlagValue(
+  argv: string[],
+  name: string,
+): string | null | undefined {
   const args = argv.slice(2);
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i];
@@ -59,7 +62,10 @@ export function getFlagValue(argv: string[], name: string): string | null | unde
   return undefined;
 }
 
-export function getVerboseFlag(argv: string[], options?: { includeDebug?: boolean }): boolean {
+export function getVerboseFlag(
+  argv: string[],
+  options?: { includeDebug?: boolean },
+): boolean {
   if (hasFlag(argv, "--verbose")) {
     return true;
   }
@@ -69,7 +75,10 @@ export function getVerboseFlag(argv: string[], options?: { includeDebug?: boolea
   return false;
 }
 
-export function getPositiveIntFlagValue(argv: string[], name: string): number | null | undefined {
+export function getPositiveIntFlagValue(
+  argv: string[],
+  name: string,
+): number | null | undefined {
   const raw = getFlagValue(argv, name);
   if (raw === null || raw === undefined) {
     return raw;
@@ -122,9 +131,12 @@ export function buildParseArgv(params: {
       : baseArgv[0]?.endsWith("milaidy")
         ? baseArgv.slice(1)
         : baseArgv;
-  const executable = (normalizedArgv[0]?.split(/[/\\]/).pop() ?? "").toLowerCase();
+  const executable = (
+    normalizedArgv[0]?.split(/[/\\]/).pop() ?? ""
+  ).toLowerCase();
   const looksLikeNode =
-    normalizedArgv.length >= 2 && (isNodeExecutable(executable) || isBunExecutable(executable));
+    normalizedArgv.length >= 2 &&
+    (isNodeExecutable(executable) || isBunExecutable(executable));
   if (looksLikeNode) {
     return normalizedArgv;
   }

@@ -4,10 +4,11 @@
  * Exercises install/uninstall flows, config persistence, error handling,
  * concurrent operations, and cross-platform path logic.
  */
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+
+import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import fs from "node:fs/promises";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Dynamic import for module reset between tests
@@ -60,7 +61,12 @@ function testPluginInfo(overrides: Record<string, unknown> = {}) {
     topics: [],
     stars: 0,
     language: "TypeScript",
-    npm: { package: "@elizaos/plugin-test", v0Version: null, v1Version: null, v2Version: "2.0.0-alpha.3" },
+    npm: {
+      package: "@elizaos/plugin-test",
+      v0Version: null,
+      v1Version: null,
+      v2Version: "2.0.0-alpha.3",
+    },
     git: { v0Branch: null, v1Branch: null, v2Branch: "next" },
     supports: { v0: false, v1: false, v2: true },
     ...overrides,
@@ -118,14 +124,17 @@ describe("plugin-installer", () => {
       const { getPluginInfo } = await import("./registry-client.js");
       // Use a package name that definitely doesn't exist on npm
       vi.mocked(getPluginInfo).mockResolvedValue(
-        testPluginInfo({ name: "@elizaos/plugin-nonexistent-test-12345" })
+        testPluginInfo({ name: "@elizaos/plugin-nonexistent-test-12345" }),
       );
 
       const phases: string[] = [];
       const { installPlugin } = await loadInstaller();
-      const result = await installPlugin("@elizaos/plugin-nonexistent-test-12345", (progress) => {
-        phases.push(progress.phase);
-      });
+      const result = await installPlugin(
+        "@elizaos/plugin-nonexistent-test-12345",
+        (progress) => {
+          phases.push(progress.phase);
+        },
+      );
 
       // Should have emitted resolving and downloading phases before failing
       expect(phases).toContain("resolving");
@@ -147,7 +156,12 @@ describe("plugin-installer", () => {
     });
 
     it("removes plugin from config and disk", async () => {
-      const installDir = path.join(configDir, "plugins", "installed", "_elizaos_plugin-test");
+      const installDir = path.join(
+        configDir,
+        "plugins",
+        "installed",
+        "_elizaos_plugin-test",
+      );
       await fs.mkdir(installDir, { recursive: true });
       await fs.writeFile(path.join(installDir, "marker.txt"), "test");
 
@@ -172,7 +186,9 @@ describe("plugin-installer", () => {
 
       // Verify config was updated
       const config = readConfig();
-      const installs = (config.plugins as Record<string, Record<string, unknown>>)?.installs;
+      const installs = (
+        config.plugins as Record<string, Record<string, unknown>>
+      )?.installs;
       expect(installs).toBeDefined();
       expect(installs?.["@elizaos/plugin-test"]).toBeUndefined();
 
@@ -181,12 +197,13 @@ describe("plugin-installer", () => {
     });
 
     it("succeeds even if install directory doesn't exist on disk", async () => {
+      const ghostDir = path.join(configDir, "plugins", "installed", "_elizaos_plugin-ghost");
       writeConfig({
         plugins: {
           installs: {
             "@elizaos/plugin-ghost": {
               source: "npm",
-              installPath: "/nonexistent/path/that/doesnt/exist",
+              installPath: ghostDir,
               version: "1.0.0",
             },
           },
@@ -197,6 +214,26 @@ describe("plugin-installer", () => {
       const result = await uninstallPlugin("@elizaos/plugin-ghost");
 
       expect(result.success).toBe(true);
+    });
+
+    it("refuses to remove install paths outside the plugins directory", async () => {
+      writeConfig({
+        plugins: {
+          installs: {
+            "@elizaos/plugin-escape": {
+              source: "npm",
+              installPath: "/",
+              version: "1.0.0",
+            },
+          },
+        },
+      });
+
+      const { uninstallPlugin } = await loadInstaller();
+      const result = await uninstallPlugin("@elizaos/plugin-escape");
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("Refusing to remove plugin outside");
     });
   });
 
@@ -285,7 +322,7 @@ describe("plugin-installer", () => {
       // should be sanitised with no special characters
       const { getPluginInfo } = await import("./registry-client.js");
       vi.mocked(getPluginInfo).mockResolvedValue(
-        testPluginInfo({ name: "@elizaos/plugin-foo-bar" })
+        testPluginInfo({ name: "@elizaos/plugin-foo-bar" }),
       );
 
       const phases: Array<{ pluginName: string; message: string }> = [];

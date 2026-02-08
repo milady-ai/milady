@@ -19,7 +19,9 @@ const LOG_LEVEL_PRIORITY: Record<string, number> = {
 
 function isLogLevelEnabled(level: string): boolean {
   const current = (process.env.LOG_LEVEL ?? "info").toLowerCase();
-  return (LOG_LEVEL_PRIORITY[level] ?? 30) >= (LOG_LEVEL_PRIORITY[current] ?? 30);
+  return (
+    (LOG_LEVEL_PRIORITY[level] ?? 30) >= (LOG_LEVEL_PRIORITY[current] ?? 30)
+  );
 }
 
 let globalVerbose = false;
