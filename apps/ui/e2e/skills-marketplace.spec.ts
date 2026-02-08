@@ -6,7 +6,7 @@ test.describe("Skills marketplace", () => {
     await mockApi(page, { onboardingComplete: true, agentState: "running" });
     await page.goto("/skills");
 
-    const searchInput = page.getByPlaceholder("Search Skills marketplace...");
+    const searchInput = page.getByPlaceholder("Search skills by keyword...");
     await searchInput.fill("installer");
     await searchInput.press("Enter");
 
@@ -50,7 +50,7 @@ test.describe("Skills marketplace", () => {
     });
     await page.goto("/skills");
 
-    await page.getByPlaceholder("Search Skills marketplace...").fill("agent");
+    await page.getByPlaceholder("Search skills by keyword...").fill("agent");
     await page.getByRole("button", { name: "Search" }).click();
 
     await expect(page.getByText(/SKILLSMP_API_KEY is not set/i).last()).toBeVisible();

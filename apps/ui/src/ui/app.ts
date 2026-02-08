@@ -109,7 +109,6 @@ export class MilaidyApp extends LitElement {
   @state() skillsMarketplaceApiKeySet = false;
   @state() skillsMarketplaceApiKeyInput = "";
   @state() skillsMarketplaceApiKeySaving = false;
-  @state() skillsMarketplaceUseAiSearch = true;
   @state() skillToggleAction = "";
   @state() logs: LogEntry[] = [];
 
@@ -1172,7 +1171,7 @@ export class MilaidyApp extends LitElement {
     this.skillsMarketplaceLoading = true;
     this.skillsMarketplaceError = "";
     try {
-      const { results } = await client.searchSkillsMarketplace(query, this.skillsMarketplaceUseAiSearch, 20);
+      const { results } = await client.searchSkillsMarketplace(query, false, 20);
       this.skillsMarketplaceResults = results;
     } catch (err) {
       this.skillsMarketplaceResults = [];
@@ -1884,6 +1883,9 @@ export class MilaidyApp extends LitElement {
     } finally {
       this.marketplaceLoading = false;
     }
+    // Pre-load skills marketplace config so API key section hides when already set
+    void this.loadSkillsMarketplaceConfig();
+    void this.loadInstalledMarketplaceSkills();
   }
 
   private async installFromMarketplace(pluginName: string): Promise<void> {
@@ -2979,7 +2981,7 @@ export class MilaidyApp extends LitElement {
         <button
           class="btn ${this.marketplaceSubTab === "skills" ? "" : "secondary"}"
           style="padding:6px 16px;border-radius:4px 4px 0 0;${this.marketplaceSubTab === "skills" ? "background:var(--accent);color:#fff;" : ""}"
-          @click=${() => { this.marketplaceSubTab = "skills"; }}
+          @click=${() => { this.marketplaceSubTab = "skills"; void this.loadSkillsMarketplaceConfig(); void this.loadInstalledMarketplaceSkills(); }}
         >Skills</button>
         <button
           class="btn ${this.marketplaceSubTab === "mcp" ? "" : "secondary"}"
@@ -3104,11 +3106,11 @@ export class MilaidyApp extends LitElement {
         </section>
       ` : ""}
 
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
         <input
           class="plugin-search"
           style="flex:1;min-width:220px;"
-          placeholder="${this.skillsMarketplaceUseAiSearch ? "AI semantic search..." : "Search by keywords..."}"
+          placeholder="Search skills by keyword..."
           .value=${this.skillsMarketplaceQuery}
           @input=${(e: Event) => { this.skillsMarketplaceQuery = (e.target as HTMLInputElement).value; }}
           @keydown=${(e: KeyboardEvent) => {
@@ -3118,16 +3120,6 @@ export class MilaidyApp extends LitElement {
         <button class="btn" @click=${this.searchSkillsMarketplace} ?disabled=${this.skillsMarketplaceLoading}>
           ${this.skillsMarketplaceLoading ? "Searching..." : "Search"}
         </button>
-      </div>
-      <div style="display:flex;gap:6px;margin-bottom:12px;">
-        <button
-          style="padding:4px 10px;border-radius:12px;border:1px solid var(--border);background:${!this.skillsMarketplaceUseAiSearch ? "var(--accent)" : "var(--surface)"};color:${!this.skillsMarketplaceUseAiSearch ? "#fff" : "var(--text)"};cursor:pointer;font-size:11px;"
-          @click=${() => { this.skillsMarketplaceUseAiSearch = false; }}
-        >Keyword Search</button>
-        <button
-          style="padding:4px 10px;border-radius:12px;border:1px solid var(--border);background:${this.skillsMarketplaceUseAiSearch ? "var(--accent)" : "var(--surface)"};color:${this.skillsMarketplaceUseAiSearch ? "#fff" : "var(--text)"};cursor:pointer;font-size:11px;"
-          @click=${() => { this.skillsMarketplaceUseAiSearch = true; }}
-        >AI Semantic Search</button>
       </div>
 
       ${this.skillsMarketplaceError
@@ -3808,7 +3800,7 @@ export class MilaidyApp extends LitElement {
           <input
             class="plugin-search"
             style="flex:1;min-width:220px;"
-            placeholder="${this.skillsMarketplaceUseAiSearch ? "AI semantic search..." : "Search by keywords..."}"
+            placeholder="Search skills by keyword..."
             .value=${this.skillsMarketplaceQuery}
             @input=${(e: Event) => { this.skillsMarketplaceQuery = (e.target as HTMLInputElement).value; }}
             @keydown=${(e: KeyboardEvent) => {
@@ -3818,18 +3810,6 @@ export class MilaidyApp extends LitElement {
           <button class="btn" @click=${this.searchSkillsMarketplace} ?disabled=${this.skillsMarketplaceLoading}>
             ${this.skillsMarketplaceLoading ? "Searching..." : "Search"}
           </button>
-        </div>
-        <div style="display:flex;gap:6px;margin-top:6px;">
-          <button
-            class="filter-btn ${!this.skillsMarketplaceUseAiSearch ? "active" : ""}"
-            style="padding:4px 10px;border-radius:12px;border:1px solid var(--border);background:${!this.skillsMarketplaceUseAiSearch ? "var(--accent)" : "var(--surface)"};color:${!this.skillsMarketplaceUseAiSearch ? "#fff" : "var(--text)"};cursor:pointer;font-size:11px;"
-            @click=${() => { this.skillsMarketplaceUseAiSearch = false; }}
-          >Keyword Search</button>
-          <button
-            class="filter-btn ${this.skillsMarketplaceUseAiSearch ? "active" : ""}"
-            style="padding:4px 10px;border-radius:12px;border:1px solid var(--border);background:${this.skillsMarketplaceUseAiSearch ? "var(--accent)" : "var(--surface)"};color:${this.skillsMarketplaceUseAiSearch ? "#fff" : "var(--text)"};cursor:pointer;font-size:11px;"
-            @click=${() => { this.skillsMarketplaceUseAiSearch = true; }}
-          >AI Semantic Search</button>
         </div>
 
         ${this.skillsMarketplaceError
