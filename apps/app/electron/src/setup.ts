@@ -112,6 +112,8 @@ export class ElectronCapacitorApp {
     this.MainWindow = new BrowserWindow({
       icon,
       show: false,
+      title: 'Milaidy',
+      backgroundColor: '#0a0a0a',
       x: this.mainWindowState.x,
       y: this.mainWindowState.y,
       width: this.mainWindowState.width,
@@ -119,14 +121,13 @@ export class ElectronCapacitorApp {
       webPreferences: {
         nodeIntegration: true,
         contextIsolation: true,
-        // Use preload to inject the electron varriant overrides for capacitor plugins.
-        // preload: join(app.getAppPath(), "node_modules", "@capacitor-community", "electron", "dist", "runtime", "electron-rt.js"),
+        // Use preload to inject the electron variant overrides for capacitor plugins.
         preload: preloadPath,
       },
     });
     this.mainWindowState.manage(this.MainWindow);
 
-    if (this.CapacitorFileConfig.backgroundColor) {
+    if (this.CapacitorFileConfig.electron?.backgroundColor) {
       this.MainWindow.setBackgroundColor(this.CapacitorFileConfig.electron.backgroundColor);
     }
 
@@ -225,21 +226,46 @@ export class ElectronCapacitorApp {
     // Link electron plugins into the system.
     setupCapacitorElectronPlugins();
 
-    // When the web app is loaded we hide the splashscreen if needed and show the mainwindow.
-    this.MainWindow.webContents.on('dom-ready', () => {
+    // Track whether the window has been shown to avoid double-show.
+    let windowShown = false;
+    const showWindow = () => {
+      if (windowShown || this.MainWindow.isDestroyed()) return;
+      windowShown = true;
       if (this.CapacitorFileConfig.electron?.splashScreenEnabled) {
-        this.SplashScreen.getSplashWindow().hide();
+        this.SplashScreen?.getSplashWindow()?.hide();
       }
       if (!this.CapacitorFileConfig.electron?.hideMainWindowOnLaunch) {
         this.MainWindow.show();
+        this.MainWindow.focus();
       }
+    };
+
+    // Primary: show window as soon as Electron considers it ready to paint.
+    this.MainWindow.once('ready-to-show', () => {
+      showWindow();
+    });
+
+    // When the web app is loaded we open devtools in dev mode.
+    this.MainWindow.webContents.on('dom-ready', () => {
+      showWindow();
       setTimeout(() => {
-        if (electronIsDev) {
+        if (electronIsDev && !this.MainWindow.isDestroyed()) {
           this.MainWindow.webContents.openDevTools();
         }
         CapElectronEventEmitter.emit('CAPELECTRON_DeeplinkListenerInitialized', '');
       }, 400);
     });
+
+    // Handle content load failures — still show the window so it isn't invisible.
+    this.MainWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription) => {
+      console.error(`[Milaidy] Content failed to load (${errorCode}): ${errorDescription}`);
+      showWindow();
+    });
+
+    // Failsafe: if nothing else shows the window within 5 seconds, force show it.
+    setTimeout(() => {
+      showWindow();
+    }, 5000);
   }
 }
 
