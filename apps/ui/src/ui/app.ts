@@ -25,11 +25,13 @@ import {
 import { tabFromPath, pathForTab, type Tab, TAB_GROUPS, titleForTab } from "./navigation.js";
 
 const CHAT_STORAGE_KEY = "milaidy:chatMessages";
+const THEME_STORAGE_KEY = "milaidy:theme";
 
 @customElement("milaidy-app")
 export class MilaidyApp extends LitElement {
   // --- State ---
   @state() tab: Tab = "chat";
+  @state() isDarkMode: boolean = false;
   @state() connected = false;
   @state() agentStatus: AgentStatus | null = null;
   @state() onboardingComplete = false;
@@ -141,6 +143,29 @@ export class MilaidyApp extends LitElement {
     .lifecycle-btn:hover {
       border-color: var(--accent);
       color: var(--accent);
+    }
+
+    /* Theme toggle */
+    .theme-toggle {
+      padding: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      transition: all var(--duration-fast) ease;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .theme-toggle:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
     }
 
     /* Wallet icon */
@@ -924,6 +949,7 @@ export class MilaidyApp extends LitElement {
 
   connectedCallback(): void {
     super.connectedCallback();
+    this.initializeTheme();
     this.initializeApp();
     window.addEventListener("popstate", this.handlePopState);
   }
@@ -1311,7 +1337,9 @@ export class MilaidyApp extends LitElement {
           <span class="logo">${name}</span>
           ${this.renderWalletIcon()}
         </div>
-        <div class="status-bar">
+        <div style="display:flex;align-items:center;gap:12px;">
+          ${this.renderThemeToggle()}
+          <div class="status-bar">
           <span class="status-pill ${state}">${state}</span>
           ${state === "not_started" || state === "stopped"
             ? html`<button class="lifecycle-btn" @click=${this.handleStart}>Start</button>`
@@ -1324,8 +1352,30 @@ export class MilaidyApp extends LitElement {
                 <button class="lifecycle-btn" @click=${this.handleStop}>Stop</button>
               `}
           <button class="lifecycle-btn" @click=${this.handleRestart} ?disabled=${state === "restarting" || state === "not_started"} title="Restart the agent (reload code, config, plugins)">Restart</button>
+          </div>
         </div>
       </header>
+    `;
+  }
+
+  private renderThemeToggle() {
+    return html`
+      <button
+        class="theme-toggle"
+        @click=${this.toggleTheme}
+        title=${this.isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+        aria-label=${this.isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+      >
+        ${this.isDarkMode 
+          ? html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"/>
+              <path d="m12 1 1.5 1.5M12 1l-1.5 1.5M21 12l-1.5 1.5M21 12l1.5 1.5M12 21l-1.5-1.5M12 21l1.5-1.5M3 12l1.5-1.5M3 12l-1.5-1.5"/>
+            </svg>` 
+          : html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>`
+        }
+      </button>
     `;
   }
 
@@ -2583,6 +2633,30 @@ export class MilaidyApp extends LitElement {
         <button class="btn" @click=${this.handleOnboardingFinish}>Finish</button>
       </div>
     `;
+  }
+
+  // --- Theme Management ---
+
+  private initializeTheme(): void {
+    // Load theme preference from localStorage
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    if (savedTheme === "dark" || savedTheme === "light") {
+      this.isDarkMode = savedTheme === "dark";
+    } else {
+      // Detect system preference if no saved preference
+      this.isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    this.updateThemeAttribute();
+  }
+
+  private updateThemeAttribute(): void {
+    document.documentElement.setAttribute('data-theme', this.isDarkMode ? 'dark' : 'light');
+  }
+
+  private toggleTheme(): void {
+    this.isDarkMode = !this.isDarkMode;
+    this.updateThemeAttribute();
+    localStorage.setItem(THEME_STORAGE_KEY, this.isDarkMode ? "dark" : "light");
   }
 }
 

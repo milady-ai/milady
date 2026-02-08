@@ -78,6 +78,76 @@
   color-scheme: light;
 }
 
+/* Dark theme overrides */
+:root[data-theme="dark"] {
+  /* Background */
+  --bg: #000000;
+  --bg-accent: #0a0a0a;
+  --bg-elevated: #000000;
+  --bg-hover: #0f0f0f;
+  --bg-muted: #0a0a0a;
+
+  /* Card / Surface */
+  --card: #000000;
+  --card-foreground: #dddddd;
+  --surface: #0a0a0a;
+
+  /* Text */
+  --text: #dddddd;
+  --text-strong: #ffffff;
+  --chat-text: #dddddd;
+  --muted: #888888;
+  --muted-strong: #aaaaaa;
+
+  /* Border — white lines */
+  --border: #ffffff;
+  --border-strong: #ffffff;
+  --border-hover: #ffffff;
+  --input: #ffffff;
+  --ring: #ffffff;
+
+  /* Accent — white */
+  --accent: #ffffff;
+  --accent-hover: #cccccc;
+  --accent-muted: #aaaaaa;
+  --accent-subtle: rgba(255, 255, 255, 0.06);
+  --accent-foreground: #000000;
+  --primary: #ffffff;
+  --primary-foreground: #000000;
+
+  /* Semantic — white/grey scale */
+  --ok: #bbbbbb;
+  --ok-muted: rgba(187, 187, 187, 0.7);
+  --ok-subtle: rgba(187, 187, 187, 0.08);
+  --destructive: #dddddd;
+  --destructive-foreground: #000000;
+  --warn: #999999;
+  --warn-muted: rgba(153, 153, 153, 0.7);
+  --warn-subtle: rgba(153, 153, 153, 0.08);
+  --danger: #dddddd;
+  --info: #bbbbbb;
+
+  /* Focus */
+  --focus: rgba(255, 255, 255, 0.15);
+  --focus-ring: 0 0 0 2px var(--accent);
+
+  /* Scrollbar — adjust for dark theme */
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: #666666;
+  --scrollbar-thumb-hover: #999999;
+
+  color-scheme: dark;
+}
+
+/* Update scrollbar styles for dark theme */
+:root[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+}
+
+:root[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
 * {
   box-sizing: border-box;
 }
