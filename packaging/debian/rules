@@ -1,0 +1,33 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	npm ci --ignore-scripts
+	npm run build
+
+override_dh_auto_install:
+	# Install the built distribution
+	install -d debian/milaidy/usr/lib/milaidy
+	cp -r dist/ debian/milaidy/usr/lib/milaidy/
+	cp milaidy.mjs debian/milaidy/usr/lib/milaidy/
+	cp package.json debian/milaidy/usr/lib/milaidy/
+	cp -r node_modules/ debian/milaidy/usr/lib/milaidy/ 2>/dev/null || true
+
+	# Install the plugins manifest
+	install -m 644 plugins.json debian/milaidy/usr/lib/milaidy/
+
+	# Create the CLI wrapper
+	install -d debian/milaidy/usr/bin
+	printf '#!/bin/sh\nexec /usr/bin/node /usr/lib/milaidy/milaidy.mjs "$$@"\n' \
+		> debian/milaidy/usr/bin/milaidy
+	chmod 755 debian/milaidy/usr/bin/milaidy
+
+override_dh_auto_test:
+	# Skip tests during package build
+	true
+
+override_dh_auto_clean:
+	rm -rf dist/ node_modules/
+	dh_auto_clean

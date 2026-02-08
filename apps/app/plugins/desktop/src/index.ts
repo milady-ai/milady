@@ -4,7 +4,7 @@ import type { DesktopPlugin } from "./definitions";
 
 const electronModulePath = "../electron/src/index";
 
-const Desktop = registerPlugin<DesktopPlugin>("Desktop", {
+export const Desktop = registerPlugin<DesktopPlugin>("Desktop", {
   web: () => import("./web").then((m) => new m.DesktopWeb()),
   electron: () => {
     // Use Electron-specific implementation for macOS/Windows/Linux
@@ -17,4 +17,3 @@ const Desktop = registerPlugin<DesktopPlugin>("Desktop", {
 });
 
 export * from "./definitions";
-export { Desktop };

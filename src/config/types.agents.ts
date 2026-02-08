@@ -65,6 +65,16 @@ export type AgentConfig = {
     prune?: SandboxPruneSettings;
   };
   tools?: AgentToolsConfig;
+
+  /** Cloud deployment info (set when agent runs in ELIZA Cloud). */
+  cloud?: {
+    /** ELIZA Cloud agent record ID. */
+    cloudAgentId?: string;
+    /** Last known sandbox status. */
+    lastStatus?: string;
+    /** ISO timestamp when the agent was last provisioned. */
+    lastProvisionedAt?: string;
+  };
 };
 
 export type AgentsConfig = {

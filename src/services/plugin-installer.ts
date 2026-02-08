@@ -136,6 +136,13 @@ function pluginsBaseDir(): string {
   return path.join(base, "plugins", "installed");
 }
 
+function isWithinPluginsDir(targetPath: string): boolean {
+  const base = path.resolve(pluginsBaseDir());
+  const resolved = path.resolve(targetPath);
+  if (resolved === base) return false;
+  return resolved.startsWith(`${base}${path.sep}`);
+}
+
 function sanitisePackageName(name: string): string {
   return name.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
@@ -363,7 +370,18 @@ async function _uninstallPlugin(pluginName: string): Promise<UninstallResult> {
   }
 
   const record = installs[pluginName];
-  const dirToRemove = record.installPath || pluginDir(pluginName);
+  const candidatePath = record.installPath || pluginDir(pluginName);
+
+  if (!isWithinPluginsDir(candidatePath)) {
+    return {
+      success: false,
+      pluginName,
+      requiresRestart: false,
+      error: `Refusing to remove plugin outside ${pluginsBaseDir()}`,
+    };
+  }
+
+  const dirToRemove = candidatePath;
 
   // Remove from disk
   try {

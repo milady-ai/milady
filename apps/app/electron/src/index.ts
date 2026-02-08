@@ -5,6 +5,7 @@ import { app, MenuItem } from 'electron';
 import electronIsDev from 'electron-is-dev';
 import unhandled from 'electron-unhandled';
 import { autoUpdater } from 'electron-updater';
+import path from 'node:path';
 
 import { ElectronCapacitorApp, setupContentSecurityPolicy, setupReloadWatcher } from './setup';
 import { initializeNativeModules, registerAllIPC, disposeNativeModules, getAgentManager } from './native';
@@ -18,6 +19,104 @@ const appMenuBarMenuTemplate: (MenuItemConstructorOptions | MenuItem)[] = [
   { role: process.platform === 'darwin' ? 'appMenu' : 'fileMenu' },
   { role: 'viewMenu' },
 ];
+
+interface ShareTargetPayload {
+  source: string;
+  title?: string;
+  text?: string;
+  url?: string;
+  files?: Array<{ name: string; path?: string }>;
+}
+
+let pendingSharePayloads: ShareTargetPayload[] = [];
+
+function parseShareUrl(rawUrl: string): ShareTargetPayload | null {
+  let parsed: URL;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    return null;
+  }
+
+  if (parsed.protocol !== 'milaidy:') return null;
+  const sharePath = (parsed.pathname || parsed.host || '').replace(/^\/+/, '');
+  if (sharePath !== 'share') return null;
+
+  const title = parsed.searchParams.get('title')?.trim() || undefined;
+  const text = parsed.searchParams.get('text')?.trim() || undefined;
+  const sharedUrl = parsed.searchParams.get('url')?.trim() || undefined;
+  const files = parsed.searchParams.getAll('file')
+    .map((filePath) => filePath.trim())
+    .filter((filePath) => filePath.length > 0)
+    .map((filePath) => ({
+      name: path.basename(filePath),
+      path: filePath,
+    }));
+
+  return {
+    source: 'electron-open-url',
+    title,
+    text,
+    url: sharedUrl,
+    files,
+  };
+}
+
+function dispatchShareToRenderer(payload: ShareTargetPayload): void {
+  const mainWindow = myCapacitorApp.getMainWindow();
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    pendingSharePayloads.push(payload);
+    return;
+  }
+
+  const eventName = JSON.stringify('milaidy:share-target');
+  const detail = JSON.stringify(payload).replace(/</g, '\\u003c');
+  mainWindow.webContents.executeJavaScript(
+    `window.__MILAIDY_SHARE_QUEUE__ = Array.isArray(window.__MILAIDY_SHARE_QUEUE__) ? window.__MILAIDY_SHARE_QUEUE__ : [];` +
+    `window.__MILAIDY_SHARE_QUEUE__.push(${detail});` +
+    `document.dispatchEvent(new CustomEvent(${eventName}, { detail: ${detail} }));`
+  ).catch(() => {
+    pendingSharePayloads.push(payload);
+  });
+}
+
+function flushPendingSharePayloads(): void {
+  if (pendingSharePayloads.length === 0) return;
+  const toFlush = pendingSharePayloads;
+  pendingSharePayloads = [];
+  for (const payload of toFlush) {
+    dispatchShareToRenderer(payload);
+  }
+}
+
+function revealMainWindow(): void {
+  const mainWindow = myCapacitorApp.getMainWindow();
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  if (!mainWindow.isVisible()) mainWindow.show();
+  mainWindow.focus();
+}
+
+app.on('open-file', (event, filePath) => {
+  event.preventDefault();
+  dispatchShareToRenderer({
+    source: 'electron-open-file',
+    files: [{ name: path.basename(filePath), path: filePath }],
+  });
+  revealMainWindow();
+});
+
+app.on('open-url', (event, url) => {
+  const payload = parseShareUrl(url);
+  if (!payload) return;
+  event.preventDefault();
+  dispatchShareToRenderer(payload);
+  revealMainWindow();
+});
+
+for (const arg of process.argv) {
+  const payload = parseShareUrl(arg);
+  if (payload) pendingSharePayloads.push(payload);
+}
 
 // Get Config options from capacitor.config
 const capacitorFileConfig: CapacitorElectronConfig = getCapacitorElectronConfig();
@@ -63,11 +162,14 @@ if (electronIsDev) {
       mainWindow.webContents.on('did-finish-load', () => {
         if (!mainWindow.isDestroyed()) {
           mainWindow.webContents.executeJavaScript(inject);
+          flushPendingSharePayloads();
         }
       });
       // Also inject immediately if page is already loaded
       mainWindow.webContents.executeJavaScript(inject)
-        .catch(() => { /* page not ready yet, did-finish-load will handle it */ });
+        .then(() => {
+          flushPendingSharePayloads();
+        }).catch(() => { /* page not ready yet, did-finish-load will handle it */ });
     }
   }).catch((err) => {
     console.error('[Milaidy] Agent startup failed:', err);

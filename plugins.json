@@ -1,7 +1,7 @@
 {
   "$schema": "plugin-index-v1",
-  "generatedAt": "2026-02-07T05:25:55.768Z",
-  "count": 92,
+  "generatedAt": "2026-02-08T05:45:00.000Z",
+  "count": 93,
   "plugins": [
     {
       "id": "acp",
@@ -1331,7 +1331,7 @@
       "dirName": "plugin-gmail-watch",
       "name": "Gmail Watch",
       "npmName": "@elizaos/plugin-gmail-watch",
-      "description": "Gmail Pub/Sub watcher – spawns gog gmail watch serve and auto-renews",
+      "description": "Gmail Pub/Sub watcher \u2013 spawns gog gmail watch serve and auto-renews",
       "category": "feature",
       "envKey": null,
       "configKeys": []
@@ -3034,7 +3034,7 @@
       "dirName": "plugin-social-alpha",
       "name": "Social Alpha",
       "npmName": "@elizaos/plugin-social-alpha",
-      "description": "Social Alpha Plugin — Tracks token recommendations (shills/FUD), builds trust scores based on P&L outcomes, and exposes a Social Alpha Provider with win rate, rank, and recommender analytics.",
+      "description": "Social Alpha Plugin \u2014 Tracks token recommendations (shills/FUD), builds trust scores based on P&L outcomes, and exposes a Social Alpha Provider with win rate, rank, and recommender analytics.",
       "category": "feature",
       "envKey": null,
       "configKeys": []
@@ -3626,6 +3626,102 @@
           "description": "Maximum post length (up to 4000 for premium).",
           "required": false,
           "default": 280,
+          "sensitive": false
+        }
+      }
+    },
+    {
+      "id": "zai",
+      "dirName": "plugin-zai",
+      "name": "z.ai",
+      "npmName": "@homunculuslabs/plugin-zai",
+      "description": "GLM models via z.ai Coding Plan.",
+      "category": "ai-provider",
+      "envKey": "ZAI_API_KEY",
+      "configKeys": [
+        "ZAI_API_KEY",
+        "ZAI_SMALL_MODEL",
+        "ZAI_LARGE_MODEL",
+        "ZAI_BASE_URL",
+        "ZAI_COT_BUDGET",
+        "ZAI_COT_BUDGET_SMALL",
+        "ZAI_COT_BUDGET_LARGE",
+        "ZAI_EXPERIMENTAL_TELEMETRY",
+        "ZAI_BROWSER_BASE_URL"
+      ],
+      "pluginParameters": {
+        "ZAI_API_KEY": {
+          "type": "string",
+          "description": "API key used to authenticate requests to z.ai.",
+          "required": true,
+          "sensitive": true
+        },
+        "ZAI_BASE_URL": {
+          "type": "string",
+          "description": "Base URL for z.ai API (should end with /v1).",
+          "required": false,
+          "default": "https://api.z.ai/api/anthropic/v1",
+          "sensitive": false
+        },
+        "ZAI_SMALL_MODEL": {
+          "type": "string",
+          "description": "z.ai small model for faster/smaller tasks.",
+          "required": false,
+          "default": "glm-4.7-flash",
+          "sensitive": false,
+          "options": [
+            "glm-4.5",
+            "glm-4.5-air",
+            "glm-4.6",
+            "glm-4.6v",
+            "glm-4.7",
+            "glm-4.7-flash"
+          ]
+        },
+        "ZAI_LARGE_MODEL": {
+          "type": "string",
+          "description": "z.ai large model for text generation.",
+          "required": false,
+          "default": "glm-4.7",
+          "sensitive": false,
+          "options": [
+            "glm-4.5",
+            "glm-4.5-air",
+            "glm-4.6",
+            "glm-4.6v",
+            "glm-4.7",
+            "glm-4.7-flash"
+          ]
+        },
+        "ZAI_COT_BUDGET": {
+          "type": "string",
+          "description": "Shared chain-of-thought budget (tokens) for reasoning mode.",
+          "required": false,
+          "sensitive": false
+        },
+        "ZAI_COT_BUDGET_SMALL": {
+          "type": "string",
+          "description": "Small-model chain-of-thought budget (tokens).",
+          "required": false,
+          "sensitive": false
+        },
+        "ZAI_COT_BUDGET_LARGE": {
+          "type": "string",
+          "description": "Large-model chain-of-thought budget (tokens).",
+          "required": false,
+          "sensitive": false
+        },
+        "ZAI_EXPERIMENTAL_TELEMETRY": {
+          "type": "boolean",
+          "description": "Enable experimental telemetry for debugging and analytics.",
+          "required": false,
+          "default": false,
+          "sensitive": false
+        },
+        "ZAI_BROWSER_BASE_URL": {
+          "type": "string",
+          "description": "Browser-only proxy endpoint base URL for z.ai requests.",
+          "required": false,
           "sensitive": false
         }
       }

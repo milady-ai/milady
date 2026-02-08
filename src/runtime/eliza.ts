@@ -29,6 +29,7 @@ import {
   debugLogResolvedContext,
   validateRuntimeContext,
 } from "../api/plugin-validation.js";
+import { cloudLogin } from "../cloud/auth.js";
 import {
   loadMilaidyConfig,
   type MilaidyConfig,
@@ -139,30 +140,42 @@ const CHANNEL_ENV_MAP: Readonly<
 // ---------------------------------------------------------------------------
 
 /** Core plugins that should always be loaded. */
-const CORE_PLUGINS: readonly string[] = [
-  "@elizaos/plugin-sql",
-  "@elizaos/plugin-local-embedding",
-  "@elizaos/plugin-agent-skills",
-  "@elizaos/plugin-agent-orchestrator",
-  "@elizaos/plugin-directives",
-  "@elizaos/plugin-commands",
-  "@elizaos/plugin-shell",
-  "@elizaos/plugin-personality",
-  "@elizaos/plugin-experience",
-  "@elizaos/plugin-plugin-manager",
-  "@elizaos/plugin-cli",
-  "@elizaos/plugin-code",
-  "@elizaos/plugin-edge-tts",
-  "@elizaos/plugin-knowledge",
-  "@elizaos/plugin-mcp",
-  "@elizaos/plugin-pdf",
-  "@elizaos/plugin-scratchpad",
-  "@elizaos/plugin-secrets-manager",
-  "@elizaos/plugin-todo",
-  "@elizaos/plugin-trust",
-  "@elizaos/plugin-form",
-  "@elizaos/plugin-goals",
-  "@elizaos/plugin-scheduling",
+// MINIMAL PLUGIN SET - Optimized for Haiku performance
+// Reduced from 23 to 2 plugins to minimize context (was 4.5k tokens, now ~500)
+// This makes responses fast (2-3s) and cheap ($0.001/msg with Haiku)
+export const CORE_PLUGINS: readonly string[] = [
+  "@elizaos/plugin-sql", // Database adapter (memory/persistence)
+  "@elizaos/plugin-local-embedding", // Embeddings
+
+  // ALL OTHER PLUGINS DISABLED TO REDUCE CONTEXT
+  // Each plugin adds ~50-200 tokens to every request
+  // Uncomment individual plugins if you need their features:
+
+  // "@elizaos/plugin-personality",  // Agent personality/character
+  // "@elizaos/plugin-commands",  // Slash commands
+  // "@elizaos/plugin-directives",  // Directive system
+
+  // NEVER re-enable these (huge context):
+  // "@elizaos/plugin-agent-skills",  // 4938 skills = 4.5k tokens!
+  // "@elizaos/plugin-knowledge",  // Knowledge base (can be large)
+
+  // Other disabled plugins:
+  // "@elizaos/plugin-agent-orchestrator",
+  // "@elizaos/plugin-shell",
+  // "@elizaos/plugin-experience",
+  // "@elizaos/plugin-plugin-manager",
+  // "@elizaos/plugin-cli",
+  // "@elizaos/plugin-code",
+  // "@elizaos/plugin-edge-tts",
+  // "@elizaos/plugin-mcp",
+  // "@elizaos/plugin-pdf",
+  // "@elizaos/plugin-scratchpad",
+  // "@elizaos/plugin-secrets-manager",
+  // "@elizaos/plugin-todo",
+  // "@elizaos/plugin-trust",
+  // "@elizaos/plugin-form",
+  // "@elizaos/plugin-goals",
+  // "@elizaos/plugin-scheduling",
 ];
 
 /**
@@ -170,7 +183,7 @@ const CORE_PLUGINS: readonly string[] = [
  * These are only loaded when explicitly enabled via features config,
  * NOT by default — they crash if their prerequisites are missing.
  */
-const OPTIONAL_NATIVE_PLUGINS: readonly string[] = [
+const _OPTIONAL_NATIVE_PLUGINS: readonly string[] = [
   "@elizaos/plugin-browser", // requires browser server binary
   "@elizaos/plugin-vision", // requires @tensorflow/tfjs-node native addon
   "@elizaos/plugin-cron", // requires worldId at service init
@@ -200,7 +213,10 @@ const PROVIDER_PLUGIN_MAP: Readonly<Record<string, string>> = {
   GROQ_API_KEY: "@elizaos/plugin-groq",
   XAI_API_KEY: "@elizaos/plugin-xai",
   OPENROUTER_API_KEY: "@elizaos/plugin-openrouter",
+  AI_GATEWAY_API_KEY: "@elizaos/plugin-vercel-ai-gateway",
+  AIGATEWAY_API_KEY: "@elizaos/plugin-vercel-ai-gateway",
   OLLAMA_BASE_URL: "@elizaos/plugin-ollama",
+  ZAI_API_KEY: "@homunculuslabs/plugin-zai",
   // ElizaCloud — loaded when API key is present OR cloud is explicitly enabled
   ELIZAOS_CLOUD_API_KEY: "@elizaos/plugin-elizacloud",
   ELIZAOS_CLOUD_ENABLED: "@elizaos/plugin-elizacloud",
@@ -218,6 +234,7 @@ const OPTIONAL_PLUGIN_MAP: Readonly<Record<string, string>> = {
   vision: "@elizaos/plugin-vision",
   cron: "@elizaos/plugin-cron",
   computeruse: "@elizaos/plugin-computeruse",
+  x402: "@elizaos/plugin-x402",
 };
 
 function looksLikePlugin(value: unknown): value is Plugin {
@@ -250,6 +267,16 @@ function extractPlugin(mod: PluginModuleShape): Plugin | null {
  */
 /** @internal Exported for testing. */
 export function collectPluginNames(config: MilaidyConfig): Set<string> {
+  // Check for explicit allow list first
+  const allowList = config.plugins?.allow;
+  const hasExplicitAllowList = allowList && allowList.length > 0;
+
+  // If there's an explicit allow list, respect it and skip auto-detection
+  if (hasExplicitAllowList) {
+    return new Set<string>(allowList);
+  }
+
+  // Otherwise, proceed with auto-detection
   const pluginsToLoad = new Set<string>(CORE_PLUGINS);
 
   // Channel plugins — load when channel has config entries
@@ -310,6 +337,11 @@ export function collectPluginNames(config: MilaidyConfig): Set<string> {
         }
       }
     }
+  }
+
+  // x402 plugin — auto-load when config section enabled
+  if (config.x402?.enabled) {
+    pluginsToLoad.add("@elizaos/plugin-x402");
   }
 
   // User-installed plugins from config.plugins.installs
@@ -610,6 +642,57 @@ export function applyCloudConfigToEnv(config: MilaidyConfig): void {
 }
 
 /**
+ * Translate `config.database` into the environment variables that
+ * `@elizaos/plugin-sql` reads at init time (`POSTGRES_URL`, `PGLITE_DATA_DIR`).
+ *
+ * When the provider is "postgres", we build a connection string from the
+ * credentials (or use the explicit `connectionString` field) and set
+ * `POSTGRES_URL`. When the provider is "pglite" (the default), we only
+ * set `PGLITE_DATA_DIR` if a custom directory was configured and remove
+ * any stale `POSTGRES_URL` so the plugin falls through to PGLite.
+ */
+/** @internal Exported for testing. */
+export function applyX402ConfigToEnv(config: MilaidyConfig): void {
+  const x402 = (config as Record<string, unknown>).x402 as
+    | { enabled?: boolean; apiKey?: string; baseUrl?: string }
+    | undefined;
+  if (!x402?.enabled) return;
+  if (!process.env.X402_ENABLED) process.env.X402_ENABLED = "true";
+  if (x402.apiKey && !process.env.X402_API_KEY) process.env.X402_API_KEY = x402.apiKey;
+  if (x402.baseUrl && !process.env.X402_BASE_URL) process.env.X402_BASE_URL = x402.baseUrl;
+}
+
+/** @internal Exported for testing. */
+export function applyDatabaseConfigToEnv(config: MilaidyConfig): void {
+  const db = config.database;
+  if (!db) return;
+
+  if (db.provider === "postgres" && db.postgres) {
+    const pg = db.postgres;
+    let url = pg.connectionString;
+    if (!url) {
+      const host = pg.host ?? "localhost";
+      const port = pg.port ?? 5432;
+      const user = encodeURIComponent(pg.user ?? "postgres");
+      const password = pg.password ? encodeURIComponent(pg.password) : "";
+      const database = pg.database ?? "postgres";
+      const auth = password ? `${user}:${password}` : user;
+      const sslParam = pg.ssl ? "?sslmode=require" : "";
+      url = `postgresql://${auth}@${host}:${port}/${database}${sslParam}`;
+    }
+    process.env.POSTGRES_URL = url;
+    // Clear PGLite dir so plugin-sql does not fall back to PGLite
+    delete process.env.PGLITE_DATA_DIR;
+  } else {
+    // PGLite mode (default): ensure no leftover POSTGRES_URL
+    delete process.env.POSTGRES_URL;
+    if (db.pglite?.dataDir) {
+      process.env.PGLITE_DATA_DIR = db.pglite.dataDir;
+    }
+  }
+}
+
+/**
  * Build an ElizaOS Character from the Milaidy config.
  *
  * Resolves the agent name from `config.agents.list` (first entry) or
@@ -637,6 +720,15 @@ export function buildCharacterFromConfig(config: MilaidyConfig): Character {
     "GROQ_API_KEY",
     "XAI_API_KEY",
     "OPENROUTER_API_KEY",
+    "AI_GATEWAY_API_KEY",
+    "AIGATEWAY_API_KEY",
+    "AI_GATEWAY_BASE_URL",
+    "AI_GATEWAY_SMALL_MODEL",
+    "AI_GATEWAY_LARGE_MODEL",
+    "AI_GATEWAY_EMBEDDING_MODEL",
+    "AI_GATEWAY_EMBEDDING_DIMENSIONS",
+    "AI_GATEWAY_IMAGE_MODEL",
+    "AI_GATEWAY_TIMEOUT_MS",
     "OLLAMA_BASE_URL",
     "DISCORD_BOT_TOKEN",
     "TELEGRAM_BOT_TOKEN",
@@ -659,12 +751,20 @@ export function buildCharacterFromConfig(config: MilaidyConfig): Character {
     "HELIUS_API_KEY",
     "BIRDEYE_API_KEY",
     "SOLANA_RPC_URL",
+    "X402_PRIVATE_KEY",
+    "X402_NETWORK",
+    "X402_PAY_TO",
+    "X402_FACILITATOR_URL",
+    "X402_MAX_PAYMENT_USD",
+    "X402_MAX_TOTAL_USD",
+    "X402_ENABLED",
+    "X402_DB_PATH",
   ];
 
   const secrets: Record<string, string> = {};
   for (const key of secretKeys) {
     const value = process.env[key];
-    if (value && value.trim()) {
+    if (value?.trim()) {
       secrets[key] = value;
     }
   }
@@ -735,6 +835,61 @@ async function runFirstTimeSetup(
   // ── Step 1: Welcome ────────────────────────────────────────────────────
   clack.intro("WELCOME TO MILAIDY!");
 
+  // ── Step 1b: Where to run? ────────────────────────────────────────────
+  const runMode = await clack.select({
+    message: "Where do you want to run your agent?",
+    options: [
+      {
+        value: "local",
+        label: "On this machine (local)",
+        hint: "requires an AI provider API key",
+      },
+      {
+        value: "cloud",
+        label: "In the cloud (ELIZA Cloud)",
+        hint: "free credits to start",
+      },
+    ],
+  });
+
+  if (clack.isCancel(runMode)) cancelOnboarding();
+
+  let _cloudApiKey: string | undefined;
+
+  if (runMode === "cloud") {
+    const cloudBaseUrl = config.cloud?.baseUrl ?? "https://www.elizacloud.ai";
+
+    clack.log.message("Opening your browser to log in to ELIZA Cloud...");
+
+    const loginResult = await cloudLogin({
+      baseUrl: cloudBaseUrl,
+      onBrowserUrl: (url) => {
+        // Try to open the browser automatically; fall back to showing URL
+        import("node:child_process")
+          .then((cp) => {
+            const cmd =
+              process.platform === "darwin"
+                ? "open"
+                : process.platform === "win32"
+                  ? "start"
+                  : "xdg-open";
+            cp.exec(`${cmd} "${url}"`);
+          })
+          .catch(() => {
+            clack.log.message(`Open this URL in your browser:\n  ${url}`);
+          });
+      },
+      onPollStatus: (status) => {
+        if (status === "pending") {
+          // Spinner is handled by clack; nothing extra needed
+        }
+      },
+    });
+
+    _cloudApiKey = loginResult.apiKey;
+    clack.log.success("Logged in to ELIZA Cloud!");
+  }
+
   // ── Step 2: Name ───────────────────────────────────────────────────────
   const randomNames = pickRandomNames(4);
 
@@ -782,6 +937,7 @@ async function runFirstTimeSetup(
   );
 
   // ── Step 4: Model provider ───────────────────────────────────────────────
+  // Skip provider selection in cloud mode — ELIZA Cloud handles inference.
   // Check whether an API key is already set in the environment (from .env or
   // shell).  If none is found, ask the user to pick a provider and enter a key.
   const PROVIDER_OPTIONS = [
@@ -789,58 +945,93 @@ async function runFirstTimeSetup(
       id: "anthropic",
       label: "Anthropic (Claude)",
       envKey: "ANTHROPIC_API_KEY",
+      detectKeys: ["ANTHROPIC_API_KEY"],
       hint: "sk-ant-...",
     },
     {
       id: "openai",
       label: "OpenAI (GPT)",
       envKey: "OPENAI_API_KEY",
+      detectKeys: ["OPENAI_API_KEY"],
       hint: "sk-...",
     },
     {
       id: "openrouter",
       label: "OpenRouter",
       envKey: "OPENROUTER_API_KEY",
+      detectKeys: ["OPENROUTER_API_KEY"],
       hint: "sk-or-...",
+    },
+    {
+      id: "vercel-ai-gateway",
+      label: "Vercel AI Gateway",
+      envKey: "AI_GATEWAY_API_KEY",
+      detectKeys: ["AI_GATEWAY_API_KEY", "AIGATEWAY_API_KEY"],
+      hint: "aigw_...",
     },
     {
       id: "gemini",
       label: "Google Gemini",
       envKey: "GOOGLE_API_KEY",
+      detectKeys: ["GOOGLE_API_KEY", "GOOGLE_GENERATIVE_AI_API_KEY"],
       hint: "AI...",
     },
-    { id: "grok", label: "xAI (Grok)", envKey: "XAI_API_KEY", hint: "xai-..." },
-    { id: "groq", label: "Groq", envKey: "GROQ_API_KEY", hint: "gsk_..." },
+    {
+      id: "grok",
+      label: "xAI (Grok)",
+      envKey: "XAI_API_KEY",
+      detectKeys: ["XAI_API_KEY"],
+      hint: "xai-...",
+    },
+    {
+      id: "groq",
+      label: "Groq",
+      envKey: "GROQ_API_KEY",
+      detectKeys: ["GROQ_API_KEY"],
+      hint: "gsk_...",
+    },
     {
       id: "deepseek",
       label: "DeepSeek",
       envKey: "DEEPSEEK_API_KEY",
+      detectKeys: ["DEEPSEEK_API_KEY"],
       hint: "sk-...",
     },
-    { id: "mistral", label: "Mistral", envKey: "MISTRAL_API_KEY", hint: "" },
+    {
+      id: "mistral",
+      label: "Mistral",
+      envKey: "MISTRAL_API_KEY",
+      detectKeys: ["MISTRAL_API_KEY"],
+      hint: "",
+    },
     {
       id: "together",
       label: "Together AI",
       envKey: "TOGETHER_API_KEY",
+      detectKeys: ["TOGETHER_API_KEY"],
       hint: "",
     },
     {
       id: "ollama",
       label: "Ollama (local, free)",
       envKey: "OLLAMA_BASE_URL",
+      detectKeys: ["OLLAMA_BASE_URL"],
       hint: "http://localhost:11434",
     },
   ] as const;
 
   // Detect if any provider key is already configured
   const detectedProvider = PROVIDER_OPTIONS.find((p) =>
-    process.env[p.envKey]?.trim(),
+    p.detectKeys.some((key) => process.env[key]?.trim()),
   );
 
   let providerEnvKey: string | undefined;
   let providerApiKey: string | undefined;
 
-  if (detectedProvider) {
+  // In cloud mode, skip provider selection entirely.
+  if (runMode === "cloud") {
+    clack.log.message("AI inference will be handled by ELIZA Cloud.");
+  } else if (detectedProvider) {
     clack.log.success(
       `Found existing ${detectedProvider.label} key in environment (${detectedProvider.envKey})`,
     );
@@ -972,7 +1163,41 @@ async function runFirstTimeSetup(
     // "skip" — do nothing
   }
 
-  // ── Step 6: Persist agent name + style + provider to config ─────────────
+  // ── Step 6: Skills Marketplace API key ──────────────────────────────────
+  const hasSkillsmpKey = Boolean(process.env.SKILLSMP_API_KEY?.trim());
+
+  if (!hasSkillsmpKey) {
+    const skillsmpAction = await clack.select({
+      message: `${name}: Want to connect to the Skills Marketplace? (https://skillsmp.com)`,
+      options: [
+        {
+          value: "enter",
+          label: "Enter API key",
+          hint: "enables browsing & installing skills",
+        },
+        {
+          value: "skip",
+          label: "Skip for now",
+          hint: "you can add it later via env or config",
+        },
+      ],
+    });
+
+    if (clack.isCancel(skillsmpAction)) cancelOnboarding();
+
+    if (skillsmpAction === "enter") {
+      const skillsmpKeyInput = await clack.password({
+        message: "Paste your skillsmp.com API key:",
+      });
+
+      if (!clack.isCancel(skillsmpKeyInput) && skillsmpKeyInput.trim()) {
+        process.env.SKILLSMP_API_KEY = skillsmpKeyInput.trim();
+        clack.log.success("Skills Marketplace API key saved!");
+      }
+    }
+  }
+
+  // ── Step 7: Persist agent name + style + provider to config ─────────────
   // Save the agent name and chosen personality template into config so that
   // the same character data is used regardless of whether the user onboarded
   // via CLI or GUI.  This ensures full parity between onboarding surfaces.
@@ -1025,6 +1250,9 @@ async function runFirstTimeSetup(
   if (process.env.SOLANA_PRIVATE_KEY && !hasSolKey) {
     envBucket.SOLANA_PRIVATE_KEY = process.env.SOLANA_PRIVATE_KEY;
   }
+  if (process.env.SKILLSMP_API_KEY && !hasSkillsmpKey) {
+    envBucket.SKILLSMP_API_KEY = process.env.SKILLSMP_API_KEY;
+  }
 
   try {
     saveMilaidyConfig(updated);
@@ -1060,7 +1288,7 @@ export interface StartElizaOptions {
  */
 export async function startEliza(
   opts?: StartElizaOptions,
-): Promise<AgentRuntime | void> {
+): Promise<AgentRuntime | undefined> {
   // 1. Load Milaidy config from ~/.milaidy/milaidy.json
   let config: MilaidyConfig;
   try {
@@ -1093,6 +1321,12 @@ export async function startEliza(
 
   // 2b. Propagate cloud config into process.env for ElizaCloud plugin
   applyCloudConfigToEnv(config);
+
+  // 2c. Propagate x402 config into process.env
+  applyX402ConfigToEnv(config);
+
+  // 2d. Propagate database config into process.env for plugin-sql
+  applyDatabaseConfigToEnv(config);
 
   // 3. Build ElizaOS Character from Milaidy config
   const character = buildCharacterFromConfig(config);
@@ -1199,7 +1433,7 @@ export async function startEliza(
   //     plugin-agent-skills auto-loads them on startup.
   let bundledSkillsDir: string | null = null;
   try {
-    // @ts-expect-error — optional dependency; may not ship type declarations
+    // @ts-expect-error — optional peer dependency, resolved at runtime
     const { getSkillsDir } = (await import("@elizaos/skills")) as {
       getSkillsDir: () => string;
     };
@@ -1214,7 +1448,7 @@ export async function startEliza(
   // Workspace skills directory (highest precedence for overrides)
   const workspaceSkillsDir = workspaceDir ? `${workspaceDir}/skills` : null;
 
-  const runtime = new AgentRuntime({
+  let runtime = new AgentRuntime({
     character,
     plugins: [
       milaidyPlugin,
@@ -1246,12 +1480,23 @@ export async function startEliza(
   });
 
   // 7b. Pre-register plugin-sql so the adapter is ready before other plugins init.
-  //     This MUST succeed before initialize() — otherwise other plugins (e.g.
-  //     plugin-todo) will crash when accessing runtime.db because the adapter
-  //     hasn't been set yet.  runtime.db is a getter that does this.adapter.db
-  //     and throws when this.adapter is undefined.
+  //     This is OPTIONAL — without it, some features (memory, todos) won't work.
+  //     runtime.db is a getter that returns this.adapter.db and throws when
+  //     this.adapter is undefined, so plugins that use runtime.db will fail.
   if (sqlPlugin) {
     await runtime.registerPlugin(sqlPlugin.plugin);
+
+    // 7c. Eagerly initialize the database adapter so it's fully ready (connection
+    //     open, schema bootstrapped) BEFORE other plugins run their init().
+    //     runtime.initialize() also calls adapter.init() but that happens AFTER
+    //     all plugin inits — too late for plugins that need runtime.db during init.
+    //     The call is idempotent (runtime.initialize checks adapter.isReady()).
+    if (runtime.adapter && !(await runtime.adapter.isReady())) {
+      await runtime.adapter.init();
+      logger.info(
+        "[milaidy] Database adapter initialized early (before plugin inits)",
+      );
+    }
   } else {
     const loadedNames = resolvedPlugins.map((p) => p.name).join(", ");
     logger.error(
@@ -1343,6 +1588,51 @@ export async function startEliza(
     const { port: actualApiPort } = await startApiServer({
       port: apiPort,
       runtime,
+      onRestart: async () => {
+        logger.info("[milaidy] Hot-reload: Restarting runtime...");
+        try {
+          // Stop the old runtime to release resources (DB connections, timers, etc.)
+          try { await runtime.stop(); } catch (stopErr) {
+            logger.warn(`[milaidy] Hot-reload: old runtime stop failed: ${formatError(stopErr)}`);
+          }
+
+          // Reload config from disk (updated by API)
+          const freshConfig = loadMilaidyConfig();
+
+          // Resolve plugins using same function as startup
+          const resolvedPlugins = await resolvePlugins(freshConfig);
+
+          // Recreate Milaidy plugin with fresh workspace
+          const freshMilaidyPlugin = createMilaidyPlugin({
+            workspaceDir:
+              freshConfig.agents?.defaults?.workspace ?? workspaceDir,
+            bootstrapMaxChars: freshConfig.agents?.defaults?.bootstrapMaxChars,
+            agentId:
+              runtime.character.name?.toLowerCase().replace(/\s+/g, "-") ??
+              "main",
+          });
+
+          // Create new runtime with updated plugins
+          const newRuntime = new AgentRuntime({
+            character: runtime.character,
+            plugins: [
+              freshMilaidyPlugin,
+              ...resolvedPlugins.map((p) => p.plugin),
+            ],
+            ...(runtimeLogLevel ? { logLevel: runtimeLogLevel } : {}),
+            enableAutonomy: true,
+            settings: runtime.settings,
+          });
+
+          await newRuntime.initialize();
+          runtime = newRuntime;
+          logger.info("[milaidy] Hot-reload: Runtime restarted successfully");
+          return newRuntime;
+        } catch (err) {
+          logger.error(`[milaidy] Hot-reload failed: ${formatError(err)}`);
+          return null;
+        }
+      },
     });
     logger.info(
       `[milaidy] API server listening on http://localhost:${actualApiPort}`,

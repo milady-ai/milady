@@ -32,6 +32,7 @@ export const CHANNEL_PLUGINS: Record<string, string> = {
 const PROVIDER_PLUGINS: Record<string, string> = {
   "google-antigravity": "@elizaos/plugin-google-antigravity",
   "google-gemini": "@elizaos/plugin-google-gemini",
+  "vercel-ai-gateway": "@elizaos/plugin-vercel-ai-gateway",
   openai: "@elizaos/plugin-openai",
   anthropic: "@elizaos/plugin-anthropic",
   qwen: "@elizaos/plugin-qwen",
@@ -40,6 +41,7 @@ const PROVIDER_PLUGINS: Record<string, string> = {
   xai: "@elizaos/plugin-xai",
   openrouter: "@elizaos/plugin-openrouter",
   ollama: "@elizaos/plugin-ollama",
+  zai: "@homunculuslabs/plugin-zai",
   deepseek: "@elizaos/plugin-deepseek",
   together: "@elizaos/plugin-together",
   mistral: "@elizaos/plugin-mistral",
@@ -51,6 +53,8 @@ export const AUTH_PROVIDER_PLUGINS: Record<string, string> = {
   ANTHROPIC_API_KEY: "@elizaos/plugin-anthropic",
   CLAUDE_API_KEY: "@elizaos/plugin-anthropic",
   OPENAI_API_KEY: "@elizaos/plugin-openai",
+  AI_GATEWAY_API_KEY: "@elizaos/plugin-vercel-ai-gateway",
+  AIGATEWAY_API_KEY: "@elizaos/plugin-vercel-ai-gateway",
   GOOGLE_API_KEY: "@elizaos/plugin-google-gemini",
   GOOGLE_GENERATIVE_AI_API_KEY: "@elizaos/plugin-google-gemini",
   GOOGLE_CLOUD_API_KEY: "@elizaos/plugin-google-antigravity",
@@ -59,6 +63,7 @@ export const AUTH_PROVIDER_PLUGINS: Record<string, string> = {
   GROK_API_KEY: "@elizaos/plugin-xai",
   OPENROUTER_API_KEY: "@elizaos/plugin-openrouter",
   OLLAMA_BASE_URL: "@elizaos/plugin-ollama",
+  ZAI_API_KEY: "@homunculuslabs/plugin-zai",
   DEEPSEEK_API_KEY: "@elizaos/plugin-deepseek",
   TOGETHER_API_KEY: "@elizaos/plugin-together",
   MISTRAL_API_KEY: "@elizaos/plugin-mistral",
@@ -82,6 +87,7 @@ const FEATURE_PLUGINS: Record<string, string> = {
   personality: "@elizaos/plugin-personality",
   experience: "@elizaos/plugin-experience",
   form: "@elizaos/plugin-form",
+  x402: "@elizaos/plugin-x402",
 };
 
 function isChannelConfigured(
@@ -182,7 +188,9 @@ export function applyPluginAutoEnable(
     const envValue = env[envKey];
     if (!envValue || typeof envValue !== "string" || envValue.trim() === "")
       continue;
-    const pluginId = pluginName.replace("@elizaos/plugin-", "");
+    const pluginId = pluginName.includes("/plugin-")
+      ? pluginName.slice(pluginName.lastIndexOf("/plugin-") + "/plugin-".length)
+      : pluginName;
     if (pluginsConfig.entries[pluginId]?.enabled === false) continue;
     addToAllowlist(
       pluginsConfig.allow,
@@ -206,7 +214,9 @@ export function applyPluginAutoEnable(
           featureConfig !== null &&
           featureConfig.enabled !== false);
       if (!isEnabled) continue;
-      const pluginId = pluginName.replace("@elizaos/plugin-", "");
+      const pluginId = pluginName.includes("/plugin-")
+        ? pluginName.slice(pluginName.lastIndexOf("/plugin-") + "/plugin-".length)
+        : pluginName;
       if (pluginsConfig.entries[pluginId]?.enabled === false) continue;
       addToAllowlist(
         pluginsConfig.allow,

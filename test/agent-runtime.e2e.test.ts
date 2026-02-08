@@ -40,6 +40,7 @@ import { ensureAgentWorkspace } from "../src/providers/workspace.js";
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const packageRoot = path.resolve(testDir, "..");
 dotenv.config({ path: path.resolve(packageRoot, ".env") });
+dotenv.config({ path: path.resolve(packageRoot, "..", "eliza", ".env") });
 
 const hasOpenAI = Boolean(process.env.OPENAI_API_KEY);
 const hasAnthropic = Boolean(process.env.ANTHROPIC_API_KEY);
@@ -444,7 +445,7 @@ describe("Agent Runtime E2E", () => {
   // ===================================================================
 
   describe("error paths", () => {
-    it.skipIf(!hasModelProvider)("non-JSON body → 500", async () => {
+    it.skipIf(!hasModelProvider)("non-JSON body → 400", async () => {
       const { status } = await new Promise<{ status: number }>((resolve, reject) => {
         const req = http.request(
           { hostname: "127.0.0.1", port: server!.port, path: "/api/chat", method: "POST",
@@ -455,7 +456,7 @@ describe("Agent Runtime E2E", () => {
         req.write("not-json!!!");
         req.end();
       });
-      expect(status).toBe(500);
+      expect(status).toBe(400);
     });
 
     it.skipIf(!hasModelProvider)("generateText empty → throws", async () => {

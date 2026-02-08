@@ -58,6 +58,7 @@ const AI_PROVIDERS = new Set([
   "openai", "anthropic", "groq", "xai", "ollama", "openrouter",
   "google-genai", "local-ai", "vercel-ai-gateway", "deepseek",
   "together", "mistral", "cohere", "perplexity", "qwen", "minimax",
+  "zai",
 ]);
 
 const CONNECTORS = new Set([

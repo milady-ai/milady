@@ -117,7 +117,7 @@ A custom `messageHandlerTemplate` is injected that instructs the LLM to read the
 |---|---|---|
 | `MILAIDY_BENCH_PORT` | `3939` | Port to listen on |
 
-Model provider plugins are auto-detected from API key env vars (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GOOGLE_API_KEY`, `GROQ_API_KEY`, `XAI_API_KEY`, `OPENROUTER_API_KEY`, `OLLAMA_BASE_URL`).
+Model provider plugins are auto-detected from API key env vars (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `AI_GATEWAY_API_KEY`, `GOOGLE_API_KEY`, `GROQ_API_KEY`, `XAI_API_KEY`, `OPENROUTER_API_KEY`, `OLLAMA_BASE_URL`).
 
 ## Python adapter reference
 

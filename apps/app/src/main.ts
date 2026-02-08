@@ -23,6 +23,7 @@ import { initializeStorageBridge } from "./bridge/storage-bridge.js";
 
 // Import the agent plugin
 import { Agent } from "@milaidy/capacitor-agent";
+import { Desktop } from "@milaidy/capacitor-desktop";
 
 /**
  * Platform detection utilities
@@ -33,6 +34,37 @@ const isIOS = platform === "ios";
 const isAndroid = platform === "android";
 const isElectron = platform === "electron";
 const isWeb = platform === "web";
+
+interface ShareTargetFile {
+  name: string;
+  path?: string;
+}
+
+interface ShareTargetPayload {
+  source?: string;
+  title?: string;
+  text?: string;
+  url?: string;
+  files?: ShareTargetFile[];
+}
+
+declare global {
+  interface Window {
+    __MILAIDY_SHARE_QUEUE__?: ShareTargetPayload[];
+  }
+}
+
+function dispatchShareTarget(payload: ShareTargetPayload): void {
+  if (!window.__MILAIDY_SHARE_QUEUE__) {
+    window.__MILAIDY_SHARE_QUEUE__ = [];
+  }
+  window.__MILAIDY_SHARE_QUEUE__.push(payload);
+  document.dispatchEvent(
+    new CustomEvent("milaidy:share-target", {
+      detail: payload,
+    }),
+  );
+}
 
 /**
  * Initialize the agent plugin.
@@ -169,11 +201,16 @@ function initializeAppLifecycle(): void {
  * Handle deep links (milaidy:// URLs)
  */
 function handleDeepLink(url: string): void {
-  const parsed = new URL(url);
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return;
+  }
 
   // Handle different deep link paths
   if (parsed.protocol === "milaidy:") {
-    const path = parsed.pathname || parsed.host;
+    const path = (parsed.pathname || parsed.host || "").replace(/^\/+/, "");
 
     switch (path) {
       case "chat":
@@ -184,17 +221,50 @@ function handleDeepLink(url: string): void {
         // Navigate to settings
         window.location.hash = "#settings";
         break;
-      case "connect":
+      case "connect": {
         // Handle gateway connection URL
         const gatewayUrl = parsed.searchParams.get("url");
         if (gatewayUrl) {
-          document.dispatchEvent(
-            new CustomEvent("milaidy:connect", {
-              detail: { gatewayUrl },
-            })
-          );
+          // Security: only allow https/http URLs to prevent SSRF
+          try {
+            const validatedUrl = new URL(gatewayUrl);
+            if (validatedUrl.protocol !== "https:" && validatedUrl.protocol !== "http:") {
+              console.error("[Milaidy] Invalid gateway URL protocol:", validatedUrl.protocol);
+              break;
+            }
+            document.dispatchEvent(
+              new CustomEvent("milaidy:connect", {
+                detail: { gatewayUrl: validatedUrl.href },
+              })
+            );
+          } catch {
+            console.error("[Milaidy] Invalid gateway URL format");
+          }
         }
         break;
+      }
+      case "share": {
+        const title = parsed.searchParams.get("title")?.trim() || undefined;
+        const text = parsed.searchParams.get("text")?.trim() || undefined;
+        const sharedUrl = parsed.searchParams.get("url")?.trim() || undefined;
+        const files = parsed.searchParams.getAll("file")
+          .map((filePath) => filePath.trim())
+          .filter((filePath) => filePath.length > 0)
+          .map((filePath) => {
+            const slash = Math.max(filePath.lastIndexOf("/"), filePath.lastIndexOf("\\"));
+            const name = slash >= 0 ? filePath.slice(slash + 1) : filePath;
+            return { name, path: filePath };
+          });
+
+        dispatchShareTarget({
+          source: "deep-link",
+          title,
+          text,
+          url: sharedUrl,
+          files,
+        });
+        break;
+      }
       default:
         console.log(`[Milaidy] Unknown deep link path: ${path}`);
     }
@@ -205,15 +275,45 @@ function handleDeepLink(url: string): void {
  * Initialize Electron-specific features
  */
 async function initializeElectron(): Promise<void> {
-  // Electron-specific initialization will be added when we set up the electron platform
-  // This includes:
-  // - System tray integration
-  // - Global shortcuts
-  // - Native menus
-  // - Window management
-
-  // For now, just mark that we're in Electron mode
   document.body.classList.add("electron");
+
+  try {
+    // Global command palette shortcut
+    await Desktop.registerShortcut({
+      id: "command-palette",
+      accelerator: "CommandOrControl+K",
+    });
+
+    await Desktop.addListener("shortcutPressed", (event) => {
+      if (event.id === "command-palette") {
+        document.dispatchEvent(new CustomEvent("milaidy:command-palette"));
+      }
+    });
+
+    // Tray actions routed to the renderer as app-level events.
+    await Desktop.setTrayMenu({
+      menu: [
+        { id: "tray-open-chat", label: "Open Chat" },
+        { id: "tray-open-workbench", label: "Open Workbench" },
+        { id: "tray-toggle-pause", label: "Pause/Resume Agent" },
+        { id: "tray-restart", label: "Restart Agent" },
+        { id: "tray-notify", label: "Send Test Notification" },
+        { id: "tray-sep-1", type: "separator" },
+        { id: "tray-show-window", label: "Show Window" },
+        { id: "tray-hide-window", label: "Hide Window" },
+      ],
+    });
+
+    await Desktop.addListener("trayMenuClick", (event) => {
+      document.dispatchEvent(
+        new CustomEvent("milaidy:tray-action", {
+          detail: event,
+        }),
+      );
+    });
+  } catch (err) {
+    console.warn("[Milaidy] Electron native integrations not fully available:", err);
+  }
 }
 
 /**

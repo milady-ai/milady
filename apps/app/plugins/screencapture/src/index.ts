@@ -4,7 +4,7 @@ import type { ScreenCapturePlugin } from "./definitions";
 
 const electronModulePath = "../electron/src/index";
 
-const ScreenCapture = registerPlugin<ScreenCapturePlugin>("ScreenCapture", {
+export const ScreenCapture = registerPlugin<ScreenCapturePlugin>("ScreenCapture", {
   web: () => import("./web").then((m) => new m.ScreenCaptureWeb()),
   electron: () => {
     // Use Electron-specific implementation for macOS/Windows/Linux
@@ -17,4 +17,3 @@ const ScreenCapture = registerPlugin<ScreenCapturePlugin>("ScreenCapture", {
 });
 
 export * from "./definitions";
-export { ScreenCapture };

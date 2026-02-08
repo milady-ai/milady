@@ -1,0 +1,14 @@
+{
+  "name": "milaidy-cloud-agent",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx entrypoint.ts"
+  },
+  "dependencies": {
+    "@elizaos/core": "next",
+    "@elizaos/plugin-sql": "next",
+    "@elizaos/plugin-elizacloud": "next",
+    "tsx": "^4"
+  }
+}

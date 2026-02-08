@@ -2,9 +2,9 @@
   "name": "@milaidy/capacitor-desktop",
   "version": "1.0.0",
   "description": "Milaidy Desktop Plugin for Capacitor - System tray, global shortcuts, auto-launch for Electron",
-  "main": "dist/plugin.cjs.js",
-  "module": "dist/esm/index.js",
-  "types": "dist/esm/index.d.ts",
+  "main": "./dist/plugin.cjs.js",
+  "module": "./src/index.ts",
+  "types": "./dist/plugin.d.ts",
   "unpkg": "dist/plugin.js",
   "files": [
     "dist/",

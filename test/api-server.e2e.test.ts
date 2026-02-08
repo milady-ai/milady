@@ -177,6 +177,22 @@ describe("API Server E2E (no runtime)", () => {
         expect(Array.isArray(p.configKeys)).toBe(true);
       }
     });
+
+    it("hides Vercel OIDC token key from plugin metadata", async () => {
+      const { data } = await req(port, "GET", "/api/plugins");
+      const plugins = data.plugins as Array<Record<string, unknown>>;
+      const vercel = plugins.find((p) => p.id === "vercel-ai-gateway");
+      if (!vercel) return;
+
+      const configKeys = Array.isArray(vercel.configKeys) ? vercel.configKeys as string[] : [];
+      expect(configKeys).not.toContain("VERCEL_OIDC_TOKEN");
+
+      const parameters = Array.isArray(vercel.parameters)
+        ? vercel.parameters as Array<Record<string, unknown>>
+        : [];
+      const parameterKeys = parameters.map((param) => param.key);
+      expect(parameterKeys).not.toContain("VERCEL_OIDC_TOKEN");
+    });
   });
 
   // -- Skills discovery --
@@ -186,6 +202,38 @@ describe("API Server E2E (no runtime)", () => {
       const { status, data } = await req(port, "GET", "/api/skills");
       expect(status).toBe(200);
       expect(Array.isArray(data.skills)).toBe(true);
+    });
+  });
+
+  describe("skills marketplace endpoints", () => {
+    it("GET /api/skills/marketplace/search requires query", async () => {
+      const { status, data } = await req(port, "GET", "/api/skills/marketplace/search");
+      expect(status).toBe(400);
+      expect(String(data.error)).toContain("Query");
+    });
+
+    it("GET /api/skills/marketplace/installed returns array", async () => {
+      const { status, data } = await req(port, "GET", "/api/skills/marketplace/installed");
+      expect(status).toBe(200);
+      expect(Array.isArray(data.skills)).toBe(true);
+    });
+
+    it("GET /api/skills/marketplace/search reports key-gated failure when key missing", async () => {
+      const { status, data } = await req(port, "GET", "/api/skills/marketplace/search?q=agent");
+      expect(status).toBe(502);
+      expect(String(data.error)).toContain("SKILLSMP_API_KEY");
+    });
+
+    it("POST /api/skills/marketplace/install validates source input", async () => {
+      const { status, data } = await req(port, "POST", "/api/skills/marketplace/install", { name: "test" });
+      expect(status).toBe(400);
+      expect(String(data.error)).toContain("githubUrl");
+    });
+
+    it("POST /api/skills/marketplace/uninstall validates id input", async () => {
+      const { status, data } = await req(port, "POST", "/api/skills/marketplace/uninstall", {});
+      expect(status).toBe(400);
+      expect(String(data.error)).toContain("id");
     });
   });
 
@@ -272,6 +320,69 @@ describe("API Server E2E (no runtime)", () => {
     });
   });
 
+  // -- Workbench --
+
+  describe("workbench endpoints", () => {
+    it("GET /api/workbench/overview returns summary + arrays", async () => {
+      const { status, data } = await req(port, "GET", "/api/workbench/overview");
+      expect(status).toBe(200);
+      expect(Array.isArray(data.goals)).toBe(true);
+      expect(Array.isArray(data.todos)).toBe(true);
+      expect(typeof data.summary).toBe("object");
+      expect(typeof data.autonomy).toBe("object");
+    });
+
+    it("PATCH /api/workbench/goals/:id returns 503 when runtime is absent", async () => {
+      const { status } = await req(port, "PATCH", "/api/workbench/goals/fake", { isCompleted: true });
+      expect(status).toBe(503);
+    });
+
+    it("PATCH /api/workbench/todos/:id returns 503 when runtime is absent", async () => {
+      const { status } = await req(port, "PATCH", "/api/workbench/todos/fake", { isCompleted: true });
+      expect(status).toBe(503);
+    });
+
+    it("POST /api/workbench/goals returns 503 when runtime is absent", async () => {
+      const { status } = await req(port, "POST", "/api/workbench/goals", { name: "test goal" });
+      expect(status).toBe(503);
+    });
+
+    it("POST /api/workbench/todos returns 503 when runtime is absent", async () => {
+      const { status } = await req(port, "POST", "/api/workbench/todos", { name: "test todo" });
+      expect(status).toBe(503);
+    });
+  });
+
+  describe("share ingest endpoints", () => {
+    it("POST /api/ingest/share accepts payload", async () => {
+      const { status, data } = await req(port, "POST", "/api/ingest/share", {
+        source: "e2e-test",
+        title: "Shared article",
+        url: "https://example.com/story",
+      });
+      expect(status).toBe(200);
+      expect(data.ok).toBe(true);
+      expect(typeof data.item).toBe("object");
+      expect(typeof (data.item as Record<string, unknown>).suggestedPrompt).toBe("string");
+    });
+
+    it("GET /api/ingest/share?consume=1 drains queued items", async () => {
+      await req(port, "POST", "/api/ingest/share", {
+        source: "e2e-test",
+        text: "something to analyze",
+      });
+      const first = await req(port, "GET", "/api/ingest/share?consume=1");
+      expect(first.status).toBe(200);
+      expect(Array.isArray(first.data.items)).toBe(true);
+      expect((first.data.items as unknown[]).length).toBeGreaterThan(0);
+
+      const second = await req(port, "GET", "/api/ingest/share?consume=1");
+      expect(second.status).toBe(200);
+      expect(Array.isArray(second.data.items)).toBe(true);
+      expect((second.data.items as unknown[]).length).toBe(0);
+    });
+  });
+
   // -- CORS --
 
   describe("CORS", () => {
@@ -334,29 +445,16 @@ describe("API Server E2E (no runtime)", () => {
 
   describe("error handling", () => {
     it("non-JSON POST body → 400", async () => {
-      const { status } = await new Promise<{ status: number }>(
-        (resolve, reject) => {
-          const r = http.request(
-            {
-              hostname: "127.0.0.1",
-              port,
-              path: "/api/chat",
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Content-Length": 11,
-              },
-            },
-            (res) => {
-              res.resume();
-              resolve({ status: res.statusCode ?? 0 });
-            },
-          );
-          r.on("error", reject);
-          r.write("not-json!!!");
-          r.end();
-        },
-      );
+      const { status } = await new Promise<{ status: number }>((resolve, reject) => {
+        const r = http.request(
+          { hostname: "127.0.0.1", port, path: "/api/chat", method: "POST",
+            headers: { "Content-Type": "application/json", "Content-Length": 11 } },
+          (res) => { res.resume(); resolve({ status: res.statusCode ?? 0 }); },
+        );
+        r.on("error", reject);
+        r.write("not-json!!!");
+        r.end();
+      });
       expect(status).toBe(400);
     });
 
@@ -366,6 +464,166 @@ describe("API Server E2E (no runtime)", () => {
 
     it("PUT /api/plugins/nonexistent → 404", async () => {
       expect((await req(port, "PUT", "/api/plugins/nonexistent-plugin", { enabled: true })).status).toBe(404);
+    });
+  });
+
+  // -- MCP Marketplace & Config --
+
+  describe("MCP marketplace endpoints", () => {
+    it("GET /api/mcp/marketplace/search returns results array", async () => {
+      const { status, data } = await req(port, "GET", "/api/mcp/marketplace/search?q=test&limit=5");
+      expect(status).toBe(200);
+      expect(data.ok).toBe(true);
+      expect(Array.isArray(data.results)).toBe(true);
+    });
+
+    it("GET /api/mcp/marketplace/search works with empty query", async () => {
+      const { status, data } = await req(port, "GET", "/api/mcp/marketplace/search");
+      expect(status).toBe(200);
+      expect(data.ok).toBe(true);
+      expect(Array.isArray(data.results)).toBe(true);
+    });
+
+    it("GET /api/mcp/marketplace/details/:name returns 404 for nonexistent server", async () => {
+      const { status, data } = await req(port, "GET", "/api/mcp/marketplace/details/nonexistent-server-xyz-123");
+      expect(status).toBe(404);
+      expect(typeof data.error).toBe("string");
+    });
+
+    it("GET /api/mcp/marketplace/details requires name parameter", async () => {
+      const { status } = await req(port, "GET", "/api/mcp/marketplace/details/");
+      expect(status).toBe(400);
+    });
+  });
+
+  describe("MCP config endpoints", () => {
+    it("GET /api/mcp/config returns servers object", async () => {
+      const { status, data } = await req(port, "GET", "/api/mcp/config");
+      expect(status).toBe(200);
+      expect(data.ok).toBe(true);
+      expect(typeof data.servers).toBe("object");
+    });
+
+    it("POST /api/mcp/config/server adds a server and returns requiresRestart", async () => {
+      const { status, data } = await req(port, "POST", "/api/mcp/config/server", {
+        name: "test-server",
+        config: { type: "stdio", command: "npx", args: ["-y", "@test/mcp-server"] },
+      });
+      expect(status).toBe(200);
+      expect(data.ok).toBe(true);
+      expect(data.name).toBe("test-server");
+      expect(data.requiresRestart).toBe(true);
+
+      // Verify it persisted
+      const { data: configData } = await req(port, "GET", "/api/mcp/config");
+      const servers = configData.servers as Record<string, Record<string, unknown>>;
+      expect(servers["test-server"]).toBeDefined();
+      expect(servers["test-server"].type).toBe("stdio");
+      expect(servers["test-server"].command).toBe("npx");
+    });
+
+    it("POST /api/mcp/config/server validates name", async () => {
+      const { status } = await req(port, "POST", "/api/mcp/config/server", {
+        name: "",
+        config: { type: "stdio", command: "npx" },
+      });
+      expect(status).toBe(400);
+    });
+
+    it("POST /api/mcp/config/server validates config type", async () => {
+      const { status } = await req(port, "POST", "/api/mcp/config/server", {
+        name: "bad-type",
+        config: { type: "invalid" },
+      });
+      expect(status).toBe(400);
+    });
+
+    it("POST /api/mcp/config/server validates command for stdio", async () => {
+      const { status } = await req(port, "POST", "/api/mcp/config/server", {
+        name: "no-cmd",
+        config: { type: "stdio" },
+      });
+      expect(status).toBe(400);
+    });
+
+    it("POST /api/mcp/config/server validates url for remote servers", async () => {
+      const { status } = await req(port, "POST", "/api/mcp/config/server", {
+        name: "no-url",
+        config: { type: "streamable-http" },
+      });
+      expect(status).toBe(400);
+    });
+
+    it("POST /api/mcp/config/server adds remote server with url", async () => {
+      const { status, data } = await req(port, "POST", "/api/mcp/config/server", {
+        name: "test-remote",
+        config: { type: "streamable-http", url: "https://mcp.example.com/api" },
+      });
+      expect(status).toBe(200);
+      expect(data.ok).toBe(true);
+      expect(data.requiresRestart).toBe(true);
+    });
+
+    it("DELETE /api/mcp/config/server/:name removes and returns requiresRestart", async () => {
+      // First add
+      await req(port, "POST", "/api/mcp/config/server", {
+        name: "to-delete",
+        config: { type: "stdio", command: "echo" },
+      });
+
+      // Then remove
+      const { status, data } = await req(port, "DELETE", "/api/mcp/config/server/to-delete");
+      expect(status).toBe(200);
+      expect(data.ok).toBe(true);
+      expect(data.requiresRestart).toBe(true);
+
+      // Verify removed
+      const { data: configData } = await req(port, "GET", "/api/mcp/config");
+      const servers = configData.servers as Record<string, unknown>;
+      expect(servers["to-delete"]).toBeUndefined();
+    });
+
+    it("DELETE /api/mcp/config/server/:name is idempotent for nonexistent", async () => {
+      const { status, data } = await req(port, "DELETE", "/api/mcp/config/server/does-not-exist");
+      expect(status).toBe(200);
+      expect(data.ok).toBe(true);
+    });
+
+    it("PUT /api/mcp/config replaces entire config", async () => {
+      const newServers = {
+        "bulk-a": { type: "stdio", command: "npx", args: ["-y", "@test/a"] },
+        "bulk-b": { type: "streamable-http", url: "https://example.com/mcp" },
+      };
+
+      const { status, data } = await req(port, "PUT", "/api/mcp/config", { servers: newServers });
+      expect(status).toBe(200);
+      expect(data.ok).toBe(true);
+
+      const { data: configData } = await req(port, "GET", "/api/mcp/config");
+      const servers = configData.servers as Record<string, unknown>;
+      expect(servers["bulk-a"]).toBeDefined();
+      expect(servers["bulk-b"]).toBeDefined();
+    });
+  });
+
+  describe("MCP status endpoint", () => {
+    it("GET /api/mcp/status returns servers array (empty without runtime MCP service)", async () => {
+      const { status, data } = await req(port, "GET", "/api/mcp/status");
+      expect(status).toBe(200);
+      expect(data.ok).toBe(true);
+      expect(Array.isArray(data.servers)).toBe(true);
+    });
+
+    it("GET /api/mcp/status server entries have correct shape when present", async () => {
+      const { data } = await req(port, "GET", "/api/mcp/status");
+      const servers = data.servers as Array<Record<string, unknown>>;
+      // With no runtime, it returns empty — but shape is valid
+      for (const server of servers) {
+        expect(typeof server.name).toBe("string");
+        expect(typeof server.status).toBe("string");
+        expect(typeof server.toolCount).toBe("number");
+        expect(typeof server.resourceCount).toBe("number");
+      }
     });
   });
 });

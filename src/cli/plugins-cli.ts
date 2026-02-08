@@ -42,8 +42,13 @@ export function registerPluginsCli(program: Command): void {
       const { getRegistryPlugins, searchPlugins } = await import(
         "../services/registry-client.js"
       );
+      const { listInstalledPlugins } = await import(
+        "../services/plugin-installer.js"
+      );
 
       const limit = clampInt(opts.limit, 1, 500, 30);
+      const installed = await listInstalledPlugins();
+      const installedNames = new Set(installed.map((p) => p.name));
 
       if (opts.query) {
         const results = await searchPlugins(opts.query, limit);
@@ -62,8 +67,12 @@ export function registerPluginsCli(program: Command): void {
           if (r.supports.v1) versionBadges.push("v1");
           if (r.supports.v2) versionBadges.push("v2");
 
+          const badge = installedNames.has(r.name)
+            ? chalk.green(" ✓ installed")
+            : "";
+
           console.log(
-            `  ${chalk.cyan(r.name)} ${r.latestVersion ? chalk.dim(`v${r.latestVersion}`) : ""}`,
+            `  ${chalk.cyan(r.name)} ${r.latestVersion ? chalk.dim(`v${r.latestVersion}`) : ""}${badge}`,
           );
           if (r.description) {
             console.log(`    ${r.description}`);
@@ -84,8 +93,11 @@ export function registerPluginsCli(program: Command): void {
         const registry = await getRegistryPlugins();
         const all = Array.from(registry.values());
 
+        const installedCount = all.filter((p) =>
+          installedNames.has(p.name),
+        ).length;
         console.log(
-          `\n${chalk.bold(`${all.length} plugins available in registry:`)}\n`,
+          `\n${chalk.bold(`${all.length} plugins available in registry`)}${installedCount > 0 ? chalk.green(` (${installedCount} installed)`) : ""}${chalk.bold(":")}\n`,
         );
 
         const sorted = all
@@ -94,7 +106,10 @@ export function registerPluginsCli(program: Command): void {
 
         for (const plugin of sorted) {
           const desc = plugin.description ? ` — ${plugin.description}` : "";
-          console.log(`  ${chalk.cyan(plugin.name)}${chalk.dim(desc)}`);
+          const badge = installedNames.has(plugin.name)
+            ? chalk.green(" ✓")
+            : "";
+          console.log(`  ${chalk.cyan(plugin.name)}${badge}${chalk.dim(desc)}`);
         }
 
         if (all.length > limit) {

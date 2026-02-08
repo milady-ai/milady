@@ -122,6 +122,15 @@ export default defineConfig({
     // Ensure dependencies are deduplicated
     dedupe: ["lit", "marked", "dompurify", "@noble/ed25519", "@lit/reactive-element"],
     alias: [
+      /**
+       * GEMINI_FIX: Map @milaidy/capacitor-* packages directly to their TS source.
+       * This bypasses resolution issues with local workspace symlinks and 
+       * outdated bundle exports in the plugins' dist folders.
+       */
+      {
+        find: /^@milaidy\/capacitor-(.*)/,
+        replacement: path.resolve(here, "plugins/$1/src/index.ts"),
+      },
       // Rewrite the UI's relative imports to milaidy/src/gateway
       // The UI uses paths like "../../../../src/gateway/device-auth.js"
       // from files in milaidy/apps/ui/src/ui/

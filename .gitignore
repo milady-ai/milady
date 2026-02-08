@@ -39,3 +39,7 @@ USER.md
 skills/
 apps/app/electron/.eliza
 apps/app/electron/skills/
+
+# Agent learning docs & knowledge base
+knowledge/
+scripts/knowledge-loop.mjs

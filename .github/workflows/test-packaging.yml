@@ -1,0 +1,147 @@
+name: Test Packaging
+
+on:
+  pull_request:
+    paths:
+      - 'packaging/**'
+      - '.github/workflows/publish-packages.yml'
+      - '.github/workflows/test-packaging.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'packaging/**'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate Packaging Configs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install validation dependencies
+        run: pip install pyyaml build twine
+
+      - name: Run packaging validation suite
+        run: bash packaging/test-packaging.sh
+
+  build-pypi:
+    name: Build & Test PyPI Package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Build
+        working-directory: packaging/pypi
+        run: |
+          pip install build
+          python -m build
+
+      - name: Check dist
+        working-directory: packaging/pypi
+        run: |
+          pip install twine
+          twine check dist/*
+
+      - name: Install and test
+        working-directory: packaging/pypi
+        run: |
+          pip install dist/*.whl
+
+          # Module import test
+          python -c "
+          import milady
+          print(f'milady {milady.__version__}')
+          assert milady.__version__
+          assert hasattr(milady, 'run')
+          assert hasattr(milady, 'ensure_runtime')
+          assert hasattr(milady, 'get_version')
+          "
+
+          # Loader unit tests
+          python -c "
+          from milady.loader import (
+              _parse_version,
+              _find_node,
+              _get_node_version,
+              _check_node,
+              MiladyError,
+              NodeNotFoundError,
+              RuntimeInstallError,
+          )
+
+          # Version parsing
+          assert _parse_version('v22.12.0') == (22, 12, 0)
+          assert _parse_version('v18.0.0') == (18, 0, 0)
+          assert _parse_version('v1.2.3-nightly') == (1, 2, 3)
+          assert _parse_version('not-a-version') is None
+          assert _parse_version('') is None
+
+          # Node detection (Node.js is installed in this runner)
+          node = _find_node()
+          assert node, 'Node not found on PATH'
+          ver = _get_node_version(node)
+          assert ver and ver >= (22, 0, 0), f'Node version too old: {ver}'
+          checked = _check_node()
+          assert checked == node
+
+          # Exception hierarchy
+          assert issubclass(NodeNotFoundError, MiladyError)
+          assert issubclass(RuntimeInstallError, MiladyError)
+
+          print('All loader unit tests passed')
+          "
+
+          # CLI entry point exists
+          which milady
+          which milaidy
+
+  build-pypi-matrix:
+    name: PyPI on Python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python ${{ matrix.python }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Build and test
+        working-directory: packaging/pypi
+        run: |
+          pip install build
+          python -m build
+          pip install dist/*.whl
+          python -c "import milady; print(f'OK: milady {milady.__version__} on Python ${{ matrix.python }}')"

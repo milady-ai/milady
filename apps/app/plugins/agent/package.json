@@ -2,9 +2,16 @@
   "name": "@milaidy/capacitor-agent",
   "version": "1.0.0",
   "description": "Milaidy Agent Plugin for Capacitor — agent lifecycle management",
-  "main": "dist/plugin.cjs.js",
-  "module": "dist/esm/index.js",
-  "types": "dist/esm/index.d.ts",
+ "main": "./dist/plugin.cjs.js",
+  "module": "./src/index.ts",
+  "types": "./dist/plugin.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/plugin.d.ts",
+      "import": "./dist/plugin.js",
+      "require": "./dist/plugin.cjs.js"
+    }
+  },
   "unpkg": "dist/plugin.js",
   "files": [
     "dist/"

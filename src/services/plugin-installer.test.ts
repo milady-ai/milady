@@ -197,12 +197,13 @@ describe("plugin-installer", () => {
     });
 
     it("succeeds even if install directory doesn't exist on disk", async () => {
+      const ghostDir = path.join(configDir, "plugins", "installed", "_elizaos_plugin-ghost");
       writeConfig({
         plugins: {
           installs: {
             "@elizaos/plugin-ghost": {
               source: "npm",
-              installPath: "/nonexistent/path/that/doesnt/exist",
+              installPath: ghostDir,
               version: "1.0.0",
             },
           },
@@ -213,6 +214,26 @@ describe("plugin-installer", () => {
       const result = await uninstallPlugin("@elizaos/plugin-ghost");
 
       expect(result.success).toBe(true);
+    });
+
+    it("refuses to remove install paths outside the plugins directory", async () => {
+      writeConfig({
+        plugins: {
+          installs: {
+            "@elizaos/plugin-escape": {
+              source: "npm",
+              installPath: "/",
+              version: "1.0.0",
+            },
+          },
+        },
+      });
+
+      const { uninstallPlugin } = await loadInstaller();
+      const result = await uninstallPlugin("@elizaos/plugin-escape");
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("Refusing to remove plugin outside");
     });
   });
 

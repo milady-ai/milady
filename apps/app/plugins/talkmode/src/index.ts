@@ -3,7 +3,7 @@ import type { TalkModePlugin } from "./definitions";
 
 const electronModulePath = "../electron/src/index";
 
-const TalkMode = registerPlugin<TalkModePlugin>("TalkMode", {
+export const TalkMode = registerPlugin<TalkModePlugin>("TalkMode", {
   web: () => import("./web").then((m) => new m.TalkModeWeb()),
   electron: () => {
     // Use Electron-specific implementation for macOS/Windows/Linux
@@ -16,4 +16,3 @@ const TalkMode = registerPlugin<TalkModePlugin>("TalkMode", {
 });
 
 export * from "./definitions";
-export { TalkMode };

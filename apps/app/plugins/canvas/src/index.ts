@@ -4,7 +4,7 @@ import type { CanvasPlugin } from "./definitions";
 
 const electronModulePath = "../electron/src/index";
 
-const Canvas = registerPlugin<CanvasPlugin>("MilaidyCanvas", {
+export const Canvas = registerPlugin<CanvasPlugin>("MilaidyCanvas", {
   web: () => import("./web").then((m) => new m.CanvasWeb()),
   electron: () => {
     // Use Electron-specific implementation for macOS/Windows/Linux
@@ -17,4 +17,3 @@ const Canvas = registerPlugin<CanvasPlugin>("MilaidyCanvas", {
 });
 
 export * from "./definitions";
-export { Canvas };

@@ -1,0 +1,56 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "milady"
+version = "2.0.0a7"
+description = "Dynamic loader for Milaidy — personal AI assistant built on ElizaOS"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [
+    { name = "milady-ai", email = "dev@milady.ai" },
+]
+keywords = [
+    "ai",
+    "assistant",
+    "agent",
+    "elizaos",
+    "milaidy",
+    "milady",
+    "llm",
+    "cli",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Homepage = "https://milady.ai"
+Repository = "https://github.com/milady-ai/milaidy"
+Documentation = "https://docs.milady.ai"
+Issues = "https://github.com/milady-ai/milaidy/issues"
+
+[project.scripts]
+milady = "milady.cli:main"
+milaidy = "milady.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["milady"]

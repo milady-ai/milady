@@ -4,7 +4,7 @@ import type { CameraPlugin } from "./definitions";
 
 const electronModulePath = "../electron/src/index";
 
-const Camera = registerPlugin<CameraPlugin>("MilaidyCamera", {
+export const Camera = registerPlugin<CameraPlugin>("MilaidyCamera", {
   web: () => import("./web").then((m) => new m.CameraWeb()),
   electron: () => {
     // Use Electron-specific implementation for macOS/Windows/Linux
@@ -17,4 +17,3 @@ const Camera = registerPlugin<CameraPlugin>("MilaidyCamera", {
 });
 
 export * from "./definitions";
-export { Camera };

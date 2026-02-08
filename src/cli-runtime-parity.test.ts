@@ -113,16 +113,10 @@ describe("onboarding presets parity (CLI ↔ GUI)", () => {
 
 describe("plugin loading parity across modes", () => {
   const envKeys = [
-    "ANTHROPIC_API_KEY",
-    "OPENAI_API_KEY",
-    "GROQ_API_KEY",
-    "GOOGLE_API_KEY",
-    "GOOGLE_GENERATIVE_AI_API_KEY",
-    "XAI_API_KEY",
-    "OPENROUTER_API_KEY",
-    "OLLAMA_BASE_URL",
-    "ELIZAOS_CLOUD_API_KEY",
-    "ELIZAOS_CLOUD_ENABLED",
+    "ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GROQ_API_KEY", "GOOGLE_API_KEY",
+    "GOOGLE_GENERATIVE_AI_API_KEY", "XAI_API_KEY", "OPENROUTER_API_KEY",
+    "AI_GATEWAY_API_KEY", "AIGATEWAY_API_KEY",
+    "OLLAMA_BASE_URL", "ELIZAOS_CLOUD_API_KEY", "ELIZAOS_CLOUD_ENABLED",
   ];
   const snap = envSnapshot(envKeys);
   beforeEach(() => {
@@ -175,10 +169,12 @@ describe("plugin loading parity across modes", () => {
     // Simulate a config with an Anthropic key
     process.env.ANTHROPIC_API_KEY = "sk-test-123";
     process.env.OPENAI_API_KEY = "sk-test-456";
+    process.env.AI_GATEWAY_API_KEY = "aigw-test-789";
 
     const names = collectPluginNames({} as MilaidyConfig);
     expect(names.has("@elizaos/plugin-anthropic")).toBe(true);
     expect(names.has("@elizaos/plugin-openai")).toBe(true);
+    expect(names.has("@elizaos/plugin-vercel-ai-gateway")).toBe(true);
     // Plugins not set should not be loaded
     expect(names.has("@elizaos/plugin-groq")).toBe(false);
     expect(names.has("@elizaos/plugin-xai")).toBe(false);
