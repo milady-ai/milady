@@ -13,7 +13,11 @@
 import type {
   Action,
   ActionEventPayload,
+  IAgentRuntime,
+  Memory,
   MessagePayload,
+  MessageProcessingOptions,
+  MessageProcessingResult,
   Plugin,
   RunEventPayload,
 } from "@elizaos/core";
@@ -79,8 +83,7 @@ export function resolvePhettaCompanionOptionsFromEnv(
 ): PhettaCompanionPluginOptions {
   const enabled = parseBool(env.PHETTA_COMPANION_ENABLED, false);
   const httpUrl = normalizeBaseUrl(
-    asNonEmptyString(env.PHETTA_COMPANION_HTTP_URL) ??
-      "http://127.0.0.1:9876",
+    asNonEmptyString(env.PHETTA_COMPANION_HTTP_URL) ?? "http://127.0.0.1:9876",
   );
   const timeoutMs = Math.max(
     50,
@@ -121,6 +124,17 @@ function buildMessageData(payload: MessagePayload): Record<string, unknown> {
   };
 }
 
+function safeMessagePayload(
+  runtime: IAgentRuntime,
+  message: Memory,
+): MessagePayload {
+  return {
+    runtime,
+    message,
+    source: String(message?.content?.source ?? "message-service"),
+  };
+}
+
 function buildRunData(payload: RunEventPayload): Record<string, unknown> {
   return {
     runId: payload.runId,
@@ -143,10 +157,7 @@ function buildActionData(payload: ActionEventPayload): Record<string, unknown> {
   };
 }
 
-function createHttpClient(opts: {
-  baseUrl: string;
-  timeoutMs: number;
-}): {
+function createHttpClient(opts: { baseUrl: string; timeoutMs: number }): {
   postEvent: (event: PhettaEvent) => Promise<boolean>;
   postNotify: (
     message: string,
@@ -205,6 +216,68 @@ export function createPhettaCompanionPlugin(
     baseUrl: opts.httpUrl,
     timeoutMs: opts.timeoutMs,
   });
+
+  // Wrap runtime.messageService.handleMessage so user/assistant messages are
+  // forwarded even when the runtime doesn't emit MESSAGE_RECEIVED/MESSAGE_SENT.
+  const patchMessageService = (runtime: IAgentRuntime): boolean => {
+    if (!runtime.messageService) return false;
+
+    const svc = runtime.messageService as unknown as {
+      handleMessage: (
+        runtime: IAgentRuntime,
+        message: Memory,
+        callback?: MessagePayload["callback"],
+        options?: MessageProcessingOptions,
+      ) => Promise<MessageProcessingResult>;
+      __phettaCompanionPatched?: boolean;
+    };
+
+    if (svc.__phettaCompanionPatched) return true;
+    svc.__phettaCompanionPatched = true;
+
+    const orig = svc.handleMessage.bind(svc);
+
+    svc.handleMessage = async (
+      rt: IAgentRuntime,
+      message: Memory,
+      callback?: MessagePayload["callback"],
+      options?: MessageProcessingOptions,
+    ): Promise<MessageProcessingResult> => {
+      if (opts.forwardUserMessages) {
+        const payload = safeMessagePayload(rt, message);
+        const text = extractMessageText(payload);
+        if (text) {
+          sendEvent({
+            type: "userMessage",
+            message: text,
+            data: buildMessageData(payload),
+          });
+        }
+      }
+
+      const result = await orig(rt, message, callback, options);
+
+      if (opts.forwardAssistantMessages) {
+        const inboundId = message.id;
+        for (const mem of result.responseMessages) {
+          const id = mem.id;
+          if (inboundId && id && id === inboundId) continue;
+          const payload = safeMessagePayload(rt, mem);
+          const text = extractMessageText(payload);
+          if (!text) continue;
+          sendEvent({
+            type: "assistantMessage",
+            message: text,
+            data: buildMessageData(payload),
+          });
+        }
+      }
+
+      return result;
+    };
+
+    return true;
+  };
 
   const sendEvent = (event: PhettaEvent): void => {
     // Fire-and-forget so we never block the agent turn on UI/IPC.
@@ -290,7 +363,8 @@ export function createPhettaCompanionPlugin(
       },
       {
         name: "file",
-        description: "Optional file path for fileEdit/fileOpen/fileClose events.",
+        description:
+          "Optional file path for fileEdit/fileOpen/fileClose events.",
         required: false,
         schema: { type: "string" as const },
       },
@@ -307,6 +381,18 @@ export function createPhettaCompanionPlugin(
     name: "plugin-phetta-companion",
     description:
       "Bridge Milaidy runtime events to the Phetta Companion VRM desktop pet (localhost HTTP API).",
+    init: async (_config, runtime) => {
+      // Do not await runtime.initPromise here (deadlock risk); attach a hook.
+      if (!patchMessageService(runtime)) {
+        void runtime.initPromise
+          .then(() => {
+            patchMessageService(runtime);
+          })
+          .catch(() => {
+            /* ignore */
+          });
+      }
+    },
     actions: [notifyAction, sendEventAction],
     events: {
       ...(opts.forwardUserMessages
@@ -398,4 +484,3 @@ export function createPhettaCompanionPlugin(
 
   return plugin;
 }
-

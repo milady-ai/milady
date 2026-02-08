@@ -1,10 +1,25 @@
-import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
+import type { MessagePayload, RunEventPayload, UUID } from "@elizaos/core";
 import { EventType } from "@elizaos/core";
-import type { MessagePayload, RunEventPayload } from "@elizaos/core";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createPhettaCompanionPlugin,
   resolvePhettaCompanionOptionsFromEnv,
 } from "./phetta-companion-plugin.js";
+
+type FetchInit = { method?: string; body?: string };
+
+function fetchCall(
+  mockFetch: ReturnType<typeof vi.fn>,
+  idx: number,
+): [string, FetchInit] {
+  return mockFetch.mock.calls[idx] as unknown as [string, FetchInit];
+}
+
+function fetchBody(call: [string, FetchInit]): Record<string, unknown> {
+  const init = call[1];
+  const raw = init.body ?? "{}";
+  return JSON.parse(raw) as Record<string, unknown>;
+}
 
 beforeEach(() => {
   vi.stubGlobal("fetch", vi.fn());
@@ -56,26 +71,28 @@ describe("phetta-companion-plugin", () => {
       expect(handler).toBeTypeOf("function");
 
       const payload: MessagePayload = {
-        runtime: {} as any,
+        runtime: {} as unknown as MessagePayload["runtime"],
         message: {
-          roomId: "room" as any,
-          worldId: "world" as any,
-          entityId: "entity" as any,
+          roomId: "room" as unknown as UUID,
+          worldId: "world" as unknown as UUID,
+          entityId: "entity" as unknown as UUID,
           content: { text: "hello", source: "test" },
-          metadata: { sessionKey: "agent:main:self" } as any,
-        } as any,
+          metadata: { sessionKey: "agent:main:self" },
+        } as unknown as MessagePayload["message"],
       };
 
-      await handler!(payload as any);
+      await handler?.(payload);
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
-      const [url, init] = mockFetch.mock.calls[0] as [string, any];
-      expect(url).toBe("http://127.0.0.1:9876/event");
-      expect(init.method).toBe("POST");
-      const body = JSON.parse(init.body) as any;
+      const call0 = fetchCall(mockFetch, 0);
+      expect(call0[0]).toBe("http://127.0.0.1:9876/event");
+      expect(call0[1].method).toBe("POST");
+      const body = fetchBody(call0);
       expect(body.type).toBe("userMessage");
       expect(body.message).toBe("hello");
-      expect(body.data.sessionKey).toBe("agent:main:self");
+      expect(
+        (body.data as { sessionKey?: string } | undefined)?.sessionKey,
+      ).toBe("agent:main:self");
     });
 
     it("does not forward empty text messages", async () => {
@@ -93,10 +110,12 @@ describe("phetta-companion-plugin", () => {
       });
 
       const handler = plugin.events?.[EventType.MESSAGE_RECEIVED]?.[0];
-      await handler!({
-        runtime: {} as any,
-        message: { content: { text: "   " } } as any,
-      } as any);
+      await handler?.({
+        runtime: {} as unknown as MessagePayload["runtime"],
+        message: {
+          content: { text: "   " },
+        } as unknown as MessagePayload["message"],
+      });
 
       expect(mockFetch).toHaveBeenCalledTimes(0);
     });
@@ -118,12 +137,15 @@ describe("phetta-companion-plugin", () => {
       const handler = plugin.events?.[EventType.MESSAGE_SENT]?.[0];
       expect(handler).toBeTypeOf("function");
 
-      await handler!({
-        runtime: {} as any,
-        message: { content: { text: "hi from agent" } } as any,
-      } as any);
+      await handler?.({
+        runtime: {} as unknown as MessagePayload["runtime"],
+        message: {
+          content: { text: "hi from agent", source: "test" },
+        } as unknown as MessagePayload["message"],
+      });
 
-      const body = JSON.parse((mockFetch.mock.calls[0] as any)[1].body) as any;
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      const body = fetchBody(fetchCall(mockFetch, 0));
       expect(body.type).toBe("assistantMessage");
       expect(body.message).toBe("hi from agent");
     });
@@ -148,24 +170,141 @@ describe("phetta-companion-plugin", () => {
       expect(ended).toBeTypeOf("function");
 
       const runPayload: RunEventPayload = {
-        runtime: {} as any,
-        runId: "run" as any,
-        messageId: "msg" as any,
-        roomId: "room" as any,
-        entityId: "entity" as any,
+        runtime: {} as unknown as RunEventPayload["runtime"],
+        runId: "run" as unknown as UUID,
+        messageId: "msg" as unknown as UUID,
+        roomId: "room" as unknown as UUID,
+        entityId: "entity" as unknown as UUID,
         startTime: Date.now(),
         status: "started",
       };
 
-      await started!(runPayload as any);
-      await ended!({ ...runPayload, status: "completed", endTime: Date.now() } as any);
+      await started?.(runPayload);
+      await ended?.({
+        ...runPayload,
+        status: "completed",
+        endTime: Date.now(),
+      });
 
-      const first = JSON.parse((mockFetch.mock.calls[0] as any)[1].body) as any;
-      const second = JSON.parse((mockFetch.mock.calls[1] as any)[1].body) as any;
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      const first = fetchBody(fetchCall(mockFetch, 0));
+      const second = fetchBody(fetchCall(mockFetch, 1));
       expect(first.type).toBe("agentStart");
       expect(second.type).toBe("agentDone");
-      expect(second.data.runId).toBe("run");
+      expect((second.data as { runId?: string } | undefined)?.runId).toBe(
+        "run",
+      );
+    });
+  });
+
+  describe("messageService patching", () => {
+    it("patches handleMessage to forward user + assistant messages", async () => {
+      const mockFetch = vi.fn().mockResolvedValue({ ok: true });
+      vi.stubGlobal("fetch", mockFetch);
+
+      const plugin = createPhettaCompanionPlugin({
+        enabled: true,
+        httpUrl: "http://127.0.0.1:9876",
+        timeoutMs: 300,
+        forwardUserMessages: true,
+        forwardAssistantMessages: true,
+        forwardRuns: false,
+        forwardActions: false,
+      });
+
+      const runtime = {
+        initPromise: Promise.resolve(),
+        messageService: {
+          handleMessage: vi.fn().mockResolvedValue({
+            didRespond: true,
+            responseMessages: [
+              {
+                id: "resp" as unknown as UUID,
+                roomId: "room" as unknown as UUID,
+                worldId: "world" as unknown as UUID,
+                entityId: "agent" as unknown as UUID,
+                content: { text: "hi from agent", source: "test" },
+                metadata: { sessionKey: "agent:main:self" },
+              } as unknown as MessagePayload["message"],
+            ],
+          }),
+        },
+      };
+
+      await plugin.init?.({}, runtime as unknown as MessagePayload["runtime"]);
+
+      await runtime.messageService.handleMessage(
+        runtime as unknown as MessagePayload["runtime"],
+        {
+          id: "in" as unknown as UUID,
+          roomId: "room" as unknown as UUID,
+          worldId: "world" as unknown as UUID,
+          entityId: "user" as unknown as UUID,
+          content: { text: "hello", source: "test" },
+          metadata: { sessionKey: "agent:main:self" },
+        } as unknown as MessagePayload["message"],
+      );
+
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      const first = fetchBody(fetchCall(mockFetch, 0));
+      const second = fetchBody(fetchCall(mockFetch, 1));
+      expect(first.type).toBe("userMessage");
+      expect(first.message).toBe("hello");
+      expect(second.type).toBe("assistantMessage");
+      expect(second.message).toBe("hi from agent");
+    });
+
+    it("defers patching until runtime initPromise resolves", async () => {
+      const mockFetch = vi.fn().mockResolvedValue({ ok: true });
+      vi.stubGlobal("fetch", mockFetch);
+
+      const plugin = createPhettaCompanionPlugin({
+        enabled: true,
+        httpUrl: "http://127.0.0.1:9876",
+        timeoutMs: 300,
+        forwardUserMessages: true,
+        forwardAssistantMessages: false,
+        forwardRuns: false,
+        forwardActions: false,
+      });
+
+      let resolveInit: (() => void) | null = null;
+      const initPromise = new Promise<void>((res) => {
+        resolveInit = res;
+      });
+
+      const runtime: {
+        initPromise: Promise<void>;
+        messageService: { handleMessage: ReturnType<typeof vi.fn> } | null;
+      } = {
+        initPromise,
+        messageService: null,
+      };
+
+      await plugin.init?.({}, runtime as unknown as MessagePayload["runtime"]);
+
+      runtime.messageService = {
+        handleMessage: vi.fn().mockResolvedValue({
+          didRespond: false,
+          responseMessages: [],
+        }),
+      };
+
+      resolveInit?.();
+      // Allow the initPromise.then(...) handler to run.
+      await Promise.resolve();
+      await Promise.resolve();
+
+      await runtime.messageService.handleMessage(
+        runtime as unknown as MessagePayload["runtime"],
+        {
+          content: { text: "hello", source: "test" },
+        } as unknown as MessagePayload["message"],
+      );
+
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      const body = fetchBody(fetchCall(mockFetch, 0));
+      expect(body.type).toBe("userMessage");
     });
   });
 });
-
