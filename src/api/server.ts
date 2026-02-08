@@ -128,6 +128,8 @@ interface PluginEntry {
   parameters: PluginParamDef[];
   validationErrors: Array<{ field: string; message: string }>;
   validationWarnings: Array<{ field: string; message: string }>;
+  isCore?: boolean; // True if plugin is in CORE_PLUGINS (essential for app)
+  isActive?: boolean; // True if plugin is currently loaded in runtime
 }
 
 interface SkillEntry {
@@ -1983,12 +1985,23 @@ async function handleRequest(
       const loadedNames = state.runtime.plugins.map((p) => p.name);
       for (const plugin of allPlugins) {
         const suffix = `plugin-${plugin.id}`;
-        plugin.enabled = loadedNames.some(
-          (name) =>
-            name === plugin.id ||
-            name === suffix ||
-            name.endsWith(`/${suffix}`),
+        const packageName = `@elizaos/plugin-${plugin.id}`;
+        const isLoaded = loadedNames.some(
+          (name) => {
+            // Check various name formats
+            return name === plugin.id
+              || name === suffix
+              || name === packageName
+              || name.endsWith(`/${suffix}`)
+              || name.includes(plugin.id);
+          },
         );
+        plugin.enabled = isLoaded;
+        plugin.isActive = isLoaded; // Mark as active if currently loaded in runtime
+
+        if (isLoaded) {
+          logger.debug(`[milaidy-api] Plugin ${plugin.id} is active`);
+        }
       }
     }
 
@@ -2042,8 +2055,84 @@ async function handleRequest(
       return;
     }
 
+    // Handle plugin enable/disable with hot-reload
     if (body.enabled !== undefined) {
       plugin.enabled = body.enabled;
+
+      // Update config.plugins.allow to control which plugins load on next restart
+      const pluginPackageName = `@elizaos/plugin-${pluginId}`;
+
+      if (!state.config.plugins) {
+        state.config.plugins = {};
+      }
+      if (!state.config.plugins.allow) {
+        // Initialize with currently loaded plugins
+        if (state.runtime) {
+          // Normalize all plugin names to @elizaos/plugin-* format
+          state.config.plugins.allow = state.runtime.plugins
+            .map((p) => {
+              const name = p.name;
+              // If already in full package format, keep it
+              if (name.startsWith("@elizaos/plugin-")) {
+                return name;
+              }
+              // Otherwise, convert short name to full package name
+              return `@elizaos/plugin-${name}`;
+            })
+            .filter((name) => {
+              // Filter out internal pseudo-plugins that aren't real npm packages
+              const internalPlugins = [
+                "@elizaos/plugin-bootstrap",
+                "@elizaos/plugin-milaidy",
+              ];
+              return !internalPlugins.includes(name);
+            });
+        } else {
+          // Fallback to CORE_PLUGINS if runtime not available
+          const { CORE_PLUGINS } = await import("../runtime/eliza.js");
+          state.config.plugins.allow = [...CORE_PLUGINS];
+        }
+      }
+
+      // Add or remove plugin from allow list
+      if (body.enabled) {
+        if (!state.config.plugins.allow.includes(pluginPackageName)) {
+          state.config.plugins.allow.push(pluginPackageName);
+          logger.info(`[milaidy-api] Enabled plugin: ${pluginPackageName}`);
+        }
+      } else {
+        state.config.plugins.allow = state.config.plugins.allow.filter(
+          (p) => p !== pluginPackageName
+        );
+        logger.info(`[milaidy-api] Disabled plugin: ${pluginPackageName}`);
+      }
+
+      // Save config with updated plugin list
+      try {
+        saveMilaidyConfig(state.config);
+        logger.info(`[milaidy-api] Saved plugin configuration`);
+      } catch (err) {
+        logger.warn(`[milaidy-api] Failed to save config: ${err instanceof Error ? err.message : String(err)}`);
+      }
+
+      // Trigger runtime restart to apply plugin changes
+      if (ctx?.onRestart) {
+        const onRestartFn = ctx.onRestart;
+        logger.info(`[milaidy-api] Restarting runtime to apply plugin changes...`);
+        setImmediate(async () => {
+          try {
+            const newRuntime = await onRestartFn();
+            if (newRuntime) {
+              state.runtime = newRuntime;
+              state.agentState = "running";
+              logger.info(`[milaidy-api] Runtime restarted successfully with updated plugins`);
+            }
+          } catch (err) {
+            logger.error(`[milaidy-api] Runtime restart failed: ${err instanceof Error ? err.message : String(err)}`);
+            state.agentState = "not_started";
+          }
+        });
+      }
     }
     if (body.config) {
       const pluginParamInfos: PluginParamInfo[] = plugin.parameters.map(

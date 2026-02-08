@@ -75,16 +75,16 @@ export default defineConfig(() => {
     },
     server: {
       host: true,
-      port: 2138,
+      port: 18789,
       strictPort: false,
       proxy: {
         "/api": {
-          target: "http://localhost:31337",
+          target: "http://localhost:2138",
           changeOrigin: true,
           configure: withQuietErrors,
         },
         "/ws": {
-          target: "ws://localhost:31337",
+          target: "ws://localhost:2138",
           ws: true,
           configure: withQuietErrors,
         },

@@ -136,30 +136,42 @@ const CHANNEL_ENV_MAP: Readonly<
 // ---------------------------------------------------------------------------
 
 /** Core plugins that should always be loaded. */
-const CORE_PLUGINS: readonly string[] = [
-  "@elizaos/plugin-sql",
-  "@elizaos/plugin-local-embedding",
-  "@elizaos/plugin-agent-skills",
-  "@elizaos/plugin-agent-orchestrator",
-  "@elizaos/plugin-directives",
-  "@elizaos/plugin-commands",
-  "@elizaos/plugin-shell",
-  "@elizaos/plugin-personality",
-  "@elizaos/plugin-experience",
-  "@elizaos/plugin-plugin-manager",
-  "@elizaos/plugin-cli",
-  "@elizaos/plugin-code",
-  "@elizaos/plugin-edge-tts",
-  "@elizaos/plugin-knowledge",
-  "@elizaos/plugin-mcp",
-  "@elizaos/plugin-pdf",
-  "@elizaos/plugin-scratchpad",
-  "@elizaos/plugin-secrets-manager",
-  "@elizaos/plugin-todo",
-  "@elizaos/plugin-trust",
-  "@elizaos/plugin-form",
-  "@elizaos/plugin-goals",
-  "@elizaos/plugin-scheduling",
+// MINIMAL PLUGIN SET - Optimized for Haiku performance
+// Reduced from 23 to 2 plugins to minimize context (was 4.5k tokens, now ~500)
+// This makes responses fast (2-3s) and cheap ($0.001/msg with Haiku)
+export const CORE_PLUGINS: readonly string[] = [
+  "@elizaos/plugin-sql",  // Database adapter (memory/persistence)
+  "@elizaos/plugin-local-embedding",  // Embeddings
+
+  // ALL OTHER PLUGINS DISABLED TO REDUCE CONTEXT
+  // Each plugin adds ~50-200 tokens to every request
+  // Uncomment individual plugins if you need their features:
+
+  // "@elizaos/plugin-personality",  // Agent personality/character
+  // "@elizaos/plugin-commands",  // Slash commands
+  // "@elizaos/plugin-directives",  // Directive system
+
+  // NEVER re-enable these (huge context):
+  // "@elizaos/plugin-agent-skills",  // 4938 skills = 4.5k tokens!
+  // "@elizaos/plugin-knowledge",  // Knowledge base (can be large)
+
+  // Other disabled plugins:
+  // "@elizaos/plugin-agent-orchestrator",
+  // "@elizaos/plugin-shell",
+  // "@elizaos/plugin-experience",
+  // "@elizaos/plugin-plugin-manager",
+  // "@elizaos/plugin-cli",
+  // "@elizaos/plugin-code",
+  // "@elizaos/plugin-edge-tts",
+  // "@elizaos/plugin-mcp",
+  // "@elizaos/plugin-pdf",
+  // "@elizaos/plugin-scratchpad",
+  // "@elizaos/plugin-secrets-manager",
+  // "@elizaos/plugin-todo",
+  // "@elizaos/plugin-trust",
+  // "@elizaos/plugin-form",
+  // "@elizaos/plugin-goals",
+  // "@elizaos/plugin-scheduling",
 ];
 
 /**
@@ -1378,12 +1390,21 @@ export async function startEliza(
   });
 
   // 7b. Pre-register plugin-sql so the adapter is ready before other plugins init.
-  //     This MUST succeed before initialize() — otherwise other plugins (e.g.
-  //     plugin-todo) will crash when accessing runtime.db because the adapter
-  //     hasn't been set yet.  runtime.db is a getter that does this.adapter.db
-  //     and throws when this.adapter is undefined.
+  //     This is OPTIONAL — without it, some features (memory, todos) won't work.
+  //     runtime.db is a getter that returns this.adapter.db and throws when
+  //     this.adapter is undefined, so plugins that use runtime.db will fail.
   if (sqlPlugin) {
     await runtime.registerPlugin(sqlPlugin.plugin);
+
+    // 7c. Eagerly initialize the database adapter so it's fully ready (connection
+    //     open, schema bootstrapped) BEFORE other plugins run their init().
+    //     runtime.initialize() also calls adapter.init() but that happens AFTER
+    //     all plugin inits — too late for plugins that need runtime.db during init.
+    //     The call is idempotent (runtime.initialize checks adapter.isReady()).
+    if (runtime.adapter && !(await runtime.adapter.isReady())) {
+      await runtime.adapter.init();
+      logger.info("[milaidy] Database adapter initialized early (before plugin inits)");
+    }
   } else {
     const loadedNames = resolvedPlugins.map((p) => p.name).join(", ");
     logger.error(

@@ -39,3 +39,7 @@ USER.md
 skills/
 apps/app/electron/.eliza
 apps/app/electron/skills/
+
+# Bug tracking (local development only)
+bugs.md
+fixes.mdplugins-response.json

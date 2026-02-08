@@ -210,6 +210,8 @@ export interface PluginInfo {
   parameters: PluginParamDef[];
   validationErrors: Array<{ field: string; message: string }>;
   validationWarnings: Array<{ field: string; message: string }>;
+  isCore?: boolean; // True if plugin is in CORE_PLUGINS (essential for app to run)
+  isActive?: boolean; // True if plugin is currently loaded in runtime
 }
 
 export interface ChatMessage {

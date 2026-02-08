@@ -138,6 +138,10 @@ export class MilaidyApp extends LitElement {
   @state() onboardingRpcKeys: Record<string, string> = {};
   @state() private isMobileDevice = false;
 
+  // Config state
+  @state() configRaw: unknown = null;
+  @state() configText = "";
+
   static styles = css`
     :host {
       display: flex;
@@ -997,6 +1001,13 @@ export class MilaidyApp extends LitElement {
       color: var(--muted);
     }
 
+    /* Plugin list container - scrollable wrapper */
+    .plugins-scroll-container {
+      overflow-y: auto;
+      max-height: calc(100vh - 380px);
+      margin-top: 16px;
+    }
+
     /* Plugin list */
     .plugin-list {
       display: flex;
@@ -1418,7 +1429,7 @@ export class MilaidyApp extends LitElement {
     // Restore persisted chat messages
     this.loadChatMessages();
 
-    // Connect WebSocket
+    // Connect WebSocket for real-time status updates
     client.connectWs();
     client.onWsEvent("status", (data) => {
       this.agentStatus = data as unknown as AgentStatus;
@@ -3073,6 +3084,14 @@ export class MilaidyApp extends LitElement {
       "feature": "Feature",
     };
 
+    // Filter by view mode first
+    let pluginsByMode = this.plugins;
+    if (this.pluginViewMode === "active") {
+      pluginsByMode = this.plugins.filter((p) => p.isActive);
+    } else if (this.pluginViewMode === "core") {
+      pluginsByMode = this.plugins.filter((p) => p.isCore);
+    }
+
     const searchLower = this.pluginSearch.toLowerCase();
     const filtered = this.plugins.filter((p) => {
       // Database plugins are managed via the dedicated Database tab
@@ -3098,17 +3117,65 @@ export class MilaidyApp extends LitElement {
       this.pluginSettingsOpen = next;
     };
 
-    return html`
-      <h2>Plugins</h2>
-      <p class="subtitle">Manage plugins and integrations. ${this.plugins.length} plugins discovered.</p>
+    const activeCount = this.plugins.filter((p) => p.isActive).length;
+    const coreCount = this.plugins.filter((p) => p.isCore).length;
 
-      <input
-        class="plugin-search"
-        type="text"
-        placeholder="Search plugins by name or description..."
-        .value=${this.pluginSearch}
-        @input=${(e: Event) => { this.pluginSearch = (e.target as HTMLInputElement).value; }}
-      />
+    return html`
+      <div style="flex-shrink: 0;">
+        <h2>Plugins</h2>
+        <p class="subtitle">Manage plugins and integrations. ${this.plugins.length} plugins discovered.</p>
+
+        <!-- View Mode Tabs -->
+        <div style="display:flex;gap:8px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:8px;">
+          <button
+            class="view-mode-tab ${this.pluginViewMode === "active" ? "active" : ""}"
+            @click=${() => { this.pluginViewMode = "active"; }}
+            style="
+              padding: 8px 16px;
+              border: none;
+              background: ${this.pluginViewMode === "active" ? "var(--accent)" : "transparent"};
+              color: ${this.pluginViewMode === "active" ? "#fff" : "var(--text)"};
+              cursor: pointer;
+              font-weight: ${this.pluginViewMode === "active" ? "600" : "400"};
+              border-radius: 6px;
+              transition: all 0.2s;
+            "
+          >
+            Active (${activeCount})
+          </button>
+          <button
+            class="view-mode-tab ${this.pluginViewMode === "core" ? "active" : ""}"
+            @click=${() => { this.pluginViewMode = "core"; }}
+            style="
+              padding: 8px 16px;
+              border: none;
+              background: ${this.pluginViewMode === "core" ? "var(--accent)" : "transparent"};
+              color: ${this.pluginViewMode === "core" ? "#fff" : "var(--text)"};
+              cursor: pointer;
+              font-weight: ${this.pluginViewMode === "core" ? "600" : "400"};
+              border-radius: 6px;
+              transition: all 0.2s;
+            "
+          >
+            Core (${coreCount})
+          </button>
+          <button
+            class="view-mode-tab ${this.pluginViewMode === "all" ? "active" : ""}"
+            @click=${() => { this.pluginViewMode = "all"; }}
+            style="
+              padding: 8px 16px;
+              border: none;
+              background: ${this.pluginViewMode === "all" ? "var(--accent)" : "transparent"};
+              color: ${this.pluginViewMode === "all" ? "#fff" : "var(--text)"};
+              cursor: pointer;
+              font-weight: ${this.pluginViewMode === "all" ? "600" : "400"};
+              border-radius: 6px;
+              transition: all 0.2s;
+            "
+          >
+            All (${this.plugins.length})
+          </button>
+        </div>
 
       <div class="plugin-filters" style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">
         ${categories.map(
@@ -3135,10 +3202,32 @@ export class MilaidyApp extends LitElement {
         )}
       </div>
 
-      ${filtered.length === 0
-        ? html`<div class="empty-state">${this.pluginSearch ? "No plugins match your search." : "No plugins in this category."}</div>`
-        : html`
-            <div class="plugin-list">
+      <div class="plugins-scroll-container">
+        <div class="plugin-filters" style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">
+          ${categories.map(
+            (cat) => html`
+              <button
+                class="filter-btn ${this.pluginFilter === cat ? "active" : ""}"
+                data-category=${cat}
+                @click=${() => { this.pluginFilter = cat; }}
+                style="
+                  padding: 4px 12px;
+                  border-radius: 12px;
+                  border: 1px solid var(--border);
+                  background: ${this.pluginFilter === cat ? "var(--accent)" : "var(--surface)"};
+                  color: ${this.pluginFilter === cat ? "#fff" : "var(--text)"};
+                  cursor: pointer;
+                  font-size: 12px;
+                "
+              >${cat === "all" ? `All (${this.plugins.length})` : `${categoryLabels[cat]} (${this.plugins.filter((p) => p.category === cat).length})`}</button>
+            `,
+          )}
+        </div>
+
+        ${filtered.length === 0
+          ? html`<div class="empty-state">${this.pluginSearch ? "No plugins match your search." : "No plugins in this category."}</div>`
+          : html`
+              <div class="plugin-list">
               ${filtered.map((p) => {
                 const hasParams = p.parameters && p.parameters.length > 0;
                 const allParamsSet = hasParams ? p.parameters.every((param) => param.isSet) : true;
@@ -3150,7 +3239,7 @@ export class MilaidyApp extends LitElement {
                   <div class="plugin-item" data-plugin-id=${p.id} style="flex-direction:column;align-items:stretch;">
                     <div style="display:flex;justify-content:space-between;align-items:center;">
                       <div style="flex:1;min-width:0;">
-                        <div style="display:flex;align-items:center;gap:8px;">
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                           <div class="plugin-name">${p.name}</div>
                           <span style="font-size:10px;padding:2px 6px;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:var(--muted);">${
                             p.category === "ai-provider" ? "ai provider"
@@ -3268,8 +3357,9 @@ export class MilaidyApp extends LitElement {
                   </div>
                 `;
               })}
-            </div>
-          `}
+              </div>
+            `}
+      </div>
     `;
   }
 
@@ -3315,6 +3405,36 @@ export class MilaidyApp extends LitElement {
         plugin.enabled = enabled;
         this.requestUpdate();
       }
+
+      // Refresh plugins after a delay to show updated runtime state
+      // The runtime restarts in background, so we poll to catch when it's done
+      const pollForRuntimeUpdate = async (attempts = 0) => {
+        if (attempts >= 5) return; // Stop after 5 attempts (10 seconds total)
+
+        await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait 2s
+
+        try {
+          const { plugins } = await client.getPlugins();
+          this.plugins = plugins;
+          this.requestUpdate();
+
+          // Check if the plugin's isActive state matches enabled state
+          const updatedPlugin = plugins.find((p) => p.id === pluginId);
+          if (updatedPlugin && updatedPlugin.isActive === enabled) {
+            // Runtime has updated successfully - stop polling
+            console.log(`Plugin ${pluginId} is now ${enabled ? 'active' : 'inactive'}`);
+            return;
+          }
+
+          // Keep polling if state hasn't updated yet
+          await pollForRuntimeUpdate(attempts + 1);
+        } catch (err) {
+          console.error("Failed to refresh plugins:", err);
+        }
+      };
+
+      // Start polling in background
+      pollForRuntimeUpdate();
     } catch (err) {
       console.error("Failed to toggle plugin:", err);
     }
@@ -3355,10 +3475,6 @@ export class MilaidyApp extends LitElement {
       this.extensionStatus = { relayReachable: false, relayPort: 18792, extensionPath: null };
     }
     this.extensionChecking = false;
-  }
-
-  private handleOpenExtensionsPage(): void {
-    window.open("chrome://extensions", "_blank");
   }
 
   // ═══════════════════════════════════════════════════════════════════════
