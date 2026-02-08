@@ -86,6 +86,7 @@ export const AI_PROVIDER_PLUGINS: readonly string[] = [
   "@elizaos/plugin-google-genai",
   "@elizaos/plugin-groq",
   "@elizaos/plugin-xai",
+  "@homunculuslabs/plugin-zai",
 ];
 
 // ---------------------------------------------------------------------------

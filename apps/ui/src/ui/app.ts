@@ -958,12 +958,18 @@ export class MilaidyApp extends LitElement {
       border: 1px solid var(--border);
     }
 
-    .plugin-settings-body input {
+    .plugin-settings-body input,
+    .plugin-settings-body select {
       padding: 6px 10px;
       border: 1px solid var(--border);
       background: var(--card);
+      color: var(--text);
       font-size: 12px;
       font-family: var(--mono);
+    }
+    .plugin-settings-body select {
+      cursor: pointer;
+      appearance: auto;
     }
 
     /* Logs */
@@ -1749,12 +1755,25 @@ export class MilaidyApp extends LitElement {
                                           ${param.isSet ? html`<span style="font-size:10px;color:#2ecc71;">set</span>` : ""}
                                         </div>
                                         <div style="color:var(--muted);font-size:11px;padding-left:12px;">${param.description}${param.default ? ` (default: ${param.default})` : ""}</div>
-                                        <input
-                                          type="${param.sensitive ? "password" : "text"}"
-                                          .value=${param.isSet && !param.sensitive ? (param.currentValue ?? "") : (param.isSet ? "" : (param.default ?? ""))}
-                                          placeholder="${param.sensitive && param.isSet ? "********  (already set, leave blank to keep)" : "Enter value..."}"
-                                          data-plugin-param="${p.id}:${param.key}"
-                                        />
+                                        ${param.options && param.options.length > 0
+                                          ? html`
+                                            <select
+                                              data-plugin-param="${p.id}:${param.key}"
+                                              .value=${param.isSet && param.currentValue ? param.currentValue : (param.default ?? "")}
+                                            >
+                                              <option value="" ?selected=${!param.isSet && !param.default}>Select a model...</option>
+                                              ${param.options.map(
+                                                (opt: string) => html`<option value=${opt} ?selected=${(param.isSet ? param.currentValue : param.default) === opt}>${opt}</option>`,
+                                              )}
+                                            </select>`
+                                          : html`
+                                            <input
+                                              type="${param.sensitive ? "password" : "text"}"
+                                              .value=${param.isSet && !param.sensitive ? (param.currentValue ?? "") : (param.isSet ? "" : (param.default ?? ""))}
+                                              placeholder="${param.sensitive && param.isSet ? "********  (already set, leave blank to keep)" : "Enter value..."}"
+                                              data-plugin-param="${p.id}:${param.key}"
+                                            />`
+                                        }
                                       </div>
                                     `,
                                   )}
@@ -1800,15 +1819,15 @@ export class MilaidyApp extends LitElement {
   }
 
   private async handlePluginConfigSave(pluginId: string): Promise<void> {
-    // Collect all input values for this plugin from the DOM
-    const inputs = this.shadowRoot?.querySelectorAll(`input[data-plugin-param^="${pluginId}:"]`);
+    // Collect all input and select values for this plugin from the DOM
+    const inputs = this.shadowRoot?.querySelectorAll(`input[data-plugin-param^="${pluginId}:"], select[data-plugin-param^="${pluginId}:"]`);
     if (!inputs) return;
 
     const config: Record<string, string> = {};
     for (const input of inputs) {
       const attr = input.getAttribute("data-plugin-param") ?? "";
       const key = attr.split(":").slice(1).join(":");
-      const value = (input as HTMLInputElement).value.trim();
+      const value = (input as HTMLInputElement | HTMLSelectElement).value.trim();
       if (value) {
         config[key] = value;
       }

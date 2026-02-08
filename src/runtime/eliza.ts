@@ -197,6 +197,7 @@ const PROVIDER_PLUGIN_MAP: Readonly<Record<string, string>> = {
   XAI_API_KEY: "@elizaos/plugin-xai",
   OPENROUTER_API_KEY: "@elizaos/plugin-openrouter",
   OLLAMA_BASE_URL: "@elizaos/plugin-ollama",
+  ZAI_API_KEY: "@homunculuslabs/plugin-zai",
   // ElizaCloud — loaded when API key is present OR cloud is explicitly enabled
   ELIZAOS_CLOUD_API_KEY: "@elizaos/plugin-elizacloud",
   ELIZAOS_CLOUD_ENABLED: "@elizaos/plugin-elizacloud",
@@ -825,6 +826,12 @@ async function runFirstTimeSetup(
       label: "Ollama (local, free)",
       envKey: "OLLAMA_BASE_URL",
       hint: "http://localhost:11434",
+    },
+    {
+      id: "zai",
+      label: "z.ai (GLM Coding Plan)",
+      envKey: "ZAI_API_KEY",
+      hint: "z.ai API key",
     },
   ] as const;
 
