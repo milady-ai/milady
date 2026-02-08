@@ -167,7 +167,10 @@
     "node": ">=22.12.0"
   },
   "trustedDependencies": [
+    "@lydell/node-pty",
+    "@whiskeysockets/baileys",
     "esbuild",
-    "protobufjs"
+    "protobufjs",
+    "sharp"
   ]
 }
