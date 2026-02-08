@@ -14,7 +14,7 @@
     {
       "from": "../../../dist",
       "to": "milaidy-dist",
-      "filter": ["**/*.js"]
+      "filter": ["**/*.js", "package.json"]
     }
   ],
   "publish": {

@@ -106,6 +106,7 @@ jobs:
         run: |
           bunx tsdown
           node --import tsx scripts/write-build-info.ts
+          echo '{"type":"module"}' > dist/package.json
 
       - name: Build UI
         run: node scripts/ui.js build

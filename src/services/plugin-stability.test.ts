@@ -860,6 +860,58 @@ describe("Context Serialization", () => {
 });
 
 // ============================================================================
+//  10. Version skew detection (issue #10)
+// ============================================================================
+
+describe("Version Skew Detection (issue #10)", () => {
+  it("affected plugins should NOT import MAX_EMBEDDING_TOKENS at pinned version", async () => {
+    // The 5 plugins at alpha.4 imported MAX_EMBEDDING_TOKENS from core.
+    // At alpha.3 (pinned), they should NOT attempt that import.
+    // This test validates the fix by checking our package.json pins.
+    const { readFileSync } = await import("node:fs");
+    const { resolve } = await import("node:path");
+    const pkgPath = resolve(import.meta.dirname, "../../package.json");
+    const pkg = JSON.parse(readFileSync(pkgPath, "utf-8")) as {
+      dependencies: Record<string, string>;
+    };
+
+    const affectedPlugins = [
+      "@elizaos/plugin-openrouter",
+      "@elizaos/plugin-openai",
+      "@elizaos/plugin-ollama",
+      "@elizaos/plugin-google-genai",
+      "@elizaos/plugin-knowledge",
+    ];
+
+    for (const name of affectedPlugins) {
+      const ver = pkg.dependencies[name];
+      expect(ver).toBeDefined();
+      // Must be pinned (not "next")
+      expect(ver).not.toBe("next");
+      expect(ver).toMatch(/^\d+\.\d+\.\d+/);
+    }
+  });
+
+  it("AI provider plugins are recognized in the PROVIDER_PLUGINS map", () => {
+    // All 5 affected plugins should be present in our provider resolution
+    const affectedProviders = [
+      "@elizaos/plugin-openrouter",
+      "@elizaos/plugin-openai",
+      "@elizaos/plugin-ollama",
+      "@elizaos/plugin-google-genai",
+    ];
+    const providerPluginValues = Object.values(PROVIDER_PLUGINS);
+    for (const name of affectedProviders) {
+      expect(providerPluginValues).toContain(name);
+    }
+  });
+
+  it("plugin-knowledge is in CORE_PLUGINS", () => {
+    expect(CORE_PLUGINS).toContain("@elizaos/plugin-knowledge");
+  });
+});
+
+// ============================================================================
 //  Helpers
 // ============================================================================
 

@@ -49,6 +49,7 @@ import {
   ensureAgentWorkspace,
   resolveDefaultAgentWorkspaceDir,
 } from "../providers/workspace.js";
+import { diagnoseNoAIProvider } from "../services/version-compat.js";
 import { createMilaidyPlugin } from "./milaidy-plugin.js";
 
 // ---------------------------------------------------------------------------
@@ -419,6 +420,13 @@ async function resolvePlugins(
     logger.debug(
       `[milaidy] Failed plugins: ${failedPlugins.map((f) => `${f.name} (${f.error})`).join(", ")}`,
     );
+  }
+
+  // Diagnose version-skew issues when AI providers failed to load (#10)
+  const loadedNames = plugins.map((p) => p.name);
+  const diagnostic = diagnoseNoAIProvider(loadedNames, failedPlugins);
+  if (diagnostic) {
+    logger.error(`[milaidy] ${diagnostic}`);
   }
 
   return plugins;
