@@ -346,4 +346,80 @@ export function registerPluginsCli(program: Command): void {
       const registry = await refreshRegistry();
       console.log(`${chalk.green("Done!")} ${registry.size} plugins loaded.\n`);
     });
+
+  // ── test ─────────────────────────────────────────────────────────────
+  pluginsCommand
+    .command("test")
+    .description("Validate custom drop-in plugins in ~/.milaidy/plugins/custom/")
+    .action(async () => {
+      const nodePath = await import("node:path");
+      const { pathToFileURL } = await import("node:url");
+      const fsPromises = await import("node:fs/promises");
+      const { resolveStateDir, resolveUserPath } = await import("../config/paths.js");
+      const { loadMilaidyConfig } = await import("../config/config.js");
+      const { CUSTOM_PLUGINS_DIRNAME, scanDropInPlugins, resolvePackageEntry } = await import("../runtime/eliza.js");
+
+      const customDir = nodePath.join(resolveStateDir(), CUSTOM_PLUGINS_DIRNAME);
+      console.log(`\n${chalk.bold("Custom plugins directory:")} ${chalk.dim(customDir)}\n`);
+
+      const dirsToScan: Array<{ label: string; dir: string }> = [{ label: "custom", dir: customDir }];
+      let config: ReturnType<typeof loadMilaidyConfig> | null = null;
+      try { config = loadMilaidyConfig(); } catch { /* no config */ }
+      for (const p of config?.plugins?.load?.paths ?? []) dirsToScan.push({ label: p, dir: resolveUserPath(p) });
+
+      const allRecords: Array<{ name: string; installPath: string; version: string }> = [];
+      for (const { label, dir } of dirsToScan) {
+        const records = await scanDropInPlugins(dir);
+        if (Object.keys(records).length > 0 && dirsToScan.length > 1) console.log(chalk.dim(`  Scanning ${label}...`));
+        for (const [name, record] of Object.entries(records)) {
+          allRecords.push({ name, installPath: record.installPath ?? dir, version: record.version ?? "0.0.0" });
+        }
+      }
+
+      if (allRecords.length === 0) {
+        console.log("  No custom plugins found.\n");
+        console.log(chalk.dim(`  Drop a plugin directory into ${customDir} and run this command again.\n`));
+        return;
+      }
+
+      console.log(`${chalk.bold(`Found ${allRecords.length} custom plugin(s):`)}\n`);
+      let validCount = 0;
+      let failedCount = 0;
+
+      for (const candidate of allRecords) {
+        const ver = candidate.version !== "0.0.0" ? chalk.dim(` v${candidate.version}`) : "";
+        console.log(`  ${chalk.cyan(candidate.name)}${ver}`);
+        console.log(`    ${chalk.dim("Path:")} ${candidate.installPath}`);
+
+        let entryPoint: string;
+        try { entryPoint = await resolvePackageEntry(candidate.installPath); }
+        catch (err) { console.log(`    ${chalk.red("✗ Entry point failed:")} ${err instanceof Error ? err.message : String(err)}`); failedCount++; console.log(); continue; }
+        console.log(`    ${chalk.dim("Entry:")} ${nodePath.relative(candidate.installPath, entryPoint)}`);
+
+        try { await fsPromises.access(entryPoint); }
+        catch { console.log(`    ${chalk.red("✗ File not found:")} ${entryPoint}`); failedCount++; console.log(); continue; }
+
+        let mod: Record<string, unknown>;
+        try { mod = (await import(pathToFileURL(entryPoint).href)) as Record<string, unknown>; }
+        catch (err) { console.log(`    ${chalk.red("✗ Import failed:")} ${err instanceof Error ? err.message : String(err)}`); failedCount++; console.log(); continue; }
+
+        const isPlugin = (v: unknown): v is { name: string; description: string } =>
+          v !== null && typeof v === "object" && typeof (v as Record<string, unknown>).name === "string" && typeof (v as Record<string, unknown>).description === "string";
+        const found = isPlugin(mod.default) ? mod.default : isPlugin(mod.plugin) ? mod.plugin : isPlugin(mod) ? mod : Object.values(mod).find(isPlugin);
+
+        if (found && isPlugin(found)) {
+          console.log(`    ${chalk.green("✓ Valid plugin")} — ${found.name}: ${chalk.dim(found.description)}`);
+          validCount++;
+        } else {
+          console.log(`    ${chalk.red("✗ No valid Plugin export")} — needs { name: string, description: string }`);
+          failedCount++;
+        }
+        console.log();
+      }
+
+      const parts: string[] = [];
+      if (validCount > 0) parts.push(chalk.green(`${validCount} valid`));
+      if (failedCount > 0) parts.push(chalk.red(`${failedCount} failed`));
+      console.log(`  ${chalk.bold("Summary:")} ${parts.join(", ")} out of ${allRecords.length}\n`);
+    });
 }

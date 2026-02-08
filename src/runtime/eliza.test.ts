@@ -16,8 +16,10 @@ import {
   applyCloudConfigToEnv,
   buildCharacterFromConfig,
   collectPluginNames,
+  CUSTOM_PLUGINS_DIRNAME,
   resolvePackageEntry,
   resolvePrimaryModel,
+  scanDropInPlugins,
 } from "./eliza.js";
 
 // ---------------------------------------------------------------------------
@@ -563,5 +565,81 @@ describe("resolvePackageEntry", () => {
 
     const entry = await resolvePackageEntry(pkgRoot);
     expect(entry).toBe(path.join(pkgRoot, "dist", "index.js"));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// scanDropInPlugins
+// ---------------------------------------------------------------------------
+
+describe("scanDropInPlugins", () => {
+  let tmpDir: string;
+
+  beforeEach(async () => {
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "eliza-dropin-test-"));
+  });
+
+  afterEach(async () => {
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  });
+
+  it("returns empty record for a nonexistent directory", async () => {
+    const records = await scanDropInPlugins(path.join(tmpDir, "nope"));
+    expect(Object.keys(records)).toHaveLength(0);
+  });
+
+  it("returns empty record for an empty directory", async () => {
+    const records = await scanDropInPlugins(tmpDir);
+    expect(Object.keys(records)).toHaveLength(0);
+  });
+
+  it("ignores plain files", async () => {
+    await fs.writeFile(path.join(tmpDir, "stray.js"), "export default {}");
+    const records = await scanDropInPlugins(tmpDir);
+    expect(Object.keys(records)).toHaveLength(0);
+  });
+
+  it("discovers a plugin directory with package.json", async () => {
+    const dir = path.join(tmpDir, "my-plugin");
+    await fs.mkdir(dir);
+    await fs.writeFile(
+      path.join(dir, "package.json"),
+      JSON.stringify({ name: "my-custom-plugin", version: "1.2.3" }),
+    );
+    const records = await scanDropInPlugins(tmpDir);
+    expect(records["my-custom-plugin"]).toBeDefined();
+    expect(records["my-custom-plugin"].source).toBe("path");
+    expect(records["my-custom-plugin"].installPath).toBe(dir);
+    expect(records["my-custom-plugin"].version).toBe("1.2.3");
+  });
+
+  it("uses directory name when no package.json", async () => {
+    await fs.mkdir(path.join(tmpDir, "bare-plugin"));
+    const records = await scanDropInPlugins(tmpDir);
+    expect(records["bare-plugin"]).toBeDefined();
+    expect(records["bare-plugin"].version).toBe("0.0.0");
+  });
+
+  it("discovers multiple plugins", async () => {
+    for (const n of ["a", "b", "c"]) {
+      const dir = path.join(tmpDir, n);
+      await fs.mkdir(dir);
+      await fs.writeFile(path.join(dir, "package.json"), JSON.stringify({ name: n }));
+    }
+    const records = await scanDropInPlugins(tmpDir);
+    expect(Object.keys(records)).toHaveLength(3);
+  });
+
+  it("handles malformed package.json", async () => {
+    const dir = path.join(tmpDir, "bad");
+    await fs.mkdir(dir);
+    await fs.writeFile(path.join(dir, "package.json"), "NOT JSON");
+    const records = await scanDropInPlugins(tmpDir);
+    expect(records["bad"]).toBeDefined();
+    expect(records["bad"].version).toBe("0.0.0");
+  });
+
+  it("CUSTOM_PLUGINS_DIRNAME is plugins/custom", () => {
+    expect(CUSTOM_PLUGINS_DIRNAME).toBe("plugins/custom");
   });
 });

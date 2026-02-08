@@ -40,6 +40,8 @@ import {
   applyPluginAutoEnable,
 } from "../config/plugin-auto-enable.js";
 import type { AgentConfig } from "../config/types.agents.js";
+import { resolveStateDir, resolveUserPath } from "../config/paths.js";
+import type { PluginInstallRecord } from "../config/types.milaidy.js";
 import {
   createHookEvent,
   type LoadHooksOptions,
@@ -140,42 +142,30 @@ const CHANNEL_ENV_MAP: Readonly<
 // ---------------------------------------------------------------------------
 
 /** Core plugins that should always be loaded. */
-// MINIMAL PLUGIN SET - Optimized for Haiku performance
-// Reduced from 23 to 2 plugins to minimize context (was 4.5k tokens, now ~500)
-// This makes responses fast (2-3s) and cheap ($0.001/msg with Haiku)
 export const CORE_PLUGINS: readonly string[] = [
-  "@elizaos/plugin-sql", // Database adapter (memory/persistence)
-  "@elizaos/plugin-local-embedding", // Embeddings
-
-  // ALL OTHER PLUGINS DISABLED TO REDUCE CONTEXT
-  // Each plugin adds ~50-200 tokens to every request
-  // Uncomment individual plugins if you need their features:
-
-  // "@elizaos/plugin-personality",  // Agent personality/character
-  // "@elizaos/plugin-commands",  // Slash commands
-  // "@elizaos/plugin-directives",  // Directive system
-
-  // NEVER re-enable these (huge context):
-  // "@elizaos/plugin-agent-skills",  // 4938 skills = 4.5k tokens!
-  // "@elizaos/plugin-knowledge",  // Knowledge base (can be large)
-
-  // Other disabled plugins:
-  // "@elizaos/plugin-agent-orchestrator",
-  // "@elizaos/plugin-shell",
-  // "@elizaos/plugin-experience",
-  // "@elizaos/plugin-plugin-manager",
-  // "@elizaos/plugin-cli",
-  // "@elizaos/plugin-code",
-  // "@elizaos/plugin-edge-tts",
-  // "@elizaos/plugin-mcp",
-  // "@elizaos/plugin-pdf",
-  // "@elizaos/plugin-scratchpad",
-  // "@elizaos/plugin-secrets-manager",
-  // "@elizaos/plugin-todo",
-  // "@elizaos/plugin-trust",
-  // "@elizaos/plugin-form",
-  // "@elizaos/plugin-goals",
-  // "@elizaos/plugin-scheduling",
+  "@elizaos/plugin-sql",
+  "@elizaos/plugin-local-embedding",
+  "@elizaos/plugin-agent-skills",
+  "@elizaos/plugin-agent-orchestrator",
+  "@elizaos/plugin-directives",
+  "@elizaos/plugin-commands",
+  "@elizaos/plugin-shell",
+  "@elizaos/plugin-personality",
+  "@elizaos/plugin-experience",
+  "@elizaos/plugin-plugin-manager",
+  "@elizaos/plugin-cli",
+  "@elizaos/plugin-code",
+  "@elizaos/plugin-edge-tts",
+  "@elizaos/plugin-knowledge",
+  "@elizaos/plugin-mcp",
+  "@elizaos/plugin-pdf",
+  "@elizaos/plugin-scratchpad",
+  "@elizaos/plugin-secrets-manager",
+  "@elizaos/plugin-todo",
+  "@elizaos/plugin-trust",
+  "@elizaos/plugin-form",
+  "@elizaos/plugin-goals",
+  "@elizaos/plugin-scheduling",
 ];
 
 /**
@@ -359,17 +349,79 @@ export function collectPluginNames(config: MilaidyConfig): Set<string> {
   return pluginsToLoad;
 }
 
+// ---------------------------------------------------------------------------
+// Custom / drop-in plugin discovery
+// ---------------------------------------------------------------------------
+
+/** Subdirectory under the Milaidy state dir for drop-in custom plugins. */
+export const CUSTOM_PLUGINS_DIRNAME = "plugins/custom";
+
+/**
+ * Scan a directory for drop-in plugin packages.
+ *
+ * Each immediate subdirectory is treated as a plugin package. When the
+ * subdirectory contains a `package.json` its `name` field is used as the
+ * plugin identifier; otherwise the directory name is used.
+ *
+ * Returns a map of plugin name → synthetic {@link PluginInstallRecord}
+ * that the existing {@link importFromPath} loading pipeline can consume.
+ */
+/** @internal Exported for CLI `milaidy plugins test` command. */
+export async function scanDropInPlugins(
+  dir: string,
+): Promise<Record<string, PluginInstallRecord>> {
+  const records: Record<string, PluginInstallRecord> = {};
+
+  let entries: Awaited<ReturnType<typeof fs.readdir>>;
+  try {
+    entries = await fs.readdir(dir, { withFileTypes: true });
+  } catch {
+    return records;
+  }
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+
+    const pluginDir = path.join(dir, entry.name);
+    const pkgJsonPath = path.join(pluginDir, "package.json");
+
+    let pluginName = entry.name;
+    let version = "0.0.0";
+
+    try {
+      const raw = await fs.readFile(pkgJsonPath, "utf-8");
+      const pkg = JSON.parse(raw) as { name?: string; version?: string };
+      if (typeof pkg.name === "string" && pkg.name.trim()) {
+        pluginName = pkg.name.trim();
+      }
+      if (typeof pkg.version === "string" && pkg.version.trim()) {
+        version = pkg.version.trim();
+      }
+    } catch {
+      // No package.json — use directory name as identifier.
+    }
+
+    records[pluginName] = { source: "path", installPath: pluginDir, version };
+  }
+
+  return records;
+}
+
+// ---------------------------------------------------------------------------
+// Plugin resolution
+// ---------------------------------------------------------------------------
+
 /**
  * Resolve Milaidy plugins from config and auto-enable logic.
  * Returns an array of ElizaOS Plugin instances ready for AgentRuntime.
  *
- * Handles two categories of plugins:
- * 1. Built-in/npm plugins — imported by package name (e.g. "@elizaos/plugin-discord")
- * 2. User-installed plugins — imported by absolute path from ~/.milaidy/plugins/installed/
+ * Handles three categories of plugins:
+ * 1. Built-in/npm plugins — imported by package name
+ * 2. User-installed plugins — from ~/.milaidy/plugins/installed/
+ * 3. Custom/drop-in plugins — from ~/.milaidy/plugins/custom/ and plugins.load.paths
  *
  * Each plugin is loaded inside an error boundary so a single failing plugin
- * cannot crash the entire agent startup. Errors are logged and surfaced but
- * do not propagate.
+ * cannot crash the entire agent startup.
  */
 async function resolvePlugins(
   config: MilaidyConfig,
@@ -377,7 +429,6 @@ async function resolvePlugins(
   const plugins: ResolvedPlugin[] = [];
   const failedPlugins: Array<{ name: string; error: string }> = [];
 
-  // Run auto-enable for side effects (logging which plugins would be activated).
   applyPluginAutoEnable({
     config,
     env: process.env,
@@ -386,10 +437,46 @@ async function resolvePlugins(
   const pluginsToLoad = collectPluginNames(config);
   const corePluginSet = new Set<string>(CORE_PLUGINS);
 
-  logger.info(`[milaidy] Resolving ${pluginsToLoad.size} plugins...`);
+  // Build a mutable map of install records so we can merge drop-in discoveries
+  const installRecords: Record<string, PluginInstallRecord> = {
+    ...(config.plugins?.installs ?? {}),
+  };
 
-  // Build a map of user-installed plugins with their install paths
-  const installRecords = config.plugins?.installs ?? {};
+  // ── Auto-discover drop-in custom plugins ────────────────────────────────
+  const customPluginsDir = path.join(resolveStateDir(), CUSTOM_PLUGINS_DIRNAME);
+  const allDropInRecords: Record<string, PluginInstallRecord> = {};
+
+  const customDirRecords = await scanDropInPlugins(customPluginsDir);
+  Object.assign(allDropInRecords, customDirRecords);
+
+  for (const extraPath of config.plugins?.load?.paths ?? []) {
+    const resolved = resolveUserPath(extraPath);
+    const extraRecords = await scanDropInPlugins(resolved);
+    for (const [name, record] of Object.entries(extraRecords)) {
+      if (!allDropInRecords[name]) allDropInRecords[name] = record;
+    }
+  }
+
+  const denySet = new Set(config.plugins?.deny ?? []);
+  const customPluginNames: string[] = [];
+
+  for (const [name, record] of Object.entries(allDropInRecords)) {
+    if (denySet.has(name)) continue;
+    if (corePluginSet.has(name)) {
+      logger.warn(`[milaidy] Custom plugin "${name}" collides with core plugin — skipping`);
+      continue;
+    }
+    if (installRecords[name]) continue;
+    pluginsToLoad.add(name);
+    installRecords[name] = record;
+    customPluginNames.push(name);
+  }
+
+  if (customPluginNames.length > 0) {
+    logger.info(`[milaidy] Discovered ${customPluginNames.length} custom plugin(s): ${customPluginNames.join(", ")}`);
+  }
+
+  logger.info(`[milaidy] Resolving ${pluginsToLoad.size} plugins...`);
 
   // Dynamically import each plugin inside an error boundary
   for (const pluginName of pluginsToLoad) {
@@ -1337,6 +1424,9 @@ export async function startEliza(
   const workspaceDir =
     config.agents?.defaults?.workspace ?? resolveDefaultAgentWorkspaceDir();
   await ensureAgentWorkspace({ dir: workspaceDir, ensureBootstrapFiles: true });
+
+  // 4b. Ensure custom plugins directory exists for drop-in plugins
+  await fs.mkdir(path.join(resolveStateDir(), CUSTOM_PLUGINS_DIRNAME), { recursive: true });
 
   // 5. Create the Milaidy bridge plugin (workspace context + session keys + compaction)
   const agentId = character.name?.toLowerCase().replace(/\s+/g, "-") ?? "main";
