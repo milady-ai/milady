@@ -49,15 +49,9 @@ function envSnapshot(keys: string[]): {
 
 describe("collectPluginNames", () => {
   const envKeys = [
-    "ANTHROPIC_API_KEY",
-    "OPENAI_API_KEY",
-    "GROQ_API_KEY",
-    "GOOGLE_API_KEY",
-    "XAI_API_KEY",
-    "OPENROUTER_API_KEY",
-    "OLLAMA_BASE_URL",
-    "ELIZAOS_CLOUD_API_KEY",
-    "ELIZAOS_CLOUD_ENABLED",
+    "ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GROQ_API_KEY", "GOOGLE_API_KEY",
+    "XAI_API_KEY", "OPENROUTER_API_KEY", "AI_GATEWAY_API_KEY", "AIGATEWAY_API_KEY", "OLLAMA_BASE_URL",
+    "ELIZAOS_CLOUD_API_KEY", "ELIZAOS_CLOUD_ENABLED",
   ];
   const snap = envSnapshot(envKeys);
   beforeEach(() => {
@@ -81,9 +75,11 @@ describe("collectPluginNames", () => {
   it("adds model-provider plugins when env keys are present", () => {
     process.env.ANTHROPIC_API_KEY = "sk-test";
     process.env.OPENAI_API_KEY = "sk-test";
+    process.env.AI_GATEWAY_API_KEY = "aigw-test";
     const names = collectPluginNames({} as MilaidyConfig);
     expect(names.has("@elizaos/plugin-anthropic")).toBe(true);
     expect(names.has("@elizaos/plugin-openai")).toBe(true);
+    expect(names.has("@elizaos/plugin-vercel-ai-gateway")).toBe(true);
     expect(names.has("@elizaos/plugin-groq")).toBe(false);
   });
 

@@ -76,6 +76,8 @@ const CHANNEL_PLUGINS: Record<string, string> = {
 const PROVIDER_PLUGINS: Record<string, string> = {
   ANTHROPIC_API_KEY: "@elizaos/plugin-anthropic",
   OPENAI_API_KEY: "@elizaos/plugin-openai",
+  AI_GATEWAY_API_KEY: "@elizaos/plugin-vercel-ai-gateway",
+  AIGATEWAY_API_KEY: "@elizaos/plugin-vercel-ai-gateway",
   GOOGLE_API_KEY: "@elizaos/plugin-google-genai",
   GOOGLE_GENERATIVE_AI_API_KEY: "@elizaos/plugin-google-genai",
   GROQ_API_KEY: "@elizaos/plugin-groq",
@@ -107,6 +109,8 @@ const envKeysToClean = [
   "GROQ_API_KEY",
   "XAI_API_KEY",
   "OPENROUTER_API_KEY",
+  "AI_GATEWAY_API_KEY",
+  "AIGATEWAY_API_KEY",
   "OLLAMA_BASE_URL",
   "ELIZAOS_CLOUD_API_KEY",
   "ELIZAOS_CLOUD_ENABLED",

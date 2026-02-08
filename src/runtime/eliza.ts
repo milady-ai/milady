@@ -209,6 +209,8 @@ const PROVIDER_PLUGIN_MAP: Readonly<Record<string, string>> = {
   GROQ_API_KEY: "@elizaos/plugin-groq",
   XAI_API_KEY: "@elizaos/plugin-xai",
   OPENROUTER_API_KEY: "@elizaos/plugin-openrouter",
+  AI_GATEWAY_API_KEY: "@elizaos/plugin-vercel-ai-gateway",
+  AIGATEWAY_API_KEY: "@elizaos/plugin-vercel-ai-gateway",
   OLLAMA_BASE_URL: "@elizaos/plugin-ollama",
   ZAI_API_KEY: "@homunculuslabs/plugin-zai",
   // ElizaCloud — loaded when API key is present OR cloud is explicitly enabled
@@ -703,6 +705,15 @@ export function buildCharacterFromConfig(config: MilaidyConfig): Character {
     "GROQ_API_KEY",
     "XAI_API_KEY",
     "OPENROUTER_API_KEY",
+    "AI_GATEWAY_API_KEY",
+    "AIGATEWAY_API_KEY",
+    "AI_GATEWAY_BASE_URL",
+    "AI_GATEWAY_SMALL_MODEL",
+    "AI_GATEWAY_LARGE_MODEL",
+    "AI_GATEWAY_EMBEDDING_MODEL",
+    "AI_GATEWAY_EMBEDDING_DIMENSIONS",
+    "AI_GATEWAY_IMAGE_MODEL",
+    "AI_GATEWAY_TIMEOUT_MS",
     "OLLAMA_BASE_URL",
     "DISCORD_BOT_TOKEN",
     "TELEGRAM_BOT_TOKEN",
@@ -915,62 +926,22 @@ async function runFirstTimeSetup(
   // Check whether an API key is already set in the environment (from .env or
   // shell).  If none is found, ask the user to pick a provider and enter a key.
   const PROVIDER_OPTIONS = [
-    {
-      id: "anthropic",
-      label: "Anthropic (Claude)",
-      envKey: "ANTHROPIC_API_KEY",
-      hint: "sk-ant-...",
-    },
-    {
-      id: "openai",
-      label: "OpenAI (GPT)",
-      envKey: "OPENAI_API_KEY",
-      hint: "sk-...",
-    },
-    {
-      id: "openrouter",
-      label: "OpenRouter",
-      envKey: "OPENROUTER_API_KEY",
-      hint: "sk-or-...",
-    },
-    {
-      id: "gemini",
-      label: "Google Gemini",
-      envKey: "GOOGLE_API_KEY",
-      hint: "AI...",
-    },
-    { id: "grok", label: "xAI (Grok)", envKey: "XAI_API_KEY", hint: "xai-..." },
-    { id: "groq", label: "Groq", envKey: "GROQ_API_KEY", hint: "gsk_..." },
-    {
-      id: "deepseek",
-      label: "DeepSeek",
-      envKey: "DEEPSEEK_API_KEY",
-      hint: "sk-...",
-    },
-    { id: "mistral", label: "Mistral", envKey: "MISTRAL_API_KEY", hint: "" },
-    {
-      id: "together",
-      label: "Together AI",
-      envKey: "TOGETHER_API_KEY",
-      hint: "",
-    },
-    {
-      id: "ollama",
-      label: "Ollama (local, free)",
-      envKey: "OLLAMA_BASE_URL",
-      hint: "http://localhost:11434",
-    },
-    {
-      id: "zai",
-      label: "z.ai (GLM Coding Plan)",
-      envKey: "ZAI_API_KEY",
-      hint: "z.ai API key",
-    },
+    { id: "anthropic", label: "Anthropic (Claude)", envKey: "ANTHROPIC_API_KEY", detectKeys: ["ANTHROPIC_API_KEY"], hint: "sk-ant-..." },
+    { id: "openai", label: "OpenAI (GPT)", envKey: "OPENAI_API_KEY", detectKeys: ["OPENAI_API_KEY"], hint: "sk-..." },
+    { id: "openrouter", label: "OpenRouter", envKey: "OPENROUTER_API_KEY", detectKeys: ["OPENROUTER_API_KEY"], hint: "sk-or-..." },
+    { id: "vercel-ai-gateway", label: "Vercel AI Gateway", envKey: "AI_GATEWAY_API_KEY", detectKeys: ["AI_GATEWAY_API_KEY", "AIGATEWAY_API_KEY"], hint: "aigw_..." },
+    { id: "gemini", label: "Google Gemini", envKey: "GOOGLE_API_KEY", detectKeys: ["GOOGLE_API_KEY", "GOOGLE_GENERATIVE_AI_API_KEY"], hint: "AI..." },
+    { id: "grok", label: "xAI (Grok)", envKey: "XAI_API_KEY", detectKeys: ["XAI_API_KEY"], hint: "xai-..." },
+    { id: "groq", label: "Groq", envKey: "GROQ_API_KEY", detectKeys: ["GROQ_API_KEY"], hint: "gsk_..." },
+    { id: "deepseek", label: "DeepSeek", envKey: "DEEPSEEK_API_KEY", detectKeys: ["DEEPSEEK_API_KEY"], hint: "sk-..." },
+    { id: "mistral", label: "Mistral", envKey: "MISTRAL_API_KEY", detectKeys: ["MISTRAL_API_KEY"], hint: "" },
+    { id: "together", label: "Together AI", envKey: "TOGETHER_API_KEY", detectKeys: ["TOGETHER_API_KEY"], hint: "" },
+    { id: "ollama", label: "Ollama (local, free)", envKey: "OLLAMA_BASE_URL", detectKeys: ["OLLAMA_BASE_URL"], hint: "http://localhost:11434" },
   ] as const;
 
   // Detect if any provider key is already configured
-  const detectedProvider = PROVIDER_OPTIONS.find((p) =>
-    process.env[p.envKey]?.trim(),
+  const detectedProvider = PROVIDER_OPTIONS.find(
+    (p) => p.detectKeys.some((key) => process.env[key]?.trim()),
   );
 
   let providerEnvKey: string | undefined;
@@ -1111,16 +1082,33 @@ async function runFirstTimeSetup(
     // "skip" — do nothing
   }
 
-  // ── Step 5b: Persist cloud config ──────────────────────────────────────
-  if (runMode === "cloud" && cloudApiKey) {
-    if (!config.cloud) (config as Record<string, unknown>).cloud = {};
-    const cloud = config.cloud as NonNullable<typeof config.cloud>;
-    cloud.enabled = true;
-    cloud.apiKey = cloudApiKey;
-    cloud.baseUrl = config.cloud?.baseUrl ?? "https://www.elizacloud.ai";
+  // ── Step 6: Skills Marketplace API key ──────────────────────────────────
+  const hasSkillsmpKey = Boolean(process.env.SKILLSMP_API_KEY?.trim());
+
+  if (!hasSkillsmpKey) {
+    const skillsmpAction = await clack.select({
+      message: `${name}: Want to connect to the Skills Marketplace? (https://skillsmp.com)`,
+      options: [
+        { value: "enter", label: "Enter API key", hint: "enables browsing & installing skills" },
+        { value: "skip", label: "Skip for now", hint: "you can add it later via env or config" },
+      ],
+    });
+
+    if (clack.isCancel(skillsmpAction)) cancelOnboarding();
+
+    if (skillsmpAction === "enter") {
+      const skillsmpKeyInput = await clack.password({
+        message: "Paste your skillsmp.com API key:",
+      });
+
+      if (!clack.isCancel(skillsmpKeyInput) && skillsmpKeyInput.trim()) {
+        process.env.SKILLSMP_API_KEY = skillsmpKeyInput.trim();
+        clack.log.success("Skills Marketplace API key saved!");
+      }
+    }
   }
 
-  // ── Step 6: Persist agent name + style + provider to config ─────────────
+  // ── Step 7: Persist agent name + style + provider to config ─────────────
   // Save the agent name and chosen personality template into config so that
   // the same character data is used regardless of whether the user onboarded
   // via CLI or GUI.  This ensures full parity between onboarding surfaces.
@@ -1172,6 +1160,9 @@ async function runFirstTimeSetup(
   }
   if (process.env.SOLANA_PRIVATE_KEY && !hasSolKey) {
     envBucket.SOLANA_PRIVATE_KEY = process.env.SOLANA_PRIVATE_KEY;
+  }
+  if (process.env.SKILLSMP_API_KEY && !hasSkillsmpKey) {
+    envBucket.SKILLSMP_API_KEY = process.env.SKILLSMP_API_KEY;
   }
 
   try {
@@ -1347,10 +1338,8 @@ export async function startEliza(
   //     plugin-agent-skills auto-loads them on startup.
   let bundledSkillsDir: string | null = null;
   try {
-    // @ts-expect-error — optional dependency; may not ship type declarations
-    const { getSkillsDir } = (await import("@elizaos/skills")) as {
-      getSkillsDir: () => string;
-    };
+    // @ts-ignore — optional peer dependency, resolved at runtime
+    const { getSkillsDir } = (await import("@elizaos/skills")) as { getSkillsDir: () => string };
     bundledSkillsDir = getSkillsDir();
     logger.info(`[milaidy] Bundled skills dir: ${bundledSkillsDir}`);
   } catch {

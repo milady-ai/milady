@@ -13,6 +13,8 @@ import {
   type ChatMessage,
   type PluginInfo,
   type SkillInfo,
+  type SkillMarketplaceResult,
+  type InstalledMarketplaceSkill,
   type LogEntry,
   type OnboardingOptions,
   type InventoryProviderOption,
@@ -22,8 +24,17 @@ import {
   type WalletNftsResponse,
   type WalletConfigStatus,
   type WalletExportResult,
-  type RegistryPlugin,
-  type CatalogSkill,
+  type WorkbenchOverview,
+  type WorkbenchGoal,
+  type WorkbenchTodo,
+  type ShareIngestPayload,
+  type ShareIngestItem,
+  type RegistryPluginInfo,
+  type InstalledRegistryPlugin,
+  type McpMarketplaceResult,
+  type McpServerConfig,
+  type McpRegistryServerDetail,
+  type McpServerStatus,
 } from "./api-client.js";
 import { tabFromPath, pathForTab, type Tab, TAB_GROUPS, titleForTab } from "./navigation.js";
 import "./database-viewer.js";
@@ -47,7 +58,62 @@ export class MilaidyApp extends LitElement {
   @state() pluginFilter: "all" | "store" | "ai-provider" | "connector" | "database" | "feature" = "all";
   @state() pluginSearch = "";
   @state() pluginSettingsOpen: Set<string> = new Set();
+  @state() marketplacePlugins: RegistryPluginInfo[] = [];
+  @state() marketplaceInstalled: InstalledRegistryPlugin[] = [];
+  @state() marketplaceLoading = false;
+  @state() marketplaceSearch = "";
+  @state() marketplaceAction = "";
+  @state() marketplaceSubTab: "plugins" | "skills" | "mcp" = "plugins";
+  @state() mcpMarketplaceResults: McpMarketplaceResult[] = [];
+  @state() mcpMarketplaceQuery = "";
+  @state() mcpMarketplaceLoading = false;
+  @state() mcpConfiguredServers: Record<string, McpServerConfig> = {};
+  @state() mcpConfigLoading = false;
+  @state() mcpAction = "";
+  @state() mcpManualName = "";
+  @state() mcpManualType: "stdio" | "http" | "streamable-http" | "sse" = "stdio";
+  @state() mcpManualCommand = "";
+  @state() mcpManualArgs = "";
+  @state() mcpManualUrl = "";
+  @state() mcpManualEnvPairs: Array<{ key: string; value: string }> = [];
+  @state() mcpAddingServer: McpRegistryServerDetail | null = null;
+  @state() mcpAddingResult: McpMarketplaceResult | null = null;
+  @state() mcpEnvInputs: Record<string, string> = {};
+  @state() mcpHeaderInputs: Record<string, string> = {};
+  @state() mcpServerStatuses: McpServerStatus[] = [];
+  @state() workbench: WorkbenchOverview | null = null;
+  @state() workbenchLoading = false;
+  @state() workbenchGoalName = "";
+  @state() workbenchGoalDescription = "";
+  @state() workbenchGoalTags = "";
+  @state() workbenchGoalPriority = "3";
+  @state() workbenchEditingGoalId: string | null = null;
+  @state() workbenchTodoName = "";
+  @state() workbenchTodoDescription = "";
+  @state() workbenchTodoPriority = "3";
+  @state() workbenchTodoUrgent = false;
+  @state() shareIngestNotice = "";
+  @state() commandPaletteOpen = false;
+  @state() commandQuery = "";
+  @state() commandActiveIndex = 0;
+  @state() droppedFiles: string[] = [];
+  @state() actionNotice: { tone: "info" | "success" | "error"; text: string } | null = null;
+  @state() nativeDesktopAvailable = false;
+  @state() nativeTrayEnabled = false;
+  @state() nativeShortcutEnabled = false;
+  @state() nativeEvents: string[] = [];
   @state() skills: SkillInfo[] = [];
+  @state() skillsMarketplaceResults: SkillMarketplaceResult[] = [];
+  @state() skillsMarketplaceInstalled: InstalledMarketplaceSkill[] = [];
+  @state() skillsMarketplaceQuery = "";
+  @state() skillsMarketplaceLoading = false;
+  @state() skillsMarketplaceAction = "";
+  @state() skillsMarketplaceManualGithubUrl = "";
+  @state() skillsMarketplaceError = "";
+  @state() skillsMarketplaceApiKeySet = false;
+  @state() skillsMarketplaceApiKeyInput = "";
+  @state() skillsMarketplaceApiKeySaving = false;
+  @state() skillToggleAction = "";
   @state() logs: LogEntry[] = [];
   @state() authRequired = false;
   @state() pairingEnabled = false;
@@ -55,6 +121,9 @@ export class MilaidyApp extends LitElement {
   @state() pairingCodeInput = "";
   @state() pairingError: string | null = null;
   @state() pairingBusy = false;
+
+  private nativeListenerHandles: Array<{ remove: () => Promise<void> }> = [];
+  private actionNoticeTimer: number | null = null;
 
   // Chrome extension state
   @state() extensionStatus: ExtensionStatus | null = null;
@@ -133,14 +202,9 @@ export class MilaidyApp extends LitElement {
   @state() onboardingLargeModel = "claude-sonnet-4-5";
   @state() onboardingProvider = "";
   @state() onboardingApiKey = "";
-  @state() onboardingSelectedChains: Set<string> = new Set(["evm", "solana"]);
-  @state() onboardingRpcSelections: Record<string, string> = {};
-  @state() onboardingRpcKeys: Record<string, string> = {};
-  @state() private isMobileDevice = false;
-
-  // Config state
-  @state() configRaw: unknown = null;
-  @state() configText = "";
+  @state() onboardingTelegramToken = "";
+  @state() onboardingDiscordToken = "";
+  @state() onboardingSkillsmpApiKey = "";
 
   static styles = css`
     :host {
@@ -1363,13 +1427,27 @@ export class MilaidyApp extends LitElement {
     this.initializeTheme();
     this.initializeApp();
     window.addEventListener("popstate", this.handlePopState);
+    window.addEventListener("keydown", this.handleGlobalKeydown);
+    document.addEventListener("milaidy:command-palette", this.handleExternalCommandPalette as EventListener);
+    document.addEventListener("milaidy:tray-action", this.handleExternalTrayAction as EventListener);
+    document.addEventListener("milaidy:share-target", this.handleExternalShareTarget as EventListener);
+    document.addEventListener("milaidy:app-resume", this.handleAppResume as EventListener);
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
     window.removeEventListener("popstate", this.handlePopState);
-    if (this.cloudPollInterval) clearInterval(this.cloudPollInterval);
+    window.removeEventListener("keydown", this.handleGlobalKeydown);
+    document.removeEventListener("milaidy:command-palette", this.handleExternalCommandPalette as EventListener);
+    document.removeEventListener("milaidy:tray-action", this.handleExternalTrayAction as EventListener);
+    document.removeEventListener("milaidy:share-target", this.handleExternalShareTarget as EventListener);
+    document.removeEventListener("milaidy:app-resume", this.handleAppResume as EventListener);
+    if (this.actionNoticeTimer != null) {
+      window.clearTimeout(this.actionNoticeTimer);
+      this.actionNoticeTimer = null;
+    }
     client.disconnectWs();
+    this.teardownNativeBindings();
   }
 
   private handlePopState = (): void => {
@@ -1433,6 +1511,7 @@ export class MilaidyApp extends LitElement {
     client.connectWs();
     client.onWsEvent("status", (data) => {
       this.agentStatus = data as unknown as AgentStatus;
+      void this.configureNativeTrayMenu();
     });
     // Chat is handled via the REST POST /api/chat endpoint (see
     // handleChatSend).  WebSocket is kept for status events only.
@@ -1440,6 +1519,7 @@ export class MilaidyApp extends LitElement {
     // Load initial status
     try {
       this.agentStatus = await client.getStatus();
+      await this.configureNativeTrayMenu();
       this.connected = true;
     } catch {
       this.connected = false;
@@ -1460,13 +1540,18 @@ export class MilaidyApp extends LitElement {
     const tab = tabFromPath(window.location.pathname);
     if (tab) {
       this.tab = tab;
+      if (tab === "workbench") this.loadWorkbench();
       if (tab === "inventory") this.loadInventory();
       if (tab === "plugins") this.loadPlugins();
-      if (tab === "store") this.loadStore();
+      if (tab === "marketplace") this.loadMarketplace();
       if (tab === "skills") this.loadSkills();
       if (tab === "config") { this.checkExtensionStatus(); this.loadWalletConfig(); }
       if (tab === "logs") this.loadLogs();
     }
+
+    await this.initializeNativeLayer();
+    await this.pullShareIngest();
+    this.consumePendingShareQueue();
   }
 
   private setTab(tab: Tab): void {
@@ -1475,9 +1560,10 @@ export class MilaidyApp extends LitElement {
     window.history.pushState(null, "", path);
 
     // Load data for the tab
+    if (tab === "workbench") this.loadWorkbench();
     if (tab === "inventory") this.loadInventory();
     if (tab === "plugins") this.loadPlugins();
-    if (tab === "store") this.loadStore();
+    if (tab === "marketplace") { this.loadMarketplace(); this.loadSkills(); }
     if (tab === "skills") this.loadSkills();
     if (tab === "config") { this.checkExtensionStatus(); this.loadWalletConfig(); }
     if (tab === "logs") this.loadLogs();
@@ -2321,6 +2407,8 @@ export class MilaidyApp extends LitElement {
       const { skills } = await client.getSkills();
       this.skills = skills;
     } catch { /* ignore */ }
+    await this.loadInstalledMarketplaceSkills();
+    await this.loadSkillsMarketplaceConfig();
   }
 
   private async refreshSkills(): Promise<void> {
@@ -2330,22 +2418,1069 @@ export class MilaidyApp extends LitElement {
     } catch {
       // Fall back to a normal load if refresh endpoint not available
       await this.loadSkills();
+      return;
+    }
+    await this.loadInstalledMarketplaceSkills();
+  }
+
+  private async loadInstalledMarketplaceSkills(): Promise<void> {
+    try {
+      const { skills } = await client.getInstalledMarketplaceSkills();
+      this.skillsMarketplaceInstalled = skills;
+    } catch {
+      this.skillsMarketplaceInstalled = [];
     }
   }
 
+  private async searchSkillsMarketplace(): Promise<void> {
+    const query = this.skillsMarketplaceQuery.trim();
+    if (!query) {
+      this.skillsMarketplaceResults = [];
+      this.skillsMarketplaceError = "";
+      return;
+    }
+
+    this.skillsMarketplaceLoading = true;
+    this.skillsMarketplaceError = "";
+    try {
+      const { results } = await client.searchSkillsMarketplace(query, false, 20);
+      this.skillsMarketplaceResults = results;
+    } catch (err) {
+      this.skillsMarketplaceResults = [];
+      const message = err instanceof Error ? err.message : "unknown error";
+      this.skillsMarketplaceError = message;
+      this.setActionNotice(`Skill search failed: ${message}`, "error", 4200);
+    } finally {
+      this.skillsMarketplaceLoading = false;
+    }
+  }
+
+  private async loadSkillsMarketplaceConfig(): Promise<void> {
+    try {
+      const { keySet } = await client.getSkillsMarketplaceConfig();
+      this.skillsMarketplaceApiKeySet = keySet;
+    } catch {
+      this.skillsMarketplaceApiKeySet = false;
+    }
+  }
+
+  private async handleSaveSkillsMarketplaceApiKey(): Promise<void> {
+    const apiKey = this.skillsMarketplaceApiKeyInput.trim();
+    if (!apiKey) return;
+
+    this.skillsMarketplaceApiKeySaving = true;
+    try {
+      const { keySet } = await client.updateSkillsMarketplaceConfig(apiKey);
+      this.skillsMarketplaceApiKeySet = keySet;
+      this.skillsMarketplaceApiKeyInput = "";
+      this.setActionNotice("Skills Marketplace API key saved.", "success");
+    } catch (err) {
+      this.setActionNotice(`Failed to save API key: ${err instanceof Error ? err.message : "unknown error"}`, "error", 4200);
+    } finally {
+      this.skillsMarketplaceApiKeySaving = false;
+    }
+  }
+
+
+  private async installSkillFromMarketplace(item: SkillMarketplaceResult): Promise<void> {
+    this.skillsMarketplaceAction = `install:${item.id}`;
+    try {
+      await client.installMarketplaceSkill({
+        githubUrl: item.githubUrl,
+        repository: item.repository,
+        path: item.path ?? undefined,
+        name: item.name,
+        description: item.description,
+        source: "skillsmp",
+        autoRefresh: true,
+      });
+      await this.refreshSkills();
+      this.setActionNotice(`Installed skill: ${item.name}`, "success");
+    } catch (err) {
+      this.setActionNotice(`Skill install failed: ${err instanceof Error ? err.message : "unknown error"}`, "error", 4200);
+    } finally {
+      this.skillsMarketplaceAction = "";
+    }
+  }
+
+  private async installSkillFromGithubUrl(): Promise<void> {
+    const githubUrl = this.skillsMarketplaceManualGithubUrl.trim();
+    if (!githubUrl) return;
+
+    this.skillsMarketplaceAction = "install:manual";
+    try {
+      let repository: string | undefined;
+      let skillPath: string | undefined;
+      let inferredName: string | undefined;
+      try {
+        const parsed = new URL(githubUrl);
+        if (parsed.hostname === "github.com") {
+          const parts = parsed.pathname.split("/").filter(Boolean);
+          if (parts.length >= 2) {
+            repository = `${parts[0]}/${parts[1]}`;
+          }
+          if (parts[2] === "tree" && parts.length >= 5) {
+            skillPath = parts.slice(4).join("/");
+            inferredName = parts[parts.length - 1];
+          }
+        }
+      } catch {
+        // Keep raw URL fallback handling on backend.
+      }
+
+      await client.installMarketplaceSkill({
+        githubUrl,
+        repository,
+        path: skillPath,
+        name: inferredName,
+        source: "manual",
+        autoRefresh: true,
+      });
+      this.skillsMarketplaceManualGithubUrl = "";
+      await this.refreshSkills();
+      this.setActionNotice("Skill installed from GitHub URL.", "success");
+    } catch (err) {
+      this.setActionNotice(`GitHub install failed: ${err instanceof Error ? err.message : "unknown error"}`, "error", 4200);
+    } finally {
+      this.skillsMarketplaceAction = "";
+    }
+  }
+
+  private async uninstallMarketplaceSkill(skillId: string, name: string): Promise<void> {
+    this.skillsMarketplaceAction = `uninstall:${skillId}`;
+    try {
+      await client.uninstallMarketplaceSkill(skillId, true);
+      await this.refreshSkills();
+      this.setActionNotice(`Uninstalled skill: ${name}`, "success");
+    } catch (err) {
+      this.setActionNotice(`Skill uninstall failed: ${err instanceof Error ? err.message : "unknown error"}`, "error", 4200);
+    } finally {
+      this.skillsMarketplaceAction = "";
+    }
+  }
+
+  private async handleSkillToggle(skillId: string, enabled: boolean): Promise<void> {
+    this.skillToggleAction = skillId;
+    try {
+      const { skill } = await client.updateSkill(skillId, enabled);
+      const next = this.skills.map((entry) => (entry.id === skillId ? { ...entry, enabled: skill.enabled } : entry));
+      this.skills = next;
+      this.setActionNotice(`${skill.name} ${skill.enabled ? "enabled" : "disabled"}.`, "success");
+    } catch (err) {
+      this.setActionNotice(`Failed to update skill: ${err instanceof Error ? err.message : "unknown error"}`, "error", 4200);
+    } finally {
+      this.skillToggleAction = "";
+    }
+  }
+
+  private getDesktopPlugin(): Record<string, (...args: unknown[]) => Promise<unknown>> | null {
+    const bridge = (window as unknown as { Milaidy?: { pluginCapabilities?: { desktop?: { available?: boolean } }; plugins?: { desktop?: { plugin?: unknown } } } }).Milaidy;
+    const available = Boolean(bridge?.pluginCapabilities?.desktop?.available);
+    if (!available) return null;
+    const plugin = bridge?.plugins?.desktop?.plugin;
+    if (!plugin || typeof plugin !== "object") return null;
+    return plugin as Record<string, (...args: unknown[]) => Promise<unknown>>;
+  }
+
+  private pushNativeEvent(message: string): void {
+    const stamp = new Date().toLocaleTimeString();
+    this.nativeEvents = [`${stamp} ${message}`, ...this.nativeEvents].slice(0, 8);
+  }
+
+  private setActionNotice(
+    text: string,
+    tone: "info" | "success" | "error" = "info",
+    ttlMs = 2800,
+  ): void {
+    this.actionNotice = { tone, text };
+    if (this.actionNoticeTimer != null) {
+      window.clearTimeout(this.actionNoticeTimer);
+      this.actionNoticeTimer = null;
+    }
+    this.actionNoticeTimer = window.setTimeout(() => {
+      this.actionNotice = null;
+      this.actionNoticeTimer = null;
+    }, ttlMs);
+  }
+
+  private lifecycleTrayActionLabel(): string {
+    const state = this.agentStatus?.state ?? "not_started";
+    if (state === "running") return "Pause Agent";
+    if (state === "paused") return "Resume Agent";
+    return "Start Agent";
+  }
+
+  private async initializeNativeLayer(): Promise<void> {
+    const desktop = this.getDesktopPlugin();
+    this.nativeDesktopAvailable = Boolean(desktop);
+    if (!desktop) return;
+
+    try {
+      const isRegistered = await desktop.isShortcutRegistered?.({ accelerator: "CommandOrControl+K" }) as { registered: boolean } | undefined;
+      if (!isRegistered?.registered) {
+        const registered = await desktop.registerShortcut?.({
+          id: "command-palette",
+          accelerator: "CommandOrControl+K",
+        }) as { success: boolean } | undefined;
+        this.nativeShortcutEnabled = Boolean(registered?.success);
+      } else {
+        this.nativeShortcutEnabled = true;
+      }
+
+      const shortcutListener = await desktop.addListener?.("shortcutPressed", (event: { id: string }) => {
+        if (event.id === "command-palette") this.openCommandPalette();
+      }) as { remove: () => Promise<void> } | undefined;
+      if (shortcutListener) this.nativeListenerHandles.push(shortcutListener);
+
+      const trayClickListener = await desktop.addListener?.("trayMenuClick", (event: { itemId: string }) => {
+        this.handleTrayMenuAction(event.itemId);
+      }) as { remove: () => Promise<void> } | undefined;
+      if (trayClickListener) this.nativeListenerHandles.push(trayClickListener);
+
+      const notificationActionListener = await desktop.addListener?.("notificationAction", (event: { action?: string }) => {
+        const action = event.action ?? "";
+        if (action.toLowerCase().includes("pause")) {
+          void this.handlePauseResume();
+        }
+        if (action.toLowerCase().includes("workbench")) {
+          this.setTab("workbench");
+          void this.loadWorkbench();
+        }
+      }) as { remove: () => Promise<void> } | undefined;
+      if (notificationActionListener) this.nativeListenerHandles.push(notificationActionListener);
+
+      await this.configureNativeTrayMenu();
+    } catch (err) {
+      this.pushNativeEvent(`Native init failed: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
+  private async teardownNativeBindings(): Promise<void> {
+    for (const handle of this.nativeListenerHandles) {
+      try {
+        await handle.remove();
+      } catch {
+        // ignore cleanup errors
+      }
+    }
+    this.nativeListenerHandles = [];
+  }
+
+  private async configureNativeTrayMenu(): Promise<void> {
+    const desktop = this.getDesktopPlugin();
+    if (!desktop) return;
+    try {
+      const lifecycleLabel = this.lifecycleTrayActionLabel();
+      await desktop.setTrayMenu?.({
+        menu: [
+          { id: "tray-open-chat", label: "Open Chat" },
+          { id: "tray-open-workbench", label: "Open Workbench" },
+          { id: "tray-toggle-pause", label: lifecycleLabel },
+          { id: "tray-restart", label: "Restart Agent" },
+          { id: "tray-notify", label: "Send Test Notification" },
+          { id: "tray-sep-1", type: "separator" },
+          { id: "tray-show-window", label: "Show Window" },
+          { id: "tray-hide-window", label: "Hide Window" },
+        ],
+      });
+      this.nativeTrayEnabled = true;
+      this.pushNativeEvent("Tray menu configured");
+    } catch (err) {
+      this.pushNativeEvent(`Tray setup failed: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
+  private handleTrayMenuAction(itemId: string): void {
+    switch (itemId) {
+      case "tray-open-chat":
+        this.setTab("chat");
+        break;
+      case "tray-open-workbench":
+        this.setTab("workbench");
+        void this.loadWorkbench();
+        break;
+      case "tray-toggle-pause":
+        void this.handlePauseResume();
+        break;
+      case "tray-restart":
+        void this.handleRestart();
+        break;
+      case "tray-notify":
+        void this.sendNativeNotification();
+        break;
+      case "tray-show-window":
+        void this.getDesktopPlugin()?.showWindow?.();
+        break;
+      case "tray-hide-window":
+        void this.getDesktopPlugin()?.hideWindow?.();
+        break;
+      default:
+        break;
+    }
+  }
+
+  private async sendNativeNotification(): Promise<void> {
+    const desktop = this.getDesktopPlugin();
+    if (!desktop) return;
+    try {
+      await desktop.showNotification?.({
+        title: "Milaidy",
+        body: "Agent control actions are available from this notification.",
+        actions: [
+          { type: "button", text: "Open Workbench" },
+          { type: "button", text: "Pause Agent" },
+        ],
+      });
+      this.pushNativeEvent("Notification sent");
+    } catch (err) {
+      this.pushNativeEvent(`Notification failed: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
+  private handleExternalCommandPalette = (): void => {
+    this.openCommandPalette();
+  };
+
+  private handleExternalTrayAction = (event: Event): void => {
+    const detail = (event as CustomEvent<{ itemId?: string }>).detail;
+    if (detail?.itemId) {
+      this.handleTrayMenuAction(detail.itemId);
+    }
+  };
+
+  private handleExternalShareTarget = (event: Event): void => {
+    const detail = (event as CustomEvent<ShareIngestPayload>).detail;
+    if (!detail) return;
+    void this.ingestSharePayload(detail);
+  };
+
+  private handleAppResume = (): void => {
+    void this.pullShareIngest();
+  };
+
+  private consumePendingShareQueue(): void {
+    const global = window as unknown as { __MILAIDY_SHARE_QUEUE__?: ShareIngestPayload[] };
+    const queue = Array.isArray(global.__MILAIDY_SHARE_QUEUE__) ? [...global.__MILAIDY_SHARE_QUEUE__] : [];
+    global.__MILAIDY_SHARE_QUEUE__ = [];
+    for (const payload of queue) {
+      void this.ingestSharePayload(payload);
+    }
+  }
+
+  private applySharePrompt(prompt: string, files: Array<{ name: string }>): void {
+    if (!prompt.trim()) return;
+    this.chatInput = `${this.chatInput.trim()}\n\n${prompt}`.trim();
+    this.droppedFiles = files.map((file) => file.name);
+    this.shareIngestNotice = `Share ingested (${files.length} file${files.length === 1 ? "" : "s"})`;
+    this.setTab("chat");
+    this.requestUpdate();
+    setTimeout(() => {
+      this.shareIngestNotice = "";
+    }, 5000);
+  }
+
+  private async ingestSharePayload(payload: ShareIngestPayload): Promise<void> {
+    try {
+      const result = await client.ingestShare(payload);
+      const consumed = await client.consumeShareIngest().catch(() => null);
+      if (consumed?.items && consumed.items.length > 0) {
+        const latest = consumed.items[consumed.items.length - 1];
+        this.applySharePrompt(latest.suggestedPrompt, latest.files);
+      } else {
+        this.applySharePrompt(result.item.suggestedPrompt, result.item.files);
+      }
+    } catch {
+      const fileNames = (payload.files ?? []).map((file) => file.name).filter(Boolean);
+      const lines: string[] = [];
+      lines.push("Shared content:");
+      if (payload.title) lines.push(`Title: ${payload.title}`);
+      if (payload.url) lines.push(`URL: ${payload.url}`);
+      if (payload.text) lines.push(payload.text);
+      if (fileNames.length > 0) {
+        lines.push("Files:");
+        for (const fileName of fileNames) lines.push(`- ${fileName}`);
+      }
+      this.applySharePrompt(lines.join("\n"), fileNames.map((name) => ({ name })));
+    }
+  }
+
+  private async pullShareIngest(): Promise<void> {
+    try {
+      const inbox = await client.consumeShareIngest();
+      if (!Array.isArray(inbox.items) || inbox.items.length === 0) return;
+      const latest = inbox.items[inbox.items.length - 1] as ShareIngestItem;
+      this.applySharePrompt(latest.suggestedPrompt, latest.files);
+    } catch {
+      // Endpoint may be unavailable in older runtimes.
+    }
+  }
+
+  private handleGlobalKeydown = (event: KeyboardEvent): void => {
+    if (this.commandPaletteOpen) {
+      const items = this.filteredCommandItems();
+      if (event.key === "Escape") {
+        event.preventDefault();
+        this.closeCommandPalette();
+        return;
+      }
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        if (items.length > 0) this.commandActiveIndex = (this.commandActiveIndex + 1) % items.length;
+        return;
+      }
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+        if (items.length > 0) this.commandActiveIndex = (this.commandActiveIndex - 1 + items.length) % items.length;
+        return;
+      }
+      if (event.key === "Enter") {
+        event.preventDefault();
+        const selected = items[this.commandActiveIndex] ?? items[0];
+        if (selected) void this.executeCommand(selected.id);
+        return;
+      }
+    }
+
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+      event.preventDefault();
+      this.openCommandPalette();
+      return;
+    }
+  };
+
+  private openCommandPalette(): void {
+    this.commandQuery = "";
+    this.commandActiveIndex = 0;
+    this.commandPaletteOpen = true;
+    window.setTimeout(() => {
+      const input = this.shadowRoot?.querySelector<HTMLInputElement>("[data-command-input]");
+      input?.focus();
+      input?.select();
+    }, 0);
+  }
+
+  private closeCommandPalette(): void {
+    this.commandPaletteOpen = false;
+  }
+
+  private async executeCommand(commandId: string): Promise<void> {
+    this.closeCommandPalette();
+    switch (commandId) {
+      case "agent-start":
+        await this.handleStart();
+        break;
+      case "agent-toggle-pause":
+        await this.handlePauseResume();
+        break;
+      case "agent-stop":
+        await this.handleStop();
+        break;
+      case "agent-restart":
+        await this.handleRestart();
+        break;
+      case "open-chat":
+        this.setTab("chat");
+        break;
+      case "open-workbench":
+        this.setTab("workbench");
+        await this.loadWorkbench();
+        break;
+      case "open-inventory":
+        this.setTab("inventory");
+        await this.loadInventory();
+        break;
+      case "open-marketplace":
+        this.setTab("marketplace");
+        await this.loadMarketplace();
+        break;
+      case "open-plugins":
+        this.setTab("plugins");
+        await this.loadPlugins();
+        break;
+      case "open-skills":
+        this.setTab("skills");
+        await this.loadSkills();
+        break;
+      case "open-config":
+        this.setTab("config");
+        await this.loadWalletConfig();
+        break;
+      case "open-logs":
+        this.setTab("logs");
+        await this.loadLogs();
+        break;
+      case "refresh-marketplace":
+        await this.loadMarketplace(true);
+        break;
+      case "refresh-workbench":
+        await this.loadWorkbench();
+        break;
+      case "refresh-plugins":
+        await this.loadPlugins();
+        break;
+      case "refresh-skills":
+        await this.refreshSkills();
+        break;
+      case "refresh-logs":
+        await this.loadLogs();
+        break;
+      case "chat-clear":
+        this.handleChatClear();
+        break;
+      case "native-notify":
+        await this.sendNativeNotification();
+        break;
+      case "native-tray":
+        await this.configureNativeTrayMenu();
+        break;
+      default:
+        break;
+    }
+  }
+
+  private commandItems(): Array<{ id: string; label: string; hint: string }> {
+    const state = this.agentStatus?.state ?? "not_started";
+    return [
+      { id: "agent-start", label: "Start Agent", hint: "Lifecycle" },
+      { id: "agent-toggle-pause", label: state === "running" ? "Pause Agent" : "Resume Agent", hint: "Lifecycle" },
+      { id: "agent-stop", label: "Stop Agent", hint: "Lifecycle" },
+      { id: "agent-restart", label: "Restart Agent", hint: "Lifecycle" },
+      { id: "open-chat", label: "Open Chat", hint: "Navigation" },
+      { id: "open-workbench", label: "Open Workbench", hint: "Navigation" },
+      { id: "open-inventory", label: "Open Inventory", hint: "Navigation" },
+      { id: "open-marketplace", label: "Open Marketplace", hint: "Navigation" },
+      { id: "open-plugins", label: "Open Plugins", hint: "Navigation" },
+      { id: "open-skills", label: "Open Skills", hint: "Navigation" },
+      { id: "open-config", label: "Open Config", hint: "Navigation" },
+      { id: "open-logs", label: "Open Logs", hint: "Navigation" },
+      { id: "refresh-workbench", label: "Refresh Workbench", hint: "Data" },
+      { id: "refresh-marketplace", label: "Refresh Marketplace", hint: "Data" },
+      { id: "refresh-plugins", label: "Refresh Plugins", hint: "Data" },
+      { id: "refresh-skills", label: "Refresh Skills", hint: "Data" },
+      { id: "refresh-logs", label: "Refresh Logs", hint: "Data" },
+      { id: "chat-clear", label: "Clear Chat Transcript", hint: "Chat" },
+      { id: "native-tray", label: "Configure Tray Menu", hint: "Native" },
+      { id: "native-notify", label: "Send Native Notification", hint: "Native" },
+    ];
+  }
+
+  private filteredCommandItems(): Array<{ id: string; label: string; hint: string }> {
+    const q = this.commandQuery.trim().toLowerCase();
+    const items = !q
+      ? this.commandItems()
+      : this.commandItems().filter((item) => (
+        item.label.toLowerCase().includes(q) || item.hint.toLowerCase().includes(q) || item.id.includes(q)
+      ));
+    if (items.length === 0) {
+      this.commandActiveIndex = 0;
+    } else if (this.commandActiveIndex >= items.length) {
+      this.commandActiveIndex = items.length - 1;
+    } else if (this.commandActiveIndex < 0) {
+      this.commandActiveIndex = 0;
+    }
+    return items;
+  }
+
+  private async loadWorkbench(): Promise<void> {
+    this.workbenchLoading = true;
+    try {
+      this.workbench = await client.getWorkbenchOverview();
+    } catch {
+      this.workbench = null;
+    } finally {
+      this.workbenchLoading = false;
+    }
+  }
+
+  private goalPriority(goal: WorkbenchGoal): number | null {
+    const raw = goal.metadata?.priority;
+    if (typeof raw === "number" && Number.isFinite(raw)) return raw;
+    return null;
+  }
+
+  private workbenchGoalSorted(goals: WorkbenchGoal[]): WorkbenchGoal[] {
+    return [...goals].sort((a, b) => {
+      const aPriority = this.goalPriority(a) ?? 3;
+      const bPriority = this.goalPriority(b) ?? 3;
+      if (aPriority !== bPriority) return aPriority - bPriority;
+      return a.name.localeCompare(b.name);
+    });
+  }
+
+  private workbenchTodoSorted(todos: WorkbenchTodo[]): WorkbenchTodo[] {
+    return [...todos].sort((a, b) => {
+      const aPriority = a.priority ?? 3;
+      const bPriority = b.priority ?? 3;
+      if (aPriority !== bPriority) return aPriority - bPriority;
+      if (a.isUrgent !== b.isUrgent) return a.isUrgent ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    });
+  }
+
+  private resetWorkbenchGoalForm(): void {
+    this.workbenchEditingGoalId = null;
+    this.workbenchGoalName = "";
+    this.workbenchGoalDescription = "";
+    this.workbenchGoalTags = "";
+    this.workbenchGoalPriority = "3";
+  }
+
+  private startWorkbenchGoalEdit(goal: WorkbenchGoal): void {
+    this.workbenchEditingGoalId = goal.id;
+    this.workbenchGoalName = goal.name;
+    this.workbenchGoalDescription = goal.description ?? "";
+    this.workbenchGoalTags = goal.tags.join(", ");
+    this.workbenchGoalPriority = String(this.goalPriority(goal) ?? 3);
+  }
+
+  private async submitWorkbenchGoalForm(): Promise<void> {
+    const name = this.workbenchGoalName.trim();
+    if (!name) return;
+    const description = this.workbenchGoalDescription.trim();
+    const tags = this.workbenchGoalTags
+      .split(",")
+      .map((tag) => tag.trim().toLowerCase())
+      .filter((tag) => tag.length > 0);
+    const priority = Number.parseInt(this.workbenchGoalPriority, 10);
+    const normalizedPriority = Number.isFinite(priority) ? Math.max(1, Math.min(5, priority)) : 3;
+
+    try {
+      if (this.workbenchEditingGoalId) {
+        await client.updateWorkbenchGoal(this.workbenchEditingGoalId, {
+          name,
+          description,
+          tags,
+          priority: normalizedPriority,
+        });
+      } else {
+        await client.createWorkbenchGoal({
+          name,
+          description,
+          tags,
+          priority: normalizedPriority,
+        });
+      }
+      this.resetWorkbenchGoalForm();
+      await this.loadWorkbench();
+    } catch {
+      // ignore
+    }
+  }
+
+  private async reprioritizeGoal(goalId: string, nextPriority: number): Promise<void> {
+    try {
+      await client.updateWorkbenchGoal(goalId, { priority: nextPriority });
+      await this.loadWorkbench();
+    } catch {
+      // ignore
+    }
+  }
+
+  private async toggleWorkbenchGoal(goalId: string, isCompleted: boolean): Promise<void> {
+    try {
+      await client.setWorkbenchGoalCompleted(goalId, isCompleted);
+      await this.loadWorkbench();
+    } catch {
+      // ignore
+    }
+  }
+
+  private async toggleWorkbenchTodo(todoId: string, isCompleted: boolean): Promise<void> {
+    try {
+      await client.setWorkbenchTodoCompleted(todoId, isCompleted);
+      await this.loadWorkbench();
+    } catch {
+      // ignore
+    }
+  }
+
+  private async reprioritizeTodo(todoId: string, nextPriority: number): Promise<void> {
+    try {
+      await client.updateWorkbenchTodo(todoId, { priority: nextPriority });
+      await this.loadWorkbench();
+    } catch {
+      // ignore
+    }
+  }
+
+  private async toggleTodoUrgent(todoId: string, isUrgent: boolean): Promise<void> {
+    try {
+      await client.updateWorkbenchTodo(todoId, { isUrgent });
+      await this.loadWorkbench();
+    } catch {
+      // ignore
+    }
+  }
+
+  private async createWorkbenchTodoQuick(): Promise<void> {
+    const name = this.workbenchTodoName.trim();
+    if (!name) return;
+    const description = this.workbenchTodoDescription.trim();
+    const priority = Number.parseInt(this.workbenchTodoPriority, 10);
+    const normalizedPriority = Number.isFinite(priority) ? Math.max(1, Math.min(5, priority)) : 3;
+
+    try {
+      await client.createWorkbenchTodo({
+        name,
+        description,
+        priority: normalizedPriority,
+        isUrgent: this.workbenchTodoUrgent,
+        type: "one-off",
+      });
+      this.workbenchTodoName = "";
+      this.workbenchTodoDescription = "";
+      this.workbenchTodoPriority = "3";
+      this.workbenchTodoUrgent = false;
+      await this.loadWorkbench();
+    } catch {
+      // ignore
+    }
+  }
+
+  private async loadMarketplace(forceRefresh = false): Promise<void> {
+    this.marketplaceLoading = true;
+    try {
+      if (forceRefresh) {
+        await client.refreshRegistry();
+      }
+      const [registry, installed] = await Promise.all([
+        client.getRegistryPlugins(),
+        client.getInstalledRegistryPlugins(),
+      ]);
+      this.marketplacePlugins = registry.plugins;
+      this.marketplaceInstalled = installed.plugins;
+    } catch {
+      this.marketplacePlugins = [];
+      this.marketplaceInstalled = [];
+    } finally {
+      this.marketplaceLoading = false;
+    }
+    // Pre-load skills marketplace config so API key section hides when already set
+    void this.loadSkillsMarketplaceConfig();
+    void this.loadInstalledMarketplaceSkills();
+  }
+
+  private async installFromMarketplace(pluginName: string): Promise<void> {
+    this.marketplaceAction = `install:${pluginName}`;
+    try {
+      await client.installRegistryPlugin(pluginName, true);
+      await this.loadMarketplace();
+      await this.loadPlugins();
+      await this.loadLogs();
+      this.setActionNotice(`Installed ${pluginName}.`, "success");
+    } catch (err) {
+      this.setActionNotice(`Install failed: ${err instanceof Error ? err.message : "unknown error"}`, "error", 3800);
+    } finally {
+      this.marketplaceAction = "";
+    }
+  }
+
+  private async uninstallFromMarketplace(pluginName: string): Promise<void> {
+    this.marketplaceAction = `uninstall:${pluginName}`;
+    try {
+      await client.uninstallRegistryPlugin(pluginName, true);
+      await this.loadMarketplace();
+      await this.loadPlugins();
+      await this.loadLogs();
+      this.setActionNotice(`Uninstalled ${pluginName}.`, "success");
+    } catch (err) {
+      this.setActionNotice(`Uninstall failed: ${err instanceof Error ? err.message : "unknown error"}`, "error", 3800);
+    } finally {
+      this.marketplaceAction = "";
+    }
+  }
+
+  // --- MCP Marketplace ---
+
+  private async loadMcpConfig(): Promise<void> {
+    this.mcpConfigLoading = true;
+    try {
+      const { servers } = await client.getMcpConfig();
+      this.mcpConfiguredServers = servers || {};
+    } catch {
+      this.mcpConfiguredServers = {};
+    } finally {
+      this.mcpConfigLoading = false;
+    }
+    void this.loadMcpStatus();
+  }
+
+  private async loadMcpStatus(): Promise<void> {
+    try {
+      const { servers } = await client.getMcpStatus();
+      this.mcpServerStatuses = servers || [];
+    } catch {
+      this.mcpServerStatuses = [];
+    }
+  }
+
+  private async searchMcpMarketplace(): Promise<void> {
+    const query = this.mcpMarketplaceQuery.trim();
+    if (!query) {
+      this.mcpMarketplaceResults = [];
+      return;
+    }
+    this.mcpMarketplaceLoading = true;
+    this.mcpAction = "";
+    try {
+      const { results } = await client.searchMcpMarketplace(query, 30);
+      this.mcpMarketplaceResults = results;
+    } catch (err) {
+      this.mcpMarketplaceResults = [];
+      this.setActionNotice(`MCP search failed: ${err instanceof Error ? err.message : "network error"}`, "error", 3800);
+    } finally {
+      this.mcpMarketplaceLoading = false;
+    }
+  }
+
+  private async addMcpFromMarketplace(result: McpMarketplaceResult): Promise<void> {
+    this.mcpAction = `add:${result.name}`;
+    try {
+      // Fetch full details to check for env vars / headers
+      const { server } = await client.getMcpServerDetails(result.name);
+
+      // Check if server requires configuration
+      const envVars = server.packages?.[0]?.environmentVariables || [];
+      const headers = server.remotes?.[0]?.headers || [];
+      const hasRequiredConfig = envVars.length > 0 || headers.length > 0;
+
+      if (hasRequiredConfig) {
+        // Show configuration form — pre-fill defaults
+        const envDefaults: Record<string, string> = {};
+        for (const v of envVars) {
+          envDefaults[v.name] = v.default || "";
+        }
+        const headerDefaults: Record<string, string> = {};
+        for (const h of headers) {
+          headerDefaults[h.name] = "";
+        }
+        this.mcpAddingServer = server;
+        this.mcpAddingResult = result;
+        this.mcpEnvInputs = envDefaults;
+        this.mcpHeaderInputs = headerDefaults;
+        this.mcpAction = "";
+        return;
+      }
+
+      // No config needed — add directly
+      await this.addMcpServerDirect(result, server);
+    } catch (err) {
+      this.setActionNotice(`Failed to add server: ${err instanceof Error ? err.message : "unknown error"}`, "error", 3800);
+    } finally {
+      if (!this.mcpAddingServer) {
+        this.mcpAction = "";
+      }
+    }
+  }
+
+  private async addMcpServerDirect(
+    result: McpMarketplaceResult,
+    server: McpRegistryServerDetail,
+    envValues?: Record<string, string>,
+    headerValues?: Record<string, string>,
+  ): Promise<void> {
+    let config: McpServerConfig;
+
+    // Build config from full server details
+    if (server.remotes && server.remotes.length > 0) {
+      const remote = server.remotes[0];
+      config = {
+        type: (remote.type as McpServerConfig["type"]) || "streamable-http",
+        url: remote.url,
+      };
+      if (headerValues && Object.keys(headerValues).length > 0) {
+        config.headers = { ...headerValues };
+      }
+    } else if (result.connectionType === "stdio" && result.npmPackage) {
+      config = { type: "stdio", command: "npx", args: ["-y", result.npmPackage] };
+      // Append packageArguments defaults
+      const pkgArgs = server.packages?.[0]?.packageArguments;
+      if (pkgArgs) {
+        for (const arg of pkgArgs) {
+          if (arg.default) config.args!.push(arg.default);
+        }
+      }
+      if (envValues && Object.keys(envValues).length > 0) {
+        config.env = { ...envValues };
+      }
+    } else if (result.connectionType === "stdio" && result.dockerImage) {
+      config = { type: "stdio", command: "docker", args: ["run", "-i", "--rm", result.dockerImage] };
+      if (envValues && Object.keys(envValues).length > 0) {
+        config.env = { ...envValues };
+      }
+    } else {
+      this.setActionNotice("Cannot auto-configure this server. Use manual config.", "error", 4000);
+      return;
+    }
+
+    const configName = result.name.includes("/") ? result.name.split("/").pop()! : result.name;
+    await client.addMcpServer(configName, config);
+    this.setActionNotice(`Added MCP server: ${configName}. Restarting...`, "info");
+    await this.loadMcpConfig();
+
+    // Restart agent to pick up new MCP server
+    try {
+      await client.restartAgent();
+      this.setActionNotice(`Added MCP server: ${configName}`, "success");
+      // Poll status after restart settles
+      setTimeout(() => { void this.loadMcpStatus(); }, 3000);
+    } catch {
+      this.setActionNotice(`Added ${configName} — restart agent to activate`, "info", 5000);
+    }
+  }
+
+  private async confirmMcpAdd(): Promise<void> {
+    if (!this.mcpAddingServer || !this.mcpAddingResult) return;
+
+    // Validate required env vars
+    const envVars = this.mcpAddingServer.packages?.[0]?.environmentVariables || [];
+    for (const v of envVars) {
+      if (v.isRequired && !this.mcpEnvInputs[v.name]?.trim()) {
+        this.setActionNotice(`${v.name} is required`, "error", 3000);
+        return;
+      }
+    }
+
+    // Validate required headers
+    const headers = this.mcpAddingServer.remotes?.[0]?.headers || [];
+    for (const h of headers) {
+      if (h.isRequired && !this.mcpHeaderInputs[h.name]?.trim()) {
+        this.setActionNotice(`${h.name} header is required`, "error", 3000);
+        return;
+      }
+    }
+
+    // Filter out empty values
+    const envValues: Record<string, string> = {};
+    for (const [k, v] of Object.entries(this.mcpEnvInputs)) {
+      if (v.trim()) envValues[k] = v.trim();
+    }
+    const headerValues: Record<string, string> = {};
+    for (const [k, v] of Object.entries(this.mcpHeaderInputs)) {
+      if (v.trim()) headerValues[k] = v.trim();
+    }
+
+    this.mcpAction = `add:${this.mcpAddingResult.name}`;
+    try {
+      await this.addMcpServerDirect(this.mcpAddingResult, this.mcpAddingServer, envValues, headerValues);
+      this.cancelMcpAdd();
+    } catch (err) {
+      this.setActionNotice(`Failed to add server: ${err instanceof Error ? err.message : "unknown error"}`, "error", 3800);
+    } finally {
+      this.mcpAction = "";
+    }
+  }
+
+  private cancelMcpAdd(): void {
+    this.mcpAddingServer = null;
+    this.mcpAddingResult = null;
+    this.mcpEnvInputs = {};
+    this.mcpHeaderInputs = {};
+  }
+
+  private async addMcpManual(): Promise<void> {
+    const name = this.mcpManualName.trim();
+    if (!name) {
+      this.setActionNotice("Server name is required.", "error", 3000);
+      return;
+    }
+
+    const config: McpServerConfig = { type: this.mcpManualType };
+
+    if (this.mcpManualType === "stdio") {
+      const cmd = this.mcpManualCommand.trim();
+      if (!cmd) {
+        this.setActionNotice("Command is required for stdio servers.", "error", 3000);
+        return;
+      }
+      config.command = cmd;
+      const argsStr = this.mcpManualArgs.trim();
+      if (argsStr) {
+        config.args = argsStr.includes("\n")
+          ? argsStr.split(/\r?\n/).map((a) => a.trim()).filter(Boolean)
+          : argsStr.split(/\s+/);
+      }
+    } else {
+      const url = this.mcpManualUrl.trim();
+      if (!url) {
+        this.setActionNotice("URL is required for remote servers.", "error", 3000);
+        return;
+      }
+      config.url = url;
+    }
+
+    const envPairs = this.mcpManualEnvPairs.filter((p) => p.key.trim());
+    if (envPairs.length > 0) {
+      config.env = {};
+      for (const pair of envPairs) {
+        config.env[pair.key.trim()] = pair.value;
+      }
+    }
+
+    this.mcpAction = `add-manual:${name}`;
+    try {
+      await client.addMcpServer(name, config);
+      this.setActionNotice(`Added MCP server: ${name}. Restarting...`, "info");
+      await this.loadMcpConfig();
+      this.mcpManualName = "";
+      this.mcpManualCommand = "";
+      this.mcpManualArgs = "";
+      this.mcpManualUrl = "";
+      this.mcpManualEnvPairs = [];
+      try {
+        await client.restartAgent();
+        this.setActionNotice(`Added MCP server: ${name}`, "success");
+        setTimeout(() => { void this.loadMcpStatus(); }, 3000);
+      } catch {
+        this.setActionNotice(`Added ${name} — restart agent to activate`, "info", 5000);
+      }
+    } catch (err) {
+      this.setActionNotice(`Failed to add server: ${err instanceof Error ? err.message : "unknown error"}`, "error", 3800);
+    } finally {
+      this.mcpAction = "";
+    }
+  }
+
+  private async removeMcpServer(name: string): Promise<void> {
+    this.mcpAction = `remove:${name}`;
+    try {
+      await client.removeMcpServer(name);
+      this.setActionNotice(`Removed MCP server: ${name}. Restarting...`, "info");
+      await this.loadMcpConfig();
+      try {
+        await client.restartAgent();
+        this.setActionNotice(`Removed MCP server: ${name}`, "success");
+        setTimeout(() => { void this.loadMcpStatus(); }, 3000);
+      } catch {
+        this.setActionNotice(`Removed ${name} — restart agent to activate`, "info", 5000);
+      }
+    } catch (err) {
+      this.setActionNotice(`Failed to remove server: ${err instanceof Error ? err.message : "unknown error"}`, "error", 3800);
+    } finally {
+      this.mcpAction = "";
+    }
+  }
 
   // --- Agent lifecycle ---
 
   private async handleStart(): Promise<void> {
     try {
       this.agentStatus = await client.startAgent();
-    } catch { /* ignore */ }
+      this.setActionNotice("Agent started.", "success");
+      await this.configureNativeTrayMenu();
+    } catch {
+      this.setActionNotice("Failed to start agent.", "error");
+    }
   }
 
   private async handleStop(): Promise<void> {
     try {
       this.agentStatus = await client.stopAgent();
-    } catch { /* ignore */ }
+      this.setActionNotice("Agent stopped.", "info");
+      await this.configureNativeTrayMenu();
+    } catch {
+      this.setActionNotice("Failed to stop agent.", "error");
+    }
   }
 
   private async handlePauseResume(): Promise<void> {
@@ -2353,21 +3488,33 @@ export class MilaidyApp extends LitElement {
     try {
       if (this.agentStatus.state === "running") {
         this.agentStatus = await client.pauseAgent();
+        this.setActionNotice("Agent paused.", "info");
       } else if (this.agentStatus.state === "paused") {
         this.agentStatus = await client.resumeAgent();
+        this.setActionNotice("Agent resumed.", "success");
+      } else {
+        this.agentStatus = await client.startAgent();
+        this.setActionNotice("Agent started.", "success");
       }
-    } catch { /* ignore */ }
+      await this.configureNativeTrayMenu();
+    } catch {
+      this.setActionNotice("Failed to change agent state.", "error");
+    }
   }
 
   private async handleRestart(): Promise<void> {
     try {
       this.agentStatus = { ...(this.agentStatus ?? { agentName: "Milaidy", model: undefined, uptime: undefined, startedAt: undefined }), state: "restarting" };
       this.agentStatus = await client.restartAgent();
+      this.setActionNotice("Agent restarted.", "success");
+      await this.configureNativeTrayMenu();
     } catch {
+      this.setActionNotice("Restart requested — waiting for runtime status...", "info", 4200);
       // Fall back to polling status after a delay (restart may have killed the connection)
       setTimeout(async () => {
         try {
           this.agentStatus = await client.getStatus();
+          await this.configureNativeTrayMenu();
         } catch { /* ignore */ }
       }, 3000);
     }
@@ -2425,13 +3572,11 @@ export class MilaidyApp extends LitElement {
       this.onboardingLargeModel = "claude-sonnet-4-5";
       this.onboardingProvider = "";
       this.onboardingApiKey = "";
-      this.onboardingSelectedChains = new Set(["evm", "solana"]);
-      this.onboardingRpcSelections = {};
-      this.onboardingRpcKeys = {};
+      this.onboardingTelegramToken = "";
+      this.onboardingDiscordToken = "";
+      this.onboardingSkillsmpApiKey = "";
       this.chatMessages = [];
       localStorage.removeItem(CHAT_STORAGE_KEY);
-      this.configRaw = {};
-      this.configText = "";
       this.plugins = [];
       this.skills = [];
       this.logs = [];
@@ -2524,6 +3669,7 @@ export class MilaidyApp extends LitElement {
       { role: "user", text, timestamp: Date.now() },
     ];
     this.chatInput = "";
+    this.droppedFiles = [];
     this.chatSending = true;
     this.saveChatMessages();
 
@@ -2567,6 +3713,17 @@ export class MilaidyApp extends LitElement {
       this.handleChatSend();
     }
   }
+
+  private handleChatDrop = (event: DragEvent): void => {
+    event.preventDefault();
+    const files = Array.from(event.dataTransfer?.files ?? []);
+    if (files.length === 0) return;
+    const names = files.map((file) => file.name);
+    this.droppedFiles = names;
+    const bulletList = names.map((name) => `- ${name}`).join("\n");
+    this.chatInput = `${this.chatInput.trim()}\n\nAttached files:\n${bulletList}`.trim();
+    this.requestUpdate();
+  };
 
   private saveChatMessages(): void {
     try {
@@ -2708,39 +3865,20 @@ export class MilaidyApp extends LitElement {
       ? style.system.replace(/\{\{name\}\}/g, this.onboardingName)
       : `You are ${this.onboardingName}, an autonomous AI agent powered by ElizaOS. ${this.onboardingOptions.sharedStyleRules}`;
 
-    // Build inventory providers array
-    const inventoryProviders: Array<{ chain: string; rpcProvider: string; rpcApiKey?: string }> = [];
-    if (this.onboardingRunMode === "local") {
-      for (const chain of this.onboardingSelectedChains) {
-        const rpcProvider = this.onboardingRpcSelections[chain] || "elizacloud";
-        const rpcApiKey = this.onboardingRpcKeys[`${chain}:${rpcProvider}`] || undefined;
-        inventoryProviders.push({ chain, rpcProvider, rpcApiKey });
-      }
-    }
-
-    try {
-      await client.submitOnboarding({
-        name: this.onboardingName,
-        theme: this.onboardingTheme,
-        runMode: (this.onboardingRunMode || "local") as "local" | "cloud",
-        bio: style?.bio ?? ["An autonomous AI agent."],
-        systemPrompt,
-        style: style?.style,
-        adjectives: style?.adjectives,
-        topics: style?.topics,
-        messageExamples: style?.messageExamples,
-        cloudProvider: this.onboardingRunMode === "cloud" ? this.onboardingCloudProvider : undefined,
-        smallModel: this.onboardingRunMode === "cloud" ? this.onboardingSmallModel : undefined,
-        largeModel: this.onboardingRunMode === "cloud" ? this.onboardingLargeModel : undefined,
-        provider: this.onboardingRunMode === "local" ? this.onboardingProvider || undefined : undefined,
-        providerApiKey: this.onboardingRunMode === "local" ? this.onboardingApiKey || undefined : undefined,
-        inventoryProviders: inventoryProviders.length > 0 ? inventoryProviders : undefined,
-      });
-    } catch (err) {
-      console.error("[milaidy] Onboarding submission failed:", err);
-      window.alert(`Setup failed: ${err instanceof Error ? err.message : "network error"}. Please try again.`);
-      return;
-    }
+    await client.submitOnboarding({
+      name: this.onboardingName,
+      bio: style?.bio ?? ["An autonomous AI agent."],
+      systemPrompt,
+      style: style?.style,
+      adjectives: style?.adjectives,
+      topics: style?.topics,
+      messageExamples: style?.messageExamples,
+      provider: this.onboardingProvider || undefined,
+      providerApiKey: this.onboardingApiKey || undefined,
+      telegramBotToken: this.onboardingTelegramToken || undefined,
+      discordBotToken: this.onboardingDiscordToken || undefined,
+      skillsmpApiKey: this.onboardingSkillsmpApiKey || undefined,
+    });
 
     this.onboardingComplete = true;
 
@@ -2752,6 +3890,54 @@ export class MilaidyApp extends LitElement {
   }
 
   // --- Render ---
+
+  private renderCommandPalette() {
+    if (!this.commandPaletteOpen) return html``;
+    const items = this.filteredCommandItems();
+    const selected = Math.min(this.commandActiveIndex, Math.max(0, items.length - 1));
+    return html`
+      <div
+        style="position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:999;"
+        @click=${this.closeCommandPalette}
+      >
+        <div
+          style="max-width:720px;margin:8vh auto 0;border:1px solid var(--border);background:var(--card);padding:12px;"
+          @click=${(e: Event) => e.stopPropagation()}
+        >
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input
+              data-command-input="true"
+              style="flex:1;padding:8px 10px;border:1px solid var(--border);background:var(--bg);font-family:var(--mono);"
+              placeholder="Type a command..."
+              .value=${this.commandQuery}
+              @input=${(e: Event) => {
+        this.commandQuery = (e.target as HTMLInputElement).value;
+        this.commandActiveIndex = 0;
+      }}
+            />
+            <button class="btn" @click=${this.closeCommandPalette}>Close</button>
+          </div>
+          <div style="margin-top:8px;font-size:11px;color:var(--muted);font-family:var(--mono);">
+            ↑/↓ navigate • Enter run • Esc close
+          </div>
+          <div style="margin-top:10px;max-height:45vh;overflow:auto;border:1px solid var(--border);">
+            ${items.length === 0
+        ? html`<div style="padding:12px;color:var(--muted);">No matching commands.</div>`
+        : items.map((item, index) => html`
+                  <button
+                    style="display:flex;justify-content:space-between;align-items:center;width:100%;padding:10px 12px;border:none;border-bottom:1px solid var(--bg-muted);background:${index === selected ? "var(--bg-muted)" : "var(--card)"};cursor:pointer;text-align:left;"
+                    @mouseenter=${() => { this.commandActiveIndex = index; }}
+                    @click=${() => this.executeCommand(item.id)}
+                  >
+                    <span>${item.label}</span>
+                    <span style="font-size:11px;color:var(--muted);">${item.hint}</span>
+                  </button>
+                `)}
+          </div>
+        </div>
+      </div>
+    `;
+  }
 
   render() {
     if (this.onboardingLoading) {
@@ -2769,6 +3955,13 @@ export class MilaidyApp extends LitElement {
     return html`
       <div class="app-shell">
         ${this.renderHeader()}
+        ${this.actionNotice
+        ? html`
+              <div style="margin-top:10px;padding:8px 12px;border:1px solid ${this.actionNotice.tone === "error" ? "var(--danger, #e74c3c)" : this.actionNotice.tone === "success" ? "var(--ok)" : "var(--border)"};background:${this.actionNotice.tone === "error" ? "rgba(231,76,60,0.08)" : this.actionNotice.tone === "success" ? "rgba(22,163,74,0.08)" : "var(--bg-muted)"};font-size:12px;">
+                ${this.actionNotice.text}
+              </div>
+            `
+        : ""}
         ${this.renderNav()}
         <main class=${this.tab === "chat" ? "chat-active" : ""}>${this.renderView()}</main>
       </div>
@@ -2872,6 +4065,7 @@ export class MilaidyApp extends LitElement {
           ${this.pairingError ? html`<div class="pairing-error">${this.pairingError}</div>` : null}
         </div>
       </div>
+      ${this.renderCommandPalette()}
     `;
   }
 
@@ -2892,17 +4086,17 @@ export class MilaidyApp extends LitElement {
           <div class="status-bar">
           <span class="status-pill ${state}">${state}</span>
           ${state === "not_started" || state === "stopped"
-            ? html`<button class="lifecycle-btn" @click=${this.handleStart}>Start</button>`
-            : state === "restarting"
-              ? html`<span class="lifecycle-btn" style="opacity:0.6;cursor:default;">Restarting…</span>`
-              : html`
+        ? html`<button class="lifecycle-btn" @click=${this.handleStart}>Start</button>`
+        : state === "restarting"
+          ? html`<span class="lifecycle-btn" style="opacity:0.6;cursor:default;">Restarting…</span>`
+          : html`
                 <button class="lifecycle-btn" @click=${this.handlePauseResume}>
                   ${state === "running" ? "Pause" : "Resume"}
                 </button>
                 <button class="lifecycle-btn" @click=${this.handleStop}>Stop</button>
               `}
           <button class="lifecycle-btn" @click=${this.handleRestart} ?disabled=${state === "restarting" || state === "not_started"} title="Restart the agent (reload code, config, plugins)">Restart</button>
-          </div>
+          <button class="lifecycle-btn" @click=${this.openCommandPalette} title="Command palette (Cmd/Ctrl+K)">Cmd+K</button>
         </div>
       </header>
     `;
@@ -2990,21 +4184,21 @@ export class MilaidyApp extends LitElement {
     return html`
       <nav>
         ${TAB_GROUPS.map(
-          (group) => html`
+      (group) => html`
             ${group.tabs.map(
-              (t) => html`
+        (t) => html`
                 <a
                   href=${pathForTab(t)}
                   class=${this.tab === t ? "active" : ""}
                   @click=${(e: Event) => {
-                    e.preventDefault();
-                    this.setTab(t);
-                  }}
+            e.preventDefault();
+            this.setTab(t);
+          }}
                 >${titleForTab(t)}</a>
               `,
-            )}
+      )}
           `,
-        )}
+    )}
       </nav>
     `;
   }
@@ -3012,9 +4206,10 @@ export class MilaidyApp extends LitElement {
   private renderView() {
     switch (this.tab) {
       case "chat": return this.renderChat();
+      case "workbench": return this.renderWorkbench();
       case "inventory": return this.renderInventory();
       case "plugins": return this.renderPlugins();
-      case "store": return this.renderStore();
+      case "marketplace": return this.renderMarketplace();
       case "skills": return this.renderSkills();
       case "database": return this.renderDatabase();
       case "config": return this.renderConfig();
@@ -3041,22 +4236,29 @@ export class MilaidyApp extends LitElement {
         <div class="chat-header-row">
           <h2 style="margin:0;">Chat</h2>
           ${this.chatMessages.length > 0
-            ? html`<button class="clear-btn" @click=${this.handleChatClear}>Clear</button>`
-            : ""}
+        ? html`<button class="clear-btn" @click=${this.handleChatClear}>Clear</button>`
+        : ""}
         </div>
+        ${this.shareIngestNotice
+        ? html`<div style="margin-bottom:8px;padding:8px 10px;border:1px solid var(--border);background:var(--bg-muted);font-size:12px;color:var(--muted-strong);">${this.shareIngestNotice}</div>`
+        : ""}
         <div class="chat-messages">
           ${this.chatMessages.length === 0
-            ? html`<div class="empty-state">Send a message to start chatting.</div>`
-            : this.chatMessages.map(
-                (msg) => html`
+        ? html`<div class="empty-state">Send a message to start chatting.</div>`
+        : this.chatMessages.map(
+          (msg) => html`
                   <div class="chat-msg ${msg.role}">
                     <div class="role">${msg.role === "user" ? "You" : this.agentStatus?.agentName ?? "Agent"}</div>
                     <div>${msg.text}</div>
                   </div>
                 `,
-              )}
+        )}
         </div>
-        <div class="chat-input-row">
+        <div
+          class="chat-input-row"
+          @dragover=${(e: DragEvent) => e.preventDefault()}
+          @drop=${this.handleChatDrop}
+        >
           <textarea
             class="chat-input"
             rows="1"
@@ -3070,7 +4272,795 @@ export class MilaidyApp extends LitElement {
             ${this.chatSending ? "..." : "Send"}
           </button>
         </div>
+        ${this.droppedFiles.length > 0
+        ? html`
+              <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
+                ${this.droppedFiles.map((file) => html`<span style="font-size:11px;border:1px solid var(--border);padding:2px 8px;background:var(--surface);">${file}</span>`)}
+                <button class="copy-btn" @click=${() => { this.droppedFiles = []; }}>clear</button>
+              </div>
+            `
+        : html`<div style="margin-top:8px;font-size:11px;color:var(--muted);">Tip: drag files into chat to attach context.</div>`}
       </div>
+    `;
+  }
+
+  private renderWorkbench() {
+    const wb = this.workbench;
+    if (this.workbenchLoading) {
+      return html`
+        <h2>Workbench</h2>
+        <div class="empty-state">Loading goals and todos...</div>
+      `;
+    }
+
+    if (!wb) {
+      return html`
+        <h2>Workbench</h2>
+        <p class="subtitle">Task + Goal workspace for autonomous execution.</p>
+        <div style="margin-bottom:8px;">
+          <button class="btn" @click=${this.loadWorkbench}>Reload</button>
+        </div>
+        <div class="empty-state">No workbench data yet. Start the agent and try again.</div>
+      `;
+    }
+
+    const openGoals = this.workbenchGoalSorted(wb.goals.filter((goal) => !goal.isCompleted));
+    const openTodos = this.workbenchTodoSorted(wb.todos.filter((todo) => !todo.isCompleted));
+    const dueSoonTodos = openTodos.filter((todo) => {
+      if (!todo.dueDate) return false;
+      const dueAt = Date.parse(todo.dueDate);
+      if (Number.isNaN(dueAt)) return false;
+      const now = Date.now();
+      return dueAt >= now && dueAt <= now + 24 * 60 * 60 * 1000;
+    });
+
+    return html`
+      <h2>Workbench</h2>
+      <p class="subtitle">Task + Goal workspace for autonomous execution.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+        <button class="btn" @click=${this.loadWorkbench}>Refresh</button>
+        <button class="btn" @click=${() => this.executeCommand("agent-toggle-pause")}>
+          ${this.agentStatus?.state === "running" ? "Pause Agent" : "Resume Agent"}
+        </button>
+        <button class="btn" @click=${() => this.executeCommand("agent-restart")}>Restart Agent</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:14px;">
+        <div style="border:1px solid var(--border);padding:10px;background:var(--card);">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;">Open Goals</div>
+          <div style="font-size:22px;font-weight:bold;">${wb.summary.openGoals}</div>
+        </div>
+        <div style="border:1px solid var(--border);padding:10px;background:var(--card);">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;">Open Todos</div>
+          <div style="font-size:22px;font-weight:bold;">${wb.summary.openTodos}</div>
+        </div>
+        <div style="border:1px solid var(--border);padding:10px;background:var(--card);">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;">Due Soon</div>
+          <div style="font-size:22px;font-weight:bold;">${wb.summary.dueSoonTodos}</div>
+        </div>
+        <div style="border:1px solid var(--border);padding:10px;background:var(--card);">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;">Autonomy Loop</div>
+          <div style="font-size:16px;font-weight:bold;">${wb.autonomy.loopRunning ? "Running" : "Idle"}</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <section style="border:1px solid var(--border);background:var(--card);padding:12px;">
+          <div style="font-weight:bold;margin-bottom:8px;">${this.workbenchEditingGoalId ? "Edit Goal" : "Create Goal"}</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <input
+              class="plugin-search"
+              placeholder="Goal name"
+              .value=${this.workbenchGoalName}
+              @input=${(e: Event) => { this.workbenchGoalName = (e.target as HTMLInputElement).value; }}
+            />
+            <textarea
+              class="chat-input"
+              rows="3"
+              placeholder="Goal description"
+              .value=${this.workbenchGoalDescription}
+              @input=${(e: Event) => { this.workbenchGoalDescription = (e.target as HTMLTextAreaElement).value; }}
+            ></textarea>
+            <input
+              class="plugin-search"
+              placeholder="Tags (comma separated)"
+              .value=${this.workbenchGoalTags}
+              @input=${(e: Event) => { this.workbenchGoalTags = (e.target as HTMLInputElement).value; }}
+            />
+            <div style="display:flex;gap:8px;align-items:center;">
+              <label style="font-size:12px;color:var(--muted);">Priority</label>
+              <select
+                style="padding:6px 8px;border:1px solid var(--border);background:var(--bg);"
+                .value=${this.workbenchGoalPriority}
+                @change=${(e: Event) => { this.workbenchGoalPriority = (e.target as HTMLSelectElement).value; }}
+              >
+                <option value="1">P1</option>
+                <option value="2">P2</option>
+                <option value="3">P3</option>
+                <option value="4">P4</option>
+                <option value="5">P5</option>
+              </select>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn" @click=${this.submitWorkbenchGoalForm} ?disabled=${!this.workbenchGoalName.trim()}>
+                ${this.workbenchEditingGoalId ? "Save Goal" : "Add Goal"}
+              </button>
+              ${this.workbenchEditingGoalId
+        ? html`<button class="btn btn-outline" @click=${this.resetWorkbenchGoalForm}>Cancel</button>`
+        : ""}
+            </div>
+          </div>
+        </section>
+
+        <section style="border:1px solid var(--border);background:var(--card);padding:12px;">
+          <div style="font-weight:bold;margin-bottom:8px;">Quick Todo</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <input
+              class="plugin-search"
+              placeholder="Todo name"
+              .value=${this.workbenchTodoName}
+              @input=${(e: Event) => { this.workbenchTodoName = (e.target as HTMLInputElement).value; }}
+            />
+            <textarea
+              class="chat-input"
+              rows="3"
+              placeholder="Todo description"
+              .value=${this.workbenchTodoDescription}
+              @input=${(e: Event) => { this.workbenchTodoDescription = (e.target as HTMLTextAreaElement).value; }}
+            ></textarea>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <label style="font-size:12px;color:var(--muted);">Priority</label>
+              <select
+                style="padding:6px 8px;border:1px solid var(--border);background:var(--bg);"
+                .value=${this.workbenchTodoPriority}
+                @change=${(e: Event) => { this.workbenchTodoPriority = (e.target as HTMLSelectElement).value; }}
+              >
+                <option value="1">P1</option>
+                <option value="2">P2</option>
+                <option value="3">P3</option>
+                <option value="4">P4</option>
+                <option value="5">P5</option>
+              </select>
+              <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);">
+                <input
+                  type="checkbox"
+                  .checked=${this.workbenchTodoUrgent}
+                  @change=${(e: Event) => { this.workbenchTodoUrgent = (e.target as HTMLInputElement).checked; }}
+                />
+                urgent
+              </label>
+            </div>
+            <button class="btn" @click=${this.createWorkbenchTodoQuick} ?disabled=${!this.workbenchTodoName.trim()}>Add Todo</button>
+          </div>
+        </section>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <section style="border:1px solid var(--border);background:var(--card);">
+          <div style="padding:8px 10px;border-bottom:1px solid var(--border);font-weight:bold;">Goals (${openGoals.length} open)</div>
+          ${openGoals.length === 0
+        ? html`<div style="padding:12px;color:var(--muted);">No open goals.</div>`
+        : html`
+                ${openGoals.map((goal) => html`
+                  <div style="display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-bottom:1px solid var(--bg-muted);">
+                    <input
+                      type="checkbox"
+                      .checked=${goal.isCompleted}
+                      @change=${(e: Event) => this.toggleWorkbenchGoal(goal.id, (e.target as HTMLInputElement).checked)}
+                    />
+                    <span style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;">
+                      <span style="font-weight:600;">${goal.name}</span>
+                      ${goal.description ? html`<span style="font-size:12px;color:var(--muted);">${goal.description}</span>` : ""}
+                      ${goal.tags.length > 0 ? html`<span style="font-size:11px;color:var(--muted);">#${goal.tags.join(" #")}</span>` : ""}
+                    </span>
+                    <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+                      <select
+                        style="padding:3px 6px;border:1px solid var(--border);background:var(--bg);font-size:11px;"
+                        .value=${String(this.goalPriority(goal) ?? 3)}
+                        @change=${(e: Event) => {
+            const next = Number.parseInt((e.target as HTMLSelectElement).value, 10);
+            if (!Number.isNaN(next)) void this.reprioritizeGoal(goal.id, next);
+          }}
+                      >
+                        <option value="1">P1</option>
+                        <option value="2">P2</option>
+                        <option value="3">P3</option>
+                        <option value="4">P4</option>
+                        <option value="5">P5</option>
+                      </select>
+                      <button class="copy-btn" @click=${() => this.startWorkbenchGoalEdit(goal)}>edit</button>
+                    </div>
+                  </div>
+                `)}
+              `}
+        </section>
+
+        <section style="border:1px solid var(--border);background:var(--card);">
+          <div style="padding:8px 10px;border-bottom:1px solid var(--border);font-weight:bold;">Todos (${openTodos.length} open)</div>
+          ${openTodos.length === 0
+        ? html`<div style="padding:12px;color:var(--muted);">No open todos.</div>`
+        : html`
+                ${openTodos.map((todo) => {
+          const dueSoon = dueSoonTodos.some((entry) => entry.id === todo.id);
+          return html`
+                    <div style="display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-bottom:1px solid var(--bg-muted);">
+                      <input
+                        type="checkbox"
+                        .checked=${todo.isCompleted}
+                        @change=${(e: Event) => this.toggleWorkbenchTodo(todo.id, (e.target as HTMLInputElement).checked)}
+                      />
+                      <span style="display:flex;flex-direction:column;gap:2px;min-width:0;">
+                        <span style="font-weight:600;">
+                          ${todo.name}
+                          ${todo.isUrgent ? html`<span style="font-size:11px;color:var(--danger);margin-left:4px;">urgent</span>` : ""}
+                        </span>
+                        <span style="font-size:12px;color:var(--muted);">
+                          ${todo.type}
+                          ${todo.priority != null ? ` • P${todo.priority}` : ""}
+                          ${todo.dueDate ? ` • due ${new Date(todo.dueDate).toLocaleString()}` : ""}
+                        </span>
+                        ${dueSoon ? html`<span style="font-size:11px;color:var(--warn);">Due within 24h</span>` : ""}
+                      </span>
+                      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+                        <select
+                          style="padding:3px 6px;border:1px solid var(--border);background:var(--bg);font-size:11px;"
+                          .value=${String(todo.priority ?? 3)}
+                          @change=${(e: Event) => {
+              const next = Number.parseInt((e.target as HTMLSelectElement).value, 10);
+              if (!Number.isNaN(next)) void this.reprioritizeTodo(todo.id, next);
+            }}
+                        >
+                          <option value="1">P1</option>
+                          <option value="2">P2</option>
+                          <option value="3">P3</option>
+                          <option value="4">P4</option>
+                          <option value="5">P5</option>
+                        </select>
+                        <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted);">
+                          <input
+                            type="checkbox"
+                            .checked=${todo.isUrgent}
+                            @change=${(e: Event) => this.toggleTodoUrgent(todo.id, (e.target as HTMLInputElement).checked)}
+                          />
+                          urgent
+                        </label>
+                      </div>
+                    </div>
+                  `;
+        })}
+              `}
+        </section>
+      </div>
+    `;
+  }
+
+  private renderMarketplace() {
+    return html`
+      <h2>Marketplace</h2>
+      <p class="subtitle">Install plugins, skills, and MCP servers from the community.</p>
+      
+      <!-- Sub-tab navigation -->
+      <div style="display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:8px;">
+        <button
+          class="btn ${this.marketplaceSubTab === "plugins" ? "" : "secondary"}"
+          style="padding:6px 16px;border-radius:4px 4px 0 0;${this.marketplaceSubTab === "plugins" ? "background:var(--accent);color:#fff;" : ""}"
+          @click=${() => { this.marketplaceSubTab = "plugins"; }}
+        >Plugins</button>
+        <button
+          class="btn ${this.marketplaceSubTab === "skills" ? "" : "secondary"}"
+          style="padding:6px 16px;border-radius:4px 4px 0 0;${this.marketplaceSubTab === "skills" ? "background:var(--accent);color:#fff;" : ""}"
+          @click=${() => { this.marketplaceSubTab = "skills"; void this.loadSkillsMarketplaceConfig(); void this.loadInstalledMarketplaceSkills(); }}
+        >Skills</button>
+        <button
+          class="btn ${this.marketplaceSubTab === "mcp" ? "" : "secondary"}"
+          style="padding:6px 16px;border-radius:4px 4px 0 0;${this.marketplaceSubTab === "mcp" ? "background:var(--accent);color:#fff;" : ""}"
+          @click=${() => { this.marketplaceSubTab = "mcp"; void this.loadMcpConfig(); }}
+        >MCP Servers</button>
+      </div>
+
+      ${this.marketplaceSubTab === "plugins" ? this.renderMarketplacePlugins() : ""}
+      ${this.marketplaceSubTab === "skills" ? this.renderMarketplaceSkills() : ""}
+      ${this.marketplaceSubTab === "mcp" ? this.renderMarketplaceMcp() : ""}
+    `;
+  }
+
+  private renderMarketplacePlugins() {
+    const installedSet = new Set(this.marketplaceInstalled.map((plugin) => plugin.name));
+    const query = this.marketplaceSearch.trim().toLowerCase();
+    const plugins = this.marketplacePlugins.filter((plugin) => {
+      if (!query) return true;
+      return (
+        plugin.name.toLowerCase().includes(query)
+        || (plugin.description || "").toLowerCase().includes(query)
+        || plugin.topics.some((topic) => topic.toLowerCase().includes(query))
+      );
+    });
+
+    return html`
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+        <input
+          class="plugin-search"
+          placeholder="Search registry plugins..."
+          .value=${this.marketplaceSearch}
+          @input=${(e: Event) => { this.marketplaceSearch = (e.target as HTMLInputElement).value; }}
+        />
+        <button class="btn" @click=${() => this.loadMarketplace(true)} ?disabled=${this.marketplaceLoading}>
+          ${this.marketplaceLoading ? "Refreshing..." : "Refresh"}
+        </button>
+      </div>
+
+      ${plugins.length === 0
+        ? html`<div class="empty-state">${this.marketplaceLoading ? "Loading registry..." : "No registry plugins found."}</div>`
+        : html`
+            <div class="plugin-list">
+              ${plugins.map((plugin) => {
+          const isInstalled = installedSet.has(plugin.name);
+          const actionKey = `${isInstalled ? "uninstall" : "install"}:${plugin.name}`;
+          const isBusy = this.marketplaceAction === actionKey;
+          const trustLevel = plugin.insights?.trustLevel ?? (plugin.stars >= 500 ? "high" : plugin.stars >= 100 ? "medium" : "guarded");
+          const trustScore = plugin.insights?.trustScore ?? Math.min(95, Math.max(20, Math.round(Math.log10(plugin.stars + 1) * 30)));
+          const maintenanceLabel = plugin.insights?.maintenance.label ?? "recency unknown";
+          const compatibilityLabel = plugin.insights?.compatibility.label ?? (plugin.supports.v2 ? "v2 declared" : "compatibility unclear");
+          const restartLabel = plugin.insights?.restartImpact.label ?? "restart required";
+          return html`
+                  <div class="plugin-item" style="flex-direction:column;align-items:stretch;">
+                    <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+                      <div style="min-width:0;flex:1;">
+                        <div class="plugin-name">${plugin.name}</div>
+                        <div class="plugin-desc">${plugin.description || "No description available."}</div>
+                        <div style="font-size:11px;color:var(--muted);margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;">
+                          <span>Stars: ${plugin.stars}</span>
+                          <span>Language: ${plugin.language}</span>
+                          <span>Trust: ${trustLevel} (${trustScore})</span>
+                          <span>Supports v2: ${plugin.supports.v2 ? "yes" : "no"}</span>
+                        </div>
+                        <div style="font-size:11px;margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
+                          <span style="border:1px solid var(--border);padding:2px 6px;background:var(--bg-muted);">Maintenance: ${maintenanceLabel}</span>
+                          <span style="border:1px solid var(--border);padding:2px 6px;background:var(--bg-muted);">Compatibility: ${compatibilityLabel}</span>
+                          <span style="border:1px solid var(--border);padding:2px 6px;background:var(--bg-muted);">Restart: ${restartLabel}</span>
+                        </div>
+                        ${plugin.topics.length > 0 ? html`
+                          <div style="font-size:11px;color:var(--muted);margin-top:4px;">Topics: ${plugin.topics.slice(0, 6).join(", ")}</div>
+                        ` : ""}
+                      </div>
+                      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+                        <span class="plugin-status ${isInstalled ? "enabled" : ""}">${isInstalled ? "installed" : "available"}</span>
+                        ${isInstalled
+              ? html`<button class="btn" ?disabled=${isBusy} @click=${() => this.uninstallFromMarketplace(plugin.name)}>${isBusy ? "Uninstalling..." : "Uninstall"}</button>`
+              : html`<button class="btn" ?disabled=${isBusy} @click=${() => this.installFromMarketplace(plugin.name)}>${isBusy ? "Installing..." : "Install"}</button>`
+            }
+                      </div>
+                    </div>
+                  </div>
+                `;
+        })}
+            </div>
+          `}
+    `;
+  }
+
+  private renderMarketplaceSkills() {
+    const installedIds = new Set(this.skillsMarketplaceInstalled.map((skill) => skill.id));
+
+    return html`
+      <!-- Skills Marketplace API Key Configuration - only show when not configured -->
+      ${!this.skillsMarketplaceApiKeySet ? html`
+        <section style="border:1px solid var(--border);padding:12px;margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
+            <div>
+              <div style="font-weight:bold;font-size:13px;">Skills Marketplace API Key</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+                Required for searching the <a href="https://skillsmp.com" target="_blank" rel="noopener" style="color:var(--accent);">skillsmp.com</a> marketplace.
+                <a href="https://skillsmp.com/docs/api" target="_blank" rel="noopener" style="color:var(--accent);margin-left:4px;">Get API key →</a>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input
+              type="password"
+              class="plugin-search"
+              style="flex:1;min-width:200px;font-family:var(--mono);font-size:12px;"
+              placeholder="sk_live_skillsmp_..." 
+              .value=${this.skillsMarketplaceApiKeyInput}
+              @input=${(e: Event) => { this.skillsMarketplaceApiKeyInput = (e.target as HTMLInputElement).value; }}
+            />
+            <button
+              class="btn"
+              style="font-size:12px;padding:4px 12px;"
+              @click=${this.handleSaveSkillsMarketplaceApiKey}
+              ?disabled=${this.skillsMarketplaceApiKeySaving || !this.skillsMarketplaceApiKeyInput.trim()}
+            >${this.skillsMarketplaceApiKeySaving ? "Saving..." : "Save Key"}</button>
+          </div>
+        </section>
+      ` : ""}
+
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
+        <input
+          class="plugin-search"
+          style="flex:1;min-width:220px;"
+          placeholder="Search skills by keyword..."
+          .value=${this.skillsMarketplaceQuery}
+          @input=${(e: Event) => { this.skillsMarketplaceQuery = (e.target as HTMLInputElement).value; }}
+          @keydown=${(e: KeyboardEvent) => {
+        if (e.key === "Enter") void this.searchSkillsMarketplace();
+      }}
+        />
+        <button class="btn" @click=${this.searchSkillsMarketplace} ?disabled=${this.skillsMarketplaceLoading}>
+          ${this.skillsMarketplaceLoading ? "Searching..." : "Search"}
+        </button>
+      </div>
+
+      ${this.skillsMarketplaceError
+        ? html`<div style="margin-bottom:8px;padding:8px 10px;border:1px solid var(--danger, #e74c3c);font-size:12px;color:var(--danger, #e74c3c);">
+              ${this.skillsMarketplaceError}
+            </div>`
+        : ""}
+
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
+        <input
+          class="plugin-search"
+          style="flex:1;min-width:220px;"
+          placeholder="Install via GitHub URL (repo or /tree/... path)"
+          .value=${this.skillsMarketplaceManualGithubUrl}
+          @input=${(e: Event) => { this.skillsMarketplaceManualGithubUrl = (e.target as HTMLInputElement).value; }}
+          @keydown=${(e: KeyboardEvent) => {
+        if (e.key === "Enter") void this.installSkillFromGithubUrl();
+      }}
+        />
+        <button class="btn" @click=${this.installSkillFromGithubUrl} ?disabled=${this.skillsMarketplaceAction.startsWith("install-url")}>
+          ${this.skillsMarketplaceAction.startsWith("install-url") ? "Installing..." : "Install"}
+        </button>
+      </div>
+
+      ${this.skillsMarketplaceResults.length > 0 ? html`
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Search results (${this.skillsMarketplaceResults.length})</div>
+        <div class="plugin-list">
+          ${this.skillsMarketplaceResults.map((skill) => {
+        const isInstalled = installedIds.has(skill.id);
+        const actionKey = `install:${skill.id}`;
+        const isBusy = this.skillsMarketplaceAction === actionKey;
+        return html`
+              <div class="plugin-item" style="flex-direction:column;align-items:stretch;">
+                <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+                  <div style="min-width:0;flex:1;">
+                    <div class="plugin-name">${skill.name}</div>
+                    <div class="plugin-desc">${skill.description || "No description."}</div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:4px;">
+                      <a href="${skill.githubUrl}" target="_blank" rel="noopener" style="color:var(--accent);">${skill.repository}</a>
+                      ${skill.path ? html` <span style="margin-left:6px;">Path: ${skill.path}</span>` : ""}
+                    </div>
+                    ${skill.tags.length > 0 ? html`
+                      <div style="font-size:11px;color:var(--muted);margin-top:4px;">Tags: ${skill.tags.slice(0, 6).join(", ")}</div>
+                    ` : ""}
+                  </div>
+                  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+                    <span class="plugin-status ${isInstalled ? "enabled" : ""}">${isInstalled ? "installed" : "available"}</span>
+                    ${!isInstalled ? html`
+                      <button class="btn" ?disabled=${isBusy} @click=${() => this.installSkillFromMarketplace(skill)}>
+                        ${isBusy ? "Installing..." : "Install"}
+                      </button>
+                    ` : ""}
+                  </div>
+                </div>
+              </div>
+            `;
+      })}
+        </div>
+      ` : ""}
+
+      ${this.skillsMarketplaceInstalled.length > 0 ? html`
+        <div style="font-size:12px;color:var(--muted);margin:16px 0 8px;">Installed from marketplace (${this.skillsMarketplaceInstalled.length})</div>
+        <div class="plugin-list">
+          ${this.skillsMarketplaceInstalled.map((skill) => {
+        const actionKey = `uninstall:${skill.id}`;
+        const isBusy = this.skillsMarketplaceAction === actionKey;
+        return html`
+              <div class="plugin-item" style="flex-direction:column;align-items:stretch;">
+                <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+                  <div style="min-width:0;flex:1;">
+                    <div class="plugin-name">${skill.name}</div>
+                    <div class="plugin-desc">${skill.description || "No description."}</div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:4px;">
+                      <a href="${skill.githubUrl}" target="_blank" rel="noopener" style="color:var(--accent);">${skill.repository}</a>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+                    <span class="plugin-status enabled">installed</span>
+                    <button class="btn" ?disabled=${isBusy} @click=${() => this.uninstallMarketplaceSkill(skill.id, skill.name)}>
+                      ${isBusy ? "Uninstalling..." : "Uninstall"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `;
+      })}
+        </div>
+      ` : ""}
+    `;
+  }
+
+  private renderMarketplaceMcp() {
+    const configuredEntries = Object.entries(this.mcpConfiguredServers);
+    const configuredNames = new Set(configuredEntries.map(([name]) => name));
+
+    return html`
+      <!-- Env Var / Header Config Form (shown when adding a server that needs config) -->
+      ${this.mcpAddingServer ? html`
+        <section style="border:2px solid var(--accent);padding:16px;margin-bottom:16px;background:var(--surface);">
+          <div style="font-weight:bold;font-size:14px;margin-bottom:4px;">Configure: ${this.mcpAddingServer.title || this.mcpAddingServer.name}</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">${this.mcpAddingServer.description}</div>
+
+          ${(this.mcpAddingServer.packages?.[0]?.environmentVariables || []).length > 0 ? html`
+            <div style="font-size:12px;font-weight:bold;margin-bottom:6px;">Environment Variables</div>
+            ${(this.mcpAddingServer.packages?.[0]?.environmentVariables || []).map((v) => html`
+              <div style="margin-bottom:8px;">
+                <label style="font-size:11px;display:block;margin-bottom:2px;">
+                  <span style="font-family:var(--mono);">${v.name}</span>
+                  ${v.isRequired ? html`<span style="color:var(--danger, #e74c3c);">*</span>` : ""}
+                  ${v.description ? html`<span style="color:var(--muted);margin-left:4px;">${v.description}</span>` : ""}
+                </label>
+                <input
+                  class="plugin-search"
+                  style="width:100%;font-size:12px;"
+                  type="${v.isSecret ? "password" : "text"}"
+                  placeholder="${v.default || v.name}"
+                  .value=${this.mcpEnvInputs[v.name] || ""}
+                  @input=${(e: Event) => {
+        this.mcpEnvInputs = { ...this.mcpEnvInputs, [v.name]: (e.target as HTMLInputElement).value };
+      }}
+                />
+              </div>
+            `)}
+          ` : ""}
+
+          ${(this.mcpAddingServer.remotes?.[0]?.headers || []).length > 0 ? html`
+            <div style="font-size:12px;font-weight:bold;margin-bottom:6px;margin-top:8px;">Headers</div>
+            ${(this.mcpAddingServer.remotes?.[0]?.headers || []).map((h) => html`
+              <div style="margin-bottom:8px;">
+                <label style="font-size:11px;display:block;margin-bottom:2px;">
+                  <span style="font-family:var(--mono);">${h.name}</span>
+                  ${h.isRequired ? html`<span style="color:var(--danger, #e74c3c);">*</span>` : ""}
+                  ${h.description ? html`<span style="color:var(--muted);margin-left:4px;">${h.description}</span>` : ""}
+                </label>
+                <input
+                  class="plugin-search"
+                  style="width:100%;font-size:12px;"
+                  type="${h.isSecret ? "password" : "text"}"
+                  placeholder="${h.name}"
+                  .value=${this.mcpHeaderInputs[h.name] || ""}
+                  @input=${(e: Event) => {
+        this.mcpHeaderInputs = { ...this.mcpHeaderInputs, [h.name]: (e.target as HTMLInputElement).value };
+      }}
+                />
+              </div>
+            `)}
+          ` : ""}
+
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button class="btn" @click=${() => this.confirmMcpAdd()} ?disabled=${this.mcpAction.startsWith("add:")}>
+              ${this.mcpAction.startsWith("add:") ? "Adding..." : "Add Server"}
+            </button>
+            <button class="btn secondary" @click=${() => this.cancelMcpAdd()}>Cancel</button>
+          </div>
+        </section>
+      ` : ""}
+
+      <!-- Search MCP Registry -->
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+        <input
+          class="plugin-search"
+          style="flex:1;"
+          placeholder="Search MCP servers (e.g. web search, database, github)..."
+          .value=${this.mcpMarketplaceQuery}
+          @input=${(e: Event) => { this.mcpMarketplaceQuery = (e.target as HTMLInputElement).value; }}
+          @keydown=${(e: KeyboardEvent) => {
+        if (e.key === "Enter") void this.searchMcpMarketplace();
+      }}
+        />
+        <button class="btn" @click=${() => this.searchMcpMarketplace()} ?disabled=${this.mcpMarketplaceLoading}>
+          ${this.mcpMarketplaceLoading ? "Searching..." : "Search"}
+        </button>
+      </div>
+
+      <!-- Search Results -->
+      ${this.mcpMarketplaceResults.length > 0 ? html`
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Registry results (${this.mcpMarketplaceResults.length})</div>
+        <div class="plugin-list" style="margin-bottom:20px;">
+          ${this.mcpMarketplaceResults.map((result) => {
+        const shortName = result.name.includes("/") ? result.name.split("/").pop()! : result.name;
+        const isConfigured = configuredNames.has(shortName);
+        const actionKey = `add:${result.name}`;
+        const isBusy = this.mcpAction === actionKey;
+        return html`
+              <div class="plugin-item" style="flex-direction:column;align-items:stretch;">
+                <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+                  <div style="min-width:0;flex:1;">
+                    <div class="plugin-name">${result.title}</div>
+                    <div class="plugin-desc">${result.description}</div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:4px;display:flex;gap:8px;flex-wrap:wrap;">
+                      <span>v${result.version}</span>
+                      <span>${result.connectionType === "remote" ? "Remote (HTTP)" : "Local (stdio)"}</span>
+                      ${result.npmPackage ? html`<span>npm: ${result.npmPackage}</span>` : ""}
+                      ${result.repositoryUrl ? html`<a href="${result.repositoryUrl}" target="_blank" rel="noopener" style="color:var(--accent);">Repository</a>` : ""}
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+                    <span class="plugin-status ${isConfigured ? "enabled" : ""}">${isConfigured ? "configured" : "available"}</span>
+                    ${!isConfigured ? html`
+                      <button class="btn" ?disabled=${isBusy} @click=${() => this.addMcpFromMarketplace(result)}>
+                        ${isBusy ? "Adding..." : "Add"}
+                      </button>
+                    ` : ""}
+                  </div>
+                </div>
+              </div>
+            `;
+      })}
+        </div>
+      ` : this.mcpMarketplaceQuery && !this.mcpMarketplaceLoading ? html`
+        <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">No results found.</div>
+      ` : ""}
+
+      <!-- Manual Configuration -->
+      <section style="border:1px solid var(--border);padding:12px;margin-bottom:16px;">
+        <div style="font-weight:bold;font-size:13px;margin-bottom:10px;">Add Custom MCP Server</div>
+
+        <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+          <input
+            class="plugin-search"
+            style="flex:1;min-width:160px;"
+            placeholder="Server name"
+            .value=${this.mcpManualName}
+            @input=${(e: Event) => { this.mcpManualName = (e.target as HTMLInputElement).value; }}
+          />
+          <select
+            style="padding:4px 8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:12px;border-radius:4px;"
+            .value=${this.mcpManualType}
+            @change=${(e: Event) => { this.mcpManualType = (e.target as HTMLSelectElement).value as "stdio" | "http" | "streamable-http" | "sse"; }}
+          >
+            <option value="stdio">stdio</option>
+            <option value="streamable-http">streamable-http</option>
+            <option value="sse">sse</option>
+            <option value="http">http</option>
+          </select>
+        </div>
+
+        ${this.mcpManualType === "stdio" ? html`
+          <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+            <input
+              class="plugin-search"
+              style="flex:1;min-width:160px;"
+              placeholder="Command (e.g. npx, node, docker)"
+              .value=${this.mcpManualCommand}
+              @input=${(e: Event) => { this.mcpManualCommand = (e.target as HTMLInputElement).value; }}
+            />
+            <input
+              class="plugin-search"
+              style="flex:2;min-width:200px;"
+              placeholder="Arguments (space-separated, or one per line for paths with spaces)"
+              .value=${this.mcpManualArgs}
+              @input=${(e: Event) => { this.mcpManualArgs = (e.target as HTMLInputElement).value; }}
+            />
+          </div>
+        ` : html`
+          <div style="margin-bottom:8px;">
+            <input
+              class="plugin-search"
+              style="width:100%;"
+              placeholder="Server URL (e.g. https://mcp.example.com/sse)"
+              .value=${this.mcpManualUrl}
+              @input=${(e: Event) => { this.mcpManualUrl = (e.target as HTMLInputElement).value; }}
+            />
+          </div>
+        `}
+
+        <!-- Environment Variables -->
+        <div style="margin-bottom:8px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Environment Variables (optional)</div>
+          ${this.mcpManualEnvPairs.map((pair, i) => html`
+            <div style="display:flex;gap:6px;margin-bottom:4px;align-items:center;">
+              <input
+                class="plugin-search"
+                style="flex:1;min-width:100px;font-size:11px;"
+                placeholder="KEY"
+                .value=${pair.key}
+                @input=${(e: Event) => {
+        const updated = [...this.mcpManualEnvPairs];
+        updated[i] = { ...updated[i], key: (e.target as HTMLInputElement).value };
+        this.mcpManualEnvPairs = updated;
+      }}
+              />
+              <input
+                class="plugin-search"
+                style="flex:2;min-width:140px;font-size:11px;"
+                placeholder="value"
+                .value=${pair.value}
+                @input=${(e: Event) => {
+        const updated = [...this.mcpManualEnvPairs];
+        updated[i] = { ...updated[i], value: (e.target as HTMLInputElement).value };
+        this.mcpManualEnvPairs = updated;
+      }}
+              />
+              <button
+                class="btn secondary"
+                style="padding:2px 8px;font-size:11px;"
+                @click=${() => {
+        this.mcpManualEnvPairs = this.mcpManualEnvPairs.filter((_, idx) => idx !== i);
+      }}
+              >Remove</button>
+            </div>
+          `)}
+          <button
+            class="btn secondary"
+            style="font-size:11px;padding:2px 10px;"
+            @click=${() => {
+        this.mcpManualEnvPairs = [...this.mcpManualEnvPairs, { key: "", value: "" }];
+      }}
+          >+ Add Variable</button>
+        </div>
+
+        <button
+          class="btn"
+          style="font-size:12px;padding:4px 16px;"
+          @click=${() => this.addMcpManual()}
+          ?disabled=${this.mcpAction.startsWith("add-manual")}
+        >${this.mcpAction.startsWith("add-manual") ? "Adding..." : "Add Server"}</button>
+      </section>
+
+      <!-- Configured Servers -->
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">
+        Configured servers (${configuredEntries.length})
+        ${this.mcpConfigLoading ? " — loading..." : ""}
+      </div>
+      ${configuredEntries.length === 0
+        ? html`<div class="empty-state">${this.mcpConfigLoading ? "Loading..." : "No MCP servers configured."}</div>`
+        : html`
+          <div class="plugin-list">
+            ${configuredEntries.map(([name, cfg]) => {
+        const isBusy = this.mcpAction === `remove:${name}`;
+        const typeLabel = cfg.type || "unknown";
+        const detail = cfg.type === "stdio"
+          ? `${cfg.command || "?"}${cfg.args?.length ? " " + cfg.args.join(" ") : ""}`
+          : cfg.url || "no URL";
+        const envKeys = cfg.env ? Object.keys(cfg.env) : [];
+        const serverStatus = this.mcpServerStatuses.find((s) => s.name === name);
+        const statusColor = serverStatus?.status === "connected" ? "var(--ok)"
+          : serverStatus?.status === "connecting" ? "var(--warn)"
+            : "var(--muted)";
+        const statusLabel = serverStatus?.status || "unknown";
+        return html`
+                <div class="plugin-item" style="flex-direction:column;align-items:stretch;">
+                  <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+                    <div style="min-width:0;flex:1;">
+                      <div class="plugin-name">${name}</div>
+                      <div class="plugin-desc" style="font-family:var(--mono);font-size:11px;">${detail}</div>
+                      <div style="font-size:11px;color:var(--muted);margin-top:4px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                        <span style="border:1px solid var(--border);padding:2px 6px;background:var(--bg-muted);">${typeLabel}</span>
+                        <span style="display:inline-flex;align-items:center;gap:4px;">
+                          <span style="width:8px;height:8px;border-radius:50%;background:${statusColor};display:inline-block;"></span>
+                          ${statusLabel}
+                        </span>
+                        ${serverStatus?.status === "connected" && (serverStatus.toolCount > 0 || serverStatus.resourceCount > 0) ? html`
+                          <span>${serverStatus.toolCount} tools, ${serverStatus.resourceCount} resources</span>
+                        ` : ""}
+                        ${serverStatus?.error ? html`
+                          <span style="color:var(--danger, #e74c3c);">${serverStatus.error}</span>
+                        ` : ""}
+                        ${envKeys.length > 0 ? html`<span>env: ${envKeys.join(", ")}</span>` : ""}
+                      </div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+                      <span class="plugin-status ${serverStatus?.status === "connected" ? "enabled" : ""}">${statusLabel}</span>
+                      <button class="btn" ?disabled=${isBusy} @click=${() => this.removeMcpServer(name)}>
+                        ${isBusy ? "Removing..." : "Remove"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              `;
+      })}
+          </div>
+        `}
     `;
   }
 
@@ -3117,8 +5107,14 @@ export class MilaidyApp extends LitElement {
       this.pluginSettingsOpen = next;
     };
 
-    const activeCount = this.plugins.filter((p) => p.isActive).length;
-    const coreCount = this.plugins.filter((p) => p.isCore).length;
+    return html`
+      <h2>Plugins</h2>
+      <p class="subtitle">Manage plugins and integrations. ${this.plugins.length} plugins discovered.</p>
+      <div style="margin-bottom:10px;">
+        <button class="btn" @click=${() => this.setTab("marketplace")} style="font-size:12px;padding:4px 12px;">
+          Open Marketplace
+        </button>
+      </div>
 
     return html`
       <div style="flex-shrink: 0;">
@@ -3179,7 +5175,7 @@ export class MilaidyApp extends LitElement {
 
       <div class="plugin-filters" style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">
         ${categories.map(
-          (cat) => html`
+      (cat) => html`
             <button
               class="filter-btn ${this.pluginFilter === cat ? "active" : ""}"
               data-category=${cat}
@@ -3199,7 +5195,7 @@ export class MilaidyApp extends LitElement {
                 ? `${categoryLabels[cat]} (${this.plugins.filter((p) => p.source === "store").length})`
                 : `${categoryLabels[cat]} (${this.plugins.filter((p) => p.category === cat).length})`}</button>
           `,
-        )}
+    )}
       </div>
 
       <div class="plugins-scroll-container">
@@ -3229,25 +5225,23 @@ export class MilaidyApp extends LitElement {
           : html`
               <div class="plugin-list">
               ${filtered.map((p) => {
-                const hasParams = p.parameters && p.parameters.length > 0;
-                const allParamsSet = hasParams ? p.parameters.every((param) => param.isSet) : true;
-                const settingsOpen = this.pluginSettingsOpen.has(p.id);
-                const setCount = hasParams ? p.parameters.filter((param) => param.isSet).length : 0;
-                const totalCount = hasParams ? p.parameters.length : 0;
+          const hasParams = p.parameters && p.parameters.length > 0;
+          const allParamsSet = hasParams ? p.parameters.every((param) => param.isSet) : true;
+          const settingsOpen = this.pluginSettingsOpen.has(p.id);
+          const setCount = hasParams ? p.parameters.filter((param) => param.isSet).length : 0;
+          const totalCount = hasParams ? p.parameters.length : 0;
 
-                return html`
+          return html`
                   <div class="plugin-item" data-plugin-id=${p.id} style="flex-direction:column;align-items:stretch;">
                     <div style="display:flex;justify-content:space-between;align-items:center;">
                       <div style="flex:1;min-width:0;">
                         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                           <div class="plugin-name">${p.name}</div>
-                          <span style="font-size:10px;padding:2px 6px;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:var(--muted);">${
-                            p.category === "ai-provider" ? "ai provider"
-                            : p.category === "connector" ? "connector"
-                            : p.category === "database" ? "database"
-                            : "feature"
-                          }</span>
-                          ${p.source === "store" ? html`<span style="font-size:10px;padding:2px 6px;border-radius:8px;background:rgba(46,204,113,0.08);border:1px solid var(--ok);color:var(--ok);">from store</span>` : ""}
+                          <span style="font-size:10px;padding:2px 6px;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:var(--muted);">${p.category === "ai-provider" ? "ai provider"
+              : p.category === "connector" ? "connector"
+                : p.category === "database" ? "database"
+                  : "feature"
+            }</span>
                         </div>
                         <div class="plugin-desc">${p.description || "No description"}</div>
                       </div>
@@ -3257,7 +5251,11 @@ export class MilaidyApp extends LitElement {
                             type="checkbox"
                             .checked=${p.enabled}
                             data-plugin-toggle=${p.id}
-                            @change=${(e: Event) => this.handlePluginToggle(p.id, (e.target as HTMLInputElement).checked)}
+                            @change=${(e: Event) => this.handlePluginToggle(
+              p.id,
+              (e.target as HTMLInputElement).checked,
+              e.target as HTMLInputElement,
+            )}
                             style="opacity:0;width:0;height:0;"
                           />
                           <span class="toggle-slider" style="
@@ -3275,7 +5273,7 @@ export class MilaidyApp extends LitElement {
                     </div>
 
                     ${hasParams
-                      ? html`
+              ? html`
                           <div
                             class="plugin-settings-toggle"
                             @click=${() => toggleSettings(p.id)}
@@ -3287,10 +5285,10 @@ export class MilaidyApp extends LitElement {
                           </div>
 
                           ${settingsOpen
-                            ? html`
+                  ? html`
                                 <div class="plugin-settings-body">
                                   ${p.parameters.map(
-                                    (param) => html`
+                    (param) => html`
                                       <div style="display:flex;flex-direction:column;gap:3px;font-size:12px;">
                                         <div style="display:flex;align-items:center;gap:6px;">
                                           <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${param.isSet ? "#2ecc71" : (param.required ? "#e74c3c" : "var(--muted)")};flex-shrink:0;"></span>
@@ -3320,7 +5318,7 @@ export class MilaidyApp extends LitElement {
                                         }
                                       </div>
                                     `,
-                                  )}
+                  )}
                                   <button
                                     class="btn"
                                     style="align-self:flex-end;font-size:11px;padding:4px 14px;margin-top:4px;"
@@ -3328,38 +5326,37 @@ export class MilaidyApp extends LitElement {
                                   >Save Settings</button>
                                 </div>
                               `
-                            : ""
-                          }
+                  : ""
+                }
                         `
-                      : ""
-                    }
+              : ""
+            }
 
                     ${p.enabled && p.validationErrors && p.validationErrors.length > 0
-                      ? html`
+              ? html`
                           <div style="margin-top:8px;padding:8px 10px;border:1px solid #e74c3c;background:rgba(231,76,60,0.06);font-size:12px;">
                             ${p.validationErrors.map(
-                              (err) => html`<div style="color:#e74c3c;">${err.field}: ${err.message}</div>`,
-                            )}
+                (err) => html`<div style="color:#e74c3c;">${err.field}: ${err.message}</div>`,
+              )}
                           </div>
                         `
-                      : ""
-                    }
+              : ""
+            }
                     ${p.enabled && p.validationWarnings && p.validationWarnings.length > 0
-                      ? html`
+              ? html`
                           <div style="margin-top:4px;font-size:11px;">
                             ${p.validationWarnings.map(
-                              (w) => html`<div style="color:var(--warn);">${w.message}</div>`,
-                            )}
+                (w) => html`<div style="color:var(--warn);">${w.message}</div>`,
+              )}
                           </div>
                         `
-                      : ""
-                    }
+              : ""
+            }
                   </div>
                 `;
-              })}
-              </div>
-            `}
-      </div>
+        })}
+            </div>
+          `}
     `;
   }
 
@@ -3378,24 +5375,36 @@ export class MilaidyApp extends LitElement {
       }
     }
 
-    if (Object.keys(config).length === 0) return;
+    if (Object.keys(config).length === 0) {
+      this.setActionNotice("No config changes to save.", "info");
+      return;
+    }
 
     try {
       await client.updatePlugin(pluginId, { config });
       // Reload plugins to get updated validation and current values
       await this.loadPlugins();
+      this.setActionNotice("Plugin settings saved.", "success");
     } catch (err) {
       console.error("Failed to save plugin config:", err);
+      this.setActionNotice(`Failed to save plugin settings: ${err instanceof Error ? err.message : "unknown error"}`, "error", 3800);
     }
   }
 
-  private async handlePluginToggle(pluginId: string, enabled: boolean): Promise<void> {
+  private async handlePluginToggle(
+    pluginId: string,
+    enabled: boolean,
+    inputEl?: HTMLInputElement,
+  ): Promise<void> {
     const plugin = this.plugins.find((p) => p.id === pluginId);
 
     // Block enabling if there are validation errors (missing required params)
     if (enabled && plugin?.validationErrors && plugin.validationErrors.length > 0) {
       // Revert the checkbox
+      if (inputEl) inputEl.checked = false;
       this.requestUpdate();
+      const first = plugin.validationErrors[0];
+      this.setActionNotice(`Cannot enable ${plugin.name}: ${first?.message ?? "missing required settings"}`, "error", 3800);
       return;
     }
 
@@ -3404,6 +5413,7 @@ export class MilaidyApp extends LitElement {
       if (plugin) {
         plugin.enabled = enabled;
         this.requestUpdate();
+        this.setActionNotice(`${plugin.name} ${enabled ? "enabled" : "disabled"}.`, "success");
       }
 
       // Refresh plugins after a delay to show updated runtime state
@@ -3437,13 +5447,157 @@ export class MilaidyApp extends LitElement {
       pollForRuntimeUpdate();
     } catch (err) {
       console.error("Failed to toggle plugin:", err);
+      this.setActionNotice(`Failed to update plugin: ${err instanceof Error ? err.message : "unknown error"}`, "error", 3800);
     }
   }
 
   private renderSkills() {
+    const installedIds = new Set(this.skillsMarketplaceInstalled.map((skill) => skill.id));
+
     return html`
       <h2>Skills</h2>
-      <p class="subtitle">View available agent skills. ${this.skills.length > 0 ? `${this.skills.length} skills loaded.` : ""}</p>
+      <p class="subtitle">View loaded skills and install more from GitHub/Skills marketplace.</p>
+
+      <!-- Skills Marketplace API Key Configuration - only show when not configured -->
+      ${!this.skillsMarketplaceApiKeySet ? html`
+        <section style="border:1px solid var(--border);padding:12px;margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
+            <div>
+              <div style="font-weight:bold;font-size:13px;">Skills Marketplace API Key</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+                Required for searching the <a href="https://skillsmp.com" target="_blank" rel="noopener" style="color:var(--accent);">skillsmp.com</a> marketplace.
+                <a href="https://skillsmp.com/docs/api" target="_blank" rel="noopener" style="color:var(--accent);margin-left:4px;">Get API key →</a>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input
+              type="password"
+              class="plugin-search"
+              style="flex:1;min-width:200px;font-family:var(--mono);font-size:12px;"
+              placeholder="sk_live_skillsmp_..." 
+              .value=${this.skillsMarketplaceApiKeyInput}
+              @input=${(e: Event) => { this.skillsMarketplaceApiKeyInput = (e.target as HTMLInputElement).value; }}
+            />
+            <button
+              class="btn"
+              style="font-size:12px;padding:4px 12px;"
+              @click=${this.handleSaveSkillsMarketplaceApiKey}
+              ?disabled=${this.skillsMarketplaceApiKeySaving || !this.skillsMarketplaceApiKeyInput.trim()}
+            >${this.skillsMarketplaceApiKeySaving ? "Saving..." : "Save Key"}</button>
+          </div>
+        </section>
+      ` : ""}
+
+      <section style="border:1px solid var(--border);padding:12px;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;">
+          <div style="font-size:12px;color:var(--muted);">Skills marketplace</div>
+          <button class="btn" data-action="refresh-skills" @click=${this.refreshSkills} style="font-size:12px;padding:4px 12px;">Refresh Loaded Skills</button>
+        </div>
+
+        <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap;">
+          <input
+            class="plugin-search"
+            style="flex:1;min-width:220px;"
+            placeholder="Search skills by keyword..."
+            .value=${this.skillsMarketplaceQuery}
+            @input=${(e: Event) => { this.skillsMarketplaceQuery = (e.target as HTMLInputElement).value; }}
+            @keydown=${(e: KeyboardEvent) => {
+        if (e.key === "Enter") void this.searchSkillsMarketplace();
+      }}
+          />
+          <button class="btn" @click=${this.searchSkillsMarketplace} ?disabled=${this.skillsMarketplaceLoading}>
+            ${this.skillsMarketplaceLoading ? "Searching..." : "Search"}
+          </button>
+        </div>
+
+        ${this.skillsMarketplaceError
+        ? html`<div style="margin-top:8px;padding:8px 10px;border:1px solid var(--danger, #e74c3c);font-size:12px;color:var(--danger, #e74c3c);">
+              ${this.skillsMarketplaceError}
+              ${this.skillsMarketplaceError.includes("SKILLSMP_API_KEY")
+            ? html`<div style="margin-top:4px;color:var(--muted);">Set <code>SKILLSMP_API_KEY</code> to enable search, or install directly via GitHub URL below.</div>`
+            : ""}
+            </div>`
+        : ""}
+
+        <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap;">
+          <input
+            class="plugin-search"
+            style="flex:1;min-width:220px;"
+            placeholder="Install via GitHub URL (repo or /tree/... path)"
+            .value=${this.skillsMarketplaceManualGithubUrl}
+            @input=${(e: Event) => { this.skillsMarketplaceManualGithubUrl = (e.target as HTMLInputElement).value; }}
+            @keydown=${(e: KeyboardEvent) => {
+        if (e.key === "Enter") void this.installSkillFromGithubUrl();
+      }}
+          />
+          <button
+            class="btn"
+            @click=${this.installSkillFromGithubUrl}
+            ?disabled=${this.skillsMarketplaceAction === "install:manual" || !this.skillsMarketplaceManualGithubUrl.trim()}
+          >
+            ${this.skillsMarketplaceAction === "install:manual" ? "Installing..." : "Install URL"}
+          </button>
+        </div>
+
+        ${this.skillsMarketplaceInstalled.length > 0 ? html`
+          <div style="margin-top:10px;">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Installed from marketplace</div>
+            <div class="plugin-list">
+              ${this.skillsMarketplaceInstalled.map((installed) => {
+        const busy = this.skillsMarketplaceAction === `uninstall:${installed.id}`;
+        return html`
+                  <div class="plugin-item" style="justify-content:space-between;gap:8px;" data-installed-skill-id=${installed.id}>
+                    <div style="min-width:0;flex:1;">
+                      <div class="plugin-name">${installed.name}</div>
+                      <div class="plugin-desc">${installed.repository}${installed.path ? ` • ${installed.path}` : ""}</div>
+                    </div>
+                    <button class="btn" ?disabled=${busy} @click=${() => this.uninstallMarketplaceSkill(installed.id, installed.name)}>
+                      ${busy ? "Uninstalling..." : "Uninstall"}
+                    </button>
+                  </div>
+                `;
+      })}
+            </div>
+          </div>
+        ` : ""}
+
+        ${this.skillsMarketplaceResults.length === 0
+        ? html`<div style="font-size:12px;color:var(--muted);margin-top:10px;">No marketplace results yet.</div>`
+        : html`
+              <div class="plugin-list" style="margin-top:10px;">
+                ${this.skillsMarketplaceResults.map((item) => {
+          const isInstalled = installedIds.has(item.id);
+          const busyKey = `${isInstalled ? "uninstall" : "install"}:${item.id}`;
+          const busy = this.skillsMarketplaceAction === busyKey;
+          return html`
+                    <div class="plugin-item" style="flex-direction:column;align-items:stretch;" data-skill-marketplace-id=${item.id}>
+                      <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+                        <div style="min-width:0;flex:1;">
+                          <div class="plugin-name">${item.name}</div>
+                          <div class="plugin-desc">${item.description || "No description provided."}</div>
+                          <div style="font-size:11px;color:var(--muted);margin-top:6px;">
+                            ${item.repository}${item.path ? ` • path: ${item.path}` : ""}
+                            ${item.score != null ? ` • score: ${item.score.toFixed(2)}` : ""}
+                          </div>
+                          ${item.tags.length > 0 ? html`<div style="font-size:11px;color:var(--muted);margin-top:4px;">Tags: ${item.tags.slice(0, 6).join(", ")}</div>` : ""}
+                        </div>
+                        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+                          <span class="plugin-status ${isInstalled ? "enabled" : ""}">${isInstalled ? "installed" : "available"}</span>
+                          ${isInstalled
+              ? html`<button class="btn" ?disabled=${busy} @click=${() => this.uninstallMarketplaceSkill(item.id, item.name)}>${busy ? "Uninstalling..." : "Uninstall"}</button>`
+              : html`<button class="btn" ?disabled=${busy} @click=${() => this.installSkillFromMarketplace(item)}>${busy ? "Installing..." : "Install"}</button>`
+            }
+                        </div>
+                      </div>
+                    </div>
+                  `;
+        })}
+              </div>
+            `}
+      </section>
+
+      <p class="subtitle">${this.skills.length > 0 ? `${this.skills.length} loaded skills.` : "No skills loaded yet."}</p>
       <div style="margin-bottom:8px;">
         <button class="btn" data-action="refresh-skills" @click=${this.refreshSkills} style="font-size:12px;padding:4px 12px;">Refresh</button>
       </div>
@@ -3452,16 +5606,28 @@ export class MilaidyApp extends LitElement {
         : html`
             <div class="plugin-list">
               ${this.skills.map(
-                (s) => html`
+          (s) => html`
                   <div class="plugin-item" data-skill-id=${s.id}>
                     <div style="flex:1;min-width:0;">
                       <div class="plugin-name">${s.name}</div>
                       <div class="plugin-desc">${s.description || "No description"}</div>
                     </div>
-                    <span class="plugin-status ${s.enabled ? "enabled" : ""}">${s.enabled ? "active" : "inactive"}</span>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                      <span class="plugin-status ${s.enabled ? "enabled" : ""}">${s.enabled ? "active" : "inactive"}</span>
+                      <label class="switch">
+                        <input
+                          type="checkbox"
+                          data-skill-toggle=${s.id}
+                          .checked=${s.enabled}
+                          ?disabled=${this.skillToggleAction === s.id}
+                          @change=${(e: Event) => this.handleSkillToggle(s.id, (e.target as HTMLInputElement).checked)}
+                        />
+                        <span class="slider"></span>
+                      </label>
+                    </div>
                   </div>
                 `,
-              )}
+        )}
             </div>
           `}
     `;
@@ -3800,8 +5966,8 @@ export class MilaidyApp extends LitElement {
           </thead>
           <tbody>
             ${rows.map((row) => {
-              const icon = this.chainIcon(row.chain);
-              return html`
+      const icon = this.chainIcon(row.chain);
+      return html`
                 <tr>
                   <td><span class="chain-icon ${icon.cls}">${icon.code}</span></td>
                   <td>
@@ -3813,7 +5979,7 @@ export class MilaidyApp extends LitElement {
                   <td class="td-value">${row.valueUsd > 0 ? `$${row.valueUsd.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ""}</td>
                 </tr>
               `;
-            })}
+    })}
           </tbody>
         </table>
       </div>
@@ -3861,13 +6027,13 @@ export class MilaidyApp extends LitElement {
     return html`
       <div class="nft-grid">
         ${allNfts.map((nft) => {
-          const icon = this.chainIcon(nft.chain);
-          return html`
+      const icon = this.chainIcon(nft.chain);
+      return html`
             <div class="nft-card">
               ${nft.imageUrl
-                ? html`<img src="${nft.imageUrl}" alt="${nft.name}" loading="lazy" />`
-                : html`<div style="width:100%;height:150px;background:var(--bg-muted);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);">No image</div>`
-              }
+          ? html`<img src="${nft.imageUrl}" alt="${nft.name}" loading="lazy" />`
+          : html`<div style="width:100%;height:150px;background:var(--bg-muted);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);">No image</div>`
+        }
               <div class="nft-info">
                 <div class="nft-name">${nft.name}</div>
                 <div class="nft-collection">${nft.collectionName}</div>
@@ -3878,7 +6044,7 @@ export class MilaidyApp extends LitElement {
               </div>
             </div>
           `;
-        })}
+    })}
       </div>
     `;
   }
@@ -3909,6 +6075,40 @@ export class MilaidyApp extends LitElement {
       <h2>Settings</h2>
       <p class="subtitle">Agent settings and configuration.</p>
 
+      <!-- Native Integrations -->
+      <div style="margin-top:24px;padding:16px;border:1px solid var(--border);background:var(--card);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div>
+            <div style="font-weight:bold;font-size:14px;">Native Integrations</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px;">
+              Tray menu, global hotkey, and actionable notifications.
+            </div>
+          </div>
+          <span class="status-pill ${this.nativeDesktopAvailable ? "running" : "stopped"}">
+            ${this.nativeDesktopAvailable ? "desktop bridge ready" : "web mode"}
+          </span>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn" @click=${this.configureNativeTrayMenu} ?disabled=${!this.nativeDesktopAvailable}>Configure Tray Menu</button>
+          <button class="btn" @click=${this.sendNativeNotification} ?disabled=${!this.nativeDesktopAvailable}>Send Test Notification</button>
+          <button class="btn" @click=${() => this.executeCommand("native-tray")} ?disabled=${!this.nativeDesktopAvailable}>Reapply Native Actions</button>
+        </div>
+
+        <div style="margin-top:10px;font-size:12px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap;">
+          <span>Tray: ${this.nativeTrayEnabled ? "configured" : "not configured"}</span>
+          <span>Global shortcut: ${this.nativeShortcutEnabled ? "Cmd/Ctrl+K active" : "inactive"}</span>
+        </div>
+
+        ${this.nativeEvents.length > 0
+        ? html`
+              <div style="margin-top:10px;border:1px solid var(--border);padding:8px;background:var(--bg-muted);font-size:11px;font-family:var(--mono);">
+                ${this.nativeEvents.map((line) => html`<div>${line}</div>`)}
+              </div>
+            `
+        : ""}
+      </div>
+
       <!-- Chrome Extension Section -->
       <div style="margin-top:24px;padding:16px;border:1px solid var(--border);background:var(--card);">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
@@ -3927,7 +6127,7 @@ export class MilaidyApp extends LitElement {
         </div>
 
         ${ext
-          ? html`
+        ? html`
               <div style="padding:12px;border:1px solid var(--border);background:var(--bg-muted);margin-bottom:12px;">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
                   <span style="
@@ -3942,14 +6142,14 @@ export class MilaidyApp extends LitElement {
                   ws://127.0.0.1:${ext.relayPort}/extension
                 </div>
                 ${!relayOk
-                  ? html`<div style="font-size:12px;color:var(--danger, #e74c3c);margin-top:6px;">
+            ? html`<div style="font-size:12px;color:var(--danger, #e74c3c);margin-top:6px;">
                       The browser relay server is not running. Start the agent with browser control enabled,
                       then check again.
                     </div>`
-                  : ""}
+            : ""}
               </div>
             `
-          : ""}
+        : ""}
 
         <div style="margin-top:12px;">
           <div style="font-weight:bold;font-size:13px;margin-bottom:8px;">Install Chrome Extension</div>
@@ -3965,8 +6165,8 @@ export class MilaidyApp extends LitElement {
               <li style="margin-bottom:6px;">
                 Click <strong>"Load unpacked"</strong> and select the extension folder:
                 ${ext?.extensionPath
-                  ? html`<br/><code style="font-size:11px;padding:2px 6px;border:1px solid var(--border);background:var(--bg-muted);display:inline-block;margin-top:4px;word-break:break-all;">${ext.extensionPath}</code>`
-                  : html`<br/><code style="font-size:11px;padding:2px 6px;border:1px solid var(--border);background:var(--bg-muted);display:inline-block;margin-top:4px;">apps/chrome-extension/</code>
+        ? html`<br/><code style="font-size:11px;padding:2px 6px;border:1px solid var(--border);background:var(--bg-muted);display:inline-block;margin-top:4px;word-break:break-all;">${ext.extensionPath}</code>`
+        : html`<br/><code style="font-size:11px;padding:2px 6px;border:1px solid var(--border);background:var(--bg-muted);display:inline-block;margin-top:4px;">apps/chrome-extension/</code>
                     <span style="font-style:italic;"> (relative to milaidy package root)</span>`}
               </li>
               <li style="margin-bottom:6px;">
@@ -3980,12 +6180,12 @@ export class MilaidyApp extends LitElement {
         </div>
 
         ${ext?.extensionPath
-          ? html`
+        ? html`
               <div style="margin-top:12px;padding:8px 12px;border:1px solid var(--border);background:var(--bg-muted);font-family:var(--mono);font-size:11px;word-break:break-all;">
                 Extension path: ${ext.extensionPath}
               </div>
             `
-          : ""}
+        : ""}
       </div>
 
       <!-- Wallet API Keys Section -->
@@ -4185,10 +6385,10 @@ export class MilaidyApp extends LitElement {
       </div>
       <div class="logs-container">
         ${this.logs.length === 0
-          ? html`<div class="empty-state">No log entries yet.</div>`
-          : html`
+        ? html`<div class="empty-state">No log entries yet.</div>`
+        : html`
               ${this.logs.map(
-                (entry) => html`
+          (entry) => html`
                   <div class="log-entry" style="
                     font-family: var(--font-mono, monospace);
                     font-size: 12px;
@@ -4208,7 +6408,7 @@ export class MilaidyApp extends LitElement {
                     <span style="flex:1;word-break:break-all;">${entry.message}</span>
                   </div>
                 `,
-              )}
+        )}
             `}
       </div>
     `;
@@ -4234,15 +6434,12 @@ export class MilaidyApp extends LitElement {
     return html`
       <div class="app-shell">
         <div class="onboarding">
-          ${this.onboardingStep === "welcome" ? this.renderOnboardingWelcome() : ""}
-          ${this.onboardingStep === "name" ? this.renderOnboardingName(opts) : ""}
-          ${this.onboardingStep === "style" ? this.renderOnboardingStyle(opts) : ""}
-          ${this.onboardingStep === "theme" ? this.renderOnboardingTheme() : ""}
-          ${this.onboardingStep === "runMode" ? this.renderOnboardingRunMode() : ""}
-          ${this.onboardingStep === "cloudProvider" ? this.renderOnboardingCloudProvider(opts) : ""}
-          ${this.onboardingStep === "modelSelection" ? this.renderOnboardingModelSelection(opts) : ""}
-          ${this.onboardingStep === "llmProvider" ? this.renderOnboardingLlmProvider(opts) : ""}
-          ${this.onboardingStep === "inventorySetup" ? this.renderOnboardingInventory(opts) : ""}
+          ${this.onboardingStep === 0 ? this.renderOnboardingWelcome() : ""}
+          ${this.onboardingStep === 1 ? this.renderOnboardingName(opts) : ""}
+          ${this.onboardingStep === 2 ? this.renderOnboardingStyle(opts) : ""}
+          ${this.onboardingStep === 3 ? this.renderOnboardingProvider(opts) : ""}
+          ${this.onboardingStep === 4 ? this.renderOnboardingSkillsMarketplace() : ""}
+          ${this.onboardingStep === 5 ? this.renderOnboardingChannels() : ""}
         </div>
       </div>
     `;
@@ -4263,7 +6460,7 @@ export class MilaidyApp extends LitElement {
       <div class="onboarding-speech">errr, what was my name again...?</div>
       <div class="onboarding-options">
         ${opts.names.map(
-          (name) => html`
+      (name) => html`
             <div
               class="onboarding-option ${this.onboardingName === name ? "selected" : ""}"
               @click=${() => { this.onboardingName = name; }}
@@ -4271,13 +6468,13 @@ export class MilaidyApp extends LitElement {
               <div class="label">${name}</div>
             </div>
           `,
-        )}
+    )}
         <div
           class="onboarding-option ${this.onboardingName && !opts.names.includes(this.onboardingName) ? "selected" : ""}"
           @click=${(e: Event) => {
-            const input = (e.currentTarget as HTMLElement).querySelector("input");
-            if (input) input.focus();
-          }}
+        const input = (e.currentTarget as HTMLElement).querySelector("input");
+        if (input) input.focus();
+      }}
         >
           <input
             type="text"
@@ -4316,7 +6513,7 @@ export class MilaidyApp extends LitElement {
       <div class="onboarding-speech">so what's the vibe here?</div>
       <div class="onboarding-options">
         ${opts.styles.map(
-          (style) => html`
+      (style) => html`
             <div
               class="onboarding-option ${this.onboardingStyle === style.catchphrase ? "selected" : ""}"
               @click=${() => { this.onboardingStyle = style.catchphrase; }}
@@ -4325,7 +6522,7 @@ export class MilaidyApp extends LitElement {
               <div class="hint">${style.hint}</div>
             </div>
           `,
-        )}
+    )}
       </div>
       <div class="btn-row">
         <button class="btn btn-outline" @click=${() => this.handleOnboardingBack()}>Back</button>
@@ -4481,7 +6678,7 @@ export class MilaidyApp extends LitElement {
       <div class="onboarding-speech">which AI provider do you want to use?</div>
       <div class="onboarding-options onboarding-options-scroll">
         ${opts.providers.map(
-          (provider) => html`
+      (provider) => html`
             <div
               class="onboarding-option ${this.onboardingProvider === provider.id ? "selected" : ""}"
               @click=${() => { this.onboardingProvider = provider.id; this.onboardingApiKey = ""; }}
@@ -4490,7 +6687,7 @@ export class MilaidyApp extends LitElement {
               <div class="hint">${provider.description}</div>
             </div>
           `,
-        )}
+    )}
       </div>
       ${needsKey
         ? html`
@@ -4514,7 +6711,37 @@ export class MilaidyApp extends LitElement {
     `;
   }
 
-  private renderOnboardingInventory(opts: OnboardingOptions) {
+  private renderOnboardingSkillsMarketplace() {
+    return html`
+      <img class="onboarding-avatar" src="/pfp.jpg" alt="milAIdy" style="width:100px;height:100px;" />
+      <div class="onboarding-speech">want to connect to the Skills Marketplace?</div>
+      <p style="font-size: 13px; color: var(--muted-strong); margin-bottom: 16px;">
+        Add your <a href="https://skillsmp.com" target="_blank" rel="noopener" style="color: var(--accent);">skillsmp.com</a> API key to browse and install skills.
+      </p>
+
+      <div style="text-align: left; margin-bottom: 16px;">
+        <label style="font-size: 13px; color: var(--muted-strong);">Skills Marketplace API Key</label>
+        <input
+          class="onboarding-input"
+          type="password"
+          placeholder="Paste your skillsmp.com API key"
+          .value=${this.onboardingSkillsmpApiKey}
+          @input=${(e: Event) => { this.onboardingSkillsmpApiKey = (e.target as HTMLInputElement).value; }}
+        />
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-outline" @click=${this.handleOnboardingNext}>Skip</button>
+        <button
+          class="btn"
+          @click=${this.handleOnboardingNext}
+          ?disabled=${!this.onboardingSkillsmpApiKey.trim()}
+        >Next</button>
+      </div>
+    `;
+  }
+
+  private renderOnboardingChannels() {
     return html`
       <img class="onboarding-avatar" src="/pfp.jpg" alt="milAIdy" style="width:100px;height:100px;" />
       <div class="onboarding-speech">want to set up wallets?</div>

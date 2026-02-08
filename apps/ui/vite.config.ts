@@ -43,7 +43,7 @@ function isTransientConnError(err: NodeJS.ErrnoException): boolean {
  */
 const withQuietErrors: NonNullable<ProxyOptions["configure"]> = (proxy) => {
   const origEmit = proxy.emit;
-  proxy.emit = function (event: string, ...rest) {
+  proxy.emit = function (this: typeof proxy, event: string, ...rest) {
     if (
       event === "error" &&
       isTransientConnError(rest[0] as NodeJS.ErrnoException)

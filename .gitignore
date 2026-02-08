@@ -40,6 +40,6 @@ skills/
 apps/app/electron/.eliza
 apps/app/electron/skills/
 
-# Bug tracking (local development only)
-bugs.md
-fixes.mdplugins-response.json
+# Agent learning docs & knowledge base
+knowledge/
+scripts/knowledge-loop.mjs

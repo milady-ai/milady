@@ -45,6 +45,25 @@ test.describe("Plugins page", () => {
     await expect(groqToggle).not.toBeChecked();
   });
 
+  test("blocks enabling plugin when required settings are missing and shows reason", async ({ page }) => {
+    const groqToggle = page.locator("[data-plugin-toggle='groq']");
+    await expect(groqToggle).not.toBeChecked();
+
+    let requested = false;
+    page.on("request", (req) => {
+      if (req.method() === "PUT" && req.url().includes("/api/plugins/groq")) {
+        requested = true;
+      }
+    });
+
+    await clickToggle(groqToggle);
+    await page.waitForTimeout(250);
+
+    expect(requested).toBe(false);
+    await expect(groqToggle).not.toBeChecked();
+    await expect(page.getByText(/Cannot enable Groq/i)).toBeVisible();
+  });
+
   // --- Toggle ON: disabled -> enabled ---
 
   test("toggling a disabled plugin ON sends PUT with enabled:true", async ({ page }) => {

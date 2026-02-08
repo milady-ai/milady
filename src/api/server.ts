@@ -47,11 +47,6 @@ import {
   fetchEvmNfts,
   fetchSolanaBalances,
   fetchSolanaNfts,
-  generateWalletForChain,
-  generateWalletKeys,
-  getWalletAddresses,
-  importWallet,
-  validatePrivateKey,
   type WalletBalancesResponse,
   type WalletChain,
   type WalletConfigStatus,
@@ -77,6 +72,208 @@ function getAutonomySvc(
   return runtime.getService("AUTONOMY") as AutonomyServiceLike | null;
 }
 
+/** Subset of the MCP service interface for querying live server status. */
+interface McpServiceLike {
+  getServers(): Array<{
+    name: string;
+    status: string;
+    error?: string;
+    tools?: unknown[];
+    resources?: unknown[];
+  }>;
+}
+
+interface GoalDataLike {
+  id: UUID;
+  name: string;
+  description?: string | null;
+  ownerType: "agent" | "entity";
+  ownerId: UUID;
+  isCompleted: boolean;
+  completedAt?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+  tags?: string[];
+  metadata?: Record<string, unknown>;
+}
+
+interface TodoDataLike {
+  id: UUID;
+  name: string;
+  description?: string | null;
+  type: "daily" | "one-off" | "aspirational";
+  priority?: number | null;
+  isUrgent: boolean;
+  isCompleted: boolean;
+  dueDate?: Date | null;
+  completedAt?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+  tags?: string[];
+  metadata?: Record<string, unknown>;
+}
+
+interface GoalDataServiceLike {
+  createGoal(params: {
+    agentId: UUID;
+    ownerType: "agent" | "entity";
+    ownerId: UUID;
+    name: string;
+    description?: string;
+    metadata?: Record<string, unknown>;
+    tags?: string[];
+  }): Promise<UUID | null>;
+  getGoals(filters?: {
+    ownerType?: "agent" | "entity";
+    ownerId?: UUID;
+    isCompleted?: boolean;
+    tags?: string[];
+  }): Promise<GoalDataLike[]>;
+  getGoal(goalId: UUID): Promise<GoalDataLike | null>;
+  updateGoal(goalId: UUID, updates: {
+    name?: string;
+    description?: string;
+    isCompleted?: boolean;
+    completedAt?: Date;
+    metadata?: Record<string, unknown>;
+    tags?: string[];
+  }): Promise<boolean>;
+}
+
+interface TodoDataServiceLike {
+  createTodo(data: {
+    agentId: UUID;
+    worldId: UUID;
+    roomId: UUID;
+    entityId: UUID;
+    name: string;
+    description?: string;
+    type: "daily" | "one-off" | "aspirational";
+    priority?: number;
+    isUrgent?: boolean;
+    dueDate?: Date;
+    metadata?: Record<string, unknown>;
+    tags?: string[];
+  }): Promise<UUID>;
+  getTodo(todoId: UUID): Promise<TodoDataLike | null>;
+  getTodos(filters?: {
+    agentId?: UUID;
+    worldId?: UUID;
+    roomId?: UUID;
+    entityId?: UUID;
+    type?: "daily" | "one-off" | "aspirational";
+    isCompleted?: boolean;
+    tags?: string[];
+    limit?: number;
+  }): Promise<TodoDataLike[]>;
+  updateTodo(todoId: UUID, updates: {
+    name?: string;
+    description?: string;
+    priority?: number;
+    isUrgent?: boolean;
+    isCompleted?: boolean;
+    dueDate?: Date;
+    completedAt?: Date;
+    metadata?: Record<string, unknown>;
+  }): Promise<boolean>;
+}
+
+interface GoalDataServiceWrapperLike {
+  getDataService(): GoalDataServiceLike | null;
+}
+
+async function getGoalDataService(runtime: AgentRuntime | null): Promise<GoalDataServiceLike | null> {
+  if (!runtime) return null;
+
+  const wrapper = runtime.getService("GOAL_DATA") as GoalDataServiceWrapperLike | null;
+  if (wrapper?.getDataService) {
+    const svc = wrapper.getDataService();
+    if (svc) return svc;
+  }
+
+  try {
+    const { createGoalDataService } = await import("@elizaos/plugin-goals");
+    return createGoalDataService(runtime as unknown as import("@elizaos/core").IAgentRuntime) as GoalDataServiceLike;
+  } catch (err) {
+    logger.debug(`[milaidy-api] GoalDataService unavailable: ${err instanceof Error ? err.message : String(err)}`);
+    return null;
+  }
+}
+
+async function getTodoDataService(runtime: AgentRuntime | null): Promise<TodoDataServiceLike | null> {
+  if (!runtime) return null;
+  try {
+    const { createTodoDataService } = await import("@elizaos/plugin-todo");
+    return createTodoDataService(runtime as unknown as import("@elizaos/core").IAgentRuntime) as TodoDataServiceLike;
+  } catch (err) {
+    logger.debug(`[milaidy-api] TodoDataService unavailable: ${err instanceof Error ? err.message : String(err)}`);
+    return null;
+  }
+}
+
+function toIsoOrNull(value: Date | null | undefined): string | null {
+  if (!value) return null;
+  return value.toISOString();
+}
+
+function clampPriority(raw: unknown): number | null {
+  if (raw == null) return null;
+  const n = typeof raw === "number" ? raw : Number(raw);
+  if (Number.isNaN(n)) return null;
+  return Math.max(1, Math.min(5, Math.round(n)));
+}
+
+function normalizeTags(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  const tags = raw
+    .map((tag) => String(tag ?? "").trim().toLowerCase())
+    .filter((tag) => tag.length > 0);
+  return [...new Set(tags)];
+}
+
+function normalizeShareFiles(raw: unknown): ShareIngestFile[] {
+  if (!Array.isArray(raw)) return [];
+  const out: ShareIngestFile[] = [];
+  for (const entry of raw) {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) continue;
+    const file = entry as Record<string, unknown>;
+    const name = String(file.name ?? "").trim();
+    if (!name) continue;
+    out.push({
+      name,
+      path: typeof file.path === "string" && file.path.trim() ? file.path.trim() : undefined,
+      mimeType: typeof file.mimeType === "string" && file.mimeType.trim() ? file.mimeType.trim() : null,
+      size: typeof file.size === "number" && Number.isFinite(file.size) ? file.size : null,
+    });
+  }
+  return out.slice(0, 24);
+}
+
+function buildShareSuggestedPrompt(data: {
+  title: string | null;
+  text: string | null;
+  url: string | null;
+  files: ShareIngestFile[];
+  source: string;
+}): string {
+  const lines: string[] = [];
+  lines.push(`Shared from ${data.source}:`);
+  if (data.title) lines.push(`Title: ${data.title}`);
+  if (data.url) lines.push(`URL: ${data.url}`);
+  if (data.text) {
+    lines.push("Content:");
+    lines.push(data.text);
+  }
+  if (data.files.length > 0) {
+    lines.push("Files:");
+    for (const file of data.files) {
+      lines.push(`- ${file.name}${file.path ? ` (${file.path})` : ""}`);
+    }
+  }
+  lines.push("Please analyze this and propose next actions.");
+  return lines.join("\n");
+}
+
 interface ServerState {
   runtime: AgentRuntime | null;
   config: MilaidyConfig;
@@ -95,8 +292,25 @@ interface ServerState {
   logBuffer: LogEntry[];
   chatRoomId: UUID | null;
   chatUserId: UUID | null;
-  /** Cloud manager for ELIZA Cloud integration (null when cloud is disabled). */
-  cloudManager: CloudManager | null;
+  shareInbox: ShareIngestItem[];
+}
+
+interface ShareIngestFile {
+  name: string;
+  path?: string;
+  mimeType?: string | null;
+  size?: number | null;
+}
+
+interface ShareIngestItem {
+  id: string;
+  source: string;
+  title: string | null;
+  text: string | null;
+  url: string | null;
+  files: ShareIngestFile[];
+  createdAt: number;
+  suggestedPrompt: string;
 }
 
 interface PluginParamDef {
@@ -195,6 +409,14 @@ interface PluginIndex {
   plugins: PluginIndexEntry[];
 }
 
+/**
+ * Hidden plugin config keys should not be shown in UI metadata surfaces.
+ * They may still exist in upstream plugin manifests.
+ */
+const HIDDEN_PLUGIN_CONFIG_KEYS = new Set([
+  "VERCEL_OIDC_TOKEN",
+]);
+
 function maskValue(value: string): string {
   if (value.length <= 8) return "****";
   return `${value.slice(0, 4)}...${value.slice(-4)}`;
@@ -225,6 +447,23 @@ function buildParamDefs(
       isSet,
     };
   });
+}
+
+function sanitizePluginIndexEntry(entry: PluginIndexEntry): PluginIndexEntry {
+  const configKeys = entry.configKeys.filter((key) => !HIDDEN_PLUGIN_CONFIG_KEYS.has(key));
+  const pluginParameters = entry.pluginParameters
+    ? Object.fromEntries(
+      Object.entries(entry.pluginParameters).filter(([key]) => !HIDDEN_PLUGIN_CONFIG_KEYS.has(key)),
+    )
+    : undefined;
+  const envKey = entry.envKey && HIDDEN_PLUGIN_CONFIG_KEYS.has(entry.envKey) ? null : entry.envKey;
+
+  return {
+    ...entry,
+    envKey,
+    configKeys,
+    pluginParameters,
+  };
 }
 
 /**
@@ -321,35 +560,18 @@ function discoverPluginsFromManifest(): PluginEntry[] {
 
   if (fs.existsSync(manifestPath)) {
     try {
-      const index = JSON.parse(
-        fs.readFileSync(manifestPath, "utf-8"),
-      ) as PluginIndex;
-      return index.plugins
-        .map((p) => {
-          const category = categorizePlugin(p.id);
-          const envKey = p.envKey;
-          const configured = envKey
-            ? Boolean(process.env[envKey])
-            : p.configKeys.length === 0;
-          const parameters = p.pluginParameters
-            ? buildParamDefs(p.pluginParameters)
-            : [];
-          const paramInfos: PluginParamInfo[] = parameters.map((pd) => ({
-            key: pd.key,
-            required: pd.required,
-            sensitive: pd.sensitive,
-            type: pd.type,
-            description: pd.description,
-            default: pd.default,
-          }));
-          const validation = validatePluginConfig(
-            p.id,
-            category,
-            envKey,
-            p.configKeys,
-            undefined,
-            paramInfos,
-          );
+      const index = JSON.parse(fs.readFileSync(manifestPath, "utf-8")) as PluginIndex;
+      return index.plugins.map((rawPlugin) => {
+        const p = sanitizePluginIndexEntry(rawPlugin);
+        const category = categorizePlugin(p.id);
+        const envKey = p.envKey;
+        const configured = envKey ? Boolean(process.env[envKey]) : p.configKeys.length === 0;
+        const parameters = p.pluginParameters ? buildParamDefs(p.pluginParameters) : [];
+        const paramInfos: PluginParamInfo[] = parameters.map((pd) => ({
+          key: pd.key, required: pd.required, sensitive: pd.sensitive,
+          type: pd.type, description: pd.description, default: pd.default,
+        }));
+        const validation = validatePluginConfig(p.id, category, envKey, p.configKeys, undefined, paramInfos);
 
           return {
             id: p.id,
@@ -573,10 +795,8 @@ async function discoverSkills(
 
   // Bundled skills from the @elizaos/skills package
   try {
-    // @ts-expect-error — optional dependency; may not ship type declarations
-    const skillsPkg = (await import("@elizaos/skills")) as {
-      getSkillsDir: () => string;
-    };
+    // @ts-ignore — optional peer dependency, resolved at runtime
+    const skillsPkg = await import("@elizaos/skills") as { getSkillsDir: () => string };
     const bundledDir = skillsPkg.getSkillsDir();
     if (bundledDir && fs.existsSync(bundledDir)) {
       skillsDirs.push(bundledDir);
@@ -783,8 +1003,12 @@ async function readJsonBody<T = Record<string, unknown>>(
 }
 
 function json(res: http.ServerResponse, data: unknown, status = 200): void {
-  res.statusCode = status;
-  res.setHeader("Content-Type", "application/json");
+  res.writeHead(status, {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+  });
   res.end(JSON.stringify(data));
 }
 
@@ -810,254 +1034,190 @@ function getProviderOptions(): Array<{
   description: string;
 }> {
   return [
-    {
-      id: "elizacloud",
-      name: "Eliza Cloud",
-      envKey: null,
-      pluginName: "@elizaos/plugin-elizacloud",
-      keyPrefix: null,
-      description: "Free credits to start, but they run out.",
-    },
-    {
-      id: "anthropic",
-      name: "Anthropic",
-      envKey: "ANTHROPIC_API_KEY",
-      pluginName: "@elizaos/plugin-anthropic",
-      keyPrefix: "sk-ant-",
-      description: "Claude models.",
-    },
-    {
-      id: "openai",
-      name: "OpenAI",
-      envKey: "OPENAI_API_KEY",
-      pluginName: "@elizaos/plugin-openai",
-      keyPrefix: "sk-",
-      description: "GPT models.",
-    },
-    {
-      id: "openrouter",
-      name: "OpenRouter",
-      envKey: "OPENROUTER_API_KEY",
-      pluginName: "@elizaos/plugin-openrouter",
-      keyPrefix: "sk-or-",
-      description: "Access multiple models via one API key.",
-    },
-    {
-      id: "gemini",
-      name: "Gemini",
-      envKey: "GOOGLE_API_KEY",
-      pluginName: "@elizaos/plugin-google-genai",
-      keyPrefix: null,
-      description: "Google's Gemini models.",
-    },
-    {
-      id: "grok",
-      name: "Grok",
-      envKey: "XAI_API_KEY",
-      pluginName: "@elizaos/plugin-xai",
-      keyPrefix: "xai-",
-      description: "xAI's Grok models.",
-    },
-    {
-      id: "groq",
-      name: "Groq",
-      envKey: "GROQ_API_KEY",
-      pluginName: "@elizaos/plugin-groq",
-      keyPrefix: "gsk_",
-      description: "Fast inference.",
-    },
-    {
-      id: "deepseek",
-      name: "DeepSeek",
-      envKey: "DEEPSEEK_API_KEY",
-      pluginName: "@elizaos/plugin-deepseek",
-      keyPrefix: "sk-",
-      description: "DeepSeek models.",
-    },
-    {
-      id: "mistral",
-      name: "Mistral",
-      envKey: "MISTRAL_API_KEY",
-      pluginName: "@elizaos/plugin-mistral",
-      keyPrefix: null,
-      description: "Mistral AI models.",
-    },
-    {
-      id: "together",
-      name: "Together AI",
-      envKey: "TOGETHER_API_KEY",
-      pluginName: "@elizaos/plugin-together",
-      keyPrefix: null,
-      description: "Open-source model hosting.",
-    },
-    {
-      id: "ollama",
-      name: "Ollama (local)",
-      envKey: null,
-      pluginName: "@elizaos/plugin-ollama",
-      keyPrefix: null,
-      description: "Local models, no API key needed.",
-    },
-    {
-      id: "zai",
-      name: "z.ai (GLM Coding Plan)",
-      envKey: "ZAI_API_KEY",
-      pluginName: "@homunculuslabs/plugin-zai",
-      keyPrefix: null,
-      description: "GLM models via z.ai Coding Plan.",
-    },
+    { id: "elizacloud", name: "Eliza Cloud", envKey: null, pluginName: "@elizaos/plugin-elizacloud", keyPrefix: null, description: "Free credits to start, but they run out." },
+    { id: "anthropic", name: "Anthropic", envKey: "ANTHROPIC_API_KEY", pluginName: "@elizaos/plugin-anthropic", keyPrefix: "sk-ant-", description: "Claude models." },
+    { id: "openai", name: "OpenAI", envKey: "OPENAI_API_KEY", pluginName: "@elizaos/plugin-openai", keyPrefix: "sk-", description: "GPT models." },
+    { id: "openrouter", name: "OpenRouter", envKey: "OPENROUTER_API_KEY", pluginName: "@elizaos/plugin-openrouter", keyPrefix: "sk-or-", description: "Access multiple models via one API key." },
+    { id: "vercel-ai-gateway", name: "Vercel AI Gateway", envKey: "AI_GATEWAY_API_KEY", pluginName: "@elizaos/plugin-vercel-ai-gateway", keyPrefix: null, description: "OpenAI-compatible gateway to route across providers/models." },
+    { id: "gemini", name: "Gemini", envKey: "GOOGLE_API_KEY", pluginName: "@elizaos/plugin-google-genai", keyPrefix: null, description: "Google's Gemini models." },
+    { id: "grok", name: "Grok", envKey: "XAI_API_KEY", pluginName: "@elizaos/plugin-xai", keyPrefix: "xai-", description: "xAI's Grok models." },
+    { id: "groq", name: "Groq", envKey: "GROQ_API_KEY", pluginName: "@elizaos/plugin-groq", keyPrefix: "gsk_", description: "Fast inference." },
+    { id: "deepseek", name: "DeepSeek", envKey: "DEEPSEEK_API_KEY", pluginName: "@elizaos/plugin-deepseek", keyPrefix: "sk-", description: "DeepSeek models." },
+    { id: "mistral", name: "Mistral", envKey: "MISTRAL_API_KEY", pluginName: "@elizaos/plugin-mistral", keyPrefix: null, description: "Mistral AI models." },
+    { id: "together", name: "Together AI", envKey: "TOGETHER_API_KEY", pluginName: "@elizaos/plugin-together", keyPrefix: null, description: "Open-source model hosting." },
+    { id: "ollama", name: "Ollama (local)", envKey: null, pluginName: "@elizaos/plugin-ollama", keyPrefix: null, description: "Local models, no API key needed." },
   ];
 }
 
-function getCloudProviderOptions(): Array<{
-  id: string;
+// ---------------------------------------------------------------------------
+// Registry enrichment helpers (trust/risk scoring)
+// ---------------------------------------------------------------------------
+
+interface RegistryPluginLike {
   name: string;
+  gitRepo: string;
+  gitUrl: string;
   description: string;
-}> {
-  return [
-    {
-      id: "elizacloud",
-      name: "Eliza Cloud",
-      description:
-        "Managed cloud infrastructure. Wallets, LLMs, and RPCs included.",
-    },
-  ];
+  homepage: string | null;
+  topics: string[];
+  stars: number;
+  language: string;
+  npm: { package: string; v0Version: string | null; v1Version: string | null; v2Version: string | null };
+  git: { v0Branch: string | null; v1Branch: string | null; v2Branch: string | null };
+  supports: { v0: boolean; v1: boolean; v2: boolean };
 }
 
-function getModelOptions(): {
-  small: Array<{
-    id: string;
-    name: string;
-    provider: string;
-    description: string;
-  }>;
-  large: Array<{
-    id: string;
-    name: string;
-    provider: string;
-    description: string;
-  }>;
+const NPM_META_TTL_MS = 12 * 60 * 60 * 1000;
+const npmPackageModifiedCache = new Map<string, { modifiedAt: string | null; fetchedAt: number }>();
+
+async function getPackageModifiedAt(packageName: string): Promise<string | null> {
+  const cached = npmPackageModifiedCache.get(packageName);
+  if (cached && Date.now() - cached.fetchedAt < NPM_META_TTL_MS) {
+    return cached.modifiedAt;
+  }
+
+  let modifiedAt: string | null = null;
+  try {
+    const resp = await fetch(`https://registry.npmjs.org/${encodeURIComponent(packageName)}`, {
+      signal: AbortSignal.timeout(4000),
+    });
+    if (resp.ok) {
+      const data = await resp.json() as { time?: { modified?: string } };
+      modifiedAt = typeof data?.time?.modified === "string" ? data.time.modified : null;
+    }
+  } catch {
+    modifiedAt = null;
+  }
+
+  npmPackageModifiedCache.set(packageName, { modifiedAt, fetchedAt: Date.now() });
+  return modifiedAt;
+}
+
+function computeCompatibility(plugin: RegistryPluginLike): { confidence: number; level: "low" | "medium" | "high"; label: string } {
+  if (plugin.supports.v2 && plugin.npm.v2Version) {
+    return { confidence: 0.95, level: "high", label: "v2 package published" };
+  }
+  if (plugin.supports.v2 && plugin.git.v2Branch) {
+    return { confidence: 0.82, level: "high", label: "v2 branch available" };
+  }
+  if (plugin.supports.v1 && plugin.npm.v1Version) {
+    return { confidence: 0.6, level: "medium", label: "v1 only" };
+  }
+  if (plugin.supports.v0 && plugin.npm.v0Version) {
+    return { confidence: 0.35, level: "low", label: "legacy support only" };
+  }
+  return { confidence: 0.2, level: "low", label: "compatibility unclear" };
+}
+
+function computeMaintenance(modifiedAt: string | null): {
+  modifiedAt: string | null;
+  daysSinceUpdate: number | null;
+  status: "fresh" | "recent" | "stale" | "unknown";
+  label: string;
+  score: number;
 } {
-  return {
-    small: [
-      {
-        id: "claude-haiku",
-        name: "Claude Haiku (latest)",
-        provider: "anthropic",
-        description: "Fast and efficient. Default small model.",
-      },
-      {
-        id: "gpt-4o-mini",
-        name: "GPT-4o Mini",
-        provider: "openai",
-        description: "OpenAI's compact model.",
-      },
-      {
-        id: "gemini-flash",
-        name: "Gemini Flash",
-        provider: "google",
-        description: "Google's fast model.",
-      },
-    ],
-    large: [
-      {
-        id: "claude-sonnet-4-5",
-        name: "Claude Sonnet 4.5",
-        provider: "anthropic",
-        description: "Powerful reasoning. Default large model.",
-      },
-      {
-        id: "gpt-4o",
-        name: "GPT-4o",
-        provider: "openai",
-        description: "OpenAI's flagship model.",
-      },
-      {
-        id: "claude-opus",
-        name: "Claude Opus",
-        provider: "anthropic",
-        description: "Most capable Claude model.",
-      },
-      {
-        id: "gemini-pro",
-        name: "Gemini Pro",
-        provider: "google",
-        description: "Google's advanced model.",
-      },
-    ],
-  };
+  if (!modifiedAt) {
+    return {
+      modifiedAt: null,
+      daysSinceUpdate: null,
+      status: "unknown",
+      label: "recency unknown",
+      score: 0.45,
+    };
+  }
+
+  const ts = Date.parse(modifiedAt);
+  if (Number.isNaN(ts)) {
+    return {
+      modifiedAt,
+      daysSinceUpdate: null,
+      status: "unknown",
+      label: "recency unknown",
+      score: 0.45,
+    };
+  }
+
+  const days = Math.max(0, Math.floor((Date.now() - ts) / (24 * 60 * 60 * 1000)));
+  if (days <= 45) {
+    return { modifiedAt, daysSinceUpdate: days, status: "fresh", label: `updated ${days}d ago`, score: 1 };
+  }
+  if (days <= 180) {
+    return { modifiedAt, daysSinceUpdate: days, status: "recent", label: `updated ${days}d ago`, score: 0.78 };
+  }
+  return { modifiedAt, daysSinceUpdate: days, status: "stale", label: `updated ${days}d ago`, score: 0.38 };
 }
 
-function getInventoryProviderOptions(): Array<{
-  id: string;
-  name: string;
-  description: string;
-  rpcProviders: Array<{
-    id: string;
-    name: string;
-    description: string;
-    envKey: string | null;
-    requiresKey: boolean;
-  }>;
+function computeTrustLevel(score: number): "low" | "guarded" | "medium" | "high" {
+  if (score >= 80) return "high";
+  if (score >= 62) return "medium";
+  if (score >= 45) return "guarded";
+  return "low";
+}
+
+async function enrichRegistryPlugin(
+  plugin: RegistryPluginLike,
+  isInstalled: boolean,
+  fetchRecency = true,
+): Promise<RegistryPluginLike & {
+  insights: {
+    trustScore: number;
+    trustLevel: "low" | "guarded" | "medium" | "high";
+    maintenance: {
+      modifiedAt: string | null;
+      daysSinceUpdate: number | null;
+      status: "fresh" | "recent" | "stale" | "unknown";
+      label: string;
+    };
+    compatibility: {
+      confidence: number;
+      level: "low" | "medium" | "high";
+      label: string;
+    };
+    restartImpact: {
+      install: "restart-required" | "unknown";
+      uninstall: "restart-required" | "unknown";
+      label: string;
+    };
+    badges: string[];
+  };
 }> {
-  return [
-    {
-      id: "evm",
-      name: "EVM",
-      description: "Ethereum, Base, Arbitrum, Optimism, Polygon.",
-      rpcProviders: [
-        {
-          id: "elizacloud",
-          name: "Eliza Cloud",
-          description: "Managed RPC. No setup needed.",
-          envKey: null,
-          requiresKey: false,
-        },
-        {
-          id: "infura",
-          name: "Infura",
-          description: "Reliable EVM infrastructure.",
-          envKey: "INFURA_API_KEY",
-          requiresKey: true,
-        },
-        {
-          id: "alchemy",
-          name: "Alchemy",
-          description: "Full-featured EVM data platform.",
-          envKey: "ALCHEMY_API_KEY",
-          requiresKey: true,
-        },
-        {
-          id: "ankr",
-          name: "Ankr",
-          description: "Decentralized RPC provider.",
-          envKey: "ANKR_API_KEY",
-          requiresKey: true,
-        },
+  const cached = plugin.npm.package ? npmPackageModifiedCache.get(plugin.npm.package) : undefined;
+  const modifiedAt = plugin.npm.package
+    ? (fetchRecency
+      ? await getPackageModifiedAt(plugin.npm.package)
+      : (cached?.modifiedAt ?? null))
+    : null;
+  const maintenance = computeMaintenance(modifiedAt);
+  const compatibility = computeCompatibility(plugin);
+  const starsScore = Math.min(1, Math.log10((plugin.stars ?? 0) + 1) / 3);
+  const trustScore = Math.round((starsScore * 0.35 + maintenance.score * 0.3 + compatibility.confidence * 0.35) * 100);
+  const trustLevel = computeTrustLevel(trustScore);
+  const restartImpact = {
+    install: "restart-required" as const,
+    uninstall: "restart-required" as const,
+    label: isInstalled ? "restart on uninstall" : "restart on install",
+  };
+
+  return {
+    ...plugin,
+    insights: {
+      trustScore,
+      trustLevel,
+      maintenance: {
+        modifiedAt: maintenance.modifiedAt,
+        daysSinceUpdate: maintenance.daysSinceUpdate,
+        status: maintenance.status,
+        label: maintenance.label,
+      },
+      compatibility,
+      restartImpact,
+      badges: [
+        `maintenance:${maintenance.status}`,
+        `compat:${compatibility.level}`,
+        `restart:${restartImpact.install}`,
       ],
     },
-    {
-      id: "solana",
-      name: "Solana",
-      description: "Solana mainnet tokens and NFTs.",
-      rpcProviders: [
-        {
-          id: "elizacloud",
-          name: "Eliza Cloud",
-          description: "Managed RPC. No setup needed.",
-          envKey: null,
-          requiresKey: false,
-        },
-        {
-          id: "helius",
-          name: "Helius",
-          description: "Solana-native data platform.",
-          envKey: "HELIUS_API_KEY",
-          requiresKey: true,
-        },
-      ],
-    },
-  ];
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -1231,7 +1391,11 @@ async function handleRequest(
 
   // CORS preflight
   if (method === "OPTIONS") {
-    res.statusCode = 204;
+    res.writeHead(204, {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    });
     res.end();
     return;
   }
@@ -1439,6 +1603,11 @@ async function handleRequest(
           process.env[rpcDef.envKey] = inv.rpcApiKey;
         }
       }
+    }
+    if (body.skillsmpApiKey) {
+      if (!config.env) config.env = {};
+      (config.env as Record<string, string>).SKILLSMP_API_KEY = body.skillsmpApiKey as string;
+      process.env.SKILLSMP_API_KEY = body.skillsmpApiKey as string;
     }
 
     // ── Generate wallet keys if not already present ───────────────────────
@@ -1660,6 +1829,7 @@ async function handleRequest(
       state.config = {} as MilaidyConfig;
       state.chatRoomId = null;
       state.chatUserId = null;
+      state.shareInbox = [];
 
       json(res, { ok: true });
     } catch (err) {
@@ -1819,6 +1989,497 @@ async function handleRequest(
     return;
   }
 
+  // ── GET /api/workbench/overview ────────────────────────────────────────
+  // Goal/Todo overview for the Task + Goal workbench UI.
+  if (method === "GET" && pathname === "/api/workbench/overview") {
+    const runtime = state.runtime;
+    const goalSvc = await getGoalDataService(runtime);
+    const todoSvc = await getTodoDataService(runtime);
+
+    let goals: GoalDataLike[] = [];
+    let todos: TodoDataLike[] = [];
+
+    if (goalSvc) {
+      try {
+        goals = await goalSvc.getGoals();
+      } catch (err) {
+        logger.warn(`[milaidy-api] Failed to load goals for workbench: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+
+    if (todoSvc) {
+      try {
+        todos = await todoSvc.getTodos({ limit: 300 });
+      } catch (err) {
+        logger.warn(`[milaidy-api] Failed to load todos for workbench: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+
+    const openGoals = goals.filter((g) => !g.isCompleted);
+    const completedGoals = goals.length - openGoals.length;
+    const openTodos = todos.filter((t) => !t.isCompleted);
+    const completedTodos = todos.length - openTodos.length;
+
+    const now = Date.now();
+    const soonCutoff = now + 24 * 60 * 60 * 1000;
+    const dueSoonTodos = openTodos.filter((todo) => {
+      const dueAt = todo.dueDate ? new Date(todo.dueDate).getTime() : null;
+      return dueAt != null && dueAt >= now && dueAt <= soonCutoff;
+    }).length;
+    const overdueTodos = openTodos.filter((todo) => {
+      const dueAt = todo.dueDate ? new Date(todo.dueDate).getTime() : null;
+      return dueAt != null && dueAt < now;
+    }).length;
+
+    json(res, {
+      goals: goals.map((goal) => ({
+        id: goal.id,
+        name: goal.name,
+        description: goal.description ?? null,
+        ownerType: goal.ownerType,
+        ownerId: goal.ownerId,
+        isCompleted: goal.isCompleted,
+        completedAt: toIsoOrNull(goal.completedAt),
+        createdAt: toIsoOrNull(goal.createdAt),
+        updatedAt: toIsoOrNull(goal.updatedAt),
+        tags: goal.tags ?? [],
+        metadata: goal.metadata ?? {},
+      })),
+      todos: todos.map((todo) => ({
+        id: todo.id,
+        name: todo.name,
+        description: todo.description ?? null,
+        type: todo.type,
+        priority: todo.priority ?? null,
+        isUrgent: todo.isUrgent,
+        isCompleted: todo.isCompleted,
+        dueDate: toIsoOrNull(todo.dueDate),
+        completedAt: toIsoOrNull(todo.completedAt),
+        createdAt: toIsoOrNull(todo.createdAt),
+        updatedAt: toIsoOrNull(todo.updatedAt),
+        tags: todo.tags ?? [],
+        metadata: todo.metadata ?? {},
+      })),
+      summary: {
+        goalCount: goals.length,
+        openGoals: openGoals.length,
+        completedGoals,
+        todoCount: todos.length,
+        openTodos: openTodos.length,
+        completedTodos,
+        dueSoonTodos,
+        overdueTodos,
+      },
+      autonomy: {
+        enabled: true,
+        loopRunning: getAutonomySvc(runtime)?.isLoopRunning() ?? false,
+      },
+    });
+    return;
+  }
+
+  // ── POST /api/workbench/goals ──────────────────────────────────────────
+  if (method === "POST" && pathname === "/api/workbench/goals") {
+    if (!state.runtime) {
+      error(res, "Agent runtime is not running", 503);
+      return;
+    }
+
+    const body = await readJsonBody<{
+      name?: string;
+      description?: string;
+      ownerType?: "agent" | "entity";
+      ownerId?: string;
+      priority?: number | null;
+      tags?: unknown;
+    }>(req, res);
+    if (!body) return;
+
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    if (!name) {
+      error(res, "Goal name is required", 400);
+      return;
+    }
+
+    const goalSvc = await getGoalDataService(state.runtime);
+    if (!goalSvc) {
+      error(res, "Goal service is not available", 501);
+      return;
+    }
+
+    const ownerType = body.ownerType === "entity" ? "entity" : "agent";
+    const ownerId = (body.ownerId?.trim() || (ownerType === "entity"
+      ? (state.chatUserId ?? state.runtime.agentId)
+      : state.runtime.agentId)) as UUID;
+    const priority = clampPriority(body.priority);
+    const tags = normalizeTags(body.tags);
+    const metadata: Record<string, unknown> = {};
+    if (priority != null) metadata.priority = priority;
+
+    try {
+      const id = await goalSvc.createGoal({
+        agentId: state.runtime.agentId,
+        ownerType,
+        ownerId,
+        name,
+        description: typeof body.description === "string" ? body.description.trim() : undefined,
+        metadata,
+        tags,
+      });
+
+      if (!id) {
+        error(res, "Failed to create goal", 500);
+        return;
+      }
+
+      const created = await goalSvc.getGoal(id);
+      json(res, {
+        ok: true,
+        id,
+        goal: created ? {
+          id: created.id,
+          name: created.name,
+          description: created.description ?? null,
+          ownerType: created.ownerType,
+          ownerId: created.ownerId,
+          isCompleted: created.isCompleted,
+          completedAt: toIsoOrNull(created.completedAt),
+          createdAt: toIsoOrNull(created.createdAt),
+          updatedAt: toIsoOrNull(created.updatedAt),
+          tags: created.tags ?? [],
+          metadata: created.metadata ?? {},
+        } : null,
+      });
+    } catch (err) {
+      error(res, `Failed to create goal: ${err instanceof Error ? err.message : String(err)}`, 500);
+    }
+    return;
+  }
+
+  // ── PATCH /api/workbench/goals/:id ─────────────────────────────────────
+  if (method === "PATCH" && pathname.startsWith("/api/workbench/goals/")) {
+    if (!state.runtime) {
+      error(res, "Agent runtime is not running", 503);
+      return;
+    }
+
+    const goalId = decodeURIComponent(pathname.slice("/api/workbench/goals/".length));
+    if (!goalId) {
+      error(res, "Goal id is required", 400);
+      return;
+    }
+
+    const body = await readJsonBody<{
+      name?: string;
+      description?: string;
+      isCompleted?: boolean;
+      priority?: number | null;
+      tags?: unknown;
+    }>(req, res);
+    if (!body) return;
+
+    const goalSvc = await getGoalDataService(state.runtime);
+    if (!goalSvc) {
+      error(res, "Goal service is not available", 501);
+      return;
+    }
+
+    const hasAnyField = (
+      body.name !== undefined
+      || body.description !== undefined
+      || body.isCompleted !== undefined
+      || body.priority !== undefined
+      || body.tags !== undefined
+    );
+    if (!hasAnyField) {
+      error(res, "Request body must include at least one updatable goal field", 400);
+      return;
+    }
+
+    try {
+      const updates: {
+        name?: string;
+        description?: string;
+        isCompleted?: boolean;
+        completedAt?: Date;
+        metadata?: Record<string, unknown>;
+        tags?: string[];
+      } = {};
+
+      if (typeof body.name === "string") {
+        const nextName = body.name.trim();
+        if (!nextName) {
+          error(res, "Goal name cannot be empty", 400);
+          return;
+        }
+        updates.name = nextName;
+      }
+
+      if (typeof body.description === "string") {
+        updates.description = body.description.trim();
+      }
+
+      if (typeof body.isCompleted === "boolean") {
+        updates.isCompleted = body.isCompleted;
+        if (body.isCompleted) updates.completedAt = new Date();
+      }
+
+      if (body.priority !== undefined) {
+        const existing = await goalSvc.getGoal(goalId as UUID);
+        const metadata = { ...(existing?.metadata ?? {}) };
+        const priority = clampPriority(body.priority);
+        if (priority == null) {
+          delete metadata.priority;
+        } else {
+          metadata.priority = priority;
+        }
+        updates.metadata = metadata;
+      }
+
+      if (body.tags !== undefined) {
+        updates.tags = normalizeTags(body.tags);
+      }
+
+      const ok = await goalSvc.updateGoal(goalId as UUID, updates);
+      if (!ok) {
+        error(res, "Goal not found or update failed", 404);
+        return;
+      }
+      json(res, { ok: true, id: goalId });
+    } catch (err) {
+      error(res, `Failed to update goal: ${err instanceof Error ? err.message : String(err)}`, 500);
+    }
+    return;
+  }
+
+  // ── POST /api/workbench/todos ──────────────────────────────────────────
+  if (method === "POST" && pathname === "/api/workbench/todos") {
+    if (!state.runtime) {
+      error(res, "Agent runtime is not running", 503);
+      return;
+    }
+
+    const body = await readJsonBody<{
+      name?: string;
+      description?: string;
+      type?: "daily" | "one-off" | "aspirational";
+      priority?: number | null;
+      isUrgent?: boolean;
+      dueDate?: string | null;
+      tags?: unknown;
+    }>(req, res);
+    if (!body) return;
+
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    if (!name) {
+      error(res, "Todo name is required", 400);
+      return;
+    }
+
+    const todoSvc = await getTodoDataService(state.runtime);
+    if (!todoSvc) {
+      error(res, "Todo service is not available", 501);
+      return;
+    }
+
+    const runtimeAgentId = state.runtime.agentId as UUID;
+    if (!state.chatRoomId) state.chatRoomId = stringToUuid(`${runtimeAgentId}:workbench-room`);
+    if (!state.chatUserId) state.chatUserId = stringToUuid(`${runtimeAgentId}:workbench-entity`);
+
+    const todoType = body.type === "daily" || body.type === "aspirational" ? body.type : "one-off";
+    const priority = clampPriority(body.priority);
+    const parsedDueDate = typeof body.dueDate === "string" && body.dueDate.trim()
+      ? new Date(body.dueDate)
+      : undefined;
+    if (parsedDueDate && Number.isNaN(parsedDueDate.getTime())) {
+      error(res, "Invalid dueDate format", 400);
+      return;
+    }
+
+    try {
+      const id = await todoSvc.createTodo({
+        agentId: runtimeAgentId,
+        worldId: stringToUuid(`${runtimeAgentId}:workbench-world`),
+        roomId: state.chatRoomId,
+        entityId: state.chatUserId,
+        name,
+        description: typeof body.description === "string" ? body.description.trim() : undefined,
+        type: todoType,
+        priority: priority ?? undefined,
+        isUrgent: body.isUrgent === true,
+        dueDate: parsedDueDate,
+        metadata: {
+          createdBy: "workbench-ui",
+        },
+        tags: normalizeTags(body.tags),
+      });
+      json(res, { ok: true, id });
+    } catch (err) {
+      error(res, `Failed to create todo: ${err instanceof Error ? err.message : String(err)}`, 500);
+    }
+    return;
+  }
+
+  // ── PATCH /api/workbench/todos/:id ─────────────────────────────────────
+  if (method === "PATCH" && pathname.startsWith("/api/workbench/todos/")) {
+    if (!state.runtime) {
+      error(res, "Agent runtime is not running", 503);
+      return;
+    }
+
+    const todoId = decodeURIComponent(pathname.slice("/api/workbench/todos/".length));
+    if (!todoId) {
+      error(res, "Todo id is required", 400);
+      return;
+    }
+
+    const body = await readJsonBody<{
+      name?: string;
+      description?: string;
+      priority?: number | null;
+      isUrgent?: boolean;
+      isCompleted?: boolean;
+      dueDate?: string | null;
+    }>(req, res);
+    if (!body) return;
+
+    const hasAnyField = (
+      body.name !== undefined
+      || body.description !== undefined
+      || body.priority !== undefined
+      || body.isUrgent !== undefined
+      || body.isCompleted !== undefined
+      || body.dueDate !== undefined
+    );
+    if (!hasAnyField) {
+      error(res, "Request body must include at least one updatable todo field", 400);
+      return;
+    }
+
+    const todoSvc = await getTodoDataService(state.runtime);
+    if (!todoSvc) {
+      error(res, "Todo service is not available", 501);
+      return;
+    }
+
+    try {
+      const updates: {
+        name?: string;
+        description?: string;
+        priority?: number;
+        isUrgent?: boolean;
+        isCompleted?: boolean;
+        dueDate?: Date;
+        completedAt?: Date;
+        metadata?: Record<string, unknown>;
+      } = {};
+
+      if (typeof body.name === "string") {
+        const nextName = body.name.trim();
+        if (!nextName) {
+          error(res, "Todo name cannot be empty", 400);
+          return;
+        }
+        updates.name = nextName;
+      }
+
+      if (typeof body.description === "string") {
+        updates.description = body.description.trim();
+      }
+
+      if (body.priority !== undefined) {
+        const priority = clampPriority(body.priority);
+        if (priority != null) updates.priority = priority;
+      }
+
+      if (typeof body.isUrgent === "boolean") {
+        updates.isUrgent = body.isUrgent;
+      }
+
+      if (typeof body.isCompleted === "boolean") {
+        updates.isCompleted = body.isCompleted;
+        if (body.isCompleted) updates.completedAt = new Date();
+      }
+
+      if (body.dueDate !== undefined) {
+        if (typeof body.dueDate === "string" && body.dueDate.trim()) {
+          const dueDate = new Date(body.dueDate);
+          if (Number.isNaN(dueDate.getTime())) {
+            error(res, "Invalid dueDate format", 400);
+            return;
+          }
+          updates.dueDate = dueDate;
+        } else {
+          updates.metadata = { dueDateClearedAt: new Date().toISOString() };
+        }
+      }
+
+      const ok = await todoSvc.updateTodo(todoId as UUID, updates);
+      if (!ok) {
+        error(res, "Todo not found or update failed", 404);
+        return;
+      }
+      json(res, { ok: true, id: todoId });
+    } catch (err) {
+      error(res, `Failed to update todo: ${err instanceof Error ? err.message : String(err)}`, 500);
+    }
+    return;
+  }
+
+  // ── POST /api/ingest/share ─────────────────────────────────────────────
+  if (method === "POST" && pathname === "/api/ingest/share") {
+    const body = await readJsonBody<{
+      source?: string;
+      title?: string;
+      text?: string;
+      url?: string;
+      files?: unknown;
+    }>(req, res);
+    if (!body) return;
+
+    const source = typeof body.source === "string" && body.source.trim() ? body.source.trim() : "unknown-source";
+    const title = typeof body.title === "string" && body.title.trim() ? body.title.trim() : null;
+    const text = typeof body.text === "string" && body.text.trim() ? body.text.trim() : null;
+    const sharedUrl = typeof body.url === "string" && body.url.trim() ? body.url.trim() : null;
+    const files = normalizeShareFiles(body.files);
+
+    if (!title && !text && !sharedUrl && files.length === 0) {
+      error(res, "Share payload must include title, text, url, or files", 400);
+      return;
+    }
+
+    const item: ShareIngestItem = {
+      id: crypto.randomUUID(),
+      source,
+      title,
+      text,
+      url: sharedUrl,
+      files,
+      createdAt: Date.now(),
+      suggestedPrompt: buildShareSuggestedPrompt({
+        source,
+        title,
+        text,
+        url: sharedUrl,
+        files,
+      }),
+    };
+
+    state.shareInbox.push(item);
+    if (state.shareInbox.length > 100) state.shareInbox.shift();
+
+    json(res, { ok: true, item });
+    return;
+  }
+
+  // ── GET /api/ingest/share ──────────────────────────────────────────────
+  if (method === "GET" && pathname === "/api/ingest/share") {
+    const shouldConsume = url.searchParams.get("consume") === "1" || url.searchParams.get("consume") === "true";
+    const items = shouldConsume ? state.shareInbox.splice(0) : [...state.shareInbox];
+    json(res, { count: items.length, items });
+    return;
+  }
+
   // ── GET /api/character ──────────────────────────────────────────────────
   if (method === "GET" && pathname === "/api/character") {
     // Character data lives in the runtime / database, not the config file.
@@ -1881,83 +2542,21 @@ async function handleRequest(
   if (method === "GET" && pathname === "/api/character/schema") {
     json(res, {
       fields: [
+        { key: "name", type: "string", label: "Name", description: "Agent display name", maxLength: 100 },
+        { key: "username", type: "string", label: "Username", description: "Agent username for platforms", maxLength: 50 },
+        { key: "bio", type: "string | string[]", label: "Bio", description: "Biography — single string or array of points" },
+        { key: "system", type: "string", label: "System Prompt", description: "System prompt defining core behavior", maxLength: 10000 },
+        { key: "adjectives", type: "string[]", label: "Adjectives", description: "Personality adjectives (e.g. curious, witty)" },
+        { key: "topics", type: "string[]", label: "Topics", description: "Topics the agent is knowledgeable about" },
         {
-          key: "name",
-          type: "string",
-          label: "Name",
-          description: "Agent display name",
-          maxLength: 100,
+          key: "style", type: "object", label: "Style", description: "Communication style guides", children: [
+            { key: "all", type: "string[]", label: "All", description: "Style guidelines for all responses" },
+            { key: "chat", type: "string[]", label: "Chat", description: "Style guidelines for chat responses" },
+            { key: "post", type: "string[]", label: "Post", description: "Style guidelines for social media posts" },
+          ]
         },
-        {
-          key: "username",
-          type: "string",
-          label: "Username",
-          description: "Agent username for platforms",
-          maxLength: 50,
-        },
-        {
-          key: "bio",
-          type: "string | string[]",
-          label: "Bio",
-          description: "Biography — single string or array of points",
-        },
-        {
-          key: "system",
-          type: "string",
-          label: "System Prompt",
-          description: "System prompt defining core behavior",
-          maxLength: 10000,
-        },
-        {
-          key: "adjectives",
-          type: "string[]",
-          label: "Adjectives",
-          description: "Personality adjectives (e.g. curious, witty)",
-        },
-        {
-          key: "topics",
-          type: "string[]",
-          label: "Topics",
-          description: "Topics the agent is knowledgeable about",
-        },
-        {
-          key: "style",
-          type: "object",
-          label: "Style",
-          description: "Communication style guides",
-          children: [
-            {
-              key: "all",
-              type: "string[]",
-              label: "All",
-              description: "Style guidelines for all responses",
-            },
-            {
-              key: "chat",
-              type: "string[]",
-              label: "Chat",
-              description: "Style guidelines for chat responses",
-            },
-            {
-              key: "post",
-              type: "string[]",
-              label: "Post",
-              description: "Style guidelines for social media posts",
-            },
-          ],
-        },
-        {
-          key: "messageExamples",
-          type: "array",
-          label: "Message Examples",
-          description: "Example conversations demonstrating the agent's voice",
-        },
-        {
-          key: "postExamples",
-          type: "string[]",
-          label: "Post Examples",
-          description: "Example social media posts",
-        },
+        { key: "messageExamples", type: "array", label: "Message Examples", description: "Example conversations demonstrating the agent's voice" },
+        { key: "postExamples", type: "string[]", label: "Post Examples", description: "Example social media posts" },
       ],
     });
     return;
@@ -2254,42 +2853,24 @@ async function handleRequest(
 
   // ── GET /api/registry/plugins ──────────────────────────────────────────
   if (method === "GET" && pathname === "/api/registry/plugins") {
-    const { getRegistryPlugins } = await import(
-      "../services/registry-client.js"
-    );
-    const { listInstalledPlugins } = await import(
-      "../services/plugin-installer.js"
-    );
+    const { getRegistryPlugins } = await import("../services/registry-client.js");
+    const { listInstalledPlugins } = await import("../services/plugin-installer.js");
     try {
-      const registry = await getRegistryPlugins();
-      const installed = await listInstalledPlugins();
-      const installedNames = new Set(installed.map((p) => p.name));
+      const [registry, installed] = await Promise.all([
+        getRegistryPlugins(),
+        listInstalledPlugins(),
+      ]);
+      const installedSet = new Set(installed.map((entry) => entry.name));
+      const plugins = Array.from(registry.values()) as RegistryPluginLike[];
+      plugins.sort((a, b) => b.stars - a.stars || a.name.localeCompare(b.name));
 
-      // Also check which plugins are loaded in the runtime
-      const loadedNames = state.runtime
-        ? new Set(state.runtime.plugins.map((p) => p.name))
-        : new Set<string>();
+      // Keep first-load latency bounded while still enriching the most likely picks.
+      const recencyBudget = Math.min(25, plugins.length);
+      const enriched = await Promise.all(
+        plugins.map((plugin, index) => enrichRegistryPlugin(plugin, installedSet.has(plugin.name), index < recencyBudget)),
+      );
 
-      // Cross-reference with bundled manifest so the Store can hide them
-      const bundledIds = new Set(state.plugins.map((p) => p.id));
-
-      const plugins = Array.from(registry.values()).map((p) => {
-        const shortId = p.name
-          .replace(/^@[^/]+\/plugin-/, "")
-          .replace(/^@[^/]+\//, "")
-          .replace(/^plugin-/, "");
-        return {
-          ...p,
-          installed: installedNames.has(p.name),
-          installedVersion:
-            installed.find((i) => i.name === p.name)?.version ?? null,
-          loaded:
-            loadedNames.has(p.name) ||
-            loadedNames.has(p.name.replace("@elizaos/", "")),
-          bundled: bundledIds.has(shortId),
-        };
-      });
-      json(res, { count: plugins.length, plugins });
+      json(res, { count: enriched.length, plugins: enriched });
     } catch (err) {
       error(
         res,
@@ -2310,6 +2891,7 @@ async function handleRequest(
       pathname.slice("/api/registry/plugins/".length),
     );
     const { getPluginInfo } = await import("../services/registry-client.js");
+    const { listInstalledPlugins } = await import("../services/plugin-installer.js");
 
     try {
       const info = await getPluginInfo(name);
@@ -2317,7 +2899,10 @@ async function handleRequest(
         error(res, `Plugin "${name}" not found in registry`, 404);
         return;
       }
-      json(res, { plugin: info });
+      const installed = await listInstalledPlugins();
+      const installedSet = new Set(installed.map((entry) => entry.name));
+      const enriched = await enrichRegistryPlugin(info as RegistryPluginLike, installedSet.has(info.name), true);
+      json(res, { plugin: enriched });
     } catch (err) {
       error(
         res,
@@ -2840,6 +3425,362 @@ async function handleRequest(
     }
     return;
   }
+
+  // ── GET /api/skills/marketplace/search?q=... ─────────────────────────
+  if (method === "GET" && pathname === "/api/skills/marketplace/search") {
+    const query = (url.searchParams.get("q") ?? "").trim();
+    const aiMode = ["1", "true", "yes"].includes((url.searchParams.get("ai") ?? "").toLowerCase());
+    const limitParam = url.searchParams.get("limit");
+    const rawLimit = limitParam ? Number(limitParam) : 20;
+    const limit = Number.isFinite(rawLimit) ? Math.max(1, Math.min(rawLimit, 50)) : 20;
+
+    if (!query) {
+      error(res, "Query parameter 'q' is required", 400);
+      return;
+    }
+
+    try {
+      const { searchSkillsMarketplace } = await import("../services/skill-marketplace.js");
+      const results = await searchSkillsMarketplace(query, { limit, aiSearch: aiMode });
+      json(res, { query, count: results.length, results });
+    } catch (err) {
+      error(res, `Skills marketplace search failed: ${err instanceof Error ? err.message : String(err)}`, 502);
+    }
+    return;
+  }
+
+  // ── GET /api/skills/marketplace/installed ─────────────────────────────
+  if (method === "GET" && pathname === "/api/skills/marketplace/installed") {
+    try {
+      const { listInstalledMarketplaceSkills } = await import("../services/skill-marketplace.js");
+      const workspaceDir = state.config.agents?.defaults?.workspace ?? resolveDefaultAgentWorkspaceDir();
+      const skills = await listInstalledMarketplaceSkills(workspaceDir);
+      json(res, { count: skills.length, skills });
+    } catch (err) {
+      error(res, `Failed to list installed skills: ${err instanceof Error ? err.message : String(err)}`, 500);
+    }
+    return;
+  }
+
+  // ── POST /api/skills/marketplace/install ──────────────────────────────
+  if (method === "POST" && pathname === "/api/skills/marketplace/install") {
+    const body = await readJsonBody<{
+      githubUrl?: string;
+      repository?: string;
+      path?: string;
+      name?: string;
+      description?: string;
+      source?: "skillsmp" | "manual";
+      autoRefresh?: boolean;
+    }>(req, res);
+    if (!body) return;
+
+    if (!body.githubUrl?.trim() && !body.repository?.trim()) {
+      error(res, "Request body must include 'githubUrl' or 'repository'", 400);
+      return;
+    }
+
+    try {
+      const { installMarketplaceSkill } = await import("../services/skill-marketplace.js");
+      const workspaceDir = state.config.agents?.defaults?.workspace ?? resolveDefaultAgentWorkspaceDir();
+      const installed = await installMarketplaceSkill(workspaceDir, {
+        githubUrl: body.githubUrl,
+        repository: body.repository,
+        path: body.path,
+        name: body.name,
+        description: body.description,
+        source: body.source,
+      });
+
+      if (body.autoRefresh !== false) {
+        state.skills = await discoverSkills(workspaceDir, state.config, state.runtime);
+      }
+
+      json(res, {
+        ok: true,
+        skill: installed,
+        refreshedSkills: body.autoRefresh !== false ? state.skills : undefined,
+      });
+    } catch (err) {
+      error(res, `Skill install failed: ${err instanceof Error ? err.message : String(err)}`, 422);
+    }
+    return;
+  }
+
+  // ── POST /api/skills/marketplace/uninstall ────────────────────────────
+  if (method === "POST" && pathname === "/api/skills/marketplace/uninstall") {
+    const body = await readJsonBody<{ id?: string; autoRefresh?: boolean }>(req, res);
+    if (!body) return;
+
+    const skillId = body.id?.trim();
+    if (!skillId) {
+      error(res, "Request body must include 'id'", 400);
+      return;
+    }
+
+    try {
+      const { uninstallMarketplaceSkill } = await import("../services/skill-marketplace.js");
+      const workspaceDir = state.config.agents?.defaults?.workspace ?? resolveDefaultAgentWorkspaceDir();
+      const removed = await uninstallMarketplaceSkill(workspaceDir, skillId);
+
+      if (body.autoRefresh !== false) {
+        state.skills = await discoverSkills(workspaceDir, state.config, state.runtime);
+      }
+
+      json(res, {
+        ok: true,
+        skill: removed,
+        refreshedSkills: body.autoRefresh !== false ? state.skills : undefined,
+      });
+    } catch (err) {
+      error(res, `Skill uninstall failed: ${err instanceof Error ? err.message : String(err)}`, 422);
+    }
+    return;
+  }
+
+  // ── GET /api/skills/marketplace/config ─────────────────────────────────
+  // Returns whether the SKILLSMP_API_KEY is set
+  if (method === "GET" && pathname === "/api/skills/marketplace/config") {
+    json(res, {
+      keySet: Boolean(process.env.SKILLSMP_API_KEY?.trim()),
+    });
+    return;
+  }
+
+  // ── PUT /api/skills/marketplace/config ─────────────────────────────────
+  // Update the SKILLSMP_API_KEY (for post-onboarding configuration)
+  if (method === "PUT" && pathname === "/api/skills/marketplace/config") {
+    const body = await readJsonBody<{ apiKey?: string }>(req, res);
+    if (!body) return;
+
+    const apiKey = typeof body.apiKey === "string" ? body.apiKey.trim() : "";
+    if (!apiKey) {
+      error(res, "Request body must include 'apiKey'", 400);
+      return;
+    }
+
+    // Update runtime environment
+    process.env.SKILLSMP_API_KEY = apiKey;
+
+    // Persist to config file
+    if (!state.config.env) state.config.env = {};
+    (state.config.env as Record<string, string>).SKILLSMP_API_KEY = apiKey;
+    saveMilaidyConfig(state.config);
+
+    json(res, { ok: true, keySet: true });
+    return;
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // MCP MARKETPLACE ENDPOINTS
+  // ══════════════════════════════════════════════════════════════════════════
+
+  // ── GET /api/mcp/marketplace/search?q=... ─────────────────────────────────
+  if (method === "GET" && pathname === "/api/mcp/marketplace/search") {
+    const query = url.searchParams.get("q") || "";
+    const limit = Math.min(50, Math.max(1, parseInt(url.searchParams.get("limit") || "30", 10)));
+
+    try {
+      const { searchMcpMarketplace } = await import("../services/mcp-marketplace.js");
+      const { results } = await searchMcpMarketplace(query || undefined, limit);
+      json(res, { ok: true, results });
+    } catch (err) {
+      error(res, `MCP search failed: ${err instanceof Error ? err.message : String(err)}`, 500);
+    }
+    return;
+  }
+
+  // ── GET /api/mcp/marketplace/details/:name ─────────────────────────────────
+  if (method === "GET" && pathname.startsWith("/api/mcp/marketplace/details/")) {
+    const name = decodeURIComponent(pathname.slice("/api/mcp/marketplace/details/".length));
+    if (!name) {
+      error(res, "Server name is required", 400);
+      return;
+    }
+    try {
+      const { getMcpServerDetails } = await import("../services/mcp-marketplace.js");
+      const details = await getMcpServerDetails(name);
+      if (!details) {
+        error(res, `Server "${name}" not found in registry`, 404);
+        return;
+      }
+      json(res, { ok: true, server: details });
+    } catch (err) {
+      error(res, `Failed to fetch server details: ${err instanceof Error ? err.message : String(err)}`, 500);
+    }
+    return;
+  }
+
+  // ── GET /api/mcp/config ────────────────────────────────────────────────────
+  // Returns the current MCP server configuration
+  if (method === "GET" && pathname === "/api/mcp/config") {
+    // MCP config is stored in state.config.plugins["@elizaos/plugin-mcp"].mcp
+    const pluginSettings = (state.config.plugins as Record<string, unknown> | undefined)?.["@elizaos/plugin-mcp"] as Record<string, unknown> | undefined;
+    const mcpConfigRaw = pluginSettings?.mcp;
+
+    let servers: Record<string, unknown> = {};
+    if (typeof mcpConfigRaw === "string") {
+      try {
+        const parsed = JSON.parse(mcpConfigRaw);
+        servers = parsed.servers || {};
+      } catch { /* ignore parse errors */ }
+    } else if (typeof mcpConfigRaw === "object" && mcpConfigRaw !== null) {
+      servers = (mcpConfigRaw as { servers?: Record<string, unknown> }).servers || {};
+    }
+
+    json(res, { ok: true, servers });
+    return;
+  }
+
+  // ── PUT /api/mcp/config ────────────────────────────────────────────────────
+  // Replace entire MCP config
+  if (method === "PUT" && pathname === "/api/mcp/config") {
+    const body = await readJsonBody<{ servers?: Record<string, unknown> }>(req, res);
+    if (!body) return;
+
+    if (!state.config.plugins) state.config.plugins = {} as unknown as typeof state.config.plugins;
+    const plugins = state.config.plugins as Record<string, unknown>;
+    if (!plugins["@elizaos/plugin-mcp"]) {
+      plugins["@elizaos/plugin-mcp"] = {};
+    }
+
+    const pluginConfig = plugins["@elizaos/plugin-mcp"] as Record<string, unknown>;
+    pluginConfig.mcp = JSON.stringify({ servers: body.servers || {} });
+    saveMilaidyConfig(state.config);
+
+    json(res, { ok: true });
+    return;
+  }
+
+  // ── POST /api/mcp/config/server ────────────────────────────────────────────
+  // Add or update a single MCP server
+  if (method === "POST" && pathname === "/api/mcp/config/server") {
+    const body = await readJsonBody<{ name: string; config: Record<string, unknown> }>(req, res);
+    if (!body) return;
+
+    const serverName = typeof body.name === "string" ? body.name.trim() : "";
+    const serverConfig = body.config;
+    if (!serverName) {
+      error(res, "Request body must include 'name' (non-empty string)", 400);
+      return;
+    }
+    if (!serverConfig || typeof serverConfig !== "object") {
+      error(res, "Request body must include 'config' (object)", 400);
+      return;
+    }
+
+    // Validate config type
+    const validTypes = ["stdio", "http", "streamable-http", "sse"];
+    const configType = (serverConfig as Record<string, unknown>).type;
+    if (typeof configType !== "string" || !validTypes.includes(configType)) {
+      error(res, `config.type must be one of: ${validTypes.join(", ")}`, 400);
+      return;
+    }
+
+    if (configType === "stdio") {
+      const cmd = (serverConfig as Record<string, unknown>).command;
+      if (typeof cmd !== "string" || !cmd.trim()) {
+        error(res, "config.command is required for stdio servers", 400);
+        return;
+      }
+    } else {
+      const url = (serverConfig as Record<string, unknown>).url;
+      if (typeof url !== "string" || !url.trim()) {
+        error(res, "config.url is required for remote servers", 400);
+        return;
+      }
+      try { new URL(url as string); } catch {
+        error(res, "config.url must be a valid URL", 400);
+        return;
+      }
+    }
+
+    // Get current config
+    if (!state.config.plugins) state.config.plugins = {} as unknown as typeof state.config.plugins;
+    const mcpPlugins = state.config.plugins as Record<string, unknown>;
+    if (!mcpPlugins["@elizaos/plugin-mcp"]) {
+      mcpPlugins["@elizaos/plugin-mcp"] = {};
+    }
+    const pluginConfig = mcpPlugins["@elizaos/plugin-mcp"] as Record<string, unknown>;
+
+    let servers: Record<string, unknown> = {};
+    if (typeof pluginConfig.mcp === "string") {
+      try {
+        const parsed = JSON.parse(pluginConfig.mcp);
+        servers = parsed.servers || {};
+      } catch { /* ignore */ }
+    } else if (typeof pluginConfig.mcp === "object" && pluginConfig.mcp !== null) {
+      servers = (pluginConfig.mcp as { servers?: Record<string, unknown> }).servers || {};
+    }
+
+    // Add/update server
+    servers[serverName] = serverConfig;
+    pluginConfig.mcp = JSON.stringify({ servers });
+    saveMilaidyConfig(state.config);
+
+    json(res, { ok: true, name: serverName, requiresRestart: true });
+    return;
+  }
+
+  // ── DELETE /api/mcp/config/server/:name ────────────────────────────────────
+  // Remove a single MCP server
+  if (method === "DELETE" && pathname.startsWith("/api/mcp/config/server/")) {
+    const serverName = decodeURIComponent(pathname.slice("/api/mcp/config/server/".length));
+    if (!serverName) {
+      error(res, "Server name is required", 400);
+      return;
+    }
+
+    // Get current config
+    const pluginConfig = (state.config.plugins as Record<string, unknown> | undefined)?.["@elizaos/plugin-mcp"] as Record<string, unknown> | undefined;
+    if (!pluginConfig) {
+      json(res, { ok: true }); // Already doesn't exist
+      return;
+    }
+
+    let servers: Record<string, unknown> = {};
+    if (typeof pluginConfig.mcp === "string") {
+      try {
+        const parsed = JSON.parse(pluginConfig.mcp);
+        servers = parsed.servers || {};
+      } catch { /* ignore */ }
+    } else if (typeof pluginConfig.mcp === "object" && pluginConfig.mcp !== null) {
+      servers = (pluginConfig.mcp as { servers?: Record<string, unknown> }).servers || {};
+    }
+
+    // Remove server
+    delete servers[serverName];
+    pluginConfig.mcp = JSON.stringify({ servers });
+    saveMilaidyConfig(state.config);
+
+    json(res, { ok: true, requiresRestart: true });
+    return;
+  }
+
+  // ── GET /api/mcp/status ────────────────────────────────────────────────────
+  // Returns live connection status of configured MCP servers
+  if (method === "GET" && pathname === "/api/mcp/status") {
+    const mcpSvc = state.runtime?.getService("mcp") as McpServiceLike | null;
+    if (!mcpSvc || typeof mcpSvc.getServers !== "function") {
+      json(res, { ok: true, servers: [] });
+      return;
+    }
+    try {
+      const servers = mcpSvc.getServers().map((s) => ({
+        name: s.name,
+        status: s.status,
+        error: s.error || null,
+        toolCount: Array.isArray(s.tools) ? s.tools.length : 0,
+        resourceCount: Array.isArray(s.resources) ? s.resources.length : 0,
+      }));
+      json(res, { ok: true, servers });
+    } catch (err) {
+      error(res, `Failed to get MCP status: ${err instanceof Error ? err.message : String(err)}`, 500);
+    }
+    return;
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
 
   // ── PUT /api/skills/:id ────────────────────────────────────────────────
   if (method === "PUT" && pathname.startsWith("/api/skills/")) {
@@ -3482,7 +4423,7 @@ export async function startApiServer(opts?: {
     logBuffer: [],
     chatRoomId: null,
     chatUserId: null,
-    cloudManager: null,
+    shareInbox: [],
   };
 
   // ── Cloud Manager initialisation ──────────────────────────────────────
