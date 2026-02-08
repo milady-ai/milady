@@ -31,9 +31,8 @@ test.describe("Skills page", () => {
     await mockApi(page);
     await page.goto("/");
     await page.locator("a").filter({ hasText: "Skills" }).click();
-    await page.waitForTimeout(500);
-    const activeCount = await page.locator(".plugin-status.enabled").count();
-    expect(activeCount).toBe(3); // 2 loaded enabled + 1 installed marketplace skill
+    // Wait for both loaded skills and marketplace installed skills to render
+    await expect(page.locator(".plugin-status.enabled")).toHaveCount(3); // 2 loaded enabled + 1 installed marketplace skill
   });
 
   test("shows empty state when no skills", async ({ page }) => {

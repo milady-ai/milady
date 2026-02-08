@@ -112,7 +112,7 @@ test.describe("Chat page", () => {
     await page.locator("button").filter({ hasText: "Send" }).click();
 
     await simulateAgentResponse(page, "I am Reimu!");
-    await expect(page.locator(".chat-msg.assistant .role")).toHaveText("Reimu");
+    await expect(page.locator(".chat-msg.assistant .role").last()).toHaveText("Reimu");
   });
 
   test("send button restores after agent responds", async ({ page }) => {
