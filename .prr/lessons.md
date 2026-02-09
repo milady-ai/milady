@@ -16,6 +16,7 @@
 - Fix for src/runtime/eliza.ts:300 - When a review comment explicitly requests test coverage, the fix must include those tests—code changes alone don't fulfill testing requirements.
 - Fix for src/runtime/eliza.ts:300 - When a review requests both documentation and test coverage, implement both—comment updates alone don't satisfy test coverage requirements.
 - Fix for src/runtime/eliza.ts:300 - When a review requests adding a test case, implement the actual test in the test file—don't just add a comment reminder about it.
+- Fix for src/runtime/eliza.ts:300 - When a code change addresses logic, also add test cases that explicitly verify the new behavior and document the intended precedence.
 
 ### scripts/dev-ui.mjs
 
