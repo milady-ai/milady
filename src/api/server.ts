@@ -882,6 +882,13 @@ function error(res: http.ServerResponse, message: string, status = 400): void {
  * Matches against the property key at any nesting depth.  Aligned with
  * SENSITIVE_PATTERNS in src/config/schema.ts so every field the UI marks
  * as sensitive is also redacted in the API response.
+ *
+ * RESIDUAL RISK: Key-based redaction is heuristic — secrets stored under
+ * generic keys (e.g. "value", "data", "config") will not be caught.  A
+ * stronger approach would be either (a) schema-level `sensitive: true`
+ * annotations that drive redaction, or (b) an allowlist that only exposes
+ * known-safe fields and strips everything else.  Both require deeper
+ * changes to the config schema infrastructure.
  */
 const SENSITIVE_KEY_RE =
   /token|password|secret|api.?key|private.?key|seed.?phrase|authorization|connection.?string|credential/i;
