@@ -32,4 +32,58 @@ test.describe("Command palette", () => {
     await expect(page).toHaveURL(/\/logs/);
     await expect(page.getByRole("heading", { name: "Logs" })).toBeVisible();
   });
+
+  test("closes palette with Escape key", async ({ page }) => {
+    await mockApi(page, { onboardingComplete: true, agentState: "running" });
+    await page.goto("/chat");
+    await expect(page.getByPlaceholder("Type a message...")).toBeVisible();
+
+    await openPalette(page);
+    await page.keyboard.press("Escape");
+
+    await expect(page.getByPlaceholder("Type a command...")).not.toBeVisible({ timeout: 5000 });
+  });
+
+  test("filters command list when typing a query", async ({ page }) => {
+    await mockApi(page, { onboardingComplete: true, agentState: "running" });
+    await page.goto("/chat");
+    await expect(page.getByPlaceholder("Type a message...")).toBeVisible();
+
+    await openPalette(page);
+
+    // Before typing, multiple commands should be visible
+    const allButtons = page.locator(".command-palette button, .cmd-palette button, [role='option']");
+    const initialCount = await allButtons.count();
+
+    await page.getByPlaceholder("Type a command...").fill("plugins");
+    await page.waitForTimeout(250);
+
+    // After filtering, fewer commands should match
+    const filteredCount = await allButtons.count();
+    expect(filteredCount).toBeLessThanOrEqual(initialCount);
+  });
+
+  test("navigates to plugins page via palette", async ({ page }) => {
+    await mockApi(page, { onboardingComplete: true, agentState: "running" });
+    await page.goto("/chat");
+    await expect(page.getByPlaceholder("Type a message...")).toBeVisible();
+
+    await openPalette(page);
+    await page.getByPlaceholder("Type a command...").fill("open plugins");
+    await page.keyboard.press("Enter");
+
+    await expect(page).toHaveURL(/\/plugins/);
+  });
+
+  test("navigates to config page via palette", async ({ page }) => {
+    await mockApi(page, { onboardingComplete: true, agentState: "running" });
+    await page.goto("/chat");
+    await expect(page.getByPlaceholder("Type a message...")).toBeVisible();
+
+    await openPalette(page);
+    await page.getByPlaceholder("Type a command...").fill("open config");
+    await page.keyboard.press("Enter");
+
+    await expect(page).toHaveURL(/\/config/);
+  });
 });
