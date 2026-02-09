@@ -10,7 +10,6 @@
  */
 
 import { logger } from "@elizaos/core";
-import { loadMilaidyConfig } from "../config/config.js";
 import {
   installPlugin,
   listInstalledPlugins,

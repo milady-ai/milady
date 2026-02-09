@@ -4924,7 +4924,7 @@ export async function startApiServer(opts?: {
   const PATCHED_MARKER = "__milaidyLogPatched";
   if (
     opts?.runtime?.logger &&
-    !(opts.runtime.logger as Record<string, unknown>)[PATCHED_MARKER]
+    !(opts.runtime.logger as unknown as Record<string, unknown>)[PATCHED_MARKER]
   ) {
     const rtLogger = opts.runtime.logger;
     const LEVELS = ["debug", "info", "warn", "error"] as const;
@@ -4950,7 +4950,7 @@ export async function startApiServer(opts?: {
       rtLogger[lvl] = patched;
     }
 
-    (rtLogger as Record<string, unknown>)[PATCHED_MARKER] = true;
+    (rtLogger as unknown as Record<string, unknown>)[PATCHED_MARKER] = true;
     addLog(
       "info",
       "Runtime logger connected — logs will stream to the UI",
