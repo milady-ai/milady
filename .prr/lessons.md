@@ -15,6 +15,7 @@
 - Fix for src/runtime/eliza.ts:300 - tool modified wrong files (scripts/dev-ui.mjs, src/runtime/eliza.test.ts), need to modify src/runtime/eliza.ts
 - Fix for src/runtime/eliza.ts:300 - When a review comment explicitly requests test coverage, the fix must include those tests—code changes alone don't fulfill testing requirements.
 - Fix for src/runtime/eliza.ts:300 - When a review requests both documentation and test coverage, implement both—comment updates alone don't satisfy test coverage requirements.
+- Fix for src/runtime/eliza.ts:300 - When a review requests adding a test case, implement the actual test in the test file—don't just add a comment reminder about it.
 
 ### scripts/dev-ui.mjs
 

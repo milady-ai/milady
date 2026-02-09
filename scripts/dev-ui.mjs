@@ -34,16 +34,53 @@ const uiOnly = process.argv.includes("--ui-only");
 // ---------------------------------------------------------------------------
 
 function which(cmd) {
-  const dirs = (process.env.PATH ?? "").split(path.delimiter).filter(Boolean);
+  const pathEnv = process.env.PATH ?? "";
+  if (!pathEnv) return null;
+
+  const dirs = pathEnv.split(path.delimiter).filter(Boolean);
+  const isWindows = process.platform === "win32";
+
+  // On Windows, commands may be invoked without an extension and resolved
+  // using PATHEXT (e.g., bun.exe, npx.cmd). Mirror that behavior here.
+  const pathext = isWindows ? process.env.PATHEXT : "";
+  const exts = isWindows
+    ? (pathext && pathext.length
+        ? pathext.split(";").filter(Boolean)
+        : [".EXE", ".CMD", ".BAT", ".COM"])
+    : [""];
+
   for (const dir of dirs) {
-    const candidate = path.join(dir, cmd);
-    if (existsSync(candidate)) return candidate;
+    // Always check the bare command first.
+    const candidates = [cmd];
+
+    if (isWindows) {
+      const lowerCmd = cmd.toLowerCase();
+      for (const ext of exts) {
+        const normalizedExt = ext.startsWith(".") ? ext : `.${ext}`;
+        if (!lowerCmd.endsWith(normalizedExt.toLowerCase())) {
+          candidates.push(cmd + normalizedExt);
+        }
+      }
+    }
+
+    for (const name of candidates) {
+      const candidate = path.join(dir, name);
+      if (existsSync(candidate)) return candidate;
+    }
   }
   return null;
 }
 
 const hasBun = !!which("bun");
 const hasNpx = !!which("npx");
+
+if (!hasBun && !hasNpx) {
+  console.error(
+    'Neither "bun" nor "npx" was found in your PATH. ' +
+      "Install Bun or Node.js with npx to run this dev script.",
+  );
+  process.exit(1);
+}
 
 // ---------------------------------------------------------------------------
 // Output filter — only forward error-level lines from the API server.
