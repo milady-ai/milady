@@ -222,6 +222,37 @@ function validateGitRef(ref: string): void {
   }
 }
 
+function sanitizeSkillPath(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) throw new Error("Invalid skill path");
+  if (trimmed.startsWith("~")) throw new Error("Invalid skill path");
+  if (path.posix.isAbsolute(trimmed) || path.win32.isAbsolute(trimmed)) {
+    throw new Error("Invalid skill path");
+  }
+  if (trimmed.includes("\\")) throw new Error("Invalid skill path");
+  const cleaned = trimmed.replace(/^\/+/, "");
+  if (!cleaned) throw new Error("Invalid skill path");
+  if (path.posix.isAbsolute(cleaned) || path.win32.isAbsolute(cleaned)) {
+    throw new Error("Invalid skill path");
+  }
+  if (cleaned === ".") return ".";
+  const parts = cleaned.split("/").filter(Boolean);
+  if (parts.length === 0) throw new Error("Invalid skill path");
+  if (parts.some((p) => p === "." || p === "..")) {
+    throw new Error("Invalid skill path");
+  }
+  return parts.join("/");
+}
+
+function assertPathWithinRoot(rootDir: string, targetPath: string): void {
+  const root = path.resolve(rootDir);
+  const target = path.resolve(targetPath);
+  if (target === root) return;
+  if (!target.startsWith(`${root}${path.sep}`)) {
+    throw new Error("Skill path escapes repository root");
+  }
+}
+
 function normalizeRepo(raw: string): string {
   const repo = raw
     .replace(/^https:\/\/github\.com\//i, "")
@@ -250,6 +281,22 @@ function parseGithubUrl(rawUrl: string): {
     throw new Error("Only github.com URLs are supported for skill install");
   }
 
+  const treeMarker = "/tree/";
+  const rawIndex = rawUrl.toLowerCase().indexOf(treeMarker);
+  if (rawIndex !== -1) {
+    const rawTail = rawUrl.slice(rawIndex + treeMarker.length);
+    const rawPath = rawTail.split(/[?#]/)[0];
+    let decoded = rawPath;
+    try {
+      decoded = decodeURIComponent(rawPath);
+    } catch {
+      // Keep raw path if decode fails; still scan for traversal tokens.
+    }
+    if (/(^|\/)\.\.(\/|$)/.test(decoded)) {
+      throw new Error("Invalid skill path");
+    }
+  }
+
   const parts = url.pathname.split("/").filter(Boolean);
   if (parts.length < 2) {
     throw new Error("GitHub URL must include owner/repo");
@@ -261,7 +308,8 @@ function parseGithubUrl(rawUrl: string): {
     const ref = parts[3];
     validateGitRef(ref);
     const treePath = parts.slice(4).join("/");
-    return { repository, path: treePath || null, ref: ref || null };
+    const safePath = treePath ? sanitizeSkillPath(treePath) : null;
+    return { repository, path: safePath, ref: ref || null };
   }
 
   return { repository, path: null, ref: null };
@@ -520,6 +568,9 @@ async function runGitCloneSubset(
   targetDir: string,
 ): Promise<void> {
   validateGitRef(ref);
+  if (skillPath !== ".") {
+    sanitizeSkillPath(skillPath);
+  }
   const tmpBase = await fs.mkdtemp(path.join(stateDirBase(), "skill-install-"));
   const cloneDir = path.join(tmpBase, "repo");
   const repoUrl = `https://github.com/${repository}.git`;
@@ -547,6 +598,7 @@ async function runGitCloneSubset(
     );
 
     const sourceDir = path.join(cloneDir, skillPath);
+    assertPathWithinRoot(cloneDir, sourceDir);
     const stat = await fs.stat(sourceDir).catch(() => null);
     if (!stat || !stat.isDirectory()) {
       throw new Error(`Skill path not found in repository: ${skillPath}`);
@@ -571,7 +623,7 @@ async function resolveSkillPathInRepo(
   requestedPath: string | null,
 ): Promise<string> {
   validateGitRef(ref);
-  if (requestedPath) return requestedPath.replace(/^\/+/, "");
+  if (requestedPath) return sanitizeSkillPath(requestedPath);
 
   const tmpBase = await fs.mkdtemp(path.join(stateDirBase(), "skill-probe-"));
   const cloneDir = path.join(tmpBase, "repo");
@@ -640,7 +692,7 @@ export async function installMarketplaceSkill(
     ? normalizeRepo(input.repository)
     : null;
   let requestedPath = input.path?.trim()
-    ? input.path.trim().replace(/^\/+/, "")
+    ? sanitizeSkillPath(input.path)
     : null;
   let gitRef = "main";
 
