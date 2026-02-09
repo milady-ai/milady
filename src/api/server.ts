@@ -878,12 +878,11 @@ function error(res: http.ServerResponse, message: string, status = 400): void {
 // ---------------------------------------------------------------------------
 
 const SENSITIVE_ENV_KEY_RE =
-  /PRIVATE_KEY|SECRET|PASSWORD|TOKEN|API_KEY|SEED_PHRASE/i;
+  /PRIVATE_KEY|SECRET|PASSWORD|TOKEN|API_KEY|SEED_PHRASE|AUTHORIZATION/i;
 
 /**
- * Return a shallow copy of the config with sensitive values in the `env`
- * section replaced by "[REDACTED]". This prevents private keys, API keys,
- * and other credentials from leaking through the HTTP API.
+ * Redact string values in a flat key-value map whose keys match a sensitive
+ * pattern (e.g. env var maps, HTTP header maps).
  */
 function redactStringMap(
   obj: Record<string, unknown>,
@@ -899,19 +898,146 @@ function redactStringMap(
   return redacted;
 }
 
+/** Replace a string value with "[REDACTED]" if non-empty. */
+function redactString(val: unknown): unknown {
+  return typeof val === "string" && val.length > 0 ? "[REDACTED]" : val;
+}
+
+/** Deep-clone a plain value (JSON-safe). */
+function cloneDeep<T>(val: T): T {
+  return JSON.parse(JSON.stringify(val));
+}
+
+/**
+ * Return a deep copy of the config with ALL known credential fields
+ * replaced by "[REDACTED]".  Covers:
+ *
+ *   env.*  / env.vars.*           — sensitive env var names
+ *   cloud.apiKey                  — Milaidy cloud API key
+ *   x402.privateKey               — wallet private key
+ *   models.providers[*].apiKey    — LLM provider API keys
+ *   models.providers[*].headers   — may contain Authorization headers
+ *   skills.entries[*].apiKey      — skill-level API keys
+ *   skills.entries[*].env         — skill-level env vars
+ *   database.postgres.password    — DB password
+ *   database.postgres.connectionString — may embed password
+ *   mcp.servers[*].env            — MCP server env vars
+ *   mcp.servers[*].headers        — MCP server auth headers
+ *   diagnostics.otel.headers      — telemetry auth headers
+ */
 function redactConfigSecrets(
   config: Record<string, unknown>,
 ): Record<string, unknown> {
-  const safe = { ...config };
+  const safe = cloneDeep(config);
+
+  // --- env section (flat key-value maps) ---
   if (safe.env && typeof safe.env === "object") {
     const envCopy = redactStringMap(safe.env as Record<string, unknown>);
-    // Also redact inside env.vars if present
     const vars = (safe.env as Record<string, unknown>).vars;
     if (vars && typeof vars === "object") {
       envCopy.vars = redactStringMap(vars as Record<string, unknown>);
     }
     safe.env = envCopy;
   }
+
+  // --- cloud.apiKey ---
+  if (safe.cloud && typeof safe.cloud === "object") {
+    const cloud = safe.cloud as Record<string, unknown>;
+    if (cloud.apiKey) cloud.apiKey = redactString(cloud.apiKey);
+  }
+
+  // --- x402.privateKey ---
+  if (safe.x402 && typeof safe.x402 === "object") {
+    const x402 = safe.x402 as Record<string, unknown>;
+    if (x402.privateKey) x402.privateKey = redactString(x402.privateKey);
+  }
+
+  // --- models.providers[*].apiKey / .headers ---
+  if (safe.models && typeof safe.models === "object") {
+    const models = safe.models as Record<string, unknown>;
+    if (models.providers && typeof models.providers === "object") {
+      const providers = models.providers as Record<string, unknown>;
+      for (const key of Object.keys(providers)) {
+        const p = providers[key];
+        if (p && typeof p === "object") {
+          const prov = p as Record<string, unknown>;
+          if (prov.apiKey) prov.apiKey = redactString(prov.apiKey);
+          if (prov.headers && typeof prov.headers === "object") {
+            prov.headers = redactStringMap(
+              prov.headers as Record<string, unknown>,
+            );
+          }
+        }
+      }
+    }
+  }
+
+  // --- skills.entries[*].apiKey / .env ---
+  if (safe.skills && typeof safe.skills === "object") {
+    const skills = safe.skills as Record<string, unknown>;
+    if (skills.entries && typeof skills.entries === "object") {
+      const entries = skills.entries as Record<string, unknown>;
+      for (const key of Object.keys(entries)) {
+        const e = entries[key];
+        if (e && typeof e === "object") {
+          const entry = e as Record<string, unknown>;
+          if (entry.apiKey) entry.apiKey = redactString(entry.apiKey);
+          if (entry.env && typeof entry.env === "object") {
+            entry.env = redactStringMap(
+              entry.env as Record<string, unknown>,
+            );
+          }
+        }
+      }
+    }
+  }
+
+  // --- database.postgres.password / .connectionString ---
+  if (safe.database && typeof safe.database === "object") {
+    const db = safe.database as Record<string, unknown>;
+    if (db.postgres && typeof db.postgres === "object") {
+      const pg = db.postgres as Record<string, unknown>;
+      if (pg.password) pg.password = redactString(pg.password);
+      if (pg.connectionString)
+        pg.connectionString = redactString(pg.connectionString);
+    }
+  }
+
+  // --- mcp.servers[*].env / .headers ---
+  if (safe.mcp && typeof safe.mcp === "object") {
+    const mcp = safe.mcp as Record<string, unknown>;
+    if (mcp.servers && typeof mcp.servers === "object") {
+      const servers = mcp.servers as Record<string, unknown>;
+      for (const key of Object.keys(servers)) {
+        const s = servers[key];
+        if (s && typeof s === "object") {
+          const srv = s as Record<string, unknown>;
+          if (srv.env && typeof srv.env === "object") {
+            srv.env = redactStringMap(srv.env as Record<string, unknown>);
+          }
+          if (srv.headers && typeof srv.headers === "object") {
+            srv.headers = redactStringMap(
+              srv.headers as Record<string, unknown>,
+            );
+          }
+        }
+      }
+    }
+  }
+
+  // --- diagnostics.otel.headers ---
+  if (safe.diagnostics && typeof safe.diagnostics === "object") {
+    const diag = safe.diagnostics as Record<string, unknown>;
+    if (diag.otel && typeof diag.otel === "object") {
+      const otel = diag.otel as Record<string, unknown>;
+      if (otel.headers && typeof otel.headers === "object") {
+        otel.headers = redactStringMap(
+          otel.headers as Record<string, unknown>,
+        );
+      }
+    }
+  }
+
   return safe;
 }
 
