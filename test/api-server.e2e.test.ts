@@ -353,12 +353,12 @@ describe("API Server E2E (no runtime)", () => {
     it("PUT /api/config → GET /api/config round-trips", async () => {
       const original = (await req(port, "GET", "/api/config")).data;
 
-      // Write new config
-      await req(port, "PUT", "/api/config", { test: { roundTrip: true } });
+      // Write new config (use an allowed top-level key per config allowlist)
+      await req(port, "PUT", "/api/config", { wizard: { lastRunCommand: "round-trip-test" } });
       const { data } = await req(port, "GET", "/api/config");
       expect(
-        (data as Record<string, Record<string, boolean>>).test?.roundTrip,
-      ).toBe(true);
+        (data as Record<string, Record<string, string>>).wizard?.lastRunCommand,
+      ).toBe("round-trip-test");
 
       // Restore
       await req(port, "PUT", "/api/config", original);
