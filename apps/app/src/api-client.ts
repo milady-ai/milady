@@ -727,6 +727,38 @@ export class MilaidyClient {
     });
   }
 
+  async startAnthropicLogin(): Promise<{ authUrl: string }> {
+    return this.fetch("/api/subscription/anthropic/start", { method: "POST" });
+  }
+
+  async exchangeAnthropicCode(code: string): Promise<{ success: boolean; expiresAt?: string }> {
+    return this.fetch("/api/subscription/anthropic/exchange", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code }),
+    });
+  }
+
+  async submitAnthropicSetupToken(token: string): Promise<{ success: boolean }> {
+    return this.fetch("/api/subscription/anthropic/setup-token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    });
+  }
+
+  async startOpenAILogin(): Promise<{ authUrl: string; state: string; instructions: string }> {
+    return this.fetch("/api/subscription/openai/start", { method: "POST" });
+  }
+
+  async exchangeOpenAICode(code: string): Promise<{ success: boolean; expiresAt?: string; accountId?: string }> {
+    return this.fetch("/api/subscription/openai/exchange", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code }),
+    });
+  }
+
   async startAgent(): Promise<AgentStatus> {
     const res = await this.fetch<{ status: AgentStatus }>("/api/agent/start", { method: "POST" });
     return res.status;

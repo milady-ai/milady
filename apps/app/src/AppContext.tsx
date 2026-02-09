@@ -273,6 +273,10 @@ export interface AppState {
   onboardingProvider: string;
   onboardingApiKey: string;
   onboardingSubscriptionTab: "token" | "oauth";
+  onboardingOAuthBusy: boolean;
+  onboardingOAuthError: string;
+  onboardingOAuthSuccess: boolean;
+  onboardingOAuthPasteUrl: string;
   onboardingChannelType: string;
   onboardingChannelToken: string;
   onboardingSelectedChains: Set<string>;
@@ -313,6 +317,8 @@ export interface AppState {
 }
 
 export interface AppActions {
+  client: typeof client;
+
   // Navigation
   setTab: (tab: Tab) => void;
   setTheme: (theme: ThemeName) => void;
@@ -579,6 +585,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [onboardingProvider, setOnboardingProvider] = useState("");
   const [onboardingApiKey, setOnboardingApiKey] = useState("");
   const [onboardingSubscriptionTab, setOnboardingSubscriptionTab] = useState<"token" | "oauth">("token");
+  const [onboardingOAuthBusy, setOnboardingOAuthBusy] = useState(false);
+  const [onboardingOAuthError, setOnboardingOAuthError] = useState("");
+  const [onboardingOAuthSuccess, setOnboardingOAuthSuccess] = useState(false);
+  const [onboardingOAuthPasteUrl, setOnboardingOAuthPasteUrl] = useState("");
   const [onboardingChannelType, setOnboardingChannelType] = useState("");
   const [onboardingChannelToken, setOnboardingChannelToken] = useState("");
   const [onboardingSelectedChains, setOnboardingSelectedChains] = useState<Set<string>>(new Set(["evm", "solana"]));
@@ -1786,6 +1796,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       onboardingProvider: setOnboardingProvider as (v: never) => void,
       onboardingApiKey: setOnboardingApiKey as (v: never) => void,
       onboardingSubscriptionTab: setOnboardingSubscriptionTab as (v: never) => void,
+      onboardingOAuthBusy: setOnboardingOAuthBusy as (v: never) => void,
+      onboardingOAuthError: setOnboardingOAuthError as (v: never) => void,
+      onboardingOAuthSuccess: setOnboardingOAuthSuccess as (v: never) => void,
+      onboardingOAuthPasteUrl: setOnboardingOAuthPasteUrl as (v: never) => void,
       onboardingChannelType: setOnboardingChannelType as (v: never) => void,
       onboardingChannelToken: setOnboardingChannelToken as (v: never) => void,
       onboardingSelectedChains: setOnboardingSelectedChains as (v: never) => void,
@@ -1997,7 +2011,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     importBusy, importPassword, importFile, importError, importSuccess,
     onboardingStep, onboardingOptions, onboardingName, onboardingStyle, onboardingTheme,
     onboardingRunMode, onboardingCloudProvider, onboardingSmallModel, onboardingLargeModel,
-    onboardingProvider, onboardingApiKey, onboardingSubscriptionTab, onboardingChannelType, onboardingChannelToken,
+    onboardingProvider, onboardingApiKey, onboardingSubscriptionTab,
+    onboardingOAuthBusy, onboardingOAuthError, onboardingOAuthSuccess, onboardingOAuthPasteUrl,
+    onboardingChannelType, onboardingChannelToken,
     onboardingSelectedChains, onboardingRpcSelections, onboardingRpcKeys,
     commandPaletteOpen, commandQuery, commandActiveIndex,
     mcpConfiguredServers, mcpServerStatuses, mcpMarketplaceQuery, mcpMarketplaceResults,
@@ -2009,6 +2025,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     configRaw, configText,
 
     // Actions
+    client,
     setTab, setTheme,
     handleStart, handleStop, handlePauseResume, handleRestart, handleReset,
     handleChatSend, handleChatClear, handleNewConversation,

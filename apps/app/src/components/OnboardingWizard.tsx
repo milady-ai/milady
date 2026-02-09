@@ -2,7 +2,7 @@
  * Onboarding wizard component — multi-step onboarding flow.
  */
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useApp, THEMES, type OnboardingStep } from "../AppContext.js";
 import type { StylePreset, ProviderOption, CloudProviderOption, ModelOption, InventoryProviderOption, RpcProviderOption } from "../api-client";
 
@@ -20,6 +20,10 @@ export function OnboardingWizard() {
     onboardingProvider,
     onboardingApiKey,
     onboardingSubscriptionTab,
+    onboardingOAuthBusy,
+    onboardingOAuthError,
+    onboardingOAuthSuccess,
+    onboardingOAuthPasteUrl,
     onboardingChannelType,
     onboardingChannelToken,
     onboardingSelectedChains,
@@ -34,7 +38,10 @@ export function OnboardingWizard() {
     setState,
     setTheme,
     handleCloudLogin,
+    client,
   } = useApp();
+
+  const [oauthInstructions, setOauthInstructions] = useState("");
 
   useEffect(() => {
     if (onboardingStep === "theme") {
@@ -73,17 +80,20 @@ export function OnboardingWizard() {
 
   const handleProviderSelect = (providerId: string) => {
     setState("onboardingProvider", providerId);
+    setState("onboardingApiKey", "");
+    setState("onboardingOAuthBusy", false);
+    setState("onboardingOAuthError", "");
+    setState("onboardingOAuthSuccess", false);
+    setState("onboardingOAuthPasteUrl", "");
+    setOauthInstructions("");
     if (providerId === "anthropic-subscription") {
       setState("onboardingSubscriptionTab", "token");
-      return;
-    }
-    if (providerId === "openai-subscription" || providerId === "elizacloud") {
-      setState("onboardingApiKey", "");
     }
   };
 
   const handleSubscriptionTabSelect = (tab: "token" | "oauth") => {
     setState("onboardingSubscriptionTab", tab);
+    setState("onboardingOAuthError", "");
     if (tab === "oauth") {
       setState("onboardingApiKey", "");
     }
@@ -91,6 +101,110 @@ export function OnboardingWizard() {
 
   const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setState("onboardingApiKey", e.target.value);
+  };
+
+  const handleOAuthPasteInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setState("onboardingOAuthPasteUrl", e.target.value);
+  };
+
+  const handleAnthropicOAuthStart = async () => {
+    setState("onboardingOAuthBusy", true);
+    setState("onboardingOAuthError", "");
+    setState("onboardingOAuthSuccess", false);
+    setState("onboardingOAuthPasteUrl", "");
+    try {
+      const { authUrl } = await client.startAnthropicLogin();
+      window.open(authUrl, "_blank");
+    } catch (err) {
+      setState("onboardingOAuthError", err instanceof Error ? err.message : "Failed to start Anthropic login");
+    } finally {
+      setState("onboardingOAuthBusy", false);
+    }
+  };
+
+  const handleAnthropicOAuthSubmit = async () => {
+    const code = onboardingOAuthPasteUrl.trim();
+    if (!code) {
+      setState("onboardingOAuthError", "Paste the authorization code first.");
+      return;
+    }
+    setState("onboardingOAuthBusy", true);
+    setState("onboardingOAuthError", "");
+    try {
+      const res = await client.exchangeAnthropicCode(code);
+      if (!res.success) {
+        throw new Error("Anthropic login did not complete.");
+      }
+      setState("onboardingOAuthSuccess", true);
+    } catch (err) {
+      setState("onboardingOAuthSuccess", false);
+      setState("onboardingOAuthError", err instanceof Error ? err.message : "Failed to connect Anthropic subscription");
+    } finally {
+      setState("onboardingOAuthBusy", false);
+    }
+  };
+
+  const handleVerifyAnthropicSetupToken = async () => {
+    const token = onboardingApiKey.trim();
+    if (!token) {
+      setState("onboardingOAuthError", "Enter a setup token first.");
+      setState("onboardingOAuthSuccess", false);
+      return;
+    }
+    setState("onboardingOAuthBusy", true);
+    setState("onboardingOAuthError", "");
+    setState("onboardingOAuthSuccess", false);
+    try {
+      const res = await client.submitAnthropicSetupToken(token);
+      if (!res.success) {
+        throw new Error("Token verification failed.");
+      }
+      setState("onboardingOAuthSuccess", true);
+    } catch (err) {
+      setState("onboardingOAuthError", err instanceof Error ? err.message : "Failed to verify setup token");
+      setState("onboardingOAuthSuccess", false);
+    } finally {
+      setState("onboardingOAuthBusy", false);
+    }
+  };
+
+  const handleOpenAIOAuthStart = async () => {
+    setState("onboardingOAuthBusy", true);
+    setState("onboardingOAuthError", "");
+    setState("onboardingOAuthSuccess", false);
+    setState("onboardingOAuthPasteUrl", "");
+    setOauthInstructions("");
+    try {
+      const { authUrl, instructions } = await client.startOpenAILogin();
+      setOauthInstructions(instructions ?? "");
+      window.open(authUrl, "_blank");
+    } catch (err) {
+      setState("onboardingOAuthError", err instanceof Error ? err.message : "Failed to start OpenAI login");
+    } finally {
+      setState("onboardingOAuthBusy", false);
+    }
+  };
+
+  const handleOpenAIOAuthSubmit = async () => {
+    const redirectUrl = onboardingOAuthPasteUrl.trim();
+    if (!redirectUrl) {
+      setState("onboardingOAuthError", "Paste the redirect URL first.");
+      return;
+    }
+    setState("onboardingOAuthBusy", true);
+    setState("onboardingOAuthError", "");
+    try {
+      const res = await client.exchangeOpenAICode(redirectUrl);
+      if (!res.success) {
+        throw new Error("OpenAI login did not complete.");
+      }
+      setState("onboardingOAuthSuccess", true);
+    } catch (err) {
+      setState("onboardingOAuthSuccess", false);
+      setState("onboardingOAuthError", err instanceof Error ? err.message : "Failed to connect OpenAI subscription");
+    } finally {
+      setState("onboardingOAuthBusy", false);
+    }
   };
 
   const handleChannelSelect = (type: string) => {
@@ -434,7 +548,12 @@ export function OnboardingWizard() {
                         }`}
                         onClick={() => handleProviderSelect(provider.id)}
                       >
-                        <div className="font-bold text-sm">{display.name}</div>
+                        <div className="flex items-center gap-2">
+                          <div className="font-bold text-sm">{display.name}</div>
+                          {onboardingProvider === provider.id && onboardingOAuthSuccess && (
+                            <span className="text-[11px] px-1.5 py-0.5 rounded bg-emerald-600 text-white">✓ Connected</span>
+                          )}
+                        </div>
                         {display.description && (
                           <div className={`text-xs mt-0.5 ${onboardingProvider === provider.id ? "opacity-80" : "text-muted"}`}>
                             {display.description}
@@ -463,7 +582,12 @@ export function OnboardingWizard() {
                         }`}
                         onClick={() => handleProviderSelect(provider.id)}
                       >
-                        <div className="font-bold text-sm">{display.name}</div>
+                        <div className="flex items-center gap-2">
+                          <div className="font-bold text-sm">{display.name}</div>
+                          {onboardingProvider === provider.id && onboardingOAuthSuccess && (
+                            <span className="text-[11px] px-1.5 py-0.5 rounded bg-emerald-600 text-white">✓ Connected</span>
+                          )}
+                        </div>
                         {display.description && (
                           <div className={`text-xs mt-0.5 ${onboardingProvider === provider.id ? "opacity-80" : "text-muted"}`}>
                             {display.description}
@@ -540,6 +664,22 @@ export function OnboardingWizard() {
                       placeholder="sk-ant-oat01-..."
                       className="w-full px-3 py-2 border border-border bg-card text-sm mt-2 focus:border-accent focus:outline-none"
                     />
+                    <div className="mt-3">
+                      <button
+                        className="px-4 py-2 border border-accent bg-accent text-accent-fg text-sm cursor-pointer hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
+                        onClick={() => void handleVerifyAnthropicSetupToken()}
+                        disabled={onboardingOAuthBusy}
+                      >
+                        {onboardingOAuthBusy ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <span className="inline-block w-4 h-4 border-2 border-border border-t-accent rounded-full animate-spin"></span>
+                            Verifying...
+                          </span>
+                        ) : (
+                          "Verify"
+                        )}
+                      </button>
+                    </div>
                     <p className="text-xs text-muted mt-2 whitespace-pre-line">
                       Paste your Claude Code setup token.{"\n"}
                       Get it from: claude.ai/settings/api → "Claude Code" → "Use setup token"
@@ -548,15 +688,48 @@ export function OnboardingWizard() {
                 ) : (
                   <>
                     <button
-                      className="px-6 py-2 border border-accent bg-accent text-accent-fg text-sm cursor-pointer hover:bg-accent-hover"
-                      onClick={() => undefined}
+                      className="px-6 py-2 border border-accent bg-accent text-accent-fg text-sm cursor-pointer hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
+                      onClick={() => void handleAnthropicOAuthStart()}
+                      disabled={onboardingOAuthBusy}
                     >
-                      Login with Anthropic
+                      {onboardingOAuthBusy ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <span className="inline-block w-4 h-4 border-2 border-border border-t-accent rounded-full animate-spin"></span>
+                          Opening...
+                        </span>
+                      ) : (
+                        "Login with Anthropic"
+                      )}
                     </button>
                     <p className="text-xs text-muted mt-2">
                       Opens Anthropic login in your browser to connect your subscription.
                     </p>
+                    <div className="mt-3">
+                      <label className="text-[13px] font-bold text-txt-strong block mb-2 text-left">
+                        After logging in, paste the authorization code here:
+                      </label>
+                      <input
+                        type="text"
+                        value={onboardingOAuthPasteUrl}
+                        onChange={handleOAuthPasteInputChange}
+                        placeholder="Paste authorization code"
+                        className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none"
+                      />
+                      <button
+                        className="mt-3 px-4 py-2 border border-border bg-card text-txt text-sm cursor-pointer hover:border-accent disabled:opacity-40 disabled:cursor-not-allowed"
+                        onClick={() => void handleAnthropicOAuthSubmit()}
+                        disabled={onboardingOAuthBusy}
+                      >
+                        {onboardingOAuthBusy ? "Connecting..." : "Connect Anthropic"}
+                      </button>
+                    </div>
                   </>
+                )}
+                {onboardingOAuthSuccess && (
+                  <p className="text-[13px] text-emerald-600 mt-2">✓ Connected</p>
+                )}
+                {onboardingOAuthError && (
+                  <p className="text-[13px] text-danger mt-2">{onboardingOAuthError}</p>
                 )}
               </div>
             )}
@@ -564,14 +737,50 @@ export function OnboardingWizard() {
             {onboardingProvider === "openai-subscription" && (
               <div className="max-w-[520px] mx-auto mt-4 text-left">
                 <button
-                  className="px-6 py-2 border border-accent bg-accent text-accent-fg text-sm cursor-pointer hover:bg-accent-hover"
-                  onClick={() => undefined}
+                  className="px-6 py-2 border border-accent bg-accent text-accent-fg text-sm cursor-pointer hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
+                  onClick={() => void handleOpenAIOAuthStart()}
+                  disabled={onboardingOAuthBusy}
                 >
-                  Login with OpenAI
+                  {onboardingOAuthBusy ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="inline-block w-4 h-4 border-2 border-border border-t-accent rounded-full animate-spin"></span>
+                      Opening...
+                    </span>
+                  ) : (
+                    "Login with OpenAI"
+                  )}
                 </button>
                 <p className="text-xs text-muted mt-2">
                   Opens OpenAI login in your browser. Requires ChatGPT Plus ($20/mo) or Pro ($200/mo).
                 </p>
+                {oauthInstructions && (
+                  <p className="text-xs text-muted mt-2 whitespace-pre-line">{oauthInstructions}</p>
+                )}
+                <div className="mt-3">
+                  <label className="text-[13px] font-bold text-txt-strong block mb-2 text-left">
+                    After logging in, paste the redirect URL here:
+                  </label>
+                  <input
+                    type="text"
+                    value={onboardingOAuthPasteUrl}
+                    onChange={handleOAuthPasteInputChange}
+                    placeholder="https://..."
+                    className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none"
+                  />
+                  <button
+                    className="mt-3 px-4 py-2 border border-border bg-card text-txt text-sm cursor-pointer hover:border-accent disabled:opacity-40 disabled:cursor-not-allowed"
+                    onClick={() => void handleOpenAIOAuthSubmit()}
+                    disabled={onboardingOAuthBusy}
+                  >
+                    {onboardingOAuthBusy ? "Connecting..." : "Connect OpenAI"}
+                  </button>
+                </div>
+                {onboardingOAuthSuccess && (
+                  <p className="text-[13px] text-emerald-600 mt-2">✓ Connected</p>
+                )}
+                {onboardingOAuthError && (
+                  <p className="text-[13px] text-danger mt-2">{onboardingOAuthError}</p>
+                )}
               </div>
             )}
 
@@ -798,10 +1007,10 @@ export function OnboardingWizard() {
         return cloudConnected;
       case "llmProvider":
         if (onboardingProvider === "anthropic-subscription") {
-          return onboardingApiKey.length > 0;
+          return onboardingApiKey.length > 0 || onboardingOAuthSuccess;
         }
         if (onboardingProvider === "openai-subscription") {
-          return true;
+          return onboardingOAuthSuccess;
         }
         if (onboardingProvider === "elizacloud") {
           return true;
