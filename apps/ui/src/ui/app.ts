@@ -196,6 +196,7 @@ export class MilaidyApp extends LitElement {
   @state() onboardingLargeModel = "claude-sonnet-4-5";
   @state() onboardingProvider = "";
   @state() onboardingApiKey = "";
+  @state() onboardingOpenRouterModel = "anthropic/claude-sonnet-4";
   @state() anthropicAuthMode: "oauth" | "token" = "oauth";
   @state() onboardingSelectedChains: Set<string> = new Set(["evm", "solana"]);
   @state() onboardingRpcSelections: Record<string, string> = {};
@@ -3756,6 +3757,7 @@ export class MilaidyApp extends LitElement {
         largeModel: this.onboardingRunMode === "cloud" ? this.onboardingLargeModel : undefined,
         provider: this.onboardingRunMode === "local" ? this.onboardingProvider || undefined : undefined,
         providerApiKey: this.onboardingRunMode === "local" ? this.onboardingApiKey || undefined : undefined,
+        openrouterModel: this.onboardingRunMode === "local" && this.onboardingProvider === "openrouter" ? this.onboardingOpenRouterModel || undefined : undefined,
         inventoryProviders: inventoryProviders.length > 0 ? inventoryProviders : undefined,
       });
     } catch (err) {
@@ -7232,6 +7234,27 @@ export class MilaidyApp extends LitElement {
                 @input=${(e: Event) => { this.onboardingApiKey = (e.target as HTMLInputElement).value; }}
                 style="margin-top:0;"
               />
+            </div>
+          `
+        : ""}
+      ${this.onboardingProvider === "openrouter" && this.onboardingApiKey.trim() && opts.openrouterModels
+        ? html`
+            <div style="margin-top:12px;padding:12px 14px;border:1px solid var(--border);background:var(--card);">
+              <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:6px;">Select Model</label>
+              <div style="display:grid;gap:6px;">
+                ${(opts.openrouterModels as Array<{id: string; name: string; description: string}>).map(
+                  (model) => html`
+                    <div
+                      class="onboarding-option ${this.onboardingOpenRouterModel === model.id ? "selected" : ""}"
+                      @click=${() => { this.onboardingOpenRouterModel = model.id; }}
+                      style="padding:8px 12px;"
+                    >
+                      <div class="label" style="font-size:13px;">${model.name}</div>
+                      <div class="hint" style="font-size:11px;">${model.description}</div>
+                    </div>
+                  `,
+                )}
+              </div>
             </div>
           `
         : ""}
