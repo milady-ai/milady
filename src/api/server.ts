@@ -1084,6 +1084,129 @@ function validateSkillId(
 }
 
 // ---------------------------------------------------------------------------
+// MCP server config validation — prevent arbitrary command execution
+// ---------------------------------------------------------------------------
+
+/**
+ * Allowed commands for MCP stdio servers.  These are the standard package
+ * runners and runtimes used by MCP server packages.  Anything outside this
+ * list is rejected — an attacker cannot register `/bin/bash` or arbitrary
+ * binaries as MCP servers via the API.
+ */
+const ALLOWED_MCP_COMMANDS = new Set([
+  "npx",
+  "node",
+  "bun",
+  "bunx",
+  "deno",
+  "python",
+  "python3",
+  "uvx",
+  "uv",
+  "docker",
+  "podman",
+]);
+
+/**
+ * Environment variables that must never be set via MCP server config because
+ * they enable code injection into spawned processes.
+ */
+const BLOCKED_MCP_ENV_KEYS = new Set([
+  "LD_PRELOAD",
+  "LD_LIBRARY_PATH",
+  "DYLD_INSERT_LIBRARIES",
+  "DYLD_LIBRARY_PATH",
+  "NODE_OPTIONS",
+  "NODE_EXTRA_CA_CERTS",
+  "ELECTRON_RUN_AS_NODE",
+  "PATH",
+  "HOME",
+  "SHELL",
+]);
+
+/**
+ * Validate an MCP server config object.  Returns an error string if invalid,
+ * or `null` if the config is acceptable.
+ */
+function validateMcpServerConfig(
+  config: Record<string, unknown>,
+): string | null {
+  const configType = config.type as string | undefined;
+  const validTypes = ["stdio", "http", "streamable-http", "sse"];
+  if (!configType || !validTypes.includes(configType)) {
+    return `Invalid config type. Must be one of: ${validTypes.join(", ")}`;
+  }
+
+  if (configType === "stdio") {
+    const command = config.command as string | undefined;
+    if (!command) {
+      return "Command is required for stdio servers";
+    }
+    // Extract the base binary name (strip path components)
+    const baseName = command.replace(/\\/g, "/").split("/").pop() ?? "";
+    // Strip common extensions (.exe, .cmd, .bat) for Windows compatibility
+    const normalized = baseName.replace(/\.(exe|cmd|bat)$/i, "");
+    if (!ALLOWED_MCP_COMMANDS.has(normalized)) {
+      return (
+        `Command "${baseName}" is not allowed. ` +
+        `Permitted commands: ${[...ALLOWED_MCP_COMMANDS].join(", ")}`
+      );
+    }
+    // Validate args are strings (no object injection)
+    if (config.args !== undefined) {
+      if (!Array.isArray(config.args)) {
+        return "args must be an array of strings";
+      }
+      for (const arg of config.args) {
+        if (typeof arg !== "string") {
+          return "Each arg must be a string";
+        }
+      }
+    }
+  }
+
+  if (
+    (configType === "http" ||
+      configType === "streamable-http" ||
+      configType === "sse") &&
+    !config.url
+  ) {
+    return "URL is required for remote servers";
+  }
+
+  // Validate env vars — block keys that enable code injection
+  if (config.env !== undefined) {
+    if (typeof config.env !== "object" || config.env === null || Array.isArray(config.env)) {
+      return "env must be a plain object of string key-value pairs";
+    }
+    for (const [key, val] of Object.entries(config.env as Record<string, unknown>)) {
+      if (typeof val !== "string") {
+        return `env.${key} must be a string`;
+      }
+      if (BLOCKED_MCP_ENV_KEYS.has(key.toUpperCase())) {
+        return `env variable "${key}" is not allowed for security reasons`;
+      }
+    }
+  }
+
+  // Validate cwd if present — must be a string, no path traversal to root
+  if (config.cwd !== undefined) {
+    if (typeof config.cwd !== "string") {
+      return "cwd must be a string";
+    }
+  }
+
+  // Validate timeoutInMillis if present
+  if (config.timeoutInMillis !== undefined) {
+    if (typeof config.timeoutInMillis !== "number" || config.timeoutInMillis < 0) {
+      return "timeoutInMillis must be a non-negative number";
+    }
+  }
+
+  return null;
+}
+
+// ---------------------------------------------------------------------------
 // Onboarding helpers
 // ---------------------------------------------------------------------------
 
@@ -4369,6 +4492,28 @@ async function handleRequest(
       }
     }
 
+    // Validate MCP server configs BEFORE merging — prevent bypassing
+    // the dedicated MCP endpoints' command allowlist via PUT /api/config.
+    if (filtered.mcp && typeof filtered.mcp === "object") {
+      const mcpObj = filtered.mcp as Record<string, unknown>;
+      const servers = mcpObj.servers as Record<string, unknown> | undefined;
+      if (servers && typeof servers === "object") {
+        for (const [name, cfg] of Object.entries(servers)) {
+          if (["__proto__", "constructor", "prototype"].includes(name)) {
+            error(res, `Invalid MCP server name: "${name}"`, 400);
+            return;
+          }
+          if (cfg && typeof cfg === "object") {
+            const mcpErr = validateMcpServerConfig(cfg as Record<string, unknown>);
+            if (mcpErr) {
+              error(res, `MCP server "${name}": ${mcpErr}`, 400);
+              return;
+            }
+          }
+        }
+      }
+    }
+
     safeMerge(state.config as Record<string, unknown>, filtered);
 
     try {
@@ -5257,35 +5402,21 @@ async function handleRequest(
       return;
     }
 
+    // Block prototype pollution via server name
+    if (["__proto__", "constructor", "prototype"].includes(serverName)) {
+      error(res, "Invalid server name", 400);
+      return;
+    }
+
     const config = body.config as Record<string, unknown> | undefined;
     if (!config || typeof config !== "object") {
       error(res, "Server config object is required", 400);
       return;
     }
 
-    const configType = config.type as string | undefined;
-    const validTypes = ["stdio", "http", "streamable-http", "sse"];
-    if (!configType || !validTypes.includes(configType)) {
-      error(
-        res,
-        `Invalid config type. Must be one of: ${validTypes.join(", ")}`,
-        400,
-      );
-      return;
-    }
-
-    if (configType === "stdio" && !config.command) {
-      error(res, "Command is required for stdio servers", 400);
-      return;
-    }
-
-    if (
-      (configType === "http" ||
-        configType === "streamable-http" ||
-        configType === "sse") &&
-      !config.url
-    ) {
-      error(res, "URL is required for remote servers", 400);
+    const mcpErr = validateMcpServerConfig(config);
+    if (mcpErr) {
+      error(res, mcpErr, 400);
       return;
     }
 
@@ -5333,6 +5464,20 @@ async function handleRequest(
 
     if (!state.config.mcp) state.config.mcp = {};
     if (body.servers && typeof body.servers === "object") {
+      // Validate every server config in the bulk update
+      for (const [name, cfg] of Object.entries(body.servers)) {
+        if (["__proto__", "constructor", "prototype"].includes(name)) {
+          error(res, `Invalid server name: "${name}"`, 400);
+          return;
+        }
+        if (cfg && typeof cfg === "object") {
+          const mcpErr = validateMcpServerConfig(cfg as Record<string, unknown>);
+          if (mcpErr) {
+            error(res, `Server "${name}": ${mcpErr}`, 400);
+            return;
+          }
+        }
+      }
       state.config.mcp.servers = body.servers as NonNullable<
         NonNullable<typeof state.config.mcp>["servers"]
       >;
