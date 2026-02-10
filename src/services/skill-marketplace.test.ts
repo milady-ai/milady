@@ -492,6 +492,16 @@ describe("installMarketplaceSkill", () => {
     ).rejects.toThrow("Invalid git ref");
   });
 
+  it("rejects skill path traversal attempts", async () => {
+    await expect(
+      installMarketplaceSkill(tmpDir, {
+        repository: "owner/repo",
+        path: "../secrets",
+        name: "test-skill",
+      }),
+    ).rejects.toThrow("Invalid skill path");
+  });
+
   it("throws when skill is already installed at the target path", async () => {
     // Pre-create the target directory to trigger the existence check.
     // Providing input.path skips the git-based resolveSkillPathInRepo probe.

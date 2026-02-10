@@ -222,6 +222,30 @@ function validateGitRef(ref: string): void {
   }
 }
 
+function normalizeSkillPath(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) throw new Error("Invalid skill path: empty");
+
+  const cleaned = trimmed.replace(/\\/g, "/");
+
+  if (/^[a-zA-Z]:\//.test(cleaned)) {
+    throw new Error(`Invalid skill path: "${raw}"`);
+  }
+
+  if (path.posix.isAbsolute(cleaned)) {
+    throw new Error(`Invalid skill path: "${raw}"`);
+  }
+
+  const parts = cleaned.split("/");
+  if (parts.some((p) => p === "..")) {
+    throw new Error(`Invalid skill path: "${raw}"`);
+  }
+
+  const normalized = path.posix.normalize(cleaned);
+  if (!normalized || normalized === ".") return ".";
+  return normalized.replace(/^\.\/+/, "");
+}
+
 function normalizeRepo(raw: string): string {
   const repo = raw
     .replace(/^https:\/\/github\.com\//i, "")
@@ -640,14 +664,16 @@ export async function installMarketplaceSkill(
     ? normalizeRepo(input.repository)
     : null;
   let requestedPath = input.path?.trim()
-    ? input.path.trim().replace(/^\/+/, "")
+    ? normalizeSkillPath(input.path)
     : null;
   let gitRef = "main";
 
   if (input.githubUrl?.trim()) {
     const parsed = parseGithubUrl(input.githubUrl.trim());
     repository = parsed.repository;
-    if (!requestedPath && parsed.path) requestedPath = parsed.path;
+    if (!requestedPath && parsed.path) {
+      requestedPath = normalizeSkillPath(parsed.path);
+    }
     if (parsed.ref) gitRef = parsed.ref;
   }
 
