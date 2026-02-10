@@ -177,10 +177,13 @@ export class ElizaCloudClient {
         }
 
         if (eventData) {
-          yield {
-            type: eventType,
-            data: JSON.parse(eventData) as Record<string, unknown>,
-          };
+          let data: Record<string, unknown>;
+          try {
+            data = JSON.parse(eventData) as Record<string, unknown>;
+          } catch {
+            continue;
+          }
+          yield { type: eventType, data };
         }
       }
     }
