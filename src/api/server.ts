@@ -1581,6 +1581,31 @@ function extractAuthToken(req: http.IncomingMessage): string | null {
   return null;
 }
 
+function isLoopbackBindAddress(bind: string): boolean {
+  const normalized = bind.trim().toLowerCase();
+  return (
+    normalized === "127.0.0.1" ||
+    normalized === "::1" ||
+    normalized === "::ffff:127.0.0.1" ||
+    normalized === "localhost"
+  );
+}
+
+function ensureApiTokenForBind(bind: string): void {
+  const existing = process.env.MILAIDY_API_TOKEN?.trim();
+  if (existing) return;
+  if (isLoopbackBindAddress(bind)) return;
+
+  const generated = crypto.randomBytes(32).toString("hex");
+  process.env.MILAIDY_API_TOKEN = generated;
+  logger.warn(
+    `[milaidy-api] MILAIDY_API_BIND=${bind} is non-loopback and MILAIDY_API_TOKEN is unset. Generated an ephemeral API token for this process.`,
+  );
+  logger.warn(
+    `[milaidy-api] Set MILAIDY_API_TOKEN explicitly to a stable value. Generated token: ${generated}`,
+  );
+}
+
 function isAuthorized(req: http.IncomingMessage): boolean {
   const expected = process.env.MILAIDY_API_TOKEN?.trim();
   if (!expected) return true;
@@ -5963,6 +5988,7 @@ export async function startApiServer(opts?: {
   const port = opts?.port ?? 2138;
   const host =
     (process.env.MILAIDY_API_BIND ?? "127.0.0.1").trim() || "127.0.0.1";
+  ensureApiTokenForBind(host);
 
   let config: MilaidyConfig;
   try {

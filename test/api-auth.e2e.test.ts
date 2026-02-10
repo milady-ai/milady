@@ -7,7 +7,8 @@
  * - Pairing code generation, validation, rate limiting, expiry
  * - Auth status endpoint (/api/auth/status)
  * - Pairing endpoint (/api/auth/pair)
- * - Auth bypass when no token is configured
+ * - Auth bypass when no token is configured on loopback
+ * - Forced auth when no token is configured on non-loopback bind
  * - Bearer, X-Milaidy-Token, X-Api-Key header extraction
  * - Loopback binding (MILAIDY_API_BIND)
  *
@@ -91,7 +92,7 @@ function saveEnv(...keys: string[]): { restore: () => void } {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 1. AUTH BYPASS — No token configured
+// 1. AUTH BYPASS (LOOPBACK) — No token configured
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe("Auth bypass (no MILAIDY_API_TOKEN)", () => {
@@ -138,7 +139,63 @@ describe("Auth bypass (no MILAIDY_API_TOKEN)", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 2. TOKEN AUTH GATE
+// 2. NON-LOOPBACK FORCES AUTH EVEN WITHOUT EXPLICIT TOKEN
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe("Non-loopback bind without MILAIDY_API_TOKEN", () => {
+  let port: number;
+  let close: () => Promise<void>;
+  let envBackup: { restore: () => void };
+  let generatedToken = "";
+
+  beforeAll(async () => {
+    envBackup = saveEnv(
+      "MILAIDY_API_TOKEN",
+      "MILAIDY_PAIRING_DISABLED",
+      "MILAIDY_API_BIND",
+    );
+    delete process.env.MILAIDY_API_TOKEN;
+    delete process.env.MILAIDY_PAIRING_DISABLED;
+    process.env.MILAIDY_API_BIND = "0.0.0.0";
+
+    const server = await startApiServer({ port: 0 });
+    port = server.port;
+    close = server.close;
+    generatedToken = process.env.MILAIDY_API_TOKEN ?? "";
+  }, 30_000);
+
+  afterAll(async () => {
+    await close();
+    envBackup.restore();
+  });
+
+  it("auto-generates a token", () => {
+    expect(generatedToken).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  it("rejects unauthenticated requests", async () => {
+    const { status, data } = await req(port, "GET", "/api/status");
+    expect(status).toBe(401);
+    expect(data.error).toBe("Unauthorized");
+  });
+
+  it("accepts requests with the generated token", async () => {
+    const { status } = await req(port, "GET", "/api/status", undefined, {
+      headers: { Authorization: `Bearer ${generatedToken}` },
+    });
+    expect(status).toBe(200);
+  });
+
+  it("/api/auth/status reports auth required", async () => {
+    const { status, data } = await req(port, "GET", "/api/auth/status");
+    expect(status).toBe(200);
+    expect(data.required).toBe(true);
+    expect(data.pairingEnabled).toBe(true);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 3. TOKEN AUTH GATE
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe("Token auth gate (MILAIDY_API_TOKEN set)", () => {
@@ -271,7 +328,7 @@ describe("Token auth gate (MILAIDY_API_TOKEN set)", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 3. CORS ORIGIN RESTRICTIONS
+// 4. CORS ORIGIN RESTRICTIONS
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe("CORS origin restrictions", () => {
@@ -401,7 +458,7 @@ describe("CORS origin restrictions", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 4. PAIRING FLOW
+// 5. PAIRING FLOW
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe("Pairing flow", () => {
@@ -531,7 +588,7 @@ describe("Pairing flow", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 5. AUTH + WALLET INTEGRATION
+// 6. AUTH + WALLET INTEGRATION
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe("Auth + wallet integration", () => {
@@ -618,7 +675,7 @@ describe("Auth + wallet integration", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 6. AUTH + ONBOARDING + AGENT LIFECYCLE
+// 7. AUTH + ONBOARDING + AGENT LIFECYCLE
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe("Auth + agent lifecycle", () => {
@@ -698,7 +755,7 @@ describe("Auth + agent lifecycle", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 7. maskSecret UTILITY
+// 8. maskSecret UTILITY
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe("maskSecret utility", () => {
@@ -734,7 +791,7 @@ describe("maskSecret utility", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 8. EDGE CASES AND SECURITY
+// 9. EDGE CASES AND SECURITY
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe("Auth edge cases and security", () => {
