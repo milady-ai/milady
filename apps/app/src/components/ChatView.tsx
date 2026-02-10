@@ -11,6 +11,7 @@ import { useApp } from "../AppContext.js";
 import { ChatAvatar } from "./ChatAvatar.js";
 import { useVoiceChat } from "../hooks/useVoiceChat.js";
 import { client, type VoiceConfig } from "../api-client.js";
+import { MessageContent } from "./MessageContent.js";
 
 // ── Typewriter streaming component ────────────────────────────────────
 // Reveals text progressively using direct DOM manipulation (no React
@@ -281,7 +282,7 @@ export function ChatView() {
                     onProgress={handleStreamProgress}
                   />
                 ) : (
-                  msg.text
+                  <MessageContent message={msg} />
                 )}
               </div>
             </div>

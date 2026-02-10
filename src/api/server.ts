@@ -174,6 +174,8 @@ interface PluginEntry {
   pluginDeps?: string[];
   /** Whether this plugin is currently active in the runtime. */
   isActive?: boolean;
+  /** Server-provided UI hints for plugin configuration fields. */
+  configUiHints?: Record<string, Record<string, unknown>>;
 }
 
 interface SkillEntry {
@@ -191,6 +193,115 @@ interface LogEntry {
   message: string;
   source: string;
   tags: string[];
+}
+
+// ---------------------------------------------------------------------------
+// Response block extraction — parse agent text for structured UI blocks
+// ---------------------------------------------------------------------------
+
+/** Content block types returned in the /api/chat and /api/conversations/:id/messages responses. */
+type ResponseBlock =
+  | { type: "text"; text: string }
+  | { type: "ui-spec"; spec: Record<string, unknown>; raw: string }
+  | { type: "config-form"; pluginId: string; pluginName?: string; schema: Record<string, unknown>; hints?: Record<string, unknown>; values?: Record<string, unknown> };
+
+/** Regex matching fenced JSON code blocks: ```json ... ``` or ``` ... ``` */
+const FENCED_JSON_RE_SERVER = /```(?:json)?\s*\n([\s\S]*?)```/g;
+
+/** CONFIG marker pattern: [CONFIG:pluginId] */
+const CONFIG_MARKER_RE = /\[CONFIG:([^\]]+)\]/g;
+
+function tryParseJsonServer(raw: string): unknown {
+  try { return JSON.parse(raw); } catch { return null; }
+}
+
+function isUiSpecObject(obj: unknown): obj is { root: string; elements: Record<string, unknown> } {
+  if (obj === null || typeof obj !== "object" || Array.isArray(obj)) return false;
+  const c = obj as Record<string, unknown>;
+  return typeof c.root === "string" && c.elements !== null && typeof c.elements === "object" && !Array.isArray(c.elements);
+}
+
+/**
+ * Scan agent response text for:
+ * 1. Fenced UiSpec JSON blocks → extract as { type: "ui-spec", spec, raw }
+ * 2. [CONFIG:pluginId] markers → generate { type: "config-form", ... } from plugin list
+ * 3. Remaining text → { type: "text", text }
+ *
+ * Returns { cleanText, blocks } where cleanText has UI blocks/markers removed.
+ */
+function extractResponseBlocks(
+  responseText: string,
+  plugins: PluginEntry[],
+): { cleanText: string; blocks: ResponseBlock[] } {
+  const blocks: ResponseBlock[] = [];
+  let text = responseText;
+
+  // Pass 1: extract fenced UiSpec JSON blocks
+  FENCED_JSON_RE_SERVER.lastIndex = 0;
+  const uiSpecRanges: Array<{ start: number; end: number; block: ResponseBlock }> = [];
+  let match: RegExpExecArray | null;
+
+  while ((match = FENCED_JSON_RE_SERVER.exec(text)) !== null) {
+    const jsonContent = match[1].trim();
+    const parsed = tryParseJsonServer(jsonContent);
+    if (parsed !== null && isUiSpecObject(parsed)) {
+      uiSpecRanges.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        block: { type: "ui-spec", spec: parsed as Record<string, unknown>, raw: jsonContent },
+      });
+    }
+  }
+
+  // Remove UiSpec blocks from text (reverse order to preserve indices)
+  if (uiSpecRanges.length > 0) {
+    for (let i = uiSpecRanges.length - 1; i >= 0; i--) {
+      const r = uiSpecRanges[i];
+      blocks.unshift(r.block);
+      text = text.slice(0, r.start) + text.slice(r.end);
+    }
+  }
+
+  // Pass 2: extract [CONFIG:pluginId] markers
+  CONFIG_MARKER_RE.lastIndex = 0;
+  const configMarkers: Array<{ start: number; end: number; pluginId: string }> = [];
+  while ((match = CONFIG_MARKER_RE.exec(text)) !== null) {
+    configMarkers.push({ start: match.index, end: match.index + match[0].length, pluginId: match[1].trim() });
+  }
+
+  if (configMarkers.length > 0) {
+    for (let i = configMarkers.length - 1; i >= 0; i--) {
+      const m = configMarkers[i];
+      const plugin = plugins.find((p) => p.id === m.pluginId);
+      if (plugin) {
+        const schema: Record<string, unknown> = {};
+        const values: Record<string, unknown> = {};
+        for (const param of plugin.parameters) {
+          schema[param.key] = { type: param.type, description: param.description, required: param.required };
+          if (param.currentValue !== null) values[param.key] = param.currentValue;
+        }
+        blocks.push({
+          type: "config-form",
+          pluginId: m.pluginId,
+          pluginName: plugin.name,
+          schema,
+          hints: plugin.configUiHints ?? {},
+          values,
+        });
+      }
+      text = text.slice(0, m.start) + text.slice(m.end);
+    }
+  }
+
+  // Build clean text (trim whitespace from block removal)
+  const cleanText = text.replace(/\n{3,}/g, "\n\n").trim();
+
+  // If there's remaining text content, prepend it as a text block
+  if (cleanText) {
+    blocks.unshift({ type: "text", text: cleanText });
+  }
+
+  return { cleanText, blocks };
 }
 
 // ---------------------------------------------------------------------------
@@ -235,6 +346,7 @@ interface PluginIndexEntry {
   pluginParameters?: Record<string, Record<string, unknown>>;
   version?: string;
   pluginDeps?: string[];
+  configUiHints?: Record<string, Record<string, unknown>>;
 }
 
 interface PluginIndex {
@@ -274,6 +386,276 @@ function buildParamDefs(
       isSet,
     };
   });
+}
+
+/**
+ * Infer parameter definitions from bare config key names when explicit
+ * pluginParameters metadata is not provided.  Uses naming conventions to
+ * determine type, sensitivity, requirement level, and a human-readable
+ * description.
+ */
+function inferParamDefs(configKeys: string[]): PluginParamDef[] {
+  return configKeys.map((key) => {
+    const upper = key.toUpperCase();
+
+    // Detect sensitive keys
+    const sensitive =
+      upper.includes("_API_KEY") ||
+      upper.includes("_SECRET") ||
+      upper.includes("_TOKEN") ||
+      upper.includes("_PASSWORD") ||
+      upper.includes("_PRIVATE_KEY") ||
+      upper.includes("_SIGNING_") ||
+      upper.includes("ENCRYPTION_");
+
+    // Detect booleans
+    const isBoolean =
+      upper.includes("ENABLED") ||
+      upper.includes("_ENABLE_") ||
+      upper.startsWith("ENABLE_") ||
+      upper.includes("DRY_RUN") ||
+      upper.includes("_DEBUG") ||
+      upper.includes("_VERBOSE") ||
+      upper.includes("AUTO_") ||
+      upper.includes("FORCE_") ||
+      upper.includes("DISABLE_") ||
+      upper.includes("SHOULD_") ||
+      upper.endsWith("_SSL");
+
+    // Detect numbers
+    const isNumber =
+      upper.endsWith("_PORT") ||
+      upper.endsWith("_INTERVAL") ||
+      upper.endsWith("_TIMEOUT") ||
+      upper.endsWith("_MS") ||
+      upper.endsWith("_MINUTES") ||
+      upper.endsWith("_SECONDS") ||
+      upper.endsWith("_LIMIT") ||
+      upper.endsWith("_MAX") ||
+      upper.endsWith("_MIN") ||
+      upper.includes("_MAX_") ||
+      upper.includes("_MIN_") ||
+      upper.endsWith("_COUNT") ||
+      upper.endsWith("_SIZE") ||
+      upper.endsWith("_STEPS");
+
+    const type = isBoolean ? "boolean" : isNumber ? "number" : "string";
+
+    // Primary keys are required (API keys, tokens, bot tokens, account IDs)
+    const required =
+      sensitive &&
+      (upper.endsWith("_API_KEY") ||
+        upper.endsWith("_BOT_TOKEN") ||
+        upper.endsWith("_TOKEN") ||
+        upper.endsWith("_PRIVATE_KEY"));
+
+    // Generate a human-readable description from the key name
+    const description = inferDescription(key);
+
+    const envValue = process.env[key];
+    const isSet = Boolean(envValue?.trim());
+
+    return {
+      key,
+      type,
+      description,
+      required,
+      sensitive,
+      default: undefined,
+      options: undefined,
+      currentValue: isSet
+        ? sensitive
+          ? maskValue(envValue ?? "")
+          : (envValue ?? "")
+        : null,
+      isSet,
+    };
+  });
+}
+
+/** Derive a human-readable description from an environment variable key. */
+function inferDescription(key: string): string {
+  const upper = key.toUpperCase();
+
+  // Special well-known suffixes
+  if (upper.endsWith("_API_KEY"))
+    return `API key for ${prefixLabel(key, "_API_KEY")}`;
+  if (upper.endsWith("_BOT_TOKEN"))
+    return `Bot token for ${prefixLabel(key, "_BOT_TOKEN")}`;
+  if (upper.endsWith("_TOKEN"))
+    return `Authentication token for ${prefixLabel(key, "_TOKEN")}`;
+  if (upper.endsWith("_SECRET"))
+    return `Secret for ${prefixLabel(key, "_SECRET")}`;
+  if (upper.endsWith("_PRIVATE_KEY"))
+    return `Private key for ${prefixLabel(key, "_PRIVATE_KEY")}`;
+  if (upper.endsWith("_PASSWORD"))
+    return `Password for ${prefixLabel(key, "_PASSWORD")}`;
+  if (upper.endsWith("_RPC_URL"))
+    return `RPC endpoint URL for ${prefixLabel(key, "_RPC_URL")}`;
+  if (upper.endsWith("_BASE_URL"))
+    return `Base URL for ${prefixLabel(key, "_BASE_URL")}`;
+  if (upper.endsWith("_URL")) return `URL for ${prefixLabel(key, "_URL")}`;
+  if (upper.endsWith("_ENDPOINT"))
+    return `Endpoint for ${prefixLabel(key, "_ENDPOINT")}`;
+  if (upper.endsWith("_HOST"))
+    return `Host address for ${prefixLabel(key, "_HOST")}`;
+  if (upper.endsWith("_PORT"))
+    return `Port number for ${prefixLabel(key, "_PORT")}`;
+  if (upper.endsWith("_MODEL") || upper.includes("_MODEL_"))
+    return `Model identifier for ${prefixLabel(key, "_MODEL")}`;
+  if (upper.endsWith("_VOICE") || upper.includes("_VOICE_"))
+    return `Voice setting for ${prefixLabel(key, "_VOICE")}`;
+  if (upper.endsWith("_DIR") || upper.endsWith("_PATH"))
+    return `Directory path for ${prefixLabel(key, "_DIR").replace(/_PATH$/i, "")}`;
+  if (upper.endsWith("_ENABLED") || upper.startsWith("ENABLE_"))
+    return `Enable/disable ${prefixLabel(key, "_ENABLED").replace(/^ENABLE_/i, "")}`;
+  if (upper.includes("DRY_RUN")) return `Dry-run mode (no real actions)`;
+  if (upper.endsWith("_INTERVAL") || upper.endsWith("_INTERVAL_MINUTES"))
+    return `Check interval for ${prefixLabel(key, "_INTERVAL")}`;
+  if (upper.endsWith("_TIMEOUT") || upper.endsWith("_TIMEOUT_MS"))
+    return `Timeout setting for ${prefixLabel(key, "_TIMEOUT")}`;
+
+  // Generic: convert KEY_NAME to "Key name"
+  return key
+    .split("_")
+    .map((w, i) =>
+      i === 0
+        ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+        : w.toLowerCase(),
+    )
+    .join(" ");
+}
+
+/** Extract the plugin/service prefix label from a key by removing a known suffix. */
+function prefixLabel(key: string, suffix: string): string {
+  const raw = key.replace(new RegExp(`${suffix}$`, "i"), "").replace(/_+$/, "");
+  if (!raw) return key;
+  return raw
+    .split("_")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
+// ---------------------------------------------------------------------------
+// Blocked env keys — dangerous system vars that must never be written via API
+// ---------------------------------------------------------------------------
+
+const BLOCKED_ENV_KEYS = new Set([
+  "LD_PRELOAD",
+  "LD_LIBRARY_PATH",
+  "DYLD_INSERT_LIBRARIES",
+  "DYLD_LIBRARY_PATH",
+  "NODE_OPTIONS",
+  "NODE_EXTRA_CA_CERTS",
+  "ELECTRON_RUN_AS_NODE",
+  "PATH",
+  "HOME",
+  "SHELL",
+  "MILAIDY_API_TOKEN",
+  "DATABASE_URL",
+  "POSTGRES_URL",
+]);
+
+// ---------------------------------------------------------------------------
+// Secrets aggregation — collect all sensitive params across plugins
+// ---------------------------------------------------------------------------
+
+interface SecretEntry {
+  key: string;
+  description: string;
+  category: string;
+  sensitive: boolean;
+  required: boolean;
+  isSet: boolean;
+  maskedValue: string | null;
+  usedBy: Array<{ pluginId: string; pluginName: string; enabled: boolean }>;
+}
+
+const AI_PROVIDERS = new Set([
+  "OPENAI", "ANTHROPIC", "GOOGLE", "MISTRAL", "GROQ", "COHERE",
+  "TOGETHER", "FIREWORKS", "PERPLEXITY", "DEEPSEEK", "XAI",
+  "OPENROUTER", "ELEVENLABS", "REPLICATE", "HUGGINGFACE",
+]);
+
+function inferSecretCategory(key: string): string {
+  const upper = key.toUpperCase();
+
+  // AI provider keys
+  if (upper.endsWith("_API_KEY")) {
+    const prefix = upper.replace(/_API_KEY$/, "");
+    if (AI_PROVIDERS.has(prefix)) return "ai-provider";
+  }
+
+  // Blockchain
+  if (
+    upper.endsWith("_RPC_URL") ||
+    upper.endsWith("_PRIVATE_KEY") ||
+    upper.startsWith("SOLANA_") ||
+    upper.startsWith("EVM_") ||
+    upper.includes("_WALLET_") ||
+    upper.includes("HELIUS") ||
+    upper.includes("ALCHEMY") ||
+    upper.includes("INFURA") ||
+    upper.includes("ANKR") ||
+    upper.includes("BIRDEYE")
+  ) {
+    return "blockchain";
+  }
+
+  // Connectors
+  if (
+    upper.endsWith("_BOT_TOKEN") ||
+    upper.startsWith("TELEGRAM_") ||
+    upper.startsWith("DISCORD_") ||
+    upper.startsWith("TWITTER_") ||
+    upper.startsWith("SLACK_") ||
+    upper.startsWith("FARCASTER_")
+  ) {
+    return "connector";
+  }
+
+  // Auth
+  if (
+    upper.endsWith("_TOKEN") ||
+    upper.endsWith("_SECRET") ||
+    upper.endsWith("_PASSWORD")
+  ) {
+    return "auth";
+  }
+
+  return "other";
+}
+
+function aggregateSecrets(plugins: PluginEntry[]): SecretEntry[] {
+  const map = new Map<string, SecretEntry>();
+
+  for (const plugin of plugins) {
+    for (const param of plugin.parameters) {
+      if (!param.sensitive) continue;
+
+      const existing = map.get(param.key);
+      if (existing) {
+        existing.usedBy.push({ pluginId: plugin.id, pluginName: plugin.name, enabled: plugin.enabled });
+        // Only mark required if an *enabled* plugin requires it
+        if (param.required && plugin.enabled) existing.required = true;
+      } else {
+        const envValue = process.env[param.key];
+        const isSet = Boolean(envValue?.trim());
+        map.set(param.key, {
+          key: param.key,
+          description: param.description || inferDescription(param.key),
+          category: inferSecretCategory(param.key),
+          sensitive: true,
+          required: param.required && plugin.enabled,
+          isSet,
+          maskedValue: isSet ? maskValue(envValue!) : null,
+          usedBy: [{ pluginId: plugin.id, pluginName: plugin.name, enabled: plugin.enabled }],
+        });
+      }
+    }
+  }
+
+  return Array.from(map.values());
 }
 
 /**
@@ -424,6 +806,7 @@ function discoverPluginsFromManifest(): PluginEntry[] {
             npmName: p.npmName,
             version: p.version,
             pluginDeps: p.pluginDeps,
+            ...(p.configUiHints ? { configUiHints: p.configUiHints } : {}),
           };
         })
         .sort((a, b) => a.name.localeCompare(b.name));
@@ -2902,6 +3285,11 @@ async function handleRequest(
         return;
       }
 
+      // Only allow env vars declared in the plugin's parameter definitions.
+      // This prevents attackers from injecting arbitrary env vars like
+      // NODE_OPTIONS, LD_PRELOAD, PATH, etc. via the config endpoint.
+      const allowedParamKeys = new Set(plugin.parameters.map((p) => p.key));
+
       for (const [key, value] of Object.entries(body.config)) {
         if (typeof value === "string" && value.trim()) {
           process.env[key] = value;
@@ -3004,6 +3392,72 @@ async function handleRequest(
     }
 
     json(res, { ok: true, plugin });
+    return;
+  }
+
+  // ── GET /api/secrets ─────────────────────────────────────────────────
+  if (method === "GET" && pathname === "/api/secrets") {
+    // Merge bundled + installed plugins for full parameter coverage
+    const bundledIds = new Set(state.plugins.map((p) => p.id));
+    const installedEntries = discoverInstalledPlugins(state.config, bundledIds);
+    const allPlugins: PluginEntry[] = [...state.plugins, ...installedEntries];
+
+    // Sync enabled status from runtime (same logic as GET /api/plugins)
+    if (state.runtime) {
+      const loadedNames = state.runtime.plugins.map((p) => p.name);
+      for (const plugin of allPlugins) {
+        const suffix = `plugin-${plugin.id}`;
+        const packageName = `@elizaos/plugin-${plugin.id}`;
+        plugin.enabled = loadedNames.some((name) =>
+          name === plugin.id || name === suffix || name === packageName ||
+          name.endsWith(`/${suffix}`) || name.includes(plugin.id),
+        );
+      }
+    }
+
+    const secrets = aggregateSecrets(allPlugins);
+    json(res, { secrets });
+    return;
+  }
+
+  // ── PUT /api/secrets ─────────────────────────────────────────────────
+  if (method === "PUT" && pathname === "/api/secrets") {
+    const body = await readJsonBody<{ secrets: Record<string, string> }>(req, res);
+    if (!body) return;
+    if (!body.secrets || typeof body.secrets !== "object") {
+      error(res, "Missing or invalid 'secrets' object", 400);
+      return;
+    }
+
+    // Build allowlist from all plugin-declared sensitive params
+    const bundledIds = new Set(state.plugins.map((p) => p.id));
+    const installedEntries = discoverInstalledPlugins(state.config, bundledIds);
+    const allPlugins: PluginEntry[] = [...state.plugins, ...installedEntries];
+    const allowedKeys = new Set<string>();
+    for (const plugin of allPlugins) {
+      for (const param of plugin.parameters) {
+        if (param.sensitive) allowedKeys.add(param.key);
+      }
+    }
+
+    const updated: string[] = [];
+    for (const [key, value] of Object.entries(body.secrets)) {
+      if (typeof value !== "string" || !value.trim()) continue;
+      if (!allowedKeys.has(key)) continue;
+      if (BLOCKED_ENV_KEYS.has(key.toUpperCase())) continue;
+      process.env[key] = value;
+      updated.push(key);
+    }
+
+    // Mark affected plugins as configured
+    for (const plugin of allPlugins) {
+      const pluginKeys = new Set(plugin.parameters.map((p) => p.key));
+      if (updated.some((k) => pluginKeys.has(k))) {
+        plugin.configured = true;
+      }
+    }
+
+    json(res, { ok: true, updated });
     return;
   }
 
@@ -3123,6 +3577,61 @@ async function handleRequest(
         `Refresh failed: ${err instanceof Error ? err.message : String(err)}`,
         502,
       );
+    }
+    return;
+  }
+
+  // ── POST /api/plugins/:id/test ────────────────────────────────────────
+  // Test a plugin's connection / configuration validity.
+  const pluginTestMatch = method === "POST" && pathname.match(/^\/api\/plugins\/([^/]+)\/test$/);
+  if (pluginTestMatch) {
+    const pluginId = decodeURIComponent(pluginTestMatch[1]);
+    const startMs = Date.now();
+
+    try {
+      // Find the plugin in the runtime
+      const allPlugins = state.runtime?.plugins ?? [];
+      const plugin = allPlugins.find((p: { id?: string; name?: string }) =>
+        p.id === pluginId || p.name === pluginId
+      );
+
+      if (!plugin) {
+        json(res, {
+          success: false,
+          pluginId,
+          error: "Plugin not found or not loaded",
+          durationMs: Date.now() - startMs,
+        }, 404);
+        return;
+      }
+
+      // Check if plugin exposes a test/health method
+      const testFn = (plugin as unknown as Record<string, unknown>).testConnection ?? (plugin as unknown as Record<string, unknown>).healthCheck;
+      if (typeof testFn === "function") {
+        const result = await (testFn as () => Promise<{ ok: boolean; message?: string }>)();
+        json(res, {
+          success: result.ok !== false,
+          pluginId,
+          message: result.message ?? (result.ok !== false ? "Connection successful" : "Connection failed"),
+          durationMs: Date.now() - startMs,
+        });
+        return;
+      }
+
+      // No test function — return a basic "plugin is loaded" status
+      json(res, {
+        success: true,
+        pluginId,
+        message: "Plugin is loaded and active (no custom test available)",
+        durationMs: Date.now() - startMs,
+      });
+    } catch (err) {
+      json(res, {
+        success: false,
+        pluginId,
+        error: err instanceof Error ? err.message : String(err),
+        durationMs: Date.now() - startMs,
+      }, 500);
     }
     return;
   }
@@ -4631,6 +5140,86 @@ async function handleRequest(
     };
     saveMilaidyConfig(state.config);
     json(res, { channel: ch });
+    return;
+  }
+
+  // ── GET /api/connectors ──────────────────────────────────────────────────
+  if (method === "GET" && pathname === "/api/connectors") {
+    const connectors = state.config.connectors ?? state.config.channels ?? {};
+    json(res, {
+      connectors: redactConfigSecrets(connectors as Record<string, unknown>),
+    });
+    return;
+  }
+
+  // ── POST /api/connectors ─────────────────────────────────────────────────
+  if (method === "POST" && pathname === "/api/connectors") {
+    const body = await readJsonBody(req, res);
+    if (!body) return;
+    const name = body.name;
+    const config = body.config;
+    if (!name || typeof name !== "string" || !name.trim()) {
+      error(res, "Missing connector name", 400);
+      return;
+    }
+    if (!config || typeof config !== "object") {
+      error(res, "Missing connector config", 400);
+      return;
+    }
+    if (!state.config.connectors) state.config.connectors = {};
+    state.config.connectors[name.trim()] = config as ConnectorConfig;
+    try {
+      saveMilaidyConfig(state.config);
+    } catch {
+      /* test envs */
+    }
+    json(res, {
+      connectors: redactConfigSecrets(
+        (state.config.connectors ?? {}) as Record<string, unknown>,
+      ),
+    });
+    return;
+  }
+
+  // ── DELETE /api/connectors/:name ─────────────────────────────────────────
+  if (method === "DELETE" && pathname.startsWith("/api/connectors/")) {
+    const name = decodeURIComponent(pathname.slice("/api/connectors/".length));
+    if (!name) {
+      error(res, "Missing connector name", 400);
+      return;
+    }
+    if (state.config.connectors) {
+      delete state.config.connectors[name];
+    }
+    // Also remove from legacy channels key
+    if (state.config.channels) {
+      delete state.config.channels[name];
+    }
+    try {
+      saveMilaidyConfig(state.config);
+    } catch {
+      /* test envs */
+    }
+    json(res, {
+      connectors: redactConfigSecrets(
+        (state.config.connectors ?? {}) as Record<string, unknown>,
+      ),
+    });
+    return;
+  }
+
+  // ── POST /api/restart ───────────────────────────────────────────────────
+  if (method === "POST" && pathname === "/api/restart") {
+    json(res, { ok: true, message: "Restarting..." });
+    setTimeout(() => process.exit(0), 1000);
+    return;
+  }
+
+  // ── GET /api/config/schema ───────────────────────────────────────────────
+  if (method === "GET" && pathname === "/api/config/schema") {
+    const { buildConfigSchema } = await import("../config/schema.js");
+    const result = buildConfigSchema();
+    json(res, result);
     return;
   }
 

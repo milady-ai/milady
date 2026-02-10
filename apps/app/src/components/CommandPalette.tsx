@@ -30,6 +30,11 @@ export function CommandPalette() {
 
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const openSecrets = () => {
+    setState("adminSubTab", "secrets");
+    setTab("admin");
+  };
+
   const agentState = agentStatus?.state ?? "stopped";
   const isRunning = agentState === "running";
   const isPaused = agentState === "paused";
@@ -74,6 +79,7 @@ export function CommandPalette() {
       { id: "nav-character", label: "Open Character", action: () => setTab("character") },
       { id: "nav-config", label: "Open Config", action: () => setTab("config") },
       { id: "nav-admin", label: "Open Admin", action: () => setTab("admin") },
+      { id: "nav-secrets", label: "Open Secrets", hint: "Admin > Secrets", action: openSecrets },
       { id: "nav-inventory", label: "Open Inventory", action: () => setTab("inventory") },
       { id: "nav-apps", label: "Open Apps", action: () => setTab("apps") }
     );
@@ -103,6 +109,7 @@ export function CommandPalette() {
     handlePauseResume,
     handleRestart,
     setTab,
+    openSecrets,
     handleChatClear,
     loadPlugins,
     loadSkills,

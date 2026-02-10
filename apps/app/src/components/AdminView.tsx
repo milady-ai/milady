@@ -1,24 +1,31 @@
 /**
- * Admin view — logs, database management, and core plugin status.
+ * Admin view — advanced settings, logs, database, and secrets vault.
  *
- * Contains three sub-tabs:
+ * Contains five sub-tabs:
+ *   - Config: theme, model provider, RPC, connectors, updates, extension, export/import, danger zone
  *   - Logs: agent runtime logs
  *   - Plugins: core plugin status & optional plugin toggles
  *   - Database: database explorer
+ *   - Secrets: unified secrets vault for API keys and credentials
  */
 
 import { useCallback, useEffect, useState } from "react";
 import { client } from "../api-client";
 import type { CorePluginEntry } from "../api-client";
+import { useApp } from "../AppContext";
+import { ConfigView } from "./ConfigView";
 import { LogsView } from "./LogsView";
 import { DatabaseView } from "./DatabaseView";
+import { SecretsView } from "./SecretsView";
 
-type AdminTab = "logs" | "plugins" | "database";
+type AdminTab = "config" | "logs" | "plugins" | "database" | "secrets";
 
 const ADMIN_TABS: { id: AdminTab; label: string }[] = [
+  { id: "config", label: "Config" },
   { id: "logs", label: "Logs" },
   { id: "plugins", label: "Plugins" },
   { id: "database", label: "Database" },
+  { id: "secrets", label: "Secrets" },
 ];
 
 /* ── Core Plugins sub-view ──────────────────────────────────────────── */
@@ -190,10 +197,14 @@ function PluginRow({
 /* ── Main AdminView ─────────────────────────────────────────────────── */
 
 export function AdminView() {
-  const [activeTab, setActiveTab] = useState<AdminTab>("logs");
+  const { adminSubTab, setState } = useApp();
+  const activeTab = adminSubTab as AdminTab;
 
   return (
     <div>
+      <h2 className="text-lg font-bold">Admin</h2>
+      <p className="text-[13px] text-[var(--muted)] mb-4">Advanced settings, logs, database, and secrets.</p>
+
       {/* Sub-tab bar */}
       <div className="flex gap-1 border-b border-[var(--border)] mb-5">
         {ADMIN_TABS.map((t) => (
@@ -204,7 +215,7 @@ export function AdminView() {
                 ? "text-[var(--accent)] font-medium border-b-[var(--accent)]"
                 : "text-[var(--muted)] border-b-transparent hover:text-[var(--txt)]"
             }`}
-            onClick={() => setActiveTab(t.id)}
+            onClick={() => setState("adminSubTab", t.id)}
           >
             {t.label}
           </button>
@@ -212,9 +223,11 @@ export function AdminView() {
       </div>
 
       {/* Sub-tab content */}
+      {activeTab === "config" && <ConfigView />}
       {activeTab === "logs" && <LogsView />}
       {activeTab === "plugins" && <CorePluginsView />}
       {activeTab === "database" && <DatabaseView />}
+      {activeTab === "secrets" && <SecretsView />}
     </div>
   );
 }

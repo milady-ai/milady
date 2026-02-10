@@ -334,6 +334,12 @@ export interface AppState {
   activeGameSandbox: string;
   activeGamePostMessageAuth: boolean;
 
+  // Admin
+  adminSubTab: "config" | "logs" | "plugins" | "database" | "secrets";
+
+  // Config text
+  configRaw: Record<string, unknown>;
+  configText: string;
 }
 
 export interface AppActions {
@@ -648,6 +654,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [activeGameSandbox, setActiveGameSandbox] = useState("allow-scripts allow-same-origin allow-popups");
   const [activeGamePostMessageAuth, setActiveGamePostMessageAuth] = useState(false);
 
+  // --- Admin ---
+  const [adminSubTab, setAdminSubTab] = useState<"config" | "logs" | "plugins" | "database" | "secrets">("config");
+
+  // --- Config ---
+  const [configRaw, setConfigRaw] = useState<Record<string, unknown>>({});
+  const [configText, setConfigText] = useState("");
 
   // --- Refs for timers ---
   const actionNoticeTimer = useRef<number | null>(null);
@@ -1057,10 +1069,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     try {
       const data = await client.sendConversationMessage(convId, text);
-      setConversationMessages((prev: ConversationMessage[]) => [
-        ...prev,
-        { id: `temp-resp-${Date.now()}`, role: "assistant", text: data.text, timestamp: Date.now() },
-      ]);
+      const msg: ConversationMessage = {
+        id: `temp-resp-${Date.now()}`,
+        role: "assistant",
+        text: data.text,
+        timestamp: Date.now(),
+      };
+      if (data.blocks?.length) msg.blocks = data.blocks;
+      setConversationMessages((prev: ConversationMessage[]) => [...prev, msg]);
     } catch (err) {
       // If the conversation was lost (server restart), create a fresh one and retry
       const status = (err as { status?: number }).status;
@@ -1070,10 +1086,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
           setConversations((prev) => [conversation, ...prev]);
           setActiveConversationId(conversation.id);
           convId = conversation.id;
-          const data = await client.sendConversationMessage(convId, text);
+          const retryData = await client.sendConversationMessage(convId, text);
+          const retryMsg: ConversationMessage = {
+            id: `temp-resp-${Date.now()}`,
+            role: "assistant",
+            text: retryData.text,
+            timestamp: Date.now(),
+          };
+          if (retryData.blocks?.length) retryMsg.blocks = retryData.blocks;
           setConversationMessages([
             { id: `temp-${Date.now()}`, role: "user", text, timestamp: Date.now() },
-            { id: `temp-resp-${Date.now()}`, role: "assistant", text: data.text, timestamp: Date.now() },
+            retryMsg,
           ]);
         } catch {
           // Give up — show whatever we have
@@ -1953,6 +1976,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       mcpHeaderInputs: setMcpHeaderInputs as (v: never) => void,
       droppedFiles: setDroppedFiles as (v: never) => void,
       shareIngestNotice: setShareIngestNotice as (v: never) => void,
+      adminSubTab: setAdminSubTab as (v: never) => void,
+      configRaw: setConfigRaw as (v: never) => void,
+      configText: setConfigText as (v: never) => void,
     };
     const setter = setterMap[key as string];
     if (setter) setter(value as never);
@@ -2186,6 +2212,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     droppedFiles, shareIngestNotice,
     activeGameApp, activeGameDisplayName, activeGameViewerUrl, activeGameSandbox,
     activeGamePostMessageAuth,
+    adminSubTab,
+    configRaw, configText,
 
     // Actions
     setTab, setTheme,

@@ -15,7 +15,10 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useApp, THEMES } from "../AppContext";
-import { client, type PluginInfo, type PluginParamDef, type OnboardingOptions } from "../api-client";
+import { client, type PluginParamDef, type OnboardingOptions } from "../api-client";
+import { ConfigRenderer, defaultRegistry } from "./config-renderer";
+import type { ConfigUiHint } from "../types";
+import type { JsonSchemaObject } from "./config-catalog";
 
 /* ── Modal shell ─────────────────────────────────────────────────────── */
 
@@ -79,217 +82,6 @@ function autoLabel(key: string, pluginId: string): string {
     .join(" ");
 }
 
-function autoFieldType(param: PluginParamDef): "text" | "password" | "boolean" | "number" | "url" {
-  if (param.type === "boolean") return "boolean";
-  if (param.sensitive) return "password";
-  const k = param.key.toUpperCase();
-  if (k.includes("URL") || k.includes("ENDPOINT")) return "url";
-  if (param.type === "number" || k.includes("PORT") || k.includes("TIMEOUT") || k.includes("DELAY"))
-    return "number";
-  return "text";
-}
-
-/* ── Plugin field sub-components ──────────────────────────────────────── */
-
-function PluginBooleanField({
-  param,
-  onChange,
-}: {
-  param: PluginParamDef;
-  onChange: (value: string) => void;
-}) {
-  const serverVal = param.currentValue === "true" || param.currentValue === "1";
-  const defaultVal = String(param.default) === "true" || String(param.default) === "1";
-  const initialVal = param.isSet ? serverVal : defaultVal;
-
-  const [localVal, setLocalVal] = useState(initialVal);
-
-  const handleToggle = () => {
-    const next = !localVal;
-    setLocalVal(next);
-    onChange(next ? "true" : "false");
-  };
-
-  return (
-    <button
-      type="button"
-      className="flex items-center gap-2 cursor-pointer bg-transparent border-none p-0"
-      onClick={handleToggle}
-    >
-      <div
-        className={`relative w-9 h-5 rounded-full transition-colors ${
-          localVal ? "bg-[var(--accent)]" : "bg-[var(--border)]"
-        }`}
-      >
-        <div
-          className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
-            localVal ? "translate-x-[18px]" : "translate-x-0.5"
-          }`}
-        />
-      </div>
-      <span className="text-xs text-[var(--muted)]">{localVal ? "Enabled" : "Disabled"}</span>
-    </button>
-  );
-}
-
-function PluginPasswordField({
-  param,
-  onChange,
-}: {
-  param: PluginParamDef;
-  onChange: (value: string) => void;
-}) {
-  const [visible, setVisible] = useState(false);
-
-  return (
-    <div className="flex">
-      <input
-        className="flex-1 px-2.5 py-[7px] border border-[var(--border)] bg-[var(--card)] text-[13px] font-[var(--mono)] transition-colors focus:border-[var(--accent)] focus:outline-none"
-        type={visible ? "text" : "password"}
-        defaultValue={param.isSet ? "" : (param.default ?? "")}
-        placeholder={param.isSet ? "********  (already set, leave blank to keep)" : "Enter value..."}
-        onChange={(e) => onChange(e.target.value)}
-      />
-      <button
-        className="px-3 border border-l-0 border-[var(--border)] bg-[var(--bg-muted,transparent)] text-xs cursor-pointer hover:border-[var(--accent)] hover:text-[var(--accent)]"
-        onClick={() => setVisible(!visible)}
-        type="button"
-      >
-        {visible ? "Hide" : "Show"}
-      </button>
-    </div>
-  );
-}
-
-function PluginSelectField({
-  param,
-  onChange,
-}: {
-  param: PluginParamDef;
-  onChange: (value: string) => void;
-}) {
-  const currentValue = param.isSet && !param.sensitive ? (param.currentValue ?? "") : "";
-  const effectiveValue = currentValue || (param.default ?? "");
-
-  return (
-    <select
-      className="w-full px-2.5 py-[7px] border border-[var(--border)] bg-[var(--card)] text-[13px] font-[var(--mono)] transition-colors focus:border-[var(--accent)] focus:outline-none"
-      defaultValue={effectiveValue}
-      onChange={(e) => onChange(e.target.value)}
-    >
-      {!param.required && <option value="">— none —</option>}
-      {(param.options ?? []).map((opt: string) => (
-        <option key={opt} value={opt}>
-          {opt}
-        </option>
-      ))}
-    </select>
-  );
-}
-
-function PluginTextField({
-  param,
-  fieldType,
-  onChange,
-}: {
-  param: PluginParamDef;
-  fieldType: string;
-  onChange: (value: string) => void;
-}) {
-  const inputType = fieldType === "number" ? "number" : fieldType === "url" ? "url" : "text";
-  const currentValue = param.isSet && !param.sensitive ? (param.currentValue ?? "") : "";
-  const effectiveValue = currentValue || (param.default ?? "");
-
-  return (
-    <input
-      className="w-full px-2.5 py-[7px] border border-[var(--border)] bg-[var(--card)] text-[13px] font-[var(--mono)] transition-colors focus:border-[var(--accent)] focus:outline-none"
-      type={inputType}
-      defaultValue={effectiveValue}
-      placeholder="Enter value..."
-      onChange={(e) => onChange(e.target.value)}
-    />
-  );
-}
-
-function PluginField({
-  plugin,
-  param,
-  onChange,
-}: {
-  plugin: PluginInfo;
-  param: PluginParamDef;
-  onChange: (key: string, value: string) => void;
-}) {
-  const fieldType = autoFieldType(param);
-  const label = autoLabel(param.key, plugin.id);
-  const handleChange = (value: string) => onChange(param.key, value);
-
-  /* Boolean fields — ultra-compact single row */
-  if (fieldType === "boolean") {
-    return (
-      <div className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-0 py-1.5 border-b border-[var(--border)] last:border-b-0">
-        <div className="flex items-center gap-2 text-xs min-w-0">
-          <span
-            className={`shrink-0 inline-block w-1.5 h-1.5 rounded-full ${
-              param.isSet ? "bg-[var(--ok,#16a34a)]" : "bg-[var(--muted)]"
-            }`}
-          />
-          <span className="font-semibold truncate">{label}</span>
-          <code className="text-[10px] text-[var(--muted)] font-[var(--mono)] hidden sm:inline">{param.key}</code>
-        </div>
-        <PluginBooleanField param={param} onChange={handleChange} />
-      </div>
-    );
-  }
-
-  /* All other field types — compact 2-column row */
-  return (
-    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] items-start gap-x-4 gap-y-0.5 py-2 border-b border-[var(--border)] last:border-b-0">
-      {/* Left: label + env key + description */}
-      <div className="flex flex-col gap-0.5 min-w-0">
-        <div className="flex items-center gap-1.5 text-xs">
-          <span
-            className={`shrink-0 inline-block w-1.5 h-1.5 rounded-full ${
-              param.isSet
-                ? "bg-[var(--ok,#16a34a)]"
-                : param.required
-                  ? "bg-[var(--warning,#f39c12)]"
-                  : "bg-[var(--muted)]"
-            }`}
-          />
-          <span className="font-semibold truncate">{label}</span>
-          {param.required && (
-            <span className="shrink-0 text-[10px] text-[var(--warning,#f39c12)] font-medium">required</span>
-          )}
-          {param.isSet && (
-            <span className="shrink-0 text-[10px] text-[var(--ok,#16a34a)] font-medium">configured</span>
-          )}
-        </div>
-        <code className="text-[10px] text-[var(--muted)] font-[var(--mono)] truncate">{param.key}</code>
-        {param.description && (
-          <div className="text-[10px] text-[var(--muted)] leading-snug mt-0.5">
-            {param.description}
-            {param.default != null && (
-              <span className="opacity-70"> (default: {param.default})</span>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Right: input */}
-      <div className="min-w-0">
-        {fieldType === "password" ? (
-          <PluginPasswordField param={param} onChange={handleChange} />
-        ) : param.options?.length ? (
-          <PluginSelectField param={param} onChange={handleChange} />
-        ) : (
-          <PluginTextField param={param} fieldType={fieldType} onChange={handleChange} />
-        )}
-      </div>
-    </div>
-  );
-}
-
 /* ── ConfigView ───────────────────────────────────────────────────────── */
 
 export function ConfigView() {
@@ -314,7 +106,7 @@ export function ConfigView() {
     // Updates
     updateStatus,
     updateLoading,
-    updateChannelSaving,
+    updateChannelSaving: _updateChannelSaving,
     // Extension
     extensionStatus,
     extensionChecking,
@@ -384,19 +176,6 @@ export function ConfigView() {
       } catch { /* ignore */ }
     })();
   }, [loadPlugins, loadUpdateStatus, checkExtensionStatus]);
-
-  const handleModelSave = useCallback(async () => {
-    setModelSaving(true);
-    setModelSaveSuccess(false);
-    try {
-      await client.updateConfig({
-        models: { small: currentSmallModel, large: currentLargeModel },
-      });
-      setModelSaveSuccess(true);
-      setTimeout(() => setModelSaveSuccess(false), 2000);
-    } catch { /* ignore */ }
-    setModelSaving(false);
-  }, [currentSmallModel, currentLargeModel]);
 
   /* ── Derived ──────────────────────────────────────────────────────── */
 
@@ -483,19 +262,116 @@ export function ConfigView() {
   const ext = extensionStatus;
   const relayOk = ext?.relayReachable === true;
 
-  /* ── Wallet key save (collects all 3 inputs) ────────────────────── */
-  const handleWalletSaveAll = useCallback(() => {
-    const inputs = document.querySelectorAll<HTMLInputElement>("[data-wallet-config]");
-    const config: Record<string, string> = {};
-    inputs.forEach((input) => {
-      const key = input.dataset.walletConfig;
-      if (key && input.value) {
-        config[key] = input.value;
-      }
-    });
-    void handleWalletApiKeySave(config);
-  }, [handleWalletApiKeySave]);
+  /* ── RPC provider field values (replaces DOM-based data-wallet-config) */
+  const [rpcFieldValues, setRpcFieldValues] = useState<Record<string, string>>({});
 
+  const handleRpcFieldChange = useCallback((key: string, value: unknown) => {
+    setRpcFieldValues((prev) => ({ ...prev, [key]: String(value ?? "") }));
+  }, []);
+
+  /* ── Wallet key save (collects values from rpcFieldValues state) ── */
+  const handleWalletSaveAll = useCallback(() => {
+    const config: Record<string, string> = {};
+    for (const [key, value] of Object.entries(rpcFieldValues)) {
+      if (value) config[key] = value;
+    }
+    void handleWalletApiKeySave(config);
+  }, [handleWalletApiKeySave, rpcFieldValues]);
+
+  /* ── Messaging channels state ── */
+  const [channelsLoading, setChannelsLoading] = useState(false);
+  const [channelsError, setChannelsError] = useState<string | null>(null);
+  const [connectorValues, setConnectorValues] = useState<Record<string, Record<string, unknown>>>({});
+  const [connectorStatus, setConnectorStatus] = useState<Record<string, { configured: boolean }>>({});
+  const [connectorSaving, setConnectorSaving] = useState<Set<string>>(new Set());
+  const [connectorFeedback, setConnectorFeedback] = useState<Record<string, { type: "success" | "error"; text: string } | null>>({});
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [deleteBusy, setDeleteBusy] = useState(false);
+
+  // Map connector names to the plugin token parameter keys so we can
+  // detect when a user configured the token via the Plugins page.
+  const CONNECTOR_PLUGIN_TOKEN_KEYS: Record<string, string[]> = {
+    telegram: ["TELEGRAM_BOT_TOKEN"],
+    discord: ["DISCORD_BOT_TOKEN", "DISCORD_APPLICATION_ID"],
+    whatsapp: ["WHATSAPP_ACCESS_TOKEN", "WHATSAPP_PHONE_NUMBER_ID"],
+  };
+
+  const loadConnectors = useCallback(async () => {
+    setChannelsLoading(true);
+    setChannelsError(null);
+    try {
+      const { connectors } = await client.getConnectors();
+      const status: Record<string, { configured: boolean }> = {};
+      const values: Record<string, Record<string, unknown>> = {};
+      for (const [name, cfg] of Object.entries(connectors ?? {})) {
+        const cfgObj = cfg as Record<string, unknown>;
+        const hasToken = Boolean(
+          (cfgObj.botToken as string)?.trim() || (cfgObj.token as string)?.trim() || (cfgObj.apiKey as string)?.trim()
+        );
+        status[name] = { configured: hasToken };
+        values[name] = {};
+        // Don't populate sensitive values - user must re-enter them
+      }
+      // Also check if the corresponding plugin has its token params set
+      // (user may have configured via Plugins page instead of Connectors)
+      for (const [connName, tokenKeys] of Object.entries(CONNECTOR_PLUGIN_TOKEN_KEYS)) {
+        if (status[connName]?.configured) continue; // already configured via connectors
+        const plug = plugins.find((p) => p.id === connName);
+        if (!plug?.parameters) continue;
+        const hasPluginToken = tokenKeys.some((tk) =>
+          plug.parameters?.some((param) => param.key === tk && param.isSet)
+        );
+        if (hasPluginToken) {
+          status[connName] = { configured: true };
+        }
+      }
+      setConnectorStatus(status);
+      setConnectorValues(values);
+    } catch (err) {
+      setChannelsError(err instanceof Error ? err.message : "Failed to load connectors");
+    }
+    setChannelsLoading(false);
+  }, [plugins]);
+
+  const handleConnectorSave = useCallback(async (name: string) => {
+    const vals = connectorValues[name];
+    if (!vals || Object.values(vals).every((v) => !v || (typeof v === "string" && v.startsWith("••••")))) {
+      setConnectorFeedback((prev) => ({ ...prev, [name]: { type: "error", text: "Enter credentials before saving." } }));
+      return;
+    }
+    setConnectorSaving((prev) => new Set(prev).add(name));
+    setConnectorFeedback((prev) => ({ ...prev, [name]: null }));
+    try {
+      await client.saveConnector(name, vals as Record<string, string>);
+      setConnectorFeedback((prev) => ({ ...prev, [name]: { type: "success", text: `${name.charAt(0).toUpperCase() + name.slice(1)} connector saved. Restart agent to apply.` } }));
+      await loadConnectors();
+    } catch (err) {
+      setConnectorFeedback((prev) => ({ ...prev, [name]: { type: "error", text: err instanceof Error ? err.message : `Failed to save ${name} connector.` } }));
+    }
+    setConnectorSaving((prev) => { const next = new Set(prev); next.delete(name); return next; });
+  }, [connectorValues, loadConnectors]);
+
+  const handleConnectorDelete = useCallback(async () => {
+    if (!deleteTarget) return;
+    setDeleteBusy(true);
+    try {
+      await client.deleteConnector(deleteTarget);
+      setConnectorStatus((prev) => ({ ...prev, [deleteTarget]: { configured: false } }));
+      setConnectorValues((prev) => ({ ...prev, [deleteTarget]: {} }));
+      setDeleteModalOpen(false);
+      setConnectorFeedback((prev) => ({ ...prev, [deleteTarget]: { type: "success", text: `${deleteTarget.charAt(0).toUpperCase() + deleteTarget.slice(1)} connector deleted. Restart agent to apply.` } }));
+      await loadConnectors();
+    } catch (err) {
+      setConnectorFeedback((prev) => ({ ...prev, [deleteTarget!]: { type: "error", text: err instanceof Error ? err.message : `Failed to delete ${deleteTarget} connector.` } }));
+    }
+    setDeleteBusy(false);
+    setDeleteTarget(null);
+  }, [deleteTarget, loadConnectors]);
+
+  useEffect(() => {
+    void loadConnectors();
+  }, [loadConnectors]);
 
   /* ── RPC provider selection state ────────────────────────────────── */
   const [selectedEvmRpc, setSelectedEvmRpc] = useState<"eliza-cloud" | "alchemy" | "infura" | "ankr">("eliza-cloud");
@@ -542,6 +418,73 @@ export function ConfigView() {
     },
     [pluginFieldValues, handlePluginConfigSave],
   );
+
+  /* ── Connector definitions ────────────────────────────────────────── */
+  const CONNECTORS: Array<{
+    name: string;
+    label: string;
+    description: string;
+    available: boolean;
+    schema: JsonSchemaObject;
+    hints: Record<string, ConfigUiHint>;
+  }> = [
+    {
+      name: "telegram",
+      label: "Telegram",
+      description: "Connect via @BotFather bot token.",
+      available: true,
+      schema: {
+        type: "object",
+        properties: {
+          botToken: { type: "string", description: "Bot token from @BotFather" },
+        },
+        required: ["botToken"],
+      },
+      hints: {
+        botToken: { label: "Bot Token", type: "password", sensitive: true, placeholder: "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11" },
+      },
+    },
+    {
+      name: "discord",
+      label: "Discord",
+      description: "Discord bot integration.",
+      available: true,
+      schema: {
+        type: "object",
+        properties: {
+          botToken: { type: "string", description: "Discord bot token" },
+          applicationId: { type: "string", description: "Discord application ID" },
+        },
+        required: ["botToken"],
+      },
+      hints: {
+        botToken: { label: "Bot Token", type: "password", sensitive: true, placeholder: "Your Discord bot token" },
+        applicationId: { label: "Application ID", placeholder: "Discord application ID" },
+      },
+    },
+    {
+      name: "whatsapp",
+      label: "WhatsApp",
+      description: "WhatsApp Business API integration.",
+      available: true,
+      schema: {
+        type: "object",
+        properties: {
+          phoneNumberId: { type: "string", description: "WhatsApp Business phone number ID" },
+          accessToken: { type: "string", description: "Permanent access token from Meta" },
+          verifyToken: { type: "string", description: "Webhook verification token (you choose this)" },
+          businessAccountId: { type: "string", description: "WhatsApp Business Account ID" },
+        },
+        required: ["phoneNumberId", "accessToken"],
+      },
+      hints: {
+        phoneNumberId: { label: "Phone Number ID", placeholder: "115234567890123456" },
+        accessToken: { label: "Access Token", type: "password", sensitive: true, placeholder: "EAABs..." },
+        verifyToken: { label: "Webhook Verify Token", placeholder: "my-verify-token-123" },
+        businessAccountId: { label: "Business Account ID", placeholder: "102345678901234", advanced: true },
+      },
+    },
+  ];
 
   return (
     <div>
@@ -694,69 +637,65 @@ export function ConfigView() {
 
                       {/* Cloud model selection */}
                       {modelOptions && (() => {
-                        // Group models by provider for cleaner optgroup display
-                        const groupByProvider = (models: typeof modelOptions.small) => {
-                          const groups: Record<string, typeof models> = {};
-                          for (const m of models) {
-                            const key = m.provider || "Other";
-                            if (!groups[key]) groups[key] = [];
-                            groups[key].push(m);
-                          }
-                          return groups;
+                        const modelSchema = {
+                          type: "object" as const,
+                          properties: {
+                            small: {
+                              type: "string",
+                              enum: modelOptions.small.map((m) => m.id),
+                              description: "Fast model for simple tasks",
+                            },
+                            large: {
+                              type: "string",
+                              enum: modelOptions.large.map((m) => m.id),
+                              description: "Powerful model for complex reasoning",
+                            },
+                          },
+                          required: [] as string[],
                         };
-                        const smallGroups = groupByProvider(modelOptions.small);
-                        const largeGroups = groupByProvider(modelOptions.large);
+                        const modelHints: Record<string, ConfigUiHint> = {
+                          small: { label: "Small Model", width: "half" },
+                          large: { label: "Large Model", width: "half" },
+                        };
+                        const modelValues: Record<string, unknown> = {};
+                        const modelSetKeys = new Set<string>();
+                        if (currentSmallModel) { modelValues.small = currentSmallModel; modelSetKeys.add("small"); }
+                        if (currentLargeModel) { modelValues.large = currentLargeModel; modelSetKeys.add("large"); }
 
                         return (
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="flex flex-col gap-1">
-                              <label className="text-xs font-semibold">Small Model</label>
-                              <div className="text-[10px] text-[var(--muted)]">Fast model for simple tasks</div>
-                              <select
-                                value={currentSmallModel}
-                                onChange={(e) => setCurrentSmallModel(e.target.value)}
-                                className="px-2.5 py-[7px] border border-[var(--border)] bg-[var(--card)] text-[13px] focus:border-[var(--accent)] focus:outline-none"
-                              >
-                                <option value="">Select model...</option>
-                                {Object.entries(smallGroups).map(([provider, models]) => (
-                                  <optgroup key={provider} label={provider}>
-                                    {models.map((m) => (
-                                      <option key={m.id} value={m.id}>{m.name}</option>
-                                    ))}
-                                  </optgroup>
-                                ))}
-                              </select>
-                            </div>
-                            <div className="flex flex-col gap-1">
-                              <label className="text-xs font-semibold">Large Model</label>
-                              <div className="text-[10px] text-[var(--muted)]">Powerful model for complex reasoning</div>
-                              <select
-                                value={currentLargeModel}
-                                onChange={(e) => setCurrentLargeModel(e.target.value)}
-                                className="px-2.5 py-[7px] border border-[var(--border)] bg-[var(--card)] text-[13px] focus:border-[var(--accent)] focus:outline-none"
-                              >
-                                <option value="">Select model...</option>
-                                {Object.entries(largeGroups).map(([provider, models]) => (
-                                  <optgroup key={provider} label={provider}>
-                                    {models.map((m) => (
-                                      <option key={m.id} value={m.id}>{m.name}</option>
-                                    ))}
-                                  </optgroup>
-                                ))}
-                              </select>
-                            </div>
-                          </div>
+                          <ConfigRenderer
+                            schema={modelSchema as JsonSchemaObject}
+                            hints={modelHints}
+                            values={modelValues}
+                            setKeys={modelSetKeys}
+                            registry={defaultRegistry}
+                            onChange={(key, value) => {
+                              const val = String(value);
+                              if (key === "small") setCurrentSmallModel(val);
+                              if (key === "large") setCurrentLargeModel(val);
+                              // Auto-save + restart on model change
+                              const updated = {
+                                small: key === "small" ? val : currentSmallModel,
+                                large: key === "large" ? val : currentLargeModel,
+                              };
+                              void (async () => {
+                                setModelSaving(true);
+                                try {
+                                  await client.updateConfig({ models: updated });
+                                  setModelSaveSuccess(true);
+                                  setTimeout(() => setModelSaveSuccess(false), 2000);
+                                  await client.restartAgent();
+                                } catch { /* ignore */ }
+                                setModelSaving(false);
+                              })();
+                            }}
+                          />
                         );
                       })()}
 
-                      <div className="flex justify-end mt-3">
-                        <button
-                          className={`btn text-xs py-[5px] px-4 !mt-0 ${modelSaveSuccess ? "!bg-[var(--ok,#16a34a)] !border-[var(--ok,#16a34a)]" : ""}`}
-                          onClick={() => void handleModelSave()}
-                          disabled={modelSaving}
-                        >
-                          {modelSaving ? "Saving..." : modelSaveSuccess ? "Saved" : "Save"}
-                        </button>
+                      <div className="flex items-center justify-end gap-2 mt-3">
+                        {modelSaving && <span className="text-[11px] text-[var(--muted)]">Saving &amp; restarting...</span>}
+                        {modelSaveSuccess && <span className="text-[11px] text-[var(--ok,#16a34a)]">Saved — restarting agent</span>}
                       </div>
                     </div>
                   ) : (
@@ -818,16 +757,49 @@ export function ConfigView() {
                       </div>
                     </div>
 
-                    {params.map((param: PluginParamDef) => (
-                      <PluginField
-                        key={param.key}
-                        plugin={selectedProvider}
-                        param={param}
-                        onChange={(key, value) =>
-                          handlePluginFieldChange(selectedProvider.id, key, value)
-                        }
-                      />
-                    ))}
+                    {(() => {
+                      const properties: Record<string, Record<string, unknown>> = {};
+                      const required: string[] = [];
+                      const hints: Record<string, ConfigUiHint> = {};
+                      for (const p of params) {
+                        const prop: Record<string, unknown> = {};
+                        if (p.type === "boolean") prop.type = "boolean";
+                        else if (p.type === "number") prop.type = "number";
+                        else prop.type = "string";
+                        if (p.description) prop.description = p.description;
+                        if (p.default != null) prop.default = p.default;
+                        if (p.options?.length) prop.enum = p.options;
+                        const k = p.key.toUpperCase();
+                        if (k.includes("URL") || k.includes("ENDPOINT")) prop.format = "uri";
+                        properties[p.key] = prop;
+                        if (p.required) required.push(p.key);
+                        hints[p.key] = {
+                          label: autoLabel(p.key, selectedProvider.id),
+                          sensitive: p.sensitive ?? false,
+                        };
+                        if (p.description) hints[p.key].help = p.description;
+                      }
+                      const schema = { type: "object", properties, required } as JsonSchemaObject;
+                      const values: Record<string, unknown> = {};
+                      const setKeys = new Set<string>();
+                      for (const p of params) {
+                        const cv = pluginFieldValues[selectedProvider.id]?.[p.key];
+                        if (cv !== undefined) { values[p.key] = cv; }
+                        else if (p.isSet && !p.sensitive && p.currentValue != null) { values[p.key] = p.currentValue; }
+                        if (p.isSet) setKeys.add(p.key);
+                      }
+                      return (
+                        <ConfigRenderer
+                          schema={schema}
+                          hints={hints}
+                          values={values}
+                          setKeys={setKeys}
+                          registry={defaultRegistry}
+                          pluginId={selectedProvider.id}
+                          onChange={(key, value) => handlePluginFieldChange(selectedProvider.id, key, String(value ?? ""))}
+                        />
+                      );
+                    })()}
 
                     <div className="flex justify-end mt-3">
                       <button
@@ -884,8 +856,8 @@ export function ConfigView() {
               })}
             </div>
 
-            {/* Inline settings for selected EVM provider */}
-            {selectedEvmRpc === "eliza-cloud" && (
+            {/* Inline settings for selected EVM provider via ConfigRenderer */}
+            {selectedEvmRpc === "eliza-cloud" ? (
               <div className="mt-3">
                 {cloudConnected ? (
                   <div className="flex items-center gap-2 text-xs">
@@ -914,37 +886,40 @@ export function ConfigView() {
                   </div>
                 )}
               </div>
-            )}
-            {selectedEvmRpc === "alchemy" && (
-              <div className="mt-3 flex flex-col gap-1">
-                <div className="flex items-center gap-1.5 text-xs">
-                  <span className="font-semibold">Alchemy API Key</span>
-                  {walletConfig?.alchemyKeySet && <span className="text-[10px] text-[var(--ok,#16a34a)]">configured</span>}
-                  <a href="https://dashboard.alchemy.com/" target="_blank" rel="noopener" className="text-[10px] text-[var(--accent)] ml-auto">Get key</a>
+            ) : (() => {
+              const evmProviders: Record<"alchemy" | "infura" | "ankr", { configKey: string; label: string; isSet: boolean }> = {
+                alchemy: { configKey: "ALCHEMY_API_KEY", label: "Alchemy API Key", isSet: walletConfig?.alchemyKeySet ?? false },
+                infura: { configKey: "INFURA_API_KEY", label: "Infura API Key", isSet: walletConfig?.infuraKeySet ?? false },
+                ankr: { configKey: "ANKR_API_KEY", label: "Ankr API Key", isSet: walletConfig?.ankrKeySet ?? false },
+              };
+              const p = evmProviders[selectedEvmRpc as "alchemy" | "infura" | "ankr"];
+              if (!p) return null;
+              const evmSchema: JsonSchemaObject = {
+                type: "object",
+                properties: { [p.configKey]: { type: "string", description: p.label } },
+                required: [],
+              };
+              const evmHints: Record<string, ConfigUiHint> = {
+                [p.configKey]: { label: p.label, sensitive: true, placeholder: p.isSet ? "Already set \u2014 leave blank to keep" : "Enter API key", width: "full" },
+              };
+              const evmValues: Record<string, unknown> = {};
+              const evmSetKeys = new Set<string>();
+              if (rpcFieldValues[p.configKey] !== undefined) evmValues[p.configKey] = rpcFieldValues[p.configKey];
+              if (p.isSet) evmSetKeys.add(p.configKey);
+
+              return (
+                <div className="mt-3">
+                  <ConfigRenderer
+                    schema={evmSchema}
+                    hints={evmHints}
+                    values={evmValues}
+                    setKeys={evmSetKeys}
+                    registry={defaultRegistry}
+                    onChange={handleRpcFieldChange}
+                  />
                 </div>
-                <input type="password" data-wallet-config="ALCHEMY_API_KEY" placeholder={walletConfig?.alchemyKeySet ? "Already set — leave blank to keep" : "Enter API key"} className="w-full py-1.5 px-2 border border-[var(--border)] bg-[var(--card)] text-xs font-[var(--mono)] box-border focus:border-[var(--accent)] focus:outline-none" />
-              </div>
-            )}
-            {selectedEvmRpc === "infura" && (
-              <div className="mt-3 flex flex-col gap-1">
-                <div className="flex items-center gap-1.5 text-xs">
-                  <span className="font-semibold">Infura API Key</span>
-                  {walletConfig?.infuraKeySet && <span className="text-[10px] text-[var(--ok,#16a34a)]">configured</span>}
-                  <a href="https://app.infura.io/" target="_blank" rel="noopener" className="text-[10px] text-[var(--accent)] ml-auto">Get key</a>
-                </div>
-                <input type="password" data-wallet-config="INFURA_API_KEY" placeholder={walletConfig?.infuraKeySet ? "Already set — leave blank to keep" : "Enter API key"} className="w-full py-1.5 px-2 border border-[var(--border)] bg-[var(--card)] text-xs font-[var(--mono)] box-border focus:border-[var(--accent)] focus:outline-none" />
-              </div>
-            )}
-            {selectedEvmRpc === "ankr" && (
-              <div className="mt-3 flex flex-col gap-1">
-                <div className="flex items-center gap-1.5 text-xs">
-                  <span className="font-semibold">Ankr API Key</span>
-                  {walletConfig?.ankrKeySet && <span className="text-[10px] text-[var(--ok,#16a34a)]">configured</span>}
-                  <a href="https://www.ankr.com/rpc/" target="_blank" rel="noopener" className="text-[10px] text-[var(--accent)] ml-auto">Get key</a>
-                </div>
-                <input type="password" data-wallet-config="ANKR_API_KEY" placeholder={walletConfig?.ankrKeySet ? "Already set — leave blank to keep" : "Enter API key"} className="w-full py-1.5 px-2 border border-[var(--border)] bg-[var(--card)] text-xs font-[var(--mono)] box-border focus:border-[var(--accent)] focus:outline-none" />
-              </div>
-            )}
+              );
+            })()}
           </div>
 
           {/* ── Solana ──────────────────────────────────── */}
@@ -977,7 +952,7 @@ export function ConfigView() {
             </div>
 
             {/* Inline settings for selected Solana provider */}
-            {selectedSolanaRpc === "eliza-cloud" && (
+            {selectedSolanaRpc === "eliza-cloud" ? (
               <div className="mt-3">
                 {cloudConnected ? (
                   <div className="flex items-center gap-2 text-xs">
@@ -1006,27 +981,38 @@ export function ConfigView() {
                   </div>
                 )}
               </div>
-            )}
-            {selectedSolanaRpc === "helius-birdeye" && (
-              <div className="mt-3 flex flex-col gap-3">
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-1.5 text-xs">
-                    <span className="font-semibold">Helius API Key</span>
-                    {walletConfig?.heliusKeySet && <span className="text-[10px] text-[var(--ok,#16a34a)]">configured</span>}
-                    <a href="https://dev.helius.xyz/" target="_blank" rel="noopener" className="text-[10px] text-[var(--accent)] ml-auto">Get key</a>
-                  </div>
-                  <input type="password" data-wallet-config="HELIUS_API_KEY" placeholder={walletConfig?.heliusKeySet ? "Already set — leave blank to keep" : "Enter API key"} className="w-full py-1.5 px-2 border border-[var(--border)] bg-[var(--card)] text-xs font-[var(--mono)] box-border focus:border-[var(--accent)] focus:outline-none" />
+            ) : (() => {
+              const solProviders: Record<string, { configKey: string; label: string; isSet: boolean }> = {
+                helius: { configKey: "HELIUS_API_KEY", label: "Helius API Key", isSet: walletConfig?.heliusKeySet ?? false },
+                birdeye: { configKey: "BIRDEYE_API_KEY", label: "Birdeye API Key", isSet: walletConfig?.birdeyeKeySet ?? false },
+              };
+              const solKeys = selectedSolanaRpc === "helius-birdeye" ? ["helius", "birdeye"] : [];
+              const allSchemaProps: Record<string, Record<string, unknown>> = {};
+              const allHints: Record<string, ConfigUiHint> = {};
+              const allValues: Record<string, unknown> = {};
+              const allSetKeys = new Set<string>();
+              for (const sk of solKeys) {
+                const p = solProviders[sk];
+                if (!p) continue;
+                allSchemaProps[p.configKey] = { type: "string", description: p.label };
+                allHints[p.configKey] = { label: p.label, sensitive: true, placeholder: p.isSet ? "Already set \u2014 leave blank to keep" : "Enter API key", width: "full" };
+                if (rpcFieldValues[p.configKey] !== undefined) allValues[p.configKey] = rpcFieldValues[p.configKey];
+                if (p.isSet) allSetKeys.add(p.configKey);
+              }
+              const solSchema: JsonSchemaObject = { type: "object", properties: allSchemaProps, required: [] };
+              return (
+                <div className="mt-3">
+                  <ConfigRenderer
+                    schema={solSchema}
+                    hints={allHints}
+                    values={allValues}
+                    setKeys={allSetKeys}
+                    registry={defaultRegistry}
+                    onChange={handleRpcFieldChange}
+                  />
                 </div>
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-1.5 text-xs">
-                    <span className="font-semibold">Birdeye API Key</span>
-                    {walletConfig?.birdeyeKeySet && <span className="text-[10px] text-[var(--ok,#16a34a)]">configured</span>}
-                    <a href="https://birdeye.so/" target="_blank" rel="noopener" className="text-[10px] text-[var(--accent)] ml-auto">Get key</a>
-                  </div>
-                  <input type="password" data-wallet-config="BIRDEYE_API_KEY" placeholder={walletConfig?.birdeyeKeySet ? "Already set — leave blank to keep" : "Enter API key"} className="w-full py-1.5 px-2 border border-[var(--border)] bg-[var(--card)] text-xs font-[var(--mono)] box-border focus:border-[var(--accent)] focus:outline-none" />
-                </div>
-              </div>
-            )}
+              );
+            })()}
           </div>
         </div>
 
@@ -1041,6 +1027,100 @@ export function ConfigView() {
         </div>
       </div>
 
+      {/* ═══════════════════════════════════════════════════════════════
+          6. MESSAGING CHANNELS
+          ═══════════════════════════════════════════════════════════════ */}
+      <div className="mt-6 p-4 border border-[var(--border)] bg-[var(--card)]">
+        <div className="mb-4">
+          <div className="font-bold text-sm">Connectors</div>
+          <div className="text-xs text-[var(--muted)] mt-0.5">
+            Configure how your agent connects to messaging platforms.
+          </div>
+        </div>
+
+        {channelsError && <div className="mb-3 text-xs text-[var(--danger,#e74c3c)]">{channelsError}</div>}
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {CONNECTORS.map((conn) => {
+            const configured = connectorStatus[conn.name]?.configured;
+            // Check if configured via plugin (not via connector config directly)
+            const tokenKeys = CONNECTOR_PLUGIN_TOKEN_KEYS[conn.name];
+            const plug = plugins.find((p) => p.id === conn.name);
+            const viaPlugin = configured && tokenKeys && plug?.parameters?.some(
+              (param) => tokenKeys.includes(param.key) && param.isSet
+            ) && !connectorValues[conn.name]?.botToken;
+            const saving = connectorSaving.has(conn.name);
+            const fb = connectorFeedback[conn.name];
+
+            if (!conn.available) {
+              return (
+                <div key={conn.name} className="px-3.5 py-3 border border-[var(--border)] bg-[var(--card)] opacity-50">
+                  <div className="font-bold text-sm flex items-center gap-2">
+                    {conn.label} <span className="text-[10px] border border-[var(--border)] px-2 py-0.5">Coming Soon</span>
+                  </div>
+                  <div className="text-[11px] text-[var(--muted)] mt-0.5">{conn.description}</div>
+                </div>
+              );
+            }
+
+            return (
+              <div key={conn.name} className="px-3.5 py-3 border border-[var(--border)] bg-[var(--card)]">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="font-bold text-sm">{conn.label}</div>
+                  <span
+                    className={`text-[10px] px-2 py-0.5 border ${
+                      configured
+                        ? "border-[var(--ok,#16a34a)] text-[var(--ok,#16a34a)]"
+                        : "border-[var(--border)] text-[var(--muted)]"
+                    }`}
+                  >
+                    {configured ? (viaPlugin ? "Connected (via plugin)" : "Connected") : "Not configured"}
+                  </span>
+                </div>
+                <div className="text-[11px] text-[var(--muted)] mt-0.5">{conn.description}</div>
+
+                <div className="mt-3">
+                  <ConfigRenderer
+                    schema={conn.schema}
+                    hints={conn.hints}
+                    values={connectorValues[conn.name] ?? {}}
+                    registry={defaultRegistry}
+                    onChange={(key, value) => {
+                      setConnectorValues((prev) => ({
+                        ...prev,
+                        [conn.name]: { ...(prev[conn.name] ?? {}), [key]: value },
+                      }));
+                    }}
+                  />
+                </div>
+
+                {fb && (
+                  <div className={`text-[11px] mt-2 ${fb.type === "error" ? "text-[var(--danger,#e74c3c)]" : "text-[var(--ok,#16a34a)]"}`}>
+                    {fb.text}
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2 mt-3">
+                  <button
+                    className="btn text-xs py-[5px] px-3 !mt-0"
+                    disabled={saving || channelsLoading}
+                    onClick={() => void handleConnectorSave(conn.name)}
+                  >
+                    {saving ? "Saving..." : "Save"}
+                  </button>
+                  <button
+                    className="btn text-xs py-[5px] px-3 !mt-0 !bg-transparent !border-[var(--border)] !text-[var(--danger,#e74c3c)]"
+                    disabled={deleteBusy || !configured}
+                    onClick={() => { setDeleteTarget(conn.name); setDeleteModalOpen(true); }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       {/* ═══════════════════════════════════════════════════════════════
           7. SOFTWARE UPDATES
@@ -1064,27 +1144,36 @@ export function ConfigView() {
 
         {updateStatus ? (
           <>
-            {/* Channel selector */}
+            {/* Channel selector — rendered via ConfigRenderer radio field */}
             <div className="mb-4">
-              <div className="font-semibold text-xs mb-1.5">Release Channel</div>
-              <div className="grid grid-cols-3 gap-2">
-                {(["stable", "beta", "nightly"] as const).map((ch) => {
-                  const active = updateStatus.channel === ch;
-                  const desc =
-                    ch === "stable" ? "Recommended" : ch === "beta" ? "Preview" : "Bleeding edge";
-                  return (
-                    <button
-                      key={ch}
-                      className={`theme-btn text-left p-2.5 ${active ? "active" : ""}`}
-                      disabled={updateChannelSaving}
-                      onClick={() => void handleChannelChange(ch)}
-                    >
-                      <div className="text-[13px] font-bold text-[var(--text)]">{ch}</div>
-                      <div className="text-[11px] text-[var(--muted)] mt-0.5">{desc}</div>
-                    </button>
-                  );
-                })}
-              </div>
+              <ConfigRenderer
+                schema={{
+                  type: "object",
+                  properties: {
+                    channel: {
+                      type: "string",
+                      enum: ["stable", "beta", "nightly"],
+                    },
+                  },
+                }}
+                hints={{
+                  channel: {
+                    label: "Release Channel",
+                    type: "radio",
+                    width: "full",
+                    options: [
+                      { value: "stable", label: "Stable", description: "Recommended — production-ready releases" },
+                      { value: "beta", label: "Beta", description: "Preview — early access to upcoming features" },
+                      { value: "nightly", label: "Nightly", description: "Bleeding edge — latest development builds" },
+                    ],
+                  },
+                }}
+                values={{ channel: updateStatus.channel }}
+                registry={defaultRegistry}
+                onChange={(key, value) => {
+                  if (key === "channel") void handleChannelChange(value as "stable" | "beta" | "nightly");
+                }}
+              />
             </div>
 
             {/* Update available banner */}
@@ -1234,6 +1323,30 @@ export function ConfigView() {
         </div>
       </div>
 
+      <Modal open={deleteModalOpen} onClose={() => { setDeleteModalOpen(false); setDeleteTarget(null); }} title={`Delete ${deleteTarget ? deleteTarget.charAt(0).toUpperCase() + deleteTarget.slice(1) : ""} Channel`}>
+        <div className="flex flex-col gap-3">
+          <div className="text-xs text-[var(--muted)]">
+            Remove the {deleteTarget} channel configuration? This will disconnect {deleteTarget} after restart.
+          </div>
+          <div className="flex justify-end gap-2">
+            <button
+              className="btn text-xs py-1.5 px-4 !mt-0 !bg-transparent !border-[var(--border)] !text-[var(--txt)]"
+              onClick={() => { setDeleteModalOpen(false); setDeleteTarget(null); }}
+              disabled={deleteBusy}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn text-xs py-1.5 px-4 !mt-0"
+              style={{ background: "var(--danger, #e74c3c)", borderColor: "var(--danger, #e74c3c)" }}
+              onClick={() => void handleConnectorDelete()}
+              disabled={deleteBusy}
+            >
+              {deleteBusy ? "Deleting..." : "Delete"}
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       {/* ─── Export Modal ─────────────────────────────────────────────── */}
       <Modal open={exportModalOpen} onClose={() => setExportModalOpen(false)} title="Export Agent">
