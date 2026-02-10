@@ -493,6 +493,35 @@ describe("installMarketplaceSkill", () => {
     ).rejects.toThrow("Invalid git ref");
   });
 
+  it("rejects skill paths with traversal segments", async () => {
+    await expect(
+      installMarketplaceSkill(tmpDir, {
+        repository: "owner/repo",
+        path: "../secrets",
+        name: "evil-skill",
+      }),
+    ).rejects.toThrow("Invalid skill path");
+  });
+
+  it("rejects absolute skill paths", async () => {
+    await expect(
+      installMarketplaceSkill(tmpDir, {
+        repository: "owner/repo",
+        path: "/etc",
+        name: "evil-skill",
+      }),
+    ).rejects.toThrow("Invalid skill path");
+  });
+
+  it("rejects GitHub URLs with traversal paths", async () => {
+    await expect(
+      installMarketplaceSkill(tmpDir, {
+        githubUrl: "https://github.com/owner/repo/tree/main/../secrets",
+        name: "evil-skill",
+      }),
+    ).rejects.toThrow("Invalid skill path");
+  });
+
   it("throws when skill is already installed at the target path", async () => {
     // Pre-create the target directory to trigger the existence check.
     // Providing input.path skips the git-based resolveSkillPathInRepo probe.
