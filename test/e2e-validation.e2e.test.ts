@@ -367,7 +367,11 @@ describe("CLI Entry Point (npx milaidy equivalent)", () => {
       // Write config so onboarding is skipped
       fs.writeFileSync(
         path.join(subConfigDir, "milaidy.json"),
-        JSON.stringify({ agent: { name: "CLIBootAgent", bio: "cli test" } }),
+        JSON.stringify({
+          agents: {
+            list: [{ id: "main", name: "CLIBootAgent", bio: ["cli test"] }],
+          },
+        }),
       );
 
       const env: Record<string, string> = {};

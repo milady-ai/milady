@@ -597,7 +597,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [onboardingOptions, setOnboardingOptions] = useState<OnboardingOptions | null>(null);
   const [onboardingName, setOnboardingName] = useState("");
   const [onboardingStyle, setOnboardingStyle] = useState("");
-  const [onboardingTheme, setOnboardingTheme] = useState<ThemeName>("milady");
+  const [onboardingTheme, setOnboardingTheme] = useState<ThemeName>(loadTheme);
   const [onboardingRunMode, setOnboardingRunMode] = useState<"local" | "cloud" | "">("");
   const [onboardingCloudProvider, setOnboardingCloudProvider] = useState("");
   const [onboardingSmallModel, setOnboardingSmallModel] = useState("claude-haiku");

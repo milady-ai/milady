@@ -14,35 +14,43 @@ import type { PluginInfo, PluginParamDef } from "../api-client";
 
 /* ── Always-on plugins (hidden from all views) ────────────────────────── */
 
-/** Plugin IDs that are always enabled and hidden from the UI. */
+/**
+ * Plugin IDs hidden from Features/Connectors views.
+ * Core plugins are visible in Admin > Plugins instead.
+ */
 const ALWAYS_ON_PLUGIN_IDS = new Set([
+  // Core (always loaded)
+  "sql",
+  "local-embedding",
+  "knowledge",
+  "agent-skills",
+  "directives",
+  "commands",
+  "personality",
+  "experience",
+  // Optional core (shown in admin)
+  "agent-orchestrator",
+  "shell",
+  "plugin-manager",
   "cli",
   "code",
-  "agent-orchestrator",
-  "agent-skills",
-  "commands",
-  "directives",
-  "form",
-  "goals",
+  "edge-tts",
   "pdf",
-  "plugin-manager",
+  "scratchpad",
   "secrets-manager",
   "todo",
   "trust",
-  "scratchpad",
-  "cron",
-  "knowledge",
-  "rolodex",
-  "shell",
-  "edge-tts",
-  "experience",
-  "personality",
-  "tts",
-  "elevenlabs",
+  "form",
+  "goals",
+  "scheduling",
+  // Internal / infrastructure
   "elizacloud",
   "evm",
-  "local-embedding",
   "memory",
+  "rolodex",
+  "tts",
+  "elevenlabs",
+  "cron",
   "webhooks",
   "browser",
   "vision",

@@ -55,16 +55,14 @@ export function OnboardingWizard() {
   const [anthropicCode, setAnthropicCode] = useState("");
   const [anthropicConnected, setAnthropicConnected] = useState(false);
   const [anthropicError, setAnthropicError] = useState("");
+  const [customNameText, setCustomNameText] = useState("");
+  const [isCustomSelected, setIsCustomSelected] = useState(false);
 
   useEffect(() => {
     if (onboardingStep === "theme") {
       setTheme(onboardingTheme);
     }
   }, [onboardingStep, onboardingTheme, setTheme]);
-
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setState("onboardingName", e.target.value);
-  };
 
   const handleStyleSelect = (catchphrase: string) => {
     setState("onboardingStyle", catchphrase);
@@ -128,47 +126,66 @@ export function OnboardingWizard() {
               alt="Avatar"
               className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
             />
-            <h1 className="text-[28px] font-normal mb-1 text-txt-strong">Welcome to Milaidy</h1>
-            <p className="italic text-muted text-sm mb-8">Let's get you set up</p>
+            <h1 className="text-[28px] font-normal mb-1 text-txt-strong">ohhh uhhhh hey there!</h1>
+            <h1 className="text-[28px] font-normal mb-1 text-txt-strong">welcome to milaidy!</h1>
           </div>
         );
 
       case "name":
         return (
-          <div className="max-w-[500px] mx-auto mt-10 text-center font-body">
+          <div className="max-w-[520px] mx-auto mt-10 text-center font-body">
+            <img
+              src="/android-chrome-512x512.png"
+              alt="Avatar"
+              className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
+            />
             <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[360px] relative text-[15px] text-txt leading-relaxed">
-              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">Choose a Name</h2>
+              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">ohhh... what's my name again?</h2>
             </div>
-            <div className="flex flex-col gap-2 text-left max-w-[360px] mx-auto">
-              {onboardingOptions?.names.map((name: string) => (
+            <div className="flex flex-wrap gap-2 justify-center mx-auto mb-3">
+              {onboardingOptions?.names.slice(0, 5).map((name: string) => (
                 <button
                   key={name}
-                  className={`px-4 py-3 border cursor-pointer bg-card transition-colors text-left ${
-                    onboardingName === name
+                  className={`px-5 py-2 border cursor-pointer bg-card transition-colors rounded-full text-sm font-bold ${
+                    onboardingName === name && !isCustomSelected
                       ? "border-accent !bg-accent !text-accent-fg"
                       : "border-border hover:border-accent"
                   }`}
-                  onClick={() => setState("onboardingName", name)}
+                  onClick={() => {
+                    setState("onboardingName", name);
+                    setIsCustomSelected(false);
+                  }}
                 >
-                  <div className="font-bold text-sm">{name}</div>
+                  {name}
                 </button>
               ))}
             </div>
-            <div className="max-w-[360px] mx-auto mt-4">
-              <label className="text-xs text-muted block mb-2 text-left">Or enter custom name:</label>
+            <div className="max-w-[260px] mx-auto">
               <div
-                className={`px-4 py-3 border cursor-pointer bg-card transition-colors ${
-                  onboardingName && !onboardingOptions?.names.includes(onboardingName)
-                    ? "border-accent !bg-accent !text-accent-fg"
+                className={`px-4 py-2.5 border cursor-text bg-card transition-colors rounded-full ${
+                  isCustomSelected
+                    ? "border-accent ring-2 ring-accent/30"
                     : "border-border hover:border-accent"
                 }`}
+                onClick={() => {
+                  setIsCustomSelected(true);
+                  setState("onboardingName", customNameText);
+                }}
               >
                 <input
                   type="text"
-                  value={onboardingName}
-                  onChange={handleNameChange}
-                  className="border-none bg-transparent text-sm font-bold w-full p-0 outline-none text-inherit"
-                  placeholder="Enter custom name"
+                  value={customNameText}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    setCustomNameText(e.target.value);
+                    setState("onboardingName", e.target.value);
+                    setIsCustomSelected(true);
+                  }}
+                  onFocus={() => {
+                    setIsCustomSelected(true);
+                    setState("onboardingName", customNameText);
+                  }}
+                  className="border-none bg-transparent text-sm font-bold w-full p-0 outline-none text-txt text-center placeholder:text-muted"
+                  placeholder="enter custom name..."
                 />
               </div>
             </div>
@@ -178,8 +195,13 @@ export function OnboardingWizard() {
       case "avatar":
         return (
           <div className="mx-auto mt-10 text-center font-body">
+                                    <img
+              src="/android-chrome-512x512.png"
+              alt="Avatar"
+              className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
+            />
             <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[360px] relative text-[15px] text-txt leading-relaxed">
-              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">Choose Your Agent</h2>
+              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">what body should i use?</h2>
             </div>
             <div className="mx-auto">
               <AvatarSelector
@@ -198,15 +220,20 @@ export function OnboardingWizard() {
 
       case "style":
         return (
-          <div className="max-w-[500px] mx-auto mt-10 text-center font-body">
+          <div className="max-w-[520px] mx-auto mt-10 text-center font-body">
+            <img
+              src="/android-chrome-512x512.png"
+              alt="Avatar"
+              className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
+            />
             <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[360px] relative text-[15px] text-txt leading-relaxed">
-              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">Choose a Vibe</h2>
+              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">whats my vibe?</h2>
             </div>
-            <div className="flex flex-col gap-2 text-left max-w-[360px] mx-auto">
+            <div className="grid grid-cols-3 gap-2 mx-auto max-w-[480px]">
               {onboardingOptions?.styles.map((preset: StylePreset) => (
                 <button
                   key={preset.catchphrase}
-                  className={`px-4 py-3 border cursor-pointer bg-card transition-colors text-left ${
+                  className={`px-3 py-3 border cursor-pointer bg-card transition-colors text-center rounded-lg ${
                     onboardingStyle === preset.catchphrase
                       ? "border-accent !bg-accent !text-accent-fg"
                       : "border-border hover:border-accent"
@@ -214,7 +241,7 @@ export function OnboardingWizard() {
                   onClick={() => handleStyleSelect(preset.catchphrase)}
                 >
                   <div className="font-bold text-sm">{preset.catchphrase}</div>
-                  <div className={`text-xs mt-0.5 ${
+                  <div className={`text-[11px] mt-0.5 ${
                     onboardingStyle === preset.catchphrase ? "text-accent-fg/70" : "text-muted"
                   }`}>{preset.hint}</div>
                 </button>
@@ -225,15 +252,20 @@ export function OnboardingWizard() {
 
       case "theme":
         return (
-          <div className="max-w-[500px] mx-auto mt-10 text-center font-body">
+          <div className="max-w-[520px] mx-auto mt-10 text-center font-body">
+            <img
+              src="/android-chrome-512x512.png"
+              alt="Avatar"
+              className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
+            />
             <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[360px] relative text-[15px] text-txt leading-relaxed">
-              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">Choose a Theme</h2>
+              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">what colors do u like?</h2>
             </div>
-            <div className="grid grid-cols-3 gap-2 text-left max-w-[360px] mx-auto">
+            <div className="grid grid-cols-3 gap-2 max-w-[360px] mx-auto">
               {THEMES.map((theme) => (
                 <button
                   key={theme.id}
-                  className={`px-2 py-3.5 border cursor-pointer bg-card transition-colors text-center ${
+                  className={`px-2 py-3.5 border cursor-pointer bg-card transition-colors text-center rounded-lg ${
                     onboardingTheme === theme.id
                       ? "border-accent !bg-accent !text-accent-fg"
                       : "border-border hover:border-accent"
@@ -249,32 +281,35 @@ export function OnboardingWizard() {
 
       case "runMode":
         return (
-          <div className="max-w-[500px] mx-auto mt-10 text-center font-body">
+          <div className="max-w-[520px] mx-auto mt-10 text-center font-body">
+            <img
+              src="/android-chrome-512x512.png"
+              alt="Avatar"
+              className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
+            />
             <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[360px] relative text-[15px] text-txt leading-relaxed">
-              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">Run Mode</h2>
+              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">where should i live?</h2>
             </div>
-            <div className="flex flex-col gap-2 text-left max-w-[360px] mx-auto">
+            <div className="grid grid-cols-2 gap-2 max-w-[320px] mx-auto">
               <button
-                className={`px-4 py-3 border cursor-pointer bg-card transition-colors ${
+                className={`px-4 py-3 border cursor-pointer bg-card transition-colors rounded-lg text-center ${
                   onboardingRunMode === "local"
                     ? "border-accent !bg-accent !text-accent-fg"
                     : "border-border hover:border-accent"
                 }`}
                 onClick={() => handleRunModeSelect("local")}
               >
-                <div className="font-bold text-sm">Local</div>
-                <div className="text-xs text-muted mt-0.5">Run on your machine with your own API keys</div>
+                <div className="font-bold text-sm">local</div>
               </button>
               <button
-                className={`px-4 py-3 border cursor-pointer bg-card transition-colors ${
+                className={`px-4 py-3 border cursor-pointer bg-card transition-colors rounded-lg text-center ${
                   onboardingRunMode === "cloud"
                     ? "border-accent !bg-accent !text-accent-fg"
                     : "border-border hover:border-accent"
                 }`}
                 onClick={() => handleRunModeSelect("cloud")}
               >
-                <div className="font-bold text-sm">Cloud</div>
-                <div className="text-xs text-muted mt-0.5">Use Eliza Cloud managed services</div>
+                <div className="font-bold text-sm">cloud</div>
               </button>
             </div>
           </div>
@@ -283,8 +318,13 @@ export function OnboardingWizard() {
       case "cloudProvider":
         return (
           <div className="max-w-[500px] mx-auto mt-10 text-center font-body">
+            <img
+              src="/android-chrome-512x512.png"
+              alt="Avatar"
+              className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
+            />
             <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[360px] relative text-[15px] text-txt leading-relaxed">
-              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">Cloud Provider</h2>
+              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">okay which cloud?</h2>
             </div>
             <div className="flex flex-col gap-2 text-left max-w-[360px] mx-auto">
               {onboardingOptions?.cloudProviders.map((provider: CloudProviderOption) => (
@@ -462,42 +502,23 @@ export function OnboardingWizard() {
 
         return (
           <div className="max-w-[760px] mx-auto mt-10 text-center font-body">
+                        <img
+              src="/android-chrome-512x512.png"
+              alt="Avatar"
+              className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
+            />
             <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-4 max-w-[420px] relative text-[15px] text-txt leading-relaxed">
-              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">LLM Provider</h2>
+              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">what is my brain?</h2>
             </div>
-
-            <div className="border border-border bg-card text-xs text-muted p-3 rounded text-left max-w-[760px] mx-auto mb-4">
-              Most providers need an API key or subscription. Free options like Eliza Cloud have limited credits.
-              Subscriptions (Claude/ChatGPT) are the easiest way to get started if you already pay for one.
-            </div>
-
             <div className="max-w-[760px] mx-auto">
-              {cloudProviders.length > 0 && (
-                <div className="mb-3 text-left">
-                  <div className="text-[11px] uppercase tracking-wide text-muted mb-2">Cloud</div>
-                  <div className="grid grid-cols-1 gap-2">
-                    {cloudProviders.map((p: ProviderOption) => renderProviderCard(p, "lg"))}
-                  </div>
-                </div>
-              )}
 
-              {subscriptionProviders.length > 0 && (
                 <div className="mb-4 text-left">
-                  <div className="text-[11px] uppercase tracking-wide text-muted mb-2">Subscriptions</div>
                   <div className="grid grid-cols-1 gap-2">
-                    {subscriptionProviders.map((p: ProviderOption) => renderProviderCard(p, "lg"))}
+                  {cloudProviders.map((p: ProviderOption) => renderProviderCard(p, "lg"))}
+                  {subscriptionProviders.map((p: ProviderOption) => renderProviderCard(p, "lg"))}
+                  {apiProviders.map((p: ProviderOption) => renderProviderCard(p))}
                   </div>
                 </div>
-              )}
-
-              {apiProviders.length > 0 && (
-                <div className="text-left">
-                  <div className="text-[11px] uppercase tracking-wide text-muted mb-2">API Keys</div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {apiProviders.map((p: ProviderOption) => renderProviderCard(p))}
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Claude Subscription — setup token / OAuth */}
@@ -1056,26 +1077,24 @@ export function OnboardingWizard() {
   const canGoBack = onboardingStep !== "welcome";
 
   return (
-    <div className="max-w-[500px] mx-auto flex flex-col h-[100dvh] text-center font-body">
-      <div className="flex-1 overflow-y-auto pt-10 pb-4 px-1">
-        {renderStep(onboardingStep)}
-      </div>
-      <div className="flex gap-2 py-4 justify-center shrink-0 border-t border-border/30">
+    <div className="mx-auto px-4 pb-16 text-center font-body">
+      {renderStep(onboardingStep)}
+      <div className="flex gap-2 mt-8 justify-center">
         {canGoBack && (
           <button
-            className="px-6 py-2 border border-border bg-transparent text-txt text-sm cursor-pointer hover:bg-accent-subtle hover:text-accent"
+            className="px-6 py-2 border border-border bg-transparent text-txt text-sm cursor-pointer rounded-full hover:bg-accent-subtle hover:text-accent"
             onClick={handleOnboardingBack}
             disabled={onboardingRestarting}
           >
-            Back
+            back
           </button>
         )}
         <button
-          className="px-6 py-2 border border-accent bg-accent text-accent-fg text-sm cursor-pointer hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
+          className="px-6 py-2 border border-accent bg-accent text-accent-fg text-sm cursor-pointer rounded-full hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
           onClick={() => void handleOnboardingNext()}
           disabled={!canGoNext() || onboardingRestarting}
         >
-          {onboardingRestarting ? "Restarting agent..." : "Next"}
+          {onboardingRestarting ? "restarting..." : "next"}
         </button>
       </div>
     </div>

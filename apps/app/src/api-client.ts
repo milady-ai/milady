@@ -248,6 +248,19 @@ export interface PluginInfo {
   pluginDeps?: string[];
 }
 
+export interface CorePluginEntry {
+  npmName: string;
+  id: string;
+  name: string;
+  isCore: boolean;
+  loaded: boolean;
+}
+
+export interface CorePluginsResponse {
+  core: CorePluginEntry[];
+  optional: CorePluginEntry[];
+}
+
 export interface ChatMessage {
   role: "user" | "assistant";
   text: string;
@@ -865,6 +878,10 @@ export class MilaidyClient {
 
   async getPlugins(): Promise<{ plugins: PluginInfo[] }> {
     return this.fetch("/api/plugins");
+  }
+
+  async getCorePlugins(): Promise<CorePluginsResponse> {
+    return this.fetch("/api/plugins/core");
   }
 
   async updatePlugin(id: string, config: Record<string, unknown>): Promise<{ ok: boolean; restarting?: boolean }> {

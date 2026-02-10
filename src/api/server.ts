@@ -1932,7 +1932,7 @@ async function handleRequest(
   // ── GET /api/onboarding/options ─────────────────────────────────────────
   if (method === "GET" && pathname === "/api/onboarding/options") {
     json(res, {
-      names: pickRandomNames(6),
+      names: pickRandomNames(5),
       styles: STYLE_PRESETS,
       providers: getProviderOptions(),
       cloudProviders: getCloudProviderOptions(),
@@ -3263,6 +3263,53 @@ async function handleRequest(
         500,
       );
     }
+    return;
+  }
+
+  // ── GET /api/plugins/core ────────────────────────────────────────────
+  // Returns all core and optional core plugins with their loaded/running status.
+  if (method === "GET" && pathname === "/api/plugins/core") {
+    const { CORE_PLUGINS, OPTIONAL_CORE_PLUGINS } = await import(
+      "../runtime/eliza.js"
+    );
+
+    const loadedNames = state.runtime
+      ? state.runtime.plugins.map((p: { name: string }) => p.name)
+      : [];
+
+    const isLoaded = (npmName: string): boolean => {
+      const shortName = npmName.replace("@elizaos/", "");
+      return loadedNames.some(
+        (n: string) =>
+          n === npmName || n === shortName || n.includes(shortName),
+      );
+    };
+
+    const coreList = CORE_PLUGINS.map((npm: string) => ({
+      npmName: npm,
+      id: npm.replace("@elizaos/plugin-", ""),
+      name: npm
+        .replace("@elizaos/plugin-", "")
+        .split("-")
+        .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" "),
+      isCore: true,
+      loaded: isLoaded(npm),
+    }));
+
+    const optionalList = OPTIONAL_CORE_PLUGINS.map((npm: string) => ({
+      npmName: npm,
+      id: npm.replace("@elizaos/plugin-", ""),
+      name: npm
+        .replace("@elizaos/plugin-", "")
+        .split("-")
+        .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" "),
+      isCore: false,
+      loaded: isLoaded(npm),
+    }));
+
+    json(res, { core: coreList, optional: optionalList });
     return;
   }
 

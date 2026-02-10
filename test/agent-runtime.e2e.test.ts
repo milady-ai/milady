@@ -765,7 +765,11 @@ describe("Agent Runtime E2E", () => {
         // Write a config with an agent name so onboarding is skipped
         fs.writeFileSync(
           path.join(subConfigDir, "milaidy.json"),
-          JSON.stringify({ agent: { name: "SubprocessAgent", bio: "test" } }),
+          JSON.stringify({
+            agents: {
+              list: [{ id: "main", name: "SubprocessAgent", bio: ["test"] }],
+            },
+          }),
         );
 
         // Build env: inherit everything, override HOME + PGLITE + XDG dirs

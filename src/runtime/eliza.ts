@@ -146,21 +146,27 @@ const CHANNEL_ENV_MAP: Readonly<
 
 /** Core plugins that should always be loaded. */
 export const CORE_PLUGINS: readonly string[] = [
-  "@elizaos/plugin-sql",
-  "@elizaos/plugin-local-embedding",
-  "@elizaos/plugin-agent-skills",
+  "@elizaos/plugin-sql", // database adapter — required
+  "@elizaos/plugin-local-embedding", // local embeddings — required for memory
+  "@elizaos/plugin-knowledge", // knowledge retrieval — required for RAG
+  "@elizaos/plugin-agent-skills", // skill execution
+  "@elizaos/plugin-directives", // directive processing
+  "@elizaos/plugin-commands", // slash command handling
+  "@elizaos/plugin-personality", // personality coherence
+  "@elizaos/plugin-experience", // learning from interactions
+];
+
+/**
+ * Plugins that can be enabled from the admin panel.
+ * Not loaded by default to keep the runtime lean.
+ */
+export const OPTIONAL_CORE_PLUGINS: readonly string[] = [
   "@elizaos/plugin-agent-orchestrator",
-  "@elizaos/plugin-directives",
-  "@elizaos/plugin-commands",
   "@elizaos/plugin-shell",
-  "@elizaos/plugin-personality",
-  "@elizaos/plugin-experience",
   "@elizaos/plugin-plugin-manager",
   "@elizaos/plugin-cli",
   "@elizaos/plugin-code",
   "@elizaos/plugin-edge-tts",
-  "@elizaos/plugin-knowledge",
-  "@elizaos/plugin-mcp",
   "@elizaos/plugin-pdf",
   "@elizaos/plugin-scratchpad",
   "@elizaos/plugin-secrets-manager",
@@ -268,7 +274,10 @@ export function collectPluginNames(config: MilaidyConfig): Set<string> {
   // but always include essential plugins that the runtime depends on.
   if (hasExplicitAllowList) {
     const names = new Set<string>(allowList);
-    names.add("@elizaos/plugin-sql");
+    // Core plugins are always loaded regardless of allow list.
+    for (const core of CORE_PLUGINS) {
+      names.add(core);
+    }
 
     const cloudActive = config.cloud?.enabled || Boolean(config.cloud?.apiKey);
     if (cloudActive) {
