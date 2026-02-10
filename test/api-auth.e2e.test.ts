@@ -182,7 +182,61 @@ describe("Auth bypass (no MILAIDY_API_TOKEN)", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 2. TOKEN AUTH GATE
+// 2. NON-LOOPBACK BIND REQUIRES AUTH (AUTO-TOKEN)
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe("Non-loopback bind enforces auth when token is unset", () => {
+  let port: number;
+  let close: () => Promise<void>;
+  let envBackup: { restore: () => void };
+
+  beforeAll(async () => {
+    envBackup = saveEnv(
+      "MILAIDY_API_TOKEN",
+      "MILAIDY_API_BIND",
+      "MILAIDY_PAIRING_DISABLED",
+    );
+    delete process.env.MILAIDY_API_TOKEN;
+    process.env.MILAIDY_API_BIND = "0.0.0.0";
+    delete process.env.MILAIDY_PAIRING_DISABLED;
+
+    const server = await startApiServer({ port: 0 });
+    port = server.port;
+    close = server.close;
+  }, 30_000);
+
+  afterAll(async () => {
+    await close();
+    envBackup.restore();
+  });
+
+  it("rejects unauthenticated requests with 401", async () => {
+    const { status, data } = await req(port, "GET", "/api/status");
+    expect(status).toBe(401);
+    expect(data.error).toBe("Unauthorized");
+  });
+
+  it("auto-generates a startup token and accepts it", async () => {
+    const token = process.env.MILAIDY_API_TOKEN;
+    expect(typeof token).toBe("string");
+    expect(token).toMatch(/^[a-f0-9]{64}$/);
+
+    const { status } = await req(port, "GET", "/api/status", undefined, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    expect(status).toBe(200);
+  });
+
+  it("/api/auth/status reports auth required", async () => {
+    const { status, data } = await req(port, "GET", "/api/auth/status");
+    expect(status).toBe(200);
+    expect(data.required).toBe(true);
+    expect(data.pairingEnabled).toBe(true);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 3. TOKEN AUTH GATE
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe("Token auth gate (MILAIDY_API_TOKEN set)", () => {

@@ -1608,6 +1608,38 @@ function isAuthorized(req: http.IncomingMessage): boolean {
   return hasValidApiToken(extractAuthToken(req));
 }
 
+function isLoopbackBind(host: string): boolean {
+  const normalized = host.trim().toLowerCase();
+  if (!normalized) return false;
+  if (normalized === "localhost") return true;
+  if (normalized === "::1" || normalized === "[::1]") return true;
+  if (normalized === "0.0.0.0" || normalized === "::" || normalized === "[::]")
+    return false;
+  if (normalized.startsWith("127.")) return true;
+  if (normalized.startsWith("::ffff:127.")) return true;
+  return false;
+}
+
+/**
+ * Security guard:
+ * If the API is bound off-loopback and no token is configured, generate one
+ * at startup so privileged endpoints are never exposed unauthenticated.
+ */
+function ensureApiTokenForBind(host: string): void {
+  if (isLoopbackBind(host)) return;
+  const existing = process.env.MILAIDY_API_TOKEN?.trim();
+  if (existing) return;
+
+  const generated = crypto.randomBytes(32).toString("hex");
+  process.env.MILAIDY_API_TOKEN = generated;
+  logger.warn(
+    `[milaidy-api] MILAIDY_API_BIND="${host}" is non-loopback and MILAIDY_API_TOKEN is unset.`,
+  );
+  logger.warn(
+    `[milaidy-api] Generated temporary MILAIDY_API_TOKEN=${generated}. Set MILAIDY_API_TOKEN explicitly to keep it stable across restarts.`,
+  );
+}
+
 async function handleRequest(
   req: http.IncomingMessage,
   res: http.ServerResponse,
@@ -5979,6 +6011,7 @@ export async function startApiServer(opts?: {
   const port = opts?.port ?? 2138;
   const host =
     (process.env.MILAIDY_API_BIND ?? "127.0.0.1").trim() || "127.0.0.1";
+  ensureApiTokenForBind(host);
 
   let config: MilaidyConfig;
   try {
