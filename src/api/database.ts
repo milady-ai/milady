@@ -576,12 +576,26 @@ async function handleTestConnection(
     return;
   }
 
-  const pool = new Pool({
-    connectionString,
-    max: 1,
-    connectionTimeoutMillis: 10000,
-    idleTimeoutMillis: 5000,
-  });
+  let pool: import("pg").Pool | null = null;
+  try {
+    pool = new Pool({
+      connectionString,
+      max: 1,
+      connectionTimeoutMillis: 10000,
+      idleTimeoutMillis: 5000,
+    });
+  } catch (err) {
+    jsonResponse(res, {
+      success: false,
+      serverVersion: null,
+      error:
+        err instanceof Error
+          ? err.message
+          : "Failed to initialize PostgreSQL client.",
+      durationMs: Date.now() - start,
+    } satisfies ConnectionTestResult);
+    return;
+  }
 
   let client: import("pg").PoolClient | null = null;
   try {
@@ -607,7 +621,7 @@ async function handleTestConnection(
     } satisfies ConnectionTestResult);
   } finally {
     if (client) client.release();
-    await pool.end();
+    if (pool) await pool.end();
   }
 }
 
