@@ -111,14 +111,11 @@ describe("collectPluginNames", () => {
   it("includes all core plugins for an empty config", () => {
     const names = collectPluginNames({} as MilaidyConfig);
     expect(names.has("@elizaos/plugin-sql")).toBe(true);
+    expect(names.has("@elizaos/plugin-local-embedding")).toBe(true);
     expect(names.has("@elizaos/plugin-agent-skills")).toBe(true);
-    expect(names.has("@elizaos/plugin-directives")).toBe(true);
-    expect(names.has("@elizaos/plugin-commands")).toBe(true);
+    expect(names.has("@elizaos/plugin-agent-orchestrator")).toBe(true);
     expect(names.has("@elizaos/plugin-shell")).toBe(true);
-    expect(names.has("@elizaos/plugin-personality")).toBe(true);
-    expect(names.has("@elizaos/plugin-experience")).toBe(true);
-    // plugin-form, plugin-goals, plugin-scheduling are currently disabled
-    // in CORE_PLUGINS due to packaging/spec issues
+    expect(names.has("@elizaos/plugin-plugin-manager")).toBe(true);
   });
 
   it("adds model-provider plugins when env keys are present", () => {

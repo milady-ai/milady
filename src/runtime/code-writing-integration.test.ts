@@ -13,35 +13,46 @@
 
 import { describe, expect, it } from "vitest";
 import type { MilaidyConfig } from "../config/config.js";
-import { CORE_PLUGINS, collectPluginNames } from "./eliza.js";
+import {
+  CORE_PLUGINS,
+  OPTIONAL_CORE_PLUGINS,
+  collectPluginNames,
+} from "./eliza.js";
 
 // ---------------------------------------------------------------------------
-// Plugin classification — code is a core plugin
+// Plugin classification — code is an optional plugin (admin-panel toggleable)
 // ---------------------------------------------------------------------------
 
 describe("Code writing plugin classification", () => {
-  it("@elizaos/plugin-code IS in CORE_PLUGINS", () => {
-    expect(CORE_PLUGINS).toContain("@elizaos/plugin-code");
+  it("@elizaos/plugin-code is NOT in CORE_PLUGINS (optional)", () => {
+    expect(CORE_PLUGINS).not.toContain("@elizaos/plugin-code");
   });
 
-  it("@elizaos/plugin-code is loaded with empty config", () => {
+  it("@elizaos/plugin-code IS in OPTIONAL_CORE_PLUGINS", () => {
+    expect(OPTIONAL_CORE_PLUGINS).toContain("@elizaos/plugin-code");
+  });
+
+  it("@elizaos/plugin-code is not loaded with empty config (optional)", () => {
     const names = collectPluginNames({} as MilaidyConfig);
-    expect(names.has("@elizaos/plugin-code")).toBe(true);
+    expect(names.has("@elizaos/plugin-code")).toBe(false);
   });
 
-  it("@elizaos/plugin-code is loaded alongside shell and other core plugins", () => {
-    const names = collectPluginNames({} as MilaidyConfig);
-    expect(names.has("@elizaos/plugin-code")).toBe(true);
-    expect(names.has("@elizaos/plugin-shell")).toBe(true);
-    expect(names.has("@elizaos/plugin-sql")).toBe(true);
-  });
-
-  it("@elizaos/plugin-code remains loaded even with optional features enabled", () => {
+  it("@elizaos/plugin-code loads when explicitly in plugins.installs", () => {
     const config = {
-      features: { browser: true, computeruse: true },
+      plugins: {
+        installs: {
+          "@elizaos/plugin-code": {
+            source: "npm",
+            installPath: "/tmp/test",
+            version: "1.0.0",
+          },
+        },
+      },
     } as unknown as MilaidyConfig;
     const names = collectPluginNames(config);
     expect(names.has("@elizaos/plugin-code")).toBe(true);
+    expect(names.has("@elizaos/plugin-shell")).toBe(true);
+    expect(names.has("@elizaos/plugin-sql")).toBe(true);
   });
 });
 

@@ -148,25 +148,8 @@ describe("plugin loading parity across modes", () => {
       "@elizaos/plugin-local-embedding",
       "@elizaos/plugin-agent-skills",
       "@elizaos/plugin-agent-orchestrator",
-      "@elizaos/plugin-directives",
-      "@elizaos/plugin-commands",
       "@elizaos/plugin-shell",
-      "@elizaos/plugin-personality",
-      "@elizaos/plugin-experience",
       "@elizaos/plugin-plugin-manager",
-      "@elizaos/plugin-cli",
-      // "@elizaos/plugin-code", // disabled: Provider spec mismatch
-      "@elizaos/plugin-edge-tts",
-      "@elizaos/plugin-knowledge",
-      "@elizaos/plugin-mcp",
-      "@elizaos/plugin-pdf",
-      "@elizaos/plugin-scratchpad",
-      "@elizaos/plugin-secrets-manager",
-      "@elizaos/plugin-todo",
-      "@elizaos/plugin-trust",
-      // "@elizaos/plugin-form", // disabled: packaging issue
-      // "@elizaos/plugin-goals", // disabled: spec mismatch
-      // "@elizaos/plugin-scheduling", // disabled: packaging issue
     ];
     for (const plugin of essentials) {
       expect(names.has(plugin)).toBe(true);

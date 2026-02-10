@@ -28,6 +28,7 @@ function CorePluginsView() {
   const [optional, setOptional] = useState<CorePluginEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [toggling, setToggling] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -44,6 +45,22 @@ function CorePluginsView() {
 
   useEffect(() => { void load(); }, [load]);
 
+  const handleToggle = useCallback(async (plugin: CorePluginEntry) => {
+    setToggling(plugin.id);
+    try {
+      await client.toggleCorePlugin(plugin.npmName, !plugin.enabled);
+      // Optimistic update
+      setOptional(prev =>
+        prev.map(p =>
+          p.id === plugin.id ? { ...p, enabled: !p.enabled } : p,
+        ),
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Toggle failed");
+    }
+    setToggling(null);
+  }, []);
+
   if (loading) {
     return <div className="text-[var(--muted)] text-sm py-8 text-center">Loading plugin status...</div>;
   }
@@ -59,13 +76,13 @@ function CorePluginsView() {
   }
 
   const loadedCore = core.filter(p => p.loaded).length;
-  const loadedOptional = optional.filter(p => p.loaded).length;
+  const enabledOptional = optional.filter(p => p.enabled).length;
 
   return (
     <div className="space-y-6">
       {/* Summary */}
       <div className="text-xs text-[var(--muted)]">
-        {loadedCore}/{core.length} core loaded &middot; {loadedOptional}/{optional.length} optional loaded
+        {loadedCore}/{core.length} core running &middot; {enabledOptional}/{optional.length} optional enabled
         <button onClick={load} className="ml-3 text-[var(--accent)] bg-transparent border-0 cursor-pointer text-xs underline">
           Refresh
         </button>
@@ -86,11 +103,17 @@ function CorePluginsView() {
       <div>
         <h3 className="text-sm font-semibold text-[var(--txt-strong)] mb-3">Optional Plugins</h3>
         <p className="text-xs text-[var(--muted)] mb-3">
-          Can be enabled by adding to the plugins allow list in config. Restart required.
+          Toggle to enable or disable. Agent will restart automatically.
         </p>
         <div className="grid gap-2">
           {optional.map(p => (
-            <PluginRow key={p.id} plugin={p} />
+            <PluginRow
+              key={p.id}
+              plugin={p}
+              toggleable
+              toggling={toggling === p.id}
+              onToggle={() => handleToggle(p)}
+            />
           ))}
         </div>
       </div>
@@ -98,28 +121,68 @@ function CorePluginsView() {
   );
 }
 
-function PluginRow({ plugin }: { plugin: CorePluginEntry }) {
+function PluginRow({
+  plugin,
+  toggleable,
+  toggling,
+  onToggle,
+}: {
+  plugin: CorePluginEntry;
+  toggleable?: boolean;
+  toggling?: boolean;
+  onToggle?: () => void;
+}) {
   return (
     <div className="flex items-center gap-3 px-3 py-2 rounded bg-[var(--surface)] border border-[var(--border)]">
+      {/* Status dot */}
       <span
         className={`inline-block w-2 h-2 rounded-full flex-shrink-0 ${
           plugin.loaded
             ? "bg-[var(--ok,#16a34a)]"
-            : "bg-[var(--muted)]"
+            : plugin.enabled
+              ? "bg-[#b8860b]"
+              : "bg-[var(--muted)]"
         }`}
-        title={plugin.loaded ? "Loaded" : "Not loaded"}
+        title={plugin.loaded ? "Running" : plugin.enabled ? "Enabled (not loaded yet)" : "Disabled"}
       />
+
+      {/* Name */}
       <span className="text-sm font-medium text-[var(--txt)] flex-1 min-w-0 truncate">
         {plugin.name}
       </span>
-      <code className="text-[10px] text-[var(--muted)] font-[var(--mono)] flex-shrink-0">
-        {plugin.npmName}
-      </code>
+
+      {/* Status label */}
       <span className={`text-[10px] font-medium flex-shrink-0 ${
-        plugin.loaded ? "text-[var(--ok,#16a34a)]" : "text-[var(--muted)]"
+        plugin.loaded
+          ? "text-[var(--ok,#16a34a)]"
+          : plugin.enabled
+            ? "text-[#b8860b]"
+            : "text-[var(--muted)]"
       }`}>
-        {plugin.loaded ? "Running" : "Off"}
+        {plugin.loaded ? "Running" : plugin.enabled ? "Enabled" : "Off"}
       </span>
+
+      {/* Toggle button for optional plugins */}
+      {toggleable && onToggle && (
+        <button
+          className={`relative w-9 h-5 rounded-full border transition-colors flex-shrink-0 cursor-pointer ${
+            plugin.enabled
+              ? "bg-[var(--accent)] border-[var(--accent)]"
+              : "bg-[var(--surface)] border-[var(--border)]"
+          } ${toggling ? "opacity-50 pointer-events-none" : ""}`}
+          onClick={onToggle}
+          disabled={toggling}
+          title={plugin.enabled ? "Disable" : "Enable"}
+        >
+          <span
+            className={`absolute top-0.5 w-3.5 h-3.5 rounded-full transition-all ${
+              plugin.enabled
+                ? "left-[18px] bg-white"
+                : "left-[2px] bg-[var(--muted)]"
+            }`}
+          />
+        </button>
+      )}
     </div>
   );
 }

@@ -1,0 +1,8 @@
+# actionlint configuration
+# https://github.com/rhysd/actionlint/blob/main/docs/config.md
+
+paths:
+  .github/workflows/release.yml:
+    ignore:
+      # Optional signing secrets — linter cannot verify repo secrets exist
+      - "Context access might be invalid:.+"

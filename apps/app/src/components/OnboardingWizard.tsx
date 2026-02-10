@@ -24,7 +24,6 @@ export function OnboardingWizard() {
     onboardingOpenRouterModel,
     onboardingTelegramToken,
     onboardingDiscordToken,
-    onboardingWhatsAppSessionPath,
     onboardingTwilioAccountSid,
     onboardingTwilioAuthToken,
     onboardingTwilioPhoneNumber,
@@ -139,7 +138,7 @@ export function OnboardingWizard() {
               alt="Avatar"
               className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
             />
-            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[360px] relative text-[15px] text-txt leading-relaxed">
+            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
               <h2 className="text-[28px] font-normal mb-1 text-txt-strong">ohhh... what's my name again?</h2>
             </div>
             <div className="flex flex-wrap gap-2 justify-center mx-auto mb-3">
@@ -200,7 +199,7 @@ export function OnboardingWizard() {
               alt="Avatar"
               className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
             />
-            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[360px] relative text-[15px] text-txt leading-relaxed">
+            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
               <h2 className="text-[28px] font-normal mb-1 text-txt-strong">what body should i use?</h2>
             </div>
             <div className="mx-auto">
@@ -226,7 +225,7 @@ export function OnboardingWizard() {
               alt="Avatar"
               className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
             />
-            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[360px] relative text-[15px] text-txt leading-relaxed">
+            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
               <h2 className="text-[28px] font-normal mb-1 text-txt-strong">whats my vibe?</h2>
             </div>
             <div className="grid grid-cols-3 gap-2 mx-auto max-w-[480px]">
@@ -258,10 +257,10 @@ export function OnboardingWizard() {
               alt="Avatar"
               className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
             />
-            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[360px] relative text-[15px] text-txt leading-relaxed">
+            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
               <h2 className="text-[28px] font-normal mb-1 text-txt-strong">what colors do u like?</h2>
             </div>
-            <div className="grid grid-cols-3 gap-2 max-w-[360px] mx-auto">
+            <div className="grid grid-cols-3 gap-2 max-w-[600px] mx-auto">
               {THEMES.map((theme) => (
                 <button
                   key={theme.id}
@@ -287,7 +286,7 @@ export function OnboardingWizard() {
               alt="Avatar"
               className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
             />
-            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[360px] relative text-[15px] text-txt leading-relaxed">
+            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
               <h2 className="text-[28px] font-normal mb-1 text-txt-strong">where should i live?</h2>
             </div>
             <div className="grid grid-cols-2 gap-2 max-w-[320px] mx-auto">
@@ -323,10 +322,10 @@ export function OnboardingWizard() {
               alt="Avatar"
               className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
             />
-            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[360px] relative text-[15px] text-txt leading-relaxed">
+            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
               <h2 className="text-[28px] font-normal mb-1 text-txt-strong">okay which cloud?</h2>
             </div>
-            <div className="flex flex-col gap-2 text-left max-w-[360px] mx-auto">
+            <div className="flex flex-col gap-2 text-left max-w-[600px] mx-auto">
               {onboardingOptions?.cloudProviders.map((provider: CloudProviderOption) => (
                 <div
                   key={provider.id}
@@ -347,7 +346,7 @@ export function OnboardingWizard() {
               ))}
             </div>
             {onboardingCloudProvider === "elizacloud" && (
-              <div className="max-w-[360px] mx-auto mt-4">
+              <div className="max-w-[600px] mx-auto mt-4">
                 {cloudConnected ? (
                   <div className="flex items-center gap-2 px-4 py-2.5 border border-green-500/30 bg-green-500/10 text-green-400 text-sm rounded-lg justify-center">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -378,10 +377,10 @@ export function OnboardingWizard() {
       case "modelSelection":
         return (
           <div className="max-w-[500px] mx-auto mt-10 text-center font-body">
-            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[360px] relative text-[15px] text-txt leading-relaxed">
+            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
               <h2 className="text-[28px] font-normal mb-1 text-txt-strong">Model Selection</h2>
             </div>
-            <div className="flex flex-col gap-4 text-left max-w-[360px] mx-auto">
+            <div className="flex flex-col gap-4 text-left max-w-[600px] mx-auto">
               <div>
                 <label className="text-[13px] font-bold text-txt-strong block mb-2 text-left">
                   Small Model:
@@ -421,16 +420,16 @@ export function OnboardingWizard() {
       case "cloudLogin":
         return (
           <div className="max-w-[500px] mx-auto mt-10 text-center font-body">
-            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[360px] relative text-[15px] text-txt leading-relaxed">
+            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
               <h2 className="text-[28px] font-normal mb-1 text-txt-strong">Cloud Login</h2>
             </div>
             {cloudConnected ? (
-              <div className="max-w-[360px] mx-auto">
+              <div className="max-w-[600px] mx-auto">
                 <p className="text-txt mb-2">Logged in successfully!</p>
                 {cloudUserId && <p className="text-muted text-sm">User ID: {cloudUserId}</p>}
               </div>
             ) : (
-              <div className="max-w-[360px] mx-auto">
+              <div className="max-w-[600px] mx-auto">
                 <p className="text-txt mb-4">Click the button below to log in to Eliza Cloud</p>
                 <button
                   className="px-6 py-2 border border-accent bg-accent text-accent-fg text-sm cursor-pointer hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed mt-5"
@@ -530,30 +529,95 @@ export function OnboardingWizard() {
           );
         };
 
-        return (
-          <div className="max-w-[760px] mx-auto mt-10 text-center font-body">
-                        <img
-              src="/android-chrome-512x512.png"
-              alt="Avatar"
-              className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
-            />
-            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-4 max-w-[420px] relative text-[15px] text-txt leading-relaxed">
-              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">what is my brain?</h2>
-            </div>
-            <div className="max-w-[760px] mx-auto">
-
+        // ── Phase 1: provider grid (no provider selected yet) ──────────
+        if (!onboardingProvider) {
+          return (
+            <div className="w-full mx-auto mt-10 text-center font-body">
+              <img
+                src="/android-chrome-512x512.png"
+                alt="Avatar"
+                className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
+              />
+              <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-4 max-w-[420px] relative text-[15px] text-txt leading-relaxed">
+                <h2 className="text-[28px] font-normal mb-1 text-txt-strong">what is my brain?</h2>
+              </div>
+              <div className="w-full mx-auto px-2">
                 <div className="mb-4 text-left">
-                  <div className="grid grid-cols-1 gap-2">
-                  {cloudProviders.map((p: ProviderOption) => renderProviderCard(p, "lg"))}
-                  {subscriptionProviders.map((p: ProviderOption) => renderProviderCard(p, "lg"))}
-                  {apiProviders.map((p: ProviderOption) => renderProviderCard(p))}
+                  <div className="grid grid-cols-4 gap-2">
+                    {cloudProviders.map((p: ProviderOption) => renderProviderCard(p))}
+                    {subscriptionProviders.map((p: ProviderOption) => renderProviderCard(p))}
+                    {apiProviders.map((p: ProviderOption) => renderProviderCard(p))}
                   </div>
                 </div>
+              </div>
             </div>
+          );
+        }
+
+        // ── Phase 2: config for the selected provider ─────────────────
+        const selectedProvider = providers.find((p: ProviderOption) => p.id === onboardingProvider);
+        const selectedDisplay = selectedProvider ? getProviderDisplay(selectedProvider) : { name: onboardingProvider, description: "" };
+
+        return (
+          <div className="max-w-[520px] mx-auto mt-10 text-center font-body">
+            {/* Header with selected provider + change link */}
+            <div className="flex items-center justify-center gap-3 mb-6">
+              {selectedProvider && (
+                <img
+                  src={getProviderLogo(selectedProvider.id, isDark)}
+                  alt={selectedDisplay.name}
+                  className="w-10 h-10 rounded-md object-contain bg-bg-muted p-1.5"
+                />
+              )}
+              <div className="text-left">
+                <h2 className="text-[22px] font-normal text-txt-strong leading-tight">{selectedDisplay.name}</h2>
+                {selectedDisplay.description && (
+                  <p className="text-xs text-muted mt-0.5">{selectedDisplay.description}</p>
+                )}
+              </div>
+              <button
+                className="ml-2 text-xs text-accent bg-transparent border border-accent/30 px-2.5 py-1 rounded-full cursor-pointer hover:bg-accent/10"
+                onClick={() => {
+                  setState("onboardingProvider", "");
+                  setState("onboardingApiKey", "");
+                }}
+              >
+                change
+              </button>
+            </div>
+
+            {/* Eliza Cloud — cloud login */}
+            {onboardingProvider === "elizacloud" && (
+              <div className="max-w-[600px] mx-auto">
+                {cloudConnected ? (
+                  <div className="flex items-center gap-2 px-4 py-2.5 border border-green-500/30 bg-green-500/10 text-green-400 text-sm rounded-lg justify-center">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    connected~
+                  </div>
+                ) : (
+                  <button
+                    className="w-full px-6 py-2.5 border border-accent bg-accent text-accent-fg text-sm cursor-pointer rounded-full hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
+                    onClick={handleCloudLogin}
+                    disabled={cloudLoginBusy}
+                  >
+                    {cloudLoginBusy ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="inline-block w-4 h-4 border-2 border-border border-t-accent rounded-full animate-spin" />
+                        connecting...
+                      </span>
+                    ) : (
+                      "connect account"
+                    )}
+                  </button>
+                )}
+                {cloudLoginError && <p className="text-danger text-[13px] mt-2">{cloudLoginError}</p>}
+                <p className="text-xs text-muted mt-3">Free credits to start. No API key needed.</p>
+              </div>
+            )}
 
             {/* Claude Subscription — setup token / OAuth */}
             {onboardingProvider === "anthropic-subscription" && (
-              <div className="max-w-[520px] mx-auto mt-4 text-left">
+              <div className="text-left">
                 <div className="flex items-center gap-4 border-b border-border mb-3">
                   <button
                     className={`text-sm pb-2 border-b-2 ${
@@ -677,7 +741,7 @@ export function OnboardingWizard() {
 
             {/* ChatGPT Subscription — OAuth */}
             {onboardingProvider === "openai-subscription" && (
-              <div className="max-w-[520px] mx-auto mt-4 space-y-4">
+              <div className="space-y-4">
                 {openaiConnected ? (
                   <div className="flex flex-col items-center gap-3">
                     <div className="flex items-center gap-2 px-6 py-3 border border-green-500/30 bg-green-500/10 text-green-400 text-sm font-medium w-full max-w-xs justify-center">
@@ -785,7 +849,7 @@ export function OnboardingWizard() {
               onboardingProvider !== "openai-subscription" &&
               onboardingProvider !== "elizacloud" &&
               onboardingProvider !== "ollama" && (
-                <div className="max-w-[520px] mx-auto mt-4 text-left">
+                <div className="text-left">
                   <label className="text-[13px] font-bold text-txt-strong block mb-2">API Key:</label>
                   <input
                     type="password"
@@ -797,9 +861,14 @@ export function OnboardingWizard() {
                 </div>
               )}
 
+            {/* Ollama — no config needed */}
+            {onboardingProvider === "ollama" && (
+              <p className="text-xs text-muted">No configuration needed. Make sure Ollama is running locally.</p>
+            )}
+
             {/* OpenRouter model selection */}
             {onboardingProvider === "openrouter" && onboardingApiKey.trim() && onboardingOptions?.openrouterModels && (
-              <div className="max-w-[520px] mx-auto mt-4 text-left">
+              <div className="mt-4 text-left">
                 <label className="text-[13px] font-bold text-txt-strong block mb-2">Select Model:</label>
                 <div className="flex flex-col gap-2">
                   {onboardingOptions.openrouterModels.map((model: OpenRouterModelOption) => (
@@ -823,86 +892,130 @@ export function OnboardingWizard() {
         );
       }
 
-      case "inventorySetup":
+      case "inventorySetup": {
         return (
-          <div className="max-w-[500px] mx-auto mt-10 text-center font-body">
-            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[360px] relative text-[15px] text-txt leading-relaxed">
-              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">Inventory Setup</h2>
+          <div className="w-full mx-auto mt-10 text-center font-body">
+            <img
+              src="/android-chrome-512x512.png"
+              alt="Avatar"
+              className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
+            />
+            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
+              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">soooo can i have a wallet?</h2>
             </div>
-            <div className="flex flex-col gap-3 text-left max-w-[360px] mx-auto">
-              <h3 className="text-[13px] font-bold text-txt-strong block mb-2 text-left">Select Chains:</h3>
-              {onboardingOptions?.inventoryProviders.map((provider: InventoryProviderOption) => (
-                <div key={provider.id} className="px-4 py-3 border border-border bg-card">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={onboardingSelectedChains.has(provider.id)}
-                      onChange={() => handleChainToggle(provider.id)}
-                      className="cursor-pointer"
-                    />
-                    <span className="font-bold text-sm">{provider.name}</span>
-                  </label>
-                  {provider.description && (
-                    <p className="text-xs text-muted mt-0.5 ml-6">{provider.description}</p>
-                  )}
-                  {onboardingSelectedChains.has(provider.id) && (
-                    <div className="mt-3 ml-6">
-                      <label className="text-[13px] font-bold text-txt-strong block mb-2 text-left">
-                        RPC Provider:
-                      </label>
-                      <select
-                        value={onboardingRpcSelections[provider.id] ?? "elizacloud"}
-                        onChange={(e) => handleRpcSelectionChange(provider.id, e.target.value)}
-                        className="w-full px-3 py-2 border border-border bg-card text-sm mt-2 focus:border-accent focus:outline-none"
-                      >
-                        {provider.rpcProviders.map((rpc: RpcProviderOption) => (
-                          <option key={rpc.id} value={rpc.id}>
-                            {rpc.name}
-                          </option>
-                        ))}
-                      </select>
-                      {onboardingRpcSelections[provider.id] && (
-                        <div className="mt-3">
-                          <label className="text-[13px] font-bold text-txt-strong block mb-2 text-left">
-                            RPC API Key (optional):
-                          </label>
-                          <input
-                            type="password"
-                            value={onboardingRpcKeys[`${provider.id}:${onboardingRpcSelections[provider.id]}`] ?? ""}
-                            onChange={(e) =>
-                              handleRpcKeyChange(
-                                provider.id,
-                                onboardingRpcSelections[provider.id],
-                                e.target.value,
-                              )
-                            }
-                            placeholder="Optional API key"
-                            className="w-full px-3 py-2 border border-border bg-card text-sm mt-2 focus:border-accent focus:outline-none"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left w-full px-4">
+              <h3 className="text-[13px] font-bold text-txt-strong col-span-full mb-2">Select Chains:</h3>
+              {onboardingOptions?.inventoryProviders.map((provider: InventoryProviderOption) => {
+                const selectedRpc = onboardingRpcSelections[provider.id] ?? "elizacloud";
+                const isElizaCloudRpc = selectedRpc === "elizacloud";
+                return (
+                  <div key={provider.id} className="px-4 py-3 border rounded-lg border-border bg-card min-w-0">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={onboardingSelectedChains.has(provider.id)}
+                        onChange={() => handleChainToggle(provider.id)}
+                        className="cursor-pointer"
+                      />
+                      <span className="font-bold text-sm">{provider.name}</span>
+                    </label>
+                    {provider.description && (
+                      <p className="text-xs text-muted mt-0.5 ml-6">{provider.description}</p>
+                    )}
+                    {onboardingSelectedChains.has(provider.id) && (
+                      <div className="mt-3 ml-6">
+                        <label className="text-[13px] font-bold text-txt-strong block mb-2 text-left">
+                          RPC Provider:
+                        </label>
+                        <select
+                          value={selectedRpc}
+                          onChange={(e) => handleRpcSelectionChange(provider.id, e.target.value)}
+                          className="w-full px-3 py-2 border border-border bg-card text-sm mt-2 focus:border-accent focus:outline-none"
+                        >
+                          {provider.rpcProviders.map((rpc: RpcProviderOption) => (
+                            <option key={rpc.id} value={rpc.id}>
+                              {rpc.name}
+                            </option>
+                          ))}
+                        </select>
+                        {isElizaCloudRpc ? (
+                          <div className="mt-3">
+                            {cloudConnected ? (
+                              <div className="flex items-center gap-2 px-4 py-2.5 border border-green-500/30 bg-green-500/10 text-green-400 text-sm rounded-lg w-fit">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                connected~ no keys needed
+                              </div>
+                            ) : (
+                              <div className="mt-2">
+                                <p className="text-xs text-muted mb-2">Eliza Cloud RPC — no keys necessary. Log in to use.</p>
+                                <button
+                                  className="px-6 py-2.5 border border-accent bg-accent text-accent-fg text-sm cursor-pointer rounded-full hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
+                                  onClick={handleCloudLogin}
+                                  disabled={cloudLoginBusy}
+                                >
+                                  {cloudLoginBusy ? (
+                                    <span className="flex items-center justify-center gap-2">
+                                      <span className="inline-block w-4 h-4 border-2 border-border border-t-accent rounded-full animate-spin"></span>
+                                      connecting...
+                                    </span>
+                                  ) : (
+                                    "connect account"
+                                  )}
+                                </button>
+                                {cloudLoginError && <p className="text-danger text-[13px] mt-2">{cloudLoginError}</p>}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          onboardingRpcSelections[provider.id] && (
+                            <div className="mt-3">
+                              <label className="text-[13px] font-bold text-txt-strong block mb-2 text-left">
+                                RPC API Key (optional):
+                              </label>
+                              <input
+                                type="password"
+                                value={onboardingRpcKeys[`${provider.id}:${onboardingRpcSelections[provider.id]}`] ?? ""}
+                                onChange={(e) =>
+                                  handleRpcKeyChange(
+                                    provider.id,
+                                    onboardingRpcSelections[provider.id],
+                                    e.target.value,
+                                  )
+                                }
+                                placeholder="Optional API key"
+                                className="w-full px-3 py-2 border border-border bg-card text-sm mt-2 focus:border-accent focus:outline-none"
+                              />
+                            </div>
+                          )
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         );
+      }
 
       case "connectors":
         return (
-          <div className="max-w-[500px] mx-auto mt-10 text-center font-body">
-            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[360px] relative text-[15px] text-txt leading-relaxed">
-              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">Connectors</h2>
-              <p className="text-xs text-muted mt-1">All connectors are optional — configure any you want to use</p>
+          <div className="w-full mx-auto mt-10 text-center font-body">
+                        <img
+              src="/android-chrome-512x512.png"
+              alt="Avatar"
+              className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
+            />
+            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
+              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">how do you want to reach me?</h2>
             </div>
-            <div className="flex flex-col gap-3 text-left max-w-[360px] mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left w-full max-w-[800px] mx-auto px-2">
               {/* Telegram */}
-              <div className={`px-4 py-3 border bg-card transition-colors ${onboardingTelegramToken.trim() ? "border-accent" : "border-border"}`}>
+              <div className={`px-4 py-3 border rounded-lg bg-card transition-colors min-w-0 ${onboardingTelegramToken.trim() ? "border-accent" : "border-border"}`}>
                 <div className="flex items-center justify-between">
                   <div className="font-bold text-sm text-txt-strong">Telegram</div>
                   {onboardingTelegramToken.trim() && (
-                    <span className="text-[10px] text-accent border border-accent px-1.5 py-0.5">Configured</span>
+                    <span className="text-[10px] text-accent border border-accent px-1.5 py-0.5 rounded">Configured</span>
                   )}
                 </div>
                 <p className="text-xs text-muted mb-3 mt-1">
@@ -922,16 +1035,16 @@ export function OnboardingWizard() {
                   value={onboardingTelegramToken}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setState("onboardingTelegramToken", e.target.value)}
                   placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
-                  className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none"
+                  className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none rounded"
                 />
               </div>
 
               {/* Discord */}
-              <div className={`px-4 py-3 border bg-card transition-colors ${onboardingDiscordToken.trim() ? "border-accent" : "border-border"}`}>
+              <div className={`px-4 py-3 border rounded-lg bg-card transition-colors min-w-0 ${onboardingDiscordToken.trim() ? "border-accent" : "border-border"}`}>
                 <div className="flex items-center justify-between">
                   <div className="font-bold text-sm text-txt-strong">Discord</div>
                   {onboardingDiscordToken.trim() && (
-                    <span className="text-[10px] text-accent border border-accent px-1.5 py-0.5">Configured</span>
+                    <span className="text-[10px] text-accent border border-accent px-1.5 py-0.5 rounded">Configured</span>
                   )}
                 </div>
                 <p className="text-xs text-muted mb-3 mt-1">
@@ -951,36 +1064,16 @@ export function OnboardingWizard() {
                   value={onboardingDiscordToken}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setState("onboardingDiscordToken", e.target.value)}
                   placeholder="Discord bot token"
-                  className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none"
-                />
-              </div>
-
-              {/* WhatsApp */}
-              <div className={`px-4 py-3 border bg-card transition-colors ${onboardingWhatsAppSessionPath.trim() ? "border-accent" : "border-border"}`}>
-                <div className="flex items-center justify-between">
-                  <div className="font-bold text-sm text-txt-strong">WhatsApp</div>
-                  {onboardingWhatsAppSessionPath.trim() && (
-                    <span className="text-[10px] text-accent border border-accent px-1.5 py-0.5">Configured</span>
-                  )}
-                </div>
-                <p className="text-xs text-muted mb-3 mt-1">
-                  Connects via Baileys — provide a session directory path. QR pairing will start on first launch.
-                </p>
-                <input
-                  type="text"
-                  value={onboardingWhatsAppSessionPath}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => setState("onboardingWhatsAppSessionPath", e.target.value)}
-                  placeholder="~/.milaidy/whatsapp-session"
-                  className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none"
+                  className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none rounded"
                 />
               </div>
 
               {/* Twilio (SMS / Green Text) */}
-              <div className={`px-4 py-3 border bg-card transition-colors ${onboardingTwilioAccountSid.trim() && onboardingTwilioAuthToken.trim() ? "border-accent" : "border-border"}`}>
+              <div className={`px-4 py-3 border rounded-lg bg-card transition-colors min-w-0 ${onboardingTwilioAccountSid.trim() && onboardingTwilioAuthToken.trim() ? "border-accent" : "border-border"}`}>
                 <div className="flex items-center justify-between">
                   <div className="font-bold text-sm text-txt-strong">Twilio SMS</div>
                   {onboardingTwilioAccountSid.trim() && onboardingTwilioAuthToken.trim() && (
-                    <span className="text-[10px] text-accent border border-accent px-1.5 py-0.5">Configured</span>
+                    <span className="text-[10px] text-accent border border-accent px-1.5 py-0.5 rounded">Configured</span>
                   )}
                 </div>
                 <p className="text-xs text-muted mb-3 mt-1">
@@ -1000,31 +1093,31 @@ export function OnboardingWizard() {
                     value={onboardingTwilioAccountSid}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setState("onboardingTwilioAccountSid", e.target.value)}
                     placeholder="Account SID"
-                    className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none"
+                    className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none rounded"
                   />
                   <input
                     type="password"
                     value={onboardingTwilioAuthToken}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setState("onboardingTwilioAuthToken", e.target.value)}
                     placeholder="Auth Token"
-                    className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none"
+                    className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none rounded"
                   />
                   <input
                     type="tel"
                     value={onboardingTwilioPhoneNumber}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setState("onboardingTwilioPhoneNumber", e.target.value)}
                     placeholder="+1234567890 (Twilio phone number)"
-                    className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none"
+                    className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none rounded"
                   />
                 </div>
               </div>
 
               {/* Blooio (iMessage / Blue Text) */}
-              <div className={`px-4 py-3 border bg-card transition-colors ${onboardingBlooioApiKey.trim() ? "border-accent" : "border-border"}`}>
+              <div className={`px-4 py-3 border rounded-lg bg-card transition-colors min-w-0 ${onboardingBlooioApiKey.trim() ? "border-accent" : "border-border"}`}>
                 <div className="flex items-center justify-between">
                   <div className="font-bold text-sm text-txt-strong">Blooio iMessage</div>
                   {onboardingBlooioApiKey.trim() && (
-                    <span className="text-[10px] text-accent border border-accent px-1.5 py-0.5">Configured</span>
+                    <span className="text-[10px] text-accent border border-accent px-1.5 py-0.5 rounded">Configured</span>
                   )}
                 </div>
                 <p className="text-xs text-muted mb-3 mt-1">
@@ -1044,14 +1137,14 @@ export function OnboardingWizard() {
                     value={onboardingBlooioApiKey}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setState("onboardingBlooioApiKey", e.target.value)}
                     placeholder="Blooio API key"
-                    className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none"
+                    className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none rounded"
                   />
                   <input
                     type="tel"
                     value={onboardingBlooioPhoneNumber}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setState("onboardingBlooioPhoneNumber", e.target.value)}
                     placeholder="+1234567890 (your phone number)"
-                    className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none"
+                    className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none rounded"
                   />
                 </div>
               </div>
@@ -1107,14 +1200,24 @@ export function OnboardingWizard() {
 
   const canGoBack = onboardingStep !== "welcome";
 
+  /** On the llmProvider config screen, "back" returns to the provider grid. */
+  const handleBack = () => {
+    if (onboardingStep === "llmProvider" && onboardingProvider) {
+      setState("onboardingProvider", "");
+      setState("onboardingApiKey", "");
+    } else {
+      handleOnboardingBack();
+    }
+  };
+
   return (
-    <div className="mx-auto px-4 pb-16 text-center font-body">
+    <div className="mx-auto px-4 pb-16 text-center font-body h-full overflow-y-auto">
       {renderStep(onboardingStep)}
       <div className="flex gap-2 mt-8 justify-center">
         {canGoBack && (
           <button
             className="px-6 py-2 border border-border bg-transparent text-txt text-sm cursor-pointer rounded-full hover:bg-accent-subtle hover:text-accent"
-            onClick={handleOnboardingBack}
+            onClick={handleBack}
             disabled={onboardingRestarting}
           >
             back

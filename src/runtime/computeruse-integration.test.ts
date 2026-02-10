@@ -84,7 +84,7 @@ describe("Computer Use plugin classification", () => {
     // Core plugins should still all be present
     expect(names.has("@elizaos/plugin-sql")).toBe(true);
     expect(names.has("@elizaos/plugin-shell")).toBe(true);
-    expect(names.has("@elizaos/plugin-code")).toBe(true);
+    expect(names.has("@elizaos/plugin-agent-skills")).toBe(true);
     // And computeruse should be there too
     expect(names.has("@elizaos/plugin-computeruse")).toBe(true);
   });

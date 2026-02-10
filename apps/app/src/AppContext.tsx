@@ -600,8 +600,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [onboardingTheme, setOnboardingTheme] = useState<ThemeName>(loadTheme);
   const [onboardingRunMode, setOnboardingRunMode] = useState<"local" | "cloud" | "">("");
   const [onboardingCloudProvider, setOnboardingCloudProvider] = useState("");
-  const [onboardingSmallModel, setOnboardingSmallModel] = useState("claude-haiku");
-  const [onboardingLargeModel, setOnboardingLargeModel] = useState("claude-sonnet-4-5");
+  const [onboardingSmallModel, setOnboardingSmallModel] = useState("moonshotai/kimi-k2-turbo");
+  const [onboardingLargeModel, setOnboardingLargeModel] = useState("moonshotai/kimi-k2-0905");
   const [onboardingProvider, setOnboardingProvider] = useState("");
   const [onboardingApiKey, setOnboardingApiKey] = useState("");
   const [onboardingOpenRouterModel, setOnboardingOpenRouterModel] = useState("");
@@ -1692,6 +1692,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
 
     setOnboardingComplete(true);
+    setTab("chat");
     try {
       setAgentStatus(await client.restartAgent());
     } catch {
@@ -1706,6 +1707,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     onboardingTelegramToken, onboardingDiscordToken, onboardingWhatsAppSessionPath,
     onboardingTwilioAccountSid, onboardingTwilioAuthToken, onboardingTwilioPhoneNumber,
     onboardingBlooioApiKey, onboardingBlooioPhoneNumber,
+    setTab,
   ]);
 
   // ── Cloud ──────────────────────────────────────────────────────────

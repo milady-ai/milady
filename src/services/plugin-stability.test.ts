@@ -23,6 +23,8 @@ import {
   applyConnectorSecretsToEnv,
   buildCharacterFromConfig,
   collectPluginNames,
+  CORE_PLUGINS,
+  OPTIONAL_CORE_PLUGINS,
   resolvePrimaryModel,
 } from "../runtime/eliza.js";
 import { createMilaidyPlugin } from "../runtime/milaidy-plugin.js";
@@ -30,33 +32,7 @@ import { createMilaidyPlugin } from "../runtime/milaidy-plugin.js";
 // ---------------------------------------------------------------------------
 // Constants — Full plugin enumeration
 // ---------------------------------------------------------------------------
-
-/** Core plugins that are always loaded (must match CORE_PLUGINS in eliza.ts). */
-const CORE_PLUGINS: readonly string[] = [
-  "@elizaos/plugin-sql",
-  "@elizaos/plugin-local-embedding",
-  "@elizaos/plugin-agent-skills",
-  "@elizaos/plugin-agent-orchestrator",
-  "@elizaos/plugin-directives",
-  "@elizaos/plugin-commands",
-  "@elizaos/plugin-shell",
-  "@elizaos/plugin-personality",
-  "@elizaos/plugin-experience",
-  "@elizaos/plugin-plugin-manager",
-  "@elizaos/plugin-cli",
-  "@elizaos/plugin-code",
-  "@elizaos/plugin-edge-tts",
-  "@elizaos/plugin-knowledge",
-  "@elizaos/plugin-mcp",
-  "@elizaos/plugin-pdf",
-  "@elizaos/plugin-scratchpad",
-  "@elizaos/plugin-secrets-manager",
-  "@elizaos/plugin-todo",
-  "@elizaos/plugin-trust",
-  "@elizaos/plugin-form",
-  "@elizaos/plugin-goals",
-  "@elizaos/plugin-scheduling",
-];
+// CORE_PLUGINS and OPTIONAL_CORE_PLUGINS are imported from eliza.ts
 
 /** Connector plugins (loaded when connector config is present). */
 const CONNECTOR_PLUGINS: Record<string, string> = {
@@ -127,7 +103,7 @@ const envKeysToClean = [
 
 describe("Plugin Enumeration", () => {
   it("lists all core plugins", () => {
-    expect(CORE_PLUGINS.length).toBe(23);
+    expect(CORE_PLUGINS.length).toBe(6);
     for (const name of CORE_PLUGINS) {
       expect(name).toMatch(/^@elizaos\/plugin-/);
     }
@@ -938,8 +914,8 @@ describe("Version Skew Detection (issue #10)", () => {
     }
   });
 
-  it("plugin-knowledge is in CORE_PLUGINS", () => {
-    expect(CORE_PLUGINS).toContain("@elizaos/plugin-knowledge");
+  it("plugin-knowledge is in OPTIONAL_CORE_PLUGINS", () => {
+    expect(OPTIONAL_CORE_PLUGINS).toContain("@elizaos/plugin-knowledge");
   });
 });
 

@@ -42,13 +42,13 @@ export function AvatarSelector({
 
   return (
     <div>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-3 justify-start">
         {avatarIndices.map((i) => (
           <button
             key={i}
-            className={`relative w-12 h-12 shrink-0 rounded-full overflow-hidden cursor-pointer transition-all ${
+            className={`relative w-24 h-24 shrink-0 rounded-lg overflow-hidden cursor-pointer transition-all ${
               selected === i
-                ? "ring-2 ring-[var(--accent)] ring-offset-2 ring-offset-[var(--card)] scale-110"
+                ? "ring-2 ring-[var(--accent)] ring-offset-2 ring-offset-[var(--card)] scale-105"
                 : "opacity-60 hover:opacity-100 hover:scale-105"
             }`}
             onClick={() => onSelect(i)}
@@ -73,16 +73,16 @@ export function AvatarSelector({
               onChange={handleFileChange}
             />
             <button
-              className={`w-12 h-12 shrink-0 rounded-full border-2 border-dashed flex items-center justify-center cursor-pointer transition-all ${
+              className={`w-24 h-24 shrink-0 rounded-lg border-2 border-dashed flex items-center justify-center cursor-pointer transition-all ${
                 selected === 0
-                  ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)] ring-2 ring-[var(--accent)] ring-offset-2 ring-offset-[var(--card)] scale-110"
+                  ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)] ring-2 ring-[var(--accent)] ring-offset-2 ring-offset-[var(--card)] scale-105"
                   : "border-[var(--border)] text-[var(--muted)] opacity-60 hover:opacity-100 hover:border-[var(--accent)] hover:scale-105"
               }`}
               onClick={() => fileInputRef.current?.click()}
               title="Upload custom .vrm"
               type="button"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 5v14m-7-7h14" />
               </svg>
             </button>

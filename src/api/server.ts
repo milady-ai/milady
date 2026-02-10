@@ -17,7 +17,6 @@ import {
   type Content,
   createMessageMemory,
   logger,
-  ModelType,
   stringToUuid,
   type UUID,
 } from "@elizaos/core";
@@ -1109,7 +1108,7 @@ function getProviderOptions(): Array<{
       envKey: null,
       pluginName: "@elizaos/plugin-elizacloud",
       keyPrefix: null,
-      description: "Free credits to start, but they run out.",
+      description: "Free credits, best option to try the app.",
     },
     {
       id: "anthropic-subscription",
@@ -3274,43 +3273,128 @@ async function handleRequest(
       "../runtime/eliza.js"
     );
 
+    // Build a set of loaded plugin names for robust matching.
+    // Plugin internal names vary wildly (e.g. "local-ai" for plugin-local-embedding,
+    // "eliza-coder" for plugin-code), so we check loaded names against multiple
+    // derived forms of the npm package name.
     const loadedNames = state.runtime
-      ? state.runtime.plugins.map((p: { name: string }) => p.name)
-      : [];
+      ? new Set(state.runtime.plugins.map((p: { name: string }) => p.name))
+      : new Set<string>();
 
     const isLoaded = (npmName: string): boolean => {
-      const shortName = npmName.replace("@elizaos/", "");
-      return loadedNames.some(
-        (n: string) =>
-          n === npmName || n === shortName || n.includes(shortName),
-      );
+      if (loadedNames.has(npmName)) return true;
+      // @elizaos/plugin-foo -> plugin-foo
+      const withoutScope = npmName.replace("@elizaos/", "");
+      if (loadedNames.has(withoutScope)) return true;
+      // plugin-foo -> foo
+      const shortId = withoutScope.replace("plugin-", "");
+      if (loadedNames.has(shortId)) return true;
+      // Check if ANY loaded name contains the short id or vice versa
+      for (const n of loadedNames) {
+        if (n.includes(shortId) || shortId.includes(n)) return true;
+      }
+      return false;
     };
 
-    const coreList = CORE_PLUGINS.map((npm: string) => ({
-      npmName: npm,
-      id: npm.replace("@elizaos/plugin-", ""),
-      name: npm
-        .replace("@elizaos/plugin-", "")
-        .split("-")
-        .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(" "),
-      isCore: true,
-      loaded: isLoaded(npm),
-    }));
+    // Check which optional plugins are currently in the allow list
+    const allowList = new Set(state.config.plugins?.allow ?? []);
 
-    const optionalList = OPTIONAL_CORE_PLUGINS.map((npm: string) => ({
-      npmName: npm,
-      id: npm.replace("@elizaos/plugin-", ""),
-      name: npm
-        .replace("@elizaos/plugin-", "")
-        .split("-")
-        .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(" "),
-      isCore: false,
-      loaded: isLoaded(npm),
-    }));
+    const makeEntry = (npm: string, isCore: boolean) => {
+      const id = npm.replace("@elizaos/plugin-", "");
+      return {
+        npmName: npm,
+        id,
+        name: id
+          .split("-")
+          .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(" "),
+        isCore,
+        loaded: isLoaded(npm),
+        enabled: isCore || allowList.has(npm) || allowList.has(id),
+      };
+    };
+
+    const coreList = CORE_PLUGINS.map((npm: string) => makeEntry(npm, true));
+    const optionalList = OPTIONAL_CORE_PLUGINS.map((npm: string) =>
+      makeEntry(npm, false),
+    );
 
     json(res, { core: coreList, optional: optionalList });
+    return;
+  }
+
+  // ── POST /api/plugins/core/toggle ─────────────────────────────────────
+  // Enable or disable an optional core plugin by updating the allow list.
+  if (method === "POST" && pathname === "/api/plugins/core/toggle") {
+    const body = await readJsonBody<{ npmName: string; enabled: boolean }>(
+      req,
+      res,
+    );
+    if (!body || !body.npmName) return;
+
+    const { CORE_PLUGINS, OPTIONAL_CORE_PLUGINS } = await import(
+      "../runtime/eliza.js"
+    );
+
+    // Only allow toggling optional plugins, not core
+    const isCorePlugin = (CORE_PLUGINS as readonly string[]).includes(
+      body.npmName,
+    );
+    if (isCorePlugin) {
+      error(res, "Core plugins cannot be disabled");
+      return;
+    }
+    const isOptional = (OPTIONAL_CORE_PLUGINS as readonly string[]).includes(
+      body.npmName,
+    );
+    if (!isOptional) {
+      error(res, "Unknown optional plugin");
+      return;
+    }
+
+    // Update the allow list in config
+    state.config.plugins = state.config.plugins ?? {};
+    state.config.plugins.allow = state.config.plugins.allow ?? [];
+    const allow = state.config.plugins.allow;
+    const shortId = body.npmName.replace("@elizaos/plugin-", "");
+
+    if (body.enabled) {
+      if (!allow.includes(body.npmName) && !allow.includes(shortId)) {
+        allow.push(body.npmName);
+      }
+    } else {
+      state.config.plugins.allow = allow.filter(
+        (p: string) => p !== body.npmName && p !== shortId,
+      );
+    }
+
+    try {
+      saveMilaidyConfig(state.config);
+    } catch (err) {
+      logger.warn(
+        `[api] Config save failed: ${err instanceof Error ? err.message : err}`,
+      );
+    }
+
+    // Auto-restart so the change takes effect
+    try {
+      const { requestRestart } = await import("../runtime/restart.js");
+      setTimeout(() => {
+        Promise.resolve(
+          requestRestart(
+            `Plugin ${shortId} ${body.enabled ? "enabled" : "disabled"}`,
+          ),
+        ).catch(() => {});
+      }, 300);
+    } catch {
+      /* restart module not available */
+    }
+
+    json(res, {
+      ok: true,
+      restarting: true,
+      message: `${shortId} ${body.enabled ? "enabled" : "disabled"}. Restarting...`,
+    });
     return;
   }
 
@@ -4885,12 +4969,9 @@ async function handleRequest(
   }
 
   // ── POST /api/conversations/:id/greeting ───────────────────────────
-  // Generate an opening greeting using a direct model call.
-  // IMPORTANT: we do NOT route through the message pipeline because that
-  // would persist the instruction prompt as a "user" message in the DB,
-  // polluting the conversation with meta-text like "[A new user has
-  // opened a conversation...]".  Instead we call the model directly and
-  // only store the agent's response.
+  // Pick a random postExample from the character as the opening message.
+  // No model call, no latency, no cost — already in the agent's voice.
+  // Stored as an agent message so it persists on refresh.
   if (
     method === "POST" &&
     /^\/api\/conversations\/[^/]+\/greeting$/.test(pathname)
@@ -4906,81 +4987,15 @@ async function handleRequest(
     const charName = runtime?.character.name ?? state.agentName ?? "Milaidy";
     const FALLBACK_MSG = `Hey! I'm ${charName}. What's on your mind?`;
 
-    if (!runtime || state.agentState !== "running") {
-      json(res, {
-        text: FALLBACK_MSG,
-        agentName: charName,
-        generated: false,
-      });
-      return;
-    }
+    // Collect post examples from the character
+    const postExamples = runtime?.character.postExamples ?? [];
+    const greeting =
+      postExamples.length > 0
+        ? postExamples[Math.floor(Math.random() * postExamples.length)]
+        : FALLBACK_MSG;
 
-    // Cloud proxy path
-    const proxy = state.cloudManager?.getProxy();
-    if (proxy) {
-      try {
-        const responseText = await proxy.handleChatMessage(
-          "[system: send a short greeting to open the conversation. introduce yourself briefly in your own style.]",
-        );
-        conv.updatedAt = new Date().toISOString();
-        json(res, {
-          text: responseText,
-          agentName: proxy.agentName,
-          generated: true,
-        });
-      } catch {
-        json(res, {
-          text: FALLBACK_MSG,
-          agentName: proxy.agentName,
-          generated: false,
-        });
-      }
-      return;
-    }
-
-    // Direct model call — no message pipeline, no DB persistence of the
-    // instruction prompt.  Only the agent's response is stored.
-    try {
-      const character = runtime.character;
-      const bio = Array.isArray(character.bio)
-        ? character.bio.join(" ")
-        : (character.bio ?? "");
-      const allStyle = character.style?.all?.join(" ") ?? "";
-
-      const greetingPrompt = [
-        character.system ?? "",
-        bio ? `Bio: ${bio}` : "",
-        allStyle ? `General style rules: ${allStyle}` : "",
-        "",
-        "Write a short, natural opening message to greet someone who just started a conversation with you.",
-        "Be yourself — use your own voice, personality, and style.",
-        "Keep it brief (1-2 sentences). Do not use quotation marks around your message.",
-        "Just output the greeting, nothing else.",
-      ]
-        .filter(Boolean)
-        .join("\n");
-
-      let result: string | undefined;
-      try {
-        result = (await runtime.useModel(ModelType.TEXT_SMALL, {
-          prompt: greetingPrompt,
-        })) as string | undefined;
-      } catch (modelErr) {
-        logger.debug(
-          `[greeting] Model call failed: ${modelErr instanceof Error ? modelErr.message : String(modelErr)}`,
-        );
-      }
-
-      if (!result?.trim()) {
-        json(res, {
-          text: FALLBACK_MSG,
-          agentName: charName,
-          generated: false,
-        });
-        return;
-      }
-
-      // Store the greeting as an agent message so it persists on refresh
+    // Store the greeting as an agent message so it persists on refresh
+    if (runtime && state.agentState === "running") {
       try {
         await ensureConversationRoom(conv);
         const agentMemory = createMessageMemory({
@@ -4988,7 +5003,7 @@ async function handleRequest(
           entityId: runtime.agentId,
           roomId: conv.roomId,
           content: {
-            text: result.trim(),
+            text: greeting,
             source: "agent_greeting",
             channelType: ChannelType.DM,
           },
@@ -4999,19 +5014,14 @@ async function handleRequest(
           `[greeting] Failed to store greeting memory: ${memErr instanceof Error ? memErr.message : String(memErr)}`,
         );
       }
-
-      conv.updatedAt = new Date().toISOString();
-      json(res, { text: result.trim(), agentName: charName, generated: true });
-    } catch (greetErr) {
-      logger.error(
-        `[greeting] Model call failed: ${greetErr instanceof Error ? greetErr.message : String(greetErr)}`,
-      );
-      json(res, {
-        text: FALLBACK_MSG,
-        agentName: charName,
-        generated: false,
-      });
     }
+
+    conv.updatedAt = new Date().toISOString();
+    json(res, {
+      text: greeting,
+      agentName: charName,
+      generated: postExamples.length > 0,
+    });
     return;
   }
 
@@ -6299,6 +6309,71 @@ export async function startApiServer(opts?: {
   // Broadcast status every 5 seconds
   const statusInterval = setInterval(broadcastStatus, 5000);
 
+  /**
+   * Restore the in-memory conversation list from the database.
+   * Web-chat rooms live in a deterministic world; we scan it for rooms
+   * whose channelId starts with "web-conv-" and reconstruct the metadata.
+   */
+  const restoreConversationsFromDb = async (rt: AgentRuntime): Promise<void> => {
+    try {
+      const agentName = rt.character.name ?? "Milaidy";
+      const worldId = stringToUuid(`${agentName}-web-chat-world`);
+      const rooms = await rt.getRoomsByWorld(worldId);
+      if (!rooms?.length) return;
+
+      let restored = 0;
+      for (const room of rooms) {
+        // channelId is "web-conv-{uuid}" — extract the conversation id
+        const channelId =
+          typeof room.channelId === "string" ? room.channelId : "";
+        if (!channelId.startsWith("web-conv-")) continue;
+        const convId = channelId.replace("web-conv-", "");
+        if (!convId || state.conversations.has(convId)) continue;
+
+        // Peek at the latest message to get a timestamp
+        let updatedAt = new Date().toISOString();
+        try {
+          const msgs = await rt.getMemories({
+            roomId: room.id as UUID,
+            tableName: "messages",
+            count: 1,
+          });
+          if (msgs.length > 0 && msgs[0].createdAt) {
+            updatedAt = new Date(msgs[0].createdAt).toISOString();
+          }
+        } catch {
+          // non-fatal — use current time
+        }
+
+        state.conversations.set(convId, {
+          id: convId,
+          title: (room as Record<string, unknown>).name as string || "Chat",
+          roomId: room.id as UUID,
+          createdAt: updatedAt,
+          updatedAt,
+        });
+        restored++;
+      }
+      if (restored > 0) {
+        addLog(
+          "info",
+          `Restored ${restored} conversation(s) from database`,
+          "system",
+          ["system"],
+        );
+      }
+    } catch (err) {
+      logger.warn(
+        `[milaidy-api] Failed to restore conversations from DB: ${err instanceof Error ? err.message : err}`,
+      );
+    }
+  };
+
+  // Restore conversations from DB at initial boot (if runtime was passed in)
+  if (opts?.runtime) {
+    void restoreConversationsFromDb(opts.runtime);
+  }
+
   /** Hot-swap the runtime reference (used after an in-process restart). */
   const updateRuntime = (rt: AgentRuntime): void => {
     state.runtime = rt;
@@ -6310,6 +6385,10 @@ export async function startApiServer(opts?: {
       "system",
       "agent",
     ]);
+
+    // Restore conversations from DB so they survive restarts
+    void restoreConversationsFromDb(rt);
+
     // Broadcast status update immediately after restart
     broadcastStatus();
   };

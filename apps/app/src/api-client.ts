@@ -254,6 +254,7 @@ export interface CorePluginEntry {
   name: string;
   isCore: boolean;
   loaded: boolean;
+  enabled: boolean;
 }
 
 export interface CorePluginsResponse {
@@ -882,6 +883,13 @@ export class MilaidyClient {
 
   async getCorePlugins(): Promise<CorePluginsResponse> {
     return this.fetch("/api/plugins/core");
+  }
+
+  async toggleCorePlugin(npmName: string, enabled: boolean): Promise<{ ok: boolean; restarting?: boolean; message?: string }> {
+    return this.fetch("/api/plugins/core/toggle", {
+      method: "POST",
+      body: JSON.stringify({ npmName, enabled }),
+    });
   }
 
   async updatePlugin(id: string, config: Record<string, unknown>): Promise<{ ok: boolean; restarting?: boolean }> {

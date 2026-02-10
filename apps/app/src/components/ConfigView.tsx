@@ -375,8 +375,12 @@ export function ConfigView() {
       try {
         const cfg = await client.getConfig();
         const models = cfg.models as Record<string, string> | undefined;
-        if (models?.small) setCurrentSmallModel(models.small);
-        if (models?.large) setCurrentLargeModel(models.large);
+        const cloud = cfg.cloud as Record<string, unknown> | undefined;
+        const cloudEnabled = cloud?.enabled === true;
+        const defaultSmall = "moonshotai/kimi-k2-turbo";
+        const defaultLarge = "moonshotai/kimi-k2-0905";
+        setCurrentSmallModel(models?.small || (cloudEnabled ? defaultSmall : ""));
+        setCurrentLargeModel(models?.large || (cloudEnabled ? defaultLarge : ""));
       } catch { /* ignore */ }
     })();
   }, [loadPlugins, loadUpdateStatus, checkExtensionStatus]);
@@ -468,8 +472,8 @@ export function ConfigView() {
       await client.updateConfig({
         cloud: { enabled: true },
         models: {
-          small: currentSmallModel || "openai/gpt-5-mini",
-          large: currentLargeModel || "anthropic/claude-sonnet-4.5",
+          small: currentSmallModel || "moonshotai/kimi-k2-turbo",
+          large: currentLargeModel || "moonshotai/kimi-k2-0905",
         },
       });
       await client.restartAgent();

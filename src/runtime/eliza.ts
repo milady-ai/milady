@@ -148,24 +148,10 @@ const CHANNEL_ENV_MAP: Readonly<
 export const CORE_PLUGINS: readonly string[] = [
   "@elizaos/plugin-sql", // database adapter — required
   "@elizaos/plugin-local-embedding", // local embeddings — required for memory
-  "@elizaos/plugin-knowledge", // knowledge retrieval — required for RAG
   "@elizaos/plugin-agent-skills", // skill execution
-  "@elizaos/plugin-directives", // directive processing
-  "@elizaos/plugin-commands", // slash command handling
-  "@elizaos/plugin-personality", // personality coherence
-  "@elizaos/plugin-experience", // learning from interactions
   "@elizaos/plugin-agent-orchestrator", // multi-agent orchestration
   "@elizaos/plugin-shell", // shell command execution
   "@elizaos/plugin-plugin-manager", // dynamic plugin management
-  "@elizaos/plugin-cli", // CLI interface
-  "@elizaos/plugin-code", // code writing and file operations
-  "@elizaos/plugin-edge-tts", // text-to-speech
-  "@elizaos/plugin-mcp", // MCP protocol support
-  "@elizaos/plugin-pdf", // PDF processing
-  "@elizaos/plugin-scratchpad", // scratchpad notes
-  "@elizaos/plugin-secrets-manager", // secrets management
-  "@elizaos/plugin-todo", // todo/task management
-  "@elizaos/plugin-trust", // trust scoring
 ];
 
 /**
@@ -176,6 +162,20 @@ export const OPTIONAL_CORE_PLUGINS: readonly string[] = [
   "@elizaos/plugin-form", // packaging issue
   "@elizaos/plugin-goals", // spec mismatch
   "@elizaos/plugin-scheduling", // packaging issue
+  "@elizaos/plugin-knowledge", // knowledge retrieval — required for RAG
+  "@elizaos/plugin-directives", // directive processing
+  "@elizaos/plugin-commands", // slash command handling
+  "@elizaos/plugin-personality", // personality coherence
+  "@elizaos/plugin-experience", // learning from interactions
+  "@elizaos/plugin-cli", // CLI interface
+  "@elizaos/plugin-code", // code writing and file operations
+  "@elizaos/plugin-edge-tts", // text-to-speech
+  "@elizaos/plugin-mcp", // MCP protocol support
+  "@elizaos/plugin-pdf", // PDF processing
+  "@elizaos/plugin-scratchpad", // scratchpad notes
+  "@elizaos/plugin-secrets-manager", // secrets management
+  "@elizaos/plugin-todo", // todo/task management
+  "@elizaos/plugin-trust", // trust scoring
 ];
 
 /**
@@ -1786,11 +1786,26 @@ export async function startEliza(
   //    before other plugins (e.g. plugin-personality) run their init functions.
   //    runtime.initialize() registers all characterPlugins in parallel, so we
   //    pre-register plugin-sql here to avoid the race condition.
+  //
+  //    plugin-local-embedding must also be pre-registered so its TEXT_EMBEDDING
+  //    handler (priority 10) is available before any services start.  Without
+  //    this, the bootstrap plugin's ActionFilterService and EmbeddingGeneration
+  //    service can race ahead and use the cloud plugin's TEXT_EMBEDDING handler
+  //    (priority 0) — which hits a paid API — because local-embedding's init()
+  //    takes longer (environment setup, model path validation) and hasn't
+  //    registered its model handler yet when services start generating embeddings.
+  const PREREGISTER_PLUGINS = new Set([
+    "@elizaos/plugin-sql",
+    "@elizaos/plugin-local-embedding",
+  ]);
   const sqlPlugin = resolvedPlugins.find(
     (p) => p.name === "@elizaos/plugin-sql",
   );
+  const localEmbeddingPlugin = resolvedPlugins.find(
+    (p) => p.name === "@elizaos/plugin-local-embedding",
+  );
   const otherPlugins = resolvedPlugins.filter(
-    (p) => p.name !== "@elizaos/plugin-sql",
+    (p) => !PREREGISTER_PLUGINS.has(p.name),
   );
 
   // Resolve the runtime log level from config (AgentRuntime doesn't support
@@ -1900,6 +1915,25 @@ export async function startEliza(
     await runtime.adapter.init();
     logger.info(
       "[milaidy] Database adapter initialized early (before plugin inits)",
+    );
+  }
+
+  // 7d. Pre-register plugin-local-embedding so its TEXT_EMBEDDING handler
+  //     (priority 10) is available before runtime.initialize() starts all
+  //     plugins in parallel.  Without this, the bootstrap plugin's services
+  //     (ActionFilterService, EmbeddingGenerationService) race ahead and use
+  //     the cloud plugin's TEXT_EMBEDDING handler — which hits a paid API —
+  //     because local-embedding's heavier init hasn't completed yet.
+  if (localEmbeddingPlugin) {
+    await runtime.registerPlugin(localEmbeddingPlugin.plugin);
+    logger.info(
+      "[milaidy] plugin-local-embedding pre-registered (TEXT_EMBEDDING ready)",
+    );
+  } else {
+    logger.warn(
+      "[milaidy] @elizaos/plugin-local-embedding not found — embeddings " +
+        "will fall back to whatever TEXT_EMBEDDING handler is registered by " +
+        "other plugins (may incur cloud API costs)",
     );
   }
 
@@ -2026,13 +2060,19 @@ export async function startEliza(
               freshCharacter.name?.toLowerCase().replace(/\s+/g, "-") ?? "main",
           });
 
-          // Create new runtime with updated plugins
+          // Create new runtime with updated plugins.
+          // Filter out pre-registered plugins so they aren't double-loaded
+          // inside initialize()'s Promise.all — same pattern as the initial
+          // startup to avoid the TEXT_EMBEDDING race condition.
           const freshPrimaryModel = resolvePrimaryModel(freshConfig);
+          const freshOtherPlugins = resolvedPlugins.filter(
+            (p) => !PREREGISTER_PLUGINS.has(p.name),
+          );
           const newRuntime = new AgentRuntime({
             character: freshCharacter,
             plugins: [
               freshMilaidyPlugin,
-              ...resolvedPlugins.map((p) => p.plugin),
+              ...freshOtherPlugins.map((p) => p.plugin),
             ],
             ...(runtimeLogLevel ? { logLevel: runtimeLogLevel } : {}),
             settings: {
@@ -2045,6 +2085,18 @@ export async function startEliza(
                 : {}),
             },
           });
+
+          // Pre-register plugin-sql + local-embedding before initialize()
+          // to avoid the same race condition as the initial startup.
+          if (sqlPlugin) {
+            await newRuntime.registerPlugin(sqlPlugin.plugin);
+            if (newRuntime.adapter && !(await newRuntime.adapter.isReady())) {
+              await newRuntime.adapter.init();
+            }
+          }
+          if (localEmbeddingPlugin) {
+            await newRuntime.registerPlugin(localEmbeddingPlugin.plugin);
+          }
 
           await newRuntime.initialize();
           runtime = newRuntime;

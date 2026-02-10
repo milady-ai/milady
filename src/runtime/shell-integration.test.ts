@@ -29,12 +29,12 @@ describe("Shell plugin classification", () => {
     expect(names.has("@elizaos/plugin-shell")).toBe(true);
   });
 
-  it("@elizaos/plugin-shell is loaded alongside all other core plugins", () => {
+  it("@elizaos/plugin-shell is loaded alongside other core plugins", () => {
     const names = collectPluginNames({} as MilaidyConfig);
     expect(names.has("@elizaos/plugin-shell")).toBe(true);
     expect(names.has("@elizaos/plugin-sql")).toBe(true);
-    expect(names.has("@elizaos/plugin-code")).toBe(true);
-    expect(names.has("@elizaos/plugin-commands")).toBe(true);
+    expect(names.has("@elizaos/plugin-agent-skills")).toBe(true);
+    expect(names.has("@elizaos/plugin-plugin-manager")).toBe(true);
   });
 
   it("@elizaos/plugin-shell remains loaded even with other features enabled", () => {
