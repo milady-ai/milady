@@ -6077,12 +6077,21 @@ export async function startApiServer(opts?: {
         ]);
       },
     });
-    mgr.init();
-    state.cloudManager = mgr;
-    addLog("info", "Cloud manager initialised (Eliza Cloud enabled)", "cloud", [
-      "server",
-      "cloud",
-    ]);
+    try {
+      await mgr.init();
+      state.cloudManager = mgr;
+      addLog("info", "Cloud manager initialised (Eliza Cloud enabled)", "cloud", [
+        "server",
+        "cloud",
+      ]);
+    } catch (initErr) {
+      addLog(
+        "warn",
+        `Cloud manager init failed: ${initErr instanceof Error ? initErr.message : String(initErr)}`,
+        "cloud",
+        ["server", "cloud"],
+      );
+    }
   }
 
   addLog(
