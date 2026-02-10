@@ -42,6 +42,38 @@ function readBody(req: http.IncomingMessage): Promise<string> {
   });
 }
 
+/**
+ * Read and parse a JSON request body with size limits and error handling.
+ * Returns null (and sends a 4xx response) if reading or parsing fails.
+ */
+async function readJsonBody<T = Record<string, unknown>>(
+  req: http.IncomingMessage,
+  res: http.ServerResponse,
+): Promise<T | null> {
+  let raw: string;
+  try {
+    raw = await readBody(req);
+  } catch (readErr) {
+    const msg =
+      readErr instanceof Error
+        ? readErr.message
+        : "Failed to read request body";
+    err(res, msg, 413);
+    return null;
+  }
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (parsed == null || typeof parsed !== "object" || Array.isArray(parsed)) {
+      err(res, "Request body must be a JSON object", 400);
+      return null;
+    }
+    return parsed as T;
+  } catch {
+    err(res, "Invalid JSON in request body", 400);
+    return null;
+  }
+}
+
 function json(res: http.ServerResponse, data: unknown, status = 200): void {
   res.statusCode = status;
   res.setHeader("Content-Type", "application/json");
@@ -199,17 +231,13 @@ export async function handleCloudRoute(
       return true;
     }
 
-    const raw = await readBody(req);
-    const parsed: unknown = JSON.parse(raw);
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-      err(res, "Request body must be a JSON object");
-      return true;
-    }
-    const body = parsed as {
+    const body = await readJsonBody<{
       agentName?: string;
       agentConfig?: Record<string, unknown>;
       environmentVars?: Record<string, string>;
-    };
+    }>(req, res);
+    if (!body) return true;
+
     if (!body.agentName?.trim()) {
       err(res, "agentName is required");
       return true;
