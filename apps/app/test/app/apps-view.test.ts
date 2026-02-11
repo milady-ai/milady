@@ -23,6 +23,13 @@ const { mockClientFns, mockUseApp } = vi.hoisted(() => ({
   mockClientFns: {
     listApps: vi.fn(),
     launchApp: vi.fn(),
+    listHyperscapeEmbeddedAgents: vi.fn(),
+    getHyperscapeAgentGoal: vi.fn(),
+    getHyperscapeAgentQuickActions: vi.fn(),
+    createHyperscapeEmbeddedAgent: vi.fn(),
+    controlHyperscapeEmbeddedAgent: vi.fn(),
+    sendHyperscapeAgentMessage: vi.fn(),
+    sendHyperscapeEmbeddedAgentCommand: vi.fn(),
   },
   mockUseApp: vi.fn(),
 }));
@@ -94,6 +101,19 @@ function findButtonByText(
   return matches[0];
 }
 
+function findTextareaByPlaceholder(
+  root: TestRenderer.ReactTestInstance,
+  placeholder: string,
+): TestRenderer.ReactTestInstance {
+  const matches = root.findAll(
+    (node) => node.type === "textarea" && node.props.placeholder === placeholder,
+  );
+  if (!matches[0]) {
+    throw new Error(`Textarea "${placeholder}" not found`);
+  }
+  return matches[0];
+}
+
 async function flush(): Promise<void> {
   await act(async () => {
     await Promise.resolve();
@@ -104,7 +124,49 @@ describe("AppsView", () => {
   beforeEach(() => {
     mockClientFns.listApps.mockReset();
     mockClientFns.launchApp.mockReset();
+    mockClientFns.listHyperscapeEmbeddedAgents.mockReset();
+    mockClientFns.getHyperscapeAgentGoal.mockReset();
+    mockClientFns.getHyperscapeAgentQuickActions.mockReset();
+    mockClientFns.createHyperscapeEmbeddedAgent.mockReset();
+    mockClientFns.controlHyperscapeEmbeddedAgent.mockReset();
+    mockClientFns.sendHyperscapeAgentMessage.mockReset();
+    mockClientFns.sendHyperscapeEmbeddedAgentCommand.mockReset();
     mockUseApp.mockReset();
+
+    mockClientFns.listHyperscapeEmbeddedAgents.mockResolvedValue({
+      success: true,
+      agents: [],
+      count: 0,
+    });
+    mockClientFns.getHyperscapeAgentGoal.mockResolvedValue({
+      success: true,
+      goal: null,
+      availableGoals: [],
+    });
+    mockClientFns.getHyperscapeAgentQuickActions.mockResolvedValue({
+      success: true,
+      nearbyLocations: [],
+      availableGoals: [],
+      quickCommands: [],
+      inventory: [],
+      playerPosition: null,
+    });
+    mockClientFns.createHyperscapeEmbeddedAgent.mockResolvedValue({
+      success: true,
+      message: "created",
+    });
+    mockClientFns.controlHyperscapeEmbeddedAgent.mockResolvedValue({
+      success: true,
+      message: "ok",
+    });
+    mockClientFns.sendHyperscapeAgentMessage.mockResolvedValue({
+      success: true,
+      message: "sent",
+    });
+    mockClientFns.sendHyperscapeEmbeddedAgentCommand.mockResolvedValue({
+      success: true,
+      message: "command sent",
+    });
   });
 
   afterEach(() => {
@@ -302,5 +364,106 @@ describe("AppsView", () => {
       await findButtonByText(root, "Refresh").props.onClick();
     });
     expect(mockClientFns.listApps).toHaveBeenCalledTimes(2);
+  });
+
+  it("wires Hyperscape controls for message + command + telemetry routes", async () => {
+    const setState = vi.fn<AppsContextStub["setState"]>();
+    const setActionNotice = vi.fn<AppsContextStub["setActionNotice"]>();
+    mockUseApp.mockReturnValue({ setState, setActionNotice });
+    const app = createApp("@elizaos/app-hyperscape", "Hyperscape", "Arena");
+    mockClientFns.listApps.mockResolvedValue([app]);
+    mockClientFns.listHyperscapeEmbeddedAgents.mockResolvedValue({
+      success: true,
+      agents: [
+        {
+          agentId: "agent-1",
+          characterId: "char-1",
+          accountId: "acct-1",
+          name: "ArenaBot",
+          scriptedRole: "balanced",
+          state: "running",
+          entityId: "entity-1",
+          position: [1, 2, 3],
+          health: 10,
+          maxHealth: 20,
+          startedAt: 1,
+          lastActivity: 2,
+          error: null,
+        },
+      ],
+      count: 1,
+    });
+    mockClientFns.getHyperscapeAgentGoal.mockResolvedValue({
+      success: true,
+      goal: {
+        description: "Chop trees",
+        progressPercent: 50,
+      },
+      availableGoals: [],
+    });
+    mockClientFns.getHyperscapeAgentQuickActions.mockResolvedValue({
+      success: true,
+      nearbyLocations: [],
+      availableGoals: [],
+      quickCommands: [
+        {
+          id: "cmd-1",
+          label: "Woodcutting",
+          command: "chop nearest tree",
+          icon: "TreePine",
+          available: true,
+        },
+      ],
+      inventory: [],
+      playerPosition: null,
+    });
+
+    let tree: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(AppsView));
+    });
+    await flush();
+
+    await act(async () => {
+      findButtonByText(tree!.root, "Show Hyperscape Controls").props.onClick();
+    });
+    await flush();
+
+    expect(mockClientFns.listHyperscapeEmbeddedAgents).toHaveBeenCalled();
+    expect(mockClientFns.getHyperscapeAgentGoal).toHaveBeenCalledWith("agent-1");
+    expect(mockClientFns.getHyperscapeAgentQuickActions).toHaveBeenCalledWith(
+      "agent-1",
+    );
+
+    const messageInput = findTextareaByPlaceholder(
+      tree!.root,
+      "Say something to selected agent...",
+    );
+    await act(async () => {
+      messageInput.props.onChange({ target: { value: "hello there" } });
+    });
+    await act(async () => {
+      await findButtonByText(tree!.root, "Send Message").props.onClick();
+    });
+    expect(mockClientFns.sendHyperscapeAgentMessage).toHaveBeenCalledWith(
+      "agent-1",
+      "hello there",
+    );
+
+    const commandDataInput = findTextareaByPlaceholder(
+      tree!.root,
+      '{"target":[0,0,0]}',
+    );
+    await act(async () => {
+      commandDataInput.props.onChange({ target: { value: '{"message":"hi"}' } });
+    });
+    await act(async () => {
+      await findButtonByText(tree!.root, "Send Command").props.onClick();
+    });
+    expect(mockClientFns.sendHyperscapeEmbeddedAgentCommand).toHaveBeenCalledWith(
+      "char-1",
+      "chat",
+      { message: "hi" },
+    );
   });
 });

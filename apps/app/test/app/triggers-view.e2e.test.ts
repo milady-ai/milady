@@ -6,7 +6,7 @@ import React, {
   useState,
   type ReactElement,
 } from "react";
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import TestRenderer, { act } from "react-test-renderer";
 import {
   MilaidyClient,
@@ -472,6 +472,11 @@ describe("TriggersView UI E2E", () => {
   beforeEach(() => {
     mockUseApp.mockReset();
     runtimeHarness.injectAutonomousInstruction.mockClear();
+    vi.stubGlobal("confirm", vi.fn(() => true));
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it("creates, executes, inspects runs, and deletes triggers via live API", async () => {
@@ -529,7 +534,7 @@ describe("TriggersView UI E2E", () => {
     await flush();
 
     const successRows = root.findAll(
-      (node) => node.type === "div" && nodeText(node).includes("success"),
+      (node) => node.type === "span" && nodeText(node).includes("success"),
     );
     expect(successRows.length).toBeGreaterThan(0);
 
