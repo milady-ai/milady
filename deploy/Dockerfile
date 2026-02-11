@@ -14,31 +14,29 @@ RUN if [ -n "$MILAIDY_DOCKER_APT_PACKAGES" ]; then \
       rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*; \
     fi
 
-COPY package.json bun.lock* .npmrc ./
-COPY ui/package.json ./ui/package.json
-COPY patches ./patches
+# Copy dependency manifests first for better layer caching
+COPY package.json pnpm-lock.yaml ./
+COPY apps/app/package.json ./apps/app/package.json
 COPY scripts ./scripts
 
-RUN bun install --frozen-lockfile
+# Install dependencies (bun reads pnpm-lock.yaml)
+RUN bun install --frozen-lockfile || bun install
 
+# Copy everything and build (includes UI at apps/app/dist/)
 COPY . .
-RUN MILAIDY_A2UI_SKIP_MISSING=1 bun run build
-RUN bun run ui:build
+RUN bun run build
 
 ENV NODE_ENV=production
 
-# Allow non-root user to write temp files during runtime/tests.
+# Allow non-root user to write temp files during runtime.
 RUN chown -R node:node /app
 
 # Security hardening: Run as non-root user
-# The node:22-bookworm image includes a 'node' user (uid 1000)
-# This reduces the attack surface by preventing container escape via root privileges
 USER node
 
-# Start gateway server with default config.
-# Binds to loopback (127.0.0.1) by default for security.
-#
-# For container platforms requiring external health checks:
-#   1. Set MILAIDY_GATEWAY_TOKEN or MILAIDY_GATEWAY_PASSWORD env var
-#   2. Override CMD: ["node","dist/index.js","gateway","--allow-unconfigured","--bind","lan"]
-CMD ["node", "dist/index.js", "gateway", "--allow-unconfigured"]
+# Default: bind to 0.0.0.0 in containers so the service is reachable.
+# Set MILAIDY_API_TOKEN in production to require auth.
+ENV MILAIDY_API_BIND="0.0.0.0"
+
+# Start the API server + dashboard UI on port 2138.
+CMD ["node", "milaidy.mjs", "start"]

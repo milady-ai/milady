@@ -1603,6 +1603,143 @@ function error(res: http.ServerResponse, message: string, status = 400): void {
   json(res, { error: message }, status);
 }
 
+// ---------------------------------------------------------------------------
+// Static UI serving (production)
+// ---------------------------------------------------------------------------
+// Serves the built React dashboard from apps/app/dist/ when running in
+// production (NODE_ENV=production). In dev mode, the Vite dev server handles
+// the UI and proxies /api requests to this server.
+
+const STATIC_MIME: Record<string, string> = {
+  ".html": "text/html; charset=utf-8",
+  ".js": "application/javascript; charset=utf-8",
+  ".mjs": "application/javascript; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".gif": "image/gif",
+  ".svg": "image/svg+xml",
+  ".ico": "image/x-icon",
+  ".webp": "image/webp",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+  ".ttf": "font/ttf",
+  ".map": "application/json",
+  ".wasm": "application/wasm",
+  ".txt": "text/plain; charset=utf-8",
+};
+
+/** Resolved UI directory. Lazily computed once on first request. */
+let uiDir: string | null | undefined;
+let uiIndexHtml: Buffer | null = null;
+
+function resolveUiDir(): string | null {
+  // Already resolved
+  if (uiDir !== undefined) return uiDir;
+
+  // Skip in dev mode — Vite handles the UI
+  if (process.env.NODE_ENV !== "production") {
+    uiDir = null;
+    return null;
+  }
+
+  // Look for the built UI relative to the package root.
+  // In Docker images, this is /app/apps/app/dist/.
+  const candidates = [
+    path.resolve("apps/app/dist"),
+    path.resolve(__dirname, "../../apps/app/dist"),
+  ];
+
+  for (const candidate of candidates) {
+    try {
+      if (fs.statSync(path.join(candidate, "index.html")).isFile()) {
+        uiDir = candidate;
+        uiIndexHtml = fs.readFileSync(path.join(candidate, "index.html"));
+        logger.info(`[milaidy-api] Serving dashboard UI from ${candidate}`);
+        return uiDir;
+      }
+    } catch {
+      // Not found, try next
+    }
+  }
+
+  uiDir = null;
+  logger.info(
+    "[milaidy-api] No built UI found — dashboard will not be served",
+  );
+  return null;
+}
+
+/**
+ * Serve a static file from the built UI directory, with SPA fallback.
+ * Returns true if the request was handled, false otherwise.
+ */
+function serveStaticUi(
+  _req: http.IncomingMessage,
+  res: http.ServerResponse,
+  pathname: string,
+): boolean {
+  const root = resolveUiDir();
+  if (!root) return false;
+
+  // Don't intercept /api or /ws routes
+  if (pathname.startsWith("/api/") || pathname.startsWith("/api?") || pathname === "/api") {
+    return false;
+  }
+  if (pathname === "/ws" || pathname.startsWith("/ws?")) {
+    return false;
+  }
+
+  // Decode and resolve the file path (prevent directory traversal)
+  const decoded = decodeURIComponent(pathname);
+  const filePath = path.join(root, decoded);
+  if (!filePath.startsWith(root)) {
+    res.writeHead(403);
+    res.end("Forbidden");
+    return true;
+  }
+
+  // Try to serve the exact file
+  try {
+    const stat = fs.statSync(filePath);
+    if (stat.isFile()) {
+      const ext = path.extname(filePath).toLowerCase();
+      const mime = STATIC_MIME[ext] || "application/octet-stream";
+      const content = fs.readFileSync(filePath);
+
+      // Cache immutable hashed assets aggressively
+      const cacheControl = pathname.startsWith("/assets/")
+        ? "public, max-age=31536000, immutable"
+        : "public, max-age=0, must-revalidate";
+
+      res.writeHead(200, {
+        "Content-Type": mime,
+        "Content-Length": content.length,
+        "Cache-Control": cacheControl,
+      });
+      res.end(content);
+      return true;
+    }
+  } catch {
+    // File doesn't exist — fall through to SPA fallback
+  }
+
+  // SPA fallback: serve index.html for all non-file routes
+  if (uiIndexHtml) {
+    res.writeHead(200, {
+      "Content-Type": "text/html; charset=utf-8",
+      "Content-Length": uiIndexHtml.length,
+      "Cache-Control": "public, max-age=0, must-revalidate",
+    });
+    res.end(uiIndexHtml);
+    return true;
+  }
+
+  return false;
+}
+
 interface ChatGenerationResult {
   text: string;
   agentName: string;
@@ -9625,6 +9762,14 @@ async function handleRequest(
     });
     json(res, { ok: true });
     return;
+  }
+
+  // ── Static UI serving (production) ──────────────────────────────────────
+  // Serve the built React dashboard from apps/app/dist/ as a fallback for
+  // non-API routes. In dev mode the Vite dev server handles this instead.
+  if (method === "GET" || method === "HEAD") {
+    const served = serveStaticUi(req, res, pathname);
+    if (served) return;
   }
 
   // ── Fallback ────────────────────────────────────────────────────────────
