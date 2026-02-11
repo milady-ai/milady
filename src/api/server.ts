@@ -1221,6 +1221,35 @@ function parseBoundedLimit(rawLimit: string | null, fallback = 15): number {
 const SENSITIVE_KEY_RE =
   /password|secret|api.?key|private.?key|seed.?phrase|authorization|connection.?string|credential|(?<!max)tokens?$/i;
 
+const BLOCKED_OBJECT_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+
+function hasBlockedObjectKeyDeep(value: unknown): boolean {
+  if (value === null || value === undefined) return false;
+  if (Array.isArray(value)) return value.some(hasBlockedObjectKeyDeep);
+  if (typeof value !== "object") return false;
+
+  for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+    if (BLOCKED_OBJECT_KEYS.has(key)) return true;
+    if (hasBlockedObjectKeyDeep(child)) return true;
+  }
+  return false;
+}
+
+function cloneWithoutBlockedObjectKeys<T>(value: T): T {
+  if (value === null || value === undefined) return value;
+  if (Array.isArray(value)) {
+    return value.map((item) => cloneWithoutBlockedObjectKeys(item)) as T;
+  }
+  if (typeof value !== "object") return value;
+
+  const out: Record<string, unknown> = {};
+  for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+    if (BLOCKED_OBJECT_KEYS.has(key)) continue;
+    out[key] = cloneWithoutBlockedObjectKeys(child);
+  }
+  return out as T;
+}
+
 /**
  * Replace any non-empty value with "[REDACTED]".  For arrays, each string
  * element is individually redacted; for objects, all string leaves are
@@ -5192,8 +5221,6 @@ async function handleRequest(
     ]);
 
     // Keys that could enable prototype pollution.
-    const BLOCKED_KEYS = new Set(["__proto__", "constructor", "prototype"]);
-
     /**
      * Deep-merge `src` into `target`, only touching keys present in `src`.
      * Prevents prototype pollution by rejecting dangerous key names at every
@@ -5205,7 +5232,7 @@ async function handleRequest(
       src: Record<string, unknown>,
     ): void {
       for (const key of Object.keys(src)) {
-        if (BLOCKED_KEYS.has(key)) continue;
+        if (BLOCKED_OBJECT_KEYS.has(key)) continue;
         const srcVal = src[key];
         const tgtVal = target[key];
         if (
@@ -5229,7 +5256,7 @@ async function handleRequest(
     // Filter to allowed top-level keys, then deep-merge.
     const filtered: Record<string, unknown> = {};
     for (const key of Object.keys(body)) {
-      if (ALLOWED_TOP_KEYS.has(key) && !BLOCKED_KEYS.has(key)) {
+      if (ALLOWED_TOP_KEYS.has(key) && !BLOCKED_OBJECT_KEYS.has(key)) {
         filtered[key] = body[key];
       }
     }
@@ -6600,10 +6627,26 @@ async function handleRequest(
       error(res, "Server name is required", 400);
       return;
     }
+    if (BLOCKED_OBJECT_KEYS.has(serverName)) {
+      error(
+        res,
+        'Invalid server name: "__proto__", "constructor", and "prototype" are reserved',
+        400,
+      );
+      return;
+    }
 
     const config = body.config as Record<string, unknown> | undefined;
     if (!config || typeof config !== "object") {
       error(res, "Server config object is required", 400);
+      return;
+    }
+    if (hasBlockedObjectKeyDeep(config)) {
+      error(
+        res,
+        'Invalid server config: "__proto__", "constructor", and "prototype" are not allowed',
+        400,
+      );
       return;
     }
 
@@ -6635,7 +6678,8 @@ async function handleRequest(
 
     if (!state.config.mcp) state.config.mcp = {};
     if (!state.config.mcp.servers) state.config.mcp.servers = {};
-    state.config.mcp.servers[serverName] = config as NonNullable<
+    const sanitized = cloneWithoutBlockedObjectKeys(config);
+    state.config.mcp.servers[serverName] = sanitized as NonNullable<
       NonNullable<typeof state.config.mcp>["servers"]
     >[string];
 
@@ -6656,6 +6700,14 @@ async function handleRequest(
     const serverName = decodeURIComponent(
       pathname.slice("/api/mcp/config/server/".length),
     );
+    if (BLOCKED_OBJECT_KEYS.has(serverName)) {
+      error(
+        res,
+        'Invalid server name: "__proto__", "constructor", and "prototype" are reserved',
+        400,
+      );
+      return;
+    }
 
     if (state.config.mcp?.servers?.[serverName]) {
       delete state.config.mcp.servers[serverName];
@@ -6681,7 +6733,16 @@ async function handleRequest(
 
     if (!state.config.mcp) state.config.mcp = {};
     if (body.servers && typeof body.servers === "object") {
-      state.config.mcp.servers = body.servers as NonNullable<
+      if (hasBlockedObjectKeyDeep(body.servers)) {
+        error(
+          res,
+          'Invalid servers config: "__proto__", "constructor", and "prototype" are not allowed',
+          400,
+        );
+        return;
+      }
+      const sanitized = cloneWithoutBlockedObjectKeys(body.servers);
+      state.config.mcp.servers = sanitized as NonNullable<
         NonNullable<typeof state.config.mcp>["servers"]
       >;
     }

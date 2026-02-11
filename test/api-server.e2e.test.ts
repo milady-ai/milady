@@ -1279,6 +1279,14 @@ describe("API Server E2E (no runtime)", () => {
       expect(status).toBe(400);
     });
 
+    it("POST /api/mcp/config/server rejects reserved server names", async () => {
+      const { status } = await req(port, "POST", "/api/mcp/config/server", {
+        name: "__proto__",
+        config: { type: "stdio", command: "npx" },
+      });
+      expect(status).toBe(400);
+    });
+
     it("POST /api/mcp/config/server validates config type", async () => {
       const { status } = await req(port, "POST", "/api/mcp/config/server", {
         name: "bad-type",
@@ -1299,6 +1307,20 @@ describe("API Server E2E (no runtime)", () => {
       const { status } = await req(port, "POST", "/api/mcp/config/server", {
         name: "no-url",
         config: { type: "streamable-http" },
+      });
+      expect(status).toBe(400);
+    });
+
+    it("POST /api/mcp/config/server rejects reserved keys in nested config", async () => {
+      const { status } = await req(port, "POST", "/api/mcp/config/server", {
+        name: "bad-nested-keys",
+        config: {
+          type: "stdio",
+          command: "npx",
+          env: {
+            constructor: { polluted: "yes" },
+          },
+        },
       });
       expect(status).toBe(400);
     });
@@ -1374,6 +1396,27 @@ describe("API Server E2E (no runtime)", () => {
       const servers = configData.servers as Record<string, unknown>;
       expect(servers["bulk-a"]).toBeDefined();
       expect(servers["bulk-b"]).toBeDefined();
+    });
+
+    it("PUT /api/mcp/config rejects reserved keys in servers payload", async () => {
+      const { status } = await req(port, "PUT", "/api/mcp/config", {
+        servers: {
+          constructor: {
+            type: "stdio",
+            command: "npx",
+          },
+        },
+      });
+      expect(status).toBe(400);
+    });
+
+    it("DELETE /api/mcp/config/server/:name rejects reserved server names", async () => {
+      const { status } = await req(
+        port,
+        "DELETE",
+        "/api/mcp/config/server/__proto__",
+      );
+      expect(status).toBe(400);
     });
   });
 
