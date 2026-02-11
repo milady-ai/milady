@@ -1642,6 +1642,19 @@ function isAuthorized(req: http.IncomingMessage): boolean {
   return crypto.timingSafeEqual(a, b);
 }
 
+function decodePathComponent(
+  raw: string,
+  res: http.ServerResponse,
+  fieldName: string,
+): string | null {
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    error(res, `Invalid ${fieldName}: malformed URL encoding`, 400);
+    return null;
+  }
+}
+
 async function handleRequest(
   req: http.IncomingMessage,
   res: http.ServerResponse,
@@ -3156,9 +3169,12 @@ async function handleRequest(
     pathname.startsWith("/api/registry/plugins/") &&
     pathname.length > "/api/registry/plugins/".length
   ) {
-    const name = decodeURIComponent(
+    const name = decodePathComponent(
       pathname.slice("/api/registry/plugins/".length),
+      res,
+      "plugin name",
     );
+    if (name === null) return;
     const { getPluginInfo } = await import("../services/registry-client.js");
 
     try {
@@ -3601,9 +3617,12 @@ async function handleRequest(
 
   // ── GET /api/skills/catalog/:slug ──────────────────────────────────────
   if (method === "GET" && pathname.startsWith("/api/skills/catalog/")) {
-    const slug = decodeURIComponent(
+    const slug = decodePathComponent(
       pathname.slice("/api/skills/catalog/".length),
+      res,
+      "skill slug",
     );
+    if (slug === null) return;
     // Exclude "search" which is handled above
     if (slug && slug !== "search") {
       try {
@@ -3825,10 +3844,13 @@ async function handleRequest(
 
   // ── GET /api/skills/:id/scan ───────────────────────────────────────────
   if (method === "GET" && pathname.match(/^\/api\/skills\/[^/]+\/scan$/)) {
-    const skillId = validateSkillId(
-      decodeURIComponent(pathname.split("/")[3]),
+    const rawSkillId = decodePathComponent(
+      pathname.split("/")[3],
       res,
+      "skill ID",
     );
+    if (rawSkillId === null) return;
+    const skillId = validateSkillId(rawSkillId, res);
     if (!skillId) return;
     const workspaceDir =
       state.config.agents?.defaults?.workspace ??
@@ -3849,10 +3871,13 @@ async function handleRequest(
     method === "POST" &&
     pathname.match(/^\/api\/skills\/[^/]+\/acknowledge$/)
   ) {
-    const skillId = validateSkillId(
-      decodeURIComponent(pathname.split("/")[3]),
+    const rawSkillId = decodePathComponent(
+      pathname.split("/")[3],
       res,
+      "skill ID",
     );
+    if (rawSkillId === null) return;
+    const skillId = validateSkillId(rawSkillId, res);
     if (!skillId) return;
     const body = await readJsonBody<{ enable?: boolean }>(req, res);
     if (!body) return;
@@ -3983,10 +4008,13 @@ async function handleRequest(
 
   // ── POST /api/skills/:id/open ─────────────────────────────────────────
   if (method === "POST" && pathname.match(/^\/api\/skills\/[^/]+\/open$/)) {
-    const skillId = validateSkillId(
-      decodeURIComponent(pathname.split("/")[3]),
+    const rawSkillId = decodePathComponent(
+      pathname.split("/")[3],
       res,
+      "skill ID",
     );
+    if (rawSkillId === null) return;
+    const skillId = validateSkillId(rawSkillId, res);
     if (!skillId) return;
     const workspaceDir =
       state.config.agents?.defaults?.workspace ??
@@ -4070,10 +4098,13 @@ async function handleRequest(
     pathname.match(/^\/api\/skills\/[^/]+$/) &&
     !pathname.includes("/marketplace")
   ) {
-    const skillId = validateSkillId(
-      decodeURIComponent(pathname.slice("/api/skills/".length)),
+    const rawSkillId = decodePathComponent(
+      pathname.slice("/api/skills/".length),
       res,
+      "skill ID",
     );
+    if (rawSkillId === null) return;
+    const skillId = validateSkillId(rawSkillId, res);
     if (!skillId) return;
     const workspaceDir =
       state.config.agents?.defaults?.workspace ??
@@ -4277,10 +4308,13 @@ async function handleRequest(
   // ── PUT /api/skills/:id ────────────────────────────────────────────────
   // IMPORTANT: This wildcard route MUST be after all /api/skills/<specific-path> routes
   if (method === "PUT" && pathname.startsWith("/api/skills/")) {
-    const skillId = validateSkillId(
-      decodeURIComponent(pathname.slice("/api/skills/".length)),
+    const rawSkillId = decodePathComponent(
+      pathname.slice("/api/skills/".length),
       res,
+      "skill ID",
     );
+    if (rawSkillId === null) return;
+    const skillId = validateSkillId(rawSkillId, res);
     if (!skillId) return;
     const body = await readJsonBody<{ enabled?: boolean }>(req, res);
     if (!body) return;
@@ -5000,7 +5034,12 @@ async function handleRequest(
     method === "GET" &&
     /^\/api\/conversations\/[^/]+\/messages$/.test(pathname)
   ) {
-    const convId = decodeURIComponent(pathname.split("/")[3]);
+    const convId = decodePathComponent(
+      pathname.split("/")[3],
+      res,
+      "conversation ID",
+    );
+    if (convId === null) return;
     const conv = state.conversations.get(convId);
     if (!conv) {
       error(res, "Conversation not found", 404);
@@ -5040,7 +5079,12 @@ async function handleRequest(
     method === "POST" &&
     /^\/api\/conversations\/[^/]+\/messages$/.test(pathname)
   ) {
-    const convId = decodeURIComponent(pathname.split("/")[3]);
+    const convId = decodePathComponent(
+      pathname.split("/")[3],
+      res,
+      "conversation ID",
+    );
+    if (convId === null) return;
     const conv = state.conversations.get(convId);
     if (!conv) {
       error(res, "Conversation not found", 404);
@@ -5121,7 +5165,12 @@ async function handleRequest(
     method === "POST" &&
     /^\/api\/conversations\/[^/]+\/greeting$/.test(pathname)
   ) {
-    const convId = decodeURIComponent(pathname.split("/")[3]);
+    const convId = decodePathComponent(
+      pathname.split("/")[3],
+      res,
+      "conversation ID",
+    );
+    if (convId === null) return;
     const conv = state.conversations.get(convId);
     if (!conv) {
       error(res, "Conversation not found", 404);
@@ -5176,7 +5225,12 @@ async function handleRequest(
     /^\/api\/conversations\/[^/]+$/.test(pathname) &&
     !pathname.endsWith("/messages")
   ) {
-    const convId = decodeURIComponent(pathname.split("/")[3]);
+    const convId = decodePathComponent(
+      pathname.split("/")[3],
+      res,
+      "conversation ID",
+    );
+    if (convId === null) return;
     const conv = state.conversations.get(convId);
     if (!conv) {
       error(res, "Conversation not found", 404);
@@ -5198,7 +5252,12 @@ async function handleRequest(
     /^\/api\/conversations\/[^/]+$/.test(pathname) &&
     !pathname.endsWith("/messages")
   ) {
-    const convId = decodeURIComponent(pathname.split("/")[3]);
+    const convId = decodePathComponent(
+      pathname.split("/")[3],
+      res,
+      "conversation ID",
+    );
+    if (convId === null) return;
     state.conversations.delete(convId);
     json(res, { ok: true });
     return;
@@ -5520,9 +5579,12 @@ async function handleRequest(
   }
 
   if (method === "GET" && pathname.startsWith("/api/apps/info/")) {
-    const appName = decodeURIComponent(
+    const appName = decodePathComponent(
       pathname.slice("/api/apps/info/".length),
+      res,
+      "app name",
     );
+    if (appName === null) return;
     if (!appName) {
       error(res, "app name is required");
       return;
@@ -5808,9 +5870,12 @@ async function handleRequest(
     method === "GET" &&
     pathname.startsWith("/api/mcp/marketplace/details/")
   ) {
-    const serverName = decodeURIComponent(
+    const serverName = decodePathComponent(
       pathname.slice("/api/mcp/marketplace/details/".length),
+      res,
+      "server name",
     );
+    if (serverName === null) return;
     if (!serverName.trim()) {
       error(res, "Server name is required", 400);
       return;
@@ -5909,9 +5974,12 @@ async function handleRequest(
 
   // ── DELETE /api/mcp/config/server/:name ──────────────────────────────
   if (method === "DELETE" && pathname.startsWith("/api/mcp/config/server/")) {
-    const serverName = decodeURIComponent(
+    const serverName = decodePathComponent(
       pathname.slice("/api/mcp/config/server/".length),
+      res,
+      "server name",
     );
+    if (serverName === null) return;
 
     if (state.config.mcp?.servers?.[serverName]) {
       delete state.config.mcp.servers[serverName];
