@@ -7753,6 +7753,10 @@ async function handleRequest(
       !Array.isArray(filtered.env)
     ) {
       const envPatch = filtered.env as Record<string, unknown>;
+      // Defense-in-depth: strip step-up secrets from persisted config before
+      // merge, even though BLOCKED_ENV_KEYS also blocks them during process.env
+      // sync below. Keeping both guards prevents accidental persistence if one
+      // path changes in future refactors.
       delete envPatch.MILAIDY_API_TOKEN;
       delete envPatch.MILAIDY_WALLET_EXPORT_TOKEN;
       if (
