@@ -15,6 +15,7 @@ import type { MilaidyConfig } from "../config/config.js";
 import {
   applyCloudConfigToEnv,
   applyConnectorSecretsToEnv,
+  applyDatabaseConfigToEnv,
   buildCharacterFromConfig,
   CUSTOM_PLUGINS_DIRNAME,
   collectPluginNames,
@@ -414,6 +415,90 @@ describe("applyCloudConfigToEnv", () => {
 
   it("handles missing cloud config gracefully", () => {
     expect(() => applyCloudConfigToEnv({} as MilaidyConfig)).not.toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// applyDatabaseConfigToEnv
+// ---------------------------------------------------------------------------
+
+describe("applyDatabaseConfigToEnv", () => {
+  const envKeys = ["POSTGRES_URL", "PGLITE_DATA_DIR", "MILAIDY_PROFILE"];
+  const snap = envSnapshot(envKeys);
+
+  beforeEach(() => {
+    snap.save();
+    for (const key of envKeys) delete process.env[key];
+  });
+
+  afterEach(() => snap.restore());
+
+  it("defaults PGLITE_DATA_DIR to the agent workspace when database config is missing", () => {
+    applyDatabaseConfigToEnv({} as MilaidyConfig);
+    expect(process.env.POSTGRES_URL).toBeUndefined();
+    expect(process.env.PGLITE_DATA_DIR).toBe(
+      path.join(os.homedir(), ".milaidy", "workspace", ".eliza", ".elizadb"),
+    );
+  });
+
+  it("uses configured agent workspace for default PGLite directory", () => {
+    const config = {
+      agents: {
+        defaults: {
+          workspace: "/tmp/milaidy-workspace",
+        },
+      },
+    } as MilaidyConfig;
+
+    applyDatabaseConfigToEnv(config);
+    expect(process.env.PGLITE_DATA_DIR).toBe(
+      path.join("/tmp/milaidy-workspace", ".eliza", ".elizadb"),
+    );
+  });
+
+  it("honors custom pglite.dataDir and clears stale POSTGRES_URL", () => {
+    process.env.POSTGRES_URL = "postgresql://localhost:5432/old";
+    const config = {
+      database: {
+        provider: "pglite",
+        pglite: { dataDir: "~/milaidy-pglite" },
+      },
+    } as MilaidyConfig;
+
+    applyDatabaseConfigToEnv(config);
+    expect(process.env.POSTGRES_URL).toBeUndefined();
+    expect(process.env.PGLITE_DATA_DIR).toBe(
+      path.resolve(path.join(os.homedir(), "milaidy-pglite")),
+    );
+  });
+
+  it("does not overwrite externally provided PGLITE_DATA_DIR when config has no override", () => {
+    process.env.PGLITE_DATA_DIR = "/tmp/external-pglite";
+    applyDatabaseConfigToEnv({} as MilaidyConfig);
+    expect(process.env.PGLITE_DATA_DIR).toBe("/tmp/external-pglite");
+  });
+
+  it("builds POSTGRES_URL for postgres provider and clears PGLITE_DATA_DIR", () => {
+    process.env.PGLITE_DATA_DIR = "/tmp/pglite";
+    const config = {
+      database: {
+        provider: "postgres",
+        postgres: {
+          host: "db.example.test",
+          port: 5433,
+          database: "milaidy",
+          user: "admin",
+          password: "secret",
+          ssl: true,
+        },
+      },
+    } as MilaidyConfig;
+
+    applyDatabaseConfigToEnv(config);
+    expect(process.env.PGLITE_DATA_DIR).toBeUndefined();
+    expect(process.env.POSTGRES_URL).toBe(
+      "postgresql://admin:secret@db.example.test:5433/milaidy?sslmode=require",
+    );
   });
 });
 

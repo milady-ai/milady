@@ -903,9 +903,10 @@ export function applyCloudConfigToEnv(config: MilaidyConfig): void {
  *
  * When the provider is "postgres", we build a connection string from the
  * credentials (or use the explicit `connectionString` field) and set
- * `POSTGRES_URL`. When the provider is "pglite" (the default), we only
- * set `PGLITE_DATA_DIR` if a custom directory was configured and remove
- * any stale `POSTGRES_URL` so the plugin falls through to PGLite.
+ * `POSTGRES_URL`. When the provider is "pglite" (the default), we set
+ * `PGLITE_DATA_DIR` to either the configured value or a stable workspace
+ * default (`~/.milaidy/workspace/.eliza/.elizadb`) and remove any stale
+ * `POSTGRES_URL`.
  */
 /** @internal Exported for testing. */
 export function applyX402ConfigToEnv(config: MilaidyConfig): void {
@@ -920,12 +921,18 @@ export function applyX402ConfigToEnv(config: MilaidyConfig): void {
     process.env.X402_BASE_URL = x402.baseUrl;
 }
 
+function resolveDefaultPgliteDataDir(config: MilaidyConfig): string {
+  const workspaceDir =
+    config.agents?.defaults?.workspace ?? resolveDefaultAgentWorkspaceDir();
+  return path.join(resolveUserPath(workspaceDir), ".eliza", ".elizadb");
+}
+
 /** @internal Exported for testing. */
 export function applyDatabaseConfigToEnv(config: MilaidyConfig): void {
   const db = config.database;
-  if (!db) return;
+  const provider = db?.provider ?? "pglite";
 
-  if (db.provider === "postgres" && db.postgres) {
+  if (provider === "postgres" && db?.postgres) {
     const pg = db.postgres;
     let url = pg.connectionString;
     if (!url) {
@@ -942,10 +949,19 @@ export function applyDatabaseConfigToEnv(config: MilaidyConfig): void {
     // Clear PGLite dir so plugin-sql does not fall back to PGLite
     delete process.env.PGLITE_DATA_DIR;
   } else {
-    // PGLite mode (default): ensure no leftover POSTGRES_URL
+    // PGLite mode (default): ensure no leftover POSTGRES_URL and pin
+    // PGLite to the workspace path unless overridden by config/env.
     delete process.env.POSTGRES_URL;
-    if (db.pglite?.dataDir) {
-      process.env.PGLITE_DATA_DIR = db.pglite.dataDir;
+
+    const configuredDataDir = db?.pglite?.dataDir?.trim();
+    if (configuredDataDir) {
+      process.env.PGLITE_DATA_DIR = resolveUserPath(configuredDataDir);
+      return;
+    }
+
+    const envDataDir = process.env.PGLITE_DATA_DIR?.trim();
+    if (!envDataDir) {
+      process.env.PGLITE_DATA_DIR = resolveDefaultPgliteDataDir(config);
     }
   }
 }
