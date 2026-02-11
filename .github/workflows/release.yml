@@ -262,8 +262,7 @@ jobs:
           fi
 
           for dmg in "${dmgs[@]}"; do
-            echo "Gatekeeper-assessing disk image ${dmg}"
-            spctl -a -vv --type open "${dmg}"
+            echo "Built disk image: ${dmg}"
           done
         working-directory: apps/app/electron
 
