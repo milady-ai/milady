@@ -1,8 +1,4 @@
-import {
-  type Component,
-  visibleWidth,
-  wrapTextWithAnsi,
-} from "@mariozechner/pi-tui";
+import { type Component, visibleWidth, wrapTextWithAnsi } from "@elizaos/tui";
 import chalk from "chalk";
 
 export class UserMessageComponent implements Component {

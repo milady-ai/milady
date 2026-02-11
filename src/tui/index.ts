@@ -1,7 +1,7 @@
 import process from "node:process";
 import type { AgentRuntime } from "@elizaos/core";
+import { Text } from "@elizaos/tui";
 import type { Api, Model } from "@mariozechner/pi-ai";
-import { Text } from "@mariozechner/pi-tui";
 import { registerPiAiModelHandler } from "../runtime/pi-ai-model-handler.js";
 import { createPiCredentialProvider } from "../runtime/pi-credentials.js";
 import {

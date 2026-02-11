@@ -3,7 +3,7 @@ import {
   Markdown,
   type MarkdownTheme,
   visibleWidth,
-} from "@mariozechner/pi-tui";
+} from "@elizaos/tui";
 import chalk from "chalk";
 
 export class AssistantMessageComponent implements Component {

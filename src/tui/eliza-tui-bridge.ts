@@ -10,7 +10,7 @@ import {
   stringToUuid,
   type UUID,
 } from "@elizaos/core";
-import { Loader, Spacer, Text } from "@mariozechner/pi-tui";
+import { Loader, Spacer, Text } from "@elizaos/tui";
 import type { StreamEvent } from "../runtime/pi-ai-model-handler.js";
 import {
   AssistantMessageComponent,

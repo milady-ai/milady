@@ -1,4 +1,4 @@
-import { type Component, visibleWidth } from "@mariozechner/pi-tui";
+import { type Component, visibleWidth } from "@elizaos/tui";
 import chalk from "chalk";
 
 export interface KeyHint {

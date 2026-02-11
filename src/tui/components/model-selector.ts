@@ -1,18 +1,18 @@
 import {
-  type Api,
-  getEnvApiKey,
-  getModels,
-  getProviders,
-  type Model,
-} from "@mariozechner/pi-ai";
-import {
   type Component,
   type Focusable,
   getEditorKeybindings,
   Input,
   type SelectItem,
   SelectList,
-} from "@mariozechner/pi-tui";
+} from "@elizaos/tui";
+import {
+  type Api,
+  getEnvApiKey,
+  getModels,
+  getProviders,
+  type Model,
+} from "@mariozechner/pi-ai";
 import chalk from "chalk";
 import { tuiTheme } from "../theme.js";
 

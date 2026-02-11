@@ -1,11 +1,5 @@
 import type { AgentRuntime } from "@elizaos/core";
 import {
-  type Api,
-  getModels,
-  getProviders,
-  type Model,
-} from "@mariozechner/pi-ai";
-import {
   type AutocompleteItem,
   CombinedAutocompleteProvider,
   type Component,
@@ -16,7 +10,13 @@ import {
   Spacer,
   Text,
   TUI,
-} from "@mariozechner/pi-tui";
+} from "@elizaos/tui";
+import {
+  type Api,
+  getModels,
+  getProviders,
+  type Model,
+} from "@mariozechner/pi-ai";
 import {
   ChatEditor,
   FooterComponent,

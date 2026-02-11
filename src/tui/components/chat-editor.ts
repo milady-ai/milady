@@ -1,4 +1,4 @@
-import { Editor, matchesKey } from "@mariozechner/pi-tui";
+import { Editor, matchesKey } from "@elizaos/tui";
 
 /**
  * Small wrapper around pi-tui's Editor to support Milaidy-wide keybindings.

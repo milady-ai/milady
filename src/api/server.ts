@@ -7714,7 +7714,7 @@ async function handleRequest(
       const vars = envPatch.vars;
       if (vars && typeof vars === "object" && !Array.isArray(vars)) {
         for (const [k, v] of Object.entries(vars as Record<string, unknown>)) {
-          if (BLOCKED_KEYS.has(k)) continue;
+          if (BLOCKED_ENV_KEYS.has(k.toUpperCase())) continue;
           const str = typeof v === "string" ? v : "";
           if (str.trim()) {
             process.env[k] = str;
@@ -7727,7 +7727,7 @@ async function handleRequest(
       // 2) Direct env.* string keys (legacy)
       for (const [k, v] of Object.entries(envPatch)) {
         if (k === "vars" || k === "shellEnv") continue;
-        if (BLOCKED_KEYS.has(k)) continue;
+        if (BLOCKED_ENV_KEYS.has(k.toUpperCase())) continue;
         if (typeof v !== "string") continue;
         if (v.trim()) process.env[k] = v;
         else delete process.env[k];

@@ -3,7 +3,7 @@ import {
   Loader,
   type TUI,
   truncateToWidth,
-} from "@mariozechner/pi-tui";
+} from "@elizaos/tui";
 import chalk from "chalk";
 
 export type ToolStatus = "running" | "success" | "error";

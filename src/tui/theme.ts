@@ -1,8 +1,4 @@
-import type {
-  EditorTheme,
-  MarkdownTheme,
-  SelectListTheme,
-} from "@mariozechner/pi-tui";
+import type { EditorTheme, MarkdownTheme, SelectListTheme } from "@elizaos/tui";
 import chalk from "chalk";
 
 // Milaidy brand colors (TUI-specific).
