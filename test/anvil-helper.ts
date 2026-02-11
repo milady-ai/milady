@@ -232,7 +232,14 @@ export async function startAnvil(options?: {
 
   const fund = async (address: string, amountEth: string): Promise<string> => {
     // Use funder wallet (different from deployer) to avoid nonce conflicts
-    const nonce = await funderWallet.getNonce("pending");
+    // Create a fresh provider for nonce lookup to avoid ethers.js v6 caching issues
+    const freshProvider = new ethers.JsonRpcProvider(rpcUrl);
+    const nonce = await freshProvider.getTransactionCount(
+      funderAccount.address,
+      "pending",
+    );
+    freshProvider.destroy();
+
     const tx = await funderWallet.sendTransaction({
       to: address,
       value: ethers.parseEther(amountEth),

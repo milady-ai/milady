@@ -24,7 +24,6 @@ export class TxService {
   private readonly provider: ethers.JsonRpcProvider;
   private readonly wallet: ethers.Wallet;
   private readonly rpcUrl: string;
-  private nonceCache: number | null = null;
 
   constructor(rpcUrl: string, privateKey: string) {
     this.rpcUrl = rpcUrl;
@@ -52,35 +51,18 @@ export class TxService {
 
   /**
    * Get fresh nonce for the wallet address.
-   * Uses local tracking to avoid ethers.js provider caching issues.
-   * Each call returns the current nonce and increments for the next call.
+   * Always fetches from blockchain using a fresh provider to avoid caching issues.
+   * This ensures we always get the correct nonce even after failed transactions.
    */
   async getFreshNonce(): Promise<number> {
-    if (this.nonceCache === null) {
-      // First call: fetch from blockchain using a fresh provider to avoid caching
-      const freshProvider = new ethers.JsonRpcProvider(this.rpcUrl);
-      this.nonceCache = await freshProvider.getTransactionCount(
-        this.wallet.address,
-        "pending",
-      );
-      freshProvider.destroy();
-    }
-    const nonce = this.nonceCache;
-    this.nonceCache++;
-    return nonce;
-  }
-
-  /**
-   * Reset nonce cache to sync with blockchain.
-   * Call this if transactions fail and you need to resync.
-   */
-  async resetNonceCache(): Promise<void> {
+    // Use a fresh provider for each nonce lookup to avoid ethers.js v6 caching
     const freshProvider = new ethers.JsonRpcProvider(this.rpcUrl);
-    this.nonceCache = await freshProvider.getTransactionCount(
+    const nonce = await freshProvider.getTransactionCount(
       this.wallet.address,
       "pending",
     );
     freshProvider.destroy();
+    return nonce;
   }
 
   get address(): string {
