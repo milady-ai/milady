@@ -275,39 +275,17 @@ function extractPlugin(mod: PluginModuleShape): Plugin | null {
  */
 /** @internal Exported for testing. */
 export function collectPluginNames(config: MilaidyConfig): Set<string> {
-  // Check for explicit allow list first
-  const allowList = config.plugins?.allow;
-  const hasExplicitAllowList = allowList && allowList.length > 0;
-
-  // If there's an explicit allow list, respect it and skip auto-detection —
-  // but always include essential plugins that the runtime depends on.
-  if (hasExplicitAllowList) {
-    const names = new Set<string>(allowList);
-    // Core plugins are always loaded regardless of allow list.
-    for (const core of CORE_PLUGINS) {
-      names.add(core);
-    }
-
-    const cloudActive = config.cloud?.enabled || Boolean(config.cloud?.apiKey);
-    if (cloudActive) {
-      // Always include cloud plugin when the user has logged in.
-      names.add("@elizaos/plugin-elizacloud");
-
-      // Remove direct AI provider plugins — they would try to call
-      // Anthropic/OpenAI/etc. directly (requiring their own API keys)
-      // instead of routing through Eliza Cloud.  The cloud plugin handles
-      // ALL model calls via its own gateway.
-      const directProviders = new Set(Object.values(PROVIDER_PLUGIN_MAP));
-      directProviders.delete("@elizaos/plugin-elizacloud"); // keep cloud itself
-      for (const p of directProviders) {
-        names.delete(p);
-      }
-    }
-    return names;
-  }
-
-  // Otherwise, proceed with auto-detection
+  // Always start with core plugins
   const pluginsToLoad = new Set<string>(CORE_PLUGINS);
+
+  // Allow list is additive — extra plugins on top of auto-detection,
+  // not an exclusive whitelist that blocks everything else.
+  const allowList = config.plugins?.allow;
+  if (allowList && allowList.length > 0) {
+    for (const name of allowList) {
+      pluginsToLoad.add(name);
+    }
+  }
 
   // Connector plugins — load when connector has config entries
   // Prefer config.connectors, fall back to config.channels for backward compatibility
@@ -328,17 +306,19 @@ export function collectPluginNames(config: MilaidyConfig): Set<string> {
     }
   }
 
-  // plugin-local-embedding provides the TEXT_EMBEDDING delegate which is
-  // required for knowledge / memory retrieval.  Remote model-provider plugins
-  // do NOT supply this delegate, so local-embedding must always stay loaded.
-  // (Previously it was stripped when a remote provider was detected, but that
-  // left TEXT_EMBEDDING unhandled — see #10.)
-
-  // ElizaCloud plugin — load when cloud is enabled OR an API key exists
-  // (the key proves the user logged in; the enabled flag may have been
-  // accidentally reset by a provider switch or config merge).
-  if (config.cloud?.enabled || config.cloud?.apiKey) {
+  // ElizaCloud plugin — only load when explicitly enabled.
+  // A leftover apiKey from a previous login should not force cloud routing
+  // when the user has set enabled: false.
+  if (config.cloud?.enabled === true) {
     pluginsToLoad.add("@elizaos/plugin-elizacloud");
+
+    // When cloud is explicitly enabled, remove direct AI provider plugins —
+    // the cloud plugin handles ALL model calls via its own gateway.
+    const directProviders = new Set(Object.values(PROVIDER_PLUGIN_MAP));
+    directProviders.delete("@elizaos/plugin-elizacloud");
+    for (const p of directProviders) {
+      pluginsToLoad.delete(p);
+    }
   }
 
   // Optional feature plugins from config.plugins.entries
@@ -352,7 +332,12 @@ export function collectPluginNames(config: MilaidyConfig): Set<string> {
         typeof entry === "object" &&
         (entry as Record<string, unknown>).enabled !== false
       ) {
-        const pluginName = OPTIONAL_PLUGIN_MAP[key] ?? `@elizaos/plugin-${key}`;
+        // Connector keys (telegram, discord, etc.) must use CHANNEL_PLUGIN_MAP
+        // so the correct variant loads (e.g. enhanced telegram, not base).
+        const pluginName =
+          CHANNEL_PLUGIN_MAP[key] ??
+          OPTIONAL_PLUGIN_MAP[key] ??
+          `@elizaos/plugin-${key}`;
         pluginsToLoad.add(pluginName);
       }
     }
@@ -1654,7 +1639,7 @@ export async function startEliza(
   opts?: StartElizaOptions,
 ): Promise<AgentRuntime | undefined> {
   // Start buffering logs early so startup messages appear in the UI log viewer
-  const { captureEarlyLogs } = await import("../api/server");
+  const { captureEarlyLogs } = await import("../api/early-logs");
   captureEarlyLogs();
 
   // 1. Load Milaidy config from ~/.milaidy/milaidy.json

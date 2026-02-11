@@ -140,6 +140,43 @@ describe("collectPluginNames", () => {
     expect(names.has("@elizaos/plugin-slack")).toBe(false);
   });
 
+  it("uses enhanced Telegram plugin when telegram is enabled via plugins.entries", () => {
+    const config = {
+      plugins: {
+        entries: { telegram: { enabled: true } },
+      },
+    } as unknown as MilaidyConfig;
+    const names = collectPluginNames(config);
+    // Should load the enhanced telegram plugin, NOT the base @elizaos/plugin-telegram
+    expect(names.has("@milaidy/plugin-telegram-enhanced")).toBe(true);
+    expect(names.has("@elizaos/plugin-telegram")).toBe(false);
+  });
+
+  it("uses enhanced Telegram plugin from CHANNEL_PLUGIN_MAP for connectors with plugins.entries", () => {
+    // When both connectors AND plugins.entries set telegram, the enhanced
+    // plugin should load (not both enhanced + base).
+    const config = {
+      connectors: { telegram: { botToken: "tok" } },
+      plugins: {
+        entries: { telegram: { enabled: true } },
+      },
+    } as unknown as MilaidyConfig;
+    const names = collectPluginNames(config);
+    expect(names.has("@milaidy/plugin-telegram-enhanced")).toBe(true);
+    expect(names.has("@elizaos/plugin-telegram")).toBe(false);
+  });
+
+  it("does not load telegram plugin when plugins.entries.telegram.enabled is false", () => {
+    const config = {
+      plugins: {
+        entries: { telegram: { enabled: false } },
+      },
+    } as unknown as MilaidyConfig;
+    const names = collectPluginNames(config);
+    expect(names.has("@milaidy/plugin-telegram-enhanced")).toBe(false);
+    expect(names.has("@elizaos/plugin-telegram")).toBe(false);
+  });
+
   it("does not add connector plugins for empty connector configs", () => {
     const config = {
       connectors: { telegram: null },
