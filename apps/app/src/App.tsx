@@ -29,7 +29,7 @@ function ViewRouter() {
     case "apps": return <AppsPageView />;
     case "character": return <CharacterView />;
     case "triggers": return <TriggersView />;
-    case "inventory": return <InventoryView />;
+    case "wallets": return <InventoryView />;
     case "knowledge": return <KnowledgeView />;
     case "connectors": return <ConnectorsPageView />;
     case "advanced":

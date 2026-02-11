@@ -60,17 +60,24 @@ describe("navigation", () => {
     expect(titleForTab("connectors")).toBe("Connectors");
   });
 
+  test("routes /wallets and keeps legacy /inventory redirect", () => {
+    expect(pathForTab("wallets")).toBe("/wallets");
+    expect(tabFromPath("/wallets")).toBe("wallets");
+    expect(tabFromPath("/inventory")).toBe("wallets");
+    expect(titleForTab("wallets")).toBe("Wallets");
+  });
+
   test("does not expose game as a top-level apps tab", () => {
     const apps = TAB_GROUPS.find((group) => group.label === "Apps");
     expect(apps).toBeDefined();
     expect(apps?.tabs).toEqual(["apps"]);
   });
 
-  test("moves character/triggers/inventory/knowledge/connectors to top-level groups", () => {
+  test("moves character/triggers/wallets/knowledge/connectors to top-level groups", () => {
     const labels = TAB_GROUPS.map((group) => group.label);
     expect(labels).toContain("Character");
     expect(labels).toContain("Triggers");
-    expect(labels).toContain("Inventory");
+    expect(labels).toContain("Wallets");
     expect(labels).toContain("Knowledge");
     expect(labels).toContain("Connectors");
     expect(labels.indexOf("Connectors")).toBeLessThan(labels.indexOf("Triggers"));

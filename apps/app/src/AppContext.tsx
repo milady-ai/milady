@@ -2863,7 +2863,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (urlTab === "character") {
           void loadCharacter();
         }
-        if (urlTab === "inventory") {
+        if (urlTab === "wallets") {
           void loadInventory();
         }
       }

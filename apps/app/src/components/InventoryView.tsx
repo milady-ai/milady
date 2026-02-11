@@ -415,7 +415,7 @@ export function InventoryView() {
             No data yet. Click Refresh.
           </div>
         ) : rows.length === 0 ? (
-          <div className="px-4 py-6 text-center text-xs text-muted italic">No inventory</div>
+          <div className="px-4 py-6 text-center text-xs text-muted italic">No wallet assets</div>
         ) : (
           <table className="w-full border-collapse text-xs">
             <tbody>

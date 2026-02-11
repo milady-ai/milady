@@ -11,6 +11,7 @@ import fs from "node:fs";
 import http from "node:http";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   type AgentRuntime,
   ChannelType,
@@ -1607,6 +1608,159 @@ function error(res: http.ServerResponse, message: string, status = 400): void {
   json(res, { error: message }, status);
 }
 
+// ---------------------------------------------------------------------------
+// Static UI serving (production)
+// ---------------------------------------------------------------------------
+
+const STATIC_MIME: Record<string, string> = {
+  ".css": "text/css; charset=utf-8",
+  ".gif": "image/gif",
+  ".html": "text/html; charset=utf-8",
+  ".ico": "image/x-icon",
+  ".jpeg": "image/jpeg",
+  ".jpg": "image/jpeg",
+  ".js": "application/javascript; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".map": "application/json",
+  ".mjs": "application/javascript; charset=utf-8",
+  ".png": "image/png",
+  ".svg": "image/svg+xml",
+  ".ttf": "font/ttf",
+  ".txt": "text/plain; charset=utf-8",
+  ".wasm": "application/wasm",
+  ".webp": "image/webp",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+};
+
+/** Resolved UI directory. Lazily computed once on first request. */
+let uiDir: string | null | undefined;
+let uiIndexHtml: Buffer | null = null;
+
+function resolveUiDir(): string | null {
+  if (uiDir !== undefined) return uiDir;
+
+  if (process.env.NODE_ENV !== "production") {
+    uiDir = null;
+    return null;
+  }
+
+  const thisDir = path.dirname(fileURLToPath(import.meta.url));
+  const candidates = [
+    path.resolve("apps/app/dist"),
+    path.resolve(thisDir, "../../apps/app/dist"),
+  ];
+
+  for (const candidate of candidates) {
+    const indexPath = path.join(candidate, "index.html");
+    try {
+      if (fs.statSync(indexPath).isFile()) {
+        uiDir = candidate;
+        uiIndexHtml = fs.readFileSync(indexPath);
+        logger.info(`[milaidy-api] Serving dashboard UI from ${candidate}`);
+        return uiDir;
+      }
+    } catch {
+      // Candidate not present, keep searching.
+    }
+  }
+
+  uiDir = null;
+  logger.info(
+    "[milaidy-api] No built UI found — dashboard routes are disabled",
+  );
+  return null;
+}
+
+function sendStaticResponse(
+  req: http.IncomingMessage,
+  res: http.ServerResponse,
+  status: number,
+  headers: Record<string, string | number>,
+  body?: Buffer,
+): void {
+  res.writeHead(status, headers);
+  if (req.method === "HEAD") {
+    res.end();
+    return;
+  }
+  res.end(body);
+}
+
+/**
+ * Serve built dashboard assets from apps/app/dist with SPA fallback.
+ * Returns true when the request is handled.
+ */
+function serveStaticUi(
+  req: http.IncomingMessage,
+  res: http.ServerResponse,
+  pathname: string,
+): boolean {
+  const root = resolveUiDir();
+  if (!root) return false;
+
+  // Keep API and WebSocket namespaces exclusively owned by server handlers.
+  if (pathname === "/api" || pathname.startsWith("/api/")) return false;
+  if (pathname === "/ws") return false;
+
+  let decodedPath: string;
+  try {
+    decodedPath = decodeURIComponent(pathname);
+  } catch {
+    error(res, "Invalid URL path encoding", 400);
+    return true;
+  }
+
+  const relativePath = decodedPath.replace(/^\/+/, "");
+  const candidatePath = path.resolve(root, relativePath);
+  if (
+    candidatePath !== root &&
+    !candidatePath.startsWith(`${root}${path.sep}`)
+  ) {
+    error(res, "Forbidden", 403);
+    return true;
+  }
+
+  try {
+    const stat = fs.statSync(candidatePath);
+    if (stat.isFile()) {
+      const ext = path.extname(candidatePath).toLowerCase();
+      const body = fs.readFileSync(candidatePath);
+      const cacheControl = relativePath.startsWith("assets/")
+        ? "public, max-age=31536000, immutable"
+        : "public, max-age=0, must-revalidate";
+      sendStaticResponse(
+        req,
+        res,
+        200,
+        {
+          "Cache-Control": cacheControl,
+          "Content-Length": body.length,
+          "Content-Type": STATIC_MIME[ext] ?? "application/octet-stream",
+        },
+        body,
+      );
+      return true;
+    }
+  } catch {
+    // Missing file falls through to SPA index fallback.
+  }
+
+  if (!uiIndexHtml) return false;
+  sendStaticResponse(
+    req,
+    res,
+    200,
+    {
+      "Cache-Control": "public, max-age=0, must-revalidate",
+      "Content-Length": uiIndexHtml.length,
+      "Content-Type": "text/html; charset=utf-8",
+    },
+    uiIndexHtml,
+  );
+  return true;
+}
+
 interface ChatGenerationResult {
   text: string;
   agentName: string;
@@ -2969,6 +3123,33 @@ function isWebSocketAuthorized(
   return tokenMatches(expected, queryToken);
 }
 
+export interface WebSocketUpgradeRejection {
+  status: 401 | 403 | 404;
+  reason: string;
+}
+
+export function resolveWebSocketUpgradeRejection(
+  req: http.IncomingMessage,
+  wsUrl: URL,
+): WebSocketUpgradeRejection | null {
+  if (wsUrl.pathname !== "/ws") {
+    return { status: 404, reason: "Not found" };
+  }
+
+  const origin =
+    typeof req.headers.origin === "string" ? req.headers.origin : undefined;
+  const allowedOrigin = resolveCorsOrigin(origin);
+  if (origin && !allowedOrigin) {
+    return { status: 403, reason: "Origin not allowed" };
+  }
+
+  if (!isWebSocketAuthorized(req, wsUrl)) {
+    return { status: 401, reason: "Unauthorized" };
+  }
+
+  return null;
+}
+
 function rejectWebSocketUpgrade(
   socket: import("node:stream").Duplex,
   statusCode: number,
@@ -2979,7 +3160,9 @@ function rejectWebSocketUpgrade(
       ? "Unauthorized"
       : statusCode === 403
         ? "Forbidden"
-        : "Bad Request";
+        : statusCode === 404
+          ? "Not Found"
+          : "Bad Request";
   const body = `${message}\n`;
   socket.write(
     `HTTP/1.1 ${statusCode} ${statusText}\r\n` +
@@ -5620,6 +5803,13 @@ async function handleRequest(
       return;
     }
 
+    const npmNamePattern =
+      /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/;
+    if (!npmNamePattern.test(pluginName)) {
+      error(res, "Invalid plugin name format", 400);
+      return;
+    }
+
     const { installPlugin } = await import("../services/plugin-installer.js");
 
     try {
@@ -5786,6 +5976,21 @@ async function handleRequest(
       res,
     );
     if (!body || !body.npmName) return;
+
+    if (body.enabled) {
+      const { getSecurityBlockedPluginReason } = await import(
+        "../runtime/eliza.js"
+      );
+      const blockedReason = getSecurityBlockedPluginReason(body.npmName);
+      if (blockedReason) {
+        error(
+          res,
+          `Plugin is temporarily disabled for security reasons: ${blockedReason}`,
+          409,
+        );
+        return;
+      }
+    }
 
     // Only allow toggling optional plugins, not core
     const isCorePlugin = (CORE_PLUGINS as readonly string[]).includes(
@@ -7543,8 +7748,17 @@ async function handleRequest(
       error(res, "Missing connector config", 400);
       return;
     }
+    const connectorName = name.trim();
+    if (isBlockedObjectKey(connectorName)) {
+      error(
+        res,
+        'Invalid connector name: "__proto__", "constructor", and "prototype" are reserved',
+        400,
+      );
+      return;
+    }
     if (!state.config.connectors) state.config.connectors = {};
-    state.config.connectors[name.trim()] = config as ConnectorConfig;
+    state.config.connectors[connectorName] = config as ConnectorConfig;
     try {
       saveMilaidyConfig(state.config);
     } catch {
@@ -7561,15 +7775,18 @@ async function handleRequest(
   // ── DELETE /api/connectors/:name ─────────────────────────────────────────
   if (method === "DELETE" && pathname.startsWith("/api/connectors/")) {
     const name = decodeURIComponent(pathname.slice("/api/connectors/".length));
-    if (!name) {
-      error(res, "Missing connector name", 400);
+    if (!name || isBlockedObjectKey(name)) {
+      error(res, "Missing or invalid connector name", 400);
       return;
     }
-    if (state.config.connectors) {
+    if (
+      state.config.connectors &&
+      Object.hasOwn(state.config.connectors, name)
+    ) {
       delete state.config.connectors[name];
     }
     // Also remove from legacy channels key
-    if (state.config.channels) {
+    if (state.config.channels && Object.hasOwn(state.config.channels, name)) {
       delete state.config.channels[name];
     }
     try {
@@ -9623,6 +9840,11 @@ async function handleRequest(
     return;
   }
 
+  // ── Static UI serving (production) ──────────────────────────────────────
+  if (method === "GET" || method === "HEAD") {
+    if (serveStaticUi(req, res, pathname)) return;
+  }
+
   // ── Fallback ────────────────────────────────────────────────────────────
   error(res, "Not found", 404);
 }
@@ -10188,25 +10410,9 @@ export async function startApiServer(opts?: {
         request.url ?? "/",
         `http://${request.headers.host ?? "localhost"}`,
       );
-      if (wsUrl.pathname !== "/ws") {
-        socket.destroy();
-        return;
-      }
-
-      // Enforce the same origin allowlist used by HTTP routes.
-      const origin =
-        typeof request.headers.origin === "string"
-          ? request.headers.origin
-          : undefined;
-      const allowedOrigin = resolveCorsOrigin(origin);
-      if (origin && !allowedOrigin) {
-        rejectWebSocketUpgrade(socket, 403, "Origin not allowed");
-        return;
-      }
-
-      // Enforce API token auth for WebSocket upgrades.
-      if (!isWebSocketAuthorized(request, wsUrl)) {
-        rejectWebSocketUpgrade(socket, 401, "Unauthorized");
+      const rejection = resolveWebSocketUpgradeRejection(request, wsUrl);
+      if (rejection) {
+        rejectWebSocketUpgrade(socket, rejection.status, rejection.reason);
         return;
       }
 
@@ -10217,7 +10423,7 @@ export async function startApiServer(opts?: {
       logger.error(
         `[milaidy-api] WebSocket upgrade error: ${err instanceof Error ? err.message : err}`,
       );
-      socket.destroy();
+      rejectWebSocketUpgrade(socket, 404, "Not found");
     }
   });
 

@@ -19,6 +19,7 @@ import {
   buildCharacterFromConfig,
   CUSTOM_PLUGINS_DIRNAME,
   collectPluginNames,
+  getSecurityBlockedPluginReason,
   mergeDropInPlugins,
   resolvePackageEntry,
   resolvePrimaryModel,
@@ -139,6 +140,28 @@ describe("collectPluginNames", () => {
     expect(names.has("@milaidy/plugin-telegram-enhanced")).toBe(true);
     expect(names.has("@elizaos/plugin-discord")).toBe(true);
     expect(names.has("@elizaos/plugin-slack")).toBe(false);
+  });
+
+  it("uses enhanced telegram plugin when enabled via plugins.entries", () => {
+    const config = {
+      plugins: {
+        entries: { telegram: { enabled: true } },
+      },
+    } as unknown as MilaidyConfig;
+    const names = collectPluginNames(config);
+    expect(names.has("@milaidy/plugin-telegram-enhanced")).toBe(true);
+    expect(names.has("@elizaos/plugin-telegram")).toBe(false);
+  });
+
+  it("does not load telegram plugin when plugins.entries.telegram.enabled is false", () => {
+    const config = {
+      plugins: {
+        entries: { telegram: { enabled: false } },
+      },
+    } as unknown as MilaidyConfig;
+    const names = collectPluginNames(config);
+    expect(names.has("@milaidy/plugin-telegram-enhanced")).toBe(false);
+    expect(names.has("@elizaos/plugin-telegram")).toBe(false);
   });
 
   it("does not add connector plugins for empty connector configs", () => {
@@ -286,6 +309,20 @@ describe("collectPluginNames", () => {
     const names = collectPluginNames(config);
     expect(names.has("@elizaos/plugin-elizacloud")).toBe(true);
     expect(names.has("@elizaos/plugin-vision")).toBe(false);
+  });
+
+  it("blocks @elizaos/plugin-pdf even when explicitly allow-listed", () => {
+    const config = {
+      plugins: { allow: ["@elizaos/plugin-pdf"] },
+    } as unknown as MilaidyConfig;
+    const names = collectPluginNames(config);
+    expect(names.has("@elizaos/plugin-pdf")).toBe(false);
+    expect(names.has("@elizaos/plugin-sql")).toBe(true);
+  });
+
+  it("provides a security block reason for @elizaos/plugin-pdf", () => {
+    const reason = getSecurityBlockedPluginReason("@elizaos/plugin-pdf");
+    expect(reason).toContain("pdfjs-dist");
   });
 });
 
