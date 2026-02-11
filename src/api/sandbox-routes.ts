@@ -765,12 +765,36 @@ function performKeypress(keys: string): void {
     if (commandExists("cliclick")) {
       execSync(`cliclick kp:${keys}`, { timeout: 5000 });
     } else {
-      execSync(
-        `osascript -e 'tell application "System Events" to key code ${keys}'`,
-        {
-          timeout: 5000,
-        },
-      );
+      const symbolicKeyCodes: Record<string, number> = {
+        return: 36,
+        enter: 36,
+        tab: 48,
+        space: 49,
+        escape: 53,
+        esc: 53,
+        left: 123,
+        right: 124,
+        down: 125,
+        up: 126,
+      };
+      const normalized = keys.trim().toLowerCase();
+      const mappedCode = symbolicKeyCodes[normalized];
+      const numericCode =
+        mappedCode ??
+        (Number.isInteger(Number(keys.trim())) ? Number(keys.trim()) : null);
+
+      if (numericCode !== null) {
+        execSync(
+          `osascript -e 'tell application "System Events" to key code ${numericCode}'`,
+          { timeout: 5000 },
+        );
+      } else {
+        const escaped = keys.replace(/"/g, '\\"').replace(/'/g, "'\\''");
+        execSync(
+          `osascript -e 'tell application "System Events" to keystroke "${escaped}"'`,
+          { timeout: 5000 },
+        );
+      }
     }
   } else if (os === "linux") {
     if (commandExists("xdotool")) {

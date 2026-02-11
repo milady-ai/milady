@@ -220,6 +220,7 @@ export class DockerEngine implements ISandboxEngine {
       const result = execSync(`docker inspect -f "{{.State.Running}}" ${id}`, {
         encoding: "utf-8",
         timeout: 5000,
+        stdio: ["ignore", "pipe", "ignore"],
       }).trim();
       return result === "true";
     } catch {
@@ -240,14 +241,21 @@ export class DockerEngine implements ISandboxEngine {
   }
 
   async pullImage(image: string): Promise<void> {
-    execSync(`docker pull ${image}`, { stdio: "inherit", timeout: 300000 });
+    execSync(`docker pull ${image}`, {
+      stdio: ["ignore", "pipe", "pipe"],
+      timeout: 300000,
+    });
   }
 
   listContainers(prefix: string): string[] {
     try {
       const output = execSync(
         `docker ps -a --filter name=${prefix} --format "{{.ID}}"`,
-        { encoding: "utf-8", timeout: 10000 },
+        {
+          encoding: "utf-8",
+          timeout: 10000,
+          stdio: ["ignore", "pipe", "ignore"],
+        },
       );
       return output
         .split("\n")
@@ -263,6 +271,7 @@ export class DockerEngine implements ISandboxEngine {
       const result = execSync(`docker exec ${id} echo "healthy"`, {
         encoding: "utf-8",
         timeout: 5000,
+        stdio: ["ignore", "pipe", "ignore"],
       }).trim();
       return result === "healthy";
     } catch {
@@ -275,6 +284,7 @@ export class DockerEngine implements ISandboxEngine {
       return execSync("docker context show", {
         encoding: "utf-8",
         timeout: 5000,
+        stdio: ["ignore", "pipe", "ignore"],
       }).trim();
     } catch {
       return "default";
@@ -472,14 +482,21 @@ export class AppleContainerEngine implements ISandboxEngine {
   }
 
   async pullImage(image: string): Promise<void> {
-    execSync(`container pull ${image}`, { stdio: "inherit", timeout: 300000 });
+    execSync(`container pull ${image}`, {
+      stdio: ["ignore", "pipe", "pipe"],
+      timeout: 300000,
+    });
   }
 
   listContainers(prefix: string): string[] {
     try {
       const output = execSync(
         `container ps -a --filter name=${prefix} --format "{{.ID}}"`,
-        { encoding: "utf-8", timeout: 10000 },
+        {
+          encoding: "utf-8",
+          timeout: 10000,
+          stdio: ["ignore", "pipe", "ignore"],
+        },
       );
       return output
         .split("\n")
@@ -495,6 +512,7 @@ export class AppleContainerEngine implements ISandboxEngine {
       const result = execSync(`container exec ${id} echo "healthy"`, {
         encoding: "utf-8",
         timeout: 5000,
+        stdio: ["ignore", "pipe", "ignore"],
       }).trim();
       return result === "healthy";
     } catch {

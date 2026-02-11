@@ -18,7 +18,10 @@ function shouldIgnoreTestConsoleError(args: unknown[]): boolean {
   const first = args[0];
   return (
     typeof first === "string" &&
-    first.includes("react-test-renderer is deprecated")
+    (first.includes("react-test-renderer is deprecated") ||
+      first.includes(
+        "The current testing environment is not configured to support act(...)",
+      ))
   );
 }
 

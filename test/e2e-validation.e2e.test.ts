@@ -72,6 +72,10 @@ function extractPlugin(mod: PluginModule): Plugin | null {
   if (looksLikePlugin(mod.default)) return mod.default;
   if (looksLikePlugin(mod.plugin)) return mod.plugin;
   if (looksLikePlugin(mod)) return mod as Plugin;
+  for (const [key, value] of Object.entries(mod)) {
+    if (key === "default" || key === "plugin") continue;
+    if (looksLikePlugin(value)) return value;
+  }
   return null;
 }
 
@@ -1206,7 +1210,7 @@ describe("Runtime Integration (with model provider)", () => {
     runtime = new AgentRuntime({
       character,
       plugins,
-      logLevel: "info",
+      logLevel: "error",
       enableAutonomy: true,
     });
 

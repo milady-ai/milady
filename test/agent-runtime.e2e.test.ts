@@ -67,6 +67,10 @@ function extractPlugin(mod: PluginModule): Plugin | null {
   if (looksLikePlugin(mod.default)) return mod.default;
   if (looksLikePlugin(mod.plugin)) return mod.plugin;
   if (looksLikePlugin(mod)) return mod as unknown as Plugin;
+  for (const [key, value] of Object.entries(mod)) {
+    if (key === "default" || key === "plugin") continue;
+    if (looksLikePlugin(value)) return value;
+  }
   return null;
 }
 
@@ -307,7 +311,7 @@ describe("Agent Runtime E2E", () => {
     runtime = new AgentRuntime({
       character,
       plugins,
-      logLevel: "info",
+      logLevel: "error",
       enableAutonomy: true,
       // checkShouldRespond is NOT set — defaults to true (production behavior)
     });
