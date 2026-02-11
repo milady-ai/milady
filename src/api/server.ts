@@ -1863,9 +1863,20 @@ function classifyModel(modelId: string): ModelCategory {
     id.includes("flux")
   )
     return "image";
-  if (id.includes("tts") || id.includes("text-to-speech") || id.includes("eleven_")) return "tts";
-  if (id.includes("whisper") || id.includes("stt") || id.includes("transcrib")) return "stt";
-  if (id.includes("moderation") || id.includes("guard") || id.includes("safety")) return "other";
+  if (
+    id.includes("tts") ||
+    id.includes("text-to-speech") ||
+    id.includes("eleven_")
+  )
+    return "tts";
+  if (id.includes("whisper") || id.includes("stt") || id.includes("transcrib"))
+    return "stt";
+  if (
+    id.includes("moderation") ||
+    id.includes("guard") ||
+    id.includes("safety")
+  )
+    return "other";
   return "chat";
 }
 
@@ -1927,7 +1938,10 @@ function writeProviderCache(cache: ProviderCache): void {
   try {
     const dir = resolveModelsCacheDir();
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(providerCachePath(cache.providerId), JSON.stringify(cache, null, 2));
+    fs.writeFileSync(
+      providerCachePath(cache.providerId),
+      JSON.stringify(cache, null, 2),
+    );
   } catch (e) {
     logger.warn(
       `[model-catalog] Failed to write cache for ${cache.providerId}: ${e instanceof Error ? e.message : e}`,
@@ -1952,11 +1966,13 @@ async function fetchModelsREST(
     const data = (await res.json()) as {
       data?: Array<{ id: string; name?: string; type?: string }>;
     };
-    return (data.data ?? []).map((m) => ({
-      id: m.id,
-      name: m.name ?? m.id,
-      category: m.type ? restTypeToCategory(m.type) : classifyModel(m.id),
-    })).sort((a, b) => a.id.localeCompare(b.id));
+    return (data.data ?? [])
+      .map((m) => ({
+        id: m.id,
+        name: m.name ?? m.id,
+        category: m.type ? restTypeToCategory(m.type) : classifyModel(m.id),
+      }))
+      .sort((a, b) => a.id.localeCompare(b.id));
   } catch (e) {
     logger.warn(
       `[model-catalog] Failed to fetch models for ${providerId}: ${e instanceof Error ? e.message : e}`,
@@ -1970,25 +1986,32 @@ function restTypeToCategory(type: string): ModelCategory {
   if (t.includes("embed")) return "embedding";
   if (t === "image" || t.includes("image-generation")) return "image";
   if (t.includes("tts") || t.includes("speech")) return "tts";
-  if (t.includes("stt") || t.includes("transcription") || t.includes("whisper")) return "stt";
+  if (t.includes("stt") || t.includes("transcription") || t.includes("whisper"))
+    return "stt";
   if (t === "language" || t === "chat" || t.includes("text")) return "chat";
   return classifyModel(type);
 }
 
 async function fetchAnthropicModels(apiKey: string): Promise<CachedModel[]> {
   try {
-    const headers: Record<string, string> = { "anthropic-version": "2023-06-01" };
+    const headers: Record<string, string> = {
+      "anthropic-version": "2023-06-01",
+    };
     if (apiKey) headers["x-api-key"] = apiKey;
-    const res = await fetch("https://api.anthropic.com/v1/models?limit=100", { headers });
+    const res = await fetch("https://api.anthropic.com/v1/models?limit=100", {
+      headers,
+    });
     if (!res.ok) return [];
     const data = (await res.json()) as {
       data?: Array<{ id: string; display_name?: string; type?: string }>;
     };
-    return (data.data ?? []).map((m) => ({
-      id: m.id,
-      name: m.display_name ?? m.id,
-      category: classifyModel(m.id),
-    })).sort((a, b) => a.id.localeCompare(b.id));
+    return (data.data ?? [])
+      .map((m) => ({
+        id: m.id,
+        name: m.display_name ?? m.id,
+        category: classifyModel(m.id),
+      }))
+      .sort((a, b) => a.id.localeCompare(b.id));
   } catch (e) {
     logger.warn(
       `[model-catalog] Failed to fetch Anthropic models: ${e instanceof Error ? e.message : e}`,
@@ -2056,7 +2079,9 @@ async function fetchOpenRouterModels(apiKey: string): Promise<CachedModel[]> {
   // Fetch chat/text models and embedding models in parallel
   const [chatRes, embedRes] = await Promise.all([
     fetch("https://openrouter.ai/api/v1/models", { headers }).catch(() => null),
-    fetch("https://openrouter.ai/api/v1/embeddings/models", { headers }).catch(() => null),
+    fetch("https://openrouter.ai/api/v1/embeddings/models", { headers }).catch(
+      () => null,
+    ),
   ]);
 
   const models: CachedModel[] = [];
@@ -2072,7 +2097,9 @@ async function fetchOpenRouterModels(apiKey: string): Promise<CachedModel[]> {
         else if (outputs.includes("audio")) category = "tts";
         models.push({ id: m.id, name: m.name ?? m.id, category });
       }
-    } catch { /* parse error */ }
+    } catch {
+      /* parse error */
+    }
   }
 
   // Parse embedding models
@@ -2082,7 +2109,9 @@ async function fetchOpenRouterModels(apiKey: string): Promise<CachedModel[]> {
       for (const m of data.data ?? []) {
         models.push({ id: m.id, name: m.name ?? m.id, category: "embedding" });
       }
-    } catch { /* parse error */ }
+    } catch {
+      /* parse error */
+    }
   }
 
   models.sort((a, b) => a.id.localeCompare(b.id));
@@ -2090,7 +2119,9 @@ async function fetchOpenRouterModels(apiKey: string): Promise<CachedModel[]> {
 }
 
 /** Fetch Vercel AI Gateway models — no auth required, response has `type` field. */
-async function fetchVercelGatewayModels(baseUrl: string): Promise<CachedModel[]> {
+async function fetchVercelGatewayModels(
+  baseUrl: string,
+): Promise<CachedModel[]> {
   try {
     const url = `${baseUrl.replace(/\/+$/, "")}/models`;
     const res = await fetch(url);
@@ -2098,11 +2129,13 @@ async function fetchVercelGatewayModels(baseUrl: string): Promise<CachedModel[]>
     const data = (await res.json()) as {
       data?: Array<{ id: string; name?: string; type?: string }>;
     };
-    return (data.data ?? []).map((m) => ({
-      id: m.id,
-      name: m.name ?? m.id,
-      category: m.type ? restTypeToCategory(m.type) : classifyModel(m.id),
-    })).sort((a, b) => a.id.localeCompare(b.id));
+    return (data.data ?? [])
+      .map((m) => ({
+        id: m.id,
+        name: m.name ?? m.id,
+        category: m.type ? restTypeToCategory(m.type) : classifyModel(m.id),
+      }))
+      .sort((a, b) => a.id.localeCompare(b.id));
   } catch (e) {
     logger.warn(
       `[model-catalog] Failed to fetch Vercel AI Gateway models: ${e instanceof Error ? e.message : e}`,
@@ -2126,20 +2159,37 @@ async function fetchProviderModels(
     case "openrouter":
       return fetchOpenRouterModels(apiKey);
     case "openai":
-      return fetchModelsREST(providerId, apiKey, baseUrl ?? "https://api.openai.com/v1");
+      return fetchModelsREST(
+        providerId,
+        apiKey,
+        baseUrl ?? "https://api.openai.com/v1",
+      );
     case "groq":
-      return fetchModelsREST(providerId, apiKey, baseUrl ?? "https://api.groq.com/openai/v1");
+      return fetchModelsREST(
+        providerId,
+        apiKey,
+        baseUrl ?? "https://api.groq.com/openai/v1",
+      );
     case "xai":
-      return fetchModelsREST(providerId, apiKey, baseUrl ?? "https://api.x.ai/v1");
+      return fetchModelsREST(
+        providerId,
+        apiKey,
+        baseUrl ?? "https://api.x.ai/v1",
+      );
     case "vercel-ai-gateway":
-      return fetchVercelGatewayModels(baseUrl ?? "https://ai-gateway.vercel.sh/v1");
+      return fetchVercelGatewayModels(
+        baseUrl ?? "https://ai-gateway.vercel.sh/v1",
+      );
     default:
       return [];
   }
 }
 
 /** Fetch + cache a single provider. Returns cached models or empty array. */
-async function getOrFetchProvider(providerId: string, force = false): Promise<CachedModel[]> {
+async function getOrFetchProvider(
+  providerId: string,
+  force = false,
+): Promise<CachedModel[]> {
   if (!force) {
     const cached = readProviderCache(providerId);
     if (cached) return cached.models;
@@ -2158,7 +2208,9 @@ async function getOrFetchProvider(providerId: string, force = false): Promise<Ca
 
   let baseUrl = cfg.baseUrl;
   if (providerId === "vercel-ai-gateway") {
-    baseUrl = process.env.AI_GATEWAY_BASE_URL?.trim() || "https://ai-gateway.vercel.sh/v1";
+    baseUrl =
+      process.env.AI_GATEWAY_BASE_URL?.trim() ||
+      "https://ai-gateway.vercel.sh/v1";
   }
 
   // Listing models doesn't require an API key — fetch from all providers
@@ -3733,7 +3785,11 @@ async function handleRequest(
 
     if (specificProvider) {
       if (force) {
-        try { fs.unlinkSync(providerCachePath(specificProvider)); } catch { /* ok */ }
+        try {
+          fs.unlinkSync(providerCachePath(specificProvider));
+        } catch {
+          /* ok */
+        }
       }
       const models = await getOrFetchProvider(specificProvider, force);
       json(res, { provider: specificProvider, models });
@@ -3747,7 +3803,9 @@ async function handleRequest(
               if (f.endsWith(".json")) fs.unlinkSync(path.join(dir, f));
             }
           }
-        } catch { /* ok */ }
+        } catch {
+          /* ok */
+        }
       }
       const all = await getOrFetchAllProviders(force);
       json(res, { providers: all });
@@ -3833,7 +3891,9 @@ async function handleRequest(
 
         // Filter to the category this field expects (chat, embedding, image, etc.)
         const expectedCat = paramKeyToCategory(param.key);
-        const filtered = providerModels.filter((m) => m.category === expectedCat);
+        const filtered = providerModels.filter(
+          (m) => m.category === expectedCat,
+        );
 
         if (!plugin.configUiHints) plugin.configUiHints = {};
         plugin.configUiHints[param.key] = {
@@ -3874,8 +3934,9 @@ async function handleRequest(
       // fields. Users may save partial config (e.g. just the API key) from
       // the Settings page; blocking the save because OTHER required fields
       // aren't set yet is counterproductive.
+      const configObj = body.config;
       const submittedParamInfos: PluginParamInfo[] = plugin.parameters
-        .filter((p) => p.key in body.config!)
+        .filter((p) => p.key in configObj)
         .map((p) => ({
           key: p.key,
           required: p.required,
@@ -6764,6 +6825,106 @@ async function handleRequest(
     });
     return;
   }
+  const resolveHyperscapeApiBaseUrl = (): string => {
+    const configured = process.env.HYPERSCAPE_API_URL?.trim();
+    const baseUrl = configured && configured.length > 0 ? configured : "http://localhost:5555";
+    return baseUrl.replace(/\/+$/, "");
+  };
+
+  const relayHyperscapeApi = async (
+    outboundMethod: "GET" | "POST",
+    outboundPath: string,
+    options?: {
+      rawBodyOverride?: string;
+      contentTypeOverride?: string | null;
+    },
+  ): Promise<void> => {
+    const baseUrl = resolveHyperscapeApiBaseUrl();
+    const normalizedPath = outboundPath.startsWith("/")
+      ? outboundPath
+      : `/${outboundPath}`;
+    const upstreamUrl = `${baseUrl}${normalizedPath}`;
+
+    let rawBody: string | undefined;
+    if (options?.rawBodyOverride !== undefined) {
+      rawBody = options.rawBodyOverride;
+    } else if (outboundMethod === "POST") {
+      try {
+        rawBody = await readBody(req);
+        if (rawBody.trim().length === 0) {
+          rawBody = undefined;
+        }
+      } catch (err) {
+        error(
+          res,
+          `Failed to read request body: ${err instanceof Error ? err.message : String(err)}`,
+          400,
+        );
+        return;
+      }
+    }
+
+    const outboundHeaders: Record<string, string> = {};
+    const authHeader = req.headers.authorization;
+    if (typeof authHeader === "string" && authHeader.trim().length > 0) {
+      outboundHeaders.Authorization = authHeader;
+    }
+
+    const contentType =
+      options?.contentTypeOverride !== undefined
+        ? options.contentTypeOverride
+        : typeof req.headers["content-type"] === "string"
+          ? req.headers["content-type"]
+          : null;
+    if (contentType && rawBody !== undefined) {
+      outboundHeaders["Content-Type"] = contentType;
+    }
+
+    let upstreamResponse: Response;
+    try {
+      upstreamResponse = await fetch(upstreamUrl, {
+        method: outboundMethod,
+        headers: outboundHeaders,
+        body: rawBody,
+      });
+    } catch (err) {
+      error(
+        res,
+        `Failed to reach Hyperscape API: ${err instanceof Error ? err.message : String(err)}`,
+        502,
+      );
+      return;
+    }
+
+    const responseText = await upstreamResponse.text();
+    const responseType = upstreamResponse.headers.get("content-type") ?? "";
+    if (responseType.toLowerCase().includes("application/json")) {
+      let parsed: unknown = {};
+      if (responseText.trim().length > 0) {
+        try {
+          parsed = JSON.parse(responseText) as unknown;
+        } catch (err) {
+          error(
+            res,
+            `Hyperscape returned invalid JSON: ${
+              err instanceof Error ? err.message : String(err)
+            }`,
+            502,
+          );
+          return;
+        }
+      }
+      json(res, parsed, upstreamResponse.status);
+      return;
+    }
+
+    res.statusCode = upstreamResponse.status;
+    if (responseType) {
+      res.setHeader("Content-Type", responseType);
+    }
+    res.end(responseText);
+  };
+
   // ── App routes (/api/apps/*) ──────────────────────────────────────────
   if (method === "GET" && pathname === "/api/apps") {
     const apps = await state.appManager.listAvailable();
@@ -6880,6 +7041,88 @@ async function handleRequest(
       );
     }
     return;
+  }
+
+  // ── Hyperscape control proxy routes ──────────────────────────────────
+  if (method === "GET" && pathname === "/api/apps/hyperscape/embedded-agents") {
+    await relayHyperscapeApi("GET", "/api/embedded-agents");
+    return;
+  }
+
+  if (
+    method === "POST" &&
+    pathname === "/api/apps/hyperscape/embedded-agents"
+  ) {
+    await relayHyperscapeApi("POST", "/api/embedded-agents");
+    return;
+  }
+
+  if (method === "POST") {
+    const embeddedActionMatch = pathname.match(
+      /^\/api\/apps\/hyperscape\/embedded-agents\/([^/]+)\/(start|stop|pause|resume|command)$/,
+    );
+    if (embeddedActionMatch) {
+      const characterId = decodeURIComponent(embeddedActionMatch[1]);
+      const action = embeddedActionMatch[2];
+      await relayHyperscapeApi(
+        "POST",
+        `/api/embedded-agents/${encodeURIComponent(characterId)}/${action}`,
+      );
+      return;
+    }
+
+    const messageMatch = pathname.match(
+      /^\/api\/apps\/hyperscape\/agents\/([^/]+)\/message$/,
+    );
+    if (messageMatch) {
+      const agentId = decodeURIComponent(messageMatch[1]);
+      const body = await readJsonBody<{ content?: string }>(req, res);
+      if (!body) return;
+      const content = body.content?.trim();
+      if (!content) {
+        error(res, "content is required");
+        return;
+      }
+
+      await relayHyperscapeApi(
+        "POST",
+        `/api/embedded-agents/${encodeURIComponent(agentId)}/command`,
+        {
+          rawBodyOverride: JSON.stringify({
+            command: "chat",
+            data: { message: content },
+          }),
+          contentTypeOverride: "application/json",
+        },
+      );
+      return;
+    }
+  }
+
+  if (method === "GET") {
+    const goalMatch = pathname.match(
+      /^\/api\/apps\/hyperscape\/agents\/([^/]+)\/goal$/,
+    );
+    if (goalMatch) {
+      const agentId = decodeURIComponent(goalMatch[1]);
+      await relayHyperscapeApi(
+        "GET",
+        `/api/agents/${encodeURIComponent(agentId)}/goal`,
+      );
+      return;
+    }
+
+    const quickActionsMatch = pathname.match(
+      /^\/api\/apps\/hyperscape\/agents\/([^/]+)\/quick-actions$/,
+    );
+    if (quickActionsMatch) {
+      const agentId = decodeURIComponent(quickActionsMatch[1]);
+      await relayHyperscapeApi(
+        "GET",
+        `/api/agents/${encodeURIComponent(agentId)}/quick-actions`,
+      );
+      return;
+    }
   }
 
   // ═══════════════════════════════════════════════════════════════════════

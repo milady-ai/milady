@@ -6,6 +6,8 @@
  * Memory search/get actions are superseded by plugin-scratchpad.
  */
 
+import fs from "node:fs";
+import path from "node:path";
 import type {
   IAgentRuntime,
   Memory,
@@ -22,8 +24,6 @@ import {
   getSessionProviders,
   resolveDefaultSessionStorePath,
 } from "@elizaos/core";
-import fs from "node:fs";
-import path from "node:path";
 import { emoteAction } from "../actions/emote.js";
 import { restartAction } from "../actions/restart.js";
 import { EMOTE_CATALOG } from "../emotes/catalog.js";
@@ -68,9 +68,14 @@ function readPluginManifest(): Array<{
       const pkgPath = path.join(dir, "package.json");
       if (fs.existsSync(pkgPath)) {
         try {
-          const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8")) as Record<string, unknown>;
+          const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8")) as Record<
+            string,
+            unknown
+          >;
           if (pkg.name === "milaidy") break;
-        } catch { /* keep searching */ }
+        } catch {
+          /* keep searching */
+        }
       }
       const parent = path.dirname(dir);
       if (parent === dir) return [];
@@ -87,9 +92,7 @@ function readPluginManifest(): Array<{
       }>;
     };
     return index.plugins.map((p) => ({
-      shortId: p.id
-        .replace(/^@elizaos\/plugin-/, "")
-        .replace(/^plugin-/, ""),
+      shortId: p.id.replace(/^@elizaos\/plugin-/, "").replace(/^plugin-/, ""),
       name: p.name,
       description: p.description || "",
       category: p.category || "",
@@ -222,7 +225,12 @@ export function createMilaidyPlugin(config?: MilaidyPluginConfig): Plugin {
     description:
       "Milaidy workspace context, session keys, and lifecycle actions",
 
-    providers: [...baseProviders, ...bootstrapProviders, uiCatalogProvider, emoteProvider],
+    providers: [
+      ...baseProviders,
+      ...bootstrapProviders,
+      uiCatalogProvider,
+      emoteProvider,
+    ],
 
     actions: [restartAction, emoteAction],
 
