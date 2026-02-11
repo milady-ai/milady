@@ -10095,6 +10095,11 @@ export async function startApiServer(opts?: {
     }
   });
 
+  // Configure server timeouts to prevent premature connection drops
+  server.keepAliveTimeout = 120000; // 120 seconds
+  server.headersTimeout = 120000; // 120 seconds
+  server.requestTimeout = 0; // Disable request timeout for WebSocket
+
   const broadcastWs = (payload: object): void => {
     const message = JSON.stringify(payload);
     for (const client of wsClients) {
@@ -10187,13 +10192,22 @@ export async function startApiServer(opts?: {
 
   // Handle upgrade requests for WebSocket
   server.on("upgrade", (request, socket, head) => {
+    // Prevent crashes from client disconnects during upgrade
+    socket.on("error", (err) => {
+      logger.error(
+        `[milaidy-api] Socket error during upgrade: ${err instanceof Error ? err.message : err}`,
+      );
+    });
+
     try {
       const wsUrl = new URL(
         request.url ?? "/",
         `http://${request.headers.host ?? "localhost"}`,
       );
       if (wsUrl.pathname !== "/ws") {
-        socket.destroy();
+        if (!socket.destroyed) {
+          socket.destroy();
+        }
         return;
       }
 
@@ -10221,7 +10235,9 @@ export async function startApiServer(opts?: {
       logger.error(
         `[milaidy-api] WebSocket upgrade error: ${err instanceof Error ? err.message : err}`,
       );
-      socket.destroy();
+      if (!socket.destroyed) {
+        socket.destroy();
+      }
     }
   });
 

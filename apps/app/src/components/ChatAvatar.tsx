@@ -37,6 +37,10 @@ export function ChatAvatar({ mouthOpen = 0, isSpeaking = false }: ChatAvatarProp
     setAvatarReady(true);
   }, []);
 
+  const handleError = useCallback((_error: string) => {
+    // Error will be shown in modal, no need to update avatar state
+  }, []);
+
   // Subscribe to WebSocket emote events and trigger avatar animations.
   useEffect(() => {
     if (!avatarReady) return;
@@ -89,6 +93,7 @@ export function ChatAvatar({ mouthOpen = 0, isSpeaking = false }: ChatAvatarProp
           mouthOpen={mouthOpen}
           isSpeaking={isSpeaking}
           onEngineReady={handleEngineReady}
+          onError={handleError}
         />
       </div>
     </div>

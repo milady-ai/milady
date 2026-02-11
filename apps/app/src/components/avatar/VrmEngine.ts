@@ -98,7 +98,36 @@ export class VrmEngine {
     this.onUpdate = onUpdate;
     this.loadingAborted = false;
 
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    // Dev helper: force WebGL error for testing
+    const forceWebGLError = typeof window !== "undefined"
+      && localStorage.getItem("__forceWebGLError") === "true";
+
+    if (forceWebGLError) {
+      throw new Error("WebGL is not available or disabled in your browser.");
+    }
+
+    let renderer: THREE.WebGLRenderer;
+    try {
+      // Suppress THREE.js console warnings during WebGL initialization.
+      // These are not real errors — just noise from the renderer detecting
+      // missing features. We restore the console immediately after.
+      const originalWarn = console.warn;
+      const originalError = console.error;
+      console.warn = () => {};
+      console.error = () => {};
+
+      try {
+        renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      } finally {
+        // Always restore console methods
+        console.warn = originalWarn;
+        console.error = originalError;
+      }
+    } catch (err) {
+      // WebGL is unavailable (disabled, unsupported, or blocked)
+      throw new Error("WebGL is not available or disabled in your browser.");
+    }
+
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setClearColor(0x000000, 0);
     this.renderer = renderer;
