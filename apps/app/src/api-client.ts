@@ -162,6 +162,8 @@ export interface OnboardingOptions {
   };
   /** Optional: model catalog from pi-ai (used when selecting provider "pi-ai"). */
   piModels?: ModelOption[];
+  /** Default provider/model from pi settings.json, if available. */
+  piDefaultModel?: string;
   openrouterModels?: OpenRouterModelOption[];
   inventoryProviders: InventoryProviderOption[];
   sharedStyleRules: string;

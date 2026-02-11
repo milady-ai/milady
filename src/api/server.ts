@@ -49,6 +49,7 @@ import {
   searchSkillsMarketplace,
   uninstallMarketplaceSkill,
 } from "../services/skill-marketplace.js";
+import { createPiCredentialProvider } from "../tui/pi-credentials.js";
 import { type CloudRouteState, handleCloudRoute } from "./cloud-routes.js";
 import { handleDatabaseRoute } from "./database.js";
 import {
@@ -1980,6 +1981,9 @@ async function handleRequest(
 
   // ── GET /api/onboarding/options ─────────────────────────────────────────
   if (method === "GET" && pathname === "/api/onboarding/options") {
+    const piCreds = await createPiCredentialProvider();
+    const piDefaultModel = (await piCreds.getDefaultModelSpec()) ?? undefined;
+
     json(res, {
       names: pickRandomNames(5),
       styles: STYLE_PRESETS,
@@ -1987,6 +1991,7 @@ async function handleRequest(
       cloudProviders: getCloudProviderOptions(),
       models: getModelOptions(),
       piModels: getPiModelOptions(),
+      piDefaultModel,
       inventoryProviders: getInventoryProviderOptions(),
       sharedStyleRules: "Keep responses brief. Be helpful and concise.",
     });

@@ -548,6 +548,26 @@ export function OnboardingWizard() {
                 <h2 className="text-[28px] font-normal mb-1 text-txt-strong">what is my brain?</h2>
               </div>
               <div className="w-full mx-auto px-2">
+                {(onboardingOptions?.piModels?.length || onboardingOptions?.piDefaultModel) && (
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div className="text-left">
+                      <div className="text-xs font-semibold text-txt-strong">Use local credentials</div>
+                      <div className="text-xs text-muted">
+                        Pulls tokens/keys from <code className="px-1 py-0.5 bg-bg-muted rounded">~/.pi/agent</code>.
+                      </div>
+                    </div>
+                    <button
+                      className="px-3 py-2 border border-accent bg-accent text-accent-fg text-xs cursor-pointer rounded-full hover:bg-accent-hover"
+                      onClick={() => {
+                        handleProviderSelect("pi-ai");
+                        setState("onboardingPrimaryModel", onboardingOptions?.piDefaultModel ?? "");
+                      }}
+                    >
+                      use local creds
+                    </button>
+                  </div>
+                )}
+
                 <div className="mb-4 text-left">
                   <div className="grid grid-cols-4 gap-2">
                     {cloudProviders.map((p: ProviderOption) => renderProviderCard(p))}
@@ -586,6 +606,7 @@ export function OnboardingWizard() {
                 onClick={() => {
                   setState("onboardingProvider", "");
                   setState("onboardingApiKey", "");
+                  setState("onboardingPrimaryModel", "");
                 }}
               >
                 change
