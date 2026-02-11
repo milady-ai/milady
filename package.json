@@ -169,6 +169,7 @@
     "ollama": "^0.6.3",
     "rimraf": "^5.0.0",
     "rolldown": "1.0.0-rc.3",
+    "react-test-renderer": "^19.2.4",
     "rollup": "^4.0.0",
     "tsdown": "^0.20.1",
     "tsx": "^4.21.0",

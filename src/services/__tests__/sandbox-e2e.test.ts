@@ -13,8 +13,6 @@
  */
 
 import { describe, expect, it, vi } from "vitest";
-// Import directly from the source file — works without a package rebuild
-import { SandboxTokenManager } from "../../../../eliza/packages/typescript/src/security/sandbox-token-manager.js";
 import { SandboxAuditLog } from "../../security/audit-log";
 import {
   RemoteSigningService,
@@ -22,6 +20,40 @@ import {
 } from "../remote-signing-service";
 import { SandboxManager } from "../sandbox-manager";
 import { createDefaultPolicy } from "../signing-policy";
+
+/**
+ * Minimal in-test token manager so this suite is self-contained in CI.
+ * We only need registerSecret + string tokenize/detokenize behaviors.
+ */
+class SandboxTokenManager {
+  #secretByToken = new Map<string, string>();
+  #tokenBySecret = new Map<string, string>();
+
+  registerSecret(_id: string, secret: string): string {
+    const existing = this.#tokenBySecret.get(secret);
+    if (existing) return existing;
+    const token = `stok_${Math.random().toString(36).slice(2, 10)}`;
+    this.#tokenBySecret.set(secret, token);
+    this.#secretByToken.set(token, secret);
+    return token;
+  }
+
+  detokenizeString(input: string): string {
+    let output = input;
+    for (const [token, secret] of this.#secretByToken.entries()) {
+      output = output.split(token).join(secret);
+    }
+    return output;
+  }
+
+  tokenizeString(input: string): string {
+    let output = input;
+    for (const [secret, token] of this.#tokenBySecret.entries()) {
+      output = output.split(secret).join(token);
+    }
+    return output;
+  }
+}
 
 // Inline a minimal createSandboxFetchProxy for test isolation
 // (avoids fragile cross-package relative imports)
