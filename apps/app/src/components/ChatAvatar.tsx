@@ -36,6 +36,10 @@ export function ChatAvatar({ mouthOpen = 0, isSpeaking = false }: ChatAvatarProp
     setAvatarReady(true);
   }, []);
 
+  const handleError = useCallback((_error: string) => {
+    // Error will be shown in modal, no need to update avatar state
+  }, []);
+
   return (
     <div
       className="absolute inset-0 pointer-events-none"
@@ -59,6 +63,7 @@ export function ChatAvatar({ mouthOpen = 0, isSpeaking = false }: ChatAvatarProp
           mouthOpen={mouthOpen}
           isSpeaking={isSpeaking}
           onEngineReady={handleEngineReady}
+          onError={handleError}
         />
       </div>
     </div>

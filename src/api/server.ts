@@ -2798,6 +2798,39 @@ async function handleRequest(
     return;
   }
 
+  // ── GET /api/cost/config ────────────────────────────────────────────────
+  // Returns current configuration for cost analysis
+  if (method === "GET" && pathname === "/api/cost/config") {
+    const config = state.config;
+    json(res, {
+      models: {
+        small: config.models?.small || "openai/gpt-5-mini",
+        large: config.models?.large || "anthropic/claude-sonnet-4.5",
+        imageModel: config.agents?.defaults?.imageModel?.primary || "NOT SET (uses plugin defaults: gpt-5-mini)",
+      },
+      features: {
+        vision: config.features?.vision !== false,
+        browser: config.features?.browser !== false,
+        computeruse: config.features?.computeruse !== false,
+        computeruseMode: process.env.COMPUTERUSE_MODE || "auto",
+      },
+      agents: {
+        bootstrapProvidersEnabled: config.agents?.defaults?.enableBootstrapProviders ?? true,
+      },
+      logging: {
+        level: process.env.LOG_LEVEL || config.logging?.level || "info",
+      },
+      notes: [
+        "Vision uses plugin defaults (gpt-5-mini) unless imageModel is configured",
+        "Large model (Sonnet 4.5) costs: $3/M input, $15/M output tokens",
+        "Small model (gpt-5-mini) costs: ~$0.50-0.60/M tokens",
+        "Bootstrap providers add context to every message when enabled",
+        "Enable LOG_LEVEL=debug to see detailed ElizaOS metrics",
+      ],
+    });
+    return;
+  }
+
   // ── GET /api/plugins ────────────────────────────────────────────────────
   if (method === "GET" && pathname === "/api/plugins") {
     // Re-read config from disk so we pick up plugins installed since server start.
@@ -6270,12 +6303,24 @@ export async function startApiServer(opts?: {
     }
   });
 
+  // Configure server timeouts to prevent premature connection drops
+  server.keepAliveTimeout = 120000; // 120 seconds
+  server.headersTimeout = 120000; // 120 seconds
+  server.requestTimeout = 0; // Disable request timeout for WebSocket
+
   // ── WebSocket Server ─────────────────────────────────────────────────────
   const wss = new WebSocketServer({ noServer: true });
   const wsClients = new Set<WebSocket>();
 
   // Handle upgrade requests for WebSocket
   server.on("upgrade", (request, socket, head) => {
+    // Prevent crashes from client disconnects during upgrade
+    socket.on("error", (err) => {
+      logger.error(
+        `[milaidy-api] Socket error during upgrade: ${err instanceof Error ? err.message : err}`,
+      );
+    });
+
     try {
       const { pathname: wsPath } = new URL(
         request.url ?? "/",
@@ -6286,13 +6331,19 @@ export async function startApiServer(opts?: {
           wss.emit("connection", ws, request);
         });
       } else {
-        socket.destroy();
+        // Only destroy if socket is still writable
+        if (!socket.destroyed) {
+          socket.destroy();
+        }
       }
     } catch (err) {
       logger.error(
         `[milaidy-api] WebSocket upgrade error: ${err instanceof Error ? err.message : err}`,
       );
-      socket.destroy();
+      // Only destroy if socket is still writable
+      if (!socket.destroyed) {
+        socket.destroy();
+      }
     }
   });
 
@@ -6361,6 +6412,7 @@ export async function startApiServer(opts?: {
     };
     const message = JSON.stringify(statusData);
     for (const client of wsClients) {
+      // Check if connection is open (1 = OPEN, 2 = CLOSING, 3 = CLOSED)
       if (client.readyState === 1) {
         // OPEN
         try {
@@ -6369,7 +6421,12 @@ export async function startApiServer(opts?: {
           logger.error(
             `[milaidy-api] WebSocket broadcast error: ${err instanceof Error ? err.message : err}`,
           );
+          // Remove client if send fails
+          wsClients.delete(client);
         }
+      } else if (client.readyState > 1) {
+        // CLOSING or CLOSED - remove from set
+        wsClients.delete(client);
       }
     }
   };
