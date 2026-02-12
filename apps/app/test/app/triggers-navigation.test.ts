@@ -25,7 +25,7 @@ describe("navigation", () => {
 
     expect(pathForTab("triggers")).toBe("/triggers");
     expect(tabFromPath("/triggers")).toBe("triggers");
-    expect(titleForTab("triggers")).toBe("Tasks");
+    expect(titleForTab("triggers")).toBe("Triggers");
   });
 
   test("includes advanced tabs in Advanced group", () => {
@@ -34,6 +34,8 @@ describe("navigation", () => {
     expect(advanced?.tabs.includes("advanced")).toBe(true);
     expect(advanced?.tabs.includes("plugins")).toBe(true);
     expect(advanced?.tabs.includes("skills")).toBe(true);
+    expect(advanced?.tabs.includes("actions")).toBe(true);
+    expect(advanced?.tabs.includes("triggers")).toBe(true);
     expect(advanced?.tabs.includes("fine-tuning")).toBe(true);
     expect(advanced?.tabs.includes("trajectories")).toBe(true);
     expect(advanced?.tabs.includes("runtime")).toBe(true);
@@ -57,7 +59,7 @@ describe("navigation", () => {
   test("routes /connectors to connectors tab", () => {
     expect(pathForTab("connectors")).toBe("/connectors");
     expect(tabFromPath("/connectors")).toBe("connectors");
-    expect(titleForTab("connectors")).toBe("Connectors");
+    expect(titleForTab("connectors")).toBe("Social");
   });
 
   test("routes /wallets and keeps legacy /inventory redirect", () => {
@@ -73,14 +75,16 @@ describe("navigation", () => {
     expect(apps?.tabs).toEqual(["apps"]);
   });
 
-  test("moves character/triggers/wallets/knowledge/connectors to top-level groups", () => {
+  test("keeps character/wallets/knowledge/social as top-level groups and moves triggers to Advanced", () => {
     const labels = TAB_GROUPS.map((group) => group.label);
     expect(labels).toContain("Character");
-    expect(labels).toContain("Tasks");
     expect(labels).toContain("Wallets");
     expect(labels).toContain("Knowledge");
-    expect(labels).toContain("Connectors");
-    expect(labels.indexOf("Connectors")).toBeLessThan(labels.indexOf("Tasks"));
+    expect(labels).toContain("Social");
+    expect(labels).not.toContain("Tasks");
+    expect(labels).not.toContain("Triggers");
+    const advanced = TAB_GROUPS.find((group) => group.label === "Advanced");
+    expect(advanced?.tabs.includes("triggers")).toBe(true);
     expect(labels).not.toContain("Agent");
   });
 });

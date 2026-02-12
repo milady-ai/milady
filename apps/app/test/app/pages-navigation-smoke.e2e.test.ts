@@ -307,6 +307,7 @@ describe("pages navigation smoke (e2e)", () => {
       { label: "Plugins", tab: "plugins", token: "PluginsPageView Ready" },
       { label: "Skills", tab: "skills", token: "SkillsView Ready" },
       { label: "Actions", tab: "actions", token: "CustomActionsView Ready" },
+      { label: "Triggers", tab: "triggers", token: "TriggersView Ready" },
       {
         label: "Fine-Tuning",
         tab: "fine-tuning",
