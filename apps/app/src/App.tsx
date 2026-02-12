@@ -58,6 +58,23 @@ export function App() {
   const { onboardingLoading, authRequired, onboardingComplete, tab, actionNotice } = useApp();
   const contextMenu = useContextMenu();
 
+  const [customActionsPanelOpen, setCustomActionsPanelOpen] = useState(false);
+  const [customActionsEditorOpen, setCustomActionsEditorOpen] = useState(false);
+  const [editingAction, setEditingAction] = useState<import("./api-client").CustomActionDef | null>(null);
+
+  // Keep hook order stable across onboarding/auth state transitions.
+  // Otherwise React can throw when onboarding completes and the main shell mounts.
+  useEffect(() => {
+    const handler = () => setCustomActionsPanelOpen((v) => !v);
+    window.addEventListener("toggle-custom-actions-panel", handler);
+    return () => window.removeEventListener("toggle-custom-actions-panel", handler);
+  }, []);
+
+  const handleEditorSave = useCallback(() => {
+    setCustomActionsEditorOpen(false);
+    setEditingAction(null);
+  }, []);
+
   if (onboardingLoading) {
     return <LoadingScreen />;
   }
@@ -76,22 +93,6 @@ export function App() {
     tab === "runtime" ||
     tab === "database" ||
     tab === "logs";
-
-  const [customActionsPanelOpen, setCustomActionsPanelOpen] = useState(false);
-  const [customActionsEditorOpen, setCustomActionsEditorOpen] = useState(false);
-  const [editingAction, setEditingAction] = useState<import("./api-client").CustomActionDef | null>(null);
-
-  // Listen for toggle event from ChatView button
-  useEffect(() => {
-    const handler = () => setCustomActionsPanelOpen((v) => !v);
-    window.addEventListener("toggle-custom-actions-panel", handler);
-    return () => window.removeEventListener("toggle-custom-actions-panel", handler);
-  }, []);
-
-  const handleEditorSave = useCallback(() => {
-    setCustomActionsEditorOpen(false);
-    setEditingAction(null);
-  }, []);
 
   return (
     <>
