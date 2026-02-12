@@ -97,7 +97,7 @@ export interface CustomActionDef {
   updatedAt: string;
 }
 
-export type AgentState = "not_started" | "running" | "paused" | "stopped" | "restarting" | "error";
+export type AgentState = "not_started" | "starting" | "running" | "paused" | "stopped" | "restarting" | "error";
 
 export interface AgentStatus {
   state: AgentState;

@@ -81,7 +81,7 @@ export class AgentManager {
 
       console.log(`[Agent] Resolved milaidy dist: ${milaidyDist} (packaged: ${app.isPackaged})`);
 
-      // 1. Start the ElizaOS runtime in headless mode
+      // 1. Resolve runtime bootstrap entry
       const elizaModule = await dynamicImport(path.join(milaidyDist, "eliza.js"));
       const startEliza = (
         elizaModule.startEliza ?? (elizaModule.default as Record<string, unknown>)?.startEliza
@@ -91,16 +91,7 @@ export class AgentManager {
         throw new Error("eliza.js does not export startEliza");
       }
 
-      const runtimeResult = await startEliza({ headless: true });
-      if (!runtimeResult) {
-        throw new Error("startEliza returned null — runtime failed to initialize");
-      }
-
-      this.runtime = runtimeResult as Record<string, unknown>;
-      const agentName =
-        (runtimeResult as { character?: { name?: string } }).character?.name ?? "Milaidy";
-
-      // 2. Start the API server with the live runtime on port 2138
+      // 2. Start API server immediately so the UI can bootstrap while runtime starts.
       //    (or MILAIDY_PORT if set)
       const apiPort = Number(process.env.MILAIDY_PORT) || 2138;
       const serverModule = await dynamicImport(
@@ -110,7 +101,7 @@ export class AgentManager {
         return null;
       });
 
-      let actualPort = apiPort;
+      let actualPort: number | null = null;
       // `startApiServer()` returns an `updateRuntime()` helper that broadcasts
       // status updates and restores conversation state after a hot restart.
       // Keep it around so our onRestart hook can call it.
@@ -119,7 +110,7 @@ export class AgentManager {
       if (serverModule?.startApiServer) {
         const { port: resolvedPort, close, updateRuntime } = await serverModule.startApiServer({
           port: apiPort,
-          runtime: runtimeResult,
+          initialAgentState: "starting",
           // IMPORTANT: the web UI expects POST /api/agent/restart to work.
           // Without an onRestart handler, config changes that require a runtime
           // restart (including pi-ai model routing) appear to "not work".
@@ -159,6 +150,7 @@ export class AgentManager {
               ...this.status,
               state: "running",
               agentName: nextName,
+              port: actualPort,
               startedAt: Date.now(),
               error: null,
             };
@@ -172,8 +164,28 @@ export class AgentManager {
         this.apiClose = close;
         apiUpdateRuntime = updateRuntime;
       } else {
-        console.warn("[Agent] Could not find API server module — runtime only, no HTTP");
+        console.warn("[Agent] Could not find API server module — runtime will start without HTTP API");
       }
+
+      // Surface the API port while runtime is still booting.
+      this.status = {
+        ...this.status,
+        port: actualPort,
+      };
+      this.sendToRenderer("agent:status", this.status);
+
+      // 3. Start Eliza runtime in headless mode (can take time on cold boot).
+      const runtimeResult = await startEliza({ headless: true });
+      if (!runtimeResult) {
+        throw new Error("startEliza returned null — runtime failed to initialize");
+      }
+
+      this.runtime = runtimeResult as Record<string, unknown>;
+      const agentName =
+        (runtimeResult as { character?: { name?: string } }).character?.name ?? "Milaidy";
+
+      // Attach runtime to the already-running API server.
+      apiUpdateRuntime?.(runtimeResult as unknown);
 
       this.status = {
         state: "running",
@@ -184,14 +196,18 @@ export class AgentManager {
       };
 
       this.sendToRenderer("agent:status", this.status);
-      console.log(`[Agent] Runtime started — agent: ${agentName}, port: ${actualPort}`);
+      if (actualPort) {
+        console.log(`[Agent] Runtime started — agent: ${agentName}, port: ${actualPort}`);
+      } else {
+        console.log(`[Agent] Runtime started — agent: ${agentName}, API unavailable`);
+      }
       return this.status;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       this.status = {
         state: "error",
         agentName: null,
-        port: null,
+        port: this.status.port,
         startedAt: null,
         error: msg,
       };
@@ -203,7 +219,9 @@ export class AgentManager {
 
   /** Stop the agent runtime. */
   async stop(): Promise<void> {
-    if (this.status.state !== "running") return;
+    if (this.status.state !== "running" && this.status.state !== "starting") {
+      return;
+    }
 
     try {
       if (this.apiClose) {

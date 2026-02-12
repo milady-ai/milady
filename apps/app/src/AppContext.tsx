@@ -166,6 +166,7 @@ type GamePostMessageAuthPayload = AppViewerAuthMessage;
 
 const AGENT_STATES: ReadonlySet<AgentStatus["state"]> = new Set([
   "not_started",
+  "starting",
   "running",
   "paused",
   "stopped",
@@ -2814,7 +2815,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setConnected(true);
 
         // Keep runtime available by default when the app opens.
-        if (status.state === "not_started" || status.state === "stopped") {
+        const canAutoStartOverHttp =
+          window.location.protocol === "http:" || window.location.protocol === "https:";
+        if (
+          canAutoStartOverHttp &&
+          (status.state === "not_started" || status.state === "stopped")
+        ) {
           try {
             const started = await client.startAgent();
             setAgentStatus(started);

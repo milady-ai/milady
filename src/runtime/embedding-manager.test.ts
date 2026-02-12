@@ -1,7 +1,15 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mock node-llama-cpp before importing the manager
@@ -161,6 +169,18 @@ describe("MilaidyEmbeddingManager", () => {
     expect(mockDisposeContext).toHaveBeenCalled();
     expect(mockDisposeModel).toHaveBeenCalled();
     expect(mgr.isLoaded()).toBe(false);
+  });
+
+  it("initializes node-llama-cpp with error-only logging", async () => {
+    const mgr = new MilaidyEmbeddingManager(defaultConfig());
+    await mgr.generateEmbedding("hello");
+
+    expect(mockGetLlama).toHaveBeenCalledTimes(1);
+    const options = mockGetLlama.mock.calls[0]?.[0] as
+      | { logLevel?: string; logger?: unknown }
+      | undefined;
+    expect(options?.logLevel).toBe("error");
+    expect(typeof options?.logger).toBe("function");
   });
 
   // 5. lastUsedAt updates on generateEmbedding, preventing premature unload

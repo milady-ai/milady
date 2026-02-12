@@ -10334,6 +10334,8 @@ export { captureEarlyLogs };
 export async function startApiServer(opts?: {
   port?: number;
   runtime?: AgentRuntime;
+  /** Initial state when starting without a runtime (e.g. embedded bootstrapping). */
+  initialAgentState?: "not_started" | "starting" | "stopped" | "error";
   /**
    * Called when the UI requests a restart via `POST /api/agent/restart`.
    * Should stop the current runtime, create a new one, and return it.
@@ -10390,6 +10392,9 @@ export async function startApiServer(opts?: {
   );
 
   const hasRuntime = opts?.runtime != null;
+  const initialAgentState = hasRuntime
+    ? "running"
+    : (opts?.initialAgentState ?? "not_started");
   const agentName = hasRuntime
     ? (opts.runtime?.character.name ?? "Milaidy")
     : (config.agents?.list?.[0]?.name ??
@@ -10399,10 +10404,11 @@ export async function startApiServer(opts?: {
   const state: ServerState = {
     runtime: opts?.runtime ?? null,
     config,
-    agentState: hasRuntime ? "running" : "not_started",
+    agentState: initialAgentState,
     agentName,
     model: hasRuntime ? "provided" : undefined,
-    startedAt: hasRuntime ? Date.now() : undefined,
+    startedAt:
+      hasRuntime || initialAgentState === "starting" ? Date.now() : undefined,
     plugins,
     skills,
     logBuffer: [],

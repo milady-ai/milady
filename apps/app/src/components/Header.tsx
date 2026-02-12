@@ -15,7 +15,7 @@ export function Header() {
   const state = agentStatus?.state ?? "not_started";
 
   const stateColor = state === "running" ? "text-ok border-ok" :
-    state === "paused" || state === "restarting" ? "text-warn border-warn" :
+    state === "paused" || state === "restarting" || state === "starting" ? "text-warn border-warn" :
     state === "error" ? "text-danger border-danger" : "text-muted border-muted";
 
   const creditColor = cloudCreditsCritical ? "border-danger text-danger" :
@@ -58,7 +58,7 @@ export function Header() {
         )}
         <div className="flex items-center gap-1.5">
           <span className={`inline-flex items-center h-7 px-2.5 border font-mono text-xs leading-none ${stateColor}`} data-testid="status-pill">{state}</span>
-          {state === "restarting" || state === "not_started" || state === "stopped" ? (
+          {state === "restarting" || state === "starting" || state === "not_started" || state === "stopped" ? (
             <span className="inline-flex items-center justify-center w-7 h-7 text-sm leading-none opacity-60">⏳</span>
           ) : (
             <button
