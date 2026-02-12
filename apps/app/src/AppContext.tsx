@@ -991,6 +991,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const prevAgentStateRef = useRef<string | null>(null);
   const lifecycleBusyRef = useRef(false);
   const lifecycleActionRef = useRef<LifecycleAction | null>(null);
+  const pairingBusyRef = useRef(false);
   /** Guards against double-greeting when both init and state-transition paths fire. */
   const greetingFiredRef = useRef(false);
   const chatAbortRef = useRef<AbortController | null>(null);
@@ -2018,12 +2019,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // ── Pairing ────────────────────────────────────────────────────────
 
   const handlePairingSubmit = useCallback(async () => {
+    if (pairingBusyRef.current || pairingBusy) return;
     const code = pairingCodeInput.trim();
     if (!code) {
       setPairingError("Enter the pairing code from the server logs.");
       return;
     }
     setPairingError(null);
+    pairingBusyRef.current = true;
     setPairingBusy(true);
     try {
       const { token } = await client.pair(code);
@@ -2035,9 +2038,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       else if (status === 429) setPairingError("Too many attempts. Try again later.");
       else setPairingError("Pairing failed. Check the code and try again.");
     } finally {
+      pairingBusyRef.current = false;
       setPairingBusy(false);
     }
-  }, [pairingCodeInput]);
+  }, [pairingBusy, pairingCodeInput]);
 
   // ── Plugin actions ─────────────────────────────────────────────────
 
