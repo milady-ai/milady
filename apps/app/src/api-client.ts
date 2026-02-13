@@ -412,6 +412,24 @@ export interface OnboardingData {
   blooioPhoneNumber?: string;
 }
 
+export interface SandboxPlatformStatus {
+  platform: string;
+  arch?: string;
+  dockerInstalled?: boolean;
+  dockerAvailable?: boolean;
+  dockerRunning?: boolean;
+  appleContainerAvailable?: boolean;
+  wsl2?: boolean;
+  recommended?: string;
+}
+
+export interface SandboxStartResponse {
+  success: boolean;
+  message: string;
+  waitMs?: number;
+  error?: string;
+}
+
 export interface SecretInfo {
   key: string;
   description: string;
@@ -1615,7 +1633,11 @@ export class MilaidyClient {
     return this.fetch("/api/subscription/anthropic/start", { method: "POST" });
   }
 
-  async exchangeAnthropicCode(code: string): Promise<{ success: boolean; expiresAt?: string }> {
+  async exchangeAnthropicCode(code: string): Promise<{
+    success: boolean;
+    expiresAt?: string;
+    error?: string;
+  }> {
     return this.fetch("/api/subscription/anthropic/exchange", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1635,12 +1657,25 @@ export class MilaidyClient {
     return this.fetch("/api/subscription/openai/start", { method: "POST" });
   }
 
-  async exchangeOpenAICode(code: string): Promise<{ success: boolean; expiresAt?: string; accountId?: string }> {
+  async exchangeOpenAICode(code: string): Promise<{
+    success: boolean;
+    expiresAt?: string;
+    accountId?: string;
+    error?: string;
+  }> {
     return this.fetch("/api/subscription/openai/exchange", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ code }),
     });
+  }
+
+  async getSandboxPlatform(): Promise<SandboxPlatformStatus> {
+    return this.fetch("/api/sandbox/platform");
+  }
+
+  async startDocker(): Promise<SandboxStartResponse> {
+    return this.fetch("/api/sandbox/docker/start", { method: "POST" });
   }
 
   async startAgent(): Promise<AgentStatus> {

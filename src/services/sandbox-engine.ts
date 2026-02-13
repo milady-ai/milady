@@ -45,6 +45,60 @@ type ExecCommandResult = {
   stdin?: string;
 };
 
+function appendMountArgs(
+  args: string[],
+  mounts: Array<{ host: string; container: string; readonly: boolean }>,
+) {
+  for (const mount of mounts) {
+    if (mount.readonly) {
+      args.push(
+        "--mount",
+        `type=bind,source=${mount.host},target=${mount.container},readonly`,
+      );
+    } else {
+      args.push("-v", `${mount.host}:${mount.container}`);
+    }
+  }
+}
+
+function appendEnvArgs(args: string[], env: Record<string, string>) {
+  for (const [key, value] of Object.entries(env)) {
+    args.push("-e", `${key}=${value}`);
+  }
+}
+
+function listContainersFromBinary(binary: string, prefix: string): string[] {
+  try {
+    const output = execSync(
+      `${binary} ps -a --filter name=${prefix} --format "{{.ID}}"`,
+      {
+        encoding: "utf-8",
+        timeout: 10_000,
+        stdio: ["ignore", "pipe", "ignore"],
+      },
+    );
+    return output
+      .split("\n")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+function checkHealthWithBinary(binary: string, id: string): Promise<boolean> {
+  try {
+    const result = execSync(`${binary} exec ${id} echo "healthy"`, {
+      encoding: "utf-8",
+      timeout: 5000,
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+    return Promise.resolve(result === "healthy");
+  } catch {
+    return Promise.resolve(false);
+  }
+}
+
 async function runExecInContainer(
   opts: ExecCommandResult,
 ): Promise<ContainerExecResult> {
@@ -163,19 +217,8 @@ export class DockerEngine implements ISandboxEngine {
     for (const cap of opts.capDrop) {
       args.push("--cap-drop", cap);
     }
-    for (const mount of opts.mounts) {
-      if (mount.readonly) {
-        args.push(
-          "--mount",
-          `type=bind,source=${mount.host},target=${mount.container},readonly`,
-        );
-      } else {
-        args.push("-v", `${mount.host}:${mount.container}`);
-      }
-    }
-    for (const [key, value] of Object.entries(opts.env)) {
-      args.push("-e", `${key}=${value}`);
-    }
+    appendMountArgs(args, opts.mounts);
+    appendEnvArgs(args, opts.env);
     if (opts.ports) {
       for (const p of opts.ports) {
         args.push("-p", `${p.host}:${p.container}`);
@@ -203,9 +246,7 @@ export class DockerEngine implements ISandboxEngine {
     const args = ["exec"];
     if (opts.workdir) args.push("-w", opts.workdir);
     if (opts.env) {
-      for (const [key, value] of Object.entries(opts.env)) {
-        args.push("-e", `${key}=${value}`);
-      }
+      appendEnvArgs(args, opts.env);
     }
     args.push(opts.containerId, "sh", "-c", opts.command);
     return runExecInContainer({
@@ -265,35 +306,11 @@ export class DockerEngine implements ISandboxEngine {
   }
 
   listContainers(prefix: string): string[] {
-    try {
-      const output = execSync(
-        `docker ps -a --filter name=${prefix} --format "{{.ID}}"`,
-        {
-          encoding: "utf-8",
-          timeout: 10000,
-          stdio: ["ignore", "pipe", "ignore"],
-        },
-      );
-      return output
-        .split("\n")
-        .map((s) => s.trim())
-        .filter(Boolean);
-    } catch {
-      return [];
-    }
+    return listContainersFromBinary("docker", prefix);
   }
 
   async healthCheck(id: string): Promise<boolean> {
-    try {
-      const result = execSync(`docker exec ${id} echo "healthy"`, {
-        encoding: "utf-8",
-        timeout: 5000,
-        stdio: ["ignore", "pipe", "ignore"],
-      }).trim();
-      return result === "healthy";
-    } catch {
-      return false;
-    }
+    return checkHealthWithBinary("docker", id);
   }
 
   private getDockerContext(): string {
@@ -350,20 +367,8 @@ export class AppleContainerEngine implements ISandboxEngine {
     const args = ["run", "--name", opts.name];
 
     // Apple Container: --mount for readonly, -v for read-write
-    for (const mount of opts.mounts) {
-      if (mount.readonly) {
-        args.push(
-          "--mount",
-          `type=bind,source=${mount.host},target=${mount.container},readonly`,
-        );
-      } else {
-        args.push("-v", `${mount.host}:${mount.container}`);
-      }
-    }
-
-    for (const [key, value] of Object.entries(opts.env)) {
-      args.push("-e", `${key}=${value}`);
-    }
+    appendMountArgs(args, opts.mounts);
+    appendEnvArgs(args, opts.env);
 
     args.push(opts.image);
 
@@ -468,35 +473,11 @@ export class AppleContainerEngine implements ISandboxEngine {
   }
 
   listContainers(prefix: string): string[] {
-    try {
-      const output = execSync(
-        `container ps -a --filter name=${prefix} --format "{{.ID}}"`,
-        {
-          encoding: "utf-8",
-          timeout: 10000,
-          stdio: ["ignore", "pipe", "ignore"],
-        },
-      );
-      return output
-        .split("\n")
-        .map((s) => s.trim())
-        .filter(Boolean);
-    } catch {
-      return [];
-    }
+    return listContainersFromBinary("container", prefix);
   }
 
   async healthCheck(id: string): Promise<boolean> {
-    try {
-      const result = execSync(`container exec ${id} echo "healthy"`, {
-        encoding: "utf-8",
-        timeout: 5000,
-        stdio: ["ignore", "pipe", "ignore"],
-      }).trim();
-      return result === "healthy";
-    } catch {
-      return false;
-    }
+    return checkHealthWithBinary("container", id);
   }
 }
 
