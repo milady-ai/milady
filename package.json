@@ -40,7 +40,7 @@
     "typecheck": "bunx tsc --noEmit"
   },
   "dependencies": {
-    "@clack/prompts": "^0.12.0",
+    "@clack/prompts": "^1.0.0",
     "@elizaos/core": "2.0.0-alpha.4",
     "@elizaos/plugin-google-genai": "2.0.0-alpha.4",
     "@elizaos/plugin-knowledge": "2.0.0-alpha.4",
