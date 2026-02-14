@@ -308,6 +308,7 @@ jobs:
             --required \
             --repo "$GH_REPO" \
             --watch \
+            --interval 10 \
             --fail-fast; then
             echo "Required PR checks failed or are not passing. Aborting merge."
             exit 1
