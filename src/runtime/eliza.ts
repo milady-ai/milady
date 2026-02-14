@@ -93,9 +93,12 @@ interface ResolvedPlugin {
 }
 
 /**
- * Temporary local compatibility shim while @elizaos/core temporarily
- * drops `SandboxFetchAuditEvent`; remove/update once the upstream export
- * is restored.
+ * Temporary local compatibility shim for `@elizaos/core` not exporting
+ * `SandboxFetchAuditEvent` on the current dependency line in this repo.
+ * It preserves the runtime shape used by `sandboxAuditHandler`:
+ * - `direction` and `url` are required
+ * - `tokenIds` tracks tokens associated with the audit payload
+ * TODO(elizaos): replace/remove when upstream re-exports this type.
  */
 type SandboxFetchAuditEvent = {
   direction: "inbound" | "outbound";

@@ -1,4 +1,5 @@
 import { createRequire } from "node:module";
+import { logger } from "@elizaos/core";
 
 const TELEGRAM_MESSAGE_LIMIT = 4096;
 const DEFAULT_HEADROOM = 120;
@@ -37,7 +38,13 @@ const markdownToTelegramChunks = (() => {
     if (typeof chunker === "function") {
       return chunker;
     }
-  } catch {
+  } catch (error) {
+    logger.warn(
+      "[milaidy] Telegram plugin load failed; using fallback chunker",
+      {
+        error: error instanceof Error ? error.message : String(error),
+      },
+    );
     return fallbackMarkdownChunker;
   }
   return fallbackMarkdownChunker;
