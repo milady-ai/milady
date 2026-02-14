@@ -65,6 +65,9 @@ jobs:
       contents: read
       pull-requests: write
       issues: write
+      checks: write
+      statuses: write
+      actions: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -418,20 +421,28 @@ jobs:
               commentUrl ? `**Review:** ${commentUrl}` : '',
             ].filter(Boolean).join('\n');
 
-            await github.rest.checks.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: 'Agent Review Verdict',
-              head_sha: context.payload.pull_request.head.sha,
-              status: 'completed',
-              conclusion: conclusionMap[verdict] || 'failure',
-              output: {
-                title: titleMap[verdict] || `Decision: ${decision}`,
-                summary: summaryLines,
-              },
-            });
+            try {
+              await github.rest.checks.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: 'Agent Review Verdict',
+                head_sha: context.payload.pull_request.head.sha,
+                status: 'completed',
+                conclusion: conclusionMap[verdict] || 'failure',
+                output: {
+                  title: titleMap[verdict] || `Decision: ${decision}`,
+                  summary: summaryLines,
+                },
+              });
 
-            console.log(`Check run created: ${verdict} → ${conclusionMap[verdict]}`);
+              console.log(`Check run created: ${verdict} → ${conclusionMap[verdict]}`);
+            } catch (error) {
+              if (error?.status === 403) {
+                core.warning('Skipping check-run creation due to token permission limits (requires checks:write).');
+              } else {
+                throw error;
+              }
+            }
 
       - name: Update contributor trust score (v2)
         if: always()
@@ -506,13 +517,27 @@ jobs:
                 name: 'CONTRIBUTOR_TRUST_V2',
                 value,
               });
-            } catch (e) {
-              await github.rest.actions.createRepoVariable({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                name: 'CONTRIBUTOR_TRUST_V2',
-                value,
-              });
+            } catch (updateError) {
+              if (updateError?.status === 403) {
+                core.warning('Skipping trust variable update due to token permission limits (requires actions:write).');
+              } else if (updateError?.status === 404) {
+                try {
+                  await github.rest.actions.createRepoVariable({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name: 'CONTRIBUTOR_TRUST_V2',
+                    value,
+                  });
+                } catch (createError) {
+                  if (createError?.status === 403) {
+                    core.warning('Skipping trust variable create due to token permission limits (requires actions:write).');
+                  } else {
+                    throw createError;
+                  }
+                }
+              } else {
+                throw updateError;
+              }
             }
 
             // Map tier to label
