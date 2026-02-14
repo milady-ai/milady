@@ -403,20 +403,23 @@ jobs:
               commentUrl ? `**Review:** ${commentUrl}` : '',
             ].filter(Boolean).join('\n');
 
-            await github.rest.checks.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: 'Agent Review Verdict',
-              head_sha: context.payload.pull_request.head.sha,
-              status: 'completed',
-              conclusion: conclusionMap[verdict] || 'failure',
-              output: {
-                title: titleMap[verdict] || `Decision: ${decision}`,
-                summary: summaryLines,
-              },
-            });
-
-            console.log(`Check run created: ${verdict} → ${conclusionMap[verdict]}`);
+            try {
+              await github.rest.checks.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: 'Agent Review Verdict',
+                head_sha: context.payload.pull_request.head.sha,
+                status: 'completed',
+                conclusion: conclusionMap[verdict] || 'failure',
+                output: {
+                  title: titleMap[verdict] || `Decision: ${decision}`,
+                  summary: summaryLines,
+                },
+              });
+              console.log(`Check run created: ${verdict} → ${conclusionMap[verdict]}`);
+            } catch (e) {
+              console.log(`⚠️ Could not create check run (${e.status || 'unknown'}). GITHUB_TOKEN may lack checks:write for fork PRs. Verdict still posted as comment.`);
+            }
 
       - name: Update contributor trust score (v2)
         if: always()
@@ -483,6 +486,9 @@ jobs:
             }
 
             // Write back to repo variable
+            // Note: GITHUB_TOKEN may lack actions_variables:write permission
+            // (fine-grained scope not available in workflow tokens).
+            // Gracefully degrade — score is computed and logged but may not persist.
             const value = JSON.stringify(allStates);
             try {
               await github.rest.actions.updateRepoVariable({
@@ -492,12 +498,16 @@ jobs:
                 value,
               });
             } catch (e) {
-              await github.rest.actions.createRepoVariable({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                name: 'CONTRIBUTOR_TRUST_V2',
-                value,
-              });
+              try {
+                await github.rest.actions.createRepoVariable({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: 'CONTRIBUTOR_TRUST_V2',
+                  value,
+                });
+              } catch (e2) {
+                console.log(`⚠️ Could not persist trust scores (${e2.status || 'unknown'}). GITHUB_TOKEN lacks actions_variables:write. Scores computed but not saved.`);
+              }
             }
 
             // Map tier to label
