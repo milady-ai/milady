@@ -264,6 +264,8 @@ export async function handleSandboxRoute(
           });
           return true;
         }
+        // Defense in depth: JSON.parse only produces finite numbers, but this guard
+        // keeps behavior explicit against future parser/runtime changes.
         if (!Number.isFinite(durationValue)) {
           sendJson(res, 400, {
             error: "durationMs must be a finite number",
