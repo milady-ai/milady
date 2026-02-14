@@ -221,7 +221,7 @@ jobs:
             <!-- agent-review-run:${{ github.run_id }}:${{ github.run_attempt }}:${{ github.event.pull_request.head.sha }} -->
 
             Be direct. Be opinionated. This repo's quality is your responsibility.
-          model: claude-sonnet-4-20250514
+          model: claude-opus-4-20250603
           timeout_minutes: 10
           allowed_tools: "Bash,GitHub"
 
