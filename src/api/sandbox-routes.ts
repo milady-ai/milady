@@ -419,7 +419,7 @@ export async function handleSandboxRoute(
     const body = await readJsonBody<unknown>(req, res);
     if (body === null) return true;
     const parsed = resolveSigningRequestPayload(body);
-    if (parsed.error) {
+    if ("error" in parsed) {
       sendJson(res, 400, { error: parsed.error });
       return true;
     }
@@ -511,10 +511,9 @@ function asObject(value: unknown): Record<string, unknown> | null {
   return value as Record<string, unknown>;
 }
 
-function resolveSigningRequestPayload(input: unknown): {
-  request?: SigningRequest;
-  error?: string;
-} {
+function resolveSigningRequestPayload(
+  input: unknown
+): { request: SigningRequest } | { error: string } {
   const obj = asObject(input);
   if (!obj) {
     return { error: "Signing payload must be a JSON object" };
