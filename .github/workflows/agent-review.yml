@@ -235,6 +235,34 @@ jobs:
 
           rm -f CODEX.md
 
+          # Ensure output stays machine-parseable even when Codex CLI fails
+          # (e.g. auth/config issues that return raw logs instead of a review).
+          has_structured_output=0
+          if grep -Eiq "(^|[[:space:]])Decision:[[:space:]]*(APPROVE|REQUEST CHANGES|CLOSE)([[:space:]]|$)" /tmp/review-output.md && \
+             grep -Eiq "(Classification|Scope verdict|Code quality):" /tmp/review-output.md; then
+            has_structured_output=1
+          fi
+
+          if [ "$has_structured_output" -eq 0 ]; then
+            fallback_reason="Automated Codex review did not produce a structured decision."
+
+            if grep -Eiq "(401 Unauthorized|Missing bearer or basic authentication|unexpected status 401)" /tmp/review-output.md; then
+              fallback_reason="Codex CLI authentication to OpenAI failed (401)."
+            fi
+
+            {
+              printf '%s\n' "1. **Classification:** other"
+              printf '%s\n' "2. **Scope verdict:** needs deep review"
+              printf '%s\n' "3. **Code quality:** issues found (Automated review did not return parseable structured output.)"
+              printf '%s\n' "4. **Security:** concerns (Automated review was unavailable; manual verification required.)"
+              printf '%s\n' "5. **Tests:** missing (Automated review output is a deterministic fallback response.)"
+              printf '%s\n' "6. **Decision:** REQUEST CHANGES"
+              printf '%s\n' ""
+              printf '%s\n' "Reason: $fallback_reason"
+              printf '%s\n' "Manual review is required."
+            } > /tmp/review-output.md
+          fi
+
           echo "Review output:"
           cat /tmp/review-output.md
         env:
