@@ -69,7 +69,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.base.sha }}
           fetch-depth: 0
 
       - name: Check PR author permissions
@@ -143,6 +143,8 @@ jobs:
             - **Base**: ${{ github.event.pull_request.base.ref }}
             - **Pre-classification**: ${{ needs.classify.outputs.category }}
             - **Contributor trust**: ${{ steps.trust-context.outputs.trust_info }}
+            This environment is checked out at the PR base ref.
+            The PR patch is available via 'gh pr diff'.
 
             ## Review Protocol
 
