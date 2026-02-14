@@ -418,8 +418,13 @@ export async function handleSandboxRoute(
     }
     const body = await readJsonBody<unknown>(req, res);
     if (body === null) return true;
+    const parsed = resolveSigningRequestPayload(body);
+    if (parsed.error) {
+      sendJson(res, 400, { error: parsed.error });
+      return true;
+    }
     try {
-      const result = await signer.submitSigningRequest(body as SigningRequest);
+      const result = await signer.submitSigningRequest(parsed.request);
       sendJson(res, result.success ? 200 : 403, result);
     } catch (err) {
       sendJson(res, 400, {
@@ -504,6 +509,76 @@ export async function handleSandboxRoute(
 function asObject(value: unknown): Record<string, unknown> | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   return value as Record<string, unknown>;
+}
+
+function resolveSigningRequestPayload(input: unknown): {
+  request?: SigningRequest;
+  error?: string;
+} {
+  const obj = asObject(input);
+  if (!obj) {
+    return { error: "Signing payload must be a JSON object" };
+  }
+
+  const requestId = obj.requestId;
+  const chainId = parseFiniteInteger(obj.chainId);
+  const to = obj.to;
+  const value = obj.value;
+  const data = obj.data;
+  const nonce =
+    obj.nonce === undefined ? undefined : parseFiniteInteger(obj.nonce);
+  const rawGasLimit = obj.gasLimit;
+  const createdAt = parseFiniteInteger(obj.createdAt);
+
+  if (typeof requestId !== "string" || !requestId.trim()) {
+    return { error: "Signing payload requires a non-empty string 'requestId'" };
+  }
+  if (chainId === null || chainId < 0) {
+    return { error: "Signing payload requires an integer 'chainId' >= 0" };
+  }
+  if (typeof to !== "string" || !/^0x[0-9a-fA-F]{40}$/.test(to.trim())) {
+    return {
+      error:
+        "Signing payload requires a hex 'to' address (e.g., 0x followed by 40 hex characters)",
+    };
+  }
+  if (typeof value !== "string" || !value.trim()) {
+    return { error: "Signing payload requires a non-empty string 'value'" };
+  }
+  if (typeof data !== "string" || !data.trim()) {
+    return { error: "Signing payload requires a non-empty string 'data'" };
+  }
+  if (nonce === null) {
+    return { error: "'nonce' must be a non-negative integer when provided" };
+  }
+  if (createdAt === null) {
+    return { error: "Signing payload requires an integer 'createdAt'" };
+  }
+  if (rawGasLimit !== undefined && typeof rawGasLimit !== "string") {
+    return {
+      error: "Signing payload 'gasLimit' must be a string when provided",
+    };
+  }
+
+  const gasLimit = rawGasLimit?.trim();
+  if (gasLimit === "") {
+    return {
+      error: "Signing payload 'gasLimit' cannot be empty when provided",
+    };
+  }
+
+  return {
+    request: {
+      requestId: requestId.trim(),
+      chainId,
+      to: to.trim(),
+      value: value.trim(),
+      data,
+      ...(nonce === undefined ? {} : { nonce }),
+      ...(gasLimit === undefined ? {} : { gasLimit }),
+      createdAt,
+    },
+  };
 }
 
 function parseFiniteInteger(value: unknown): number | null {

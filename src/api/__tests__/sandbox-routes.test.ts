@@ -425,6 +425,108 @@ describe("handleSandboxRoute", () => {
     });
   });
 
+  describe("Signing bridge", () => {
+    const validSigningPayload = {
+      requestId: "sign-request-1",
+      chainId: 1,
+      to: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      value: "1000",
+      data: "0x",
+      nonce: 0,
+      gasLimit: "21000",
+      createdAt: 1710000000000,
+    };
+
+    it("POST /api/sandbox/sign should validate signing payload shape", async () => {
+      const req = createMockReq("POST", JSON.stringify({ requestId: 123 }));
+      const res = createMockRes();
+      const submitSigningRequest = vi.fn();
+
+      await handleSandboxRoute(req, res, "/api/sandbox/sign", "POST", {
+        sandboxManager: mgr,
+        signingService: { submitSigningRequest },
+      });
+      expect(res._status).toBe(400);
+      expect(JSON.parse(res._body).error).toContain(
+        "non-empty string 'requestId'",
+      );
+      expect(submitSigningRequest).not.toHaveBeenCalled();
+    });
+
+    it("POST /api/sandbox/sign should reject invalid destination address", async () => {
+      const req = createMockReq(
+        "POST",
+        JSON.stringify({
+          ...validSigningPayload,
+          to: "not-an-address",
+        }),
+      );
+      const res = createMockRes();
+      const submitSigningRequest = vi.fn();
+
+      await handleSandboxRoute(req, res, "/api/sandbox/sign", "POST", {
+        sandboxManager: mgr,
+        signingService: { submitSigningRequest },
+      });
+      expect(res._status).toBe(400);
+      expect(JSON.parse(res._body).error).toContain("hex 'to' address");
+      expect(submitSigningRequest).not.toHaveBeenCalled();
+    });
+
+    it("POST /api/sandbox/sign should reject non-integer chainId", async () => {
+      const req = createMockReq(
+        "POST",
+        JSON.stringify({
+          ...validSigningPayload,
+          chainId: 1.5,
+        }),
+      );
+      const res = createMockRes();
+      const submitSigningRequest = vi.fn();
+
+      await handleSandboxRoute(req, res, "/api/sandbox/sign", "POST", {
+        sandboxManager: mgr,
+        signingService: { submitSigningRequest },
+      });
+      expect(res._status).toBe(400);
+      expect(JSON.parse(res._body).error).toContain("integer 'chainId'");
+      expect(submitSigningRequest).not.toHaveBeenCalled();
+    });
+
+    it("POST /api/sandbox/sign forwards valid payload to signing service", async () => {
+      const req = createMockReq("POST", JSON.stringify(validSigningPayload));
+      const res = createMockRes();
+      const submitSigningRequest = vi.fn().mockResolvedValue({
+        success: true,
+        policyDecision: {
+          allowed: true,
+          reason: "ok",
+          requiresHumanConfirmation: false,
+          matchedRule: "allowed",
+        },
+        humanConfirmed: false,
+      });
+
+      await handleSandboxRoute(req, res, "/api/sandbox/sign", "POST", {
+        sandboxManager: mgr,
+        signingService: { submitSigningRequest },
+      });
+
+      expect(res._status).toBe(200);
+      expect(submitSigningRequest).toHaveBeenCalledTimes(1);
+      expect(submitSigningRequest).toHaveBeenCalledWith({
+        requestId: "sign-request-1",
+        chainId: 1,
+        to: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        value: "1000",
+        data: "0x",
+        nonce: 0,
+        gasLimit: "21000",
+        createdAt: 1710000000000,
+      });
+    });
+  });
+
   describe("Computer use bridge", () => {
     it("POST /api/sandbox/computer/click should handle request", async () => {
       const req = createMockReq("POST", JSON.stringify({ x: 100, y: 200 }));
