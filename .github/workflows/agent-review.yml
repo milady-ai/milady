@@ -65,9 +65,6 @@ jobs:
       contents: read
       pull-requests: write
       issues: write
-      checks: write
-      statuses: write
-      actions: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -103,32 +100,10 @@ jobs:
           npm install -g @openai/codex@latest
           codex --version
 
-      - name: Fetch contributor trust context
+      - name: Set contributor trust context
         id: trust-context
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const { computeTrustScore, DEFAULT_CONFIG, createContributorState } = require('./.github/trust-scoring.cjs');
-            const author = context.payload.pull_request.user.login;
-            let trustInfo = 'New contributor (no review history)';
-            try {
-              const { data } = await github.rest.actions.getRepoVariable({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                name: 'CONTRIBUTOR_TRUST_V2',
-              });
-              const allStates = JSON.parse(data.value);
-              if (allStates[author]) {
-                const result = computeTrustScore(allStates[author], DEFAULT_CONFIG);
-                trustInfo = `Trust score: ${result.score}/100 (${result.tier}) | Events: ${allStates[author].events.length} | ${result.tierInfo.description}`;
-                if (result.warnings.length > 0) {
-                  trustInfo += ` | Warnings: ${result.warnings.join('; ')}`;
-                }
-              }
-            } catch (e) {
-              // No trust data yet
-            }
-            core.setOutput('trust_info', trustInfo);
+        run: |
+          echo "trust_info=Trust tier unavailable in untrusted checkout context" >> "$GITHUB_OUTPUT"
 
       - name: Build review prompt
         id: build-prompt
@@ -256,12 +231,16 @@ jobs:
             - < /tmp/review-prompt.md \
             > /tmp/review-output.md 2>&1; then
             if grep -Fq "cannot be used with '[PROMPT]'" /tmp/review-output.md; then
-              echo "Codex CLI rejected prompt input with --base; retrying without positional prompt."
-              codex review \
-                --base "origin/$PR_BASE_REF" \
-                --title "$PR_TITLE" \
-                -c 'model="gpt-5.3-codex"' \
-                > /tmp/review-output.md 2>&1 || true
+              {
+                printf '%s\n' "1. **Classification:** other"
+                printf '%s\n' "2. **Scope verdict:** needs deep review"
+                printf '%s\n' "3. **Code quality:** issues found (Automated review could not pass the required structured prompt to Codex.)"
+                printf '%s\n' "4. **Security:** concerns (Prompt-constrained automated review did not execute.)"
+                printf '%s\n' "5. **Tests:** missing (Automated review output is a fallback response.)"
+                printf '%s\n' "6. **Decision:** REQUEST CHANGES"
+                printf '%s\n' ""
+                printf '%s\n' "Codex CLI rejected the required prompt mode (\`--base\` with stdin prompt). Manual review is required."
+              } > /tmp/review-output.md
             fi
           fi
 
@@ -386,16 +365,34 @@ jobs:
 
             console.log(`Verdict parsed from PR comments: ${verdict} (${decision})`);
 
+  review-postprocess:
+    if: github.event_name == 'pull_request_target'
+    needs: [classify, review-pr]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      checks: write
+      statuses: write
+      actions: write
+    steps:
+      - name: Checkout trusted base ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 1
+
       - name: Create review check run
         if: always()
         uses: actions/github-script@v7
         with:
           script: |
-            const verdict = '${{ steps.extract-verdict.outputs.verdict }}';
-            const decision = '${{ steps.extract-verdict.outputs.decision }}';
+            const verdict = '${{ needs.review-pr.outputs.verdict }}';
+            const decision = '${{ needs.review-pr.outputs.decision }}';
             const author = context.payload.pull_request.user.login;
             const prNumber = context.payload.pull_request.number;
-            const commentUrl = '${{ steps.extract-verdict.outputs.decision_comment_url }}';
+            const commentUrl = '${{ needs.review-pr.outputs.decision_comment_url }}';
 
             const conclusionMap = {
               approve: 'success',
@@ -446,7 +443,7 @@ jobs:
           script: |
             const { computeTrustScore, DEFAULT_CONFIG, createContributorState, addEvent, getTier } = require('./.github/trust-scoring.cjs');
             const author = context.payload.pull_request.user.login;
-            const verdict = '${{ steps.extract-verdict.outputs.verdict }}';
+            const verdict = '${{ needs.review-pr.outputs.verdict }}';
             const category = '${{ needs.classify.outputs.category }}';
             const prNumber = context.payload.pull_request.number;
 
