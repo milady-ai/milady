@@ -113,6 +113,7 @@ describe("collectPluginNames", () => {
     const names = collectPluginNames({} as MilaidyConfig);
     expect(names.has("@elizaos/plugin-sql")).toBe(true);
     expect(names.has("@elizaos/plugin-local-embedding")).toBe(true);
+    expect(names.has("@elizaos/plugin-trajectory-logger")).toBe(true);
     expect(names.has("@elizaos/plugin-agent-skills")).toBe(true);
     expect(names.has("@elizaos/plugin-agent-orchestrator")).toBe(true);
     expect(names.has("@elizaos/plugin-shell")).toBe(true);
@@ -262,6 +263,7 @@ describe("collectPluginNames", () => {
     const names = collectPluginNames(config);
     // Should still have all core plugins, no crash
     expect(names.has("@elizaos/plugin-sql")).toBe(true);
+    expect(names.has("@elizaos/plugin-trajectory-logger")).toBe(true);
   });
 
   it("handles undefined plugins.installs gracefully", () => {

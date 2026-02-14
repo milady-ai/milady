@@ -32,6 +32,10 @@ import dotenv from "dotenv";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { startApiServer } from "../src/api/server.js";
 import { ensureAgentWorkspace } from "../src/providers/workspace.js";
+import {
+  extractPlugin,
+  type PluginModuleShape,
+} from "../src/test-support/test-helpers.js";
 
 // ---------------------------------------------------------------------------
 // Environment
@@ -53,35 +57,14 @@ const hasModelProvider =
 // Plugin helpers — tracks failures
 // ---------------------------------------------------------------------------
 
-interface PluginModule {
-  default?: Plugin;
-  plugin?: Plugin;
-}
-
-function looksLikePlugin(v: unknown): v is Plugin {
-  return (
-    !!v &&
-    typeof v === "object" &&
-    typeof (v as Record<string, unknown>).name === "string"
-  );
-}
-function extractPlugin(mod: PluginModule): Plugin | null {
-  if (looksLikePlugin(mod.default)) return mod.default;
-  if (looksLikePlugin(mod.plugin)) return mod.plugin;
-  if (looksLikePlugin(mod)) return mod as unknown as Plugin;
-  for (const [key, value] of Object.entries(mod)) {
-    if (key === "default" || key === "plugin") continue;
-    if (looksLikePlugin(value)) return value;
-  }
-  return null;
-}
-
 const pluginLoadResults: { name: string; loaded: boolean; error?: string }[] =
   [];
 
 async function loadPlugin(name: string): Promise<Plugin | null> {
   try {
-    const p = extractPlugin((await import(name)) as PluginModule);
+    const p = extractPlugin(
+      (await import(name)) as PluginModuleShape,
+    ) as Plugin | null;
     pluginLoadResults.push({
       name,
       loaded: p !== null,
@@ -390,6 +373,7 @@ describe("Agent Runtime E2E", () => {
   );
 
   const corePluginNames = [
+    "@elizaos/plugin-trajectory-logger",
     "@elizaos/plugin-agent-skills",
     "@elizaos/plugin-directives",
     "@elizaos/plugin-commands",

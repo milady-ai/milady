@@ -141,6 +141,42 @@ jobs:
       - name: Build Electron app
         run: bun run --cwd apps/app/electron build
 
+  electron-packaged-dmg-e2e:
+    name: Electron Packaged DMG E2E (macOS)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build web assets
+        run: bun run --cwd apps/app build
+
+      - name: Sync Electron platform
+        run: bun run --cwd apps/app cap:sync:electron
+
+      - name: Install Electron dependencies
+        run: npm install --no-audit --no-fund
+        working-directory: apps/app/electron
+
+      - name: Build standalone DMG
+        run: bun run --cwd apps/app/electron electron:make:dmg:test
+
+      - name: Run packaged DMG startup E2E
+        run: bun run --cwd apps/app test:electron:packaged:e2e
+
   cloud-live-e2e:
     name: Cloud Live E2E (Eliza Cloud)
     runs-on: ubuntu-latest
@@ -216,7 +252,7 @@ jobs:
   test-status:
     name: All Tests Passed
     if: always()
-    needs: [unit-tests, e2e-tests, app-startup-e2e, electron-ui-e2e, cloud-live-e2e, validation-e2e]
+    needs: [unit-tests, e2e-tests, app-startup-e2e, electron-ui-e2e, electron-packaged-dmg-e2e, cloud-live-e2e, validation-e2e]
     runs-on: ubuntu-latest
     steps:
       - name: Check test results
@@ -225,6 +261,7 @@ jobs:
                 "${{ needs.e2e-tests.result }}" == "failure" || \
                 "${{ needs.app-startup-e2e.result }}" == "failure" || \
                 "${{ needs.electron-ui-e2e.result }}" == "failure" || \
+                "${{ needs.electron-packaged-dmg-e2e.result }}" == "failure" || \
                 "${{ needs.cloud-live-e2e.result }}" == "failure" || \
                 "${{ needs.validation-e2e.result }}" == "failure" ]]; then
             echo "One or more test jobs failed"

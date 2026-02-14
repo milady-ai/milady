@@ -2,17 +2,16 @@ import { type IAgentRuntime, ModelType } from "@elizaos/core";
 import type { Api, Model } from "@mariozechner/pi-ai";
 import { describe, expect, it, vi } from "vitest";
 
+import { createModelRegistrationContext } from "../test-support/test-helpers.js";
+import { registerPiAiModelHandler } from "./pi-ai-model-handler.js";
+
 const streamMock = vi.hoisted(() => vi.fn());
 
-vi.mock("@mariozechner/pi-ai", () => {
-  return {
-    // Keep alias registration deterministic for tests.
-    getProviders: () => [],
-    stream: (...args: unknown[]) => streamMock(...args),
-  };
-});
-
-import { registerPiAiModelHandler } from "./pi-ai-model-handler.js";
+vi.mock("@mariozechner/pi-ai", () => ({
+  // Keep alias registration deterministic for tests.
+  getProviders: () => [],
+  stream: (...args: unknown[]) => streamMock(...args),
+}));
 
 function createDummyModel(): Model<Api> {
   return {
@@ -35,31 +34,21 @@ function createEventStream(events: Array<Record<string, unknown>>) {
   })();
 }
 
+type LargeHandler = (
+  rt: IAgentRuntime,
+  p: Record<string, unknown>,
+) => Promise<unknown>;
+
 describe("registerPiAiModelHandler", () => {
   it("registers handlers for TEXT_LARGE and TEXT_SMALL", () => {
-    const calls: Array<{
-      modelType: string;
-      provider: string;
-      priority: number;
-    }> = [];
+    const modelContext = createModelRegistrationContext();
 
-    const runtime = {
-      registerModel: (
-        modelType: string,
-        _handler: unknown,
-        provider: string,
-        priority?: number,
-      ) => {
-        calls.push({ modelType, provider, priority: priority ?? 0 });
-      },
-    } as unknown as IAgentRuntime;
-
-    registerPiAiModelHandler(runtime, {
+    registerPiAiModelHandler(modelContext.runtime as IAgentRuntime, {
       largeModel: createDummyModel(),
       smallModel: createDummyModel(),
     });
 
-    expect(calls).toEqual(
+    expect(modelContext.calls).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           modelType: ModelType.TEXT_LARGE,
@@ -76,26 +65,8 @@ describe("registerPiAiModelHandler", () => {
   it("aggregates text deltas even when streaming is not requested", async () => {
     streamMock.mockReset();
 
-    type LargeHandler = (
-      rt: IAgentRuntime,
-      p: Record<string, unknown>,
-    ) => Promise<unknown>;
-
-    let largeHandler: LargeHandler | null = null;
-
-    const runtime = {
-      registerModel: (
-        modelType: string,
-        handler: unknown,
-        provider: string,
-      ) => {
-        if (modelType === ModelType.TEXT_LARGE && provider === "pi-ai") {
-          largeHandler = handler as LargeHandler;
-        }
-      },
-    } as unknown as IAgentRuntime;
-
-    registerPiAiModelHandler(runtime, {
+    const modelContext = createModelRegistrationContext();
+    registerPiAiModelHandler(modelContext.runtime as IAgentRuntime, {
       largeModel: createDummyModel(),
       smallModel: createDummyModel(),
     });
@@ -108,36 +79,22 @@ describe("registerPiAiModelHandler", () => {
       ]),
     );
 
-    expect(largeHandler).toBeTypeOf("function");
-    if (!largeHandler) throw new Error("Expected TEXT_LARGE handler");
+    const handler = modelContext.getLargeHandler();
+    expect(handler).toBeTypeOf("function");
+    if (!handler) throw new Error("Expected TEXT_LARGE handler");
 
-    const out = await largeHandler(runtime, { prompt: "hello" });
+    const out = await (handler as LargeHandler)(
+      modelContext.runtime as IAgentRuntime,
+      { prompt: "hello" },
+    );
     expect(out).toBe("<response>ok</response>");
   });
 
   it("forwards text deltas to onStreamChunk when provided", async () => {
     streamMock.mockReset();
 
-    type LargeHandler = (
-      rt: IAgentRuntime,
-      p: Record<string, unknown>,
-    ) => Promise<unknown>;
-
-    let largeHandler: LargeHandler | null = null;
-
-    const runtime = {
-      registerModel: (
-        modelType: string,
-        handler: unknown,
-        provider: string,
-      ) => {
-        if (modelType === ModelType.TEXT_LARGE && provider === "pi-ai") {
-          largeHandler = handler as LargeHandler;
-        }
-      },
-    } as unknown as IAgentRuntime;
-
-    registerPiAiModelHandler(runtime, {
+    const modelContext = createModelRegistrationContext();
+    registerPiAiModelHandler(modelContext.runtime as IAgentRuntime, {
       largeModel: createDummyModel(),
       smallModel: createDummyModel(),
     });
@@ -149,15 +106,18 @@ describe("registerPiAiModelHandler", () => {
       ]),
     );
 
+    const handler = modelContext.getLargeHandler();
     const onStreamChunk = vi.fn(async (_chunk: string) => {});
+    expect(handler).toBeTypeOf("function");
+    if (!handler) throw new Error("Expected TEXT_LARGE handler");
 
-    expect(largeHandler).toBeTypeOf("function");
-    if (!largeHandler) throw new Error("Expected TEXT_LARGE handler");
-
-    const out = await largeHandler(runtime, {
-      prompt: "hello",
-      onStreamChunk,
-    });
+    const out = await (handler as LargeHandler)(
+      modelContext.runtime as IAgentRuntime,
+      {
+        prompt: "hello",
+        onStreamChunk,
+      },
+    );
 
     expect(out).toBe("ab");
     expect(onStreamChunk).toHaveBeenCalledTimes(2);

@@ -158,25 +158,80 @@ function safeUnlink(filepath: string): void {
   }
 }
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+  if (
+    error != null &&
+    typeof error === "object" &&
+    "message" in error &&
+    typeof (error as { message?: unknown }).message === "string"
+  ) {
+    return (error as { message: string }).message;
+  }
+  return String(error);
+}
+
+function isCorruptedModelLoadError(error: unknown): boolean {
+  const message = getErrorMessage(error).toLowerCase();
+  return (
+    message.includes("failed to load model") ||
+    message.includes("data is not within the file bounds") ||
+    (message.includes("tensor") && message.includes("is corrupted")) ||
+    message.includes("model is corrupted")
+  );
+}
+
+function parseContentLength(
+  contentLength: string | string[] | undefined,
+): number | null {
+  if (!contentLength || Array.isArray(contentLength)) return null;
+  const parsed = Number.parseInt(contentLength, 10);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
+
 function downloadFile(
   url: string,
   dest: string,
   maxRedirects = 5,
 ): Promise<void> {
   return new Promise<void>((resolve, reject) => {
+    let settled = false;
     let redirectCount = 0;
 
     const request = (reqUrl: string) => {
       // Open a fresh write stream for each attempt
       const file = fs.createWriteStream(dest);
+      let bytesReceived = 0;
+      let expectedBytes: number | null = null;
 
-      const cleanup = () => {
+      const settleError = (err: Error) => {
+        if (settled) return;
+        settled = true;
         file.close();
         safeUnlink(dest);
+        reject(err);
+      };
+
+      const settleSuccess = () => {
+        if (settled) return;
+        if (expectedBytes != null && bytesReceived !== expectedBytes) {
+          settleError(
+            new Error(
+              `[milaidy] Download failed: bytes received (${bytesReceived}) ` +
+                `does not match Content-Length (${expectedBytes})`,
+            ),
+          );
+          return;
+        }
+        settled = true;
+        file.close();
+        resolve();
       };
 
       https
         .get(reqUrl, { headers: { "User-Agent": "milaidy" } }, (res) => {
+          expectedBytes = parseContentLength(res.headers["content-length"]);
           // Follow redirects (open new stream each time)
           if (
             res.statusCode &&
@@ -189,7 +244,7 @@ function downloadFile(
             safeUnlink(dest);
             redirectCount += 1;
             if (redirectCount > maxRedirects) {
-              reject(
+              settleError(
                 new Error(
                   `Download failed: too many redirects (>${maxRedirects})`,
                 ),
@@ -201,8 +256,7 @@ function downloadFile(
             try {
               next = new URL(res.headers.location, reqUrl).toString();
             } catch {
-              cleanup();
-              reject(
+              settleError(
                 new Error(
                   `Download failed: malformed redirect URL "${res.headers.location}"`,
                 ),
@@ -213,28 +267,21 @@ function downloadFile(
             return;
           }
           if (res.statusCode !== 200) {
-            cleanup();
-            reject(
+            settleError(
               new Error(
                 `Download failed: HTTP ${res.statusCode} for ${reqUrl}`,
               ),
             );
             return;
           }
+          res.on("data", (chunk: Buffer) => {
+            bytesReceived += chunk.length;
+          });
           res.pipe(file);
-          file.on("finish", () => {
-            file.close();
-            resolve();
-          });
-          file.on("error", (err) => {
-            cleanup();
-            reject(err);
-          });
+          file.on("finish", settleSuccess);
+          file.on("error", settleError);
         })
-        .on("error", (err) => {
-          cleanup();
-          reject(err);
-        });
+        .on("error", settleError);
     };
     request(url);
   });
@@ -244,8 +291,10 @@ async function ensureModel(
   modelsDir: string,
   repo: string,
   filename: string,
+  force = false,
 ): Promise<string> {
   const modelPath = path.join(modelsDir, filename);
+  if (force) safeUnlink(modelPath);
   if (fs.existsSync(modelPath)) return modelPath;
 
   const log = getLogger();
@@ -416,16 +465,52 @@ export class MilaidyEmbeddingManager {
     // Load model + create context with cleanup guard: if context creation
     // fails after model loads, dispose the model to avoid leaking native
     // allocations.
-    const model = await this.llama.loadModel({
+    const loadOpts = {
       modelPath,
       // node-llama-cpp accepts gpuLayers as number | "auto" | "max"
       gpuLayers: this.gpuLayers as number,
-    });
+    };
+
+    let model: LlamaModelInstance;
+    try {
+      model = await this.llama.loadModel(loadOpts);
+    } catch (err) {
+      if (!isCorruptedModelLoadError(err)) {
+        throw err;
+      }
+
+      const failureMessage = getErrorMessage(err);
+      safeUnlink(modelPath);
+      log.warn(
+        `[milaidy] Embedding model load failed due to a likely corrupted/incomplete ` +
+          `file (${failureMessage}) at ${modelPath}. Deleting file and ` +
+          `re-downloading, then retrying once.`,
+      );
+
+      try {
+        const recoveredPath = await ensureModel(
+          this.modelsDir,
+          this.modelRepo,
+          this.model,
+          true,
+        );
+        model = await this.llama.loadModel({
+          ...loadOpts,
+          modelPath: recoveredPath,
+        });
+      } catch (retryErr) {
+        safeUnlink(modelPath);
+        throw retryErr;
+      }
+    }
 
     let context: LlamaEmbeddingContextInstance;
     try {
       context = await model.createEmbeddingContext();
     } catch (err) {
+      if (isCorruptedModelLoadError(err)) {
+        safeUnlink(modelPath);
+      }
       // Clean up the successfully loaded model before rethrowing
       try {
         await model.dispose();

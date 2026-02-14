@@ -59,7 +59,7 @@ export class ElectronCapacitorApp {
     { role: 'viewMenu' },
   ];
   private mainWindowState;
-  private loadWebApp;
+  private loadWebApp: (window: BrowserWindow) => Promise<void>;
   private customScheme: string;
   private webAssetDirectory: string;
 
@@ -117,21 +117,37 @@ export class ElectronCapacitorApp {
   private async loadMainWindow(thisRef: ElectronCapacitorApp): Promise<void> {
     if (!thisRef.MainWindow || thisRef.MainWindow.isDestroyed()) return;
 
-    const customSchemeUrl = `${thisRef.customScheme}://-/`;
+    const fallbackIndexPath = join(thisRef.webAssetDirectory, 'index.html');
+    const customSchemeUrl = `${thisRef.customScheme}://-`;
+
+    // On packaged builds, prefer direct file loading for startup stability.
+    // We still keep custom-scheme support as a fallback.
+    if (!electronIsDev && existsSync(fallbackIndexPath)) {
+      try {
+        if (!thisRef.MainWindow || thisRef.MainWindow.isDestroyed()) return;
+        await thisRef.MainWindow.loadFile(fallbackIndexPath);
+        console.info(`[Milaidy] Loaded packaged web assets from ${fallbackIndexPath}`);
+        return;
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : String(error);
+        console.error(`[Milaidy] Packaged file:// load failed (${reason})`);
+      }
+    }
+
     try {
-      // Explicitly await the initial custom-scheme navigation so load failures
-      // are handled here instead of surfacing as unhandled Promise rejections.
-      await thisRef.MainWindow.loadURL(customSchemeUrl);
+      if (!thisRef.MainWindow || thisRef.MainWindow.isDestroyed()) return;
+      // Use electron-serve's loader so custom-scheme startup matches its
+      // registered protocol behavior in packaged and dev environments.
+      await thisRef.loadWebApp(thisRef.MainWindow);
       return;
     } catch (error) {
       const reason = error instanceof Error ? error.message : String(error);
       console.error(`[Milaidy] Failed to load web app via ${customSchemeUrl} (${reason})`);
     }
 
-    // Fallback: attempt direct file:// load when the custom protocol fails.
-    const fallbackIndexPath = join(thisRef.webAssetDirectory, 'index.html');
     if (existsSync(fallbackIndexPath)) {
       try {
+        if (!thisRef.MainWindow || thisRef.MainWindow.isDestroyed()) return;
         await thisRef.MainWindow.loadFile(fallbackIndexPath);
         console.info(`[Milaidy] Loaded fallback web assets from ${fallbackIndexPath}`);
         return;
@@ -150,7 +166,24 @@ export class ElectronCapacitorApp {
       primaryHasIndexHtml: false,
     });
     const html = `<html><body style="font-family: sans-serif; margin: 24px;"><h2>Milaidy Desktop Failed to Load UI Assets</h2><pre style="white-space: pre-wrap;">${diagnostics}</pre></body></html>`;
-    await thisRef.MainWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+    try {
+      if (!thisRef.MainWindow || thisRef.MainWindow.isDestroyed()) return;
+      await thisRef.MainWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      console.error(`[Milaidy] Failed to render diagnostics page (${reason})`);
+    }
+  }
+
+  // Capacitor splash invokes load callbacks without awaiting them.
+  // Keep startup errors contained so they never surface as unhandled rejections.
+  private async safeLoadMainWindow(thisRef: ElectronCapacitorApp): Promise<void> {
+    try {
+      await this.loadMainWindow(thisRef);
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      console.error(`[Milaidy] Unexpected startup load error (${reason})`);
+    }
   }
 
   // Expose the mainWindow ref for use outside of the class.
@@ -246,9 +279,11 @@ export class ElectronCapacitorApp {
         windowWidth: 400,
         windowHeight: 400,
       });
-      this.SplashScreen.init(this.loadMainWindow, this);
+      this.SplashScreen.init((thisRef) => {
+        void this.safeLoadMainWindow(thisRef as ElectronCapacitorApp);
+      }, this);
     } else {
-      void this.loadMainWindow(this);
+      void this.safeLoadMainWindow(this);
     }
 
     // Security

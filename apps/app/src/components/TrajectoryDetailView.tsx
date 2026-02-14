@@ -11,33 +11,15 @@ import {
   type TrajectoryDetailResult,
   type TrajectoryLlmCall,
 } from "../api-client";
+import {
+  formatTrajectoryDuration,
+  formatTrajectoryTimestamp,
+  formatTrajectoryTokenCount,
+} from "./trajectory-format";
 
 interface TrajectoryDetailViewProps {
   trajectoryId: string;
   onBack?: () => void;
-}
-
-function formatDuration(ms: number | null): string {
-  if (ms === null) return "—";
-  if (ms < 1000) return `${ms}ms`;
-  if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;
-  return `${(ms / 60000).toFixed(1)}m`;
-}
-
-function formatTimestamp(iso: string): string {
-  return new Date(iso).toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-}
-
-function formatTokens(count: number | undefined): string {
-  if (count === undefined || count === 0) return "—";
-  if (count < 1000) return String(count);
-  return `${(count / 1000).toFixed(1)}k`;
 }
 
 function estimateCost(
@@ -140,16 +122,16 @@ function LlmCallCard({
         </span>
         <span className="text-[10px] text-muted">{call.purpose || call.actionType || "response"}</span>
         <span className="text-[10px] text-muted ml-auto">
-          {formatDuration(call.latencyMs)}
+          {formatTrajectoryDuration(call.latencyMs)}
         </span>
       </div>
 
       {/* Metadata row */}
       <div className="flex flex-wrap gap-4 px-3 py-1.5 text-[10px] text-muted border-b border-border">
         <span>
-          Tokens: <span className="text-txt font-mono">{formatTokens(totalTokens)}</span>
+          Tokens: <span className="text-txt font-mono">{formatTrajectoryTokenCount(totalTokens, { emptyLabel: "—" })}</span>
           <span className="ml-1">
-            ({formatTokens(promptTokens)}↑ {formatTokens(completionTokens)}↓)
+            ({formatTrajectoryTokenCount(promptTokens, { emptyLabel: "—" })}↑ {formatTrajectoryTokenCount(completionTokens, { emptyLabel: "—" })}↓)
           </span>
         </span>
         <span>
@@ -287,7 +269,7 @@ export function TrajectoryDetailView({
       <div className="flex flex-wrap gap-4 text-xs mb-3 pb-3 border-b border-border">
         <div>
           <span className="text-muted">Time: </span>
-          <span>{formatTimestamp(trajectory.createdAt)}</span>
+          <span>{formatTrajectoryTimestamp(trajectory.createdAt, "detailed")}</span>
         </div>
         <div>
           <span className="text-muted">Source: </span>
@@ -309,7 +291,7 @@ export function TrajectoryDetailView({
         </div>
         <div>
           <span className="text-muted">Duration: </span>
-          <span>{formatDuration(trajectory.durationMs)}</span>
+          <span>{formatTrajectoryDuration(trajectory.durationMs)}</span>
         </div>
         <div>
           <span className="text-muted">LLM Calls: </span>
@@ -318,7 +300,10 @@ export function TrajectoryDetailView({
         <div>
           <span className="text-muted">Total Tokens: </span>
           <span className="text-accent font-mono">
-            {formatTokens(totalPromptTokens + totalCompletionTokens)}
+            {formatTrajectoryTokenCount(
+              totalPromptTokens + totalCompletionTokens,
+              { emptyLabel: "—" },
+            )}
           </span>
         </div>
       </div>

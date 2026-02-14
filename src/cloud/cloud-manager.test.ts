@@ -149,6 +149,25 @@ describe("CloudManager", () => {
       expect(statuses).toContain("connecting");
       expect(statuses).toContain("connected");
     });
+
+    it("resets status and state on connection failure", async () => {
+      const mgr = new CloudManager(cfg());
+      await mgr.init();
+
+      const state = mgr as {
+        client: { provision: (...args: unknown[]) => Promise<unknown> };
+      };
+      state.client.provision = vi.fn(async () => {
+        throw new Error("provision failed");
+      });
+
+      await expect(mgr.connect("agent-123")).rejects.toThrow(
+        "provision failed",
+      );
+      expect(mgr.getStatus()).toBe("disconnected");
+      expect(mgr.getActiveAgentId()).toBeNull();
+      expect(mgr.getProxy()).toBeNull();
+    });
   });
 
   describe("disconnect", () => {

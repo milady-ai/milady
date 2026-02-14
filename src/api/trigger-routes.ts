@@ -1,5 +1,4 @@
 import crypto from "node:crypto";
-import type http from "node:http";
 import {
   type AgentRuntime,
   stringToUuid,
@@ -30,21 +29,11 @@ import type {
   TriggerTaskMetadata,
   UpdateTriggerRequest,
 } from "../triggers/types.js";
+import type { RouteHelpers, RouteRequestContext } from "./route-helpers.js";
 
-export interface TriggerRouteHelpers {
-  json: (res: http.ServerResponse, data: object, status?: number) => void;
-  error: (res: http.ServerResponse, message: string, status?: number) => void;
-  readJsonBody: <T extends object>(
-    req: http.IncomingMessage,
-    res: http.ServerResponse,
-  ) => Promise<T | null>;
-}
+export type TriggerRouteHelpers = RouteHelpers;
 
-export interface TriggerRouteContext extends TriggerRouteHelpers {
-  req: http.IncomingMessage;
-  res: http.ServerResponse;
-  method: string;
-  pathname: string;
+export interface TriggerRouteContext extends RouteRequestContext {
   runtime: AgentRuntime | null;
 }
 

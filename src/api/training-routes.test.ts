@@ -1,20 +1,9 @@
-import type http from "node:http";
 import type { AgentRuntime } from "@elizaos/core";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import type { MilaidyConfig } from "../config/types.js";
 import { TrainingService } from "../services/training-service.js";
+import { createRouteInvoker } from "../test-support/route-test-helpers.js";
 import { handleTrainingRoutes } from "./training-routes.js";
-
-type JsonBody =
-  | Record<string, string | number | boolean | null | undefined>
-  | null
-  | undefined;
-
-interface RouteInvocationResult {
-  handled: boolean;
-  status: number;
-  payload: object;
-}
 
 describe("training routes", () => {
   let runtime: AgentRuntime | null;
@@ -132,45 +121,26 @@ describe("training routes", () => {
     });
   });
 
-  async function invoke(params: {
-    method: string;
-    pathname: string;
-    url?: string;
-    body?: JsonBody;
-    runtimeOverride?: AgentRuntime | null;
-  }): Promise<RouteInvocationResult> {
-    const response = { status: 0, payload: {} as object };
-    const req = {
-      url: params.url ?? params.pathname,
-      headers: { host: "localhost:2138" },
-    } as http.IncomingMessage;
-    const res = {} as http.ServerResponse;
-
-    const handled = await handleTrainingRoutes({
-      req,
-      res,
-      method: params.method,
-      pathname: params.pathname,
-      runtime:
-        params.runtimeOverride === undefined ? runtime : params.runtimeOverride,
-      trainingService,
-      readJsonBody: async () => params.body ?? null,
-      json: (_res, data, status = 200) => {
-        response.status = status;
-        response.payload = data;
-      },
-      error: (_res, message, status = 400) => {
-        response.status = status;
-        response.payload = { error: message };
-      },
-    });
-
-    return {
-      handled,
-      status: response.status,
-      payload: response.payload,
-    };
-  }
+  const invoke = createRouteInvoker<
+    Record<string, unknown> | null,
+    AgentRuntime | null,
+    object
+  >(
+    (ctx) => {
+      return handleTrainingRoutes({
+        req: ctx.req,
+        res: ctx.res,
+        method: ctx.method,
+        pathname: ctx.pathname,
+        runtime: ctx.runtime,
+        trainingService,
+        readJsonBody: async () => ctx.readJsonBody(),
+        json: (res, data, status) => ctx.json(res, data, status),
+        error: (res, message, status) => ctx.error(res, message, status),
+      });
+    },
+    { runtimeProvider: () => runtime },
+  );
 
   test("returns false for non-training paths", async () => {
     const result = await invoke({

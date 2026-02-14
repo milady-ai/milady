@@ -4,10 +4,53 @@
 
 import { useEffect, useState, type ChangeEvent } from "react";
 import { useApp, THEMES, type OnboardingStep } from "../AppContext.js";
-import type { ProviderOption, CloudProviderOption, ModelOption, InventoryProviderOption, RpcProviderOption, OpenRouterModelOption, StylePreset } from "../api-client";
+import {
+  client,
+  type ProviderOption,
+  type CloudProviderOption,
+  type ModelOption,
+  type InventoryProviderOption,
+  type RpcProviderOption,
+  type OpenRouterModelOption,
+  type StylePreset,
+  type SandboxPlatformStatus,
+} from "../api-client";
 import { getProviderLogo } from "../provider-logos.js";
 import { AvatarSelector } from "./AvatarSelector.js";
 import { PermissionsOnboardingSection } from "./PermissionsSection.js";
+
+const SANDBOX_POLL_INTERVAL_MS = 3000;
+const SANDBOX_START_MAX_ATTEMPTS = 20;
+
+const inferPlatform = (): string => {
+  if (typeof navigator === "undefined") {
+    return "unknown";
+  }
+  if (navigator.platform.toLowerCase().includes("mac")) return "darwin";
+  if (navigator.platform.toLowerCase().includes("win")) return "win32";
+  if (navigator.platform.toLowerCase().includes("linux")) return "linux";
+  return "unknown";
+};
+
+function formatRequestError(err: unknown): string {
+  return err instanceof Error ? err.message : "unknown error";
+}
+
+function mapSandboxPlatform(status: SandboxPlatformStatus): {
+  installed: boolean;
+  running: boolean;
+  platform: string;
+  appleContainerAvailable: boolean;
+  engineRecommendation: string;
+} {
+  return {
+    installed: Boolean(status.dockerInstalled ?? status.dockerAvailable),
+    running: Boolean(status.dockerRunning),
+    platform: status.platform ?? inferPlatform(),
+    appleContainerAvailable: Boolean(status.appleContainerAvailable),
+    engineRecommendation: status.recommended ?? "docker",
+  };
+}
 
 // Platform detection for mobile — on iOS/Android only cloud mode is available
 let isMobilePlatform = false;
@@ -128,6 +171,67 @@ export function OnboardingWizard() {
   const handleRpcKeyChange = (chain: string, provider: string, key: string) => {
     const keyName = `${chain}:${provider}`;
     setState("onboardingRpcKeys", { ...onboardingRpcKeys, [keyName]: key });
+  };
+
+  const handleAnthropicStart = async () => {
+    setAnthropicError("");
+    try {
+      const { authUrl } = await client.startAnthropicLogin();
+      if (authUrl) {
+        window.open(authUrl, "anthropic-oauth", "width=600,height=700,top=50,left=200");
+        setAnthropicOAuthStarted(true);
+        return;
+      }
+      setAnthropicError("Failed to get auth URL");
+    } catch (err) {
+      setAnthropicError(`Failed to start login: ${formatRequestError(err)}`);
+    }
+  };
+
+  const handleAnthropicExchange = async () => {
+    setAnthropicError("");
+    try {
+      const result = await client.exchangeAnthropicCode(anthropicCode);
+      if (result.success) {
+        setAnthropicConnected(true);
+        return;
+      }
+      setAnthropicError(result.error ?? "Exchange failed");
+    } catch (err) {
+      setAnthropicError(`Exchange failed: ${formatRequestError(err)}`);
+    }
+  };
+
+  const handleOpenAIStart = async () => {
+    try {
+      const { authUrl } = await client.startOpenAILogin();
+      if (authUrl) {
+        window.open(authUrl, "openai-oauth", "width=500,height=700,top=50,left=200");
+        setOpenaiOAuthStarted(true);
+        return;
+      }
+      setOpenaiError("No auth URL returned from login");
+    } catch (err) {
+      setOpenaiError(`Failed to start login: ${formatRequestError(err)}`);
+    }
+  };
+
+  const handleOpenAIExchange = async () => {
+    setOpenaiError("");
+    try {
+      const data = await client.exchangeOpenAICode(openaiCallbackUrl);
+      if (data.success) {
+        setOpenaiOAuthStarted(false);
+        setOpenaiCallbackUrl("");
+        setOpenaiConnected(true);
+        setState("onboardingProvider", "openai-subscription");
+        return;
+      }
+      const msg = data.error ?? "Exchange failed";
+      setOpenaiError(msg.includes("No active flow") ? "Login session expired. Click 'Start Over' and try again." : msg);
+    } catch (err) {
+      setOpenaiError("Network error — check your connection and try again.");
+    }
   };
 
   const renderStep = (step: OnboardingStep) => {
@@ -764,21 +868,7 @@ export function OnboardingWizard() {
                   <div className="flex flex-col items-center gap-3">
                     <button
                       className="w-full max-w-xs px-6 py-3 border border-accent bg-accent text-accent-fg text-sm font-medium cursor-pointer hover:bg-accent-hover transition-colors"
-                      onClick={async () => {
-                        try {
-                          setAnthropicError("");
-                          const res = await fetch("/api/subscription/anthropic/start", { method: "POST" });
-                          const data = await res.json();
-                          if (data.authUrl) {
-                            window.open(data.authUrl, "anthropic-oauth", "width=600,height=700,top=50,left=200");
-                            setAnthropicOAuthStarted(true);
-                          } else {
-                            setAnthropicError("Failed to get auth URL");
-                          }
-                        } catch (err) {
-                          setAnthropicError(`Failed to start login: ${err}`);
-                        }
-                      }}
+                      onClick={() => void handleAnthropicStart()}
                     >
                       Login with Anthropic
                     </button>
@@ -808,24 +898,7 @@ export function OnboardingWizard() {
                     <button
                       disabled={!anthropicCode}
                       className="w-full max-w-xs px-6 py-2 border border-accent bg-accent text-accent-fg text-sm cursor-pointer hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
-                      onClick={async () => {
-                        try {
-                          setAnthropicError("");
-                          const res = await fetch("/api/subscription/anthropic/exchange", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ code: anthropicCode }),
-                          });
-                          const data = await res.json();
-                          if (data.success) {
-                            setAnthropicConnected(true);
-                          } else {
-                            setAnthropicError(data.error || "Exchange failed");
-                          }
-                        } catch (err) {
-                          setAnthropicError(`Exchange failed: ${err}`);
-                        }
-                      }}
+                      onClick={() => void handleAnthropicExchange()}
                     >
                       Connect
                     </button>
@@ -851,20 +924,7 @@ export function OnboardingWizard() {
                   <div className="flex flex-col items-center gap-3">
                     <button
                       className="w-full max-w-xs px-6 py-3 border border-accent bg-accent text-accent-fg text-sm font-medium cursor-pointer hover:bg-accent-hover transition-colors"
-                      onClick={async () => {
-                        try {
-                          const res = await fetch("/api/subscription/openai/start", { method: "POST" });
-                          const data = await res.json();
-                          if (data.authUrl) {
-                            window.open(data.authUrl, "openai-oauth", "width=500,height=700,top=50,left=200");
-                            setOpenaiOAuthStarted(true);
-                          } else {
-                            console.error("No authUrl in response", data);
-                          }
-                        } catch (err) {
-                          console.error("Failed to start OpenAI OAuth:", err);
-                        }
-                      }}
+                      onClick={() => void handleOpenAIStart()}
                     >
                       Login with OpenAI
                     </button>
@@ -897,32 +957,7 @@ export function OnboardingWizard() {
                       <button
                         className="px-6 py-2.5 border border-accent bg-accent text-accent-fg text-sm font-medium cursor-pointer hover:bg-accent-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                         disabled={!openaiCallbackUrl}
-                        onClick={async () => {
-                          setOpenaiError("");
-                          try {
-                            const res = await fetch("/api/subscription/openai/exchange", {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({ code: openaiCallbackUrl }),
-                            });
-                            const data = await res.json();
-                            if (data.success) {
-                              setOpenaiOAuthStarted(false);
-                              setOpenaiCallbackUrl("");
-                              setOpenaiConnected(true);
-                              setState("onboardingProvider", "openai-subscription");
-                            } else {
-                              const msg = data.error || "Exchange failed";
-                              if (msg.includes("No active flow")) {
-                                setOpenaiError("Login session expired. Click 'Start Over' and try again.");
-                              } else {
-                                setOpenaiError(msg);
-                              }
-                            }
-                          } catch (err) {
-                            setOpenaiError("Network error — check your connection and try again.");
-                          }
-                        }}
+                        onClick={() => void handleOpenAIExchange()}
                       >
                         Complete Login
                       </button>
@@ -1396,32 +1431,13 @@ function DockerSetupStep() {
   const checkDocker = async () => {
     setChecking(true);
     try {
-      const res = await fetch("/api/sandbox/platform");
-      if (res.ok) {
-        const data = await res.json();
-        setDockerStatus({
-          installed: Boolean(data.dockerInstalled ?? data.dockerAvailable),
-          running: Boolean(data.dockerRunning ?? data.dockerAvailable),
-          platform: String(data.platform || "unknown"),
-          appleContainerAvailable: Boolean(data.appleContainerAvailable),
-          engineRecommendation: String(data.recommended || "docker"),
-        });
-      } else {
-        setDockerStatus({
-          installed: false,
-          running: false,
-          platform: navigator.platform.toLowerCase().includes("mac") ? "darwin"
-            : navigator.platform.toLowerCase().includes("win") ? "win32"
-            : "linux",
-          appleContainerAvailable: false,
-          engineRecommendation: "docker",
-        });
-      }
+      const data = await client.getSandboxPlatform();
+      setDockerStatus(mapSandboxPlatform(data));
     } catch {
       setDockerStatus({
         installed: false,
         running: false,
-        platform: "unknown",
+        platform: inferPlatform(),
         appleContainerAvailable: false,
         engineRecommendation: "docker",
       });
@@ -1434,25 +1450,27 @@ function DockerSetupStep() {
     setStarting(true);
     setStartMessage("starting docker...");
     try {
-      const res = await fetch("/api/sandbox/docker/start", { method: "POST" });
-      const data = await res.json();
+      const data = await client.startDocker();
       if (data.success) {
         setStartMessage(data.message || "starting up...");
         // Poll every 3 seconds until Docker is running
-        const maxAttempts = 20; // ~60 seconds max
-        for (let i = 0; i < maxAttempts; i++) {
-          await new Promise((r) => setTimeout(r, 3000));
-          setStartMessage(`waiting for docker to start... (${(i + 1) * 3}s)`);
+        for (let i = 0; i < SANDBOX_START_MAX_ATTEMPTS; i++) {
+          await new Promise((r) => setTimeout(r, SANDBOX_POLL_INTERVAL_MS));
+          setStartMessage(
+            `waiting for docker to start... (${(i + 1) * 3}s)`,
+          );
           try {
-            const check = await fetch("/api/sandbox/platform");
-            if (check.ok) {
-              const status = await check.json();
-              if (status.dockerRunning) {
-                setDockerStatus((prev) => prev ? { ...prev, running: true } : prev);
-                setStartMessage("docker is running!");
-                setStarting(false);
-                return;
-              }
+            const status = await client.getSandboxPlatform();
+            if (status.dockerRunning) {
+              setDockerStatus(
+                (prev) =>
+                  prev
+                    ? { ...prev, ...mapSandboxPlatform(status), running: true }
+                    : prev,
+              );
+              setStartMessage("docker is running!");
+              setStarting(false);
+              return;
             }
           } catch { /* keep polling */ }
         }

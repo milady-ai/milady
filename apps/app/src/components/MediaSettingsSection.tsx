@@ -19,6 +19,11 @@ import {
   type AudioGenProvider,
   type VisionProvider,
 } from "../api-client";
+import {
+  CloudConnectionStatus,
+  CloudSourceModeToggle,
+} from "./CloudSourceControls";
+import { ConfigSaveFooter } from "./ConfigSaveFooter";
 
 type MediaCategory = "image" | "video" | "audio" | "vision";
 
@@ -278,30 +283,16 @@ export function MediaSettingsSection() {
       {/* Mode toggle (cloud vs own-key) */}
       <div className="flex items-center gap-3">
         <span className="text-xs font-semibold text-[var(--muted)]">API Source:</span>
-        <div className="flex border border-[var(--border)]">
-          <button
-            type="button"
-            className={`px-3 py-1.5 text-xs font-semibold cursor-pointer transition-colors ${
-              currentMode === "cloud"
-                ? "bg-[var(--accent)] text-[var(--accent-foreground)]"
-                : "bg-[var(--card)] text-[var(--muted)] hover:text-[var(--text)]"
-            }`}
-            onClick={() => updateCategoryConfig(activeTab, { mode: "cloud", provider: "cloud" })}
-          >
-            Eliza Cloud
-          </button>
-          <button
-            type="button"
-            className={`px-3 py-1.5 text-xs font-semibold cursor-pointer transition-colors border-l border-[var(--border)] ${
-              currentMode === "own-key"
-                ? "bg-[var(--accent)] text-[var(--accent-foreground)]"
-                : "bg-[var(--card)] text-[var(--muted)] hover:text-[var(--text)]"
-            }`}
-            onClick={() => updateCategoryConfig(activeTab, { mode: "own-key" })}
-          >
-            Own API Key
-          </button>
-        </div>
+        <CloudSourceModeToggle
+          mode={currentMode}
+          onChange={(mode) => {
+            if (mode === "cloud") {
+              updateCategoryConfig(activeTab, { mode: "cloud", provider: "cloud" });
+              return;
+            }
+            updateCategoryConfig(activeTab, { mode: "own-key" });
+          }}
+        />
 
         {/* Status badge */}
         <span
@@ -317,27 +308,10 @@ export function MediaSettingsSection() {
 
       {/* Cloud mode status */}
       {currentMode === "cloud" && (
-        <div className="flex items-center justify-between py-2.5 px-3 border border-[var(--border)] bg-[var(--bg-muted)]">
-          {cloudConnected ? (
-            <>
-              <span className="text-xs text-[var(--text)]">
-                Connected to Eliza Cloud
-              </span>
-              <span className="text-[10px] px-1.5 py-0.5 border border-green-600 text-green-600">
-                Active
-              </span>
-            </>
-          ) : (
-            <>
-              <span className="text-xs text-[var(--muted)]">
-                Eliza Cloud not connected — configure in Settings &rarr; AI Model
-              </span>
-              <span className="text-[10px] px-1.5 py-0.5 border border-yellow-600 text-yellow-600">
-                Offline
-              </span>
-            </>
-          )}
-        </div>
+        <CloudConnectionStatus
+          connected={cloudConnected}
+          disconnectedText="Eliza Cloud not connected - configure in Settings -> AI Model"
+        />
       )}
 
       {/* Own-key mode: provider selection */}
@@ -566,25 +540,13 @@ export function MediaSettingsSection() {
         </div>
       )}
 
-      {/* Save button */}
-      {dirty && (
-        <div className="flex items-center justify-end gap-3 pt-2 border-t border-[var(--border)]">
-          {saveError && (
-            <span className="text-xs text-red-500">{saveError}</span>
-          )}
-          {saveSuccess && (
-            <span className="text-xs text-green-600">Saved!</span>
-          )}
-          <button
-            type="button"
-            className="px-4 py-1.5 text-xs font-semibold bg-[var(--accent)] text-[var(--accent-foreground)] cursor-pointer hover:opacity-90 disabled:opacity-50"
-            disabled={saving}
-            onClick={handleSave}
-          >
-            {saving ? "Saving..." : "Save Changes"}
-          </button>
-        </div>
-      )}
+      <ConfigSaveFooter
+        dirty={dirty}
+        saving={saving}
+        saveError={saveError}
+        saveSuccess={saveSuccess}
+        onSave={() => void handleSave()}
+      />
     </div>
   );
 }

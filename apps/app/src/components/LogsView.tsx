@@ -5,6 +5,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useApp } from "../AppContext.js";
 import type { LogEntry } from "../api-client";
+import { formatTime } from "./shared/format";
 
 /** Per-tag badge colour map. */
 const TAG_COLORS: Record<string, { bg: string; fg: string }> = {
@@ -165,7 +166,7 @@ export function LogsView() {
             >
               {/* Timestamp */}
               <span className="text-muted whitespace-nowrap">
-                {new Date(entry.timestamp).toLocaleTimeString()}
+                {formatTime(entry.timestamp, { fallback: "—" })}
               </span>
 
               {/* Level */}

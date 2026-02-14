@@ -6,44 +6,10 @@
  * screen/vision, audio/voice, computer use, platform info, capabilities.
  */
 
-import type { IncomingMessage, ServerResponse } from "node:http";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { SandboxManager } from "../../services/sandbox-manager";
 import { handleSandboxRoute } from "../sandbox-routes";
-
-// ── Mock helpers ─────────────────────────────────────────────────────────────
-
-function createMockReq(method: string, body?: string): IncomingMessage {
-  const req = {
-    method,
-    headers: {},
-    on: vi.fn((event: string, handler: (...args: unknown[]) => void) => {
-      if (event === "data" && body) {
-        handler(Buffer.from(body));
-      }
-      if (event === "end") {
-        handler();
-      }
-      return req;
-    }),
-    destroy: vi.fn(),
-  } as unknown as IncomingMessage;
-  return req;
-}
-
-function createMockRes(): ServerResponse & { _status: number; _body: string } {
-  const res = {
-    _status: 0,
-    _body: "",
-    writeHead: vi.fn(function (this: { _status: number }, status: number) {
-      this._status = status;
-    }),
-    end: vi.fn(function (this: { _body: string }, data?: string) {
-      this._body = data ?? "";
-    }),
-  } as unknown as ServerResponse & { _status: number; _body: string };
-  return res;
-}
+import { createMockReq, createMockRes } from "./sandbox-test-helpers";
 
 function createMockManager(
   overrides: Partial<SandboxManager> = {},
@@ -343,6 +309,82 @@ describe("handleSandboxRoute", () => {
       expect([200, 500]).toContain(res._status);
     });
 
+    it("POST /api/sandbox/audio/record should reject invalid JSON", async () => {
+      const req = createMockReq("POST", "{durationMs:1000}");
+      const res = createMockRes();
+      await handleSandboxRoute(req, res, "/api/sandbox/audio/record", "POST", {
+        sandboxManager: mgr,
+      });
+      expect(res._status).toBe(400);
+      expect(JSON.parse(res._body).error).toContain("Invalid JSON");
+    });
+
+    it("POST /api/sandbox/audio/record should reject non-object JSON", async () => {
+      const req = createMockReq("POST", "123");
+      const res = createMockRes();
+      await handleSandboxRoute(req, res, "/api/sandbox/audio/record", "POST", {
+        sandboxManager: mgr,
+      });
+      expect(res._status).toBe(400);
+      expect(JSON.parse(res._body).error).toContain(
+        "Request body must be a JSON object",
+      );
+    });
+
+    it("POST /api/sandbox/audio/record should reject non-numeric duration", async () => {
+      const req = createMockReq("POST", JSON.stringify({ durationMs: "1000" }));
+      const res = createMockRes();
+      await handleSandboxRoute(req, res, "/api/sandbox/audio/record", "POST", {
+        sandboxManager: mgr,
+      });
+      expect(res._status).toBe(400);
+      expect(JSON.parse(res._body).error).toContain(
+        "durationMs must be a finite number",
+      );
+    });
+
+    it("POST /api/sandbox/audio/record should reject fractional duration", async () => {
+      const req = createMockReq("POST", JSON.stringify({ durationMs: 1000.7 }));
+      const res = createMockRes();
+      await handleSandboxRoute(req, res, "/api/sandbox/audio/record", "POST", {
+        sandboxManager: mgr,
+      });
+      expect(res._status).toBe(400);
+      expect(JSON.parse(res._body).error).toContain(
+        "durationMs must be an integer number of milliseconds",
+      );
+    });
+
+    it("POST /api/sandbox/audio/record should reject oversized duration", async () => {
+      const req = createMockReq("POST", JSON.stringify({ durationMs: 60000 }));
+      const res = createMockRes();
+      await handleSandboxRoute(req, res, "/api/sandbox/audio/record", "POST", {
+        sandboxManager: mgr,
+      });
+      expect(res._status).toBe(400);
+      expect(JSON.parse(res._body).error).toContain(
+        "durationMs must be between",
+      );
+    });
+
+    it("POST /api/sandbox/audio/record should accept minimum duration boundary", async () => {
+      const req = createMockReq("POST", JSON.stringify({ durationMs: 250 }));
+      const res = createMockRes();
+      await handleSandboxRoute(req, res, "/api/sandbox/audio/record", "POST", {
+        sandboxManager: mgr,
+      });
+      expect(res._status).not.toBe(400);
+    });
+
+    it("POST /api/sandbox/audio/record should accept maximum duration boundary", async () => {
+      const req = createMockReq("POST", JSON.stringify({ durationMs: 30000 }));
+      const res = createMockRes();
+      await handleSandboxRoute(req, res, "/api/sandbox/audio/record", "POST", {
+        sandboxManager: mgr,
+      });
+      expect(res._status).not.toBe(400);
+    });
+
     it("POST /api/sandbox/audio/play should require data field", async () => {
       const req = createMockReq("POST", JSON.stringify({}));
       const res = createMockRes();
@@ -380,6 +422,108 @@ describe("handleSandboxRoute", () => {
         sandboxManager: mgr,
       });
       expect(res._status).toBe(400);
+    });
+  });
+
+  describe("Signing bridge", () => {
+    const validSigningPayload = {
+      requestId: "sign-request-1",
+      chainId: 1,
+      to: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      value: "1000",
+      data: "0x",
+      nonce: 0,
+      gasLimit: "21000",
+      createdAt: 1710000000000,
+    };
+
+    it("POST /api/sandbox/sign should validate signing payload shape", async () => {
+      const req = createMockReq("POST", JSON.stringify({ requestId: 123 }));
+      const res = createMockRes();
+      const submitSigningRequest = vi.fn();
+
+      await handleSandboxRoute(req, res, "/api/sandbox/sign", "POST", {
+        sandboxManager: mgr,
+        signingService: { submitSigningRequest },
+      });
+      expect(res._status).toBe(400);
+      expect(JSON.parse(res._body).error).toContain(
+        "non-empty string 'requestId'",
+      );
+      expect(submitSigningRequest).not.toHaveBeenCalled();
+    });
+
+    it("POST /api/sandbox/sign should reject invalid destination address", async () => {
+      const req = createMockReq(
+        "POST",
+        JSON.stringify({
+          ...validSigningPayload,
+          to: "not-an-address",
+        }),
+      );
+      const res = createMockRes();
+      const submitSigningRequest = vi.fn();
+
+      await handleSandboxRoute(req, res, "/api/sandbox/sign", "POST", {
+        sandboxManager: mgr,
+        signingService: { submitSigningRequest },
+      });
+      expect(res._status).toBe(400);
+      expect(JSON.parse(res._body).error).toContain("hex 'to' address");
+      expect(submitSigningRequest).not.toHaveBeenCalled();
+    });
+
+    it("POST /api/sandbox/sign should reject non-integer chainId", async () => {
+      const req = createMockReq(
+        "POST",
+        JSON.stringify({
+          ...validSigningPayload,
+          chainId: 1.5,
+        }),
+      );
+      const res = createMockRes();
+      const submitSigningRequest = vi.fn();
+
+      await handleSandboxRoute(req, res, "/api/sandbox/sign", "POST", {
+        sandboxManager: mgr,
+        signingService: { submitSigningRequest },
+      });
+      expect(res._status).toBe(400);
+      expect(JSON.parse(res._body).error).toContain("integer 'chainId'");
+      expect(submitSigningRequest).not.toHaveBeenCalled();
+    });
+
+    it("POST /api/sandbox/sign forwards valid payload to signing service", async () => {
+      const req = createMockReq("POST", JSON.stringify(validSigningPayload));
+      const res = createMockRes();
+      const submitSigningRequest = vi.fn().mockResolvedValue({
+        success: true,
+        policyDecision: {
+          allowed: true,
+          reason: "ok",
+          requiresHumanConfirmation: false,
+          matchedRule: "allowed",
+        },
+        humanConfirmed: false,
+      });
+
+      await handleSandboxRoute(req, res, "/api/sandbox/sign", "POST", {
+        sandboxManager: mgr,
+        signingService: { submitSigningRequest },
+      });
+
+      expect(res._status).toBe(200);
+      expect(submitSigningRequest).toHaveBeenCalledTimes(1);
+      expect(submitSigningRequest).toHaveBeenCalledWith({
+        requestId: "sign-request-1",
+        chainId: 1,
+        to: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        value: "1000",
+        data: "0x",
+        nonce: 0,
+        gasLimit: "21000",
+        createdAt: 1710000000000,
+      });
     });
   });
 

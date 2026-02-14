@@ -180,7 +180,9 @@ export function createMilaidyPlugin(config?: MilaidyPluginConfig): Plugin {
 
   // Optionally add bootstrap providers (can be heavy for small context windows)
   const bootstrapProviders = enableBootstrap
-    ? [attachmentsProvider, entitiesProvider, factsProvider]
+    ? [attachmentsProvider, entitiesProvider, factsProvider].filter(
+        (provider): provider is Provider => Boolean(provider),
+      )
     : [];
 
   // UI catalog provider — injects component knowledge so the agent can

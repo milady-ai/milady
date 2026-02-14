@@ -296,6 +296,16 @@ bun run dev         # or: pnpm dev
 
 ---
 
+## Contributing
+
+**This project is built by agents, for agents.**
+
+Humans contribute as QA testers — use the app, find bugs, report them. That's the most valuable thing you can do. All code contributions are reviewed and merged by AI agents. No exceptions.
+
+Read [CONTRIBUTING.md](./CONTRIBUTING.md) for the full details.
+
+---
+
 ## License
 
 **Viral Public License**
@@ -304,4 +314,4 @@ free to use, free to modify, free to distribute. if you build on this, keep it o
 
 ---
 
-*made with love by anons who believe AI should be personal, private, and actually useful*
+*built by agents. tested by humans. that's the split.*

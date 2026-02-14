@@ -137,6 +137,53 @@ export class SandboxManager {
     return this.state === "ready";
   }
 
+  private getMainContainerConfig(): {
+    image: string;
+    containerPrefix: string;
+    workdir: string;
+    network: string;
+    user: string;
+    wsRoot: string;
+  } {
+    const image = this.config.image ?? "milaidy-sandbox:bookworm-slim";
+    const containerPrefix = this.config.containerPrefix ?? "milaidy-sandbox";
+    const workdir = this.config.workdir ?? "/workspace";
+    const network = this.config.network ?? "none";
+    const user = this.config.user ?? "1000:1000";
+    const wsRoot =
+      this.config.workspaceRoot ??
+      join(process.env.HOME ?? "/tmp", ".milaidy", "sandbox-workspace");
+    mkdirSync(wsRoot, { recursive: true });
+    return { image, containerPrefix, workdir, network, user, wsRoot };
+  }
+
+  private async createMainContainer(): Promise<string> {
+    const config = this.getMainContainerConfig();
+    return this.engine.runContainer({
+      image: config.image,
+      name: `${config.containerPrefix}-${Date.now()}`,
+      detach: true,
+      mounts: [
+        { host: config.wsRoot, container: config.workdir, readonly: false },
+      ],
+      env: this.config.env ?? {},
+      network: config.network,
+      user: config.user,
+      capDrop: this.config.capDrop ?? [],
+      memory: this.config.memory,
+      cpus: this.config.cpus,
+      pidsLimit: this.config.pidsLimit,
+      readOnlyRoot: this.config.readOnlyRoot,
+      dns: this.config.dns,
+    });
+  }
+
+  private async cleanupContainer(containerId: string | null): Promise<void> {
+    if (!containerId) return;
+    await this.engine.stopContainer(containerId);
+    await this.engine.removeContainer(containerId);
+  }
+
   private setState(newState: SandboxState): void {
     const oldState = this.state;
     this.state = newState;
@@ -163,15 +210,7 @@ export class SandboxManager {
     this.setState("initializing");
 
     try {
-      const image = this.config.image ?? "milaidy-sandbox:bookworm-slim";
-      const containerPrefix = this.config.containerPrefix ?? "milaidy-sandbox";
-      const workdir = this.config.workdir ?? "/workspace";
-      const network = this.config.network ?? "none";
-      const user = this.config.user ?? "1000:1000";
-      const wsRoot =
-        this.config.workspaceRoot ??
-        join(process.env.HOME ?? "/tmp", ".milaidy", "sandbox-workspace");
-      mkdirSync(wsRoot, { recursive: true });
+      const config = this.getMainContainerConfig();
 
       if (!this.engine.isAvailable()) {
         throw new Error(
@@ -179,39 +218,24 @@ export class SandboxManager {
         );
       }
 
-      if (!this.engine.imageExists(image)) {
+      if (!this.engine.imageExists(config.image)) {
         try {
-          await this.engine.pullImage(image);
+          await this.engine.pullImage(config.image);
         } catch {
           throw new Error(
-            `Sandbox image "${image}" not found. Build with: scripts/sandbox-setup.sh`,
+            `Sandbox image "${config.image}" not found. Build with: scripts/sandbox-setup.sh`,
           );
         }
       }
 
       // Cleanup orphans from previous runs
-      const orphans = this.engine.listContainers(containerPrefix);
+      const orphans = this.engine.listContainers(config.containerPrefix);
       for (const id of orphans) {
         await this.engine.stopContainer(id);
         await this.engine.removeContainer(id);
       }
 
-      // Create sandbox container via engine
-      this.containerId = await this.engine.runContainer({
-        image,
-        name: `${containerPrefix}-${Date.now()}`,
-        detach: true,
-        mounts: [{ host: wsRoot, container: workdir, readonly: false }],
-        env: this.config.env ?? {},
-        network,
-        user,
-        capDrop: this.config.capDrop ?? [],
-        memory: this.config.memory,
-        cpus: this.config.cpus,
-        pidsLimit: this.config.pidsLimit,
-        readOnlyRoot: this.config.readOnlyRoot,
-        dns: this.config.dns,
-      });
+      this.containerId = await this.createMainContainer();
 
       this.emitEvent({
         timestamp: Date.now(),
@@ -264,48 +288,19 @@ export class SandboxManager {
     });
 
     try {
-      const image = this.config.image ?? "milaidy-sandbox:bookworm-slim";
-      const containerPrefix = this.config.containerPrefix ?? "milaidy-sandbox";
-      const workdir = this.config.workdir ?? "/workspace";
-      const network = this.config.network ?? "none";
-      const user = this.config.user ?? "1000:1000";
-      if (this.containerId) {
-        await this.engine.stopContainer(this.containerId);
-        await this.engine.removeContainer(this.containerId);
-        this.containerId = null;
-      }
-      if (this.browserContainerId) {
-        await this.engine.stopContainer(this.browserContainerId);
-        await this.engine.removeContainer(this.browserContainerId);
-        this.browserContainerId = null;
-      }
+      const config = this.getMainContainerConfig();
+      await this.cleanupContainer(this.containerId);
+      await this.cleanupContainer(this.browserContainerId);
+      this.containerId = null;
+      this.browserContainerId = null;
 
-      const orphans = this.engine.listContainers(containerPrefix);
+      const orphans = this.engine.listContainers(config.containerPrefix);
       for (const id of orphans) {
         await this.engine.stopContainer(id);
         await this.engine.removeContainer(id);
       }
 
-      const wsRoot =
-        this.config.workspaceRoot ??
-        join(process.env.HOME ?? "/tmp", ".milaidy", "sandbox-workspace");
-      mkdirSync(wsRoot, { recursive: true });
-
-      this.containerId = await this.engine.runContainer({
-        image,
-        name: `${containerPrefix}-${Date.now()}`,
-        detach: true,
-        mounts: [{ host: wsRoot, container: workdir, readonly: false }],
-        env: this.config.env ?? {},
-        network,
-        user,
-        capDrop: this.config.capDrop ?? [],
-        memory: this.config.memory,
-        cpus: this.config.cpus,
-        pidsLimit: this.config.pidsLimit,
-        readOnlyRoot: this.config.readOnlyRoot,
-        dns: this.config.dns,
-      });
+      this.containerId = await this.createMainContainer();
 
       const healthy = await this.healthCheck();
       if (healthy) {
@@ -327,16 +322,10 @@ export class SandboxManager {
     this.setState("stopping");
 
     try {
-      if (this.browserContainerId) {
-        await this.engine.stopContainer(this.browserContainerId);
-        await this.engine.removeContainer(this.browserContainerId);
-        this.browserContainerId = null;
-      }
-      if (this.containerId) {
-        await this.engine.stopContainer(this.containerId);
-        await this.engine.removeContainer(this.containerId);
-        this.containerId = null;
-      }
+      await this.cleanupContainer(this.browserContainerId);
+      await this.cleanupContainer(this.containerId);
+      this.browserContainerId = null;
+      this.containerId = null;
     } catch (err) {
       this.emitEvent({
         timestamp: Date.now(),

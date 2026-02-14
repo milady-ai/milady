@@ -1,11 +1,15 @@
 import type http from "node:http";
 import { afterEach, describe, expect, it } from "vitest";
+import { createMockHeadersRequest } from "./../test-support/test-helpers.js";
 import { resolveWalletExportRejection } from "./server.js";
 
-type ReqLike = Pick<http.IncomingMessage, "headers">;
-
-function req(headers: http.IncomingHttpHeaders = {}): ReqLike {
-  return { headers };
+function req(
+  headers: http.IncomingHttpHeaders = {},
+): Pick<http.IncomingMessage, "headers"> {
+  return createMockHeadersRequest(headers) as Pick<
+    http.IncomingMessage,
+    "headers"
+  >;
 }
 
 describe("resolveWalletExportRejection", () => {

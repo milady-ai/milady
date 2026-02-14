@@ -14,6 +14,7 @@ import {
   type RuntimeOrderItem,
   type RuntimeServiceOrderItem,
 } from "../api-client";
+import { formatDateTime } from "./shared/format";
 
 type RuntimeSectionKey =
   | "runtime"
@@ -31,11 +32,6 @@ const SECTION_TABS: Array<{ key: RuntimeSectionKey; label: string }> = [
   { key: "services", label: "Services" },
   { key: "evaluators", label: "Evaluators" },
 ];
-
-function formatTimestamp(ms: number): string {
-  if (!Number.isFinite(ms)) return "n/a";
-  return new Date(ms).toLocaleString();
-}
 
 function nodeSummary(value: unknown): string {
   if (value === null) return "null";
@@ -329,7 +325,7 @@ export function RuntimeView() {
           Expand Top
         </button>
         <div className="text-[11px] text-[var(--muted)] ml-auto">
-          {snapshot ? `Last updated: ${formatTimestamp(snapshot.generatedAt)}` : "No snapshot loaded"}
+          {snapshot ? `Last updated: ${formatDateTime(snapshot.generatedAt, { fallback: "n/a" })}` : "No snapshot loaded"}
         </div>
       </div>
 

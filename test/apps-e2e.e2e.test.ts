@@ -73,6 +73,20 @@ function requestApi(
   return new Promise((resolve, reject) => {
     const body = payload?.body;
     const contentType = payload?.contentType ?? "application/json";
+    let settled = false;
+
+    const finish = (result: ApiResponse) => {
+      if (settled) return;
+      settled = true;
+      resolve(result);
+    };
+
+    const fail = (err: Error) => {
+      if (settled) return;
+      settled = true;
+      reject(err);
+    };
+
     const req = http.request(
       {
         hostname: "127.0.0.1",
@@ -84,24 +98,32 @@ function requestApi(
             ? {
                 "Content-Type": contentType,
                 "Content-Length": Buffer.byteLength(body),
+                Connection: "close",
               }
             : {}),
         },
       },
       (res) => {
         const chunks: Buffer[] = [];
-        res.on("data", (c: Buffer) => chunks.push(c));
-        res.on("end", () => {
+        const flush = () => {
           const raw = Buffer.concat(chunks).toString("utf-8");
-          resolve({
+          finish({
             status: res.statusCode ?? 0,
             data: parseJson(raw),
           });
-        });
+        };
+        res.on("data", (c: Buffer) => chunks.push(c));
+        res.on("end", flush);
+        res.on("aborted", flush);
+        res.on("close", flush);
+        res.on("error", fail);
       },
     );
     req.on("error", (err: Error & { code?: string }) => {
-      reject(err);
+      fail(err);
+    });
+    req.setTimeout(15_000, () => {
+      req.destroy(new Error(`Request timed out: ${method} ${path}`));
     });
     if (body) req.write(body);
     req.end();

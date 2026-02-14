@@ -9,6 +9,11 @@ import type { CloudManager } from "../cloud/cloud-manager.js";
 import { validateCloudBaseUrl } from "../cloud/validate-url.js";
 import type { MilaidyConfig } from "../config/config.js";
 import { saveMilaidyConfig } from "../config/config.js";
+import {
+  readJsonBody as parseJsonBody,
+  sendJson,
+  sendJsonError,
+} from "./http-helpers.js";
 
 export interface CloudRouteState {
   config: MilaidyConfig;
@@ -25,24 +30,6 @@ function extractAgentId(pathname: string): string | null {
   return id && UUID_RE.test(id) ? id : null;
 }
 
-function readBody(req: http.IncomingMessage): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    let totalBytes = 0;
-    req.on("data", (c: Buffer) => {
-      totalBytes += c.length;
-      if (totalBytes > 1_048_576) {
-        req.destroy();
-        reject(new Error("Request body too large"));
-        return;
-      }
-      chunks.push(c);
-    });
-    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
-    req.on("error", reject);
-  });
-}
-
 /**
  * Read and parse a JSON request body with size limits and error handling.
  * Returns null (and sends a 4xx response) if reading or parsing fails.
@@ -51,38 +38,11 @@ async function readJsonBody<T = Record<string, unknown>>(
   req: http.IncomingMessage,
   res: http.ServerResponse,
 ): Promise<T | null> {
-  let raw: string;
-  try {
-    raw = await readBody(req);
-  } catch (readErr) {
-    const msg =
-      readErr instanceof Error
-        ? readErr.message
-        : "Failed to read request body";
-    err(res, msg, 413);
-    return null;
-  }
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    if (parsed == null || typeof parsed !== "object" || Array.isArray(parsed)) {
-      err(res, "Request body must be a JSON object", 400);
-      return null;
-    }
-    return parsed as T;
-  } catch {
-    err(res, "Invalid JSON in request body", 400);
-    return null;
-  }
-}
-
-function json(res: http.ServerResponse, data: unknown, status = 200): void {
-  res.statusCode = status;
-  res.setHeader("Content-Type", "application/json");
-  res.end(JSON.stringify(data));
-}
-
-function err(res: http.ServerResponse, message: string, status = 400): void {
-  json(res, { error: message }, status);
+  return parseJsonBody(req, res, {
+    maxBytes: 1_048_576,
+    tooLargeMessage: "Request body too large",
+    destroyOnTooLarge: true,
+  });
 }
 
 const CLOUD_LOGIN_CREATE_TIMEOUT_MS = 10_000;
@@ -121,7 +81,7 @@ export async function handleCloudRoute(
     const baseUrl = state.config.cloud?.baseUrl ?? "https://www.elizacloud.ai";
     const urlError = await validateCloudBaseUrl(baseUrl);
     if (urlError) {
-      err(res, urlError);
+      sendJsonError(res, urlError);
       return true;
     }
     const sessionId = crypto.randomUUID();
@@ -139,19 +99,19 @@ export async function handleCloudRoute(
       );
     } catch (fetchErr) {
       if (isTimeoutError(fetchErr)) {
-        err(res, "Eliza Cloud login request timed out", 504);
+        sendJsonError(res, "Eliza Cloud login request timed out", 504);
         return true;
       }
-      err(res, "Failed to reach Eliza Cloud", 502);
+      sendJsonError(res, "Failed to reach Eliza Cloud", 502);
       return true;
     }
 
     if (!createRes.ok) {
-      err(res, "Failed to create auth session with Eliza Cloud", 502);
+      sendJsonError(res, "Failed to create auth session with Eliza Cloud", 502);
       return true;
     }
 
-    json(res, {
+    sendJson(res, {
       ok: true,
       sessionId,
       browserUrl: `${baseUrl}/auth/cli-login?session=${encodeURIComponent(sessionId)}`,
@@ -167,14 +127,14 @@ export async function handleCloudRoute(
     );
     const sessionId = url.searchParams.get("sessionId");
     if (!sessionId) {
-      err(res, "sessionId query parameter is required");
+      sendJsonError(res, "sessionId query parameter is required");
       return true;
     }
 
     const baseUrl = state.config.cloud?.baseUrl ?? "https://www.elizacloud.ai";
     const urlError = await validateCloudBaseUrl(baseUrl);
     if (urlError) {
-      err(res, urlError);
+      sendJsonError(res, urlError);
       return true;
     }
     let pollRes: Response;
@@ -186,7 +146,7 @@ export async function handleCloudRoute(
       );
     } catch (fetchErr) {
       if (isTimeoutError(fetchErr)) {
-        json(
+        sendJson(
           res,
           {
             status: "error",
@@ -196,7 +156,7 @@ export async function handleCloudRoute(
         );
         return true;
       }
-      json(
+      sendJson(
         res,
         {
           status: "error",
@@ -208,7 +168,7 @@ export async function handleCloudRoute(
     }
 
     if (!pollRes.ok) {
-      json(
+      sendJson(
         res,
         pollRes.status === 404
           ? { status: "expired", error: "Session not found or expired" }
@@ -278,9 +238,9 @@ export async function handleCloudRoute(
         await state.cloudManager.init();
       }
 
-      json(res, { status: "authenticated", keyPrefix: data.keyPrefix });
+      sendJson(res, { status: "authenticated", keyPrefix: data.keyPrefix });
     } else {
-      json(res, { status: data.status });
+      sendJson(res, { status: data.status });
     }
     return true;
   }
@@ -289,10 +249,10 @@ export async function handleCloudRoute(
   if (method === "GET" && pathname === "/api/cloud/agents") {
     const client = state.cloudManager?.getClient();
     if (!client) {
-      err(res, "Not connected to Eliza Cloud", 401);
+      sendJsonError(res, "Not connected to Eliza Cloud", 401);
       return true;
     }
-    json(res, { ok: true, agents: await client.listAgents() });
+    sendJson(res, { ok: true, agents: await client.listAgents() });
     return true;
   }
 
@@ -300,7 +260,7 @@ export async function handleCloudRoute(
   if (method === "POST" && pathname === "/api/cloud/agents") {
     const client = state.cloudManager?.getClient();
     if (!client) {
-      err(res, "Not connected to Eliza Cloud", 401);
+      sendJsonError(res, "Not connected to Eliza Cloud", 401);
       return true;
     }
 
@@ -312,7 +272,7 @@ export async function handleCloudRoute(
     if (!body) return true;
 
     if (!body.agentName?.trim()) {
-      err(res, "agentName is required");
+      sendJsonError(res, "agentName is required");
       return true;
     }
 
@@ -321,7 +281,7 @@ export async function handleCloudRoute(
       agentConfig: body.agentConfig,
       environmentVars: body.environmentVars,
     });
-    json(res, { ok: true, agent }, 201);
+    sendJson(res, { ok: true, agent }, 201);
     return true;
   }
 
@@ -333,11 +293,11 @@ export async function handleCloudRoute(
   ) {
     const agentId = extractAgentId(pathname);
     if (!agentId || !state.cloudManager) {
-      err(res, "Invalid agent ID or cloud not connected", 400);
+      sendJsonError(res, "Invalid agent ID or cloud not connected", 400);
       return true;
     }
     const proxy = await state.cloudManager.connect(agentId);
-    json(res, {
+    sendJson(res, {
       ok: true,
       agentId,
       agentName: proxy.agentName,
@@ -354,18 +314,18 @@ export async function handleCloudRoute(
   ) {
     const agentId = extractAgentId(pathname);
     if (!agentId || !state.cloudManager) {
-      err(res, "Invalid agent ID or cloud not connected", 400);
+      sendJsonError(res, "Invalid agent ID or cloud not connected", 400);
       return true;
     }
     const client = state.cloudManager.getClient();
     if (!client) {
-      err(res, "Not connected to Eliza Cloud", 401);
+      sendJsonError(res, "Not connected to Eliza Cloud", 401);
       return true;
     }
     if (state.cloudManager.getActiveAgentId() === agentId)
       await state.cloudManager.disconnect();
     await client.deleteAgent(agentId);
-    json(res, { ok: true, agentId, status: "stopped" });
+    sendJson(res, { ok: true, agentId, status: "stopped" });
     return true;
   }
 
@@ -377,13 +337,13 @@ export async function handleCloudRoute(
   ) {
     const agentId = extractAgentId(pathname);
     if (!agentId || !state.cloudManager) {
-      err(res, "Invalid agent ID or cloud not connected", 400);
+      sendJsonError(res, "Invalid agent ID or cloud not connected", 400);
       return true;
     }
     if (state.cloudManager.getActiveAgentId())
       await state.cloudManager.disconnect();
     const proxy = await state.cloudManager.connect(agentId);
-    json(res, {
+    sendJson(res, {
       ok: true,
       agentId,
       agentName: proxy.agentName,
@@ -395,7 +355,7 @@ export async function handleCloudRoute(
   // POST /api/cloud/disconnect
   if (method === "POST" && pathname === "/api/cloud/disconnect") {
     if (state.cloudManager) await state.cloudManager.disconnect();
-    json(res, { ok: true, status: "disconnected" });
+    sendJson(res, { ok: true, status: "disconnected" });
     return true;
   }
 

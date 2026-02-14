@@ -1,20 +1,13 @@
-import type http from "node:http";
 import type { AgentRuntime, Memory, UUID } from "@elizaos/core";
+import {
+  parseClampedFloat,
+  parsePositiveInteger,
+} from "../utils/number-parsing.js";
+import type { RouteHelpers, RouteRequestContext } from "./route-helpers.js";
 
-export interface KnowledgeRouteHelpers {
-  json: (res: http.ServerResponse, data: object, status?: number) => void;
-  error: (res: http.ServerResponse, message: string, status?: number) => void;
-  readJsonBody: <T extends object>(
-    req: http.IncomingMessage,
-    res: http.ServerResponse,
-  ) => Promise<T | null>;
-}
+export type KnowledgeRouteHelpers = RouteHelpers;
 
-export interface KnowledgeRouteContext extends KnowledgeRouteHelpers {
-  req: http.IncomingMessage;
-  res: http.ServerResponse;
-  method: string;
-  pathname: string;
+export interface KnowledgeRouteContext extends RouteRequestContext {
   url: URL;
   runtime: AgentRuntime | null;
 }
@@ -89,20 +82,6 @@ async function getKnowledgeService(
   }
 
   return service;
-}
-
-function parsePositiveInt(value: string | null, fallback: number): number {
-  if (!value) return fallback;
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed)) return fallback;
-  return Math.max(1, Math.floor(parsed));
-}
-
-function parseFloat01(value: string | null, fallback: number): number {
-  if (!value) return fallback;
-  const parsed = Number.parseFloat(value);
-  if (!Number.isFinite(parsed)) return fallback;
-  return Math.max(0, Math.min(1, parsed));
 }
 
 function isYouTubeUrl(url: string): boolean {
@@ -326,8 +305,8 @@ export async function handleKnowledgeRoutes(
 
   // ── GET /api/knowledge/documents ────────────────────────────────────────
   if (method === "GET" && pathname === "/api/knowledge/documents") {
-    const limit = parsePositiveInt(url.searchParams.get("limit"), 100);
-    const offset = parsePositiveInt(url.searchParams.get("offset"), 0) - 1;
+    const limit = parsePositiveInteger(url.searchParams.get("limit"), 100);
+    const offset = parsePositiveInteger(url.searchParams.get("offset"), 0) - 1;
 
     const documents = await knowledgeService.getMemories({
       tableName: "documents",
@@ -536,8 +515,12 @@ export async function handleKnowledgeRoutes(
       return true;
     }
 
-    const threshold = parseFloat01(url.searchParams.get("threshold"), 0.3);
-    const limit = parsePositiveInt(url.searchParams.get("limit"), 20);
+    const threshold = parseClampedFloat(url.searchParams.get("threshold"), {
+      fallback: 0.3,
+      min: 0,
+      max: 1,
+    });
+    const limit = parsePositiveInteger(url.searchParams.get("limit"), 20);
 
     // Create a mock message for the search
     const searchMessage: Memory = {

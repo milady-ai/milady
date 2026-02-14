@@ -60,39 +60,55 @@ export class CloudManager {
     this.setStatus("connecting");
     this.activeAgentId = agentId;
 
-    await this.client.provision(agentId);
-    const agent = await this.client.getAgent(agentId);
+    try {
+      await this.client.provision(agentId);
+      const agent = await this.client.getAgent(agentId);
 
-    this.proxy = new CloudRuntimeProxy(this.client, agentId, agent.agentName);
+      this.proxy = new CloudRuntimeProxy(this.client, agentId, agent.agentName);
 
-    this.backupScheduler = new BackupScheduler(
-      this.client,
-      agentId,
-      this.cloudConfig.backup?.autoBackupIntervalMs ?? 60_000,
-    );
-    this.backupScheduler.start();
+      this.backupScheduler = new BackupScheduler(
+        this.client,
+        agentId,
+        this.cloudConfig.backup?.autoBackupIntervalMs ?? 60_000,
+      );
+      this.backupScheduler.start();
 
-    this.connectionMonitor = new ConnectionMonitor(
-      this.client,
-      agentId,
-      {
-        onDisconnect: () => this.setStatus("reconnecting"),
-        onReconnect: () => this.setStatus("connected"),
-        onStatusChange: (s) => {
-          if (s === "connected") this.setStatus("connected");
-          else if (s === "reconnecting") this.setStatus("reconnecting");
-          else this.setStatus("error");
+      this.connectionMonitor = new ConnectionMonitor(
+        this.client,
+        agentId,
+        {
+          onDisconnect: () => this.setStatus("reconnecting"),
+          onReconnect: () => this.setStatus("connected"),
+          onStatusChange: (s) => {
+            if (s === "connected") this.setStatus("connected");
+            else if (s === "reconnecting") this.setStatus("reconnecting");
+            else this.setStatus("error");
+          },
         },
-      },
-      this.cloudConfig.bridge?.heartbeatIntervalMs ?? 30_000,
-    );
-    this.connectionMonitor.start();
+        this.cloudConfig.bridge?.heartbeatIntervalMs ?? 30_000,
+      );
+      this.connectionMonitor.start();
 
-    this.setStatus("connected");
-    logger.info(
-      `[cloud-manager] Connected to cloud agent (agentId=${agentId}, agentName=${agent.agentName})`,
-    );
-    return this.proxy;
+      this.setStatus("connected");
+      logger.info(
+        `[cloud-manager] Connected to cloud agent (agentId=${agentId}, agentName=${agent.agentName})`,
+      );
+      return this.proxy;
+    } catch (err) {
+      this.setStatus("error");
+      if (this.backupScheduler) {
+        this.backupScheduler.stop();
+        this.backupScheduler = null;
+      }
+      if (this.connectionMonitor) {
+        this.connectionMonitor.stop();
+        this.connectionMonitor = null;
+      }
+      this.proxy = null;
+      this.activeAgentId = null;
+      this.setStatus("disconnected");
+      throw err;
+    }
   }
 
   async disconnect(): Promise<void> {

@@ -1,13 +1,7 @@
-import type http from "node:http";
 import type { AgentRuntime, Task, UUID } from "@elizaos/core";
 import { beforeEach, describe, expect, test, vi } from "vitest";
+import { createRouteInvoker } from "../test-support/route-test-helpers.js";
 import { handleTriggerRoutes } from "./trigger-routes.js";
-
-interface RouteInvocationResult {
-  handled: boolean;
-  status: number;
-  payload: object;
-}
 
 describe("trigger routes", () => {
   let tasks: Task[];
@@ -60,49 +54,24 @@ describe("trigger routes", () => {
     runtime = runtimePartial as AgentRuntime;
   });
 
-  async function invoke(params: {
-    method: string;
-    pathname: string;
-    body?: Record<
-      string,
-      string | number | boolean | null | object | undefined
-    >;
-    runtimeOverride?: AgentRuntime | null;
-  }): Promise<RouteInvocationResult> {
-    const response = {
-      status: 0,
-      payload: {} as object,
-    };
-    const req = {} as http.IncomingMessage;
-    const res = {} as http.ServerResponse;
-    const handled = await handleTriggerRoutes({
-      req,
-      res,
-      method: params.method,
-      pathname: params.pathname,
-      runtime:
-        params.runtimeOverride === undefined ? runtime : params.runtimeOverride,
-      readJsonBody: async () =>
-        (params.body ?? null) as Record<
-          string,
-          string | number | boolean | null | object | undefined
-        > | null,
-      json: (_res, data, status = 200) => {
-        response.status = status;
-        response.payload = data;
-      },
-      error: (_res, message, status = 400) => {
-        response.status = status;
-        response.payload = { error: message };
-      },
-    });
-
-    return {
-      handled,
-      status: response.status,
-      payload: response.payload,
-    };
-  }
+  const invoke = createRouteInvoker<
+    Record<string, string | number | boolean | null | object | undefined>,
+    AgentRuntime | null,
+    object
+  >(
+    (ctx) =>
+      handleTriggerRoutes({
+        req: ctx.req,
+        res: ctx.res,
+        method: ctx.method,
+        pathname: ctx.pathname,
+        runtime: ctx.runtime,
+        readJsonBody: async () => ctx.readJsonBody(),
+        json: (res, data, status) => ctx.json(res, data, status),
+        error: (res, message, status) => ctx.error(res, message, status),
+      }),
+    { runtimeProvider: () => runtime },
+  );
 
   test("returns false for non-trigger paths", async () => {
     const result = await invoke({

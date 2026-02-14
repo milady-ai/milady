@@ -1,0 +1,384 @@
+name: Agent Review
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  classify:
+    runs-on: ubuntu-latest
+    outputs:
+      category: ${{ steps.classify.outputs.category }}
+    steps:
+      - name: Classify contribution
+        id: classify
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const isPR = !!context.payload.pull_request;
+            const title = isPR
+              ? context.payload.pull_request.title
+              : context.payload.issue.title;
+            const body = isPR
+              ? context.payload.pull_request.body || ''
+              : context.payload.issue.body || '';
+            const text = `${title}\n${body}`.toLowerCase();
+
+            // aesthetic/UI keywords
+            const aestheticPatterns = [
+              'redesign', 'restyle', 'theme', 'color', 'colour', 'font',
+              'layout', 'css', 'styling', 'ui overhaul', 'visual',
+              'dark mode', 'light mode', 'icon', 'logo', 'animation',
+              'prettier', 'beautif'
+            ];
+
+            const isAesthetic = aestheticPatterns.some(p => text.includes(p));
+            const isBugFix = text.includes('fix') || text.includes('bug') ||
+              text.includes('crash') || text.includes('error') ||
+              text.includes('broken') || text.includes('regression');
+
+            let category = 'feature';
+            if (isAesthetic) category = 'aesthetic';
+            if (isBugFix) category = 'bugfix';
+
+            core.setOutput('category', category);
+            console.log(`Classified as: ${category}`);
+
+  review-pr:
+    if: github.event_name == 'pull_request_target'
+    needs: classify
+    runs-on: ubuntu-latest
+    outputs:
+      verdict: ${{ steps.extract-verdict.outputs.verdict }}
+      decision: ${{ steps.extract-verdict.outputs.decision }}
+      decision_comment_url: ${{ steps.extract-verdict.outputs.decision_comment_url }}
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Read project scope
+        id: scope
+        run: |
+          if [ -f SCOPE.md ]; then
+            echo "scope<<SCOPE_EOF" >> $GITHUB_OUTPUT
+            cat SCOPE.md >> $GITHUB_OUTPUT
+            echo "SCOPE_EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Agent Review
+        id: claude-review
+        continue-on-error: false
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          allowed_non_write_users: 'lawyered0,jqmwa,0xSolace'
+          claude_args: '--model claude-opus-4-6 --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr review:*),Bash(git log:*),Bash(git diff:*),Bash(git show:*),Bash(cat:*),Bash(find:*),Bash(grep:*),Bash(head:*),Bash(tail:*),Bash(wc:*),Bash(ls:*),Read,Glob,LS"'
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            Reference the following project scope document when making review decisions:
+            ${{ steps.scope.outputs.scope }}
+
+            You are the sole code reviewer for the Milaidy project. This is an agents-only codebase. No human contributions are accepted — humans contribute by using the app and reporting bugs as QA testers. Your review is final.
+
+            PRs are expected to follow the structured PR template with clear sections for what, why, how, and testing. Flag missing or weak sections.
+
+            The PR branch is already checked out in the current working directory.
+
+            ## Classification
+            This PR has been pre-classified as: ${{ needs.classify.outputs.category }}
+
+            ## Review Protocol
+
+            ### 1. Scope Check
+            Milaidy is a personal AI assistant built on ElizaOS. Contributions MUST be in scope:
+
+            **IN SCOPE (welcome):**
+            - Bug fixes (connector issues, crashes, regressions, error handling)
+            - Performance improvements (with benchmarks proving improvement)
+            - Security fixes
+            - Test coverage improvements
+            - Documentation fixes for accuracy
+
+            **REQUIRES DEEP REVIEW (may not get merged):**
+            - New features (must align with project mission, must include tests)
+            - New plugins or integrations
+            - Architectural changes
+            - Memory/context improvements (must include benchmarks)
+            - Dependency additions (must justify why)
+
+            **OUT OF SCOPE (close or request changes):**
+            - Frontend redesigns, aesthetic changes, theme changes, icon swaps
+            - "Beautification" PRs that don't improve agent capability
+            - Changes that prioritize human visual experience over agent quality
+            - Scope creep disguised as improvements
+            - Changes without tests for testable code
+
+            If this PR is classified as "aesthetic": reject it firmly but politely. Explain that this project prioritizes agent capability over human-facing aesthetics. Visual changes that don't improve the agent's function are out of scope.
+
+            ### 2. Code Quality
+            - TypeScript strict mode compliance
+            - No `any` types unless absolutely necessary (explain why)
+            - Biome lint/format compliance
+            - Files under ~500 LOC
+            - Meaningful variable names, brief comments on non-obvious logic
+            - No committed secrets, real phone numbers, or live config values
+            - Dependencies: do NOT add unless src/ code directly imports them
+
+            ### 3. Security Review
+            - Check for prompt injection vectors
+            - Check for credential exposure
+            - Check for supply chain risks (new dependencies, postinstall scripts)
+            - Check for data exfiltration patterns
+            - Flag any changes to auth, permissions, or secret handling
+
+            ### 4. Test Requirements
+            - Bug fixes MUST include a regression test
+            - New features MUST include unit tests
+            - Coverage thresholds: 70% lines/branches/functions/statements
+            - Run `bun run test` mentally — would these tests pass?
+
+            ### 5. Dark Forest Awareness
+            Assume adversarial intent until proven otherwise. Ask yourself:
+            - Why would someone submit this change?
+            - What does it break that isn't obvious?
+            - Does it introduce subtle behavior changes?
+            - Could this be a supply chain attack?
+            - Are there hidden side effects in seemingly innocent changes?
+
+            ## How to Post Your Review
+            You MUST post your review as a PR comment using `gh pr comment`. This is required for the automation pipeline to read your verdict.
+
+            Use `mcp__github_inline_comment__create_inline_comment` for specific code-level feedback on individual lines.
+
+            For your final verdict, run:
+            ```
+            gh pr comment ${{ github.event.pull_request.number }} --body "YOUR STRUCTURED REVIEW HERE"
+            ```
+
+            ## Output Format
+            Your PR comment MUST include this structured format:
+            1. **Classification:** bug fix / feature / aesthetic / security / other
+            2. **Scope verdict:** in scope / needs deep review / out of scope
+            3. **Code quality:** pass / issues found (list them)
+            4. **Security:** clear / concerns (list them)
+            5. **Tests:** adequate / missing (specify what's needed)
+            6. **Decision:** APPROVE / REQUEST CHANGES / CLOSE (with reason)
+
+            The **Decision** line is machine-parsed by downstream automation. It MUST be exactly one of: APPROVE, REQUEST CHANGES, or CLOSE.
+
+            Be direct. Be opinionated. This repo's quality is your responsibility.
+
+      - name: Extract Claude decision from PR comments
+        id: extract-verdict
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue_number = context.payload.pull_request.number;
+
+            // Prefer bot-authored comments first, then fall back to any matching comment.
+            // Match Decision in any format: **Decision:**, ### N. Decision:, 6. **Decision:**, etc.
+            const decisionPattern = /(?:^|\n)\s*(?:#{1,4}\s+)?(?:\d+\.\s*)?(?:\*{0,2})Decision:(?:\*{0,2})\s*(APPROVE|REQUEST CHANGES|CLOSE)\b/i;
+            const structuredPattern = /(?:#{1,4}\s+)?(?:\d+\.\s*)?(?:\*{0,2})(?:Classification|Scope verdict|Code quality)(?:\*{0,2}):/i;
+            const maxAttempts = 6; // ~60s total with a 10s interval
+            const pollIntervalMs = 10_000;
+
+            const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+            const findLatest = (items) => {
+              const filtered = items.filter((c) => {
+                if (!c?.body) return false;
+                if (!decisionPattern.test(c.body)) return false;
+                return structuredPattern.test(c.body);
+              });
+              return filtered.sort((a, b) =>
+                new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+              )[0];
+            };
+
+            let latest = null;
+            let attemptUsed = 1;
+
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+              attemptUsed = attempt;
+
+              const comments = await github.paginate(github.rest.issues.listComments, {
+                owner,
+                repo,
+                issue_number,
+                per_page: 100,
+              });
+
+              const botComments = comments.filter((c) => c.user?.type === 'Bot');
+              latest = findLatest(botComments) || findLatest(comments);
+
+              if (latest) {
+                break;
+              }
+
+              if (attempt < maxAttempts) {
+                console.log(`Structured decision comment not found yet (attempt ${attempt}/${maxAttempts}); waiting ${pollIntervalMs / 1000}s...`);
+                await sleep(pollIntervalMs);
+              }
+            }
+
+            let verdict = 'reject';
+            let decision = 'REQUEST CHANGES';
+            let decisionCommentUrl = '';
+
+            if (latest) {
+              const match = latest.body.match(decisionPattern);
+              const normalized = (match?.[1] || '').toUpperCase();
+              decision = normalized || decision;
+              decisionCommentUrl = latest.html_url || '';
+
+              if (normalized === 'APPROVE') {
+                verdict = 'approve';
+              } else if (normalized === 'CLOSE') {
+                verdict = 'close';
+              } else {
+                verdict = 'reject';
+              }
+            } else {
+              core.warning(`No structured Claude decision comment found after ${attemptUsed} attempts. Treating as reject.`);
+            }
+
+            core.setOutput('verdict', verdict);
+            core.setOutput('decision', decision);
+            core.setOutput('decision_comment_url', decisionCommentUrl);
+
+            core.summary
+              .addHeading('Agent review decision gate')
+              .addRaw(`- Poll attempts used: ${attemptUsed}\n`)
+              .addRaw(`- Verdict: ${verdict}\n`)
+              .addRaw(`- Decision: ${decision}\n`)
+              .addRaw(`- Decision comment: ${decisionCommentUrl || 'not found'}\n`)
+              .write();
+
+            console.log(`Verdict parsed from PR comments: ${verdict} (${decision})`);
+
+  auto-merge:
+    name: Auto-merge approved PRs
+    needs: [classify, review-pr]
+    if: github.event_name == 'pull_request_target' && needs.review-pr.result == 'success' && needs.review-pr.outputs.verdict == 'approve' && github.event.pull_request.base.ref != 'main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Merge approved PR
+        run: |
+          method="${MERGE_METHOD:-squash}"
+          case "$method" in
+            merge|squash|rebase) ;;
+            *)
+              echo "Invalid AGENT_REVIEW_MERGE_METHOD='$method', defaulting to 'squash'"
+              method="squash"
+              ;;
+          esac
+
+          echo "Merging PR #${{ github.event.pull_request.number }} using '$method' method"
+          gh pr merge ${{ github.event.pull_request.number }} --"$method" --delete-branch || \
+            gh pr merge ${{ github.event.pull_request.number }} --"$method" --admin || \
+            gh pr merge ${{ github.event.pull_request.number }} --"$method"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          MERGE_METHOD: ${{ vars.AGENT_REVIEW_MERGE_METHOD }}
+
+  close-pr:
+    name: Close PRs with CLOSE verdict
+    needs: [review-pr]
+    if: github.event_name == 'pull_request_target' && needs.review-pr.result == 'success' && needs.review-pr.outputs.verdict == 'close'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Close PR after agent verdict
+        run: |
+          comment="Closing this pull request because the automated agent review decision was **CLOSE**."
+          if [ -n "${DECISION_COMMENT_URL}" ]; then
+            comment="$comment\n\nDecision source: ${DECISION_COMMENT_URL}"
+          fi
+
+          gh pr close ${{ github.event.pull_request.number }} --comment "$comment"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          DECISION_COMMENT_URL: ${{ needs.review-pr.outputs.decision_comment_url }}
+
+  triage-issue:
+    if: github.event_name == 'issues'
+    needs: classify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Triage Issue
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          allowed_non_write_users: 'lawyered0,jqmwa,0xSolace'
+          claude_args: '--model claude-opus-4-6 --allowedTools "Bash(gh issue comment:*),Bash(gh issue edit:*),Bash(gh issue close:*),Bash(gh issue view:*),Bash(cat:*),Read,Glob,LS"'
+          prompt: |
+            You are the issue triager for the Milaidy project. This is an agents-only codebase where humans serve as QA testers.
+
+            ## Classification
+            This issue has been pre-classified as: ${{ needs.classify.outputs.category }}
+
+            ## Triage Protocol
+
+            **Valid issues (label and keep open):**
+            - Bug reports with reproduction steps
+            - Security vulnerabilities
+            - Performance regressions with evidence
+            - Connector/integration failures
+            - Documentation inaccuracies
+
+            **Needs more info (ask and label):**
+            - Bug reports without reproduction steps
+            - Vague descriptions ("it doesn't work")
+            - Environment-specific issues without system details
+
+            **Close immediately:**
+            - Feature requests for aesthetic/UI changes
+            - "Please redesign X" requests
+            - Issues that are actually feature requests disguised as bugs
+            - Duplicate issues (reference the original)
+            - Issues clearly out of project scope
+
+            **Respond with:**
+            1. Thank the reporter (they're QA testers, their role matters)
+            2. Classification and labels to apply
+            3. If valid: acknowledge and note priority
+            4. If closing: explain why clearly, reference scope
+            5. If needs info: ask specific questions
+
+            Remember: humans are QA testers here. Their bug reports are valuable. Their feature requests for visual changes are not. Be respectful but firm about scope.

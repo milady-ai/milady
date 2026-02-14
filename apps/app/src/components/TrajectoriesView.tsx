@@ -13,42 +13,13 @@ import {
   type TrajectoryStats,
   type TrajectoryConfig,
 } from "../api-client";
+import {
+  formatTrajectoryDuration,
+  formatTrajectoryTimestamp,
+  formatTrajectoryTokenCount,
+} from "./trajectory-format";
 
 type StatusFilter = "" | "active" | "completed" | "error";
-
-function formatDuration(ms: number | null): string {
-  if (ms === null) return "—";
-  if (ms < 1000) return `${ms}ms`;
-  if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;
-  return `${(ms / 60000).toFixed(1)}m`;
-}
-
-function formatTimestamp(iso: string): string {
-  const date = new Date(iso);
-  const now = new Date();
-  const isToday = date.toDateString() === now.toDateString();
-
-  if (isToday) {
-    return date.toLocaleTimeString(undefined, {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
-  }
-
-  return date.toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-function formatTokens(count: number): string {
-  if (count === 0) return "0";
-  if (count < 1000) return String(count);
-  return `${(count / 1000).toFixed(1)}k`;
-}
 
 const STATUS_COLORS: Record<string, { bg: string; fg: string }> = {
   active: { bg: "rgba(59, 130, 246, 0.15)", fg: "rgb(59, 130, 246)" },
@@ -187,15 +158,18 @@ export function TrajectoriesView({ onSelectTrajectory }: TrajectoriesViewProps) 
           <div className="flex items-center gap-1.5">
             <span className="text-muted">Tokens:</span>
             <span className="font-semibold text-accent">
-              {formatTokens(stats.totalPromptTokens + stats.totalCompletionTokens)}
+              {formatTrajectoryTokenCount(
+                stats.totalPromptTokens + stats.totalCompletionTokens,
+                { emptyLabel: "0" },
+              )}
             </span>
             <span className="text-muted text-[10px]">
-              ({formatTokens(stats.totalPromptTokens)}↑ {formatTokens(stats.totalCompletionTokens)}↓)
+              ({formatTrajectoryTokenCount(stats.totalPromptTokens, { emptyLabel: "0" })}↑ {formatTrajectoryTokenCount(stats.totalCompletionTokens, { emptyLabel: "0" })}↓)
             </span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="text-muted">Avg Duration:</span>
-            <span className="font-semibold">{formatDuration(stats.averageDurationMs)}</span>
+            <span className="font-semibold">{formatTrajectoryDuration(stats.averageDurationMs)}</span>
           </div>
           <div className="ml-auto flex items-center gap-2">
             <label className="flex items-center gap-1.5 cursor-pointer">
@@ -360,7 +334,7 @@ export function TrajectoriesView({ onSelectTrajectory }: TrajectoriesViewProps) 
                     onClick={() => onSelectTrajectory?.(traj.id)}
                   >
                     <td className="px-2 py-1.5 text-muted whitespace-nowrap">
-                      {formatTimestamp(traj.createdAt)}
+                      {formatTrajectoryTimestamp(traj.createdAt, "smart")}
                     </td>
                     <td className="px-2 py-1.5">
                       <span
@@ -389,11 +363,14 @@ export function TrajectoriesView({ onSelectTrajectory }: TrajectoriesViewProps) 
                     </td>
                     <td className="px-2 py-1.5 text-right font-mono">
                       <span className="text-accent">
-                        {formatTokens(traj.totalPromptTokens + traj.totalCompletionTokens)}
+                        {formatTrajectoryTokenCount(
+                          traj.totalPromptTokens + traj.totalCompletionTokens,
+                          { emptyLabel: "0" },
+                        )}
                       </span>
                     </td>
                     <td className="px-2 py-1.5 text-right text-muted font-mono">
-                      {formatDuration(traj.durationMs)}
+                      {formatTrajectoryDuration(traj.durationMs)}
                     </td>
                   </tr>
                 );

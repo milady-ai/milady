@@ -1,6 +1,6 @@
 /** Cross-platform sandbox engine: Docker, Apple Container, auto-detect. */
 
-import { execSync, spawn } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import { arch, platform } from "node:os";
 
 export type SandboxEngineType = "docker" | "apple-container" | "auto";
@@ -38,6 +38,272 @@ export interface ContainerExecResult {
   durationMs: number;
 }
 
+type ExecCommandResult = {
+  binary: string;
+  args: string[];
+  timeoutMs?: number;
+  stdin?: string;
+};
+
+function appendMountArgs(
+  args: string[],
+  mounts: Array<{ host: string; container: string; readonly: boolean }>,
+) {
+  for (const mount of mounts) {
+    if (mount.readonly) {
+      args.push(
+        "--mount",
+        `type=bind,source=${mount.host},target=${mount.container},readonly`,
+      );
+    } else {
+      args.push("-v", `${mount.host}:${mount.container}`);
+    }
+  }
+}
+
+function appendEnvArgs(args: string[], env: Record<string, string>) {
+  for (const [key, value] of Object.entries(env)) {
+    args.push("-e", `${key}=${value}`);
+  }
+}
+
+function listContainersFromBinary(binary: string, prefix: string): string[] {
+  try {
+    const output = execFileSync(
+      binary,
+      ["ps", "-a", "--filter", `name=${prefix}`, "--format", "{{.ID}}"],
+      {
+        encoding: "utf-8",
+        timeout: 10_000,
+        stdio: ["ignore", "pipe", "ignore"],
+      },
+    );
+    return output
+      .split("\n")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+function checkHealthWithBinary(binary: string, id: string): Promise<boolean> {
+  try {
+    const result = execFileSync(binary, ["exec", id, "echo", "healthy"], {
+      encoding: "utf-8",
+      timeout: 5000,
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+    return Promise.resolve(result === "healthy");
+  } catch {
+    return Promise.resolve(false);
+  }
+}
+
+function getChildProcessErrorText(error: unknown): string {
+  const execError = error as {
+    message?: string;
+    stderr?: string | Buffer;
+    stdout?: string | Buffer;
+  };
+
+  const parts = [execError.message, execError.stderr, execError.stdout]
+    .map((value) => {
+      if (value === undefined || value === null) return "";
+      if (typeof value === "string") return value;
+      if (typeof value === "object" && "toString" in value)
+        return value.toString();
+      return "";
+    })
+    .filter(Boolean)
+    .join(" ");
+
+  return parts.toLowerCase();
+}
+
+function isContainerVersionUnsupported(error: unknown): boolean {
+  const errorText = getChildProcessErrorText(error);
+  return (
+    errorText.includes("unknown option") ||
+    errorText.includes("unrecognized option") ||
+    errorText.includes("invalid option") ||
+    errorText.includes("unknown flag") ||
+    errorText.includes("no such option")
+  );
+}
+
+async function runExecInContainer(
+  opts: ExecCommandResult,
+): Promise<ContainerExecResult> {
+  const { binary, args, timeoutMs, stdin } = opts;
+  const start = Date.now();
+  return new Promise<ContainerExecResult>((resolve) => {
+    const proc = spawn(binary, args, { stdio: ["pipe", "pipe", "pipe"] });
+
+    let stdout = "";
+    let stderr = "";
+    const timeout = setTimeout(() => proc.kill("SIGKILL"), timeoutMs ?? 30_000);
+
+    proc.stdout.on("data", (data: Buffer) => {
+      stdout += data.toString();
+    });
+    proc.stderr.on("data", (data: Buffer) => {
+      stderr += data.toString();
+    });
+
+    if (stdin) {
+      proc.stdin.write(stdin);
+      proc.stdin.end();
+    }
+
+    proc.on("close", (code) => {
+      clearTimeout(timeout);
+      resolve({
+        exitCode: code ?? 1,
+        stdout,
+        stderr,
+        durationMs: Date.now() - start,
+      });
+    });
+
+    proc.on("error", (err) => {
+      clearTimeout(timeout);
+      resolve({
+        exitCode: 1,
+        stdout,
+        stderr: `Exec error: ${err.message}`,
+        durationMs: Date.now() - start,
+      });
+    });
+  });
+}
+
+function parseContainerCommand(command: string): string[] {
+  const args: string[] = [];
+  let current = "";
+  let inSingleQuote = false;
+  let inDoubleQuote = false;
+  let escaping = false;
+  let tokenStarted = false;
+
+  const emitCurrent = () => {
+    if (tokenStarted) {
+      args.push(current);
+      current = "";
+      tokenStarted = false;
+    }
+  };
+
+  const trimmed = command.trim();
+  if (trimmed.length === 0) {
+    throw new Error("Container exec command is required");
+  }
+
+  for (let i = 0; i < trimmed.length; i++) {
+    const char = trimmed[i];
+
+    if (escaping) {
+      current += char;
+      escaping = false;
+      continue;
+    }
+
+    if (inSingleQuote) {
+      if (char === "'") {
+        inSingleQuote = false;
+      } else {
+        current += char;
+        tokenStarted = true;
+      }
+      continue;
+    }
+
+    if (inDoubleQuote) {
+      if (char === '"') {
+        inDoubleQuote = false;
+      } else if (char === "\\") {
+        const next = trimmed[i + 1];
+        if (next === "\\" || next === '"' || next === "$" || next === "`") {
+          i += 1;
+          current += trimmed[i];
+        } else {
+          current += char;
+        }
+      } else {
+        current += char;
+      }
+      tokenStarted = true;
+      continue;
+    }
+
+    if (char === "'") {
+      inSingleQuote = true;
+      tokenStarted = true;
+      continue;
+    }
+
+    if (char === '"') {
+      inDoubleQuote = true;
+      tokenStarted = true;
+      continue;
+    }
+
+    if (char === "\\") {
+      if (i + 1 >= trimmed.length) {
+        throw new Error(
+          "Container exec command cannot end with dangling escape",
+        );
+      }
+      escaping = true;
+      continue;
+    }
+
+    if (/\s/.test(char)) {
+      emitCurrent();
+      continue;
+    }
+
+    if (
+      char === "&" ||
+      char === "|" ||
+      char === ";" ||
+      char === "<" ||
+      char === ">" ||
+      char === "$" ||
+      char === "`" ||
+      char === "(" ||
+      char === ")" ||
+      char === "{" ||
+      char === "}" ||
+      char === "\n" ||
+      char === "\r"
+    ) {
+      throw new Error(
+        "Container exec command contains unsupported shell syntax",
+      );
+    }
+
+    current += char;
+    tokenStarted = true;
+  }
+
+  if (inSingleQuote || inDoubleQuote) {
+    throw new Error("Container exec command has unterminated quotes");
+  }
+
+  if (escaping) {
+    throw new Error("Container exec command has trailing escape");
+  }
+
+  emitCurrent();
+
+  if (args.length === 0) {
+    throw new Error("Container exec command is required");
+  }
+
+  return args;
+}
+
 export interface EngineInfo {
   type: SandboxEngineType;
   available: boolean;
@@ -67,7 +333,7 @@ export class DockerEngine implements ISandboxEngine {
 
   isAvailable(): boolean {
     try {
-      execSync("docker info", { stdio: "ignore", timeout: 10000 });
+      execFileSync("docker", ["info"], { stdio: "ignore", timeout: 10000 });
       return true;
     } catch {
       return false;
@@ -77,7 +343,7 @@ export class DockerEngine implements ISandboxEngine {
   getInfo(): EngineInfo {
     let version = "unknown";
     try {
-      version = execSync("docker --version", {
+      version = execFileSync("docker", ["--version"], {
         encoding: "utf-8",
         timeout: 5000,
       }).trim();
@@ -110,19 +376,8 @@ export class DockerEngine implements ISandboxEngine {
     for (const cap of opts.capDrop) {
       args.push("--cap-drop", cap);
     }
-    for (const mount of opts.mounts) {
-      if (mount.readonly) {
-        args.push(
-          "--mount",
-          `type=bind,source=${mount.host},target=${mount.container},readonly`,
-        );
-      } else {
-        args.push("-v", `${mount.host}:${mount.container}`);
-      }
-    }
-    for (const [key, value] of Object.entries(opts.env)) {
-      args.push("-e", `${key}=${value}`);
-    }
+    appendMountArgs(args, opts.mounts);
+    appendEnvArgs(args, opts.env);
     if (opts.ports) {
       for (const p of opts.ports) {
         args.push("-p", `${p.host}:${p.container}`);
@@ -136,7 +391,7 @@ export class DockerEngine implements ISandboxEngine {
 
     args.push(opts.image);
 
-    const output = execSync(`docker ${args.join(" ")}`, {
+    const output = execFileSync("docker", args, {
       encoding: "utf-8",
       timeout: 60000,
     }).trim();
@@ -147,61 +402,27 @@ export class DockerEngine implements ISandboxEngine {
   async execInContainer(
     opts: ContainerExecOptions,
   ): Promise<ContainerExecResult> {
-    const start = Date.now();
     const args = ["exec"];
     if (opts.workdir) args.push("-w", opts.workdir);
     if (opts.env) {
-      for (const [key, value] of Object.entries(opts.env)) {
-        args.push("-e", `${key}=${value}`);
-      }
+      appendEnvArgs(args, opts.env);
     }
-    args.push(opts.containerId, "sh", "-c", opts.command);
-
-    return new Promise<ContainerExecResult>((resolve) => {
-      const proc = spawn("docker", args, { stdio: ["pipe", "pipe", "pipe"] });
-
-      let stdout = "";
-      let stderr = "";
-      const timeoutMs = opts.timeoutMs ?? 30000;
-      const timeout = setTimeout(() => proc.kill("SIGKILL"), timeoutMs);
-
-      proc.stdout.on("data", (data: Buffer) => {
-        stdout += data.toString();
-      });
-      proc.stderr.on("data", (data: Buffer) => {
-        stderr += data.toString();
-      });
-
-      if (opts.stdin) {
-        proc.stdin.write(opts.stdin);
-        proc.stdin.end();
-      }
-
-      proc.on("close", (code) => {
-        clearTimeout(timeout);
-        resolve({
-          exitCode: code ?? 1,
-          stdout,
-          stderr,
-          durationMs: Date.now() - start,
-        });
-      });
-
-      proc.on("error", (err) => {
-        clearTimeout(timeout);
-        resolve({
-          exitCode: 1,
-          stdout,
-          stderr: `Exec error: ${err.message}`,
-          durationMs: Date.now() - start,
-        });
-      });
+    const commandArgs = parseContainerCommand(opts.command);
+    args.push(opts.containerId, ...commandArgs);
+    return runExecInContainer({
+      binary: "docker",
+      args,
+      timeoutMs: opts.timeoutMs,
+      stdin: opts.stdin,
     });
   }
 
   async stopContainer(id: string): Promise<void> {
     try {
-      execSync(`docker stop ${id}`, { timeout: 15000, stdio: "ignore" });
+      execFileSync("docker", ["stop", id], {
+        timeout: 15000,
+        stdio: "ignore",
+      });
     } catch {
       /* best effort */
     }
@@ -209,7 +430,10 @@ export class DockerEngine implements ISandboxEngine {
 
   async removeContainer(id: string): Promise<void> {
     try {
-      execSync(`docker rm -f ${id}`, { timeout: 10000, stdio: "ignore" });
+      execFileSync("docker", ["rm", "-f", id], {
+        timeout: 10000,
+        stdio: "ignore",
+      });
     } catch {
       /* best effort */
     }
@@ -217,11 +441,15 @@ export class DockerEngine implements ISandboxEngine {
 
   isContainerRunning(id: string): boolean {
     try {
-      const result = execSync(`docker inspect -f "{{.State.Running}}" ${id}`, {
-        encoding: "utf-8",
-        timeout: 5000,
-        stdio: ["ignore", "pipe", "ignore"],
-      }).trim();
+      const result = execFileSync(
+        "docker",
+        ["inspect", "-f", "{{.State.Running}}", id],
+        {
+          encoding: "utf-8",
+          timeout: 5000,
+          stdio: ["ignore", "pipe", "ignore"],
+        },
+      ).trim();
       return result === "true";
     } catch {
       return false;
@@ -230,7 +458,7 @@ export class DockerEngine implements ISandboxEngine {
 
   imageExists(image: string): boolean {
     try {
-      execSync(`docker image inspect ${image}`, {
+      execFileSync("docker", ["image", "inspect", image], {
         stdio: "ignore",
         timeout: 10000,
       });
@@ -241,47 +469,23 @@ export class DockerEngine implements ISandboxEngine {
   }
 
   async pullImage(image: string): Promise<void> {
-    execSync(`docker pull ${image}`, {
+    execFileSync("docker", ["pull", image], {
       stdio: ["ignore", "pipe", "pipe"],
       timeout: 300000,
     });
   }
 
   listContainers(prefix: string): string[] {
-    try {
-      const output = execSync(
-        `docker ps -a --filter name=${prefix} --format "{{.ID}}"`,
-        {
-          encoding: "utf-8",
-          timeout: 10000,
-          stdio: ["ignore", "pipe", "ignore"],
-        },
-      );
-      return output
-        .split("\n")
-        .map((s) => s.trim())
-        .filter(Boolean);
-    } catch {
-      return [];
-    }
+    return listContainersFromBinary("docker", prefix);
   }
 
   async healthCheck(id: string): Promise<boolean> {
-    try {
-      const result = execSync(`docker exec ${id} echo "healthy"`, {
-        encoding: "utf-8",
-        timeout: 5000,
-        stdio: ["ignore", "pipe", "ignore"],
-      }).trim();
-      return result === "healthy";
-    } catch {
-      return false;
-    }
+    return checkHealthWithBinary("docker", id);
   }
 
   private getDockerContext(): string {
     try {
-      return execSync("docker context show", {
+      return execFileSync("docker", ["context", "show"], {
         encoding: "utf-8",
         timeout: 5000,
         stdio: ["ignore", "pipe", "ignore"],
@@ -298,17 +502,28 @@ export class AppleContainerEngine implements ISandboxEngine {
   isAvailable(): boolean {
     if (platform() !== "darwin") return false;
     try {
-      execSync("which container", { stdio: "ignore", timeout: 5000 });
+      execFileSync("container", ["--version"], {
+        stdio: "ignore",
+        timeout: 5000,
+      });
       return true;
-    } catch {
-      return false;
+    } catch (error) {
+      if (!isContainerVersionUnsupported(error)) {
+        return false;
+      }
+      try {
+        execFileSync("container", ["help"], { stdio: "ignore", timeout: 5000 });
+        return true;
+      } catch {
+        return false;
+      }
     }
   }
 
   getInfo(): EngineInfo {
     let version = "unknown";
     try {
-      version = execSync("container --version 2>&1 || echo unknown", {
+      version = execFileSync("container", ["--version"], {
         encoding: "utf-8",
         timeout: 5000,
       }).trim();
@@ -333,20 +548,8 @@ export class AppleContainerEngine implements ISandboxEngine {
     const args = ["run", "--name", opts.name];
 
     // Apple Container: --mount for readonly, -v for read-write
-    for (const mount of opts.mounts) {
-      if (mount.readonly) {
-        args.push(
-          "--mount",
-          `type=bind,source=${mount.host},target=${mount.container},readonly`,
-        );
-      } else {
-        args.push("-v", `${mount.host}:${mount.container}`);
-      }
-    }
-
-    for (const [key, value] of Object.entries(opts.env)) {
-      args.push("-e", `${key}=${value}`);
-    }
+    appendMountArgs(args, opts.mounts);
+    appendEnvArgs(args, opts.env);
 
     args.push(opts.image);
 
@@ -394,58 +597,24 @@ export class AppleContainerEngine implements ISandboxEngine {
   async execInContainer(
     opts: ContainerExecOptions,
   ): Promise<ContainerExecResult> {
-    const start = Date.now();
     const args = ["exec"];
     if (opts.workdir) args.push("-w", opts.workdir);
-    args.push(opts.containerId, "sh", "-c", opts.command);
-
-    return new Promise<ContainerExecResult>((resolve) => {
-      const proc = spawn("container", args, {
-        stdio: ["pipe", "pipe", "pipe"],
-      });
-
-      let stdout = "";
-      let stderr = "";
-      const timeoutMs = opts.timeoutMs ?? 30000;
-      const timeout = setTimeout(() => proc.kill("SIGKILL"), timeoutMs);
-
-      proc.stdout.on("data", (data: Buffer) => {
-        stdout += data.toString();
-      });
-      proc.stderr.on("data", (data: Buffer) => {
-        stderr += data.toString();
-      });
-
-      if (opts.stdin) {
-        proc.stdin.write(opts.stdin);
-        proc.stdin.end();
-      }
-
-      proc.on("close", (code) => {
-        clearTimeout(timeout);
-        resolve({
-          exitCode: code ?? 1,
-          stdout,
-          stderr,
-          durationMs: Date.now() - start,
-        });
-      });
-
-      proc.on("error", (err) => {
-        clearTimeout(timeout);
-        resolve({
-          exitCode: 1,
-          stdout,
-          stderr: `Exec error: ${err.message}`,
-          durationMs: Date.now() - start,
-        });
-      });
+    const commandArgs = parseContainerCommand(opts.command);
+    args.push(opts.containerId, ...commandArgs);
+    return runExecInContainer({
+      binary: "container",
+      args,
+      timeoutMs: opts.timeoutMs,
+      stdin: opts.stdin,
     });
   }
 
   async stopContainer(id: string): Promise<void> {
     try {
-      execSync(`container stop ${id}`, { timeout: 15000, stdio: "ignore" });
+      execFileSync("container", ["stop", id], {
+        timeout: 15000,
+        stdio: "ignore",
+      });
     } catch {
       /* best effort */
     }
@@ -454,7 +623,10 @@ export class AppleContainerEngine implements ISandboxEngine {
   async removeContainer(id: string): Promise<void> {
     // Apple Container uses --rm by default; explicit remove for safety
     try {
-      execSync(`container rm ${id}`, { timeout: 10000, stdio: "ignore" });
+      execFileSync("container", ["rm", id], {
+        timeout: 10000,
+        stdio: "ignore",
+      });
     } catch {
       /* best effort */
     }
@@ -462,7 +634,10 @@ export class AppleContainerEngine implements ISandboxEngine {
 
   isContainerRunning(id: string): boolean {
     try {
-      execSync(`container inspect ${id}`, { stdio: "ignore", timeout: 5000 });
+      execFileSync("container", ["inspect", id], {
+        stdio: "ignore",
+        timeout: 5000,
+      });
       return true;
     } catch {
       return false;
@@ -471,7 +646,7 @@ export class AppleContainerEngine implements ISandboxEngine {
 
   imageExists(image: string): boolean {
     try {
-      execSync(`container image inspect ${image}`, {
+      execFileSync("container", ["image", "inspect", image], {
         stdio: "ignore",
         timeout: 10000,
       });
@@ -482,42 +657,18 @@ export class AppleContainerEngine implements ISandboxEngine {
   }
 
   async pullImage(image: string): Promise<void> {
-    execSync(`container pull ${image}`, {
+    execFileSync("container", ["pull", image], {
       stdio: ["ignore", "pipe", "pipe"],
       timeout: 300000,
     });
   }
 
   listContainers(prefix: string): string[] {
-    try {
-      const output = execSync(
-        `container ps -a --filter name=${prefix} --format "{{.ID}}"`,
-        {
-          encoding: "utf-8",
-          timeout: 10000,
-          stdio: ["ignore", "pipe", "ignore"],
-        },
-      );
-      return output
-        .split("\n")
-        .map((s) => s.trim())
-        .filter(Boolean);
-    } catch {
-      return [];
-    }
+    return listContainersFromBinary("container", prefix);
   }
 
   async healthCheck(id: string): Promise<boolean> {
-    try {
-      const result = execSync(`container exec ${id} echo "healthy"`, {
-        encoding: "utf-8",
-        timeout: 5000,
-        stdio: ["ignore", "pipe", "ignore"],
-      }).trim();
-      return result === "healthy";
-    } catch {
-      return false;
-    }
+    return checkHealthWithBinary("container", id);
   }
 }
 

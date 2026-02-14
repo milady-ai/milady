@@ -1,6 +1,9 @@
-import { EventEmitter } from "node:events";
 import type http from "node:http";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  createMockHttpResponse,
+  createMockIncomingMessage,
+} from "../test-support/test-helpers.js";
 import type { CloudRouteState } from "./cloud-routes.js";
 import { handleCloudRoute } from "./cloud-routes.js";
 
@@ -8,50 +11,6 @@ const fetchMock =
   vi.fn<
     (input: string | URL | Request, init?: RequestInit) => Promise<Response>
   >();
-
-function createMockRequest(
-  bodyChunks: Buffer[],
-): http.IncomingMessage & EventEmitter {
-  const req = new EventEmitter() as http.IncomingMessage &
-    EventEmitter & { destroy: () => void };
-  req.method = "POST";
-  req.url = "/api/cloud/agents";
-  req.headers = {};
-  req.destroy = vi.fn();
-  for (const chunk of bodyChunks) {
-    queueMicrotask(() => req.emit("data", chunk));
-  }
-  queueMicrotask(() => req.emit("end"));
-  return req;
-}
-
-function createMockResponse(): {
-  res: http.ServerResponse;
-  getStatus: () => number;
-  getJson: () => unknown;
-} {
-  let statusCode = 200;
-  let payload = "";
-
-  const res = {
-    set statusCode(value: number) {
-      statusCode = value;
-    },
-    get statusCode() {
-      return statusCode;
-    },
-    setHeader: () => undefined,
-    end: (chunk?: string | Buffer) => {
-      payload = chunk ? chunk.toString() : "";
-    },
-  } as unknown as http.ServerResponse;
-
-  return {
-    res,
-    getStatus: () => statusCode,
-    getJson: () => (payload ? JSON.parse(payload) : null),
-  };
-}
 
 function createState(createAgent: (args: unknown) => Promise<unknown>) {
   return {
@@ -68,8 +27,13 @@ function createState(createAgent: (args: unknown) => Promise<unknown>) {
 
 describe("handleCloudRoute", () => {
   it("returns 400 for invalid JSON in POST /api/cloud/agents", async () => {
-    const req = createMockRequest([Buffer.from("{")]);
-    const { res, getStatus, getJson } = createMockResponse();
+    const req = createMockIncomingMessage({
+      method: "POST",
+      url: "/api/cloud/agents",
+      headers: {},
+      bodyChunks: [Buffer.from("{")],
+    });
+    const { res, getStatus, getJson } = createMockHttpResponse();
     const createAgent = vi.fn().mockResolvedValue({ id: "agent-1" });
 
     const handled = await handleCloudRoute(
@@ -87,8 +51,13 @@ describe("handleCloudRoute", () => {
   });
 
   it("returns 413 when POST /api/cloud/agents body exceeds size limit", async () => {
-    const req = createMockRequest([Buffer.alloc(1_048_577, "a")]);
-    const { res, getStatus, getJson } = createMockResponse();
+    const req = createMockIncomingMessage({
+      method: "POST",
+      url: "/api/cloud/agents",
+      headers: {},
+      bodyChunks: [Buffer.alloc(1_048_577, "a")],
+    });
+    const { res, getStatus, getJson } = createMockHttpResponse();
     const createAgent = vi.fn().mockResolvedValue({ id: "agent-1" });
 
     const handled = await handleCloudRoute(
@@ -106,15 +75,16 @@ describe("handleCloudRoute", () => {
   });
 
   it("keeps successful create-agent behavior for valid JSON", async () => {
-    const req = createMockRequest([
-      Buffer.from(
-        JSON.stringify({
-          agentName: "My Agent",
-          agentConfig: { modelProvider: "openai" },
-        }),
-      ),
-    ]);
-    const { res, getStatus, getJson } = createMockResponse();
+    const req = createMockIncomingMessage({
+      method: "POST",
+      url: "/api/cloud/agents",
+      headers: {},
+      body: JSON.stringify({
+        agentName: "My Agent",
+        agentConfig: { modelProvider: "openai" },
+      }),
+    });
+    const { res, getStatus, getJson } = createMockHttpResponse();
     const createAgent = vi.fn().mockResolvedValue({ id: "agent-1" });
 
     const handled = await handleCloudRoute(
@@ -142,32 +112,6 @@ function timeoutError(message = "The operation was aborted due to timeout") {
   return err;
 }
 
-function createReq(url = "/"): http.IncomingMessage {
-  return {
-    url,
-    headers: { host: "localhost:2138" },
-  } as unknown as http.IncomingMessage;
-}
-
-function createRes(): {
-  res: http.ServerResponse;
-  getJson: () => Record<string, unknown>;
-} {
-  let raw = "";
-  const target = {
-    statusCode: 200,
-    setHeader: (_k: string, _v: string) => {},
-    end: (chunk?: string) => {
-      if (typeof chunk === "string") raw += chunk;
-    },
-  } as unknown as http.ServerResponse;
-
-  return {
-    res: target,
-    getJson: () => JSON.parse(raw) as Record<string, unknown>,
-  };
-}
-
 function cloudState(): CloudRouteState {
   return {
     config: { cloud: { baseUrl: "https://test.elizacloud.ai" } },
@@ -192,9 +136,11 @@ describe("handleCloudRoute timeout behavior", () => {
       throw timeoutError();
     });
 
-    const { res, getJson } = createRes();
+    const { res, getJson } = createMockHttpResponse<Record<string, unknown>>();
     const handled = await handleCloudRoute(
-      createReq("/api/cloud/login"),
+      createMockIncomingMessage({
+        url: "/api/cloud/login",
+      }) as http.IncomingMessage,
       res,
       "/api/cloud/login",
       "POST",
@@ -210,9 +156,11 @@ describe("handleCloudRoute timeout behavior", () => {
   it("returns 504 when cloud login status polling times out", async () => {
     fetchMock.mockRejectedValue(timeoutError());
 
-    const { res, getJson } = createRes();
+    const { res, getJson } = createMockHttpResponse<Record<string, unknown>>();
     const handled = await handleCloudRoute(
-      createReq("/api/cloud/login/status?sessionId=test-session"),
+      createMockIncomingMessage({
+        url: "/api/cloud/login/status?sessionId=test-session",
+      }) as http.IncomingMessage,
       res,
       "/api/cloud/login/status",
       "GET",
@@ -230,9 +178,11 @@ describe("handleCloudRoute timeout behavior", () => {
   it("returns 502 when cloud polling fails for non-timeout network errors", async () => {
     fetchMock.mockRejectedValue(new Error("ECONNREFUSED"));
 
-    const { res, getJson } = createRes();
+    const { res, getJson } = createMockHttpResponse<Record<string, unknown>>();
     const handled = await handleCloudRoute(
-      createReq("/api/cloud/login/status?sessionId=test-session"),
+      createMockIncomingMessage({
+        url: "/api/cloud/login/status?sessionId=test-session",
+      }) as http.IncomingMessage,
       res,
       "/api/cloud/login/status",
       "GET",

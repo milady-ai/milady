@@ -11,6 +11,7 @@ import {
   stringToUuid,
   type UUID,
 } from "@elizaos/core";
+import { parsePositiveInteger } from "../utils/number-parsing.js";
 import {
   getTriggerLimit,
   listTriggerTasks,
@@ -79,13 +80,6 @@ function parseExtraction(xml: string): TriggerExtraction {
     cronExpression: parseTag(xml, "cronExpression"),
     maxRuns: parseTag(xml, "maxRuns"),
   };
-}
-
-function parsePositiveInteger(raw: string | undefined): number | undefined {
-  if (!raw || !/^\d+$/.test(raw)) return undefined;
-  const value = Number(raw);
-  if (!Number.isFinite(value) || value <= 0) return undefined;
-  return value;
 }
 
 function deriveTriggerType(

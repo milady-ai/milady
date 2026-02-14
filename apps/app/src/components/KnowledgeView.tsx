@@ -19,6 +19,8 @@ import type {
   KnowledgeSearchResult,
   KnowledgeStats,
 } from "../api-client";
+import { ConfirmDeleteControl } from "./shared/confirm-delete-control";
+import { formatByteSize, formatShortDate } from "./shared/format";
 
 /* ── Shared style constants ─────────────────────────────────────────── */
 
@@ -293,24 +295,6 @@ function DocumentCard({
   onDelete: (id: string) => void;
   deleting: boolean;
 }) {
-  const [confirmDelete, setConfirmDelete] = useState(false);
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return "—";
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
-
-  const formatDate = (timestamp: number): string => {
-    if (!timestamp) return "—";
-    return new Date(timestamp).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
   return (
     <div className="flex items-center justify-between p-4 border border-[var(--border)] bg-[var(--card)] rounded hover:border-[var(--accent)]/50 transition-colors">
       <div
@@ -322,8 +306,8 @@ function DocumentCard({
         </div>
         <div className="flex items-center gap-3 text-xs text-[var(--muted)]">
           <span>{doc.contentType}</span>
-          <span>{formatFileSize(doc.fileSize)}</span>
-          <span>{formatDate(doc.createdAt)}</span>
+          <span>{formatByteSize(doc.fileSize)}</span>
+          <span>{formatShortDate(doc.createdAt, { fallback: "—" })}</span>
           {doc.source === "youtube" && (
             <span className="px-1.5 py-0.5 bg-[#e74c3c]/10 text-[#e74c3c] rounded text-[10px]">
               YouTube
@@ -337,37 +321,14 @@ function DocumentCard({
         </div>
       </div>
       <div className="flex items-center gap-2 ml-4">
-        {confirmDelete ? (
-          <>
-            <button
-              type="button"
-              className={btnDanger}
-              onClick={() => {
-                onDelete(doc.id);
-                setConfirmDelete(false);
-              }}
-              disabled={deleting}
-            >
-              {deleting ? "..." : "Confirm"}
-            </button>
-            <button
-              type="button"
-              className={btnGhost}
-              onClick={() => setConfirmDelete(false)}
-              disabled={deleting}
-            >
-              Cancel
-            </button>
-          </>
-        ) : (
-          <button
-            type="button"
-            className={btnDanger}
-            onClick={() => setConfirmDelete(true)}
-          >
-            Delete
-          </button>
-        )}
+        <ConfirmDeleteControl
+          triggerClassName={btnDanger}
+          confirmClassName={btnDanger}
+          cancelClassName={btnGhost}
+          disabled={deleting}
+          busyLabel="..."
+          onConfirm={() => onDelete(doc.id)}
+        />
       </div>
     </div>
   );

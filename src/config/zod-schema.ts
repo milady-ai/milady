@@ -14,6 +14,7 @@ import {
 import {
   HookMappingSchema,
   HooksGmailSchema,
+  InstallRecordSchema,
   InternalHooksSchema,
 } from "./zod-schema.hooks.js";
 import {
@@ -804,25 +805,7 @@ export const MilaidySchema = z
               .strict(),
           )
           .optional(),
-        installs: z
-          .record(
-            z.string(),
-            z
-              .object({
-                source: z.union([
-                  z.literal("npm"),
-                  z.literal("archive"),
-                  z.literal("path"),
-                ]),
-                spec: z.string().optional(),
-                sourcePath: z.string().optional(),
-                installPath: z.string().optional(),
-                version: z.string().optional(),
-                installedAt: z.string().optional(),
-              })
-              .strict(),
-          )
-          .optional(),
+        installs: z.record(z.string(), InstallRecordSchema).optional(),
       })
       .strict()
       .optional(),

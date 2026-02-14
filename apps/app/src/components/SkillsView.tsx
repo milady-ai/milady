@@ -10,6 +10,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useApp } from "../AppContext";
 import { client } from "../api-client";
 import type { SkillInfo, SkillMarketplaceResult, SkillScanReportSummary } from "../api-client";
+import { ConfirmDeleteControl } from "./shared/confirm-delete-control";
+import { StatusBadge } from "./shared/ui-badges";
+import { Switch } from "./shared/ui-switch";
 
 /* ── Shared style constants ─────────────────────────────────────────── */
 
@@ -21,80 +24,6 @@ const btnGhost =
   "px-3 py-1.5 text-xs bg-transparent text-[var(--muted)] border border-[var(--border)] cursor-pointer hover:text-[var(--txt)] hover:border-[var(--txt)] transition-colors disabled:opacity-40 disabled:cursor-default";
 const btnDanger =
   "px-2 py-1 text-[11px] bg-transparent text-[var(--muted)] border border-[var(--border)] cursor-pointer hover:text-[#e74c3c] hover:border-[#e74c3c] transition-colors";
-
-/* ── Toggle Switch ──────────────────────────────────────────────────── */
-
-function Toggle({
-  checked,
-  disabled,
-  onChange,
-}: {
-  checked: boolean;
-  disabled?: boolean;
-  onChange: (val: boolean) => void;
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      disabled={disabled}
-      className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none disabled:opacity-40 disabled:cursor-default ${
-        checked ? "bg-[var(--accent)]" : "bg-[var(--border)]"
-      }`}
-      onClick={() => onChange(!checked)}
-    >
-      <span
-        className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-          checked ? "translate-x-4" : "translate-x-0"
-        }`}
-      />
-    </button>
-  );
-}
-
-/* ── Status Badge ───────────────────────────────────────────────────── */
-
-function StatusBadge({ status, enabled }: { status: SkillInfo["scanStatus"]; enabled: boolean }) {
-  if (status === "blocked") {
-    return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase bg-[#e74c3c]/15 text-[#e74c3c] rounded-sm">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#e74c3c]" />
-        Blocked
-      </span>
-    );
-  }
-  if (status === "critical") {
-    return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase bg-[#e74c3c]/15 text-[#e74c3c] rounded-sm">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#e74c3c]" />
-        Critical
-      </span>
-    );
-  }
-  if (status === "warning") {
-    return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase bg-[#f39c12]/15 text-[#f39c12] rounded-sm">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#f39c12]" />
-        Warning
-      </span>
-    );
-  }
-  if (enabled) {
-    return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase bg-[var(--ok,#16a34a)]/15 text-[var(--ok,#16a34a)] rounded-sm">
-        <span className="w-1.5 h-1.5 rounded-full bg-[var(--ok,#16a34a)]" />
-        Active
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase bg-[var(--border)]/30 text-[var(--muted)] rounded-sm">
-      <span className="w-1.5 h-1.5 rounded-full bg-[var(--muted)]" />
-      Inactive
-    </span>
-  );
-}
 
 /* ── Skill Card ─────────────────────────────────────────────────────── */
 
@@ -126,7 +55,6 @@ function SkillCard({
   const isQuarantined = skill.scanStatus === "warning" || skill.scanStatus === "critical";
   const isBlocked = skill.scanStatus === "blocked";
   const isReviewing = skillReviewId === skill.id;
-  const [confirmDelete, setConfirmDelete] = useState(false);
 
   return (
     <div
@@ -137,27 +65,51 @@ function SkillCard({
       }`}
       data-skill-id={skill.id}
     >
-      {/* Main content area */}
-      <div className="p-4">
-        {/* Top row: badge + toggle */}
-        <div className="flex items-center justify-between mb-2.5">
-          <StatusBadge status={skill.scanStatus} enabled={skill.enabled} />
-          {!isBlocked && !isQuarantined && (
-            <Toggle
-              checked={skill.enabled}
-              disabled={skillToggleAction === skill.id}
-              onChange={(val) => onToggle(skill.id, val)}
+        {/* Main content area */}
+        <div className="p-4">
+          {/* Top row: badge + toggle */}
+          <div className="flex items-center justify-between mb-2.5">
+            <StatusBadge
+              label={
+                skill.scanStatus === "blocked" || skill.scanStatus === "critical"
+                  ? "Blocked"
+                  : skill.scanStatus === "warning"
+                    ? "Warning"
+                    : skill.enabled
+                      ? "Active"
+                      : "Inactive"
+              }
+              tone={
+                skill.scanStatus === "blocked" || skill.scanStatus === "critical" || skill.scanStatus === "warning"
+                  ? skill.scanStatus === "warning"
+                    ? "warning"
+                    : "danger"
+                  : skill.enabled
+                    ? "success"
+                    : "muted"
+              }
+              withDot
             />
-          )}
-          {isQuarantined && !isReviewing && (
-            <button
-              className="px-2.5 py-1 text-[11px] font-medium bg-[#f39c12]/15 text-[#f39c12] border border-[#f39c12]/30 cursor-pointer hover:bg-[#f39c12]/25 transition-colors"
-              onClick={() => onReview(skill.id)}
-            >
-              Review Findings
-            </button>
-          )}
-        </div>
+            {!isBlocked && !isQuarantined && (
+              <Switch
+                checked={skill.enabled}
+                disabled={skillToggleAction === skill.id}
+                onChange={(val) => onToggle(skill.id, val)}
+                size="compact"
+                trackOnClass="bg-[var(--accent)]"
+                trackOffClass="bg-[var(--border)]"
+                knobClass="bg-white shadow-sm"
+              />
+            )}
+            {isQuarantined && !isReviewing && (
+              <button
+                className="px-2.5 py-1 text-[11px] font-medium bg-[#f39c12]/15 text-[#f39c12] border border-[#f39c12]/30 cursor-pointer hover:bg-[#f39c12]/25 transition-colors"
+                onClick={() => onReview(skill.id)}
+              >
+                Review Findings
+              </button>
+            )}
+          </div>
 
         {/* Name + description */}
         <div className="font-semibold text-sm text-[var(--txt)] mb-1 truncate" title={skill.name}>
@@ -173,30 +125,14 @@ function SkillCard({
         <button className={btnGhost} onClick={() => onEdit(skill)}>
           Edit
         </button>
-        {confirmDelete ? (
-          <>
-            <span className="text-[11px] text-[#e74c3c] ml-1">Delete?</span>
-            <button
-              className="px-2 py-1 text-[11px] bg-[#e74c3c] text-white border border-[#e74c3c] cursor-pointer hover:opacity-90 transition-opacity"
-              onClick={() => {
-                onDelete(skill.id, skill.name);
-                setConfirmDelete(false);
-              }}
-            >
-              Yes
-            </button>
-            <button
-              className={btnGhost}
-              onClick={() => setConfirmDelete(false)}
-            >
-              No
-            </button>
-          </>
-        ) : (
-          <button className={btnDanger} onClick={() => setConfirmDelete(true)}>
-            Delete
-          </button>
-        )}
+        <ConfirmDeleteControl
+          triggerClassName={btnDanger}
+          confirmClassName="px-2 py-1 text-[11px] bg-[#e74c3c] text-white border border-[#e74c3c] cursor-pointer hover:opacity-90 transition-opacity"
+          cancelClassName={btnGhost}
+          confirmLabel="Yes"
+          cancelLabel="No"
+          onConfirm={() => onDelete(skill.id, skill.name)}
+        />
         <span className="flex-1" />
         <span className="text-[10px] text-[var(--muted)] font-mono truncate max-w-[120px]" title={skill.id}>
           {skill.id.length > 16 ? `${skill.id.slice(0, 16)}...` : skill.id}

@@ -11,6 +11,7 @@ import type { PluginInfo, PluginParamDef } from "../api-client";
 import { ConfigRenderer, defaultRegistry } from "./config-renderer";
 import type { ConfigUiHint } from "../types";
 import type { JsonSchemaObject } from "./config-catalog";
+import { autoLabel } from "./shared/labels";
 
 /* ── UI Showcase Plugin ────────────────────────────────────────────── */
 
@@ -192,30 +193,6 @@ const ALWAYS_ON_PLUGIN_IDS = new Set([
 ]);
 
 /* ── Helpers ────────────────────────────────────────────────────────── */
-
-const ACRONYMS = new Set([
-  "API", "URL", "ID", "SSH", "SSL", "HTTP", "HTTPS", "RPC",
-  "NFT", "EVM", "TLS", "DNS", "IP", "JWT", "SDK", "LLM",
-]);
-
-/** Strip plugin-id prefix and title-case the env-key into a human label. */
-export function autoLabel(key: string, pluginId: string): string {
-  const prefixes = [
-    pluginId.toUpperCase().replace(/-/g, "_") + "_",
-    pluginId.toUpperCase().replace(/-/g, "") + "_",
-  ];
-  let remainder = key;
-  for (const prefix of prefixes) {
-    if (key.startsWith(prefix) && key.length > prefix.length) {
-      remainder = key.slice(prefix.length);
-      break;
-    }
-  }
-  return remainder
-    .split("_")
-    .map((w) => (ACRONYMS.has(w) ? w : w.charAt(0) + w.slice(1).toLowerCase()))
-    .join(" ");
-}
 
 /** Detect advanced / debug parameters that should be collapsed by default. */
 export function isAdvancedParam(param: PluginParamDef): boolean {

@@ -282,6 +282,14 @@ export async function startMockApiServer(options: MockApiServerOptions = {}): Pr
     },
   };
 
+  const statusPayload = () => ({
+    state: agentState,
+    agentName,
+    model: "mock-model",
+    startedAt: Date.now() - 60_000,
+    uptime: 60_000,
+  });
+
   const server = http.createServer(async (req, res) => {
     const method = req.method ?? "GET";
     const host = req.headers.host ?? "127.0.0.1";
@@ -295,14 +303,6 @@ export async function startMockApiServer(options: MockApiServerOptions = {}): Pr
       res.end();
       return;
     }
-
-    const statusPayload = () => ({
-      state: agentState,
-      agentName,
-      model: "mock-model",
-      startedAt: Date.now() - 60_000,
-      uptime: 60_000,
-    });
 
     if (method === "GET" && pathname === "/api/auth/status") {
       json(res, 200, { required: false, pairingEnabled: false, expiresAt: null });

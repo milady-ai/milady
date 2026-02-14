@@ -14,6 +14,11 @@
 
 import type http from "node:http";
 import type { AgentRuntime } from "@elizaos/core";
+import {
+  readJsonBody as parseJsonBody,
+  sendJson,
+  sendJsonError,
+} from "./http-helpers.js";
 
 // Interface for the plugin's TrajectoryLoggerService
 interface TrajectoryLoggerService {
@@ -194,65 +199,13 @@ interface UITrajectoryDetailResult {
   providerAccesses: UIProviderAccess[];
 }
 
-function jsonResponse(
-  res: http.ServerResponse,
-  data: unknown,
-  status = 200,
-): void {
-  res.statusCode = status;
-  res.setHeader("Content-Type", "application/json");
-  res.end(JSON.stringify(data));
-}
-
-function errorResponse(
-  res: http.ServerResponse,
-  message: string,
-  status = 400,
-): void {
-  jsonResponse(res, { error: message }, status);
-}
-
-function readBody(req: http.IncomingMessage): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    let totalBytes = 0;
-    req.on("data", (c: Buffer) => {
-      totalBytes += c.length;
-      if (totalBytes > 2 * 1024 * 1024) {
-        reject(new Error("Request body too large"));
-        return;
-      }
-      chunks.push(c);
-    });
-    req.on("end", () => resolve(Buffer.concat(chunks).toString()));
-    req.on("error", reject);
-  });
-}
-
 async function readJsonBody<T = Record<string, unknown>>(
   req: http.IncomingMessage,
   res: http.ServerResponse,
 ): Promise<T | null> {
-  let raw: string;
-  try {
-    raw = await readBody(req);
-  } catch (err) {
-    const msg =
-      err instanceof Error ? err.message : "Failed to read request body";
-    errorResponse(res, msg, 413);
-    return null;
-  }
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    if (parsed == null || typeof parsed !== "object" || Array.isArray(parsed)) {
-      errorResponse(res, "Request body must be a JSON object", 400);
-      return null;
-    }
-    return parsed as T;
-  } catch {
-    errorResponse(res, "Invalid JSON in request body", 400);
-    return null;
-  }
+  return parseJsonBody(req, res, {
+    maxBytes: 2 * 1024 * 1024,
+  });
 }
 
 function getTrajectoryLogger(
@@ -412,7 +365,7 @@ async function handleGetTrajectories(
 ): Promise<void> {
   const logger = getTrajectoryLogger(runtime);
   if (!logger) {
-    errorResponse(res, "Trajectory logger service not available", 503);
+    sendJsonError(res, "Trajectory logger service not available", 503);
     return;
   }
 
@@ -446,7 +399,7 @@ async function handleGetTrajectories(
     limit: result.limit,
   };
 
-  jsonResponse(res, uiResult);
+  sendJson(res, uiResult);
 }
 
 async function handleGetTrajectoryDetail(
@@ -457,19 +410,19 @@ async function handleGetTrajectoryDetail(
 ): Promise<void> {
   const logger = getTrajectoryLogger(runtime);
   if (!logger) {
-    errorResponse(res, "Trajectory logger service not available", 503);
+    sendJsonError(res, "Trajectory logger service not available", 503);
     return;
   }
 
   const trajectory = await logger.getTrajectoryDetail(trajectoryId);
   if (!trajectory) {
-    errorResponse(res, `Trajectory "${trajectoryId}" not found`, 404);
+    sendJsonError(res, `Trajectory "${trajectoryId}" not found`, 404);
     return;
   }
 
   // Transform to UI-compatible format
   const uiDetail = trajectoryToUIDetail(trajectory);
-  jsonResponse(res, uiDetail);
+  sendJson(res, uiDetail);
 }
 
 async function handleGetStats(
@@ -479,7 +432,7 @@ async function handleGetStats(
 ): Promise<void> {
   const logger = getTrajectoryLogger(runtime);
   if (!logger) {
-    errorResponse(res, "Trajectory logger service not available", 503);
+    sendJsonError(res, "Trajectory logger service not available", 503);
     return;
   }
 
@@ -497,7 +450,7 @@ async function handleGetStats(
     byModel: {}, // Would need additional query to aggregate by model
   };
 
-  jsonResponse(res, uiStats);
+  sendJson(res, uiStats);
 }
 
 async function handleGetConfig(
@@ -507,11 +460,11 @@ async function handleGetConfig(
 ): Promise<void> {
   const logger = getTrajectoryLogger(runtime);
   if (!logger) {
-    errorResponse(res, "Trajectory logger service not available", 503);
+    sendJsonError(res, "Trajectory logger service not available", 503);
     return;
   }
 
-  jsonResponse(res, {
+  sendJson(res, {
     enabled: logger.isEnabled(),
   });
 }
@@ -523,7 +476,7 @@ async function handlePutConfig(
 ): Promise<void> {
   const logger = getTrajectoryLogger(runtime);
   if (!logger) {
-    errorResponse(res, "Trajectory logger service not available", 503);
+    sendJsonError(res, "Trajectory logger service not available", 503);
     return;
   }
 
@@ -534,7 +487,7 @@ async function handlePutConfig(
     logger.setEnabled(body.enabled);
   }
 
-  jsonResponse(res, {
+  sendJson(res, {
     enabled: logger.isEnabled(),
   });
 }
@@ -546,7 +499,7 @@ async function handleExportTrajectories(
 ): Promise<void> {
   const logger = getTrajectoryLogger(runtime);
   if (!logger) {
-    errorResponse(res, "Trajectory logger service not available", 503);
+    sendJsonError(res, "Trajectory logger service not available", 503);
     return;
   }
 
@@ -563,7 +516,7 @@ async function handleExportTrajectories(
     !body.format ||
     (body.format !== "json" && body.format !== "csv" && body.format !== "art")
   ) {
-    errorResponse(res, "Format must be 'json', 'csv', or 'art'", 400);
+    sendJsonError(res, "Format must be 'json', 'csv', or 'art'", 400);
     return;
   }
 
@@ -593,7 +546,7 @@ async function handleDeleteTrajectories(
 ): Promise<void> {
   const logger = getTrajectoryLogger(runtime);
   if (!logger) {
-    errorResponse(res, "Trajectory logger service not available", 503);
+    sendJsonError(res, "Trajectory logger service not available", 503);
     return;
   }
 
@@ -610,7 +563,7 @@ async function handleDeleteTrajectories(
   } else if (body.trajectoryIds && Array.isArray(body.trajectoryIds)) {
     deleted = await logger.deleteTrajectories(body.trajectoryIds);
   } else {
-    errorResponse(
+    sendJsonError(
       res,
       "Request must include 'trajectoryIds' array or 'clearAll: true'",
       400,
@@ -618,7 +571,7 @@ async function handleDeleteTrajectories(
     return;
   }
 
-  jsonResponse(res, { deleted });
+  sendJson(res, { deleted });
 }
 
 /**
@@ -642,7 +595,7 @@ export async function handleTrajectoryRoute(
   const method = req.method ?? "GET";
 
   if (!runtime?.adapter) {
-    errorResponse(
+    sendJsonError(
       res,
       "Database not available. The agent may not be running or the database adapter is not initialized.",
       503,

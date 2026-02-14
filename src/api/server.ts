@@ -73,9 +73,22 @@ import {
   readTriggerConfig,
   taskToTriggerSummary,
 } from "../triggers/runtime.js";
+import { parseClampedInteger } from "../utils/number-parsing.js";
 import { type CloudRouteState, handleCloudRoute } from "./cloud-routes.js";
+import {
+  extractAnthropicSystemAndLastUser,
+  extractOpenAiSystemAndLastUser,
+  resolveCompatRoomKey,
+} from "./compat-utils.js";
 import { handleDatabaseRoute } from "./database.js";
 import { DropService } from "./drop-service.js";
+import {
+  readJsonBody as parseJsonBody,
+  readRequestBody,
+  readRequestBodyBuffer,
+  sendJson,
+  sendJsonError,
+} from "./http-helpers.js";
 import { handleKnowledgeRoutes } from "./knowledge-routes.js";
 import {
   type PluginParamInfo,
@@ -1534,53 +1547,6 @@ const MAX_IMPORT_BYTES = 512 * 1_048_576; // 512 MB for agent imports
 const AGENT_TRANSFER_MIN_PASSWORD_LENGTH = 4;
 const AGENT_TRANSFER_MAX_PASSWORD_LENGTH = 1024;
 
-function readBody(req: http.IncomingMessage): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    let totalBytes = 0;
-    let tooLarge = false;
-    let settled = false;
-    const cleanup = () => {
-      req.off("data", onData);
-      req.off("end", onEnd);
-      req.off("error", onError);
-    };
-    const onData = (c: Buffer) => {
-      if (settled) return;
-      totalBytes += c.length;
-      if (totalBytes > MAX_BODY_BYTES) {
-        // Keep draining the stream, but stop buffering to avoid memory growth.
-        tooLarge = true;
-        return;
-      }
-      chunks.push(c);
-    };
-    const onEnd = () => {
-      if (settled) return;
-      settled = true;
-      cleanup();
-      if (tooLarge) {
-        reject(
-          new Error(
-            `Request body exceeds maximum size (${MAX_BODY_BYTES} bytes)`,
-          ),
-        );
-        return;
-      }
-      resolve(Buffer.concat(chunks).toString("utf-8"));
-    };
-    const onError = (err: Error) => {
-      if (settled) return;
-      settled = true;
-      cleanup();
-      reject(err);
-    };
-    req.on("data", onData);
-    req.on("end", onEnd);
-    req.on("error", onError);
-  });
-}
-
 /**
  * Read raw binary request body with a configurable size limit.
  * Used for agent import file uploads.
@@ -1589,47 +1555,16 @@ function readRawBody(
   req: http.IncomingMessage,
   maxBytes: number,
 ): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    let totalBytes = 0;
-    let tooLarge = false;
-    let settled = false;
-    const cleanup = () => {
-      req.off("data", onData);
-      req.off("end", onEnd);
-      req.off("error", onError);
-    };
-    const onData = (c: Buffer) => {
-      if (settled) return;
-      totalBytes += c.length;
-      if (totalBytes > maxBytes) {
-        tooLarge = true;
-        return;
-      }
-      chunks.push(c);
-    };
-    const onEnd = () => {
-      if (settled) return;
-      settled = true;
-      cleanup();
-      if (tooLarge) {
-        reject(
-          new Error(`Request body exceeds maximum size (${maxBytes} bytes)`),
+  return readRequestBodyBuffer(req, { maxBytes }).then(
+    (body: Buffer | null) => {
+      if (body === null) {
+        throw new Error(
+          `Request body exceeds maximum size (${maxBytes} bytes)`,
         );
-        return;
       }
-      resolve(Buffer.concat(chunks));
-    };
-    const onError = (err: Error) => {
-      if (settled) return;
-      settled = true;
-      cleanup();
-      reject(err);
-    };
-    req.on("data", onData);
-    req.on("end", onEnd);
-    req.on("error", onError);
-  });
+      return body;
+    },
+  );
 }
 
 /**
@@ -1640,36 +1575,22 @@ async function readJsonBody<T = Record<string, unknown>>(
   req: http.IncomingMessage,
   res: http.ServerResponse,
 ): Promise<T | null> {
-  let raw: string;
-  try {
-    raw = await readBody(req);
-  } catch (err) {
-    const msg =
-      err instanceof Error ? err.message : "Failed to read request body";
-    error(res, msg, 413);
-    return null;
-  }
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    if (parsed == null || typeof parsed !== "object" || Array.isArray(parsed)) {
-      error(res, "Request body must be a JSON object", 400);
-      return null;
-    }
-    return parsed as T;
-  } catch {
-    error(res, "Invalid JSON in request body", 400);
-    return null;
-  }
+  return parseJsonBody(req, res, {
+    maxBytes: MAX_BODY_BYTES,
+  });
 }
 
+const readBody = (req: http.IncomingMessage): Promise<string> =>
+  readRequestBody(req, { maxBytes: MAX_BODY_BYTES }).then(
+    (value) => value ?? "",
+  );
+
 function json(res: http.ServerResponse, data: unknown, status = 200): void {
-  res.statusCode = status;
-  res.setHeader("Content-Type", "application/json");
-  res.end(JSON.stringify(data));
+  sendJson(res, data, status);
 }
 
 function error(res: http.ServerResponse, message: string, status = 400): void {
-  json(res, { error: message }, status);
+  sendJsonError(res, message, status);
 }
 
 // ---------------------------------------------------------------------------
@@ -1766,6 +1687,7 @@ function serveStaticUi(
 
   // Keep API and WebSocket namespaces exclusively owned by server handlers.
   if (pathname === "/api" || pathname.startsWith("/api/")) return false;
+  if (pathname === "/v1" || pathname.startsWith("/v1/")) return false;
   if (pathname === "/ws") return false;
 
   let decodedPath: string;
@@ -1972,6 +1894,24 @@ function writeSse(
   res.write(`data: ${JSON.stringify(payload)}\n\n`);
 }
 
+function writeSseData(
+  res: http.ServerResponse,
+  data: string,
+  event?: string,
+): void {
+  if (res.writableEnded || res.destroyed) return;
+  if (event) res.write(`event: ${event}\n`);
+  res.write(`data: ${data}\n\n`);
+}
+
+function writeSseJson(
+  res: http.ServerResponse,
+  payload: unknown,
+  event?: string,
+): void {
+  writeSseData(res, JSON.stringify(payload), event);
+}
+
 async function generateChatResponse(
   runtime: AgentRuntime,
   message: ReturnType<typeof createMessageMemory>,
@@ -2014,10 +1954,11 @@ async function generateChatResponse(
 }
 
 function parseBoundedLimit(rawLimit: string | null, fallback = 15): number {
-  if (!rawLimit) return fallback;
-  const parsed = Number.parseInt(rawLimit, 10);
-  if (!Number.isFinite(parsed)) return fallback;
-  return Math.min(Math.max(parsed, 1), 50);
+  return parseClampedInteger(rawLimit, {
+    min: 1,
+    max: 50,
+    fallback,
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -5887,7 +5828,7 @@ async function handleRequest(
         pluginId,
         plugin.category,
         plugin.envKey,
-        Object.keys(body.config),
+        plugin.configKeys,
         body.config,
         submittedParamInfos,
       );
@@ -6163,7 +6104,7 @@ async function handleRequest(
     try {
       const limitParam = url.searchParams.get("limit");
       const limit = limitParam
-        ? Math.min(Math.max(Number(limitParam), 1), 50)
+        ? parseClampedInteger(limitParam, { min: 1, max: 50, fallback: 15 })
         : 15;
       const results = await searchPlugins(query, limit);
       json(res, { query, count: results.length, results });
@@ -6205,10 +6146,21 @@ async function handleRequest(
     try {
       // Find the plugin in the runtime
       const allPlugins = state.runtime?.plugins ?? [];
-      const plugin = allPlugins.find(
-        (p: { id?: string; name?: string }) =>
-          p.id === pluginId || p.name === pluginId,
-      );
+      const normalizePluginId = (value: string): string =>
+        value.replace(/^@[^/]+\//, "").replace(/^plugin-/, "");
+
+      const normalizedPluginId = normalizePluginId(pluginId);
+
+      const plugin = allPlugins.find((p: { id?: string; name?: string }) => {
+        const runtimeName = p.name ?? "";
+        const runtimeId = normalizePluginId(runtimeName);
+        return (
+          p.id === pluginId ||
+          p.name === pluginId ||
+          runtimeId === pluginId ||
+          runtimeId === normalizedPluginId
+        );
+      });
 
       if (!plugin) {
         json(
@@ -7355,7 +7307,9 @@ async function handleRequest(
     }
     try {
       const limitStr = url.searchParams.get("limit");
-      const limit = limitStr ? Math.min(Math.max(Number(limitStr), 1), 50) : 20;
+      const limit = limitStr
+        ? parseClampedInteger(limitStr, { min: 1, max: 50, fallback: 20 })
+        : 20;
       const results = await searchSkillsMarketplace(query, { limit });
       json(res, { ok: true, results });
     } catch (err) {
@@ -7566,10 +7520,11 @@ async function handleRequest(
 
   // ── GET /api/agent/events?after=evt-123&limit=200 ───────────────────────
   if (method === "GET" && pathname === "/api/agent/events") {
-    const limitRaw = Number(url.searchParams.get("limit") ?? "200");
-    const limit = Number.isFinite(limitRaw)
-      ? Math.min(Math.max(Math.trunc(limitRaw), 1), 1000)
-      : 200;
+    const limit = parseClampedInteger(url.searchParams.get("limit"), {
+      min: 1,
+      max: 1000,
+      fallback: 200,
+    });
     const afterEventId = url.searchParams.get("after");
     const autonomyEvents = state.eventBuffer.filter(
       (event) =>
@@ -8808,6 +8763,629 @@ async function handleRequest(
       await state.chatConnectionPromise;
     }
   };
+
+  const ensureCompatChatConnection = async (
+    runtime: AgentRuntime,
+    agentName: string,
+    channelIdPrefix: string,
+    roomKey: string,
+  ): Promise<{ userId: UUID; roomId: UUID; worldId: UUID }> => {
+    const userId = ensureAdminEntityId();
+    const roomId = stringToUuid(
+      `${agentName}-${channelIdPrefix}-room-${roomKey}`,
+    ) as UUID;
+    const worldId = stringToUuid(`${agentName}-web-chat-world`) as UUID;
+    const messageServerId = stringToUuid(`${agentName}-web-server`) as UUID;
+
+    await runtime.ensureConnection({
+      entityId: userId,
+      roomId,
+      worldId,
+      userName: "User",
+      source: "client_chat",
+      channelId: `${channelIdPrefix}-${roomKey}`,
+      type: ChannelType.DM,
+      messageServerId,
+      metadata: { ownership: { ownerId: userId } },
+    });
+    await ensureWorldOwnershipAndRoles(runtime, worldId, userId);
+
+    return { userId, roomId, worldId };
+  };
+
+  // -------------------------------------------------------------------------
+  // OpenAI / Anthropic compatibility endpoints
+  // -------------------------------------------------------------------------
+
+  // ── GET /v1/models (OpenAI compatible) ─────────────────────────────────
+  if (method === "GET" && pathname === "/v1/models") {
+    const created = Math.floor(Date.now() / 1000);
+    const ids = new Set<string>();
+    ids.add("milaidy");
+    if (state.agentName?.trim()) ids.add(state.agentName.trim());
+    if (state.runtime?.character.name?.trim())
+      ids.add(state.runtime.character.name.trim());
+
+    json(res, {
+      object: "list",
+      data: Array.from(ids).map((id) => ({
+        id,
+        object: "model",
+        created,
+        owned_by: "milaidy",
+      })),
+    });
+    return;
+  }
+
+  // ── GET /v1/models/:id (OpenAI compatible) ─────────────────────────────
+  if (method === "GET" && /^\/v1\/models\/[^/]+$/.test(pathname)) {
+    const created = Math.floor(Date.now() / 1000);
+    const raw = pathname.split("/")[3] ?? "";
+    const decoded = decodePathComponent(raw, res, "model id");
+    if (!decoded) return;
+    const id = decoded.trim();
+    if (!id) {
+      json(
+        res,
+        {
+          error: {
+            message: "Model id is required",
+            type: "invalid_request_error",
+          },
+        },
+        400,
+      );
+      return;
+    }
+    json(res, { id, object: "model", created, owned_by: "milaidy" });
+    return;
+  }
+
+  // ── POST /v1/chat/completions (OpenAI compatible) ──────────────────────
+  if (method === "POST" && pathname === "/v1/chat/completions") {
+    const body = await readJsonBody<Record<string, unknown>>(req, res);
+    if (!body) return;
+    if (hasBlockedObjectKeyDeep(body)) {
+      json(
+        res,
+        {
+          error: {
+            message: "Request body contains a blocked object key",
+            type: "invalid_request_error",
+          },
+        },
+        400,
+      );
+      return;
+    }
+    const safeBody = cloneWithoutBlockedObjectKeys(body);
+
+    const extracted = extractOpenAiSystemAndLastUser(safeBody.messages);
+    if (!extracted) {
+      json(
+        res,
+        {
+          error: {
+            message:
+              "messages must be an array containing at least one user message",
+            type: "invalid_request_error",
+          },
+        },
+        400,
+      );
+      return;
+    }
+
+    const roomKey = resolveCompatRoomKey(safeBody).slice(0, 120);
+    const wantsStream =
+      safeBody.stream === true ||
+      (req.headers.accept ?? "").includes("text/event-stream");
+    const requestedModel =
+      typeof safeBody.model === "string" && safeBody.model.trim()
+        ? safeBody.model.trim()
+        : null;
+
+    const mode: ChatMode = "power";
+    const prompt = extracted.system
+      ? `${extracted.system}\n\n${extracted.user}`.trim()
+      : extracted.user;
+
+    const proxy = state.cloudManager?.getProxy();
+    const created = Math.floor(Date.now() / 1000);
+    const id = `chatcmpl-${crypto.randomUUID()}`;
+    const model =
+      requestedModel ?? proxy?.agentName ?? state.agentName ?? "milaidy";
+
+    if (wantsStream) {
+      initSse(res);
+      let aborted = false;
+      req.on("close", () => {
+        aborted = true;
+      });
+
+      const sendChunk = (
+        delta: Record<string, unknown>,
+        finishReason: string | null,
+      ) => {
+        writeSseData(
+          res,
+          JSON.stringify({
+            id,
+            object: "chat.completion.chunk",
+            created,
+            model,
+            choices: [
+              {
+                index: 0,
+                delta,
+                finish_reason: finishReason,
+              },
+            ],
+          }),
+        );
+      };
+
+      try {
+        if (!proxy && !state.runtime) {
+          writeSseData(
+            res,
+            JSON.stringify({
+              error: {
+                message: "Agent is not running",
+                type: "service_unavailable",
+              },
+            }),
+          );
+          writeSseData(res, "[DONE]");
+          return;
+        }
+
+        sendChunk({ role: "assistant" }, null);
+
+        let fullText = "";
+
+        if (proxy) {
+          for await (const chunk of proxy.handleChatMessageStream(
+            prompt,
+            "openai-compat",
+            mode,
+          )) {
+            if (aborted) throw new Error("client_disconnected");
+            fullText += chunk;
+            if (chunk) sendChunk({ content: chunk }, null);
+          }
+        } else {
+          const runtime = state.runtime;
+          if (!runtime) throw new Error("Agent is not running");
+          const agentName = runtime.character.name ?? "Milaidy";
+          const { userId, roomId } = await ensureCompatChatConnection(
+            runtime,
+            agentName,
+            "openai-compat",
+            roomKey,
+          );
+
+          const message = createMessageMemory({
+            id: crypto.randomUUID() as UUID,
+            entityId: userId,
+            roomId,
+            content: {
+              text: prompt,
+              mode,
+              simple: false,
+              source: "compat_openai",
+              channelType: ChannelType.DM,
+            },
+          });
+
+          await generateChatResponse(runtime, message, state.agentName, {
+            isAborted: () => aborted,
+            onChunk: (chunk) => {
+              fullText += chunk;
+              if (chunk) sendChunk({ content: chunk }, null);
+            },
+            resolveNoResponseText: () =>
+              resolveNoResponseFallback(state.logBuffer),
+          });
+        }
+
+        const resolved = normalizeChatResponseText(fullText, state.logBuffer);
+        if (
+          (fullText.trim().length === 0 || isNoResponsePlaceholder(fullText)) &&
+          resolved.trim()
+        ) {
+          // Ensure clients receive a non-empty completion even if the model returned "(no response)".
+          sendChunk({ content: resolved }, null);
+        }
+
+        sendChunk({}, "stop");
+        writeSseData(res, "[DONE]");
+      } catch (err) {
+        if (!aborted) {
+          writeSseData(
+            res,
+            JSON.stringify({
+              error: {
+                message: getErrorMessage(err),
+                type: "server_error",
+              },
+            }),
+          );
+          writeSseData(res, "[DONE]");
+        }
+      } finally {
+        res.end();
+      }
+      return;
+    }
+
+    // Non-streaming
+    try {
+      let responseText: string;
+
+      if (proxy) {
+        responseText = await proxy.handleChatMessage(
+          prompt,
+          "openai-compat",
+          mode,
+        );
+      } else {
+        if (!state.runtime) {
+          json(
+            res,
+            {
+              error: {
+                message: "Agent is not running",
+                type: "service_unavailable",
+              },
+            },
+            503,
+          );
+          return;
+        }
+        const runtime = state.runtime;
+        const agentName = runtime.character.name ?? "Milaidy";
+        const { userId, roomId } = await ensureCompatChatConnection(
+          runtime,
+          agentName,
+          "openai-compat",
+          roomKey,
+        );
+        const message = createMessageMemory({
+          id: crypto.randomUUID() as UUID,
+          entityId: userId,
+          roomId,
+          content: {
+            text: prompt,
+            mode,
+            simple: false,
+            source: "compat_openai",
+            channelType: ChannelType.DM,
+          },
+        });
+        const result = await generateChatResponse(
+          runtime,
+          message,
+          state.agentName,
+          {
+            resolveNoResponseText: () =>
+              resolveNoResponseFallback(state.logBuffer),
+          },
+        );
+        responseText = result.text;
+      }
+
+      const resolvedText = normalizeChatResponseText(
+        responseText,
+        state.logBuffer,
+      );
+      json(res, {
+        id,
+        object: "chat.completion",
+        created,
+        model,
+        choices: [
+          {
+            index: 0,
+            message: { role: "assistant", content: resolvedText },
+            finish_reason: "stop",
+          },
+        ],
+      });
+    } catch (err) {
+      json(
+        res,
+        { error: { message: getErrorMessage(err), type: "server_error" } },
+        500,
+      );
+    }
+    return;
+  }
+
+  // ── POST /v1/messages (Anthropic compatible) ───────────────────────────
+  if (method === "POST" && pathname === "/v1/messages") {
+    const body = await readJsonBody<Record<string, unknown>>(req, res);
+    if (!body) return;
+    if (hasBlockedObjectKeyDeep(body)) {
+      json(
+        res,
+        {
+          error: {
+            type: "invalid_request_error",
+            message: "Request body contains a blocked object key",
+          },
+        },
+        400,
+      );
+      return;
+    }
+    const safeBody = cloneWithoutBlockedObjectKeys(body);
+
+    const extracted = extractAnthropicSystemAndLastUser({
+      system: safeBody.system,
+      messages: safeBody.messages,
+    });
+    if (!extracted) {
+      json(
+        res,
+        {
+          error: {
+            type: "invalid_request_error",
+            message:
+              "messages must be an array containing at least one user message",
+          },
+        },
+        400,
+      );
+      return;
+    }
+
+    const roomKey = resolveCompatRoomKey(safeBody).slice(0, 120);
+    const wantsStream =
+      safeBody.stream === true ||
+      (req.headers.accept ?? "").includes("text/event-stream");
+    const requestedModel =
+      typeof safeBody.model === "string" && safeBody.model.trim()
+        ? safeBody.model.trim()
+        : null;
+
+    const mode: ChatMode = "power";
+    const prompt = extracted.system
+      ? `${extracted.system}\n\n${extracted.user}`.trim()
+      : extracted.user;
+
+    const proxy = state.cloudManager?.getProxy();
+    const id = `msg_${crypto.randomUUID().replace(/-/g, "")}`;
+    const model =
+      requestedModel ?? proxy?.agentName ?? state.agentName ?? "milaidy";
+
+    if (wantsStream) {
+      initSse(res);
+      let aborted = false;
+      req.on("close", () => {
+        aborted = true;
+      });
+
+      try {
+        if (!proxy && !state.runtime) {
+          writeSseJson(
+            res,
+            {
+              type: "error",
+              error: {
+                type: "service_unavailable",
+                message: "Agent is not running",
+              },
+            },
+            "error",
+          );
+          return;
+        }
+
+        writeSseJson(
+          res,
+          {
+            type: "message_start",
+            message: {
+              id,
+              type: "message",
+              role: "assistant",
+              model,
+              content: [],
+              stop_reason: null,
+              stop_sequence: null,
+              usage: { input_tokens: 0, output_tokens: 0 },
+            },
+          },
+          "message_start",
+        );
+        writeSseJson(
+          res,
+          {
+            type: "content_block_start",
+            index: 0,
+            content_block: { type: "text", text: "" },
+          },
+          "content_block_start",
+        );
+
+        let fullText = "";
+
+        const onDelta = (chunk: string) => {
+          if (!chunk) return;
+          fullText += chunk;
+          writeSseJson(
+            res,
+            {
+              type: "content_block_delta",
+              index: 0,
+              delta: { type: "text_delta", text: chunk },
+            },
+            "content_block_delta",
+          );
+        };
+
+        if (proxy) {
+          for await (const chunk of proxy.handleChatMessageStream(
+            prompt,
+            "anthropic-compat",
+            mode,
+          )) {
+            if (aborted) throw new Error("client_disconnected");
+            onDelta(chunk);
+          }
+        } else {
+          const runtime = state.runtime;
+          if (!runtime) throw new Error("Agent is not running");
+          const agentName = runtime.character.name ?? "Milaidy";
+          const { userId, roomId } = await ensureCompatChatConnection(
+            runtime,
+            agentName,
+            "anthropic-compat",
+            roomKey,
+          );
+
+          const message = createMessageMemory({
+            id: crypto.randomUUID() as UUID,
+            entityId: userId,
+            roomId,
+            content: {
+              text: prompt,
+              mode,
+              simple: false,
+              source: "compat_anthropic",
+              channelType: ChannelType.DM,
+            },
+          });
+
+          await generateChatResponse(runtime, message, state.agentName, {
+            isAborted: () => aborted,
+            onChunk: onDelta,
+            resolveNoResponseText: () =>
+              resolveNoResponseFallback(state.logBuffer),
+          });
+        }
+
+        const resolved = normalizeChatResponseText(fullText, state.logBuffer);
+        if (
+          (fullText.trim().length === 0 || isNoResponsePlaceholder(fullText)) &&
+          resolved.trim()
+        ) {
+          onDelta(resolved);
+        }
+
+        writeSseJson(
+          res,
+          { type: "content_block_stop", index: 0 },
+          "content_block_stop",
+        );
+        writeSseJson(
+          res,
+          {
+            type: "message_delta",
+            delta: { stop_reason: "end_turn", stop_sequence: null },
+            usage: { output_tokens: 0 },
+          },
+          "message_delta",
+        );
+        writeSseJson(res, { type: "message_stop" }, "message_stop");
+      } catch (err) {
+        if (!aborted) {
+          writeSseJson(
+            res,
+            {
+              type: "error",
+              error: { type: "server_error", message: getErrorMessage(err) },
+            },
+            "error",
+          );
+        }
+      } finally {
+        res.end();
+      }
+      return;
+    }
+
+    // Non-streaming
+    try {
+      let responseText: string;
+
+      if (proxy) {
+        responseText = await proxy.handleChatMessage(
+          prompt,
+          "anthropic-compat",
+          mode,
+        );
+      } else {
+        if (!state.runtime) {
+          json(
+            res,
+            {
+              error: {
+                type: "service_unavailable",
+                message: "Agent is not running",
+              },
+            },
+            503,
+          );
+          return;
+        }
+        const runtime = state.runtime;
+        const agentName = runtime.character.name ?? "Milaidy";
+        const { userId, roomId } = await ensureCompatChatConnection(
+          runtime,
+          agentName,
+          "anthropic-compat",
+          roomKey,
+        );
+        const message = createMessageMemory({
+          id: crypto.randomUUID() as UUID,
+          entityId: userId,
+          roomId,
+          content: {
+            text: prompt,
+            mode,
+            simple: false,
+            source: "compat_anthropic",
+            channelType: ChannelType.DM,
+          },
+        });
+        const result = await generateChatResponse(
+          runtime,
+          message,
+          state.agentName,
+          {
+            resolveNoResponseText: () =>
+              resolveNoResponseFallback(state.logBuffer),
+          },
+        );
+        responseText = result.text;
+      }
+
+      const resolvedText = normalizeChatResponseText(
+        responseText,
+        state.logBuffer,
+      );
+      json(res, {
+        id,
+        type: "message",
+        role: "assistant",
+        model,
+        content: [{ type: "text", text: resolvedText }],
+        stop_reason: "end_turn",
+        stop_sequence: null,
+        usage: { input_tokens: 0, output_tokens: 0 },
+      });
+    } catch (err) {
+      json(
+        res,
+        { error: { type: "server_error", message: getErrorMessage(err) } },
+        500,
+      );
+    }
+    return;
+  }
 
   // ── GET /api/conversations ──────────────────────────────────────────
   if (method === "GET" && pathname === "/api/conversations") {
@@ -10574,7 +11152,9 @@ async function handleRequest(
   if (method === "GET" && pathname === "/api/mcp/marketplace/search") {
     const query = url.searchParams.get("q") ?? "";
     const limitStr = url.searchParams.get("limit");
-    const limit = limitStr ? Math.min(Math.max(Number(limitStr), 1), 50) : 30;
+    const limit = limitStr
+      ? parseClampedInteger(limitStr, { min: 1, max: 50, fallback: 30 })
+      : 30;
     try {
       const result = await searchMcpMarketplace(query || undefined, limit);
       json(res, { ok: true, results: result.results });
@@ -11980,6 +12560,13 @@ export async function startApiServer(opts?: {
         port: actualPort,
         close: () =>
           new Promise<void>((r) => {
+            const closeAllConnections = (
+              server as { closeAllConnections?: () => void }
+            ).closeAllConnections;
+            const closeIdleConnections = (
+              server as { closeIdleConnections?: () => void }
+            ).closeIdleConnections;
+
             clearInterval(statusInterval);
             if (detachRuntimeStreams) {
               detachRuntimeStreams();
@@ -11989,8 +12576,37 @@ export async function startApiServer(opts?: {
               detachTrainingStream();
               detachTrainingStream = null;
             }
+            for (const ws of wsClients) {
+              if (ws.readyState === 1 || ws.readyState === 0) {
+                ws.terminate();
+              }
+            }
+            wsClients.clear();
             wss.close();
-            server.close(() => r());
+            const closeTimeout = setTimeout(() => r(), 5_000);
+            const resolved = { done: false };
+            const finalize = () => {
+              if (!resolved.done) {
+                resolved.done = true;
+                clearTimeout(closeTimeout);
+                r();
+              }
+            };
+            if (typeof closeAllConnections === "function") {
+              try {
+                closeAllConnections();
+              } catch {
+                // Bun/Node server internals vary by runtime; non-fatal on shutdown.
+              }
+            }
+            if (typeof closeIdleConnections === "function") {
+              try {
+                closeIdleConnections();
+              } catch {
+                // Bun/Node server internals vary by runtime; non-fatal on shutdown.
+              }
+            }
+            server.close(finalize);
           }),
         updateRuntime,
       });

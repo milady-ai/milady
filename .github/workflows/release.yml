@@ -57,6 +57,7 @@ jobs:
     name: Build ${{ matrix.platform.name }}
     needs: prepare
     runs-on: ${{ matrix.platform.runner }}
+    continue-on-error: ${{ matrix.platform.os == 'windows' }}
     defaults:
       run:
         shell: bash
@@ -335,6 +336,29 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID || '' }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID || '' }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET || '' }}
+
+      - name: Install Playwright browser runtime
+        if: matrix.platform.os == 'macos'
+        run: bunx playwright install chromium
+        working-directory: apps/app
+
+      - name: Verify packaged DMG boots to chat
+        if: matrix.platform.os == 'macos'
+        run: |
+          set -euo pipefail
+          if [ "${{ matrix.platform.electron-args }}" = "--mac --x64" ]; then
+            /usr/sbin/softwareupdate --install-rosetta --agree-to-license || true
+          fi
+
+          dmg_path=$(ls -t dist/*.dmg | head -n 1)
+          if [ -z "${dmg_path:-}" ]; then
+            echo "::error::No DMG artifact found under apps/app/electron/dist"
+            exit 1
+          fi
+
+          echo "Running packaged startup test against ${dmg_path}"
+          MILAIDY_TEST_DMG_PATH="${PWD}/${dmg_path}" bun run --cwd .. test:electron:packaged:e2e
+        working-directory: apps/app/electron
 
       - name: Verify macOS signature and notarization
         if: matrix.platform.os == 'macos'

@@ -829,9 +829,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // --- Whitelist ---
   const [whitelistStatus, setWhitelistStatus] = useState<WhitelistStatus | null>(null);
   const [whitelistLoading, setWhitelistLoading] = useState(false);
-  const [twitterVerifyMessage, setTwitterVerifyMessage] = useState<string | null>(null);
-  const [twitterVerifyUrl, setTwitterVerifyUrl] = useState("");
-  const [twitterVerifying, setTwitterVerifying] = useState(false);
+  const [twitterVerifyMessage] = useState<string | null>(null);
+  const [twitterVerifyUrl] = useState("");
+  const [twitterVerifying] = useState(false);
 
   // --- Character ---
   const [characterData, setCharacterData] = useState<CharacterData | null>(null);
@@ -991,6 +991,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const prevAgentStateRef = useRef<string | null>(null);
   const lifecycleBusyRef = useRef(false);
   const lifecycleActionRef = useRef<LifecycleAction | null>(null);
+  /** Synchronous lock for onboarding finish to prevent duplicate same-tick submits. */
+  const onboardingFinishBusyRef = useRef(false);
   const pairingBusyRef = useRef(false);
   /** Guards against double-greeting when both init and state-transition paths fire. */
   const greetingFiredRef = useRef(false);
@@ -1001,8 +1003,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const exportBusyRef = useRef(false);
   /** Synchronous lock for import action to prevent duplicate clicks in the same tick. */
   const importBusyRef = useRef(false);
+  /** Synchronous lock for wallet API key save to prevent duplicate clicks in the same tick. */
+  const walletApiKeySavingRef = useRef(false);
   /** Synchronous lock for cloud login action to prevent duplicate clicks in the same tick. */
   const cloudLoginBusyRef = useRef(false);
+  /** Synchronous lock for update channel changes to prevent duplicate submits. */
+  const updateChannelSavingRef = useRef(false);
+  /** Synchronous lock for onboarding completion submit to prevent duplicate clicks. */
+  const onboardingFinishSavingRef = useRef(false);
 
   // ── Action notice ──────────────────────────────────────────────────
 
@@ -2358,6 +2366,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const handleWalletApiKeySave = useCallback(
     async (config: Record<string, string>) => {
       if (Object.keys(config).length === 0) return;
+      if (walletApiKeySavingRef.current || walletApiKeySaving) return;
+      walletApiKeySavingRef.current = true;
       setWalletApiKeySaving(true);
       setWalletError(null);
       try {
@@ -2368,10 +2378,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setActionNotice("Wallet API keys saved and agent restarted.", "success");
       } catch (err) {
         setWalletError(`Failed to save API keys: ${err instanceof Error ? err.message : "network error"}`);
+      } finally {
+        walletApiKeySavingRef.current = false;
+        setWalletApiKeySaving(false);
       }
-      setWalletApiKeySaving(false);
     },
-    [loadWalletConfig, loadBalances, setActionNotice],
+    [walletApiKeySaving, loadWalletConfig, loadBalances, setActionNotice],
   );
 
   const handleExportKeys = useCallback(async () => {
@@ -2425,27 +2437,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setRegistryRegistering(true);
     setRegistryError(null);
     try {
-      await client.registerAgent({ name: characterDraft?.name || agentStatus?.name });
+      await client.registerAgent({
+        name: characterDraft?.name || agentStatus?.agentName,
+      });
       await loadRegistryStatus();
     } catch (err) {
       setRegistryError(err instanceof Error ? err.message : "Registration failed");
     } finally {
       setRegistryRegistering(false);
     }
-  }, [characterDraft?.name, agentStatus?.name, loadRegistryStatus]);
+  }, [characterDraft?.name, agentStatus?.agentName, loadRegistryStatus]);
 
   const syncRegistryProfile = useCallback(async () => {
     setRegistryRegistering(true);
     setRegistryError(null);
     try {
-      await client.syncRegistryProfile({ name: characterDraft?.name || agentStatus?.name });
+      await client.syncRegistryProfile({
+        name: characterDraft?.name || agentStatus?.agentName,
+      });
       await loadRegistryStatus();
     } catch (err) {
       setRegistryError(err instanceof Error ? err.message : "Sync failed");
     } finally {
       setRegistryRegistering(false);
     }
-  }, [characterDraft?.name, agentStatus?.name, loadRegistryStatus]);
+  }, [characterDraft?.name, agentStatus?.agentName, loadRegistryStatus]);
 
   const loadDropStatus = useCallback(async () => {
     setDropLoading(true);
@@ -2461,11 +2477,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const mintFromDrop = useCallback(async (shiny: boolean) => {
     setMintInProgress(true);
+    setMintShiny(shiny);
     setMintError(null);
     setMintResult(null);
     try {
       const result = await client.mintAgent({
-        name: characterDraft?.name || agentStatus?.name,
+        name: characterDraft?.name || agentStatus?.agentName,
         shiny,
       });
       setMintResult(result);
@@ -2475,8 +2492,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setMintError(err instanceof Error ? err.message : "Mint failed");
     } finally {
       setMintInProgress(false);
+      setMintShiny(false);
     }
-  }, [characterDraft?.name, agentStatus?.name, loadRegistryStatus, loadDropStatus]);
+  }, [characterDraft?.name, agentStatus?.agentName, loadRegistryStatus, loadDropStatus]);
 
   const loadWhitelistStatus = useCallback(async () => {
     setWhitelistLoading(true);
@@ -2712,7 +2730,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [onboardingStep, onboardingOptions, onboardingRunMode]);
 
   const handleOnboardingFinish = useCallback(async () => {
+    if (onboardingFinishBusyRef.current || onboardingRestarting) return;
     if (!onboardingOptions) return;
+    if (onboardingFinishSavingRef.current || onboardingRestarting) return;
     const style = onboardingOptions.styles.find((s: StylePreset) => s.catchphrase === onboardingStyle);
     const systemPrompt = style?.system
       ? style.system.replace(/\{\{name\}\}/g, onboardingName)
@@ -2733,7 +2753,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Sandbox mode is additionally stored as a separate flag
     const apiRunMode = onboardingRunMode === "cloud" ? "cloud" : "local";
 
+    onboardingFinishBusyRef.current = true;
     setOnboardingRestarting(true);
+    onboardingFinishSavingRef.current = true;
+
     try {
       await client.submitOnboarding({
         name: onboardingName,
@@ -2763,21 +2786,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
         blooioApiKey: onboardingBlooioApiKey.trim() || undefined,
         blooioPhoneNumber: onboardingBlooioPhoneNumber.trim() || undefined,
       });
+      setOnboardingComplete(true);
+      setTab("chat");
+      try {
+        setAgentStatus(await client.restartAgent());
+      } catch {
+        /* ignore */
+      }
     } catch (err) {
-      setOnboardingRestarting(false);
       window.alert(`Setup failed: ${err instanceof Error ? err.message : "network error"}. Please try again.`);
-      return;
+    } finally {
+      onboardingFinishSavingRef.current = false;
+      onboardingFinishBusyRef.current = false;
+      setOnboardingRestarting(false);
     }
-
-    setOnboardingComplete(true);
-    setTab("chat");
-    try {
-      setAgentStatus(await client.restartAgent());
-    } catch {
-      /* ignore */
-    }
-    setOnboardingRestarting(false);
   }, [
+    onboardingRestarting,
     onboardingOptions, onboardingStyle, onboardingName, onboardingTheme,
     onboardingRunMode, onboardingCloudProvider, onboardingSmallModel,
     onboardingLargeModel, onboardingProvider, onboardingApiKey,
@@ -2864,17 +2888,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const handleChannelChange = useCallback(
     async (channel: ReleaseChannel) => {
+      if (updateChannelSavingRef.current || updateChannelSaving) return;
       if (updateStatus?.channel === channel) return;
+      updateChannelSavingRef.current = true;
       setUpdateChannelSaving(true);
       try {
         await client.setUpdateChannel(channel);
         await loadUpdateStatus(true);
       } catch {
         /* ignore */
+      } finally {
+        updateChannelSavingRef.current = false;
+        setUpdateChannelSaving(false);
       }
-      setUpdateChannelSaving(false);
     },
-    [updateStatus, loadUpdateStatus],
+    [updateChannelSaving, updateStatus, loadUpdateStatus],
   );
 
   // ── Agent export/import ────────────────────────────────────────────

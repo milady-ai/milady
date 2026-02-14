@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import type { Command } from "commander";
+import { parseClampedInteger } from "../utils/number-parsing.js";
 
 /**
  * Normalize a user-provided plugin name to its fully-qualified form.
@@ -63,19 +64,6 @@ function displayPluginConfig(
   }
 }
 
-function clampInt(
-  raw: string,
-  min: number,
-  max: number,
-  fallback: number,
-): number {
-  const parsed = Number.parseInt(raw, 10);
-  if (!Number.isFinite(parsed)) {
-    return fallback;
-  }
-  return Math.min(Math.max(parsed, min), max);
-}
-
 export function registerPluginsCli(program: Command): void {
   const pluginsCommand = program
     .command("plugins")
@@ -97,7 +85,11 @@ export function registerPluginsCli(program: Command): void {
         "../services/plugin-installer.js"
       );
 
-      const limit = clampInt(opts.limit, 1, 500, 30);
+      const limit = parseClampedInteger(opts.limit, {
+        min: 1,
+        max: 500,
+        fallback: 30,
+      });
       const installed = await listInstalledPlugins();
       const installedNames = new Set(installed.map((p) => p.name));
 
@@ -190,7 +182,11 @@ export function registerPluginsCli(program: Command): void {
     .option("-l, --limit <number>", "Max results", "15")
     .action(async (query: string, opts: { limit: string }) => {
       const { searchPlugins } = await import("../services/registry-client.js");
-      const limit = clampInt(opts.limit, 1, 50, 15);
+      const limit = parseClampedInteger(opts.limit, {
+        min: 1,
+        max: 50,
+        fallback: 15,
+      });
 
       const results = await searchPlugins(query, limit);
 

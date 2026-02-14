@@ -7,6 +7,12 @@ import { platform, tmpdir } from "node:os";
 import { join } from "node:path";
 import type { RemoteSigningService } from "../services/remote-signing-service.js";
 import type { SandboxManager } from "../services/sandbox-manager.js";
+import type { SigningRequest } from "../services/signing-policy.js";
+import {
+  readJsonBody as parseJsonBody,
+  readRequestBody,
+  sendJson as sendJsonResponse,
+} from "./http-helpers.js";
 
 interface SandboxRouteState {
   sandboxManager: SandboxManager | null;
@@ -17,6 +23,8 @@ const MAX_COMPUTER_INPUT_LENGTH = 4096;
 const MAX_KEYPRESS_LENGTH = 128;
 const SAFE_KEYPRESS_PATTERN = /^[A-Za-z0-9+_.,: -]+$/;
 const ALLOWED_AUDIO_FORMATS = new Set(["wav", "mp3", "ogg", "flac", "m4a"]);
+const MIN_AUDIO_RECORD_DURATION_MS = 250;
+const MAX_AUDIO_RECORD_DURATION_MS = 30_000;
 
 // ── Route handler ────────────────────────────────────────────────────────────
 
@@ -116,19 +124,12 @@ export async function handleSandboxRoute(
 
   // ── POST /api/sandbox/exec ──────────────────────────────────────────
   if (method === "POST" && pathname === "/api/sandbox/exec") {
-    const body = await readBody(req);
-    if (!body) {
-      sendJson(res, 400, { error: "Missing request body" });
-      return true;
-    }
-
-    let parsed: { command?: string; workdir?: string; timeoutMs?: number };
-    try {
-      parsed = JSON.parse(body);
-    } catch {
-      sendJson(res, 400, { error: "Invalid JSON body" });
-      return true;
-    }
+    const parsed = await readJsonBody<{
+      command?: string;
+      workdir?: string;
+      timeoutMs?: number;
+    }>(req, res);
+    if (!parsed) return true;
 
     if (!parsed.command || typeof parsed.command !== "string") {
       sendJson(res, 400, { error: "Missing 'command' field" });
@@ -174,15 +175,24 @@ export async function handleSandboxRoute(
   // ── POST /api/sandbox/screen/screenshot ─────────────────────────────
   // Returns base64-encoded screenshot for easy consumption by agents
   if (method === "POST" && pathname === "/api/sandbox/screen/screenshot") {
-    const body = await readBody(req);
+    const rawBody = await readBody(req);
+    if (!rawBody || !rawBody.trim()) {
+      sendJson(res, 200, {
+        format: "png",
+        encoding: "base64",
+        width: null,
+        height: null,
+        data: captureScreenshot().toString("base64"),
+      });
+      return true;
+    }
+
     let regionInput: unknown;
-    if (body?.trim()) {
-      try {
-        regionInput = JSON.parse(body);
-      } catch {
-        sendJson(res, 400, { error: "Invalid JSON body" });
-        return true;
-      }
+    try {
+      regionInput = JSON.parse(rawBody);
+    } catch {
+      sendJson(res, 400, { error: "Invalid JSON body" });
+      return true;
     }
 
     const region = resolveScreenshotRegion(regionInput);
@@ -225,12 +235,59 @@ export async function handleSandboxRoute(
     const body = await readBody(req);
     let durationMs = 5000;
     if (body) {
+      let parsed: unknown;
       try {
-        const parsed = JSON.parse(body);
-        if (typeof parsed.durationMs === "number")
-          durationMs = parsed.durationMs;
+        parsed = JSON.parse(body);
       } catch {
-        /* use default */
+        sendJson(res, 400, {
+          error: "Invalid JSON in request body",
+        });
+        return true;
+      }
+
+      if (
+        parsed === null ||
+        typeof parsed !== "object" ||
+        Array.isArray(parsed)
+      ) {
+        sendJson(res, 400, { error: "Request body must be a JSON object" });
+        return true;
+      }
+
+      const bodyValues = parsed as Record<string, unknown>;
+
+      if (Object.hasOwn(bodyValues, "durationMs")) {
+        const durationValue = bodyValues.durationMs;
+        if (typeof durationValue !== "number") {
+          sendJson(res, 400, {
+            error: "durationMs must be a finite number",
+          });
+          return true;
+        }
+        // Defense in depth: JSON.parse only produces finite numbers, but this guard
+        // keeps behavior explicit against future parser/runtime changes.
+        if (!Number.isFinite(durationValue)) {
+          sendJson(res, 400, {
+            error: "durationMs must be a finite number",
+          });
+          return true;
+        }
+        if (!Number.isInteger(durationValue)) {
+          sendJson(res, 400, {
+            error: "durationMs must be an integer number of milliseconds",
+          });
+          return true;
+        }
+        if (
+          durationValue < MIN_AUDIO_RECORD_DURATION_MS ||
+          durationValue > MAX_AUDIO_RECORD_DURATION_MS
+        ) {
+          sendJson(res, 400, {
+            error: `durationMs must be between ${MIN_AUDIO_RECORD_DURATION_MS} and ${MAX_AUDIO_RECORD_DURATION_MS} milliseconds`,
+          });
+          return true;
+        }
+        durationMs = durationValue;
       }
     }
     try {
@@ -251,19 +308,8 @@ export async function handleSandboxRoute(
 
   // ── POST /api/sandbox/audio/play ────────────────────────────────────
   if (method === "POST" && pathname === "/api/sandbox/audio/play") {
-    const body = await readBody(req);
-    if (!body) {
-      sendJson(res, 400, { error: "Missing request body" });
-      return true;
-    }
-
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(body);
-    } catch {
-      sendJson(res, 400, { error: "Invalid JSON body" });
-      return true;
-    }
+    const parsed = await readJsonBody(req, res);
+    if (!parsed) return true;
 
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
       sendJson(res, 400, { error: "Body must be a JSON object" });
@@ -295,19 +341,8 @@ export async function handleSandboxRoute(
 
   // ── POST /api/sandbox/computer/click ────────────────────────────────
   if (method === "POST" && pathname === "/api/sandbox/computer/click") {
-    const body = await readBody(req);
-    if (!body) {
-      sendJson(res, 400, { error: "Missing request body" });
-      return true;
-    }
-
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(body);
-    } catch {
-      sendJson(res, 400, { error: "Invalid JSON body" });
-      return true;
-    }
+    const parsed = await readJsonBody(req, res);
+    if (!parsed) return true;
 
     const clickPayload = resolveClickPayload(parsed);
     if (clickPayload.error) {
@@ -329,19 +364,8 @@ export async function handleSandboxRoute(
 
   // ── POST /api/sandbox/computer/type ─────────────────────────────────
   if (method === "POST" && pathname === "/api/sandbox/computer/type") {
-    const body = await readBody(req);
-    if (!body) {
-      sendJson(res, 400, { error: "Missing request body" });
-      return true;
-    }
-
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(body);
-    } catch {
-      sendJson(res, 400, { error: "Invalid JSON body" });
-      return true;
-    }
+    const parsed = await readJsonBody(req, res);
+    if (!parsed) return true;
 
     const typePayload = resolveTypePayload(parsed);
     if (typePayload.error) {
@@ -363,19 +387,8 @@ export async function handleSandboxRoute(
 
   // ── POST /api/sandbox/computer/keypress ─────────────────────────────
   if (method === "POST" && pathname === "/api/sandbox/computer/keypress") {
-    const body = await readBody(req);
-    if (!body) {
-      sendJson(res, 400, { error: "Missing request body" });
-      return true;
-    }
-
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(body);
-    } catch {
-      sendJson(res, 400, { error: "Invalid JSON body" });
-      return true;
-    }
+    const parsed = await readJsonBody(req, res);
+    if (!parsed) return true;
 
     const keypressPayload = resolveKeypressPayload(parsed);
     if (keypressPayload.error) {
@@ -403,14 +416,15 @@ export async function handleSandboxRoute(
       sendJson(res, 503, { error: "Signing service not configured" });
       return true;
     }
-    const body = await readBody(req);
-    if (!body) {
-      sendJson(res, 400, { error: "Missing body" });
+    const body = await readJsonBody<unknown>(req, res);
+    if (body === null) return true;
+    const parsed = resolveSigningRequestPayload(body);
+    if (parsed.error) {
+      sendJson(res, 400, { error: parsed.error });
       return true;
     }
     try {
-      const request = JSON.parse(body);
-      const result = await signer.submitSigningRequest(request);
+      const result = await signer.submitSigningRequest(parsed.request);
       sendJson(res, result.success ? 200 : 403, result);
     } catch (err) {
       sendJson(res, 400, {
@@ -426,13 +440,10 @@ export async function handleSandboxRoute(
       sendJson(res, 503, { error: "Signing service not configured" });
       return true;
     }
-    const body = await readBody(req);
-    if (!body) {
-      sendJson(res, 400, { error: "Missing body" });
-      return true;
-    }
+    const body = await readJsonBody<{ requestId?: string }>(req, res);
+    if (!body) return true;
     try {
-      const { requestId } = JSON.parse(body) as { requestId: string };
+      const { requestId } = body as { requestId: string };
       const result = await signer.approveRequest(requestId);
       sendJson(res, result.success ? 200 : 403, result);
     } catch (err) {
@@ -447,13 +458,10 @@ export async function handleSandboxRoute(
       sendJson(res, 503, { error: "Signing service not configured" });
       return true;
     }
-    const body = await readBody(req);
-    if (!body) {
-      sendJson(res, 400, { error: "Missing body" });
-      return true;
-    }
+    const body = await readJsonBody<{ requestId?: string }>(req, res);
+    if (!body) return true;
     try {
-      const { requestId } = JSON.parse(body) as { requestId: string };
+      const { requestId } = body as { requestId: string };
       const rejected = signer.rejectRequest(requestId);
       sendJson(res, 200, { rejected });
     } catch (err) {
@@ -501,6 +509,76 @@ export async function handleSandboxRoute(
 function asObject(value: unknown): Record<string, unknown> | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   return value as Record<string, unknown>;
+}
+
+function resolveSigningRequestPayload(input: unknown): {
+  request?: SigningRequest;
+  error?: string;
+} {
+  const obj = asObject(input);
+  if (!obj) {
+    return { error: "Signing payload must be a JSON object" };
+  }
+
+  const requestId = obj.requestId;
+  const chainId = parseFiniteInteger(obj.chainId);
+  const to = obj.to;
+  const value = obj.value;
+  const data = obj.data;
+  const nonce =
+    obj.nonce === undefined ? undefined : parseFiniteInteger(obj.nonce);
+  const rawGasLimit = obj.gasLimit;
+  const createdAt = parseFiniteInteger(obj.createdAt);
+
+  if (typeof requestId !== "string" || !requestId.trim()) {
+    return { error: "Signing payload requires a non-empty string 'requestId'" };
+  }
+  if (chainId === null || chainId < 0) {
+    return { error: "Signing payload requires an integer 'chainId' >= 0" };
+  }
+  if (typeof to !== "string" || !/^0x[0-9a-fA-F]{40}$/.test(to.trim())) {
+    return {
+      error:
+        "Signing payload requires a hex 'to' address (e.g., 0x followed by 40 hex characters)",
+    };
+  }
+  if (typeof value !== "string" || !value.trim()) {
+    return { error: "Signing payload requires a non-empty string 'value'" };
+  }
+  if (typeof data !== "string" || !data.trim()) {
+    return { error: "Signing payload requires a non-empty string 'data'" };
+  }
+  if (nonce === null) {
+    return { error: "'nonce' must be a non-negative integer when provided" };
+  }
+  if (createdAt === null) {
+    return { error: "Signing payload requires an integer 'createdAt'" };
+  }
+  if (rawGasLimit !== undefined && typeof rawGasLimit !== "string") {
+    return {
+      error: "Signing payload 'gasLimit' must be a string when provided",
+    };
+  }
+
+  const gasLimit = rawGasLimit?.trim();
+  if (gasLimit === "") {
+    return {
+      error: "Signing payload 'gasLimit' cannot be empty when provided",
+    };
+  }
+
+  return {
+    request: {
+      requestId: requestId.trim(),
+      chainId,
+      to: to.trim(),
+      value: value.trim(),
+      data,
+      ...(nonce === undefined ? {} : { nonce }),
+      ...(gasLimit === undefined ? {} : { gasLimit }),
+      createdAt,
+    },
+  };
 }
 
 function parseFiniteInteger(value: unknown): number | null {
@@ -1375,32 +1453,28 @@ function commandExists(cmd: string): boolean {
 }
 
 function sendJson(res: ServerResponse, status: number, data: object): void {
-  res.writeHead(status, { "Content-Type": "application/json" });
-  res.end(JSON.stringify(data));
+  sendJsonResponse(res, data, status);
 }
 
 function readBody(req: IncomingMessage): Promise<string | null> {
-  return new Promise((resolve) => {
-    const chunks: Buffer[] = [];
-    let totalBytes = 0;
-    const MAX_BODY = 10 * 1024 * 1024; // 10 MB for audio data
+  return readRequestBody(req, {
+    maxBytes: 10 * 1024 * 1024,
+    returnNullOnTooLarge: true,
+    returnNullOnError: true,
+    destroyOnTooLarge: true,
+  });
+}
 
-    req.on("data", (chunk: Buffer) => {
-      totalBytes += chunk.length;
-      if (totalBytes > MAX_BODY) {
-        resolve(null);
-        req.destroy();
-        return;
-      }
-      chunks.push(chunk);
-    });
-
-    req.on("end", () => {
-      resolve(Buffer.concat(chunks).toString("utf-8"));
-    });
-
-    req.on("error", () => {
-      resolve(null);
-    });
+function readJsonBody<T = unknown>(
+  req: IncomingMessage,
+  res: ServerResponse,
+): Promise<T | null> {
+  return parseJsonBody(req, res, {
+    maxBytes: 10 * 1024 * 1024,
+    requireObject: false,
+    readErrorStatus: 400,
+    parseErrorStatus: 400,
+    readErrorMessage: "Missing request body",
+    parseErrorMessage: "Invalid JSON in request body",
   });
 }

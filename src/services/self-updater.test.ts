@@ -29,10 +29,9 @@ vi.mock("node:fs", async (importOriginal) => {
   };
 });
 
-import type { ChildProcess } from "node:child_process";
 import { execSync, spawn } from "node:child_process";
-import { EventEmitter } from "node:events";
 import fs from "node:fs";
+import { createMockChildProcess } from "../test-support/process-helpers.js";
 import type { InstallMethod } from "./self-updater.js";
 import {
   buildUpdateCommand,
@@ -276,24 +275,6 @@ describe("performUpdate", () => {
     stderrWriteSpy.mockRestore();
   });
 
-  function createMockChild(exitCode: number, stderrOutput = ""): ChildProcess {
-    const child = new EventEmitter() as ChildProcess;
-    const stderrEmitter = new EventEmitter();
-    Object.defineProperty(child, "stderr", { value: stderrEmitter });
-    Object.defineProperty(child, "stdin", { value: null });
-    Object.defineProperty(child, "stdout", { value: null });
-
-    // Simulate the child process completing after a tick
-    process.nextTick(() => {
-      if (stderrOutput) {
-        stderrEmitter.emit("data", Buffer.from(stderrOutput));
-      }
-      child.emit("close", exitCode);
-    });
-
-    return child;
-  }
-
   it("returns error for local-dev installs without spawning", async () => {
     // detectInstallMethod returns local-dev when which fails and devDependencies exist
     vi.mocked(execSync).mockImplementation((cmd: string) => {
@@ -329,7 +310,10 @@ describe("performUpdate", () => {
 
     // Simulate npm install failing
     vi.mocked(spawn).mockReturnValueOnce(
-      createMockChild(1, "npm ERR! code E403\nnpm ERR! 403 Forbidden"),
+      createMockChildProcess({
+        exitCode: 1,
+        stderrOutput: "npm ERR! code E403\nnpm ERR! 403 Forbidden",
+      }),
     );
 
     const result = await performUpdate("2.0.0-alpha.7", "stable");
@@ -357,7 +341,9 @@ describe("performUpdate", () => {
     );
 
     // Simulate npm install succeeding
-    vi.mocked(spawn).mockReturnValueOnce(createMockChild(0));
+    vi.mocked(spawn).mockReturnValueOnce(
+      createMockChildProcess({ exitCode: 0 }),
+    );
 
     const result = await performUpdate("2.0.0-alpha.7", "stable");
 
@@ -418,27 +404,12 @@ describe("performUpdate edge cases", () => {
     vi.mocked(fs.readFileSync).mockReset();
   });
 
-  function createMockChild(exitCode: number, stderrOutput = ""): ChildProcess {
-    const child = new EventEmitter() as ChildProcess;
-    const stderrEmitter = new EventEmitter();
-    Object.defineProperty(child, "stderr", { value: stderrEmitter });
-    Object.defineProperty(child, "stdin", { value: null });
-    Object.defineProperty(child, "stdout", { value: null });
-
-    process.nextTick(() => {
-      if (stderrOutput) {
-        stderrEmitter.emit("data", Buffer.from(stderrOutput));
-      }
-      child.emit("close", exitCode);
-    });
-
-    return child;
-  }
-
   it("uses pre-provided method instead of detecting", async () => {
     // When method is provided, detectInstallMethod is NOT called
     // so we don't need to mock which/realpathSync at all
-    vi.mocked(spawn).mockReturnValueOnce(createMockChild(0));
+    vi.mocked(spawn).mockReturnValueOnce(
+      createMockChildProcess({ exitCode: 0 }),
+    );
     vi.mocked(execSync).mockImplementation((cmd: string) => {
       if (typeof cmd === "string" && cmd.includes("--version")) {
         return Buffer.from("2.1.0\n");
@@ -454,19 +425,12 @@ describe("performUpdate edge cases", () => {
   });
 
   it("handles spawn error event (command not found)", async () => {
-    vi.mocked(spawn).mockImplementation(() => {
-      const child = new EventEmitter() as ChildProcess;
-      const stderrEmitter = new EventEmitter();
-      Object.defineProperty(child, "stderr", { value: stderrEmitter });
-      Object.defineProperty(child, "stdin", { value: null });
-      Object.defineProperty(child, "stdout", { value: null });
-
-      process.nextTick(() => {
-        child.emit("error", new Error("spawn npm ENOENT"));
-      });
-
-      return child;
-    });
+    vi.mocked(spawn).mockReturnValueOnce(
+      createMockChildProcess({
+        exitCode: 1,
+        emitError: new Error("spawn npm ENOENT"),
+      }),
+    );
 
     const result = await performUpdate("2.0.0", "stable", "npm-global");
 
@@ -481,7 +445,9 @@ describe("performUpdate edge cases", () => {
       }
       throw new Error(`unexpected: ${cmd}`);
     });
-    vi.mocked(spawn).mockReturnValueOnce(createMockChild(0));
+    vi.mocked(spawn).mockReturnValueOnce(
+      createMockChildProcess({ exitCode: 0 }),
+    );
 
     const result = await performUpdate("2.0.0", "beta", "npm-global");
 
@@ -496,7 +462,9 @@ describe("performUpdate edge cases", () => {
       }
       throw new Error(`unexpected: ${cmd}`);
     });
-    vi.mocked(spawn).mockReturnValueOnce(createMockChild(0));
+    vi.mocked(spawn).mockReturnValueOnce(
+      createMockChildProcess({ exitCode: 0 }),
+    );
 
     const result = await performUpdate("2.0.0", "stable", "npm-global");
 
@@ -511,7 +479,9 @@ describe("performUpdate edge cases", () => {
       }
       throw new Error(`unexpected: ${cmd}`);
     });
-    vi.mocked(spawn).mockReturnValueOnce(createMockChild(0));
+    vi.mocked(spawn).mockReturnValueOnce(
+      createMockChildProcess({ exitCode: 0 }),
+    );
 
     const result = await performUpdate("2.0.0", "stable", "npm-global");
 
@@ -526,7 +496,9 @@ describe("performUpdate edge cases", () => {
       }
       throw new Error(`unexpected: ${cmd}`);
     });
-    vi.mocked(spawn).mockReturnValueOnce(createMockChild(0));
+    vi.mocked(spawn).mockReturnValueOnce(
+      createMockChildProcess({ exitCode: 0 }),
+    );
 
     const result = await performUpdate("2.0.0", "stable", "npm-global");
 
@@ -535,7 +507,9 @@ describe("performUpdate edge cases", () => {
   });
 
   it("reports exit code in error message when stderr is empty", async () => {
-    vi.mocked(spawn).mockReturnValueOnce(createMockChild(127)); // no stderr
+    vi.mocked(spawn).mockReturnValueOnce(
+      createMockChildProcess({ exitCode: 127 }),
+    ); // no stderr
 
     const result = await performUpdate("2.0.0", "stable", "npm-global");
 

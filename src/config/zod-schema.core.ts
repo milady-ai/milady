@@ -393,7 +393,18 @@ export const ExecutableTokenSchema = z
   .string()
   .refine(isSafeExecutableValue, "expected safe executable name or path");
 
-export const MediaUnderstandingScopeSchema = z
+const MessagePolicyMatchSchema = z
+  .object({
+    channel: z.string().optional(),
+    chatType: z
+      .union([z.literal("direct"), z.literal("group"), z.literal("channel")])
+      .optional(),
+    keyPrefix: z.string().optional(),
+  })
+  .strict()
+  .optional();
+
+const MessagePolicySchemaBase = z
   .object({
     default: z.union([z.literal("allow"), z.literal("deny")]).optional(),
     rules: z
@@ -401,20 +412,7 @@ export const MediaUnderstandingScopeSchema = z
         z
           .object({
             action: z.union([z.literal("allow"), z.literal("deny")]),
-            match: z
-              .object({
-                channel: z.string().optional(),
-                chatType: z
-                  .union([
-                    z.literal("direct"),
-                    z.literal("group"),
-                    z.literal("channel"),
-                  ])
-                  .optional(),
-                keyPrefix: z.string().optional(),
-              })
-              .strict()
-              .optional(),
+            match: MessagePolicyMatchSchema,
           })
           .strict(),
       )
@@ -422,6 +420,9 @@ export const MediaUnderstandingScopeSchema = z
   })
   .strict()
   .optional();
+
+export const MediaUnderstandingScopeSchema = MessagePolicySchemaBase;
+export const MessagePolicySchema = MessagePolicySchemaBase;
 
 export const MediaUnderstandingCapabilitiesSchema = z
   .array(z.union([z.literal("image"), z.literal("audio"), z.literal("video")]))

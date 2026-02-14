@@ -6,6 +6,7 @@ import type {
   WorkbenchTask,
   WorkbenchTodo,
 } from "../api-client";
+import { formatTime } from "./shared/format";
 
 function getEventText(event: StreamEventEnvelope): string {
   const payload = event.payload as Record<string, string | number | boolean | null | object | undefined>;
@@ -133,7 +134,7 @@ export function AutonomousPanel() {
                           {event.stream ?? event.type}
                         </span>
                         <span className="text-[11px] text-muted">
-                          {new Date(event.ts).toLocaleTimeString()}
+                          {formatTime(event.ts, { fallback: "—" })}
                         </span>
                       </div>
                       <div className="text-[12px] text-txt mt-1 break-words">{getEventText(event)}</div>

@@ -78,7 +78,18 @@ test("electron app startup: onboarding -> chat -> all pages", async () => {
       requestFailures.push(`${request.method()} ${request.url()} :: ${failure?.errorText ?? "failed"}`);
     });
 
-    await expect(page.getByText(/starting backend|initializing agent/i)).toBeVisible({ timeout: 60_000 });
+    // Startup can be fast enough to skip the loading text and render onboarding directly.
+    await expect.poll(async () => {
+      const loadingVisible = await page
+        .getByText(/starting backend|initializing agent/i)
+        .isVisible()
+        .catch(() => false);
+      const onboardingVisible = await page
+        .getByText(/welcome to milaidy/i)
+        .isVisible()
+        .catch(() => false);
+      return loadingVisible || onboardingVisible;
+    }, { timeout: 60_000 }).toBe(true);
     await expect.poll(async () => {
       return page.evaluate(() => (window as { __MILAIDY_API_BASE__?: string }).__MILAIDY_API_BASE__ ?? null);
     }, { timeout: 30_000 }).not.toBeNull();
@@ -171,7 +182,24 @@ test("electron app startup: onboarding -> chat -> all pages", async () => {
 
     await page.getByRole("button", { name: "Triggers", exact: true }).click();
     await expect(page).toHaveURL(/\/triggers$/);
-    await expect(page.getByText("Trigger Health")).toBeVisible();
+    const triggerHealthHeading = page.getByRole("heading", {
+      name: "Trigger Health",
+      exact: true,
+    });
+    if ((await triggerHealthHeading.count()) === 0) {
+      const triggerBodyText = await page.evaluate(() => {
+        const text = document.body?.innerText ?? "";
+        return text.trim().slice(0, 1200);
+      });
+      throw new Error(
+        `Triggers page heading missing.\n` +
+          `Body text:\n${triggerBodyText}\n\n` +
+          `Console logs:\n${consoleLogs.join("\n")}\n\n` +
+          `Page errors:\n${pageErrors.join("\n")}\n\n` +
+          `Request failures:\n${requestFailures.join("\n")}\n\n` +
+          `Mock requests:\n${api.requests.join("\n")}`,
+      );
+    }
 
     await page.getByRole("button", { name: "Fine-Tuning", exact: true }).click();
     await expect(page).toHaveURL(/\/fine-tuning$/);

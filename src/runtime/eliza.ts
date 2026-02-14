@@ -92,6 +92,20 @@ interface ResolvedPlugin {
   plugin: Plugin;
 }
 
+/**
+ * Temporary local compatibility shim for `@elizaos/core` not exporting
+ * `SandboxFetchAuditEvent` on the current dependency line in this repo.
+ * It preserves the runtime shape used by `sandboxAuditHandler`:
+ * - `direction` and `url` are required
+ * - `tokenIds` tracks tokens associated with the audit payload
+ * TODO(elizaos): replace/remove when upstream re-exports this type.
+ */
+type SandboxFetchAuditEvent = {
+  direction: "inbound" | "outbound";
+  url: string;
+  tokenIds: string[];
+};
+
 /** Shape we expect from a dynamically-imported plugin package. */
 interface PluginModuleShape {
   default?: Plugin;
@@ -106,6 +120,35 @@ interface PluginModuleShape {
 /** Extract a human-readable error message from an unknown thrown value. */
 function formatError(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
+}
+
+interface TrajectoryLoggerControl {
+  isEnabled?: () => boolean;
+  setEnabled?: (enabled: boolean) => void;
+}
+
+function ensureTrajectoryLoggerEnabled(
+  runtime: AgentRuntime,
+  context: string,
+): void {
+  const trajectoryLogger = runtime.getService(
+    "trajectory_logger",
+  ) as TrajectoryLoggerControl | null;
+  if (!trajectoryLogger) {
+    logger.warn(
+      `[milaidy] trajectory_logger service unavailable (${context}); trajectory capture disabled`,
+    );
+    return;
+  }
+
+  const isEnabled =
+    typeof trajectoryLogger.isEnabled === "function"
+      ? trajectoryLogger.isEnabled()
+      : true;
+  if (!isEnabled && typeof trajectoryLogger.setEnabled === "function") {
+    trajectoryLogger.setEnabled(true);
+    logger.info("[milaidy] trajectory_logger enabled by default");
+  }
 }
 
 /**
@@ -2080,13 +2123,11 @@ export async function startEliza(
       ? {
           sandboxMode: true,
           sandboxAuditHandler: sandboxAuditLog
-            ? (event: Record<string, unknown>) => {
+            ? (event: SandboxFetchAuditEvent) => {
                 sandboxAuditLog.recordTokenReplacement(
-                  (event.direction as string) === "outbound"
-                    ? "outbound"
-                    : "inbound",
-                  (event.url as string) ?? "unknown",
-                  (event.tokenIds as string[]) ?? [],
+                  event.direction,
+                  event.url,
+                  event.tokenIds,
                 );
               }
             : undefined,
@@ -2243,6 +2284,7 @@ export async function startEliza(
 
   // 8. Initialize the runtime (registers remaining plugins, starts services)
   await runtime.initialize();
+  ensureTrajectoryLoggerEnabled(runtime, "runtime.initialize()");
 
   // 8b. Wait for AgentSkillsService to finish loading.
   //     runtime.initialize() resolves the internal initPromise which unblocks
@@ -2579,6 +2621,10 @@ export async function startEliza(
           embeddingManager = freshEmbeddingManager;
 
           await newRuntime.initialize();
+          ensureTrajectoryLoggerEnabled(
+            newRuntime,
+            "hot-reload runtime.initialize()",
+          );
           runtime = newRuntime;
           logger.info("[milaidy] Hot-reload: Runtime restarted successfully");
           return newRuntime;

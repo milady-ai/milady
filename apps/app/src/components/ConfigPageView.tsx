@@ -13,6 +13,227 @@ import type { ConfigUiHint } from "../types";
 import type { JsonSchemaObject } from "./config-catalog";
 import { SecretsView } from "./SecretsView";
 
+type RpcProviderOption<T extends string> = {
+  id: T;
+  label: string;
+};
+
+type RpcFieldDefinition = {
+  configKey: string;
+  label: string;
+  isSet: boolean;
+};
+
+type RpcFieldGroup = ReadonlyArray<RpcFieldDefinition>;
+
+type RpcSectionConfigMap = Record<string, RpcFieldGroup>;
+
+const EVM_RPC_OPTIONS = [
+  { id: "eliza-cloud", label: "Eliza Cloud" },
+  { id: "alchemy", label: "Alchemy" },
+  { id: "infura", label: "Infura" },
+  { id: "ankr", label: "Ankr" },
+] as const;
+
+const SOLANA_RPC_OPTIONS = [
+  { id: "eliza-cloud", label: "Eliza Cloud" },
+  { id: "helius-birdeye", label: "Helius + Birdeye" },
+] as const;
+
+type CloudRpcStatusProps = {
+  connected: boolean;
+  credits: number | null;
+  creditsLow: boolean;
+  creditsCritical: boolean;
+  topUpUrl: string | null;
+  loginBusy: boolean;
+  onLogin: () => void;
+};
+
+function CloudRpcStatus({
+  connected,
+  credits,
+  creditsLow,
+  creditsCritical,
+  topUpUrl,
+  loginBusy,
+  onLogin,
+}: CloudRpcStatusProps) {
+  if (connected) {
+    return (
+      <div className="flex items-center gap-2 text-xs">
+        <span className="inline-block w-2 h-2 rounded-full bg-[var(--ok,#16a34a)]" />
+        <span className="font-semibold">Connected to Eliza Cloud</span>
+        {credits !== null && (
+          <span className="text-[var(--muted)] ml-auto">
+            Credits: <span className={creditsCritical ? "text-[var(--danger,#e74c3c)] font-bold" : creditsLow ? "text-[#b8860b] font-bold" : ""}>${credits.toFixed(2)}</span>
+            {topUpUrl && <a href={topUpUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] ml-1.5 text-[var(--accent)]">Top up</a>}
+          </span>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center gap-2 text-xs">
+        <span className="inline-block w-2 h-2 rounded-full bg-[var(--muted)]" />
+        <span className="text-[var(--muted)]">Requires Eliza Cloud connection</span>
+      </div>
+      <button
+        className="btn text-xs py-[3px] px-3 !mt-0 font-bold"
+        onClick={() => void onLogin()}
+        disabled={loginBusy}
+      >
+        {loginBusy ? "Connecting..." : "Log in"}
+      </button>
+    </div>
+  );
+}
+
+function buildRpcRendererConfig(
+  selectedProvider: string,
+  providerConfigs: RpcSectionConfigMap,
+  rpcFieldValues: Record<string, string>,
+) {
+  const fields = providerConfigs[selectedProvider];
+  if (!fields?.length) return null;
+
+  const props: {
+    schema: JsonSchemaObject;
+    hints: Record<string, ConfigUiHint>;
+    values: Record<string, unknown>;
+    setKeys: Set<string>;
+  } = {
+    schema: {
+      type: "object",
+      properties: {},
+      required: [],
+    },
+    hints: {},
+    values: {},
+    setKeys: new Set<string>(),
+  };
+
+  for (const field of fields) {
+    props.schema.properties[field.configKey] = {
+      type: "string",
+      description: field.label,
+    };
+    props.hints[field.configKey] = {
+      label: field.label,
+      sensitive: true,
+      placeholder: field.isSet ? "Already set — leave blank to keep" : "Enter API key",
+      width: "full",
+    };
+    if (rpcFieldValues[field.configKey] !== undefined) {
+      props.values[field.configKey] = rpcFieldValues[field.configKey];
+    }
+    if (field.isSet) {
+      props.setKeys.add(field.configKey);
+    }
+  }
+
+  return props;
+}
+
+type RpcSectionCloudProps = CloudRpcStatusProps;
+
+type RpcSectionProps<T extends string> = {
+  title: string;
+  description: string;
+  options: readonly RpcProviderOption<T>[];
+  selectedProvider: T;
+  onSelect: (provider: T) => void;
+  providerConfigs: RpcSectionConfigMap;
+  rpcFieldValues: Record<string, string>;
+  onRpcFieldChange: (key: string, value: unknown) => void;
+  cloud: RpcSectionCloudProps;
+  containerClassName: string;
+};
+
+function RpcConfigSection<T extends string>({
+  title,
+  description,
+  options,
+  selectedProvider,
+  onSelect,
+  providerConfigs,
+  rpcFieldValues,
+  onRpcFieldChange,
+  cloud,
+  containerClassName,
+}: RpcSectionProps<T>) {
+  const rpcConfig = buildRpcRendererConfig(selectedProvider, providerConfigs, rpcFieldValues);
+
+  return (
+    <div>
+      <div className="text-xs font-bold mb-1">{title}</div>
+      <div className="text-[11px] text-[var(--muted)] mb-2">{description}</div>
+
+      {renderRpcProviderButtons(
+        options,
+        selectedProvider,
+        onSelect,
+        containerClassName,
+      )}
+
+      <div className="mt-3">
+        {selectedProvider === "eliza-cloud" ? (
+          <CloudRpcStatus
+            connected={cloud.connected}
+            credits={cloud.credits}
+            creditsLow={cloud.creditsLow}
+            creditsCritical={cloud.creditsCritical}
+            topUpUrl={cloud.topUpUrl}
+            loginBusy={cloud.loginBusy}
+            onLogin={() => void cloud.onLogin()}
+          />
+        ) : rpcConfig ? (
+          <ConfigRenderer
+            schema={rpcConfig.schema}
+            hints={rpcConfig.hints}
+            values={rpcConfig.values}
+            setKeys={rpcConfig.setKeys}
+            registry={defaultRegistry}
+            onChange={onRpcFieldChange}
+          />
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function renderRpcProviderButtons<T extends string>(
+  options: readonly RpcProviderOption<T>[],
+  selectedProvider: T,
+  onSelect: (provider: T) => void,
+  containerClassName: string,
+) {
+  return (
+    <div className={containerClassName}>
+      {options.map((provider) => {
+        const active = selectedProvider === provider.id;
+        return (
+          <button
+            key={provider.id}
+            className={`text-center px-2 py-2 border cursor-pointer transition-colors ${
+              active
+                ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)]"
+                : "border-[var(--border)] bg-[var(--card)] hover:border-[var(--accent)]"
+            }`}
+            onClick={() => onSelect(provider.id)}
+          >
+            <div className={`text-xs font-bold whitespace-nowrap ${active ? "" : "text-[var(--text)]"}`}>
+              {provider.label}
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 /* ── ConfigPageView ──────────────────────────────────────────────────── */
 
 export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
@@ -50,6 +271,55 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
   const [selectedEvmRpc, setSelectedEvmRpc] = useState<"eliza-cloud" | "alchemy" | "infura" | "ankr">("eliza-cloud");
   const [selectedSolanaRpc, setSelectedSolanaRpc] = useState<"eliza-cloud" | "helius-birdeye">("eliza-cloud");
 
+  const evmRpcConfigs: RpcSectionConfigMap = {
+    alchemy: [
+      {
+        configKey: "ALCHEMY_API_KEY",
+        label: "Alchemy API Key",
+        isSet: walletConfig?.alchemyKeySet ?? false,
+      },
+    ],
+    infura: [
+      {
+        configKey: "INFURA_API_KEY",
+        label: "Infura API Key",
+        isSet: walletConfig?.infuraKeySet ?? false,
+      },
+    ],
+    ankr: [
+      {
+        configKey: "ANKR_API_KEY",
+        label: "Ankr API Key",
+        isSet: walletConfig?.ankrKeySet ?? false,
+      },
+    ],
+  };
+
+  const solanaRpcConfigs: RpcSectionConfigMap = {
+    "helius-birdeye": [
+      {
+        configKey: "HELIUS_API_KEY",
+        label: "Helius API Key",
+        isSet: walletConfig?.heliusKeySet ?? false,
+      },
+      {
+        configKey: "BIRDEYE_API_KEY",
+        label: "Birdeye API Key",
+        isSet: walletConfig?.birdeyeKeySet ?? false,
+      },
+    ],
+  };
+
+  const cloudStatusProps = {
+    connected: cloudConnected,
+    credits: cloudCredits,
+    creditsLow: cloudCreditsLow,
+    creditsCritical: cloudCreditsCritical,
+    topUpUrl: cloudTopUpUrl,
+    loginBusy: cloudLoginBusy,
+    onLogin: () => void handleCloudLogin(),
+  };
+
   return (
     <div>
       {!embedded && (
@@ -82,192 +352,32 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
 
         <div className="grid grid-cols-2 gap-6">
           {/* EVM */}
-          <div>
-            <div className="text-xs font-bold mb-1">EVM</div>
-            <div className="text-[11px] text-[var(--muted)] mb-2">Ethereum, Base, Arbitrum, Optimism, Polygon</div>
-
-            <div className="grid grid-cols-4 gap-1.5">
-              {([
-                { id: "eliza-cloud" as const, label: "Eliza Cloud" },
-                { id: "alchemy" as const, label: "Alchemy" },
-                { id: "infura" as const, label: "Infura" },
-                { id: "ankr" as const, label: "Ankr" },
-              ]).map((p) => {
-                const active = selectedEvmRpc === p.id;
-                return (
-                  <button
-                    key={p.id}
-                    className={`text-center px-2 py-2 border cursor-pointer transition-colors ${
-                      active
-                        ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)]"
-                        : "border-[var(--border)] bg-[var(--card)] hover:border-[var(--accent)]"
-                    }`}
-                    onClick={() => setSelectedEvmRpc(p.id)}
-                  >
-                    <div className={`text-xs font-bold whitespace-nowrap ${active ? "" : "text-[var(--text)]"}`}>
-                      {p.label}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {selectedEvmRpc === "eliza-cloud" ? (
-              <div className="mt-3">
-                {cloudConnected ? (
-                  <div className="flex items-center gap-2 text-xs">
-                    <span className="inline-block w-2 h-2 rounded-full bg-[var(--ok,#16a34a)]" />
-                    <span className="font-semibold">Connected to Eliza Cloud</span>
-                    {cloudCredits !== null && (
-                      <span className="text-[var(--muted)] ml-auto">
-                        Credits: <span className={cloudCreditsCritical ? "text-[var(--danger,#e74c3c)] font-bold" : cloudCreditsLow ? "text-[#b8860b] font-bold" : ""}>${cloudCredits.toFixed(2)}</span>
-                        {cloudTopUpUrl && <a href={cloudTopUpUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] ml-1.5 text-[var(--accent)]">Top up</a>}
-                      </span>
-                    )}
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 text-xs">
-                      <span className="inline-block w-2 h-2 rounded-full bg-[var(--muted)]" />
-                      <span className="text-[var(--muted)]">Requires Eliza Cloud connection</span>
-                    </div>
-                    <button
-                      className="btn text-xs py-[3px] px-3 !mt-0 font-bold"
-                      onClick={() => void handleCloudLogin()}
-                      disabled={cloudLoginBusy}
-                    >
-                      {cloudLoginBusy ? "Connecting..." : "Log in"}
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (() => {
-              const evmProviders: Record<"alchemy" | "infura" | "ankr", { configKey: string; label: string; isSet: boolean }> = {
-                alchemy: { configKey: "ALCHEMY_API_KEY", label: "Alchemy API Key", isSet: walletConfig?.alchemyKeySet ?? false },
-                infura: { configKey: "INFURA_API_KEY", label: "Infura API Key", isSet: walletConfig?.infuraKeySet ?? false },
-                ankr: { configKey: "ANKR_API_KEY", label: "Ankr API Key", isSet: walletConfig?.ankrKeySet ?? false },
-              };
-              const p = evmProviders[selectedEvmRpc as "alchemy" | "infura" | "ankr"];
-              if (!p) return null;
-              const evmSchema: JsonSchemaObject = {
-                type: "object",
-                properties: { [p.configKey]: { type: "string", description: p.label } },
-                required: [],
-              };
-              const evmHints: Record<string, ConfigUiHint> = {
-                [p.configKey]: { label: p.label, sensitive: true, placeholder: p.isSet ? "Already set \u2014 leave blank to keep" : "Enter API key", width: "full" },
-              };
-              const evmValues: Record<string, unknown> = {};
-              const evmSetKeys = new Set<string>();
-              if (rpcFieldValues[p.configKey] !== undefined) evmValues[p.configKey] = rpcFieldValues[p.configKey];
-              if (p.isSet) evmSetKeys.add(p.configKey);
-
-              return (
-                <div className="mt-3">
-                  <ConfigRenderer
-                    schema={evmSchema}
-                    hints={evmHints}
-                    values={evmValues}
-                    setKeys={evmSetKeys}
-                    registry={defaultRegistry}
-                    onChange={handleRpcFieldChange}
-                  />
-                </div>
-              );
-            })()}
-          </div>
+          <RpcConfigSection
+            title="EVM"
+            description="Ethereum, Base, Arbitrum, Optimism, Polygon"
+            options={EVM_RPC_OPTIONS}
+            selectedProvider={selectedEvmRpc}
+            onSelect={setSelectedEvmRpc}
+            providerConfigs={evmRpcConfigs}
+            rpcFieldValues={rpcFieldValues}
+            onRpcFieldChange={handleRpcFieldChange}
+            cloud={cloudStatusProps}
+            containerClassName="grid grid-cols-4 gap-1.5"
+          />
 
           {/* Solana */}
-          <div>
-            <div className="text-xs font-bold mb-1">Solana</div>
-            <div className="text-[11px] text-[var(--muted)] mb-2">Solana mainnet tokens and NFTs</div>
-
-            <div className="grid grid-cols-2 gap-1.5">
-              {([
-                { id: "eliza-cloud" as const, label: "Eliza Cloud" },
-                { id: "helius-birdeye" as const, label: "Helius + Birdeye" },
-              ]).map((p) => {
-                const active = selectedSolanaRpc === p.id;
-                return (
-                  <button
-                    key={p.id}
-                    className={`text-center px-2 py-2 border cursor-pointer transition-colors ${
-                      active
-                        ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)]"
-                        : "border-[var(--border)] bg-[var(--card)] hover:border-[var(--accent)]"
-                    }`}
-                    onClick={() => setSelectedSolanaRpc(p.id)}
-                  >
-                    <div className={`text-xs font-bold whitespace-nowrap ${active ? "" : "text-[var(--text)]"}`}>
-                      {p.label}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {selectedSolanaRpc === "eliza-cloud" ? (
-              <div className="mt-3">
-                {cloudConnected ? (
-                  <div className="flex items-center gap-2 text-xs">
-                    <span className="inline-block w-2 h-2 rounded-full bg-[var(--ok,#16a34a)]" />
-                    <span className="font-semibold">Connected to Eliza Cloud</span>
-                    {cloudCredits !== null && (
-                      <span className="text-[var(--muted)] ml-auto">
-                        Credits: <span className={cloudCreditsCritical ? "text-[var(--danger,#e74c3c)] font-bold" : cloudCreditsLow ? "text-[#b8860b] font-bold" : ""}>${cloudCredits.toFixed(2)}</span>
-                        {cloudTopUpUrl && <a href={cloudTopUpUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] ml-1.5 text-[var(--accent)]">Top up</a>}
-                      </span>
-                    )}
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 text-xs">
-                      <span className="inline-block w-2 h-2 rounded-full bg-[var(--muted)]" />
-                      <span className="text-[var(--muted)]">Requires Eliza Cloud connection</span>
-                    </div>
-                    <button
-                      className="btn text-xs py-[3px] px-3 !mt-0 font-bold"
-                      onClick={() => void handleCloudLogin()}
-                      disabled={cloudLoginBusy}
-                    >
-                      {cloudLoginBusy ? "Connecting..." : "Log in"}
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (() => {
-              const solProviders: Record<string, { configKey: string; label: string; isSet: boolean }> = {
-                helius: { configKey: "HELIUS_API_KEY", label: "Helius API Key", isSet: walletConfig?.heliusKeySet ?? false },
-                birdeye: { configKey: "BIRDEYE_API_KEY", label: "Birdeye API Key", isSet: walletConfig?.birdeyeKeySet ?? false },
-              };
-              const solKeys = selectedSolanaRpc === "helius-birdeye" ? ["helius", "birdeye"] : [];
-              const allSchemaProps: Record<string, Record<string, unknown>> = {};
-              const allHints: Record<string, ConfigUiHint> = {};
-              const allValues: Record<string, unknown> = {};
-              const allSetKeys = new Set<string>();
-              for (const sk of solKeys) {
-                const p = solProviders[sk];
-                if (!p) continue;
-                allSchemaProps[p.configKey] = { type: "string", description: p.label };
-                allHints[p.configKey] = { label: p.label, sensitive: true, placeholder: p.isSet ? "Already set \u2014 leave blank to keep" : "Enter API key", width: "full" };
-                if (rpcFieldValues[p.configKey] !== undefined) allValues[p.configKey] = rpcFieldValues[p.configKey];
-                if (p.isSet) allSetKeys.add(p.configKey);
-              }
-              const solSchema: JsonSchemaObject = { type: "object", properties: allSchemaProps, required: [] };
-              return (
-                <div className="mt-3">
-                  <ConfigRenderer
-                    schema={solSchema}
-                    hints={allHints}
-                    values={allValues}
-                    setKeys={allSetKeys}
-                    registry={defaultRegistry}
-                    onChange={handleRpcFieldChange}
-                  />
-                </div>
-              );
-            })()}
-          </div>
+          <RpcConfigSection
+            title="Solana"
+            description="Solana mainnet tokens and NFTs"
+            options={SOLANA_RPC_OPTIONS}
+            selectedProvider={selectedSolanaRpc}
+            onSelect={setSelectedSolanaRpc}
+            providerConfigs={solanaRpcConfigs}
+            rpcFieldValues={rpcFieldValues}
+            onRpcFieldChange={handleRpcFieldChange}
+            cloud={cloudStatusProps}
+            containerClassName="grid grid-cols-2 gap-1.5"
+          />
         </div>
 
         <div className="flex justify-end mt-4">

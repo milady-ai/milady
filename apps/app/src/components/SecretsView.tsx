@@ -24,6 +24,32 @@ const CATEGORY_LABELS: Record<string, string> = {
   other: "Other",
 };
 
+type GroupedSecrets = {
+  category: string;
+  label: string;
+  secrets: SecretInfo[];
+};
+
+function groupSecretsByCategory(secrets: SecretInfo[]): GroupedSecrets[] {
+  const grouped = new Map<string, SecretInfo[]>();
+  for (const secret of secrets) {
+    const existing = grouped.get(secret.category);
+    if (existing) {
+      existing.push(secret);
+    } else {
+      grouped.set(secret.category, [secret]);
+    }
+  }
+
+  return CATEGORY_ORDER
+    .filter((category) => grouped.has(category))
+    .map((category) => ({
+      category,
+      label: CATEGORY_LABELS[category],
+      secrets: grouped.get(category) ?? [],
+    }));
+}
+
 /* ── Persistence ────────────────────────────────────────────────────── */
 
 function loadPinnedKeys(): Set<string> {
@@ -90,15 +116,7 @@ export function SecretsView() {
 
   // Group vault secrets by category
   const grouped = useMemo(() => {
-    const map = new Map<string, SecretInfo[]>();
-    for (const s of vaultSecrets) {
-      const list = map.get(s.category) || [];
-      list.push(s);
-      map.set(s.category, list);
-    }
-    return CATEGORY_ORDER
-      .filter((cat) => map.has(cat))
-      .map((cat) => ({ category: cat, label: CATEGORY_LABELS[cat], secrets: map.get(cat)! }));
+    return groupSecretsByCategory(vaultSecrets);
   }, [vaultSecrets]);
 
   const dirtyKeys = useMemo(() => {
@@ -287,15 +305,7 @@ function SecretPicker({
 }) {
   // Group available by category
   const grouped = useMemo(() => {
-    const map = new Map<string, SecretInfo[]>();
-    for (const s of available) {
-      const list = map.get(s.category) || [];
-      list.push(s);
-      map.set(s.category, list);
-    }
-    return CATEGORY_ORDER
-      .filter((cat) => map.has(cat))
-      .map((cat) => ({ category: cat, label: CATEGORY_LABELS[cat], secrets: map.get(cat)! }));
+    return groupSecretsByCategory(available);
   }, [available]);
 
   return (

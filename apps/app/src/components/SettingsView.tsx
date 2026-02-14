@@ -21,6 +21,8 @@ import { VoiceConfigView } from "./VoiceConfigView";
 import { PermissionsSection } from "./PermissionsSection";
 import type { ConfigUiHint } from "../types";
 import type { JsonSchemaObject } from "./config-catalog";
+import { autoLabel } from "./shared/labels";
+import { formatByteSize } from "./shared/format";
 
 /* ── Modal shell ─────────────────────────────────────────────────────── */
 
@@ -60,37 +62,6 @@ function Modal({
 }
 
 /* ── Auto-detection helpers ────────────────────────────────────────── */
-
-const ACRONYMS = new Set([
-  "API", "URL", "ID", "SSH", "SSL", "HTTP", "HTTPS", "RPC",
-  "NFT", "EVM", "TLS", "DNS", "IP", "JWT", "SDK", "LLM",
-]);
-
-function autoLabel(key: string, pluginId: string): string {
-  const prefixes = [
-    pluginId.toUpperCase().replace(/-/g, "_") + "_",
-    pluginId.toUpperCase().replace(/-/g, "") + "_",
-  ];
-  let remainder = key;
-  for (const prefix of prefixes) {
-    if (key.startsWith(prefix) && key.length > prefix.length) {
-      remainder = key.slice(prefix.length);
-      break;
-    }
-  }
-  return remainder
-    .split("_")
-    .map((w) => (ACRONYMS.has(w) ? w : w.charAt(0) + w.slice(1).toLowerCase()))
-    .join(" ");
-}
-
-function formatByteSize(bytes: number): string {
-  if (!Number.isFinite(bytes) || bytes < 0) return "unknown";
-  if (bytes >= 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
-  if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-  if (bytes >= 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${bytes} B`;
-}
 
 /* ── SettingsView ─────────────────────────────────────────────────────── */
 
