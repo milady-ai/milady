@@ -140,7 +140,7 @@
     "@elizaos/plugin-todo": "next",
     "@elizaos/plugin-trajectory-logger": "2.0.0-alpha.5",
     "@elizaos/plugin-trust": "next",
-    "@elizaos/plugin-twitter": "^1.2.22",
+    "@elizaos/plugin-twitter": "1.2.23-alpha.0",
     "@elizaos/plugin-vercel-ai-gateway": "next",
     "@elizaos/plugin-vision": "2.0.0-alpha.6",
     "@elizaos/plugin-whatsapp": "next",
