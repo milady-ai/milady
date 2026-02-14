@@ -11,6 +11,22 @@ type MarkdownChunker = (
 ) => TelegramChunkCandidate[] | undefined;
 type TelegramPluginLike = { markdownToTelegramChunks?: MarkdownChunker };
 
+function extractErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === "object" && error !== null) {
+    const candidate = (error as { message?: unknown }).message;
+    if (typeof candidate === "string") {
+      return candidate;
+    }
+    if (candidate !== undefined) {
+      return String(candidate);
+    }
+  }
+  return String(error);
+}
+
 function fallbackMarkdownChunker(
   markdownText: string,
   maxChars?: number,
@@ -39,10 +55,7 @@ const markdownToTelegramChunks = (() => {
       return chunker;
     }
   } catch (error) {
-    const errorMessage =
-      error instanceof Error
-        ? error.message
-        : String(error?.message ?? error?.toString?.() ?? error);
+    const errorMessage = extractErrorMessage(error);
     logger.warn(
       `[milaidy] Telegram plugin load failed: ${
         errorMessage
