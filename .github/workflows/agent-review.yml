@@ -177,16 +177,13 @@ jobs:
             const repo = context.repo.repo;
             const issue_number = context.payload.pull_request.number;
 
-            const comments = await github.paginate(github.rest.issues.listComments, {
-              owner,
-              repo,
-              issue_number,
-              per_page: 100,
-            });
-
             // Prefer bot-authored comments first, then fall back to any matching comment.
             const decisionPattern = /(?:^|\n)\s*(?:\d+\.\s*)?\*\*?Decision:\*\*?\s*(APPROVE|REQUEST CHANGES|CLOSE)\b/i;
             const structuredPattern = /\*\*?Classification:|\*\*?Scope verdict:|\*\*?Code quality:/i;
+            const maxAttempts = 6; // ~60s total with a 10s interval
+            const pollIntervalMs = 10_000;
+
+            const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
             const findLatest = (items) => {
               const filtered = items.filter((c) => {
@@ -199,8 +196,31 @@ jobs:
               )[0];
             };
 
-            const botComments = comments.filter((c) => c.user?.type === 'Bot');
-            const latest = findLatest(botComments) || findLatest(comments);
+            let latest = null;
+            let attemptUsed = 1;
+
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+              attemptUsed = attempt;
+
+              const comments = await github.paginate(github.rest.issues.listComments, {
+                owner,
+                repo,
+                issue_number,
+                per_page: 100,
+              });
+
+              const botComments = comments.filter((c) => c.user?.type === 'Bot');
+              latest = findLatest(botComments) || findLatest(comments);
+
+              if (latest) {
+                break;
+              }
+
+              if (attempt < maxAttempts) {
+                console.log(`Structured decision comment not found yet (attempt ${attempt}/${maxAttempts}); waiting ${pollIntervalMs / 1000}s...`);
+                await sleep(pollIntervalMs);
+              }
+            }
 
             let verdict = 'reject';
             let decision = 'REQUEST CHANGES';
@@ -220,7 +240,7 @@ jobs:
                 verdict = 'reject';
               }
             } else {
-              core.warning('No structured Claude decision comment found. Treating as reject.');
+              core.warning(`No structured Claude decision comment found after ${attemptUsed} attempts. Treating as reject.`);
             }
 
             core.setOutput('verdict', verdict);
@@ -229,6 +249,7 @@ jobs:
 
             core.summary
               .addHeading('Agent review decision gate')
+              .addRaw(`- Poll attempts used: ${attemptUsed}\n`)
               .addRaw(`- Verdict: ${verdict}\n`)
               .addRaw(`- Decision: ${decision}\n`)
               .addRaw(`- Decision comment: ${decisionCommentUrl || 'not found'}\n`)
