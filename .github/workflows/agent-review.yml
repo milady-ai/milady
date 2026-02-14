@@ -244,7 +244,7 @@ jobs:
             --base "origin/${{ github.event.pull_request.base.ref }}" \
             --title "${{ github.event.pull_request.title }}" \
             -c 'model="gpt-5.3-codex"' \
-            "$(cat /tmp/review-prompt.md)" \
+            - < /tmp/review-prompt.md \
             > /tmp/review-output.md 2>&1 || true
 
           echo "Review output:"
