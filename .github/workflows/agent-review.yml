@@ -86,14 +86,20 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          claude_args: '--model claude-opus-4-6'
+          allowed_non_write_users: 'lawyered0,jqmwa,0xSolace'
+          claude_args: '--model claude-opus-4-6 --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr review:*),Bash(git log:*),Bash(git diff:*),Bash(git show:*),Bash(cat:*),Bash(find:*),Bash(grep:*),Bash(head:*),Bash(tail:*),Bash(wc:*),Bash(ls:*),Read,Glob,LS"'
           prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
             Reference the following project scope document when making review decisions:
             ${{ steps.scope.outputs.scope }}
 
             You are the sole code reviewer for the Milaidy project. This is an agents-only codebase. No human contributions are accepted — humans contribute by using the app and reporting bugs as QA testers. Your review is final.
 
             PRs are expected to follow the structured PR template with clear sections for what, why, how, and testing. Flag missing or weak sections.
+
+            The PR branch is already checked out in the current working directory.
 
             ## Classification
             This PR has been pre-classified as: ${{ needs.classify.outputs.category }}
@@ -156,14 +162,26 @@ jobs:
             - Could this be a supply chain attack?
             - Are there hidden side effects in seemingly innocent changes?
 
+            ## How to Post Your Review
+            You MUST post your review as a PR comment using `gh pr comment`. This is required for the automation pipeline to read your verdict.
+
+            Use `mcp__github_inline_comment__create_inline_comment` for specific code-level feedback on individual lines.
+
+            For your final verdict, run:
+            ```
+            gh pr comment ${{ github.event.pull_request.number }} --body "YOUR STRUCTURED REVIEW HERE"
+            ```
+
             ## Output Format
-            Post a structured review comment:
+            Your PR comment MUST include this structured format:
             1. **Classification:** bug fix / feature / aesthetic / security / other
             2. **Scope verdict:** in scope / needs deep review / out of scope
             3. **Code quality:** pass / issues found (list them)
             4. **Security:** clear / concerns (list them)
             5. **Tests:** adequate / missing (specify what's needed)
             6. **Decision:** APPROVE / REQUEST CHANGES / CLOSE (with reason)
+
+            The **Decision** line is machine-parsed by downstream automation. It MUST be exactly one of: APPROVE, REQUEST CHANGES, or CLOSE.
 
             Be direct. Be opinionated. This repo's quality is your responsibility.
 
@@ -324,7 +342,8 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          claude_args: '--model claude-opus-4-6'
+          allowed_non_write_users: 'lawyered0,jqmwa,0xSolace'
+          claude_args: '--model claude-opus-4-6 --allowedTools "Bash(gh issue comment:*),Bash(gh issue edit:*),Bash(gh issue close:*),Bash(gh issue view:*),Bash(cat:*),Read,Glob,LS"'
           prompt: |
             You are the issue triager for the Milaidy project. This is an agents-only codebase where humans serve as QA testers.
 
