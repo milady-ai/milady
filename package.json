@@ -130,6 +130,7 @@
   },
   "overrides": {
     "drizzle-orm": "0.45.1",
-    "@elizaos/core": "2.0.0-alpha.10"
+    "@elizaos/core": "2.0.0-alpha.10",
+    "tar": "^7.5.7"
   }
 }
