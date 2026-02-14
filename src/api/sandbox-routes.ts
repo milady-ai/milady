@@ -254,29 +254,32 @@ export async function handleSandboxRoute(
         return true;
       }
 
-      if (Object.hasOwn(parsed, "durationMs")) {
-        if (typeof parsed.durationMs !== "number") {
+      const bodyValues = parsed as Record<string, unknown>;
+
+      if (Object.hasOwn(bodyValues, "durationMs")) {
+        const durationValue = bodyValues.durationMs;
+        if (typeof durationValue !== "number") {
           sendJson(res, 400, {
             error: "durationMs must be a finite number",
           });
           return true;
         }
-        if (!Number.isFinite(parsed.durationMs)) {
+        if (!Number.isFinite(durationValue)) {
           sendJson(res, 400, {
             error: "durationMs must be a finite number",
           });
           return true;
         }
         if (
-          parsed.durationMs < MIN_AUDIO_RECORD_DURATION_MS ||
-          parsed.durationMs > MAX_AUDIO_RECORD_DURATION_MS
+          durationValue < MIN_AUDIO_RECORD_DURATION_MS ||
+          durationValue > MAX_AUDIO_RECORD_DURATION_MS
         ) {
           sendJson(res, 400, {
             error: `durationMs must be between ${MIN_AUDIO_RECORD_DURATION_MS} and ${MAX_AUDIO_RECORD_DURATION_MS} milliseconds`,
           });
           return true;
         }
-        durationMs = Math.floor(parsed.durationMs);
+        durationMs = Math.floor(durationValue);
       }
     }
     try {
