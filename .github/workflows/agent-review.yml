@@ -128,6 +128,7 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          allowed_non_write_users: ${{ vars.ALLOWED_NON_WRITE_USERS || 'lawyered0,jqmwa,0xSolace' }}
           claude_args: '--model claude-opus-4-6 --allowedTools "Bash,GitHub,Read,Glob,LS"'
           prompt: |
             You are the sole code reviewer for the Milaidy project (milady-ai/milaidy).
