@@ -161,6 +161,39 @@ describe("handleCloudRoute timeout behavior", () => {
     expect(capturedSignal).toBeInstanceOf(AbortSignal);
   });
 
+  it("rejects redirected cloud login session creation", async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 302,
+      statusText: "Found",
+      headers: new Headers({
+        location: "http://169.254.169.254/latest/meta-data",
+      }),
+      json: async () => ({}),
+    } as Response);
+
+    const { res, getJson } = createMockHttpResponse<Record<string, unknown>>();
+    const handled = await handleCloudRoute(
+      createMockIncomingMessage({
+        url: "/api/cloud/login",
+      }) as http.IncomingMessage,
+      res,
+      "/api/cloud/login",
+      "POST",
+      cloudState(),
+    );
+
+    expect(handled).toBe(true);
+    expect(res.statusCode).toBe(502);
+    expect(getJson().error).toBe(
+      "Eliza Cloud login request was redirected; redirects are not allowed",
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://test.elizacloud.ai/api/auth/cli-session",
+      expect.objectContaining({ redirect: "manual" }),
+    );
+  });
+
   it("returns 504 when cloud login status polling times out", async () => {
     fetchMock.mockRejectedValue(timeoutError());
 
@@ -181,6 +214,41 @@ describe("handleCloudRoute timeout behavior", () => {
       status: "error",
       error: "Eliza Cloud status request timed out",
     });
+  });
+
+  it("rejects redirected cloud login status polling", async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 307,
+      statusText: "Temporary Redirect",
+      headers: new Headers({
+        location: "http://127.0.0.1:8080/internal",
+      }),
+      json: async () => ({}),
+    } as Response);
+
+    const { res, getJson } = createMockHttpResponse<Record<string, unknown>>();
+    const handled = await handleCloudRoute(
+      createMockIncomingMessage({
+        url: "/api/cloud/login/status?sessionId=test-session",
+      }) as http.IncomingMessage,
+      res,
+      "/api/cloud/login/status",
+      "GET",
+      cloudState(),
+    );
+
+    expect(handled).toBe(true);
+    expect(res.statusCode).toBe(502);
+    expect(getJson()).toEqual({
+      status: "error",
+      error:
+        "Eliza Cloud status request was redirected; redirects are not allowed",
+    });
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://test.elizacloud.ai/api/auth/cli-session/test-session",
+      expect.objectContaining({ redirect: "manual" }),
+    );
   });
 
   it("returns 502 when cloud polling fails for non-timeout network errors", async () => {

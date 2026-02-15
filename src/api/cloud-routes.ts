@@ -48,6 +48,10 @@ async function readJsonBody<T = Record<string, unknown>>(
 const CLOUD_LOGIN_CREATE_TIMEOUT_MS = 10_000;
 const CLOUD_LOGIN_POLL_TIMEOUT_MS = 10_000;
 
+function isRedirectResponse(response: Response): boolean {
+  return response.status >= 300 && response.status < 400;
+}
+
 function isTimeoutError(error: unknown): boolean {
   if (!(error instanceof Error)) return false;
   if (error.name === "TimeoutError" || error.name === "AbortError") return true;
@@ -62,6 +66,7 @@ async function fetchWithTimeout(
 ): Promise<Response> {
   return fetch(input, {
     ...init,
+    redirect: "manual",
     signal: AbortSignal.timeout(timeoutMs),
   });
 }
@@ -103,6 +108,15 @@ export async function handleCloudRoute(
         return true;
       }
       sendJsonError(res, "Failed to reach Eliza Cloud", 502);
+      return true;
+    }
+
+    if (isRedirectResponse(createRes)) {
+      sendJsonError(
+        res,
+        "Eliza Cloud login request was redirected; redirects are not allowed",
+        502,
+      );
       return true;
     }
 
@@ -161,6 +175,19 @@ export async function handleCloudRoute(
         {
           status: "error",
           error: "Failed to reach Eliza Cloud",
+        },
+        502,
+      );
+      return true;
+    }
+
+    if (isRedirectResponse(pollRes)) {
+      sendJson(
+        res,
+        {
+          status: "error",
+          error:
+            "Eliza Cloud status request was redirected; redirects are not allowed",
         },
         502,
       );
