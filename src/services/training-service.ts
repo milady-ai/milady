@@ -1068,6 +1068,7 @@ export class TrainingService {
 
     const response = await fetch(`${ollamaUrl}/api/create`, {
       method: "POST",
+      redirect: "manual",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: ollamaModelName,

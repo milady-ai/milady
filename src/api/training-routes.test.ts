@@ -319,6 +319,24 @@ describe("training routes", () => {
     expect(trainingService.importModelToOllama).not.toHaveBeenCalled();
   });
 
+  test("accepts bracketed IPv6 loopback ollamaUrl", async () => {
+    const result = await invoke({
+      method: "POST",
+      pathname: "/api/training/models/model-1/import-ollama",
+      body: {
+        ollamaUrl: "http://[::1]:11434",
+      },
+    });
+
+    expect(result.status).toBe(200);
+    expect(trainingService.importModelToOllama).toHaveBeenCalledWith(
+      "model-1",
+      expect.objectContaining({
+        ollamaUrl: "http://[::1]:11434",
+      }),
+    );
+  });
+
   test("benchmarks model from endpoint", async () => {
     const result = await invoke({
       method: "POST",
