@@ -4018,6 +4018,9 @@ export function resolveWalletExportRejection(
 }
 
 function extractWsQueryToken(url: URL): string | null {
+  const allowQueryToken = process.env.MILADY_ALLOW_WS_QUERY_TOKEN === "1";
+  if (!allowQueryToken) return null;
+
   const token =
     url.searchParams.get("token") ??
     url.searchParams.get("apiKey") ??
