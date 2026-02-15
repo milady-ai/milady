@@ -1547,6 +1547,36 @@ const MAX_IMPORT_BYTES = 512 * 1_048_576; // 512 MB for agent imports
 const AGENT_TRANSFER_MIN_PASSWORD_LENGTH = 4;
 const AGENT_TRANSFER_MAX_PASSWORD_LENGTH = 1024;
 
+const TERMINAL_RUN_MAX_CONCURRENT_DEFAULT = 2;
+const TERMINAL_RUN_MAX_CONCURRENT_CAP = 16;
+const TERMINAL_RUN_MAX_DURATION_MS_DEFAULT = 5 * 60 * 1000;
+const TERMINAL_RUN_MAX_DURATION_MS_CAP = 60 * 60 * 1000;
+
+export function resolveTerminalRunLimits(): {
+  maxConcurrent: number;
+  maxDurationMs: number;
+} {
+  const maxConcurrent = parseClampedInteger(
+    process.env.MILAIDY_TERMINAL_MAX_CONCURRENT,
+    {
+      fallback: TERMINAL_RUN_MAX_CONCURRENT_DEFAULT,
+      min: 1,
+      max: TERMINAL_RUN_MAX_CONCURRENT_CAP,
+    },
+  );
+
+  const maxDurationMs = parseClampedInteger(
+    process.env.MILAIDY_TERMINAL_MAX_DURATION_MS,
+    {
+      fallback: TERMINAL_RUN_MAX_DURATION_MS_DEFAULT,
+      min: 1_000,
+      max: TERMINAL_RUN_MAX_DURATION_MS_CAP,
+    },
+  );
+
+  return { maxConcurrent, maxDurationMs };
+}
+
 /**
  * Read raw binary request body with a configurable size limit.
  * Used for agent import file uploads.
@@ -1584,6 +1614,8 @@ const readBody = (req: http.IncomingMessage): Promise<string> =>
   readRequestBody(req, { maxBytes: MAX_BODY_BYTES }).then(
     (value) => value ?? "",
   );
+
+let activeTerminalRunCount = 0;
 
 function json(res: http.ServerResponse, data: unknown, status = 200): void {
   sendJson(res, data, status);
@@ -11455,18 +11487,29 @@ async function handleRequest(
       return;
     }
 
+    const { maxConcurrent, maxDurationMs } = resolveTerminalRunLimits();
+    if (activeTerminalRunCount >= maxConcurrent) {
+      error(
+        res,
+        `Too many active terminal runs (${maxConcurrent}). Wait for a command to finish.`,
+        429,
+      );
+      return;
+    }
+
     // Respond immediately — output streams via WebSocket
     json(res, { ok: true });
 
     // Spawn in background and broadcast output
     const { spawn } = await import("node:child_process");
-    const runId = `run-${Date.now()}`;
+    const runId = `run-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
     state.broadcastWs?.({
       type: "terminal-output",
       runId,
       event: "start",
       command,
+      maxDurationMs,
     });
 
     const proc = spawn(command, {
@@ -11474,6 +11517,30 @@ async function handleRequest(
       cwd: process.cwd(),
       env: { ...process.env, FORCE_COLOR: "0" },
     });
+
+    activeTerminalRunCount += 1;
+    let finalized = false;
+    const finalize = () => {
+      if (finalized) return;
+      finalized = true;
+      activeTerminalRunCount = Math.max(0, activeTerminalRunCount - 1);
+      clearTimeout(timeoutHandle);
+    };
+
+    const timeoutHandle = setTimeout(() => {
+      if (proc.killed) return;
+      proc.kill("SIGTERM");
+      state.broadcastWs?.({
+        type: "terminal-output",
+        runId,
+        event: "timeout",
+        maxDurationMs,
+      });
+
+      setTimeout(() => {
+        if (!proc.killed) proc.kill("SIGKILL");
+      }, 3000);
+    }, maxDurationMs);
 
     proc.stdout?.on("data", (chunk: Buffer) => {
       state.broadcastWs?.({
@@ -11494,6 +11561,7 @@ async function handleRequest(
     });
 
     proc.on("close", (code: number | null) => {
+      finalize();
       state.broadcastWs?.({
         type: "terminal-output",
         runId,
@@ -11503,6 +11571,7 @@ async function handleRequest(
     });
 
     proc.on("error", (err: Error) => {
+      finalize();
       state.broadcastWs?.({
         type: "terminal-output",
         runId,
