@@ -37,7 +37,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Install app dependencies for workspace tests
-        run: bun install --frozen-lockfile
+        run: npm ci --no-audit --no-fund
         working-directory: apps/app
 
       - name: Run unit tests
@@ -103,7 +103,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Install app dependencies for workspace tests
-        run: bun install --frozen-lockfile
+        run: npm ci --no-audit --no-fund
         working-directory: apps/app
 
       - name: Run app startup/onboarding tests
