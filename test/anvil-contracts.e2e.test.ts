@@ -11,6 +11,7 @@
  * - NFT queries for inventory display
  */
 
+import { spawnSync } from "node:child_process";
 import { ethers } from "ethers";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { DropService } from "../src/api/drop-service.js";
@@ -22,11 +23,22 @@ import {
   deployContracts,
 } from "./contract-deployer.js";
 
+function hasAnvilBinary(): boolean {
+  try {
+    const result = spawnSync("anvil", ["--version"], { stdio: "ignore" });
+    return result.status === 0;
+  } catch {
+    return false;
+  }
+}
+
+const describeAnvil = hasAnvilBinary() ? describe : describe.skip;
+
 // ---------------------------------------------------------------------------
 // Test Suite
 // ---------------------------------------------------------------------------
 
-describe("Anvil Contract E2E Tests", () => {
+describeAnvil("Anvil Contract E2E Tests", () => {
   let anvil: AnvilInstance;
   let contracts: DeployedContracts;
   let txService: TxService;
@@ -65,7 +77,7 @@ describe("Anvil Contract E2E Tests", () => {
   }, 60_000);
 
   afterAll(async () => {
-    await anvil.stop();
+    if (anvil) await anvil.stop();
   });
 
   // ═══════════════════════════════════════════════════════════════════════════

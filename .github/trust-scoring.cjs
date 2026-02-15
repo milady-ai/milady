@@ -243,7 +243,12 @@ function computeTrustScore(history, config = DEFAULT_CONFIG, now = Date.now()) {
       diminishingMultiplier =
         1 / (1 + config.diminishingRate * Math.log(1 + approvalCount));
       approvalCount++;
-    } else if (basePoints < 0 && (event.type === "close" || event.type === "selfClose" || event.type === "reject")) {
+    } else if (
+      basePoints < 0 &&
+      (event.type === "close" ||
+        event.type === "selfClose" ||
+        event.type === "reject")
+    ) {
       diminishingMultiplier =
         1 / (1 + config.diminishingRate * Math.log(1 + closeCount));
       closeCount++;
@@ -388,7 +393,8 @@ function computeTrustScore(history, config = DEFAULT_CONFIG, now = Date.now()) {
   const volumeBonus = round(Math.min(10, Math.sqrt(approvalCount) * 1.5), 4);
   breakdown.volumeBonus = volumeBonus;
 
-  let score = config.initialScore + adjustedPoints + approveRateBonus + volumeBonus;
+  let score =
+    config.initialScore + adjustedPoints + approveRateBonus + volumeBonus;
 
   // --- Phase 4: Inactivity decay ---
   const lastEventTime = sorted[sorted.length - 1].timestamp;

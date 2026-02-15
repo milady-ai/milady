@@ -53,6 +53,20 @@ interface ActiveAppSession {
   startedAt: string;
 }
 
+function resolvePluginPackageName(appInfo: RegistryAppInfo): string {
+  const npmPackage = appInfo.npm.package?.trim();
+  return npmPackage && npmPackage.length > 0 ? npmPackage : appInfo.name;
+}
+
+function isAutoInstallable(appInfo: RegistryAppInfo): boolean {
+  const supportsRuntime =
+    appInfo.supports.v0 || appInfo.supports.v1 || appInfo.supports.v2;
+  const hasVersion = Boolean(
+    appInfo.npm.v0Version || appInfo.npm.v1Version || appInfo.npm.v2Version,
+  );
+  return supportsRuntime && hasVersion;
+}
+
 function getTemplateFallbackValue(key: string): string | undefined {
   if (key === "RS_SDK_BOT_NAME") {
     const runtimeBotName = process.env.BOT_NAME?.trim();
@@ -215,26 +229,34 @@ export class AppManager {
 
     // The app's plugin is what the agent needs to play the game.
     // It's the same npm package name as the app, or a separate plugin ref.
-    const pluginName = appInfo.name;
+    const pluginName = resolvePluginPackageName(appInfo);
 
     // Check if the plugin is already installed
     const installed = listInstalledPlugins();
     const alreadyInstalled = installed.some((p) => p.name === pluginName);
+    let pluginInstalled = alreadyInstalled;
 
     let needsRestart = false;
 
     if (!alreadyInstalled) {
-      logger.info(`[app-manager] Installing plugin for app: ${pluginName}`);
-      const result = await installPlugin(pluginName, onProgress);
-      if (!result.success) {
-        throw new Error(
-          `Failed to install plugin "${pluginName}": ${result.error}`,
+      if (isAutoInstallable(appInfo)) {
+        logger.info(`[app-manager] Installing plugin for app: ${pluginName}`);
+        const result = await installPlugin(pluginName, onProgress);
+        if (!result.success) {
+          throw new Error(
+            `Failed to install plugin "${pluginName}": ${result.error}`,
+          );
+        }
+        pluginInstalled = true;
+        needsRestart = result.requiresRestart;
+        logger.info(
+          `[app-manager] Plugin installed: ${pluginName} v${result.version}`,
+        );
+      } else {
+        logger.info(
+          `[app-manager] Skipping plugin install for ${name}: no installable runtime package/version in registry metadata.`,
         );
       }
-      needsRestart = result.requiresRestart;
-      logger.info(
-        `[app-manager] Plugin installed: ${pluginName} v${result.version}`,
-      );
     } else {
       logger.info(`[app-manager] Plugin already installed: ${pluginName}`);
     }
@@ -254,7 +276,7 @@ export class AppManager {
     });
 
     return {
-      pluginInstalled: true,
+      pluginInstalled,
       needsRestart,
       displayName: appInfo.displayName,
       launchType: appInfo.launchType,
@@ -270,7 +292,7 @@ export class AppManager {
     }
 
     const hadSession = this.activeSessions.delete(name);
-    const pluginName = appInfo.name;
+    const pluginName = resolvePluginPackageName(appInfo);
     const installed = listInstalledPlugins();
     const isPluginInstalled = installed.some(
       (plugin) => plugin.name === pluginName,

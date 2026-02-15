@@ -298,7 +298,10 @@ describe("AppManager", () => {
     it("throws when plugin install fails", async () => {
       const { getAppInfo } = await import("./registry-client.js");
       vi.mocked(getAppInfo).mockResolvedValue(
-        makeRegistryAppInfo(APP_INFO_TEST_FAIL),
+        makeRegistryAppInfo({
+          ...APP_INFO_TEST_FAIL,
+          supports: { v0: false, v1: false, v2: true },
+        }),
       );
 
       const { installPlugin, listInstalledPlugins } = await import(
@@ -319,6 +322,28 @@ describe("AppManager", () => {
       await expect(mgr.launch("@elizaos/app-test")).rejects.toThrow(
         "Package not found",
       );
+    });
+
+    it("skips install when app is not installable from registry metadata", async () => {
+      const { getAppInfo } = await import("./registry-client.js");
+      vi.mocked(getAppInfo).mockResolvedValue(
+        makeRegistryAppInfo(APP_INFO_TEST_FAIL),
+      );
+
+      const { installPlugin, listInstalledPlugins } = await import(
+        "./plugin-installer.js"
+      );
+      vi.mocked(listInstalledPlugins).mockReturnValue([]);
+      const mockInstall = vi.mocked(installPlugin);
+      mockInstall.mockClear();
+
+      const { AppManager } = await import("./app-manager.js");
+      const mgr = new AppManager();
+      const result = await mgr.launch("@elizaos/app-test");
+
+      expect(result.pluginInstalled).toBe(false);
+      expect(result.needsRestart).toBe(false);
+      expect(mockInstall).not.toHaveBeenCalled();
     });
 
     it("returns null viewer when app has no viewer config", async () => {
