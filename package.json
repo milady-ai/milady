@@ -124,6 +124,7 @@
     "@elizaos/plugin-telegram": "^1.6.4",
     "@elizaos/plugin-todo": "next",
     "@elizaos/plugin-trust": "next",
+    "@elizaos/plugin-trajectory-logger": "next",
     "@elizaos/tui": "next",
     "@noble/curves": "^2.0.1",
     "bonjour-service": "^1.3.0",
