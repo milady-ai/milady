@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="console-application">
-  <id>ai.milady.Milady</id>
+  <id>ai.milady.Milaidy</id>
   <metadata_license>MIT</metadata_license>
   <project_license>MIT</project_license>
-  <name>Milady</name>
+  <name>Milaidy</name>
   <summary>Personal AI assistant built on ElizaOS</summary>
   <description>
     <p>
-      Milady is a personal AI assistant you run on your own devices, built on
+      Milaidy is a personal AI assistant you run on your own devices, built on
       ElizaOS. It provides zero-config onboarding, multi-provider AI support,
       a web dashboard, and a plugin system for extensibility.
     </p>
@@ -21,10 +21,10 @@
     </ul>
   </description>
   <url type="homepage">https://milady.ai</url>
-  <url type="bugtracker">https://github.com/milady-ai/milady/issues</url>
-  <url type="vcs-browser">https://github.com/milady-ai/milady</url>
+  <url type="bugtracker">https://github.com/milady-ai/milaidy/issues</url>
+  <url type="vcs-browser">https://github.com/milady-ai/milaidy</url>
   <provides>
-    <binary>milady</binary>
+    <binary>milaidy</binary>
   </provides>
   <categories>
     <category>Development</category>
@@ -33,7 +33,7 @@
   <releases>
     <release version="2.0.0-alpha.7" date="2026-02-07">
       <description>
-        <p>Initial Flatpak release of Milady.</p>
+        <p>Initial Flatpak release of Milaidy.</p>
       </description>
     </release>
   </releases>

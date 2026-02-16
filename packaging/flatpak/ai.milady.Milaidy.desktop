@@ -1,9 +1,9 @@
 [Desktop Entry]
 Type=Application
-Name=Milady
+Name=Milaidy
 Comment=Personal AI assistant built on ElizaOS
-Exec=milady start
-Icon=ai.milady.Milady
+Exec=milaidy start
+Icon=ai.milady.Milaidy
 Terminal=true
 Categories=Development;Utility;
 Keywords=ai;assistant;agent;elizaos;llm;

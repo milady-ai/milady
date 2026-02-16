@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const CORE_PACKAGE_NAME = "milady";
+const CORE_PACKAGE_NAME = "milaidy";
 
 async function readPackageName(dir: string): Promise<string | null> {
   try {
@@ -75,13 +75,13 @@ function candidateDirsFromArgv1(argv1: string): string[] {
   return candidates;
 }
 
-type ResolveMiladyRootOptions = {
+type ResolveMilaidyRootOptions = {
   cwd?: string;
   argv1?: string;
   moduleUrl?: string;
 };
 
-function candidateDirsFromOptions(opts: ResolveMiladyRootOptions): string[] {
+function candidateDirsFromOptions(opts: ResolveMilaidyRootOptions): string[] {
   const candidates: string[] = [];
 
   if (opts.moduleUrl) {
@@ -97,8 +97,8 @@ function candidateDirsFromOptions(opts: ResolveMiladyRootOptions): string[] {
   return candidates;
 }
 
-export async function resolveMiladyPackageRoot(
-  opts: ResolveMiladyRootOptions,
+export async function resolveMilaidyPackageRoot(
+  opts: ResolveMilaidyRootOptions,
 ): Promise<string | null> {
   const candidates = candidateDirsFromOptions(opts);
 
@@ -112,8 +112,8 @@ export async function resolveMiladyPackageRoot(
   return null;
 }
 
-export function resolveMiladyPackageRootSync(
-  opts: ResolveMiladyRootOptions,
+export function resolveMilaidyPackageRootSync(
+  opts: ResolveMilaidyRootOptions,
 ): string | null {
   const candidates = candidateDirsFromOptions(opts);
 

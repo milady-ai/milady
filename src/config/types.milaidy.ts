@@ -90,8 +90,8 @@ export type BrowserProfileConfig = {
   cdpPort?: number;
   /** CDP URL for this profile (use for remote Chrome). */
   cdpUrl?: string;
-  /** Profile driver (default: milady). */
-  driver?: "milady" | "extension";
+  /** Profile driver (default: milaidy). */
+  driver?: "milaidy" | "extension";
   /** Profile color (hex). Auto-assigned at creation. */
   color: string;
 };
@@ -109,7 +109,7 @@ export type BrowserConfig = {
   remoteCdpTimeoutMs?: number;
   /** Remote CDP WebSocket handshake timeout (ms). Default: max(remoteCdpTimeoutMs * 2, 2000). */
   remoteCdpHandshakeTimeoutMs?: number;
-  /** Accent color for the milady browser profile (hex). Default: #FF4500 */
+  /** Accent color for the milaidy browser profile (hex). Default: #FF4500 */
   color?: string;
   /** Override the browser executable path (all platforms). */
   executablePath?: string;
@@ -399,7 +399,7 @@ export type MemoryQmdLimitsConfig = {
 // --- Database types ---
 
 export type PgliteConfig = {
-  /** Custom PGLite data directory. Default: ~/.milady/workspace/.eliza/.elizadb */
+  /** Custom PGLite data directory. Default: ~/.milaidy/workspace/.eliza/.elizadb */
   dataDir?: string;
 };
 
@@ -591,9 +591,9 @@ export type ConnectorFieldValue =
  */
 export type ConnectorConfig = { [key: string]: ConnectorFieldValue };
 
-export type MiladyConfig = {
+export type MilaidyConfig = {
   meta?: {
-    /** Last Milady version that wrote this config. */
+    /** Last Milaidy version that wrote this config. */
     lastTouchedVersion?: string;
     /** ISO timestamp when this config was last written. */
     lastTouchedAt?: string;
@@ -627,7 +627,7 @@ export type MiladyConfig = {
   update?: UpdateConfig;
   browser?: BrowserConfig;
   ui?: {
-    /** Accent color for Milady UI chrome (hex). */
+    /** Accent color for Milaidy UI chrome (hex). */
     seamColor?: string;
     /** User's preferred UI theme. Set during onboarding. */
     theme?: "milady" | "qt314" | "web2000" | "programmer" | "haxor" | "psycho";
@@ -687,13 +687,13 @@ export type MiladyConfig = {
       }
     >;
   };
-  /** ERC-8004 agent registry and MiladyMaker NFT collection configuration. */
+  /** ERC-8004 agent registry and MilaidyMaker NFT collection configuration. */
   registry?: {
     /** Ethereum mainnet (or local Anvil) RPC URL. */
     mainnetRpc?: string;
-    /** MiladyAgentRegistry contract address. */
+    /** MilaidyAgentRegistry contract address. */
     registryAddress?: string;
-    /** MiladyMaker collection contract address. */
+    /** MilaidyMaker collection contract address. */
     collectionAddress?: string;
   };
   /** Feature flags for plugin auto-enable. */
@@ -716,7 +716,7 @@ export type ConfigFileSnapshot = {
   raw: string | null;
   parsed: unknown;
   valid: boolean;
-  config: MiladyConfig;
+  config: MilaidyConfig;
   hash?: string;
   issues: ConfigValidationIssue[];
   warnings: ConfigValidationIssue[];

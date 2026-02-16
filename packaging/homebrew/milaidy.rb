@@ -1,22 +1,22 @@
-# Homebrew formula for Milady — personal AI assistant built on ElizaOS
+# Homebrew formula for Milaidy — personal AI assistant built on ElizaOS
 #
 # Installation:
 #   brew tap milady-ai/tap
-#   brew install milady
+#   brew install milaidy
 #
 # Or direct:
-#   brew install milady-ai/tap/milady
+#   brew install milady-ai/tap/milaidy
 
-class Milady < Formula
+class Milaidy < Formula
   desc "Personal AI assistant built on ElizaOS — cute agents for the acceleration"
   homepage "https://milady.ai"
-  url "https://registry.npmjs.org/milady/-/milady-2.0.0-alpha.6.tgz"
+  url "https://registry.npmjs.org/milaidy/-/milaidy-2.0.0-alpha.6.tgz"
   sha256 "d0da83506fc528ab7f3b4d9b1e44aaec2761005aac874ca2478c37444e8ae6e5"
   license "MIT"
 
   # Semantic versioning — tracks stable releases
   livecheck do
-    url "https://registry.npmjs.org/milady"
+    url "https://registry.npmjs.org/milaidy"
     regex(/["']version["']:\s*["']([^"']+)["']/i)
   end
 
@@ -28,12 +28,12 @@ class Milady < Formula
   end
 
   def post_install
-    ohai "Milady installed! Run 'milady start' to begin."
+    ohai "Milaidy installed! Run 'milaidy start' to begin."
     ohai "First run will walk you through interactive setup."
   end
 
   test do
-    assert_match version.to_s, shell_output("#{bin}/milady --version").strip
-    assert_match "milady", shell_output("#{bin}/milady --help")
+    assert_match version.to_s, shell_output("#{bin}/milaidy --version").strip
+    assert_match "milaidy", shell_output("#{bin}/milaidy --help")
   end
 end

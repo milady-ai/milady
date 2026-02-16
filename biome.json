@@ -14,7 +14,6 @@
       "!assets",
       "!dist",
       "!docs/_layouts",
-      "!**/.github/contributor-trust.json",
       "!node_modules",
       "!patches",
       "!pnpm-lock.yaml",

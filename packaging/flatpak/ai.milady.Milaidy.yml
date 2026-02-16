@@ -1,12 +1,12 @@
-# Flatpak manifest for Milady
-# Build: flatpak-builder --repo=repo build-dir ai.milady.Milady.yml
-# Install: flatpak --user install repo ai.milady.Milady
+# Flatpak manifest for Milaidy
+# Build: flatpak-builder --repo=repo build-dir ai.milady.Milaidy.yml
+# Install: flatpak --user install repo ai.milady.Milaidy
 
-app-id: ai.milady.Milady
+app-id: ai.milady.Milaidy
 runtime: org.freedesktop.Platform
 runtime-version: '23.08'
 sdk: org.freedesktop.Sdk
-command: milady
+command: milaidy
 
 finish-args:
   # Network access (for AI providers, plugin downloads)
@@ -40,31 +40,31 @@ modules:
         only-arches:
           - aarch64
 
-  # ── Milady ────────────────────────────────────────────────────────────
-  - name: milady
+  # ── Milaidy ────────────────────────────────────────────────────────────
+  - name: milaidy
     buildsystem: simple
     build-options:
       env:
         npm_config_nodedir: /app
     build-commands:
-      # Install milady globally
-      - npm install -g milady --prefix=/app
+      # Install milaidy globally
+      - npm install -g milaidy --prefix=/app
 
       # Create wrapper script
       - |
-        cat > /app/bin/milady << 'WRAPPER'
+        cat > /app/bin/milaidy << 'WRAPPER'
         #!/bin/sh
         export NODE_PATH="/app/lib/node_modules"
-        exec /app/bin/node /app/lib/node_modules/milady/milady.mjs "$@"
+        exec /app/bin/node /app/lib/node_modules/milaidy/milaidy.mjs "$@"
         WRAPPER
-      - chmod +x /app/bin/milady
+      - chmod +x /app/bin/milaidy
 
       # Install desktop entry
-      - install -D -m 644 ai.milady.Milady.desktop /app/share/applications/ai.milady.Milady.desktop
-      - install -D -m 644 ai.milady.Milady.metainfo.xml /app/share/metainfo/ai.milady.Milady.metainfo.xml
+      - install -D -m 644 ai.milady.Milaidy.desktop /app/share/applications/ai.milady.Milaidy.desktop
+      - install -D -m 644 ai.milady.Milaidy.metainfo.xml /app/share/metainfo/ai.milady.Milaidy.metainfo.xml
 
     sources:
       - type: file
-        path: ai.milady.Milady.desktop
+        path: ai.milady.Milaidy.desktop
       - type: file
-        path: ai.milady.Milady.metainfo.xml
+        path: ai.milady.Milaidy.metainfo.xml
