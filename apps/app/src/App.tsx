@@ -66,6 +66,9 @@ export function App() {
     agentStatus,
     unreadConversations,
     setState,
+    setTab,
+    handlePauseResume,
+    handleRestart,
   } = useApp();
   const contextMenu = useContextMenu();
 
@@ -159,11 +162,38 @@ export function App() {
     setState("commandActiveIndex", 0);
   }, [setState]);
 
+  const handleTrayAction = useCallback((event: Event) => {
+    const itemId = (event as CustomEvent<{ itemId?: string }>).detail?.itemId;
+    if (!itemId) return;
+
+    switch (itemId) {
+      case "tray-open-chat":
+        setTab("chat");
+        break;
+      case "tray-open-workbench":
+        setTab("apps");
+        break;
+      case "tray-toggle-pause":
+        void handlePauseResume();
+        break;
+      case "tray-restart":
+        void handleRestart();
+        break;
+      default:
+        return;
+    }
+  }, [handlePauseResume, handleRestart, setTab]);
+
   useEffect(() => {
     const handler = () => handleOpenCommandPalette();
     document.addEventListener("milady:command-palette", handler);
     return () => document.removeEventListener("milady:command-palette", handler);
   }, [handleOpenCommandPalette]);
+
+  useEffect(() => {
+    document.addEventListener("milady:tray-action", handleTrayAction);
+    return () => document.removeEventListener("milady:tray-action", handleTrayAction);
+  }, [handleTrayAction]);
 
   const handleEditorSave = useCallback(() => {
     setCustomActionsEditorOpen(false);

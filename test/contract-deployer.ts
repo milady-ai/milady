@@ -39,6 +39,17 @@ function loadCompiledContract(contractName: string): CompiledContract {
   };
 }
 
+function contractArtifactPath(contractName: string): string {
+  return path.join(__dirname, "contracts", "out", `${contractName}.sol`, `${contractName}.json`);
+}
+
+export function hasContractArtifacts(): boolean {
+  return (
+    fs.existsSync(contractArtifactPath("MockMiladyAgentRegistry")) &&
+    fs.existsSync(contractArtifactPath("MockMiladyCollection"))
+  );
+}
+
 export interface DeployedContracts {
   registry: {
     address: string;
