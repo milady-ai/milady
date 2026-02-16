@@ -99,7 +99,6 @@
     "@elizaos/plugin-agent-orchestrator": "next",
     "@elizaos/plugin-agent-skills": "next",
     "@elizaos/plugin-browser": "next",
-    "@elizaos/plugin-computeruse": "next",
     "@elizaos/plugin-cron": "next",
     "@elizaos/plugin-discord": "next",
     "@elizaos/plugin-edge-tts": "next",
