@@ -883,6 +883,18 @@ describe("Version Skew Detection (issue #10)", () => {
     );
   }
 
+  function getPinnedCoreVersion(manifest: PackageManifest): string | undefined {
+    const coreDependency = manifest.dependencies["@elizaos/core"];
+    if (
+      coreDependency === "next" ||
+      coreDependency?.startsWith(".") ||
+      coreDependency?.startsWith("file:")
+    ) {
+      return getDependencyOverride(manifest);
+    }
+    return coreDependency;
+  }
+
   it("core is pinned to a version that includes MAX_EMBEDDING_TOKENS (issue #10 fix)", async () => {
     // Issue #10: plugins at "next" imported MAX_EMBEDDING_TOKENS from @elizaos/core,
     // which was missing in older core versions.
@@ -890,16 +902,11 @@ describe("Version Skew Detection (issue #10)", () => {
     // so plugins at "next" dist-tag resolve safely.
     const pkg = await readPackageManifest();
 
-    const coreVersion = pkg.dependencies["@elizaos/core"];
-    expect(coreVersion).toBeDefined();
-    // Core can use "next" dist-tag if overrides pin the actual version
-    const coreOverride = getDependencyOverride(pkg);
-    if (coreVersion === "next") {
-      expect(coreOverride).toBeDefined();
-      expect(coreOverride).toMatch(/^\d+\.\d+\.\d+/);
-    } else {
-      expect(coreVersion).toMatch(/^\d+\.\d+\.\d+/);
-    }
+    const _coreVersion = pkg.dependencies["@elizaos/core"];
+    const pinnedCoreVersion = getPinnedCoreVersion(pkg);
+    expect(pinnedCoreVersion).toBeDefined();
+    // Core can use "next" dist-tag if overrides pin the actual version.
+    expect(pinnedCoreVersion).toMatch(/^\d+\.\d+\.\d+/);
 
     // The affected plugins should still be present in dependencies
     const affectedPlugins = [

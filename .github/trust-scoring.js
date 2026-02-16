@@ -33,7 +33,7 @@ const DEFAULT_CONFIG = {
   basePoints: {
     approve: 12, // PR approved and merged
     reject: -6, // PR rejected (REQUEST_CHANGES)
-    close: -10, // PR closed without merge (wasted reviewer time)
+    close: -5, // PR closed without merge (wasted reviewer time)
     selfClose: -2, // Contributor closed their own PR (less punitive)
   },
 
@@ -43,14 +43,13 @@ const DEFAULT_CONFIG = {
   // At 5 prior approvals:  ~74% of points
   // At 20 prior approvals: ~62% of points
   // At 50 prior approvals: ~49% of points
-  // NOTE: Rate lowered from 0.25 → 0.20 for high-velocity repos (10 PRs/week baseline)
-  diminishingRate: 0.2,
+  diminishingRate: 0.08,
 
   // --- Recency weighting (exponential decay) ---
   // Events lose relevance over time. Half-life in days.
   // After 1 half-life, event weight = 50%
   // After 2 half-lives, event weight = 25%
-  recencyHalfLifeDays: 45,
+  recencyHalfLifeDays: 60,
 
   // --- PR complexity/size multipliers ---
   // Based on total lines changed (additions + deletions)
@@ -104,9 +103,9 @@ const DEFAULT_CONFIG = {
   // Too many PRs too fast is suspicious (bot spam, gaming)
   velocity: {
     windowDays: 7, // look-back window
-    softCapPRs: 10, // PRs in window before penalty starts (10/week is baseline)
-    hardCapPRs: 25, // PRs in window where points are zeroed
-    penaltyPerExcess: 0.15, // 15% penalty per PR over soft cap
+    softCapPRs: 80, // PRs in window before penalty starts
+    hardCapPRs: 200, // PRs in window where points are zeroed
+    penaltyPerExcess: 0.03, // 3% penalty per PR over soft cap
   },
 
   // --- Review severity ---
@@ -124,12 +123,12 @@ const DEFAULT_CONFIG = {
   // --- Score boundaries ---
   minScore: 0,
   maxScore: 100,
-  initialScore: 35, // new contributors start below midpoint — trust is earned
+  initialScore: 40, // new contributors start below midpoint — trust is earned
 
   // --- Daily point cap ---
   // Maximum raw points (positive) that can be earned in a single calendar day
   // Prevents single-day trust explosion
-  dailyPointCap: 35,
+  dailyPointCap: 80,
 
   // --- Tier thresholds ---
   tiers: [

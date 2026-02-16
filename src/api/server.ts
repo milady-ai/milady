@@ -12509,7 +12509,7 @@ async function handleRequest(
         "- parameters: array of { name: string, description: string, required: boolean }",
         "",
         "Use {{paramName}} placeholders in URLs, body templates, and shell commands.",
-        "For code handlers, parameters are available via params.paramName and fetch() is available.",
+        "For code handlers, parameters are available via params.paramName, fetch() is available, and Node globals like process/require are not exposed in the sandbox.",
         "",
         "Respond with ONLY the JSON object, no markdown fences or explanation.",
       ].join("\n");

@@ -40,6 +40,22 @@ export function registerCustomActionLive(def: CustomActionDef): Action | null {
 
 /** API port for shell handler requests. */
 const API_PORT = process.env.API_PORT || process.env.SERVER_PORT || "2138";
+const CODE_HANDLER_TIMEOUT_MS = 30_000;
+const CODE_HANDLER_SANDBOX_LOCKDOWN = `
+  globalThis.constructor = undefined;
+  globalThis.require = undefined;
+  globalThis.process = undefined;
+  globalThis.__dirname = undefined;
+  globalThis.__filename = undefined;
+  globalThis.module = undefined;
+  globalThis.exports = undefined;
+  globalThis.Function = undefined;
+  globalThis.eval = undefined;
+
+  if (globalThis.__proto__) {
+    globalThis.__proto__ = null;
+  }
+`;
 
 /** Valid handler types that we actually support. */
 const VALID_HANDLER_TYPES = new Set(["http", "shell", "code"]);
@@ -54,10 +70,69 @@ type VmRunner = {
 
 let vmRunner: VmRunner | null = null;
 
+function isLegacyCodeHandlerMode(): boolean {
+  const mode =
+    process.env.MILADY_CODE_HANDLER_EXECUTION_MODE?.trim().toLowerCase() ?? "vm";
+  return mode === "legacy" || mode === "unsafe";
+}
+
+function createSafeFetch(): (input: RequestInfo | URL, init?: RequestInit) => Promise<Response> {
+  return async (
+    input: RequestInfo | URL,
+    init?: RequestInit,
+  ): Promise<Response> => {
+    let urlForCheck: string | null = null;
+    if (typeof input === "string") {
+      urlForCheck = input;
+    } else if (input instanceof URL) {
+      urlForCheck = input.toString();
+    } else if (typeof Request !== "undefined" && input instanceof Request) {
+      urlForCheck = input.url;
+    }
+
+    if (urlForCheck && (await isBlockedUrl(urlForCheck))) {
+      throw new Error(
+        "Blocked: cannot make requests to internal network addresses",
+      );
+    }
+
+    const response = await fetch(input, {
+      ...(init ?? {}),
+      redirect: "manual",
+    } as RequestInit);
+
+    if (response.status >= 300 && response.status < 400) {
+      throw new Error(
+        "Blocked: redirects are not allowed for HTTP custom actions",
+      );
+    }
+
+    return response;
+  };
+}
+
+async function runCodeHandlerLegacy(
+  code: string,
+  params: Record<string, string>,
+): Promise<unknown> {
+  const safeFetch = createSafeFetch();
+  const executor = new Function(
+    "params",
+    "fetch",
+    `"use strict"; return (async () => { ${code} })();`,
+  );
+
+  return executor(Object.freeze({ ...params }), safeFetch);
+}
+
 async function runCodeHandler(
   code: string,
   params: Record<string, string>,
 ): Promise<unknown> {
+  if (isLegacyCodeHandlerMode()) {
+    return runCodeHandlerLegacy(code, params);
+  }
+
   if (typeof process === "undefined" || !process.versions?.node) {
     throw new Error("Code actions are only supported in Node runtimes.");
   }
@@ -66,11 +141,18 @@ async function runCodeHandler(
     vmRunner = (await import("node:vm")) as VmRunner;
   }
 
-  const script = `(async () => { ${code} })();`;
-  const context: Record<string, unknown> = { params, fetch };
+  const safeFetch = createSafeFetch();
+
+  const script = `"use strict";
+${CODE_HANDLER_SANDBOX_LOCKDOWN}
+(async () => { ${code} })();`;
+  const context: Record<string, unknown> = {
+    params: Object.freeze({ ...params }),
+    fetch: safeFetch,
+  };
   return await vmRunner.runInNewContext(`"use strict"; ${script}`, context, {
     filename: "milady-custom-action",
-    timeout: 30_000,
+    timeout: CODE_HANDLER_TIMEOUT_MS,
   });
 }
 
@@ -140,6 +222,9 @@ function isBlockedIp(ip: string): boolean {
 async function isBlockedUrl(url: string): Promise<boolean> {
   try {
     const parsed = new URL(url);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return true;
+    }
     const hostname = normalizeHostLike(parsed.hostname);
 
     // Allow requests to our own API (terminal/run endpoint etc.)
@@ -281,14 +366,22 @@ function buildHandler(
       };
 
     case "code":
-      // NOTE: code handlers run user-authored code from local config with
-      // the same privileges as the host process. This is intentional for a
-      // desktop app — the owner wrote the code. We restrict the sandbox to
-      // only expose `params` and `fetch`; no require/import/process/global.
+      // Code handlers are user-authored and execute through a restricted
+      // sandbox exposing only `params` and a wrapped `fetch` with the same
+      // SSRF/redirect controls as HTTP actions.
+      // Set MILADY_CODE_HANDLER_EXECUTION_MODE=legacy to use the legacy
+      // non-VM execution path for compatibility.
       return async (params) => {
-        const result = await runCodeHandler(handler.code, params);
-        const output = result !== undefined ? String(result) : "Done";
-        return { ok: true, output: output.slice(0, 4000) };
+        try {
+          const result = await runCodeHandler(handler.code, params);
+          const output = result !== undefined ? String(result) : "Done";
+          return { ok: true, output: output.slice(0, 4000) };
+        } catch (error) {
+          return {
+            ok: false,
+            output: error instanceof Error ? error.message : String(error),
+          };
+        }
       };
 
     default:

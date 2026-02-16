@@ -146,6 +146,7 @@ describe("RetakeClient", () => {
 
     const client = new RetakeClient({ timeoutMs: 10 });
     const promise = client.getRtmpCredentials();
+    void promise.catch(() => undefined);
 
     await vi.advanceTimersByTimeAsync(20);
 
