@@ -27,6 +27,7 @@ import {
   ModelType,
   mergeCharacterDefaults,
   type Plugin,
+  type SandboxFetchAuditEvent,
   stringToUuid,
   type UUID,
 } from "@elizaos/core";
@@ -2080,11 +2081,9 @@ export async function startEliza(
       ? {
           sandboxMode: true,
           sandboxAuditHandler: sandboxAuditLog
-            ? (event: Record<string, unknown>) => {
+            ? (event: SandboxFetchAuditEvent) => {
                 sandboxAuditLog.recordTokenReplacement(
-                  (event.direction as string) === "outbound"
-                    ? "outbound"
-                    : "inbound",
+                  event.direction === "outbound" ? "outbound" : "inbound",
                   (event.url as string) ?? "unknown",
                   (event.tokenIds as string[]) ?? [],
                 );

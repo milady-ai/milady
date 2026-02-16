@@ -152,7 +152,7 @@ type MockResponsePayload<T> = {
     writeHead: (statusCode: number) => void;
   };
   getStatus: () => number;
-  getJson: () => T;
+  getJson: <U = T>() => U;
 };
 
 type MockBodyChunk = string | Buffer;
@@ -202,7 +202,7 @@ export function createMockHttpResponse<T = unknown>(): MockResponsePayload<T> {
   return {
     res,
     getStatus: () => statusCode,
-    getJson: () => (payload ? (JSON.parse(payload) as T) : (null as T)),
+    getJson: <U = T>() => (payload ? (JSON.parse(payload) as U) : (null as U)),
   };
 }
 

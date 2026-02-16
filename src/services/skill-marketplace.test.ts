@@ -135,6 +135,31 @@ let tmpDir: string;
 const savedApiKey = process.env.SKILLSMP_API_KEY;
 const savedStateDir = process.env.MILAIDY_STATE_DIR;
 
+type ExecFileCallback = (
+  error: unknown,
+  stdout: string,
+  stderr: string,
+) => void;
+
+function getExecFileCallback(
+  args: unknown[],
+  callback?: unknown,
+): ExecFileCallback | null {
+  if (typeof callback === "function") {
+    return callback as ExecFileCallback;
+  }
+
+  // node:child_process#execFile places the callback at the end of the args list
+  // across overload variants. Keep this fallback to support both modern and legacy
+  // call signatures used by code under test.
+  const tail = args.at(-1);
+  if (typeof tail === "function") {
+    return tail as ExecFileCallback;
+  }
+
+  return null;
+}
+
 beforeEach(async () => {
   tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "skill-mp-test-"));
   delete process.env.SKILLSMP_API_KEY;
@@ -143,12 +168,7 @@ beforeEach(async () => {
   execFileMock.mockReset();
   execFileMock.mockImplementation(
     (_cmd: string, args: string[], _options: unknown, callback?: unknown) => {
-      const done =
-        typeof callback === "function"
-          ? callback
-          : args[args.length - 1] && typeof args[args.length - 1] === "function"
-            ? (args[args.length - 1] as () => void)
-            : null;
+      const done = getExecFileCallback(args, callback);
 
       void (async () => {
         if (_cmd !== "git") {
