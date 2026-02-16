@@ -17,6 +17,7 @@ vi.mock("./index.js", () => ({
   getRetakeClient: vi.fn(),
   getRetakeCredentials: vi.fn(),
   getStreamManager: vi.fn(),
+  setRetakeCredentials: vi.fn(),
   startChatPollerWithGreeting: vi.fn(),
   stopChatPoller: vi.fn(),
 }));
@@ -47,6 +48,7 @@ describe("retake-tv action validate + handler behavior", () => {
   const getStreamManager = vi.mocked(index.getStreamManager);
   const startPoller = vi.mocked(index.startChatPollerWithGreeting);
   const stopPoller = vi.mocked(index.stopChatPoller);
+  const setRetakeCredentials = vi.mocked(index.setRetakeCredentials);
 
   afterEach(() => {
     vi.clearAllMocks();
@@ -98,6 +100,11 @@ describe("retake-tv action validate + handler behavior", () => {
       }),
     );
     expect(ok.success).toBe(true);
+    expect(setRetakeCredentials).toHaveBeenCalledWith(
+      expect.objectContaining({
+        agent_id: "a1",
+      }),
+    );
   });
 
   it("go-live validate requires initialized client and non-live stream", async () => {

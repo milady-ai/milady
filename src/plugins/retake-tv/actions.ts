@@ -11,6 +11,7 @@ import {
   getRetakeClient,
   getRetakeCredentials,
   getStreamManager,
+  setRetakeCredentials,
   startChatPollerWithGreeting,
   stopChatPoller,
 } from "./index.js";
@@ -88,6 +89,7 @@ export const registerAction: Action = {
             : undefined,
         wallet_address: walletAddress.trim(),
       });
+      setRetakeCredentials(creds);
 
       logger.info(
         `${TAG} Registered as "${agentName}" (agent: ${creds.agent_id})`,
