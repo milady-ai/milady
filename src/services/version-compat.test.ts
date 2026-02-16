@@ -378,6 +378,24 @@ describe("Package.json version pinning (issue #10)", () => {
     );
   }
 
+  function isPathDependency(version: string | undefined): boolean {
+    return (
+      version !== undefined &&
+      (version.startsWith("./") ||
+        version.startsWith("../") ||
+        version.startsWith("/") ||
+        version.startsWith("file:"))
+    );
+  }
+
+  function getPinnedCoreVersion(manifest: PackageManifest): string | undefined {
+    const declaredCore = manifest.dependencies["@elizaos/core"];
+    if (declaredCore === "next" || isPathDependency(declaredCore)) {
+      return getDependencyOverride(manifest);
+    }
+    return declaredCore;
+  }
+
   /**
    * Verify that the affected plugins are pinned to a version compatible
    * with core@2.0.0-alpha.3 in milady's package.json.
@@ -387,20 +405,14 @@ describe("Package.json version pinning (issue #10)", () => {
   it("core is pinned to a version that includes MAX_EMBEDDING_TOKENS", async () => {
     const pkg = await readPackageManifest();
 
-    const coreVersion = pkg.dependencies["@elizaos/core"];
-    expect(coreVersion).toBeDefined();
-    // Core can use "next" dist-tag if pnpm overrides pin the actual version
-    if (coreVersion === "next") {
-      const pinnedCoreVersion = getDependencyOverride(pkg);
-      expect(pinnedCoreVersion).toBeDefined();
-      expect(pinnedCoreVersion).toMatch(/^\d+\.\d+\.\d+/);
-      expect(versionSatisfies(pinnedCoreVersion ?? "", "2.0.0-alpha.3")).toBe(
-        true,
-      );
-    } else {
-      expect(coreVersion).toMatch(/^\d+\.\d+\.\d+/);
-      expect(versionSatisfies(coreVersion, "2.0.0-alpha.3")).toBe(true);
-    }
+    const declaredCoreVersion = pkg.dependencies["@elizaos/core"];
+    const pinnedCoreVersion = getPinnedCoreVersion(pkg);
+    expect(declaredCoreVersion).toBeDefined();
+    expect(pinnedCoreVersion).toBeDefined();
+    expect(pinnedCoreVersion).toMatch(/^\d+\.\d+\.\d+/);
+    expect(versionSatisfies(pinnedCoreVersion ?? "", "2.0.0-alpha.3")).toBe(
+      true,
+    );
   });
 
   it("affected plugins are present in dependencies (core pin makes next safe)", async () => {
@@ -415,10 +427,10 @@ describe("Package.json version pinning (issue #10)", () => {
       "@elizaos/plugin-knowledge",
     ];
 
-    // If core is "next", ensure pnpm overrides pin the actual version
+    // If core is "next" or local, ensure pinned version is specified.
     const coreVersion = pkg.dependencies["@elizaos/core"];
-    if (coreVersion === "next") {
-      const pinnedCoreVersion = getDependencyOverride(pkg);
+    const pinnedCoreVersion = getPinnedCoreVersion(pkg);
+    if (coreVersion === "next" || isPathDependency(coreVersion)) {
       expect(pinnedCoreVersion).toBeDefined();
       expect(pinnedCoreVersion).toMatch(/^\d+\.\d+\.\d+/);
     }
@@ -440,11 +452,12 @@ describe("Package.json version pinning (issue #10)", () => {
     // Core can use "next" dist-tag if dependency overrides pin the actual version.
     // See docs/ELIZAOS_VERSIONING.md for explanation.
     const coreVersion = pkg.dependencies["@elizaos/core"];
+    const pinnedCoreVersion = getPinnedCoreVersion(pkg);
     expect(coreVersion).toBeDefined();
-    if (coreVersion === "next") {
-      const pinnedCoreVersion = getDependencyOverride(pkg);
+    if (coreVersion === "next" || isPathDependency(coreVersion)) {
       expect(pinnedCoreVersion).toBeDefined();
       expect(pinnedCoreVersion).toMatch(/^\d+\.\d+\.\d+/);
+      expect(pinnedCoreVersion).toMatch(/^\d+\.\d+\.\d+-alpha\.\d+$/);
     } else {
       expect(coreVersion).toMatch(/^\d+\.\d+\.\d+-alpha\.\d+$/);
     }

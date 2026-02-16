@@ -45,8 +45,27 @@ type RootPackageJson = {
 
 function _getCoreOverride(pkg: RootPackageJson): string | undefined {
   return (
-    pkg.overrides?.["@elizaos/core"] ?? pkg.pnpm?.overrides?.["@elizaos/core"]
+    pkg.overrides?.["@elizaos/core"] ??
+    pkg.pnpm?.overrides?.["@elizaos/core"]
   );
+}
+
+function _isPathDependency(version: string | undefined): boolean {
+  return (
+    version !== undefined &&
+    (version.startsWith("./") ||
+      version.startsWith("../") ||
+      version.startsWith("/") ||
+      version.startsWith("file:"))
+  );
+}
+
+function _getPinnedCoreVersion(pkg: RootPackageJson): string | undefined {
+  const declaredCore = pkg.dependencies["@elizaos/core"];
+  if (declaredCore === "next" || _isPathDependency(declaredCore)) {
+    return _getCoreOverride(pkg);
+  }
+  return declaredCore;
 }
 
 // ---------------------------------------------------------------------------
@@ -891,12 +910,11 @@ describe("Version Skew Detection (issue #10)", () => {
     const pkg = await readPackageManifest();
 
     const coreVersion = pkg.dependencies["@elizaos/core"];
+    const pinnedCoreVersion = _getPinnedCoreVersion(pkg);
     expect(coreVersion).toBeDefined();
-    // Core can use "next" dist-tag if overrides pin the actual version
-    const coreOverride = getDependencyOverride(pkg);
-    if (coreVersion === "next") {
-      expect(coreOverride).toBeDefined();
-      expect(coreOverride).toMatch(/^\d+\.\d+\.\d+/);
+    if (coreVersion === "next" || _isPathDependency(coreVersion)) {
+      expect(pinnedCoreVersion).toBeDefined();
+      expect(pinnedCoreVersion).toMatch(/^\d+\.\d+\.\d+/);
     } else {
       expect(coreVersion).toMatch(/^\d+\.\d+\.\d+/);
     }
