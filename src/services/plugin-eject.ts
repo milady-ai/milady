@@ -108,7 +108,10 @@ async function readPackageNameVersion(pluginDir: string): Promise<{
   let name = path.basename(pluginDir);
   let version = "0.0.0";
   try {
-    const raw = await fs.readFile(path.join(pluginDir, "package.json"), "utf-8");
+    const raw = await fs.readFile(
+      path.join(pluginDir, "package.json"),
+      "utf-8",
+    );
     const pkg = JSON.parse(raw) as { name?: string; version?: string };
     if (typeof pkg.name === "string" && pkg.name.trim()) name = pkg.name.trim();
     if (typeof pkg.version === "string" && pkg.version.trim()) {
@@ -154,7 +157,8 @@ async function readUpstreamMetadata(
           ? parsed.lastSyncAt
           : null,
       localCommits:
-        typeof parsed.localCommits === "number" && Number.isFinite(parsed.localCommits)
+        typeof parsed.localCommits === "number" &&
+        Number.isFinite(parsed.localCommits)
           ? parsed.localCommits
           : 0,
     };
@@ -358,7 +362,10 @@ export function ejectPlugin(pluginId: string): Promise<EjectResult> {
         ejectedAt: new Date().toISOString(),
         npmPackage: info.npm.package || canonicalName,
         npmVersion:
-          info.npm.v2Version || info.npm.v1Version || info.npm.v0Version || "unknown",
+          info.npm.v2Version ||
+          info.npm.v1Version ||
+          info.npm.v0Version ||
+          "unknown",
         lastSyncAt: null,
         localCommits: 0,
       };
@@ -425,7 +432,10 @@ export function syncPlugin(pluginId: string): Promise<SyncResult> {
         error: `Missing or invalid ${upstreamFilePath(pluginDir)}`,
       };
     }
-    if (!VALID_GIT_URL.test(upstream.gitUrl) || !VALID_BRANCH.test(upstream.branch)) {
+    if (
+      !VALID_GIT_URL.test(upstream.gitUrl) ||
+      !VALID_BRANCH.test(upstream.branch)
+    ) {
       return {
         success: false,
         pluginName: pkg.name,
