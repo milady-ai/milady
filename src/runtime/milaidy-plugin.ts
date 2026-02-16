@@ -336,6 +336,7 @@ export function createMilaidyPlugin(config?: MilaidyPluginConfig): Plugin {
 
   // UI catalog provider — injects component knowledge so the agent can
   // generate UiSpec JSON and [CONFIG:pluginId] markers in responses.
+  // Gated on character.settings — disable for chat-only agents to save ~5k tokens.
   let catalogCache: string | null = null;
   const allManifestPlugins = readPluginManifest();
   const uiCatalogProvider: Provider = {
@@ -347,6 +348,14 @@ export function createMilaidyPlugin(config?: MilaidyPluginConfig): Plugin {
       _message: Memory,
       _state: State,
     ): Promise<ProviderResult> {
+      // Allow agents to opt out of UI catalog injection via character settings.
+      // Set character.settings.DISABLE_UI_CATALOG = true for chat-only agents
+      // (Discord, Telegram, etc.) to save ~5,000 tokens per message.
+      const settings = runtime.character?.settings;
+      if (settings?.DISABLE_UI_CATALOG) {
+        return { text: "" };
+      }
+
       if (!catalogCache) {
         catalogCache = generateCatalogPrompt({ includeExamples: true });
       }
@@ -414,6 +423,7 @@ export function createMilaidyPlugin(config?: MilaidyPluginConfig): Plugin {
 
   // Emote provider — injects available emotes into agent context so the LLM
   // knows it can trigger animations via the PLAY_EMOTE action.
+  // Gated on character.settings — disable for agents without 3D avatars.
   const emoteProvider: Provider = {
     name: "emotes",
     description: "Available avatar emote animations",
@@ -423,6 +433,12 @@ export function createMilaidyPlugin(config?: MilaidyPluginConfig): Plugin {
       _message: Memory,
       _state: State,
     ): Promise<ProviderResult> {
+      // Skip emote injection for agents without avatars.
+      // Set character.settings.DISABLE_EMOTES = true to save ~300 tokens.
+      const settings = _runtime.character?.settings;
+      if (settings?.DISABLE_EMOTES) {
+        return { text: "" };
+      }
       const ids = EMOTE_CATALOG.map((e) => e.id).join(", ");
       return {
         text: [
@@ -445,14 +461,8 @@ export function createMilaidyPlugin(config?: MilaidyPluginConfig): Plugin {
     async get(): Promise<ProviderResult> {
       const customActions = loadCustomActions();
       if (customActions.length === 0) {
-        return {
-          text: [
-            "## Custom Actions",
-            "",
-            "No custom actions are currently defined.",
-            "Users can create custom actions from the Custom Actions panel in the UI.",
-          ].join("\n"),
-        };
+        // Don't waste tokens telling the LLM there are no custom actions.
+        return { text: "" };
       }
 
       const lines = customActions.map((a) => {
@@ -478,11 +488,22 @@ export function createMilaidyPlugin(config?: MilaidyPluginConfig): Plugin {
   };
 
   // Terminal provider — tells the LLM it can run shell commands.
+  // Gated on character.settings — disable for chat-only agents.
   const terminalProvider: Provider = {
     name: "terminal",
     description: "Embedded terminal for running shell commands",
 
-    async get(): Promise<ProviderResult> {
+    async get(
+      _runtime: IAgentRuntime,
+      _message: Memory,
+      _state: State,
+    ): Promise<ProviderResult> {
+      // Skip terminal docs for agents that don't need shell access.
+      // Set character.settings.DISABLE_TERMINAL = true to save ~100 tokens.
+      const settings = _runtime.character?.settings;
+      if (settings?.DISABLE_TERMINAL) {
+        return { text: "" };
+      }
       return {
         text: [
           "## Terminal",
@@ -497,6 +518,7 @@ export function createMilaidyPlugin(config?: MilaidyPluginConfig): Plugin {
 
   // Media provider — injects media generation capabilities into agent context
   // so the LLM knows it can generate images, videos, audio, and analyze images.
+  // Gated on character.settings — disable for agents that don't need media gen.
   const mediaProvider: Provider = {
     name: "media",
     description: "Media generation and analysis capabilities",
@@ -506,6 +528,12 @@ export function createMilaidyPlugin(config?: MilaidyPluginConfig): Plugin {
       _message: Memory,
       _state: State,
     ): Promise<ProviderResult> {
+      // Skip media generation docs for agents that don't generate media.
+      // Set character.settings.DISABLE_MEDIA_GENERATION = true to save ~400 tokens.
+      const settings = _runtime.character?.settings;
+      if (settings?.DISABLE_MEDIA_GENERATION) {
+        return { text: "" };
+      }
       return {
         text: [
           "## Media Generation Capabilities",
