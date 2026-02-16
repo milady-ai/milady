@@ -111,6 +111,8 @@ const DEFAULT_ELEVEN_MODEL = "eleven_flash_v2_5";
 const DEFAULT_ELEVEN_VOICE = "EXAVITQu4vr4xnSDxMaL";
 const MAX_SPOKEN_CHARS = 360;
 const MAX_CACHED_SEGMENTS = 128;
+const REDACTED_SECRET = "[REDACTED]";
+const ELEVEN_PROXY_ENDPOINT = "/api/tts/elevenlabs";
 
 function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
   const out = new Uint8Array(bytes.byteLength);
@@ -125,6 +127,10 @@ function collapseWhitespace(input: string): string {
 function normalizeCacheText(input: string): string {
   // Preserve punctuation while normalizing spacing/casing.
   return collapseWhitespace(input.normalize("NFKC")).toLowerCase();
+}
+
+function isRedactedSecret(value: unknown): boolean {
+  return typeof value === "string" && value.trim().toUpperCase() === REDACTED_SECRET;
 }
 
 function stripThinkingAndMarkup(input: string): string {
@@ -469,31 +475,77 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
     }
 
     if (!audioBytes) {
-      const url = new URL(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voiceId)}/stream`);
-      url.searchParams.set("output_format", "mp3_22050_32");
-
       const controller = new AbortController();
       activeFetchAbortRef.current = controller;
 
-      const res = await fetch(url.toString(), {
-        method: "POST",
-        headers: {
-          "xi-api-key": elConfig.apiKey ?? "",
-          "Content-Type": "application/json",
-          Accept: "audio/mpeg",
+      const requestBody = {
+        text,
+        model_id: modelId,
+        apply_text_normalization: "auto",
+        voice_settings: {
+          stability: elConfig.stability ?? 0.5,
+          similarity_boost: elConfig.similarityBoost ?? 0.75,
+          speed: elConfig.speed ?? 1.0,
         },
-        body: JSON.stringify({
-          text,
-          model_id: modelId,
-          apply_text_normalization: "auto",
-          voice_settings: {
-            stability: elConfig.stability ?? 0.5,
-            similarity_boost: elConfig.similarityBoost ?? 0.75,
-            speed: elConfig.speed ?? 1.0,
+      };
+      const apiToken =
+        typeof window !== "undefined" &&
+        typeof window.__MILAIDY_API_TOKEN__ === "string"
+          ? window.__MILAIDY_API_TOKEN__.trim()
+          : "";
+
+      const fetchViaProxy = async () => {
+        return fetch(ELEVEN_PROXY_ENDPOINT, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "audio/mpeg",
+            ...(apiToken ? { Authorization: `Bearer ${apiToken}` } : {}),
           },
-        }),
-        signal: controller.signal,
-      });
+          body: JSON.stringify({
+            ...requestBody,
+            voiceId,
+            modelId,
+            outputFormat: "mp3_22050_32",
+          }),
+          signal: controller.signal,
+        });
+      };
+
+      const trimmedApiKey =
+        typeof elConfig.apiKey === "string" ? elConfig.apiKey.trim() : "";
+      const hasDirectKey =
+        trimmedApiKey.length > 0 && !isRedactedSecret(trimmedApiKey);
+
+      let res: Response;
+      if (hasDirectKey) {
+        try {
+          const url = new URL(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voiceId)}/stream`);
+          url.searchParams.set("output_format", "mp3_22050_32");
+          res = await fetch(url.toString(), {
+            method: "POST",
+            headers: {
+              "xi-api-key": trimmedApiKey,
+              "Content-Type": "application/json",
+              Accept: "audio/mpeg",
+            },
+            body: JSON.stringify(requestBody),
+            signal: controller.signal,
+          });
+        } catch {
+          res = await fetchViaProxy();
+        }
+
+        // If the locally-available key is stale, fall back to server-side key.
+        if (!res.ok && (res.status === 401 || res.status === 403)) {
+          const proxyRes = await fetchViaProxy();
+          if (proxyRes.ok) {
+            res = proxyRes;
+          }
+        }
+      } else {
+        res = await fetchViaProxy();
+      }
 
       if (activeFetchAbortRef.current === controller) {
         activeFetchAbortRef.current = null;
@@ -636,9 +688,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
           const elConfig = config?.elevenlabs;
           const useElevenLabs =
             config?.provider === "elevenlabs" &&
-            config?.mode !== "cloud" &&
-            !!elConfig?.apiKey &&
-            !!elConfig?.voiceId;
+            config?.mode !== "cloud";
 
           if (useElevenLabs && elConfig) {
             usingAudioAnalysisRef.current = true;
@@ -791,9 +841,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
     const config = voiceConfigRef.current;
     if (
       config?.provider !== "elevenlabs" ||
-      config.mode === "cloud" ||
-      !config.elevenlabs?.apiKey ||
-      !config.elevenlabs?.voiceId
+      config.mode === "cloud"
     ) {
       return;
     }

@@ -86,6 +86,7 @@ import { handleDatabaseRoute } from "./database.js";
 import { DropService } from "./drop-service.js";
 import {
   readJsonBody as parseJsonBody,
+  type ReadJsonBodyOptions,
   readRequestBody,
   readRequestBodyBuffer,
   sendJson,
@@ -1622,9 +1623,11 @@ function readRawBody(
 async function readJsonBody<T = Record<string, unknown>>(
   req: http.IncomingMessage,
   res: http.ServerResponse,
+  options: ReadJsonBodyOptions = {},
 ): Promise<T | null> {
   return parseJsonBody(req, res, {
     maxBytes: MAX_BODY_BYTES,
+    ...options,
   });
 }
 
@@ -2848,6 +2851,12 @@ function redactConfigSecrets(
   config: Record<string, unknown>,
 ): Record<string, unknown> {
   return redactDeep(config) as Record<string, unknown>;
+}
+
+function isRedactedSecretValue(value: unknown): boolean {
+  return (
+    typeof value === "string" && value.trim().toUpperCase() === "[REDACTED]"
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -9111,6 +9120,166 @@ async function handleRequest(
     json(res, { ok: true, message: "Restarting..." });
     setTimeout(() => process.exit(0), 1000);
     return;
+  }
+
+  // ── POST /api/tts/elevenlabs ─────────────────────────────────────────────
+  if (method === "POST" && pathname === "/api/tts/elevenlabs") {
+    const body = await readJsonBody<{
+      text?: string;
+      voiceId?: string;
+      modelId?: string;
+      outputFormat?: string;
+      apiKey?: string;
+      apply_text_normalization?: "auto" | "on" | "off";
+      voice_settings?: {
+        stability?: number;
+        similarity_boost?: number;
+        speed?: number;
+      };
+    }>(req, res);
+    if (!body) return;
+
+    const text = typeof body.text === "string" ? body.text.trim() : "";
+    if (!text) {
+      error(res, "Missing text", 400);
+      return;
+    }
+
+    const messages =
+      state.config && typeof state.config === "object"
+        ? ((state.config as Record<string, unknown>).messages as
+            | Record<string, unknown>
+            | undefined)
+        : undefined;
+    const tts =
+      messages && typeof messages === "object"
+        ? ((messages.tts as Record<string, unknown>) ?? undefined)
+        : undefined;
+    const eleven =
+      tts && typeof tts === "object"
+        ? ((tts.elevenlabs as Record<string, unknown>) ?? undefined)
+        : undefined;
+
+    const requestedApiKey =
+      typeof body.apiKey === "string" ? body.apiKey.trim() : "";
+    const configuredApiKey =
+      typeof eleven?.apiKey === "string" ? eleven.apiKey.trim() : "";
+    const envApiKey =
+      typeof process.env.ELEVENLABS_API_KEY === "string"
+        ? process.env.ELEVENLABS_API_KEY.trim()
+        : "";
+
+    const resolvedApiKey =
+      requestedApiKey && !isRedactedSecretValue(requestedApiKey)
+        ? requestedApiKey
+        : configuredApiKey && !isRedactedSecretValue(configuredApiKey)
+          ? configuredApiKey
+          : envApiKey && !isRedactedSecretValue(envApiKey)
+            ? envApiKey
+            : "";
+
+    if (!resolvedApiKey) {
+      error(
+        res,
+        "ElevenLabs API key is not available. Set ELEVENLABS_API_KEY in Secrets.",
+        400,
+      );
+      return;
+    }
+
+    const voiceId =
+      (typeof body.voiceId === "string" && body.voiceId.trim()) ||
+      (typeof eleven?.voiceId === "string" && eleven.voiceId.trim()) ||
+      "EXAVITQu4vr4xnSDxMaL";
+    const modelId =
+      (typeof body.modelId === "string" && body.modelId.trim()) ||
+      (typeof eleven?.modelId === "string" && eleven.modelId.trim()) ||
+      "eleven_flash_v2_5";
+    const outputFormat =
+      (typeof body.outputFormat === "string" && body.outputFormat.trim()) ||
+      "mp3_22050_32";
+
+    const requestedVoiceSettings =
+      body.voice_settings &&
+      typeof body.voice_settings === "object" &&
+      !Array.isArray(body.voice_settings)
+        ? body.voice_settings
+        : undefined;
+
+    const voiceSettings: Record<string, number> = {};
+    const stability = requestedVoiceSettings?.stability;
+    if (typeof stability === "number" && stability >= 0 && stability <= 1) {
+      voiceSettings.stability = stability;
+    }
+    const similarityBoost = requestedVoiceSettings?.similarity_boost;
+    if (
+      typeof similarityBoost === "number" &&
+      similarityBoost >= 0 &&
+      similarityBoost <= 1
+    ) {
+      voiceSettings.similarity_boost = similarityBoost;
+    }
+    const speed = requestedVoiceSettings?.speed;
+    if (typeof speed === "number" && speed >= 0.5 && speed <= 2) {
+      voiceSettings.speed = speed;
+    }
+
+    const payload: Record<string, unknown> = {
+      text,
+      model_id: modelId,
+      apply_text_normalization:
+        body.apply_text_normalization === "on" ||
+        body.apply_text_normalization === "off"
+          ? body.apply_text_normalization
+          : "auto",
+    };
+    if (Object.keys(voiceSettings).length > 0) {
+      payload.voice_settings = voiceSettings;
+    }
+
+    try {
+      const upstreamUrl = new URL(
+        `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voiceId)}/stream`,
+      );
+      upstreamUrl.searchParams.set("output_format", outputFormat);
+
+      const upstream = await fetch(upstreamUrl.toString(), {
+        method: "POST",
+        headers: {
+          "xi-api-key": resolvedApiKey,
+          "Content-Type": "application/json",
+          Accept: "audio/mpeg",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!upstream.ok) {
+        const upstreamBody = await upstream.text().catch(() => "");
+        error(
+          res,
+          `ElevenLabs request failed (${upstream.status}): ${upstreamBody.slice(0, 240)}`,
+          upstream.status === 429 ? 429 : 502,
+        );
+        return;
+      }
+
+      const audio = Buffer.from(await upstream.arrayBuffer());
+      const contentType = upstream.headers.get("content-type") || "audio/mpeg";
+      res.writeHead(200, {
+        "Content-Type": contentType,
+        "Content-Length": String(audio.byteLength),
+        "Cache-Control": "no-store",
+      });
+      res.end(audio);
+      return;
+    } catch (err) {
+      error(
+        res,
+        `ElevenLabs proxy error: ${err instanceof Error ? err.message : String(err)}`,
+        502,
+      );
+      return;
+    }
   }
 
   // ── GET /api/config/schema ───────────────────────────────────────────────

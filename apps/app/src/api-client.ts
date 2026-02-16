@@ -1356,6 +1356,7 @@ export interface KnowledgeUploadResult {
   filename?: string;
   contentType?: string;
   isYouTubeTranscript?: boolean;
+  warnings?: string[];
 }
 
 // WebSocket

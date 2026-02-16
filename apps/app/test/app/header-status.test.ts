@@ -76,10 +76,15 @@ describe("header status", () => {
     const restartButton = tree!.root.find(
       (node) =>
         node.type === "button" &&
-        Array.isArray(node.children) &&
-        node.children.join("") === "Restarting...",
+        node.props.title === "Restart agent",
     );
     expect(restartButton.props.disabled).toBe(true);
+
+    const renderedText = tree!.root
+      .findAllByType("span")
+      .map((node) => node.children.join(""))
+      .join("\n");
+    expect(renderedText).toContain("Restarting...");
 
     const pauseResumeButton = tree!.root.find(
       (node) =>

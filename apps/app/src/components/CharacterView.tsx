@@ -18,6 +18,15 @@ import type { ConfigUiHint } from "../types";
 import type { JsonSchemaObject } from "./config-catalog";
 
 const DEFAULT_ELEVEN_FAST_MODEL = "eleven_flash_v2_5";
+const REDACTED_SECRET = "[REDACTED]";
+
+function sanitizeApiKey(apiKey: string | undefined): string | undefined {
+  if (typeof apiKey !== "string") return undefined;
+  const trimmed = apiKey.trim();
+  if (!trimmed) return undefined;
+  if (trimmed.toUpperCase() === REDACTED_SECRET) return undefined;
+  return trimmed;
+}
 
 /* ── Tag Editor ─────────────────────────────────────────────────────── */
 
@@ -505,18 +514,30 @@ export function CharacterView() {
     setVoiceSaveError(null);
     setVoiceSaveSuccess(false);
     try {
+      const normalizedElevenlabs = {
+        ...voiceConfig.elevenlabs,
+        modelId: voiceConfig.elevenlabs?.modelId ?? DEFAULT_ELEVEN_FAST_MODEL,
+      };
+      const sanitizedKey = sanitizeApiKey(normalizedElevenlabs?.apiKey);
+      if (sanitizedKey) normalizedElevenlabs.apiKey = sanitizedKey;
+      else delete normalizedElevenlabs.apiKey;
+
+      const normalizedVoiceConfig: VoiceConfig = {
+        ...voiceConfig,
+        provider: voiceConfig.provider ?? "elevenlabs",
+        elevenlabs: normalizedElevenlabs,
+      };
+
       await client.updateConfig({
         messages: {
-          tts: {
-            ...voiceConfig,
-            provider: voiceConfig.provider ?? "elevenlabs",
-            elevenlabs: {
-              ...voiceConfig.elevenlabs,
-              modelId: voiceConfig.elevenlabs?.modelId ?? DEFAULT_ELEVEN_FAST_MODEL,
-            },
-          },
+          tts: normalizedVoiceConfig,
         },
       });
+      window.dispatchEvent(
+        new CustomEvent("milaidy:voice-config-updated", {
+          detail: normalizedVoiceConfig,
+        }),
+      );
       setVoiceSaveSuccess(true);
       setTimeout(() => setVoiceSaveSuccess(false), 2500);
     } catch (err) {

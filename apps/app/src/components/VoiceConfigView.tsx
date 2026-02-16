@@ -55,6 +55,15 @@ const PROVIDERS: Array<{ id: VoiceProvider; label: string; hint: string; needsKe
 ];
 
 const DEFAULT_ELEVEN_FAST_MODEL = "eleven_flash_v2_5";
+const REDACTED_SECRET = "[REDACTED]";
+
+function sanitizeApiKey(apiKey: string | undefined): string | undefined {
+  if (typeof apiKey !== "string") return undefined;
+  const trimmed = apiKey.trim();
+  if (!trimmed) return undefined;
+  if (trimmed.toUpperCase() === REDACTED_SECRET) return undefined;
+  return trimmed;
+}
 
 export function VoiceConfigView() {
   const { cloudConnected } = useApp();
@@ -151,17 +160,23 @@ export function VoiceConfigView() {
       const cfg = await client.getConfig();
       const messages = (cfg.messages ?? {}) as Record<string, unknown>;
       const provider = voiceConfig.provider ?? "elevenlabs";
+      const normalizedElevenLabs =
+        provider === "elevenlabs"
+          ? {
+              ...voiceConfig.elevenlabs,
+              modelId: voiceConfig.elevenlabs?.modelId ?? DEFAULT_ELEVEN_FAST_MODEL,
+            }
+          : voiceConfig.elevenlabs;
+      const sanitizedKey = sanitizeApiKey(normalizedElevenLabs?.apiKey);
+      if (normalizedElevenLabs) {
+        if (sanitizedKey) normalizedElevenLabs.apiKey = sanitizedKey;
+        else delete normalizedElevenLabs.apiKey;
+      }
       const normalizedVoiceConfig: VoiceConfig = {
         ...voiceConfig,
         provider,
         mode: provider === "elevenlabs" ? (voiceConfig.mode ?? "own-key") : undefined,
-        elevenlabs:
-          provider === "elevenlabs"
-            ? {
-                ...voiceConfig.elevenlabs,
-                modelId: voiceConfig.elevenlabs?.modelId ?? DEFAULT_ELEVEN_FAST_MODEL,
-              }
-            : voiceConfig.elevenlabs,
+        elevenlabs: normalizedElevenLabs,
       };
       await client.updateConfig({
         messages: {
@@ -169,6 +184,11 @@ export function VoiceConfigView() {
           tts: normalizedVoiceConfig,
         },
       });
+      window.dispatchEvent(
+        new CustomEvent("milaidy:voice-config-updated", {
+          detail: normalizedVoiceConfig,
+        }),
+      );
       setSaveSuccess(true);
       setDirty(false);
       setTimeout(() => setSaveSuccess(false), 2500);

@@ -32,6 +32,12 @@ const btnGhost =
   "px-3 py-1.5 text-xs bg-transparent text-[var(--muted)] border border-[var(--border)] cursor-pointer hover:text-[var(--txt)] hover:border-[var(--txt)] transition-colors disabled:opacity-40 disabled:cursor-default rounded";
 const btnDanger =
   "px-2 py-1 text-[11px] bg-transparent text-[var(--muted)] border border-[var(--border)] cursor-pointer hover:text-[#e74c3c] hover:border-[#e74c3c] transition-colors rounded";
+const MAX_UPLOAD_REQUEST_BYTES = 32 * 1_048_576; // Must match server knowledge route limit
+const LARGE_FILE_WARNING_BYTES = 8 * 1_048_576;
+
+type KnowledgeUploadOptions = {
+  includeImageDescriptions: boolean;
+};
 
 /* ── Stats Card ─────────────────────────────────────────────────────── */
 
@@ -73,13 +79,14 @@ function UploadZone({
   onUrlUpload,
   uploading,
 }: {
-  onFileUpload: (file: File) => void;
-  onUrlUpload: (url: string) => void;
+  onFileUpload: (file: File, options: KnowledgeUploadOptions) => void;
+  onUrlUpload: (url: string, options: KnowledgeUploadOptions) => void;
   uploading: boolean;
 }) {
   const [dragOver, setDragOver] = useState(false);
   const [urlInput, setUrlInput] = useState("");
   const [showUrlInput, setShowUrlInput] = useState(false);
+  const [includeImageDescriptions, setIncludeImageDescriptions] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDrop = useCallback(
@@ -88,31 +95,31 @@ function UploadZone({
       setDragOver(false);
       const files = Array.from(e.dataTransfer.files);
       if (files.length > 0 && !uploading) {
-        onFileUpload(files[0]);
+        onFileUpload(files[0], { includeImageDescriptions });
       }
     },
-    [onFileUpload, uploading],
+    [includeImageDescriptions, onFileUpload, uploading],
   );
 
   const handleFileSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
       if (files && files.length > 0 && !uploading) {
-        onFileUpload(files[0]);
+        onFileUpload(files[0], { includeImageDescriptions });
       }
       e.target.value = "";
     },
-    [onFileUpload, uploading],
+    [includeImageDescriptions, onFileUpload, uploading],
   );
 
   const handleUrlSubmit = useCallback(() => {
     const url = urlInput.trim();
     if (url && !uploading) {
-      onUrlUpload(url);
+      onUrlUpload(url, { includeImageDescriptions });
       setUrlInput("");
       setShowUrlInput(false);
     }
-  }, [urlInput, uploading, onUrlUpload]);
+  }, [includeImageDescriptions, urlInput, uploading, onUrlUpload]);
 
   return (
     <div className="mb-6">
@@ -133,7 +140,7 @@ function UploadZone({
           ref={fileInputRef}
           type="file"
           className="hidden"
-          accept=".txt,.md,.pdf,.docx,.json,.csv,.xml,.html"
+          accept=".txt,.md,.pdf,.docx,.json,.csv,.xml,.html,.png,.jpg,.jpeg,.webp,.gif"
           onChange={handleFileSelect}
         />
         <div className="text-[var(--muted)] mb-3">
@@ -144,7 +151,7 @@ function UploadZone({
           )}
         </div>
         <div className="text-[11px] text-[var(--muted)] mb-4">
-          Supported: PDF, Markdown, Text, DOCX, JSON, CSV, XML, HTML
+          Supported: PDF, Markdown, Text, DOCX, JSON, CSV, XML, HTML, PNG, JPG, WEBP, GIF
         </div>
         <div className="flex gap-3 justify-center">
           <button
@@ -164,12 +171,24 @@ function UploadZone({
             Add from URL
           </button>
         </div>
+        <label className="mt-4 inline-flex items-center gap-2 text-xs text-[var(--muted)]">
+          <input
+            type="checkbox"
+            checked={includeImageDescriptions}
+            onChange={(e) => setIncludeImageDescriptions(e.target.checked)}
+            disabled={uploading}
+          />
+          Include AI image descriptions (more context, may increase cost)
+        </label>
       </div>
 
       {showUrlInput && (
         <div className="mt-4 p-4 border border-[var(--border)] bg-[var(--card)] rounded">
           <div className="text-xs text-[var(--muted)] mb-2">
             Paste a URL to import content. YouTube links will be auto-transcribed.
+          </div>
+          <div className="text-[11px] text-[var(--muted)] mb-2">
+            Image URLs can optionally use AI description extraction and may increase costs.
           </div>
           <div className="flex gap-2">
             <input
@@ -502,85 +521,125 @@ export function KnowledgeView() {
   }, [loadData]);
 
   const handleFileUpload = useCallback(
-    async (file: File) => {
+    async (file: File, options: KnowledgeUploadOptions) => {
+      if (file.size >= LARGE_FILE_WARNING_BYTES) {
+        const shouldContinue =
+          typeof window === "undefined" ||
+          window.confirm(
+            `This file is ${formatByteSize(file.size)}. Large uploads can take longer and may increase embedding/vision costs. Continue?`,
+          );
+        if (!shouldContinue) return;
+      }
+
       setUploading(true);
-
-      // Read file content
-      const reader = new FileReader();
-      const content = await new Promise<string>((resolve, reject) => {
-        reader.onload = () => {
-          const result = reader.result;
-          if (typeof result === "string") {
-            // For text files
-            resolve(result);
-          } else if (result instanceof ArrayBuffer) {
-            // For binary files (PDF, DOCX), convert to base64
-            const bytes = new Uint8Array(result);
-            let binary = "";
-            for (let i = 0; i < bytes.byteLength; i++) {
-              binary += String.fromCharCode(bytes[i]);
+      try {
+        // Read file content
+        const reader = new FileReader();
+        const content = await new Promise<string>((resolve, reject) => {
+          reader.onload = () => {
+            const result = reader.result;
+            if (typeof result === "string") {
+              // For text files
+              resolve(result);
+            } else if (result instanceof ArrayBuffer) {
+              // For binary files (PDF, DOCX, images), convert to base64
+              const bytes = new Uint8Array(result);
+              let binary = "";
+              for (let i = 0; i < bytes.byteLength; i++) {
+                binary += String.fromCharCode(bytes[i]);
+              }
+              resolve(btoa(binary));
+            } else {
+              reject(new Error("Failed to read file"));
             }
-            resolve(btoa(binary));
+          };
+          reader.onerror = () => reject(reader.error);
+
+          // Read as text for text-based files, binary for others
+          const textTypes = [
+            "text/plain",
+            "text/markdown",
+            "text/html",
+            "text/csv",
+            "application/json",
+            "application/xml",
+          ];
+          if (textTypes.some((t) => file.type.includes(t)) || file.name.endsWith(".md")) {
+            reader.readAsText(file);
           } else {
-            reject(new Error("Failed to read file"));
+            reader.readAsArrayBuffer(file);
           }
+        });
+
+        const request = {
+          content,
+          filename: file.name,
+          contentType: file.type || "application/octet-stream",
+          metadata: {
+            includeImageDescriptions: options.includeImageDescriptions,
+          },
         };
-        reader.onerror = () => reject(reader.error);
-
-        // Read as text for text-based files, binary for others
-        const textTypes = [
-          "text/plain",
-          "text/markdown",
-          "text/html",
-          "text/csv",
-          "application/json",
-          "application/xml",
-        ];
-        if (textTypes.some((t) => file.type.includes(t)) || file.name.endsWith(".md")) {
-          reader.readAsText(file);
-        } else {
-          reader.readAsArrayBuffer(file);
+        const requestBytes = new TextEncoder().encode(JSON.stringify(request))
+          .length;
+        if (requestBytes > MAX_UPLOAD_REQUEST_BYTES) {
+          throw new Error(
+            `Upload payload is ${formatByteSize(requestBytes)}, which exceeds the current limit (${formatByteSize(MAX_UPLOAD_REQUEST_BYTES)}).`,
+          );
         }
-      });
 
-      const result = await client.uploadKnowledgeDocument({
-        content,
-        filename: file.name,
-        contentType: file.type || "application/octet-stream",
-      });
-
-      setUploading(false);
-
-      if (result.ok) {
-        setActionNotice(
-          `Uploaded "${file.name}" (${result.fragmentCount} fragments)`,
-          "success",
-          3000,
-        );
+        const result = await client.uploadKnowledgeDocument(request);
+        const baseMessage = `Uploaded "${file.name}" (${result.fragmentCount} fragments)`;
+        if (result.warnings && result.warnings.length > 0) {
+          setActionNotice(
+            `${baseMessage}. ${result.warnings[0]}`,
+            "info",
+            6000,
+          );
+        } else {
+          setActionNotice(baseMessage, "success", 3000);
+        }
         loadData();
-      } else {
-        setActionNotice("Failed to upload document", "error", 4000);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Unknown upload error";
+        const status = (err as Error & { status?: number })?.status;
+        if (status === 413 || /maximum size|payload is/i.test(message)) {
+          setActionNotice(
+            `Upload too large. Try a smaller file or split it into parts.`,
+            "error",
+            6000,
+          );
+        } else {
+          setActionNotice(`Failed to upload "${file.name}": ${message}`, "error", 5000);
+        }
+      } finally {
+        setUploading(false);
       }
     },
     [loadData, setActionNotice],
   );
 
   const handleUrlUpload = useCallback(
-    async (url: string) => {
+    async (url: string, options: KnowledgeUploadOptions) => {
       setUploading(true);
+      try {
+        const result = await client.uploadKnowledgeFromUrl(url, {
+          includeImageDescriptions: options.includeImageDescriptions,
+        });
 
-      const result = await client.uploadKnowledgeFromUrl(url);
-
-      setUploading(false);
-
-      if (result.ok) {
-        const message = result.isYouTubeTranscript
+        const baseMessage = result.isYouTubeTranscript
           ? `Imported YouTube transcript (${result.fragmentCount} fragments)`
           : `Imported "${result.filename}" (${result.fragmentCount} fragments)`;
-        setActionNotice(message, "success", 3000);
+        if (result.warnings && result.warnings.length > 0) {
+          setActionNotice(`${baseMessage}. ${result.warnings[0]}`, "info", 6000);
+        } else {
+          setActionNotice(baseMessage, "success", 3000);
+        }
         loadData();
-      } else {
-        setActionNotice("Failed to import from URL", "error", 4000);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Unknown import error";
+        setActionNotice(`Failed to import from URL: ${message}`, "error", 5000);
+      } finally {
+        setUploading(false);
       }
     },
     [loadData, setActionNotice],

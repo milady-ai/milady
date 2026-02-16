@@ -1,6 +1,12 @@
+import { Buffer } from "node:buffer";
 import { lookup as dnsLookup } from "node:dns/promises";
 import net from "node:net";
-import type { AgentRuntime, Memory, UUID } from "@elizaos/core";
+import {
+  type AgentRuntime,
+  type Memory,
+  ModelType,
+  type UUID,
+} from "@elizaos/core";
 import {
   parseClampedFloat,
   parsePositiveInteger,
@@ -75,6 +81,229 @@ const PRIVATE_IP_PATTERNS: RegExp[] = [
   /^192\.168\./, // RFC1918
   /^f[cd][0-9a-f]{2}:/i, // IPv6 ULA fc00::/7
 ];
+const MAX_KNOWLEDGE_UPLOAD_BODY_BYTES = 32 * 1_048_576; // 32 MB
+const MAX_IMAGE_DESCRIPTION_BYTES = 8 * 1_048_576; // 8 MB
+const IMAGE_DESCRIPTION_PROMPT = [
+  "Describe this image for semantic retrieval in a knowledge base.",
+  "Include visible text (OCR), key entities, actions, and relevant context.",
+  "Return plain text only.",
+].join(" ");
+
+interface ProcessedImageUpload {
+  content: string;
+  contentType: string;
+  metadata: Record<string, unknown>;
+  warnings: string[];
+}
+
+function isImageContentType(contentType: string | undefined): boolean {
+  return (
+    typeof contentType === "string" &&
+    contentType.toLowerCase().startsWith("image/")
+  );
+}
+
+function parseBooleanLike(value: unknown): boolean | null {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value !== 0;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (!normalized) return null;
+    if (["true", "1", "yes", "on"].includes(normalized)) return true;
+    if (["false", "0", "no", "off"].includes(normalized)) return false;
+  }
+  return null;
+}
+
+function normalizeMetadata(
+  metadata: unknown,
+): Record<string, unknown> | undefined {
+  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) {
+    return undefined;
+  }
+  return metadata as Record<string, unknown>;
+}
+
+function shouldIncludeImageDescriptions(
+  metadata: Record<string, unknown> | undefined,
+): boolean {
+  const parsed = parseBooleanLike(metadata?.includeImageDescriptions);
+  return parsed ?? true;
+}
+
+function normalizeBase64Payload(payload: string): string {
+  const trimmed = payload.trim();
+  const match = /^data:[^;]+;base64,(.+)$/i.exec(trimmed);
+  return (match?.[1] ?? trimmed).trim();
+}
+
+function decodeBase64Bytes(payload: string): Buffer {
+  const normalized = normalizeBase64Payload(payload);
+  if (!normalized) throw new Error("Image payload is empty");
+  const decoded = Buffer.from(normalized, "base64");
+  if (decoded.length === 0) {
+    throw new Error("Image payload is invalid base64");
+  }
+  return decoded;
+}
+
+function parseImageDescriptionModelResponse(response: unknown): string | null {
+  if (typeof response === "string") {
+    const trimmed = response.trim();
+    if (!trimmed) return null;
+    const descriptionMatch = /<description>([\s\S]*?)<\/description>/i.exec(
+      trimmed,
+    );
+    const textMatch = /<text>([\s\S]*?)<\/text>/i.exec(trimmed);
+    const extracted = (
+      descriptionMatch?.[1] ??
+      textMatch?.[1] ??
+      trimmed
+    ).trim();
+    return extracted || null;
+  }
+
+  if (response && typeof response === "object") {
+    const asRecord = response as Record<string, unknown>;
+    const directDescription = asRecord.description;
+    if (typeof directDescription === "string" && directDescription.trim()) {
+      return directDescription.trim();
+    }
+    const directText = asRecord.text;
+    if (typeof directText === "string" && directText.trim()) {
+      return directText.trim();
+    }
+  }
+
+  return null;
+}
+
+function runtimeDisablesImageDescriptions(
+  runtime: AgentRuntime | null,
+): boolean {
+  if (!runtime) return true;
+  const disableSetting = runtime.getSetting("DISABLE_IMAGE_DESCRIPTION");
+  return parseBooleanLike(disableSetting) ?? false;
+}
+
+async function maybeProcessImageUploadForKnowledge(params: {
+  runtime: AgentRuntime | null;
+  contentType: string;
+  content: string;
+  filename: string;
+  metadata?: Record<string, unknown>;
+}): Promise<ProcessedImageUpload | null> {
+  const { runtime, contentType, content, filename, metadata } = params;
+  if (!isImageContentType(contentType)) return null;
+
+  const includeImageDescriptions = shouldIncludeImageDescriptions(metadata);
+  const mergedMetadata = {
+    ...(metadata ?? {}),
+    originalImageContentType: contentType,
+    imageDescriptionIncluded: includeImageDescriptions,
+  };
+
+  if (!includeImageDescriptions) {
+    return {
+      content: `Image "${filename}" uploaded without AI image descriptions (disabled for this upload).`,
+      contentType: "text/plain",
+      metadata: mergedMetadata,
+      warnings: [
+        "Image descriptions were disabled for this upload; retrieval quality may be limited.",
+      ],
+    };
+  }
+
+  if (runtimeDisablesImageDescriptions(runtime)) {
+    return {
+      content: `Image "${filename}" uploaded, but image descriptions are disabled in runtime settings.`,
+      contentType: "text/plain",
+      metadata: {
+        ...mergedMetadata,
+        imageDescriptionIncluded: false,
+      },
+      warnings: [
+        "Image descriptions are disabled for this agent (vision feature is off).",
+      ],
+    };
+  }
+
+  let decodedImage: Buffer;
+  try {
+    decodedImage = decodeBase64Bytes(content);
+  } catch (err) {
+    const reason = err instanceof Error ? err.message : "invalid image payload";
+    return {
+      content: `Image "${filename}" uploaded, but description generation failed: ${reason}.`,
+      contentType: "text/plain",
+      metadata: {
+        ...mergedMetadata,
+        imageDescriptionIncluded: false,
+      },
+      warnings: [
+        "Image description generation failed due to invalid image payload.",
+      ],
+    };
+  }
+
+  if (decodedImage.length > MAX_IMAGE_DESCRIPTION_BYTES) {
+    return {
+      content: `Image "${filename}" uploaded, but it is too large for AI description generation (${decodedImage.length} bytes).`,
+      contentType: "text/plain",
+      metadata: {
+        ...mergedMetadata,
+        imageDescriptionIncluded: false,
+      },
+      warnings: [
+        `Image exceeds ${MAX_IMAGE_DESCRIPTION_BYTES} bytes for description generation; uploaded without AI description.`,
+      ],
+    };
+  }
+
+  try {
+    const modelResponse = await runtime?.useModel(ModelType.IMAGE_DESCRIPTION, {
+      prompt: IMAGE_DESCRIPTION_PROMPT,
+      imageUrl: `data:${contentType};base64,${normalizeBase64Payload(content)}`,
+    });
+    const imageDescription = parseImageDescriptionModelResponse(modelResponse);
+    if (!imageDescription) {
+      return {
+        content: `Image "${filename}" uploaded, but no description text was returned by the vision model.`,
+        contentType: "text/plain",
+        metadata: {
+          ...mergedMetadata,
+          imageDescriptionIncluded: false,
+        },
+        warnings: [
+          "Vision model returned an empty image description; uploaded image as placeholder text.",
+        ],
+      };
+    }
+
+    return {
+      content: `Image: ${filename}\n\n${imageDescription}`,
+      contentType: "text/plain",
+      metadata: {
+        ...mergedMetadata,
+        imageDescriptionIncluded: true,
+      },
+      warnings: [],
+    };
+  } catch (err) {
+    const reason = err instanceof Error ? err.message : "unknown vision error";
+    return {
+      content: `Image "${filename}" uploaded, but description generation failed (${reason}).`,
+      contentType: "text/plain",
+      metadata: {
+        ...mergedMetadata,
+        imageDescriptionIncluded: false,
+      },
+      warnings: [
+        "Vision model failed while generating image description; uploaded image as placeholder text.",
+      ],
+    };
+  }
+}
 
 function hasUuidId(memory: Memory): memory is Memory & { id: UUID } {
   return typeof memory.id === "string" && memory.id.length > 0;
@@ -597,12 +826,34 @@ export async function handleKnowledgeRoutes(
       filename: string;
       contentType?: string;
       metadata?: Record<string, unknown>;
-    }>(req, res);
+    }>(req, res, {
+      maxBytes: MAX_KNOWLEDGE_UPLOAD_BODY_BYTES,
+      tooLargeMessage: `Knowledge upload exceeds maximum size (${MAX_KNOWLEDGE_UPLOAD_BODY_BYTES} bytes)`,
+    });
     if (!body) return true;
 
     if (!body.content || !body.filename) {
       error(res, "content and filename are required");
       return true;
+    }
+
+    const uploadWarnings: string[] = [];
+    let uploadContent = body.content;
+    let uploadContentType = body.contentType || "text/plain";
+    let uploadMetadata = normalizeMetadata(body.metadata);
+
+    const processedImage = await maybeProcessImageUploadForKnowledge({
+      runtime,
+      contentType: uploadContentType,
+      content: uploadContent,
+      filename: body.filename,
+      metadata: uploadMetadata,
+    });
+    if (processedImage) {
+      uploadContent = processedImage.content;
+      uploadContentType = processedImage.contentType;
+      uploadMetadata = processedImage.metadata;
+      uploadWarnings.push(...processedImage.warnings);
     }
 
     const result = await knowledgeService.addKnowledge({
@@ -611,16 +862,17 @@ export async function handleKnowledgeRoutes(
       roomId: agentId,
       entityId: agentId,
       clientDocumentId: "" as UUID, // Will be generated
-      contentType: body.contentType || "text/plain",
+      contentType: uploadContentType,
       originalFilename: body.filename,
-      content: body.content,
-      metadata: body.metadata,
+      content: uploadContent,
+      metadata: uploadMetadata,
     });
 
     json(res, {
       ok: true,
       documentId: result.clientDocumentId,
       fragmentCount: result.fragmentCount,
+      ...(uploadWarnings.length > 0 ? { warnings: uploadWarnings } : {}),
     });
     return true;
   }
@@ -650,6 +902,7 @@ export async function handleKnowledgeRoutes(
     let content: string;
     let contentType: string;
     let filename: string;
+    const uploadWarnings: string[] = [];
     try {
       ({ content, contentType, filename } = await fetchUrlContent(urlToFetch));
     } catch (err) {
@@ -660,17 +913,34 @@ export async function handleKnowledgeRoutes(
       return true;
     }
 
+    let uploadContent = content;
+    let uploadContentType = contentType;
+    let uploadMetadata = normalizeMetadata(body.metadata);
+    const processedImage = await maybeProcessImageUploadForKnowledge({
+      runtime,
+      contentType: uploadContentType,
+      content: uploadContent,
+      filename,
+      metadata: uploadMetadata,
+    });
+    if (processedImage) {
+      uploadContent = processedImage.content;
+      uploadContentType = processedImage.contentType;
+      uploadMetadata = processedImage.metadata;
+      uploadWarnings.push(...processedImage.warnings);
+    }
+
     const result = await knowledgeService.addKnowledge({
       agentId,
       worldId: agentId,
       roomId: agentId,
       entityId: agentId,
       clientDocumentId: "" as UUID,
-      contentType,
+      contentType: uploadContentType,
       originalFilename: filename,
-      content,
+      content: uploadContent,
       metadata: {
-        ...body.metadata,
+        ...uploadMetadata,
         url: urlToFetch,
         source: isYouTubeUrl(urlToFetch) ? "youtube" : "url",
       },
@@ -681,8 +951,9 @@ export async function handleKnowledgeRoutes(
       documentId: result.clientDocumentId,
       fragmentCount: result.fragmentCount,
       filename,
-      contentType,
+      contentType: uploadContentType,
       isYouTubeTranscript: isYouTubeUrl(urlToFetch),
+      ...(uploadWarnings.length > 0 ? { warnings: uploadWarnings } : {}),
     });
     return true;
   }

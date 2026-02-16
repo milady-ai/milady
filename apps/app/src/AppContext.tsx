@@ -770,10 +770,6 @@ export interface AppActions {
   // Extension
   checkExtensionStatus: () => Promise<void>;
 
-  // Command palette
-  openCommandPalette: () => void;
-  closeCommandPalette: () => void;
-
   // Emote picker
   openEmotePicker: () => void;
   closeEmotePicker: () => void;
@@ -3126,18 +3122,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [importBusy, importFile, importPassword]);
 
-  // ── Command palette ────────────────────────────────────────────────
-
-  const openCommandPalette = useCallback(() => {
-    setCommandQuery("");
-    setCommandActiveIndex(0);
-    setCommandPaletteOpen(true);
-  }, []);
-
-  const closeCommandPalette = useCallback(() => {
-    setCommandPaletteOpen(false);
-  }, []);
-
   // ── Emote picker ────────────────────────────────────────────────────
 
   const openEmotePicker = useCallback(() => {
@@ -3676,7 +3660,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     handleCloudLogin, handleCloudDisconnect,
     loadUpdateStatus, handleChannelChange,
     checkExtensionStatus,
-    openCommandPalette, closeCommandPalette,
     openEmotePicker, closeEmotePicker,
     loadWorkbench,
     handleAgentExport, handleAgentImport,

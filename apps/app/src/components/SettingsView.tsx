@@ -475,6 +475,19 @@ export function SettingsView() {
           const totalCols = allAiProviders.length + 2; /* +2 for Eliza Cloud + Pi */
           const isCloudSelected = resolvedSelectedId === "__cloud__";
           const isPiAiSelected = resolvedSelectedId === "pi-ai";
+          const providerChoices = [
+            { id: "__cloud__", label: "Eliza Cloud", disabled: false },
+            {
+              id: "pi-ai",
+              label: !piAiAvailable && !isPiAiSelected ? "Pi (pi-ai) — unavailable" : "Pi (pi-ai)",
+              disabled: !piAiAvailable && !isPiAiSelected,
+            },
+            ...allAiProviders.map((provider) => ({
+              id: provider.id,
+              label: provider.name,
+              disabled: false,
+            })),
+          ];
 
           if (totalCols === 0) {
             return (
@@ -499,8 +512,35 @@ export function SettingsView() {
 
           return (
             <>
+              <div className="lg:hidden mb-3">
+                <label className="block text-xs font-semibold mb-1.5">Provider</label>
+                <select
+                  className="w-full px-2.5 py-[8px] border border-[var(--border)] bg-[var(--card)] text-[13px] transition-colors focus:border-[var(--accent)] focus:outline-none"
+                  value={resolvedSelectedId ?? "__cloud__"}
+                  onChange={(e) => {
+                    const nextId = e.target.value;
+                    if (nextId === "__cloud__") {
+                      void handleSelectCloud();
+                      return;
+                    }
+                    if (nextId === "pi-ai") {
+                      if (!piAiAvailable && !isPiAiSelected) return;
+                      void handleSelectPiAi();
+                      return;
+                    }
+                    void handleSwitchProvider(nextId);
+                  }}
+                >
+                  {providerChoices.map((choice) => (
+                    <option key={choice.id} value={choice.id} disabled={choice.disabled}>
+                      {choice.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div
-                className="grid gap-1.5"
+                className="hidden lg:grid gap-1.5"
                 style={{ gridTemplateColumns: `repeat(${totalCols}, 1fr)` }}
               >
                 <button

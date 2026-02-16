@@ -42,7 +42,12 @@ function isActionStream(stream: string | undefined): boolean {
   return stream === "action" || stream === "tool" || stream === "provider";
 }
 
-export function AutonomousPanel() {
+interface AutonomousPanelProps {
+  mobile?: boolean;
+  onClose?: () => void;
+}
+
+export function AutonomousPanel({ mobile = false, onClose }: AutonomousPanelProps) {
   const {
     agentStatus,
     autonomousEvents,
@@ -86,20 +91,31 @@ export function AutonomousPanel() {
   const tasks = workbench?.tasks ?? [];
   const triggers = workbench?.triggers ?? [];
   const todos = workbench?.todos ?? [];
-  const powerModeEnabled = chatMode === "power";
 
   return (
     <aside
-      className="w-[420px] min-w-[420px] border-l border-border flex flex-col h-full font-body text-[13px]"
+      className={`${mobile ? "w-full min-w-0" : "w-[420px] min-w-[420px] border-l"} border-border bg-bg flex flex-col h-full font-body text-[13px]`}
       data-testid="autonomous-panel"
     >
-      <div className="px-3 py-2 border-b border-border">
-        <div className="text-xs uppercase tracking-wide text-muted">Autonomous Loop</div>
-        <div className="mt-1 text-[12px] text-muted">
-          {agentStatus?.state === "running"
-            ? "Live stream connected"
-            : `Agent state: ${agentStatus?.state ?? "offline"}`}
+      <div className="px-3 py-2 border-b border-border flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="text-xs uppercase tracking-wide text-muted">{mobile ? "Status" : "Autonomous Loop"}</div>
+          <div className="mt-1 text-[12px] text-muted">
+            {agentStatus?.state === "running"
+              ? "Live stream connected"
+              : `Agent state: ${agentStatus?.state ?? "offline"}`}
+          </div>
         </div>
+        {mobile && (
+          <button
+            type="button"
+            className="inline-flex items-center justify-center w-7 h-7 border border-border bg-card text-sm text-muted cursor-pointer hover:border-accent hover:text-accent transition-colors shrink-0"
+            onClick={onClose}
+            aria-label="Close autonomous panel"
+          >
+            &times;
+          </button>
+        )}
       </div>
 
       {isAgentStopped ? (
@@ -282,7 +298,7 @@ export function AutonomousPanel() {
       <div className="border-t border-border px-3 py-2">
         <div className="text-xs uppercase tracking-wide text-muted mb-2">Chat Controls</div>
 
-        <div className="h-[420px] border border-border bg-bg-hover/20 rounded overflow-hidden relative">
+        <div className={`${mobile ? "h-[300px]" : "h-[420px]"} border border-border bg-bg-hover/20 rounded overflow-hidden relative`}>
           {chatAvatarVisible ? (
             <ChatAvatar
               isSpeaking={chatAvatarSpeaking}
@@ -328,22 +344,7 @@ export function AutonomousPanel() {
               : "Powerful mode: tool/action execution is enabled for richer responses."}
           </div>
 
-          <div className="grid grid-cols-3 gap-1.5">
-            <button
-              className={`h-8 flex items-center justify-center border rounded cursor-pointer transition-all ${
-                powerModeEnabled
-                  ? "bg-card border-border text-muted hover:border-accent hover:text-accent"
-                  : "bg-card border-border text-muted opacity-50 cursor-not-allowed"
-              }`}
-              onClick={() => powerModeEnabled && window.dispatchEvent(new Event("toggle-custom-actions-panel"))}
-              title={powerModeEnabled ? "Custom Actions" : "Custom Actions require Powerful mode"}
-              disabled={!powerModeEnabled}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-              </svg>
-            </button>
-
+          <div className="grid grid-cols-2 gap-1.5">
             <button
               className={`h-8 flex items-center justify-center border rounded cursor-pointer transition-all bg-card ${
                 chatAvatarVisible

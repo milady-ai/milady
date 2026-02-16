@@ -22,6 +22,13 @@ function nowMs(): number {
   return typeof performance !== "undefined" ? performance.now() : Date.now();
 }
 
+function isMobileViewport(): boolean {
+  return typeof window !== "undefined" && window.innerWidth < 768;
+}
+
+const CHAT_INPUT_MIN_HEIGHT_PX = 38;
+const CHAT_INPUT_MAX_HEIGHT_PX = 200;
+
 export function ChatView() {
   const {
     agentStatus,
@@ -45,21 +52,38 @@ export function ChatView() {
   // ── Voice config (ElevenLabs / browser TTS) ────────────────────────
   const [voiceConfig, setVoiceConfig] = useState<VoiceConfig | null>(null);
 
+  const loadVoiceConfig = useCallback(async () => {
+    try {
+      const cfg = await client.getConfig();
+      const messages = cfg.messages as
+        | Record<string, Record<string, string>>
+        | undefined;
+      const tts = messages?.tts as VoiceConfig | undefined;
+      setVoiceConfig(tts ?? null);
+    } catch {
+      /* ignore — will use browser TTS fallback */
+    }
+  }, []);
+
   // Load saved voice config on mount so the correct TTS provider is used
   useEffect(() => {
-    void (async () => {
-      try {
-        const cfg = await client.getConfig();
-        const messages = cfg.messages as
-          | Record<string, Record<string, string>>
-          | undefined;
-        const tts = messages?.tts as VoiceConfig | undefined;
-        if (tts) setVoiceConfig(tts);
-      } catch {
-        /* ignore — will use browser TTS fallback */
+    void loadVoiceConfig();
+  }, [loadVoiceConfig]);
+
+  // Keep chat voice config synchronized when Settings/Character voice is saved.
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<VoiceConfig | undefined>).detail;
+      if (detail && typeof detail === "object") {
+        setVoiceConfig(detail);
+        return;
       }
-    })();
-  }, []);
+      void loadVoiceConfig();
+    };
+
+    window.addEventListener("milaidy:voice-config-updated", handler);
+    return () => window.removeEventListener("milaidy:voice-config-updated", handler);
+  }, [loadVoiceConfig]);
 
   // ── Voice chat ────────────────────────────────────────────────────
   const pendingVoiceTurnRef = useRef<{
@@ -194,16 +218,24 @@ export function ChatView() {
   useEffect(() => {
     const ta = textareaRef.current;
     if (!ta) return;
+
+    // Force a compact baseline when empty so the composer never boots oversized.
+    if (!chatInput) {
+      ta.style.height = `${CHAT_INPUT_MIN_HEIGHT_PX}px`;
+      ta.style.overflowY = "hidden";
+      return;
+    }
+
     ta.style.height = "auto";
     ta.style.overflowY = "hidden";
-    const h = Math.min(ta.scrollHeight, 200);
+    const h = Math.min(ta.scrollHeight, CHAT_INPUT_MAX_HEIGHT_PX);
     ta.style.height = `${h}px`;
-    ta.style.overflowY = ta.scrollHeight > 200 ? "auto" : "hidden";
+    ta.style.overflowY = ta.scrollHeight > CHAT_INPUT_MAX_HEIGHT_PX ? "auto" : "hidden";
   }, [chatInput]);
 
   // Keep input focused for fast multi-turn chat.
   useEffect(() => {
-    if (chatSending) return;
+    if (chatSending || isMobileViewport()) return;
     textareaRef.current?.focus();
   }, [chatSending]);
 
@@ -215,7 +247,7 @@ export function ChatView() {
   };
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 px-3 relative">
+    <div className="flex flex-col flex-1 min-h-0 px-2 sm:px-3 relative">
       {/* ── Messages ───────────────────────────────────────────────── */}
       <div ref={messagesRef} className="flex-1 overflow-y-auto py-2 relative" style={{ zIndex: 1 }}>
         {visibleMsgs.length === 0 && !chatSending ? (
@@ -232,7 +264,7 @@ export function ChatView() {
               return (
                 <div
                   key={msg.id}
-                  className={`flex items-start gap-2 ${isUser ? "justify-end" : "justify-start"} ${grouped ? "mt-1" : "mt-3"}`}
+                  className={`flex items-start gap-1.5 sm:gap-2 ${isUser ? "justify-end" : "justify-start"} ${grouped ? "mt-1" : "mt-3"}`}
                   data-testid="chat-message"
                   data-role={msg.role}
                 >
@@ -255,7 +287,7 @@ export function ChatView() {
                       </div>
                     ))}
                   <div
-                    className="max-w-[85%] px-0 py-1 text-sm leading-relaxed whitespace-pre-wrap break-words"
+                    className="max-w-[92%] sm:max-w-[85%] min-w-0 px-0 py-1 text-sm leading-relaxed whitespace-pre-wrap break-words"
                   >
                     {!grouped && (
                       <div className="font-bold text-[12px] mb-1 text-accent">
@@ -291,7 +323,7 @@ export function ChatView() {
                     </div>
                   )}
                 </div>
-                <div className="max-w-[85%] px-0 py-1 text-sm leading-relaxed">
+                <div className="max-w-[92%] sm:max-w-[85%] min-w-0 px-0 py-1 text-sm leading-relaxed">
                   <div className="font-bold text-[12px] mb-1 text-accent">{agentName}</div>
                   <div className="flex gap-1 py-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-muted-strong animate-[typing-bounce_1.2s_ease-in-out_infinite]" />
@@ -332,7 +364,7 @@ export function ChatView() {
       )}
 
       {/* ── Input row: mic + textarea + send ───────────────────────── */}
-      <div className="flex gap-2 items-end border-t border-border pt-3 pb-4 relative" style={{ zIndex: 1 }}>
+      <div className="flex gap-1.5 sm:gap-2 items-end border-t border-border pt-3 pb-3 sm:pb-4 relative" style={{ zIndex: 1 }}>
         {/* Mic button — user voice input */}
         {voice.supported && (
           <button
@@ -364,13 +396,13 @@ export function ChatView() {
 
         {/* Textarea / live transcript */}
         {voice.isListening && voice.interimTranscript ? (
-          <div className="flex-1 px-3 py-2 border border-accent bg-card text-txt text-sm font-body leading-relaxed min-h-[38px] flex items-center">
+          <div className="flex-1 min-w-0 px-3 py-2 border border-accent bg-card text-txt text-sm font-body leading-relaxed min-h-[38px] flex items-center">
             <span className="text-muted italic">{voice.interimTranscript}</span>
           </div>
         ) : (
           <textarea
             ref={textareaRef}
-            className="flex-1 px-3 py-2 border border-border bg-card text-txt text-sm font-body leading-relaxed resize-none overflow-y-hidden min-h-[38px] max-h-[200px] focus:border-accent focus:outline-none"
+            className="flex-1 min-w-0 px-3 py-2 border border-border bg-card text-txt text-sm font-body leading-relaxed resize-none overflow-y-hidden min-h-[38px] max-h-[200px] focus:border-accent focus:outline-none"
             rows={1}
             placeholder={voice.isListening ? "Listening..." : "Type a message..."}
             value={chatInput}
@@ -383,7 +415,7 @@ export function ChatView() {
         {/* Send / Stop */}
         {chatSending ? (
           <button
-            className="h-[38px] px-4 py-2 border border-danger bg-danger/10 text-danger text-sm cursor-pointer hover:bg-danger/20 self-end"
+            className="h-[38px] shrink-0 px-3 sm:px-4 py-2 border border-danger bg-danger/10 text-danger text-sm cursor-pointer hover:bg-danger/20 self-end"
             onClick={handleChatStop}
             title="Stop generation"
           >
@@ -391,7 +423,7 @@ export function ChatView() {
           </button>
         ) : voice.isSpeaking ? (
           <button
-            className="h-[38px] px-4 py-2 border border-danger bg-danger/10 text-danger text-sm cursor-pointer hover:bg-danger/20 self-end"
+            className="h-[38px] shrink-0 px-3 sm:px-4 py-2 border border-danger bg-danger/10 text-danger text-sm cursor-pointer hover:bg-danger/20 self-end"
             onClick={stopSpeaking}
             title="Stop speaking"
           >
@@ -399,7 +431,7 @@ export function ChatView() {
           </button>
         ) : (
           <button
-            className="h-[38px] px-6 py-2 border border-accent bg-accent text-accent-fg text-sm cursor-pointer hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed self-end"
+            className="h-[38px] shrink-0 px-4 sm:px-6 py-2 border border-accent bg-accent text-accent-fg text-sm cursor-pointer hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed self-end"
             onClick={() => void handleChatSend(chatMode)}
             disabled={chatSending}
           >

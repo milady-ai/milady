@@ -5,6 +5,11 @@
 import { useState, useRef, useEffect } from "react";
 import { useApp } from "../AppContext.js";
 
+interface ConversationsSidebarProps {
+  mobile?: boolean;
+  onClose?: () => void;
+}
+
 function formatRelativeTime(dateString: string): string {
   const date = new Date(dateString);
   const now = new Date();
@@ -21,7 +26,7 @@ function formatRelativeTime(dateString: string): string {
   return date.toLocaleDateString();
 }
 
-export function ConversationsSidebar() {
+export function ConversationsSidebar({ mobile = false, onClose }: ConversationsSidebarProps) {
   const {
     conversations,
     activeConversationId,
@@ -80,11 +85,31 @@ export function ConversationsSidebar() {
   };
 
   return (
-    <aside className="w-60 min-w-60 border-r border-border bg-bg flex flex-col overflow-y-auto text-[13px]" data-testid="conversations-sidebar">
+    <aside
+      className={`${mobile ? "w-full min-w-0 h-full" : "w-60 min-w-60 border-r"} border-border bg-bg flex flex-col overflow-y-auto text-[13px]`}
+      data-testid="conversations-sidebar"
+    >
+      {mobile && (
+        <div className="px-3 py-2 border-b border-border flex items-center justify-between">
+          <div className="text-xs uppercase tracking-wide text-muted">Chats</div>
+          <button
+            type="button"
+            className="inline-flex items-center justify-center w-7 h-7 border border-border bg-card text-sm text-muted cursor-pointer hover:border-accent hover:text-accent transition-colors"
+            onClick={onClose}
+            aria-label="Close chats panel"
+          >
+            &times;
+          </button>
+        </div>
+      )}
       <div className="p-3 border-b border-border">
         <button
+          type="button"
           className="w-full px-3 py-2 border border-border rounded-md bg-accent text-accent-fg text-[13px] font-medium cursor-pointer transition-opacity hover:opacity-90"
-          onClick={handleNewConversation}
+          onClick={() => {
+            handleNewConversation();
+            onClose?.();
+          }}
         >
           + New Chat
         </button>
@@ -109,6 +134,7 @@ export function ConversationsSidebar() {
                 onClick={() => {
                   if (!isEditing) {
                     void handleSelectConversation(conv.id);
+                    onClose?.();
                   }
                 }}
                 onDoubleClick={() => handleDoubleClick(conv)}
@@ -133,8 +159,9 @@ export function ConversationsSidebar() {
                       <div className="text-[11px] text-muted mt-0.5">{formatRelativeTime(conv.updatedAt)}</div>
                     </div>
                     <button
+                      type="button"
                       data-testid="conv-delete"
-                      className="opacity-0 group-hover:opacity-100 transition-opacity border-none bg-transparent text-muted hover:text-danger hover:bg-destructive-subtle cursor-pointer text-sm px-1 py-0.5 rounded flex-shrink-0"
+                      className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity border-none bg-transparent text-muted hover:text-danger hover:bg-destructive-subtle cursor-pointer text-sm px-1 py-0.5 rounded flex-shrink-0"
                       onClick={(e) => {
                         e.stopPropagation();
                         void handleDeleteConversation(conv.id);

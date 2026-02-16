@@ -58,16 +58,24 @@ export async function startBenchmarkServer() {
   if (process.env.MILAIDY_ENABLE_COMPUTERUSE) {
     try {
       // Import directly from source to ensure we use Native backend (not MCP)
-      // const computerUsePlugin = await import("@elizaos/plugin-computeruse").then(m => m.computerUsePlugin || m.default);
-      const { computerUsePlugin } = await import(
-        "../../../eliza/packages/plugin-computeruse/src/index.ts"
-      );
-      plugins.push(
-        toPlugin(
-          computerUsePlugin,
-          "../../../eliza/packages/plugin-computeruse/src/index.ts",
-        ),
-      );
+      process.env.COMPUTERUSE_ENABLED ??= "true";
+      process.env.COMPUTERUSE_MODE ??= "local";
+      const localComputerusePath =
+        "../../../plugins/plugin-computeruse/typescript/src/index.ts";
+      const computeruseModule = (await import(localComputerusePath)) as Record<
+        string,
+        unknown
+      >;
+      const computerusePlugin =
+        computeruseModule.computerusePlugin ??
+        computeruseModule.computerUsePlugin ??
+        computeruseModule.default;
+      if (!computerusePlugin) {
+        throw new Error(
+          "ComputerUse plugin export not found in local plugins workspace",
+        );
+      }
+      plugins.push(toPlugin(computerusePlugin, localComputerusePath));
       elizaLogger.info(
         "[bench] Loaded local plugin: @elizaos/plugin-computeruse",
       );
