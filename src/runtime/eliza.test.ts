@@ -188,7 +188,7 @@ describe("collectPluginNames", () => {
     } as MiladyConfig;
     const names = collectPluginNames(config);
     // Telegram maps to the local enhanced plugin, not the upstream one
-    expect(names.has("@milady/plugin-telegram-enhanced")).toBe(true);
+    expect(names.has("@elizaos/plugin-telegram")).toBe(true);
     expect(names.has("@elizaos/plugin-discord")).toBe(true);
     expect(names.has("@elizaos/plugin-slack")).toBe(false);
   });
@@ -219,7 +219,7 @@ describe("collectPluginNames", () => {
     } as unknown as MiladyConfig;
     const names = collectPluginNames(config);
     // Should load the enhanced telegram plugin, NOT the base @elizaos/plugin-telegram
-    expect(names.has("@milady/plugin-telegram-enhanced")).toBe(true);
+    expect(names.has("@elizaos/plugin-telegram")).toBe(true);
     expect(names.has("@elizaos/plugin-telegram")).toBe(false);
   });
 
@@ -233,7 +233,7 @@ describe("collectPluginNames", () => {
       },
     } as unknown as MiladyConfig;
     const names = collectPluginNames(config);
-    expect(names.has("@milady/plugin-telegram-enhanced")).toBe(true);
+    expect(names.has("@elizaos/plugin-telegram")).toBe(true);
     expect(names.has("@elizaos/plugin-telegram")).toBe(false);
   });
 
@@ -244,7 +244,7 @@ describe("collectPluginNames", () => {
       },
     } as unknown as MiladyConfig;
     const names = collectPluginNames(config);
-    expect(names.has("@milady/plugin-telegram-enhanced")).toBe(false);
+    expect(names.has("@elizaos/plugin-telegram")).toBe(false);
     expect(names.has("@elizaos/plugin-telegram")).toBe(false);
   });
 

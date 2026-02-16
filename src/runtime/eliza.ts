@@ -327,7 +327,7 @@ const _OPTIONAL_NATIVE_PLUGINS: readonly string[] = [
 /** Maps Milady channel names to ElizaOS plugin package names. */
 const CHANNEL_PLUGIN_MAP: Readonly<Record<string, string>> = {
   discord: "@elizaos/plugin-discord",
-  telegram: "@milady/plugin-telegram-enhanced",
+  telegram: "@elizaos/plugin-telegram",
   slack: "@elizaos/plugin-slack",
   twitter: "@elizaos/plugin-twitter",
   whatsapp: "@elizaos/plugin-whatsapp",
@@ -616,6 +616,8 @@ export function collectPluginNames(config: MiladyConfig): Set<string> {
 
 /** Subdirectory under the Milady state dir for drop-in custom plugins. */
 export const CUSTOM_PLUGINS_DIRNAME = "plugins/custom";
+/** Subdirectory under the Milady state dir for ejected plugins. */
+export const EJECTED_PLUGINS_DIRNAME = "plugins/ejected";
 
 /**
  * Scan a directory for drop-in plugin packages. Each immediate subdirectory
@@ -806,6 +808,26 @@ async function resolvePlugins(
     ...(config.plugins?.installs ?? {}),
   };
 
+  const denyList = new Set(config.plugins?.deny ?? []);
+
+  // ── Auto-discover ejected plugins ───────────────────────────────────────
+  // Ejected plugins override npm/core versions, so they are tracked
+  // separately and consulted first at import time.
+  const ejectedRecords = await scanDropInPlugins(
+    path.join(resolveStateDir(), EJECTED_PLUGINS_DIRNAME),
+  );
+  const ejectedPluginNames: string[] = [];
+  for (const [name, _record] of Object.entries(ejectedRecords)) {
+    if (denyList.has(name)) continue;
+    pluginsToLoad.add(name);
+    ejectedPluginNames.push(name);
+  }
+  if (ejectedPluginNames.length > 0) {
+    logger.info(
+      `[milady] Discovered ${ejectedPluginNames.length} ejected plugin(s): ${ejectedPluginNames.join(", ")}`,
+    );
+  }
+
   // ── Auto-discover drop-in custom plugins ────────────────────────────────
   // Scan well-known dir + any extra dirs from plugins.load.paths (first wins).
   const scanDirs = [
@@ -824,7 +846,7 @@ async function resolvePlugins(
     dropInRecords,
     installRecords,
     corePluginNames: corePluginSet,
-    denyList: new Set(config.plugins?.deny ?? []),
+    denyList,
     pluginsToLoad,
   });
 
@@ -840,6 +862,7 @@ async function resolvePlugins(
   // Dynamically import each plugin inside an error boundary
   for (const pluginName of pluginsToLoad) {
     const isCore = corePluginSet.has(pluginName);
+    const ejectedRecord = ejectedRecords[pluginName];
     const installRecord = installRecords[pluginName];
 
     // Pre-flight: ensure native dependencies are available for special plugins.
@@ -860,7 +883,13 @@ async function resolvePlugins(
     try {
       let mod: PluginModuleShape;
 
-      if (installRecord?.installPath) {
+      if (ejectedRecord?.installPath) {
+        // Ejected plugin — always prefer local source over npm/core.
+        logger.info(
+          `[milady] Loading ejected plugin: ${pluginName} from ${ejectedRecord.installPath}`,
+        );
+        mod = await importFromPath(ejectedRecord.installPath, pluginName);
+      } else if (installRecord?.installPath) {
         // Prefer bundled/node_modules copies for official Eliza plugins.
         // User install records can pin stale versions that drift from the
         // runtime core and cause hard-to-debug runtime errors.

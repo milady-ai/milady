@@ -182,7 +182,7 @@ describe("plugin loading parity across modes", () => {
 
     const names = collectPluginNames(config);
     // Telegram maps to the local enhanced plugin, not the upstream one
-    expect(names.has("@milady/plugin-telegram-enhanced")).toBe(true);
+    expect(names.has("@elizaos/plugin-telegram")).toBe(true);
     expect(names.has("@elizaos/plugin-discord")).toBe(true);
     expect(names.has("@elizaos/plugin-slack")).toBe(true);
     // Unconfigured channels should NOT be loaded

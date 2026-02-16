@@ -38,18 +38,19 @@ const execFileAsync = promisify(execFile);
 // ---------------------------------------------------------------------------
 
 /** npm package names: @scope/name or name. No shell metacharacters. */
-const VALID_PACKAGE_NAME = /^(@[a-zA-Z0-9][\w.-]*\/)?[a-zA-Z0-9][\w.-]*$/;
+export const VALID_PACKAGE_NAME =
+  /^(@[a-zA-Z0-9][\w.-]*\/)?[a-zA-Z0-9][\w.-]*$/;
 
 /** Version strings: semver, dist-tags, git refs. Conservative allowlist. */
 const VALID_VERSION = /^[a-zA-Z0-9][\w.+-]*$/;
 
 /** Git branch names: alphanumeric, hyphens, slashes, dots. No shell metacharacters. */
-const VALID_BRANCH = /^[a-zA-Z0-9][\w./-]*$/;
+export const VALID_BRANCH = /^[a-zA-Z0-9][\w./-]*$/;
 
 /** Git URLs: https:// only, no shell metacharacters. */
-const VALID_GIT_URL = /^https:\/\/[a-zA-Z0-9][\w./-]*\.git$/;
+export const VALID_GIT_URL = /^https:\/\/[a-zA-Z0-9][\w./-]*\.git$/;
 
-function assertValidPackageName(name: string): void {
+export function assertValidPackageName(name: string): void {
   if (!VALID_PACKAGE_NAME.test(name)) {
     throw new Error(`Invalid package name: "${name}"`);
   }
@@ -61,7 +62,7 @@ function assertValidVersion(version: string): void {
   }
 }
 
-function assertValidGitUrl(url: string): void {
+export function assertValidGitUrl(url: string): void {
   if (!VALID_GIT_URL.test(url)) {
     throw new Error(`Invalid git URL: "${url}"`);
   }
@@ -137,7 +138,7 @@ function isWithinPluginsDir(targetPath: string): boolean {
   return resolved.startsWith(`${base}${path.sep}`);
 }
 
-function sanitisePackageName(name: string): string {
+export function sanitisePackageName(name: string): string {
   return name.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
@@ -149,7 +150,7 @@ function pluginDir(pluginName: string): string {
 // Package manager detection
 // ---------------------------------------------------------------------------
 
-async function detectPackageManager(): Promise<"bun" | "pnpm" | "npm"> {
+export async function detectPackageManager(): Promise<"bun" | "pnpm" | "npm"> {
   for (const cmd of ["bun", "pnpm", "npm"] as const) {
     try {
       await execFileAsync(cmd, ["--version"]);
@@ -577,7 +578,9 @@ async function listRemoteBranches(gitUrl: string): Promise<string[]> {
   }
 }
 
-async function resolveGitBranch(info: RegistryPluginInfo): Promise<string> {
+export async function resolveGitBranch(
+  info: RegistryPluginInfo,
+): Promise<string> {
   assertValidGitUrl(info.gitUrl);
   const rawCandidates = [
     info.git.v2Branch,

@@ -7095,6 +7095,24 @@ async function handleRequest(
     return;
   }
 
+  // ── GET /api/plugins/ejected ────────────────────────────────────────────
+  // List plugins ejected to local source checkouts with upstream metadata.
+  if (method === "GET" && pathname === "/api/plugins/ejected") {
+    const { listEjectedPlugins } = await import("../services/plugin-eject.js");
+
+    try {
+      const plugins = await listEjectedPlugins();
+      json(res, { count: plugins.length, plugins });
+    } catch (err) {
+      error(
+        res,
+        `Failed to list ejected plugins: ${err instanceof Error ? err.message : String(err)}`,
+        500,
+      );
+    }
+    return;
+  }
+
   // ── GET /api/plugins/core ────────────────────────────────────────────
   // Returns all core and optional core plugins with their loaded/running status.
   if (method === "GET" && pathname === "/api/plugins/core") {

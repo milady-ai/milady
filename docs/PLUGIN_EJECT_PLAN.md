@@ -1,11 +1,11 @@
 # Plugin Eject System — Implementation Plan
 
-> **Goal:** Allow the milaidy agent to clone plugin source code locally, edit it, and have the runtime load the local version instead of the npm package — without modifying the milaidy repo's `package.json` or workspace config.
+> **Goal:** Allow the milady agent to clone plugin source code locally, edit it, and have the runtime load the local version instead of the npm package — without modifying the milady repo's `package.json` or workspace config.
 
 ## Architecture Overview
 
 ```
-~/.milaidy/
+~/.milady/
 ├── plugins/
 │   ├── installed/     # npm-installed plugins (existing, managed by plugin-installer.ts)
 │   ├── custom/        # drop-in custom plugins (existing scan dir)
@@ -33,8 +33,8 @@
 ### Three Existing Plugin Load Paths
 
 1. **Core/npm plugins** — `import(pluginName)` from `node_modules/`
-2. **Installed plugins** — `~/.milaidy/plugins/installed/<name>/` via config `plugins.installs` records
-3. **Custom/drop-in plugins** — `~/.milaidy/plugins/custom/` auto-scanned via `scanDropInPlugins()`
+2. **Installed plugins** — `~/.milady/plugins/installed/<name>/` via config `plugins.installs` records
+3. **Custom/drop-in plugins** — `~/.milady/plugins/custom/` auto-scanned via `scanDropInPlugins()`
 
 ### Two Blockers for Using `custom/` as-is
 
@@ -69,7 +69,7 @@ Official `@elizaos/plugin-*` packages **always prefer node_modules** over the in
 
 **File:** `src/runtime/eliza.ts`
 
-In `resolvePlugins()`, add a new scan pass for `~/.milaidy/plugins/ejected/` that runs **before** the main plugin import loop. Ejected plugins should:
+In `resolvePlugins()`, add a new scan pass for `~/.milady/plugins/ejected/` that runs **before** the main plugin import loop. Ejected plugins should:
 - Be scanned via the existing `scanDropInPlugins()` function (it already reads `package.json` from subdirs)
 - Be stored in a separate `ejectedRecords` map (not mixed with `dropInRecords`)
 - **NOT** be filtered by the core collision guard (unlike custom plugins)
@@ -128,7 +128,7 @@ export interface EjectResult {
 export async function ejectPlugin(pluginId: string): Promise<EjectResult> {
   // 1. Look up plugin in registry (via existing getPluginInfo())
   // 2. Resolve git URL and branch (reuse resolveGitBranch() from plugin-installer.ts)
-  // 3. Clone into ~/.milaidy/plugins/ejected/<plugin-name>/
+  // 3. Clone into ~/.milady/plugins/ejected/<plugin-name>/
   //    - git clone --depth 1 --branch <branch> <gitUrl> <targetDir>
   // 4. Install dependencies: bun install / npm install in the cloned dir
   // 5. Build if needed: check for tsconfig, run build
@@ -149,7 +149,7 @@ export async function ejectPlugin(pluginId: string): Promise<EjectResult> {
 - Use shallow clone (`--depth 1`) initially for speed, but unshallow on first sync
 - Clone the branch that matches the currently installed npm version (prefer v2Branch → next → main)
 - Run `bun install` in the ejected dir so it has its own `node_modules/`
-- Do NOT modify the milaidy repo's `package.json` — the runtime override handles resolution
+- Do NOT modify the milady repo's `package.json` — the runtime override handles resolution
 
 #### 2.2 Plugin Sync Service
 
@@ -184,7 +184,7 @@ export async function syncPlugin(pluginId: string): Promise<SyncResult> {
 export async function reinjectPlugin(pluginId: string): Promise<{ success: boolean; error?: string }> {
   // 1. Verify the ejected dir exists
   // 2. Optionally: check for unpushed local changes and warn
-  // 3. Remove the ejected directory: rm -rf ~/.milaidy/plugins/ejected/<name>/
+  // 3. Remove the ejected directory: rm -rf ~/.milady/plugins/ejected/<name>/
   // 4. Runtime will fall back to npm version on next restart
   // 5. Trigger restart
 }
@@ -243,11 +243,11 @@ export const listEjectedAction: Action = {
 };
 ```
 
-### Phase 4: Wire into milaidy-plugin.ts
+### Phase 4: Wire into milady-plugin.ts
 
-**File:** `src/runtime/milaidy-plugin.ts`
+**File:** `src/runtime/milady-plugin.ts`
 
-Register the new actions in the milaidy plugin's action list:
+Register the new actions in the milady plugin's action list:
 
 ```typescript
 import { ejectPluginAction } from "../actions/eject-plugin.js";
@@ -272,10 +272,10 @@ actions: [
 Add subcommands to the existing plugins CLI:
 
 ```
-milaidy plugins eject <plugin-id>     # clone plugin source for editing
-milaidy plugins sync <plugin-id>      # pull upstream changes
-milaidy plugins reinject <plugin-id>  # remove local source, revert to npm
-milaidy plugins ejected               # list all ejected plugins
+milady plugins eject <plugin-id>     # clone plugin source for editing
+milady plugins sync <plugin-id>      # pull upstream changes
+milady plugins reinject <plugin-id>  # remove local source, revert to npm
+milady plugins ejected               # list all ejected plugins
 ```
 
 ## .upstream.json Schema
@@ -328,7 +328,7 @@ milaidy plugins ejected               # list all ejected plugins
 | `src/actions/sync-plugin.ts` | **NEW** — SYNC_PLUGIN action |
 | `src/actions/reinject-plugin.ts` | **NEW** — REINJECT_PLUGIN action |
 | `src/actions/list-ejected.ts` | **NEW** — LIST_EJECTED_PLUGINS action |
-| `src/runtime/milaidy-plugin.ts` | Register new actions |
+| `src/runtime/milady-plugin.ts` | Register new actions |
 | `src/api/server.ts` | Add `/api/plugins/ejected` endpoint |
 | `src/cli/plugins-cli.ts` | Add CLI subcommands (optional) |
 
