@@ -9,7 +9,7 @@
  */
 import crypto from "node:crypto";
 import type { Dirent } from "node:fs";
-import { existsSync, symlinkSync } from "node:fs";
+import { existsSync, mkdirSync, symlinkSync } from "node:fs";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import fs from "node:fs/promises";
 import { createRequire } from "node:module";
@@ -1451,12 +1451,23 @@ export function applyDatabaseConfigToEnv(config: MiladyConfig): void {
     const configuredDataDir = db?.pglite?.dataDir?.trim();
     if (configuredDataDir) {
       process.env.PGLITE_DATA_DIR = resolveUserPath(configuredDataDir);
-      return;
+      // Fall through to directory creation below instead of returning early
     }
 
     const envDataDir = process.env.PGLITE_DATA_DIR?.trim();
     if (!envDataDir) {
       process.env.PGLITE_DATA_DIR = resolveDefaultPgliteDataDir(config);
+    }
+
+    // Ensure the PGlite data directory exists before init so PGlite does
+    // not silently fall back to in-memory mode on first run.
+    const dataDir = process.env.PGLITE_DATA_DIR;
+    if (dataDir) {
+      const alreadyExisted = existsSync(dataDir);
+      mkdirSync(dataDir, { recursive: true });
+      logger.info(
+        `[milady] PGlite data dir: ${dataDir} (${alreadyExisted ? "existed" : "created"})`,
+      );
     }
   }
 }
@@ -1580,6 +1591,24 @@ async function initializeDatabaseAdapter(
     logger.info(
       "[milady] Database adapter recovered after resetting PGLite data",
     );
+  }
+
+  // Health check: verify PGlite data directory has files after init
+  const pgliteDataDir = resolveActivePgliteDataDir(config);
+  if (pgliteDataDir && existsSync(pgliteDataDir)) {
+    try {
+      const files = await fs.readdir(pgliteDataDir);
+      logger.info(
+        `[milady] PGlite health check: ${files.length} file(s) in ${pgliteDataDir}`,
+      );
+      if (files.length === 0) {
+        logger.warn(
+          `[milady] PGlite data directory is empty after init — data may not persist across restarts`,
+        );
+      }
+    } catch (err) {
+      logger.warn(`[milady] PGlite health check failed: ${formatError(err)}`);
+    }
   }
 }
 
@@ -2357,6 +2386,22 @@ export async function startEliza(
 
   // 2d. Propagate database config into process.env for plugin-sql
   applyDatabaseConfigToEnv(config);
+
+  // Log active database configuration for debugging persistence issues
+  {
+    const dbProvider = config.database?.provider ?? "pglite";
+    const pgliteDir = process.env.PGLITE_DATA_DIR;
+    const postgresUrl = process.env.POSTGRES_URL;
+    logger.info(
+      `[milady] Database provider: ${dbProvider}` +
+        (dbProvider === "pglite" && pgliteDir
+          ? ` | data dir: ${pgliteDir}`
+          : "") +
+        (dbProvider === "postgres" && postgresUrl
+          ? ` | connection: ${postgresUrl.replace(/:[^@]*@/, ":***@")}`
+          : ""),
+    );
+  }
 
   // 2d-iii. OG tracking code initialization
   try {
