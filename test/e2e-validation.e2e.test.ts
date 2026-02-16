@@ -1608,7 +1608,9 @@ describe("Fresh Machine Validation (non-Docker)", () => {
     ) as Record<string, Record<string, string>>;
     expect(pkg.exports?.["."]).toMatch(/^\.\/dist\/index(?:\.js)?$/);
     expect(pkg.exports?.["./cli-entry"]).toBe("./milady.mjs");
-    expect(pkg.exports?.["./eliza"]).toMatch(/^\.\/dist\/runtime\/eliza(?:\.js)?$/);
+    expect(pkg.exports?.["./eliza"]).toMatch(
+      /^\.\/dist\/runtime\/eliza(?:\.js)?$/,
+    );
   });
 
   it("dist/ contains expected entry files", () => {

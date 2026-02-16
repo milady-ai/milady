@@ -283,43 +283,7 @@ function normalizeStepId(value: unknown): string | null {
   return stepId.length > 0 ? stepId : null;
 }
 
-function normalizeLlmCallPayload(
-  args: unknown[],
-): { stepId: string; params: Record<string, unknown> } | null {
-  if (args.length === 0) return null;
-  if (typeof args[0] === "string") {
-    const stepId = normalizeStepId(args[0]);
-    const details = asRecord(args[1]);
-    if (!stepId || !details) return null;
-    return {
-      stepId,
-      params: {
-        ...details,
-        stepId,
-      },
-    };
-  }
-
-  const params = asRecord(args[0]);
-  if (!params) return null;
-  const stepId = normalizeStepId(params.stepId);
-  if (!stepId) return null;
-  if (params.stepId === stepId) {
-    return {
-      stepId,
-      params,
-    };
-  }
-  return {
-    stepId,
-    params: {
-      ...params,
-      stepId,
-    },
-  };
-}
-
-function normalizeProviderAccessPayload(
+function normalizeStepPayload(
   args: unknown[],
 ): { stepId: string; params: Record<string, unknown> } | null {
   if (args.length === 0) return null;
@@ -863,7 +827,7 @@ export function installDatabaseTrajectoryLogger(runtime: IAgentRuntime): void {
       }
     }
 
-    const normalized = normalizeLlmCallPayload(args);
+    const normalized = normalizeStepPayload(args);
     if (!normalized) return;
 
     void enqueueStepWrite(runtime, normalized.stepId, async () => {
@@ -882,7 +846,7 @@ export function installDatabaseTrajectoryLogger(runtime: IAgentRuntime): void {
       }
     }
 
-    const normalized = normalizeProviderAccessPayload(args);
+    const normalized = normalizeStepPayload(args);
     if (!normalized) return;
 
     void enqueueStepWrite(runtime, normalized.stepId, async () => {

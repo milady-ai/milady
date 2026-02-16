@@ -8,8 +8,8 @@
  */
 
 import { lookup as dnsLookup } from "node:dns/promises";
-import net from "node:net";
 import { createRequire } from "node:module";
+import net from "node:net";
 import type { Action, HandlerOptions, IAgentRuntime } from "@elizaos/core";
 import { loadMiladyConfig } from "../config/config";
 import type {
@@ -70,14 +70,19 @@ type VmRunner = {
 };
 
 let vmRunner: VmRunner | null = null;
+let legacyModeWarningIssued = false;
 
 function isLegacyCodeHandlerMode(): boolean {
   const mode =
-    process.env.MILADY_CODE_HANDLER_EXECUTION_MODE?.trim().toLowerCase() ?? "vm";
+    process.env.MILADY_CODE_HANDLER_EXECUTION_MODE?.trim().toLowerCase() ??
+    "vm";
   return mode === "legacy" || mode === "unsafe";
 }
 
-function createSafeFetch(): (input: RequestInfo | URL, init?: RequestInit) => Promise<Response> {
+function createSafeFetch(): (
+  input: RequestInfo | URL,
+  init?: RequestInit,
+) => Promise<Response> {
   return async (
     input: RequestInfo | URL,
     init?: RequestInit,
@@ -119,7 +124,7 @@ async function runCodeHandlerLegacy(
   const safeFetch = createSafeFetch();
   const legacyRequire =
     typeof (globalThis as { require?: unknown }).require === "function"
-      ? ((globalThis as { require: typeof createRequire }).require)
+      ? (globalThis as { require: typeof createRequire }).require
       : createRequire(import.meta.url);
   const executor = new Function(
     "params",
@@ -136,6 +141,13 @@ async function runCodeHandler(
   params: Record<string, string>,
 ): Promise<unknown> {
   if (isLegacyCodeHandlerMode()) {
+    if (!legacyModeWarningIssued) {
+      console.warn(
+        "Running custom action code handlers in legacy/unsafe mode. " +
+          "Code executes with Node.js runtime globals and require() access.",
+      );
+      legacyModeWarningIssued = true;
+    }
     return runCodeHandlerLegacy(code, params);
   }
 
@@ -149,9 +161,7 @@ async function runCodeHandler(
 
   const safeFetch = createSafeFetch();
 
-  const script = `"use strict";
-${CODE_HANDLER_SANDBOX_LOCKDOWN}
-(async () => { ${code} })();`;
+  const script = `${CODE_HANDLER_SANDBOX_LOCKDOWN}(async () => { ${code} })();`;
   const context: Record<string, unknown> = {
     params: Object.freeze({ ...params }),
     fetch: safeFetch,
