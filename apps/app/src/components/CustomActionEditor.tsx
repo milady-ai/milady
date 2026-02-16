@@ -195,8 +195,9 @@ export function CustomActionEditor({
               })),
           );
         }
-      } catch (err: any) {
-        alert(`Generation failed: ${err.message || String(err)}`);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        alert(`Generation failed: ${message}`);
       } finally {
         setGenerating(false);
       }
@@ -283,9 +284,10 @@ export function CustomActionEditor({
       const result = await client.testCustomAction(action.id, testParams);
       const duration = Date.now() - startTime;
       setTestResult({ output: JSON.stringify(result, null, 2), duration });
-    } catch (err: any) {
+    } catch (err: unknown) {
       const duration = Date.now() - startTime;
-      setTestResult({ error: err.message || String(err), duration });
+      const message = err instanceof Error ? err.message : String(err);
+      setTestResult({ error: message, duration });
     } finally {
       setTesting(false);
     }
@@ -345,8 +347,9 @@ export function CustomActionEditor({
         : await client.createCustomAction(actionDef);
 
       onSave(saved);
-    } catch (err: any) {
-      alert(`Failed to save: ${err.message || String(err)}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      alert(`Failed to save: ${message}`);
     }
   };
 

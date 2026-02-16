@@ -185,5 +185,5 @@ export function dispatchShareTargetToWindow(mainWindow: BrowserWindow | null, pa
     `window.__MILADY_SHARE_QUEUE__.push(${safePayload});` +
     `window.dispatchEvent(new CustomEvent('milady:share-target', { detail: ${safePayload} }));`;
 
-  void mainWindow.webContents.executeJavaScript(script);
+  void mainWindow.webContents.executeJavaScript(script).catch(() => {});
 }
