@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { client, type CustomActionDef, type CustomActionHandler } from "../api-client";
 
+function asErrorMessage(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
+
 interface CustomActionEditorProps {
   open: boolean;
   action?: CustomActionDef | null;
@@ -147,8 +151,8 @@ export function CustomActionEditor({ open, action, onSave, onClose }: CustomActi
             }))
         );
       }
-    } catch (err: any) {
-      alert(`Generation failed: ${err.message || String(err)}`);
+    } catch (err: unknown) {
+      alert(`Generation failed: ${asErrorMessage(err)}`);
     } finally {
       setGenerating(false);
     }
@@ -196,9 +200,9 @@ export function CustomActionEditor({ open, action, onSave, onClose }: CustomActi
       const result = await client.testCustomAction(action.id, testParams);
       const duration = Date.now() - startTime;
       setTestResult({ output: JSON.stringify(result, null, 2), duration });
-    } catch (err: any) {
+    } catch (err: unknown) {
       const duration = Date.now() - startTime;
-      setTestResult({ error: err.message || String(err), duration });
+      setTestResult({ error: asErrorMessage(err), duration });
     } finally {
       setTesting(false);
     }
@@ -258,8 +262,8 @@ export function CustomActionEditor({ open, action, onSave, onClose }: CustomActi
         : await client.createCustomAction(actionDef);
 
       onSave(saved);
-    } catch (err: any) {
-      alert(`Failed to save: ${err.message || String(err)}`);
+    } catch (err: unknown) {
+      alert(`Failed to save: ${asErrorMessage(err)}`);
     }
   };
 

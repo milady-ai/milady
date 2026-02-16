@@ -65,6 +65,7 @@ export function App() {
     actionNotice,
     agentStatus,
     unreadConversations,
+    setState,
   } = useApp();
   const contextMenu = useContextMenu();
 
@@ -151,6 +152,18 @@ export function App() {
     window.addEventListener("toggle-custom-actions-panel", handler);
     return () => window.removeEventListener("toggle-custom-actions-panel", handler);
   }, []);
+
+  const handleOpenCommandPalette = useCallback(() => {
+    setState("commandPaletteOpen", true);
+    setState("commandQuery", "");
+    setState("commandActiveIndex", 0);
+  }, [setState]);
+
+  useEffect(() => {
+    const handler = () => handleOpenCommandPalette();
+    document.addEventListener("milady:command-palette", handler);
+    return () => document.removeEventListener("milady:command-palette", handler);
+  }, [handleOpenCommandPalette]);
 
   const handleEditorSave = useCallback(() => {
     setCustomActionsEditorOpen(false);

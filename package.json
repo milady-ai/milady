@@ -25,17 +25,17 @@
     "milady": "milady.mjs"
   },
   "exports": {
-    ".": "./dist/index.js",
+    ".": "./dist/index",
     "./cli-entry": "./milady.mjs",
-    "./eliza": "./dist/runtime/eliza.js"
+    "./eliza": "./dist/runtime/eliza"
   },
   "engines": {
     "node": ">=22"
   },
   "scripts": {
     "benchmark:server": "node --import tsx src/benchmark/server.ts",
-    "build": "bunx tsdown && scripts/rt.sh scripts/write-build-info.ts && cd apps/app && ../../scripts/rt.sh run build",
-    "build:node": "bunx tsdown && node --import tsx scripts/write-build-info.ts && cd apps/app && npm run build",
+    "build": "bunx tsdown && scripts/rt.sh scripts/write-build-info.ts && node --import tsx scripts/normalize-dist-entries.ts && cd apps/app && ../../scripts/rt.sh run build",
+    "build:node": "bunx tsdown && node --import tsx scripts/write-build-info.ts && node --import tsx scripts/normalize-dist-entries.ts && cd apps/app && npm run build",
     "build:android": "cd apps/app && ../../scripts/rt.sh run build:android",
     "build:desktop": "cd apps/app && ../../scripts/rt.sh run build:electron",
     "build:ios": "cd apps/app && ../../scripts/rt.sh run build:ios",

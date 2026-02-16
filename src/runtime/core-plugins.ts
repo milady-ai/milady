@@ -10,7 +10,6 @@ export const CORE_PLUGINS: readonly string[] = [
   "@elizaos/plugin-sql", // database adapter — required
   "@elizaos/plugin-local-embedding", // local embeddings — required for memory
   "@elizaos/plugin-form", // packaging issue
-  "@elizaos/plugin-elizacloud", // elizacloud responses
   "@elizaos/plugin-knowledge", // RAG knowledge management — required for knowledge tab
   "@elizaos/plugin-trajectory-logger", // trajectory logging for debugging and RL training
   "@elizaos/plugin-agent-orchestrator", // multi-agent orchestration
