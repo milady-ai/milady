@@ -691,6 +691,61 @@ describe("applyDatabaseConfigToEnv", () => {
 // isRecoverablePgliteInitError
 // ---------------------------------------------------------------------------
 
+describe("applyDatabaseConfigToEnv — directory creation", () => {
+  const envKeys = ["POSTGRES_URL", "PGLITE_DATA_DIR", "MILADY_PROFILE"];
+  const snap = envSnapshot(envKeys);
+
+  beforeEach(() => {
+    snap.save();
+    for (const key of envKeys) delete process.env[key];
+  });
+
+  afterEach(() => snap.restore());
+
+  it("creates the PGlite data directory when it does not exist", async () => {
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "pglite-test-"));
+    const dataDir = path.join(tmpDir, "nested", "deep", ".elizadb");
+
+    const config = {
+      database: {
+        provider: "pglite",
+        pglite: { dataDir },
+      },
+    } as MiladyConfig;
+
+    applyDatabaseConfigToEnv(config);
+
+    // The directory should now exist
+    const stat = await fs.stat(dataDir);
+    expect(stat.isDirectory()).toBe(true);
+
+    // Cleanup
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  });
+
+  it("does not error when PGlite data directory already exists", async () => {
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "pglite-test-"));
+    const dataDir = path.join(tmpDir, ".elizadb");
+    await fs.mkdir(dataDir, { recursive: true });
+
+    const config = {
+      database: {
+        provider: "pglite",
+        pglite: { dataDir },
+      },
+    } as MiladyConfig;
+
+    // Should not throw
+    applyDatabaseConfigToEnv(config);
+
+    const stat = await fs.stat(dataDir);
+    expect(stat.isDirectory()).toBe(true);
+
+    // Cleanup
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  });
+});
+
 describe("isRecoverablePgliteInitError", () => {
   it("returns true for the known PGLite abort + migrations signature", () => {
     const err = new Error(

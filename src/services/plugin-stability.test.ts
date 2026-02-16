@@ -50,7 +50,6 @@ function _getCoreOverride(pkg: RootPackageJson): string | undefined {
   );
 }
 
-
 // ---------------------------------------------------------------------------
 // Constants — Full plugin enumeration
 // ---------------------------------------------------------------------------

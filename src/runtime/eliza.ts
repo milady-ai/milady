@@ -1574,7 +1574,6 @@ async function initializeDatabaseAdapter(
     logger.info(
       "[milady] Database adapter initialized early (before plugin inits)",
     );
-    return;
   } catch (err) {
     const pgliteDataDir = resolveActivePgliteDataDir(config);
     if (!pgliteDataDir || !isRecoverablePgliteInitError(err)) {
@@ -1593,22 +1592,31 @@ async function initializeDatabaseAdapter(
     );
   }
 
-  // Health check: verify PGlite data directory has files after init
+  // Health check: verify PGlite data directory has files after init.
+  // Runs on BOTH the happy path and the recovery path.
+  await verifyPgliteDataDir(config);
+}
+
+/**
+ * Verify PGlite data directory contains files after init.
+ * Warns if the directory is empty (suggests ephemeral/in-memory fallback).
+ */
+async function verifyPgliteDataDir(config: MiladyConfig): Promise<void> {
   const pgliteDataDir = resolveActivePgliteDataDir(config);
-  if (pgliteDataDir && existsSync(pgliteDataDir)) {
-    try {
-      const files = await fs.readdir(pgliteDataDir);
-      logger.info(
-        `[milady] PGlite health check: ${files.length} file(s) in ${pgliteDataDir}`,
+  if (!pgliteDataDir || !existsSync(pgliteDataDir)) return;
+
+  try {
+    const files = await fs.readdir(pgliteDataDir);
+    logger.info(
+      `[milady] PGlite health check: ${files.length} file(s) in ${pgliteDataDir}`,
+    );
+    if (files.length === 0) {
+      logger.warn(
+        `[milady] PGlite data directory is empty after init — data may not persist across restarts`,
       );
-      if (files.length === 0) {
-        logger.warn(
-          `[milady] PGlite data directory is empty after init — data may not persist across restarts`,
-        );
-      }
-    } catch (err) {
-      logger.warn(`[milady] PGlite health check failed: ${formatError(err)}`);
     }
+  } catch (err) {
+    logger.warn(`[milady] PGlite health check failed: ${formatError(err)}`);
   }
 }
 
@@ -2398,7 +2406,7 @@ export async function startEliza(
           ? ` | data dir: ${pgliteDir}`
           : "") +
         (dbProvider === "postgres" && postgresUrl
-          ? ` | connection: ${postgresUrl.replace(/:[^@]*@/, ":***@")}`
+          ? ` | connection: ${postgresUrl.replace(/:\/\/([^:]+):([^@]+)@/, "://$1:***@")}`
           : ""),
     );
   }
