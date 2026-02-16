@@ -195,7 +195,8 @@ describe("handleCloudRoute", () => {
   });
 
   it("uses the default cloud base URL for /api/cloud/login", async () => {
-    const { res, getStatus, getJson } = createMockHttpResponse<Record<string, unknown>>();
+    const { res, getStatus, getJson } =
+      createMockHttpResponse<Record<string, unknown>>();
     fetchMock.mockResolvedValue({
       ok: true,
       headers: new Headers(),

@@ -152,8 +152,11 @@ describe("RetakeClient", () => {
     const client = new RetakeClient({ timeoutMs: 10 });
     const promise = client.getRtmpCredentials();
 
+    // Attach rejection handler BEFORE advancing timers to prevent unhandled rejection
+    const assertion = expect(promise).rejects.toThrow("timed out (10ms)");
+
     await vi.advanceTimersByTimeAsync(20);
 
-    await expect(promise).rejects.toThrow("timed out (10ms)");
+    await assertion;
   });
 });
