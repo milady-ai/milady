@@ -323,19 +323,37 @@ export function App() {
       }
     };
 
-    window.addEventListener("milaidy:open-notes-panel", handleOpenNotes);
-    window.addEventListener("milaidy:open-custom-action-editor", handleOpenActionEditor);
-    window.addEventListener("milaidy:agent-control", handleAgentControl);
-    window.addEventListener("milaidy:open-tab", handleOpenTab);
-    window.addEventListener("milaidy:app-command", handleAppCommand);
+    window.addEventListener("milady:open-notes-panel", handleOpenNotes);
+    window.addEventListener("milady:open-custom-action-editor", handleOpenActionEditor);
+    window.addEventListener("milady:agent-control", handleAgentControl);
+    window.addEventListener("milady:open-tab", handleOpenTab);
+    window.addEventListener("milady:app-command", handleAppCommand);
+
+    // Bridge IPC events from Electron main process → window CustomEvents
+    const ipcBridge = (eventName: unknown, detail: unknown) => {
+      if (typeof eventName === "string") {
+        window.dispatchEvent(new CustomEvent(eventName, { detail }));
+      }
+    };
+    const shareTargetBridge = (payload: unknown) => {
+      if (!Array.isArray((window as Record<string, unknown>).__MILADY_SHARE_QUEUE__)) {
+        (window as Record<string, unknown>).__MILADY_SHARE_QUEUE__ = [];
+      }
+      ((window as Record<string, unknown>).__MILADY_SHARE_QUEUE__ as unknown[]).push(payload);
+      window.dispatchEvent(new CustomEvent("milady:share-target", { detail: payload }));
+    };
+    window.electron?.ipcRenderer?.on("milady:ipc-event", ipcBridge);
+    window.electron?.ipcRenderer?.on("milady:share-target", shareTargetBridge);
 
     return () => {
       window.removeEventListener("toggle-custom-actions-panel", handler);
-      window.removeEventListener("milaidy:open-notes-panel", handleOpenNotes);
-      window.removeEventListener("milaidy:open-custom-action-editor", handleOpenActionEditor);
-      window.removeEventListener("milaidy:agent-control", handleAgentControl);
-      window.removeEventListener("milaidy:open-tab", handleOpenTab);
-      window.removeEventListener("milaidy:app-command", handleAppCommand);
+      window.removeEventListener("milady:open-notes-panel", handleOpenNotes);
+      window.removeEventListener("milady:open-custom-action-editor", handleOpenActionEditor);
+      window.removeEventListener("milady:agent-control", handleAgentControl);
+      window.removeEventListener("milady:open-tab", handleOpenTab);
+      window.removeEventListener("milady:app-command", handleAppCommand);
+      window.electron?.ipcRenderer?.removeListener("milady:ipc-event", ipcBridge);
+      window.electron?.ipcRenderer?.removeListener("milady:share-target", shareTargetBridge);
     };
   }, [
     handleStart,

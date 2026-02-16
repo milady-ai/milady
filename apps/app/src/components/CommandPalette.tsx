@@ -49,7 +49,7 @@ export function CommandPalette() {
       dispatchAppEvent(new CustomEvent(name, { detail }));
     };
     const dispatchAppCommand = (command: string, detail: Record<string, unknown> = {}) => {
-      dispatchEvent("milaidy:app-command", { command, ...detail });
+      dispatchEvent("milady:app-command", { command, ...detail });
     };
 
     // Lifecycle commands
@@ -87,13 +87,13 @@ export function CommandPalette() {
       {
         id: "open-notes-edit",
         label: "Open Notes (Edit)",
-        action: () => dispatchEvent("milaidy:open-notes-panel", { mode: "edit" }),
+        action: () => dispatchEvent("milady:open-notes-panel", { mode: "edit" }),
         hint: "Ctrl/Cmd+Shift+N",
       },
       {
         id: "open-notes-view",
         label: "Open Notes (View)",
-        action: () => dispatchEvent("milaidy:open-notes-panel", { mode: "view" }),
+        action: () => dispatchEvent("milady:open-notes-panel", { mode: "view" }),
         hint: "Ctrl/Cmd+Shift+V",
       },
       {
@@ -132,7 +132,7 @@ export function CommandPalette() {
       {
         id: "open-command-palette",
         label: "Open Command Palette",
-        action: () => dispatchEvent("milaidy:app-command", { command: "open-command-palette" }),
+        action: () => dispatchEvent("milady:app-command", { command: "open-command-palette" }),
       },
       {
         id: "open-custom-actions",
@@ -143,7 +143,7 @@ export function CommandPalette() {
       {
         id: "open-custom-action-editor",
         label: "Create New Custom Action",
-        action: () => dispatchEvent("milaidy:open-custom-action-editor"),
+        action: () => dispatchEvent("milady:open-custom-action-editor"),
       },
       {
         id: "open-custom-action-editor-with-prompt",

@@ -114,21 +114,21 @@ describe("CommandPalette", () => {
     expect(
       events.some(
         (evt) =>
-          evt.type === "milaidy:open-notes-panel" &&
+          evt.type === "milady:open-notes-panel" &&
           (evt as CustomEvent<{ mode?: string }>).detail?.mode === "edit",
       ),
     ).toBe(true);
     expect(
       events.some(
         (evt) =>
-          evt.type === "milaidy:open-notes-panel" &&
+          evt.type === "milady:open-notes-panel" &&
           (evt as CustomEvent<{ mode?: string }>).detail?.mode === "view",
       ),
     ).toBe(true);
     expect(
       events.some(
         (evt) =>
-          evt.type === "milaidy:app-command" &&
+          evt.type === "milady:app-command" &&
           (evt as CustomEvent<{ command?: string }>).detail?.command ===
             "open-notes-split",
       ),
@@ -136,7 +136,7 @@ describe("CommandPalette", () => {
     expect(
       events.some(
         (evt) =>
-          evt.type === "milaidy:app-command" &&
+          evt.type === "milady:app-command" &&
           (evt as CustomEvent<{ command?: string }>).detail?.command ===
             "open-custom-actions-panel",
       ),

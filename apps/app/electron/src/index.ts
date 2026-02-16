@@ -71,11 +71,9 @@ function dispatchShareToRenderer(payload: ShareTargetPayload): void {
     return;
   }
 
-  try {
-    dispatchShareTargetToWindow(mainWindow, payload);
-  } catch {
+  dispatchShareTargetToWindow(mainWindow, payload).catch(() => {
     pendingSharePayloads.push(payload);
-  }
+  });
 }
 
 function flushPendingSharePayloads(): void {

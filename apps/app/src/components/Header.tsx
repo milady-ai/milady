@@ -41,7 +41,7 @@ export function Header() {
 
   const openNotesPanel = (mode: "edit" | "view" | "split") => {
     dispatchAppEvent(
-      new CustomEvent("milaidy:open-notes-panel", { detail: { mode } }),
+      new CustomEvent("milady:open-notes-panel", { detail: { mode } }),
     );
   };
 

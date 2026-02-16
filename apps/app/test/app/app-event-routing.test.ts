@@ -272,7 +272,7 @@ describe("App event routing for notes and custom actions", () => {
 
     await act(async () => {
       dispatchEvent(
-        new CustomEvent("milaidy:open-notes-panel", {
+        new CustomEvent("milady:open-notes-panel", {
           detail: { mode: "edit", seedText: "note seed from event" },
         }),
       );
@@ -300,7 +300,7 @@ describe("App event routing for notes and custom actions", () => {
 
     await act(async () => {
       dispatchEvent(
-        new CustomEvent("milaidy:app-command", {
+        new CustomEvent("milady:app-command", {
           detail: { command: "open-notes-view" },
         }),
       );
@@ -312,7 +312,7 @@ describe("App event routing for notes and custom actions", () => {
 
     await act(async () => {
       dispatchEvent(
-        new CustomEvent("milaidy:app-command", {
+        new CustomEvent("milady:app-command", {
           detail: { command: "open-custom-actions-panel" },
         }),
       );
@@ -327,7 +327,7 @@ describe("App event routing for notes and custom actions", () => {
 
     await act(async () => {
       dispatchEvent(
-        new CustomEvent("milaidy:app-command", {
+        new CustomEvent("milady:app-command", {
           detail: {
             command: "open-custom-action-editor-with-prompt",
             seedPrompt: "custom prompt for generation",
@@ -345,7 +345,7 @@ describe("App event routing for notes and custom actions", () => {
 
     await act(async () => {
       dispatchEvent(
-        new CustomEvent("milaidy:app-command", {
+        new CustomEvent("milady:app-command", {
           detail: { command: "open-notes-split" },
         }),
       );
@@ -357,7 +357,7 @@ describe("App event routing for notes and custom actions", () => {
 
     await act(async () => {
       dispatchEvent(
-        new CustomEvent("milaidy:app-command", {
+        new CustomEvent("milady:app-command", {
           detail: {
             command: "open-notes-with-seed",
             seedText: "seed from app command",

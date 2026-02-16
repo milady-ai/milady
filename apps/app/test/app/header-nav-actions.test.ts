@@ -105,21 +105,21 @@ describe("Header quick actions", () => {
     expect(
       calls.some(
         (evt) =>
-          evt.type === "milaidy:open-notes-panel" &&
+          evt.type === "milady:open-notes-panel" &&
           (evt as CustomEvent<{ mode?: string }>).detail?.mode === "edit",
       ),
     ).toBe(true);
     expect(
       calls.some(
         (evt) =>
-          evt.type === "milaidy:open-notes-panel" &&
+          evt.type === "milady:open-notes-panel" &&
           (evt as CustomEvent<{ mode?: string }>).detail?.mode === "split",
       ),
     ).toBe(true);
     expect(
       calls.some(
         (evt) =>
-          evt.type === "milaidy:open-notes-panel" &&
+          evt.type === "milady:open-notes-panel" &&
           (evt as CustomEvent<{ mode?: string }>).detail?.mode === "view",
       ),
     ).toBe(true);
