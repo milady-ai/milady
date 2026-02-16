@@ -4,7 +4,7 @@
 
 ## Overview
 
-The eject system lets you clone an upstream plugin's source locally, modify it, and have the runtime load your local copy instead of the npm package. All ejected plugins live outside the repo in `~/.milaidy/plugins/ejected/`.
+The eject system lets you clone an upstream plugin's source locally, modify it, and have the runtime load your local copy instead of the npm package. All ejected plugins live outside the repo in `~/.milady/plugins/ejected/`.
 
 ## Quick Start
 
@@ -19,9 +19,9 @@ Or manually:
 ```bash
 # Clone upstream source
 git clone --branch 1.x https://github.com/elizaos-plugins/plugin-telegram.git \
-  ~/.milaidy/plugins/ejected/plugin-telegram
+  ~/.milady/plugins/ejected/plugin-telegram
 
-cd ~/.milaidy/plugins/ejected/plugin-telegram
+cd ~/.milady/plugins/ejected/plugin-telegram
 
 # Install deps + build
 npm install
@@ -49,10 +49,10 @@ Every ejected plugin needs a `.upstream.json` at its root:
 
 ### 3. Edit source
 
-Make your changes in `~/.milaidy/plugins/ejected/plugin-telegram/src/`. After editing:
+Make your changes in `~/.milady/plugins/ejected/plugin-telegram/src/`. After editing:
 
 ```bash
-cd ~/.milaidy/plugins/ejected/plugin-telegram
+cd ~/.milady/plugins/ejected/plugin-telegram
 npm run build
 ```
 
@@ -63,7 +63,7 @@ The runtime auto-discovers ejected plugins. Just restart milaidy and it will loa
 ## Directory Structure
 
 ```
-~/.milaidy/
+~/.milady/
 └── plugins/
     ├── installed/     # npm-installed plugins (managed by plugin-installer)
     ├── custom/        # hand-written drop-in plugins
@@ -80,9 +80,9 @@ The runtime auto-discovers ejected plugins. Just restart milaidy and it will loa
 
 When the runtime resolves plugins, ejected versions always win:
 
-1. **Ejected** (`~/.milaidy/plugins/ejected/`) — highest priority
+1. **Ejected** (`~/.milady/plugins/ejected/`) — highest priority
 2. **Official npm** (`node_modules/@elizaos/plugin-*`) — with install record repair
-3. **User-installed** (`~/.milaidy/plugins/installed/`)
+3. **User-installed** (`~/.milady/plugins/installed/`)
 4. **Local @milaidy** (`src/plugins/`)
 5. **npm fallback** (`import(name)`)
 
@@ -102,7 +102,7 @@ The agent has four built-in actions for managing ejected plugins:
 ## Syncing with Upstream
 
 ```bash
-cd ~/.milaidy/plugins/ejected/plugin-telegram
+cd ~/.milady/plugins/ejected/plugin-telegram
 
 # Check what's changed upstream
 git fetch origin
@@ -125,7 +125,7 @@ Or via agent: `sync the ejected telegram plugin`
 The ejected plugin is a real git repo. You can push changes upstream:
 
 ```bash
-cd ~/.milaidy/plugins/ejected/plugin-telegram
+cd ~/.milady/plugins/ejected/plugin-telegram
 
 # Add your fork as a remote
 git remote add fork git@github.com:YOUR_USER/plugin-telegram.git
@@ -144,7 +144,7 @@ gh pr create --repo elizaos-plugins/plugin-telegram --base 1.x
 To stop using the ejected version and fall back to npm:
 
 ```bash
-rm -rf ~/.milaidy/plugins/ejected/plugin-telegram
+rm -rf ~/.milady/plugins/ejected/plugin-telegram
 # Restart milaidy — it will load the npm version again
 ```
 
