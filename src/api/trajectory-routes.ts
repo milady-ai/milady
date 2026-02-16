@@ -268,32 +268,51 @@ function getTrajectoryLogger(
     getService?: (serviceType: string) => unknown;
   };
 
+  const isLoggerShape = (
+    service: unknown,
+  ): service is TrajectoryLoggerService => {
+    if (typeof service !== "object" || service === null) {
+      return false;
+    }
+
+    return (
+      typeof (service as Record<string, unknown>).listTrajectories ===
+        "function" &&
+      typeof (service as Record<string, unknown>).isEnabled === "function" &&
+      typeof (service as Record<string, unknown>).setEnabled === "function" &&
+      typeof (service as Record<string, unknown>).getTrajectoryDetail ===
+        "function" &&
+      typeof (service as Record<string, unknown>).getStats === "function" &&
+      typeof (service as Record<string, unknown>).deleteTrajectories ===
+        "function" &&
+      typeof (service as Record<string, unknown>).clearAllTrajectories ===
+        "function" &&
+      typeof (service as Record<string, unknown>).exportTrajectories ===
+        "function"
+    );
+  };
+
   const services: TrajectoryLoggerService[] = [];
   if (typeof runtimeLike.getServicesByType === "function") {
     const byType = runtimeLike.getServicesByType("trajectory_logger");
     if (Array.isArray(byType)) {
-      services.push(...(byType as TrajectoryLoggerService[]));
-    } else if (byType) {
-      services.push(byType as TrajectoryLoggerService);
+      for (const service of byType) {
+        if (isLoggerShape(service)) {
+          services.push(service);
+        }
+      }
+    } else if (isLoggerShape(byType)) {
+      services.push(byType);
     }
   }
   if (services.length === 0 && typeof runtimeLike.getService === "function") {
     const single = runtimeLike.getService("trajectory_logger");
-    if (single) {
+    if (isLoggerShape(single)) {
       services.push(single as TrajectoryLoggerService);
     }
   }
   if (services.length === 0) return null;
-
-  // Find the service that has the listTrajectories method (the full plugin version)
-  for (const svc of services) {
-    if (typeof svc.listTrajectories === "function") {
-      return svc;
-    }
-  }
-
-  // Fallback to first service (may not have all methods)
-  return services[0] ?? null;
+  return services[0];
 }
 
 /**
