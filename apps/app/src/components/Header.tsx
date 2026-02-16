@@ -2,8 +2,7 @@ import { useEffect } from "react";
 import { useApp } from "../AppContext.js";
 
 const dispatchAppEvent = (event: CustomEvent) => {
-  const target = typeof window.dispatchEvent === "function" ? window : document;
-  target.dispatchEvent(event);
+  window.dispatchEvent(event);
 };
 
 export function Header() {
@@ -16,7 +15,7 @@ export function Header() {
 
   useEffect(() => { void loadDropStatus(); }, [loadDropStatus]);
 
-  const name = agentStatus?.agentName ?? "Milaidy";
+  const name = agentStatus?.agentName ?? "Milady";
   const state = agentStatus?.state ?? "not_started";
 
   const stateColor = state === "running" ? "text-ok border-ok" :
@@ -55,6 +54,7 @@ export function Header() {
       <div className="flex items-center gap-3">
         {dropStatus?.dropEnabled && dropStatus?.publicMintOpen && !dropStatus?.mintedOut && !dropStatus?.userHasMinted && !registryStatus?.registered && (
           <button
+            type="button"
             onClick={() => setTab("character")}
             className="inline-flex items-center gap-1.5 px-3 py-1 border border-[var(--accent)] bg-[color-mix(in_srgb,var(--accent)_12%,transparent)] text-xs font-bold text-[var(--accent)] cursor-pointer hover:bg-[color-mix(in_srgb,var(--accent)_20%,transparent)] transition-colors animate-pulse"
           >
@@ -77,6 +77,7 @@ export function Header() {
         )}
         <div className="flex items-center gap-1.5">
           <button
+            type="button"
             onClick={() => openNotesPanel("edit")}
             className="inline-flex items-center h-7 px-2.5 border border-border bg-bg text-xs cursor-pointer hover:border-accent hover:text-accent transition-colors"
             title="Open Notes"
@@ -84,6 +85,7 @@ export function Header() {
             Notes
           </button>
           <button
+            type="button"
             onClick={() => openNotesPanel("split")}
             className="inline-flex items-center h-7 px-2.5 border border-border bg-bg text-xs cursor-pointer hover:border-accent hover:text-accent transition-colors"
             title="Open Notes (Split View)"
@@ -91,6 +93,7 @@ export function Header() {
             Split Notes
           </button>
           <button
+            type="button"
             onClick={() => openNotesPanel("view")}
             className="inline-flex items-center h-7 px-2.5 border border-border bg-bg text-xs cursor-pointer hover:border-accent hover:text-accent transition-colors"
             title="Open Notes (Preview)"
@@ -98,6 +101,7 @@ export function Header() {
             Preview Notes
           </button>
           <button
+            type="button"
             onClick={() => setTab("plugins")}
             className="inline-flex items-center h-7 px-2.5 border border-border bg-bg text-xs cursor-pointer hover:border-accent hover:text-accent transition-colors"
             title="Open Plugins"
@@ -105,6 +109,7 @@ export function Header() {
             Plugins
           </button>
           <button
+            type="button"
             onClick={() => setTab("skills")}
             className="inline-flex items-center h-7 px-2.5 border border-border bg-bg text-xs cursor-pointer hover:border-accent hover:text-accent transition-colors"
             title="Open Skills"
@@ -112,6 +117,7 @@ export function Header() {
             Skills
           </button>
           <button
+            type="button"
             onClick={() => setTab("logs")}
             className="inline-flex items-center h-7 px-2.5 border border-border bg-bg text-xs cursor-pointer hover:border-accent hover:text-accent transition-colors"
             title="Open Logs"
@@ -119,6 +125,7 @@ export function Header() {
             Logs
           </button>
           <button
+            type="button"
             onClick={openCustomActionsPanel}
             className="inline-flex items-center h-7 px-2.5 border border-border bg-bg text-xs cursor-pointer hover:border-accent hover:text-accent transition-colors"
             title="Open Custom Actions"
@@ -130,6 +137,7 @@ export function Header() {
             <span className="inline-flex items-center justify-center w-7 h-7 text-sm leading-none opacity-60">⏳</span>
           ) : (
             <button
+              type="button"
               onClick={handlePauseResume}
               title={state === "paused" ? "Resume autonomy" : "Pause autonomy"}
               className={`${iconBtn} disabled:opacity-40 disabled:cursor-not-allowed`}
@@ -139,6 +147,7 @@ export function Header() {
             </button>
           )}
           <button
+            type="button"
             onClick={handleRestart}
             disabled={lifecycleBusy || state === "restarting"}
             title="Restart agent"
@@ -149,7 +158,11 @@ export function Header() {
         </div>
         {(evmShort || solShort) && (
           <div className="wallet-wrapper relative inline-flex">
-            <button onClick={() => setTab("wallets")} className="inline-flex items-center justify-center w-7 h-7 border border-border bg-bg cursor-pointer hover:border-accent hover:text-accent transition-colors">
+            <button
+              type="button"
+              onClick={() => setTab("wallets")}
+              className="inline-flex items-center justify-center w-7 h-7 border border-border bg-bg cursor-pointer hover:border-accent hover:text-accent transition-colors"
+            >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
             </button>
             <div className="wallet-tooltip hidden absolute top-full right-0 mt-2 p-3 border border-border bg-bg z-50 min-w-[280px] shadow-lg">
@@ -157,16 +170,26 @@ export function Header() {
                 <div className="flex items-center gap-2 text-xs py-1">
                   <span className="font-bold font-mono min-w-[30px]">EVM</span>
                   <code className="font-mono flex-1 truncate">{evmShort}</code>
-                  <button onClick={(e) => { e.stopPropagation(); copyToClipboard(walletAddresses!.evmAddress!); }}
-                    className="px-1.5 py-0.5 border border-border bg-bg text-[10px] font-mono cursor-pointer hover:border-accent hover:text-accent">copy</button>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); copyToClipboard(walletAddresses!.evmAddress!); }}
+                    className="px-1.5 py-0.5 border border-border bg-bg text-[10px] font-mono cursor-pointer hover:border-accent hover:text-accent"
+                  >
+                    copy
+                  </button>
                 </div>
               )}
               {solShort && (
                 <div className="flex items-center gap-2 text-xs py-1 border-t border-border">
                   <span className="font-bold font-mono min-w-[30px]">SOL</span>
                   <code className="font-mono flex-1 truncate">{solShort}</code>
-                  <button onClick={(e) => { e.stopPropagation(); copyToClipboard(walletAddresses!.solanaAddress!); }}
-                    className="px-1.5 py-0.5 border border-border bg-bg text-[10px] font-mono cursor-pointer hover:border-accent hover:text-accent">copy</button>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); copyToClipboard(walletAddresses!.solanaAddress!); }}
+                    className="px-1.5 py-0.5 border border-border bg-bg text-[10px] font-mono cursor-pointer hover:border-accent hover:text-accent"
+                  >
+                    copy
+                  </button>
                 </div>
               )}
             </div>
@@ -174,7 +197,11 @@ export function Header() {
         )}
       </div>
     </header>
-    <button onClick={openCommandPalette} className="fixed bottom-5 right-5 z-50 inline-flex items-center h-7 px-3 border border-border bg-bg text-xs font-mono cursor-pointer hover:border-accent hover:text-accent transition-colors shadow-lg">Cmd+K</button>
+    <button
+      type="button"
+      onClick={openCommandPalette}
+      className="fixed bottom-5 right-5 z-50 inline-flex items-center h-7 px-3 border border-border bg-bg text-xs font-mono cursor-pointer hover:border-accent hover:text-accent transition-colors shadow-lg"
+    >Cmd+K</button>
   </>
   );
 }

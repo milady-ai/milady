@@ -5,6 +5,7 @@ interface CustomActionsPanelProps {
   open: boolean;
   onClose: () => void;
   onOpenEditor: (action?: CustomActionDef | null) => void;
+  mobile?: boolean;
 }
 
 const HANDLER_TYPE_COLORS: Record<string, string> = {
@@ -17,6 +18,7 @@ export function CustomActionsPanel({
   open,
   onClose,
   onOpenEditor,
+  mobile = false,
 }: CustomActionsPanelProps) {
   const [actions, setActions] = useState<CustomActionDef[]>([]);
   const [loading, setLoading] = useState(false);
@@ -74,9 +76,7 @@ export function CustomActionsPanel({
 
   return (
     <div
-      className={`border-l border-border bg-card flex flex-col transition-all duration-200 ${
-        open ? "w-72" : "w-0 overflow-hidden"
-      }`}
+      className={`${mobile ? "fixed inset-0 z-40" : "border-l border-border"} bg-card flex flex-col transition-all duration-200 ${open ? (mobile ? "w-full" : "w-72") : "w-0 overflow-hidden"}`}
     >
       {open && (
         <>

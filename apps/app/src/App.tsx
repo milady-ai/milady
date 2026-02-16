@@ -58,6 +58,7 @@ function ViewRouter() {
 
 export function App() {
   type DashboardNotesMode = "edit" | "view" | "split";
+  type MobilePanel = "none" | "conversations" | "autonomous" | "notes" | "actions";
 
   const {
     onboardingLoading,
@@ -80,22 +81,98 @@ export function App() {
   } = useApp();
   const contextMenu = useContextMenu();
 
+  const [isMobileViewport, setIsMobileViewport] = useState<boolean>(
+    () => typeof window === "undefined" || window.innerWidth < 1024,
+  );
+  const [mobilePanel, setMobilePanel] = useState<MobilePanel>("none");
   const [customActionsPanelOpen, setCustomActionsPanelOpen] = useState(false);
   const [customActionsEditorOpen, setCustomActionsEditorOpen] = useState(false);
   const [editingAction, setEditingAction] = useState<import("./api-client").CustomActionDef | null>(null);
   const [customActionSeedPrompt, setCustomActionSeedPrompt] = useState("");
   const [notesPanelOpen, setNotesPanelOpen] = useState(false);
   const [notesPanelMode, setNotesPanelMode] = useState<DashboardNotesMode>("edit");
-	const [notesPanelSeedText, setNotesPanelSeedText] = useState("");
+  const [notesPanelSeedText, setNotesPanelSeedText] = useState("");
 
-	const openNotesPanel = useCallback((mode: DashboardNotesMode, seedText = "") => {
-	  setTab("chat");
-	  setCustomActionsPanelOpen(false);
-	  setCustomActionsEditorOpen(false);
-	  setNotesPanelMode(mode);
-	  setNotesPanelSeedText(seedText.trim());
-	  setNotesPanelOpen(true);
-	}, [setTab]);
+  const hideChatMainForMobilePanel = isMobileViewport && mobilePanel !== "none";
+  const setMobilePanelVisible = useCallback(
+    (panel: MobilePanel) => {
+      if (!isMobileViewport) return;
+      setMobilePanel((current) => (current === panel ? "none" : panel));
+    },
+    [isMobileViewport],
+  );
+
+  const clearMobilePanel = useCallback(() => {
+    if (!isMobileViewport) return;
+    setMobilePanel("none");
+  }, [isMobileViewport]);
+
+  const openNotesPanel = useCallback((mode: DashboardNotesMode, seedText = "") => {
+    setTab("chat");
+    setCustomActionsPanelOpen(false);
+    setCustomActionsEditorOpen(false);
+    setNotesPanelMode(mode);
+    setNotesPanelSeedText(seedText.trim());
+    setNotesPanelOpen(true);
+    if (isMobileViewport) {
+      setMobilePanel("notes");
+    }
+  }, [isMobileViewport, setTab]);
+
+  const openAutonomousPanel = useCallback(() => {
+    if (isMobileViewport) {
+      setMobilePanelVisible("autonomous");
+    }
+    setCustomActionsPanelOpen(false);
+    setCustomActionsEditorOpen(false);
+    setNotesPanelOpen(false);
+  }, [isMobileViewport, setMobilePanelVisible]);
+
+  const openConversationsPanel = useCallback(() => {
+    if (isMobileViewport) {
+      setMobilePanelVisible("conversations");
+    }
+    setCustomActionsPanelOpen(false);
+    setCustomActionsEditorOpen(false);
+    setNotesPanelOpen(false);
+  }, [isMobileViewport, setMobilePanelVisible]);
+
+  const openActionsPanel = useCallback(() => {
+    setNotesPanelOpen(false);
+    setCustomActionsEditorOpen(false);
+    if (isMobileViewport) {
+      setMobilePanel("actions");
+    } else {
+      setCustomActionsPanelOpen(true);
+    }
+  }, [isMobileViewport]);
+
+  const closeNotesPanel = useCallback(() => {
+    setNotesPanelOpen(false);
+    setNotesPanelSeedText("");
+    if (isMobileViewport) {
+      clearMobilePanel();
+    }
+  }, [isMobileViewport, clearMobilePanel]);
+
+  const closeActionsPanel = useCallback(() => {
+    setCustomActionsPanelOpen(false);
+    if (isMobileViewport) {
+      clearMobilePanel();
+    }
+  }, [isMobileViewport, clearMobilePanel]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const nextIsMobile = window.innerWidth < 1024;
+      setIsMobileViewport(nextIsMobile);
+      if (!nextIsMobile) {
+        setMobilePanel("none");
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const isValidTab = useCallback((value: string | undefined): value is Tab => {
     if (typeof value !== "string") return false;
@@ -124,19 +201,32 @@ export function App() {
   // Keep hook order stable across onboarding/auth state transitions.
   // Otherwise React can throw when onboarding completes and the main shell mounts.
   useEffect(() => {
-    const handler = () => setCustomActionsPanelOpen((v) => !v);
+    const handler = () => {
+      if (isMobileViewport) {
+        setMobilePanel((current) => {
+          const shouldOpen = current !== "actions";
+          setNotesPanelOpen(false);
+          setCustomActionsPanelOpen(shouldOpen);
+          setCustomActionsEditorOpen(false);
+          return shouldOpen ? "actions" : "none";
+        });
+        return;
+      }
+
+      setCustomActionsPanelOpen((v) => !v);
+    };
     window.addEventListener("toggle-custom-actions-panel", handler);
 
-	  const handleOpenNotes = (event: Event) => {
-	    const detail = (event as CustomEvent<{ mode?: string; seedText?: string }>)?.detail;
-	    const mode =
-	      detail?.mode === "view"
-	        ? "view"
-	        : detail?.mode === "split"
-	          ? "split"
-	          : "edit";
-	    openNotesPanel(mode, detail?.seedText);
-	  };
+    const handleOpenNotes = (event: Event) => {
+      const detail = (event as CustomEvent<{ mode?: string; seedText?: string }>)?.detail;
+      const mode =
+        detail?.mode === "view"
+          ? "view"
+          : detail?.mode === "split"
+            ? "split"
+            : "edit";
+      openNotesPanel(mode, detail?.seedText);
+    };
 
     const handleOpenActionEditor = (event: Event) => {
       const detail = (event as CustomEvent<{ seedPrompt?: string }>)?.detail;
@@ -145,6 +235,7 @@ export function App() {
       setCustomActionSeedPrompt(detail?.seedPrompt?.trim() ?? "");
       setEditingAction(null);
       setCustomActionsEditorOpen(true);
+      clearMobilePanel();
     };
 
     const handleAgentControl = (event: Event) => {
@@ -165,17 +256,18 @@ export function App() {
       if (!isValidTab(detail?.tab)) return;
       setNotesPanelOpen(false);
       setCustomActionsPanelOpen(false);
+      clearMobilePanel();
       setTab(detail.tab);
     };
 
-	    const handleAppCommand = (event: Event) => {
-	      const detail = (event as CustomEvent<{
-	        command?: string;
-	        seedText?: string;
-	        seedPrompt?: string;
-	      }>)?.detail;
-	      const command = detail?.command;
-	      if (!command) return;
+    const handleAppCommand = (event: Event) => {
+      const detail = (event as CustomEvent<{
+        command?: string;
+        seedText?: string;
+        seedPrompt?: string;
+      }>)?.detail;
+      const command = detail?.command;
+      if (!command) return;
 
       if (command === "open-command-palette") {
         openCommandPalette();
@@ -189,25 +281,26 @@ export function App() {
         openNotesPanel("view");
       } else if (command === "open-notes-with-seed") {
         openNotesPanel("edit", detail?.seedText);
-	      } else if (command === "open-custom-actions-panel") {
-	        setTab("chat");
-	        setNotesPanelOpen(false);
-	        setCustomActionsPanelOpen(true);
-	      } else if (command === "open-custom-action-editor") {
-	        setTab("chat");
-	        setNotesPanelOpen(false);
-	        setCustomActionsPanelOpen(false);
-	        setCustomActionSeedPrompt("");
-	        setEditingAction(null);
-	        setCustomActionsEditorOpen(true);
-	      } else if (command === "open-custom-action-editor-with-prompt") {
-	        setTab("chat");
-	        setNotesPanelOpen(false);
-	        setCustomActionsPanelOpen(false);
-	        setCustomActionSeedPrompt(detail?.seedPrompt?.trim() ?? "");
-	        setEditingAction(null);
-	        setCustomActionsEditorOpen(true);
-	      } else if (command === "agent-start") {
+      } else if (command === "open-custom-actions-panel") {
+        setTab("chat");
+        openActionsPanel();
+      } else if (command === "open-custom-action-editor") {
+        setTab("chat");
+        setNotesPanelOpen(false);
+        setCustomActionsPanelOpen(false);
+        setCustomActionSeedPrompt("");
+        setEditingAction(null);
+        setCustomActionsEditorOpen(true);
+        clearMobilePanel();
+      } else if (command === "open-custom-action-editor-with-prompt") {
+        setTab("chat");
+        setNotesPanelOpen(false);
+        setCustomActionsPanelOpen(false);
+        setCustomActionSeedPrompt(detail?.seedPrompt?.trim() ?? "");
+        setEditingAction(null);
+        setCustomActionsEditorOpen(true);
+        clearMobilePanel();
+      } else if (command === "agent-start") {
         void handleStart();
       } else if (command === "agent-stop") {
         void handleStop();
@@ -258,6 +351,10 @@ export function App() {
     loadSkills,
     loadLogs,
     loadWorkbench,
+    clearMobilePanel,
+    setNotesPanelOpen,
+    openActionsPanel,
+    isMobileViewport,
   ]);
 
   const handleEditorSave = useCallback(() => {
@@ -273,7 +370,7 @@ export function App() {
     setCustomActionSeedPrompt(seedPrompt);
     setEditingAction(null);
     setCustomActionsEditorOpen(true);
-  }, []);
+  }, [setTab]);
 
   const handleCreateSkillFromNotes = useCallback(async (noteContent: string, noteTitle = "") => {
     const cleaned = noteContent.trim();
@@ -318,25 +415,77 @@ export function App() {
     tab === "triggers" ||
     tab === "fine-tuning" ||
     tab === "trajectories" ||
-    tab === "runtime" ||
-    tab === "database" ||
-    tab === "logs";
+      tab === "runtime" ||
+      tab === "database" ||
+      tab === "logs";
+
+  const mobileActionButtonClass = "inline-flex items-center px-2 py-1 text-[11px] border border-border bg-card text-txt rounded-sm transition-colors hover:border-accent hover:text-accent";
+
+  const mobileTopNavLeft = isMobileViewport ? (
+    <div className="flex items-center gap-1.5 min-w-0 overflow-x-auto">
+      <button
+        type="button"
+        onClick={openConversationsPanel}
+        className={mobileActionButtonClass}
+        aria-label="Open conversations panel"
+      >
+        Conversations
+      </button>
+      <button
+        type="button"
+        onClick={openAutonomousPanel}
+        className={mobileActionButtonClass}
+        aria-label="Open autonomous status panel"
+      >
+        Autonomous
+      </button>
+      <button
+        type="button"
+        onClick={() => openNotesPanel("edit")}
+        className={mobileActionButtonClass}
+        aria-label="Open notes panel"
+      >
+        Notes
+      </button>
+      <button
+        type="button"
+        onClick={openActionsPanel}
+        className={mobileActionButtonClass}
+        aria-label="Open custom actions panel"
+      >
+        Actions
+      </button>
+    </div>
+  ) : null;
 
   return (
     <>
       {isChat ? (
         <div className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg">
           <Header />
-          <Nav />
+          <Nav mobileLeft={mobileTopNavLeft} />
           <div className="flex flex-1 min-h-0 relative">
-            <ConversationsSidebar />
-            <main className="flex flex-col flex-1 min-w-0 overflow-visible pt-3 px-5">
+            {(!isMobileViewport || mobilePanel === "conversations") && (
+              <ConversationsSidebar
+                mobile={isMobileViewport && mobilePanel === "conversations"}
+                onClose={clearMobilePanel}
+              />
+            )}
+            <main className={`flex flex-col flex-1 min-w-0 overflow-visible pt-3 px-5 ${
+              hideChatMainForMobilePanel ? "hidden" : "flex"
+            }`}>
               <ChatView />
             </main>
-            <AutonomousPanel />
+            {(!isMobileViewport || mobilePanel === "autonomous") && (
+              <AutonomousPanel
+                mobile={isMobileViewport && mobilePanel === "autonomous"}
+                onClose={clearMobilePanel}
+              />
+            )}
             <CustomActionsPanel
-              open={customActionsPanelOpen}
-              onClose={() => setCustomActionsPanelOpen(false)}
+              open={isMobileViewport ? mobilePanel === "actions" : customActionsPanelOpen}
+              mobile={isMobileViewport}
+              onClose={closeActionsPanel}
               onOpenEditor={(action) => {
                 setEditingAction(action ?? null);
                 setCustomActionsEditorOpen(true);
@@ -346,10 +495,8 @@ export function App() {
               open={notesPanelOpen}
               mode={notesPanelMode}
               seedText={notesPanelSeedText}
-              onClose={() => {
-                setNotesPanelOpen(false);
-                setNotesPanelSeedText("");
-              }}
+              mobile={isMobileViewport}
+              onClose={closeNotesPanel}
               onCreateActionFromNote={handleOpenCustomActionFromNotes}
               onCreateSkillFromNote={handleCreateSkillFromNotes}
             />

@@ -1,10 +1,26 @@
 import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import TestRenderer, { act } from "react-test-renderer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import {
+  renderMarkdown,
+  sanitizeMarkdownHref,
+} from "../../src/components/WorkspaceNotesMarkdown";
+import { WorkspaceNotesPanel } from "../../src/components/WorkspaceNotesPanel";
+
+type LocalStorageFacade = {
+  clear: () => void;
+  getItem: (key: string) => string | null;
+  setItem: (key: string, value: string) => void;
+  removeItem: (key: string) => void;
+};
+
 function nodeText(node: TestRenderer.ReactTestInstance): string {
   return node.children
-    .map((child) => (typeof child === "string" ? child : nodeText(child as TestRenderer.ReactTestInstance)))
+    .map((child) =>
+      typeof child === "string" ? child : nodeText(child as TestRenderer.ReactTestInstance),
+    )
     .join("");
 }
 
@@ -28,14 +44,40 @@ function findTextAreaByPlaceholder(
   return matches[0];
 }
 
+function ensureStorage(): void {
+  if (typeof localStorage !== "undefined") {
+    return;
+  }
+
+  const values = new Map<string, string>();
+
+  const storage = {
+    clear: () => {
+      values.clear();
+    },
+    getItem: (key: string): string | null => values.get(key) ?? null,
+    setItem: (key: string, value: string): void => {
+      values.set(key, value);
+    },
+    removeItem: (key: string): void => {
+      values.delete(key);
+    },
+  } as const;
+
+  Object.defineProperty(globalThis, "localStorage", {
+    configurable: true,
+    value: storage,
+  });
+}
+
 function mockStorage(): void {
+  ensureStorage();
   localStorage.setItem("milaidy:workspace-notes", "[]");
 }
 
-import { WorkspaceNotesPanel } from "../../src/components/WorkspaceNotesPanel";
-
 describe("WorkspaceNotesPanel", () => {
   beforeEach(() => {
+    ensureStorage();
     localStorage.clear();
     vi.restoreAllMocks();
   });
@@ -135,7 +177,11 @@ describe("WorkspaceNotesPanel", () => {
 
     await act(async () => {
       editor.props.onChange({ target: { value: "capture ideas" } });
+    });
+    await act(async () => {
       h1Button.props.onClick();
+    });
+    await act(async () => {
       skillTemplateButton.props.onClick();
     });
 
@@ -162,5 +208,34 @@ describe("WorkspaceNotesPanel", () => {
       editButton.props.onClick();
     });
     expect(root.findAll((node) => node.type === "textarea")).toHaveLength(1);
+  });
+
+  it("rejects unsafe markdown links and allows safe protocols", async () => {
+    const safeMarkup = renderToStaticMarkup(
+      React.createElement(
+        React.Fragment,
+        null,
+        renderMarkdown("[Safe](https://example.com)"),
+      ),
+    );
+    expect(safeMarkup).toContain('<a href="https://example.com"');
+    expect(safeMarkup).toContain(">Safe</a>");
+
+    const unsafeMarkup = renderToStaticMarkup(
+      React.createElement(
+        React.Fragment,
+        null,
+        renderMarkdown("[Bad](javascript:alert(1))"),
+      ),
+    );
+    expect(unsafeMarkup).toContain("javascript:alert(1)");
+    expect(unsafeMarkup).not.toContain("<a href=\"javascript");
+
+    expect(sanitizeMarkdownHref("https://example.com")).toBe("https://example.com");
+    expect(sanitizeMarkdownHref("mailto:test@example.com")).toBe(
+      "mailto:test@example.com",
+    );
+    expect(sanitizeMarkdownHref("javascript:alert(1)")).toBeNull();
+    expect(sanitizeMarkdownHref("data:text/plain,hello")).toBeNull();
   });
 });

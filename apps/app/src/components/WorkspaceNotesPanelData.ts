@@ -16,6 +16,7 @@ export interface WorkspaceNotesPanelProps {
   open: boolean;
   mode: NotesPanelMode;
   seedText?: string;
+  mobile?: boolean;
   onClose: () => void;
   onCreateActionFromNote: (noteContent: string, noteTitle?: string) => void;
   onCreateSkillFromNote: (noteContent: string, noteTitle?: string) => Promise<void>;

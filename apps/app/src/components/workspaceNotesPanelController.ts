@@ -14,7 +14,6 @@ import {
   createBlankNote,
   fromStoredNotes,
   getWordCount,
-  NOTE_TOOLBAR,
   normalizeText,
   parseTimestamp,
   sanitizeNoteTitle,
@@ -24,13 +23,17 @@ import {
   toStoredNotes,
   timestampId,
 } from "./WorkspaceNotesPanelData";
+import {
+  useWorkspaceNotesPanelEditorController,
+  type WorkspaceNotesPanelEditorController,
+} from "./workspaceNotesPanelEditorController";
 
 type Params = Pick<
   WorkspaceNotesPanelProps,
   "open" | "mode" | "seedText" | "onCreateActionFromNote" | "onCreateSkillFromNote"
 >;
 
-interface UseWorkspaceNotesPanelControllerResult {
+export interface UseWorkspaceNotesPanelControllerResult {
   panelMode: NotesPanelMode;
   notes: WorkspaceNote[];
   search: string;
@@ -71,7 +74,7 @@ interface UseWorkspaceNotesPanelControllerResult {
   handleCreateActionFromNotes: () => void;
   handleCreateSkillFromNotes: () => Promise<void>;
   insertTemplate: (template: string) => void;
-  toolbarItems: typeof NOTE_TOOLBAR;
+  toolbarItems: WorkspaceNotesPanelEditorController["toolbarItems"];
   parseTimestamp: (value: number) => string;
 }
 
@@ -173,7 +176,7 @@ export function useWorkspaceNotesPanelController({
       if (appliedSeedRef.current === trimmed) return;
       appliedSeedRef.current = trimmed;
 
-        const nextNotes = [createBlankNote(trimmed, undefined), ...notes];
+      const nextNotes = [createBlankNote(trimmed, undefined), ...notes];
       persistNotes(nextNotes);
       const created = nextNotes[0];
       setActiveNoteId(created.id);
@@ -220,155 +223,13 @@ export function useWorkspaceNotesPanelController({
     setSearch(value);
   }, []);
 
-  const handleSelectionInsert = useCallback(
-    (prefix: string, suffix = prefix) => {
-      const el = editorRef.current;
-      if (!el) return;
-
-      const start = el.selectionStart;
-      const end = el.selectionEnd;
-      const selected = content.slice(start, end);
-      const insertBefore = selected || "";
-      const replacement = `${prefix}${insertBefore}${suffix}`;
-
-      const next = `${content.slice(0, start)}${replacement}${content.slice(end)}`;
-      handleContentChange(next);
-
-      requestAnimationFrame(() => {
-        el.focus();
-        if (selected) {
-          el.setSelectionRange(
-            start + prefix.length,
-            start + prefix.length + selected.length,
-          );
-        } else {
-          el.setSelectionRange(start + prefix.length, start + prefix.length);
-        }
-      });
-    },
-    [content, handleContentChange],
-  );
-
-  const insertAtCursor = useCallback(
-    (text: string) => {
-      const el = editorRef.current;
-      if (!el) {
-        setContent((current) =>
-          `${current}${current.endsWith("\n") ? "" : "\n\n"}${text}`,
-        );
-        return;
-      }
-
-      const start = el.selectionStart;
-      const end = el.selectionEnd;
-      const next = `${content.slice(0, start)}${text}${content.slice(end)}`;
-      setContent(normalizeText(next));
-      setTransientStatus("Template inserted");
-
-      requestAnimationFrame(() => {
-        el.focus();
-        const cursor = start + text.length;
-        el.setSelectionRange(cursor, cursor);
-      });
-    },
-    [content, setTransientStatus],
-  );
-
-  const prependLine = useCallback(
-    (token: string) => {
-      const el = editorRef.current;
-      if (!el) return;
-      const start = content.lastIndexOf("\n", el.selectionStart - 1) + 1;
-      const end = content.indexOf("\n", el.selectionStart);
-      const lineEnd = end === -1 ? content.length : end;
-      const line = content.slice(start, lineEnd);
-      const already = line.startsWith(token);
-      const nextLine = already ? line.slice(token.length) : `${token}${line}`;
-      const next = `${content.slice(0, start)}${nextLine}${content.slice(lineEnd)}`;
-      handleContentChange(next);
-
-      requestAnimationFrame(() => {
-        el.focus();
-        const cursor = start + nextLine.length;
-        el.setSelectionRange(cursor, cursor);
-      });
-    },
-    [content, handleContentChange],
-  );
-
-  const insertCodeBlock = useCallback(() => {
-    handleSelectionInsert("```\n", "\n```");
-    requestAnimationFrame(() => {
-      const el = editorRef.current;
-      if (!el) return;
-      const start = el.selectionStart;
-      el.setSelectionRange(start - 4, start - 4);
-    });
-  }, [handleSelectionInsert]);
-
-  const createHeader = useCallback(
-    (level: number) => {
-      const headingLevel = Math.max(1, Math.min(6, level));
-      handleSelectionInsert(`${"#".repeat(headingLevel)} `, "");
-    },
-    [handleSelectionInsert],
-  );
-
-  const applyToolbarAction = useCallback(
-    (action: string) => {
-      if (!activeNote) return;
-
-      if (action === "header-1") {
-        createHeader(1);
-      } else if (action === "header-2") {
-        createHeader(2);
-      } else if (action === "header-3") {
-        createHeader(3);
-      } else if (action === "bold") {
-        handleSelectionInsert("**", "**");
-      } else if (action === "italic") {
-        handleSelectionInsert("_", "_");
-      } else if (action === "code") {
-        handleSelectionInsert("`", "`");
-      } else if (action === "quote") {
-        prependLine("> ");
-      } else if (action === "bullet") {
-        prependLine("- ");
-      } else if (action === "number") {
-        prependLine("1. ");
-      } else if (action === "task") {
-        prependLine("- [ ] ");
-      } else if (action === "hr") {
-        insertAtCursor("\n\n---\n\n");
-      } else if (action === "codeblock") {
-        insertCodeBlock();
-      }
-    },
-    [
-      activeNote,
-      createHeader,
-      handleSelectionInsert,
-      prependLine,
-      insertAtCursor,
-      insertCodeBlock,
-    ],
-  );
-
-  const insertTemplate = useCallback(
-    (template: string) => {
-      const normalizedTemplate = normalizeText(template).trim();
-      if (!normalizedTemplate) return;
-
-      insertAtCursor(`\n${normalizedTemplate}\n`);
-    },
-    [insertAtCursor],
-  );
-
-  const createLink = useCallback(() => {
-    const url = window.prompt("Paste link URL", "https://");
-    if (!url) return;
-    handleSelectionInsert("[", `](${url})`);
-  }, [handleSelectionInsert]);
+  const editorController = useWorkspaceNotesPanelEditorController({
+    content,
+    activeNote,
+    editorRef,
+    handleContentChange,
+    setTransientStatus,
+  });
 
   const openImportMarkdown = useCallback(() => {
     if (fileInputRef.current) fileInputRef.current.click();
@@ -580,9 +441,9 @@ export function useWorkspaceNotesPanelController({
     saveActiveNote,
     createNewNote,
     deleteActiveNote,
-    applyToolbarAction,
-    createLink,
-    insertAtCursor,
+    applyToolbarAction: editorController.applyToolbarAction,
+    createLink: editorController.createLink,
+    insertAtCursor: editorController.insertAtCursor,
     openImportMarkdown,
     openImportNotes,
     handleImportMarkdownFile,
@@ -591,8 +452,8 @@ export function useWorkspaceNotesPanelController({
     exportWorkspaceNotes,
     handleCreateActionFromNotes,
     handleCreateSkillFromNotes,
-    insertTemplate,
-    toolbarItems: NOTE_TOOLBAR,
+    insertTemplate: editorController.insertTemplate,
+    toolbarItems: editorController.toolbarItems,
     parseTimestamp,
   };
 }

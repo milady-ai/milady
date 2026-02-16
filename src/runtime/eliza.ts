@@ -360,7 +360,8 @@ const PROVIDER_PLUGIN_MAP: Readonly<Record<string, string>> = {
 /**
  * Optional feature plugins keyed by feature name.
  *
- * Currently empty — reserved for future feature→plugin mappings.
+ * Optional feature/plugins can be added by key (for config.features/entries entries)
+ * or by plugin package names from user config.
  * The lookup code in {@link collectPluginNames} is intentionally kept
  * so new entries work without additional wiring.
  */
@@ -370,6 +371,7 @@ const OPTIONAL_PLUGIN_MAP: Readonly<Record<string, string>> = {
   cron: "@elizaos/plugin-cron",
   computeruse: "@elizaos/plugin-computeruse",
   x402: "@elizaos/plugin-x402",
+  "retake-tv": "@milady/plugin-retake-tv",
 };
 
 function looksLikePlugin(value: unknown): value is Plugin {
@@ -462,6 +464,24 @@ export function collectPluginNames(config: MiladyConfig): Set<string> {
     return pluginEntries?.[pluginId]?.enabled === false;
   };
 
+  const normalizeConfiguredPluginName = (value: string): string => {
+    const trimmed = value.trim();
+    if (!trimmed) return trimmed;
+
+    if (trimmed.startsWith("@")) {
+      return trimmed;
+    }
+
+    const shortName = trimmed.startsWith("plugin-")
+      ? trimmed.slice("plugin-".length)
+      : trimmed;
+    return (
+      CHANNEL_PLUGIN_MAP[shortName] ??
+      OPTIONAL_PLUGIN_MAP[shortName] ??
+      `@elizaos/plugin-${shortName}`
+    );
+  };
+
   const providerPluginIdSet = new Set(
     Object.values(PROVIDER_PLUGIN_MAP).map((pluginPackageName) => {
       const marker = "/plugin-";
@@ -486,8 +506,7 @@ export function collectPluginNames(config: MiladyConfig): Set<string> {
   // not an exclusive whitelist that blocks everything else.
   if (allowList && allowList.length > 0) {
     for (const item of allowList) {
-      const pluginName =
-        CHANNEL_PLUGIN_MAP[item] ?? OPTIONAL_PLUGIN_MAP[item] ?? item;
+      const pluginName = normalizeConfiguredPluginName(item);
       pluginsToLoad.add(pluginName);
     }
   }
@@ -558,10 +577,7 @@ export function collectPluginNames(config: MiladyConfig): Set<string> {
       ) {
         // Connector keys (telegram, discord, etc.) must use CHANNEL_PLUGIN_MAP
         // so the correct variant loads (e.g. enhanced telegram, not base).
-        const pluginName =
-          CHANNEL_PLUGIN_MAP[key] ??
-          OPTIONAL_PLUGIN_MAP[key] ??
-          `@elizaos/plugin-${key}`;
+        const pluginName = normalizeConfiguredPluginName(key);
         pluginsToLoad.add(pluginName);
       }
     }
@@ -927,16 +943,26 @@ async function resolvePlugins(
         // Local Milady plugin — resolve from the compiled dist directory.
         // These are built by tsdown into dist/plugins/<name>/ and are not
         // published to npm.  import.meta.url points to dist/runtime/eliza.js
-        // (unbundled) or dist/eliza.js (bundled), so we resolve relative to
-        // the dist root via the parent of the current file's directory.
+        // (unbundled) or src/runtime/eliza.ts (dev), so try multiple
+        // repository layouts for maximum compatibility.
         const shortName = pluginName.replace("@milady/plugin-", "");
         const thisDir = path.dirname(fileURLToPath(import.meta.url));
-        // Walk up until we find the dist directory that contains plugins/
-        const distRoot = thisDir.endsWith("runtime")
-          ? path.resolve(thisDir, "..")
-          : thisDir;
-        const distDir = path.resolve(distRoot, "plugins", shortName);
-        mod = await importFromPath(distDir, pluginName);
+
+        const candidateDirs = [
+          path.resolve(thisDir, "..", "plugins", shortName),
+          path.resolve(thisDir, "..", "..", "src", "plugins", shortName),
+          path.resolve(thisDir, "..", "..", "dist", "plugins", shortName),
+          path.resolve(thisDir, "..", "..", "plugins", shortName),
+          path.resolve(process.cwd(), "src", "plugins", shortName),
+          path.resolve(process.cwd(), "dist", "plugins", shortName),
+          path.resolve(process.cwd(), "plugins", shortName),
+        ];
+
+        const pluginDir = candidateDirs.find((candidate) =>
+          existsSync(candidate),
+        ) ?? candidateDirs[0];
+
+        mod = await importFromPath(pluginDir, pluginName);
       } else {
         // Built-in/npm plugin — import by package name from node_modules.
         mod = (await import(pluginName)) as PluginModuleShape;
@@ -1417,7 +1443,7 @@ export function isRecoverablePgliteInitError(err: unknown): boolean {
     "create schema if not exists migrations",
   );
 
-  return (hasAbort && hasPglite) || (hasAbort && hasMigrationsSchema);
+  return (hasAbort && hasPglite) || hasMigrationsSchema;
 }
 
 function resolveActivePgliteDataDir(config: MiladyConfig): string | null {
@@ -2542,6 +2568,12 @@ export async function startEliza(
       ...(bundledSkillsDir ? { BUNDLED_SKILLS_DIRS: bundledSkillsDir } : {}),
       ...(workspaceSkillsDir
         ? { WORKSPACE_SKILLS_DIR: workspaceSkillsDir }
+        : {}),
+      ...(config.env?.RETAKE_ACCESS_TOKEN
+        ? { RETAKE_ACCESS_TOKEN: config.env.RETAKE_ACCESS_TOKEN }
+        : {}),
+      ...(process.env.RETAKE_ACCESS_TOKEN
+        ? { RETAKE_ACCESS_TOKEN: process.env.RETAKE_ACCESS_TOKEN }
         : {}),
       // Also forward extra dirs from config
       ...(config.skills?.load?.extraDirs?.length

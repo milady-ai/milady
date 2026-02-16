@@ -3530,7 +3530,7 @@ async function fetchProviderModels(
     case "google-genai":
       return fetchGoogleModels(apiKey);
     case "ollama":
-      return fetchOllamaModels(apiKey);
+      return fetchOllamaModels(normalizeBaseUrl(baseUrl));
     case "openrouter":
       return fetchOpenRouterModels(apiKey);
     case "openai":
@@ -3559,6 +3559,15 @@ async function fetchProviderModels(
       return [];
   }
 }
+
+const normalizeBaseUrl = (rawUrl?: string): string => {
+  const candidate = (rawUrl ?? "").trim();
+  if (!candidate) return "http://localhost:11434";
+  if (/^[a-z][a-z0-9+.-]*:\/\//i.test(candidate)) {
+    return candidate.replace(/\/+$/, "");
+  }
+  return `http://${candidate.replace(/\/+$/, "")}`;
+};
 
 /** Fetch + cache a single provider. Returns cached models or empty array. */
 async function getOrFetchProvider(
@@ -6449,9 +6458,12 @@ async function handleRequest(
         const installs = freshConfig.plugins?.installs as
           | Record<string, unknown>
           | undefined;
-        const packageName = `@elizaos/plugin-${plugin.id}`;
+        const packageName = plugin.npmName ?? `@elizaos/plugin-${plugin.id}`;
+        const legacyPackageName = `@elizaos/plugin-${plugin.id}`;
         const hasInstallRecord =
-          installs?.[packageName] || installs?.[plugin.id];
+          installs?.[packageName] ||
+          installs?.[legacyPackageName] ||
+          installs?.[plugin.id];
         if (hasInstallRecord) {
           plugin.loadError =
             "Plugin installed but failed to load — the package may be missing compiled files.";
@@ -6640,7 +6652,7 @@ async function handleRequest(
 
     // Update config.plugins.entries so the runtime loads/skips this plugin
     if (body.enabled !== undefined) {
-      const packageName = `@elizaos/plugin-${pluginId}`;
+      const packageName = plugin.npmName ?? `@elizaos/plugin-${pluginId}`;
 
       if (!state.config.plugins) {
         state.config.plugins = {};
@@ -6699,7 +6711,7 @@ async function handleRequest(
       const loadedNames = state.runtime.plugins.map((p) => p.name);
       for (const plugin of allPlugins) {
         const suffix = `plugin-${plugin.id}`;
-        const packageName = `@elizaos/plugin-${plugin.id}`;
+        const packageName = plugin.npmName ?? `@elizaos/plugin-${plugin.id}`;
         plugin.enabled = loadedNames.some(
           (name) =>
             name === plugin.id ||
@@ -7116,6 +7128,32 @@ async function handleRequest(
   // ── GET /api/plugins/core ────────────────────────────────────────────
   // Returns all core and optional core plugins with their loaded/running status.
   if (method === "GET" && pathname === "/api/plugins/core") {
+    const normalizeScopedPluginName = (npmName: string): string => {
+      const withoutScope = npmName.replace(/^@[^/]+\//, "");
+      return withoutScope.startsWith("plugin-")
+        ? withoutScope.slice("plugin-".length)
+        : withoutScope;
+    };
+
+    const pluginMatchCandidates = (npmName: string): Set<string> => {
+      const candidates = new Set<string>();
+      const trimmed = npmName.trim();
+      if (!trimmed) return candidates;
+
+      const withoutScope = trimmed.replace(/^@[^/]+\//, "");
+      const pluginPrefixed = withoutScope.startsWith("plugin-")
+        ? withoutScope
+        : `plugin-${withoutScope}`;
+      const unscoped = pluginPrefixed.replace(/^plugin-/, "");
+
+      candidates.add(trimmed);
+      candidates.add(withoutScope);
+      candidates.add(pluginPrefixed);
+      candidates.add(unscoped);
+
+      return candidates;
+    };
+
     // Build a set of loaded plugin names for robust matching.
     // Plugin internal names vary wildly (e.g. "local-ai" for plugin-local-embedding,
     // "eliza-coder" for plugin-code), so we check loaded names against multiple
@@ -7125,16 +7163,16 @@ async function handleRequest(
       : new Set<string>();
 
     const isLoaded = (npmName: string): boolean => {
-      if (loadedNames.has(npmName)) return true;
-      // @elizaos/plugin-foo -> plugin-foo
-      const withoutScope = npmName.replace("@elizaos/", "");
-      if (loadedNames.has(withoutScope)) return true;
-      // plugin-foo -> foo
-      const shortId = withoutScope.replace("plugin-", "");
-      if (loadedNames.has(shortId)) return true;
-      // Check if ANY loaded name contains the short id or vice versa
+      const expected = pluginMatchCandidates(npmName);
+      if ([...expected].some((candidate) => loadedNames.has(candidate)))
+        return true;
+
+      // Check if any loaded name contains a candidate match or is contained by
+      // one (covers short names like plugin-local-embedding ↔ local-embedding).
       for (const n of loadedNames) {
-        if (n.includes(shortId) || shortId.includes(n)) return true;
+        for (const candidate of expected) {
+          if (n.includes(candidate) || candidate.includes(n)) return true;
+        }
       }
       return false;
     };
@@ -7143,7 +7181,7 @@ async function handleRequest(
     const allowList = new Set(state.config.plugins?.allow ?? []);
 
     const makeEntry = (npm: string, isCore: boolean) => {
-      const id = npm.replace("@elizaos/plugin-", "");
+      const id = normalizeScopedPluginName(npm);
       return {
         npmName: npm,
         id,
@@ -7195,7 +7233,7 @@ async function handleRequest(
     state.config.plugins = state.config.plugins ?? {};
     state.config.plugins.allow = state.config.plugins.allow ?? [];
     const allow = state.config.plugins.allow;
-    const shortId = body.npmName.replace("@elizaos/plugin-", "");
+    const shortId = normalizeScopedPluginName(body.npmName);
 
     if (body.enabled) {
       if (!allow.includes(body.npmName) && !allow.includes(shortId)) {

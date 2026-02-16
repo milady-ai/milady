@@ -211,6 +211,14 @@ describe("collectPluginNames", () => {
     expect(names.has("@elizaos/plugin-discord")).toBe(true);
   });
 
+  it("supports full @milady plugin package IDs in plugins.allow", () => {
+    const config = {
+      plugins: { allow: ["@milady/plugin-retake-tv"] },
+    } as unknown as MiladyConfig;
+    const names = collectPluginNames(config);
+    expect(names.has("@milady/plugin-retake-tv")).toBe(true);
+  });
+
   it("uses @elizaos/plugin-telegram when telegram is enabled via plugins.entries", () => {
     const config = {
       plugins: {
@@ -232,6 +240,16 @@ describe("collectPluginNames", () => {
     } as unknown as MiladyConfig;
     const names = collectPluginNames(config);
     expect(names.has("@elizaos/plugin-telegram")).toBe(true);
+  });
+
+  it("uses fully-qualified plugin IDs in plugins.entries", () => {
+    const config = {
+      plugins: {
+        entries: { "@milady/plugin-retake-tv": { enabled: true } },
+      },
+    } as unknown as MiladyConfig;
+    const names = collectPluginNames(config);
+    expect(names.has("@milady/plugin-retake-tv")).toBe(true);
   });
 
   it("does not load telegram plugin when plugins.entries.telegram.enabled is false", () => {

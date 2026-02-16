@@ -25,6 +25,10 @@ try {
 
 const port = Number(process.env.MILADY_PORT) || 31337;
 
+const MAX_STARTUP_ATTEMPTS = 5;
+const BASE_RETRY_DELAY_MS = 500;
+const MAX_RETRY_DELAY_MS = 5_000;
+
 /** The currently active runtime — swapped on restart. */
 let currentRuntime: AgentRuntime | null = null;
 
@@ -36,6 +40,40 @@ let isRestarting = false;
 
 /** Tracks whether the process is shutting down to prevent restart during exit. */
 let isShuttingDown = false;
+
+const sleep = (ms: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, ms));
+
+async function withRetries<T>(
+  label: string,
+  action: () => Promise<T>,
+): Promise<T> {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= MAX_STARTUP_ATTEMPTS; attempt++) {
+    try {
+      return await action();
+    } catch (error) {
+      lastError = error;
+      if (attempt >= MAX_STARTUP_ATTEMPTS) break;
+
+      const delay = Math.min(
+        MAX_RETRY_DELAY_MS,
+        BASE_RETRY_DELAY_MS * 2 ** (attempt - 1),
+      );
+      logger.warn(
+        `[milady] ${label} failed (attempt ${attempt}/${MAX_STARTUP_ATTEMPTS}) — retrying in ${delay}ms`,
+      );
+      await sleep(delay);
+    }
+  }
+
+  if (lastError instanceof Error) {
+    throw lastError;
+  }
+
+  throw new Error(`Unknown error while ${label}`);
+}
 
 /**
  * Create a fresh runtime via startEliza (headless).
@@ -91,7 +129,7 @@ async function handleRestart(reason?: string): Promise<void> {
       `[milady] Restart requested${reason ? ` (${reason})` : ""} — bouncing runtime…`,
     );
 
-    const rt = await createRuntime();
+    const rt = await withRetries("runtime restart", createRuntime);
     const agentName = rt.character.name ?? "Milady";
     logger.info(`[milady] Runtime restarted — agent: ${agentName}`);
 
@@ -140,18 +178,22 @@ async function main() {
 
   // 1. Start the API server first (no runtime yet) so the UI can connect
   //    immediately while the heavier agent runtime boots in the background.
-  const { port: actualPort, updateRuntime } = await startApiServer({
-    port,
-    onRestart: async () => {
-      await handleRestart("api");
-      return currentRuntime;
-    },
-  });
+  const { port: actualPort, updateRuntime } = await withRetries(
+    "API server startup",
+    () =>
+      startApiServer({
+        port,
+        onRestart: async () => {
+          await handleRestart("api");
+          return currentRuntime;
+        },
+      }),
+  );
   apiUpdateRuntime = updateRuntime;
   logger.info(`[milady] API server ready on port ${actualPort}`);
 
   // 2. Boot the ElizaOS agent runtime (plugin loading, migrations, etc.).
-  const runtime = await createRuntime();
+  const runtime = await withRetries("runtime startup", createRuntime);
   const agentName = runtime.character.name ?? "Milady";
   logger.info(`[milady] Runtime ready — agent: ${agentName}`);
 
