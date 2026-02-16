@@ -9,6 +9,7 @@
 
 import { lookup as dnsLookup } from "node:dns/promises";
 import net from "node:net";
+import { createRequire } from "node:module";
 import type { Action, HandlerOptions, IAgentRuntime } from "@elizaos/core";
 import { loadMiladyConfig } from "../config/config";
 import type {
@@ -116,13 +117,18 @@ async function runCodeHandlerLegacy(
   params: Record<string, string>,
 ): Promise<unknown> {
   const safeFetch = createSafeFetch();
+  const legacyRequire =
+    typeof (globalThis as { require?: unknown }).require === "function"
+      ? ((globalThis as { require: typeof createRequire }).require)
+      : createRequire(import.meta.url);
   const executor = new Function(
     "params",
     "fetch",
+    "require",
     `"use strict"; return (async () => { ${code} })();`,
   );
 
-  return executor(Object.freeze({ ...params }), safeFetch);
+  return executor(Object.freeze({ ...params }), safeFetch, legacyRequire);
 }
 
 async function runCodeHandler(
