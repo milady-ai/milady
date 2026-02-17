@@ -86,6 +86,7 @@ import {
   resolveCompatRoomKey,
 } from "./compat-utils";
 import { handleDatabaseRoute } from "./database";
+import { handleDiagnosticsRoutes } from "./diagnostics-routes";
 import { DropService } from "./drop-service";
 import {
   readJsonBody as parseJsonBody,
@@ -6909,97 +6910,18 @@ async function handleRequest(
     return;
   }
 
-  // ── GET /api/logs ───────────────────────────────────────────────────────
-  if (method === "GET" && pathname === "/api/logs") {
-    let entries = state.logBuffer;
-
-    const sourceFilter = url.searchParams.get("source");
-    if (sourceFilter)
-      entries = entries.filter((e) => e.source === sourceFilter);
-
-    const levelFilter = url.searchParams.get("level");
-    if (levelFilter) entries = entries.filter((e) => e.level === levelFilter);
-
-    // Filter by tag — entries must contain the requested tag
-    const tagFilter = url.searchParams.get("tag");
-    if (tagFilter) entries = entries.filter((e) => e.tags.includes(tagFilter));
-
-    const sinceFilter = url.searchParams.get("since");
-    if (sinceFilter) {
-      const sinceTs = Number(sinceFilter);
-      if (!Number.isNaN(sinceTs))
-        entries = entries.filter((e) => e.timestamp >= sinceTs);
-    }
-
-    const sources = [...new Set(state.logBuffer.map((e) => e.source))].sort();
-    const tags = [...new Set(state.logBuffer.flatMap((e) => e.tags))].sort();
-    json(res, { entries: entries.slice(-200), sources, tags });
-    return;
-  }
-
-  // ── GET /api/agent/events?after=evt-123&limit=200 ───────────────────────
-  if (method === "GET" && pathname === "/api/agent/events") {
-    const limit = parseClampedInteger(url.searchParams.get("limit"), {
-      min: 1,
-      max: 1000,
-      fallback: 200,
-    });
-    const afterEventId = url.searchParams.get("after");
-    const autonomyEvents = state.eventBuffer.filter(
-      (event) =>
-        event.type === "agent_event" || event.type === "heartbeat_event",
-    );
-    let startIndex = 0;
-    if (afterEventId) {
-      const idx = autonomyEvents.findIndex(
-        (event) => event.eventId === afterEventId,
-      );
-      if (idx >= 0) startIndex = idx + 1;
-    }
-    const events = autonomyEvents.slice(startIndex, startIndex + limit);
-    const latestEventId =
-      events.length > 0 ? events[events.length - 1].eventId : null;
-    json(res, {
-      events,
-      latestEventId,
-      totalBuffered: autonomyEvents.length,
-      replayed: true,
-    });
-    return;
-  }
-
-  // ── GET /api/extension/status ─────────────────────────────────────────
-  // Check if the Chrome extension relay server is reachable.
-  if (method === "GET" && pathname === "/api/extension/status") {
-    const relayPort = 18792;
-    let relayReachable = false;
-    try {
-      const resp = await fetch(`http://127.0.0.1:${relayPort}/`, {
-        method: "HEAD",
-        signal: AbortSignal.timeout(2000),
-      });
-      relayReachable = resp.ok || resp.status < 500;
-    } catch {
-      relayReachable = false;
-    }
-
-    // Resolve the extension source path (always available in the repo)
-    let extensionPath: string | null = null;
-    try {
-      const serverDir = path.dirname(fileURLToPath(import.meta.url));
-      extensionPath = path.resolve(
-        serverDir,
-        "..",
-        "..",
-        "apps",
-        "chrome-extension",
-      );
-      if (!fs.existsSync(extensionPath)) extensionPath = null;
-    } catch {
-      // ignore
-    }
-
-    json(res, { relayReachable, relayPort, extensionPath });
+  if (
+    await handleDiagnosticsRoutes({
+      req,
+      res,
+      method,
+      pathname,
+      url,
+      logBuffer: state.logBuffer,
+      eventBuffer: state.eventBuffer,
+      json,
+    })
+  ) {
     return;
   }
 
