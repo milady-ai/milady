@@ -61,3 +61,5 @@ scripts/knowledge-loop.mjs
 test/contracts/
 apps/app/test-results/
 :memory:/
+benchmarks/
+plugins/

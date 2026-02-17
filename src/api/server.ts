@@ -10893,10 +10893,14 @@ export async function startApiServer(opts?: {
   close: () => Promise<void>;
   updateRuntime: (rt: AgentRuntime) => void;
 }> {
+  const apiStartTime = Date.now();
+  console.log(`[milady-api] startApiServer called`);
+
   const port = opts?.port ?? 2138;
   const host =
     (process.env.MILADY_API_BIND ?? "127.0.0.1").trim() || "127.0.0.1";
   ensureApiTokenForBindHost(host);
+  console.log(`[milady-api] Token check done (${Date.now() - apiStartTime}ms)`);
 
   let config: MiladyConfig;
   try {
@@ -10907,6 +10911,7 @@ export async function startApiServer(opts?: {
     );
     config = {} as MiladyConfig;
   }
+  console.log(`[milady-api] Config loaded (${Date.now() - apiStartTime}ms)`);
 
   // Wallet/inventory routes read from process.env at request-time.
   // Hydrate persisted config.env values so addresses remain visible after restarts.
@@ -10941,6 +10946,9 @@ export async function startApiServer(opts?: {
   }
 
   const plugins = discoverPluginsFromManifest();
+  console.log(
+    `[milady-api] Plugins discovered (${Date.now() - apiStartTime}ms)`,
+  );
   const workspaceDir =
     config.agents?.defaults?.workspace ?? resolveDefaultAgentWorkspaceDir();
 
@@ -11180,6 +11188,9 @@ export async function startApiServer(opts?: {
   // Store the restart callback on the state so the route handler can access it.
   const onRestart = opts?.onRestart ?? null;
 
+  console.log(
+    `[milady-api] Creating http server (${Date.now() - apiStartTime}ms)`,
+  );
   const server = http.createServer(async (req, res) => {
     try {
       await handleRequest(req, res, state, { onRestart });
@@ -11189,6 +11200,7 @@ export async function startApiServer(opts?: {
       error(res, msg, 500);
     }
   });
+  console.log(`[milady-api] Server created (${Date.now() - apiStartTime}ms)`);
 
   const broadcastWs = (payload: object): void => {
     const message = JSON.stringify(payload);
@@ -11587,8 +11599,14 @@ export async function startApiServer(opts?: {
     broadcastStatus();
   };
 
+  console.log(
+    `[milady-api] Calling server.listen (${Date.now() - apiStartTime}ms)`,
+  );
   return new Promise((resolve) => {
     server.listen(port, host, () => {
+      console.log(
+        `[milady-api] server.listen callback fired (${Date.now() - apiStartTime}ms)`,
+      );
       const addr = server.address();
       const actualPort = typeof addr === "object" && addr ? addr.port : port;
       const displayHost =

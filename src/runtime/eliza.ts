@@ -964,9 +964,13 @@ async function resolvePlugins(
   }
 
   logger.info(`[milady] Resolving ${pluginsToLoad.size} plugins...`);
+  const loadStartTime = Date.now();
 
-  // Dynamically import each plugin inside an error boundary
-  for (const pluginName of pluginsToLoad) {
+  // Load a single plugin - returns result or null on skip/failure
+  async function loadSinglePlugin(pluginName: string): Promise<{
+    name: string;
+    plugin: Plugin;
+  } | null> {
     const isCore = corePluginSet.has(pluginName);
     const ejectedRecord = ejectedRecords[pluginName];
     const installRecord = installRecords[pluginName];
@@ -983,7 +987,7 @@ async function resolvePlugins(
           `[milady] Skipping ${pluginName}: browser server not available. ` +
             `Build the stagehand-server or remove the plugin from plugins.allow.`,
         );
-        continue;
+        return null;
       }
     }
 
@@ -992,19 +996,17 @@ async function resolvePlugins(
 
       if (ejectedRecord?.installPath) {
         // Ejected plugin — always prefer local source over npm/core.
-        logger.info(
+        logger.debug(
           `[milady] Loading ejected plugin: ${pluginName} from ${ejectedRecord.installPath}`,
         );
         mod = await importFromPath(ejectedRecord.installPath, pluginName);
       } else if (workspaceOverridePath) {
-        logger.info(
+        logger.debug(
           `[milady] Loading workspace plugin override: ${pluginName} from ${workspaceOverridePath}`,
         );
         mod = await importFromPath(workspaceOverridePath, pluginName);
       } else if (installRecord?.installPath) {
         // Prefer bundled/node_modules copies for official Eliza plugins.
-        // User install records can pin stale versions that drift from the
-        // runtime core and cause hard-to-debug runtime errors.
         const isOfficialElizaPlugin = pluginName.startsWith("@elizaos/plugin-");
 
         if (isOfficialElizaPlugin) {
@@ -1021,8 +1023,6 @@ async function resolvePlugins(
           }
         } else {
           // User-installed plugin — load from its install directory on disk.
-          // This works cross-platform including .app bundles where we can't
-          // modify the app's node_modules.
           try {
             mod = await importFromPath(installRecord.installPath, pluginName);
           } catch (installErr) {
@@ -1037,13 +1037,8 @@ async function resolvePlugins(
         }
       } else if (pluginName.startsWith("@milady/plugin-")) {
         // Local Milady plugin — resolve from the compiled dist directory.
-        // These are built by tsdown into dist/plugins/<name>/ and are not
-        // published to npm.  import.meta.url points to dist/runtime/eliza.js
-        // (unbundled) or dist/eliza.js (bundled), so we resolve relative to
-        // the dist root via the parent of the current file's directory.
         const shortName = pluginName.replace("@milady/plugin-", "");
         const thisDir = path.dirname(fileURLToPath(import.meta.url));
-        // Walk up until we find the dist directory that contains plugins/
         const distRoot = thisDir.endsWith("runtime")
           ? path.resolve(thisDir, "..")
           : thisDir;
@@ -1057,14 +1052,13 @@ async function resolvePlugins(
       const pluginInstance = findRuntimePluginExport(mod);
 
       if (pluginInstance) {
-        // Wrap the plugin's init function with an error boundary so a
-        // crashing plugin.init() does not take down the entire agent.
+        // Wrap the plugin's init function with an error boundary
         const wrappedPlugin = wrapPluginWithErrorBoundary(
           pluginName,
           pluginInstance,
         );
-        plugins.push({ name: pluginName, plugin: wrappedPlugin });
         logger.debug(`[milady] ✓ Loaded plugin: ${pluginName}`);
+        return { name: pluginName, plugin: wrappedPlugin };
       } else {
         const msg = `[milady] Plugin ${pluginName} did not export a valid Plugin object`;
         failedPlugins.push({
@@ -1076,10 +1070,9 @@ async function resolvePlugins(
         } else {
           logger.warn(msg);
         }
+        return null;
       }
     } catch (err) {
-      // Core plugins log at error level (visible even with LOG_LEVEL=error).
-      // Optional/channel plugins log at warn level so they don't spam in dev.
       const msg = formatError(err);
       failedPlugins.push({ name: pluginName, error: msg });
       if (isCore) {
@@ -1089,8 +1082,24 @@ async function resolvePlugins(
       } else {
         logger.info(`[milady] Could not load plugin ${pluginName}: ${msg}`);
       }
+      return null;
     }
   }
+
+  // Load all plugins in parallel for faster startup
+  const pluginResults = await Promise.all(
+    Array.from(pluginsToLoad).map(loadSinglePlugin),
+  );
+
+  // Collect successful loads
+  for (const result of pluginResults) {
+    if (result) {
+      plugins.push(result);
+    }
+  }
+
+  const loadDuration = Date.now() - loadStartTime;
+  logger.info(`[milady] Plugin loading took ${loadDuration}ms`);
 
   // Summary logging
   logger.info(

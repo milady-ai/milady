@@ -1,3 +1,7 @@
+// Timing: Track when the script starts
+const SCRIPT_START = Date.now();
+console.log(`[milady] Script starting...`);
+
 /**
  * Combined dev server — starts the ElizaOS runtime in headless mode and
  * wires it into the API server so the Control UI has a live agent to talk to.
@@ -15,6 +19,8 @@ import { startApiServer } from "../api/server";
 import { startEliza } from "./eliza";
 import { setRestartHandler } from "./restart";
 
+console.log(`[milady] Imports complete (${Date.now() - SCRIPT_START}ms)`);
+
 // Load .env files for parity with CLI mode (which loads via run-main.ts).
 try {
   const { config } = await import("dotenv");
@@ -22,6 +28,8 @@ try {
 } catch {
   // dotenv not installed or .env not found — non-fatal.
 }
+
+console.log(`[milady] dotenv loaded (${Date.now() - SCRIPT_START}ms)`);
 
 const port = Number(process.env.MILADY_PORT) || 31337;
 
@@ -74,10 +82,12 @@ function scheduleRuntimeBootstrap(delayMs: number, reason: string): void {
 async function bootstrapRuntime(reason: string): Promise<void> {
   if (isShuttingDown || isRestarting || runtimeBootInProgress) return;
   runtimeBootInProgress = true;
+  const bootstrapStart = Date.now();
 
   try {
     logger.info(`[milady] Runtime bootstrap starting (${reason})`);
     const rt = await createRuntime();
+    logger.info(`[milady] Runtime created in ${Date.now() - bootstrapStart}ms`);
     const agentName = rt.character.name ?? "Milady";
 
     if (isShuttingDown) {
@@ -93,7 +103,9 @@ async function bootstrapRuntime(reason: string): Promise<void> {
       apiUpdateRuntime(rt);
     }
     runtimeBootAttempt = 0;
-    logger.info(`[milady] Runtime ready — agent: ${agentName}`);
+    logger.info(
+      `[milady] Runtime ready — agent: ${agentName} (total: ${Date.now() - bootstrapStart}ms)`,
+    );
   } catch (err) {
     runtimeBootAttempt += 1;
     const delayMs = nextRetryDelayMs(runtimeBootAttempt);
@@ -211,6 +223,8 @@ process.on("SIGINT", () => void shutdown());
 process.on("SIGTERM", () => void shutdown());
 
 async function main() {
+  const startupStart = Date.now();
+
   // Register the in-process restart handler so the RESTART_AGENT action
   // (and the POST /api/agent/restart endpoint) work without killing the
   // process.
@@ -218,6 +232,7 @@ async function main() {
 
   // 1. Start the API server first (no runtime yet) so the UI can connect
   //    immediately while the heavier agent runtime boots in the background.
+  const apiStart = Date.now();
   const { port: actualPort, updateRuntime } = await startApiServer({
     port,
     initialAgentState: "starting",
@@ -227,10 +242,18 @@ async function main() {
     },
   });
   apiUpdateRuntime = updateRuntime;
-  logger.info(`[milady] API server ready on port ${actualPort}`);
+  const apiReady = Date.now();
+  // Use console.log for startup timing to bypass logger filtering
+  console.log(
+    `[milady] API server ready on port ${actualPort} (${apiReady - apiStart}ms)`,
+  );
 
   // 2. Boot the ElizaOS agent runtime without blocking server readiness.
   scheduleRuntimeBootstrap(0, "startup");
+
+  console.log(
+    `[milady] Startup init complete in ${Date.now() - startupStart}ms, agent bootstrapping...`,
+  );
 }
 
 main().catch((err: unknown) => {
