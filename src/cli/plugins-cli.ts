@@ -11,7 +11,7 @@ import { parseClampedInteger } from "../utils/number-parsing";
  * Normalize a user-provided plugin name to its fully-qualified form.
  * Accepts `@scope/plugin-x`, `plugin-x`, or shorthand `x` (→ `@elizaos/plugin-x`).
  */
-function normalizePluginName(name: string): string {
+export function normalizePluginName(name: string): string {
   // Already fully qualified (starts with @) or plugin- prefix
   if (name.startsWith("@") || name.startsWith("plugin-")) {
     return name;
@@ -27,7 +27,7 @@ function normalizePluginName(name: string): string {
  *   - "twitter@1.2.3" → { name: "@elizaos/plugin-twitter", version: "1.2.3" }
  *   - "@custom/plugin-x@2.0.0" → { name: "@custom/plugin-x", version: "2.0.0" }
  */
-function parsePluginSpec(input: string): { name: string; version?: string } {
+export function parsePluginSpec(input: string): { name: string; version?: string } {
   let namepart: string;
   let version: string | undefined;
 
@@ -141,7 +141,7 @@ export function registerPluginsCli(program: Command): void {
   const pluginsCommand = program
     .command("plugins")
     .description(
-      "Browse, search, install, and manage ElizaOS plugins from the registry. Supports version pinning (e.g., install twitter@1.2.3)",
+      "Browse, search, install, and manage ElizaOS plugins from the registry",
     );
 
   // ── list ─────────────────────────────────────────────────────────────
@@ -344,7 +344,9 @@ export function registerPluginsCli(program: Command): void {
   // ── install ──────────────────────────────────────────────────────────
   pluginsCommand
     .command("install <name>")
-    .description("Install a plugin from the registry (supports name@version)")
+    .description(
+      "Install a plugin from the registry. Optionally pin to a specific version or dist-tag (e.g., twitter@1.2.3, twitter@next)",
+    )
     .option("--no-restart", "Install without restarting the agent")
     .action(async (name: string, opts: { restart: boolean }) => {
       const pluginManager = await getPluginManager();
