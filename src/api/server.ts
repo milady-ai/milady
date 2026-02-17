@@ -2782,6 +2782,7 @@ export function buildUserMessages(params: {
   return { userMessage, messageToStore };
 }
 
+
 async function readChatRequestPayload(
   req: http.IncomingMessage,
   res: http.ServerResponse,
