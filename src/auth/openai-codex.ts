@@ -6,8 +6,8 @@
  */
 
 import {
-  loginOpenAICodex,
   refreshOpenAICodexToken as _refreshOpenAICodexToken,
+  loginOpenAICodex,
 } from "@mariozechner/pi-ai";
 import type { OAuthCredentials } from "./types.js";
 
@@ -46,10 +46,14 @@ export function startCodexLogin(): Promise<CodexFlow> {
           try {
             const parsed = new URL(url);
             flowState = parsed.searchParams.get("state") || "";
-          } catch { /* */ }
+          } catch {
+            /* */
+          }
 
           resolveFlow({
-            get authUrl() { return authUrl; },
+            get authUrl() {
+              return authUrl;
+            },
             state: flowState,
             submitCode: (code: string) => resolveManual?.(code),
             credentials,

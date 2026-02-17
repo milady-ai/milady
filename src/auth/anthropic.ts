@@ -7,8 +7,8 @@
  */
 
 import {
-  loginAnthropic,
   refreshAnthropicToken as _refreshAnthropicToken,
+  loginAnthropic,
 } from "@mariozechner/pi-ai";
 import type { OAuthCredentials } from "./types.js";
 
@@ -36,7 +36,10 @@ export async function startAnthropicLogin(): Promise<AnthropicFlow> {
   });
 
   const credentials = loginAnthropic(
-    (url: string) => { authUrl = url; resolveUrlReady?.(); },
+    (url: string) => {
+      authUrl = url;
+      resolveUrlReady?.();
+    },
     () => codePromise,
   );
 

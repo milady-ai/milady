@@ -5057,7 +5057,10 @@ async function handleRequest(
   // Atomically switch the active AI provider.  Clears competing credentials
   // and env vars so the runtime loads the correct plugin on restart.
   if (method === "POST" && pathname === "/api/provider/switch") {
-    const body = await readJsonBody<{ provider: string; apiKey?: string }>(req, res);
+    const body = await readJsonBody<{ provider: string; apiKey?: string }>(
+      req,
+      res,
+    );
     if (!body) return;
     const provider = body.provider;
     if (!provider || typeof provider !== "string") {
@@ -5080,7 +5083,10 @@ async function handleRequest(
       delete envCfg.ELIZAOS_CLOUD_ENABLED;
       // Also clear from runtime character secrets if available
       if (state.runtime?.character?.secrets) {
-        const secrets = state.runtime.character.secrets as Record<string, unknown>;
+        const secrets = state.runtime.character.secrets as Record<
+          string,
+          unknown
+        >;
         delete secrets.ELIZAOS_CLOUD_API_KEY;
         delete secrets.ELIZAOS_CLOUD_ENABLED;
       }
@@ -5092,7 +5098,9 @@ async function handleRequest(
         const { deleteCredentials } = await import("../auth/index");
         deleteCredentials("anthropic-subscription");
         deleteCredentials("openai-codex");
-      } catch { /* credentials may not exist */ }
+      } catch {
+        /* credentials may not exist */
+      }
       // Don't clear the env keys here — applySubscriptionCredentials on
       // restart will simply not set them if creds are gone.
     };
@@ -5140,14 +5148,18 @@ async function handleRequest(
         try {
           const { deleteCredentials } = await import("../auth/index");
           deleteCredentials("anthropic-subscription");
-        } catch { /* ok */ }
+        } catch {
+          /* ok */
+        }
         // Apply the OpenAI subscription credentials to env
         try {
           const { applySubscriptionCredentials } = await import(
             "../auth/index"
           );
           await applySubscriptionCredentials();
-        } catch { /* ok */ }
+        } catch {
+          /* ok */
+        }
       } else if (provider === "anthropic-subscription") {
         // Switching TO Anthropic subscription
         clearCloud();
@@ -5156,13 +5168,17 @@ async function handleRequest(
         try {
           const { deleteCredentials } = await import("../auth/index");
           deleteCredentials("openai-codex");
-        } catch { /* ok */ }
+        } catch {
+          /* ok */
+        }
         try {
           const { applySubscriptionCredentials } = await import(
             "../auth/index"
           );
           await applySubscriptionCredentials();
-        } catch { /* ok */ }
+        } catch {
+          /* ok */
+        }
       } else if (PROVIDER_ENV_KEYS[provider]) {
         // Switching TO a direct API key provider
         clearCloud();
@@ -5205,7 +5221,11 @@ async function handleRequest(
         state.agentState = "restarting";
       }
 
-      json(res, { success: true, provider, restarting: Boolean(ctx?.onRestart) });
+      json(res, {
+        success: true,
+        provider,
+        restarting: Boolean(ctx?.onRestart),
+      });
     } catch (err) {
       error(res, `Provider switch failed: ${err}`, 500);
     }
