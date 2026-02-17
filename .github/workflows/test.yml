@@ -23,28 +23,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          version: 9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: 'pnpm'
+          bun-version: latest
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: bun install
 
       - name: Run repository postinstall patches
-        run: pnpm run postinstall
+        run: bun run postinstall
 
       - name: Run unit tests
-        run: pnpm exec vitest run --config vitest.unit.config.ts
+        run: bunx vitest run --config vitest.unit.config.ts
 
       - name: Run unit tests with coverage
-        run: pnpm run test:coverage
+        run: bun run test:coverage
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
@@ -60,29 +54,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          version: 9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: 'pnpm'
+          bun-version: latest
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: bun install
 
       - name: Run repository postinstall patches
-        run: pnpm run postinstall
+        run: bun run postinstall
 
       - name: Build
-        run: pnpm run build
+        run: bun run build
 
       - name: Run E2E tests
         run: >
-          pnpm exec vitest run --config vitest.e2e.config.ts
+          bunx vitest run --config vitest.e2e.config.ts
           --exclude test/anvil-contracts.e2e.test.ts
           --exclude test/apps-e2e.e2e.test.ts
 
@@ -93,27 +81,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          version: 9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: 'pnpm'
+          bun-version: latest
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: bun install
 
       - name: Run repository postinstall patches
-        run: pnpm run postinstall
+        run: bun run postinstall
 
       - name: Run app startup/onboarding tests
         run: |
           cd apps/app
-          npx --prefix ../.. vitest run --config vitest.config.ts \
+          bunx --cwd ../.. vitest run --config vitest.config.ts \
             test/electron/electron-startup.e2e.test.ts \
             test/electron/electron-plugin-entrypoints.e2e.test.ts \
             test/app/startup-chat.e2e.test.ts \
@@ -130,31 +112,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          version: 9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: 'pnpm'
+          bun-version: latest
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: bun install
 
       - name: Run repository postinstall patches
-        run: pnpm run postinstall
+        run: bun run postinstall
 
       - name: Build web assets
-        run: pnpm run --filter @milady/app build
+        run: bun run --filter @milady/app build
 
       - name: Build Electron app
-        run: pnpm run --filter @milady/app build:electron
+        run: bun run --filter @milady/app build:electron
         continue-on-error: true
 
   electron-packaged-dmg-e2e:
@@ -164,36 +140,30 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          version: 9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: 'pnpm'
+          bun-version: latest
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: bun install
 
       - name: Run repository postinstall patches
-        run: pnpm run postinstall
+        run: bun run postinstall
 
       - name: Build web assets
-        run: pnpm run --filter @milady/app build
+        run: bun run --filter @milady/app build
 
       - name: Sync Electron platform
-        run: pnpm run --filter @milady/app cap:sync:electron
+        run: bun run --filter @milady/app cap:sync:electron
 
       - name: Build standalone DMG
         run: |
           cd apps/app/electron
-          pnpm run electron:make:dmg:test
+          bun run electron:make:dmg:test
         continue-on-error: true
 
   cloud-live-e2e:
@@ -214,31 +184,24 @@ jobs:
         if: steps.cloud.outputs.enabled == 'true'
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
+      - name: Setup Bun
         if: steps.cloud.outputs.enabled == 'true'
-        uses: pnpm/action-setup@v4
+        uses: oven-sh/setup-bun@v2
         with:
-          version: 9
-
-      - name: Setup Node.js
-        if: steps.cloud.outputs.enabled == 'true'
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: 'pnpm'
+          bun-version: latest
 
       - name: Install dependencies
         if: steps.cloud.outputs.enabled == 'true'
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: bun install
 
       - name: Run repository postinstall patches
         if: steps.cloud.outputs.enabled == 'true'
-        run: pnpm run postinstall
+        run: bun run postinstall
 
       - name: Run cloud live test
         if: steps.cloud.outputs.enabled == 'true'
         run: >
-          pnpm exec vitest run --config vitest.e2e.config.ts
+          bunx vitest run --config vitest.e2e.config.ts
           test/cloud-providers.e2e.test.ts
         env:
           MILAIDY_LIVE_TEST: "1"
@@ -252,28 +215,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          version: 9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: 'pnpm'
+          bun-version: latest
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: bun install
 
       - name: Run repository postinstall patches
-        run: pnpm run postinstall
+        run: bun run postinstall
 
       - name: Build
-        run: pnpm run build
+        run: bun run build
 
       - name: Run E2E Validation tests
-        run: pnpm exec vitest run --config vitest.e2e.config.ts test/e2e-validation.e2e.test.ts
+        run: bunx vitest run --config vitest.e2e.config.ts test/e2e-validation.e2e.test.ts
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
 

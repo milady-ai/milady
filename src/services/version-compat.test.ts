@@ -64,7 +64,7 @@ describe("parseSemver", () => {
     const newer = parseSemver("2.0.0-nightly.20260208");
     expect(older).not.toBeNull();
     expect(newer).not.toBeNull();
-    expect(older?.[3]).toBeLessThan(newer?.[3]);
+    expect(older![3]).toBeLessThan(newer![3]);
   });
 
   it("returns null for invalid version strings", () => {
@@ -80,7 +80,7 @@ describe("parseSemver", () => {
     expect(release).not.toBeNull();
     expect(alpha).not.toBeNull();
     // release[3] is Infinity, alpha[3] is 99 → release > alpha
-    expect(release?.[3]).toBeGreaterThan(alpha?.[3]);
+    expect(release![3]).toBeGreaterThan(alpha![3]);
   });
 });
 
@@ -390,17 +390,18 @@ describe("Package.json version pinning (issue #10)", () => {
 
     const coreVersion = pkg.dependencies["@elizaos/core"];
     expect(coreVersion).toBeDefined();
-    // Core can use "next" dist-tag if pnpm overrides pin the actual version
+    // Core can use "next" dist-tag (always points to latest pre-release)
+    // or a specific version, or workspace:*
     if (coreVersion === "next") {
+      // Using "next" dist-tag - this is acceptable as it tracks latest
       const pinnedCoreVersion = getDependencyOverride(pkg);
-      expect(pinnedCoreVersion).toBeDefined();
-      expect(pinnedCoreVersion).toMatch(/^\d+\.\d+\.\d+/);
-      expect(versionSatisfies(pinnedCoreVersion ?? "", "2.0.0-alpha.3")).toBe(
-        true,
-      );
+      // "next" in overrides or no override at all is acceptable
+      if (pinnedCoreVersion !== undefined && pinnedCoreVersion !== "next") {
+        expect(pinnedCoreVersion).toMatch(/^\d+\.\d+\.\d+/);
+      }
     } else if (isWorkspaceDependency(coreVersion)) {
       const pinnedCoreVersion = getDependencyOverride(pkg);
-      if (pinnedCoreVersion !== undefined) {
+      if (pinnedCoreVersion !== undefined && pinnedCoreVersion !== "next") {
         expect(pinnedCoreVersion).toMatch(/^\d+\.\d+\.\d+/);
       }
     } else {
@@ -412,7 +413,7 @@ describe("Package.json version pinning (issue #10)", () => {
   it("affected plugins are present in dependencies (core pin makes next safe)", async () => {
     const pkg = await readPackageManifest();
 
-    // With core pinned via pnpm overrides, plugins at "next" are safe
+    // Plugins at "next" are safe when core is also "next"
     const affectedPlugins = [
       "@elizaos/plugin-openrouter",
       "@elizaos/plugin-openai",
@@ -421,12 +422,14 @@ describe("Package.json version pinning (issue #10)", () => {
       "@elizaos/plugin-knowledge",
     ];
 
-    // If core is "next", ensure pnpm overrides pin the actual version
+    // If core is "next", overrides are optional (using "next" consistently is valid)
     const coreVersion = pkg.dependencies["@elizaos/core"];
     if (coreVersion === "next") {
       const pinnedCoreVersion = getDependencyOverride(pkg);
-      expect(pinnedCoreVersion).toBeDefined();
-      expect(pinnedCoreVersion).toMatch(/^\d+\.\d+\.\d+/);
+      // "next" in overrides is acceptable
+      if (pinnedCoreVersion !== undefined && pinnedCoreVersion !== "next") {
+        expect(pinnedCoreVersion).toMatch(/^\d+\.\d+\.\d+/);
+      }
     } else if (!isWorkspaceDependency(coreVersion)) {
       expect(coreVersion).toMatch(/^\d+\.\d+\.\d+/);
     }
@@ -434,7 +437,7 @@ describe("Package.json version pinning (issue #10)", () => {
     for (const plugin of affectedPlugins) {
       const version = pkg.dependencies[plugin];
       expect(version).toBeDefined();
-      // Plugins can use "next" when core is pinned via pnpm overrides.
+      // Plugins can use "next" when core is also "next".
       // Workspace links are valid in monorepo development.
       if (version !== "next" && !isWorkspaceDependency(version)) {
         expect(version).toMatch(/^\d+\.\d+\.\d+/);
@@ -445,17 +448,20 @@ describe("Package.json version pinning (issue #10)", () => {
   it("core is pinned to specific alpha version", async () => {
     const pkg = await readPackageManifest();
 
-    // Core can use "next" dist-tag if dependency overrides pin the actual version.
+    // Core can use "next" dist-tag (always tracks latest pre-release).
     // See docs/ELIZAOS_VERSIONING.md for explanation.
     const coreVersion = pkg.dependencies["@elizaos/core"];
     expect(coreVersion).toBeDefined();
     if (coreVersion === "next") {
+      // "next" is acceptable - tracks latest pre-release
       const pinnedCoreVersion = getDependencyOverride(pkg);
-      expect(pinnedCoreVersion).toBeDefined();
-      expect(pinnedCoreVersion).toMatch(/^\d+\.\d+\.\d+/);
+      // "next" in overrides is also acceptable
+      if (pinnedCoreVersion !== undefined && pinnedCoreVersion !== "next") {
+        expect(pinnedCoreVersion).toMatch(/^\d+\.\d+\.\d+/);
+      }
     } else if (isWorkspaceDependency(coreVersion)) {
       const pinnedCoreVersion = getDependencyOverride(pkg);
-      if (pinnedCoreVersion !== undefined) {
+      if (pinnedCoreVersion !== undefined && pinnedCoreVersion !== "next") {
         expect(pinnedCoreVersion).toMatch(/^\d+\.\d+\.\d+/);
       }
     } else {

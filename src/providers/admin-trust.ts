@@ -15,6 +15,8 @@ function normalizeRole(role: string | undefined): string {
   return (role ?? "").toUpperCase();
 }
 
+export const adminTrustProvider: Provider = createAdminTrustProvider();
+
 export function createAdminTrustProvider(): Provider {
   return {
     name: "miladyAdminTrust",

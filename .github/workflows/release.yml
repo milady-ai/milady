@@ -134,7 +134,7 @@ jobs:
         run: |
           for d in gateway swabble camera screencapture canvas desktop location talkmode agent; do
             echo "[plugin:$d] building..."
-            (cd plugins/$d && npm run build)
+            (cd plugins/$d && bun run build)
           done
         working-directory: apps/app
         shell: bash
@@ -158,7 +158,7 @@ jobs:
         working-directory: apps/app
 
       - name: Install Electron dependencies
-        run: npm install --no-audit --no-fund
+        run: bun install --no-save
         working-directory: apps/app/electron
 
       - name: Build Electron app
@@ -235,6 +235,7 @@ jobs:
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET || '' }}
 
       - name: Preflight Azure Trusted Signing access
+        id: trusted_signing_preflight
         if: matrix.platform.os == 'windows'
         shell: pwsh
         run: |

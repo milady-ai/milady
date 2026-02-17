@@ -59,5 +59,10 @@ export default defineConfig({
         "src/hooks/**",
       ],
     },
+    server: {
+      deps: {
+        inline: ["@elizaos/core"],
+      },
+    },
   },
 });

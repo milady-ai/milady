@@ -46,7 +46,7 @@
     "dev:ios": "cd apps/app && ../../scripts/rt.sh run ios",
     "dev:ui": "scripts/rt.sh scripts/dev-ui.mjs --ui-only",
     "docs:bin": "scripts/rt.sh scripts/docs-list.js --build-bin",
-    "docs:build": "cd docs && pnpm exec mint broken-links",
+    "docs:build": "cd docs && bun exec mint broken-links",
     "docs:dev": "cd docs && mint dev",
     "docs:list": "scripts/rt.sh scripts/docs-list.js",
     "format": "bunx @biomejs/biome format src scripts apps",
@@ -61,14 +61,14 @@
     "prepack": "scripts/rt.sh run build",
     "prepare": "node -e \"try{require('child_process').execSync('git config core.hooksPath git-hooks',{stdio:'ignore'})}catch{}\"",
     "publish:all:next": "node ./scripts/publish-all-next.mjs",
-    "publish:plugins:next": "cd plugins && pnpm run publish:next",
+    "publish:plugins:next": "cd plugins && bun run publish:next",
     "release:check": "node --import tsx scripts/release-check.ts",
     "start": "scripts/rt.sh scripts/run-node.mjs start",
     "start:desktop": "cd apps/app && ../../scripts/rt.sh run build:electron && cd electron && ../../../scripts/rt.sh run electron:start",
     "start:eliza": "node --import tsx src/runtime/eliza.ts",
     "test": "node test/scripts/test-parallel.mjs",
     "test:coverage": "bunx vitest run --coverage",
-    "test:docker:all": "pnpm run test:docker:live-models && pnpm run test:docker:live-gateway && pnpm run test:docker:onboard && pnpm run test:docker:gateway-network && pnpm run test:docker:qr && pnpm run test:docker:doctor-switch && pnpm run test:docker:plugins && pnpm run test:docker:cleanup",
+    "test:docker:all": "bun run test:docker:live-models && bun run test:docker:live-gateway && bun run test:docker:onboard && bun run test:docker:gateway-network && bun run test:docker:qr && bun run test:docker:doctor-switch && bun run test:docker:plugins && bun run test:docker:cleanup",
     "test:docker:cleanup": "bash test/scripts/test-cleanup-docker.sh",
     "test:docker:doctor-switch": "bash test/scripts/e2e/doctor-install-switch-docker.sh",
     "test:docker:gateway-network": "bash test/scripts/e2e/gateway-network-docker.sh",
@@ -86,7 +86,7 @@
     "test:install:e2e:anthropic": "MILADY_E2E_MODELS=anthropic bash test/scripts/test-install-sh-e2e-docker.sh",
     "test:install:e2e:openai": "MILADY_E2E_MODELS=openai bash test/scripts/test-install-sh-e2e-docker.sh",
     "test:install:smoke": "bash test/scripts/test-install-sh-docker.sh",
-    "test:live": "MILADY_LIVE_TEST=1 pnpm exec vitest run --config vitest.e2e.config.ts test/wallet-live.e2e.test.ts test/api-auth-live.e2e.test.ts test/cloud-providers.e2e.test.ts",
+    "test:live": "MILADY_LIVE_TEST=1 bun exec vitest run --config vitest.e2e.config.ts test/wallet-live.e2e.test.ts test/api-auth-live.e2e.test.ts test/cloud-providers.e2e.test.ts",
     "test:watch": "bunx vitest",
     "typecheck": "tsc --noEmit",
     "tui": "scripts/rt.sh scripts/run-node.mjs tui",
@@ -165,6 +165,7 @@
   "overrides": {
     "drizzle-orm": "0.45.1",
     "ai": "6.0.30",
-    "tar": "^7.5.7"
+    "tar": "^7.5.7",
+    "@elizaos/core": "next"
   }
 }

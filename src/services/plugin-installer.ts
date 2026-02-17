@@ -150,8 +150,8 @@ function pluginDir(pluginName: string): string {
 // Package manager detection
 // ---------------------------------------------------------------------------
 
-export async function detectPackageManager(): Promise<"bun" | "pnpm" | "npm"> {
-  for (const cmd of ["bun", "pnpm", "npm"] as const) {
+export async function detectPackageManager(): Promise<"bun" | "npm"> {
+  for (const cmd of ["bun", "npm"] as const) {
     try {
       await execFileAsync(cmd, ["--version"]);
       return cmd;
@@ -454,7 +454,7 @@ export async function uninstallAndRestart(
 // ---------------------------------------------------------------------------
 
 async function runPackageInstall(
-  pm: "bun" | "pnpm" | "npm",
+  pm: "bun" | "npm",
   packageName: string,
   version: string,
   targetDir: string,
@@ -466,7 +466,7 @@ async function runPackageInstall(
 }
 
 async function runLocalPathInstall(
-  pm: "bun" | "pnpm" | "npm",
+  pm: "bun" | "npm",
   packageName: string,
   sourcePath: string,
   targetDir: string,
@@ -480,7 +480,7 @@ async function runLocalPathInstall(
 }
 
 async function installSpecWithFallback(
-  pm: "bun" | "pnpm" | "npm",
+  pm: "bun" | "npm",
   spec: string,
   targetDir: string,
 ): Promise<void> {
@@ -496,16 +496,13 @@ async function installSpecWithFallback(
 }
 
 async function runInstallSpec(
-  pm: "bun" | "pnpm" | "npm",
+  pm: "bun" | "npm",
   spec: string,
   targetDir: string,
 ): Promise<void> {
   switch (pm) {
     case "bun":
       await execFileAsync("bun", ["add", spec], { cwd: targetDir });
-      break;
-    case "pnpm":
-      await execFileAsync("pnpm", ["add", spec, "--dir", targetDir]);
       break;
     default:
       await execFileAsync("npm", ["install", spec, "--prefix", targetDir]);

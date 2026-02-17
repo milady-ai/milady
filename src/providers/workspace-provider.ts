@@ -16,7 +16,7 @@ import {
   type ProviderResult,
   type State,
 } from "@elizaos/core";
-
+import type { CodingAgentContext } from "../services/coding-agent-context";
 import {
   DEFAULT_AGENT_WORKSPACE_DIR,
   filterBootstrapFilesForSession,
@@ -89,6 +89,68 @@ export function buildContext(
   }
   if (sections.length === 0) return "";
   return `## Project Context (Workspace)\n\n${sections.join("\n\n---\n\n")}`;
+}
+
+/** @internal Exported for testing. Builds a summary of the coding agent session. */
+export function buildCodingAgentSummary(ctx: CodingAgentContext): string {
+  const lines: string[] = [];
+
+  lines.push("## Coding Agent Session");
+  lines.push("");
+  lines.push(`**Task:** ${ctx.taskDescription}`);
+  lines.push(`**Working Directory:** ${ctx.workingDirectory}`);
+  lines.push(`**Connector:** ${ctx.connector.type}`);
+  lines.push(`**Mode:** ${ctx.interactionMode}`);
+  lines.push(`**Active:** ${ctx.active ? "yes" : "no"}`);
+
+  if (!ctx.connector.available) {
+    lines.push(`**Connector Status:** unavailable`);
+  }
+
+  // Errors from the last iteration
+  const lastIteration = ctx.iterations[ctx.iterations.length - 1];
+  if (lastIteration && lastIteration.errors.length > 0) {
+    lines.push("");
+    lines.push("### Errors to Resolve");
+    for (const err of lastIteration.errors) {
+      const loc = err.filePath
+        ? err.line
+          ? ` (${err.filePath}:${err.line})`
+          : ` (${err.filePath})`
+        : "";
+      lines.push(`- [${err.category}]${loc}: ${err.message}`);
+    }
+  }
+
+  // Human feedback
+  const pendingFeedback = ctx.allFeedback.filter(
+    (fb) => !fb.iterationRef || fb.iterationRef >= ctx.iterations.length - 1,
+  );
+  if (pendingFeedback.length > 0) {
+    lines.push("");
+    lines.push("### Human Feedback");
+    for (const fb of pendingFeedback) {
+      lines.push(`- [${fb.type}]: ${fb.text}`);
+    }
+  }
+
+  // Recent commands from the last iteration
+  if (lastIteration && lastIteration.commandResults.length > 0) {
+    lines.push("");
+    lines.push("### Recent Commands");
+    for (const cmd of lastIteration.commandResults.slice(-5)) {
+      const status = cmd.success ? "OK" : `FAIL(${cmd.exitCode})`;
+      lines.push(`- \`${cmd.command}\` → ${status}`);
+      if (cmd.stdout?.trim()) {
+        lines.push(`  stdout: ${truncate(cmd.stdout.trim(), 200)}`);
+      }
+      if (cmd.stderr?.trim()) {
+        lines.push(`  stderr: ${truncate(cmd.stderr.trim(), 200)}`);
+      }
+    }
+  }
+
+  return lines.join("\n");
 }
 
 export function createWorkspaceProvider(options?: {

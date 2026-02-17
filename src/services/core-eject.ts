@@ -268,8 +268,8 @@ async function writeTsconfigCorePaths(
 }
 
 async function runCoreInstallAndBuild(monorepoDir: string): Promise<void> {
-  await execFileAsync("pnpm", ["install"], { cwd: monorepoDir });
-  await execFileAsync("pnpm", ["--filter", CORE_PACKAGE_NAME, "build"], {
+  await execFileAsync("bun", ["install"], { cwd: monorepoDir });
+  await execFileAsync("bun", ["run", "--filter", CORE_PACKAGE_NAME, "build"], {
     cwd: monorepoDir,
   });
 }

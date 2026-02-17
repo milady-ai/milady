@@ -14,17 +14,19 @@ import type {
   ProviderResult,
   State,
 } from "@elizaos/core";
-import {
-  createAutonomousStateProvider,
-  createSessionKeyProvider,
-  ensureAutonomousStateTracking,
-  getSessionProviders,
-  resolveDefaultSessionStorePath,
-} from "@elizaos/core";
-import { adminTrustProvider } from "@elizaos/plugin-trust";
 import { emoteAction } from "../actions/emote";
 import { restartAction } from "../actions/restart";
 import { EMOTE_CATALOG } from "../emotes/catalog";
+import { adminTrustProvider } from "../providers/admin-trust";
+import {
+  createAutonomousStateProvider,
+  ensureAutonomousStateTracking,
+} from "../providers/autonomous-state";
+import { createSessionKeyProvider } from "../providers/session-bridge";
+import {
+  getSessionProviders,
+  resolveDefaultSessionStorePath,
+} from "../providers/session-utils";
 import { createChannelProfileProvider } from "../providers/simple-mode";
 import { uiCatalogProvider } from "../providers/ui-catalog";
 import { DEFAULT_AGENT_WORKSPACE_DIR } from "../providers/workspace";

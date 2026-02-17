@@ -52,9 +52,41 @@ export function GameView() {
   const [connectionStatus, setConnectionStatus] = useState<
     "connecting" | "connected" | "disconnected"
   >("connecting");
+  const [chatInput, setChatInput] = useState("");
+  const [sendingChat, setSendingChat] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const authSentRef = useRef(false);
   const logsIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Send command to the agent - routes through ElizaOS which processes
+  // the message and decides what hyperscape actions to take
+  const handleSendChat = useCallback(async () => {
+    const content = chatInput.trim();
+    if (!content) return;
+    setSendingChat(true);
+    try {
+      // Send message to ElizaOS agent - it will process and execute hyperscape actions
+      // Examples: "go chop some wood", "attack the goblin", "go to the bank"
+      const response = await client.sendChatRest(content, "DM");
+      setChatInput("");
+      // Show agent's response
+      if (response.text) {
+        setActionNotice(`Agent: ${response.text.slice(0, 100)}${response.text.length > 100 ? "..." : ""}`, "success", 4000);
+      } else {
+        setActionNotice("Command sent to agent.", "success", 2000);
+      }
+      // Refresh logs to show activity
+      setTimeout(() => void loadLogs(), 1500);
+    } catch (err) {
+      setActionNotice(
+        `Failed to send: ${err instanceof Error ? err.message : "error"}`,
+        "error",
+        3000,
+      );
+    } finally {
+      setSendingChat(false);
+    }
+  }, [chatInput, setActionNotice, loadLogs]);
   const postMessageTargetOrigin = useMemo(
     () => resolvePostMessageTargetOrigin(activeGameViewerUrl),
     [activeGameViewerUrl],
@@ -234,6 +266,31 @@ export function GameView() {
           onClick={() => setShowLogsPanel(false)}
         >
           Hide
+        </button>
+      </div>
+      {/* Chat input for sending commands to agent */}
+      <div className="flex items-center gap-2 px-2 py-2 border-b border-border">
+        <input
+          type="text"
+          value={chatInput}
+          onChange={(e) => setChatInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey && !sendingChat) {
+              e.preventDefault();
+              handleSendChat();
+            }
+          }}
+          placeholder="e.g. 'go chop wood' or 'attack the goblin'"
+          className="flex-1 px-2 py-1 text-xs border border-border bg-bg rounded-none focus:border-accent focus:outline-none"
+          disabled={sendingChat}
+        />
+        <button
+          type="button"
+          onClick={handleSendChat}
+          disabled={sendingChat || !chatInput.trim()}
+          className="text-xs px-2 py-1 bg-accent text-accent-fg border border-accent cursor-pointer hover:bg-accent-hover disabled:opacity-40"
+        >
+          {sendingChat ? "..." : "Send"}
         </button>
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto p-2 text-[11px] font-mono">

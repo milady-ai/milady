@@ -276,6 +276,99 @@ function buildViewerConfig(
   return null;
 }
 
+/**
+ * Auto-provision a hyperscape agent using wallet-based authentication.
+ * The agent's wallet address becomes its identity - no manual registration needed.
+ */
+async function autoProvisionHyperscapeAgent(): Promise<{
+  characterId: string;
+  authToken?: string;
+} | null> {
+  // Check if already configured
+  const existingCharId = process.env.HYPERSCAPE_CHARACTER_ID?.trim();
+  const existingToken = process.env.HYPERSCAPE_AUTH_TOKEN?.trim();
+  if (existingCharId && existingToken) {
+    logger.info(
+      `[app-manager] Hyperscape already configured with character: ${existingCharId}`,
+    );
+    return { characterId: existingCharId, authToken: existingToken };
+  }
+
+  // Get wallet address - try EVM first, then Solana
+  const walletAddress =
+    process.env.EVM_PUBLIC_KEY?.trim() || process.env.SOLANA_PUBLIC_KEY?.trim();
+
+  if (!walletAddress) {
+    logger.warn(
+      "[app-manager] No wallet address found for hyperscape auto-auth (need EVM_PUBLIC_KEY or SOLANA_PUBLIC_KEY)",
+    );
+    return null;
+  }
+
+  const walletType = walletAddress.startsWith("0x") ? "evm" : "solana";
+
+  // Get server URL for API calls
+  const serverUrl =
+    process.env.HYPERSCAPE_SERVER_URL?.trim() || "ws://localhost:5555/ws";
+  const apiBaseUrl = serverUrl
+    .replace(/^ws:/, "http:")
+    .replace(/^wss:/, "https:")
+    .replace(/\/ws$/, "");
+
+  try {
+    logger.info(
+      `[app-manager] Auto-provisioning hyperscape agent with wallet: ${walletAddress.slice(0, 10)}...`,
+    );
+
+    // Authenticate using wallet address
+    const response = await fetch(`${apiBaseUrl}/api/agents/wallet-auth`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        walletAddress,
+        walletType,
+        agentName: process.env.BOT_NAME || "Agent",
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => "Unknown error");
+      logger.warn(
+        `[app-manager] Hyperscape wallet auth failed: ${response.status} ${errorText}`,
+      );
+      return null;
+    }
+
+    const result = (await response.json()) as {
+      success: boolean;
+      authToken?: string;
+      characterId?: string;
+    };
+
+    if (!result.success || !result.authToken || !result.characterId) {
+      logger.warn("[app-manager] Hyperscape wallet auth returned failure");
+      return null;
+    }
+
+    // Set environment variables for the plugin and viewer
+    process.env.HYPERSCAPE_CHARACTER_ID = result.characterId;
+    process.env.HYPERSCAPE_AUTH_TOKEN = result.authToken;
+
+    logger.info(
+      `[app-manager] ✅ Auto-provisioned hyperscape agent: ${result.characterId}`,
+    );
+
+    return { characterId: result.characterId, authToken: result.authToken };
+  } catch (error) {
+    logger.warn(
+      `[app-manager] Failed to auto-provision hyperscape agent: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+    return null;
+  }
+}
+
 export class AppManager {
   private readonly activeSessions = new Map<string, ActiveAppSession>();
 
@@ -376,6 +469,11 @@ export class AppManager {
       }
     } else {
       logger.info(`[app-manager] Plugin already installed: ${pluginName}`);
+    }
+
+    // Auto-provision hyperscape agent if needed
+    if (name === HYPERSCAPE_APP_NAME) {
+      await autoProvisionHyperscapeAgent();
     }
 
     // Build viewer config from registry app metadata

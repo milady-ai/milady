@@ -14,3 +14,9 @@ declare module "@elizaos/plugin-trajectory-logger" {
   const plugin: Plugin;
   export default plugin;
 }
+
+declare module "@elizaos/plugin-groq" {
+  import type { Plugin } from "@elizaos/core";
+  const plugin: Plugin;
+  export default plugin;
+}
