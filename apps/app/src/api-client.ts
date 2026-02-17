@@ -1649,6 +1649,21 @@ export class MiladyClient {
     });
   }
 
+  async getSubscriptionStatus(): Promise<{
+    providers: Array<{
+      provider: string;
+      configured: boolean;
+      valid: boolean;
+      expiresAt: number | null;
+    }>;
+  }> {
+    return this.fetch("/api/subscription/status");
+  }
+
+  async deleteSubscription(provider: string): Promise<{ success: boolean }> {
+    return this.fetch(`/api/subscription/${provider}`, { method: "DELETE" });
+  }
+
   async startOpenAILogin(): Promise<{ authUrl: string; state: string; instructions: string }> {
     return this.fetch("/api/subscription/openai/start", { method: "POST" });
   }

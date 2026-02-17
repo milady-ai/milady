@@ -63,6 +63,10 @@ function Modal({
 
 /* ── Auto-detection helpers ────────────────────────────────────────── */
 
+function formatRequestError(err: unknown): string {
+  return err instanceof Error ? err.message : "unknown error";
+}
+
 /* ── SettingsView ─────────────────────────────────────────────────────── */
 
 export function SettingsView() {
@@ -131,10 +135,38 @@ export function SettingsView() {
   const [modelSaving, setModelSaving] = useState(false);
   const [modelSaveSuccess, setModelSaveSuccess] = useState(false);
 
+  const [subscriptionStatus, setSubscriptionStatus] = useState<Array<{
+    provider: string;
+    configured: boolean;
+    valid: boolean;
+    expiresAt: number | null;
+  }>>([]);
+  const [subscriptionTab, setSubscriptionTab] = useState<"token" | "oauth">("token");
+  const [setupTokenValue, setSetupTokenValue] = useState("");
+  const [setupTokenSaving, setSetupTokenSaving] = useState(false);
+  const [setupTokenSuccess, setSetupTokenSuccess] = useState(false);
+  const [anthropicOAuthStarted, setAnthropicOAuthStarted] = useState(false);
+  const [anthropicCode, setAnthropicCode] = useState("");
+  const [anthropicConnected, setAnthropicConnected] = useState(false);
+  const [anthropicError, setAnthropicError] = useState("");
+  const [openaiOAuthStarted, setOpenaiOAuthStarted] = useState(false);
+  const [openaiCallbackUrl, setOpenaiCallbackUrl] = useState("");
+  const [openaiConnected, setOpenaiConnected] = useState(false);
+  const [openaiError, setOpenaiError] = useState("");
+  const [subscriptionDisconnecting, setSubscriptionDisconnecting] = useState<string | null>(null);
+
+  const loadSubscriptionStatus = useCallback(async () => {
+    try {
+      const res = await client.getSubscriptionStatus();
+      setSubscriptionStatus(res.providers ?? []);
+    } catch { /* ignore */ }
+  }, []);
+
   useEffect(() => {
     void loadPlugins();
     void loadUpdateStatus();
     void checkExtensionStatus();
+    void loadSubscriptionStatus();
 
     void (async () => {
       try {
@@ -152,12 +184,27 @@ export function SettingsView() {
         setCurrentLargeModel(models?.large || (cloudEnabledCfg ? defaultLarge : ""));
       } catch { /* ignore */ }
     })();
-  }, [loadPlugins, loadUpdateStatus, checkExtensionStatus]);
+  }, [loadPlugins, loadUpdateStatus, checkExtensionStatus, loadSubscriptionStatus]);
+
+  useEffect(() => {
+    const anthropicStatus = subscriptionStatus.find((s) => s.provider === "anthropic-subscription");
+    const openaiStatus = subscriptionStatus.find((s) =>
+      s.provider === "openai-subscription" || s.provider === "openai-codex",
+    );
+    setAnthropicConnected(Boolean(anthropicStatus?.configured && anthropicStatus?.valid));
+    setOpenaiConnected(Boolean(openaiStatus?.configured && openaiStatus?.valid));
+  }, [subscriptionStatus]);
 
   /* ── Derived ──────────────────────────────────────────────────────── */
 
   const allAiProviders = plugins.filter((p) => p.category === "ai-provider");
   const enabledAiProviders = allAiProviders.filter((p) => p.enabled);
+  const subscriptionProviders = [
+    { id: "anthropic-subscription", label: "Claude Subscription" },
+    { id: "openai-subscription", label: "ChatGPT Subscription" },
+  ];
+  const isSubscriptionId = (id: string | null) =>
+    id === "anthropic-subscription" || id === "openai-subscription";
 
   const [selectedProviderId, setSelectedProviderId] = useState<string | null>(
     () => (cloudEnabled ? "__cloud__" : null),
@@ -177,16 +224,24 @@ export function SettingsView() {
   const resolvedSelectedId =
     selectedProviderId === "__cloud__"
       ? "__cloud__"
-      : selectedProviderId && allAiProviders.some((p) => p.id === selectedProviderId)
+      : selectedProviderId && (allAiProviders.some((p) => p.id === selectedProviderId) || isSubscriptionId(selectedProviderId))
         ? selectedProviderId
         : cloudEnabled
           ? "__cloud__"
-          : enabledAiProviders[0]?.id ?? null;
+          : anthropicConnected
+            ? "anthropic-subscription"
+            : openaiConnected
+              ? "openai-subscription"
+              : enabledAiProviders[0]?.id ?? null;
 
   const selectedProvider =
-    resolvedSelectedId && resolvedSelectedId !== "__cloud__"
+    resolvedSelectedId && resolvedSelectedId !== "__cloud__" && !isSubscriptionId(resolvedSelectedId)
       ? allAiProviders.find((p) => p.id === resolvedSelectedId) ?? null
       : null;
+  const anthropicStatus = subscriptionStatus.find((s) => s.provider === "anthropic-subscription");
+  const openaiStatus = subscriptionStatus.find((s) =>
+    s.provider === "openai-subscription" || s.provider === "openai-codex",
+  );
 
   const handleSwitchProvider = useCallback(
     async (newId: string) => {
@@ -214,6 +269,164 @@ export function SettingsView() {
     },
     [allAiProviders, enabledAiProviders, handlePluginToggle, setState],
   );
+
+  const handleSelectSubscription = useCallback(
+    async (providerId: string) => {
+      hasManualSelection.current = true;
+      setSelectedProviderId(providerId);
+      const pluginId =
+        providerId === "anthropic-subscription"
+          ? "@elizaos/plugin-anthropic"
+          : "@elizaos/plugin-openai";
+      const target = allAiProviders.find((p) => p.id === pluginId);
+      if (!target) return;
+
+      /* Turn off cloud mode when switching to a subscription provider */
+      try {
+        await client.updateConfig({
+          cloud: { enabled: false },
+          agents: { defaults: { model: { primary: null } } },
+        });
+        setState("cloudEnabled", false);
+      } catch { /* non-fatal */ }
+      if (!target.enabled) {
+        await handlePluginToggle(target.id, true);
+      }
+      for (const p of enabledAiProviders) {
+        if (p.id !== target.id) {
+          await handlePluginToggle(p.id, false);
+        }
+      }
+    },
+    [allAiProviders, enabledAiProviders, handlePluginToggle, setState],
+  );
+
+  const handleSaveSetupToken = useCallback(async () => {
+    if (!setupTokenValue.trim() || setupTokenSaving) return;
+    setSetupTokenSaving(true);
+    setSetupTokenSuccess(false);
+    setAnthropicError("");
+    try {
+      const result = await client.submitAnthropicSetupToken(setupTokenValue.trim());
+      if (!result.success) {
+        setAnthropicError("Failed to save setup token.");
+        return;
+      }
+      setSetupTokenSuccess(true);
+      setSetupTokenValue("");
+      await handleSelectSubscription("anthropic-subscription");
+      await loadSubscriptionStatus();
+      await client.restartAgent();
+      setTimeout(() => setSetupTokenSuccess(false), 2000);
+    } catch (err) {
+      setAnthropicError(`Failed to save token: ${formatRequestError(err)}`);
+    } finally {
+      setSetupTokenSaving(false);
+    }
+  }, [handleSelectSubscription, loadSubscriptionStatus, setupTokenSaving, setupTokenValue]);
+
+  const handleDisconnectSubscription = useCallback(
+    async (providerId: string) => {
+      if (subscriptionDisconnecting) return;
+      setSubscriptionDisconnecting(providerId);
+      setAnthropicError("");
+      setOpenaiError("");
+      try {
+        const apiProvider = providerId === "openai-subscription" ? "openai-codex" : providerId;
+        await client.deleteSubscription(apiProvider);
+        await loadSubscriptionStatus();
+        if (providerId === "anthropic-subscription") {
+          setAnthropicConnected(false);
+          setAnthropicOAuthStarted(false);
+          setAnthropicCode("");
+        }
+        if (providerId === "openai-subscription") {
+          setOpenaiConnected(false);
+          setOpenaiOAuthStarted(false);
+          setOpenaiCallbackUrl("");
+        }
+        await client.restartAgent();
+      } catch (err) {
+        const msg = `Disconnect failed: ${formatRequestError(err)}`;
+        if (providerId === "anthropic-subscription") setAnthropicError(msg);
+        if (providerId === "openai-subscription") setOpenaiError(msg);
+      } finally {
+        setSubscriptionDisconnecting(null);
+      }
+    },
+    [loadSubscriptionStatus, subscriptionDisconnecting],
+  );
+
+  const handleAnthropicStart = useCallback(async () => {
+    setAnthropicError("");
+    try {
+      const { authUrl } = await client.startAnthropicLogin();
+      if (authUrl) {
+        window.open(authUrl, "anthropic-oauth", "width=600,height=700,top=50,left=200");
+        setAnthropicOAuthStarted(true);
+        return;
+      }
+      setAnthropicError("Failed to get auth URL");
+    } catch (err) {
+      setAnthropicError(`Failed to start login: ${formatRequestError(err)}`);
+    }
+  }, []);
+
+  const handleAnthropicExchange = useCallback(async () => {
+    setAnthropicError("");
+    try {
+      const result = await client.exchangeAnthropicCode(anthropicCode);
+      if (result.success) {
+        setAnthropicConnected(true);
+        setAnthropicOAuthStarted(false);
+        setAnthropicCode("");
+        await handleSelectSubscription("anthropic-subscription");
+        await loadSubscriptionStatus();
+        await client.restartAgent();
+        return;
+      }
+      setAnthropicError(result.error ?? "Exchange failed");
+    } catch (err) {
+      setAnthropicError(`Exchange failed: ${formatRequestError(err)}`);
+    }
+  }, [anthropicCode, handleSelectSubscription, loadSubscriptionStatus]);
+
+  const handleOpenAIStart = useCallback(async () => {
+    setOpenaiError("");
+    try {
+      const { authUrl } = await client.startOpenAILogin();
+      if (authUrl) {
+        window.open(authUrl, "openai-oauth", "width=500,height=700,top=50,left=200");
+        setOpenaiOAuthStarted(true);
+        return;
+      }
+      setOpenaiError("No auth URL returned from login");
+    } catch (err) {
+      setOpenaiError(`Failed to start login: ${formatRequestError(err)}`);
+    }
+  }, []);
+
+  const handleOpenAIExchange = useCallback(async () => {
+    setOpenaiError("");
+    try {
+      const data = await client.exchangeOpenAICode(openaiCallbackUrl);
+      if (data.success) {
+        setOpenaiConnected(true);
+        setOpenaiOAuthStarted(false);
+        setOpenaiCallbackUrl("");
+        await handleSelectSubscription("openai-subscription");
+        await loadSubscriptionStatus();
+        await client.restartAgent();
+        return;
+      }
+      const msg = data.error ?? "Exchange failed";
+      setOpenaiError(msg.includes("No active flow")
+        ? "Login session expired. Click 'Start Over' and try again."
+        : msg);
+    } catch (err) {
+      setOpenaiError("Network error — check your connection and try again.");
+    }
+  }, [handleSelectSubscription, loadSubscriptionStatus, openaiCallbackUrl]);
 
   const handleSelectCloud = useCallback(async () => {
     hasManualSelection.current = true;
@@ -362,10 +575,16 @@ export function SettingsView() {
         <div className="font-bold text-sm mb-4">AI Model</div>
 
         {(() => {
-          const totalCols = allAiProviders.length + 1; /* +1 for Eliza Cloud */
+          const totalCols = allAiProviders.length + 1 + subscriptionProviders.length; /* +1 for Eliza Cloud */
           const isCloudSelected = resolvedSelectedId === "__cloud__";
+          const isSubscriptionSelected = resolvedSelectedId === "anthropic-subscription" || resolvedSelectedId === "openai-subscription";
           const providerChoices = [
             { id: "__cloud__", label: "Eliza Cloud", disabled: false },
+            ...subscriptionProviders.map((provider) => ({
+              id: provider.id,
+              label: provider.label,
+              disabled: false,
+            })),
             ...allAiProviders.map((provider) => ({
               id: provider.id,
               label: provider.name,
@@ -407,6 +626,10 @@ export function SettingsView() {
                       void handleSelectCloud();
                       return;
                     }
+                    if (nextId === "anthropic-subscription" || nextId === "openai-subscription") {
+                      void handleSelectSubscription(nextId);
+                      return;
+                    }
                     void handleSwitchProvider(nextId);
                   }}
                 >
@@ -434,6 +657,25 @@ export function SettingsView() {
                     Eliza Cloud
                   </div>
                 </button>
+
+                {subscriptionProviders.map((provider) => {
+                  const isSelected = !isCloudSelected && provider.id === resolvedSelectedId;
+                  return (
+                    <button
+                      key={provider.id}
+                      className={`text-center px-2 py-2 border cursor-pointer transition-colors ${
+                        isSelected
+                          ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)]"
+                          : "border-[var(--border)] bg-[var(--card)] hover:border-[var(--accent)]"
+                      }`}
+                      onClick={() => void handleSelectSubscription(provider.id)}
+                    >
+                      <div className={`text-xs font-bold whitespace-nowrap ${isSelected ? "" : "text-[var(--text)]"}`}>
+                        {provider.label}
+                      </div>
+                    </button>
+                  );
+                })}
 
                 {allAiProviders.map((provider) => {
                   const isSelected = !isCloudSelected && provider.id === resolvedSelectedId;
@@ -590,6 +832,258 @@ export function SettingsView() {
                             Opens a browser window to authenticate.
                           </div>
                         </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Subscription provider settings */}
+              {isSubscriptionSelected && (
+                <div className="mt-4 pt-4 border-t border-[var(--border)]">
+                  {resolvedSelectedId === "anthropic-subscription" && (
+                    <div>
+                      <div className="flex justify-between items-center mb-3">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="inline-block w-2 h-2 rounded-full"
+                            style={{
+                              background: anthropicConnected ? "var(--ok,#16a34a)" : "var(--warning,#f39c12)",
+                            }}
+                          />
+                          <span className="text-xs font-semibold">
+                            {anthropicConnected ? "Connected to Claude Subscription" : "Claude Subscription"}
+                          </span>
+                        </div>
+                        {anthropicConnected && (
+                          <button
+                            className="btn text-xs py-[3px] px-3 !mt-0 !bg-transparent !border-[var(--border)] !text-[var(--muted)]"
+                            onClick={() => void handleDisconnectSubscription("anthropic-subscription")}
+                            disabled={subscriptionDisconnecting === "anthropic-subscription"}
+                          >
+                            {subscriptionDisconnecting === "anthropic-subscription" ? "Disconnecting..." : "Disconnect"}
+                          </button>
+                        )}
+                      </div>
+
+                      {anthropicStatus?.configured && !anthropicStatus.valid && (
+                        <div className="text-xs text-[var(--warning,#f39c12)] mb-3">
+                          Claude subscription credentials are expired or invalid. Reconnect to continue.
+                        </div>
+                      )}
+
+                      <div className="flex items-center gap-4 border-b border-[var(--border)] mb-3">
+                        <button
+                          className={`text-xs pb-2 border-b-2 ${
+                            subscriptionTab === "token"
+                              ? "border-[var(--accent)] text-[var(--accent)]"
+                              : "border-transparent text-[var(--muted)] hover:text-[var(--text)]"
+                          }`}
+                          onClick={() => setSubscriptionTab("token")}
+                        >
+                          Setup Token
+                        </button>
+                        <button
+                          className={`text-xs pb-2 border-b-2 ${
+                            subscriptionTab === "oauth"
+                              ? "border-[var(--accent)] text-[var(--accent)]"
+                              : "border-transparent text-[var(--muted)] hover:text-[var(--text)]"
+                          }`}
+                          onClick={() => setSubscriptionTab("oauth")}
+                        >
+                          OAuth Login
+                        </button>
+                      </div>
+
+                      {subscriptionTab === "token" ? (
+                        <div>
+                          <label className="text-xs font-semibold mb-1.5 block">Setup Token</label>
+                          <input
+                            type="password"
+                            placeholder="sk-ant-oat01-..."
+                            value={setupTokenValue}
+                            onChange={(e) => {
+                              setSetupTokenValue(e.target.value);
+                              setSetupTokenSuccess(false);
+                              setAnthropicError("");
+                            }}
+                            className="w-full px-2.5 py-1.5 border border-[var(--border)] bg-[var(--card)] text-xs font-[var(--mono)] focus:border-[var(--accent)] focus:outline-none"
+                          />
+                          <div className="text-[11px] text-[var(--muted)] mt-2 whitespace-pre-line">
+                            {"How to get your setup token:\n\n• Option A: Run  claude setup-token  in your terminal (if you have Claude Code CLI installed)\n\n• Option B: Go to claude.ai/settings/api → \"Claude Code\" → \"Use setup token\""}
+                          </div>
+                          {anthropicError && (
+                            <div className="text-[11px] text-[var(--danger,#e74c3c)] mt-2">
+                              {anthropicError}
+                            </div>
+                          )}
+                          <div className="flex items-center justify-between mt-3">
+                            <button
+                              className="btn text-xs py-[5px] px-3.5 !mt-0"
+                              disabled={setupTokenSaving || !setupTokenValue.trim()}
+                              onClick={() => void handleSaveSetupToken()}
+                            >
+                              {setupTokenSaving ? "Saving..." : "Save Token"}
+                            </button>
+                            <div className="flex items-center gap-2">
+                              {setupTokenSaving && (
+                                <span className="text-[11px] text-[var(--muted)]">Saving &amp; restarting...</span>
+                              )}
+                              {setupTokenSuccess && (
+                                <span className="text-[11px] text-[var(--ok,#16a34a)]">Saved</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ) : anthropicConnected ? (
+                        <div className="text-xs text-[var(--muted)]">
+                          Your Claude subscription is linked. Disconnect to switch accounts.
+                        </div>
+                      ) : !anthropicOAuthStarted ? (
+                        <div>
+                          <button
+                            className="btn text-xs py-[5px] px-3.5 !mt-0"
+                            onClick={() => void handleAnthropicStart()}
+                          >
+                            Login with Anthropic
+                          </button>
+                          <div className="text-[11px] text-[var(--muted)] mt-1.5">
+                            Requires Claude Pro ($20/mo) or Max ($100/mo).
+                          </div>
+                          {anthropicError && (
+                            <div className="text-[11px] text-[var(--danger,#e74c3c)] mt-2">
+                              {anthropicError}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="text-xs text-[var(--muted)] mb-2">
+                            After logging in, copy the authorization code from Anthropic and paste it below.
+                          </div>
+                          <input
+                            type="text"
+                            placeholder="Paste the authorization code here..."
+                            value={anthropicCode}
+                            onChange={(e) => {
+                              setAnthropicCode(e.target.value);
+                              setAnthropicError("");
+                            }}
+                            className="w-full px-2.5 py-1.5 border border-[var(--border)] bg-[var(--card)] text-xs focus:border-[var(--accent)] focus:outline-none"
+                          />
+                          {anthropicError && (
+                            <div className="text-[11px] text-[var(--danger,#e74c3c)] mt-2">
+                              {anthropicError}
+                            </div>
+                          )}
+                          <div className="flex items-center gap-2 mt-2">
+                            <button
+                              className="btn text-xs py-[5px] px-3.5 !mt-0"
+                              disabled={!anthropicCode}
+                              onClick={() => void handleAnthropicExchange()}
+                            >
+                              Connect
+                            </button>
+                            <button
+                              className="btn text-xs py-[5px] px-3.5 !mt-0 !bg-transparent !border-[var(--border)] !text-[var(--muted)]"
+                              onClick={() => { setAnthropicOAuthStarted(false); setAnthropicCode(""); }}
+                            >
+                              Start Over
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {resolvedSelectedId === "openai-subscription" && (
+                    <div>
+                      <div className="flex justify-between items-center mb-3">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="inline-block w-2 h-2 rounded-full"
+                            style={{
+                              background: openaiConnected ? "var(--ok,#16a34a)" : "var(--warning,#f39c12)",
+                            }}
+                          />
+                          <span className="text-xs font-semibold">
+                            {openaiConnected ? "Connected to ChatGPT Subscription" : "ChatGPT Subscription"}
+                          </span>
+                        </div>
+                        {openaiConnected && (
+                          <button
+                            className="btn text-xs py-[3px] px-3 !mt-0 !bg-transparent !border-[var(--border)] !text-[var(--muted)]"
+                            onClick={() => void handleDisconnectSubscription("openai-subscription")}
+                            disabled={subscriptionDisconnecting === "openai-subscription"}
+                          >
+                            {subscriptionDisconnecting === "openai-subscription" ? "Disconnecting..." : "Disconnect"}
+                          </button>
+                        )}
+                      </div>
+
+                      {openaiStatus?.configured && !openaiStatus.valid && (
+                        <div className="text-xs text-[var(--warning,#f39c12)] mb-3">
+                          ChatGPT subscription credentials are expired or invalid. Reconnect to continue.
+                        </div>
+                      )}
+
+                      {openaiConnected ? (
+                        <div className="text-xs text-[var(--muted)]">
+                          Your ChatGPT subscription is linked. Disconnect to switch accounts.
+                        </div>
+                      ) : !openaiOAuthStarted ? (
+                        <div>
+                          <button
+                            className="btn text-xs py-[5px] px-3.5 !mt-0"
+                            onClick={() => void handleOpenAIStart()}
+                          >
+                            Login with OpenAI
+                          </button>
+                          <div className="text-[11px] text-[var(--muted)] mt-1.5">
+                            Requires ChatGPT Plus ($20/mo) or Pro ($200/mo).
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="p-2.5 border border-[var(--border)] bg-[var(--bg-muted)] text-[11px] text-[var(--muted)] leading-relaxed">
+                            After logging in, you'll be redirected to a page that won't load
+                            (starts with <code className="text-[10px] px-1 border border-[var(--border)] bg-[var(--card)]">localhost:1455</code>).
+                            Copy the entire URL and paste it below.
+                          </div>
+                          <input
+                            type="text"
+                            className="w-full mt-2 px-2.5 py-1.5 border border-[var(--border)] bg-[var(--card)] text-xs focus:border-[var(--accent)] focus:outline-none"
+                            placeholder="http://localhost:1455/auth/callback?code=..."
+                            value={openaiCallbackUrl}
+                            onChange={(e) => { setOpenaiCallbackUrl(e.target.value); setOpenaiError(""); }}
+                          />
+                          {openaiError && (
+                            <div className="text-[11px] text-[var(--danger,#e74c3c)] mt-2">
+                              {openaiError}
+                            </div>
+                          )}
+                          <div className="flex items-center gap-2 mt-2">
+                            <button
+                              className="btn text-xs py-[5px] px-3.5 !mt-0"
+                              disabled={!openaiCallbackUrl}
+                              onClick={() => void handleOpenAIExchange()}
+                            >
+                              Complete Login
+                            </button>
+                            <button
+                              className="btn text-xs py-[5px] px-3.5 !mt-0 !bg-transparent !border-[var(--border)] !text-[var(--muted)]"
+                              onClick={() => { setOpenaiOAuthStarted(false); setOpenaiCallbackUrl(""); }}
+                            >
+                              Start Over
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {openaiError && !openaiOAuthStarted && (
+                        <div className="text-[11px] text-[var(--danger,#e74c3c)] mt-2">
+                          {openaiError}
+                        </div>
                       )}
                     </div>
                   )}
