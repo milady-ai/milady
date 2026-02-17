@@ -1,1 +1,7 @@
+eliza
+packages
+plugins
+**/node_modules
+**/dist
+.git
 src/benchmark/mock-plugin.ts
