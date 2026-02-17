@@ -257,6 +257,7 @@ jobs:
       - name: Preflight Azure Trusted Signing access
         id: trusted_signing_preflight
         if: matrix.platform.os == 'windows'
+        continue-on-error: true
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
