@@ -8997,19 +8997,28 @@ async function handleRequest(
       return;
     }
 
+    // Compact attachments: placeholder URL (no base64) to avoid bloating the
+    // LLM prompt context. The raw image data is stashed in `_data`/`_mimeType`
+    // for action handlers (e.g. POST_TWEET) that need to upload the bytes.
     const attachments = images?.map((img, i) => ({
       id: `img-${i}`,
-      url: `data:${img.mimeType};base64,${img.data}`,
+      url: `attachment:img-${i}`,
       title: img.name,
       source: "client_chat",
-      description: img.name,
+      description: "User-attached image",
       text: "",
       contentType: ContentType.IMAGE,
+      _data: img.data,
+      _mimeType: img.mimeType,
     }));
+
+    // DB-persisted version omits _data so the raw bytes aren't stored.
+    const compactAttachments = attachments?.map(({ _data: _d, _mimeType: _m, ...rest }) => rest);
 
     const msgId = crypto.randomUUID() as UUID;
 
-    // In-memory message carries full base64 data so action handlers can upload it.
+    // In-memory message: compact URL + _data so action handlers can upload.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const userMessage = createMessageMemory({
       id: msgId,
       entityId: userId,
@@ -9018,13 +9027,12 @@ async function handleRequest(
         text: prompt,
         source: "client_chat",
         channelType,
-        ...(attachments?.length ? { attachments } : {}),
+        ...(attachments?.length ? { attachments: attachments as any } : {}),
       },
     });
 
-    // Persisted message strips the base64 payload to prevent it from bloating
-    // the LLM context window on subsequent conversation turns.
-    const messageToStore = attachments?.length
+    // Persisted message: compact URL, no raw bytes.
+    const messageToStore = compactAttachments?.length
       ? createMessageMemory({
           id: msgId,
           entityId: userId,
@@ -9033,10 +9041,7 @@ async function handleRequest(
             text: prompt,
             source: "client_chat",
             channelType,
-            attachments: attachments.map((att) => ({
-              ...att,
-              url: `attachment:${att.id}`,
-            })),
+            attachments: compactAttachments,
           },
         })
       : userMessage;
@@ -9178,16 +9183,23 @@ async function handleRequest(
 
     const msgAttachments = images?.map((img, i) => ({
       id: `img-${i}`,
-      url: `data:${img.mimeType};base64,${img.data}`,
+      url: `attachment:img-${i}`,
       title: img.name,
       source: "client_chat",
-      description: img.name,
+      description: "User-attached image",
       text: "",
       contentType: ContentType.IMAGE,
+      _data: img.data,
+      _mimeType: img.mimeType,
     }));
+
+    const compactMsgAttachments = msgAttachments?.map(
+      ({ _data: _d, _mimeType: _m, ...rest }) => rest,
+    );
 
     const msgId2 = crypto.randomUUID() as UUID;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const userMessage = createMessageMemory({
       id: msgId2,
       entityId: userId,
@@ -9196,11 +9208,11 @@ async function handleRequest(
         text: prompt,
         source: "client_chat",
         channelType,
-        ...(msgAttachments?.length ? { attachments: msgAttachments } : {}),
+        ...(msgAttachments?.length ? { attachments: msgAttachments as any } : {}),
       },
     });
 
-    const msgToStore2 = msgAttachments?.length
+    const msgToStore2 = compactMsgAttachments?.length
       ? createMessageMemory({
           id: msgId2,
           entityId: userId,
@@ -9209,10 +9221,7 @@ async function handleRequest(
             text: prompt,
             source: "client_chat",
             channelType,
-            attachments: msgAttachments.map((att) => ({
-              ...att,
-              url: `attachment:${att.id}`,
-            })),
+            attachments: compactMsgAttachments,
           },
         })
       : userMessage;
