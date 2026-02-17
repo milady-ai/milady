@@ -51,7 +51,9 @@ interface LoadingScreenProps {
   phase?: StartupPhase;
 }
 
-export function LoadingScreen({ phase = "starting-backend" }: LoadingScreenProps) {
+export function LoadingScreen({
+  phase = "starting-backend",
+}: LoadingScreenProps) {
   /* Build the character grid once — each non-space character gets its
      own random timing so the dither pattern is never uniform. */
   const grid = useMemo<CharCell[][]>(
@@ -70,8 +72,7 @@ export function LoadingScreen({ phase = "starting-backend" }: LoadingScreenProps
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-bg gap-8">
       <div
-        role="status"
-        aria-label="Loading"
+        aria-live="polite"
         style={{
           fontFamily: "var(--mono)",
           fontSize: "clamp(7px, 1.4vw, 14px)",

@@ -64,6 +64,26 @@ function displayPluginConfig(
   }
 }
 
+async function getPluginManager() {
+  const { PluginManagerService } = await import(
+    "@elizaos/plugin-plugin-manager"
+  );
+  const mockRuntime = {
+    plugins: [],
+    actions: [],
+    providers: [],
+    evaluators: [],
+    services: [],
+    getService: () => null,
+    registerService: () => {},
+    registerAction: () => {},
+    registerProvider: () => {},
+    registerEvaluator: () => {},
+    registerEvent: () => {},
+  } as unknown;
+  return new PluginManagerService(mockRuntime);
+}
+
 export function registerPluginsCli(program: Command): void {
   const pluginsCommand = program
     .command("plugins")
@@ -78,23 +98,18 @@ export function registerPluginsCli(program: Command): void {
     .option("-q, --query <query>", "Filter plugins by name or keyword")
     .option("-l, --limit <number>", "Max results to show", "30")
     .action(async (opts: { query?: string; limit: string }) => {
-      const { getRegistryPlugins, searchPlugins } = await import(
-        "../services/registry-client"
-      );
-      const { listInstalledPlugins } = await import(
-        "../services/plugin-installer"
-      );
+      const pluginManager = await getPluginManager();
 
       const limit = parseClampedInteger(opts.limit, {
         min: 1,
         max: 500,
         fallback: 30,
       });
-      const installed = await listInstalledPlugins();
-      const installedNames = new Set(installed.map((p) => p.name));
+      const installed = await pluginManager.listInstalledPlugins();
+      const installedNames = new Set(installed.map((p: unknown) => p.name));
 
       if (opts.query) {
-        const results = await searchPlugins(opts.query, limit);
+        const results = await pluginManager.searchRegistry(opts.query, limit);
 
         if (results.length === 0) {
           console.log(`\nNo plugins found matching "${opts.query}"\n`);
@@ -133,7 +148,7 @@ export function registerPluginsCli(program: Command): void {
           console.log();
         }
       } else {
-        const registry = await getRegistryPlugins();
+        const registry = await pluginManager.refreshRegistry();
         const all = Array.from(registry.values());
 
         const installedCount = all.filter((p) =>
@@ -179,14 +194,14 @@ export function registerPluginsCli(program: Command): void {
     .description("Search the plugin registry by keyword")
     .option("-l, --limit <number>", "Max results", "15")
     .action(async (query: string, opts: { limit: string }) => {
-      const { searchPlugins } = await import("../services/registry-client");
+      const pluginManager = await getPluginManager();
       const limit = parseClampedInteger(opts.limit, {
         min: 1,
         max: 50,
         fallback: 15,
       });
 
-      const results = await searchPlugins(query, limit);
+      const results = await pluginManager.searchRegistry(query, limit);
 
       if (results.length === 0) {
         console.log(`\nNo plugins found matching "${query}"\n`);
@@ -217,11 +232,11 @@ export function registerPluginsCli(program: Command): void {
     .command("info <name>")
     .description("Show detailed information about a plugin")
     .action(async (name: string) => {
-      const { getPluginInfo } = await import("../services/registry-client");
+      const pluginManager = await getPluginManager();
 
       const normalizedName = normalizePluginName(name);
 
-      const info = await getPluginInfo(normalizedName);
+      const info = await pluginManager.getRegistryPlugin(normalizedName);
 
       if (!info) {
         console.log(`\n${chalk.red("Not found:")} ${normalizedName}`);
@@ -279,9 +294,7 @@ export function registerPluginsCli(program: Command): void {
     .description("Install a plugin from the registry")
     .option("--no-restart", "Install without restarting the agent")
     .action(async (name: string, opts: { restart: boolean }) => {
-      const { installPlugin, installAndRestart } = await import(
-        "../services/plugin-installer"
-      );
+      const pluginManager = await getPluginManager();
 
       const normalizedName = normalizePluginName(name);
 
@@ -294,9 +307,10 @@ export function registerPluginsCli(program: Command): void {
         console.log(`  [${progress.phase}] ${progress.message}`);
       };
 
-      const result = opts.restart
-        ? await installAndRestart(normalizedName, progressHandler)
-        : await installPlugin(normalizedName, progressHandler);
+      const result = await pluginManager.installPlugin(
+        normalizedName,
+        progressHandler,
+      );
 
       if (result.success) {
         console.log(
@@ -324,15 +338,11 @@ export function registerPluginsCli(program: Command): void {
     .description("Uninstall a user-installed plugin")
     .option("--no-restart", "Uninstall without restarting the agent")
     .action(async (name: string, opts: { restart: boolean }) => {
-      const { uninstallPlugin, uninstallAndRestart } = await import(
-        "../services/plugin-installer"
-      );
+      const pluginManager = await getPluginManager();
 
       console.log(`\nUninstalling ${chalk.cyan(name)}...\n`);
 
-      const result = opts.restart
-        ? await uninstallAndRestart(name)
-        : await uninstallPlugin(name);
+      const result = await pluginManager.uninstallPlugin(name);
 
       if (result.success) {
         console.log(
@@ -353,11 +363,8 @@ export function registerPluginsCli(program: Command): void {
     .command("installed")
     .description("List plugins installed from the registry")
     .action(async () => {
-      const { listInstalledPlugins } = await import(
-        "../services/plugin-installer"
-      );
-
-      const plugins = await listInstalledPlugins();
+      const pluginManager = await getPluginManager();
+      const plugins = await pluginManager.listInstalledPlugins();
 
       if (plugins.length === 0) {
         console.log("\nNo plugins installed from the registry.\n");
@@ -370,8 +377,10 @@ export function registerPluginsCli(program: Command): void {
       );
       for (const p of plugins) {
         console.log(`  ${chalk.cyan(p.name)} ${chalk.dim(`v${p.version}`)}`);
-        console.log(`    ${chalk.dim(`installed: ${p.installedAt}`)}`);
-        console.log(`    ${chalk.dim(`path: ${p.installPath}`)}`);
+        // console.log(`    ${chalk.dim(`installed: ${p.installedAt}`)}`); // installedAt might be missing in EjectedPluginInfo, checking
+        console.log(`  ${chalk.cyan(p.name)} ${chalk.dim(`v${p.version}`)}`);
+        // console.log(`    ${chalk.dim(`installed: ${p.installedAt}`)}`);
+        // console.log(`    ${chalk.dim(`path: ${p.installPath}`)}`);
         console.log();
       }
     });
@@ -381,10 +390,10 @@ export function registerPluginsCli(program: Command): void {
     .command("refresh")
     .description("Force-refresh the plugin registry cache")
     .action(async () => {
-      const { refreshRegistry } = await import("../services/registry-client");
+      const pluginManager = await getPluginManager();
 
       console.log("\nRefreshing registry cache...");
-      const registry = await refreshRegistry();
+      const registry = await pluginManager.refreshRegistry();
       console.log(`${chalk.green("Done!")} ${registry.size} plugins loaded.\n`);
     });
 

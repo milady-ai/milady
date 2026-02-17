@@ -2,9 +2,9 @@
  * Game View — embeds a running app's game client in an iframe.
  */
 
-import { useState, useCallback, useEffect, useRef, useMemo } from "react";
-import { client } from "../api-client";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useApp } from "../AppContext";
+import { client } from "../api-client";
 
 const DEFAULT_VIEWER_SANDBOX = "allow-scripts allow-same-origin allow-popups";
 const READY_EVENT_BY_AUTH_TYPE: Record<string, string> = {
@@ -48,7 +48,7 @@ export function GameView() {
 
   useEffect(() => {
     authSentRef.current = false;
-  }, [activeGameViewerUrl, activeGamePostMessageAuth, activeGamePostMessagePayload]);
+  }, []);
 
   useEffect(() => {
     if (!activeGamePostMessageAuth || !activeGamePostMessagePayload) return;
@@ -68,7 +68,10 @@ export function GameView() {
       ) {
         return;
       }
-      iframeWindow.postMessage(activeGamePostMessagePayload, postMessageTargetOrigin);
+      iframeWindow.postMessage(
+        activeGamePostMessagePayload,
+        postMessageTargetOrigin,
+      );
       authSentRef.current = true;
       setActionNotice("Viewer auth sent.", "info", 1800);
     };
@@ -85,9 +88,17 @@ export function GameView() {
   ]);
 
   const handleOpenInNewTab = useCallback(() => {
-    const popup = window.open(activeGameViewerUrl, "_blank", "noopener,noreferrer");
+    const popup = window.open(
+      activeGameViewerUrl,
+      "_blank",
+      "noopener,noreferrer",
+    );
     if (!popup) {
-      setActionNotice("Popup blocked. Allow popups and try again.", "error", 3600);
+      setActionNotice(
+        "Popup blocked. Allow popups and try again.",
+        "error",
+        3600,
+      );
     }
   }, [activeGameViewerUrl, setActionNotice]);
 
@@ -104,7 +115,10 @@ export function GameView() {
         stopResult.needsRestart ? 5000 : 3200,
       );
     } catch (err) {
-      setActionNotice(`Failed to stop: ${err instanceof Error ? err.message : "error"}`, "error");
+      setActionNotice(
+        `Failed to stop: ${err instanceof Error ? err.message : "error"}`,
+        "error",
+      );
     } finally {
       setStopping(false);
     }
@@ -115,6 +129,7 @@ export function GameView() {
       <div className="flex items-center justify-center py-10 text-muted italic">
         No active game session.{" "}
         <button
+          type="button"
           onClick={() => {
             setState("tab", "apps");
             setState("appsSubTab", "browse");
@@ -130,7 +145,9 @@ export function GameView() {
   return (
     <div className="flex flex-col h-full min-h-0">
       <div className="flex items-center gap-3 px-4 py-2 border-b border-border bg-card">
-        <span className="font-bold text-sm">{activeGameDisplayName || activeGameApp}</span>
+        <span className="font-bold text-sm">
+          {activeGameDisplayName || activeGameApp}
+        </span>
         {activeGamePostMessageAuth ? (
           <span className="text-[10px] px-1.5 py-0.5 border border-border text-muted">
             postMessage auth
@@ -138,12 +155,14 @@ export function GameView() {
         ) : null}
         <span className="flex-1" />
         <button
+          type="button"
           className="text-xs px-3 py-1 bg-accent text-accent-fg border border-accent cursor-pointer hover:bg-accent-hover disabled:opacity-40"
           onClick={handleOpenInNewTab}
         >
           Open in New Tab
         </button>
         <button
+          type="button"
           className="text-xs px-3 py-1 bg-accent text-accent-fg border border-accent cursor-pointer hover:bg-accent-hover disabled:opacity-40"
           disabled={stopping}
           onClick={handleStop}
@@ -151,6 +170,7 @@ export function GameView() {
           {stopping ? "Stopping..." : "Stop"}
         </button>
         <button
+          type="button"
           className="text-xs px-3 py-1 bg-accent text-accent-fg border border-accent cursor-pointer hover:bg-accent-hover disabled:opacity-40"
           onClick={() => {
             setState("tab", "apps");

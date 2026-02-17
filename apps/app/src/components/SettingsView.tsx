@@ -11,18 +11,22 @@
  *      Chrome Extension, Export/Import, Danger Zone
  */
 
-import { useEffect, useState, useCallback, useRef } from "react";
-import { useApp, THEMES } from "../AppContext";
-import { client, type PluginParamDef, type OnboardingOptions } from "../api-client";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { THEMES, useApp } from "../AppContext";
+import {
+  client,
+  type OnboardingOptions,
+  type PluginParamDef,
+} from "../api-client";
+import type { ConfigUiHint } from "../types";
 import { ConfigPageView } from "./ConfigPageView";
+import type { JsonSchemaObject } from "./config-catalog";
 import { ConfigRenderer, defaultRegistry } from "./config-renderer";
 import { MediaSettingsSection } from "./MediaSettingsSection";
-import { VoiceConfigView } from "./VoiceConfigView";
 import { PermissionsSection } from "./PermissionsSection";
-import type { ConfigUiHint } from "../types";
-import type { JsonSchemaObject } from "./config-catalog";
-import { autoLabel } from "./shared/labels";
 import { formatByteSize } from "./shared/format";
+import { autoLabel } from "./shared/labels";
+import { VoiceConfigView } from "./VoiceConfigView";
 
 /* ── Modal shell ─────────────────────────────────────────────────────── */
 
@@ -49,6 +53,7 @@ function Modal({
         <div className="flex items-center justify-between mb-4">
           <div className="font-bold text-sm">{title}</div>
           <button
+            type="button"
             className="text-[var(--muted)] hover:text-[var(--txt)] text-lg leading-none px-1"
             onClick={onClose}
           >
@@ -124,7 +129,9 @@ export function SettingsView() {
   } = useApp();
 
   /* ── Model selection state ─────────────────────────────────────────── */
-  const [modelOptions, setModelOptions] = useState<OnboardingOptions["models"] | null>(null);
+  const [modelOptions, setModelOptions] = useState<
+    OnboardingOptions["models"] | null
+  >(null);
 
   const [currentSmallModel, setCurrentSmallModel] = useState("");
   const [currentLargeModel, setCurrentLargeModel] = useState("");
@@ -140,7 +147,9 @@ export function SettingsView() {
       try {
         const opts = await client.getOnboardingOptions();
         setModelOptions(opts.models);
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
       try {
         const cfg = await client.getConfig();
         const models = cfg.models as Record<string, string> | undefined;
@@ -148,9 +157,15 @@ export function SettingsView() {
         const cloudEnabledCfg = cloud?.enabled === true;
         const defaultSmall = "moonshotai/kimi-k2-turbo";
         const defaultLarge = "moonshotai/kimi-k2-0905";
-        setCurrentSmallModel(models?.small || (cloudEnabledCfg ? defaultSmall : ""));
-        setCurrentLargeModel(models?.large || (cloudEnabledCfg ? defaultLarge : ""));
-      } catch { /* ignore */ }
+        setCurrentSmallModel(
+          models?.small || (cloudEnabledCfg ? defaultSmall : ""),
+        );
+        setCurrentLargeModel(
+          models?.large || (cloudEnabledCfg ? defaultLarge : ""),
+        );
+      } catch {
+        /* ignore */
+      }
     })();
   }, [loadPlugins, loadUpdateStatus, checkExtensionStatus]);
 
@@ -168,7 +183,8 @@ export function SettingsView() {
     if (hasManualSelection.current) return;
 
     if (cloudEnabled) {
-      if (selectedProviderId !== "__cloud__") setSelectedProviderId("__cloud__");
+      if (selectedProviderId !== "__cloud__")
+        setSelectedProviderId("__cloud__");
       return;
     }
   }, [cloudEnabled, selectedProviderId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -177,15 +193,16 @@ export function SettingsView() {
   const resolvedSelectedId =
     selectedProviderId === "__cloud__"
       ? "__cloud__"
-      : selectedProviderId && allAiProviders.some((p) => p.id === selectedProviderId)
+      : selectedProviderId &&
+          allAiProviders.some((p) => p.id === selectedProviderId)
         ? selectedProviderId
         : cloudEnabled
           ? "__cloud__"
-          : enabledAiProviders[0]?.id ?? null;
+          : (enabledAiProviders[0]?.id ?? null);
 
   const selectedProvider =
     resolvedSelectedId && resolvedSelectedId !== "__cloud__"
-      ? allAiProviders.find((p) => p.id === resolvedSelectedId) ?? null
+      ? (allAiProviders.find((p) => p.id === resolvedSelectedId) ?? null)
       : null;
 
   const handleSwitchProvider = useCallback(
@@ -202,7 +219,9 @@ export function SettingsView() {
           agents: { defaults: { model: { primary: null } } },
         });
         setState("cloudEnabled", false);
-      } catch { /* non-fatal */ }
+      } catch {
+        /* non-fatal */
+      }
       if (!target.enabled) {
         await handlePluginToggle(newId, true);
       }
@@ -229,7 +248,9 @@ export function SettingsView() {
       });
       setState("cloudEnabled", true);
       await client.restartAgent();
-    } catch { /* non-fatal */ }
+    } catch {
+      /* non-fatal */
+    }
   }, [currentSmallModel, currentLargeModel, setState]);
 
   const ext = extensionStatus;
@@ -240,7 +261,9 @@ export function SettingsView() {
   const [importModalOpen, setImportModalOpen] = useState(false);
   const importFileRef = useRef<HTMLInputElement>(null);
   const [exportEstimateLoading, setExportEstimateLoading] = useState(false);
-  const [exportEstimateError, setExportEstimateError] = useState<string | null>(null);
+  const [exportEstimateError, setExportEstimateError] = useState<string | null>(
+    null,
+  );
   const [exportEstimate, setExportEstimate] = useState<{
     estimatedBytes: number;
     memoriesCount: number;
@@ -265,7 +288,9 @@ export function SettingsView() {
         setExportEstimate(estimate);
       } catch (err) {
         setExportEstimateError(
-          err instanceof Error ? err.message : "Failed to estimate export size.",
+          err instanceof Error
+            ? err.message
+            : "Failed to estimate export size.",
         );
       } finally {
         setExportEstimateLoading(false);
@@ -283,7 +308,9 @@ export function SettingsView() {
 
   /* ── Fetch Models state ────────────────────────────────────────── */
   const [modelsFetching, setModelsFetching] = useState(false);
-  const [modelsFetchResult, setModelsFetchResult] = useState<string | null>(null);
+  const [modelsFetchResult, setModelsFetchResult] = useState<string | null>(
+    null,
+  );
 
   const handleFetchModels = useCallback(
     async (providerId: string) => {
@@ -297,7 +324,9 @@ export function SettingsView() {
         await loadPlugins();
         setTimeout(() => setModelsFetchResult(null), 3000);
       } catch (err) {
-        setModelsFetchResult(`Error: ${err instanceof Error ? err.message : "failed"}`);
+        setModelsFetchResult(
+          `Error: ${err instanceof Error ? err.message : "failed"}`,
+        );
         setTimeout(() => setModelsFetchResult(null), 5000);
       }
       setModelsFetching(false);
@@ -306,7 +335,9 @@ export function SettingsView() {
   );
 
   /* ── Plugin config local state for collecting field values ──────── */
-  const [pluginFieldValues, setPluginFieldValues] = useState<Record<string, Record<string, string>>>({});
+  const [pluginFieldValues, setPluginFieldValues] = useState<
+    Record<string, Record<string, string>>
+  >({});
 
   const handlePluginFieldChange = useCallback(
     (pluginId: string, key: string, value: string) => {
@@ -326,11 +357,12 @@ export function SettingsView() {
     [pluginFieldValues, handlePluginConfigSave],
   );
 
-
   return (
     <div>
       <h2 className="text-lg font-bold mb-1">Settings</h2>
-      <p className="text-[13px] text-[var(--muted)] mb-5">Appearance, AI provider, updates, and app preferences.</p>
+      <p className="text-[13px] text-[var(--muted)] mb-5">
+        Appearance, AI provider, updates, and app preferences.
+      </p>
 
       {/* ═══════════════════════════════════════════════════════════════
           1. APPEARANCE
@@ -340,6 +372,7 @@ export function SettingsView() {
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
           {THEMES.map((t) => (
             <button
+              type="button"
               key={t.id}
               className={`theme-btn py-2 px-2 ${currentTheme === t.id ? "active" : ""}`}
               onClick={() => setTheme(t.id)}
@@ -378,16 +411,15 @@ export function SettingsView() {
               <div className="p-4 border border-[var(--warning,#f39c12)] bg-[var(--card)]">
                 <div className="text-xs text-[var(--warning,#f39c12)]">
                   No AI providers available. Install a provider plugin from the{" "}
-                  <a
-                    href="#"
-                    className="text-[var(--accent)] underline"
-                    onClick={(e: React.MouseEvent) => {
-                      e.preventDefault();
+                  <button
+                    type="button"
+                    className="text-[var(--accent)] underline bg-transparent border-0 p-0 cursor-pointer"
+                    onClick={() => {
                       setTab("plugins");
                     }}
                   >
                     Plugins
-                  </a>{" "}
+                  </button>{" "}
                   page.
                 </div>
               </div>
@@ -397,7 +429,9 @@ export function SettingsView() {
           return (
             <>
               <div className="lg:hidden mb-3">
-                <label className="block text-xs font-semibold mb-1.5">Provider</label>
+                <span className="block text-xs font-semibold mb-1.5">
+                  Provider
+                </span>
                 <select
                   className="w-full px-2.5 py-[8px] border border-[var(--border)] bg-[var(--card)] text-[13px] transition-colors focus:border-[var(--accent)] focus:outline-none"
                   value={resolvedSelectedId ?? "__cloud__"}
@@ -411,7 +445,11 @@ export function SettingsView() {
                   }}
                 >
                   {providerChoices.map((choice) => (
-                    <option key={choice.id} value={choice.id} disabled={choice.disabled}>
+                    <option
+                      key={choice.id}
+                      value={choice.id}
+                      disabled={choice.disabled}
+                    >
                       {choice.label}
                     </option>
                   ))}
@@ -423,6 +461,7 @@ export function SettingsView() {
                 style={{ gridTemplateColumns: `repeat(${totalCols}, 1fr)` }}
               >
                 <button
+                  type="button"
                   className={`text-center px-2 py-2 border cursor-pointer transition-colors ${
                     isCloudSelected
                       ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)]"
@@ -430,15 +469,19 @@ export function SettingsView() {
                   }`}
                   onClick={() => void handleSelectCloud()}
                 >
-                  <div className={`text-xs font-bold whitespace-nowrap ${isCloudSelected ? "" : "text-[var(--text)]"}`}>
+                  <div
+                    className={`text-xs font-bold whitespace-nowrap ${isCloudSelected ? "" : "text-[var(--text)]"}`}
+                  >
                     Eliza Cloud
                   </div>
                 </button>
 
                 {allAiProviders.map((provider) => {
-                  const isSelected = !isCloudSelected && provider.id === resolvedSelectedId;
+                  const isSelected =
+                    !isCloudSelected && provider.id === resolvedSelectedId;
                   return (
                     <button
+                      type="button"
                       key={provider.id}
                       className={`text-center px-2 py-2 border cursor-pointer transition-colors ${
                         isSelected
@@ -447,7 +490,9 @@ export function SettingsView() {
                       }`}
                       onClick={() => void handleSwitchProvider(provider.id)}
                     >
-                      <div className={`text-xs font-bold whitespace-nowrap ${isSelected ? "" : "text-[var(--text)]"}`}>
+                      <div
+                        className={`text-xs font-bold whitespace-nowrap ${isSelected ? "" : "text-[var(--text)]"}`}
+                      >
                         {provider.name}
                       </div>
                     </button>
@@ -463,26 +508,35 @@ export function SettingsView() {
                       <div className="flex justify-between items-center mb-3">
                         <div className="flex items-center gap-2">
                           <span className="inline-block w-2 h-2 rounded-full bg-[var(--ok,#16a34a)]" />
-                          <span className="text-xs font-semibold">Logged into Eliza Cloud</span>
+                          <span className="text-xs font-semibold">
+                            Logged into Eliza Cloud
+                          </span>
                         </div>
                         <button
+                          type="button"
                           className="btn text-xs py-[3px] px-3 !mt-0 !bg-transparent !border-[var(--border)] !text-[var(--muted)]"
                           onClick={() => void handleCloudDisconnect()}
                           disabled={cloudDisconnecting}
                         >
-                          {cloudDisconnecting ? "Disconnecting..." : "Disconnect"}
+                          {cloudDisconnecting
+                            ? "Disconnecting..."
+                            : "Disconnect"}
                         </button>
                       </div>
 
                       <div className="text-xs mb-4">
                         {cloudUserId && (
                           <span className="text-[var(--muted)] mr-3">
-                            <code className="font-[var(--mono)] text-[11px]">{cloudUserId}</code>
+                            <code className="font-[var(--mono)] text-[11px]">
+                              {cloudUserId}
+                            </code>
                           </span>
                         )}
                         {cloudCredits !== null && (
                           <span>
-                            <span className="text-[var(--muted)]">Credits:</span>{" "}
+                            <span className="text-[var(--muted)]">
+                              Credits:
+                            </span>{" "}
                             <span
                               className={
                                 cloudCreditsCritical
@@ -506,72 +560,98 @@ export function SettingsView() {
                         )}
                       </div>
 
-                      {modelOptions && (() => {
-                        const modelSchema = {
-                          type: "object" as const,
-                          properties: {
-                            small: {
-                              type: "string",
-                              enum: modelOptions.small.map((m) => m.id),
-                              description: "Fast model for simple tasks",
+                      {modelOptions &&
+                        (() => {
+                          const modelSchema = {
+                            type: "object" as const,
+                            properties: {
+                              small: {
+                                type: "string",
+                                enum: modelOptions.small.map((m) => m.id),
+                                description: "Fast model for simple tasks",
+                              },
+                              large: {
+                                type: "string",
+                                enum: modelOptions.large.map((m) => m.id),
+                                description:
+                                  "Powerful model for complex reasoning",
+                              },
                             },
-                            large: {
-                              type: "string",
-                              enum: modelOptions.large.map((m) => m.id),
-                              description: "Powerful model for complex reasoning",
-                            },
-                          },
-                          required: [] as string[],
-                        };
-                        const modelHints: Record<string, ConfigUiHint> = {
-                          small: { label: "Small Model", width: "half" },
-                          large: { label: "Large Model", width: "half" },
-                        };
-                        const modelValues: Record<string, unknown> = {};
-                        const modelSetKeys = new Set<string>();
-                        if (currentSmallModel) { modelValues.small = currentSmallModel; modelSetKeys.add("small"); }
-                        if (currentLargeModel) { modelValues.large = currentLargeModel; modelSetKeys.add("large"); }
+                            required: [] as string[],
+                          };
+                          const modelHints: Record<string, ConfigUiHint> = {
+                            small: { label: "Small Model", width: "half" },
+                            large: { label: "Large Model", width: "half" },
+                          };
+                          const modelValues: Record<string, unknown> = {};
+                          const modelSetKeys = new Set<string>();
+                          if (currentSmallModel) {
+                            modelValues.small = currentSmallModel;
+                            modelSetKeys.add("small");
+                          }
+                          if (currentLargeModel) {
+                            modelValues.large = currentLargeModel;
+                            modelSetKeys.add("large");
+                          }
 
-                        return (
-                          <ConfigRenderer
-                            schema={modelSchema as JsonSchemaObject}
-                            hints={modelHints}
-                            values={modelValues}
-                            setKeys={modelSetKeys}
-                            registry={defaultRegistry}
-                            onChange={(key, value) => {
-                              const val = String(value);
-                              if (key === "small") setCurrentSmallModel(val);
-                              if (key === "large") setCurrentLargeModel(val);
-                              const updated = {
-                                small: key === "small" ? val : currentSmallModel,
-                                large: key === "large" ? val : currentLargeModel,
-                              };
-                              void (async () => {
-                                setModelSaving(true);
-                                try {
-                                  await client.updateConfig({ models: updated });
-                                  setModelSaveSuccess(true);
-                                  setTimeout(() => setModelSaveSuccess(false), 2000);
-                                  await client.restartAgent();
-                                } catch { /* ignore */ }
-                                setModelSaving(false);
-                              })();
-                            }}
-                          />
-                        );
-                      })()}
+                          return (
+                            <ConfigRenderer
+                              schema={modelSchema as JsonSchemaObject}
+                              hints={modelHints}
+                              values={modelValues}
+                              setKeys={modelSetKeys}
+                              registry={defaultRegistry}
+                              onChange={(key, value) => {
+                                const val = String(value);
+                                if (key === "small") setCurrentSmallModel(val);
+                                if (key === "large") setCurrentLargeModel(val);
+                                const updated = {
+                                  small:
+                                    key === "small" ? val : currentSmallModel,
+                                  large:
+                                    key === "large" ? val : currentLargeModel,
+                                };
+                                void (async () => {
+                                  setModelSaving(true);
+                                  try {
+                                    await client.updateConfig({
+                                      models: updated,
+                                    });
+                                    setModelSaveSuccess(true);
+                                    setTimeout(
+                                      () => setModelSaveSuccess(false),
+                                      2000,
+                                    );
+                                    await client.restartAgent();
+                                  } catch {
+                                    /* ignore */
+                                  }
+                                  setModelSaving(false);
+                                })();
+                              }}
+                            />
+                          );
+                        })()}
 
                       <div className="flex items-center justify-end gap-2 mt-3">
-                        {modelSaving && <span className="text-[11px] text-[var(--muted)]">Saving &amp; restarting...</span>}
-                        {modelSaveSuccess && <span className="text-[11px] text-[var(--ok,#16a34a)]">Saved — restarting agent</span>}
+                        {modelSaving && (
+                          <span className="text-[11px] text-[var(--muted)]">
+                            Saving &amp; restarting...
+                          </span>
+                        )}
+                        {modelSaveSuccess && (
+                          <span className="text-[11px] text-[var(--ok,#16a34a)]">
+                            Saved — restarting agent
+                          </span>
+                        )}
                       </div>
                     </div>
                   ) : (
                     <div>
                       {cloudLoginBusy ? (
                         <div className="text-xs text-[var(--muted)]">
-                          Waiting for browser authentication... A new tab should have opened.
+                          Waiting for browser authentication... A new tab should
+                          have opened.
                         </div>
                       ) : (
                         <>
@@ -581,6 +661,7 @@ export function SettingsView() {
                             </div>
                           )}
                           <button
+                            type="button"
                             className="btn text-xs py-[5px] px-3.5 font-bold !mt-0"
                             onClick={() => void handleCloudLogin()}
                           >
@@ -597,106 +678,153 @@ export function SettingsView() {
               )}
 
               {/* ── Local provider settings ──────────────────────────── */}
-              {!isCloudSelected && selectedProvider && selectedProvider.parameters.length > 0 && (() => {
-                const isSaving = pluginSaving.has(selectedProvider.id);
-                const saveSuccess = pluginSaveSuccess.has(selectedProvider.id);
-                const params = selectedProvider.parameters;
-                const setCount = params.filter((p: PluginParamDef) => p.isSet).length;
+              {!isCloudSelected &&
+                selectedProvider &&
+                selectedProvider.parameters.length > 0 &&
+                (() => {
+                  const isSaving = pluginSaving.has(selectedProvider.id);
+                  const saveSuccess = pluginSaveSuccess.has(
+                    selectedProvider.id,
+                  );
+                  const params = selectedProvider.parameters;
+                  const setCount = params.filter(
+                    (p: PluginParamDef) => p.isSet,
+                  ).length;
 
-                return (
-                  <div className="mt-4 pt-4 border-t border-[var(--border)]">
-                    <div className="flex justify-between items-center mb-3">
-                      <div className="text-xs font-semibold">
-                        {selectedProvider.name} Settings
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] text-[var(--muted)]">
-                          {setCount}/{params.length} configured
-                        </span>
-                        <span
-                          className="text-[11px] px-2 py-[3px] border"
-                          style={{
-                            borderColor: selectedProvider.configured ? "#2d8a4e" : "var(--warning,#f39c12)",
-                            color: selectedProvider.configured ? "#2d8a4e" : "var(--warning,#f39c12)",
-                          }}
-                        >
-                          {selectedProvider.configured ? "Configured" : "Needs Setup"}
-                        </span>
-                      </div>
-                    </div>
-
-                    {(() => {
-                      const properties: Record<string, Record<string, unknown>> = {};
-                      const required: string[] = [];
-                      const hints: Record<string, ConfigUiHint> = {};
-                      const serverHints = selectedProvider.configUiHints ?? {};
-                      for (const p of params) {
-                        const prop: Record<string, unknown> = {};
-                        if (p.type === "boolean") prop.type = "boolean";
-                        else if (p.type === "number") prop.type = "number";
-                        else prop.type = "string";
-                        if (p.description) prop.description = p.description;
-                        if (p.default != null) prop.default = p.default;
-                        if (p.options?.length) prop.enum = p.options;
-                        const k = p.key.toUpperCase();
-                        if (k.includes("URL") || k.includes("ENDPOINT")) prop.format = "uri";
-                        properties[p.key] = prop;
-                        if (p.required) required.push(p.key);
-                        hints[p.key] = {
-                          label: autoLabel(p.key, selectedProvider.id),
-                          sensitive: p.sensitive ?? false,
-                          ...serverHints[p.key],
-                        };
-                        if (p.description && !hints[p.key].help) hints[p.key].help = p.description;
-                      }
-                      const schema = { type: "object", properties, required } as JsonSchemaObject;
-                      const values: Record<string, unknown> = {};
-                      const setKeys = new Set<string>();
-                      for (const p of params) {
-                        const cv = pluginFieldValues[selectedProvider.id]?.[p.key];
-                        if (cv !== undefined) { values[p.key] = cv; }
-                        else if (p.isSet && !p.sensitive && p.currentValue != null) { values[p.key] = p.currentValue; }
-                        if (p.isSet) setKeys.add(p.key);
-                      }
-                      return (
-                        <ConfigRenderer
-                          schema={schema}
-                          hints={hints}
-                          values={values}
-                          setKeys={setKeys}
-                          registry={defaultRegistry}
-                          pluginId={selectedProvider.id}
-                          onChange={(key, value) => handlePluginFieldChange(selectedProvider.id, key, String(value ?? ""))}
-                        />
-                      );
-                    })()}
-
-                    <div className="flex justify-between items-center mt-3">
-                      <div className="flex items-center gap-2">
-                        <button
-                          className="btn text-xs py-[5px] px-3.5 !mt-0 !bg-transparent !border-[var(--border)] !text-[var(--muted)] hover:!text-[var(--text)] hover:!border-[var(--accent)]"
-                          onClick={() => void handleFetchModels(selectedProvider.id)}
-                          disabled={modelsFetching}
-                        >
-                          {modelsFetching ? "Fetching..." : "Fetch Models"}
-                        </button>
-                        {modelsFetchResult && (
-                          <span className={`text-[11px] ${modelsFetchResult.startsWith("Error") ? "text-[var(--danger,#e74c3c)]" : "text-[var(--ok,#16a34a)]"}`}>
-                            {modelsFetchResult}
+                  return (
+                    <div className="mt-4 pt-4 border-t border-[var(--border)]">
+                      <div className="flex justify-between items-center mb-3">
+                        <div className="text-xs font-semibold">
+                          {selectedProvider.name} Settings
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] text-[var(--muted)]">
+                            {setCount}/{params.length} configured
                           </span>
-                        )}
+                          <span
+                            className="text-[11px] px-2 py-[3px] border"
+                            style={{
+                              borderColor: selectedProvider.configured
+                                ? "#2d8a4e"
+                                : "var(--warning,#f39c12)",
+                              color: selectedProvider.configured
+                                ? "#2d8a4e"
+                                : "var(--warning,#f39c12)",
+                            }}
+                          >
+                            {selectedProvider.configured
+                              ? "Configured"
+                              : "Needs Setup"}
+                          </span>
+                        </div>
                       </div>
-                      <button
-                        className={`btn text-xs py-[5px] px-4 !mt-0 ${saveSuccess ? "!bg-[var(--ok,#16a34a)] !border-[var(--ok,#16a34a)]" : ""}`}
-                        onClick={() => handlePluginSave(selectedProvider.id)}
-                        disabled={isSaving}
-                      >
-                        {isSaving ? "Saving..." : saveSuccess ? "Saved" : "Save"}
-                      </button>
+
+                      {(() => {
+                        const properties: Record<
+                          string,
+                          Record<string, unknown>
+                        > = {};
+                        const required: string[] = [];
+                        const hints: Record<string, ConfigUiHint> = {};
+                        const serverHints =
+                          selectedProvider.configUiHints ?? {};
+                        for (const p of params) {
+                          const prop: Record<string, unknown> = {};
+                          if (p.type === "boolean") prop.type = "boolean";
+                          else if (p.type === "number") prop.type = "number";
+                          else prop.type = "string";
+                          if (p.description) prop.description = p.description;
+                          if (p.default != null) prop.default = p.default;
+                          if (p.options?.length) prop.enum = p.options;
+                          const k = p.key.toUpperCase();
+                          if (k.includes("URL") || k.includes("ENDPOINT"))
+                            prop.format = "uri";
+                          properties[p.key] = prop;
+                          if (p.required) required.push(p.key);
+                          hints[p.key] = {
+                            label: autoLabel(p.key, selectedProvider.id),
+                            sensitive: p.sensitive ?? false,
+                            ...serverHints[p.key],
+                          };
+                          if (p.description && !hints[p.key].help)
+                            hints[p.key].help = p.description;
+                        }
+                        const schema = {
+                          type: "object",
+                          properties,
+                          required,
+                        } as JsonSchemaObject;
+                        const values: Record<string, unknown> = {};
+                        const setKeys = new Set<string>();
+                        for (const p of params) {
+                          const cv =
+                            pluginFieldValues[selectedProvider.id]?.[p.key];
+                          if (cv !== undefined) {
+                            values[p.key] = cv;
+                          } else if (
+                            p.isSet &&
+                            !p.sensitive &&
+                            p.currentValue != null
+                          ) {
+                            values[p.key] = p.currentValue;
+                          }
+                          if (p.isSet) setKeys.add(p.key);
+                        }
+                        return (
+                          <ConfigRenderer
+                            schema={schema}
+                            hints={hints}
+                            values={values}
+                            setKeys={setKeys}
+                            registry={defaultRegistry}
+                            pluginId={selectedProvider.id}
+                            onChange={(key, value) =>
+                              handlePluginFieldChange(
+                                selectedProvider.id,
+                                key,
+                                String(value ?? ""),
+                              )
+                            }
+                          />
+                        );
+                      })()}
+
+                      <div className="flex justify-between items-center mt-3">
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            className="btn text-xs py-[5px] px-3.5 !mt-0 !bg-transparent !border-[var(--border)] !text-[var(--muted)] hover:!text-[var(--text)] hover:!border-[var(--accent)]"
+                            onClick={() =>
+                              void handleFetchModels(selectedProvider.id)
+                            }
+                            disabled={modelsFetching}
+                          >
+                            {modelsFetching ? "Fetching..." : "Fetch Models"}
+                          </button>
+                          {modelsFetchResult && (
+                            <span
+                              className={`text-[11px] ${modelsFetchResult.startsWith("Error") ? "text-[var(--danger,#e74c3c)]" : "text-[var(--ok,#16a34a)]"}`}
+                            >
+                              {modelsFetchResult}
+                            </span>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          className={`btn text-xs py-[5px] px-4 !mt-0 ${saveSuccess ? "!bg-[var(--ok,#16a34a)] !border-[var(--ok,#16a34a)]" : ""}`}
+                          onClick={() => handlePluginSave(selectedProvider.id)}
+                          disabled={isSaving}
+                        >
+                          {isSaving
+                            ? "Saving..."
+                            : saveSuccess
+                              ? "Saved"
+                              : "Save"}
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                );
-              })()}
+                  );
+                })()}
             </>
           );
         })()}
@@ -741,10 +869,15 @@ export function SettingsView() {
           <div>
             <div className="font-bold text-sm">Software Updates</div>
             <div className="text-xs text-[var(--muted)] mt-0.5">
-              {updateStatus ? <>Version {updateStatus.currentVersion}</> : <>Loading...</>}
+              {updateStatus ? (
+                <>Version {updateStatus.currentVersion}</>
+              ) : (
+                <>Loading...</>
+              )}
             </div>
           </div>
           <button
+            type="button"
             className="btn whitespace-nowrap !mt-0 text-xs py-1.5 px-3.5"
             disabled={updateLoading}
             onClick={() => void loadUpdateStatus(true)}
@@ -772,16 +905,33 @@ export function SettingsView() {
                     type: "radio",
                     width: "full",
                     options: [
-                      { value: "stable", label: "Stable", description: "Recommended — production-ready releases" },
-                      { value: "beta", label: "Beta", description: "Preview — early access to upcoming features" },
-                      { value: "nightly", label: "Nightly", description: "Bleeding edge — latest development builds" },
+                      {
+                        value: "stable",
+                        label: "Stable",
+                        description: "Recommended — production-ready releases",
+                      },
+                      {
+                        value: "beta",
+                        label: "Beta",
+                        description:
+                          "Preview — early access to upcoming features",
+                      },
+                      {
+                        value: "nightly",
+                        label: "Nightly",
+                        description:
+                          "Bleeding edge — latest development builds",
+                      },
                     ],
                   },
                 }}
                 values={{ channel: updateStatus.channel }}
                 registry={defaultRegistry}
                 onChange={(key, value) => {
-                  if (key === "channel") void handleChannelChange(value as "stable" | "beta" | "nightly");
+                  if (key === "channel")
+                    void handleChannelChange(
+                      value as "stable" | "beta" | "nightly",
+                    );
                 }}
               />
             </div>
@@ -789,9 +939,12 @@ export function SettingsView() {
             {updateStatus.updateAvailable && updateStatus.latestVersion && (
               <div className="mt-3 py-2.5 px-3 border border-[var(--accent)] bg-[rgba(255,255,255,0.03)] rounded flex justify-between items-center">
                 <div>
-                  <div className="text-[13px] font-bold text-[var(--accent)]">Update available</div>
+                  <div className="text-[13px] font-bold text-[var(--accent)]">
+                    Update available
+                  </div>
                   <div className="text-xs text-[var(--muted)]">
-                    {updateStatus.currentVersion} &rarr; {updateStatus.latestVersion}
+                    {updateStatus.currentVersion} &rarr;{" "}
+                    {updateStatus.latestVersion}
                   </div>
                 </div>
                 <div className="text-[11px] text-[var(--muted)] text-right">
@@ -811,13 +964,16 @@ export function SettingsView() {
 
             {updateStatus.lastCheckAt && (
               <div className="mt-2 text-[11px] text-[var(--muted)]">
-                Last checked: {new Date(updateStatus.lastCheckAt).toLocaleString()}
+                Last checked:{" "}
+                {new Date(updateStatus.lastCheckAt).toLocaleString()}
               </div>
             )}
           </>
         ) : (
           <div className="text-center py-3 text-[var(--muted)] text-xs">
-            {updateLoading ? "Checking for updates..." : "Unable to load update status."}
+            {updateLoading
+              ? "Checking for updates..."
+              : "Unable to load update status."}
           </div>
         )}
       </div>
@@ -829,6 +985,7 @@ export function SettingsView() {
         <div className="flex justify-between items-center mb-3">
           <div className="font-bold text-sm">Chrome Extension</div>
           <button
+            type="button"
             className="btn whitespace-nowrap !mt-0 text-xs py-1.5 px-3.5"
             onClick={() => void checkExtensionStatus()}
             disabled={extensionChecking}
@@ -843,7 +1000,9 @@ export function SettingsView() {
               <span
                 className="inline-block w-2 h-2 rounded-full"
                 style={{
-                  background: relayOk ? "var(--ok, #16a34a)" : "var(--danger, #e74c3c)",
+                  background: relayOk
+                    ? "var(--ok, #16a34a)"
+                    : "var(--danger, #e74c3c)",
                 }}
               />
               <span className="text-[13px] font-bold">
@@ -855,15 +1014,17 @@ export function SettingsView() {
             </div>
             {!relayOk && (
               <div className="text-xs text-[var(--danger,#e74c3c)] mt-1.5">
-                The browser relay server is not running. Start the agent with browser control
-                enabled, then check again.
+                The browser relay server is not running. Start the agent with
+                browser control enabled, then check again.
               </div>
             )}
           </div>
         )}
 
         <div className="mt-3">
-          <div className="font-bold text-[13px] mb-2">Install Chrome Extension</div>
+          <div className="font-bold text-[13px] mb-2">
+            Install Chrome Extension
+          </div>
           <div className="text-xs text-[var(--muted)] leading-relaxed">
             <ol className="m-0 pl-5">
               <li className="mb-1.5">
@@ -873,10 +1034,12 @@ export function SettingsView() {
                 </code>
               </li>
               <li className="mb-1.5">
-                Enable <strong>Developer mode</strong> (toggle in the top-right corner)
+                Enable <strong>Developer mode</strong> (toggle in the top-right
+                corner)
               </li>
               <li className="mb-1.5">
-                Click <strong>&quot;Load unpacked&quot;</strong> and select the extension folder:
+                Click <strong>&quot;Load unpacked&quot;</strong> and select the
+                extension folder:
                 {ext?.extensionPath ? (
                   <>
                     <br />
@@ -890,13 +1053,19 @@ export function SettingsView() {
                     <code className="text-[11px] px-1.5 border border-[var(--border)] bg-[var(--bg-muted)] inline-block mt-1">
                       apps/chrome-extension/
                     </code>
-                    <span className="italic"> (relative to milady package root)</span>
+                    <span className="italic">
+                      {" "}
+                      (relative to milady package root)
+                    </span>
                   </>
                 )}
               </li>
-              <li className="mb-1.5">Pin the extension icon in Chrome&apos;s toolbar</li>
+              <li className="mb-1.5">
+                Pin the extension icon in Chrome&apos;s toolbar
+              </li>
               <li>
-                Click the extension icon on any tab to attach/detach the Milady browser relay
+                Click the extension icon on any tab to attach/detach the Milady
+                browser relay
               </li>
             </ol>
           </div>
@@ -917,12 +1086,14 @@ export function SettingsView() {
           <div className="font-bold text-sm">Agent Export / Import</div>
           <div className="flex items-center gap-2">
             <button
+              type="button"
               className="btn whitespace-nowrap !mt-0 text-xs py-1.5 px-3.5"
               onClick={openImportModal}
             >
               Import
             </button>
             <button
+              type="button"
               className="btn whitespace-nowrap !mt-0 text-xs py-1.5 px-3.5"
               onClick={openExportModal}
             >
@@ -936,7 +1107,9 @@ export function SettingsView() {
           12. DANGER ZONE
           ═══════════════════════════════════════════════════════════════ */}
       <div className="mt-8 pt-6 border-t border-[var(--border)]">
-        <h3 className="text-lg font-bold text-[var(--danger,#e74c3c)]">Danger Zone</h3>
+        <h3 className="text-lg font-bold text-[var(--danger,#e74c3c)]">
+          Danger Zone
+        </h3>
         <p className="text-[13px] text-[var(--muted)] mb-5">
           Irreversible actions. Proceed with caution.
         </p>
@@ -946,10 +1119,12 @@ export function SettingsView() {
             <div>
               <div className="font-bold text-sm">Export Private Keys</div>
               <div className="text-xs text-[var(--muted)] mt-0.5">
-                Reveal your EVM and Solana private keys. Never share these with anyone.
+                Reveal your EVM and Solana private keys. Never share these with
+                anyone.
               </div>
             </div>
             <button
+              type="button"
               className="btn whitespace-nowrap !mt-0 text-xs py-1.5 px-4"
               style={{
                 background: "var(--danger, #e74c3c)",
@@ -965,12 +1140,17 @@ export function SettingsView() {
               {walletExportData.evm && (
                 <div className="mb-2">
                   <strong>EVM Private Key</strong>{" "}
-                  <span className="text-[var(--muted)]">({walletExportData.evm.address})</span>
+                  <span className="text-[var(--muted)]">
+                    ({walletExportData.evm.address})
+                  </span>
                   <br />
                   <span>{walletExportData.evm.privateKey}</span>
                   <button
+                    type="button"
                     className="ml-2 px-1.5 py-0.5 border border-[var(--border)] bg-[var(--bg)] cursor-pointer text-[10px] font-[var(--mono)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
-                    onClick={() => void copyToClipboard(walletExportData.evm!.privateKey)}
+                    onClick={() =>
+                      void copyToClipboard(walletExportData.evm?.privateKey)
+                    }
                   >
                     copy
                   </button>
@@ -979,19 +1159,26 @@ export function SettingsView() {
               {walletExportData.solana && (
                 <div>
                   <strong>Solana Private Key</strong>{" "}
-                  <span className="text-[var(--muted)]">({walletExportData.solana.address})</span>
+                  <span className="text-[var(--muted)]">
+                    ({walletExportData.solana.address})
+                  </span>
                   <br />
                   <span>{walletExportData.solana.privateKey}</span>
                   <button
+                    type="button"
                     className="ml-2 px-1.5 py-0.5 border border-[var(--border)] bg-[var(--bg)] cursor-pointer text-[10px] font-[var(--mono)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
-                    onClick={() => void copyToClipboard(walletExportData.solana!.privateKey)}
+                    onClick={() =>
+                      void copyToClipboard(walletExportData.solana?.privateKey)
+                    }
                   >
                     copy
                   </button>
                 </div>
               )}
               {!walletExportData.evm && !walletExportData.solana && (
-                <div className="text-[var(--muted)]">No wallet keys configured.</div>
+                <div className="text-[var(--muted)]">
+                  No wallet keys configured.
+                </div>
               )}
             </div>
           )}
@@ -1001,10 +1188,12 @@ export function SettingsView() {
           <div>
             <div className="font-bold text-sm">Reset Agent</div>
             <div className="text-xs text-[var(--muted)] mt-0.5">
-              Wipe all config, memory, and data. Returns to the onboarding wizard.
+              Wipe all config, memory, and data. Returns to the onboarding
+              wizard.
             </div>
           </div>
           <button
+            type="button"
             className="btn whitespace-nowrap !mt-0 text-xs py-1.5 px-4"
             style={{
               background: "var(--danger, #e74c3c)",
@@ -1018,20 +1207,33 @@ export function SettingsView() {
       </div>
 
       {/* ── Modals ── */}
-      <Modal open={exportModalOpen} onClose={() => setExportModalOpen(false)} title="Export Agent">
+      <Modal
+        open={exportModalOpen}
+        onClose={() => setExportModalOpen(false)}
+        title="Export Agent"
+      >
         <div className="flex flex-col gap-3">
           <div className="text-xs text-[var(--muted)]">
-            Your character, memories, chats, secrets, and relationships will be downloaded as a
-            single file. Exports are encrypted and require a password.
+            Your character, memories, chats, secrets, and relationships will be
+            downloaded as a single file. Exports are encrypted and require a
+            password.
           </div>
           {exportEstimateLoading && (
-            <div className="text-[11px] text-[var(--muted)]">Estimating export size…</div>
+            <div className="text-[11px] text-[var(--muted)]">
+              Estimating export size…
+            </div>
           )}
           {!exportEstimateLoading && exportEstimate && (
             <div className="text-[11px] text-[var(--muted)] border border-[var(--border)] bg-[var(--bg-muted)] px-2.5 py-2">
-              <div>Estimated file size: {formatByteSize(exportEstimate.estimatedBytes)}</div>
               <div>
-                Contains {exportEstimate.memoriesCount} memories, {exportEstimate.entitiesCount} entities, {exportEstimate.roomsCount} rooms, {exportEstimate.worldsCount} worlds, {exportEstimate.tasksCount} tasks.
+                Estimated file size:{" "}
+                {formatByteSize(exportEstimate.estimatedBytes)}
+              </div>
+              <div>
+                Contains {exportEstimate.memoriesCount} memories,{" "}
+                {exportEstimate.entitiesCount} entities,{" "}
+                {exportEstimate.roomsCount} rooms, {exportEstimate.worldsCount}{" "}
+                worlds, {exportEstimate.tasksCount} tasks.
               </div>
             </div>
           )}
@@ -1041,7 +1243,7 @@ export function SettingsView() {
             </div>
           )}
           <div className="flex flex-col gap-1">
-            <label className="font-semibold text-xs">Encryption Password</label>
+            <span className="font-semibold text-xs">Encryption Password</span>
             <input
               type="password"
               placeholder="Enter password (minimum 4 characters)"
@@ -1053,28 +1255,34 @@ export function SettingsView() {
               Password must be at least 4 characters.
             </div>
           </div>
-          <label className="flex items-center gap-2 text-xs text-[var(--muted)] cursor-pointer">
+          <span className="flex items-center gap-2 text-xs text-[var(--muted)] cursor-pointer">
             <input
               type="checkbox"
               checked={exportIncludeLogs}
               onChange={(e) => setState("exportIncludeLogs", e.target.checked)}
             />
             Include logs in export
-          </label>
+          </span>
           {exportError && (
-            <div className="text-[11px] text-[var(--danger,#e74c3c)]">{exportError}</div>
+            <div className="text-[11px] text-[var(--danger,#e74c3c)]">
+              {exportError}
+            </div>
           )}
           {exportSuccess && (
-            <div className="text-[11px] text-[var(--ok,#16a34a)]">{exportSuccess}</div>
+            <div className="text-[11px] text-[var(--ok,#16a34a)]">
+              {exportSuccess}
+            </div>
           )}
           <div className="flex justify-end gap-2 mt-1">
             <button
+              type="button"
               className="btn text-xs py-1.5 px-4 !mt-0 !bg-transparent !border-[var(--border)] !text-[var(--txt)]"
               onClick={() => setExportModalOpen(false)}
             >
               Cancel
             </button>
             <button
+              type="button"
               className="btn text-xs py-1.5 px-4 !mt-0"
               disabled={exportBusy}
               onClick={() => void handleAgentExport()}
@@ -1085,14 +1293,18 @@ export function SettingsView() {
         </div>
       </Modal>
 
-      <Modal open={importModalOpen} onClose={() => setImportModalOpen(false)} title="Import Agent">
+      <Modal
+        open={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        title="Import Agent"
+      >
         <div className="flex flex-col gap-3">
           <div className="text-xs text-[var(--muted)]">
-            Select an <code className="text-[11px]">.eliza-agent</code> export file and enter the
-            password used during export.
+            Select an <code className="text-[11px]">.eliza-agent</code> export
+            file and enter the password used during export.
           </div>
           <div className="flex flex-col gap-1">
-            <label className="font-semibold text-xs">Export File</label>
+            <span className="font-semibold text-xs">Export File</span>
             <input
               ref={importFileRef}
               type="file"
@@ -1106,7 +1318,7 @@ export function SettingsView() {
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="font-semibold text-xs">Decryption Password</label>
+            <span className="font-semibold text-xs">Decryption Password</span>
             <input
               type="password"
               placeholder="Enter password (minimum 4 characters)"
@@ -1119,19 +1331,25 @@ export function SettingsView() {
             </div>
           </div>
           {importError && (
-            <div className="text-[11px] text-[var(--danger,#e74c3c)]">{importError}</div>
+            <div className="text-[11px] text-[var(--danger,#e74c3c)]">
+              {importError}
+            </div>
           )}
           {importSuccess && (
-            <div className="text-[11px] text-[var(--ok,#16a34a)]">{importSuccess}</div>
+            <div className="text-[11px] text-[var(--ok,#16a34a)]">
+              {importSuccess}
+            </div>
           )}
           <div className="flex justify-end gap-2 mt-1">
             <button
+              type="button"
               className="btn text-xs py-1.5 px-4 !mt-0 !bg-transparent !border-[var(--border)] !text-[var(--txt)]"
               onClick={() => setImportModalOpen(false)}
             >
               Cancel
             </button>
             <button
+              type="button"
               className="btn text-xs py-1.5 px-4 !mt-0"
               disabled={importBusy}
               onClick={() => void handleAgentImport()}

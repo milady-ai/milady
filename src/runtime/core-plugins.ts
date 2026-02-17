@@ -12,6 +12,7 @@ export const CORE_PLUGINS: readonly string[] = [
   "@elizaos/plugin-form", // packaging issue
   "@elizaos/plugin-elizacloud", // elizacloud responses
   "@elizaos/plugin-knowledge", // RAG knowledge management — required for knowledge tab
+  "@elizaos/plugin-rolodex", // contact graph and relationship/social memory
   "@elizaos/plugin-trajectory-logger", // trajectory logging for debugging and RL training
   "@elizaos/plugin-agent-orchestrator", // multi-agent orchestration
   "@elizaos/plugin-cron", // scheduled jobs and automation
@@ -39,6 +40,5 @@ export const OPTIONAL_CORE_PLUGINS: readonly string[] = [
   // "@elizaos/plugin-personality", // personality coherence
   // "@elizaos/plugin-scratchpad", // scratchpad notes
   // "@elizaos/plugin-experience", // learning from interactions
-  // "@elizaos/plugin-rolodex", // contact graph and social memory
   // "@elizaos/plugin-trust", // trust scoring and policy signals
 ];

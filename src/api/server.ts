@@ -42,11 +42,7 @@ import {
   buildTestHandler,
   registerCustomActionLive,
 } from "../runtime/custom-actions";
-import {
-  completeTrajectoryStepInDatabase,
-  installDatabaseTrajectoryLogger,
-  startTrajectoryStepInDatabase,
-} from "../runtime/trajectory-persistence";
+
 import {
   AgentExportError,
   estimateExportSize,
@@ -96,6 +92,7 @@ import {
 } from "./plugin-validation";
 import { RegistryService } from "./registry-service";
 import { handleSandboxRoute } from "./sandbox-routes";
+import { resolveTerminalRunLimits } from "./terminal-run-limits";
 import { handleTrainingRoutes } from "./training-routes";
 import { handleTrajectoryRoute } from "./trajectory-routes";
 import { handleTriggerRoutes } from "./trigger-routes";
@@ -1633,6 +1630,8 @@ const readBody = (req: http.IncomingMessage): Promise<string> =>
     (value) => value ?? "",
   );
 
+let activeTerminalRunCount = 0;
+
 function json(res: http.ServerResponse, data: unknown, status = 200): void {
   sendJson(res, data, status);
 }
@@ -1805,475 +1804,6 @@ interface ChatGenerateOptions {
   resolveNoResponseText?: () => string;
 }
 
-interface TrajectoryLoggerForChat {
-  isEnabled?: () => boolean;
-  setEnabled?: (enabled: boolean) => void;
-  startTrajectory?: (
-    stepIdOrAgentId: string,
-    options?: Record<string, unknown>,
-  ) => Promise<string> | string;
-  startStep?: (
-    trajectoryId: string,
-    envState: {
-      timestamp: number;
-      agentBalance: number;
-      agentPoints: number;
-      agentPnL: number;
-      openPositions: number;
-    },
-  ) => string;
-  endTrajectory?: (
-    stepIdOrTrajectoryId: string,
-    status?: string,
-  ) => Promise<void> | void;
-  logLlmCall?: (params: Record<string, unknown>) => void;
-  logProviderAccess?: (params: Record<string, unknown>) => void;
-  getProviderAccessLogs?: () => readonly unknown[];
-  getLlmCallLogs?: () => readonly unknown[];
-}
-
-interface TrajectorySpanContext {
-  runtime: AgentRuntime | null;
-  source: string;
-  roomId?: string;
-  entityId?: string;
-  conversationId?: string;
-  messageId?: string;
-  metadata?: Record<string, unknown>;
-}
-
-interface TrajectorySpanHandle {
-  stepId: string;
-  logger: TrajectoryLoggerForChat;
-}
-
-function scoreTrajectoryLoggerCandidate(
-  candidate: TrajectoryLoggerForChat | null,
-): number {
-  if (!candidate) return -1;
-  const candidateWithRuntime = candidate as TrajectoryLoggerForChat & {
-    runtime?: { adapter?: unknown };
-    initialized?: boolean;
-    listTrajectories?: unknown;
-  };
-  let score = 0;
-  if (typeof candidate.startTrajectory === "function") score += 3;
-  if (typeof candidate.endTrajectory === "function") score += 3;
-  if (typeof candidate.logLlmCall === "function") score += 2;
-  if (typeof candidateWithRuntime.listTrajectories === "function") score += 1;
-  if (candidateWithRuntime.initialized === true) score += 3;
-  if (candidateWithRuntime.runtime?.adapter) score += 3;
-  const enabled =
-    typeof candidate.isEnabled === "function" ? candidate.isEnabled() : true;
-  if (enabled) score += 1;
-  return score;
-}
-
-function getTrajectoryLoggerForRuntime(
-  runtime: AgentRuntime | null,
-): TrajectoryLoggerForChat | null {
-  if (!runtime) return null;
-  const runtimeLike = runtime as unknown as {
-    getServicesByType?: (serviceType: string) => unknown;
-    getService?: (serviceType: string) => unknown;
-  };
-
-  const candidates: TrajectoryLoggerForChat[] = [];
-  const seen = new Set<unknown>();
-  const pushCandidate = (candidate: unknown): void => {
-    if (!candidate || seen.has(candidate)) return;
-    seen.add(candidate);
-    candidates.push(candidate as TrajectoryLoggerForChat);
-  };
-
-  if (typeof runtimeLike.getServicesByType === "function") {
-    const byType = runtimeLike.getServicesByType("trajectory_logger");
-    if (Array.isArray(byType) && byType.length > 0) {
-      for (const service of byType) {
-        pushCandidate(service);
-      }
-    }
-    if (byType && !Array.isArray(byType)) {
-      pushCandidate(byType);
-    }
-  }
-
-  if (typeof runtimeLike.getService === "function") {
-    pushCandidate(runtimeLike.getService("trajectory_logger"));
-  }
-
-  let best: TrajectoryLoggerForChat | null = null;
-  let bestScore = -1;
-  for (const candidate of candidates) {
-    const score = scoreTrajectoryLoggerCandidate(candidate);
-    if (score <= 0) continue;
-    if (score > bestScore) {
-      best = candidate;
-      bestScore = score;
-    }
-  }
-  if (
-    best &&
-    typeof best.isEnabled === "function" &&
-    !best.isEnabled() &&
-    typeof best.setEnabled === "function"
-  ) {
-    try {
-      best.setEnabled(true);
-    } catch {
-      // Keep chat path resilient if logger enable fails.
-    }
-  }
-  return best;
-}
-
-function readTrajectoryLlmLogs(
-  logger: TrajectoryLoggerForChat | null,
-): readonly unknown[] {
-  if (!logger || typeof logger.getLlmCallLogs !== "function") return [];
-  const logs = logger.getLlmCallLogs();
-  return Array.isArray(logs) ? logs : [];
-}
-
-function readTrajectoryProviderLogs(
-  logger: TrajectoryLoggerForChat | null,
-): readonly unknown[] {
-  if (!logger || typeof logger.getProviderAccessLogs !== "function") return [];
-  const logs = logger.getProviderAccessLogs();
-  return Array.isArray(logs) ? logs : [];
-}
-
-function getTrajectoryStepId(entry: unknown): string | null {
-  if (!entry || typeof entry !== "object") return null;
-  const raw = (entry as { stepId?: unknown }).stepId;
-  return typeof raw === "string" && raw.trim() ? raw.trim() : null;
-}
-
-function copyTrajectoryLogsToLogger(
-  source: TrajectoryLoggerForChat | null,
-  target: TrajectoryLoggerForChat | null,
-): { llmCalls: number; providerAccesses: number } {
-  if (!source || !target || source === target) {
-    return { llmCalls: 0, providerAccesses: 0 };
-  }
-
-  const sourceLlm = readTrajectoryLlmLogs(source);
-  const sourceProvider = readTrajectoryProviderLogs(source);
-  if (sourceLlm.length === 0 && sourceProvider.length === 0) {
-    return { llmCalls: 0, providerAccesses: 0 };
-  }
-
-  const existingLlmKeys = new Set(
-    readTrajectoryLlmLogs(target).map((entry) => JSON.stringify(entry)),
-  );
-  const existingProviderKeys = new Set(
-    readTrajectoryProviderLogs(target).map((entry) => JSON.stringify(entry)),
-  );
-
-  let copiedLlm = 0;
-  let copiedProvider = 0;
-
-  const targetAny = target as TrajectoryLoggerForChat & {
-    llmCalls?: unknown[];
-    providerAccess?: unknown[];
-  };
-
-  const targetLlmArray = Array.isArray(targetAny.llmCalls)
-    ? targetAny.llmCalls
-    : null;
-  const targetProviderArray = Array.isArray(targetAny.providerAccess)
-    ? targetAny.providerAccess
-    : null;
-
-  for (const entry of sourceLlm) {
-    const stepId = getTrajectoryStepId(entry);
-    if (!stepId) continue;
-    const key = JSON.stringify(entry);
-    if (existingLlmKeys.has(key)) continue;
-    existingLlmKeys.add(key);
-
-    if (targetLlmArray) {
-      targetLlmArray.push(entry);
-      copiedLlm += 1;
-      continue;
-    }
-
-    if (typeof target.logLlmCall === "function") {
-      const row =
-        entry && typeof entry === "object"
-          ? (entry as Record<string, unknown>)
-          : {};
-      target.logLlmCall({
-        stepId,
-        model:
-          typeof row.model === "string" && row.model.trim()
-            ? row.model
-            : "unknown",
-        systemPrompt:
-          typeof row.systemPrompt === "string" ? row.systemPrompt : "",
-        userPrompt: typeof row.userPrompt === "string" ? row.userPrompt : "",
-        response: typeof row.response === "string" ? row.response : "",
-        temperature: typeof row.temperature === "number" ? row.temperature : 0,
-        maxTokens: typeof row.maxTokens === "number" ? row.maxTokens : 0,
-        purpose: typeof row.purpose === "string" ? row.purpose : "action",
-        actionType:
-          typeof row.actionType === "string"
-            ? row.actionType
-            : "runtime.useModel",
-        latencyMs: typeof row.latencyMs === "number" ? row.latencyMs : 0,
-      });
-      copiedLlm += 1;
-    }
-  }
-
-  for (const entry of sourceProvider) {
-    const stepId = getTrajectoryStepId(entry);
-    if (!stepId) continue;
-    const key = JSON.stringify(entry);
-    if (existingProviderKeys.has(key)) continue;
-    existingProviderKeys.add(key);
-
-    if (targetProviderArray) {
-      targetProviderArray.push(entry);
-      copiedProvider += 1;
-      continue;
-    }
-
-    if (typeof target.logProviderAccess === "function") {
-      const row =
-        entry && typeof entry === "object"
-          ? (entry as Record<string, unknown>)
-          : {};
-      target.logProviderAccess({
-        stepId,
-        providerName:
-          typeof row.providerName === "string" && row.providerName.trim()
-            ? row.providerName
-            : "unknown",
-        purpose: typeof row.purpose === "string" ? row.purpose : "provider",
-        data:
-          row.data && typeof row.data === "object"
-            ? (row.data as Record<string, unknown>)
-            : {},
-        query:
-          row.query && typeof row.query === "object"
-            ? (row.query as Record<string, unknown>)
-            : undefined,
-      });
-      copiedProvider += 1;
-    }
-  }
-
-  return { llmCalls: copiedLlm, providerAccesses: copiedProvider };
-}
-
-function carryOverTrajectoryLogsBetweenRuntimes(
-  previousRuntime: AgentRuntime | null,
-  nextRuntime: AgentRuntime | null,
-): { llmCalls: number; providerAccesses: number } {
-  const previousLogger = getTrajectoryLoggerForRuntime(previousRuntime);
-  const nextLogger = getTrajectoryLoggerForRuntime(nextRuntime);
-  return copyTrajectoryLogsToLogger(previousLogger, nextLogger);
-}
-
-function createRuntimeWithTrajectoryLogger(
-  runtime: AgentRuntime,
-  trajectoryLogger: TrajectoryLoggerForChat | null,
-): AgentRuntime {
-  if (!trajectoryLogger) return runtime;
-
-  const runtimeLike = runtime as AgentRuntime & {
-    getServicesByType?: (serviceType: string) => unknown;
-  };
-
-  return new Proxy(runtime, {
-    get(target, prop, receiver) {
-      if (prop === "getService") {
-        return (serviceName: string) => {
-          if (serviceName === "trajectory_logger") return trajectoryLogger;
-          return target.getService(serviceName);
-        };
-      }
-      if (prop === "getServicesByType") {
-        return (serviceName: string) => {
-          if (serviceName === "trajectory_logger") return [trajectoryLogger];
-          return typeof runtimeLike.getServicesByType === "function"
-            ? runtimeLike.getServicesByType.call(target, serviceName)
-            : [];
-        };
-      }
-      return Reflect.get(target, prop, receiver);
-    },
-  }) as AgentRuntime;
-}
-
-function isTrajectoryLoggerEnabled(
-  logger: TrajectoryLoggerForChat | null,
-): boolean {
-  if (!logger) return false;
-  if (typeof logger.isEnabled !== "function") return true;
-  if (logger.isEnabled()) return true;
-  if (typeof logger.setEnabled === "function") {
-    try {
-      logger.setEnabled(true);
-      return logger.isEnabled();
-    } catch {
-      return false;
-    }
-  }
-  return false;
-}
-
-async function startApiMessageTrajectory(params: {
-  logger: TrajectoryLoggerForChat;
-  runtime: AgentRuntime;
-  stepId: string;
-  source: string;
-  roomId?: string;
-  entityId?: string;
-  metadata?: Record<string, unknown>;
-}): Promise<{ stepId: string; endTargetId: string | null }> {
-  const { logger, runtime, stepId, source, roomId, entityId, metadata } =
-    params;
-
-  if (typeof logger.startTrajectory !== "function") {
-    return { stepId, endTargetId: null };
-  }
-
-  if (typeof logger.startStep === "function") {
-    const trajectoryId = await logger.startTrajectory(runtime.agentId, {
-      source,
-      metadata: {
-        ...(metadata ?? {}),
-        roomId,
-        entityId,
-      },
-    });
-    const normalizedTrajectoryId =
-      typeof trajectoryId === "string" && trajectoryId.trim().length > 0
-        ? trajectoryId
-        : null;
-    if (!normalizedTrajectoryId) {
-      return { stepId, endTargetId: null };
-    }
-    const runtimeStepId = logger.startStep(normalizedTrajectoryId, {
-      timestamp: Date.now(),
-      agentBalance: 0,
-      agentPoints: 0,
-      agentPnL: 0,
-      openPositions: 0,
-    });
-    const normalizedStepId =
-      typeof runtimeStepId === "string" && runtimeStepId.trim().length > 0
-        ? runtimeStepId
-        : stepId;
-    return {
-      stepId: normalizedStepId,
-      endTargetId: normalizedTrajectoryId,
-    };
-  }
-
-  const startedId = await logger.startTrajectory(stepId, {
-    agentId: runtime.agentId,
-    roomId,
-    entityId,
-    source,
-    metadata,
-  });
-  const normalizedStartedId =
-    typeof startedId === "string" && startedId.trim().length > 0
-      ? startedId
-      : stepId;
-  return {
-    stepId,
-    endTargetId: normalizedStartedId,
-  };
-}
-
-function buildTrajectoryMetadata(
-  context: TrajectorySpanContext,
-): Record<string, unknown> | undefined {
-  const metadata: Record<string, unknown> = {
-    ...(context.metadata ?? {}),
-  };
-  if (context.messageId) metadata.messageId = context.messageId;
-  if (context.conversationId) metadata.conversationId = context.conversationId;
-  return Object.keys(metadata).length > 0 ? metadata : undefined;
-}
-
-async function startTrajectorySpan(
-  context: TrajectorySpanContext,
-): Promise<TrajectorySpanHandle | null> {
-  const { runtime } = context;
-  const logger = getTrajectoryLoggerForRuntime(runtime);
-  if (!runtime || !isTrajectoryLoggerEnabled(logger)) return null;
-
-  const stepId = crypto.randomUUID();
-  try {
-    await logger?.startTrajectory?.(stepId, {
-      agentId: runtime.agentId,
-      roomId: context.roomId,
-      entityId: context.entityId,
-      source: context.source,
-      metadata: buildTrajectoryMetadata(context),
-    });
-    return { stepId, logger: logger as TrajectoryLoggerForChat };
-  } catch (err) {
-    runtime.logger?.warn(
-      {
-        err,
-        src: "milady-api",
-        stepId,
-        source: context.source,
-        roomId: context.roomId,
-      },
-      "Failed to start proxy trajectory logging",
-    );
-    return null;
-  }
-}
-
-async function endTrajectorySpan(
-  runtime: AgentRuntime | null,
-  span: TrajectorySpanHandle | null,
-  status: "completed" | "error",
-): Promise<void> {
-  if (!span || typeof span.logger.endTrajectory !== "function") return;
-  try {
-    await span.logger.endTrajectory(span.stepId, status);
-  } catch (err) {
-    runtime?.logger?.warn(
-      {
-        err,
-        src: "milady-api",
-        stepId: span.stepId,
-        status,
-      },
-      "Failed to end proxy trajectory logging",
-    );
-  }
-}
-
-async function _withTrajectorySpan<T>(
-  context: TrajectorySpanContext,
-  operation: () => Promise<T>,
-): Promise<T> {
-  const span = await startTrajectorySpan(context);
-  let operationError: unknown = null;
-  try {
-    return await operation();
-  } catch (err) {
-    operationError = err;
-    throw err;
-  } finally {
-    await endTrajectorySpan(
-      context.runtime,
-      span,
-      operationError ? "error" : "completed",
-    );
-  }
-}
-
 const INSUFFICIENT_CREDITS_RE =
   /\b(?:insufficient(?:[_\s]+(?:credits?|quota))|insufficient_quota|out of credits|max usage reached|quota(?:\s+exceeded)?)\b/i;
 
@@ -2439,9 +1969,6 @@ async function generateChatResponse(
     message.content.source.trim().length > 0
       ? message.content.source
       : "api";
-  const trajectoryLogger = getTrajectoryLoggerForRuntime(runtime);
-  let fallbackTrajectoryStepId: string | null = null;
-  let fallbackTrajectoryEndTargetId: string | null = null;
 
   // The core message service emits MESSAGE_SENT but not MESSAGE_RECEIVED.
   // Emit inbound events here so trajectory/session hooks run for API chat.
@@ -2466,93 +1993,16 @@ async function generateChatResponse(
 
   // Fallback when MESSAGE_RECEIVED hooks are unavailable: start a trajectory
   // directly so /api/chat still produces rows for the Trajectories view.
-  const meta =
-    message.metadata && typeof message.metadata === "object"
-      ? (message.metadata as Record<string, unknown>)
-      : null;
-  const eventTrajectoryStepId =
-    typeof meta?.trajectoryStepId === "string" && meta.trajectoryStepId.trim()
-      ? meta.trajectoryStepId
-      : null;
-  if (
-    !eventTrajectoryStepId &&
-    trajectoryLogger &&
-    isTrajectoryLoggerEnabled(trajectoryLogger)
-  ) {
-    const stepId = crypto.randomUUID();
-    if (!message.metadata || typeof message.metadata !== "object") {
-      message.metadata = {
-        type: "message",
-      } as unknown as typeof message.metadata;
-    }
-    const mutableMeta = message.metadata as Record<string, unknown>;
-    mutableMeta.trajectoryStepId = stepId;
-
-    fallbackTrajectoryStepId = stepId;
-
-    try {
-      const startResult = await startApiMessageTrajectory({
-        logger: trajectoryLogger,
-        runtime,
-        stepId,
-        source: messageSource,
-        roomId: message.roomId,
-        entityId: message.entityId,
-        metadata: {
-          messageId: message.id,
-          conversationId:
-            typeof mutableMeta.sessionKey === "string"
-              ? mutableMeta.sessionKey
-              : undefined,
-        },
-      });
-      mutableMeta.trajectoryStepId = startResult.stepId;
-      fallbackTrajectoryStepId = startResult.stepId;
-      fallbackTrajectoryEndTargetId = startResult.endTargetId;
-    } catch (err) {
-      runtime.logger?.warn(
-        {
-          err,
-          src: "milady-api",
-          messageId: message.id,
-          roomId: message.roomId,
-        },
-        "Failed to start fallback trajectory logging",
-      );
-    }
-  }
-
-  const stepIdToStartInDb = fallbackTrajectoryStepId ?? eventTrajectoryStepId;
-  if (stepIdToStartInDb) {
-    await startTrajectoryStepInDatabase({
-      runtime,
-      stepId: stepIdToStartInDb,
-      source: messageSource,
-      metadata: {
-        messageId: message.id,
-        roomId: message.roomId,
-        entityId: message.entityId,
-        conversationId:
-          meta && typeof meta.sessionKey === "string"
-            ? meta.sessionKey
-            : undefined,
-      },
-    });
-  }
 
   let result:
     | Awaited<
         ReturnType<NonNullable<AgentRuntime["messageService"]>["handleMessage"]>
       >
     | undefined;
-  let handlerError: unknown = null;
-  const runtimeForMessageHandling = createRuntimeWithTrajectoryLogger(
-    runtime,
-    trajectoryLogger,
-  );
+  let _handlerError: unknown = null;
   try {
     result = await runtime.messageService?.handleMessage(
-      runtimeForMessageHandling,
+      runtime,
       message,
       async (content: Content) => {
         if (opts?.isAborted?.()) {
@@ -2603,59 +2053,8 @@ async function generateChatResponse(
       );
     }
   } catch (err) {
-    handlerError = err;
+    _handlerError = err;
     throw err;
-  } finally {
-    const messageMeta =
-      message.metadata && typeof message.metadata === "object"
-        ? (message.metadata as Record<string, unknown>)
-        : null;
-    const metadataTrajectoryStepId =
-      typeof messageMeta?.trajectoryStepId === "string" &&
-      messageMeta.trajectoryStepId.trim().length > 0
-        ? messageMeta.trajectoryStepId
-        : null;
-    const stepIdToEnd =
-      fallbackTrajectoryEndTargetId ??
-      fallbackTrajectoryStepId ??
-      metadataTrajectoryStepId ??
-      eventTrajectoryStepId;
-    const stepIdToPersist =
-      metadataTrajectoryStepId ??
-      fallbackTrajectoryStepId ??
-      eventTrajectoryStepId;
-
-    if (
-      stepIdToEnd &&
-      trajectoryLogger &&
-      typeof trajectoryLogger.endTrajectory === "function"
-    ) {
-      try {
-        await trajectoryLogger.endTrajectory(
-          stepIdToEnd,
-          handlerError ? "error" : "completed",
-        );
-      } catch (err) {
-        runtime.logger?.warn(
-          {
-            err,
-            src: "milady-api",
-            trajectoryStepId: stepIdToEnd,
-          },
-          "Failed to end API trajectory logging",
-        );
-      }
-    }
-
-    if (stepIdToPersist) {
-      await completeTrajectoryStepInDatabase({
-        runtime,
-        stepId: stepIdToPersist,
-        source: messageSource,
-        status: handlerError ? "error" : "completed",
-        metadata: messageMeta ?? undefined,
-      });
-    }
   }
 
   // Fallback: if callback wasn't used for text, stream + return final text.
@@ -2778,7 +2177,7 @@ function parseBoundedLimit(rawLimit: string | null, fallback = 15): number {
 
 /**
  * Key patterns that indicate a value is sensitive and must be redacted.
- * Matches against the property key at any nesting depth.  Aligned with
+ * Matches against the property key at unknown nesting depth.  Aligned with
  * SENSITIVE_PATTERNS in src/config/schema.ts so every field the UI marks
  * as sensitive is also redacted in the API response.
  *
@@ -2824,7 +2223,7 @@ function cloneWithoutBlockedObjectKeys<T>(value: T): T {
 }
 
 /**
- * Replace any non-empty value with "[REDACTED]".  For arrays, each string
+ * Replace unknown non-empty value with "[REDACTED]".  For arrays, each string
  * element is individually redacted; for objects, all string leaves are
  * redacted.  Non-string primitives (booleans, numbers) are replaced with
  * the string "[REDACTED]" to avoid leaking e.g. numeric PINs.
@@ -2892,7 +2291,7 @@ function isRedactedSecretValue(value: unknown): boolean {
 
 /**
  * Validate that a user-supplied skill ID is safe to use in filesystem paths.
- * Rejects IDs containing path separators, ".." sequences, or any characters
+ * Rejects IDs containing path separators, ".." sequences, or unknown characters
  * outside the safe set used by the marketplace (`safeName()` in
  * skill-marketplace.ts).  Returns `null` and sends a 400 response if the
  * ID is invalid.
@@ -3326,7 +2725,7 @@ function writeProviderCache(cache: ProviderCache): void {
 
 // ── Provider fetchers ────────────────────────────────────────────────────
 
-/** Fetch models from any provider's /v1/models endpoint (standard REST). */
+/** Fetch models from unknown provider's /v1/models endpoint (standard REST). */
 async function fetchModelsREST(
   providerId: string,
   apiKey: string,
@@ -5146,7 +4545,7 @@ async function handleRequest(
   if (method === "POST" && pathname === "/api/subscription/openai/start") {
     try {
       const { startCodexLogin } = await import("../auth/index");
-      // Clean up any stale flow from a previous attempt
+      // Clean up unknown stale flow from a previous attempt
       if (state._codexFlow) {
         try {
           state._codexFlow.close();
@@ -5537,7 +4936,7 @@ async function handleRequest(
         config.cloud.provider = body.cloudProvider as string;
       }
       // Always ensure model defaults when cloud is selected so the cloud
-      // plugin has valid models to call even if the user didn't pick any.
+      // plugin has valid models to call even if the user didn't pick unknown.
       if (!config.models) config.models = {};
       config.models.small =
         (body.smallModel as string) ||
@@ -6768,14 +6167,12 @@ async function handleRequest(
 
   // ── GET /api/registry/plugins ──────────────────────────────────────────
   if (method === "GET" && pathname === "/api/registry/plugins") {
-    const { getRegistryPlugins } = await import("../services/registry-client");
-    const { listInstalledPlugins: listInstalled } = await import(
-      "../services/plugin-installer"
-    );
     try {
-      const registry = await getRegistryPlugins();
-      const installed = await listInstalled();
-      const installedNames = new Set(installed.map((p) => p.name));
+      const pluginManager = state.runtime?.getService("plugin_manager") as unknown;
+      if (!pluginManager) throw new Error("Plugin manager service not found");
+      const registry = await pluginManager.refreshRegistry();
+      const installed = await pluginManager.listInstalledPlugins();
+      const installedNames = new Set(installed.map((p: unknown) => p.name));
 
       // Also check which plugins are loaded in the runtime
       const loadedNames = state.runtime
@@ -6785,7 +6182,7 @@ async function handleRequest(
       // Cross-reference with bundled manifest so the Store can hide them
       const bundledIds = new Set(state.plugins.map((p) => p.id));
 
-      const plugins = Array.from(registry.values()).map((p) => {
+      const plugins = Array.from(registry.values()).map((p: unknown) => {
         const shortId = p.name
           .replace(/^@[^/]+\/plugin-/, "")
           .replace(/^@[^/]+\//, "")
@@ -6794,7 +6191,7 @@ async function handleRequest(
           ...p,
           installed: installedNames.has(p.name),
           installedVersion:
-            installed.find((i) => i.name === p.name)?.version ?? null,
+            installed.find((i: unknown) => i.name === p.name)?.version ?? null,
           loaded:
             loadedNames.has(p.name) ||
             loadedNames.has(p.name.replace("@elizaos/", "")),
@@ -6821,10 +6218,10 @@ async function handleRequest(
     const name = decodeURIComponent(
       pathname.slice("/api/registry/plugins/".length),
     );
-    const { getPluginInfo } = await import("../services/registry-client");
-
     try {
-      const info = await getPluginInfo(name);
+      const pluginManager = state.runtime?.getService("plugin_manager") as unknown;
+      if (!pluginManager) throw new Error("Plugin manager service not found");
+      const info = await pluginManager.getRegistryPlugin(name);
       if (!info) {
         error(res, `Plugin "${name}" not found in registry`, 404);
         return;
@@ -6848,14 +6245,15 @@ async function handleRequest(
       return;
     }
 
-    const { searchPlugins } = await import("../services/registry-client");
-
     try {
       const limitParam = url.searchParams.get("limit");
       const limit = limitParam
         ? parseClampedInteger(limitParam, { min: 1, max: 50, fallback: 15 })
         : 15;
-      const results = await searchPlugins(query, limit);
+
+      const pluginManager = state.runtime?.getService("plugin_manager") as unknown;
+      if (!pluginManager) throw new Error("Plugin manager service not found");
+      const results = await pluginManager.searchRegistry(query, limit);
       json(res, { query, count: results.length, results });
     } catch (err) {
       error(
@@ -6869,10 +6267,10 @@ async function handleRequest(
 
   // ── POST /api/registry/refresh ──────────────────────────────────────────
   if (method === "POST" && pathname === "/api/registry/refresh") {
-    const { refreshRegistry } = await import("../services/registry-client");
-
     try {
-      const registry = await refreshRegistry();
+      const pluginManager = state.runtime?.getService("plugin_manager") as unknown;
+      if (!pluginManager) throw new Error("Plugin manager service not found");
+      const registry = await pluginManager.refreshRegistry();
       json(res, { ok: true, count: registry.size });
     } catch (err) {
       error(
@@ -6990,18 +6388,21 @@ async function handleRequest(
       return;
     }
 
-    const { installPlugin } = await import("../services/plugin-installer");
-
     try {
-      const result = await installPlugin(pluginName, (progress) => {
-        logger.info(`[install] ${progress.phase}: ${progress.message}`);
-        state.broadcastWs?.({
-          type: "install-progress",
-          pluginName: progress.pluginName,
-          phase: progress.phase,
-          message: progress.message,
-        });
-      });
+      const pluginManager = state.runtime?.getService("plugin_manager") as unknown;
+      if (!pluginManager) throw new Error("Plugin manager service not found");
+      const result = await pluginManager.installPlugin(
+        pluginName,
+        (progress: unknown) => {
+          logger.info(`[install] ${progress.phase}: ${progress.message}`);
+          state.broadcastWs?.({
+            type: "install-progress",
+            pluginName: progress.pluginName,
+            phase: progress.phase,
+            message: progress.message,
+          });
+        },
+      );
 
       if (!result.success) {
         json(res, { ok: false, error: result.error }, 422);
@@ -7049,10 +6450,10 @@ async function handleRequest(
       return;
     }
 
-    const { uninstallPlugin } = await import("../services/plugin-installer");
-
     try {
-      const result = await uninstallPlugin(pluginName);
+      const pluginManager = state.runtime?.getService("plugin_manager") as unknown;
+      if (!pluginManager) throw new Error("Plugin manager service not found");
+      const result = await pluginManager.uninstallPlugin(pluginName);
 
       if (!result.success) {
         json(res, { ok: false, error: result.error }, 422);
@@ -7084,12 +6485,10 @@ async function handleRequest(
   // ── GET /api/plugins/installed ──────────────────────────────────────────
   // List plugins that were installed from the registry at runtime.
   if (method === "GET" && pathname === "/api/plugins/installed") {
-    const { listInstalledPlugins } = await import(
-      "../services/plugin-installer"
-    );
-
     try {
-      const installed = await listInstalledPlugins();
+      const pluginManager = state.runtime?.getService("plugin_manager") as unknown;
+      if (!pluginManager) throw new Error("Plugin manager service not found");
+      const installed = await pluginManager.listInstalledPlugins();
       json(res, { count: installed.length, plugins: installed });
     } catch (err) {
       error(
@@ -7104,10 +6503,10 @@ async function handleRequest(
   // ── GET /api/plugins/ejected ────────────────────────────────────────────
   // List plugins ejected to local source checkouts with upstream metadata.
   if (method === "GET" && pathname === "/api/plugins/ejected") {
-    const { listEjectedPlugins } = await import("../services/plugin-eject.js");
-
     try {
-      const plugins = await listEjectedPlugins();
+      const pluginManager = state.runtime?.getService("plugin_manager") as unknown;
+      if (!pluginManager) throw new Error("Plugin manager service not found");
+      const plugins = await pluginManager.listEjectedPlugins();
       json(res, { count: plugins.length, plugins });
     } catch (err) {
       error(
@@ -7122,10 +6521,10 @@ async function handleRequest(
   // ── GET /api/core/status ────────────────────────────────────────────────
   // Returns whether @elizaos/core is ejected or resolved from npm.
   if (method === "GET" && pathname === "/api/core/status") {
-    const { getCoreStatus } = await import("../services/core-eject.js");
-
     try {
-      const status = await getCoreStatus();
+      const coreManager = state.runtime?.getService("core_manager") as unknown;
+      if (!coreManager) throw new Error("Core manager service not found");
+      const status = await coreManager.getCoreStatus();
       json(res, status);
     } catch (err) {
       error(
@@ -7981,7 +7380,7 @@ async function handleRequest(
 
     try {
       fs.writeFileSync(skillMdPath, parsed.content, "utf-8");
-      // Re-discover skills to pick up any name/description changes
+      // Re-discover skills to pick up unknown name/description changes
       state.skills = await discoverSkills(
         workspaceDir,
         state.config,
@@ -10973,13 +10372,16 @@ async function handleRequest(
 
   // ── Trajectory management API ──────────────────────────────────────────
   if (pathname.startsWith("/api/trajectories")) {
-    const handled = await handleTrajectoryRoute(
-      req,
-      res,
-      state.runtime,
-      pathname,
-    );
-    if (handled) return;
+    if (state.runtime) {
+      const handled = await handleTrajectoryRoute(
+        req,
+        res,
+        state.runtime,
+        pathname,
+        method,
+      );
+      if (handled) return;
+    }
   }
 
   // ── GET /api/cloud/status ─────────────────────────────────────────────
@@ -11140,7 +10542,9 @@ async function handleRequest(
 
   // ── App routes (/api/apps/*) ──────────────────────────────────────────
   if (method === "GET" && pathname === "/api/apps") {
-    const apps = await state.appManager.listAvailable();
+    const pluginManager = state.runtime?.getService("plugin_manager") as unknown;
+    if (!pluginManager) throw new Error("Plugin manager service not found");
+    const apps = await state.appManager.listAvailable(pluginManager);
     json(res, apps);
     return;
   }
@@ -11152,13 +10556,18 @@ async function handleRequest(
       return;
     }
     const limit = parseBoundedLimit(url.searchParams.get("limit"));
-    const results = await state.appManager.search(query, limit);
+    const pluginManager = state.runtime?.getService("plugin_manager") as unknown;
+    if (!pluginManager) throw new Error("Plugin manager service not found");
+    const results = await state.appManager.search(pluginManager, query, limit);
     json(res, results);
     return;
   }
 
   if (method === "GET" && pathname === "/api/apps/installed") {
-    json(res, state.appManager.listInstalled());
+    const pluginManager = state.runtime?.getService("plugin_manager") as unknown;
+    if (!pluginManager) throw new Error("Plugin manager service not found");
+    const installed = await state.appManager.listInstalled(pluginManager);
+    json(res, installed);
     return;
   }
 
@@ -11170,7 +10579,13 @@ async function handleRequest(
       error(res, "name is required");
       return;
     }
-    const result = await state.appManager.launch(body.name.trim());
+    const pluginManager = state.runtime?.getService("plugin_manager") as unknown;
+    if (!pluginManager) throw new Error("Plugin manager service not found");
+    const result = await state.appManager.launch(
+      pluginManager,
+      body.name.trim(),
+      (_progress: unknown) => {},
+    );
     json(res, result);
     return;
   }
@@ -11184,7 +10599,9 @@ async function handleRequest(
       return;
     }
     const appName = body.name.trim();
-    const result = await state.appManager.stop(appName);
+    const pluginManager = state.runtime?.getService("plugin_manager") as unknown;
+    if (!pluginManager) throw new Error("Plugin manager service not found");
+    const result = await state.appManager.stop(pluginManager, appName);
     json(res, result);
     return;
   }
@@ -11197,7 +10614,9 @@ async function handleRequest(
       error(res, "app name is required");
       return;
     }
-    const info = await state.appManager.getInfo(appName);
+    const pluginManager = state.runtime?.getService("plugin_manager") as unknown;
+    if (!pluginManager) throw new Error("Plugin manager service not found");
+    const info = await state.appManager.getInfo(pluginManager, appName);
     if (!info) {
       error(res, `App "${appName}" not found in registry`, 404);
       return;
@@ -12320,18 +11739,29 @@ async function handleRequest(
       return;
     }
 
+    const { maxConcurrent, maxDurationMs } = resolveTerminalRunLimits();
+    if (activeTerminalRunCount >= maxConcurrent) {
+      error(
+        res,
+        `Too many active terminal runs (${maxConcurrent}). Wait for a command to finish.`,
+        429,
+      );
+      return;
+    }
+
     // Respond immediately — output streams via WebSocket
     json(res, { ok: true });
 
     // Spawn in background and broadcast output
     const { spawn } = await import("node:child_process");
-    const runId = `run-${Date.now()}`;
+    const runId = `run-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
     state.broadcastWs?.({
       type: "terminal-output",
       runId,
       event: "start",
       command,
+      maxDurationMs,
     });
 
     const proc = spawn(command, {
@@ -12339,6 +11769,30 @@ async function handleRequest(
       cwd: process.cwd(),
       env: { ...process.env, FORCE_COLOR: "0" },
     });
+
+    activeTerminalRunCount += 1;
+    let finalized = false;
+    const finalize = () => {
+      if (finalized) return;
+      finalized = true;
+      activeTerminalRunCount = Math.max(0, activeTerminalRunCount - 1);
+      clearTimeout(timeoutHandle);
+    };
+
+    const timeoutHandle = setTimeout(() => {
+      if (proc.killed) return;
+      proc.kill("SIGTERM");
+      state.broadcastWs?.({
+        type: "terminal-output",
+        runId,
+        event: "timeout",
+        maxDurationMs,
+      });
+
+      setTimeout(() => {
+        if (!proc.killed) proc.kill("SIGKILL");
+      }, 3000);
+    }, maxDurationMs);
 
     proc.stdout?.on("data", (chunk: Buffer) => {
       state.broadcastWs?.({
@@ -12359,6 +11813,7 @@ async function handleRequest(
     });
 
     proc.on("close", (code: number | null) => {
+      finalize();
       state.broadcastWs?.({
         type: "terminal-output",
         runId,
@@ -12368,6 +11823,7 @@ async function handleRequest(
     });
 
     proc.on("error", (err: Error) => {
+      finalize();
       state.broadcastWs?.({
         type: "terminal-output",
         runId,
@@ -13358,14 +12814,11 @@ export async function startApiServer(opts?: {
 
   // Restore conversations from DB at initial boot (if runtime was passed in)
   if (opts?.runtime) {
-    installDatabaseTrajectoryLogger(opts.runtime);
     void restoreConversationsFromDb(opts.runtime);
   }
 
   /** Hot-swap the runtime reference (used after an in-process restart). */
   const updateRuntime = (rt: AgentRuntime): void => {
-    installDatabaseTrajectoryLogger(rt);
-    const carryOver = carryOverTrajectoryLogsBetweenRuntimes(state.runtime, rt);
     state.runtime = rt;
     state.chatConnectionReady = null;
     state.chatConnectionPromise = null;
@@ -13378,14 +12831,6 @@ export async function startApiServer(opts?: {
       "system",
       "agent",
     ]);
-    if (carryOver.llmCalls > 0 || carryOver.providerAccesses > 0) {
-      addLog(
-        "info",
-        `Carried over ${carryOver.llmCalls} LLM call(s) and ${carryOver.providerAccesses} provider access log(s) after runtime restart`,
-        "system",
-        ["system", "agent", "trajectory"],
-      );
-    }
 
     // Restore conversations from DB so they survive restarts
     void restoreConversationsFromDb(rt);

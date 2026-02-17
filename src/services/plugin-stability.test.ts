@@ -12,11 +12,15 @@
  * Issue: #3 — Plugin & Provider Stability
  */
 
-import type { Plugin, Provider, ProviderResult } from "@elizaos/core";
+import {
+  createSessionKeyProvider,
+  type Plugin,
+  type Provider,
+  type ProviderResult,
+} from "@elizaos/core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { validateRuntimeContext } from "../api/plugin-validation";
 import type { MiladyConfig } from "../config/types.milady";
-import { createSessionKeyProvider } from "../providers/session-bridge";
 import { createWorkspaceProvider } from "../providers/workspace-provider";
 import {
   applyCloudConfigToEnv,
@@ -49,7 +53,6 @@ function _getCoreOverride(pkg: RootPackageJson): string | undefined {
     pkg.overrides?.["@elizaos/core"] ?? pkg.pnpm?.overrides?.["@elizaos/core"]
   );
 }
-
 
 // ---------------------------------------------------------------------------
 // Constants — Full plugin enumeration

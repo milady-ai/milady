@@ -71,7 +71,9 @@ export function LogsView() {
         entry.level ?? "",
         ...(entry.tags ?? []),
       ];
-      return haystack.some((part) => part.toLowerCase().includes(normalizedSearch));
+      return haystack.some((part) =>
+        part.toLowerCase().includes(normalizedSearch),
+      );
     });
   }, [logs, normalizedSearch]);
 
@@ -135,6 +137,7 @@ export function LogsView() {
 
         {hasActiveFilters && (
           <button
+            type="button"
             className="text-xs px-3 py-1.5 border border-border bg-card text-txt cursor-pointer hover:border-accent hover:text-accent"
             onClick={handleClearFilters}
           >
@@ -143,6 +146,7 @@ export function LogsView() {
         )}
 
         <button
+          type="button"
           className="text-xs px-3 py-1.5 border border-border bg-card text-txt cursor-pointer hover:border-accent hover:text-accent ml-auto"
           onClick={() => void loadLogs()}
         >

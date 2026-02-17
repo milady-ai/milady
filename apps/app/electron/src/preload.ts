@@ -5,20 +5,32 @@
  * This is the secure bridge between Node.js and the web context.
  */
 
-import { contextBridge, ipcRenderer, desktopCapturer } from "electron";
+import { contextBridge, desktopCapturer, ipcRenderer } from "electron";
 
 // Load Capacitor runtime
 require("./rt/electron-rt");
 
 type IpcPrimitive = string | number | boolean | null | undefined;
 type IpcObject = { [key: string]: IpcValue };
-type IpcValue = IpcPrimitive | IpcObject | IpcValue[] | ArrayBuffer | Float32Array | Uint8Array;
+type IpcValue =
+  | IpcPrimitive
+  | IpcObject
+  | IpcValue[]
+  | ArrayBuffer
+  | Float32Array
+  | Uint8Array;
 type IpcListener = (...args: IpcValue[]) => void;
 type ElectronIpcListener = Parameters<typeof ipcRenderer.on>[1];
 
-const ipcListenerRegistry = new Map<string, WeakMap<IpcListener, ElectronIpcListener>>();
+const ipcListenerRegistry = new Map<
+  string,
+  WeakMap<IpcListener, ElectronIpcListener>
+>();
 
-function getWrappedListener(channel: string, listener: IpcListener): ElectronIpcListener {
+function getWrappedListener(
+  channel: string,
+  listener: IpcListener,
+): ElectronIpcListener {
   let channelRegistry = ipcListenerRegistry.get(channel);
   if (!channelRegistry) {
     channelRegistry = new WeakMap<IpcListener, ElectronIpcListener>();
@@ -46,8 +58,10 @@ function clearWrappedListener(channel: string, listener: IpcListener): void {
  */
 const electronAPI = {
   ipcRenderer: {
-    invoke: (channel: string, ...args: IpcValue[]) => ipcRenderer.invoke(channel, ...args) as Promise<IpcValue>,
-    send: (channel: string, ...args: IpcValue[]) => ipcRenderer.send(channel, ...args),
+    invoke: (channel: string, ...args: IpcValue[]) =>
+      ipcRenderer.invoke(channel, ...args) as Promise<IpcValue>,
+    send: (channel: string, ...args: IpcValue[]) =>
+      ipcRenderer.send(channel, ...args),
     on: (channel: string, listener: IpcListener) => {
       ipcRenderer.on(channel, getWrappedListener(channel, listener));
     },
@@ -80,8 +94,13 @@ const electronAPI = {
    * Desktop Capturer for screen capture
    */
   desktopCapturer: {
-    getSources: async (options: { types: string[]; thumbnailSize?: { width: number; height: number } }) => {
-      const sources = await desktopCapturer.getSources(options as Electron.SourcesOptions);
+    getSources: async (options: {
+      types: string[];
+      thumbnailSize?: { width: number; height: number };
+    }) => {
+      const sources = await desktopCapturer.getSources(
+        options as Electron.SourcesOptions,
+      );
       return sources.map((source) => ({
         id: source.id,
         name: source.name,

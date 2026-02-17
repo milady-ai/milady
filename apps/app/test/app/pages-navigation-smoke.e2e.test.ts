@@ -61,7 +61,8 @@ vi.mock("../../src/components/CustomActionEditor", () => ({
 }));
 
 vi.mock("../../src/components/AppsPageView", () => ({
-  AppsPageView: () => React.createElement("section", null, "AppsPageView Ready"),
+  AppsPageView: () =>
+    React.createElement("section", null, "AppsPageView Ready"),
 }));
 
 vi.mock("../../src/components/CharacterView", () => ({
@@ -70,7 +71,8 @@ vi.mock("../../src/components/CharacterView", () => ({
 }));
 
 vi.mock("../../src/components/TriggersView", () => ({
-  TriggersView: () => React.createElement("section", null, "TriggersView Ready"),
+  TriggersView: () =>
+    React.createElement("section", null, "TriggersView Ready"),
 }));
 
 vi.mock("../../src/components/ConnectorsPageView", () => ({
@@ -89,12 +91,12 @@ vi.mock("../../src/components/KnowledgeView", () => ({
 }));
 
 vi.mock("../../src/components/SettingsView", () => ({
-  SettingsView: () => React.createElement("section", null, "SettingsView Ready"),
+  SettingsView: () =>
+    React.createElement("section", null, "SettingsView Ready"),
 }));
 
 vi.mock("../../src/components/LoadingScreen", () => ({
-  LoadingScreen: () =>
-    React.createElement("div", null, "LoadingScreen"),
+  LoadingScreen: () => React.createElement("div", null, "LoadingScreen"),
 }));
 
 vi.mock("../../src/components/TerminalPanel", () => ({
@@ -380,7 +382,7 @@ describe("pages navigation smoke (e2e)", () => {
     for (const entry of expectedByTab) {
       state.tab = entry.tab;
       await act(async () => {
-        tree!.update(React.createElement(App));
+        tree?.update(React.createElement(App));
       });
       const content = mainContent(tree!);
       expect(content).toContain(entry.token);
@@ -419,12 +421,20 @@ describe("pages navigation smoke (e2e)", () => {
       },
       {
         name: "pairing",
-        patch: { onboardingLoading: false, onboardingComplete: true, authRequired: true },
+        patch: {
+          onboardingLoading: false,
+          onboardingComplete: true,
+          authRequired: true,
+        },
         token: "PairingView",
       },
       {
         name: "onboarding",
-        patch: { onboardingLoading: false, authRequired: false, onboardingComplete: false },
+        patch: {
+          onboardingLoading: false,
+          authRequired: false,
+          onboardingComplete: false,
+        },
         token: "OnboardingWizard",
       },
     ];
@@ -447,7 +457,7 @@ describe("pages navigation smoke (e2e)", () => {
       await act(async () => {
         tree = TestRenderer.create(React.createElement(App));
       });
-      const appText = textOf(tree!.root);
+      const appText = textOf(tree?.root);
       expect(appText).toContain(entry.token);
       expectValidContent(appText);
     }

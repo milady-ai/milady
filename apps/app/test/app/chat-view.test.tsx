@@ -1,6 +1,6 @@
 import React from "react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import TestRenderer, { act } from "react-test-renderer";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 interface ChatViewContextStub {
   agentStatus: { agentName: string } | null;
@@ -128,7 +128,7 @@ describe("ChatView", () => {
     });
     await flush();
 
-    const root = tree!.root;
+    const root = tree?.root;
     const headerCount = root.findAll(
       (node) => node.type === "div" && text(node) === "Milady",
     ).length;
@@ -153,7 +153,7 @@ describe("ChatView", () => {
     });
     await flush();
 
-    const root = tree!.root;
+    const root = tree?.root;
     const userTextNodes = root.findAll(
       (node) => node.type === "span" && text(node) === "stream me",
     );

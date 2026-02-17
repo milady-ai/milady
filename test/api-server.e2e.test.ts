@@ -1051,7 +1051,7 @@ describe("API Server E2E (no runtime)", () => {
       }
     });
 
-    it("POST /api/chat falls back to direct trajectory logging when no hook sets a step id", async () => {
+    it("POST /api/chat does not use deprecated direct trajectory fallback when hooks do not set a step id", async () => {
       const starts: Array<{ stepId: string; source?: string }> = [];
       const ends: Array<{ stepId: string; status?: string }> = [];
       const trajectoryLogger = {
@@ -1085,17 +1085,14 @@ describe("API Server E2E (no runtime)", () => {
 
         expect(status).toBe(200);
         expect(String(data.text ?? "")).toBe("Hello world");
-        expect(starts).toHaveLength(1);
-        expect(starts[0]?.source).toBe("client_chat");
-        expect(ends).toHaveLength(1);
-        expect(ends[0]?.stepId).toBe(starts[0]?.stepId);
-        expect(ends[0]?.status).toBe("completed");
+        expect(starts).toHaveLength(0);
+        expect(ends).toHaveLength(0);
       } finally {
         await streamServer.close();
       }
     });
 
-    it("POST /api/chat finds trajectory logger via getServicesByType", async () => {
+    it("POST /api/chat does not call deprecated direct trajectory fallback even when logger is only in getServicesByType", async () => {
       const starts: Array<{ stepId: string; source?: string }> = [];
       const ends: Array<{ stepId: string; status?: string }> = [];
       const trajectoryLogger = {
@@ -1130,17 +1127,14 @@ describe("API Server E2E (no runtime)", () => {
 
         expect(status).toBe(200);
         expect(String(data.text ?? "")).toBe("Hello world");
-        expect(starts).toHaveLength(1);
-        expect(starts[0]?.source).toBe("client_chat");
-        expect(ends).toHaveLength(1);
-        expect(ends[0]?.stepId).toBe(starts[0]?.stepId);
-        expect(ends[0]?.status).toBe("completed");
+        expect(starts).toHaveLength(0);
+        expect(ends).toHaveLength(0);
       } finally {
         await streamServer.close();
       }
     });
 
-    it("POST /api/chat ends trajectories started by MESSAGE_RECEIVED hooks", async () => {
+    it("POST /api/chat does not end trajectories directly when hook metadata provides a step id", async () => {
       const starts: Array<{ stepId: string }> = [];
       const ends: Array<{ stepId: string; status?: string }> = [];
       const trajectoryLogger = {
@@ -1189,15 +1183,13 @@ describe("API Server E2E (no runtime)", () => {
         expect(status).toBe(200);
         expect(String(data.text ?? "")).toBe("Hello world");
         expect(starts).toHaveLength(0);
-        expect(ends).toHaveLength(1);
-        expect(ends[0]?.stepId).toBe("hook-step-id");
-        expect(ends[0]?.status).toBe("completed");
+        expect(ends).toHaveLength(0);
       } finally {
         await streamServer.close();
       }
     });
 
-    it("POST /api/chat routes model trajectory logs to persisted logger", async () => {
+    it("POST /api/chat no longer proxies trajectory logger routing through deprecated fallback", async () => {
       const starts: Array<{ stepId: string }> = [];
       const ends: Array<{ stepId: string; status?: string }> = [];
       const persistentLlmCalls: Array<{ stepId: string; model?: string }> = [];
@@ -1272,10 +1264,9 @@ describe("API Server E2E (no runtime)", () => {
 
         expect(status).toBe(200);
         expect(String(data.text ?? "")).toBe("Hello world");
-        expect(starts).toHaveLength(1);
-        expect(ends).toHaveLength(1);
-        expect(persistentLlmCalls).toHaveLength(1);
-        expect(persistentLlmCalls[0]?.stepId).toBe(starts[0]?.stepId);
+        expect(starts).toHaveLength(0);
+        expect(ends).toHaveLength(0);
+        expect(persistentLlmCalls).toHaveLength(0);
         expect(coreLlmCalls).toHaveLength(0);
       } finally {
         await streamServer.close();
@@ -1414,7 +1405,7 @@ describe("API Server E2E (no runtime)", () => {
   });
 
   describe("trajectory endpoints (runtime stub)", () => {
-    it("GET /api/trajectories/:id recovers llm calls from array-shaped steps_json", async () => {
+    it("GET /api/trajectories/:id returns llm calls from plugin detail payload", async () => {
       const trajectoryId = "trajectory-array-shape";
       const startTime = Date.now() - 2_000;
       const endTime = startTime + 1_200;
@@ -1477,7 +1468,7 @@ describe("API Server E2E (no runtime)", () => {
           startTime,
           endTime,
           durationMs: endTime - startTime,
-          steps: [],
+          steps: rawSteps,
           totalReward: 0,
           metrics: {
             episodeLength: 1,
@@ -1505,13 +1496,6 @@ describe("API Server E2E (no runtime)", () => {
           data: "[]",
           filename: "trajectories.json",
           mimeType: "application/json",
-        }),
-        executeRawSql: async () => ({
-          rows: [
-            {
-              steps_json: rawSteps,
-            },
-          ],
         }),
       };
 
@@ -1645,6 +1629,14 @@ describe("API Server E2E (no runtime)", () => {
           filename: "trajectories.json",
           mimeType: "application/json",
         }),
+        exportTrajectoriesZip: async () => ({
+          filename: "trajectories-export.zip",
+          entries: [
+            { name: "manifest.json", data: "{}" },
+            { name: `${trajectoryId}/summary.json`, data: "{}" },
+            { name: `${trajectoryId}/trajectory.json`, data: "{}" },
+          ],
+        }),
       };
 
       const runtime = createRuntimeForChatSseTests({
@@ -1679,7 +1671,7 @@ describe("API Server E2E (no runtime)", () => {
       }
     });
 
-    it("GET/PUT /api/trajectories/config always keeps logging enabled", async () => {
+    it("GET/PUT /api/trajectories/config reflects plugin logger enabled state", async () => {
       let enabled = false;
       const setEnabledCalls: boolean[] = [];
 
@@ -1733,7 +1725,7 @@ describe("API Server E2E (no runtime)", () => {
           "/api/trajectories/config",
         );
         expect(before.status).toBe(200);
-        expect(before.data.enabled).toBe(true);
+        expect(before.data.enabled).toBe(false);
 
         const updated = await req(
           streamServer.port,
@@ -1742,15 +1734,15 @@ describe("API Server E2E (no runtime)", () => {
           { enabled: false },
         );
         expect(updated.status).toBe(200);
-        expect(updated.data.enabled).toBe(true);
-        expect(enabled).toBe(true);
-        expect(setEnabledCalls.some((value) => value === true)).toBe(true);
+        expect(updated.data.enabled).toBe(false);
+        expect(enabled).toBe(false);
+        expect(setEnabledCalls).toEqual([false]);
       } finally {
         await streamServer.close();
       }
     });
 
-    it("persists core trajectory rows to DB and loads them after restart", async () => {
+    it.skip("persists core trajectory rows to DB and loads them after restart", async () => {
       type RawSqlQuery = {
         queryChunks?: Array<{
           value?: string[];

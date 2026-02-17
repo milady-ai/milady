@@ -5,3 +5,4 @@ plugins
 **/dist
 .git
 src/benchmark/mock-plugin.ts
+apps/app/src/styles.css

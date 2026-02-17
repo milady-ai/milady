@@ -2,7 +2,7 @@
  * Conversations sidebar component — left sidebar with conversation list.
  */
 
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useApp } from "../AppContext";
 
 interface ConversationsSidebarProps {
@@ -26,7 +26,10 @@ function formatRelativeTime(dateString: string): string {
   return date.toLocaleDateString();
 }
 
-export function ConversationsSidebar({ mobile = false, onClose }: ConversationsSidebarProps) {
+export function ConversationsSidebar({
+  mobile = false,
+  onClose,
+}: ConversationsSidebarProps) {
   const {
     conversations,
     activeConversationId,
@@ -74,7 +77,10 @@ export function ConversationsSidebar({ mobile = false, onClose }: ConversationsS
     setEditingTitle("");
   };
 
-  const handleEditKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, id: string) => {
+  const handleEditKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    id: string,
+  ) => {
     if (e.key === "Enter") {
       e.preventDefault();
       void handleEditSubmit(id);
@@ -91,7 +97,9 @@ export function ConversationsSidebar({ mobile = false, onClose }: ConversationsS
     >
       {mobile && (
         <div className="px-3 py-2 border-b border-border flex items-center justify-between">
-          <div className="text-xs uppercase tracking-wide text-muted">Chats</div>
+          <div className="text-xs uppercase tracking-wide text-muted">
+            Chats
+          </div>
           <button
             type="button"
             className="inline-flex items-center justify-center w-7 h-7 border border-border bg-card text-sm text-muted cursor-pointer hover:border-accent hover:text-accent transition-colors"
@@ -117,7 +125,9 @@ export function ConversationsSidebar({ mobile = false, onClose }: ConversationsS
 
       <div className="flex-1 overflow-y-auto py-1">
         {sortedConversations.length === 0 ? (
-          <div className="px-3 py-6 text-center text-muted text-xs">No conversations yet</div>
+          <div className="px-3 py-6 text-center text-muted text-xs">
+            No conversations yet
+          </div>
         ) : (
           sortedConversations.map((conv) => {
             const isActive = conv.id === activeConversationId;
@@ -129,7 +139,9 @@ export function ConversationsSidebar({ mobile = false, onClose }: ConversationsS
                 data-testid="conv-item"
                 data-active={isActive || undefined}
                 className={`flex items-center px-3 py-2 gap-2 cursor-pointer transition-colors border-l-[3px] ${
-                  isActive ? "bg-bg-hover border-l-accent" : "border-l-transparent hover:bg-bg-hover"
+                  isActive
+                    ? "bg-bg-hover border-l-accent"
+                    : "border-l-transparent hover:bg-bg-hover"
                 } group`}
                 onClick={() => {
                   if (!isEditing) {
@@ -155,8 +167,12 @@ export function ConversationsSidebar({ mobile = false, onClose }: ConversationsS
                       <span className="w-2 h-2 rounded-full bg-accent shrink-0" />
                     )}
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium truncate text-txt">{conv.title}</div>
-                      <div className="text-[11px] text-muted mt-0.5">{formatRelativeTime(conv.updatedAt)}</div>
+                      <div className="font-medium truncate text-txt">
+                        {conv.title}
+                      </div>
+                      <div className="text-[11px] text-muted mt-0.5">
+                        {formatRelativeTime(conv.updatedAt)}
+                      </div>
                     </div>
                     <button
                       type="button"

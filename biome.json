@@ -9,24 +9,9 @@
     "ignoreUnknown": true,
     "maxSize": 1048576,
     "includes": [
-      "**",
-      "!apps",
-      "!assets",
-      "!dist",
-      "!docs/_layouts",
-      "!**/.github/contributor-trust.json",
-      "!.github/trust-scoring.cjs",
-      "!node_modules",
-      "!patches",
-      "!pnpm-lock.yaml",
-      "!bun.lock",
-      "!bun.lockb",
-      "!skills",
-      "!Swabble",
-      "!vendor",
-      "!test/contracts/lib",
-      "!test/contracts/out",
-      "!test/contracts/cache"
+      "src/**",
+      "scripts/**",
+      "apps/**"
     ]
   },
   "assist": {
@@ -66,5 +51,10 @@
     "enabled": true,
     "indentStyle": "space",
     "indentWidth": 2
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
   }
 }

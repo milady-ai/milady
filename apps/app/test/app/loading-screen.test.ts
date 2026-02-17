@@ -5,7 +5,10 @@ import { describe, expect, it } from "vitest";
 import { LoadingScreen } from "../../src/components/LoadingScreen";
 
 function renderedText(tree: TestRenderer.ReactTestRenderer): string {
-  return tree.root.findAllByType("div").map((node) => node.children.join("")).join("\n");
+  return tree.root
+    .findAllByType("div")
+    .map((node) => node.children.join(""))
+    .join("\n");
 }
 
 describe("LoadingScreen", () => {

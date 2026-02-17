@@ -1,3 +1,4 @@
+import net from "node:net";
 import type { AgentRuntime } from "@elizaos/core";
 import type { TrainingService } from "../services/training-service";
 import { parsePositiveInteger } from "../utils/number-parsing";
@@ -8,6 +9,68 @@ export type TrainingRouteHelpers = RouteHelpers;
 export interface TrainingRouteContext extends RouteRequestContext {
   runtime: AgentRuntime | null;
   trainingService: TrainingService;
+}
+
+function normalizeHostLike(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/^\[|\]$/g, "");
+}
+
+function decodeIpv6MappedHex(mapped: string): string | null {
+  const match = /^([0-9a-f]{1,4}):([0-9a-f]{1,4})$/i.exec(mapped);
+  if (!match) return null;
+  const hi = Number.parseInt(match[1], 16);
+  const lo = Number.parseInt(match[2], 16);
+  if (!Number.isFinite(hi) || !Number.isFinite(lo)) return null;
+  return [hi >> 8, hi & 0xff, lo >> 8, lo & 0xff].join(".");
+}
+
+function normalizeLoopbackHost(host: string): string {
+  const normalized = normalizeHostLike(host).split("%")[0] ?? "";
+  if (!normalized.startsWith("::ffff:")) return normalized;
+  const mapped = normalized.slice("::ffff:".length);
+  if (net.isIP(mapped) === 4) return mapped;
+  return decodeIpv6MappedHex(mapped) ?? normalized;
+}
+
+function isLoopbackHost(host: string): boolean {
+  const normalized = normalizeLoopbackHost(host);
+  if (!normalized) return false;
+  if (normalized === "localhost" || normalized === "::1") {
+    return true;
+  }
+
+  // Accept only IPv4 literals in 127.0.0.0/8, not hostnames that start with
+  // "127." (for example "127.0.0.1.evil.com").
+  if (net.isIP(normalized) === 4) {
+    return normalized.startsWith("127.");
+  }
+
+  return false;
+}
+
+function resolveOllamaUrlRejection(rawUrl: string): string | null {
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return null;
+
+  let parsed: URL;
+  try {
+    parsed = new URL(trimmed);
+  } catch {
+    return "ollamaUrl must be a valid URL";
+  }
+
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    return "ollamaUrl must use http:// or https://";
+  }
+
+  if (!isLoopbackHost(parsed.hostname)) {
+    return "ollamaUrl must target a loopback host (localhost, 127.0.0.1, or ::1)";
+  }
+
+  return null;
 }
 
 export async function handleTrainingRoutes(
@@ -169,6 +232,19 @@ export async function handleTrainingRoutes(
       ollamaUrl?: string;
     }>(req, res);
     if (!body) return true;
+
+    if (body.ollamaUrl !== undefined && typeof body.ollamaUrl !== "string") {
+      error(res, "ollamaUrl must be a string", 400);
+      return true;
+    }
+    if (typeof body.ollamaUrl === "string") {
+      const ollamaUrlRejection = resolveOllamaUrlRejection(body.ollamaUrl);
+      if (ollamaUrlRejection) {
+        error(res, ollamaUrlRejection, 400);
+        return true;
+      }
+    }
+
     try {
       const model = await trainingService.importModelToOllama(modelId, body);
       json(res, { model });
