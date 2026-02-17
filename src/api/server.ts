@@ -71,6 +71,7 @@ import { parseClampedInteger } from "../utils/number-parsing";
 import { handleAgentAdminRoutes } from "./agent-admin-routes";
 import { handleAgentLifecycleRoutes } from "./agent-lifecycle-routes";
 import { handleAgentTransferRoutes } from "./agent-transfer-routes";
+import { handleAppsRoutes } from "./apps-routes";
 import { handleAuthRoutes } from "./auth-routes";
 import { getAutonomyState, handleAutonomyRoutes } from "./autonomy-routes";
 import { handleCharacterRoutes } from "./character-routes";
@@ -9545,135 +9546,21 @@ async function handleRequest(
   }
 
   // ── App routes (/api/apps/*) ──────────────────────────────────────────
-  if (method === "GET" && pathname === "/api/apps") {
-    const pluginManager = requirePluginManager(state.runtime);
-    const apps = await state.appManager.listAvailable(pluginManager);
-    json(res, apps);
-    return;
-  }
-
-  if (method === "GET" && pathname === "/api/apps/search") {
-    const query = url.searchParams.get("q") ?? "";
-    if (!query.trim()) {
-      json(res, []);
-      return;
-    }
-    const limit = parseBoundedLimit(url.searchParams.get("limit"));
-    const pluginManager = requirePluginManager(state.runtime);
-    const results = await state.appManager.search(pluginManager, query, limit);
-    json(res, results);
-    return;
-  }
-
-  if (method === "GET" && pathname === "/api/apps/installed") {
-    const pluginManager = requirePluginManager(state.runtime);
-    const installed = await state.appManager.listInstalled(pluginManager);
-    json(res, installed);
-    return;
-  }
-
-  // Launch an app: install its plugin (if needed), return viewer config
-  if (method === "POST" && pathname === "/api/apps/launch") {
-    const body = await readJsonBody<{ name?: string }>(req, res);
-    if (!body) return;
-    if (!body.name?.trim()) {
-      error(res, "name is required");
-      return;
-    }
-    const pluginManager = requirePluginManager(state.runtime);
-    const result = await state.appManager.launch(
-      pluginManager,
-      body.name.trim(),
-      (_progress: InstallProgressLike) => {},
-    );
-    json(res, result);
-    return;
-  }
-
-  // Stop an app: disconnects session and uninstalls plugin when installed
-  if (method === "POST" && pathname === "/api/apps/stop") {
-    const body = await readJsonBody<{ name?: string }>(req, res);
-    if (!body) return;
-    if (!body.name?.trim()) {
-      error(res, "name is required");
-      return;
-    }
-    const appName = body.name.trim();
-    const pluginManager = requirePluginManager(state.runtime);
-    const result = await state.appManager.stop(pluginManager, appName);
-    json(res, result);
-    return;
-  }
-
-  if (method === "GET" && pathname.startsWith("/api/apps/info/")) {
-    const appName = decodeURIComponent(
-      pathname.slice("/api/apps/info/".length),
-    );
-    if (!appName) {
-      error(res, "app name is required");
-      return;
-    }
-    const pluginManager = requirePluginManager(state.runtime);
-    const info = await state.appManager.getInfo(pluginManager, appName);
-    if (!info) {
-      error(res, `App "${appName}" not found in registry`, 404);
-      return;
-    }
-    json(res, info);
-    return;
-  }
-
-  // ── GET /api/apps/plugins — non-app plugins from registry ───────────
-  if (method === "GET" && pathname === "/api/apps/plugins") {
-    const { listNonAppPlugins } = await import("../services/registry-client");
-    try {
-      const plugins = await listNonAppPlugins();
-      json(res, plugins);
-    } catch (err) {
-      error(
-        res,
-        `Failed to list plugins: ${err instanceof Error ? err.message : String(err)}`,
-        502,
-      );
-    }
-    return;
-  }
-
-  // ── GET /api/apps/plugins/search?q=... — search non-app plugins ─────
-  if (method === "GET" && pathname === "/api/apps/plugins/search") {
-    const query = url.searchParams.get("q") ?? "";
-    if (!query.trim()) {
-      json(res, []);
-      return;
-    }
-    const { searchNonAppPlugins } = await import("../services/registry-client");
-    try {
-      const limit = parseBoundedLimit(url.searchParams.get("limit"));
-      const results = await searchNonAppPlugins(query, limit);
-      json(res, results);
-    } catch (err) {
-      error(
-        res,
-        `Plugin search failed: ${err instanceof Error ? err.message : String(err)}`,
-        502,
-      );
-    }
-    return;
-  }
-
-  // ── POST /api/apps/refresh — refresh the registry cache ─────────────
-  if (method === "POST" && pathname === "/api/apps/refresh") {
-    const { refreshRegistry } = await import("../services/registry-client");
-    try {
-      const registry = await refreshRegistry();
-      json(res, { ok: true, count: registry.size });
-    } catch (err) {
-      error(
-        res,
-        `Refresh failed: ${err instanceof Error ? err.message : String(err)}`,
-        502,
-      );
-    }
+  if (
+    await handleAppsRoutes({
+      req,
+      res,
+      method,
+      pathname,
+      url,
+      appManager: state.appManager,
+      getPluginManager: () => requirePluginManager(state.runtime),
+      parseBoundedLimit,
+      readJsonBody,
+      json,
+      error,
+    })
+  ) {
     return;
   }
 
