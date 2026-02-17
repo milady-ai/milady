@@ -1896,8 +1896,9 @@ async function generateChatResponse(
   agentName: string,
   opts?: ChatGenerateOptions,
 ): Promise<ChatGenerationResult> {
+  type StreamSource = "unset" | "callback" | "onStreamChunk";
   let responseText = "";
-  let streamedViaOnChunk = false;
+  let activeStreamSource: StreamSource = "unset";
   const messageSource =
     typeof message.content.source === "string" &&
     message.content.source.trim().length > 0
@@ -1907,6 +1908,36 @@ async function generateChatResponse(
     if (!chunk) return;
     responseText += chunk;
     opts?.onChunk?.(chunk);
+  };
+  const claimStreamSource = (
+    source: Exclude<StreamSource, "unset">,
+  ): boolean => {
+    if (activeStreamSource === "unset") {
+      activeStreamSource = source;
+      return true;
+    }
+    return activeStreamSource === source;
+  };
+  const computeDelta = (existing: string, incoming: string): string => {
+    if (!incoming) return "";
+    if (!existing) return incoming;
+    if (incoming === existing) return "";
+    if (incoming.startsWith(existing)) return incoming.slice(existing.length);
+    if (existing.startsWith(incoming)) return "";
+    if (existing.endsWith(incoming) || existing.includes(incoming)) return "";
+
+    const maxOverlap = Math.min(existing.length, incoming.length);
+    for (let overlap = maxOverlap; overlap > 0; overlap -= 1) {
+      if (existing.endsWith(incoming.slice(0, overlap))) {
+        return incoming.slice(overlap);
+      }
+    }
+    return incoming;
+  };
+  const appendIncomingText = (incoming: string): void => {
+    const delta = computeDelta(responseText, incoming);
+    if (!delta) return;
+    emitChunk(delta);
   };
 
   // The core message service emits MESSAGE_SENT but not MESSAGE_RECEIVED.
@@ -1949,8 +1980,9 @@ async function generateChatResponse(
         }
 
         const chunk = extractCompatTextContent(content);
-        if (!chunk || streamedViaOnChunk) return [];
-        emitChunk(chunk);
+        if (!chunk) return [];
+        if (!claimStreamSource("callback")) return [];
+        appendIncomingText(chunk);
         return [];
       },
       {
@@ -1960,8 +1992,8 @@ async function generateChatResponse(
                 throw new Error("client_disconnected");
               }
               if (!chunk) return;
-              streamedViaOnChunk = true;
-              emitChunk(chunk);
+              if (!claimStreamSource("onStreamChunk")) return;
+              appendIncomingText(chunk);
             }
           : undefined,
       },
@@ -2033,6 +2065,54 @@ async function generateChatResponse(
     text: finalText,
     agentName,
   };
+}
+
+async function generateConversationTitle(
+  runtime: AgentRuntime,
+  userMessage: string,
+  agentName: string,
+): Promise<string | null> {
+  // Use small model for speed
+  const modelClass = ModelType.TEXT_SMALL;
+
+  const prompt = `Based on the user's first message in a new chat, generate a very short, concise title (max 4-5 words) for the conversation.
+The agent's name is "${agentName}". The title should reflect the topic or intent of the user.
+Ideally, the title should fit the persona/vibe of the agent if possible, but clarity is more important.
+Do not use quotes. Do not include "Title:" prefix.
+
+User message: "${userMessage}"
+
+Title:`;
+
+  try {
+    // Use maxTokens instead of max_tokens
+    const title = await runtime.useModel(modelClass, {
+      prompt,
+      maxTokens: 20,
+      temperature: 0.7,
+    });
+
+    if (!title) return null;
+
+    let cleanTitle = title.trim();
+    // Remove surrounding quotes if present
+    if (
+      (cleanTitle.startsWith('"') && cleanTitle.endsWith('"')) ||
+      (cleanTitle.startsWith("'") && cleanTitle.endsWith("'"))
+    ) {
+      cleanTitle = cleanTitle.slice(1, -1);
+    }
+
+    // Fallback if empty or too long
+    if (!cleanTitle || cleanTitle.length > 50) return null;
+
+    return cleanTitle;
+  } catch (err) {
+    logger.warn(
+      `[milady] Failed to generate conversation title: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    return null;
+  }
 }
 
 function isDuplicateMemoryError(err: unknown): boolean {
@@ -5623,6 +5703,115 @@ async function handleRequest(
     return;
   }
 
+  // ── POST /api/plugins/:id/eject ─────────────────────────────────────────
+  if (method === "POST" && pathname.match(/^\/api\/plugins\/[^/]+\/eject$/)) {
+    const pluginName = decodeURIComponent(
+      pathname.slice("/api/plugins/".length, pathname.length - "/eject".length),
+    );
+    try {
+      const pluginManager = requirePluginManager(state.runtime);
+      // Ensure the method exists on the service (it should)
+      if (typeof pluginManager.ejectPlugin !== "function") {
+        throw new Error("Plugin manager does not support ejecting plugins");
+      }
+      const result = await pluginManager.ejectPlugin(pluginName);
+      if (!result.success) {
+        json(res, { ok: false, error: result.error }, 422);
+        return;
+      }
+      if (result.requiresRestart) {
+        scheduleRuntimeRestart(`Plugin ${pluginName} ejected`, 500);
+      }
+      json(res, {
+        ok: true,
+        pluginName: result.pluginName,
+        requiresRestart: result.requiresRestart,
+        message: `${pluginName} ejected to local source.`,
+      });
+    } catch (err) {
+      error(
+        res,
+        `Eject failed: ${err instanceof Error ? err.message : String(err)}`,
+        500,
+      );
+    }
+    return;
+  }
+
+  // ── POST /api/plugins/:id/sync ──────────────────────────────────────────
+  if (method === "POST" && pathname.match(/^\/api\/plugins\/[^/]+\/sync$/)) {
+    const pluginName = decodeURIComponent(
+      pathname.slice("/api/plugins/".length, pathname.length - "/sync".length),
+    );
+    try {
+      const pluginManager = requirePluginManager(state.runtime);
+      if (typeof pluginManager.syncPlugin !== "function") {
+        throw new Error("Plugin manager does not support syncing plugins");
+      }
+      const result = await pluginManager.syncPlugin(pluginName);
+      if (!result.success) {
+        json(res, { ok: false, error: result.error }, 422);
+        return;
+      }
+      if (result.requiresRestart) {
+        scheduleRuntimeRestart(`Plugin ${pluginName} synced`, 500);
+      }
+      json(res, {
+        ok: true,
+        pluginName: result.pluginName,
+        requiresRestart: result.requiresRestart,
+        message: `${pluginName} synced with upstream.`,
+      });
+    } catch (err) {
+      error(
+        res,
+        `Sync failed: ${err instanceof Error ? err.message : String(err)}`,
+        500,
+      );
+    }
+    return;
+  }
+
+  // ── POST /api/plugins/:id/reinject ──────────────────────────────────────
+  if (
+    method === "POST" &&
+    pathname.match(/^\/api\/plugins\/[^/]+\/reinject$/)
+  ) {
+    const pluginName = decodeURIComponent(
+      pathname.slice(
+        "/api/plugins/".length,
+        pathname.length - "/reinject".length,
+      ),
+    );
+    try {
+      const pluginManager = requirePluginManager(state.runtime);
+      if (typeof pluginManager.reinjectPlugin !== "function") {
+        throw new Error("Plugin manager does not support reinjecting plugins");
+      }
+      const result = await pluginManager.reinjectPlugin(pluginName);
+      if (!result.success) {
+        json(res, { ok: false, error: result.error }, 422);
+        return;
+      }
+      if (result.requiresRestart) {
+        scheduleRuntimeRestart(`Plugin ${pluginName} reinjected`, 500);
+      }
+      json(res, {
+        ok: true,
+        pluginName: result.pluginName,
+        requiresRestart: result.requiresRestart,
+        message: `${pluginName} restored to registry version.`,
+      });
+    } catch (err) {
+      error(
+        res,
+        `Reinject failed: ${err instanceof Error ? err.message : String(err)}`,
+        500,
+      );
+    }
+    return;
+  }
+
   // ── GET /api/plugins/installed ──────────────────────────────────────────
   // List plugins that were installed from the registry at runtime.
   if (method === "GET" && pathname === "/api/plugins/installed") {
@@ -8564,6 +8753,24 @@ async function handleRequest(
           fullText: result.text,
           agentName: result.agentName,
         });
+
+        // Background chat renaming
+        if (conv.title === "New Chat") {
+          // Fire and forget (don't await) to not block the response stream close
+          generateConversationTitle(runtime, prompt, state.agentName).then(
+            (newTitle) => {
+              if (newTitle && state.broadcastWs) {
+                conv.title = newTitle;
+                // Broadcast full conversations list update for simplicity
+                // (or ideally a specific event, but the frontend listens for reloads)
+                state.broadcastWs({
+                  type: "conversation-updated",
+                  conversation: conv,
+                });
+              }
+            },
+          );
+        }
       }
     } catch (err) {
       if (!aborted) {

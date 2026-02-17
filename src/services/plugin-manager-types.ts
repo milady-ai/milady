@@ -33,6 +33,10 @@ export interface RegistryPluginInfo {
   viewer?: RegistryPluginViewerInfo;
   npm: RegistryPluginNpmInfo;
   supports: RegistryVersionSupport;
+  // App-specific metadata
+  category?: string;
+  capabilities?: string[];
+  icon?: string | null;
 }
 
 export interface RegistrySearchResult {
@@ -76,6 +80,30 @@ export interface PluginUninstallResult {
   error?: string;
 }
 
+export interface EjectResult {
+  success: boolean;
+  pluginName: string;
+  ejectedPath: string;
+  requiresRestart: boolean;
+  error?: string;
+}
+
+export interface SyncResult {
+  success: boolean;
+  pluginName: string;
+  ejectedPath: string;
+  requiresRestart: boolean;
+  error?: string;
+}
+
+export interface ReinjectResult {
+  success: boolean;
+  pluginName: string;
+  removedPath: string;
+  requiresRestart: boolean;
+  error?: string;
+}
+
 export interface PluginManagerLike {
   refreshRegistry(): Promise<Map<string, RegistryPluginInfo>>;
   listInstalledPlugins(): Promise<InstalledPluginInfo[]>;
@@ -89,7 +117,10 @@ export interface PluginManagerLike {
     onProgress?: (progress: InstallProgressLike) => void,
   ): Promise<PluginInstallResult>;
   uninstallPlugin(pluginName: string): Promise<PluginUninstallResult>;
-  listEjectedPlugins?(): Promise<InstalledPluginInfo[]>;
+  listEjectedPlugins(): Promise<InstalledPluginInfo[]>;
+  ejectPlugin(pluginName: string): Promise<EjectResult>;
+  syncPlugin(pluginName: string): Promise<SyncResult>;
+  reinjectPlugin(pluginName: string): Promise<ReinjectResult>;
 }
 
 export interface CoreStatusLike {

@@ -97,7 +97,7 @@ describe("MiladyClient streaming chat endpoints", () => {
     expect(requestHeaders.Accept).toBe("text/event-stream");
     expect(requestHeaders.Authorization).toBe("Bearer token");
     expect(requestInit.body).toBe(
-      JSON.stringify({ text: "hi", mode: "power" }),
+      JSON.stringify({ text: "hi", channelType: "power" }),
     );
   });
 

@@ -2,7 +2,7 @@
  * Milady plugin for ElizaOS — workspace context, session keys, and agent
  * lifecycle actions (restart).
  *
- * Compaction is now a built-in runtime action (COMPACT_SESSION in basic-capabilities).
+ * Compaction is handled by core auto-compaction in the recent-messages provider.
  * Memory search/get actions are superseded by plugin-scratchpad.
  */
 
@@ -25,7 +25,7 @@ import { adminTrustProvider } from "@elizaos/plugin-trust";
 import { emoteAction } from "../actions/emote";
 import { restartAction } from "../actions/restart";
 import { EMOTE_CATALOG } from "../emotes/catalog";
-import { createSimpleModeProvider } from "../providers/simple-mode";
+import { createChannelProfileProvider } from "../providers/simple-mode";
 import { uiCatalogProvider } from "../providers/ui-catalog";
 import { DEFAULT_AGENT_WORKSPACE_DIR } from "../providers/workspace";
 import { createWorkspaceProvider } from "../providers/workspace-provider";
@@ -47,7 +47,7 @@ export function createMiladyPlugin(config?: MiladyPluginConfig): Plugin {
     config?.sessionStorePath ?? resolveDefaultSessionStorePath(agentId);
 
   const baseProviders = [
-    createSimpleModeProvider(),
+    createChannelProfileProvider(),
     createWorkspaceProvider({
       workspaceDir,
       maxCharsPerFile: config?.bootstrapMaxChars,

@@ -1,11 +1,13 @@
 import { describe, expect, test, vi } from "vitest";
-import type { MilaidyConfig } from "../config/types.js";
-import type { TrainingModelRecord } from "./training-service.js";
-import { TrainingService } from "./training-service.js";
+import {
+  type TrainingModelRecord,
+  TrainingService,
+} from "../../plugins/plugin-training/src/services/trainingService";
+import type { MiladyConfig } from "../config/config";
 
 describe("training service importModelToOllama", () => {
   test("uses manual redirect mode to prevent redirect-based SSRF escapes", async () => {
-    const config = {} as MilaidyConfig;
+    const config = {} as MiladyConfig;
     const service = new TrainingService({
       getRuntime: () => null,
       getConfig: () => config,

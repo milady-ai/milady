@@ -64,9 +64,7 @@ export function AutonomousPanel({
     workbenchTodosAvailable,
     chatAvatarVisible,
     chatAgentVoiceMuted,
-    chatMode,
     chatAvatarSpeaking,
-    chatSending,
     setState,
   } = useApp();
 
@@ -358,39 +356,9 @@ export function AutonomousPanel({
         </div>
 
         <div className="pt-2 flex flex-col gap-2">
-          <div className="grid grid-cols-2 gap-1.5">
-            <button
-              type="button"
-              className={`px-2 py-1 text-xs border rounded cursor-pointer transition-all ${
-                chatMode === "simple"
-                  ? "border-accent bg-accent text-accent-fg"
-                  : "border-border text-muted bg-card hover:border-accent hover:text-accent"
-              }`}
-              onClick={() => setState("chatMode", "simple")}
-              title="Conversational: no tools/actions"
-              disabled={chatSending}
-            >
-              Conversational
-            </button>
-            <button
-              type="button"
-              className={`px-2 py-1 text-xs border rounded cursor-pointer transition-all ${
-                chatMode === "power"
-                  ? "border-accent bg-accent text-accent-fg"
-                  : "border-border text-muted bg-card hover:border-accent hover:text-accent"
-              }`}
-              onClick={() => setState("chatMode", "power")}
-              title="Powerful: tools/actions enabled"
-              disabled={chatSending}
-            >
-              Powerful
-            </button>
-          </div>
-
           <div className="text-[10px] leading-relaxed text-muted">
-            {chatMode === "simple"
-              ? "Conversational mode: direct replies only. Tool/action use is blocked."
-              : "Powerful mode: tool/action execution is enabled for richer responses."}
+            Channel profile is selected automatically from message channel type.
+            Voice messages always use fast compact mode for lower latency.
           </div>
 
           <div className="grid grid-cols-2 gap-1.5">

@@ -340,7 +340,7 @@ async function initializeElectron(): Promise<void> {
         );
       },
     );
-  } catch { }
+  } catch {}
 }
 
 /**

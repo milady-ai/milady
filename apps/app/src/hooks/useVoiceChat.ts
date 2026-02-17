@@ -545,7 +545,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
         };
         const apiToken =
           typeof window !== "undefined" &&
-          typeof window.__MILADY_API_TOKEN__ === "string"
+            typeof window.__MILADY_API_TOKEN__ === "string"
             ? window.__MILADY_API_TOKEN__.trim()
             : "";
 
@@ -757,7 +757,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
           const config = voiceConfigRef.current;
           const elConfig = config?.elevenlabs;
           const useElevenLabs =
-            config?.provider === "elevenlabs" && config?.mode !== "cloud";
+            config?.provider === "elevenlabs";
 
           if (useElevenLabs && elConfig) {
             usingAudioAnalysisRef.current = true;
@@ -877,8 +877,8 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
           const elConfig = voiceConfigRef.current?.elevenlabs;
           const cacheKey =
             voiceConfigRef.current?.provider === "elevenlabs" &&
-            voiceConfigRef.current?.mode !== "cloud" &&
-            elConfig
+              voiceConfigRef.current?.mode !== "cloud" &&
+              elConfig
               ? makeElevenCacheKey(firstSentence, elConfig)
               : undefined;
 

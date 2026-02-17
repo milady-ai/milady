@@ -8,6 +8,7 @@
  */
 
 import {
+  ChannelType,
   type IAgentRuntime,
   logger,
   type Memory,
@@ -108,6 +109,20 @@ export function createWorkspaceProvider(options?: {
       message: Memory,
       _state: State,
     ): Promise<ProviderResult> {
+      const channelType = message.content?.channelType;
+      if (
+        channelType === ChannelType.VOICE_DM ||
+        channelType === ChannelType.VOICE_GROUP
+      ) {
+        return {
+          text: "",
+          data: {
+            workspaceDir: dir,
+            skipped: "voice_channel",
+          },
+        };
+      }
+
       try {
         const allFiles = await getFiles(dir);
         const meta = message.metadata as Record<string, unknown> | undefined;

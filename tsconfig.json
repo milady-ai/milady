@@ -28,6 +28,12 @@
       ],
       "@elizaos/core/*": [
         "./eliza/packages/typescript/src/*"
+      ],
+      "@elizaos/plugin-rolodex": [
+        "./plugins/plugin-rolodex/typescript/src/index.ts"
+      ],
+      "@elizaos/plugin-training": [
+        "./plugins/plugin-training/src/index.ts"
       ]
     }
   },

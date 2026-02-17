@@ -1,0 +1,8 @@
+packages:
+  - 'apps/*'
+  - 'apps/*/plugins/*'
+  - 'plugins/*'
+  - 'plugins/plugin-*/typescript'
+  - 'eliza/packages/*'
+  - 'apps/*/electron'
+  - 'deploy/cloud-agent-template'

@@ -517,7 +517,19 @@ export function AppsView() {
   ]);
 
   const normalizedSearch = searchQuery.trim().toLowerCase();
+  const ALLOWED_APP_KEYWORDS = [
+    "2004scape",
+    "hyperscape",
+    "hyperfy",
+    "babylon",
+  ];
+
   const filtered = apps.filter((app) => {
+    const isAllowed = ALLOWED_APP_KEYWORDS.some((keyword) =>
+      app.name.toLowerCase().includes(keyword),
+    );
+    if (!isAllowed) return false;
+
     if (
       normalizedSearch &&
       !app.name.toLowerCase().includes(normalizedSearch) &&
@@ -951,7 +963,7 @@ export function AppsView() {
             </div>
           </div>
 
-          {selectedApp.capabilities.length ? (
+          {selectedApp.capabilities?.length ? (
             <div className="border border-border p-2 flex flex-col gap-1">
               <div className="font-bold text-xs">Capabilities</div>
               <div className="flex flex-wrap gap-1">

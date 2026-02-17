@@ -40,6 +40,18 @@ const SAFE_APP_URL_PROTOCOLS = new Set(["http:", "https:"]);
 
 type AppViewerConfig = NonNullable<AppLaunchResult["viewer"]>;
 
+interface RegistryAppPlugin extends RegistryPluginInfo {
+  viewer?: {
+    url: string;
+    embedParams?: Record<string, string>;
+    postMessageAuth?: boolean;
+    sandbox?: string;
+  };
+  launchType?: "connect" | "local";
+  launchUrl?: string;
+  displayName?: string;
+}
+
 interface ActiveAppSession {
   appName: string;
   pluginName: string;
@@ -70,6 +82,14 @@ function getTemplateFallbackValue(key: string): string | undefined {
       return runtimeBotName;
     }
     return "testbot";
+  }
+  // Hyperscape client URL defaults to localhost:3333
+  if (key === "HYPERSCAPE_CLIENT_URL") {
+    return "http://localhost:3333";
+  }
+  // Hyperscape server URL defaults to localhost:5555
+  if (key === "HYPERSCAPE_SERVER_URL") {
+    return "ws://localhost:5555/ws";
   }
   return undefined;
 }
@@ -169,7 +189,7 @@ function buildViewerAuthMessage(
 }
 
 function buildViewerConfig(
-  appInfo: RegistryPluginInfo,
+  appInfo: RegistryAppPlugin,
   launchUrl: string | null,
 ): AppViewerConfig | null {
   const viewerInfo = appInfo.viewer;
@@ -233,7 +253,12 @@ export class AppManager {
     pluginManager: PluginManagerLike,
   ): Promise<RegistryPluginInfo[]> {
     const registry = await pluginManager.refreshRegistry();
-    return Array.from(registry.values());
+    // Filter to only include app packages (those with "/app-" in the name)
+    return Array.from(registry.values()).filter((plugin) => {
+      const name = plugin.name.toLowerCase();
+      const npmPackage = plugin.npm.package.toLowerCase();
+      return name.includes("/app-") || npmPackage.includes("/app-");
+    });
   }
 
   async search(
@@ -241,7 +266,13 @@ export class AppManager {
     query: string,
     limit = 15,
   ): Promise<RegistrySearchResult[]> {
-    return pluginManager.searchRegistry(query, limit);
+    const results = await pluginManager.searchRegistry(query, limit);
+    // Filter to only include app packages
+    return results.filter((result) => {
+      const name = result.name.toLowerCase();
+      const npmPackage = result.npmPackage.toLowerCase();
+      return name.includes("/app-") || npmPackage.includes("/app-");
+    });
   }
 
   async getInfo(
@@ -265,7 +296,9 @@ export class AppManager {
     name: string,
     onProgress?: (progress: InstallProgressLike) => void,
   ): Promise<AppLaunchResult> {
-    const appInfo = await pluginManager.getRegistryPlugin(name);
+    const appInfo = (await pluginManager.getRegistryPlugin(
+      name,
+    )) as RegistryAppPlugin | null;
     if (!appInfo) {
       throw new Error(`App "${name}" not found in the registry.`);
     }
@@ -343,7 +376,9 @@ export class AppManager {
     pluginManager: PluginManagerLike,
     name: string,
   ): Promise<AppStopResult> {
-    const appInfo = await pluginManager.getRegistryPlugin(name);
+    const appInfo = (await pluginManager.getRegistryPlugin(
+      name,
+    )) as RegistryAppPlugin | null;
     if (!appInfo) {
       throw new Error(`App "${name}" not found in the registry.`);
     }
@@ -402,7 +437,12 @@ export class AppManager {
     pluginManager: PluginManagerLike,
   ): Promise<InstalledAppInfo[]> {
     const installed = await pluginManager.listInstalledPlugins();
-    return installed.map((p: InstalledPluginInfo) => ({
+    // Filter to only include app plugins
+    const appPlugins = installed.filter((p: InstalledPluginInfo) => {
+      const name = p.name.toLowerCase();
+      return name.includes("/app-");
+    });
+    return appPlugins.map((p: InstalledPluginInfo) => ({
       name: p.name,
       displayName: p.name
         .replace(/^@elizaos\/(app-|plugin-)/, "")
@@ -410,7 +450,7 @@ export class AppManager {
         .replace(/\b\w/g, (c: string) => c.toUpperCase()),
       pluginName: p.name,
       version: p.version ?? "unknown",
-      installedAt: p.installedAt ?? "",
+      installedAt: new Date().toISOString(), // Ejected plugins don't track install time yet
     }));
   }
 }

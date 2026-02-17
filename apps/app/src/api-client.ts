@@ -561,7 +561,12 @@ export interface ConversationMessage {
   source?: string;
 }
 
-export type ConversationMode = "simple" | "power";
+export type ConversationChannelType =
+  | "DM"
+  | "GROUP"
+  | "VOICE_DM"
+  | "VOICE_GROUP"
+  | "API";
 
 export interface SkillInfo {
   id: string;
@@ -3092,7 +3097,7 @@ export class MiladyClient {
     path: string,
     text: string,
     onToken: (token: string) => void,
-    mode: ConversationMode = "simple",
+    channelType: ConversationChannelType = "DM",
     signal?: AbortSignal,
   ): Promise<{ text: string; agentName: string }> {
     if (!this.apiAvailable) {
@@ -3107,7 +3112,7 @@ export class MiladyClient {
         Accept: "text/event-stream",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      body: JSON.stringify({ text, mode }),
+      body: JSON.stringify({ text, channelType }),
       signal,
     });
 
@@ -3232,13 +3237,13 @@ export class MiladyClient {
    */
   async sendChatRest(
     text: string,
-    mode: ConversationMode = "simple",
+    channelType: ConversationChannelType = "DM",
   ): Promise<{ text: string; agentName: string }> {
     const response = await this.fetch<{ text: string; agentName: string }>(
       "/api/chat",
       {
         method: "POST",
-        body: JSON.stringify({ text, mode }),
+        body: JSON.stringify({ text, channelType }),
       },
     );
     return {
@@ -3250,14 +3255,14 @@ export class MiladyClient {
   async sendChatStream(
     text: string,
     onToken: (token: string) => void,
-    mode: ConversationMode = "simple",
+    channelType: ConversationChannelType = "DM",
     signal?: AbortSignal,
   ): Promise<{ text: string; agentName: string }> {
     return this.streamChatEndpoint(
       "/api/chat/stream",
       text,
       onToken,
-      mode,
+      channelType,
       signal,
     );
   }
@@ -3286,7 +3291,7 @@ export class MiladyClient {
   async sendConversationMessage(
     id: string,
     text: string,
-    mode: ConversationMode = "simple",
+    channelType: ConversationChannelType = "DM",
   ): Promise<{ text: string; agentName: string; blocks?: ContentBlock[] }> {
     const response = await this.fetch<{
       text: string;
@@ -3294,7 +3299,7 @@ export class MiladyClient {
       blocks?: ContentBlock[];
     }>(`/api/conversations/${encodeURIComponent(id)}/messages`, {
       method: "POST",
-      body: JSON.stringify({ text, mode }),
+      body: JSON.stringify({ text, channelType }),
     });
     return {
       ...response,
@@ -3306,14 +3311,14 @@ export class MiladyClient {
     id: string,
     text: string,
     onToken: (token: string) => void,
-    mode: ConversationMode = "simple",
+    channelType: ConversationChannelType = "DM",
     signal?: AbortSignal,
   ): Promise<{ text: string; agentName: string }> {
     return this.streamChatEndpoint(
       `/api/conversations/${encodeURIComponent(id)}/messages/stream`,
       text,
       onToken,
-      mode,
+      channelType,
       signal,
     );
   }

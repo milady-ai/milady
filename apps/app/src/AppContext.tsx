@@ -19,8 +19,8 @@ import {
   type CatalogSkill,
   type CharacterData,
   type Conversation,
+  type ConversationChannelType,
   type ConversationMessage,
-  type ConversationMode,
   type CreateTriggerRequest,
   client,
   type DropStatus,
@@ -160,7 +160,6 @@ function saveAvatarIndex(index: number) {
 /* ── Chat UI persistence ──────────────────────────────────────────────── */
 const CHAT_AVATAR_VISIBLE_KEY = "milady:chat:avatarVisible";
 const CHAT_VOICE_MUTED_KEY = "milady:chat:voiceMuted";
-const CHAT_MODE_KEY = "milady:chat:mode";
 
 function loadChatAvatarVisible(): boolean {
   try {
@@ -180,15 +179,6 @@ function loadChatVoiceMuted(): boolean {
   }
 }
 
-function loadChatMode(): ConversationMode {
-  try {
-    const stored = localStorage.getItem(CHAT_MODE_KEY);
-    return stored === "power" ? "power" : "simple";
-  } catch {
-    return "simple";
-  }
-}
-
 function saveChatAvatarVisible(value: boolean): void {
   try {
     localStorage.setItem(CHAT_AVATAR_VISIBLE_KEY, String(value));
@@ -200,14 +190,6 @@ function saveChatAvatarVisible(value: boolean): void {
 function saveChatVoiceMuted(value: boolean): void {
   try {
     localStorage.setItem(CHAT_VOICE_MUTED_KEY, String(value));
-  } catch {
-    /* ignore */
-  }
-}
-
-function saveChatMode(value: ConversationMode): void {
-  try {
-    localStorage.setItem(CHAT_MODE_KEY, value);
   } catch {
     /* ignore */
   }
@@ -450,7 +432,6 @@ export interface AppState {
   chatFirstTokenReceived: boolean;
   chatAvatarVisible: boolean;
   chatAgentVoiceMuted: boolean;
-  chatMode: ConversationMode;
   chatAvatarSpeaking: boolean;
   conversations: Conversation[];
   activeConversationId: string | null;
@@ -698,7 +679,7 @@ export interface AppActions {
   handleReset: () => Promise<void>;
 
   // Chat
-  handleChatSend: (mode?: ConversationMode) => Promise<void>;
+  handleChatSend: (channelType?: ConversationChannelType) => Promise<void>;
   handleChatStop: () => void;
   handleChatClear: () => Promise<void>;
   handleNewConversation: () => Promise<void>;
@@ -866,7 +847,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
   const [chatAgentVoiceMuted, setChatAgentVoiceMuted] =
     useState(loadChatVoiceMuted);
-  const [chatMode, setChatMode] = useState<ConversationMode>(loadChatMode);
   const [chatAvatarSpeaking, setChatAvatarSpeaking] = useState(false);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<
@@ -898,10 +878,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     saveChatVoiceMuted(chatAgentVoiceMuted);
   }, [chatAgentVoiceMuted]);
-
-  useEffect(() => {
-    saveChatMode(chatMode);
-  }, [chatMode]);
 
   // --- Triggers ---
   const [triggers, setTriggers] = useState<TriggerSummary[]>([]);
@@ -2021,7 +1997,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [fetchGreeting]);
 
   const handleChatSend = useCallback(
-    async (mode: ConversationMode = "simple") => {
+    async (channelType: ConversationChannelType = "DM") => {
       const text = chatInput.trim();
       if (!text) return;
       if (chatSendBusyRef.current || chatSending) return;
@@ -2077,7 +2053,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
                 ),
               );
             },
-            mode,
+            channelType,
             controller.signal,
           );
 
@@ -2117,7 +2093,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
               const retryData = await client.sendConversationMessage(
                 conversation.id,
                 text,
-                mode,
+                channelType,
               );
               setConversationMessages([
                 {
@@ -3570,7 +3546,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         chatInput: setChatInput,
         chatAvatarVisible: setChatAvatarVisible,
         chatAgentVoiceMuted: setChatAgentVoiceMuted,
-        chatMode: setChatMode,
         chatAvatarSpeaking: setChatAvatarSpeaking,
         pairingCodeInput: setPairingCodeInput,
         pluginFilter: setPluginFilter,
@@ -3956,6 +3931,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
         },
       );
 
+      // Handle conversation updates (e.g. title changes)
+      client.onWsEvent(
+        "conversation-updated",
+        (data: Record<string, unknown>) => {
+          const conv = data.conversation as Conversation;
+          if (conv?.id) {
+            setConversations((prev) => {
+              const updated = prev.map((c) => (c.id === conv.id ? conv : c));
+              return updated.sort(
+                (a, b) =>
+                  new Date(b.updatedAt).getTime() -
+                  new Date(a.updatedAt).getTime(),
+              );
+            });
+          }
+        },
+      );
+
       // Load wallet addresses for header
       try {
         setWalletAddresses(await client.getWalletAddresses());
@@ -4100,7 +4093,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     chatFirstTokenReceived,
     chatAvatarVisible,
     chatAgentVoiceMuted,
-    chatMode,
     chatAvatarSpeaking,
     conversations,
     activeConversationId,

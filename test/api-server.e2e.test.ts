@@ -537,6 +537,9 @@ function createRuntimeForChatSseTests(options?: {
     runtime: AgentRuntime,
     message: object,
     onResponse: (content: Content) => Promise<object[]>,
+    messageOptions?: {
+      onStreamChunk?: (chunk: string, messageId?: string) => Promise<void>;
+    },
   ) => Promise<{
     responseContent?: {
       text?: string;
@@ -573,8 +576,11 @@ function createRuntimeForChatSseTests(options?: {
         runtime: AgentRuntime,
         message: object,
         onResponse: (content: Content) => Promise<object[]>,
+        messageOptions?: {
+          onStreamChunk?: (chunk: string, messageId?: string) => Promise<void>;
+        },
       ) =>
-        options?.handleMessage?.(runtime, message, onResponse) ??
+        options?.handleMessage?.(runtime, message, onResponse, messageOptions) ??
         (await (async () => {
           await onResponse({ text: "Hello " } as Content);
           await onResponse({ text: "world" } as Content);
@@ -1288,6 +1294,174 @@ describe("API Server E2E (no runtime)", () => {
           "text/event-stream",
         );
 
+        const tokenEvents = events.filter((event) => event.type === "token");
+        expect(tokenEvents.map((event) => event.text)).toEqual([
+          "Hello ",
+          "world",
+        ]);
+
+        const doneEvent = events.find((event) => event.type === "done");
+        expect(doneEvent?.fullText).toBe("Hello world");
+        expect(doneEvent?.agentName).toBe("ChatStreamAgent");
+      } finally {
+        await streamServer.close();
+      }
+    });
+
+    it("POST /api/chat/stream emits token events from runtime onStreamChunk", async () => {
+      const runtime = createRuntimeForChatSseTests({
+        handleMessage: async (
+          _runtime,
+          _message,
+          onResponse,
+          messageOptions,
+        ) => {
+          await messageOptions?.onStreamChunk?.("Hello ");
+          await messageOptions?.onStreamChunk?.("world");
+          await onResponse({ text: "Hello world" } as Content);
+          return {
+            responseContent: {
+              text: "Hello world",
+            },
+          };
+        },
+      });
+      const streamServer = await startApiServer({ port: 0, runtime });
+      try {
+        const { status, events } = await reqSse(
+          streamServer.port,
+          "/api/chat/stream",
+          { text: "hello", mode: "power" },
+        );
+
+        expect(status).toBe(200);
+        const tokenEvents = events.filter((event) => event.type === "token");
+        expect(tokenEvents.map((event) => event.text)).toEqual([
+          "Hello ",
+          "world",
+        ]);
+
+        const doneEvent = events.find((event) => event.type === "done");
+        expect(doneEvent?.fullText).toBe("Hello world");
+        expect(doneEvent?.agentName).toBe("ChatStreamAgent");
+      } finally {
+        await streamServer.close();
+      }
+    });
+
+    it("POST /api/chat/stream avoids mixed-source duplication when callback text arrives before onStreamChunk", async () => {
+      const runtime = createRuntimeForChatSseTests({
+        handleMessage: async (
+          _runtime,
+          _message,
+          onResponse,
+          messageOptions,
+        ) => {
+          await onResponse({ text: "Hello world" } as Content);
+          await messageOptions?.onStreamChunk?.("Hello ");
+          await messageOptions?.onStreamChunk?.("world");
+          return {
+            responseContent: {
+              text: "Hello world",
+            },
+          };
+        },
+      });
+      const streamServer = await startApiServer({ port: 0, runtime });
+      try {
+        const { status, events } = await reqSse(
+          streamServer.port,
+          "/api/chat/stream",
+          { text: "hello", mode: "power" },
+        );
+
+        expect(status).toBe(200);
+        const tokenEvents = events.filter((event) => event.type === "token");
+        expect(tokenEvents.map((event) => event.text)).toEqual(["Hello world"]);
+
+        const doneEvent = events.find((event) => event.type === "done");
+        expect(doneEvent?.fullText).toBe("Hello world");
+        expect(doneEvent?.agentName).toBe("ChatStreamAgent");
+      } finally {
+        await streamServer.close();
+      }
+    });
+
+    it("POST /api/chat/stream de-duplicates cumulative callback text updates", async () => {
+      const runtime = createRuntimeForChatSseTests({
+        handleMessage: async (_runtime, _message, onResponse) => {
+          await onResponse({ text: "Hello " } as Content);
+          await onResponse({ text: "Hello world" } as Content);
+          return {
+            responseContent: {
+              text: "Hello world",
+            },
+          };
+        },
+      });
+      const streamServer = await startApiServer({ port: 0, runtime });
+      try {
+        const { status, events } = await reqSse(
+          streamServer.port,
+          "/api/chat/stream",
+          { text: "hello", mode: "power" },
+        );
+
+        expect(status).toBe(200);
+        const tokenEvents = events.filter((event) => event.type === "token");
+        expect(tokenEvents.map((event) => event.text)).toEqual([
+          "Hello ",
+          "world",
+        ]);
+
+        const doneEvent = events.find((event) => event.type === "done");
+        expect(doneEvent?.fullText).toBe("Hello world");
+        expect(doneEvent?.agentName).toBe("ChatStreamAgent");
+      } finally {
+        await streamServer.close();
+      }
+    });
+
+    it("POST /api/conversations/:id/messages/stream emits token events from runtime onStreamChunk", async () => {
+      const runtime = createRuntimeForChatSseTests({
+        handleMessage: async (
+          _runtime,
+          _message,
+          onResponse,
+          messageOptions,
+        ) => {
+          await messageOptions?.onStreamChunk?.("Hello ");
+          await messageOptions?.onStreamChunk?.("world");
+          await onResponse({ text: "Hello world" } as Content);
+          return {
+            responseContent: {
+              text: "Hello world",
+            },
+          };
+        },
+      });
+      const streamServer = await startApiServer({ port: 0, runtime });
+      try {
+        const create = await req(
+          streamServer.port,
+          "POST",
+          "/api/conversations",
+          {
+            title: "SSE onStreamChunk conversation",
+          },
+        );
+        expect(create.status).toBe(200);
+        const conversation = create.data.conversation as { id?: string };
+        const conversationId = conversation.id ?? "";
+        expect(conversationId.length).toBeGreaterThan(0);
+
+        const { status, events } = await reqSse(
+          streamServer.port,
+          `/api/conversations/${conversationId}/messages/stream`,
+          { text: "hello", mode: "power" },
+        );
+
+        expect(status).toBe(200);
         const tokenEvents = events.filter((event) => event.type === "token");
         expect(tokenEvents.map((event) => event.text)).toEqual([
           "Hello ",
@@ -2588,7 +2762,7 @@ describe("API Server E2E (no runtime)", () => {
         eventService.emit({
           runId: "run-autonomy-surface",
           seq: 1,
-          stream: "assistant",
+          stream: "provider",
           ts: Date.now() - 5,
           data: { text: "autonomy-thought" },
           agentId: "autonomy-surface-agent",
@@ -2601,20 +2775,18 @@ describe("API Server E2E (no runtime)", () => {
           data: { text: "autonomy-action" },
           agentId: "autonomy-surface-agent",
         });
-
-        await runtime.messageService?.handleMessage?.(
-          runtime,
-          {
-            id: crypto.randomUUID(),
-            roomId: "00000000-0000-0000-0000-00000000a999",
-            entityId: "autonomy-surface-agent",
-            content: {
-              text: "trigger follow-up",
-              source: "trigger-dispatch",
-            },
-          } as never,
-          async () => [],
-        );
+        eventService.emit({
+          runId: "run-autonomy-surface",
+          seq: 3,
+          stream: "assistant",
+          ts: Date.now(),
+          data: {
+            text: "Autonomy says: trigger follow-up",
+            source: "trigger-dispatch",
+          },
+          agentId: "autonomy-surface-agent",
+          roomId: "00000000-0000-0000-0000-00000000a999" as UUID,
+        });
 
         await waitForThought;
         await waitForAction;
@@ -2781,18 +2953,39 @@ describe("API Server E2E (no runtime)", () => {
   // -- Autonomy --
 
   describe("autonomy endpoints", () => {
-    it("GET /api/agent/autonomy always returns enabled: true", async () => {
+    it("GET /api/agent/autonomy reflects runtime availability when no runtime is configured", async () => {
       const { status, data } = await req(port, "GET", "/api/agent/autonomy");
       expect(status).toBe(200);
-      expect(data.enabled).toBe(true);
+      expect(data.enabled).toBe(false);
+      expect(data.thinking).toBe(false);
     });
 
-    it("POST /api/agent/autonomy always returns autonomy: true", async () => {
+    it("POST /api/agent/autonomy returns the current effective state", async () => {
       const { data } = await req(port, "POST", "/api/agent/autonomy", {
         enabled: false,
       });
       expect(data.ok).toBe(true);
-      expect(data.autonomy).toBe(true);
+      expect(data.autonomy).toBe(false);
+      expect(data.thinking).toBe(false);
+    });
+
+    it("GET /api/agent/autonomy uses AutonomyService state when runtime is present", async () => {
+      const runtime = createRuntimeForStreamTests({
+        loopRunning: true,
+      });
+      const streamServer = await startApiServer({ port: 0, runtime });
+      try {
+        const { status, data } = await req(
+          streamServer.port,
+          "GET",
+          "/api/agent/autonomy",
+        );
+        expect(status).toBe(200);
+        expect(data.enabled).toBe(true);
+        expect(data.thinking).toBe(true);
+      } finally {
+        await streamServer.close();
+      }
     });
   });
 
@@ -2825,8 +3018,11 @@ describe("API Server E2E (no runtime)", () => {
           "/api/workbench/overview",
         );
         expect(status).toBe(200);
-        const autonomy = (data as { autonomy?: { thinking?: boolean } })
+        const autonomy = (
+          data as { autonomy?: { enabled?: boolean; thinking?: boolean } }
+        )
           .autonomy;
+        expect(autonomy?.enabled).toBe(true);
         expect(autonomy?.thinking).toBe(true);
       } finally {
         await workbenchServer.close();

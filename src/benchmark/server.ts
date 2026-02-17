@@ -391,8 +391,12 @@ export async function startBenchmarkServer() {
     const { default: trajectoryPlugin } = await import(
       "@elizaos/plugin-trajectory-logger"
     );
-    plugins.push(toPlugin(trajectoryPlugin, "@elizaos/plugin-trajectory-logger"));
-    elizaLogger.info("[bench] Loaded plugin: @elizaos/plugin-trajectory-logger");
+    plugins.push(
+      toPlugin(trajectoryPlugin, "@elizaos/plugin-trajectory-logger"),
+    );
+    elizaLogger.info(
+      "[bench] Loaded plugin: @elizaos/plugin-trajectory-logger",
+    );
   } catch (error: unknown) {
     elizaLogger.warn(
       `[bench] Trajectory logger plugin not available: ${formatUnknownError(error)}`,
@@ -799,9 +803,7 @@ export async function startBenchmarkServer() {
             err instanceof Error && err.stack
               ? err.stack
               : formatUnknownError(err);
-          elizaLogger.error(
-            `[bench] Request error: ${errorDetail}`,
-          );
+          elizaLogger.error(`[bench] Request error: ${errorDetail}`);
           res.writeHead(500, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ error: errorMessage }));
         }

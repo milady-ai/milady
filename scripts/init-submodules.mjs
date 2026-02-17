@@ -33,7 +33,6 @@ let initialized = 0;
 
 for (const submodule of submodules) {
   const submodulePath = resolve(root, submodule.path);
-  const submoduleGit = resolve(submodulePath, ".git");
 
   // Check if directory exists but is empty (not initialized)
   if (existsSync(submodulePath)) {
