@@ -62,9 +62,8 @@ describe("parseSemver", () => {
   it("compares two nightly versions correctly", () => {
     const older = parseSemver("2.0.0-nightly.20260207");
     const newer = parseSemver("2.0.0-nightly.20260208");
-    expect(older).not.toBeNull();
-    expect(newer).not.toBeNull();
-    expect(older![3]).toBeLessThan(newer![3]);
+    if (!older || !newer) throw new Error("Parsed as null");
+    expect(older[3]).toBeLessThan(newer[3]);
   });
 
   it("returns null for invalid version strings", () => {
@@ -77,10 +76,9 @@ describe("parseSemver", () => {
   it("release sorts after all pre-release tags", () => {
     const release = parseSemver("2.0.0");
     const alpha = parseSemver("2.0.0-alpha.99");
-    expect(release).not.toBeNull();
-    expect(alpha).not.toBeNull();
+    if (!release || !alpha) throw new Error("Parsed as null");
     // release[3] is Infinity, alpha[3] is 99 → release > alpha
-    expect(release![3]).toBeGreaterThan(alpha![3]);
+    expect(release[3]).toBeGreaterThan(alpha[3]);
   });
 });
 
