@@ -10759,6 +10759,7 @@ async function handleRequest(
       channelType,
     });
 
+
     try {
       await persistConversationMemory(runtime, messageToStore);
     } catch (err) {
@@ -10912,6 +10913,7 @@ async function handleRequest(
       roomId: conv.roomId,
       channelType,
     });
+
 
     try {
       await persistConversationMemory(runtime, messageToStore);
