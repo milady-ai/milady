@@ -404,7 +404,6 @@ export async function startBenchmarkServer() {
     process.env.MILAIDY_BENCH_MOCK === "true"
   ) {
     try {
-      // @ts-expect-error - mock-plugin.ts is gitignored, only available locally
       const { mockPlugin } = await import("./mock-plugin.ts");
       plugins.push(toPlugin(mockPlugin, "./mock-plugin.ts"));
       elizaLogger.info("[bench] Loaded mock benchmark plugin");
@@ -577,10 +576,10 @@ export async function startBenchmarkServer() {
           plugins: plugins.length,
           active_session: activeSession
             ? {
-                benchmark: activeSession.benchmark,
-                task_id: activeSession.taskId,
-                room_id: activeSession.roomId,
-              }
+              benchmark: activeSession.benchmark,
+              task_id: activeSession.taskId,
+              room_id: activeSession.roomId,
+            }
             : null,
         }),
       );
@@ -594,18 +593,18 @@ export async function startBenchmarkServer() {
         try {
           const parsed = body.trim()
             ? (JSON.parse(body) as {
-                task_id?: unknown;
-                benchmark?: unknown;
-              })
+              task_id?: unknown;
+              benchmark?: unknown;
+            })
             : {};
           const taskId =
             typeof parsed.task_id === "string" &&
-            parsed.task_id.trim().length > 0
+              parsed.task_id.trim().length > 0
               ? parsed.task_id
               : "default-task";
           const benchmark =
             typeof parsed.benchmark === "string" &&
-            parsed.benchmark.trim().length > 0
+              parsed.benchmark.trim().length > 0
               ? parsed.benchmark
               : "unknown";
 
