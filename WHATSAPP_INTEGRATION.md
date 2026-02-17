@@ -5,24 +5,26 @@ This guide explains how to use the WhatsApp connector in Milaidy with Baileys (Q
 ## Overview
 
 As of `@elizaos/plugin-whatsapp@2.0.0-alpha.6`, the plugin supports two authentication methods:
-- **Cloud API**: For business accounts using WhatsApp Business API
+- **Cloud API**: For business accounts using the WhatsApp Business API
 - **Baileys**: For personal accounts using QR code authentication (like WhatsApp Web)
 
 ## Quick Start with Baileys (QR Code)
 
 ### 1. Configuration
 
-Create or modify your character configuration file to include the WhatsApp connector:
+Add the WhatsApp connector to your character configuration file. Each account is defined under the `accounts` key:
 
 ```json
 {
   "name": "Your Bot Name",
   "connectors": {
     "whatsapp": {
-      "enabled": true,
-      "authMethod": "baileys",
-      "authDir": "./auth/whatsapp",
-      "printQRInTerminal": true,
+      "accounts": {
+        "default": {
+          "enabled": true,
+          "authDir": "./auth/whatsapp"
+        }
+      },
       "dmPolicy": "pairing",
       "sendReadReceipts": true,
       "selfChatMode": false
@@ -34,169 +36,131 @@ Create or modify your character configuration file to include the WhatsApp conne
 ### 2. Start Milaidy
 
 ```bash
-npm start -- --character=./your-config.character.json
-```
-
-Or using the test configuration:
-
-```bash
 npm start -- --character=./whatsapp-test.character.json
 ```
 
 ### 3. Scan QR Code
 
-When Milaidy starts, it will display a QR code in your terminal:
-
-```
-=== WhatsApp QR Code ===
-
-█████████████████████████████████
-█████████████████████████████████
-███ ▄▄▄▄▄ █▀█ █▄▄▀▄█ ▄▄▄▄▄ ███
-███ █   █ █▀▀▀█ ▀ ▄█ █   █ ███
-███ █▄▄▄█ █▀ █▀▀█▀▀█ █▄▄▄█ ███
-...
-
-Scan the QR code with your WhatsApp mobile app
-```
+When Milaidy starts, a QR code will appear in your terminal:
 
 1. Open WhatsApp on your phone
 2. Go to **Settings** > **Linked Devices**
 3. Tap **Link a Device**
-4. Scan the QR code displayed in your terminal
+4. Scan the QR code
 
 ### 4. Connection Established
 
-Once scanned, you'll see:
+Once scanned you'll see:
 
 ```
 [WhatsApp] ✅ Connected to WhatsApp!
 ```
 
-Your session will be saved in the `authDir` directory for future use.
+Your session is saved in `authDir` and reused on restart — no re-scanning needed.
 
-## Configuration Options
+## Configuration Reference
 
-### Baileys-Specific Options
+### Top-Level WhatsApp Config
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `authMethod` | string | `"baileys"` | Authentication method: `"baileys"` or `"cloudapi"` |
-| `authDir` | string | Required | Directory to store session files |
-| `printQRInTerminal` | boolean | `true` | Display QR code in terminal |
-| `selfChatMode` | boolean | `false` | Enable responding to messages from your own number |
+These fields apply to all accounts:
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `accounts` | object | — | Named account configs (see below) |
 | `dmPolicy` | string | `"pairing"` | DM acceptance policy |
-| `sendReadReceipts` | boolean | `true` | Send read receipts for received messages |
-| `messagePrefix` | string | `""` | Prefix to add to all outgoing messages |
+| `sendReadReceipts` | boolean | — | Send read receipts |
+| `selfChatMode` | boolean | — | Respond to own messages (avoid `true` in production) |
+| `messagePrefix` | string | — | Prefix added to all outgoing messages |
+| `groupPolicy` | string | `"allowlist"` | Group message policy |
+| `historyLimit` | number | — | Max messages to load from history |
+| `debounceMs` | number | `0` | Debounce delay before responding |
+| `mediaMaxMb` | number | `50` | Max media size in MB |
 
-### Cloud API Options
+### Per-Account Config (`accounts.<name>`)
 
-For WhatsApp Business API (Cloud API), use these options instead:
+| Field | Type | Description |
+|---|---|---|
+| `enabled` | boolean | Enable/disable this account |
+| `authDir` | string | Directory to store Baileys session files |
+| `dmPolicy` | string | Override DM policy for this account |
+| `sendReadReceipts` | boolean | Override read receipts for this account |
+| `allowFrom` | string[] | Allowlist of phone numbers (required when `dmPolicy: "open"`) |
 
-```json
-{
-  "whatsapp": {
-    "enabled": true,
-    "authMethod": "cloudapi",
-    "accessToken": "${WHATSAPP_ACCESS_TOKEN}",
-    "phoneNumberId": "${WHATSAPP_PHONE_NUMBER_ID}",
-    "webhookVerifyToken": "${WHATSAPP_WEBHOOK_VERIFY_TOKEN}",
-    "businessAccountId": "${WHATSAPP_BUSINESS_ACCOUNT_ID}"
-  }
-}
+### Cloud API Config
+
+For the WhatsApp Business API, configure via environment variables:
+
+```bash
+WHATSAPP_ACCESS_TOKEN=your_token
+WHATSAPP_PHONE_NUMBER_ID=your_phone_id
+WHATSAPP_WEBHOOK_VERIFY_TOKEN=your_verify_token
+WHATSAPP_BUSINESS_ACCOUNT_ID=your_account_id
 ```
 
 ## Session Persistence
 
-When using Baileys authentication, your session is stored in the `authDir` directory. This includes:
-- `creds.json` - WhatsApp credentials
-- `app-state-sync-*` - Encryption keys and state
-- `pre-key-*` - Pre-shared keys
-- `device-list-*` - Linked device information
+Baileys saves session state to `authDir`. This includes credentials, encryption keys, and device info. Keep this directory secure:
 
-**Important**: Keep these files secure and do not commit them to version control. Add your auth directory to `.gitignore`:
-
-```
-auth/
-```
+- Never commit it to version control (`auth/` is in `.gitignore`)
+- Back it up if you want to avoid re-scanning on a new machine
 
 ## Reconnection
 
-If you restart Milaidy with the same `authDir`, it will automatically reconnect using your saved session without requiring a new QR code scan.
+Milaidy automatically reconnects using saved session files on restart. A new QR code is only needed if:
+- The session files are deleted
+- Your phone revokes the linked device
+- The session expires
 
 ## Troubleshooting
 
-### QR Code Not Displaying
-- Ensure `printQRInTerminal: true` in your config
-- Check that your terminal supports Unicode characters
-- Try a different terminal emulator if needed
+### Plugin Not Loading
 
-### Connection Timeout
-- QR codes expire after a short time
-- Milaidy will automatically generate a new QR code if the previous one expires
-- Make sure your phone has internet connectivity
+If the WhatsApp plugin does not start, ensure your config has at least one account defined under `accounts` with `enabled: true` and a valid `authDir`. The auto-enable logic activates the plugin when it detects a configured account.
+
+### QR Code Expires
+
+QR codes have a short TTL. Milaidy automatically generates a new one if the previous expires. Ensure your phone has internet access when scanning.
 
 ### Session Expired
-- Delete the contents of your `authDir`
-- Restart Milaidy to generate a new QR code
-- Link your device again
 
-### Rate Limiting
-- WhatsApp has rate limits for message sending
-- The plugin implements automatic retry logic with exponential backoff
-- Avoid sending messages too rapidly
+Delete the contents of `authDir` and restart to re-link your device.
+
+### `dmPolicy: "open"` Error
+
+When using `dmPolicy: "open"`, you must also set `allowFrom: ["*"]` in your config, otherwise validation will fail.
 
 ## Testing Checklist
 
-Based on issue [#147](https://github.com/milady-ai/milaidy/issues/147), the following features should be tested:
+From issue [#147](https://github.com/milady-ai/milaidy/issues/147):
 
 ### Setup & Authentication
 - [x] QR code authentication flow
-- [x] Session persistence (authState/sessionPath)
+- [x] Session persistence (`authDir`)
 - [ ] Reconnection after restart
-- [ ] Clear error messaging during auth failures
+- [ ] Error messaging on auth failures
 
 ### Message Handling
-- [ ] Text message receiving
-- [ ] Text message sending
-- [ ] Long message handling (>280 chars)
-- [ ] Message formatting support
+- [ ] Text message receive/send
+- [ ] Long message handling
+- [ ] Message formatting
 
-### Platform-Specific Features
-- [ ] Group messaging capabilities
-- [ ] Reply quoting functionality
+### Platform Features
+- [ ] Group messaging
+- [ ] Reply quoting
 - [ ] Read receipts
 - [ ] Typing indicators
 
-### Media & Attachments
-- [ ] Image reception
-- [ ] Voice message reception
-- [ ] Document reception
-- [ ] Image transmission
-- [ ] Document transmission
-
-### Contacts & Groups
-- [ ] One-to-one chat functionality
-- [ ] Group chat functionality
-- [ ] @mention support in groups
-- [ ] Contact information access
+### Media
+- [ ] Image/voice/document reception
+- [ ] Image/document sending
 
 ### Error Handling
-- [ ] Session expiration management
-- [ ] Network error resilience
+- [ ] Session expiration
+- [ ] Network resilience
 - [ ] Rate limit compliance
-- [ ] Offline device handling
 
-## Version Information
-
-- **Plugin Version**: `@elizaos/plugin-whatsapp@2.0.0-alpha.6`
-- **Baileys Version**: `@whiskeysockets/baileys@^7.0.0-rc.9`
-- **Published**: 2026-02-14
-
-## Related Resources
+## Related
 
 - [WhatsApp Plugin Repository](https://github.com/elizaos-plugins/plugin-whatsapp)
-- [Baileys Documentation](https://github.com/WhiskeySockets/Baileys)
-- [Issue #147: WhatsApp Connector Testing](https://github.com/milady-ai/milaidy/issues/147)
-- [PR #2: Build Dependencies](https://github.com/elizaos-plugins/plugin-whatsapp/pull/2)
-- [PR #3: Baileys Authentication](https://github.com/elizaos-plugins/plugin-whatsapp/pull/3)
+- [Baileys Library](https://github.com/WhiskeySockets/Baileys)
+- [Issue #147](https://github.com/milady-ai/milaidy/issues/147)

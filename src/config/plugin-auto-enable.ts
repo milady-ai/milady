@@ -116,7 +116,17 @@ function isConnectorConfigured(
     case "imessage":
       return Boolean(config.cliPath);
     case "whatsapp":
-      return Boolean(config.authState || config.sessionPath);
+      // authState/sessionPath: legacy field names
+      // authDir: Baileys multi-file auth state directory (WhatsAppAccountSchema)
+      // accounts: at least one account configured
+      return Boolean(
+        config.authState ||
+          config.sessionPath ||
+          config.authDir ||
+          (config.accounts &&
+            typeof config.accounts === "object" &&
+            Object.keys(config.accounts as object).length > 0),
+      );
     default:
       return false;
   }

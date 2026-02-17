@@ -7,13 +7,15 @@
   ],
   "connectors": {
     "whatsapp": {
-      "enabled": true,
-      "authMethod": "baileys",
-      "authDir": "./auth/whatsapp-test",
-      "printQRInTerminal": true,
+      "accounts": {
+        "default": {
+          "enabled": true,
+          "authDir": "./auth/whatsapp-test"
+        }
+      },
       "dmPolicy": "pairing",
       "sendReadReceipts": true,
-      "selfChatMode": true,
+      "selfChatMode": false,
       "messagePrefix": "[Milaidy] "
     }
   },
