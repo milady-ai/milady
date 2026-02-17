@@ -23,7 +23,11 @@
     "target": "es2023",
     "useDefineForClassFields": false,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@elizaos/*": [
+        "./plugins/*/src/index.ts"
+      ]
+    }
   },
   "include": [
     "src/**/*"
