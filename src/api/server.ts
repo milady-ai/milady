@@ -5053,6 +5053,165 @@ async function handleRequest(
     return;
   }
 
+  // ── POST /api/provider/switch ─────────────────────────────────────────
+  // Atomically switch the active AI provider.  Clears competing credentials
+  // and env vars so the runtime loads the correct plugin on restart.
+  if (method === "POST" && pathname === "/api/provider/switch") {
+    const body = await readJsonBody<{ provider: string; apiKey?: string }>(req, res);
+    if (!body) return;
+    const provider = body.provider;
+    if (!provider || typeof provider !== "string") {
+      error(res, "Missing provider", 400);
+      return;
+    }
+
+    const config = state.config;
+    if (!config.cloud) config.cloud = {} as NonNullable<typeof config.cloud>;
+    if (!config.env) config.env = {};
+    const envCfg = config.env as Record<string, string>;
+
+    // Helper: clear cloud config & env vars
+    const clearCloud = () => {
+      (config.cloud as Record<string, unknown>).enabled = false;
+      delete (config.cloud as Record<string, unknown>).apiKey;
+      delete process.env.ELIZAOS_CLOUD_API_KEY;
+      delete process.env.ELIZAOS_CLOUD_ENABLED;
+      delete envCfg.ELIZAOS_CLOUD_API_KEY;
+      delete envCfg.ELIZAOS_CLOUD_ENABLED;
+      // Also clear from runtime character secrets if available
+      if (state.runtime?.character?.secrets) {
+        const secrets = state.runtime.character.secrets as Record<string, unknown>;
+        delete secrets.ELIZAOS_CLOUD_API_KEY;
+        delete secrets.ELIZAOS_CLOUD_ENABLED;
+      }
+    };
+
+    // Helper: clear subscription credentials
+    const clearSubscriptions = async () => {
+      try {
+        const { deleteCredentials } = await import("../auth/index");
+        deleteCredentials("anthropic-subscription");
+        deleteCredentials("openai-codex");
+      } catch { /* credentials may not exist */ }
+      // Don't clear the env keys here — applySubscriptionCredentials on
+      // restart will simply not set them if creds are gone.
+    };
+
+    // Provider-specific env key map
+    const PROVIDER_ENV_KEYS: Record<string, string> = {
+      openai: "OPENAI_API_KEY",
+      anthropic: "ANTHROPIC_API_KEY",
+      google: "GOOGLE_API_KEY",
+      groq: "GROQ_API_KEY",
+      xai: "XAI_API_KEY",
+      openrouter: "OPENROUTER_API_KEY",
+    };
+
+    // Helper: clear all direct API keys from env (except the one we're switching to)
+    const clearOtherApiKeys = (keepKey?: string) => {
+      for (const [, envKey] of Object.entries(PROVIDER_ENV_KEYS)) {
+        if (envKey === keepKey) continue;
+        delete process.env[envKey];
+        delete envCfg[envKey];
+      }
+    };
+
+    try {
+      if (provider === "elizacloud") {
+        // Switching TO elizacloud
+        await clearSubscriptions();
+        clearOtherApiKeys();
+        // Restore cloud config — the actual API key should already be in
+        // config.cloud.apiKey from the original cloud login.  If it was
+        // wiped, the user will need to re-login via cloud.
+        (config.cloud as Record<string, unknown>).enabled = true;
+        if (config.cloud.apiKey) {
+          process.env.ELIZAOS_CLOUD_API_KEY = config.cloud.apiKey;
+          process.env.ELIZAOS_CLOUD_ENABLED = "true";
+        }
+      } else if (
+        provider === "openai-codex" ||
+        provider === "openai-subscription"
+      ) {
+        // Switching TO OpenAI subscription
+        clearCloud();
+        clearOtherApiKeys("OPENAI_API_KEY");
+        // Delete Anthropic subscription but keep OpenAI
+        try {
+          const { deleteCredentials } = await import("../auth/index");
+          deleteCredentials("anthropic-subscription");
+        } catch { /* ok */ }
+        // Apply the OpenAI subscription credentials to env
+        try {
+          const { applySubscriptionCredentials } = await import(
+            "../auth/index"
+          );
+          await applySubscriptionCredentials();
+        } catch { /* ok */ }
+      } else if (provider === "anthropic-subscription") {
+        // Switching TO Anthropic subscription
+        clearCloud();
+        clearOtherApiKeys("ANTHROPIC_API_KEY");
+        // Delete OpenAI subscription but keep Anthropic
+        try {
+          const { deleteCredentials } = await import("../auth/index");
+          deleteCredentials("openai-codex");
+        } catch { /* ok */ }
+        try {
+          const { applySubscriptionCredentials } = await import(
+            "../auth/index"
+          );
+          await applySubscriptionCredentials();
+        } catch { /* ok */ }
+      } else if (PROVIDER_ENV_KEYS[provider]) {
+        // Switching TO a direct API key provider
+        clearCloud();
+        await clearSubscriptions();
+        const envKey = PROVIDER_ENV_KEYS[provider];
+        clearOtherApiKeys(envKey);
+        if (body.apiKey) {
+          process.env[envKey] = body.apiKey;
+          envCfg[envKey] = body.apiKey;
+        }
+      } else {
+        error(res, `Unknown provider: ${provider}`, 400);
+        return;
+      }
+
+      saveMiladyConfig(config);
+
+      // Trigger agent restart so the new provider takes effect
+      if (ctx?.onRestart) {
+        // Fire-and-forget restart; the client can poll /api/status
+        const restartPromise = ctx.onRestart();
+        restartPromise
+          .then((newRuntime) => {
+            if (newRuntime) {
+              state.runtime = newRuntime;
+              state.chatConnectionReady = null;
+              state.chatConnectionPromise = null;
+              state.agentState = "running";
+              state.agentName = newRuntime.character.name ?? "Milady";
+              state.startedAt = Date.now();
+              patchMessageServiceForAutonomy(state);
+            }
+          })
+          .catch((err) => {
+            logger.error(
+              `[api] Provider switch restart failed: ${err instanceof Error ? err.message : err}`,
+            );
+            state.agentState = "error";
+          });
+        state.agentState = "restarting";
+      }
+
+      json(res, { success: true, provider, restarting: Boolean(ctx?.onRestart) });
+    } catch (err) {
+      error(res, `Provider switch failed: ${err}`, 500);
+    }
+    return;
+  }
+
   // ── GET /api/subscription/status ──────────────────────────────────────
   // Returns the status of subscription-based auth providers
   if (method === "GET" && pathname === "/api/subscription/status") {
@@ -5105,6 +5264,14 @@ async function handleRequest(
       flow.submitCode(body.code);
       const credentials = await flow.credentials;
       saveCredentials("anthropic-subscription", credentials);
+      // Clear cloud config so the subscription provider takes precedence
+      if (state.config.cloud) {
+        (state.config.cloud as Record<string, unknown>).enabled = false;
+        delete (state.config.cloud as Record<string, unknown>).apiKey;
+      }
+      delete process.env.ELIZAOS_CLOUD_API_KEY;
+      delete process.env.ELIZAOS_CLOUD_ENABLED;
+      saveMiladyConfig(state.config);
       await applySubscriptionCredentials();
       delete state._anthropicFlow;
       json(res, { success: true, expiresAt: credentials.expires });
@@ -5129,6 +5296,13 @@ async function handleRequest(
     try {
       // Setup tokens are direct API keys — set in env immediately
       process.env.ANTHROPIC_API_KEY = body.token.trim();
+      // Clear cloud config so the API key provider takes precedence
+      if (state.config.cloud) {
+        (state.config.cloud as Record<string, unknown>).enabled = false;
+        delete (state.config.cloud as Record<string, unknown>).apiKey;
+      }
+      delete process.env.ELIZAOS_CLOUD_API_KEY;
+      delete process.env.ELIZAOS_CLOUD_ENABLED;
       // Also save to config so it persists across restarts
       if (!state.config.env) state.config.env = {};
       (state.config.env as Record<string, string>).ANTHROPIC_API_KEY =
@@ -5234,6 +5408,14 @@ async function handleRequest(
         return;
       }
       saveCredentials("openai-codex", credentials);
+      // Clear cloud config so the subscription provider takes precedence
+      if (state.config.cloud) {
+        (state.config.cloud as Record<string, unknown>).enabled = false;
+        delete (state.config.cloud as Record<string, unknown>).apiKey;
+      }
+      delete process.env.ELIZAOS_CLOUD_API_KEY;
+      delete process.env.ELIZAOS_CLOUD_ENABLED;
+      saveMiladyConfig(state.config);
       await applySubscriptionCredentials();
       flow.close();
       delete state._codexFlow;

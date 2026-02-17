@@ -203,7 +203,14 @@ async function maybeRunBuild(cwd: string): Promise<void> {
   }
 
   const pm = await detectPackageManager();
-  await execFileAsync(pm, ["run", "build"], { cwd });
+  try {
+    await execFileAsync(pm, ["run", "build"], { cwd });
+  } catch (err) {
+    // Build failures during eject are non-fatal — the user can fix and
+    // rebuild manually.  Log a warning but don't abort the eject.
+    const msg = err instanceof Error ? err.message : String(err);
+    logger.warn(`[plugin-eject] Build failed (non-fatal): ${msg}`);
+  }
 }
 
 async function resolveEjectedDirById(pluginId: string): Promise<string | null> {

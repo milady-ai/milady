@@ -1664,6 +1664,14 @@ export class MiladyClient {
     return this.fetch(`/api/subscription/${provider}`, { method: "DELETE" });
   }
 
+  async switchProvider(provider: string, apiKey?: string): Promise<{ success: boolean; provider: string; restarting: boolean }> {
+    return this.fetch("/api/provider/switch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ provider, ...(apiKey ? { apiKey } : {}) }),
+    });
+  }
+
   async startOpenAILogin(): Promise<{ authUrl: string; state: string; instructions: string }> {
     return this.fetch("/api/subscription/openai/start", { method: "POST" });
   }

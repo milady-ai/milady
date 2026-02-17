@@ -250,14 +250,22 @@ export function SettingsView() {
       const target = allAiProviders.find((p) => p.id === newId);
       if (!target) return;
 
-      /* Turn off cloud mode when switching to a local provider */
+      /* Atomically switch provider — clears competing cloud/subscription
+         credentials and env vars on the server side, then restarts. */
       try {
-        await client.updateConfig({
-          cloud: { enabled: false },
-          agents: { defaults: { model: { primary: null } } },
-        });
+        // Map plugin id to provider switch id
+        const providerMap: Record<string, string> = {
+          "@elizaos/plugin-openai": "openai",
+          "@elizaos/plugin-anthropic": "anthropic",
+          "@elizaos/plugin-google-genai": "google",
+          "@elizaos/plugin-groq": "groq",
+          "@elizaos/plugin-xai": "xai",
+          "@elizaos/plugin-openrouter": "openrouter",
+        };
+        const switchId = providerMap[newId] ?? newId;
+        await client.switchProvider(switchId);
         setState("cloudEnabled", false);
-      } catch { /* non-fatal */ }
+      } catch { /* non-fatal — fall back to legacy config update */ }
       if (!target.enabled) {
         await handlePluginToggle(newId, true);
       }
@@ -281,12 +289,13 @@ export function SettingsView() {
       const target = allAiProviders.find((p) => p.id === pluginId);
       if (!target) return;
 
-      /* Turn off cloud mode when switching to a subscription provider */
+      /* Atomically switch to subscription provider — clears cloud config
+         and competing credentials on the server side, then restarts. */
       try {
-        await client.updateConfig({
-          cloud: { enabled: false },
-          agents: { defaults: { model: { primary: null } } },
-        });
+        const switchId = providerId === "anthropic-subscription"
+          ? "anthropic-subscription"
+          : "openai-codex";
+        await client.switchProvider(switchId);
         setState("cloudEnabled", false);
       } catch { /* non-fatal */ }
       if (!target.enabled) {
