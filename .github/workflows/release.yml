@@ -64,10 +64,10 @@ jobs:
       fail-fast: false
       matrix:
         platform:
-          # macos-14 (ARM64) cross-compiles x64 via Rosetta
+          # Use native Intel runner for x64 builds to avoid Rosetta timing issues in E2E tests
           - name: macOS (Intel)
             os: macos
-            runner: macos-14
+            runner: macos-13
             electron-args: --mac --x64
             artifact-name: macos-x64
           - name: macOS (Apple Silicon)
@@ -361,9 +361,6 @@ jobs:
         if: matrix.platform.os == 'macos'
         run: |
           set -euo pipefail
-          if [ "${{ matrix.platform.electron-args }}" = "--mac --x64" ]; then
-            /usr/sbin/softwareupdate --install-rosetta --agree-to-license || true
-          fi
 
           dmg_path=$(ls -t dist/*.dmg | head -n 1)
           if [ -z "${dmg_path:-}" ]; then
