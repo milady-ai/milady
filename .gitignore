@@ -17,8 +17,6 @@ apps/app/electron/build/
 package-lock.json
 bun.lock
 bun.lockb
-pnpm-lock.yaml
-**/pnpm-lock.yaml
 !deploy/cloud-agent-template/package-lock.json
 
 # Docker overrides
