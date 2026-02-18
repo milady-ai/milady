@@ -3330,7 +3330,6 @@ const PAIRING_TTL_MS = 10 * 60 * 1000;
 const PAIRING_WINDOW_MS = 10 * 60 * 1000;
 const PAIRING_MAX_ATTEMPTS = 5;
 const PAIRING_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-const API_RESTART_EXIT_CODE = 75;
 
 let pairingCode: string | null = null;
 let pairingExpiresAt = 0;

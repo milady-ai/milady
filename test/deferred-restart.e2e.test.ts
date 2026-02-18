@@ -229,6 +229,28 @@ describe("Deferred restart E2E", () => {
       expect(data.state).not.toBe("restarting");
     });
   });
+
+  // -- No onRestart handler --
+
+  describe("POST /api/agent/restart without onRestart handler", () => {
+    it("returns 501 when no restart handler is registered", async () => {
+      // This server was started without onRestart, so explicit restart is unsupported
+      const { status, data } = await req(port, "POST", "/api/agent/restart");
+      expect(status).toBe(501);
+      expect(data.error).toMatch(/not supported/i);
+    });
+
+    it("still accumulates pending reasons even without onRestart handler", async () => {
+      // scheduleRuntimeRestart works independently of the onRestart handler
+      await req(port, "PUT", "/api/config", {
+        env: { vars: { NO_HANDLER_KEY: "test" } },
+      });
+
+      const { data } = await req(port, "GET", "/api/status");
+      expect(data.pendingRestart).toBe(true);
+      expect((data.pendingRestartReasons as string[]).length).toBeGreaterThan(0);
+    });
+  });
 });
 
 // ---------------------------------------------------------------------------
