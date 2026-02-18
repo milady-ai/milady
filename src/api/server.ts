@@ -4754,6 +4754,7 @@ async function handleRequest(
       "anthropic-subscription",
       "openai",
       "anthropic",
+      "deepseek",
       "google",
       "groq",
       "xai",
@@ -4814,6 +4815,7 @@ async function handleRequest(
     const PROVIDER_ENV_KEYS: Record<string, string> = {
       openai: "OPENAI_API_KEY",
       anthropic: "ANTHROPIC_API_KEY",
+      deepseek: "DEEPSEEK_API_KEY",
       google: "GOOGLE_API_KEY",
       groq: "GROQ_API_KEY",
       xai: "XAI_API_KEY",

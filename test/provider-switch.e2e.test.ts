@@ -131,6 +131,7 @@ describe("POST /api/provider/switch", () => {
     const directProviders = [
       "openai",
       "anthropic",
+      "deepseek",
       "google",
       "groq",
       "xai",
@@ -202,6 +203,7 @@ describe("POST /api/provider/switch", () => {
     const directProviders = [
       { provider: "openai", key: "sk-test-openai-key-1234" },
       { provider: "anthropic", key: "sk-ant-test-key-1234" },
+      { provider: "deepseek", key: "sk-test-deepseek-key-1234" },
       { provider: "google", key: "AIza-test-google-key" },
       { provider: "groq", key: "gsk_test-groq-key" },
       { provider: "xai", key: "xai-test-key-1234" },
