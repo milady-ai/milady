@@ -613,7 +613,7 @@ describe("Provider Validation", () => {
   });
 
   it.skip("createSessionKeyProvider returns a valid Provider shape", () => {
-    const provider = createSessionKeyProvider({ defaultAgentId: "test-agent" });
+    const provider = createSessionKeyProvider();
     expect(provider).toBeDefined();
     expect(typeof provider.name).toBe("string");
     expect(typeof provider.description).toBe("string");

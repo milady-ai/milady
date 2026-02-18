@@ -542,7 +542,24 @@ export class AppManager {
 
     // Auto-provision hyperscape agent if needed
     if (name === HYPERSCAPE_APP_NAME) {
-      await autoProvisionHyperscapeAgent(runtime);
+      const provisionResult = await autoProvisionHyperscapeAgent(runtime);
+      // If auto-provisioning failed and no credentials exist, don't launch viewer
+      if (
+        !provisionResult &&
+        !process.env.HYPERSCAPE_CHARACTER_ID?.trim() &&
+        !process.env.HYPERSCAPE_AUTH_TOKEN?.trim()
+      ) {
+        logger.warn(
+          "[app-manager] Hyperscape requires authentication but auto-provisioning failed. " +
+            "Set HYPERSCAPE_CHARACTER_ID and HYPERSCAPE_AUTH_TOKEN, or ensure the hyperscape server is running.",
+        );
+        throw new Error(
+          "Hyperscape authentication required. Set HYPERSCAPE_CHARACTER_ID and HYPERSCAPE_AUTH_TOKEN, " +
+            "or ensure the hyperscape server is running at " +
+            (process.env.HYPERSCAPE_SERVER_URL || "localhost:5555") +
+            " for auto-provisioning.",
+        );
+      }
     }
 
     // Build viewer config from registry app metadata

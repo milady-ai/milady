@@ -8,7 +8,7 @@
  * 4. Verify viewer config - Should have correct URLs
  */
 
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { AppManager } from "../services/app-manager";
 import type {
   PluginManagerLike,
@@ -122,10 +122,32 @@ function createMockPluginManager(
 describe("Hyperscape E2E Integration", () => {
   let appManager: AppManager;
   let pluginManager: PluginManagerLike;
+  let originalEnv: Record<string, string | undefined>;
 
   beforeEach(() => {
+    // Save original env vars
+    originalEnv = {
+      HYPERSCAPE_CHARACTER_ID: process.env.HYPERSCAPE_CHARACTER_ID,
+      HYPERSCAPE_AUTH_TOKEN: process.env.HYPERSCAPE_AUTH_TOKEN,
+    };
+
+    // Set test credentials for hyperscape authentication
+    process.env.HYPERSCAPE_CHARACTER_ID = "test-character-id";
+    process.env.HYPERSCAPE_AUTH_TOKEN = "test-auth-token";
+
     appManager = new AppManager();
     pluginManager = createMockPluginManager();
+  });
+
+  afterEach(() => {
+    // Restore original env vars
+    for (const [key, value] of Object.entries(originalEnv)) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
   });
 
   describe("App Discovery", () => {
