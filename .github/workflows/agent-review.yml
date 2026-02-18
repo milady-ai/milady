@@ -535,6 +535,12 @@ jobs:
               allStates[author] = createContributorState(author);
             }
 
+            // Deduplicate: remove any existing events for this PR before adding the latest verdict
+            // This ensures each PR counts once (latest verdict wins), preventing streak stacking
+            if (allStates[author].events) {
+              allStates[author].events = allStates[author].events.filter(e => e.prNumber !== prNumber);
+            }
+
             // Add this review event
             addEvent(allStates[author], {
               type: eventType,
