@@ -89,6 +89,11 @@ export function loadMiladyConfig(): MiladyConfig {
     resolved.logging.level = "error";
   }
 
+  // Default heartbeat interval when agents.defaults exists but heartbeat is omitted.
+  if (resolved.agents?.defaults && !resolved.agents.defaults.heartbeat) {
+    resolved.agents.defaults.heartbeat = { every: "20m" };
+  }
+
   const envVars = collectConfigEnvVars(resolved);
   for (const [key, value] of Object.entries(envVars)) {
     if (process.env[key] === undefined) {

@@ -269,6 +269,10 @@ export type AgentDefaultsConfig = {
      * Default: false (only the final heartbeat payload is delivered).
      */
     includeReasoning?: boolean;
+    /** Allowlist of action names the heartbeat may invoke. If set, only these actions run. */
+    allowActions?: string[];
+    /** Denylist of action names the heartbeat must NOT invoke. Must not overlap with allowActions. */
+    denyActions?: string[];
   };
   /** Max concurrent agent runs across all conversations. Default: 1 (sequential). */
   maxConcurrent?: number;

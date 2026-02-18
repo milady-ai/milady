@@ -29,6 +29,8 @@ export const HeartbeatSchema = z
     to: z.string().optional(),
     prompt: z.string().optional(),
     ackMaxChars: z.number().int().nonnegative().optional(),
+    allowActions: z.array(z.string()).optional(),
+    denyActions: z.array(z.string()).optional(),
   })
   .strict()
   .superRefine((val, ctx) => {
@@ -43,6 +45,19 @@ export const HeartbeatSchema = z
         path: ["every"],
         message: "invalid duration (use ms, s, m, h)",
       });
+    }
+
+    // Validate allowActions / denyActions don't overlap.
+    if (val.allowActions && val.denyActions) {
+      const allowSet = new Set(val.allowActions);
+      const overlap = val.denyActions.filter((a) => allowSet.has(a));
+      if (overlap.length > 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["denyActions"],
+          message: `denyActions overlaps with allowActions: ${overlap.join(", ")}`,
+        });
+      }
     }
 
     const active = val.activeHours;
