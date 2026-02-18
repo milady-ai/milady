@@ -76,10 +76,16 @@ describe("validateMcpServerConfig", () => {
       command: "python3",
       args: ['-cprint("pwn")'],
     });
+    const uvEval = validateMcpServerConfig({
+      type: "stdio",
+      command: "uv",
+      args: ["run", "-c", "print('pwn')"],
+    });
 
     expect(nodeEval).toContain('Flag "-e" is not allowed');
     expect(pythonEval).toContain('Flag "-c" is not allowed');
     expect(pythonAttachedEval).toContain('Flag "-c" is not allowed');
+    expect(uvEval).toContain('Flag "-c" is not allowed');
   });
 
   it("rejects inline-exec flags for package runner commands", () => {
@@ -96,6 +102,32 @@ describe("validateMcpServerConfig", () => {
 
     expect(rejection).toContain('Flag "-c" is not allowed');
     expect(attachedRejection).toContain('Flag "-c" is not allowed');
+  });
+
+  it("rejects dangerous container flags for docker/podman", () => {
+    const dockerPrivileged = validateMcpServerConfig({
+      type: "stdio",
+      command: "docker",
+      args: ["run", "--privileged", "alpine"],
+    });
+    const podmanVolume = validateMcpServerConfig({
+      type: "stdio",
+      command: "podman",
+      args: ["run", "-v", "/:/host", "alpine"],
+    });
+
+    expect(dockerPrivileged).toContain('Flag "--privileged" is not allowed');
+    expect(podmanVolume).toContain('Flag "-v" is not allowed');
+  });
+
+  it("rejects deno eval subcommand", () => {
+    const rejection = validateMcpServerConfig({
+      type: "stdio",
+      command: "deno",
+      args: ["eval", "console.log('pwn')"],
+    });
+
+    expect(rejection).toContain('Subcommand "eval" is not allowed');
   });
 });
 

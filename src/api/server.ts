@@ -2139,9 +2139,11 @@ const INTERPRETER_MCP_COMMANDS = new Set([
   "deno",
   "python",
   "python3",
+  "uv",
 ]);
 
 const PACKAGE_RUNNER_MCP_COMMANDS = new Set(["npx", "bunx", "uvx"]);
+const CONTAINER_MCP_COMMANDS = new Set(["docker", "podman"]);
 
 const BLOCKED_INTERPRETER_FLAGS = new Set([
   "-e",
@@ -2153,6 +2155,17 @@ const BLOCKED_INTERPRETER_FLAGS = new Set([
 ]);
 
 const BLOCKED_PACKAGE_RUNNER_FLAGS = new Set(["-c", "--call", "-e", "--eval"]);
+const BLOCKED_CONTAINER_FLAGS = new Set([
+  "--privileged",
+  "-v",
+  "--volume",
+  "--mount",
+  "--cap-add",
+  "--security-opt",
+  "--pid",
+  "--network",
+]);
+const BLOCKED_DENO_SUBCOMMANDS = new Set(["eval"]);
 
 function normalizeMcpCommand(command: string): string {
   const baseName = command.replace(/\\/g, "/").split("/").pop() ?? "";
@@ -2178,6 +2191,15 @@ function hasBlockedFlag(
         return flag;
       }
     }
+  }
+  return null;
+}
+
+function firstPositionalArg(args: string[]): string | null {
+  for (const arg of args) {
+    const trimmed = arg.trim();
+    if (!trimmed || trimmed === "--" || trimmed.startsWith("-")) continue;
+    return trimmed.toLowerCase();
   }
   return null;
 }
@@ -2231,6 +2253,18 @@ export function validateMcpServerConfig(
         const blocked = hasBlockedFlag(args, BLOCKED_PACKAGE_RUNNER_FLAGS);
         if (blocked) {
           return `Flag "${blocked}" is not allowed for ${normalizedCommand} MCP servers`;
+        }
+      }
+      if (CONTAINER_MCP_COMMANDS.has(normalizedCommand)) {
+        const blocked = hasBlockedFlag(args, BLOCKED_CONTAINER_FLAGS);
+        if (blocked) {
+          return `Flag "${blocked}" is not allowed for ${normalizedCommand} MCP servers`;
+        }
+      }
+      if (normalizedCommand === "deno") {
+        const subcommand = firstPositionalArg(args);
+        if (subcommand && BLOCKED_DENO_SUBCOMMANDS.has(subcommand)) {
+          return `Subcommand "${subcommand}" is not allowed for deno MCP servers`;
         }
       }
     }
