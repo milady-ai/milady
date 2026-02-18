@@ -79,17 +79,6 @@ describe("collectPluginNames", () => {
   });
 
   describe("remote provider precedence", () => {
-    const originalEnv = process.env;
-
-    beforeEach(() => {
-      vi.resetModules();
-      process.env = { ...originalEnv };
-    });
-
-    afterEach(() => {
-      process.env = originalEnv;
-    });
-
     it("should keep @elizaos/plugin-local-embedding even when a remote provider env var is present", async () => {
       // Set a remote provider env var (e.g., OPENAI_API_KEY)
       process.env.OPENAI_API_KEY = "test-api-key";
@@ -584,6 +573,13 @@ describe("autoResolveDiscordAppId", () => {
     "DISCORD_BOT_TOKEN",
   ];
   const snap = envSnapshot(envKeys);
+  const withFetchStub = (fetchMock: ReturnType<typeof vi.fn>) => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = fetchMock as typeof fetch;
+    return () => {
+      globalThis.fetch = originalFetch;
+    };
+  };
 
   beforeEach(() => {
     snap.save();
@@ -593,7 +589,6 @@ describe("autoResolveDiscordAppId", () => {
   afterEach(() => {
     snap.restore();
     vi.restoreAllMocks();
-    vi.unstubAllGlobals();
   });
 
   it("no-ops when DISCORD_APPLICATION_ID is already set", async () => {
@@ -601,22 +596,24 @@ describe("autoResolveDiscordAppId", () => {
     process.env.DISCORD_API_TOKEN = "tok";
 
     const fetchMock = vi.fn();
-    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+    const restoreFetch = withFetchStub(fetchMock);
 
     await autoResolveDiscordAppId();
 
     expect(process.env.DISCORD_APPLICATION_ID).toBe("app-existing");
     expect(fetchMock).not.toHaveBeenCalled();
+    restoreFetch();
   });
 
   it("no-ops when no Discord token exists", async () => {
     const fetchMock = vi.fn();
-    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+    const restoreFetch = withFetchStub(fetchMock);
 
     await autoResolveDiscordAppId();
 
     expect(process.env.DISCORD_APPLICATION_ID).toBeUndefined();
     expect(fetchMock).not.toHaveBeenCalled();
+    restoreFetch();
   });
 
   it("resolves app id from Discord API when token is present", async () => {
@@ -629,7 +626,7 @@ describe("autoResolveDiscordAppId", () => {
       status: 200,
       json: async () => ({ id: "app-123" }),
     }));
-    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+    const restoreFetch = withFetchStub(fetchMock);
 
     await autoResolveDiscordAppId();
 
@@ -646,18 +643,18 @@ describe("autoResolveDiscordAppId", () => {
       "[milady] Auto-resolved Discord Application ID: app-123",
     );
     expect(warnSpy).not.toHaveBeenCalled();
+    restoreFetch();
   });
 
   it("logs a warning when Discord API responds with an error", async () => {
     process.env.DISCORD_API_TOKEN = "tok";
     const warnSpy = vi.spyOn(logger, "warn").mockImplementation(() => {});
 
-    vi.stubGlobal(
-      "fetch",
+    const restoreFetch = withFetchStub(
       vi.fn(async () => ({
         ok: false,
         status: 401,
-      })) as unknown as typeof fetch,
+      })),
     );
 
     await autoResolveDiscordAppId();
@@ -666,17 +663,17 @@ describe("autoResolveDiscordAppId", () => {
     expect(warnSpy).toHaveBeenCalledWith(
       "[milady] Failed to auto-resolve Discord Application ID: 401",
     );
+    restoreFetch();
   });
 
   it("logs a warning when the Discord API request throws", async () => {
     process.env.DISCORD_API_TOKEN = "tok";
     const warnSpy = vi.spyOn(logger, "warn").mockImplementation(() => {});
 
-    vi.stubGlobal(
-      "fetch",
+    const restoreFetch = withFetchStub(
       vi.fn(async () => {
         throw new Error("network down");
-      }) as unknown as typeof fetch,
+      }),
     );
 
     await autoResolveDiscordAppId();
@@ -685,6 +682,7 @@ describe("autoResolveDiscordAppId", () => {
     expect(warnSpy).toHaveBeenCalledWith(
       expect.stringContaining("Could not auto-resolve Discord Application ID"),
     );
+    restoreFetch();
   });
 });
 

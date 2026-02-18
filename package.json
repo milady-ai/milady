@@ -34,6 +34,7 @@
     "node": ">=22"
   },
   "scripts": {
+    "pre-review:local": "bun run scripts/pre-review-local.mjs",
     "benchmark:server": "node --import tsx src/benchmark/server.ts",
     "build": "tsdown && scripts/rt.sh scripts/write-build-info.ts && cd apps/app && ../../scripts/rt.sh run build",
     "build:node": "tsdown && node --import tsx scripts/write-build-info.ts && cd apps/app && npm run build",
@@ -70,6 +71,7 @@
     "start:eliza": "node --import tsx src/runtime/eliza.ts",
     "test": "node test/scripts/test-parallel.mjs",
     "test:coverage": "bunx vitest run --coverage",
+    "test:once": "bun test",
     "test:docker:all": "bun run test:docker:live-models && bun run test:docker:live-gateway && bun run test:docker:onboard && bun run test:docker:gateway-network && bun run test:docker:qr && bun run test:docker:doctor-switch && bun run test:docker:plugins && bun run test:docker:cleanup",
     "test:docker:cleanup": "bash test/scripts/test-cleanup-docker.sh",
     "test:docker:doctor-switch": "bash test/scripts/e2e/doctor-install-switch-docker.sh",
