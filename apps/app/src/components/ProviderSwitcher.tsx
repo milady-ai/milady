@@ -92,7 +92,9 @@ export function ProviderSwitcher({
     try {
       const res = await client.getSubscriptionStatus();
       setSubscriptionStatus(res.providers ?? []);
-    } catch { /* ignore */ }
+    } catch (err) {
+      console.warn("[milady] Failed to load subscription status", err);
+    }
   }, []);
 
   useEffect(() => {
@@ -101,7 +103,9 @@ export function ProviderSwitcher({
       try {
         const opts = await client.getOnboardingOptions();
         setModelOptions(opts.models);
-      } catch { /* ignore */ }
+      } catch (err) {
+        console.warn("[milady] Failed to load onboarding options", err);
+      }
       try {
         const cfg = await client.getConfig();
         const models = cfg.models as Record<string, string> | undefined;
@@ -111,7 +115,9 @@ export function ProviderSwitcher({
         const defaultLarge = "moonshotai/kimi-k2-0905";
         setCurrentSmallModel(models?.small || (cloudEnabledCfg ? defaultSmall : ""));
         setCurrentLargeModel(models?.large || (cloudEnabledCfg ? defaultLarge : ""));
-      } catch { /* ignore */ }
+      } catch (err) {
+        console.warn("[milady] Failed to load config", err);
+      }
     })();
   }, [loadSubscriptionStatus]);
 
@@ -172,19 +178,25 @@ export function ProviderSwitcher({
       const target = allAiProviders.find((p) => p.id === newId);
       if (!target) return;
 
-      try {
-        const providerMap: Record<string, string> = {
-          "@elizaos/plugin-openai": "openai",
-          "@elizaos/plugin-anthropic": "anthropic",
-          "@elizaos/plugin-google-genai": "google",
-          "@elizaos/plugin-groq": "groq",
-          "@elizaos/plugin-xai": "xai",
-          "@elizaos/plugin-openrouter": "openrouter",
-        };
-        const switchId = providerMap[newId] ?? newId;
-        await client.switchProvider(switchId);
-        setState("cloudEnabled", false);
-      } catch { /* non-fatal */ }
+      // Direct providers require API keys. The UI does not have access to stored
+      // secrets, so we avoid calling /api/provider/switch here and instead rely
+      // on enabling/disabling provider plugins + saving provider config.
+      if (cloudEnabled) {
+        const willToggle =
+          !target.enabled || enabledAiProviders.some((p) => p.id !== newId);
+        try {
+          await client.updateConfig({ cloud: { enabled: false } });
+          setState("cloudEnabled", false);
+          if (!willToggle) {
+            await client.restartAgent();
+          }
+        } catch (err) {
+          console.warn(
+            "[milady] Failed to disable cloud config during provider switch",
+            err,
+          );
+        }
+      }
       if (!target.enabled) {
         await handlePluginToggle(newId, true);
       }
@@ -194,7 +206,7 @@ export function ProviderSwitcher({
         }
       }
     },
-    [allAiProviders, enabledAiProviders, handlePluginToggle, setState],
+    [allAiProviders, enabledAiProviders, handlePluginToggle, setState, cloudEnabled],
   );
 
   const handleSelectSubscription = useCallback(
@@ -214,7 +226,9 @@ export function ProviderSwitcher({
           : "openai-codex";
         await client.switchProvider(switchId);
         setState("cloudEnabled", false);
-      } catch { /* non-fatal */ }
+      } catch (err) {
+        console.warn("[milady] Provider switch failed", err);
+      }
       if (!target.enabled) {
         await handlePluginToggle(target.id, true);
       }
@@ -241,7 +255,9 @@ export function ProviderSwitcher({
       });
       setState("cloudEnabled", true);
       await client.restartAgent();
-    } catch { /* non-fatal */ }
+    } catch (err) {
+      console.warn("[milady] Failed to select cloud provider", err);
+    }
   }, [currentSmallModel, currentLargeModel, setState]);
 
   /* ── Render ───────────────────────────────────────────────────── */
@@ -318,6 +334,7 @@ export function ProviderSwitcher({
         style={{ gridTemplateColumns: `repeat(${totalCols}, 1fr)` }}
       >
         <button
+          type="button"
           className={`text-center px-2 py-2 border cursor-pointer transition-colors ${
             isCloudSelected
               ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)]"
@@ -335,6 +352,7 @@ export function ProviderSwitcher({
           return (
             <button
               key={provider.id}
+              type="button"
               className={`text-center px-2 py-2 border cursor-pointer transition-colors ${
                 isSelected
                   ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)]"
@@ -354,6 +372,7 @@ export function ProviderSwitcher({
           return (
             <button
               key={provider.id}
+              type="button"
               className={`text-center px-2 py-2 border cursor-pointer transition-colors ${
                 isSelected
                   ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)]"
@@ -380,6 +399,7 @@ export function ProviderSwitcher({
                   <span className="text-xs font-semibold">Logged into Eliza Cloud</span>
                 </div>
                 <button
+                  type="button"
                   className="btn text-xs py-[3px] px-3 !mt-0 !bg-transparent !border-[var(--border)] !text-[var(--muted)]"
                   onClick={() => void handleCloudDisconnect()}
                   disabled={cloudDisconnecting}
@@ -468,7 +488,9 @@ export function ProviderSwitcher({
                           setModelSaveSuccess(true);
                           setTimeout(() => setModelSaveSuccess(false), 2000);
                           await client.restartAgent();
-                        } catch { /* ignore */ }
+                        } catch (err) {
+                          console.warn("[milady] Failed to save cloud model config", err);
+                        }
                         setModelSaving(false);
                       })();
                     }}
@@ -495,6 +517,7 @@ export function ProviderSwitcher({
                     </div>
                   )}
                   <button
+                    type="button"
                     className="btn text-xs py-[5px] px-3.5 font-bold !mt-0"
                     onClick={() => void handleCloudLogin()}
                   >

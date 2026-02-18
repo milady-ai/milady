@@ -12,6 +12,51 @@ function formatRequestError(err: unknown): string {
   return String(err);
 }
 
+function normalizeOpenAICallbackInput(input: string): {
+  ok: true;
+  code: string;
+} | {
+  ok: false;
+  error: string;
+} {
+  const trimmed = input.trim();
+  if (!trimmed) {
+    return {
+      ok: false,
+      error: "Paste the callback URL from the localhost:1455 page.",
+    };
+  }
+
+  const normalized =
+    trimmed.startsWith("localhost:") || trimmed.startsWith("127.0.0.1:")
+      ? `http://${trimmed}`
+      : trimmed;
+
+  // Allow raw codes in addition to full callback URLs.
+  if (!normalized.includes("://")) {
+    if (normalized.length > 4096) {
+      return { ok: false, error: "Callback code is too long." };
+    }
+    return { ok: true, code: normalized };
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(normalized);
+  } catch {
+    return { ok: false, error: "Invalid callback URL." };
+  }
+
+  const hostOk = parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1";
+  if (!hostOk || parsed.port !== "1455" || parsed.pathname !== "/auth/callback") {
+    return { ok: false, error: "Expected a localhost:1455/auth/callback URL." };
+  }
+  if (!parsed.searchParams.get("code")) {
+    return { ok: false, error: "Callback URL is missing the ?code= parameter." };
+  }
+  return { ok: true, code: normalized };
+}
+
 export interface SubscriptionStatusProps {
   resolvedSelectedId: string | null;
   subscriptionStatus: Array<{
@@ -51,11 +96,15 @@ export function SubscriptionStatus({
   const anthropicCodeRef = useRef(anthropicCode);
   anthropicCodeRef.current = anthropicCode;
   const [anthropicError, setAnthropicError] = useState("");
+  const [anthropicExchangeBusy, setAnthropicExchangeBusy] = useState(false);
+  const anthropicExchangeBusyRef = useRef(false);
   const [openaiOAuthStarted, setOpenaiOAuthStarted] = useState(false);
   const [openaiCallbackUrl, setOpenaiCallbackUrl] = useState("");
   const openaiCallbackRef = useRef(openaiCallbackUrl);
   openaiCallbackRef.current = openaiCallbackUrl;
   const [openaiError, setOpenaiError] = useState("");
+  const [openaiExchangeBusy, setOpenaiExchangeBusy] = useState(false);
+  const openaiExchangeBusyRef = useRef(false);
   const [subscriptionDisconnecting, setSubscriptionDisconnecting] = useState<string | null>(null);
   const disconnectingRef = useRef(subscriptionDisconnecting);
   disconnectingRef.current = subscriptionDisconnecting;
@@ -137,9 +186,13 @@ export function SubscriptionStatus({
   }, []);
 
   const handleAnthropicExchange = useCallback(async () => {
+    const code = anthropicCodeRef.current.trim();
+    if (!code || anthropicExchangeBusyRef.current) return;
+    anthropicExchangeBusyRef.current = true;
+    setAnthropicExchangeBusy(true);
     setAnthropicError("");
     try {
-      const result = await client.exchangeAnthropicCode(anthropicCodeRef.current);
+      const result = await client.exchangeAnthropicCode(code);
       if (result.success) {
         setAnthropicConnected(true);
         setAnthropicOAuthStarted(false);
@@ -152,6 +205,9 @@ export function SubscriptionStatus({
       setAnthropicError(result.error ?? "Exchange failed");
     } catch (err) {
       setAnthropicError(`Exchange failed: ${formatRequestError(err)}`);
+    } finally {
+      anthropicExchangeBusyRef.current = false;
+      setAnthropicExchangeBusy(false);
     }
   }, [handleSelectSubscription, loadSubscriptionStatus, setAnthropicConnected]);
 
@@ -171,9 +227,18 @@ export function SubscriptionStatus({
   }, []);
 
   const handleOpenAIExchange = useCallback(async () => {
+    if (openaiExchangeBusyRef.current) return;
+    const normalized = normalizeOpenAICallbackInput(openaiCallbackRef.current);
+    if (!normalized.ok) {
+      setOpenaiError(normalized.error);
+      return;
+    }
+
+    openaiExchangeBusyRef.current = true;
+    setOpenaiExchangeBusy(true);
     setOpenaiError("");
     try {
-      const data = await client.exchangeOpenAICode(openaiCallbackRef.current);
+      const data = await client.exchangeOpenAICode(normalized.code);
       if (data.success) {
         setOpenaiConnected(true);
         setOpenaiOAuthStarted(false);
@@ -187,8 +252,12 @@ export function SubscriptionStatus({
       setOpenaiError(msg.includes("No active flow")
         ? "Login session expired. Click 'Start Over' and try again."
         : msg);
-    } catch {
+    } catch (err) {
+      console.warn("[milady] OpenAI exchange failed", err);
       setOpenaiError("Network error — check your connection and try again.");
+    } finally {
+      openaiExchangeBusyRef.current = false;
+      setOpenaiExchangeBusy(false);
     }
   }, [handleSelectSubscription, loadSubscriptionStatus, setOpenaiConnected]);
 
@@ -210,6 +279,7 @@ export function SubscriptionStatus({
             </div>
             {anthropicConnected && (
               <button
+                type="button"
                 className="btn text-xs py-[3px] px-3 !mt-0 !bg-transparent !border-[var(--border)] !text-[var(--muted)]"
                 onClick={() => void handleDisconnectSubscription("anthropic-subscription")}
                 disabled={subscriptionDisconnecting === "anthropic-subscription"}
@@ -227,6 +297,7 @@ export function SubscriptionStatus({
 
           <div className="flex items-center gap-4 border-b border-[var(--border)] mb-3">
             <button
+              type="button"
               className={`text-xs pb-2 border-b-2 ${
                 subscriptionTab === "token"
                   ? "border-[var(--accent)] text-[var(--accent)]"
@@ -237,6 +308,7 @@ export function SubscriptionStatus({
               Setup Token
             </button>
             <button
+              type="button"
               className={`text-xs pb-2 border-b-2 ${
                 subscriptionTab === "oauth"
                   ? "border-[var(--accent)] text-[var(--accent)]"
@@ -272,6 +344,7 @@ export function SubscriptionStatus({
               )}
               <div className="flex items-center justify-between mt-3">
                 <button
+                  type="button"
                   className="btn text-xs py-[5px] px-3.5 !mt-0"
                   disabled={setupTokenSaving || !setupTokenValue.trim()}
                   onClick={() => void handleSaveSetupToken()}
@@ -295,6 +368,7 @@ export function SubscriptionStatus({
           ) : !anthropicOAuthStarted ? (
             <div>
               <button
+                type="button"
                 className="btn text-xs py-[5px] px-3.5 !mt-0"
                 onClick={() => void handleAnthropicStart()}
               >
@@ -331,13 +405,15 @@ export function SubscriptionStatus({
               )}
               <div className="flex items-center gap-2 mt-2">
                 <button
+                  type="button"
                   className="btn text-xs py-[5px] px-3.5 !mt-0"
-                  disabled={!anthropicCode}
+                  disabled={anthropicExchangeBusy || !anthropicCode.trim()}
                   onClick={() => void handleAnthropicExchange()}
                 >
-                  Connect
+                  {anthropicExchangeBusy ? "Connecting..." : "Connect"}
                 </button>
                 <button
+                  type="button"
                   className="btn text-xs py-[5px] px-3.5 !mt-0 !bg-transparent !border-[var(--border)] !text-[var(--muted)]"
                   onClick={() => { setAnthropicOAuthStarted(false); setAnthropicCode(""); }}
                 >
@@ -365,6 +441,7 @@ export function SubscriptionStatus({
             </div>
             {openaiConnected && (
               <button
+                type="button"
                 className="btn text-xs py-[3px] px-3 !mt-0 !bg-transparent !border-[var(--border)] !text-[var(--muted)]"
                 onClick={() => void handleDisconnectSubscription("openai-subscription")}
                 disabled={subscriptionDisconnecting === "openai-subscription"}
@@ -387,6 +464,7 @@ export function SubscriptionStatus({
           ) : !openaiOAuthStarted ? (
             <div>
               <button
+                type="button"
                 className="btn text-xs py-[5px] px-3.5 !mt-0"
                 onClick={() => void handleOpenAIStart()}
               >
@@ -417,13 +495,15 @@ export function SubscriptionStatus({
               )}
               <div className="flex items-center gap-2 mt-2">
                 <button
+                  type="button"
                   className="btn text-xs py-[5px] px-3.5 !mt-0"
-                  disabled={!openaiCallbackUrl}
+                  disabled={openaiExchangeBusy || !openaiCallbackUrl.trim()}
                   onClick={() => void handleOpenAIExchange()}
                 >
-                  Complete Login
+                  {openaiExchangeBusy ? "Completing..." : "Complete Login"}
                 </button>
                 <button
+                  type="button"
                   className="btn text-xs py-[5px] px-3.5 !mt-0 !bg-transparent !border-[var(--border)] !text-[var(--muted)]"
                   onClick={() => { setOpenaiOAuthStarted(false); setOpenaiCallbackUrl(""); }}
                 >

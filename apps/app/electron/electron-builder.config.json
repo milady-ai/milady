@@ -40,7 +40,7 @@
     "gatekeeperAssess": false,
     "entitlements": "entitlements.mac.plist",
     "entitlementsInherit": "entitlements.mac.plist",
-    "notarize": false
+    "notarize": true
   },
   "dmg": {
     "format": "UDZO",

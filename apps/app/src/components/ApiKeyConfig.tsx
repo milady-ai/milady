@@ -152,6 +152,7 @@ export function ApiKeyConfig({
       <div className="flex justify-between items-center mt-3">
         <div className="flex items-center gap-2">
           <button
+            type="button"
             className="btn text-xs py-[5px] px-3.5 !mt-0 !bg-transparent !border-[var(--border)] !text-[var(--muted)] hover:!text-[var(--text)] hover:!border-[var(--accent)]"
             onClick={() => void handleFetchModels(selectedProvider.id)}
             disabled={modelsFetching}
@@ -165,6 +166,7 @@ export function ApiKeyConfig({
           )}
         </div>
         <button
+          type="button"
           className={`btn text-xs py-[5px] px-4 !mt-0 ${saveSuccess ? "!bg-[var(--ok,#16a34a)] !border-[var(--ok,#16a34a)]" : ""}`}
           onClick={() => handlePluginSave(selectedProvider.id)}
           disabled={isSaving}

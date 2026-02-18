@@ -1758,7 +1758,9 @@ export class MiladyClient {
   }
 
   async deleteSubscription(provider: string): Promise<{ success: boolean }> {
-    return this.fetch(`/api/subscription/${provider}`, { method: "DELETE" });
+    return this.fetch(`/api/subscription/${encodeURIComponent(provider)}`, {
+      method: "DELETE",
+    });
   }
 
   async switchProvider(provider: string, apiKey?: string): Promise<{ success: boolean; provider: string; restarting: boolean }> {

@@ -194,12 +194,13 @@ export function SettingsView() {
       <div className="p-4 border border-[var(--border)] bg-[var(--card)]">
         <div className="font-bold text-sm mb-2">Appearance</div>
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
-          {THEMES.map((t) => (
-            <button
-              key={t.id}
-              className={`theme-btn py-2 px-2 ${currentTheme === t.id ? "active" : ""}`}
-              onClick={() => setTheme(t.id)}
-            >
+	          {THEMES.map((t) => (
+	            <button
+	              key={t.id}
+	              type="button"
+	              className={`theme-btn py-2 px-2 ${currentTheme === t.id ? "active" : ""}`}
+	              onClick={() => setTheme(t.id)}
+	            >
               <div className="text-xs font-bold text-[var(--text)] whitespace-nowrap text-center">
                 {t.label}
               </div>
@@ -282,11 +283,12 @@ export function SettingsView() {
               {updateStatus ? <>Version {updateStatus.currentVersion}</> : <>Loading...</>}
             </div>
           </div>
-          <button
-            className="btn whitespace-nowrap !mt-0 text-xs py-1.5 px-3.5"
-            disabled={updateLoading}
-            onClick={() => void loadUpdateStatus(true)}
-          >
+	          <button
+	            type="button"
+	            className="btn whitespace-nowrap !mt-0 text-xs py-1.5 px-3.5"
+	            disabled={updateLoading}
+	            onClick={() => void loadUpdateStatus(true)}
+	          >
             {updateLoading ? "Checking..." : "Check Now"}
           </button>
         </div>
@@ -366,11 +368,12 @@ export function SettingsView() {
       <div className="mt-6 p-4 border border-[var(--border)] bg-[var(--card)]">
         <div className="flex justify-between items-center mb-3">
           <div className="font-bold text-sm">Chrome Extension</div>
-          <button
-            className="btn whitespace-nowrap !mt-0 text-xs py-1.5 px-3.5"
-            onClick={() => void checkExtensionStatus()}
-            disabled={extensionChecking}
-          >
+	          <button
+	            type="button"
+	            className="btn whitespace-nowrap !mt-0 text-xs py-1.5 px-3.5"
+	            onClick={() => void checkExtensionStatus()}
+	            disabled={extensionChecking}
+	          >
             {extensionChecking ? "Checking..." : "Check Connection"}
           </button>
         </div>
@@ -454,16 +457,18 @@ export function SettingsView() {
         <div className="flex justify-between items-center">
           <div className="font-bold text-sm">Agent Export / Import</div>
           <div className="flex items-center gap-2">
-            <button
-              className="btn whitespace-nowrap !mt-0 text-xs py-1.5 px-3.5"
-              onClick={openImportModal}
-            >
+	            <button
+	              type="button"
+	              className="btn whitespace-nowrap !mt-0 text-xs py-1.5 px-3.5"
+	              onClick={openImportModal}
+	            >
               Import
             </button>
-            <button
-              className="btn whitespace-nowrap !mt-0 text-xs py-1.5 px-3.5"
-              onClick={openExportModal}
-            >
+	            <button
+	              type="button"
+	              className="btn whitespace-nowrap !mt-0 text-xs py-1.5 px-3.5"
+	              onClick={openExportModal}
+	            >
               Export
             </button>
           </div>
@@ -487,10 +492,11 @@ export function SettingsView() {
                 Reveal your EVM and Solana private keys. Never share these with anyone.
               </div>
             </div>
-            <button
-              className="btn whitespace-nowrap !mt-0 text-xs py-1.5 px-4"
-              style={{
-                background: "var(--danger, #e74c3c)",
+	            <button
+	              type="button"
+	              className="btn whitespace-nowrap !mt-0 text-xs py-1.5 px-4"
+	              style={{
+	                background: "var(--danger, #e74c3c)",
                 borderColor: "var(--danger, #e74c3c)",
               }}
               onClick={() => void handleExportKeys()}
@@ -506,12 +512,13 @@ export function SettingsView() {
                   <span className="text-[var(--muted)]">({walletExportData.evm.address})</span>
                   <br />
                   <span>{walletExportData.evm.privateKey}</span>
-                  <button
-                    className="ml-2 px-1.5 py-0.5 border border-[var(--border)] bg-[var(--bg)] cursor-pointer text-[10px] font-[var(--mono)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
-                    onClick={() => void copyToClipboard(walletExportData.evm!.privateKey)}
-                  >
-                    copy
-                  </button>
+	                  <button
+	                    type="button"
+	                    className="ml-2 px-1.5 py-0.5 border border-[var(--border)] bg-[var(--bg)] cursor-pointer text-[10px] font-[var(--mono)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
+	                    onClick={() => void copyToClipboard(walletExportData.evm.privateKey)}
+	                  >
+	                    copy
+	                  </button>
                 </div>
               )}
               {walletExportData.solana && (
@@ -520,12 +527,13 @@ export function SettingsView() {
                   <span className="text-[var(--muted)]">({walletExportData.solana.address})</span>
                   <br />
                   <span>{walletExportData.solana.privateKey}</span>
-                  <button
-                    className="ml-2 px-1.5 py-0.5 border border-[var(--border)] bg-[var(--bg)] cursor-pointer text-[10px] font-[var(--mono)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
-                    onClick={() => void copyToClipboard(walletExportData.solana!.privateKey)}
-                  >
-                    copy
-                  </button>
+	                  <button
+	                    type="button"
+	                    className="ml-2 px-1.5 py-0.5 border border-[var(--border)] bg-[var(--bg)] cursor-pointer text-[10px] font-[var(--mono)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
+	                    onClick={() => void copyToClipboard(walletExportData.solana.privateKey)}
+	                  >
+	                    copy
+	                  </button>
                 </div>
               )}
               {!walletExportData.evm && !walletExportData.solana && (
@@ -542,10 +550,11 @@ export function SettingsView() {
               Wipe all config, memory, and data. Returns to the onboarding wizard.
             </div>
           </div>
-          <button
-            className="btn whitespace-nowrap !mt-0 text-xs py-1.5 px-4"
-            style={{
-              background: "var(--danger, #e74c3c)",
+	          <button
+	            type="button"
+	            className="btn whitespace-nowrap !mt-0 text-xs py-1.5 px-4"
+	            style={{
+	              background: "var(--danger, #e74c3c)",
               borderColor: "var(--danger, #e74c3c)",
             }}
             onClick={() => void handleReset()}
@@ -606,17 +615,19 @@ export function SettingsView() {
             <div className="text-[11px] text-[var(--ok,#16a34a)]">{exportSuccess}</div>
           )}
           <div className="flex justify-end gap-2 mt-1">
-            <button
-              className="btn text-xs py-1.5 px-4 !mt-0 !bg-transparent !border-[var(--border)] !text-[var(--txt)]"
-              onClick={() => setExportModalOpen(false)}
-            >
+	            <button
+	              type="button"
+	              className="btn text-xs py-1.5 px-4 !mt-0 !bg-transparent !border-[var(--border)] !text-[var(--txt)]"
+	              onClick={() => setExportModalOpen(false)}
+	            >
               Cancel
             </button>
-            <button
-              className="btn text-xs py-1.5 px-4 !mt-0"
-              disabled={exportBusy}
-              onClick={() => void handleAgentExport()}
-            >
+	            <button
+	              type="button"
+	              className="btn text-xs py-1.5 px-4 !mt-0"
+	              disabled={exportBusy}
+	              onClick={() => void handleAgentExport()}
+	            >
               {exportBusy ? "Exporting..." : "Download Export"}
             </button>
           </div>
@@ -663,17 +674,19 @@ export function SettingsView() {
             <div className="text-[11px] text-[var(--ok,#16a34a)]">{importSuccess}</div>
           )}
           <div className="flex justify-end gap-2 mt-1">
-            <button
-              className="btn text-xs py-1.5 px-4 !mt-0 !bg-transparent !border-[var(--border)] !text-[var(--txt)]"
-              onClick={() => setImportModalOpen(false)}
-            >
+	            <button
+	              type="button"
+	              className="btn text-xs py-1.5 px-4 !mt-0 !bg-transparent !border-[var(--border)] !text-[var(--txt)]"
+	              onClick={() => setImportModalOpen(false)}
+	            >
               Cancel
             </button>
-            <button
-              className="btn text-xs py-1.5 px-4 !mt-0"
-              disabled={importBusy}
-              onClick={() => void handleAgentImport()}
-            >
+	            <button
+	              type="button"
+	              className="btn text-xs py-1.5 px-4 !mt-0"
+	              disabled={importBusy}
+	              onClick={() => void handleAgentImport()}
+	            >
               {importBusy ? "Importing..." : "Import Agent"}
             </button>
           </div>

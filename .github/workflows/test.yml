@@ -116,9 +116,6 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Install dependencies
         run: bun install
         continue-on-error: true
@@ -146,9 +143,6 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
 
       - name: Install dependencies
         run: bun install
@@ -210,7 +204,7 @@ jobs:
           bunx vitest run --config vitest.e2e.config.ts
           test/cloud-providers.e2e.test.ts
         env:
-          MILAIDY_LIVE_TEST: "1"
+          MILADY_LIVE_TEST: "1"
           ELIZAOS_CLOUD_API_KEY: ${{ secrets.ELIZAOS_CLOUD_API_KEY }}
           ELIZAOS_CLOUD_BASE_URL: ${{ secrets.ELIZAOS_CLOUD_BASE_URL }}
 

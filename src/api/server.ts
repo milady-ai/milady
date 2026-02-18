@@ -4610,6 +4610,11 @@ async function handleRequest(
           error(res, "API key is required for this provider", 400);
           return;
         }
+        if (trimmedKey.length > 512) {
+          providerSwitchInProgress = false;
+          error(res, "API key is too long", 400);
+          return;
+        }
         // Store trimmed key back for use below
         body.apiKey = trimmedKey;
       }
@@ -4682,18 +4687,29 @@ async function handleRequest(
         await clearSubscriptions();
         const envKey = PROVIDER_ENV_KEYS[provider];
         clearOtherApiKeys(envKey);
-        // apiKey is already validated and trimmed above
-        process.env[envKey] = body.apiKey!;
-        envCfg[envKey] = body.apiKey!;
+        const apiKey = body.apiKey;
+        if (!apiKey) {
+          providerSwitchInProgress = false;
+          error(res, "API key is required for this provider", 400);
+          return;
+        }
+        process.env[envKey] = apiKey;
+        envCfg[envKey] = apiKey;
       }
 
       saveMiladyConfig(config);
 
       // Trigger agent restart so the new provider takes effect
       if (ctx?.onRestart) {
-        scheduleRuntimeRestart(`provider switch to ${provider}`, 300);
-        // Clear switch lock after a reasonable timeout for restart
-        setTimeout(() => { providerSwitchInProgress = false; }, 30_000);
+        try {
+          scheduleRuntimeRestart(`provider switch to ${provider}`, 300);
+          // Clear switch lock after a reasonable timeout for restart
+          setTimeout(() => {
+            providerSwitchInProgress = false;
+          }, 30_000);
+        } catch {
+          providerSwitchInProgress = false;
+        }
       } else {
         providerSwitchInProgress = false;
       }
@@ -4710,33 +4726,6 @@ async function handleRequest(
         `[api] Provider switch failed: ${err instanceof Error ? err.stack : err}`,
       );
       error(res, "Provider switch failed", 500);
-    }
-    return;
-  }
-
-  // ── GET /api/subscription/status ──────────────────────────────────────
-  // Returns the status of subscription-based auth providers
-  if (method === "GET" && pathname === "/api/subscription/status") {
-    try {
-      const { getSubscriptionStatus } = await import("../auth/index");
-      json(res, { providers: getSubscriptionStatus() });
-    } catch (err) {
-      error(res, `Failed to get subscription status: ${err}`, 500);
-    }
-    return;
-  }
-
-  // ── POST /api/subscription/anthropic/start ──────────────────────────────
-  // Start Anthropic OAuth flow — returns URL for user to visit
-  if (method === "POST" && pathname === "/api/subscription/anthropic/start") {
-    try {
-      const { startAnthropicLogin } = await import("../auth/index");
-      const flow = await startAnthropicLogin();
-      // Store flow in server state for the exchange step
-      state._anthropicFlow = flow;
-      json(res, { authUrl: flow.authUrl });
-    } catch (err) {
-      error(res, `Failed to start Anthropic login: ${err}`, 500);
     }
     return;
   }
