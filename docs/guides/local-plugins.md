@@ -148,7 +148,7 @@ Explicitly specify plugin paths in your config:
 Override config paths via environment:
 
 ```bash
-MILAIDY_CONFIG_DIR=/path/to/config milaidy start
+MILADY_CONFIG_DIR=/path/to/config milaidy start
 ```
 
 ---
