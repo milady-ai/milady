@@ -266,7 +266,16 @@ export class ElizaTUIBridge {
         },
         {
           abortSignal: this.abortController.signal,
-        },
+          // Signal "rich consumer" to suppress inline retry separators
+          // ("-- that's not right, let me start again:") from
+          // ValidationStreamExtractor. The type is not yet in the
+          // @elizaos/core typedefs, so we spread into the options.
+          ...{
+            onStreamEvent: (event: StreamEvent) => {
+              this.onStreamEvent(event);
+            },
+          },
+        } as Record<string, unknown>,
       );
     } catch (error) {
       // User-initiated cancellation should keep the partial response without

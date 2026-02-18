@@ -32,6 +32,7 @@ import {
   type MiladyConfig,
   saveMiladyConfig,
 } from "../config/config";
+import { AUTH_PROVIDER_PLUGINS } from "../config/plugin-auto-enable";
 import { resolveModelsCacheDir, resolveStateDir } from "../config/paths";
 import type { ConnectorConfig, CustomActionDef } from "../config/types.milady";
 import { EMOTE_BY_ID, EMOTE_CATALOG } from "../emotes/catalog";
@@ -48,6 +49,7 @@ import {
   getMcpServerDetails,
   searchMcpMarketplace,
 } from "../services/mcp-marketplace";
+import { createPluginManager } from "../services/plugin-manager-composite";
 import {
   type CoreManagerLike,
   type InstallProgressLike,
@@ -132,12 +134,20 @@ function getAgentEventSvc(
   return runtime.getService("AGENT_EVENT") as AgentEventServiceLike | null;
 }
 
+/** Singleton composite so we don't recreate on every request. */
+let _pluginManagerComposite: PluginManagerLike | null = null;
+
 function requirePluginManager(runtime: AgentRuntime | null): PluginManagerLike {
+  // Prefer the runtime-registered service if it conforms to the interface.
   const service = runtime?.getService("plugin_manager");
-  if (!isPluginManagerLike(service)) {
-    throw new Error("Plugin manager service not found");
+  if (isPluginManagerLike(service)) {
+    return service;
   }
-  return service;
+  // Fall back to our local composite of registry-client + plugin-installer + plugin-eject.
+  if (!_pluginManagerComposite) {
+    _pluginManagerComposite = createPluginManager();
+  }
+  return _pluginManagerComposite;
 }
 
 function requireCoreManager(runtime: AgentRuntime | null): CoreManagerLike {
@@ -246,6 +256,8 @@ interface ServerState {
   >;
   /** Whether shell access is enabled (can be toggled in UI). */
   shellEnabled?: boolean;
+  /** Reasons a restart is pending. Empty array = no restart needed. */
+  pendingRestartReasons: string[];
 }
 
 interface ShareIngestItem {
@@ -1996,7 +2008,22 @@ async function generateChatResponse(
               appendIncomingText(chunk);
             }
           : undefined,
-      },
+        // Signal that we are a "rich consumer" so ElizaOS's
+        // ValidationStreamExtractor suppresses its inline retry
+        // separator ("-- that's not right, let me start again:") and
+        // emits structured events instead.
+        ...(opts?.onChunk
+          ? {
+              onStreamEvent: (event: { type: string; text?: string }) => {
+                if (event.type === "token" && event.text) {
+                  if (opts?.isAborted?.()) return;
+                  if (!claimStreamSource("onStreamChunk")) return;
+                  appendIncomingText(event.text);
+                }
+              },
+            }
+          : {}),
+      } as Record<string, unknown>,
     );
 
     // Ensure MESSAGE_SENT hooks run for API chat flows. Some runtimes emit this
@@ -2446,7 +2473,7 @@ function getProviderOptions(): Array<{
       envKey: null,
       pluginName: "@elizaos/plugin-openai",
       keyPrefix: null,
-      description: "Use your $20-200/mo ChatGPT subscription via OAuth.",
+      description: "Coming soon — use OpenAI API Key instead.",
     },
     {
       id: "anthropic",
@@ -4320,55 +4347,17 @@ async function handleRequest(
   const registryService = state.registryService;
   const dropService = state.dropService;
 
-  const scheduleRuntimeRestart = (reason: string, delayMs = 300): void => {
-    const restart = () => {
-      if (ctx?.onRestart) {
-        logger.info(`[milady-api] Triggering runtime restart (${reason})...`);
-        Promise.resolve(ctx.onRestart())
-          .then((newRuntime) => {
-            if (!newRuntime) {
-              logger.warn("[milady-api] Runtime restart returned null");
-              return;
-            }
-            state.runtime = newRuntime;
-            state.chatConnectionReady = null;
-            state.chatConnectionPromise = null;
-            state.agentState = "running";
-            state.agentName = newRuntime.character.name ?? "Milady";
-            state.startedAt = Date.now();
-            logger.info("[milady-api] Runtime restarted successfully");
-            // Notify WebSocket clients so the UI can refresh
-            state.broadcastWs?.({
-              type: "status",
-              state: state.agentState,
-              agentName: state.agentName,
-              startedAt: state.startedAt,
-              restarted: true,
-            });
-          })
-          .catch((err) => {
-            logger.error(
-              `[milady-api] Runtime restart failed: ${err instanceof Error ? err.message : err}`,
-            );
-          });
-        return;
-      }
-
-      logger.info(
-        `[milady-api] No in-process restart handler; exiting for external restart (${reason})`,
-      );
-      if (process.env.VITEST || process.env.NODE_ENV === "test") {
-        logger.info("[milady-api] Skipping process.exit during test execution");
-        return;
-      }
-      process.exit(API_RESTART_EXIT_CODE);
-    };
-
-    if (delayMs <= 0) {
-      restart();
-      return;
+  const scheduleRuntimeRestart = (reason: string, _delayMs?: number): void => {
+    if (!state.pendingRestartReasons.includes(reason)) {
+      state.pendingRestartReasons.push(reason);
     }
-    setTimeout(restart, delayMs);
+    logger.info(
+      `[milady-api] Restart required: ${reason} (${state.pendingRestartReasons.length} pending)`,
+    );
+    state.broadcastWs?.({
+      type: "restart-required",
+      reasons: [...state.pendingRestartReasons],
+    });
   };
 
   const resolveHyperscapeApiBaseUrl = async (): Promise<string> => {
@@ -4545,6 +4534,8 @@ async function handleRequest(
       model: state.model,
       uptime,
       cloud: cloudStatus,
+      pendingRestart: state.pendingRestartReasons.length > 0,
+      pendingRestartReasons: state.pendingRestartReasons,
     });
     return;
   }
@@ -4833,6 +4824,30 @@ async function handleRequest(
           (config.env as Record<string, string>)[providerOpt.envKey] =
             body.providerApiKey as string;
           process.env[providerOpt.envKey] = body.providerApiKey as string;
+        }
+      }
+
+      // Persist model selections for local providers so the plugin picks
+      // up the user's chosen models instead of its hardcoded defaults.
+      // Each provider reads {PREFIX}_SMALL_MODEL / {PREFIX}_LARGE_MODEL
+      // with SMALL_MODEL / LARGE_MODEL as fallbacks.
+      if (runMode === "local" && providerId) {
+        const prefix = providerId.toUpperCase().replace(/-/g, "_");
+        const envRef = config.env as Record<string, string>;
+
+        if (typeof body.smallModel === "string" && body.smallModel.trim()) {
+          const sm = body.smallModel.trim();
+          envRef[`${prefix}_SMALL_MODEL`] = sm;
+          envRef.SMALL_MODEL = sm;
+          process.env[`${prefix}_SMALL_MODEL`] = sm;
+          process.env.SMALL_MODEL = sm;
+        }
+        if (typeof body.largeModel === "string" && body.largeModel.trim()) {
+          const lg = body.largeModel.trim();
+          envRef[`${prefix}_LARGE_MODEL`] = lg;
+          envRef.LARGE_MODEL = lg;
+          process.env[`${prefix}_LARGE_MODEL`] = lg;
+          process.env.LARGE_MODEL = lg;
         }
       }
     }
@@ -5477,23 +5492,38 @@ async function handleRequest(
       return;
     }
 
-    // Build allowlist from all plugin-declared sensitive params
+    // Build allowlist from all plugin-declared params (sensitive AND
+    // non-sensitive).  The Secrets UI displays both kinds and users
+    // expect the Save button to persist everything they entered.
     const bundledIds = new Set(state.plugins.map((p) => p.id));
     const installedEntries = discoverInstalledPlugins(state.config, bundledIds);
     const allPlugins: PluginEntry[] = [...state.plugins, ...installedEntries];
     const allowedKeys = new Set<string>();
     for (const plugin of allPlugins) {
       for (const param of plugin.parameters) {
-        if (param.sensitive) allowedKeys.add(param.key);
+        allowedKeys.add(param.key);
+      }
+    }
+
+    // Snapshot which provider keys were previously unset so we can
+    // detect when a NEW provider key is added (needs runtime restart
+    // to load the corresponding plugin).
+    const providerKeysWereUnset = new Set<string>();
+    for (const envKey of Object.keys(AUTH_PROVIDER_PLUGINS)) {
+      const existing = process.env[envKey];
+      if (!existing || !existing.trim()) {
+        providerKeysWereUnset.add(envKey);
       }
     }
 
     const updated: string[] = [];
+    if (!state.config.env) state.config.env = {};
     for (const [key, value] of Object.entries(body.secrets)) {
       if (typeof value !== "string" || !value.trim()) continue;
       if (!allowedKeys.has(key)) continue;
       if (BLOCKED_ENV_KEYS.has(key.toUpperCase())) continue;
       process.env[key] = value;
+      (state.config.env as Record<string, string>)[key] = value;
       updated.push(key);
     }
 
@@ -5503,6 +5533,31 @@ async function handleRequest(
       if (updated.some((k) => pluginKeys.has(k))) {
         plugin.configured = true;
       }
+    }
+
+    // Persist to disk so secrets survive restarts
+    if (updated.length > 0) {
+      try {
+        saveMiladyConfig(state.config);
+      } catch (err) {
+        logger.warn(
+          `[milady-api] Failed to persist secrets to config: ${err instanceof Error ? err.message : err}`,
+        );
+      }
+    }
+
+    // If a NEW provider key was added (was previously unset), restart the
+    // runtime so the corresponding model-provider plugin gets loaded.
+    // Updating an existing key's value does NOT need a restart — the value
+    // is already in process.env and the plugin is already loaded.
+    const newProviderKeys = updated.filter(
+      (k) => providerKeysWereUnset.has(k) && k in AUTH_PROVIDER_PLUGINS,
+    );
+    if (newProviderKeys.length > 0) {
+      logger.info(
+        `[milady-api] New provider key(s) saved via Secrets UI: ${newProviderKeys.join(", ")} — scheduling runtime restart`,
+      );
+      scheduleRuntimeRestart("New provider key saved via Secrets UI", 500);
     }
 
     json(res, { ok: true, updated });
@@ -7118,6 +7173,7 @@ async function handleRequest(
       saveConfig: saveMiladyConfig,
       ensureWalletKeysInEnvAndConfig,
       resolveWalletExportRejection,
+      scheduleRuntimeRestart,
       readJsonBody,
       json,
       error,
@@ -7803,6 +7859,7 @@ async function handleRequest(
 
     try {
       saveMiladyConfig(state.config);
+      scheduleRuntimeRestart("Configuration updated");
     } catch (err) {
       logger.warn(
         `[api] Config save failed: ${err instanceof Error ? err.message : err}`,
@@ -10745,6 +10802,7 @@ export async function startApiServer(opts?: {
     activeConversationId: null,
     permissionStates: {},
     shellEnabled: config.features?.shellEnabled !== false,
+    pendingRestartReasons: [],
   };
 
   const trainingServiceCtor = await resolveTrainingServiceCtor();
@@ -11234,6 +11292,8 @@ export async function startApiServer(opts?: {
       agentName: state.agentName,
       model: state.model,
       startedAt: state.startedAt,
+      pendingRestart: state.pendingRestartReasons.length > 0,
+      pendingRestartReasons: state.pendingRestartReasons,
     });
   };
 

@@ -16,6 +16,7 @@ import type { ConfigUiHint } from "../types";
 import { AvatarSelector } from "./AvatarSelector";
 import type { JsonSchemaObject } from "./config-catalog";
 import { ConfigRenderer, defaultRegistry } from "./config-renderer";
+import { SecretsView } from "./SecretsView";
 
 const DEFAULT_ELEVEN_FAST_MODEL = "eleven_flash_v2_5";
 const REDACTED_SECRET = "[REDACTED]";
@@ -447,6 +448,9 @@ export function CharacterView() {
     null,
   );
   const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
+
+  /* ── Secrets vault modal state ───────────────────────────────── */
+  const [secretsOpen, setSecretsOpen] = useState(false);
 
   /* ── ElevenLabs voice presets ──────────────────────────────────── */
   type VoicePreset = {
@@ -1051,6 +1055,28 @@ export function CharacterView() {
             >
               export
             </button>
+            <button
+              type="button"
+              className="flex items-center gap-1 px-2 py-0.5 text-[10px] text-[var(--muted)] hover:text-[var(--txt)] bg-transparent border border-[var(--border)] cursor-pointer transition-colors hover:border-[var(--accent)]"
+              onClick={() => setSecretsOpen(true)}
+              title="Secrets Vault"
+            >
+              <svg
+                width="11"
+                height="11"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <title>Secrets vault</title>
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              secrets
+            </button>
           </div>
         </div>
 
@@ -1624,6 +1650,57 @@ export function CharacterView() {
           )}
         </div>
       </div>
+
+      {/* ── Secrets vault modal ── */}
+      {secretsOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSecretsOpen(false);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape" || e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setSecretsOpen(false);
+            }
+          }}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="w-full max-w-2xl max-h-[80vh] border border-[var(--border)] bg-[var(--card)] p-5 shadow-lg flex flex-col">
+            <div className="flex items-center justify-between mb-4 flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-[var(--accent)]"
+                >
+                  <title>Secrets vault</title>
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <span className="font-bold text-sm">Secrets Vault</span>
+              </div>
+              <button
+                type="button"
+                className="text-[var(--muted)] hover:text-[var(--txt)] text-lg leading-none px-1 bg-transparent border-0 cursor-pointer"
+                onClick={() => setSecretsOpen(false)}
+              >
+                &times;
+              </button>
+            </div>
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              <SecretsView />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

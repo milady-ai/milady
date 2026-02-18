@@ -872,7 +872,7 @@ export function OnboardingWizard() {
           },
           "openai-subscription": {
             name: "ChatGPT Subscription",
-            description: "$20-200/mo ChatGPT Plus/Pro subscription",
+            description: "Coming soon \u2014 use OpenAI API Key instead",
           },
           anthropic: { name: "Anthropic API Key" },
           openai: { name: "OpenAI API Key" },
@@ -1060,213 +1060,44 @@ export function OnboardingWizard() {
               </div>
             )}
 
-            {/* Claude Subscription — setup token / OAuth */}
+            {/* Claude Subscription — setup token */}
             {onboardingProvider === "anthropic-subscription" && (
               <div className="text-left">
-                <div className="flex items-center gap-4 border-b border-border mb-3">
-                  <button
-                    type="button"
-                    className={`text-sm pb-2 border-b-2 ${
-                      onboardingSubscriptionTab === "token"
-                        ? "border-accent text-accent"
-                        : "border-transparent text-muted hover:text-txt"
-                    }`}
-                    onClick={() =>
-                      setState("onboardingSubscriptionTab", "token")
-                    }
-                  >
-                    Setup Token
-                  </button>
-                  <button
-                    type="button"
-                    className={`text-sm pb-2 border-b-2 ${
-                      onboardingSubscriptionTab === "oauth"
-                        ? "border-accent text-accent"
-                        : "border-transparent text-muted hover:text-txt"
-                    }`}
-                    onClick={() =>
-                      setState("onboardingSubscriptionTab", "oauth")
-                    }
-                  >
-                    OAuth Login
-                  </button>
-                </div>
-
-                {onboardingSubscriptionTab === "token" ? (
-                  <>
-                    <span className="text-[13px] font-bold text-txt-strong block mb-2">
-                      Setup Token:
-                    </span>
-                    <input
-                      type="password"
-                      value={onboardingApiKey}
-                      onChange={handleApiKeyChange}
-                      placeholder="sk-ant-oat01-..."
-                      className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none"
-                    />
-                    <p className="text-xs text-muted mt-2 whitespace-pre-line">
-                      {
-                        'How to get your setup token:\n\n• Option A: Run  claude setup-token  in your terminal (if you have Claude Code CLI installed)\n\n• Option B: Go to claude.ai/settings/api → "Claude Code" → "Use setup token"'
-                      }
-                    </p>
-                  </>
-                ) : anthropicConnected ? (
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="flex items-center gap-2 px-6 py-3 border border-green-500/30 bg-green-500/10 text-green-400 text-sm font-medium w-full max-w-xs justify-center">
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <title>Connected</title>
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                      Connected to Claude
-                    </div>
-                    <p className="text-xs text-muted text-center">
-                      Your Claude subscription is linked. Click Next to
-                      continue.
-                    </p>
-                  </div>
-                ) : !anthropicOAuthStarted ? (
-                  <div className="flex flex-col items-center gap-3">
-                    <button
-                      type="button"
-                      className="w-full max-w-xs px-6 py-3 border border-accent bg-accent text-accent-fg text-sm font-medium cursor-pointer hover:bg-accent-hover transition-colors"
-                      onClick={() => void handleAnthropicStart()}
-                    >
-                      Login with Anthropic
-                    </button>
-                    <p className="text-xs text-muted text-center">
-                      Requires Claude Pro ($20/mo) or Max ($100/mo).
-                    </p>
-                    {anthropicError && (
-                      <p className="text-xs text-red-400">{anthropicError}</p>
-                    )}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center gap-3">
-                    <p className="text-sm text-txt text-center">
-                      After logging in, you'll see a code on Anthropic's page.
-                      <br />
-                      Copy and paste it below:
-                    </p>
-                    <input
-                      type="text"
-                      placeholder="Paste the authorization code here..."
-                      value={anthropicCode}
-                      onChange={(e) => setAnthropicCode(e.target.value)}
-                      className="w-full max-w-xs px-3 py-2 border border-border bg-card text-sm text-center focus:border-accent focus:outline-none"
-                    />
-                    {anthropicError && (
-                      <p className="text-xs text-red-400">{anthropicError}</p>
-                    )}
-                    <button
-                      type="button"
-                      disabled={!anthropicCode}
-                      className="w-full max-w-xs px-6 py-2 border border-accent bg-accent text-accent-fg text-sm cursor-pointer hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
-                      onClick={() => void handleAnthropicExchange()}
-                    >
-                      Connect
-                    </button>
-                  </div>
-                )}
+                <span className="text-[13px] font-bold text-txt-strong block mb-2">
+                  Setup Token:
+                </span>
+                <input
+                  type="password"
+                  value={onboardingApiKey}
+                  onChange={handleApiKeyChange}
+                  placeholder="sk-ant-oat01-..."
+                  className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none"
+                />
+                <p className="text-xs text-muted mt-2 whitespace-pre-line">
+                  {
+                    'How to get your setup token:\n\n\u2022 Option A: Run  claude setup-token  in your terminal (if you have Claude Code CLI installed)\n\n\u2022 Option B: Go to claude.ai/settings/api \u2192 "Claude Code" \u2192 "Use setup token"'
+                  }
+                </p>
+                <p className="text-xs text-muted mt-2">
+                  Requires Claude Pro ($20/mo) or Max ($100/mo).
+                </p>
               </div>
             )}
 
-            {/* ChatGPT Subscription — OAuth */}
+            {/* ChatGPT Subscription — OAuth (not yet available) */}
             {onboardingProvider === "openai-subscription" && (
               <div className="space-y-4">
-                {openaiConnected ? (
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="flex items-center gap-2 px-6 py-3 border border-green-500/30 bg-green-500/10 text-green-400 text-sm font-medium w-full max-w-xs justify-center">
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <title>Connected</title>
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                      Connected to ChatGPT
-                    </div>
-                    <p className="text-xs text-muted text-center">
-                      Your ChatGPT subscription is linked. Click Next to
-                      continue.
-                    </p>
-                  </div>
-                ) : !openaiOAuthStarted ? (
-                  <div className="flex flex-col items-center gap-3">
-                    <button
-                      type="button"
-                      className="w-full max-w-xs px-6 py-3 border border-accent bg-accent text-accent-fg text-sm font-medium cursor-pointer hover:bg-accent-hover transition-colors"
-                      onClick={() => void handleOpenAIStart()}
-                    >
-                      Login with OpenAI
-                    </button>
-                    <p className="text-xs text-muted text-center">
-                      Requires ChatGPT Plus ($20/mo) or Pro ($200/mo).
-                    </p>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-3">
-                    <div className="p-3 border border-border bg-card text-sm text-fg rounded">
-                      <p className="font-medium mb-1">Almost there!</p>
-                      <p className="text-muted text-xs leading-relaxed">
-                        After logging in, you'll be redirected to a page that
-                        won't load (starts with{" "}
-                        <code className="text-fg bg-input px-1 py-0.5 text-xs">
-                          localhost:1455
-                        </code>
-                        ). Copy the <strong>entire URL</strong> from your
-                        browser's address bar and paste it below.
-                      </p>
-                    </div>
-                    <input
-                      type="text"
-                      className="w-full px-3 py-2.5 border border-border bg-input text-fg text-sm placeholder:text-muted"
-                      placeholder="http://localhost:1455/auth/callback?code=..."
-                      value={openaiCallbackUrl}
-                      onChange={(e) => {
-                        setOpenaiCallbackUrl(e.target.value);
-                        setOpenaiError("");
-                      }}
-                    />
-                    {openaiError && (
-                      <p className="text-xs text-red-400">{openaiError}</p>
-                    )}
-                    <div className="flex gap-2 justify-center">
-                      <button
-                        type="button"
-                        className="px-6 py-2.5 border border-accent bg-accent text-accent-fg text-sm font-medium cursor-pointer hover:bg-accent-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                        disabled={!openaiCallbackUrl}
-                        onClick={() => void handleOpenAIExchange()}
-                      >
-                        Complete Login
-                      </button>
-                      <button
-                        type="button"
-                        className="px-4 py-2.5 border border-border text-muted text-sm cursor-pointer hover:text-fg transition-colors"
-                        onClick={() => {
-                          setOpenaiOAuthStarted(false);
-                          setOpenaiCallbackUrl("");
-                        }}
-                      >
-                        Start Over
-                      </button>
-                    </div>
-                  </div>
-                )}
+                <div className="p-4 border border-border bg-card text-center">
+                  <p className="text-sm text-txt font-medium mb-1">
+                    ChatGPT subscription login is coming soon.
+                  </p>
+                  <p className="text-xs text-muted">
+                    In the meantime, select{" "}
+                    <strong>OpenAI (API Key)</strong> from the provider list
+                    above and use an API key from{" "}
+                    <span className="text-fg">platform.openai.com/api-keys</span>.
+                  </p>
+                </div>
               </div>
             )}
 
@@ -1721,12 +1552,11 @@ export function OnboardingWizard() {
         return cloudConnected;
       case "llmProvider":
         if (onboardingProvider === "anthropic-subscription") {
-          return onboardingSubscriptionTab === "token"
-            ? onboardingApiKey.length > 0
-            : anthropicConnected;
+          return onboardingApiKey.length > 0;
         }
         if (onboardingProvider === "openai-subscription") {
-          return openaiConnected;
+          // OAuth flow not yet available — Next is always disabled
+          return false;
         }
         if (
           onboardingProvider === "elizacloud" ||

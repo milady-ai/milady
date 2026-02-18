@@ -9,7 +9,7 @@
  */
 import crypto from "node:crypto";
 import type { Dirent } from "node:fs";
-import { existsSync, mkdirSync, symlinkSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, symlinkSync } from "node:fs";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import fs from "node:fs/promises";
 import { createRequire } from "node:module";
@@ -66,6 +66,7 @@ import {
 import { SandboxAuditLog } from "../security/audit-log";
 import { SandboxManager, type SandboxMode } from "../services/sandbox-manager";
 import { diagnoseNoAIProvider } from "../services/version-compat";
+import { resolveMiladyPackageRootSync } from "../utils/milady-root";
 import { CORE_PLUGINS, OPTIONAL_CORE_PLUGINS } from "./core-plugins";
 import { createMiladyPlugin } from "./milady-plugin";
 
@@ -1748,6 +1749,81 @@ async function registerSqlPluginWithRecovery(
 }
 
 /**
+ * Collect ALL pluginParameters keys from the plugins.json manifest.
+ *
+ * Reads `plugins.json` from the package root and extracts every key from
+ * every plugin's `pluginParameters` object. This ensures that
+ * `buildCharacterFromConfig()` snapshots ALL env vars that any plugin
+ * might need — not just a manually-maintained whitelist.
+ *
+ * Falls back to a minimal hardcoded list when `plugins.json` is missing.
+ *
+ * @internal Exported for testing.
+ */
+export function collectPluginParameterKeys(): string[] {
+  const FALLBACK_KEYS = [
+    "ANTHROPIC_API_KEY",
+    "OPENAI_API_KEY",
+    "GOOGLE_API_KEY",
+    "GOOGLE_GENERATIVE_AI_API_KEY",
+    "GROQ_API_KEY",
+    "XAI_API_KEY",
+    "OPENROUTER_API_KEY",
+    "AI_GATEWAY_API_KEY",
+    "OLLAMA_BASE_URL",
+    "DISCORD_API_TOKEN",
+    "DISCORD_BOT_TOKEN",
+    "TELEGRAM_BOT_TOKEN",
+    "SLACK_BOT_TOKEN",
+    "SMALL_MODEL",
+    "LARGE_MODEL",
+    "ELIZAOS_CLOUD_API_KEY",
+  ];
+
+  try {
+    // Try the package root first (works both in dev and installed contexts)
+    const pkgRoot = resolveMiladyPackageRootSync({ cwd: process.cwd() });
+    const candidates = pkgRoot
+      ? [path.join(pkgRoot, "plugins.json")]
+      : [path.join(process.cwd(), "plugins.json")];
+
+    for (const candidate of candidates) {
+      if (!existsSync(candidate)) continue;
+      const raw = readFileSync(candidate, "utf-8");
+      const manifest = JSON.parse(raw) as {
+        plugins?: Array<{
+          pluginParameters?: Record<string, unknown>;
+        }>;
+      };
+
+      if (!Array.isArray(manifest.plugins)) continue;
+
+      const keys = new Set<string>();
+      for (const plugin of manifest.plugins) {
+        if (plugin.pluginParameters && typeof plugin.pluginParameters === "object") {
+          for (const key of Object.keys(plugin.pluginParameters)) {
+            keys.add(key);
+          }
+        }
+      }
+
+      if (keys.size > 0) {
+        logger.debug(
+          `[milady] collectPluginParameterKeys: loaded ${keys.size} keys from plugins.json`,
+        );
+        return [...keys];
+      }
+    }
+  } catch (err) {
+    logger.warn(
+      `[milady] Failed to read plugins.json, falling back to hardcoded keys: ${err instanceof Error ? err.message : err}`,
+    );
+  }
+
+  return FALLBACK_KEYS;
+}
+
+/**
  * Build an ElizaOS Character from the Milady config.
  *
  * Resolves the agent name from `config.agents.list` (first entry) or
@@ -1778,57 +1854,10 @@ export function buildCharacterFromConfig(config: MiladyConfig): Character {
   const postExamples = agentEntry?.postExamples;
   const messageExamples = agentEntry?.messageExamples;
 
-  // Collect secrets from process.env (API keys the plugins need)
-  const secretKeys = [
-    "ANTHROPIC_API_KEY",
-    "OPENAI_API_KEY",
-    "GOOGLE_API_KEY",
-    "GOOGLE_GENERATIVE_AI_API_KEY",
-    "GROQ_API_KEY",
-    "XAI_API_KEY",
-    "OPENROUTER_API_KEY",
-    "AI_GATEWAY_API_KEY",
-    "AIGATEWAY_API_KEY",
-    "AI_GATEWAY_BASE_URL",
-    "AI_GATEWAY_SMALL_MODEL",
-    "AI_GATEWAY_LARGE_MODEL",
-    "AI_GATEWAY_EMBEDDING_MODEL",
-    "AI_GATEWAY_EMBEDDING_DIMENSIONS",
-    "AI_GATEWAY_IMAGE_MODEL",
-    "AI_GATEWAY_TIMEOUT_MS",
-    "OLLAMA_BASE_URL",
-    "DISCORD_API_TOKEN",
-    "DISCORD_APPLICATION_ID",
-    "DISCORD_BOT_TOKEN",
-    "TELEGRAM_BOT_TOKEN",
-    "SLACK_BOT_TOKEN",
-    "SLACK_APP_TOKEN",
-    "SLACK_USER_TOKEN",
-    "SIGNAL_ACCOUNT",
-    "MSTEAMS_APP_ID",
-    "MSTEAMS_APP_PASSWORD",
-    "MATTERMOST_BOT_TOKEN",
-    "MATTERMOST_BASE_URL",
-    // ElizaCloud secrets
-    "ELIZAOS_CLOUD_API_KEY",
-    "ELIZAOS_CLOUD_BASE_URL",
-    "ELIZAOS_CLOUD_ENABLED",
-    // Wallet / blockchain secrets
-    "EVM_PRIVATE_KEY",
-    "SOLANA_PRIVATE_KEY",
-    "ALCHEMY_API_KEY",
-    "HELIUS_API_KEY",
-    "BIRDEYE_API_KEY",
-    "SOLANA_RPC_URL",
-    "X402_PRIVATE_KEY",
-    "X402_NETWORK",
-    "X402_PAY_TO",
-    "X402_FACILITATOR_URL",
-    "X402_MAX_PAYMENT_USD",
-    "X402_MAX_TOTAL_USD",
-    "X402_ENABLED",
-    "X402_DB_PATH",
-  ];
+  // Collect secrets from process.env (API keys the plugins need).
+  // Keys are loaded dynamically from plugins.json so new plugins are
+  // automatically picked up without maintaining a manual whitelist.
+  const secretKeys = collectPluginParameterKeys();
 
   const secrets: Record<string, string> = {};
   for (const key of secretKeys) {

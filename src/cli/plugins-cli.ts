@@ -69,19 +69,55 @@ function displayPluginConfig(
   }
 }
 
+/**
+ * Raw service shape extracted from `@elizaos/plugin-plugin-manager`.
+ * The package only exports `pluginManagerPlugin`; the internal service class
+ * uses different method names than `PluginManagerLike`. This adapter bridges
+ * the gap so all CLI commands work through the standard interface.
+ */
+interface RawPluginManagerService {
+  getAvailablePluginsFromRegistry(): Promise<
+    Record<
+      string,
+      {
+        git?: { repo?: string };
+        npm?: { repo?: string; v0?: string | null; v1?: string | null; v2?: string | null };
+        supports?: { v0?: boolean; v1?: boolean; v2?: boolean };
+        description?: string;
+        topics?: string[];
+        stargazers_count?: number;
+        language?: string;
+        homepage?: string | null;
+        viewer?: { url: string; embedParams?: Record<string, string>; postMessageAuth?: boolean; sandbox?: string };
+        launchType?: string;
+        launchUrl?: string | null;
+        category?: string;
+        capabilities?: string[];
+        icon?: string | null;
+      }
+    >
+  >;
+  listInstalledPlugins(): Array<{ name: string; version?: string; installedAt?: Date }>;
+  installPluginFromRegistry(
+    pluginName: string,
+    version?: string,
+    onProgress?: (progress: { phase: string; message: string }) => void,
+  ): Promise<{ name: string; version: string; path: string; status: string }>;
+  getPluginInstallPath(pluginName: string): string;
+}
+
 async function getPluginManager(): Promise<PluginManagerLike> {
-  const { PluginManagerService } = await import(
+  const { pluginManagerPlugin } = await import(
     "@elizaos/plugin-plugin-manager"
   );
-  const PluginManagerServiceCtor = PluginManagerService as unknown as new (
-    runtime: IAgentRuntime,
-  ) => PluginManagerLike;
+  // biome-ignore lint/suspicious/noExplicitAny: service constructor not exported
+  const PluginManagerServiceCtor = pluginManagerPlugin.services![0] as any;
   const mockRuntime = {
     plugins: [],
     actions: [],
     providers: [],
     evaluators: [],
-    services: [],
+    services: new Map(),
     getService: () => null,
     registerService: () => {},
     registerAction: () => {},
@@ -89,7 +125,162 @@ async function getPluginManager(): Promise<PluginManagerLike> {
     registerEvaluator: () => {},
     registerEvent: () => {},
   } as unknown as IAgentRuntime;
-  return new PluginManagerServiceCtor(mockRuntime);
+  const raw: RawPluginManagerService = new PluginManagerServiceCtor(mockRuntime);
+
+  // Convert raw registry entry → RegistryPluginInfo
+  const toPluginInfo = (
+    name: string,
+    entry: Record<string, unknown>,
+  ): import("../services/plugin-manager-types").RegistryPluginInfo => {
+    const git = (entry.git ?? {}) as Record<string, unknown>;
+    const npm = (entry.npm ?? {}) as Record<string, unknown>;
+    const supports = (entry.supports ?? {}) as Record<string, boolean>;
+    return {
+      name,
+      gitRepo: String(git.repo ?? ""),
+      gitUrl: git.repo ? `https://github.com/${git.repo}` : "",
+      description: String(entry.description ?? ""),
+      homepage: (entry.homepage as string | null) ?? null,
+      topics: Array.isArray(entry.topics) ? entry.topics : [],
+      stars: Number(entry.stargazers_count ?? 0),
+      language: String(entry.language ?? ""),
+      launchType: entry.launchType as string | undefined,
+      launchUrl: (entry.launchUrl as string | null) ?? null,
+      viewer: entry.viewer as import("../services/plugin-manager-types").RegistryPluginInfo["viewer"],
+      npm: {
+        package: String(npm.repo ?? npm.package ?? name),
+        v0Version: (npm.v0 as string | null) ?? null,
+        v1Version: (npm.v1 as string | null) ?? null,
+        v2Version: (npm.v2 as string | null) ?? null,
+      },
+      supports: {
+        v0: Boolean(supports.v0),
+        v1: Boolean(supports.v1),
+        v2: Boolean(supports.v2),
+      },
+      category: entry.category as string | undefined,
+      capabilities: entry.capabilities as string[] | undefined,
+      icon: (entry.icon as string | null) ?? null,
+    };
+  };
+
+  // Cached registry map
+  let registryCache: Map<string, import("../services/plugin-manager-types").RegistryPluginInfo> | null = null;
+
+  const refreshRegistry = async () => {
+    const rawRegistry = await raw.getAvailablePluginsFromRegistry();
+    const map = new Map<string, import("../services/plugin-manager-types").RegistryPluginInfo>();
+    for (const [key, entry] of Object.entries(rawRegistry)) {
+      map.set(key, toPluginInfo(key, entry as Record<string, unknown>));
+    }
+    registryCache = map;
+    return map;
+  };
+
+  return {
+    refreshRegistry,
+
+    async listInstalledPlugins() {
+      const list = raw.listInstalledPlugins();
+      return list.map((p) => ({
+        name: p.name,
+        version: p.version,
+        installedAt: p.installedAt?.toISOString(),
+      }));
+    },
+
+    async getRegistryPlugin(name: string) {
+      const registry = registryCache ?? (await refreshRegistry());
+      return registry.get(name) ?? null;
+    },
+
+    async searchRegistry(query: string, limit = 15) {
+      const registry = registryCache ?? (await refreshRegistry());
+      const q = query.toLowerCase();
+      const scored: Array<import("../services/plugin-manager-types").RegistrySearchResult> = [];
+      for (const plugin of registry.values()) {
+        const nameScore = plugin.name.toLowerCase().includes(q) ? 0.8 : 0;
+        const descScore = plugin.description.toLowerCase().includes(q) ? 0.4 : 0;
+        const tagScore = plugin.topics.some((t) => t.toLowerCase().includes(q)) ? 0.3 : 0;
+        const score = Math.min(nameScore + descScore + tagScore, 1);
+        if (score > 0) {
+          scored.push({
+            name: plugin.name,
+            description: plugin.description,
+            score,
+            tags: plugin.topics,
+            version: plugin.npm.v2Version ?? plugin.npm.v1Version ?? plugin.npm.v0Version ?? null,
+            latestVersion: plugin.npm.v2Version ?? plugin.npm.v1Version ?? plugin.npm.v0Version ?? null,
+            npmPackage: plugin.npm.package,
+            repository: plugin.gitUrl,
+            stars: plugin.stars,
+            supports: plugin.supports,
+          });
+        }
+      }
+      return scored.sort((a, b) => b.score - a.score).slice(0, limit);
+    },
+
+    async installPlugin(pluginName, onProgress) {
+      try {
+        const info = await raw.installPluginFromRegistry(pluginName, undefined, onProgress);
+        return {
+          success: true,
+          pluginName: info.name,
+          version: info.version,
+          installPath: info.path,
+          requiresRestart: true,
+        };
+      } catch (err) {
+        return {
+          success: false,
+          pluginName,
+          version: "",
+          installPath: "",
+          requiresRestart: false,
+          error: err instanceof Error ? err.message : String(err),
+        };
+      }
+    },
+
+    async uninstallPlugin(pluginName) {
+      try {
+        const installPath = raw.getPluginInstallPath(pluginName);
+        const fsModule = await import("node:fs");
+        if (fsModule.existsSync(installPath)) {
+          fsModule.rmSync(installPath, { recursive: true, force: true });
+        }
+        return {
+          success: true,
+          pluginName,
+          requiresRestart: true,
+        };
+      } catch (err) {
+        return {
+          success: false,
+          pluginName,
+          requiresRestart: false,
+          error: err instanceof Error ? err.message : String(err),
+        };
+      }
+    },
+
+    async listEjectedPlugins() {
+      return [];
+    },
+
+    async ejectPlugin(_pluginName) {
+      return { success: false, pluginName: _pluginName, ejectedPath: "", requiresRestart: false, error: "Not supported in CLI mode" };
+    },
+
+    async syncPlugin(_pluginName) {
+      return { success: false, pluginName: _pluginName, ejectedPath: "", requiresRestart: false, error: "Not supported in CLI mode" };
+    },
+
+    async reinjectPlugin(_pluginName) {
+      return { success: false, pluginName: _pluginName, removedPath: "", requiresRestart: false, error: "Not supported in CLI mode" };
+    },
+  };
 }
 
 export function registerPluginsCli(program: Command): void {
@@ -382,10 +573,6 @@ export function registerPluginsCli(program: Command): void {
       );
       for (const p of plugins) {
         console.log(`  ${chalk.cyan(p.name)} ${chalk.dim(`v${p.version}`)}`);
-        // console.log(`    ${chalk.dim(`installed: ${p.installedAt}`)}`); // installedAt might be missing in EjectedPluginInfo, checking
-        console.log(`  ${chalk.cyan(p.name)} ${chalk.dim(`v${p.version}`)}`);
-        // console.log(`    ${chalk.dim(`installed: ${p.installedAt}`)}`);
-        // console.log(`    ${chalk.dim(`path: ${p.installPath}`)}`);
         console.log();
       }
     });
