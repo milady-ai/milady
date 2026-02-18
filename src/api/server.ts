@@ -2447,7 +2447,7 @@ function getProviderOptions(): Array<{
       envKey: null,
       pluginName: "@elizaos/plugin-openai",
       keyPrefix: null,
-      description: "Coming soon — use OpenAI API Key instead.",
+      description: "Use your $20-200/mo ChatGPT subscription via OAuth.",
     },
     {
       id: "anthropic",
@@ -4834,30 +4834,6 @@ async function handleRequest(
           (config.env as Record<string, string>)[providerOpt.envKey] =
             body.providerApiKey as string;
           process.env[providerOpt.envKey] = body.providerApiKey as string;
-        }
-      }
-
-      // Persist model selections for local providers so the plugin picks
-      // up the user's chosen models instead of its hardcoded defaults.
-      // Each provider reads {PREFIX}_SMALL_MODEL / {PREFIX}_LARGE_MODEL
-      // with SMALL_MODEL / LARGE_MODEL as fallbacks.
-      if (runMode === "local" && providerId) {
-        const prefix = providerId.toUpperCase().replace(/-/g, "_");
-        const envRef = config.env as Record<string, string>;
-
-        if (typeof body.smallModel === "string" && body.smallModel.trim()) {
-          const sm = body.smallModel.trim();
-          envRef[`${prefix}_SMALL_MODEL`] = sm;
-          envRef.SMALL_MODEL = sm;
-          process.env[`${prefix}_SMALL_MODEL`] = sm;
-          process.env.SMALL_MODEL = sm;
-        }
-        if (typeof body.largeModel === "string" && body.largeModel.trim()) {
-          const lg = body.largeModel.trim();
-          envRef[`${prefix}_LARGE_MODEL`] = lg;
-          envRef.LARGE_MODEL = lg;
-          process.env[`${prefix}_LARGE_MODEL`] = lg;
-          process.env.LARGE_MODEL = lg;
         }
       }
     }
