@@ -296,7 +296,12 @@ export function ChatView() {
       );
 
       void Promise.all(readers).then((attachments) => {
-        setChatPendingImages((prev) => [...prev, ...attachments]);
+        setChatPendingImages((prev) => {
+          const combined = [...prev, ...attachments];
+          // Mirror the server-side MAX_CHAT_IMAGES=4 limit so the user gets
+          // immediate feedback rather than a 400 after upload.
+          return combined.slice(0, 4);
+        });
       });
     },
     [setChatPendingImages],

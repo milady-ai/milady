@@ -1,5 +1,8 @@
+import { ChannelType } from "@elizaos/core";
 import { describe, expect, it } from "vitest";
-import { buildChatAttachments, validateChatImages } from "../server";
+import { buildChatAttachments, buildUserMessages, validateChatImages } from "../server";
+
+type UUID = `${string}-${string}-${string}-${string}-${string}`;
 
 describe("validateChatImages", () => {
   describe("absence / empty", () => {
@@ -111,6 +114,18 @@ describe("validateChatImages", () => {
         validateChatImages([{ data: 123, mimeType: "image/png", name: "x.png" }]),
       ).toMatch(/data/);
     });
+
+    it("rejects malformed base64 (invalid characters)", () => {
+      expect(
+        validateChatImages([{ data: "abc!@#$%", mimeType: "image/png", name: "x.png" }]),
+      ).toMatch(/invalid base64/i);
+    });
+
+    it("accepts valid base64 with padding", () => {
+      expect(
+        validateChatImages([{ data: "aGVsbG8=", mimeType: "image/png", name: "x.png" }]),
+      ).toBeNull();
+    });
   });
 
   describe("mimeType field", () => {
@@ -143,6 +158,18 @@ describe("validateChatImages", () => {
         ]),
       ).toMatch(/Unsupported image type/);
     });
+
+    it("accepts mixed-case mimeType (Image/PNG) — case-insensitive allowlist", () => {
+      expect(
+        validateChatImages([{ data: "abc", mimeType: "Image/PNG", name: "x.png" }]),
+      ).toBeNull();
+    });
+
+    it("accepts mixed-case mimeType (IMAGE/JPEG)", () => {
+      expect(
+        validateChatImages([{ data: "abc", mimeType: "IMAGE/JPEG", name: "x.jpg" }]),
+      ).toBeNull();
+    });
   });
 
   describe("name field", () => {
@@ -160,6 +187,20 @@ describe("validateChatImages", () => {
       expect(
         validateChatImages([{ data: "abc", mimeType: "image/png", name: 42 }]),
       ).toMatch(/name/);
+    });
+
+    it("rejects name exceeding 255 characters", () => {
+      const longName = "a".repeat(256) + ".png";
+      expect(
+        validateChatImages([{ data: "abc", mimeType: "image/png", name: longName }]),
+      ).toMatch(/name/);
+    });
+
+    it("accepts name at exactly 255 characters", () => {
+      const maxName = "a".repeat(255);
+      expect(
+        validateChatImages([{ data: "abc", mimeType: "image/png", name: maxName }]),
+      ).toBeNull();
     });
   });
 });
@@ -220,5 +261,69 @@ describe("buildChatAttachments", () => {
     const { attachments, compactAttachments } = buildChatAttachments([img, img, img]);
     expect(attachments).toHaveLength(3);
     expect(compactAttachments).toHaveLength(3);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// buildUserMessages
+// ---------------------------------------------------------------------------
+
+describe("buildUserMessages", () => {
+  const TEST_USER_ID = "00000000-0000-0000-0000-000000000001" as UUID;
+  const TEST_ROOM_ID = "00000000-0000-0000-0000-000000000002" as UUID;
+  const img = { data: "abc123", mimeType: "image/png", name: "photo.png" };
+
+  const baseParams = {
+    prompt: "hello world",
+    userId: TEST_USER_ID,
+    roomId: TEST_ROOM_ID,
+    channelType: ChannelType.DM,
+  };
+
+  it("userMessage.content.attachments carries _data when images provided", () => {
+    const { userMessage } = buildUserMessages({ ...baseParams, images: [img] });
+    const atts = userMessage.content.attachments as Array<Record<string, unknown>>;
+    expect(atts).toHaveLength(1);
+    expect(atts[0]._data).toBe("abc123");
+    expect(atts[0]._mimeType).toBe("image/png");
+  });
+
+  it("messageToStore.content.attachments strips _data and _mimeType", () => {
+    const { messageToStore } = buildUserMessages({ ...baseParams, images: [img] });
+    const atts = messageToStore.content.attachments as Array<Record<string, unknown>>;
+    expect(atts).toHaveLength(1);
+    expect(atts[0]).not.toHaveProperty("_data");
+    expect(atts[0]).not.toHaveProperty("_mimeType");
+  });
+
+  it("userMessage and messageToStore share the same id", () => {
+    const { userMessage, messageToStore } = buildUserMessages({ ...baseParams, images: [img] });
+    expect(userMessage.id).toBe(messageToStore.id);
+  });
+
+  it("messageToStore is the same reference as userMessage when no images", () => {
+    const { userMessage, messageToStore } = buildUserMessages({
+      ...baseParams,
+      images: undefined,
+    });
+    expect(messageToStore).toBe(userMessage);
+  });
+
+  it("sets prompt text on userMessage", () => {
+    const { userMessage } = buildUserMessages({ ...baseParams, images: undefined });
+    expect(userMessage.content.text).toBe("hello world");
+  });
+
+  it("sets prompt text on messageToStore when images provided", () => {
+    const { messageToStore } = buildUserMessages({ ...baseParams, images: [img] });
+    expect(messageToStore.content.text).toBe("hello world");
+  });
+
+  it("compactAttachments retain url and title but drop raw data", () => {
+    const { messageToStore } = buildUserMessages({ ...baseParams, images: [img] });
+    const att = (messageToStore.content.attachments as Array<Record<string, unknown>>)[0];
+    expect(att.url).toBe("attachment:img-0");
+    expect(att.title).toBe("photo.png");
+    expect(att).not.toHaveProperty("_data");
   });
 });

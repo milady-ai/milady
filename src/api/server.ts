@@ -2244,6 +2244,12 @@ const MAX_CHAT_IMAGES = 4;
 /** Maximum base64 data length for a single image (~3.75 MB binary). */
 const MAX_IMAGE_DATA_BYTES = 5 * 1_048_576;
 
+/** Maximum length of an image filename. */
+const MAX_IMAGE_NAME_LENGTH = 255;
+
+/** Matches a valid base64 string (standard or URL-safe alphabet, optional = padding). */
+const BASE64_RE = /^[A-Za-z0-9+/]*={0,2}$/;
+
 const ALLOWED_IMAGE_MIME_TYPES = new Set([
   "image/jpeg",
   "image/png",
@@ -2265,12 +2271,16 @@ export function validateChatImages(images: unknown): string | null {
       return "Image data must be raw base64, not a data URL";
     if (data.length > MAX_IMAGE_DATA_BYTES)
       return `Image too large (max ${MAX_IMAGE_DATA_BYTES / 1_048_576} MB per image)`;
+    if (!BASE64_RE.test(data))
+      return "Image data contains invalid base64 characters";
     if (typeof mimeType !== "string" || !mimeType)
       return "Each image must have a mimeType string";
     if (!ALLOWED_IMAGE_MIME_TYPES.has(mimeType.toLowerCase()))
       return `Unsupported image type: ${mimeType}`;
     if (typeof name !== "string" || !name)
       return "Each image must have a name string";
+    if (name.length > MAX_IMAGE_NAME_LENGTH)
+      return `Image name too long (max ${MAX_IMAGE_NAME_LENGTH} characters)`;
   }
   return null;
 }
@@ -2326,7 +2336,7 @@ type MessageMemory = ReturnType<typeof createMessageMemory>;
  * and the persistence-safe counterpart (image data stripped). Extracted to
  * avoid duplicating this logic across the stream and non-stream chat endpoints.
  */
-function buildUserMessages(params: {
+export function buildUserMessages(params: {
   images: ChatImageAttachment[] | undefined;
   prompt: string;
   userId: UUID;
