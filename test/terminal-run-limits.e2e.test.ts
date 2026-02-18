@@ -108,7 +108,6 @@ describe("Terminal run validation and limit guards", () => {
   });
 
   it("enforces max concurrent terminal runs", async () => {
-    process.env.MILADY_TERMINAL_MAX_CONCURRENT = "1";
     process.env.MILAIDY_TERMINAL_MAX_CONCURRENT = "1";
 
     const first = await req(port, "POST", "/api/terminal/run", {
