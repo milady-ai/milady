@@ -60,6 +60,7 @@
     "learn:snapshot": "scripts/rt.sh scripts/knowledge-loop.mjs --full",
     "milady": "scripts/rt.sh scripts/run-node.mjs",
     "postinstall": "node ./scripts/init-submodules.mjs && node ./scripts/ensure-skills.mjs && node ./scripts/link-browser-server.mjs && node ./scripts/patch-deps.mjs",
+    "pre-review:local": "node scripts/pre-review-local.mjs",
     "prepack": "scripts/rt.sh run build",
     "prepare": "node -e \"try{require('child_process').execSync('git config core.hooksPath git-hooks',{stdio:'ignore'})}catch{}\"",
     "publish:all:next": "node ./scripts/publish-all-next.mjs",
