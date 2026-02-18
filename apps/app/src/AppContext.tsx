@@ -454,6 +454,11 @@ export interface AppState {
   lifecycleBusy: boolean;
   lifecycleAction: LifecycleAction | null;
 
+  // Deferred restart
+  pendingRestart: boolean;
+  pendingRestartReasons: string[];
+  restartBannerDismissed: boolean;
+
   // Pairing
   pairingEnabled: boolean;
   pairingExpiresAt: number | null;
@@ -712,6 +717,8 @@ export interface AppActions {
   handlePauseResume: () => Promise<void>;
   handleRestart: () => Promise<void>;
   handleReset: () => Promise<void>;
+  dismissRestartBanner: () => void;
+  triggerRestart: () => Promise<void>;
 
   // Chat
   handleChatSend: (channelType?: ConversationChannelType) => Promise<void>;
@@ -865,6 +872,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [lifecycleBusy, setLifecycleBusy] = useState(false);
   const [lifecycleAction, setLifecycleAction] =
     useState<LifecycleAction | null>(null);
+
+  // --- Deferred restart ---
+  const [pendingRestart, setPendingRestart] = useState(false);
+  const [pendingRestartReasons, setPendingRestartReasons] = useState<string[]>([]);
+  const [restartBannerDismissed, setRestartBannerDismissed] = useState(false);
 
   // --- Pairing ---
   const [pairingEnabled, setPairingEnabled] = useState(false);
@@ -1326,7 +1338,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setAppsSubTab(activeGameViewerUrl.trim() ? "games" : "browse");
       }
       const path = pathForTab(newTab);
-      window.history.pushState(null, "", path);
+      // In Electron packaged builds (file:// URLs), use hash routing to avoid
+      // "Not allowed to load local resource: file:///..." errors.
+      if (window.location.protocol === "file:") {
+        window.location.hash = path;
+      } else {
+        window.history.pushState(null, "", path);
+      }
     },
     [activeGameViewerUrl],
   );
@@ -1901,6 +1919,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setConversations([]);
       const s = await client.restartAgent();
       setAgentStatus(s);
+      setPendingRestart(false);
+      setPendingRestartReasons([]);
       setActionNotice(LIFECYCLE_MESSAGES.restart.success, "success", 2400);
     } catch (err) {
       setActionNotice(
@@ -1925,6 +1945,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     finishLifecycleAction,
     setActionNotice,
   ]);
+
+  const dismissRestartBanner = useCallback(() => {
+    setRestartBannerDismissed(true);
+  }, []);
+
+  const triggerRestart = useCallback(async () => {
+    await handleRestart();
+  }, [handleRestart]);
 
   const handleReset = useCallback(async () => {
     if (lifecycleBusyRef.current) {
@@ -2466,16 +2494,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       try {
         setActionNotice(
-          `${enabled ? "Enabling" : "Disabling"} ${pluginName}. Restarting agent...`,
+          `${enabled ? "Enabling" : "Disabling"} ${pluginName}...`,
           "info",
           4200,
         );
         await client.updatePlugin(pluginId, { enabled });
-        // The server schedules a restart after toggle — wait for it then refresh
-        await client.restartAndWait();
         await loadPlugins();
         setActionNotice(
-          `${pluginName} ${enabled ? "enabled" : "disabled"}.`,
+          `${pluginName} ${enabled ? "enabled" : "disabled"}. Restart required to apply.`,
           "success",
           2800,
         );
@@ -2505,20 +2531,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const plugin = plugins.find((p) => p.id === pluginId);
         const isAiProvider = plugin?.category === "ai-provider";
 
-        // Restart agent if AI provider (API keys need restart to take effect)
-        if (isAiProvider) {
-          setActionNotice(
-            "Saving provider settings. Restarting agent to apply changes...",
-            "info",
-            4200,
-          );
-          await client.restartAndWait();
-        }
-
         await loadPlugins();
         setActionNotice(
           isAiProvider
-            ? "Provider settings saved and agent restarted."
+            ? "Provider settings saved. Restart required to apply."
             : "Plugin settings saved.",
           "success",
         );
@@ -2803,11 +2819,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setWalletError(null);
       try {
         await client.updateWalletConfig(config);
-        await client.restartAgent();
         await loadWalletConfig();
         await loadBalances();
         setActionNotice(
-          "Wallet API keys saved and agent restarted.",
+          "Wallet API keys saved. Restart required to apply.",
           "success",
         );
       } catch (err) {
@@ -3800,6 +3815,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
           setAgentStatus(status);
           setConnected(true);
 
+          // Hydrate deferred restart state
+          if (status.pendingRestart) {
+            setPendingRestart(true);
+            setPendingRestartReasons(status.pendingRestartReasons ?? []);
+          }
+
           if (status.state === "not_started" || status.state === "stopped") {
             try {
               status = await client.startAgent();
@@ -3925,8 +3946,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
             setAgentStatus(nextStatus);
             // Auto-refresh plugins when agent reports a restart
             if (data.restarted) {
+              setPendingRestart(false);
+              setPendingRestartReasons([]);
               void loadPlugins();
             }
+          }
+          // Sync pending restart state from periodic broadcasts
+          if (typeof data.pendingRestart === "boolean") {
+            setPendingRestart(data.pendingRestart);
+          }
+          if (Array.isArray(data.pendingRestartReasons)) {
+            setPendingRestartReasons(
+              data.pendingRestartReasons.filter(
+                (el): el is string => typeof el === "string",
+              ),
+            );
+          }
+        },
+      );
+      client.onWsEvent(
+        "restart-required",
+        (data: Record<string, unknown>) => {
+          if (Array.isArray(data.reasons)) {
+            setPendingRestartReasons(
+              data.reasons.filter(
+                (el): el is string => typeof el === "string",
+              ),
+            );
+            setPendingRestart(true);
+            setRestartBannerDismissed(false);
           }
         },
       );
@@ -4037,8 +4085,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         60_000,
       );
 
-      // Load tab from URL
-      const urlTab = tabFromPath(window.location.pathname);
+      // Load tab from URL — use hash in file:// mode (Electron packaged builds)
+      const navPath =
+        window.location.protocol === "file:"
+          ? window.location.hash.replace(/^#/, "") || "/"
+          : window.location.pathname;
+      const urlTab = tabFromPath(navPath);
       if (urlTab) {
         setTabRaw(urlTab);
         if (urlTab === "plugins" || urlTab === "connectors") {
@@ -4065,16 +4117,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     void initApp();
 
-    // Popstate listener
-    const handlePopState = () => {
-      const t = tabFromPath(window.location.pathname);
+    // Navigation listener — use hashchange in file:// mode (Electron packaged builds)
+    const isFileProtocol = window.location.protocol === "file:";
+    const handleNavChange = () => {
+      const navPath = isFileProtocol
+        ? window.location.hash.replace(/^#/, "") || "/"
+        : window.location.pathname;
+      const t = tabFromPath(navPath);
       if (t) setTabRaw(t);
     };
-    window.addEventListener("popstate", handlePopState);
+    const navEvent = isFileProtocol ? "hashchange" : "popstate";
+    window.addEventListener(navEvent, handleNavChange);
 
     return () => {
       cancelled = true;
-      window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener(navEvent, handleNavChange);
       if (cloudPollInterval.current) clearInterval(cloudPollInterval.current);
       if (cloudLoginPollTimer.current)
         clearInterval(cloudLoginPollTimer.current);
@@ -4146,6 +4203,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     actionNotice,
     lifecycleBusy,
     lifecycleAction,
+    pendingRestart,
+    pendingRestartReasons,
+    restartBannerDismissed,
     pairingEnabled,
     pairingExpiresAt,
     pairingCodeInput,
@@ -4348,6 +4408,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     handlePauseResume,
     handleRestart,
     handleReset,
+    dismissRestartBanner,
+    triggerRestart,
     handleChatSend,
     handleChatStop,
     handleChatClear,

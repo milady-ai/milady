@@ -351,6 +351,7 @@ const CHANNEL_ENV_MAP: Readonly<
   discord: {
     token: "DISCORD_API_TOKEN",
     botToken: "DISCORD_API_TOKEN",
+    applicationId: "DISCORD_APPLICATION_ID",
   },
   telegram: {
     botToken: "TELEGRAM_BOT_TOKEN",
@@ -612,6 +613,10 @@ export function collectPluginNames(config: MiladyConfig): Set<string> {
     for (const p of directProviders) {
       pluginsToLoad.delete(p);
     }
+  } else if (cloudExplicitlyDisabled) {
+    // Cloud was explicitly disabled — remove elizacloud even though it's
+    // in CORE_PLUGINS, so it cannot intercept model calls.
+    pluginsToLoad.delete("@elizaos/plugin-elizacloud");
   }
 
   // Optional feature plugins from config.plugins.entries
@@ -777,9 +782,11 @@ export function mergeDropInPlugins(params: {
 }
 
 const WORKSPACE_PLUGIN_OVERRIDES = new Set<string>([
-  "@elizaos/plugin-trajectory-logger",
-  "@elizaos/plugin-plugin-manager",
-  "@elizaos/plugin-media-generation",
+  // Plugins listed here will be loaded from local workspace paths instead of npm.
+  // Only add plugins here when you need to test local modifications.
+  // "@elizaos/plugin-trajectory-logger",
+  // "@elizaos/plugin-plugin-manager",
+  // "@elizaos/plugin-media-generation",
 ]);
 
 function getWorkspacePluginOverridePath(pluginName: string): string | null {
@@ -1368,6 +1375,43 @@ export function applyConnectorSecretsToEnv(config: MiladyConfig): void {
         process.env[envKey] = value;
       }
     }
+  }
+}
+
+/**
+ * Auto-resolve Discord Application ID from the bot token via Discord API.
+ * Called during async runtime init so that users only need a bot token.
+ */
+/** @internal Exported for testing. */
+export async function autoResolveDiscordAppId(): Promise<void> {
+  if (process.env.DISCORD_APPLICATION_ID) return;
+
+  const discordToken =
+    process.env.DISCORD_API_TOKEN || process.env.DISCORD_BOT_TOKEN;
+  if (!discordToken) return;
+
+  try {
+    const res = await fetch(
+      "https://discord.com/api/v10/oauth2/applications/@me",
+      { headers: { Authorization: `Bot ${discordToken}` } },
+    );
+
+    if (!res.ok) {
+      logger.warn(
+        `[milady] Failed to auto-resolve Discord Application ID: ${res.status}`,
+      );
+      return;
+    }
+
+    const app = (await res.json()) as { id?: string };
+    if (!app.id) return;
+
+    process.env.DISCORD_APPLICATION_ID = app.id;
+    logger.info(`[milady] Auto-resolved Discord Application ID: ${app.id}`);
+  } catch (err) {
+    logger.warn(
+      `[milady] Could not auto-resolve Discord Application ID: ${err}`,
+    );
   }
 }
 
@@ -2279,6 +2323,12 @@ export interface StartElizaOptions {
    */
   headless?: boolean;
   /**
+   * When true, start the API server and keep running without entering
+   * the interactive chat loop. Used by `bun run start` for production
+   * server mode (like dev but without watch).
+   */
+  serverOnly?: boolean;
+  /**
    * Internal guard to prevent infinite retry loops when recovering from
    * corrupt PGLite state.
    */
@@ -2412,6 +2462,7 @@ export async function startEliza(
 
   // 2. Push channel secrets into process.env for plugin discovery
   applyConnectorSecretsToEnv(config);
+  await autoResolveDiscordAppId();
 
   // 2b. Propagate cloud config into process.env for ElizaCloud plugin
   applyCloudConfigToEnv(config);
@@ -2784,10 +2835,10 @@ export async function startEliza(
         setTimeout(() => {
           reject(
             new Error(
-              "[milady] AgentSkillsService timed out waiting to initialise (30 s)",
+              "AgentSkillsService warm-up timed out (10s) — non-blocking, agent will function without skills",
             ),
           );
-        }, 30_000);
+        }, 10_000);
       });
       await Promise.race([skillServicePromise, timeout]);
 
@@ -2837,10 +2888,9 @@ export async function startEliza(
         logger.debug("[milady] Patched getLoadedSkills to guard descriptions");
       }
     } catch (err) {
-      // Non-fatal — the agent can operate without skills.
-      logger.warn(
-        `[milady] AgentSkillsService did not initialise in time: ${formatError(err)}`,
-      );
+      // Non-fatal — the agent can operate without skills. This warm-up runs
+      // async so it doesn't block startup.
+      logger.debug(`[milady] AgentSkillsService warm-up: ${formatError(err)}`);
     }
   };
 
@@ -2994,6 +3044,7 @@ export async function startEliza(
           // because the config may have changed (e.g. cloud enabled during
           // onboarding).
           applyConnectorSecretsToEnv(freshConfig);
+          await autoResolveDiscordAppId();
           applyCloudConfigToEnv(freshConfig);
           applyX402ConfigToEnv(freshConfig);
           applyDatabaseConfigToEnv(freshConfig);
@@ -3106,6 +3157,31 @@ export async function startEliza(
   } catch (apiErr) {
     logger.warn(`[milady] Could not start API server: ${formatError(apiErr)}`);
     // Non-fatal — CLI chat loop still works without the API server.
+  }
+
+  // ── Server-only mode — keep running without chat loop ────────────────────
+  if (opts?.serverOnly) {
+    logger.info("[milady] Running in server-only mode (no interactive chat)");
+    console.log("[milady] Server running. Press Ctrl+C to stop.");
+
+    // Keep process alive — the API server handles all interaction
+    const keepAlive = setInterval(() => {}, 1 << 30); // ~12 days
+
+    // Cleanup on exit
+    const cleanup = async () => {
+      clearInterval(keepAlive);
+      try {
+        await runtime.stop();
+      } catch (err) {
+        logger.warn(`[milady] Error stopping runtime: ${formatError(err)}`);
+      }
+      process.exit(0);
+    };
+
+    process.on("SIGINT", () => void cleanup());
+    process.on("SIGTERM", () => void cleanup());
+
+    return runtime;
   }
 
   // ── Interactive chat loop ────────────────────────────────────────────────

@@ -246,6 +246,8 @@ interface ServerState {
   >;
   /** Whether shell access is enabled (can be toggled in UI). */
   shellEnabled?: boolean;
+  /** Reasons a restart is pending. Empty array = no restart needed. */
+  pendingRestartReasons: string[];
 }
 
 interface ShareIngestItem {
@@ -2405,6 +2407,248 @@ function validateSkillId(
   return skillId;
 }
 
+const ALLOWED_MCP_CONFIG_TYPES = new Set([
+  "stdio",
+  "http",
+  "streamable-http",
+  "sse",
+]);
+
+const ALLOWED_MCP_COMMANDS = new Set([
+  "npx",
+  "node",
+  "bun",
+  "bunx",
+  "deno",
+  "python",
+  "python3",
+  "uvx",
+  "uv",
+  "docker",
+  "podman",
+]);
+
+const BLOCKED_MCP_ENV_KEYS = new Set([
+  "LD_PRELOAD",
+  "LD_LIBRARY_PATH",
+  "DYLD_INSERT_LIBRARIES",
+  "DYLD_LIBRARY_PATH",
+  "NODE_OPTIONS",
+  "NODE_EXTRA_CA_CERTS",
+  "ELECTRON_RUN_AS_NODE",
+  "PATH",
+  "HOME",
+  "SHELL",
+]);
+
+const INTERPRETER_MCP_COMMANDS = new Set([
+  "node",
+  "bun",
+  "deno",
+  "python",
+  "python3",
+  "uv",
+]);
+
+const PACKAGE_RUNNER_MCP_COMMANDS = new Set(["npx", "bunx", "uvx"]);
+const CONTAINER_MCP_COMMANDS = new Set(["docker", "podman"]);
+
+const BLOCKED_INTERPRETER_FLAGS = new Set([
+  "-e",
+  "--eval",
+  "-p",
+  "--print",
+  "-c",
+  "-m",
+]);
+
+const BLOCKED_PACKAGE_RUNNER_FLAGS = new Set(["-c", "--call", "-e", "--eval"]);
+const BLOCKED_CONTAINER_FLAGS = new Set([
+  "--privileged",
+  "-v",
+  "--volume",
+  "--mount",
+  "--cap-add",
+  "--security-opt",
+  "--pid",
+  "--network",
+]);
+const BLOCKED_DENO_SUBCOMMANDS = new Set(["eval"]);
+
+function normalizeMcpCommand(command: string): string {
+  const baseName = command.replace(/\\/g, "/").split("/").pop() ?? "";
+  return baseName.replace(/\.(exe|cmd|bat)$/i, "").toLowerCase();
+}
+
+function hasBlockedFlag(
+  args: string[],
+  blockedFlags: ReadonlySet<string>,
+): string | null {
+  for (const arg of args) {
+    const trimmed = arg.trim();
+    for (const flag of blockedFlags) {
+      if (trimmed === flag || trimmed.startsWith(`${flag}=`)) {
+        return flag;
+      }
+      // Block attached short-option forms like -cpayload or -epayload.
+      if (
+        /^-[A-Za-z]$/.test(flag) &&
+        trimmed.startsWith(flag) &&
+        trimmed.length > flag.length
+      ) {
+        return flag;
+      }
+    }
+  }
+  return null;
+}
+
+function firstPositionalArg(args: string[]): string | null {
+  for (const arg of args) {
+    const trimmed = arg.trim();
+    if (!trimmed || trimmed === "--" || trimmed.startsWith("-")) continue;
+    return trimmed.toLowerCase();
+  }
+  return null;
+}
+
+export function validateMcpServerConfig(
+  config: Record<string, unknown>,
+): string | null {
+  const configType = config.type;
+  if (
+    typeof configType !== "string" ||
+    !ALLOWED_MCP_CONFIG_TYPES.has(configType)
+  ) {
+    return `Invalid config type. Must be one of: ${[...ALLOWED_MCP_CONFIG_TYPES].join(", ")}`;
+  }
+
+  if (configType === "stdio") {
+    const command =
+      typeof config.command === "string" ? config.command.trim() : "";
+    if (!command) {
+      return "Command is required for stdio servers";
+    }
+    if (!/^[A-Za-z0-9._-]+$/.test(command)) {
+      return "Command must be a bare executable name without path separators";
+    }
+
+    const normalizedCommand = normalizeMcpCommand(command);
+    if (!ALLOWED_MCP_COMMANDS.has(normalizedCommand)) {
+      return (
+        `Command "${command}" is not allowed. ` +
+        `Allowed commands: ${[...ALLOWED_MCP_COMMANDS].join(", ")}`
+      );
+    }
+
+    if (config.args !== undefined) {
+      if (!Array.isArray(config.args)) {
+        return "args must be an array of strings";
+      }
+      for (const arg of config.args) {
+        if (typeof arg !== "string") {
+          return "Each arg must be a string";
+        }
+      }
+      const args = config.args as string[];
+      if (INTERPRETER_MCP_COMMANDS.has(normalizedCommand)) {
+        const blocked = hasBlockedFlag(args, BLOCKED_INTERPRETER_FLAGS);
+        if (blocked) {
+          return `Flag "${blocked}" is not allowed for ${normalizedCommand} MCP servers`;
+        }
+      }
+      if (PACKAGE_RUNNER_MCP_COMMANDS.has(normalizedCommand)) {
+        const blocked = hasBlockedFlag(args, BLOCKED_PACKAGE_RUNNER_FLAGS);
+        if (blocked) {
+          return `Flag "${blocked}" is not allowed for ${normalizedCommand} MCP servers`;
+        }
+      }
+      if (CONTAINER_MCP_COMMANDS.has(normalizedCommand)) {
+        const blocked = hasBlockedFlag(args, BLOCKED_CONTAINER_FLAGS);
+        if (blocked) {
+          return `Flag "${blocked}" is not allowed for ${normalizedCommand} MCP servers`;
+        }
+      }
+      if (normalizedCommand === "deno") {
+        const subcommand = firstPositionalArg(args);
+        if (subcommand && BLOCKED_DENO_SUBCOMMANDS.has(subcommand)) {
+          return `Subcommand "${subcommand}" is not allowed for deno MCP servers`;
+        }
+      }
+    }
+  } else {
+    const url = typeof config.url === "string" ? config.url.trim() : "";
+    if (!url) {
+      return "URL is required for remote servers";
+    }
+  }
+
+  if (config.env !== undefined) {
+    if (
+      typeof config.env !== "object" ||
+      config.env === null ||
+      Array.isArray(config.env)
+    ) {
+      return "env must be a plain object of string key-value pairs";
+    }
+
+    for (const [key, value] of Object.entries(config.env)) {
+      if (isBlockedObjectKey(key)) {
+        return `env key "${key}" is blocked for security reasons`;
+      }
+      if (typeof value !== "string") {
+        return `env.${key} must be a string`;
+      }
+      if (BLOCKED_MCP_ENV_KEYS.has(key.toUpperCase())) {
+        return `env variable "${key}" is not allowed for security reasons`;
+      }
+    }
+  }
+
+  if (config.cwd !== undefined && typeof config.cwd !== "string") {
+    return "cwd must be a string";
+  }
+
+  if (config.timeoutInMillis !== undefined) {
+    if (
+      typeof config.timeoutInMillis !== "number" ||
+      !Number.isFinite(config.timeoutInMillis) ||
+      config.timeoutInMillis < 0
+    ) {
+      return "timeoutInMillis must be a non-negative number";
+    }
+  }
+
+  return null;
+}
+
+export function resolveMcpServersRejection(
+  servers: Record<string, unknown>,
+): string | null {
+  for (const [serverName, serverConfig] of Object.entries(servers)) {
+    if (isBlockedObjectKey(serverName)) {
+      return `Invalid server name: "${serverName}"`;
+    }
+    if (
+      !serverConfig ||
+      typeof serverConfig !== "object" ||
+      Array.isArray(serverConfig)
+    ) {
+      return `Server "${serverName}" config must be a JSON object`;
+    }
+    if (hasBlockedObjectKeyDeep(serverConfig)) {
+      return `Server "${serverName}" contains blocked object keys`;
+    }
+    const configError = validateMcpServerConfig(
+      serverConfig as Record<string, unknown>,
+    );
+    if (configError) {
+      return `Server "${serverName}": ${configError}`;
+    }
+  }
+  return null;
+}
+
 // ---------------------------------------------------------------------------
 // Onboarding helpers
 // ---------------------------------------------------------------------------
@@ -3272,7 +3516,8 @@ async function resolveTrainingServiceCtor(): Promise<TrainingServiceCtor | null>
   return null;
 }
 
-const LOCAL_ORIGIN_RE = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i;
+const LOCAL_ORIGIN_RE =
+  /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\]|\[0:0:0:0:0:0:0:1\])(:\d+)?$/i;
 const APP_ORIGIN_RE =
   /^(capacitor|capacitor-electron|app):\/\/(localhost|-)?$/i;
 
@@ -3328,7 +3573,6 @@ const PAIRING_TTL_MS = 10 * 60 * 1000;
 const PAIRING_WINDOW_MS = 10 * 60 * 1000;
 const PAIRING_MAX_ATTEMPTS = 5;
 const PAIRING_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-const API_RESTART_EXIT_CODE = 75;
 
 let pairingCode: string | null = null;
 /** Guard against concurrent provider switch requests (P0 §3). */
@@ -3409,14 +3653,38 @@ function tokenMatches(expected: string, provided: string): boolean {
 }
 
 function isLoopbackBindHost(host: string): boolean {
-  const normalized = host
-    .trim()
-    .toLowerCase()
-    .replace(/^\[|\]$/g, "");
+  let normalized = host.trim().toLowerCase();
+
+  if (!normalized) return true;
+
+  // Allow users to provide full URLs by mistake (e.g. http://localhost:2138)
+  if (normalized.startsWith("http://") || normalized.startsWith("https://")) {
+    try {
+      const parsed = new URL(normalized);
+      normalized = parsed.hostname.toLowerCase();
+    } catch {
+      // Fall through and parse as raw host value.
+    }
+  }
+
+  // [::1]:2138 -> ::1
+  const bracketedIpv6 = /^\[([^\]]+)\](?::\d+)?$/.exec(normalized);
+  if (bracketedIpv6?.[1]) {
+    normalized = bracketedIpv6[1];
+  } else {
+    // localhost:2138 -> localhost, 127.0.0.1:2138 -> 127.0.0.1
+    const singleColonHostPort = /^([^:]+):(\d+)$/.exec(normalized);
+    if (singleColonHostPort?.[1]) {
+      normalized = singleColonHostPort[1];
+    }
+  }
+
+  normalized = normalized.replace(/^\[|\]$/g, "");
   if (!normalized) return true;
   if (
     normalized === "localhost" ||
     normalized === "::1" ||
+    normalized === "0:0:0:0:0:0:0:1" ||
     normalized === "::ffff:127.0.0.1"
   ) {
     return true;
@@ -4322,55 +4590,24 @@ async function handleRequest(
   const registryService = state.registryService;
   const dropService = state.dropService;
 
-  const scheduleRuntimeRestart = (reason: string, delayMs = 300): void => {
-    const restart = () => {
-      if (ctx?.onRestart) {
-        logger.info(`[milady-api] Triggering runtime restart (${reason})...`);
-        Promise.resolve(ctx.onRestart())
-          .then((newRuntime) => {
-            if (!newRuntime) {
-              logger.warn("[milady-api] Runtime restart returned null");
-              return;
-            }
-            state.runtime = newRuntime;
-            state.chatConnectionReady = null;
-            state.chatConnectionPromise = null;
-            state.agentState = "running";
-            state.agentName = newRuntime.character.name ?? "Milady";
-            state.startedAt = Date.now();
-            logger.info("[milady-api] Runtime restarted successfully");
-            // Notify WebSocket clients so the UI can refresh
-            state.broadcastWs?.({
-              type: "status",
-              state: state.agentState,
-              agentName: state.agentName,
-              startedAt: state.startedAt,
-              restarted: true,
-            });
-          })
-          .catch((err) => {
-            logger.error(
-              `[milady-api] Runtime restart failed: ${err instanceof Error ? err.message : err}`,
-            );
-          });
-        return;
-      }
-
-      logger.info(
-        `[milady-api] No in-process restart handler; exiting for external restart (${reason})`,
+  const scheduleRuntimeRestart = (reason: string): void => {
+    if (state.pendingRestartReasons.length >= 50) {
+      // Prevent unbounded growth — keep only first entry + latest
+      state.pendingRestartReasons.splice(
+        1,
+        state.pendingRestartReasons.length - 1,
       );
-      if (process.env.VITEST || process.env.NODE_ENV === "test") {
-        logger.info("[milady-api] Skipping process.exit during test execution");
-        return;
-      }
-      process.exit(API_RESTART_EXIT_CODE);
-    };
-
-    if (delayMs <= 0) {
-      restart();
-      return;
     }
-    setTimeout(restart, delayMs);
+    if (!state.pendingRestartReasons.includes(reason)) {
+      state.pendingRestartReasons.push(reason);
+    }
+    logger.info(
+      `[milady-api] Restart required: ${reason} (${state.pendingRestartReasons.length} pending)`,
+    );
+    state.broadcastWs?.({
+      type: "restart-required",
+      reasons: [...state.pendingRestartReasons],
+    });
   };
 
   const resolveHyperscapeApiBaseUrl = async (): Promise<string> => {
@@ -4783,6 +5020,8 @@ async function handleRequest(
       model: state.model,
       uptime,
       cloud: cloudStatus,
+      pendingRestart: state.pendingRestartReasons.length > 0,
+      pendingRestartReasons: state.pendingRestartReasons,
     });
     return;
   }
@@ -5091,6 +5330,24 @@ async function handleRequest(
       logger.info(
         `[milady-api] Subscription provider selected: ${body.provider} — complete OAuth via /api/subscription/ endpoints`,
       );
+
+      // Handle Anthropic setup token (sk-ant-oat01-...) provided during
+      // onboarding. The API-key gate above skips subscription providers
+      // because their envKey is null. Mirrors POST /api/subscription/
+      // anthropic/setup-token in subscription-routes.ts.
+      if (
+        body.provider === "anthropic-subscription" &&
+        typeof body.providerApiKey === "string" &&
+        body.providerApiKey.trim().startsWith("sk-ant-")
+      ) {
+        const token = body.providerApiKey.trim();
+        if (!config.env) config.env = {};
+        (config.env as Record<string, string>).ANTHROPIC_API_KEY = token;
+        process.env.ANTHROPIC_API_KEY = token;
+        logger.info(
+          "[milady-api] Anthropic setup token saved during onboarding",
+        );
+      }
     }
 
     // ── Connectors (Telegram, Discord, WhatsApp, Twilio, Blooio) ────────
@@ -5667,7 +5924,7 @@ async function handleRequest(
         );
       }
 
-      scheduleRuntimeRestart(`Plugin toggle: ${pluginId}`, 300);
+      scheduleRuntimeRestart(`Plugin toggle: ${pluginId}`);
     }
 
     json(res, { ok: true, plugin });
@@ -5875,7 +6132,7 @@ async function handleRequest(
 
       // If autoRestart is not explicitly false, restart the agent
       if (body.autoRestart !== false && result.requiresRestart) {
-        scheduleRuntimeRestart(`Plugin ${result.pluginName} installed`, 500);
+        scheduleRuntimeRestart(`Plugin ${result.pluginName} installed`);
       }
 
       json(res, {
@@ -5924,7 +6181,7 @@ async function handleRequest(
       }
 
       if (body.autoRestart !== false && result.requiresRestart) {
-        scheduleRuntimeRestart(`Plugin ${pluginName} uninstalled`, 500);
+        scheduleRuntimeRestart(`Plugin ${pluginName} uninstalled`);
       }
 
       json(res, {
@@ -5962,7 +6219,7 @@ async function handleRequest(
         return;
       }
       if (result.requiresRestart) {
-        scheduleRuntimeRestart(`Plugin ${pluginName} ejected`, 500);
+        scheduleRuntimeRestart(`Plugin ${pluginName} ejected`);
       }
       json(res, {
         ok: true,
@@ -5996,7 +6253,7 @@ async function handleRequest(
         return;
       }
       if (result.requiresRestart) {
-        scheduleRuntimeRestart(`Plugin ${pluginName} synced`, 500);
+        scheduleRuntimeRestart(`Plugin ${pluginName} synced`);
       }
       json(res, {
         ok: true,
@@ -6036,7 +6293,7 @@ async function handleRequest(
         return;
       }
       if (result.requiresRestart) {
-        scheduleRuntimeRestart(`Plugin ${pluginName} reinjected`, 500);
+        scheduleRuntimeRestart(`Plugin ${pluginName} reinjected`);
       }
       json(res, {
         ok: true,
@@ -6215,7 +6472,6 @@ async function handleRequest(
     // Auto-restart so the change takes effect
     scheduleRuntimeRestart(
       `Plugin ${shortId} ${body.enabled ? "enabled" : "disabled"}`,
-      300,
     );
 
     json(res, {
@@ -7337,6 +7593,8 @@ async function handleRequest(
       url,
       logBuffer: state.logBuffer,
       eventBuffer: state.eventBuffer,
+      initSse,
+      writeSseJson,
       json,
     })
   ) {
@@ -7356,6 +7614,7 @@ async function handleRequest(
       saveConfig: saveMiladyConfig,
       ensureWalletKeysInEnvAndConfig,
       resolveWalletExportRejection,
+      scheduleRuntimeRestart,
       readJsonBody,
       json,
       error,
@@ -7984,6 +8243,31 @@ async function handleRequest(
         delete (envPatch.vars as Record<string, unknown>).MILADY_API_TOKEN;
         delete (envPatch.vars as Record<string, unknown>)
           .MILADY_WALLET_EXPORT_TOKEN;
+      }
+    }
+
+    if (
+      filtered.mcp &&
+      typeof filtered.mcp === "object" &&
+      !Array.isArray(filtered.mcp)
+    ) {
+      const mcpPatch = filtered.mcp as Record<string, unknown>;
+      if (mcpPatch.servers !== undefined) {
+        if (
+          !mcpPatch.servers ||
+          typeof mcpPatch.servers !== "object" ||
+          Array.isArray(mcpPatch.servers)
+        ) {
+          error(res, "mcp.servers must be a JSON object", 400);
+          return;
+        }
+        const mcpRejection = resolveMcpServersRejection(
+          mcpPatch.servers as Record<string, unknown>,
+        );
+        if (mcpRejection) {
+          error(res, mcpRejection, 400);
+          return;
+        }
       }
     }
 
@@ -9478,6 +9762,7 @@ async function handleRequest(
       readJsonBody,
       json,
       error,
+      runtime: state.runtime,
     })
   ) {
     return;
@@ -10257,42 +10542,14 @@ async function handleRequest(
     }
 
     const config = body.config as Record<string, unknown> | undefined;
-    if (!config || typeof config !== "object") {
+    if (!config || typeof config !== "object" || Array.isArray(config)) {
       error(res, "Server config object is required", 400);
       return;
     }
-    if (hasBlockedObjectKeyDeep(config)) {
-      error(
-        res,
-        'Invalid server config: "__proto__", "constructor", and "prototype" are not allowed',
-        400,
-      );
-      return;
-    }
 
-    const configType = config.type as string | undefined;
-    const validTypes = ["stdio", "http", "streamable-http", "sse"];
-    if (!configType || !validTypes.includes(configType)) {
-      error(
-        res,
-        `Invalid config type. Must be one of: ${validTypes.join(", ")}`,
-        400,
-      );
-      return;
-    }
-
-    if (configType === "stdio" && !config.command) {
-      error(res, "Command is required for stdio servers", 400);
-      return;
-    }
-
-    if (
-      (configType === "http" ||
-        configType === "streamable-http" ||
-        configType === "sse") &&
-      !config.url
-    ) {
-      error(res, "URL is required for remote servers", 400);
+    const mcpRejection = resolveMcpServersRejection({ [serverName]: config });
+    if (mcpRejection) {
+      error(res, mcpRejection, 400);
       return;
     }
 
@@ -10355,13 +10612,20 @@ async function handleRequest(
     if (!body) return;
 
     if (!state.config.mcp) state.config.mcp = {};
-    if (body.servers && typeof body.servers === "object") {
-      if (hasBlockedObjectKeyDeep(body.servers)) {
-        error(
-          res,
-          'Invalid servers config: "__proto__", "constructor", and "prototype" are not allowed',
-          400,
-        );
+    if (body.servers !== undefined) {
+      if (
+        !body.servers ||
+        typeof body.servers !== "object" ||
+        Array.isArray(body.servers)
+      ) {
+        error(res, "servers must be a JSON object", 400);
+        return;
+      }
+      const mcpRejection = resolveMcpServersRejection(
+        body.servers as Record<string, unknown>,
+      );
+      if (mcpRejection) {
+        error(res, mcpRejection, 400);
         return;
       }
       const sanitized = cloneWithoutBlockedObjectKeys(body.servers);
@@ -10474,6 +10738,21 @@ async function handleRequest(
     // Guard against excessively long commands (likely injection or abuse)
     if (command.length > 4096) {
       error(res, "Command exceeds maximum length (4096 chars)", 400);
+      return;
+    }
+
+    // Prevent multiline/control-character payloads that can smuggle
+    // unintended command chains through a single request.
+    if (
+      command.includes("\n") ||
+      command.includes("\r") ||
+      command.includes("\0")
+    ) {
+      error(
+        res,
+        "Command must be a single line without control characters",
+        400,
+      );
       return;
     }
 
@@ -10983,6 +11262,7 @@ export async function startApiServer(opts?: {
     activeConversationId: null,
     permissionStates: {},
     shellEnabled: config.features?.shellEnabled !== false,
+    pendingRestartReasons: [],
   };
 
   const trainingServiceCtor = await resolveTrainingServiceCtor();
@@ -11472,6 +11752,8 @@ export async function startApiServer(opts?: {
       agentName: state.agentName,
       model: state.model,
       startedAt: state.startedAt,
+      pendingRestart: state.pendingRestartReasons.length > 0,
+      pendingRestartReasons: state.pendingRestartReasons,
     });
   };
 
@@ -11591,7 +11873,19 @@ export async function startApiServer(opts?: {
   console.log(
     `[milady-api] Calling server.listen (${Date.now() - apiStartTime}ms)`,
   );
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
+    server.on("error", (err: NodeJS.ErrnoException) => {
+      if (err.code === "EADDRINUSE") {
+        console.error(
+          `[milady-api] Port ${port} is already in use. Another process may be running.`,
+        );
+      } else {
+        console.error(
+          `[milady-api] Server error: ${err.message} (code: ${err.code})`,
+        );
+      }
+      reject(err);
+    });
     server.listen(port, host, () => {
       console.log(
         `[milady-api] server.listen callback fired (${Date.now() - apiStartTime}ms)`,

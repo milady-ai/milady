@@ -1,4 +1,5 @@
 import { type AgentRuntime, logger } from "@elizaos/core";
+import { validateCloudBaseUrl } from "../cloud/validate-url";
 import type { MiladyConfig } from "../config/config";
 import type { RouteHelpers, RouteRequestMeta } from "./route-helpers";
 
@@ -41,8 +42,15 @@ async function fetchCloudCreditsByApiKey(
       Accept: "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
+    redirect: "manual",
     signal: AbortSignal.timeout(10_000),
   });
+
+  if (response.status >= 300 && response.status < 400) {
+    throw new Error(
+      "Cloud credits request was redirected; redirects are not allowed",
+    );
+  }
 
   const creditResponse = (await response.json().catch(() => ({}))) as Record<
     string,
@@ -135,9 +143,16 @@ export async function handleCloudStatusRoutes(
         return true;
       }
 
+      const resolvedBaseUrl = resolveCloudApiBaseUrl(config.cloud?.baseUrl);
+      const baseUrlRejection = await validateCloudBaseUrl(resolvedBaseUrl);
+      if (baseUrlRejection) {
+        json(res, { balance: null, connected: true, error: baseUrlRejection });
+        return true;
+      }
+
       try {
         const balance = await fetchCloudCreditsByApiKey(
-          resolveCloudApiBaseUrl(config.cloud?.baseUrl),
+          resolvedBaseUrl,
           configApiKey,
         );
         if (typeof balance !== "number") {
