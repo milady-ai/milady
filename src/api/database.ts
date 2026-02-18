@@ -178,11 +178,42 @@ const PRIVATE_IP_PATTERNS: RegExp[] = [
  * since only local processes can reach the API.
  */
 function isApiLoopbackOnly(): boolean {
-  const bind =
-    (process.env.MILADY_API_BIND ?? "127.0.0.1").trim() || "127.0.0.1";
-  return (
-    bind === "127.0.0.1" || bind === "::1" || bind.toLowerCase() === "localhost"
-  );
+  let bind = (process.env.MILADY_API_BIND ?? "127.0.0.1").trim().toLowerCase();
+  if (!bind) bind = "127.0.0.1";
+
+  // Accept accidental URL-shaped bind values.
+  if (bind.startsWith("http://") || bind.startsWith("https://")) {
+    try {
+      const parsed = new URL(bind);
+      bind = parsed.hostname.toLowerCase();
+    } catch {
+      // Fall through and treat as raw host value.
+    }
+  }
+
+  // [::1]:2138 -> ::1
+  const bracketedIpv6 = /^\[([^\]]+)\](?::\d+)?$/.exec(bind);
+  if (bracketedIpv6?.[1]) {
+    bind = bracketedIpv6[1];
+  } else {
+    // localhost:2138 -> localhost, 127.0.0.1:2138 -> 127.0.0.1
+    const singleColonHostPort = /^([^:]+):(\d+)$/.exec(bind);
+    if (singleColonHostPort?.[1]) {
+      bind = singleColonHostPort[1];
+    }
+  }
+
+  bind = bind.replace(/^\[|\]$/g, "");
+  if (
+    bind === "localhost" ||
+    bind === "::1" ||
+    bind === "0:0:0:0:0:0:0:1" ||
+    bind === "::ffff:127.0.0.1"
+  ) {
+    return true;
+  }
+
+  return bind.startsWith("127.");
 }
 
 /**
