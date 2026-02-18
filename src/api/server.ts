@@ -16,8 +16,10 @@ import {
   type AgentRuntime,
   ChannelType,
   type Content,
+  ContentType,
   createMessageMemory,
   logger,
+  type Media,
   ModelType,
   stringToUuid,
   type Task,
@@ -1591,6 +1593,13 @@ function scanSkillsDir(
 const MAX_BODY_BYTES = 1_048_576;
 
 /**
+ * Raised body limit for chat endpoints that accept base64-encoded image
+ * attachments. A single smartphone JPEG is typically 2–5 MB binary
+ * (~3–7 MB base64); 20 MB accommodates up to 4 images with room to spare.
+ */
+const CHAT_MAX_BODY_BYTES = 20 * 1_048_576;
+
+/**
  * Read and parse a JSON request body with size limits and error handling.
  * Returns null (and sends a 4xx response) if reading or parsing fails.
  */
@@ -2223,6 +2232,157 @@ function parseRequestChannelType(
   return normalized as ChannelType;
 }
 
+interface ChatImageAttachment {
+  /** Base64-encoded image data (no data URL prefix). */
+  data: string;
+  mimeType: string;
+  name: string;
+}
+
+const MAX_CHAT_IMAGES = 4;
+
+/** Maximum base64 data length for a single image (~3.75 MB binary). */
+const MAX_IMAGE_DATA_BYTES = 5 * 1_048_576;
+
+/** Maximum length of an image filename. */
+const MAX_IMAGE_NAME_LENGTH = 255;
+
+/** Matches a valid standard-alphabet base64 string (RFC 4648 §4, `+/`, optional `=` padding). */
+const BASE64_RE = /^[A-Za-z0-9+/]*={0,2}$/;
+
+const ALLOWED_IMAGE_MIME_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+]);
+
+/** Returns an error message string, or null if valid. Exported for unit tests. */
+export function validateChatImages(images: unknown): string | null {
+  if (!Array.isArray(images) || images.length === 0) return null;
+  if (images.length > MAX_CHAT_IMAGES)
+    return `Too many images (max ${MAX_CHAT_IMAGES})`;
+  for (const img of images) {
+    if (!img || typeof img !== "object") return "Each image must be an object";
+    const { data, mimeType, name } = img as Record<string, unknown>;
+    if (typeof data !== "string" || !data)
+      return "Each image must have a non-empty data string";
+    if (data.startsWith("data:"))
+      return "Image data must be raw base64, not a data URL";
+    if (data.length > MAX_IMAGE_DATA_BYTES)
+      return `Image too large (max ${MAX_IMAGE_DATA_BYTES / 1_048_576} MB per image)`;
+    if (!BASE64_RE.test(data))
+      return "Image data contains invalid base64 characters";
+    if (typeof mimeType !== "string" || !mimeType)
+      return "Each image must have a mimeType string";
+    if (!ALLOWED_IMAGE_MIME_TYPES.has(mimeType.toLowerCase()))
+      return `Unsupported image type: ${mimeType}`;
+    if (typeof name !== "string" || !name)
+      return "Each image must have a name string";
+    if (name.length > MAX_IMAGE_NAME_LENGTH)
+      return `Image name too long (max ${MAX_IMAGE_NAME_LENGTH} characters)`;
+  }
+  return null;
+}
+
+/**
+ * Extension of the core Media attachment shape that carries raw image bytes for
+ * action handlers (e.g. POST_TWEET) while the message is in-memory. The
+ * extra fields are intentionally stripped before the message is persisted.
+ *
+ * Note: `_data`/`_mimeType` survive only because ElizaOS passes the
+ * `userMessage` object reference directly to action handlers without
+ * deep-cloning or serializing it. If that ever changes, action handlers
+ * that read these fields will silently receive `undefined`.
+ */
+export interface ChatAttachmentWithData extends Media {
+  /** Raw base64 image data — never written to the database. */
+  _data: string;
+  /** MIME type corresponding to `_data`. */
+  _mimeType: string;
+}
+
+/**
+ * Builds in-memory and compact (DB-persisted) attachment arrays from
+ * validated images. Exported so it can be unit-tested independently.
+ */
+export function buildChatAttachments(
+  images: ChatImageAttachment[] | undefined,
+): {
+  /** In-memory attachments that include `_data`/`_mimeType` for action handlers. */
+  attachments: ChatAttachmentWithData[] | undefined;
+  /** Persistence-safe attachments with `_data`/`_mimeType` stripped. */
+  compactAttachments: Media[] | undefined;
+} {
+  if (!images?.length)
+    return { attachments: undefined, compactAttachments: undefined };
+  // Compact placeholder URL (no base64) keeps the LLM context lean. The raw
+  // image bytes are stashed in `_data`/`_mimeType` for action handlers (e.g.
+  // POST_TWEET) that need to upload them.
+  const attachments: ChatAttachmentWithData[] = images.map((img, i) => ({
+    id: `img-${i}`,
+    url: `attachment:img-${i}`,
+    title: img.name,
+    source: "client_chat",
+    description: "User-attached image",
+    text: "",
+    contentType: ContentType.IMAGE,
+    _data: img.data,
+    _mimeType: img.mimeType,
+  }));
+  // DB-persisted version omits _data/_mimeType so raw bytes aren't stored.
+  const compactAttachments: Media[] = attachments.map(
+    ({ _data: _d, _mimeType: _m, ...rest }) => rest,
+  );
+  return { attachments, compactAttachments };
+}
+
+type MessageMemory = ReturnType<typeof createMessageMemory>;
+
+/**
+ * Constructs the in-memory user message (with image data for action handlers)
+ * and the persistence-safe counterpart (image data stripped). Extracted to
+ * avoid duplicating this logic across the stream and non-stream chat endpoints.
+ */
+export function buildUserMessages(params: {
+  images: ChatImageAttachment[] | undefined;
+  prompt: string;
+  userId: UUID;
+  roomId: UUID;
+  channelType: ChannelType;
+}): { userMessage: MessageMemory; messageToStore: MessageMemory } {
+  const { images, prompt, userId, roomId, channelType } = params;
+  const { attachments, compactAttachments } = buildChatAttachments(images);
+  const id = crypto.randomUUID() as UUID;
+  // In-memory message carries _data/_mimeType so action handlers can upload.
+  const userMessage = createMessageMemory({
+    id,
+    entityId: userId,
+    roomId,
+    content: {
+      text: prompt,
+      source: "client_chat",
+      channelType,
+      ...(attachments?.length ? { attachments } : {}),
+    },
+  });
+  // Persisted message: compact placeholder URL, no raw bytes in DB.
+  const messageToStore = compactAttachments?.length
+    ? createMessageMemory({
+        id,
+        entityId: userId,
+        roomId,
+        content: {
+          text: prompt,
+          source: "client_chat",
+          channelType,
+          attachments: compactAttachments,
+        },
+      })
+    : userMessage;
+  return { userMessage, messageToStore };
+}
+
 async function readChatRequestPayload(
   req: http.IncomingMessage,
   res: http.ServerResponse,
@@ -2234,11 +2394,19 @@ async function readChatRequestPayload(
     ) => Promise<T | null>;
     error: (res: http.ServerResponse, message: string, status?: number) => void;
   },
-): Promise<{ prompt: string; channelType: ChannelType } | null> {
+  /** Body size limit. Image-capable endpoints pass CHAT_MAX_BODY_BYTES (20 MB);
+   *  legacy/cloud-proxy endpoints that don't process images pass MAX_BODY_BYTES (1 MB). */
+  maxBytes = CHAT_MAX_BODY_BYTES,
+): Promise<{
+  prompt: string;
+  channelType: ChannelType;
+  images?: ChatImageAttachment[];
+} | null> {
   const body = await helpers.readJsonBody<{
     text?: string;
     channelType?: string;
-  }>(req, res);
+    images?: ChatImageAttachment[];
+  }>(req, res, { maxBytes });
   if (!body) return null;
   if (!body.text?.trim()) {
     helpers.error(res, "text is required");
@@ -2249,9 +2417,24 @@ async function readChatRequestPayload(
     helpers.error(res, "channelType is invalid", 400);
     return null;
   }
+  const imageValidationError = validateChatImages(body.images);
+  if (imageValidationError) {
+    helpers.error(res, imageValidationError, 400);
+    return null;
+  }
+  // Normalize mimeType to lowercase so downstream consumers (Twitter
+  // uploadMedia, content-type headers) never encounter mixed-case variants
+  // that slipped past the allowlist check.
+  const images = Array.isArray(body.images)
+    ? (body.images as ChatImageAttachment[]).map((img) => ({
+        ...img,
+        mimeType: img.mimeType.toLowerCase(),
+      }))
+    : undefined;
   return {
     prompt: body.text.trim(),
     channelType,
+    images,
   };
 }
 
@@ -8964,7 +9147,7 @@ async function handleRequest(
       error,
     });
     if (!chatPayload) return;
-    const { prompt, channelType } = chatPayload;
+    const { prompt, channelType, images } = chatPayload;
 
     const runtime = state.runtime;
     if (!runtime) {
@@ -8986,19 +9169,16 @@ async function handleRequest(
       return;
     }
 
-    const userMessage = createMessageMemory({
-      id: crypto.randomUUID() as UUID,
-      entityId: userId,
+    const { userMessage, messageToStore } = buildUserMessages({
+      images,
+      prompt,
+      userId,
       roomId: conv.roomId,
-      content: {
-        text: prompt,
-        source: "client_chat",
-        channelType,
-      },
+      channelType,
     });
 
     try {
-      await persistConversationMemory(runtime, userMessage);
+      await persistConversationMemory(runtime, messageToStore);
     } catch (err) {
       error(res, `Failed to store user message: ${getErrorMessage(err)}`, 500);
       return;
@@ -9112,7 +9292,7 @@ async function handleRequest(
       error,
     });
     if (!chatPayload) return;
-    const { prompt, channelType } = chatPayload;
+    const { prompt, channelType, images } = chatPayload;
     const runtime = state.runtime;
     if (!runtime) {
       error(res, "Agent is not running", 503);
@@ -9132,19 +9312,16 @@ async function handleRequest(
       return;
     }
 
-    const userMessage = createMessageMemory({
-      id: crypto.randomUUID() as UUID,
-      entityId: userId,
+    const { userMessage, messageToStore } = buildUserMessages({
+      images,
+      prompt,
+      userId,
       roomId: conv.roomId,
-      content: {
-        text: prompt,
-        source: "client_chat",
-        channelType,
-      },
+      channelType,
     });
 
     try {
-      await persistConversationMemory(runtime, userMessage);
+      await persistConversationMemory(runtime, messageToStore);
     } catch (err) {
       error(res, `Failed to store user message: ${getErrorMessage(err)}`, 500);
       return;
@@ -9317,10 +9494,14 @@ async function handleRequest(
 
   // ── POST /api/chat/stream ────────────────────────────────────────────
   if (method === "POST" && pathname === "/api/chat/stream") {
-    const chatPayload = await readChatRequestPayload(req, res, {
-      readJsonBody,
-      error,
-    });
+    // Legacy cloud-proxy path — forwards messages to a remote sandbox and
+    // does not process image attachments. Retain the standard 1 MB body limit.
+    const chatPayload = await readChatRequestPayload(
+      req,
+      res,
+      { readJsonBody, error },
+      MAX_BODY_BYTES,
+    );
     if (!chatPayload) return;
     const { prompt, channelType } = chatPayload;
 
@@ -9410,10 +9591,14 @@ async function handleRequest(
   // remote sandbox instead of the local runtime.  Supports SSE streaming
   // when the client sends Accept: text/event-stream.
   if (method === "POST" && pathname === "/api/chat") {
-    const chatPayload = await readChatRequestPayload(req, res, {
-      readJsonBody,
-      error,
-    });
+    // Legacy cloud-proxy path — forwards messages to a remote sandbox and
+    // does not process image attachments. Retain the standard 1 MB body limit.
+    const chatPayload = await readChatRequestPayload(
+      req,
+      res,
+      { readJsonBody, error },
+      MAX_BODY_BYTES,
+    );
     if (!chatPayload) return;
     const { prompt, channelType } = chatPayload;
 
