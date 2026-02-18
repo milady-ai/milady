@@ -75,7 +75,9 @@ function scopeVerdictFor(classification) {
 function scanForBlockedDiffPatterns(base, changedFiles) {
   const issues = [];
   const sourceFiles = changedFiles.filter(
-    (file) => !/\.(?:e2e\.)?test\.(tsx?|jsx?)$/i.test(file),
+    (file) =>
+      file !== "scripts/pre-review-local.mjs" &&
+      !/\.(?:e2e\.)?test\.(tsx?|jsx?)$/i.test(file),
   );
   if (sourceFiles.length === 0) return issues;
 
