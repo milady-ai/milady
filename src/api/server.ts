@@ -10239,6 +10239,21 @@ async function handleRequest(
       return;
     }
 
+    // Prevent multiline/control-character payloads that can smuggle
+    // unintended command chains through a single request.
+    if (
+      command.includes("\n") ||
+      command.includes("\r") ||
+      command.includes("\0")
+    ) {
+      error(
+        res,
+        "Command must be a single line without control characters",
+        400,
+      );
+      return;
+    }
+
     const { maxConcurrent, maxDurationMs } = resolveTerminalRunLimits();
     if (activeTerminalRunCount >= maxConcurrent) {
       error(
