@@ -24,15 +24,27 @@
   },
   "dependencies": {
     "@capacitor-community/electron": "^5.0.1",
+    "@elizaos/core": "next",
+    "@noble/curves": "^2.0.1",
     "bonjour-service": "^1.3.0",
     "chokidar": "~3.5.3",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "0.45.1",
     "electron-is-dev": "~2.0.0",
     "electron-serve": "~1.1.0",
     "electron-unhandled": "~4.0.1",
     "electron-updater": "^6.8.3",
     "electron-window-state": "^5.0.3",
+    "ethers": "^6.16.0",
+    "glob": "^13.0.0",
+    "handlebars": "^4.7.8",
+    "json5": "^2.2.3",
+    "pg": "^8.16.3",
     "tslib": "^2.8.1",
-    "whisper-node": "^1.1.1"
+    "unique-names-generator": "^4.7.1",
+    "whisper-node": "^1.1.1",
+    "ws": "^8.19.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "electron": "^40.4.1",
