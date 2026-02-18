@@ -244,10 +244,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
+      - name: Setup Node.js (system-wide for dpkg)
+        run: |
+          # Install Node.js 22 via NodeSource so dpkg-checkbuilddeps can find it
+          curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+          sudo apt-get install -y nodejs build-essential
+          node --version
+          npm --version
+
+      - name: Setup Bun
+        run: |
+          curl -fsSL https://bun.sh/install | bash
+          echo "$HOME/.bun/bin" >> $GITHUB_PATH
+          export PATH="$HOME/.bun/bin:$PATH"
+          bun --version
 
       - name: Prepare debian packaging
         run: |
@@ -272,10 +282,13 @@ jobs:
           dpkg-buildpackage -us -uc -b
           echo "Built packages:"
           ls -lh ../*.deb
+          # Copy to workspace for artifact upload (upload-artifact doesn't allow ../)
+          mkdir -p deb-output
+          cp ../*.deb ../*.changes deb-output/ 2>/dev/null || cp ../*.deb deb-output/
 
       - name: Test .deb package
         run: |
-          sudo dpkg -i ../*.deb || sudo apt-get -f install -y
+          sudo dpkg -i deb-output/*.deb || sudo apt-get -f install -y
           which milady
           milady --version || echo "Version check completed"
 
@@ -283,9 +296,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: debian-package
-          path: |
-            ../*.deb
-            ../*.changes
+          path: deb-output/
           retention-days: 90
 
       - name: Attach .deb to GitHub Release
@@ -293,7 +304,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          for deb in ../*.deb; do
+          for deb in deb-output/*.deb; do
             echo "Uploading $deb to release..."
             gh release upload "${{ github.event.release.tag_name }}" "$deb" --clobber
           done

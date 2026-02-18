@@ -192,7 +192,7 @@ pnpm test:watch
 pnpm test:e2e
 
 # Live tests (requires API keys)
-MILAIDY_LIVE_TEST=1 pnpm test:live
+MILADY_LIVE_TEST=1 pnpm test:live
 
 # Docker-based tests
 pnpm test:docker:all

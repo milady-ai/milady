@@ -4,8 +4,14 @@
 	dh $@
 
 override_dh_auto_build:
-	npm ci --ignore-scripts
-	npm run build
+	# Use bun if available (installed by CI), fallback to npm
+	if command -v bun >/dev/null 2>&1; then \
+		bun install --frozen-lockfile --ignore-scripts; \
+		bun run build; \
+	else \
+		npm install --ignore-scripts; \
+		npm run build; \
+	fi
 
 override_dh_auto_install:
 	# Install the built distribution

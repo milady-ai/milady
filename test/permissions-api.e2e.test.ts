@@ -369,6 +369,30 @@ describe("Permissions API E2E", () => {
       expect(data).toHaveProperty("error", "Shell access is disabled");
       await req(port, "PUT", "/api/permissions/shell", { enabled: true });
     });
+
+    it("rejects multiline terminal commands", async () => {
+      await req(port, "PUT", "/api/permissions/shell", { enabled: true });
+      const { status, data } = await req(port, "POST", "/api/terminal/run", {
+        command: "echo test\nwhoami",
+      });
+      expect(status).toBe(400);
+      expect(data).toHaveProperty(
+        "error",
+        "Command must be a single line without control characters",
+      );
+    });
+
+    it("rejects terminal commands containing null bytes", async () => {
+      await req(port, "PUT", "/api/permissions/shell", { enabled: true });
+      const { status, data } = await req(port, "POST", "/api/terminal/run", {
+        command: "echo test\u0000",
+      });
+      expect(status).toBe(400);
+      expect(data).toHaveProperty(
+        "error",
+        "Command must be a single line without control characters",
+      );
+    });
   });
 
   // ─────────────────────────────────────────────────────────────────────────
