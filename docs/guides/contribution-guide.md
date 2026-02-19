@@ -197,7 +197,6 @@ chore: update @elizaos/core to latest
 
 Other accepted styles follow the `milaidy: description` pattern seen in the repo history (e.g., `milaidy: fix telegram reconnect on rate limit`).
 
-
 ### The Agent Review Bot
 
 Every PR triggers the **Agent Review** GitHub Actions workflow. Here is how it works:
@@ -279,15 +278,15 @@ const BATCH_DELAY_MS = 100;
 
 ### Error Handling
 
-```text
+```typescript
 // Specific error messages with context
-throw new Error(`Failed to load plugin "${name}": ${err.message}`);
+throw new Error("Failed to load plugin: " + err.message);
 
 // Graceful degradation over silent swallowing
 try {
   await riskyOperation();
 } catch (err) {
-  runtime.logger?.warn({ err, context }, "Operation failed, using fallback");
+  runtime.logger?.warn(err, "Operation failed, using fallback");
   return fallbackValue;
 }
 ```

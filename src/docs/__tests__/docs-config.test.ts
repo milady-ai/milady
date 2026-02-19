@@ -83,7 +83,7 @@ describe("docs page frontmatter", () => {
   ];
 
   const guidePages = [
-    "guides/contributing",
+    "guides/contribution-guide",
     "guides/plugin-development",
     "guides/skills",
     "guides/registry",
