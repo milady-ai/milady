@@ -26,6 +26,23 @@ function makeHttpAction(url: string): CustomActionDef {
   };
 }
 
+function makeShellAction(command: string): CustomActionDef {
+  return {
+    id: "test-shell-action",
+    name: "TEST_SHELL_ACTION",
+    description: "test shell",
+    similes: [],
+    parameters: [],
+    handler: {
+      type: "shell",
+      command,
+    },
+    enabled: true,
+    createdAt: new Date(0).toISOString(),
+    updatedAt: new Date(0).toISOString(),
+  };
+}
+
 describe("custom action SSRF guard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -135,5 +152,36 @@ describe("custom action SSRF guard", () => {
       "https://example.com/redirect",
       expect.objectContaining({ redirect: "manual" }),
     );
+  });
+
+  it("attaches API auth token for shell handlers when MILADY_API_TOKEN is set", async () => {
+    const originalToken = process.env.MILADY_API_TOKEN;
+    process.env.MILADY_API_TOKEN = "test-api-token";
+
+    try {
+      const fetchSpy = vi
+        .spyOn(globalThis, "fetch")
+        .mockResolvedValue({ ok: true, text: async () => "ok" } as Response);
+      const handler = buildTestHandler(makeShellAction("echo hello"));
+
+      const result = await handler({});
+      expect(result.ok).toBe(true);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        "http://localhost:2138/api/terminal/run",
+        expect.objectContaining({
+          method: "POST",
+          headers: expect.objectContaining({
+            "Content-Type": "application/json",
+            Authorization: "Bearer test-api-token",
+          }),
+        }),
+      );
+    } finally {
+      if (originalToken === undefined) {
+        delete process.env.MILADY_API_TOKEN;
+      } else {
+        process.env.MILADY_API_TOKEN = originalToken;
+      }
+    }
   });
 });
