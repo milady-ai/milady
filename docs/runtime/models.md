@@ -11,15 +11,27 @@ Milady selects AI models from the configured provider plugins. Model selection f
 Model provider plugins are selected by which API key environment variables are present:
 
 ```
-ANTHROPIC_API_KEY      → @elizaos/plugin-anthropic
-OPENAI_API_KEY         → @elizaos/plugin-openai
-GOOGLE_API_KEY         → @elizaos/plugin-google-genai
-GROQ_API_KEY           → @elizaos/plugin-groq
-XAI_API_KEY            → @elizaos/plugin-xai
-OPENROUTER_API_KEY     → @elizaos/plugin-openrouter
-AI_GATEWAY_API_KEY     → @elizaos/plugin-vercel-ai-gateway
-OLLAMA_BASE_URL        → @elizaos/plugin-ollama
-ELIZAOS_CLOUD_API_KEY  → @elizaos/plugin-elizacloud
+ANTHROPIC_API_KEY              → @elizaos/plugin-anthropic
+CLAUDE_API_KEY                 → @elizaos/plugin-anthropic
+OPENAI_API_KEY                 → @elizaos/plugin-openai
+AI_GATEWAY_API_KEY             → @elizaos/plugin-vercel-ai-gateway
+AIGATEWAY_API_KEY              → @elizaos/plugin-vercel-ai-gateway
+GOOGLE_API_KEY                 → @elizaos/plugin-google-gemini
+GOOGLE_GENERATIVE_AI_API_KEY   → @elizaos/plugin-google-gemini
+GOOGLE_CLOUD_API_KEY           → @elizaos/plugin-google-antigravity
+GROQ_API_KEY                   → @elizaos/plugin-groq
+XAI_API_KEY                    → @elizaos/plugin-xai
+GROK_API_KEY                   → @elizaos/plugin-xai
+OPENROUTER_API_KEY             → @elizaos/plugin-openrouter
+OLLAMA_BASE_URL                → @elizaos/plugin-ollama
+ZAI_API_KEY                    → @homunculuslabs/plugin-zai
+DEEPSEEK_API_KEY               → @elizaos/plugin-deepseek
+TOGETHER_API_KEY               → @elizaos/plugin-together
+MISTRAL_API_KEY                → @elizaos/plugin-mistral
+COHERE_API_KEY                 → @elizaos/plugin-cohere
+PERPLEXITY_API_KEY             → @elizaos/plugin-perplexity
+ELIZAOS_CLOUD_API_KEY          → @elizaos/plugin-elizacloud
+ELIZAOS_CLOUD_ENABLED          → @elizaos/plugin-elizacloud
 ```
 
 When multiple providers are configured, all are loaded. The `MODEL_PROVIDER` runtime setting (set from `agents.defaults.model.primary`) tells the agent which one to use for generation.
@@ -248,6 +260,18 @@ During first-run onboarding, users choose from these providers:
 | Mistral | `MISTRAL_API_KEY` | — |
 | Together AI | `TOGETHER_API_KEY` | — |
 | Ollama (local) | `OLLAMA_BASE_URL` | `http://localhost:11434` |
+
+<Note>
+DeepSeek, Mistral, and Together AI appear as onboarding provider options but were not included in earlier versions of the provider plugin map. If you selected one of these providers during onboarding and the env var is set (e.g., `DEEPSEEK_API_KEY`), the corresponding plugin will auto-load via `AUTH_PROVIDER_PLUGINS`. If you want to load one of these providers without setting an env var, add it to `plugins.allow` in `milady.json` explicitly:
+
+```json
+{
+  "plugins": {
+    "allow": ["deepseek", "mistral", "together"]
+  }
+}
+```
+</Note>
 
 ## Embedding Model
 

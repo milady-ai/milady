@@ -71,7 +71,7 @@ RUN chown -R node:node /app
 USER node
 
 # Default: bind to 0.0.0.0 in containers so the service is reachable.
-# Set MILAIDY_API_TOKEN in production to require auth.
+# Set MILADY_API_TOKEN in production to require auth.
 ENV MILAIDY_API_BIND="0.0.0.0"
 
 # Start the API server + dashboard UI on port 2138.
@@ -217,7 +217,7 @@ When extra mounts or a home volume are specified, the setup script generates a `
 | `MILAIDY_BRIDGE_PORT` | `18790` | Host port for the bridge |
 | `MILAIDY_GATEWAY_BIND` | `lan` | Gateway bind mode (`lan`, `localhost`, `0.0.0.0`) |
 | `MILAIDY_API_BIND` | `0.0.0.0` | API server bind address |
-| `MILAIDY_API_TOKEN` | (none) | Token-based auth for the API server. Set in production. |
+| `MILADY_API_TOKEN` | (none) | Token-based auth for the API server. Set in production. |
 | `MILAIDY_ALLOWED_ORIGINS` | (none) | CORS allowed origins for the API server |
 | `MILAIDY_DOCKER_APT_PACKAGES` | (none) | Additional apt packages to install at build time |
 | `MILAIDY_EXTRA_MOUNTS` | (none) | Comma-separated extra volume mounts |
@@ -397,7 +397,7 @@ docker compose -f deploy/docker-compose.yml up -d milaidy-gateway
     Both Dockerfiles run as non-root users (`node` or `agent`). Never override this with `--user root` in production.
   </Card>
   <Card title="API Token Auth" icon="key">
-    Set `MILAIDY_API_TOKEN` in production to require authentication for all API and WebSocket connections.
+    Set `MILADY_API_TOKEN` in production to require authentication for all API and WebSocket connections.
   </Card>
   <Card title="Gateway Token" icon="lock">
     The gateway token is auto-generated with 256 bits of entropy. Store it securely and rotate periodically.

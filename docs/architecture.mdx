@@ -369,7 +369,7 @@ Routes are organized into domain-specific handler modules:
 
 ### Authentication
 
-When `MILAIDY_API_TOKEN` is set (or auto-generated for non-loopback binds), all API requests must include a valid bearer token:
+When `MILADY_API_TOKEN` is set (or auto-generated for non-loopback binds), all API requests must include a valid bearer token:
 
 ```
 Authorization: Bearer <token>
@@ -494,7 +494,7 @@ Milaidy uses a Zod-validated JSON configuration file (`milaidy.json`):
 
 ### API Authentication
 
-- Token-based auth via `MILAIDY_API_TOKEN` (bearer token on all `/api/*` requests)
+- Token-based auth via `MILADY_API_TOKEN` (bearer token on all `/api/*` requests)
 - Auto-generated token when binding to non-loopback addresses
 - WebSocket connections validated against the same token
 
@@ -515,7 +515,7 @@ Sandbox events are recorded to a `SandboxAuditLog` for security review.
 - **Deny list** (`config.plugins.deny`) blocks specific plugins from loading
 - **Core collision detection** prevents custom plugins from shadowing core plugins
 - **Error boundaries** isolate plugin crashes from the main runtime
-- **Config allowlist** prevents API endpoints from writing sensitive env vars (e.g., `MILAIDY_API_TOKEN` is stripped from config patches)
+- **Config allowlist** prevents API endpoints from writing sensitive env vars (e.g., `MILADY_API_TOKEN` is stripped from config patches)
 
 ### Secret Management
 

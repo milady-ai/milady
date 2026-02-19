@@ -1,157 +1,60 @@
 ---
 title: Twitter/X Connector
 sidebarTitle: Twitter/X
-description: Connect your Milaidy agent to Twitter/X for posting tweets, replying to mentions, engaging with timelines, and monitoring keywords.
+description: Connect your agent to Twitter/X using the @elizaos/plugin-twitter package.
 ---
 
-Connect your Milaidy agent to Twitter/X for autonomous social media engagement.
+Connect your agent to Twitter/X for social media engagement.
 
 ## Overview
 
-The Twitter connector enables your agent to post tweets, reply to mentions, engage with timelines, and monitor keywords or hashtags. It uses the Twitter API v2 with OAuth 2.0 authentication.
+The Twitter connector is an external ElizaOS plugin that bridges your agent to Twitter/X. It is auto-enabled by the runtime when a valid token is detected in your connector configuration.
 
-## Prerequisites
+## Package Info
 
-- A Twitter Developer account with API access
-- OAuth 2.0 credentials (Client ID and Client Secret)
-- Elevated access for tweet posting
+| Field | Value |
+|-------|-------|
+| Package | `@elizaos/plugin-twitter` |
+| Config key | `connectors.twitter` |
+| Auto-enable trigger | `botToken`, `token`, or `apiKey` is truthy in connector config |
 
-## Configuration
+## Minimal Configuration
 
-Add to your `.env` file:
-
-```bash
-TWITTER_API_KEY=your-api-key
-TWITTER_API_SECRET=your-api-secret
-TWITTER_ACCESS_TOKEN=your-access-token
-TWITTER_ACCESS_SECRET=your-access-secret
-```
-
-Or configure in your character file:
+In your character file:
 
 ```json
 {
   "connectors": {
     "twitter": {
-      "enabled": true,
-      "username": "your_bot_handle",
-      "mode": "reply-only",
-      "monitorKeywords": ["keyword1", "keyword2"],
-      "postInterval": 3600000
+      "apiKey": "your-twitter-api-key"
     }
   }
 }
 ```
 
-## Modes
-
-### Reply-Only Mode
-
-The agent only responds to mentions and replies. Safest for getting started:
-
-```json
-{ "mode": "reply-only" }
-```
-
-### Timeline Mode
-
-The agent monitors its home timeline and engages with relevant tweets:
-
-```json
-{ "mode": "timeline" }
-```
-
-### Autonomous Mode
-
-The agent proactively posts tweets and engages with the community based on its character and knowledge:
-
-```json
-{ "mode": "autonomous" }
-```
-
-## Features
-
-### Mentions & Replies
-
-The agent monitors mentions in real-time and generates contextual replies. Each mention starts or continues a conversation thread.
-
-### Tweet Posting
-
-In autonomous or timeline mode, the agent can compose and post original tweets based on:
-- Scheduled intervals
-- Knowledge base updates
-- Trigger events
-- Character-driven topics
-
-### Keyword Monitoring
-
-Track specific keywords, hashtags, or accounts:
+To explicitly disable the connector even when a token is present:
 
 ```json
 {
   "connectors": {
     "twitter": {
-      "monitorKeywords": ["#AI", "#crypto", "milaidy"],
-      "monitorAccounts": ["@elonmusk", "@vaboratory"]
+      "apiKey": "your-twitter-api-key",
+      "enabled": false
     }
   }
 }
 ```
 
-### Quote Tweets & Retweets
+## Auto-Enable Mechanism
 
-The agent can quote tweet and retweet based on relevance scoring against its character profile and knowledge base.
+The `plugin-auto-enable.ts` module checks `connectors.twitter` in your character config. If any of the fields `botToken`, `token`, or `apiKey` is truthy (and `enabled` is not explicitly `false`), the runtime automatically loads `@elizaos/plugin-twitter`.
 
-### Thread Composition
+No environment variable is required to trigger auto-enable -- it is driven entirely by the connector config object.
 
-For longer responses, the agent automatically breaks content into threaded tweets while maintaining coherence.
+## Environment Variables
 
-## Rate Limits
+Unlike Discord, Telegram, and Slack, the Twitter connector does not have individual secret keys pushed into `process.env` by the runtime's `secretKeys` configuration. Twitter credentials are read directly from the `connectors.twitter` config path by the plugin.
 
-Twitter API v2 rate limits:
+## Plugin Configuration
 
-| Endpoint | Limit |
-|----------|-------|
-| Post tweet | 200/15min (app), 50/15min (user) |
-| Search | 450/15min |
-| Mentions | 450/15min |
-| Timeline | 1500/15min |
-
-The connector respects these limits automatically with exponential backoff.
-
-## Content Safety
-
-Built-in safeguards prevent:
-- Duplicate or near-duplicate posts
-- Excessive posting frequency
-- Engagement with flagged content
-- Character-breaking responses
-
-Configure safety thresholds:
-
-```json
-{
-  "connectors": {
-    "twitter": {
-      "minPostInterval": 1800000,
-      "maxDailyPosts": 48,
-      "contentFilter": true
-    }
-  }
-}
-```
-
-## Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| 403 Forbidden | Check API access level (Elevated required for posting) |
-| Mentions not detected | Verify stream connection and credentials |
-| Posts rejected | Check content safety filters and rate limits |
-| Duplicate detection false positives | Adjust similarity threshold |
-
-## Related
-
-- [Autonomous Mode](/guides/autonomous-mode) — Configure autonomous behavior
-- [Triggers](/guides/triggers) — Set up event-driven posting
-- [Connectors Overview](/guides/connectors) — General connector architecture
+Detailed configuration options (posting modes, mention handling, keyword monitoring, rate limits, content safety, etc.) are defined by the `@elizaos/plugin-twitter` package itself. See plugin documentation for [`@elizaos/plugin-twitter`](https://www.npmjs.com/package/@elizaos/plugin-twitter) for the full set of supported options.

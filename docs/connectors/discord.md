@@ -1,132 +1,66 @@
 ---
 title: Discord Connector
 sidebarTitle: Discord
-description: Connect your Milaidy agent to Discord servers with slash commands, reactions, voice channel support, and multi-guild management.
+description: Connect your agent to Discord using the @elizaos/plugin-discord package.
 ---
 
-Connect your Milaidy agent to Discord for real-time messaging in servers and DMs.
+Connect your agent to Discord servers and DMs.
 
 ## Overview
 
-The Discord connector bridges your agent to Discord using the `discord.js` library. It supports text channels, DMs, slash commands, reactions, thread conversations, and voice channel integration.
+The Discord connector is an external ElizaOS plugin that bridges your agent to Discord. It is auto-enabled by the runtime when a valid token is detected in your connector configuration.
 
-## Prerequisites
+## Package Info
 
-- A Discord bot application from the [Discord Developer Portal](https://discord.com/developers/applications)
-- Bot token with the `MESSAGE_CONTENT` privileged intent enabled
-- Server invite with appropriate permissions
+| Field | Value |
+|-------|-------|
+| Package | `@elizaos/plugin-discord` |
+| Config key | `connectors.discord` |
+| Auto-enable trigger | `botToken`, `token`, or `apiKey` is truthy in connector config |
 
-## Configuration
+## Minimal Configuration
 
-Add the following to your `.env` file:
-
-```bash
-DISCORD_BOT_TOKEN=your-bot-token
-DISCORD_GUILD_ID=your-server-id        # optional, restrict to one server
-```
-
-Or configure in your character file:
+In your character file:
 
 ```json
 {
   "connectors": {
     "discord": {
-      "enabled": true,
-      "guildId": "123456789",
-      "channels": ["general", "bot-chat"],
-      "prefix": "!",
-      "allowDMs": true
+      "botToken": "your-discord-bot-token"
     }
   }
 }
 ```
 
-## Features
-
-### Text Channels
-
-The agent responds to mentions and prefix commands in configured channels. It maintains conversation context per channel using thread-based memory.
-
-### Slash Commands
-
-Register custom slash commands that map to your agent's actions:
-
-| Command | Description |
-|---------|-------------|
-| `/ask <question>` | Direct question to the agent |
-| `/status` | Show agent status and uptime |
-| `/knowledge <query>` | Search the agent's knowledge base |
-| `/action <name>` | Trigger a specific action |
-
-### Thread Conversations
-
-When a user starts a thread, the agent maintains separate context for that thread, enabling focused multi-turn conversations without polluting the main channel.
-
-### Reactions
-
-The agent can react to messages and respond to reaction events, enabling reaction-based workflows like approval systems or sentiment tracking.
-
-### Voice Channels
-
-With TTS and STT plugins enabled, the agent can join voice channels, listen to speech, and respond with synthesized voice.
-
-## Message Routing
-
-```
-Discord Gateway → Connector → Message Router → Agent Runtime
-                                                    ↓
-Discord API    ← Connector ← Response Router ← Agent Response
-```
-
-Messages are routed based on:
-1. Channel allowlist (if configured)
-2. Mention detection
-3. DM detection
-4. Prefix matching
-
-## Multi-Guild Support
-
-Run a single agent across multiple Discord servers. Each guild maintains its own:
-- Channel configuration
-- Permission overrides
-- Conversation history
-
-## Rate Limiting
-
-The connector respects Discord's rate limits automatically. For high-traffic servers, configure message batching:
+To explicitly disable the connector even when a token is present:
 
 ```json
 {
   "connectors": {
     "discord": {
-      "batchMessages": true,
-      "batchInterval": 2000
+      "botToken": "your-discord-bot-token",
+      "enabled": false
     }
   }
 }
 ```
 
-## Permissions
+## Auto-Enable Mechanism
 
-The bot requires these Discord permissions:
-- `Send Messages`
-- `Read Message History`
-- `Add Reactions`
-- `Use Slash Commands`
-- `Connect` and `Speak` (for voice)
-- `Manage Threads` (for thread support)
+The `plugin-auto-enable.ts` module checks `connectors.discord` in your character config. If any of the fields `botToken`, `token`, or `apiKey` is truthy (and `enabled` is not explicitly `false`), the runtime automatically loads `@elizaos/plugin-discord`.
 
-## Troubleshooting
+No environment variable is required to trigger auto-enable -- it is driven entirely by the connector config object.
 
-| Issue | Solution |
-|-------|----------|
-| Bot doesn't respond | Check `MESSAGE_CONTENT` intent is enabled |
-| Slash commands missing | Run `milaidy setup` to register commands |
-| Rate limited | Enable `batchMessages` in config |
-| Voice not working | Ensure TTS/STT plugins are installed |
+## Environment Variables
 
-## Related
+When the connector is loaded, the runtime pushes the following secrets from your config into `process.env` for the plugin to consume:
 
-- [Connectors Overview](/guides/connectors) — General connector architecture
-- [Custom Actions](/guides/custom-actions) — Create actions the bot can trigger
-- [Autonomous Mode](/guides/autonomous-mode) — Let the agent act proactively
+| Variable | Description |
+|----------|-------------|
+| `DISCORD_API_TOKEN` | Discord API token |
+| `DISCORD_APPLICATION_ID` | Discord application ID |
+| `DISCORD_BOT_TOKEN` | Discord bot token |
+
+## Plugin Configuration
+
+Detailed configuration options (channels, permissions, slash commands, voice support, etc.) are defined by the `@elizaos/plugin-discord` package itself. See plugin documentation for [`@elizaos/plugin-discord`](https://www.npmjs.com/package/@elizaos/plugin-discord) for the full set of supported options.

@@ -24,7 +24,7 @@ The WebSocket endpoint is available at `/ws` on the API server (port 2138) or th
 
 ### Authentication
 
-When `MILAIDY_API_TOKEN` is configured, the WebSocket upgrade request must include the token. The server calls `resolveWebSocketUpgradeRejection()` to validate credentials before accepting the connection. Unauthenticated upgrade requests receive an HTTP 401 or 403 rejection.
+When `MILADY_API_TOKEN` is configured, the WebSocket upgrade request must include the token. The server calls `resolveWebSocketUpgradeRejection()` to validate credentials before accepting the connection. Unauthenticated upgrade requests receive an HTTP 401 or 403 rejection.
 
 <Warning>
 If token auth is enabled and the WebSocket upgrade request lacks valid credentials, the connection will be rejected with a standard HTTP error before the WebSocket handshake completes.

@@ -73,7 +73,6 @@ These services are available but not loaded by default:
 | `@elizaos/plugin-browser` | Browser automation (requires stagehand-server binary) |
 | `@elizaos/plugin-vision` | Visual understanding (requires @tensorflow/tfjs-node) |
 | `@elizaos/plugin-computeruse` | Computer use automation (requires platform binaries) |
-| `@elizaos/plugin-cron` | Scheduled job management |
 | `@elizaos/plugin-x402` | x402 HTTP micropayment protocol |
 
 ## Trajectory Logger Service
@@ -124,7 +123,8 @@ SKILLS_DENYLIST = <comma-separated denied skill names>
 ```typescript
 const sandboxManager = new SandboxManager({
   mode: "standard",
-  image: "ghcr.io/elizaos/sandbox:latest",
+  image: dockerSettings?.image ?? undefined,  // no default image — must be configured
+  browser: dockerSettings?.browser ?? undefined,
   containerPrefix: "milady-sandbox-",
   network: "bridge",
   memory: "512m",

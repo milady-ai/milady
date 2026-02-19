@@ -25,6 +25,9 @@ Global flags that apply to this command:
 | `--help`, `-h` | Show help for this command |
 | `--profile <name>` | Use a named configuration profile (state dir becomes `~/.milady-<name>/`) |
 | `--dev` | Shorthand for `--profile dev` (also sets the gateway port to `19001`) |
+| `--verbose` | Enable verbose logging output |
+| `--debug` | Enable debug mode |
+| `--no-color` | Disable colored output |
 
 ## Examples
 

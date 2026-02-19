@@ -90,7 +90,7 @@ The resolved path is affected by:
 
 ## `milaidy config show`
 
-Display all configuration values grouped by logical section, with labels, help text, and sensitive value masking. Sensitive fields (API keys, tokens) are displayed as `--------` in the formatted view.
+Display all configuration values grouped by logical section, with labels, help text, and sensitive value masking. Sensitive fields (API keys, tokens) are displayed as `●●●●●●●●` in the formatted view.
 
 ### Usage
 
@@ -128,7 +128,7 @@ The formatted output groups values by section (derived from the first segment of
 ```
 Gateway
   Port                     2138
-  Auth Token               --------  (API authentication token)
+  Auth Token               ●●●●●●●●  (API authentication token)
 
 Plugins
   Custom Paths             (not set)

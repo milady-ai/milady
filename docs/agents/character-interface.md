@@ -70,12 +70,44 @@ const mappedExamples = messageExamples?.map((convo) =>
 Milady collects the following environment variables into `character.secrets` so that loaded plugins can find them at runtime without reading `process.env` directly:
 
 ```
-ANTHROPIC_API_KEY      OPENAI_API_KEY         GOOGLE_API_KEY
-GROQ_API_KEY           XAI_API_KEY            OPENROUTER_API_KEY
-AI_GATEWAY_API_KEY     OLLAMA_BASE_URL        DISCORD_API_TOKEN
-DISCORD_APPLICATION_ID TELEGRAM_BOT_TOKEN     SLACK_BOT_TOKEN
-SIGNAL_ACCOUNT         MSTEAMS_APP_ID         EVM_PRIVATE_KEY
-SOLANA_PRIVATE_KEY     ELIZAOS_CLOUD_API_KEY  X402_PRIVATE_KEY
+# LLM Provider Keys
+ANTHROPIC_API_KEY             OPENAI_API_KEY
+GOOGLE_API_KEY                GOOGLE_GENERATIVE_AI_API_KEY
+GROQ_API_KEY                  XAI_API_KEY
+OPENROUTER_API_KEY
+
+# AI Gateway
+AI_GATEWAY_API_KEY            AIGATEWAY_API_KEY
+AI_GATEWAY_BASE_URL           AI_GATEWAY_SMALL_MODEL
+AI_GATEWAY_LARGE_MODEL        AI_GATEWAY_EMBEDDING_MODEL
+AI_GATEWAY_EMBEDDING_DIMENSIONS
+AI_GATEWAY_IMAGE_MODEL        AI_GATEWAY_TIMEOUT_MS
+
+# Local Models
+OLLAMA_BASE_URL
+
+# Connector Tokens
+DISCORD_API_TOKEN             DISCORD_APPLICATION_ID
+DISCORD_BOT_TOKEN             TELEGRAM_BOT_TOKEN
+SLACK_BOT_TOKEN               SLACK_APP_TOKEN
+SLACK_USER_TOKEN              SIGNAL_ACCOUNT
+MSTEAMS_APP_ID                MSTEAMS_APP_PASSWORD
+MATTERMOST_BOT_TOKEN          MATTERMOST_BASE_URL
+
+# ElizaCloud
+ELIZAOS_CLOUD_API_KEY         ELIZAOS_CLOUD_BASE_URL
+ELIZAOS_CLOUD_ENABLED
+
+# Wallet / Blockchain
+EVM_PRIVATE_KEY               SOLANA_PRIVATE_KEY
+ALCHEMY_API_KEY               HELIUS_API_KEY
+BIRDEYE_API_KEY               SOLANA_RPC_URL
+
+# X402 Payments
+X402_PRIVATE_KEY              X402_NETWORK
+X402_PAY_TO                   X402_FACILITATOR_URL
+X402_MAX_PAYMENT_USD          X402_MAX_TOTAL_USD
+X402_ENABLED                  X402_DB_PATH
 ```
 
 Only variables that have a non-empty value are included.
@@ -87,7 +119,18 @@ These fields live in `milady.json` under `agents.list[0]` and map directly to Ch
 ```typescript
 export type AgentConfig = {
   id: string;
+  default?: boolean;
   name?: string;
+  workspace?: string;
+  agentDir?: string;
+  model?: AgentModelConfig;       // string or { primary?, fallbacks? }
+  skills?: string[];
+  memorySearch?: MemorySearchConfig;
+  humanDelay?: HumanDelayConfig;
+  heartbeat?: AgentDefaultsConfig["heartbeat"];
+  identity?: IdentityConfig;
+  groupChat?: GroupChatConfig;
+  // Personality (set during onboarding)
   bio?: string[];
   system?: string;
   style?: { all?: string[]; chat?: string[]; post?: string[] };
@@ -95,6 +138,27 @@ export type AgentConfig = {
   topics?: string[];
   postExamples?: string[];
   messageExamples?: Array<Array<{ user: string; content: { text: string } }>>;
+  subagents?: {
+    allowAgents?: string[];
+    model?: string | { primary?: string; fallbacks?: string[] };
+  };
+  sandbox?: {
+    mode?: "off" | "non-main" | "all";
+    workspaceAccess?: "none" | "ro" | "rw";
+    sessionToolsVisibility?: "spawned" | "all";
+    scope?: "session" | "agent" | "shared";
+    perSession?: boolean;
+    workspaceRoot?: string;
+    docker?: SandboxDockerSettings;
+    browser?: SandboxBrowserSettings;
+    prune?: SandboxPruneSettings;
+  };
+  tools?: AgentToolsConfig;
+  cloud?: {
+    cloudAgentId?: string;
+    lastStatus?: string;
+    lastProvisionedAt?: string;
+  };
 };
 ```
 

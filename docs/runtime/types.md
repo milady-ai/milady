@@ -15,30 +15,54 @@ The root configuration type for `milady.json`. All fields are optional.
 export type MiladyConfig = {
   meta?:         { lastTouchedVersion?: string; lastTouchedAt?: string };
   auth?:         AuthConfig;
-  env?:          Record<string, string | object>;
+  env?:          {
+    shellEnv?: { enabled?: boolean; timeoutMs?: number };
+    vars?: Record<string, string>;
+    [key: string]: string | Record<string, string>
+                 | { enabled?: boolean; timeoutMs?: number }
+                 | undefined;
+  };
+  wizard?:       { lastRunAt?: string; lastRunVersion?: string; lastRunCommit?: string;
+                   lastRunCommand?: string; lastRunMode?: "local" | "remote" };
   diagnostics?:  DiagnosticsConfig;
   logging?:      LoggingConfig;
   update?:       UpdateConfig;
   browser?:      BrowserConfig;
-  ui?:           { seamColor?: string; theme?: string; assistant?: { name?: string; avatar?: string } };
+  ui?:           {
+    seamColor?: string;
+    theme?: "milady" | "qt314" | "web2000" | "programmer" | "haxor" | "psycho";
+    assistant?: { name?: string; avatar?: string };
+  };
   skills?:       SkillsConfig;
   plugins?:      PluginsConfig;
   models?:       ModelsConfig;
+  nodeHost?:     NodeHostConfig;
   agents?:       AgentsConfig;
   tools?:        ToolsConfig;
+  bindings?:     AgentBinding[];
+  broadcast?:    BroadcastConfig;
+  audio?:        AudioConfig;
+  messages?:     MessagesConfig;
+  commands?:     CommandsConfig;
+  approvals?:    ApprovalsConfig;
+  session?:      SessionConfig;
+  web?:          WebConfig;
   connectors?:   Record<string, ConnectorConfig>;
   channels?:     Record<string, ConnectorConfig>; // deprecated alias for connectors
+  cron?:         CronConfig;
   hooks?:        HooksConfig;
+  discovery?:    DiscoveryConfig;
+  talk?:         TalkConfig;
+  gateway?:      GatewayConfig;
   memory?:       MemoryConfig;
   embedding?:    EmbeddingConfig;
   database?:     DatabaseConfig;
   cloud?:        CloudConfig;
   x402?:         X402Config;
   media?:        MediaConfig;
-  cron?:         CronConfig;
   mcp?:          { servers?: Record<string, MCPServerConfig> };
   registry?:     { mainnetRpc?: string; registryAddress?: string; collectionAddress?: string };
-  features?:     Record<string, boolean | { enabled?: boolean }>;
+  features?:     Record<string, boolean | { enabled?: boolean; [k: string]: unknown }>;
   customActions?: CustomActionDef[];
 };
 ```
@@ -54,8 +78,12 @@ export type AgentConfig = {
   default?: boolean;
   name?: string;
   workspace?: string;
+  agentDir?: string;
   model?: AgentModelConfig;       // string or { primary?, fallbacks? }
   skills?: string[];
+  memorySearch?: MemorySearchConfig;
+  humanDelay?: HumanDelayConfig;
+  heartbeat?: AgentDefaultsConfig["heartbeat"];
   identity?: IdentityConfig;
   groupChat?: GroupChatConfig;
   // Personality (set during onboarding)
@@ -66,19 +94,23 @@ export type AgentConfig = {
   topics?: string[];
   postExamples?: string[];
   messageExamples?: Array<Array<{ user: string; content: { text: string } }>>;
+  subagents?: {
+    allowAgents?: string[];
+    model?: string | { primary?: string; fallbacks?: string[] };
+  };
   // Sandbox
   sandbox?: {
     mode?: "off" | "non-main" | "all";
     workspaceAccess?: "none" | "ro" | "rw";
+    sessionToolsVisibility?: "spawned" | "all";
     scope?: "session" | "agent" | "shared";
+    perSession?: boolean;
+    workspaceRoot?: string;
     docker?: SandboxDockerSettings;
     browser?: SandboxBrowserSettings;
+    prune?: SandboxPruneSettings;
   };
   tools?: AgentToolsConfig;
-  memorySearch?: MemorySearchConfig;
-  humanDelay?: HumanDelayConfig;
-  heartbeat?: AgentDefaultsConfig["heartbeat"];
-  subagents?: { allowAgents?: string[]; model?: string | { primary?: string; fallbacks?: string[] } };
   cloud?: { cloudAgentId?: string; lastStatus?: string; lastProvisionedAt?: string };
 };
 ```

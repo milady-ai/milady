@@ -14,7 +14,11 @@ const runtime = new AgentRuntime({
   actionPlanning: true,
   plugins: [miladyPlugin, ...resolvedPlugins],
   logLevel: "error",
-  sandboxMode: false,
+  // sandboxMode and sandboxAuditHandler are only included when sandbox is active
+  ...(isSandboxActive && {
+    sandboxMode: true,
+    sandboxAuditHandler: handleSandboxAudit,
+  }),
   settings: {
     VALIDATION_LEVEL: "fast",
     MODEL_PROVIDER: "anthropic/claude-sonnet-4-5",
@@ -34,7 +38,7 @@ const runtime = new AgentRuntime({
 | `actionPlanning` | `boolean` | Enable the action planning subsystem. Milady sets this to `true`. |
 | `plugins` | `Plugin[]` | Ordered array of plugins. Milady plugin comes first, then resolved plugins. |
 | `logLevel` | `string` | Log verbosity: `"trace"`, `"debug"`, `"info"`, `"warn"`, `"error"`, `"fatal"`. Resolved from `config.logging.level`. |
-| `sandboxMode` | `boolean` | Enable sandbox token replacement for audit logging. Active when `agents.defaults.sandbox.mode != "off"`. |
+| `sandboxMode` | `boolean` | Enable sandbox token replacement for audit logging. Only spread-included in the constructor when `isSandboxActive` is true (i.e., `agents.defaults.sandbox.mode != "off"`). When sandbox is off, this parameter is not passed at all. |
 | `sandboxAuditHandler` | `function` | Callback for sandbox fetch audit events. Receives `{ direction, url, tokenIds }`. |
 | `settings` | `Record<string, string>` | Runtime settings passed to plugins via `runtime.getSetting()`. |
 
@@ -59,13 +63,19 @@ Milady registers plugins in two phases:
 
 ```typescript
 // 1. SQL plugin — must be first so DB adapter is ready
-await runtime.registerPlugin(sqlPlugin.plugin);
+// Wrapped in registerSqlPluginWithRecovery() which catches PGLite corruption,
+// resets the data directory, and retries registration once.
+await registerSqlPluginWithRecovery(runtime, sqlPlugin.plugin, config);
 await initializeDatabaseAdapter(runtime, config);
 
 // 2. Local embedding — must be second so TEXT_EMBEDDING handler is ready
 configureLocalEmbeddingPlugin(localEmbeddingPlugin.plugin, config);
 await runtime.registerPlugin(localEmbeddingPlugin.plugin);
 ```
+
+<Note>
+**SQL plugin recovery**: `registerSqlPluginWithRecovery()` wraps the SQL plugin registration in a try/catch. If the initial registration fails due to corrupted PGLite state, the wrapper deletes the PGLite data directory, logs a warning, and retries registration from scratch. This prevents the agent from being permanently stuck after a crash corrupts the local database.
+</Note>
 
 ### Phase 2: Full initialization (parallel)
 
@@ -131,6 +141,10 @@ for (const [featureName, enabled] of Object.entries(config.features ?? {})) {
 }
 ```
 
+<Note>
+**ElizaCloud plugin exclusion**: When ElizaCloud is effectively enabled (cloud API key is set and the cloud plugin is loaded), direct AI provider plugins (e.g., `@elizaos/plugin-anthropic`, `@elizaos/plugin-openai`) are removed from the load set. The cloud plugin proxies model requests through ElizaCloud, so loading individual provider plugins would be redundant and could cause routing conflicts.
+</Note>
+
 ## Channel to Plugin Mapping
 
 ```typescript
@@ -153,15 +167,19 @@ const CHANNEL_PLUGIN_MAP = {
 
 ```typescript
 const PROVIDER_PLUGIN_MAP = {
-  ANTHROPIC_API_KEY:         "@elizaos/plugin-anthropic",
-  OPENAI_API_KEY:            "@elizaos/plugin-openai",
-  GOOGLE_API_KEY:            "@elizaos/plugin-google-genai",
-  GROQ_API_KEY:              "@elizaos/plugin-groq",
-  XAI_API_KEY:               "@elizaos/plugin-xai",
-  OPENROUTER_API_KEY:        "@elizaos/plugin-openrouter",
-  AI_GATEWAY_API_KEY:        "@elizaos/plugin-vercel-ai-gateway",
-  OLLAMA_BASE_URL:           "@elizaos/plugin-ollama",
-  ELIZAOS_CLOUD_API_KEY:     "@elizaos/plugin-elizacloud",
+  ANTHROPIC_API_KEY:              "@elizaos/plugin-anthropic",
+  OPENAI_API_KEY:                 "@elizaos/plugin-openai",
+  GOOGLE_API_KEY:                 "@elizaos/plugin-google-genai",
+  GOOGLE_GENERATIVE_AI_API_KEY:   "@elizaos/plugin-google-genai",
+  GROQ_API_KEY:                   "@elizaos/plugin-groq",
+  XAI_API_KEY:                    "@elizaos/plugin-xai",
+  OPENROUTER_API_KEY:             "@elizaos/plugin-openrouter",
+  AI_GATEWAY_API_KEY:             "@elizaos/plugin-vercel-ai-gateway",
+  AIGATEWAY_API_KEY:              "@elizaos/plugin-vercel-ai-gateway",
+  ZAI_API_KEY:                    "@homunculuslabs/plugin-zai",
+  OLLAMA_BASE_URL:                "@elizaos/plugin-ollama",
+  ELIZAOS_CLOUD_API_KEY:          "@elizaos/plugin-elizacloud",
+  ELIZAOS_CLOUD_ENABLED:          "@elizaos/plugin-elizacloud",
 };
 ```
 

@@ -268,6 +268,10 @@ milaidy plugins config twitter --edit
 
 In **display mode** (default), all plugin parameters are listed with their current values. Sensitive fields (API keys, tokens) are masked as `--------`.
 
+<Note>
+This command reads available config parameters from a local `plugins.json` catalog file. If the catalog is not available, parameter discovery may be limited.
+</Note>
+
 In **edit mode** (`--edit`), you are prompted for each parameter:
 - Text fields use a standard text input
 - Sensitive fields use a password input (input is hidden)

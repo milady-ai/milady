@@ -1,136 +1,64 @@
 ---
 title: Telegram Connector
 sidebarTitle: Telegram
-description: Connect your Milaidy agent to Telegram with bot commands, inline queries, group chat support, and media handling.
+description: Connect your agent to Telegram using the @elizaos/plugin-telegram package.
 ---
 
-Connect your Milaidy agent to Telegram for messaging in private chats and groups.
+Connect your agent to Telegram for private chats and group conversations.
 
 ## Overview
 
-The Telegram connector uses the Bot API to bridge your agent to Telegram. It supports private chats, group conversations, inline queries, media messages, and bot commands.
+The Telegram connector is an external ElizaOS plugin that bridges your agent to Telegram via the Bot API. It is auto-enabled by the runtime when a valid token is detected in your connector configuration.
 
-## Prerequisites
+## Package Info
 
-- A Telegram bot token from [@BotFather](https://t.me/BotFather)
-- Bot privacy mode disabled (for group chats)
+| Field | Value |
+|-------|-------|
+| Package | `@elizaos/plugin-telegram` |
+| Config key | `connectors.telegram` |
+| Auto-enable trigger | `botToken`, `token`, or `apiKey` is truthy in connector config |
 
-## Configuration
+## Minimal Configuration
 
-Add to your `.env` file:
-
-```bash
-TELEGRAM_BOT_TOKEN=your-bot-token
-```
-
-Or configure in your character file:
+In your character file:
 
 ```json
 {
   "connectors": {
     "telegram": {
-      "enabled": true,
-      "allowGroups": true,
-      "allowPrivate": true,
-      "adminUsers": ["your-telegram-id"]
+      "botToken": "your-telegram-bot-token"
     }
   }
 }
 ```
 
-## Features
-
-### Private Chats
-
-The agent responds to all messages in private (1:1) chats. Each user gets a separate conversation context with full memory persistence.
-
-### Group Chats
-
-In groups, the agent responds to:
-- Direct mentions (`@your_bot message`)
-- Reply-to-bot messages
-- Bot commands (`/ask`, `/status`)
-
-Configure whether the agent should respond to all messages or only when mentioned:
+To explicitly disable the connector even when a token is present:
 
 ```json
 {
   "connectors": {
     "telegram": {
-      "groupMode": "mention-only"
+      "botToken": "your-telegram-bot-token",
+      "enabled": false
     }
   }
 }
 ```
 
-### Bot Commands
+## Auto-Enable Mechanism
 
-Register commands with BotFather that map to agent actions:
+The `plugin-auto-enable.ts` module checks `connectors.telegram` in your character config. If any of the fields `botToken`, `token`, or `apiKey` is truthy (and `enabled` is not explicitly `false`), the runtime automatically loads `@elizaos/plugin-telegram`.
 
-| Command | Description |
-|---------|-------------|
-| `/start` | Initialize conversation |
-| `/ask <question>` | Ask the agent a question |
-| `/status` | Show agent status |
-| `/clear` | Reset conversation context |
-| `/help` | Show available commands |
+No environment variable is required to trigger auto-enable -- it is driven entirely by the connector config object.
 
-### Inline Queries
+## Environment Variables
 
-Users can invoke your agent from any chat using inline mode:
+When the connector is loaded, the runtime pushes the following secret from your config into `process.env` for the plugin to consume:
 
-```
-@your_bot what is the weather today
-```
+| Variable | Description |
+|----------|-------------|
+| `TELEGRAM_BOT_TOKEN` | Telegram bot token from [@BotFather](https://t.me/BotFather) |
 
-### Media Handling
+## Plugin Configuration
 
-The connector processes:
-- **Photos**: Sent to vision-capable models for analysis
-- **Voice messages**: Transcribed via STT plugin
-- **Documents**: Parsed and added to conversation context
-- **Stickers**: Interpreted as emoji-based sentiment
-
-## Message Flow
-
-```
-Telegram Bot API → Connector → Message Router → Agent Runtime
-                                                      ↓
-Telegram Bot API ← Connector ← Response Router ← Agent Response
-```
-
-## Webhook vs Polling
-
-By default, the connector uses long polling. For production, configure a webhook:
-
-```json
-{
-  "connectors": {
-    "telegram": {
-      "webhook": {
-        "url": "https://your-domain.com/telegram/webhook",
-        "port": 8443
-      }
-    }
-  }
-}
-```
-
-## Rate Limiting
-
-Telegram enforces limits of ~30 messages/second to different chats and ~20 messages/minute to the same chat. The connector handles throttling automatically.
-
-## Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| Bot doesn't respond in groups | Disable privacy mode via BotFather |
-| Webhook not receiving | Check SSL certificate and port |
-| Media not processed | Ensure relevant plugins (TTS, vision) are installed |
-| Rate limited | Reduce autonomous message frequency |
-
-## Related
-
-- [Connectors Overview](/guides/connectors) — General connector architecture
-- [WhatsApp Connector](/guides/whatsapp) — WhatsApp integration guide
-- [Media Generation](/guides/media-generation) — Generate and send media
+Detailed configuration options (group behavior, webhook vs polling, media handling, bot commands, etc.) are defined by the `@elizaos/plugin-telegram` package itself. See plugin documentation for [`@elizaos/plugin-telegram`](https://www.npmjs.com/package/@elizaos/plugin-telegram) for the full set of supported options.

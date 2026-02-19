@@ -87,7 +87,8 @@ export default async function handler(event: HookEvent): Promise<void> {
 Use `registerHook` to register handlers in code:
 
 ```typescript
-import { registerHook, createHookEvent, triggerHook } from "../hooks/index";
+import { registerHook } from "../hooks/registry";
+import { createHookEvent, triggerHook } from "../hooks/index";
 
 // Register a handler for all command events
 registerHook("command", async (event) => {
@@ -118,7 +119,9 @@ await triggerHook(event);
 
 ## loadHooks
 
-`loadHooks()` is the main entry point called during gateway startup. It orchestrates the full pipeline:
+`loadHooks()` is the main entry point called during gateway startup. It orchestrates the full pipeline.
+
+> **Note:** `clearHooks()` is called at the start of each `loadHooks()` invocation, which means all previously registered hooks are cleared on reload. This is important for hot-reload semantics — calling `loadHooks()` again gives you a fresh hook registry.
 
 ```typescript
 import { loadHooks } from "../hooks/index";
@@ -148,13 +151,13 @@ console.log(`Failed: ${result.failed}`);
 
 ## Hook Discovery
 
-Hooks are discovered from three directory categories (in order of precedence):
+Hooks are discovered from four directory categories. Directories processed later override earlier ones on name collision (highest precedence wins):
 
 ```
-1. Workspace hooks:   <workspaceDir>/hooks/
+1. Extra dirs:        hooks.internal.load.extraDirs (lowest precedence)
 2. Bundled hooks:     <bundledDir>/ (from config or package)
 3. Managed hooks:     ~/.milady/hooks/
-4. Extra dirs:        hooks.internal.load.extraDirs (must be under ~/.milady/)
+4. Workspace hooks:   <workspaceDir>/hooks/ (highest precedence)
 ```
 
 Each hook directory should contain a `HOOK.md` file with frontmatter metadata.

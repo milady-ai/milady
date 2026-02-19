@@ -4,7 +4,7 @@ sidebarTitle: "Auth"
 description: "REST API endpoints for API authentication and pairing flow."
 ---
 
-The Milaidy API can be secured with a token by setting the `MILAIDY_API_TOKEN` environment variable. When set, include the token as a `Bearer` token in the `Authorization` header on all requests. The pairing flow allows remote UIs to obtain the token without embedding it directly.
+The Milady API can be secured with a token by setting the `MILADY_API_TOKEN` environment variable. When set, include the token as a `Bearer` token in the `Authorization` header on all requests. The pairing flow allows remote UIs to obtain the token without embedding it directly.
 
 ## Endpoints
 
@@ -24,7 +24,7 @@ Check whether authentication is required and whether the pairing flow is current
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `required` | boolean | `true` when `MILAIDY_API_TOKEN` is set |
+| `required` | boolean | `true` when `MILADY_API_TOKEN` is set |
 | `pairingEnabled` | boolean | `true` when the pairing flow is active |
 | `expiresAt` | number \| null | Unix ms timestamp when the pairing code expires, or `null` if pairing is disabled |
 
@@ -58,7 +58,7 @@ Submit a pairing code displayed in the server logs to receive the API token. Thi
 
 | Status | Condition |
 |--------|-----------|
-| `400` | Pairing not enabled (no `MILAIDY_API_TOKEN` set) |
+| `400` | Pairing not enabled (no `MILADY_API_TOKEN` set) |
 | `403` | Pairing disabled or invalid code |
 | `410` | Pairing code expired — a new code has been issued |
 | `429` | Too many attempts — rate limit exceeded |

@@ -4,7 +4,7 @@ sidebarTitle: "Agents"
 description: "REST API endpoints for agent lifecycle, administration, and transfer (export/import)."
 ---
 
-All agent endpoints require the agent runtime to be initialized. The API server runs on port **2138** by default and all paths are prefixed with `/api/`. When `MILAIDY_API_TOKEN` is set, include it as a `Bearer` token in the `Authorization` header.
+All agent endpoints require the agent runtime to be initialized. The API server runs on port **2138** by default and all paths are prefixed with `/api/`. When `MILADY_API_TOKEN` is set, include it as a `Bearer` token in the `Authorization` header.
 
 ## Endpoints
 

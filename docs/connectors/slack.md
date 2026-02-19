@@ -1,136 +1,66 @@
 ---
 title: Slack Connector
 sidebarTitle: Slack
-description: Connect your Milaidy agent to Slack workspaces with channel messaging, thread support, slash commands, and event handling.
+description: Connect your agent to Slack workspaces using the @elizaos/plugin-slack package.
 ---
 
-Connect your Milaidy agent to Slack for workplace messaging and automation.
+Connect your agent to Slack for workplace messaging and automation.
 
 ## Overview
 
-The Slack connector uses the Bolt framework to integrate your agent with Slack workspaces. It supports channel messaging, threads, DMs, slash commands, interactive components, and event subscriptions.
+The Slack connector is an external ElizaOS plugin that bridges your agent to Slack workspaces. It is auto-enabled by the runtime when a valid token is detected in your connector configuration.
 
-## Prerequisites
+## Package Info
 
-- A Slack app created at [api.slack.com](https://api.slack.com/apps)
-- Bot token with required scopes
-- Event subscriptions configured
+| Field | Value |
+|-------|-------|
+| Package | `@elizaos/plugin-slack` |
+| Config key | `connectors.slack` |
+| Auto-enable trigger | `botToken`, `token`, or `apiKey` is truthy in connector config |
 
-## Configuration
+## Minimal Configuration
 
-Add to your `.env` file:
-
-```bash
-SLACK_BOT_TOKEN=xoxb-your-bot-token
-SLACK_SIGNING_SECRET=your-signing-secret
-SLACK_APP_TOKEN=xapp-your-app-token    # for socket mode
-```
-
-Or configure in your character file:
+In your character file:
 
 ```json
 {
   "connectors": {
     "slack": {
-      "enabled": true,
-      "channels": ["general", "bot-channel"],
-      "respondToMentions": true,
-      "respondInThreads": true,
-      "socketMode": true
+      "botToken": "xoxb-your-bot-token"
     }
   }
 }
 ```
 
-## Features
-
-### Channel Messages
-
-The agent responds when mentioned in configured channels. It maintains context per channel and per thread.
-
-### Thread Conversations
-
-When a user mentions the agent in a channel, it responds in a thread to keep the main channel clean. Subsequent messages in the thread are handled as a continuous conversation.
-
-### Direct Messages
-
-The agent responds to all DMs without requiring a mention.
-
-### Slash Commands
-
-Register slash commands that map to agent actions:
-
-| Command | Description |
-|---------|-------------|
-| `/ask <question>` | Ask the agent a question |
-| `/status` | Show agent status and uptime |
-| `/search <query>` | Search the agent's knowledge base |
-| `/action <name>` | Trigger a specific action |
-
-### Interactive Components
-
-Support for buttons, modals, and select menus for rich interactions:
+To explicitly disable the connector even when a token is present:
 
 ```json
 {
   "connectors": {
     "slack": {
-      "interactive": {
-        "approvalButtons": true,
-        "actionMenus": true
-      }
+      "botToken": "xoxb-your-bot-token",
+      "enabled": false
     }
   }
 }
 ```
 
-### Event Subscriptions
+## Auto-Enable Mechanism
 
-Subscribe to workspace events:
-- `message` — Channel and DM messages
-- `app_mention` — Bot mentions
-- `reaction_added` — Emoji reactions
-- `member_joined_channel` — New member events
+The `plugin-auto-enable.ts` module checks `connectors.slack` in your character config. If any of the fields `botToken`, `token`, or `apiKey` is truthy (and `enabled` is not explicitly `false`), the runtime automatically loads `@elizaos/plugin-slack`.
 
-## Required Bot Scopes
+No environment variable is required to trigger auto-enable -- it is driven entirely by the connector config object.
 
-```
-chat:write
-channels:history
-channels:read
-groups:history
-groups:read
-im:history
-im:read
-im:write
-app_mentions:read
-reactions:read
-commands
-```
+## Environment Variables
 
-## Socket Mode vs HTTP
+When the connector is loaded, the runtime pushes the following secrets from your config into `process.env` for the plugin to consume:
 
-**Socket Mode** (recommended for development):
-- No public URL needed
-- Uses WebSocket connection
-- Set `socketMode: true`
+| Variable | Description |
+|----------|-------------|
+| `SLACK_BOT_TOKEN` | Slack bot token (`xoxb-...`) |
+| `SLACK_APP_TOKEN` | Slack app-level token (`xapp-...`) |
+| `SLACK_USER_TOKEN` | Slack user token |
 
-**HTTP Mode** (recommended for production):
-- Requires public URL
-- Configure request URL in Slack app settings
-- Better for high-traffic workspaces
+## Plugin Configuration
 
-## Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| Bot doesn't respond | Check bot token scopes and channel membership |
-| Slash commands fail | Verify signing secret and request URL |
-| Socket mode disconnects | Check `SLACK_APP_TOKEN` is valid |
-| Missing messages | Ensure `channels:history` scope is granted |
-
-## Related
-
-- [Connectors Overview](/guides/connectors) — General connector architecture
-- [Custom Actions](/guides/custom-actions) — Create actions for slash commands
-- [Hooks](/guides/hooks) — Set up event-driven workflows
+Detailed configuration options (channels, socket mode, slash commands, interactive components, event subscriptions, etc.) are defined by the `@elizaos/plugin-slack` package itself. See plugin documentation for [`@elizaos/plugin-slack`](https://www.npmjs.com/package/@elizaos/plugin-slack) for the full set of supported options.

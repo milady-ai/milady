@@ -60,6 +60,18 @@ If no agent name is configured and stdin is a TTY, the interactive onboarding wi
 
 The wizard writes the agent name and chosen style template back to `milady.json` before continuing. In headless mode, onboarding is skipped — the GUI handles it.
 
+### Step 3a: Post-Config Propagation
+
+Immediately after config is loaded and before onboarding, several environment variables and internal flags are propagated:
+
+| Step | Detail |
+|---|---|
+| LOG_LEVEL propagation | `process.env.LOG_LEVEL = config.logging?.level ?? "error"` |
+| Destructive migrations | `ELIZA_ALLOW_DESTRUCTIVE_MIGRATIONS=true` |
+| Bootstrap ignore | `IGNORE_BOOTSTRAP=true` |
+| Subscription credentials | `applySubscriptionCredentials()` applies any stored subscription keys |
+| OG tracking | OG tracking initialization for analytics/telemetry |
+
 ### Step 4: Environment Variable Population
 
 Several helper functions push config values into `process.env` so that ElizaOS plugins can read them:
@@ -154,10 +166,10 @@ After initialization:
 ## Plugin Loading Order
 
 ```
-1. @elizaos/plugin-sql           (pre-registered — database adapter)
-2. @elizaos/plugin-local-embedding (pre-registered — TEXT_EMBEDDING handler)
-3. milady (built-in bridge plugin)
-4. All other plugins (parallel initialization via runtime.initialize())
+1. miladyPlugin                    (passed first in the plugins array to AgentRuntime constructor)
+2. @elizaos/plugin-sql             (pre-registered via registerSqlPluginWithRecovery() before runtime.initialize())
+3. @elizaos/plugin-local-embedding (pre-registered so TEXT_EMBEDDING handler at priority 10 is available)
+4. All other plugins               (registered during runtime.initialize() in parallel)
 ```
 
 ## Restart Behavior
@@ -200,7 +212,7 @@ The `restartAction` available to the LLM calls `requestRestart()` with an option
 
 ## Sandbox Modes
 
-The runtime can operate in one of four sandbox modes, configured in `agents.defaults.sandbox.mode`:
+The runtime can operate in one of four sandbox modes, configured via `agents.defaults.sandbox.mode`:
 
 | Mode | Description |
 |---|---|
@@ -208,6 +220,10 @@ The runtime can operate in one of four sandbox modes, configured in `agents.defa
 | `"light"` | Audit log only; no container isolation |
 | `"standard"` | Docker container isolation for tool execution |
 | `"max"` | Maximum isolation including network restrictions |
+
+<Note>
+The runtime reads `agents.defaults.sandbox.mode` and expects one of `"off"`, `"light"`, `"standard"`, or `"max"`. Note that the `AgentConfig` TypeScript type in `types.agents.ts` defines the mode as `"off" | "non-main" | "all"`, but the runtime implementation in `eliza.ts` checks against the values listed above. Use the runtime values (`off`/`light`/`standard`/`max`) when configuring `milady.json`.
+</Note>
 
 ## Related Pages
 

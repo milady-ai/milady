@@ -33,7 +33,7 @@ These variables control the API server and network behavior.
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `MILADY_PORT` | API server port when running `milaidy start`. | `2138` |
-| `MILADY_HEADLESS` | Run in headless mode. Set to `1` to suppress interactive prompts. | (unset) |
+| `MILADY_HEADLESS` | Run in headless mode. Set to `1` to suppress interactive prompts. **Note:** This variable is read by the dev server (`dev-server.ts`) and is not parsed by `startEliza()` directly. The headless behavior in the main runtime is controlled by the `opts.headless` parameter passed programmatically. | (unset) |
 | `MILADY_GATEWAY_PORT` | Gateway port. Automatically set to `19001` when the `--dev` flag is used. | (unset) |
 | `MILADY_API_TOKEN` | Static API token for authenticating requests to the agent API server. When set, all API requests must include this token. | (unset) |
 | `MILADY_ALLOW_WS_QUERY_TOKEN` | When set to `1`, allows the API token to be passed as a WebSocket query parameter (less secure; useful for some clients). | (unset) |
@@ -61,7 +61,7 @@ These variables affect the CLI output and banner behavior.
 |----------|-------------|---------|
 | `MILADY_HIDE_BANNER` | When set to `1`, suppresses the Milaidy ASCII banner that normally prints before each command. The banner is also suppressed for the `update` and `completion` commands regardless of this variable. | (unset) |
 | `FORCE_COLOR` | Force colored terminal output even when stdout is not a TTY. Set to any non-empty, non-`0` string to enable. | (unset) |
-| `LOG_LEVEL` | Set the logging verbosity level. Accepted values: `debug`, `info`, `warn`, `error`. | `info` |
+| `LOG_LEVEL` | Set the logging verbosity level. Accepted values: `debug`, `info`, `warn`, `error`. | `error` |
 | `NODE_NO_WARNINGS` | Suppresses Node.js runtime warnings. Automatically set to `1` by the CLI when `--verbose` / `--debug` is not active. | (auto-set) |
 
 ---

@@ -4,6 +4,10 @@ sidebarTitle: "TUI"
 description: "Interact with your Milaidy agent from the terminal using the keyboard-driven text interface and chat commands."
 ---
 
+<Warning>
+The TUI is under active development and may be disabled in current builds. The `launchTUI()` function currently throws `"TUI is disabled."` when called. The documentation below is retained for reference and will apply once the TUI is re-enabled.
+</Warning>
+
 The Milaidy TUI is a terminal-based interface for chatting with your agent and managing the runtime without opening a browser or desktop app. It renders directly in your terminal emulator using a full-screen layout with a conversation list, active chat view, and status bar. All interaction is keyboard-driven, making it well-suited to headless servers, SSH sessions, and power-user workflows.
 
 The TUI connects to the same local API server as the web dashboard (default port `2138`). It can be launched alongside the dashboard or as the sole interface when running in a headless environment.

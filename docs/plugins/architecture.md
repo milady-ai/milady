@@ -38,6 +38,18 @@ export const CORE_PLUGINS: readonly string[] = [
 ];
 ```
 
+### Optional Core Plugins
+
+A separate list of optional core plugins can be enabled from the admin panel. These are not loaded by default due to packaging or specification constraints. The list lives in `src/runtime/core-plugins.ts`:
+
+```typescript
+export const OPTIONAL_CORE_PLUGINS: readonly string[] = [
+  "@elizaos/plugin-code",  // code writing and file operations
+];
+```
+
+Other plugins such as `@elizaos/plugin-directives`, `@elizaos/plugin-commands`, `@elizaos/plugin-mcp`, `@elizaos/plugin-computeruse`, and `@elizaos/plugin-personality` are commented out in the source and may be activated in future releases.
+
 ## Plugin Hook Points
 
 A plugin can register any combination of the following hook points:
@@ -102,13 +114,26 @@ Plugins are automatically enabled when their required configuration is detected.
 ```typescript
 const AUTH_PROVIDER_PLUGINS = {
   ANTHROPIC_API_KEY:              "@elizaos/plugin-anthropic",
+  CLAUDE_API_KEY:                 "@elizaos/plugin-anthropic",
   OPENAI_API_KEY:                 "@elizaos/plugin-openai",
+  AI_GATEWAY_API_KEY:             "@elizaos/plugin-vercel-ai-gateway",
+  AIGATEWAY_API_KEY:              "@elizaos/plugin-vercel-ai-gateway",
   GOOGLE_API_KEY:                 "@elizaos/plugin-google-gemini",
+  GOOGLE_GENERATIVE_AI_API_KEY:   "@elizaos/plugin-google-gemini",
+  GOOGLE_CLOUD_API_KEY:           "@elizaos/plugin-google-antigravity",
   GROQ_API_KEY:                   "@elizaos/plugin-groq",
-  OLLAMA_BASE_URL:                "@elizaos/plugin-ollama",
+  XAI_API_KEY:                    "@elizaos/plugin-xai",
+  GROK_API_KEY:                   "@elizaos/plugin-xai",
   OPENROUTER_API_KEY:             "@elizaos/plugin-openrouter",
+  OLLAMA_BASE_URL:                "@elizaos/plugin-ollama",
+  ZAI_API_KEY:                    "@homunculuslabs/plugin-zai",
   DEEPSEEK_API_KEY:               "@elizaos/plugin-deepseek",
-  // ... and more
+  TOGETHER_API_KEY:               "@elizaos/plugin-together",
+  MISTRAL_API_KEY:                "@elizaos/plugin-mistral",
+  COHERE_API_KEY:                 "@elizaos/plugin-cohere",
+  PERPLEXITY_API_KEY:             "@elizaos/plugin-perplexity",
+  ELIZAOS_CLOUD_API_KEY:          "@elizaos/plugin-elizacloud",
+  ELIZAOS_CLOUD_ENABLED:          "@elizaos/plugin-elizacloud",
 };
 ```
 
@@ -116,17 +141,26 @@ const AUTH_PROVIDER_PLUGINS = {
 
 ```typescript
 const CONNECTOR_PLUGINS = {
-  telegram:   "@elizaos/plugin-telegram",
-  discord:    "@elizaos/plugin-discord",
-  slack:      "@elizaos/plugin-slack",
-  twitter:    "@elizaos/plugin-twitter",
-  whatsapp:   "@elizaos/plugin-whatsapp",
-  farcaster:  "@elizaos/plugin-farcaster",
-  // ...
+  telegram:    "@elizaos/plugin-telegram",
+  discord:     "@elizaos/plugin-discord",
+  slack:       "@elizaos/plugin-slack",
+  twitter:     "@elizaos/plugin-twitter",
+  whatsapp:    "@elizaos/plugin-whatsapp",
+  signal:      "@elizaos/plugin-signal",
+  bluebubbles: "@elizaos/plugin-bluebubbles",
+  imessage:    "@elizaos/plugin-imessage",
+  farcaster:   "@elizaos/plugin-farcaster",
+  lens:        "@elizaos/plugin-lens",
+  msteams:     "@elizaos/plugin-msteams",
+  mattermost:  "@elizaos/plugin-mattermost",
+  googlechat:  "@elizaos/plugin-google-chat",
+  feishu:      "@elizaos/plugin-feishu",
+  matrix:      "@elizaos/plugin-matrix",
+  nostr:       "@elizaos/plugin-nostr",
 };
 ```
 
-**Feature flags** — The `features` section of `milaidy.json` auto-enables feature plugins:
+**Feature flags** — The `features` section of `milaidy.json` auto-enables feature plugins. A feature can be enabled with `features.<name>: true` or `features.<name>.enabled: true`:
 
 ```json
 {
@@ -136,6 +170,33 @@ const CONNECTOR_PLUGINS = {
     "tts": { "enabled": true }
   }
 }
+```
+
+The complete `FEATURE_PLUGINS` map:
+
+```typescript
+const FEATURE_PLUGINS = {
+  browser:          "@elizaos/plugin-browser",
+  cron:             "@elizaos/plugin-cron",
+  shell:            "@elizaos/plugin-shell",
+  imageGen:         "@elizaos/plugin-image-generation",
+  tts:              "@elizaos/plugin-tts",
+  stt:              "@elizaos/plugin-stt",
+  agentSkills:      "@elizaos/plugin-agent-skills",
+  directives:       "@elizaos/plugin-directives",
+  commands:         "@elizaos/plugin-commands",
+  diagnosticsOtel:  "@elizaos/plugin-diagnostics-otel",
+  webhooks:         "@elizaos/plugin-webhooks",
+  gmailWatch:       "@elizaos/plugin-gmail-watch",
+  personality:      "@elizaos/plugin-personality",
+  experience:       "@elizaos/plugin-experience",
+  form:             "@elizaos/plugin-form",
+  x402:             "@elizaos/plugin-x402",
+  fal:              "@elizaos/plugin-fal",
+  suno:             "@elizaos/plugin-suno",
+  vision:           "@elizaos/plugin-vision",
+  computeruse:      "@elizaos/plugin-computeruse",
+};
 ```
 
 **Auth profiles** — Auth profiles specifying a provider name trigger loading of the matching provider plugin.

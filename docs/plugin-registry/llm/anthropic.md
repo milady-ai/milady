@@ -40,7 +40,7 @@ export ANTHROPIC_API_KEY=sk-ant-...
     "profiles": {
       "default": {
         "provider": "anthropic",
-        "model": "claude-sonnet-4-5"
+        "model": "claude-sonnet-4-20250514"
       }
     }
   }
@@ -53,9 +53,10 @@ export ANTHROPIC_API_KEY=sk-ant-...
 
 | Model | Context | Best For |
 |-------|---------|---------|
-| `claude-opus-4` | 200k | Most capable, complex reasoning |
-| `claude-sonnet-4-5` | 200k | Balanced performance and cost |
-| `claude-haiku-4` | 200k | Fast, lightweight tasks |
+| `claude-opus-4-20250514` | 200k | Most capable, complex reasoning |
+| `claude-sonnet-4-20250514` | 200k | Balanced performance and cost |
+| `claude-sonnet-4.5` | 200k | Latest Sonnet, improved coding |
+| `claude-3-5-haiku-20241022` | 200k | Fast, lightweight tasks |
 
 ### Claude 3.7 Family
 
@@ -82,25 +83,24 @@ export ANTHROPIC_API_KEY=sk-ant-...
 
 | ElizaOS Model Type | Anthropic Model |
 |-------------------|----------------|
-| `TEXT_SMALL` | `claude-haiku-4` |
-| `TEXT_LARGE` | `claude-sonnet-4-5` |
-| `TEXT_REASONING_SMALL` | `claude-3-7-sonnet-20250219` |
-| `TEXT_REASONING_LARGE` | `claude-opus-4` |
-| `IMAGE_DESCRIPTION` | `claude-sonnet-4-5` (vision) |
+| `TEXT_SMALL` | `claude-3-5-haiku-20241022` |
+| `TEXT_LARGE` | `claude-sonnet-4-20250514` |
+| `OBJECT_SMALL` | `claude-3-5-haiku-20241022` |
+| `OBJECT_LARGE` | `claude-sonnet-4-20250514` |
 
 ## Features
 
 - Streaming responses
 - Tool use (function calling)
 - Vision (image input on all models)
-- Extended thinking (claude-3-7-sonnet, claude-opus-4)
+- Extended thinking (claude-3-7-sonnet, claude-opus-4-20250514)
 - Structured JSON output via tool use
 - 200k token context window on all models
 - Prompt caching for cost reduction on repeated context
 
 ## Extended Thinking
 
-Claude 3.7 Sonnet and Claude Opus 4 support extended thinking — a mode where the model reasons step-by-step before answering. This is particularly effective for complex reasoning, math, and multi-step planning.
+Claude 3.7 Sonnet and Claude Opus 4 (`claude-opus-4-20250514`) support extended thinking — a mode where the model reasons step-by-step before answering. This is particularly effective for complex reasoning, math, and multi-step planning.
 
 ```typescript
 const response = await runtime.useModel("TEXT_REASONING_LARGE", {
