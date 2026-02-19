@@ -1,3 +1,9 @@
+---
+title: "Contributing Guide"
+sidebarTitle: "Contributing"
+description: "Set up your development environment and contribute to Milaidy."
+---
+
 # Contributing Guide
 
 Welcome to Milaidy! This guide will help you set up your development environment and contribute effectively.

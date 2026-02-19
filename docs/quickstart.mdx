@@ -1,0 +1,70 @@
+---
+title: "Quick Start"
+sidebarTitle: "Quick Start"
+description: "Get Milady up and running in under a minute."
+---
+
+# Quick Start
+
+## Install and Setup
+
+```bash
+curl -fsSL https://milady-ai.github.io/milady/install.sh | bash
+milady setup
+```
+
+Then start Milady:
+
+```bash
+milady
+```
+
+## First Run
+
+First run walks you through onboarding:
+
+```
+┌  milady
+│
+◇  What should I call your agent?
+│  mila
+│
+◇  Pick a vibe
+│  ● Helpful & friendly
+│  ○ Tsundere
+│  ○ Unhinged
+│  ○ Custom...
+│
+◇  Connect a brain
+│  ● Anthropic (Claude) ← recommended, actually smart
+│  ○ OpenAI (GPT)
+│  ○ Ollama (local, free, full schizo mode)
+│  ○ Skip for now
+│
+◇  API key?
+│  sk-ant-•••••••••••••••••
+│
+└  Starting agent...
+
+   Dashboard: http://localhost:2138
+   Gateway:   ws://localhost:18789/ws
+
+   she's alive. go say hi.
+```
+
+## What's Next?
+
+<CardGroup cols={2}>
+  <Card title="Configuration" icon="gear" href="/configuration">
+    Customize ports, config file, and model providers
+  </Card>
+  <Card title="CLI Reference" icon="terminal" href="/cli-reference">
+    All available terminal commands
+  </Card>
+  <Card title="Chat Commands" icon="message" href="/chat-commands">
+    In-session commands for controlling your agent
+  </Card>
+  <Card title="Plugin Development" icon="puzzle-piece" href="/guides/plugin-development">
+    Extend Milady with custom plugins
+  </Card>
+</CardGroup>

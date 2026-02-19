@@ -1,0 +1,107 @@
+---
+title: "CLI Reference"
+sidebarTitle: "CLI Reference"
+description: "All Milady terminal commands, TUI hotkeys, and headless mode."
+---
+
+# CLI Reference
+
+## Starting Milady
+
+```bash
+milady                    # start (default)
+milady start              # same thing
+milady start --headless   # no browser popup
+milady start --verbose    # debug mode for when things break
+```
+
+## Setup & Config
+
+```bash
+milady setup              # first-time setup / refresh workspace after update
+milady configure          # interactive config wizard
+milady config get <key>   # read a config value
+milady config set <k> <v> # set a config value
+```
+
+## Dashboard & UI
+
+```bash
+milady dashboard          # open web UI in browser
+milady dashboard --port 3000  # custom port
+```
+
+## Models
+
+```bash
+milady models             # list configured model providers
+milady models add         # add a new provider
+milady models test        # test if your API keys work
+```
+
+## Plugins
+
+```bash
+milady plugins list       # what's installed
+milady plugins add <name> # install a plugin
+milady plugins remove <name>
+```
+
+## Misc
+
+```bash
+milady --version          # version check
+milady --help             # help
+milady doctor             # diagnose issues
+```
+
+---
+
+## TUI (Terminal UI)
+
+When running, Milady shows a live terminal interface:
+
+```
+╭─────────────────────────────────────────────────────────────╮
+│  milady v0.1.0                              ▲ running      │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Agent: mila                                                │
+│  Model: anthropic/claude-opus-4-5                           │
+│  Sessions: 2 active                                         │
+│                                                             │
+│  ┌─ Activity ──────────────────────────────────────────┐    │
+│  │ 12:34:02  [web] user: hey mila                      │    │
+│  │ 12:34:05  [web] mila: hi anon~ what's up?           │    │
+│  │ 12:35:11  [telegram] user joined                    │    │
+│  │ 12:35:15  [telegram] user: gm                       │    │
+│  │ 12:35:17  [telegram] mila: gm fren                  │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                                                             │
+│  Tokens: 12,847 in / 3,291 out   Cost: $0.42                │
+│                                                             │
+╰─────────────────────────────────────────────────────────────╯
+  [q] quit  [r] restart  [d] dashboard  [l] logs  [?] help
+```
+
+## TUI Hotkeys
+
+| Key | Action |
+|-----|--------|
+| `q` | quit gracefully |
+| `r` | restart gateway |
+| `d` | open dashboard in browser |
+| `l` | toggle log view |
+| `c` | compact/clear activity |
+| `?` | show help |
+| `↑/↓` | scroll activity |
+
+## Headless Mode
+
+Don't want the TUI? Run headless:
+
+```bash
+milady start --headless
+```
+
+Logs go to `~/.milady/logs/`. Daemonize with your favorite process manager.

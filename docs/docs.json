@@ -1,0 +1,89 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Milady",
+  "colors": {
+    "primary": "#4a7c59",
+    "light": "#6b9e7a",
+    "dark": "#3d6b4a"
+  },
+  "favicon": "/favicon.png",
+  "logo": {
+    "light": "/logo/light.png",
+    "dark": "/logo/dark.png"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "GitHub",
+        "href": "https://github.com/milady-ai/milady"
+      },
+      {
+        "label": "Discord",
+        "href": "https://discord.gg/milady"
+      }
+    ]
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Docs",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "index",
+              "installation",
+              "quickstart",
+              "configuration"
+            ]
+          },
+          {
+            "group": "Development",
+            "pages": [
+              "guides/plugin-development",
+              "guides/local-plugins",
+              "guides/skills"
+            ]
+          },
+          {
+            "group": "Ecosystem",
+            "pages": [
+              "guides/registry",
+              "guides/contributing"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "cli-reference",
+              "chat-commands",
+              "model-providers"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "CLI Reference",
+        "groups": [
+          {
+            "group": "CLI Reference",
+            "pages": [
+              "cli-reference"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/milady-ai/milady",
+      "x": "https://x.com/milaboratory",
+      "discord": "https://discord.gg/milady"
+    }
+  },
+  "contextual": {
+    "options": ["copy", "view", "chatgpt", "claude", "perplexity"]
+  }
+}

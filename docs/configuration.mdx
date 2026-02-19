@@ -1,0 +1,63 @@
+---
+title: "Configuration"
+sidebarTitle: "Configuration"
+description: "Config file, ports, environment variables, and model provider setup."
+---
+
+# Configuration
+
+## Config File
+
+Lives at `~/.milady/milady.json`
+
+```json5
+{
+  agent: {
+    name: "mila",
+    model: "anthropic/claude-opus-4-5",
+  },
+  env: {
+    ANTHROPIC_API_KEY: "sk-ant-...",
+  },
+}
+```
+
+Or use `~/.milady/.env` for secrets.
+
+## Ports
+
+| Service | Default | Env Override |
+|---------|---------|--------------|
+| Gateway (API + WebSocket) | `18789` | `MILADY_GATEWAY_PORT` |
+| Dashboard (Web UI) | `2138` | `MILADY_PORT` |
+
+```bash
+# custom ports
+MILADY_GATEWAY_PORT=19000 MILADY_PORT=3000 milady start
+```
+
+## Model Providers
+
+Milady supports multiple AI model providers. Set the corresponding environment variable to enable each one.
+
+| Provider | Env Variable | Notes |
+|----------|--------------|-------|
+| [Anthropic](https://anthropic.com) | `ANTHROPIC_API_KEY` | **recommended** — Claude models |
+| [OpenAI](https://openai.com) | `OPENAI_API_KEY` | GPT-4o, o1 |
+| [OpenRouter](https://openrouter.ai) | `OPENROUTER_API_KEY` | 100+ models, one API |
+| [Ollama](https://ollama.ai) | — | local, free, no API key |
+| [Groq](https://groq.com) | `GROQ_API_KEY` | fast inference |
+| [xAI](https://x.ai) | `XAI_API_KEY` | Grok models |
+| [DeepSeek](https://deepseek.com) | `DEEPSEEK_API_KEY` | reasoning models |
+
+See the [Model Providers](/model-providers) page for full details.
+
+## Interactive Config
+
+Use the CLI to manage configuration:
+
+```bash
+milady configure          # interactive config wizard
+milady config get <key>   # read a config value
+milady config set <k> <v> # set a config value
+```

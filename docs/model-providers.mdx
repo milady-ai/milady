@@ -1,0 +1,45 @@
+---
+title: "Model Providers"
+sidebarTitle: "Model Providers"
+description: "Supported AI model providers and how to configure them."
+---
+
+# Model Providers
+
+Milady supports multiple AI model providers out of the box. Set the corresponding environment variable in `~/.milady/.env` or via `milady configure`.
+
+| Provider | Env Variable | Notes |
+|----------|--------------|-------|
+| [Anthropic](https://anthropic.com) | `ANTHROPIC_API_KEY` | **recommended** — Claude models are cracked |
+| [OpenAI](https://openai.com) | `OPENAI_API_KEY` | GPT-4o, o1, the classics |
+| [OpenRouter](https://openrouter.ai) | `OPENROUTER_API_KEY` | 100+ models, one API |
+| [Ollama](https://ollama.ai) | — | local, free, no API key, full privacy |
+| [Groq](https://groq.com) | `GROQ_API_KEY` | fast inference |
+| [xAI](https://x.ai) | `XAI_API_KEY` | Grok, based |
+| [DeepSeek](https://deepseek.com) | `DEEPSEEK_API_KEY` | reasoning arc |
+
+## Managing Providers
+
+```bash
+milady models             # list configured model providers
+milady models add         # add a new provider interactively
+milady models test        # test if your API keys work
+```
+
+## Switching Models
+
+Change the default model in your config file (`~/.milady/milady.json`):
+
+```json5
+{
+  agent: {
+    model: "anthropic/claude-opus-4-5",
+  }
+}
+```
+
+Or switch mid-session using the `/model` chat command:
+
+```
+/model openai/gpt-4o
+```

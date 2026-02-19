@@ -1,3 +1,9 @@
+---
+title: "Plugin Development"
+sidebarTitle: "Plugin Development"
+description: "Create, test, and publish plugins for Milaidy/ElizaOS."
+---
+
 # Plugin Development Guide
 
 This guide walks you through creating, testing, and publishing plugins for Milaidy/ElizaOS.

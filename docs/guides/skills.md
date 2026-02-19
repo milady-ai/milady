@@ -1,3 +1,9 @@
+---
+title: "Skills"
+sidebarTitle: "Skills"
+description: "Markdown-based extensions that teach the agent how to perform specific tasks."
+---
+
 # Skills Documentation
 
 Skills are markdown-based extensions that teach the agent how to perform specific tasks. Unlike plugins (which are TypeScript code), skills are primarily documentation that gets injected into the agent's context.

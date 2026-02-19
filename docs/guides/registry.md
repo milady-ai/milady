@@ -1,3 +1,9 @@
+---
+title: "Plugin Registry"
+sidebarTitle: "Registry"
+description: "Discover, use, and submit plugins to the ElizaOS plugin registry."
+---
+
 # Plugin Registry Guide
 
 The plugin registry is the central index of available ElizaOS plugins. This guide covers discovering, using, and submitting plugins to the registry.
