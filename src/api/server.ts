@@ -262,7 +262,7 @@ async function isOllamaReachable(
 // Package root resolution (for reading bundled plugins.json)
 // ---------------------------------------------------------------------------
 
-function findOwnPackageRoot(startDir: string): string {
+export function findOwnPackageRoot(startDir: string): string {
   let dir = startDir;
   for (let i = 0; i < 10; i++) {
     const pkgPath = path.join(dir, "package.json");
@@ -272,7 +272,8 @@ function findOwnPackageRoot(startDir: string): string {
           string,
           unknown
         >;
-        if (pkg.name === "milaidy") return dir;
+        const pkgName = String(pkg.name ?? "").toLowerCase();
+        if (pkgName === "milaidy" || pkgName === "milady") return dir;
       } catch {
         /* keep searching */
       }
@@ -282,6 +283,189 @@ function findOwnPackageRoot(startDir: string): string {
     dir = parent;
   }
   return startDir;
+}
+
+export const CONFIG_WRITE_ALLOWED_TOP_KEYS = new Set<string>([
+  "agent",
+  "plugins",
+  "wallet",
+  "security",
+  "cloud",
+  "connectors",
+  // Backward compatibility for legacy config shape.
+  "channels",
+]);
+
+const PLUGIN_CONFIG_BLOCKED_KEYS = new Set<string>([
+  "MILADY_API_TOKEN",
+  "MILADY_WALLET_EXPORT_TOKEN",
+  "MILADY_ADMIN_TOKEN",
+]);
+
+export function resolvePluginConfigMutationRejections(
+  declared: Array<{ key: string }>,
+  changes: Record<string, unknown>,
+): Array<{ field: string; message: string }> {
+  const declaredSet = new Set(
+    declared
+      .map((entry) => String(entry.key ?? "").trim())
+      .filter((key) => key.length > 0),
+  );
+  const rejections: Array<{ field: string; message: string }> = [];
+  for (const key of Object.keys(changes)) {
+    if (!declaredSet.has(key)) {
+      rejections.push({
+        field: key,
+        message: `${key} is not a declared config key for this plugin`,
+      });
+      continue;
+    }
+    if (PLUGIN_CONFIG_BLOCKED_KEYS.has(key)) {
+      rejections.push({
+        field: key,
+        message: `${key} is blocked for security reasons`,
+      });
+    }
+  }
+  return rejections;
+}
+
+function isLoopbackBindHost(host: string): boolean {
+  const trimmed = host.trim().toLowerCase();
+  return (
+    trimmed === "" ||
+    trimmed === "127.0.0.1" ||
+    trimmed === "localhost" ||
+    trimmed === "::1"
+  );
+}
+
+export function ensureApiTokenForBindHost(host: string): void {
+  if (process.env.MILADY_API_TOKEN) return;
+  if (isLoopbackBindHost(host)) return;
+  process.env.MILADY_API_TOKEN = crypto.randomBytes(32).toString("hex");
+  logger.warn(
+    "[milaidy-api] MILADY_API_TOKEN was auto-generated for non-loopback bind host",
+  );
+}
+
+function isAllowedWsOrigin(origin: string | undefined): boolean {
+  if (!origin) return true;
+  const value = origin.trim().toLowerCase();
+  return (
+    value.startsWith("http://localhost") ||
+    value.startsWith("https://localhost") ||
+    value.startsWith("http://127.0.0.1") ||
+    value.startsWith("https://127.0.0.1")
+  );
+}
+
+type UpgradeRejection = { status: number; reason: string } | null;
+
+export function resolveWebSocketUpgradeRejection(
+  req: http.IncomingMessage,
+  requestUrl: URL,
+): UpgradeRejection {
+  if (requestUrl.pathname !== "/ws") {
+    return { status: 404, reason: "Not found" };
+  }
+  const origin =
+    typeof req.headers.origin === "string" ? req.headers.origin : undefined;
+  if (!isAllowedWsOrigin(origin)) {
+    return { status: 403, reason: "Origin not allowed" };
+  }
+
+  const expected = process.env.MILADY_API_TOKEN;
+  if (!expected || expected.length === 0) return null;
+
+  const authHeader = req.headers.authorization;
+  const bearer =
+    typeof authHeader === "string" && authHeader.startsWith("Bearer ")
+      ? authHeader.slice("Bearer ".length).trim()
+      : "";
+  if (bearer === expected) return null;
+
+  const allowQueryToken = process.env.MILADY_ALLOW_WS_QUERY_TOKEN === "1";
+  const queryToken = requestUrl.searchParams.get("token")?.trim() ?? "";
+  if (allowQueryToken && queryToken === expected) return null;
+
+  return { status: 401, reason: "Unauthorized" };
+}
+
+export async function persistConversationRoomTitle(
+  runtime:
+    | Pick<AgentRuntime, "getRoom" | "adapter">
+    | null,
+  conversation: { roomId: UUID; title: string },
+): Promise<boolean> {
+  if (!runtime) return false;
+  const room = await runtime.getRoom(conversation.roomId);
+  if (!room) return false;
+  if (room.name === conversation.title) return false;
+  const adapter = runtime.adapter as
+    | { updateRoom?: (room: { id: UUID; name: string }) => Promise<void> }
+    | undefined;
+  if (!adapter || typeof adapter.updateRoom !== "function") return false;
+  await adapter.updateRoom({ id: conversation.roomId, name: conversation.title });
+  return true;
+}
+
+export function isSafeResetStateDir(
+  targetDir: string,
+  homeDir: string,
+): boolean {
+  const resolvedTarget = path.resolve(targetDir);
+  const resolvedHome = path.resolve(homeDir);
+  if (resolvedTarget === path.parse(resolvedTarget).root) return false;
+  if (resolvedTarget === resolvedHome) return false;
+  if (
+    resolvedTarget !== resolvedHome &&
+    !resolvedTarget.startsWith(`${resolvedHome}${path.sep}`)
+  ) {
+    return false;
+  }
+  const segments = resolvedTarget.split(path.sep).filter(Boolean);
+  return segments.includes(".milady") || segments.includes("milaidy");
+}
+
+export function resolveWalletExportRejection(
+  req: Pick<http.IncomingMessage, "headers">,
+  body: Record<string, unknown>,
+): { status: number; reason: string } | null {
+  if (body.confirm !== true) {
+    return {
+      status: 403,
+      reason: "Wallet export requires explicit confirm=true.",
+    };
+  }
+
+  const expected = process.env.MILADY_WALLET_EXPORT_TOKEN;
+  if (!expected) {
+    return {
+      status: 403,
+      reason:
+        "Wallet export is disabled. Set MILADY_WALLET_EXPORT_TOKEN to enable secure exports.",
+    };
+  }
+
+  const headerToken =
+    typeof req.headers["x-milady-export-token"] === "string"
+      ? req.headers["x-milady-export-token"]
+      : undefined;
+  const bodyToken =
+    typeof body.exportToken === "string" ? body.exportToken : undefined;
+  const supplied = (headerToken ?? bodyToken ?? "").trim();
+  if (!supplied) {
+    return {
+      status: 401,
+      reason:
+        "Missing export token. Provide X-Milady-Export-Token header or exportToken in request body.",
+    };
+  }
+  if (supplied !== expected) {
+    return { status: 401, reason: "Invalid export token." };
+  }
+  return null;
 }
 
 // ---------------------------------------------------------------------------
