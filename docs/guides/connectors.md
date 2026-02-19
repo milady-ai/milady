@@ -4,8 +4,6 @@ sidebarTitle: "Connectors"
 description: "Platform bridges for Discord, Telegram, Slack, WhatsApp, Signal, iMessage, BlueBubbles, MS Teams, Google Chat, and Twitter."
 ---
 
-# Platform Connectors
-
 Connectors are platform bridges that allow your agent to communicate across messaging platforms and social networks. Each connector handles authentication, message routing, session management, and platform-specific features.
 
 ## Table of Contents

@@ -4,8 +4,6 @@ sidebarTitle: Mobile App
 description: Run Milaidy on iOS and Android devices using the Capacitor-based mobile app with native plugin support.
 ---
 
-# Mobile App (iOS/Android)
-
 The Milaidy mobile app brings the full dashboard experience to iOS and Android devices using [Capacitor](https://capacitorjs.com/), a cross-platform native runtime. The same web UI runs inside a native WebView with access to device hardware through Capacitor plugins.
 
 ## Platform Support

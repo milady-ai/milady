@@ -4,8 +4,6 @@ sidebarTitle: "Training & Fine-Tuning"
 description: "Trajectory collection, dataset curation, fine-tuning workflows, and Ollama model import for agent self-improvement."
 ---
 
-# Training & Fine-Tuning
-
 Milaidy captures all LLM interactions as trajectories, which can be curated into training datasets and used to fine-tune local models. The training pipeline supports dataset building, training job management, model import to Ollama, and model activation.
 
 ## Table of Contents

@@ -4,8 +4,6 @@ sidebarTitle: "WhatsApp"
 description: "Detailed guide for WhatsApp integration using Baileys (QR code) or Cloud API authentication."
 ---
 
-# WhatsApp Integration
-
 This guide covers the WhatsApp connector in detail, including both authentication methods, configuration, session management, and troubleshooting.
 
 ## Table of Contents

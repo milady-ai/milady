@@ -4,8 +4,6 @@ sidebarTitle: "Local Plugins"
 description: "Develop plugins locally without publishing to npm."
 ---
 
-# Local Plugin Development Guide
-
 This guide covers developing plugins locally without publishing to npm -- custom integrations, private plugins, rapid prototyping, and ejecting upstream plugins for modification.
 
 ## Table of Contents

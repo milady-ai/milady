@@ -4,8 +4,6 @@ sidebarTitle: Themes & Avatars
 description: Customize the Milaidy dashboard appearance with 6 built-in themes and 8 VRM 3D avatars with 29 emotes across 6 categories.
 ---
 
-# Themes & Avatars
-
 Milaidy ships with 6 visual themes and 8 built-in 3D VRM avatars. Themes control the entire dashboard look and feel — colors, typography, border radii, shadows, and animations. Avatars provide a live 3D character in the chat view.
 
 ## Themes

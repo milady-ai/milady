@@ -4,8 +4,6 @@ sidebarTitle: Media Generation
 description: Generate images, videos, and audio, or analyze images using AI providers like FAL, OpenAI, Google, xAI, and Eliza Cloud.
 ---
 
-# Media Generation
-
 Milaidy includes a media generation abstraction layer that provides a unified interface for creating images, videos, and audio, as well as analyzing images with AI vision. Multiple provider backends are supported, with Eliza Cloud as the default (no API key required).
 
 ## Media Capabilities

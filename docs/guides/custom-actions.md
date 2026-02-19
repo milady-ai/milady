@@ -4,8 +4,6 @@ sidebarTitle: Custom Actions
 description: Define user-created agent capabilities with HTTP, shell, and code handlers that extend what the agent can do.
 ---
 
-# Custom Actions
-
 Custom actions are user-defined capabilities that extend what the Milaidy agent can do at runtime. They allow you to wire up external APIs, run shell commands, or execute inline JavaScript -- all surfaced as first-class actions the agent can invoke during conversations.
 
 ## Overview

@@ -4,8 +4,6 @@ sidebarTitle: "Contributing"
 description: "Set up your development environment and contribute to Milaidy."
 ---
 
-# Contributing Guide
-
 Welcome to the Milaidy project. This guide covers environment setup, development workflow, and the pull request process.
 
 Before contributing, read [CONTRIBUTING.md](https://github.com/milady-ai/milady/blob/develop/CONTRIBUTING.md) in the repo root for the project's contribution philosophy. Milaidy is an **agents-only codebase** -- every PR is reviewed and merged by AI agents, not human maintainers. Humans contribute primarily as QA testers and bug reporters.

@@ -4,8 +4,6 @@ sidebarTitle: "Skills"
 description: "Markdown-based extensions that teach the agent how to perform specific tasks."
 ---
 
-# Skills
-
 Skills are markdown-based extensions that teach the Milaidy agent how to perform specific tasks. Each skill is a folder containing a `SKILL.md` file with YAML frontmatter and instructional content that gets injected into the agent's context at runtime.
 
 ---

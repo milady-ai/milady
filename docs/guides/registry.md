@@ -4,8 +4,6 @@ sidebarTitle: "Registry"
 description: "How Milaidy discovers, caches, and resolves plugins from the remote registry."
 ---
 
-# Plugin Registry
-
 The plugin registry is the system that discovers, caches, and resolves plugins and apps for Milaidy agents. It combines a bundled local index with a remote GitHub-hosted registry, using a 3-tier cache to work offline, in Electron app bundles, and in development.
 
 ## Table of Contents

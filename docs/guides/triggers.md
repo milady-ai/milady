@@ -4,8 +4,6 @@ sidebarTitle: Triggers
 description: Schedule tasks that wake the agent on intervals, at specific times, or via cron expressions.
 ---
 
-# Triggers & Scheduled Tasks
-
 Triggers are scheduled tasks that wake the Milaidy agent at defined times or intervals. They allow the agent to perform recurring work, one-time future tasks, or cron-scheduled operations without manual intervention.
 
 ## Trigger Types

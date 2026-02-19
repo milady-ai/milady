@@ -4,8 +4,6 @@ sidebarTitle: "Eliza Cloud"
 description: "Remote agent hosting and provisioning via Eliza Cloud with backup scheduling, connection monitoring, and proxy routing."
 ---
 
-# Eliza Cloud Integration
-
 Eliza Cloud provides remote agent hosting and provisioning. The Milaidy cloud integration allows you to deploy agents to Eliza Cloud, manage their lifecycle, route chat through remote sandboxes, and maintain persistent backups.
 
 ## Table of Contents

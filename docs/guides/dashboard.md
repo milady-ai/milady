@@ -4,8 +4,6 @@ sidebarTitle: Dashboard
 description: Navigate the Milaidy web dashboard to configure your agent, chat, manage knowledge, and access advanced settings.
 ---
 
-# Web Dashboard
-
 The Milaidy web dashboard is the primary interface for interacting with your agent. It provides a full-featured control panel for chatting, configuring your agent's character, managing plugins, and monitoring runtime behavior.
 
 ## Accessing the Dashboard

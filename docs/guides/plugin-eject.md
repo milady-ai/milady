@@ -4,8 +4,6 @@ sidebarTitle: "Plugin Eject"
 description: "Clone plugin or core source locally for editing, testing, syncing with upstream, and contributing back via pull requests."
 ---
 
-# Plugin Eject System
-
 The eject system lets you clone an upstream plugin's source code locally, modify it, and have the runtime load your local copy instead of the npm package. This enables rapid plugin development, debugging, and contribution back to upstream repositories.
 
 ## Table of Contents

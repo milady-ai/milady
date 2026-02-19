@@ -4,8 +4,6 @@ sidebarTitle: Desktop App
 description: Install and use the Milaidy desktop application on macOS, Windows, and Linux with embedded agent runtime and native features.
 ---
 
-# Desktop App (Electron)
-
 The Milaidy desktop app wraps the web dashboard in a native Electron shell, adding system-level features like tray icons, global keyboard shortcuts, native notifications, and an embedded agent runtime that requires no separate server.
 
 ## Download and Install

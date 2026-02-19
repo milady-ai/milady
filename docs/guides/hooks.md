@@ -4,8 +4,6 @@ sidebarTitle: Hooks
 description: Extend the agent with event-driven handlers that respond to commands, sessions, agent lifecycle, and gateway events.
 ---
 
-# Event Hooks
-
 Hooks are event-driven handlers that extend the Milaidy agent by responding to system events. They are loaded from disk at startup, checked for eligibility, and registered into an event dispatch system. Hooks allow you to run custom logic when commands are issued, sessions change, the agent starts up, or gateway events occur.
 
 ## Hook Event Types

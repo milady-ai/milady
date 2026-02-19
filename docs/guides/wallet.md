@@ -4,8 +4,6 @@ sidebarTitle: "Wallet & Crypto"
 description: "Built-in EVM and Solana wallet with key generation, balance fetching, NFT queries, signing policy, and smart contract interactions."
 ---
 
-# Wallet & Crypto
-
 Milaidy includes a built-in crypto wallet supporting both EVM-compatible chains and Solana. The wallet uses Node.js crypto primitives (no heavy dependencies like viem or @solana/web3.js) and fetches on-chain data via Alchemy (EVM) and Helius (Solana) REST APIs.
 
 ## Table of Contents
