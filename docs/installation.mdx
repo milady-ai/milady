@@ -63,10 +63,10 @@ git clone https://github.com/milady-ai/milady.git
 cd milady
 bun install
 bun run build
-bun run milaidy start
+bun run start
 ```
 
-> `scripts/rt.sh` prefers bun but falls back to npm automatically. If you want to be explicit: `bun run build:node` uses only Node.
+> `scripts/rt.sh` always uses bun for both script execution and package management. If you want to build without bun: `bun run build:node` uses only Node.
 
 Dev mode with hot reload:
 

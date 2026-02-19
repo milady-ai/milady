@@ -286,7 +286,43 @@ The service accepts a signer backend, an optional signing policy (defaults to th
 | Method | Path | Description |
 |--------|------|-------------|
 | `GET` | `/api/sandbox/status` | Get current sandbox state, mode, and health |
+| `GET` | `/api/sandbox/events` | Get the last 100 sandbox event log entries |
+| `GET` | `/api/sandbox/platform` | Get platform info (Docker/Apple Container availability) |
+| `GET` | `/api/sandbox/capabilities` | Detect available host capabilities (screenshot, audio, computer use, browser, shell) |
+| `GET` | `/api/sandbox/browser` | Get browser container CDP and WebSocket endpoints |
+| `POST` | `/api/sandbox/start` | Start the sandbox container |
+| `POST` | `/api/sandbox/stop` | Stop the sandbox container |
+| `POST` | `/api/sandbox/recover` | Attempt recovery from degraded state |
 | `POST` | `/api/sandbox/exec` | Execute a command inside the sandbox |
+| `POST` | `/api/sandbox/docker/start` | Attempt to start Docker Desktop on the host |
+
+### Screen and Computer Use
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/sandbox/screen/screenshot` | Capture a screenshot (returns PNG binary) |
+| `POST` | `/api/sandbox/screen/screenshot` | Capture a screenshot with optional region (returns base64) |
+| `GET` | `/api/sandbox/screen/windows` | List visible windows on the host |
+| `POST` | `/api/sandbox/computer/click` | Perform a mouse click at (x, y) coordinates |
+| `POST` | `/api/sandbox/computer/type` | Type text via keyboard input |
+| `POST` | `/api/sandbox/computer/keypress` | Send a keypress (e.g., return, tab, escape) |
+
+### Audio
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/sandbox/audio/record` | Record audio from the default microphone |
+| `POST` | `/api/sandbox/audio/play` | Play base64-encoded audio |
+
+### Remote Signing
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/sandbox/sign` | Submit a transaction signing request |
+| `POST` | `/api/sandbox/sign/approve` | Approve a pending signing request |
+| `POST` | `/api/sandbox/sign/reject` | Reject a pending signing request |
+| `GET` | `/api/sandbox/sign/pending` | List pending signing approvals |
+| `GET` | `/api/sandbox/sign/address` | Get the signer address |
 
 ### Audit Feed
 

@@ -119,7 +119,7 @@ interface CloudLoginResult {
 The dashboard also provides a login flow via `POST /api/cloud/login` which returns a `sessionId` and `browserUrl`. The frontend then polls `GET /api/cloud/login/status?sessionId=...` until authentication completes. On success, the API key is:
 
 1. Saved to the `milaidy.json` config file
-2. Set in `process.env.ELIZAOS_CLOUD_API_KEY`
+2. Set in `process.env.ELIZAOS_CLOUD_API_KEY` (runtime environment variable)
 3. Persisted to the agent's database record (survives config-file resets)
 4. Used to initialize the cloud manager
 

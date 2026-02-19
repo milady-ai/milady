@@ -45,7 +45,7 @@ When a WebSocket client connects, the server immediately sends:
 {
   "type": "status",
   "state": "running",
-  "agentName": "Milaidy",
+  "agentName": "Milady",
   "model": "@elizaos/plugin-anthropic",
   "startedAt": 1708000000000
 }
@@ -100,7 +100,7 @@ Broadcast every 5 seconds and on state changes.
 {
   "type": "status",
   "state": "running",
-  "agentName": "Milaidy",
+  "agentName": "Milady",
   "model": "@elizaos/plugin-anthropic",
   "startedAt": 1708000000000,
   "pendingRestart": false,
@@ -116,10 +116,6 @@ Broadcast every 5 seconds and on state changes.
 | `startedAt` | `number \| undefined` | Epoch timestamp when the agent was started |
 | `pendingRestart` | `boolean` | Whether a restart is pending |
 | `pendingRestartReasons` | `string[]` | Human-readable reasons why a restart is needed |
-
-<Note>
-When `status.restarted` is `true`, the frontend auto-refreshes the plugin list.
-</Note>
 
 ### `restart-required`
 
@@ -140,7 +136,7 @@ Envelope for agent autonomy loop events streamed from the `AGENT_EVENT` service.
 {
   "type": "agent_event",
   "version": 1,
-  "eventId": "evt-abc-123",
+  "eventId": "evt-42",
   "ts": 1708000000000,
   "runId": "run-xyz",
   "seq": 42,
@@ -148,24 +144,21 @@ Envelope for agent autonomy loop events streamed from the `AGENT_EVENT` service.
   "sessionKey": "session-key",
   "agentId": "agent-uuid",
   "roomId": "room-uuid",
-  "payload": {
-    "runId": "run-xyz",
-    "seq": 42,
-    "stream": "autonomy",
-    "ts": 1708000000000,
-    "data": {}
-  }
+  "payload": {}
 }
 ```
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `version` | `1` | Envelope format version |
-| `eventId` | `string` | Unique event identifier |
+| `eventId` | `string` | Unique event identifier (format: `evt-{N}`) |
 | `ts` | `number` | Epoch timestamp |
-| `runId` | `string` | Autonomy run identifier |
-| `seq` | `number` | Sequence number within the run |
-| `stream` | `string` | Event stream name (e.g., `"autonomy"`) |
+| `runId` | `string \| undefined` | Autonomy run identifier |
+| `seq` | `number \| undefined` | Sequence number within the run |
+| `stream` | `string \| undefined` | Event stream name (e.g., `"autonomy"`, `"assistant"`) |
+| `sessionKey` | `string \| undefined` | Session key |
+| `agentId` | `string \| undefined` | Agent UUID |
+| `roomId` | `string \| undefined` | Room UUID |
 | `payload` | `object` | Inner event data from the agent runtime |
 
 ### `heartbeat_event`
@@ -176,7 +169,7 @@ Envelope for agent heartbeat events (activity indicators).
 {
   "type": "heartbeat_event",
   "version": 1,
-  "eventId": "evt-hb-456",
+  "eventId": "evt-43",
   "ts": 1708000000000,
   "payload": {
     "ts": 1708000000000,
@@ -210,7 +203,7 @@ Envelope for fine-tuning/training progress events.
 {
   "type": "training_event",
   "version": 1,
-  "eventId": "evt-train-789",
+  "eventId": "evt-44",
   "ts": 1708000000000,
   "payload": {}
 }
@@ -228,10 +221,19 @@ Sent when the agent autonomously generates a message in a conversation.
     "id": "msg-uuid",
     "role": "assistant",
     "text": "I noticed something interesting...",
-    "createdAt": "2024-02-15T10:30:00.000Z"
+    "timestamp": 1708000000000,
+    "source": "autonomy"
   }
 }
 ```
+
+| Message Field | Type | Description |
+|--------------|------|-------------|
+| `id` | `string` | Message UUID |
+| `role` | `string` | Always `"assistant"` |
+| `text` | `string` | Message content |
+| `timestamp` | `number` | Epoch timestamp (milliseconds) |
+| `source` | `string` | Origin of the message (e.g., `"autonomy"`) |
 
 The frontend handles this by:
 - Appending the message in real-time if the conversation is active
@@ -257,15 +259,16 @@ Sent when conversation metadata changes (e.g., title auto-generated from first m
 
 ## Reconnection Behavior
 
-The frontend API client (`apps/app/src/api-client.ts`) handles reconnection automatically via its `connectWs()` method. The reconnection strategy is configured through the `web.reconnect` config section:
+The frontend API client (`apps/app/src/api-client.ts`) handles reconnection automatically via its `connectWs()` method. The reconnection strategy uses exponential backoff with these hardcoded parameters:
 
-| Field | Default | Description |
-|-------|---------|-------------|
-| `initialMs` | varies | Initial delay before first reconnection attempt |
-| `maxMs` | varies | Maximum delay between reconnection attempts |
-| `factor` | varies | Exponential backoff multiplier |
-| `jitter` | varies | Randomization factor to prevent thundering herd |
-| `maxAttempts` | `0` (unlimited) | Maximum number of reconnection attempts |
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| Initial delay | 500ms | Delay before first reconnection attempt |
+| Backoff factor | 1.5x | Multiplier applied after each failed attempt |
+| Max delay | 10,000ms | Maximum delay between reconnection attempts |
+| Max attempts | unlimited | Reconnection never stops trying |
+
+On successful reconnect, the `backoffMs` resets to 500ms.
 
 <Tip>
 On reconnect, the server replays the last 120 buffered events, so clients can catch up on missed events without a full page refresh.
@@ -275,6 +278,6 @@ On reconnect, the server replays the last 120 buffered events, so clients can ca
 
 The server maintains an in-memory event buffer for stream events. Key characteristics:
 
-- `agent_event` and `heartbeat_event` types are buffered
+- `agent_event`, `heartbeat_event`, and `training_event` types are buffered
 - Last 120 events are replayed to newly connected clients
-- The `GET /api/agent/events` REST endpoint provides paginated access to the buffer with `after` and `limit` parameters
+- The buffer is capped at 1,500 events; older events are pruned automatically

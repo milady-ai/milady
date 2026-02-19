@@ -1,7 +1,7 @@
 ---
 title: Themes & Avatars
 sidebarTitle: Themes & Avatars
-description: Customize the Milaidy dashboard appearance with 6 built-in themes and 8 VRM 3D avatars with 27 emotes.
+description: Customize the Milaidy dashboard appearance with 6 built-in themes and 8 VRM 3D avatars with 29 emotes across 6 categories.
 ---
 
 # Themes & Avatars
@@ -12,7 +12,7 @@ Milaidy ships with 6 visual themes and 8 built-in 3D VRM avatars. Themes control
 
 ### How to Switch Themes
 
-Navigate to **Settings** and look for the **Appearance** section at the top. The theme picker displays all available themes. Your selection is saved to `localStorage` under the key `milaidy:theme` and persists across sessions.
+Navigate to **Settings** and look for the **Appearance** section at the top. The theme picker displays all available themes. Your selection is saved to `localStorage` under the key `milady:theme` and persists across sessions.
 
 ### Available Themes
 
@@ -40,7 +40,7 @@ Soft pastels with pink and purple tones. A light, playful aesthetic.
 - **Text:** Deep plum (`#4a044e`)
 - **Header bar:** Fuchsia (`#d946ef`)
 - **Borders:** Soft purple (`#e9d5ff`)
-- **Typography:** Hiragino Kaku Gothic Pro, Osaka, sans-serif
+- **Typography:** Hiragino Kaku Gothic Pro, Osaka, Meiryo, MS PGothic, sans-serif
 - **Corners:** Rounded (8px radius)
 - **Shadows:** Subtle fuchsia-tinted
 
@@ -54,7 +54,7 @@ Dark mode with miladymaker.net-inspired green hues. A moody hacker aesthetic.
 - **Text:** Pale green (`#d4e8c4`)
 - **Header bar:** Dark forest (`#1a2a0e`)
 - **Borders:** Deep forest green (`#2a3d1a`)
-- **Typography:** Hiragino Kaku Gothic Pro, Osaka, sans-serif
+- **Typography:** Hiragino Kaku Gothic Pro, Osaka, Meiryo, MS PGothic, sans-serif
 - **Corners:** Sharp (0px radius)
 - **Shadows:** None
 
@@ -68,8 +68,8 @@ VS Code-inspired dark theme for developers. Familiar, functional, professional.
 - **Text:** Light gray (`#d4d4d4`)
 - **Header bar:** VS Code blue (`#007acc`)
 - **Borders:** Medium gray (`#3c3c3c`)
-- **Typography:** system-ui, Segoe UI, Roboto, sans-serif
-- **Monospace:** Cascadia Code, Fira Code, Consolas
+- **Typography:** -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif
+- **Monospace:** Cascadia Code, Fira Code, Consolas, Courier New, monospace
 - **Corners:** Slight rounding (4px radius)
 - **Shadows:** Subtle dark shadows
 
@@ -107,7 +107,7 @@ Neon chaos. A deliberately overwhelming, maximalist theme.
 Every theme defines a consistent set of CSS custom properties, including:
 
 - **Plugin UI tokens** — `--plugin-field-gap`, `--plugin-group-gap`, `--plugin-section-padding`, `--plugin-label-size`, `--plugin-input-height`, `--plugin-max-field-width` — ensuring plugin settings forms are styled consistently across themes.
-- **Timing tokens** — `--duration-fast`, `--duration-normal`, `--duration-slow` — animation speeds that vary by theme (haxor is fastest at 50/100/150ms; psycho/qt314 are 50-100/100-200/200-300ms).
+- **Timing tokens** — `--duration-fast`, `--duration-normal`, `--duration-slow` — animation speeds that vary by theme (haxor is fastest at 50/100/150ms; psycho is 50/100/200ms; qt3.14 is 100/200/300ms; milady and web2000 are 100/150/250ms; programmer is 80/120/200ms).
 
 ## VRM 3D Avatars
 
@@ -120,7 +120,7 @@ Every theme defines a consistent set of CSS custom properties, including:
 Milaidy ships with **8 built-in VRM avatars** (indexed 1 through 8). Each avatar has:
 
 - A `.vrm` model file located at `vrms/{index}.vrm`.
-- A preview thumbnail at `vrms/previews/milaidy-{index}.png`.
+- A preview thumbnail at `vrms/previews/milady-{index}.png`.
 
 Select an avatar index of 0 to disable the 3D avatar entirely.
 
@@ -149,12 +149,12 @@ The `VrmEngine` manages:
 
 The emote picker is accessible via:
 
-- The **Cmd/Ctrl+E** keyboard shortcut (desktop app only).
+- The **Cmd/Ctrl+E** keyboard shortcut (works in both the desktop app and the web dashboard).
 - The emote picker button in the chat UI.
 
 ### Available Emotes
 
-There are **27 emotes** across **6 categories**:
+There are **29 emotes** across **6 categories**:
 
 #### Greeting (2)
 

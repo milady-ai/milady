@@ -212,10 +212,11 @@ The agent has built-in actions for managing ejected plugins and core:
 When the runtime resolves plugins, ejected versions always take precedence:
 
 1. **Ejected** (`~/.milaidy/plugins/ejected/`) -- highest priority
-2. **Official npm** (`node_modules/@elizaos/plugin-*`) -- with install record repair
-3. **User-installed** (`~/.milaidy/plugins/installed/`)
-4. **Local @milaidy** (`src/plugins/`)
-5. **npm fallback** (`import(name)`)
+2. **Workspace override** (project-local plugin overrides)
+3. **Official npm** (`node_modules/@elizaos/plugin-*`) -- with install record repair
+4. **User-installed** (`~/.milaidy/plugins/installed/`)
+5. **Local @milaidy** (built-in dist plugins)
+6. **npm fallback** (`import(name)`)
 
 This means you can eject any plugin and your local version automatically takes over without any additional configuration.
 

@@ -1,12 +1,12 @@
 ---
 title: Chrome Extension
 sidebarTitle: Chrome Extension
-description: Use the Milaidy Browser Relay Chrome extension to let your agent control browser tabs via the Chrome DevTools Protocol.
+description: Use the Milady Browser Relay Chrome extension to let your agent control browser tabs via the Chrome DevTools Protocol.
 ---
 
 # Chrome Extension
 
-The **Milaidy Browser Relay** is a Chrome extension that bridges your browser tabs to the Milaidy agent runtime using the Chrome DevTools Protocol (CDP). This allows your agent to inspect, navigate, and interact with web pages in real time.
+The **Milady Browser Relay** is a Chrome extension that bridges your browser tabs to the Milaidy agent runtime using the Chrome DevTools Protocol (CDP). This allows your agent to inspect, navigate, and interact with web pages in real time.
 
 ## What It Does
 
@@ -27,7 +27,7 @@ The extension is not published to the Chrome Web Store. Install it from source:
 3. Open Chrome and go to `chrome://extensions/`.
 4. Enable **Developer mode** (toggle in the top-right corner).
 5. Click **Load unpacked** and select the `apps/chrome-extension/` directory.
-6. The Milaidy Browser Relay icon appears in your toolbar.
+6. The Milady Browser Relay icon appears in your toolbar.
 
 On first install, the extension automatically opens its options page with setup instructions.
 
@@ -98,18 +98,18 @@ The extension icon displays a badge indicating the connection state for each tab
 |-------|-------|---------|
 | **ON** | Red (`#FF5A36`) | Debugger attached and relay connected |
 | *(empty)* | — | Not attached to this tab |
-| **...** | Yellow (`#F59E0B`) | Connecting to the relay server |
+| **...** (Unicode ellipsis `\u2026`) | Yellow (`#F59E0B`) | Connecting to the relay server |
 | **!** | Dark red (`#B91C1C`) | Error — relay server not reachable |
 
 ### Tooltip States
 
 The toolbar icon tooltip also updates to reflect the current state:
 
-- `"Milaidy Browser Relay (click to attach/detach)"` — idle state.
-- `"Milaidy Browser Relay: connecting to local relay..."` — connecting.
-- `"Milaidy Browser Relay: attached (click to detach)"` — attached and active.
-- `"Milaidy Browser Relay: disconnected (click to re-attach)"` — relay disconnected.
-- `"Milaidy Browser Relay: relay not running (open options for setup)"` — relay server unreachable.
+- `"Milady Browser Relay (click to attach/detach)"` — idle state.
+- `"Milady Browser Relay: connecting to local relay\u2026"` — connecting.
+- `"Milady Browser Relay: attached (click to detach)"` — attached and active.
+- `"Milady Browser Relay: disconnected (click to re-attach)"` — relay disconnected.
+- `"Milady Browser Relay: relay not running (open options for setup)"` — relay server unreachable.
 
 ## Security Considerations
 

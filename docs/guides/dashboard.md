@@ -39,7 +39,7 @@ The default landing tab. Features include:
 - **VRM 3D avatar** — a live 3D avatar rendered with Three.js and `@pixiv/three-vrm`. The avatar responds to conversation with idle animations and emotes. Select from 8 built-in VRM models.
 - **Conversations sidebar** — manage multiple conversations, see unread counts, create new threads.
 - **Autonomous panel** — displays real-time agent status, stream events (actions, tools, errors, heartbeats), active triggers, and workbench tasks/todos.
-- **Emote picker** — trigger VRM avatar emotes (Cmd/Ctrl+E in the desktop app). 27 emotes across 6 categories: Greeting, Emotion, Dance, Combat, Idle, Movement.
+- **Emote picker** — trigger VRM avatar emotes (Cmd/Ctrl+E). 29 emotes across 6 categories: Greeting, Emotion, Dance, Combat, Idle, Movement.
 - **Context menu** — right-click messages to save commands or perform custom actions.
 
 ### Character
@@ -82,10 +82,14 @@ Unified scrollable preferences panel with the following sections:
 
 1. **Appearance** — theme picker with 6 built-in themes (see [Themes & Avatars](/guides/themes)).
 2. **AI Model** — provider selection and model configuration.
-3. **Media Generation** — image, video, audio, and vision provider selection.
-4. **Speech (TTS/STT)** — voice provider and transcription configuration.
-5. **Updates** — software update channel selection and manual update check.
-6. **Advanced** (collapsible) — Logs, Core Plugins, Database, Secrets, Chrome Extension connection, Export/Import, and Danger Zone.
+3. **Wallet / RPC / Secrets** — wallet, RPC endpoint, and secrets configuration (embedded config view).
+4. **Media Generation** — image, video, audio, and vision provider selection.
+5. **Speech (TTS/STT)** — voice provider and transcription configuration.
+6. **Permissions & Capabilities** — system permission management for native platforms.
+7. **Software Updates** — update channel selection (stable, beta, nightly) and manual update check.
+8. **Chrome Extension** — relay server connection status and extension installation instructions.
+9. **Agent Export / Import** — export agent data as an encrypted file or import from a previous export.
+10. **Danger Zone** — export private keys and reset agent (irreversible actions).
 
 ### Advanced Group
 

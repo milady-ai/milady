@@ -14,8 +14,8 @@ Milaidy is a cross-platform AI agent runtime built on top of [ElizaOS](https://e
 +---------------------------------------------------------------+
 |                        Frontend Layer                          |
 |  React SPA (Vite) + Capacitor (iOS/Android) + Electron (Desktop)|
-|  Tabs: Chat, Character, Knowledge, Connectors, Apps,          |
-|         Wallets, Advanced (Plugins, Skills, Triggers, DB, ...) |
+|  Tabs: Chat, Character, Wallets, Knowledge, Social, Apps,     |
+|         Settings, Advanced (Plugins, Skills, Triggers, DB, ...) |
 +----------------------------+----------------------------------+
                              | HTTP + WebSocket
                              v
@@ -38,7 +38,7 @@ Milaidy is a cross-platform AI agent runtime built on top of [ElizaOS](https://e
 +---------------------------------------------------------------+
 |                       CLI Layer                                |
 |  Commander-based CLI (entry.ts -> run-main.ts)                |
-|  Commands: start, update, status, channel, ...                |
+|  Commands: start, setup, configure, config, update, ...       |
 |  Profile system, dotenv loading, log-level control            |
 +---------------------------------------------------------------+
 ```
@@ -98,13 +98,13 @@ The frontend (`apps/app/src/App.tsx`) is a React SPA built with Vite.
   <Card title="Knowledge View" icon="book">
     Upload documents, search knowledge base, manage RAG fragments
   </Card>
-  <Card title="Connectors View" icon="plug">
-    Configure Discord, Telegram, Slack, and other messaging connectors
+  <Card title="Social View" icon="plug">
+    Configure Discord, Telegram, and other messaging connectors
   </Card>
   <Card title="Apps View" icon="grid">
     Browse, install, and manage ElizaOS apps from the marketplace
   </Card>
-  <Card title="Inventory View" icon="wallet">
+  <Card title="Wallets View" icon="wallet">
     View wallet addresses, balances, NFTs across EVM and Solana chains
   </Card>
   <Card title="Advanced View" icon="gear">
@@ -167,7 +167,7 @@ Additional optional plugins like `plugin-mcp`, `plugin-computeruse`, `plugin-cli
 
 ### Milaidy Plugin
 
-The `milaidy` plugin (`src/runtime/milaidy-plugin.ts`) provides:
+The `milaidy` plugin (`src/runtime/milady-plugin.ts`) provides:
 
 - **Providers**: Workspace context, channel profiles, admin trust, autonomous state, session keys, UI catalog, emotes, custom actions
 - **Actions**: Restart, send message, trigger tasks, emote playback, user-defined custom actions

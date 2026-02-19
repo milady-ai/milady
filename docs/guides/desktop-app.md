@@ -24,7 +24,7 @@ Download the `.exe` installer (NSIS) from the releases page.
 
 - **Build target:** NSIS installer.
 - **Options:** Choose installation directory, run elevated if needed.
-- **Code signed** via Azure Code Signing (`milaidy-code-sign` certificate profile).
+- **Code signed** via Azure Code Signing (`milady-code-sign` certificate profile).
 
 ### Linux
 
@@ -39,11 +39,12 @@ The desktop app embeds the full Milaidy agent runtime directly in the Electron m
 
 On startup, the agent module:
 
-1. Dynamically imports the headless `startEliza` function from the bundled Milaidy distribution.
-2. Starts the API server on an available port.
-3. Sends the port number to the renderer process so the UI's API client can connect.
+1. Starts the API server on a configured port (default 2138, or the `MILADY_PORT` environment variable).
+2. Dynamically imports the headless `startEliza` function from the bundled distribution.
+3. Starts the Eliza runtime in headless mode.
+4. Sends the port number to the renderer process so the UI's API client can connect.
 
-The renderer never needs to distinguish between an embedded or remote API server — it connects to `http://localhost:{port}` using the injected `window.__MILAIDY_API_BASE__` value.
+The renderer never needs to distinguish between an embedded or remote API server — it connects to `http://localhost:{port}` using the injected `window.__MILADY_API_BASE__` value.
 
 ### Agent Status States
 
@@ -62,14 +63,18 @@ The embedded agent reports its state to the UI:
 For testing or connecting to a remote agent, set the environment variable:
 
 ```
-MILAIDY_ELECTRON_TEST_API_BASE=http://your-host:port
+MILADY_ELECTRON_TEST_API_BASE=http://your-host:port
 ```
 
-This skips the embedded agent and connects to the specified API server instead. Setting `MILAIDY_ELECTRON_SKIP_EMBEDDED_AGENT=1` also disables the embedded runtime.
+This skips the embedded agent and connects to the specified API server instead. Setting `MILADY_ELECTRON_SKIP_EMBEDDED_AGENT=1` also disables the embedded runtime.
 
 ## Native Modules
 
 The desktop app registers 10 native modules via IPC, each providing platform-specific capabilities:
+
+### Agent
+
+Embedded agent runtime management. Starts, stops, and restarts the agent runtime, and reports status to the renderer.
 
 ### Desktop Manager
 
@@ -90,11 +95,11 @@ Network discovery for finding and connecting to Milaidy gateway servers on the l
 
 ### Talk Mode
 
-Native speech-to-text and text-to-speech pipeline with ElevenLabs integration and system TTS fallback.
+Native speech-to-text and text-to-speech pipeline with ElevenLabs integration and system TTS fallback. Includes local Whisper-based speech transcription support.
 
 ### Swabble (Voice Wake)
 
-Voice wake-word detection for hands-free activation on macOS.
+Voice wake-word detection for hands-free activation on macOS. Includes Whisper availability detection.
 
 ### Screen Capture
 
@@ -116,10 +121,6 @@ GPS and geolocation services.
 
 System permission management (microphone, camera, screen recording, etc.).
 
-### Whisper
-
-Local Whisper-based speech transcription.
-
 ## Global Shortcuts
 
 The desktop app registers these global keyboard shortcuts:
@@ -133,14 +134,14 @@ These shortcuts work system-wide when the app is running.
 
 ## Deep Linking
 
-The desktop app supports the `milaidy://` custom URL protocol for deep linking.
+The desktop app supports the `milady://` custom URL protocol for deep linking.
 
 ### Share Target
 
-The `milaidy://share` URL scheme allows external applications to share content with your agent:
+The `milady://share` URL scheme allows external applications to share content with your agent:
 
 ```
-milaidy://share?title=Hello&text=Check+this+out&url=https://example.com
+milady://share?title=Hello&text=Check+this+out&url=https://example.com
 ```
 
 Parameters:
@@ -161,4 +162,4 @@ In development mode:
 
 - A **file watcher** (chokidar) monitors the web asset directory and auto-reloads the app when files change (1.5 second debounce).
 - Content Security Policy is adjusted for development.
-- The `MILAIDY_ELECTRON_USER_DATA_DIR` environment variable can override the user data directory for automated E2E testing.
+- The `MILADY_ELECTRON_USER_DATA_DIR` environment variable can override the user data directory for automated E2E testing.

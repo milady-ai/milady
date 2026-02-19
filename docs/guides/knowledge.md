@@ -54,7 +54,7 @@ Fetch and index content from a web URL.
 
 The system fetches the URL content, detects its type, and processes it appropriately. Text content is stored directly; binary content (PDF, Word, images) is stored as base64.
 
-Security: URL fetching includes SSRF protection. Requests to localhost, private/internal network addresses, link-local ranges, and cloud metadata endpoints (169.254.169.254, metadata.google.internal) are blocked. DNS resolution is checked to prevent alias bypasses. Redirects are not followed.
+Security: URL fetching includes SSRF protection. Requests to localhost, private/internal network addresses, link-local ranges, and cloud metadata endpoints (169.254.169.254, metadata.google.internal) are blocked. DNS resolution is checked to prevent alias bypasses. Redirects are blocked entirely.
 
 ### YouTube Transcripts
 

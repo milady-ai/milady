@@ -20,7 +20,7 @@ cd deploy
 The setup script performs the following steps:
 
 1. Builds the Docker image (`milaidy:local` by default)
-2. Generates a random gateway token (via `openssl rand -hex 32`)
+2. Generates a random gateway token (via `openssl rand -hex 32`, or Python `secrets.token_hex(32)` as fallback)
 3. Writes environment variables to `deploy/.env`
 4. Runs interactive onboarding (`milaidy-cli onboard --no-install-daemon`)
 5. Starts the gateway service in detached mode
@@ -44,12 +44,20 @@ ENV PATH="/root/.bun/bin:${PATH}"
 
 WORKDIR /app
 
+ARG MILAIDY_DOCKER_APT_PACKAGES=""
+RUN if [ -n "$MILAIDY_DOCKER_APT_PACKAGES" ]; then \
+      apt-get update && \
+      DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $MILAIDY_DOCKER_APT_PACKAGES && \
+      apt-get clean && \
+      rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*; \
+    fi
+
 # Copy dependency manifests first for better layer caching
 COPY package.json bun.lock* .npmrc ./
 COPY apps/app/package.json ./apps/app/package.json
 COPY scripts ./scripts
 
-# Install dependencies using the committed lockfile only
+# Install dependencies using the committed lockfile only.
 RUN bun install --frozen-lockfile
 
 # Copy source and build (includes apps/app/dist UI bundle)
@@ -58,14 +66,17 @@ RUN bun run build
 
 ENV NODE_ENV=production
 
-# Security hardening: Run as non-root user
+# Allow non-root user to write temp files during runtime.
 RUN chown -R node:node /app
+
+# Security hardening: Run as non-root user
 USER node
 
-# Bind to 0.0.0.0 in containers so the service is reachable
+# Default: bind to 0.0.0.0 in containers so the service is reachable.
+# Set MILAIDY_API_TOKEN in production to require auth.
 ENV MILAIDY_API_BIND="0.0.0.0"
 
-# Start the API server + dashboard UI on port 2138
+# Start the API server + dashboard UI on port 2138.
 CMD ["node", "milaidy.mjs", "start"]
 ```
 
@@ -109,6 +120,9 @@ The `docker-compose.yml` defines two services:
           TERM: xterm-256color
           MILAIDY_GATEWAY_TOKEN: ${MILAIDY_GATEWAY_TOKEN}
           MILAIDY_ALLOWED_ORIGINS: ${MILAIDY_ALLOWED_ORIGINS}
+          CLAUDE_AI_SESSION_KEY: ${CLAUDE_AI_SESSION_KEY}
+          CLAUDE_WEB_SESSION_KEY: ${CLAUDE_WEB_SESSION_KEY}
+          CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE}
         volumes:
           - ${MILAIDY_CONFIG_DIR}:/home/node/.milaidy
           - ${MILAIDY_WORKSPACE_DIR}:/home/node/.milaidy/workspace
@@ -137,6 +151,9 @@ The `docker-compose.yml` defines two services:
           TERM: xterm-256color
           MILAIDY_GATEWAY_TOKEN: ${MILAIDY_GATEWAY_TOKEN}
           BROWSER: echo
+          CLAUDE_AI_SESSION_KEY: ${CLAUDE_AI_SESSION_KEY}
+          CLAUDE_WEB_SESSION_KEY: ${CLAUDE_WEB_SESSION_KEY}
+          CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE}
         volumes:
           - ${MILAIDY_CONFIG_DIR}:/home/node/.milaidy
           - ${MILAIDY_WORKSPACE_DIR}:/home/node/.milaidy/workspace
@@ -221,7 +238,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 ```
 
 <Info>
-The docker-compose.yml passes `CLAUDE_AI_SESSION_KEY`, `CLAUDE_WEB_SESSION_KEY`, and `CLAUDE_WEB_COOKIE` through to both services. Add additional provider keys by extending the `environment` section.
+The `docker-compose.yml` passes `CLAUDE_AI_SESSION_KEY`, `CLAUDE_WEB_SESSION_KEY`, and `CLAUDE_WEB_COOKIE` through to both the gateway and CLI services. Add additional provider keys by extending the `environment` section.
 </Info>
 
 ## Cloud Agent Deployment
@@ -310,7 +327,13 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-    bash ca-certificates curl git jq python3 ripgrep \
+    bash \
+    ca-certificates \
+    curl \
+    git \
+    jq \
+    python3 \
+    ripgrep \
   && rm -rf /var/lib/apt/lists/*
 
 CMD ["sleep", "infinity"]

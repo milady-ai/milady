@@ -85,7 +85,7 @@ export default myPlugin;
 
 1. **Discovery** — Plugins are discovered from:
    - Bundled plugins (shipped with Milaidy)
-   - Workspace plugins (`./plugins/`, `./extensions/`)
+   - Workspace plugins (`./plugins/`)
    - Global plugins (`~/.milaidy/plugins/`)
    - npm packages (`@elizaos/plugin-*`)
    - Config-specified plugins
@@ -782,7 +782,7 @@ Plugins can include an `elizaos.plugin.json` manifest file for rich metadata:
   "name": "My Plugin",
   "description": "A plugin that does awesome things",
   "version": "1.0.0",
-  "kind": "tool",
+  "kind": "skill",
   
   "configSchema": {
     "type": "object",
@@ -837,7 +837,7 @@ Indicates where a plugin was discovered:
 |--------|-------------|
 | `bundled` | Shipped with Milaidy |
 | `global` | From `~/.milaidy/plugins/` |
-| `workspace` | From `./plugins/` or `./extensions/` |
+| `workspace` | From `./plugins/` |
 | `config` | Explicitly listed in config |
 | `npm` | Installed npm package |
 

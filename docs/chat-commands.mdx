@@ -1,21 +1,36 @@
 ---
 title: "Chat Commands"
 sidebarTitle: "Chat Commands"
-description: "In-session commands available in any Milaidy chat."
+description: "In-session commands available in Milaidy TUI and web chat."
 ---
 
 # Chat Commands
 
-These commands work in any chat session — WebChat, Telegram, Discord, etc.
+## TUI Slash Commands
+
+These commands work in the interactive TUI (terminal) chat:
 
 | Command | What it does |
 |---------|------------|
-| `/status` | session status, tokens, cost |
-| `/new` `/reset` | memory wipe, fresh start |
-| `/compact` | compress context (she summarizes) |
-| `/think <level>` | reasoning: off\|minimal\|low\|medium\|high\|max |
-| `/verbose on\|off` | toggle verbose responses |
-| `/usage off\|tokens\|full` | per-message token display |
-| `/model <id>` | switch model mid-session |
-| `/restart` | restart the gateway |
-| `/help` | list commands |
+| `/model [provider/id]` | switch model (opens selector or set directly) |
+| `/models` | alias for `/model` |
+| `/clear` | clear chat display |
+| `/help` | show help |
+| `/exit` | quit |
+| `/quit` | alias for `/exit` |
+
+## Runtime Commands
+
+The following capabilities are available through the ElizaOS runtime and may vary depending on installed plugins and configuration. They are controlled by the `commands` section in `milaidy.json`:
+
+| Config Key | Description |
+|-----------|------------|
+| `commands.text` | Enable text command parsing (default: true) |
+| `commands.bash` | Allow bash chat command (default: false) |
+| `commands.config` | Allow /config command (default: false) |
+| `commands.debug` | Allow /debug command (default: false) |
+| `commands.restart` | Allow restart commands/tools (default: false) |
+
+<Note>
+The hook system supports custom command handlers via event keys like `"command:new"` for routing specific actions. See the [Hooks guide](/guides/hooks) for details.
+</Note>

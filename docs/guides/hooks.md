@@ -39,7 +39,7 @@ name: my-hook
 description: Does something useful on session start
 homepage: https://example.com/docs
 metadata:
-  milaidy:
+  milady:
     always: false
     hookKey: my-hook
     emoji: "🔧"
@@ -69,7 +69,7 @@ metadata:
 ---
 ```
 
-### Milaidy Metadata Fields
+### Milady Metadata Fields
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -83,16 +83,16 @@ metadata:
 | `requires.bins` | `string[]` | All listed binaries must exist on `$PATH` |
 | `requires.anyBins` | `string[]` | At least one listed binary must exist on `$PATH` |
 | `requires.env` | `string[]` | Required environment variables (checked in both process env and hook config env) |
-| `requires.config` | `string[]` | Required config paths that must be truthy in the Milaidy config |
+| `requires.config` | `string[]` | Required config paths that must be truthy in the Milady config |
 | `install` | `HookInstallSpec[]` | Installation methods for the macOS Skills UI |
 
 ## Hook Discovery
 
 Hooks are discovered from multiple directory sources with a defined precedence order (later sources override earlier ones on name conflicts):
 
-1. **Extra directories** (lowest precedence) -- additional directories specified in config `hooks.load.extraDirs` (must be under `~/.milaidy/`)
+1. **Extra directories** (lowest precedence) -- additional directories specified in config `hooks.load.extraDirs` (must be under `~/.milady/`)
 2. **Bundled directory** -- hooks shipped with Milaidy
-3. **Managed directory** -- `~/.milaidy/hooks/` for user-installed hooks
+3. **Managed directory** -- `~/.milady/hooks/` for user-installed hooks
 4. **Workspace directory** (highest precedence) -- `<workspace>/hooks/` for project-specific hooks
 
 Within each directory, the discovery system:
@@ -165,7 +165,7 @@ await triggerHook(event);
 
 ### 1. Create the Hook Directory
 
-Create a new directory under `~/.milaidy/hooks/my-hook/` with two files:
+Create a new directory under `~/.milady/hooks/my-hook/` with two files:
 
 **HOOK.md**
 ```yaml
@@ -173,7 +173,7 @@ Create a new directory under `~/.milaidy/hooks/my-hook/` with two files:
 name: my-hook
 description: Logs a greeting when a new session starts
 metadata:
-  milaidy:
+  milady:
     events:
       - session:new
     requires:
@@ -218,7 +218,7 @@ The loader returns a summary: total discovered, eligible, registered, skipped (w
 ### 4. Path Safety
 
 Hook handler modules can only be loaded from allowed directories:
-- `~/.milaidy/hooks/`
+- `~/.milady/hooks/`
 - The bundled hooks directory
 - `<workspace>/hooks/`
 

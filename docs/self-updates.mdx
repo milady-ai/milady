@@ -194,7 +194,7 @@ When `milaidy update` runs (without `--check`), the following steps occur:
 4. If update available:
    a. Detect installation method
    b. Build appropriate update command
-   c. Execute update command (inherits stdin, pipes stderr)
+   c. Execute update command (inherits stdin/stdout, pipes stderr)
    d. Verify new version via `milaidy --version`
    e. Report success/failure
 5. Save check metadata to config

@@ -174,4 +174,5 @@ Milaidy ships with the following built-in actions in `src/actions/`:
 | `EJECT_CORE` | Clone ElizaOS core source locally so edits override npm @elizaos/core. |
 | `SYNC_CORE` | Sync an ejected @elizaos/core checkout with upstream and rebuild it. |
 | `REINJECT_CORE` | Remove ejected core source so runtime falls back to npm @elizaos/core. |
+| `LIST_EJECTED_PLUGINS` | List all ejected plugins and their upstream metadata. |
 | `CORE_STATUS` | Show whether @elizaos/core is running from npm or ejected source. |

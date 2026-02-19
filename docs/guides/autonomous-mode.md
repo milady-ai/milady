@@ -56,7 +56,7 @@ The Autonomous Panel in the dashboard UI provides a visual toggle for enabling a
 
 ## Autonomous State Provider
 
-The `milaidyAutonomousState` provider bridges context between autonomous loop iterations. It is a dynamic ElizaOS provider (position 10) that injects a snapshot of recent autonomous activity into the agent's context on every reasoning cycle.
+The `miladyAutonomousState` provider bridges context between autonomous loop iterations. It is a dynamic ElizaOS provider (position 10) that injects a snapshot of recent autonomous activity into the agent's context on every reasoning cycle.
 
 ### How It Works
 
@@ -79,7 +79,7 @@ Autonomous state snapshot:
    - `autonomousEventsCount` -- total cached events
    - `heartbeatStatus` -- last heartbeat status string
    - `events` -- array of recent event summaries (runId, seq, stream, ts)
-   - `heartbeat` -- last heartbeat object (status, ts, target)
+   - `heartbeat` -- last heartbeat object (status, ts, to)
 
 ## Activity Stream
 

@@ -1,7 +1,7 @@
 ---
 title: "Platform Connectors"
 sidebarTitle: "Connectors"
-description: "Platform bridges for Discord, Telegram, Slack, WhatsApp, Signal, iMessage, Matrix, MS Teams, Google Chat, Twitter, and BlueBubbles."
+description: "Platform bridges for Discord, Telegram, Slack, WhatsApp, Signal, iMessage, BlueBubbles, MS Teams, Google Chat, and Twitter."
 ---
 
 # Platform Connectors
@@ -47,7 +47,7 @@ Connectors are platform bridges that allow your agent to communicate across mess
 
 ## General Configuration
 
-Connectors are configured in the `channels` section of `milaidy.json`. Common fields shared across most connectors:
+Connectors are configured in the `connectors` section of `milaidy.json`. Common fields shared across most connectors:
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -80,7 +80,7 @@ Connectors are configured in the `channels` section of `milaidy.json`. Common fi
 
 ```json
 {
-  "channels": {
+  "connectors": {
     "discord": {
       "enabled": true,
       "token": "BOT_TOKEN",
@@ -128,7 +128,7 @@ Connectors are configured in the `channels` section of `milaidy.json`. Common fi
 
 ```json
 {
-  "channels": {
+  "connectors": {
     "telegram": {
       "enabled": true,
       "botToken": "BOT_TOKEN",
@@ -175,7 +175,7 @@ Connectors are configured in the `channels` section of `milaidy.json`. Common fi
 
 ```json
 {
-  "channels": {
+  "connectors": {
     "slack": {
       "enabled": true,
       "mode": "socket",
@@ -217,7 +217,7 @@ Connectors are configured in the `channels` section of `milaidy.json`. Common fi
 
 ```json
 {
-  "channels": {
+  "connectors": {
     "whatsapp": {
       "accounts": {
         "default": {
@@ -258,7 +258,7 @@ See the [WhatsApp Integration Guide](/guides/whatsapp) for detailed setup instru
 
 ```json
 {
-  "channels": {
+  "connectors": {
     "signal": {
       "enabled": true,
       "account": "+1234567890",
@@ -292,7 +292,7 @@ See the [WhatsApp Integration Guide](/guides/whatsapp) for detailed setup instru
 
 ```json
 {
-  "channels": {
+  "connectors": {
     "imessage": {
       "enabled": true,
       "service": "auto",
@@ -324,7 +324,7 @@ See the [WhatsApp Integration Guide](/guides/whatsapp) for detailed setup instru
 
 ```json
 {
-  "channels": {
+  "connectors": {
     "bluebubbles": {
       "enabled": true,
       "serverUrl": "http://localhost:1234",
@@ -355,7 +355,7 @@ See the [WhatsApp Integration Guide](/guides/whatsapp) for detailed setup instru
 
 ```json
 {
-  "channels": {
+  "connectors": {
     "msteams": {
       "enabled": true,
       "appId": "APP_ID",
@@ -389,7 +389,7 @@ See the [WhatsApp Integration Guide](/guides/whatsapp) for detailed setup instru
 
 ```json
 {
-  "channels": {
+  "connectors": {
     "googlechat": {
       "enabled": true,
       "serviceAccountFile": "./service-account.json",
@@ -422,7 +422,7 @@ See the [WhatsApp Integration Guide](/guides/whatsapp) for detailed setup instru
 
 ```json
 {
-  "channels": {
+  "connectors": {
     "twitter": {
       "enabled": true,
       "apiKey": "...",
@@ -455,7 +455,7 @@ See the [WhatsApp Integration Guide](/guides/whatsapp) for detailed setup instru
 The typical connector lifecycle follows this pattern:
 
 1. **Install plugin** -- Connector plugins are installed as `@elizaos/plugin-{platform}` packages
-2. **Configure** -- Add the platform configuration to the `channels` section of `milaidy.json`
+2. **Configure** -- Add the platform configuration to the `connectors` section of `milaidy.json`
 3. **Enable** -- Set `enabled: true` in the connector config
 4. **Authenticate** -- Provide credentials (tokens, keys) or complete auth flow (QR code scan)
 5. **Run** -- The runtime starts the connector, establishes connections, and begins message handling
@@ -469,7 +469,7 @@ Most connectors support multiple accounts via the `accounts` key. Each account h
 
 ```json
 {
-  "channels": {
+  "connectors": {
     "telegram": {
       "dmPolicy": "pairing",
       "accounts": {

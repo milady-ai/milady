@@ -176,8 +176,8 @@ Manages installable apps with viewer configurations:
 
 Supports NFT minting with drop mechanics:
 
-- `DropStatus` — drop state (enabled, public/whitelist mint, supply, price, minted-out flag)
-- `MintResult` — agent ID, mint number, transaction hash, shiny flag
+- `DropStatus` — drop state (dropEnabled, publicMintOpen, whitelistMintOpen, mintedOut, currentSupply, maxSupply, shinyPrice, userHasMinted)
+- `MintResult` — agentId (number), mintNumber, txHash, isShiny
 
 ### Verification (`src/contracts/verification.ts`)
 

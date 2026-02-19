@@ -71,7 +71,7 @@ bun run milaidy start
 
 ### Testing
 
-The project uses **Vitest 4.x** with V8 coverage. Coverage thresholds are set at **70%** for lines, branches, functions, and statements.
+The project uses **Vitest 4.x** with V8 coverage. Coverage thresholds are set at **25%** for lines, functions, and statements, and **15%** for branches.
 
 ```bash
 # Run all tests (parallel runner)
@@ -130,7 +130,7 @@ Key Biome rules configured in `biome.json`:
 # Full build (TypeScript + UI)
 bun run build
 
-# TypeScript only (no UI)
+# Build using Node.js (instead of Bun runtime)
 bun run build:node
 
 # Desktop app (Electron)

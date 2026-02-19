@@ -9,19 +9,24 @@ description: "All Milaidy terminal commands, TUI hotkeys, and headless mode."
 ## Starting Milaidy
 
 ```bash
-milaidy                    # start (default)
-milaidy start              # same thing
-milaidy start --headless   # no browser popup
-milaidy start --verbose    # debug mode for when things break
+milaidy                    # start interactive TUI (default command)
+milaidy tui                # same thing — interactive terminal chat
+milaidy tui -m <model>     # start TUI with a specific model (e.g. anthropic/claude-sonnet-4-20250514)
+milaidy start              # start the agent runtime (API server only, no TUI)
+milaidy run                # alias for start
 ```
 
 ## Setup & Config
 
 ```bash
-milaidy setup              # first-time setup / refresh workspace after update
-milaidy configure          # interactive config wizard
-milaidy config get <key>   # read a config value
-milaidy config set <k> <v> # set a config value
+milaidy setup              # initialize ~/.milaidy/milaidy.json and agent workspace
+milaidy setup --workspace <dir>  # specify custom workspace directory
+milaidy configure          # display configuration guidance and common env vars
+milaidy config get <key>   # read a config value (supports dot-notation)
+milaidy config path        # print the resolved config file path
+milaidy config show        # display all config values grouped by section
+milaidy config show --all  # include advanced/hidden fields
+milaidy config show --json # output raw JSON
 ```
 
 ## Dashboard & UI
@@ -29,22 +34,43 @@ milaidy config set <k> <v> # set a config value
 ```bash
 milaidy dashboard          # open web UI in browser
 milaidy dashboard --port 3000  # custom port
+milaidy dashboard --url <url>  # open a specific URL directly
 ```
 
 ## Models
 
 ```bash
-milaidy models             # list configured model providers
-milaidy models add         # add a new provider
-milaidy models test        # test if your API keys work
+milaidy models             # list configured model providers (checks env vars)
 ```
 
 ## Plugins
 
 ```bash
-milaidy plugins list       # what's installed
-milaidy plugins add <name> # install a plugin
-milaidy plugins remove <name>
+milaidy plugins list               # list all plugins from the registry
+milaidy plugins list -q <keyword>  # filter by name or keyword
+milaidy plugins search <query>     # search the plugin registry
+milaidy plugins info <name>        # show detailed info about a plugin
+milaidy plugins install <name>     # install a plugin (supports name@version)
+milaidy plugins uninstall <name>   # uninstall a user-installed plugin
+milaidy plugins installed          # list plugins installed from the registry
+milaidy plugins refresh            # force-refresh the registry cache
+milaidy plugins test               # validate custom drop-in plugins
+milaidy plugins config <name>      # show plugin configuration
+milaidy plugins config <name> -e   # interactive plugin config editor
+milaidy plugins add-path <path>    # register a plugin search directory
+milaidy plugins paths              # list all plugin search directories
+milaidy plugins open [name-or-path]  # open a plugin directory in your editor
+```
+
+## Updates
+
+```bash
+milaidy update                     # check for and install updates
+milaidy update --check             # check only, don't install
+milaidy update --channel <ch>      # switch release channel (stable, beta, nightly)
+milaidy update --force             # bypass interval cache
+milaidy update status              # show versions across all channels
+milaidy update channel [name]      # view or change the release channel
 ```
 
 ## Misc
@@ -52,56 +78,43 @@ milaidy plugins remove <name>
 ```bash
 milaidy --version          # version check
 milaidy --help             # help
-milaidy doctor             # diagnose issues
 ```
 
 ---
 
 ## TUI (Terminal UI)
 
-When running, Milaidy shows a live terminal interface:
-
-```
-╭─────────────────────────────────────────────────────────────╮
-│  milaidy v0.1.0                              ▲ running      │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  Agent: mila                                                │
-│  Model: anthropic/claude-opus-4-5                           │
-│  Sessions: 2 active                                         │
-│                                                             │
-│  ┌─ Activity ──────────────────────────────────────────┐    │
-│  │ 12:34:02  [web] user: hey mila                      │    │
-│  │ 12:34:05  [web] mila: hi anon~ what's up?           │    │
-│  │ 12:35:11  [telegram] user joined                    │    │
-│  │ 12:35:15  [telegram] user: gm                       │    │
-│  │ 12:35:17  [telegram] mila: gm fren                  │    │
-│  └─────────────────────────────────────────────────────┘    │
-│                                                             │
-│  Tokens: 12,847 in / 3,291 out   Cost: $0.42                │
-│                                                             │
-╰─────────────────────────────────────────────────────────────╯
-  [q] quit  [r] restart  [d] dashboard  [l] logs  [?] help
-```
+When running, Milaidy shows a live interactive terminal chat interface with a status bar, chat area, and input editor.
 
 ## TUI Hotkeys
 
 | Key | Action |
 |-----|--------|
-| `q` | quit gracefully |
-| `r` | restart gateway |
-| `d` | open dashboard in browser |
-| `l` | toggle log view |
-| `c` | compact/clear activity |
-| `?` | show help |
-| `↑/↓` | scroll activity |
+| `Enter` | send message |
+| `Shift+Enter` | insert newline |
+| `Ctrl+P` | open model selector |
+| `Ctrl+E` | expand/collapse tool output |
+| `Ctrl+C` | cancel current operation or quit |
 
-## Headless Mode
+## TUI Slash Commands
 
-Don't want the TUI? Run headless:
+The following slash commands are available in the TUI input:
+
+| Command | Action |
+|---------|--------|
+| `/model` | switch model (opens selector or `/model provider/id`) |
+| `/models` | alias for `/model` |
+| `/clear` | clear chat history |
+| `/help` | show help |
+| `/exit` | quit |
+| `/quit` | alias for `/exit` |
+
+## Headless / Server Mode
+
+Don't want the TUI? Use the `start` command for API-server-only mode:
 
 ```bash
-milaidy start --headless
+milaidy start
 ```
 
 Logs go to `~/.milaidy/logs/`. Daemonize with your favorite process manager.
