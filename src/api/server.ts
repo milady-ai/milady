@@ -8354,6 +8354,12 @@ async function handleRequest(
       error(res, "Request body is empty or exceeds 50 MB", 400);
       return;
     }
+    // VRM files are GLB (binary glTF) — validate the 4-byte magic header
+    const GLB_MAGIC = Buffer.from([0x67, 0x6c, 0x54, 0x46]); // "glTF"
+    if (rawBody.length < 4 || !rawBody.subarray(0, 4).equals(GLB_MAGIC)) {
+      error(res, "Invalid VRM file: not a valid glTF/GLB file", 400);
+      return;
+    }
     const avatarDir = path.join(resolveStateDir(), "avatars");
     fs.mkdirSync(avatarDir, { recursive: true });
     const vrmPath = path.join(avatarDir, "custom.vrm");
@@ -8364,7 +8370,10 @@ async function handleRequest(
 
   // ── GET /api/avatar/vrm ──────────────────────────────────────────────────
   // Serve the user's custom VRM avatar file if it exists.
-  if ((method === "GET" || method === "HEAD") && pathname === "/api/avatar/vrm") {
+  if (
+    (method === "GET" || method === "HEAD") &&
+    pathname === "/api/avatar/vrm"
+  ) {
     const vrmPath = path.join(resolveStateDir(), "avatars", "custom.vrm");
     try {
       const stat = fs.statSync(vrmPath);

@@ -1954,6 +1954,7 @@ export class MiladyClient {
     });
   }
 
+  /** Uses raw fetch instead of this.fetch() because HEAD returns no JSON body. */
   async hasCustomVrm(): Promise<boolean> {
     try {
       const token = this.apiToken;

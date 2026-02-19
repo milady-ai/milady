@@ -1086,13 +1086,17 @@ export function CharacterView() {
                 selected={selectedVrmIndex}
                 onSelect={(i) => setState("selectedVrmIndex", i)}
                 onUpload={(file) => {
+                  const previousIndex = selectedVrmIndex;
                   const url = URL.createObjectURL(file);
                   setState("customVrmUrl", url);
                   setState("selectedVrmIndex", 0);
                   client.uploadCustomVrm(file).then(() => {
-                    URL.revokeObjectURL(url);
                     setState("customVrmUrl", `/api/avatar/vrm?t=${Date.now()}`);
-                  }).catch(() => { /* upload failed — blob URL still works for session */ });
+                    requestAnimationFrame(() => URL.revokeObjectURL(url));
+                  }).catch(() => {
+                    setState("selectedVrmIndex", previousIndex);
+                    URL.revokeObjectURL(url);
+                  });
                 }}
                 showUpload
                 fullWidth

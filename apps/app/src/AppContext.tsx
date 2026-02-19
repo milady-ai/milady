@@ -4088,7 +4088,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const cfg = await client.getConfig();
         const ui = cfg.ui as Record<string, unknown> | undefined;
         if (ui?.avatarIndex != null) {
-          resolvedIndex = Number(ui.avatarIndex);
+          resolvedIndex = normalizeAvatarIndex(Number(ui.avatarIndex));
           setSelectedVrmIndex(resolvedIndex);
         }
       } catch {

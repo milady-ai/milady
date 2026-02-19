@@ -42,7 +42,8 @@ describe("Avatar VRM Utilities", () => {
 });
 
 describe("Avatar Selection State", () => {
-  const AVATAR_STORAGE_KEY = "milady:selectedVrm";
+  // Must match AVATAR_INDEX_KEY in AppContext.tsx
+  const AVATAR_STORAGE_KEY = "milady_avatar_index";
 
   beforeEach(() => {
     vi.restoreAllMocks();
