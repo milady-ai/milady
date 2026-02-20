@@ -88,6 +88,22 @@ describe("validateMcpServerConfig", () => {
     expect(uvEval).toContain('Flag "-c" is not allowed');
   });
 
+  it("rejects interpreter bootstrap flags that can execute preload code", () => {
+    const nodeImport = validateMcpServerConfig({
+      type: "stdio",
+      command: "node",
+      args: ["--import", "data:text/javascript,console.log('pwn')"],
+    });
+    const nodeRequireAttached = validateMcpServerConfig({
+      type: "stdio",
+      command: "node",
+      args: ["-r./bootstrap.js", "server.js"],
+    });
+
+    expect(nodeImport).toContain('Flag "--import" is not allowed');
+    expect(nodeRequireAttached).toContain('Flag "-r" is not allowed');
+  });
+
   it("rejects inline-exec flags for package runner commands", () => {
     const rejection = validateMcpServerConfig({
       type: "stdio",
