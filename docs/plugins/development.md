@@ -84,7 +84,7 @@ export default myPlugin;
 1. **Discovery** — Plugins are discovered from:
    - Bundled plugins (shipped with Milaidy)
    - Workspace plugins (`./plugins/`)
-   - Global plugins (`~/.milaidy/plugins/`)
+   - Global plugins (`~/.milady/plugins/`)
    - npm packages (`@elizaos/plugin-*`)
    - Config-specified plugins
 
@@ -395,7 +395,7 @@ const workspaceProvider: Provider = {
   position: -10, // Run early
 
   get: async (runtime, message, state) => {
-    const workspaceDir = runtime.getSetting("WORKSPACE_DIR") || "~/.milaidy/workspace";
+    const workspaceDir = runtime.getSetting("WORKSPACE_DIR") || "~/.milady/workspace";
 
     // Read key files from workspace
     const agentsMd = await readFile(path.join(workspaceDir, "AGENTS.md"));
@@ -751,7 +751,7 @@ For local plugin development without publishing:
 
 1. **Workspace discovery** — Place your plugin in:
    - `./plugins/my-plugin/` (project-local)
-   - `~/.milaidy/plugins/my-plugin/` (global)
+   - `~/.milady/plugins/my-plugin/` (global)
 
 2. **Config-based loading** — Add to `milaidy.json`:
    ```json
@@ -762,7 +762,7 @@ For local plugin development without publishing:
 
 3. **Symlink for development:**
    ```bash
-   cd ~/.milaidy/plugins
+   cd ~/.milady/plugins
    ln -s /path/to/my-plugin my-plugin
    ```
 
@@ -834,7 +834,7 @@ Indicates where a plugin was discovered:
 | Origin | Description |
 |--------|-------------|
 | `bundled` | Shipped with Milaidy |
-| `global` | From `~/.milaidy/plugins/` |
+| `global` | From `~/.milady/plugins/` |
 | `workspace` | From `./plugins/` |
 | `config` | Explicitly listed in config |
 | `npm` | Installed npm package |

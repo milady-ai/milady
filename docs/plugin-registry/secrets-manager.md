@@ -80,7 +80,7 @@ When `runtime.getSetting("KEY")` is called, the Secrets Manager resolves in this
 1. Agent-specific secrets stored in the database (highest priority)
 2. Character file `settings.secrets` object
 3. `process.env` environment variables
-4. Global secrets from `~/.milaidy/secrets`
+4. Global secrets from `~/.milady/secrets`
 
 ## Environment Variable Mapping
 

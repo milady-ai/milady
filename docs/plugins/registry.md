@@ -79,7 +79,7 @@ The registry client (`src/services/registry-client.ts`) uses a 3-tier resolution
 
 ```
 Memory Cache  -->  File Cache  -->  Network Fetch
-  (in-process)     (~/.milaidy/     (GitHub raw)
+  (in-process)     (~/.milady/     (GitHub raw)
                     cache/
                     registry.json)
 ```
@@ -90,7 +90,7 @@ An in-process `Map<string, RegistryPluginInfo>` held in module-level state. Chec
 
 ### Tier 2: File Cache
 
-A JSON file at `~/.milaidy/cache/registry.json` containing the serialized plugin map and a `fetchedAt` timestamp. Checked when the memory cache is empty or expired. Written asynchronously after each successful network fetch.
+A JSON file at `~/.milady/cache/registry.json` containing the serialized plugin map and a `fetchedAt` timestamp. Checked when the memory cache is empty or expired. Written asynchronously after each successful network fetch.
 
 The file cache stores entries as `{ fetchedAt: number, plugins: Array<[string, RegistryPluginInfo]> }` and is invalidated when the TTL expires.
 
@@ -185,7 +185,7 @@ milaidy plugins info @elizaos/plugin-openai
 
 ### `milaidy plugins install <name>`
 
-Install a plugin from the registry into `~/.milaidy/plugins/installed/<name>/`.
+Install a plugin from the registry into `~/.milady/plugins/installed/<name>/`.
 
 ```bash
 # Install by shorthand (expands to @elizaos/plugin-telegram)
@@ -241,7 +241,7 @@ In edit mode, the CLI walks through each parameter, showing current values (mask
 
 ### `milaidy plugins test`
 
-Validate custom drop-in plugins in `~/.milaidy/plugins/custom/`. Checks that each plugin directory has a valid entry point and exports a Plugin object with `name` and `description`.
+Validate custom drop-in plugins in `~/.milady/plugins/custom/`. Checks that each plugin directory has a valid entry point and exports a Plugin object with `name` and `description`.
 
 ```bash
 milaidy plugins test
@@ -370,7 +370,7 @@ const results = await searchApps("game", 10);
 The registry client also discovers apps from local workspace directories. It scans:
 
 1. `plugins/` directories in workspace roots for folders starting with `app-`
-2. User-installed plugins at `~/.milaidy/plugins/installed/` with `kind: "app"` in their package.json
+2. User-installed plugins at `~/.milady/plugins/installed/` with `kind: "app"` in their package.json
 
 Local app metadata is merged with remote registry data, with local values taking priority for fields like `description`, `homepage`, and `localPath`.
 

@@ -17,7 +17,7 @@ The SQL plugin implements the `IDatabaseAdapter` interface from ElizaOS core, ba
 The SQLite database file is stored at:
 
 ```
-~/.milaidy/agents/{agentId}/agent.db
+~/.milady/agents/{agentId}/agent.db
 ```
 
 For multi-agent setups, each agent has its own isolated database.

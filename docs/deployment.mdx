@@ -122,8 +122,8 @@ The `docker-compose.yml` defines two services:
           CLAUDE_WEB_SESSION_KEY: ${CLAUDE_WEB_SESSION_KEY}
           CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE}
         volumes:
-          - ${MILADY_CONFIG_DIR}:/home/node/.milaidy
-          - ${MILADY_WORKSPACE_DIR}:/home/node/.milaidy/workspace
+          - ${MILADY_CONFIG_DIR}:/home/node/.milady
+          - ${MILADY_WORKSPACE_DIR}:/home/node/.milady/workspace
         ports:
           - "${MILADY_GATEWAY_PORT:-18789}:18789"
           - "${MILADY_BRIDGE_PORT:-18790}:18790"
@@ -153,8 +153,8 @@ The `docker-compose.yml` defines two services:
           CLAUDE_WEB_SESSION_KEY: ${CLAUDE_WEB_SESSION_KEY}
           CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE}
         volumes:
-          - ${MILADY_CONFIG_DIR}:/home/node/.milaidy
-          - ${MILADY_WORKSPACE_DIR}:/home/node/.milaidy/workspace
+          - ${MILADY_CONFIG_DIR}:/home/node/.milady
+          - ${MILADY_WORKSPACE_DIR}:/home/node/.milady/workspace
         stdin_open: true
         tty: true
         init: true
@@ -169,11 +169,11 @@ Both services share two persistent volumes:
 
 | Volume Mount | Container Path | Purpose |
 |-------------|---------------|---------|
-| `MILADY_CONFIG_DIR` | `/home/node/.milaidy` | Configuration files (`milaidy.json`), database, secrets |
-| `MILADY_WORKSPACE_DIR` | `/home/node/.milaidy/workspace` | Agent workspace files, uploaded knowledge, generated content |
+| `MILADY_CONFIG_DIR` | `/home/node/.milady` | Configuration files (`milaidy.json`), database, secrets |
+| `MILADY_WORKSPACE_DIR` | `/home/node/.milady/workspace` | Agent workspace files, uploaded knowledge, generated content |
 
 <Tip>
-The setup script defaults `MILADY_CONFIG_DIR` to `$HOME/.milaidy` and `MILADY_WORKSPACE_DIR` to `$HOME/.milaidy/workspace` on the host machine.
+The setup script defaults `MILADY_CONFIG_DIR` to `$HOME/.milady` and `MILADY_WORKSPACE_DIR` to `$HOME/.milady/workspace` on the host machine.
 </Tip>
 
 ### Extra Mounts and Home Volume
@@ -211,8 +211,8 @@ When extra mounts or a home volume are specified, the setup script generates a `
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `MILADY_IMAGE` | `milaidy:local` | Docker image name/tag to use |
-| `MILADY_CONFIG_DIR` | `$HOME/.milaidy` | Host path for configuration storage |
-| `MILADY_WORKSPACE_DIR` | `$HOME/.milaidy/workspace` | Host path for workspace storage |
+| `MILADY_CONFIG_DIR` | `$HOME/.milady` | Host path for configuration storage |
+| `MILADY_WORKSPACE_DIR` | `$HOME/.milady/workspace` | Host path for workspace storage |
 | `MILADY_GATEWAY_PORT` | `18789` | Host port for the gateway |
 | `MILADY_BRIDGE_PORT` | `18790` | Host port for the bridge |
 | `MILADY_GATEWAY_BIND` | `lan` | Gateway bind mode (`lan`, `localhost`, `0.0.0.0`) |

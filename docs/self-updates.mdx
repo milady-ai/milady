@@ -255,7 +255,7 @@ Milaidy automatically detects how it was installed to determine the correct upda
 | `homebrew` | Binary path contains `/Cellar/` or `/homebrew/` | `brew upgrade milaidy` |
 | `snap` | Binary path contains `/snap/` | `sudo snap refresh milaidy --channel=<channel>` |
 | `apt` | Binary path starts with `/usr/` (no `node_modules`) | `sudo apt-get update && sudo apt-get install --only-upgrade -y milaidy` |
-| `flatpak` | Binary path contains `/flatpak/` or `ai.milaidy.Milaidy` | `flatpak update ai.milaidy.Milaidy` |
+| `flatpak` | Binary path contains `/flatpak/` or `ai.milady.Milady` | `flatpak update ai.milady.Milady` |
 | `local-dev` | `devDependencies` found in root `package.json` | Not supported -- use `git pull` |
 | `unknown` | Fallback when no heuristic matches | `npm install -g milaidy@<dist-tag>` (fallback) |
 
@@ -339,9 +339,9 @@ The `milaidy update` command updates the CLI package itself, which includes:
 | API server (`src/api/`) | Yes | Bundled into the package |
 | Built-in services | Yes | Update checker, plugin installer, etc. |
 | Bundled core plugins | No | Core plugins are separate npm packages resolved at runtime |
-| User-installed plugins | No | Installed independently in `~/.milaidy/plugins/` |
+| User-installed plugins | No | Installed independently in `~/.milady/plugins/` |
 | Configuration (`milaidy.json`) | No | Preserved across updates |
-| Database (PGLite data) | No | Preserved in `~/.milaidy/workspace/` |
+| Database (PGLite data) | No | Preserved in `~/.milady/workspace/` |
 | Workspace files | No | Agent workspace is independent of the CLI version |
 
 Core ElizaOS plugins (`@elizaos/plugin-*`) are resolved from `node_modules` at runtime. When you update Milaidy and the new version specifies different plugin versions in its `dependencies`, those plugins are updated as part of the npm/bun install process.

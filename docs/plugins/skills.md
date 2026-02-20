@@ -97,7 +97,7 @@ Shipped with the `@elizaos/plugin-agent-skills` package. These are automatically
 
 ### 2. Extra Directories
 
-Additional directories configured in `~/.milaidy/config.json`:
+Additional directories configured in `~/.milady/config.json`:
 
 ```json
 {
@@ -117,21 +117,21 @@ Additional directories configured in `~/.milaidy/config.json`:
 Global user-level skills stored at:
 
 ```
-~/.milaidy/skills/
+~/.milady/skills/
 ├── my-custom-skill/
 │   └── SKILL.md
 └── team-shared-skill/
     └── SKILL.md
 ```
 
-The catalog file is also stored here at `~/.milaidy/skills/catalog.json`.
+The catalog file is also stored here at `~/.milady/skills/catalog.json`.
 
 ### 4. Workspace Skills (highest precedence)
 
 Project-local skills in the agent's workspace directory:
 
 ```
-~/.milaidy/workspace/skills/
+~/.milady/workspace/skills/
 ├── project-specific-skill/
 │   └── SKILL.md
 └── override-bundled-skill/
@@ -143,7 +143,7 @@ Project-local skills in the agent's workspace directory:
 Skills installed from the marketplace are placed under:
 
 ```
-~/.milaidy/workspace/skills/.marketplace/
+~/.milady/workspace/skills/.marketplace/
 ├── content-marketer/
 │   ├── SKILL.md
 │   └── .scan-results.json
@@ -152,7 +152,7 @@ Skills installed from the marketplace are placed under:
     └── .scan-results.json
 ```
 
-Install records are tracked in `~/.milaidy/workspace/skills/.cache/marketplace-installs.json`.
+Install records are tracked in `~/.milady/workspace/skills/.cache/marketplace-installs.json`.
 
 ---
 
@@ -162,7 +162,7 @@ When two skills share the same name, the higher-precedence source wins. The full
 
 1. **Bundled skills** -- from `@elizaos/plugin-agent-skills`
 2. **Extra directories** -- from `skills.load.extraDirs` config
-3. **Managed skills** -- from `~/.milaidy/skills/`
+3. **Managed skills** -- from `~/.milady/skills/`
 4. **Workspace skills** -- from `{workspace}/skills/`
 5. **Marketplace skills** -- from `{workspace}/skills/.marketplace/`
 
@@ -176,7 +176,7 @@ Whether a skill is active is determined by this cascade (highest priority first)
 4. **`skills.allowBundled`** -- config allow list (whitelist mode: only listed skills load)
 5. **Default** -- enabled
 
-Configuration example in `~/.milaidy/config.json`:
+Configuration example in `~/.milady/config.json`:
 
 ```json
 {
@@ -358,7 +358,7 @@ Scan results are persisted as `.scan-results.json` inside the skill directory:
   },
   "findings": [],
   "manifestFindings": [],
-  "skillPath": "/Users/you/.milaidy/workspace/skills/.marketplace/my-skill"
+  "skillPath": "/Users/you/.milady/workspace/skills/.marketplace/my-skill"
 }
 ```
 
@@ -388,7 +388,7 @@ The catalog client checks these paths in order:
 
 1. `MILADY_SKILLS_CATALOG` environment variable (if set, used exclusively)
 2. `skills/.cache/catalog.json` relative to the package root (walks up to 5 parent directories)
-3. `~/.milaidy/skills/catalog.json` (home directory fallback)
+3. `~/.milady/skills/catalog.json` (home directory fallback)
 
 ### Catalog Entry Shape
 
@@ -472,13 +472,13 @@ my-skill/
 For a workspace-local skill:
 
 ```bash
-mkdir -p ~/.milaidy/workspace/skills/my-tool
+mkdir -p ~/.milady/workspace/skills/my-tool
 ```
 
 For a globally available skill:
 
 ```bash
-mkdir -p ~/.milaidy/skills/my-tool
+mkdir -p ~/.milady/skills/my-tool
 ```
 
 ### Step 2: Write SKILL.md
@@ -664,7 +664,7 @@ apt install my-tool   # Linux
 | `CLAWHUB_REGISTRY` | Alternative to `SKILLS_REGISTRY` |
 | `SKILLS_MARKETPLACE_URL` | Alternative to `SKILLS_REGISTRY` |
 | `SKILLSMP_API_KEY` | API key for the legacy SkillsMP marketplace |
-| `MILADY_STATE_DIR` | Override the base state directory (default: `~/.milaidy`) |
+| `MILADY_STATE_DIR` | Override the base state directory (default: `~/.milady`) |
 | `BUNDLED_SKILLS_DIRS` | Set by runtime -- path to bundled skills |
 | `WORKSPACE_SKILLS_DIR` | Set by runtime -- path to workspace skills |
 | `EXTRA_SKILLS_DIRS` | Set by runtime -- comma-separated extra skill directories |

@@ -48,14 +48,14 @@ Milaidy uses an **auto-enable** system. You do not need to manually register pro
 
 ### Auto-enable flow
 
-1. On startup, Milaidy scans your environment variables (from `~/.milaidy/.env`, shell environment, or `milaidy.json`).
+1. On startup, Milaidy scans your environment variables (from `~/.milady/.env`, shell environment, or `milaidy.json`).
 2. If a recognized API key is found (e.g., `ANTHROPIC_API_KEY`), the corresponding provider plugin is automatically added to the plugin allowlist.
-3. The plugin is installed on demand if not already present (installed to `~/.milaidy/plugins/installed/`).
+3. The plugin is installed on demand if not already present (installed to `~/.milady/plugins/installed/`).
 4. The provider becomes available for model selection.
 
 ### Explicit plugin configuration
 
-You can also enable providers manually in `~/.milaidy/milaidy.json` under the `plugins` key:
+You can also enable providers manually in `~/.milady/milaidy.json` under the `plugins` key:
 
 ```json5
 {
@@ -102,7 +102,7 @@ Providers can also be activated through auth profiles in your config:
 
 ### Option 1: Environment file (recommended)
 
-Create or edit `~/.milaidy/.env`:
+Create or edit `~/.milady/.env`:
 
 ```bash
 # Primary provider
@@ -116,7 +116,7 @@ GROQ_API_KEY=gsk_...
 
 ### Option 2: Config file
 
-Add keys directly in `~/.milaidy/milaidy.json`:
+Add keys directly in `~/.milady/milaidy.json`:
 
 ```json5
 {
@@ -152,7 +152,7 @@ milaidy configure          # interactive config wizard (includes provider setup)
 
 ### Setting the default model
 
-In `~/.milaidy/milaidy.json`, specify the model using `provider/model` format:
+In `~/.milady/milaidy.json`, specify the model using `provider/model` format:
 
 ```json5
 {
@@ -205,7 +205,7 @@ You can have multiple providers active simultaneously. Every provider whose API 
 A common setup:
 
 ```bash
-# ~/.milaidy/.env
+# ~/.milady/.env
 
 # Primary — high-quality reasoning
 ANTHROPIC_API_KEY=sk-ant-api03-...
@@ -258,13 +258,13 @@ Ollama lets you run models locally with no API key and full privacy. It is the o
     ```
   </Step>
   <Step title="Set the base URL">
-    Add to `~/.milaidy/.env`:
+    Add to `~/.milady/.env`:
     ```bash
     OLLAMA_BASE_URL=http://127.0.0.1:11434
     ```
   </Step>
   <Step title="Select the model">
-    In `~/.milaidy/milaidy.json`:
+    In `~/.milady/milaidy.json`:
     ```json5
     {
       agents: {

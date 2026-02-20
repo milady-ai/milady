@@ -23,14 +23,14 @@ This guide covers developing plugins locally without publishing to npm -- custom
 
 ## Plugin Locations
 
-Milaidy discovers plugins from three locations under the state directory (`~/.milaidy/` by default):
+Milaidy discovers plugins from three locations under the state directory (`~/.milady/` by default):
 
 ### 1. Ejected Plugins
 
 Upstream plugins cloned locally for modification:
 
 ```
-~/.milaidy/plugins/ejected/<plugin-name>/
+~/.milady/plugins/ejected/<plugin-name>/
 ```
 
 These are created by the eject system (see [Ejecting Upstream Plugins](#ejecting-upstream-plugins)). Each subdirectory is a full git repo with editable source.
@@ -40,7 +40,7 @@ These are created by the eject system (see [Ejecting Upstream Plugins](#ejecting
 Plugins installed at runtime via the plugin manager or CLI:
 
 ```
-~/.milaidy/plugins/installed/<sanitised-name>/
+~/.milady/plugins/installed/<sanitised-name>/
 ```
 
 Each plugin gets an isolated directory with its own `package.json` and `node_modules/`. The installer creates a minimal `{ "private": true, "dependencies": {} }` package.json, then runs `bun add <package>` (or `npm install` as fallback) inside that directory.
@@ -50,7 +50,7 @@ Each plugin gets an isolated directory with its own `package.json` and `node_mod
 Hand-written plugins placed directly in the custom directory:
 
 ```
-~/.milaidy/plugins/custom/<your-plugin>/
+~/.milady/plugins/custom/<your-plugin>/
 ```
 
 Any subdirectory here with a `package.json` is auto-discovered at startup. This is the simplest way to add a local plugin -- just drop it in and restart.
@@ -77,7 +77,7 @@ Each directory is scanned the same way as `plugins/custom/` -- subdirectories wi
 ### Full Directory Layout
 
 ```
-~/.milaidy/
+~/.milady/
 ├── milaidy.json              # Main config file
 └── plugins/
     ├── ejected/              # Git-cloned upstream plugins for editing
@@ -105,10 +105,10 @@ When multiple sources provide the same plugin name, Milaidy uses this precedence
 
 | Priority | Source | Path | Use case |
 |----------|--------|------|----------|
-| 1 | **Ejected** | `~/.milaidy/plugins/ejected/` | Modifying upstream plugin source |
+| 1 | **Ejected** | `~/.milady/plugins/ejected/` | Modifying upstream plugin source |
 | 2 | **Workspace override** | Internal dev mechanism | Milaidy contributors only |
 | 3 | **Official npm** (with install record) | `node_modules/@elizaos/plugin-*` | Standard `@elizaos/*` plugins prefer bundled copies |
-| 4 | **User-installed** (with install record) | `~/.milaidy/plugins/installed/` | Third-party plugins installed at runtime |
+| 4 | **User-installed** (with install record) | `~/.milady/plugins/installed/` | Third-party plugins installed at runtime |
 | 5 | **Local @milady** | `src/plugins/` (compiled dist) | Built-in Milaidy plugins |
 | 6 | **npm fallback** | `import(name)` | Last resort dynamic import |
 
@@ -123,8 +123,8 @@ The deny list (`plugins.deny` in `milaidy.json`) takes absolute precedence -- de
 ### Step 1: Create the Directory
 
 ```bash
-mkdir -p ~/.milaidy/plugins/custom/my-plugin/src
-cd ~/.milaidy/plugins/custom/my-plugin
+mkdir -p ~/.milady/plugins/custom/my-plugin/src
+cd ~/.milady/plugins/custom/my-plugin
 ```
 
 ### Step 2: Initialize package.json
@@ -224,7 +224,7 @@ export default plugin;
 ### Step 5: Install Dependencies and Build
 
 ```bash
-cd ~/.milaidy/plugins/custom/my-plugin
+cd ~/.milady/plugins/custom/my-plugin
 bun install
 bun run build
 ```
@@ -313,7 +313,7 @@ The plugin installer (`plugin-installer.ts`) handles runtime installation of plu
 ### How It Works
 
 1. **Resolves** the plugin name against the plugin registry
-2. **Installs** via `bun add` (preferred) or `npm install` (fallback) into an isolated directory at `~/.milaidy/plugins/installed/<sanitised-name>/`
+2. **Installs** via `bun add` (preferred) or `npm install` (fallback) into an isolated directory at `~/.milady/plugins/installed/<sanitised-name>/`
 3. **Falls back** to `git clone` if the npm install fails
 4. **Validates** that the installed plugin has a resolvable entry point
 5. **Records** the installation in `milaidy.json` under `plugins.installs`
@@ -334,7 +334,7 @@ Each installed plugin is tracked in `milaidy.json`:
       "@elizaos/plugin-twitter": {
         "source": "npm",
         "spec": "@elizaos/plugin-twitter@1.0.0",
-        "installPath": "/Users/you/.milaidy/plugins/installed/_elizaos_plugin-twitter",
+        "installPath": "/Users/you/.milady/plugins/installed/_elizaos_plugin-twitter",
         "version": "1.0.0",
         "installedAt": "2026-02-19T12:00:00.000Z"
       }
@@ -349,7 +349,7 @@ The installer uses a serialisation lock to prevent concurrent installs from corr
 
 ### Uninstalling
 
-Uninstallation removes the plugin directory from disk and deletes its record from `milaidy.json`. Core/built-in plugins cannot be uninstalled. The uninstaller refuses to delete directories outside `~/.milaidy/plugins/installed/` as a safety measure.
+Uninstallation removes the plugin directory from disk and deletes its record from `milaidy.json`. Core/built-in plugins cannot be uninstalled. The uninstaller refuses to delete directories outside `~/.milady/plugins/installed/` as a safety measure.
 
 ---
 
@@ -368,9 +368,9 @@ eject the telegram plugin so I can edit its source
 ```bash
 git clone --branch 1.x --depth 1 \
   https://github.com/elizaos-plugins/plugin-telegram.git \
-  ~/.milaidy/plugins/ejected/plugin-telegram
+  ~/.milady/plugins/ejected/plugin-telegram
 
-cd ~/.milaidy/plugins/ejected/plugin-telegram
+cd ~/.milady/plugins/ejected/plugin-telegram
 bun install
 bun run build
 ```
@@ -397,7 +397,7 @@ Each ejected plugin has a `.upstream.json` at its root:
 ### Syncing with Upstream
 
 ```bash
-cd ~/.milaidy/plugins/ejected/plugin-telegram
+cd ~/.milady/plugins/ejected/plugin-telegram
 git fetch origin
 git pull --rebase origin 1.x
 bun run build
@@ -410,7 +410,7 @@ Or via agent chat: `sync the ejected telegram plugin`
 Remove the ejected directory to fall back to the npm version:
 
 ```bash
-rm -rf ~/.milaidy/plugins/ejected/plugin-telegram
+rm -rf ~/.milady/plugins/ejected/plugin-telegram
 # Restart milaidy -- it will load the npm version again
 ```
 
@@ -426,7 +426,7 @@ The standard development loop for local plugins:
 
 ```bash
 # Terminal 1: Watch and rebuild on changes
-cd ~/.milaidy/plugins/custom/my-plugin
+cd ~/.milady/plugins/custom/my-plugin
 bun run dev  # runs tsc --watch
 
 # Terminal 2: Run milaidy
@@ -454,7 +454,7 @@ Check the logs for your plugin's initialization message and any debug output.
 If you prefer manual builds:
 
 ```bash
-cd ~/.milaidy/plugins/custom/my-plugin
+cd ~/.milady/plugins/custom/my-plugin
 bun run build && milaidy start
 ```
 
@@ -548,7 +548,7 @@ Set breakpoints in your plugin's TypeScript files and launch with F5.
 ### Common Issues
 
 **Plugin not discovered at startup:**
-- Verify the plugin directory is directly under `~/.milaidy/plugins/custom/` (not nested deeper)
+- Verify the plugin directory is directly under `~/.milady/plugins/custom/` (not nested deeper)
 - Confirm `package.json` exists and has a `name` field
 - Check that `main` in `package.json` points to an existing file
 - Look for `[milady] Discovered N custom plugin(s)` in the startup logs
@@ -565,7 +565,7 @@ Set breakpoints in your plugin's TypeScript files and launch with F5.
 
 **TypeScript compilation errors:**
 ```bash
-cd ~/.milaidy/plugins/custom/my-plugin
+cd ~/.milady/plugins/custom/my-plugin
 bun run tsc --noEmit  # Type-check without emitting
 ```
 
@@ -577,9 +577,9 @@ These environment variables affect plugin paths and behavior. They are defined i
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `MILADY_STATE_DIR` | `~/.milaidy` | Override the state directory. Changes where plugins, config, and credentials are stored. |
-| `MILADY_CONFIG_PATH` | `~/.milaidy/milaidy.json` | Override the config file path directly. |
-| `MILADY_OAUTH_DIR` | `~/.milaidy/credentials` | Override the OAuth credentials directory. |
+| `MILADY_STATE_DIR` | `~/.milady` | Override the state directory. Changes where plugins, config, and credentials are stored. |
+| `MILADY_CONFIG_PATH` | `~/.milady/milaidy.json` | Override the config file path directly. |
+| `MILADY_OAUTH_DIR` | `~/.milady/credentials` | Override the OAuth credentials directory. |
 | `LOG_LEVEL` | `error` | Set log verbosity: `debug`, `info`, `warn`, `error`. |
 | `MILADY_DISABLE_WORKSPACE_PLUGIN_OVERRIDES` | unset | Set to `1` to disable workspace plugin overrides (dev-only mechanism). |
 
@@ -617,7 +617,7 @@ When your plugin is ready for distribution:
 ### 2. Build and Publish
 
 ```bash
-cd ~/.milaidy/plugins/custom/my-plugin
+cd ~/.milady/plugins/custom/my-plugin
 bun run build
 npm pack              # Preview what gets published
 npm publish --access public
@@ -635,7 +635,7 @@ Once published, install through the agent chat or directly in config:
 }
 ```
 
-Remove the local copy from `~/.milaidy/plugins/custom/` to avoid loading both versions.
+Remove the local copy from `~/.milady/plugins/custom/` to avoid loading both versions.
 
 ---
 

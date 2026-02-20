@@ -42,7 +42,7 @@ After building, verify the CLI works:
 bun run milaidy --help
 ```
 
-Configuration is stored at `~/.milaidy/milaidy.json` and the workspace lives at `~/.milaidy/workspace/`.
+Configuration is stored at `~/.milady/milaidy.json` and the workspace lives at `~/.milady/workspace/`.
 
 ---
 
