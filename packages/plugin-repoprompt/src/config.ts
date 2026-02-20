@@ -1,6 +1,11 @@
 import { z } from 'zod';
 
-export const DEFAULT_ALLOWED_COMMANDS = ['*'] as const;
+export const DEFAULT_ALLOWED_COMMANDS = [
+  'context_builder',
+  'read_file',
+  'file_search',
+  'tree',
+] as const;
 const DEFAULT_TIMEOUT_MS = 45_000;
 const DEFAULT_MAX_OUTPUT_CHARS = 20_000;
 const MIN_TIMEOUT_MS = 500;

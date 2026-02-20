@@ -20,7 +20,7 @@ Set via environment variables or plugin config:
 - `REPOPROMPT_DEFAULT_TAB` (optional)
 - `REPOPROMPT_TIMEOUT_MS` (default: `45000`)
 - `REPOPROMPT_MAX_OUTPUT_CHARS` (default: `20000`)
-- `REPOPROMPT_ALLOWED_COMMANDS` (default: `*`)
+- `REPOPROMPT_ALLOWED_COMMANDS` (default: `context_builder,read_file,file_search,tree`)
 
 `REPOPROMPT_ALLOWED_COMMANDS` accepts a comma-separated allowlist. Example:
 

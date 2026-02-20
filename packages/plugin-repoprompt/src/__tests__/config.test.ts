@@ -24,12 +24,12 @@ describe('plugin-repoprompt config', () => {
     expect(config.allowedCommands).toEqual(['context_builder', 'read_file']);
   });
 
-  it('falls back to wildcard when allowlist is empty', () => {
+  it('falls back to safe defaults when allowlist is empty', () => {
     const config = loadRepoPromptConfig({
       REPOPROMPT_ALLOWED_COMMANDS: '   ',
     });
 
-    expect(config.allowedCommands).toEqual(['*']);
+    expect(config.allowedCommands).toEqual([...DEFAULT_ALLOWED_COMMANDS]);
   });
 
   it('rejects out-of-range timeout values', () => {

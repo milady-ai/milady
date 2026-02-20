@@ -1,3 +1,5 @@
+import { lookup as dnsLookup } from "node:dns/promises";
+import net from "node:net";
 import {
   type IAgentRuntime,
   type JsonValue,
@@ -117,6 +119,113 @@ export function registerPiAiModelHandler(
   };
 }
 
+const BLOCKED_IMAGE_HOST_LITERALS = new Set([
+  "localhost",
+  "127.0.0.1",
+  "::1",
+  "0.0.0.0",
+  "169.254.169.254",
+]);
+
+function normalizeHostLike(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/^\[|\]$/g, "");
+}
+
+function isBlockedPrivateOrLinkLocalIp(ip: string): boolean {
+  const normalized = normalizeHostLike(ip).split("%")[0];
+  return (
+    /^0\./.test(normalized) ||
+    /^10\./.test(normalized) ||
+    /^127\./.test(normalized) ||
+    /^169\.254\./.test(normalized) ||
+    /^172\.(1[6-9]|2\d|3[01])\./.test(normalized) ||
+    /^192\.168\./.test(normalized) ||
+    /^::$/i.test(normalized) ||
+    /^::1$/i.test(normalized) ||
+    /^fe[89ab][0-9a-f]:/i.test(normalized) ||
+    /^f[cd][0-9a-f]{2}:/i.test(normalized)
+  );
+}
+
+async function validatePublicImageUrl(rawUrl: string): Promise<URL> {
+  let parsed: URL;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    throw new Error("IMAGE_DESCRIPTION imageUrl must be a valid absolute URL");
+  }
+
+  if (parsed.protocol !== "https:") {
+    throw new Error("IMAGE_DESCRIPTION imageUrl must use https://");
+  }
+
+  const hostname = normalizeHostLike(parsed.hostname);
+  if (!hostname) {
+    throw new Error("IMAGE_DESCRIPTION imageUrl hostname is required");
+  }
+
+  if (
+    BLOCKED_IMAGE_HOST_LITERALS.has(hostname) ||
+    hostname.endsWith(".localhost") ||
+    hostname.endsWith(".local")
+  ) {
+    throw new Error(`IMAGE_DESCRIPTION blocked host: ${hostname}`);
+  }
+
+  if (net.isIP(hostname) && isBlockedPrivateOrLinkLocalIp(hostname)) {
+    throw new Error(`IMAGE_DESCRIPTION blocked host: ${hostname}`);
+  }
+
+  if (!net.isIP(hostname)) {
+    let addresses: Array<{ address: string }>;
+    try {
+      const resolved = await dnsLookup(hostname, { all: true });
+      addresses = Array.isArray(resolved) ? resolved : [resolved];
+    } catch {
+      throw new Error(`IMAGE_DESCRIPTION could not resolve host: ${hostname}`);
+    }
+
+    if (addresses.length === 0) {
+      throw new Error(`IMAGE_DESCRIPTION could not resolve host: ${hostname}`);
+    }
+
+    for (const entry of addresses) {
+      if (isBlockedPrivateOrLinkLocalIp(entry.address)) {
+        throw new Error(
+          `IMAGE_DESCRIPTION blocked host ${hostname} resolving to ${entry.address}`,
+        );
+      }
+    }
+  }
+
+  return parsed;
+}
+
+async function fetchImageWithValidation(imageUrl: string): Promise<Response> {
+  let currentUrl = await validatePublicImageUrl(imageUrl);
+
+  for (let redirectCount = 0; redirectCount <= 5; redirectCount++) {
+    const resp = await fetch(currentUrl.toString(), { redirect: "manual" });
+    if (resp.status >= 300 && resp.status < 400) {
+      const location = resp.headers.get("location");
+      if (!location) {
+        throw new Error("Image redirect missing Location header");
+      }
+      currentUrl = await validatePublicImageUrl(
+        new URL(location, currentUrl).toString(),
+      );
+      continue;
+    }
+
+    return resp;
+  }
+
+  throw new Error("Too many redirects while fetching image");
+}
+
 function parseImageUrl(imageUrl: string): {
   data: string;
   mimeType: string;
@@ -163,7 +272,7 @@ function createPiAiImageDescriptionHandler(
     let imgData: { data: string; mimeType: string };
 
     if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
-      const resp = await fetch(imageUrl);
+      const resp = await fetchImageWithValidation(imageUrl);
       if (!resp.ok) throw new Error(`Failed to fetch image: ${resp.status}`);
       const buf = Buffer.from(await resp.arrayBuffer());
       const ct = resp.headers.get("content-type") ?? "image/png";
