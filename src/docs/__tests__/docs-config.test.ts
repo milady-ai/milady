@@ -3,11 +3,10 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const DOCS_DIR = join(__dirname, "..", "..", "..", "docs");
+const raw = readFileSync(join(DOCS_DIR, "docs.json"), "utf8");
+const config = JSON.parse(raw);
 
 describe("docs/docs.json", () => {
-  const raw = readFileSync(join(DOCS_DIR, "docs.json"), "utf8");
-  const config = JSON.parse(raw);
-
   it("parses as valid JSON", () => {
     expect(config).toBeDefined();
     expect(typeof config).toBe("object");
@@ -66,50 +65,17 @@ describe("docs/docs.json", () => {
 });
 
 describe("docs page frontmatter", () => {
-  const mdxPages = [
-    "index",
-    "installation",
-    "quickstart",
-    "configuration",
-    "cli-reference",
-    "chat-commands",
-    "model-providers",
-    "architecture",
-    "api-reference",
-    "websocket-events",
-    "config-schema",
-    "deployment",
-    "self-updates",
-  ];
+  // Derive pages from docs.json so the list never goes stale
+  const allPages: string[] = [];
+  for (const tab of config.navigation.tabs) {
+    for (const group of tab.groups) {
+      for (const page of group.pages) {
+        allPages.push(page);
+      }
+    }
+  }
 
-  const guidePages = [
-    "guides/contribution-guide",
-    "guides/plugin-development",
-    "guides/skills",
-    "guides/registry",
-    "guides/local-plugins",
-    "guides/dashboard",
-    "guides/desktop-app",
-    "guides/mobile-app",
-    "guides/chrome-extension",
-    "guides/themes",
-    "guides/agent-export",
-    "guides/autonomous-mode",
-    "guides/custom-actions",
-    "guides/triggers",
-    "guides/hooks",
-    "guides/knowledge",
-    "guides/media-generation",
-    "guides/wallet",
-    "guides/sandbox",
-    "guides/cloud",
-    "guides/training",
-    "guides/connectors",
-    "guides/whatsapp",
-    "guides/plugin-eject",
-  ];
-
-  for (const page of [...mdxPages, ...guidePages]) {
+  for (const page of allPages) {
     it(`${page} has YAML frontmatter with title`, () => {
       const mdx = join(DOCS_DIR, `${page}.mdx`);
       const md = join(DOCS_DIR, `${page}.md`);
