@@ -236,6 +236,10 @@ interface ServerState {
   broadcastStatus: (() => void) | null;
   /** Broadcast an arbitrary JSON message to all WebSocket clients. Set by startApiServer. */
   broadcastWs: ((data: Record<string, unknown>) => void) | null;
+  /** Broadcast a JSON payload to WebSocket clients bound to a specific client id. */
+  broadcastWsToClientId:
+    | ((clientId: string, data: Record<string, unknown>) => number)
+    | null;
   /** Currently active conversation ID from the frontend (sent via WS). */
   activeConversationId: string | null;
   /** Transient OAuth flow state for subscription auth. */
@@ -3772,7 +3776,7 @@ function applyCors(
     );
     res.setHeader(
       "Access-Control-Allow-Headers",
-      "Content-Type, Authorization, X-Milady-Token, X-Api-Key, X-Milady-Export-Token",
+      "Content-Type, Authorization, X-Milady-Token, X-Api-Key, X-Milady-Export-Token, X-Milady-Client-Id",
     );
   }
 
@@ -3863,6 +3867,42 @@ function extractAuthToken(req: http.IncomingMessage): string | null {
   if (typeof header === "string" && header.trim()) return header.trim();
 
   return null;
+}
+
+const SAFE_WS_CLIENT_ID_RE = /^[A-Za-z0-9._-]{1,128}$/;
+
+export function normalizeWsClientId(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (!SAFE_WS_CLIENT_ID_RE.test(trimmed)) return null;
+  return trimmed;
+}
+
+function firstHeaderValue(value: string | string[] | undefined): string | null {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value) && typeof value[0] === "string") return value[0];
+  return null;
+}
+
+export function resolveTerminalRunClientId(
+  req: Pick<http.IncomingMessage, "headers">,
+  body: { clientId?: unknown } | null | undefined,
+): string | null {
+  const headerClientId = normalizeWsClientId(
+    firstHeaderValue(req.headers["x-milady-client-id"]),
+  );
+  if (headerClientId) return headerClientId;
+  return normalizeWsClientId(body?.clientId);
+}
+
+const SHARED_TERMINAL_CLIENT_IDS = new Set([
+  "runtime-terminal-action",
+  "runtime-shell-action",
+]);
+
+function isSharedTerminalClientId(clientId: string): boolean {
+  return SHARED_TERMINAL_CLIENT_IDS.has(clientId);
 }
 
 /**
@@ -10978,7 +11018,10 @@ async function handleRequest(
       return;
     }
 
-    const body = await readJsonBody<{ command?: string }>(req, res);
+    const body = await readJsonBody<{ command?: string; clientId?: unknown }>(
+      req,
+      res,
+    );
     if (!body) return;
     const command = typeof body.command === "string" ? body.command.trim() : "";
     if (!command) {
@@ -11007,6 +11050,25 @@ async function handleRequest(
       return;
     }
 
+    const targetClientId = resolveTerminalRunClientId(req, body);
+    if (!targetClientId) {
+      error(
+        res,
+        "Missing client id. Provide X-Milady-Client-Id header or clientId in the request body.",
+        400,
+      );
+      return;
+    }
+
+    const emitTerminalEvent = (payload: Record<string, unknown>) => {
+      if (isSharedTerminalClientId(targetClientId)) {
+        state.broadcastWs?.(payload);
+        return;
+      }
+      if (typeof state.broadcastWsToClientId !== "function") return;
+      state.broadcastWsToClientId(targetClientId, payload);
+    };
+
     const { maxConcurrent, maxDurationMs } = resolveTerminalRunLimits();
     if (activeTerminalRunCount >= maxConcurrent) {
       error(
@@ -11024,7 +11086,7 @@ async function handleRequest(
     const { spawn } = await import("node:child_process");
     const runId = `run-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-    state.broadcastWs?.({
+    emitTerminalEvent({
       type: "terminal-output",
       runId,
       event: "start",
@@ -11050,7 +11112,7 @@ async function handleRequest(
     const timeoutHandle = setTimeout(() => {
       if (proc.killed) return;
       proc.kill("SIGTERM");
-      state.broadcastWs?.({
+      emitTerminalEvent({
         type: "terminal-output",
         runId,
         event: "timeout",
@@ -11063,7 +11125,7 @@ async function handleRequest(
     }, maxDurationMs);
 
     proc.stdout?.on("data", (chunk: Buffer) => {
-      state.broadcastWs?.({
+      emitTerminalEvent({
         type: "terminal-output",
         runId,
         event: "stdout",
@@ -11072,7 +11134,7 @@ async function handleRequest(
     });
 
     proc.stderr?.on("data", (chunk: Buffer) => {
-      state.broadcastWs?.({
+      emitTerminalEvent({
         type: "terminal-output",
         runId,
         event: "stderr",
@@ -11082,7 +11144,7 @@ async function handleRequest(
 
     proc.on("close", (code: number | null) => {
       finalize();
-      state.broadcastWs?.({
+      emitTerminalEvent({
         type: "terminal-output",
         runId,
         event: "exit",
@@ -11092,7 +11154,7 @@ async function handleRequest(
 
     proc.on("error", (err: Error) => {
       finalize();
-      state.broadcastWs?.({
+      emitTerminalEvent({
         type: "terminal-output",
         runId,
         event: "error",
@@ -11505,6 +11567,7 @@ export async function startApiServer(opts?: {
     shareIngestQueue: [],
     broadcastStatus: null,
     broadcastWs: null,
+    broadcastWsToClientId: null,
     activeConversationId: null,
     permissionStates: {},
     shellEnabled: config.features?.shellEnabled !== false,
@@ -11907,6 +11970,7 @@ export async function startApiServer(opts?: {
   // ── WebSocket Server ─────────────────────────────────────────────────────
   const wss = new WebSocketServer({ noServer: true });
   const wsClients = new Set<WebSocket>();
+  const wsClientIds = new WeakMap<WebSocket, string>();
   bindRuntimeStreams(opts?.runtime ?? null);
   bindTrainingStream();
 
@@ -11934,7 +11998,18 @@ export async function startApiServer(opts?: {
   });
 
   // Handle WebSocket connections
-  wss.on("connection", (ws: WebSocket) => {
+  wss.on("connection", (ws: WebSocket, request: http.IncomingMessage) => {
+    try {
+      const wsUrl = new URL(
+        request.url ?? "/",
+        `http://${request.headers.host ?? "localhost"}`,
+      );
+      const clientId = normalizeWsClientId(wsUrl.searchParams.get("clientId"));
+      if (clientId) wsClientIds.set(ws, clientId);
+    } catch {
+      // Ignore malformed WS URL metadata; auth/path were already validated.
+    }
+
     wsClients.add(ws);
     addLog("info", "WebSocket client connected", "websocket", [
       "server",
@@ -12024,6 +12099,27 @@ export async function startApiServer(opts?: {
         }
       }
     }
+  };
+
+  state.broadcastWsToClientId = (
+    clientId: string,
+    data: Record<string, unknown>,
+  ) => {
+    const message = JSON.stringify(data);
+    let delivered = 0;
+    for (const client of wsClients) {
+      if (client.readyState !== 1) continue;
+      if (wsClientIds.get(client) !== clientId) continue;
+      try {
+        client.send(message);
+        delivered += 1;
+      } catch (err) {
+        logger.error(
+          `[milady-api] WebSocket targeted send error: ${err instanceof Error ? err.message : err}`,
+        );
+      }
+    }
+    return delivered;
   };
 
   // Broadcast status every 5 seconds
