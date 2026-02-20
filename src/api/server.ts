@@ -4941,6 +4941,13 @@ async function handleRequest(
     return;
   }
 
+  // Serve dashboard static assets before the auth gate.  serveStaticUi
+  // already refuses /api/, /v1/, and /ws paths, so API endpoints remain
+  // fully protected by the token check below.
+  if (method === "GET" || method === "HEAD") {
+    if (serveStaticUi(req, res, pathname)) return;
+  }
+
   if (method !== "OPTIONS" && !isAuthEndpoint && !isAuthorized(req)) {
     json(res, { error: "Unauthorized" }, 401);
     return;
@@ -11364,11 +11371,6 @@ async function handleRequest(
 
     json(res, { ok: true });
     return;
-  }
-
-  // ── Static UI serving (production) ──────────────────────────────────────
-  if (method === "GET" || method === "HEAD") {
-    if (serveStaticUi(req, res, pathname)) return;
   }
 
   // ── Fallback ────────────────────────────────────────────────────────────
