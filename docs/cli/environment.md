@@ -139,4 +139,4 @@ Or use a `.env` file in your working directory (Milaidy loads `.env` files via t
 - [milaidy models](/cli/models) -- check configured model providers
 - [milaidy config](/cli/config) -- read and inspect config file values
 - [milaidy configure](/cli/configure) -- display common environment variable guidance
-- [CLI Reference](/cli-reference) -- complete CLI command reference with global flags
+- [CLI Reference](/cli/overview) -- complete CLI command reference with global flags

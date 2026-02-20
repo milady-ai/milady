@@ -445,6 +445,6 @@ Results are sorted by score descending, then by star count as a tiebreaker.
 
 ## Next Steps
 
-- [Plugin Development Guide](./plugin-development.md) -- Create your own plugins
+- [Plugin Development Guide](./development.md) -- Create your own plugins
 - [Local Plugin Development](./local-plugins.md) -- Develop without publishing
-- [Contributing Guide](./contributing.md) -- Submit plugins upstream
+- [Contributing Guide](/guides/contribution-guide) -- Submit plugins upstream

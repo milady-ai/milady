@@ -641,6 +641,6 @@ Remove the local copy from `~/.milady/plugins/custom/` to avoid loading both ver
 
 ## Next Steps
 
-- [Plugin Development Guide](./plugin-development.md) -- Full plugin API reference
+- [Plugin Development Guide](./development.md) -- Full plugin API reference
 - [Skills Documentation](./skills.md) -- Lighter-weight extensions
-- [Contributing Guide](./contributing.md) -- Contributing plugins upstream
+- [Contributing Guide](/guides/contribution-guide) -- Contributing plugins upstream

@@ -374,6 +374,6 @@ An AI agent triages all incoming issues. Valid bugs are labeled and prioritized.
 
 - [CONTRIBUTING.md](https://github.com/milady-ai/milady/blob/develop/CONTRIBUTING.md) -- Full contribution philosophy
 - [AGENTS.md](https://github.com/milady-ai/milady/blob/develop/AGENTS.md) -- Repository guidelines for coding agents
-- [Plugin Development Guide](./plugin-development.md) -- Build plugins
-- [Skills Documentation](./skills.md) -- Create skills
-- [Local Plugin Development](./local-plugins.md) -- Develop plugins locally
+- [Plugin Development Guide](/plugins/development) -- Build plugins
+- [Skills Documentation](/plugins/skills) -- Create skills
+- [Local Plugin Development](/plugins/local-plugins) -- Develop plugins locally

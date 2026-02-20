@@ -229,4 +229,4 @@ The runtime reads `agents.defaults.sandbox.mode` and expects one of `"off"`, `"l
 
 - [Core Runtime](/runtime/core) — AgentRuntime class reference
 - [Services](/runtime/services) — service lifecycle and built-in service list
-- [Plugins](/guides/plugin-development) — plugin development guide
+- [Plugins](/plugins/development) — plugin development guide
