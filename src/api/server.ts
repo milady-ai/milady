@@ -5526,6 +5526,7 @@ async function handleRequest(
       models: getModelOptions(),
       inventoryProviders: getInventoryProviderOptions(),
       sharedStyleRules: "Keep responses brief. Be helpful and concise.",
+      githubOAuthAvailable: Boolean(process.env.GITHUB_OAUTH_CLIENT_ID?.trim()),
     });
     return;
   }
@@ -5692,6 +5693,13 @@ async function handleRequest(
           "[milady-api] Anthropic setup token saved during onboarding",
         );
       }
+    }
+
+    // ── GitHub token ────────────────────────────────────────────────────
+    if (body.githubToken && typeof body.githubToken === "string" && body.githubToken.trim()) {
+      if (!config.env) config.env = {};
+      (config.env as Record<string, string>).GITHUB_TOKEN = body.githubToken.trim();
+      process.env.GITHUB_TOKEN = body.githubToken.trim();
     }
 
     // ── Connectors (Telegram, Discord, WhatsApp, Twilio, Blooio) ────────

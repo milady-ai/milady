@@ -2244,26 +2244,30 @@ async function runFirstTimeSetup(config: MiladyConfig): Promise<MiladyConfig> {
   // ── Step 7: GitHub access (for coding agents, issue management) ─────────
   const hasGithubToken = Boolean(process.env.GITHUB_TOKEN?.trim());
   const hasGithubOAuth = Boolean(process.env.GITHUB_OAUTH_CLIENT_ID?.trim());
-  if (!hasGithubToken && !hasGithubOAuth) {
+  if (!hasGithubToken) {
+    const options: Array<{ value: string; label: string; hint?: string }> = [
+      { value: "skip", label: "Skip for now", hint: "you can add this later" },
+      { value: "pat", label: "Paste a Personal Access Token", hint: "github.com/settings/tokens" },
+    ];
+    if (hasGithubOAuth) {
+      options.push({ value: "oauth", label: "Use OAuth (authorize in browser)", hint: "recommended" });
+    }
+
     const githubChoice = await clack.select({
       message: "Configure GitHub access? (needed for coding agents, issue management, PRs)",
-      options: [
-        { value: "skip", label: "Skip for now", hint: "you can add this later" },
-        { value: "pat", label: "Paste a Personal Access Token", hint: "github.com/settings/tokens" },
-        // OAuth option available when org registers their app
-        // { value: "oauth", label: "Use OAuth (authorize in browser)", hint: "recommended" },
-      ],
+      options,
     });
 
     if (!clack.isCancel(githubChoice) && githubChoice === "pat") {
       const tokenInput = await clack.password({
         message: "Paste your GitHub token (or skip):",
       });
-
       if (!clack.isCancel(tokenInput) && tokenInput.trim()) {
         process.env.GITHUB_TOKEN = tokenInput.trim();
         clack.log.success("GitHub token configured.");
       }
+    } else if (!clack.isCancel(githubChoice) && githubChoice === "oauth") {
+      clack.log.info("GitHub OAuth will activate when coding agents need access.");
     }
   }
 
