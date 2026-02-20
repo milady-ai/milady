@@ -43,6 +43,26 @@ describe("applyClaudeCodeStealth", () => {
   });
 });
 
+describe("findProjectRoot", () => {
+  test("resolves project root by matching package name 'milaidy'", async () => {
+    const { findProjectRoot } = await import("./apply-stealth");
+    const result = findProjectRoot(__dirname);
+    // Should walk up from src/auth/ and find the root package.json with name "milaidy"
+    expect(result).not.toBe(__dirname);
+    // The resolved root should contain a package.json
+    const fs = await import("node:fs");
+    const pkg = JSON.parse(fs.readFileSync(`${result}/package.json`, "utf-8"));
+    expect(pkg.name.toLowerCase()).toBe("milaidy");
+  });
+
+  test("returns startDir when no matching package.json is found", async () => {
+    const { findProjectRoot } = await import("./apply-stealth");
+    // Use filesystem root — no package.json with name "milaidy" there
+    const result = findProjectRoot("/tmp");
+    expect(result).toBe("/tmp");
+  });
+});
+
 describe("applyOpenAICodexStealth", () => {
   const savedEnv: Record<string, string | undefined> = {};
 
@@ -77,6 +97,23 @@ describe("applyOpenAICodexStealth", () => {
     expect(
       (globalThis as Record<symbol, unknown>)[OPENAI_STEALTH_GUARD],
     ).toBeFalsy();
+  });
+
+  test("installs stealth and sets guard for JWT-style token", async () => {
+    process.env.OPENAI_API_KEY = "eyJhbGciOiJSUzI1NiJ9.eyJ0ZXN0IjoxfQ.sig";
+    const savedFetch = globalThis.fetch;
+
+    try {
+      const { applyOpenAICodexStealth } = await import("./apply-stealth");
+      await applyOpenAICodexStealth();
+
+      expect(
+        (globalThis as Record<symbol, unknown>)[OPENAI_STEALTH_GUARD],
+      ).toBe(true);
+    } finally {
+      // Restore fetch in case the stealth module patched it
+      globalThis.fetch = savedFetch;
+    }
   });
 
   test("symbol guard prevents double-installation", async () => {

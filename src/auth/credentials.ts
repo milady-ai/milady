@@ -10,10 +10,11 @@ import path from "node:path";
 import { logger } from "@elizaos/core";
 import { refreshAnthropicToken } from "./anthropic";
 import { refreshCodexToken } from "./openai-codex";
-import type {
-  OAuthCredentials,
-  StoredCredentials,
-  SubscriptionProvider,
+import {
+  type OAuthCredentials,
+  type StoredCredentials,
+  SUBSCRIPTION_PROVIDER_MAP,
+  type SubscriptionProvider,
 } from "./types";
 
 const AUTH_DIR = path.join(
@@ -160,12 +161,6 @@ export function getSubscriptionStatus(): Array<{
   });
 }
 
-/** Maps subscription provider names to their model provider identifiers. */
-const SUBSCRIPTION_MODEL_MAP: Record<string, string> = {
-  "anthropic-subscription": "anthropic",
-  "openai-codex": "openai",
-};
-
 /**
  * Apply subscription credentials to the environment.
  * Called at startup to make credentials available to ElizaOS plugins.
@@ -220,17 +215,19 @@ export async function applySubscriptionCredentials(config?: {
   // choose a model provider.
   if (config?.agents?.defaults) {
     const defaults = config.agents.defaults;
-    const provider = defaults.subscriptionProvider;
-    if (provider && SUBSCRIPTION_MODEL_MAP[provider]) {
+    const provider =
+      defaults.subscriptionProvider as keyof typeof SUBSCRIPTION_PROVIDER_MAP;
+    const modelId = provider ? SUBSCRIPTION_PROVIDER_MAP[provider] : undefined;
+    if (modelId) {
       if (!defaults.model) {
-        defaults.model = { primary: SUBSCRIPTION_MODEL_MAP[provider] };
+        defaults.model = { primary: modelId };
         logger.info(
-          `[auth] Auto-set model.primary to "${SUBSCRIPTION_MODEL_MAP[provider]}" from subscription provider`,
+          `[auth] Auto-set model.primary to "${modelId}" from subscription provider`,
         );
       } else if (!defaults.model.primary) {
-        defaults.model.primary = SUBSCRIPTION_MODEL_MAP[provider];
+        defaults.model.primary = modelId;
         logger.info(
-          `[auth] Auto-set model.primary to "${SUBSCRIPTION_MODEL_MAP[provider]}" from subscription provider`,
+          `[auth] Auto-set model.primary to "${modelId}" from subscription provider`,
         );
       }
     }

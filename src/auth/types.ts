@@ -10,6 +10,12 @@ export interface OAuthCredentials {
 
 export type SubscriptionProvider = "anthropic-subscription" | "openai-codex";
 
+/** Maps subscription provider IDs to their model provider short names. */
+export const SUBSCRIPTION_PROVIDER_MAP: Record<SubscriptionProvider, string> = {
+  "anthropic-subscription": "anthropic",
+  "openai-codex": "openai",
+};
+
 export interface StoredCredentials {
   provider: SubscriptionProvider;
   credentials: OAuthCredentials;

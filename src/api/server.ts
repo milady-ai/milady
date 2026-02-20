@@ -110,6 +110,10 @@ import {
   type PluginParamInfo,
   validatePluginConfig,
 } from "./plugin-validation";
+import {
+  applySubscriptionProviderConfig,
+  clearSubscriptionProviderConfig,
+} from "./provider-switch-config";
 import { handleRegistryRoutes } from "./registry-routes";
 import { RegistryService } from "./registry-service";
 import { handleSandboxRoute } from "./sandbox-routes";
@@ -5127,21 +5131,11 @@ async function handleRequest(
         body.apiKey = trimmedKey;
       }
 
-      // Ensure agents.defaults exists for subscription config
-      if (!config.agents)
-        config.agents = {} as NonNullable<typeof config.agents>;
-      if (!(config.agents as Record<string, unknown>).defaults) {
-        (config.agents as Record<string, unknown>).defaults = {};
-      }
-      const defaults = (config.agents as Record<string, unknown>)
-        .defaults as Record<string, unknown>;
-
       if (provider === "elizacloud") {
         // Switching TO elizacloud
         await clearSubscriptions();
         clearOtherApiKeys();
-        // Clear subscription config
-        delete defaults.subscriptionProvider;
+        clearSubscriptionProviderConfig(config);
         // Restore cloud config — the actual API key should already be in
         // config.cloud.apiKey from the original cloud login.  If it was
         // wiped, the user will need to re-login via cloud.
@@ -5157,9 +5151,7 @@ async function handleRequest(
         // Switching TO OpenAI subscription
         clearCloud();
         clearOtherApiKeys("OPENAI_API_KEY");
-        // Set subscription config so restart auto-detects provider
-        defaults.subscriptionProvider = "openai-codex";
-        defaults.model = { primary: "openai" };
+        applySubscriptionProviderConfig(config, provider);
         // Delete Anthropic subscription but keep OpenAI
         try {
           const { deleteCredentials } = await import("../auth/index");
@@ -5184,9 +5176,7 @@ async function handleRequest(
         // Switching TO Anthropic subscription
         clearCloud();
         clearOtherApiKeys("ANTHROPIC_API_KEY");
-        // Set subscription config so restart auto-detects provider
-        defaults.subscriptionProvider = "anthropic-subscription";
-        defaults.model = { primary: "anthropic" };
+        applySubscriptionProviderConfig(config, provider);
         // Delete OpenAI subscription but keep Anthropic
         try {
           const { deleteCredentials } = await import("../auth/index");
@@ -5211,8 +5201,7 @@ async function handleRequest(
         // Switching TO a direct API key provider
         clearCloud();
         await clearSubscriptions();
-        // Clear subscription config
-        delete defaults.subscriptionProvider;
+        clearSubscriptionProviderConfig(config);
         const envKey = PROVIDER_ENV_KEYS[provider];
         clearOtherApiKeys(envKey);
         const apiKey = body.apiKey;

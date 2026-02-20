@@ -5,16 +5,20 @@ import { installClaudeCodeStealthFetchInterceptor } from "./claude-code-stealth"
 
 /**
  * Walk up from `startDir` until we find a directory containing package.json
- * with name "milady". Returns the directory path, or falls back to `startDir`.
+ * with name "milaidy". Returns the directory path, or falls back to `startDir`.
  */
-function findProjectRoot(startDir: string): string {
+/** @internal Exported for testing only. */
+export function findProjectRoot(startDir: string): string {
   let dir = startDir;
   const { root } = path.parse(dir);
   while (dir !== root) {
     const pkgPath = path.join(dir, "package.json");
     try {
       const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
-      if (typeof pkg.name === "string" && pkg.name.toLowerCase() === "milady") {
+      if (
+        typeof pkg.name === "string" &&
+        pkg.name.toLowerCase() === "milaidy"
+      ) {
         return dir;
       }
     } catch {

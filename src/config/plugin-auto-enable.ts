@@ -1,3 +1,4 @@
+import { SUBSCRIPTION_PROVIDER_MAP } from "../auth/types";
 import type { MiladyConfig } from "./types";
 
 export interface ApplyPluginAutoEnableResult {
@@ -255,13 +256,11 @@ export function applyPluginAutoEnable(
   // the subscription's own plugin because the user deliberately connected
   // the subscription.
   const subscriptionProvider = getSubscriptionProvider(updatedConfig);
-  const SUBSCRIPTION_TO_PLUGIN: Record<string, string> = {
-    "anthropic-subscription": "anthropic",
-    "openai-codex": "openai",
-  };
   const subscriptionPluginId =
     typeof subscriptionProvider === "string"
-      ? SUBSCRIPTION_TO_PLUGIN[subscriptionProvider]
+      ? SUBSCRIPTION_PROVIDER_MAP[
+          subscriptionProvider as keyof typeof SUBSCRIPTION_PROVIDER_MAP
+        ]
       : undefined;
   if (subscriptionPluginId) {
     const pluginName = PROVIDER_PLUGINS[subscriptionPluginId];
