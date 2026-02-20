@@ -283,3 +283,116 @@ The Trajectories view displays:
 | `POST` | `/api/training/models/:id/import-ollama` | Import model to Ollama |
 | `POST` | `/api/training/models/:id/activate` | Activate model for agent use |
 | `POST` | `/api/training/models/:id/benchmark` | Run benchmarks against a model |
+
+---
+
+## End-to-End Tutorial
+
+Walk through the complete training workflow using curl commands.
+
+### Step 1: Check Training Status
+
+```bash
+curl http://localhost:2138/api/training/status \
+  -H "Authorization: Bearer your-token"
+```
+
+Response:
+```json
+{
+  "runtimeAvailable": true,
+  "trajectoryCount": 150,
+  "jobCount": 0
+}
+```
+
+### Step 2: Browse Collected Trajectories
+
+Trajectories are automatically collected as your agent processes messages. Each trajectory records LLM calls, provider accesses, and token usage.
+
+```bash
+curl "http://localhost:2138/api/training/trajectories?limit=10&offset=0" \
+  -H "Authorization: Bearer your-token"
+```
+
+### Step 3: Build a Training Dataset
+
+Filter trajectories into a dataset suitable for fine-tuning:
+
+```bash
+curl -X POST http://localhost:2138/api/training/datasets/build \
+  -H "Authorization: Bearer your-token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "limit": 500,
+    "minLlmCallsPerTrajectory": 2
+  }'
+```
+
+Response:
+```json
+{
+  "dataset": {
+    "id": "dataset-abc123",
+    "trajectoryCount": 342,
+    "createdAt": "2026-02-19T10:00:00.000Z"
+  }
+}
+```
+
+### Step 4: Start a Training Job
+
+```bash
+curl -X POST http://localhost:2138/api/training/jobs \
+  -H "Authorization: Bearer your-token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "datasetId": "dataset-abc123",
+    "backend": "mlx",
+    "model": "llama-3.2-3b",
+    "iterations": 100,
+    "batchSize": 4,
+    "learningRate": 0.0001
+  }'
+```
+
+Supported backends: `mlx` (Apple Silicon), `cuda` (NVIDIA GPU), `cpu`.
+
+### Step 5: Monitor Progress
+
+```bash
+curl http://localhost:2138/api/training/jobs/job-xyz789 \
+  -H "Authorization: Bearer your-token"
+```
+
+Job statuses: `pending` -> `running` -> `completed` (or `failed` / `cancelled`).
+
+### Step 6: Import to Ollama
+
+After training completes, import the fine-tuned model into Ollama for local inference:
+
+```bash
+curl -X POST http://localhost:2138/api/training/models/model-abc123/import-ollama \
+  -H "Authorization: Bearer your-token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "modelName": "my-fine-tuned-agent",
+    "baseModel": "llama-3.2-3b",
+    "ollamaUrl": "http://localhost:11434"
+  }'
+```
+
+The `ollamaUrl` must point to a local Ollama server (localhost, 127.0.0.1, or ::1 only).
+
+### Step 7: Activate the Model
+
+Switch your agent to use the fine-tuned model:
+
+```bash
+curl -X POST http://localhost:2138/api/training/models/model-abc123/activate \
+  -H "Authorization: Bearer your-token" \
+  -H "Content-Type: application/json" \
+  -d '{"providerModel": "ollama/my-fine-tuned-agent"}'
+```
+
+This updates the agent's model configuration to use your fine-tuned model for inference.

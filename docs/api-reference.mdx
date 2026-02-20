@@ -10,6 +10,124 @@ The Milaidy API server runs on port **2138** by default. All endpoints are prefi
 When `MILADY_API_TOKEN` is configured, include the token as a `Bearer` token in the `Authorization` header, or use the pairing flow to obtain it.
 </Warning>
 
+## Quick Start
+
+These examples assume the API is running on `localhost:2138`. Replace `YOUR_TOKEN` with the value of `MILADY_API_TOKEN` or the token received from the pairing flow.
+
+### Check agent status
+
+```bash
+curl http://localhost:2138/api/status
+```
+
+```json
+{
+  "name": "Milady",
+  "status": "running",
+  "model": "claude-sonnet-4-20250514",
+  "uptime": 3600
+}
+```
+
+### Authenticate via pairing code
+
+When pairing is enabled, the agent displays a code in its terminal. Submit it to receive a token:
+
+```bash
+curl -X POST http://localhost:2138/api/auth/pair \
+  -H "Content-Type: application/json" \
+  -d '{"code": "ABCD-EFGH"}'
+```
+
+```json
+{
+  "token": "your-api-token"
+}
+```
+
+### Get character info
+
+```bash
+curl http://localhost:2138/api/character \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+### Send a chat message
+
+```bash
+curl -X POST http://localhost:2138/api/chat \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Hello, what can you do?"}'
+```
+
+### Stream a chat response
+
+```bash
+curl -N -X POST http://localhost:2138/api/chat/stream \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Tell me about yourself"}'
+```
+
+The response is a Server-Sent Events stream. Each event contains a `data` field with a JSON payload.
+
+### List conversations
+
+```bash
+curl http://localhost:2138/api/conversations \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+### Upload a knowledge document
+
+```bash
+curl -X POST http://localhost:2138/api/knowledge/documents \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Company FAQ",
+    "content": "Q: What is Milaidy?\nA: A personal AI assistant built on ElizaOS."
+  }'
+```
+
+### Search knowledge
+
+```bash
+curl "http://localhost:2138/api/knowledge/search?q=what+is+milaidy&limit=5" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+### List plugins
+
+```bash
+curl http://localhost:2138/api/plugins \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+### Get autonomy state
+
+```bash
+curl http://localhost:2138/api/agent/autonomy \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```json
+{
+  "enabled": false,
+  "thinking": false
+}
+```
+
+### Enable autonomy
+
+```bash
+curl -X POST http://localhost:2138/api/agent/autonomy \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"enabled": true}'
+```
+
 ---
 
 ## Authentication

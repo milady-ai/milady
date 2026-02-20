@@ -68,6 +68,10 @@
               "guides/training",
               "guides/agent-export",
               "guides/themes",
+              "guides/config-includes",
+              "guides/emotes",
+              "guides/local-models",
+              "guides/mcp-marketplace",
               "chat-commands"
             ]
           },

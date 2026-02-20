@@ -9,13 +9,15 @@ Eliza Cloud provides remote agent hosting and provisioning. The Milaidy cloud in
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Cloud Manager](#cloud-manager)
-3. [Cloud Login Flow](#cloud-login-flow)
-4. [Cloud Proxy](#cloud-proxy)
-5. [Backup Scheduler](#backup-scheduler)
-6. [Connection Monitor](#connection-monitor)
-7. [Cloud Status and Credits](#cloud-status-and-credits)
-8. [API Endpoints](#api-endpoints)
+2. [Getting Started](#getting-started)
+3. [Cloud Manager](#cloud-manager)
+4. [Cloud Login Flow](#cloud-login-flow)
+5. [Cloud Proxy](#cloud-proxy)
+6. [Backup Scheduler](#backup-scheduler)
+7. [Connection Monitor](#connection-monitor)
+8. [Cloud Status and Credits](#cloud-status-and-credits)
+9. [Credits and Billing](#credits-and-billing)
+10. [API Endpoints](#api-endpoints)
 
 ---
 
@@ -30,6 +32,90 @@ The Eliza Cloud integration consists of several components:
 - **ConnectionMonitor** -- heartbeat monitoring with exponential backoff reconnection
 
 The default cloud base URL is `https://www.elizacloud.ai`.
+
+---
+
+## Getting Started
+
+The following walkthrough covers the full lifecycle of connecting to Eliza Cloud, deploying a cloud agent, and disconnecting — using the local dashboard API running on port `2138`.
+
+### Step 1: Start the Login Flow
+
+```bash
+curl -X POST http://localhost:2138/api/cloud/login \
+  -H "Authorization: Bearer your-token"
+```
+
+Response:
+```json
+{
+  "ok": true,
+  "sessionId": "a1b2c3d4-...",
+  "browserUrl": "https://www.elizacloud.ai/auth/cli-login?session=a1b2c3d4-..."
+}
+```
+
+Open the `browserUrl` in your browser to authenticate.
+
+### Step 2: Poll for Authentication
+
+```bash
+curl "http://localhost:2138/api/cloud/login/status?sessionId=a1b2c3d4-..."
+```
+
+Responses:
+- `{"status": "pending"}` — still waiting for browser login
+- `{"status": "authenticated", "keyPrefix": "mk_..."}` — login complete, API key saved
+- `{"status": "expired", "error": "Session not found or expired"}` — timed out
+
+On success, the API key is automatically saved to `milady.json` and `process.env.ELIZAOS_CLOUD_API_KEY` is set.
+
+### Step 3: Check Connection Status
+
+```bash
+curl http://localhost:2138/api/cloud/status
+```
+
+Response:
+```json
+{
+  "connected": true,
+  "enabled": true,
+  "hasApiKey": true,
+  "userId": "user-123",
+  "organizationId": "org-456",
+  "topUpUrl": "https://www.elizacloud.ai/dashboard/settings?tab=billing"
+}
+```
+
+### Step 4: Create a Cloud Agent
+
+```bash
+curl -X POST http://localhost:2138/api/cloud/agents \
+  -H "Authorization: Bearer your-token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agentName": "my-cloud-agent",
+    "agentConfig": {},
+    "environmentVars": {}
+  }'
+```
+
+### Step 5: Connect to the Agent
+
+```bash
+curl -X POST http://localhost:2138/api/cloud/agents/agent-id/connect \
+  -H "Authorization: Bearer your-token"
+```
+
+### Disconnecting
+
+```bash
+curl -X POST http://localhost:2138/api/cloud/disconnect \
+  -H "Authorization: Bearer your-token"
+```
+
+This takes a final backup snapshot, clears the API key from config, and removes cloud env vars.
 
 ---
 
@@ -201,6 +287,37 @@ When not connected, the response includes a `reason` field: `"not_authenticated"
 ```
 
 Balance thresholds: `low` is true when balance < $2.00, `critical` when < $0.50.
+
+---
+
+## Credits and Billing
+
+Monitor your Eliza Cloud balance before and during agent operation to avoid service interruption.
+
+```bash
+curl http://localhost:2138/api/cloud/credits \
+  -H "Authorization: Bearer your-token"
+```
+
+Response:
+```json
+{
+  "connected": true,
+  "balance": 12.50,
+  "low": false,
+  "critical": false,
+  "topUpUrl": "https://www.elizacloud.ai/dashboard/settings?tab=billing"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `balance` | number \| null | Current balance in USD |
+| `low` | boolean | `true` when balance is below $2.00 |
+| `critical` | boolean | `true` when balance is below $0.50 |
+| `topUpUrl` | string | Direct link to the billing page |
+
+When `low` or `critical` is `true`, consider topping up to avoid service interruption.
 
 ---
 
