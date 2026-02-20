@@ -1,19 +1,16 @@
 import type http from "node:http";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  type BugReportRouteContext,
-  handleBugReportRoutes,
-  sanitize,
-} from "../bug-report-routes";
+import { handleBugReportRoutes, sanitize } from "../bug-report-routes";
+import type { RouteRequestContext } from "../route-helpers";
 
 // --- helpers ----------------------------------------------------------------
 
 function makeCtx(
-  overrides: Partial<BugReportRouteContext> & {
+  overrides: Partial<RouteRequestContext> & {
     method: string;
     pathname: string;
   },
-): BugReportRouteContext {
+): RouteRequestContext {
   return {
     req: {} as http.IncomingMessage,
     res: {} as http.ServerResponse,
@@ -210,31 +207,6 @@ describe("POST /api/bug-report", () => {
       const body = JSON.parse(fetchCall[1].body);
       expect(body.title).not.toContain("<script>");
       expect(body.title).toContain("Bug here");
-    });
-
-    it("skips oversized screenshots", async () => {
-      vi.stubGlobal(
-        "fetch",
-        vi.fn().mockResolvedValue({
-          ok: true,
-          json: () => Promise.resolve({ html_url: "https://example.com/1" }),
-        }),
-      );
-
-      const bigScreenshot = `data:image/jpeg;base64,${"A".repeat(2_000_000)}`;
-      const ctx = makeCtx({
-        method: "POST",
-        pathname: "/api/bug-report",
-        readJsonBody: vi.fn().mockResolvedValue({
-          ...validBody,
-          screenshot: bigScreenshot,
-        }),
-      });
-      await handleBugReportRoutes(ctx);
-
-      const fetchCall = (fetch as ReturnType<typeof vi.fn>).mock.calls[0];
-      const body = JSON.parse(fetchCall[1].body);
-      expect(body.body).not.toContain("screenshot");
     });
   });
 

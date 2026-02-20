@@ -148,7 +148,6 @@ export function BugReportModal() {
         nodeVersion: form.nodeVersion,
         modelProvider: form.modelProvider,
         logs: form.logs,
-        screenshot: screenshot ?? undefined,
       });
       if (result.url) {
         setResultUrl(result.url);
@@ -165,7 +164,7 @@ export function BugReportModal() {
     } finally {
       setSubmitting(false);
     }
-  }, [form, screenshot, formatMarkdown]);
+  }, [form, formatMarkdown]);
 
   const handleCopyAndOpen = useCallback(async () => {
     const ok = await copyText(formatMarkdown());

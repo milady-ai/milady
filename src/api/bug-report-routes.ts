@@ -1,11 +1,9 @@
 import os from "node:os";
-import type { RouteHelpers, RouteRequestMeta } from "./route-helpers";
+import type { RouteRequestContext } from "./route-helpers";
 
 export const BUG_REPORT_REPO = "milady-ai/milady";
 const GITHUB_ISSUES_URL = `https://api.github.com/repos/${BUG_REPORT_REPO}/issues`;
 const GITHUB_NEW_ISSUE_URL = `https://github.com/${BUG_REPORT_REPO}/issues/new?template=bug_report.yml`;
-
-export interface BugReportRouteContext extends RouteRequestMeta, RouteHelpers {}
 
 interface BugReportBody {
   description: string;
@@ -16,7 +14,6 @@ interface BugReportBody {
   nodeVersion?: string;
   modelProvider?: string;
   logs?: string;
-  screenshot?: string;
 }
 
 /**
@@ -28,7 +25,7 @@ export function sanitize(input: string, maxLen = 10_000): string {
   return input.replace(/<[^>]*>/g, "").slice(0, maxLen);
 }
 
-function formatIssueBody(body: BugReportBody, screenshot?: string): string {
+function formatIssueBody(body: BugReportBody): string {
   const sections: string[] = [];
   sections.push(`### Description\n\n${sanitize(body.description)}`);
   sections.push(`### Steps to Reproduce\n\n${sanitize(body.stepsToReproduce)}`);
@@ -46,15 +43,11 @@ function formatIssueBody(body: BugReportBody, screenshot?: string): string {
     sections.push(`### Model Provider\n\n${sanitize(body.modelProvider, 200)}`);
   if (body.logs)
     sections.push(`### Logs\n\n\`\`\`\n${sanitize(body.logs, 50_000)}\n\`\`\``);
-  if (screenshot)
-    sections.push(
-      `### Screenshots\n\n<details><summary>Screenshot</summary>\n\n![screenshot](${screenshot})\n\n</details>`,
-    );
   return sections.join("\n\n");
 }
 
 export async function handleBugReportRoutes(
-  ctx: BugReportRouteContext,
+  ctx: RouteRequestContext,
 ): Promise<boolean> {
   const { req, res, method, pathname, json, error, readJsonBody } = ctx;
 
@@ -85,24 +78,11 @@ export async function handleBugReportRoutes(
     }
 
     try {
-      // If screenshot provided, include as inline data URI (GitHub renders
-      // images from data URIs in issue bodies). Cap at ~1MB base64 to stay
-      // within GitHub's issue body size limits.
-      let screenshotDataUri: string | undefined;
-      if (body.screenshot) {
-        const raw = body.screenshot.startsWith("data:")
-          ? body.screenshot
-          : `data:image/jpeg;base64,${body.screenshot}`;
-        if (raw.length <= 1_500_000) {
-          screenshotDataUri = raw;
-        }
-      }
-
       const sanitizedTitle = sanitize(body.description, 80).replace(
         /[\r\n]+/g,
         " ",
       );
-      const issueBody = formatIssueBody(body, screenshotDataUri);
+      const issueBody = formatIssueBody(body);
       const issueRes = await fetch(GITHUB_ISSUES_URL, {
         method: "POST",
         headers: {

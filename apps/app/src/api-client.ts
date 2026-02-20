@@ -4007,7 +4007,6 @@ export class MiladyClient {
     nodeVersion?: string;
     modelProvider?: string;
     logs?: string;
-    screenshot?: string;
   }): Promise<{ url?: string; fallback?: string }> {
     return this.fetch("/api/bug-report", {
       method: "POST",
