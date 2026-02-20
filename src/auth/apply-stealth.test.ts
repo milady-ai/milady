@@ -9,7 +9,7 @@ const OPENAI_STEALTH_GUARD = Symbol.for("milady.openaiCodexStealthInstalled");
 
 describe("applyClaudeCodeStealth", () => {
   beforeEach(() => {
-    vi.resetModules();
+    vi.clearAllMocks();
     delete process.env.ANTHROPIC_API_KEY;
   });
 
