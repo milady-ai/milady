@@ -3192,6 +3192,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
           onboardingRunMode === "cloud" ? onboardingLargeModel : undefined,
         provider: isLocalMode ? onboardingProvider || undefined : undefined,
         providerApiKey: isLocalMode ? onboardingApiKey || undefined : undefined,
+        primaryModel: isLocalMode
+          ? onboardingPrimaryModel.trim() || undefined
+          : undefined,
         inventoryProviders:
           inventoryProviders.length > 0 ? inventoryProviders : undefined,
         // Connectors
@@ -3233,6 +3236,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     onboardingLargeModel,
     onboardingProvider,
     onboardingApiKey,
+    onboardingPrimaryModel,
     onboardingSelectedChains,
     onboardingRpcSelections,
     onboardingRpcKeys,

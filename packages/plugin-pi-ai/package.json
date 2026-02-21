@@ -1,0 +1,87 @@
+{
+  "name": "@elizaos/plugin-pi-ai",
+  "description": "pi-ai credential bridge plugin for ElizaOS",
+  "version": "1.7.3-alpha.3",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "packageType": "plugin",
+  "platform": "node",
+  "license": "MIT",
+  "keywords": [
+    "plugin",
+    "elizaos",
+    "pi-ai",
+    "providers"
+  ],
+  "homepage": "https://elizaos.ai",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "package.json"
+  ],
+  "dependencies": {
+    "@elizaos/core": "next",
+    "@mariozechner/pi-ai": "0.52.12",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "dotenv": "^17.2.3",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "start": "elizaos start",
+    "dev": "elizaos dev",
+    "build": "bun run build.ts",
+    "build:watch": "bun run build.ts --watch",
+    "test": "bun test",
+    "format": "prettier --write ./src"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "resolutions": {
+    "zod": "4.3.5"
+  },
+  "agentConfig": {
+    "pluginType": "elizaos:plugin:1.0.0",
+    "pluginParameters": {
+      "PI_CODING_AGENT_DIR": {
+        "type": "string",
+        "description": "Path to pi's credential/settings directory (default: ~/.pi/agent)",
+        "required": false
+      },
+      "PI_AI_MODEL_SPEC": {
+        "type": "string",
+        "description": "Preferred provider/modelId for both small+large handlers (example: anthropic/claude-sonnet-4-20250514)",
+        "required": false
+      },
+      "PI_AI_SMALL_MODEL_SPEC": {
+        "type": "string",
+        "description": "Optional provider/modelId override for TEXT_SMALL",
+        "required": false
+      },
+      "PI_AI_LARGE_MODEL_SPEC": {
+        "type": "string",
+        "description": "Optional provider/modelId override for TEXT_LARGE",
+        "required": false
+      },
+      "PI_AI_PRIORITY": {
+        "type": "number",
+        "description": "Model handler registration priority (higher wins, default: 10000)",
+        "required": false
+      }
+    }
+  }
+}

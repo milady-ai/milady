@@ -38,7 +38,6 @@ import {
   debugLogResolvedContext,
   validateRuntimeContext,
 } from "../api/plugin-validation";
-
 import {
   configFileExists,
   loadMiladyConfig,
@@ -425,6 +424,15 @@ const CHANNEL_PLUGIN_MAP: Readonly<Record<string, string>> = {
   googlechat: "@elizaos/plugin-google-chat",
 };
 
+const PI_AI_PLUGIN_PACKAGE = "@elizaos/plugin-pi-ai";
+
+function isPiAiEnabledFromEnv(env: NodeJS.ProcessEnv = process.env): boolean {
+  const raw = env.MILAIDY_USE_PI_AI;
+  if (!raw) return false;
+  const value = String(raw).trim().toLowerCase();
+  return value === "1" || value === "true" || value === "yes";
+}
+
 /** Maps environment variable names to model-provider plugin packages. */
 const PROVIDER_PLUGIN_MAP: Readonly<Record<string, string>> = {
   ANTHROPIC_API_KEY: "@elizaos/plugin-anthropic",
@@ -439,6 +447,7 @@ const PROVIDER_PLUGIN_MAP: Readonly<Record<string, string>> = {
   AIGATEWAY_API_KEY: "@elizaos/plugin-vercel-ai-gateway",
   OLLAMA_BASE_URL: "@elizaos/plugin-ollama",
   ZAI_API_KEY: "@homunculuslabs/plugin-zai",
+  MILAIDY_USE_PI_AI: PI_AI_PLUGIN_PACKAGE,
   // ElizaCloud — loaded when API key is present OR cloud is explicitly enabled
   ELIZAOS_CLOUD_API_KEY: "@elizaos/plugin-elizacloud",
   ELIZAOS_CLOUD_ENABLED: "@elizaos/plugin-elizacloud",
@@ -447,15 +456,20 @@ const PROVIDER_PLUGIN_MAP: Readonly<Record<string, string>> = {
 /**
  * Optional feature plugins keyed by feature name.
  *
- * Currently empty — reserved for future feature→plugin mappings.
- * The lookup code in {@link collectPluginNames} is intentionally kept
- * so new entries work without additional wiring.
+ * Mappings here support short IDs in allow-lists and feature toggles.
+ * Keep this map in sync with optional plugin registration and tests.
  */
 const OPTIONAL_PLUGIN_MAP: Readonly<Record<string, string>> = {
   browser: "@elizaos/plugin-browser",
   vision: "@elizaos/plugin-vision",
   cron: "@elizaos/plugin-cron",
+  cua: "@elizaos/plugin-cua",
   computeruse: "@elizaos/plugin-computeruse",
+  obsidian: "@elizaos/plugin-obsidian",
+  repoprompt: "@elizaos/plugin-repoprompt",
+  repoPrompt: "@elizaos/plugin-repoprompt",
+  "pi-ai": PI_AI_PLUGIN_PACKAGE,
+  piAi: PI_AI_PLUGIN_PACKAGE,
   x402: "@elizaos/plugin-x402",
   "coding-agent": "@milaidy/plugin-coding-agent",
 };
@@ -537,6 +551,22 @@ export function collectPluginNames(config: MiladyConfig): Set<string> {
   const cloudExplicitlyDisabled = cloudMode === false;
   const cloudEffectivelyEnabled =
     cloudMode === true || (!cloudExplicitlyDisabled && cloudHasApiKey);
+  const configEnv = config.env as
+    | (Record<string, unknown> & { vars?: Record<string, unknown> })
+    | undefined;
+  const configPiAiFlag =
+    (configEnv?.vars &&
+    typeof configEnv.vars === "object" &&
+    !Array.isArray(configEnv.vars)
+      ? (configEnv.vars as Record<string, unknown>).MILAIDY_USE_PI_AI
+      : undefined) ?? configEnv?.MILAIDY_USE_PI_AI;
+  const piAiEnabled =
+    isPiAiEnabledFromEnv(process.env) ||
+    (typeof configPiAiFlag === "string" &&
+      isPiAiEnabledFromEnv({
+        MILAIDY_USE_PI_AI: configPiAiFlag,
+      } as NodeJS.ProcessEnv));
+
   const pluginEntries = (config.plugins as Record<string, unknown> | undefined)
     ?.entries as Record<string, { enabled?: boolean }> | undefined;
 
@@ -594,6 +624,10 @@ export function collectPluginNames(config: MiladyConfig): Set<string> {
 
   // Model-provider plugins — load when env key is present
   for (const [envKey, pluginName] of Object.entries(PROVIDER_PLUGIN_MAP)) {
+    if (envKey === "MILAIDY_USE_PI_AI") {
+      // pi-ai enablement uses dedicated boolean parsing + precedence logic below.
+      continue;
+    }
     if (
       cloudExplicitlyDisabled &&
       (envKey === "ELIZAOS_CLOUD_API_KEY" || envKey === "ELIZAOS_CLOUD_ENABLED")
@@ -619,23 +653,50 @@ export function collectPluginNames(config: MiladyConfig): Set<string> {
     }
   }
 
-  // ElizaCloud plugin — load when explicitly enabled OR when an API key
-  // exists in config, unless cloud was explicitly disabled.
-  if (cloudEffectivelyEnabled) {
-    pluginsToLoad.add("@elizaos/plugin-elizacloud");
+  const shouldEnablePiAi =
+    piAiEnabled && pluginEntries?.["pi-ai"]?.enabled !== false;
 
-    // When cloud is active, remove direct AI provider plugins — the cloud
-    // plugin handles ALL model calls via its own gateway.
-    const directProviders = new Set(Object.values(PROVIDER_PLUGIN_MAP));
-    directProviders.delete("@elizaos/plugin-elizacloud");
-    for (const p of directProviders) {
-      pluginsToLoad.delete(p);
+  const applyProviderPrecedence = (): void => {
+    // Provider precedence:
+    // 1) ElizaCloud (when enabled)
+    // 2) pi-ai (when enabled and cloud is not active)
+    // 3) direct provider plugins (api-key/env based)
+    if (cloudEffectivelyEnabled) {
+      pluginsToLoad.add("@elizaos/plugin-elizacloud");
+
+      // When cloud is active, remove direct AI provider plugins and pi-ai —
+      // the cloud plugin handles ALL model calls via its own gateway.
+      const directProviders = new Set(Object.values(PROVIDER_PLUGIN_MAP));
+      directProviders.delete("@elizaos/plugin-elizacloud");
+      for (const p of directProviders) {
+        pluginsToLoad.delete(p);
+      }
+      return;
     }
-  } else if (cloudExplicitlyDisabled) {
-    // Cloud was explicitly disabled — remove elizacloud even though it's
-    // in CORE_PLUGINS, so it cannot intercept model calls.
-    pluginsToLoad.delete("@elizaos/plugin-elizacloud");
-  }
+
+    if (shouldEnablePiAi) {
+      pluginsToLoad.add(PI_AI_PLUGIN_PACKAGE);
+
+      // When pi-ai is active, remove direct provider plugins + cloud plugin.
+      // pi-ai performs the upstream provider selection itself.
+      const directProviders = new Set(Object.values(PROVIDER_PLUGIN_MAP));
+      directProviders.delete(PI_AI_PLUGIN_PACKAGE);
+      for (const p of directProviders) {
+        pluginsToLoad.delete(p);
+      }
+      pluginsToLoad.delete("@elizaos/plugin-elizacloud");
+      return;
+    }
+
+    if (cloudExplicitlyDisabled) {
+      // Cloud was explicitly disabled — remove elizacloud even though it's
+      // in CORE_PLUGINS, so it cannot intercept model calls.
+      pluginsToLoad.delete("@elizaos/plugin-elizacloud");
+    }
+  };
+
+  // Apply once before additive plugin-entry/feature paths.
+  applyProviderPrecedence();
 
   // Optional feature plugins from config.plugins.entries
   const pluginsConfig = config.plugins as
@@ -693,6 +754,10 @@ export function collectPluginNames(config: MiladyConfig): Set<string> {
       }
     }
   }
+
+  // Re-apply provider precedence so later additive paths (entries, features,
+  // installs) cannot accidentally re-introduce suppressed providers.
+  applyProviderPrecedence();
 
   // Enforce feature gating last so allow-list entries cannot bypass it.
   if (shellPluginDisabled) {
@@ -803,8 +868,6 @@ export function mergeDropInPlugins(params: {
 }
 
 const WORKSPACE_PLUGIN_OVERRIDES = new Set<string>([
-  // Plugins listed here will be loaded from local workspace paths instead of npm.
-  // Only add plugins here when you need to test local modifications.
   // "@elizaos/plugin-trajectory-logger",
   // "@elizaos/plugin-plugin-manager",
   // "@elizaos/plugin-media-generation",
@@ -830,6 +893,8 @@ function getWorkspacePluginOverridePath(pluginName: string): string | null {
     path.join(workspaceRoot, "plugins", pluginSegment, "typescript"),
     path.join(miladyRoot, "plugins", pluginSegment),
     path.join(workspaceRoot, "plugins", pluginSegment),
+    path.join(miladyRoot, "packages", pluginSegment),
+    path.join(workspaceRoot, "packages", pluginSegment),
   ];
 
   for (const candidate of candidates) {
@@ -1102,6 +1167,7 @@ async function resolvePlugins(
       }
     } catch (err) {
       const msg = formatError(err);
+
       failedPlugins.push({ name: pluginName, error: msg });
       if (isCore) {
         logger.error(

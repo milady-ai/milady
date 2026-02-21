@@ -267,6 +267,7 @@ Utilities and capabilities.
 | `browser` | Web browsing |
 | `shell` | Shell command execution |
 | `code` | Code generation/execution |
+| `repoprompt` | RepoPrompt CLI orchestration |
 | `vision` | Image analysis |
 | `knowledge` | RAG/knowledge base |
 | `mcp` | Model Context Protocol |

@@ -99,6 +99,16 @@ export function ProviderSwitcher({
   const [anthropicConnected, setAnthropicConnected] = useState(false);
   const [openaiConnected, setOpenaiConnected] = useState(false);
 
+  /* ── pi-ai state ──────────────────────────────────────────────── */
+  const [piAiEnabled, setPiAiEnabled] = useState(false);
+  const [piAiModelSpec, setPiAiModelSpec] = useState("");
+  const [piAiModelOptions, setPiAiModelOptions] = useState<
+    OnboardingOptions["piAiModels"]
+  >([]);
+  const [piAiDefaultModelSpec, setPiAiDefaultModelSpec] = useState("");
+  const [piAiSaving, setPiAiSaving] = useState(false);
+  const [piAiSaveSuccess, setPiAiSaveSuccess] = useState(false);
+
   const loadSubscriptionStatus = useCallback(async () => {
     try {
       const res = await client.getSubscriptionStatus();
@@ -114,6 +124,12 @@ export function ProviderSwitcher({
       try {
         const opts = await client.getOnboardingOptions();
         setModelOptions(opts.models);
+        setPiAiModelOptions(opts.piAiModels ?? []);
+        setPiAiDefaultModelSpec(
+          typeof opts.piAiDefaultModel === "string"
+            ? opts.piAiDefaultModel
+            : "",
+        );
       } catch (err) {
         console.warn("[milady] Failed to load onboarding options", err);
       }
@@ -129,6 +145,29 @@ export function ProviderSwitcher({
         );
         setCurrentLargeModel(
           models?.large || (cloudEnabledCfg ? defaultLarge : ""),
+        );
+
+        const env = cfg.env as Record<string, unknown> | undefined;
+        const vars = (env?.vars as Record<string, unknown> | undefined) ?? {};
+        const rawPiAi =
+          (typeof vars.MILAIDY_USE_PI_AI === "string"
+            ? vars.MILAIDY_USE_PI_AI
+            : undefined) ||
+          (typeof env?.MILAIDY_USE_PI_AI === "string"
+            ? env.MILAIDY_USE_PI_AI
+            : "");
+        const piAiOn = ["1", "true", "yes"].includes(
+          rawPiAi.trim().toLowerCase(),
+        );
+        setPiAiEnabled(piAiOn);
+
+        const agents = cfg.agents as Record<string, unknown> | undefined;
+        const defaults = agents?.defaults as
+          | Record<string, unknown>
+          | undefined;
+        const model = defaults?.model as Record<string, unknown> | undefined;
+        setPiAiModelSpec(
+          typeof model?.primary === "string" ? model.primary : "",
         );
       } catch (err) {
         console.warn("[milady] Failed to load config", err);
@@ -165,30 +204,39 @@ export function ProviderSwitcher({
 
   useEffect(() => {
     if (hasManualSelection.current) return;
+    if (piAiEnabled) {
+      if (selectedProviderId !== "pi-ai") setSelectedProviderId("pi-ai");
+      return;
+    }
     if (cloudEnabled) {
       if (selectedProviderId !== "__cloud__")
         setSelectedProviderId("__cloud__");
     }
-  }, [cloudEnabled, selectedProviderId]);
+  }, [cloudEnabled, piAiEnabled, selectedProviderId]);
 
   const resolvedSelectedId =
     selectedProviderId === "__cloud__"
       ? "__cloud__"
-      : selectedProviderId &&
-          (allAiProviders.some((p) => p.id === selectedProviderId) ||
-            isSubscriptionId(selectedProviderId))
-        ? selectedProviderId
-        : cloudEnabled
-          ? "__cloud__"
-          : anthropicConnected
-            ? "anthropic-subscription"
-            : openaiConnected
-              ? "openai-subscription"
-              : (enabledAiProviders[0]?.id ?? null);
+      : selectedProviderId === "pi-ai"
+        ? "pi-ai"
+        : selectedProviderId &&
+            (allAiProviders.some((p) => p.id === selectedProviderId) ||
+              isSubscriptionId(selectedProviderId))
+          ? selectedProviderId
+          : cloudEnabled
+            ? "__cloud__"
+            : piAiEnabled
+              ? "pi-ai"
+              : anthropicConnected
+                ? "anthropic-subscription"
+                : openaiConnected
+                  ? "openai-subscription"
+                  : (enabledAiProviders[0]?.id ?? null);
 
   const selectedProvider =
     resolvedSelectedId &&
     resolvedSelectedId !== "__cloud__" &&
+    resolvedSelectedId !== "pi-ai" &&
     !isSubscriptionId(resolvedSelectedId)
       ? (allAiProviders.find((p) => p.id === resolvedSelectedId) ?? null)
       : null;
@@ -204,18 +252,22 @@ export function ProviderSwitcher({
       // Direct providers require API keys. The UI does not have access to stored
       // secrets, so we avoid calling /api/provider/switch here and instead rely
       // on enabling/disabling provider plugins + saving provider config.
-      if (cloudEnabled) {
-        const willToggle =
-          !target.enabled || enabledAiProviders.some((p) => p.id !== newId);
+      const willTogglePlugins =
+        !target.enabled || enabledAiProviders.some((p) => p.id !== newId);
+      if (cloudEnabled || piAiEnabled) {
         try {
-          await client.updateConfig({ cloud: { enabled: false } });
+          await client.updateConfig({
+            cloud: { enabled: false },
+            env: { vars: { MILAIDY_USE_PI_AI: "" } },
+          });
           setState("cloudEnabled", false);
-          if (!willToggle) {
+          setPiAiEnabled(false);
+          if (!willTogglePlugins) {
             await client.restartAgent();
           }
         } catch (err) {
           console.warn(
-            "[milady] Failed to disable cloud config during provider switch",
+            "[milady] Failed to disable cloud/pi-ai config during provider switch",
             err,
           );
         }
@@ -235,6 +287,7 @@ export function ProviderSwitcher({
       handlePluginToggle,
       setState,
       cloudEnabled,
+      piAiEnabled,
     ],
   );
 
@@ -250,12 +303,17 @@ export function ProviderSwitcher({
       if (!target) return;
 
       try {
+        await client.updateConfig({
+          cloud: { enabled: false },
+          env: { vars: { MILAIDY_USE_PI_AI: "" } },
+        });
         const switchId =
           providerId === "anthropic-subscription"
             ? "anthropic-subscription"
             : "openai-codex";
         await client.switchProvider(switchId);
         setState("cloudEnabled", false);
+        setPiAiEnabled(false);
       } catch (err) {
         console.warn("[milady] Provider switch failed", err);
       }
@@ -277,6 +335,7 @@ export function ProviderSwitcher({
     try {
       await client.updateConfig({
         cloud: { enabled: true },
+        env: { vars: { MILAIDY_USE_PI_AI: "" } },
         agents: { defaults: { model: { primary: null } } },
         models: {
           small: currentSmallModel || "moonshotai/kimi-k2-turbo",
@@ -284,20 +343,67 @@ export function ProviderSwitcher({
         },
       });
       setState("cloudEnabled", true);
+      setPiAiEnabled(false);
       await client.restartAgent();
     } catch (err) {
       console.warn("[milady] Failed to select cloud provider", err);
     }
   }, [currentSmallModel, currentLargeModel, setState]);
 
+  const handlePiAiSave = useCallback(async () => {
+    setPiAiSaving(true);
+    setPiAiSaveSuccess(false);
+    try {
+      await client.updateConfig({
+        cloud: { enabled: false },
+        env: { vars: { MILAIDY_USE_PI_AI: "1" } },
+        agents: {
+          defaults: {
+            model: {
+              primary: piAiModelSpec.trim() || null,
+            },
+          },
+        },
+      });
+      setState("cloudEnabled", false);
+      setPiAiEnabled(true);
+      setPiAiSaveSuccess(true);
+      setTimeout(() => setPiAiSaveSuccess(false), 2000);
+      await client.restartAgent();
+    } catch (err) {
+      console.warn("[milady] Failed to enable pi-ai", err);
+    } finally {
+      setPiAiSaving(false);
+    }
+  }, [piAiModelSpec, setState]);
+
+  const handleSelectPiAi = useCallback(async () => {
+    hasManualSelection.current = true;
+    setSelectedProviderId("pi-ai");
+    await handlePiAiSave();
+  }, [handlePiAiSave]);
+
+  const normalizedPiAiModelSpec = piAiModelSpec.trim();
+  const hasKnownPiAiModel = (piAiModelOptions ?? []).some(
+    (model) => model.id === normalizedPiAiModelSpec,
+  );
+  const piAiModelSelectValue =
+    normalizedPiAiModelSpec.length === 0
+      ? ""
+      : hasKnownPiAiModel
+        ? normalizedPiAiModelSpec
+        : "__custom__";
+
   /* ── Render ───────────────────────────────────────────────────── */
-  const totalCols = allAiProviders.length + 1 + subscriptionProviders.length;
+  const totalCols = allAiProviders.length + 2 + subscriptionProviders.length;
   const isCloudSelected = resolvedSelectedId === "__cloud__";
+  const isPiAiSelected = resolvedSelectedId === "pi-ai";
   const isSubscriptionSelected =
     resolvedSelectedId === "anthropic-subscription" ||
     resolvedSelectedId === "openai-subscription";
   const providerChoices = [
     { id: "__cloud__", label: "Eliza Cloud", disabled: false },
+    { id: "pi-ai", label: "Pi (pi-ai)", disabled: false },
     ...subscriptionProviders.map((provider) => ({
       id: provider.id,
       label: provider.label,
@@ -350,6 +456,10 @@ export function ProviderSwitcher({
               void handleSelectCloud();
               return;
             }
+            if (nextId === "pi-ai") {
+              void handleSelectPiAi();
+              return;
+            }
             if (
               nextId === "anthropic-subscription" ||
               nextId === "openai-subscription"
@@ -390,6 +500,22 @@ export function ProviderSwitcher({
             className={`text-xs font-bold whitespace-nowrap ${isCloudSelected ? "" : "text-[var(--text)]"}`}
           >
             Eliza Cloud
+          </div>
+        </button>
+
+        <button
+          type="button"
+          className={`text-center px-2 py-2 border cursor-pointer transition-colors ${
+            isPiAiSelected
+              ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)]"
+              : "border-[var(--border)] bg-[var(--card)] hover:border-[var(--accent)]"
+          }`}
+          onClick={() => void handleSelectPiAi()}
+        >
+          <div
+            className={`text-xs font-bold whitespace-nowrap ${isPiAiSelected ? "" : "text-[var(--text)]"}`}
+          >
+            Pi (pi-ai)
           </div>
         </button>
 
@@ -620,6 +746,92 @@ export function ProviderSwitcher({
           handleSelectSubscription={handleSelectSubscription}
           loadSubscriptionStatus={loadSubscriptionStatus}
         />
+      )}
+
+      {/* pi-ai settings */}
+      {!isCloudSelected && isPiAiSelected && (
+        <div className="mt-4 pt-4 border-t border-[var(--border)]">
+          <div className="text-xs font-semibold mb-2">Pi (pi-ai) Settings</div>
+          <div className="text-[11px] text-[var(--muted)] mb-2">
+            Uses local credentials from ~/.pi/agent/auth.json.
+          </div>
+          <label
+            htmlFor="pi-ai-model-override"
+            className="block text-[11px] text-[var(--muted)] mb-1"
+          >
+            Primary model override (optional)
+          </label>
+
+          {piAiModelOptions && piAiModelOptions.length > 0 ? (
+            <>
+              <select
+                id="pi-ai-model-override"
+                value={piAiModelSelectValue}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  if (next === "__custom__") {
+                    if (piAiModelSelectValue !== "__custom__") {
+                      setPiAiModelSpec("");
+                    }
+                    return;
+                  }
+                  setPiAiModelSpec(next);
+                }}
+                className="w-full px-2.5 py-[8px] border border-[var(--border)] bg-[var(--card)] text-[13px] transition-colors focus:border-[var(--accent)] focus:outline-none"
+              >
+                <option value="">
+                  Use pi default model
+                  {piAiDefaultModelSpec ? ` (${piAiDefaultModelSpec})` : ""}
+                </option>
+                {piAiModelOptions.map((model) => (
+                  <option key={model.id} value={model.id}>
+                    {model.name} ({model.provider})
+                  </option>
+                ))}
+                <option value="__custom__">Custom model spec…</option>
+              </select>
+
+              {piAiModelSelectValue === "__custom__" && (
+                <input
+                  type="text"
+                  value={piAiModelSpec}
+                  onChange={(e) => setPiAiModelSpec(e.target.value)}
+                  placeholder="provider/model (e.g. anthropic/claude-sonnet-4.5)"
+                  className="w-full mt-2 px-2.5 py-[8px] border border-[var(--border)] bg-[var(--card)] text-[13px] transition-colors focus:border-[var(--accent)] focus:outline-none"
+                />
+              )}
+            </>
+          ) : (
+            <input
+              id="pi-ai-model-override"
+              type="text"
+              value={piAiModelSpec}
+              onChange={(e) => setPiAiModelSpec(e.target.value)}
+              placeholder="provider/model (e.g. anthropic/claude-sonnet-4.5)"
+              className="w-full px-2.5 py-[8px] border border-[var(--border)] bg-[var(--card)] text-[13px] transition-colors focus:border-[var(--accent)] focus:outline-none"
+            />
+          )}
+          <div className="flex items-center justify-end gap-2 mt-3">
+            {piAiSaving && (
+              <span className="text-[11px] text-[var(--muted)]">
+                Saving &amp; restarting...
+              </span>
+            )}
+            {piAiSaveSuccess && (
+              <span className="text-[11px] text-[var(--ok,#16a34a)]">
+                Saved — restarting agent
+              </span>
+            )}
+            <button
+              type="button"
+              className="btn text-xs py-[5px] px-3.5 !mt-0"
+              onClick={() => void handlePiAiSave()}
+              disabled={piAiSaving}
+            >
+              {piAiSaving ? "Saving..." : "Save"}
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Local provider settings (API keys) */}

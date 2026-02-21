@@ -71,6 +71,9 @@ describe("collectPluginNames", () => {
     "OLLAMA_BASE_URL",
     "ELIZAOS_CLOUD_API_KEY",
     "ELIZAOS_CLOUD_ENABLED",
+    "MILAIDY_USE_PI_AI",
+    "OBSIDIAN_VAULT_PATH",
+    "OBSIDAN_VAULT_PATH",
   ];
   const snap = envSnapshot(envKeys);
   beforeEach(() => {
@@ -168,6 +171,44 @@ describe("collectPluginNames", () => {
     expect(names.has("@elizaos/plugin-groq")).toBe(false);
   });
 
+  it("adds pi-ai provider plugin when MILAIDY_USE_PI_AI is enabled", () => {
+    process.env.MILAIDY_USE_PI_AI = "1";
+    const names = collectPluginNames({} as MiladyConfig);
+
+    expect(names.has("@elizaos/plugin-pi-ai")).toBe(true);
+    // pi-ai mode should suppress direct provider plugins.
+    expect(names.has("@elizaos/plugin-anthropic")).toBe(false);
+    expect(names.has("@elizaos/plugin-openai")).toBe(false);
+    expect(names.has("@elizaos/plugin-elizacloud")).toBe(false);
+  });
+
+  it("cloud mode takes precedence over pi-ai mode", () => {
+    process.env.MILAIDY_USE_PI_AI = "1";
+    const config = {
+      cloud: { enabled: true },
+    } as unknown as MiladyConfig;
+    const names = collectPluginNames(config);
+
+    expect(names.has("@elizaos/plugin-elizacloud")).toBe(true);
+    expect(names.has("@elizaos/plugin-pi-ai")).toBe(false);
+  });
+
+  it("pi-ai mode overrides explicit direct-provider entries", () => {
+    process.env.MILAIDY_USE_PI_AI = "1";
+    const config = {
+      plugins: {
+        entries: {
+          openai: { enabled: true },
+        },
+      },
+    } as unknown as MiladyConfig;
+
+    const names = collectPluginNames(config);
+
+    expect(names.has("@elizaos/plugin-pi-ai")).toBe(true);
+    expect(names.has("@elizaos/plugin-openai")).toBe(false);
+  });
+
   it("does not auto-enable a provider from env when explicitly disabled in plugins.entries", () => {
     process.env.OPENAI_API_KEY = "sk-test";
     const config = {
@@ -215,6 +256,24 @@ describe("collectPluginNames", () => {
     const names = collectPluginNames(config);
     expect(names.has("@elizaos/plugin-browser")).toBe(true);
     expect(names.has("@elizaos/plugin-discord")).toBe(true);
+  });
+
+  it("normalizes repoprompt short IDs in plugins.allow", () => {
+    const config = {
+      plugins: { allow: ["repoprompt", "repoPrompt"] },
+    } as unknown as MiladyConfig;
+    const names = collectPluginNames(config);
+
+    expect(names.has("@elizaos/plugin-repoprompt")).toBe(true);
+  });
+
+  it("normalizes cua short IDs in plugins.allow", () => {
+    const config = {
+      plugins: { allow: ["cua"] },
+    } as unknown as MiladyConfig;
+    const names = collectPluginNames(config);
+
+    expect(names.has("@elizaos/plugin-cua")).toBe(true);
   });
 
   it("normalizes short plugin IDs in plugins.allow", () => {
@@ -286,12 +345,28 @@ describe("collectPluginNames", () => {
   });
 
   it("respects feature flags in config.features", () => {
-    // OPTIONAL_PLUGIN_MAP is empty, so features won't add anything currently.
-    // But the function should not crash on arbitrary features.
     const config = {
       features: { someFeature: true, another: { enabled: false } },
     } as unknown as MiladyConfig;
     expect(() => collectPluginNames(config)).not.toThrow();
+  });
+
+  it("adds @elizaos/plugin-repoprompt when features.repoprompt = true", () => {
+    const config = {
+      features: { repoprompt: true },
+    } as unknown as MiladyConfig;
+    const names = collectPluginNames(config);
+
+    expect(names.has("@elizaos/plugin-repoprompt")).toBe(true);
+  });
+
+  it("does not add @elizaos/plugin-repoprompt when features.repoprompt = false", () => {
+    const config = {
+      features: { repoprompt: false },
+    } as unknown as MiladyConfig;
+    const names = collectPluginNames(config);
+
+    expect(names.has("@elizaos/plugin-repoprompt")).toBe(false);
   });
 
   // --- plugins.installs (user-installed from registry) ---
@@ -411,6 +486,22 @@ describe("collectPluginNames", () => {
     const names = collectPluginNames(config);
     expect(names.has("@elizaos/plugin-elizacloud")).toBe(true);
     expect(names.has("@elizaos/plugin-vision")).toBe(false);
+  });
+
+  it("adds @elizaos/plugin-obsidian when features.obsidian = true", () => {
+    const config = {
+      features: { obsidian: true },
+    } as unknown as MiladyConfig;
+    const names = collectPluginNames(config);
+    expect(names.has("@elizaos/plugin-obsidian")).toBe(true);
+  });
+
+  it("adds @elizaos/plugin-obsidian when plugins.allow includes obsidian", () => {
+    const config = {
+      plugins: { allow: ["obsidian"] },
+    } as unknown as MiladyConfig;
+    const names = collectPluginNames(config);
+    expect(names.has("@elizaos/plugin-obsidian")).toBe(true);
   });
 });
 

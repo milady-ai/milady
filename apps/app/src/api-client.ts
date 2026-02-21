@@ -346,6 +346,13 @@ export interface OpenRouterModelOption {
   description: string;
 }
 
+export interface PiAiModelOption {
+  id: string;
+  name: string;
+  provider: string;
+  isDefault: boolean;
+}
+
 export interface OnboardingOptions {
   names: string[];
   styles: StylePreset[];
@@ -356,6 +363,8 @@ export interface OnboardingOptions {
     large: ModelOption[];
   };
   openrouterModels?: OpenRouterModelOption[];
+  piAiModels?: PiAiModelOption[];
+  piAiDefaultModel?: string | null;
   inventoryProviders: InventoryProviderOption[];
   sharedStyleRules: string;
   githubOAuthAvailable?: boolean;
@@ -400,6 +409,8 @@ export interface OnboardingData {
   // Local-specific
   provider?: string;
   providerApiKey?: string;
+  /** Optional primary model override (provider/model), used by pi-ai mode. */
+  primaryModel?: string;
   openrouterModel?: string;
   subscriptionProvider?: string;
   // Messaging channel setup
