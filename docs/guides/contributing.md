@@ -18,8 +18,8 @@ Welcome to Milaidy! This guide will help you set up your development environment
 
 ### Prerequisites
 
-- **Node.js 22+** — Required runtime
-- **pnpm** — Package manager (recommended)
+- **Node.js 22 LTS** — Required runtime (`.nvmrc` is pinned)
+- **Bun** — Package manager/runtime used by repo scripts
 - **Git** — Version control
 
 ### Quick Setup
@@ -29,14 +29,17 @@ Welcome to Milaidy! This guide will help you set up your development environment
 git clone https://github.com/milady-ai/milaidy.git
 cd milaidy
 
+# Match repository Node version
+nvm use || nvm install
+
 # Install dependencies
-pnpm install
+bun install
 
 # Build the project
-pnpm build
+bun run build
 
 # Run in development mode
-pnpm dev
+bun run dev
 ```
 
 ---
@@ -47,15 +50,15 @@ pnpm dev
 
 | Tool | Version | Purpose |
 |------|---------|---------|
-| Node.js | ≥22.12.0 | Runtime |
-| pnpm | Latest | Package management |
+| Node.js | 22.x LTS | Runtime |
+| Bun | Latest | Package management + script runner |
 | Git | Latest | Version control |
 
 ### Optional Tools
 
 | Tool | Purpose |
 |------|---------|
-| Bun | Alternative runtime (faster) |
+| pnpm | Optional package manager for non-repo workflows |
 | Docker | Container testing |
 | VS Code | Recommended editor |
 
@@ -142,60 +145,68 @@ milaidy/
 
 ```bash
 # Full build (TypeScript + UI)
-pnpm build
+bun run build
 
 # TypeScript only
-pnpm build:node
+bun run build:node
 
 # Desktop app (Electron)
-pnpm build:desktop
+bun run build:desktop
 
 # Mobile (Android)
-pnpm build:android
+bun run build:android
 
 # Mobile (iOS)
-pnpm build:ios
+bun run build:ios
 ```
 
 ### Development Mode
 
 ```bash
 # Run with auto-reload on changes
-pnpm dev
+bun run dev
 
 # Run CLI directly (via tsx)
-pnpm milaidy start
+bun run milaidy start
 
 # UI development only
-pnpm dev:ui
+bun run dev:ui
 
 # Desktop app development
-pnpm dev:desktop
+bun run dev:desktop
 
 # Terminal UI
-pnpm tui
+bun run tui
 ```
 
 ### Testing
 
 ```bash
 # Run all tests (parallel)
-pnpm test
+bun run test
 
 # Run with coverage
-pnpm test:coverage
+bun run test:coverage
 
 # Watch mode
-pnpm test:watch
+bun run test:watch
 
 # End-to-end tests
-pnpm test:e2e
+bun run test:e2e
 
 # Live tests (requires API keys)
-MILADY_LIVE_TEST=1 pnpm test:live
+MILADY_LIVE_TEST=1 bun run test:live
 
 # Docker-based tests
-pnpm test:docker:all
+bun run test:docker:all
+```
+
+### Runtime fallback for Bun crashes
+
+If Bun segfaults on your platform during long-running sessions, run Milady on Node runtime:
+
+```bash
+MILADY_RUNTIME=node bun run milady start
 ```
 
 ### Test File Conventions
