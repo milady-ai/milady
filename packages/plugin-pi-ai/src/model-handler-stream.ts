@@ -135,6 +135,7 @@ type PiAiModelHandler = (
 export function createPiAiHandler(
   getModel: () => Model<Api>,
   config: PiAiHandlerConfig,
+  streamImpl: typeof stream = stream,
 ): PiAiModelHandler {
   return async (
     _runtime: IAgentRuntime,
@@ -158,7 +159,7 @@ export function createPiAiHandler(
       hasTuiListener;
 
     const makeStream = () =>
-      stream(model, context, {
+      streamImpl(model, context, {
         temperature: p.temperature,
         maxTokens: p.maxTokens,
         signal,

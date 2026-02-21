@@ -119,6 +119,7 @@
     "@elizaos/plugin-openai": "next",
     "@elizaos/plugin-openrouter": "next",
     "@elizaos/plugin-pdf": "next",
+    "@elizaos/plugin-pi-ai": "file:packages/plugin-pi-ai",
     "@elizaos/plugin-personality": "next",
     "@elizaos/plugin-plugin-manager": "next",
     "@mariozechner/pi-ai": "0.52.12",

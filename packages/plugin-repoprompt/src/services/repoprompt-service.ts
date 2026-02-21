@@ -1,12 +1,13 @@
-import path from 'node:path';
-import { spawn } from 'node:child_process';
-import { Service, type IAgentRuntime } from '@elizaos/core';
+import { spawn } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import { type IAgentRuntime, Service } from "@elizaos/core";
 import {
-  type RepoPromptConfig,
   isCommandAllowed,
   loadRepoPromptConfig,
   normalizeCommandName,
-} from '../config.ts';
+  type RepoPromptConfig,
+} from "../config.ts";
 
 export interface RepoPromptRunInput {
   command?: string;
@@ -48,18 +49,18 @@ export interface RepoPromptStatus {
 
 const MAX_ARGS = 64;
 const MAX_ARG_LENGTH = 4096;
-const DISALLOWED_ARG_FLAGS = new Set(['-e', '--eval', '--exec', '--command']);
+const DISALLOWED_ARG_FLAGS = new Set(["-e", "--eval", "--exec", "--command"]);
 
 function appendWithLimit(
   current: string,
   chunk: Buffer | string,
-  limit: number
+  limit: number,
 ): { value: string; truncated: boolean } {
   if (current.length >= limit) {
     return { value: current, truncated: true };
   }
 
-  const text = typeof chunk === 'string' ? chunk : chunk.toString('utf8');
+  const text = typeof chunk === "string" ? chunk : chunk.toString("utf8");
   const remaining = limit - current.length;
 
   if (text.length <= remaining) {
@@ -77,7 +78,7 @@ function withTruncationSuffix(value: string, truncated: boolean): string {
     return value;
   }
 
-  const suffix = '\n...[truncated by plugin-repoprompt]';
+  const suffix = "\n...[truncated by plugin-repoprompt]";
   return value.endsWith(suffix) ? value : `${value}${suffix}`;
 }
 
@@ -91,16 +92,18 @@ function isPathInside(baseDir: string, targetDir: string): boolean {
     return true;
   }
 
-  const normalizedBase = process.platform === 'win32' ? baseDir.toLowerCase() : baseDir;
-  const normalizedTarget = process.platform === 'win32' ? targetDir.toLowerCase() : targetDir;
+  const normalizedBase =
+    process.platform === "win32" ? baseDir.toLowerCase() : baseDir;
+  const normalizedTarget =
+    process.platform === "win32" ? targetDir.toLowerCase() : targetDir;
   return normalizedTarget.startsWith(`${normalizedBase}${path.sep}`);
 }
 
 export class RepoPromptService extends Service {
-  static override serviceType = 'repoprompt';
+  static override serviceType = "repoprompt";
 
   override capabilityDescription =
-    'Run RepoPrompt CLI commands from actions and routes with timeout and allowlist safeguards.';
+    "Run RepoPrompt CLI commands from actions and routes with timeout and allowlist safeguards.";
 
   private readonly runtimeConfig: RepoPromptConfig;
   private runQueue: Promise<unknown> = Promise.resolve();
@@ -123,7 +126,7 @@ export class RepoPromptService extends Service {
 
   static override async stop(runtime: IAgentRuntime): Promise<void> {
     const service = runtime.getService(RepoPromptService.serviceType);
-    if (service && 'stop' in service && typeof service.stop === 'function') {
+    if (service && "stop" in service && typeof service.stop === "function") {
       await service.stop();
     }
   }
@@ -153,12 +156,12 @@ export class RepoPromptService extends Service {
   async run(input: RepoPromptRunInput): Promise<RepoPromptRunResult> {
     const task = this.runQueue.then(
       () => this.executeRun(input),
-      () => this.executeRun(input)
+      () => this.executeRun(input),
     );
 
     this.runQueue = task.then(
       () => undefined,
-      () => undefined
+      () => undefined,
     );
 
     return task;
@@ -170,12 +173,12 @@ export class RepoPromptService extends Service {
       return normalizeCommandName(explicit);
     }
 
-    const firstNonFlag = (input.args ?? []).find((arg) => !arg.startsWith('-'));
+    const firstNonFlag = (input.args ?? []).find((arg) => !arg.startsWith("-"));
     const inferred = cleanOptionalValue(firstNonFlag);
 
     if (!inferred) {
       throw new Error(
-        'RepoPrompt command missing. Provide `command`, or include a non-flag command token in `args`.'
+        "RepoPrompt command missing. Provide `command`, or include a non-flag command token in `args`.",
       );
     }
 
@@ -185,23 +188,25 @@ export class RepoPromptService extends Service {
   private validateUserArgs(inputArgs: string[] | undefined): void {
     const args = inputArgs ?? [];
     if (args.length > MAX_ARGS) {
-      throw new Error(`Too many RepoPrompt args (${args.length}). Maximum allowed is ${MAX_ARGS}.`);
+      throw new Error(
+        `Too many RepoPrompt args (${args.length}). Maximum allowed is ${MAX_ARGS}.`,
+      );
     }
 
     for (const arg of args) {
       const value = String(arg).trim();
       if (value.length > MAX_ARG_LENGTH) {
         throw new Error(
-          `RepoPrompt arg too long (${value.length} chars). Maximum allowed is ${MAX_ARG_LENGTH}.`
+          `RepoPrompt arg too long (${value.length} chars). Maximum allowed is ${MAX_ARG_LENGTH}.`,
         );
       }
 
       const normalized = value.toLowerCase();
       if (
         DISALLOWED_ARG_FLAGS.has(normalized) ||
-        normalized.startsWith('--exec=') ||
-        normalized.startsWith('--eval=') ||
-        normalized.startsWith('--command=')
+        normalized.startsWith("--exec=") ||
+        normalized.startsWith("--eval=") ||
+        normalized.startsWith("--command=")
       ) {
         throw new Error(`RepoPrompt arg "${value}" is not allowed.`);
       }
@@ -209,12 +214,35 @@ export class RepoPromptService extends Service {
   }
 
   private resolveWorkingDirectory(inputCwd?: string): string {
-    const workspaceRoot = path.resolve(this.runtimeConfig.workspaceRoot);
-    const requested = path.resolve(cleanOptionalValue(inputCwd) ?? workspaceRoot);
+    const workspaceRootPath = path.resolve(this.runtimeConfig.workspaceRoot);
+    const requestedPath = path.resolve(
+      cleanOptionalValue(inputCwd) ?? workspaceRootPath,
+    );
+
+    let workspaceRoot: string;
+    let requested: string;
+
+    try {
+      workspaceRoot = fs.realpathSync(workspaceRootPath);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(
+        `RepoPrompt workspace root is not accessible (${workspaceRootPath}): ${message}`,
+      );
+    }
+
+    try {
+      requested = fs.realpathSync(requestedPath);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(
+        `RepoPrompt cwd is not accessible (${requestedPath}): ${message}`,
+      );
+    }
 
     if (!isPathInside(workspaceRoot, requested)) {
       throw new Error(
-        `RepoPrompt cwd must stay within REPOPROMPT_WORKSPACE_ROOT (${workspaceRoot}). Received: ${requested}`
+        `RepoPrompt cwd must stay within REPOPROMPT_WORKSPACE_ROOT (${workspaceRoot}). Received: ${requested}`,
       );
     }
 
@@ -223,17 +251,31 @@ export class RepoPromptService extends Service {
 
   private buildChildEnv(): NodeJS.ProcessEnv {
     const env: NodeJS.ProcessEnv = {};
-    const baseKeys = ['PATH', 'HOME', 'USERPROFILE', 'SHELL', 'COMSPEC', 'PATHEXT', 'SystemRoot', 'TMP', 'TEMP'];
+    const baseKeys = [
+      "PATH",
+      "HOME",
+      "USERPROFILE",
+      "SHELL",
+      "COMSPEC",
+      "PATHEXT",
+      "SystemRoot",
+      "TMP",
+      "TEMP",
+    ];
 
     for (const key of baseKeys) {
       const value = process.env[key];
-      if (typeof value === 'string' && value.length > 0) {
+      if (typeof value === "string" && value.length > 0) {
         env[key] = value;
       }
     }
 
     for (const [key, value] of Object.entries(process.env)) {
-      if (key.startsWith('REPOPROMPT_') && typeof value === 'string' && value.length > 0) {
+      if (
+        key.startsWith("REPOPROMPT_") &&
+        typeof value === "string" &&
+        value.length > 0
+      ) {
         env[key] = value;
       }
     }
@@ -246,12 +288,14 @@ export class RepoPromptService extends Service {
 
     const windowValue = input.window ?? this.runtimeConfig.defaultWindow;
     if (windowValue !== undefined && String(windowValue).trim().length > 0) {
-      args.push('-w', String(windowValue).trim());
+      args.push("-w", String(windowValue).trim());
     }
 
-    const tabValue = cleanOptionalValue(input.tab ?? this.runtimeConfig.defaultTab);
+    const tabValue = cleanOptionalValue(
+      input.tab ?? this.runtimeConfig.defaultTab,
+    );
     if (tabValue) {
-      args.push('-t', tabValue);
+      args.push("-t", tabValue);
     }
 
     const explicitCommand = cleanOptionalValue(input.command);
@@ -266,11 +310,13 @@ export class RepoPromptService extends Service {
     return args;
   }
 
-  private async executeRun(input: RepoPromptRunInput): Promise<RepoPromptRunResult> {
+  private async executeRun(
+    input: RepoPromptRunInput,
+  ): Promise<RepoPromptRunResult> {
     const command = this.resolveCommand(input);
     if (!isCommandAllowed(command, this.runtimeConfig.allowedCommands)) {
       throw new Error(
-        `RepoPrompt command "${command}" is not allowed. Allowed commands: ${this.runtimeConfig.allowedCommands.join(', ')}`
+        `RepoPrompt command "${command}" is not allowed. Allowed commands: ${this.runtimeConfig.allowedCommands.join(", ")}`,
       );
     }
 
@@ -280,10 +326,10 @@ export class RepoPromptService extends Service {
 
     if (
       input.stdin &&
-      Buffer.byteLength(input.stdin, 'utf8') > this.runtimeConfig.maxStdinBytes
+      Buffer.byteLength(input.stdin, "utf8") > this.runtimeConfig.maxStdinBytes
     ) {
       throw new Error(
-        `RepoPrompt stdin exceeds limit (${this.runtimeConfig.maxStdinBytes} bytes).`
+        `RepoPrompt stdin exceeds limit (${this.runtimeConfig.maxStdinBytes} bytes).`,
       );
     }
 
@@ -291,8 +337,8 @@ export class RepoPromptService extends Service {
     this.lastCommand = command;
 
     const startedAt = Date.now();
-    let stdout = '';
-    let stderr = '';
+    let stdout = "";
+    let stderr = "";
     let stdoutTruncated = false;
     let stderrTruncated = false;
     let timedOut = false;
@@ -301,7 +347,7 @@ export class RepoPromptService extends Service {
       const child = spawn(this.runtimeConfig.cliPath, args, {
         cwd,
         env: this.buildChildEnv(),
-        stdio: ['pipe', 'pipe', 'pipe'],
+        stdio: ["pipe", "pipe", "pipe"],
         shell: false,
       });
 
@@ -310,14 +356,22 @@ export class RepoPromptService extends Service {
       }
       child.stdin?.end();
 
-      child.stdout?.on('data', (chunk) => {
-        const next = appendWithLimit(stdout, chunk, this.runtimeConfig.maxOutputChars);
+      child.stdout?.on("data", (chunk) => {
+        const next = appendWithLimit(
+          stdout,
+          chunk,
+          this.runtimeConfig.maxOutputChars,
+        );
         stdout = next.value;
         stdoutTruncated = stdoutTruncated || next.truncated;
       });
 
-      child.stderr?.on('data', (chunk) => {
-        const next = appendWithLimit(stderr, chunk, this.runtimeConfig.maxOutputChars);
+      child.stderr?.on("data", (chunk) => {
+        const next = appendWithLimit(
+          stderr,
+          chunk,
+          this.runtimeConfig.maxOutputChars,
+        );
         stderr = next.value;
         stderrTruncated = stderrTruncated || next.truncated;
       });
@@ -325,14 +379,14 @@ export class RepoPromptService extends Service {
       const timeoutHandle = setTimeout(() => {
         timedOut = true;
         try {
-          child.kill('SIGTERM');
+          child.kill("SIGTERM");
         } catch {
           // ignore kill errors
         }
 
         setTimeout(() => {
           try {
-            child.kill('SIGKILL');
+            child.kill("SIGKILL");
           } catch {
             // ignore kill errors
           }
@@ -340,15 +394,19 @@ export class RepoPromptService extends Service {
       }, this.runtimeConfig.timeoutMs);
 
       const exitCode = await new Promise<number | null>((resolve, reject) => {
-        child.once('error', reject);
-        child.once('close', (code) => resolve(code));
+        child.once("error", reject);
+        child.once("close", (code) => resolve(code));
       }).finally(() => {
         clearTimeout(timeoutHandle);
       });
 
       if (timedOut) {
         const timeoutMessage = `RepoPrompt CLI timed out after ${this.runtimeConfig.timeoutMs}ms.`;
-        const next = appendWithLimit(stderr, timeoutMessage, this.runtimeConfig.maxOutputChars);
+        const next = appendWithLimit(
+          stderr,
+          timeoutMessage,
+          this.runtimeConfig.maxOutputChars,
+        );
         stderr = next.value;
         stderrTruncated = stderrTruncated || next.truncated;
       }
@@ -360,7 +418,9 @@ export class RepoPromptService extends Service {
       this.lastRunAt = startedAt;
       this.lastExitCode = exitCode;
       this.lastDurationMs = durationMs;
-      this.lastError = ok ? undefined : stderr || `Process exited with code ${String(exitCode)}`;
+      this.lastError = ok
+        ? undefined
+        : stderr || `Process exited with code ${String(exitCode)}`;
 
       return {
         ok,
@@ -382,7 +442,7 @@ export class RepoPromptService extends Service {
       this.lastError = message;
 
       const maybeErrno = error as NodeJS.ErrnoException;
-      if (maybeErrno?.code === 'ENOENT') {
+      if (maybeErrno?.code === "ENOENT") {
         this.available = false;
       }
 

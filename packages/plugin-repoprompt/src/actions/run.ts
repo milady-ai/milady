@@ -3,15 +3,15 @@ import {
   type ActionResult,
   type HandlerCallback,
   type IAgentRuntime,
+  logger,
   type Memory,
   type State,
-  logger,
-} from '@elizaos/core';
-import {
+} from "@elizaos/core";
+import type {
+  RepoPromptRunInput,
+  RepoPromptRunResult,
   RepoPromptService,
-  type RepoPromptRunInput,
-  type RepoPromptRunResult,
-} from '../services/repoprompt-service.ts';
+} from "../services/repoprompt-service.ts";
 
 interface RepoPromptActionOptions extends Record<string, unknown> {
   command?: string;
@@ -25,16 +25,11 @@ interface RepoPromptActionOptions extends Record<string, unknown> {
 const TOKEN_PATTERN =
   /"([^"\\]*(?:\\.[^"\\]*)*)"|'([^'\\]*(?:\\.[^'\\]*)*)'|`([^`\\]*(?:\\.[^`\\]*)*)`|(\S+)/g;
 
-function parseTokens(raw: string): string[] {
+export function parseTokens(raw: string): string[] {
   const tokens: string[] = [];
   for (const match of raw.matchAll(TOKEN_PATTERN)) {
-    const value =
-      match[1] ??
-      match[2] ??
-      match[3] ??
-      match[4] ??
-      '';
-    const unescaped = value.replace(/\\(["'`\\])/g, '$1');
+    const value = match[1] ?? match[2] ?? match[3] ?? match[4] ?? "";
+    const unescaped = value.replace(/\\(["'`\\])/g, "$1");
     if (unescaped.length > 0) {
       tokens.push(unescaped);
     }
@@ -46,28 +41,31 @@ function normalizeArgs(value: unknown): string[] {
   if (Array.isArray(value)) {
     return value.map((item) => String(item));
   }
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     return parseTokens(value);
   }
   return [];
 }
 
 function normalizeString(value: unknown): string | undefined {
-  if (typeof value !== 'string') {
+  if (typeof value !== "string") {
     return undefined;
   }
   const normalized = value.trim();
   return normalized.length > 0 ? normalized : undefined;
 }
 
-function extractRunInput(
+export function extractRunInput(
   message: Memory,
-  options: RepoPromptActionOptions
+  options: RepoPromptActionOptions,
 ): RepoPromptRunInput | null {
   const command = normalizeString(options.command);
   const args = normalizeArgs(options.args);
   const base: RepoPromptRunInput = {
-    window: typeof options.window === 'number' || typeof options.window === 'string' ? options.window : undefined,
+    window:
+      typeof options.window === "number" || typeof options.window === "string"
+        ? options.window
+        : undefined,
     tab: normalizeString(options.tab),
     cwd: normalizeString(options.cwd),
     stdin: normalizeString(options.stdin),
@@ -104,29 +102,33 @@ function extractRunInput(
 }
 
 function summarizeResult(result: RepoPromptRunResult): string {
-  const status = result.ok ? '✅ RepoPrompt command completed.' : '❌ RepoPrompt command failed.';
-  const previewSource = (result.ok ? result.stdout : result.stderr || result.stdout).trim();
+  const status = result.ok
+    ? "✅ RepoPrompt command completed."
+    : "❌ RepoPrompt command failed.";
+  const previewSource = (
+    result.ok ? result.stdout : result.stderr || result.stdout
+  ).trim();
   if (!previewSource) {
     return status;
   }
 
   const preview = previewSource.slice(0, 600);
-  const suffix = previewSource.length > 600 ? '\n…' : '';
+  const suffix = previewSource.length > 600 ? "\n…" : "";
   return `${status}\n\n${preview}${suffix}`;
 }
 
 export const repoPromptRunAction: Action = {
-  name: 'REPOPROMPT_RUN',
-  similes: ['RUN_REPOPROMPT', 'REPOPROMPT_COMMAND', 'RP_CLI_RUN'],
+  name: "REPOPROMPT_RUN",
+  similes: ["RUN_REPOPROMPT", "REPOPROMPT_COMMAND", "RP_CLI_RUN"],
   description:
-    'Run a RepoPrompt CLI command through the configured RepoPrompt service with timeouts and command allowlist checks.',
+    "Run a RepoPrompt CLI command through the configured RepoPrompt service with timeouts and command allowlist checks.",
 
   validate: async (
     runtime: IAgentRuntime,
     _message: Memory,
-    _state: State | undefined
+    _state: State | undefined,
   ): Promise<boolean> => {
-    return Boolean(runtime.getService('repoprompt'));
+    return Boolean(runtime.getService("repoprompt"));
   },
 
   handler: async (
@@ -134,21 +136,27 @@ export const repoPromptRunAction: Action = {
     message: Memory,
     _state: State | undefined,
     options: Record<string, unknown> = {},
-    callback?: HandlerCallback
+    callback?: HandlerCallback,
   ): Promise<ActionResult> => {
-    const service = runtime.getService('repoprompt') as RepoPromptService | null;
+    const service = runtime.getService(
+      "repoprompt",
+    ) as RepoPromptService | null;
     if (!service) {
-      const error = 'RepoPrompt service is not available. Ensure plugin-repoprompt is enabled.';
+      const error =
+        "RepoPrompt service is not available. Ensure plugin-repoprompt is enabled.";
       if (callback) {
         await callback({ text: error, source: message.content.source });
       }
       return { success: false, error };
     }
 
-    const runInput = extractRunInput(message, options as RepoPromptActionOptions);
+    const runInput = extractRunInput(
+      message,
+      options as RepoPromptActionOptions,
+    );
     if (!runInput) {
       const error =
-        'No RepoPrompt command provided. Pass `command`/`args` options or message text like `rp-cli <command> ...`.';
+        "No RepoPrompt command provided. Pass `command`/`args` options or message text like `rp-cli <command> ...`.";
       if (callback) {
         await callback({ text: error, source: message.content.source });
       }
@@ -170,11 +178,19 @@ export const repoPromptRunAction: Action = {
         success: result.ok,
         text,
         data: { ...result },
-        ...(result.ok ? {} : { error: result.stderr || `RepoPrompt exited with code ${String(result.exitCode)}` }),
+        ...(result.ok
+          ? {}
+          : {
+              error:
+                result.stderr ||
+                `RepoPrompt exited with code ${String(result.exitCode)}`,
+            }),
       };
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : `Unknown RepoPrompt error: ${String(error)}`;
+        error instanceof Error
+          ? error.message
+          : `Unknown RepoPrompt error: ${String(error)}`;
       logger.error(`REPOPROMPT_RUN failed: ${errorMessage}`);
 
       if (callback) {
@@ -191,16 +207,16 @@ export const repoPromptRunAction: Action = {
   examples: [
     [
       {
-        name: '{{name1}}',
+        name: "{{name1}}",
         content: {
-          text: 'rp-cli context_builder --response-type plan',
+          text: "rp-cli context_builder --response-type plan",
         },
       },
       {
-        name: '{{name2}}',
+        name: "{{name2}}",
         content: {
-          text: '✅ RepoPrompt command completed.',
-          actions: ['REPOPROMPT_RUN'],
+          text: "✅ RepoPrompt command completed.",
+          actions: ["REPOPROMPT_RUN"],
         },
       },
     ],

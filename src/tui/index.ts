@@ -2,14 +2,14 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { type AgentRuntime, stringToUuid, type UUID } from "@elizaos/core";
-import type { Api, Model } from "@mariozechner/pi-ai";
-import { Text } from "@mariozechner/pi-tui";
 import {
   createPiCredentialProvider,
   getPiModel,
   parseModelSpec,
   registerPiAiModelHandler,
-} from "../../packages/plugin-pi-ai/src/index.ts";
+} from "@elizaos/plugin-pi-ai";
+import type { Api, Model } from "@mariozechner/pi-ai";
+import { Text } from "@mariozechner/pi-tui";
 import { loadMiladyConfig, saveMiladyConfig } from "../config/config.js";
 import {
   DEFAULT_MODELS_DIR,
@@ -25,7 +25,7 @@ import { ElizaTUIBridge } from "./eliza-tui-bridge.js";
 import { resolveTuiModelSpec } from "./model-spec.js";
 import { MiladyTUI } from "./tui-app.js";
 
-export { registerPiAiModelHandler } from "../../packages/plugin-pi-ai/src/index.ts";
+export { registerPiAiModelHandler } from "@elizaos/plugin-pi-ai";
 export { ElizaTUIBridge } from "./eliza-tui-bridge.js";
 export { MiladyTUI } from "./tui-app.js";
 

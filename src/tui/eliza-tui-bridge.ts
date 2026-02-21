@@ -10,13 +10,13 @@ import {
   stringToUuid,
   type UUID,
 } from "@elizaos/core";
+import type { StreamEvent } from "@elizaos/plugin-pi-ai";
 import {
   CancellableLoader,
   type TUI as PiTUI,
   Spacer,
   Text,
 } from "@mariozechner/pi-tui";
-import type { StreamEvent } from "../../packages/plugin-pi-ai/src/index.ts";
 import {
   AssistantMessageComponent,
   ToolExecutionComponent,
