@@ -953,19 +953,39 @@ function parseRegistryEndpointUrl(rawUrl: string): URL {
   return parsed;
 }
 
-async function resolveRegistryEndpointUrlRejection(
-  rawUrl: string,
-): Promise<string | null> {
+type ResolvedRegistryEndpoint = {
+  parsed: URL;
+  hostname: string;
+  pinnedAddress: string | null;
+};
+
+async function resolveRegistryEndpointUrlRejection(rawUrl: string): Promise<{
+  rejection: string | null;
+  endpoint: ResolvedRegistryEndpoint | null;
+}> {
   let parsed: URL;
   try {
     parsed = parseRegistryEndpointUrl(rawUrl);
   } catch (error) {
-    return error instanceof Error ? error.message : String(error);
+    return {
+      rejection: error instanceof Error ? error.message : String(error),
+      endpoint: null,
+    };
   }
 
   const hostname = normalizeHostLike(parsed.hostname);
-  if (!hostname || net.isIP(hostname)) {
-    return null;
+  if (!hostname) {
+    return {
+      rejection: "Endpoint URL hostname is required",
+      endpoint: null,
+    };
+  }
+
+  if (net.isIP(hostname)) {
+    return {
+      rejection: null,
+      endpoint: { parsed, hostname, pinnedAddress: hostname },
+    };
   }
 
   let addresses: Array<{ address: string }>;
@@ -973,20 +993,36 @@ async function resolveRegistryEndpointUrlRejection(
     const resolved = await dnsLookup(hostname, { all: true });
     addresses = Array.isArray(resolved) ? resolved : [resolved];
   } catch {
-    return `Could not resolve endpoint host "${hostname}"`;
+    return {
+      rejection: `Could not resolve endpoint host "${hostname}"`,
+      endpoint: null,
+    };
   }
 
   if (addresses.length === 0) {
-    return `Could not resolve endpoint host "${hostname}"`;
+    return {
+      rejection: `Could not resolve endpoint host "${hostname}"`,
+      endpoint: null,
+    };
   }
 
   for (const entry of addresses) {
     if (isBlockedPrivateOrLinkLocalIp(entry.address)) {
-      return `Endpoint host "${hostname}" resolves to blocked address ${entry.address}`;
+      return {
+        rejection: `Endpoint host "${hostname}" resolves to blocked address ${entry.address}`,
+        endpoint: null,
+      };
     }
   }
 
-  return null;
+  return {
+    rejection: null,
+    endpoint: {
+      parsed,
+      hostname,
+      pinnedAddress: addresses[0]?.address ?? null,
+    },
+  };
 }
 
 /** Return the list of custom registry endpoints from config. */
@@ -1062,16 +1098,42 @@ async function fetchSingleEndpoint(
   url: string,
   label: string,
 ): Promise<Map<string, RegistryPluginInfo> | null> {
-  const rejection = await resolveRegistryEndpointUrlRejection(url);
-  if (rejection) {
+  const { rejection, endpoint } =
+    await resolveRegistryEndpointUrlRejection(url);
+  if (rejection || !endpoint) {
     logger.warn(
-      `[registry-client] Endpoint "${label}" (${url}) blocked: ${rejection}`,
+      `[registry-client] Endpoint "${label}" (${url}) blocked: ${rejection ?? "validation failed"}`,
     );
     return null;
   }
 
   try {
-    const resp = await fetch(url);
+    if (endpoint.pinnedAddress && !net.isIP(endpoint.hostname)) {
+      const refreshed = await dnsLookup(endpoint.hostname, { all: true });
+      const refreshedAddresses = new Set(
+        (Array.isArray(refreshed) ? refreshed : [refreshed]).map((entry) =>
+          normalizeHostLike(entry.address),
+        ),
+      );
+
+      if (!refreshedAddresses.has(normalizeHostLike(endpoint.pinnedAddress))) {
+        logger.warn(
+          `[registry-client] Endpoint "${label}" (${url}) blocked: host resolution changed before fetch`,
+        );
+        return null;
+      }
+
+      for (const address of refreshedAddresses) {
+        if (isBlockedPrivateOrLinkLocalIp(address)) {
+          logger.warn(
+            `[registry-client] Endpoint "${label}" (${url}) blocked: host resolves to blocked address ${address}`,
+          );
+          return null;
+        }
+      }
+    }
+
+    const resp = await fetch(url, { redirect: "error" });
     if (!resp.ok) {
       logger.warn(
         `[registry-client] Endpoint "${label}" (${url}): ${resp.status} ${resp.statusText}`,

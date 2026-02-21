@@ -150,7 +150,7 @@ function isBlockedPrivateOrLinkLocalIp(ip: string): boolean {
   );
 }
 
-async function validatePublicImageUrl(rawUrl: string): Promise<URL> {
+export async function validatePublicImageUrl(rawUrl: string): Promise<URL> {
   let parsed: URL;
   try {
     parsed = new URL(rawUrl);

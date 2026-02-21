@@ -34,7 +34,6 @@ import {
   type TargetInfo,
   type UUID,
 } from "@elizaos/core";
-import { isPiAiEnabledFromEnv } from "../../packages/plugin-pi-ai/src/runtime.ts";
 import {
   debugLogResolvedContext,
   validateRuntimeContext,
@@ -409,6 +408,13 @@ const CHANNEL_PLUGIN_MAP: Readonly<Record<string, string>> = {
 };
 
 const PI_AI_PLUGIN_PACKAGE = "@elizaos/plugin-pi-ai";
+
+function isPiAiEnabledFromEnv(env: NodeJS.ProcessEnv = process.env): boolean {
+  const raw = env.MILAIDY_USE_PI_AI;
+  if (!raw) return false;
+  const value = String(raw).trim().toLowerCase();
+  return value === "1" || value === "true" || value === "yes";
+}
 
 /** Maps environment variable names to model-provider plugin packages. */
 const PROVIDER_PLUGIN_MAP: Readonly<Record<string, string>> = {
@@ -840,10 +846,6 @@ export function mergeDropInPlugins(params: {
 }
 
 const WORKSPACE_PLUGIN_OVERRIDES = new Set<string>([
-  // Plugins listed here will be loaded from local workspace paths instead of npm.
-  // Keep @elizaos/plugin-pi-ai pinned to local source until the package is
-  // available in every runtime environment used by Milady.
-  "@elizaos/plugin-pi-ai",
   // "@elizaos/plugin-trajectory-logger",
   // "@elizaos/plugin-plugin-manager",
   // "@elizaos/plugin-media-generation",
