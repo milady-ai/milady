@@ -124,7 +124,7 @@ import {
 import { handleRegistryRoutes } from "./registry-routes";
 import { RegistryService } from "./registry-service";
 import { handleSandboxRoute } from "./sandbox-routes";
-import { handleWhatsAppRoute } from "./whatsapp-routes";
+import { handleWhatsAppRoute, applyWhatsAppQrOverride } from "./whatsapp-routes";
 import { handleSubscriptionRoutes } from "./subscription-routes";
 import { resolveTerminalRunLimits } from "./terminal-run-limits";
 import { handleTrainingRoutes } from "./training-routes";
@@ -1068,29 +1068,7 @@ function discoverInstalledPlugins(
   return entries.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-/**
- * When WhatsApp is connected via QR code (Baileys auth on disk), mark the
- * plugin entry as configured and clear validation errors so the UI doesn't
- * show misleading "missing API key" warnings.
- */
-function applyWhatsAppQrOverride(
-  plugins: { id: string; validationErrors: unknown[]; configured: boolean; qrConnected?: boolean }[],
-): void {
-  try {
-    const workspaceBase = resolveDefaultAgentWorkspaceDir();
-    const waCredsPath = path.join(workspaceBase, "whatsapp-auth", "default", "creds.json");
-    if (fs.existsSync(waCredsPath)) {
-      const waPlugin = plugins.find((p) => p.id === "whatsapp");
-      if (waPlugin) {
-        waPlugin.validationErrors = [];
-        waPlugin.configured = true;
-        waPlugin.qrConnected = true;
-      }
-    }
-  } catch {
-    /* workspace dir may not exist */
-  }
-}
+// applyWhatsAppQrOverride is imported from ./whatsapp-routes
 
 /**
  * Discover available plugins from the bundled plugins.json manifest.
@@ -1168,7 +1146,7 @@ function discoverPluginsFromManifest(): PluginEntry[] {
         })
         .sort((a, b) => a.name.localeCompare(b.name));
 
-      applyWhatsAppQrOverride(entries);
+      applyWhatsAppQrOverride(entries, resolveDefaultAgentWorkspaceDir());
 
       return entries;
     } catch (err) {
@@ -6540,7 +6518,7 @@ async function handleRequest(
       plugin.validationWarnings = validation.warnings;
     }
 
-    applyWhatsAppQrOverride(allPlugins);
+    applyWhatsAppQrOverride(allPlugins, resolveDefaultAgentWorkspaceDir());
 
     // Inject per-provider model options into configUiHints for MODEL fields.
     // Each provider's cache is independent — no cross-population.
@@ -8819,6 +8797,7 @@ async function handleRequest(
   }
 
   // ── WhatsApp routes (/api/whatsapp/*) ────────────────────────────────────
+  // Auth: these routes are protected by the isAuthorized(req) gate at L5331.
   if (pathname.startsWith("/api/whatsapp")) {
     if (!state.whatsappPairingSessions) {
       state.whatsappPairingSessions = new Map();
