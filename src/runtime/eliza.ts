@@ -44,6 +44,7 @@ import {
   type MiladyConfig,
   saveMiladyConfig,
 } from "../config/config";
+import { collectConfigEnvVars } from "../config/env-vars";
 import { resolveStateDir, resolveUserPath } from "../config/paths";
 import {
   type ApplyPluginAutoEnableParams,
@@ -171,6 +172,22 @@ function configureLocalEmbeddingPlugin(
 
   // Set default models directory if not present
   setEnvIfMissing("MODELS_DIR", path.join(os.homedir(), ".eliza", "models"));
+
+  // Normalize Google AI API key aliases — the ElizaOS plugin and @google/genai
+  // SDK expect different env var names. Canonicalize to the long form that
+  // @elizaos/plugin-google-genai reads via runtime.getSetting(). Users can set
+  // any of: GEMINI_API_KEY, GOOGLE_API_KEY, GOOGLE_GENERATIVE_AI_API_KEY.
+  setEnvIfMissing(
+    "GOOGLE_GENERATIVE_AI_API_KEY",
+    process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY,
+  );
+
+  // Default Google model names — the Google GenAI plugin's getSetting() returns
+  // null (not undefined) for missing keys, but the plugin checks !== undefined
+  // causing String(null) = "null" to be sent as the model name. Set sensible
+  // defaults so the plugin always has valid model names.
+  setEnvIfMissing("GOOGLE_SMALL_MODEL", "gemini-3-flash-preview");
+  setEnvIfMissing("GOOGLE_LARGE_MODEL", "gemini-3.1-pro-preview");
 
   logger.info(
     `[milady] Configured local embedding env: ${process.env.LOCAL_EMBEDDING_MODEL} (repo: ${process.env.LOCAL_EMBEDDING_MODEL_REPO ?? "auto"}, dims: ${process.env.LOCAL_EMBEDDING_DIMENSIONS ?? "auto"}, ctx: ${process.env.LOCAL_EMBEDDING_CONTEXT_SIZE ?? "auto"}, GPU: ${process.env.LOCAL_EMBEDDING_GPU_LAYERS}, mmap: ${process.env.LOCAL_EMBEDDING_USE_MMAP})`,
@@ -420,6 +437,7 @@ function isPiAiEnabledFromEnv(env: NodeJS.ProcessEnv = process.env): boolean {
 const PROVIDER_PLUGIN_MAP: Readonly<Record<string, string>> = {
   ANTHROPIC_API_KEY: "@elizaos/plugin-anthropic",
   OPENAI_API_KEY: "@elizaos/plugin-openai",
+  GEMINI_API_KEY: "@elizaos/plugin-google-genai",
   GOOGLE_API_KEY: "@elizaos/plugin-google-genai",
   GOOGLE_GENERATIVE_AI_API_KEY: "@elizaos/plugin-google-genai",
   GROQ_API_KEY: "@elizaos/plugin-groq",
@@ -1781,6 +1799,38 @@ function installRuntimeMethodBindings(runtime: AgentRuntime): void {
   // Some plugin builds store this method and invoke it later without the
   // runtime receiver, which breaks private-field access in AgentRuntime.
   runtime.getConversationLength = runtime.getConversationLength.bind(runtime);
+
+  // Wrap getSetting() to fall back to process.env for known keys when the
+  // core returns null. ElizaOS core returns null for missing keys, but some
+  // plugins (e.g. @elizaos/plugin-google-genai) check `!== undefined` and
+  // convert null to the string "null", causing API calls like `models/null`.
+  // Scoped to an allowlist to avoid leaking arbitrary env vars to plugins.
+  const GETSETTING_ENV_ALLOWLIST = new Set([
+    // Model provider API keys
+    "ANTHROPIC_API_KEY",
+    "OPENAI_API_KEY",
+    "GOOGLE_GENERATIVE_AI_API_KEY",
+    "GOOGLE_API_KEY",
+    "GEMINI_API_KEY",
+    "GROQ_API_KEY",
+    "XAI_API_KEY",
+    "DEEPSEEK_API_KEY",
+    "OPENROUTER_API_KEY",
+    // Google model defaults
+    "GOOGLE_SMALL_MODEL",
+    "GOOGLE_LARGE_MODEL",
+  ]);
+  const originalGetSetting = runtime.getSetting.bind(runtime);
+  runtime.getSetting = (key: string) => {
+    const result = originalGetSetting(key);
+    if (result !== null && result !== undefined) return result;
+    if (GETSETTING_ENV_ALLOWLIST.has(key)) {
+      const envVal = process.env[key];
+      if (envVal !== undefined && envVal.trim() !== "") return envVal;
+    }
+    return result;
+  };
+
   runtimeWithBindings.__miladyMethodBindingsInstalled = true;
 }
 
@@ -1889,6 +1939,7 @@ export function buildCharacterFromConfig(config: MiladyConfig): Character {
   const secretKeys = [
     "ANTHROPIC_API_KEY",
     "OPENAI_API_KEY",
+    "GEMINI_API_KEY",
     "GOOGLE_API_KEY",
     "GOOGLE_GENERATIVE_AI_API_KEY",
     "GROQ_API_KEY",
@@ -2103,8 +2154,12 @@ async function runFirstTimeSetup(config: MiladyConfig): Promise<MiladyConfig> {
     {
       id: "gemini",
       label: "Google Gemini",
-      envKey: "GOOGLE_API_KEY",
-      detectKeys: ["GOOGLE_API_KEY", "GOOGLE_GENERATIVE_AI_API_KEY"],
+      envKey: "GOOGLE_GENERATIVE_AI_API_KEY",
+      detectKeys: [
+        "GOOGLE_GENERATIVE_AI_API_KEY",
+        "GOOGLE_API_KEY",
+        "GEMINI_API_KEY",
+      ],
       hint: "AI...",
     },
     {
@@ -2820,6 +2875,26 @@ export async function startEliza(
       : {}),
     settings: {
       VALIDATION_LEVEL: "fast",
+      // Forward non-sensitive Milady config.env vars as runtime settings so
+      // plugins can access them via runtime.getSetting(). This fixes a bug where
+      // plugins (e.g. @elizaos/plugin-google-genai) call runtime.getSetting()
+      // which returns null for keys not in settings, but the plugin checks
+      // !== undefined causing it to use "null" as the model name.
+      //
+      // Security: Filter out blockchain private keys and secrets. API keys are
+      // allowed since plugins need them via runtime.getSetting(). Private keys
+      // should only be accessed via process.env by signing services.
+      ...Object.fromEntries(
+        Object.entries(collectConfigEnvVars(config)).filter(([key]) => {
+          const upper = key.toUpperCase();
+          if (upper.includes("PRIVATE_KEY")) return false;
+          if (upper.startsWith("EVM_") || upper.startsWith("SOLANA_"))
+            return false;
+          if (/(SECRET|PASSWORD|AUTH_TOKEN|CREDENTIAL)$/i.test(key))
+            return false;
+          return true;
+        }),
+      ),
       // Forward Milady config env vars as runtime settings
       ...(primaryModel ? { MODEL_PROVIDER: primaryModel } : {}),
       // Forward skills config so plugin-agent-skills can apply allow/deny filtering
