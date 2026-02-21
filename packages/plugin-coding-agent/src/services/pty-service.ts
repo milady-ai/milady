@@ -546,8 +546,7 @@ export class PTYService {
         codex: 300,
         aider: 200,
       };
-      const settleMs =
-        POST_READY_DELAY[options.agentType] ?? 300;
+      const settleMs = POST_READY_DELAY[options.agentType] ?? 300;
 
       const VERIFY_DELAY_MS = 5000; // how long to wait before checking acceptance
       const MAX_RETRIES = 2;
@@ -767,7 +766,7 @@ export class PTYService {
   async sendToSession(
     sessionId: string,
     input: string,
-  ): Promise<SessionMessage | void> {
+  ): Promise<SessionMessage | undefined> {
     if (!this.manager) {
       throw new Error("PTYService not initialized");
     }

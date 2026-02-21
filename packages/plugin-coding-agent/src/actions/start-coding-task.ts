@@ -101,9 +101,8 @@ function registerSessionEvents(
     if (event === "task_complete") {
       if (callback) {
         const response = (data as { response?: string }).response ?? "";
-        const preview = response.length > 500
-          ? `${response.slice(0, 500)}...`
-          : response;
+        const preview =
+          response.length > 500 ? `${response.slice(0, 500)}...` : response;
         callback({
           text: preview
             ? `Agent "${label}" completed the task.\n\n${preview}`
