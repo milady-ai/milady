@@ -183,7 +183,13 @@ export function ConversationsSidebar({
                       className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity border-none bg-transparent text-muted hover:text-danger hover:bg-destructive-subtle cursor-pointer text-sm px-1 py-0.5 rounded flex-shrink-0"
                       onClick={(e) => {
                         e.stopPropagation();
-                        void handleDeleteConversation(conv.id);
+                        if (
+                          window.confirm(
+                            `Delete conversation "${conv.title}"? This cannot be undone.`,
+                          )
+                        ) {
+                          void handleDeleteConversation(conv.id);
+                        }
                       }}
                       title="Delete conversation"
                     >
