@@ -9,7 +9,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { logger } from "@elizaos/core";
+import { logger, type Plugin } from "@elizaos/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { findPluginExport } from "../cli/plugins-cli";
 import type { MiladyConfig } from "../config/config";
@@ -22,6 +22,7 @@ import {
   CORE_PLUGINS,
   CUSTOM_PLUGINS_DIRNAME,
   collectPluginNames,
+  deduplicatePluginActions,
   findRuntimePluginExport,
   isEnvKeyAllowedForForwarding,
   isRecoverablePgliteInitError,
@@ -83,15 +84,16 @@ describe("collectPluginNames", () => {
   });
 
   describe("remote provider precedence", () => {
-    const originalEnv = process.env;
+    const envKeys = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY", "OLLAMA_BASE_URL"];
+    const precSnap = envSnapshot(envKeys);
 
     beforeEach(() => {
-      vi.resetModules();
-      process.env = { ...originalEnv };
+      precSnap.save();
+      for (const k of envKeys) delete process.env[k];
     });
 
     afterEach(() => {
-      process.env = originalEnv;
+      precSnap.restore();
     });
 
     it("should keep @elizaos/plugin-local-embedding even when a remote provider env var is present", async () => {
@@ -675,6 +677,7 @@ describe("autoResolveDiscordAppId", () => {
     "DISCORD_BOT_TOKEN",
   ];
   const snap = envSnapshot(envKeys);
+  const originalFetch = globalThis.fetch;
 
   beforeEach(() => {
     snap.save();
@@ -684,7 +687,7 @@ describe("autoResolveDiscordAppId", () => {
   afterEach(() => {
     snap.restore();
     vi.restoreAllMocks();
-    vi.unstubAllGlobals();
+    globalThis.fetch = originalFetch;
   });
 
   it("no-ops when DISCORD_APPLICATION_ID is already set", async () => {
@@ -692,7 +695,7 @@ describe("autoResolveDiscordAppId", () => {
     process.env.DISCORD_API_TOKEN = "tok";
 
     const fetchMock = vi.fn();
-    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
 
     await autoResolveDiscordAppId();
 
@@ -702,7 +705,7 @@ describe("autoResolveDiscordAppId", () => {
 
   it("no-ops when no Discord token exists", async () => {
     const fetchMock = vi.fn();
-    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
 
     await autoResolveDiscordAppId();
 
@@ -720,7 +723,7 @@ describe("autoResolveDiscordAppId", () => {
       status: 200,
       json: async () => ({ id: "app-123" }),
     }));
-    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
 
     await autoResolveDiscordAppId();
 
@@ -743,13 +746,10 @@ describe("autoResolveDiscordAppId", () => {
     process.env.DISCORD_API_TOKEN = "tok";
     const warnSpy = vi.spyOn(logger, "warn").mockImplementation(() => {});
 
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => ({
-        ok: false,
-        status: 401,
-      })) as unknown as typeof fetch,
-    );
+    globalThis.fetch = vi.fn(async () => ({
+      ok: false,
+      status: 401,
+    })) as unknown as typeof fetch;
 
     await autoResolveDiscordAppId();
 
@@ -763,12 +763,9 @@ describe("autoResolveDiscordAppId", () => {
     process.env.DISCORD_API_TOKEN = "tok";
     const warnSpy = vi.spyOn(logger, "warn").mockImplementation(() => {});
 
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => {
-        throw new Error("network down");
-      }) as unknown as typeof fetch,
-    );
+    globalThis.fetch = vi.fn(async () => {
+      throw new Error("network down");
+    }) as unknown as typeof fetch;
 
     await autoResolveDiscordAppId();
 
@@ -2006,5 +2003,106 @@ describe("getSetting null fallback — default Google model names", () => {
       process.env.GOOGLE_SMALL_MODEL = "gemini-3-flash-preview";
     }
     expect(process.env.GOOGLE_SMALL_MODEL).toBe("gemini-custom");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// collectPluginNames — whitespace-only env keys
+// ---------------------------------------------------------------------------
+
+describe("collectPluginNames — whitespace env keys", () => {
+  const envKeys = ["GROQ_API_KEY", "ANTHROPIC_API_KEY"];
+  const snap = envSnapshot(envKeys);
+  beforeEach(() => {
+    snap.save();
+    for (const k of envKeys) delete process.env[k];
+  });
+  afterEach(() => snap.restore());
+
+  it("does not load a provider plugin when its env key is whitespace-only", () => {
+    process.env.GROQ_API_KEY = "   ";
+    const names = collectPluginNames({} as MiladyConfig);
+    expect(names.has("@elizaos/plugin-groq")).toBe(false);
+  });
+
+  it("does not load a provider plugin when its env key is an empty string", () => {
+    process.env.GROQ_API_KEY = "";
+    const names = collectPluginNames({} as MiladyConfig);
+    expect(names.has("@elizaos/plugin-groq")).toBe(false);
+  });
+
+  it("still loads a provider plugin when its env key has a real value", () => {
+    process.env.ANTHROPIC_API_KEY = "sk-real-key";
+    const names = collectPluginNames({} as MiladyConfig);
+    expect(names.has("@elizaos/plugin-anthropic")).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// deduplicatePluginActions
+// ---------------------------------------------------------------------------
+
+describe("deduplicatePluginActions", () => {
+  function makePlugin(name: string, actionNames: string[]): Plugin {
+    return {
+      name,
+      description: `test plugin ${name}`,
+      actions: actionNames.map((n) => ({
+        name: n,
+        description: `action ${n}`,
+        similes: [],
+        handler: async () => {},
+        validate: async () => true,
+        examples: [],
+      })),
+    };
+  }
+
+  it("keeps first occurrence and removes duplicates from later plugins", () => {
+    const pluginA = makePlugin("plugin-a", ["SEND_MESSAGE", "GET_TRADES"]);
+    const pluginB = makePlugin("plugin-b", ["SEND_MESSAGE", "REGISTER_AGENT"]);
+
+    deduplicatePluginActions([pluginA, pluginB]);
+
+    expect(pluginA.actions?.map((a) => a.name)).toEqual([
+      "SEND_MESSAGE",
+      "GET_TRADES",
+    ]);
+    expect(pluginB.actions?.map((a) => a.name)).toEqual(["REGISTER_AGENT"]);
+  });
+
+  it("does not modify plugins with no overlapping actions", () => {
+    const pluginA = makePlugin("plugin-a", ["ACTION_A"]);
+    const pluginB = makePlugin("plugin-b", ["ACTION_B"]);
+
+    deduplicatePluginActions([pluginA, pluginB]);
+
+    expect(pluginA.actions).toHaveLength(1);
+    expect(pluginB.actions).toHaveLength(1);
+  });
+
+  it("handles plugins with no actions array", () => {
+    const pluginA = makePlugin("plugin-a", ["FOO"]);
+    const pluginB: Plugin = {
+      name: "plugin-b",
+      description: "no actions",
+    };
+
+    deduplicatePluginActions([pluginA, pluginB]);
+
+    expect(pluginA.actions?.map((a) => a.name)).toEqual(["FOO"]);
+    expect(pluginB.actions).toBeUndefined();
+  });
+
+  it("removes all duplicates when three plugins share the same action", () => {
+    const p1 = makePlugin("p1", ["SHARED"]);
+    const p2 = makePlugin("p2", ["SHARED", "UNIQUE_2"]);
+    const p3 = makePlugin("p3", ["SHARED", "UNIQUE_3"]);
+
+    deduplicatePluginActions([p1, p2, p3]);
+
+    expect(p1.actions?.map((a) => a.name)).toEqual(["SHARED"]);
+    expect(p2.actions?.map((a) => a.name)).toEqual(["UNIQUE_2"]);
+    expect(p3.actions?.map((a) => a.name)).toEqual(["UNIQUE_3"]);
   });
 });
