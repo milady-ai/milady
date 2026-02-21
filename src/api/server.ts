@@ -28,6 +28,7 @@ import {
   type UUID,
 } from "@elizaos/core";
 import { listPiAiModelOptions } from "@elizaos/plugin-pi-ai";
+import { createCodingAgentRouteHandler } from "@milaidy/plugin-coding-agent";
 import { type WebSocket, WebSocketServer } from "ws";
 import type { CloudManager } from "../cloud/cloud-manager";
 import {
@@ -49,7 +50,6 @@ import {
   isBlockedPrivateOrLinkLocalIp,
   normalizeHostLike,
 } from "../security/network-policy";
-
 import { AppManager } from "../services/app-manager";
 import { FallbackTrainingService } from "../services/fallback-training-service";
 import {
@@ -86,7 +86,6 @@ import { getAutonomyState, handleAutonomyRoutes } from "./autonomy-routes";
 import { handleCharacterRoutes } from "./character-routes";
 import { type CloudRouteState, handleCloudRoute } from "./cloud-routes";
 import { handleCloudStatusRoutes } from "./cloud-status-routes";
-
 import {
   extractAnthropicSystemAndLastUser,
   extractCompatTextContent,
@@ -5794,6 +5793,7 @@ async function handleRequest(
       piAiDefaultModel,
       inventoryProviders: getInventoryProviderOptions(),
       sharedStyleRules: "Keep responses brief. Be helpful and concise.",
+      githubOAuthAvailable: Boolean(process.env.GITHUB_OAUTH_CLIENT_ID?.trim()),
     });
     return;
   }
@@ -5988,6 +5988,18 @@ async function handleRequest(
           "[milady-api] Anthropic setup token saved during onboarding",
         );
       }
+    }
+
+    // ── GitHub token ────────────────────────────────────────────────────
+    if (
+      body.githubToken &&
+      typeof body.githubToken === "string" &&
+      body.githubToken.trim()
+    ) {
+      if (!config.env) config.env = {};
+      (config.env as Record<string, string>).GITHUB_TOKEN =
+        body.githubToken.trim();
+      process.env.GITHUB_TOKEN = body.githubToken.trim();
     }
 
     // ── Connectors (Telegram, Discord, WhatsApp, Twilio, Blooio) ────────
@@ -6547,6 +6559,7 @@ async function handleRequest(
         "vision",
         "browser",
         "computeruse",
+        "coding-agent",
       ]);
       if (CAPABILITY_FEATURE_IDS.has(pluginId)) {
         if (!state.config.features) {
@@ -10430,6 +10443,18 @@ async function handleRequest(
       );
       if (handled) return;
     }
+  }
+
+  // ── Coding Agent API (/api/coding-agents/*, /api/workspace/*, /api/issues/*) ──
+  if (
+    state.runtime &&
+    (pathname.startsWith("/api/coding-agents") ||
+      pathname.startsWith("/api/workspace") ||
+      pathname.startsWith("/api/issues"))
+  ) {
+    const handler = createCodingAgentRouteHandler(state.runtime);
+    const handled = await handler(req, res, pathname);
+    if (handled) return;
   }
 
   if (

@@ -367,6 +367,7 @@ export interface OnboardingOptions {
   piAiDefaultModel?: string | null;
   inventoryProviders: InventoryProviderOption[];
   sharedStyleRules: string;
+  githubOAuthAvailable?: boolean;
 }
 
 /** Configuration for a single messaging connector. */
@@ -430,6 +431,7 @@ export interface OnboardingData {
   twilioPhoneNumber?: string;
   blooioApiKey?: string;
   blooioPhoneNumber?: string;
+  githubToken?: string;
 }
 
 export interface SandboxPlatformStatus {

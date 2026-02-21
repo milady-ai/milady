@@ -14,8 +14,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { THEMES, useApp } from "../AppContext";
 import { client } from "../api-client";
+import { CodingAgentSettingsSection } from "./CodingAgentSettingsSection";
 import { ConfigPageView } from "./ConfigPageView";
 import { ConfigRenderer, defaultRegistry } from "./config-renderer";
+import { GitHubSettingsSection } from "./GitHubSettingsSection";
 import { MediaSettingsSection } from "./MediaSettingsSection";
 import { PermissionsSection } from "./PermissionsSection";
 import { ProviderSwitcher } from "./ProviderSwitcher";
@@ -252,6 +254,22 @@ export function SettingsView() {
           ═══════════════════════════════════════════════════════════════ */}
       <div className="mt-6">
         <ConfigPageView embedded />
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          3b. GITHUB
+          ═══════════════════════════════════════════════════════════════ */}
+      <div className="mt-6 p-4 border border-[var(--border)] bg-[var(--card)]">
+        <div className="font-bold text-sm mb-4">GitHub</div>
+        <GitHubSettingsSection />
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          3c. CODING AGENTS
+          ═══════════════════════════════════════════════════════════════ */}
+      <div className="mt-6 p-4 border border-[var(--border)] bg-[var(--card)]">
+        <div className="font-bold text-sm mb-4">Coding Agents</div>
+        <CodingAgentSettingsSection />
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════

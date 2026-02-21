@@ -1,7 +1,7 @@
 {
   "$schema": "plugin-index-v1",
   "generatedAt": "2026-02-09T20:23:38.561Z",
-  "count": 97,
+  "count": 98,
   "plugins": [
     {
       "id": "acp",
@@ -1462,6 +1462,17 @@
           "width": "half"
         }
       }
+    },
+    {
+      "id": "coding-agent",
+      "dirName": "plugin-coding-agent",
+      "name": "Coding Agent Swarms",
+      "npmName": "@milaidy/plugin-coding-agent",
+      "description": "Orchestrate CLI coding agents (Claude Code, Gemini CLI, Codex, Aider) via PTY sessions with workspace and issue management",
+      "category": "feature",
+      "envKey": null,
+      "configKeys": [],
+      "version": "1.0.0"
     },
     {
       "id": "code",

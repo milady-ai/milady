@@ -662,6 +662,7 @@ export interface AppState {
   onboardingTwilioPhoneNumber: string;
   onboardingBlooioApiKey: string;
   onboardingBlooioPhoneNumber: string;
+  onboardingGithubToken: string;
   onboardingSubscriptionTab: "token" | "oauth";
   onboardingSelectedChains: Set<string>;
   onboardingRpcSelections: Record<string, string>;
@@ -1192,6 +1193,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [onboardingBlooioApiKey, setOnboardingBlooioApiKey] = useState("");
   const [onboardingBlooioPhoneNumber, setOnboardingBlooioPhoneNumber] =
     useState("");
+  const [onboardingGithubToken, setOnboardingGithubToken] = useState("");
   const [onboardingSubscriptionTab, setOnboardingSubscriptionTab] = useState<
     "token" | "oauth"
   >("token");
@@ -3204,6 +3206,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         twilioPhoneNumber: onboardingTwilioPhoneNumber.trim() || undefined,
         blooioApiKey: onboardingBlooioApiKey.trim() || undefined,
         blooioPhoneNumber: onboardingBlooioPhoneNumber.trim() || undefined,
+        githubToken: onboardingGithubToken.trim() || undefined,
       });
       setOnboardingComplete(true);
       setTab("chat");
@@ -3245,6 +3248,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     onboardingTwilioPhoneNumber,
     onboardingBlooioApiKey,
     onboardingBlooioPhoneNumber,
+    onboardingGithubToken,
     setTab,
   ]);
 
@@ -3714,6 +3718,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         onboardingTwilioPhoneNumber: setOnboardingTwilioPhoneNumber,
         onboardingBlooioApiKey: setOnboardingBlooioApiKey,
         onboardingBlooioPhoneNumber: setOnboardingBlooioPhoneNumber,
+        onboardingGithubToken: setOnboardingGithubToken,
         onboardingSubscriptionTab: setOnboardingSubscriptionTab,
         onboardingRpcKeys: setOnboardingRpcKeys,
         onboardingAvatar: setOnboardingAvatar,
@@ -4403,6 +4408,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     onboardingTwilioPhoneNumber,
     onboardingBlooioApiKey,
     onboardingBlooioPhoneNumber,
+    onboardingGithubToken,
     onboardingSubscriptionTab,
     onboardingSelectedChains,
     onboardingRpcSelections,

@@ -471,6 +471,7 @@ const OPTIONAL_PLUGIN_MAP: Readonly<Record<string, string>> = {
   "pi-ai": PI_AI_PLUGIN_PACKAGE,
   piAi: PI_AI_PLUGIN_PACKAGE,
   x402: "@elizaos/plugin-x402",
+  "coding-agent": "@milaidy/plugin-coding-agent",
 };
 
 function looksLikePlugin(value: unknown): value is Plugin {
@@ -758,9 +759,12 @@ export function collectPluginNames(config: MiladyConfig): Set<string> {
   // installs) cannot accidentally re-introduce suppressed providers.
   applyProviderPrecedence();
 
-  // Enforce shell feature gating last so allow-list entries cannot bypass it.
+  // Enforce feature gating last so allow-list entries cannot bypass it.
   if (shellPluginDisabled) {
     pluginsToLoad.delete("@elizaos/plugin-shell");
+  }
+  if (isPluginExplicitlyDisabled("@milaidy/plugin-coding-agent")) {
+    pluginsToLoad.delete("@milaidy/plugin-coding-agent");
   }
 
   return pluginsToLoad;
@@ -1819,6 +1823,22 @@ function installRuntimeMethodBindings(runtime: AgentRuntime): void {
     // Google model defaults
     "GOOGLE_SMALL_MODEL",
     "GOOGLE_LARGE_MODEL",
+    // GitHub
+    "GITHUB_TOKEN",
+    "GITHUB_OAUTH_CLIENT_ID",
+    // Coding agent model preferences
+    "PARALLAX_CLAUDE_MODEL_POWERFUL",
+    "PARALLAX_CLAUDE_MODEL_FAST",
+    "PARALLAX_GEMINI_MODEL_POWERFUL",
+    "PARALLAX_GEMINI_MODEL_FAST",
+    "PARALLAX_CODEX_MODEL_POWERFUL",
+    "PARALLAX_CODEX_MODEL_FAST",
+    "PARALLAX_AIDER_PROVIDER",
+    "PARALLAX_AIDER_MODEL_POWERFUL",
+    "PARALLAX_AIDER_MODEL_FAST",
+    // Custom credential forwarding — intentionally broad: users configure which env vars
+    // to forward to coding agents via this comma-separated key list (e.g. MCP server tokens).
+    "CUSTOM_CREDENTIAL_KEYS",
   ]);
   const originalGetSetting = runtime.getSetting.bind(runtime);
   runtime.getSetting = (key: string) => {
@@ -1986,6 +2006,9 @@ export function buildCharacterFromConfig(config: MiladyConfig): Character {
     "X402_MAX_TOTAL_USD",
     "X402_ENABLED",
     "X402_DB_PATH",
+    // GitHub access for coding agent plugin
+    "GITHUB_TOKEN",
+    "GITHUB_OAUTH_CLIENT_ID",
   ];
 
   const secrets: Record<string, string> = {};
@@ -2358,7 +2381,48 @@ async function runFirstTimeSetup(config: MiladyConfig): Promise<MiladyConfig> {
     process.env.SKILLS_REGISTRY = "https://clawhub.ai";
   }
 
-  // ── Step 7: Persist agent + style + provider + embedding config ─────────
+  // ── Step 7: GitHub access (for coding agents, issue management) ─────────
+  const hasGithubToken = Boolean(process.env.GITHUB_TOKEN?.trim());
+  const hasGithubOAuth = Boolean(process.env.GITHUB_OAUTH_CLIENT_ID?.trim());
+  if (!hasGithubToken) {
+    const options: Array<{ value: string; label: string; hint?: string }> = [
+      { value: "skip", label: "Skip for now", hint: "you can add this later" },
+      {
+        value: "pat",
+        label: "Paste a Personal Access Token",
+        hint: "github.com/settings/tokens",
+      },
+    ];
+    if (hasGithubOAuth) {
+      options.push({
+        value: "oauth",
+        label: "Use OAuth (authorize in browser)",
+        hint: "recommended",
+      });
+    }
+
+    const githubChoice = await clack.select({
+      message:
+        "Configure GitHub access? (needed for coding agents, issue management, PRs)",
+      options,
+    });
+
+    if (!clack.isCancel(githubChoice) && githubChoice === "pat") {
+      const tokenInput = await clack.password({
+        message: "Paste your GitHub token (or skip):",
+      });
+      if (!clack.isCancel(tokenInput) && tokenInput.trim()) {
+        process.env.GITHUB_TOKEN = tokenInput.trim();
+        clack.log.success("GitHub token configured.");
+      }
+    } else if (!clack.isCancel(githubChoice) && githubChoice === "oauth") {
+      clack.log.info(
+        "GitHub OAuth will activate when coding agents need access.",
+      );
+    }
+  }
+
+  // ── Step 8: Persist agent + style + provider + embedding config ─────────
   // Save the agent name and chosen personality template into config so that
   // the same character data is used regardless of whether the user onboarded
   // via CLI or GUI.  This ensures full parity between onboarding surfaces.
@@ -2416,6 +2480,12 @@ async function runFirstTimeSetup(config: MiladyConfig): Promise<MiladyConfig> {
   }
   if (process.env.SKILLSMP_API_KEY && !hasSkillsmpKey) {
     envBucket.SKILLSMP_API_KEY = process.env.SKILLSMP_API_KEY;
+  }
+  if (process.env.GITHUB_TOKEN && !hasGithubToken) {
+    envBucket.GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+  }
+  if (process.env.GITHUB_OAUTH_CLIENT_ID && !hasGithubOAuth) {
+    envBucket.GITHUB_OAUTH_CLIENT_ID = process.env.GITHUB_OAUTH_CLIENT_ID;
   }
 
   try {
@@ -2887,9 +2957,11 @@ export async function startEliza(
       ...Object.fromEntries(
         Object.entries(collectConfigEnvVars(config)).filter(([key]) => {
           const upper = key.toUpperCase();
+          // Block blockchain private keys
           if (upper.includes("PRIVATE_KEY")) return false;
           if (upper.startsWith("EVM_") || upper.startsWith("SOLANA_"))
             return false;
+          // Block secrets, passwords, auth tokens (but not API_KEY which plugins need)
           if (/(SECRET|PASSWORD|AUTH_TOKEN|CREDENTIAL)$/i.test(key))
             return false;
           return true;
