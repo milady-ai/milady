@@ -124,6 +124,20 @@ export const provisionWorkspaceAction: Action = {
       return { success: false, error: "MISSING_REPO" };
     }
 
+    // Validate repo URL against allowed domains
+    if (repo) {
+      const ALLOWED_DOMAINS =
+        /^https?:\/\/(github\.com|gitlab\.com|bitbucket\.org)\//i;
+      if (!ALLOWED_DOMAINS.test(repo)) {
+        if (callback) {
+          await callback({
+            text: "Repository URL must be from github.com, gitlab.com, or bitbucket.org.",
+          });
+        }
+        return { success: false, error: "INVALID_REPO_DOMAIN" };
+      }
+    }
+
     // For worktree mode, need parent
     let parentWorkspaceId = content.parentWorkspaceId;
     if (content.useWorktree && !parentWorkspaceId) {

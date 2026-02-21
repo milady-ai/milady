@@ -73,7 +73,7 @@ export function buildStallClassificationPrompt(
 }
 
 /**
- * Write a debug snapshot to /tmp for offline stall analysis.
+ * Write a debug snapshot to ~/.milaidy/debug/ for offline stall analysis.
  */
 export async function writeStallSnapshot(
   sessionId: string,
@@ -86,6 +86,10 @@ export async function writeStallSnapshot(
 ): Promise<void> {
   try {
     const fs = await import("node:fs");
+    const os = await import("node:os");
+    const path = await import("node:path");
+    const snapshotDir = path.join(os.homedir(), ".milaidy", "debug");
+    fs.mkdirSync(snapshotDir, { recursive: true });
     const ourBuffer = buffers.get(sessionId);
     const ourTail = ourBuffer
       ? ourBuffer.slice(-100).join("\n")
@@ -116,8 +120,12 @@ export async function writeStallSnapshot(
       traceEntries.slice(-20).join("\n"),
       ``,
     ].join("\n");
-    fs.writeFileSync(`/tmp/stall-snapshot-${sessionId}.txt`, snapshot);
-    log(`Stall snapshot → /tmp/stall-snapshot-${sessionId}.txt`);
+    const snapshotPath = path.join(
+      snapshotDir,
+      `stall-snapshot-${sessionId}.txt`,
+    );
+    fs.writeFileSync(snapshotPath, snapshot);
+    log(`Stall snapshot → ${snapshotPath}`);
   } catch (_) {
     /* best-effort */
   }

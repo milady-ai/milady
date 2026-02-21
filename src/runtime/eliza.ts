@@ -1826,7 +1826,6 @@ function installRuntimeMethodBindings(runtime: AgentRuntime): void {
     // GitHub
     "GITHUB_TOKEN",
     "GITHUB_OAUTH_CLIENT_ID",
-    "GITHUB_OAUTH_CLIENT_SECRET",
     // Coding agent model preferences
     "PARALLAX_CLAUDE_MODEL_POWERFUL",
     "PARALLAX_CLAUDE_MODEL_FAST",
@@ -1837,7 +1836,8 @@ function installRuntimeMethodBindings(runtime: AgentRuntime): void {
     "PARALLAX_AIDER_PROVIDER",
     "PARALLAX_AIDER_MODEL_POWERFUL",
     "PARALLAX_AIDER_MODEL_FAST",
-    // Custom credential forwarding
+    // Custom credential forwarding — intentionally broad: users configure which env vars
+    // to forward to coding agents via this comma-separated key list (e.g. MCP server tokens).
     "CUSTOM_CREDENTIAL_KEYS",
   ]);
   const originalGetSetting = runtime.getSetting.bind(runtime);
