@@ -2,7 +2,10 @@
  * PROVISION_WORKSPACE action tests
  */
 
-import { describe, it, expect, jest, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it, jest } from "bun:test";
+
+import type { IAgentRuntime, Memory, State } from "@elizaos/core";
+
 import { provisionWorkspaceAction } from "../actions/provision-workspace.js";
 
 const mockProvisionWorkspace = jest.fn();
@@ -15,7 +18,7 @@ const createMockWorkspaceService = () => ({
   listWorkspaces: mockListWorkspaces.mockReturnValue([]),
 });
 
-const createMockRuntime = (workspaceService: any = null) => ({
+const createMockRuntime = (workspaceService: unknown = null) => ({
   getService: jest.fn((name: string) => {
     if (name === "CODING_WORKSPACE_SERVICE") return workspaceService;
     return null;
@@ -51,7 +54,9 @@ describe("provisionWorkspaceAction", () => {
     });
 
     it("should define parameters", () => {
-      const paramNames = provisionWorkspaceAction.parameters!.map((p) => p.name);
+      const paramNames = (provisionWorkspaceAction.parameters ?? []).map(
+        (p) => p.name,
+      );
       expect(paramNames).toContain("repo");
       expect(paramNames).toContain("baseBranch");
       expect(paramNames).toContain("useWorktree");
@@ -64,9 +69,9 @@ describe("provisionWorkspaceAction", () => {
       const workspaceService = createMockWorkspaceService();
       const runtime = createMockRuntime(workspaceService);
 
-      const result = await provisionWorkspaceAction.validate!(
-        runtime as any,
-        createMockMessage() as any
+      const result = await provisionWorkspaceAction.validate?.(
+        runtime as unknown as IAgentRuntime,
+        createMockMessage() as unknown as Memory,
       );
       expect(result).toBe(true);
     });
@@ -74,9 +79,9 @@ describe("provisionWorkspaceAction", () => {
     it("should return false when WorkspaceService not available", async () => {
       const runtime = createMockRuntime(null);
 
-      const result = await provisionWorkspaceAction.validate!(
-        runtime as any,
-        createMockMessage() as any
+      const result = await provisionWorkspaceAction.validate?.(
+        runtime as unknown as IAgentRuntime,
+        createMockMessage() as unknown as Memory,
       );
       expect(result).toBe(false);
     });
@@ -93,11 +98,11 @@ describe("provisionWorkspaceAction", () => {
       const callback = jest.fn();
 
       const result = await provisionWorkspaceAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(true);
@@ -105,12 +110,12 @@ describe("provisionWorkspaceAction", () => {
         expect.objectContaining({
           repo: "https://github.com/user/repo.git",
           baseBranch: "develop",
-        })
+        }),
       );
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining("/tmp/workspaces"),
-        })
+        }),
       );
     });
 
@@ -137,11 +142,11 @@ describe("provisionWorkspaceAction", () => {
       const callback = jest.fn();
 
       const result = await provisionWorkspaceAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(true);
@@ -149,7 +154,7 @@ describe("provisionWorkspaceAction", () => {
         expect.objectContaining({
           useWorktree: true,
           parentWorkspaceId: "parent-ws",
-        })
+        }),
       );
     });
 
@@ -171,21 +176,23 @@ describe("provisionWorkspaceAction", () => {
         useWorktree: true,
         branch: "feature/from-state",
       });
-      const state = { codingWorkspace: { id: "state-ws" } };
+      const state: Record<string, unknown> = {
+        codingWorkspace: { id: "state-ws" },
+      };
       const callback = jest.fn();
 
       await provisionWorkspaceAction.handler(
-        runtime as any,
-        message as any,
-        state as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
+        state as unknown as State,
         {},
-        callback
+        callback,
       );
 
       expect(mockProvisionWorkspace).toHaveBeenCalledWith(
         expect.objectContaining({
           parentWorkspaceId: "state-ws",
-        })
+        }),
       );
     });
 
@@ -195,20 +202,22 @@ describe("provisionWorkspaceAction", () => {
       const message = createMockMessage({
         repo: "https://github.com/user/repo.git",
       });
-      const state: any = {};
+      const state: Record<string, unknown> = {};
       const callback = jest.fn();
 
       await provisionWorkspaceAction.handler(
-        runtime as any,
-        message as any,
-        state,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
+        state as unknown as State,
         {},
-        callback
+        callback,
       );
 
       expect(state.codingWorkspace).toBeDefined();
-      expect(state.codingWorkspace.id).toBe("ws-123");
-      expect(state.codingWorkspace.path).toBe("/tmp/workspaces/ws-123");
+      expect((state.codingWorkspace as { id: string }).id).toBe("ws-123");
+      expect((state.codingWorkspace as { path: string }).path).toBe(
+        "/tmp/workspaces/ws-123",
+      );
     });
 
     it("should error when no repo URL for clone", async () => {
@@ -218,18 +227,18 @@ describe("provisionWorkspaceAction", () => {
       const callback = jest.fn();
 
       const result = await provisionWorkspaceAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(false);
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining("repo"),
-        })
+        }),
       );
     });
 
@@ -244,24 +253,24 @@ describe("provisionWorkspaceAction", () => {
       const callback = jest.fn();
 
       const result = await provisionWorkspaceAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(false);
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining("parent"),
-        })
+        }),
       );
     });
 
     it("should handle provision errors", async () => {
       mockProvisionWorkspace.mockRejectedValue(
-        new Error("Clone failed: repository not found")
+        new Error("Clone failed: repository not found"),
       );
 
       const workspaceService = createMockWorkspaceService();
@@ -272,18 +281,18 @@ describe("provisionWorkspaceAction", () => {
       const callback = jest.fn();
 
       const result = await provisionWorkspaceAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(false);
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining("Clone failed"),
-        })
+        }),
       );
     });
 
@@ -296,17 +305,17 @@ describe("provisionWorkspaceAction", () => {
       const callback = jest.fn();
 
       await provisionWorkspaceAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(mockProvisionWorkspace).toHaveBeenCalledWith(
         expect.objectContaining({
           repo: "https://github.com/user/repo.git",
-        })
+        }),
       );
     });
   });

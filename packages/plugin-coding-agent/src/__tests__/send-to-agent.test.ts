@@ -2,7 +2,8 @@
  * SEND_TO_CODING_AGENT action tests
  */
 
-import { describe, it, expect, jest, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it, jest } from "bun:test";
+import type { IAgentRuntime, Memory, State } from "@elizaos/core";
 import { sendToAgentAction } from "../actions/send-to-agent.js";
 
 // Mock PTYService
@@ -11,14 +12,14 @@ const mockSendKeysToSession = jest.fn();
 const mockGetSession = jest.fn();
 const mockListSessions = jest.fn();
 
-const createMockPTYService = (sessions: any[] = []) => ({
+const createMockPTYService = (sessions: { id: string }[] = []) => ({
   sendToSession: mockSendToSession,
   sendKeysToSession: mockSendKeysToSession,
   getSession: mockGetSession,
   listSessions: mockListSessions.mockReturnValue(sessions),
 });
 
-const createMockRuntime = (ptyService: any = null) => ({
+const createMockRuntime = (ptyService: unknown = null) => ({
   getService: jest.fn((name: string) => {
     if (name === "PTY_SERVICE") return ptyService;
     return null;
@@ -52,7 +53,9 @@ describe("sendToAgentAction", () => {
     });
 
     it("should define input and keys parameters", () => {
-      const paramNames = sendToAgentAction.parameters!.map((p) => p.name);
+      const paramNames = (sendToAgentAction.parameters ?? []).map(
+        (p) => p.name,
+      );
       expect(paramNames).toContain("sessionId");
       expect(paramNames).toContain("input");
       expect(paramNames).toContain("keys");
@@ -65,9 +68,9 @@ describe("sendToAgentAction", () => {
       const ptyService = createMockPTYService(sessions);
       const runtime = createMockRuntime(ptyService);
 
-      const result = await sendToAgentAction.validate!(
-        runtime as any,
-        createMockMessage() as any
+      const result = await sendToAgentAction.validate?.(
+        runtime as unknown as IAgentRuntime,
+        createMockMessage() as unknown as Memory,
       );
       expect(result).toBe(true);
     });
@@ -76,9 +79,9 @@ describe("sendToAgentAction", () => {
       const ptyService = createMockPTYService([]);
       const runtime = createMockRuntime(ptyService);
 
-      const result = await sendToAgentAction.validate!(
-        runtime as any,
-        createMockMessage() as any
+      const result = await sendToAgentAction.validate?.(
+        runtime as unknown as IAgentRuntime,
+        createMockMessage() as unknown as Memory,
       );
       expect(result).toBe(false);
     });
@@ -86,9 +89,9 @@ describe("sendToAgentAction", () => {
     it("should return false when PTYService not available", async () => {
       const runtime = createMockRuntime(null);
 
-      const result = await sendToAgentAction.validate!(
-        runtime as any,
-        createMockMessage() as any
+      const result = await sendToAgentAction.validate?.(
+        runtime as unknown as IAgentRuntime,
+        createMockMessage() as unknown as Memory,
       );
       expect(result).toBe(false);
     });
@@ -105,11 +108,11 @@ describe("sendToAgentAction", () => {
       const callback = jest.fn();
 
       const result = await sendToAgentAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(true);
@@ -117,7 +120,7 @@ describe("sendToAgentAction", () => {
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining("yes"),
-        })
+        }),
       );
     });
 
@@ -131,15 +134,18 @@ describe("sendToAgentAction", () => {
       const callback = jest.fn();
 
       const result = await sendToAgentAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(true);
-      expect(mockSendKeysToSession).toHaveBeenCalledWith("session-123", "Enter");
+      expect(mockSendKeysToSession).toHaveBeenCalledWith(
+        "session-123",
+        "Enter",
+      );
     });
 
     it("should use session from state if not specified", async () => {
@@ -150,11 +156,11 @@ describe("sendToAgentAction", () => {
       const callback = jest.fn();
 
       await sendToAgentAction.handler(
-        runtime as any,
-        message as any,
-        state as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
+        state as unknown as State,
         {},
-        callback
+        callback,
       );
 
       expect(mockSendToSession).toHaveBeenCalledWith("session-123", "test");
@@ -168,11 +174,11 @@ describe("sendToAgentAction", () => {
       const callback = jest.fn();
 
       await sendToAgentAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(mockSendToSession).toHaveBeenCalledWith("session-2", "test");
@@ -185,18 +191,18 @@ describe("sendToAgentAction", () => {
       const callback = jest.fn();
 
       const result = await sendToAgentAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(false);
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining("No active"),
-        })
+        }),
       );
     });
 
@@ -211,18 +217,18 @@ describe("sendToAgentAction", () => {
       const callback = jest.fn();
 
       const result = await sendToAgentAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(false);
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining("not found"),
-        })
+        }),
       );
     });
 
@@ -233,18 +239,18 @@ describe("sendToAgentAction", () => {
       const callback = jest.fn();
 
       const result = await sendToAgentAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(false);
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining("input"),
-        })
+        }),
       );
     });
 
@@ -259,18 +265,18 @@ describe("sendToAgentAction", () => {
       const callback = jest.fn();
 
       const result = await sendToAgentAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(false);
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining("Failed"),
-        })
+        }),
       );
     });
   });

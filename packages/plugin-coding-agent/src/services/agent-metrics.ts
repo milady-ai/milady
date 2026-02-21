@@ -38,7 +38,11 @@ export class AgentMetricsTracker {
   }
 
   /** Record a task completion and update rolling average duration. */
-  recordCompletion(agentType: string, method: "fast-path" | "classifier", durationMs: number): void {
+  recordCompletion(
+    agentType: string,
+    method: "fast-path" | "classifier",
+    durationMs: number,
+  ): void {
     const m = this.get(agentType);
     m.completed++;
     if (method === "fast-path") m.completedViaFastPath++;

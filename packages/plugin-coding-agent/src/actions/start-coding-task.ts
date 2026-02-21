@@ -27,31 +27,13 @@ import type {
   State,
 } from "@elizaos/core";
 import type { AgentCredentials, ApprovalPreset } from "coding-agent-adapters";
-import type {
-  CodingAgentType,
-  PTYService,
-  SessionInfo,
+import {
+  type CodingAgentType,
+  normalizeAgentType,
+  type PTYService,
+  type SessionInfo,
 } from "../services/pty-service.js";
 import type { CodingWorkspaceService } from "../services/workspace-service.js";
-
-/** Normalize user-provided agent type to adapter type */
-const normalizeAgentType = (input: string): CodingAgentType => {
-  const normalized = input.toLowerCase().trim();
-  const mapping: Record<string, CodingAgentType> = {
-    claude: "claude",
-    "claude-code": "claude",
-    claudecode: "claude",
-    codex: "codex",
-    openai: "codex",
-    "openai-codex": "codex",
-    gemini: "gemini",
-    google: "gemini",
-    aider: "aider",
-    shell: "shell",
-    bash: "shell",
-  };
-  return mapping[normalized] ?? "claude";
-};
 
 /** Create a scratch sandbox directory for non-repo tasks */
 function createScratchDir(): string {

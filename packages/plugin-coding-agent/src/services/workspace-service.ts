@@ -351,14 +351,14 @@ export class CodingWorkspaceService {
     }
 
     // Execute git status in workspace
-    const { execSync } = await import("node:child_process");
+    const { execFileSync } = await import("node:child_process");
 
-    const statusOutput = execSync("git status --porcelain", {
+    const statusOutput = execFileSync("git", ["status", "--porcelain"], {
       cwd: workspace.path,
       encoding: "utf-8",
     });
 
-    const branchOutput = execSync("git branch --show-current", {
+    const branchOutput = execFileSync("git", ["branch", "--show-current"], {
       cwd: workspace.path,
       encoding: "utf-8",
     }).trim();
@@ -400,17 +400,17 @@ export class CodingWorkspaceService {
       throw new Error(`Workspace ${workspaceId} not found`);
     }
 
-    const { execSync } = await import("node:child_process");
+    const { execFileSync } = await import("node:child_process");
 
     if (options.all) {
-      execSync("git add -A", { cwd: workspace.path });
+      execFileSync("git", ["add", "-A"], { cwd: workspace.path });
     }
 
-    execSync(`git commit -m "${options.message.replace(/"/g, '\\"')}"`, {
+    execFileSync("git", ["commit", "-m", options.message], {
       cwd: workspace.path,
     });
 
-    const hash = execSync("git rev-parse HEAD", {
+    const hash = execFileSync("git", ["rev-parse", "HEAD"], {
       cwd: workspace.path,
       encoding: "utf-8",
     }).trim();
@@ -428,17 +428,17 @@ export class CodingWorkspaceService {
       throw new Error(`Workspace ${workspaceId} not found`);
     }
 
-    const { execSync } = await import("node:child_process");
+    const { execFileSync } = await import("node:child_process");
 
-    let cmd = "git push";
+    const args = ["push"];
     if (options?.setUpstream) {
-      cmd += ` -u origin ${workspace.branch}`;
+      args.push("-u", "origin", workspace.branch);
     }
     if (options?.force) {
-      cmd += " --force";
+      args.push("--force");
     }
 
-    execSync(cmd, { cwd: workspace.path });
+    execFileSync("git", args, { cwd: workspace.path });
     this.log(`Pushed workspace ${workspaceId}`);
   }
 
@@ -723,7 +723,11 @@ export class CodingWorkspaceService {
     const baseDir = this.serviceConfig.baseDir as string;
     // Safety: only remove directories under our base dir
     const resolved = path.resolve(dirPath);
-    if (!resolved.startsWith(path.resolve(baseDir))) {
+    const resolvedBase = path.resolve(baseDir) + path.sep;
+    if (
+      !resolved.startsWith(resolvedBase) &&
+      resolved !== path.resolve(baseDir)
+    ) {
       console.warn(
         `[CodingWorkspaceService] Refusing to remove dir outside base: ${resolved}`,
       );

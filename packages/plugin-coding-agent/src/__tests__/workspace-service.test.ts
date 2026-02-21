@@ -4,7 +4,9 @@
  * Tests git workspace management, branch operations, and PR creation.
  */
 
-import { describe, it, expect, jest, beforeEach, mock } from "bun:test";
+import { beforeEach, describe, expect, it, jest, mock } from "bun:test";
+
+import type { IAgentRuntime } from "@elizaos/core";
 
 // Track workspace count for unique IDs
 let workspaceCounter = 0;
@@ -23,11 +25,11 @@ const mockCredentialService = {};
 
 // Mock modules BEFORE importing CodingWorkspaceService
 mock.module("git-workspace-service", () => ({
-  WorkspaceService: function() { return mockWorkspaceService; },
-  CredentialService: function() { return mockCredentialService; },
-  MemoryTokenStore: function() { return {}; },
-  GitHubPatClient: function() { return {}; },
-  OAuthDeviceFlow: function() { return {}; },
+  WorkspaceService: () => mockWorkspaceService,
+  CredentialService: () => mockCredentialService,
+  MemoryTokenStore: () => ({}),
+  GitHubPatClient: () => ({}),
+  OAuthDeviceFlow: () => ({}),
 }));
 
 mock.module("node:child_process", () => ({
@@ -46,9 +48,13 @@ mock.module("node:child_process", () => ({
 }));
 
 // Dynamic import after mocks are registered
-const { CodingWorkspaceService } = await import("../services/workspace-service.js");
-type CodingWorkspaceConfig = import("../services/workspace-service.js").CodingWorkspaceConfig;
-type WorkspaceResult = import("../services/workspace-service.js").WorkspaceResult;
+const { CodingWorkspaceService } = await import(
+  "../services/workspace-service.js"
+);
+type CodingWorkspaceConfig =
+  import("../services/workspace-service.js").CodingWorkspaceConfig;
+type WorkspaceResult =
+  import("../services/workspace-service.js").WorkspaceResult;
 
 // Mock runtime
 const createMockRuntime = (settings: Record<string, unknown> = {}) => ({
@@ -73,7 +79,7 @@ describe("CodingWorkspaceService", () => {
         strategy: "clone",
         repo: "https://github.com/user/repo.git",
         status: "ready",
-      })
+      }),
     );
     mockWorkspaceService.finalize.mockResolvedValue({
       number: 42,
@@ -84,7 +90,9 @@ describe("CodingWorkspaceService", () => {
     mockWorkspaceService.onEvent.mockImplementation(() => {});
 
     const runtime = createMockRuntime();
-    service = await CodingWorkspaceService.start(runtime as any);
+    service = await CodingWorkspaceService.start(
+      runtime as unknown as IAgentRuntime,
+    );
   });
 
   describe("initialization", () => {
@@ -97,8 +105,12 @@ describe("CodingWorkspaceService", () => {
         baseDir: "/custom/workspaces",
         debug: true,
       };
-      const runtime = createMockRuntime({ CODING_WORKSPACE_CONFIG: customConfig });
-      const customService = await CodingWorkspaceService.start(runtime as any);
+      const runtime = createMockRuntime({
+        CODING_WORKSPACE_CONFIG: customConfig,
+      });
+      const customService = await CodingWorkspaceService.start(
+        runtime as unknown as IAgentRuntime,
+      );
       expect(customService).toBeInstanceOf(CodingWorkspaceService);
     });
   });
@@ -132,7 +144,7 @@ describe("CodingWorkspaceService", () => {
           strategy: "worktree",
           repo: "https://github.com/user/repo.git",
           status: "ready",
-        })
+        }),
       );
 
       // Create worktree
@@ -206,7 +218,7 @@ describe("CodingWorkspaceService", () => {
 
     it("should throw for unknown workspace git operations", async () => {
       await expect(
-        service.commit("unknown-id", { message: "test", all: true })
+        service.commit("unknown-id", { message: "test", all: true }),
       ).rejects.toThrow(/not found/);
 
       await expect(service.push("unknown-id")).rejects.toThrow(/not found/);
@@ -230,7 +242,9 @@ describe("CodingWorkspaceService", () => {
     });
 
     it("should throw for unknown workspace status", async () => {
-      await expect(service.getStatus("unknown-id")).rejects.toThrow(/not found/);
+      await expect(service.getStatus("unknown-id")).rejects.toThrow(
+        /not found/,
+      );
     });
   });
 
@@ -275,7 +289,7 @@ describe("CodingWorkspaceService", () => {
 
     it("should throw for unknown workspace PR creation", async () => {
       await expect(
-        service.createPR("unknown-id", { title: "Test", body: "Test body" })
+        service.createPR("unknown-id", { title: "Test", body: "Test body" }),
       ).rejects.toThrow(/not found/);
     });
   });

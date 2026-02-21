@@ -8,14 +8,14 @@
  * @module services/stall-classifier
  */
 
+import { type IAgentRuntime, ModelType } from "@elizaos/core";
 import {
-  type StallClassification,
-  extractTaskCompletionTraceRecords,
   buildTaskCompletionTimeline,
+  extractTaskCompletionTraceRecords,
+  type StallClassification,
 } from "pty-manager";
-import { ModelType, type IAgentRuntime } from "@elizaos/core";
-import { stripAnsi } from "./ansi-utils.js";
 import type { AgentMetricsTracker } from "./agent-metrics.js";
+import { stripAnsi } from "./ansi-utils.js";
 
 /** Everything the classifier needs, passed in from PTYService. */
 export interface StallClassifierContext {
@@ -25,7 +25,9 @@ export interface StallClassifierContext {
   buffers: Map<string, string[]>;
   traceEntries: Array<string | Record<string, unknown>>;
   runtime: IAgentRuntime;
-  manager: { get(id: string): { startedAt?: string | Date } | null | undefined } | null;
+  manager: {
+    get(id: string): { startedAt?: string | Date } | null | undefined;
+  } | null;
   metricsTracker: AgentMetricsTracker;
   log: (msg: string) => void;
 }
@@ -85,12 +87,16 @@ export async function writeStallSnapshot(
   try {
     const fs = await import("node:fs");
     const ourBuffer = buffers.get(sessionId);
-    const ourTail = ourBuffer ? ourBuffer.slice(-100).join("\n") : "(no buffer)";
+    const ourTail = ourBuffer
+      ? ourBuffer.slice(-100).join("\n")
+      : "(no buffer)";
     void ourTail; // used in snapshot context but not directly printed
     let traceTimeline = "(no trace entries)";
     try {
       const records = extractTaskCompletionTraceRecords(traceEntries);
-      const timeline = buildTaskCompletionTimeline(records, { adapterType: agentType });
+      const timeline = buildTaskCompletionTimeline(records, {
+        adapterType: agentType,
+      });
       traceTimeline = JSON.stringify(timeline, null, 2);
     } catch (e) {
       traceTimeline = `(trace error: ${e})`;
@@ -112,7 +118,9 @@ export async function writeStallSnapshot(
     ].join("\n");
     fs.writeFileSync(`/tmp/stall-snapshot-${sessionId}.txt`, snapshot);
     log(`Stall snapshot → /tmp/stall-snapshot-${sessionId}.txt`);
-  } catch (_) { /* best-effort */ }
+  } catch (_) {
+    /* best-effort */
+  }
 }
 
 /**
@@ -122,7 +130,17 @@ export async function writeStallSnapshot(
 export async function classifyStallOutput(
   ctx: StallClassifierContext,
 ): Promise<StallClassification | null> {
-  const { sessionId, recentOutput, agentType, buffers, traceEntries, runtime, manager, metricsTracker, log } = ctx;
+  const {
+    sessionId,
+    recentOutput,
+    agentType,
+    buffers,
+    traceEntries,
+    runtime,
+    manager,
+    metricsTracker,
+    log,
+  } = ctx;
 
   metricsTracker.incrementStalls(agentType);
 
@@ -135,15 +153,29 @@ export async function classifyStallOutput(
       const stripped = stripAnsi(rawTail);
       if (stripped.length > effectiveOutput.length) {
         effectiveOutput = stripped;
-        log(`Using own buffer for stall classification (${effectiveOutput.length} chars after stripping, pty-manager had ${recentOutput.length})`);
+        log(
+          `Using own buffer for stall classification (${effectiveOutput.length} chars after stripping, pty-manager had ${recentOutput.length})`,
+        );
       }
     }
   }
 
-  const systemPrompt = buildStallClassificationPrompt(agentType, sessionId, effectiveOutput);
+  const systemPrompt = buildStallClassificationPrompt(
+    agentType,
+    sessionId,
+    effectiveOutput,
+  );
 
   // Dump debug snapshot for offline analysis
-  await writeStallSnapshot(sessionId, agentType, recentOutput, effectiveOutput, buffers, traceEntries, log);
+  await writeStallSnapshot(
+    sessionId,
+    agentType,
+    recentOutput,
+    effectiveOutput,
+    buffers,
+    traceEntries,
+    log,
+  );
 
   try {
     log(`Stall detected for ${sessionId}, asking LLM to classify...`);
@@ -158,7 +190,12 @@ export async function classifyStallOutput(
     }
 
     const parsed = JSON.parse(jsonMatch[0]);
-    const validStates: StallClassification["state"][] = ["waiting_for_input", "still_working", "task_complete", "error"];
+    const validStates: StallClassification["state"][] = [
+      "waiting_for_input",
+      "still_working",
+      "task_complete",
+      "error",
+    ];
     if (!validStates.includes(parsed.state)) {
       log(`Stall classification: invalid state "${parsed.state}"`);
       return null;
@@ -168,10 +205,14 @@ export async function classifyStallOutput(
       prompt: parsed.prompt,
       suggestedResponse: parsed.suggestedResponse,
     };
-    log(`Stall classification for ${sessionId}: ${classification.state}${classification.suggestedResponse ? ` → "${classification.suggestedResponse}"` : ""}`);
+    log(
+      `Stall classification for ${sessionId}: ${classification.state}${classification.suggestedResponse ? ` → "${classification.suggestedResponse}"` : ""}`,
+    );
     if (classification.state === "task_complete") {
       const session = manager?.get(sessionId);
-      const durationMs = session?.startedAt ? Date.now() - new Date(session.startedAt).getTime() : 0;
+      const durationMs = session?.startedAt
+        ? Date.now() - new Date(session.startedAt).getTime()
+        : 0;
       metricsTracker.recordCompletion(agentType, "classifier", durationMs);
     }
     return classification;

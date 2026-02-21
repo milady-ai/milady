@@ -7,6 +7,8 @@
  * @module actions/spawn-agent
  */
 
+import * as os from "node:os";
+import * as path from "node:path";
 import type {
   Action,
   ActionResult,
@@ -17,31 +19,13 @@ import type {
   State,
 } from "@elizaos/core";
 import type { AgentCredentials, ApprovalPreset } from "coding-agent-adapters";
-import type {
-  CodingAgentType,
-  PTYService,
-  SessionInfo,
+import {
+  type CodingAgentType,
+  normalizeAgentType,
+  type PTYService,
+  type SessionInfo,
 } from "../services/pty-service.js";
 import type { CodingWorkspaceService } from "../services/workspace-service.js";
-
-/** Normalize user-provided agent type to adapter type */
-const normalizeAgentType = (input: string): CodingAgentType => {
-  const normalized = input.toLowerCase().trim();
-  const mapping: Record<string, CodingAgentType> = {
-    claude: "claude",
-    "claude-code": "claude",
-    claudecode: "claude",
-    codex: "codex",
-    openai: "codex",
-    "openai-codex": "codex",
-    gemini: "gemini",
-    google: "gemini",
-    aider: "aider",
-    shell: "shell",
-    bash: "shell",
-  };
-  return mapping[normalized] ?? "claude";
-};
 
 export const spawnAgentAction: Action = {
   name: "SPAWN_CODING_AGENT",
@@ -151,8 +135,36 @@ export const spawnAgentAction: Action = {
       }
     }
     if (!workdir) {
-      workdir = process.cwd();
+      if (callback) {
+        await callback({
+          text: "No workspace found. Please provision a workspace first using PROVISION_WORKSPACE or provide a workdir.",
+        });
+      }
+      return { success: false, error: "NO_WORKSPACE" };
     }
+
+    // Validate workdir is within allowed directories
+    const resolvedWorkdir = path.resolve(workdir);
+    const workspaceBaseDir = path.join(os.homedir(), ".milaidy", "workspaces");
+    const allowedPrefixes = [
+      path.resolve(workspaceBaseDir),
+      path.resolve(process.cwd()),
+    ];
+    const isAllowed = allowedPrefixes.some(
+      (prefix) =>
+        resolvedWorkdir.startsWith(prefix + path.sep) ||
+        resolvedWorkdir === prefix,
+    );
+    if (!isAllowed) {
+      if (callback) {
+        await callback({
+          text: "The specified workdir is outside of allowed directories. Please use a workspace directory.",
+        });
+      }
+      return { success: false, error: "WORKDIR_OUTSIDE_ALLOWED" };
+    }
+    workdir = resolvedWorkdir;
+
     const memoryContent =
       (params?.memoryContent as string) ?? (content.memoryContent as string);
     const approvalPreset =

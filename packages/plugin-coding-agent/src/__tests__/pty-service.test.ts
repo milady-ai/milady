@@ -4,7 +4,9 @@
  * Tests PTY session management, event handling, and adapter registration.
  */
 
-import { describe, it, expect, jest, beforeEach, mock } from "bun:test";
+import { beforeEach, describe, expect, it, jest, mock } from "bun:test";
+
+import type { IAgentRuntime } from "@elizaos/core";
 
 // Track session count for unique IDs
 let sessionCounter = 0;
@@ -26,9 +28,9 @@ const mockManager = {
 
 // Mock modules BEFORE importing PTYService (ES imports are hoisted above mock.module calls)
 mock.module("pty-manager", () => ({
-  PTYManager: function() { return mockManager; },
-  ShellAdapter: function() {},
-  BunCompatiblePTYManager: function() { return mockManager; },
+  PTYManager: () => mockManager,
+  ShellAdapter: () => {},
+  BunCompatiblePTYManager: () => mockManager,
   isBun: () => false,
   extractTaskCompletionTraceRecords: () => [],
   buildTaskCompletionTimeline: () => ({}),
@@ -71,7 +73,7 @@ describe("PTYService", () => {
         status: "running",
         startedAt: new Date(),
         lastActivityAt: new Date(),
-      })
+      }),
     );
     mockManager.send.mockResolvedValue(undefined);
     mockManager.stop.mockResolvedValue(undefined);
@@ -95,12 +97,12 @@ describe("PTYService", () => {
       return undefined;
     });
     mockManager.list.mockReturnValue([]);
-    mockManager.logs.mockImplementation(async function*() {
+    mockManager.logs.mockImplementation(async function* () {
       yield "mock output line";
     });
 
     const runtime = createMockRuntime();
-    service = await PTYService.start(runtime as any);
+    service = await PTYService.start(runtime as unknown as IAgentRuntime);
   });
 
   describe("initialization", () => {
@@ -114,7 +116,9 @@ describe("PTYService", () => {
         debug: true,
       };
       const runtime = createMockRuntime({ PTY_SERVICE_CONFIG: customConfig });
-      const customService = await PTYService.start(runtime as any);
+      const customService = await PTYService.start(
+        runtime as unknown as IAgentRuntime,
+      );
       expect(customService).toBeInstanceOf(PTYService);
     });
   });
@@ -144,7 +148,7 @@ describe("PTYService", () => {
           status: "ready",
           startedAt: new Date(),
           lastActivityAt: new Date(),
-        })
+        }),
       );
 
       const session = await service.spawnSession({
@@ -170,7 +174,11 @@ describe("PTYService", () => {
         metadata: { userId: "user-123", taskId: "task-456" },
       });
 
-      expect(session.metadata).toEqual({ userId: "user-123", taskId: "task-456", agentType: "shell" });
+      expect(session.metadata).toEqual({
+        userId: "user-123",
+        taskId: "task-456",
+        agentType: "shell",
+      });
     });
 
     it("should get session by ID", async () => {
@@ -198,8 +206,16 @@ describe("PTYService", () => {
         { id: "session-2", name: "b", type: "shell", status: "running" },
       ]);
 
-      await service.spawnSession({ name: "a", agentType: "shell", workdir: "/a" });
-      await service.spawnSession({ name: "b", agentType: "shell", workdir: "/b" });
+      await service.spawnSession({
+        name: "a",
+        agentType: "shell",
+        workdir: "/a",
+      });
+      await service.spawnSession({
+        name: "b",
+        agentType: "shell",
+        workdir: "/b",
+      });
 
       const sessions = await service.listSessions();
       expect(sessions.length).toBe(2);
@@ -237,7 +253,9 @@ describe("PTYService", () => {
 
     it("should throw when sending to unknown session", async () => {
       mockManager.get.mockReturnValueOnce(undefined);
-      await expect(service.sendToSession("unknown-id", "hello")).rejects.toThrow();
+      await expect(
+        service.sendToSession("unknown-id", "hello"),
+      ).rejects.toThrow();
     });
 
     it("should send keys to session", async () => {

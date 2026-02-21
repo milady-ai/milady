@@ -2,16 +2,17 @@
  * LIST_CODING_AGENTS action tests
  */
 
-import { describe, it, expect, jest, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it, jest } from "bun:test";
+import type { IAgentRuntime, Memory } from "@elizaos/core";
 import { listAgentsAction } from "../actions/list-agents.js";
 
 const mockListSessions = jest.fn();
 
-const createMockPTYService = (sessions: any[] = []) => ({
+const createMockPTYService = (sessions: unknown[] = []) => ({
   listSessions: mockListSessions.mockReturnValue(sessions),
 });
 
-const createMockRuntime = (ptyService: any = null) => ({
+const createMockRuntime = (ptyService: unknown = null) => ({
   getService: jest.fn((name: string) => {
     if (name === "PTY_SERVICE") return ptyService;
     return null;
@@ -49,9 +50,9 @@ describe("listAgentsAction", () => {
       const ptyService = createMockPTYService();
       const runtime = createMockRuntime(ptyService);
 
-      const result = await listAgentsAction.validate!(
-        runtime as any,
-        createMockMessage() as any
+      const result = await listAgentsAction.validate?.(
+        runtime as unknown as IAgentRuntime,
+        createMockMessage() as unknown as Memory,
       );
       expect(result).toBe(true);
     });
@@ -59,9 +60,9 @@ describe("listAgentsAction", () => {
     it("should return false when PTYService not available", async () => {
       const runtime = createMockRuntime(null);
 
-      const result = await listAgentsAction.validate!(
-        runtime as any,
-        createMockMessage() as any
+      const result = await listAgentsAction.validate?.(
+        runtime as unknown as IAgentRuntime,
+        createMockMessage() as unknown as Memory,
       );
       expect(result).toBe(false);
     });
@@ -92,18 +93,18 @@ describe("listAgentsAction", () => {
       const callback = jest.fn();
 
       const result = await listAgentsAction.handler(
-        runtime as any,
-        createMockMessage() as any,
+        runtime as unknown as IAgentRuntime,
+        createMockMessage() as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(true);
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining("claude-code"),
-        })
+        }),
       );
     });
 
@@ -113,18 +114,18 @@ describe("listAgentsAction", () => {
       const callback = jest.fn();
 
       const result = await listAgentsAction.handler(
-        runtime as any,
-        createMockMessage() as any,
+        runtime as unknown as IAgentRuntime,
+        createMockMessage() as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(true);
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining("No active"),
-        })
+        }),
       );
     });
 
@@ -144,11 +145,11 @@ describe("listAgentsAction", () => {
       const callback = jest.fn();
 
       await listAgentsAction.handler(
-        runtime as any,
-        createMockMessage() as any,
+        runtime as unknown as IAgentRuntime,
+        createMockMessage() as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       const callArg = callback.mock.calls[0][0];
@@ -179,11 +180,11 @@ describe("listAgentsAction", () => {
       const callback = jest.fn();
 
       await listAgentsAction.handler(
-        runtime as any,
-        createMockMessage() as any,
+        runtime as unknown as IAgentRuntime,
+        createMockMessage() as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       const text = callback.mock.calls[0][0].text;
@@ -196,18 +197,18 @@ describe("listAgentsAction", () => {
       const callback = jest.fn();
 
       const result = await listAgentsAction.handler(
-        runtime as any,
-        createMockMessage() as any,
+        runtime as unknown as IAgentRuntime,
+        createMockMessage() as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(false);
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining("not available"),
-        })
+        }),
       );
     });
   });

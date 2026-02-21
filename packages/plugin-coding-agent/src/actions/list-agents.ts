@@ -7,8 +7,16 @@
  * @module actions/list-agents
  */
 
-import type { Action, IAgentRuntime, Memory, State, HandlerCallback, ActionResult, HandlerOptions } from "@elizaos/core";
-import { PTYService, type SessionInfo } from "../services/pty-service.js";
+import type {
+  Action,
+  ActionResult,
+  HandlerCallback,
+  HandlerOptions,
+  IAgentRuntime,
+  Memory,
+  State,
+} from "@elizaos/core";
+import type { PTYService, SessionInfo } from "../services/pty-service.js";
 
 export const listAgentsAction: Action = {
   name: "LIST_CODING_AGENTS",
@@ -53,8 +61,13 @@ export const listAgentsAction: Action = {
     ],
   ],
 
-  validate: async (runtime: IAgentRuntime, _message: Memory): Promise<boolean> => {
-    const ptyService = runtime.getService("PTY_SERVICE") as unknown as PTYService | undefined;
+  validate: async (
+    runtime: IAgentRuntime,
+    _message: Memory,
+  ): Promise<boolean> => {
+    const ptyService = runtime.getService("PTY_SERVICE") as unknown as
+      | PTYService
+      | undefined;
     return ptyService != null;
   },
 
@@ -65,7 +78,9 @@ export const listAgentsAction: Action = {
     _options?: HandlerOptions,
     callback?: HandlerCallback,
   ): Promise<ActionResult | undefined> => {
-    const ptyService = runtime.getService("PTY_SERVICE") as unknown as PTYService | undefined;
+    const ptyService = runtime.getService("PTY_SERVICE") as unknown as
+      | PTYService
+      | undefined;
     if (!ptyService) {
       if (callback) {
         await callback({
@@ -83,7 +98,11 @@ export const listAgentsAction: Action = {
           text: "No active coding agents. Use SPAWN_CODING_AGENT to start one.",
         });
       }
-      return { success: true, text: "No active coding agents", data: { sessions: [] } };
+      return {
+        success: true,
+        text: "No active coding agents",
+        data: { sessions: [] },
+      };
     }
 
     // Format session info for display
@@ -98,13 +117,14 @@ export const listAgentsAction: Action = {
 
     // Build readable text summary
     const lines = sessions.map((session: SessionInfo, index: number) => {
-      const statusEmoji = {
-        running: "▶️",
-        idle: "⏸️",
-        blocked: "⚠️",
-        completed: "✅",
-        error: "❌",
-      }[session.status as string] ?? "❓";
+      const statusEmoji =
+        {
+          running: "▶️",
+          idle: "⏸️",
+          blocked: "⚠️",
+          completed: "✅",
+          error: "❌",
+        }[session.status as string] ?? "❓";
 
       return `${index + 1}. ${statusEmoji} ${session.agentType} (${session.id.slice(0, 8)}...)\n   📁 ${session.workdir}\n   Status: ${session.status}`;
     });
@@ -115,7 +135,11 @@ export const listAgentsAction: Action = {
       });
     }
 
-    return { success: true, text: `Found ${sessions.length} active coding agents`, data: { sessions: sessionSummaries } };
+    return {
+      success: true,
+      text: `Found ${sessions.length} active coding agents`,
+      data: { sessions: sessionSummaries },
+    };
   },
 
   parameters: [],

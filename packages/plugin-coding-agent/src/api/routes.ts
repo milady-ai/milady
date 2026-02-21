@@ -10,6 +10,8 @@
  */
 
 import type { IncomingMessage, ServerResponse } from "node:http";
+import * as os from "node:os";
+import * as path from "node:path";
 import type { IAgentRuntime } from "@elizaos/core";
 import type { PTYService } from "../services/pty-service.js";
 import type { CodingWorkspaceService } from "../services/workspace-service.js";
@@ -28,13 +30,25 @@ interface RouteContext {
   workspaceService: CodingWorkspaceService | null;
 }
 
-// Helper to parse JSON body
+// Max request body size (1 MB)
+const MAX_BODY_SIZE = 1024 * 1024;
+
+// Helper to parse JSON body with size limit
 async function parseBody(
   req: IncomingMessage,
 ): Promise<Record<string, unknown>> {
   return new Promise((resolve, reject) => {
     let body = "";
-    req.on("data", (chunk) => (body += chunk));
+    let size = 0;
+    req.on("data", (chunk: Buffer | string) => {
+      size += typeof chunk === "string" ? chunk.length : chunk.byteLength;
+      if (size > MAX_BODY_SIZE) {
+        req.destroy();
+        reject(new Error("Request body too large"));
+        return;
+      }
+      body += chunk;
+    });
     req.on("end", () => {
       try {
         resolve(body ? JSON.parse(body) : {});
@@ -224,13 +238,40 @@ export async function handleCodingAgentRoutes(
       const body = await parseBody(req);
       const {
         agentType,
-        workdir,
+        workdir: rawWorkdir,
         task,
         memoryContent,
         approvalPreset,
         customCredentials,
         metadata,
       } = body;
+
+      // Validate workdir: must be within workspace base dir or cwd
+      const workspaceBaseDir = path.join(
+        os.homedir(),
+        ".milaidy",
+        "workspaces",
+      );
+      const allowedPrefixes = [
+        path.resolve(workspaceBaseDir),
+        path.resolve(process.cwd()),
+      ];
+      let workdir = rawWorkdir as string | undefined;
+      if (workdir) {
+        const resolved = path.resolve(workdir);
+        const isAllowed = allowedPrefixes.some((prefix) =>
+          resolved.startsWith(prefix),
+        );
+        if (!isAllowed) {
+          sendError(
+            res,
+            "workdir must be within workspace base directory or cwd",
+            403,
+          );
+          return true;
+        }
+        workdir = resolved;
+      }
 
       // Build credentials from runtime
       const credentials = {

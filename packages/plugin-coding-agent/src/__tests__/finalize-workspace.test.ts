@@ -2,7 +2,10 @@
  * FINALIZE_WORKSPACE action tests
  */
 
-import { describe, it, expect, jest, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it, jest } from "bun:test";
+
+import type { IAgentRuntime, Memory, State } from "@elizaos/core";
+
 import { finalizeWorkspaceAction } from "../actions/finalize-workspace.js";
 
 const mockGetWorkspace = jest.fn();
@@ -21,7 +24,7 @@ const createMockWorkspaceService = () => ({
   createPR: mockCreatePR,
 });
 
-const createMockRuntime = (workspaceService: any = null) => ({
+const createMockRuntime = (workspaceService: unknown = null) => ({
   getService: jest.fn((name: string) => {
     if (name === "CODING_WORKSPACE_SERVICE") return workspaceService;
     return null;
@@ -73,7 +76,9 @@ describe("finalizeWorkspaceAction", () => {
     });
 
     it("should define parameters", () => {
-      const paramNames = finalizeWorkspaceAction.parameters!.map((p) => p.name);
+      const paramNames = (finalizeWorkspaceAction.parameters ?? []).map(
+        (p) => p.name,
+      );
       expect(paramNames).toContain("workspaceId");
       expect(paramNames).toContain("commitMessage");
       expect(paramNames).toContain("prTitle");
@@ -89,9 +94,9 @@ describe("finalizeWorkspaceAction", () => {
       const workspaceService = createMockWorkspaceService();
       const runtime = createMockRuntime(workspaceService);
 
-      const result = await finalizeWorkspaceAction.validate!(
-        runtime as any,
-        createMockMessage() as any
+      const result = await finalizeWorkspaceAction.validate?.(
+        runtime as unknown as IAgentRuntime,
+        createMockMessage() as unknown as Memory,
       );
       expect(result).toBe(true);
     });
@@ -110,11 +115,11 @@ describe("finalizeWorkspaceAction", () => {
       const callback = jest.fn();
 
       const result = await finalizeWorkspaceAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(true);
@@ -132,7 +137,7 @@ describe("finalizeWorkspaceAction", () => {
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining("PR #42"),
-        })
+        }),
       );
     });
 
@@ -142,7 +147,9 @@ describe("finalizeWorkspaceAction", () => {
       const message = createMockMessage({
         commitMessage: "test commit",
       });
-      const state = { codingWorkspace: { id: "ws-from-state" } };
+      const state: Record<string, unknown> = {
+        codingWorkspace: { id: "ws-from-state" },
+      };
       mockGetWorkspace.mockReturnValue({
         id: "ws-from-state",
         branch: "main",
@@ -150,11 +157,11 @@ describe("finalizeWorkspaceAction", () => {
       const callback = jest.fn();
 
       await finalizeWorkspaceAction.handler(
-        runtime as any,
-        message as any,
-        state as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
+        state as unknown as State,
         {},
-        callback
+        callback,
       );
 
       expect(mockGetStatus).toHaveBeenCalledWith("ws-from-state");
@@ -165,10 +172,7 @@ describe("finalizeWorkspaceAction", () => {
       const runtime = createMockRuntime(workspaceService);
 
       // Set up mocks AFTER creating service (factory resets listWorkspaces)
-      mockListWorkspaces.mockReturnValue([
-        { id: "ws-1" },
-        { id: "ws-2" },
-      ]);
+      mockListWorkspaces.mockReturnValue([{ id: "ws-1" }, { id: "ws-2" }]);
       mockGetWorkspace.mockReturnValue({
         id: "ws-2",
         branch: "main",
@@ -177,11 +181,11 @@ describe("finalizeWorkspaceAction", () => {
       const callback = jest.fn();
 
       await finalizeWorkspaceAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(mockGetStatus).toHaveBeenCalledWith("ws-2");
@@ -197,11 +201,11 @@ describe("finalizeWorkspaceAction", () => {
       const callback = jest.fn();
 
       await finalizeWorkspaceAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(mockCommit).toHaveBeenCalled();
@@ -210,7 +214,7 @@ describe("finalizeWorkspaceAction", () => {
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.not.stringContaining("PR #"),
-        })
+        }),
       );
     });
 
@@ -225,16 +229,19 @@ describe("finalizeWorkspaceAction", () => {
       const callback = jest.fn();
 
       await finalizeWorkspaceAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
-      expect(mockCreatePR).toHaveBeenCalledWith("ws-123", expect.objectContaining({
-        draft: true,
-      }));
+      expect(mockCreatePR).toHaveBeenCalledWith(
+        "ws-123",
+        expect.objectContaining({
+          draft: true,
+        }),
+      );
     });
 
     it("should use custom base branch", async () => {
@@ -248,16 +255,19 @@ describe("finalizeWorkspaceAction", () => {
       const callback = jest.fn();
 
       await finalizeWorkspaceAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
-      expect(mockCreatePR).toHaveBeenCalledWith("ws-123", expect.objectContaining({
-        base: "develop",
-      }));
+      expect(mockCreatePR).toHaveBeenCalledWith(
+        "ws-123",
+        expect.objectContaining({
+          base: "develop",
+        }),
+      );
     });
 
     it("should use default commit message if not provided", async () => {
@@ -269,11 +279,11 @@ describe("finalizeWorkspaceAction", () => {
       const callback = jest.fn();
 
       await finalizeWorkspaceAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(mockCommit).toHaveBeenCalledWith("ws-123", {
@@ -297,11 +307,11 @@ describe("finalizeWorkspaceAction", () => {
       const callback = jest.fn();
 
       const result = await finalizeWorkspaceAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(true);
@@ -309,7 +319,7 @@ describe("finalizeWorkspaceAction", () => {
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining("No changes"),
-        })
+        }),
       );
     });
 
@@ -322,18 +332,18 @@ describe("finalizeWorkspaceAction", () => {
       const callback = jest.fn();
 
       const result = await finalizeWorkspaceAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(false);
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining("No workspace"),
-        })
+        }),
       );
     });
 
@@ -347,23 +357,25 @@ describe("finalizeWorkspaceAction", () => {
       const callback = jest.fn();
 
       const result = await finalizeWorkspaceAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(false);
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining("not found"),
-        })
+        }),
       );
     });
 
     it("should handle commit errors", async () => {
-      mockCommit.mockRejectedValue(new Error("Commit failed: nothing to commit"));
+      mockCommit.mockRejectedValue(
+        new Error("Commit failed: nothing to commit"),
+      );
 
       const workspaceService = createMockWorkspaceService();
       const runtime = createMockRuntime(workspaceService);
@@ -371,18 +383,18 @@ describe("finalizeWorkspaceAction", () => {
       const callback = jest.fn();
 
       const result = await finalizeWorkspaceAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(false);
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining("Failed"),
-        })
+        }),
       );
     });
 
@@ -395,18 +407,18 @@ describe("finalizeWorkspaceAction", () => {
       const callback = jest.fn();
 
       const result = await finalizeWorkspaceAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(false);
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining("permission denied"),
-        })
+        }),
       );
     });
 
@@ -419,18 +431,18 @@ describe("finalizeWorkspaceAction", () => {
       const callback = jest.fn();
 
       const result = await finalizeWorkspaceAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(false);
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining("Failed"),
-        })
+        }),
       );
     });
   });

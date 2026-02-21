@@ -1738,17 +1738,50 @@ function installRuntimeMethodBindings(runtime: AgentRuntime): void {
   // runtime receiver, which breaks private-field access in AgentRuntime.
   runtime.getConversationLength = runtime.getConversationLength.bind(runtime);
 
-  // Wrap getSetting() to fall back to process.env when the core returns null.
-  // ElizaOS core returns null for missing keys, but some plugins (e.g.
-  // @elizaos/plugin-google-genai) check `!== undefined` and convert null to
-  // the string "null", causing API calls like `models/null`.  This wrapper
-  // ensures process.env values are always reachable via getSetting().
+  // Wrap getSetting() to fall back to process.env for known keys when the
+  // core returns null. ElizaOS core returns null for missing keys, but some
+  // plugins (e.g. @elizaos/plugin-google-genai) check `!== undefined` and
+  // convert null to the string "null", causing API calls like `models/null`.
+  // Scoped to an allowlist to avoid leaking arbitrary env vars to plugins.
+  const GETSETTING_ENV_ALLOWLIST = new Set([
+    // Model provider API keys
+    "ANTHROPIC_API_KEY",
+    "OPENAI_API_KEY",
+    "GOOGLE_GENERATIVE_AI_API_KEY",
+    "GOOGLE_API_KEY",
+    "GEMINI_API_KEY",
+    "GROQ_API_KEY",
+    "XAI_API_KEY",
+    "DEEPSEEK_API_KEY",
+    "OPENROUTER_API_KEY",
+    // Google model defaults
+    "GOOGLE_SMALL_MODEL",
+    "GOOGLE_LARGE_MODEL",
+    // GitHub
+    "GITHUB_TOKEN",
+    "GITHUB_OAUTH_CLIENT_ID",
+    "GITHUB_OAUTH_CLIENT_SECRET",
+    // Coding agent model preferences
+    "PARALLAX_CLAUDE_MODEL_POWERFUL",
+    "PARALLAX_CLAUDE_MODEL_FAST",
+    "PARALLAX_GEMINI_MODEL_POWERFUL",
+    "PARALLAX_GEMINI_MODEL_FAST",
+    "PARALLAX_CODEX_MODEL_POWERFUL",
+    "PARALLAX_CODEX_MODEL_FAST",
+    "PARALLAX_AIDER_PROVIDER",
+    "PARALLAX_AIDER_MODEL_POWERFUL",
+    "PARALLAX_AIDER_MODEL_FAST",
+    // Custom credential forwarding
+    "CUSTOM_CREDENTIAL_KEYS",
+  ]);
   const originalGetSetting = runtime.getSetting.bind(runtime);
   runtime.getSetting = (key: string) => {
     const result = originalGetSetting(key);
     if (result !== null && result !== undefined) return result;
-    const envVal = process.env[key];
-    if (envVal !== undefined && envVal.trim() !== "") return envVal;
+    if (GETSETTING_ENV_ALLOWLIST.has(key)) {
+      const envVal = process.env[key];
+      if (envVal !== undefined && envVal.trim() !== "") return envVal;
+    }
     return result;
   };
 

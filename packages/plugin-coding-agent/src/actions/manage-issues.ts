@@ -7,8 +7,16 @@
  * @module actions/manage-issues
  */
 
-import type { Action, IAgentRuntime, Memory, State, HandlerCallback, ActionResult, HandlerOptions } from "@elizaos/core";
-import { CodingWorkspaceService } from "../services/workspace-service.js";
+import type {
+  Action,
+  ActionResult,
+  HandlerCallback,
+  HandlerOptions,
+  IAgentRuntime,
+  Memory,
+  State,
+} from "@elizaos/core";
+import type { CodingWorkspaceService } from "../services/workspace-service.js";
 
 export const manageIssuesAction: Action = {
   name: "MANAGE_ISSUES",
@@ -31,7 +39,9 @@ export const manageIssuesAction: Action = {
     [
       {
         name: "{{user1}}",
-        content: { text: "Create an issue on the testbed repo to add a login page" },
+        content: {
+          text: "Create an issue on the testbed repo to add a login page",
+        },
       },
       {
         name: "{{agentName}}",
@@ -44,7 +54,9 @@ export const manageIssuesAction: Action = {
     [
       {
         name: "{{user1}}",
-        content: { text: "List the open issues on HaruHunab1320/git-workspace-service-testbed" },
+        content: {
+          text: "List the open issues on HaruHunab1320/git-workspace-service-testbed",
+        },
       },
       {
         name: "{{agentName}}",
@@ -69,8 +81,13 @@ export const manageIssuesAction: Action = {
     ],
   ],
 
-  validate: async (runtime: IAgentRuntime, _message: Memory): Promise<boolean> => {
-    const workspaceService = runtime.getService("CODING_WORKSPACE_SERVICE") as unknown as CodingWorkspaceService | undefined;
+  validate: async (
+    runtime: IAgentRuntime,
+    _message: Memory,
+  ): Promise<boolean> => {
+    const workspaceService = runtime.getService(
+      "CODING_WORKSPACE_SERVICE",
+    ) as unknown as CodingWorkspaceService | undefined;
     return workspaceService != null;
   },
 
@@ -81,7 +98,9 @@ export const manageIssuesAction: Action = {
     options?: HandlerOptions,
     callback?: HandlerCallback,
   ): Promise<ActionResult | undefined> => {
-    const workspaceService = runtime.getService("CODING_WORKSPACE_SERVICE") as unknown as CodingWorkspaceService | undefined;
+    const workspaceService = runtime.getService(
+      "CODING_WORKSPACE_SERVICE",
+    ) as unknown as CodingWorkspaceService | undefined;
     if (!workspaceService) {
       if (callback) {
         await callback({ text: "Workspace Service is not available." });
@@ -93,7 +112,8 @@ export const manageIssuesAction: Action = {
     workspaceService.setAuthPromptCallback((prompt) => {
       if (callback) {
         callback({
-          text: `I need GitHub access to manage issues. Please authorize me:\n\n` +
+          text:
+            `I need GitHub access to manage issues. Please authorize me:\n\n` +
             `Go to: ${prompt.verificationUri}\n` +
             `Enter code: **${prompt.userCode}**\n\n` +
             `This code expires in ${Math.floor(prompt.expiresIn / 60)} minutes. ` +
@@ -106,30 +126,50 @@ export const manageIssuesAction: Action = {
     const content = message.content as Record<string, unknown>;
     const text = (content.text as string) ?? "";
 
-    const operation = (params?.operation as string) ?? (content.operation as string) ?? inferOperation(text);
+    const operation =
+      (params?.operation as string) ??
+      (content.operation as string) ??
+      inferOperation(text);
     const repo = (params?.repo as string) ?? (content.repo as string);
 
     if (!repo) {
       // Try to extract repo from text
       const urlMatch = text?.match(
-        /(?:https?:\/\/github\.com\/)?([a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+)/
+        /(?:https?:\/\/github\.com\/)?([a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+)/,
       );
       if (!urlMatch) {
         if (callback) {
-          await callback({ text: "Please specify a repository (e.g., owner/repo or a GitHub URL)." });
+          await callback({
+            text: "Please specify a repository (e.g., owner/repo or a GitHub URL).",
+          });
         }
         return { success: false, error: "MISSING_REPO" };
       }
-      return handleOperation(workspaceService, urlMatch[1], operation, params ?? content, text, callback);
+      return handleOperation(
+        workspaceService,
+        urlMatch[1],
+        operation,
+        params ?? content,
+        text,
+        callback,
+      );
     }
 
-    return handleOperation(workspaceService, repo, operation, params ?? content, text, callback);
+    return handleOperation(
+      workspaceService,
+      repo,
+      operation,
+      params ?? content,
+      text,
+      callback,
+    );
   },
 
   parameters: [
     {
       name: "operation",
-      description: "The operation to perform: create, list, get, update, comment, close, reopen, add_labels",
+      description:
+        "The operation to perform: create, list, get, update, comment, close, reopen, add_labels",
       required: true,
       schema: { type: "string" as const },
     },
@@ -153,7 +193,8 @@ export const manageIssuesAction: Action = {
     },
     {
       name: "issueNumber",
-      description: "Issue number (for get, update, comment, close, reopen operations).",
+      description:
+        "Issue number (for get, update, comment, close, reopen operations).",
       required: false,
       schema: { type: "number" as const },
     },
@@ -165,7 +206,8 @@ export const manageIssuesAction: Action = {
     },
     {
       name: "state",
-      description: "Filter by state: open, closed, or all (for list operation).",
+      description:
+        "Filter by state: open, closed, or all (for list operation).",
       required: false,
       schema: { type: "string" as const },
     },
@@ -188,7 +230,9 @@ async function handleOperation(
 
         // Support batch create: if no explicit title but text contains numbered items, create multiple
         if (!title) {
-          const items = extractBulkItems(params.text as string ?? originalText);
+          const items = extractBulkItems(
+            (params.text as string) ?? originalText,
+          );
           if (items.length > 0) {
             const labels = parseLabels(params.labels);
             const created = [];
@@ -204,12 +248,15 @@ async function handleOperation(
               const summary = created
                 .map((i) => `#${i.number}: ${i.title}\n  ${i.url}`)
                 .join("\n");
-              await callback({ text: `Created ${created.length} issues:\n${summary}` });
+              await callback({
+                text: `Created ${created.length} issues:\n${summary}`,
+              });
             }
             return { success: true, data: { issues: created } };
           }
 
-          if (callback) await callback({ text: "Issue title is required for create." });
+          if (callback)
+            await callback({ text: "Issue title is required for create." });
           return { success: false, error: "MISSING_TITLE" };
         }
 
@@ -236,10 +283,15 @@ async function handleOperation(
         });
         if (callback) {
           if (issues.length === 0) {
-            await callback({ text: `No ${stateFilter} issues found in ${repo}.` });
+            await callback({
+              text: `No ${stateFilter} issues found in ${repo}.`,
+            });
           } else {
             const summary = issues
-              .map((i) => `#${i.number} [${i.state}] ${i.title}${i.labels.length > 0 ? ` (${i.labels.join(", ")})` : ""}`)
+              .map(
+                (i) =>
+                  `#${i.number} [${i.state}] ${i.title}${i.labels.length > 0 ? ` (${i.labels.join(", ")})` : ""}`,
+              )
               .join("\n");
             await callback({ text: `Issues in ${repo}:\n${summary}` });
           }
@@ -275,7 +327,9 @@ async function handleOperation(
           labels: labels.length > 0 ? labels : undefined,
         });
         if (callback) {
-          await callback({ text: `Updated issue #${issue.number}: ${issue.title}` });
+          await callback({
+            text: `Updated issue #${issue.number}: ${issue.title}`,
+          });
         }
         return { success: true, data: { issue } };
       }
@@ -284,12 +338,17 @@ async function handleOperation(
         const issueNumber = Number(params.issueNumber);
         const body = params.body as string;
         if (!issueNumber || !body) {
-          if (callback) await callback({ text: "Issue number and comment body are required." });
+          if (callback)
+            await callback({
+              text: "Issue number and comment body are required.",
+            });
           return { success: false, error: "MISSING_PARAMS" };
         }
         const comment = await service.addComment(repo, issueNumber, body);
         if (callback) {
-          await callback({ text: `Added comment to issue #${issueNumber}: ${comment.url}` });
+          await callback({
+            text: `Added comment to issue #${issueNumber}: ${comment.url}`,
+          });
         }
         return { success: true, data: { comment } };
       }
@@ -302,7 +361,9 @@ async function handleOperation(
         }
         const issue = await service.closeIssue(repo, issueNumber);
         if (callback) {
-          await callback({ text: `Closed issue #${issue.number}: ${issue.title}` });
+          await callback({
+            text: `Closed issue #${issue.number}: ${issue.title}`,
+          });
         }
         return { success: true, data: { issue } };
       }
@@ -315,7 +376,9 @@ async function handleOperation(
         }
         const issue = await service.reopenIssue(repo, issueNumber);
         if (callback) {
-          await callback({ text: `Reopened issue #${issue.number}: ${issue.title}` });
+          await callback({
+            text: `Reopened issue #${issue.number}: ${issue.title}`,
+          });
         }
         return { success: true, data: { issue } };
       }
@@ -324,19 +387,24 @@ async function handleOperation(
         const issueNumber = Number(params.issueNumber);
         const labels = parseLabels(params.labels);
         if (!issueNumber || labels.length === 0) {
-          if (callback) await callback({ text: "Issue number and labels are required." });
+          if (callback)
+            await callback({ text: "Issue number and labels are required." });
           return { success: false, error: "MISSING_PARAMS" };
         }
         await service.addLabels(repo, issueNumber, labels);
         if (callback) {
-          await callback({ text: `Added labels [${labels.join(", ")}] to issue #${issueNumber}` });
+          await callback({
+            text: `Added labels [${labels.join(", ")}] to issue #${issueNumber}`,
+          });
         }
         return { success: true };
       }
 
       default:
         if (callback) {
-          await callback({ text: `Unknown operation: ${operation}. Use: create, list, get, update, comment, close, reopen, add_labels` });
+          await callback({
+            text: `Unknown operation: ${operation}. Use: create, list, get, update, comment, close, reopen, add_labels`,
+          });
         }
         return { success: false, error: "UNKNOWN_OPERATION" };
     }
@@ -353,15 +421,17 @@ async function handleOperation(
  * Extract multiple issue titles/bodies from text containing numbered or bulleted items.
  * E.g. "1) Add a login page 2) Fix the bug 3) Add tests"
  */
-function extractBulkItems(text: string): Array<{ title: string; body?: string }> {
+function extractBulkItems(
+  text: string,
+): Array<{ title: string; body?: string }> {
   if (!text) return [];
 
   // Match numbered items: "1) ...", "1. ...", "1: ..."
-  const numberedPattern = /(?:^|\s)(\d+)[).:\-]\s*(.+?)(?=(?:\s+\d+[).:\-]\s)|$)/gs;
+  const numberedPattern =
+    /(?:^|\s)(\d+)[).:-]\s*(.+?)(?=(?:\s+\d+[).:-]\s)|$)/gs;
   const items: Array<{ title: string; body?: string }> = [];
 
-  let match;
-  while ((match = numberedPattern.exec(text)) !== null) {
+  for (const match of text.matchAll(numberedPattern)) {
     const raw = match[2].trim();
     if (raw.length > 0) {
       items.push({ title: raw });
@@ -373,7 +443,7 @@ function extractBulkItems(text: string): Array<{ title: string; body?: string }>
   // Fallback: split by common delimiters like " - " or newlines with bullets
   const bulletPattern = /(?:^|\n)\s*[-*•]\s+(.+)/g;
   const bulletItems: Array<{ title: string; body?: string }> = [];
-  while ((match = bulletPattern.exec(text)) !== null) {
+  for (const match of text.matchAll(bulletPattern)) {
     const raw = match[1].trim();
     if (raw.length > 0) {
       bulletItems.push({ title: raw });
@@ -393,8 +463,10 @@ function inferOperation(text: string): string {
   const lower = text.toLowerCase();
 
   // Order matters: check more specific patterns first
-  if (/\b(create|open|file|submit|make|add)\b.*\bissue/.test(lower)) return "create";
-  if (/\bissue.*\b(create|open|file|submit|make)\b/.test(lower)) return "create";
+  if (/\b(create|open|file|submit|make|add)\b.*\bissue/.test(lower))
+    return "create";
+  if (/\bissue.*\b(create|open|file|submit|make)\b/.test(lower))
+    return "create";
   if (/\b(close|resolve)\b.*\bissue/.test(lower)) return "close";
   if (/\bissue.*\b(close|resolve)\b/.test(lower)) return "close";
   if (/\b(reopen|re-open)\b.*\bissue/.test(lower)) return "reopen";
@@ -404,7 +476,8 @@ function inferOperation(text: string): string {
   if (/\bissue.*\b(update|edit|modify)\b/.test(lower)) return "update";
   if (/\b(label|tag)\b.*\bissue/.test(lower)) return "add_labels";
   if (/\bget\b.*\bissue\s*#?\d/.test(lower)) return "get";
-  if (/\bissue\s*#?\d/.test(lower) && !/\b(list|show|all)\b/.test(lower)) return "get";
+  if (/\bissue\s*#?\d/.test(lower) && !/\b(list|show|all)\b/.test(lower))
+    return "get";
   if (/\b(list|show|check|what are)\b.*\bissue/.test(lower)) return "list";
 
   return "list";
@@ -413,6 +486,10 @@ function inferOperation(text: string): string {
 function parseLabels(input: unknown): string[] {
   if (!input) return [];
   if (Array.isArray(input)) return input.map(String);
-  if (typeof input === "string") return input.split(",").map((s) => s.trim()).filter(Boolean);
+  if (typeof input === "string")
+    return input
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
   return [];
 }

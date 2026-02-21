@@ -7,8 +7,19 @@
  * @module actions/provision-workspace
  */
 
-import type { Action, IAgentRuntime, Memory, State, HandlerCallback, ActionResult, HandlerOptions } from "@elizaos/core";
-import { CodingWorkspaceService, type WorkspaceResult } from "../services/workspace-service.js";
+import type {
+  Action,
+  ActionResult,
+  HandlerCallback,
+  HandlerOptions,
+  IAgentRuntime,
+  Memory,
+  State,
+} from "@elizaos/core";
+import type {
+  CodingWorkspaceService,
+  WorkspaceResult,
+} from "../services/workspace-service.js";
 
 export const provisionWorkspaceAction: Action = {
   name: "PROVISION_WORKSPACE",
@@ -28,7 +39,9 @@ export const provisionWorkspaceAction: Action = {
     [
       {
         name: "{{user1}}",
-        content: { text: "Clone the repo and create a workspace for the feature" },
+        content: {
+          text: "Clone the repo and create a workspace for the feature",
+        },
       },
       {
         name: "{{agentName}}",
@@ -53,8 +66,13 @@ export const provisionWorkspaceAction: Action = {
     ],
   ],
 
-  validate: async (runtime: IAgentRuntime, _message: Memory): Promise<boolean> => {
-    const workspaceService = runtime.getService("CODING_WORKSPACE_SERVICE") as unknown as CodingWorkspaceService | undefined;
+  validate: async (
+    runtime: IAgentRuntime,
+    _message: Memory,
+  ): Promise<boolean> => {
+    const workspaceService = runtime.getService(
+      "CODING_WORKSPACE_SERVICE",
+    ) as unknown as CodingWorkspaceService | undefined;
     return workspaceService != null;
   },
 
@@ -65,7 +83,9 @@ export const provisionWorkspaceAction: Action = {
     _options?: HandlerOptions,
     callback?: HandlerCallback,
   ): Promise<ActionResult | undefined> => {
-    const workspaceService = runtime.getService("CODING_WORKSPACE_SERVICE") as unknown as CodingWorkspaceService | undefined;
+    const workspaceService = runtime.getService(
+      "CODING_WORKSPACE_SERVICE",
+    ) as unknown as CodingWorkspaceService | undefined;
     if (!workspaceService) {
       if (callback) {
         await callback({
@@ -88,7 +108,7 @@ export const provisionWorkspaceAction: Action = {
     if (!repo && content.text) {
       // Match GitHub/GitLab/Bitbucket URLs
       const urlMatch = content.text.match(
-        /https?:\/\/(?:github\.com|gitlab\.com|bitbucket\.org)\/[\w.-]+\/[\w.-]+(?:\.git)?/i
+        /https?:\/\/(?:github\.com|gitlab\.com|bitbucket\.org)\/[\w.-]+\/[\w.-]+(?:\.git)?/i,
       );
       if (urlMatch) {
         repo = urlMatch[0];
@@ -121,12 +141,13 @@ export const provisionWorkspaceAction: Action = {
     }
 
     try {
-      const workspace: WorkspaceResult = await workspaceService.provisionWorkspace({
-        repo: repo ?? "",
-        baseBranch: content.baseBranch,
-        useWorktree: content.useWorktree,
-        parentWorkspaceId,
-      });
+      const workspace: WorkspaceResult =
+        await workspaceService.provisionWorkspace({
+          repo: repo ?? "",
+          baseBranch: content.baseBranch,
+          useWorktree: content.useWorktree,
+          parentWorkspaceId,
+        });
 
       // Store workspace in state
       if (state) {
@@ -140,7 +161,8 @@ export const provisionWorkspaceAction: Action = {
 
       if (callback) {
         await callback({
-          text: `Created workspace at ${workspace.path}\n` +
+          text:
+            `Created workspace at ${workspace.path}\n` +
             `Branch: ${workspace.branch}\n` +
             `Type: ${workspace.isWorktree ? "worktree" : "clone"}`,
         });
@@ -157,7 +179,8 @@ export const provisionWorkspaceAction: Action = {
         },
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       if (callback) {
         await callback({
           text: `Failed to provision workspace: ${errorMessage}`,

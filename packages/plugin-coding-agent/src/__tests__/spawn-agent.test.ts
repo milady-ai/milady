@@ -2,7 +2,8 @@
  * SPAWN_CODING_AGENT action tests
  */
 
-import { describe, it, expect, jest, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it, jest } from "bun:test";
+import type { IAgentRuntime, Memory, State } from "@elizaos/core";
 import { spawnAgentAction } from "../actions/spawn-agent.js";
 
 // Mock PTYService
@@ -19,7 +20,7 @@ const createMockPTYService = () => ({
 });
 
 // Mock runtime
-const createMockRuntime = (ptyService: any = null) => ({
+const createMockRuntime = (ptyService: unknown = null) => ({
   getService: jest.fn((name: string) => {
     if (name === "PTY_SERVICE") return ptyService;
     return null;
@@ -49,7 +50,12 @@ describe("spawnAgentAction", () => {
     });
     // Default: agents are installed
     mockCheckAvailableAgents.mockResolvedValue([
-      { adapter: "claude", installed: true, installCommand: "npm i -g @anthropic-ai/claude-code", docsUrl: "https://docs.anthropic.com" },
+      {
+        adapter: "claude",
+        installed: true,
+        installCommand: "npm i -g @anthropic-ai/claude-code",
+        docsUrl: "https://docs.anthropic.com",
+      },
     ]);
   });
 
@@ -70,12 +76,12 @@ describe("spawnAgentAction", () => {
 
     it("should have examples", () => {
       expect(spawnAgentAction.examples).toBeDefined();
-      expect(spawnAgentAction.examples!.length).toBeGreaterThan(0);
+      expect((spawnAgentAction.examples ?? []).length).toBeGreaterThan(0);
     });
 
     it("should define parameters", () => {
       expect(spawnAgentAction.parameters).toBeDefined();
-      const paramNames = spawnAgentAction.parameters!.map((p) => p.name);
+      const paramNames = (spawnAgentAction.parameters ?? []).map((p) => p.name);
       expect(paramNames).toContain("agentType");
       expect(paramNames).toContain("workdir");
       expect(paramNames).toContain("task");
@@ -88,7 +94,10 @@ describe("spawnAgentAction", () => {
       const runtime = createMockRuntime(ptyService);
       const message = createMockMessage();
 
-      const result = await spawnAgentAction.validate!(runtime as any, message as any);
+      const result = await spawnAgentAction.validate?.(
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
+      );
       expect(result).toBe(true);
     });
 
@@ -96,7 +105,10 @@ describe("spawnAgentAction", () => {
       const runtime = createMockRuntime(null);
       const message = createMockMessage();
 
-      const result = await spawnAgentAction.validate!(runtime as any, message as any);
+      const result = await spawnAgentAction.validate?.(
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
+      );
       expect(result).toBe(false);
     });
   });
@@ -113,11 +125,11 @@ describe("spawnAgentAction", () => {
       const callback = jest.fn();
 
       const result = await spawnAgentAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(true);
@@ -141,17 +153,17 @@ describe("spawnAgentAction", () => {
       const callback = jest.fn();
 
       await spawnAgentAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(mockSpawnSession).toHaveBeenCalledWith(
         expect.objectContaining({
           agentType: "claude",
-        })
+        }),
       );
     });
 
@@ -162,17 +174,17 @@ describe("spawnAgentAction", () => {
       const callback = jest.fn();
 
       await spawnAgentAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(mockSpawnSession).toHaveBeenCalledWith(
         expect.objectContaining({
           agentType: "claude",
-        })
+        }),
       );
     });
 
@@ -182,21 +194,26 @@ describe("spawnAgentAction", () => {
       const message = createMockMessage({ agentType: "codex" });
       const callback = jest.fn();
       mockCheckAvailableAgents.mockResolvedValue([
-        { adapter: "codex", installed: true, installCommand: "npm i -g @openai/codex", docsUrl: "https://openai.com" },
+        {
+          adapter: "codex",
+          installed: true,
+          installCommand: "npm i -g @openai/codex",
+          docsUrl: "https://openai.com",
+        },
       ]);
 
       await spawnAgentAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(mockSpawnSession).toHaveBeenCalledWith(
         expect.objectContaining({
           agentType: "codex",
-        })
+        }),
       );
     });
 
@@ -207,17 +224,17 @@ describe("spawnAgentAction", () => {
       const callback = jest.fn();
 
       await spawnAgentAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(mockSpawnSession).toHaveBeenCalledWith(
         expect.objectContaining({
           workdir: expect.any(String),
-        })
+        }),
       );
     });
 
@@ -231,17 +248,17 @@ describe("spawnAgentAction", () => {
       const callback = jest.fn();
 
       await spawnAgentAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining("Started"),
-        })
+        }),
       );
     });
 
@@ -249,19 +266,19 @@ describe("spawnAgentAction", () => {
       const ptyService = createMockPTYService();
       const runtime = createMockRuntime(ptyService);
       const message = createMockMessage({ agentType: "claude" });
-      const state: any = {};
+      const state: Record<string, unknown> = {};
       const callback = jest.fn();
 
       await spawnAgentAction.handler(
-        runtime as any,
-        message as any,
-        state,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
+        state as unknown as State,
         {},
-        callback
+        callback,
       );
 
       expect(state.codingSession).toBeDefined();
-      expect(state.codingSession.id).toBe("session-123");
+      expect((state.codingSession as { id: string }).id).toBe("session-123");
     });
 
     it("should register session event handler", async () => {
@@ -270,11 +287,11 @@ describe("spawnAgentAction", () => {
       const message = createMockMessage({ agentType: "claude" });
 
       await spawnAgentAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        jest.fn()
+        jest.fn(),
       );
 
       expect(mockOnSessionEvent).toHaveBeenCalled();
@@ -286,15 +303,20 @@ describe("spawnAgentAction", () => {
       const message = createMockMessage({ agentType: "claude" });
       const callback = jest.fn();
       mockCheckAvailableAgents.mockResolvedValue([
-        { adapter: "claude", installed: false, installCommand: "npm i -g @anthropic-ai/claude-code", docsUrl: "https://docs.anthropic.com" },
+        {
+          adapter: "claude",
+          installed: false,
+          installCommand: "npm i -g @anthropic-ai/claude-code",
+          docsUrl: "https://docs.anthropic.com",
+        },
       ]);
 
       const result = await spawnAgentAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(false);
@@ -302,7 +324,7 @@ describe("spawnAgentAction", () => {
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining("not installed"),
-        })
+        }),
       );
     });
 
@@ -312,18 +334,18 @@ describe("spawnAgentAction", () => {
       const callback = jest.fn();
 
       const result = await spawnAgentAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(false);
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining("not available"),
-        })
+        }),
       );
     });
 
@@ -335,18 +357,18 @@ describe("spawnAgentAction", () => {
       const callback = jest.fn();
 
       const result = await spawnAgentAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       expect(result?.success).toBe(false);
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining("Failed"),
-        })
+        }),
       );
     });
 
@@ -357,11 +379,11 @@ describe("spawnAgentAction", () => {
       const callback = jest.fn();
 
       await spawnAgentAction.handler(
-        runtime as any,
-        message as any,
+        runtime as unknown as IAgentRuntime,
+        message as unknown as Memory,
         undefined,
         {},
-        callback
+        callback,
       );
 
       // checkAvailableAgents should not be called for shell
@@ -369,7 +391,7 @@ describe("spawnAgentAction", () => {
       expect(mockSpawnSession).toHaveBeenCalledWith(
         expect.objectContaining({
           agentType: "shell",
-        })
+        }),
       );
     });
   });
