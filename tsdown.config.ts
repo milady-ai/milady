@@ -52,14 +52,4 @@ export default defineConfig([
     inlineOnly: false,
     external: nativeExternals,
   },
-  {
-    entry: "src/plugins/retake/index.ts",
-    outDir: "dist/plugins/retake",
-    env,
-    fixedExtension: false,
-    platform: "node",
-    unbundle: true,
-    inlineOnly: false,
-    external: [...nativeExternals, "socket.io-client"],
-  },
 ]);
