@@ -59,7 +59,7 @@ The onboarding wizard only runs when stdin is a TTY (interactive terminal). In h
   </Step>
 
   <Step title="Name your agent">
-    The wizard presents 4 randomly selected names from a pool of 64 options (Japanese-inspired names like Reimu, Sakuya, Yukari, Marisa, Koishi, Remilia, etc.) plus a "Custom..." option to type your own:
+    The wizard presents 4 randomly selected names from a pool of 55 options (Japanese-inspired names like Reimu, Sakuya, Yukari, Marisa, Koishi, Remilia, etc.) plus a "Custom..." option to type your own:
 
     ```
     ◇  ♡♡milady♡♡: Hey there, I'm.... err, what was my name again?
@@ -234,9 +234,11 @@ you: explain how transformers work
     }
     EOF
 
-    # Start headless
-    milady start --headless
+    # Start in server mode (no interactive chat loop)
+    milady start
     ```
+
+    The `start` command launches the API server and gateway without entering an interactive chat loop. When stdin is not a TTY (e.g., in a container), the onboarding wizard is automatically skipped, so the pre-configured `milady.json` is used directly.
 
     <Warning>
     When binding to `0.0.0.0` for network access, always set `MILADY_API_TOKEN` for authentication. See the [Installation](/installation#security-api-token) page.
@@ -277,7 +279,7 @@ you: explain how transformers work
     - **Config location**: `~/.milady/milady.json` instead of an inline character file.
     - **Gateway**: Milady adds a multiplexed WebSocket + HTTP gateway on port 18789.
     - **Onboarding**: The first-run wizard generates a character from style presets and random pool sampling.
-    - **Plugin manager**: Install plugins via `milady plugins add <name>` -- they are tracked in config and auto-loaded.
+    - **Plugin manager**: Install plugins via `milady plugins install <name>` -- they are tracked in config and auto-loaded.
     - **Skills**: Markdown-based extensions via ClawHub registry, separate from the plugin system.
 
     Existing ElizaOS plugins are fully compatible. Add them to your config or install via the plugin manager.
@@ -293,13 +295,13 @@ you: explain how transformers work
   <Card title="Autonomous Mode" icon="robot" href="/guides/autonomous-mode">
     Set up triggers and let your agent work independently
   </Card>
-  <Card title="Plugins & Skills" icon="puzzle-piece" href="/guides/plugin-development">
+  <Card title="Plugins & Skills" icon="puzzle-piece" href="/plugins/overview">
     Extend capabilities with plugins or install skills from ClawHub
   </Card>
   <Card title="Connectors" icon="plug" href="/guides/connectors">
     Connect to Telegram, Discord, WhatsApp, and more
   </Card>
-  <Card title="Dashboard Guide" icon="browser" href="/guides/dashboard">
+  <Card title="Dashboard Guide" icon="browser" href="/cli/dashboard">
     Learn the web UI features and session management
   </Card>
   <Card title="Model Providers" icon="microchip" href="/model-providers">

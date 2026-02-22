@@ -45,19 +45,27 @@ A plugin is a self-contained module that registers one or more of:
 
 Plugins are loaded during runtime initialization in this order:
 
-1. **Core plugins** — Always loaded (`bootstrap`, `knowledge`, `sql`)
-2. **Auto-enabled plugins** — Enabled based on environment variables (e.g., `OPENAI_API_KEY` enables the OpenAI plugin)
-3. **Character plugins** — Specified in the character file
-4. **Local plugins** — Loaded from the `plugins/` directory
+1. **Milady plugin** — The bridge plugin (`createMiladyPlugin()`) providing workspace context, session keys, emotes, custom actions, and lifecycle actions. Always first in the plugins array.
+2. **Pre-registered plugins** — `@elizaos/plugin-sql` and `@elizaos/plugin-local-embedding` are pre-registered before `runtime.initialize()` to prevent race conditions.
+3. **Core plugins** — Always loaded: `sql`, `local-embedding`, `secrets-manager`, `form`, `knowledge`, `rolodex`, `trajectory-logger`, `agent-orchestrator`, `cron`, `shell`, `plugin-manager`, `agent-skills`, `pdf` (see `src/runtime/core-plugins.ts`).
+4. **Connector plugins** — Loaded when channel config is present in `connectors` (e.g., Discord, Telegram, Slack).
+5. **Provider plugins** — Loaded when the corresponding API key env var is set (e.g., `ANTHROPIC_API_KEY` enables `@elizaos/plugin-anthropic`).
+6. **Feature plugins** — Loaded when feature flags or `plugins.entries` are enabled in `milady.json`.
+7. **User-installed plugins** — Tracked in `plugins.installs` in `milady.json`.
+8. **Custom/drop-in plugins** — Scanned from `~/.milady/plugins/custom/`.
+9. **Ejected plugins** — Local overrides from `~/.milady/plugins/ejected/`.
 
-```typescript
-// Character file plugin configuration
+```json
+// milady.json plugin configuration
 {
-  "plugins": ["@elizaos/plugin-openai", "@elizaos/plugin-discord"],
-  "settings": {
-    "secrets": {
-      "OPENAI_API_KEY": "sk-..."
+  "plugins": {
+    "allow": ["@elizaos/plugin-openai", "discord"],
+    "entries": {
+      "openai": { "enabled": true }
     }
+  },
+  "connectors": {
+    "discord": { "token": "..." }
   }
 }
 ```

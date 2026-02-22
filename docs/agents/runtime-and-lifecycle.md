@@ -212,7 +212,17 @@ The `restartAction` available to the LLM calls `requestRestart()` with an option
 
 ## Sandbox Modes
 
-The runtime can operate in one of four sandbox modes, configured via `agents.defaults.sandbox.mode`:
+The sandbox system has two layers of configuration:
+
+**TypeScript config type** (`AgentDefaultsConfig` in `types.agent-defaults.ts` and `AgentConfig` in `types.agents.ts`):
+
+| Mode | Description |
+|---|---|
+| `"off"` | No sandboxing (default) |
+| `"non-main"` | Sandbox non-main sessions only |
+| `"all"` | Sandbox all sessions |
+
+**Runtime sandbox manager** (`SandboxManager` in `services/sandbox-manager.ts`):
 
 | Mode | Description |
 |---|---|
@@ -222,7 +232,7 @@ The runtime can operate in one of four sandbox modes, configured via `agents.def
 | `"max"` | Maximum isolation including network restrictions |
 
 <Note>
-The runtime reads `agents.defaults.sandbox.mode` and expects one of `"off"`, `"light"`, `"standard"`, or `"max"`. Note that the `AgentConfig` TypeScript type in `types.agents.ts` defines the mode as `"off" | "non-main" | "all"`, but the runtime implementation in `eliza.ts` checks against the values listed above. Use the runtime values (`off`/`light`/`standard`/`max`) when configuring `milady.json`.
+The runtime in `eliza.ts` reads `agents.defaults.sandbox.mode` as a raw string and maps it to the `SandboxMode` type. It only recognizes `"light"`, `"standard"`, and `"max"` -- all other values (including the TypeScript-typed `"non-main"` and `"all"`) fall back to `"off"`. To enable sandboxing, use `"light"`, `"standard"`, or `"max"` in `milady.json`. The per-agent `sandbox.mode` field in `types.agents.ts` (`"off" | "non-main" | "all"`) controls which sessions are sandboxed, while the defaults-level mode controls the sandbox intensity.
 </Note>
 
 ## Related Pages

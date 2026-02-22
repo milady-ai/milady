@@ -6,15 +6,20 @@ description: "Download the desktop app or install Milady via CLI on macOS, Windo
 
 ## Prerequisites
 
-Before installing Milady, make sure you have the required toolchain:
+Before installing Milady, make sure you have the required runtime:
 
 | Requirement | Version | How to Check | Install |
 |-------------|---------|-------------|---------|
 | **Node.js** | >= 22 | `node --version` | [nodejs.org](https://nodejs.org) or `nvm install 22` |
+
+For **building from source** or development, you also need:
+
+| Requirement | Version | How to Check | Install |
+|-------------|---------|-------------|---------|
 | **Bun** | latest | `bun --version` | `curl -fsSL https://bun.sh/install \| bash` |
 
 <Info>
-Node 22+ is required because Milady uses native ES modules, the `node:` protocol prefix, and other modern Node APIs. Bun is used as the package manager and script runner for builds and development.
+Node 22+ is required because Milady uses native ES modules, the `node:` protocol prefix, and other modern Node APIs. Bun is only needed for development and building from source -- it is used as the package manager and script runner. The published npm package and install scripts run on Node.js alone.
 </Info>
 
 You will also need an API key from at least one model provider (Anthropic, OpenAI, OpenRouter, etc.) -- unless you plan to use [Ollama](https://ollama.ai) for fully local inference, which requires no API key.
@@ -254,14 +259,18 @@ After installation, confirm everything is working:
 # Check version
 milady --version
 
-# Run diagnostics
-milady doctor
+# Show configured model providers
+milady models
 
-# Test model provider connectivity
-milady models test
+# Run the interactive setup wizard
+milady setup
 ```
 
-The `doctor` command checks your Node version, Bun availability, config file health, provider key validity, and port availability.
+The `models` command lists all configured model providers and their status. The `setup` command runs the onboarding wizard if needed and validates your workspace.
+
+<Info>
+A `milady doctor` diagnostic command is planned but not yet implemented. See [milady doctor](/cli/doctor) for the planned behavior.
+</Info>
 
 ## Troubleshooting
 

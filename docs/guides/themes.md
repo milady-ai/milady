@@ -411,7 +411,7 @@ There are **29 emotes** across **6 categories**:
 | Range | `range` |
 | Death | `death` |
 
-#### Idle (4)
+#### Idle (5)
 
 | Emote | ID |
 |-------|----|
@@ -419,12 +419,12 @@ There are **29 emotes** across **6 categories**:
 | Talk | `talk` |
 | Squat | `squat` |
 | Fishing | `fishing` |
+| Float | `float` |
 
-#### Movement (7)
+#### Movement (6)
 
 | Emote | ID |
 |-------|----|
-| Float | `float` |
 | Jump | `jump` |
 | Flip | `flip` |
 | Run | `run` |

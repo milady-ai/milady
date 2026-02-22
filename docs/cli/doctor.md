@@ -1,50 +1,22 @@
 ---
 title: "milady doctor"
 sidebarTitle: "doctor"
-description: "Run diagnostics to verify your Milady installation."
+description: "Run diagnostics to verify your Milady installation (planned)."
 ---
 
-Run a suite of diagnostic checks to verify that your Milady installation is healthy and properly configured. The `doctor` command inspects the runtime environment, configuration, API key availability, plugin state, and network connectivity, then prints a structured report with pass/fail indicators and suggested fixes.
+<Warning>
+The `doctor` command is **not yet implemented**. This page describes the planned behavior for an upcoming release. Running `milady doctor` will currently produce an "unknown command" error.
+</Warning>
 
-> **Note:** The `doctor` command is planned for an upcoming release. The checks described here represent the expected behavior based on the existing CLI architecture.
+The `doctor` command will run a suite of diagnostic checks to verify that your Milady installation is healthy and properly configured. It will inspect the runtime environment, configuration, API key availability, plugin state, and network connectivity, then print a structured report with pass/fail indicators and suggested fixes.
 
-## Usage
-
-```bash
-milady doctor [options]
-```
-
-## Options
-
-| Flag | Type | Default | Description |
-|------|------|---------|-------------|
-| `--json` | boolean | false | Output results as machine-readable JSON |
-| `--fix` | boolean | false | Attempt to automatically resolve fixable issues |
-
-Global flags:
-
-| Flag | Description |
-|------|-------------|
-| `--version`, `-v`, `-V` | Print the current Milady version and exit |
-| `--help`, `-h` | Show help for this command |
-| `--profile <name>` | Run diagnostics against a specific profile |
-
-## Examples
+## Planned Usage
 
 ```bash
-# Run all diagnostic checks
 milady doctor
-
-# Output results as JSON
-milady doctor --json
-
-# Check a specific profile
-milady --profile staging doctor
 ```
 
-## Diagnostic Checks
-
-The doctor command is expected to perform the following checks:
+## Planned Diagnostic Checks
 
 ### Runtime
 
@@ -87,62 +59,28 @@ The doctor command is expected to perform the following checks:
 | Plugin registry cache | Registry cache file is present and not stale |
 | Installed plugins | All registry-installed plugins are present on disk |
 
-## Output Format
+## Workarounds Until `doctor` Exists
 
-```
-Milady Doctor
+You can manually verify your installation using existing commands:
 
-Runtime
-  ✓ Node.js 22.0.0
-  ✓ CLI version 1.2.3 (latest on stable)
-  ✓ Config file readable
+```bash
+# Check model providers
+milady models
 
-Configuration
-  ✓ Config valid
-  ✗ Workspace missing — run: milady setup
+# Validate custom plugins
+milady plugins test
 
-API Keys
-  ✓ Anthropic (ANTHROPIC_API_KEY configured)
-  ✗ No model provider configured — set at least one API key
+# Inspect config file location and values
+milady config path
+milady config show
 
-Plugins
-  ✓ No custom plugins to validate
-  ✓ Plugin registry cache up to date
-
-Summary: 4 passed, 2 warnings
-```
-
-Checks are grouped by category. Each line shows a `✓` (pass), `✗` (fail), or `!` (warning) indicator. Failures include a short suggestion for resolving the issue.
-
-## JSON Output
-
-With `--json`, results are output as a structured object:
-
-```json
-{
-  "version": "1.2.3",
-  "profile": "default",
-  "checks": [
-    {
-      "category": "Runtime",
-      "name": "Config file readable",
-      "status": "pass",
-      "detail": "/Users/you/.milady/milady.json"
-    },
-    {
-      "category": "Configuration",
-      "name": "Workspace missing",
-      "status": "fail",
-      "fix": "milady setup"
-    }
-  ],
-  "summary": { "passed": 4, "failed": 1, "warnings": 1 }
-}
+# Verify workspace setup
+milady setup
 ```
 
 ## Related
 
-- [milady setup](/cli/setup) -- initialize the workspace when setup checks fail
+- [milady setup](/cli/setup) -- initialize the workspace
 - [milady config](/cli/config) -- inspect configuration values
 - [milady models](/cli/models) -- verify model provider key configuration
 - [milady plugins test](/cli/plugins) -- validate custom drop-in plugins

@@ -79,7 +79,7 @@ import("./cli/run-main")
 
 ### Library Entry (`src/index.ts`)
 
-The public API surface exported by the `milady` npm package. It re-exports:
+The public API surface exported by the `milaidy` npm package. It re-exports:
 
 - **Config types** from `src/config/types.ts` -- the full `MiladyConfig` type and its nested schemas
 - **Restart infrastructure** -- `RESTART_EXIT_CODE`, `requestRestart()`, `setRestartHandler()`, and the `RestartHandler` type
@@ -434,6 +434,10 @@ Milady's `src/services/` directory contains standalone service modules:
 | **Training Service** | `training-service.ts` | Fine-tuning orchestration with Ollama integration |
 | **Agent Export** | `agent-export.ts` | Export agent state (character, knowledge, config) as portable archives |
 | **Version Compat** | `version-compat.ts` | Detect version skew between `@elizaos/core` and plugins |
+| **Core Eject** | `core-eject.ts` | Eject core plugins for local modification |
+| **Plugin Eject** | `plugin-eject.ts` | Eject installed plugins for local overrides |
+| **Skill Catalog** | `skill-catalog-client.ts` | Skills registry API client for browsing and installing |
+| **MCP Marketplace** | `mcp-marketplace.ts` | MCP server discovery and marketplace integration |
 
 ## Configuration Cascade
 

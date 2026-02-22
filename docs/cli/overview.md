@@ -15,7 +15,7 @@ bun install -g milaidy
 Or run directly:
 
 ```bash
-bunx milady
+bunx milaidy
 ```
 
 ## Global Flags
@@ -23,54 +23,55 @@ bunx milady
 | Flag | Description |
 |------|-------------|
 | `--help`, `-h` | Show help for any command |
-| `--version`, `-V` | Print version number |
-| `--profile <name>` | Use a named configuration profile |
-| `--verbose` | Enable verbose logging |
-| `--quiet` | Suppress non-essential output |
-| `--json` | Output in JSON format |
+| `-v, --version` | Print version number |
+| `--profile <name>` | Use a named configuration profile (state dir becomes `~/.milady-<name>/`) |
+| `--dev` | Shorthand for `--profile dev` (also sets the gateway port to `19001`) |
+| `--verbose` | Enable informational runtime logs |
+| `--debug` | Enable debug-level runtime logs |
+| `--no-color` | Disable ANSI colors |
 
 ## Commands
 
 <CardGroup cols={2}>
 
 <Card title="start" icon="play" href="/cli/start">
-  Start the agent runtime with optional character file and configuration overrides.
+  Start the ElizaOS agent runtime in headless server-only mode.
 </Card>
 
 <Card title="tui" icon="terminal" href="/cli/tui">
-  Launch the terminal user interface for interactive agent management.
+  Launch the interactive terminal UI with chat, model selection, and slash commands (default command).
 </Card>
 
 <Card title="setup" icon="gear" href="/cli/setup">
-  Run the interactive setup wizard to configure API keys and preferences.
+  Initialize the config file and bootstrap the agent workspace directory.
 </Card>
 
 <Card title="configure" icon="sliders" href="/cli/configure">
-  Modify runtime configuration interactively or via flags.
+  Display configuration guidance and common environment variables.
 </Card>
 
 <Card title="config" icon="file-code" href="/cli/config">
-  Read and write configuration values directly.
+  Read and inspect configuration values with get, path, and show subcommands.
 </Card>
 
 <Card title="dashboard" icon="gauge" href="/cli/dashboard">
-  Launch the web dashboard for browser-based management.
+  Open the Control UI in your default web browser.
 </Card>
 
 <Card title="models" icon="brain" href="/cli/models">
-  List, test, and manage model providers and configurations.
+  Show configured model providers by checking environment variables.
 </Card>
 
 <Card title="plugins" icon="plug" href="/cli/plugins">
-  Install, remove, enable, disable, and eject plugins.
+  Browse, search, install, and manage ElizaOS plugins from the registry.
 </Card>
 
 <Card title="update" icon="arrow-up" href="/cli/update">
-  Check for and apply updates to the Milady installation.
+  Check for and install updates with release channel support (stable, beta, nightly).
 </Card>
 
 <Card title="doctor" icon="stethoscope" href="/cli/doctor">
-  Diagnose common issues with your installation and configuration.
+  Diagnose common issues with your installation and configuration (planned).
 </Card>
 
 </CardGroup>
@@ -78,26 +79,26 @@ bunx milady
 ## Quick Reference
 
 ```bash
-# Start agent with default character
+# Start the interactive TUI (default command)
+milady
+
+# Start agent in headless server mode
 milady start
 
-# Start with a specific character
-milady start --character ./my-character.json
+# Launch TUI with a specific model
+milady tui -m anthropic/claude-sonnet-4-20250514
 
-# Launch TUI
-milady tui
-
-# Run setup wizard
+# Run setup
 milady setup
 
 # Install a plugin
-milady plugins install @elizaos/plugin-openai
+milady plugins install twitter
 
 # Check for updates
 milady update
 
-# Diagnose issues
-milady doctor
+# Show model provider status
+milady models
 ```
 
 ## Environment Variables

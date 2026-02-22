@@ -102,7 +102,7 @@ milady config show [options]
 
 | Flag | Type | Default | Description |
 |------|------|---------|-------------|
-| `-a, --all` | boolean | false | Include advanced and hidden fields in the output |
+| `-a, --all` | boolean | false | Include advanced fields in the output (hidden fields are always excluded) |
 | `--json` | boolean | false | Output raw JSON instead of the formatted grouped table |
 
 ### Examples
@@ -111,7 +111,7 @@ milady config show [options]
 # Formatted output grouped by section
 milady config show
 
-# Include advanced and hidden fields
+# Include advanced fields
 milady config show --all
 
 # Machine-readable JSON (includes actual sensitive values)

@@ -18,10 +18,13 @@ milady models
 
 | Flag | Description |
 |------|-------------|
-| `--version`, `-v`, `-V` | Print the current Milady version and exit |
+| `-v, --version` | Print the current Milady version and exit |
 | `--help`, `-h` | Show help for this command |
-| `--profile <name>` | Use a named configuration profile |
-| `--dev` | Shorthand for `--profile dev` |
+| `--profile <name>` | Use a named configuration profile (state dir becomes `~/.milady-<name>/`) |
+| `--dev` | Shorthand for `--profile dev` (also sets the gateway port to `19001`) |
+| `--verbose` | Enable informational runtime logs |
+| `--debug` | Enable debug-level runtime logs |
+| `--no-color` | Disable ANSI colors |
 
 ## Example
 

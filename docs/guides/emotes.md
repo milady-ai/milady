@@ -106,7 +106,7 @@ isValidEmote("foo");   // false
 | `idle` | 5 | Standing and idle poses |
 | `movement` | 6 | Locomotion animations |
 
-**Total: 30 emotes** across 6 categories.
+**Total: 29 emotes** across 6 categories.
 
 ## Related
 

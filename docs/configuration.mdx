@@ -409,13 +409,18 @@ Milady automatically enables plugins based on your configuration. You do not nee
 | `discord` | `@elizaos/plugin-discord` | `connectors.discord.botToken` |
 | `slack` | `@elizaos/plugin-slack` | `connectors.slack.botToken` |
 | `twitter` | `@elizaos/plugin-twitter` | `connectors.twitter.apiKey` |
-| `whatsapp` | `@elizaos/plugin-whatsapp` | `connectors.whatsapp.authDir` |
-| `signal` | `@elizaos/plugin-signal` | `connectors.signal.account` |
+| `whatsapp` | `@elizaos/plugin-whatsapp` | `connectors.whatsapp.authDir` (or `authState`, `sessionPath`, or `accounts` with `authDir`) |
+| `signal` | `@elizaos/plugin-signal` | `connectors.signal.account` (or `httpUrl`, `httpHost`, `httpPort`, `cliPath`, or `accounts` with enabled entries) |
 | `farcaster` | `@elizaos/plugin-farcaster` | `connectors.farcaster.token` |
 | `matrix` | `@elizaos/plugin-matrix` | `connectors.matrix.token` |
 | `nostr` | `@elizaos/plugin-nostr` | `connectors.nostr.token` |
 | `msteams` | `@elizaos/plugin-msteams` | `connectors.msteams.token` |
 | `googlechat` | `@elizaos/plugin-google-chat` | `connectors.googlechat.token` |
+| `bluebubbles` | `@elizaos/plugin-bluebubbles` | `connectors.bluebubbles.serverUrl` + `password` |
+| `imessage` | `@elizaos/plugin-imessage` | `connectors.imessage.cliPath` |
+| `lens` | `@elizaos/plugin-lens` | `connectors.lens.token` |
+| `mattermost` | `@elizaos/plugin-mattermost` | `connectors.mattermost.token` |
+| `feishu` | `@elizaos/plugin-feishu` | `connectors.feishu.token` |
 
 **Provider plugins** are auto-enabled when the corresponding API key environment variable is set:
 
@@ -423,16 +428,20 @@ Milady automatically enables plugins based on your configuration. You do not nee
 |--------------|--------|
 | `ANTHROPIC_API_KEY` / `CLAUDE_API_KEY` | `@elizaos/plugin-anthropic` |
 | `OPENAI_API_KEY` | `@elizaos/plugin-openai` |
-| `GOOGLE_API_KEY` / `GOOGLE_GENERATIVE_AI_API_KEY` | `@elizaos/plugin-google-gemini` |
+| `AI_GATEWAY_API_KEY` / `AIGATEWAY_API_KEY` | `@elizaos/plugin-vercel-ai-gateway` |
+| `GOOGLE_API_KEY` / `GOOGLE_GENERATIVE_AI_API_KEY` | `@elizaos/plugin-google-genai` |
+| `GOOGLE_CLOUD_API_KEY` | `@elizaos/plugin-google-antigravity` |
 | `GROQ_API_KEY` | `@elizaos/plugin-groq` |
 | `XAI_API_KEY` / `GROK_API_KEY` | `@elizaos/plugin-xai` |
 | `OPENROUTER_API_KEY` | `@elizaos/plugin-openrouter` |
 | `OLLAMA_BASE_URL` | `@elizaos/plugin-ollama` |
+| `ZAI_API_KEY` | `@homunculuslabs/plugin-zai` |
 | `DEEPSEEK_API_KEY` | `@elizaos/plugin-deepseek` |
 | `TOGETHER_API_KEY` | `@elizaos/plugin-together` |
 | `MISTRAL_API_KEY` | `@elizaos/plugin-mistral` |
 | `COHERE_API_KEY` | `@elizaos/plugin-cohere` |
 | `PERPLEXITY_API_KEY` | `@elizaos/plugin-perplexity` |
+| `ELIZAOS_CLOUD_API_KEY` / `ELIZAOS_CLOUD_ENABLED` | `@elizaos/plugin-elizacloud` |
 
 **Feature plugins** are auto-enabled via the `features` flag map:
 
@@ -444,8 +453,8 @@ Milady automatically enables plugins based on your configuration. You do not nee
     shell: true,
     imageGen: true,
     tts: true,
-    vision: { enabled: true },
     webhooks: true,
+    computeruse: true,
   },
 }
 ```
@@ -458,10 +467,24 @@ Milady automatically enables plugins based on your configuration. You do not nee
 | `imageGen` | `@elizaos/plugin-image-generation` |
 | `tts` | `@elizaos/plugin-tts` |
 | `stt` | `@elizaos/plugin-stt` |
-| `vision` | `@elizaos/plugin-vision` |
+| `agentSkills` | `@elizaos/plugin-agent-skills` |
+| `directives` | `@elizaos/plugin-directives` |
+| `commands` | `@elizaos/plugin-commands` |
+| `diagnosticsOtel` | `@elizaos/plugin-diagnostics-otel` |
 | `webhooks` | `@elizaos/plugin-webhooks` |
+| `gmailWatch` | `@elizaos/plugin-gmail-watch` |
+| `personality` | `@elizaos/plugin-personality` |
+| `experience` | `@elizaos/plugin-experience` |
+| `form` | `@elizaos/plugin-form` |
 | `x402` | `@elizaos/plugin-x402` |
+| `fal` | `@elizaos/plugin-fal` |
+| `suno` | `@elizaos/plugin-suno` |
+| `vision` | `@elizaos/plugin-vision` |
 | `computeruse` | `@elizaos/plugin-computeruse` |
+
+<Info>
+The `vision`, `fal`, and `suno` plugins are also auto-enabled when their respective `media.*` config sections are configured (e.g., `media.vision.provider` is set, or `media.image.provider: "fal"` with `mode: "own-key"`). Webhook plugins auto-enable when `hooks.token` is set. Gmail watch auto-enables when `hooks.gmail.account` is set.
+</Info>
 
 <Tip>
 You can always force-disable any auto-enabled plugin by setting `plugins.entries.<id>.enabled: false`. The denylist takes priority over all auto-enable logic.
@@ -751,15 +774,19 @@ Milady supports two database backends:
       ],
       sessions: {
         enabled: true,
+        exportDir: "~/.milady/qmd-sessions",
         retentionDays: 30,
       },
       update: {
         interval: "30m",
+        debounceMs: 500,
         onBoot: true,
+        embedInterval: "1h",
       },
       limits: {
         maxResults: 10,
         maxSnippetChars: 500,
+        maxInjectedChars: 10000,
         timeoutMs: 5000,
       },
     },
@@ -861,7 +888,7 @@ Configure image, video, audio generation, and vision:
     removeAckAfterReply: false,
     // Message queue behavior
     queue: {
-      mode: "steer",                // steer | followup | collect | queue | interrupt
+      mode: "steer",                // steer | followup | collect | steer-backlog | steer+backlog | queue | interrupt
       debounceMs: 1500,
       cap: 20,
       drop: "old",                  // old | new | summarize
@@ -1002,6 +1029,8 @@ Configure Model Context Protocol (MCP) servers:
       enabled: false,
       filePath: "/tmp/cache-trace.jsonl",
       includeMessages: true,
+      includePrompt: false,
+      includeSystem: false,
     },
   },
 }
@@ -1188,7 +1217,9 @@ MILADY_GATEWAY_PORT=19000 MILADY_PORT=3000 milady start
 |----------|----------|
 | `ANTHROPIC_API_KEY` | Anthropic (Claude) |
 | `OPENAI_API_KEY` | OpenAI (GPT) |
+| `AI_GATEWAY_API_KEY` | Vercel AI Gateway |
 | `GOOGLE_API_KEY` | Google Gemini |
+| `GOOGLE_CLOUD_API_KEY` | Google Antigravity |
 | `GROQ_API_KEY` | Groq |
 | `XAI_API_KEY` | xAI (Grok) |
 | `OPENROUTER_API_KEY` | OpenRouter |
@@ -1197,6 +1228,7 @@ MILADY_GATEWAY_PORT=19000 MILADY_PORT=3000 milady start
 | `MISTRAL_API_KEY` | Mistral |
 | `COHERE_API_KEY` | Cohere |
 | `PERPLEXITY_API_KEY` | Perplexity |
+| `ZAI_API_KEY` | zAI |
 | `OLLAMA_BASE_URL` | Ollama (local) |
 
 ### Feature-Specific Variables
@@ -1212,23 +1244,29 @@ See the [Model Providers](/model-providers) page for a full list of supported pr
 
 ## CLI Config Commands
 
-Milady provides CLI commands to manage configuration without editing JSON directly:
+Milady provides CLI commands to inspect configuration without editing JSON directly:
 
 ```bash
-# Interactive configuration wizard (guided setup)
+# Configuration guidance (common env vars and usage)
 milady configure
 
 # Read a config value (dot-notation)
 milady config get agents.defaults.model
 milady config get gateway.port
 
-# Set a config value
-milady config set gateway.port 19000
-milady config set agents.defaults.thinkingDefault "high"
+# Print the resolved config file path
+milady config path
+
+# Display all config values grouped by section
+milady config show
+milady config show --all    # Include advanced/hidden fields
+milady config show --json   # Raw JSON output
 ```
 
+To change values, edit `~/.milady/milady.json` directly (it supports JSON5 with comments).
+
 <Tip>
-Use `milady configure` for initial setup. It walks through model provider selection, agent personality, and connector setup interactively.
+Use `milady configure` for a quick reference of common configuration options and environment variables. For full initial setup, run `milady setup` to go through the onboarding wizard, or edit `~/.milady/milady.json` directly.
 </Tip>
 
 ## Full Example

@@ -21,13 +21,13 @@ Global flags that apply to this command:
 
 | Flag | Description |
 |------|-------------|
-| `--version`, `-v`, `-V` | Print the current Milady version and exit |
+| `-v, --version` | Print the current Milady version and exit |
 | `--help`, `-h` | Show help for this command |
 | `--profile <name>` | Use a named configuration profile (state dir becomes `~/.milady-<name>/`) |
 | `--dev` | Shorthand for `--profile dev` (also sets the gateway port to `19001`) |
-| `--verbose` | Enable verbose logging output |
-| `--debug` | Enable debug mode |
-| `--no-color` | Disable colored output |
+| `--verbose` | Enable informational runtime logs |
+| `--debug` | Enable debug-level runtime logs |
+| `--no-color` | Disable ANSI colors |
 
 ## Examples
 
@@ -53,7 +53,6 @@ When you run `milady start`:
 2. The API server starts on port `2138` by default (override with `MILADY_PORT`).
 3. The agent loop begins processing messages from connected clients and messaging platforms.
 4. No interactive terminal UI is launched -- the process runs headlessly.
-5. Logs are written to `~/.milady/logs/`.
 
 The `run` command is a direct alias that calls the exact same `startEliza({ serverOnly: true })` function.
 

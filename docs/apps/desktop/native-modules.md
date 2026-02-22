@@ -51,7 +51,7 @@ Manages the embedded Eliza agent runtime lifecycle — starting, stopping, resta
 **Return type** — `AgentStatus`:
 ```typescript
 interface AgentStatus {
-  state: "stopped" | "starting" | "running" | "error";
+  state: "not_started" | "starting" | "running" | "stopped" | "error";
   agentName?: string;
   port?: number;
   startedAt?: string;
