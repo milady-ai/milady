@@ -1,6 +1,10 @@
-# Plugin Development Guide
+---
+title: "Plugin Development"
+sidebarTitle: "Plugin Development"
+description: "Create, test, and publish plugins for Milady/ElizaOS."
+---
 
-This guide walks you through creating, testing, and publishing plugins for Milaidy/ElizaOS.
+This guide walks you through creating, testing, and publishing plugins for Milady/ElizaOS.
 
 ## Table of Contents
 
@@ -78,9 +82,9 @@ export default myPlugin;
 ### Plugin Lifecycle
 
 1. **Discovery** — Plugins are discovered from:
-   - Bundled plugins (shipped with Milaidy)
-   - Workspace plugins (`./plugins/`, `./extensions/`)
-   - Global plugins (`~/.milaidy/plugins/`)
+   - Bundled plugins (shipped with Milady)
+   - Workspace plugins (`./plugins/`)
+   - Global plugins (`~/.milady/plugins/`)
    - npm packages (`@elizaos/plugin-*`)
    - Config-specified plugins
 
@@ -391,7 +395,7 @@ const workspaceProvider: Provider = {
   position: -10, // Run early
 
   get: async (runtime, message, state) => {
-    const workspaceDir = runtime.getSetting("WORKSPACE_DIR") || "~/.milaidy/workspace";
+    const workspaceDir = runtime.getSetting("WORKSPACE_DIR") || "~/.milady/workspace";
 
     // Read key files from workspace
     const agentsMd = await readFile(path.join(workspaceDir, "AGENTS.md"));
@@ -747,9 +751,9 @@ For local plugin development without publishing:
 
 1. **Workspace discovery** — Place your plugin in:
    - `./plugins/my-plugin/` (project-local)
-   - `~/.milaidy/plugins/my-plugin/` (global)
+   - `~/.milady/plugins/my-plugin/` (global)
 
-2. **Config-based loading** — Add to `milaidy.json`:
+2. **Config-based loading** — Add to `milady.json`:
    ```json
    {
      "plugins": ["./path/to/my-plugin"]
@@ -758,7 +762,7 @@ For local plugin development without publishing:
 
 3. **Symlink for development:**
    ```bash
-   cd ~/.milaidy/plugins
+   cd ~/.milady/plugins
    ln -s /path/to/my-plugin my-plugin
    ```
 
@@ -776,7 +780,7 @@ Plugins can include an `elizaos.plugin.json` manifest file for rich metadata:
   "name": "My Plugin",
   "description": "A plugin that does awesome things",
   "version": "1.0.0",
-  "kind": "tool",
+  "kind": "skill",
   
   "configSchema": {
     "type": "object",
@@ -829,9 +833,9 @@ Indicates where a plugin was discovered:
 
 | Origin | Description |
 |--------|-------------|
-| `bundled` | Shipped with Milaidy |
-| `global` | From `~/.milaidy/plugins/` |
-| `workspace` | From `./plugins/` or `./extensions/` |
+| `bundled` | Shipped with Milady |
+| `global` | From `~/.milady/plugins/` |
+| `workspace` | From `./plugins/` |
 | `config` | Explicitly listed in config |
 | `npm` | Installed npm package |
 
@@ -1085,4 +1089,4 @@ const myPlugin: Plugin = {
 
 - [Skills Documentation](./skills.md) — Learn about markdown-based skill extensions
 - [Registry Guide](./registry.md) — Publishing to the plugin registry
-- [Contributing Guide](./contributing.md) — Contributing to Milaidy/ElizaOS
+- [Contributing Guide](/guides/contribution-guide) — Contributing to Milady/ElizaOS
