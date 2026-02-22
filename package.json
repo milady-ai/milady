@@ -116,7 +116,6 @@
     "@elizaos/plugin-groq": "next",
     "@elizaos/plugin-imessage": "next",
     "@elizaos/plugin-knowledge": "next",
-    "@elizaos/plugin-local-embedding": "next",
     "@elizaos/plugin-mattermost": "next",
     "@elizaos/plugin-mcp": "next",
     "@elizaos/plugin-msteams": "next",
