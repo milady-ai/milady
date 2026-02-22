@@ -16,6 +16,7 @@ import type {
 } from "@elizaos/core";
 import { emoteAction } from "../actions/emote";
 import { restartAction } from "../actions/restart";
+import { sendMessageAction } from "../actions/send-message";
 import { EMOTE_CATALOG } from "../emotes/catalog";
 import { adminTrustProvider } from "../providers/admin-trust";
 import {
@@ -147,6 +148,7 @@ export function createMiladyPlugin(config?: MiladyPluginConfig): Plugin {
 
     actions: [
       restartAction,
+      sendMessageAction,
       createTriggerTaskAction,
       emoteAction,
       ...loadCustomActions(),

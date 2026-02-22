@@ -108,6 +108,7 @@ export function AvatarSelector({
                 strokeLinejoin="round"
                 aria-label="Add new persona"
               >
+                <title>Add new persona</title>
                 <path d="M12 5v14m-7-7h14" />
               </svg>
             </button>

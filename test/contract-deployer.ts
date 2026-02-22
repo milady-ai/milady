@@ -17,18 +17,33 @@ interface CompiledContract {
   bytecode: string;
 }
 
-function loadCompiledContract(contractName: string): CompiledContract {
-  const artifactPath = path.join(
-    __dirname,
-    "contracts",
-    "out",
-    `${contractName}.sol`,
-    `${contractName}.json`,
-  );
+function resolveArtifactPath(contractNames: string[]): string | null {
+  for (const contractName of contractNames) {
+    const candidate = path.join(
+      __dirname,
+      "contracts",
+      "out",
+      `${contractName}.sol`,
+      `${contractName}.json`,
+    );
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  return null;
+}
 
-  if (!fs.existsSync(artifactPath)) {
+function loadCompiledContract(
+  contractName: string | string[],
+): CompiledContract {
+  const candidates = Array.isArray(contractName)
+    ? contractName
+    : [contractName];
+  const artifactPath = resolveArtifactPath(candidates);
+
+  if (!artifactPath) {
     throw new Error(
-      `Contract artifact not found: ${artifactPath}. Did you run 'forge build' in test/contracts?`,
+      `Contract artifact not found for any of: ${candidates.join(", ")}. Did you run 'forge build' in test/contracts?`,
     );
   }
 
@@ -62,8 +77,14 @@ export async function deployContracts(
   wallet: ethers.Wallet,
 ): Promise<DeployedContracts> {
   // Load compiled artifacts
-  const registryArtifact = loadCompiledContract("MockMiladyAgentRegistry");
-  const collectionArtifact = loadCompiledContract("MockMiladyCollection");
+  const registryArtifact = loadCompiledContract([
+    "MockMiladyAgentRegistry",
+    "MockMilaidyAgentRegistry",
+  ]);
+  const collectionArtifact = loadCompiledContract([
+    "MockMiladyCollection",
+    "MockMilaidyCollection",
+  ]);
 
   // Get current nonce explicitly to avoid race conditions
   let currentNonce = await wallet.getNonce("pending");
@@ -114,8 +135,14 @@ export function getContractABIs(): {
   registryABI: ethers.InterfaceAbi;
   collectionABI: ethers.InterfaceAbi;
 } {
-  const registryArtifact = loadCompiledContract("MockMiladyAgentRegistry");
-  const collectionArtifact = loadCompiledContract("MockMiladyCollection");
+  const registryArtifact = loadCompiledContract([
+    "MockMiladyAgentRegistry",
+    "MockMilaidyAgentRegistry",
+  ]);
+  const collectionArtifact = loadCompiledContract([
+    "MockMiladyCollection",
+    "MockMilaidyCollection",
+  ]);
 
   return {
     registryABI: registryArtifact.abi,

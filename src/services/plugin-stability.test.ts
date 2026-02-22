@@ -120,6 +120,7 @@ const envKeysToClean = [
   "OLLAMA_BASE_URL",
   "ELIZAOS_CLOUD_API_KEY",
   "ELIZAOS_CLOUD_ENABLED",
+  "MILAIDY_USE_PI_AI",
   "DISCORD_BOT_TOKEN",
   "TELEGRAM_BOT_TOKEN",
   "SLACK_BOT_TOKEN",
@@ -612,13 +613,13 @@ describe("Provider Validation", () => {
     expect(provider.name).toBe("workspaceContext");
   });
 
-  it.skip("createSessionKeyProvider returns a valid Provider shape", () => {
+  it("createSessionKeyProvider returns a valid Provider shape", () => {
     const provider = createSessionKeyProvider({ defaultAgentId: "test-agent" });
     expect(provider).toBeDefined();
     expect(typeof provider.name).toBe("string");
     expect(typeof provider.description).toBe("string");
     expect(typeof provider.get).toBe("function");
-    expect(provider.name).toBe("session-key");
+    expect(provider.name).toBe("miladySessionKey");
   });
 
   it("createMiladyPlugin returns a valid Plugin with providers", () => {

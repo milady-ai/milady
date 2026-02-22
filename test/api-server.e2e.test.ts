@@ -580,7 +580,12 @@ function createRuntimeForChatSseTests(options?: {
           onStreamChunk?: (chunk: string, messageId?: string) => Promise<void>;
         },
       ) =>
-        options?.handleMessage?.(runtime, message, onResponse, messageOptions) ??
+        options?.handleMessage?.(
+          runtime,
+          message,
+          onResponse,
+          messageOptions,
+        ) ??
         (await (async () => {
           await onResponse({ text: "Hello " } as Content);
           await onResponse({ text: "world" } as Content);
@@ -1413,6 +1418,54 @@ describe("API Server E2E (no runtime)", () => {
           "Hello ",
           "world",
         ]);
+
+        const doneEvent = events.find((event) => event.type === "done");
+        expect(doneEvent?.fullText).toBe("Hello world");
+        expect(doneEvent?.agentName).toBe("ChatStreamAgent");
+      } finally {
+        await streamServer.close();
+      }
+    });
+
+    it("POST /api/chat/stream preserves repeated characters in incremental callback tokens", async () => {
+      const runtime = createRuntimeForChatSseTests({
+        handleMessage: async (_runtime, _message, onResponse) => {
+          for (const token of [
+            "H",
+            "e",
+            "l",
+            "l",
+            "o",
+            " ",
+            "w",
+            "o",
+            "r",
+            "l",
+            "d",
+          ]) {
+            await onResponse({ text: token } as Content);
+          }
+          return {
+            responseContent: {
+              text: "Hello world",
+            },
+          };
+        },
+      });
+      const streamServer = await startApiServer({ port: 0, runtime });
+      try {
+        const { status, events } = await reqSse(
+          streamServer.port,
+          "/api/chat/stream",
+          { text: "hello", mode: "power" },
+        );
+
+        expect(status).toBe(200);
+        const tokenText = events
+          .filter((event) => event.type === "token")
+          .map((event) => event.text ?? "")
+          .join("");
+        expect(tokenText).toBe("Hello world");
 
         const doneEvent = events.find((event) => event.type === "done");
         expect(doneEvent?.fullText).toBe("Hello world");
@@ -2943,6 +2996,80 @@ describe("API Server E2E (no runtime)", () => {
         await streamServer.close();
       }
     });
+
+    it("does not route ambiguous assistant events without source or room metadata", async () => {
+      const eventService = new TestAgentEventService();
+      const runtime = createRuntimeForAutonomySurfaceTests({
+        eventService,
+        loopRunning: true,
+      });
+      const streamServer = await startApiServer({ port: 0, runtime });
+      const ws = new WebSocket(`ws://127.0.0.1:${streamServer.port}/ws`);
+      try {
+        await waitForWsMessage(ws, (message) => message.type === "status");
+
+        const createConversation = await req(
+          streamServer.port,
+          "POST",
+          "/api/conversations",
+          {
+            title: "No ambiguous proactive routing",
+          },
+        );
+        expect(createConversation.status).toBe(200);
+        const conversation = createConversation.data.conversation as {
+          id?: string;
+        };
+        const conversationId = conversation.id ?? "";
+        expect(conversationId.length).toBeGreaterThan(0);
+
+        ws.send(
+          JSON.stringify({
+            type: "active-conversation",
+            conversationId,
+          }),
+        );
+
+        eventService.emit({
+          runId: "run-ambiguous-no-proactive",
+          seq: 1,
+          stream: "assistant",
+          ts: Date.now(),
+          data: {
+            text: "ambiguous-should-not-route",
+          },
+          agentId: "autonomy-surface-agent",
+        });
+
+        await expect(
+          waitForWsMessage(
+            ws,
+            (message) =>
+              message.type === "proactive-message" &&
+              message.conversationId === conversationId,
+            900,
+          ),
+        ).rejects.toThrow("Timed out waiting for websocket message");
+
+        const messagesResponse = await req(
+          streamServer.port,
+          "GET",
+          `/api/conversations/${encodeURIComponent(conversationId)}/messages`,
+        );
+        expect(messagesResponse.status).toBe(200);
+        const messages = messagesResponse.data.messages as Array<
+          Record<string, unknown>
+        >;
+        const routed = messages.find(
+          (message) =>
+            String(message.text ?? "") === "ambiguous-should-not-route",
+        );
+        expect(routed).toBeUndefined();
+      } finally {
+        ws.close();
+        await streamServer.close();
+      }
+    });
   });
 
   // -- Onboarding --
@@ -3095,8 +3222,7 @@ describe("API Server E2E (no runtime)", () => {
         expect(status).toBe(200);
         const autonomy = (
           data as { autonomy?: { enabled?: boolean; thinking?: boolean } }
-        )
-          .autonomy;
+        ).autonomy;
         expect(autonomy?.enabled).toBe(true);
         expect(autonomy?.thinking).toBe(true);
       } finally {
@@ -3412,7 +3538,7 @@ describe("API Server E2E (no runtime)", () => {
           name: "test-remote",
           config: {
             type: "streamable-http",
-            url: "https://mcp.example.com/api",
+            url: "https://93.184.216.34/api",
           },
         },
       );
@@ -3471,7 +3597,7 @@ describe("API Server E2E (no runtime)", () => {
     it("PUT /api/mcp/config replaces entire config", async () => {
       const newServers = {
         "bulk-a": { type: "stdio", command: "npx", args: ["-y", "@test/a"] },
-        "bulk-b": { type: "streamable-http", url: "https://example.com/mcp" },
+        "bulk-b": { type: "streamable-http", url: "https://93.184.216.34/mcp" },
       };
 
       const { status, data } = await req(port, "PUT", "/api/mcp/config", {

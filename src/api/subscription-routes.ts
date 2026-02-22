@@ -27,7 +27,10 @@ export async function handleSubscriptionRoutes(
       const { getSubscriptionStatus } = await import("../auth/index");
       json(res, { providers: getSubscriptionStatus() });
     } catch (err) {
-      error(res, `Failed to get subscription status: ${err}`, 500);
+      logger.error(
+        `[api] Failed to get subscription status: ${err instanceof Error ? err.stack : err}`,
+      );
+      error(res, "Failed to get subscription status", 500);
     }
     return true;
   }
@@ -42,7 +45,10 @@ export async function handleSubscriptionRoutes(
       state._anthropicFlow = flow;
       json(res, { authUrl: flow.authUrl });
     } catch (err) {
-      error(res, `Failed to start Anthropic login: ${err}`, 500);
+      logger.error(
+        `[api] Failed to start Anthropic login: ${err instanceof Error ? err.stack : err}`,
+      );
+      error(res, "Failed to start Anthropic login", 500);
     }
     return true;
   }
@@ -72,11 +78,14 @@ export async function handleSubscriptionRoutes(
       flow.submitCode(body.code);
       const credentials = await flow.credentials;
       saveCredentials("anthropic-subscription", credentials);
-      await applySubscriptionCredentials();
+      await applySubscriptionCredentials(state.config);
       delete state._anthropicFlow;
       json(res, { success: true, expiresAt: credentials.expires });
     } catch (err) {
-      error(res, `Anthropic exchange failed: ${err}`, 500);
+      logger.error(
+        `[api] Anthropic exchange failed: ${err instanceof Error ? err.stack : err}`,
+      );
+      error(res, "Anthropic exchange failed", 500);
     }
     return true;
   }
@@ -103,7 +112,10 @@ export async function handleSubscriptionRoutes(
       ctx.saveConfig(state.config);
       json(res, { success: true });
     } catch (err) {
-      error(res, `Failed to save setup token: ${err}`, 500);
+      logger.error(
+        `[api] Failed to save setup token: ${err instanceof Error ? err.stack : err}`,
+      );
+      error(res, "Failed to save setup token", 500);
     }
     return true;
   }
@@ -149,7 +161,10 @@ export async function handleSubscriptionRoutes(
           "Open the URL in your browser. After login, if auto-redirect doesn't work, paste the full redirect URL.",
       });
     } catch (err) {
-      error(res, `Failed to start OpenAI login: ${err}`, 500);
+      logger.error(
+        `[api] Failed to start OpenAI login: ${err instanceof Error ? err.stack : err}`,
+      );
+      error(res, "Failed to start OpenAI login", 500);
     }
     return true;
   }
@@ -196,11 +211,14 @@ export async function handleSubscriptionRoutes(
         delete state._codexFlow;
         clearTimeout(state._codexFlowTimer);
         delete state._codexFlowTimer;
-        error(res, `OpenAI exchange failed: ${err}`, 500);
+        logger.error(
+          `[api] OpenAI exchange failed: ${err instanceof Error ? err.stack : err}`,
+        );
+        error(res, "OpenAI exchange failed", 500);
         return true;
       }
       saveCredentials("openai-codex", credentials);
-      await applySubscriptionCredentials();
+      await applySubscriptionCredentials(state.config);
       flow.close();
       delete state._codexFlow;
       clearTimeout(state._codexFlowTimer);
@@ -210,7 +228,10 @@ export async function handleSubscriptionRoutes(
         expiresAt: credentials.expires,
       });
     } catch (err) {
-      error(res, `OpenAI exchange failed: ${err}`, 500);
+      logger.error(
+        `[api] OpenAI exchange failed: ${err instanceof Error ? err.stack : err}`,
+      );
+      error(res, "OpenAI exchange failed", 500);
     }
     return true;
   }
@@ -225,7 +246,10 @@ export async function handleSubscriptionRoutes(
         deleteCredentials(provider);
         json(res, { success: true });
       } catch (err) {
-        error(res, `Failed to delete credentials: ${err}`, 500);
+        logger.error(
+          `[api] Failed to delete credentials: ${err instanceof Error ? err.stack : err}`,
+        );
+        error(res, "Failed to delete credentials", 500);
       }
     } else {
       error(res, `Unknown provider: ${provider}`, 400);

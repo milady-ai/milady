@@ -226,6 +226,26 @@ describe("applyPluginAutoEnable — env vars", () => {
     expect(changes.some((c) => c.includes("ANTHROPIC_API_KEY"))).toBe(true);
   });
 
+  it("enables repoprompt plugin when REPOPROMPT_CLI_PATH is set", () => {
+    const params = makeParams({
+      env: { REPOPROMPT_CLI_PATH: "/usr/local/bin/rp-cli" },
+    });
+    const { config, changes } = applyPluginAutoEnable(params);
+
+    expect(config.plugins?.allow).toContain("repoprompt");
+    expect(changes.some((c) => c.includes("REPOPROMPT_CLI_PATH"))).toBe(true);
+  });
+
+  it("enables pi-ai plugin when MILAIDY_USE_PI_AI is set", () => {
+    const params = makeParams({
+      env: { MILAIDY_USE_PI_AI: "1" },
+    });
+    const { config, changes } = applyPluginAutoEnable(params);
+
+    expect(config.plugins?.allow).toContain("pi-ai");
+    expect(changes.some((c) => c.includes("MILAIDY_USE_PI_AI"))).toBe(true);
+  });
+
   it("skips env var with empty string value", () => {
     const params = makeParams({ env: { OPENAI_API_KEY: "" } });
     const { changes } = applyPluginAutoEnable(params);
@@ -268,6 +288,16 @@ describe("applyPluginAutoEnable — env vars", () => {
     expect(allow).toContain("xai");
   });
 
+  it("auto-enables obsidian plugin when OBSIDIAN_VAULT_PATH is set", () => {
+    const params = makeParams({
+      env: { OBSIDIAN_VAULT_PATH: "/tmp/vault" },
+    });
+    const { config, changes } = applyPluginAutoEnable(params);
+
+    expect(config.plugins?.allow).toContain("obsidian");
+    expect(changes.some((c) => c.includes("OBSIDIAN_VAULT_PATH"))).toBe(true);
+  });
+
   it("does not duplicate entries in allow list", () => {
     const params = makeParams({
       env: {
@@ -280,6 +310,38 @@ describe("applyPluginAutoEnable — env vars", () => {
 
     const anthropicEntries = allow.filter((p) => p === "anthropic");
     expect(anthropicEntries).toHaveLength(1);
+  });
+
+  it("auto-enables cua plugin when CUA_API_KEY is set", () => {
+    const params = makeParams({
+      env: { CUA_API_KEY: "cua-key" },
+    });
+    const { config, changes } = applyPluginAutoEnable(params);
+
+    expect(config.plugins?.allow).toContain("cua");
+    expect(changes.some((c) => c.includes("CUA_API_KEY"))).toBe(true);
+  });
+
+  it("auto-enables cua plugin when CUA_HOST is set", () => {
+    const params = makeParams({
+      env: { CUA_HOST: "https://cua.example" },
+    });
+    const { config, changes } = applyPluginAutoEnable(params);
+
+    expect(config.plugins?.allow).toContain("cua");
+    expect(changes.some((c) => c.includes("CUA_HOST"))).toBe(true);
+  });
+
+  it("respects cua enabled=false override for env auto-enable", () => {
+    const params = makeParams({
+      config: {
+        plugins: { entries: { cua: { enabled: false } } },
+      },
+      env: { CUA_API_KEY: "cua-key" },
+    });
+    const { config } = applyPluginAutoEnable(params);
+
+    expect(config.plugins?.allow ?? []).not.toContain("cua");
   });
 });
 
@@ -296,6 +358,16 @@ describe("applyPluginAutoEnable — features", () => {
 
     expect(config.plugins?.allow).toContain("browser");
     expect(changes.some((c) => c.includes("feature: browser"))).toBe(true);
+  });
+
+  it("enables repoprompt plugin when feature flag is enabled", () => {
+    const params = makeParams({
+      config: { features: { repoprompt: true } },
+    });
+    const { config, changes } = applyPluginAutoEnable(params);
+
+    expect(config.plugins?.allow).toContain("repoprompt");
+    expect(changes.some((c) => c.includes("feature: repoprompt"))).toBe(true);
   });
 
   it("enables plugin when feature is an object with enabled not false", () => {
@@ -323,6 +395,45 @@ describe("applyPluginAutoEnable — features", () => {
     const { changes } = applyPluginAutoEnable(params);
 
     expect(changes).toHaveLength(0);
+  });
+
+  it("enables obsidian plugin when features.obsidian = true", () => {
+    const params = makeParams({
+      config: { features: { obsidian: true } },
+    });
+    const { config } = applyPluginAutoEnable(params);
+
+    expect(config.plugins?.allow).toContain("obsidian");
+  });
+
+  it("enables x402 plugin when features.x402 = true", () => {
+    const params = makeParams({
+      config: { features: { x402: true } },
+    });
+    const { config, changes } = applyPluginAutoEnable(params);
+
+    expect(config.plugins?.allow).toContain("x402");
+    expect(changes.some((c) => c.includes("feature: x402"))).toBe(true);
+  });
+
+  it("enables cua plugin when features.cua = true", () => {
+    const params = makeParams({
+      config: { features: { cua: true } },
+    });
+    const { config, changes } = applyPluginAutoEnable(params);
+
+    expect(config.plugins?.allow).toContain("cua");
+    expect(changes.some((c) => c.includes("feature: cua"))).toBe(true);
+  });
+
+  it("enables computeruse plugin when features.computeruse = true", () => {
+    const params = makeParams({
+      config: { features: { computeruse: true } },
+    });
+    const { config, changes } = applyPluginAutoEnable(params);
+
+    expect(config.plugins?.allow).toContain("computeruse");
+    expect(changes.some((c) => c.includes("feature: computeruse"))).toBe(true);
   });
 });
 
@@ -370,7 +481,63 @@ describe("applyPluginAutoEnable — hooks", () => {
 });
 
 // ============================================================================
-//  7. Mapping constants
+//  7. Subscription provider auto-enable
+// ============================================================================
+
+describe("applyPluginAutoEnable — subscription provider", () => {
+  it("force-enables anthropic plugin when subscriptionProvider is anthropic-subscription", () => {
+    const params = makeParams({
+      config: {
+        agents: {
+          defaults: { subscriptionProvider: "anthropic-subscription" },
+        },
+      },
+    });
+    const { config, changes } = applyPluginAutoEnable(params);
+
+    expect(config.plugins?.allow).toContain("anthropic");
+    expect(changes.some((c) => c.includes("subscription"))).toBe(true);
+  });
+
+  it("force-enables openai plugin when subscriptionProvider is openai-codex", () => {
+    const params = makeParams({
+      config: {
+        agents: { defaults: { subscriptionProvider: "openai-codex" } },
+      },
+    });
+    const { config, changes } = applyPluginAutoEnable(params);
+
+    expect(config.plugins?.allow).toContain("openai");
+    expect(changes.some((c) => c.includes("subscription"))).toBe(true);
+  });
+
+  it("overrides explicit enabled=false for the subscription plugin", () => {
+    const params = makeParams({
+      config: {
+        plugins: { entries: { anthropic: { enabled: false } } },
+        agents: {
+          defaults: { subscriptionProvider: "anthropic-subscription" },
+        },
+      },
+    });
+    const { config } = applyPluginAutoEnable(params);
+
+    expect(config.plugins?.allow).toContain("anthropic");
+    expect(config.plugins?.entries?.anthropic?.enabled).toBe(true);
+  });
+
+  it("does nothing when subscriptionProvider is not set", () => {
+    const params = makeParams({
+      config: { agents: { defaults: {} } },
+    });
+    const { changes } = applyPluginAutoEnable(params);
+
+    expect(changes.every((c) => !c.includes("subscription"))).toBe(true);
+  });
+});
+
+// ============================================================================
+//  8. Mapping constants
 // ============================================================================
 
 describe("CONNECTOR_PLUGINS", () => {
@@ -382,8 +549,12 @@ describe("CONNECTOR_PLUGINS", () => {
     expect(CONNECTOR_PLUGINS.discord).toBe("@elizaos/plugin-discord");
   });
 
-  it("contains 16 connector mappings", () => {
-    expect(Object.keys(CONNECTOR_PLUGINS)).toHaveLength(16);
+  it("contains 17 connector mappings", () => {
+    expect(Object.keys(CONNECTOR_PLUGINS)).toHaveLength(17);
+  });
+
+  it("maps retake to @milady/plugin-retake", () => {
+    expect(CONNECTOR_PLUGINS.retake).toBe("@milady/plugin-retake");
   });
 });
 
@@ -399,5 +570,171 @@ describe("AUTH_PROVIDER_PLUGINS", () => {
     expect(AUTH_PROVIDER_PLUGINS.CLAUDE_API_KEY).toBe(
       "@elizaos/plugin-anthropic",
     );
+  });
+
+  it("maps OBSIDIAN_VAULT_PATH and OBSIDAN_VAULT_PATH to obsidian plugin", () => {
+    expect(AUTH_PROVIDER_PLUGINS.OBSIDIAN_VAULT_PATH).toBe(
+      "@elizaos/plugin-obsidian",
+    );
+    expect(AUTH_PROVIDER_PLUGINS.OBSIDAN_VAULT_PATH).toBe(
+      "@elizaos/plugin-obsidian",
+    );
+  });
+
+  it("maps MILAIDY_USE_PI_AI to pi-ai plugin", () => {
+    expect(AUTH_PROVIDER_PLUGINS.MILAIDY_USE_PI_AI).toBe(
+      "@elizaos/plugin-pi-ai",
+    );
+  });
+
+  it("maps CUA env keys to cua plugin", () => {
+    expect(AUTH_PROVIDER_PLUGINS.CUA_API_KEY).toBe("@elizaos/plugin-cua");
+    expect(AUTH_PROVIDER_PLUGINS.CUA_HOST).toBe("@elizaos/plugin-cua");
+  });
+});
+
+// ============================================================================
+//  WhatsApp connector auto-enable — Baileys auth fields
+// ============================================================================
+
+describe("WhatsApp connector auto-enable", () => {
+  it("auto-enables via legacy authState field", () => {
+    const { config } = applyPluginAutoEnable(
+      makeParams({
+        config: { connectors: { whatsapp: { authState: "./auth" } } },
+      }),
+    );
+    expect(config.plugins?.allow).toContain("whatsapp");
+  });
+
+  it("auto-enables via legacy sessionPath field", () => {
+    const { config } = applyPluginAutoEnable(
+      makeParams({
+        config: { connectors: { whatsapp: { sessionPath: "./auth" } } },
+      }),
+    );
+    expect(config.plugins?.allow).toContain("whatsapp");
+  });
+
+  it("auto-enables via authDir (Baileys WhatsAppAccountSchema field)", () => {
+    const { config } = applyPluginAutoEnable(
+      makeParams({
+        config: { connectors: { whatsapp: { authDir: "./auth/whatsapp" } } },
+      }),
+    );
+    expect(config.plugins?.allow).toContain("whatsapp");
+  });
+
+  it("auto-enables when accounts object is configured", () => {
+    const { config } = applyPluginAutoEnable(
+      makeParams({
+        config: {
+          connectors: {
+            whatsapp: {
+              accounts: { default: { enabled: true, authDir: "./auth" } },
+            },
+          },
+        },
+      }),
+    );
+    expect(config.plugins?.allow).toContain("whatsapp");
+  });
+
+  it("does not auto-enable when whatsapp config is empty", () => {
+    const { config } = applyPluginAutoEnable(
+      makeParams({ config: { connectors: { whatsapp: {} } } }),
+    );
+    expect(config.plugins?.allow ?? []).not.toContain("whatsapp");
+  });
+
+  it("does not auto-enable when accounts object has no valid authDir", () => {
+    const { config } = applyPluginAutoEnable(
+      makeParams({
+        config: {
+          connectors: {
+            whatsapp: { accounts: { default: {} } },
+          },
+        },
+      }),
+    );
+    expect(config.plugins?.allow ?? []).not.toContain("whatsapp");
+  });
+
+  it("does not auto-enable when all accounts are explicitly disabled", () => {
+    const { config } = applyPluginAutoEnable(
+      makeParams({
+        config: {
+          connectors: {
+            whatsapp: {
+              accounts: { main: { enabled: false, authDir: "./auth" } },
+            },
+          },
+        },
+      }),
+    );
+    expect(config.plugins?.allow ?? []).not.toContain("whatsapp");
+  });
+
+  it("does not auto-enable when enabled is explicitly false", () => {
+    const { config } = applyPluginAutoEnable(
+      makeParams({
+        config: {
+          connectors: {
+            whatsapp: { enabled: false, authDir: "./auth/whatsapp" },
+          },
+        },
+      }),
+    );
+    expect(config.plugins?.allow ?? []).not.toContain("whatsapp");
+  });
+});
+
+// ============================================================================
+//  Retake connector auto-enable
+// ============================================================================
+
+describe("Retake connector auto-enable", () => {
+  it("auto-enables when accessToken is set", () => {
+    const { config } = applyPluginAutoEnable(
+      makeParams({
+        config: {
+          connectors: { retake: { accessToken: "rtk-test-token" } },
+        },
+      }),
+    );
+    expect(config.plugins?.allow).toContain("retake");
+  });
+
+  it("auto-enables when enabled is true", () => {
+    const { config } = applyPluginAutoEnable(
+      makeParams({
+        config: {
+          connectors: { retake: { enabled: true } },
+        },
+      }),
+    );
+    expect(config.plugins?.allow).toContain("retake");
+  });
+
+  it("does not auto-enable when config is empty", () => {
+    const { config } = applyPluginAutoEnable(
+      makeParams({
+        config: { connectors: { retake: {} } },
+      }),
+    );
+    expect(config.plugins?.allow ?? []).not.toContain("retake");
+  });
+
+  it("does not auto-enable when enabled is explicitly false", () => {
+    const { config } = applyPluginAutoEnable(
+      makeParams({
+        config: {
+          connectors: {
+            retake: { enabled: false, accessToken: "rtk-test" },
+          },
+        },
+      }),
+    );
+    expect(config.plugins?.allow ?? []).not.toContain("retake");
   });
 });

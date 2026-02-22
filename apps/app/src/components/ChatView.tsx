@@ -7,14 +7,17 @@
  */
 
 import {
+  type ChangeEvent,
+  type DragEvent,
   type KeyboardEvent,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
 import { getVrmPreviewUrl, useApp } from "../AppContext";
-import { client, type VoiceConfig } from "../api-client";
+import { client, type ImageAttachment, type VoiceConfig } from "../api-client";
 import {
   useVoiceChat,
   type VoicePlaybackStartEvent,
@@ -46,10 +49,14 @@ export function ChatView() {
     shareIngestNotice,
     chatAgentVoiceMuted: agentVoiceMuted,
     selectedVrmIndex,
+    chatPendingImages,
+    setChatPendingImages,
   } = useApp();
 
   const messagesRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imageDragOver, setImageDragOver] = useState(false);
 
   // ── Voice config (ElevenLabs / browser TTS) ────────────────────────
   const [voiceConfig, setVoiceConfig] = useState<VoiceConfig | null>(null);
@@ -157,14 +164,18 @@ export function ChatView() {
 
   const agentName = agentStatus?.agentName ?? "Agent";
   const msgs = conversationMessages;
-  const visibleMsgs = msgs.filter(
-    (msg) =>
-      !(
-        chatSending &&
-        !chatFirstTokenReceived &&
-        msg.role === "assistant" &&
-        !msg.text.trim()
+  const visibleMsgs = useMemo(
+    () =>
+      msgs.filter(
+        (msg) =>
+          !(
+            chatSending &&
+            !chatFirstTokenReceived &&
+            msg.role === "assistant" &&
+            !msg.text.trim()
+          ),
       ),
+    [chatFirstTokenReceived, chatSending, msgs],
   );
   const agentAvatarSrc =
     selectedVrmIndex > 0 ? getVrmPreviewUrl(selectedVrmIndex) : null;
@@ -178,7 +189,11 @@ export function ChatView() {
       .find((message) => message.role === "assistant");
     if (!latestAssistant || !latestAssistant.text.trim()) return;
 
-    queueAssistantSpeech(latestAssistant.id, latestAssistant.text, !chatSending);
+    queueAssistantSpeech(
+      latestAssistant.id,
+      latestAssistant.text,
+      !chatSending,
+    );
   }, [msgs, chatSending, agentVoiceMuted, queueAssistantSpeech]);
 
   useEffect(() => {
@@ -229,10 +244,13 @@ export function ChatView() {
 
   // Smooth auto-scroll while streaming and on new messages.
   useEffect(() => {
+    if (!chatSending && visibleMsgs.length === 0) {
+      return;
+    }
     const el = messagesRef.current;
     if (!el) return;
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-  }, []);
+  }, [chatSending, visibleMsgs]);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -267,20 +285,92 @@ export function ChatView() {
     }
   };
 
+  const addImageFiles = useCallback(
+    (files: FileList | File[]) => {
+      const imageFiles = Array.from(files).filter((f) =>
+        f.type.startsWith("image/"),
+      );
+      if (!imageFiles.length) return;
+
+      const readers = imageFiles.map(
+        (file) =>
+          new Promise<ImageAttachment>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const result = reader.result as string;
+              // result is "data:<mime>;base64,<data>" — strip the prefix
+              const commaIdx = result.indexOf(",");
+              const data = commaIdx >= 0 ? result.slice(commaIdx + 1) : result;
+              resolve({ data, mimeType: file.type, name: file.name });
+            };
+            reader.readAsDataURL(file);
+          }),
+      );
+
+      void Promise.all(readers).then((attachments) => {
+        setChatPendingImages((prev) => {
+          const combined = [...prev, ...attachments];
+          // Mirror the server-side MAX_CHAT_IMAGES=4 limit so the user gets
+          // immediate feedback rather than a 400 after upload.
+          return combined.slice(0, 4);
+        });
+      });
+    },
+    [setChatPendingImages],
+  );
+
+  const handleImageDrop = useCallback(
+    (e: DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      setImageDragOver(false);
+      if (e.dataTransfer.files.length) {
+        addImageFiles(e.dataTransfer.files);
+      }
+    },
+    [addImageFiles],
+  );
+
+  const handleFileInputChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files) {
+        addImageFiles(e.target.files);
+      }
+      e.target.value = "";
+    },
+    [addImageFiles],
+  );
+
+  const removeImage = useCallback(
+    (index: number) => {
+      setChatPendingImages((prev) => prev.filter((_, i) => i !== index));
+    },
+    [setChatPendingImages],
+  );
+
   return (
-    <div className="flex flex-col flex-1 min-h-0 px-2 sm:px-3 relative">
+    <section
+      aria-label="Chat workspace"
+      className={`flex flex-col flex-1 min-h-0 px-2 sm:px-3 relative${imageDragOver ? " ring-2 ring-accent ring-inset" : ""}`}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setImageDragOver(true);
+      }}
+      onDragLeave={() => setImageDragOver(false)}
+      onDrop={handleImageDrop}
+    >
       {/* ── Messages ───────────────────────────────────────────────── */}
       <div
         ref={messagesRef}
-        className="flex-1 overflow-y-auto py-2 pr-2 sm:pr-3 relative"
-        style={{ zIndex: 1, scrollbarGutter: "stable" }}
+        data-testid="chat-messages-scroll"
+        className="flex-1 overflow-y-auto py-2 pr-3 sm:pr-4 relative"
+        style={{ zIndex: 1, scrollbarGutter: "stable both-edges" }}
       >
         {visibleMsgs.length === 0 && !chatSending ? (
           <div className="text-center py-10 text-muted italic">
             Send a message to start chatting.
           </div>
         ) : (
-          <div className="w-full pr-1">
+          <div className="w-full pr-2 sm:pr-3">
             {visibleMsgs.map((msg, i) => {
               const prev = i > 0 ? visibleMsgs[i - 1] : null;
               const grouped = prev?.role === msg.role;
@@ -311,7 +401,9 @@ export function ChatView() {
                         )}
                       </div>
                     ))}
-                  <div className="max-w-[92%] sm:max-w-[85%] min-w-0 px-0 py-1 text-sm leading-relaxed whitespace-pre-wrap break-words">
+                  <div
+                    className={`max-w-[92%] sm:max-w-[85%] min-w-0 px-0 py-1 text-sm leading-relaxed whitespace-pre-wrap break-words ${isUser ? "mr-1 sm:mr-2" : ""}`}
+                  >
                     {!grouped && (
                       <div className="font-bold text-[12px] mb-1 text-accent">
                         {isUser ? "You" : agentName}
@@ -348,7 +440,7 @@ export function ChatView() {
                     </div>
                   )}
                 </div>
-                <div className="max-w-[92%] sm:max-w-[85%] min-w-0 px-0 py-1 text-sm leading-relaxed">
+                <div className="max-w-[92%] sm:max-w-[85%] min-w-0 px-0 py-1 pr-1 sm:pr-2 text-sm leading-relaxed">
                   <div className="font-bold text-[12px] mb-1 text-accent">
                     {agentName}
                   </div>
@@ -383,6 +475,35 @@ export function ChatView() {
         </div>
       )}
 
+      {/* Pending image thumbnails */}
+      {chatPendingImages.length > 0 && (
+        <div
+          className="flex gap-2 flex-wrap py-1 relative"
+          style={{ zIndex: 1 }}
+        >
+          {chatPendingImages.map((img, i) => (
+            <div
+              key={`${img.name}-${i}`}
+              className="relative group w-16 h-16 shrink-0"
+            >
+              <img
+                src={`data:${img.mimeType};base64,${img.data}`}
+                alt={img.name}
+                className="w-16 h-16 object-cover border border-border rounded"
+              />
+              <button
+                type="button"
+                title="Remove image"
+                onClick={() => removeImage(i)}
+                className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-danger text-white text-[10px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
       {voiceLatency && (
         <div
           className="pb-1 text-[10px] text-muted relative"
@@ -399,20 +520,61 @@ export function ChatView() {
         </div>
       )}
 
-      {/* ── Input row: mic + textarea + send ───────────────────────── */}
+      {/* ── Input row: mic + paperclip + textarea + send ───────────── */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        className="hidden"
+        onChange={handleFileInputChange}
+      />
       <div
         className="flex gap-1.5 sm:gap-2 items-end border-t border-border pt-3 pb-3 sm:pb-4 relative"
         style={{ zIndex: 1 }}
       >
+        {/* Paperclip / image attach button */}
+        <button
+          type="button"
+          className={`h-[38px] w-[38px] shrink-0 flex items-center justify-center border rounded cursor-pointer transition-all self-end ${
+            chatPendingImages.length > 0
+              ? "border-accent bg-accent/10 text-accent"
+              : "border-border bg-card text-muted hover:border-accent hover:text-accent"
+          }`}
+          onClick={() => fileInputRef.current?.click()}
+          aria-label="Attach image"
+          title="Attach image"
+          disabled={chatSending}
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <title>Attach image</title>
+            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+          </svg>
+        </button>
+
         {/* Mic button — user voice input */}
         {voice.supported && (
           <button
             type="button"
-            className={`h-[38px] w-[38px] flex-shrink-0 flex items-center justify-center border rounded cursor-pointer transition-all self-end ${voice.isListening
-              ? "bg-accent border-accent text-accent-fg shadow-[0_0_10px_rgba(124,58,237,0.4)] animate-pulse"
-              : "border-border bg-card text-muted hover:border-accent hover:text-accent"
-              }`}
+            className={`h-[38px] w-[38px] flex-shrink-0 flex items-center justify-center border rounded cursor-pointer transition-all self-end ${
+              voice.isListening
+                ? "bg-accent border-accent text-accent-fg shadow-[0_0_10px_rgba(124,58,237,0.4)] animate-pulse"
+                : "border-border bg-card text-muted hover:border-accent hover:text-accent"
+            }`}
             onClick={voice.toggleListening}
+            aria-label={
+              voice.isListening ? "Stop voice input" : "Start voice input"
+            }
+            aria-pressed={voice.isListening}
             title={voice.isListening ? "Stop listening" : "Voice input"}
           >
             <svg
@@ -453,6 +615,7 @@ export function ChatView() {
             ref={textareaRef}
             className="flex-1 min-w-0 px-3 py-2 border border-border bg-card text-txt text-sm font-body leading-relaxed resize-none overflow-y-hidden min-h-[38px] max-h-[200px] focus:border-accent focus:outline-none"
             rows={1}
+            aria-label="Chat message"
             placeholder={
               voice.isListening ? "Listening..." : "Type a message..."
             }
@@ -493,6 +656,6 @@ export function ChatView() {
           </button>
         )}
       </div>
-    </div>
+    </section>
   );
 }

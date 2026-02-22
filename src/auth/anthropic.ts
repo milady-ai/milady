@@ -1,22 +1,63 @@
 /**
  * Anthropic OAuth flow (Claude Pro/Max subscription)
  *
+ * Wraps @mariozechner/pi-ai's loginAnthropic for server-side use.
+ * The pi-ai callback API is adapted to a start/exchange pattern
+ * for HTTP route handlers.
  */
 
-import type { OAuthCredentials } from "./types";
+import {
+  refreshAnthropicToken as _refreshAnthropicToken,
+  loginAnthropic,
+} from "@mariozechner/pi-ai";
+import type { OAuthCredentials } from "./types.js";
 
 export interface AnthropicFlow {
   authUrl: string;
+  /** Provide the authorization code (format: code#state) to complete the flow */
   submitCode: (code: string) => void;
+  /** Resolves with credentials once submitCode() is called */
   credentials: Promise<OAuthCredentials>;
 }
 
+/**
+ * Start the Anthropic OAuth flow.
+ * Returns an auth URL and a way to submit the code + get credentials.
+ */
 export async function startAnthropicLogin(): Promise<AnthropicFlow> {
-  throw new Error("Anthropic OAuth is disabled.");
+  let authUrl = "";
+  let resolveCode: ((code: string) => void) | null = null;
+  let resolveUrlReady: (() => void) | null = null;
+  const codePromise = new Promise<string>((resolve) => {
+    resolveCode = resolve;
+  });
+  const urlReady = new Promise<void>((resolve) => {
+    resolveUrlReady = resolve;
+  });
+
+  const credentials = loginAnthropic(
+    (url: string) => {
+      authUrl = url;
+      resolveUrlReady?.();
+    },
+    () => codePromise,
+  );
+
+  // Wait for the onAuthUrl callback to fire before returning
+  await urlReady;
+
+  return {
+    authUrl,
+    submitCode: (code: string) => resolveCode?.(code),
+    credentials,
+  };
 }
 
+/**
+ * Refresh an expired Anthropic token.
+ */
 export async function refreshAnthropicToken(
-  _refreshToken: string,
+  refreshToken: string,
 ): Promise<OAuthCredentials> {
-  throw new Error("Anthropic token refresh is disabled.");
+  return _refreshAnthropicToken(refreshToken);
 }

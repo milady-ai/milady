@@ -316,11 +316,16 @@ test("packaged DMG app starts and reaches chat/agent-ready state", async () => {
       );
     });
 
+    // Ensure desktop layout so the nav tabs are visible (hidden below lg/1024px).
+    await page.setViewportSize({ width: 1280, height: 720 });
+
     await expect(page.getByPlaceholder("Type a message...")).toBeVisible({
       timeout: 120_000,
     });
     // Status pill verifies app reached ready state (status could be running, paused, etc.)
-    await expect(page.getByTestId("status-pill")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByTestId("status-pill")).toBeVisible({
+      timeout: 30_000,
+    });
     expect(
       api.requests.some((request) => request.includes("/api/status")),
     ).toBe(true);

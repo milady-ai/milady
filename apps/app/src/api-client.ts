@@ -166,6 +166,8 @@ export interface AgentStatus {
   model: string | undefined;
   uptime: number | undefined;
   startedAt: number | undefined;
+  pendingRestart?: boolean;
+  pendingRestartReasons?: string[];
 }
 
 export interface RuntimeOrderItem {
@@ -344,6 +346,13 @@ export interface OpenRouterModelOption {
   description: string;
 }
 
+export interface PiAiModelOption {
+  id: string;
+  name: string;
+  provider: string;
+  isDefault: boolean;
+}
+
 export interface OnboardingOptions {
   names: string[];
   styles: StylePreset[];
@@ -354,8 +363,11 @@ export interface OnboardingOptions {
     large: ModelOption[];
   };
   openrouterModels?: OpenRouterModelOption[];
+  piAiModels?: PiAiModelOption[];
+  piAiDefaultModel?: string | null;
   inventoryProviders: InventoryProviderOption[];
   sharedStyleRules: string;
+  githubOAuthAvailable?: boolean;
 }
 
 /** Configuration for a single messaging connector. */
@@ -397,6 +409,8 @@ export interface OnboardingData {
   // Local-specific
   provider?: string;
   providerApiKey?: string;
+  /** Optional primary model override (provider/model), used by pi-ai mode. */
+  primaryModel?: string;
   openrouterModel?: string;
   subscriptionProvider?: string;
   // Messaging channel setup
@@ -417,6 +431,7 @@ export interface OnboardingData {
   twilioPhoneNumber?: string;
   blooioApiKey?: string;
   blooioPhoneNumber?: string;
+  githubToken?: string;
 }
 
 export interface SandboxPlatformStatus {
@@ -543,6 +558,14 @@ export interface UiSpecBlock {
 /** Union of all content block types. */
 export type ContentBlock = TextBlock | ConfigFormBlock | UiSpecBlock;
 
+/** An image attachment to send with a chat message. */
+export interface ImageAttachment {
+  /** Base64-encoded image data (no data URL prefix). */
+  data: string;
+  mimeType: string;
+  name: string;
+}
+
 export interface ConfigSchemaResponse {
   schema: unknown;
   uiHints: Record<string, unknown>;
@@ -662,6 +685,54 @@ export interface LogsFilter {
   tag?: string;
   since?: number;
 }
+
+export type SecurityAuditSeverity = "info" | "warn" | "error" | "critical";
+export type SecurityAuditEventType =
+  | "sandbox_mode_transition"
+  | "secret_token_replacement_outbound"
+  | "secret_sanitization_inbound"
+  | "privileged_capability_invocation"
+  | "policy_decision"
+  | "signing_request_submitted"
+  | "signing_request_rejected"
+  | "signing_request_approved"
+  | "plugin_fallback_attempt"
+  | "security_kill_switch"
+  | "sandbox_lifecycle"
+  | "fetch_proxy_error";
+
+export interface SecurityAuditEntry {
+  timestamp: string;
+  type: SecurityAuditEventType;
+  summary: string;
+  metadata?: Record<string, string | number | boolean | null>;
+  severity: SecurityAuditSeverity;
+  traceId?: string;
+}
+
+export interface SecurityAuditFilter {
+  type?: SecurityAuditEventType;
+  severity?: SecurityAuditSeverity;
+  since?: number | string | Date;
+  limit?: number;
+}
+
+export interface SecurityAuditResponse {
+  entries: SecurityAuditEntry[];
+  totalBuffered: number;
+  replayed: true;
+}
+
+export type SecurityAuditStreamEvent =
+  | {
+      type: "snapshot";
+      entries: SecurityAuditEntry[];
+      totalBuffered: number;
+    }
+  | {
+      type: "entry";
+      entry: SecurityAuditEntry;
+    };
 
 export type StreamEventType =
   | "agent_event"
@@ -1508,6 +1579,7 @@ export class MiladyClient {
   private _baseUrl: string;
   private _explicitBase: boolean;
   private _token: string | null;
+  private readonly clientId: string;
   private ws: WebSocket | null = null;
   private wsHandlers = new Map<string, Set<WsEventHandler>>();
   private wsSendQueue: string[] = [];
@@ -1529,8 +1601,17 @@ export class MiladyClient {
     return "";
   }
 
+  private static generateClientId(): string {
+    const random =
+      typeof globalThis.crypto?.randomUUID === "function"
+        ? globalThis.crypto.randomUUID()
+        : `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
+    return `ui-${random.replace(/[^a-zA-Z0-9._-]/g, "")}`;
+  }
+
   constructor(baseUrl?: string, token?: string) {
     this._explicitBase = baseUrl != null;
+    this.clientId = MiladyClient.generateClientId();
     const stored =
       typeof window !== "undefined"
         ? window.sessionStorage.getItem("milady_api_token")
@@ -1611,6 +1692,7 @@ export class MiladyClient {
         ...init,
         headers: {
           "Content-Type": "application/json",
+          "X-Milady-Client-Id": this.clientId,
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
           ...init?.headers,
         },
@@ -1746,6 +1828,34 @@ export class MiladyClient {
     });
   }
 
+  async getSubscriptionStatus(): Promise<{
+    providers: Array<{
+      provider: string;
+      configured: boolean;
+      valid: boolean;
+      expiresAt: number | null;
+    }>;
+  }> {
+    return this.fetch("/api/subscription/status");
+  }
+
+  async deleteSubscription(provider: string): Promise<{ success: boolean }> {
+    return this.fetch(`/api/subscription/${encodeURIComponent(provider)}`, {
+      method: "DELETE",
+    });
+  }
+
+  async switchProvider(
+    provider: string,
+    apiKey?: string,
+  ): Promise<{ success: boolean; provider: string; restarting: boolean }> {
+    return this.fetch("/api/provider/switch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ provider, ...(apiKey ? { apiKey } : {}) }),
+    });
+  }
+
   async startOpenAILogin(): Promise<{
     authUrl: string;
     state: string;
@@ -1858,6 +1968,31 @@ export class MiladyClient {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(patch),
     });
+  }
+
+  // ── Custom VRM avatar ────────────────────────────────────────────────
+
+  async uploadCustomVrm(file: File): Promise<void> {
+    const buf = await file.arrayBuffer();
+    await this.fetch("/api/avatar/vrm", {
+      method: "POST",
+      headers: { "Content-Type": "application/octet-stream" },
+      body: buf,
+    });
+  }
+
+  /** Uses raw fetch instead of this.fetch() because HEAD returns no JSON body. */
+  async hasCustomVrm(): Promise<boolean> {
+    try {
+      const token = this.apiToken;
+      const res = await fetch(`${this.baseUrl}/api/avatar/vrm`, {
+        method: "HEAD",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
   }
 
   // ── Connectors ──────────────────────────────────────────────────────
@@ -2139,6 +2274,122 @@ export class MiladyClient {
     if (filter?.since) params.set("since", String(filter.since));
     const qs = params.toString();
     return this.fetch(`/api/logs${qs ? `?${qs}` : ""}`);
+  }
+
+  private buildSecurityAuditParams(
+    filter?: SecurityAuditFilter,
+    includeStream = false,
+  ): URLSearchParams {
+    const params = new URLSearchParams();
+    if (filter?.type) params.set("type", filter.type);
+    if (filter?.severity) params.set("severity", filter.severity);
+    if (filter?.since !== undefined) {
+      const sinceValue =
+        filter.since instanceof Date
+          ? filter.since.toISOString()
+          : String(filter.since);
+      params.set("since", sinceValue);
+    }
+    if (filter?.limit !== undefined) params.set("limit", String(filter.limit));
+    if (includeStream) params.set("stream", "1");
+    return params;
+  }
+
+  async getSecurityAudit(
+    filter?: SecurityAuditFilter,
+  ): Promise<SecurityAuditResponse> {
+    const qs = this.buildSecurityAuditParams(filter).toString();
+    return this.fetch(`/api/security/audit${qs ? `?${qs}` : ""}`);
+  }
+
+  async streamSecurityAudit(
+    onEvent: (event: SecurityAuditStreamEvent) => void,
+    filter?: SecurityAuditFilter,
+    signal?: AbortSignal,
+  ): Promise<void> {
+    if (!this.apiAvailable) {
+      throw new Error("API not available (no HTTP origin)");
+    }
+
+    const token = this.apiToken;
+    const qs = this.buildSecurityAuditParams(filter, true).toString();
+    const res = await fetch(
+      `${this.baseUrl}/api/security/audit${qs ? `?${qs}` : ""}`,
+      {
+        method: "GET",
+        headers: {
+          Accept: "text/event-stream",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        signal,
+      },
+    );
+
+    if (!res.ok) {
+      const body = (await res
+        .json()
+        .catch(() => ({ error: res.statusText }))) as Record<string, string>;
+      const err = new Error(body.error ?? `HTTP ${res.status}`);
+      (err as Error & { status?: number }).status = res.status;
+      throw err;
+    }
+
+    if (!res.body) {
+      throw new Error("Streaming not supported by this browser");
+    }
+
+    const parsePayload = (payload: string) => {
+      if (!payload) return;
+      try {
+        const parsed = JSON.parse(payload) as SecurityAuditStreamEvent;
+        if (parsed.type === "snapshot" || parsed.type === "entry") {
+          onEvent(parsed);
+        }
+      } catch {
+        // Ignore malformed payloads to keep stream consumption resilient.
+      }
+    };
+
+    const decoder = new TextDecoder();
+    const reader = res.body.getReader();
+    let buffer = "";
+
+    const findSseEventBreak = (
+      chunkBuffer: string,
+    ): { index: number; length: number } | null => {
+      const lfBreak = chunkBuffer.indexOf("\n\n");
+      const crlfBreak = chunkBuffer.indexOf("\r\n\r\n");
+      if (lfBreak === -1 && crlfBreak === -1) return null;
+      if (lfBreak === -1) return { index: crlfBreak, length: 4 };
+      if (crlfBreak === -1) return { index: lfBreak, length: 2 };
+      return lfBreak < crlfBreak
+        ? { index: lfBreak, length: 2 }
+        : { index: crlfBreak, length: 4 };
+    };
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      let eventBreak = findSseEventBreak(buffer);
+      while (eventBreak) {
+        const rawEvent = buffer.slice(0, eventBreak.index);
+        buffer = buffer.slice(eventBreak.index + eventBreak.length);
+        for (const line of rawEvent.split(/\r?\n/)) {
+          if (!line.startsWith("data:")) continue;
+          parsePayload(line.slice(5).trim());
+        }
+        eventBreak = findSseEventBreak(buffer);
+      }
+    }
+
+    if (buffer.trim()) {
+      for (const line of buffer.split(/\r?\n/)) {
+        if (!line.startsWith("data:")) continue;
+        parsePayload(line.slice(5).trim());
+      }
+    }
   }
 
   async getAgentEvents(opts?: {
@@ -2971,10 +3222,10 @@ export class MiladyClient {
 
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     let url = `${protocol}//${host}/ws`;
+    const params = new URLSearchParams({ clientId: this.clientId });
     const token = this.apiToken;
-    if (token) {
-      url += `?token=${encodeURIComponent(token)}`;
-    }
+    if (token) params.set("token", token);
+    url += `?${params.toString()}`;
 
     this.ws = new WebSocket(url);
 
@@ -3099,6 +3350,7 @@ export class MiladyClient {
     onToken: (token: string) => void,
     channelType: ConversationChannelType = "DM",
     signal?: AbortSignal,
+    images?: ImageAttachment[],
   ): Promise<{ text: string; agentName: string }> {
     if (!this.apiAvailable) {
       throw new Error("API not available (no HTTP origin)");
@@ -3112,7 +3364,11 @@ export class MiladyClient {
         Accept: "text/event-stream",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      body: JSON.stringify({ text, channelType }),
+      body: JSON.stringify({
+        text,
+        channelType,
+        ...(images?.length ? { images } : {}),
+      }),
       signal,
     });
 
@@ -3292,6 +3548,7 @@ export class MiladyClient {
     id: string,
     text: string,
     channelType: ConversationChannelType = "DM",
+    images?: ImageAttachment[],
   ): Promise<{ text: string; agentName: string; blocks?: ContentBlock[] }> {
     const response = await this.fetch<{
       text: string;
@@ -3299,7 +3556,11 @@ export class MiladyClient {
       blocks?: ContentBlock[];
     }>(`/api/conversations/${encodeURIComponent(id)}/messages`, {
       method: "POST",
-      body: JSON.stringify({ text, channelType }),
+      body: JSON.stringify({
+        text,
+        channelType,
+        ...(images?.length ? { images } : {}),
+      }),
     });
     return {
       ...response,
@@ -3313,6 +3574,7 @@ export class MiladyClient {
     onToken: (token: string) => void,
     channelType: ConversationChannelType = "DM",
     signal?: AbortSignal,
+    images?: ImageAttachment[],
   ): Promise<{ text: string; agentName: string }> {
     return this.streamChatEndpoint(
       `/api/conversations/${encodeURIComponent(id)}/messages/stream`,
@@ -3320,6 +3582,7 @@ export class MiladyClient {
       onToken,
       channelType,
       signal,
+      images,
     );
   }
 

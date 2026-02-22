@@ -7,8 +7,10 @@
  */
 
 import crypto from "node:crypto";
+import { lookup as dnsLookup } from "node:dns/promises";
 import fs from "node:fs";
 import http from "node:http";
+import net from "node:net";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -16,16 +18,19 @@ import {
   type AgentRuntime,
   ChannelType,
   type Content,
+  ContentType,
   createMessageMemory,
   logger,
+  type Media,
   ModelType,
   stringToUuid,
   type Task,
   type UUID,
 } from "@elizaos/core";
+import { listPiAiModelOptions } from "@elizaos/plugin-pi-ai";
+import { createCodingAgentRouteHandler } from "@milaidy/plugin-coding-agent";
 import { type WebSocket, WebSocketServer } from "ws";
 import type { CloudManager } from "../cloud/cloud-manager";
-
 import {
   configFileExists,
   loadMiladyConfig,
@@ -41,7 +46,10 @@ import {
   buildTestHandler,
   registerCustomActionLive,
 } from "../runtime/custom-actions";
-
+import {
+  isBlockedPrivateOrLinkLocalIp,
+  normalizeHostLike,
+} from "../security/network-policy";
 import { AppManager } from "../services/app-manager";
 import { FallbackTrainingService } from "../services/fallback-training-service";
 import {
@@ -62,6 +70,7 @@ import {
   searchSkillsMarketplace,
   uninstallMarketplaceSkill,
 } from "../services/skill-marketplace";
+import { streamManager } from "../services/stream-manager";
 import {
   listTriggerTasks,
   readTriggerConfig,
@@ -78,7 +87,6 @@ import { getAutonomyState, handleAutonomyRoutes } from "./autonomy-routes";
 import { handleCharacterRoutes } from "./character-routes";
 import { type CloudRouteState, handleCloudRoute } from "./cloud-routes";
 import { handleCloudStatusRoutes } from "./cloud-status-routes";
-
 import {
   extractAnthropicSystemAndLastUser,
   extractCompatTextContent,
@@ -92,16 +100,27 @@ import {
   readJsonBody as parseJsonBody,
   type ReadJsonBodyOptions,
   readRequestBody,
+  readRequestBodyBuffer,
   sendJson,
   sendJsonError,
 } from "./http-helpers";
 import { handleKnowledgeRoutes } from "./knowledge-routes";
+import {
+  evictOldestConversation,
+  getOrReadCachedFile,
+  pushWithBatchEvict,
+  sweepExpiredEntries,
+} from "./memory-bounds";
 import { handleModelsRoutes } from "./models-routes";
 import { handlePermissionRoutes } from "./permissions-routes";
 import {
   type PluginParamInfo,
   validatePluginConfig,
 } from "./plugin-validation";
+import {
+  applySubscriptionProviderConfig,
+  clearSubscriptionProviderConfig,
+} from "./provider-switch-config";
 import { handleRegistryRoutes } from "./registry-routes";
 import { RegistryService } from "./registry-service";
 import { handleSandboxRoute } from "./sandbox-routes";
@@ -228,6 +247,10 @@ interface ServerState {
   broadcastStatus: (() => void) | null;
   /** Broadcast an arbitrary JSON message to all WebSocket clients. Set by startApiServer. */
   broadcastWs: ((data: Record<string, unknown>) => void) | null;
+  /** Broadcast a JSON payload to WebSocket clients bound to a specific client id. */
+  broadcastWsToClientId:
+    | ((clientId: string, data: Record<string, unknown>) => number)
+    | null;
   /** Currently active conversation ID from the frontend (sent via WS). */
   activeConversationId: string | null;
   /** Transient OAuth flow state for subscription auth. */
@@ -246,6 +269,8 @@ interface ServerState {
   >;
   /** Whether shell access is enabled (can be toggled in UI). */
   shellEnabled?: boolean;
+  /** Reasons a restart is pending. Empty array = no restart needed. */
+  pendingRestartReasons: string[];
 }
 
 interface ShareIngestItem {
@@ -527,7 +552,7 @@ export function findOwnPackageRoot(startDir: string): string {
         >;
         const pkgName =
           typeof pkg.name === "string" ? pkg.name.toLowerCase() : "";
-        if (pkgName === "milady") return dir;
+        if (pkgName === "milady" || pkgName === "milaidy") return dir;
       } catch {
         /* keep searching */
       }
@@ -1147,6 +1172,7 @@ function categorizePlugin(
     "qwen",
     "minimax",
     "zai",
+    "pi-ai",
   ];
   const connectors = [
     "telegram",
@@ -1589,6 +1615,210 @@ function scanSkillsDir(
 const MAX_BODY_BYTES = 1_048_576;
 
 /**
+ * Raised body limit for chat endpoints that accept base64-encoded image
+ * attachments. A single smartphone JPEG is typically 2–5 MB binary
+ * (~3–7 MB base64); 20 MB accommodates up to 4 images with room to spare.
+ */
+const CHAT_MAX_BODY_BYTES = 20 * 1_048_576;
+const ELEVENLABS_FETCH_TIMEOUT_MS = 20_000;
+const ELEVENLABS_AUDIO_MAX_BYTES = 20 * 1_048_576;
+
+type StreamableServerResponse = Pick<
+  http.ServerResponse,
+  "write" | "once" | "off" | "removeListener"
+> & {
+  writableEnded?: boolean;
+  destroyed?: boolean;
+};
+
+function removeResponseListener(
+  res: StreamableServerResponse,
+  event: "drain" | "error",
+  handler: (...args: unknown[]) => void,
+): void {
+  if (typeof res.off === "function") {
+    res.off(event, handler);
+    return;
+  }
+  if (typeof res.removeListener === "function") {
+    res.removeListener(event, handler);
+  }
+}
+
+function responseContentLength(headers: Pick<Headers, "get">): number | null {
+  const raw = headers.get("content-length");
+  if (!raw) return null;
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isFinite(parsed) || parsed < 0) return null;
+  return parsed;
+}
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof DOMException
+    ? error.name === "AbortError" || error.name === "TimeoutError"
+    : error instanceof Error &&
+        (error.name === "AbortError" || error.name === "TimeoutError");
+}
+
+function createTimeoutError(message: string): Error {
+  const timeoutError = new Error(message);
+  timeoutError.name = "TimeoutError";
+  return timeoutError;
+}
+
+export async function fetchWithTimeoutGuard(
+  input: string | URL,
+  init: RequestInit,
+  timeoutMs: number,
+): Promise<Response> {
+  const controller = new AbortController();
+  const upstreamSignal = init.signal;
+  let timedOut = false;
+
+  const onAbort = () => {
+    controller.abort();
+  };
+
+  if (upstreamSignal) {
+    if (upstreamSignal.aborted) {
+      controller.abort();
+    } else {
+      upstreamSignal.addEventListener("abort", onAbort, { once: true });
+    }
+  }
+
+  const timeoutHandle = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, timeoutMs);
+
+  try {
+    return await fetch(input, {
+      ...init,
+      signal: controller.signal,
+    });
+  } catch (err) {
+    if (timedOut && isAbortError(err)) {
+      throw createTimeoutError(
+        `Upstream request timed out after ${timeoutMs}ms`,
+      );
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeoutHandle);
+    if (upstreamSignal) {
+      upstreamSignal.removeEventListener("abort", onAbort);
+    }
+  }
+}
+
+async function waitForDrain(res: StreamableServerResponse): Promise<void> {
+  await new Promise<void>((resolve, reject) => {
+    const onDrain = () => {
+      cleanup();
+      resolve();
+    };
+    const onError = (err: unknown) => {
+      cleanup();
+      reject(err instanceof Error ? err : new Error(String(err)));
+    };
+    const cleanup = () => {
+      removeResponseListener(
+        res,
+        "drain",
+        onDrain as (...args: unknown[]) => void,
+      );
+      removeResponseListener(
+        res,
+        "error",
+        onError as (...args: unknown[]) => void,
+      );
+    };
+
+    res.once("drain", onDrain);
+    res.once("error", onError);
+  });
+}
+
+/**
+ * Stream a web Response body to an HTTP response while enforcing a strict byte cap.
+ * Returns the number of bytes forwarded.
+ */
+export async function streamResponseBodyWithByteLimit(
+  upstream: Response,
+  res: StreamableServerResponse,
+  maxBytes: number,
+  timeoutMs?: number,
+): Promise<number> {
+  const declaredLength = responseContentLength(upstream.headers);
+  if (declaredLength !== null && declaredLength > maxBytes) {
+    throw new Error(
+      `Upstream response exceeds maximum size of ${maxBytes} bytes`,
+    );
+  }
+
+  if (!upstream.body) {
+    throw new Error("Upstream response did not include a body stream");
+  }
+
+  const reader = upstream.body.getReader();
+  let totalBytes = 0;
+  let streamTimeoutHandle: ReturnType<typeof setTimeout> | null = null;
+  const streamTimeoutPromise =
+    typeof timeoutMs === "number" && timeoutMs > 0
+      ? new Promise<never>((_resolve, reject) => {
+          streamTimeoutHandle = setTimeout(() => {
+            reject(
+              createTimeoutError(
+                `Upstream response body timed out after ${timeoutMs}ms`,
+              ),
+            );
+          }, timeoutMs);
+        })
+      : null;
+
+  try {
+    while (true) {
+      const { done, value } = streamTimeoutPromise
+        ? await Promise.race([reader.read(), streamTimeoutPromise])
+        : await reader.read();
+      if (done) break;
+      if (!value || value.byteLength === 0) continue;
+
+      totalBytes += value.byteLength;
+      if (totalBytes > maxBytes) {
+        throw new Error(
+          `Upstream response exceeds maximum size of ${maxBytes} bytes`,
+        );
+      }
+
+      if (res.writableEnded || res.destroyed) {
+        throw new Error("Client connection closed while streaming response");
+      }
+
+      const canContinue = res.write(Buffer.from(value));
+      if (!canContinue) {
+        await waitForDrain(res);
+      }
+    }
+  } catch (err) {
+    try {
+      await reader.cancel(err);
+    } catch {
+      // Best effort cleanup; keep original error.
+    }
+    throw err;
+  } finally {
+    if (streamTimeoutHandle !== null) {
+      clearTimeout(streamTimeoutHandle);
+    }
+    reader.releaseLock();
+  }
+
+  return totalBytes;
+}
+
+/**
  * Read and parse a JSON request body with size limits and error handling.
  * Returns null (and sends a 4xx response) if reading or parsing fails.
  */
@@ -1631,7 +1861,7 @@ const STATIC_MIME: Record<string, string> = {
   ".ico": "image/x-icon",
   ".jpeg": "image/jpeg",
   ".jpg": "image/jpeg",
-  "": "application/javascript; charset=utf-8",
+  ".js": "application/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
   ".map": "application/json",
   ".mjs": "application/javascript; charset=utf-8",
@@ -1696,6 +1926,22 @@ function sendStaticResponse(
   res.end(body);
 }
 
+// ── Static file cache ─────────────────────────────────────────────────
+const STATIC_CACHE_MAX = 50;
+const STATIC_CACHE_FILE_LIMIT = 512 * 1024; // 512 KB
+const staticFileCache = new Map<string, { body: Buffer; mtimeMs: number }>();
+
+function getCachedFile(filePath: string, mtimeMs: number): Buffer {
+  return getOrReadCachedFile(
+    staticFileCache,
+    filePath,
+    mtimeMs,
+    (p) => fs.readFileSync(p),
+    STATIC_CACHE_MAX,
+    STATIC_CACHE_FILE_LIMIT,
+  );
+}
+
 /**
  * Serve built dashboard assets from apps/app/dist with SPA fallback.
  * Returns true when the request is handled.
@@ -1735,7 +1981,7 @@ function serveStaticUi(
     const stat = fs.statSync(candidatePath);
     if (stat.isFile()) {
       const ext = path.extname(candidatePath).toLowerCase();
-      const body = fs.readFileSync(candidatePath);
+      const body = getCachedFile(candidatePath, stat.mtimeMs);
       const cacheControl = relativePath.startsWith("assets/")
         ? "public, max-age=31536000, immutable"
         : "public, max-age=0, must-revalidate";
@@ -1924,12 +2170,17 @@ async function generateChatResponse(
     if (incoming === existing) return "";
     if (incoming.startsWith(existing)) return incoming.slice(existing.length);
     if (existing.startsWith(incoming)) return "";
-    if (existing.endsWith(incoming) || existing.includes(incoming)) return "";
+
+    // Small chunks are usually raw token deltas; keep them even if they
+    // repeat suffix characters (e.g., "l" + "l" in "Hello").
+    if (incoming.length <= 3) return incoming;
 
     const maxOverlap = Math.min(existing.length, incoming.length);
     for (let overlap = maxOverlap; overlap > 0; overlap -= 1) {
       if (existing.endsWith(incoming.slice(0, overlap))) {
-        return incoming.slice(overlap);
+        const delta = incoming.slice(overlap);
+        if (!delta && overlap === incoming.length) return "";
+        return delta;
       }
     }
     return incoming;
@@ -1977,6 +2228,19 @@ async function generateChatResponse(
       async (content: Content) => {
         if (opts?.isAborted?.()) {
           throw new Error("client_disconnected");
+        }
+
+        // Trace action callback invocations so we can verify handlers execute.
+        const actionTag = (content as Record<string, unknown>)?.action;
+        if (actionTag) {
+          runtime.logger?.info(
+            {
+              src: "milady-api",
+              action: actionTag,
+              hasText: Boolean(extractCompatTextContent(content)),
+            },
+            `[milady-api] Action callback fired: ${actionTag}`,
+          );
         }
 
         const chunk = extractCompatTextContent(content);
@@ -2037,6 +2301,22 @@ async function generateChatResponse(
   } catch (err) {
     _handlerError = err;
     throw err;
+  }
+
+  // Log the response mode and actions for debugging action execution
+  if (result) {
+    const rc = result.responseContent as Record<string, unknown> | null;
+    const resultRecord = result as unknown as Record<string, unknown>;
+    runtime.logger?.info(
+      {
+        src: "milady-api",
+        mode: resultRecord.mode,
+        actions: rc?.actions,
+        simple: rc?.simple,
+        hasText: Boolean(rc?.text),
+      },
+      "[milady-api] Chat response metadata",
+    );
   }
 
   const resultText = extractCompatTextContent(result?.responseContent);
@@ -2221,6 +2501,157 @@ function parseRequestChannelType(
   return normalized as ChannelType;
 }
 
+interface ChatImageAttachment {
+  /** Base64-encoded image data (no data URL prefix). */
+  data: string;
+  mimeType: string;
+  name: string;
+}
+
+const MAX_CHAT_IMAGES = 4;
+
+/** Maximum base64 data length for a single image (~3.75 MB binary). */
+const MAX_IMAGE_DATA_BYTES = 5 * 1_048_576;
+
+/** Maximum length of an image filename. */
+const MAX_IMAGE_NAME_LENGTH = 255;
+
+/** Matches a valid standard-alphabet base64 string (RFC 4648 §4, `+/`, optional `=` padding). */
+const BASE64_RE = /^[A-Za-z0-9+/]*={0,2}$/;
+
+const ALLOWED_IMAGE_MIME_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+]);
+
+/** Returns an error message string, or null if valid. Exported for unit tests. */
+export function validateChatImages(images: unknown): string | null {
+  if (!Array.isArray(images) || images.length === 0) return null;
+  if (images.length > MAX_CHAT_IMAGES)
+    return `Too many images (max ${MAX_CHAT_IMAGES})`;
+  for (const img of images) {
+    if (!img || typeof img !== "object") return "Each image must be an object";
+    const { data, mimeType, name } = img as Record<string, unknown>;
+    if (typeof data !== "string" || !data)
+      return "Each image must have a non-empty data string";
+    if (data.startsWith("data:"))
+      return "Image data must be raw base64, not a data URL";
+    if (data.length > MAX_IMAGE_DATA_BYTES)
+      return `Image too large (max ${MAX_IMAGE_DATA_BYTES / 1_048_576} MB per image)`;
+    if (!BASE64_RE.test(data))
+      return "Image data contains invalid base64 characters";
+    if (typeof mimeType !== "string" || !mimeType)
+      return "Each image must have a mimeType string";
+    if (!ALLOWED_IMAGE_MIME_TYPES.has(mimeType.toLowerCase()))
+      return `Unsupported image type: ${mimeType}`;
+    if (typeof name !== "string" || !name)
+      return "Each image must have a name string";
+    if (name.length > MAX_IMAGE_NAME_LENGTH)
+      return `Image name too long (max ${MAX_IMAGE_NAME_LENGTH} characters)`;
+  }
+  return null;
+}
+
+/**
+ * Extension of the core Media attachment shape that carries raw image bytes for
+ * action handlers (e.g. POST_TWEET) while the message is in-memory. The
+ * extra fields are intentionally stripped before the message is persisted.
+ *
+ * Note: `_data`/`_mimeType` survive only because ElizaOS passes the
+ * `userMessage` object reference directly to action handlers without
+ * deep-cloning or serializing it. If that ever changes, action handlers
+ * that read these fields will silently receive `undefined`.
+ */
+export interface ChatAttachmentWithData extends Media {
+  /** Raw base64 image data — never written to the database. */
+  _data: string;
+  /** MIME type corresponding to `_data`. */
+  _mimeType: string;
+}
+
+/**
+ * Builds in-memory and compact (DB-persisted) attachment arrays from
+ * validated images. Exported so it can be unit-tested independently.
+ */
+export function buildChatAttachments(
+  images: ChatImageAttachment[] | undefined,
+): {
+  /** In-memory attachments that include `_data`/`_mimeType` for action handlers. */
+  attachments: ChatAttachmentWithData[] | undefined;
+  /** Persistence-safe attachments with `_data`/`_mimeType` stripped. */
+  compactAttachments: Media[] | undefined;
+} {
+  if (!images?.length)
+    return { attachments: undefined, compactAttachments: undefined };
+  // Compact placeholder URL (no base64) keeps the LLM context lean. The raw
+  // image bytes are stashed in `_data`/`_mimeType` for action handlers (e.g.
+  // POST_TWEET) that need to upload them.
+  const attachments: ChatAttachmentWithData[] = images.map((img, i) => ({
+    id: `img-${i}`,
+    url: `attachment:img-${i}`,
+    title: img.name,
+    source: "client_chat",
+    description: "User-attached image",
+    text: "",
+    contentType: ContentType.IMAGE,
+    _data: img.data,
+    _mimeType: img.mimeType,
+  }));
+  // DB-persisted version omits _data/_mimeType so raw bytes aren't stored.
+  const compactAttachments: Media[] = attachments.map(
+    ({ _data: _d, _mimeType: _m, ...rest }) => rest,
+  );
+  return { attachments, compactAttachments };
+}
+
+type MessageMemory = ReturnType<typeof createMessageMemory>;
+
+/**
+ * Constructs the in-memory user message (with image data for action handlers)
+ * and the persistence-safe counterpart (image data stripped). Extracted to
+ * avoid duplicating this logic across the stream and non-stream chat endpoints.
+ */
+export function buildUserMessages(params: {
+  images: ChatImageAttachment[] | undefined;
+  prompt: string;
+  userId: UUID;
+  roomId: UUID;
+  channelType: ChannelType;
+}): { userMessage: MessageMemory; messageToStore: MessageMemory } {
+  const { images, prompt, userId, roomId, channelType } = params;
+  const { attachments, compactAttachments } = buildChatAttachments(images);
+  const id = crypto.randomUUID() as UUID;
+  // In-memory message carries _data/_mimeType so action handlers can upload.
+  const userMessage = createMessageMemory({
+    id,
+    entityId: userId,
+    roomId,
+    content: {
+      text: prompt,
+      source: "client_chat",
+      channelType,
+      ...(attachments?.length ? { attachments } : {}),
+    },
+  });
+  // Persisted message: compact placeholder URL, no raw bytes in DB.
+  const messageToStore = compactAttachments?.length
+    ? createMessageMemory({
+        id,
+        entityId: userId,
+        roomId,
+        content: {
+          text: prompt,
+          source: "client_chat",
+          channelType,
+          attachments: compactAttachments,
+        },
+      })
+    : userMessage;
+  return { userMessage, messageToStore };
+}
+
 async function readChatRequestPayload(
   req: http.IncomingMessage,
   res: http.ServerResponse,
@@ -2232,11 +2663,19 @@ async function readChatRequestPayload(
     ) => Promise<T | null>;
     error: (res: http.ServerResponse, message: string, status?: number) => void;
   },
-): Promise<{ prompt: string; channelType: ChannelType } | null> {
+  /** Body size limit. Image-capable endpoints pass CHAT_MAX_BODY_BYTES (20 MB);
+   *  legacy/cloud-proxy endpoints that don't process images pass MAX_BODY_BYTES (1 MB). */
+  maxBytes = CHAT_MAX_BODY_BYTES,
+): Promise<{
+  prompt: string;
+  channelType: ChannelType;
+  images?: ChatImageAttachment[];
+} | null> {
   const body = await helpers.readJsonBody<{
     text?: string;
     channelType?: string;
-  }>(req, res);
+    images?: ChatImageAttachment[];
+  }>(req, res, { maxBytes });
   if (!body) return null;
   if (!body.text?.trim()) {
     helpers.error(res, "text is required");
@@ -2247,9 +2686,24 @@ async function readChatRequestPayload(
     helpers.error(res, "channelType is invalid", 400);
     return null;
   }
+  const imageValidationError = validateChatImages(body.images);
+  if (imageValidationError) {
+    helpers.error(res, imageValidationError, 400);
+    return null;
+  }
+  // Normalize mimeType to lowercase so downstream consumers (Twitter
+  // uploadMedia, content-type headers) never encounter mixed-case variants
+  // that slipped past the allowlist check.
+  const images = Array.isArray(body.images)
+    ? (body.images as ChatImageAttachment[]).map((img) => ({
+        ...img,
+        mimeType: img.mimeType.toLowerCase(),
+      }))
+    : undefined;
   return {
     prompt: body.text.trim(),
     channelType,
+    images,
   };
 }
 
@@ -2405,6 +2859,307 @@ function validateSkillId(
   return skillId;
 }
 
+const ALLOWED_MCP_CONFIG_TYPES = new Set([
+  "stdio",
+  "http",
+  "streamable-http",
+  "sse",
+]);
+
+const ALLOWED_MCP_COMMANDS = new Set([
+  "npx",
+  "node",
+  "bun",
+  "bunx",
+  "deno",
+  "python",
+  "python3",
+  "uvx",
+  "uv",
+  "docker",
+  "podman",
+]);
+
+const BLOCKED_MCP_ENV_KEYS = new Set([
+  "LD_PRELOAD",
+  "LD_LIBRARY_PATH",
+  "DYLD_INSERT_LIBRARIES",
+  "DYLD_LIBRARY_PATH",
+  "NODE_OPTIONS",
+  "NODE_EXTRA_CA_CERTS",
+  "ELECTRON_RUN_AS_NODE",
+  "PATH",
+  "HOME",
+  "SHELL",
+]);
+
+const INTERPRETER_MCP_COMMANDS = new Set([
+  "node",
+  "bun",
+  "deno",
+  "python",
+  "python3",
+  "uv",
+]);
+
+const PACKAGE_RUNNER_MCP_COMMANDS = new Set(["npx", "bunx", "uvx"]);
+const CONTAINER_MCP_COMMANDS = new Set(["docker", "podman"]);
+
+const BLOCKED_INTERPRETER_FLAGS = new Set([
+  "-e",
+  "--eval",
+  "-p",
+  "--print",
+  "-c",
+  "-m",
+]);
+
+const BLOCKED_PACKAGE_RUNNER_FLAGS = new Set(["-c", "--call", "-e", "--eval"]);
+const BLOCKED_CONTAINER_FLAGS = new Set([
+  "--privileged",
+  "-v",
+  "--volume",
+  "--mount",
+  "--cap-add",
+  "--security-opt",
+  "--pid",
+  "--network",
+]);
+const BLOCKED_DENO_SUBCOMMANDS = new Set(["eval"]);
+const BLOCKED_MCP_REMOTE_HOST_LITERALS = new Set([
+  "localhost",
+  "metadata.google.internal",
+]);
+
+function normalizeMcpCommand(command: string): string {
+  const baseName = command.replace(/\\/g, "/").split("/").pop() ?? "";
+  return baseName.replace(/\.(exe|cmd|bat)$/i, "").toLowerCase();
+}
+
+function hasBlockedFlag(
+  args: string[],
+  blockedFlags: ReadonlySet<string>,
+): string | null {
+  for (const arg of args) {
+    const trimmed = arg.trim();
+    for (const flag of blockedFlags) {
+      if (trimmed === flag || trimmed.startsWith(`${flag}=`)) {
+        return flag;
+      }
+      // Block attached short-option forms like -cpayload or -epayload.
+      if (
+        /^-[A-Za-z]$/.test(flag) &&
+        trimmed.startsWith(flag) &&
+        trimmed.length > flag.length
+      ) {
+        return flag;
+      }
+    }
+  }
+  return null;
+}
+
+function firstPositionalArg(args: string[]): string | null {
+  for (const arg of args) {
+    const trimmed = arg.trim();
+    if (!trimmed || trimmed === "--" || trimmed.startsWith("-")) continue;
+    return trimmed.toLowerCase();
+  }
+  return null;
+}
+
+async function resolveMcpRemoteUrlRejection(
+  rawUrl: string,
+): Promise<string | null> {
+  let parsed: URL;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    return "URL must be a valid absolute URL";
+  }
+
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    return "URL must use http:// or https://";
+  }
+
+  const hostname = normalizeHostLike(parsed.hostname);
+  if (!hostname) return "URL hostname is required";
+
+  if (
+    BLOCKED_MCP_REMOTE_HOST_LITERALS.has(hostname) ||
+    hostname.endsWith(".localhost") ||
+    hostname.endsWith(".local")
+  ) {
+    return `URL host "${hostname}" is blocked for security reasons`;
+  }
+
+  if (net.isIP(hostname)) {
+    if (isBlockedPrivateOrLinkLocalIp(hostname)) {
+      return `URL host "${hostname}" is blocked for security reasons`;
+    }
+    return null;
+  }
+
+  let addresses: Array<{ address: string }>;
+  try {
+    const resolved = await dnsLookup(hostname, { all: true });
+    addresses = Array.isArray(resolved) ? resolved : [resolved];
+  } catch {
+    return `Could not resolve URL host "${hostname}"`;
+  }
+
+  if (addresses.length === 0) {
+    return `Could not resolve URL host "${hostname}"`;
+  }
+
+  for (const entry of addresses) {
+    if (isBlockedPrivateOrLinkLocalIp(entry.address)) {
+      return `URL host "${hostname}" resolves to blocked address ${entry.address}`;
+    }
+  }
+
+  return null;
+}
+
+export async function validateMcpServerConfig(
+  config: Record<string, unknown>,
+): Promise<string | null> {
+  const configType = config.type;
+  if (
+    typeof configType !== "string" ||
+    !ALLOWED_MCP_CONFIG_TYPES.has(configType)
+  ) {
+    return `Invalid config type. Must be one of: ${[...ALLOWED_MCP_CONFIG_TYPES].join(", ")}`;
+  }
+
+  if (configType === "stdio") {
+    const command =
+      typeof config.command === "string" ? config.command.trim() : "";
+    if (!command) {
+      return "Command is required for stdio servers";
+    }
+    if (!/^[A-Za-z0-9._-]+$/.test(command)) {
+      return "Command must be a bare executable name without path separators";
+    }
+
+    const normalizedCommand = normalizeMcpCommand(command);
+    if (!ALLOWED_MCP_COMMANDS.has(normalizedCommand)) {
+      return (
+        `Command "${command}" is not allowed. ` +
+        `Allowed commands: ${[...ALLOWED_MCP_COMMANDS].join(", ")}`
+      );
+    }
+
+    if (config.args !== undefined) {
+      if (!Array.isArray(config.args)) {
+        return "args must be an array of strings";
+      }
+      for (const arg of config.args) {
+        if (typeof arg !== "string") {
+          return "Each arg must be a string";
+        }
+      }
+      const args = config.args as string[];
+      if (INTERPRETER_MCP_COMMANDS.has(normalizedCommand)) {
+        const blocked = hasBlockedFlag(args, BLOCKED_INTERPRETER_FLAGS);
+        if (blocked) {
+          return `Flag "${blocked}" is not allowed for ${normalizedCommand} MCP servers`;
+        }
+      }
+      if (PACKAGE_RUNNER_MCP_COMMANDS.has(normalizedCommand)) {
+        const blocked = hasBlockedFlag(args, BLOCKED_PACKAGE_RUNNER_FLAGS);
+        if (blocked) {
+          return `Flag "${blocked}" is not allowed for ${normalizedCommand} MCP servers`;
+        }
+      }
+      if (CONTAINER_MCP_COMMANDS.has(normalizedCommand)) {
+        const blocked = hasBlockedFlag(args, BLOCKED_CONTAINER_FLAGS);
+        if (blocked) {
+          return `Flag "${blocked}" is not allowed for ${normalizedCommand} MCP servers`;
+        }
+      }
+      if (normalizedCommand === "deno") {
+        const subcommand = firstPositionalArg(args);
+        if (subcommand && BLOCKED_DENO_SUBCOMMANDS.has(subcommand)) {
+          return `Subcommand "${subcommand}" is not allowed for deno MCP servers`;
+        }
+      }
+    }
+  } else {
+    const url = typeof config.url === "string" ? config.url.trim() : "";
+    if (!url) {
+      return "URL is required for remote servers";
+    }
+    const urlRejection = await resolveMcpRemoteUrlRejection(url);
+    if (urlRejection) return urlRejection;
+  }
+
+  if (config.env !== undefined) {
+    if (
+      typeof config.env !== "object" ||
+      config.env === null ||
+      Array.isArray(config.env)
+    ) {
+      return "env must be a plain object of string key-value pairs";
+    }
+
+    for (const [key, value] of Object.entries(config.env)) {
+      if (isBlockedObjectKey(key)) {
+        return `env key "${key}" is blocked for security reasons`;
+      }
+      if (typeof value !== "string") {
+        return `env.${key} must be a string`;
+      }
+      if (BLOCKED_MCP_ENV_KEYS.has(key.toUpperCase())) {
+        return `env variable "${key}" is not allowed for security reasons`;
+      }
+    }
+  }
+
+  if (config.cwd !== undefined && typeof config.cwd !== "string") {
+    return "cwd must be a string";
+  }
+
+  if (config.timeoutInMillis !== undefined) {
+    if (
+      typeof config.timeoutInMillis !== "number" ||
+      !Number.isFinite(config.timeoutInMillis) ||
+      config.timeoutInMillis < 0
+    ) {
+      return "timeoutInMillis must be a non-negative number";
+    }
+  }
+
+  return null;
+}
+
+export async function resolveMcpServersRejection(
+  servers: Record<string, unknown>,
+): Promise<string | null> {
+  for (const [serverName, serverConfig] of Object.entries(servers)) {
+    if (isBlockedObjectKey(serverName)) {
+      return `Invalid server name: "${serverName}"`;
+    }
+    if (
+      !serverConfig ||
+      typeof serverConfig !== "object" ||
+      Array.isArray(serverConfig)
+    ) {
+      return `Server "${serverName}" config must be a JSON object`;
+    }
+    if (hasBlockedObjectKeyDeep(serverConfig)) {
+      return `Server "${serverName}" contains blocked object keys`;
+    }
+    const configError = await validateMcpServerConfig(
+      serverConfig as Record<string, unknown>,
+    );
+    if (configError) {
+      return `Server "${serverName}": ${configError}`;
+    }
+  }
+  return null;
+}
+
 // ---------------------------------------------------------------------------
 // Onboarding helpers
 // ---------------------------------------------------------------------------
@@ -2449,6 +3204,15 @@ function getProviderOptions(): Array<{
       description: "Use your $20-200/mo ChatGPT subscription via OAuth.",
     },
     {
+      id: "pi-ai",
+      name: "Pi Credentials (pi-ai)",
+      envKey: null,
+      pluginName: "@elizaos/plugin-pi-ai",
+      keyPrefix: null,
+      description:
+        "Use credentials from ~/.pi/agent/auth.json (API keys or OAuth).",
+    },
+    {
       id: "anthropic",
       name: "Anthropic (API Key)",
       envKey: "ANTHROPIC_API_KEY",
@@ -2475,7 +3239,7 @@ function getProviderOptions(): Array<{
     {
       id: "gemini",
       name: "Gemini",
-      envKey: "GOOGLE_API_KEY",
+      envKey: "GOOGLE_GENERATIVE_AI_API_KEY",
       pluginName: "@elizaos/plugin-google-genai",
       keyPrefix: null,
       description: "Google's Gemini models.",
@@ -2770,7 +3534,7 @@ const PROVIDER_ENV_KEYS: Record<
   },
   "google-genai": {
     envKey: "GOOGLE_GENERATIVE_AI_API_KEY",
-    altEnvKeys: ["GOOGLE_API_KEY"],
+    altEnvKeys: ["GOOGLE_API_KEY", "GEMINI_API_KEY"],
   },
   ollama: { envKey: "OLLAMA_BASE_URL" },
   "vercel-ai-gateway": {
@@ -3272,7 +4036,8 @@ async function resolveTrainingServiceCtor(): Promise<TrainingServiceCtor | null>
   return null;
 }
 
-const LOCAL_ORIGIN_RE = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i;
+const LOCAL_ORIGIN_RE =
+  /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\]|\[0:0:0:0:0:0:0:1\])(:\d+)?$/i;
 const APP_ORIGIN_RE =
   /^(capacitor|capacitor-electron|app):\/\/(localhost|-)?$/i;
 
@@ -3317,9 +4082,15 @@ function applyCors(
     );
     res.setHeader(
       "Access-Control-Allow-Headers",
-      "Content-Type, Authorization, X-Milady-Token, X-Api-Key, X-Milady-Export-Token",
+      "Content-Type, Authorization, X-Milady-Token, X-Api-Key, X-Milady-Export-Token, X-Milady-Client-Id",
     );
   }
+
+  // Security headers
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
 
   return true;
 }
@@ -3328,9 +4099,10 @@ const PAIRING_TTL_MS = 10 * 60 * 1000;
 const PAIRING_WINDOW_MS = 10 * 60 * 1000;
 const PAIRING_MAX_ATTEMPTS = 5;
 const PAIRING_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-const API_RESTART_EXIT_CODE = 75;
 
 let pairingCode: string | null = null;
+/** Guard against concurrent provider switch requests (P0 §3). */
+let providerSwitchInProgress = false;
 let pairingExpiresAt = 0;
 const pairingAttempts = new Map<string, { count: number; resetAt: number }>();
 
@@ -3370,6 +4142,10 @@ function ensurePairingCode(): string | null {
 function rateLimitPairing(ip: string | null): boolean {
   const key = ip ?? "unknown";
   const now = Date.now();
+
+  // Lazy sweep: evict expired entries when map grows beyond 100
+  sweepExpiredEntries(pairingAttempts, now, 100);
+
   const current = pairingAttempts.get(key);
   if (!current || now > current.resetAt) {
     pairingAttempts.set(key, { count: 1, resetAt: now + PAIRING_WINDOW_MS });
@@ -3399,6 +4175,58 @@ function extractAuthToken(req: http.IncomingMessage): string | null {
   return null;
 }
 
+const SAFE_WS_CLIENT_ID_RE = /^[A-Za-z0-9._-]{1,128}$/;
+
+export function normalizeWsClientId(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (!SAFE_WS_CLIENT_ID_RE.test(trimmed)) return null;
+  return trimmed;
+}
+
+function firstHeaderValue(value: string | string[] | undefined): string | null {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value) && typeof value[0] === "string") return value[0];
+  return null;
+}
+
+export function resolveTerminalRunClientId(
+  req: Pick<http.IncomingMessage, "headers">,
+  body: { clientId?: unknown } | null | undefined,
+): string | null {
+  const headerClientId = normalizeWsClientId(
+    firstHeaderValue(req.headers["x-milady-client-id"]),
+  );
+  if (headerClientId) return headerClientId;
+  return normalizeWsClientId(body?.clientId);
+}
+
+const SHARED_TERMINAL_CLIENT_IDS = new Set([
+  "runtime-terminal-action",
+  "runtime-shell-action",
+]);
+
+function isSharedTerminalClientId(clientId: string): boolean {
+  return SHARED_TERMINAL_CLIENT_IDS.has(clientId);
+}
+
+/**
+ * Resolve Authorization for Hyperscape API relays.
+ *
+ * Security: never forward the incoming request Authorization header
+ * (which typically carries MILADY_API_TOKEN for this API). Hyperscape relay
+ * auth must come from the dedicated HYPERSCAPE_AUTH_TOKEN secret instead.
+ */
+export function resolveHyperscapeAuthorizationHeader(
+  req: Pick<http.IncomingMessage, "headers">,
+): string | null {
+  void req;
+  const envToken = process.env.HYPERSCAPE_AUTH_TOKEN?.trim();
+  if (!envToken) return null;
+  return /^Bearer\s+/i.test(envToken) ? envToken : `Bearer ${envToken}`;
+}
+
 function tokenMatches(expected: string, provided: string): boolean {
   const a = Buffer.from(expected, "utf8");
   const b = Buffer.from(provided, "utf8");
@@ -3407,14 +4235,38 @@ function tokenMatches(expected: string, provided: string): boolean {
 }
 
 function isLoopbackBindHost(host: string): boolean {
-  const normalized = host
-    .trim()
-    .toLowerCase()
-    .replace(/^\[|\]$/g, "");
+  let normalized = host.trim().toLowerCase();
+
+  if (!normalized) return true;
+
+  // Allow users to provide full URLs by mistake (e.g. http://localhost:2138)
+  if (normalized.startsWith("http://") || normalized.startsWith("https://")) {
+    try {
+      const parsed = new URL(normalized);
+      normalized = parsed.hostname.toLowerCase();
+    } catch {
+      // Fall through and parse as raw host value.
+    }
+  }
+
+  // [::1]:2138 -> ::1
+  const bracketedIpv6 = /^\[([^\]]+)\](?::\d+)?$/.exec(normalized);
+  if (bracketedIpv6?.[1]) {
+    normalized = bracketedIpv6[1];
+  } else {
+    // localhost:2138 -> localhost, 127.0.0.1:2138 -> 127.0.0.1
+    const singleColonHostPort = /^([^:]+):(\d+)$/.exec(normalized);
+    if (singleColonHostPort?.[1]) {
+      normalized = singleColonHostPort[1];
+    }
+  }
+
+  normalized = normalized.replace(/^\[|\]$/g, "");
   if (!normalized) return true;
   if (
     normalized === "localhost" ||
     normalized === "::1" ||
+    normalized === "0:0:0:0:0:0:0:1" ||
     normalized === "::ffff:127.0.0.1"
   ) {
     return true;
@@ -4279,14 +5131,16 @@ async function maybeRouteAutonomyEventToConversation(
   const text = typeof payload?.text === "string" ? payload.text.trim() : "";
   if (!text) return;
 
-  const source =
-    typeof payload?.source === "string" && payload.source.trim().length > 0
-      ? payload.source
-      : "autonomy";
+  const hasExplicitSource =
+    typeof payload?.source === "string" && payload.source.trim().length > 0;
+  const source = hasExplicitSource
+    ? (payload?.source as string).trim()
+    : "autonomy";
 
   // Regular user conversation turns should never be re-routed as proactive.
   // Some AGENT_EVENT payloads may omit roomId metadata, so rely on source too.
   if (source === "client_chat") return;
+  if (!hasExplicitSource && !event.roomId) return;
 
   // Keep regular conversation messages in their own room only.
   if (
@@ -4299,6 +5153,96 @@ async function maybeRouteAutonomyEventToConversation(
   }
 
   await routeAutonomyTextToUser(state, text, source);
+}
+
+/**
+ * Shared pipeline: fetch RTMP creds → register session → headless capture → FFmpeg.
+ * Used by both the POST /api/retake/live handler and deferred auto-start.
+ */
+async function startRetakeStream(): Promise<{ rtmpUrl: string }> {
+  const retakeToken = process.env.RETAKE_AGENT_TOKEN?.trim() || "";
+  if (!retakeToken) {
+    throw new Error("RETAKE_AGENT_TOKEN not configured");
+  }
+  const retakeApiUrl = process.env.RETAKE_API_URL || "https://retake.tv/api/v1";
+  const authHeaders = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${retakeToken}`,
+  };
+
+  // 1. Fetch fresh RTMP credentials
+  const rtmpRes = await fetch(`${retakeApiUrl}/agent/rtmp`, {
+    method: "POST",
+    headers: authHeaders,
+  });
+  if (!rtmpRes.ok) {
+    throw new Error(`RTMP creds failed: ${rtmpRes.status}`);
+  }
+  const { url: rtmpUrl, key: rtmpKey } = (await rtmpRes.json()) as {
+    url: string;
+    key: string;
+  };
+
+  // 2. Register stream session on retake.tv
+  const startRes = await fetch(`${retakeApiUrl}/agent/stream/start`, {
+    method: "POST",
+    headers: authHeaders,
+  });
+  if (!startRes.ok) {
+    const text = await startRes.text();
+    throw new Error(`retake.tv start failed: ${startRes.status} ${text}`);
+  }
+
+  // 3. Start headless browser capture (writes frames to temp file)
+  const baseGameUrl = (
+    process.env.RETAKE_GAME_URL || "https://lunchtable.cards"
+  ).replace(/\/$/, "");
+  const ltcgApiKey = process.env.LTCG_API_KEY || "";
+  const gameUrl = ltcgApiKey
+    ? `${baseGameUrl}/stream-overlay?apiKey=${encodeURIComponent(ltcgApiKey)}&embedded=true`
+    : baseGameUrl;
+
+  const { startBrowserCapture, FRAME_FILE } = await import(
+    "../services/browser-capture.js"
+  );
+  try {
+    await startBrowserCapture({
+      url: gameUrl,
+      width: 1280,
+      height: 720,
+      quality: 70,
+    });
+    // Wait for first frame file to be written
+    await new Promise((resolve) => {
+      const check = setInterval(() => {
+        try {
+          if (fs.existsSync(FRAME_FILE) && fs.statSync(FRAME_FILE).size > 0) {
+            clearInterval(check);
+            resolve(true);
+          }
+        } catch {}
+      }, 200);
+      setTimeout(() => {
+        clearInterval(check);
+        resolve(false);
+      }, 10_000);
+    });
+  } catch (captureErr) {
+    logger.warn(`[retake] Browser capture failed: ${captureErr}`);
+  }
+
+  // 4. Start FFmpeg → RTMP
+  await streamManager.start({
+    rtmpUrl,
+    rtmpKey,
+    inputMode: "file",
+    frameFile: FRAME_FILE,
+    resolution: "1280x720",
+    framerate: 30,
+    bitrate: "1500k",
+  });
+
+  return { rtmpUrl };
 }
 
 async function handleRequest(
@@ -4320,55 +5264,24 @@ async function handleRequest(
   const registryService = state.registryService;
   const dropService = state.dropService;
 
-  const scheduleRuntimeRestart = (reason: string, delayMs = 300): void => {
-    const restart = () => {
-      if (ctx?.onRestart) {
-        logger.info(`[milady-api] Triggering runtime restart (${reason})...`);
-        Promise.resolve(ctx.onRestart())
-          .then((newRuntime) => {
-            if (!newRuntime) {
-              logger.warn("[milady-api] Runtime restart returned null");
-              return;
-            }
-            state.runtime = newRuntime;
-            state.chatConnectionReady = null;
-            state.chatConnectionPromise = null;
-            state.agentState = "running";
-            state.agentName = newRuntime.character.name ?? "Milady";
-            state.startedAt = Date.now();
-            logger.info("[milady-api] Runtime restarted successfully");
-            // Notify WebSocket clients so the UI can refresh
-            state.broadcastWs?.({
-              type: "status",
-              state: state.agentState,
-              agentName: state.agentName,
-              startedAt: state.startedAt,
-              restarted: true,
-            });
-          })
-          .catch((err) => {
-            logger.error(
-              `[milady-api] Runtime restart failed: ${err instanceof Error ? err.message : err}`,
-            );
-          });
-        return;
-      }
-
-      logger.info(
-        `[milady-api] No in-process restart handler; exiting for external restart (${reason})`,
+  const scheduleRuntimeRestart = (reason: string): void => {
+    if (state.pendingRestartReasons.length >= 50) {
+      // Prevent unbounded growth — keep only first entry + latest
+      state.pendingRestartReasons.splice(
+        1,
+        state.pendingRestartReasons.length - 1,
       );
-      if (process.env.VITEST || process.env.NODE_ENV === "test") {
-        logger.info("[milady-api] Skipping process.exit during test execution");
-        return;
-      }
-      process.exit(API_RESTART_EXIT_CODE);
-    };
-
-    if (delayMs <= 0) {
-      restart();
-      return;
     }
-    setTimeout(restart, delayMs);
+    if (!state.pendingRestartReasons.includes(reason)) {
+      state.pendingRestartReasons.push(reason);
+    }
+    logger.info(
+      `[milady-api] Restart required: ${reason} (${state.pendingRestartReasons.length} pending)`,
+    );
+    state.broadcastWs?.({
+      type: "restart-required",
+      reasons: [...state.pendingRestartReasons],
+    });
   };
 
   const resolveHyperscapeApiBaseUrl = async (): Promise<string> => {
@@ -4379,22 +5292,6 @@ async function handleRequest(
     // Default to the local Hyperscape API server. Viewer URLs can point at a
     // client dev server (for example :3333) which does not expose API routes.
     return "http://localhost:5555";
-  };
-
-  const resolveHyperscapeAuthorizationHeader = (): string | null => {
-    const requestAuth =
-      typeof req.headers.authorization === "string"
-        ? req.headers.authorization.trim()
-        : "";
-    if (requestAuth) {
-      return requestAuth;
-    }
-
-    const envToken = process.env.HYPERSCAPE_AUTH_TOKEN?.trim();
-    if (!envToken) {
-      return null;
-    }
-    return /^Bearer\s+/i.test(envToken) ? envToken : `Bearer ${envToken}`;
   };
 
   const relayHyperscapeApi = async (
@@ -4445,7 +5342,7 @@ async function handleRequest(
     if (contentType && rawBody !== undefined) {
       outboundHeaders["Content-Type"] = contentType;
     }
-    const authorization = resolveHyperscapeAuthorizationHeader();
+    const authorization = resolveHyperscapeAuthorizationHeader(req);
     if (authorization) {
       outboundHeaders.Authorization = authorization;
     }
@@ -4480,6 +5377,13 @@ async function handleRequest(
     return;
   }
 
+  // Serve dashboard static assets before the auth gate.  serveStaticUi
+  // already refuses /api/, /v1/, and /ws paths, so API endpoints remain
+  // fully protected by the token check below.
+  if (method === "GET" || method === "HEAD") {
+    if (serveStaticUi(req, res, pathname)) return;
+  }
+
   if (method !== "OPTIONS" && !isAuthEndpoint && !isAuthorized(req)) {
     json(res, { error: "Unauthorized" }, 401);
     return;
@@ -4489,6 +5393,288 @@ async function handleRequest(
   if (method === "OPTIONS") {
     res.statusCode = 204;
     res.end();
+    return;
+  }
+
+  // ── POST /api/provider/switch ─────────────────────────────────────────
+  // Atomically switch the active AI provider.  Clears competing credentials
+  // and env vars so the runtime loads the correct plugin on restart.
+  if (method === "POST" && pathname === "/api/provider/switch") {
+    const body = await readJsonBody<{ provider: string; apiKey?: string }>(
+      req,
+      res,
+    );
+    if (!body) return;
+    const provider = body.provider;
+    if (!provider || typeof provider !== "string") {
+      error(res, "Missing provider", 400);
+      return;
+    }
+
+    // P1 §7 — explicit provider allowlist
+    const VALID_PROVIDERS = new Set([
+      "elizacloud",
+      "pi-ai",
+      "openai-codex",
+      "openai-subscription",
+      "anthropic-subscription",
+      "openai",
+      "anthropic",
+      "deepseek",
+      "google",
+      "groq",
+      "xai",
+      "openrouter",
+    ]);
+    if (!VALID_PROVIDERS.has(provider)) {
+      error(res, "Invalid provider", 400);
+      return;
+    }
+
+    // P0 §3 — race guard: reject concurrent provider switch requests
+    if (providerSwitchInProgress) {
+      error(res, "Provider switch already in progress", 409);
+      return;
+    }
+    providerSwitchInProgress = true;
+
+    const config = state.config;
+    if (!config.cloud) config.cloud = {} as NonNullable<typeof config.cloud>;
+    if (!config.env) config.env = {};
+    const envCfg = config.env as Record<string, string>;
+
+    // Helper: clear cloud config & env vars
+    const clearCloud = () => {
+      (config.cloud as Record<string, unknown>).enabled = false;
+      delete (config.cloud as Record<string, unknown>).apiKey;
+      delete process.env.ELIZAOS_CLOUD_API_KEY;
+      delete process.env.ELIZAOS_CLOUD_ENABLED;
+      delete envCfg.ELIZAOS_CLOUD_API_KEY;
+      delete envCfg.ELIZAOS_CLOUD_ENABLED;
+      // Also clear from runtime character secrets if available
+      if (state.runtime?.character?.secrets) {
+        const secrets = state.runtime.character.secrets as Record<
+          string,
+          unknown
+        >;
+        delete secrets.ELIZAOS_CLOUD_API_KEY;
+        delete secrets.ELIZAOS_CLOUD_ENABLED;
+      }
+    };
+
+    // Helper: clear pi-ai mode
+    const clearPiAi = () => {
+      delete process.env.MILAIDY_USE_PI_AI;
+      delete envCfg.MILAIDY_USE_PI_AI;
+
+      const envRoot = config.env as Record<string, unknown>;
+      const vars = envRoot.vars;
+      if (vars && typeof vars === "object" && !Array.isArray(vars)) {
+        delete (vars as Record<string, unknown>).MILAIDY_USE_PI_AI;
+      }
+
+      if (state.runtime?.character?.secrets) {
+        const secrets = state.runtime.character.secrets as Record<
+          string,
+          unknown
+        >;
+        delete secrets.MILAIDY_USE_PI_AI;
+      }
+    };
+
+    // Helper: clear subscription credentials
+    const clearSubscriptions = async () => {
+      try {
+        const { deleteCredentials } = await import("../auth/index");
+        deleteCredentials("anthropic-subscription");
+        deleteCredentials("openai-codex");
+      } catch (err) {
+        logger.warn(
+          `[api] Failed to clear subscriptions: ${err instanceof Error ? err.message : err}`,
+        );
+      }
+      // Don't clear the env keys here — applySubscriptionCredentials on
+      // restart will simply not set them if creds are gone.
+    };
+
+    // Provider-specific env key map
+    const PROVIDER_ENV_KEYS: Record<string, string> = {
+      openai: "OPENAI_API_KEY",
+      anthropic: "ANTHROPIC_API_KEY",
+      deepseek: "DEEPSEEK_API_KEY",
+      google: "GOOGLE_API_KEY",
+      groq: "GROQ_API_KEY",
+      xai: "XAI_API_KEY",
+      openrouter: "OPENROUTER_API_KEY",
+    };
+
+    // Helper: clear all direct API keys from env (except the one we're switching to)
+    const clearOtherApiKeys = (keepKey?: string) => {
+      for (const [, envKey] of Object.entries(PROVIDER_ENV_KEYS)) {
+        if (envKey === keepKey) continue;
+        delete process.env[envKey];
+        delete envCfg[envKey];
+        // P1 §6 — also clear from runtime character secrets
+        if (state.runtime?.character?.secrets) {
+          const secrets = state.runtime.character.secrets as Record<
+            string,
+            unknown
+          >;
+          delete secrets[envKey];
+        }
+      }
+    };
+
+    try {
+      // P0 §4 — input validation for direct API key providers
+      if (PROVIDER_ENV_KEYS[provider]) {
+        const trimmedKey =
+          typeof body.apiKey === "string" ? body.apiKey.trim() : "";
+        if (!trimmedKey) {
+          providerSwitchInProgress = false;
+          error(res, "API key is required for this provider", 400);
+          return;
+        }
+        if (trimmedKey.length > 512) {
+          providerSwitchInProgress = false;
+          error(res, "API key is too long", 400);
+          return;
+        }
+        // Store trimmed key back for use below
+        body.apiKey = trimmedKey;
+      }
+
+      if (provider === "elizacloud") {
+        // Switching TO elizacloud
+        clearPiAi();
+        await clearSubscriptions();
+        clearOtherApiKeys();
+        clearSubscriptionProviderConfig(config);
+        // Restore cloud config — the actual API key should already be in
+        // config.cloud.apiKey from the original cloud login.  If it was
+        // wiped, the user will need to re-login via cloud.
+        (config.cloud as Record<string, unknown>).enabled = true;
+        if (config.cloud.apiKey) {
+          process.env.ELIZAOS_CLOUD_API_KEY = config.cloud.apiKey;
+          process.env.ELIZAOS_CLOUD_ENABLED = "true";
+        }
+      } else if (provider === "pi-ai") {
+        // Switching TO pi-ai credentials mode
+        clearCloud();
+        await clearSubscriptions();
+        clearOtherApiKeys();
+        process.env.MILAIDY_USE_PI_AI = "1";
+        envCfg.MILAIDY_USE_PI_AI = "1";
+
+        const envRoot = config.env as Record<string, unknown>;
+        const vars =
+          envRoot.vars &&
+          typeof envRoot.vars === "object" &&
+          !Array.isArray(envRoot.vars)
+            ? (envRoot.vars as Record<string, unknown>)
+            : {};
+        vars.MILAIDY_USE_PI_AI = "1";
+        envRoot.vars = vars;
+      } else if (
+        provider === "openai-codex" ||
+        provider === "openai-subscription"
+      ) {
+        // Switching TO OpenAI subscription
+        clearPiAi();
+        clearCloud();
+        clearOtherApiKeys("OPENAI_API_KEY");
+        applySubscriptionProviderConfig(config, provider);
+        // Delete Anthropic subscription but keep OpenAI
+        try {
+          const { deleteCredentials } = await import("../auth/index");
+          deleteCredentials("anthropic-subscription");
+        } catch (err) {
+          logger.warn(
+            `[api] Failed to clear Anthropic subscription: ${err instanceof Error ? err.message : err}`,
+          );
+        }
+        // Apply the OpenAI subscription credentials to env + install stealth
+        try {
+          const { applySubscriptionCredentials } = await import(
+            "../auth/index"
+          );
+          await applySubscriptionCredentials(config);
+        } catch (err) {
+          logger.warn(
+            `[api] Failed to apply OpenAI subscription creds: ${err instanceof Error ? err.message : err}`,
+          );
+        }
+      } else if (provider === "anthropic-subscription") {
+        // Switching TO Anthropic subscription
+        clearPiAi();
+        clearCloud();
+        clearOtherApiKeys("ANTHROPIC_API_KEY");
+        applySubscriptionProviderConfig(config, provider);
+        // Delete OpenAI subscription but keep Anthropic
+        try {
+          const { deleteCredentials } = await import("../auth/index");
+          deleteCredentials("openai-codex");
+        } catch (err) {
+          logger.warn(
+            `[api] Failed to clear OpenAI subscription: ${err instanceof Error ? err.message : err}`,
+          );
+        }
+        // Apply the Anthropic subscription credentials to env + install stealth
+        try {
+          const { applySubscriptionCredentials } = await import(
+            "../auth/index"
+          );
+          await applySubscriptionCredentials(config);
+        } catch (err) {
+          logger.warn(
+            `[api] Failed to apply Anthropic subscription creds: ${err instanceof Error ? err.message : err}`,
+          );
+        }
+      } else if (PROVIDER_ENV_KEYS[provider]) {
+        // Switching TO a direct API key provider
+        clearPiAi();
+        clearCloud();
+        await clearSubscriptions();
+        clearSubscriptionProviderConfig(config);
+        const envKey = PROVIDER_ENV_KEYS[provider];
+        clearOtherApiKeys(envKey);
+        const apiKey = body.apiKey;
+        if (!apiKey) {
+          providerSwitchInProgress = false;
+          error(res, "API key is required for this provider", 400);
+          return;
+        }
+        process.env[envKey] = apiKey;
+        envCfg[envKey] = apiKey;
+      }
+
+      saveMiladyConfig(config);
+
+      // Schedule runtime restart so the new provider takes effect.
+      scheduleRuntimeRestart(`provider switch to ${provider}`);
+      // Keep the lock briefly in restart-capable environments to prevent
+      // double-submits from racing with restart-required propagation.
+      if (ctx?.onRestart) {
+        setTimeout(() => {
+          providerSwitchInProgress = false;
+        }, 250);
+      } else {
+        providerSwitchInProgress = false;
+      }
+
+      json(res, {
+        success: true,
+        provider,
+        restarting: true,
+      });
+    } catch (err) {
+      providerSwitchInProgress = false;
+      // P1 §8 — don't leak internal error details to client
+      logger.error(
+        `[api] Provider switch failed: ${err instanceof Error ? err.stack : err}`,
+      );
+      error(res, "Provider switch failed", 500);
+    }
     return;
   }
 
@@ -4545,6 +5731,8 @@ async function handleRequest(
       model: state.model,
       uptime,
       cloud: cloudStatus,
+      pendingRestart: state.pendingRestartReasons.length > 0,
+      pendingRestartReasons: state.pendingRestartReasons,
     });
     return;
   }
@@ -4697,14 +5885,35 @@ async function handleRequest(
 
   // ── GET /api/onboarding/options ─────────────────────────────────────────
   if (method === "GET" && pathname === "/api/onboarding/options") {
+    let piAiModels: Array<{
+      id: string;
+      name: string;
+      provider: string;
+      isDefault: boolean;
+    }> = [];
+    let piAiDefaultModel: string | null = null;
+
+    try {
+      const piAi = await listPiAiModelOptions();
+      piAiModels = piAi.models;
+      piAiDefaultModel = piAi.defaultModelSpec ?? null;
+    } catch (err) {
+      logger.warn(
+        `[api] Failed to load pi-ai model options: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+
     json(res, {
       names: pickRandomNames(5),
       styles: STYLE_PRESETS,
       providers: getProviderOptions(),
       cloudProviders: getCloudProviderOptions(),
       models: getModelOptions(),
+      piAiModels,
+      piAiDefaultModel,
       inventoryProviders: getInventoryProviderOptions(),
       sharedStyleRules: "Keep responses brief. Be helpful and concise.",
+      githubOAuthAvailable: Boolean(process.env.GITHUB_OAUTH_CLIENT_ID?.trim()),
     });
     return;
   }
@@ -4818,11 +6027,39 @@ async function handleRequest(
       if (!config.env) config.env = {};
       const envCfg = config.env as Record<string, unknown>;
       const vars = (envCfg.vars ?? {}) as Record<string, string>;
-
       const providerId = typeof body.provider === "string" ? body.provider : "";
 
       // Persist vars back onto config.env
       (envCfg as Record<string, unknown>).vars = vars;
+
+      const clearPiAiFlag = () => {
+        delete vars.MILAIDY_USE_PI_AI;
+        delete (config.env as Record<string, string>).MILAIDY_USE_PI_AI;
+        delete process.env.MILAIDY_USE_PI_AI;
+      };
+
+      if (runMode === "local" && providerId === "pi-ai") {
+        vars.MILAIDY_USE_PI_AI = "1";
+        process.env.MILAIDY_USE_PI_AI = "1";
+
+        // Optional primary model override (provider/model).
+        if (!config.agents) config.agents = {};
+        if (!config.agents.defaults) config.agents.defaults = {};
+        const defaults = config.agents.defaults as Record<string, unknown>;
+        const modelConfig = (defaults.model ?? {}) as Record<string, unknown>;
+        const primaryModel =
+          typeof body.primaryModel === "string" ? body.primaryModel.trim() : "";
+
+        if (primaryModel) {
+          modelConfig.primary = primaryModel;
+        } else {
+          delete modelConfig.primary;
+        }
+
+        defaults.model = modelConfig;
+      } else {
+        clearPiAiFlag();
+      }
 
       // API-key providers (envKey backed)
       if (runMode === "local" && providerId && body.providerApiKey) {
@@ -4853,6 +6090,36 @@ async function handleRequest(
       logger.info(
         `[milady-api] Subscription provider selected: ${body.provider} — complete OAuth via /api/subscription/ endpoints`,
       );
+
+      // Handle Anthropic setup token (sk-ant-oat01-...) provided during
+      // onboarding. The API-key gate above skips subscription providers
+      // because their envKey is null. Mirrors POST /api/subscription/
+      // anthropic/setup-token in subscription-routes.ts.
+      if (
+        body.provider === "anthropic-subscription" &&
+        typeof body.providerApiKey === "string" &&
+        body.providerApiKey.trim().startsWith("sk-ant-")
+      ) {
+        const token = body.providerApiKey.trim();
+        if (!config.env) config.env = {};
+        (config.env as Record<string, string>).ANTHROPIC_API_KEY = token;
+        process.env.ANTHROPIC_API_KEY = token;
+        logger.info(
+          "[milady-api] Anthropic setup token saved during onboarding",
+        );
+      }
+    }
+
+    // ── GitHub token ────────────────────────────────────────────────────
+    if (
+      body.githubToken &&
+      typeof body.githubToken === "string" &&
+      body.githubToken.trim()
+    ) {
+      if (!config.env) config.env = {};
+      (config.env as Record<string, string>).GITHUB_TOKEN =
+        body.githubToken.trim();
+      process.env.GITHUB_TOKEN = body.githubToken.trim();
     }
 
     // ── Connectors (Telegram, Discord, WhatsApp, Twilio, Blooio) ────────
@@ -5412,6 +6679,7 @@ async function handleRequest(
         "vision",
         "browser",
         "computeruse",
+        "coding-agent",
       ]);
       if (CAPABILITY_FEATURE_IDS.has(pluginId)) {
         if (!state.config.features) {
@@ -5429,7 +6697,7 @@ async function handleRequest(
         );
       }
 
-      scheduleRuntimeRestart(`Plugin toggle: ${pluginId}`, 300);
+      scheduleRuntimeRestart(`Plugin toggle: ${pluginId}`);
     }
 
     json(res, { ok: true, plugin });
@@ -5637,7 +6905,7 @@ async function handleRequest(
 
       // If autoRestart is not explicitly false, restart the agent
       if (body.autoRestart !== false && result.requiresRestart) {
-        scheduleRuntimeRestart(`Plugin ${result.pluginName} installed`, 500);
+        scheduleRuntimeRestart(`Plugin ${result.pluginName} installed`);
       }
 
       json(res, {
@@ -5686,7 +6954,7 @@ async function handleRequest(
       }
 
       if (body.autoRestart !== false && result.requiresRestart) {
-        scheduleRuntimeRestart(`Plugin ${pluginName} uninstalled`, 500);
+        scheduleRuntimeRestart(`Plugin ${pluginName} uninstalled`);
       }
 
       json(res, {
@@ -5724,7 +6992,7 @@ async function handleRequest(
         return;
       }
       if (result.requiresRestart) {
-        scheduleRuntimeRestart(`Plugin ${pluginName} ejected`, 500);
+        scheduleRuntimeRestart(`Plugin ${pluginName} ejected`);
       }
       json(res, {
         ok: true,
@@ -5758,7 +7026,7 @@ async function handleRequest(
         return;
       }
       if (result.requiresRestart) {
-        scheduleRuntimeRestart(`Plugin ${pluginName} synced`, 500);
+        scheduleRuntimeRestart(`Plugin ${pluginName} synced`);
       }
       json(res, {
         ok: true,
@@ -5798,7 +7066,7 @@ async function handleRequest(
         return;
       }
       if (result.requiresRestart) {
-        scheduleRuntimeRestart(`Plugin ${pluginName} reinjected`, 500);
+        scheduleRuntimeRestart(`Plugin ${pluginName} reinjected`);
       }
       json(res, {
         ok: true,
@@ -5977,7 +7245,6 @@ async function handleRequest(
     // Auto-restart so the change takes effect
     scheduleRuntimeRestart(
       `Plugin ${shortId} ${body.enabled ? "enabled" : "disabled"}`,
-      300,
     );
 
     json(res, {
@@ -7099,6 +8366,8 @@ async function handleRequest(
       url,
       logBuffer: state.logBuffer,
       eventBuffer: state.eventBuffer,
+      initSse,
+      writeSseJson,
       json,
     })
   ) {
@@ -7118,6 +8387,7 @@ async function handleRequest(
       saveConfig: saveMiladyConfig,
       ensureWalletKeysInEnvAndConfig,
       resolveWalletExportRejection,
+      scheduleRuntimeRestart,
       readJsonBody,
       json,
       error,
@@ -7225,12 +8495,29 @@ async function handleRequest(
 
   if (method === "GET" && pathname === "/api/registry/config") {
     const registryConfig = state.config.registry;
+    let chainId = 1;
+    if (registryService) {
+      try {
+        chainId = await registryService.getChainId();
+      } catch {
+        // Keep default if chain RPC is unavailable.
+      }
+    }
+
+    const explorerByChainId: Record<number, string> = {
+      1: "https://etherscan.io",
+      10: "https://optimistic.etherscan.io",
+      137: "https://polygonscan.com",
+      8453: "https://basescan.org",
+      42161: "https://arbiscan.io",
+    };
+
     json(res, {
       configured: Boolean(registryService),
-      chainId: 1,
+      chainId,
       registryAddress: registryConfig?.registryAddress ?? null,
       collectionAddress: registryConfig?.collectionAddress ?? null,
-      explorerUrl: "https://etherscan.io",
+      explorerUrl: explorerByChainId[chainId] ?? "",
     });
     return;
   }
@@ -7623,15 +8910,19 @@ async function handleRequest(
       );
       upstreamUrl.searchParams.set("output_format", outputFormat);
 
-      const upstream = await fetch(upstreamUrl.toString(), {
-        method: "POST",
-        headers: {
-          "xi-api-key": resolvedApiKey,
-          "Content-Type": "application/json",
-          Accept: "audio/mpeg",
+      const upstream = await fetchWithTimeoutGuard(
+        upstreamUrl.toString(),
+        {
+          method: "POST",
+          headers: {
+            "xi-api-key": resolvedApiKey,
+            "Content-Type": "application/json",
+            Accept: "audio/mpeg",
+          },
+          body: JSON.stringify(payload),
         },
-        body: JSON.stringify(payload),
-      });
+        ELEVENLABS_FETCH_TIMEOUT_MS,
+      );
 
       if (!upstream.ok) {
         const upstreamBody = await upstream.text().catch(() => "");
@@ -7643,23 +8934,112 @@ async function handleRequest(
         return;
       }
 
-      const audio = Buffer.from(await upstream.arrayBuffer());
       const contentType = upstream.headers.get("content-type") || "audio/mpeg";
+      const contentLength = responseContentLength(upstream.headers);
+      if (
+        contentLength !== null &&
+        contentLength > ELEVENLABS_AUDIO_MAX_BYTES
+      ) {
+        error(
+          res,
+          `ElevenLabs response exceeds maximum size of ${ELEVENLABS_AUDIO_MAX_BYTES} bytes`,
+          502,
+        );
+        return;
+      }
+
       res.writeHead(200, {
         "Content-Type": contentType,
-        "Content-Length": String(audio.byteLength),
         "Cache-Control": "no-store",
+        ...(contentLength !== null
+          ? { "Content-Length": String(contentLength) }
+          : {}),
       });
-      res.end(audio);
+
+      await streamResponseBodyWithByteLimit(
+        upstream,
+        res,
+        ELEVENLABS_AUDIO_MAX_BYTES,
+        ELEVENLABS_FETCH_TIMEOUT_MS,
+      );
+      res.end();
       return;
     } catch (err) {
+      if (res.headersSent) {
+        res.destroy(
+          err instanceof Error
+            ? err
+            : new Error(
+                `ElevenLabs proxy error: ${typeof err === "string" ? err : String(err)}`,
+              ),
+        );
+        return;
+      }
       error(
         res,
         `ElevenLabs proxy error: ${err instanceof Error ? err.message : String(err)}`,
-        502,
+        isAbortError(err) ? 504 : 502,
       );
       return;
     }
+  }
+
+  // ── POST /api/avatar/vrm ─────────────────────────────────────────────────
+  // Upload a custom VRM avatar file. Saved to ~/.milady/avatars/custom.vrm.
+  if (method === "POST" && pathname === "/api/avatar/vrm") {
+    const MAX_VRM_BYTES = 50 * 1024 * 1024; // 50 MB
+    const rawBody = await readRequestBodyBuffer(req, {
+      maxBytes: MAX_VRM_BYTES,
+      returnNullOnTooLarge: true,
+    });
+    if (!rawBody || rawBody.length === 0) {
+      error(res, "Request body is empty or exceeds 50 MB", 400);
+      return;
+    }
+    // VRM files are GLB (binary glTF) — validate the 4-byte magic header
+    const GLB_MAGIC = Buffer.from([0x67, 0x6c, 0x54, 0x46]); // "glTF"
+    if (rawBody.length < 4 || !rawBody.subarray(0, 4).equals(GLB_MAGIC)) {
+      error(res, "Invalid VRM file: not a valid glTF/GLB file", 400);
+      return;
+    }
+    const avatarDir = path.join(resolveStateDir(), "avatars");
+    fs.mkdirSync(avatarDir, { recursive: true });
+    const vrmPath = path.join(avatarDir, "custom.vrm");
+    fs.writeFileSync(vrmPath, rawBody);
+    json(res, { ok: true, size: rawBody.length });
+    return;
+  }
+
+  // ── GET /api/avatar/vrm ──────────────────────────────────────────────────
+  // Serve the user's custom VRM avatar file if it exists.
+  if (
+    (method === "GET" || method === "HEAD") &&
+    pathname === "/api/avatar/vrm"
+  ) {
+    const vrmPath = path.join(resolveStateDir(), "avatars", "custom.vrm");
+    try {
+      const stat = fs.statSync(vrmPath);
+      if (!stat.isFile()) {
+        error(res, "No custom avatar found", 404);
+        return;
+      }
+      const headers: Record<string, string | number> = {
+        "Content-Type": "model/gltf-binary",
+        "Content-Length": stat.size,
+        "Cache-Control": "no-cache",
+      };
+      if (method === "HEAD") {
+        res.writeHead(200, headers);
+        res.end();
+        return;
+      }
+      const body = fs.readFileSync(vrmPath);
+      res.writeHead(200, headers);
+      res.end(body);
+    } catch {
+      error(res, "No custom avatar found", 404);
+    }
+    return;
   }
 
   // ── GET /api/config/schema ───────────────────────────────────────────────
@@ -7746,6 +9126,31 @@ async function handleRequest(
         delete (envPatch.vars as Record<string, unknown>).MILADY_API_TOKEN;
         delete (envPatch.vars as Record<string, unknown>)
           .MILADY_WALLET_EXPORT_TOKEN;
+      }
+    }
+
+    if (
+      filtered.mcp &&
+      typeof filtered.mcp === "object" &&
+      !Array.isArray(filtered.mcp)
+    ) {
+      const mcpPatch = filtered.mcp as Record<string, unknown>;
+      if (mcpPatch.servers !== undefined) {
+        if (
+          !mcpPatch.servers ||
+          typeof mcpPatch.servers !== "object" ||
+          Array.isArray(mcpPatch.servers)
+        ) {
+          error(res, "mcp.servers must be a JSON object", 400);
+          return;
+        }
+        const mcpRejection = await resolveMcpServersRejection(
+          mcpPatch.servers as Record<string, unknown>,
+        );
+        if (mcpRejection) {
+          error(res, mcpRejection, 400);
+          return;
+        }
       }
     }
 
@@ -8196,6 +9601,7 @@ async function handleRequest(
           const message = createMessageMemory({
             id: crypto.randomUUID() as UUID,
             entityId: userId,
+            agentId: runtime.agentId,
             roomId,
             content: {
               text: prompt,
@@ -8607,6 +10013,10 @@ async function handleRequest(
       updatedAt: now,
     };
     state.conversations.set(id, conv);
+
+    // Soft cap: evict the oldest conversation when the map exceeds 500
+    evictOldestConversation(state.conversations, 500);
+
     if (state.runtime) {
       await ensureConversationRoom(conv);
       await syncConversationRoomTitle(conv);
@@ -8680,7 +10090,7 @@ async function handleRequest(
       error,
     });
     if (!chatPayload) return;
-    const { prompt, channelType } = chatPayload;
+    const { prompt, channelType, images } = chatPayload;
 
     const runtime = state.runtime;
     if (!runtime) {
@@ -8702,19 +10112,16 @@ async function handleRequest(
       return;
     }
 
-    const userMessage = createMessageMemory({
-      id: crypto.randomUUID() as UUID,
-      entityId: userId,
+    const { userMessage, messageToStore } = buildUserMessages({
+      images,
+      prompt,
+      userId,
       roomId: conv.roomId,
-      content: {
-        text: prompt,
-        source: "client_chat",
-        channelType,
-      },
+      channelType,
     });
 
     try {
-      await persistConversationMemory(runtime, userMessage);
+      await persistConversationMemory(runtime, messageToStore);
     } catch (err) {
       error(res, `Failed to store user message: ${getErrorMessage(err)}`, 500);
       return;
@@ -8828,7 +10235,7 @@ async function handleRequest(
       error,
     });
     if (!chatPayload) return;
-    const { prompt, channelType } = chatPayload;
+    const { prompt, channelType, images } = chatPayload;
     const runtime = state.runtime;
     if (!runtime) {
       error(res, "Agent is not running", 503);
@@ -8848,19 +10255,16 @@ async function handleRequest(
       return;
     }
 
-    const userMessage = createMessageMemory({
-      id: crypto.randomUUID() as UUID,
-      entityId: userId,
+    const { userMessage, messageToStore } = buildUserMessages({
+      images,
+      prompt,
+      userId,
       roomId: conv.roomId,
-      content: {
-        text: prompt,
-        source: "client_chat",
-        channelType,
-      },
+      channelType,
     });
 
     try {
-      await persistConversationMemory(runtime, userMessage);
+      await persistConversationMemory(runtime, messageToStore);
     } catch (err) {
       error(res, `Failed to store user message: ${getErrorMessage(err)}`, 500);
       return;
@@ -9033,10 +10437,14 @@ async function handleRequest(
 
   // ── POST /api/chat/stream ────────────────────────────────────────────
   if (method === "POST" && pathname === "/api/chat/stream") {
-    const chatPayload = await readChatRequestPayload(req, res, {
-      readJsonBody,
-      error,
-    });
+    // Legacy cloud-proxy path — forwards messages to a remote sandbox and
+    // does not process image attachments. Retain the standard 1 MB body limit.
+    const chatPayload = await readChatRequestPayload(
+      req,
+      res,
+      { readJsonBody, error },
+      MAX_BODY_BYTES,
+    );
     if (!chatPayload) return;
     const { prompt, channelType } = chatPayload;
 
@@ -9066,6 +10474,7 @@ async function handleRequest(
       const message = createMessageMemory({
         id: crypto.randomUUID() as UUID,
         entityId: chatUserId,
+        agentId: runtime.agentId,
         roomId: chatRoomId,
         content: {
           text: prompt,
@@ -9126,10 +10535,14 @@ async function handleRequest(
   // remote sandbox instead of the local runtime.  Supports SSE streaming
   // when the client sends Accept: text/event-stream.
   if (method === "POST" && pathname === "/api/chat") {
-    const chatPayload = await readChatRequestPayload(req, res, {
-      readJsonBody,
-      error,
-    });
+    // Legacy cloud-proxy path — forwards messages to a remote sandbox and
+    // does not process image attachments. Retain the standard 1 MB body limit.
+    const chatPayload = await readChatRequestPayload(
+      req,
+      res,
+      { readJsonBody, error },
+      MAX_BODY_BYTES,
+    );
     if (!chatPayload) return;
     const { prompt, channelType } = chatPayload;
 
@@ -9151,6 +10564,7 @@ async function handleRequest(
       const message = createMessageMemory({
         id: crypto.randomUUID() as UUID,
         entityId: chatUserId,
+        agentId: runtime.agentId,
         roomId: chatRoomId,
         content: {
           text: prompt,
@@ -9210,6 +10624,18 @@ async function handleRequest(
       );
       if (handled) return;
     }
+  }
+
+  // ── Coding Agent API (/api/coding-agents/*, /api/workspace/*, /api/issues/*) ──
+  if (
+    state.runtime &&
+    (pathname.startsWith("/api/coding-agents") ||
+      pathname.startsWith("/api/workspace") ||
+      pathname.startsWith("/api/issues"))
+  ) {
+    const handler = createCodingAgentRouteHandler(state.runtime);
+    const handled = await handler(req, res, pathname);
+    if (handled) return;
   }
 
   if (
@@ -10020,42 +11446,16 @@ async function handleRequest(
     }
 
     const config = body.config as Record<string, unknown> | undefined;
-    if (!config || typeof config !== "object") {
+    if (!config || typeof config !== "object" || Array.isArray(config)) {
       error(res, "Server config object is required", 400);
       return;
     }
-    if (hasBlockedObjectKeyDeep(config)) {
-      error(
-        res,
-        'Invalid server config: "__proto__", "constructor", and "prototype" are not allowed',
-        400,
-      );
-      return;
-    }
 
-    const configType = config.type as string | undefined;
-    const validTypes = ["stdio", "http", "streamable-http", "sse"];
-    if (!configType || !validTypes.includes(configType)) {
-      error(
-        res,
-        `Invalid config type. Must be one of: ${validTypes.join(", ")}`,
-        400,
-      );
-      return;
-    }
-
-    if (configType === "stdio" && !config.command) {
-      error(res, "Command is required for stdio servers", 400);
-      return;
-    }
-
-    if (
-      (configType === "http" ||
-        configType === "streamable-http" ||
-        configType === "sse") &&
-      !config.url
-    ) {
-      error(res, "URL is required for remote servers", 400);
+    const mcpRejection = await resolveMcpServersRejection({
+      [serverName]: config,
+    });
+    if (mcpRejection) {
+      error(res, mcpRejection, 400);
       return;
     }
 
@@ -10118,13 +11518,20 @@ async function handleRequest(
     if (!body) return;
 
     if (!state.config.mcp) state.config.mcp = {};
-    if (body.servers && typeof body.servers === "object") {
-      if (hasBlockedObjectKeyDeep(body.servers)) {
-        error(
-          res,
-          'Invalid servers config: "__proto__", "constructor", and "prototype" are not allowed',
-          400,
-        );
+    if (body.servers !== undefined) {
+      if (
+        !body.servers ||
+        typeof body.servers !== "object" ||
+        Array.isArray(body.servers)
+      ) {
+        error(res, "servers must be a JSON object", 400);
+        return;
+      }
+      const mcpRejection = await resolveMcpServersRejection(
+        body.servers as Record<string, unknown>,
+      );
+      if (mcpRejection) {
+        error(res, mcpRejection, 400);
         return;
       }
       const sanitized = cloneWithoutBlockedObjectKeys(body.servers);
@@ -10226,7 +11633,10 @@ async function handleRequest(
       return;
     }
 
-    const body = await readJsonBody<{ command?: string }>(req, res);
+    const body = await readJsonBody<{ command?: string; clientId?: unknown }>(
+      req,
+      res,
+    );
     if (!body) return;
     const command = typeof body.command === "string" ? body.command.trim() : "";
     if (!command) {
@@ -10239,6 +11649,40 @@ async function handleRequest(
       error(res, "Command exceeds maximum length (4096 chars)", 400);
       return;
     }
+
+    // Prevent multiline/control-character payloads that can smuggle
+    // unintended command chains through a single request.
+    if (
+      command.includes("\n") ||
+      command.includes("\r") ||
+      command.includes("\0")
+    ) {
+      error(
+        res,
+        "Command must be a single line without control characters",
+        400,
+      );
+      return;
+    }
+
+    const targetClientId = resolveTerminalRunClientId(req, body);
+    if (!targetClientId) {
+      error(
+        res,
+        "Missing client id. Provide X-Milady-Client-Id header or clientId in the request body.",
+        400,
+      );
+      return;
+    }
+
+    const emitTerminalEvent = (payload: Record<string, unknown>) => {
+      if (isSharedTerminalClientId(targetClientId)) {
+        state.broadcastWs?.(payload);
+        return;
+      }
+      if (typeof state.broadcastWsToClientId !== "function") return;
+      state.broadcastWsToClientId(targetClientId, payload);
+    };
 
     const { maxConcurrent, maxDurationMs } = resolveTerminalRunLimits();
     if (activeTerminalRunCount >= maxConcurrent) {
@@ -10257,7 +11701,7 @@ async function handleRequest(
     const { spawn } = await import("node:child_process");
     const runId = `run-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-    state.broadcastWs?.({
+    emitTerminalEvent({
       type: "terminal-output",
       runId,
       event: "start",
@@ -10283,7 +11727,7 @@ async function handleRequest(
     const timeoutHandle = setTimeout(() => {
       if (proc.killed) return;
       proc.kill("SIGTERM");
-      state.broadcastWs?.({
+      emitTerminalEvent({
         type: "terminal-output",
         runId,
         event: "timeout",
@@ -10296,7 +11740,7 @@ async function handleRequest(
     }, maxDurationMs);
 
     proc.stdout?.on("data", (chunk: Buffer) => {
-      state.broadcastWs?.({
+      emitTerminalEvent({
         type: "terminal-output",
         runId,
         event: "stdout",
@@ -10305,7 +11749,7 @@ async function handleRequest(
     });
 
     proc.stderr?.on("data", (chunk: Buffer) => {
-      state.broadcastWs?.({
+      emitTerminalEvent({
         type: "terminal-output",
         runId,
         event: "stderr",
@@ -10315,7 +11759,7 @@ async function handleRequest(
 
     proc.on("close", (code: number | null) => {
       finalize();
-      state.broadcastWs?.({
+      emitTerminalEvent({
         type: "terminal-output",
         runId,
         event: "exit",
@@ -10325,7 +11769,7 @@ async function handleRequest(
 
     proc.on("error", (err: Error) => {
       finalize();
-      state.broadcastWs?.({
+      emitTerminalEvent({
         type: "terminal-output",
         runId,
         event: "error",
@@ -10606,9 +12050,274 @@ async function handleRequest(
     return;
   }
 
-  // ── Static UI serving (production) ──────────────────────────────────────
-  if (method === "GET" || method === "HEAD") {
-    if (serveStaticUi(req, res, pathname)) return;
+  // ── Stream Manager (macOS-compatible RTMP via FFmpeg) ────────────────────
+  if (method === "POST" && pathname === "/api/stream/start") {
+    try {
+      const body = await readJsonBody(req, res, { maxBytes: MAX_BODY_BYTES });
+      // Get RTMP credentials from retake.tv if not provided
+      let rtmpUrl = body?.rtmpUrl as string | undefined;
+      let rtmpKey = body?.rtmpKey as string | undefined;
+
+      if (!rtmpUrl || !rtmpKey) {
+        // Auto-fetch from retake.tv using the token in config
+        const retakeToken = process.env.RETAKE_AGENT_TOKEN || "";
+        const retakeApiUrl =
+          process.env.RETAKE_API_URL || "https://retake.tv/api/v1";
+
+        if (!retakeToken) {
+          error(res, "RETAKE_AGENT_TOKEN not configured", 400);
+          return;
+        }
+
+        // Start the stream session first
+        const startRes = await fetch(`${retakeApiUrl}/agent/stream/start`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${retakeToken}`,
+          },
+        });
+        if (!startRes.ok) {
+          error(res, `Failed to start retake stream: ${startRes.status}`, 502);
+          return;
+        }
+
+        // Get RTMP credentials
+        const rtmpRes = await fetch(`${retakeApiUrl}/agent/rtmp`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${retakeToken}`,
+          },
+        });
+        if (!rtmpRes.ok) {
+          error(res, `Failed to get RTMP credentials: ${rtmpRes.status}`, 502);
+          return;
+        }
+        const rtmpData = (await rtmpRes.json()) as {
+          url: string;
+          key: string;
+        };
+        rtmpUrl = rtmpData.url;
+        rtmpKey = rtmpData.key;
+      }
+
+      await streamManager.start({
+        rtmpUrl,
+        rtmpKey,
+        inputMode: (body?.inputMode as "testsrc" | "avfoundation") || "testsrc",
+        resolution: (body?.resolution as string) || "1280x720",
+        bitrate: (body?.bitrate as string) || "2500k",
+        framerate: (body?.framerate as number) || 30,
+      });
+
+      json(res, { ok: true, message: "Stream started" });
+    } catch (err) {
+      error(
+        res,
+        err instanceof Error ? err.message : "Stream start failed",
+        500,
+      );
+    }
+    return;
+  }
+
+  if (method === "POST" && pathname === "/api/stream/stop") {
+    try {
+      const result = await streamManager.stop();
+
+      // Also stop the retake session
+      const retakeToken = process.env.RETAKE_AGENT_TOKEN || "";
+      const retakeApiUrl =
+        process.env.RETAKE_API_URL || "https://retake.tv/api/v1";
+      if (retakeToken) {
+        await fetch(`${retakeApiUrl}/agent/stream/stop`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${retakeToken}`,
+          },
+        }).catch(() => {});
+      }
+
+      json(res, { ok: true, ...result });
+    } catch (err) {
+      error(
+        res,
+        err instanceof Error ? err.message : "Stream stop failed",
+        500,
+      );
+    }
+    return;
+  }
+
+  if (method === "GET" && pathname === "/api/stream/status") {
+    json(res, streamManager.getHealth());
+    return;
+  }
+
+  // ── Stream frame push (pipe mode — Electron capturePage → FFmpeg stdin)
+  if (method === "POST" && pathname === "/api/stream/frame") {
+    if (!streamManager.isRunning()) {
+      error(res, "Stream not running", 400);
+      return;
+    }
+    try {
+      const buf = await readRequestBodyBuffer(req, {
+        maxBytes: 2 * 1024 * 1024,
+      });
+      if (!buf || buf.length === 0) {
+        error(res, "Empty frame", 400);
+        return;
+      }
+      const ok = streamManager.writeFrame(buf);
+      // Minimal response to reduce overhead at 15fps
+      res.writeHead(200);
+      res.end(ok ? "1" : "0");
+    } catch (err) {
+      error(
+        res,
+        err instanceof Error ? err.message : "Frame write failed",
+        500,
+      );
+    }
+    return;
+  }
+
+  // ── Retake frame push (browser-capture mode) ────────────────────────────
+  if (method === "POST" && pathname === "/api/retake/frame") {
+    // Route frames to StreamManager (pipe mode) or RetakeService
+    if (streamManager.isRunning()) {
+      try {
+        const buf = await readRequestBodyBuffer(req, {
+          maxBytes: 2 * 1024 * 1024,
+        });
+        if (!buf || buf.length === 0) {
+          error(res, "Empty frame", 400);
+          return;
+        }
+        streamManager.writeFrame(buf);
+        res.writeHead(200);
+        res.end();
+      } catch {
+        error(res, "Frame write failed", 500);
+      }
+      return;
+    }
+    error(
+      res,
+      "StreamManager not running — start stream via POST /api/retake/live",
+      503,
+    );
+    return;
+  }
+
+  // ── Retake go-live via StreamManager ────────────────────────────────────
+  if (method === "POST" && pathname === "/api/retake/live") {
+    if (streamManager.isRunning()) {
+      json(res, { ok: true, live: true, message: "Already streaming" });
+      return;
+    }
+    const retakeToken = process.env.RETAKE_AGENT_TOKEN || "";
+    if (!retakeToken) {
+      error(res, "RETAKE_AGENT_TOKEN not configured", 400);
+      return;
+    }
+    try {
+      const { rtmpUrl } = await startRetakeStream();
+      json(res, { ok: true, live: true, rtmpUrl });
+    } catch (err) {
+      error(res, err instanceof Error ? err.message : "Failed to go live", 500);
+    }
+    return;
+  }
+
+  if (method === "POST" && pathname === "/api/retake/offline") {
+    try {
+      // Stop browser capture
+      try {
+        const { stopBrowserCapture } = await import(
+          "../services/browser-capture.js"
+        );
+        await stopBrowserCapture();
+      } catch {}
+      // Stop StreamManager
+      if (streamManager.isRunning()) {
+        await streamManager.stop();
+      }
+      // Stop retake.tv session
+      const retakeToken = process.env.RETAKE_AGENT_TOKEN || "";
+      const retakeApiUrl =
+        process.env.RETAKE_API_URL || "https://retake.tv/api/v1";
+      if (retakeToken) {
+        await fetch(`${retakeApiUrl}/agent/stream/stop`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${retakeToken}`,
+          },
+        }).catch(() => {});
+      }
+      json(res, { ok: true, live: false });
+    } catch (err) {
+      error(
+        res,
+        err instanceof Error ? err.message : "Failed to go offline",
+        500,
+      );
+    }
+    return;
+  }
+
+  // ── LTCG Autonomy routes ─────────────────────────────────────────────
+  // The LTCG plugin registers these as ElizaOS plugin routes, but Milady's
+  // server doesn't dispatch plugin routes. Wire them up directly here.
+  if (pathname.startsWith("/api/ltcg/autonomy")) {
+    try {
+      const { getAutonomyController } = await import("@lunchtable/plugin-ltcg");
+      const ctrl = getAutonomyController();
+
+      if (method === "GET" && pathname === "/api/ltcg/autonomy/status") {
+        json(res, ctrl.getStatus());
+        return;
+      }
+
+      if (method === "POST" && pathname === "/api/ltcg/autonomy/start") {
+        const body = (await readJsonBody(req, res)) ?? {};
+        const bodyRecord = body as Record<string, unknown>;
+        const mode = bodyRecord.mode === "pvp" ? "pvp" : "story";
+        const continuousValue = bodyRecord.continuous;
+        const continuous =
+          typeof continuousValue === "boolean" ? continuousValue : true;
+        await ctrl.start({ mode, continuous });
+        json(res, { ok: true, mode, continuous });
+        return;
+      }
+
+      if (method === "POST" && pathname === "/api/ltcg/autonomy/pause") {
+        ctrl.pause();
+        json(res, { ok: true, state: "paused" });
+        return;
+      }
+
+      if (method === "POST" && pathname === "/api/ltcg/autonomy/resume") {
+        ctrl.resume();
+        json(res, { ok: true, state: "running" });
+        return;
+      }
+
+      if (method === "POST" && pathname === "/api/ltcg/autonomy/stop") {
+        await ctrl.stop();
+        json(res, { ok: true, state: "idle" });
+        return;
+      }
+    } catch (err) {
+      logger.error(
+        `[ltcg-autonomy] ${err instanceof Error ? err.message : err}`,
+      );
+      error(res, err instanceof Error ? err.message : "Autonomy error", 500);
+      return;
+    }
   }
 
   // ── Fallback ────────────────────────────────────────────────────────────
@@ -10743,9 +12452,11 @@ export async function startApiServer(opts?: {
     shareIngestQueue: [],
     broadcastStatus: null,
     broadcastWs: null,
+    broadcastWsToClientId: null,
     activeConversationId: null,
     permissionStates: {},
     shellEnabled: config.features?.shellEnabled !== false,
+    pendingRestartReasons: [],
   };
 
   const trainingServiceCtor = await resolveTrainingServiceCtor();
@@ -10803,14 +12514,18 @@ export async function startApiServer(opts?: {
             : resolvedSource === "cloud"
               ? ["server", "cloud"]
               : ["system"];
-    state.logBuffer.push({
-      timestamp: Date.now(),
-      level,
-      message,
-      source: resolvedSource,
-      tags: resolvedTags,
-    });
-    if (state.logBuffer.length > 1000) state.logBuffer.shift();
+    pushWithBatchEvict(
+      state.logBuffer,
+      {
+        timestamp: Date.now(),
+        level,
+        message,
+        source: resolvedSource,
+        tags: resolvedTags,
+      },
+      1200,
+      200,
+    );
   };
 
   // ── Flush early-captured logs into the main buffer ────────────────────
@@ -11029,6 +12744,11 @@ export async function startApiServer(opts?: {
     };
   };
 
+  // NOTE: registerStreamAutoStart was removed — it spawned a competing
+  // FFmpeg RTMP process whenever the LTCG plugin fired START_RETAKE_STREAM,
+  // conflicting with @milady/plugin-retake's own FfmpegManager. Streaming
+  // is now solely owned by plugin-retake (RetakeService).
+
   const bindTrainingStream = () => {
     if (detachTrainingStream) {
       detachTrainingStream();
@@ -11135,11 +12855,38 @@ export async function startApiServer(opts?: {
         logger.warn({ err }, "Failed to initialize ERC-8004 registry service");
       }
     })();
+
+    // Auto-start retake.tv stream (best-effort, non-blocking)
+    void (async () => {
+      const retakeToken = process.env.RETAKE_AGENT_TOKEN || "";
+      if (!retakeToken) return; // No token — skip silently
+
+      // Let LTCG plugin finish init before starting the stream
+      await new Promise((r) => setTimeout(r, 5_000));
+
+      if (streamManager.isRunning()) {
+        logger.info(
+          "[milady-api] Retake stream already running, skipping auto-start",
+        );
+        return;
+      }
+
+      logger.info("[milady-api] Auto-starting retake.tv stream...");
+      try {
+        await startRetakeStream();
+        logger.info("[milady-api] Retake.tv stream auto-started successfully");
+      } catch (err) {
+        logger.warn(
+          `[milady-api] Retake stream auto-start failed: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
+    })();
   };
 
   // ── WebSocket Server ─────────────────────────────────────────────────────
   const wss = new WebSocketServer({ noServer: true });
   const wsClients = new Set<WebSocket>();
+  const wsClientIds = new WeakMap<WebSocket, string>();
   bindRuntimeStreams(opts?.runtime ?? null);
   bindTrainingStream();
 
@@ -11167,7 +12914,18 @@ export async function startApiServer(opts?: {
   });
 
   // Handle WebSocket connections
-  wss.on("connection", (ws: WebSocket) => {
+  wss.on("connection", (ws: WebSocket, request: http.IncomingMessage) => {
+    try {
+      const wsUrl = new URL(
+        request.url ?? "/",
+        `http://${request.headers.host ?? "localhost"}`,
+      );
+      const clientId = normalizeWsClientId(wsUrl.searchParams.get("clientId"));
+      if (clientId) wsClientIds.set(ws, clientId);
+    } catch {
+      // Ignore malformed WS URL metadata; auth/path were already validated.
+    }
+
     wsClients.add(ws);
     addLog("info", "WebSocket client connected", "websocket", [
       "server",
@@ -11235,6 +12993,8 @@ export async function startApiServer(opts?: {
       agentName: state.agentName,
       model: state.model,
       startedAt: state.startedAt,
+      pendingRestart: state.pendingRestartReasons.length > 0,
+      pendingRestartReasons: state.pendingRestartReasons,
     });
   };
 
@@ -11255,6 +13015,27 @@ export async function startApiServer(opts?: {
         }
       }
     }
+  };
+
+  state.broadcastWsToClientId = (
+    clientId: string,
+    data: Record<string, unknown>,
+  ) => {
+    const message = JSON.stringify(data);
+    let delivered = 0;
+    for (const client of wsClients) {
+      if (client.readyState !== 1) continue;
+      if (wsClientIds.get(client) !== clientId) continue;
+      try {
+        client.send(message);
+        delivered += 1;
+      } catch (err) {
+        logger.error(
+          `[milady-api] WebSocket targeted send error: ${err instanceof Error ? err.message : err}`,
+        );
+      }
+    }
+    return delivered;
   };
 
   // Broadcast status every 5 seconds

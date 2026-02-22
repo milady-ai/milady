@@ -16,6 +16,7 @@ import {
   type InventoryProviderOption,
   type ModelOption,
   type OpenRouterModelOption,
+  type PiAiModelOption,
   type ProviderOption,
   type RpcProviderOption,
   type SandboxPlatformStatus,
@@ -85,6 +86,7 @@ export function OnboardingWizard() {
     onboardingProvider,
     onboardingApiKey,
     onboardingOpenRouterModel,
+    onboardingPrimaryModel,
     onboardingTelegramToken,
     onboardingDiscordToken,
     onboardingTwilioAccountSid,
@@ -92,6 +94,7 @@ export function OnboardingWizard() {
     onboardingTwilioPhoneNumber,
     onboardingBlooioApiKey,
     onboardingBlooioPhoneNumber,
+    onboardingGithubToken,
     onboardingSubscriptionTab,
     onboardingSelectedChains,
     onboardingRpcSelections,
@@ -480,9 +483,23 @@ export function OnboardingWizard() {
                 selected={onboardingAvatar}
                 onSelect={(i) => setState("onboardingAvatar", i)}
                 onUpload={(file) => {
+                  const previousAvatar = onboardingAvatar;
                   const url = URL.createObjectURL(file);
                   setState("customVrmUrl", url);
                   setState("onboardingAvatar", 0);
+                  client
+                    .uploadCustomVrm(file)
+                    .then(() => {
+                      setState(
+                        "customVrmUrl",
+                        `/api/avatar/vrm?t=${Date.now()}`,
+                      );
+                      requestAnimationFrame(() => URL.revokeObjectURL(url));
+                    })
+                    .catch(() => {
+                      setState("onboardingAvatar", previousAvatar);
+                      URL.revokeObjectURL(url);
+                    });
                 }}
                 showUpload
               />
@@ -881,6 +898,11 @@ export function OnboardingWizard() {
           grok: { name: "xAI (Grok)" },
           groq: { name: "Groq" },
           deepseek: { name: "DeepSeek" },
+          "pi-ai": {
+            name: "Pi Credentials (pi-ai)",
+            description:
+              "Use pi auth (~/.pi/agent/auth.json) for API keys / OAuth",
+          },
         };
 
         const getProviderDisplay = (provider: ProviderOption) => {
@@ -890,6 +912,19 @@ export function OnboardingWizard() {
             description: override?.description ?? provider.description,
           };
         };
+
+        const piAiModels = onboardingOptions?.piAiModels ?? [];
+        const piAiDefaultModel = onboardingOptions?.piAiDefaultModel ?? "";
+        const normalizedPrimaryModel = onboardingPrimaryModel.trim();
+        const hasKnownPiAiModel = piAiModels.some(
+          (model: PiAiModelOption) => model.id === normalizedPrimaryModel,
+        );
+        const piAiSelectValue =
+          normalizedPrimaryModel.length === 0
+            ? ""
+            : hasKnownPiAiModel
+              ? normalizedPrimaryModel
+              : "__custom__";
 
         const handleProviderSelect = (providerId: string) => {
           setState("onboardingProvider", providerId);
@@ -1275,7 +1310,8 @@ export function OnboardingWizard() {
               onboardingProvider !== "anthropic-subscription" &&
               onboardingProvider !== "openai-subscription" &&
               onboardingProvider !== "elizacloud" &&
-              onboardingProvider !== "ollama" && (
+              onboardingProvider !== "ollama" &&
+              onboardingProvider !== "pi-ai" && (
                 <div className="text-left">
                   <span className="text-[13px] font-bold text-txt-strong block mb-2">
                     API Key:
@@ -1295,6 +1331,75 @@ export function OnboardingWizard() {
               <p className="text-xs text-muted">
                 No configuration needed. Make sure Ollama is running locally.
               </p>
+            )}
+
+            {/* pi-ai — optional model override */}
+            {onboardingProvider === "pi-ai" && (
+              <div className="text-left">
+                <span className="text-[13px] font-bold text-txt-strong block mb-2">
+                  Primary Model (optional):
+                </span>
+
+                {piAiModels.length > 0 ? (
+                  <>
+                    <select
+                      value={piAiSelectValue}
+                      onChange={(e) => {
+                        const next = e.target.value;
+                        if (next === "__custom__") {
+                          if (piAiSelectValue !== "__custom__") {
+                            setState("onboardingPrimaryModel", "");
+                          }
+                          return;
+                        }
+                        setState("onboardingPrimaryModel", next);
+                      }}
+                      className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none"
+                    >
+                      <option value="">
+                        Use pi default model
+                        {piAiDefaultModel ? ` (${piAiDefaultModel})` : ""}
+                      </option>
+                      {piAiModels.map((model: PiAiModelOption) => (
+                        <option key={model.id} value={model.id}>
+                          {model.name} ({model.provider})
+                        </option>
+                      ))}
+                      <option value="__custom__">Custom model spec…</option>
+                    </select>
+
+                    {piAiSelectValue === "__custom__" && (
+                      <input
+                        type="text"
+                        value={onboardingPrimaryModel}
+                        onChange={(e) =>
+                          setState("onboardingPrimaryModel", e.target.value)
+                        }
+                        placeholder="provider/model (e.g. anthropic/claude-sonnet-4.5)"
+                        className="w-full mt-2 px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none"
+                      />
+                    )}
+                  </>
+                ) : (
+                  <input
+                    type="text"
+                    value={onboardingPrimaryModel}
+                    onChange={(e) =>
+                      setState("onboardingPrimaryModel", e.target.value)
+                    }
+                    placeholder="provider/model (e.g. anthropic/claude-sonnet-4.5)"
+                    className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none"
+                  />
+                )}
+
+                <p className="text-xs text-muted mt-2">
+                  Uses credentials from ~/.pi/agent/auth.json. Leave blank to
+                  use your pi default model.
+                  {piAiModels.length > 0
+                    ? " Pick from the dropdown or choose a custom model spec."
+                    : " Enter provider/model manually if you want an override."}
+                </p>
+              </div>
             )}
 
             {/* OpenRouter model selection */}
@@ -1551,16 +1656,15 @@ export function OnboardingWizard() {
                   )}
                 </div>
                 <p className="text-xs text-muted mb-3 mt-1">
-                  Create a bot at the{" "}
+                  Only a bot token is needed.{" "}
                   <a
                     href="https://discord.com/developers/applications"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-accent underline"
+                    className="text-accent hover:underline"
                   >
-                    Discord Developer Portal
-                  </a>{" "}
-                  and copy the bot token
+                    Create a bot →
+                  </a>
                 </p>
                 <input
                   type="password"
@@ -1676,6 +1780,49 @@ export function OnboardingWizard() {
                   />
                 </div>
               </div>
+
+              {/* GitHub */}
+              <div
+                className={`px-4 py-3 border rounded-lg bg-card transition-colors min-w-0 ${(onboardingGithubToken ?? "").trim() ? "border-accent" : "border-border"}`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="font-bold text-sm text-txt-strong">
+                    GitHub
+                  </div>
+                  {(onboardingGithubToken ?? "").trim() && (
+                    <span className="text-[10px] text-accent border border-accent px-1.5 py-0.5 rounded">
+                      Configured
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-muted mb-3 mt-1">
+                  For coding agents, PRs, and issue management.{" "}
+                  <a
+                    href="https://github.com/settings/tokens"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-accent underline"
+                  >
+                    Create a token
+                  </a>
+                </p>
+                <input
+                  type="password"
+                  value={onboardingGithubToken}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setState("onboardingGithubToken", e.target.value)
+                  }
+                  placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                  className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none rounded"
+                />
+                {onboardingOptions?.githubOAuthAvailable &&
+                  !(onboardingGithubToken ?? "").trim() && (
+                    <p className="text-[11px] text-muted mt-2">
+                      Or skip this — you'll be prompted to authorize via GitHub
+                      OAuth when needed.
+                    </p>
+                  )}
+              </div>
             </div>
           </div>
         );
@@ -1730,7 +1877,8 @@ export function OnboardingWizard() {
         }
         if (
           onboardingProvider === "elizacloud" ||
-          onboardingProvider === "ollama"
+          onboardingProvider === "ollama" ||
+          onboardingProvider === "pi-ai"
         ) {
           return true;
         }

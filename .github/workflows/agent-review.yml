@@ -238,7 +238,9 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const prNumber = context.payload.pull_request.number;
-            const runMarker = `<!-- agent-review-run:${context.runId}:${context.runNumber || '1'}:${context.payload.pull_request.head.sha} -->`;
+            const runId = process.env.GITHUB_RUN_ID || context.runId;
+            const runAttempt = process.env.GITHUB_RUN_ATTEMPT || '1';
+            const runMarker = `<!-- agent-review-run:${runId}:${runAttempt}:${context.payload.pull_request.head.sha} -->`;
 
             // Check if comment already exists
             const comments = await github.paginate(github.rest.issues.listComments, {
@@ -310,20 +312,35 @@ jobs:
             const issue_number = context.payload.pull_request.number;
             const runMarker = (process.env.AGENT_REVIEW_MARKER || '').trim();
 
-            // Match Decision in any format: **Decision:**, ### N. Decision:, 6. **Decision:**, etc.
-            const decisionPattern = /(?:^|\n)\s*(?:#{1,4}\s+)?(?:\d+\.\s*)?(?:\*{0,2})Decision:(?:\*{0,2})\s*(APPROVE|REQUEST CHANGES|CLOSE)\b/i;
-            const structuredPattern = /(?:#{1,4}\s+)?(?:\d+\.\s*)?(?:\*{0,2})(?:Classification|Scope verdict|Code quality)(?:\*{0,2}):?/i;
+            // Inline decision can appear mid-paragraph (e.g. "Decision: **APPROVE**.") so don't anchor to line start.
+            const inlineDecisionPattern = /\bDecision(?:\*{0,2})?\s*:\s*(?:\*{0,2})\s*(APPROVE|REQUEST CHANGES|CLOSE)\b/i;
+            const multilineDecisionPattern = /(?:^|\n)\s*(?:#{1,4}\s+)?(?:\d+\.\s*)?(?:\*{0,2})Decision(?:\*{0,2})?\s*:?\s*\n+\s*(?:\*{0,2})(APPROVE|REQUEST CHANGES|CLOSE)\b/i;
+            const boldVerdictPattern = /\*{1,3}(APPROVE|REQUEST CHANGES|CLOSE)\b\*{1,3}/i;
+            const bareLineVerdictPattern = /(?:^|\n)\s*(APPROVE|REQUEST CHANGES|CLOSE)\b/i;
             const maxAttempts = 5; // Increased for fallback comment posting
             const pollIntervalMs = 3_000;
 
             const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+            const extractDecision = (body) => {
+              if (!body) return '';
+              const inline = body.match(inlineDecisionPattern);
+              if (inline?.[1]) return inline[1].toUpperCase();
+              const multiline = body.match(multilineDecisionPattern);
+              if (multiline?.[1]) return multiline[1].toUpperCase();
+              const prefix = body.slice(0, 1500);
+              const boldVerdict = prefix.match(boldVerdictPattern);
+              if (boldVerdict?.[1]) return boldVerdict[1].toUpperCase();
+              const bareLineVerdict = prefix.match(bareLineVerdictPattern);
+              if (bareLineVerdict?.[1]) return bareLineVerdict[1].toUpperCase();
+              return '';
+            };
+
             const findLatest = (items) => {
               const filtered = items.filter((c) => {
                 if (!c?.body) return false;
                 if (!runMarker || !c.body.includes(runMarker)) return false;
-                if (!decisionPattern.test(c.body)) return false;
-                return structuredPattern.test(c.body);
+                return Boolean(extractDecision(c.body));
               });
               return filtered.sort((a, b) =>
                 new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -373,8 +390,7 @@ jobs:
             let decisionCommentUrl = '';
 
             if (latest) {
-              const match = latest.body.match(decisionPattern);
-              const normalized = (match?.[1] || '').toUpperCase();
+              const normalized = extractDecision(latest.body);
               decision = normalized || decision;
               decisionCommentUrl = latest.html_url || '';
 
@@ -410,7 +426,7 @@ jobs:
     needs: [classify, review-pr]
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read        # read-only — trust scores are never written by CI
       pull-requests: write
       issues: write
       checks: write
@@ -475,18 +491,32 @@ jobs:
               }
             }
 
-      - name: Update contributor trust score (v2)
+      - name: Apply contributor trust label
         if: always()
         uses: actions/github-script@v7
         with:
           script: |
-            const { computeTrustScore, DEFAULT_CONFIG, createContributorState, addEvent, getTier, expandState, compactState } = require('./.github/trust-scoring.cjs');
+            // ─── Architecture ────────────────────────────────────────────────────────────
+            // The dashboard (trust-dashboard repo) owns contributor-trust.json.
+            // It rebuilds the file every 6 hours from GitHub's closed-PR API — the single
+            // source of truth.  CI must NEVER write back to that file.  Writing on every
+            // PR push caused:  (1) "chore: update trust scores" commits every few minutes
+            // and (2) streak stacking when a PR is reviewed more than once.
+            //
+            // This step:
+            //   1. Reads contributor-trust.json as a read-only baseline (≤6h stale).
+            //   2. Strips any existing event for the current prNumber (dedup).
+            //   3. Appends the current verdict — exactly once, every time.
+            //   4. Computes score, applies trust: label.
+            //   5. Writes NOTHING.
+            // ─────────────────────────────────────────────────────────────────────────────
+
+            const { computeTrustScore, DEFAULT_CONFIG, createContributorState, addEvent, expandState } = require('./.github/trust-scoring.cjs');
             const author = context.payload.pull_request.user.login;
             const verdict = '${{ needs.review-pr.outputs.verdict }}';
             const category = '${{ needs.classify.outputs.category }}';
             const prNumber = context.payload.pull_request.number;
 
-            // Map verdict to trust event type
             const verdictToType = { approve: 'approve', reject: 'reject', close: 'close' };
             const eventType = verdictToType[verdict] || 'reject';
 
@@ -500,43 +530,40 @@ jobs:
                 pull_number: prNumber,
               });
               linesChanged = (pr.additions || 0) + (pr.deletions || 0);
-              prLabels = (pr.labels || []).map(l => l.name);
+              prLabels = (pr.labels || []).map(l => l.name).filter(l => !l.startsWith('trust:'));
             } catch (e) {
               console.log('Could not fetch PR stats, using defaults');
             }
 
-            // Fetch existing trust data from committed JSON file
-            let allStates = {};
-            let fileSha = null;
-            const trustFilePath = '.github/contributor-trust.json';
+            // ── Step 1: Load baseline from dashboard-managed JSON (read-only) ───────────
+            let baseState = createContributorState(author);
             try {
               const { data: fileData } = await github.rest.repos.getContent({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                path: trustFilePath,
+                path: '.github/contributor-trust.json',
                 ref: '${{ github.event.pull_request.base.ref }}',
               });
-              fileSha = fileData.sha;
-              const parsed = JSON.parse(Buffer.from(fileData.content, 'base64').toString());
-              allStates = Object.fromEntries(
-                Object.entries(parsed).map(([contributor, state]) => [contributor, expandState(state)])
-              );
-              console.log(`Loaded trust data for ${Object.keys(allStates).length} contributors`);
-            } catch (e) {
-              if (e.status === 404) {
-                console.log('No existing trust file, will create one');
+              const allStates = JSON.parse(Buffer.from(fileData.content, 'base64').toString());
+              if (allStates[author]) {
+                baseState = expandState(allStates[author]);
+                console.log(`Loaded baseline for ${author}: ${baseState.events.length} events`);
               } else {
-                console.log('Error reading trust file:', e.message);
+                console.log(`No baseline for ${author} yet, starting fresh`);
               }
+            } catch (e) {
+              console.log('Baseline unavailable (new contributor or file missing):', e.message);
             }
 
-            // Initialize contributor if new
-            if (!allStates[author]) {
-              allStates[author] = createContributorState(author);
-            }
+            // ── Step 2: Dedup — strip any existing events for this PR ─────────────────
+            // The baseline might already include a previous verdict for this PR
+            // (if the dashboard ran between review cycles).  Remove it so we always
+            // apply exactly one event per PR per compute.
+            const dedupedEvents = (baseState.events || []).filter(e => e.prNumber !== prNumber);
+            const workingState = { ...baseState, events: dedupedEvents };
 
-            // Add this review event
-            addEvent(allStates[author], {
+            // ── Step 3: Add current verdict (exactly once) ────────────────────────────
+            addEvent(workingState, {
               type: eventType,
               timestamp: Date.now(),
               linesChanged,
@@ -544,40 +571,15 @@ jobs:
               prNumber,
             });
 
-            // Compute new score
-            const result = computeTrustScore(allStates[author], DEFAULT_CONFIG);
-            console.log(`Trust score for ${author}: ${result.score}/100 (${result.tier})`);
+            // ── Step 4: Compute score (no writes) ────────────────────────────────────
+            const result = computeTrustScore(workingState, DEFAULT_CONFIG);
+            console.log(`Trust score for ${author}: ${result.score}/100 (${result.tier}) | ${workingState.events.length} events | ${result.breakdown.recencyWeightedPoints} weighted pts`);
             if (result.warnings.length > 0) {
               console.log(`Warnings: ${result.warnings.join('; ')}`);
             }
+            // NOTE: No write-back.  contributor-trust.json is updated exclusively by the
+            // trust-dashboard update-scores.yml cron job (every 6 hours).
 
-            // Write back to committed JSON file via Contents API
-            const compactedStates = Object.fromEntries(
-              Object.entries(allStates).map(([contributor, state]) => [contributor, compactState(state)])
-            );
-            const content = Buffer.from(JSON.stringify(compactedStates)).toString('base64');
-            try {
-              const params = {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                path: trustFilePath,
-                message: `chore: update trust scores [skip ci]\n\n${author}: ${result.score}/100 (${result.tier})`,
-                content,
-                branch: '${{ github.event.pull_request.base.ref }}',
-              };
-              if (fileSha) params.sha = fileSha;
-              await github.rest.repos.createOrUpdateFileContents(params);
-              console.log('Trust data saved to repo file');
-            } catch (writeErr) {
-              // 409 = concurrent update conflict, 403 = permission issue
-              if (writeErr.status === 409) {
-                core.warning('Trust file was updated concurrently. Score computed but not persisted — next review will pick up.');
-              } else if (writeErr.status === 403) {
-                core.warning('Cannot write trust file (permission denied). Trust label will still be applied.');
-              } else {
-                core.warning(`Failed to save trust data: ${writeErr.message}`);
-              }
-            }
 
             // Map tier to label
             const tierLabel = `trust:${result.tier}`;
@@ -651,16 +653,40 @@ jobs:
           esac
 
           PR_NUM="${{ github.event.pull_request.number }}"
-          echo "Waiting for required checks to pass for PR #${PR_NUM}"
-          if ! timeout 15m gh pr checks "$PR_NUM" \
-            --required \
-            --repo "$GH_REPO" \
-            --watch \
-            --interval 10 \
-            --fail-fast; then
-            echo "Required PR checks failed or are not passing. Aborting merge."
-            exit 1
-          fi
+          echo "Waiting for PR checks to finish for PR #${PR_NUM} (excluding this job)"
+
+          deadline="$((SECONDS + 900))" # 15 minutes
+          while true; do
+            checks_json="$(gh pr checks "$PR_NUM" --repo "$GH_REPO" --json name,bucket,state 2>/dev/null || true)"
+
+            if [ -z "$checks_json" ]; then
+              echo "Failed to fetch PR checks; retrying..."
+              sleep 10
+              continue
+            fi
+
+            failing="$(printf "%s" "$checks_json" | jq '[.[] | select(.name != "Auto-merge approved PRs") | select(.bucket == "fail" or .bucket == "cancel")] | length')"
+            pending="$(printf "%s" "$checks_json" | jq '[.[] | select(.name != "Auto-merge approved PRs") | select(.bucket == "pending")] | length')"
+
+            if [ "$failing" -gt 0 ]; then
+              echo "One or more PR checks are failing; aborting merge."
+              gh pr checks "$PR_NUM" --repo "$GH_REPO" || true
+              exit 1
+            fi
+
+            if [ "$pending" -eq 0 ]; then
+              echo "All PR checks finished."
+              break
+            fi
+
+            if [ "$SECONDS" -ge "$deadline" ]; then
+              echo "Timed out waiting for PR checks to finish; aborting merge."
+              gh pr checks "$PR_NUM" --repo "$GH_REPO" || true
+              exit 1
+            fi
+
+            sleep 10
+          done
 
           echo "Merging PR #${PR_NUM} using '$method' method"
 

@@ -97,6 +97,7 @@ function PasswordFieldInner({ fp: props }: { fp: FieldRenderProps }) {
   const [visible, setVisible] = useState(false);
   const [busy, setBusy] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const onReveal = props.onReveal;
 
   const handleToggle = useCallback(async () => {
     const input = inputRef.current;
@@ -110,9 +111,9 @@ function PasswordFieldInner({ fp: props }: { fp: FieldRenderProps }) {
     }
 
     // Reveal: fetch the real value from the server
-    if (props.onReveal) {
+    if (onReveal) {
       setBusy(true);
-      const realValue = await props.onReveal();
+      const realValue = await onReveal();
       setBusy(false);
       if (realValue != null) {
         setVisible(true);
@@ -122,7 +123,7 @@ function PasswordFieldInner({ fp: props }: { fp: FieldRenderProps }) {
       // Fallback: just toggle type (shows whatever is in the input)
       setVisible(true);
     }
-  }, [visible, props.onReveal]);
+  }, [visible, onReveal]);
 
   return (
     <div className="flex">

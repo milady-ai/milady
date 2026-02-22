@@ -1,3 +1,4 @@
+import { SUBSCRIPTION_PROVIDER_MAP } from "../auth/types";
 import type { MiladyConfig } from "./types";
 
 export interface ApplyPluginAutoEnableResult {
@@ -27,6 +28,7 @@ export const CONNECTOR_PLUGINS: Record<string, string> = {
   feishu: "@elizaos/plugin-feishu",
   matrix: "@elizaos/plugin-matrix",
   nostr: "@elizaos/plugin-nostr",
+  retake: "@milady/plugin-retake",
 };
 
 const PROVIDER_PLUGINS: Record<string, string> = {
@@ -35,6 +37,7 @@ const PROVIDER_PLUGINS: Record<string, string> = {
   "vercel-ai-gateway": "@elizaos/plugin-vercel-ai-gateway",
   openai: "@elizaos/plugin-openai",
   anthropic: "@elizaos/plugin-anthropic",
+  "pi-ai": "@elizaos/plugin-pi-ai",
   qwen: "@elizaos/plugin-qwen",
   minimax: "@elizaos/plugin-minimax",
   groq: "@elizaos/plugin-groq",
@@ -71,10 +74,18 @@ export const AUTH_PROVIDER_PLUGINS: Record<string, string> = {
   PERPLEXITY_API_KEY: "@elizaos/plugin-perplexity",
   ELIZAOS_CLOUD_API_KEY: "@elizaos/plugin-elizacloud",
   ELIZAOS_CLOUD_ENABLED: "@elizaos/plugin-elizacloud",
+  MILAIDY_USE_PI_AI: "@elizaos/plugin-pi-ai",
+  CUA_API_KEY: "@elizaos/plugin-cua",
+  CUA_HOST: "@elizaos/plugin-cua",
+  OBSIDIAN_VAULT_PATH: "@elizaos/plugin-obsidian",
+  OBSIDAN_VAULT_PATH: "@elizaos/plugin-obsidian",
+  REPOPROMPT_CLI_PATH: "@elizaos/plugin-repoprompt",
 };
 
 const FEATURE_PLUGINS: Record<string, string> = {
   browser: "@elizaos/plugin-browser",
+  cua: "@elizaos/plugin-cua",
+  obsidian: "@elizaos/plugin-obsidian",
   cron: "@elizaos/plugin-cron",
   shell: "@elizaos/plugin-shell",
   imageGen: "@elizaos/plugin-image-generation",
@@ -95,6 +106,7 @@ const FEATURE_PLUGINS: Record<string, string> = {
   suno: "@elizaos/plugin-suno",
   vision: "@elizaos/plugin-vision",
   computeruse: "@elizaos/plugin-computeruse",
+  repoprompt: "@elizaos/plugin-repoprompt",
 };
 
 function isConnectorConfigured(
@@ -149,7 +161,26 @@ function isConnectorConfigured(
           config.cliPath,
       );
     case "whatsapp":
-      return Boolean(config.authState || config.sessionPath);
+      // authState/sessionPath: legacy field names
+      // authDir: Baileys multi-file auth state directory (WhatsAppAccountSchema)
+      // accounts: at least one account with authDir set and not explicitly disabled
+      return Boolean(
+        config.authState ||
+          config.sessionPath ||
+          config.authDir ||
+          (config.accounts &&
+            typeof config.accounts === "object" &&
+            Object.values(config.accounts as Record<string, unknown>).some(
+              (account) => {
+                if (!account || typeof account !== "object") return false;
+                const acc = account as Record<string, unknown>;
+                if (acc.enabled === false) return false;
+                return Boolean(acc.authDir);
+              },
+            )),
+      );
+    case "retake":
+      return Boolean(config.accessToken || config.enabled === true);
     default:
       return false;
   }
@@ -166,6 +197,17 @@ function addToAllowlist(
     allow.push(shortId);
     changes.push(`Auto-enabled plugin: ${pluginName} (${reason})`);
   }
+}
+
+/** Safely extract `agents.defaults.subscriptionProvider` from an untyped config. */
+function getSubscriptionProvider(config: unknown): string | undefined {
+  if (typeof config !== "object" || config === null) return undefined;
+  const agents = (config as Record<string, unknown>).agents;
+  if (typeof agents !== "object" || agents === null) return undefined;
+  const defaults = (agents as Record<string, unknown>).defaults;
+  if (typeof defaults !== "object" || defaults === null) return undefined;
+  const provider = (defaults as Record<string, unknown>).subscriptionProvider;
+  return typeof provider === "string" ? provider : undefined;
 }
 
 export function applyPluginAutoEnable(
@@ -217,6 +259,36 @@ export function applyPluginAutoEnable(
         provider,
         changes,
         `auth profile: ${profileKey}`,
+      );
+    }
+  }
+
+  // Subscription provider — when a subscription is configured, force-enable
+  // the corresponding provider plugin so the user doesn't need to manually
+  // toggle entries.  This takes priority over explicit `enabled: false` for
+  // the subscription's own plugin because the user deliberately connected
+  // the subscription.
+  const subscriptionProvider = getSubscriptionProvider(updatedConfig);
+  const subscriptionPluginId =
+    typeof subscriptionProvider === "string"
+      ? SUBSCRIPTION_PROVIDER_MAP[
+          subscriptionProvider as keyof typeof SUBSCRIPTION_PROVIDER_MAP
+        ]
+      : undefined;
+  if (subscriptionPluginId) {
+    const pluginName = PROVIDER_PLUGINS[subscriptionPluginId];
+    if (pluginName) {
+      // Force-enable the subscription plugin (override enabled: false)
+      pluginsConfig.entries[subscriptionPluginId] = {
+        ...pluginsConfig.entries[subscriptionPluginId],
+        enabled: true,
+      };
+      addToAllowlist(
+        pluginsConfig.allow,
+        pluginName,
+        subscriptionPluginId,
+        changes,
+        `subscription: ${subscriptionProvider}`,
       );
     }
   }

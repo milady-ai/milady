@@ -1,6 +1,15 @@
 import type { AgentRuntime } from "@elizaos/core";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import type { MiladyConfig } from "../config/config";
+
+const validateCloudBaseUrlMock = vi.hoisted(() =>
+  vi.fn(async () => null as string | null),
+);
+
+vi.mock("../cloud/validate-url", () => ({
+  validateCloudBaseUrl: validateCloudBaseUrlMock,
+}));
+
 import { handleCloudStatusRoutes } from "./cloud-status-routes";
 
 type InvokeResult = {
@@ -43,6 +52,8 @@ async function invoke(args: {
 }
 
 afterEach(() => {
+  validateCloudBaseUrlMock.mockReset();
+  validateCloudBaseUrlMock.mockResolvedValue(null);
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
@@ -130,14 +141,12 @@ describe("cloud status routes", () => {
   });
 
   test("fetches credits via configured api key", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => ({
-        ok: true,
-        status: 200,
-        json: async () => ({ balance: 1.5 }),
-      })) as unknown as typeof fetch,
-    );
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ balance: 1.5 }),
+    }));
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
 
     const result = await invoke({
       method: "GET",
@@ -155,6 +164,69 @@ describe("cloud status routes", () => {
       low: true,
       critical: false,
       topUpUrl: "https://www.elizacloud.ai/dashboard/settings?tab=billing",
+    });
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://cloud.example/api/v1/credits/balance",
+      expect.objectContaining({
+        redirect: "manual",
+      }),
+    );
+    expect(validateCloudBaseUrlMock).toHaveBeenCalledWith(
+      "https://cloud.example/api/v1",
+    );
+  });
+
+  test("rejects unsafe cloud baseUrl before credit fetch", async () => {
+    validateCloudBaseUrlMock.mockResolvedValueOnce(
+      'Cloud base URL "http://127.0.0.1:1234/api/v1" points to a blocked address.',
+    );
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ balance: 1.5 }),
+    }));
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+
+    const result = await invoke({
+      method: "GET",
+      pathname: "/api/cloud/credits",
+      runtime: null,
+      config: {
+        cloud: { apiKey: "abc123", baseUrl: "http://127.0.0.1:1234" },
+      } as MiladyConfig,
+    });
+
+    expect(result.handled).toBe(true);
+    expect(result.payload).toEqual({
+      connected: true,
+      balance: null,
+      error: expect.stringContaining("blocked"),
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  test("rejects redirected cloud credits responses", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: false,
+        status: 302,
+        json: async () => ({}),
+      })) as unknown as typeof fetch,
+    );
+
+    const result = await invoke({
+      method: "GET",
+      pathname: "/api/cloud/credits",
+      runtime: null,
+      config: { cloud: { apiKey: "abc123" } } as MiladyConfig,
+    });
+
+    expect(result.handled).toBe(true);
+    expect(result.payload).toEqual({
+      balance: null,
+      connected: true,
+      error: "Cloud credits request was redirected; redirects are not allowed",
     });
   });
 

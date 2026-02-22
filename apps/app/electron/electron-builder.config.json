@@ -4,8 +4,11 @@
   "directories": {
     "buildResources": "resources"
   },
-  "files": ["assets/**/*", "build/**/*", "capacitor.config.*", "app/**/*"],
-  "extraResources": [
+  "files": [
+    "assets/**/*",
+    "build/**/*",
+    "capacitor.config.*",
+    "app/**/*",
     {
       "from": "../../../dist",
       "to": "milady-dist",

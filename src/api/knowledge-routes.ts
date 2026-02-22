@@ -61,10 +61,25 @@ interface KnowledgeServiceLike {
 }
 
 const FRAGMENT_COUNT_BATCH_SIZE = 500;
+const MAX_URL_IMPORT_BYTES = 10 * 1024 * 1024; // 10 MB
+const MAX_YOUTUBE_WATCH_PAGE_BYTES = 2 * 1024 * 1024; // 2 MB
+const MAX_YOUTUBE_TRANSCRIPT_BYTES = 10 * 1024 * 1024; // 10 MB
+const URL_FETCH_TIMEOUT_MS = 15_000;
 const BLOCKED_HOST_LITERALS = new Set([
   "localhost",
   "metadata.google.internal",
 ]);
+
+function toSafeNumber(value: unknown, fallback: number): number {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return fallback;
+}
 
 function hasUuidId(memory: Memory): memory is Memory & { id: UUID } {
   return typeof memory.id === "string" && memory.id.length > 0;
@@ -109,6 +124,53 @@ async function countKnowledgeFragmentsForDocument(
   }
 
   return fragmentCount;
+}
+
+async function mapKnowledgeFragmentsByDocumentId(
+  knowledgeService: KnowledgeServiceLike,
+  roomId: UUID,
+  documentIds: readonly UUID[],
+): Promise<Map<UUID, number>> {
+  const fragmentCounts = new Map<UUID, number>();
+  const trackedDocumentIds = new Set(documentIds);
+  for (const documentId of trackedDocumentIds) {
+    fragmentCounts.set(documentId, 0);
+  }
+
+  if (trackedDocumentIds.size === 0) return fragmentCounts;
+
+  let offset = 0;
+  while (true) {
+    const knowledgeBatch = await knowledgeService.getMemories({
+      tableName: "knowledge",
+      roomId,
+      count: FRAGMENT_COUNT_BATCH_SIZE,
+      offset,
+    });
+
+    if (knowledgeBatch.length === 0) {
+      break;
+    }
+
+    for (const memory of knowledgeBatch) {
+      const metadata = memory.metadata as Record<string, unknown> | undefined;
+      const documentId = metadata?.documentId;
+      if (
+        typeof documentId === "string" &&
+        trackedDocumentIds.has(documentId as UUID)
+      ) {
+        const currentCount = fragmentCounts.get(documentId as UUID) ?? 0;
+        fragmentCounts.set(documentId as UUID, currentCount + 1);
+      }
+    }
+
+    if (knowledgeBatch.length < FRAGMENT_COUNT_BATCH_SIZE) {
+      break;
+    }
+    offset += FRAGMENT_COUNT_BATCH_SIZE;
+  }
+
+  return fragmentCounts;
 }
 
 async function listKnowledgeFragmentsForDocument(
@@ -251,7 +313,7 @@ function extractYouTubeVideoId(url: string): string | null {
 async function fetchYouTubeTranscript(videoId: string): Promise<string | null> {
   // Fetch the video page to get transcript data
   const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
-  const response = await fetch(watchUrl, {
+  const response = await fetchWithTimeout(watchUrl, {
     headers: {
       "User-Agent":
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -263,7 +325,9 @@ async function fetchYouTubeTranscript(videoId: string): Promise<string | null> {
     return null;
   }
 
-  const html = await response.text();
+  const html = new TextDecoder().decode(
+    await readResponseBodyWithLimit(response, MAX_YOUTUBE_WATCH_PAGE_BYTES),
+  );
 
   // Extract the captions track URL from the page
   const captionsMatch = html.match(
@@ -291,12 +355,17 @@ async function fetchYouTubeTranscript(videoId: string): Promise<string | null> {
     .replace(/\\\//g, "/");
 
   // Fetch the transcript
-  const transcriptResponse = await fetch(captionUrl);
+  const transcriptResponse = await fetchWithTimeout(captionUrl, {});
   if (!transcriptResponse.ok) {
     return null;
   }
 
-  const transcriptXml = await transcriptResponse.text();
+  const transcriptXml = new TextDecoder().decode(
+    await readResponseBodyWithLimit(
+      transcriptResponse,
+      MAX_YOUTUBE_TRANSCRIPT_BYTES,
+    ),
+  );
 
   // Parse the XML transcript
   const textMatches = transcriptXml.matchAll(/<text[^>]*>([^<]*)<\/text>/g);
@@ -325,6 +394,113 @@ async function fetchYouTubeTranscript(videoId: string): Promise<string | null> {
   return segments.join(" ");
 }
 
+function readContentLengthHeader(response: Response): number | null {
+  const raw = response.headers.get("content-length");
+  if (!raw) return null;
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isFinite(parsed) || parsed < 0) return null;
+  return parsed;
+}
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof DOMException
+    ? error.name === "AbortError"
+    : error instanceof Error && error.name === "AbortError";
+}
+
+async function fetchWithTimeout(
+  input: RequestInfo | URL,
+  init: RequestInit,
+  timeoutMs = URL_FETCH_TIMEOUT_MS,
+): Promise<Response> {
+  const controller = new AbortController();
+  const upstreamSignal = init.signal;
+  const onAbort = () => controller.abort();
+
+  if (upstreamSignal) {
+    if (upstreamSignal.aborted) {
+      controller.abort();
+    } else {
+      upstreamSignal.addEventListener("abort", onAbort, { once: true });
+    }
+  }
+
+  const timeoutHandle = setTimeout(() => {
+    controller.abort();
+  }, timeoutMs);
+
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } catch (error) {
+    if (isAbortError(error)) {
+      throw new Error(`URL fetch timed out after ${timeoutMs}ms`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutHandle);
+    if (upstreamSignal) {
+      upstreamSignal.removeEventListener("abort", onAbort);
+    }
+  }
+}
+
+async function readResponseBodyWithLimit(
+  response: Response,
+  maxBytes: number,
+): Promise<Uint8Array> {
+  const declaredLength = readContentLengthHeader(response);
+  if (declaredLength !== null && declaredLength > maxBytes) {
+    throw new Error(`URL content exceeds maximum size of ${maxBytes} bytes`);
+  }
+
+  if (!response.body) {
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    if (bytes.byteLength > maxBytes) {
+      throw new Error(`URL content exceeds maximum size of ${maxBytes} bytes`);
+    }
+    return bytes;
+  }
+
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+
+      totalBytes += value.byteLength;
+      if (totalBytes > maxBytes) {
+        throw new Error(
+          `URL content exceeds maximum size of ${maxBytes} bytes`,
+        );
+      }
+
+      chunks.push(value);
+    }
+  } catch (err) {
+    try {
+      await reader.cancel(err);
+    } catch {
+      // Best effort cleanup; keep the original error.
+    }
+    throw err;
+  } finally {
+    reader.releaseLock();
+  }
+
+  const output = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    output.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
+  return output;
+}
+
 async function fetchUrlContent(
   url: string,
 ): Promise<{ content: string; contentType: string; filename: string }> {
@@ -350,7 +526,7 @@ async function fetchUrlContent(
   }
 
   // Regular URL fetch
-  const response = await fetch(url, {
+  const response = await fetchWithTimeout(url, {
     redirect: "manual",
     headers: {
       "User-Agent":
@@ -375,8 +551,12 @@ async function fetchUrlContent(
   const encodedFilename = pathSegments[pathSegments.length - 1] || "document";
   const filename = decodeURIComponent(encodedFilename);
 
+  const buffer = await readResponseBodyWithLimit(
+    response,
+    MAX_URL_IMPORT_BYTES,
+  );
+
   // For binary content, return as base64
-  const buffer = await response.arrayBuffer();
   const isBinary =
     contentType.startsWith("application/pdf") ||
     contentType.startsWith("application/msword") ||
@@ -460,16 +640,27 @@ export async function handleKnowledgeRoutes(
       offset: offset > 0 ? offset : undefined,
     });
 
+    const documentIds = documents.filter(hasUuidId).map((doc) => doc.id);
+    const fragmentCounts = await mapKnowledgeFragmentsByDocumentId(
+      knowledgeService,
+      agentId,
+      documentIds,
+    );
+
     // Clean up documents for response (remove embeddings, format metadata)
     const cleanedDocuments = documents.map((doc) => {
       const metadata = doc.metadata as Record<string, unknown> | undefined;
+      const documentId = hasUuidId(doc) ? doc.id : null;
       return {
         id: doc.id,
         filename: metadata?.filename || metadata?.title || "Untitled",
         contentType: metadata?.fileType || metadata?.contentType || "unknown",
-        fileSize: metadata?.fileSize || 0,
-        createdAt: doc.createdAt,
-        fragmentCount: 0, // Will be populated below if needed
+        fileSize: toSafeNumber(metadata?.fileSize, 0),
+        createdAt: toSafeNumber(doc.createdAt, 0),
+        fragmentCount:
+          documentId !== null && fragmentCounts.has(documentId)
+            ? (fragmentCounts.get(documentId) ?? 0)
+            : 0,
         source: metadata?.source || "upload",
         url: metadata?.url,
       };
@@ -515,8 +706,8 @@ export async function handleKnowledgeRoutes(
         id: document.id,
         filename: metadata?.filename || metadata?.title || "Untitled",
         contentType: metadata?.fileType || metadata?.contentType || "unknown",
-        fileSize: metadata?.fileSize || 0,
-        createdAt: document.createdAt,
+        fileSize: toSafeNumber(metadata?.fileSize, 0),
+        createdAt: toSafeNumber(document.createdAt, 0),
         fragmentCount,
         source: metadata?.source || "upload",
         url: metadata?.url,

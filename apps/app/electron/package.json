@@ -1,6 +1,6 @@
 {
   "name": "Milady",
-  "version": "2.0.0-alpha.7",
+  "version": "2.0.0-alpha.27",
   "description": "Cute agents for the acceleration",
   "homepage": "https://github.com/milady-ai/milady",
   "author": {
@@ -50,7 +50,7 @@
     "electron": "^40.4.1",
     "electron-builder": "^26.7.0",
     "electron-rebuild": "^3.2.9",
-    "typescript": "^5.0.4"
+    "typescript": "^5.9.3"
   },
   "keywords": [
     "capacitor",

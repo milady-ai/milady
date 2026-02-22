@@ -1,6 +1,7 @@
 /** Sandbox container lifecycle: create, exec, health check, teardown. */
 
 import { mkdirSync } from "node:fs";
+import os from "node:os";
 import { join } from "node:path";
 import {
   createEngine,
@@ -152,7 +153,11 @@ export class SandboxManager {
     const user = this.config.user ?? "1000:1000";
     const wsRoot =
       this.config.workspaceRoot ??
-      join(process.env.HOME ?? "/tmp", ".milady", "sandbox-workspace");
+      join(
+        process.env.HOME ?? process.env.USERPROFILE ?? os.tmpdir(),
+        ".milady",
+        "sandbox-workspace",
+      );
     mkdirSync(wsRoot, { recursive: true });
     return { image, containerPrefix, workdir, network, user, wsRoot };
   }

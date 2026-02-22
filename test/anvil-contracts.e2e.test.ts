@@ -11,9 +11,9 @@
  * - NFT queries for inventory display
  */
 
+import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { ethers } from "ethers";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -35,23 +35,44 @@ function hasAnvilBinary(): boolean {
 }
 
 function hasContractArtifacts(): boolean {
-  const artifactFiles = [
-    path.join(
-      __dirname,
-      "contracts",
-      "out",
-      "MockMiladyAgentRegistry.sol",
-      "MockMiladyAgentRegistry.json",
-    ),
-    path.join(
-      __dirname,
-      "contracts",
-      "out",
-      "MockMiladyCollection.sol",
-      "MockMiladyCollection.json",
-    ),
+  const artifactVariants = [
+    [
+      path.join(
+        __dirname,
+        "contracts",
+        "out",
+        "MockMiladyAgentRegistry.sol",
+        "MockMiladyAgentRegistry.json",
+      ),
+      path.join(
+        __dirname,
+        "contracts",
+        "out",
+        "MockMilaidyAgentRegistry.sol",
+        "MockMilaidyAgentRegistry.json",
+      ),
+    ],
+    [
+      path.join(
+        __dirname,
+        "contracts",
+        "out",
+        "MockMiladyCollection.sol",
+        "MockMiladyCollection.json",
+      ),
+      path.join(
+        __dirname,
+        "contracts",
+        "out",
+        "MockMilaidyCollection.sol",
+        "MockMilaidyCollection.json",
+      ),
+    ],
   ];
-  return artifactFiles.every((filePath) => fs.existsSync(filePath));
+
+  return artifactVariants.every((candidates) =>
+    candidates.some((filePath) => fs.existsSync(filePath)),
+  );
 }
 
 const describeAnvil =
@@ -295,7 +316,9 @@ describeAnvil("Anvil Contract E2E Tests", () => {
       expect(owner.toLowerCase()).toBe(TEST_ADDRESS.toLowerCase());
 
       const uri = await collectionContract.tokenURI(1);
-      expect(uri).toBe("ipfs://QmMiladyMetadata");
+      expect(["ipfs://QmMiladyMetadata", "ipfs://QmMilaidyMetadata"]).toContain(
+        uri,
+      );
     });
   });
 
@@ -350,7 +373,10 @@ describeAnvil("Anvil Contract E2E Tests", () => {
       );
 
       const uri = await collectionContract.tokenURI(2);
-      expect(uri).toBe("ipfs://QmShinyMiladyMetadata");
+      expect([
+        "ipfs://QmShinyMiladyMetadata",
+        "ipfs://QmShinyMilaidyMetadata",
+      ]).toContain(uri);
     });
   });
 

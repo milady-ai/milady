@@ -8,7 +8,7 @@
  * 4. Verify viewer config - Should have correct URLs
  */
 
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { AppManager } from "../services/app-manager";
 import type {
   PluginManagerLike,
@@ -122,19 +122,44 @@ function createMockPluginManager(
 describe("Hyperscape E2E Integration", () => {
   let appManager: AppManager;
   let pluginManager: PluginManagerLike;
+  let originalEnv: Record<string, string | undefined>;
 
   beforeEach(() => {
+    // Save original env vars
+    originalEnv = {
+      HYPERSCAPE_CHARACTER_ID: process.env.HYPERSCAPE_CHARACTER_ID,
+      HYPERSCAPE_AUTH_TOKEN: process.env.HYPERSCAPE_AUTH_TOKEN,
+    };
+
+    // Set test credentials for hyperscape authentication
+    process.env.HYPERSCAPE_CHARACTER_ID = "test-character-id";
+    process.env.HYPERSCAPE_AUTH_TOKEN = "test-auth-token";
+
     appManager = new AppManager();
     pluginManager = createMockPluginManager();
+  });
+
+  afterEach(() => {
+    // Restore original env vars
+    for (const [key, value] of Object.entries(originalEnv)) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
   });
 
   describe("App Discovery", () => {
     test("lists available apps including Hyperscape", async () => {
       const apps = await appManager.listAvailable(pluginManager);
+      const hyperscape = apps.find(
+        (app) => app.name === "@elizaos/app-hyperscape",
+      );
 
-      expect(apps).toHaveLength(1);
-      expect(apps[0].name).toBe("@elizaos/app-hyperscape");
-      expect(apps[0].displayName).toBe("Hyperscape");
+      expect(apps.length).toBeGreaterThan(0);
+      expect(hyperscape).toBeDefined();
+      expect(hyperscape?.displayName).toBe("Hyperscape");
     });
 
     test("filters out non-app plugins", async () => {

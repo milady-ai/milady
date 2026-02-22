@@ -89,11 +89,10 @@ const VIDEO_BITRATE: Record<string, number> = {
  * Camera Manager – orchestrates webcam access through a hidden renderer window.
  */
 export class CameraManager {
-  private mainWindow: BrowserWindow | null = null;
   private rendererWindow: BrowserWindow | null = null;
 
-  setMainWindow(window: BrowserWindow): void {
-    this.mainWindow = window;
+  setMainWindow(_window: BrowserWindow): void {
+    // Reserved for parity with other native managers.
   }
 
   // ── Renderer lifecycle ──────────────────────────────────────────────────

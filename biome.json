@@ -10,7 +10,6 @@
     "maxSize": 1048576,
     "includes": [
       "**",
-      "!apps",
       "!assets",
       "!dist",
       "!docs/_layouts",

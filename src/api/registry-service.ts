@@ -94,6 +94,10 @@ export class RegistryService {
     return this.registryAddress;
   }
 
+  async getChainId(): Promise<number> {
+    return this.txService.getChainId();
+  }
+
   /**
    * Get the full registration status for the current wallet.
    */

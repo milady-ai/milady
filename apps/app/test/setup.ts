@@ -344,8 +344,8 @@ if (typeof globalThis.AudioContext === "undefined") {
         length: 44100,
         sampleRate: 44100,
       }));
-      resume = vi.fn(async () => { });
-      close = vi.fn(async () => { });
+      resume = vi.fn(async () => {});
+      close = vi.fn(async () => {});
     },
     writable: true,
     configurable: true,

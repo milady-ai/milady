@@ -13,19 +13,15 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { THEMES, useApp } from "../AppContext";
-import {
-  client,
-  type OnboardingOptions,
-  type PluginParamDef,
-} from "../api-client";
-import type { ConfigUiHint } from "../types";
+import { client } from "../api-client";
+import { CodingAgentSettingsSection } from "./CodingAgentSettingsSection";
 import { ConfigPageView } from "./ConfigPageView";
-import type { JsonSchemaObject } from "./config-catalog";
 import { ConfigRenderer, defaultRegistry } from "./config-renderer";
+import { GitHubSettingsSection } from "./GitHubSettingsSection";
 import { MediaSettingsSection } from "./MediaSettingsSection";
 import { PermissionsSection } from "./PermissionsSection";
+import { ProviderSwitcher } from "./ProviderSwitcher";
 import { formatByteSize } from "./shared/format";
-import { autoLabel } from "./shared/labels";
 import { VoiceConfigView } from "./VoiceConfigView";
 
 /* ── Modal shell ─────────────────────────────────────────────────────── */
@@ -73,8 +69,6 @@ function Modal({
     </div>
   );
 }
-
-/* ── Auto-detection helpers ────────────────────────────────────────── */
 
 /* ── SettingsView ─────────────────────────────────────────────────────── */
 
@@ -136,130 +130,11 @@ export function SettingsView() {
     setState,
   } = useApp();
 
-  /* ── Model selection state ─────────────────────────────────────────── */
-  const [modelOptions, setModelOptions] = useState<
-    OnboardingOptions["models"] | null
-  >(null);
-
-  const [currentSmallModel, setCurrentSmallModel] = useState("");
-  const [currentLargeModel, setCurrentLargeModel] = useState("");
-  const [modelSaving, setModelSaving] = useState(false);
-  const [modelSaveSuccess, setModelSaveSuccess] = useState(false);
-
   useEffect(() => {
     void loadPlugins();
     void loadUpdateStatus();
     void checkExtensionStatus();
-
-    void (async () => {
-      try {
-        const opts = await client.getOnboardingOptions();
-        setModelOptions(opts.models);
-      } catch {
-        /* ignore */
-      }
-      try {
-        const cfg = await client.getConfig();
-        const models = cfg.models as Record<string, string> | undefined;
-        const cloud = cfg.cloud as Record<string, unknown> | undefined;
-        const cloudEnabledCfg = cloud?.enabled === true;
-        const defaultSmall = "moonshotai/kimi-k2-turbo";
-        const defaultLarge = "moonshotai/kimi-k2-0905";
-        setCurrentSmallModel(
-          models?.small || (cloudEnabledCfg ? defaultSmall : ""),
-        );
-        setCurrentLargeModel(
-          models?.large || (cloudEnabledCfg ? defaultLarge : ""),
-        );
-      } catch {
-        /* ignore */
-      }
-    })();
   }, [loadPlugins, loadUpdateStatus, checkExtensionStatus]);
-
-  /* ── Derived ──────────────────────────────────────────────────────── */
-
-  const allAiProviders = plugins.filter((p) => p.category === "ai-provider");
-  const enabledAiProviders = allAiProviders.filter((p) => p.enabled);
-
-  const [selectedProviderId, setSelectedProviderId] = useState<string | null>(
-    () => (cloudEnabled ? "__cloud__" : null),
-  );
-
-  const hasManualSelection = useRef(false);
-  useEffect(() => {
-    if (hasManualSelection.current) return;
-
-    if (cloudEnabled) {
-      if (selectedProviderId !== "__cloud__")
-        setSelectedProviderId("__cloud__");
-      return;
-    }
-  }, [cloudEnabled, selectedProviderId]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  /* Resolve the actually-selected provider: accept __cloud__ or fall back */
-  const resolvedSelectedId =
-    selectedProviderId === "__cloud__"
-      ? "__cloud__"
-      : selectedProviderId &&
-          allAiProviders.some((p) => p.id === selectedProviderId)
-        ? selectedProviderId
-        : cloudEnabled
-          ? "__cloud__"
-          : (enabledAiProviders[0]?.id ?? null);
-
-  const selectedProvider =
-    resolvedSelectedId && resolvedSelectedId !== "__cloud__"
-      ? (allAiProviders.find((p) => p.id === resolvedSelectedId) ?? null)
-      : null;
-
-  const handleSwitchProvider = useCallback(
-    async (newId: string) => {
-      hasManualSelection.current = true;
-      setSelectedProviderId(newId);
-      const target = allAiProviders.find((p) => p.id === newId);
-      if (!target) return;
-
-      /* Turn off cloud mode when switching to a local provider */
-      try {
-        await client.updateConfig({
-          cloud: { enabled: false },
-          agents: { defaults: { model: { primary: null } } },
-        });
-        setState("cloudEnabled", false);
-      } catch {
-        /* non-fatal */
-      }
-      if (!target.enabled) {
-        await handlePluginToggle(newId, true);
-      }
-      for (const p of enabledAiProviders) {
-        if (p.id !== newId) {
-          await handlePluginToggle(p.id, false);
-        }
-      }
-    },
-    [allAiProviders, enabledAiProviders, handlePluginToggle, setState],
-  );
-
-  const handleSelectCloud = useCallback(async () => {
-    hasManualSelection.current = true;
-    setSelectedProviderId("__cloud__");
-    try {
-      await client.updateConfig({
-        cloud: { enabled: true },
-        agents: { defaults: { model: { primary: null } } },
-        models: {
-          small: currentSmallModel || "moonshotai/kimi-k2-turbo",
-          large: currentLargeModel || "moonshotai/kimi-k2-0905",
-        },
-      });
-      setState("cloudEnabled", true);
-      await client.restartAgent();
-    } catch {
-      /* non-fatal */
-    }
-  }, [currentSmallModel, currentLargeModel, setState]);
 
   const ext = extensionStatus;
   const relayOk = ext?.relayReachable === true;
@@ -314,57 +189,6 @@ export function SettingsView() {
     setImportModalOpen(true);
   }, [setState]);
 
-  /* ── Fetch Models state ────────────────────────────────────────── */
-  const [modelsFetching, setModelsFetching] = useState(false);
-  const [modelsFetchResult, setModelsFetchResult] = useState<string | null>(
-    null,
-  );
-
-  const handleFetchModels = useCallback(
-    async (providerId: string) => {
-      setModelsFetching(true);
-      setModelsFetchResult(null);
-      try {
-        const result = await client.fetchModels(providerId, true);
-        const count = Array.isArray(result?.models) ? result.models.length : 0;
-        setModelsFetchResult(`Loaded ${count} models`);
-        // Reload plugins so configUiHints are refreshed with new model options
-        await loadPlugins();
-        setTimeout(() => setModelsFetchResult(null), 3000);
-      } catch (err) {
-        setModelsFetchResult(
-          `Error: ${err instanceof Error ? err.message : "failed"}`,
-        );
-        setTimeout(() => setModelsFetchResult(null), 5000);
-      }
-      setModelsFetching(false);
-    },
-    [loadPlugins],
-  );
-
-  /* ── Plugin config local state for collecting field values ──────── */
-  const [pluginFieldValues, setPluginFieldValues] = useState<
-    Record<string, Record<string, string>>
-  >({});
-
-  const handlePluginFieldChange = useCallback(
-    (pluginId: string, key: string, value: string) => {
-      setPluginFieldValues((prev) => ({
-        ...prev,
-        [pluginId]: { ...(prev[pluginId] ?? {}), [key]: value },
-      }));
-    },
-    [],
-  );
-
-  const handlePluginSave = useCallback(
-    (pluginId: string) => {
-      const values = pluginFieldValues[pluginId] ?? {};
-      void handlePluginConfigSave(pluginId, values);
-    },
-    [pluginFieldValues, handlePluginConfigSave],
-  );
-
   return (
     <div>
       <h2 className="text-lg font-bold mb-1">Settings</h2>
@@ -380,8 +204,8 @@ export function SettingsView() {
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
           {THEMES.map((t) => (
             <button
-              type="button"
               key={t.id}
+              type="button"
               className={`theme-btn py-2 px-2 ${currentTheme === t.id ? "active" : ""}`}
               onClick={() => setTheme(t.id)}
             >
@@ -401,441 +225,28 @@ export function SettingsView() {
           ═══════════════════════════════════════════════════════════════ */}
       <div className="mt-6 p-4 border border-[var(--border)] bg-[var(--card)]">
         <div className="font-bold text-sm mb-4">AI Model</div>
-
-        {(() => {
-          const totalCols = allAiProviders.length + 1; /* +1 for Eliza Cloud */
-          const isCloudSelected = resolvedSelectedId === "__cloud__";
-          const providerChoices = [
-            { id: "__cloud__", label: "Eliza Cloud", disabled: false },
-            ...allAiProviders.map((provider) => ({
-              id: provider.id,
-              label: provider.name,
-              disabled: false,
-            })),
-          ];
-
-          if (totalCols === 0) {
-            return (
-              <div className="p-4 border border-[var(--warning,#f39c12)] bg-[var(--card)]">
-                <div className="text-xs text-[var(--warning,#f39c12)]">
-                  No AI providers available. Install a provider plugin from the{" "}
-                  <button
-                    type="button"
-                    className="text-[var(--accent)] underline bg-transparent border-0 p-0 cursor-pointer"
-                    onClick={() => {
-                      setTab("plugins");
-                    }}
-                  >
-                    Plugins
-                  </button>{" "}
-                  page.
-                </div>
-              </div>
-            );
-          }
-
-          return (
-            <>
-              <div className="lg:hidden mb-3">
-                <span className="block text-xs font-semibold mb-1.5">
-                  Provider
-                </span>
-                <select
-                  className="w-full px-2.5 py-[8px] border border-[var(--border)] bg-[var(--card)] text-[13px] transition-colors focus:border-[var(--accent)] focus:outline-none"
-                  value={resolvedSelectedId ?? "__cloud__"}
-                  onChange={(e) => {
-                    const nextId = e.target.value;
-                    if (nextId === "__cloud__") {
-                      void handleSelectCloud();
-                      return;
-                    }
-                    void handleSwitchProvider(nextId);
-                  }}
-                >
-                  {providerChoices.map((choice) => (
-                    <option
-                      key={choice.id}
-                      value={choice.id}
-                      disabled={choice.disabled}
-                    >
-                      {choice.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div
-                className="hidden lg:grid gap-1.5"
-                style={{ gridTemplateColumns: `repeat(${totalCols}, 1fr)` }}
-              >
-                <button
-                  type="button"
-                  className={`text-center px-2 py-2 border cursor-pointer transition-colors ${
-                    isCloudSelected
-                      ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)]"
-                      : "border-[var(--border)] bg-[var(--card)] hover:border-[var(--accent)]"
-                  }`}
-                  onClick={() => void handleSelectCloud()}
-                >
-                  <div
-                    className={`text-xs font-bold whitespace-nowrap ${isCloudSelected ? "" : "text-[var(--text)]"}`}
-                  >
-                    Eliza Cloud
-                  </div>
-                </button>
-
-                {allAiProviders.map((provider) => {
-                  const isSelected =
-                    !isCloudSelected && provider.id === resolvedSelectedId;
-                  return (
-                    <button
-                      type="button"
-                      key={provider.id}
-                      className={`text-center px-2 py-2 border cursor-pointer transition-colors ${
-                        isSelected
-                          ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)]"
-                          : "border-[var(--border)] bg-[var(--card)] hover:border-[var(--accent)]"
-                      }`}
-                      onClick={() => void handleSwitchProvider(provider.id)}
-                    >
-                      <div
-                        className={`text-xs font-bold whitespace-nowrap ${isSelected ? "" : "text-[var(--text)]"}`}
-                      >
-                        {provider.name}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Eliza Cloud settings */}
-              {isCloudSelected && (
-                <div className="mt-4 pt-4 border-t border-[var(--border)]">
-                  {cloudConnected ? (
-                    <div>
-                      <div className="flex justify-between items-center mb-3">
-                        <div className="flex items-center gap-2">
-                          <span className="inline-block w-2 h-2 rounded-full bg-[var(--ok,#16a34a)]" />
-                          <span className="text-xs font-semibold">
-                            Logged into Eliza Cloud
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          className="btn text-xs py-[3px] px-3 !mt-0 !bg-transparent !border-[var(--border)] !text-[var(--muted)]"
-                          onClick={() => void handleCloudDisconnect()}
-                          disabled={cloudDisconnecting}
-                        >
-                          {cloudDisconnecting
-                            ? "Disconnecting..."
-                            : "Disconnect"}
-                        </button>
-                      </div>
-
-                      <div className="text-xs mb-4">
-                        {cloudUserId && (
-                          <span className="text-[var(--muted)] mr-3">
-                            <code className="font-[var(--mono)] text-[11px]">
-                              {cloudUserId}
-                            </code>
-                          </span>
-                        )}
-                        {cloudCredits !== null && (
-                          <span>
-                            <span className="text-[var(--muted)]">
-                              Credits:
-                            </span>{" "}
-                            <span
-                              className={
-                                cloudCreditsCritical
-                                  ? "text-[var(--danger,#e74c3c)] font-bold"
-                                  : cloudCreditsLow
-                                    ? "text-[#b8860b] font-bold"
-                                    : ""
-                              }
-                            >
-                              ${cloudCredits.toFixed(2)}
-                            </span>
-                            <a
-                              href={cloudTopUpUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-[11px] ml-2 text-[var(--accent)]"
-                            >
-                              Top up
-                            </a>
-                          </span>
-                        )}
-                      </div>
-
-                      {modelOptions &&
-                        (() => {
-                          const modelSchema = {
-                            type: "object" as const,
-                            properties: {
-                              small: {
-                                type: "string",
-                                enum: modelOptions.small.map((m) => m.id),
-                                description: "Fast model for simple tasks",
-                              },
-                              large: {
-                                type: "string",
-                                enum: modelOptions.large.map((m) => m.id),
-                                description:
-                                  "Powerful model for complex reasoning",
-                              },
-                            },
-                            required: [] as string[],
-                          };
-                          const modelHints: Record<string, ConfigUiHint> = {
-                            small: { label: "Small Model", width: "half" },
-                            large: { label: "Large Model", width: "half" },
-                          };
-                          const modelValues: Record<string, unknown> = {};
-                          const modelSetKeys = new Set<string>();
-                          if (currentSmallModel) {
-                            modelValues.small = currentSmallModel;
-                            modelSetKeys.add("small");
-                          }
-                          if (currentLargeModel) {
-                            modelValues.large = currentLargeModel;
-                            modelSetKeys.add("large");
-                          }
-
-                          return (
-                            <ConfigRenderer
-                              schema={modelSchema as JsonSchemaObject}
-                              hints={modelHints}
-                              values={modelValues}
-                              setKeys={modelSetKeys}
-                              registry={defaultRegistry}
-                              onChange={(key, value) => {
-                                const val = String(value);
-                                if (key === "small") setCurrentSmallModel(val);
-                                if (key === "large") setCurrentLargeModel(val);
-                                const updated = {
-                                  small:
-                                    key === "small" ? val : currentSmallModel,
-                                  large:
-                                    key === "large" ? val : currentLargeModel,
-                                };
-                                void (async () => {
-                                  setModelSaving(true);
-                                  try {
-                                    await client.updateConfig({
-                                      models: updated,
-                                    });
-                                    setModelSaveSuccess(true);
-                                    setTimeout(
-                                      () => setModelSaveSuccess(false),
-                                      2000,
-                                    );
-                                    await client.restartAgent();
-                                  } catch {
-                                    /* ignore */
-                                  }
-                                  setModelSaving(false);
-                                })();
-                              }}
-                            />
-                          );
-                        })()}
-
-                      <div className="flex items-center justify-end gap-2 mt-3">
-                        {modelSaving && (
-                          <span className="text-[11px] text-[var(--muted)]">
-                            Saving &amp; restarting...
-                          </span>
-                        )}
-                        {modelSaveSuccess && (
-                          <span className="text-[11px] text-[var(--ok,#16a34a)]">
-                            Saved — restarting agent
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      {cloudLoginBusy ? (
-                        <div className="text-xs text-[var(--muted)]">
-                          Waiting for browser authentication... A new tab should
-                          have opened.
-                        </div>
-                      ) : (
-                        <>
-                          {cloudLoginError && (
-                            <div className="text-xs text-[var(--danger,#e74c3c)] mb-2">
-                              {cloudLoginError}
-                            </div>
-                          )}
-                          <button
-                            type="button"
-                            className="btn text-xs py-[5px] px-3.5 font-bold !mt-0"
-                            onClick={() => void handleCloudLogin()}
-                          >
-                            Log in to Eliza Cloud
-                          </button>
-                          <div className="text-[11px] text-[var(--muted)] mt-1.5">
-                            Opens a browser window to authenticate.
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* ── Local provider settings ──────────────────────────── */}
-              {!isCloudSelected &&
-                selectedProvider &&
-                selectedProvider.parameters.length > 0 &&
-                (() => {
-                  const isSaving = pluginSaving.has(selectedProvider.id);
-                  const saveSuccess = pluginSaveSuccess.has(
-                    selectedProvider.id,
-                  );
-                  const params = selectedProvider.parameters;
-                  const setCount = params.filter(
-                    (p: PluginParamDef) => p.isSet,
-                  ).length;
-
-                  return (
-                    <div className="mt-4 pt-4 border-t border-[var(--border)]">
-                      <div className="flex justify-between items-center mb-3">
-                        <div className="text-xs font-semibold">
-                          {selectedProvider.name} Settings
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[11px] text-[var(--muted)]">
-                            {setCount}/{params.length} configured
-                          </span>
-                          <span
-                            className="text-[11px] px-2 py-[3px] border"
-                            style={{
-                              borderColor: selectedProvider.configured
-                                ? "#2d8a4e"
-                                : "var(--warning,#f39c12)",
-                              color: selectedProvider.configured
-                                ? "#2d8a4e"
-                                : "var(--warning,#f39c12)",
-                            }}
-                          >
-                            {selectedProvider.configured
-                              ? "Configured"
-                              : "Needs Setup"}
-                          </span>
-                        </div>
-                      </div>
-
-                      {(() => {
-                        const properties: Record<
-                          string,
-                          Record<string, unknown>
-                        > = {};
-                        const required: string[] = [];
-                        const hints: Record<string, ConfigUiHint> = {};
-                        const serverHints =
-                          selectedProvider.configUiHints ?? {};
-                        for (const p of params) {
-                          const prop: Record<string, unknown> = {};
-                          if (p.type === "boolean") prop.type = "boolean";
-                          else if (p.type === "number") prop.type = "number";
-                          else prop.type = "string";
-                          if (p.description) prop.description = p.description;
-                          if (p.default != null) prop.default = p.default;
-                          if (p.options?.length) prop.enum = p.options;
-                          const k = p.key.toUpperCase();
-                          if (k.includes("URL") || k.includes("ENDPOINT"))
-                            prop.format = "uri";
-                          properties[p.key] = prop;
-                          if (p.required) required.push(p.key);
-                          hints[p.key] = {
-                            label: autoLabel(p.key, selectedProvider.id),
-                            sensitive: p.sensitive ?? false,
-                            ...serverHints[p.key],
-                          };
-                          if (p.description && !hints[p.key].help)
-                            hints[p.key].help = p.description;
-                        }
-                        const schema = {
-                          type: "object",
-                          properties,
-                          required,
-                        } as JsonSchemaObject;
-                        const values: Record<string, unknown> = {};
-                        const setKeys = new Set<string>();
-                        for (const p of params) {
-                          const cv =
-                            pluginFieldValues[selectedProvider.id]?.[p.key];
-                          if (cv !== undefined) {
-                            values[p.key] = cv;
-                          } else if (
-                            p.isSet &&
-                            !p.sensitive &&
-                            p.currentValue != null
-                          ) {
-                            values[p.key] = p.currentValue;
-                          }
-                          if (p.isSet) setKeys.add(p.key);
-                        }
-                        return (
-                          <ConfigRenderer
-                            schema={schema}
-                            hints={hints}
-                            values={values}
-                            setKeys={setKeys}
-                            registry={defaultRegistry}
-                            pluginId={selectedProvider.id}
-                            onChange={(key, value) =>
-                              handlePluginFieldChange(
-                                selectedProvider.id,
-                                key,
-                                String(value ?? ""),
-                              )
-                            }
-                          />
-                        );
-                      })()}
-
-                      <div className="flex justify-between items-center mt-3">
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            className="btn text-xs py-[5px] px-3.5 !mt-0 !bg-transparent !border-[var(--border)] !text-[var(--muted)] hover:!text-[var(--text)] hover:!border-[var(--accent)]"
-                            onClick={() =>
-                              void handleFetchModels(selectedProvider.id)
-                            }
-                            disabled={modelsFetching}
-                          >
-                            {modelsFetching ? "Fetching..." : "Fetch Models"}
-                          </button>
-                          {modelsFetchResult && (
-                            <span
-                              className={`text-[11px] ${modelsFetchResult.startsWith("Error") ? "text-[var(--danger,#e74c3c)]" : "text-[var(--ok,#16a34a)]"}`}
-                            >
-                              {modelsFetchResult}
-                            </span>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          className={`btn text-xs py-[5px] px-4 !mt-0 ${saveSuccess ? "!bg-[var(--ok,#16a34a)] !border-[var(--ok,#16a34a)]" : ""}`}
-                          onClick={() => handlePluginSave(selectedProvider.id)}
-                          disabled={isSaving}
-                        >
-                          {isSaving
-                            ? "Saving..."
-                            : saveSuccess
-                              ? "Saved"
-                              : "Save"}
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })()}
-            </>
-          );
-        })()}
+        <ProviderSwitcher
+          cloudEnabled={cloudEnabled}
+          cloudConnected={cloudConnected}
+          cloudCredits={cloudCredits}
+          cloudCreditsLow={cloudCreditsLow}
+          cloudCreditsCritical={cloudCreditsCritical}
+          cloudTopUpUrl={cloudTopUpUrl}
+          cloudUserId={cloudUserId}
+          cloudLoginBusy={cloudLoginBusy}
+          cloudLoginError={cloudLoginError}
+          cloudDisconnecting={cloudDisconnecting}
+          plugins={plugins}
+          pluginSaving={pluginSaving}
+          pluginSaveSuccess={pluginSaveSuccess}
+          loadPlugins={loadPlugins}
+          handlePluginToggle={handlePluginToggle}
+          handlePluginConfigSave={handlePluginConfigSave}
+          handleCloudLogin={handleCloudLogin}
+          handleCloudDisconnect={handleCloudDisconnect}
+          setState={setState}
+          setTab={setTab}
+        />
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════
@@ -843,6 +254,22 @@ export function SettingsView() {
           ═══════════════════════════════════════════════════════════════ */}
       <div className="mt-6">
         <ConfigPageView embedded />
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          3b. GITHUB
+          ═══════════════════════════════════════════════════════════════ */}
+      <div className="mt-6 p-4 border border-[var(--border)] bg-[var(--card)]">
+        <div className="font-bold text-sm mb-4">GitHub</div>
+        <GitHubSettingsSection />
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          3c. CODING AGENTS
+          ═══════════════════════════════════════════════════════════════ */}
+      <div className="mt-6 p-4 border border-[var(--border)] bg-[var(--card)]">
+        <div className="font-bold text-sm mb-4">Coding Agents</div>
+        <CodingAgentSettingsSection />
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════
@@ -1157,7 +584,7 @@ export function SettingsView() {
                     type="button"
                     className="ml-2 px-1.5 py-0.5 border border-[var(--border)] bg-[var(--bg)] cursor-pointer text-[10px] font-[var(--mono)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
                     onClick={() =>
-                      void copyToClipboard(walletExportData.evm?.privateKey)
+                      void copyToClipboard(walletExportData.evm.privateKey)
                     }
                   >
                     copy
@@ -1176,7 +603,7 @@ export function SettingsView() {
                     type="button"
                     className="ml-2 px-1.5 py-0.5 border border-[var(--border)] bg-[var(--bg)] cursor-pointer text-[10px] font-[var(--mono)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
                     onClick={() =>
-                      void copyToClipboard(walletExportData.solana?.privateKey)
+                      void copyToClipboard(walletExportData.solana.privateKey)
                     }
                   >
                     copy
@@ -1251,8 +678,14 @@ export function SettingsView() {
             </div>
           )}
           <div className="flex flex-col gap-1">
-            <span className="font-semibold text-xs">Encryption Password</span>
+            <label
+              htmlFor="agent-export-password-input"
+              className="font-semibold text-xs"
+            >
+              Encryption Password
+            </label>
             <input
+              id="agent-export-password-input"
               type="password"
               placeholder="Enter password (minimum 4 characters)"
               value={exportPassword}
@@ -1263,14 +696,14 @@ export function SettingsView() {
               Password must be at least 4 characters.
             </div>
           </div>
-          <span className="flex items-center gap-2 text-xs text-[var(--muted)] cursor-pointer">
+          <label className="flex items-center gap-2 text-xs text-[var(--muted)] cursor-pointer">
             <input
               type="checkbox"
               checked={exportIncludeLogs}
               onChange={(e) => setState("exportIncludeLogs", e.target.checked)}
             />
             Include logs in export
-          </span>
+          </label>
           {exportError && (
             <div className="text-[11px] text-[var(--danger,#e74c3c)]">
               {exportError}
@@ -1312,8 +745,14 @@ export function SettingsView() {
             file and enter the password used during export.
           </div>
           <div className="flex flex-col gap-1">
-            <span className="font-semibold text-xs">Export File</span>
+            <label
+              htmlFor="agent-import-file-input"
+              className="font-semibold text-xs"
+            >
+              Export File
+            </label>
             <input
+              id="agent-import-file-input"
               ref={importFileRef}
               type="file"
               accept=".eliza-agent"
@@ -1326,8 +765,14 @@ export function SettingsView() {
             />
           </div>
           <div className="flex flex-col gap-1">
-            <span className="font-semibold text-xs">Decryption Password</span>
+            <label
+              htmlFor="agent-import-password-input"
+              className="font-semibold text-xs"
+            >
+              Decryption Password
+            </label>
             <input
+              id="agent-import-password-input"
               type="password"
               placeholder="Enter password (minimum 4 characters)"
               value={importPassword}

@@ -139,9 +139,9 @@ describe("collectPluginNames — cloud plugin inclusion", () => {
     expect(names.has("@elizaos/plugin-elizacloud")).toBe(true);
   });
 
-  it("includes cloud plugin as a core dependency even without cloud config", () => {
+  it("does not include cloud plugin without cloud config or cloud key", () => {
     const names = collectPluginNames({} as MiladyConfig);
-    expect(names.has("@elizaos/plugin-elizacloud")).toBe(true);
+    expect(names.has("@elizaos/plugin-elizacloud")).toBe(false);
   });
 });
 

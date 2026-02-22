@@ -10,7 +10,6 @@
     "cli.js"
   ],
   "dependencies": {
-    "milady": "next"
   },
   "license": "MIT"
 }

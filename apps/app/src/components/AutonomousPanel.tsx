@@ -343,7 +343,9 @@ export function AutonomousPanel({
           Chat Controls
         </div>
 
-        <div className={`${mobile ? "h-[300px]" : "h-[260px] xl:h-[320px] 2xl:h-[420px]"} border border-border bg-bg-hover/20 rounded overflow-hidden relative`}>
+        <div
+          className={`${mobile ? "h-[300px]" : "h-[260px] xl:h-[320px] 2xl:h-[420px]"} border border-border bg-bg-hover/20 rounded overflow-hidden relative`}
+        >
           {chatAvatarVisible ? (
             <ChatAvatar isSpeaking={chatAvatarSpeaking} />
           ) : (

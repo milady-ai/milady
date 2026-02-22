@@ -19,7 +19,10 @@ import {
   type ServiceTypeName,
   type State,
 } from "@elizaos/core";
-import { PluginManagerService } from "@elizaos/plugin-plugin-manager";
+import {
+  PluginManagerService,
+  pluginRegistry,
+} from "@elizaos/plugin-plugin-manager";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AppManager } from "./app-manager";
 
@@ -429,5 +432,242 @@ describe("AppManager Integration", () => {
 
     // Verify file system
     expect(fs.existsSync(installedDir)).toBe(false);
+  });
+});
+
+describe("Hyperscape Auto-Provisioning", () => {
+  let appManager: AppManager;
+  let pluginManager: PluginManagerService;
+  let runtime: FakeAgentRuntime;
+  let tempDir: string;
+  let originalEnv: Record<string, string | undefined>;
+
+  const HYPERSCAPE_APP_NAME = "@elizaos/app-hyperscape";
+  const HYPERSCAPE_PLUGIN_NAME = "@elizaos/plugin-hyperscape";
+
+  beforeEach(async () => {
+    // Flush any cached registry from prior test suites so fresh fetch mocks
+    // installed in individual tests are honoured.
+    pluginRegistry.resetRegistryCache();
+
+    // Save original env vars
+    originalEnv = {
+      HYPERSCAPE_CHARACTER_ID: process.env.HYPERSCAPE_CHARACTER_ID,
+      HYPERSCAPE_AUTH_TOKEN: process.env.HYPERSCAPE_AUTH_TOKEN,
+      HYPERSCAPE_SERVER_URL: process.env.HYPERSCAPE_SERVER_URL,
+      SOLANA_PRIVATE_KEY: process.env.SOLANA_PRIVATE_KEY,
+      EVM_PRIVATE_KEY: process.env.EVM_PRIVATE_KEY,
+    };
+
+    // Clear hyperscape env vars
+    delete process.env.HYPERSCAPE_CHARACTER_ID;
+    delete process.env.HYPERSCAPE_AUTH_TOKEN;
+    delete process.env.SOLANA_PRIVATE_KEY;
+    delete process.env.EVM_PRIVATE_KEY;
+
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "milady-hyperscape-test-"));
+    const pluginsDir = path.join(tempDir, "plugins");
+    fs.mkdirSync(pluginsDir);
+
+    runtime = new FakeAgentRuntime();
+    pluginManager = new PluginManagerService(runtime, {
+      pluginDirectory: pluginsDir,
+    });
+
+    process.env.MILADY_STATE_DIR = tempDir;
+    appManager = new AppManager();
+  });
+
+  afterEach(() => {
+    // Restore original env vars
+    for (const [key, value] of Object.entries(originalEnv)) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
+    fs.rmSync(tempDir, { recursive: true, force: true });
+    vi.restoreAllMocks();
+  });
+
+  it("throws error when hyperscape auto-provisioning fails and no credentials exist", async () => {
+    // Mock registry to return hyperscape app
+    global.fetch = vi.fn().mockImplementation((url: string) => {
+      if (url.includes("wallet-auth")) {
+        // Simulate server not responding
+        return Promise.reject(new Error("ECONNREFUSED"));
+      }
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({
+          registry: {
+            [HYPERSCAPE_APP_NAME]: {
+              git: { repo: "elizaos/app-hyperscape", v0: {}, v1: {}, v2: {} },
+              npm: {
+                repo: HYPERSCAPE_PLUGIN_NAME,
+                v0: null,
+                v1: null,
+                v2: "1.0.0",
+              },
+              supports: { v0: true, v1: false, v2: false },
+              description: "Hyperscape 3D world",
+              topics: ["app"],
+            },
+            [HYPERSCAPE_PLUGIN_NAME]: {
+              git: {
+                repo: "elizaos/plugin-hyperscape",
+                v0: {},
+                v1: {},
+                v2: {},
+              },
+              npm: {
+                repo: HYPERSCAPE_PLUGIN_NAME,
+                v0: null,
+                v1: null,
+                v2: "1.0.0",
+              },
+              supports: { v0: true, v1: false, v2: false },
+              description: "Hyperscape plugin",
+              topics: ["plugin"],
+            },
+          },
+        }),
+      });
+    });
+
+    // Simulate plugin already installed
+    const installedDir = path.join(
+      tempDir,
+      "plugins",
+      "installed",
+      "_elizaos_plugin-hyperscape",
+    );
+    fs.mkdirSync(installedDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(installedDir, "package.json"),
+      JSON.stringify({ name: HYPERSCAPE_PLUGIN_NAME, version: "1.0.0" }),
+    );
+
+    // No wallet keys set, auto-provisioning will fail
+    await expect(
+      appManager.launch(pluginManager, HYPERSCAPE_APP_NAME),
+    ).rejects.toThrow(/Hyperscape authentication required/);
+  });
+
+  it("succeeds when hyperscape credentials are pre-configured", async () => {
+    // Pre-set credentials
+    process.env.HYPERSCAPE_CHARACTER_ID = "test-char-id";
+    process.env.HYPERSCAPE_AUTH_TOKEN = "test-auth-token";
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        registry: {
+          [HYPERSCAPE_APP_NAME]: {
+            git: { repo: "elizaos/app-hyperscape", v0: {}, v1: {}, v2: {} },
+            npm: {
+              repo: HYPERSCAPE_PLUGIN_NAME,
+              v0: null,
+              v1: null,
+              v2: "1.0.0",
+            },
+            supports: { v0: true, v1: false, v2: false },
+            description: "Hyperscape 3D world",
+            topics: ["app"],
+          },
+          [HYPERSCAPE_PLUGIN_NAME]: {
+            git: { repo: "elizaos/plugin-hyperscape", v0: {}, v1: {}, v2: {} },
+            npm: {
+              repo: HYPERSCAPE_PLUGIN_NAME,
+              v0: null,
+              v1: null,
+              v2: "1.0.0",
+            },
+            supports: { v0: true, v1: false, v2: false },
+            description: "Hyperscape plugin",
+            topics: ["plugin"],
+          },
+        },
+      }),
+    });
+
+    // Simulate plugin already installed
+    const installedDir = path.join(
+      tempDir,
+      "plugins",
+      "installed",
+      "_elizaos_plugin-hyperscape",
+    );
+    fs.mkdirSync(installedDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(installedDir, "package.json"),
+      JSON.stringify({ name: HYPERSCAPE_PLUGIN_NAME, version: "1.0.0" }),
+    );
+
+    const result = await appManager.launch(pluginManager, HYPERSCAPE_APP_NAME);
+    expect(result.pluginInstalled).toBe(true);
+  });
+
+  it("skips auto-provisioning when credentials already exist", async () => {
+    // Pre-set credentials - auto-provisioning should be skipped
+    process.env.HYPERSCAPE_CHARACTER_ID = "existing-char-id";
+    process.env.HYPERSCAPE_AUTH_TOKEN = "existing-auth-token";
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        registry: {
+          [HYPERSCAPE_APP_NAME]: {
+            git: { repo: "elizaos/app-hyperscape", v0: {}, v1: {}, v2: {} },
+            npm: {
+              repo: HYPERSCAPE_PLUGIN_NAME,
+              v0: null,
+              v1: null,
+              v2: "1.0.0",
+            },
+            supports: { v0: true, v1: false, v2: false },
+            description: "Hyperscape 3D world",
+            topics: ["app"],
+          },
+          [HYPERSCAPE_PLUGIN_NAME]: {
+            git: {
+              repo: "elizaos/plugin-hyperscape",
+              v0: {},
+              v1: {},
+              v2: {},
+            },
+            npm: {
+              repo: HYPERSCAPE_PLUGIN_NAME,
+              v0: null,
+              v1: null,
+              v2: "1.0.0",
+            },
+            supports: { v0: true, v1: false, v2: false },
+            description: "Hyperscape plugin",
+            topics: ["plugin"],
+          },
+        },
+      }),
+    });
+
+    // Simulate plugin already installed
+    const installedDir = path.join(
+      tempDir,
+      "plugins",
+      "installed",
+      "_elizaos_plugin-hyperscape",
+    );
+    fs.mkdirSync(installedDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(installedDir, "package.json"),
+      JSON.stringify({ name: HYPERSCAPE_PLUGIN_NAME, version: "1.0.0" }),
+    );
+
+    const result = await appManager.launch(pluginManager, HYPERSCAPE_APP_NAME);
+    expect(result.pluginInstalled).toBe(true);
+    // Credentials should remain unchanged (auto-provisioning skipped)
+    expect(process.env.HYPERSCAPE_CHARACTER_ID).toBe("existing-char-id");
+    expect(process.env.HYPERSCAPE_AUTH_TOKEN).toBe("existing-auth-token");
   });
 });

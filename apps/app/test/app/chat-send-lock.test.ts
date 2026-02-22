@@ -443,4 +443,169 @@ describe("chat send locking", () => {
       tree?.unmount();
     });
   });
+
+  it("preserves repeated characters in incremental token streams", async () => {
+    const deferred = createDeferred<{ text: string; agentName: string }>();
+    mockClient.sendConversationMessageStream.mockImplementation(
+      async (
+        _conversationId: string,
+        _text: string,
+        onToken: (token: string) => void,
+      ) => {
+        for (const token of [
+          "H",
+          "e",
+          "l",
+          "l",
+          "o",
+          " ",
+          "w",
+          "o",
+          "r",
+          "l",
+          "d",
+        ]) {
+          onToken(token);
+        }
+        return deferred.promise;
+      },
+    );
+
+    let api: ProbeApi | null = null;
+    let tree: TestRenderer.ReactTestRenderer;
+
+    await act(async () => {
+      tree = TestRenderer.create(
+        React.createElement(
+          AppProvider,
+          null,
+          React.createElement(Probe, {
+            onReady: (nextApi) => {
+              api = nextApi;
+            },
+          }),
+        ),
+      );
+    });
+
+    expect(api).not.toBeNull();
+
+    await act(async () => {
+      await api?.handleSelectConversation("conv-1");
+      api?.setChatInput("stream me");
+    });
+
+    let sendPromise: Promise<void> | null = null;
+    await act(async () => {
+      sendPromise = api?.handleChatSend();
+      await Promise.resolve();
+    });
+
+    await vi.waitFor(() => {
+      const snapshot = api?.snapshot();
+      const streamedAssistant = snapshot.conversationMessages.find(
+        (message) =>
+          message.role === "assistant" && message.id.startsWith("temp-resp-"),
+      );
+      expect(streamedAssistant?.text).toBe("Hello world");
+      expect(snapshot.chatSending).toBe(true);
+    });
+
+    await act(async () => {
+      deferred.resolve({ text: "Hello world", agentName: "Milady" });
+      await sendPromise;
+    });
+
+    await act(async () => {
+      tree?.unmount();
+    });
+  });
+
+  it("does not block stream completion on conversation list refresh", async () => {
+    const refreshDeferred = createDeferred<{
+      conversations: Array<{
+        id: string;
+        title: string;
+        roomId: string;
+        createdAt: string;
+        updatedAt: string;
+      }>;
+    }>();
+
+    mockClient.listConversations
+      .mockResolvedValueOnce({
+        conversations: [
+          {
+            id: "conv-1",
+            title: "Chat",
+            roomId: "room-1",
+            createdAt: "2026-02-01T00:00:00.000Z",
+            updatedAt: "2026-02-01T00:00:00.000Z",
+          },
+        ],
+      })
+      .mockImplementationOnce(async () => refreshDeferred.promise);
+
+    mockClient.sendConversationMessageStream.mockResolvedValue({
+      text: "done",
+      agentName: "Milady",
+    });
+
+    let api: ProbeApi | null = null;
+    let tree: TestRenderer.ReactTestRenderer;
+
+    await act(async () => {
+      tree = TestRenderer.create(
+        React.createElement(
+          AppProvider,
+          null,
+          React.createElement(Probe, {
+            onReady: (nextApi) => {
+              api = nextApi;
+            },
+          }),
+        ),
+      );
+    });
+
+    expect(api).not.toBeNull();
+
+    await act(async () => {
+      await api?.handleSelectConversation("conv-1");
+      api?.setChatInput("quick response");
+    });
+
+    let resolved = false;
+    await act(async () => {
+      const promise = api?.handleChatSend() ?? Promise.resolve();
+      promise.then(() => {
+        resolved = true;
+      });
+      await Promise.resolve();
+    });
+
+    await vi.waitFor(() => {
+      expect(resolved).toBe(true);
+      expect(api?.snapshot().chatSending).toBe(false);
+    });
+
+    await act(async () => {
+      refreshDeferred.resolve({
+        conversations: [
+          {
+            id: "conv-1",
+            title: "Chat",
+            roomId: "room-1",
+            createdAt: "2026-02-01T00:00:00.000Z",
+            updatedAt: "2026-02-01T00:00:00.000Z",
+          },
+        ],
+      });
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      tree?.unmount();
+    });
+  });
 });

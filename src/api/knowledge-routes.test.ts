@@ -1,4 +1,4 @@
-import { lookup as dnsLookup } from "node:dns/promises";
+import * as dns from "node:dns/promises";
 import type { AgentRuntime, Memory, UUID } from "@elizaos/core";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { createRouteInvoker } from "../test-support/route-test-helpers.js";
@@ -116,6 +116,159 @@ describe("knowledge routes", () => {
         offset: undefined,
       }),
     );
+  });
+
+  test("enriches documents list with fragment counts and metadata defaults", async () => {
+    const firstDocumentId = uuid(2001);
+    const secondDocumentId = uuid(2002);
+    const thirdDocumentId = uuid(2003);
+    getMemoriesMock.mockImplementation(async ({ tableName }) => {
+      if (tableName === "documents") {
+        return [
+          buildMemory({
+            id: firstDocumentId,
+            metadata: {
+              filename: "project-notes.md",
+              fileType: "text/markdown",
+              fileSize: "2048",
+            },
+            createdAt: 111,
+          }),
+          buildMemory({
+            id: secondDocumentId,
+            metadata: {
+              title: "missing-metadata",
+              source: "url",
+            },
+            createdAt: undefined,
+          }),
+          buildMemory({
+            id: thirdDocumentId,
+            metadata: {
+              filename: "no-fragments.pdf",
+            },
+            createdAt: 333,
+            content: { text: "third-doc" },
+          }),
+        ];
+      }
+      return [
+        buildMemory({
+          id: uuid(2010),
+          metadata: { documentId: firstDocumentId },
+        }),
+        buildMemory({
+          id: uuid(2011),
+          metadata: { documentId: firstDocumentId },
+        }),
+        buildMemory({
+          id: uuid(2012),
+          metadata: { documentId: secondDocumentId },
+        }),
+        buildMemory({
+          id: undefined,
+          metadata: { documentId: thirdDocumentId },
+        }),
+      ];
+    });
+
+    const result = await invoke({
+      method: "GET",
+      pathname: "/api/knowledge/documents",
+      url: "/api/knowledge/documents?limit=10&offset=1",
+    });
+
+    expect(result.status).toBe(200);
+    expect(
+      (
+        result.payload as {
+          documents: Array<{ id: string; fragmentCount: number }>;
+        }
+      ).documents.map((doc) => doc.fragmentCount),
+    ).toEqual([2, 1, 1]);
+    expect(
+      (
+        result.payload as {
+          documents: Array<{
+            id: string;
+            createdAt: number;
+            fileSize: number;
+            contentType: string;
+            filename: string;
+          }>;
+        }
+      ).documents,
+    ).toMatchObject([
+      {
+        id: firstDocumentId,
+        filename: "project-notes.md",
+        contentType: "text/markdown",
+        fileSize: 2048,
+        createdAt: 111,
+      },
+      {
+        id: secondDocumentId,
+        filename: "missing-metadata",
+        contentType: "unknown",
+        fileSize: 0,
+        createdAt: 0,
+      },
+      {
+        id: thirdDocumentId,
+        filename: "no-fragments.pdf",
+        contentType: "unknown",
+        fileSize: 0,
+        createdAt: 333,
+      },
+    ]);
+  });
+
+  test("returns document detail with single fragmentCount and defaulted metadata", async () => {
+    const documentId = uuid(2100);
+    getMemoriesMock.mockImplementation(async ({ tableName }) => {
+      if (tableName === "documents") {
+        return [
+          buildMemory({
+            id: documentId,
+            metadata: {
+              title: "detail.md",
+              fileType: "text/markdown",
+            },
+            createdAt: undefined,
+            content: { text: "document body" },
+          }),
+        ];
+      }
+      return [
+        buildMemory({ id: uuid(2101), metadata: { documentId } }),
+        buildMemory({ id: uuid(2102), metadata: { documentId } }),
+      ];
+    });
+
+    const result = await invoke({
+      method: "GET",
+      pathname: `/api/knowledge/documents/${documentId}`,
+    });
+
+    expect(result.status).toBe(200);
+    expect(
+      (result.payload as { document: Record<string, unknown> }).document,
+    ).toEqual({
+      id: documentId,
+      filename: "detail.md",
+      contentType: "text/markdown",
+      fileSize: 0,
+      createdAt: 0,
+      fragmentCount: 2,
+      source: "upload",
+      url: undefined,
+      content: { text: "document body" },
+    });
+    expect(
+      Object.keys(
+        (result.payload as { document: Record<string, unknown> }).document,
+      ).filter((key) => key === "fragmentCount"),
+    ).toHaveLength(1);
   });
 
   test("filters fragments without id/createdAt and paginates batches", async () => {
@@ -279,7 +432,7 @@ describe("knowledge routes", () => {
   });
 
   test("blocks URL import when DNS resolves to link-local/metadata IP", async () => {
-    vi.mocked(dnsLookup).mockResolvedValue([
+    vi.spyOn(dns, "lookup").mockResolvedValue([
       { address: "169.254.169.254", family: 4 },
     ]);
     const fetchSpy = vi.spyOn(globalThis, "fetch");
@@ -297,7 +450,7 @@ describe("knowledge routes", () => {
   });
 
   test("allows URL import for public hosts", async () => {
-    vi.mocked(dnsLookup).mockResolvedValue([
+    vi.spyOn(dns, "lookup").mockResolvedValue([
       { address: "93.184.216.34", family: 4 },
     ]);
     vi.spyOn(globalThis, "fetch").mockResolvedValue({
@@ -325,7 +478,7 @@ describe("knowledge routes", () => {
   });
 
   test("blocks URL import when fetch responds with redirect", async () => {
-    vi.mocked(dnsLookup).mockResolvedValue([
+    vi.spyOn(dns, "lookup").mockResolvedValue([
       { address: "93.184.216.34", family: 4 },
     ]);
     const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue({
@@ -350,6 +503,192 @@ describe("knowledge routes", () => {
       "https://example.com/redirect",
       expect.objectContaining({ redirect: "manual" }),
     );
+    expect(addKnowledgeMock).not.toHaveBeenCalled();
+  });
+
+  test("rejects URL import when declared content-length exceeds max size", async () => {
+    vi.spyOn(dns, "lookup").mockResolvedValue([
+      { address: "93.184.216.34", family: 4 },
+    ]);
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      status: 200,
+      statusText: "OK",
+      headers: new Headers({
+        "content-type": "text/plain; charset=utf-8",
+        "content-length": String(10 * 1024 * 1024 + 1),
+      }),
+      body: new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode("small"));
+          controller.close();
+        },
+      }),
+    } as Response);
+
+    const result = await invoke({
+      method: "POST",
+      pathname: "/api/knowledge/documents/url",
+      body: { url: "https://example.com/huge.txt" },
+    });
+
+    expect(result.status).toBe(400);
+    expect((result.payload as { error?: string }).error).toContain(
+      "maximum size",
+    );
+    expect(fetchSpy).toHaveBeenCalled();
+    expect(addKnowledgeMock).not.toHaveBeenCalled();
+  });
+
+  test("rejects URL import when streamed body exceeds max size", async () => {
+    vi.spyOn(dns, "lookup").mockResolvedValue([
+      { address: "93.184.216.34", family: 4 },
+    ]);
+
+    const chunk = new Uint8Array(256 * 1024); // 256 KiB
+    let chunksSent = 0;
+
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      status: 200,
+      statusText: "OK",
+      headers: new Headers({
+        "content-type": "text/plain; charset=utf-8",
+      }),
+      body: new ReadableStream<Uint8Array>({
+        pull(controller) {
+          if (chunksSent >= 41) {
+            controller.close();
+            return;
+          }
+          chunksSent += 1;
+          controller.enqueue(chunk);
+        },
+      }),
+    } as Response);
+
+    const result = await invoke({
+      method: "POST",
+      pathname: "/api/knowledge/documents/url",
+      body: { url: "https://example.com/chunked.txt" },
+    });
+
+    expect(result.status).toBe(400);
+    expect((result.payload as { error?: string }).error).toContain(
+      "maximum size",
+    );
+    expect(addKnowledgeMock).not.toHaveBeenCalled();
+  });
+
+  test("rejects YouTube import when watch page exceeds max size", async () => {
+    vi.spyOn(dns, "lookup").mockResolvedValue([
+      { address: "142.250.190.14", family: 4 },
+    ]);
+
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      status: 200,
+      statusText: "OK",
+      headers: new Headers({
+        "content-type": "text/html; charset=utf-8",
+        "content-length": String(2 * 1024 * 1024 + 1),
+      }),
+      body: new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode("small"));
+          controller.close();
+        },
+      }),
+    } as Response);
+
+    const result = await invoke({
+      method: "POST",
+      pathname: "/api/knowledge/documents/url",
+      body: { url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
+    });
+
+    expect(result.status).toBe(400);
+    expect((result.payload as { error?: string }).error).toContain(
+      "maximum size",
+    );
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(addKnowledgeMock).not.toHaveBeenCalled();
+  });
+
+  test("rejects YouTube import when transcript exceeds max size", async () => {
+    vi.spyOn(dns, "lookup").mockResolvedValue([
+      { address: "142.250.190.14", family: 4 },
+    ]);
+
+    const watchHtml =
+      '{"captionTracks":[{"baseUrl":"https://www.youtube.com/api/timedtext?lang=en"}]}';
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    fetchSpy
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        headers: new Headers({
+          "content-type": "text/html; charset=utf-8",
+          "content-length": String(new TextEncoder().encode(watchHtml).length),
+        }),
+        body: new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(new TextEncoder().encode(watchHtml));
+            controller.close();
+          },
+        }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        headers: new Headers({
+          "content-type": "application/xml; charset=utf-8",
+          "content-length": String(10 * 1024 * 1024 + 1),
+        }),
+        body: new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(
+              new TextEncoder().encode("<transcript></transcript>"),
+            );
+            controller.close();
+          },
+        }),
+      } as Response);
+
+    const result = await invoke({
+      method: "POST",
+      pathname: "/api/knowledge/documents/url",
+      body: { url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
+    });
+
+    expect(result.status).toBe(400);
+    expect((result.payload as { error?: string }).error).toContain(
+      "maximum size",
+    );
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    expect(addKnowledgeMock).not.toHaveBeenCalled();
+  });
+
+  test("rejects URL import when upstream fetch aborts", async () => {
+    vi.spyOn(dns, "lookup").mockResolvedValue([
+      { address: "93.184.216.34", family: 4 },
+    ]);
+
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockRejectedValue(new DOMException("Aborted", "AbortError"));
+
+    const result = await invoke({
+      method: "POST",
+      pathname: "/api/knowledge/documents/url",
+      body: { url: "https://example.com/slow.txt" },
+    });
+
+    expect(result.status).toBe(400);
+    expect((result.payload as { error?: string }).error).toContain("timed out");
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
     expect(addKnowledgeMock).not.toHaveBeenCalled();
   });
 });
