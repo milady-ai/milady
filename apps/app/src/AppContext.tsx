@@ -3955,6 +3955,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         detail,
       };
     };
+    const STARTUP_WARN_PREFIX = "[milady][startup:init]";
+    const logStartupWarning = (scope: string, err: unknown) => {
+      console.warn(`${STARTUP_WARN_PREFIX} ${scope}`, err);
+    };
 
     const initApp = async () => {
       if (import.meta.env.DEV && startupRunId > 0) {
@@ -4179,8 +4183,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
             if (messages.length === 0) {
               greetConvId = latest.id;
             }
-          } catch {
-            /* ignore */
+          } catch (err) {
+            logStartupWarning(
+              "failed to load latest conversation messages",
+              err,
+            );
           }
         } else {
           // First launch — create a conversation and greet
@@ -4195,12 +4202,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
             });
             setConversationMessages([]);
             greetConvId = conversation.id;
-          } catch {
-            /* ignore */
+          } catch (err) {
+            logStartupWarning("failed to create initial conversation", err);
           }
         }
-      } catch {
-        /* ignore */
+      } catch (err) {
+        logStartupWarning("failed to list conversations", err);
       }
 
       // If the agent is already running and we have a conversation needing a
@@ -4225,13 +4232,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
                   },
                 ]);
               }
-            } catch {
-              /* ignore */
+            } catch (err) {
+              logStartupWarning("failed to request greeting", err);
             }
             setChatSending(false);
           }
-        } catch {
-          /* ignore */
+        } catch (err) {
+          logStartupWarning(
+            "failed to confirm runtime state for greeting",
+            err,
+          );
         }
       }
 
@@ -4359,8 +4369,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       // Load wallet addresses for header
       try {
         setWalletAddresses(await client.getWalletAddresses());
-      } catch {
-        /* ignore */
+      } catch (err) {
+        logStartupWarning("failed to load wallet addresses", err);
       }
 
       // Restore avatar selection from config (server-persisted under "ui")
@@ -4372,12 +4382,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
           resolvedIndex = normalizeAvatarIndex(Number(ui.avatarIndex));
           setSelectedVrmIndex(resolvedIndex);
         }
-      } catch {
-        /* ignore — localStorage fallback already loaded */
+      } catch (err) {
+        logStartupWarning("failed to load config for avatar selection", err);
       }
       // If custom avatar selected, verify the file still exists on the server
       if (resolvedIndex === 0) {
-        const hasVrm = await client.hasCustomVrm().catch(() => false);
+        const hasVrm = await client.hasCustomVrm();
         if (hasVrm) {
           setCustomVrmUrl(`/api/avatar/vrm?t=${Date.now()}`);
         } else {

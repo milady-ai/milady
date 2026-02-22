@@ -1726,7 +1726,11 @@ export class MiladyClient {
 
   // --- REST API ---
 
-  private async fetch<T>(path: string, init?: RequestInit): Promise<T> {
+  private async rawRequest(
+    path: string,
+    init?: RequestInit,
+    options?: { allowNonOk?: boolean },
+  ): Promise<Response> {
     if (!this.apiAvailable) {
       throw new ApiError({
         kind: "network",
@@ -1749,7 +1753,6 @@ export class MiladyClient {
           ...init,
           signal,
           headers: {
-            "Content-Type": "application/json",
             "X-Milady-Client-Id": this.clientId,
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
             ...init?.headers,
@@ -1786,7 +1789,7 @@ export class MiladyClient {
         res = await makeRequest(retryToken);
       }
     }
-    if (!res.ok) {
+    if (!res.ok && !options?.allowNonOk) {
       const body = (await res
         .json()
         .catch(() => ({ error: res.statusText }))) as Record<string, string>;
@@ -1797,6 +1800,17 @@ export class MiladyClient {
         message: body.error ?? `HTTP ${res.status}`,
       });
     }
+    return res;
+  }
+
+  private async fetch<T>(path: string, init?: RequestInit): Promise<T> {
+    const res = await this.rawRequest(path, {
+      ...init,
+      headers: {
+        "Content-Type": "application/json",
+        ...init?.headers,
+      },
+    });
     return res.json() as Promise<T>;
   }
 
@@ -2067,11 +2081,11 @@ export class MiladyClient {
   /** Uses raw fetch instead of this.fetch() because HEAD returns no JSON body. */
   async hasCustomVrm(): Promise<boolean> {
     try {
-      const token = this.apiToken;
-      const res = await fetch(`${this.baseUrl}/api/avatar/vrm`, {
-        method: "HEAD",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      const res = await this.rawRequest(
+        "/api/avatar/vrm",
+        { method: "HEAD" },
+        { allowNonOk: true },
+      );
       return res.ok;
     } catch {
       return false;
@@ -2618,27 +2632,13 @@ export class MiladyClient {
         `Password must be at least ${AGENT_TRANSFER_MIN_PASSWORD_LENGTH} characters.`,
       );
     }
-    if (!this.apiAvailable) {
-      throw new Error("API not available (no HTTP origin)");
-    }
-    const token = this.apiToken;
-    const res = await fetch(`${this.baseUrl}/api/agent/export`, {
+    return this.rawRequest("/api/agent/export", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: JSON.stringify({ password, includeLogs }),
     });
-    if (!res.ok) {
-      const body = (await res
-        .json()
-        .catch(() => ({ error: res.statusText }))) as Record<string, string>;
-      const err = new Error(body.error ?? `HTTP ${res.status}`);
-      (err as Error & { status?: number }).status = res.status;
-      throw err;
-    }
-    return res;
   }
 
   /** Get an estimate of the export size. */
@@ -2671,9 +2671,6 @@ export class MiladyClient {
         `Password must be at least ${AGENT_TRANSFER_MIN_PASSWORD_LENGTH} characters.`,
       );
     }
-    if (!this.apiAvailable) {
-      throw new Error("API not available (no HTTP origin)");
-    }
     const passwordBytes = new TextEncoder().encode(password);
     const envelope = new Uint8Array(
       4 + passwordBytes.length + fileBuffer.byteLength,
@@ -2683,12 +2680,10 @@ export class MiladyClient {
     envelope.set(passwordBytes, 4);
     envelope.set(new Uint8Array(fileBuffer), 4 + passwordBytes.length);
 
-    const token = this.apiToken;
-    const res = await fetch(`${this.baseUrl}/api/agent/import`, {
+    const res = await this.rawRequest("/api/agent/import", {
       method: "POST",
       headers: {
         "Content-Type": "application/octet-stream",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: envelope,
     });
@@ -2700,7 +2695,7 @@ export class MiladyClient {
       agentName?: string;
       counts?: Record<string, number>;
     };
-    if (!res.ok || !data.success) {
+    if (!data.success) {
       throw new Error(data.error ?? `Import failed (${res.status})`);
     }
     return data as {
@@ -3435,17 +3430,11 @@ export class MiladyClient {
     signal?: AbortSignal,
     images?: ImageAttachment[],
   ): Promise<{ text: string; agentName: string }> {
-    if (!this.apiAvailable) {
-      throw new Error("API not available (no HTTP origin)");
-    }
-
-    const token = this.apiToken;
-    const res = await fetch(`${this.baseUrl}${path}`, {
+    const res = await this.rawRequest(path, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Accept: "text/event-stream",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: JSON.stringify({
         text,
@@ -3454,15 +3443,6 @@ export class MiladyClient {
       }),
       signal,
     });
-
-    if (!res.ok) {
-      const body = (await res
-        .json()
-        .catch(() => ({ error: res.statusText }))) as Record<string, string>;
-      const err = new Error(body.error ?? `HTTP ${res.status}`);
-      (err as Error & { status?: number }).status = res.status;
-      throw err;
-    }
 
     if (!res.body) {
       throw new Error("Streaming not supported by this browser");
@@ -3861,24 +3841,13 @@ export class MiladyClient {
   }
 
   async exportTrajectories(options: TrajectoryExportOptions): Promise<Blob> {
-    if (!this.apiAvailable) {
-      throw new Error("API not available (no HTTP origin)");
-    }
-    const token = this.apiToken;
-    const res = await fetch(`${this.baseUrl}/api/trajectories/export`, {
+    const res = await this.rawRequest("/api/trajectories/export", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: JSON.stringify(options),
     });
-    if (!res.ok) {
-      const body = (await res
-        .json()
-        .catch(() => ({ error: res.statusText }))) as Record<string, string>;
-      throw new Error(body.error ?? `HTTP ${res.status}`);
-    }
     return res.blob();
   }
 

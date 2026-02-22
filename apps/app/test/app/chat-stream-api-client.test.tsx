@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { MiladyClient } from "../../src/api-client";
+import { ApiError, MiladyClient } from "../../src/api-client";
 
 function buildSseResponse(chunks: string[]): Response {
   const encoder = new TextEncoder();
@@ -163,5 +163,23 @@ describe("MiladyClient streaming chat endpoints", () => {
     await expect(
       client.sendChatStream("boom", () => {}, "simple"),
     ).rejects.toThrow("stream failed");
+  });
+
+  test("throws typed ApiError when stream endpoint responds with HTTP error", async () => {
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    const client = new MiladyClient("http://localhost:2138");
+    const request = client.sendChatStream("boom", () => {}, "simple");
+    await expect(request).rejects.toBeInstanceOf(ApiError);
+    await expect(request).rejects.toMatchObject({
+      kind: "http",
+      status: 401,
+      path: "/api/chat/stream",
+    });
   });
 });
