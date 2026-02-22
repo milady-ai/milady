@@ -311,6 +311,38 @@ describe("applyPluginAutoEnable — env vars", () => {
     const anthropicEntries = allow.filter((p) => p === "anthropic");
     expect(anthropicEntries).toHaveLength(1);
   });
+
+  it("auto-enables cua plugin when CUA_API_KEY is set", () => {
+    const params = makeParams({
+      env: { CUA_API_KEY: "cua-key" },
+    });
+    const { config, changes } = applyPluginAutoEnable(params);
+
+    expect(config.plugins?.allow).toContain("cua");
+    expect(changes.some((c) => c.includes("CUA_API_KEY"))).toBe(true);
+  });
+
+  it("auto-enables cua plugin when CUA_HOST is set", () => {
+    const params = makeParams({
+      env: { CUA_HOST: "https://cua.example" },
+    });
+    const { config, changes } = applyPluginAutoEnable(params);
+
+    expect(config.plugins?.allow).toContain("cua");
+    expect(changes.some((c) => c.includes("CUA_HOST"))).toBe(true);
+  });
+
+  it("respects cua enabled=false override for env auto-enable", () => {
+    const params = makeParams({
+      config: {
+        plugins: { entries: { cua: { enabled: false } } },
+      },
+      env: { CUA_API_KEY: "cua-key" },
+    });
+    const { config } = applyPluginAutoEnable(params);
+
+    expect(config.plugins?.allow ?? []).not.toContain("cua");
+  });
 });
 
 // ============================================================================
@@ -372,6 +404,36 @@ describe("applyPluginAutoEnable — features", () => {
     const { config } = applyPluginAutoEnable(params);
 
     expect(config.plugins?.allow).toContain("obsidian");
+  });
+
+  it("enables x402 plugin when features.x402 = true", () => {
+    const params = makeParams({
+      config: { features: { x402: true } },
+    });
+    const { config, changes } = applyPluginAutoEnable(params);
+
+    expect(config.plugins?.allow).toContain("x402");
+    expect(changes.some((c) => c.includes("feature: x402"))).toBe(true);
+  });
+
+  it("enables cua plugin when features.cua = true", () => {
+    const params = makeParams({
+      config: { features: { cua: true } },
+    });
+    const { config, changes } = applyPluginAutoEnable(params);
+
+    expect(config.plugins?.allow).toContain("cua");
+    expect(changes.some((c) => c.includes("feature: cua"))).toBe(true);
+  });
+
+  it("enables computeruse plugin when features.computeruse = true", () => {
+    const params = makeParams({
+      config: { features: { computeruse: true } },
+    });
+    const { config, changes } = applyPluginAutoEnable(params);
+
+    expect(config.plugins?.allow).toContain("computeruse");
+    expect(changes.some((c) => c.includes("feature: computeruse"))).toBe(true);
   });
 });
 
@@ -523,6 +585,11 @@ describe("AUTH_PROVIDER_PLUGINS", () => {
     expect(AUTH_PROVIDER_PLUGINS.MILAIDY_USE_PI_AI).toBe(
       "@elizaos/plugin-pi-ai",
     );
+  });
+
+  it("maps CUA env keys to cua plugin", () => {
+    expect(AUTH_PROVIDER_PLUGINS.CUA_API_KEY).toBe("@elizaos/plugin-cua");
+    expect(AUTH_PROVIDER_PLUGINS.CUA_HOST).toBe("@elizaos/plugin-cua");
   });
 });
 
