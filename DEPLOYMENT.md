@@ -38,7 +38,7 @@ VITE_DISCORD_REDIRECT_URI=https://yourdomain.com/discord-callback
 
 # ── Cloud Provider Configuration ───────────────────────────
 ELIZAOS_CLOUD_BASE_URL=https://www.elizacloud.ai
-CLOUD_CONTAINER_PORT=2187
+CONTAINER_API_PORT=2187  # Cloud container API port
 
 # ── API Server Configuration ───────────────────────────────
 MILADY_API_PORT=31337
@@ -309,9 +309,9 @@ Caddy handles SSL automatically. Just ensure your domain DNS points to your serv
 - Direct container access is required for real-time Discord bot operations
 
 **Implementation:**
-- Container port is configurable via `CLOUD_CONTAINER_PORT` (default: 2187)
+- Container port is configurable via `CONTAINER_API_PORT` environment variable (default: 2187)
 - Discord OAuth endpoint: `POST /api/cloud/discord/connect`
-- Proxies OAuth code to: `http://{containerIp}:{CLOUD_CONTAINER_PORT}/api/discord/connect`
+- Proxies OAuth code to: `http://{containerIp}:{CONTAINER_API_PORT}/api/discord/connect`
 
 **Security Considerations:**
 - Container IPs are private (not exposed to clients)
