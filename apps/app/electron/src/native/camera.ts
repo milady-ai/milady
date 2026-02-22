@@ -91,8 +91,8 @@ const VIDEO_BITRATE: Record<string, number> = {
 export class CameraManager {
   private rendererWindow: BrowserWindow | null = null;
 
-  setMainWindow(window: BrowserWindow): void {
-    this.mainWindow = window;
+  setMainWindow(_window: BrowserWindow): void {
+    // Reserved for parity with other native managers.
   }
 
   // ── Renderer lifecycle ──────────────────────────────────────────────────

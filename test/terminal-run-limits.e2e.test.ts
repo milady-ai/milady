@@ -66,6 +66,7 @@ function saveEnv(...keys: string[]): { restore: () => void } {
 }
 
 describe("Terminal run validation and limit guards", () => {
+  const TEST_CLIENT_ID = "terminal-run-limits-e2e";
   let port: number;
   let close: () => Promise<void>;
   let envBackup: { restore: () => void };
@@ -98,6 +99,7 @@ describe("Terminal run validation and limit guards", () => {
   it("rejects commands longer than 4096 characters", async () => {
     const { status, data } = await req(port, "POST", "/api/terminal/run", {
       command: "x".repeat(4097),
+      clientId: TEST_CLIENT_ID,
     });
 
     expect(status).toBe(400);
@@ -112,6 +114,7 @@ describe("Terminal run validation and limit guards", () => {
 
     const first = await req(port, "POST", "/api/terminal/run", {
       command: 'node -e "setTimeout(() => process.exit(0), 1200)"',
+      clientId: TEST_CLIENT_ID,
     });
     expect(first.status).toBe(200);
 
@@ -119,6 +122,7 @@ describe("Terminal run validation and limit guards", () => {
 
     const second = await req(port, "POST", "/api/terminal/run", {
       command: "echo second",
+      clientId: TEST_CLIENT_ID,
     });
     expect(second.status).toBe(429);
     expect(second.data.error).toContain("Too many active terminal runs");

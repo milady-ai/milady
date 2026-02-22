@@ -2,7 +2,7 @@
  * Root App component — routing shell.
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useApp } from "./AppContext";
 import { AdvancedPageView } from "./components/AdvancedPageView";
 import { AppsPageView } from "./components/AppsPageView";
@@ -15,6 +15,7 @@ import { ConversationsSidebar } from "./components/ConversationsSidebar";
 import { CustomActionEditor } from "./components/CustomActionEditor";
 import { CustomActionsPanel } from "./components/CustomActionsPanel";
 import { EmotePicker } from "./components/EmotePicker";
+import { GameViewOverlay } from "./components/GameViewOverlay";
 import { Header } from "./components/Header";
 import { InventoryView } from "./components/InventoryView";
 import { KnowledgeView } from "./components/KnowledgeView";
@@ -75,8 +76,31 @@ export function App() {
     actionNotice,
     agentStatus,
     unreadConversations,
+    activeGameViewerUrl,
+    gameOverlayEnabled,
   } = useApp();
   const contextMenu = useContextMenu();
+
+  // Auto-start LTCG autonomy when game is active.
+  // (retake.tv stream is now auto-started server-side in deferred startup)
+  const autonomyAutoStarted = useRef(false);
+  useEffect(() => {
+    if (activeGameViewerUrl && !autonomyAutoStarted.current) {
+      autonomyAutoStarted.current = true;
+      const timer = setTimeout(async () => {
+        const apiBase = window.__MILADY_API_BASE__ || window.location.origin;
+        try {
+          // Start LTCG PvP autonomy
+          await fetch(`${apiBase}/api/ltcg/autonomy/start`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ mode: "pvp", continuous: true }),
+          });
+        } catch {}
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [activeGameViewerUrl]);
 
   const [customActionsPanelOpen, setCustomActionsPanelOpen] = useState(false);
   const [customActionsEditorOpen, setCustomActionsEditorOpen] = useState(false);
@@ -301,6 +325,10 @@ export function App() {
           </main>
           <TerminalPanel />
         </div>
+      )}
+      {/* Persistent game overlay — stays visible across all tabs */}
+      {activeGameViewerUrl && gameOverlayEnabled && tab !== "apps" && (
+        <GameViewOverlay />
       )}
       <CommandPalette />
       <EmotePicker />

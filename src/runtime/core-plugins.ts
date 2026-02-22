@@ -27,10 +27,13 @@ export const CORE_PLUGINS: readonly string[] = [
  * Not loaded by default — kept separate due to packaging or spec issues.
  */
 export const OPTIONAL_CORE_PLUGINS: readonly string[] = [
+  "@elizaos/plugin-cua", // CUA computer-use agent (cloud sandbox automation)
+  "@elizaos/plugin-obsidian", // Obsidian vault CLI integration
   // "@elizaos/plugin-directives", // directive processing
   // "@elizaos/plugin-commands", // slash command handling
   // "@elizaos/plugin-cli", // CLI interface
   "@elizaos/plugin-code", // code writing and file operations
+  "@elizaos/plugin-repoprompt", // RepoPrompt CLI integration and workflow orchestration
   // "@elizaos/plugin-edge-tts", // text-to-speech
   // "@elizaos/plugin-mcp", // MCP protocol support
   // "@elizaos/plugin-computeruse", // computer use automation

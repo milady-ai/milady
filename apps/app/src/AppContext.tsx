@@ -662,6 +662,7 @@ export interface AppState {
   onboardingTwilioPhoneNumber: string;
   onboardingBlooioApiKey: string;
   onboardingBlooioPhoneNumber: string;
+  onboardingGithubToken: string;
   onboardingSubscriptionTab: "token" | "oauth";
   onboardingSelectedChains: Set<string>;
   onboardingRpcSelections: Record<string, string>;
@@ -703,6 +704,9 @@ export interface AppState {
   activeGameSandbox: string;
   activeGamePostMessageAuth: boolean;
   activeGamePostMessagePayload: GamePostMessageAuthPayload | null;
+
+  /** When true, the game iframe persists as a floating overlay across all tabs. */
+  gameOverlayEnabled: boolean;
 
   // Sub-tabs
   appsSubTab: "browse" | "games";
@@ -1192,6 +1196,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [onboardingBlooioApiKey, setOnboardingBlooioApiKey] = useState("");
   const [onboardingBlooioPhoneNumber, setOnboardingBlooioPhoneNumber] =
     useState("");
+  const [onboardingGithubToken, setOnboardingGithubToken] = useState("");
   const [onboardingSubscriptionTab, setOnboardingSubscriptionTab] = useState<
     "token" | "oauth"
   >("token");
@@ -1257,6 +1262,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     useState(false);
   const [activeGamePostMessagePayload, setActiveGamePostMessagePayload] =
     useState<GamePostMessageAuthPayload | null>(null);
+  const [gameOverlayEnabled, setGameOverlayEnabled] = useState(false);
 
   // --- Admin ---
   const [appsSubTab, setAppsSubTab] = useState<"browse" | "games">("browse");
@@ -3190,6 +3196,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
           onboardingRunMode === "cloud" ? onboardingLargeModel : undefined,
         provider: isLocalMode ? onboardingProvider || undefined : undefined,
         providerApiKey: isLocalMode ? onboardingApiKey || undefined : undefined,
+        primaryModel: isLocalMode
+          ? onboardingPrimaryModel.trim() || undefined
+          : undefined,
         inventoryProviders:
           inventoryProviders.length > 0 ? inventoryProviders : undefined,
         // Connectors
@@ -3201,6 +3210,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         twilioPhoneNumber: onboardingTwilioPhoneNumber.trim() || undefined,
         blooioApiKey: onboardingBlooioApiKey.trim() || undefined,
         blooioPhoneNumber: onboardingBlooioPhoneNumber.trim() || undefined,
+        githubToken: onboardingGithubToken.trim() || undefined,
       });
       setOnboardingComplete(true);
       setTab("chat");
@@ -3230,6 +3240,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     onboardingLargeModel,
     onboardingProvider,
     onboardingApiKey,
+    onboardingPrimaryModel,
     onboardingSelectedChains,
     onboardingRpcSelections,
     onboardingRpcKeys,
@@ -3241,6 +3252,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     onboardingTwilioPhoneNumber,
     onboardingBlooioApiKey,
     onboardingBlooioPhoneNumber,
+    onboardingGithubToken,
     setTab,
   ]);
 
@@ -3710,6 +3722,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         onboardingTwilioPhoneNumber: setOnboardingTwilioPhoneNumber,
         onboardingBlooioApiKey: setOnboardingBlooioApiKey,
         onboardingBlooioPhoneNumber: setOnboardingBlooioPhoneNumber,
+        onboardingGithubToken: setOnboardingGithubToken,
         onboardingSubscriptionTab: setOnboardingSubscriptionTab,
         onboardingRpcKeys: setOnboardingRpcKeys,
         onboardingAvatar: setOnboardingAvatar,
@@ -3734,6 +3747,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         activeGameSandbox: setActiveGameSandbox,
         activeGamePostMessageAuth: setActiveGamePostMessageAuth,
         activeGamePostMessagePayload: setActiveGamePostMessagePayload,
+        gameOverlayEnabled: setGameOverlayEnabled,
         storePlugins: setStorePlugins,
         storeLoading: setStoreLoading,
         storeInstalling: setStoreInstalling,
@@ -3894,6 +3908,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
 
       setOnboardingLoading(false);
+
+      // Auto-launch LTCG game viewer (autonomous mode)
+      // LTCG is a connector loaded via env vars, not a registry plugin,
+      // so we directly set the game iframe state.
+      if (agentReady) {
+        setActiveGameApp("@lunchtable/plugin-ltcg");
+        setActiveGameDisplayName("LunchTable TCG");
+        setActiveGameViewerUrl("https://lunchtable.cards");
+        setActiveGameSandbox(
+          "allow-scripts allow-same-origin allow-popups allow-forms",
+        );
+        setActiveGamePostMessageAuth(false);
+        setActiveGamePostMessagePayload(null);
+        setTabRaw("apps" as Tab);
+        setAppsSubTab("games");
+      }
 
       // Load conversations — if none exist, create one and request a greeting
       let greetConvId: string | null = null;
@@ -4399,6 +4429,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     onboardingTwilioPhoneNumber,
     onboardingBlooioApiKey,
     onboardingBlooioPhoneNumber,
+    onboardingGithubToken,
     onboardingSubscriptionTab,
     onboardingSelectedChains,
     onboardingRpcSelections,
@@ -4427,6 +4458,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     activeGameViewerUrl,
     activeGameSandbox,
     activeGamePostMessageAuth,
+    gameOverlayEnabled,
     appsSubTab,
     agentSubTab,
     pluginsSubTab,

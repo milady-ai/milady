@@ -61,6 +61,10 @@ interface KnowledgeServiceLike {
 }
 
 const FRAGMENT_COUNT_BATCH_SIZE = 500;
+const MAX_URL_IMPORT_BYTES = 10 * 1024 * 1024; // 10 MB
+const MAX_YOUTUBE_WATCH_PAGE_BYTES = 2 * 1024 * 1024; // 2 MB
+const MAX_YOUTUBE_TRANSCRIPT_BYTES = 10 * 1024 * 1024; // 10 MB
+const URL_FETCH_TIMEOUT_MS = 15_000;
 const BLOCKED_HOST_LITERALS = new Set([
   "localhost",
   "metadata.google.internal",
@@ -309,7 +313,7 @@ function extractYouTubeVideoId(url: string): string | null {
 async function fetchYouTubeTranscript(videoId: string): Promise<string | null> {
   // Fetch the video page to get transcript data
   const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
-  const response = await fetch(watchUrl, {
+  const response = await fetchWithTimeout(watchUrl, {
     headers: {
       "User-Agent":
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -321,7 +325,9 @@ async function fetchYouTubeTranscript(videoId: string): Promise<string | null> {
     return null;
   }
 
-  const html = await response.text();
+  const html = new TextDecoder().decode(
+    await readResponseBodyWithLimit(response, MAX_YOUTUBE_WATCH_PAGE_BYTES),
+  );
 
   // Extract the captions track URL from the page
   const captionsMatch = html.match(
@@ -349,12 +355,17 @@ async function fetchYouTubeTranscript(videoId: string): Promise<string | null> {
     .replace(/\\\//g, "/");
 
   // Fetch the transcript
-  const transcriptResponse = await fetch(captionUrl);
+  const transcriptResponse = await fetchWithTimeout(captionUrl, {});
   if (!transcriptResponse.ok) {
     return null;
   }
 
-  const transcriptXml = await transcriptResponse.text();
+  const transcriptXml = new TextDecoder().decode(
+    await readResponseBodyWithLimit(
+      transcriptResponse,
+      MAX_YOUTUBE_TRANSCRIPT_BYTES,
+    ),
+  );
 
   // Parse the XML transcript
   const textMatches = transcriptXml.matchAll(/<text[^>]*>([^<]*)<\/text>/g);
@@ -383,6 +394,113 @@ async function fetchYouTubeTranscript(videoId: string): Promise<string | null> {
   return segments.join(" ");
 }
 
+function readContentLengthHeader(response: Response): number | null {
+  const raw = response.headers.get("content-length");
+  if (!raw) return null;
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isFinite(parsed) || parsed < 0) return null;
+  return parsed;
+}
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof DOMException
+    ? error.name === "AbortError"
+    : error instanceof Error && error.name === "AbortError";
+}
+
+async function fetchWithTimeout(
+  input: RequestInfo | URL,
+  init: RequestInit,
+  timeoutMs = URL_FETCH_TIMEOUT_MS,
+): Promise<Response> {
+  const controller = new AbortController();
+  const upstreamSignal = init.signal;
+  const onAbort = () => controller.abort();
+
+  if (upstreamSignal) {
+    if (upstreamSignal.aborted) {
+      controller.abort();
+    } else {
+      upstreamSignal.addEventListener("abort", onAbort, { once: true });
+    }
+  }
+
+  const timeoutHandle = setTimeout(() => {
+    controller.abort();
+  }, timeoutMs);
+
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } catch (error) {
+    if (isAbortError(error)) {
+      throw new Error(`URL fetch timed out after ${timeoutMs}ms`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutHandle);
+    if (upstreamSignal) {
+      upstreamSignal.removeEventListener("abort", onAbort);
+    }
+  }
+}
+
+async function readResponseBodyWithLimit(
+  response: Response,
+  maxBytes: number,
+): Promise<Uint8Array> {
+  const declaredLength = readContentLengthHeader(response);
+  if (declaredLength !== null && declaredLength > maxBytes) {
+    throw new Error(`URL content exceeds maximum size of ${maxBytes} bytes`);
+  }
+
+  if (!response.body) {
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    if (bytes.byteLength > maxBytes) {
+      throw new Error(`URL content exceeds maximum size of ${maxBytes} bytes`);
+    }
+    return bytes;
+  }
+
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+
+      totalBytes += value.byteLength;
+      if (totalBytes > maxBytes) {
+        throw new Error(
+          `URL content exceeds maximum size of ${maxBytes} bytes`,
+        );
+      }
+
+      chunks.push(value);
+    }
+  } catch (err) {
+    try {
+      await reader.cancel(err);
+    } catch {
+      // Best effort cleanup; keep the original error.
+    }
+    throw err;
+  } finally {
+    reader.releaseLock();
+  }
+
+  const output = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    output.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
+  return output;
+}
+
 async function fetchUrlContent(
   url: string,
 ): Promise<{ content: string; contentType: string; filename: string }> {
@@ -408,7 +526,7 @@ async function fetchUrlContent(
   }
 
   // Regular URL fetch
-  const response = await fetch(url, {
+  const response = await fetchWithTimeout(url, {
     redirect: "manual",
     headers: {
       "User-Agent":
@@ -433,8 +551,12 @@ async function fetchUrlContent(
   const encodedFilename = pathSegments[pathSegments.length - 1] || "document";
   const filename = decodeURIComponent(encodedFilename);
 
+  const buffer = await readResponseBodyWithLimit(
+    response,
+    MAX_URL_IMPORT_BYTES,
+  );
+
   // For binary content, return as base64
-  const buffer = await response.arrayBuffer();
   const isBinary =
     contentType.startsWith("application/pdf") ||
     contentType.startsWith("application/msword") ||
