@@ -26,7 +26,7 @@ import { VoiceConfigView } from "./VoiceConfigView";
 
 /* ── Modal shell ─────────────────────────────────────────────────────── */
 
-function Modal({
+export function Modal({
   open,
   onClose,
   title,
@@ -45,7 +45,7 @@ function Modal({
         if (e.target === e.currentTarget) onClose();
       }}
       onKeyDown={(e) => {
-        if (e.key === "Escape" || e.key === "Enter" || e.key === " ") {
+        if (e.key === "Escape") {
           e.preventDefault();
           onClose();
         }
