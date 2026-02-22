@@ -105,7 +105,7 @@ When auto-enable adds short IDs (example: `openai`) to `plugins.allow`, runtime 
 Observed:
 
 ```bash
-node --import tsx -e 'import { applyPluginAutoEnable } from "./src/config/plugin-auto-enable.ts"; import { collectPluginNames } from "./src/runtime/eliza.ts"; const { config } = applyPluginAutoEnable({ config: { auth: { profiles: { main: { provider: "openai", mode: "api_key" }}}}, env: {} }); const names = collectPluginNames(config as any); console.log(config.plugins?.allow, names.has("openai"), names.has("@elizaos/plugin-openai"));'
+node --import tsx -e 'import { applyPluginAutoEnable } from "./src/config/plugin-auto-enable.ts"; import type { MiladyConfig } from "./src/config/types.milady.ts"; import { collectPluginNames } from "./src/runtime/eliza.ts"; const { config } = applyPluginAutoEnable({ config: { auth: { profiles: { main: { provider: "openai", mode: "api_key" }}}}, env: {} }); const names = collectPluginNames(config as MiladyConfig); console.log(config.plugins?.allow, names.has("openai"), names.has("@elizaos/plugin-openai"));'
 # -> [ 'openai' ] true false
 ```
 
