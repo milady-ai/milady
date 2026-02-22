@@ -415,6 +415,7 @@ export const CHANNEL_PLUGIN_MAP: Readonly<Record<string, string>> = {
   telegram: "@elizaos/plugin-telegram",
   slack: "@elizaos/plugin-slack",
   twitter: "@elizaos/plugin-twitter",
+  // Internal connector built from src/plugins/whatsapp (not an npm package).
   whatsapp: "@milady/plugin-whatsapp",
   signal: "@elizaos/plugin-signal",
   imessage: "@elizaos/plugin-imessage",
