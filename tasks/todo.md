@@ -44,9 +44,9 @@ Implement obvious, minimal UI behavior improvements in `apps/app` that improve i
 - [x] Add/extend tests for Fix 2
 - [x] Run tests for Fix 2
 - [x] Review full git diff and diffstat
-- [ ] Commit on fresh branch
-- [ ] Push branch to `origin`
-- [ ] Open PR into `develop`
+- [x] Commit on fresh branch
+- [x] Push branch to `origin`
+- [x] Open PR into `develop`
 
 ## Verification Commands
 - `bun run --cwd apps/app test`
@@ -63,3 +63,6 @@ Implement obvious, minimal UI behavior improvements in `apps/app` that improve i
   - Result: 2 files passed, 6 tests passed.
 - Diff review:
   - Confirmed changes are scoped to command palette and save-command modal behavior plus new targeted tests.
+- Push/PR:
+  - Direct push to `origin` was blocked by repository permission (HTTP 403, read-only access).
+  - Pushed branch to configured writable remote `fork` and opened PR into upstream `develop`.
