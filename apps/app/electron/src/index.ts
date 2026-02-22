@@ -10,7 +10,6 @@ import { app, MenuItem } from "electron";
 import electronIsDev from "electron-is-dev";
 import unhandled from "electron-unhandled";
 import { autoUpdater } from "electron-updater";
-import { createApiBaseInjector, resolveExternalApiBase } from "./api-base";
 import {
   disposeNativeModules,
   getAgentManager,
@@ -130,6 +129,18 @@ function revealMainWindow(): void {
   mainWindow.focus();
 }
 
+function normalizeApiBase(raw: string | undefined): string | null {
+  if (!raw) return null;
+  try {
+    const parsed = new URL(raw);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:")
+      return null;
+    return parsed.origin;
+  } catch {
+    return null;
+  }
+}
+
 app.on("open-file", (event, filePath) => {
   event.preventDefault();
   dispatchShareToRenderer({
@@ -192,11 +203,12 @@ if (electronIsDev) {
 
   // Start the embedded agent runtime and pass the API port to the renderer.
   // The UI's api-client reads window.__MILADY_API_BASE__ to know where to connect.
-  const externalApiBaseResolution = resolveExternalApiBase(process.env);
-  const externalApiBase = externalApiBaseResolution.base;
-  if (externalApiBaseResolution.invalidSources.length > 0) {
+  const externalApiBase = normalizeApiBase(
+    process.env.MILADY_ELECTRON_TEST_API_BASE,
+  );
+  if (!externalApiBase && process.env.MILADY_ELECTRON_TEST_API_BASE) {
     console.warn(
-      `[Milady] Ignoring invalid API base URL from ${externalApiBaseResolution.invalidSources.join(", ")}`,
+      "[Milady] Ignoring invalid MILADY_ELECTRON_TEST_API_BASE value",
     );
   }
   const skipEmbeddedAgent =
@@ -204,19 +216,26 @@ if (electronIsDev) {
     Boolean(externalApiBase);
   const agentManager = getAgentManager();
   agentManager.setMainWindow(mainWindow);
-  const apiBaseInjector = createApiBaseInjector(
-    {
-      isDestroyed: () => mainWindow.isDestroyed(),
-      executeJavaScript: (script) =>
-        mainWindow.webContents.executeJavaScript(script),
-    },
-    {
-      getApiToken: () => process.env.MILADY_API_TOKEN,
-      onInjected: flushPendingSharePayloads,
-    },
-  );
+  let injectedApiBase: string | null = null;
   const injectApiBase = (base: string | null): void => {
-    void apiBaseInjector.inject(base);
+    if (!base || base === injectedApiBase || mainWindow.isDestroyed()) return;
+    injectedApiBase = base;
+    const apiToken = process.env.MILADY_API_TOKEN;
+    const tokenSnippet = apiToken
+      ? `window.__MILADY_API_TOKEN__ = ${JSON.stringify(apiToken)};`
+      : "";
+    const baseSnippet = `window.__MILADY_API_BASE__ = ${JSON.stringify(base)};`;
+    const inject = `${baseSnippet}${tokenSnippet}`;
+
+    // Inject now if possible (no-op if the page isn't ready yet).
+    void mainWindow.webContents
+      .executeJavaScript(inject)
+      .then(() => {
+        flushPendingSharePayloads();
+      })
+      .catch(() => {
+        /* did-finish-load hook below handles first successful injection */
+      });
   };
   const injectApiEndpoint = (port: number | null): void => {
     if (!port) return;
@@ -234,9 +253,8 @@ if (electronIsDev) {
   });
 
   if (externalApiBase) {
-    const source = externalApiBaseResolution.source ?? "unknown";
     console.info(
-      `[Milady] Using external API base for renderer (${source}): ${externalApiBase}`,
+      `[Milady] Using external API base for renderer: ${externalApiBase}`,
     );
     injectApiBase(externalApiBase);
   } else if (!skipEmbeddedAgent) {
