@@ -457,6 +457,119 @@ export async function handleCloudRoute(
     return true;
   }
 
+  // POST /api/cloud/elizacloud/agents
+  if (method === "POST" && pathname === "/api/cloud/elizacloud/agents") {
+    const body = await readJsonBody<{
+      agentName?: string;
+      agentConfig?: Record<string, unknown>;
+    }>(req, res);
+    if (!body) return true;
+
+    const elizaAuth = req.headers["x-eliza-auth"];
+    if (!elizaAuth || typeof elizaAuth !== "string") {
+      err(res, "Missing elizacloud API key", 401);
+      return true;
+    }
+
+    const baseUrl = state.config.cloud?.baseUrl ?? "https://www.elizacloud.ai";
+    const urlError = await validateCloudBaseUrl(baseUrl);
+    if (urlError) {
+      err(res, urlError);
+      return true;
+    }
+
+    try {
+      const createRes = await fetchWithTimeout(
+        `${baseUrl}/api/v1/agents`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${elizaAuth}`,
+          },
+          body: JSON.stringify(body),
+        },
+        30_000,
+      );
+
+      if (!createRes.ok) {
+        const errData = await createRes.json().catch(() => ({}));
+        err(
+          res,
+          (errData as { message?: string }).message ||
+            `Agent creation failed (${createRes.status})`,
+          createRes.status,
+        );
+        return true;
+      }
+
+      const agentData = await createRes.json();
+      json(res, agentData);
+    } catch (fetchErr) {
+      if (isTimeoutError(fetchErr)) {
+        err(res, "Agent creation request timed out", 504);
+        return true;
+      }
+      err(res, "Failed to reach Eliza Cloud", 502);
+      return true;
+    }
+    return true;
+  }
+
+  // GET /api/cloud/elizacloud/agents/:agentId
+  if (method === "GET" && pathname.startsWith("/api/cloud/elizacloud/agents/")) {
+    const agentId = pathname.split("/").pop();
+    if (!agentId) {
+      err(res, "Agent ID is required");
+      return true;
+    }
+
+    const elizaAuth = req.headers["x-eliza-auth"];
+    if (!elizaAuth || typeof elizaAuth !== "string") {
+      err(res, "Missing elizacloud API key", 401);
+      return true;
+    }
+
+    const baseUrl = state.config.cloud?.baseUrl ?? "https://www.elizacloud.ai";
+    const urlError = await validateCloudBaseUrl(baseUrl);
+    if (urlError) {
+      err(res, urlError);
+      return true;
+    }
+
+    try {
+      const statusRes = await fetchWithTimeout(
+        `${baseUrl}/api/v1/agents/${encodeURIComponent(agentId)}`,
+        {
+          headers: { Authorization: `Bearer ${elizaAuth}` },
+        },
+        10_000,
+      );
+
+      if (!statusRes.ok) {
+        const errData = await statusRes.json().catch(() => ({}));
+        err(
+          res,
+          (errData as { message?: string }).message ||
+            `Agent status check failed (${statusRes.status})`,
+          statusRes.status,
+        );
+        return true;
+      }
+
+      const agentData = await statusRes.json();
+      json(res, agentData);
+    } catch (fetchErr) {
+      if (isTimeoutError(fetchErr)) {
+        err(res, "Agent status request timed out", 504);
+        return true;
+      }
+      err(res, "Failed to reach Eliza Cloud", 502);
+      return true;
+    }
+    return true;
+  }
+
   // POST /api/cloud/discord/connect
   if (method === "POST" && pathname === "/api/cloud/discord/connect") {
     const body = await readJsonBody<{

@@ -68,29 +68,26 @@ export function CloudLanding() {
 
       setStep("connecting");
 
-      // Create agent container
-      const createResp = await fetch(
-        "https://www.elizacloud.ai/api/v1/agents",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${authData.apiKey}`,
-          },
-          body: JSON.stringify({
-            agentName: "milady",
-            agentConfig: {
-              theme: "milady",
-              runMode: "cloud",
-            },
-          }),
+      // Create agent container (proxied through backend)
+      const createResp = await fetch("/api/cloud/elizacloud/agents", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Eliza-Auth": authData.apiKey,
         },
-      );
+        body: JSON.stringify({
+          agentName: "milady",
+          agentConfig: {
+            theme: "milady",
+            runMode: "cloud",
+          },
+        }),
+      });
 
       if (!createResp.ok) {
         const errData = await createResp.json().catch(() => ({}));
         throw new Error(
-          errData.message || `container creation failed (${createResp.status})`,
+          errData.error || `container creation failed (${createResp.status})`,
         );
       }
 
@@ -105,9 +102,9 @@ export function CloudLanding() {
         await new Promise((resolve) => setTimeout(resolve, 3000));
 
         const agentResp = await fetch(
-          `https://www.elizacloud.ai/api/v1/agents/${agent.agentId}`,
+          `/api/cloud/elizacloud/agents/${agent.agentId}`,
           {
-            headers: { Authorization: `Bearer ${authData.apiKey}` },
+            headers: { "X-Eliza-Auth": authData.apiKey },
           },
         );
 
