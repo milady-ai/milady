@@ -1,9 +1,10 @@
 /**
  * CloudLanding - Public cloud-only onboarding for milady.ai
- * Flow: ElizaCloud auth → get Headscale IP → connect to container → Discord setup
+ * Flow: Device auth (automatic) → get Headscale IP → connect to container → Discord setup
  */
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
+import { getDeviceFingerprint } from "../utils/device-fingerprint";
 
 const DISCORD_CLIENT_ID =
   import.meta.env.VITE_DISCORD_CLIENT_ID || "YOUR_DISCORD_CLIENT_ID";
@@ -19,21 +20,19 @@ interface ContainerInfo {
   agentName: string;
 }
 
+interface DeviceAuthResponse {
+  userId: string;
+  organizationId: string;
+  apiKey: string;
+  credits: number;
+}
+
 export function CloudLanding() {
   const [step, setStep] = useState<CloudStep>("landing");
   const [error, setError] = useState<string>("");
   const [retryable, setRetryable] = useState<boolean>(false);
   const [container, setContainer] = useState<ContainerInfo | null>(null);
-  const popupRef = useRef<Window | null>(null);
-
-  // Close popup on unmount
-  useEffect(() => {
-    return () => {
-      if (popupRef.current && !popupRef.current.closed) {
-        popupRef.current.close();
-      }
-    };
-  }, []);
+  const [elizaAuth, setElizaAuth] = useState<DeviceAuthResponse | null>(null);
 
   const handleStart = async () => {
     setStep("auth");
@@ -41,194 +40,103 @@ export function CloudLanding() {
     setRetryable(false);
 
     try {
-      // Start ElizaCloud OAuth flow
-      const loginResp = await fetch(
-        "https://www.elizacloud.ai/api/auth/cli-session",
+      // Generate device fingerprint
+      const deviceId = await getDeviceFingerprint();
+
+      // Automatic device-based authentication
+      const authResp = await fetch("/api/cloud/elizacloud/device-auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceId }),
+      });
+
+      if (!authResp.ok) {
+        const errData = await authResp.json().catch(() => ({}));
+        throw new Error(
+          errData.error || `device auth failed (${authResp.status})`,
+        );
+      }
+
+      const authData: DeviceAuthResponse = await authResp.json();
+      setElizaAuth(authData);
+
+      // Store credentials in localStorage
+      localStorage.setItem("elizacloud_user_id", authData.userId);
+      localStorage.setItem("elizacloud_api_key", authData.apiKey);
+      localStorage.setItem("elizacloud_org_id", authData.organizationId);
+      localStorage.setItem("elizacloud_credits", authData.credits.toString());
+
+      setStep("connecting");
+
+      // Create agent container
+      const createResp = await fetch(
+        "https://www.elizacloud.ai/api/v1/agents",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authData.apiKey}`,
+          },
           body: JSON.stringify({
-            sessionId: crypto.randomUUID(),
+            agentName: "milady",
+            agentConfig: {
+              theme: "milady",
+              runMode: "cloud",
+            },
           }),
         },
       );
 
-      if (!loginResp.ok) {
+      if (!createResp.ok) {
+        const errData = await createResp.json().catch(() => ({}));
         throw new Error(
-          `elizacloud auth unavailable (${loginResp.status})`,
+          errData.message || `container creation failed (${createResp.status})`,
         );
       }
 
-      const { sessionId, browserUrl } = await loginResp.json();
+      const agent = await createResp.json();
 
-      if (!browserUrl) {
-        throw new Error("invalid auth response — missing browserUrl");
+      // Wait for Headscale IP
+      let headscaleIp: string | null = null;
+      let ipRetries = 0;
+      const MAX_IP_RETRIES = 10;
+
+      while (!headscaleIp && ipRetries < MAX_IP_RETRIES) {
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+
+        const agentResp = await fetch(
+          `https://www.elizacloud.ai/api/v1/agents/${agent.agentId}`,
+          {
+            headers: { Authorization: `Bearer ${authData.apiKey}` },
+          },
+        );
+
+        if (agentResp.ok) {
+          const agentData = await agentResp.json();
+          headscaleIp = agentData.networking?.headscaleIp;
+        }
+
+        ipRetries++;
       }
 
-      // Open OAuth popup DIRECTLY to the auth URL (not about:blank!)
-      const popup = window.open(
-        browserUrl,
-        "ElizaCloudAuth",
-        "width=600,height=700,popup=yes,noopener,noreferrer"
-      );
-      
-      popupRef.current = popup;
-      
-      if (!popup) {
+      if (!headscaleIp) {
         throw new Error(
-          "popup blocked — allow popups and retry",
+          "container ready but network pending — refresh in 30s",
         );
       }
 
-      // Poll for completion
-      setStep("connecting");
-      let attempts = 0;
-      const MAX_POLL_ATTEMPTS = 120;
+      setContainer({
+        agentId: agent.agentId,
+        headscaleIp,
+        agentName: agent.agentName || "milady",
+      });
 
-      const pollInterval = setInterval(async () => {
-        attempts++;
+      localStorage.setItem("container_ip", headscaleIp);
+      localStorage.setItem("agent_id", agent.agentId);
 
-        // Check if popup was closed manually
-        if (popupRef.current?.closed) {
-          clearInterval(pollInterval);
-          setError("auth cancelled");
-          setRetryable(true);
-          setStep("landing");
-          return;
-        }
-
-        if (attempts > MAX_POLL_ATTEMPTS) {
-          clearInterval(pollInterval);
-          if (popupRef.current && !popupRef.current.closed) {
-            popupRef.current.close();
-          }
-          setError("auth timeout — complete sign-in within 2 minutes");
-          setRetryable(true);
-          setStep("landing");
-          return;
-        }
-
-        try {
-          const pollResp = await fetch(
-            `https://www.elizacloud.ai/api/auth/cli-session/${encodeURIComponent(sessionId)}`,
-          );
-
-          if (!pollResp.ok) {
-            if (pollResp.status === 404) {
-              clearInterval(pollInterval);
-              if (popupRef.current && !popupRef.current.closed) {
-                popupRef.current.close();
-              }
-              setError("session expired");
-              setRetryable(true);
-              setStep("landing");
-            }
-            return;
-          }
-
-          const poll = await pollResp.json();
-
-          if (poll.status === "authenticated" && poll.apiKey) {
-            clearInterval(pollInterval);
-            
-            // Close the popup
-            if (popupRef.current && !popupRef.current.closed) {
-              popupRef.current.close();
-            }
-
-            // Create agent container
-            const createResp = await fetch(
-              "https://www.elizacloud.ai/api/v1/agents",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${poll.apiKey}`,
-                },
-                body: JSON.stringify({
-                  agentName: "milady",
-                  agentConfig: {
-                    theme: "milady",
-                    runMode: "cloud",
-                  },
-                }),
-              },
-            );
-
-            if (!createResp.ok) {
-              const errData = await createResp.json().catch(() => ({}));
-              throw new Error(
-                errData.message || `container creation failed (${createResp.status})`,
-              );
-            }
-
-            const agent = await createResp.json();
-
-            // Wait for Headscale IP
-            let headscaleIp: string | null = null;
-            let ipRetries = 0;
-            const MAX_IP_RETRIES = 10;
-
-            while (!headscaleIp && ipRetries < MAX_IP_RETRIES) {
-              await new Promise((resolve) => setTimeout(resolve, 3000));
-
-              const agentResp = await fetch(
-                `https://www.elizacloud.ai/api/v1/agents/${agent.agentId}`,
-                {
-                  headers: { Authorization: `Bearer ${poll.apiKey}` },
-                },
-              );
-
-              if (agentResp.ok) {
-                const agentData = await agentResp.json();
-                headscaleIp = agentData.networking?.headscaleIp;
-              }
-
-              ipRetries++;
-            }
-
-            if (!headscaleIp) {
-              throw new Error(
-                "container ready but network pending — refresh in 30s",
-              );
-            }
-
-            setContainer({
-              agentId: agent.agentId,
-              headscaleIp,
-              agentName: agent.agentName || "milady",
-            });
-
-            sessionStorage.setItem("elizacloud_api_key", poll.apiKey);
-            sessionStorage.setItem("container_ip", headscaleIp);
-
-            setStep("discord");
-          } else if (poll.status === "expired") {
-            clearInterval(pollInterval);
-            if (popupRef.current && !popupRef.current.closed) {
-              popupRef.current.close();
-            }
-            setError("session expired");
-            setRetryable(true);
-            setStep("landing");
-          } else if (poll.status === "error") {
-            clearInterval(pollInterval);
-            if (popupRef.current && !popupRef.current.closed) {
-              popupRef.current.close();
-            }
-            setError(poll.error || "auth failed");
-            setRetryable(true);
-            setStep("landing");
-          }
-        } catch (pollErr) {
-          console.error("poll error:", pollErr);
-        }
-      }, 1000);
+      setStep("discord");
     } catch (err) {
       const message = err instanceof Error ? err.message : "unknown error";
-      if (popupRef.current && !popupRef.current.closed) {
-        popupRef.current.close();
-      }
       setError(message);
       setRetryable(true);
       setStep("landing");
@@ -274,8 +182,12 @@ export function CloudLanding() {
                 <div className="text-muted text-[13px]">ur agent, live in 30 seconds</div>
               </div>
               <div>
+                <div className="text-txt-strong font-bold mb-1">automatic auth</div>
+                <div className="text-muted text-[13px]">no sign-up, just click deploy</div>
+              </div>
+              <div>
                 <div className="text-txt-strong font-bold mb-1">discord ready</div>
-                <div className="text-muted text-[13px]">one-click oauth, super easy</div>
+                <div className="text-muted text-[13px]">one-click oauth after deploy</div>
               </div>
               <div>
                 <div className="text-txt-strong font-bold mb-1">private & secure</div>
@@ -322,9 +234,9 @@ export function CloudLanding() {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 bg-[var(--bg)]">
         <div className="max-w-[480px] w-full text-center">
-          <div className="text-txt-strong text-sm mb-3">authenticating...</div>
+          <div className="text-txt-strong text-sm mb-3">connecting your device...</div>
           <div className="text-muted text-[13px]">
-            check the popup window to continue
+            automatic authentication via device fingerprint
           </div>
         </div>
       </div>

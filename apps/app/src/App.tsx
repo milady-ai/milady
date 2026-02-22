@@ -24,6 +24,7 @@ import { InventoryView } from "./components/InventoryView.js";
 import { KnowledgeView } from "./components/KnowledgeView.js";
 import { SettingsView } from "./components/SettingsView.js";
 import { LoadingScreen } from "./components/LoadingScreen.js";
+import { DiscordCallback } from "./components/DiscordCallback.js";
 import { useContextMenu } from "./hooks/useContextMenu.js";
 import { TerminalPanel } from "./components/TerminalPanel.js";
 
@@ -63,6 +64,11 @@ export function App() {
     actionNotice,
   } = useApp();
   const contextMenu = useContextMenu();
+
+  // Handle Discord OAuth callback route
+  if (window.location.pathname === "/discord-callback") {
+    return <DiscordCallback />;
+  }
 
   const [customActionsPanelOpen, setCustomActionsPanelOpen] = useState(false);
   const [customActionsEditorOpen, setCustomActionsEditorOpen] = useState(false);

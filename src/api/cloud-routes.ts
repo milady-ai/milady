@@ -399,6 +399,132 @@ export async function handleCloudRoute(
     return true;
   }
 
+  // POST /api/cloud/elizacloud/device-auth
+  if (method === "POST" && pathname === "/api/cloud/elizacloud/device-auth") {
+    const body = await readJsonBody<{ deviceId?: string }>(req, res);
+    if (!body) return true;
+
+    if (!body.deviceId?.trim()) {
+      err(res, "deviceId is required");
+      return true;
+    }
+
+    const baseUrl = state.config.cloud?.baseUrl ?? "https://www.elizacloud.ai";
+    const urlError = await validateCloudBaseUrl(baseUrl);
+    if (urlError) {
+      err(res, urlError);
+      return true;
+    }
+
+    try {
+      const authRes = await fetchWithTimeout(
+        `${baseUrl}/api/v1/device-auth`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ deviceId: body.deviceId }),
+        },
+        10_000,
+      );
+
+      if (!authRes.ok) {
+        const errData = await authRes.json().catch(() => ({}));
+        err(
+          res,
+          (errData as { error?: string }).error ||
+            `Device auth failed (${authRes.status})`,
+          authRes.status,
+        );
+        return true;
+      }
+
+      const authData = (await authRes.json()) as {
+        userId: string;
+        organizationId: string;
+        apiKey: string;
+        credits: number;
+      };
+
+      json(res, authData);
+    } catch (fetchErr) {
+      if (isTimeoutError(fetchErr)) {
+        err(res, "Device auth request timed out", 504);
+        return true;
+      }
+      err(res, "Failed to reach Eliza Cloud for device auth", 502);
+      return true;
+    }
+    return true;
+  }
+
+  // POST /api/cloud/discord/connect
+  if (method === "POST" && pathname === "/api/cloud/discord/connect") {
+    const body = await readJsonBody<{
+      code?: string;
+      containerIp?: string;
+      agentId?: string;
+      redirectUri?: string;
+    }>(req, res);
+    if (!body) return true;
+
+    if (!body.code?.trim()) {
+      err(res, "Discord OAuth code is required");
+      return true;
+    }
+    if (!body.containerIp?.trim()) {
+      err(res, "Container IP is required");
+      return true;
+    }
+    if (!body.redirectUri?.trim()) {
+      err(res, "Redirect URI is required");
+      return true;
+    }
+
+    try {
+      // Proxy Discord OAuth to the cloud container
+      const containerUrl = `http://${body.containerIp}:2187/api/discord/connect`;
+      
+      const connectRes = await fetchWithTimeout(
+        containerUrl,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            code: body.code,
+            redirect_uri: body.redirectUri,
+          }),
+        },
+        30_000, // 30s timeout for Discord verification
+      );
+
+      if (!connectRes.ok) {
+        const errData = await connectRes.json().catch(() => ({}));
+        err(
+          res,
+          (errData as { error?: string }).error ||
+            `Discord connection failed (${connectRes.status})`,
+          connectRes.status,
+        );
+        return true;
+      }
+
+      const connectData = await connectRes.json();
+      json(res, connectData);
+    } catch (fetchErr) {
+      if (isTimeoutError(fetchErr)) {
+        err(res, "Discord connection request timed out", 504);
+        return true;
+      }
+      const message =
+        fetchErr instanceof Error
+          ? fetchErr.message
+          : "Failed to connect to container";
+      err(res, `Container connection error: ${message}`, 502);
+      return true;
+    }
+    return true;
+  }
+
   // NOTE: GET /api/cloud/status is handled in server.ts (uses runtime
   // CLOUD_AUTH service to return { connected, userId, topUpUrl, ... }).
   // Do NOT add a handler here — it would shadow the correct one.
