@@ -81,12 +81,34 @@ function json(res: http.ServerResponse, data: unknown, status = 200): void {
   res.end(JSON.stringify(data));
 }
 
-function err(res: http.ServerResponse, message: string, status = 400): void {
-  json(res, { error: message }, status);
+/**
+ * Standardized error response with logging.
+ * Logs the error and sends a consistent JSON error response.
+ */
+function err(
+  res: http.ServerResponse,
+  message: string,
+  status = 400,
+  context?: Record<string, unknown>,
+): void {
+  const errorResponse = { error: message };
+  logger.error("[cloud-routes]", {
+    error: message,
+    status,
+    ...context,
+  });
+  json(res, errorResponse, status);
 }
 
 const CLOUD_LOGIN_CREATE_TIMEOUT_MS = 10_000;
 const CLOUD_LOGIN_POLL_TIMEOUT_MS = 10_000;
+
+/**
+ * Cloud container port - configurable via environment variable.
+ * Default: 2187 (standard Eliza Cloud container port)
+ */
+const CLOUD_CONTAINER_PORT =
+  process.env.CLOUD_CONTAINER_PORT ?? "2187";
 
 function isTimeoutError(error: unknown): boolean {
   if (!(error instanceof Error)) return false;
@@ -121,10 +143,18 @@ export async function handleCloudRoute(
     const baseUrl = state.config.cloud?.baseUrl ?? "https://www.elizacloud.ai";
     const urlError = await validateCloudBaseUrl(baseUrl);
     if (urlError) {
-      err(res, urlError);
+      err(res, urlError, 400, {
+        endpoint: "/api/cloud/login",
+        baseUrl,
+      });
       return true;
     }
     const sessionId = crypto.randomUUID();
+
+    logger.info("[cloud-login] Initiating cloud login session", {
+      sessionId,
+      baseUrl,
+    });
 
     let createRes: Response;
     try {
@@ -139,17 +169,33 @@ export async function handleCloudRoute(
       );
     } catch (fetchErr) {
       if (isTimeoutError(fetchErr)) {
-        err(res, "Eliza Cloud login request timed out", 504);
+        err(res, "Eliza Cloud login request timed out", 504, {
+          endpoint: "/api/cloud/login",
+          sessionId,
+          timeout: CLOUD_LOGIN_CREATE_TIMEOUT_MS,
+        });
         return true;
       }
-      err(res, "Failed to reach Eliza Cloud", 502);
+      const message =
+        fetchErr instanceof Error ? fetchErr.message : "Unknown error";
+      err(res, "Failed to reach Eliza Cloud", 502, {
+        endpoint: "/api/cloud/login",
+        sessionId,
+        error: message,
+      });
       return true;
     }
 
     if (!createRes.ok) {
-      err(res, "Failed to create auth session with Eliza Cloud", 502);
+      err(res, "Failed to create auth session with Eliza Cloud", 502, {
+        endpoint: "/api/cloud/login",
+        sessionId,
+        cloudStatus: createRes.status,
+      });
       return true;
     }
+
+    logger.info("[cloud-login] Login session created", { sessionId });
 
     json(res, {
       ok: true,
@@ -405,16 +451,26 @@ export async function handleCloudRoute(
     if (!body) return true;
 
     if (!body.deviceId?.trim()) {
-      err(res, "deviceId is required");
+      err(res, "deviceId is required", 400, {
+        endpoint: "/api/cloud/elizacloud/device-auth",
+      });
       return true;
     }
 
     const baseUrl = state.config.cloud?.baseUrl ?? "https://www.elizacloud.ai";
     const urlError = await validateCloudBaseUrl(baseUrl);
     if (urlError) {
-      err(res, urlError);
+      err(res, urlError, 400, {
+        endpoint: "/api/cloud/elizacloud/device-auth",
+        baseUrl,
+      });
       return true;
     }
+
+    logger.info("[cloud-device-auth] Initiating device authentication", {
+      deviceId: body.deviceId,
+      baseUrl,
+    });
 
     try {
       const authRes = await fetchWithTimeout(
@@ -429,12 +485,14 @@ export async function handleCloudRoute(
 
       if (!authRes.ok) {
         const errData = await authRes.json().catch(() => ({}));
-        err(
-          res,
+        const errorMsg =
           (errData as { error?: string }).error ||
-            `Device auth failed (${authRes.status})`,
-          authRes.status,
-        );
+          `Device auth failed (${authRes.status})`;
+        err(res, errorMsg, authRes.status, {
+          endpoint: "/api/cloud/elizacloud/device-auth",
+          deviceId: body.deviceId,
+          cloudStatus: authRes.status,
+        });
         return true;
       }
 
@@ -445,13 +503,29 @@ export async function handleCloudRoute(
         credits: number;
       };
 
+      logger.info("[cloud-device-auth] Device authentication successful", {
+        userId: authData.userId,
+        organizationId: authData.organizationId,
+        credits: authData.credits,
+      });
+
       json(res, authData);
     } catch (fetchErr) {
       if (isTimeoutError(fetchErr)) {
-        err(res, "Device auth request timed out", 504);
+        err(res, "Device auth request timed out", 504, {
+          endpoint: "/api/cloud/elizacloud/device-auth",
+          deviceId: body.deviceId,
+          timeout: 10_000,
+        });
         return true;
       }
-      err(res, "Failed to reach Eliza Cloud for device auth", 502);
+      const message =
+        fetchErr instanceof Error ? fetchErr.message : "Unknown error";
+      err(res, "Failed to reach Eliza Cloud for device auth", 502, {
+        endpoint: "/api/cloud/elizacloud/device-auth",
+        deviceId: body.deviceId,
+        error: message,
+      });
       return true;
     }
     return true;
@@ -467,16 +541,27 @@ export async function handleCloudRoute(
 
     const elizaAuth = req.headers["x-eliza-auth"];
     if (!elizaAuth || typeof elizaAuth !== "string") {
-      err(res, "Missing elizacloud API key", 401);
+      err(res, "Missing elizacloud API key", 401, {
+        endpoint: "/api/cloud/elizacloud/agents",
+      });
       return true;
     }
 
     const baseUrl = state.config.cloud?.baseUrl ?? "https://www.elizacloud.ai";
     const urlError = await validateCloudBaseUrl(baseUrl);
     if (urlError) {
-      err(res, urlError);
+      err(res, urlError, 400, {
+        endpoint: "/api/cloud/elizacloud/agents",
+        baseUrl,
+      });
       return true;
     }
+
+    logger.info("[cloud-agent-create] Creating cloud agent", {
+      agentName: body.agentName,
+      hasConfig: !!body.agentConfig,
+      baseUrl,
+    });
 
     try {
       const createRes = await fetchWithTimeout(
@@ -494,23 +579,39 @@ export async function handleCloudRoute(
 
       if (!createRes.ok) {
         const errData = await createRes.json().catch(() => ({}));
-        err(
-          res,
+        const errorMsg =
           (errData as { message?: string }).message ||
-            `Agent creation failed (${createRes.status})`,
-          createRes.status,
-        );
+          `Agent creation failed (${createRes.status})`;
+        err(res, errorMsg, createRes.status, {
+          endpoint: "/api/cloud/elizacloud/agents",
+          agentName: body.agentName,
+          cloudStatus: createRes.status,
+        });
         return true;
       }
 
       const agentData = await createRes.json();
+      logger.info("[cloud-agent-create] Cloud agent created successfully", {
+        agentName: body.agentName,
+        agentId: (agentData as { id?: string }).id,
+      });
       json(res, agentData);
     } catch (fetchErr) {
       if (isTimeoutError(fetchErr)) {
-        err(res, "Agent creation request timed out", 504);
+        err(res, "Agent creation request timed out", 504, {
+          endpoint: "/api/cloud/elizacloud/agents",
+          agentName: body.agentName,
+          timeout: 30_000,
+        });
         return true;
       }
-      err(res, "Failed to reach Eliza Cloud", 502);
+      const message =
+        fetchErr instanceof Error ? fetchErr.message : "Unknown error";
+      err(res, "Failed to reach Eliza Cloud", 502, {
+        endpoint: "/api/cloud/elizacloud/agents",
+        agentName: body.agentName,
+        error: message,
+      });
       return true;
     }
     return true;
@@ -581,22 +682,43 @@ export async function handleCloudRoute(
     if (!body) return true;
 
     if (!body.code?.trim()) {
-      err(res, "Discord OAuth code is required");
+      err(res, "Discord OAuth code is required", 400, {
+        endpoint: "/api/cloud/discord/connect",
+      });
       return true;
     }
     if (!body.containerIp?.trim()) {
-      err(res, "Container IP is required");
+      err(res, "Container IP is required", 400, {
+        endpoint: "/api/cloud/discord/connect",
+      });
       return true;
     }
     if (!body.redirectUri?.trim()) {
-      err(res, "Redirect URI is required");
+      err(res, "Redirect URI is required", 400, {
+        endpoint: "/api/cloud/discord/connect",
+      });
       return true;
     }
 
+    logger.info("[cloud-discord] Initiating Discord OAuth connection", {
+      agentId: body.agentId,
+      containerIp: body.containerIp,
+      redirectUri: body.redirectUri,
+    });
+
     try {
       // Proxy Discord OAuth to the cloud container
-      const containerUrl = `http://${body.containerIp}:2187/api/discord/connect`;
+      // NOTE: Using direct container API instead of elizacloud API because:
+      // - Discord OAuth flow requires direct agent container access
+      // - elizacloud API doesn't expose Discord-specific endpoints
+      // - Container runs agent runtime with Discord client setup
+      const containerUrl = `http://${body.containerIp}:${CLOUD_CONTAINER_PORT}/api/discord/connect`;
       
+      logger.debug("[cloud-discord] Forwarding OAuth to container", {
+        containerUrl,
+        port: CLOUD_CONTAINER_PORT,
+      });
+
       const connectRes = await fetchWithTimeout(
         containerUrl,
         {
@@ -612,27 +734,41 @@ export async function handleCloudRoute(
 
       if (!connectRes.ok) {
         const errData = await connectRes.json().catch(() => ({}));
-        err(
-          res,
+        const errorMsg =
           (errData as { error?: string }).error ||
-            `Discord connection failed (${connectRes.status})`,
-          connectRes.status,
-        );
+          `Discord connection failed (${connectRes.status})`;
+        err(res, errorMsg, connectRes.status, {
+          endpoint: "/api/cloud/discord/connect",
+          agentId: body.agentId,
+          containerStatus: connectRes.status,
+        });
         return true;
       }
 
       const connectData = await connectRes.json();
+      logger.info("[cloud-discord] Discord OAuth successful", {
+        agentId: body.agentId,
+      });
       json(res, connectData);
     } catch (fetchErr) {
       if (isTimeoutError(fetchErr)) {
-        err(res, "Discord connection request timed out", 504);
+        err(res, "Discord connection request timed out", 504, {
+          endpoint: "/api/cloud/discord/connect",
+          agentId: body.agentId,
+          timeout: 30_000,
+        });
         return true;
       }
       const message =
         fetchErr instanceof Error
           ? fetchErr.message
           : "Failed to connect to container";
-      err(res, `Container connection error: ${message}`, 502);
+      err(res, `Container connection error: ${message}`, 502, {
+        endpoint: "/api/cloud/discord/connect",
+        agentId: body.agentId,
+        containerIp: body.containerIp,
+        port: CLOUD_CONTAINER_PORT,
+      });
       return true;
     }
     return true;
