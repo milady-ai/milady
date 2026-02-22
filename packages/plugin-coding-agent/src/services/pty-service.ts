@@ -86,7 +86,7 @@ export class PTYService {
     this.runtime = runtime;
     this.serviceConfig = {
       maxLogLines: config.maxLogLines ?? 1000,
-      debug: config.debug ?? true,
+      debug: config.debug ?? false,
       registerCodingAdapters: config.registerCodingAdapters ?? true,
       maxConcurrentSessions: config.maxConcurrentSessions ?? 8,
     };
@@ -387,6 +387,7 @@ export class PTYService {
       runtime: this.runtime,
       manager: this.manager,
       metricsTracker: this.metricsTracker,
+      debugSnapshots: this.serviceConfig.debug === true,
       log: (msg: string) => this.log(msg),
     });
   }

@@ -29,6 +29,8 @@ export interface StallClassifierContext {
     get(id: string): { startedAt?: string | Date } | null | undefined;
   } | null;
   metricsTracker: AgentMetricsTracker;
+  /** Write debug snapshots to ~/.milaidy/debug/ on stall (default: false) */
+  debugSnapshots?: boolean;
   log: (msg: string) => void;
 }
 
@@ -174,16 +176,18 @@ export async function classifyStallOutput(
     effectiveOutput,
   );
 
-  // Dump debug snapshot for offline analysis
-  await writeStallSnapshot(
-    sessionId,
-    agentType,
-    recentOutput,
-    effectiveOutput,
-    buffers,
-    traceEntries,
-    log,
-  );
+  // Dump debug snapshot for offline analysis (opt-in via PTYServiceConfig.debug)
+  if (ctx.debugSnapshots) {
+    await writeStallSnapshot(
+      sessionId,
+      agentType,
+      recentOutput,
+      effectiveOutput,
+      buffers,
+      traceEntries,
+      log,
+    );
+  }
 
   try {
     log(`Stall detected for ${sessionId}, asking LLM to classify...`);
