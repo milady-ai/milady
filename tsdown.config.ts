@@ -52,4 +52,14 @@ export default defineConfig([
     inlineOnly: false,
     external: nativeExternals,
   },
+  {
+    entry: "src/plugins/whatsapp/index.ts",
+    outDir: "dist/plugins/whatsapp",
+    env,
+    fixedExtension: false,
+    platform: "node",
+    unbundle: true,
+    inlineOnly: false,
+    external: nativeExternals,
+  },
 ]);

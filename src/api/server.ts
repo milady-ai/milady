@@ -139,6 +139,10 @@ import {
 import { TxService } from "./tx-service";
 import { generateWalletKeys, getWalletAddresses } from "./wallet";
 import { handleWalletRoutes } from "./wallet-routes";
+import {
+  applyWhatsAppQrOverride,
+  handleWhatsAppRoute,
+} from "./whatsapp-routes";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -280,6 +284,11 @@ interface ServerState {
   shellEnabled?: boolean;
   /** Reasons a restart is pending. Empty array = no restart needed. */
   pendingRestartReasons: string[];
+  /** Active WhatsApp pairing sessions (QR code flow). */
+  whatsappPairingSessions?: Map<
+    string,
+    import("../services/whatsapp-pairing").WhatsAppPairingSession
+  >;
 }
 
 interface ShareIngestItem {
@@ -1071,6 +1080,8 @@ function discoverInstalledPlugins(
   return entries.sort((a, b) => a.name.localeCompare(b.name));
 }
 
+// applyWhatsAppQrOverride is imported from ./whatsapp-routes
+
 /**
  * Discover available plugins from the bundled plugins.json manifest.
  * Falls back to filesystem scanning for monorepo development.
@@ -1089,7 +1100,7 @@ function discoverPluginsFromManifest(): PluginEntry[] {
       // Keys that are auto-injected by infrastructure and should never be
       // exposed as user-facing "config keys" or parameter definitions.
       const HIDDEN_KEYS = new Set(["VERCEL_OIDC_TOKEN"]);
-      return index.plugins
+      const entries = index.plugins
         .map((p) => {
           const category = categorizePlugin(p.id);
           const envKey = p.envKey;
@@ -1146,6 +1157,10 @@ function discoverPluginsFromManifest(): PluginEntry[] {
           };
         })
         .sort((a, b) => a.name.localeCompare(b.name));
+
+      applyWhatsAppQrOverride(entries, resolveDefaultAgentWorkspaceDir());
+
+      return entries;
     } catch (err) {
       logger.debug(
         `[milady-api] Failed to read plugins.json: ${err instanceof Error ? err.message : err}`,
@@ -6572,6 +6587,8 @@ async function handleRequest(
       plugin.validationWarnings = validation.warnings;
     }
 
+    applyWhatsAppQrOverride(allPlugins, resolveDefaultAgentWorkspaceDir());
+
     // Inject per-provider model options into configUiHints for MODEL fields.
     // Each provider's cache is independent — no cross-population.
     // Always set type: "select" on MODEL fields so they render as dropdowns,
@@ -8846,6 +8863,23 @@ async function handleRequest(
       ),
     });
     return;
+  }
+
+  // ── WhatsApp routes (/api/whatsapp/*) ────────────────────────────────────
+  // Auth: these routes are protected by the isAuthorized(req) gate at L5331.
+  if (pathname.startsWith("/api/whatsapp")) {
+    if (!state.whatsappPairingSessions) {
+      state.whatsappPairingSessions = new Map();
+    }
+    const handled = await handleWhatsAppRoute(req, res, pathname, method, {
+      whatsappPairingSessions: state.whatsappPairingSessions,
+      broadcastWs: state.broadcastWs ?? undefined,
+      config: state.config,
+      runtime: state.runtime ?? undefined,
+      saveConfig: () => saveMiladyConfig(state.config),
+      workspaceDir: resolveDefaultAgentWorkspaceDir(),
+    });
+    if (handled) return;
   }
 
   // ── POST /api/restart ───────────────────────────────────────────────────
@@ -13312,6 +13346,17 @@ export async function startApiServer(opts?: {
               }
             }
             wsClients.clear();
+            // Clean up WhatsApp pairing sessions
+            if (state.whatsappPairingSessions) {
+              for (const s of state.whatsappPairingSessions.values()) {
+                try {
+                  s.stop();
+                } catch {
+                  /* non-fatal */
+                }
+              }
+              state.whatsappPairingSessions.clear();
+            }
             wss.close();
             const closeTimeout = setTimeout(() => r(), 5_000);
             const resolved = { done: false };

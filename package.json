@@ -179,6 +179,10 @@
     "telegraf": "^4.16.3",
     "unique-names-generator": "^4.7.1",
     "whisper-node": "^1.1.1",
+    "@hapi/boom": "^10.0.1",
+    "@whiskeysockets/baileys": "7.0.0-rc.9",
+    "pino": "^10.3.1",
+    "qrcode": "^1.5.4",
     "ws": "^8.19.0",
     "zod": "^4.3.6"
   },
@@ -202,6 +206,8 @@
     "ai": "6.0.30",
     "tar": "^7.5.7",
     "@elizaos/core": "next",
-    "@elizaos/prompts": "next"
+    "@elizaos/prompts": "next",
+    "//libsignal": "Transitive dep of @whiskeysockets/baileys. Not published to npm; must be pulled from git. Pinned to full commit 1c30d7d7e76a3b0aa120b04dc6a26f5a12dccf67 (2024-10-15) to ensure reproducible builds. See: https://github.com/nicepkg/libsignal-node",
+    "libsignal": "git+https://github.com/whiskeysockets/libsignal-node.git#1c30d7d7e76a3b0aa120b04dc6a26f5a12dccf67"
   }
 }
