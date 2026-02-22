@@ -46,7 +46,7 @@ jobs:
       - name: Install dependencies
         run: |
           for i in 1 2 3; do
-            bun install --frozen-lockfile && break
+            bun install --ignore-scripts && break
             if [ "$i" -eq 3 ]; then
               echo "bun install failed after $i attempts"
               exit 1
