@@ -7,6 +7,7 @@ import { useApp } from "./AppContext";
 import { AdvancedPageView } from "./components/AdvancedPageView";
 import { AppsPageView } from "./components/AppsPageView";
 import { AutonomousPanel } from "./components/AutonomousPanel";
+import { BugReportModal } from "./components/BugReportModal";
 import { CharacterView } from "./components/CharacterView";
 import { ChatView } from "./components/ChatView";
 import { CommandPalette } from "./components/CommandPalette";
@@ -27,6 +28,7 @@ import { RestartBanner } from "./components/RestartBanner";
 import { SaveCommandModal } from "./components/SaveCommandModal";
 import { SettingsView } from "./components/SettingsView";
 import { TerminalPanel } from "./components/TerminalPanel";
+import { BugReportProvider, useBugReportState } from "./hooks/useBugReport";
 import { useContextMenu } from "./hooks/useContextMenu";
 
 const CHAT_MOBILE_BREAKPOINT_PX = 1024;
@@ -250,6 +252,8 @@ export function App() {
     }
   }, [isChat]);
 
+  const bugReport = useBugReportState();
+
   const agentStarting = agentStatus?.state === "starting";
 
   if (onboardingLoading || agentStarting) {
@@ -264,7 +268,7 @@ export function App() {
   if (!onboardingComplete) return <OnboardingWizard />;
 
   return (
-    <>
+    <BugReportProvider value={bugReport}>
       {isChat ? (
         <div className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg">
           <Header />
@@ -348,6 +352,7 @@ export function App() {
         }}
       />
       <RestartBanner />
+      <BugReportModal />
       {actionNotice && (
         <div
           className={`fixed bottom-6 left-1/2 -translate-x-1/2 px-5 py-2 rounded-lg text-[13px] font-medium z-[10000] text-white ${
@@ -361,6 +366,6 @@ export function App() {
           {actionNotice.text}
         </div>
       )}
-    </>
+    </BugReportProvider>
   );
 }
