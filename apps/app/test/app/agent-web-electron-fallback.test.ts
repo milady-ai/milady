@@ -1,12 +1,21 @@
+// @vitest-environment jsdom
+
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AgentWeb } from "../../plugins/agent/src/web";
 
 describe("AgentWeb Electron API fallback", () => {
   const originalFetch = globalThis.fetch;
-  const originalBase = (window as { __MILADY_API_BASE__?: string })
-    .__MILADY_API_BASE__;
-  const originalProtocol = (window.location as { protocol?: string }).protocol;
+  const originalBase = window.__MILADY_API_BASE__;
+  let locationGetterSpy: ReturnType<typeof vi.spyOn> | null = null;
+
+  const mockProtocol = (protocol: string): void => {
+    locationGetterSpy?.mockRestore();
+    locationGetterSpy = vi.spyOn(window, "location", "get").mockReturnValue({
+      protocol,
+      host: "",
+    } as Location);
+  };
 
   afterEach(() => {
     Object.defineProperty(globalThis, "fetch", {
@@ -14,15 +23,14 @@ describe("AgentWeb Electron API fallback", () => {
       writable: true,
       configurable: true,
     });
-    (window as { __MILADY_API_BASE__?: string }).__MILADY_API_BASE__ =
-      originalBase;
-    (window.location as { protocol?: string }).protocol = originalProtocol;
+    window.__MILADY_API_BASE__ = originalBase;
+    locationGetterSpy?.mockRestore();
+    locationGetterSpy = null;
   });
 
   it("queries local API when running on capacitor-electron without injected base", async () => {
-    (window as { __MILADY_API_BASE__?: string }).__MILADY_API_BASE__ =
-      undefined;
-    (window.location as { protocol?: string }).protocol = "capacitor-electron:";
+    window.__MILADY_API_BASE__ = undefined;
+    mockProtocol("capacitor-electron:");
 
     const fetchMock = vi.fn(async () => ({
       json: async () => ({

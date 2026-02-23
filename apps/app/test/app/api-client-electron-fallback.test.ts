@@ -1,12 +1,21 @@
+// @vitest-environment jsdom
+
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { MiladyClient } from "../../src/api-client";
 
 describe("MiladyClient Electron API fallback", () => {
   const originalFetch = globalThis.fetch;
-  const originalBase = (window as { __MILADY_API_BASE__?: string })
-    .__MILADY_API_BASE__;
-  const originalProtocol = (window.location as { protocol?: string }).protocol;
+  const originalBase = window.__MILADY_API_BASE__;
+  let locationGetterSpy: ReturnType<typeof vi.spyOn> | null = null;
+
+  const mockProtocol = (protocol: string): void => {
+    locationGetterSpy?.mockRestore();
+    locationGetterSpy = vi.spyOn(window, "location", "get").mockReturnValue({
+      protocol,
+      host: "",
+    } as Location);
+  };
 
   afterEach(() => {
     Object.defineProperty(globalThis, "fetch", {
@@ -14,15 +23,14 @@ describe("MiladyClient Electron API fallback", () => {
       writable: true,
       configurable: true,
     });
-    (window as { __MILADY_API_BASE__?: string }).__MILADY_API_BASE__ =
-      originalBase;
-    (window.location as { protocol?: string }).protocol = originalProtocol;
+    window.__MILADY_API_BASE__ = originalBase;
+    locationGetterSpy?.mockRestore();
+    locationGetterSpy = null;
   });
 
   it("does not probe localhost on capacitor-electron protocol before API base is injected", async () => {
-    (window as { __MILADY_API_BASE__?: string }).__MILADY_API_BASE__ =
-      undefined;
-    (window.location as { protocol?: string }).protocol = "capacitor-electron:";
+    window.__MILADY_API_BASE__ = undefined;
+    mockProtocol("capacitor-electron:");
 
     const fetchMock = vi.fn(async () => ({
       ok: true,
@@ -50,9 +58,8 @@ describe("MiladyClient Electron API fallback", () => {
   });
 
   it("prefers injected API base over fallback", async () => {
-    (window as { __MILADY_API_BASE__?: string }).__MILADY_API_BASE__ =
-      "http://localhost:9999";
-    (window.location as { protocol?: string }).protocol = "capacitor-electron:";
+    window.__MILADY_API_BASE__ = "http://localhost:9999";
+    mockProtocol("capacitor-electron:");
 
     const fetchMock = vi.fn(async () => ({
       ok: true,
@@ -80,9 +87,8 @@ describe("MiladyClient Electron API fallback", () => {
   });
 
   it("starts unavailable on capacitor-electron and switches to injected API base when injected later", async () => {
-    (window as { __MILADY_API_BASE__?: string }).__MILADY_API_BASE__ =
-      undefined;
-    (window.location as { protocol?: string }).protocol = "capacitor-electron:";
+    window.__MILADY_API_BASE__ = undefined;
+    mockProtocol("capacitor-electron:");
 
     const fetchMock = vi.fn(async () => ({
       ok: true,
@@ -106,8 +112,7 @@ describe("MiladyClient Electron API fallback", () => {
     );
     expect(fetchMock).not.toHaveBeenCalled();
 
-    (window as { __MILADY_API_BASE__?: string }).__MILADY_API_BASE__ =
-      "http://127.0.0.1:4444";
+    window.__MILADY_API_BASE__ = "http://127.0.0.1:4444";
     await client.getStatus();
     expect(fetchMock).toHaveBeenLastCalledWith(
       "http://127.0.0.1:4444/api/status",

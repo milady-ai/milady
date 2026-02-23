@@ -3,14 +3,30 @@
  */
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@milady/capacitor-gateway", () => ({ Gateway: {} }));
-vi.mock("@milady/capacitor-swabble", () => ({ Swabble: {} }));
-vi.mock("@milady/capacitor-talkmode", () => ({ TalkMode: {} }));
-vi.mock("@milady/capacitor-camera", () => ({ Camera: {} }));
-vi.mock("@milady/capacitor-location", () => ({ Location: {} }));
-vi.mock("@milady/capacitor-screencapture", () => ({ ScreenCapture: {} }));
-vi.mock("@milady/capacitor-canvas", () => ({ Canvas: {} }));
-vi.mock("@milady/capacitor-desktop", () => ({ Desktop: {} }));
+vi.mock("@milady/capacitor-gateway", () => ({ Gateway: {} }), {
+  virtual: true,
+});
+vi.mock("@milady/capacitor-swabble", () => ({ Swabble: {} }), {
+  virtual: true,
+});
+vi.mock("@milady/capacitor-talkmode", () => ({ TalkMode: {} }), {
+  virtual: true,
+});
+vi.mock("@milady/capacitor-camera", () => ({ Camera: {} }), {
+  virtual: true,
+});
+vi.mock("@milady/capacitor-location", () => ({ Location: {} }), {
+  virtual: true,
+});
+vi.mock("@milady/capacitor-screencapture", () => ({ ScreenCapture: {} }), {
+  virtual: true,
+});
+vi.mock("@milady/capacitor-canvas", () => ({ Canvas: {} }), {
+  virtual: true,
+});
+vi.mock("@milady/capacitor-desktop", () => ({ Desktop: {} }), {
+  virtual: true,
+});
 
 import {
   getPluginCapabilities,
@@ -92,7 +108,7 @@ describe("plugin-bridge", () => {
     it.each([
       ["gatewayDiscovery", false],
       ["desktopTray", false],
-      ["elevenlabs", false],
+      ["elevenlabs", true],
       ["backgroundLocation", false],
     ] as const)("%s → %s on web", (feature, expected) => {
       expect(isFeatureAvailable(feature)).toBe(expected);

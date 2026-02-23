@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -17,21 +19,25 @@ function HookHost({
 }
 
 describe("useRetakeCapture", () => {
-  let setIntervalSpy: ReturnType<typeof vi.spyOn>;
-  let clearIntervalSpy: ReturnType<typeof vi.spyOn>;
+  let invokeSpy: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    vi.useFakeTimers();
-    setIntervalSpy = vi.spyOn(globalThis, "setInterval");
-    clearIntervalSpy = vi.spyOn(globalThis, "clearInterval");
+    invokeSpy = vi.fn().mockResolvedValue(undefined);
+    Object.assign(window, {
+      electron: {
+        ipcRenderer: {
+          invoke: invokeSpy,
+        },
+      },
+    });
   });
 
   afterEach(() => {
-    vi.useRealTimers();
+    delete window.electron;
     vi.restoreAllMocks();
   });
 
-  it("does not create an interval when active is false", () => {
+  it("does not start capture when active is false", () => {
     const iframeRef = {
       current: null,
     } as React.RefObject<HTMLIFrameElement | null>;
@@ -42,10 +48,10 @@ describe("useRetakeCapture", () => {
       );
     });
 
-    expect(setIntervalSpy).not.toHaveBeenCalled();
+    expect(invokeSpy).not.toHaveBeenCalled();
   });
 
-  it("cleans up interval on unmount", () => {
+  it("stops capture on unmount after starting", () => {
     const iframeRef = {
       current: null,
     } as React.RefObject<HTMLIFrameElement | null>;
@@ -57,12 +63,16 @@ describe("useRetakeCapture", () => {
       );
     });
 
-    expect(setIntervalSpy).toHaveBeenCalledTimes(1);
+    expect(invokeSpy).toHaveBeenCalledWith("screencapture:startFrameCapture", {
+      fps: 15,
+      quality: 70,
+      endpoint: "/api/retake/frame",
+    });
 
     act(() => {
       renderer.unmount();
     });
 
-    expect(clearIntervalSpy).toHaveBeenCalledTimes(1);
+    expect(invokeSpy).toHaveBeenCalledWith("screencapture:stopFrameCapture");
   });
 });

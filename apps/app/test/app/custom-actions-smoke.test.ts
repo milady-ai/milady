@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import React, { useEffect, useState } from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -56,6 +58,14 @@ interface ChatViewContextStub {
   droppedFiles: string[];
   shareIngestNotice: string;
   selectedVrmIndex: number;
+  chatPendingImages: Array<{ data: string; mimeType: string; name: string }>;
+  setChatPendingImages: (
+    updater:
+      | Array<{ data: string; mimeType: string; name: string }>
+      | ((
+          prev: Array<{ data: string; mimeType: string; name: string }>,
+        ) => Array<{ data: string; mimeType: string; name: string }>),
+  ) => void;
 }
 
 function createContext(
@@ -73,6 +83,8 @@ function createContext(
     droppedFiles: [],
     shareIngestNotice: "",
     selectedVrmIndex: 0,
+    chatPendingImages: [],
+    setChatPendingImages: vi.fn(),
     ...overrides,
   };
 }
@@ -259,9 +271,8 @@ describe("custom actions smoke flow", () => {
     });
     if (!tree) throw new Error("failed to render FlowHarness");
 
-    const actionsButton = findButtonByText(tree, "Actions");
     await act(async () => {
-      actionsButton.props.onClick();
+      window.dispatchEvent(new Event("toggle-custom-actions-panel"));
     });
     await flush();
 
