@@ -137,7 +137,7 @@ export class AgentManager {
     if (
       this.runtime &&
       typeof (this.runtime as { stop?: () => Promise<void> }).stop ===
-      "function"
+        "function"
     ) {
       try {
         await (this.runtime as { stop: () => Promise<void> }).stop();
@@ -163,9 +163,9 @@ export class AgentManager {
       // extracted outside the ASAR so ESM import() works normally.)
       const miladyDist = app.isPackaged
         ? path.join(
-          app.getAppPath().replace("app.asar", "app.asar.unpacked"),
-          "milady-dist",
-        )
+            app.getAppPath().replace("app.asar", "app.asar.unpacked"),
+            "milady-dist",
+          )
         : path.resolve(__dirname, "../../../../../../dist");
 
       console.log(
@@ -183,8 +183,10 @@ export class AgentManager {
           : asarModules;
         // Force Node to re-read NODE_PATH
         // eslint-disable-next-line @typescript-eslint/no-require-imports
-        require("module").Module._initPaths();
-        console.log(`[Agent] Added ASAR node_modules to NODE_PATH: ${asarModules}`);
+        require("node:module").Module._initPaths();
+        console.log(
+          `[Agent] Added ASAR node_modules to NODE_PATH: ${asarModules}`,
+        );
       }
 
       // 1. Start API server immediately so the UI can bootstrap while runtime starts.
@@ -203,8 +205,8 @@ export class AgentManager {
       let actualPort: number | null = null;
       let startEliza:
         | ((opts: {
-          headless: boolean;
-        }) => Promise<Record<string, unknown> | null>)
+            headless: boolean;
+          }) => Promise<Record<string, unknown> | null>)
         | null = null;
       // `startApiServer()` returns an `updateRuntime()` helper that broadcasts
       // status updates and restores conversation state after a hot restart.
@@ -232,7 +234,7 @@ export class AgentManager {
             if (
               prevRuntime &&
               typeof (prevRuntime as { stop?: () => Promise<void> }).stop ===
-              "function"
+                "function"
             ) {
               try {
                 await (prevRuntime as { stop: () => Promise<void> }).stop();
@@ -307,8 +309,8 @@ export class AgentManager {
       const resolvedStartEliza = (elizaModule.startEliza ??
         (elizaModule.default as Record<string, unknown>)?.startEliza) as
         | ((opts: {
-          headless: boolean;
-        }) => Promise<Record<string, unknown> | null>)
+            headless: boolean;
+          }) => Promise<Record<string, unknown> | null>)
         | undefined;
 
       if (typeof resolvedStartEliza !== "function") {
@@ -369,7 +371,7 @@ export class AgentManager {
       if (
         this.runtime &&
         typeof (this.runtime as { stop?: () => Promise<void> }).stop ===
-        "function"
+          "function"
       ) {
         try {
           await (this.runtime as { stop: () => Promise<void> }).stop();
@@ -408,7 +410,7 @@ export class AgentManager {
       if (
         this.runtime &&
         typeof (this.runtime as { stop?: () => Promise<void> }).stop ===
-        "function"
+          "function"
       ) {
         await (this.runtime as { stop: () => Promise<void> }).stop();
       }
