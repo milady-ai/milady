@@ -13,6 +13,7 @@ import { logger, type Plugin } from "@elizaos/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { findPluginExport } from "../cli/plugins-cli";
 import type { MiladyConfig } from "../config/config";
+import { CONNECTOR_IDS } from "../config/schema";
 import {
   applyCloudConfigToEnv,
   applyConnectorSecretsToEnv,
@@ -20,6 +21,7 @@ import {
   applyX402ConfigToEnv,
   autoResolveDiscordAppId,
   buildCharacterFromConfig,
+  CHANNEL_PLUGIN_MAP,
   CORE_PLUGINS,
   CUSTOM_PLUGINS_DIRNAME,
   collectPluginNames,
@@ -575,6 +577,12 @@ describe("collectPluginNames", () => {
     } as unknown as MiladyConfig;
     const names = collectPluginNames(config);
     expect(names.has("@elizaos/plugin-obsidian")).toBe(true);
+  });
+
+  it("CHANNEL_PLUGIN_MAP keys match CONNECTOR_IDS from schema", () => {
+    expect([...Object.keys(CHANNEL_PLUGIN_MAP)].sort()).toEqual(
+      [...CONNECTOR_IDS].sort(),
+    );
   });
 });
 

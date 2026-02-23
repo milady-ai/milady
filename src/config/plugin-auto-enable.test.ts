@@ -13,6 +13,7 @@ import {
   applyPluginAutoEnable,
   CONNECTOR_PLUGINS,
 } from "./plugin-auto-enable";
+import { CONNECTOR_IDS } from "./schema";
 
 // ---------------------------------------------------------------------------
 // helpers
@@ -611,6 +612,12 @@ describe("CONNECTOR_PLUGINS", () => {
 
   it("maps retake to @milady/plugin-retake", () => {
     expect(CONNECTOR_PLUGINS.retake).toBe("@milady/plugin-retake");
+  });
+
+  it("has keys matching CONNECTOR_IDS from schema", () => {
+    expect([...Object.keys(CONNECTOR_PLUGINS)].sort()).toEqual(
+      [...CONNECTOR_IDS].sort(),
+    );
   });
 });
 
