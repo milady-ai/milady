@@ -17,8 +17,40 @@ export default defineConfig({
         replacement: path.join(repoRoot, "src", "plugin-sdk", "index.ts"),
       },
       {
-        find: /^@milady\/capacitor-(.*)$/,
-        replacement: path.join(repoRoot, "apps", "app", "plugins", "$1", "src", "index.ts"),
+        find: "@milady/capacitor-gateway",
+        replacement: path.join(repoRoot, "apps", "app", "plugins", "gateway", "src", "index.ts"),
+      },
+      {
+        find: "@milady/capacitor-swabble",
+        replacement: path.join(repoRoot, "apps", "app", "plugins", "swabble", "src", "index.ts"),
+      },
+      {
+        find: "@milady/capacitor-talkmode",
+        replacement: path.join(repoRoot, "apps", "app", "plugins", "talkmode", "src", "index.ts"),
+      },
+      {
+        find: "@milady/capacitor-camera",
+        replacement: path.join(repoRoot, "apps", "app", "plugins", "camera", "src", "index.ts"),
+      },
+      {
+        find: "@milady/capacitor-location",
+        replacement: path.join(repoRoot, "apps", "app", "plugins", "location", "src", "index.ts"),
+      },
+      {
+        find: "@milady/capacitor-screencapture",
+        replacement: path.join(repoRoot, "apps", "app", "plugins", "screencapture", "src", "index.ts"),
+      },
+      {
+        find: "@milady/capacitor-canvas",
+        replacement: path.join(repoRoot, "apps", "app", "plugins", "canvas", "src", "index.ts"),
+      },
+      {
+        find: "@milady/capacitor-desktop",
+        replacement: path.join(repoRoot, "apps", "app", "plugins", "desktop", "src", "index.ts"),
+      },
+      {
+        find: "@milady/capacitor-agent",
+        replacement: path.join(repoRoot, "apps", "app", "plugins", "agent", "src", "index.ts"),
       },
       {
         // @elizaos/skills has a broken package.json entry; the code handles the
