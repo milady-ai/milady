@@ -185,6 +185,26 @@ jobs:
         run: bun run build
         working-directory: apps/app/electron
 
+      # Copy milady dist into the electron directory so electron-builder can
+      # include it in the ASAR *and* asarUnpack can extract it.  The from/to
+      # file mapping in electron-builder doesn't support asarUnpack, so we
+      # pre-copy the files as a real local directory.
+      - name: Copy milady-dist into Electron project
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf milady-dist
+          mkdir -p milady-dist
+          # Copy only .js files and package.json (matching the old filter)
+          find ../../../dist -name '*.js' | while read f; do
+            rel="${f#../../../dist/}"
+            mkdir -p "milady-dist/$(dirname "$rel")"
+            cp "$f" "milady-dist/$rel"
+          done
+          echo '{"type":"module"}' > milady-dist/package.json
+          echo "Copied $(find milady-dist -name '*.js' | wc -l | tr -d ' ') JS files to milady-dist/"
+        working-directory: apps/app/electron
+
       - name: Prepare platform electron-builder config
         run: |
           node -e "
@@ -351,6 +371,8 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID || '' }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID || '' }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET || '' }}
+
+
 
       - name: Install Playwright browser runtime
         if: matrix.platform.os == 'macos' && matrix.platform.artifact-name == 'macos-arm64'
