@@ -8613,8 +8613,12 @@
       "npmName": "@milady/plugin-retake",
       "description": "Live video streaming connector for retake.tv",
       "category": "connector",
-      "envKey": null,
-      "configKeys": [],
+      "envKey": "RETAKE_ACCESS_TOKEN",
+      "configKeys": [
+        "RETAKE_ACCESS_TOKEN",
+        "RETAKE_API_URL",
+        "RETAKE_CAPTURE_URL"
+      ],
       "pluginParameters": {
         "RETAKE_ACCESS_TOKEN": {
           "type": "string",
