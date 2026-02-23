@@ -571,6 +571,7 @@ function _extractResponseBlocks(
 // ---------------------------------------------------------------------------
 
 export function findOwnPackageRoot(startDir: string): string {
+  const KNOWN_NAMES = new Set(["milady", "milaidy", "miladyai"]);
   let dir = startDir;
   for (let i = 0; i < 10; i++) {
     const pkgPath = path.join(dir, "package.json");
@@ -582,7 +583,9 @@ export function findOwnPackageRoot(startDir: string): string {
         >;
         const pkgName =
           typeof pkg.name === "string" ? pkg.name.toLowerCase() : "";
-        if (pkgName === "milady" || pkgName === "milaidy") return dir;
+        if (KNOWN_NAMES.has(pkgName)) return dir;
+        // Also match if plugins.json exists at this level (resilient to renames)
+        if (fs.existsSync(path.join(dir, "plugins.json"))) return dir;
       } catch {
         /* keep searching */
       }
