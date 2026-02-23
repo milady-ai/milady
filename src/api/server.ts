@@ -8685,9 +8685,26 @@ async function handleRequest(
       endpoint?: string;
       proof?: string[];
     }>(req, res);
-    if (!body || !body.proof) {
-      error(res, "proof array is required");
-      return;
+    if (!body) return;
+
+    // Auto-generate proof from Merkle tree if not provided
+    let proof = body.proof;
+    if (!proof || proof.length === 0) {
+      const addrs = getWalletAddresses();
+      const walletAddress = addrs.evmAddress ?? "";
+      if (!walletAddress) {
+        error(res, "EVM wallet not configured.");
+        return;
+      }
+      const proofResult = generateProof(walletAddress);
+      if (!proofResult.isWhitelisted) {
+        error(
+          res,
+          "Address not whitelisted. Complete Twitter or NFT verification first.",
+        );
+        return;
+      }
+      proof = proofResult.proof;
     }
 
     const agentName = body.name || state.agentName || "Milady Agent";
@@ -8695,7 +8712,7 @@ async function handleRequest(
     const result = await dropService.mintWithWhitelist(
       agentName,
       endpoint,
-      body.proof,
+      proof,
     );
     json(res, result);
     return;
