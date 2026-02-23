@@ -501,6 +501,8 @@ const OPTIONAL_PLUGIN_MAP: Readonly<Record<string, string>> = {
   obsidian: "@elizaos/plugin-obsidian",
   repoprompt: "@elizaos/plugin-repoprompt",
   repoPrompt: "@elizaos/plugin-repoprompt",
+  moltbook: "@elizaos/plugin-moltbook",
+  moltBook: "@elizaos/plugin-moltbook",
   "pi-ai": PI_AI_PLUGIN_PACKAGE,
   piAi: PI_AI_PLUGIN_PACKAGE,
   x402: "@elizaos/plugin-x402",

@@ -82,6 +82,7 @@ export const AUTH_PROVIDER_PLUGINS: Record<string, string> = {
   OBSIDAN_VAULT_PATH: "@elizaos/plugin-obsidian",
   REPOPROMPT_CLI_PATH: "@elizaos/plugin-repoprompt",
   CLAUDE_CODE_WORKBENCH_ENABLED: "@milaidy/plugin-claude-code-workbench",
+  MOLTBOOK_API_KEY: "@elizaos/plugin-moltbook",
 };
 
 const FEATURE_PLUGINS: Record<string, string> = {
@@ -110,6 +111,7 @@ const FEATURE_PLUGINS: Record<string, string> = {
   computeruse: "@elizaos/plugin-computeruse",
   repoprompt: "@elizaos/plugin-repoprompt",
   claudeCodeWorkbench: "@milaidy/plugin-claude-code-workbench",
+  moltbook: "@elizaos/plugin-moltbook",
 };
 
 function isConnectorConfigured(

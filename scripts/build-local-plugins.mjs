@@ -14,6 +14,13 @@ const pluginSpecs = [
     ],
   },
   {
+    name: "@elizaos/plugin-moltbook",
+    candidates: [
+      path.join(root, "node_modules", "@elizaos", "plugin-moltbook"),
+      path.join(root, "packages", "plugin-moltbook"),
+    ],
+  },
+  {
     name: "@milaidy/plugin-claude-code-workbench",
     candidates: [path.join(root, "packages", "plugin-claude-code-workbench")],
   },

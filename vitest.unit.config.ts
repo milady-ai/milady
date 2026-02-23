@@ -17,6 +17,8 @@ export default defineConfig({
       "apps/app/test/app/autonomous-panel.test.ts",
       "apps/app/test/app/chat-send-lock.test.ts",
       "apps/app/test/app/chat-stream-api-client.test.ts",
+      "apps/app/test/app/plugins-view-modal-hotkeys.test.ts",
+      "apps/app/test/app/plugins-view-toggle-restart.test.ts",
       "apps/app/test/avatar/voice-chat-streaming-text.test.ts",
     ],
     exclude: baseTest.exclude ?? [],

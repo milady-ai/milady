@@ -1,0 +1,91 @@
+{
+  "name": "@elizaos/plugin-moltbook",
+  "description": "Moltbook API integration plugin for ElizaOS and Milady",
+  "version": "1.7.3-alpha.3",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "packageType": "plugin",
+  "platform": "node",
+  "license": "MIT",
+  "keywords": [
+    "plugin",
+    "elizaos",
+    "moltbook",
+    "social"
+  ],
+  "homepage": "https://www.moltbook.com",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "package.json"
+  ],
+  "dependencies": {
+    "@elizaos/core": "next",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "dotenv": "^17.2.3",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "start": "elizaos start",
+    "dev": "elizaos dev",
+    "build": "bun run build.ts",
+    "build:watch": "bun run build.ts --watch",
+    "test": "bun test",
+    "format": "prettier --write ./src"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "resolutions": {
+    "zod": "4.3.5"
+  },
+  "agentConfig": {
+    "pluginType": "elizaos:plugin:1.0.0",
+    "pluginParameters": {
+      "MOLTBOOK_API_BASE_URL": {
+        "type": "string",
+        "description": "Moltbook API base URL. Must be https://www.moltbook.com/api/v1",
+        "required": false
+      },
+      "MOLTBOOK_API_KEY": {
+        "type": "string",
+        "description": "Moltbook API key for authenticated requests",
+        "required": false
+      },
+      "MOLTBOOK_AGENT_NAME": {
+        "type": "string",
+        "description": "Default Moltbook agent name used during onboarding",
+        "required": false
+      },
+      "MOLTBOOK_CREDENTIALS_PATH": {
+        "type": "string",
+        "description": "Credentials file path (default: ~/.config/moltbook/credentials.json)",
+        "required": false
+      },
+      "MOLTBOOK_TIMEOUT_MS": {
+        "type": "number",
+        "description": "HTTP timeout for Moltbook API requests",
+        "required": false
+      },
+      "MOLTBOOK_MAX_RESPONSE_CHARS": {
+        "type": "number",
+        "description": "Maximum number of response characters returned by actions",
+        "required": false
+      }
+    }
+  }
+}

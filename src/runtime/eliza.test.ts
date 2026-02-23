@@ -271,6 +271,15 @@ describe("collectPluginNames", () => {
     expect(names.has("@elizaos/plugin-repoprompt")).toBe(true);
   });
 
+  it("normalizes moltbook short IDs in plugins.allow", () => {
+    const config = {
+      plugins: { allow: ["moltbook", "moltBook"] },
+    } as unknown as MiladyConfig;
+    const names = collectPluginNames(config);
+
+    expect(names.has("@elizaos/plugin-moltbook")).toBe(true);
+  });
+
   it("normalizes cua short IDs in plugins.allow", () => {
     const config = {
       plugins: { allow: ["cua"] },
@@ -407,6 +416,24 @@ describe("collectPluginNames", () => {
     const names = collectPluginNames(config);
 
     expect(names.has("@elizaos/plugin-repoprompt")).toBe(false);
+  });
+
+  it("adds @elizaos/plugin-moltbook when features.moltbook = true", () => {
+    const config = {
+      features: { moltbook: true },
+    } as unknown as MiladyConfig;
+    const names = collectPluginNames(config);
+
+    expect(names.has("@elizaos/plugin-moltbook")).toBe(true);
+  });
+
+  it("does not add @elizaos/plugin-moltbook when features.moltbook = false", () => {
+    const config = {
+      features: { moltbook: false },
+    } as unknown as MiladyConfig;
+    const names = collectPluginNames(config);
+
+    expect(names.has("@elizaos/plugin-moltbook")).toBe(false);
   });
 
   // --- plugins.installs (user-installed from registry) ---

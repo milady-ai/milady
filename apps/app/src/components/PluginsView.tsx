@@ -6,7 +6,14 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useApp } from "../AppContext";
-import type { PluginInfo, PluginParamDef } from "../api-client";
+import type {
+  MoltbookApiRequest,
+  MoltbookApiResult,
+  MoltbookOnboardResult,
+  MoltbookStatusSnapshot,
+  PluginInfo,
+  PluginParamDef,
+} from "../api-client";
 import { client } from "../api-client";
 import type { ConfigUiHint } from "../types";
 import type { JsonSchemaObject } from "./config-catalog";
@@ -995,6 +1002,375 @@ function PluginConfigForm({
   );
 }
 
+function normalizePluginId(value: string): string {
+  return value.replace(/^@[^/]+\//, "").replace(/^plugin-/, "");
+}
+
+function isMoltbookPlugin(pluginId: string): boolean {
+  return normalizePluginId(pluginId) === "moltbook";
+}
+
+function formatTimestamp(timestamp: number | undefined): string {
+  if (typeof timestamp !== "number") return "—";
+  return new Date(timestamp).toLocaleString();
+}
+
+function stringifyResult(data: unknown): string {
+  const serialized =
+    typeof data === "string" ? data : JSON.stringify(data ?? null, null, 2);
+  if (!serialized) return "null";
+  if (serialized.length <= 2800) return serialized;
+  return `${serialized.slice(0, 2800)}\n...[truncated]`;
+}
+
+function MoltbookControlPanel({ plugin }: { plugin: PluginInfo }) {
+  const { setActionNotice } = useApp();
+  const initialAgentName =
+    plugin.parameters.find((param) => param.key === "MOLTBOOK_AGENT_NAME")
+      ?.currentValue ?? "";
+  const [agentName, setAgentName] = useState(
+    typeof initialAgentName === "string" ? initialAgentName : "",
+  );
+  const [description, setDescription] = useState("");
+  const [saveCredentials, setSaveCredentials] = useState(true);
+  const [credentialsPath, setCredentialsPath] = useState("");
+  const [status, setStatus] = useState<MoltbookStatusSnapshot | null>(null);
+  const [onboardResult, setOnboardResult] =
+    useState<MoltbookOnboardResult | null>(null);
+  const [lastResult, setLastResult] = useState<MoltbookApiResult | null>(null);
+  const [lastResultLabel, setLastResultLabel] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [busyAction, setBusyAction] = useState<string>("");
+  const [customMethod, setCustomMethod] = useState("GET");
+  const [customPath, setCustomPath] = useState("/feed");
+  const [customBody, setCustomBody] = useState("");
+
+  const actionsDisabled = !plugin.enabled || !plugin.isActive;
+
+  const refreshStatus = useCallback(async () => {
+    setBusyAction("status");
+    setErrorMessage(null);
+    try {
+      const response = await client.getMoltbookStatus();
+      setStatus(response.status);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setErrorMessage(message);
+    } finally {
+      setBusyAction("");
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshStatus();
+  }, [refreshStatus]);
+
+  const runRequest = useCallback(
+    async (label: string, request: MoltbookApiRequest) => {
+      setBusyAction(label);
+      setErrorMessage(null);
+      try {
+        const response = await client.requestMoltbook(request);
+        setLastResult(response.result);
+        setLastResultLabel(label);
+        setActionNotice(`Moltbook: ${label} complete.`, "success", 2200);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        setErrorMessage(message);
+        setActionNotice(`Moltbook: ${message}`, "error", 3600);
+      } finally {
+        setBusyAction("");
+      }
+    },
+    [setActionNotice],
+  );
+
+  const handleOnboard = useCallback(async () => {
+    const name = agentName.trim();
+    const details = description.trim();
+    if (!name || !details) {
+      setErrorMessage(
+        "Agent name and description are required for onboarding.",
+      );
+      return;
+    }
+
+    setBusyAction("onboard");
+    setErrorMessage(null);
+    try {
+      const response = await client.onboardMoltbookAgent({
+        name,
+        description: details,
+        saveCredentials,
+        credentialsPath: credentialsPath.trim() || undefined,
+      });
+      setOnboardResult(response.result);
+      setActionNotice("Moltbook onboarding complete.", "success", 2600);
+      await refreshStatus();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setErrorMessage(message);
+      setActionNotice(`Moltbook onboarding failed: ${message}`, "error", 3800);
+    } finally {
+      setBusyAction("");
+    }
+  }, [
+    agentName,
+    description,
+    saveCredentials,
+    credentialsPath,
+    refreshStatus,
+    setActionNotice,
+  ]);
+
+  const handleCustomRequest = useCallback(async () => {
+    const path = customPath.trim();
+    if (!path) {
+      setErrorMessage("Custom request path is required.");
+      return;
+    }
+
+    let parsedBody: unknown;
+    const rawBody = customBody.trim();
+    if (rawBody.length > 0) {
+      try {
+        parsedBody = JSON.parse(rawBody);
+      } catch {
+        setErrorMessage("Custom body must be valid JSON.");
+        return;
+      }
+    }
+
+    await runRequest("custom", {
+      method: customMethod,
+      path,
+      body: parsedBody,
+    });
+  }, [customBody, customMethod, customPath, runRequest]);
+
+  return (
+    <details className="mt-3 border border-border bg-surface">
+      <summary className="cursor-pointer select-none px-3 py-2 text-[11px] font-bold tracking-wide text-muted uppercase">
+        Moltbook Controls
+      </summary>
+      <div className="border-t border-border px-3 py-3 flex flex-col gap-3">
+        {actionsDisabled && (
+          <div className="text-[11px] border border-warn bg-[rgba(234,179,8,0.06)] text-warn px-2.5 py-2">
+            Enable and load this plugin before running Moltbook actions.
+          </div>
+        )}
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            className="px-2.5 py-[4px] text-[11px] border border-border bg-card text-muted hover:text-txt hover:border-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => void refreshStatus()}
+            disabled={busyAction.length > 0}
+          >
+            {busyAction === "status" ? "Refreshing..." : "Refresh Status"}
+          </button>
+          {status && (
+            <span className="text-[11px] text-muted">
+              {status.available ? "service online" : "service offline"} ·{" "}
+              {status.hasApiKey ? "api key present" : "api key missing"}
+            </span>
+          )}
+        </div>
+
+        {status && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-muted">
+            <div>Agent: {status.agentName || "—"}</div>
+            <div>Last status: {status.lastStatus ?? "—"}</div>
+            <div className="sm:col-span-2">
+              Credentials path: {status.credentialsPath}
+            </div>
+            <div className="sm:col-span-2">
+              Last request: {formatTimestamp(status.lastRequestAt)}
+            </div>
+            <div className="sm:col-span-2">
+              Last path: {status.lastPath || "—"}
+            </div>
+            {status.lastError && (
+              <div className="sm:col-span-2 text-destructive">
+                Last error: {status.lastError}
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="border border-border bg-card p-2.5">
+          <div className="text-[11px] font-bold text-txt mb-2">
+            Onboard Agent
+          </div>
+          <div className="grid grid-cols-1 gap-2">
+            <input
+              type="text"
+              className="w-full py-1.5 px-2 border border-border bg-bg text-[12px] focus:border-accent focus:outline-none"
+              placeholder="Agent name"
+              value={agentName}
+              onChange={(event) => setAgentName(event.target.value)}
+            />
+            <textarea
+              className="w-full py-1.5 px-2 border border-border bg-bg text-[12px] min-h-[64px] resize-y focus:border-accent focus:outline-none"
+              placeholder="Short description of the agent"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+            />
+            <input
+              type="text"
+              className="w-full py-1.5 px-2 border border-border bg-bg text-[12px] focus:border-accent focus:outline-none"
+              placeholder="Credentials path (optional)"
+              value={credentialsPath}
+              onChange={(event) => setCredentialsPath(event.target.value)}
+            />
+            <label className="inline-flex items-center gap-2 text-[11px] text-muted">
+              <input
+                type="checkbox"
+                checked={saveCredentials}
+                onChange={(event) => setSaveCredentials(event.target.checked)}
+              />
+              Save credentials to file
+            </label>
+            <button
+              type="button"
+              className="justify-self-start px-3 py-1 text-[11px] border border-accent bg-accent text-accent-fg hover:bg-accent-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => void handleOnboard()}
+              disabled={actionsDisabled || busyAction.length > 0}
+            >
+              {busyAction === "onboard" ? "Onboarding..." : "Run Onboarding"}
+            </button>
+          </div>
+        </div>
+
+        {onboardResult && (
+          <div className="text-[11px] border border-ok bg-[color-mix(in_srgb,var(--ok)_8%,transparent)] px-2.5 py-2 text-muted">
+            <div>Agent: {onboardResult.agentName}</div>
+            <div>
+              Credentials saved: {onboardResult.credentialsSavedPath ?? "—"}
+            </div>
+            <div>
+              Verification code:{" "}
+              {onboardResult.verificationCode ?? "not required"}
+            </div>
+            {onboardResult.claimUrl && (
+              <div className="truncate">
+                Claim URL:{" "}
+                <a
+                  className="text-accent hover:underline"
+                  href={onboardResult.claimUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {onboardResult.claimUrl}
+                </a>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="border border-border bg-card p-2.5">
+          <div className="text-[11px] font-bold text-txt mb-2">
+            Quick Actions
+          </div>
+          <div className="flex gap-1.5 flex-wrap">
+            <button
+              type="button"
+              className="px-2 py-[4px] text-[11px] border border-border bg-surface text-muted hover:text-txt hover:border-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={actionsDisabled || busyAction.length > 0}
+              onClick={() =>
+                void runRequest("claim-status", {
+                  method: "GET",
+                  path: "/agents/status",
+                })
+              }
+            >
+              Claim Status
+            </button>
+            <button
+              type="button"
+              className="px-2 py-[4px] text-[11px] border border-border bg-surface text-muted hover:text-txt hover:border-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={actionsDisabled || busyAction.length > 0}
+              onClick={() =>
+                void runRequest("profile", {
+                  method: "GET",
+                  path: "/agents/me",
+                })
+              }
+            >
+              Profile
+            </button>
+            <button
+              type="button"
+              className="px-2 py-[4px] text-[11px] border border-border bg-surface text-muted hover:text-txt hover:border-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={actionsDisabled || busyAction.length > 0}
+              onClick={() =>
+                void runRequest("feed", {
+                  method: "GET",
+                  path: "/feed",
+                  query: { sort: "new", limit: 10 },
+                })
+              }
+            >
+              Feed
+            </button>
+          </div>
+          <div className="mt-2 grid grid-cols-1 gap-2">
+            <div className="grid grid-cols-[96px,1fr] gap-2">
+              <select
+                className="py-1.5 px-2 border border-border bg-bg text-[11px] focus:border-accent focus:outline-none"
+                value={customMethod}
+                onChange={(event) => setCustomMethod(event.target.value)}
+              >
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+                <option value="PATCH">PATCH</option>
+                <option value="DELETE">DELETE</option>
+              </select>
+              <input
+                type="text"
+                className="py-1.5 px-2 border border-border bg-bg text-[11px] focus:border-accent focus:outline-none"
+                value={customPath}
+                onChange={(event) => setCustomPath(event.target.value)}
+                placeholder="/feed"
+              />
+            </div>
+            <textarea
+              className="w-full py-1.5 px-2 border border-border bg-bg text-[11px] min-h-[56px] resize-y focus:border-accent focus:outline-none"
+              value={customBody}
+              onChange={(event) => setCustomBody(event.target.value)}
+              placeholder='JSON body (optional), e.g. {"submolt":"general","title":"Hello","content":"..."}'
+            />
+            <button
+              type="button"
+              className="justify-self-start px-2.5 py-[4px] text-[11px] border border-border bg-surface text-muted hover:text-txt hover:border-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={actionsDisabled || busyAction.length > 0}
+              onClick={() => void handleCustomRequest()}
+            >
+              Run Custom Request
+            </button>
+          </div>
+          {lastResult && (
+            <div className="mt-2">
+              <div className="text-[11px] text-muted mb-1">
+                {lastResultLabel} · {lastResult.status}
+              </div>
+              <pre className="m-0 p-2 border border-border bg-bg text-[10px] leading-[1.45] text-muted whitespace-pre-wrap break-all max-h-[180px] overflow-auto">
+                {stringifyResult(lastResult.data)}
+              </pre>
+            </div>
+          )}
+        </div>
+
+        {errorMessage && (
+          <div className="text-[11px] border border-destructive bg-[rgba(153,27,27,0.04)] text-destructive px-2.5 py-2">
+            {errorMessage}
+          </div>
+        )}
+      </div>
+    </details>
+  );
+}
+
 /* ── Default Icons ─────────────────────────────────────────────────── */
 
 const DEFAULT_ICONS: Record<string, string> = {
@@ -1096,7 +1472,7 @@ const DEFAULT_ICONS: Record<string, string> = {
   babylon: "🎮",
   mysticism: "🔮",
   personality: "🎭",
-  moltbook: "📖",
+  moltbook: "🦞",
   tee: "🔏",
   blooio: "🟠",
   acp: "🏗️",
@@ -1107,7 +1483,8 @@ const DEFAULT_ICONS: Record<string, string> = {
 /** Resolve display icon: explicit plugin.icon, fallback to default map, or null. */
 function resolveIcon(p: PluginInfo): string | null {
   if (p.icon) return p.icon;
-  return DEFAULT_ICONS[p.id] ?? null;
+  const normalizedId = normalizePluginId(p.id);
+  return DEFAULT_ICONS[p.id] ?? DEFAULT_ICONS[normalizedId] ?? null;
 }
 
 /* ── Sub-group Classification ──────────────────────────────────────── */
@@ -1178,7 +1555,6 @@ const FEATURE_SUBGROUP: Record<string, string> = {
   babylon: "gaming",
   mysticism: "gaming",
   personality: "gaming",
-  moltbook: "gaming",
   ltcg: "gaming",
 };
 
@@ -1218,7 +1594,12 @@ function subgroupForPlugin(plugin: PluginInfo): string {
   if (plugin.id === "__ui-showcase__") return "showcase";
   if (plugin.category === "ai-provider") return "ai-provider";
   if (plugin.category === "connector") return "connector";
-  return FEATURE_SUBGROUP[plugin.id] ?? "feature-other";
+  const normalizedId = normalizePluginId(plugin.id);
+  return (
+    FEATURE_SUBGROUP[plugin.id] ??
+    FEATURE_SUBGROUP[normalizedId] ??
+    "feature-other"
+  );
 }
 
 type StatusFilter = "all" | "enabled";
@@ -2042,7 +2423,7 @@ function PluginListView({ label, mode = "all" }: PluginListViewProps) {
                 if (e.target === e.currentTarget) toggleSettings(p.id);
               }}
               onKeyDown={(e) => {
-                if (e.key === "Escape" || e.key === "Enter" || e.key === " ") {
+                if (e.key === "Escape") {
                   e.preventDefault();
                   toggleSettings(p.id);
                 }
@@ -2135,6 +2516,9 @@ function PluginListView({ label, mode = "all" }: PluginListViewProps) {
                     />
                     {p.id === "whatsapp" && (
                       <WhatsAppQrOverlay accountId="default" />
+                    )}
+                    {isMoltbookPlugin(p.id) && (
+                      <MoltbookControlPanel plugin={p} />
                     )}
                   </div>
                 </div>
@@ -2230,7 +2614,7 @@ function PluginListView({ label, mode = "all" }: PluginListViewProps) {
             }
           }}
           onKeyDown={(e) => {
-            if (e.key === "Escape" || e.key === "Enter" || e.key === " ") {
+            if (e.key === "Escape") {
               e.preventDefault();
               setAddDirOpen(false);
               setAddDirPath("");

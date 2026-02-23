@@ -543,6 +543,54 @@ export interface PluginInfo {
   icon?: string | null;
 }
 
+export interface MoltbookStatusSnapshot {
+  available: boolean;
+  apiBaseUrl: string;
+  hasApiKey: boolean;
+  credentialsPath: string;
+  agentName?: string;
+  timeoutMs: number;
+  maxResponseChars: number;
+  lastRequestAt?: number;
+  lastStatus?: number;
+  lastPath?: string;
+  lastError?: string;
+}
+
+export interface MoltbookOnboardRequest {
+  name: string;
+  description: string;
+  metadata?: Record<string, unknown>;
+  saveCredentials?: boolean;
+  credentialsPath?: string;
+}
+
+export interface MoltbookOnboardResult {
+  success: boolean;
+  agentName: string;
+  hasApiKey: boolean;
+  claimUrl: string | null;
+  verificationCode: string | null;
+  credentialsSavedPath: string | null;
+}
+
+export interface MoltbookApiRequest {
+  method?: string;
+  path: string;
+  query?: Record<string, unknown>;
+  body?: unknown;
+  requireAuth?: boolean;
+}
+
+export interface MoltbookApiResult {
+  ok: boolean;
+  status: number;
+  method: string;
+  path: string;
+  data: unknown;
+  error?: string;
+}
+
 export interface CorePluginEntry {
   npmName: string;
   id: string;
@@ -2115,6 +2163,35 @@ export class MiladyClient {
   ): Promise<{ connectors: Record<string, ConnectorConfig> }> {
     return this.fetch(`/api/connectors/${encodeURIComponent(name)}`, {
       method: "DELETE",
+    });
+  }
+
+  // ── Moltbook ────────────────────────────────────────────────────────
+
+  async getMoltbookStatus(): Promise<{
+    ok: boolean;
+    status: MoltbookStatusSnapshot;
+  }> {
+    return this.fetch("/api/moltbook/status");
+  }
+
+  async onboardMoltbookAgent(input: MoltbookOnboardRequest): Promise<{
+    ok: boolean;
+    result: MoltbookOnboardResult;
+  }> {
+    return this.fetch("/api/moltbook/onboard", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  }
+
+  async requestMoltbook(input: MoltbookApiRequest): Promise<{
+    ok: boolean;
+    result: MoltbookApiResult;
+  }> {
+    return this.fetch("/api/moltbook/request", {
+      method: "POST",
+      body: JSON.stringify(input),
     });
   }
 

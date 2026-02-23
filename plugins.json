@@ -5368,101 +5368,91 @@
       "dirName": "plugin-moltbook",
       "name": "Moltbook",
       "npmName": "@elizaos/plugin-moltbook",
-      "description": "Moltbook social plugin for Eliza agents - Reddit-style platform for AI agents",
-      "category": "feature",
-      "envKey": "MOLTBOOK_TOKEN",
+      "description": "Moltbook integration for ElizaOS. Supports onboarding and safe API requests bound to www.moltbook.com.",
+      "category": "connector",
+      "envKey": "MOLTBOOK_API_KEY",
       "configKeys": [
-        "MOLTBOOK_TOKEN",
+        "MOLTBOOK_API_BASE_URL",
+        "MOLTBOOK_API_KEY",
         "MOLTBOOK_AGENT_NAME",
-        "MOLTBOOK_MODEL",
-        "MOLTBOOK_PERSONALITY",
-        "MOLTBOOK_AUTONOMY_INTERVAL_MS",
-        "MOLTBOOK_AUTONOMY_MAX_STEPS",
-        "MOLTBOOK_AUTONOMOUS_MODE"
+        "MOLTBOOK_CREDENTIALS_PATH",
+        "MOLTBOOK_TIMEOUT_MS",
+        "MOLTBOOK_MAX_RESPONSE_CHARS"
       ],
-      "version": "2.0.0-alpha.4",
+      "version": "1.7.3-alpha.3",
       "pluginParameters": {
-        "MOLTBOOK_TOKEN": {
+        "MOLTBOOK_API_BASE_URL": {
           "type": "string",
-          "description": "Authentication token for Moltbook",
+          "description": "Moltbook API base URL (must use https://www.moltbook.com/api/v1)",
+          "required": false,
+          "sensitive": false
+        },
+        "MOLTBOOK_API_KEY": {
+          "type": "string",
+          "description": "Moltbook API key for authenticated requests",
           "required": false,
           "sensitive": true
         },
         "MOLTBOOK_AGENT_NAME": {
           "type": "string",
-          "description": "Agent display name",
+          "description": "Default Moltbook agent name for onboarding actions",
           "required": false,
           "sensitive": false
         },
-        "MOLTBOOK_MODEL": {
+        "MOLTBOOK_CREDENTIALS_PATH": {
           "type": "string",
-          "description": "Model identifier",
+          "description": "Credentials file path (default: ~/.config/moltbook/credentials.json)",
           "required": false,
           "sensitive": false
         },
-        "MOLTBOOK_PERSONALITY": {
-          "type": "string",
-          "description": "Agent personality description",
-          "required": false,
-          "sensitive": false
-        },
-        "MOLTBOOK_AUTONOMY_INTERVAL_MS": {
+        "MOLTBOOK_TIMEOUT_MS": {
           "type": "number",
-          "description": "Interval in milliseconds",
+          "description": "HTTP timeout in milliseconds",
           "required": false,
           "sensitive": false
         },
-        "MOLTBOOK_AUTONOMY_MAX_STEPS": {
+        "MOLTBOOK_MAX_RESPONSE_CHARS": {
           "type": "number",
-          "description": "Maximum number of steps",
-          "required": false,
-          "sensitive": false
-        },
-        "MOLTBOOK_AUTONOMOUS_MODE": {
-          "type": "string",
-          "description": "Enable autonomous operation mode",
+          "description": "Maximum response characters returned by actions",
           "required": false,
           "sensitive": false
         }
       },
       "configUiHints": {
-        "MOLTBOOK_TOKEN": {
-          "label": "Auth Token",
+        "MOLTBOOK_API_BASE_URL": {
+          "label": "API Base URL",
+          "group": "Connection",
+          "width": "full"
+        },
+        "MOLTBOOK_API_KEY": {
+          "label": "API Key",
           "group": "Authentication",
-          "width": "half"
+          "width": "full"
         },
         "MOLTBOOK_AGENT_NAME": {
           "label": "Agent Name",
           "group": "Identity",
-          "width": "half"
-        },
-        "MOLTBOOK_MODEL": {
-          "label": "Model",
-          "group": "Identity",
-          "width": "half"
-        },
-        "MOLTBOOK_PERSONALITY": {
-          "label": "Personality",
-          "group": "Identity",
           "width": "full"
         },
-        "MOLTBOOK_AUTONOMY_INTERVAL_MS": {
-          "label": "Autonomy Interval",
-          "group": "Autonomy",
+        "MOLTBOOK_CREDENTIALS_PATH": {
+          "label": "Credentials Path",
+          "group": "Authentication",
+          "width": "full"
+        },
+        "MOLTBOOK_TIMEOUT_MS": {
+          "label": "HTTP Timeout",
+          "group": "Safety",
           "width": "half",
           "unit": "ms",
-          "min": 1000
+          "min": 1000,
+          "max": 120000
         },
-        "MOLTBOOK_AUTONOMY_MAX_STEPS": {
-          "label": "Max Steps",
-          "group": "Autonomy",
+        "MOLTBOOK_MAX_RESPONSE_CHARS": {
+          "label": "Max Response Chars",
+          "group": "Safety",
           "width": "half",
-          "min": 1
-        },
-        "MOLTBOOK_AUTONOMOUS_MODE": {
-          "label": "Autonomous Mode",
-          "group": "Autonomy",
-          "width": "half"
+          "min": 500,
+          "max": 500000
         }
       }
     },
