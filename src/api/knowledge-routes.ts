@@ -606,17 +606,18 @@ export async function handleKnowledgeRoutes(
     error(res, "Agent runtime is not available", 503);
     return true;
   }
+  const activeKnowledgeService = knowledgeService;
   const agentId = runtime.agentId as UUID;
 
   // ── GET /api/knowledge/stats ────────────────────────────────────────────
   if (method === "GET" && pathname === "/api/knowledge/stats") {
-    const documentCount = await knowledgeService.countMemories({
+    const documentCount = await activeKnowledgeService.countMemories({
       tableName: "documents",
       roomId: agentId,
       unique: false,
     });
 
-    const fragmentCount = await knowledgeService.countMemories({
+    const fragmentCount = await activeKnowledgeService.countMemories({
       tableName: "knowledge",
       roomId: agentId,
       unique: false,
@@ -635,7 +636,7 @@ export async function handleKnowledgeRoutes(
     const limit = parsePositiveInteger(url.searchParams.get("limit"), 100);
     const offset = parsePositiveInteger(url.searchParams.get("offset"), 0);
 
-    const documents = await knowledgeService.getMemories({
+    const documents = await activeKnowledgeService.getMemories({
       tableName: "documents",
       roomId: agentId,
       count: limit,
@@ -682,7 +683,7 @@ export async function handleKnowledgeRoutes(
   if (method === "GET" && docIdMatch) {
     const documentId = decodeURIComponent(docIdMatch[1]) as UUID;
 
-    const documents = await knowledgeService.getMemories({
+    const documents = await activeKnowledgeService.getMemories({
       tableName: "documents",
       roomId: agentId,
       count: 10000,
@@ -730,11 +731,11 @@ export async function handleKnowledgeRoutes(
     );
 
     for (const fragmentId of fragmentIds) {
-      await knowledgeService.deleteMemory(fragmentId);
+      await activeKnowledgeService.deleteMemory(fragmentId);
     }
 
     // Then delete the document itself
-    await knowledgeService.deleteMemory(documentId);
+    await activeKnowledgeService.deleteMemory(documentId);
 
     json(res, {
       ok: true,
@@ -757,7 +758,7 @@ export async function handleKnowledgeRoutes(
     fragmentCount: number;
     warnings?: string[];
   }> {
-    const result = await knowledgeService.addKnowledge({
+    const result = await activeKnowledgeService.addKnowledge({
       agentId,
       worldId: agentId,
       roomId: agentId,
@@ -771,7 +772,9 @@ export async function handleKnowledgeRoutes(
 
     const warningsValue = (result as { warnings?: unknown }).warnings;
     const warnings = Array.isArray(warningsValue)
-      ? warningsValue.filter((warning): warning is string => typeof warning === "string")
+      ? warningsValue.filter(
+          (warning): warning is string => typeof warning === "string",
+        )
       : undefined;
 
     return {
@@ -875,7 +878,8 @@ export async function handleKnowledgeRoutes(
           index,
           ok: false,
           filename,
-          error: err instanceof Error ? err.message : "Failed to upload document",
+          error:
+            err instanceof Error ? err.message : "Failed to upload document",
         });
       }
     }
