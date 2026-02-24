@@ -4117,6 +4117,46 @@ const LOCAL_ORIGIN_RE =
 const APP_ORIGIN_RE =
   /^(capacitor|capacitor-electron|app):\/\/(localhost|-)?$/i;
 
+/**
+ * Hostname allowlist for DNS rebinding protection.
+ * Requests with a Host header that doesn't match a known loopback name are
+ * rejected before CORS / auth processing.  This prevents a malicious page
+ * from rebinding its DNS to 127.0.0.1 and reading the unauthenticated API.
+ */
+const LOCAL_HOST_RE =
+  /^(localhost|127\.0\.0\.1|\[?::1\]?|\[?0:0:0:0:0:0:0:1\]?|::ffff:127\.0\.0\.1)$/;
+
+export function isAllowedHost(req: http.IncomingMessage): boolean {
+  const raw = req.headers.host;
+  if (!raw) return true; // No Host header → non-browser client (e.g. curl)
+
+  let hostname: string;
+  const trimmed = raw.trim().toLowerCase();
+  if (!trimmed) return true;
+
+  if (trimmed.startsWith("[")) {
+    // Bracketed IPv6: [::1]:31337 → ::1
+    const close = trimmed.indexOf("]");
+    hostname = close > 0 ? trimmed.slice(1, close) : trimmed.slice(1);
+  } else if ((trimmed.match(/:/g) || []).length >= 2) {
+    // Bare IPv6 (multiple colons, no brackets): ::1 → ::1
+    hostname = trimmed;
+  } else {
+    // IPv4 or hostname: localhost:31337 → localhost
+    hostname = trimmed.replace(/:\d+$/, "");
+  }
+
+  if (!hostname) return true;
+
+  // Allow configured custom bind host (if non-loopback, the token gate
+  // enforced by ensureApiTokenForBindHost already protects the API)
+  const bindHost = process.env.MILADY_API_BIND?.trim().toLowerCase();
+  if (bindHost && hostname === bindHost.replace(/:\d+$/, "").trim()) {
+    return true;
+  }
+  return LOCAL_HOST_RE.test(hostname);
+}
+
 function resolveCorsOrigin(origin?: string): string | null {
   if (!origin) return null;
   const trimmed = origin.trim();
@@ -5502,6 +5542,16 @@ async function handleRequest(
     res.statusCode = upstreamResponse.status;
     res.end(responseText);
   };
+
+  // ── DNS rebinding protection ──────────────────────────────────────────
+  // Reject requests whose Host header doesn't match a known loopback
+  // hostname.  Without this check an attacker can rebind their domain's
+  // DNS to 127.0.0.1 and read the unauthenticated localhost API from a
+  // malicious page.
+  if (!isAllowedHost(req)) {
+    json(res, { error: "Forbidden — invalid Host header" }, 403);
+    return;
+  }
 
   if (!applyCors(req, res)) {
     json(res, { error: "Origin not allowed" }, 403);
