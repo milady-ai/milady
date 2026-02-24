@@ -1686,6 +1686,42 @@ describe("API Server E2E (no runtime)", () => {
         await streamServer.close();
       }
     });
+
+    it("GET /api/conversations/:id/messages returns an empty messages array on runtime read failure", async () => {
+      const runtime = createRuntimeForChatSseTests();
+      runtime.getMemories = async () => {
+        throw new Error("forced-memories-failure");
+      };
+
+      const streamServer = await startApiServer({ port: 0, runtime });
+      try {
+        const create = await req(
+          streamServer.port,
+          "POST",
+          "/api/conversations",
+          {
+            title: "Conversation messages failure fallback",
+          },
+        );
+        expect(create.status).toBe(200);
+        const conversation = create.data.conversation as { id?: string };
+        const conversationId = conversation.id ?? "";
+        expect(conversationId.length).toBeGreaterThan(0);
+
+        const response = await req(
+          streamServer.port,
+          "GET",
+          `/api/conversations/${conversationId}/messages`,
+        );
+
+        expect(response.status).toBe(500);
+        expect(Array.isArray(response.data.messages)).toBe(true);
+        expect((response.data.messages as unknown[]).length).toBe(0);
+        expect(typeof response.data.error).toBe("string");
+      } finally {
+        await streamServer.close();
+      }
+    });
   });
 
   describe("trajectory endpoints (runtime stub)", () => {

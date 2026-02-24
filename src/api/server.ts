@@ -10145,7 +10145,7 @@ async function handleRequest(
       logger.warn(
         `[conversations] Failed to fetch messages: ${err instanceof Error ? err.message : String(err)}`,
       );
-      json(res, { error: "Failed to fetch messages" }, 500);
+      json(res, { messages: [], error: "Failed to fetch messages" }, 500);
     }
     return;
   }
