@@ -83,9 +83,10 @@ export function shouldReadKnowledgeFileAsText(file: Pick<File, "type" | "name">)
 
 function isSupportedKnowledgeFile(file: Pick<File, "name">): boolean {
   const lowerName = file.name.toLowerCase();
-  return Array.from(SUPPORTED_UPLOAD_EXTENSIONS).some((ext) =>
-    lowerName.endsWith(ext),
-  );
+  for (const extension of SUPPORTED_UPLOAD_EXTENSIONS) {
+    if (lowerName.endsWith(extension)) return true;
+  }
+  return false;
 }
 
 /* ── Stats Card ─────────────────────────────────────────────────────── */

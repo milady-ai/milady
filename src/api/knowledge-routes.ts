@@ -61,6 +61,8 @@ interface KnowledgeServiceLike {
 }
 
 const FRAGMENT_COUNT_BATCH_SIZE = 500;
+const KNOWLEDGE_UPLOAD_MAX_BODY_BYTES = 32 * 1_048_576; // 32 MB
+const MAX_BULK_DOCUMENTS = 100;
 const MAX_URL_IMPORT_BYTES = 10 * 1024 * 1024; // 10 MB
 const MAX_YOUTUBE_WATCH_PAGE_BYTES = 2 * 1024 * 1024; // 2 MB
 const MAX_YOUTUBE_TRANSCRIPT_BYTES = 10 * 1024 * 1024; // 10 MB
@@ -782,7 +784,9 @@ export async function handleKnowledgeRoutes(
   // ── POST /api/knowledge/documents ───────────────────────────────────────
   // Upload document from base64 content or text
   if (method === "POST" && pathname === "/api/knowledge/documents") {
-    const body = await readJsonBody<KnowledgeUploadDocumentBody>(req, res);
+    const body = await readJsonBody<KnowledgeUploadDocumentBody>(req, res, {
+      maxBytes: KNOWLEDGE_UPLOAD_MAX_BODY_BYTES,
+    });
     if (!body) return true;
 
     if (!body.content || !body.filename) {
@@ -805,7 +809,9 @@ export async function handleKnowledgeRoutes(
   if (method === "POST" && pathname === "/api/knowledge/documents/bulk") {
     const body = await readJsonBody<{
       documents?: KnowledgeUploadDocumentBody[];
-    }>(req, res);
+    }>(req, res, {
+      maxBytes: KNOWLEDGE_UPLOAD_MAX_BODY_BYTES,
+    });
     if (!body) return true;
 
     if (!Array.isArray(body.documents) || body.documents.length === 0) {
@@ -813,7 +819,6 @@ export async function handleKnowledgeRoutes(
       return true;
     }
 
-    const MAX_BULK_DOCUMENTS = 100;
     if (body.documents.length > MAX_BULK_DOCUMENTS) {
       error(
         res,
@@ -851,7 +856,7 @@ export async function handleKnowledgeRoutes(
 
       const normalizedDocument: KnowledgeUploadDocumentBody = {
         ...document,
-        content: document.content.trim(),
+        content: document.content,
         filename: document.filename.trim(),
       };
 
