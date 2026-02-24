@@ -146,6 +146,52 @@ export OLLAMA_BASE_URL=http://192.168.1.100:11434
 
 Secure with a reverse proxy (Nginx + TLS) for production.
 
+## Troubleshooting
+
+### "Unsupported model version v1" Error
+
+**Symptoms:** Agent crashes or silently fails on first chat. Terminal shows:
+
+```
+Error: Unsupported model version v1
+```
+
+**Cause:** The `@elizaos/plugin-ollama` depends on `ollama-ai-provider@^1.2.0`, which uses the v1 AI SDK spec. The current runtime ships AI SDK v6, causing a silent version mismatch.
+
+**Workaround — Use Ollama's OpenAI-Compatible Endpoint:**
+
+Ollama exposes an OpenAI-compatible API at `http://localhost:11434/v1`. Route through the OpenAI plugin instead:
+
+```json5
+// ~/.milady/milady.json
+{
+  env: {
+    OPENAI_API_KEY: "ollama",                        // any non-empty string
+    OPENAI_BASE_URL: "http://localhost:11434/v1",     // ollama's openai-compat endpoint
+    SMALL_MODEL: "gemma3:4b",                        // your pulled model
+    LARGE_MODEL: "gemma3:4b",
+  },
+}
+```
+
+This bypasses `plugin-ollama` entirely and uses `plugin-openai` with your local Ollama instance. All models, streaming, and function calling work as expected.
+
+> **Tracking:** [elizaos-plugins/plugin-ollama#18](https://github.com/elizaos-plugins/plugin-ollama/issues/18)
+
+### Ollama Not Detected
+
+If Milady doesn't detect your Ollama instance:
+
+1. Verify Ollama is running: `curl http://localhost:11434/api/tags`
+2. Check you have models pulled: `ollama list`
+3. If using a non-default port, set `OLLAMA_BASE_URL` accordingly
+
+### Slow Responses
+
+- Check available RAM/VRAM — models running on CPU are significantly slower
+- Try a smaller model: `gemma3:4b` or `llama3.2:3b`
+- Close other GPU-intensive applications
+
 ## Related
 
 - [Groq Plugin](/plugin-registry/llm/groq) — Fast cloud inference for Llama models
