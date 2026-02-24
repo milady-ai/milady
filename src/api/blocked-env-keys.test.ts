@@ -27,6 +27,20 @@ const BLOCKED_ENV_KEYS = new Set([
   "NODE_OPTIONS",
   "NODE_EXTRA_CA_CERTS",
   "ELECTRON_RUN_AS_NODE",
+  // TLS bypass
+  "NODE_TLS_REJECT_UNAUTHORIZED",
+  // Proxy hijack
+  "HTTP_PROXY",
+  "HTTPS_PROXY",
+  "ALL_PROXY",
+  "NO_PROXY",
+  // Module resolution override
+  "NODE_PATH",
+  // CA certificate override
+  "SSL_CERT_FILE",
+  "SSL_CERT_DIR",
+  "CURL_CA_BUNDLE",
+  // Process environment
   "PATH",
   "HOME",
   "SHELL",
@@ -109,6 +123,42 @@ describe("BLOCKED_ENV_KEYS — privilege escalation prevention", () => {
     }
   });
 
+  /* ── TLS bypass ─────────────────────────────────────────────────── */
+
+  describe("TLS bypass must be blocked (MITM prevention)", () => {
+    it("blocks NODE_TLS_REJECT_UNAUTHORIZED", () => {
+      expect(BLOCKED_ENV_KEYS.has("NODE_TLS_REJECT_UNAUTHORIZED")).toBe(true);
+    });
+  });
+
+  /* ── Proxy hijack ───────────────────────────────────────────────── */
+
+  describe("proxy hijack vars must be blocked (traffic interception)", () => {
+    for (const key of ["HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "NO_PROXY"]) {
+      it(`blocks ${key}`, () => {
+        expect(BLOCKED_ENV_KEYS.has(key)).toBe(true);
+      });
+    }
+  });
+
+  /* ── Module resolution override ───────────────────────────────── */
+
+  describe("module resolution override must be blocked", () => {
+    it("blocks NODE_PATH", () => {
+      expect(BLOCKED_ENV_KEYS.has("NODE_PATH")).toBe(true);
+    });
+  });
+
+  /* ── CA certificate override ───────────────────────────────────── */
+
+  describe("CA certificate overrides must be blocked (MITM prevention)", () => {
+    for (const key of ["SSL_CERT_FILE", "SSL_CERT_DIR", "CURL_CA_BUNDLE"]) {
+      it(`blocks ${key}`, () => {
+        expect(BLOCKED_ENV_KEYS.has(key)).toBe(true);
+      });
+    }
+  });
+
   /* ── Database connection strings ──────────────────────────────── */
 
   describe("database connection strings must be blocked", () => {
@@ -123,7 +173,7 @@ describe("BLOCKED_ENV_KEYS — privilege escalation prevention", () => {
 
   /* ── Minimum size guard ───────────────────────────────────────── */
 
-  it("has at least 19 entries (guard against accidental truncation)", () => {
-    expect(BLOCKED_ENV_KEYS.size).toBeGreaterThanOrEqual(19);
+  it("has at least 28 entries (guard against accidental truncation)", () => {
+    expect(BLOCKED_ENV_KEYS.size).toBeGreaterThanOrEqual(28);
   });
 });

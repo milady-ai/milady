@@ -818,6 +818,22 @@ const BLOCKED_ENV_KEYS = new Set([
   "NODE_OPTIONS",
   "NODE_EXTRA_CA_CERTS",
   "ELECTRON_RUN_AS_NODE",
+  // TLS bypass — setting to "0" disables ALL certificate verification,
+  // enabling MITM interception of every outbound HTTPS request (API keys
+  // for OpenAI, Anthropic, ElevenLabs etc. sent in plaintext headers).
+  "NODE_TLS_REJECT_UNAUTHORIZED",
+  // Proxy hijack — routes all HTTP/HTTPS traffic through attacker proxy,
+  // exposing Authorization headers and API keys in transit.
+  "HTTP_PROXY",
+  "HTTPS_PROXY",
+  "ALL_PROXY",
+  "NO_PROXY",
+  // Module resolution override
+  "NODE_PATH",
+  // CA certificate override — trust rogue CAs for MITM
+  "SSL_CERT_FILE",
+  "SSL_CERT_DIR",
+  "CURL_CA_BUNDLE",
   "PATH",
   "HOME",
   "SHELL",
@@ -2976,6 +2992,15 @@ const BLOCKED_MCP_ENV_KEYS = new Set([
   "NODE_OPTIONS",
   "NODE_EXTRA_CA_CERTS",
   "ELECTRON_RUN_AS_NODE",
+  "NODE_TLS_REJECT_UNAUTHORIZED",
+  "HTTP_PROXY",
+  "HTTPS_PROXY",
+  "ALL_PROXY",
+  "NO_PROXY",
+  "NODE_PATH",
+  "SSL_CERT_FILE",
+  "SSL_CERT_DIR",
+  "CURL_CA_BUNDLE",
   "PATH",
   "HOME",
   "SHELL",
