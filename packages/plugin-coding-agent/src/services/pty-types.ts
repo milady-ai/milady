@@ -70,7 +70,7 @@ export const normalizeAgentType = (input: string): CodingAgentType => {
 export const toPiCommand = (task: string | undefined): string => {
   const trimmed = task?.trim();
   if (!trimmed) return "pi";
-  const shellSafe = `'${trimmed.replace(/'/g, `'\"'\"'`)}'`;
+  const shellSafe = `'${trimmed.replace(/'/g, `'"'"'`)}'`;
   return `pi ${shellSafe}`;
 };
 

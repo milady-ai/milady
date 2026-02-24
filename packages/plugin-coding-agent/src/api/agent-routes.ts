@@ -92,14 +92,11 @@ export async function handleAgentRoutes(
       }
 
       if (isPiAgentType(agentType)) {
-        sendJson(
-          res,
-          {
-            agentType: "pi",
-            memoryFilePath: ".pi/agent/settings.json",
-            files: [],
-          } as unknown as JsonValue,
-        );
+        sendJson(res, {
+          agentType: "pi",
+          memoryFilePath: ".pi/agent/settings.json",
+          files: [],
+        } as unknown as JsonValue);
         return true;
       }
 

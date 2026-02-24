@@ -42,7 +42,6 @@ import {
   setupDeferredTaskDelivery,
   setupOutputBuffer,
 } from "./pty-spawn.js";
-import { isPiAgentType, toPiCommand } from "./pty-types.js";
 import type {
   CodingAgentType,
   PTYServiceConfig,
@@ -50,6 +49,7 @@ import type {
   SessionInfo,
   SpawnSessionOptions,
 } from "./pty-types.js";
+import { isPiAgentType, toPiCommand } from "./pty-types.js";
 import { classifyStallOutput } from "./stall-classifier.js";
 
 export type {
