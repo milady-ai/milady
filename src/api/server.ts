@@ -4230,7 +4230,7 @@ function rateLimitPairing(ip: string | null): boolean {
   return true;
 }
 
-function extractAuthToken(req: http.IncomingMessage): string | null {
+export function extractAuthToken(req: http.IncomingMessage): string | null {
   const auth =
     typeof req.headers.authorization === "string"
       ? req.headers.authorization.trim()
@@ -4366,7 +4366,7 @@ export function ensureApiTokenForBindHost(host: string): void {
   );
 }
 
-function isAuthorized(req: http.IncomingMessage): boolean {
+export function isAuthorized(req: http.IncomingMessage): boolean {
   const expected = process.env.MILADY_API_TOKEN?.trim();
   if (!expected) return true;
   const provided = extractAuthToken(req);
