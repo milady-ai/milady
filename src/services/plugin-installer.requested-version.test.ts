@@ -164,9 +164,10 @@ describe("plugin-installer (requestedVersion)", () => {
     const installCall = execCalls.find(
       (c) => c.cmd === "npm" && c.args[0] === "install",
     );
-    expect(installCall?.args[1]).toBe(
-      `@elizaos/plugin-test@${requestedVersion}`,
+    const versionedArg = installCall?.args.find((a: string) =>
+      a.startsWith("@elizaos/plugin-test@"),
     );
+    expect(versionedArg).toBe(`@elizaos/plugin-test@${requestedVersion}`);
 
     const config = JSON.parse(await fs.readFile(configPath, "utf-8")) as {
       plugins?: {

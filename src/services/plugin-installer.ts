@@ -511,12 +511,25 @@ async function runInstallSpec(
   spec: string,
   targetDir: string,
 ): Promise<void> {
+  // SECURITY: --ignore-scripts prevents npm postinstall/preinstall scripts
+  // from executing arbitrary code on the host. Without this flag, any
+  // package (including compromised registered plugins) can run shell
+  // commands as the current user — reading wallet keys, installing
+  // backdoors, or exfiltrating credentials.
   switch (pm) {
     case "bun":
-      await execFileAsync("bun", ["add", spec], { cwd: targetDir });
+      await execFileAsync("bun", ["add", "--ignore-scripts", spec], {
+        cwd: targetDir,
+      });
       break;
     default:
-      await execFileAsync("npm", ["install", spec, "--prefix", targetDir]);
+      await execFileAsync("npm", [
+        "install",
+        "--ignore-scripts",
+        spec,
+        "--prefix",
+        targetDir,
+      ]);
   }
 }
 
@@ -651,7 +664,7 @@ async function gitCloneInstall(
     });
 
     const pm = await detectPackageManager();
-    await execFileAsync(pm, ["install"], { cwd: tempDir });
+    await execFileAsync(pm, ["install", "--ignore-scripts"], { cwd: tempDir });
 
     // If there's a typescript/ subdirectory (monorepo plugin structure),
     // build it and use that as the install target.
