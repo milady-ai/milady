@@ -6,7 +6,12 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": ["DOM", "DOM.Iterable", "ES2023", "ScriptHost"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2023",
+      "ScriptHost"
+    ],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "noEmit": true,
@@ -19,11 +24,20 @@
     "useDefineForClassFields": false,
     "baseUrl": ".",
     "paths": {
-      "@elizaos/plugin-*": ["./packages/plugin-*/src/index.ts"],
-      "@elizaos/*": ["./plugins/*/src/index.ts"]
+      "@elizaos/plugin-*": [
+        "./packages/plugin-*/src/index.ts"
+      ],
+      "@milaidy/plugin-*": [
+        "./packages/plugin-*/src/index.ts"
+      ],
+      "@elizaos/*": [
+        "./plugins/*/src/index.ts"
+      ]
     }
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*"
+  ],
   "exclude": [
     "node_modules",
     "dist",
