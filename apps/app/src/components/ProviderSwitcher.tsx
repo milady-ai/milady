@@ -140,15 +140,24 @@ export function ProviderSwitcher({
         const cloudEnabledCfg = cloud?.enabled === true;
         const defaultSmall = "moonshotai/kimi-k2-turbo";
         const defaultLarge = "moonshotai/kimi-k2-0905";
-        setCurrentSmallModel(
-          models?.small || (cloudEnabledCfg ? defaultSmall : ""),
-        );
-        setCurrentLargeModel(
-          models?.large || (cloudEnabledCfg ? defaultLarge : ""),
-        );
 
+        // Environment variables — needed both for model fallback and pi-ai
         const env = cfg.env as Record<string, unknown> | undefined;
         const vars = (env?.vars as Record<string, unknown> | undefined) ?? {};
+
+        // Fall back to SMALL_MODEL / LARGE_MODEL env vars when cfg.models
+        // is empty.  Local providers (e.g. Ollama) store the active model
+        // names as env vars rather than in cfg.models.
+        const envSmall =
+          typeof vars.SMALL_MODEL === "string" ? vars.SMALL_MODEL : "";
+        const envLarge =
+          typeof vars.LARGE_MODEL === "string" ? vars.LARGE_MODEL : "";
+        setCurrentSmallModel(
+          models?.small || envSmall || (cloudEnabledCfg ? defaultSmall : ""),
+        );
+        setCurrentLargeModel(
+          models?.large || envLarge || (cloudEnabledCfg ? defaultLarge : ""),
+        );
         const rawPiAi =
           (typeof vars.MILAIDY_USE_PI_AI === "string"
             ? vars.MILAIDY_USE_PI_AI
