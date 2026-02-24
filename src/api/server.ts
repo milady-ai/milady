@@ -10589,6 +10589,8 @@ async function handleRequest(
       const agentId = runtime.agentId;
       const messages = memories.map((m) => {
         const contentSource = (m.content as Record<string, unknown>)?.source;
+        const meta = m.metadata as Record<string, unknown> | undefined;
+        const entityName = meta?.entityName;
         return {
           id: m.id ?? "",
           role: m.entityId === agentId ? "assistant" : "user",
@@ -10597,6 +10599,10 @@ async function handleRequest(
           source:
             typeof contentSource === "string" && contentSource !== "client_chat"
               ? contentSource
+              : undefined,
+          from:
+            typeof entityName === "string" && entityName.length > 0
+              ? entityName
               : undefined,
         };
       });
@@ -12217,6 +12223,41 @@ async function handleRequest(
     return;
   }
 
+  // ── POST /api/agent/event ──────────────────────────────────────────────
+  // Push an event into the agent event stream (WebSocket + buffer).
+  // Used by plugins (e.g. retake) to surface activity in the StreamView.
+  if (method === "POST" && pathname === "/api/agent/event") {
+    const body = await readJsonBody<{
+      stream?: string;
+      data?: Record<string, unknown>;
+      roomId?: string;
+    }>(req, res);
+    if (!body || !body.stream) {
+      error(res, "Missing 'stream' field");
+      return;
+    }
+    const envelope: StreamEventEnvelope = {
+      type: "agent_event",
+      version: 1,
+      eventId: `evt-${state.nextEventId}`,
+      ts: Date.now(),
+      stream: body.stream,
+      agentId: state.runtime?.agentId
+        ? String(state.runtime.agentId)
+        : undefined,
+      roomId: body.roomId,
+      payload: body.data ?? {},
+    };
+    state.nextEventId += 1;
+    state.eventBuffer.push(envelope);
+    if (state.eventBuffer.length > 1500) {
+      state.eventBuffer.splice(0, state.eventBuffer.length - 1500);
+    }
+    state.broadcastWs?.(envelope as unknown as Record<string, unknown>);
+    json(res, { ok: true });
+    return;
+  }
+
   // ── POST /api/terminal/run ──────────────────────────────────────────────
   // Execute a shell command server-side and stream output via WebSocket.
   if (method === "POST" && pathname === "/api/terminal/run") {
@@ -13339,7 +13380,14 @@ export async function startApiServer(opts?: {
       detachRuntimeStreams = null;
     }
     const svc = getAgentEventSvc(runtime);
-    if (!svc) return;
+    if (!svc) {
+      if (runtime) {
+        logger.warn(
+          "[milady-api] AGENT_EVENT service not found on runtime — event streaming will be unavailable",
+        );
+      }
+      return;
+    }
 
     const unsubAgentEvents = svc.subscribe((event) => {
       pushEvent({
@@ -13489,9 +13537,7 @@ export async function startApiServer(opts?: {
       const connectors = state.config.connectors ?? {};
       if (isConnectorConfigured("retake", connectors.retake)) {
         try {
-          const { handleRetakeRoute, initRetakeAutoStart } = await import(
-            "./retake-routes.js"
-          );
+          const { handleRetakeRoute } = await import("./retake-routes.js");
           const retakeState = {
             streamManager,
             port,
@@ -13502,7 +13548,9 @@ export async function startApiServer(opts?: {
           state.connectorRouteHandlers.push((req, res, pathname, method) =>
             handleRetakeRoute(req, res, pathname, method, retakeState),
           );
-          initRetakeAutoStart(retakeState);
+          // Auto-start disabled — stream is started manually via POST /api/retake/live
+          // or the "Go Live" button in StreamView.
+          // initRetakeAutoStart(retakeState);
           addLog("info", "Retake connector routes registered", "system", [
             "system",
             "connectors",

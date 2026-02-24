@@ -240,6 +240,38 @@ async function startRetakeStream(
         inputMode: "pipe",
         framerate: 15,
       });
+
+      // Auto-start Electron frame capture so the UI is streamed without
+      // requiring a manual button click in the renderer.
+      // The Electron native module exposes the singleton on globalThis.
+      const scm = (
+        globalThis as unknown as {
+          __miladyScreenCaptureManager?: {
+            isFrameCaptureActive(): boolean;
+            startFrameCapture(opts: {
+              fps?: number;
+              quality?: number;
+              endpoint?: string;
+            }): Promise<void>;
+          };
+        }
+      ).__miladyScreenCaptureManager;
+      if (scm && !scm.isFrameCaptureActive()) {
+        try {
+          await scm.startFrameCapture({
+            fps: 15,
+            quality: 70,
+            endpoint: "/api/retake/frame",
+          });
+          logger.info("[retake] Auto-started Electron frame capture");
+        } catch (err) {
+          logger.warn(`[retake] Failed to auto-start frame capture: ${err}`);
+        }
+      } else if (!scm) {
+        logger.warn(
+          "[retake] ScreenCaptureManager not available — frame capture must be started manually",
+        );
+      }
       break;
     }
 
@@ -553,6 +585,98 @@ export function initRetakeAutoStart(state: RetakeRouteState): void {
     try {
       await startRetakeStream(state);
       logger.info("[milady-api] Retake.tv stream auto-started successfully");
+
+      // -- Periodic thumbnail updates (every 3 minutes) ---------------------
+      const thumbnailInterval = setInterval(async () => {
+        if (!state.streamManager.isRunning()) {
+          clearInterval(thumbnailInterval);
+          return;
+        }
+        try {
+          const scm = (
+            globalThis as unknown as {
+              __miladyScreenCaptureManager?: {
+                captureWindow(): Promise<Buffer>;
+              };
+            }
+          ).__miladyScreenCaptureManager;
+
+          let thumbnailBuffer: Buffer | null = null;
+          if (scm) {
+            try {
+              thumbnailBuffer = await scm.captureWindow();
+            } catch {
+              // Capture unavailable — skip this cycle
+            }
+          }
+          if (!thumbnailBuffer) return;
+
+          const thumbToken = resolve(
+            state,
+            "accessToken",
+            "RETAKE_AGENT_TOKEN",
+          );
+          const thumbApiUrl = resolve(
+            state,
+            "apiUrl",
+            "RETAKE_API_URL",
+            "https://retake.tv/api/v1",
+          );
+          if (!thumbToken) return;
+
+          const formData = new FormData();
+          formData.append(
+            "image",
+            new Blob([new Uint8Array(thumbnailBuffer)], { type: "image/jpeg" }),
+            "thumbnail.jpg",
+          );
+          await fetch(`${thumbApiUrl}/agent/update-thumbnail`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${thumbToken}` },
+            body: formData,
+          });
+          logger.info("[retake] Thumbnail updated");
+        } catch (err) {
+          logger.warn(
+            `[retake] Thumbnail update failed: ${err instanceof Error ? err.message : String(err)}`,
+          );
+        }
+      }, 3 * 60_000);
+
+      // -- Health watchdog (every 30 seconds) --------------------------------
+      let lastFrameCount = 0;
+      let staleFrameWarnings = 0;
+      const watchdogInterval = setInterval(() => {
+        if (!state.streamManager.isRunning()) {
+          clearInterval(watchdogInterval);
+          clearInterval(thumbnailInterval);
+          return;
+        }
+        const health = state.streamManager.getHealth();
+
+        // Check if FFmpeg died but stream should be running
+        if (!health.ffmpegAlive) {
+          logger.warn(
+            "[retake] Watchdog: FFmpeg not alive — restart expected via auto-recovery",
+          );
+        }
+
+        // Check for stale frames (no new frames in pipe mode)
+        if (
+          health.frameCount === lastFrameCount &&
+          health.inputMode === "pipe"
+        ) {
+          staleFrameWarnings++;
+          if (staleFrameWarnings >= 2) {
+            logger.warn(
+              `[retake] Watchdog: No new frames for ${staleFrameWarnings * 30}s (stuck at ${health.frameCount})`,
+            );
+          }
+        } else {
+          staleFrameWarnings = 0;
+        }
+        lastFrameCount = health.frameCount;
+      }, 30_000);
     } catch (err) {
       logger.warn(
         `[milady-api] Retake stream auto-start failed: ${err instanceof Error ? err.message : String(err)}`,
