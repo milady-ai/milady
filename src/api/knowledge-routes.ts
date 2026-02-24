@@ -606,18 +606,17 @@ export async function handleKnowledgeRoutes(
     error(res, "Agent runtime is not available", 503);
     return true;
   }
-  const activeKnowledgeService = knowledgeService;
   const agentId = runtime.agentId as UUID;
 
   // ── GET /api/knowledge/stats ────────────────────────────────────────────
   if (method === "GET" && pathname === "/api/knowledge/stats") {
-    const documentCount = await activeKnowledgeService.countMemories({
+    const documentCount = await knowledgeService.countMemories({
       tableName: "documents",
       roomId: agentId,
       unique: false,
     });
 
-    const fragmentCount = await activeKnowledgeService.countMemories({
+    const fragmentCount = await knowledgeService.countMemories({
       tableName: "knowledge",
       roomId: agentId,
       unique: false,
@@ -636,7 +635,7 @@ export async function handleKnowledgeRoutes(
     const limit = parsePositiveInteger(url.searchParams.get("limit"), 100);
     const offset = parsePositiveInteger(url.searchParams.get("offset"), 0);
 
-    const documents = await activeKnowledgeService.getMemories({
+    const documents = await knowledgeService.getMemories({
       tableName: "documents",
       roomId: agentId,
       count: limit,
@@ -683,7 +682,7 @@ export async function handleKnowledgeRoutes(
   if (method === "GET" && docIdMatch) {
     const documentId = decodeURIComponent(docIdMatch[1]) as UUID;
 
-    const documents = await activeKnowledgeService.getMemories({
+    const documents = await knowledgeService.getMemories({
       tableName: "documents",
       roomId: agentId,
       count: 10000,
@@ -731,11 +730,11 @@ export async function handleKnowledgeRoutes(
     );
 
     for (const fragmentId of fragmentIds) {
-      await activeKnowledgeService.deleteMemory(fragmentId);
+      await knowledgeService.deleteMemory(fragmentId);
     }
 
     // Then delete the document itself
-    await activeKnowledgeService.deleteMemory(documentId);
+    await knowledgeService.deleteMemory(documentId);
 
     json(res, {
       ok: true,
@@ -752,13 +751,14 @@ export async function handleKnowledgeRoutes(
   };
 
   async function addKnowledgeDocument(
+    service: KnowledgeServiceLike,
     document: KnowledgeUploadDocumentBody,
   ): Promise<{
     documentId: UUID;
     fragmentCount: number;
     warnings?: string[];
   }> {
-    const result = await activeKnowledgeService.addKnowledge({
+    const result = await service.addKnowledge({
       agentId,
       worldId: agentId,
       roomId: agentId,
@@ -797,7 +797,7 @@ export async function handleKnowledgeRoutes(
       return true;
     }
 
-    const result = await addKnowledgeDocument(body);
+    const result = await addKnowledgeDocument(knowledgeService, body);
 
     json(res, {
       ok: true,
@@ -864,7 +864,10 @@ export async function handleKnowledgeRoutes(
       };
 
       try {
-        const uploadResult = await addKnowledgeDocument(normalizedDocument);
+        const uploadResult = await addKnowledgeDocument(
+          knowledgeService,
+          normalizedDocument,
+        );
         results.push({
           index,
           ok: true,
