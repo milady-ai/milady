@@ -270,6 +270,44 @@ Or use `~/.milady/.env` for secrets.
 | [xAI](https://x.ai) | `XAI_API_KEY` | grok, based |
 | [DeepSeek](https://deepseek.com) | `DEEPSEEK_API_KEY` | reasoning arc |
 
+### Using Ollama (local models)
+
+[Ollama](https://ollama.ai) lets you run models locally with zero API keys. Install it, pull a model, and configure Milady:
+
+```bash
+# install ollama
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# pull a model
+ollama pull gemma3:4b
+```
+
+> **⚠️ Known issue:** The `@elizaos/plugin-ollama` has an SDK version incompatibility with the current AI SDK. Use Ollama's **OpenAI-compatible endpoint** as a workaround:
+
+Edit `~/.milady/milady.json`:
+
+```json5
+{
+  env: {
+    OPENAI_API_KEY: "ollama",           // any non-empty string works
+    OPENAI_BASE_URL: "http://localhost:11434/v1",  // ollama's openai-compat endpoint
+    SMALL_MODEL: "gemma3:4b",           // or any model you pulled
+    LARGE_MODEL: "gemma3:4b",
+  },
+}
+```
+
+This routes through the OpenAI plugin instead of the broken Ollama plugin. Works with any Ollama model — just make sure `ollama serve` is running.
+
+**Recommended models for local use:**
+
+| Model | Size | Vibe |
+|-------|------|------|
+| `gemma3:4b` | ~3GB | fast, good for chat |
+| `llama3.2` | ~2GB | lightweight, quick responses |
+| `mistral` | ~4GB | solid all-rounder |
+| `deepseek-r1:8b` | ~5GB | reasoning arc |
+
 ---
 
 ## Prerequisites
