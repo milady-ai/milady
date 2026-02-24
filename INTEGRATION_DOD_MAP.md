@@ -18,9 +18,7 @@ Repository: `milady-ai/milady`
 - External registry/marketplace boundaries include plugin registry, skill marketplace, and MCP registry (`src/services/registry-client.ts`, `src/services/skill-marketplace.ts`, `src/services/mcp-marketplace.ts`).
 - Connector ecosystem is plugin-driven with env/config auto-enable maps (`src/config/plugin-auto-enable.ts`, `src/config/schema.ts`).
 - Security hardening exists for wallet export token, MCP config validation, websocket auth, DB host pinning, and URL safety checks (`src/api/server.wallet-export-auth.test.ts`, `src/api/server.mcp-config-validation.test.ts`, `src/api/server.websocket-auth.test.ts`, `src/api/database.ts`, `src/cloud/validate-url.ts`, `src/api/knowledge-routes.ts`).
-- Coverage policy is inconsistent across repo docs/config:
-  - Policy docs say 70% floor (`AGENTS.md`, `CONTRIBUTING.md`).
-  - Enforced Vitest thresholds are currently 25/25/15/25 (`vitest.config.ts`).
+- Coverage policy is aligned: 25% lines/functions/statements, 15% branches — enforced in `vitest.config.ts` and documented in `AGENTS.md`, `CONTRIBUTING.md`, `docs/guides/contribution-guide.md`, and `.github/workflows/agent-review.yml`.
 
 ---
 
@@ -454,7 +452,7 @@ Prioritization order applied: correctness/security first, then reliability/obser
 
 | ID | Priority | Area | Owner | Integration | Missing item | Acceptance criteria | Verification command(s) | Suggested file locations | Risk if not done |
 |---|---|---|---|---|---|---|---|---|---|
-| MW-01 | P0 | DX/Tooling | DX/Tooling | Coverage policy governance | Coverage threshold drift (70% policy vs 25/15 enforced) | One canonical threshold decision; docs and `vitest.config.ts` match; CI fails on non-compliance | `bun run test:coverage` | `vitest.config.ts`, `AGENTS.md`, `CONTRIBUTING.md`, `docs/guides/contribution-guide.md` | False confidence and inconsistent review standards |
+| MW-01 | P0 | DX/Tooling | DX/Tooling | Coverage policy governance | ~~Coverage threshold drift~~ Resolved: all docs aligned to 25/25/15/25 | One canonical threshold decision; docs and `vitest.config.ts` match; CI fails on non-compliance | `bun run test:coverage` | `vitest.config.ts`, `AGENTS.md`, `CONTRIBUTING.md`, `docs/guides/contribution-guide.md`, `.github/workflows/agent-review.yml` | False confidence and inconsistent review standards |
 | MW-02 | P0 | Blockchain | Blockchain | Wallet/registry/drop | Missing direct tests for `tx-service`, `registry-service`, `drop-service` | Add deterministic unit tests for tx timeout, nonce/retry behavior, and route->service failure mapping | `bunx vitest run src/api/tx-service.test.ts src/api/registry-service.test.ts src/api/drop-service.test.ts` | `src/api/tx-service.test.ts`, `src/api/registry-service.test.ts`, `src/api/drop-service.test.ts` | On-chain failures/regressions can ship undetected |
 | MW-03 | P0 | Runtime | Runtime | x402 and CUA boundaries | Missing runtime-focused tests and explicit security assertions for both integrations | Add explicit x402 + CUA route/service tests, runtime mapping assertions, and docs-backed verify commands | `rg -n "x402|cua" src docs && bunx vitest run <new-tests>` | `src/runtime/eliza.ts`, `src/config/plugin-auto-enable.ts`, new tests under `src/runtime/` and `src/api/` | Payment/sandbox integrations remain under-verified in production path |
 | MW-04 | P0 | Security | Security | Websocket/auth surfaces | Ensure all sensitive ingress endpoints have explicit auth tests | Add/extend auth tests for config mutation, secrets update, connector mutation, MCP mutation | `bunx vitest run src/api/server.websocket-auth.test.ts src/api/server.mcp-config-validation.test.ts src/api/server.wallet-export-auth.test.ts` | `src/api/server.*.test.ts` | Unauthorized access vectors |
