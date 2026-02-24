@@ -1093,6 +1093,25 @@ export interface WorkbenchOverview {
   };
 }
 
+// Coding Agent Sessions
+export interface CodingAgentSession {
+  sessionId: string;
+  agentType: string;
+  label: string;
+  originalTask: string;
+  workdir: string;
+  status: "active" | "blocked" | "completed" | "stopped" | "error";
+  decisionCount: number;
+  autoResolvedCount: number;
+}
+
+export interface CodingAgentStatus {
+  supervisionLevel: string;
+  taskCount: number;
+  tasks: CodingAgentSession[];
+  pendingConfirmations: number;
+}
+
 // MCP
 export interface McpServerConfig {
   type: "stdio" | "streamable-http" | "sse";
@@ -4257,6 +4276,30 @@ export class MiladyClient {
       method: "POST",
       body: JSON.stringify(report),
     });
+  }
+
+  // ── Coding Agents ───────────────────────────────────────────────────
+
+  async getCodingAgentStatus(): Promise<CodingAgentStatus | null> {
+    try {
+      return await this.fetch<CodingAgentStatus>(
+        "/api/coding-agents/coordinator/status",
+      );
+    } catch {
+      return null;
+    }
+  }
+
+  async stopCodingAgent(sessionId: string): Promise<boolean> {
+    try {
+      await this.fetch(
+        `/api/coding-agents/${encodeURIComponent(sessionId)}/stop`,
+        { method: "POST" },
+      );
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
 
