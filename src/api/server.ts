@@ -810,6 +810,7 @@ function prefixLabel(key: string, suffix: string): string {
 // ---------------------------------------------------------------------------
 
 const BLOCKED_ENV_KEYS = new Set([
+  // System-level injection vectors
   "LD_PRELOAD",
   "LD_LIBRARY_PATH",
   "DYLD_INSERT_LIBRARIES",
@@ -820,8 +821,17 @@ const BLOCKED_ENV_KEYS = new Set([
   "PATH",
   "HOME",
   "SHELL",
+  // Auth / step-up tokens — writable via API would grant privilege escalation
   "MILADY_API_TOKEN",
   "MILADY_WALLET_EXPORT_TOKEN",
+  "MILADY_TERMINAL_RUN_TOKEN",
+  "HYPERSCAPE_AUTH_TOKEN",
+  // Wallet private keys — writable via API would enable key theft / replacement
+  "EVM_PRIVATE_KEY",
+  "SOLANA_PRIVATE_KEY",
+  // Third-party auth tokens
+  "GITHUB_TOKEN",
+  // Database connection strings
   "DATABASE_URL",
   "POSTGRES_URL",
 ]);
@@ -9431,14 +9441,24 @@ async function handleRequest(
       // path changes in future refactors.
       delete envPatch.MILADY_API_TOKEN;
       delete envPatch.MILADY_WALLET_EXPORT_TOKEN;
+      delete envPatch.MILADY_TERMINAL_RUN_TOKEN;
+      delete envPatch.HYPERSCAPE_AUTH_TOKEN;
+      delete envPatch.EVM_PRIVATE_KEY;
+      delete envPatch.SOLANA_PRIVATE_KEY;
+      delete envPatch.GITHUB_TOKEN;
       if (
         envPatch.vars &&
         typeof envPatch.vars === "object" &&
         !Array.isArray(envPatch.vars)
       ) {
-        delete (envPatch.vars as Record<string, unknown>).MILADY_API_TOKEN;
-        delete (envPatch.vars as Record<string, unknown>)
-          .MILADY_WALLET_EXPORT_TOKEN;
+        const vars = envPatch.vars as Record<string, unknown>;
+        delete vars.MILADY_API_TOKEN;
+        delete vars.MILADY_WALLET_EXPORT_TOKEN;
+        delete vars.MILADY_TERMINAL_RUN_TOKEN;
+        delete vars.HYPERSCAPE_AUTH_TOKEN;
+        delete vars.EVM_PRIVATE_KEY;
+        delete vars.SOLANA_PRIVATE_KEY;
+        delete vars.GITHUB_TOKEN;
       }
     }
 
