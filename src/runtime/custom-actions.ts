@@ -101,7 +101,13 @@ async function runCodeHandler(
   }
 
   const script = `(async () => { ${code} })();`;
-  const context: Record<string, unknown> = { params, fetch: safeCodeFetch };
+  // Build a null-prototype context so user code cannot escape the sandbox
+  // via constructor chain traversal (e.g. this.constructor.constructor(
+  // 'return process')()). All injected values are frozen to prevent
+  // prototype mutation.
+  const context: Record<string, unknown> = Object.create(null);
+  context.params = Object.freeze({ ...params });
+  context.fetch = safeCodeFetch;
   return await vmRunner.runInNewContext(`"use strict"; ${script}`, context, {
     filename: "milady-custom-action",
     timeout: 30_000,
