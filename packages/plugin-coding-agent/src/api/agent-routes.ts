@@ -479,6 +479,30 @@ export async function handleAgentRoutes(
     return true;
   }
 
+  // === Get Buffered Terminal Output (raw ANSI for xterm.js hydration) ===
+  // GET /api/coding-agents/:id/buffered-output
+  const bufferedMatch = pathname.match(
+    /^\/api\/coding-agents\/([^/]+)\/buffered-output$/,
+  );
+  if (method === "GET" && bufferedMatch) {
+    if (!ctx.ptyService?.consoleBridge) {
+      sendError(res, "Console bridge not available", 503);
+      return true;
+    }
+    try {
+      const sessionId = bufferedMatch[1];
+      const output = ctx.ptyService.consoleBridge.getBufferedOutput(sessionId);
+      sendJson(res, { sessionId, output });
+    } catch (error) {
+      sendError(
+        res,
+        error instanceof Error ? error.message : "Failed to get buffered output",
+        500,
+      );
+    }
+    return true;
+  }
+
   // Route not handled
   return false;
 }

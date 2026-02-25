@@ -23,6 +23,7 @@ import type {
   StallClassification,
   WorkerSessionHandle,
 } from "pty-manager";
+import { PTYConsoleBridge } from "pty-console";
 import { AgentMetricsTracker } from "./agent-metrics.js";
 import {
   handleGeminiAuth as handleGeminiAuthFlow,
@@ -85,6 +86,8 @@ export class PTYService {
   private static readonly MAX_TRACE_ENTRIES = 200;
   /** Lightweight per-agent-type metrics for observability */
   private metricsTracker = new AgentMetricsTracker();
+  /** Console bridge for terminal output streaming and buffered hydration */
+  consoleBridge: PTYConsoleBridge | null = null;
 
   constructor(runtime: IAgentRuntime, config: PTYServiceConfig = {}) {
     this.runtime = runtime;
@@ -146,6 +149,17 @@ export class PTYService {
     });
     this.manager = result.manager;
     this.usingBunWorker = result.usingBunWorker;
+
+    // Wire console bridge for terminal output streaming / hydration
+    try {
+      this.consoleBridge = new PTYConsoleBridge(this.manager, {
+        maxBufferedCharsPerSession: 100_000,
+      });
+      this.log("PTYConsoleBridge wired");
+    } catch (err) {
+      this.log(`Failed to wire PTYConsoleBridge: ${err}`);
+    }
+
     this.log("PTYService initialized");
   }
 
@@ -157,6 +171,11 @@ export class PTYService {
       coordinator.stop();
       (this.runtime as unknown as Record<string, unknown>).__swarmCoordinator =
         undefined;
+    }
+
+    if (this.consoleBridge) {
+      this.consoleBridge.close();
+      this.consoleBridge = null;
     }
 
     for (const unsubscribe of this.outputUnsubscribers.values()) {

@@ -29,6 +29,7 @@ import {
 } from "@elizaos/core";
 import { listPiAiModelOptions } from "@elizaos/plugin-pi-ai";
 import { createCodingAgentRouteHandler } from "@milaidy/plugin-coding-agent";
+import type { PTYService } from "@milaidy/plugin-coding-agent";
 import { type WebSocket, WebSocketServer } from "ws";
 import type { CloudManager } from "../cloud/cloud-manager";
 import {
@@ -5379,9 +5380,22 @@ function wireCodingAgentWsBridge(st: ServerState): boolean {
     | undefined;
   if (!coordinator?.setWsBroadcast) return false;
   coordinator.setWsBroadcast((event: Record<string, unknown>) => {
-    st.broadcastWs?.({ type: "pty-session-event", ...event });
+    // Preserve the coordinator's event type (task_registered, task_complete, etc.)
+    // as `eventType` so it doesn't overwrite the WS message dispatch type.
+    const { type: eventType, ...rest } = event;
+    st.broadcastWs?.({ type: "pty-session-event", eventType, ...rest });
   });
   return true;
+}
+
+/**
+ * Get the PTYConsoleBridge from the PTYService (if available).
+ * Used by the WS PTY handlers to subscribe to output and forward input.
+ */
+function getPtyConsoleBridge(st: ServerState) {
+  if (!st.runtime) return null;
+  const ptyService = st.runtime.getService("PTY_SERVICE") as unknown as PTYService | null;
+  return ptyService?.consoleBridge ?? null;
 }
 
 /**
@@ -10606,6 +10620,16 @@ async function handleRequest(
       aborted = true;
     });
 
+    // SSE heartbeat: keep data flowing during long generation (LLM + action
+    // execution can take 30-60s).  Without this, idle connections can be
+    // dropped by proxies, browsers, or load-balancers.  SSE comments (lines
+    // starting with ':') are ignored by the client parser.
+    const heartbeatInterval = setInterval(() => {
+      if (!aborted && !res.writableEnded) {
+        res.write(": heartbeat\n\n");
+      }
+    }, 5000);
+
     try {
       const result = await generateChatResponse(
         runtime,
@@ -10685,6 +10709,7 @@ async function handleRequest(
         }
       }
     } finally {
+      clearInterval(heartbeatInterval);
       res.end();
     }
     return;
@@ -13401,6 +13426,8 @@ export async function startApiServer(opts?: {
   const wss = new WebSocketServer({ noServer: true });
   const wsClients = new Set<WebSocket>();
   const wsClientIds = new WeakMap<WebSocket, string>();
+  /** Per-WS-client PTY output subscriptions: sessionId → unsubscribe */
+  const wsClientPtySubscriptions = new WeakMap<WebSocket, Map<string, () => void>>();
   bindRuntimeStreams(opts?.runtime ?? null);
   bindTrainingStream();
 
@@ -13495,6 +13522,42 @@ export async function startApiServer(opts?: {
         } else if (msg.type === "active-conversation") {
           state.activeConversationId =
             typeof msg.conversationId === "string" ? msg.conversationId : null;
+        } else if (msg.type === "pty-subscribe" && typeof msg.sessionId === "string") {
+          const bridge = getPtyConsoleBridge(state);
+          if (bridge) {
+            let subs = wsClientPtySubscriptions.get(ws);
+            if (!subs) {
+              subs = new Map();
+              wsClientPtySubscriptions.set(ws, subs);
+            }
+            // Don't double-subscribe
+            if (!subs.has(msg.sessionId)) {
+              const targetId = msg.sessionId;
+              const listener = (evt: { sessionId: string; data: string }) => {
+                if (evt.sessionId !== targetId) return;
+                if (ws.readyState === 1) {
+                  ws.send(JSON.stringify({ type: "pty-output", sessionId: targetId, data: evt.data }));
+                }
+              };
+              bridge.on("session_output", listener);
+              subs.set(targetId, () => bridge.off("session_output", listener));
+            }
+          }
+        } else if (msg.type === "pty-unsubscribe" && typeof msg.sessionId === "string") {
+          const subs = wsClientPtySubscriptions.get(ws);
+          const unsub = subs?.get(msg.sessionId);
+          if (unsub) {
+            unsub();
+            subs!.delete(msg.sessionId);
+          }
+        } else if (msg.type === "pty-input" && typeof msg.sessionId === "string" && typeof msg.data === "string") {
+          const bridge = getPtyConsoleBridge(state);
+          if (bridge) bridge.writeRaw(msg.sessionId, msg.data);
+        } else if (msg.type === "pty-resize" && typeof msg.sessionId === "string") {
+          const bridge = getPtyConsoleBridge(state);
+          if (bridge && typeof msg.cols === "number" && typeof msg.rows === "number") {
+            bridge.resize(msg.sessionId, msg.cols, msg.rows);
+          }
         }
       } catch (err) {
         logger.error(
@@ -13505,6 +13568,12 @@ export async function startApiServer(opts?: {
 
     ws.on("close", () => {
       wsClients.delete(ws);
+      // Clean up any PTY output subscriptions for this client
+      const subs = wsClientPtySubscriptions.get(ws);
+      if (subs) {
+        for (const unsub of subs.values()) unsub();
+        subs.clear();
+      }
       addLog("info", "WebSocket client disconnected", "websocket", [
         "server",
         "websocket",
@@ -13516,6 +13585,12 @@ export async function startApiServer(opts?: {
         `[milady-api] WebSocket error: ${err instanceof Error ? err.message : err}`,
       );
       wsClients.delete(ws);
+      // Clean up PTY subscriptions on error too
+      const subs = wsClientPtySubscriptions.get(ws);
+      if (subs) {
+        for (const unsub of subs.values()) unsub();
+        subs.clear();
+      }
     });
   });
 

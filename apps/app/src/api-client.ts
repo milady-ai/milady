@@ -4301,6 +4301,40 @@ export class MiladyClient {
       return false;
     }
   }
+
+  // ── PTY Terminal (xterm.js bridge) ─────────────────────────────────────
+
+  /** Subscribe to live PTY output for a session over WebSocket. */
+  subscribePtyOutput(sessionId: string): void {
+    this.sendWsMessage({ type: "pty-subscribe", sessionId });
+  }
+
+  /** Unsubscribe from live PTY output for a session. */
+  unsubscribePtyOutput(sessionId: string): void {
+    this.sendWsMessage({ type: "pty-unsubscribe", sessionId });
+  }
+
+  /** Send raw keyboard input to a PTY session. */
+  sendPtyInput(sessionId: string, data: string): void {
+    this.sendWsMessage({ type: "pty-input", sessionId, data });
+  }
+
+  /** Resize a PTY session's terminal dimensions. */
+  resizePty(sessionId: string, cols: number, rows: number): void {
+    this.sendWsMessage({ type: "pty-resize", sessionId, cols, rows });
+  }
+
+  /** Fetch buffered terminal output (raw ANSI) for xterm.js hydration. */
+  async getPtyBufferedOutput(sessionId: string): Promise<string> {
+    try {
+      const res = await this.fetch<{ output: string }>(
+        `/api/coding-agents/${encodeURIComponent(sessionId)}/buffered-output`,
+      );
+      return res.output ?? "";
+    } catch {
+      return "";
+    }
+  }
 }
 
 // Singleton
