@@ -3,11 +3,10 @@
  */
 
 import { describe, expect, it } from "bun:test";
-import {
-  captureTaskResponse,
-  cleanForChat,
-  stripAnsi,
-} from "../services/ansi-utils.js";
+
+const { captureTaskResponse, cleanForChat, stripAnsi } = await import(
+  "../services/ansi-utils.js"
+);
 
 describe("stripAnsi", () => {
   it("should replace cursor movement codes with spaces", () => {
@@ -43,7 +42,7 @@ describe("cleanForChat", () => {
   });
 
   it("should strip Claude Code prompt character", () => {
-    const input = "❯ some prompt text";
+    const input = "\u276F some prompt text";
     expect(cleanForChat(input)).toBe("some prompt text");
   });
 
@@ -89,7 +88,7 @@ describe("cleanForChat", () => {
   });
 
   it("should strip TUI decorative characters while preserving text", () => {
-    const input = "✔ Create garden & farming system (garden.py)";
+    const input = "\u2714 Create garden & farming system (garden.py)";
     expect(cleanForChat(input)).toBe(
       "Create garden & farming system (garden.py)",
     );

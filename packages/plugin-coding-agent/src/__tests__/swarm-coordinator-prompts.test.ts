@@ -1,19 +1,20 @@
 /**
  * Swarm Coordinator prompt construction and parsing tests
  *
- * Tests buildCoordinationPrompt() and parseCoordinationResponse() —
+ * Tests buildCoordinationPrompt() and parseCoordinationResponse() --
  * pure functions, no mocks needed.
  */
 
 import { describe, expect, it } from "bun:test";
-import type {
-  DecisionHistoryEntry,
-  TaskContextSummary,
-} from "../services/swarm-coordinator-prompts.js";
-import {
-  buildCoordinationPrompt,
-  parseCoordinationResponse,
-} from "../services/swarm-coordinator-prompts.js";
+
+type DecisionHistoryEntry =
+  import("../services/swarm-coordinator-prompts.js").DecisionHistoryEntry;
+type TaskContextSummary =
+  import("../services/swarm-coordinator-prompts.js").TaskContextSummary;
+
+const { buildCoordinationPrompt, parseCoordinationResponse } = await import(
+  "../services/swarm-coordinator-prompts.js"
+);
 
 const makeTaskCtx = (
   overrides: Partial<TaskContextSummary> = {},

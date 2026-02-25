@@ -5,14 +5,9 @@
  * LLM decision loop, supervision levels, and confirmation queue.
  */
 
-import { beforeEach, describe, expect, it, jest, mock } from "bun:test";
+import { beforeEach, describe, expect, it, jest } from "bun:test";
 
-// Mock modules BEFORE importing the coordinator
-mock.module("@elizaos/core", () => ({
-  ModelType: { TEXT_SMALL: "text-small" },
-}));
-
-// Dynamic import after mocks
+// Dynamic import after preload mocks
 const { SwarmCoordinator } = await import("../services/swarm-coordinator.js");
 
 // ---------------------------------------------------------------------------
@@ -30,6 +25,7 @@ const createMockPTYService = () => ({
   sendToSession: jest.fn().mockResolvedValue(undefined),
   sendKeysToSession: jest.fn().mockResolvedValue(undefined),
   getSessionOutput: jest.fn().mockResolvedValue("recent output"),
+  stopSession: jest.fn().mockResolvedValue(undefined),
   listSessions: jest.fn().mockResolvedValue([]),
 });
 
@@ -267,6 +263,56 @@ describe("SwarmCoordinator", () => {
 
       // No crash — event is buffered
       expect(coordinator.getTaskContext("s-unknown")).toBeUndefined();
+    });
+
+    it("replays buffered events after task registration", async () => {
+      // Send a blocked event for a session that hasn't been registered yet
+      await coordinator.handleSessionEvent("s-late", "error", {
+        message: "test error",
+      });
+
+      // Now register the session — buffered events should replay
+      coordinator.registerTask("s-late", {
+        agentType: "claude",
+        label: "late-agent",
+        originalTask: "Fix thing",
+        workdir: "/w",
+      });
+
+      // Wait for buffered event replay (flush is synchronous after registerTask)
+      await new Promise((r) => setTimeout(r, 50));
+
+      const ctx = coordinator.getTaskContext("s-late");
+      expect(ctx).toBeDefined();
+      expect(ctx.status).toBe("error");
+    });
+
+    it("updates activity timestamp on session events", async () => {
+      const before = Date.now();
+      await new Promise((r) => setTimeout(r, 10));
+
+      await coordinator.handleSessionEvent("s-1", "ready", {});
+
+      const ctx = coordinator.getTaskContext("s-1");
+      expect(ctx.lastActivityAt).toBeGreaterThan(before);
+      expect(ctx.idleCheckCount).toBe(0);
+    });
+
+    it("broadcasts unknown event types for observability", async () => {
+      const res = createMockSseRes();
+      coordinator.addSseClient(res);
+      res.write.mockClear();
+
+      await coordinator.handleSessionEvent("s-1", "custom_event", {
+        detail: "test",
+      });
+
+      const events = res.write.mock.calls.map((c: unknown[]) =>
+        JSON.parse((c[0] as string).replace("data: ", "").trim()),
+      );
+      expect(
+        events.some((e: { type: string }) => e.type === "custom_event"),
+      ).toBe(true);
     });
   });
 

@@ -7,8 +7,11 @@
 
 import { beforeEach, describe, expect, it, jest } from "bun:test";
 import { EventEmitter } from "node:events";
-import { handleCoordinatorRoutes } from "../api/coordinator-routes.js";
-import type { RouteContext } from "../api/routes.js";
+
+const { handleCoordinatorRoutes } = await import(
+  "../api/coordinator-routes.js"
+);
+type RouteContext = import("../api/routes.js").RouteContext;
 
 // ---------------------------------------------------------------------------
 // Mock request / response helpers (same pattern as routes.test.ts)
@@ -162,6 +165,16 @@ describe("coordinator routes", () => {
         }),
       );
       expect(asMock(ctx.coordinator).addSseClient).toHaveBeenCalledWith(res);
+    });
+
+    it("does not set wildcard CORS header (server middleware handles CORS)", async () => {
+      const req = createMockReq("GET", `${PREFIX}/events`);
+      const res = createMockRes();
+
+      await handleCoordinatorRoutes(req, res, `${PREFIX}/events`, ctx);
+
+      const headers = res.writeHead.mock.calls[0][1];
+      expect(headers["Access-Control-Allow-Origin"]).toBeUndefined();
     });
   });
 
