@@ -3033,6 +3033,17 @@ const BLOCKED_INTERPRETER_FLAGS = new Set([
   "--preload",
   "-c",
   "-m",
+  // V8 inspector — opens an unauthenticated debug port (default 9229) that
+  // allows arbitrary code execution via Chrome DevTools Protocol.  If bound
+  // to 0.0.0.0, any network peer can connect → RCE without any token.
+  "--inspect",
+  "--inspect-brk",
+  "--inspect-wait",
+  "--inspect-port",
+  "--inspect-publish-uid",
+  // Policy / diagnostics file access
+  "--experimental-policy",
+  "--diagnostic-dir",
 ]);
 
 const BLOCKED_PACKAGE_RUNNER_FLAGS = new Set(["-c", "--call", "-e", "--eval"]);
