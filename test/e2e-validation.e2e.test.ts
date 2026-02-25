@@ -490,6 +490,7 @@ describe("CLI Entry Point (npx miladyai equivalent)", () => {
     const output = fs.existsSync(outPath) ? fs.readFileSync(outPath, "utf-8") : "";
     if (fs.existsSync(outPath)) fs.unlinkSync(outPath);
 
+
     // Should contain a semver-like version
     expect(output).toMatch(/\d+\.\d+\.\d+/);
   }, 45_000);

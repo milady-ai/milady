@@ -232,13 +232,13 @@ interface ServerState {
   runtime: AgentRuntime | null;
   config: MiladyConfig;
   agentState:
-    | "not_started"
-    | "starting"
-    | "running"
-    | "paused"
-    | "stopped"
-    | "restarting"
-    | "error";
+  | "not_started"
+  | "starting"
+  | "running"
+  | "paused"
+  | "stopped"
+  | "restarting"
+  | "error";
   agentName: string;
   model: string | undefined;
   startedAt: number | undefined;
@@ -274,8 +274,8 @@ interface ServerState {
   broadcastWs: ((data: Record<string, unknown>) => void) | null;
   /** Broadcast a JSON payload to WebSocket clients bound to a specific client id. */
   broadcastWsToClientId:
-    | ((clientId: string, data: Record<string, unknown>) => number)
-    | null;
+  | ((clientId: string, data: Record<string, unknown>) => number)
+  | null;
   /** Currently active conversation ID from the frontend (sent via WS). */
   activeConversationId: string | null;
   /** Transient OAuth flow state for subscription auth. */
@@ -428,13 +428,13 @@ type ResponseBlock =
   | { type: "text"; text: string }
   | { type: "ui-spec"; spec: Record<string, unknown>; raw: string }
   | {
-      type: "config-form";
-      pluginId: string;
-      pluginName?: string;
-      schema: Record<string, unknown>;
-      hints?: Record<string, unknown>;
-      values?: Record<string, unknown>;
-    };
+    type: "config-form";
+    pluginId: string;
+    pluginName?: string;
+    schema: Record<string, unknown>;
+    hints?: Record<string, unknown>;
+    values?: Record<string, unknown>;
+  };
 
 /** Regex matching fenced JSON code blocks: ```json ... ``` or ``` ... ``` */
 const FENCED_JSON_RE_SERVER = /```(?:json)?\s*\n([\s\S]*?)```/g;
@@ -1155,10 +1155,10 @@ function discoverPluginsFromManifest(): PluginEntry[] {
             : filteredConfigKeys.length === 0;
           const filteredParams = p.pluginParameters
             ? Object.fromEntries(
-                Object.entries(p.pluginParameters).filter(
-                  ([k]) => !HIDDEN_KEYS.has(k),
-                ),
-              )
+              Object.entries(p.pluginParameters).filter(
+                ([k]) => !HIDDEN_KEYS.has(k),
+              ),
+            )
             : undefined;
           const parameters = filteredParams
             ? buildParamDefs(filteredParams)
@@ -1497,17 +1497,17 @@ async function discoverSkills(
       // eslint-disable-next-line -- runtime service is loosely typed; cast via unknown
       const svc = service as unknown as
         | {
-            getLoadedSkills?: () => Array<{
-              slug: string;
-              name: string;
-              description: string;
-              source: string;
-              path: string;
-            }>;
-            getSkillScanStatus?: (
-              slug: string,
-            ) => "clean" | "warning" | "critical" | "blocked" | null;
-          }
+          getLoadedSkills?: () => Array<{
+            slug: string;
+            name: string;
+            description: string;
+            source: string;
+            path: string;
+          }>;
+          getSkillScanStatus?: (
+            slug: string,
+          ) => "clean" | "warning" | "critical" | "blocked" | null;
+        }
         | undefined;
       if (svc && typeof svc.getLoadedSkills === "function") {
         const loadedSkills = svc.getLoadedSkills();
@@ -1754,7 +1754,7 @@ function isAbortError(error: unknown): boolean {
   return error instanceof DOMException
     ? error.name === "AbortError" || error.name === "TimeoutError"
     : error instanceof Error &&
-        (error.name === "AbortError" || error.name === "TimeoutError");
+    (error.name === "AbortError" || error.name === "TimeoutError");
 }
 
 function createTimeoutError(message: string): Error {
@@ -1864,14 +1864,14 @@ export async function streamResponseBodyWithByteLimit(
   const streamTimeoutPromise =
     typeof timeoutMs === "number" && timeoutMs > 0
       ? new Promise<never>((_resolve, reject) => {
-          streamTimeoutHandle = setTimeout(() => {
-            reject(
-              createTimeoutError(
-                `Upstream response body timed out after ${timeoutMs}ms`,
-              ),
-            );
-          }, timeoutMs);
-        })
+        streamTimeoutHandle = setTimeout(() => {
+          reject(
+            createTimeoutError(
+              `Upstream response body timed out after ${timeoutMs}ms`,
+            ),
+          );
+        }, timeoutMs);
+      })
       : null;
 
   try {
@@ -2244,7 +2244,7 @@ async function generateChatResponse(
   let activeStreamSource: StreamSource = "unset";
   const messageSource =
     typeof message.content.source === "string" &&
-    message.content.source.trim().length > 0
+      message.content.source.trim().length > 0
       ? message.content.source
       : "api";
   const emitChunk = (chunk: string): void => {
@@ -2314,8 +2314,8 @@ async function generateChatResponse(
 
   let result:
     | Awaited<
-        ReturnType<NonNullable<AgentRuntime["messageService"]>["handleMessage"]>
-      >
+      ReturnType<NonNullable<AgentRuntime["messageService"]>["handleMessage"]>
+    >
     | undefined;
   let _handlerError: unknown = null;
   try {
@@ -2349,13 +2349,13 @@ async function generateChatResponse(
       {
         onStreamChunk: opts?.onChunk
           ? async (chunk: string) => {
-              if (opts?.isAborted?.()) {
-                throw new Error("client_disconnected");
-              }
-              if (!chunk) return;
-              if (!claimStreamSource("onStreamChunk")) return;
-              appendIncomingText(chunk);
+            if (opts?.isAborted?.()) {
+              throw new Error("client_disconnected");
             }
+            if (!chunk) return;
+            if (!claimStreamSource("onStreamChunk")) return;
+            appendIncomingText(chunk);
+          }
           : undefined,
       },
     );
@@ -2735,16 +2735,16 @@ export function buildUserMessages(params: {
   // Persisted message: compact placeholder URL, no raw bytes in DB.
   const messageToStore = compactAttachments?.length
     ? createMessageMemory({
-        id,
-        entityId: userId,
-        roomId,
-        content: {
-          text: prompt,
-          source: "client_chat",
-          channelType,
-          attachments: compactAttachments,
-        },
-      })
+      id,
+      entityId: userId,
+      roomId,
+      content: {
+        text: prompt,
+        source: "client_chat",
+        channelType,
+        attachments: compactAttachments,
+      },
+    })
     : userMessage;
   return { userMessage, messageToStore };
 }
@@ -2793,9 +2793,9 @@ async function readChatRequestPayload(
   // that slipped past the allowlist check.
   const images = Array.isArray(body.images)
     ? (body.images as ChatImageAttachment[]).map((img) => ({
-        ...img,
-        mimeType: img.mimeType.toLowerCase(),
-      }))
+      ...img,
+      mimeType: img.mimeType.toLowerCase(),
+    }))
     : undefined;
   return {
     prompt: body.text.trim(),
@@ -4729,11 +4729,11 @@ function rejectWebSocketUpgrade(
   const body = `${message}\n`;
   socket.write(
     `HTTP/1.1 ${statusCode} ${statusText}\r\n` +
-      "Connection: close\r\n" +
-      "Content-Type: text/plain; charset=utf-8\r\n" +
-      `Content-Length: ${Buffer.byteLength(body)}\r\n` +
-      "\r\n" +
-      body,
+    "Connection: close\r\n" +
+    "Content-Type: text/plain; charset=utf-8\r\n" +
+    `Content-Length: ${Buffer.byteLength(body)}\r\n` +
+    "\r\n" +
+    body,
   );
   socket.destroy();
 }
@@ -5436,7 +5436,7 @@ async function startRetakeStream(): Promise<{ rtmpUrl: string }> {
             clearInterval(check);
             resolve(true);
           }
-        } catch {}
+        } catch { }
       }, 200);
       setTimeout(() => {
         clearInterval(check);
@@ -5794,8 +5794,8 @@ async function handleRequest(
         const envRoot = config.env as Record<string, unknown>;
         const vars =
           envRoot.vars &&
-          typeof envRoot.vars === "object" &&
-          !Array.isArray(envRoot.vars)
+            typeof envRoot.vars === "object" &&
+            !Array.isArray(envRoot.vars)
             ? (envRoot.vars as Record<string, unknown>)
             : {};
         vars.MILAIDY_USE_PI_AI = "1";
@@ -7523,8 +7523,8 @@ async function handleRequest(
         try {
           const svc = state.runtime.getService("AGENT_SKILLS_SERVICE") as
             | {
-                getLoadedSkills?: () => Array<{ slug: string; source: string }>;
-              }
+              getLoadedSkills?: () => Array<{ slug: string; source: string }>;
+            }
             | undefined;
           if (svc && typeof svc.getLoadedSkills === "function") {
             for (const s of svc.getLoadedSkills()) {
@@ -7658,12 +7658,12 @@ async function handleRequest(
     try {
       const service = state.runtime.getService("AGENT_SKILLS_SERVICE") as
         | {
-            install?: (
-              slug: string,
-              opts?: { version?: string; force?: boolean },
-            ) => Promise<boolean>;
-            isInstalled?: (slug: string) => Promise<boolean>;
-          }
+          install?: (
+            slug: string,
+            opts?: { version?: string; force?: boolean },
+          ) => Promise<boolean>;
+          isInstalled?: (slug: string) => Promise<boolean>;
+        }
         | undefined;
 
       if (!service || typeof service.install !== "function") {
@@ -7740,8 +7740,8 @@ async function handleRequest(
     try {
       const service = state.runtime.getService("AGENT_SKILLS_SERVICE") as
         | {
-            uninstall?: (slug: string) => Promise<boolean>;
-          }
+          uninstall?: (slug: string) => Promise<boolean>;
+        }
         | undefined;
 
       if (!service || typeof service.uninstall !== "function") {
@@ -8002,12 +8002,12 @@ async function handleRequest(
       try {
         const svc = state.runtime.getService("AGENT_SKILLS_SERVICE") as
           | {
-              getLoadedSkills?: () => Array<{
-                slug: string;
-                path: string;
-                source: string;
-              }>;
-            }
+            getLoadedSkills?: () => Array<{
+              slug: string;
+              path: string;
+              source: string;
+            }>;
+          }
           | undefined;
         if (svc?.getLoadedSkills) {
           const loaded = svc.getLoadedSkills().find((s) => s.slug === skillId);
@@ -8084,12 +8084,12 @@ async function handleRequest(
       try {
         const svc = state.runtime.getService("AGENT_SKILLS_SERVICE") as
           | {
-              getLoadedSkills?: () => Array<{
-                slug: string;
-                path: string;
-                source: string;
-              }>;
-            }
+            getLoadedSkills?: () => Array<{
+              slug: string;
+              path: string;
+              source: string;
+            }>;
+          }
           | undefined;
         if (svc?.getLoadedSkills) {
           const loaded = svc.getLoadedSkills().find((s) => s.slug === skillId);
@@ -8179,12 +8179,12 @@ async function handleRequest(
       try {
         const svc = state.runtime.getService("AGENT_SKILLS_SERVICE") as
           | {
-              getLoadedSkills?: () => Array<{
-                slug: string;
-                path: string;
-                source: string;
-              }>;
-            }
+            getLoadedSkills?: () => Array<{
+              slug: string;
+              path: string;
+              source: string;
+            }>;
+          }
           | undefined;
         if (svc?.getLoadedSkills) {
           const loaded = svc.getLoadedSkills().find((s) => s.slug === skillId);
@@ -8393,12 +8393,12 @@ async function handleRequest(
 
         const service = state.runtime.getService("AGENT_SKILLS_SERVICE") as
           | {
-              install?: (
-                skillSlug: string,
-                opts?: { version?: string; force?: boolean },
-              ) => Promise<boolean>;
-              isInstalled?: (skillSlug: string) => Promise<boolean>;
-            }
+            install?: (
+              skillSlug: string,
+              opts?: { version?: string; force?: boolean },
+            ) => Promise<boolean>;
+            isInstalled?: (skillSlug: string) => Promise<boolean>;
+          }
           | undefined;
 
         if (!service || typeof service.install !== "function") {
@@ -8877,6 +8877,9 @@ async function handleRequest(
       eligible: twitterVerified,
       twitterVerified,
       nftVerified: twitterVerified, // We'll leave it as is if there's no way to distinguish, or we can check the file
+      whitelisted: walletAddress
+        ? isAddressWhitelisted(walletAddress)
+        : false,
       ogCode: ogCode ?? null,
       walletAddress,
       merkle: {
@@ -8923,8 +8926,11 @@ async function handleRequest(
     return;
   }
 
+
   // ── POST /api/whitelist/nft/verify ───────────────────────────────────────
   // Verify Milady NFT ownership for whitelist eligibility.
+  // Security: only verifies the agent's own wallet — does not accept
+  // arbitrary addresses to prevent whitelist injection from local processes.
   if (method === "POST" && pathname === "/api/whitelist/nft/verify") {
     // PR 518 FIX: Restrict to the agent's own wallet to prevent injection
     const addrs = getWalletAddresses();
@@ -8975,1071 +8981,995 @@ async function handleRequest(
     json(res, {
       root: info.root,
       addressCount: info.addressCount,
+      proofReady: true,
     });
     return;
   }
-
-  // ── GET /api/whitelist/merkle/proof?address=0x... — proof for an address
-  if (method === "GET" && pathname === "/api/whitelist/merkle/proof") {
-    const url = new URL(req.url ?? "", `http://${req.headers.host}`);
-    const addr = url.searchParams.get("address");
-    if (!addr) {
-      error(res, "address query parameter is required", 400);
-      return;
-    }
-    const result = generateProof(addr);
-    json(res, result);
-    return;
+});
+return;
   }
 
-  // ── GET /api/update/status ───────────────────────────────────────────────
-  if (method === "GET" && pathname === "/api/update/status") {
-    const { VERSION } = await import("../runtime/version");
-    const {
-      resolveChannel,
-      checkForUpdate,
-      fetchAllChannelVersions,
-      CHANNEL_DIST_TAGS,
-    } = await import("../services/update-checker");
-    const { detectInstallMethod } = await import("../services/self-updater");
-    const channel = resolveChannel(state.config.update);
-
-    const [check, versions] = await Promise.all([
-      checkForUpdate({ force: req.url?.includes("force=true") }),
-      fetchAllChannelVersions(),
-    ]);
-
-    json(res, {
-      currentVersion: VERSION,
-      channel,
-      installMethod: detectInstallMethod(),
-      updateAvailable: check.updateAvailable,
-      latestVersion: check.latestVersion,
-      channels: {
-        stable: versions.stable,
-        beta: versions.beta,
-        nightly: versions.nightly,
-      },
-      distTags: CHANNEL_DIST_TAGS,
-      lastCheckAt: state.config.update?.lastCheckAt ?? null,
-      error: check.error,
-    });
+// ── GET /api/whitelist/merkle/proof?address=0x... — proof for an address
+if (method === "GET" && pathname === "/api/whitelist/merkle/proof") {
+  const url = new URL(req.url ?? "", `http://${req.headers.host}`);
+  const addr = url.searchParams.get("address");
+  if (!addr) {
+    error(res, "address query parameter is required", 400);
     return;
   }
+  const result = generateProof(addr);
+  json(res, result);
+  return;
+}
 
-  // ── PUT /api/update/channel ────────────────────────────────────────────
-  if (method === "PUT" && pathname === "/api/update/channel") {
-    const body = (await readJsonBody(req, res)) as { channel?: string } | null;
-    if (!body) return;
-    const ch = body.channel;
-    if (ch !== "stable" && ch !== "beta" && ch !== "nightly") {
-      error(res, `Invalid channel "${ch}". Must be stable, beta, or nightly.`);
-      return;
-    }
-    state.config.update = {
-      ...state.config.update,
-      channel: ch,
-      lastCheckAt: undefined,
-      lastCheckVersion: undefined,
-    };
+// ── GET /api/update/status ───────────────────────────────────────────────
+if (method === "GET" && pathname === "/api/update/status") {
+  const { VERSION } = await import("../runtime/version");
+  const {
+    resolveChannel,
+    checkForUpdate,
+    fetchAllChannelVersions,
+    CHANNEL_DIST_TAGS,
+  } = await import("../services/update-checker");
+  const { detectInstallMethod } = await import("../services/self-updater");
+  const channel = resolveChannel(state.config.update);
+
+  const [check, versions] = await Promise.all([
+    checkForUpdate({ force: req.url?.includes("force=true") }),
+    fetchAllChannelVersions(),
+  ]);
+
+  json(res, {
+    currentVersion: VERSION,
+    channel,
+    installMethod: detectInstallMethod(),
+    updateAvailable: check.updateAvailable,
+    latestVersion: check.latestVersion,
+    channels: {
+      stable: versions.stable,
+      beta: versions.beta,
+      nightly: versions.nightly,
+    },
+    distTags: CHANNEL_DIST_TAGS,
+    lastCheckAt: state.config.update?.lastCheckAt ?? null,
+    error: check.error,
+  });
+  return;
+}
+
+// ── PUT /api/update/channel ────────────────────────────────────────────
+if (method === "PUT" && pathname === "/api/update/channel") {
+  const body = (await readJsonBody(req, res)) as { channel?: string } | null;
+  if (!body) return;
+  const ch = body.channel;
+  if (ch !== "stable" && ch !== "beta" && ch !== "nightly") {
+    error(res, `Invalid channel "${ch}". Must be stable, beta, or nightly.`);
+    return;
+  }
+  state.config.update = {
+    ...state.config.update,
+    channel: ch,
+    lastCheckAt: undefined,
+    lastCheckVersion: undefined,
+  };
+  saveMiladyConfig(state.config);
+  json(res, { channel: ch });
+  return;
+}
+
+// ── GET /api/connectors ──────────────────────────────────────────────────
+if (method === "GET" && pathname === "/api/connectors") {
+  const connectors = state.config.connectors ?? state.config.channels ?? {};
+  json(res, {
+    connectors: redactConfigSecrets(connectors as Record<string, unknown>),
+  });
+  return;
+}
+
+// ── POST /api/connectors ─────────────────────────────────────────────────
+if (method === "POST" && pathname === "/api/connectors") {
+  const body = await readJsonBody(req, res);
+  if (!body) return;
+  const name = body.name;
+  const config = body.config;
+  if (!name || typeof name !== "string" || !name.trim()) {
+    error(res, "Missing connector name", 400);
+    return;
+  }
+  // Prevent prototype pollution via special keys
+  const connectorName = name.trim();
+  if (isBlockedObjectKey(connectorName)) {
+    error(
+      res,
+      'Invalid connector name: "__proto__", "constructor", and "prototype" are reserved',
+      400,
+    );
+    return;
+  }
+  if (!config || typeof config !== "object") {
+    error(res, "Missing connector config", 400);
+    return;
+  }
+  if (!state.config.connectors) state.config.connectors = {};
+  state.config.connectors[connectorName] = config as ConnectorConfig;
+  try {
     saveMiladyConfig(state.config);
-    json(res, { channel: ch });
+  } catch {
+    /* test envs */
+  }
+  json(res, {
+    connectors: redactConfigSecrets(
+      (state.config.connectors ?? {}) as Record<string, unknown>,
+    ),
+  });
+  return;
+}
+
+// ── DELETE /api/connectors/:name ─────────────────────────────────────────
+if (method === "DELETE" && pathname.startsWith("/api/connectors/")) {
+  const name = decodeURIComponent(pathname.slice("/api/connectors/".length));
+  if (!name || isBlockedObjectKey(name)) {
+    error(res, "Missing or invalid connector name", 400);
+    return;
+  }
+  if (
+    state.config.connectors &&
+    Object.hasOwn(state.config.connectors, name)
+  ) {
+    delete state.config.connectors[name];
+  }
+  // Also remove from legacy channels key
+  if (state.config.channels && Object.hasOwn(state.config.channels, name)) {
+    delete state.config.channels[name];
+  }
+  try {
+    saveMiladyConfig(state.config);
+  } catch {
+    /* test envs */
+  }
+  json(res, {
+    connectors: redactConfigSecrets(
+      (state.config.connectors ?? {}) as Record<string, unknown>,
+    ),
+  });
+  return;
+}
+
+// ── WhatsApp routes (/api/whatsapp/*) ────────────────────────────────────
+// Auth: these routes are protected by the isAuthorized(req) gate at L5331.
+if (pathname.startsWith("/api/whatsapp")) {
+  if (!state.whatsappPairingSessions) {
+    state.whatsappPairingSessions = new Map();
+  }
+  const handled = await handleWhatsAppRoute(req, res, pathname, method, {
+    whatsappPairingSessions: state.whatsappPairingSessions,
+    broadcastWs: state.broadcastWs ?? undefined,
+    config: state.config,
+    runtime: state.runtime ?? undefined,
+    saveConfig: () => saveMiladyConfig(state.config),
+    workspaceDir: resolveDefaultAgentWorkspaceDir(),
+  });
+  if (handled) return;
+}
+
+// ── POST /api/restart ───────────────────────────────────────────────────
+if (method === "POST" && pathname === "/api/restart") {
+  json(res, { ok: true, message: "Restarting..." });
+  setTimeout(() => process.exit(0), 1000);
+  return;
+}
+
+// ── POST /api/tts/elevenlabs ─────────────────────────────────────────────
+if (method === "POST" && pathname === "/api/tts/elevenlabs") {
+  const body = await readJsonBody<{
+    text?: string;
+    voiceId?: string;
+    modelId?: string;
+    outputFormat?: string;
+    apiKey?: string;
+    apply_text_normalization?: "auto" | "on" | "off";
+    voice_settings?: {
+      stability?: number;
+      similarity_boost?: number;
+      speed?: number;
+    };
+  }>(req, res);
+  if (!body) return;
+
+  const text = typeof body.text === "string" ? body.text.trim() : "";
+  if (!text) {
+    error(res, "Missing text", 400);
     return;
   }
 
-  // ── GET /api/connectors ──────────────────────────────────────────────────
-  if (method === "GET" && pathname === "/api/connectors") {
-    const connectors = state.config.connectors ?? state.config.channels ?? {};
-    json(res, {
-      connectors: redactConfigSecrets(connectors as Record<string, unknown>),
-    });
+  const messages =
+    state.config && typeof state.config === "object"
+      ? ((state.config as Record<string, unknown>).messages as
+        | Record<string, unknown>
+        | undefined)
+      : undefined;
+  const tts =
+    messages && typeof messages === "object"
+      ? ((messages.tts as Record<string, unknown>) ?? undefined)
+      : undefined;
+  const eleven =
+    tts && typeof tts === "object"
+      ? ((tts.elevenlabs as Record<string, unknown>) ?? undefined)
+      : undefined;
+
+  const requestedApiKey =
+    typeof body.apiKey === "string" ? body.apiKey.trim() : "";
+  const configuredApiKey =
+    typeof eleven?.apiKey === "string" ? eleven.apiKey.trim() : "";
+  const envApiKey =
+    typeof process.env.ELEVENLABS_API_KEY === "string"
+      ? process.env.ELEVENLABS_API_KEY.trim()
+      : "";
+
+  const resolvedApiKey =
+    requestedApiKey && !isRedactedSecretValue(requestedApiKey)
+      ? requestedApiKey
+      : configuredApiKey && !isRedactedSecretValue(configuredApiKey)
+        ? configuredApiKey
+        : envApiKey && !isRedactedSecretValue(envApiKey)
+          ? envApiKey
+          : "";
+
+  if (!resolvedApiKey) {
+    error(
+      res,
+      "ElevenLabs API key is not available. Set ELEVENLABS_API_KEY in Secrets.",
+      400,
+    );
     return;
   }
 
-  // ── POST /api/connectors ─────────────────────────────────────────────────
-  if (method === "POST" && pathname === "/api/connectors") {
-    const body = await readJsonBody(req, res);
-    if (!body) return;
-    const name = body.name;
-    const config = body.config;
-    if (!name || typeof name !== "string" || !name.trim()) {
-      error(res, "Missing connector name", 400);
-      return;
-    }
-    // Prevent prototype pollution via special keys
-    const connectorName = name.trim();
-    if (isBlockedObjectKey(connectorName)) {
-      error(
-        res,
-        'Invalid connector name: "__proto__", "constructor", and "prototype" are reserved',
-        400,
-      );
-      return;
-    }
-    if (!config || typeof config !== "object") {
-      error(res, "Missing connector config", 400);
-      return;
-    }
-    if (!state.config.connectors) state.config.connectors = {};
-    state.config.connectors[connectorName] = config as ConnectorConfig;
-    try {
-      saveMiladyConfig(state.config);
-    } catch {
-      /* test envs */
-    }
-    json(res, {
-      connectors: redactConfigSecrets(
-        (state.config.connectors ?? {}) as Record<string, unknown>,
-      ),
-    });
-    return;
-  }
+  const voiceId =
+    (typeof body.voiceId === "string" && body.voiceId.trim()) ||
+    (typeof eleven?.voiceId === "string" && eleven.voiceId.trim()) ||
+    "EXAVITQu4vr4xnSDxMaL";
+  const modelId =
+    (typeof body.modelId === "string" && body.modelId.trim()) ||
+    (typeof eleven?.modelId === "string" && eleven.modelId.trim()) ||
+    "eleven_flash_v2_5";
+  const outputFormat =
+    (typeof body.outputFormat === "string" && body.outputFormat.trim()) ||
+    "mp3_22050_32";
 
-  // ── DELETE /api/connectors/:name ─────────────────────────────────────────
-  if (method === "DELETE" && pathname.startsWith("/api/connectors/")) {
-    const name = decodeURIComponent(pathname.slice("/api/connectors/".length));
-    if (!name || isBlockedObjectKey(name)) {
-      error(res, "Missing or invalid connector name", 400);
-      return;
-    }
-    if (
-      state.config.connectors &&
-      Object.hasOwn(state.config.connectors, name)
-    ) {
-      delete state.config.connectors[name];
-    }
-    // Also remove from legacy channels key
-    if (state.config.channels && Object.hasOwn(state.config.channels, name)) {
-      delete state.config.channels[name];
-    }
-    try {
-      saveMiladyConfig(state.config);
-    } catch {
-      /* test envs */
-    }
-    json(res, {
-      connectors: redactConfigSecrets(
-        (state.config.connectors ?? {}) as Record<string, unknown>,
-      ),
-    });
-    return;
-  }
-
-  // ── WhatsApp routes (/api/whatsapp/*) ────────────────────────────────────
-  // Auth: these routes are protected by the isAuthorized(req) gate at L5331.
-  if (pathname.startsWith("/api/whatsapp")) {
-    if (!state.whatsappPairingSessions) {
-      state.whatsappPairingSessions = new Map();
-    }
-    const handled = await handleWhatsAppRoute(req, res, pathname, method, {
-      whatsappPairingSessions: state.whatsappPairingSessions,
-      broadcastWs: state.broadcastWs ?? undefined,
-      config: state.config,
-      runtime: state.runtime ?? undefined,
-      saveConfig: () => saveMiladyConfig(state.config),
-      workspaceDir: resolveDefaultAgentWorkspaceDir(),
-    });
-    if (handled) return;
-  }
-
-  // ── POST /api/restart ───────────────────────────────────────────────────
-  if (method === "POST" && pathname === "/api/restart") {
-    json(res, { ok: true, message: "Restarting..." });
-    setTimeout(() => process.exit(0), 1000);
-    return;
-  }
-
-  // ── POST /api/tts/elevenlabs ─────────────────────────────────────────────
-  if (method === "POST" && pathname === "/api/tts/elevenlabs") {
-    const body = await readJsonBody<{
-      text?: string;
-      voiceId?: string;
-      modelId?: string;
-      outputFormat?: string;
-      apiKey?: string;
-      apply_text_normalization?: "auto" | "on" | "off";
-      voice_settings?: {
-        stability?: number;
-        similarity_boost?: number;
-        speed?: number;
-      };
-    }>(req, res);
-    if (!body) return;
-
-    const text = typeof body.text === "string" ? body.text.trim() : "";
-    if (!text) {
-      error(res, "Missing text", 400);
-      return;
-    }
-
-    const messages =
-      state.config && typeof state.config === "object"
-        ? ((state.config as Record<string, unknown>).messages as
-            | Record<string, unknown>
-            | undefined)
-        : undefined;
-    const tts =
-      messages && typeof messages === "object"
-        ? ((messages.tts as Record<string, unknown>) ?? undefined)
-        : undefined;
-    const eleven =
-      tts && typeof tts === "object"
-        ? ((tts.elevenlabs as Record<string, unknown>) ?? undefined)
-        : undefined;
-
-    const requestedApiKey =
-      typeof body.apiKey === "string" ? body.apiKey.trim() : "";
-    const configuredApiKey =
-      typeof eleven?.apiKey === "string" ? eleven.apiKey.trim() : "";
-    const envApiKey =
-      typeof process.env.ELEVENLABS_API_KEY === "string"
-        ? process.env.ELEVENLABS_API_KEY.trim()
-        : "";
-
-    const resolvedApiKey =
-      requestedApiKey && !isRedactedSecretValue(requestedApiKey)
-        ? requestedApiKey
-        : configuredApiKey && !isRedactedSecretValue(configuredApiKey)
-          ? configuredApiKey
-          : envApiKey && !isRedactedSecretValue(envApiKey)
-            ? envApiKey
-            : "";
-
-    if (!resolvedApiKey) {
-      error(
-        res,
-        "ElevenLabs API key is not available. Set ELEVENLABS_API_KEY in Secrets.",
-        400,
-      );
-      return;
-    }
-
-    const voiceId =
-      (typeof body.voiceId === "string" && body.voiceId.trim()) ||
-      (typeof eleven?.voiceId === "string" && eleven.voiceId.trim()) ||
-      "EXAVITQu4vr4xnSDxMaL";
-    const modelId =
-      (typeof body.modelId === "string" && body.modelId.trim()) ||
-      (typeof eleven?.modelId === "string" && eleven.modelId.trim()) ||
-      "eleven_flash_v2_5";
-    const outputFormat =
-      (typeof body.outputFormat === "string" && body.outputFormat.trim()) ||
-      "mp3_22050_32";
-
-    const requestedVoiceSettings =
-      body.voice_settings &&
+  const requestedVoiceSettings =
+    body.voice_settings &&
       typeof body.voice_settings === "object" &&
       !Array.isArray(body.voice_settings)
-        ? body.voice_settings
-        : undefined;
+      ? body.voice_settings
+      : undefined;
 
-    const voiceSettings: Record<string, number> = {};
-    const stability = requestedVoiceSettings?.stability;
-    if (typeof stability === "number" && stability >= 0 && stability <= 1) {
-      voiceSettings.stability = stability;
-    }
-    const similarityBoost = requestedVoiceSettings?.similarity_boost;
-    if (
-      typeof similarityBoost === "number" &&
-      similarityBoost >= 0 &&
-      similarityBoost <= 1
-    ) {
-      voiceSettings.similarity_boost = similarityBoost;
-    }
-    const speed = requestedVoiceSettings?.speed;
-    if (typeof speed === "number" && speed >= 0.5 && speed <= 2) {
-      voiceSettings.speed = speed;
-    }
+  const voiceSettings: Record<string, number> = {};
+  const stability = requestedVoiceSettings?.stability;
+  if (typeof stability === "number" && stability >= 0 && stability <= 1) {
+    voiceSettings.stability = stability;
+  }
+  const similarityBoost = requestedVoiceSettings?.similarity_boost;
+  if (
+    typeof similarityBoost === "number" &&
+    similarityBoost >= 0 &&
+    similarityBoost <= 1
+  ) {
+    voiceSettings.similarity_boost = similarityBoost;
+  }
+  const speed = requestedVoiceSettings?.speed;
+  if (typeof speed === "number" && speed >= 0.5 && speed <= 2) {
+    voiceSettings.speed = speed;
+  }
 
-    const payload: Record<string, unknown> = {
-      text,
-      model_id: modelId,
-      apply_text_normalization:
-        body.apply_text_normalization === "on" ||
+  const payload: Record<string, unknown> = {
+    text,
+    model_id: modelId,
+    apply_text_normalization:
+      body.apply_text_normalization === "on" ||
         body.apply_text_normalization === "off"
-          ? body.apply_text_normalization
-          : "auto",
-    };
-    if (Object.keys(voiceSettings).length > 0) {
-      payload.voice_settings = voiceSettings;
-    }
+        ? body.apply_text_normalization
+        : "auto",
+  };
+  if (Object.keys(voiceSettings).length > 0) {
+    payload.voice_settings = voiceSettings;
+  }
 
-    try {
-      const upstreamUrl = new URL(
-        `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voiceId)}/stream`,
-      );
-      upstreamUrl.searchParams.set("output_format", outputFormat);
+  try {
+    const upstreamUrl = new URL(
+      `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voiceId)}/stream`,
+    );
+    upstreamUrl.searchParams.set("output_format", outputFormat);
 
-      const upstream = await fetchWithTimeoutGuard(
-        upstreamUrl.toString(),
-        {
-          method: "POST",
-          headers: {
-            "xi-api-key": resolvedApiKey,
-            "Content-Type": "application/json",
-            Accept: "audio/mpeg",
-          },
-          body: JSON.stringify(payload),
+    const upstream = await fetchWithTimeoutGuard(
+      upstreamUrl.toString(),
+      {
+        method: "POST",
+        headers: {
+          "xi-api-key": resolvedApiKey,
+          "Content-Type": "application/json",
+          Accept: "audio/mpeg",
         },
-        ELEVENLABS_FETCH_TIMEOUT_MS,
-      );
+        body: JSON.stringify(payload),
+      },
+      ELEVENLABS_FETCH_TIMEOUT_MS,
+    );
 
-      if (!upstream.ok) {
-        const upstreamBody = await upstream.text().catch(() => "");
-        error(
-          res,
-          `ElevenLabs request failed (${upstream.status}): ${upstreamBody.slice(0, 240)}`,
-          upstream.status === 429 ? 429 : 502,
-        );
-        return;
-      }
-
-      const contentType = upstream.headers.get("content-type") || "audio/mpeg";
-      const contentLength = responseContentLength(upstream.headers);
-      if (
-        contentLength !== null &&
-        contentLength > ELEVENLABS_AUDIO_MAX_BYTES
-      ) {
-        error(
-          res,
-          `ElevenLabs response exceeds maximum size of ${ELEVENLABS_AUDIO_MAX_BYTES} bytes`,
-          502,
-        );
-        return;
-      }
-
-      res.writeHead(200, {
-        "Content-Type": contentType,
-        "Cache-Control": "no-store",
-        ...(contentLength !== null
-          ? { "Content-Length": String(contentLength) }
-          : {}),
-      });
-
-      await streamResponseBodyWithByteLimit(
-        upstream,
-        res,
-        ELEVENLABS_AUDIO_MAX_BYTES,
-        ELEVENLABS_FETCH_TIMEOUT_MS,
-      );
-      res.end();
-      return;
-    } catch (err) {
-      if (res.headersSent) {
-        res.destroy(
-          err instanceof Error
-            ? err
-            : new Error(
-                `ElevenLabs proxy error: ${typeof err === "string" ? err : String(err)}`,
-              ),
-        );
-        return;
-      }
+    if (!upstream.ok) {
+      const upstreamBody = await upstream.text().catch(() => "");
       error(
         res,
-        `ElevenLabs proxy error: ${err instanceof Error ? err.message : String(err)}`,
-        isAbortError(err) ? 504 : 502,
+        `ElevenLabs request failed (${upstream.status}): ${upstreamBody.slice(0, 240)}`,
+        upstream.status === 429 ? 429 : 502,
       );
       return;
     }
-  }
 
-  // ── POST /api/avatar/vrm ─────────────────────────────────────────────────
-  // Upload a custom VRM avatar file. Saved to ~/.milady/avatars/custom.vrm.
-  if (method === "POST" && pathname === "/api/avatar/vrm") {
-    const MAX_VRM_BYTES = 50 * 1024 * 1024; // 50 MB
-    const rawBody = await readRequestBodyBuffer(req, {
-      maxBytes: MAX_VRM_BYTES,
-      returnNullOnTooLarge: true,
+    const contentType = upstream.headers.get("content-type") || "audio/mpeg";
+    const contentLength = responseContentLength(upstream.headers);
+    if (
+      contentLength !== null &&
+      contentLength > ELEVENLABS_AUDIO_MAX_BYTES
+    ) {
+      error(
+        res,
+        `ElevenLabs response exceeds maximum size of ${ELEVENLABS_AUDIO_MAX_BYTES} bytes`,
+        502,
+      );
+      return;
+    }
+
+    res.writeHead(200, {
+      "Content-Type": contentType,
+      "Cache-Control": "no-store",
+      ...(contentLength !== null
+        ? { "Content-Length": String(contentLength) }
+        : {}),
     });
-    if (!rawBody || rawBody.length === 0) {
-      error(res, "Request body is empty or exceeds 50 MB", 400);
-      return;
-    }
-    // VRM files are GLB (binary glTF) — validate the 4-byte magic header
-    const GLB_MAGIC = Buffer.from([0x67, 0x6c, 0x54, 0x46]); // "glTF"
-    if (rawBody.length < 4 || !rawBody.subarray(0, 4).equals(GLB_MAGIC)) {
-      error(res, "Invalid VRM file: not a valid glTF/GLB file", 400);
-      return;
-    }
-    const avatarDir = path.join(resolveStateDir(), "avatars");
-    fs.mkdirSync(avatarDir, { recursive: true });
-    const vrmPath = path.join(avatarDir, "custom.vrm");
-    fs.writeFileSync(vrmPath, rawBody);
-    json(res, { ok: true, size: rawBody.length });
-    return;
-  }
 
-  // ── GET /api/avatar/vrm ──────────────────────────────────────────────────
-  // Serve the user's custom VRM avatar file if it exists.
-  if (
-    (method === "GET" || method === "HEAD") &&
-    pathname === "/api/avatar/vrm"
-  ) {
-    const vrmPath = path.join(resolveStateDir(), "avatars", "custom.vrm");
-    try {
-      const stat = fs.statSync(vrmPath);
-      if (!stat.isFile()) {
-        error(res, "No custom avatar found", 404);
-        return;
-      }
-      const headers: Record<string, string | number> = {
-        "Content-Type": "model/gltf-binary",
-        "Content-Length": stat.size,
-        "Cache-Control": "no-cache",
-      };
-      if (method === "HEAD") {
-        res.writeHead(200, headers);
-        res.end();
-        return;
-      }
-      const body = fs.readFileSync(vrmPath);
-      res.writeHead(200, headers);
-      res.end(body);
-    } catch {
-      error(res, "No custom avatar found", 404);
-    }
-    return;
-  }
-
-  // ── GET /api/config/schema ───────────────────────────────────────────────
-  if (method === "GET" && pathname === "/api/config/schema") {
-    const { buildConfigSchema } = await import("../config/schema");
-    const result = buildConfigSchema();
-    json(res, result);
-    return;
-  }
-
-  // ── GET /api/config ──────────────────────────────────────────────────────
-  if (method === "GET" && pathname === "/api/config") {
-    json(res, redactConfigSecrets(state.config));
-    return;
-  }
-
-  // ── PUT /api/config ─────────────────────────────────────────────────────
-  if (method === "PUT" && pathname === "/api/config") {
-    const body = await readJsonBody(req, res);
-    if (!body) return;
-
-    // --- Security: validate and safely merge config updates ----------------
-
-    // Keys that could enable prototype pollution.
-    /**
-     * Deep-merge `src` into `target`, only touching keys present in `src`.
-     * Prevents prototype pollution by rejecting dangerous key names at every
-     * level.  Performs a recursive merge for plain objects so that partial
-     * updates don't wipe sibling keys.
-     */
-    function safeMerge(
-      target: Record<string, unknown>,
-      src: Record<string, unknown>,
-    ): void {
-      for (const key of Object.keys(src)) {
-        if (isBlockedObjectKey(key)) continue;
-        const srcVal = src[key];
-        const tgtVal = target[key];
-        if (
-          srcVal !== null &&
-          typeof srcVal === "object" &&
-          !Array.isArray(srcVal) &&
-          tgtVal !== null &&
-          typeof tgtVal === "object" &&
-          !Array.isArray(tgtVal)
-        ) {
-          safeMerge(
-            tgtVal as Record<string, unknown>,
-            srcVal as Record<string, unknown>,
-          );
-        } else {
-          target[key] = srcVal;
-        }
-      }
-    }
-
-    // Filter to allowed top-level keys, then deep-merge.
-    const filtered: Record<string, unknown> = {};
-    for (const key of Object.keys(body)) {
-      if (CONFIG_WRITE_ALLOWED_TOP_KEYS.has(key) && !isBlockedObjectKey(key)) {
-        filtered[key] = body[key];
-      }
-    }
-
-    // Security: keep auth/step-up secrets out of API-driven config writes so
-    // secret rotation remains an out-of-band operation.
-    if (
-      filtered.env &&
-      typeof filtered.env === "object" &&
-      !Array.isArray(filtered.env)
-    ) {
-      const envPatch = filtered.env as Record<string, unknown>;
-      // Defense-in-depth: strip step-up secrets from persisted config before
-      // merge, even though BLOCKED_ENV_KEYS also blocks them during process.env
-      // sync below. Keeping both guards prevents accidental persistence if one
-      // path changes in future refactors.
-      delete envPatch.MILADY_API_TOKEN;
-      delete envPatch.MILADY_WALLET_EXPORT_TOKEN;
-      delete envPatch.MILADY_TERMINAL_RUN_TOKEN;
-      delete envPatch.HYPERSCAPE_AUTH_TOKEN;
-      delete envPatch.EVM_PRIVATE_KEY;
-      delete envPatch.SOLANA_PRIVATE_KEY;
-      delete envPatch.GITHUB_TOKEN;
-      if (
-        envPatch.vars &&
-        typeof envPatch.vars === "object" &&
-        !Array.isArray(envPatch.vars)
-      ) {
-        const vars = envPatch.vars as Record<string, unknown>;
-        delete vars.MILADY_API_TOKEN;
-        delete vars.MILADY_WALLET_EXPORT_TOKEN;
-        delete vars.MILADY_TERMINAL_RUN_TOKEN;
-        delete vars.HYPERSCAPE_AUTH_TOKEN;
-        delete vars.EVM_PRIVATE_KEY;
-        delete vars.SOLANA_PRIVATE_KEY;
-        delete vars.GITHUB_TOKEN;
-      }
-    }
-
-    if (
-      filtered.mcp &&
-      typeof filtered.mcp === "object" &&
-      !Array.isArray(filtered.mcp)
-    ) {
-      const mcpPatch = filtered.mcp as Record<string, unknown>;
-      if (mcpPatch.servers !== undefined) {
-        if (
-          !mcpPatch.servers ||
-          typeof mcpPatch.servers !== "object" ||
-          Array.isArray(mcpPatch.servers)
-        ) {
-          error(res, "mcp.servers must be a JSON object", 400);
-          return;
-        }
-        const mcpRejection = await resolveMcpServersRejection(
-          mcpPatch.servers as Record<string, unknown>,
-        );
-        if (mcpRejection) {
-          error(res, mcpRejection, 400);
-          return;
-        }
-      }
-    }
-
-    safeMerge(state.config as Record<string, unknown>, filtered);
-
-    // If the client updated env vars, synchronise them into process.env so
-    // subsequent hot-restarts see the latest values (loadMiladyConfig()
-    // only fills missing env vars and does not override existing ones).
-    if (
-      filtered.env &&
-      typeof filtered.env === "object" &&
-      !Array.isArray(filtered.env)
-    ) {
-      const envPatch = filtered.env as Record<string, unknown>;
-
-      // 1) env.vars.* (preferred)
-      const vars = envPatch.vars;
-      if (vars && typeof vars === "object" && !Array.isArray(vars)) {
-        for (const [k, v] of Object.entries(vars as Record<string, unknown>)) {
-          if (BLOCKED_ENV_KEYS.has(k.toUpperCase())) continue;
-          const str = typeof v === "string" ? v : "";
-          if (str.trim()) {
-            process.env[k] = str;
-          } else {
-            delete process.env[k];
-          }
-        }
-      }
-
-      // 2) Direct env.* string keys (legacy)
-      for (const [k, v] of Object.entries(envPatch)) {
-        if (k === "vars" || k === "shellEnv") continue;
-        if (BLOCKED_ENV_KEYS.has(k.toUpperCase())) continue;
-        if (typeof v !== "string") continue;
-        if (v.trim()) process.env[k] = v;
-        else delete process.env[k];
-      }
-
-      // Keep config clean: drop empty env.vars entries so we don't persist
-      // null/empty-string tombstones forever.
-      const cfgEnv = (state.config as Record<string, unknown>).env;
-      if (cfgEnv && typeof cfgEnv === "object" && !Array.isArray(cfgEnv)) {
-        const cfgVars = (cfgEnv as Record<string, unknown>).vars;
-        if (cfgVars && typeof cfgVars === "object" && !Array.isArray(cfgVars)) {
-          for (const [k, v] of Object.entries(
-            cfgVars as Record<string, unknown>,
-          )) {
-            if (typeof v !== "string" || !v.trim()) {
-              delete (cfgVars as Record<string, unknown>)[k];
-            }
-          }
-        }
-      }
-    }
-
-    try {
-      saveMiladyConfig(state.config);
-    } catch (err) {
-      logger.warn(
-        `[api] Config save failed: ${err instanceof Error ? err.message : err}`,
-      );
-    }
-    json(res, redactConfigSecrets(state.config));
-    return;
-  }
-
-  if (
-    await handlePermissionRoutes({
-      req,
+    await streamResponseBodyWithByteLimit(
+      upstream,
       res,
-      method,
-      pathname,
-      state,
-      readJsonBody,
-      json,
-      error,
-      saveConfig: saveMiladyConfig,
-      scheduleRuntimeRestart,
-    })
-  ) {
-    return;
-  }
-
-  // ── Cloud routes (/api/cloud/*) ─────────────────────────────────────────
-  if (pathname.startsWith("/api/cloud/")) {
-    const cloudState: CloudRouteState = {
-      config: state.config,
-      cloudManager: state.cloudManager,
-      runtime: state.runtime,
-    };
-    const handled = await handleCloudRoute(
-      req,
-      res,
-      pathname,
-      method,
-      cloudState,
+      ELEVENLABS_AUDIO_MAX_BYTES,
+      ELEVENLABS_FETCH_TIMEOUT_MS,
     );
-    if (handled) return;
-  }
-
-  // ── Sandbox routes (/api/sandbox/*) ────────────────────────────────────
-  if (pathname.startsWith("/api/sandbox")) {
-    const handled = await handleSandboxRoute(req, res, pathname, method, {
-      sandboxManager: state.sandboxManager,
-    });
-    if (handled) return;
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════
-  // Conversation routes (/api/conversations/*)
-  // ═══════════════════════════════════════════════════════════════════════
-
-  const ensureAdminEntityId = (): UUID => {
-    if (state.adminEntityId) {
-      return state.adminEntityId;
-    }
-    const configured = state.config.agents?.defaults?.adminEntityId?.trim();
-    const nextAdminEntityId =
-      configured && isUuidLike(configured)
-        ? configured
-        : (stringToUuid(`${state.agentName}-admin-entity`) as UUID);
-    if (configured && !isUuidLike(configured)) {
-      logger.warn(
-        `[milady-api] Invalid agents.defaults.adminEntityId "${configured}", using deterministic fallback`,
+    res.end();
+    return;
+  } catch (err) {
+    if (res.headersSent) {
+      res.destroy(
+        err instanceof Error
+          ? err
+          : new Error(
+            `ElevenLabs proxy error: ${typeof err === "string" ? err : String(err)}`,
+          ),
       );
+      return;
     }
-    state.adminEntityId = nextAdminEntityId;
-    state.chatUserId = state.adminEntityId;
-    return nextAdminEntityId;
-  };
+    error(
+      res,
+      `ElevenLabs proxy error: ${err instanceof Error ? err.message : String(err)}`,
+      isAbortError(err) ? 504 : 502,
+    );
+    return;
+  }
+}
 
-  // Ensure ownership + admin role metadata contract on the world.
-  const ensureWorldOwnershipAndRoles = async (
-    runtime: AgentRuntime,
-    worldId: UUID,
-    ownerId: UUID,
-  ): Promise<void> => {
-    const world = await runtime.getWorld(worldId);
-    if (!world) return;
-    let needsUpdate = false;
-    if (!world.metadata) {
-      world.metadata = {};
-      needsUpdate = true;
+// ── POST /api/avatar/vrm ─────────────────────────────────────────────────
+// Upload a custom VRM avatar file. Saved to ~/.milady/avatars/custom.vrm.
+if (method === "POST" && pathname === "/api/avatar/vrm") {
+  const MAX_VRM_BYTES = 50 * 1024 * 1024; // 50 MB
+  const rawBody = await readRequestBodyBuffer(req, {
+    maxBytes: MAX_VRM_BYTES,
+    returnNullOnTooLarge: true,
+  });
+  if (!rawBody || rawBody.length === 0) {
+    error(res, "Request body is empty or exceeds 50 MB", 400);
+    return;
+  }
+  // VRM files are GLB (binary glTF) — validate the 4-byte magic header
+  const GLB_MAGIC = Buffer.from([0x67, 0x6c, 0x54, 0x46]); // "glTF"
+  if (rawBody.length < 4 || !rawBody.subarray(0, 4).equals(GLB_MAGIC)) {
+    error(res, "Invalid VRM file: not a valid glTF/GLB file", 400);
+    return;
+  }
+  const avatarDir = path.join(resolveStateDir(), "avatars");
+  fs.mkdirSync(avatarDir, { recursive: true });
+  const vrmPath = path.join(avatarDir, "custom.vrm");
+  fs.writeFileSync(vrmPath, rawBody);
+  json(res, { ok: true, size: rawBody.length });
+  return;
+}
+
+// ── GET /api/avatar/vrm ──────────────────────────────────────────────────
+// Serve the user's custom VRM avatar file if it exists.
+if (
+  (method === "GET" || method === "HEAD") &&
+  pathname === "/api/avatar/vrm"
+) {
+  const vrmPath = path.join(resolveStateDir(), "avatars", "custom.vrm");
+  try {
+    const stat = fs.statSync(vrmPath);
+    if (!stat.isFile()) {
+      error(res, "No custom avatar found", 404);
+      return;
     }
-    if (
-      !world.metadata.ownership ||
-      typeof world.metadata.ownership !== "object" ||
-      (world.metadata.ownership as { ownerId?: string }).ownerId !== ownerId
-    ) {
-      world.metadata.ownership = { ownerId };
-      needsUpdate = true;
-    }
-    const metadataWithRoles = world.metadata as {
-      roles?: Record<string, string>;
+    const headers: Record<string, string | number> = {
+      "Content-Type": "model/gltf-binary",
+      "Content-Length": stat.size,
+      "Cache-Control": "no-cache",
     };
-    const roles = metadataWithRoles.roles ?? {};
-    if (roles[ownerId] !== "OWNER") {
-      roles[ownerId] = "OWNER";
-      metadataWithRoles.roles = roles;
-      needsUpdate = true;
+    if (method === "HEAD") {
+      res.writeHead(200, headers);
+      res.end();
+      return;
     }
-    if (needsUpdate) {
-      await runtime.updateWorld(world);
-    }
-  };
+    const body = fs.readFileSync(vrmPath);
+    res.writeHead(200, headers);
+    res.end(body);
+  } catch {
+    error(res, "No custom avatar found", 404);
+  }
+  return;
+}
 
-  // Helper: ensure the room for a conversation is set up.
-  // Also ensures the world has ownership metadata so the settings provider
-  // can find it via findWorldsForOwner during onboarding.
-  const ensureConversationRoom = async (
-    conv: ConversationMeta,
-  ): Promise<void> => {
-    if (!state.runtime) return;
-    const runtime = state.runtime;
-    const agentName = runtime.character.name ?? "Milady";
-    const userId = ensureAdminEntityId();
-    const worldId = stringToUuid(`${agentName}-web-chat-world`);
-    const messageServerId = stringToUuid(`${agentName}-web-server`) as UUID;
-    await runtime.ensureConnection({
-      entityId: userId,
-      roomId: conv.roomId,
-      worldId,
-      userName: "User",
-      source: "client_chat",
-      channelId: `web-conv-${conv.id}`,
-      type: ChannelType.DM,
-      messageServerId,
-      metadata: { ownership: { ownerId: userId } },
-    });
-    await ensureWorldOwnershipAndRoles(runtime, worldId as UUID, userId);
-  };
+// ── GET /api/config/schema ───────────────────────────────────────────────
+if (method === "GET" && pathname === "/api/config/schema") {
+  const { buildConfigSchema } = await import("../config/schema");
+  const result = buildConfigSchema();
+  json(res, result);
+  return;
+}
 
-  const syncConversationRoomTitle = async (
-    conv: ConversationMeta,
-  ): Promise<void> => {
-    try {
-      await persistConversationRoomTitle(state.runtime, conv);
-    } catch (err) {
-      logger.debug(
-        `[conversations] Failed to persist room title for ${conv.id}: ${err instanceof Error ? err.message : String(err)}`,
-      );
-    }
-  };
+// ── GET /api/config ──────────────────────────────────────────────────────
+if (method === "GET" && pathname === "/api/config") {
+  json(res, redactConfigSecrets(state.config));
+  return;
+}
 
-  const ensureLegacyChatConnection = async (
-    runtime: AgentRuntime,
-    agentName: string,
-  ): Promise<void> => {
-    const userId = ensureAdminEntityId();
-    if (!state.chatRoomId) {
-      state.chatRoomId = stringToUuid(`${agentName}-web-chat-room`);
-    }
-    state.chatUserId = userId;
+// ── PUT /api/config ─────────────────────────────────────────────────────
+if (method === "PUT" && pathname === "/api/config") {
+  const body = await readJsonBody(req, res);
+  if (!body) return;
 
-    const roomId = state.chatRoomId;
-    const worldId = stringToUuid(`${agentName}-web-chat-world`) as UUID;
-    const messageServerId = stringToUuid(`${agentName}-web-server`) as UUID;
-    const target = { userId, roomId, worldId };
+  // --- Security: validate and safely merge config updates ----------------
 
-    while (true) {
-      const ready = state.chatConnectionReady;
+  // Keys that could enable prototype pollution.
+  /**
+   * Deep-merge `src` into `target`, only touching keys present in `src`.
+   * Prevents prototype pollution by rejecting dangerous key names at every
+   * level.  Performs a recursive merge for plain objects so that partial
+   * updates don't wipe sibling keys.
+   */
+  function safeMerge(
+    target: Record<string, unknown>,
+    src: Record<string, unknown>,
+  ): void {
+    for (const key of Object.keys(src)) {
+      if (isBlockedObjectKey(key)) continue;
+      const srcVal = src[key];
+      const tgtVal = target[key];
       if (
-        ready &&
-        ready.userId === target.userId &&
-        ready.roomId === target.roomId &&
-        ready.worldId === target.worldId
+        srcVal !== null &&
+        typeof srcVal === "object" &&
+        !Array.isArray(srcVal) &&
+        tgtVal !== null &&
+        typeof tgtVal === "object" &&
+        !Array.isArray(tgtVal)
       ) {
+        safeMerge(
+          tgtVal as Record<string, unknown>,
+          srcVal as Record<string, unknown>,
+        );
+      } else {
+        target[key] = srcVal;
+      }
+    }
+  }
+
+  // Filter to allowed top-level keys, then deep-merge.
+  const filtered: Record<string, unknown> = {};
+  for (const key of Object.keys(body)) {
+    if (CONFIG_WRITE_ALLOWED_TOP_KEYS.has(key) && !isBlockedObjectKey(key)) {
+      filtered[key] = body[key];
+    }
+  }
+
+  // Security: keep auth/step-up secrets out of API-driven config writes so
+  // secret rotation remains an out-of-band operation.
+  if (
+    filtered.env &&
+    typeof filtered.env === "object" &&
+    !Array.isArray(filtered.env)
+  ) {
+    const envPatch = filtered.env as Record<string, unknown>;
+    // Defense-in-depth: strip step-up secrets from persisted config before
+    // merge, even though BLOCKED_ENV_KEYS also blocks them during process.env
+    // sync below. Keeping both guards prevents accidental persistence if one
+    // path changes in future refactors.
+    delete envPatch.MILADY_API_TOKEN;
+    delete envPatch.MILADY_WALLET_EXPORT_TOKEN;
+    delete envPatch.MILADY_TERMINAL_RUN_TOKEN;
+    delete envPatch.HYPERSCAPE_AUTH_TOKEN;
+    delete envPatch.EVM_PRIVATE_KEY;
+    delete envPatch.SOLANA_PRIVATE_KEY;
+    delete envPatch.GITHUB_TOKEN;
+    if (
+      envPatch.vars &&
+      typeof envPatch.vars === "object" &&
+      !Array.isArray(envPatch.vars)
+    ) {
+      const vars = envPatch.vars as Record<string, unknown>;
+      delete vars.MILADY_API_TOKEN;
+      delete vars.MILADY_WALLET_EXPORT_TOKEN;
+      delete vars.MILADY_TERMINAL_RUN_TOKEN;
+      delete vars.HYPERSCAPE_AUTH_TOKEN;
+      delete vars.EVM_PRIVATE_KEY;
+      delete vars.SOLANA_PRIVATE_KEY;
+      delete vars.GITHUB_TOKEN;
+    }
+  }
+
+  if (
+    filtered.mcp &&
+    typeof filtered.mcp === "object" &&
+    !Array.isArray(filtered.mcp)
+  ) {
+    const mcpPatch = filtered.mcp as Record<string, unknown>;
+    if (mcpPatch.servers !== undefined) {
+      if (
+        !mcpPatch.servers ||
+        typeof mcpPatch.servers !== "object" ||
+        Array.isArray(mcpPatch.servers)
+      ) {
+        error(res, "mcp.servers must be a JSON object", 400);
         return;
       }
-
-      if (!state.chatConnectionPromise) {
-        state.chatConnectionPromise = (async () => {
-          await runtime.ensureConnection({
-            entityId: target.userId,
-            roomId: target.roomId,
-            worldId: target.worldId,
-            userName: "User",
-            source: "client_chat",
-            channelId: `${agentName}-web-chat`,
-            type: ChannelType.DM,
-            messageServerId,
-            metadata: { ownership: { ownerId: target.userId } },
-          });
-          await ensureWorldOwnershipAndRoles(
-            runtime,
-            target.worldId,
-            target.userId,
-          );
-          state.chatConnectionReady = target;
-        })().finally(() => {
-          state.chatConnectionPromise = null;
-        });
+      const mcpRejection = await resolveMcpServersRejection(
+        mcpPatch.servers as Record<string, unknown>,
+      );
+      if (mcpRejection) {
+        error(res, mcpRejection, 400);
+        return;
       }
-
-      await state.chatConnectionPromise;
     }
-  };
-
-  const ensureCompatChatConnection = async (
-    runtime: AgentRuntime,
-    agentName: string,
-    channelIdPrefix: string,
-    roomKey: string,
-  ): Promise<{ userId: UUID; roomId: UUID; worldId: UUID }> => {
-    const userId = ensureAdminEntityId();
-    const roomId = stringToUuid(
-      `${agentName}-${channelIdPrefix}-room-${roomKey}`,
-    ) as UUID;
-    const worldId = stringToUuid(`${agentName}-web-chat-world`) as UUID;
-    const messageServerId = stringToUuid(`${agentName}-web-server`) as UUID;
-
-    await runtime.ensureConnection({
-      entityId: userId,
-      roomId,
-      worldId,
-      userName: "User",
-      source: "client_chat",
-      channelId: `${channelIdPrefix}-${roomKey}`,
-      type: ChannelType.DM,
-      messageServerId,
-      metadata: { ownership: { ownerId: userId } },
-    });
-    await ensureWorldOwnershipAndRoles(runtime, worldId, userId);
-
-    return { userId, roomId, worldId };
-  };
-
-  // -------------------------------------------------------------------------
-  // OpenAI / Anthropic compatibility endpoints
-  // -------------------------------------------------------------------------
-
-  // ── GET /v1/models (OpenAI compatible) ─────────────────────────────────
-  if (method === "GET" && pathname === "/v1/models") {
-    const created = Math.floor(Date.now() / 1000);
-    const ids = new Set<string>();
-    ids.add("milady");
-    if (state.agentName?.trim()) ids.add(state.agentName.trim());
-    if (state.runtime?.character.name?.trim())
-      ids.add(state.runtime.character.name.trim());
-
-    json(res, {
-      object: "list",
-      data: Array.from(ids).map((id) => ({
-        id,
-        object: "model",
-        created,
-        owned_by: "milady",
-      })),
-    });
-    return;
   }
 
-  // ── GET /v1/models/:id (OpenAI compatible) ─────────────────────────────
-  if (method === "GET" && /^\/v1\/models\/[^/]+$/.test(pathname)) {
-    const created = Math.floor(Date.now() / 1000);
-    const raw = pathname.split("/")[3] ?? "";
-    const decoded = decodePathComponent(raw, res, "model id");
-    if (!decoded) return;
-    const id = decoded.trim();
-    if (!id) {
-      json(
-        res,
-        {
-          error: {
-            message: "Model id is required",
-            type: "invalid_request_error",
-          },
-        },
-        400,
-      );
-      return;
+  safeMerge(state.config as Record<string, unknown>, filtered);
+
+  // If the client updated env vars, synchronise them into process.env so
+  // subsequent hot-restarts see the latest values (loadMiladyConfig()
+  // only fills missing env vars and does not override existing ones).
+  if (
+    filtered.env &&
+    typeof filtered.env === "object" &&
+    !Array.isArray(filtered.env)
+  ) {
+    const envPatch = filtered.env as Record<string, unknown>;
+
+    // 1) env.vars.* (preferred)
+    const vars = envPatch.vars;
+    if (vars && typeof vars === "object" && !Array.isArray(vars)) {
+      for (const [k, v] of Object.entries(vars as Record<string, unknown>)) {
+        if (BLOCKED_ENV_KEYS.has(k.toUpperCase())) continue;
+        const str = typeof v === "string" ? v : "";
+        if (str.trim()) {
+          process.env[k] = str;
+        } else {
+          delete process.env[k];
+        }
+      }
     }
-    json(res, { id, object: "model", created, owned_by: "milady" });
-    return;
+
+    // 2) Direct env.* string keys (legacy)
+    for (const [k, v] of Object.entries(envPatch)) {
+      if (k === "vars" || k === "shellEnv") continue;
+      if (BLOCKED_ENV_KEYS.has(k.toUpperCase())) continue;
+      if (typeof v !== "string") continue;
+      if (v.trim()) process.env[k] = v;
+      else delete process.env[k];
+    }
+
+    // Keep config clean: drop empty env.vars entries so we don't persist
+    // null/empty-string tombstones forever.
+    const cfgEnv = (state.config as Record<string, unknown>).env;
+    if (cfgEnv && typeof cfgEnv === "object" && !Array.isArray(cfgEnv)) {
+      const cfgVars = (cfgEnv as Record<string, unknown>).vars;
+      if (cfgVars && typeof cfgVars === "object" && !Array.isArray(cfgVars)) {
+        for (const [k, v] of Object.entries(
+          cfgVars as Record<string, unknown>,
+        )) {
+          if (typeof v !== "string" || !v.trim()) {
+            delete (cfgVars as Record<string, unknown>)[k];
+          }
+        }
+      }
+    }
   }
 
-  // ── POST /v1/chat/completions (OpenAI compatible) ──────────────────────
-  if (method === "POST" && pathname === "/v1/chat/completions") {
-    const body = await readJsonBody<Record<string, unknown>>(req, res);
-    if (!body) return;
-    if (hasBlockedObjectKeyDeep(body)) {
-      json(
-        res,
-        {
-          error: {
-            message: "Request body contains a blocked object key",
-            type: "invalid_request_error",
-          },
-        },
-        400,
-      );
+  try {
+    saveMiladyConfig(state.config);
+  } catch (err) {
+    logger.warn(
+      `[api] Config save failed: ${err instanceof Error ? err.message : err}`,
+    );
+  }
+  json(res, redactConfigSecrets(state.config));
+  return;
+}
+
+if (
+  await handlePermissionRoutes({
+    req,
+    res,
+    method,
+    pathname,
+    state,
+    readJsonBody,
+    json,
+    error,
+    saveConfig: saveMiladyConfig,
+    scheduleRuntimeRestart,
+  })
+) {
+  return;
+}
+
+// ── Cloud routes (/api/cloud/*) ─────────────────────────────────────────
+if (pathname.startsWith("/api/cloud/")) {
+  const cloudState: CloudRouteState = {
+    config: state.config,
+    cloudManager: state.cloudManager,
+    runtime: state.runtime,
+  };
+  const handled = await handleCloudRoute(
+    req,
+    res,
+    pathname,
+    method,
+    cloudState,
+  );
+  if (handled) return;
+}
+
+// ── Sandbox routes (/api/sandbox/*) ────────────────────────────────────
+if (pathname.startsWith("/api/sandbox")) {
+  const handled = await handleSandboxRoute(req, res, pathname, method, {
+    sandboxManager: state.sandboxManager,
+  });
+  if (handled) return;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// Conversation routes (/api/conversations/*)
+// ═══════════════════════════════════════════════════════════════════════
+
+const ensureAdminEntityId = (): UUID => {
+  if (state.adminEntityId) {
+    return state.adminEntityId;
+  }
+  const configured = state.config.agents?.defaults?.adminEntityId?.trim();
+  const nextAdminEntityId =
+    configured && isUuidLike(configured)
+      ? configured
+      : (stringToUuid(`${state.agentName}-admin-entity`) as UUID);
+  if (configured && !isUuidLike(configured)) {
+    logger.warn(
+      `[milady-api] Invalid agents.defaults.adminEntityId "${configured}", using deterministic fallback`,
+    );
+  }
+  state.adminEntityId = nextAdminEntityId;
+  state.chatUserId = state.adminEntityId;
+  return nextAdminEntityId;
+};
+
+// Ensure ownership + admin role metadata contract on the world.
+const ensureWorldOwnershipAndRoles = async (
+  runtime: AgentRuntime,
+  worldId: UUID,
+  ownerId: UUID,
+): Promise<void> => {
+  const world = await runtime.getWorld(worldId);
+  if (!world) return;
+  let needsUpdate = false;
+  if (!world.metadata) {
+    world.metadata = {};
+    needsUpdate = true;
+  }
+  if (
+    !world.metadata.ownership ||
+    typeof world.metadata.ownership !== "object" ||
+    (world.metadata.ownership as { ownerId?: string }).ownerId !== ownerId
+  ) {
+    world.metadata.ownership = { ownerId };
+    needsUpdate = true;
+  }
+  const metadataWithRoles = world.metadata as {
+    roles?: Record<string, string>;
+  };
+  const roles = metadataWithRoles.roles ?? {};
+  if (roles[ownerId] !== "OWNER") {
+    roles[ownerId] = "OWNER";
+    metadataWithRoles.roles = roles;
+    needsUpdate = true;
+  }
+  if (needsUpdate) {
+    await runtime.updateWorld(world);
+  }
+};
+
+// Helper: ensure the room for a conversation is set up.
+// Also ensures the world has ownership metadata so the settings provider
+// can find it via findWorldsForOwner during onboarding.
+const ensureConversationRoom = async (
+  conv: ConversationMeta,
+): Promise<void> => {
+  if (!state.runtime) return;
+  const runtime = state.runtime;
+  const agentName = runtime.character.name ?? "Milady";
+  const userId = ensureAdminEntityId();
+  const worldId = stringToUuid(`${agentName}-web-chat-world`);
+  const messageServerId = stringToUuid(`${agentName}-web-server`) as UUID;
+  await runtime.ensureConnection({
+    entityId: userId,
+    roomId: conv.roomId,
+    worldId,
+    userName: "User",
+    source: "client_chat",
+    channelId: `web-conv-${conv.id}`,
+    type: ChannelType.DM,
+    messageServerId,
+    metadata: { ownership: { ownerId: userId } },
+  });
+  await ensureWorldOwnershipAndRoles(runtime, worldId as UUID, userId);
+};
+
+const syncConversationRoomTitle = async (
+  conv: ConversationMeta,
+): Promise<void> => {
+  try {
+    await persistConversationRoomTitle(state.runtime, conv);
+  } catch (err) {
+    logger.debug(
+      `[conversations] Failed to persist room title for ${conv.id}: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
+};
+
+const ensureLegacyChatConnection = async (
+  runtime: AgentRuntime,
+  agentName: string,
+): Promise<void> => {
+  const userId = ensureAdminEntityId();
+  if (!state.chatRoomId) {
+    state.chatRoomId = stringToUuid(`${agentName}-web-chat-room`);
+  }
+  state.chatUserId = userId;
+
+  const roomId = state.chatRoomId;
+  const worldId = stringToUuid(`${agentName}-web-chat-world`) as UUID;
+  const messageServerId = stringToUuid(`${agentName}-web-server`) as UUID;
+  const target = { userId, roomId, worldId };
+
+  while (true) {
+    const ready = state.chatConnectionReady;
+    if (
+      ready &&
+      ready.userId === target.userId &&
+      ready.roomId === target.roomId &&
+      ready.worldId === target.worldId
+    ) {
       return;
     }
-    const safeBody = cloneWithoutBlockedObjectKeys(body);
 
-    const extracted = extractOpenAiSystemAndLastUser(safeBody.messages);
-    if (!extracted) {
-      json(
-        res,
-        {
-          error: {
-            message:
-              "messages must be an array containing at least one user message",
-            type: "invalid_request_error",
-          },
-        },
-        400,
-      );
-      return;
-    }
-
-    const roomKey = resolveCompatRoomKey(safeBody).slice(0, 120);
-    const wantsStream =
-      safeBody.stream === true ||
-      (req.headers.accept ?? "").includes("text/event-stream");
-    const requestedModel =
-      typeof safeBody.model === "string" && safeBody.model.trim()
-        ? safeBody.model.trim()
-        : null;
-
-    const prompt = extracted.system
-      ? `${extracted.system}\n\n${extracted.user}`.trim()
-      : extracted.user;
-
-    const created = Math.floor(Date.now() / 1000);
-    const id = `chatcmpl-${crypto.randomUUID()}`;
-    const model = requestedModel ?? state.agentName ?? "milady";
-
-    if (wantsStream) {
-      initSse(res);
-      let aborted = false;
-      req.on("close", () => {
-        aborted = true;
+    if (!state.chatConnectionPromise) {
+      state.chatConnectionPromise = (async () => {
+        await runtime.ensureConnection({
+          entityId: target.userId,
+          roomId: target.roomId,
+          worldId: target.worldId,
+          userName: "User",
+          source: "client_chat",
+          channelId: `${agentName}-web-chat`,
+          type: ChannelType.DM,
+          messageServerId,
+          metadata: { ownership: { ownerId: target.userId } },
+        });
+        await ensureWorldOwnershipAndRoles(
+          runtime,
+          target.worldId,
+          target.userId,
+        );
+        state.chatConnectionReady = target;
+      })().finally(() => {
+        state.chatConnectionPromise = null;
       });
+    }
 
-      const sendChunk = (
-        delta: Record<string, unknown>,
-        finishReason: string | null,
-      ) => {
+    await state.chatConnectionPromise;
+  }
+};
+
+const ensureCompatChatConnection = async (
+  runtime: AgentRuntime,
+  agentName: string,
+  channelIdPrefix: string,
+  roomKey: string,
+): Promise<{ userId: UUID; roomId: UUID; worldId: UUID }> => {
+  const userId = ensureAdminEntityId();
+  const roomId = stringToUuid(
+    `${agentName}-${channelIdPrefix}-room-${roomKey}`,
+  ) as UUID;
+  const worldId = stringToUuid(`${agentName}-web-chat-world`) as UUID;
+  const messageServerId = stringToUuid(`${agentName}-web-server`) as UUID;
+
+  await runtime.ensureConnection({
+    entityId: userId,
+    roomId,
+    worldId,
+    userName: "User",
+    source: "client_chat",
+    channelId: `${channelIdPrefix}-${roomKey}`,
+    type: ChannelType.DM,
+    messageServerId,
+    metadata: { ownership: { ownerId: userId } },
+  });
+  await ensureWorldOwnershipAndRoles(runtime, worldId, userId);
+
+  return { userId, roomId, worldId };
+};
+
+// -------------------------------------------------------------------------
+// OpenAI / Anthropic compatibility endpoints
+// -------------------------------------------------------------------------
+
+// ── GET /v1/models (OpenAI compatible) ─────────────────────────────────
+if (method === "GET" && pathname === "/v1/models") {
+  const created = Math.floor(Date.now() / 1000);
+  const ids = new Set<string>();
+  ids.add("milady");
+  if (state.agentName?.trim()) ids.add(state.agentName.trim());
+  if (state.runtime?.character.name?.trim())
+    ids.add(state.runtime.character.name.trim());
+
+  json(res, {
+    object: "list",
+    data: Array.from(ids).map((id) => ({
+      id,
+      object: "model",
+      created,
+      owned_by: "milady",
+    })),
+  });
+  return;
+}
+
+// ── GET /v1/models/:id (OpenAI compatible) ─────────────────────────────
+if (method === "GET" && /^\/v1\/models\/[^/]+$/.test(pathname)) {
+  const created = Math.floor(Date.now() / 1000);
+  const raw = pathname.split("/")[3] ?? "";
+  const decoded = decodePathComponent(raw, res, "model id");
+  if (!decoded) return;
+  const id = decoded.trim();
+  if (!id) {
+    json(
+      res,
+      {
+        error: {
+          message: "Model id is required",
+          type: "invalid_request_error",
+        },
+      },
+      400,
+    );
+    return;
+  }
+  json(res, { id, object: "model", created, owned_by: "milady" });
+  return;
+}
+
+// ── POST /v1/chat/completions (OpenAI compatible) ──────────────────────
+if (method === "POST" && pathname === "/v1/chat/completions") {
+  const body = await readJsonBody<Record<string, unknown>>(req, res);
+  if (!body) return;
+  if (hasBlockedObjectKeyDeep(body)) {
+    json(
+      res,
+      {
+        error: {
+          message: "Request body contains a blocked object key",
+          type: "invalid_request_error",
+        },
+      },
+      400,
+    );
+    return;
+  }
+  const safeBody = cloneWithoutBlockedObjectKeys(body);
+
+  const extracted = extractOpenAiSystemAndLastUser(safeBody.messages);
+  if (!extracted) {
+    json(
+      res,
+      {
+        error: {
+          message:
+            "messages must be an array containing at least one user message",
+          type: "invalid_request_error",
+        },
+      },
+      400,
+    );
+    return;
+  }
+
+  const roomKey = resolveCompatRoomKey(safeBody).slice(0, 120);
+  const wantsStream =
+    safeBody.stream === true ||
+    (req.headers.accept ?? "").includes("text/event-stream");
+  const requestedModel =
+    typeof safeBody.model === "string" && safeBody.model.trim()
+      ? safeBody.model.trim()
+      : null;
+
+  const prompt = extracted.system
+    ? `${extracted.system}\n\n${extracted.user}`.trim()
+    : extracted.user;
+
+  const created = Math.floor(Date.now() / 1000);
+  const id = `chatcmpl-${crypto.randomUUID()}`;
+  const model = requestedModel ?? state.agentName ?? "milady";
+
+  if (wantsStream) {
+    initSse(res);
+    let aborted = false;
+    req.on("close", () => {
+      aborted = true;
+    });
+
+    const sendChunk = (
+      delta: Record<string, unknown>,
+      finishReason: string | null,
+    ) => {
+      writeSseData(
+        res,
+        JSON.stringify({
+          id,
+          object: "chat.completion.chunk",
+          created,
+          model,
+          choices: [
+            {
+              index: 0,
+              delta,
+              finish_reason: finishReason,
+            },
+          ],
+        }),
+      );
+    };
+
+    try {
+      if (!state.runtime) {
         writeSseData(
           res,
           JSON.stringify({
-            id,
-            object: "chat.completion.chunk",
-            created,
-            model,
-            choices: [
-              {
-                index: 0,
-                delta,
-                finish_reason: finishReason,
-              },
-            ],
+            error: {
+              message: "Agent is not running",
+              type: "service_unavailable",
+            },
           }),
         );
-      };
-
-      try {
-        if (!state.runtime) {
-          writeSseData(
-            res,
-            JSON.stringify({
-              error: {
-                message: "Agent is not running",
-                type: "service_unavailable",
-              },
-            }),
-          );
-          writeSseData(res, "[DONE]");
-          return;
-        }
-
-        sendChunk({ role: "assistant" }, null);
-
-        let fullText = "";
-
-        {
-          const runtime = state.runtime;
-          if (!runtime) throw new Error("Agent is not running");
-          const agentName = runtime.character.name ?? "Milady";
-          const { userId, roomId } = await ensureCompatChatConnection(
-            runtime,
-            agentName,
-            "openai-compat",
-            roomKey,
-          );
-
-          const message = createMessageMemory({
-            id: crypto.randomUUID() as UUID,
-            entityId: userId,
-            agentId: runtime.agentId,
-            roomId,
-            content: {
-              text: prompt,
-              source: "compat_openai",
-              channelType: ChannelType.API,
-            },
-          });
-
-          await generateChatResponse(runtime, message, state.agentName, {
-            isAborted: () => aborted,
-            onChunk: (chunk) => {
-              fullText += chunk;
-              if (chunk) sendChunk({ content: chunk }, null);
-            },
-            resolveNoResponseText: () =>
-              resolveNoResponseFallback(state.logBuffer),
-          });
-        }
-
-        const resolved = normalizeChatResponseText(fullText, state.logBuffer);
-        if (
-          (fullText.trim().length === 0 || isNoResponsePlaceholder(fullText)) &&
-          resolved.trim()
-        ) {
-          // Ensure clients receive a non-empty completion even if the model returned "(no response)".
-          sendChunk({ content: resolved }, null);
-        }
-
-        sendChunk({}, "stop");
         writeSseData(res, "[DONE]");
-      } catch (err) {
-        if (!aborted) {
-          writeSseData(
-            res,
-            JSON.stringify({
-              error: {
-                message: getErrorMessage(err),
-                type: "server_error",
-              },
-            }),
-          );
-          writeSseData(res, "[DONE]");
-        }
-      } finally {
-        res.end();
+        return;
       }
-      return;
-    }
 
-    // Non-streaming
-    try {
-      let responseText: string;
+      sendChunk({ role: "assistant" }, null);
+
+      let fullText = "";
 
       {
-        if (!state.runtime) {
-          json(
-            res,
-            {
-              error: {
-                message: "Agent is not running",
-                type: "service_unavailable",
-              },
-            },
-            503,
-          );
-          return;
-        }
         const runtime = state.runtime;
+        if (!runtime) throw new Error("Agent is not running");
         const agentName = runtime.character.name ?? "Milady";
         const { userId, roomId } = await ensureCompatChatConnection(
           runtime,
@@ -10047,9 +9977,11 @@ async function handleRequest(
           "openai-compat",
           roomKey,
         );
+
         const message = createMessageMemory({
           id: crypto.randomUUID() as UUID,
           entityId: userId,
+          agentId: runtime.agentId,
           roomId,
           content: {
             text: prompt,
@@ -10057,254 +9989,246 @@ async function handleRequest(
             channelType: ChannelType.API,
           },
         });
-        const result = await generateChatResponse(
-          runtime,
-          message,
-          state.agentName,
-          {
-            resolveNoResponseText: () =>
-              resolveNoResponseFallback(state.logBuffer),
+
+        await generateChatResponse(runtime, message, state.agentName, {
+          isAborted: () => aborted,
+          onChunk: (chunk) => {
+            fullText += chunk;
+            if (chunk) sendChunk({ content: chunk }, null);
           },
-        );
-        responseText = result.text;
+          resolveNoResponseText: () =>
+            resolveNoResponseFallback(state.logBuffer),
+        });
       }
 
-      const resolvedText = normalizeChatResponseText(
-        responseText,
-        state.logBuffer,
-      );
-      json(res, {
-        id,
-        object: "chat.completion",
-        created,
-        model,
-        choices: [
-          {
-            index: 0,
-            message: { role: "assistant", content: resolvedText },
-            finish_reason: "stop",
-          },
-        ],
-      });
+      const resolved = normalizeChatResponseText(fullText, state.logBuffer);
+      if (
+        (fullText.trim().length === 0 || isNoResponsePlaceholder(fullText)) &&
+        resolved.trim()
+      ) {
+        // Ensure clients receive a non-empty completion even if the model returned "(no response)".
+        sendChunk({ content: resolved }, null);
+      }
+
+      sendChunk({}, "stop");
+      writeSseData(res, "[DONE]");
     } catch (err) {
-      json(
-        res,
-        { error: { message: getErrorMessage(err), type: "server_error" } },
-        500,
-      );
+      if (!aborted) {
+        writeSseData(
+          res,
+          JSON.stringify({
+            error: {
+              message: getErrorMessage(err),
+              type: "server_error",
+            },
+          }),
+        );
+        writeSseData(res, "[DONE]");
+      }
+    } finally {
+      res.end();
     }
     return;
   }
 
-  // ── POST /v1/messages (Anthropic compatible) ───────────────────────────
-  if (method === "POST" && pathname === "/v1/messages") {
-    const body = await readJsonBody<Record<string, unknown>>(req, res);
-    if (!body) return;
-    if (hasBlockedObjectKeyDeep(body)) {
-      json(
-        res,
-        {
-          error: {
-            type: "invalid_request_error",
-            message: "Request body contains a blocked object key",
-          },
-        },
-        400,
-      );
-      return;
-    }
-    const safeBody = cloneWithoutBlockedObjectKeys(body);
+  // Non-streaming
+  try {
+    let responseText: string;
 
-    const extracted = extractAnthropicSystemAndLastUser({
-      system: safeBody.system,
-      messages: safeBody.messages,
-    });
-    if (!extracted) {
-      json(
-        res,
-        {
-          error: {
-            type: "invalid_request_error",
-            message:
-              "messages must be an array containing at least one user message",
-          },
-        },
-        400,
-      );
-      return;
-    }
-
-    const roomKey = resolveCompatRoomKey(safeBody).slice(0, 120);
-    const wantsStream =
-      safeBody.stream === true ||
-      (req.headers.accept ?? "").includes("text/event-stream");
-    const requestedModel =
-      typeof safeBody.model === "string" && safeBody.model.trim()
-        ? safeBody.model.trim()
-        : null;
-
-    const prompt = extracted.system
-      ? `${extracted.system}\n\n${extracted.user}`.trim()
-      : extracted.user;
-
-    const id = `msg_${crypto.randomUUID().replace(/-/g, "")}`;
-    const model = requestedModel ?? state.agentName ?? "milady";
-
-    if (wantsStream) {
-      initSse(res);
-      let aborted = false;
-      req.on("close", () => {
-        aborted = true;
-      });
-
-      try {
-        if (!state.runtime) {
-          writeSseJson(
-            res,
-            {
-              type: "error",
-              error: {
-                type: "service_unavailable",
-                message: "Agent is not running",
-              },
-            },
-            "error",
-          );
-          return;
-        }
-
-        writeSseJson(
+    {
+      if (!state.runtime) {
+        json(
           res,
           {
-            type: "message_start",
-            message: {
-              id,
-              type: "message",
-              role: "assistant",
-              model,
-              content: [],
-              stop_reason: null,
-              stop_sequence: null,
-              usage: { input_tokens: 0, output_tokens: 0 },
+            error: {
+              message: "Agent is not running",
+              type: "service_unavailable",
             },
           },
-          "message_start",
+          503,
         );
-        writeSseJson(
-          res,
-          {
-            type: "content_block_start",
-            index: 0,
-            content_block: { type: "text", text: "" },
-          },
-          "content_block_start",
-        );
-
-        let fullText = "";
-
-        const onDelta = (chunk: string) => {
-          if (!chunk) return;
-          fullText += chunk;
-          writeSseJson(
-            res,
-            {
-              type: "content_block_delta",
-              index: 0,
-              delta: { type: "text_delta", text: chunk },
-            },
-            "content_block_delta",
-          );
-        };
-
-        {
-          const runtime = state.runtime;
-          if (!runtime) throw new Error("Agent is not running");
-          const agentName = runtime.character.name ?? "Milady";
-          const { userId, roomId } = await ensureCompatChatConnection(
-            runtime,
-            agentName,
-            "anthropic-compat",
-            roomKey,
-          );
-
-          const message = createMessageMemory({
-            id: crypto.randomUUID() as UUID,
-            entityId: userId,
-            roomId,
-            content: {
-              text: prompt,
-              source: "compat_anthropic",
-              channelType: ChannelType.API,
-            },
-          });
-
-          await generateChatResponse(runtime, message, state.agentName, {
-            isAborted: () => aborted,
-            onChunk: onDelta,
-            resolveNoResponseText: () =>
-              resolveNoResponseFallback(state.logBuffer),
-          });
-        }
-
-        const resolved = normalizeChatResponseText(fullText, state.logBuffer);
-        if (
-          (fullText.trim().length === 0 || isNoResponsePlaceholder(fullText)) &&
-          resolved.trim()
-        ) {
-          onDelta(resolved);
-        }
-
-        writeSseJson(
-          res,
-          { type: "content_block_stop", index: 0 },
-          "content_block_stop",
-        );
-        writeSseJson(
-          res,
-          {
-            type: "message_delta",
-            delta: { stop_reason: "end_turn", stop_sequence: null },
-            usage: { output_tokens: 0 },
-          },
-          "message_delta",
-        );
-        writeSseJson(res, { type: "message_stop" }, "message_stop");
-      } catch (err) {
-        if (!aborted) {
-          writeSseJson(
-            res,
-            {
-              type: "error",
-              error: { type: "server_error", message: getErrorMessage(err) },
-            },
-            "error",
-          );
-        }
-      } finally {
-        res.end();
+        return;
       }
-      return;
+      const runtime = state.runtime;
+      const agentName = runtime.character.name ?? "Milady";
+      const { userId, roomId } = await ensureCompatChatConnection(
+        runtime,
+        agentName,
+        "openai-compat",
+        roomKey,
+      );
+      const message = createMessageMemory({
+        id: crypto.randomUUID() as UUID,
+        entityId: userId,
+        roomId,
+        content: {
+          text: prompt,
+          source: "compat_openai",
+          channelType: ChannelType.API,
+        },
+      });
+      const result = await generateChatResponse(
+        runtime,
+        message,
+        state.agentName,
+        {
+          resolveNoResponseText: () =>
+            resolveNoResponseFallback(state.logBuffer),
+        },
+      );
+      responseText = result.text;
     }
 
-    // Non-streaming
+    const resolvedText = normalizeChatResponseText(
+      responseText,
+      state.logBuffer,
+    );
+    json(res, {
+      id,
+      object: "chat.completion",
+      created,
+      model,
+      choices: [
+        {
+          index: 0,
+          message: { role: "assistant", content: resolvedText },
+          finish_reason: "stop",
+        },
+      ],
+    });
+  } catch (err) {
+    json(
+      res,
+      { error: { message: getErrorMessage(err), type: "server_error" } },
+      500,
+    );
+  }
+  return;
+}
+
+// ── POST /v1/messages (Anthropic compatible) ───────────────────────────
+if (method === "POST" && pathname === "/v1/messages") {
+  const body = await readJsonBody<Record<string, unknown>>(req, res);
+  if (!body) return;
+  if (hasBlockedObjectKeyDeep(body)) {
+    json(
+      res,
+      {
+        error: {
+          type: "invalid_request_error",
+          message: "Request body contains a blocked object key",
+        },
+      },
+      400,
+    );
+    return;
+  }
+  const safeBody = cloneWithoutBlockedObjectKeys(body);
+
+  const extracted = extractAnthropicSystemAndLastUser({
+    system: safeBody.system,
+    messages: safeBody.messages,
+  });
+  if (!extracted) {
+    json(
+      res,
+      {
+        error: {
+          type: "invalid_request_error",
+          message:
+            "messages must be an array containing at least one user message",
+        },
+      },
+      400,
+    );
+    return;
+  }
+
+  const roomKey = resolveCompatRoomKey(safeBody).slice(0, 120);
+  const wantsStream =
+    safeBody.stream === true ||
+    (req.headers.accept ?? "").includes("text/event-stream");
+  const requestedModel =
+    typeof safeBody.model === "string" && safeBody.model.trim()
+      ? safeBody.model.trim()
+      : null;
+
+  const prompt = extracted.system
+    ? `${extracted.system}\n\n${extracted.user}`.trim()
+    : extracted.user;
+
+  const id = `msg_${crypto.randomUUID().replace(/-/g, "")}`;
+  const model = requestedModel ?? state.agentName ?? "milady";
+
+  if (wantsStream) {
+    initSse(res);
+    let aborted = false;
+    req.on("close", () => {
+      aborted = true;
+    });
+
     try {
-      let responseText: string;
+      if (!state.runtime) {
+        writeSseJson(
+          res,
+          {
+            type: "error",
+            error: {
+              type: "service_unavailable",
+              message: "Agent is not running",
+            },
+          },
+          "error",
+        );
+        return;
+      }
+
+      writeSseJson(
+        res,
+        {
+          type: "message_start",
+          message: {
+            id,
+            type: "message",
+            role: "assistant",
+            model,
+            content: [],
+            stop_reason: null,
+            stop_sequence: null,
+            usage: { input_tokens: 0, output_tokens: 0 },
+          },
+        },
+        "message_start",
+      );
+      writeSseJson(
+        res,
+        {
+          type: "content_block_start",
+          index: 0,
+          content_block: { type: "text", text: "" },
+        },
+        "content_block_start",
+      );
+
+      let fullText = "";
+
+      const onDelta = (chunk: string) => {
+        if (!chunk) return;
+        fullText += chunk;
+        writeSseJson(
+          res,
+          {
+            type: "content_block_delta",
+            index: 0,
+            delta: { type: "text_delta", text: chunk },
+          },
+          "content_block_delta",
+        );
+      };
 
       {
-        if (!state.runtime) {
-          json(
-            res,
-            {
-              error: {
-                type: "service_unavailable",
-                message: "Agent is not running",
-              },
-            },
-            503,
-          );
-          return;
-        }
         const runtime = state.runtime;
+        if (!runtime) throw new Error("Agent is not running");
         const agentName = runtime.character.name ?? "Milady";
         const { userId, roomId } = await ensureCompatChatConnection(
           runtime,
@@ -10312,6 +10236,7 @@ async function handleRequest(
           "anthropic-compat",
           roomKey,
         );
+
         const message = createMessageMemory({
           id: crypto.randomUUID() as UUID,
           entityId: userId,
@@ -10322,266 +10247,48 @@ async function handleRequest(
             channelType: ChannelType.API,
           },
         });
-        const result = await generateChatResponse(
-          runtime,
-          message,
-          state.agentName,
-          {
-            resolveNoResponseText: () =>
-              resolveNoResponseFallback(state.logBuffer),
-          },
-        );
-        responseText = result.text;
-      }
 
-      const resolvedText = normalizeChatResponseText(
-        responseText,
-        state.logBuffer,
-      );
-      json(res, {
-        id,
-        type: "message",
-        role: "assistant",
-        model,
-        content: [{ type: "text", text: resolvedText }],
-        stop_reason: "end_turn",
-        stop_sequence: null,
-        usage: { input_tokens: 0, output_tokens: 0 },
-      });
-    } catch (err) {
-      json(
-        res,
-        { error: { type: "server_error", message: getErrorMessage(err) } },
-        500,
-      );
-    }
-    return;
-  }
-
-  // ── GET /api/conversations ──────────────────────────────────────────
-  if (method === "GET" && pathname === "/api/conversations") {
-    const convos = Array.from(state.conversations.values()).sort(
-      (a, b) =>
-        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-    );
-    json(res, { conversations: convos });
-    return;
-  }
-
-  // ── POST /api/conversations ─────────────────────────────────────────
-  if (method === "POST" && pathname === "/api/conversations") {
-    const body = await readJsonBody<{ title?: string }>(req, res);
-    if (!body) return;
-    const id = crypto.randomUUID();
-    const now = new Date().toISOString();
-    const roomId = stringToUuid(`web-conv-${id}`);
-    const conv: ConversationMeta = {
-      id,
-      title: body.title?.trim() || "New Chat",
-      roomId,
-      createdAt: now,
-      updatedAt: now,
-    };
-    state.conversations.set(id, conv);
-
-    // Soft cap: evict the oldest conversation when the map exceeds 500
-    evictOldestConversation(state.conversations, 500);
-
-    if (state.runtime) {
-      await ensureConversationRoom(conv);
-      await syncConversationRoomTitle(conv);
-    }
-    json(res, { conversation: conv });
-    return;
-  }
-
-  // ── GET /api/conversations/:id/messages ─────────────────────────────
-  if (
-    method === "GET" &&
-    /^\/api\/conversations\/[^/]+\/messages$/.test(pathname)
-  ) {
-    const convId = decodeURIComponent(pathname.split("/")[3]);
-    const conv = state.conversations.get(convId);
-    if (!conv) {
-      error(res, "Conversation not found", 404);
-      return;
-    }
-    if (!state.runtime) {
-      json(res, { messages: [] });
-      return;
-    }
-    const runtime = state.runtime;
-    try {
-      const memories = await runtime.getMemories({
-        roomId: conv.roomId,
-        tableName: "messages",
-        count: 200,
-      });
-      // Sort by createdAt ascending
-      memories.sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0));
-      const agentId = runtime.agentId;
-      const messages = memories.map((m) => {
-        const contentSource = (m.content as Record<string, unknown>)?.source;
-        return {
-          id: m.id ?? "",
-          role: m.entityId === agentId ? "assistant" : "user",
-          text: (m.content as { text?: string })?.text ?? "",
-          timestamp: m.createdAt ?? 0,
-          source:
-            typeof contentSource === "string" && contentSource !== "client_chat"
-              ? contentSource
-              : undefined,
-        };
-      });
-      json(res, { messages });
-    } catch (err) {
-      logger.warn(
-        `[conversations] Failed to fetch messages: ${err instanceof Error ? err.message : String(err)}`,
-      );
-      json(res, { messages: [], error: "Failed to fetch messages" }, 500);
-    }
-    return;
-  }
-
-  // ── POST /api/conversations/:id/messages/stream ─────────────────────
-  if (
-    method === "POST" &&
-    /^\/api\/conversations\/[^/]+\/messages\/stream$/.test(pathname)
-  ) {
-    const convId = decodeURIComponent(pathname.split("/")[3]);
-    const conv = state.conversations.get(convId);
-    if (!conv) {
-      error(res, "Conversation not found", 404);
-      return;
-    }
-
-    const chatPayload = await readChatRequestPayload(req, res, {
-      readJsonBody,
-      error,
-    });
-    if (!chatPayload) return;
-    const { prompt, channelType, images } = chatPayload;
-
-    const runtime = state.runtime;
-    if (!runtime) {
-      error(res, "Agent is not running", 503);
-      return;
-    }
-
-    const userId = ensureAdminEntityId();
-    const turnStartedAt = Date.now();
-
-    try {
-      await ensureConversationRoom(conv);
-    } catch (err) {
-      error(
-        res,
-        `Failed to initialize conversation room: ${getErrorMessage(err)}`,
-        500,
-      );
-      return;
-    }
-
-    const { userMessage, messageToStore } = buildUserMessages({
-      images,
-      prompt,
-      userId,
-      roomId: conv.roomId,
-      channelType,
-    });
-
-    try {
-      await persistConversationMemory(runtime, messageToStore);
-    } catch (err) {
-      error(res, `Failed to store user message: ${getErrorMessage(err)}`, 500);
-      return;
-    }
-
-    // ── Local runtime path (existing code below) ───────────────────────
-
-    initSse(res);
-    let aborted = false;
-    req.on("close", () => {
-      aborted = true;
-    });
-
-    try {
-      const result = await generateChatResponse(
-        runtime,
-        userMessage,
-        state.agentName,
-        {
+        await generateChatResponse(runtime, message, state.agentName, {
           isAborted: () => aborted,
-          onChunk: (chunk) => {
-            writeSse(res, { type: "token", text: chunk });
-          },
+          onChunk: onDelta,
           resolveNoResponseText: () =>
             resolveNoResponseFallback(state.logBuffer),
-        },
-      );
-
-      if (!aborted) {
-        await persistAssistantConversationMemory(
-          runtime,
-          conv.roomId,
-          result.text,
-          channelType,
-          turnStartedAt,
-        );
-        conv.updatedAt = new Date().toISOString();
-        writeSse(res, {
-          type: "done",
-          fullText: result.text,
-          agentName: result.agentName,
         });
-
-        // Background chat renaming
-        if (conv.title === "New Chat") {
-          // Fire and forget (don't await) to not block the response stream close
-          generateConversationTitle(runtime, prompt, state.agentName).then(
-            (newTitle) => {
-              if (newTitle && state.broadcastWs) {
-                conv.title = newTitle;
-                // Broadcast full conversations list update for simplicity
-                // (or ideally a specific event, but the frontend listens for reloads)
-                state.broadcastWs({
-                  type: "conversation-updated",
-                  conversation: conv,
-                });
-              }
-            },
-          );
-        }
       }
+
+      const resolved = normalizeChatResponseText(fullText, state.logBuffer);
+      if (
+        (fullText.trim().length === 0 || isNoResponsePlaceholder(fullText)) &&
+        resolved.trim()
+      ) {
+        onDelta(resolved);
+      }
+
+      writeSseJson(
+        res,
+        { type: "content_block_stop", index: 0 },
+        "content_block_stop",
+      );
+      writeSseJson(
+        res,
+        {
+          type: "message_delta",
+          delta: { stop_reason: "end_turn", stop_sequence: null },
+          usage: { output_tokens: 0 },
+        },
+        "message_delta",
+      );
+      writeSseJson(res, { type: "message_stop" }, "message_stop");
     } catch (err) {
       if (!aborted) {
-        const creditReply = getInsufficientCreditsReplyFromError(err);
-        if (creditReply) {
-          try {
-            await persistAssistantConversationMemory(
-              runtime,
-              conv.roomId,
-              creditReply,
-              channelType,
-            );
-            conv.updatedAt = new Date().toISOString();
-            writeSse(res, {
-              type: "done",
-              fullText: creditReply,
-              agentName: state.agentName,
-            });
-          } catch (persistErr) {
-            writeSse(res, {
-              type: "error",
-              message: getErrorMessage(persistErr),
-            });
-          }
-        } else {
-          writeSse(res, {
+        writeSseJson(
+          res,
+          {
             type: "error",
-            message: getErrorMessage(err),
-          });
-        }
+            error: { type: "server_error", message: getErrorMessage(err) },
+          },
+          "error",
+        );
       }
     } finally {
       res.end();
@@ -10589,68 +10296,241 @@ async function handleRequest(
     return;
   }
 
-  // ── POST /api/conversations/:id/messages ────────────────────────────
-  if (
-    method === "POST" &&
-    /^\/api\/conversations\/[^/]+\/messages$/.test(pathname)
-  ) {
-    const convId = decodeURIComponent(pathname.split("/")[3]);
-    const conv = state.conversations.get(convId);
-    if (!conv) {
-      error(res, "Conversation not found", 404);
-      return;
-    }
-    const chatPayload = await readChatRequestPayload(req, res, {
-      readJsonBody,
-      error,
-    });
-    if (!chatPayload) return;
-    const { prompt, channelType, images } = chatPayload;
-    const runtime = state.runtime;
-    if (!runtime) {
-      error(res, "Agent is not running", 503);
-      return;
-    }
-    const userId = ensureAdminEntityId();
-    const turnStartedAt = Date.now();
+  // Non-streaming
+  try {
+    let responseText: string;
 
-    try {
-      await ensureConversationRoom(conv);
-    } catch (err) {
-      error(
-        res,
-        `Failed to initialize conversation room: ${getErrorMessage(err)}`,
-        500,
+    {
+      if (!state.runtime) {
+        json(
+          res,
+          {
+            error: {
+              type: "service_unavailable",
+              message: "Agent is not running",
+            },
+          },
+          503,
+        );
+        return;
+      }
+      const runtime = state.runtime;
+      const agentName = runtime.character.name ?? "Milady";
+      const { userId, roomId } = await ensureCompatChatConnection(
+        runtime,
+        agentName,
+        "anthropic-compat",
+        roomKey,
       );
-      return;
-    }
-
-    const { userMessage, messageToStore } = buildUserMessages({
-      images,
-      prompt,
-      userId,
-      roomId: conv.roomId,
-      channelType,
-    });
-
-    try {
-      await persistConversationMemory(runtime, messageToStore);
-    } catch (err) {
-      error(res, `Failed to store user message: ${getErrorMessage(err)}`, 500);
-      return;
-    }
-
-    try {
+      const message = createMessageMemory({
+        id: crypto.randomUUID() as UUID,
+        entityId: userId,
+        roomId,
+        content: {
+          text: prompt,
+          source: "compat_anthropic",
+          channelType: ChannelType.API,
+        },
+      });
       const result = await generateChatResponse(
         runtime,
-        userMessage,
+        message,
         state.agentName,
         {
           resolveNoResponseText: () =>
             resolveNoResponseFallback(state.logBuffer),
         },
       );
+      responseText = result.text;
+    }
 
+    const resolvedText = normalizeChatResponseText(
+      responseText,
+      state.logBuffer,
+    );
+    json(res, {
+      id,
+      type: "message",
+      role: "assistant",
+      model,
+      content: [{ type: "text", text: resolvedText }],
+      stop_reason: "end_turn",
+      stop_sequence: null,
+      usage: { input_tokens: 0, output_tokens: 0 },
+    });
+  } catch (err) {
+    json(
+      res,
+      { error: { type: "server_error", message: getErrorMessage(err) } },
+      500,
+    );
+  }
+  return;
+}
+
+// ── GET /api/conversations ──────────────────────────────────────────
+if (method === "GET" && pathname === "/api/conversations") {
+  const convos = Array.from(state.conversations.values()).sort(
+    (a, b) =>
+      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+  );
+  json(res, { conversations: convos });
+  return;
+}
+
+// ── POST /api/conversations ─────────────────────────────────────────
+if (method === "POST" && pathname === "/api/conversations") {
+  const body = await readJsonBody<{ title?: string }>(req, res);
+  if (!body) return;
+  const id = crypto.randomUUID();
+  const now = new Date().toISOString();
+  const roomId = stringToUuid(`web-conv-${id}`);
+  const conv: ConversationMeta = {
+    id,
+    title: body.title?.trim() || "New Chat",
+    roomId,
+    createdAt: now,
+    updatedAt: now,
+  };
+  state.conversations.set(id, conv);
+
+  // Soft cap: evict the oldest conversation when the map exceeds 500
+  evictOldestConversation(state.conversations, 500);
+
+  if (state.runtime) {
+    await ensureConversationRoom(conv);
+    await syncConversationRoomTitle(conv);
+  }
+  json(res, { conversation: conv });
+  return;
+}
+
+// ── GET /api/conversations/:id/messages ─────────────────────────────
+if (
+  method === "GET" &&
+  /^\/api\/conversations\/[^/]+\/messages$/.test(pathname)
+) {
+  const convId = decodeURIComponent(pathname.split("/")[3]);
+  const conv = state.conversations.get(convId);
+  if (!conv) {
+    error(res, "Conversation not found", 404);
+    return;
+  }
+  if (!state.runtime) {
+    json(res, { messages: [] });
+    return;
+  }
+  const runtime = state.runtime;
+  try {
+    const memories = await runtime.getMemories({
+      roomId: conv.roomId,
+      tableName: "messages",
+      count: 200,
+    });
+    // Sort by createdAt ascending
+    memories.sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0));
+    const agentId = runtime.agentId;
+    const messages = memories.map((m) => {
+      const contentSource = (m.content as Record<string, unknown>)?.source;
+      return {
+        id: m.id ?? "",
+        role: m.entityId === agentId ? "assistant" : "user",
+        text: (m.content as { text?: string })?.text ?? "",
+        timestamp: m.createdAt ?? 0,
+        source:
+          typeof contentSource === "string" && contentSource !== "client_chat"
+            ? contentSource
+            : undefined,
+      };
+    });
+    json(res, { messages });
+  } catch (err) {
+    logger.warn(
+      `[conversations] Failed to fetch messages: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    json(res, { messages: [], error: "Failed to fetch messages" }, 500);
+  }
+  return;
+}
+
+// ── POST /api/conversations/:id/messages/stream ─────────────────────
+if (
+  method === "POST" &&
+  /^\/api\/conversations\/[^/]+\/messages\/stream$/.test(pathname)
+) {
+  const convId = decodeURIComponent(pathname.split("/")[3]);
+  const conv = state.conversations.get(convId);
+  if (!conv) {
+    error(res, "Conversation not found", 404);
+    return;
+  }
+
+  const chatPayload = await readChatRequestPayload(req, res, {
+    readJsonBody,
+    error,
+  });
+  if (!chatPayload) return;
+  const { prompt, channelType, images } = chatPayload;
+
+  const runtime = state.runtime;
+  if (!runtime) {
+    error(res, "Agent is not running", 503);
+    return;
+  }
+
+  const userId = ensureAdminEntityId();
+  const turnStartedAt = Date.now();
+
+  try {
+    await ensureConversationRoom(conv);
+  } catch (err) {
+    error(
+      res,
+      `Failed to initialize conversation room: ${getErrorMessage(err)}`,
+      500,
+    );
+    return;
+  }
+
+  const { userMessage, messageToStore } = buildUserMessages({
+    images,
+    prompt,
+    userId,
+    roomId: conv.roomId,
+    channelType,
+  });
+
+  try {
+    await persistConversationMemory(runtime, messageToStore);
+  } catch (err) {
+    error(res, `Failed to store user message: ${getErrorMessage(err)}`, 500);
+    return;
+  }
+
+  // ── Local runtime path (existing code below) ───────────────────────
+
+  initSse(res);
+  let aborted = false;
+  req.on("close", () => {
+    aborted = true;
+  });
+
+  try {
+    const result = await generateChatResponse(
+      runtime,
+      userMessage,
+      state.agentName,
+      {
+        isAborted: () => aborted,
+        onChunk: (chunk) => {
+          writeSse(res, { type: "token", text: chunk });
+        },
+        resolveNoResponseText: () =>
+          resolveNoResponseFallback(state.logBuffer),
+      },
+    );
+
+    if (!aborted) {
       await persistAssistantConversationMemory(
         runtime,
         conv.roomId,
@@ -10659,14 +10539,32 @@ async function handleRequest(
         turnStartedAt,
       );
       conv.updatedAt = new Date().toISOString();
-      json(res, {
-        text: result.text,
+      writeSse(res, {
+        type: "done",
+        fullText: result.text,
         agentName: result.agentName,
       });
-    } catch (err) {
-      logger.warn(
-        `[conversations] POST /messages failed: ${err instanceof Error ? err.message : String(err)}`,
-      );
+
+      // Background chat renaming
+      if (conv.title === "New Chat") {
+        // Fire and forget (don't await) to not block the response stream close
+        generateConversationTitle(runtime, prompt, state.agentName).then(
+          (newTitle) => {
+            if (newTitle && state.broadcastWs) {
+              conv.title = newTitle;
+              // Broadcast full conversations list update for simplicity
+              // (or ideally a specific event, but the frontend listens for reloads)
+              state.broadcastWs({
+                type: "conversation-updated",
+                conversation: conv,
+              });
+            }
+          },
+        );
+      }
+    }
+  } catch (err) {
+    if (!aborted) {
       const creditReply = getInsufficientCreditsReplyFromError(err);
       if (creditReply) {
         try {
@@ -10677,1879 +10575,2017 @@ async function handleRequest(
             channelType,
           );
           conv.updatedAt = new Date().toISOString();
-          json(res, {
-            text: creditReply,
-            agentName: state.agentName,
-          });
-        } catch (persistErr) {
-          error(res, getErrorMessage(persistErr), 500);
-        }
-      } else {
-        error(res, getErrorMessage(err), 500);
-      }
-    }
-    return;
-  }
-
-  // ── POST /api/conversations/:id/greeting ───────────────────────────
-  // Pick a random postExample from the character as the opening message.
-  // No model call, no latency, no cost — already in the agent's voice.
-  // Stored as an agent message so it persists on refresh.
-  if (
-    method === "POST" &&
-    /^\/api\/conversations\/[^/]+\/greeting$/.test(pathname)
-  ) {
-    const convId = decodeURIComponent(pathname.split("/")[3]);
-    const conv = state.conversations.get(convId);
-    if (!conv) {
-      error(res, "Conversation not found", 404);
-      return;
-    }
-
-    const runtime = state.runtime;
-    if (!runtime) {
-      error(res, "Agent is not running", 503);
-      return;
-    }
-    const charName = runtime.character.name ?? state.agentName ?? "Milady";
-
-    // Collect post examples from the character
-    const postExamples = runtime.character.postExamples ?? [];
-    const greeting =
-      postExamples[Math.floor(Math.random() * postExamples.length)];
-
-    if (!greeting?.trim()) {
-      json(res, {
-        text: "",
-        agentName: charName,
-        generated: false,
-      });
-      return;
-    }
-
-    try {
-      await ensureConversationRoom(conv);
-    } catch (err) {
-      error(
-        res,
-        `Failed to initialize conversation room: ${getErrorMessage(err)}`,
-        500,
-      );
-      return;
-    }
-
-    try {
-      await persistConversationMemory(
-        runtime,
-        createMessageMemory({
-          id: crypto.randomUUID() as UUID,
-          entityId: runtime.agentId,
-          roomId: conv.roomId,
-          content: {
-            text: greeting,
-            source: "agent_greeting",
-            channelType: ChannelType.DM,
-          },
-        }),
-      );
-    } catch (err) {
-      error(
-        res,
-        `Failed to store greeting message: ${getErrorMessage(err)}`,
-        500,
-      );
-      return;
-    }
-
-    conv.updatedAt = new Date().toISOString();
-    json(res, {
-      text: greeting,
-      agentName: charName,
-      generated: postExamples.length > 0,
-    });
-    return;
-  }
-
-  // ── PATCH /api/conversations/:id ────────────────────────────────────
-  if (
-    method === "PATCH" &&
-    /^\/api\/conversations\/[^/]+$/.test(pathname) &&
-    !pathname.endsWith("/messages")
-  ) {
-    const convId = decodeURIComponent(pathname.split("/")[3]);
-    const conv = state.conversations.get(convId);
-    if (!conv) {
-      error(res, "Conversation not found", 404);
-      return;
-    }
-    const body = await readJsonBody<{ title?: string }>(req, res);
-    if (!body) return;
-    if (body.title?.trim()) {
-      conv.title = body.title.trim();
-      conv.updatedAt = new Date().toISOString();
-      await syncConversationRoomTitle(conv);
-    }
-    json(res, { conversation: conv });
-    return;
-  }
-
-  // ── DELETE /api/conversations/:id ───────────────────────────────────
-  if (
-    method === "DELETE" &&
-    /^\/api\/conversations\/[^/]+$/.test(pathname) &&
-    !pathname.endsWith("/messages")
-  ) {
-    const convId = decodeURIComponent(pathname.split("/")[3]);
-    state.conversations.delete(convId);
-    json(res, { ok: true });
-    return;
-  }
-
-  // ── POST /api/chat/stream ────────────────────────────────────────────
-  if (method === "POST" && pathname === "/api/chat/stream") {
-    // Legacy cloud-proxy path — forwards messages to a remote sandbox and
-    // does not process image attachments. Retain the standard 1 MB body limit.
-    const chatPayload = await readChatRequestPayload(
-      req,
-      res,
-      { readJsonBody, error },
-      MAX_BODY_BYTES,
-    );
-    if (!chatPayload) return;
-    const { prompt, channelType } = chatPayload;
-
-    // Cloud proxy path
-
-    if (!state.runtime) {
-      error(res, "Agent is not running", 503);
-      return;
-    }
-
-    initSse(res);
-    let aborted = false;
-    req.on("close", () => {
-      aborted = true;
-    });
-
-    try {
-      const runtime = state.runtime;
-      const agentName = runtime.character.name ?? "Milady";
-      await ensureLegacyChatConnection(runtime, agentName);
-      const chatUserId = state.chatUserId;
-      const chatRoomId = state.chatRoomId;
-      if (!chatUserId || !chatRoomId) {
-        throw new Error("Legacy chat connection was not initialized");
-      }
-
-      const message = createMessageMemory({
-        id: crypto.randomUUID() as UUID,
-        entityId: chatUserId,
-        agentId: runtime.agentId,
-        roomId: chatRoomId,
-        content: {
-          text: prompt,
-          source: "client_chat",
-          channelType,
-        },
-      });
-
-      const result = await generateChatResponse(
-        runtime,
-        message,
-        state.agentName,
-        {
-          isAborted: () => aborted,
-          onChunk: (chunk) => {
-            writeSse(res, { type: "token", text: chunk });
-          },
-          resolveNoResponseText: () =>
-            resolveNoResponseFallback(state.logBuffer),
-        },
-      );
-
-      if (!aborted) {
-        writeSse(res, {
-          type: "done",
-          fullText: result.text,
-          agentName: result.agentName,
-        });
-      }
-    } catch (err) {
-      if (!aborted) {
-        const creditReply = getInsufficientCreditsReplyFromError(err);
-        if (creditReply) {
           writeSse(res, {
             type: "done",
             fullText: creditReply,
             agentName: state.agentName,
           });
-        } else {
+        } catch (persistErr) {
           writeSse(res, {
             type: "error",
-            message: getErrorMessage(err),
+            message: getErrorMessage(persistErr),
           });
         }
+      } else {
+        writeSse(res, {
+          type: "error",
+          message: getErrorMessage(err),
+        });
       }
-    } finally {
-      res.end();
     }
+  } finally {
+    res.end();
+  }
+  return;
+}
+
+// ── POST /api/conversations/:id/messages ────────────────────────────
+if (
+  method === "POST" &&
+  /^\/api\/conversations\/[^/]+\/messages$/.test(pathname)
+) {
+  const convId = decodeURIComponent(pathname.split("/")[3]);
+  const conv = state.conversations.get(convId);
+  if (!conv) {
+    error(res, "Conversation not found", 404);
+    return;
+  }
+  const chatPayload = await readChatRequestPayload(req, res, {
+    readJsonBody,
+    error,
+  });
+  if (!chatPayload) return;
+  const { prompt, channelType, images } = chatPayload;
+  const runtime = state.runtime;
+  if (!runtime) {
+    error(res, "Agent is not running", 503);
+    return;
+  }
+  const userId = ensureAdminEntityId();
+  const turnStartedAt = Date.now();
+
+  try {
+    await ensureConversationRoom(conv);
+  } catch (err) {
+    error(
+      res,
+      `Failed to initialize conversation room: ${getErrorMessage(err)}`,
+      500,
+    );
     return;
   }
 
-  // ── POST /api/chat (legacy — routes to default conversation) ───────
-  // Routes messages through the full ElizaOS message pipeline so the agent
-  // has conversation memory, context, and always responds (DM + client_chat
-  // bypass the shouldRespond LLM evaluation).
-  //
-  // Cloud mode: when a cloud proxy is active, messages are forwarded to the
-  // remote sandbox instead of the local runtime.  Supports SSE streaming
-  // when the client sends Accept: text/event-stream.
-  if (method === "POST" && pathname === "/api/chat") {
-    // Legacy cloud-proxy path — forwards messages to a remote sandbox and
-    // does not process image attachments. Retain the standard 1 MB body limit.
-    const chatPayload = await readChatRequestPayload(
-      req,
-      res,
-      { readJsonBody, error },
-      MAX_BODY_BYTES,
+  const { userMessage, messageToStore } = buildUserMessages({
+    images,
+    prompt,
+    userId,
+    roomId: conv.roomId,
+    channelType,
+  });
+
+  try {
+    await persistConversationMemory(runtime, messageToStore);
+  } catch (err) {
+    error(res, `Failed to store user message: ${getErrorMessage(err)}`, 500);
+    return;
+  }
+
+  try {
+    const result = await generateChatResponse(
+      runtime,
+      userMessage,
+      state.agentName,
+      {
+        resolveNoResponseText: () =>
+          resolveNoResponseFallback(state.logBuffer),
+      },
     );
-    if (!chatPayload) return;
-    const { prompt, channelType } = chatPayload;
 
-    if (!state.runtime) {
-      error(res, "Agent is not running", 503);
-      return;
-    }
-
-    try {
-      const runtime = state.runtime;
-      const agentName = runtime.character.name ?? "Milady";
-      await ensureLegacyChatConnection(runtime, agentName);
-      const chatUserId = state.chatUserId;
-      const chatRoomId = state.chatRoomId;
-      if (!chatUserId || !chatRoomId) {
-        throw new Error("Legacy chat connection was not initialized");
-      }
-
-      const message = createMessageMemory({
-        id: crypto.randomUUID() as UUID,
-        entityId: chatUserId,
-        agentId: runtime.agentId,
-        roomId: chatRoomId,
-        content: {
-          text: prompt,
-          source: "client_chat",
+    await persistAssistantConversationMemory(
+      runtime,
+      conv.roomId,
+      result.text,
+      channelType,
+      turnStartedAt,
+    );
+    conv.updatedAt = new Date().toISOString();
+    json(res, {
+      text: result.text,
+      agentName: result.agentName,
+    });
+  } catch (err) {
+    logger.warn(
+      `[conversations] POST /messages failed: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    const creditReply = getInsufficientCreditsReplyFromError(err);
+    if (creditReply) {
+      try {
+        await persistAssistantConversationMemory(
+          runtime,
+          conv.roomId,
+          creditReply,
           channelType,
-        },
-      });
-
-      const result = await generateChatResponse(
-        runtime,
-        message,
-        state.agentName,
-        {
-          resolveNoResponseText: () =>
-            resolveNoResponseFallback(state.logBuffer),
-        },
-      );
-
-      json(res, {
-        text: result.text,
-        agentName: result.agentName,
-      });
-    } catch (err) {
-      const creditReply = getInsufficientCreditsReplyFromError(err);
-      if (creditReply) {
+        );
+        conv.updatedAt = new Date().toISOString();
         json(res, {
           text: creditReply,
           agentName: state.agentName,
         });
-      } else {
-        error(res, getErrorMessage(err), 500);
+      } catch (persistErr) {
+        error(res, getErrorMessage(persistErr), 500);
       }
+    } else {
+      error(res, getErrorMessage(err), 500);
     }
+  }
+  return;
+}
+
+// ── POST /api/conversations/:id/greeting ───────────────────────────
+// Pick a random postExample from the character as the opening message.
+// No model call, no latency, no cost — already in the agent's voice.
+// Stored as an agent message so it persists on refresh.
+if (
+  method === "POST" &&
+  /^\/api\/conversations\/[^/]+\/greeting$/.test(pathname)
+) {
+  const convId = decodeURIComponent(pathname.split("/")[3]);
+  const conv = state.conversations.get(convId);
+  if (!conv) {
+    error(res, "Conversation not found", 404);
     return;
   }
 
-  // ── Database management API ─────────────────────────────────────────────
-  if (pathname.startsWith("/api/database/")) {
-    const handled = await handleDatabaseRoute(
+  const runtime = state.runtime;
+  if (!runtime) {
+    error(res, "Agent is not running", 503);
+    return;
+  }
+  const charName = runtime.character.name ?? state.agentName ?? "Milady";
+
+  // Collect post examples from the character
+  const postExamples = runtime.character.postExamples ?? [];
+  const greeting =
+    postExamples[Math.floor(Math.random() * postExamples.length)];
+
+  if (!greeting?.trim()) {
+    json(res, {
+      text: "",
+      agentName: charName,
+      generated: false,
+    });
+    return;
+  }
+
+  try {
+    await ensureConversationRoom(conv);
+  } catch (err) {
+    error(
+      res,
+      `Failed to initialize conversation room: ${getErrorMessage(err)}`,
+      500,
+    );
+    return;
+  }
+
+  try {
+    await persistConversationMemory(
+      runtime,
+      createMessageMemory({
+        id: crypto.randomUUID() as UUID,
+        entityId: runtime.agentId,
+        roomId: conv.roomId,
+        content: {
+          text: greeting,
+          source: "agent_greeting",
+          channelType: ChannelType.DM,
+        },
+      }),
+    );
+  } catch (err) {
+    error(
+      res,
+      `Failed to store greeting message: ${getErrorMessage(err)}`,
+      500,
+    );
+    return;
+  }
+
+  conv.updatedAt = new Date().toISOString();
+  json(res, {
+    text: greeting,
+    agentName: charName,
+    generated: postExamples.length > 0,
+  });
+  return;
+}
+
+// ── PATCH /api/conversations/:id ────────────────────────────────────
+if (
+  method === "PATCH" &&
+  /^\/api\/conversations\/[^/]+$/.test(pathname) &&
+  !pathname.endsWith("/messages")
+) {
+  const convId = decodeURIComponent(pathname.split("/")[3]);
+  const conv = state.conversations.get(convId);
+  if (!conv) {
+    error(res, "Conversation not found", 404);
+    return;
+  }
+  const body = await readJsonBody<{ title?: string }>(req, res);
+  if (!body) return;
+  if (body.title?.trim()) {
+    conv.title = body.title.trim();
+    conv.updatedAt = new Date().toISOString();
+    await syncConversationRoomTitle(conv);
+  }
+  json(res, { conversation: conv });
+  return;
+}
+
+// ── DELETE /api/conversations/:id ───────────────────────────────────
+if (
+  method === "DELETE" &&
+  /^\/api\/conversations\/[^/]+$/.test(pathname) &&
+  !pathname.endsWith("/messages")
+) {
+  const convId = decodeURIComponent(pathname.split("/")[3]);
+  state.conversations.delete(convId);
+  json(res, { ok: true });
+  return;
+}
+
+// ── POST /api/chat/stream ────────────────────────────────────────────
+if (method === "POST" && pathname === "/api/chat/stream") {
+  // Legacy cloud-proxy path — forwards messages to a remote sandbox and
+  // does not process image attachments. Retain the standard 1 MB body limit.
+  const chatPayload = await readChatRequestPayload(
+    req,
+    res,
+    { readJsonBody, error },
+    MAX_BODY_BYTES,
+  );
+  if (!chatPayload) return;
+  const { prompt, channelType } = chatPayload;
+
+  // Cloud proxy path
+
+  if (!state.runtime) {
+    error(res, "Agent is not running", 503);
+    return;
+  }
+
+  initSse(res);
+  let aborted = false;
+  req.on("close", () => {
+    aborted = true;
+  });
+
+  try {
+    const runtime = state.runtime;
+    const agentName = runtime.character.name ?? "Milady";
+    await ensureLegacyChatConnection(runtime, agentName);
+    const chatUserId = state.chatUserId;
+    const chatRoomId = state.chatRoomId;
+    if (!chatUserId || !chatRoomId) {
+      throw new Error("Legacy chat connection was not initialized");
+    }
+
+    const message = createMessageMemory({
+      id: crypto.randomUUID() as UUID,
+      entityId: chatUserId,
+      agentId: runtime.agentId,
+      roomId: chatRoomId,
+      content: {
+        text: prompt,
+        source: "client_chat",
+        channelType,
+      },
+    });
+
+    const result = await generateChatResponse(
+      runtime,
+      message,
+      state.agentName,
+      {
+        isAborted: () => aborted,
+        onChunk: (chunk) => {
+          writeSse(res, { type: "token", text: chunk });
+        },
+        resolveNoResponseText: () =>
+          resolveNoResponseFallback(state.logBuffer),
+      },
+    );
+
+    if (!aborted) {
+      writeSse(res, {
+        type: "done",
+        fullText: result.text,
+        agentName: result.agentName,
+      });
+    }
+  } catch (err) {
+    if (!aborted) {
+      const creditReply = getInsufficientCreditsReplyFromError(err);
+      if (creditReply) {
+        writeSse(res, {
+          type: "done",
+          fullText: creditReply,
+          agentName: state.agentName,
+        });
+      } else {
+        writeSse(res, {
+          type: "error",
+          message: getErrorMessage(err),
+        });
+      }
+    }
+  } finally {
+    res.end();
+  }
+  return;
+}
+
+// ── POST /api/chat (legacy — routes to default conversation) ───────
+// Routes messages through the full ElizaOS message pipeline so the agent
+// has conversation memory, context, and always responds (DM + client_chat
+// bypass the shouldRespond LLM evaluation).
+//
+// Cloud mode: when a cloud proxy is active, messages are forwarded to the
+// remote sandbox instead of the local runtime.  Supports SSE streaming
+// when the client sends Accept: text/event-stream.
+if (method === "POST" && pathname === "/api/chat") {
+  // Legacy cloud-proxy path — forwards messages to a remote sandbox and
+  // does not process image attachments. Retain the standard 1 MB body limit.
+  const chatPayload = await readChatRequestPayload(
+    req,
+    res,
+    { readJsonBody, error },
+    MAX_BODY_BYTES,
+  );
+  if (!chatPayload) return;
+  const { prompt, channelType } = chatPayload;
+
+  if (!state.runtime) {
+    error(res, "Agent is not running", 503);
+    return;
+  }
+
+  try {
+    const runtime = state.runtime;
+    const agentName = runtime.character.name ?? "Milady";
+    await ensureLegacyChatConnection(runtime, agentName);
+    const chatUserId = state.chatUserId;
+    const chatRoomId = state.chatRoomId;
+    if (!chatUserId || !chatRoomId) {
+      throw new Error("Legacy chat connection was not initialized");
+    }
+
+    const message = createMessageMemory({
+      id: crypto.randomUUID() as UUID,
+      entityId: chatUserId,
+      agentId: runtime.agentId,
+      roomId: chatRoomId,
+      content: {
+        text: prompt,
+        source: "client_chat",
+        channelType,
+      },
+    });
+
+    const result = await generateChatResponse(
+      runtime,
+      message,
+      state.agentName,
+      {
+        resolveNoResponseText: () =>
+          resolveNoResponseFallback(state.logBuffer),
+      },
+    );
+
+    json(res, {
+      text: result.text,
+      agentName: result.agentName,
+    });
+  } catch (err) {
+    const creditReply = getInsufficientCreditsReplyFromError(err);
+    if (creditReply) {
+      json(res, {
+        text: creditReply,
+        agentName: state.agentName,
+      });
+    } else {
+      error(res, getErrorMessage(err), 500);
+    }
+  }
+  return;
+}
+
+// ── Database management API ─────────────────────────────────────────────
+if (pathname.startsWith("/api/database/")) {
+  const handled = await handleDatabaseRoute(
+    req,
+    res,
+    state.runtime,
+    pathname,
+  );
+  if (handled) return;
+}
+
+// ── Trajectory management API ──────────────────────────────────────────
+if (pathname.startsWith("/api/trajectories")) {
+  if (state.runtime) {
+    const handled = await handleTrajectoryRoute(
       req,
       res,
       state.runtime,
       pathname,
+      method,
     );
     if (handled) return;
   }
+}
 
-  // ── Trajectory management API ──────────────────────────────────────────
-  if (pathname.startsWith("/api/trajectories")) {
-    if (state.runtime) {
-      const handled = await handleTrajectoryRoute(
-        req,
-        res,
-        state.runtime,
-        pathname,
-        method,
-      );
-      if (handled) return;
+// ── Coding Agent API (/api/coding-agents/*, /api/workspace/*, /api/issues/*) ──
+if (
+  state.runtime &&
+  (pathname.startsWith("/api/coding-agents") ||
+    pathname.startsWith("/api/workspace") ||
+    pathname.startsWith("/api/issues"))
+) {
+  const handler = createCodingAgentRouteHandler(state.runtime);
+  const handled = await handler(req, res, pathname);
+  if (handled) return;
+}
+
+if (
+  await handleCloudStatusRoutes({
+    req,
+    res,
+    method,
+    pathname,
+    config: state.config,
+    runtime: state.runtime,
+    json,
+  })
+) {
+  return;
+}
+
+// ── App routes (/api/apps/*) ──────────────────────────────────────────
+if (
+  await handleAppsRoutes({
+    req,
+    res,
+    method,
+    pathname,
+    url,
+    appManager: state.appManager,
+    getPluginManager: () => requirePluginManager(state.runtime),
+    parseBoundedLimit,
+    readJsonBody,
+    json,
+    error,
+    runtime: state.runtime,
+  })
+) {
+  return;
+}
+
+// ── Hyperscape control proxy routes ──────────────────────────────────
+if (
+  await handleAppsHyperscapeRoutes({
+    req,
+    res,
+    method,
+    pathname,
+    relayHyperscapeApi,
+    readJsonBody,
+    error,
+  })
+) {
+  return;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// Workbench routes
+// ═══════════════════════════════════════════════════════════════════════
+
+// ── GET /api/workbench/overview ──────────────────────────────────────
+if (method === "GET" && pathname === "/api/workbench/overview") {
+  const tasks: WorkbenchTaskView[] = [];
+  const triggers: Array<
+    NonNullable<ReturnType<typeof taskToTriggerSummary>>
+  > = [];
+  const todos: WorkbenchTodoView[] = [];
+  const summary = {
+    totalTasks: 0,
+    completedTasks: 0,
+    totalTriggers: 0,
+    activeTriggers: 0,
+    totalTodos: 0,
+    completedTodos: 0,
+  };
+  const latestAutonomyEvent = [...state.eventBuffer]
+    .reverse()
+    .find(
+      (event) =>
+        event.type === "agent_event" &&
+        (event.stream === "assistant" ||
+          event.stream === "provider" ||
+          event.stream === "evaluator"),
+    );
+  const autonomyState = getAutonomyState(state.runtime);
+  const autonomy = {
+    enabled: autonomyState.enabled,
+    thinking: autonomyState.thinking,
+    lastEventAt: latestAutonomyEvent?.ts ?? null,
+  };
+  let tasksAvailable = false;
+  let triggersAvailable = false;
+  let todosAvailable = false;
+  let runtimeTasks: Task[] = [];
+  let todoData: TodoDataServiceLike | null = null;
+
+  if (state.runtime) {
+    try {
+      runtimeTasks = await state.runtime.getTasks({});
+      tasksAvailable = true;
+      todosAvailable = true;
+
+      for (const task of runtimeTasks) {
+        const todo = toWorkbenchTodo(task);
+        if (todo) {
+          todos.push(todo);
+          continue;
+        }
+        const mappedTask = toWorkbenchTask(task);
+        if (mappedTask) {
+          tasks.push(mappedTask);
+        }
+      }
+    } catch {
+      tasksAvailable = false;
+      todosAvailable = false;
     }
-  }
 
-  // ── Coding Agent API (/api/coding-agents/*, /api/workspace/*, /api/issues/*) ──
-  if (
-    state.runtime &&
-    (pathname.startsWith("/api/coding-agents") ||
-      pathname.startsWith("/api/workspace") ||
-      pathname.startsWith("/api/issues"))
-  ) {
-    const handler = createCodingAgentRouteHandler(state.runtime);
-    const handled = await handler(req, res, pathname);
-    if (handled) return;
-  }
-
-  if (
-    await handleCloudStatusRoutes({
-      req,
-      res,
-      method,
-      pathname,
-      config: state.config,
-      runtime: state.runtime,
-      json,
-    })
-  ) {
-    return;
-  }
-
-  // ── App routes (/api/apps/*) ──────────────────────────────────────────
-  if (
-    await handleAppsRoutes({
-      req,
-      res,
-      method,
-      pathname,
-      url,
-      appManager: state.appManager,
-      getPluginManager: () => requirePluginManager(state.runtime),
-      parseBoundedLimit,
-      readJsonBody,
-      json,
-      error,
-      runtime: state.runtime,
-    })
-  ) {
-    return;
-  }
-
-  // ── Hyperscape control proxy routes ──────────────────────────────────
-  if (
-    await handleAppsHyperscapeRoutes({
-      req,
-      res,
-      method,
-      pathname,
-      relayHyperscapeApi,
-      readJsonBody,
-      error,
-    })
-  ) {
-    return;
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════
-  // Workbench routes
-  // ═══════════════════════════════════════════════════════════════════════
-
-  // ── GET /api/workbench/overview ──────────────────────────────────────
-  if (method === "GET" && pathname === "/api/workbench/overview") {
-    const tasks: WorkbenchTaskView[] = [];
-    const triggers: Array<
-      NonNullable<ReturnType<typeof taskToTriggerSummary>>
-    > = [];
-    const todos: WorkbenchTodoView[] = [];
-    const summary = {
-      totalTasks: 0,
-      completedTasks: 0,
-      totalTriggers: 0,
-      activeTriggers: 0,
-      totalTodos: 0,
-      completedTodos: 0,
-    };
-    const latestAutonomyEvent = [...state.eventBuffer]
-      .reverse()
-      .find(
-        (event) =>
-          event.type === "agent_event" &&
-          (event.stream === "assistant" ||
-            event.stream === "provider" ||
-            event.stream === "evaluator"),
-      );
-    const autonomyState = getAutonomyState(state.runtime);
-    const autonomy = {
-      enabled: autonomyState.enabled,
-      thinking: autonomyState.thinking,
-      lastEventAt: latestAutonomyEvent?.ts ?? null,
-    };
-    let tasksAvailable = false;
-    let triggersAvailable = false;
-    let todosAvailable = false;
-    let runtimeTasks: Task[] = [];
-    let todoData: TodoDataServiceLike | null = null;
-
-    if (state.runtime) {
-      try {
-        runtimeTasks = await state.runtime.getTasks({});
-        tasksAvailable = true;
+    try {
+      todoData = await getTodoDataService(state.runtime);
+      if (todoData) {
+        const dbTodos = await todoData.getTodos({
+          agentId: state.runtime.agentId,
+        });
         todosAvailable = true;
-
-        for (const task of runtimeTasks) {
-          const todo = toWorkbenchTodo(task);
-          if (todo) {
-            todos.push(todo);
-            continue;
-          }
-          const mappedTask = toWorkbenchTask(task);
-          if (mappedTask) {
-            tasks.push(mappedTask);
+        for (const rawTodo of dbTodos) {
+          const mapped = toWorkbenchTodoFromRecord(rawTodo);
+          if (mapped) {
+            todos.push(mapped);
           }
         }
-      } catch {
-        tasksAvailable = false;
-        todosAvailable = false;
       }
+    } catch {
+      // plugin todo unavailable or errored; keep fallback todos
+    }
 
-      try {
-        todoData = await getTodoDataService(state.runtime);
-        if (todoData) {
-          const dbTodos = await todoData.getTodos({
-            agentId: state.runtime.agentId,
-          });
-          todosAvailable = true;
-          for (const rawTodo of dbTodos) {
-            const mapped = toWorkbenchTodoFromRecord(rawTodo);
-            if (mapped) {
-              todos.push(mapped);
-            }
-          }
+    try {
+      const triggerTasks = await listTriggerTasks(state.runtime);
+      triggersAvailable = true;
+      for (const task of triggerTasks) {
+        const summaryItem = taskToTriggerSummary(task);
+        if (summaryItem) {
+          triggers.push(summaryItem);
         }
-      } catch {
-        // plugin todo unavailable or errored; keep fallback todos
       }
-
-      try {
-        const triggerTasks = await listTriggerTasks(state.runtime);
+    } catch {
+      if (tasksAvailable) {
         triggersAvailable = true;
-        for (const task of triggerTasks) {
+        for (const task of runtimeTasks) {
           const summaryItem = taskToTriggerSummary(task);
           if (summaryItem) {
             triggers.push(summaryItem);
           }
         }
-      } catch {
-        if (tasksAvailable) {
-          triggersAvailable = true;
-          for (const task of runtimeTasks) {
-            const summaryItem = taskToTriggerSummary(task);
-            if (summaryItem) {
-              triggers.push(summaryItem);
-            }
-          }
-        }
       }
     }
+  }
 
-    if (todos.length > 1) {
-      const dedupedTodos = new Map<string, WorkbenchTodoView>();
-      for (const todo of todos) {
-        dedupedTodos.set(todo.id, todo);
-      }
-      todos.length = 0;
-      todos.push(...dedupedTodos.values());
+  if (todos.length > 1) {
+    const dedupedTodos = new Map<string, WorkbenchTodoView>();
+    for (const todo of todos) {
+      dedupedTodos.set(todo.id, todo);
     }
+    todos.length = 0;
+    todos.push(...dedupedTodos.values());
+  }
 
-    tasks.sort((a, b) => a.name.localeCompare(b.name));
-    todos.sort((a, b) => a.name.localeCompare(b.name));
-    triggers.sort((a, b) => a.displayName.localeCompare(b.displayName));
-    summary.totalTasks = tasks.length;
-    summary.completedTasks = tasks.filter((task) => task.isCompleted).length;
-    summary.totalTriggers = triggers.length;
-    summary.activeTriggers = triggers.filter(
-      (trigger) => trigger.enabled,
-    ).length;
-    summary.totalTodos = todos.length;
-    summary.completedTodos = todos.filter((todo) => todo.isCompleted).length;
+  tasks.sort((a, b) => a.name.localeCompare(b.name));
+  todos.sort((a, b) => a.name.localeCompare(b.name));
+  triggers.sort((a, b) => a.displayName.localeCompare(b.displayName));
+  summary.totalTasks = tasks.length;
+  summary.completedTasks = tasks.filter((task) => task.isCompleted).length;
+  summary.totalTriggers = triggers.length;
+  summary.activeTriggers = triggers.filter(
+    (trigger) => trigger.enabled,
+  ).length;
+  summary.totalTodos = todos.length;
+  summary.completedTodos = todos.filter((todo) => todo.isCompleted).length;
 
-    json(res, {
-      tasks,
-      triggers,
-      todos,
-      summary,
-      autonomy,
-      tasksAvailable,
-      triggersAvailable,
-      todosAvailable,
-    });
+  json(res, {
+    tasks,
+    triggers,
+    todos,
+    summary,
+    autonomy,
+    tasksAvailable,
+    triggersAvailable,
+    todosAvailable,
+  });
+  return;
+}
+
+// ── GET /api/workbench/tasks ─────────────────────────────────────────
+if (method === "GET" && pathname === "/api/workbench/tasks") {
+  if (!state.runtime) {
+    error(res, "Agent runtime is not available", 503);
+    return;
+  }
+  const runtimeTasks = await state.runtime.getTasks({});
+  const tasks = runtimeTasks
+    .map((task) => toWorkbenchTask(task))
+    .filter((task): task is WorkbenchTaskView => task !== null)
+    .sort((a, b) => a.name.localeCompare(b.name));
+  json(res, { tasks });
+  return;
+}
+
+// ── POST /api/workbench/tasks ────────────────────────────────────────
+if (method === "POST" && pathname === "/api/workbench/tasks") {
+  if (!state.runtime) {
+    error(res, "Agent runtime is not available", 503);
+    return;
+  }
+  const body = await readJsonBody<{
+    name?: string;
+    description?: string;
+    tags?: string[];
+    isCompleted?: boolean;
+  }>(req, res);
+  if (!body) return;
+  const name = typeof body.name === "string" ? body.name.trim() : "";
+  if (!name) {
+    error(res, "name is required", 400);
+    return;
+  }
+  const description =
+    typeof body.description === "string" ? body.description : "";
+  const isCompleted = body.isCompleted === true;
+  const metadata = {
+    isCompleted,
+    workbench: { kind: "task" },
+  };
+  const taskId = await state.runtime.createTask({
+    name,
+    description,
+    tags: normalizeTags(body.tags, [WORKBENCH_TASK_TAG]),
+    metadata,
+  });
+  const created = await state.runtime.getTask(taskId);
+  const task = created ? toWorkbenchTask(created) : null;
+  if (!task) {
+    error(res, "Task created but unavailable", 500);
+    return;
+  }
+  json(res, { task }, 201);
+  return;
+}
+
+const taskItemMatch = /^\/api\/workbench\/tasks\/([^/]+)$/.exec(pathname);
+if (taskItemMatch && ["GET", "PUT", "DELETE"].includes(method)) {
+  if (!state.runtime) {
+    error(res, "Agent runtime is not available", 503);
+    return;
+  }
+  const decodedTaskId = decodePathComponent(taskItemMatch[1], res, "task id");
+  if (!decodedTaskId) return;
+  const task = await state.runtime.getTask(decodedTaskId as UUID);
+  const taskView = task ? toWorkbenchTask(task) : null;
+  if (!task || !taskView || !task.id) {
+    error(res, "Task not found", 404);
     return;
   }
 
-  // ── GET /api/workbench/tasks ─────────────────────────────────────────
-  if (method === "GET" && pathname === "/api/workbench/tasks") {
-    if (!state.runtime) {
-      error(res, "Agent runtime is not available", 503);
-      return;
-    }
-    const runtimeTasks = await state.runtime.getTasks({});
-    const tasks = runtimeTasks
-      .map((task) => toWorkbenchTask(task))
-      .filter((task): task is WorkbenchTaskView => task !== null)
-      .sort((a, b) => a.name.localeCompare(b.name));
-    json(res, { tasks });
+  if (method === "GET") {
+    json(res, { task: taskView });
     return;
   }
 
-  // ── POST /api/workbench/tasks ────────────────────────────────────────
-  if (method === "POST" && pathname === "/api/workbench/tasks") {
-    if (!state.runtime) {
-      error(res, "Agent runtime is not available", 503);
-      return;
-    }
-    const body = await readJsonBody<{
-      name?: string;
-      description?: string;
-      tags?: string[];
-      isCompleted?: boolean;
-    }>(req, res);
-    if (!body) return;
-    const name = typeof body.name === "string" ? body.name.trim() : "";
-    if (!name) {
-      error(res, "name is required", 400);
-      return;
-    }
-    const description =
-      typeof body.description === "string" ? body.description : "";
-    const isCompleted = body.isCompleted === true;
-    const metadata = {
-      isCompleted,
-      workbench: { kind: "task" },
-    };
-    const taskId = await state.runtime.createTask({
-      name,
-      description,
-      tags: normalizeTags(body.tags, [WORKBENCH_TASK_TAG]),
-      metadata,
-    });
-    const created = await state.runtime.getTask(taskId);
-    const task = created ? toWorkbenchTask(created) : null;
-    if (!task) {
-      error(res, "Task created but unavailable", 500);
-      return;
-    }
-    json(res, { task }, 201);
-    return;
-  }
-
-  const taskItemMatch = /^\/api\/workbench\/tasks\/([^/]+)$/.exec(pathname);
-  if (taskItemMatch && ["GET", "PUT", "DELETE"].includes(method)) {
-    if (!state.runtime) {
-      error(res, "Agent runtime is not available", 503);
-      return;
-    }
-    const decodedTaskId = decodePathComponent(taskItemMatch[1], res, "task id");
-    if (!decodedTaskId) return;
-    const task = await state.runtime.getTask(decodedTaskId as UUID);
-    const taskView = task ? toWorkbenchTask(task) : null;
-    if (!task || !taskView || !task.id) {
-      error(res, "Task not found", 404);
-      return;
-    }
-
-    if (method === "GET") {
-      json(res, { task: taskView });
-      return;
-    }
-
-    if (method === "DELETE") {
-      await state.runtime.deleteTask(task.id);
-      json(res, { ok: true });
-      return;
-    }
-
-    const body = await readJsonBody<{
-      name?: string;
-      description?: string;
-      tags?: string[];
-      isCompleted?: boolean;
-    }>(req, res);
-    if (!body) return;
-
-    const update: Partial<Task> = {};
-    if (typeof body.name === "string") {
-      const name = body.name.trim();
-      if (!name) {
-        error(res, "name cannot be empty", 400);
-        return;
-      }
-      update.name = name;
-    }
-    if (typeof body.description === "string") {
-      update.description = body.description;
-    }
-    if (body.tags !== undefined) {
-      update.tags = normalizeTags(body.tags, [WORKBENCH_TASK_TAG]);
-    }
-    if (typeof body.isCompleted === "boolean") {
-      update.metadata = {
-        ...readTaskMetadata(task),
-        isCompleted: body.isCompleted,
-      };
-    }
-    await state.runtime.updateTask(task.id, update);
-    const refreshed = await state.runtime.getTask(task.id);
-    const refreshedView = refreshed ? toWorkbenchTask(refreshed) : null;
-    if (!refreshedView) {
-      error(res, "Task updated but unavailable", 500);
-      return;
-    }
-    json(res, { task: refreshedView });
-    return;
-  }
-
-  // ── GET /api/workbench/todos ─────────────────────────────────────────
-  if (method === "GET" && pathname === "/api/workbench/todos") {
-    if (!state.runtime) {
-      error(res, "Agent runtime is not available", 503);
-      return;
-    }
-    const runtimeTasks = await state.runtime.getTasks({});
-    const todos = runtimeTasks
-      .map((task) => toWorkbenchTodo(task))
-      .filter((todo): todo is WorkbenchTodoView => todo !== null)
-      .sort((a, b) => a.name.localeCompare(b.name));
-    const todoData = await getTodoDataService(state.runtime);
-    if (todoData) {
-      try {
-        const dbTodos = await todoData.getTodos({
-          agentId: state.runtime.agentId,
-        });
-        for (const rawTodo of dbTodos) {
-          const mapped = toWorkbenchTodoFromRecord(rawTodo);
-          if (mapped) {
-            const existingIndex = todos.findIndex(
-              (todo) => todo.id === mapped.id,
-            );
-            if (existingIndex >= 0) {
-              todos[existingIndex] = mapped;
-            } else {
-              todos.push(mapped);
-            }
-          }
-        }
-        todos.sort((a, b) => a.name.localeCompare(b.name));
-      } catch {
-        // fallback to task-backed todos only
-      }
-    }
-    json(res, { todos });
-    return;
-  }
-
-  // ── POST /api/workbench/todos ────────────────────────────────────────
-  if (method === "POST" && pathname === "/api/workbench/todos") {
-    if (!state.runtime) {
-      error(res, "Agent runtime is not available", 503);
-      return;
-    }
-    const body = await readJsonBody<{
-      name?: string;
-      description?: string;
-      priority?: number | string | null;
-      isUrgent?: boolean;
-      type?: string;
-      isCompleted?: boolean;
-      tags?: string[];
-    }>(req, res);
-    if (!body) return;
-    const name = typeof body.name === "string" ? body.name.trim() : "";
-    if (!name) {
-      error(res, "name is required", 400);
-      return;
-    }
-    const description =
-      typeof body.description === "string" ? body.description : "";
-    const isCompleted = body.isCompleted === true;
-    const priority = parseNullableNumber(body.priority);
-    const isUrgent = body.isUrgent === true;
-    const type =
-      typeof body.type === "string" && body.type.trim().length > 0
-        ? body.type.trim()
-        : "task";
-
-    const todoData = await getTodoDataService(state.runtime);
-    if (todoData) {
-      try {
-        const now = Date.now();
-        const roomId =
-          (
-            state.runtime.getService("AUTONOMY") as {
-              getAutonomousRoomId?: () => UUID;
-            } | null
-          )?.getAutonomousRoomId?.() ??
-          stringToUuid(`workbench-todo-room-${state.runtime.agentId}`);
-        const worldId = stringToUuid(
-          `workbench-todo-world-${state.runtime.agentId}`,
-        );
-        const entityId =
-          state.adminEntityId ?? stringToUuid(`workbench-todo-entity-${now}`);
-        const createdTodoId = await todoData.createTodo({
-          agentId: state.runtime.agentId,
-          worldId,
-          roomId,
-          entityId,
-          name,
-          description: description || name,
-          type,
-          priority: priority ?? undefined,
-          isUrgent,
-          metadata: {
-            createdAt: new Date(now).toISOString(),
-            source: "workbench-api",
-          },
-          tags: normalizeTags(body.tags, ["TODO"]),
-        });
-        const createdDbTodo = await todoData.getTodo(createdTodoId);
-        const mappedDbTodo = createdDbTodo
-          ? toWorkbenchTodoFromRecord(createdDbTodo)
-          : null;
-        if (mappedDbTodo) {
-          json(res, { todo: mappedDbTodo }, 201);
-          return;
-        }
-      } catch {
-        // fallback to task-backed todo creation
-      }
-    }
-
-    const metadata = {
-      isCompleted,
-      workbenchTodo: {
-        description,
-        priority,
-        isUrgent,
-        isCompleted,
-        type,
-      },
-    };
-    const taskId = await state.runtime.createTask({
-      name,
-      description,
-      tags: normalizeTags(body.tags, [WORKBENCH_TODO_TAG, "todo"]),
-      metadata,
-    });
-    const created = await state.runtime.getTask(taskId);
-    const todo = created ? toWorkbenchTodo(created) : null;
-    if (!todo) {
-      error(res, "Todo created but unavailable", 500);
-      return;
-    }
-    json(res, { todo }, 201);
-    return;
-  }
-
-  const todoCompleteMatch = /^\/api\/workbench\/todos\/([^/]+)\/complete$/.exec(
-    pathname,
-  );
-  if (method === "POST" && todoCompleteMatch) {
-    if (!state.runtime) {
-      error(res, "Agent runtime is not available", 503);
-      return;
-    }
-    const decodedTodoId = decodePathComponent(
-      todoCompleteMatch[1],
-      res,
-      "todo id",
-    );
-    if (!decodedTodoId) return;
-    const body = await readJsonBody<{ isCompleted?: boolean }>(req, res);
-    if (!body) return;
-    const isCompleted = body.isCompleted === true;
-    const todoData = await getTodoDataService(state.runtime);
-    if (todoData) {
-      try {
-        await todoData.updateTodo(decodedTodoId, {
-          isCompleted,
-          completedAt: isCompleted ? new Date() : null,
-        });
-        json(res, { ok: true });
-        return;
-      } catch {
-        // fallback to task-backed path
-      }
-    }
-    const todoTask = await state.runtime.getTask(decodedTodoId as UUID);
-    if (!todoTask || !todoTask.id || !toWorkbenchTodo(todoTask)) {
-      error(res, "Todo not found", 404);
-      return;
-    }
-    const metadata = readTaskMetadata(todoTask);
-    const todoMeta =
-      asObject(metadata.workbenchTodo) ?? asObject(metadata.todo) ?? {};
-    await state.runtime.updateTask(todoTask.id, {
-      metadata: {
-        ...metadata,
-        isCompleted,
-        workbenchTodo: {
-          ...todoMeta,
-          isCompleted,
-        },
-      },
-    });
+  if (method === "DELETE") {
+    await state.runtime.deleteTask(task.id);
     json(res, { ok: true });
     return;
   }
 
-  const todoItemMatch = /^\/api\/workbench\/todos\/([^/]+)$/.exec(pathname);
-  if (todoItemMatch && ["GET", "PUT", "DELETE"].includes(method)) {
-    if (!state.runtime) {
-      error(res, "Agent runtime is not available", 503);
+  const body = await readJsonBody<{
+    name?: string;
+    description?: string;
+    tags?: string[];
+    isCompleted?: boolean;
+  }>(req, res);
+  if (!body) return;
+
+  const update: Partial<Task> = {};
+  if (typeof body.name === "string") {
+    const name = body.name.trim();
+    if (!name) {
+      error(res, "name cannot be empty", 400);
       return;
     }
-    const decodedTodoId = decodePathComponent(todoItemMatch[1], res, "todo id");
-    if (!decodedTodoId) return;
-    const todoData = await getTodoDataService(state.runtime);
+    update.name = name;
+  }
+  if (typeof body.description === "string") {
+    update.description = body.description;
+  }
+  if (body.tags !== undefined) {
+    update.tags = normalizeTags(body.tags, [WORKBENCH_TASK_TAG]);
+  }
+  if (typeof body.isCompleted === "boolean") {
+    update.metadata = {
+      ...readTaskMetadata(task),
+      isCompleted: body.isCompleted,
+    };
+  }
+  await state.runtime.updateTask(task.id, update);
+  const refreshed = await state.runtime.getTask(task.id);
+  const refreshedView = refreshed ? toWorkbenchTask(refreshed) : null;
+  if (!refreshedView) {
+    error(res, "Task updated but unavailable", 500);
+    return;
+  }
+  json(res, { task: refreshedView });
+  return;
+}
 
-    if (method === "GET" && todoData) {
-      try {
-        const dbTodo = await todoData.getTodo(decodedTodoId);
-        const mapped = dbTodo ? toWorkbenchTodoFromRecord(dbTodo) : null;
+// ── GET /api/workbench/todos ─────────────────────────────────────────
+if (method === "GET" && pathname === "/api/workbench/todos") {
+  if (!state.runtime) {
+    error(res, "Agent runtime is not available", 503);
+    return;
+  }
+  const runtimeTasks = await state.runtime.getTasks({});
+  const todos = runtimeTasks
+    .map((task) => toWorkbenchTodo(task))
+    .filter((todo): todo is WorkbenchTodoView => todo !== null)
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const todoData = await getTodoDataService(state.runtime);
+  if (todoData) {
+    try {
+      const dbTodos = await todoData.getTodos({
+        agentId: state.runtime.agentId,
+      });
+      for (const rawTodo of dbTodos) {
+        const mapped = toWorkbenchTodoFromRecord(rawTodo);
         if (mapped) {
-          json(res, { todo: mapped });
-          return;
+          const existingIndex = todos.findIndex(
+            (todo) => todo.id === mapped.id,
+          );
+          if (existingIndex >= 0) {
+            todos[existingIndex] = mapped;
+          } else {
+            todos.push(mapped);
+          }
         }
-      } catch {
-        // fallback to task-backed path
       }
+      todos.sort((a, b) => a.name.localeCompare(b.name));
+    } catch {
+      // fallback to task-backed todos only
     }
+  }
+  json(res, { todos });
+  return;
+}
 
-    if (method === "GET") {
-      const todoTask = await state.runtime.getTask(decodedTodoId as UUID);
-      const todoView = todoTask ? toWorkbenchTodo(todoTask) : null;
-      if (!todoTask || !todoTask.id || !todoView) {
-        error(res, "Todo not found", 404);
+// ── POST /api/workbench/todos ────────────────────────────────────────
+if (method === "POST" && pathname === "/api/workbench/todos") {
+  if (!state.runtime) {
+    error(res, "Agent runtime is not available", 503);
+    return;
+  }
+  const body = await readJsonBody<{
+    name?: string;
+    description?: string;
+    priority?: number | string | null;
+    isUrgent?: boolean;
+    type?: string;
+    isCompleted?: boolean;
+    tags?: string[];
+  }>(req, res);
+  if (!body) return;
+  const name = typeof body.name === "string" ? body.name.trim() : "";
+  if (!name) {
+    error(res, "name is required", 400);
+    return;
+  }
+  const description =
+    typeof body.description === "string" ? body.description : "";
+  const isCompleted = body.isCompleted === true;
+  const priority = parseNullableNumber(body.priority);
+  const isUrgent = body.isUrgent === true;
+  const type =
+    typeof body.type === "string" && body.type.trim().length > 0
+      ? body.type.trim()
+      : "task";
+
+  const todoData = await getTodoDataService(state.runtime);
+  if (todoData) {
+    try {
+      const now = Date.now();
+      const roomId =
+        (
+          state.runtime.getService("AUTONOMY") as {
+            getAutonomousRoomId?: () => UUID;
+          } | null
+        )?.getAutonomousRoomId?.() ??
+        stringToUuid(`workbench-todo-room-${state.runtime.agentId}`);
+      const worldId = stringToUuid(
+        `workbench-todo-world-${state.runtime.agentId}`,
+      );
+      const entityId =
+        state.adminEntityId ?? stringToUuid(`workbench-todo-entity-${now}`);
+      const createdTodoId = await todoData.createTodo({
+        agentId: state.runtime.agentId,
+        worldId,
+        roomId,
+        entityId,
+        name,
+        description: description || name,
+        type,
+        priority: priority ?? undefined,
+        isUrgent,
+        metadata: {
+          createdAt: new Date(now).toISOString(),
+          source: "workbench-api",
+        },
+        tags: normalizeTags(body.tags, ["TODO"]),
+      });
+      const createdDbTodo = await todoData.getTodo(createdTodoId);
+      const mappedDbTodo = createdDbTodo
+        ? toWorkbenchTodoFromRecord(createdDbTodo)
+        : null;
+      if (mappedDbTodo) {
+        json(res, { todo: mappedDbTodo }, 201);
         return;
       }
-      json(res, { todo: todoView });
-      return;
+    } catch {
+      // fallback to task-backed todo creation
     }
+  }
 
-    if (method === "DELETE" && todoData) {
-      try {
-        await todoData.deleteTodo(decodedTodoId);
-        json(res, { ok: true });
-        return;
-      } catch {
-        // fallback to task-backed path
-      }
-    }
+  const metadata = {
+    isCompleted,
+    workbenchTodo: {
+      description,
+      priority,
+      isUrgent,
+      isCompleted,
+      type,
+    },
+  };
+  const taskId = await state.runtime.createTask({
+    name,
+    description,
+    tags: normalizeTags(body.tags, [WORKBENCH_TODO_TAG, "todo"]),
+    metadata,
+  });
+  const created = await state.runtime.getTask(taskId);
+  const todo = created ? toWorkbenchTodo(created) : null;
+  if (!todo) {
+    error(res, "Todo created but unavailable", 500);
+    return;
+  }
+  json(res, { todo }, 201);
+  return;
+}
 
-    if (method === "DELETE") {
-      const todoTask = await state.runtime.getTask(decodedTodoId as UUID);
-      if (!todoTask?.id || !toWorkbenchTodo(todoTask)) {
-        error(res, "Todo not found", 404);
-        return;
-      }
-      await state.runtime.deleteTask(todoTask.id);
+const todoCompleteMatch = /^\/api\/workbench\/todos\/([^/]+)\/complete$/.exec(
+  pathname,
+);
+if (method === "POST" && todoCompleteMatch) {
+  if (!state.runtime) {
+    error(res, "Agent runtime is not available", 503);
+    return;
+  }
+  const decodedTodoId = decodePathComponent(
+    todoCompleteMatch[1],
+    res,
+    "todo id",
+  );
+  if (!decodedTodoId) return;
+  const body = await readJsonBody<{ isCompleted?: boolean }>(req, res);
+  if (!body) return;
+  const isCompleted = body.isCompleted === true;
+  const todoData = await getTodoDataService(state.runtime);
+  if (todoData) {
+    try {
+      await todoData.updateTodo(decodedTodoId, {
+        isCompleted,
+        completedAt: isCompleted ? new Date() : null,
+      });
       json(res, { ok: true });
       return;
+    } catch {
+      // fallback to task-backed path
     }
+  }
+  const todoTask = await state.runtime.getTask(decodedTodoId as UUID);
+  if (!todoTask || !todoTask.id || !toWorkbenchTodo(todoTask)) {
+    error(res, "Todo not found", 404);
+    return;
+  }
+  const metadata = readTaskMetadata(todoTask);
+  const todoMeta =
+    asObject(metadata.workbenchTodo) ?? asObject(metadata.todo) ?? {};
+  await state.runtime.updateTask(todoTask.id, {
+    metadata: {
+      ...metadata,
+      isCompleted,
+      workbenchTodo: {
+        ...todoMeta,
+        isCompleted,
+      },
+    },
+  });
+  json(res, { ok: true });
+  return;
+}
 
-    const body = await readJsonBody<{
-      name?: string;
-      description?: string;
-      priority?: number | string | null;
-      isUrgent?: boolean;
-      type?: string;
-      isCompleted?: boolean;
-      tags?: string[];
-    }>(req, res);
-    if (!body) return;
+const todoItemMatch = /^\/api\/workbench\/todos\/([^/]+)$/.exec(pathname);
+if (todoItemMatch && ["GET", "PUT", "DELETE"].includes(method)) {
+  if (!state.runtime) {
+    error(res, "Agent runtime is not available", 503);
+    return;
+  }
+  const decodedTodoId = decodePathComponent(todoItemMatch[1], res, "todo id");
+  if (!decodedTodoId) return;
+  const todoData = await getTodoDataService(state.runtime);
 
-    if (todoData) {
-      try {
-        const updates: Record<string, unknown> = {};
-        if (typeof body.name === "string") {
-          const name = body.name.trim();
-          if (!name) {
-            error(res, "name cannot be empty", 400);
-            return;
-          }
-          updates.name = name;
-        }
-        if (typeof body.description === "string") {
-          updates.description = body.description;
-        }
-        if (body.priority !== undefined) {
-          updates.priority = parseNullableNumber(body.priority);
-        }
-        if (typeof body.isUrgent === "boolean") {
-          updates.isUrgent = body.isUrgent;
-        }
-        if (typeof body.type === "string" && body.type.trim().length > 0) {
-          updates.type = body.type.trim();
-        }
-        if (typeof body.isCompleted === "boolean") {
-          updates.isCompleted = body.isCompleted;
-          updates.completedAt = body.isCompleted ? new Date() : null;
-        }
-        await todoData.updateTodo(decodedTodoId, updates);
-        const refreshedDbTodo = await todoData.getTodo(decodedTodoId);
-        const refreshedMapped = refreshedDbTodo
-          ? toWorkbenchTodoFromRecord(refreshedDbTodo)
-          : null;
-        if (refreshedMapped) {
-          json(res, { todo: refreshedMapped });
-          return;
-        }
-      } catch {
-        // fallback to task-backed path
+  if (method === "GET" && todoData) {
+    try {
+      const dbTodo = await todoData.getTodo(decodedTodoId);
+      const mapped = dbTodo ? toWorkbenchTodoFromRecord(dbTodo) : null;
+      if (mapped) {
+        json(res, { todo: mapped });
+        return;
       }
+    } catch {
+      // fallback to task-backed path
     }
+  }
 
+  if (method === "GET") {
     const todoTask = await state.runtime.getTask(decodedTodoId as UUID);
     const todoView = todoTask ? toWorkbenchTodo(todoTask) : null;
     if (!todoTask || !todoTask.id || !todoView) {
       error(res, "Todo not found", 404);
       return;
     }
+    json(res, { todo: todoView });
+    return;
+  }
 
-    const update: Partial<Task> = {};
-    if (typeof body.name === "string") {
-      const name = body.name.trim();
-      if (!name) {
-        error(res, "name cannot be empty", 400);
-        return;
-      }
-      update.name = name;
+  if (method === "DELETE" && todoData) {
+    try {
+      await todoData.deleteTodo(decodedTodoId);
+      json(res, { ok: true });
+      return;
+    } catch {
+      // fallback to task-backed path
     }
-    if (typeof body.description === "string") {
-      update.description = body.description;
-    }
-    if (body.tags !== undefined) {
-      update.tags = normalizeTags(body.tags, [WORKBENCH_TODO_TAG, "todo"]);
-    }
+  }
 
-    const metadata = readTaskMetadata(todoTask);
-    const existingTodoMeta =
-      asObject(metadata.workbenchTodo) ?? asObject(metadata.todo) ?? {};
-    const nextTodoMeta: Record<string, unknown> = {
-      ...existingTodoMeta,
-    };
-    if (typeof body.description === "string") {
-      nextTodoMeta.description = body.description;
-    }
-    if (body.priority !== undefined) {
-      nextTodoMeta.priority = parseNullableNumber(body.priority);
-    }
-    if (typeof body.isUrgent === "boolean") {
-      nextTodoMeta.isUrgent = body.isUrgent;
-    }
-    if (typeof body.type === "string" && body.type.trim().length > 0) {
-      nextTodoMeta.type = body.type.trim();
-    }
-
-    let isCompleted = readTaskCompleted(todoTask);
-    if (typeof body.isCompleted === "boolean") {
-      isCompleted = body.isCompleted;
-    }
-    nextTodoMeta.isCompleted = isCompleted;
-    update.metadata = {
-      ...metadata,
-      isCompleted,
-      workbenchTodo: nextTodoMeta,
-    };
-
-    await state.runtime.updateTask(todoTask.id, update);
-    const refreshed = await state.runtime.getTask(todoTask.id);
-    const refreshedTodo = refreshed ? toWorkbenchTodo(refreshed) : null;
-    if (!refreshedTodo) {
-      error(res, "Todo updated but unavailable", 500);
+  if (method === "DELETE") {
+    const todoTask = await state.runtime.getTask(decodedTodoId as UUID);
+    if (!todoTask?.id || !toWorkbenchTodo(todoTask)) {
+      error(res, "Todo not found", 404);
       return;
     }
-    json(res, { todo: refreshedTodo });
+    await state.runtime.deleteTask(todoTask.id);
+    json(res, { ok: true });
     return;
   }
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // Share ingest routes
-  // ═══════════════════════════════════════════════════════════════════════
+  const body = await readJsonBody<{
+    name?: string;
+    description?: string;
+    priority?: number | string | null;
+    isUrgent?: boolean;
+    type?: string;
+    isCompleted?: boolean;
+    tags?: string[];
+  }>(req, res);
+  if (!body) return;
 
-  // ── POST /api/ingest/share ───────────────────────────────────────────
-  if (method === "POST" && pathname === "/api/ingest/share") {
-    const body = await readJsonBody<{
-      source?: string;
-      title?: string;
-      url?: string;
-      text?: string;
-    }>(req, res);
-    if (!body) return;
-
-    const item: ShareIngestItem = {
-      id: crypto.randomUUID(),
-      source: (body.source as string) ?? "unknown",
-      title: body.title as string | undefined,
-      url: body.url as string | undefined,
-      text: body.text as string | undefined,
-      suggestedPrompt: body.title
-        ? `What do you think about "${body.title}"?`
-        : body.url
-          ? `Can you analyze this: ${body.url}`
-          : body.text
-            ? `What are your thoughts on: ${(body.text as string).slice(0, 100)}`
-            : "What do you think about this shared content?",
-      receivedAt: Date.now(),
-    };
-    state.shareIngestQueue.push(item);
-    json(res, { ok: true, item });
-    return;
-  }
-
-  // ── GET /api/ingest/share ────────────────────────────────────────────
-  if (method === "GET" && pathname === "/api/ingest/share") {
-    const consume = url.searchParams.get("consume") === "1";
-    if (consume) {
-      const items = [...state.shareIngestQueue];
-      state.shareIngestQueue.length = 0;
-      json(res, { items });
-    } else {
-      json(res, { items: state.shareIngestQueue });
-    }
-    return;
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════
-  // MCP marketplace routes
-  // ═══════════════════════════════════════════════════════════════════════
-
-  // ── GET /api/mcp/marketplace/search ──────────────────────────────────
-  if (method === "GET" && pathname === "/api/mcp/marketplace/search") {
-    const query = url.searchParams.get("q") ?? "";
-    const limitStr = url.searchParams.get("limit");
-    const limit = limitStr
-      ? parseClampedInteger(limitStr, { min: 1, max: 50, fallback: 30 })
-      : 30;
+  if (todoData) {
     try {
-      const result = await searchMcpMarketplace(query || undefined, limit);
-      json(res, { ok: true, results: result.results });
-    } catch (err) {
-      error(
-        res,
-        `MCP marketplace search failed: ${err instanceof Error ? err.message : err}`,
-        502,
-      );
+      const updates: Record<string, unknown> = {};
+      if (typeof body.name === "string") {
+        const name = body.name.trim();
+        if (!name) {
+          error(res, "name cannot be empty", 400);
+          return;
+        }
+        updates.name = name;
+      }
+      if (typeof body.description === "string") {
+        updates.description = body.description;
+      }
+      if (body.priority !== undefined) {
+        updates.priority = parseNullableNumber(body.priority);
+      }
+      if (typeof body.isUrgent === "boolean") {
+        updates.isUrgent = body.isUrgent;
+      }
+      if (typeof body.type === "string" && body.type.trim().length > 0) {
+        updates.type = body.type.trim();
+      }
+      if (typeof body.isCompleted === "boolean") {
+        updates.isCompleted = body.isCompleted;
+        updates.completedAt = body.isCompleted ? new Date() : null;
+      }
+      await todoData.updateTodo(decodedTodoId, updates);
+      const refreshedDbTodo = await todoData.getTodo(decodedTodoId);
+      const refreshedMapped = refreshedDbTodo
+        ? toWorkbenchTodoFromRecord(refreshedDbTodo)
+        : null;
+      if (refreshedMapped) {
+        json(res, { todo: refreshedMapped });
+        return;
+      }
+    } catch {
+      // fallback to task-backed path
     }
+  }
+
+  const todoTask = await state.runtime.getTask(decodedTodoId as UUID);
+  const todoView = todoTask ? toWorkbenchTodo(todoTask) : null;
+  if (!todoTask || !todoTask.id || !todoView) {
+    error(res, "Todo not found", 404);
     return;
   }
 
-  // ── GET /api/mcp/marketplace/details/:name ───────────────────────────
-  if (
-    method === "GET" &&
-    pathname.startsWith("/api/mcp/marketplace/details/")
-  ) {
-    const serverName = decodePathComponent(
-      pathname.slice("/api/mcp/marketplace/details/".length),
+  const update: Partial<Task> = {};
+  if (typeof body.name === "string") {
+    const name = body.name.trim();
+    if (!name) {
+      error(res, "name cannot be empty", 400);
+      return;
+    }
+    update.name = name;
+  }
+  if (typeof body.description === "string") {
+    update.description = body.description;
+  }
+  if (body.tags !== undefined) {
+    update.tags = normalizeTags(body.tags, [WORKBENCH_TODO_TAG, "todo"]);
+  }
+
+  const metadata = readTaskMetadata(todoTask);
+  const existingTodoMeta =
+    asObject(metadata.workbenchTodo) ?? asObject(metadata.todo) ?? {};
+  const nextTodoMeta: Record<string, unknown> = {
+    ...existingTodoMeta,
+  };
+  if (typeof body.description === "string") {
+    nextTodoMeta.description = body.description;
+  }
+  if (body.priority !== undefined) {
+    nextTodoMeta.priority = parseNullableNumber(body.priority);
+  }
+  if (typeof body.isUrgent === "boolean") {
+    nextTodoMeta.isUrgent = body.isUrgent;
+  }
+  if (typeof body.type === "string" && body.type.trim().length > 0) {
+    nextTodoMeta.type = body.type.trim();
+  }
+
+  let isCompleted = readTaskCompleted(todoTask);
+  if (typeof body.isCompleted === "boolean") {
+    isCompleted = body.isCompleted;
+  }
+  nextTodoMeta.isCompleted = isCompleted;
+  update.metadata = {
+    ...metadata,
+    isCompleted,
+    workbenchTodo: nextTodoMeta,
+  };
+
+  await state.runtime.updateTask(todoTask.id, update);
+  const refreshed = await state.runtime.getTask(todoTask.id);
+  const refreshedTodo = refreshed ? toWorkbenchTodo(refreshed) : null;
+  if (!refreshedTodo) {
+    error(res, "Todo updated but unavailable", 500);
+    return;
+  }
+  json(res, { todo: refreshedTodo });
+  return;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// Share ingest routes
+// ═══════════════════════════════════════════════════════════════════════
+
+// ── POST /api/ingest/share ───────────────────────────────────────────
+if (method === "POST" && pathname === "/api/ingest/share") {
+  const body = await readJsonBody<{
+    source?: string;
+    title?: string;
+    url?: string;
+    text?: string;
+  }>(req, res);
+  if (!body) return;
+
+  const item: ShareIngestItem = {
+    id: crypto.randomUUID(),
+    source: (body.source as string) ?? "unknown",
+    title: body.title as string | undefined,
+    url: body.url as string | undefined,
+    text: body.text as string | undefined,
+    suggestedPrompt: body.title
+      ? `What do you think about "${body.title}"?`
+      : body.url
+        ? `Can you analyze this: ${body.url}`
+        : body.text
+          ? `What are your thoughts on: ${(body.text as string).slice(0, 100)}`
+          : "What do you think about this shared content?",
+    receivedAt: Date.now(),
+  };
+  state.shareIngestQueue.push(item);
+  json(res, { ok: true, item });
+  return;
+}
+
+// ── GET /api/ingest/share ────────────────────────────────────────────
+if (method === "GET" && pathname === "/api/ingest/share") {
+  const consume = url.searchParams.get("consume") === "1";
+  if (consume) {
+    const items = [...state.shareIngestQueue];
+    state.shareIngestQueue.length = 0;
+    json(res, { items });
+  } else {
+    json(res, { items: state.shareIngestQueue });
+  }
+  return;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// MCP marketplace routes
+// ═══════════════════════════════════════════════════════════════════════
+
+// ── GET /api/mcp/marketplace/search ──────────────────────────────────
+if (method === "GET" && pathname === "/api/mcp/marketplace/search") {
+  const query = url.searchParams.get("q") ?? "";
+  const limitStr = url.searchParams.get("limit");
+  const limit = limitStr
+    ? parseClampedInteger(limitStr, { min: 1, max: 50, fallback: 30 })
+    : 30;
+  try {
+    const result = await searchMcpMarketplace(query || undefined, limit);
+    json(res, { ok: true, results: result.results });
+  } catch (err) {
+    error(
       res,
-      "server name",
+      `MCP marketplace search failed: ${err instanceof Error ? err.message : err}`,
+      502,
     );
-    if (serverName === null) return;
-    if (!serverName.trim()) {
-      error(res, "Server name is required", 400);
+  }
+  return;
+}
+
+// ── GET /api/mcp/marketplace/details/:name ───────────────────────────
+if (
+  method === "GET" &&
+  pathname.startsWith("/api/mcp/marketplace/details/")
+) {
+  const serverName = decodePathComponent(
+    pathname.slice("/api/mcp/marketplace/details/".length),
+    res,
+    "server name",
+  );
+  if (serverName === null) return;
+  if (!serverName.trim()) {
+    error(res, "Server name is required", 400);
+    return;
+  }
+  try {
+    const details = await getMcpServerDetails(serverName);
+    if (!details) {
+      error(res, `MCP server "${serverName}" not found`, 404);
       return;
     }
+    json(res, { ok: true, server: details });
+  } catch (err) {
+    error(
+      res,
+      `Failed to fetch server details: ${err instanceof Error ? err.message : err}`,
+      502,
+    );
+  }
+  return;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// MCP config routes
+// ═══════════════════════════════════════════════════════════════════════
+
+// ── GET /api/mcp/config ──────────────────────────────────────────────
+if (method === "GET" && pathname === "/api/mcp/config") {
+  const servers = state.config.mcp?.servers ?? {};
+  json(res, { ok: true, servers: redactDeep(servers) });
+  return;
+}
+
+// ── POST /api/mcp/config/server ──────────────────────────────────────
+if (method === "POST" && pathname === "/api/mcp/config/server") {
+  const body = await readJsonBody<{
+    name?: string;
+    config?: Record<string, unknown>;
+  }>(req, res);
+  if (!body) return;
+
+  const serverName = (body.name as string | undefined)?.trim();
+  if (!serverName) {
+    error(res, "Server name is required", 400);
+    return;
+  }
+  if (isBlockedObjectKey(serverName)) {
+    error(
+      res,
+      'Invalid server name: "__proto__", "constructor", and "prototype" are reserved',
+      400,
+    );
+    return;
+  }
+
+  const config = body.config as Record<string, unknown> | undefined;
+  if (!config || typeof config !== "object" || Array.isArray(config)) {
+    error(res, "Server config object is required", 400);
+    return;
+  }
+
+  const mcpRejection = await resolveMcpServersRejection({
+    [serverName]: config,
+  });
+  if (mcpRejection) {
+    error(res, mcpRejection, 400);
+    return;
+  }
+
+  if (!state.config.mcp) state.config.mcp = {};
+  if (!state.config.mcp.servers) state.config.mcp.servers = {};
+  const sanitized = cloneWithoutBlockedObjectKeys(config);
+  state.config.mcp.servers[serverName] = sanitized as NonNullable<
+    NonNullable<typeof state.config.mcp>["servers"]
+  >[string];
+
+  try {
+    saveMiladyConfig(state.config);
+  } catch (err) {
+    logger.warn(
+      `[api] Config save failed: ${err instanceof Error ? err.message : err}`,
+    );
+  }
+
+  json(res, { ok: true, name: serverName, requiresRestart: true });
+  return;
+}
+
+// ── DELETE /api/mcp/config/server/:name ──────────────────────────────
+if (method === "DELETE" && pathname.startsWith("/api/mcp/config/server/")) {
+  const serverName = decodePathComponent(
+    pathname.slice("/api/mcp/config/server/".length),
+    res,
+    "server name",
+  );
+  if (serverName === null) return;
+  if (isBlockedObjectKey(serverName)) {
+    error(
+      res,
+      'Invalid server name: "__proto__", "constructor", and "prototype" are reserved',
+      400,
+    );
+    return;
+  }
+
+  if (state.config.mcp?.servers?.[serverName]) {
+    delete state.config.mcp.servers[serverName];
     try {
-      const details = await getMcpServerDetails(serverName);
-      if (!details) {
-        error(res, `MCP server "${serverName}" not found`, 404);
-        return;
-      }
-      json(res, { ok: true, server: details });
+      saveMiladyConfig(state.config);
     } catch (err) {
-      error(
-        res,
-        `Failed to fetch server details: ${err instanceof Error ? err.message : err}`,
-        502,
+      logger.warn(
+        `[api] Config save failed: ${err instanceof Error ? err.message : err}`,
       );
     }
-    return;
   }
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // MCP config routes
-  // ═══════════════════════════════════════════════════════════════════════
+  json(res, { ok: true, requiresRestart: true });
+  return;
+}
 
-  // ── GET /api/mcp/config ──────────────────────────────────────────────
-  if (method === "GET" && pathname === "/api/mcp/config") {
-    const servers = state.config.mcp?.servers ?? {};
-    json(res, { ok: true, servers: redactDeep(servers) });
-    return;
-  }
+// ── PUT /api/mcp/config ──────────────────────────────────────────────
+if (method === "PUT" && pathname === "/api/mcp/config") {
+  const body = await readJsonBody<{
+    servers?: Record<string, unknown>;
+  }>(req, res);
+  if (!body) return;
 
-  // ── POST /api/mcp/config/server ──────────────────────────────────────
-  if (method === "POST" && pathname === "/api/mcp/config/server") {
-    const body = await readJsonBody<{
-      name?: string;
-      config?: Record<string, unknown>;
-    }>(req, res);
-    if (!body) return;
-
-    const serverName = (body.name as string | undefined)?.trim();
-    if (!serverName) {
-      error(res, "Server name is required", 400);
+  if (!state.config.mcp) state.config.mcp = {};
+  if (body.servers !== undefined) {
+    if (
+      !body.servers ||
+      typeof body.servers !== "object" ||
+      Array.isArray(body.servers)
+    ) {
+      error(res, "servers must be a JSON object", 400);
       return;
     }
-    if (isBlockedObjectKey(serverName)) {
-      error(
-        res,
-        'Invalid server name: "__proto__", "constructor", and "prototype" are reserved',
-        400,
-      );
-      return;
-    }
-
-    const config = body.config as Record<string, unknown> | undefined;
-    if (!config || typeof config !== "object" || Array.isArray(config)) {
-      error(res, "Server config object is required", 400);
-      return;
-    }
-
-    const mcpRejection = await resolveMcpServersRejection({
-      [serverName]: config,
-    });
+    const mcpRejection = await resolveMcpServersRejection(
+      body.servers as Record<string, unknown>,
+    );
     if (mcpRejection) {
       error(res, mcpRejection, 400);
       return;
     }
-
-    if (!state.config.mcp) state.config.mcp = {};
-    if (!state.config.mcp.servers) state.config.mcp.servers = {};
-    const sanitized = cloneWithoutBlockedObjectKeys(config);
-    state.config.mcp.servers[serverName] = sanitized as NonNullable<
+    const sanitized = cloneWithoutBlockedObjectKeys(body.servers);
+    state.config.mcp.servers = sanitized as NonNullable<
       NonNullable<typeof state.config.mcp>["servers"]
-    >[string];
-
-    try {
-      saveMiladyConfig(state.config);
-    } catch (err) {
-      logger.warn(
-        `[api] Config save failed: ${err instanceof Error ? err.message : err}`,
-      );
-    }
-
-    json(res, { ok: true, name: serverName, requiresRestart: true });
-    return;
+    >;
   }
 
-  // ── DELETE /api/mcp/config/server/:name ──────────────────────────────
-  if (method === "DELETE" && pathname.startsWith("/api/mcp/config/server/")) {
-    const serverName = decodePathComponent(
-      pathname.slice("/api/mcp/config/server/".length),
-      res,
-      "server name",
+  try {
+    saveMiladyConfig(state.config);
+  } catch (err) {
+    logger.warn(
+      `[api] Config save failed: ${err instanceof Error ? err.message : err}`,
     );
-    if (serverName === null) return;
-    if (isBlockedObjectKey(serverName)) {
-      error(
-        res,
-        'Invalid server name: "__proto__", "constructor", and "prototype" are reserved',
-        400,
-      );
-      return;
-    }
-
-    if (state.config.mcp?.servers?.[serverName]) {
-      delete state.config.mcp.servers[serverName];
-      try {
-        saveMiladyConfig(state.config);
-      } catch (err) {
-        logger.warn(
-          `[api] Config save failed: ${err instanceof Error ? err.message : err}`,
-        );
-      }
-    }
-
-    json(res, { ok: true, requiresRestart: true });
-    return;
   }
 
-  // ── PUT /api/mcp/config ──────────────────────────────────────────────
-  if (method === "PUT" && pathname === "/api/mcp/config") {
-    const body = await readJsonBody<{
-      servers?: Record<string, unknown>;
-    }>(req, res);
-    if (!body) return;
+  json(res, { ok: true });
+  return;
+}
 
-    if (!state.config.mcp) state.config.mcp = {};
-    if (body.servers !== undefined) {
-      if (
-        !body.servers ||
-        typeof body.servers !== "object" ||
-        Array.isArray(body.servers)
-      ) {
-        error(res, "servers must be a JSON object", 400);
-        return;
-      }
-      const mcpRejection = await resolveMcpServersRejection(
-        body.servers as Record<string, unknown>,
-      );
-      if (mcpRejection) {
-        error(res, mcpRejection, 400);
-        return;
-      }
-      const sanitized = cloneWithoutBlockedObjectKeys(body.servers);
-      state.config.mcp.servers = sanitized as NonNullable<
-        NonNullable<typeof state.config.mcp>["servers"]
-      >;
-    }
+// ═══════════════════════════════════════════════════════════════════════
+// MCP status route
+// ═══════════════════════════════════════════════════════════════════════
 
+// ── GET /api/mcp/status ──────────────────────────────────────────────
+if (method === "GET" && pathname === "/api/mcp/status") {
+  const servers: Array<{
+    name: string;
+    status: string;
+    toolCount: number;
+    resourceCount: number;
+  }> = [];
+
+  // If runtime has an MCP service, enumerate active servers
+  if (state.runtime) {
     try {
-      saveMiladyConfig(state.config);
-    } catch (err) {
-      logger.warn(
-        `[api] Config save failed: ${err instanceof Error ? err.message : err}`,
-      );
-    }
-
-    json(res, { ok: true });
-    return;
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════
-  // MCP status route
-  // ═══════════════════════════════════════════════════════════════════════
-
-  // ── GET /api/mcp/status ──────────────────────────────────────────────
-  if (method === "GET" && pathname === "/api/mcp/status") {
-    const servers: Array<{
-      name: string;
-      status: string;
-      toolCount: number;
-      resourceCount: number;
-    }> = [];
-
-    // If runtime has an MCP service, enumerate active servers
-    if (state.runtime) {
-      try {
-        const mcpService = state.runtime.getService("MCP") as {
-          getServers?: () => Array<{
-            name: string;
-            status: string;
-            tools?: unknown[];
-            resources?: unknown[];
-          }>;
-        } | null;
-        if (mcpService && typeof mcpService.getServers === "function") {
-          for (const s of mcpService.getServers()) {
-            servers.push({
-              name: s.name,
-              status: s.status,
-              toolCount: Array.isArray(s.tools) ? s.tools.length : 0,
-              resourceCount: Array.isArray(s.resources)
-                ? s.resources.length
-                : 0,
-            });
-          }
+      const mcpService = state.runtime.getService("MCP") as {
+        getServers?: () => Array<{
+          name: string;
+          status: string;
+          tools?: unknown[];
+          resources?: unknown[];
+        }>;
+      } | null;
+      if (mcpService && typeof mcpService.getServers === "function") {
+        for (const s of mcpService.getServers()) {
+          servers.push({
+            name: s.name,
+            status: s.status,
+            toolCount: Array.isArray(s.tools) ? s.tools.length : 0,
+            resourceCount: Array.isArray(s.resources)
+              ? s.resources.length
+              : 0,
+          });
         }
-      } catch (err) {
-        logger.debug(
-          `[api] Service not available: ${err instanceof Error ? err.message : err}`,
-        );
       }
+    } catch (err) {
+      logger.debug(
+        `[api] Service not available: ${err instanceof Error ? err.message : err}`,
+      );
     }
+  }
 
-    json(res, { ok: true, servers });
+  json(res, { ok: true, servers });
+  return;
+}
+
+// ── GET /api/emotes ──────────────────────────────────────────────────────
+if (method === "GET" && pathname === "/api/emotes") {
+  json(res, { emotes: EMOTE_CATALOG });
+  return;
+}
+
+// ── POST /api/emote ─────────────────────────────────────────────────────
+if (method === "POST" && pathname === "/api/emote") {
+  const body = await readJsonBody<{ emoteId?: string }>(req, res);
+  if (!body) return;
+  const emote = body.emoteId ? EMOTE_BY_ID.get(body.emoteId) : undefined;
+  if (!emote) {
+    error(res, `Unknown emote: ${body.emoteId ?? "(none)"}`);
+    return;
+  }
+  state.broadcastWs?.({
+    type: "emote",
+    emoteId: emote.id,
+    glbPath: emote.glbPath,
+    duration: emote.duration,
+    loop: emote.loop,
+  });
+  json(res, { ok: true });
+  return;
+}
+
+// ── POST /api/terminal/run ──────────────────────────────────────────────
+// Execute a shell command server-side and stream output via WebSocket.
+if (method === "POST" && pathname === "/api/terminal/run") {
+  if (state.shellEnabled === false) {
+    error(res, "Shell access is disabled", 403);
     return;
   }
 
-  // ── GET /api/emotes ──────────────────────────────────────────────────────
-  if (method === "GET" && pathname === "/api/emotes") {
-    json(res, { emotes: EMOTE_CATALOG });
+  const body = await readJsonBody<{
+    command?: string;
+    clientId?: unknown;
+    terminalToken?: string;
+  }>(req, res);
+  if (!body) return;
+
+  const terminalRejection = resolveTerminalRunRejection(req, body);
+  if (terminalRejection) {
+    error(res, terminalRejection.reason, terminalRejection.status);
     return;
   }
 
-  // ── POST /api/emote ─────────────────────────────────────────────────────
-  if (method === "POST" && pathname === "/api/emote") {
-    const body = await readJsonBody<{ emoteId?: string }>(req, res);
-    if (!body) return;
-    const emote = body.emoteId ? EMOTE_BY_ID.get(body.emoteId) : undefined;
-    if (!emote) {
-      error(res, `Unknown emote: ${body.emoteId ?? "(none)"}`);
-      return;
-    }
-    state.broadcastWs?.({
-      type: "emote",
-      emoteId: emote.id,
-      glbPath: emote.glbPath,
-      duration: emote.duration,
-      loop: emote.loop,
-    });
-    json(res, { ok: true });
+  const command = typeof body.command === "string" ? body.command.trim() : "";
+  if (!command) {
+    error(res, "Missing or empty command");
     return;
   }
 
-  // ── POST /api/terminal/run ──────────────────────────────────────────────
-  // Execute a shell command server-side and stream output via WebSocket.
-  if (method === "POST" && pathname === "/api/terminal/run") {
-    if (state.shellEnabled === false) {
-      error(res, "Shell access is disabled", 403);
+  // Guard against excessively long commands (likely injection or abuse)
+  if (command.length > 4096) {
+    error(res, "Command exceeds maximum length (4096 chars)", 400);
+    return;
+  }
+
+  // Prevent multiline/control-character payloads that can smuggle
+  // unintended command chains through a single request.
+  if (
+    command.includes("\n") ||
+    command.includes("\r") ||
+    command.includes("\0")
+  ) {
+    error(
+      res,
+      "Command must be a single line without control characters",
+      400,
+    );
+    return;
+  }
+
+  const targetClientId = resolveTerminalRunClientId(req, body);
+  if (!targetClientId) {
+    error(
+      res,
+      "Missing client id. Provide X-Milady-Client-Id header or clientId in the request body.",
+      400,
+    );
+    return;
+  }
+
+  const emitTerminalEvent = (payload: Record<string, unknown>) => {
+    if (isSharedTerminalClientId(targetClientId)) {
+      state.broadcastWs?.(payload);
       return;
     }
+    if (typeof state.broadcastWsToClientId !== "function") return;
+    state.broadcastWsToClientId(targetClientId, payload);
+  };
 
-    const body = await readJsonBody<{
-      command?: string;
-      clientId?: unknown;
-      terminalToken?: string;
-    }>(req, res);
-    if (!body) return;
+  const { maxConcurrent, maxDurationMs } = resolveTerminalRunLimits();
+  if (activeTerminalRunCount >= maxConcurrent) {
+    error(
+      res,
+      `Too many active terminal runs (${maxConcurrent}). Wait for a command to finish.`,
+      429,
+    );
+    return;
+  }
 
-    const terminalRejection = resolveTerminalRunRejection(req, body);
-    if (terminalRejection) {
-      error(res, terminalRejection.reason, terminalRejection.status);
-      return;
-    }
+  // Respond immediately — output streams via WebSocket
+  json(res, { ok: true });
 
-    const command = typeof body.command === "string" ? body.command.trim() : "";
-    if (!command) {
-      error(res, "Missing or empty command");
-      return;
-    }
+  // Spawn in background and broadcast output
+  const { spawn } = await import("node:child_process");
+  const runId = `run-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-    // Guard against excessively long commands (likely injection or abuse)
-    if (command.length > 4096) {
-      error(res, "Command exceeds maximum length (4096 chars)", 400);
-      return;
-    }
+  emitTerminalEvent({
+    type: "terminal-output",
+    runId,
+    event: "start",
+    command,
+    maxDurationMs,
+  });
 
-    // Prevent multiline/control-character payloads that can smuggle
-    // unintended command chains through a single request.
-    if (
-      command.includes("\n") ||
-      command.includes("\r") ||
-      command.includes("\0")
-    ) {
-      error(
-        res,
-        "Command must be a single line without control characters",
-        400,
-      );
-      return;
-    }
+  const proc = spawn(command, {
+    shell: true,
+    cwd: process.cwd(),
+    env: { ...process.env, FORCE_COLOR: "0" },
+  });
 
-    const targetClientId = resolveTerminalRunClientId(req, body);
-    if (!targetClientId) {
-      error(
-        res,
-        "Missing client id. Provide X-Milady-Client-Id header or clientId in the request body.",
-        400,
-      );
-      return;
-    }
+  activeTerminalRunCount += 1;
+  let finalized = false;
+  const finalize = () => {
+    if (finalized) return;
+    finalized = true;
+    activeTerminalRunCount = Math.max(0, activeTerminalRunCount - 1);
+    clearTimeout(timeoutHandle);
+  };
 
-    const emitTerminalEvent = (payload: Record<string, unknown>) => {
-      if (isSharedTerminalClientId(targetClientId)) {
-        state.broadcastWs?.(payload);
-        return;
-      }
-      if (typeof state.broadcastWsToClientId !== "function") return;
-      state.broadcastWsToClientId(targetClientId, payload);
-    };
-
-    const { maxConcurrent, maxDurationMs } = resolveTerminalRunLimits();
-    if (activeTerminalRunCount >= maxConcurrent) {
-      error(
-        res,
-        `Too many active terminal runs (${maxConcurrent}). Wait for a command to finish.`,
-        429,
-      );
-      return;
-    }
-
-    // Respond immediately — output streams via WebSocket
-    json(res, { ok: true });
-
-    // Spawn in background and broadcast output
-    const { spawn } = await import("node:child_process");
-    const runId = `run-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-
+  const timeoutHandle = setTimeout(() => {
+    if (proc.killed) return;
+    proc.kill("SIGTERM");
     emitTerminalEvent({
       type: "terminal-output",
       runId,
-      event: "start",
-      command,
+      event: "timeout",
       maxDurationMs,
     });
 
-    const proc = spawn(command, {
-      shell: true,
-      cwd: process.cwd(),
-      env: { ...process.env, FORCE_COLOR: "0" },
+    setTimeout(() => {
+      if (!proc.killed) proc.kill("SIGKILL");
+    }, 3000);
+  }, maxDurationMs);
+
+  proc.stdout?.on("data", (chunk: Buffer) => {
+    emitTerminalEvent({
+      type: "terminal-output",
+      runId,
+      event: "stdout",
+      data: chunk.toString("utf-8"),
     });
+  });
 
-    activeTerminalRunCount += 1;
-    let finalized = false;
-    const finalize = () => {
-      if (finalized) return;
-      finalized = true;
-      activeTerminalRunCount = Math.max(0, activeTerminalRunCount - 1);
-      clearTimeout(timeoutHandle);
-    };
-
-    const timeoutHandle = setTimeout(() => {
-      if (proc.killed) return;
-      proc.kill("SIGTERM");
-      emitTerminalEvent({
-        type: "terminal-output",
-        runId,
-        event: "timeout",
-        maxDurationMs,
-      });
-
-      setTimeout(() => {
-        if (!proc.killed) proc.kill("SIGKILL");
-      }, 3000);
-    }, maxDurationMs);
-
-    proc.stdout?.on("data", (chunk: Buffer) => {
-      emitTerminalEvent({
-        type: "terminal-output",
-        runId,
-        event: "stdout",
-        data: chunk.toString("utf-8"),
-      });
+  proc.stderr?.on("data", (chunk: Buffer) => {
+    emitTerminalEvent({
+      type: "terminal-output",
+      runId,
+      event: "stderr",
+      data: chunk.toString("utf-8"),
     });
+  });
 
-    proc.stderr?.on("data", (chunk: Buffer) => {
-      emitTerminalEvent({
-        type: "terminal-output",
-        runId,
-        event: "stderr",
-        data: chunk.toString("utf-8"),
-      });
+  proc.on("close", (code: number | null) => {
+    finalize();
+    emitTerminalEvent({
+      type: "terminal-output",
+      runId,
+      event: "exit",
+      code: code ?? 1,
     });
+  });
 
-    proc.on("close", (code: number | null) => {
-      finalize();
-      emitTerminalEvent({
-        type: "terminal-output",
-        runId,
-        event: "exit",
-        code: code ?? 1,
-      });
+  proc.on("error", (err: Error) => {
+    finalize();
+    emitTerminalEvent({
+      type: "terminal-output",
+      runId,
+      event: "error",
+      data: err.message,
     });
+  });
 
-    proc.on("error", (err: Error) => {
-      finalize();
-      emitTerminalEvent({
-        type: "terminal-output",
-        runId,
-        event: "error",
-        data: err.message,
-      });
-    });
+  return;
+}
 
+// ── Custom Actions CRUD ──────────────────────────────────────────────
+
+if (method === "GET" && pathname === "/api/custom-actions") {
+  const config = loadMiladyConfig();
+  json(res, { actions: config.customActions ?? [] });
+  return;
+}
+
+if (method === "POST" && pathname === "/api/custom-actions") {
+  const body = await readJsonBody<Record<string, unknown>>(req, res);
+  if (!body) return;
+
+  const name = typeof body.name === "string" ? body.name.trim() : "";
+  const description =
+    typeof body.description === "string" ? body.description.trim() : "";
+
+  if (!name || !description) {
+    error(res, "name and description are required", 400);
     return;
   }
 
-  // ── Custom Actions CRUD ──────────────────────────────────────────────
-
-  if (method === "GET" && pathname === "/api/custom-actions") {
-    const config = loadMiladyConfig();
-    json(res, { actions: config.customActions ?? [] });
-    return;
-  }
-
-  if (method === "POST" && pathname === "/api/custom-actions") {
-    const body = await readJsonBody<Record<string, unknown>>(req, res);
-    if (!body) return;
-
-    const name = typeof body.name === "string" ? body.name.trim() : "";
-    const description =
-      typeof body.description === "string" ? body.description.trim() : "";
-
-    if (!name || !description) {
-      error(res, "name and description are required", 400);
-      return;
-    }
-
-    const handler = body.handler as CustomActionDef["handler"] | undefined;
-    const validHandlerTypes = new Set(["http", "shell", "code"]);
-    if (!handler || !handler.type || !validHandlerTypes.has(handler.type)) {
-      error(
-        res,
-        "handler with valid type (http, shell, code) is required",
-        400,
-      );
-      return;
-    }
-
-    // Security gate: shell and code handlers execute arbitrary commands or
-    // code on the host machine, and the resulting action persists in config
-    // (survives restarts). Require the MILADY_TERMINAL_RUN_TOKEN to prove
-    // the caller has explicit operator authority for code execution.
-    if (handler.type === "shell" || handler.type === "code") {
-      const terminalRejection = resolveTerminalRunRejection(
-        req,
-        body as TerminalRunRequestBody,
-      );
-      if (terminalRejection) {
-        error(
-          res,
-          `Creating ${handler.type} actions requires terminal authorization. ${terminalRejection.reason}`,
-          terminalRejection.status,
-        );
-        return;
-      }
-    }
-
-    // Validate type-specific required fields
-    if (
-      handler.type === "http" &&
-      (typeof handler.url !== "string" || !handler.url.trim())
-    ) {
-      error(res, "HTTP handler requires a url", 400);
-      return;
-    }
-    if (
-      handler.type === "shell" &&
-      (typeof handler.command !== "string" || !handler.command.trim())
-    ) {
-      error(res, "Shell handler requires a command", 400);
-      return;
-    }
-    if (
-      handler.type === "code" &&
-      (typeof handler.code !== "string" || !handler.code.trim())
-    ) {
-      error(res, "Code handler requires code", 400);
-      return;
-    }
-
-    const now = new Date().toISOString();
-    const actionDef: CustomActionDef = {
-      id: crypto.randomUUID(),
-      name: name.toUpperCase().replace(/\s+/g, "_"),
-      description,
-      similes: Array.isArray(body.similes)
-        ? body.similes.filter((s): s is string => typeof s === "string")
-        : [],
-      parameters: Array.isArray(body.parameters)
-        ? (body.parameters as Array<{
-            name: string;
-            description: string;
-            required: boolean;
-          }>)
-        : [],
-      handler,
-      enabled: body.enabled !== false,
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    const config = loadMiladyConfig();
-    if (!config.customActions) config.customActions = [];
-    config.customActions.push(actionDef);
-    saveMiladyConfig(config);
-
-    // Hot-register into the running agent so it's available immediately
-    if (actionDef.enabled) {
-      registerCustomActionLive(actionDef);
-    }
-
-    json(res, { ok: true, action: actionDef });
-    return;
-  }
-
-  // Generate a custom action definition from a natural language prompt
-  if (method === "POST" && pathname === "/api/custom-actions/generate") {
-    const body = await readJsonBody<{ prompt?: string }>(req, res);
-    if (!body) return;
-
-    const prompt = typeof body.prompt === "string" ? body.prompt.trim() : "";
-    if (!prompt) {
-      error(res, "prompt is required", 400);
-      return;
-    }
-
-    const runtime = state.runtime;
-    if (!runtime) {
-      error(res, "Agent runtime not available", 503);
-      return;
-    }
-
-    try {
-      const systemPrompt = [
-        "You are a helper that generates custom action definitions from natural language descriptions.",
-        "Given a user's description of what they want an action to do, generate a JSON object with these fields:",
-        "",
-        "- name: string (UPPER_SNAKE_CASE action name)",
-        "- description: string (clear description of what the action does)",
-        "- similes: optional string[] of alternative action names and phrases",
-        '- handlerType: "http" | "shell" | "code"',
-        "- handler: object with type-specific fields:",
-        '  For http: { type: "http", method: "GET"|"POST"|etc, url: string, headers?: object, bodyTemplate?: string }',
-        '  For shell: { type: "shell", command: string }',
-        '  For code: { type: "code", code: string }',
-        "- parameters: array of { name: string, description: string, required: boolean }",
-        "",
-        "Use {{paramName}} placeholders in URLs, body templates, and shell commands.",
-        "For code handlers, parameters are available via params.paramName and fetch() is available.",
-        "",
-        "Respond with ONLY the JSON object, no markdown fences or explanation.",
-      ].join("\n");
-
-      const llmResponse = await runtime.useModel(ModelType.TEXT_SMALL, {
-        prompt: `${systemPrompt}\n\nUser request: ${prompt}`,
-      });
-
-      // Parse the JSON from the LLM response
-      const text =
-        typeof llmResponse === "string" ? llmResponse : String(llmResponse);
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        error(res, "Failed to generate action definition", 500);
-        return;
-      }
-
-      const generated = JSON.parse(jsonMatch[0]) as Record<string, unknown>;
-      json(res, { ok: true, generated });
-    } catch (err) {
-      error(
-        res,
-        `Generation failed: ${err instanceof Error ? err.message : String(err)}`,
-        500,
-      );
-    }
-    return;
-  }
-
-  const customActionMatch = pathname.match(/^\/api\/custom-actions\/([^/]+)$/);
-  const customActionTestMatch = pathname.match(
-    /^\/api\/custom-actions\/([^/]+)\/test$/,
-  );
-
-  if (method === "POST" && customActionTestMatch) {
-    const actionId = decodeURIComponent(customActionTestMatch[1]);
-    const body = await readJsonBody<{ params?: Record<string, string> }>(
-      req,
+  const handler = body.handler as CustomActionDef["handler"] | undefined;
+  const validHandlerTypes = new Set(["http", "shell", "code"]);
+  if (!handler || !handler.type || !validHandlerTypes.has(handler.type)) {
+    error(
       res,
+      "handler with valid type (http, shell, code) is required",
+      400,
     );
-    if (!body) return;
-
-    const config = loadMiladyConfig();
-    const def = (config.customActions ?? []).find((a) => a.id === actionId);
-    if (!def) {
-      error(res, "Action not found", 404);
-      return;
-    }
-
-    // Security gate: shell/code handlers execute arbitrary commands on the host.
-    if (def.handler.type === "shell" || def.handler.type === "code") {
-      const terminalRejection = resolveTerminalRunRejection(
-        req,
-        body as TerminalRunRequestBody,
-      );
-      if (terminalRejection) {
-        error(
-          res,
-          `Testing ${def.handler.type} actions requires terminal authorization. ${terminalRejection.reason}`,
-          terminalRejection.status,
-        );
-        return;
-      }
-    }
-
-    const testParams = body.params ?? {};
-    const start = Date.now();
-    try {
-      const handler = buildTestHandler(def);
-      const result = await handler(testParams);
-      json(res, {
-        ok: result.ok,
-        output: result.output,
-        durationMs: Date.now() - start,
-      });
-    } catch (err) {
-      json(res, {
-        ok: false,
-        output: "",
-        error: err instanceof Error ? err.message : String(err),
-        durationMs: Date.now() - start,
-      });
-    }
     return;
   }
 
-  if (method === "PUT" && customActionMatch) {
-    const actionId = decodeURIComponent(customActionMatch[1]);
-    const body = await readJsonBody<Record<string, unknown>>(req, res);
-    if (!body) return;
-
-    const config = loadMiladyConfig();
-    const actions = config.customActions ?? [];
-    const idx = actions.findIndex((a) => a.id === actionId);
-    if (idx === -1) {
-      error(res, "Action not found", 404);
-      return;
-    }
-
-    const existing = actions[idx];
-
-    // Validate handler if provided in the update
-    let newHandler = existing.handler;
-    if (body.handler != null) {
-      const h = body.handler as Record<string, unknown>;
-      const hValidTypes = new Set(["http", "shell", "code"]);
-      if (!h.type || !hValidTypes.has(h.type as string)) {
-        error(res, "handler.type must be http, shell, or code", 400);
-        return;
-      }
-      newHandler = h as unknown as CustomActionDef["handler"];
-    }
-
-    // Security gate: if the new/updated handler is shell or code, require
-    // terminal authorization — same gate as POST creation.
-    if (newHandler.type === "shell" || newHandler.type === "code") {
-      const terminalRejection = resolveTerminalRunRejection(
-        req,
-        body as TerminalRunRequestBody,
-      );
-      if (terminalRejection) {
-        error(
-          res,
-          `Updating to ${newHandler.type} handler requires terminal authorization. ${terminalRejection.reason}`,
-          terminalRejection.status,
-        );
-        return;
-      }
-    }
-
-    const updated: CustomActionDef = {
-      ...existing,
-      name:
-        typeof body.name === "string"
-          ? body.name.trim().toUpperCase().replace(/\s+/g, "_")
-          : existing.name,
-      description:
-        typeof body.description === "string"
-          ? body.description.trim()
-          : existing.description,
-      similes: Array.isArray(body.similes)
-        ? body.similes.filter((s): s is string => typeof s === "string")
-        : existing.similes,
-      parameters: Array.isArray(body.parameters)
-        ? (body.parameters as CustomActionDef["parameters"])
-        : existing.parameters,
-      handler: newHandler,
-      enabled:
-        typeof body.enabled === "boolean" ? body.enabled : existing.enabled,
-      updatedAt: new Date().toISOString(),
-    };
-
-    actions[idx] = updated;
-    config.customActions = actions;
-    saveMiladyConfig(config);
-
-    json(res, { ok: true, action: updated });
-    return;
-  }
-
-  if (method === "DELETE" && customActionMatch) {
-    const actionId = decodeURIComponent(customActionMatch[1]);
-
-    const config = loadMiladyConfig();
-    const actions = config.customActions ?? [];
-    const idx = actions.findIndex((a) => a.id === actionId);
-    if (idx === -1) {
-      error(res, "Action not found", 404);
-      return;
-    }
-
-    actions.splice(idx, 1);
-    config.customActions = actions;
-    saveMiladyConfig(config);
-
-    json(res, { ok: true });
-    return;
-  }
-
-  // ── Stream Manager (macOS-compatible RTMP via FFmpeg) ────────────────────
-  if (method === "POST" && pathname === "/api/stream/start") {
-    try {
-      const body = await readJsonBody(req, res, { maxBytes: MAX_BODY_BYTES });
-      const rtmpUrl = body?.rtmpUrl as string | undefined;
-      const rtmpKey = body?.rtmpKey as string | undefined;
-
-      if (!rtmpUrl || !rtmpKey) {
-        error(res, "rtmpUrl and rtmpKey are required", 400);
-        return;
-      }
-
-      await streamManager.start({
-        rtmpUrl,
-        rtmpKey,
-        inputMode: (body?.inputMode as "testsrc" | "avfoundation") || "testsrc",
-        resolution: (body?.resolution as string) || "1280x720",
-        bitrate: (body?.bitrate as string) || "2500k",
-        framerate: (body?.framerate as number) || 30,
-      });
-
-      json(res, { ok: true, message: "Stream started" });
-    } catch (err) {
+  // Security gate: shell and code handlers execute arbitrary commands or
+  // code on the host machine, and the resulting action persists in config
+  // (survives restarts). Require the MILADY_TERMINAL_RUN_TOKEN to prove
+  // the caller has explicit operator authority for code execution.
+  if (handler.type === "shell" || handler.type === "code") {
+    const terminalRejection = resolveTerminalRunRejection(
+      req,
+      body as TerminalRunRequestBody,
+    );
+    if (terminalRejection) {
       error(
         res,
-        err instanceof Error ? err.message : "Stream start failed",
-        500,
+        `Creating ${handler.type} actions requires terminal authorization. ${terminalRejection.reason}`,
+        terminalRejection.status,
       );
-    }
-    return;
-  }
-
-  if (method === "POST" && pathname === "/api/stream/stop") {
-    try {
-      const result = await streamManager.stop();
-      // Also stop the retake session
-      const retakeToken = process.env.RETAKE_AGENT_TOKEN || "";
-      const retakeApiUrl =
-        process.env.RETAKE_API_URL || "https://retake.tv/api/v1";
-      if (retakeToken) {
-        await fetch(`${retakeApiUrl}/agent/stream/stop`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${retakeToken}`,
-          },
-        }).catch(() => {});
-      }
-      json(res, { ok: true, ...result });
-    } catch (err) {
-      error(
-        res,
-        err instanceof Error ? err.message : "Stream stop failed",
-        500,
-      );
-    }
-    return;
-  }
-
-  if (method === "GET" && pathname === "/api/stream/status") {
-    json(res, streamManager.getHealth());
-    return;
-  }
-
-  // ── Stream frame push (pipe mode — Electron capturePage → FFmpeg stdin)
-  if (method === "POST" && pathname === "/api/stream/frame") {
-    if (!streamManager.isRunning()) {
-      error(res, "Stream not running", 400);
       return;
     }
+  }
+
+  // Validate type-specific required fields
+  if (
+    handler.type === "http" &&
+    (typeof handler.url !== "string" || !handler.url.trim())
+  ) {
+    error(res, "HTTP handler requires a url", 400);
+    return;
+  }
+  if (
+    handler.type === "shell" &&
+    (typeof handler.command !== "string" || !handler.command.trim())
+  ) {
+    error(res, "Shell handler requires a command", 400);
+    return;
+  }
+  if (
+    handler.type === "code" &&
+    (typeof handler.code !== "string" || !handler.code.trim())
+  ) {
+    error(res, "Code handler requires code", 400);
+    return;
+  }
+
+  const now = new Date().toISOString();
+  const actionDef: CustomActionDef = {
+    id: crypto.randomUUID(),
+    name: name.toUpperCase().replace(/\s+/g, "_"),
+    description,
+    similes: Array.isArray(body.similes)
+      ? body.similes.filter((s): s is string => typeof s === "string")
+      : [],
+    parameters: Array.isArray(body.parameters)
+      ? (body.parameters as Array<{
+        name: string;
+        description: string;
+        required: boolean;
+      }>)
+      : [],
+    handler,
+    enabled: body.enabled !== false,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  const config = loadMiladyConfig();
+  if (!config.customActions) config.customActions = [];
+  config.customActions.push(actionDef);
+  saveMiladyConfig(config);
+
+  // Hot-register into the running agent so it's available immediately
+  if (actionDef.enabled) {
+    registerCustomActionLive(actionDef);
+  }
+
+  json(res, { ok: true, action: actionDef });
+  return;
+}
+
+// Generate a custom action definition from a natural language prompt
+if (method === "POST" && pathname === "/api/custom-actions/generate") {
+  const body = await readJsonBody<{ prompt?: string }>(req, res);
+  if (!body) return;
+
+  const prompt = typeof body.prompt === "string" ? body.prompt.trim() : "";
+  if (!prompt) {
+    error(res, "prompt is required", 400);
+    return;
+  }
+
+  const runtime = state.runtime;
+  if (!runtime) {
+    error(res, "Agent runtime not available", 503);
+    return;
+  }
+
+  try {
+    const systemPrompt = [
+      "You are a helper that generates custom action definitions from natural language descriptions.",
+      "Given a user's description of what they want an action to do, generate a JSON object with these fields:",
+      "",
+      "- name: string (UPPER_SNAKE_CASE action name)",
+      "- description: string (clear description of what the action does)",
+      "- similes: optional string[] of alternative action names and phrases",
+      '- handlerType: "http" | "shell" | "code"',
+      "- handler: object with type-specific fields:",
+      '  For http: { type: "http", method: "GET"|"POST"|etc, url: string, headers?: object, bodyTemplate?: string }',
+      '  For shell: { type: "shell", command: string }',
+      '  For code: { type: "code", code: string }',
+      "- parameters: array of { name: string, description: string, required: boolean }",
+      "",
+      "Use {{paramName}} placeholders in URLs, body templates, and shell commands.",
+      "For code handlers, parameters are available via params.paramName and fetch() is available.",
+      "",
+      "Respond with ONLY the JSON object, no markdown fences or explanation.",
+    ].join("\n");
+
+    const llmResponse = await runtime.useModel(ModelType.TEXT_SMALL, {
+      prompt: `${systemPrompt}\n\nUser request: ${prompt}`,
+    });
+
+    // Parse the JSON from the LLM response
+    const text =
+      typeof llmResponse === "string" ? llmResponse : String(llmResponse);
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      error(res, "Failed to generate action definition", 500);
+      return;
+    }
+
+    const generated = JSON.parse(jsonMatch[0]) as Record<string, unknown>;
+    json(res, { ok: true, generated });
+  } catch (err) {
+    error(
+      res,
+      `Generation failed: ${err instanceof Error ? err.message : String(err)}`,
+      500,
+    );
+  }
+  return;
+}
+
+const customActionMatch = pathname.match(/^\/api\/custom-actions\/([^/]+)$/);
+const customActionTestMatch = pathname.match(
+  /^\/api\/custom-actions\/([^/]+)\/test$/,
+);
+
+if (method === "POST" && customActionTestMatch) {
+  const actionId = decodeURIComponent(customActionTestMatch[1]);
+  const body = await readJsonBody<{ params?: Record<string, string> }>(
+    req,
+    res,
+  );
+  if (!body) return;
+
+  const config = loadMiladyConfig();
+  const def = (config.customActions ?? []).find((a) => a.id === actionId);
+  if (!def) {
+    error(res, "Action not found", 404);
+    return;
+  }
+
+  // Security gate: shell/code handlers execute arbitrary commands on the host.
+  if (def.handler.type === "shell" || def.handler.type === "code") {
+    const terminalRejection = resolveTerminalRunRejection(
+      req,
+      body as TerminalRunRequestBody,
+    );
+    if (terminalRejection) {
+      error(
+        res,
+        `Testing ${def.handler.type} actions requires terminal authorization. ${terminalRejection.reason}`,
+        terminalRejection.status,
+      );
+      return;
+    }
+  }
+
+  const testParams = body.params ?? {};
+  const start = Date.now();
+  try {
+    const handler = buildTestHandler(def);
+    const result = await handler(testParams);
+    json(res, {
+      ok: result.ok,
+      output: result.output,
+      durationMs: Date.now() - start,
+    });
+  } catch (err) {
+    json(res, {
+      ok: false,
+      output: "",
+      error: err instanceof Error ? err.message : String(err),
+      durationMs: Date.now() - start,
+    });
+  }
+  return;
+}
+
+if (method === "PUT" && customActionMatch) {
+  const actionId = decodeURIComponent(customActionMatch[1]);
+  const body = await readJsonBody<Record<string, unknown>>(req, res);
+  if (!body) return;
+
+  const config = loadMiladyConfig();
+  const actions = config.customActions ?? [];
+  const idx = actions.findIndex((a) => a.id === actionId);
+  if (idx === -1) {
+    error(res, "Action not found", 404);
+    return;
+  }
+
+  const existing = actions[idx];
+
+  // Validate handler if provided in the update
+  let newHandler = existing.handler;
+  if (body.handler != null) {
+    const h = body.handler as Record<string, unknown>;
+    const hValidTypes = new Set(["http", "shell", "code"]);
+    if (!h.type || !hValidTypes.has(h.type as string)) {
+      error(res, "handler.type must be http, shell, or code", 400);
+      return;
+    }
+    newHandler = h as unknown as CustomActionDef["handler"];
+  }
+
+  // Security gate: if the new/updated handler is shell or code, require
+  // terminal authorization — same gate as POST creation.
+  if (newHandler.type === "shell" || newHandler.type === "code") {
+    const terminalRejection = resolveTerminalRunRejection(
+      req,
+      body as TerminalRunRequestBody,
+    );
+    if (terminalRejection) {
+      error(
+        res,
+        `Updating to ${newHandler.type} handler requires terminal authorization. ${terminalRejection.reason}`,
+        terminalRejection.status,
+      );
+      return;
+    }
+  }
+
+  const updated: CustomActionDef = {
+    ...existing,
+    name:
+      typeof body.name === "string"
+        ? body.name.trim().toUpperCase().replace(/\s+/g, "_")
+        : existing.name,
+    description:
+      typeof body.description === "string"
+        ? body.description.trim()
+        : existing.description,
+    similes: Array.isArray(body.similes)
+      ? body.similes.filter((s): s is string => typeof s === "string")
+      : existing.similes,
+    parameters: Array.isArray(body.parameters)
+      ? (body.parameters as CustomActionDef["parameters"])
+      : existing.parameters,
+    handler: newHandler,
+    enabled:
+      typeof body.enabled === "boolean" ? body.enabled : existing.enabled,
+    updatedAt: new Date().toISOString(),
+  };
+
+  actions[idx] = updated;
+  config.customActions = actions;
+  saveMiladyConfig(config);
+
+  json(res, { ok: true, action: updated });
+  return;
+}
+
+if (method === "DELETE" && customActionMatch) {
+  const actionId = decodeURIComponent(customActionMatch[1]);
+
+  const config = loadMiladyConfig();
+  const actions = config.customActions ?? [];
+  const idx = actions.findIndex((a) => a.id === actionId);
+  if (idx === -1) {
+    error(res, "Action not found", 404);
+    return;
+  }
+
+  actions.splice(idx, 1);
+  config.customActions = actions;
+  saveMiladyConfig(config);
+
+  json(res, { ok: true });
+  return;
+}
+
+// ── Stream Manager (macOS-compatible RTMP via FFmpeg) ────────────────────
+if (method === "POST" && pathname === "/api/stream/start") {
+  try {
+    const body = await readJsonBody(req, res, { maxBytes: MAX_BODY_BYTES });
+    const rtmpUrl = body?.rtmpUrl as string | undefined;
+    const rtmpKey = body?.rtmpKey as string | undefined;
+
+    if (!rtmpUrl || !rtmpKey) {
+      error(res, "rtmpUrl and rtmpKey are required", 400);
+      return;
+    }
+
+    await streamManager.start({
+      rtmpUrl,
+      rtmpKey,
+      inputMode: (body?.inputMode as "testsrc" | "avfoundation") || "testsrc",
+      resolution: (body?.resolution as string) || "1280x720",
+      bitrate: (body?.bitrate as string) || "2500k",
+      framerate: (body?.framerate as number) || 30,
+    });
+
+    json(res, { ok: true, message: "Stream started" });
+  } catch (err) {
+    error(
+      res,
+      err instanceof Error ? err.message : "Stream start failed",
+      500,
+    );
+  }
+  return;
+}
+
+if (method === "POST" && pathname === "/api/stream/stop") {
+  try {
+    const result = await streamManager.stop();
+    // Also stop the retake session
+    const retakeToken = process.env.RETAKE_AGENT_TOKEN || "";
+    const retakeApiUrl =
+      process.env.RETAKE_API_URL || "https://retake.tv/api/v1";
+    if (retakeToken) {
+      await fetch(`${retakeApiUrl}/agent/stream/stop`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${retakeToken}`,
+        },
+      }).catch(() => { });
+    }
+    json(res, { ok: true, ...result });
+  } catch (err) {
+    error(
+      res,
+      err instanceof Error ? err.message : "Stream stop failed",
+      500,
+    );
+  }
+  return;
+}
+
+if (method === "GET" && pathname === "/api/stream/status") {
+  json(res, streamManager.getHealth());
+  return;
+}
+
+// ── Stream frame push (pipe mode — Electron capturePage → FFmpeg stdin)
+if (method === "POST" && pathname === "/api/stream/frame") {
+  if (!streamManager.isRunning()) {
+    error(res, "Stream not running", 400);
+    return;
+  }
+  try {
+    const buf = await readRequestBodyBuffer(req, {
+      maxBytes: 2 * 1024 * 1024,
+    });
+    if (!buf || buf.length === 0) {
+      error(res, "Empty frame", 400);
+      return;
+    }
+    const ok = streamManager.writeFrame(buf);
+    // Minimal response to reduce overhead at 15fps
+    res.writeHead(200);
+    res.end(ok ? "1" : "0");
+  } catch (err) {
+    error(
+      res,
+      err instanceof Error ? err.message : "Frame write failed",
+      500,
+    );
+  }
+  return;
+}
+
+// ── Retake frame push (browser-capture mode) ────────────────────────────
+if (method === "POST" && pathname === "/api/retake/frame") {
+  // Route frames to StreamManager (pipe mode) or RetakeService
+  if (streamManager.isRunning()) {
     try {
       const buf = await readRequestBodyBuffer(req, {
         maxBytes: 2 * 1024 * 1024,
@@ -12558,164 +12594,138 @@ async function handleRequest(
         error(res, "Empty frame", 400);
         return;
       }
-      const ok = streamManager.writeFrame(buf);
-      // Minimal response to reduce overhead at 15fps
+      streamManager.writeFrame(buf);
       res.writeHead(200);
-      res.end(ok ? "1" : "0");
-    } catch (err) {
-      error(
-        res,
-        err instanceof Error ? err.message : "Frame write failed",
-        500,
-      );
+      res.end();
+    } catch {
+      error(res, "Frame write failed", 500);
     }
     return;
   }
+  error(
+    res,
+    "StreamManager not running — start stream via POST /api/retake/live",
+    503,
+  );
+  return;
+}
 
-  // ── Retake frame push (browser-capture mode) ────────────────────────────
-  if (method === "POST" && pathname === "/api/retake/frame") {
-    // Route frames to StreamManager (pipe mode) or RetakeService
+// ── Retake go-live via StreamManager ────────────────────────────────────
+if (method === "POST" && pathname === "/api/retake/live") {
+  if (streamManager.isRunning()) {
+    json(res, { ok: true, live: true, message: "Already streaming" });
+    return;
+  }
+  const retakeToken = process.env.RETAKE_AGENT_TOKEN || "";
+  if (!retakeToken) {
+    error(res, "RETAKE_AGENT_TOKEN not configured", 400);
+    return;
+  }
+  try {
+    const { rtmpUrl } = await startRetakeStream();
+    json(res, { ok: true, live: true, rtmpUrl });
+  } catch (err) {
+    error(res, err instanceof Error ? err.message : "Failed to go live", 500);
+  }
+  return;
+}
+
+if (method === "POST" && pathname === "/api/retake/offline") {
+  try {
+    // Stop browser capture
+    try {
+      const { stopBrowserCapture } = await import(
+        "../services/browser-capture.js"
+      );
+      await stopBrowserCapture();
+    } catch { }
+    // Stop StreamManager
     if (streamManager.isRunning()) {
-      try {
-        const buf = await readRequestBodyBuffer(req, {
-          maxBytes: 2 * 1024 * 1024,
-        });
-        if (!buf || buf.length === 0) {
-          error(res, "Empty frame", 400);
-          return;
-        }
-        streamManager.writeFrame(buf);
-        res.writeHead(200);
-        res.end();
-      } catch {
-        error(res, "Frame write failed", 500);
-      }
-      return;
+      await streamManager.stop();
     }
+    // Stop retake.tv session
+    const retakeToken = process.env.RETAKE_AGENT_TOKEN || "";
+    const retakeApiUrl =
+      process.env.RETAKE_API_URL || "https://retake.tv/api/v1";
+    if (retakeToken) {
+      await fetch(`${retakeApiUrl}/agent/stream/stop`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${retakeToken}`,
+        },
+      }).catch(() => { });
+    }
+    json(res, { ok: true, live: false });
+  } catch (err) {
     error(
       res,
-      "StreamManager not running — start stream via POST /api/retake/live",
-      503,
+      err instanceof Error ? err.message : "Failed to go offline",
+      500,
     );
-    return;
   }
+  return;
+}
 
-  // ── Retake go-live via StreamManager ────────────────────────────────────
-  if (method === "POST" && pathname === "/api/retake/live") {
-    if (streamManager.isRunning()) {
-      json(res, { ok: true, live: true, message: "Already streaming" });
+// ── LTCG Autonomy routes ─────────────────────────────────────────────
+// The LTCG plugin registers these as ElizaOS plugin routes, but Milady's
+// server doesn't dispatch plugin routes. Wire them up directly here.
+if (pathname.startsWith("/api/ltcg/autonomy")) {
+  try {
+    const { getAutonomyController } = await import("@lunchtable/plugin-ltcg");
+    const ctrl = getAutonomyController();
+
+    if (method === "GET" && pathname === "/api/ltcg/autonomy/status") {
+      json(res, ctrl.getStatus());
       return;
     }
-    const retakeToken = process.env.RETAKE_AGENT_TOKEN || "";
-    if (!retakeToken) {
-      error(res, "RETAKE_AGENT_TOKEN not configured", 400);
+
+    if (method === "POST" && pathname === "/api/ltcg/autonomy/start") {
+      const body = (await readJsonBody(req, res)) ?? {};
+      const bodyRecord = body as Record<string, unknown>;
+      const mode = bodyRecord.mode === "pvp" ? "pvp" : "story";
+      const continuousValue = bodyRecord.continuous;
+      const continuous =
+        typeof continuousValue === "boolean" ? continuousValue : true;
+      await ctrl.start({ mode, continuous });
+      json(res, { ok: true, mode, continuous });
       return;
     }
-    try {
-      const { rtmpUrl } = await startRetakeStream();
-      json(res, { ok: true, live: true, rtmpUrl });
-    } catch (err) {
-      error(res, err instanceof Error ? err.message : "Failed to go live", 500);
-    }
-    return;
-  }
 
-  if (method === "POST" && pathname === "/api/retake/offline") {
-    try {
-      // Stop browser capture
-      try {
-        const { stopBrowserCapture } = await import(
-          "../services/browser-capture.js"
-        );
-        await stopBrowserCapture();
-      } catch {}
-      // Stop StreamManager
-      if (streamManager.isRunning()) {
-        await streamManager.stop();
-      }
-      // Stop retake.tv session
-      const retakeToken = process.env.RETAKE_AGENT_TOKEN || "";
-      const retakeApiUrl =
-        process.env.RETAKE_API_URL || "https://retake.tv/api/v1";
-      if (retakeToken) {
-        await fetch(`${retakeApiUrl}/agent/stream/stop`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${retakeToken}`,
-          },
-        }).catch(() => {});
-      }
-      json(res, { ok: true, live: false });
-    } catch (err) {
-      error(
-        res,
-        err instanceof Error ? err.message : "Failed to go offline",
-        500,
-      );
-    }
-    return;
-  }
-
-  // ── LTCG Autonomy routes ─────────────────────────────────────────────
-  // The LTCG plugin registers these as ElizaOS plugin routes, but Milady's
-  // server doesn't dispatch plugin routes. Wire them up directly here.
-  if (pathname.startsWith("/api/ltcg/autonomy")) {
-    try {
-      const { getAutonomyController } = await import("@lunchtable/plugin-ltcg");
-      const ctrl = getAutonomyController();
-
-      if (method === "GET" && pathname === "/api/ltcg/autonomy/status") {
-        json(res, ctrl.getStatus());
-        return;
-      }
-
-      if (method === "POST" && pathname === "/api/ltcg/autonomy/start") {
-        const body = (await readJsonBody(req, res)) ?? {};
-        const bodyRecord = body as Record<string, unknown>;
-        const mode = bodyRecord.mode === "pvp" ? "pvp" : "story";
-        const continuousValue = bodyRecord.continuous;
-        const continuous =
-          typeof continuousValue === "boolean" ? continuousValue : true;
-        await ctrl.start({ mode, continuous });
-        json(res, { ok: true, mode, continuous });
-        return;
-      }
-
-      if (method === "POST" && pathname === "/api/ltcg/autonomy/pause") {
-        ctrl.pause();
-        json(res, { ok: true, state: "paused" });
-        return;
-      }
-
-      if (method === "POST" && pathname === "/api/ltcg/autonomy/resume") {
-        ctrl.resume();
-        json(res, { ok: true, state: "running" });
-        return;
-      }
-
-      if (method === "POST" && pathname === "/api/ltcg/autonomy/stop") {
-        await ctrl.stop();
-        json(res, { ok: true, state: "idle" });
-        return;
-      }
-    } catch (err) {
-      logger.error(
-        `[ltcg-autonomy] ${err instanceof Error ? err.message : err}`,
-      );
-      error(res, err instanceof Error ? err.message : "Autonomy error", 500);
+    if (method === "POST" && pathname === "/api/ltcg/autonomy/pause") {
+      ctrl.pause();
+      json(res, { ok: true, state: "paused" });
       return;
     }
-  }
 
-  // ── Connector plugin routes (dynamically registered) ────────────────────
-  for (const handler of state.connectorRouteHandlers) {
-    const handled = await handler(req, res, pathname, method);
-    if (handled) return;
-  }
+    if (method === "POST" && pathname === "/api/ltcg/autonomy/resume") {
+      ctrl.resume();
+      json(res, { ok: true, state: "running" });
+      return;
+    }
 
-  // ── Fallback ────────────────────────────────────────────────────────────
-  error(res, "Not found", 404);
+    if (method === "POST" && pathname === "/api/ltcg/autonomy/stop") {
+      await ctrl.stop();
+      json(res, { ok: true, state: "idle" });
+      return;
+    }
+  } catch (err) {
+    logger.error(
+      `[ltcg-autonomy] ${err instanceof Error ? err.message : err}`,
+    );
+    error(res, err instanceof Error ? err.message : "Autonomy error", 500);
+    return;
+  }
+}
+
+// ── Connector plugin routes (dynamically registered) ────────────────────
+for (const handler of state.connectorRouteHandlers) {
+  const handled = await handler(req, res, pathname, method);
+  if (handled) return;
+}
+
+// ── Fallback ────────────────────────────────────────────────────────────
+error(res, "Not found", 404);
 }
 
 // ---------------------------------------------------------------------------
@@ -12962,7 +12972,7 @@ export async function startApiServer(opts?: {
   );
 
   // Warm per-provider model caches in background (non-blocking)
-  void getOrFetchAllProviders().catch(() => {});
+  void getOrFetchAllProviders().catch(() => { });
 
   // ── Intercept loggers so ALL agent/plugin/service logs appear in the UI ──
   // We patch both the global `logger` singleton from @elizaos/core (used by
