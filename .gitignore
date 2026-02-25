@@ -15,7 +15,6 @@ apps/app/electron/build/
 
 # Lock files (managed at repo root)
 package-lock.json
-bun.lock
 bun.lockb
 !deploy/cloud-agent-template/package-lock.json
 
