@@ -55,10 +55,10 @@ export async function runCli(argv: string[] = process.argv) {
 
   try {
     await program.parseAsync(argv);
-  } catch (err: any) {
+  } catch (err) {
     // If commander threw because of an early exit (e.g. --help, --version), don't crash.
     if (err && typeof err === "object" && "code" in err && "exitCode" in err) {
-      process.exitCode = err.exitCode ?? 1;
+      process.exitCode = (err as { exitCode: number }).exitCode ?? 1;
       return;
     }
     throw err;
