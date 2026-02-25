@@ -213,4 +213,7 @@ Only known top-level configuration keys are accepted (`CONFIG_WRITE_ALLOWED_TOP_
 
 ## Reporting Security Issues
 
-If you discover a security vulnerability, please report it responsibly by opening a GitHub issue with the `security` label, or contact the maintainers directly.
+If you discover a security vulnerability, please report it responsibly through a **private channel** — do **not** open a public GitHub issue, as this risks 0-day disclosure. Use one of:
+
+- **GitHub private vulnerability reporting** via the repository's Security tab
+- **Direct contact** with the maintainers
