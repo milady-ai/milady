@@ -1,7 +1,9 @@
 import { lookup as dnsLookup } from "node:dns/promises";
+import type http from "node:http";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   resolveMcpServersRejection,
+  resolveMcpTerminalAuthorizationRejection,
   validateMcpServerConfig,
 } from "./server.js";
 
@@ -82,6 +84,16 @@ describe("validateMcpServerConfig", () => {
       command: "node",
       args: ["-e", "console.log('pwn')"],
     });
+    const nodePrint = await validateMcpServerConfig({
+      type: "stdio",
+      command: "node",
+      args: ["-p", "process.version"],
+    });
+    const nodePrintLong = await validateMcpServerConfig({
+      type: "stdio",
+      command: "node",
+      args: ["--print", "process.version"],
+    });
     const pythonEval = await validateMcpServerConfig({
       type: "stdio",
       command: "python3",
@@ -99,6 +111,8 @@ describe("validateMcpServerConfig", () => {
     });
 
     expect(nodeEval).toContain('Flag "-e" is not allowed');
+    expect(nodePrint).toContain('Flag "-p" is not allowed');
+    expect(nodePrintLong).toContain('Flag "--print" is not allowed');
     expect(pythonEval).toContain('Flag "-c" is not allowed');
     expect(pythonAttachedEval).toContain('Flag "-c" is not allowed');
     expect(uvEval).toContain('Flag "-c" is not allowed');
@@ -286,6 +300,68 @@ describe("resolveMcpServersRejection", () => {
         url: "https://93.184.216.34/mcp",
       },
     });
+
+    expect(rejection).toBeNull();
+  });
+});
+
+describe("resolveMcpTerminalAuthorizationRejection", () => {
+  afterEach(() => {
+    delete process.env.MILADY_API_TOKEN;
+    delete process.env.MILADY_TERMINAL_RUN_TOKEN;
+  });
+
+  it("requires terminal authorization for stdio MCP server configs", () => {
+    process.env.MILADY_API_TOKEN = "api-secret";
+    const req: Pick<http.IncomingMessage, "headers"> = { headers: {} };
+    const rejection = resolveMcpTerminalAuthorizationRejection(
+      req,
+      {
+        local: {
+          type: "stdio",
+          command: "npx",
+          args: ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"],
+        },
+      },
+      {},
+    );
+
+    expect(rejection?.status).toBe(403);
+    expect(rejection?.reason).toContain("Terminal run is disabled");
+  });
+
+  it("does not require terminal authorization for remote-only MCP configs", () => {
+    process.env.MILADY_API_TOKEN = "api-secret";
+    const req: Pick<http.IncomingMessage, "headers"> = { headers: {} };
+    const rejection = resolveMcpTerminalAuthorizationRejection(
+      req,
+      {
+        remote: {
+          type: "streamable-http",
+          url: "https://mcp.example.com",
+        },
+      },
+      {},
+    );
+
+    expect(rejection).toBeNull();
+  });
+
+  it("accepts stdio MCP config when terminal token is provided", () => {
+    process.env.MILADY_API_TOKEN = "api-secret";
+    process.env.MILADY_TERMINAL_RUN_TOKEN = "terminal-secret";
+    const req: Pick<http.IncomingMessage, "headers"> = { headers: {} };
+    const rejection = resolveMcpTerminalAuthorizationRejection(
+      req,
+      {
+        local: {
+          type: "stdio",
+          command: "npx",
+          args: ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"],
+        },
+      },
+      { terminalToken: "terminal-secret" },
+    );
 
     expect(rejection).toBeNull();
   });

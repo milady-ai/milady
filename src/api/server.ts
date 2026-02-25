@@ -4173,6 +4173,30 @@ async function resolveTrainingServiceCtor(): Promise<TrainingServiceCtor | null>
   return null;
 }
 
+function mcpServersIncludeStdio(servers: Record<string, unknown>): boolean {
+  return Object.values(servers).some((serverConfig) => {
+    if (
+      !serverConfig ||
+      typeof serverConfig !== "object" ||
+      Array.isArray(serverConfig)
+    ) {
+      return false;
+    }
+    return (serverConfig as Record<string, unknown>).type === "stdio";
+  });
+}
+
+export function resolveMcpTerminalAuthorizationRejection(
+  req: Pick<http.IncomingMessage, "headers">,
+  servers: Record<string, unknown>,
+  body: { terminalToken?: string },
+): TerminalRunRejection | null {
+  if (!mcpServersIncludeStdio(servers)) {
+    return null;
+  }
+  return resolveTerminalRunRejection(req as http.IncomingMessage, body);
+}
+
 const LOCAL_ORIGIN_RE =
   /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\]|\[0:0:0:0:0:0:0:1\])(:\d+)?$/i;
 const APP_ORIGIN_RE =
@@ -9584,6 +9608,19 @@ async function handleRequest(
           error(res, mcpRejection, 400);
           return;
         }
+        const mcpTerminalRejection = resolveMcpTerminalAuthorizationRejection(
+          req,
+          mcpPatch.servers as Record<string, unknown>,
+          body as { terminalToken?: string },
+        );
+        if (mcpTerminalRejection) {
+          error(
+            res,
+            `Configuring stdio MCP servers via /api/config requires terminal authorization. ${mcpTerminalRejection.reason}`,
+            mcpTerminalRejection.status,
+          );
+          return;
+        }
       }
     }
 
@@ -11861,6 +11898,7 @@ async function handleRequest(
     const body = await readJsonBody<{
       name?: string;
       config?: Record<string, unknown>;
+      terminalToken?: string;
     }>(req, res);
     if (!body) return;
 
@@ -11889,6 +11927,20 @@ async function handleRequest(
     });
     if (mcpRejection) {
       error(res, mcpRejection, 400);
+      return;
+    }
+
+    const mcpTerminalRejection = resolveMcpTerminalAuthorizationRejection(
+      req,
+      { [serverName]: config },
+      body,
+    );
+    if (mcpTerminalRejection) {
+      error(
+        res,
+        `Configuring stdio MCP servers requires terminal authorization. ${mcpTerminalRejection.reason}`,
+        mcpTerminalRejection.status,
+      );
       return;
     }
 
@@ -11947,6 +11999,7 @@ async function handleRequest(
   if (method === "PUT" && pathname === "/api/mcp/config") {
     const body = await readJsonBody<{
       servers?: Record<string, unknown>;
+      terminalToken?: string;
     }>(req, res);
     if (!body) return;
 
@@ -11965,6 +12018,19 @@ async function handleRequest(
       );
       if (mcpRejection) {
         error(res, mcpRejection, 400);
+        return;
+      }
+      const mcpTerminalRejection = resolveMcpTerminalAuthorizationRejection(
+        req,
+        body.servers as Record<string, unknown>,
+        body,
+      );
+      if (mcpTerminalRejection) {
+        error(
+          res,
+          `Configuring stdio MCP servers requires terminal authorization. ${mcpTerminalRejection.reason}`,
+          mcpTerminalRejection.status,
+        );
         return;
       }
       const sanitized = cloneWithoutBlockedObjectKeys(body.servers);
