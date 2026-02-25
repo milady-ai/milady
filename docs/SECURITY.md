@@ -48,7 +48,9 @@ The `isBlockedPrivateOrLinkLocalIp()` function blocks access to:
 | `::ffff:` mapped | IPv4-mapped IPv6 addresses (decoded and rechecked) |
 
 ### DNS Resolution Verification
-After hostname validation, the system performs DNS resolution and checks **every resolved IP address** against the blocklist. This prevents DNS rebinding and split-horizon DNS attacks where a hostname resolves to a private IP.
+**File:** `src/runtime/custom-actions.ts` (`isBlockedUrl()`)
+
+After hostname validation, the `isBlockedUrl()` function performs DNS resolution (via `node:dns/promises` `lookup`) and checks **every resolved IP address** against the blocklist using `isBlockedPrivateOrLinkLocalIp()` from `network-policy.ts`. This prevents DNS rebinding and split-horizon DNS attacks where a hostname resolves to a private IP.
 
 ### Hostname Blocklist
 Literal hostnames like `localhost`, `metadata.google.internal`, and cloud metadata service hostnames are explicitly blocked.
@@ -118,7 +120,7 @@ The shell execution endpoint applies multiple constraints:
 ### Sandbox Routes
 **File:** `src/api/sandbox-routes.ts`
 
-Uses `execFileSync` (not `execSync`) with argument arrays, preventing shell metacharacter injection. Variables used in commands are bounded integers or server-generated paths, never raw user input.
+The `runCommand()` helper uses `execFileSync` with argument arrays, preventing shell metacharacter injection for general command execution. Note that `execSync` is also used elsewhere in the file for platform-specific operations (PowerShell commands, `osascript`, `wmctrl`/`xdotool`, audio recording, Docker). Variables used in commands are bounded integers or server-generated paths, never raw user input.
 
 ### Custom Actions
 **File:** `src/runtime/custom-actions.ts`
@@ -142,7 +144,7 @@ This prevents prototype pollution attacks that could modify the behavior of all 
 
 ## Plugin Installation Safety
 
-**Files:** `src/services/plugin-installer.ts`, `src/services/plugin-eject.ts`, `apps/app/electron/src/services/core-eject.ts`
+**Files:** `src/services/plugin-installer.ts`, `src/services/plugin-eject.ts`, `src/services/core-eject.ts`
 
 All `npm install` and `bun install` calls include the `--ignore-scripts` flag to prevent:
 - Postinstall RCE from malicious packages
