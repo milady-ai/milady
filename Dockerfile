@@ -28,8 +28,8 @@ COPY packages/psyop/package.json ./packages/psyop/package.json
 COPY deploy/cloud-agent-template/package.json ./deploy/cloud-agent-template/package.json
 COPY scripts ./scripts
 
-# Install dependencies using the committed lockfile only.
-RUN bun install --frozen-lockfile
+# Install dependencies (no lockfile in repo; bun resolves from package.json).
+RUN bun install
 
 # Copy source and build (includes apps/app/dist UI bundle)
 COPY . .
