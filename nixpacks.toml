@@ -1,5 +1,6 @@
 # Nixpacks build configuration for Sevalla deployment
-# Bun added via Nix packages (not curl) for reliable PATH availability.
+# Uses npm for dependency install (no bun.lock in repo, bun resolution OOMs).
+# Bun added via Nix for build scripts that require it (postinstall, build).
 
 [variables]
 NIXPACKS_SPA_CADDY    = "false"
@@ -10,10 +11,11 @@ NPM_CONFIG_PRODUCTION = "false"
 [phases.setup]
 nixPkgs = ["...", "nodejs_22", "bun"]
 
-# Install dependencies with Bun (available via Nix).
-# postinstall hooks also call bun, so Bun must be on PATH before this runs.
+# npm handles dependency resolution reliably without a lockfile.
+# --legacy-peer-deps works around @capacitor/core peer dep conflicts.
+# postinstall hooks call bun (available from Nix setup phase).
 [phases.install]
-cmds = ["bun install"]
+cmds = ["npm install --legacy-peer-deps"]
 
 # Full build: compile agent runtime (tsdown) + web UI (Vite)
 [phases.build]
