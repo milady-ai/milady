@@ -124,7 +124,7 @@ jobs:
 
       - name: Build core
         run: |
-          bunx tsdown
+          node node_modules/tsdown/dist/run.mjs
           node --import tsx scripts/write-build-info.ts
           echo '{"type":"module"}' > dist/package.json
 
@@ -227,7 +227,7 @@ jobs:
           }]);
           EOF
 
-          bunx tsdown --config tsdown.electron.config.ts --no-clean
+          node node_modules/tsdown/dist/run.mjs --config tsdown.electron.config.ts --no-clean
 
           # Copy to milady-dist so electron-builder can pack it.
           rm -rf apps/app/electron/milady-dist
