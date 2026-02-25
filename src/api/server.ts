@@ -5604,6 +5604,19 @@ async function handleRequest(
     res.end(responseText);
   };
 
+  // ── Health check (unauthenticated, no host/CORS gating) ─────────────
+  // PaaS platforms (Sevalla/Kinsta, Railway, etc.) probe /health or
+  // /healthz to decide whether the container is alive.  This MUST sit
+  // BEFORE the DNS-rebinding and CORS checks because k8s probes send
+  // Host: <pod-ip>:<port> which doesn't match loopback patterns.
+  if (
+    (method === "GET" || method === "HEAD") &&
+    (pathname === "/health" || pathname === "/healthz")
+  ) {
+    json(res, { status: "ok", timestamp: Date.now() });
+    return;
+  }
+
   // ── DNS rebinding protection ──────────────────────────────────────────
   // Reject requests whose Host header doesn't match a known loopback
   // hostname.  Without this check an attacker can rebind their domain's
@@ -5616,19 +5629,6 @@ async function handleRequest(
 
   if (!applyCors(req, res)) {
     json(res, { error: "Origin not allowed" }, 403);
-    return;
-  }
-
-  // ── Health check (unauthenticated) ──────────────────────────────────
-  // PaaS platforms (Sevalla/Kinsta, Railway, etc.) probe /health or
-  // /healthz to decide whether the container is alive.  This MUST sit
-  // before the auth gate so probes succeed even when MILADY_API_TOKEN is
-  // set (or auto-generated for non-loopback binds).
-  if (
-    (method === "GET" || method === "HEAD") &&
-    (pathname === "/health" || pathname === "/healthz")
-  ) {
-    json(res, { status: "ok", timestamp: Date.now() });
     return;
   }
 

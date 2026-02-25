@@ -2902,6 +2902,42 @@ export async function startEliza(
     }
   }
 
+  // ── Early API server start for PaaS health probes ──────────────────
+  // On cloud platforms (Sevalla, Railway, etc.) the k8s readiness/liveness
+  // probes must get a 200 before the deployment is considered successful.
+  // Full runtime init (plugin resolution, DB migrations, model downloads)
+  // can take 30-120+ seconds.  Start the HTTP server NOW with
+  // initialAgentState: "starting" so /health returns 200 immediately,
+  // then hot-swap the runtime in via updateRuntime() once init completes.
+  let earlyServerHandle: {
+    updateRuntime: (rt: AgentRuntime) => void;
+    updateStartup: (update: Record<string, unknown>) => void;
+    close: () => Promise<void>;
+  } | null = null;
+
+  if (opts?.serverOnly && !opts?.headless) {
+    try {
+      const { startApiServer } = await import("../api/server");
+      const apiPort = Number(process.env.MILADY_PORT) || 2138;
+      const handle = await startApiServer({
+        port: apiPort,
+        initialAgentState: "starting",
+      });
+      earlyServerHandle = handle as typeof earlyServerHandle;
+      logger.info(
+        `[milady] Early API server listening on port ${handle.port} (health probes active)`,
+      );
+      console.log(
+        `[milady] Early API server started on port ${handle.port} — health probes will pass`,
+      );
+    } catch (earlyErr) {
+      logger.warn(
+        `[milady] Early API server failed: ${earlyErr instanceof Error ? earlyErr.message : String(earlyErr)}`,
+      );
+      // Non-fatal — fall through to the original server start path below
+    }
+  }
+
   // 1b. First-run onboarding — ask for agent name if not configured.
   //     In headless mode (GUI) the onboarding is handled by the web UI,
   //     so we skip the interactive CLI prompt and let the runtime start
