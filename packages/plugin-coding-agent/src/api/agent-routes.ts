@@ -304,9 +304,8 @@ export async function handleAgentRoutes(
           : null;
 
       // Check if coordinator is active — route blocking prompts through it
-      const coordinator = (
-        ctx.runtime as unknown as Record<string, unknown>
-      ).__swarmCoordinator as SwarmCoordinator | undefined;
+      const coordinator = (ctx.runtime as unknown as Record<string, unknown>)
+        .__swarmCoordinator as SwarmCoordinator | undefined;
 
       const session = await ctx.ptyService.spawnSession({
         name: `agent-${Date.now()}`,
@@ -336,8 +335,9 @@ export async function handleAgentRoutes(
         },
       });
       if (coordinator && task) {
-        const label =
-          (metadata as Record<string, unknown>)?.label as string | undefined;
+        const label = (metadata as Record<string, unknown>)?.label as
+          | string
+          | undefined;
         coordinator.registerTask(session.id, {
           agentType:
             agentStr as import("../services/pty-service.js").CodingAgentType,
@@ -496,7 +496,9 @@ export async function handleAgentRoutes(
     } catch (error) {
       sendError(
         res,
-        error instanceof Error ? error.message : "Failed to get buffered output",
+        error instanceof Error
+          ? error.message
+          : "Failed to get buffered output",
         500,
       );
     }

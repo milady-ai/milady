@@ -122,9 +122,7 @@ export {
   SwarmCoordinator,
   wireSwarmCoordinator,
 } from "./services/swarm-coordinator.js";
-export type {
-  CoordinationLLMResponse,
-} from "./services/swarm-coordinator-prompts.js";
+export type { CoordinationLLMResponse } from "./services/swarm-coordinator-prompts.js";
 export type {
   AuthPromptCallback,
   CodingWorkspaceConfig,

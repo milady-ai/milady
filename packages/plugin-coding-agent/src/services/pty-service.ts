@@ -13,6 +13,7 @@ import {
   type PreflightResult,
   type WriteMemoryOptions,
 } from "coding-agent-adapters";
+import { PTYConsoleBridge } from "pty-console";
 import type {
   BunCompatiblePTYManager,
   PTYManager,
@@ -23,7 +24,6 @@ import type {
   StallClassification,
   WorkerSessionHandle,
 } from "pty-manager";
-import { PTYConsoleBridge } from "pty-console";
 import { AgentMetricsTracker } from "./agent-metrics.js";
 import {
   handleGeminiAuth as handleGeminiAuthFlow,
@@ -47,7 +47,6 @@ import type {
   CodingAgentType,
   PTYServiceConfig,
   SessionEventCallback,
-  SessionEventName,
   SessionInfo,
   SpawnSessionOptions,
 } from "./pty-types.js";

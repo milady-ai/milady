@@ -7,10 +7,22 @@ type ConfigurableAgentTab = Exclude<AgentTab, "pi">;
 type AiderProvider = "anthropic" | "openai" | "google";
 type ApprovalPreset = "readonly" | "standard" | "permissive" | "autonomous";
 
-const APPROVAL_PRESETS: { value: ApprovalPreset; label: string; desc: string }[] = [
+const APPROVAL_PRESETS: {
+  value: ApprovalPreset;
+  label: string;
+  desc: string;
+}[] = [
   { value: "readonly", label: "Read Only", desc: "Read-only tools only" },
-  { value: "standard", label: "Standard", desc: "Read + write, asks for shell/network" },
-  { value: "permissive", label: "Permissive", desc: "File ops auto-approved, asks for shell" },
+  {
+    value: "standard",
+    label: "Standard",
+    desc: "Read + write, asks for shell/network",
+  },
+  {
+    value: "permissive",
+    label: "Permissive",
+    desc: "File ops auto-approved, asks for shell",
+  },
   { value: "autonomous", label: "Autonomous", desc: "All tools auto-approved" },
 ];
 
@@ -107,7 +119,8 @@ export function CodingAgentSettingsSection() {
         if (env.PARALLAX_AIDER_PROVIDER)
           loaded.PARALLAX_AIDER_PROVIDER = env.PARALLAX_AIDER_PROVIDER;
         if (env.PARALLAX_DEFAULT_APPROVAL_PRESET)
-          loaded.PARALLAX_DEFAULT_APPROVAL_PRESET = env.PARALLAX_DEFAULT_APPROVAL_PRESET;
+          loaded.PARALLAX_DEFAULT_APPROVAL_PRESET =
+            env.PARALLAX_DEFAULT_APPROVAL_PRESET;
         setPrefs(loaded);
 
         // Process fetched models — filter to "chat" category only
@@ -204,7 +217,8 @@ export function CodingAgentSettingsSection() {
   const fastValue = prefs[`${prefix}_MODEL_FAST`] ?? "";
   const isDynamic = providerId ? !!providerModels[providerId] : false;
 
-  const approvalPreset = (prefs.PARALLAX_DEFAULT_APPROVAL_PRESET || "permissive") as ApprovalPreset;
+  const approvalPreset = (prefs.PARALLAX_DEFAULT_APPROVAL_PRESET ||
+    "permissive") as ApprovalPreset;
 
   return (
     <div className="flex flex-col gap-4">
@@ -226,7 +240,9 @@ export function CodingAgentSettingsSection() {
         </select>
         <div className="text-[11px] text-[var(--muted)]">
           {APPROVAL_PRESETS.find((p) => p.value === approvalPreset)?.desc ?? ""}
-          {" — applies to all newly spawned agents unless overridden per-spawn."}
+          {
+            " — applies to all newly spawned agents unless overridden per-spawn."
+          }
         </div>
       </div>
 

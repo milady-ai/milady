@@ -6,13 +6,13 @@
  */
 
 import { describe, expect, it } from "bun:test";
-import {
-  buildCoordinationPrompt,
-  parseCoordinationResponse,
-} from "../services/swarm-coordinator-prompts.js";
 import type {
   DecisionHistoryEntry,
   TaskContextSummary,
+} from "../services/swarm-coordinator-prompts.js";
+import {
+  buildCoordinationPrompt,
+  parseCoordinationResponse,
 } from "../services/swarm-coordinator-prompts.js";
 
 const makeTaskCtx = (

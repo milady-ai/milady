@@ -27,19 +27,21 @@ const LONG_SPACES = / {3,}/g;
 
 /** Apply all ANSI stripping patterns to a string */
 function applyAnsiStrip(input: string): string {
-  return input
-    // Pre-process: rejoin SGR sequences split across lines by chunk boundaries.
-    // e.g. "[38;2;153;\n153;153m" → "[38;2;153;153;153m"
-    .replace(/(\[[\d;]*)\r?\n([\d;]*m)/g, "$1$2")
-    .replace(CURSOR_MOVEMENT, " ")
-    .replace(CURSOR_POSITION, " ")
-    .replace(ERASE, "")
-    .replace(OSC, "")
-    .replace(ALL_ANSI, "")
-    .replace(CONTROL_CHARS, "")
-    .replace(ORPHAN_SGR, "")
-    .replace(LONG_SPACES, " ")
-    .trim();
+  return (
+    input
+      // Pre-process: rejoin SGR sequences split across lines by chunk boundaries.
+      // e.g. "[38;2;153;\n153;153m" → "[38;2;153;153;153m"
+      .replace(/(\[[\d;]*)\r?\n([\d;]*m)/g, "$1$2")
+      .replace(CURSOR_MOVEMENT, " ")
+      .replace(CURSOR_POSITION, " ")
+      .replace(ERASE, "")
+      .replace(OSC, "")
+      .replace(ALL_ANSI, "")
+      .replace(CONTROL_CHARS, "")
+      .replace(ORPHAN_SGR, "")
+      .replace(LONG_SPACES, " ")
+      .trim()
+  );
 }
 
 /**
@@ -121,9 +123,7 @@ export function extractCompletionSummary(raw: string): string {
   }
 
   // Commit hashes
-  const commits = stripped.match(
-    /(?:committed|commit)\s+[a-f0-9]{7,40}/gi,
-  );
+  const commits = stripped.match(/(?:committed|commit)\s+[a-f0-9]{7,40}/gi);
   if (commits) {
     for (const m of [...new Set(commits)]) lines.push(m.trim());
   }

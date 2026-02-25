@@ -204,9 +204,8 @@ export async function handleMultiAgent(
       }
 
       // Check if coordinator is active — route blocking prompts through it
-      const coordinator = (
-        runtime as unknown as Record<string, unknown>
-      ).__swarmCoordinator as SwarmCoordinator | undefined;
+      const coordinator = (runtime as unknown as Record<string, unknown>)
+        .__swarmCoordinator as SwarmCoordinator | undefined;
 
       // Spawn the agent
       const initialTask = specPiRequested ? toPiCommand(specTask) : specTask;
@@ -218,7 +217,9 @@ export async function handleMultiAgent(
         initialTask,
         memoryContent,
         credentials,
-        approvalPreset: (approvalPreset as ApprovalPreset | undefined) ?? ptyService.defaultApprovalPreset,
+        approvalPreset:
+          (approvalPreset as ApprovalPreset | undefined) ??
+          ptyService.defaultApprovalPreset,
         customCredentials,
         // Let adapter auto-response handle known prompts (permissions, trust, etc.)
         // instantly. The coordinator handles only unrecognized prompts via LLM.
@@ -323,7 +324,9 @@ export async function handleSingleAgent(
   ctx: CodingTaskContext,
   task: string | undefined,
 ): Promise<ActionResult | undefined> {
-  console.log(`[START_CODING_TASK] handleSingleAgent called, agentType=${ctx.defaultAgentType}, task=${task ? "yes" : "none"}, repo=${ctx.repo ?? "none"}`);
+  console.log(
+    `[START_CODING_TASK] handleSingleAgent called, agentType=${ctx.defaultAgentType}, task=${task ? "yes" : "none"}, repo=${ctx.repo ?? "none"}`,
+  );
   const {
     runtime,
     ptyService,
@@ -395,14 +398,18 @@ export async function handleSingleAgent(
   }
 
   // --- Step 2: Spawn the agent ---
-  console.log(`[START_CODING_TASK] Spawning ${agentType} agent, task: ${task ? `"${task.slice(0, 80)}..."` : "(none)"}, workdir: ${workdir}`);
+  console.log(
+    `[START_CODING_TASK] Spawning ${agentType} agent, task: ${task ? `"${task.slice(0, 80)}..."` : "(none)"}, workdir: ${workdir}`,
+  );
   try {
     if (agentType !== "shell" && agentType !== "pi") {
       const [preflight] = await ptyService.checkAvailableAgents([
         agentType as Exclude<CodingAgentType, "shell" | "pi">,
       ]);
       if (preflight && !preflight.installed) {
-        console.warn(`[START_CODING_TASK] ${preflight.adapter} CLI not installed`);
+        console.warn(
+          `[START_CODING_TASK] ${preflight.adapter} CLI not installed`,
+        );
         if (callback) {
           await callback({
             text: `${preflight.adapter} CLI is not installed.\nInstall with: ${preflight.installCommand}\nDocs: ${preflight.docsUrl}`,
@@ -410,7 +417,9 @@ export async function handleSingleAgent(
         }
         return { success: false, error: "AGENT_NOT_INSTALLED" };
       }
-      console.log(`[START_CODING_TASK] Preflight OK: ${preflight?.adapter} installed`);
+      console.log(
+        `[START_CODING_TASK] Preflight OK: ${preflight?.adapter} installed`,
+      );
     }
 
     const piRequested = isPiAgentType(rawAgentType);
@@ -418,11 +427,12 @@ export async function handleSingleAgent(
     const displayType = piRequested ? "pi" : agentType;
 
     // Check if coordinator is active — route blocking prompts through it
-    const coordinator = (
-      runtime as unknown as Record<string, unknown>
-    ).__swarmCoordinator as SwarmCoordinator | undefined;
+    const coordinator = (runtime as unknown as Record<string, unknown>)
+      .__swarmCoordinator as SwarmCoordinator | undefined;
 
-    console.log(`[START_CODING_TASK] Calling spawnSession (${agentType}, coordinator=${!!coordinator})`);
+    console.log(
+      `[START_CODING_TASK] Calling spawnSession (${agentType}, coordinator=${!!coordinator})`,
+    );
     const session: SessionInfo = await ptyService.spawnSession({
       name: `coding-${Date.now()}`,
       agentType,
@@ -430,7 +440,9 @@ export async function handleSingleAgent(
       initialTask,
       memoryContent,
       credentials,
-      approvalPreset: (approvalPreset as ApprovalPreset | undefined) ?? ptyService.defaultApprovalPreset,
+      approvalPreset:
+        (approvalPreset as ApprovalPreset | undefined) ??
+        ptyService.defaultApprovalPreset,
       customCredentials,
       ...(coordinator ? { skipAdapterAutoResponse: true } : {}),
       metadata: {
@@ -441,7 +453,9 @@ export async function handleSingleAgent(
         label,
       },
     });
-    console.log(`[START_CODING_TASK] Session spawned: ${session.id} (${session.status})`);
+    console.log(
+      `[START_CODING_TASK] Session spawned: ${session.id} (${session.status})`,
+    );
 
     // Register event handler
     const isScratchWorkspace = !repo;

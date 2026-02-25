@@ -56,61 +56,67 @@ export function CodingAgentsSection({ sessions }: CodingAgentsSectionProps) {
             return (
               <div
                 key={session.sessionId}
-                className={`rounded border px-2 py-1.5 cursor-pointer transition-colors ${
+                className={`rounded border transition-colors ${
                   isExpanded
                     ? "border-accent"
                     : "border-border hover:border-border-hover"
                 }`}
-                onClick={() => toggleTerminal(session.sessionId)}
               >
-                <div className="flex items-center gap-1.5">
-                  <span
-                    className={`inline-block w-2 h-2 rounded-full shrink-0 ${
-                      STATUS_DOT[session.status] ?? "bg-muted"
-                    }${session.status === "active" ? " animate-pulse" : ""}`}
-                  />
-                  <span className="text-[11px] font-medium text-accent uppercase">
-                    {AGENT_LABELS[session.agentType] ?? session.agentType}
-                  </span>
-                  <span className="text-[12px] text-txt-strong truncate flex-1 min-w-0">
-                    {session.label}
-                  </span>
-                </div>
-                {session.originalTask && (
-                  <div className="text-[11px] text-muted mt-1 line-clamp-2">
-                    {session.originalTask.length > 80
-                      ? `${session.originalTask.slice(0, 80)}...`
-                      : session.originalTask}
+                <button
+                  type="button"
+                  className="w-full text-left px-2 py-1.5 cursor-pointer bg-transparent"
+                  onClick={() => toggleTerminal(session.sessionId)}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className={`inline-block w-2 h-2 rounded-full shrink-0 ${
+                        STATUS_DOT[session.status] ?? "bg-muted"
+                      }${session.status === "active" ? " animate-pulse" : ""}`}
+                    />
+                    <span className="text-[11px] font-medium text-accent uppercase">
+                      {AGENT_LABELS[session.agentType] ?? session.agentType}
+                    </span>
+                    <span className="text-[12px] text-txt-strong truncate flex-1 min-w-0">
+                      {session.label}
+                    </span>
                   </div>
-                )}
-                <div className="flex items-center justify-between mt-1.5">
-                  <span className="text-[10px] text-muted">
-                    {session.status === "blocked"
-                      ? "Waiting for input"
-                      : session.status === "error"
-                        ? "Error"
-                        : "Running"}
-                  </span>
-                  {(session.status === "active" ||
-                    session.status === "blocked") && (
-                    <button
-                      type="button"
-                      className="text-[10px] px-1.5 py-0.5 rounded border border-border text-muted hover:text-danger hover:border-danger transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleStop(session.sessionId);
-                      }}
-                      disabled={stopping.has(session.sessionId)}
-                    >
-                      {stopping.has(session.sessionId) ? "Stopping..." : "Stop"}
-                    </button>
+                  {session.originalTask && (
+                    <div className="text-[11px] text-muted mt-1 line-clamp-2">
+                      {session.originalTask.length > 80
+                        ? `${session.originalTask.slice(0, 80)}...`
+                        : session.originalTask}
+                    </div>
                   )}
-                </div>
+                  <div className="flex items-center justify-between mt-1.5">
+                    <span className="text-[10px] text-muted">
+                      {session.status === "blocked"
+                        ? "Waiting for input"
+                        : session.status === "error"
+                          ? "Error"
+                          : "Running"}
+                    </span>
+                    {(session.status === "active" ||
+                      session.status === "blocked") && (
+                      <button
+                        type="button"
+                        className="text-[10px] px-1.5 py-0.5 rounded border border-border text-muted hover:text-danger hover:border-danger transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleStop(session.sessionId);
+                        }}
+                        disabled={stopping.has(session.sessionId)}
+                      >
+                        {stopping.has(session.sessionId)
+                          ? "Stopping..."
+                          : "Stop"}
+                      </button>
+                    )}
+                  </div>
+                </button>
                 {isExpanded && (
                   <div
-                    className="mt-2 rounded overflow-hidden"
+                    className="mx-2 mb-1.5 rounded overflow-hidden"
                     style={{ height: 300 }}
-                    onClick={(e) => e.stopPropagation()}
                   >
                     <XTerminal sessionId={session.sessionId} />
                   </div>

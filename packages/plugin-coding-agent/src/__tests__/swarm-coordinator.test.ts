@@ -13,9 +13,7 @@ mock.module("@elizaos/core", () => ({
 }));
 
 // Dynamic import after mocks
-const { SwarmCoordinator } = await import(
-  "../services/swarm-coordinator.js"
-);
+const { SwarmCoordinator } = await import("../services/swarm-coordinator.js");
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -157,8 +155,7 @@ describe("SwarmCoordinator", () => {
 
       // Should have broadcast task_registered
       expect(res.write).toHaveBeenCalled();
-      const lastCall =
-        res.write.mock.calls[res.write.mock.calls.length - 1][0];
+      const lastCall = res.write.mock.calls[res.write.mock.calls.length - 1][0];
       const parsed = JSON.parse(lastCall.replace("data: ", "").trim());
       expect(parsed.type).toBe("task_registered");
       expect(parsed.sessionId).toBe("s-1");
@@ -252,10 +249,14 @@ describe("SwarmCoordinator", () => {
       expect(ctx.decisions[0].decision).toBe("auto_resolved");
 
       // Should broadcast blocked_auto_resolved
-      const events = res.write.mock.calls.map(
-        (c: unknown[]) => JSON.parse((c[0] as string).replace("data: ", "").trim()),
+      const events = res.write.mock.calls.map((c: unknown[]) =>
+        JSON.parse((c[0] as string).replace("data: ", "").trim()),
       );
-      expect(events.some((e: { type: string }) => e.type === "blocked_auto_resolved")).toBe(true);
+      expect(
+        events.some(
+          (e: { type: string }) => e.type === "blocked_auto_resolved",
+        ),
+      ).toBe(true);
     });
 
     it("buffers events for unregistered sessions", async () => {
@@ -289,8 +290,8 @@ describe("SwarmCoordinator", () => {
 
       coordinator.setSupervisionLevel("notify");
 
-      const events = res.write.mock.calls.map(
-        (c: unknown[]) => JSON.parse((c[0] as string).replace("data: ", "").trim()),
+      const events = res.write.mock.calls.map((c: unknown[]) =>
+        JSON.parse((c[0] as string).replace("data: ", "").trim()),
       );
       expect(
         events.some((e: { type: string }) => e.type === "supervision_changed"),
@@ -340,9 +341,7 @@ describe("SwarmCoordinator", () => {
         autoResponded: false,
       });
 
-      expect(mockPty.sendKeysToSession).toHaveBeenCalledWith("s-1", [
-        "enter",
-      ]);
+      expect(mockPty.sendKeysToSession).toHaveBeenCalledWith("s-1", ["enter"]);
     });
 
     it("escalates when LLM returns escalate", async () => {
@@ -362,10 +361,12 @@ describe("SwarmCoordinator", () => {
       expect(mockPty.sendToSession).not.toHaveBeenCalled();
 
       // Should broadcast escalation
-      const events = res.write.mock.calls.map(
-        (c: unknown[]) => JSON.parse((c[0] as string).replace("data: ", "").trim()),
+      const events = res.write.mock.calls.map((c: unknown[]) =>
+        JSON.parse((c[0] as string).replace("data: ", "").trim()),
       );
-      expect(events.some((e: { type: string }) => e.type === "escalation")).toBe(true);
+      expect(
+        events.some((e: { type: string }) => e.type === "escalation"),
+      ).toBe(true);
     });
 
     it("escalates when LLM returns invalid JSON", async () => {
@@ -398,10 +399,12 @@ describe("SwarmCoordinator", () => {
       // Should escalate without calling LLM
       expect(mockRuntime.useModel).not.toHaveBeenCalled();
 
-      const events = res.write.mock.calls.map(
-        (c: unknown[]) => JSON.parse((c[0] as string).replace("data: ", "").trim()),
+      const events = res.write.mock.calls.map((c: unknown[]) =>
+        JSON.parse((c[0] as string).replace("data: ", "").trim()),
       );
-      expect(events.some((e: { type: string }) => e.type === "escalation")).toBe(true);
+      expect(
+        events.some((e: { type: string }) => e.type === "escalation"),
+      ).toBe(true);
     });
   });
 

@@ -118,12 +118,7 @@ describe("coordinator routes", () => {
       const req = createMockReq("GET", `${PREFIX}/status`);
       const res = createMockRes();
 
-      await handleCoordinatorRoutes(
-        req,
-        res,
-        `${PREFIX}/status`,
-        ctxNoCoord,
-      );
+      await handleCoordinatorRoutes(req, res, `${PREFIX}/status`, ctxNoCoord);
 
       expect(res._getStatus()).toBe(503);
       expect(res._getJson().error).toContain("Coordinator not available");
@@ -222,12 +217,7 @@ describe("coordinator routes", () => {
       const req = createMockReq("GET", `${PREFIX}/tasks/s-1`);
       const res = createMockRes();
 
-      await handleCoordinatorRoutes(
-        req,
-        res,
-        `${PREFIX}/tasks/s-1`,
-        ctx,
-      );
+      await handleCoordinatorRoutes(req, res, `${PREFIX}/tasks/s-1`, ctx);
 
       expect(res._getStatus()).toBe(200);
       expect(res._getJson().sessionId).toBe("s-1");
@@ -239,12 +229,7 @@ describe("coordinator routes", () => {
       const req = createMockReq("GET", `${PREFIX}/tasks/s-unknown`);
       const res = createMockRes();
 
-      await handleCoordinatorRoutes(
-        req,
-        res,
-        `${PREFIX}/tasks/s-unknown`,
-        ctx,
-      );
+      await handleCoordinatorRoutes(req, res, `${PREFIX}/tasks/s-unknown`, ctx);
 
       expect(res._getStatus()).toBe(404);
     });
@@ -295,12 +280,7 @@ describe("coordinator routes", () => {
       });
       const res = createMockRes();
 
-      await handleCoordinatorRoutes(
-        req,
-        res,
-        `${PREFIX}/confirm/s-1`,
-        ctx,
-      );
+      await handleCoordinatorRoutes(req, res, `${PREFIX}/confirm/s-1`, ctx);
 
       expect(asMock(ctx.coordinator).confirmDecision).toHaveBeenCalledWith(
         "s-1",
@@ -317,12 +297,7 @@ describe("coordinator routes", () => {
       });
       const res = createMockRes();
 
-      await handleCoordinatorRoutes(
-        req,
-        res,
-        `${PREFIX}/confirm/s-1`,
-        ctx,
-      );
+      await handleCoordinatorRoutes(req, res, `${PREFIX}/confirm/s-1`, ctx);
 
       expect(asMock(ctx.coordinator).confirmDecision).toHaveBeenCalledWith(
         "s-1",
@@ -338,12 +313,7 @@ describe("coordinator routes", () => {
       });
       const res = createMockRes();
 
-      await handleCoordinatorRoutes(
-        req,
-        res,
-        `${PREFIX}/confirm/s-1`,
-        ctx,
-      );
+      await handleCoordinatorRoutes(req, res, `${PREFIX}/confirm/s-1`, ctx);
 
       expect(asMock(ctx.coordinator).confirmDecision).toHaveBeenCalledWith(
         "s-1",
@@ -362,12 +332,7 @@ describe("coordinator routes", () => {
       });
       const res = createMockRes();
 
-      await handleCoordinatorRoutes(
-        req,
-        res,
-        `${PREFIX}/confirm/s-1`,
-        ctx,
-      );
+      await handleCoordinatorRoutes(req, res, `${PREFIX}/confirm/s-1`, ctx);
 
       expect(res._getStatus()).toBe(404);
     });
@@ -381,12 +346,7 @@ describe("coordinator routes", () => {
       const req = createMockReq("GET", `${PREFIX}/supervision`);
       const res = createMockRes();
 
-      await handleCoordinatorRoutes(
-        req,
-        res,
-        `${PREFIX}/supervision`,
-        ctx,
-      );
+      await handleCoordinatorRoutes(req, res, `${PREFIX}/supervision`, ctx);
 
       expect(res._getStatus()).toBe(200);
       expect(res._getJson().level).toBe("autonomous");
@@ -398,12 +358,7 @@ describe("coordinator routes", () => {
       });
       const res = createMockRes();
 
-      await handleCoordinatorRoutes(
-        req,
-        res,
-        `${PREFIX}/supervision`,
-        ctx,
-      );
+      await handleCoordinatorRoutes(req, res, `${PREFIX}/supervision`, ctx);
 
       expect(asMock(ctx.coordinator).setSupervisionLevel).toHaveBeenCalledWith(
         "confirm",
@@ -418,12 +373,7 @@ describe("coordinator routes", () => {
       });
       const res = createMockRes();
 
-      await handleCoordinatorRoutes(
-        req,
-        res,
-        `${PREFIX}/supervision`,
-        ctx,
-      );
+      await handleCoordinatorRoutes(req, res, `${PREFIX}/supervision`, ctx);
 
       expect(res._getStatus()).toBe(400);
       expect(res._getJson().error).toContain("Invalid supervision level");

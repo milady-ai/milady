@@ -28,8 +28,8 @@ import {
   type UUID,
 } from "@elizaos/core";
 import { listPiAiModelOptions } from "@elizaos/plugin-pi-ai";
-import { createCodingAgentRouteHandler } from "@milaidy/plugin-coding-agent";
 import type { PTYService } from "@milaidy/plugin-coding-agent";
+import { createCodingAgentRouteHandler } from "@milaidy/plugin-coding-agent";
 import { type WebSocket, WebSocketServer } from "ws";
 import type { CloudManager } from "../cloud/cloud-manager";
 import {
@@ -5358,7 +5358,11 @@ function wireCodingAgentChatBridge(st: ServerState): boolean {
   if (!st.runtime) return false;
   const coordinator = (st.runtime as unknown as Record<string, unknown>)
     .__swarmCoordinator as
-    | { setChatCallback?: (cb: (text: string, source?: string) => Promise<void>) => void }
+    | {
+        setChatCallback?: (
+          cb: (text: string, source?: string) => Promise<void>,
+        ) => void;
+      }
     | undefined;
   if (!coordinator?.setChatCallback) return false;
   coordinator.setChatCallback(async (text: string, source?: string) => {
@@ -5376,7 +5380,9 @@ function wireCodingAgentWsBridge(st: ServerState): boolean {
   if (!st.runtime) return false;
   const coordinator = (st.runtime as unknown as Record<string, unknown>)
     .__swarmCoordinator as
-    | { setWsBroadcast?: (cb: (event: Record<string, unknown>) => void) => void }
+    | {
+        setWsBroadcast?: (cb: (event: Record<string, unknown>) => void) => void;
+      }
     | undefined;
   if (!coordinator?.setWsBroadcast) return false;
   coordinator.setWsBroadcast((event: Record<string, unknown>) => {
@@ -5394,7 +5400,9 @@ function wireCodingAgentWsBridge(st: ServerState): boolean {
  */
 function getPtyConsoleBridge(st: ServerState) {
   if (!st.runtime) return null;
-  const ptyService = st.runtime.getService("PTY_SERVICE") as unknown as PTYService | null;
+  const ptyService = st.runtime.getService(
+    "PTY_SERVICE",
+  ) as unknown as PTYService | null;
   return ptyService?.consoleBridge ?? null;
 }
 
@@ -11130,7 +11138,9 @@ async function handleRequest(
       pathname.startsWith("/api/issues"))
   ) {
     const coordinator = (state.runtime as unknown as Record<string, unknown>)
-      .__swarmCoordinator as Parameters<typeof createCodingAgentRouteHandler>[1];
+      .__swarmCoordinator as Parameters<
+      typeof createCodingAgentRouteHandler
+    >[1];
     const handler = createCodingAgentRouteHandler(state.runtime, coordinator);
     const handled = await handler(req, res, pathname);
     if (handled) return;
@@ -13427,7 +13437,10 @@ export async function startApiServer(opts?: {
   const wsClients = new Set<WebSocket>();
   const wsClientIds = new WeakMap<WebSocket, string>();
   /** Per-WS-client PTY output subscriptions: sessionId → unsubscribe */
-  const wsClientPtySubscriptions = new WeakMap<WebSocket, Map<string, () => void>>();
+  const wsClientPtySubscriptions = new WeakMap<
+    WebSocket,
+    Map<string, () => void>
+  >();
   bindRuntimeStreams(opts?.runtime ?? null);
   bindTrainingStream();
 
@@ -13522,7 +13535,10 @@ export async function startApiServer(opts?: {
         } else if (msg.type === "active-conversation") {
           state.activeConversationId =
             typeof msg.conversationId === "string" ? msg.conversationId : null;
-        } else if (msg.type === "pty-subscribe" && typeof msg.sessionId === "string") {
+        } else if (
+          msg.type === "pty-subscribe" &&
+          typeof msg.sessionId === "string"
+        ) {
           const bridge = getPtyConsoleBridge(state);
           if (bridge) {
             let subs = wsClientPtySubscriptions.get(ws);
@@ -13536,26 +13552,46 @@ export async function startApiServer(opts?: {
               const listener = (evt: { sessionId: string; data: string }) => {
                 if (evt.sessionId !== targetId) return;
                 if (ws.readyState === 1) {
-                  ws.send(JSON.stringify({ type: "pty-output", sessionId: targetId, data: evt.data }));
+                  ws.send(
+                    JSON.stringify({
+                      type: "pty-output",
+                      sessionId: targetId,
+                      data: evt.data,
+                    }),
+                  );
                 }
               };
               bridge.on("session_output", listener);
               subs.set(targetId, () => bridge.off("session_output", listener));
             }
           }
-        } else if (msg.type === "pty-unsubscribe" && typeof msg.sessionId === "string") {
+        } else if (
+          msg.type === "pty-unsubscribe" &&
+          typeof msg.sessionId === "string"
+        ) {
           const subs = wsClientPtySubscriptions.get(ws);
           const unsub = subs?.get(msg.sessionId);
           if (unsub) {
             unsub();
-            subs!.delete(msg.sessionId);
+            subs?.delete(msg.sessionId);
           }
-        } else if (msg.type === "pty-input" && typeof msg.sessionId === "string" && typeof msg.data === "string") {
+        } else if (
+          msg.type === "pty-input" &&
+          typeof msg.sessionId === "string" &&
+          typeof msg.data === "string"
+        ) {
           const bridge = getPtyConsoleBridge(state);
           if (bridge) bridge.writeRaw(msg.sessionId, msg.data);
-        } else if (msg.type === "pty-resize" && typeof msg.sessionId === "string") {
+        } else if (
+          msg.type === "pty-resize" &&
+          typeof msg.sessionId === "string"
+        ) {
           const bridge = getPtyConsoleBridge(state);
-          if (bridge && typeof msg.cols === "number" && typeof msg.rows === "number") {
+          if (
+            bridge &&
+            typeof msg.cols === "number" &&
+            typeof msg.rows === "number"
+          ) {
             bridge.resize(msg.sessionId, msg.cols, msg.rows);
           }
         }

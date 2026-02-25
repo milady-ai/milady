@@ -220,9 +220,8 @@ export const spawnAgentAction: Action = {
       }
 
       // Check if coordinator is active — route blocking prompts through it
-      const coordinator = (
-        runtime as unknown as Record<string, unknown>
-      ).__swarmCoordinator as SwarmCoordinator | undefined;
+      const coordinator = (runtime as unknown as Record<string, unknown>)
+        .__swarmCoordinator as SwarmCoordinator | undefined;
 
       // Spawn the PTY session
       const session: SessionInfo = await ptyService.spawnSession({
@@ -232,7 +231,9 @@ export const spawnAgentAction: Action = {
         initialTask,
         memoryContent,
         credentials,
-        approvalPreset: (approvalPreset as ApprovalPreset | undefined) ?? ptyService.defaultApprovalPreset,
+        approvalPreset:
+          (approvalPreset as ApprovalPreset | undefined) ??
+          ptyService.defaultApprovalPreset,
         customCredentials,
         ...(coordinator ? { skipAdapterAutoResponse: true } : {}),
         metadata: {

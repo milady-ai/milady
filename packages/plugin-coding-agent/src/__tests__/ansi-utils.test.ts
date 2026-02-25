@@ -70,7 +70,8 @@ describe("cleanForChat", () => {
   });
 
   it("should filter file write summaries", () => {
-    const input = "Real content\nWrote 362 lines to test_garden.py\nMore content";
+    const input =
+      "Real content\nWrote 362 lines to test_garden.py\nMore content";
     expect(cleanForChat(input)).toBe("Real content\nMore content");
   });
 

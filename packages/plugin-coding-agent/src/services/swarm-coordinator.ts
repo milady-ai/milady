@@ -15,9 +15,9 @@
  * @module services/swarm-coordinator
  */
 
+import type { ServerResponse } from "node:http";
 import type { IAgentRuntime } from "@elizaos/core";
 import { ModelType } from "@elizaos/core";
-import type { ServerResponse } from "node:http";
 import { cleanForChat, extractCompletionSummary } from "./ansi-utils.js";
 import type { PTYService } from "./pty-service.js";
 import type { CodingAgentType } from "./pty-types.js";
@@ -343,7 +343,11 @@ export class SwarmCoordinator {
 
     // Buffer events for unregistered sessions (race condition guard)
     if (!taskCtx) {
-      if (event === "blocked" || event === "task_complete" || event === "error") {
+      if (
+        event === "blocked" ||
+        event === "task_complete" ||
+        event === "error"
+      ) {
         let buffer = this.unregisteredBuffer.get(sessionId);
         if (!buffer) {
           buffer = [];
@@ -471,9 +475,7 @@ export class SwarmCoordinator {
 
     // Extract prompt text from promptInfo (the actual blocking prompt info object)
     const promptText =
-      eventData.promptInfo?.prompt ??
-      eventData.promptInfo?.instructions ??
-      "";
+      eventData.promptInfo?.prompt ?? eventData.promptInfo?.instructions ?? "";
 
     // Auto-responded by rules — log and broadcast, no LLM needed
     if (eventData.autoResponded) {
@@ -796,9 +798,14 @@ export class SwarmCoordinator {
         // dumping raw terminal output which is full of TUI noise.
         let summary = "";
         try {
-          const rawOutput = await this.ptyService.getSessionOutput(sessionId, 50);
+          const rawOutput = await this.ptyService.getSessionOutput(
+            sessionId,
+            50,
+          );
           summary = extractCompletionSummary(rawOutput);
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
 
         this.sendChatMessage(
           summary
@@ -809,7 +816,9 @@ export class SwarmCoordinator {
 
         // Stop the session
         this.ptyService.stopSession(sessionId).catch((err) => {
-          this.log(`Failed to stop session after LLM-detected completion: ${err}`);
+          this.log(
+            `Failed to stop session after LLM-detected completion: ${err}`,
+          );
         });
         break;
       }
@@ -1147,7 +1156,9 @@ export class SwarmCoordinator {
       }
 
       if (!decision) {
-        this.log(`Idle check for "${taskCtx.label}": LLM returned invalid response — escalating`);
+        this.log(
+          `Idle check for "${taskCtx.label}": LLM returned invalid response — escalating`,
+        );
         this.sendChatMessage(
           `[${taskCtx.label}] Session idle for ${idleMinutes}m — couldn't determine status. Needs your attention.`,
           "coding-agent",

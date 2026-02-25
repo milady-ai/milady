@@ -127,9 +127,8 @@ export const activeWorkspaceContextProvider: Provider = {
     }
 
     // Add coordinator status if available
-    const coordinator = (
-      runtime as unknown as Record<string, unknown>
-    ).__swarmCoordinator as SwarmCoordinator | undefined;
+    const coordinator = (runtime as unknown as Record<string, unknown>)
+      .__swarmCoordinator as SwarmCoordinator | undefined;
     if (coordinator) {
       const pending = coordinator.getPendingConfirmations();
       const supervisionLevel = coordinator.getSupervisionLevel();
