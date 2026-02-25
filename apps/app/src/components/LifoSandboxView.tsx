@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import "@xterm/xterm/css/xterm.css";
+import "../styles/xterm.css";
 import { client } from "../api-client";
 import { pathForTab } from "../navigation";
 
