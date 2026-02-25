@@ -7,15 +7,17 @@
  * @module actions/coding-task-handlers
  */
 
-import type {
-  ActionResult,
-  HandlerCallback,
-  IAgentRuntime,
-  Memory,
-  State,
+import {
+  type ActionResult,
+  type HandlerCallback,
+  type IAgentRuntime,
+  logger,
+  type Memory,
+  type State,
 } from "@elizaos/core";
 import type { AgentCredentials, ApprovalPreset } from "coding-agent-adapters";
 import type { PTYService } from "../services/pty-service.js";
+import { getCoordinator } from "../services/pty-service.js";
 import {
   type CodingAgentType,
   isPiAgentType,
@@ -23,7 +25,6 @@ import {
   type SessionInfo,
   toPiCommand,
 } from "../services/pty-types.js";
-import type { SwarmCoordinator } from "../services/swarm-coordinator.js";
 import type { CodingWorkspaceService } from "../services/workspace-service.js";
 import {
   createScratchDir,
@@ -204,8 +205,7 @@ export async function handleMultiAgent(
       }
 
       // Check if coordinator is active — route blocking prompts through it
-      const coordinator = (runtime as unknown as Record<string, unknown>)
-        .__swarmCoordinator as SwarmCoordinator | undefined;
+      const coordinator = getCoordinator(runtime);
 
       // Spawn the agent
       const initialTask = specPiRequested ? toPiCommand(specTask) : specTask;
@@ -221,8 +221,7 @@ export async function handleMultiAgent(
           (approvalPreset as ApprovalPreset | undefined) ??
           ptyService.defaultApprovalPreset,
         customCredentials,
-        // Let adapter auto-response handle known prompts (permissions, trust, etc.)
-        // instantly. The coordinator handles only unrecognized prompts via LLM.
+        ...(coordinator ? { skipAdapterAutoResponse: true } : {}),
         metadata: {
           requestedType: specRequestedType,
           messageId: message.id,
@@ -272,7 +271,7 @@ export async function handleMultiAgent(
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      console.error(
+      logger.error(
         `[START_CODING_TASK] Failed to spawn agent ${i + 1}:`,
         errorMessage,
       );
@@ -324,7 +323,7 @@ export async function handleSingleAgent(
   ctx: CodingTaskContext,
   task: string | undefined,
 ): Promise<ActionResult | undefined> {
-  console.log(
+  logger.debug(
     `[START_CODING_TASK] handleSingleAgent called, agentType=${ctx.defaultAgentType}, task=${task ? "yes" : "none"}, repo=${ctx.repo ?? "none"}`,
   );
   const {
@@ -398,7 +397,7 @@ export async function handleSingleAgent(
   }
 
   // --- Step 2: Spawn the agent ---
-  console.log(
+  logger.debug(
     `[START_CODING_TASK] Spawning ${agentType} agent, task: ${task ? `"${task.slice(0, 80)}..."` : "(none)"}, workdir: ${workdir}`,
   );
   try {
@@ -407,7 +406,7 @@ export async function handleSingleAgent(
         agentType as Exclude<CodingAgentType, "shell" | "pi">,
       ]);
       if (preflight && !preflight.installed) {
-        console.warn(
+        logger.warn(
           `[START_CODING_TASK] ${preflight.adapter} CLI not installed`,
         );
         if (callback) {
@@ -417,7 +416,7 @@ export async function handleSingleAgent(
         }
         return { success: false, error: "AGENT_NOT_INSTALLED" };
       }
-      console.log(
+      logger.debug(
         `[START_CODING_TASK] Preflight OK: ${preflight?.adapter} installed`,
       );
     }
@@ -427,10 +426,9 @@ export async function handleSingleAgent(
     const displayType = piRequested ? "pi" : agentType;
 
     // Check if coordinator is active — route blocking prompts through it
-    const coordinator = (runtime as unknown as Record<string, unknown>)
-      .__swarmCoordinator as SwarmCoordinator | undefined;
+    const coordinator = getCoordinator(runtime);
 
-    console.log(
+    logger.debug(
       `[START_CODING_TASK] Calling spawnSession (${agentType}, coordinator=${!!coordinator})`,
     );
     const session: SessionInfo = await ptyService.spawnSession({
@@ -453,7 +451,7 @@ export async function handleSingleAgent(
         label,
       },
     });
-    console.log(
+    logger.debug(
       `[START_CODING_TASK] Session spawned: ${session.id} (${session.status})`,
     );
 
@@ -510,7 +508,7 @@ export async function handleSingleAgent(
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error("[START_CODING_TASK] Failed to spawn agent:", errorMessage);
+    logger.error("[START_CODING_TASK] Failed to spawn agent:", errorMessage);
 
     if (callback) {
       await callback({

@@ -1,6 +1,6 @@
 /** @module services/pty-service */
 
-import type { IAgentRuntime } from "@elizaos/core";
+import { type IAgentRuntime, logger } from "@elizaos/core";
 import {
   type AdapterType,
   type AgentFileDescriptor,
@@ -64,6 +64,19 @@ export type {
 // Re-export for backward compatibility
 export { normalizeAgentType } from "./pty-types.js";
 
+/**
+ * Retrieve the SwarmCoordinator from the PTYService registered on the runtime.
+ * Returns undefined if PTYService or coordinator is not available.
+ */
+export function getCoordinator(
+  runtime: IAgentRuntime,
+): SwarmCoordinator | undefined {
+  const ptyService = runtime.getService("PTY_SERVICE") as unknown as
+    | PTYService
+    | undefined;
+  return ptyService?.coordinator ?? undefined;
+}
+
 export class PTYService {
   static serviceType = "PTY_SERVICE";
   capabilityDescription = "Manages PTY sessions for CLI coding agents";
@@ -87,6 +100,8 @@ export class PTYService {
   private metricsTracker = new AgentMetricsTracker();
   /** Console bridge for terminal output streaming and buffered hydration */
   consoleBridge: PTYConsoleBridge | null = null;
+  /** Swarm coordinator instance (if active). Accessed via getCoordinator(runtime). */
+  coordinator: SwarmCoordinator | null = null;
 
   constructor(runtime: IAgentRuntime, config: PTYServiceConfig = {}) {
     this.runtime = runtime;
@@ -113,12 +128,10 @@ export class PTYService {
     try {
       const coordinator = new SwarmCoordinator(runtime);
       coordinator.start(service);
-      // Store on runtime so actions / route handlers can access it
-      (runtime as unknown as Record<string, unknown>).__swarmCoordinator =
-        coordinator;
-      console.log("[PTYService] SwarmCoordinator wired and started");
+      service.coordinator = coordinator;
+      logger.info("[PTYService] SwarmCoordinator wired and started");
     } catch (err) {
-      console.error("[PTYService] Failed to wire SwarmCoordinator:", err);
+      logger.error(`[PTYService] Failed to wire SwarmCoordinator: ${err}`);
     }
 
     return service;
@@ -164,12 +177,9 @@ export class PTYService {
 
   async stop(): Promise<void> {
     // Stop the coordinator if one was wired to this service
-    const coordinator = (this.runtime as unknown as Record<string, unknown>)
-      .__swarmCoordinator as SwarmCoordinator | undefined;
-    if (coordinator) {
-      coordinator.stop();
-      (this.runtime as unknown as Record<string, unknown>).__swarmCoordinator =
-        undefined;
+    if (this.coordinator) {
+      this.coordinator.stop();
+      this.coordinator = null;
     }
 
     if (this.consoleBridge) {
@@ -582,7 +592,7 @@ export class PTYService {
 
   private log(message: string): void {
     if (this.serviceConfig.debug) {
-      console.log(`[PTYService] ${message}`);
+      logger.debug(`[PTYService] ${message}`);
     }
   }
 }

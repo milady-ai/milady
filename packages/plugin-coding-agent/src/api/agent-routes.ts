@@ -12,12 +12,12 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import * as os from "node:os";
 import * as path from "node:path";
+import { getCoordinator } from "../services/pty-service.js";
 import {
   isPiAgentType,
   normalizeAgentType,
   toPiCommand,
 } from "../services/pty-types.js";
-import type { SwarmCoordinator } from "../services/swarm-coordinator.js";
 import type { RouteContext } from "./routes.js";
 import { parseBody, sendError, sendJson } from "./routes.js";
 
@@ -304,8 +304,7 @@ export async function handleAgentRoutes(
           : null;
 
       // Check if coordinator is active — route blocking prompts through it
-      const coordinator = (ctx.runtime as unknown as Record<string, unknown>)
-        .__swarmCoordinator as SwarmCoordinator | undefined;
+      const coordinator = getCoordinator(ctx.runtime);
 
       const session = await ctx.ptyService.spawnSession({
         name: `agent-${Date.now()}`,

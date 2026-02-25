@@ -52,11 +52,11 @@ export async function handleCoordinatorRoutes(
   // === SSE Event Stream ===
   // GET /api/coding-agents/coordinator/events
   if (method === "GET" && subPath === "/events") {
+    // CORS is handled by the server middleware — no need to set it here.
     res.writeHead(200, {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
       Connection: "keep-alive",
-      "Access-Control-Allow-Origin": "*",
     });
 
     // Send initial comment to establish connection

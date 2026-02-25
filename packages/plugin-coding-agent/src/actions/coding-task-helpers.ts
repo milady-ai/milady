@@ -12,7 +12,11 @@ import { randomUUID } from "node:crypto";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { HandlerCallback, IAgentRuntime } from "@elizaos/core";
+import {
+  type HandlerCallback,
+  type IAgentRuntime,
+  logger,
+} from "@elizaos/core";
 import type { PTYService } from "../services/pty-service.js";
 import type { CodingWorkspaceService } from "../services/workspace-service.js";
 
@@ -101,7 +105,7 @@ export function registerSessionEvents(
         }
         // Auto-stop the session after task completion.
         ptyService.stopSession(sessionId).catch((err) => {
-          console.warn(
+          logger.warn(
             `[START_CODING_TASK] Failed to stop session for "${label}" after task complete: ${err}`,
           );
         });
@@ -123,7 +127,7 @@ export function registerSessionEvents(
       ) as unknown as CodingWorkspaceService | undefined;
       if (wsService) {
         wsService.removeScratchDir(scratchDir).catch((err) => {
-          console.warn(
+          logger.warn(
             `[START_CODING_TASK] Failed to cleanup scratch dir for "${label}": ${err}`,
           );
         });

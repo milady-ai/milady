@@ -29,7 +29,10 @@ import {
 } from "@elizaos/core";
 import { listPiAiModelOptions } from "@elizaos/plugin-pi-ai";
 import type { PTYService } from "@milaidy/plugin-coding-agent";
-import { createCodingAgentRouteHandler } from "@milaidy/plugin-coding-agent";
+import {
+  createCodingAgentRouteHandler,
+  getCoordinator,
+} from "@milaidy/plugin-coding-agent";
 import { type WebSocket, WebSocketServer } from "ws";
 import type { CloudManager } from "../cloud/cloud-manager";
 import {
@@ -5356,14 +5359,7 @@ async function routeAutonomyTextToUser(
  */
 function wireCodingAgentChatBridge(st: ServerState): boolean {
   if (!st.runtime) return false;
-  const coordinator = (st.runtime as unknown as Record<string, unknown>)
-    .__swarmCoordinator as
-    | {
-        setChatCallback?: (
-          cb: (text: string, source?: string) => Promise<void>,
-        ) => void;
-      }
-    | undefined;
+  const coordinator = getCoordinator(st.runtime);
   if (!coordinator?.setChatCallback) return false;
   coordinator.setChatCallback(async (text: string, source?: string) => {
     await routeAutonomyTextToUser(st, text, source ?? "coding-agent");
@@ -5378,12 +5374,7 @@ function wireCodingAgentChatBridge(st: ServerState): boolean {
  */
 function wireCodingAgentWsBridge(st: ServerState): boolean {
   if (!st.runtime) return false;
-  const coordinator = (st.runtime as unknown as Record<string, unknown>)
-    .__swarmCoordinator as
-    | {
-        setWsBroadcast?: (cb: (event: Record<string, unknown>) => void) => void;
-      }
-    | undefined;
+  const coordinator = getCoordinator(st.runtime);
   if (!coordinator?.setWsBroadcast) return false;
   coordinator.setWsBroadcast((event: Record<string, unknown>) => {
     // Preserve the coordinator's event type (task_registered, task_complete, etc.)
@@ -11137,8 +11128,7 @@ async function handleRequest(
       pathname.startsWith("/api/workspace") ||
       pathname.startsWith("/api/issues"))
   ) {
-    const coordinator = (state.runtime as unknown as Record<string, unknown>)
-      .__swarmCoordinator as Parameters<
+    const coordinator = getCoordinator(state.runtime) as Parameters<
       typeof createCodingAgentRouteHandler
     >[1];
     const handler = createCodingAgentRouteHandler(state.runtime, coordinator);
@@ -13580,19 +13570,52 @@ export async function startApiServer(opts?: {
           typeof msg.sessionId === "string" &&
           typeof msg.data === "string"
         ) {
-          const bridge = getPtyConsoleBridge(state);
-          if (bridge) bridge.writeRaw(msg.sessionId, msg.data);
+          // Only allow input to sessions this client has subscribed to
+          const subs = wsClientPtySubscriptions.get(ws);
+          if (!subs?.has(msg.sessionId)) {
+            logger.warn(
+              `[milady-api] pty-input rejected: client not subscribed to session ${msg.sessionId}`,
+            );
+          } else {
+            const bridge = getPtyConsoleBridge(state);
+            if (bridge) {
+              logger.debug(
+                `[milady-api] pty-input: session=${msg.sessionId} len=${msg.data.length}`,
+              );
+              bridge.writeRaw(msg.sessionId, msg.data);
+            }
+          }
         } else if (
           msg.type === "pty-resize" &&
           typeof msg.sessionId === "string"
         ) {
-          const bridge = getPtyConsoleBridge(state);
-          if (
-            bridge &&
-            typeof msg.cols === "number" &&
-            typeof msg.rows === "number"
-          ) {
-            bridge.resize(msg.sessionId, msg.cols, msg.rows);
+          // Only allow resize for sessions this client has subscribed to
+          const subs = wsClientPtySubscriptions.get(ws);
+          if (!subs?.has(msg.sessionId)) {
+            logger.warn(
+              `[milady-api] pty-resize rejected: client not subscribed to session ${msg.sessionId}`,
+            );
+          } else {
+            const bridge = getPtyConsoleBridge(state);
+            if (
+              bridge &&
+              typeof msg.cols === "number" &&
+              typeof msg.rows === "number" &&
+              Number.isFinite(msg.cols) &&
+              Number.isFinite(msg.rows) &&
+              Number.isInteger(msg.cols) &&
+              Number.isInteger(msg.rows) &&
+              msg.cols >= 1 &&
+              msg.cols <= 500 &&
+              msg.rows >= 1 &&
+              msg.rows <= 500
+            ) {
+              bridge.resize(msg.sessionId, msg.cols, msg.rows);
+            } else {
+              logger.warn(
+                `[milady-api] pty-resize rejected: invalid dimensions cols=${msg.cols} rows=${msg.rows}`,
+              );
+            }
           }
         }
       } catch (err) {

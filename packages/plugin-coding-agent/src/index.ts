@@ -108,7 +108,7 @@ export type {
   SpawnSessionOptions,
 } from "./services/pty-service.js";
 // Re-export services for direct access
-export { PTYService } from "./services/pty-service.js";
+export { getCoordinator, PTYService } from "./services/pty-service.js";
 export type {
   ChatMessageCallback,
   CoordinationDecision,
@@ -118,10 +118,7 @@ export type {
   TaskContext,
   WsBroadcastCallback,
 } from "./services/swarm-coordinator.js";
-export {
-  SwarmCoordinator,
-  wireSwarmCoordinator,
-} from "./services/swarm-coordinator.js";
+export { SwarmCoordinator } from "./services/swarm-coordinator.js";
 export type { CoordinationLLMResponse } from "./services/swarm-coordinator-prompts.js";
 export type {
   AuthPromptCallback,

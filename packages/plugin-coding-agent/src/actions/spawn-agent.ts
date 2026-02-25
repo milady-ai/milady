@@ -9,17 +9,19 @@
 
 import * as os from "node:os";
 import * as path from "node:path";
-import type {
-  Action,
-  ActionResult,
-  HandlerCallback,
-  HandlerOptions,
-  IAgentRuntime,
-  Memory,
-  State,
+import {
+  type Action,
+  type ActionResult,
+  type HandlerCallback,
+  type HandlerOptions,
+  type IAgentRuntime,
+  logger,
+  type Memory,
+  type State,
 } from "@elizaos/core";
 import type { AgentCredentials, ApprovalPreset } from "coding-agent-adapters";
 import type { PTYService } from "../services/pty-service.js";
+import { getCoordinator } from "../services/pty-service.js";
 import {
   type CodingAgentType,
   isPiAgentType,
@@ -27,7 +29,6 @@ import {
   type SessionInfo,
   toPiCommand,
 } from "../services/pty-types.js";
-import type { SwarmCoordinator } from "../services/swarm-coordinator.js";
 import type { CodingWorkspaceService } from "../services/workspace-service.js";
 
 export const spawnAgentAction: Action = {
@@ -84,7 +85,7 @@ export const spawnAgentAction: Action = {
       | PTYService
       | undefined;
     if (!ptyService) {
-      console.warn("[SPAWN_CODING_AGENT] PTYService not available");
+      logger.warn("[SPAWN_CODING_AGENT] PTYService not available");
       return false;
     }
     return true;
@@ -220,8 +221,7 @@ export const spawnAgentAction: Action = {
       }
 
       // Check if coordinator is active — route blocking prompts through it
-      const coordinator = (runtime as unknown as Record<string, unknown>)
-        .__swarmCoordinator as SwarmCoordinator | undefined;
+      const coordinator = getCoordinator(runtime);
 
       // Spawn the PTY session
       const session: SessionInfo = await ptyService.spawnSession({
@@ -248,7 +248,9 @@ export const spawnAgentAction: Action = {
         if (sessionId !== session.id) return;
 
         // Log session events for debugging
-        console.log(`[Session ${sessionId}] ${event}:`, data);
+        logger.debug(
+          `[Session ${sessionId}] ${event}: ${JSON.stringify(data)}`,
+        );
 
         // When coordinator is active it owns chat messaging for these events
         if (!coordinator) {
@@ -312,10 +314,7 @@ export const spawnAgentAction: Action = {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      console.error(
-        "[SPAWN_CODING_AGENT] Failed to spawn agent:",
-        errorMessage,
-      );
+      logger.error("[SPAWN_CODING_AGENT] Failed to spawn agent:", errorMessage);
 
       if (callback) {
         await callback({

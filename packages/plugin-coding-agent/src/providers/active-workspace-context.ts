@@ -11,8 +11,8 @@
 
 import type { IAgentRuntime, Memory, Provider, State } from "@elizaos/core";
 import type { PTYService } from "../services/pty-service.js";
+import { getCoordinator } from "../services/pty-service.js";
 import type { SessionInfo } from "../services/pty-types.js";
-import type { SwarmCoordinator } from "../services/swarm-coordinator.js";
 import type {
   CodingWorkspaceService,
   WorkspaceResult,
@@ -127,8 +127,7 @@ export const activeWorkspaceContextProvider: Provider = {
     }
 
     // Add coordinator status if available
-    const coordinator = (runtime as unknown as Record<string, unknown>)
-      .__swarmCoordinator as SwarmCoordinator | undefined;
+    const coordinator = getCoordinator(runtime);
     if (coordinator) {
       const pending = coordinator.getPendingConfirmations();
       const supervisionLevel = coordinator.getSupervisionLevel();
