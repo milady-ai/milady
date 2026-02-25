@@ -86,8 +86,9 @@ export function buildCoordinationPrompt(
     `- For Y/n confirmations that align with the original task, respond "y".\n` +
     `- For design questions or choices that could go either way, escalate.\n` +
     `- For error recovery prompts, try to respond if the path forward is clear.\n` +
-    `- If the original task asked to "create a PR" and the output shows a PR was created, use "complete".\n` +
-    `- If the agent has finished its work and is idle at the prompt with no more steps needed, use "complete".\n` +
+    `- If the output shows a PR was just created (e.g. "Created pull request #N"), do NOT use "complete" yet. ` +
+    `Instead respond with "Review your PR, run each test plan item to verify it works, update the PR to check off each item, then confirm all items pass".\n` +
+    `- Only use "complete" if the agent confirmed it verified ALL test plan items after creating the PR.\n` +
     `- When in doubt, escalate — it's better to ask the human than to make a wrong choice.\n\n` +
     `Respond with ONLY a JSON object:\n` +
     `{"action": "respond|complete|escalate|ignore", "response": "...", "useKeys": false, "keys": [], "reasoning": "..."}`
@@ -188,9 +189,10 @@ export function buildTurnCompletePrompt(
     `Send a follow-up instruction to continue. Set "response" to the next instruction ` +
     `(e.g. "Now run the tests", "Create a PR with these changes", "Continue with the next part"). ` +
     `THIS IS THE DEFAULT — most turns are intermediate steps, not the final result.\n\n` +
-    `2. "complete" — The original task objectives have ALL been fully met. The output shows ` +
-    `code was written, tests pass, AND a PR was submitted (if requested). ` +
-    `Only use this when you can point to specific evidence in the output for EVERY objective.\n\n` +
+    `2. "complete" — The original task objectives have ALL been fully met. For repo-based tasks, ` +
+    `this means code was written, changes were committed, pushed, AND a pull request was created. ` +
+    `Only use this when you can point to specific evidence in the output for EVERY objective ` +
+    `(e.g. "Created pull request #N" in the output).\n\n` +
     `3. "escalate" — Something looks wrong or you're unsure whether the task is complete. ` +
     `Let the human decide.\n\n` +
     `4. "ignore" — Should not normally be used here.\n\n` +
@@ -202,6 +204,15 @@ export function buildTurnCompletePrompt(
     `- If the agent only analyzed code or read files, it hasn't done the actual work yet — send a follow-up.\n` +
     `- If the agent wrote code but didn't test it and testing seems appropriate, ask it to run tests.\n` +
     `- If the output shows errors or failed tests, send a follow-up to fix them.\n` +
+    `- IMPORTANT: If the working directory is a git repository clone (not a scratch dir), the agent ` +
+    `MUST commit its changes, push them, and create a pull request before the task can be "complete". ` +
+    `If the output only shows code edits with no git commit or PR, respond with "Now commit your changes, push, and create a pull request".\n` +
+    `- CRITICAL: Creating a PR is NEVER the final step. After you see "Created pull request" or a PR URL ` +
+    `in the output, you MUST respond with "Review your PR, run each test plan item to verify it works, ` +
+    `update the PR to check off each item, then confirm all items pass". NEVER mark as "complete" on the ` +
+    `same turn that a PR was created — always send this follow-up first.\n` +
+    `- Only mark as "complete" AFTER the agent has confirmed it verified the test plan items ` +
+    `(look for output like "all items pass", "verified", "checked off", or similar confirmation).\n` +
     `- Keep follow-up instructions concise and specific.\n` +
     `- Default to "respond" — only use "complete" when you're certain ALL work is done.\n\n` +
     `Respond with ONLY a JSON object:\n` +

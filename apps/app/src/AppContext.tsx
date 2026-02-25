@@ -4906,7 +4906,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       client.onWsEvent(
         "pty-session-event",
         (data: Record<string, unknown>) => {
-          const eventType = data.type as string;
+          const eventType = (data.eventType ?? data.type) as string;
           const sessionId = data.sessionId as string;
           if (!sessionId) return;
 

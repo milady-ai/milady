@@ -18,7 +18,7 @@
 import type { IAgentRuntime } from "@elizaos/core";
 import { ModelType } from "@elizaos/core";
 import type { ServerResponse } from "node:http";
-import { cleanForChat } from "./ansi-utils.js";
+import { cleanForChat, extractCompletionSummary } from "./ansi-utils.js";
 import type { PTYService } from "./pty-service.js";
 import type { CodingAgentType } from "./pty-types.js";
 import {
@@ -792,19 +792,17 @@ export class SwarmCoordinator {
           data: { reasoning: decision.reasoning },
         });
 
-        // Fetch recent output for the completion chat message
-        let completionPreview = "";
+        // Extract meaningful artifacts (PR URLs, commits) instead of
+        // dumping raw terminal output which is full of TUI noise.
+        let summary = "";
         try {
-          const rawOutput = await this.ptyService.getSessionOutput(sessionId, 30);
-          const cleanOutput = cleanForChat(rawOutput);
-          completionPreview = cleanOutput.length > 800
-            ? `${cleanOutput.slice(0, 800)}...`
-            : cleanOutput;
+          const rawOutput = await this.ptyService.getSessionOutput(sessionId, 50);
+          summary = extractCompletionSummary(rawOutput);
         } catch { /* ignore */ }
 
         this.sendChatMessage(
-          completionPreview
-            ? `Finished "${taskCtx?.label ?? sessionId}".\n\n${completionPreview}`
+          summary
+            ? `Finished "${taskCtx?.label ?? sessionId}".\n\n${summary}`
             : `Finished "${taskCtx?.label ?? sessionId}".`,
           "coding-agent",
         );
