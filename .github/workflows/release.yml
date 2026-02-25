@@ -227,7 +227,7 @@ jobs:
           }]);
           EOF
 
-          npx tsdown --config tsdown.electron.config.ts --no-clean
+          ./node_modules/.bin/tsdown --config tsdown.electron.config.ts --no-clean
 
           # Copy to milady-dist so electron-builder can pack it.
           rm -rf apps/app/electron/milady-dist
