@@ -171,7 +171,6 @@ These variables control ElizaOS runtime initialization behavior.
 | `IGNORE_BOOTSTRAP` | Skip the ElizaOS bootstrap plugin. Automatically set to `true` by Milady (Milady provides its own bootstrap). | `true` (set by Milady) |
 | `MILADY_DISABLE_WORKSPACE_PLUGIN_OVERRIDES` | When set to `1`, disables loading plugin overrides from workspace directories. | (unset) |
 | `MILADY_BUNDLED_VERSION` | Override the bundled version string returned by the version resolver. Used in special packaging scenarios. | (unset) |
-| `MILADY_WEB_SURFACE` | Selects which static web surface to serve: `dashboard` (default) or `landing` (alias: `marketing`). | `dashboard` |
 
 ---
 

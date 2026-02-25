@@ -1950,9 +1950,7 @@ function error(res: http.ServerResponse, message: string, status = 400): void {
 // Static UI serving (production)
 // ---------------------------------------------------------------------------
 
-// Serves a built web surface in production mode:
-// - Dashboard shell from apps/app/dist (default)
-// - Marketing landing page from apps/landing (MILADY_WEB_SURFACE=landing)
+// Serves the built React dashboard from apps/app/dist/ in production mode.
 
 const STATIC_MIME: Record<string, string> = {
   ".css": "text/css; charset=utf-8",
@@ -1975,70 +1973,35 @@ const STATIC_MIME: Record<string, string> = {
   ".woff2": "font/woff2",
 };
 
-type WebSurfaceMode = "dashboard" | "landing";
+/** Resolved UI directory. Lazily computed once on first request. */
+let uiDir: string | null | undefined;
+let uiIndexHtml: Buffer | null = null;
 
-interface ResolvedWebSurface {
-  mode: WebSurfaceMode;
-  root: string;
-  indexHtml: Buffer;
-}
-
-export function resolveWebSurfaceMode(
-  rawValue: string | undefined = process.env.MILADY_WEB_SURFACE,
-): WebSurfaceMode {
-  const normalized = rawValue?.trim().toLowerCase();
-  if (normalized === "landing" || normalized === "marketing") return "landing";
-  return "dashboard";
-}
-
-/** Resolved static web surface by mode (cached after first successful lookup). */
-const webSurfaceCache = new Map<WebSurfaceMode, ResolvedWebSurface | null>();
-
-function resolveUiDir(): ResolvedWebSurface | null {
-  const mode = resolveWebSurfaceMode();
-  const cached = webSurfaceCache.get(mode);
-  if (cached !== undefined) return cached;
+function resolveUiDir(): string | null {
+  if (uiDir !== undefined) return uiDir;
 
   const thisDir = path.dirname(fileURLToPath(import.meta.url));
-  const candidates =
-    mode === "landing"
-      ? [
-          path.resolve("apps/landing"),
-          path.resolve(thisDir, "../../apps/landing"),
-        ]
-      : [
-          path.resolve("apps/app/dist"),
-          path.resolve(thisDir, "../../apps/app/dist"),
-        ];
+  const candidates = [
+    path.resolve("apps/app/dist"),
+    path.resolve(thisDir, "../../apps/app/dist"),
+  ];
 
   for (const candidate of candidates) {
     const indexPath = path.join(candidate, "index.html");
     try {
       if (fs.statSync(indexPath).isFile()) {
-        const resolved: ResolvedWebSurface = {
-          mode,
-          root: candidate,
-          indexHtml: fs.readFileSync(indexPath),
-        };
-        webSurfaceCache.set(mode, resolved);
-        logger.info(
-          `[milady-api] Serving ${
-            mode === "landing" ? "marketing landing" : "dashboard UI"
-          } from ${candidate}`,
-        );
-        return resolved;
+        uiDir = candidate;
+        uiIndexHtml = fs.readFileSync(indexPath);
+        logger.info(`[milady-api] Serving dashboard UI from ${candidate}`);
+        return uiDir;
       }
     } catch {
       // Candidate not present, keep searching.
     }
   }
 
-  webSurfaceCache.set(mode, null);
-  logger.info(
-    `[milady-api] No built ${
-      mode === "landing" ? "marketing landing" : "dashboard UI"
-    } found — web routes are disabled`,
-  );
+  uiDir = null;
+  logger.info("[milady-api] No built UI found — dashboard routes are disabled");
   return null;
 }
 
@@ -2074,7 +2037,7 @@ function getCachedFile(filePath: string, mtimeMs: number): Buffer {
 }
 
 /**
- * Serve built web surface assets with index fallback.
+ * Serve built dashboard assets from apps/app/dist with SPA fallback.
  * Returns true when the request is handled.
  */
 function serveStaticUi(
@@ -2082,9 +2045,8 @@ function serveStaticUi(
   res: http.ServerResponse,
   pathname: string,
 ): boolean {
-  const webSurface = resolveUiDir();
-  if (!webSurface) return false;
-  const { mode, root, indexHtml } = webSurface;
+  const root = resolveUiDir();
+  if (!root) return false;
 
   // Keep API and WebSocket namespaces exclusively owned by server handlers.
   if (pathname === "/api" || pathname.startsWith("/api/")) return false;
@@ -2114,10 +2076,9 @@ function serveStaticUi(
     if (stat.isFile()) {
       const ext = path.extname(candidatePath).toLowerCase();
       const body = getCachedFile(candidatePath, stat.mtimeMs);
-      const cacheControl =
-        mode === "dashboard" && relativePath.startsWith("assets/")
-          ? "public, max-age=31536000, immutable"
-          : "public, max-age=0, must-revalidate";
+      const cacheControl = relativePath.startsWith("assets/")
+        ? "public, max-age=31536000, immutable"
+        : "public, max-age=0, must-revalidate";
       sendStaticResponse(
         req,
         res,
@@ -2135,16 +2096,17 @@ function serveStaticUi(
     // Missing file falls through to SPA index fallback.
   }
 
+  if (!uiIndexHtml) return false;
   sendStaticResponse(
     req,
     res,
     200,
     {
       "Cache-Control": "public, max-age=0, must-revalidate",
-      "Content-Length": indexHtml.length,
+      "Content-Length": uiIndexHtml.length,
       "Content-Type": "text/html; charset=utf-8",
     },
-    indexHtml,
+    uiIndexHtml,
   );
   return true;
 }
@@ -5680,7 +5642,7 @@ async function handleRequest(
     return;
   }
 
-  // Serve static web assets before the auth gate. serveStaticUi
+  // Serve dashboard static assets before the auth gate.  serveStaticUi
   // already refuses /api/, /v1/, and /ws paths, so API endpoints remain
   // fully protected by the token check below.
   if (method === "GET" || method === "HEAD") {

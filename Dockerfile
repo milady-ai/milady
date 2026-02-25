@@ -54,8 +54,6 @@ USER node
 # MILADY_API_TOKEN can be set via PaaS env vars for production auth.
 # If not set and binding to 0.0.0.0, the server auto-generates a random
 # token — set it explicitly in your PaaS environment variables.
-# docker-entrypoint.sh defaults MILADY_WEB_SURFACE=landing so cloud deploys
-# can present the marketing page while still exposing /api endpoints.
 ENV MILADY_API_BIND="0.0.0.0"
 
 # Sevalla injects PORT at runtime. docker-entrypoint.sh bridges it:
