@@ -934,7 +934,7 @@ export interface AppActions {
   handleChatStop: () => void;
   handleChatClear: () => Promise<void>;
   handleNewConversation: () => Promise<void>;
-  setChatPendingImages: (images: ImageAttachment[]) => void;
+  setChatPendingImages: React.Dispatch<React.SetStateAction<ImageAttachment[]>>;
   handleSelectConversation: (id: string) => Promise<void>;
   handleDeleteConversation: (id: string) => Promise<void>;
   handleRenameConversation: (id: string, title: string) => Promise<void>;

@@ -15,7 +15,6 @@ COPY docs ./docs
 COPY skills ./skills
 COPY patches ./patches
 COPY ui ./ui
-COPY extensions/memory-core ./extensions/memory-core
 
 RUN bun install
 RUN bun run build
