@@ -14,7 +14,7 @@
   "license": "MIT",
   "main": "tsc-out/src/index.js",
   "scripts": {
-    "build": "tsc && rm -rf build && cp -r tsc-out build && electron-rebuild",
+    "build": "tsc && node -e \"const fs=require('fs');fs.rmSync('build',{recursive:true,force:true});fs.cpSync('tsc-out','build',{recursive:true})\" && electron-rebuild",
     "build:whisper": "bash ./scripts/build-whisper-universal.sh",
     "electron:start-live": "node ./live-runner.js",
     "electron:start": "bun run build && electron --inspect=5858 ./",
