@@ -408,6 +408,12 @@ jobs:
           ls -la tsc-out || echo "TSC-OUT DIR IS MISSING"
           ls -la tsc-out/src || echo "TSC-OUT/SRC DIR IS MISSING"
           
+          # @capacitor-community/electron hardcodes path.join(app.getAppPath(), "build", "src", "rt", "electron-plugins.js")
+          # Copy tsc-out → build so the capacitor package can find its expected files
+          rm -rf build
+          cp -r tsc-out build
+          echo "Copied tsc-out to build for @capacitor-community/electron compatibility"
+          
           npx electron-builder build ${{ matrix.platform.electron-args }} -c ./electron-builder.ci.json -p never || {
             echo "ELECTRON BUILDER CRASHED. DUMPING ASAR CONTENTS:"
             if [ "${MATRIX_OS:-}" = "linux" ]; then
