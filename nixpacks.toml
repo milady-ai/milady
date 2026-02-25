@@ -1,23 +1,23 @@
-# Nixpacks build configuration for Sevalla (formerly Kinsta) deployment
-# Nixpacks auto-detects Bun from bun.lock in the repo root.
+# Nixpacks build configuration for Sevalla deployment
+# No bun.lock in repo, so Nixpacks won't auto-detect Bun.
+# Use npm with --legacy-peer-deps to handle Capacitor peer dep conflicts.
 
-# Disable SPA/Caddy auto-detection — this is a full Node.js server, not a static site.
 [variables]
 NIXPACKS_SPA_CADDY    = "false"
 NODE_ENV              = "production"
 NPM_CONFIG_PRODUCTION = "false"
 
-# Pin Node 22 alongside Bun (Bun is auto-provided by the Node provider).
+# Pin Node 22 + system libs needed by native modules
 [phases.setup]
 nixPkgs = ["...", "nodejs_22"]
 
-# Bun install (auto-detected from bun.lock, but explicit for clarity).
+# npm install with legacy peer deps to avoid ERESOLVE errors
 [phases.install]
-cmds = ["bun install --frozen-lockfile"]
+cmds = ["npm install --legacy-peer-deps"]
 
-# Full build: compile agent runtime (tsdown) + web UI (Vite).
+# Full build: compile agent runtime (tsdown) + web UI (Vite)
 [phases.build]
-cmds = ["bun run build"]
+cmds = ["npm run build"]
 
 # Start the agent server. Sevalla injects PORT at runtime.
 [start]
