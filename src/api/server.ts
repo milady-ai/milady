@@ -5619,6 +5619,19 @@ async function handleRequest(
     return;
   }
 
+  // ── Health check (unauthenticated) ──────────────────────────────────
+  // PaaS platforms (Sevalla/Kinsta, Railway, etc.) probe /health or
+  // /healthz to decide whether the container is alive.  This MUST sit
+  // before the auth gate so probes succeed even when MILADY_API_TOKEN is
+  // set (or auto-generated for non-loopback binds).
+  if (
+    (method === "GET" || method === "HEAD") &&
+    (pathname === "/health" || pathname === "/healthz")
+  ) {
+    json(res, { status: "ok", timestamp: Date.now() });
+    return;
+  }
+
   // Serve dashboard static assets before the auth gate.  serveStaticUi
   // already refuses /api/, /v1/, and /ws paths, so API endpoints remain
   // fully protected by the token check below.

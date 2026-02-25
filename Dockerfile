@@ -38,6 +38,12 @@ RUN cd apps/app && \
 
 ENV NODE_ENV=production
 
+# Pre-create writable runtime directories under the non-root user's home.
+# The agent writes config, logs, PGlite data, and skill caches here.
+RUN mkdir -p /home/node/.milady/workspace/.eliza/.elizadb \
+             /home/node/.eliza && \
+    chown -R node:node /home/node
+
 # Allow non-root user to write temp files during runtime.
 RUN chown -R node:node /app
 
@@ -45,10 +51,12 @@ RUN chown -R node:node /app
 USER node
 
 # Default: bind to 0.0.0.0 in containers so the service is reachable.
-# Set MILADY_API_TOKEN in production to require auth.
+# MILADY_API_TOKEN can be set via PaaS env vars for production auth.
+# If not set and binding to 0.0.0.0, the server auto-generates a random
+# token — set it explicitly in your PaaS environment variables.
 ENV MILADY_API_BIND="0.0.0.0"
 
-# Kinsta sets PORT env var; bridge it to MILADY_PORT.
+# Kinsta/Sevalla sets PORT env var; bridge it to MILADY_PORT.
 # Falls back to 2138 if PORT is not set.
 EXPOSE 2138
 
