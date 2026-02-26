@@ -20,17 +20,31 @@ import { app, type BrowserWindow, ipcMain } from "electron";
 import type { IpcValue } from "./ipc-types";
 
 // Diagnostic logging to file for debugging packaged app startup issues
-const diagnosticLogPath = app.isPackaged
-  ? path.join(app.getPath("userData"), "milady-startup.log")
-  : null;
+let diagnosticLogPath: string | null = null;
+
+function getDiagnosticLogPath(): string | null {
+  if (diagnosticLogPath !== null) return diagnosticLogPath;
+  try {
+    if (app.isPackaged) {
+      diagnosticLogPath = path.join(
+        app.getPath("userData"),
+        "milady-startup.log",
+      );
+    }
+  } catch {
+    // app.getPath may not be available in test environments
+  }
+  return diagnosticLogPath;
+}
 
 function diagnosticLog(message: string): void {
   const timestamp = new Date().toISOString();
   const line = `[${timestamp}] ${message}\n`;
   console.log(message);
-  if (diagnosticLogPath) {
+  const logPath = getDiagnosticLogPath();
+  if (logPath) {
     try {
-      fs.appendFileSync(diagnosticLogPath, line);
+      fs.appendFileSync(logPath, line);
     } catch {
       // Ignore write errors
     }
@@ -139,8 +153,9 @@ export class AgentManager {
     diagnosticLog(
       `[Agent] start() called, current state: ${this.status.state}`,
     );
-    if (diagnosticLogPath) {
-      diagnosticLog(`[Agent] Diagnostic log file: ${diagnosticLogPath}`);
+    const logPath = getDiagnosticLogPath();
+    if (logPath) {
+      diagnosticLog(`[Agent] Diagnostic log file: ${logPath}`);
     }
     if (this.status.state === "running" || this.status.state === "starting") {
       return this.status;
