@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { CHANNEL_PLUGIN_MAP } from "../runtime/eliza";
-import { CONNECTOR_PLUGINS } from "./plugin-auto-enable";
+import {
+  applyPluginAutoEnable,
+  CONNECTOR_PLUGINS,
+  isConnectorConfigured,
+} from "./plugin-auto-enable";
 import { CONNECTOR_IDS } from "./schema";
 
 function sorted(values: Iterable<string>): string[] {
@@ -50,5 +54,84 @@ describe("connector map parity", () => {
     for (const pkg of Object.values(CHANNEL_PLUGIN_MAP)) {
       expect(pkg).toMatch(validPrefix);
     }
+  });
+});
+
+// ── Runtime behaviour parity ────────────────────────────────────────────────
+// Ensures isConnectorConfigured and applyPluginAutoEnable actually work for
+// every connector in the map, not just the ones with dedicated unit tests.
+
+/**
+ * Minimal credential configs that satisfy isConnectorConfigured for each
+ * connector. Connectors with connector-specific detection logic are given
+ * their specific fields; others use the generic botToken/token/apiKey path.
+ */
+const CONNECTOR_CREDS: Record<string, Record<string, unknown>> = {
+  telegram: { botToken: "123:ABC" },
+  discord: { botToken: "discord-token" },
+  slack: { token: "xoxb-slack" },
+  twitter: { apiKey: "tw-key" },
+  whatsapp: { authDir: "./auth/whatsapp" },
+  signal: { account: "+15551234567" },
+  bluebubbles: { serverUrl: "http://localhost:1234", password: "pw" },
+  imessage: { cliPath: "/usr/local/bin/imessage" },
+  farcaster: { apiKey: "fc-key" },
+  lens: { apiKey: "lens-key" },
+  msteams: { botToken: "teams-token" },
+  mattermost: { token: "mm-token" },
+  googlechat: { token: "gc-token" },
+  feishu: { token: "fs-token" },
+  matrix: { token: "matrix-token" },
+  nostr: { apiKey: "nostr-key" },
+  retake: { accessToken: "rtk-token" },
+  blooio: { apiKey: "blk-key" },
+};
+
+describe("connector runtime parity", () => {
+  it("has credential fixtures for every CONNECTOR_ID", () => {
+    for (const id of CONNECTOR_IDS) {
+      expect(CONNECTOR_CREDS[id]).toBeDefined();
+    }
+  });
+
+  it.each([
+    ...CONNECTOR_IDS,
+  ])("isConnectorConfigured recognises %s with valid credentials", (connectorId) => {
+    expect(
+      isConnectorConfigured(connectorId, CONNECTOR_CREDS[connectorId]),
+    ).toBe(true);
+  });
+
+  it.each([
+    ...CONNECTOR_IDS,
+  ])("isConnectorConfigured rejects %s with empty config", (connectorId) => {
+    expect(isConnectorConfigured(connectorId, {})).toBe(false);
+  });
+
+  it.each([
+    ...CONNECTOR_IDS,
+  ])("isConnectorConfigured rejects %s when explicitly disabled", (connectorId) => {
+    expect(
+      isConnectorConfigured(connectorId, {
+        ...CONNECTOR_CREDS[connectorId],
+        enabled: false,
+      }),
+    ).toBe(false);
+  });
+
+  it("applyPluginAutoEnable enables all 18 connectors when configured", () => {
+    const connectors: Record<string, Record<string, unknown>> = {};
+    for (const id of CONNECTOR_IDS) {
+      connectors[id] = CONNECTOR_CREDS[id];
+    }
+    const { config, changes } = applyPluginAutoEnable({
+      config: { plugins: {}, connectors },
+      env: {},
+    });
+    const allow = config.plugins?.allow ?? [];
+    for (const id of CONNECTOR_IDS) {
+      expect(allow).toContain(id);
+    }
+    expect(changes).toHaveLength(18);
   });
 });
