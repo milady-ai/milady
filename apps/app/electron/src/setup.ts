@@ -403,6 +403,17 @@ export class ElectronCapacitorApp {
       }
     };
 
+    const VALID_PIP_LEVELS = new Set<string>([
+      "normal",
+      "floating",
+      "torn-off-menu",
+      "modal-panel",
+      "main-menu",
+      "status",
+      "pop-up-menu",
+      "screen-saver",
+    ]);
+
     ipcMain.removeHandler("lifo:setPip");
     ipcMain.removeHandler("lifo:getPipState");
 
@@ -415,7 +426,8 @@ export class ElectronCapacitorApp {
         }
 
         const enabled = options?.flag === true;
-        const level = options?.level ?? "floating";
+        const rawLevel = options?.level ?? "floating";
+        const level = VALID_PIP_LEVELS.has(rawLevel) ? rawLevel : "floating";
         senderWindow.setAlwaysOnTop(
           enabled,
           level as Parameters<BrowserWindow["setAlwaysOnTop"]>[1],
@@ -443,14 +455,30 @@ export class ElectronCapacitorApp {
       return { action: "allow" };
     });
 
-    // When the Lifo popout window is created, switch frame capture so
-    // retake.tv streams that dedicated surface.
+    // When any popout window is created, configure PIP and capture targeting.
+    // Lifo popouts manage PIP via IPC; non-lifo popouts (stream view) get
+    // default PIP. Both types switch the stream capture target.
     this.MainWindow.webContents.on(
       "did-create-window",
       (childWindow, { url }) => {
-        if (!isLifoPopoutUrl(url)) return;
+        const isLifo = isLifoPopoutUrl(url);
+        const isPopout = url.includes("popout");
+        if (!isLifo && !isPopout) return;
 
-        console.log("[Setup] Lifo popout created — configuring capture target");
+        if (!isLifo) {
+          // Non-lifo popout (stream view): apply default PIP configuration
+          childWindow.setAlwaysOnTop(true, "floating");
+          childWindow.setVisibleOnAllWorkspaces(true, {
+            visibleOnFullScreen: true,
+          });
+          console.log(
+            "[Setup] Stream popout created — configuring PIP + capture target",
+          );
+        } else {
+          console.log(
+            "[Setup] Lifo popout created — configuring capture target",
+          );
+        }
 
         // Switch stream capture to the popout window
         const scm = (
@@ -466,7 +494,7 @@ export class ElectronCapacitorApp {
 
           childWindow.on("closed", () => {
             console.log(
-              "[Setup] Lifo popout closed — reverting capture to main window",
+              "[Setup] Popout closed — reverting capture to main window",
             );
             scm.setCaptureTarget(null);
           });

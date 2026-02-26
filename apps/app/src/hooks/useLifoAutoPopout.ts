@@ -3,6 +3,7 @@ import { client } from "../api-client";
 import {
   buildLifoPopoutUrl,
   isLifoPopoutMode,
+  LIFO_POPOUT_FEATURES,
   LIFO_POPOUT_WINDOW_NAME,
 } from "../lifo-popout";
 
@@ -142,7 +143,7 @@ export function useLifoAutoPopout(options: UseLifoAutoPopoutOptions): void {
       const popup = window.open(
         buildLifoPopoutUrl({ targetPath }),
         LIFO_POPOUT_WINDOW_NAME,
-        "popup,width=1400,height=860",
+        LIFO_POPOUT_FEATURES,
       );
 
       if (!popup) {
@@ -151,6 +152,13 @@ export function useLifoAutoPopout(options: UseLifoAutoPopoutOptions): void {
       }
 
       popoutRef.current = popup;
+      try {
+        popup.addEventListener("beforeunload", () => {
+          popoutRef.current = null;
+        });
+      } catch {
+        // Cross-origin or minimal Window reference may not support listeners.
+      }
       popup.focus();
       return true;
     };
@@ -161,13 +169,13 @@ export function useLifoAutoPopout(options: UseLifoAutoPopoutOptions): void {
         return;
       }
       if (triggeredRunIdsRef.current.has(runId)) return;
-      // Mark run as attempted regardless of popup success to avoid
-      // repeatedly spamming blocked popup attempts during one run.
-      triggeredRunIdsRef.current.add(runId);
-      void openOrFocusPopout();
+      const opened = openOrFocusPopout();
+      // Only tombstone the runId if the popup opened successfully so
+      // a later attempt can retry after popups are unblocked.
+      if (opened) {
+        triggeredRunIdsRef.current.add(runId);
+      }
     };
-
-    client.connectWs();
 
     const unbindAgentEvents = client.onWsEvent(
       "agent_event",
