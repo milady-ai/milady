@@ -225,7 +225,7 @@ export const spawnAgentAction: Action = {
 
       // Spawn the PTY session
       const session: SessionInfo = await ptyService.spawnSession({
-        name: `coding-${Date.now()}`,
+        name: `coding-${crypto.randomUUID()}`,
         agentType,
         workdir,
         initialTask,
@@ -244,38 +244,49 @@ export const spawnAgentAction: Action = {
       });
 
       // Register event handler for this session
-      ptyService.onSessionEvent((sessionId, event, data) => {
-        if (sessionId !== session.id) return;
+      const unsubscribe = ptyService.onSessionEvent(
+        (sessionId, event, data) => {
+          if (sessionId !== session.id) return;
 
-        // Log session events for debugging
-        logger.debug(
-          `[Session ${sessionId}] ${event}: ${JSON.stringify(data)}`,
-        );
+          // Log session events for debugging
+          logger.debug(
+            `[Session ${sessionId}] ${event}: ${JSON.stringify(data)}`,
+          );
 
-        // When coordinator is active it owns chat messaging for these events
-        if (!coordinator) {
-          // Handle blocked state - agent is waiting for input
-          if (event === "blocked" && callback) {
-            callback({
-              text: `Coding agent is waiting for input: ${(data as { prompt?: string }).prompt ?? "unknown prompt"}`,
-            });
+          // When coordinator is active it owns chat messaging for these events
+          if (!coordinator) {
+            // Handle blocked state - agent is waiting for input
+            if (event === "blocked" && callback) {
+              callback({
+                text: `Coding agent is waiting for input: ${(data as { prompt?: string }).prompt ?? "unknown prompt"}`,
+              });
+            }
+
+            // Handle completion
+            if (event === "completed" && callback) {
+              callback({
+                text: "Coding agent completed the task.",
+              });
+            }
+
+            // Handle errors
+            if (event === "error" && callback) {
+              callback({
+                text: `Coding agent encountered an error: ${(data as { message?: string }).message ?? "unknown error"}`,
+              });
+            }
           }
 
-          // Handle completion
-          if (event === "completed" && callback) {
-            callback({
-              text: "Coding agent completed the task.",
-            });
+          // Unsubscribe on terminal events to prevent listener leaks
+          if (
+            event === "stopped" ||
+            event === "task_complete" ||
+            event === "error"
+          ) {
+            unsubscribe();
           }
-
-          // Handle errors
-          if (event === "error" && callback) {
-            callback({
-              text: `Coding agent encountered an error: ${(data as { message?: string }).message ?? "unknown error"}`,
-            });
-          }
-        }
-      });
+        },
+      );
       if (coordinator && task) {
         coordinator.registerTask(session.id, {
           agentType,

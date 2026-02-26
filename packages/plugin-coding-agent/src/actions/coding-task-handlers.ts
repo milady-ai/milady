@@ -211,7 +211,7 @@ export async function handleMultiAgent(
       const initialTask = specPiRequested ? toPiCommand(specTask) : specTask;
       const displayType = specPiRequested ? "pi" : specAgentType;
       const session: SessionInfo = await ptyService.spawnSession({
-        name: `coding-${Date.now()}-${i}`,
+        name: `coding-${crypto.randomUUID()}`,
         agentType: specAgentType,
         workdir,
         initialTask,
@@ -432,7 +432,7 @@ export async function handleSingleAgent(
       `[START_CODING_TASK] Calling spawnSession (${agentType}, coordinator=${!!coordinator})`,
     );
     const session: SessionInfo = await ptyService.spawnSession({
-      name: `coding-${Date.now()}`,
+      name: `coding-${crypto.randomUUID()}`,
       agentType,
       workdir,
       initialTask,

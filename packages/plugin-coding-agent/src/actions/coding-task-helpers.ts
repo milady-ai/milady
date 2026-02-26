@@ -82,7 +82,7 @@ export function registerSessionEvents(
   callback?: HandlerCallback,
   coordinatorActive = false,
 ): void {
-  ptyService.onSessionEvent((sid, event, data) => {
+  const unsubscribe = ptyService.onSessionEvent((sid, event, data) => {
     if (sid !== sessionId) return;
 
     // When coordinator is active it handles chat + lifecycle for these events
@@ -118,20 +118,21 @@ export function registerSessionEvents(
     }
 
     // Auto-cleanup scratch directories when the session exits (always runs)
-    if (
-      (event === "stopped" || event === "task_complete" || event === "error") &&
-      scratchDir
-    ) {
-      const wsService = runtime.getService(
-        "CODING_WORKSPACE_SERVICE",
-      ) as unknown as CodingWorkspaceService | undefined;
-      if (wsService) {
-        wsService.removeScratchDir(scratchDir).catch((err) => {
-          logger.warn(
-            `[START_CODING_TASK] Failed to cleanup scratch dir for "${label}": ${err}`,
-          );
-        });
+    if (event === "stopped" || event === "task_complete" || event === "error") {
+      if (scratchDir) {
+        const wsService = runtime.getService(
+          "CODING_WORKSPACE_SERVICE",
+        ) as unknown as CodingWorkspaceService | undefined;
+        if (wsService) {
+          wsService.removeScratchDir(scratchDir).catch((err) => {
+            logger.warn(
+              `[START_CODING_TASK] Failed to cleanup scratch dir for "${label}": ${err}`,
+            );
+          });
+        }
       }
+      // Unsubscribe on terminal events to prevent listener leaks
+      unsubscribe();
     }
   });
 }

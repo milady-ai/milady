@@ -145,10 +145,59 @@ export async function handleCoordinatorRoutes(
     try {
       const sessionId = confirmMatch[1];
       const body = await parseBody(req);
-      const approved = body.approved !== false; // default: approved
+      const approved = body.approved === true;
       const override = body.override as
         | { response?: string; useKeys?: boolean; keys?: string[] }
         | undefined;
+
+      // Validate override parameters
+      if (override) {
+        if (
+          override.response !== undefined &&
+          (typeof override.response !== "string" ||
+            override.response.length > 1024)
+        ) {
+          sendError(
+            res,
+            "override.response must be a string of at most 1024 characters",
+            400,
+          );
+          return true;
+        }
+        if (override.keys !== undefined) {
+          const ALLOWED_KEYS = new Set([
+            "enter",
+            "tab",
+            "up",
+            "down",
+            "left",
+            "right",
+            "escape",
+            "backspace",
+            "delete",
+            "space",
+            "y",
+            "n",
+            "ctrl+c",
+            "ctrl+d",
+            "ctrl+z",
+          ]);
+          if (
+            !Array.isArray(override.keys) ||
+            override.keys.length > 20 ||
+            override.keys.some(
+              (k: unknown) => typeof k !== "string" || !ALLOWED_KEYS.has(k),
+            )
+          ) {
+            sendError(
+              res,
+              "override.keys must be an array of at most 20 allowed key names",
+              400,
+            );
+            return true;
+          }
+        }
+      }
 
       await coordinator.confirmDecision(sessionId, approved, override);
       sendJson(res, { success: true, sessionId, approved });

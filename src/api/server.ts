@@ -13489,7 +13489,7 @@ export async function startApiServer(opts?: {
   };
 
   // ── WebSocket Server ─────────────────────────────────────────────────────
-  const wss = new WebSocketServer({ noServer: true });
+  const wss = new WebSocketServer({ noServer: true, maxPayload: 64 * 1024 });
   const wsClients = new Set<WebSocket>();
   const wsClientIds = new WeakMap<WebSocket, string>();
   /** Per-WS-client PTY output subscriptions: sessionId → unsubscribe */
@@ -13641,6 +13641,10 @@ export async function startApiServer(opts?: {
           if (!subs?.has(msg.sessionId)) {
             logger.warn(
               `[milady-api] pty-input rejected: client not subscribed to session ${msg.sessionId}`,
+            );
+          } else if (msg.data.length > 4096) {
+            logger.warn(
+              `[milady-api] pty-input rejected: payload too large (${msg.data.length} bytes) for session ${msg.sessionId}`,
             );
           } else {
             const bridge = getPtyConsoleBridge(state);

@@ -335,6 +335,107 @@ describe("coordinator routes", () => {
       );
     });
 
+    it("defaults approved to false on missing body field", async () => {
+      const req = createMockReq("POST", `${PREFIX}/confirm/s-1`, {});
+      const res = createMockRes();
+
+      await handleCoordinatorRoutes(req, res, `${PREFIX}/confirm/s-1`, ctx);
+
+      expect(asMock(ctx.coordinator).confirmDecision).toHaveBeenCalledWith(
+        "s-1",
+        false,
+        undefined,
+      );
+    });
+
+    it("defaults approved to false on null", async () => {
+      const req = createMockReq("POST", `${PREFIX}/confirm/s-1`, {
+        approved: null,
+      });
+      const res = createMockRes();
+
+      await handleCoordinatorRoutes(req, res, `${PREFIX}/confirm/s-1`, ctx);
+
+      expect(asMock(ctx.coordinator).confirmDecision).toHaveBeenCalledWith(
+        "s-1",
+        false,
+        undefined,
+      );
+    });
+
+    it("defaults approved to false on 0", async () => {
+      const req = createMockReq("POST", `${PREFIX}/confirm/s-1`, {
+        approved: 0,
+      });
+      const res = createMockRes();
+
+      await handleCoordinatorRoutes(req, res, `${PREFIX}/confirm/s-1`, ctx);
+
+      expect(asMock(ctx.coordinator).confirmDecision).toHaveBeenCalledWith(
+        "s-1",
+        false,
+        undefined,
+      );
+    });
+
+    it("rejects override with oversized response (>1024 chars)", async () => {
+      const req = createMockReq("POST", `${PREFIX}/confirm/s-1`, {
+        approved: true,
+        override: { response: "x".repeat(1025) },
+      });
+      const res = createMockRes();
+
+      await handleCoordinatorRoutes(req, res, `${PREFIX}/confirm/s-1`, ctx);
+
+      expect(res._getStatus()).toBe(400);
+      expect(res._getJson().error).toContain("1024");
+      expect(asMock(ctx.coordinator).confirmDecision).not.toHaveBeenCalled();
+    });
+
+    it("rejects override with invalid key names", async () => {
+      const req = createMockReq("POST", `${PREFIX}/confirm/s-1`, {
+        approved: true,
+        override: { keys: ["enter", "rm -rf /"] },
+      });
+      const res = createMockRes();
+
+      await handleCoordinatorRoutes(req, res, `${PREFIX}/confirm/s-1`, ctx);
+
+      expect(res._getStatus()).toBe(400);
+      expect(res._getJson().error).toContain("allowed key names");
+      expect(asMock(ctx.coordinator).confirmDecision).not.toHaveBeenCalled();
+    });
+
+    it("rejects override with too many keys (>20)", async () => {
+      const req = createMockReq("POST", `${PREFIX}/confirm/s-1`, {
+        approved: true,
+        override: { keys: Array(21).fill("enter") },
+      });
+      const res = createMockRes();
+
+      await handleCoordinatorRoutes(req, res, `${PREFIX}/confirm/s-1`, ctx);
+
+      expect(res._getStatus()).toBe(400);
+      expect(asMock(ctx.coordinator).confirmDecision).not.toHaveBeenCalled();
+    });
+
+    it("accepts valid override with allowed keys", async () => {
+      const req = createMockReq("POST", `${PREFIX}/confirm/s-1`, {
+        approved: true,
+        override: { keys: ["down", "enter"] },
+      });
+      const res = createMockRes();
+
+      await handleCoordinatorRoutes(req, res, `${PREFIX}/confirm/s-1`, ctx);
+
+      expect(res._getStatus()).toBe(200);
+      expect(asMock(ctx.coordinator).confirmDecision).toHaveBeenCalledWith(
+        "s-1",
+        true,
+        { keys: ["down", "enter"] },
+      );
+    });
+
     it("returns 404 when no pending decision exists", async () => {
       asMock(ctx.coordinator).confirmDecision.mockImplementation(() => {
         throw new Error("No pending decision for session s-1");
