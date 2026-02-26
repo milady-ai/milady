@@ -611,7 +611,7 @@ The `dmPolicy` options are:
 **Mattermost:**
 
 - Token authentication fails:
-  Confirm `connectors.mattermost.token` is a valid personal access token or bot token. Check that the Mattermost server URL is configured.
+  Confirm `connectors.mattermost.botToken` (env: `MATTERMOST_BOT_TOKEN`) is a valid personal access token or bot token. Check that the Mattermost server URL is configured.
 
 **Google Chat / Feishu:**
 

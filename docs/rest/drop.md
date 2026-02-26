@@ -165,7 +165,7 @@ Submit a tweet URL for verification. The server fetches the tweet, validates the
 2. Ensure signer wallet has sufficient gas balance on the target chain.
 3. Configure Twitter verification integration: the FxTwitter API (`api.fxtwitter.com`) must be reachable for whitelist tweet verification.
 4. Verify the runtime can reach RPC endpoints and social verification providers from the deployment environment.
-5. Confirm the whitelist state directory (`data/whitelist.json`) is writable for persisting verified addresses.
+5. Confirm the whitelist state file (`~/.milady/whitelist.json`, controlled by `MILADY_STATE_DIR`) is writable for persisting verified addresses.
 
 ### Failure Modes
 
@@ -194,12 +194,12 @@ Submit a tweet URL for verification. The server fetches the tweet, validates the
 - Status endpoint stale or inconsistent:
   Check drop service initialization and cache invalidation behavior.
 - Corrupted whitelist JSON:
-  `loadWhitelist()` throws on malformed JSON. If state is corrupted, delete `data/whitelist.json` and re-verify affected addresses.
+  `loadWhitelist()` throws on malformed JSON. If state is corrupted, delete `~/.milady/whitelist.json` (or `$MILADY_STATE_DIR/whitelist.json`) and re-verify affected addresses.
 
 ### Recovery Procedures
 
 1. **Stuck on-chain transaction:** Check the pending transaction on a block explorer. If stuck, the agent retries with higher gas on next attempt. Manual speed-up via wallet is safe — the agent re-reads nonce on next call.
-2. **Corrupted whitelist state:** Delete `data/whitelist.json` and restart the agent. Re-verify affected addresses via the whitelist verification endpoint.
+2. **Corrupted whitelist state:** Delete `~/.milady/whitelist.json` (or `$MILADY_STATE_DIR/whitelist.json`) and restart the agent. Re-verify affected addresses via the whitelist verification endpoint.
 3. **FxTwitter outage:** Tweet verification is unavailable while the API is down. Monitor `api.fxtwitter.com` status and retry once restored. There is no local fallback.
 
 ### Verification Commands
