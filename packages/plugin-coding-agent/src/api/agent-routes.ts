@@ -311,7 +311,7 @@ export async function handleAgentRoutes(
       const coordinator = getCoordinator(ctx.runtime);
 
       const session = await ctx.ptyService.spawnSession({
-        name: `agent-${Date.now()}`,
+        name: `agent-${crypto.randomUUID()}`,
         agentType: normalizedType,
         workdir: workdir as string,
         initialTask: piRequested

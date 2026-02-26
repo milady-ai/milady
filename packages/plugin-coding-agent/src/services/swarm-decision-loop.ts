@@ -475,8 +475,8 @@ export async function handleAutonomousDecision(
       reasoning: decision.reasoning,
     });
 
-    // Reset auto-resolved count on manual decision
-    taskCtx.autoResolvedCount = 0;
+    // Decay auto-resolved count on manual decision (don't reset entirely)
+    taskCtx.autoResolvedCount = Math.max(0, taskCtx.autoResolvedCount - 1);
 
     // Broadcast the decision
     ctx.broadcast({
