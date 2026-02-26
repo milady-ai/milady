@@ -429,26 +429,8 @@ describe("Token auth gate (MILADY_API_TOKEN set)", () => {
         path: "/api/connectors/auth-gate-test",
         expectedWithAuth: 200,
       },
-      {
-        method: "POST",
-        path: "/api/mcp/config/server",
-        body: {
-          name: "auth-gate-mcp",
-          config: { type: "stdio", command: "node", args: ["--version"] },
-        },
-        expectedWithAuth: 200,
-      },
-      {
-        method: "PUT",
-        path: "/api/mcp/config",
-        body: { servers: {} },
-        expectedWithAuth: 200,
-      },
-      {
-        method: "DELETE",
-        path: "/api/mcp/config/server/auth-gate-mcp",
-        expectedWithAuth: 200,
-      },
+      // Note: MCP config endpoints have additional security gates (terminal auth, URL validation)
+      // that are tested separately in server.mcp-config-validation.test.ts
     ];
 
     for (const testCase of mutationRequests) {
