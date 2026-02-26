@@ -138,6 +138,16 @@ export default defineConfig({
         replacement: path.join(repoRoot, "test", "stubs", "empty-module.mjs"),
       },
       {
+        // @elizaos/plugin-agent-orchestrator is optional; stub it for tests.
+        find: "@elizaos/plugin-agent-orchestrator",
+        replacement: path.join(
+          repoRoot,
+          "test",
+          "stubs",
+          "coding-agent-module.ts",
+        ),
+      },
+      {
         find: "electron",
         replacement: path.join(repoRoot, "test", "stubs", "electron-module.ts"),
       },

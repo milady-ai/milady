@@ -82,7 +82,7 @@ export const AUTH_PROVIDER_PLUGINS: Record<string, string> = {
   OBSIDIAN_VAULT_PATH: "@elizaos/plugin-obsidian",
   OBSIDAN_VAULT_PATH: "@elizaos/plugin-obsidian",
   REPOPROMPT_CLI_PATH: "@elizaos/plugin-repoprompt",
-  CLAUDE_CODE_WORKBENCH_ENABLED: "@milaidy/plugin-claude-code-workbench",
+  CLAUDE_CODE_WORKBENCH_ENABLED: "@elizaos/plugin-claude-code-workbench",
 };
 
 const FEATURE_PLUGINS: Record<string, string> = {
@@ -110,7 +110,7 @@ const FEATURE_PLUGINS: Record<string, string> = {
   vision: "@elizaos/plugin-vision",
   computeruse: "@elizaos/plugin-computeruse",
   repoprompt: "@elizaos/plugin-repoprompt",
-  claudeCodeWorkbench: "@milaidy/plugin-claude-code-workbench",
+  claudeCodeWorkbench: "@elizaos/plugin-claude-code-workbench",
 };
 
 export function isConnectorConfigured(

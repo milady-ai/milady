@@ -22,7 +22,7 @@ declare module "@elizaos/plugin-code" {
   export { plugin };
 }
 
-declare module "@milaidy/plugin-claude-code-workbench" {
+declare module "@elizaos/plugin-claude-code-workbench" {
   const plugin: import("@elizaos/core").Plugin;
   export default plugin;
   export { plugin };

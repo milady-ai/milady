@@ -8,7 +8,7 @@
  *  4. node:vm sandbox prevents access to process, require, and global
  *
  * NOTE: We cannot import resolveTerminalRunRejection from server.ts directly
- * because it pulls in heavy deps (@milaidy/plugin-coding-agent, ws, etc.).
+ * because it pulls in heavy deps (@elizaos/plugin-agent-orchestrator, ws, etc.).
  * Instead we test the tokenMatches logic inline (same implementation) and
  * verify the vm hardening techniques used in custom-actions.ts.
  */

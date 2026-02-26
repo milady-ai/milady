@@ -588,7 +588,7 @@ describe("collectPluginNames", () => {
       "@elizaos/plugin-deepseek",
       "@elizaos/plugin-mistral",
       "@elizaos/plugin-together",
-      "@milaidy/plugin-claude-code-workbench",
+      "@elizaos/plugin-claude-code-workbench",
     ];
     const config = {
       plugins: { allow: optionalPlugins },

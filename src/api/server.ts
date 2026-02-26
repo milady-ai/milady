@@ -27,12 +27,15 @@ import {
   type Task,
   type UUID,
 } from "@elizaos/core";
-import { listPiAiModelOptions } from "@elizaos/plugin-pi-ai";
-import type { PTYService, SwarmEvent } from "@milaidy/plugin-coding-agent";
+import type {
+  PTYService,
+  SwarmEvent,
+} from "@elizaos/plugin-agent-orchestrator";
 import {
   createCodingAgentRouteHandler,
   getCoordinator,
-} from "@milaidy/plugin-coding-agent";
+} from "@elizaos/plugin-agent-orchestrator";
+import { listPiAiModelOptions } from "@elizaos/plugin-pi-ai";
 import { type WebSocket, WebSocketServer } from "ws";
 import type { CloudManager } from "../cloud/cloud-manager";
 import {

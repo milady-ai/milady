@@ -14,7 +14,7 @@ export default defineConfig({
         "stubs",
         "empty-module.mjs",
       ),
-      "@milaidy/plugin-coding-agent": path.join(
+      "@elizaos/plugin-agent-orchestrator": path.join(
         repoRoot,
         "test",
         "stubs",

@@ -240,12 +240,14 @@ export async function launchTUI(
     : registerPiAiModelHandler(runtimeRef, {
         largeModel,
         smallModel,
-        onStreamEvent: (event) => bridge.onStreamEvent(event),
+        // biome-ignore lint/suspicious/noExplicitAny: pi-ai callback type
+        onStreamEvent: (event: any) => bridge.onStreamEvent(event),
         getAbortSignal: () => bridge.getAbortSignal(),
         // Keep TUI model switching authoritative even when the runtime also loaded
         // the pi-ai provider plugin.
         priority: 20000,
-        getApiKey: (p) => piCreds.getApiKey(p),
+        // biome-ignore lint/suspicious/noExplicitAny: pi-ai callback type
+        getApiKey: (p: any) => piCreds.getApiKey(p),
       });
 
   if (controller) {

@@ -6,7 +6,7 @@ vi.mock("@elizaos/plugin-pi-ai", () => ({
   listPiAiModelOptions: () => [],
 }));
 
-vi.mock("@milaidy/plugin-coding-agent", () => ({
+vi.mock("@elizaos/plugin-agent-orchestrator", () => ({
   createCodingAgentRouteHandler: () => async () => false,
 }));
 

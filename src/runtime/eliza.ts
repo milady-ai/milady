@@ -529,7 +529,7 @@ const OPTIONAL_PLUGIN_MAP: Readonly<Record<string, string>> = {
   "pi-ai": PI_AI_PLUGIN_PACKAGE,
   piAi: PI_AI_PLUGIN_PACKAGE,
   x402: "@elizaos/plugin-x402",
-  "coding-agent": "@milaidy/plugin-coding-agent",
+  "coding-agent": "@elizaos/plugin-agent-orchestrator",
 };
 
 function looksLikePlugin(value: unknown): value is Plugin {
@@ -821,8 +821,8 @@ export function collectPluginNames(config: MiladyConfig): Set<string> {
   if (shellPluginDisabled) {
     pluginsToLoad.delete("@elizaos/plugin-shell");
   }
-  if (isPluginExplicitlyDisabled("@milaidy/plugin-coding-agent")) {
-    pluginsToLoad.delete("@milaidy/plugin-coding-agent");
+  if (isPluginExplicitlyDisabled("@elizaos/plugin-agent-orchestrator")) {
+    pluginsToLoad.delete("@elizaos/plugin-agent-orchestrator");
   }
 
   return pluginsToLoad;
@@ -1142,10 +1142,10 @@ async function resolveStaticElizaPlugin(
       // biome-ignore lint/suspicious/noTsIgnore: dynamic import
       // @ts-ignore
       return import("@elizaos/plugin-repoprompt");
-    case "@milaidy/plugin-claude-code-workbench":
+    case "@elizaos/plugin-claude-code-workbench":
       // biome-ignore lint/suspicious/noTsIgnore: dynamic import
       // @ts-ignore
-      return import("@milaidy/plugin-claude-code-workbench");
+      return import("@elizaos/plugin-claude-code-workbench");
     case "@elizaos/plugin-openai":
       // biome-ignore lint/suspicious/noTsIgnore: dynamic import
       // @ts-ignore
