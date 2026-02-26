@@ -209,6 +209,12 @@ export function CommandPalette() {
         icon: Shield,
         tab: "security" as const,
       },
+      {
+        id: "nav-lifo",
+        label: "Open Lifo",
+        icon: Bot,
+        tab: "lifo" as const,
+      },
     ];
 
     navCommands.forEach((cmd) => {

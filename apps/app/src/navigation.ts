@@ -34,6 +34,7 @@ export type Tab =
   | "voice"
   | "runtime"
   | "database"
+  | "lifo"
   | "settings"
   | "logs"
   | "security";
@@ -100,6 +101,7 @@ const ALL_TAB_GROUPS: TabGroup[] = [
       "trajectories",
       "runtime",
       "database",
+      "lifo",
       "logs",
       "security",
     ],
@@ -129,6 +131,7 @@ const TAB_PATHS: Record<Tab, string> = {
   voice: "/voice",
   runtime: "/runtime",
   database: "/database",
+  lifo: "/lifo",
   settings: "/settings",
   logs: "/logs",
   security: "/security",
@@ -226,6 +229,8 @@ export function titleForTab(tab: Tab): string {
       return "Runtime";
     case "database":
       return "Databases";
+    case "lifo":
+      return "Lifo";
     case "settings":
       return "Settings";
     case "logs":

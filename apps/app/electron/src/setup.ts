@@ -12,6 +12,7 @@ import {
   app,
   BrowserWindow,
   clipboard,
+  ipcMain,
   Menu,
   MenuItem,
   nativeImage,
@@ -362,6 +363,90 @@ export class ElectronCapacitorApp {
       }
     };
 
+    const isLifoPopoutFlag = (value: string | null): boolean => {
+      if (value == null) return false;
+      const normalized = value.trim().toLowerCase();
+      return (
+        normalized === "" ||
+        normalized === "1" ||
+        normalized === "true" ||
+        normalized === "lifo"
+      );
+    };
+
+    const getPopoutValueFromHash = (hash: string): string | null => {
+      if (!hash) return null;
+      const normalized = hash.startsWith("#") ? hash.slice(1) : hash;
+      const queryIndex = normalized.indexOf("?");
+      if (queryIndex < 0) return null;
+      return new URLSearchParams(normalized.slice(queryIndex + 1)).get(
+        "popout",
+      );
+    };
+
+    const isLifoPopoutUrl = (raw: string): boolean => {
+      try {
+        const parsed = new URL(raw);
+        const searchValue = new URLSearchParams(parsed.search).get("popout");
+        const hashValue = getPopoutValueFromHash(parsed.hash);
+        if (!isLifoPopoutFlag(searchValue ?? hashValue)) return false;
+
+        const hashPath = (
+          parsed.hash.startsWith("#") ? parsed.hash.slice(1) : parsed.hash
+        )
+          .split("?")[0]
+          .toLowerCase();
+        const pathname = parsed.pathname.toLowerCase();
+        return pathname.endsWith("/lifo") || hashPath.endsWith("/lifo");
+      } catch {
+        return false;
+      }
+    };
+
+    const VALID_PIP_LEVELS = new Set<string>([
+      "normal",
+      "floating",
+      "torn-off-menu",
+      "modal-panel",
+      "main-menu",
+      "status",
+      "pop-up-menu",
+      "screen-saver",
+    ]);
+
+    ipcMain.removeHandler("lifo:setPip");
+    ipcMain.removeHandler("lifo:getPipState");
+
+    ipcMain.handle(
+      "lifo:setPip",
+      (event, options?: { flag?: boolean; level?: string }) => {
+        const senderWindow = BrowserWindow.fromWebContents(event.sender);
+        if (!senderWindow || senderWindow.isDestroyed()) {
+          return { enabled: false };
+        }
+
+        const enabled = options?.flag === true;
+        const rawLevel = options?.level ?? "floating";
+        const level = VALID_PIP_LEVELS.has(rawLevel) ? rawLevel : "floating";
+        senderWindow.setAlwaysOnTop(
+          enabled,
+          level as Parameters<BrowserWindow["setAlwaysOnTop"]>[1],
+        );
+        senderWindow.setVisibleOnAllWorkspaces(enabled, {
+          visibleOnFullScreen: enabled,
+        });
+        return { enabled };
+      },
+    );
+
+    ipcMain.handle("lifo:getPipState", (event) => {
+      const senderWindow = BrowserWindow.fromWebContents(event.sender);
+      if (!senderWindow || senderWindow.isDestroyed()) {
+        return { enabled: false };
+      }
+      return { enabled: senderWindow.isAlwaysOnTop() };
+    });
+
     this.MainWindow.webContents.setWindowOpenHandler((details) => {
       if (!isAllowedUrl(details.url)) {
         openExternal(details.url);
@@ -370,22 +455,30 @@ export class ElectronCapacitorApp {
       return { action: "allow" };
     });
 
-    // When a popout child window is created, configure PIP behavior and
-    // switch frame capture so retake.tv streams the pop-out StreamView.
+    // When any popout window is created, configure PIP and capture targeting.
+    // Lifo popouts manage PIP via IPC; non-lifo popouts (stream view) get
+    // default PIP. Both types switch the stream capture target.
     this.MainWindow.webContents.on(
       "did-create-window",
       (childWindow, { url }) => {
-        if (!url.includes("popout")) return;
+        const isLifo = isLifoPopoutUrl(url);
+        const isPopout = url.includes("popout");
+        if (!isLifo && !isPopout) return;
 
-        console.log(
-          "[Setup] Popout window created — configuring PIP + capture target",
-        );
-
-        // PIP: stay above all other windows including fullscreen apps
-        childWindow.setAlwaysOnTop(true, "floating");
-        childWindow.setVisibleOnAllWorkspaces(true, {
-          visibleOnFullScreen: true,
-        });
+        if (!isLifo) {
+          // Non-lifo popout (stream view): apply default PIP configuration
+          childWindow.setAlwaysOnTop(true, "floating");
+          childWindow.setVisibleOnAllWorkspaces(true, {
+            visibleOnFullScreen: true,
+          });
+          console.log(
+            "[Setup] Stream popout created — configuring PIP + capture target",
+          );
+        } else {
+          console.log(
+            "[Setup] Lifo popout created — configuring capture target",
+          );
+        }
 
         // Switch stream capture to the popout window
         const scm = (
@@ -401,7 +494,7 @@ export class ElectronCapacitorApp {
 
           childWindow.on("closed", () => {
             console.log(
-              "[Setup] Popout window closed — reverting capture to main window",
+              "[Setup] Popout closed — reverting capture to main window",
             );
             scm.setCaptureTarget(null);
           });
