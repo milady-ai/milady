@@ -289,7 +289,7 @@ jobs:
           done
 
           # Handle scoped packages separately
-          for scope_pkg in "@huggingface/transformers" "@anthropic-ai/claude-agent-sdk" "@electric-sql/pglite" "@ai-sdk/gateway" "@ai-sdk/anthropic" "@ai-sdk/provider" "@ai-sdk/provider-utils" "@tensorflow/tfjs-node" "@tensorflow/tfjs-core"; do
+          for scope_pkg in "@huggingface/transformers" "@anthropic-ai/claude-agent-sdk" "@electric-sql/pglite" "@ai-sdk/gateway" "@ai-sdk/anthropic" "@ai-sdk/provider" "@ai-sdk/provider-utils" "@tensorflow/tfjs-core"; do
             scope=$(echo "$scope_pkg" | cut -d'/' -f1)
             pkg=$(echo "$scope_pkg" | cut -d'/' -f2)
             if [ -e "node_modules/$scope/$pkg" ]; then
