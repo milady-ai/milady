@@ -5379,12 +5379,16 @@ async function routeAutonomyTextToUser(
  * Get the SwarmCoordinator from the runtime services (if available).
  * The coordinator is registered by @elizaos/plugin-agent-orchestrator.
  */
-function getCoordinatorFromRuntime(
-  runtime: AgentRuntime,
-): { setChatCallback?: (cb: (text: string, source?: string) => Promise<void>) => void; setWsBroadcast?: (cb: (event: SwarmEvent) => void) => void } | null {
+function getCoordinatorFromRuntime(runtime: AgentRuntime): {
+  setChatCallback?: (
+    cb: (text: string, source?: string) => Promise<void>,
+  ) => void;
+  setWsBroadcast?: (cb: (event: SwarmEvent) => void) => void;
+} | null {
   // Try to get coordinator from runtime services
   const coordinator = runtime.getService("SWARM_COORDINATOR");
-  if (coordinator) return coordinator as ReturnType<typeof getCoordinatorFromRuntime>;
+  if (coordinator)
+    return coordinator as ReturnType<typeof getCoordinatorFromRuntime>;
   return null;
 }
 
