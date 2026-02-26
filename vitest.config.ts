@@ -138,6 +138,16 @@ export default defineConfig({
         replacement: path.join(repoRoot, "test", "stubs", "empty-module.mjs"),
       },
       {
+        // @milaidy/plugin-coding-agent is optional; stub it for tests.
+        find: "@milaidy/plugin-coding-agent",
+        replacement: path.join(
+          repoRoot,
+          "test",
+          "stubs",
+          "coding-agent-module.ts",
+        ),
+      },
+      {
         find: "electron",
         replacement: path.join(repoRoot, "test", "stubs", "electron-module.ts"),
       },
