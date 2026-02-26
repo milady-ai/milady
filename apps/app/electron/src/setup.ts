@@ -22,7 +22,6 @@ import {
 import electronIsDev from "electron-is-dev";
 import electronServe from "electron-serve";
 import windowStateKeeper from "electron-window-state";
-import { getScreenCaptureManager } from "./native/screencapture";
 import {
   buildMissingWebAssetsMessage,
   resolveWebAssetDirectory,
@@ -363,44 +362,63 @@ export class ElectronCapacitorApp {
       }
     };
 
+    const isLifoPopoutFlag = (value: string | null): boolean => {
+      if (value == null) return false;
+      const normalized = value.trim().toLowerCase();
+      return (
+        normalized === "" ||
+        normalized === "1" ||
+        normalized === "true" ||
+        normalized === "lifo"
+      );
+    };
+
+    const getPopoutValueFromHash = (hash: string): string | null => {
+      if (!hash) return null;
+      const normalized = hash.startsWith("#") ? hash.slice(1) : hash;
+      const queryIndex = normalized.indexOf("?");
+      if (queryIndex < 0) return null;
+      return new URLSearchParams(normalized.slice(queryIndex + 1)).get(
+        "popout",
+      );
+    };
+
+    const isLifoPopoutUrl = (raw: string): boolean => {
+      try {
+        const parsed = new URL(raw);
+        const searchValue = new URLSearchParams(parsed.search).get("popout");
+        const hashValue = getPopoutValueFromHash(parsed.hash);
+        if (!isLifoPopoutFlag(searchValue ?? hashValue)) return false;
+
+        const hashPath = (
+          parsed.hash.startsWith("#") ? parsed.hash.slice(1) : parsed.hash
+        )
+          .split("?")[0]
+          .toLowerCase();
+        const pathname = parsed.pathname.toLowerCase();
+        return pathname.endsWith("/lifo") || hashPath.endsWith("/lifo");
+      } catch {
+        return false;
+      }
+    };
+
     this.MainWindow.webContents.setWindowOpenHandler((details) => {
       if (!isAllowedUrl(details.url)) {
         openExternal(details.url);
         return { action: "deny" };
       }
-      // Popout stream windows get always-on-top, PIP-friendly, frameless treatment.
-      // Only match same-origin URLs (isAllowedUrl passed above) with ?popout param.
-      if (new URL(details.url).searchParams.has("popout")) {
-        return {
-          action: "allow",
-          overrideBrowserWindowOptions: {
-            alwaysOnTop: true,
-            visibleOnAllWorkspaces: true,
-            frame: false,
-            titleBarStyle: "hidden",
-            backgroundColor: "#0a0a0a",
-            fullscreenable: false,
-            minimizable: false,
-            webPreferences: {
-              nodeIntegration: false,
-              contextIsolation: true,
-              preload: preloadPath,
-            },
-          },
-        };
-      }
       return { action: "allow" };
     });
 
-    // When a popout child window is created, configure PIP behavior and
-    // switch frame capture so retake.tv streams the pop-out StreamView.
+    // When the Lifo popout window is created, configure PIP behavior and
+    // switch frame capture so retake.tv streams that dedicated surface.
     this.MainWindow.webContents.on(
       "did-create-window",
       (childWindow, { url }) => {
-        if (!new URL(url).searchParams.has("popout")) return;
+        if (!isLifoPopoutUrl(url)) return;
 
         console.log(
-          "[Setup] Popout window created — configuring PIP + capture target",
+          "[Setup] Lifo popout created — configuring PIP + capture target",
         );
 
         // PIP: stay above all other windows including fullscreen apps
@@ -410,15 +428,24 @@ export class ElectronCapacitorApp {
         });
 
         // Switch stream capture to the popout window
-        const scm = getScreenCaptureManager();
-        scm.setCaptureTarget(childWindow);
+        const scm = (
+          globalThis as unknown as {
+            __miladyScreenCaptureManager?: {
+              setCaptureTarget(w: BrowserWindow | null): void;
+            };
+          }
+        ).__miladyScreenCaptureManager;
 
-        childWindow.on("closed", () => {
-          console.log(
-            "[Setup] Popout window closed — reverting capture to main window",
-          );
-          scm.setCaptureTarget(null);
-        });
+        if (scm) {
+          scm.setCaptureTarget(childWindow);
+
+          childWindow.on("closed", () => {
+            console.log(
+              "[Setup] Lifo popout closed — reverting capture to main window",
+            );
+            scm.setCaptureTarget(null);
+          });
+        }
       },
     );
 
