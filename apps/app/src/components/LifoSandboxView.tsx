@@ -7,7 +7,11 @@ import {
 } from "../api-client";
 import {
   buildLifoPopoutUrl,
+  generateLifoSessionId,
+  getLifoSessionIdFromLocation,
+  getLifoSyncChannelName,
   isLifoPopoutMode,
+  LIFO_POPOUT_FEATURES,
   LIFO_POPOUT_WINDOW_NAME,
 } from "../lifo-popout";
 import { pathForTab } from "../navigation";
@@ -49,9 +53,17 @@ interface LifoSyncMessage {
   message?: string;
 }
 
-const LIFO_SYNC_CHANNEL_NAME = "milady-lifo-sync";
 const MONITOR_SCREENSHOT_POLL_MS = 1800;
 const MONITOR_META_POLL_MS = 10000;
+
+function isSafeEndpointUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
 
 function formatError(error: unknown): string {
   if (error instanceof Error) {
@@ -142,6 +154,12 @@ export function LifoSandboxView() {
   const [sessionKey, setSessionKey] = useState(0);
 
   const popoutMode = useMemo(() => isLifoPopoutMode(), []);
+  const lifoSessionId = useMemo(() => {
+    if (popoutMode) {
+      return getLifoSessionIdFromLocation(window.location);
+    }
+    return generateLifoSessionId();
+  }, [popoutMode]);
   const [controllerOnline, setControllerOnline] = useState(popoutMode);
   const [monitorOnline, setMonitorOnline] = useState(false);
   const [monitorError, setMonitorError] = useState<string | null>(null);
@@ -170,7 +188,11 @@ export function LifoSandboxView() {
     [screenPreviewBase64],
   );
   const noVncEndpoint = browserEndpoints?.noVncEndpoint ?? null;
-  const noVncActive = Boolean(noVncEndpoint) && !noVncFailed;
+  const safeNoVncEndpoint = useMemo(() => {
+    if (!noVncEndpoint) return null;
+    return isSafeEndpointUrl(noVncEndpoint) ? noVncEndpoint : null;
+  }, [noVncEndpoint]);
+  const noVncActive = Boolean(safeNoVncEndpoint) && !noVncFailed;
 
   const broadcastSyncMessage = useCallback(
     (message: Omit<LifoSyncMessage, "source">) => {
@@ -184,6 +206,14 @@ export function LifoSandboxView() {
   );
 
   const teardown = useCallback(() => {
+    try {
+      const term = runtimeRef.current?.terminal;
+      if (term && "dispose" in term) {
+        (term as { dispose(): void }).dispose();
+      }
+    } catch {
+      // Ignore terminal disposal failures.
+    }
     try {
       runtimeRef.current?.explorer.destroy();
     } catch {
@@ -361,7 +391,7 @@ export function LifoSandboxView() {
   useEffect(() => {
     if (typeof BroadcastChannel === "undefined") return;
 
-    const channel = new BroadcastChannel(LIFO_SYNC_CHANNEL_NAME);
+    const channel = new BroadcastChannel(getLifoSyncChannelName(lifoSessionId));
     syncChannelRef.current = channel;
 
     let heartbeatInterval: ReturnType<typeof setInterval> | null = null;
@@ -440,7 +470,7 @@ export function LifoSandboxView() {
       syncChannelRef.current = null;
       channel.close();
     };
-  }, [appendOutput, broadcastSyncMessage, popoutMode]);
+  }, [appendOutput, broadcastSyncMessage, lifoSessionId, popoutMode]);
 
   useEffect(() => {
     if (!popoutMode) return;
@@ -469,6 +499,8 @@ export function LifoSandboxView() {
     if (popoutMode) return;
 
     let cancelled = false;
+    let previewInterval: number | null = null;
+    let metaInterval: number | null = null;
 
     const refreshMeta = async () => {
       if (cancelled) return;
@@ -479,27 +511,44 @@ export function LifoSandboxView() {
       await refreshScreenPreview();
     };
 
-    void refreshMeta();
-    void refreshPreview();
-
-    const previewInterval = window.setInterval(() => {
-      void refreshPreview();
-    }, MONITOR_SCREENSHOT_POLL_MS);
-
-    const metaInterval = window.setInterval(() => {
+    const startPolling = () => {
+      stopPolling();
       void refreshMeta();
-    }, MONITOR_META_POLL_MS);
+      void refreshPreview();
+      previewInterval = window.setInterval(() => {
+        void refreshPreview();
+      }, MONITOR_SCREENSHOT_POLL_MS);
+      metaInterval = window.setInterval(() => {
+        void refreshMeta();
+      }, MONITOR_META_POLL_MS);
+    };
+
+    const stopPolling = () => {
+      if (previewInterval) window.clearInterval(previewInterval);
+      if (metaInterval) window.clearInterval(metaInterval);
+      previewInterval = null;
+      metaInterval = null;
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        startPolling();
+      } else {
+        stopPolling();
+      }
+    };
+
+    startPolling();
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       cancelled = true;
-      window.clearInterval(previewInterval);
-      window.clearInterval(metaInterval);
+      stopPolling();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [popoutMode, refreshMonitorMeta, refreshScreenPreview]);
 
   useEffect(() => {
-    client.connectWs();
-
     const unbind = client.onWsEvent(
       "terminal-output",
       (data: Record<string, unknown>) => {
@@ -542,11 +591,12 @@ export function LifoSandboxView() {
 
     const url = buildLifoPopoutUrl({
       targetPath: pathForTab("lifo", import.meta.env.BASE_URL),
+      sessionId: lifoSessionId ?? undefined,
     });
     const popup = window.open(
       url,
       LIFO_POPOUT_WINDOW_NAME,
-      "popup,width=1400,height=860",
+      LIFO_POPOUT_FEATURES,
     );
 
     if (!popup) {
@@ -557,8 +607,13 @@ export function LifoSandboxView() {
     popoutRef.current = popup;
     controllerHeartbeatAtRef.current = Date.now();
     setControllerOnline(true);
+
+    const onPopoutClosed = () => {
+      popoutRef.current = null;
+    };
+    popup.addEventListener("beforeunload", onPopoutClosed);
     popup.focus();
-  }, []);
+  }, [lifoSessionId]);
 
   const togglePip = useCallback(async () => {
     const ipc = window.electron?.ipcRenderer;
@@ -714,12 +769,12 @@ export function LifoSandboxView() {
             </div>
 
             <div className="h-[320px] bg-black/90 flex items-center justify-center overflow-hidden">
-              {noVncActive && noVncEndpoint ? (
+              {noVncActive && safeNoVncEndpoint ? (
                 <iframe
-                  src={noVncEndpoint}
+                  src={safeNoVncEndpoint}
                   title="Sandbox live noVNC surface"
                   className="h-full w-full border-0"
-                  sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock"
+                  sandbox="allow-scripts allow-forms allow-pointer-lock"
                   onLoad={() => {
                     setMonitorOnline(true);
                     setMonitorError(null);

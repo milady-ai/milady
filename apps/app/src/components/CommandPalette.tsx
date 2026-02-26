@@ -121,6 +121,11 @@ export function CommandPalette() {
         label: "Open Security",
         action: () => setTab("security"),
       },
+      {
+        id: "nav-lifo",
+        label: "Open Lifo",
+        action: () => setTab("lifo"),
+      },
     );
 
     if (currentGameViewerUrl.trim()) {

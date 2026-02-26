@@ -75,8 +75,6 @@ describe("useLifoAutoPopout", () => {
       renderer = TestRenderer.create(React.createElement(Probe));
     });
 
-    expect(mockClient.connectWs).toHaveBeenCalledTimes(1);
-
     await act(async () => {
       emit("agent_event", {
         type: "agent_event",
@@ -119,7 +117,7 @@ describe("useLifoAutoPopout", () => {
     });
   });
 
-  it("invokes popup-blocked callback for matching terminal command", async () => {
+  it("retries popup when blocked and invokes callback each time", async () => {
     const onPopupBlocked = vi.fn();
     const openSpy = vi.spyOn(window, "open").mockReturnValue(null);
 
@@ -139,6 +137,10 @@ describe("useLifoAutoPopout", () => {
       });
     });
 
+    // First blocked attempt: callback fires, runId NOT tombstoned.
+    expect(openSpy).toHaveBeenCalledTimes(1);
+    expect(onPopupBlocked).toHaveBeenCalledTimes(1);
+
     await act(async () => {
       emit("terminal-output", {
         type: "terminal-output",
@@ -148,8 +150,9 @@ describe("useLifoAutoPopout", () => {
       });
     });
 
-    expect(openSpy).toHaveBeenCalledTimes(1);
-    expect(onPopupBlocked).toHaveBeenCalledTimes(1);
+    // Second attempt retries because failed opens don't tombstone runId.
+    expect(openSpy).toHaveBeenCalledTimes(2);
+    expect(onPopupBlocked).toHaveBeenCalledTimes(2);
 
     await act(async () => {
       renderer.unmount();
