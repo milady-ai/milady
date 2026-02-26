@@ -275,6 +275,22 @@ jobs:
             fi
           done
           echo "Done copying @elizaos plugins"
+
+          # Copy common plugin dependencies from root node_modules to milady-dist/node_modules
+          # These are transitive deps needed by @elizaos plugins at runtime
+          echo "Copying plugin dependencies..."
+          for dep in uuid ai mammoth pdfjs-dist face-api.js @huggingface/transformers @anthropic-ai/claude-agent-sdk; do
+            if [ -d "node_modules/$dep" ]; then
+              # Create parent dir for scoped packages
+              pkgdir=$(dirname "$dep")
+              if [ "$pkgdir" != "." ]; then
+                mkdir -p "apps/app/electron/milady-dist/node_modules/$pkgdir"
+              fi
+              cp -rL "node_modules/$dep" "apps/app/electron/milady-dist/node_modules/$dep"
+              echo "  Copied $dep"
+            fi
+          done
+          echo "Done copying plugin dependencies"
         working-directory: .
 
       - name: Prepare platform electron-builder config
