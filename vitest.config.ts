@@ -148,14 +148,13 @@ export default defineConfig({
         ),
       },
       {
-        // @milaidy/plugin-coding-agent is a workspace plugin; resolve to source.
-        find: "@milaidy/plugin-coding-agent",
+        // @elizaos/plugin-coding-agent is optional; stub it for tests.
+        find: "@elizaos/plugin-coding-agent",
         replacement: path.join(
           repoRoot,
-          "packages",
-          "plugin-coding-agent",
-          "src",
-          "index.ts",
+          "test",
+          "stubs",
+          "coding-agent-module.ts",
         ),
       },
       {

@@ -11315,9 +11315,9 @@ async function handleRequest(
     // Try to dynamically load the route handler from the local plugin first
     let handled = false;
 
-    // Try @milaidy/plugin-coding-agent first (local workspace plugin)
+    // Try @elizaos/plugin-coding-agent first (local workspace plugin)
     try {
-      const codingAgentPlugin = await import("@milaidy/plugin-coding-agent");
+      const codingAgentPlugin = await import("@elizaos/plugin-coding-agent");
       if (codingAgentPlugin.createCodingAgentRouteHandler) {
         const coordinator = codingAgentPlugin.getCoordinator?.(state.runtime);
         const handler = codingAgentPlugin.createCodingAgentRouteHandler(

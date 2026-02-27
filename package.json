@@ -97,7 +97,7 @@
     "@elizaos/core": "next",
     "@elizaos/plugin-agent-orchestrator": "next",
     "@elizaos/plugin-agent-skills": "next",
-    "@milaidy/plugin-coding-agent": "workspace:*",
+    "@elizaos/plugin-coding-agent": "next",
     "@elizaos/plugin-anthropic": "next",
     "@elizaos/plugin-browser": "next",
     "@elizaos/plugin-cli": "next",

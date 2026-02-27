@@ -21,6 +21,7 @@
         "@elizaos/plugin-browser": "next",
         "@elizaos/plugin-claude-code-workbench": "next",
         "@elizaos/plugin-cli": "next",
+        "@elizaos/plugin-coding-agent": "next",
         "@elizaos/plugin-computeruse": "next",
         "@elizaos/plugin-cron": "next",
         "@elizaos/plugin-discord": "next",
@@ -59,7 +60,6 @@
         "@lunchtable/plugin-ltcg": "^0.1.0",
         "@mariozechner/pi-ai": "0.52.12",
         "@mariozechner/pi-tui": "0.54.0",
-        "@milaidy/plugin-coding-agent": "workspace:*",
         "@noble/curves": "^2.0.1",
         "@opentelemetry/api": "1.9.0",
         "@tensorflow/tfjs-core": "1.7.0",
@@ -372,23 +372,6 @@
         "miladyai": "next",
       },
     },
-    "packages/plugin-coding-agent": {
-      "name": "@milaidy/plugin-coding-agent",
-      "version": "0.1.0",
-      "dependencies": {
-        "coding-agent-adapters": "0.8.0",
-        "pty-console": "0.3.0",
-      },
-      "devDependencies": {
-        "@types/node": "^25.2.3",
-        "typescript": "^5.9.3",
-      },
-      "peerDependencies": {
-        "@elizaos/core": ">=2.0.0-alpha.0",
-        "git-workspace-service": ">=0.3.0",
-        "pty-manager": ">=1.8.0",
-      },
-    },
     "packages/psyop": {
       "name": "psyop",
       "version": "1.0.1",
@@ -674,6 +657,8 @@
     "@elizaos/plugin-claude-code-workbench": ["@elizaos/plugin-claude-code-workbench@0.1.0", "", { "dependencies": { "@elizaos/core": "next", "zod": "^4.3.5" } }, "sha512-2AbjkHLrKIXzYK5KTyv4k2RIs1NWhIE1FVW+a8kYz0OdAEPGQu6s8q2sl8hUpySi1FguwGJWG5FJmwNiJkkgTg=="],
 
     "@elizaos/plugin-cli": ["@elizaos/plugin-cli@2.0.0-alpha.9", "", { "dependencies": { "@elizaos/core": "2.0.0-alpha.3", "commander": "^12.1.0" } }, "sha512-6Wui/XjYaLuLYG+yNxpoH82vtcVK57XFZJkI/aJj5+FcITdN8sASundZYPPz0FuVql9G5g91w0RrlUGlnZIYuw=="],
+
+    "@elizaos/plugin-coding-agent": ["@elizaos/plugin-coding-agent@0.1.0-next.1", "", { "dependencies": { "coding-agent-adapters": "0.8.0", "pty-console": "0.3.0" }, "peerDependencies": { "@elizaos/core": ">=2.0.0-alpha.0", "git-workspace-service": ">=0.3.0", "pty-manager": ">=1.8.0" } }, "sha512-eNXfY4Cn/hd7v8ToYmYE9ph7Tv5VGuIxNQQ5l2HrhAGz/JDALYo3G6WTGjoWmVgvb9wHERHZa5gyKhJKFGv2PA=="],
 
     "@elizaos/plugin-computeruse": ["@elizaos/plugin-computeruse@2.0.0-alpha.9", "", { "dependencies": { "@modelcontextprotocol/sdk": "^1.21.0", "zod": "^4.3.6" }, "peerDependencies": { "@elizaos/computeruse": "2.0.0-alpha.3", "@elizaos/core": "2.0.0-alpha.3" }, "optionalPeers": ["@elizaos/computeruse"] }, "sha512-obAZKraGhJuWiJP3CaFtRE8Jsczygw+cDpoR7oz1rZVpZTgVlB1opFAizPctjH9rBT1fQzhs6zqWYqnETYsifQ=="],
 
@@ -976,8 +961,6 @@
     "@milady/capacitor-swabble": ["@milady/capacitor-swabble@workspace:apps/app/plugins/swabble"],
 
     "@milady/capacitor-talkmode": ["@milady/capacitor-talkmode@workspace:apps/app/plugins/talkmode"],
-
-    "@milaidy/plugin-coding-agent": ["@milaidy/plugin-coding-agent@workspace:packages/plugin-coding-agent"],
 
     "@mistralai/mistralai": ["@mistralai/mistralai@1.10.0", "", { "dependencies": { "zod": "^3.20.0", "zod-to-json-schema": "^3.24.1" } }, "sha512-tdIgWs4Le8vpvPiUEWne6tK0qbVc+jMenujnvTqOjogrJUsCSQhus0tHTU1avDDh5//Rq2dFgP9mWRAdIEoBqg=="],
 

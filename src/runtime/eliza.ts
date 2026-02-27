@@ -1104,10 +1104,10 @@ async function resolveStaticElizaPlugin(
       // biome-ignore lint/suspicious/noTsIgnore: dynamic import
       // @ts-ignore
       return import("@elizaos/plugin-agent-orchestrator");
-    case "@milaidy/plugin-coding-agent":
+    case "@elizaos/plugin-coding-agent":
       // biome-ignore lint/suspicious/noTsIgnore: dynamic import
       // @ts-ignore
-      return import("@milaidy/plugin-coding-agent");
+      return import("@elizaos/plugin-coding-agent");
     case "@elizaos/plugin-cron":
       // biome-ignore lint/suspicious/noTsIgnore: dynamic import
       // @ts-ignore

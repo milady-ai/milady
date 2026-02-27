@@ -1528,7 +1528,7 @@
       "id": "coding-agent",
       "dirName": "plugin-coding-agent",
       "name": "Coding Agent Swarms",
-      "npmName": "@milaidy/plugin-coding-agent",
+      "npmName": "@elizaos/plugin-coding-agent",
       "description": "Orchestrate CLI coding agents (Claude Code, Gemini CLI, Codex, Aider) via PTY sessions with workspace and issue management",
       "category": "feature",
       "envKey": null,

@@ -126,7 +126,7 @@ describe("Plugin Enumeration", () => {
     expect(CORE_PLUGINS).toContain("@elizaos/plugin-sql");
     expect(CORE_PLUGINS).toContain("@elizaos/plugin-shell");
     for (const name of CORE_PLUGINS) {
-      expect(name).toMatch(/^@(elizaos|milaidy)\/plugin-/);
+      expect(name).toMatch(/^@elizaos\/plugin-/);
     }
   });
 
@@ -178,8 +178,7 @@ describe("Plugin Enumeration", () => {
     for (const name of ALL_KNOWN_PLUGINS) {
       expect(
         name.startsWith("@elizaos/plugin-") ||
-          name.startsWith("@milady/plugin-") ||
-          name.startsWith("@milaidy/plugin-"),
+          name.startsWith("@milady/plugin-"),
       ).toBe(true);
     }
     expect(knownPackages.size).toBeGreaterThan(0);

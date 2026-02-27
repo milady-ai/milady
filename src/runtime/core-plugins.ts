@@ -15,7 +15,7 @@ export const CORE_PLUGINS: readonly string[] = [
   "@elizaos/plugin-rolodex", // contact graph and relationship/social memory
   "@elizaos/plugin-trajectory-logger", // trajectory logging for debugging and RL training
   "@elizaos/plugin-agent-orchestrator", // multi-agent orchestration
-  "@milaidy/plugin-coding-agent", // coding agent PTY/SwarmCoordinator
+  "@elizaos/plugin-coding-agent", // coding agent PTY/SwarmCoordinator
   "@elizaos/plugin-cron", // scheduled jobs and automation
   "@elizaos/plugin-shell", // shell command execution
   "@elizaos/plugin-plugin-manager", // dynamic plugin management

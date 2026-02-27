@@ -47,7 +47,7 @@ declare module "@elizaos/plugin-agent-orchestrator" {
     [key: string]: any;
   }
 }
-declare module "@milaidy/plugin-coding-agent" {
+declare module "@elizaos/plugin-coding-agent" {
   import type { Plugin } from "@elizaos/core";
   // biome-ignore lint/suspicious/noExplicitAny: local workspace plugin
   export const createCodingAgentRouteHandler: any;
