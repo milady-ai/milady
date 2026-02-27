@@ -18,6 +18,7 @@ import type {
 } from "@elizaos/core";
 
 // ── Shared types ────────────────────────────────────────────────────────────
+// Canonical definition — stream-routes.ts re-exports this interface.
 
 export interface StreamingDestination {
   id: string;

@@ -11,7 +11,9 @@ import { CHANNEL_PLUGIN_MAP } from "../runtime/eliza";
 import {
   type ApplyPluginAutoEnableParams,
   AUTH_PROVIDER_PLUGINS,
+  STREAMING_PLUGINS,
   applyPluginAutoEnable,
+  isStreamingDestinationConfigured,
   CONNECTOR_PLUGINS,
 } from "./plugin-auto-enable";
 import { CONNECTOR_IDS } from "./schema";
@@ -607,8 +609,8 @@ describe("CONNECTOR_PLUGINS", () => {
     expect(CONNECTOR_PLUGINS.discord).toBe("@elizaos/plugin-discord");
   });
 
-  it("contains 18 connector mappings", () => {
-    expect(Object.keys(CONNECTOR_PLUGINS)).toHaveLength(18);
+  it("contains 19 connector mappings", () => {
+    expect(Object.keys(CONNECTOR_PLUGINS)).toHaveLength(19);
   });
 
   it("maps retake to @milady/plugin-retake", () => {
@@ -843,5 +845,202 @@ describe("Blooio connector auto-enable", () => {
       }),
     );
     expect(config.plugins?.allow ?? []).not.toContain("blooio");
+  });
+});
+
+// ============================================================================
+//  Streaming destination auto-enable
+// ============================================================================
+
+describe("STREAMING_PLUGINS mapping", () => {
+  it("maps known streaming destinations to plugin packages", () => {
+    expect(STREAMING_PLUGINS.retake).toBe("@milady/plugin-retake");
+    expect(STREAMING_PLUGINS.twitch).toBe("@milady/plugin-twitch-streaming");
+    expect(STREAMING_PLUGINS.youtube).toBe("@milady/plugin-youtube-streaming");
+    expect(STREAMING_PLUGINS.customRtmp).toBe("@milady/plugin-custom-rtmp");
+  });
+});
+
+describe("isStreamingDestinationConfigured", () => {
+  it("returns false for null/undefined config", () => {
+    expect(isStreamingDestinationConfigured("retake", null)).toBe(false);
+    expect(isStreamingDestinationConfigured("twitch", undefined)).toBe(false);
+  });
+
+  it("returns false for non-object config", () => {
+    expect(isStreamingDestinationConfigured("retake", "string")).toBe(false);
+    expect(isStreamingDestinationConfigured("twitch", 42)).toBe(false);
+  });
+
+  it("returns false when enabled is explicitly false", () => {
+    expect(
+      isStreamingDestinationConfigured("retake", { enabled: false, accessToken: "tok" }),
+    ).toBe(false);
+    expect(
+      isStreamingDestinationConfigured("twitch", { enabled: false, streamKey: "sk" }),
+    ).toBe(false);
+  });
+
+  it("detects retake via accessToken", () => {
+    expect(isStreamingDestinationConfigured("retake", { accessToken: "rtk-abc" })).toBe(true);
+  });
+
+  it("detects retake via enabled: true (no accessToken)", () => {
+    expect(isStreamingDestinationConfigured("retake", { enabled: true })).toBe(true);
+  });
+
+  it("rejects retake with empty config", () => {
+    expect(isStreamingDestinationConfigured("retake", {})).toBe(false);
+  });
+
+  it("detects twitch via streamKey", () => {
+    expect(isStreamingDestinationConfigured("twitch", { streamKey: "live_abc" })).toBe(true);
+  });
+
+  it("detects youtube via streamKey", () => {
+    expect(isStreamingDestinationConfigured("youtube", { streamKey: "xxxx-xxxx" })).toBe(true);
+  });
+
+  it("detects customRtmp when both rtmpUrl and rtmpKey are present", () => {
+    expect(
+      isStreamingDestinationConfigured("customRtmp", {
+        rtmpUrl: "rtmp://example.com/live",
+        rtmpKey: "key123",
+      }),
+    ).toBe(true);
+  });
+
+  it("rejects customRtmp when only rtmpUrl is present (missing rtmpKey)", () => {
+    expect(
+      isStreamingDestinationConfigured("customRtmp", { rtmpUrl: "rtmp://example.com/live" }),
+    ).toBe(false);
+  });
+
+  it("rejects customRtmp when only rtmpKey is present (missing rtmpUrl)", () => {
+    expect(isStreamingDestinationConfigured("customRtmp", { rtmpKey: "key123" })).toBe(false);
+  });
+
+  it("returns false for unknown destination names", () => {
+    expect(isStreamingDestinationConfigured("unknown", { streamKey: "sk" })).toBe(false);
+  });
+});
+
+describe("applyPluginAutoEnable — streaming destinations", () => {
+  it("auto-enables retake-streaming plugin when retake accessToken is set", () => {
+    const { config, changes } = applyPluginAutoEnable(
+      makeParams({
+        config: {
+          streaming: { retake: { accessToken: "rtk-test" } },
+        } as any,
+      }),
+    );
+    expect(config.plugins?.allow).toContain("retake");
+    expect(changes.some((c) => c.includes("streaming: retake"))).toBe(true);
+  });
+
+  it("auto-enables twitch-streaming plugin when twitch streamKey is set", () => {
+    const { config, changes } = applyPluginAutoEnable(
+      makeParams({
+        config: {
+          streaming: { twitch: { streamKey: "live_abc" } },
+        } as any,
+      }),
+    );
+    expect(config.plugins?.allow).toContain("twitch-streaming");
+    expect(changes.some((c) => c.includes("streaming: twitch"))).toBe(true);
+  });
+
+  it("auto-enables youtube-streaming plugin when youtube streamKey is set", () => {
+    const { config, changes } = applyPluginAutoEnable(
+      makeParams({
+        config: {
+          streaming: { youtube: { streamKey: "xxxx-xxxx" } },
+        } as any,
+      }),
+    );
+    expect(config.plugins?.allow).toContain("youtube-streaming");
+    expect(changes.some((c) => c.includes("streaming: youtube"))).toBe(true);
+  });
+
+  it("auto-enables custom-rtmp plugin when customRtmp has rtmpUrl and rtmpKey", () => {
+    const { config, changes } = applyPluginAutoEnable(
+      makeParams({
+        config: {
+          streaming: {
+            customRtmp: { rtmpUrl: "rtmp://example.com/live", rtmpKey: "key123" },
+          },
+        } as any,
+      }),
+    );
+    expect(config.plugins?.allow).toContain("custom-rtmp");
+    expect(changes.some((c) => c.includes("streaming: customRtmp"))).toBe(true);
+  });
+
+  it("skips activeDestination meta field", () => {
+    const { config } = applyPluginAutoEnable(
+      makeParams({
+        config: {
+          streaming: {
+            activeDestination: "twitch",
+            twitch: { streamKey: "live_abc" },
+          },
+        } as any,
+      }),
+    );
+    // activeDestination should not result in any plugin — only twitch should be added
+    const allow = config.plugins?.allow ?? [];
+    expect(allow).toContain("twitch-streaming");
+    expect(allow).not.toContain("activeDestination");
+  });
+
+  it("does not auto-enable streaming plugin when enabled is explicitly false", () => {
+    const { config } = applyPluginAutoEnable(
+      makeParams({
+        config: {
+          streaming: { twitch: { enabled: false, streamKey: "live_abc" } },
+        } as any,
+      }),
+    );
+    expect(config.plugins?.allow ?? []).not.toContain("twitch-streaming");
+  });
+
+  it("does not auto-enable streaming plugin when shortId is disabled in plugins.entries", () => {
+    const { config } = applyPluginAutoEnable(
+      makeParams({
+        config: {
+          streaming: { twitch: { streamKey: "live_abc" } },
+          plugins: { entries: { "twitch-streaming": { enabled: false } } },
+        } as any,
+      }),
+    );
+    expect(config.plugins?.allow ?? []).not.toContain("twitch-streaming");
+  });
+
+  it("does not auto-enable when streaming config is empty", () => {
+    const { changes } = applyPluginAutoEnable(
+      makeParams({
+        config: { streaming: {} } as any,
+      }),
+    );
+    expect(changes.filter((c) => c.includes("streaming:"))).toHaveLength(0);
+  });
+
+  it("enables multiple streaming plugins simultaneously", () => {
+    const { config, changes } = applyPluginAutoEnable(
+      makeParams({
+        config: {
+          streaming: {
+            retake: { accessToken: "rtk-test" },
+            twitch: { streamKey: "live_abc" },
+            youtube: { streamKey: "xxxx-xxxx" },
+          },
+        } as any,
+      }),
+    );
+    const allow = config.plugins?.allow ?? [];
+    expect(allow).toContain("retake");
+    expect(allow).toContain("twitch-streaming");
+    expect(allow).toContain("youtube-streaming");
+    expect(changes.length).toBeGreaterThanOrEqual(3);
   });
 });

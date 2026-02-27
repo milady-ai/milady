@@ -20,6 +20,7 @@ export const CONNECTOR_IDS = [
   "nostr",
   "retake",
   "blooio",
+  "twitch",
 ] as const;
 
 import { MiladySchema } from "./zod-schema";

@@ -25,5 +25,6 @@
     "noEmit": true
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["src/__tests__/**/*", "e2e/**/*", "**/*.test.ts", "**/*.spec.ts"]
+  "exclude": ["src/__tests__/**/*", "e2e/**/*", "**/*.test.ts", "**/*.spec.ts"],
+  "references": [{ "path": "../plugin-streaming-base" }]
 }

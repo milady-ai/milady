@@ -13,11 +13,8 @@ export interface RetakeChatComment {
   type: string;
 }
 
-/** Streaming destination contract (mirrors stream-routes.ts). */
-export interface StreamingDestination {
-  id: string;
-  name: string;
-  getCredentials(): Promise<{ rtmpUrl: string; rtmpKey: string }>;
-  onStreamStart?(): Promise<void>;
-  onStreamStop?(): Promise<void>;
-}
+/**
+ * Re-export the canonical StreamingDestination from plugin-streaming-base.
+ * Single source of truth — avoids duplicate definitions that can drift.
+ */
+export type { StreamingDestination } from "../../plugin-streaming-base/src/index";

@@ -26,15 +26,11 @@ import {
 
 /**
  * A streaming destination provides RTMP credentials and optional lifecycle
- * hooks. Implement this interface to add support for a new streaming platform.
+ * hooks. Canonical definition lives in plugin-streaming-base; re-exported here
+ * so existing consumers keep working.
  */
-export interface StreamingDestination {
-  id: string;
-  name: string;
-  getCredentials(): Promise<{ rtmpUrl: string; rtmpKey: string }>;
-  onStreamStart?(): Promise<void>;
-  onStreamStop?(): Promise<void>;
-}
+export type { StreamingDestination } from "../../packages/plugin-streaming-base/src/index";
+import type { StreamingDestination } from "../../packages/plugin-streaming-base/src/index";
 
 /**
  * Subset of server state relevant to stream routes.
@@ -396,6 +392,14 @@ export async function handleStreamRoute(
   method: string,
   state: StreamRouteState,
 ): Promise<boolean> {
+  // Fast-path: skip if not a stream route
+  if (
+    !pathname.startsWith("/api/stream/") &&
+    !pathname.startsWith("/api/streaming/")
+  ) {
+    return false;
+  }
+
   // ── POST /api/stream/frame -- pipe frames to StreamManager ───────────
   if (method === "POST" && pathname === "/api/stream/frame") {
     if (state.streamManager.isRunning()) {

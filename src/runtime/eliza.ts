@@ -480,6 +480,7 @@ export const CHANNEL_PLUGIN_MAP: Readonly<Record<string, string>> = {
   nostr: "@elizaos/plugin-nostr",
   retake: "@milady/plugin-retake",
   blooio: "@elizaos/plugin-blooio",
+  twitch: "@elizaos/plugin-twitch",
 };
 
 const PI_AI_PLUGIN_PACKAGE = "@elizaos/plugin-pi-ai";
