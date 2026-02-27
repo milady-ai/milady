@@ -405,12 +405,14 @@ function InlinePluginConfig({ pluginId }: { pluginId: string }) {
 
 function UiSpecBlock({ spec, raw }: { spec: UiSpec; raw: string }) {
   const [showRaw, setShowRaw] = useState(false);
+  const { sendActionMessage } = useApp();
 
-  // Actions from UiSpec elements — currently a no-op.
-  // TODO(#35): Wire to chat API for server-round-trip actions.
   const handleAction = useCallback(
-    (_action: string, _params?: Record<string, unknown>) => {},
-    [],
+    (action: string, params?: Record<string, unknown>) => {
+      const paramsStr = params ? ` ${JSON.stringify(params)}` : "";
+      void sendActionMessage(`[action:${action}]${paramsStr}`);
+    },
+    [sendActionMessage],
   );
 
   return (
