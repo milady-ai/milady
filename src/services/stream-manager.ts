@@ -84,6 +84,8 @@ class StreamManager {
   private _maxRestartAttempts = 5;
   private _restartDecayTimer: ReturnType<typeof setInterval> | null = null;
   private _intentionalStop = false;
+  /** Guard: prevents concurrent start() calls from orphaning FFmpeg. */
+  private _starting = false;
 
   isRunning(): boolean {
     return this._running;
@@ -213,11 +215,19 @@ class StreamManager {
   }
 
   async start(config: StreamConfig): Promise<void> {
-    if (this._running) {
-      logger.warn(`${TAG} Already running — stop first`);
+    if (this._running || this._starting) {
+      logger.warn(`${TAG} Already running or starting — stop first`);
       return;
     }
+    this._starting = true;
+    try {
+      await this._startInner(config);
+    } finally {
+      this._starting = false;
+    }
+  }
 
+  private async _startInner(config: StreamConfig): Promise<void> {
     this._config = config;
     this._frameCount = 0;
     this._volume = config.volume ?? this._volume;

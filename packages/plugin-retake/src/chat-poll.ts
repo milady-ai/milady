@@ -8,6 +8,7 @@ import {
 } from "./chat-api.ts";
 import {
   CHAT_POLL_INTERVAL_MS,
+  MAX_CHAT_MESSAGE_LENGTH,
   TAG,
   VIEWER_STATS_POLL_INTERVAL_MS,
 } from "./constants.ts";
@@ -88,6 +89,11 @@ async function pollChatInner(): Promise<void> {
 
       // Update cursor
       setLastSeenId(comment.chat_event_id);
+
+      // Sanitize: cap message length to prevent prompt injection via long payloads
+      if (comment.text.length > MAX_CHAT_MESSAGE_LENGTH) {
+        comment.text = comment.text.slice(0, MAX_CHAT_MESSAGE_LENGTH);
+      }
 
       // Build IDs
       const entityId = createUniqueUuid(runtime, comment.sender_user_id);

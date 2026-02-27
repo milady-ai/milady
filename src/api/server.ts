@@ -13520,13 +13520,19 @@ export async function startApiServer(opts?: {
         // Check connectors.retake (primary retake config location)
         const connectors = state.config.connectors ?? {};
         if (isConnectorConfigured("retake", connectors.retake)) {
-          const retakeMod = "@milady/plugin-retake";
-          const { createRetakeDestination } = await import(retakeMod);
-          destination = createRetakeDestination(
-            connectors.retake as
-              | { accessToken?: string; apiUrl?: string }
-              | undefined,
-          );
+          try {
+            const retakeMod = "@milady/plugin-retake";
+            const { createRetakeDestination } = await import(retakeMod);
+            destination = createRetakeDestination(
+              connectors.retake as
+                | { accessToken?: string; apiUrl?: string }
+                | undefined,
+            );
+          } catch (err) {
+            logger.warn(
+              `[milady-api] Failed to load retake destination: ${err instanceof Error ? err.message : String(err)}`,
+            );
+          }
         }
 
         // Check streaming.customRtmp
@@ -13540,12 +13546,18 @@ export async function startApiServer(opts?: {
         ) {
           const rtmpConfig = streaming.customRtmp as Record<string, unknown>;
           if (rtmpConfig.rtmpUrl && rtmpConfig.rtmpKey) {
-            const { createCustomRtmpDestination } = await import(
-              "../plugins/custom-rtmp/index.js"
-            );
-            destination = createCustomRtmpDestination(
-              rtmpConfig as { rtmpUrl?: string; rtmpKey?: string },
-            );
+            try {
+              const { createCustomRtmpDestination } = await import(
+                "../plugins/custom-rtmp/index.js"
+              );
+              destination = createCustomRtmpDestination(
+                rtmpConfig as { rtmpUrl?: string; rtmpKey?: string },
+              );
+            } catch (err) {
+              logger.warn(
+                `[milady-api] Failed to load custom-rtmp destination: ${err instanceof Error ? err.message : String(err)}`,
+              );
+            }
           }
         }
 
@@ -13557,11 +13569,17 @@ export async function startApiServer(opts?: {
         ) {
           const twitchConfig = streaming.twitch as Record<string, unknown>;
           if (twitchConfig.streamKey) {
-            const twitchMod = "@milady/plugin-twitch-streaming";
-            const { createTwitchDestination } = await import(twitchMod);
-            destination = createTwitchDestination(
-              twitchConfig as { streamKey?: string },
-            );
+            try {
+              const twitchMod = "@milady/plugin-twitch-streaming";
+              const { createTwitchDestination } = await import(twitchMod);
+              destination = createTwitchDestination(
+                twitchConfig as { streamKey?: string },
+              );
+            } catch (err) {
+              logger.warn(
+                `[milady-api] Failed to load twitch destination: ${err instanceof Error ? err.message : String(err)}`,
+              );
+            }
           }
         }
 
@@ -13573,11 +13591,17 @@ export async function startApiServer(opts?: {
         ) {
           const ytConfig = streaming.youtube as Record<string, unknown>;
           if (ytConfig.streamKey) {
-            const youtubeMod = "@milady/plugin-youtube-streaming";
-            const { createYoutubeDestination } = await import(youtubeMod);
-            destination = createYoutubeDestination(
-              ytConfig as { streamKey?: string; rtmpUrl?: string },
-            );
+            try {
+              const youtubeMod = "@milady/plugin-youtube-streaming";
+              const { createYoutubeDestination } = await import(youtubeMod);
+              destination = createYoutubeDestination(
+                ytConfig as { streamKey?: string; rtmpUrl?: string },
+              );
+            } catch (err) {
+              logger.warn(
+                `[milady-api] Failed to load youtube destination: ${err instanceof Error ? err.message : String(err)}`,
+              );
+            }
           }
         }
 

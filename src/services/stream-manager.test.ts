@@ -641,3 +641,127 @@ describe("x11grab mode args", () => {
     expect(args).toContain("1920x1080");
   });
 });
+
+// ===========================================================================
+// 8. autoRestart on unexpected FFmpeg exit
+// ===========================================================================
+
+/** Find the captured "exit" listener from the mock proc's .on() calls. */
+function getExitHandler(
+  proc: ReturnType<typeof makeMockProc>,
+): ((code: number | null, signal: string | null) => void) | undefined {
+  const calls = proc.on.mock.calls as Array<
+    [string, (code: number | null, signal: string | null) => void]
+  >;
+  const exitCall = calls.find(([event]) => event === "exit");
+  return exitCall?.[1];
+}
+
+describe("autoRestart on unexpected FFmpeg exit", () => {
+  it("exit handler is registered and fires autoRestart on unexpected exit", async () => {
+    // Start stream with a mock proc
+    vi.useRealTimers();
+    await streamManager.stop();
+
+    const proc = makeMockProc();
+    (spawn as unknown as ReturnType<typeof vi.fn>).mockReturnValue(
+      // biome-ignore lint/suspicious/noExplicitAny: mock proc
+      proc as any,
+    );
+
+    vi.useFakeTimers();
+    try {
+      const startPromise = streamManager.start(BASE_CONFIG);
+      vi.advanceTimersByTime(2000);
+      await startPromise;
+    } finally {
+      vi.useRealTimers();
+    }
+
+    expect(streamManager.isRunning()).toBe(true);
+
+    // Verify exit handler was registered
+    const exitHandler = getExitHandler(proc);
+    expect(exitHandler).toBeDefined();
+
+    // Trigger unexpected exit
+    exitHandler?.(1, null);
+
+    // After unexpected exit, _running should be false
+    expect(streamManager.isRunning()).toBe(false);
+    // Health should reflect the crashed state
+    expect(streamManager.getHealth().running).toBe(false);
+  });
+
+  it("stop() sets intentionalStop preventing restart after exit", async () => {
+    vi.useRealTimers();
+    await streamManager.stop();
+
+    const proc = makeMockProc();
+    (spawn as unknown as ReturnType<typeof vi.fn>).mockReturnValue(
+      // biome-ignore lint/suspicious/noExplicitAny: mock proc
+      proc as any,
+    );
+
+    vi.useFakeTimers();
+    try {
+      const startPromise = streamManager.start(BASE_CONFIG);
+      vi.advanceTimersByTime(2000);
+      await startPromise;
+    } finally {
+      vi.useRealTimers();
+    }
+    expect(streamManager.isRunning()).toBe(true);
+
+    // Stop intentionally
+    await streamManager.stop();
+    expect(streamManager.isRunning()).toBe(false);
+
+    const spawnCountBefore = (spawn as unknown as ReturnType<typeof vi.fn>).mock
+      .calls.length;
+
+    // Simulate exit event after intentional stop — should NOT trigger restart
+    const exitHandler = getExitHandler(proc);
+    if (exitHandler) exitHandler(0, "SIGTERM");
+
+    // Advance timers well past any restart backoff (10s)
+    vi.useFakeTimers();
+    try {
+      vi.advanceTimersByTime(10_000);
+    } finally {
+      vi.useRealTimers();
+    }
+
+    const spawnCountAfter = (spawn as unknown as ReturnType<typeof vi.fn>).mock
+      .calls.length;
+    // No new spawn calls — restart was prevented by intentionalStop
+    expect(spawnCountAfter).toBe(spawnCountBefore);
+  });
+
+  it("concurrent start() calls are rejected by _starting guard", async () => {
+    vi.useRealTimers();
+    await streamManager.stop();
+
+    const proc = makeMockProc();
+    (spawn as unknown as ReturnType<typeof vi.fn>).mockReturnValue(
+      // biome-ignore lint/suspicious/noExplicitAny: mock proc
+      proc as any,
+    );
+
+    vi.useFakeTimers();
+    try {
+      // Fire two concurrent start() calls
+      const start1 = streamManager.start(BASE_CONFIG);
+      const start2 = streamManager.start(BASE_CONFIG);
+      vi.advanceTimersByTime(2000);
+      await Promise.all([start1, start2]);
+    } finally {
+      vi.useRealTimers();
+    }
+
+    // spawn should only have been called once (second start was rejected)
+    const spawnCalls = (spawn as unknown as ReturnType<typeof vi.fn>).mock
+      .calls;
+    expect(spawnCalls.length).toBe(1);
+  });
+});

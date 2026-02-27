@@ -259,8 +259,8 @@ export function createStreamingPlugin(cfg: StreamingPluginConfig): {
         );
         const data = (await res.json()) as Record<string, unknown>;
         const status = data.running ? "LIVE" : "OFFLINE";
-        const uptime = data.uptimeSeconds
-          ? `${Math.floor(Number(data.uptimeSeconds) / 60)}m`
+        const uptime = data.uptime
+          ? `${Math.floor(Number(data.uptime) / 60)}m`
           : "n/a";
         if (callback) {
           await callback({
