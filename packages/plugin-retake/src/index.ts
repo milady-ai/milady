@@ -32,8 +32,6 @@ import {
 import {
   startChatPolling,
   startViewerStatsPolling,
-  stopChatPolling,
-  stopViewerStatsPolling,
 } from "./chat-poll.ts";
 import { TAG } from "./constants.ts";
 import {
@@ -49,12 +47,12 @@ export {
   RETAKE_SYSTEM_PROMPT,
   RETAKE_TOPICS,
 } from "./character.ts";
-// Re-export public API
-export { createRetakeDestination } from "./destination.ts";
 export {
   stopChatPolling,
   stopViewerStatsPolling,
 } from "./chat-poll.ts";
+// Re-export public API
+export { createRetakeDestination } from "./destination.ts";
 export type { RetakeChatComment, StreamingDestination } from "./types.ts";
 
 // ---------------------------------------------------------------------------

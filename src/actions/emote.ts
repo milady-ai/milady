@@ -85,8 +85,7 @@ export const emoteAction: Action = {
       }
 
       if (!emoteId) {
-        // Last resort: default to wave (action was triggered intentionally)
-        emoteId = "wave";
+        return { text: "", success: false };
       }
 
       // Look up the emote in the catalog.

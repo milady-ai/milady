@@ -2311,11 +2311,21 @@ export function buildCharacterFromConfig(config: MiladyConfig): Character {
   //   NEW (@elizaos/core):     [{examples: [{name, content}, ...]}, ...]
   const mappedExamples = messageExamples?.map((item: unknown) => {
     // Already in new format — pass through
-    if (item && typeof item === "object" && "examples" in (item as Record<string, unknown>)) {
-      return item as { examples: { name: string; content: { text: string } }[] };
+    if (
+      item &&
+      typeof item === "object" &&
+      "examples" in (item as Record<string, unknown>)
+    ) {
+      return item as {
+        examples: { name: string; content: { text: string } }[];
+      };
     }
     // Old format — array of {user, content} entries
-    const arr = item as { user?: string; name?: string; content: { text: string } }[];
+    const arr = item as {
+      user?: string;
+      name?: string;
+      content: { text: string };
+    }[];
     return {
       examples: arr.map((msg) => ({
         name: msg.name ?? msg.user ?? "",

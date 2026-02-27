@@ -11,10 +11,10 @@ import { CHANNEL_PLUGIN_MAP } from "../runtime/eliza";
 import {
   type ApplyPluginAutoEnableParams,
   AUTH_PROVIDER_PLUGINS,
-  STREAMING_PLUGINS,
   applyPluginAutoEnable,
-  isStreamingDestinationConfigured,
   CONNECTOR_PLUGINS,
+  isStreamingDestinationConfigured,
+  STREAMING_PLUGINS,
 } from "./plugin-auto-enable";
 import { CONNECTOR_IDS } from "./schema";
 
@@ -874,19 +874,29 @@ describe("isStreamingDestinationConfigured", () => {
 
   it("returns false when enabled is explicitly false", () => {
     expect(
-      isStreamingDestinationConfigured("retake", { enabled: false, accessToken: "tok" }),
+      isStreamingDestinationConfigured("retake", {
+        enabled: false,
+        accessToken: "tok",
+      }),
     ).toBe(false);
     expect(
-      isStreamingDestinationConfigured("twitch", { enabled: false, streamKey: "sk" }),
+      isStreamingDestinationConfigured("twitch", {
+        enabled: false,
+        streamKey: "sk",
+      }),
     ).toBe(false);
   });
 
   it("detects retake via accessToken", () => {
-    expect(isStreamingDestinationConfigured("retake", { accessToken: "rtk-abc" })).toBe(true);
+    expect(
+      isStreamingDestinationConfigured("retake", { accessToken: "rtk-abc" }),
+    ).toBe(true);
   });
 
   it("detects retake via enabled: true (no accessToken)", () => {
-    expect(isStreamingDestinationConfigured("retake", { enabled: true })).toBe(true);
+    expect(isStreamingDestinationConfigured("retake", { enabled: true })).toBe(
+      true,
+    );
   });
 
   it("rejects retake with empty config", () => {
@@ -894,11 +904,15 @@ describe("isStreamingDestinationConfigured", () => {
   });
 
   it("detects twitch via streamKey", () => {
-    expect(isStreamingDestinationConfigured("twitch", { streamKey: "live_abc" })).toBe(true);
+    expect(
+      isStreamingDestinationConfigured("twitch", { streamKey: "live_abc" }),
+    ).toBe(true);
   });
 
   it("detects youtube via streamKey", () => {
-    expect(isStreamingDestinationConfigured("youtube", { streamKey: "xxxx-xxxx" })).toBe(true);
+    expect(
+      isStreamingDestinationConfigured("youtube", { streamKey: "xxxx-xxxx" }),
+    ).toBe(true);
   });
 
   it("detects customRtmp when both rtmpUrl and rtmpKey are present", () => {
@@ -912,16 +926,22 @@ describe("isStreamingDestinationConfigured", () => {
 
   it("rejects customRtmp when only rtmpUrl is present (missing rtmpKey)", () => {
     expect(
-      isStreamingDestinationConfigured("customRtmp", { rtmpUrl: "rtmp://example.com/live" }),
+      isStreamingDestinationConfigured("customRtmp", {
+        rtmpUrl: "rtmp://example.com/live",
+      }),
     ).toBe(false);
   });
 
   it("rejects customRtmp when only rtmpKey is present (missing rtmpUrl)", () => {
-    expect(isStreamingDestinationConfigured("customRtmp", { rtmpKey: "key123" })).toBe(false);
+    expect(
+      isStreamingDestinationConfigured("customRtmp", { rtmpKey: "key123" }),
+    ).toBe(false);
   });
 
   it("returns false for unknown destination names", () => {
-    expect(isStreamingDestinationConfigured("unknown", { streamKey: "sk" })).toBe(false);
+    expect(
+      isStreamingDestinationConfigured("unknown", { streamKey: "sk" }),
+    ).toBe(false);
   });
 });
 
@@ -931,6 +951,7 @@ describe("applyPluginAutoEnable — streaming destinations", () => {
       makeParams({
         config: {
           streaming: { retake: { accessToken: "rtk-test" } },
+          // biome-ignore lint/suspicious/noExplicitAny: partial test config
         } as any,
       }),
     );
@@ -943,6 +964,7 @@ describe("applyPluginAutoEnable — streaming destinations", () => {
       makeParams({
         config: {
           streaming: { twitch: { streamKey: "live_abc" } },
+          // biome-ignore lint/suspicious/noExplicitAny: partial test config
         } as any,
       }),
     );
@@ -955,6 +977,7 @@ describe("applyPluginAutoEnable — streaming destinations", () => {
       makeParams({
         config: {
           streaming: { youtube: { streamKey: "xxxx-xxxx" } },
+          // biome-ignore lint/suspicious/noExplicitAny: partial test config
         } as any,
       }),
     );
@@ -967,8 +990,12 @@ describe("applyPluginAutoEnable — streaming destinations", () => {
       makeParams({
         config: {
           streaming: {
-            customRtmp: { rtmpUrl: "rtmp://example.com/live", rtmpKey: "key123" },
+            customRtmp: {
+              rtmpUrl: "rtmp://example.com/live",
+              rtmpKey: "key123",
+            },
           },
+          // biome-ignore lint/suspicious/noExplicitAny: partial test config
         } as any,
       }),
     );
@@ -984,6 +1011,7 @@ describe("applyPluginAutoEnable — streaming destinations", () => {
             activeDestination: "twitch",
             twitch: { streamKey: "live_abc" },
           },
+          // biome-ignore lint/suspicious/noExplicitAny: partial test config
         } as any,
       }),
     );
@@ -998,6 +1026,7 @@ describe("applyPluginAutoEnable — streaming destinations", () => {
       makeParams({
         config: {
           streaming: { twitch: { enabled: false, streamKey: "live_abc" } },
+          // biome-ignore lint/suspicious/noExplicitAny: partial test config
         } as any,
       }),
     );
@@ -1010,6 +1039,7 @@ describe("applyPluginAutoEnable — streaming destinations", () => {
         config: {
           streaming: { twitch: { streamKey: "live_abc" } },
           plugins: { entries: { "twitch-streaming": { enabled: false } } },
+          // biome-ignore lint/suspicious/noExplicitAny: partial test config
         } as any,
       }),
     );
@@ -1019,6 +1049,7 @@ describe("applyPluginAutoEnable — streaming destinations", () => {
   it("does not auto-enable when streaming config is empty", () => {
     const { changes } = applyPluginAutoEnable(
       makeParams({
+        // biome-ignore lint/suspicious/noExplicitAny: partial test config
         config: { streaming: {} } as any,
       }),
     );
@@ -1034,6 +1065,7 @@ describe("applyPluginAutoEnable — streaming destinations", () => {
             twitch: { streamKey: "live_abc" },
             youtube: { streamKey: "xxxx-xxxx" },
           },
+          // biome-ignore lint/suspicious/noExplicitAny: partial test config
         } as any,
       }),
     );

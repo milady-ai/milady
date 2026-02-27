@@ -30,6 +30,7 @@ import {
  * so existing consumers keep working.
  */
 export type { StreamingDestination } from "../../packages/plugin-streaming-base/src/index";
+
 import type { StreamingDestination } from "../../packages/plugin-streaming-base/src/index";
 
 /**
@@ -522,7 +523,11 @@ export async function handleStreamRoute(
       const VALID_INPUT_MODES = ["testsrc", "avfoundation", "pipe"] as const;
       const inputMode = body?.inputMode ?? "testsrc";
       if (!VALID_INPUT_MODES.includes(inputMode)) {
-        error(res, `inputMode must be one of: ${VALID_INPUT_MODES.join(", ")}`, 400);
+        error(
+          res,
+          `inputMode must be one of: ${VALID_INPUT_MODES.join(", ")}`,
+          400,
+        );
         return true;
       }
 
@@ -539,7 +544,12 @@ export async function handleStreamRoute(
       }
 
       const framerate = body?.framerate ?? 30;
-      if (typeof framerate !== "number" || !Number.isInteger(framerate) || framerate < 1 || framerate > 60) {
+      if (
+        typeof framerate !== "number" ||
+        !Number.isInteger(framerate) ||
+        framerate < 1 ||
+        framerate > 60
+      ) {
         error(res, "framerate must be an integer between 1 and 60", 400);
         return true;
       }

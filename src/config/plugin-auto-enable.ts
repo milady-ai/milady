@@ -283,7 +283,9 @@ export function applyPluginAutoEnable(
   }
 
   // Streaming destinations
-  const streaming = (updatedConfig as Record<string, unknown>).streaming as Record<string, unknown> | undefined;
+  const streaming = (updatedConfig as Record<string, unknown>).streaming as
+    | Record<string, unknown>
+    | undefined;
   if (streaming) {
     for (const [destName, destConfig] of Object.entries(streaming)) {
       if (destName === "activeDestination") continue; // skip meta field
@@ -292,7 +294,9 @@ export function applyPluginAutoEnable(
       if (!isStreamingDestinationConfigured(destName, destConfig)) continue;
       // Derive short ID from the package name (e.g. "@milady/plugin-twitch-streaming" → "twitch-streaming")
       const shortId = pluginName.includes("/plugin-")
-        ? pluginName.slice(pluginName.lastIndexOf("/plugin-") + "/plugin-".length)
+        ? pluginName.slice(
+            pluginName.lastIndexOf("/plugin-") + "/plugin-".length,
+          )
         : destName;
       if (pluginsConfig.entries[shortId]?.enabled === false) continue;
       addToAllowlist(

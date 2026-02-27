@@ -79,8 +79,10 @@ async function startWithMock(config: StreamConfig): Promise<string[]> {
   await streamManager.stop();
 
   const proc = makeMockProc();
-  // biome-ignore lint/suspicious/noExplicitAny: mock proc shape doesn't fully match ChildProcess
-  (spawn as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce(proc as any);
+  (spawn as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce(
+    // biome-ignore lint/suspicious/noExplicitAny: mock proc shape doesn't fully match ChildProcess
+    proc as any,
+  );
 
   vi.useFakeTimers();
   try {

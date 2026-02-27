@@ -277,7 +277,9 @@ describe("handleStreamRoute", () => {
         body: Buffer.from("jpeg-data"),
       });
       const state = mockState();
-      (state.streamManager.isRunning as ReturnType<typeof vi.fn>).mockReturnValue(false);
+      (
+        state.streamManager.isRunning as ReturnType<typeof vi.fn>
+      ).mockReturnValue(false);
 
       const handled = await handleStreamRoute(
         req,
@@ -303,7 +305,9 @@ describe("handleStreamRoute", () => {
         url: "/api/stream/frame",
       });
       const state = mockState();
-      (state.streamManager.isRunning as ReturnType<typeof vi.fn>).mockReturnValue(true);
+      (
+        state.streamManager.isRunning as ReturnType<typeof vi.fn>
+      ).mockReturnValue(true);
 
       const handled = await handleStreamRoute(
         req,
@@ -329,7 +333,9 @@ describe("handleStreamRoute", () => {
         body: frameData,
       });
       const state = mockState();
-      (state.streamManager.isRunning as ReturnType<typeof vi.fn>).mockReturnValue(true);
+      (
+        state.streamManager.isRunning as ReturnType<typeof vi.fn>
+      ).mockReturnValue(true);
 
       const handled = await handleStreamRoute(
         req,
@@ -415,9 +421,7 @@ describe("handleStreamRoute", () => {
 
       await handleStreamRoute(req, res, "/api/stream/status", "GET", state);
 
-      expect(getJson()).toEqual(
-        expect.objectContaining({ destination: null }),
-      );
+      expect(getJson()).toEqual(expect.objectContaining({ destination: null }));
     });
   });
 
@@ -625,9 +629,9 @@ describe("handleStreamRoute", () => {
         url: "/api/stream/mute",
       });
       const state = mockState();
-      (state.streamManager.mute as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
-        new Error("mute failed"),
-      );
+      (
+        state.streamManager.mute as ReturnType<typeof vi.fn>
+      ).mockRejectedValueOnce(new Error("mute failed"));
 
       await handleStreamRoute(req, res, "/api/stream/mute", "POST", state);
 
@@ -672,9 +676,9 @@ describe("handleStreamRoute", () => {
         url: "/api/stream/unmute",
       });
       const state = mockState();
-      (state.streamManager.unmute as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
-        new Error("unmute failed"),
-      );
+      (
+        state.streamManager.unmute as ReturnType<typeof vi.fn>
+      ).mockRejectedValueOnce(new Error("unmute failed"));
 
       await handleStreamRoute(req, res, "/api/stream/unmute", "POST", state);
 
@@ -695,7 +699,9 @@ describe("handleStreamRoute", () => {
         url: "/api/stream/live",
       });
       const state = mockState();
-      (state.streamManager.isRunning as ReturnType<typeof vi.fn>).mockReturnValue(true);
+      (
+        state.streamManager.isRunning as ReturnType<typeof vi.fn>
+      ).mockReturnValue(true);
 
       const handled = await handleStreamRoute(
         req,
@@ -751,7 +757,9 @@ describe("handleStreamRoute", () => {
         url: "/api/stream/offline",
       });
       const state = mockState();
-      (state.streamManager.isRunning as ReturnType<typeof vi.fn>).mockReturnValue(false);
+      (
+        state.streamManager.isRunning as ReturnType<typeof vi.fn>
+      ).mockReturnValue(false);
 
       const handled = await handleStreamRoute(
         req,
@@ -775,7 +783,9 @@ describe("handleStreamRoute", () => {
         url: "/api/stream/offline",
       });
       const state = mockState();
-      (state.streamManager.isRunning as ReturnType<typeof vi.fn>).mockReturnValue(true);
+      (
+        state.streamManager.isRunning as ReturnType<typeof vi.fn>
+      ).mockReturnValue(true);
 
       const handled = await handleStreamRoute(
         req,
@@ -924,7 +934,9 @@ describe("handleStreamRoute", () => {
 
 describe("createRetakeDestination()", () => {
   it("returns a StreamingDestination with id and name", async () => {
-    const { createRetakeDestination } = await import("../../packages/plugin-retake/src/index.ts");
+    const { createRetakeDestination } = await import(
+      "../../packages/plugin-retake/src/index.ts"
+    );
     const dest = createRetakeDestination({ accessToken: "test-token" });
     expect(dest.id).toBe("retake");
     expect(dest.name).toBe("Retake.tv");
@@ -935,7 +947,9 @@ describe("createRetakeDestination()", () => {
     delete process.env.RETAKE_AGENT_TOKEN;
 
     try {
-      const { createRetakeDestination } = await import("../../packages/plugin-retake/src/index.ts");
+      const { createRetakeDestination } = await import(
+        "../../packages/plugin-retake/src/index.ts"
+      );
       const dest = createRetakeDestination();
       await expect(dest.getCredentials()).rejects.toThrow("not configured");
     } finally {
@@ -948,7 +962,9 @@ describe("createRetakeDestination()", () => {
     process.env.RETAKE_AGENT_TOKEN = "env-token";
 
     try {
-      const { createRetakeDestination } = await import("../../packages/plugin-retake/src/index.ts");
+      const { createRetakeDestination } = await import(
+        "../../packages/plugin-retake/src/index.ts"
+      );
       const dest = createRetakeDestination({ accessToken: "config-token" });
 
       // getCredentials will try to fetch from retake.tv API with config-token.
@@ -1300,13 +1316,19 @@ describe("POST /api/stream/start (backward-compat)", () => {
     });
 
     const handled = await handleStreamRoute(
-      req, res, "/api/stream/start", "POST", mockState(),
+      req,
+      res,
+      "/api/stream/start",
+      "POST",
+      mockState(),
     );
 
     expect(handled).toBe(true);
     expect(getStatus()).toBe(400);
     expect(getJson()).toEqual(
-      expect.objectContaining({ error: expect.stringContaining("rtmpUrl and rtmpKey are required") }),
+      expect.objectContaining({
+        error: expect.stringContaining("rtmpUrl and rtmpKey are required"),
+      }),
     );
   });
 
@@ -1319,13 +1341,19 @@ describe("POST /api/stream/start (backward-compat)", () => {
     });
 
     const handled = await handleStreamRoute(
-      req, res, "/api/stream/start", "POST", mockState(),
+      req,
+      res,
+      "/api/stream/start",
+      "POST",
+      mockState(),
     );
 
     expect(handled).toBe(true);
     expect(getStatus()).toBe(400);
     expect(getJson()).toEqual(
-      expect.objectContaining({ error: expect.stringContaining("rtmpUrl and rtmpKey are required") }),
+      expect.objectContaining({
+        error: expect.stringContaining("rtmpUrl and rtmpKey are required"),
+      }),
     );
   });
 
@@ -1334,17 +1362,26 @@ describe("POST /api/stream/start (backward-compat)", () => {
     const req = createMockIncomingMessage({
       method: "POST",
       url: "/api/stream/start",
-      body: JSON.stringify({ rtmpUrl: "http://internal-service:8080/live", rtmpKey: "key" }),
+      body: JSON.stringify({
+        rtmpUrl: "http://internal-service:8080/live",
+        rtmpKey: "key",
+      }),
     });
 
     const handled = await handleStreamRoute(
-      req, res, "/api/stream/start", "POST", mockState(),
+      req,
+      res,
+      "/api/stream/start",
+      "POST",
+      mockState(),
     );
 
     expect(handled).toBe(true);
     expect(getStatus()).toBe(400);
     expect(getJson()).toEqual(
-      expect.objectContaining({ error: expect.stringContaining("rtmp:// or rtmps://") }),
+      expect.objectContaining({
+        error: expect.stringContaining("rtmp:// or rtmps://"),
+      }),
     );
   });
 
@@ -1423,7 +1460,9 @@ describe("POST /api/stream/start (backward-compat)", () => {
     await handleStreamRoute(req, res, "/api/stream/start", "POST", mockState());
     expect(getStatus()).toBe(400);
     expect(getJson()).toEqual(
-      expect.objectContaining({ error: expect.stringContaining("resolution must match") }),
+      expect.objectContaining({
+        error: expect.stringContaining("resolution must match"),
+      }),
     );
   });
 
@@ -1444,7 +1483,12 @@ describe("POST /api/stream/start (backward-compat)", () => {
   });
 
   it("accepts valid resolution formats", async () => {
-    for (const resolution of ["1280x720", "1920x1080", "640x480", "3840x2160"]) {
+    for (const resolution of [
+      "1280x720",
+      "1920x1080",
+      "640x480",
+      "3840x2160",
+    ]) {
       const { res, getStatus } = createMockHttpResponse();
       const req = createMockIncomingMessage({
         method: "POST",
@@ -1456,7 +1500,13 @@ describe("POST /api/stream/start (backward-compat)", () => {
         }),
       });
 
-      await handleStreamRoute(req, res, "/api/stream/start", "POST", mockState());
+      await handleStreamRoute(
+        req,
+        res,
+        "/api/stream/start",
+        "POST",
+        mockState(),
+      );
       expect(getStatus()).toBe(200);
     }
   });
@@ -1476,7 +1526,9 @@ describe("POST /api/stream/start (backward-compat)", () => {
     await handleStreamRoute(req, res, "/api/stream/start", "POST", mockState());
     expect(getStatus()).toBe(400);
     expect(getJson()).toEqual(
-      expect.objectContaining({ error: expect.stringContaining("bitrate must match") }),
+      expect.objectContaining({
+        error: expect.stringContaining("bitrate must match"),
+      }),
     );
   });
 
@@ -1493,7 +1545,13 @@ describe("POST /api/stream/start (backward-compat)", () => {
         }),
       });
 
-      await handleStreamRoute(req, res, "/api/stream/start", "POST", mockState());
+      await handleStreamRoute(
+        req,
+        res,
+        "/api/stream/start",
+        "POST",
+        mockState(),
+      );
       expect(getStatus()).toBe(200);
     }
   });
@@ -1513,7 +1571,9 @@ describe("POST /api/stream/start (backward-compat)", () => {
     await handleStreamRoute(req, res, "/api/stream/start", "POST", mockState());
     expect(getStatus()).toBe(400);
     expect(getJson()).toEqual(
-      expect.objectContaining({ error: expect.stringContaining("inputMode must be one of") }),
+      expect.objectContaining({
+        error: expect.stringContaining("inputMode must be one of"),
+      }),
     );
   });
 
@@ -1530,7 +1590,13 @@ describe("POST /api/stream/start (backward-compat)", () => {
         }),
       });
 
-      await handleStreamRoute(req, res, "/api/stream/start", "POST", mockState());
+      await handleStreamRoute(
+        req,
+        res,
+        "/api/stream/start",
+        "POST",
+        mockState(),
+      );
       expect(getStatus()).toBe(200);
     }
   });
@@ -1666,7 +1732,11 @@ describe("POST /api/stream/stop (backward-compat)", () => {
     const state = mockState();
 
     const handled = await handleStreamRoute(
-      req, res, "/api/stream/stop", "POST", state,
+      req,
+      res,
+      "/api/stream/stop",
+      "POST",
+      state,
     );
 
     expect(handled).toBe(true);
@@ -1681,9 +1751,9 @@ describe("POST /api/stream/stop (backward-compat)", () => {
       url: "/api/stream/stop",
     });
     const state = mockState();
-    (state.streamManager.stop as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
-      new Error("FFmpeg already exited"),
-    );
+    (
+      state.streamManager.stop as ReturnType<typeof vi.fn>
+    ).mockRejectedValueOnce(new Error("FFmpeg already exited"));
 
     await handleStreamRoute(req, res, "/api/stream/stop", "POST", state);
 

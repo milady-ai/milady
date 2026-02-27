@@ -525,7 +525,13 @@ export interface PluginInfo {
   enabled: boolean;
   configured: boolean;
   envKey: string | null;
-  category: "ai-provider" | "connector" | "streaming" | "database" | "app" | "feature";
+  category:
+    | "ai-provider"
+    | "connector"
+    | "streaming"
+    | "database"
+    | "app"
+    | "feature";
   source: "bundled" | "store";
   parameters: PluginParamDef[];
   validationErrors: Array<{ field: string; message: string }>;
@@ -4395,7 +4401,6 @@ export class MiladyClient {
       body: JSON.stringify({ destinationId }),
     });
   }
-
 }
 
 // Singleton

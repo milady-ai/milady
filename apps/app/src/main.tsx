@@ -411,7 +411,11 @@ function injectPopoutApiBase(): void {
     try {
       const parsed = new URL(apiBase);
       const host = parsed.hostname;
-      if (host === "localhost" || host === "127.0.0.1" || host === window.location.hostname) {
+      if (
+        host === "localhost" ||
+        host === "127.0.0.1" ||
+        host === window.location.hostname
+      ) {
         window.__MILADY_API_BASE__ = apiBase;
       } else {
         console.warn("[Milady] Rejected non-local apiBase:", host);

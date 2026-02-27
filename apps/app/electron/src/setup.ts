@@ -1,7 +1,6 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import type { CapacitorElectronConfig } from "@capacitor-community/electron";
-import { getScreenCaptureManager } from "./native/screencapture";
 import {
   CapacitorSplashScreen,
   CapElectronEventEmitter,
@@ -23,6 +22,7 @@ import {
 import electronIsDev from "electron-is-dev";
 import electronServe from "electron-serve";
 import windowStateKeeper from "electron-window-state";
+import { getScreenCaptureManager } from "./native/screencapture";
 import {
   buildMissingWebAssetsMessage,
   resolveWebAssetDirectory,

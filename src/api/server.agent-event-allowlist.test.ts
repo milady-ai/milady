@@ -3,7 +3,14 @@ import { AGENT_EVENT_ALLOWED_STREAMS } from "./server";
 
 describe("AGENT_EVENT_ALLOWED_STREAMS", () => {
   it("includes core stream names", () => {
-    for (const name of ["chat", "terminal", "game", "autonomy", "stream", "system"]) {
+    for (const name of [
+      "chat",
+      "terminal",
+      "game",
+      "autonomy",
+      "stream",
+      "system",
+    ]) {
       expect(AGENT_EVENT_ALLOWED_STREAMS.has(name)).toBe(true);
     }
   });

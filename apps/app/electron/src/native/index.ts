@@ -48,7 +48,6 @@ export function initializeNativeModules(mainWindow: BrowserWindow): void {
   getCameraManager().setMainWindow(mainWindow);
   getCanvasManager().setMainWindow(mainWindow);
   getPermissionManager().setMainWindow(mainWindow);
-
 }
 
 /**
