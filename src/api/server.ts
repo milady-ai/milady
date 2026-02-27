@@ -13371,6 +13371,31 @@ export async function startApiServer(opts?: {
           `[autonomy-route] Failed to route proactive event: ${err instanceof Error ? err.message : String(err)}`,
         );
       });
+
+      // Auto-trigger TTS for assistant messages on the stream
+      if (event.stream === "assistant") {
+        const payload =
+          event.data && typeof event.data === "object"
+            ? (event.data as Record<string, unknown>)
+            : null;
+        const text =
+          typeof payload?.text === "string" ? payload.text.trim() : "";
+        if (text) {
+          const streamRouteState = (state as unknown as Record<string, unknown>)
+            .__streamRouteState as
+            | import("./stream-routes.js").StreamRouteState
+            | undefined;
+          if (streamRouteState) {
+            void import("./stream-routes.js")
+              .then((mod) => mod.onAgentMessage(text, streamRouteState))
+              .catch((err) => {
+                logger.warn(
+                  `[stream-voice] Auto-TTS trigger failed: ${err instanceof Error ? err.message : String(err)}`,
+                );
+              });
+          }
+        }
+      }
     });
 
     const unsubHeartbeat = svc.subscribeHeartbeat((event) => {
@@ -13613,7 +13638,23 @@ export async function startApiServer(opts?: {
           captureUrl: (connectors.retake as Record<string, unknown> | undefined)
             ?.captureUrl as string | undefined,
           destination,
+          get config() {
+            const cfg = state.config as Record<string, unknown> | undefined;
+            const msgs = cfg?.messages as Record<string, unknown> | undefined;
+            return msgs
+              ? {
+                  messages: {
+                    tts: msgs.tts as
+                      | import("../config/types.messages").TtsConfig
+                      | undefined,
+                  },
+                }
+              : undefined;
+          },
         };
+        // Store streamState for auto-TTS triggering in event pipeline
+        (state as unknown as Record<string, unknown>).__streamRouteState =
+          streamState;
         state.connectorRouteHandlers.push((req, res, pathname, method) =>
           handleStreamRoute(req, res, pathname, method, streamState),
         );

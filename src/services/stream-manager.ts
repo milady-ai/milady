@@ -30,10 +30,11 @@
 
 import { type ChildProcess, spawn } from "node:child_process";
 import { logger } from "@elizaos/core";
+import { type ITtsStreamBridge, ttsStreamBridge } from "./tts-stream-bridge";
 
 const TAG = "[StreamManager]";
 
-export type AudioSource = "silent" | "system" | "microphone";
+export type AudioSource = "silent" | "system" | "microphone" | "tts";
 
 export interface StreamConfig {
   rtmpUrl: string;
@@ -158,6 +159,9 @@ class StreamManager {
     if (!this._config) return;
     const savedStartedAt = this.startedAt;
     const savedFrameCount = this._frameCount;
+
+    // Detach TTS bridge before stopping FFmpeg
+    ttsStreamBridge.detach();
 
     // Stop FFmpeg without resetting tracking
     if (this.ffmpeg && !this.ffmpeg.killed && this.ffmpeg.exitCode === null) {
@@ -324,9 +328,17 @@ class StreamManager {
       `${TAG} Resolution: ${resolution}, Bitrate: ${bitrate}, FPS: ${framerate}`,
     );
 
-    // In pipe mode, FFmpeg reads from stdin; otherwise stdin is ignored
+    const isTts = (config.audioSource || "silent") === "tts";
+
+    // In pipe mode, FFmpeg reads from stdin; otherwise stdin is ignored.
+    // TTS mode adds a 4th stdio fd (pipe:3) for raw PCM audio input.
     this.ffmpeg = spawn("ffmpeg", ["-y", ...ffmpegArgs], {
-      stdio: [isPipe ? "pipe" : "ignore", "pipe", "pipe"],
+      stdio: [
+        isPipe ? "pipe" : "ignore",
+        "pipe",
+        "pipe",
+        ...(isTts ? (["pipe"] as const) : []),
+      ],
     });
 
     // Log all FFmpeg stderr for debugging
@@ -358,6 +370,13 @@ class StreamManager {
       });
     }
 
+    // Attach TTS bridge to pipe:3 for PCM audio
+    if (isTts && this.ffmpeg.stdio[3]) {
+      const pipe3 = this.ffmpeg.stdio[3] as import("node:stream").Writable;
+      ttsStreamBridge.attach(pipe3);
+      logger.info(`${TAG} TTS bridge attached to pipe:3`);
+    }
+
     // Wait a moment to confirm it started
     await new Promise((r) => setTimeout(r, 1500));
 
@@ -386,6 +405,9 @@ class StreamManager {
   async stop(): Promise<{ uptime: number }> {
     const uptime = this.getUptime();
     const frames = this._frameCount;
+
+    // Detach TTS bridge before killing FFmpeg
+    ttsStreamBridge.detach();
 
     if (this.ffmpeg && !this.ffmpeg.killed && this.ffmpeg.exitCode === null) {
       const ffmpegProc = this.ffmpeg;
@@ -587,6 +609,11 @@ class StreamManager {
     const source = config.audioSource || "silent";
 
     switch (source) {
+      case "tts": {
+        // Raw PCM from TTS bridge via pipe:3 (4th stdio fd).
+        // Format must match tts-stream-bridge output: s16le, 24kHz, mono.
+        return ["-f", "s16le", "-ar", "24000", "-ac", "1", "-i", "pipe:3"];
+      }
       case "silent": {
         // Synthetic silent audio — always works, no hardware required.
         return [
@@ -632,6 +659,11 @@ class StreamManager {
         ];
       }
     }
+  }
+
+  /** Get the TTS stream bridge for external speak triggers. */
+  getTtsBridge(): ITtsStreamBridge {
+    return ttsStreamBridge;
   }
 }
 

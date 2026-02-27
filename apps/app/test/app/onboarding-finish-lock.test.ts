@@ -84,6 +84,7 @@ const { mockClient } = vi.hoisted(() => ({
       startedAt: undefined,
       uptime: undefined,
     })),
+    saveStreamSettings: vi.fn(async () => ({ ok: true })),
   },
 }));
 

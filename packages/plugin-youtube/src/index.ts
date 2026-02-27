@@ -7,6 +7,7 @@
  */
 
 import {
+  buildPresetLayout,
   createStreamingPlugin,
   type StreamingDestination,
 } from "@milady/plugin-streaming-base";
@@ -22,6 +23,11 @@ const { plugin, createDestination } = createStreamingPlugin({
   streamKeyEnvVar: "YOUTUBE_STREAM_KEY",
   defaultRtmpUrl: "rtmp://a.rtmp.youtube.com/live2",
   rtmpUrlEnvVar: "YOUTUBE_RTMP_URL",
+  defaultOverlayLayout: buildPresetLayout("YouTube", [
+    "viewer-count",
+    "thought-bubble",
+    "branding",
+  ]),
 });
 
 // ── Public exports ──────────────────────────────────────────────────────────

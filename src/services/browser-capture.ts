@@ -1,10 +1,19 @@
 /**
- * Headless browser capture — opens a game URL in headless Chrome and
+ * Headless browser capture — opens the StreamView in headless Chrome and
  * saves screenshots to a temp file. FFmpeg reads the temp file using
  * -loop 1 to continuously re-read the latest frame.
  *
  * This approach avoids the pipe bottleneck — FFmpeg reads at its own
  * pace while the browser updates the file independently.
+ *
+ * Visual parity with Electron:
+ * - Appends `?popout` to the URL so the app renders StreamView directly
+ *   (skips onboarding, auth gates, navigation chrome).
+ * - Enables SwiftShader for WebGL so VRM avatar renders identically.
+ * - Seeds localStorage with overlay layout, theme, and avatar index so
+ *   the first rendered frame matches the configured appearance.
+ * - Uses `waitUntil: "networkidle0"` to ensure all assets load before capture.
+ * - Keeps CSS animations/transitions enabled for visual parity.
  */
 
 import { existsSync, writeFileSync } from "node:fs";
@@ -31,11 +40,44 @@ export interface BrowserCaptureConfig {
   height?: number;
   fps?: number;
   quality?: number;
+  /** Optional overlay layout JSON to seed into localStorage before page load. */
+  overlayLayout?: string;
+  /** Theme name to apply (e.g. "milady", "haxor", "psycho"). */
+  theme?: string;
+  /** Avatar VRM index (1–8). */
+  avatarIndex?: number;
+  /** Destination ID — seeds the destination-specific localStorage key. */
+  destinationId?: string;
 }
 
 interface ScreencastFrameEvent {
   data: string;
   sessionId: number;
+}
+
+/**
+ * Ensure the URL includes the `?popout` parameter so the app renders only
+ * StreamView, skipping startup gates and navigation chrome.
+ */
+function ensurePopoutUrl(raw: string): string {
+  try {
+    const u = new URL(raw);
+    // Handle both query and hash-based routing
+    if (u.hash?.includes("?")) {
+      if (!u.hash.includes("popout")) {
+        u.hash = `${u.hash}&popout`;
+      }
+    } else if (u.hash) {
+      u.hash = `${u.hash}?popout`;
+    } else if (!u.searchParams.has("popout")) {
+      u.searchParams.set("popout", "");
+    }
+    return u.toString();
+  } catch {
+    // Fallback: just append
+    const sep = raw.includes("?") ? "&" : "?";
+    return `${raw}${sep}popout`;
+  }
 }
 
 export async function startBrowserCapture(config: BrowserCaptureConfig) {
@@ -45,9 +87,10 @@ export async function startBrowserCapture(config: BrowserCaptureConfig) {
   }
 
   const { url, width = 1280, height = 720, quality = 70 } = config;
+  const captureUrl = ensurePopoutUrl(url);
 
   stopSignal = false;
-  console.log(`[browser-capture] Launching headless Chrome → ${url}`);
+  console.log(`[browser-capture] Launching headless Chrome → ${captureUrl}`);
 
   const browser = await puppeteer.launch({
     executablePath: CHROME_PATH,
@@ -55,18 +98,62 @@ export async function startBrowserCapture(config: BrowserCaptureConfig) {
     args: [
       `--window-size=${width},${height}`,
       "--no-sandbox",
-      "--disable-gpu",
       "--disable-dev-shm-usage",
       "--disable-extensions",
       "--mute-audio",
+      // WebGL / SwiftShader — required for VRM avatar rendering parity
+      "--use-gl=swiftshader",
+      "--enable-webgl",
+      "--ignore-gpu-blocklist",
     ],
   });
 
   activeBrowser = browser;
 
   const page = await browser.newPage();
-  await page.setViewport({ width, height });
-  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30_000 });
+  await page.setViewport({ width, height, deviceScaleFactor: 1 });
+
+  // Seed localStorage before navigation so the first render matches Electron.
+  // Keys must match exactly what the React app reads:
+  //   - "milady:theme"                        → ThemeName
+  //   - "milady_avatar_index"                 → VRM index (1–8)
+  //   - "milady.stream.overlay-layout.v1[.destId]" → OverlayLayout JSON
+  await page.evaluateOnNewDocument(
+    (
+      overlayLayout: string | undefined,
+      theme: string | undefined,
+      avatarIndex: number | undefined,
+      destinationId: string | undefined,
+    ) => {
+      if (overlayLayout) {
+        // Seed both global and destination-specific keys so the hook
+        // resolves correctly regardless of when activeDestination loads.
+        localStorage.setItem("milady.stream.overlay-layout.v1", overlayLayout);
+        if (destinationId) {
+          localStorage.setItem(
+            `milady.stream.overlay-layout.v1.${destinationId}`,
+            overlayLayout,
+          );
+        }
+      }
+      if (theme) {
+        localStorage.setItem("milady:theme", theme);
+      }
+      if (avatarIndex != null) {
+        localStorage.setItem("milady_avatar_index", String(avatarIndex));
+      }
+    },
+    config.overlayLayout,
+    config.theme,
+    config.avatarIndex,
+    config.destinationId,
+  );
+
+  // Use networkidle0 so fonts, VRM models, and preview images finish loading
+  await page.goto(captureUrl, {
+    waitUntil: "networkidle0",
+    timeout: 60_000,
+  });
 
   console.log(`[browser-capture] Page loaded, writing frames to ${FRAME_FILE}`);
 

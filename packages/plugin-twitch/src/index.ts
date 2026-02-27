@@ -10,6 +10,7 @@
  */
 
 import {
+  buildPresetLayout,
   createStreamingPlugin,
   type StreamingDestination,
 } from "@milady/plugin-streaming-base";
@@ -23,6 +24,11 @@ const { plugin, createDestination } = createStreamingPlugin({
   platformName: "Twitch",
   streamKeyEnvVar: "TWITCH_STREAM_KEY",
   defaultRtmpUrl: "rtmp://live.twitch.tv/app",
+  defaultOverlayLayout: buildPresetLayout("Twitch", [
+    "viewer-count",
+    "action-ticker",
+    "branding",
+  ]),
 });
 
 // ── Public exports ──────────────────────────────────────────────────────────

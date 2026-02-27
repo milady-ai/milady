@@ -17,6 +17,23 @@ import type {
   State,
 } from "@elizaos/core";
 
+// ── Overlay layout data (JSON-serializable, no React refs) ──────────────────
+
+export interface OverlayWidgetInstance {
+  id: string;
+  type: string;
+  enabled: boolean;
+  position: { x: number; y: number; width: number; height: number };
+  zIndex: number;
+  config: Record<string, unknown>;
+}
+
+export interface OverlayLayoutData {
+  version: 1;
+  name: string;
+  widgets: OverlayWidgetInstance[];
+}
+
 // ── Shared types ────────────────────────────────────────────────────────────
 // Canonical definition — stream-routes.ts re-exports this interface.
 
@@ -26,6 +43,8 @@ export interface StreamingDestination {
   getCredentials(): Promise<{ rtmpUrl: string; rtmpKey: string }>;
   onStreamStart?(): Promise<void>;
   onStreamStop?(): Promise<void>;
+  /** Per-destination default overlay layout, seeded on first stream start. */
+  defaultOverlayLayout?: OverlayLayoutData;
 }
 
 export interface StreamingPluginConfig {
@@ -41,6 +60,77 @@ export interface StreamingPluginConfig {
   rtmpUrlEnvVar?: string;
   /** Override the ElizaOS plugin name (defaults to `${platformId}-streaming`) */
   pluginName?: string;
+  /** Per-destination default overlay layout, seeded on first stream start. */
+  defaultOverlayLayout?: OverlayLayoutData;
+}
+
+// ── Preset layout builder ───────────────────────────────────────────────────
+
+/** All known built-in widget types. */
+const WIDGET_DEFAULTS: Record<
+  string,
+  { position: OverlayWidgetInstance["position"]; zIndex: number }
+> = {
+  "thought-bubble": {
+    position: { x: 2, y: 2, width: 30, height: 20 },
+    zIndex: 10,
+  },
+  "action-ticker": {
+    position: { x: 0, y: 85, width: 100, height: 15 },
+    zIndex: 5,
+  },
+  "alert-popup": {
+    position: { x: 30, y: 10, width: 40, height: 20 },
+    zIndex: 20,
+  },
+  "viewer-count": {
+    position: { x: 88, y: 2, width: 10, height: 6 },
+    zIndex: 15,
+  },
+  branding: { position: { x: 2, y: 90, width: 20, height: 8 }, zIndex: 2 },
+  "custom-html": {
+    position: { x: 50, y: 50, width: 30, height: 20 },
+    zIndex: 1,
+  },
+  "peon-hud": {
+    position: { x: 82, y: 10, width: 16, height: 30 },
+    zIndex: 12,
+  },
+  "peon-glass": {
+    position: { x: 2, y: 2, width: 32, height: 40 },
+    zIndex: 16,
+  },
+  "peon-sakura": {
+    position: { x: 0, y: 0, width: 25, height: 50 },
+    zIndex: 3,
+  },
+};
+
+let _presetCounter = 0;
+
+/**
+ * Build a preset overlay layout with the given widget types enabled.
+ * Widget types not listed in `enabledTypes` are included but disabled.
+ */
+export function buildPresetLayout(
+  name: string,
+  enabledTypes: string[],
+): OverlayLayoutData {
+  const enabledSet = new Set(enabledTypes);
+  const widgets: OverlayWidgetInstance[] = Object.entries(WIDGET_DEFAULTS).map(
+    ([type, defaults]) => {
+      _presetCounter += 1;
+      return {
+        id: `preset${_presetCounter.toString(36)}`,
+        type,
+        enabled: enabledSet.has(type),
+        position: { ...defaults.position },
+        zIndex: defaults.zIndex,
+        config: {},
+      };
+    },
+  );
+  return { version: 1, name, widgets };
 }
 
 // ── Destination factory ─────────────────────────────────────────────────────
@@ -52,6 +142,7 @@ export function createStreamingDestination(
   return {
     id: cfg.platformId,
     name: cfg.platformName,
+    defaultOverlayLayout: cfg.defaultOverlayLayout,
 
     async getCredentials() {
       const streamKey = (

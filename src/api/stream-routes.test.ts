@@ -16,6 +16,7 @@ import {
   detectCaptureMode,
   ensureXvfb,
   handleStreamRoute,
+  onAgentMessage,
   type StreamRouteState,
 } from "./stream-routes";
 
@@ -1761,5 +1762,300 @@ describe("POST /api/stream/stop (backward-compat)", () => {
     expect(getJson()).toEqual(
       expect.objectContaining({ error: "FFmpeg already exited" }),
     );
+  });
+});
+
+// ===========================================================================
+// Voice endpoint tests (GET/POST /api/stream/voice, POST /api/stream/voice/speak)
+// ===========================================================================
+
+describe("handleStreamRoute — voice endpoints", () => {
+  // ── GET /api/stream/voice ─────────────────────────────────────────────
+
+  describe("GET /api/stream/voice", () => {
+    it("returns voice status with ok:true and default disabled state", async () => {
+      const { res, getStatus, getJson } = createMockHttpResponse();
+      const req = createMockIncomingMessage({
+        method: "GET",
+        url: "/api/stream/voice",
+      });
+      const state = mockState();
+
+      const handled = await handleStreamRoute(
+        req,
+        res,
+        "/api/stream/voice",
+        "GET",
+        state,
+      );
+
+      expect(handled).toBe(true);
+      expect(getStatus()).toBe(200);
+      const body = getJson();
+      expect(body).toEqual(
+        expect.objectContaining({
+          ok: true,
+          enabled: false,
+          isSpeaking: false,
+        }),
+      );
+    });
+
+    it("reports provider status when TTS config is available", async () => {
+      const { res, getJson } = createMockHttpResponse();
+      const req = createMockIncomingMessage({
+        method: "GET",
+        url: "/api/stream/voice",
+      });
+      const state = mockState({
+        config: {
+          messages: {
+            tts: {
+              provider: "elevenlabs",
+              elevenlabs: { apiKey: "test-key" },
+            },
+          },
+        },
+      });
+
+      await handleStreamRoute(req, res, "/api/stream/voice", "GET", state);
+
+      const body = getJson();
+      expect(body).toEqual(
+        expect.objectContaining({
+          ok: true,
+          provider: "elevenlabs",
+          configuredProvider: "elevenlabs",
+          hasApiKey: true,
+        }),
+      );
+    });
+  });
+
+  // ── POST /api/stream/voice ────────────────────────────────────────────
+
+  describe("POST /api/stream/voice", () => {
+    it("saves voice settings and returns ok:true with voice object", async () => {
+      const { res, getStatus, getJson } = createMockHttpResponse();
+      const req = createMockIncomingMessage({
+        method: "POST",
+        url: "/api/stream/voice",
+        body: { enabled: true, autoSpeak: true },
+        json: true,
+      });
+      const state = mockState();
+
+      const handled = await handleStreamRoute(
+        req,
+        res,
+        "/api/stream/voice",
+        "POST",
+        state,
+      );
+
+      expect(handled).toBe(true);
+      expect(getStatus()).toBe(200);
+      const body = getJson();
+      expect(body).toEqual(
+        expect.objectContaining({
+          ok: true,
+          voice: expect.objectContaining({
+            enabled: true,
+            autoSpeak: true,
+          }),
+        }),
+      );
+    });
+
+    it("disables voice when enabled:false is sent", async () => {
+      const { res, getJson } = createMockHttpResponse();
+      const req = createMockIncomingMessage({
+        method: "POST",
+        url: "/api/stream/voice",
+        body: { enabled: false },
+        json: true,
+      });
+      const state = mockState();
+
+      await handleStreamRoute(req, res, "/api/stream/voice", "POST", state);
+
+      const body = getJson();
+      expect(body).toEqual(
+        expect.objectContaining({
+          ok: true,
+          voice: expect.objectContaining({
+            enabled: false,
+          }),
+        }),
+      );
+    });
+  });
+
+  // ── POST /api/stream/voice/speak ──────────────────────────────────────
+
+  describe("POST /api/stream/voice/speak", () => {
+    it("returns 400 when text is missing", async () => {
+      const { res, getStatus, getJson } = createMockHttpResponse();
+      const req = createMockIncomingMessage({
+        method: "POST",
+        url: "/api/stream/voice/speak",
+        body: {},
+        json: true,
+      });
+      const state = mockState();
+
+      const handled = await handleStreamRoute(
+        req,
+        res,
+        "/api/stream/voice/speak",
+        "POST",
+        state,
+      );
+
+      expect(handled).toBe(true);
+      expect(getStatus()).toBe(400);
+      expect(getJson()).toEqual(
+        expect.objectContaining({ error: "text is required" }),
+      );
+    });
+
+    it("returns 400 when text is empty string", async () => {
+      const { res, getStatus } = createMockHttpResponse();
+      const req = createMockIncomingMessage({
+        method: "POST",
+        url: "/api/stream/voice/speak",
+        body: { text: "   " },
+        json: true,
+      });
+      const state = mockState();
+
+      await handleStreamRoute(
+        req,
+        res,
+        "/api/stream/voice/speak",
+        "POST",
+        state,
+      );
+
+      expect(getStatus()).toBe(400);
+    });
+
+    it("returns 400 when no TTS provider is available", async () => {
+      const { res, getStatus, getJson } = createMockHttpResponse();
+      const req = createMockIncomingMessage({
+        method: "POST",
+        url: "/api/stream/voice/speak",
+        body: { text: "Hello" },
+        json: true,
+      });
+      // No TTS config — provider resolution will return null
+      const state = mockState();
+
+      await handleStreamRoute(
+        req,
+        res,
+        "/api/stream/voice/speak",
+        "POST",
+        state,
+      );
+
+      expect(getStatus()).toBe(400);
+      expect(getJson()).toEqual(
+        expect.objectContaining({ error: expect.stringContaining("provider") }),
+      );
+    });
+
+    it("returns 400 when TTS bridge is not attached", async () => {
+      const { res, getStatus, getJson } = createMockHttpResponse();
+      const req = createMockIncomingMessage({
+        method: "POST",
+        url: "/api/stream/voice/speak",
+        body: { text: "Hello" },
+        json: true,
+      });
+      // Provide valid TTS config so provider resolves, but bridge is not attached
+      const state = mockState({
+        config: {
+          messages: {
+            tts: {
+              provider: "elevenlabs",
+              elevenlabs: { apiKey: "test-key" },
+            },
+          },
+        },
+      });
+
+      await handleStreamRoute(
+        req,
+        res,
+        "/api/stream/voice/speak",
+        "POST",
+        state,
+      );
+
+      expect(getStatus()).toBe(400);
+      expect(getJson()).toEqual(
+        expect.objectContaining({
+          error: expect.stringContaining("not attached"),
+        }),
+      );
+    });
+  });
+
+  // ── Route dispatching ─────────────────────────────────────────────────
+
+  describe("voice route dispatching", () => {
+    it("returns false for non-stream voice routes", async () => {
+      const { res } = createMockHttpResponse();
+      const req = createMockIncomingMessage({
+        method: "GET",
+        url: "/api/other/voice",
+      });
+      const state = mockState();
+
+      const handled = await handleStreamRoute(
+        req,
+        res,
+        "/api/other/voice",
+        "GET",
+        state,
+      );
+
+      expect(handled).toBe(false);
+    });
+  });
+});
+
+// ===========================================================================
+// onAgentMessage() — auto-TTS trigger
+// ===========================================================================
+
+describe("onAgentMessage()", () => {
+  it("does nothing when text is empty", async () => {
+    const state = mockState();
+    // Should not throw
+    await onAgentMessage("", state);
+    await onAgentMessage("   ", state);
+  });
+
+  it("does nothing when stream is not running", async () => {
+    const state = mockState();
+    (state.streamManager.isRunning as ReturnType<typeof vi.fn>).mockReturnValue(
+      false,
+    );
+
+    await onAgentMessage("Hello world", state);
+    // If we got here without error, the guard worked
+  });
+
+  it("does nothing when voice is not enabled in settings", async () => {
+    const state = mockState();
+    (state.streamManager.isRunning as ReturnType<typeof vi.fn>).mockReturnValue(
+      true,
+    );
+    // voice.enabled defaults to false (no settings file)
+
+    await onAgentMessage("Hello world", state);
+    // Guard should exit early — no TTS generation attempted
   });
 });

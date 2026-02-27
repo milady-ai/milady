@@ -6,6 +6,7 @@
  * credential fetching and session start/stop via the retake.tv API.
  */
 
+import { buildPresetLayout } from "@milady/plugin-streaming-base";
 import type { StreamingDestination } from "./types.ts";
 
 export function createRetakeDestination(config?: {
@@ -15,6 +16,11 @@ export function createRetakeDestination(config?: {
   return {
     id: "retake",
     name: "Retake.tv",
+    defaultOverlayLayout: buildPresetLayout("Retake", [
+      "thought-bubble",
+      "alert-popup",
+      "branding",
+    ]),
 
     async getCredentials() {
       const token = (

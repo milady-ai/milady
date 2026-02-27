@@ -47,16 +47,27 @@ import { streamManager } from "./stream-manager";
  * Build a minimal mock ChildProcess whose exitCode stays null so start()
  * considers FFmpeg alive after the 1500 ms probe delay.
  */
-function makeMockProc(opts: { exitCode?: number | null } = {}) {
+function makeMockProc(
+  opts: { exitCode?: number | null; withTtsPipe?: boolean } = {},
+) {
   const exitCode = opts.exitCode ?? null;
+  const stdin = { write: vi.fn(), end: vi.fn(), on: vi.fn() };
+  const stdout = { on: vi.fn() };
+  const stderr = { on: vi.fn() };
+  const pipe3 = opts.withTtsPipe
+    ? { write: vi.fn(), end: vi.fn(), on: vi.fn() }
+    : undefined;
+
+  // Node's ChildProcess exposes stdio as [stdin, stdout, stderr, ...extras]
+  const stdio = opts.withTtsPipe
+    ? [stdin, stdout, stderr, pipe3]
+    : [stdin, stdout, stderr];
+
   return {
-    stdin: {
-      write: vi.fn(),
-      end: vi.fn(),
-      on: vi.fn(),
-    },
-    stdout: { on: vi.fn() },
-    stderr: { on: vi.fn() },
+    stdin,
+    stdout,
+    stderr,
+    stdio,
     on: vi.fn(),
     kill: vi.fn(),
     killed: false,
@@ -78,7 +89,8 @@ async function startWithMock(config: StreamConfig): Promise<string[]> {
   vi.useRealTimers();
   await streamManager.stop();
 
-  const proc = makeMockProc();
+  const isTts = config.audioSource === "tts";
+  const proc = makeMockProc({ withTtsPipe: isTts });
   (spawn as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce(
     // biome-ignore lint/suspicious/noExplicitAny: mock proc shape doesn't fully match ChildProcess
     proc as any,
@@ -763,5 +775,120 @@ describe("autoRestart on unexpected FFmpeg exit", () => {
     const spawnCalls = (spawn as unknown as ReturnType<typeof vi.fn>).mock
       .calls;
     expect(spawnCalls.length).toBe(1);
+  });
+});
+
+// ===========================================================================
+// 9. TTS audio source — pipe:3 and bridge integration
+// ===========================================================================
+
+describe("buildAudioInputArgs() for TTS via spawn args", () => {
+  it("tts: args contain -f s16le, -ar 24000, -ac 1, -i pipe:3", async () => {
+    const args = await startWithMock({
+      ...BASE_CONFIG,
+      audioSource: "tts",
+    });
+
+    expect(args).toContain("-f");
+    expect(args).toContain("s16le");
+    expect(args).toContain("-ar");
+    expect(args).toContain("24000");
+    expect(args).toContain("-ac");
+    expect(args).toContain("1");
+    expect(args).toContain("-i");
+    expect(args).toContain("pipe:3");
+  });
+
+  it("tts: does NOT contain anullsrc (not silent)", async () => {
+    const args = await startWithMock({
+      ...BASE_CONFIG,
+      audioSource: "tts",
+    });
+
+    expect(args).not.toContain(
+      "anullsrc=channel_layout=stereo:sample_rate=44100",
+    );
+  });
+});
+
+describe("stdio array for TTS mode", () => {
+  it("tts: spawn is called with 4 stdio entries (includes pipe:3)", async () => {
+    await startWithMock({
+      ...BASE_CONFIG,
+      audioSource: "tts",
+    });
+
+    const calls = (spawn as unknown as ReturnType<typeof vi.fn>).mock.calls;
+    const lastCall = calls[calls.length - 1];
+    const opts = lastCall[2] as { stdio: unknown[] };
+
+    // Should have 4 stdio entries: [stdin, stdout, stderr, pipe:3]
+    expect(opts.stdio).toHaveLength(4);
+    expect(opts.stdio[3]).toBe("pipe");
+  });
+
+  it("non-tts: spawn is called with 3 stdio entries (no pipe:3)", async () => {
+    await startWithMock({
+      ...BASE_CONFIG,
+      audioSource: "silent",
+    });
+
+    const calls = (spawn as unknown as ReturnType<typeof vi.fn>).mock.calls;
+    const lastCall = calls[calls.length - 1];
+    const opts = lastCall[2] as { stdio: unknown[] };
+
+    expect(opts.stdio).toHaveLength(3);
+  });
+
+  it("pipe mode: spawn has 3 stdio entries when audioSource is silent", async () => {
+    await startWithMock({
+      ...BASE_CONFIG,
+      inputMode: "pipe",
+      audioSource: "silent",
+    });
+
+    const calls = (spawn as unknown as ReturnType<typeof vi.fn>).mock.calls;
+    const lastCall = calls[calls.length - 1];
+    const opts = lastCall[2] as { stdio: unknown[] };
+
+    // stdin=pipe, stdout=pipe, stderr=pipe — no pipe:3
+    expect(opts.stdio).toHaveLength(3);
+    expect(opts.stdio[0]).toBe("pipe");
+  });
+
+  it("pipe mode + tts: spawn has 4 stdio entries (stdin + pipe:3)", async () => {
+    await startWithMock({
+      ...BASE_CONFIG,
+      inputMode: "pipe",
+      audioSource: "tts",
+    });
+
+    const calls = (spawn as unknown as ReturnType<typeof vi.fn>).mock.calls;
+    const lastCall = calls[calls.length - 1];
+    const opts = lastCall[2] as { stdio: unknown[] };
+
+    expect(opts.stdio).toHaveLength(4);
+    expect(opts.stdio[0]).toBe("pipe"); // stdin for frames
+    expect(opts.stdio[3]).toBe("pipe"); // pipe:3 for TTS audio
+  });
+});
+
+describe("getTtsBridge()", () => {
+  it("returns a TTS bridge object with expected methods", () => {
+    const bridge = streamManager.getTtsBridge();
+
+    expect(bridge).toBeDefined();
+    expect(typeof bridge.attach).toBe("function");
+    expect(typeof bridge.detach).toBe("function");
+    expect(typeof bridge.isAttached).toBe("function");
+    expect(typeof bridge.isSpeaking).toBe("function");
+    expect(typeof bridge.speak).toBe("function");
+  });
+
+  it("returns the same bridge instance on repeated calls", () => {
+    const bridge1 = streamManager.getTtsBridge();
+    const bridge2 = streamManager.getTtsBridge();
+
+    expect(bridge1).toBe(bridge2);
   });
 });

@@ -34,8 +34,11 @@ import {
   TERMINAL_ACTIVE_WINDOW_MS,
 } from "./stream/helpers";
 import { IdleContent } from "./stream/IdleContent";
+import { OverlayLayer } from "./stream/overlays/OverlayLayer";
+import { useOverlayLayout } from "./stream/overlays/useOverlayLayout";
 import { StatusBar } from "./stream/StatusBar";
 import { StreamTerminal } from "./stream/StreamTerminal";
+import { StreamVoiceConfig } from "./stream/StreamVoiceConfig";
 
 // ---------------------------------------------------------------------------
 // StreamView
@@ -233,6 +236,8 @@ export function StreamView() {
     return "idle";
   }, [activeGameViewerUrl, terminalActive, autonomousEvents]);
 
+  const { layout } = useOverlayLayout(activeDestination?.id);
+
   const feedEvents = useMemo(
     () =>
       autonomousEvents
@@ -295,6 +300,13 @@ export function StreamView() {
         audioSource={audioSource}
       />
 
+      {/* Stream voice config — TTS toggle and status */}
+      {!isPip && (
+        <div className="flex items-center px-4 py-1 border-b border-border bg-bg">
+          <StreamVoiceConfig streamLive={streamLive} />
+        </div>
+      )}
+
       <div className="flex flex-1 min-h-0">
         {/* Main content area — shows what the agent is doing */}
         <div className="flex-1 min-w-0 relative">
@@ -318,6 +330,14 @@ export function StreamView() {
           ) : (
             <IdleContent events={autonomousEvents.slice(-20)} />
           )}
+
+          {/* Stream overlay widgets */}
+          <OverlayLayer
+            layout={layout}
+            events={autonomousEvents}
+            agentMode={mode}
+            agentName={agentName}
+          />
 
           {/* VRM avatar — picture-in-picture overlay */}
           <AvatarPip isSpeaking={chatAvatarSpeaking} />
