@@ -228,12 +228,9 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("accepts authenticated connector deletion", async () => {
-      const { status } = await req(
-        port,
-        "DELETE",
-        "/api/connectors/telegram",
-        { token: TOKEN },
-      );
+      const { status } = await req(port, "DELETE", "/api/connectors/telegram", {
+        token: TOKEN,
+      });
       expect(status).not.toBe(401);
     });
   });
@@ -253,12 +250,10 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("accepts authenticated MCP server creation", async () => {
-      const { status } = await req(
-        port,
-        "POST",
-        "/api/mcp/config/server",
-        { body: { name: "test-server", command: "echo" }, token: TOKEN },
-      );
+      const { status } = await req(port, "POST", "/api/mcp/config/server", {
+        body: { name: "test-server", command: "echo" },
+        token: TOKEN,
+      });
       expect(status).not.toBe(401);
     });
   });
@@ -291,23 +286,18 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
 
   describe("POST /api/wallet/import", () => {
     it("rejects unauthenticated wallet import with 401", async () => {
-      const { status, data } = await req(
-        port,
-        "POST",
-        "/api/wallet/import",
-        { body: { chain: "evm", privateKey: "0xSTOLEN" } },
-      );
+      const { status, data } = await req(port, "POST", "/api/wallet/import", {
+        body: { chain: "evm", privateKey: "0xSTOLEN" },
+      });
       expect(status).toBe(401);
       expect(data.error).toMatch(/unauthorized/i);
     });
 
     it("accepts authenticated wallet import", async () => {
-      const { status } = await req(
-        port,
-        "POST",
-        "/api/wallet/import",
-        { body: { chain: "evm", privateKey: "0xTEST" }, token: TOKEN },
-      );
+      const { status } = await req(port, "POST", "/api/wallet/import", {
+        body: { chain: "evm", privateKey: "0xTEST" },
+        token: TOKEN,
+      });
       expect(status).not.toBe(401);
     });
   });
@@ -316,23 +306,18 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
 
   describe("POST /api/wallet/export", () => {
     it("rejects unauthenticated wallet export with 401", async () => {
-      const { status, data } = await req(
-        port,
-        "POST",
-        "/api/wallet/export",
-        { body: { chain: "evm" } },
-      );
+      const { status, data } = await req(port, "POST", "/api/wallet/export", {
+        body: { chain: "evm" },
+      });
       expect(status).toBe(401);
       expect(data.error).toMatch(/unauthorized/i);
     });
 
     it("accepts authenticated wallet export", async () => {
-      const { status } = await req(
-        port,
-        "POST",
-        "/api/wallet/export",
-        { body: { chain: "evm" }, token: TOKEN },
-      );
+      const { status } = await req(port, "POST", "/api/wallet/export", {
+        body: { chain: "evm" },
+        token: TOKEN,
+      });
       // Not 401 — may fail for other reasons (no wallet configured) but auth gate passes
       expect(status).not.toBe(401);
     });
