@@ -13095,10 +13095,16 @@ export async function startApiServer(opts?: {
     connectorRouteHandlers: [],
   };
 
-  // Closure-captured ref for auto-TTS triggering in the event pipeline.
+  // Closure-captured refs for auto-TTS triggering in the event pipeline.
   // Set when the streaming connector initializes its route state.
   let streamRouteStateRef:
     | import("./stream-routes.js").StreamRouteState
+    | null = null;
+  let onAgentMessageFn:
+    | ((
+        text: string,
+        state: import("./stream-routes.js").StreamRouteState,
+      ) => Promise<void>)
     | null = null;
 
   const trainingServiceCtor = await resolveTrainingServiceCtor();
@@ -13380,7 +13386,8 @@ export async function startApiServer(opts?: {
 
       // Auto-trigger TTS for assistant messages on the stream
       const srs = streamRouteStateRef;
-      if (event.stream === "assistant" && srs) {
+      const ttsHandler = onAgentMessageFn;
+      if (event.stream === "assistant" && srs && ttsHandler) {
         const payload =
           event.data && typeof event.data === "object"
             ? (event.data as Record<string, unknown>)
@@ -13388,13 +13395,11 @@ export async function startApiServer(opts?: {
         const text =
           typeof payload?.text === "string" ? payload.text.trim() : "";
         if (text) {
-          void import("./stream-routes.js")
-            .then((mod) => mod.onAgentMessage(text, srs))
-            .catch((err) => {
-              logger.warn(
-                `[stream-voice] Auto-TTS trigger failed: ${err instanceof Error ? err.message : String(err)}`,
-              );
-            });
+          void ttsHandler(text, srs).catch((err) => {
+            logger.warn(
+              `[stream-voice] Auto-TTS trigger failed: ${err instanceof Error ? err.message : String(err)}`,
+            );
+          });
         }
       }
     });
@@ -13525,7 +13530,10 @@ export async function startApiServer(opts?: {
     // configured, inject it so /api/stream/live can fetch credentials.
     void (async () => {
       try {
-        const { handleStreamRoute } = await import("./stream-routes.js");
+        const { handleStreamRoute, onAgentMessage } = await import(
+          "./stream-routes.js"
+        );
+        onAgentMessageFn = onAgentMessage;
         // Screen capture manager is injected by Electron host via globalThis
         const screenCapture = (globalThis as Record<string, unknown>)
           .__miladyScreenCapture as

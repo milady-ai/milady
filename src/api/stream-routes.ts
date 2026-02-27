@@ -32,6 +32,7 @@ import {
   readStreamSettings,
   type StreamVoiceSettings,
   seedOverlayDefaults,
+  validateStreamSettings,
   writeOverlayLayout,
   writeStreamSettings,
 } from "./stream-persistence";
@@ -804,13 +805,13 @@ export async function handleStreamRoute(
     try {
       const body = await readRequestBody(req);
       const parsed = typeof body === "string" ? JSON.parse(body) : body;
-      const settings = parsed?.settings;
-      if (!settings || typeof settings !== "object") {
-        error(res, "Invalid settings object", 400);
+      const result = validateStreamSettings(parsed?.settings);
+      if (result.error || !result.settings) {
+        error(res, result.error ?? "Invalid settings", 400);
         return true;
       }
-      writeStreamSettings(settings);
-      json(res, { ok: true, settings });
+      writeStreamSettings(result.settings);
+      json(res, { ok: true, settings: result.settings });
     } catch (err) {
       error(
         res,

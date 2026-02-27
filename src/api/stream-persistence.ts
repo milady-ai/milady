@@ -160,6 +160,99 @@ export function seedOverlayDefaults(destination: StreamingDestination): void {
 // Stream visual/voice settings persistence
 // ---------------------------------------------------------------------------
 
+const SETTINGS_MAX_JSON_BYTES = 4096;
+
+/**
+ * Validate and sanitize a raw settings object into a safe StreamVisualSettings.
+ * Only allows known keys with expected types — rejects everything else.
+ * Returns null with an error message if validation fails.
+ */
+export function validateStreamSettings(
+  raw: unknown,
+):
+  | { settings: StreamVisualSettings; error?: undefined }
+  | { settings?: undefined; error: string } {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    return { error: "Settings must be a non-array object" };
+  }
+
+  // Reject if serialized payload is too large
+  const serialized = JSON.stringify(raw);
+  if (serialized.length > SETTINGS_MAX_JSON_BYTES) {
+    return {
+      error: `Settings payload exceeds ${SETTINGS_MAX_JSON_BYTES} byte limit`,
+    };
+  }
+
+  const input = raw as Record<string, unknown>;
+  const result: StreamVisualSettings = {};
+
+  // theme: optional string, max 64 chars
+  if ("theme" in input) {
+    if (typeof input.theme !== "string" || input.theme.length > 64) {
+      return { error: "theme must be a string (max 64 chars)" };
+    }
+    result.theme = input.theme;
+  }
+
+  // avatarIndex: optional non-negative integer
+  if ("avatarIndex" in input) {
+    if (
+      typeof input.avatarIndex !== "number" ||
+      !Number.isInteger(input.avatarIndex) ||
+      input.avatarIndex < 0 ||
+      input.avatarIndex > 999
+    ) {
+      return { error: "avatarIndex must be an integer between 0 and 999" };
+    }
+    result.avatarIndex = input.avatarIndex;
+  }
+
+  // voice: optional object with known fields
+  if ("voice" in input) {
+    if (
+      !input.voice ||
+      typeof input.voice !== "object" ||
+      Array.isArray(input.voice)
+    ) {
+      return { error: "voice must be an object" };
+    }
+    const v = input.voice as Record<string, unknown>;
+    const voice: StreamVoiceSettings = {
+      enabled: false,
+    };
+    if ("enabled" in v) {
+      if (typeof v.enabled !== "boolean") {
+        return { error: "voice.enabled must be a boolean" };
+      }
+      voice.enabled = v.enabled;
+    }
+    if ("autoSpeak" in v) {
+      if (typeof v.autoSpeak !== "boolean") {
+        return { error: "voice.autoSpeak must be a boolean" };
+      }
+      voice.autoSpeak = v.autoSpeak;
+    }
+    if ("provider" in v) {
+      if (typeof v.provider !== "string" || v.provider.length > 64) {
+        return { error: "voice.provider must be a string (max 64 chars)" };
+      }
+      voice.provider = v.provider;
+    }
+    result.voice = voice;
+  }
+
+  // Reject unknown top-level keys
+  const knownKeys = new Set(["theme", "avatarIndex", "voice"]);
+  for (const key of Object.keys(input)) {
+    if (!knownKeys.has(key)) {
+      return { error: `Unknown settings key: ${key}` };
+    }
+  }
+
+  return { settings: result };
+}
+
 export function readStreamSettings(): StreamVisualSettings {
   try {
     if (fs.existsSync(SETTINGS_FILE)) {
