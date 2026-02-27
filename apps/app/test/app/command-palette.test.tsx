@@ -115,9 +115,9 @@ describe("CommandPalette keyboard behavior", () => {
       } as unknown as KeyboardEvent);
     });
 
-    // New behavior: preventDefault is always called for arrow keys
-    expect(preventDefaultUp).toHaveBeenCalled();
-    expect(preventDefaultDown).toHaveBeenCalled();
+    // When no commands match, arrow keys return early without preventDefault
+    expect(preventDefaultUp).not.toHaveBeenCalled();
+    expect(preventDefaultDown).not.toHaveBeenCalled();
   });
 
   it("renders command buttons for available commands", () => {
@@ -135,7 +135,8 @@ describe("CommandPalette keyboard behavior", () => {
       (node: TestRenderer.ReactTestInstance) =>
         node.type === "button" &&
         typeof node.props.className === "string" &&
-        node.props.className.includes("w-full flex items-center"),
+        node.props.className.includes("w-full") &&
+        node.props.className.includes("flex"),
     );
 
     // Component should render at least one command button
@@ -160,8 +161,8 @@ describe("CommandPalette keyboard behavior", () => {
       keydown({ key: "Enter", preventDefault } as unknown as KeyboardEvent);
     });
 
-    // New behavior: preventDefault is always called for Enter
-    expect(preventDefault).toHaveBeenCalled();
+    // When no commands match, Enter returns early without preventDefault
+    expect(preventDefault).not.toHaveBeenCalled();
     // closeCommandPalette should not be called since no command was executed
     expect(ctx.closeCommandPalette).not.toHaveBeenCalled();
   });

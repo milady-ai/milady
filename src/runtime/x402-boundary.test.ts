@@ -328,3 +328,55 @@ describe("buildCharacterFromConfig – x402 secrets", () => {
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// Section 5: x402 config safety — disabled-by-default invariant
+// ---------------------------------------------------------------------------
+
+describe("x402 disabled-by-default safety", () => {
+  const ENV_KEYS = [
+    "X402_ENABLED",
+    "X402_API_KEY",
+    "X402_BASE_URL",
+    "X402_PRIVATE_KEY",
+  ];
+
+  const snap = envSnapshot(ENV_KEYS);
+  beforeEach(() => {
+    snap.save();
+    for (const k of ENV_KEYS) delete process.env[k];
+  });
+  afterEach(() => snap.restore());
+
+  it("x402 config with privateKey but no enabled flag does not propagate to env", () => {
+    const config = {
+      x402: { privateKey: "0xDEADBEEF", apiKey: "key-123" },
+    } as unknown as MiladyConfig;
+
+    applyX402ConfigToEnv(config);
+
+    expect(process.env.X402_ENABLED).toBeUndefined();
+    expect(process.env.X402_API_KEY).toBeUndefined();
+    expect(process.env.X402_PRIVATE_KEY).toBeUndefined();
+  });
+
+  it("x402 config with enabled: undefined is treated as disabled", () => {
+    const config = {
+      x402: { enabled: undefined, apiKey: "key-456" },
+    } as unknown as MiladyConfig;
+
+    applyX402ConfigToEnv(config);
+
+    expect(process.env.X402_ENABLED).toBeUndefined();
+    expect(process.env.X402_API_KEY).toBeUndefined();
+  });
+
+  it("collectPluginNames excludes x402 when config.x402 exists but enabled is falsy", () => {
+    process.env.ANTHROPIC_API_KEY = "test";
+    const config = {
+      x402: { privateKey: "0xDEADBEEF" },
+    } as unknown as MiladyConfig;
+    const names = collectPluginNames(config);
+    expect(names.has("@elizaos/plugin-x402")).toBe(false);
+  });
+});

@@ -2,7 +2,7 @@
  * Root App component — routing shell.
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useApp } from "./AppContext";
 import { AdvancedPageView } from "./components/AdvancedPageView";
 import { AppsPageView } from "./components/AppsPageView";
@@ -20,6 +20,7 @@ import { GameViewOverlay } from "./components/GameViewOverlay";
 import { Header } from "./components/Header";
 import { InventoryView } from "./components/InventoryView";
 import { KnowledgeView } from "./components/KnowledgeView";
+import { LifoSandboxView } from "./components/LifoSandboxView";
 import { LoadingScreen } from "./components/LoadingScreen";
 import { Nav } from "./components/Nav";
 import { OnboardingWizard } from "./components/OnboardingWizard";
@@ -32,7 +33,9 @@ import { StreamView } from "./components/StreamView";
 import { TerminalPanel } from "./components/TerminalPanel";
 import { BugReportProvider, useBugReportState } from "./hooks/useBugReport";
 import { useContextMenu } from "./hooks/useContextMenu";
-import { APPS_ENABLED } from "./navigation";
+import { useLifoAutoPopout } from "./hooks/useLifoAutoPopout";
+import { isLifoPopoutMode } from "./lifo-popout";
+import { APPS_ENABLED, pathForTab } from "./navigation";
 
 const CHAT_MOBILE_BREAKPOINT_PX = 1024;
 
@@ -75,6 +78,7 @@ function ViewRouter() {
     case "trajectories":
     case "runtime":
     case "database":
+    case "lifo":
     case "logs":
     case "security":
       return <AdvancedPageView />;
@@ -101,6 +105,7 @@ export function App() {
     unreadConversations,
     activeGameViewerUrl,
     gameOverlayEnabled,
+    setActionNotice,
   } = useApp();
   const isPopout = useIsPopout();
   const contextMenu = useContextMenu();
@@ -146,6 +151,7 @@ export function App() {
     tab === "trajectories" ||
     tab === "runtime" ||
     tab === "database" ||
+    tab === "lifo" ||
     tab === "logs" ||
     tab === "security";
   const unreadCount = unreadConversations?.size ?? 0;
@@ -271,6 +277,23 @@ export function App() {
   }, [isChat]);
 
   const bugReport = useBugReportState();
+  const lifoPopoutMode = useMemo(() => isLifoPopoutMode(), []);
+
+  useLifoAutoPopout({
+    enabled:
+      !lifoPopoutMode &&
+      !onboardingLoading &&
+      onboardingComplete &&
+      !authRequired,
+    targetPath: pathForTab("lifo", import.meta.env.BASE_URL),
+    onPopupBlocked: () => {
+      setActionNotice(
+        "Lifo popout blocked by the browser. Allow popups to watch agent computer-use live.",
+        "error",
+        3800,
+      );
+    },
+  });
 
   const agentStarting = agentStatus?.state === "starting";
 
@@ -298,6 +321,18 @@ export function App() {
 
   if (authRequired) return <PairingView />;
   if (!onboardingComplete) return <OnboardingWizard />;
+
+  if (lifoPopoutMode) {
+    return (
+      <BugReportProvider value={bugReport}>
+        <div className="flex h-screen w-screen min-h-0 bg-bg text-txt">
+          <main className="flex-1 min-h-0 overflow-hidden p-3 xl:p-4">
+            <LifoSandboxView />
+          </main>
+        </div>
+      </BugReportProvider>
+    );
+  }
 
   return (
     <BugReportProvider value={bugReport}>
