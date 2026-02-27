@@ -20,6 +20,13 @@ export default defineConfig({
         "stubs",
         "coding-agent-module.ts",
       ),
+      "@milaidy/plugin-coding-agent": path.join(
+        repoRoot,
+        "packages",
+        "plugin-coding-agent",
+        "src",
+        "index.ts",
+      ),
       "@elizaos/plugin-pi-ai": path.join(
         repoRoot,
         "test",
