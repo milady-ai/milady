@@ -37,6 +37,7 @@ export function createRetakeDestination(config?: {
       const rtmpRes = await fetch(`${apiUrl}/agent/rtmp`, {
         method: "POST",
         headers,
+        signal: AbortSignal.timeout(15_000),
       });
       if (!rtmpRes.ok) {
         throw new Error(`RTMP creds failed: ${rtmpRes.status}`);
@@ -67,6 +68,7 @@ export function createRetakeDestination(config?: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        signal: AbortSignal.timeout(15_000),
       });
       if (!res.ok) {
         const text = await res.text();
@@ -93,6 +95,7 @@ export function createRetakeDestination(config?: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        signal: AbortSignal.timeout(15_000),
       }).catch(() => {});
     },
   };

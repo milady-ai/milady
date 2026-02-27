@@ -318,6 +318,14 @@ export function startChatPolling(): void {
   );
 }
 
+export function stopChatPolling(): void {
+  if (chatPollTimer) {
+    clearInterval(chatPollTimer);
+    setChatPollTimer(null);
+    pluginRuntime?.logger.info(`${TAG} Chat polling stopped`);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Viewer stats polling — emits viewer_stats events
 // ---------------------------------------------------------------------------
@@ -370,4 +378,12 @@ export function startViewerStatsPolling(): void {
   pluginRuntime?.logger.info(
     `${TAG} Viewer stats polling started (${VIEWER_STATS_POLL_INTERVAL_MS}ms interval)`,
   );
+}
+
+export function stopViewerStatsPolling(): void {
+  if (viewerStatsPollTimer) {
+    clearInterval(viewerStatsPollTimer);
+    setViewerStatsPollTimer(null);
+    pluginRuntime?.logger.info(`${TAG} Viewer stats polling stopped`);
+  }
 }

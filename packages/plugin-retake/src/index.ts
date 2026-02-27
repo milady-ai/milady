@@ -29,7 +29,12 @@ import {
   RETAKE_SYSTEM_PROMPT,
   RETAKE_TOPICS,
 } from "./character.ts";
-import { startChatPolling, startViewerStatsPolling } from "./chat-poll.ts";
+import {
+  startChatPolling,
+  startViewerStatsPolling,
+  stopChatPolling,
+  stopViewerStatsPolling,
+} from "./chat-poll.ts";
 import { TAG } from "./constants.ts";
 import {
   ourUserDbId,
@@ -46,6 +51,10 @@ export {
 } from "./character.ts";
 // Re-export public API
 export { createRetakeDestination } from "./destination.ts";
+export {
+  stopChatPolling,
+  stopViewerStatsPolling,
+} from "./chat-poll.ts";
 export type { RetakeChatComment, StreamingDestination } from "./types.ts";
 
 // ---------------------------------------------------------------------------

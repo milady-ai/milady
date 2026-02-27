@@ -900,6 +900,27 @@ export const CONFIG_WRITE_ALLOWED_TOP_KEYS = new Set([
   "features",
 ]);
 
+/**
+ * Stream names accepted by `POST /api/agent/event`.
+ * Plugins emit events to these streams for the StreamView UI.
+ */
+export const AGENT_EVENT_ALLOWED_STREAMS = new Set([
+  "chat",
+  "terminal",
+  "game",
+  "autonomy",
+  "retake",
+  "stream",
+  "system",
+  // Retake plugin event streams (chat-poll.ts emits these)
+  "message",
+  "new_viewer",
+  "assistant",
+  "thought",
+  "action",
+  "viewer_stats",
+]);
+
 // ---------------------------------------------------------------------------
 // Secrets aggregation — collect all sensitive params across plugins
 // ---------------------------------------------------------------------------
@@ -12334,15 +12355,6 @@ async function handleRequest(
   // Used by plugins (e.g. retake) to surface activity in the StreamView.
   // Auth: protected by the isAuthorized(req) gate at L5631.
   if (method === "POST" && pathname === "/api/agent/event") {
-    const ALLOWED_STREAMS = new Set([
-      "chat",
-      "terminal",
-      "game",
-      "autonomy",
-      "retake",
-      "stream",
-      "system",
-    ]);
     const body = await readJsonBody<{
       stream?: string;
       data?: Record<string, unknown>;
@@ -12352,10 +12364,10 @@ async function handleRequest(
       error(res, "Missing 'stream' field");
       return;
     }
-    if (!ALLOWED_STREAMS.has(body.stream)) {
+    if (!AGENT_EVENT_ALLOWED_STREAMS.has(body.stream)) {
       error(
         res,
-        `Invalid stream: ${body.stream}. Allowed: ${[...ALLOWED_STREAMS].join(", ")}`,
+        `Invalid stream: ${body.stream}. Allowed: ${[...AGENT_EVENT_ALLOWED_STREAMS].join(", ")}`,
         400,
       );
       return;
