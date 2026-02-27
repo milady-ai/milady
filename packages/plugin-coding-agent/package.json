@@ -10,10 +10,12 @@
   "exports": {
     "./package.json": "./package.json",
     ".": {
+      "bun": "./src/index.ts",
       "import": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
-      }
+      },
+      "default": "./src/index.ts"
     }
   },
   "files": [
