@@ -148,6 +148,17 @@ export default defineConfig({
         ),
       },
       {
+        // @milaidy/plugin-coding-agent is a workspace plugin; resolve to source.
+        find: "@milaidy/plugin-coding-agent",
+        replacement: path.join(
+          repoRoot,
+          "packages",
+          "plugin-coding-agent",
+          "src",
+          "index.ts",
+        ),
+      },
+      {
         find: "electron",
         replacement: path.join(repoRoot, "test", "stubs", "electron-module.ts"),
       },
