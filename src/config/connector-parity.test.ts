@@ -41,9 +41,9 @@ describe("connector map parity", () => {
   });
 
   it("has identical count across all three maps", () => {
-    expect(CONNECTOR_IDS).toHaveLength(18);
-    expect(Object.keys(CONNECTOR_PLUGINS)).toHaveLength(18);
-    expect(Object.keys(CHANNEL_PLUGIN_MAP)).toHaveLength(18);
+    expect(CONNECTOR_IDS).toHaveLength(19);
+    expect(Object.keys(CONNECTOR_PLUGINS)).toHaveLength(19);
+    expect(Object.keys(CHANNEL_PLUGIN_MAP)).toHaveLength(19);
   });
 
   it("uses valid package name prefixes for all plugin mappings", () => {
@@ -85,6 +85,7 @@ const CONNECTOR_CREDS: Record<string, Record<string, unknown>> = {
   nostr: { apiKey: "nostr-key" },
   retake: { accessToken: "rtk-token" },
   blooio: { apiKey: "blk-key" },
+  twitch: { accessToken: "twitch-token" },
 };
 
 describe("connector runtime parity", () => {
@@ -132,6 +133,6 @@ describe("connector runtime parity", () => {
     for (const id of CONNECTOR_IDS) {
       expect(allow).toContain(id);
     }
-    expect(changes).toHaveLength(18);
+    expect(changes).toHaveLength(19);
   });
 });

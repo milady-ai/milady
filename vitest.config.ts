@@ -125,6 +125,16 @@ export default defineConfig({
         ),
       },
       {
+        find: "@milady/plugin-streaming-base",
+        replacement: path.join(
+          repoRoot,
+          "packages",
+          "plugin-streaming-base",
+          "src",
+          "index.ts",
+        ),
+      },
+      {
         // @elizaos/skills has a broken package.json entry; the code handles the
 
         // missing module gracefully (try/catch), so redirect to an empty stub.
