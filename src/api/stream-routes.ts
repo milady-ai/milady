@@ -207,6 +207,11 @@ async function startStreamPipeline(
   rtmpUrl: string,
   rtmpKey: string,
 ): Promise<{ inputMode: string; audioSource: string }> {
+  // Defense-in-depth: validate RTMP scheme before passing to FFmpeg
+  if (!/^rtmps?:\/\//i.test(rtmpUrl)) {
+    throw new Error("RTMP URL must use rtmp:// or rtmps:// scheme");
+  }
+
   const mode = detectCaptureMode();
   const audioSource =
     process.env.STREAM_AUDIO_SOURCE ??

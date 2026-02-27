@@ -21,9 +21,12 @@
     "noEmitOnError": false,
     "moduleDetection": "force",
     "allowArbitraryExtensions": true,
-    "isolatedModules": false,
+    "isolatedModules": true,
     "noEmit": true
   },
+  "references": [
+    { "path": "../plugin-streaming-base" }
+  ],
   "include": ["src/**/*.ts"],
   "exclude": ["src/__tests__/**/*", "e2e/**/*", "**/*.test.ts", "**/*.spec.ts"]
 }

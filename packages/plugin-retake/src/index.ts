@@ -159,7 +159,7 @@ export const retakePlugin: Plugin = {
       await import("./state.ts");
 
     runtime.logger.info(
-      `${TAG} Token: ${accessToken ? `${accessToken.slice(0, 8)}...` : "(none)"}`,
+      `${TAG} Token: ${accessToken ? "configured" : "not configured"}`,
     );
 
     if (!accessToken) {

@@ -7,9 +7,6 @@
     "declaration": true,
     "noEmit": false
   },
-  "references": [
-    { "path": "../plugin-streaming-base" }
-  ],
   "include": ["src/**/*.ts"],
   "exclude": [
     "node_modules",

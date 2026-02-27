@@ -21,7 +21,7 @@
     "noEmitOnError": false,
     "moduleDetection": "force",
     "allowArbitraryExtensions": true,
-    "isolatedModules": false,
+    "isolatedModules": true,
     "noEmit": true
   },
   "include": ["src/**/*.ts"],
