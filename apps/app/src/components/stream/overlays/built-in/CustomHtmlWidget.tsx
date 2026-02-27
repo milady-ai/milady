@@ -1,13 +1,13 @@
 /**
  * CustomHtml — User-provided HTML/CSS/JS or external URL rendered in a
- * sandboxed iframe. Events delivered via postMessage.
+ * sandboxed iframe.
  */
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { registerWidget } from "../registry";
 import type { WidgetDefinition, WidgetRenderProps } from "../types";
 
-function CustomHtml({ instance, events }: WidgetRenderProps) {
+function CustomHtml({ instance }: WidgetRenderProps) {
   const mode = (instance.config.mode as string) ?? "inline";
   const htmlContent = (instance.config.html as string) ?? "";
   const cssContent = (instance.config.css as string) ?? "";
@@ -15,18 +15,6 @@ function CustomHtml({ instance, events }: WidgetRenderProps) {
   const url = (instance.config.url as string) ?? "";
 
   const iframeRef = useRef<HTMLIFrameElement>(null);
-
-  // Forward events to iframe via postMessage
-  useEffect(() => {
-    const iframe = iframeRef.current;
-    if (!iframe?.contentWindow || events.length === 0) return;
-
-    const latest = events[events.length - 1];
-    iframe.contentWindow.postMessage(
-      { type: "milady-widget-event", event: latest },
-      "*",
-    );
-  }, [events]);
 
   if (mode === "url" && url) {
     return (

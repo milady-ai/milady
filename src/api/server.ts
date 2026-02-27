@@ -13095,6 +13095,12 @@ export async function startApiServer(opts?: {
     connectorRouteHandlers: [],
   };
 
+  // Closure-captured ref for auto-TTS triggering in the event pipeline.
+  // Set when the streaming connector initializes its route state.
+  let streamRouteStateRef:
+    | import("./stream-routes.js").StreamRouteState
+    | null = null;
+
   const trainingServiceCtor = await resolveTrainingServiceCtor();
   const trainingServiceOptions = {
     getRuntime: () => state.runtime,
@@ -13373,7 +13379,8 @@ export async function startApiServer(opts?: {
       });
 
       // Auto-trigger TTS for assistant messages on the stream
-      if (event.stream === "assistant") {
+      const srs = streamRouteStateRef;
+      if (event.stream === "assistant" && srs) {
         const payload =
           event.data && typeof event.data === "object"
             ? (event.data as Record<string, unknown>)
@@ -13381,19 +13388,13 @@ export async function startApiServer(opts?: {
         const text =
           typeof payload?.text === "string" ? payload.text.trim() : "";
         if (text) {
-          const streamRouteState = (state as unknown as Record<string, unknown>)
-            .__streamRouteState as
-            | import("./stream-routes.js").StreamRouteState
-            | undefined;
-          if (streamRouteState) {
-            void import("./stream-routes.js")
-              .then((mod) => mod.onAgentMessage(text, streamRouteState))
-              .catch((err) => {
-                logger.warn(
-                  `[stream-voice] Auto-TTS trigger failed: ${err instanceof Error ? err.message : String(err)}`,
-                );
-              });
-          }
+          void import("./stream-routes.js")
+            .then((mod) => mod.onAgentMessage(text, srs))
+            .catch((err) => {
+              logger.warn(
+                `[stream-voice] Auto-TTS trigger failed: ${err instanceof Error ? err.message : String(err)}`,
+              );
+            });
         }
       }
     });
@@ -13652,9 +13653,8 @@ export async function startApiServer(opts?: {
               : undefined;
           },
         };
-        // Store streamState for auto-TTS triggering in event pipeline
-        (state as unknown as Record<string, unknown>).__streamRouteState =
-          streamState;
+        // Capture streamState in closure for auto-TTS triggering and route handling
+        streamRouteStateRef = streamState;
         state.connectorRouteHandlers.push((req, res, pathname, method) =>
           handleStreamRoute(req, res, pathname, method, streamState),
         );
