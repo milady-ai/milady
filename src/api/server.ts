@@ -13508,9 +13508,8 @@ export async function startApiServer(opts?: {
         // Check connectors.retake (primary retake config location)
         const connectors = state.config.connectors ?? {};
         if (isConnectorConfigured("retake", connectors.retake)) {
-          const { createRetakeDestination } = await import(
-            "./retake-routes.js"
-          );
+          const retakeMod = "@milady/plugin-retake";
+          const { createRetakeDestination } = await import(retakeMod);
           destination = createRetakeDestination(
             connectors.retake as
               | { accessToken?: string; apiUrl?: string }

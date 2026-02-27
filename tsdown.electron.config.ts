@@ -12,8 +12,7 @@ export default [{
     "entry": "src/entry.ts",
     "eliza": "src/runtime/eliza.ts",
     "server": "src/api/server.ts",
-    "plugins/whatsapp/index": "src/plugins/whatsapp/index.ts",
-    "plugins/retake/index": "src/plugins/retake/index.ts"
+    "plugins/whatsapp/index": "src/plugins/whatsapp/index.ts"
   },
   format: "esm",
   platform: "node",

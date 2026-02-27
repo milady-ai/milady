@@ -80,20 +80,21 @@ async function startWithMock(config: StreamConfig): Promise<string[]> {
 
   const proc = makeMockProc();
   // biome-ignore lint/suspicious/noExplicitAny: mock proc shape doesn't fully match ChildProcess
-  vi.mocked(spawn).mockReturnValueOnce(proc as any);
+  (spawn as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce(proc as any);
 
   vi.useFakeTimers();
   try {
     const startPromise = streamManager.start(config);
     // Advance past the 1500ms probe delay — don't use runAllTimersAsync
     // because stream-manager has a setInterval that causes infinite loop.
-    await vi.advanceTimersByTimeAsync(2000);
+    // Use sync advanceTimersByTime (bun compat) and flush microtasks.
+    vi.advanceTimersByTime(2000);
     await startPromise;
   } finally {
     vi.useRealTimers();
   }
 
-  const calls = vi.mocked(spawn).mock.calls;
+  const calls = (spawn as unknown as ReturnType<typeof vi.fn>).mock.calls;
   const lastCall = calls[calls.length - 1];
   if (!lastCall) {
     throw new Error("startWithMock: spawn was never called");
@@ -107,7 +108,7 @@ async function startWithMock(config: StreamConfig): Promise<string[]> {
 // ---------------------------------------------------------------------------
 
 beforeEach(() => {
-  vi.mocked(spawn).mockReset();
+  (spawn as unknown as ReturnType<typeof vi.fn>).mockReset();
 });
 
 afterEach(async () => {
@@ -190,7 +191,7 @@ describe("setVolume()", () => {
   it("does NOT call spawn when stream is not running", async () => {
     await streamManager.setVolume(40);
 
-    expect(vi.mocked(spawn)).not.toHaveBeenCalled();
+    expect(spawn).not.toHaveBeenCalled();
   });
 });
 
@@ -252,18 +253,18 @@ describe("mute() / unmute()", () => {
   });
 
   it("mute() does NOT call spawn when stream is not running", async () => {
-    vi.mocked(spawn).mockReset();
+    (spawn as unknown as ReturnType<typeof vi.fn>).mockReset();
     await streamManager.mute();
 
-    expect(vi.mocked(spawn)).not.toHaveBeenCalled();
+    expect(spawn).not.toHaveBeenCalled();
   });
 
   it("unmute() does NOT call spawn when stream is not running", async () => {
     await streamManager.mute();
-    vi.mocked(spawn).mockReset();
+    (spawn as unknown as ReturnType<typeof vi.fn>).mockReset();
     await streamManager.unmute();
 
-    expect(vi.mocked(spawn)).not.toHaveBeenCalled();
+    expect(spawn).not.toHaveBeenCalled();
   });
 });
 

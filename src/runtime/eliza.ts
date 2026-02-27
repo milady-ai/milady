@@ -933,6 +933,7 @@ const WORKSPACE_PLUGIN_OVERRIDES = new Set<string>([
   // "@elizaos/plugin-media-generation",
   "@milady/plugin-twitch-streaming",
   "@milady/plugin-youtube-streaming",
+  "@milady/plugin-retake",
 ]);
 
 function getWorkspacePluginOverridePath(pluginName: string): string | null {

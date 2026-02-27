@@ -6,7 +6,7 @@
  * credential fetching and session start/stop via the retake.tv API.
  */
 
-import type { StreamingDestination } from "./stream-routes";
+import type { StreamingDestination } from "./types.ts";
 
 export function createRetakeDestination(config?: {
   accessToken?: string;
