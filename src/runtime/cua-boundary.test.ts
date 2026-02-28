@@ -209,3 +209,39 @@ describe("CUA security boundaries", () => {
     expect(cuaEntries).toHaveLength(1);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Section 5: CUA character secrets boundary (security assumption)
+// ---------------------------------------------------------------------------
+
+describe("CUA character secrets boundary", () => {
+  const snap = envSnapshot([...CUA_ENV_KEYS, "CUA_PRIVATE_KEY"]);
+
+  beforeEach(() => {
+    snap.save();
+    for (const k of CUA_ENV_KEYS) delete process.env[k];
+    delete process.env.CUA_PRIVATE_KEY;
+  });
+  afterEach(() => snap.restore());
+
+  it("CUA_API_KEY is NOT propagated to character.secrets (service-level only)", async () => {
+    process.env.CUA_API_KEY = "cua-secret-key";
+    const { buildCharacterFromConfig } = await import("./eliza");
+    const character = buildCharacterFromConfig({} as MiladyConfig);
+    expect(character.secrets).not.toHaveProperty("CUA_API_KEY");
+  });
+
+  it("CUA_HOST is NOT propagated to character.secrets (service-level only)", async () => {
+    process.env.CUA_HOST = "http://localhost:8000";
+    const { buildCharacterFromConfig } = await import("./eliza");
+    const character = buildCharacterFromConfig({} as MiladyConfig);
+    expect(character.secrets).not.toHaveProperty("CUA_HOST");
+  });
+
+  it("CUA_PRIVATE_KEY is NOT propagated to character.secrets", async () => {
+    process.env.CUA_PRIVATE_KEY = "should-never-leak";
+    const { buildCharacterFromConfig } = await import("./eliza");
+    const character = buildCharacterFromConfig({} as MiladyConfig);
+    expect(character.secrets).not.toHaveProperty("CUA_PRIVATE_KEY");
+  });
+});
