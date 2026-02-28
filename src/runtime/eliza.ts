@@ -45,6 +45,40 @@ import {
   type TargetInfo,
   type UUID,
 } from "@elizaos/core";
+import * as pluginAgentOrchestrator from "@elizaos/plugin-agent-orchestrator";
+import * as pluginAgentSkills from "@elizaos/plugin-agent-skills";
+import * as pluginAnthropic from "@elizaos/plugin-anthropic";
+import * as pluginBrowser from "@elizaos/plugin-browser";
+import * as pluginCli from "@elizaos/plugin-cli";
+import * as pluginCodingAgent from "@elizaos/plugin-coding-agent";
+import * as pluginComputeruse from "@elizaos/plugin-computeruse";
+import * as pluginCron from "@elizaos/plugin-cron";
+import * as pluginDiscord from "@elizaos/plugin-discord";
+import * as pluginEdgeTts from "@elizaos/plugin-edge-tts";
+import * as pluginElevenlabs from "@elizaos/plugin-elevenlabs";
+import * as pluginElizacloud from "@elizaos/plugin-elizacloud";
+import * as pluginExperience from "@elizaos/plugin-experience";
+import * as pluginForm from "@elizaos/plugin-form";
+import * as pluginGoogleGenai from "@elizaos/plugin-google-genai";
+import * as pluginGroq from "@elizaos/plugin-groq";
+import * as pluginKnowledge from "@elizaos/plugin-knowledge";
+import * as pluginLocalEmbedding from "@elizaos/plugin-local-embedding";
+import * as pluginOllama from "@elizaos/plugin-ollama";
+import * as pluginOpenai from "@elizaos/plugin-openai";
+import * as pluginOpenrouter from "@elizaos/plugin-openrouter";
+import * as pluginPdf from "@elizaos/plugin-pdf";
+import * as pluginPersonality from "@elizaos/plugin-personality";
+import * as pluginPluginManager from "@elizaos/plugin-plugin-manager";
+import * as pluginRolodex from "@elizaos/plugin-rolodex";
+import * as pluginShell from "@elizaos/plugin-shell";
+// Static plugin imports - plugins with proper type declarations are imported
+// statically to enable TypeScript type checking. Plugins without types or not
+// installed will fall back to dynamic import at runtime.
+import * as pluginSql from "@elizaos/plugin-sql";
+import * as pluginTelegram from "@elizaos/plugin-telegram";
+import * as pluginTodo from "@elizaos/plugin-todo";
+import * as pluginTrust from "@elizaos/plugin-trust";
+import * as pluginTwitch from "@elizaos/plugin-twitch";
 import {
   debugLogResolvedContext,
   validateRuntimeContext,
@@ -78,41 +112,6 @@ import { SandboxManager, type SandboxMode } from "../services/sandbox-manager";
 import { diagnoseNoAIProvider } from "../services/version-compat";
 import { CORE_PLUGINS, OPTIONAL_CORE_PLUGINS } from "./core-plugins";
 import { createMiladyPlugin } from "./milady-plugin";
-
-// Static plugin imports - plugins with proper type declarations are imported
-// statically to enable TypeScript type checking. Plugins without types or not
-// installed will fall back to dynamic import at runtime.
-import * as pluginSql from "@elizaos/plugin-sql";
-import * as pluginLocalEmbedding from "@elizaos/plugin-local-embedding";
-import * as pluginForm from "@elizaos/plugin-form";
-import * as pluginKnowledge from "@elizaos/plugin-knowledge";
-import * as pluginRolodex from "@elizaos/plugin-rolodex";
-import * as pluginAgentOrchestrator from "@elizaos/plugin-agent-orchestrator";
-import * as pluginCodingAgent from "@elizaos/plugin-coding-agent";
-import * as pluginCron from "@elizaos/plugin-cron";
-import * as pluginShell from "@elizaos/plugin-shell";
-import * as pluginPluginManager from "@elizaos/plugin-plugin-manager";
-import * as pluginAgentSkills from "@elizaos/plugin-agent-skills";
-import * as pluginPdf from "@elizaos/plugin-pdf";
-import * as pluginOpenai from "@elizaos/plugin-openai";
-import * as pluginAnthropic from "@elizaos/plugin-anthropic";
-import * as pluginGoogleGenai from "@elizaos/plugin-google-genai";
-import * as pluginGroq from "@elizaos/plugin-groq";
-import * as pluginOpenrouter from "@elizaos/plugin-openrouter";
-import * as pluginOllama from "@elizaos/plugin-ollama";
-import * as pluginElizacloud from "@elizaos/plugin-elizacloud";
-import * as pluginTrust from "@elizaos/plugin-trust";
-import * as pluginBrowser from "@elizaos/plugin-browser";
-import * as pluginDiscord from "@elizaos/plugin-discord";
-import * as pluginTwitch from "@elizaos/plugin-twitch";
-import * as pluginComputeruse from "@elizaos/plugin-computeruse";
-import * as pluginCli from "@elizaos/plugin-cli";
-import * as pluginTelegram from "@elizaos/plugin-telegram";
-import * as pluginElevenlabs from "@elizaos/plugin-elevenlabs";
-import * as pluginEdgeTts from "@elizaos/plugin-edge-tts";
-import * as pluginTodo from "@elizaos/plugin-todo";
-import * as pluginPersonality from "@elizaos/plugin-personality";
-import * as pluginExperience from "@elizaos/plugin-experience";
 
 /** Map of @elizaos plugin names to their statically imported modules. */
 const STATIC_ELIZA_PLUGINS: Record<string, unknown> = {
