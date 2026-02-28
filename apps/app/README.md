@@ -122,7 +122,11 @@ bun run plugin:build
 
 ### Desktop app startup and errors
 
-If the embedded agent fails to load (e.g. missing native module), the app keeps the API server up so the UI can show an error instead of "Failed to fetch". See [Electron startup and exception handling](../../docs/electron-startup.md) for why the guards in `electron/src/native/agent.ts` exist and must not be removed.
+If the embedded agent fails to load (e.g. missing native module), the app keeps the API server up so the UI can show an error instead of "Failed to fetch". **Why:** Without that, one load failure would close the API server and the window would show only "Failed to fetch" with no message. See [Electron startup and exception handling](../../docs/electron-startup.md) for why the guards in `electron/src/native/agent.ts` exist and must not be removed.
+
+### Build and release (Electron bundle, CI)
+
+Plugin and native deps for the packaged app are copied into `milady-dist/node_modules` by `scripts/copy-electron-plugins-and-deps.mjs`, which **derives** the list from each @elizaos package's `package.json` (no manual list). macOS Intel builds run install and build under Rosetta so x64 native binaries are included. **Why:** [Build and release (CI, desktop binaries)](../../docs/build-and-release.md) explains arch, copy script, and release workflow.
 
 ### Tests
 

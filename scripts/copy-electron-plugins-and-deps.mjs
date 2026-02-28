@@ -8,8 +8,15 @@
  * transform-plugins-for-electron.ts). Non-plugin @elizaos packages (core,
  * prompts) are copied unconditionally when present.
  *
- * Transitive deps are a curated list — update TRANSITIVE_DEPS /
- * TRANSITIVE_SCOPED here when adding new plugin runtime dependencies.
+ * Transitive deps are derived by walking each copied @elizaos package's
+ * package.json "dependencies" (and optionalDependencies) recursively.
+ *
+ * Design notes:
+ * - We do not try to exclude deps that tsdown may have inlined into plugin
+ *   dist/ bundles; plugins can dynamic-require at runtime, so excluding them
+ *   would risk "Cannot find module" in packaged app. Extra copies are safe.
+ * - DEP_SKIP below excludes known dev-only or renderer-only packages that
+ *   are sometimes listed in plugin dependencies, to avoid bundle bloat.
  *
  * Run from repo root after "Bundle dist for Electron" has created
  * milady-dist/ and copied the bundled JS files.
@@ -35,30 +42,6 @@ if (!fs.existsSync(MILADY_DIST)) {
   process.exit(1);
 }
 
-// Runtime deps required by @elizaos plugins at runtime (single source of truth).
-const TRANSITIVE_DEPS = [
-  "uuid",
-  "ai",
-  "mammoth",
-  "pdfjs-dist",
-  "face-api.js",
-  "croner",
-  "tesseract.js",
-  "unpdf",
-];
-const TRANSITIVE_SCOPED = [
-  "@huggingface/transformers",
-  "@anthropic-ai/claude-agent-sdk",
-  "@electric-sql/pglite",
-  "@ai-sdk/gateway",
-  "@ai-sdk/anthropic",
-  "@ai-sdk/provider",
-  "@ai-sdk/provider-utils",
-  "@opentelemetry/api",
-  "@tensorflow/tfjs-core",
-  "@vercel/oidc",
-];
-
 // @elizaos packages that should NOT be copied (dev tooling, not runtime deps).
 const ELIZAOS_SKIP = new Set(["@elizaos/sweagent-root", "@elizaos/tui"]);
 
@@ -71,6 +54,67 @@ function copyRecursive(src, dest) {
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   fs.cpSync(src, dest, { recursive: true, force: true, dereference: true });
   return true;
+}
+
+/** Path to a package's package.json in root node_modules. */
+function getPackageJsonPath(name) {
+  if (name.startsWith("@")) {
+    const [scope, pkgName] = name.split("/");
+    return path.join(NODE_MODULES, scope, pkgName, "package.json");
+  }
+  return path.join(NODE_MODULES, name, "package.json");
+}
+
+/** Dependency names from package.json (dependencies + optionalDependencies). WHY not devDependencies: those are build-time only; runtime needs only deps + optional. */
+function getDependencyNames(pkgObj) {
+  const deps = pkgObj.dependencies ?? {};
+  const optional = pkgObj.optionalDependencies ?? {};
+  return new Set([...Object.keys(deps), ...Object.keys(optional)]);
+}
+
+// Packages that should never be copied even if listed as a runtime dep
+// (dev tooling or renderer-only deps sometimes in plugin package.json).
+const DEP_SKIP = new Set([
+  "typescript",
+  "tslib",
+  "@types/node",
+  "lucide-react", // renderer/frontend icons; agent runtime is main process only
+]);
+
+/**
+ * Recursively collect all non-@elizaos dependency names reachable from
+ * the given package names (which are @elizaos/* — we discover their deps).
+ * WHY walk but not add @elizaos: we copy @elizaos packages in a separate
+ * loop above; this set is only for transitive third-party deps to copy here.
+ */
+function collectTransitiveDeps(entryNames) {
+  const collected = new Set();
+  const visited = new Set();
+
+  function visit(name) {
+    if (visited.has(name)) return;
+    visited.add(name);
+    if (DEP_SKIP.has(name)) return;
+    const pkgPath = getPackageJsonPath(name);
+    if (!fs.existsSync(pkgPath)) return;
+    // Only add non-@elizaos to collected; @elizaos are copied earlier.
+    if (!name.startsWith("@elizaos/")) {
+      collected.add(name);
+    }
+    try {
+      const pkg = readJson(pkgPath);
+      for (const dep of getDependencyNames(pkg)) {
+        visit(dep);
+      }
+    } catch (err) {
+      console.warn(`  Warning: could not read ${pkgPath}:`, err.message);
+    }
+  }
+
+  for (const name of entryNames) {
+    visit(name);
+  }
+  return collected;
 }
 
 // Discover @elizaos/* from package.json and filter to those present.
@@ -110,25 +154,25 @@ for (const name of toCopy) {
 }
 console.log("Done copying @elizaos packages");
 
-console.log("Copying plugin dependencies...");
-for (const dep of TRANSITIVE_DEPS) {
-  const src = path.join(NODE_MODULES, dep);
-  const dest = path.join(MILADY_DIST_NM, dep);
+const transitiveDeps = collectTransitiveDeps(toCopy);
+console.log(`Copying ${transitiveDeps.size} transitive plugin dependencies...`);
+const sortedDeps = [...transitiveDeps].sort();
+for (const name of sortedDeps) {
+  const [scope, pkgName] = name.startsWith("@")
+    ? name.split("/")
+    : [null, name];
+  const src =
+    scope != null
+      ? path.join(NODE_MODULES, scope, pkgName)
+      : path.join(NODE_MODULES, name);
+  const dest =
+    scope != null
+      ? path.join(MILADY_DIST_NM, scope, pkgName)
+      : path.join(MILADY_DIST_NM, name);
   if (copyRecursive(src, dest)) {
-    console.log("  Copied", dep);
+    console.log("  Copied", name);
   } else {
-    console.warn("  Warning:", dep, "not found in node_modules");
-  }
-}
-
-for (const scopePkg of TRANSITIVE_SCOPED) {
-  const [scope, pkgName] = scopePkg.split("/");
-  const src = path.join(NODE_MODULES, scope, pkgName);
-  const dest = path.join(MILADY_DIST_NM, scope, pkgName);
-  if (copyRecursive(src, dest)) {
-    console.log("  Copied", scopePkg);
-  } else {
-    console.warn("  Warning:", scopePkg, "not found in node_modules");
+    console.warn("  Warning:", name, "not found in node_modules");
   }
 }
 console.log("Done copying plugin dependencies");

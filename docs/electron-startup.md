@@ -15,6 +15,8 @@ If step 2 or 3 fails (missing native binary, plugin error, etc.), we want:
 
 ## Why the guards exist
 
+**Goal:** When the runtime fails to load (e.g. missing native binary), the user should see a clear error in the UI, not a dead window. That requires (1) the API server to stay up so the renderer can connect, and (2) status to include `state: "error"` and the error message so the UI can show "Agent unavailable: …".
+
 Without explicit handling:
 
 1. **`eliza.js` import fails** (e.g. `onnxruntime-node` can't find `darwin/x64/onnxruntime_binding.node`). The dynamic import throws.
