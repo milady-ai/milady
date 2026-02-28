@@ -70,6 +70,7 @@ import * as pluginPdf from "@elizaos/plugin-pdf";
 import * as pluginPersonality from "@elizaos/plugin-personality";
 import * as pluginPluginManager from "@elizaos/plugin-plugin-manager";
 import * as pluginRolodex from "@elizaos/plugin-rolodex";
+import * as pluginSecretsManager from "@elizaos/plugin-secrets-manager";
 import * as pluginShell from "@elizaos/plugin-shell";
 // Static plugin imports - plugins with proper type declarations are imported
 // statically to enable TypeScript type checking. Plugins without types or not
@@ -77,6 +78,7 @@ import * as pluginShell from "@elizaos/plugin-shell";
 import * as pluginSql from "@elizaos/plugin-sql";
 import * as pluginTelegram from "@elizaos/plugin-telegram";
 import * as pluginTodo from "@elizaos/plugin-todo";
+import * as pluginTrajectoryLogger from "@elizaos/plugin-trajectory-logger";
 import * as pluginTrust from "@elizaos/plugin-trust";
 import * as pluginTwitch from "@elizaos/plugin-twitch";
 import {
@@ -117,9 +119,11 @@ import { createMiladyPlugin } from "./milady-plugin";
 const STATIC_ELIZA_PLUGINS: Record<string, unknown> = {
   "@elizaos/plugin-sql": pluginSql,
   "@elizaos/plugin-local-embedding": pluginLocalEmbedding,
+  "@elizaos/plugin-secrets-manager": pluginSecretsManager,
   "@elizaos/plugin-form": pluginForm,
   "@elizaos/plugin-knowledge": pluginKnowledge,
   "@elizaos/plugin-rolodex": pluginRolodex,
+  "@elizaos/plugin-trajectory-logger": pluginTrajectoryLogger,
   "@elizaos/plugin-agent-orchestrator": pluginAgentOrchestrator,
   "@elizaos/plugin-coding-agent": pluginCodingAgent,
   "@elizaos/plugin-cron": pluginCron,
