@@ -177,6 +177,46 @@ for (const name of sortedDeps) {
 }
 console.log("Done copying plugin dependencies");
 
+// Copy PGLite extension files required for database initialization.
+// These files are loaded at runtime by @electric-sql/pglite.
+const ELECTRON_DIR = path.join(ROOT, "apps", "app", "electron");
+const PGLITE_DIST = path.join(
+  NODE_MODULES,
+  "@electric-sql",
+  "pglite",
+  "dist",
+);
+
+console.log("Copying PGLite extension files...");
+
+// Extensions (vector, fuzzystrmatch) go to electron root (app.asar.unpacked/)
+const extensionFiles = ["vector.tar.gz", "fuzzystrmatch.tar.gz"];
+for (const file of extensionFiles) {
+  const src = path.join(PGLITE_DIST, file);
+  const dest = path.join(ELECTRON_DIR, file);
+  if (fs.existsSync(src)) {
+    fs.copyFileSync(src, dest);
+    console.log(`  Copied ${file} to electron/`);
+  } else {
+    console.warn(`  Warning: ${file} not found in @electric-sql/pglite/dist`);
+  }
+}
+
+// Data/wasm files go to milady-dist/
+const dataFiles = ["pglite.data", "pglite.wasm"];
+for (const file of dataFiles) {
+  const src = path.join(PGLITE_DIST, file);
+  const dest = path.join(MILADY_DIST, file);
+  if (fs.existsSync(src)) {
+    fs.copyFileSync(src, dest);
+    console.log(`  Copied ${file} to milady-dist/`);
+  } else {
+    console.warn(`  Warning: ${file} not found in @electric-sql/pglite/dist`);
+  }
+}
+
+console.log("Done copying PGLite files");
+
 console.log("milady-dist/node_modules contents:");
 try {
   console.log(fs.readdirSync(MILADY_DIST_NM).join(" "));
