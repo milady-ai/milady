@@ -1,11 +1,11 @@
 ---
 title: Contributing Guide
-description: How to set up a development environment, follow code conventions, and submit pull requests to the MiladyAI project.
+description: How to set up a development environment, follow code conventions, and submit pull requests to the Milady project.
 ---
 
 # Contributing Guide
 
-Welcome to MiladyAI! This guide will help you set up your development environment and contribute effectively.
+Welcome to Milady! This guide will help you set up your development environment and contribute effectively.
 
 ## Table of Contents
 
@@ -140,7 +140,7 @@ milady/
 | `src/entry.ts` | CLI entry point |
 | `src/index.ts` | Library exports |
 | `src/runtime/eliza.ts` | ElizaOS runtime initialization |
-| `src/runtime/milady-plugin.ts` | Main MiladyAI plugin |
+| `src/runtime/milady-plugin.ts` | Main Milady plugin |
 | `milady.mjs` | npm bin entry |
 
 ---
@@ -250,7 +250,7 @@ MILADY_RUNTIME=node bun run milady start
 
 ### Product vs Code Naming
 
-- **MiladyAI** — Product name, headings, docs
+- **Milady** — Product name, headings, docs
 - **milady** — CLI command, package name, paths, config keys
 
 ### Formatting
@@ -415,7 +415,7 @@ Join the community Discord for help, discussions, and announcements:
 **[discord.gg/ai16z](https://discord.gg/ai16z)**
 
 Channels:
-- `#milady` — MiladyAI-specific discussion
+- `#milady` — Milady-specific discussion
 - `#dev` — Development help
 - `#showcase` — Share what you've built
 
@@ -433,7 +433,7 @@ When filing an issue:
 2. **Use templates** — Fill out the provided template
 3. **Include reproduction** — Steps to reproduce
 4. **Share logs** — Relevant error output
-5. **Environment** — OS, Node version, MiladyAI version
+5. **Environment** — OS, Node version, Milady version
 
 ```markdown
 ## Bug Report
@@ -452,7 +452,7 @@ What should happen
 **Environment:**
 - OS: macOS 14.2
 - Node: 22.12.0
-- MiladyAI: 2.0.0-alpha.8
+- Milady: 2.0.0-alpha.8
 
 **Logs:**
 ```
