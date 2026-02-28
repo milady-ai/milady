@@ -650,9 +650,7 @@ if (pdfTargets.length === 0) {
 // We only patch when src/index.ts does NOT exist (skip in dev workspaces).
 // ---------------------------------------------------------------------------
 function patchBunExports(pkgName) {
-  const candidates = [
-    resolve(root, "node_modules", pkgName, "package.json"),
-  ];
+  const candidates = [resolve(root, "node_modules", pkgName, "package.json")];
   // Bun may resolve from node_modules/.bun/<hash>/node_modules/<pkg>; patch
   // all copies so whichever one Bun uses gets the fix.
   const bunCache = resolve(root, "node_modules/.bun");
@@ -660,7 +658,13 @@ function patchBunExports(pkgName) {
     const safeName = pkgName.replace("/", "+").replace("@", "");
     for (const entry of readdirSync(bunCache)) {
       if (entry.startsWith(safeName)) {
-        const p = resolve(bunCache, entry, "node_modules", pkgName, "package.json");
+        const p = resolve(
+          bunCache,
+          entry,
+          "node_modules",
+          pkgName,
+          "package.json",
+        );
         if (existsSync(p)) candidates.push(p);
       }
     }
@@ -678,11 +682,13 @@ function patchBunExports(pkgName) {
 
     // Remove "bun" and "default" so resolver falls back to "import" → dist/
     delete dot.bun;
-    if (dot.default && dot.default.endsWith("/src/index.ts")) {
+    if (dot.default?.endsWith("/src/index.ts")) {
       delete dot.default;
     }
-    writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n", "utf8");
-    console.log(`[patch-deps] Patched ${pkgName} exports: removed dead "bun"/"default" → src/index.ts conditions.`);
+    writeFileSync(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`, "utf8");
+    console.log(
+      `[patch-deps] Patched ${pkgName} exports: removed dead "bun"/"default" → src/index.ts conditions.`,
+    );
   }
 }
 

@@ -180,12 +180,7 @@ console.log("Done copying plugin dependencies");
 // Copy PGLite extension files required for database initialization.
 // These files are loaded at runtime by @electric-sql/pglite.
 const ELECTRON_DIR = path.join(ROOT, "apps", "app", "electron");
-const PGLITE_DIST = path.join(
-  NODE_MODULES,
-  "@electric-sql",
-  "pglite",
-  "dist",
-);
+const PGLITE_DIST = path.join(NODE_MODULES, "@electric-sql", "pglite", "dist");
 
 console.log("Copying PGLite extension files...");
 
