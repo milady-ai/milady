@@ -7,6 +7,7 @@ import {
   Bot,
   Brain,
   Gamepad2,
+  Heart,
   MessageSquare,
   Radio,
   Settings,
@@ -66,7 +67,7 @@ export const ALL_TAB_GROUPS: TabGroup[] = [
   {
     label: "Companion",
     tabs: ["companion"],
-    icon: Bot,
+    icon: Heart,
     description: "Companion mode (feature flag)",
   },
   {
