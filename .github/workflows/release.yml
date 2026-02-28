@@ -64,12 +64,6 @@ jobs:
       fail-fast: false
       matrix:
         platform:
-          # macos-14 (ARM64) cross-compiles x64 via Rosetta; E2E test runs on arm64 only
-          - name: macOS (Intel)
-            os: macos
-            runner: macos-14
-            electron-args: --mac --x64
-            artifact-name: macos-x64
           - name: macOS (Apple Silicon)
             os: macos
             runner: macos-14
@@ -100,16 +94,10 @@ jobs:
         with:
           bun-version: latest
 
-      # For macos-x64, install under Rosetta so root node_modules gets x64 native
-      # binaries; copy-electron-plugins-and-deps copies from root into milady-dist.
       - name: Install root dependencies
         run: |
           for i in 1 2 3; do
-            if [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
-              arch -x86_64 bun install --frozen-lockfile && break
-            else
-              bun install --frozen-lockfile && break
-            fi
+            bun install --frozen-lockfile && break
             echo "Retry $i: bun install failed, retrying..."
             sleep 5
           done
@@ -130,23 +118,14 @@ jobs:
 
       - name: Build core
         run: |
-          if [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
-            arch -x86_64 bun x tsdown
-            arch -x86_64 bun x tsx scripts/write-build-info.ts
-          else
-            bunx tsdown
-            bunx tsx scripts/write-build-info.ts
-          fi
+          bunx tsdown
+          bunx tsx scripts/write-build-info.ts
           echo '{"type":"module"}' > dist/package.json
 
       - name: Install Capacitor app dependencies
         run: |
           for i in 1 2 3; do
-            if [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
-              arch -x86_64 bun install && break
-            else
-              bun install && break
-            fi
+            bun install && break
             echo "Retry $i: bun install failed, retrying..."
             sleep 5
           done
@@ -156,11 +135,7 @@ jobs:
         run: |
           for d in gateway swabble camera screencapture canvas desktop location talkmode agent; do
             echo "[plugin:$d] building..."
-            if [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
-              (cd plugins/$d && arch -x86_64 bun run build)
-            else
-              (cd plugins/$d && bun run build)
-            fi
+            (cd plugins/$d && bun run build)
           done
         working-directory: apps/app
         shell: bash
@@ -168,11 +143,7 @@ jobs:
       - name: Refresh Capacitor app dependencies
         run: |
           for i in 1 2 3; do
-            if [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
-              arch -x86_64 bun install && break
-            else
-              bun install && break
-            fi
+            bun install && break
             echo "Retry $i: bun install failed, retrying..."
             sleep 5
           done
@@ -192,59 +163,32 @@ jobs:
         working-directory: apps/app
 
       - name: Sync Electron
-        run: |
-          if [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
-            arch -x86_64 bun run cap:sync:electron
-          else
-            bun run cap:sync:electron
-          fi
+        run: bun run cap:sync:electron
         working-directory: apps/app
 
-      # For macos-x64, install under Rosetta so native modules (e.g. onnxruntime-node)
-      # get x64 binaries; otherwise the packaged DMG would contain arm64 .node files
-      # and fail on Intel with "Cannot find module .../darwin/x64/onnxruntime_binding.node".
       - name: Install Electron dependencies
         run: |
           for i in 1 2 3; do
-            if [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
-              arch -x86_64 bun install --no-save && break
-            else
-              bun install --no-save && break
-            fi
+            bun install --no-save && break
             echo "Retry $i: bun install failed, retrying..."
             sleep 5
           done
         working-directory: apps/app/electron
 
       - name: Build Electron app
-        run: |
-          if [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
-            arch -x86_64 bun run build
-          else
-            bun run build
-          fi
+        run: bun run build
         working-directory: apps/app/electron
 
       - name: Build Whisper universal binary (macOS)
         if: matrix.platform.os == 'macos'
-        run: |
-          if [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
-            arch -x86_64 bun run build:whisper
-          else
-            bun run build:whisper
-          fi
+        run: bun run build:whisper
         working-directory: apps/app/electron
 
       # Transform dynamic plugin imports to static imports for Electron bundling.
       # Dynamic imports like `import("@elizaos/plugin-sql")` cannot be bundled
       # by tsdown/rolldown. This script transforms eliza.ts to use static imports.
       - name: Transform plugins for Electron bundling
-        run: |
-          if [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
-            arch -x86_64 bun run scripts/transform-plugins-for-electron.ts
-          else
-            bun run scripts/transform-plugins-for-electron.ts
-          fi
+        run: bun run scripts/transform-plugins-for-electron.ts
         working-directory: .
 
       # Build a custom dist specifically for the Electron app where all third-party
@@ -259,11 +203,7 @@ jobs:
           set -euo pipefail
           echo "Building standalone Electron dist with all node_modules inlined..."
 
-          if [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
-            arch -x86_64 bun x tsdown --config tsdown.electron.config.ts --no-clean
-          else
-            bunx tsdown --config tsdown.electron.config.ts --no-clean
-          fi
+          bunx tsdown --config tsdown.electron.config.ts --no-clean
 
           # Copy to milady-dist so electron-builder can pack it.
           rm -rf apps/app/electron/milady-dist
@@ -580,17 +520,12 @@ jobs:
       - name: Validate required macOS release artifacts
         run: |
           VERSION="${{ needs.prepare.outputs.version }}"
-          X64_DMG="release-files/Milady-${VERSION}.dmg"
           ARM64_DMG="release-files/Milady-${VERSION}-arm64.dmg"
-          if [ ! -f "${X64_DMG}" ]; then
-            echo "::error::Missing required macOS x64 DMG: ${X64_DMG}"
-            exit 1
-          fi
           if [ ! -f "${ARM64_DMG}" ]; then
             echo "::error::Missing required macOS arm64 DMG: ${ARM64_DMG}"
             exit 1
           fi
-          echo "Found required macOS release DMGs for ${VERSION}"
+          echo "Found required macOS arm64 DMG for ${VERSION}"
 
       - name: Check for releasable files
         id: check
