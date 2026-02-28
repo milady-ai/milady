@@ -640,7 +640,10 @@ function discoverPluginsFromManifest(config?: MilaidyConfig): PluginEntry[] {
       const index = JSON.parse(
         fs.readFileSync(manifestPath, "utf-8"),
       ) as PluginIndex;
-      return index.plugins
+      // Keys that are auto-injected by infrastructure and should never be
+      // exposed as user-facing "config keys" or parameter definitions.
+      const HIDDEN_KEYS = new Set(["VERCEL_OIDC_TOKEN"]);
+      const discovered = index.plugins
         .map((p) => {
           const category = categorizePlugin(p.id);
           const envKey = p.envKey;
@@ -665,7 +668,7 @@ function discoverPluginsFromManifest(config?: MilaidyConfig): PluginEntry[] {
             p.id,
             category,
             envKey,
-            p.configKeys,
+            p.configKeys.filter((k) => !HIDDEN_KEYS.has(k)),
             undefined,
             paramInfos,
           );
@@ -678,13 +681,59 @@ function discoverPluginsFromManifest(config?: MilaidyConfig): PluginEntry[] {
             configured,
             envKey,
             category,
-            configKeys: p.configKeys,
+            configKeys: p.configKeys.filter((k) => !HIDDEN_KEYS.has(k)),
             parameters,
             validationErrors: validation.errors,
             validationWarnings: validation.warnings,
           };
         })
         .sort((a, b) => a.name.localeCompare(b.name));
+
+      // Ensure Eliza Cloud appears in AI Settings even if registry metadata
+      // shape drifts or plugin indexing misses it in some builds.
+      if (!discovered.some((p) => p.id === "elizacloud")) {
+        const envKey = "ELIZAOS_CLOUD_API_KEY";
+        const parameters = buildParamDefs({
+          ELIZAOS_CLOUD_API_KEY: {
+            type: "string",
+            description: "Eliza Cloud API key",
+            required: true,
+            sensitive: true,
+          },
+        });
+        const validation = validatePluginConfig(
+          "elizacloud",
+          "ai-provider",
+          envKey,
+          [envKey],
+          undefined,
+          [
+            {
+              key: envKey,
+              required: true,
+              sensitive: true,
+              type: "string",
+              description: "Eliza Cloud API key",
+              default: undefined,
+            },
+          ],
+        );
+        discovered.push({
+          id: "elizacloud",
+          name: "Eliza Cloud",
+          description: "Managed cloud models and services.",
+          enabled: false,
+          configured: Boolean(process.env[envKey]),
+          envKey,
+          category: "ai-provider",
+          configKeys: [envKey],
+          parameters,
+          validationErrors: validation.errors,
+          validationWarnings: validation.warnings,
+        });
+      }
+
+      return discovered.sort((a, b) => a.name.localeCompare(b.name));
     } catch (err) {
       logger.debug(
         `[milaidy-api] Failed to read plugins.json: ${err instanceof Error ? err.message : err}`,
@@ -833,6 +882,8 @@ function categorizePlugin(
   id: string,
 ): "ai-provider" | "connector" | "database" | "feature" {
   const aiProviders = [
+    "elizacloud",
+    "eliza-cloud",
     "openai",
     "anthropic",
     "groq",
@@ -4109,6 +4160,8 @@ async function handleRequest(
 
     if (!addrs.evmAddress) {
       json(res, empty);
+      return;
+    }
       return;
     }
 
