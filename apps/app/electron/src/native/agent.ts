@@ -61,6 +61,17 @@ function diagnosticLog(message: string): void {
   }
 }
 
+/** One-line, truncated error string safe for UI (status.error). Full stack still goes to diagnosticLog. */
+function shortError(err: unknown, maxLen = 280): string {
+  const raw =
+    err instanceof Error
+      ? err.message || (err.stack ?? String(err))
+      : String(err);
+  const oneLine = raw.replace(/\s+/g, " ").trim();
+  if (oneLine.length <= maxLen) return oneLine;
+  return `${oneLine.slice(0, maxLen)}…`;
+}
+
 /**
  * Dynamic import that survives TypeScript's CommonJS transformation.
  * tsc converts `import()` to `require()` when targeting CommonJS, but the
@@ -387,12 +398,14 @@ export class AgentManager {
       diagnosticLog(
         `[Agent] Loading eliza.js from: ${path.join(miladyDist, "eliza.js")}`,
       );
+      let elizaLoadError: string | null = null;
       const elizaModule = await dynamicImport(
         pathToFileURL(path.join(miladyDist, "eliza.js")).href,
       ).catch((err: unknown) => {
         const errMsg =
           err instanceof Error ? err.stack || err.message : String(err);
         diagnosticLog(`[Agent] FAILED to load eliza.js: ${errMsg}`);
+        elizaLoadError = shortError(err);
         return null;
       });
 
@@ -414,7 +427,7 @@ export class AgentManager {
       if (typeof resolvedStartEliza !== "function") {
         const reason = elizaModule
           ? "eliza.js does not export startEliza"
-          : "eliza.js failed to load (see log above)";
+          : (elizaLoadError ?? "eliza.js failed to load (see log above)");
         diagnosticLog(`[Agent] Cannot start runtime: ${reason}`);
 
         this.status = {
@@ -436,6 +449,7 @@ export class AgentManager {
       // the server (see file-level comment).
       diagnosticLog(`[Agent] Starting Eliza runtime in headless mode...`);
       let runtimeResult: Record<string, unknown> | null = null;
+      let runtimeInitError: string | null = null;
       try {
         runtimeResult = await startEliza({ headless: true });
       } catch (runtimeErr) {
@@ -444,10 +458,11 @@ export class AgentManager {
             ? runtimeErr.stack || runtimeErr.message
             : String(runtimeErr);
         diagnosticLog(`[Agent] Runtime startup threw: ${errMsg}`);
+        runtimeInitError = shortError(runtimeErr);
       }
 
       if (!runtimeResult) {
-        const reason = "Runtime failed to initialize";
+        const reason = runtimeInitError ?? "Runtime failed to initialize";
         diagnosticLog(`[Agent] ${reason}`);
         this.status = {
           state: "error",

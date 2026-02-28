@@ -140,7 +140,12 @@ describe("electron agent startup failure cleanup", () => {
     // Must be error state with port preserved — the UI can still connect.
     expect(result.state).toBe("error");
     expect(result.port).toBe(42138);
-    expect(result.error).toContain("eliza.js");
+    // Error should be the actual failure (e.g. "Cannot find module ...") so the UI can show it.
+    expect(result.error).toBeTruthy();
+    expect(
+      result.error?.includes("Cannot find module") ||
+        result.error?.includes("nonexistent"),
+    ).toBe(true);
     // API server must NOT have been closed.
     expect(globalThis.__miladyAgentStartupTestState?.closes).toBe(0);
     expect(globalThis.__miladyAgentStartupTestState?.starts).toBe(1);
