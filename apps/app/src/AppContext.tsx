@@ -32,6 +32,7 @@ import {
   type LogEntry,
   type McpMarketplaceResult,
   type McpRegistryServerDetail,
+  type AllPermissionsState,
   type McpServerConfig,
   type McpServerStatus,
   type MintResult,
@@ -60,6 +61,7 @@ import {
   type WorkbenchOverview,
 } from "./api-client";
 import { resolveAppAssetUrl } from "./asset-url";
+import type { Persona } from "./components/stream/helpers";
 import {
   type AutonomyEventStore,
   type AutonomyRunHealthMap,
@@ -217,21 +219,12 @@ function saveChatVoiceMuted(value: boolean): void {
 // ── Onboarding step type ───────────────────────────────────────────────
 
 export type OnboardingStep =
-  | "welcome"
-  | "name"
-  | "avatar"
-  | "style"
-  | "theme"
-  | "mint"
-  | "runMode"
-  | "dockerSetup"
-  | "cloudProvider"
-  | "modelSelection"
-  | "cloudLogin"
-  | "llmProvider"
-  | "inventorySetup"
-  | "connectors"
-  | "permissions";
+  | "welcome"        // Step 1: Hosting choice (absorbs old welcome + hostingChoice)
+  | "identity"       // Step 2: Name + style combined
+  | "infrastructure" // Step 3: Exec mode + database (local) or cloud config (elizaos)
+  | "permissions"    // Step 3b: OS permissions (only for rawdog + electron + missing perms)
+  | "aiProvider"     // Step 4: ElizaCloud login gate + provider selection
+  | "launch";        // Step 5: Summary + launch
 
 interface OnboardingNextOptions {
   allowPermissionBypass?: boolean;
@@ -441,26 +434,13 @@ function parseProactiveMessageEvent(
   return { conversationId, message };
 }
 
-function computeStreamingDelta(existing: string, incoming: string): string {
-  if (!incoming) return "";
-  if (!existing) return incoming;
-  if (incoming === existing) return "";
-  if (incoming.startsWith(existing)) return incoming.slice(existing.length);
-  if (existing.startsWith(incoming)) return "";
-
-  // Small chunks are usually raw token deltas; keep them even if they
-  // duplicate suffix characters (e.g., "l" + "l" in "Hello").
-  if (incoming.length <= 3) return incoming;
-
-  const maxOverlap = Math.min(existing.length, incoming.length);
-  for (let overlap = maxOverlap; overlap > 0; overlap -= 1) {
-    if (existing.endsWith(incoming.slice(0, overlap))) {
-      const delta = incoming.slice(overlap);
-      if (!delta && overlap === incoming.length) return "";
-      return delta;
-    }
-  }
-  return incoming;
+function computeStreamingDelta(_existing: string, incoming: string): string {
+  // The server-side streamChatEndpoint already extracts pure deltas from
+  // SSE `token` events (parsed.text).  Simply append the incoming chunk
+  // verbatim — no overlap detection needed (double-deduplication was
+  // silently dropping characters when token prefixes overlapped with the
+  // accumulated text suffix).
+  return incoming ?? "";
 }
 
 function normalizeStreamComparisonText(text: string): string {
@@ -676,6 +656,7 @@ export interface AppState {
   chatInput: string;
   chatSending: boolean;
   chatFirstTokenReceived: boolean;
+  activePersona: Persona;
   chatAvatarVisible: boolean;
   chatAgentVoiceMuted: boolean;
   chatAvatarSpeaking: boolean;
@@ -689,6 +670,8 @@ export interface AppState {
   ptySessions: CodingAgentSession[];
   /** Conversation IDs with unread proactive messages from the agent. */
   unreadConversations: Set<string>;
+  /** Maps conversation ID → last known source/channel for sidebar coloring. */
+  conversationSources: Record<string, string>;
 
   // Triggers
   triggers: TriggerSummary[];
@@ -848,8 +831,8 @@ export interface AppState {
   onboardingOptions: OnboardingOptions | null;
   onboardingName: string;
   onboardingStyle: string;
-  onboardingTheme: ThemeName;
-  onboardingRunMode: "local-rawdog" | "local-sandbox" | "cloud" | "";
+  onboardingHostingChoice: "local" | "elizaos" | "";
+  onboardingRunMode: "local-rawdog" | "local-lifo" | "local-sandbox" | "cloud" | "";
   onboardingCloudProvider: string;
   onboardingSmallModel: string;
   onboardingLargeModel: string;
@@ -857,6 +840,15 @@ export interface AppState {
   onboardingApiKey: string;
   onboardingOpenRouterModel: string;
   onboardingPrimaryModel: string;
+  onboardingRestarting: boolean;
+  // New onboarding state
+  onboardingDatabaseProvider: "pglite" | "postgres" | "docker-postgres";
+  onboardingDatabaseConnectionString: string;
+  onboardingElizaosRunMode: "cloud-hosted" | "local-cloud-services" | "";
+  // Legacy state kept for backward compat (used by settings, not onboarding)
+  onboardingTheme: ThemeName;
+  onboardingSubscriptionTab: "token" | "oauth";
+  onboardingAvatar: number;
   onboardingTelegramToken: string;
   onboardingDiscordToken: string;
   onboardingWhatsAppSessionPath: string;
@@ -866,12 +858,13 @@ export interface AppState {
   onboardingBlooioApiKey: string;
   onboardingBlooioPhoneNumber: string;
   onboardingGithubToken: string;
-  onboardingSubscriptionTab: "token" | "oauth";
   onboardingSelectedChains: Set<string>;
   onboardingRpcSelections: Record<string, string>;
   onboardingRpcKeys: Record<string, string>;
-  onboardingAvatar: number;
-  onboardingRestarting: boolean;
+
+  // Dev mode + permissions
+  devMode: "all" | "paygate" | false;
+  permissionsState: AllPermissionsState | null;
 
   // Command palette
   commandPaletteOpen: boolean;
@@ -1116,6 +1109,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [chatInput, setChatInput] = useState("");
   const [chatSending, setChatSending] = useState(false);
   const [chatFirstTokenReceived, setChatFirstTokenReceived] = useState(false);
+  const [activePersona, setActivePersona] = useState<Persona>("social");
   const [chatAvatarVisible, setChatAvatarVisible] = useState(
     loadChatAvatarVisible,
   );
@@ -1141,6 +1135,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [unreadConversations, setUnreadConversations] = useState<Set<string>>(
     new Set(),
   );
+  const [conversationSources, setConversationSources] = useState<
+    Record<string, string>
+  >({});
   const autonomousStoreRef = useRef<AutonomyEventStore>({
     eventsById: {},
     eventOrder: [],
@@ -1406,8 +1403,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [onboardingName, setOnboardingName] = useState("");
   const [onboardingStyle, setOnboardingStyle] = useState("");
   const [onboardingTheme, setOnboardingTheme] = useState<ThemeName>(loadTheme);
+  const [onboardingHostingChoice, setOnboardingHostingChoice] = useState<
+    "local" | "elizaos" | ""
+  >("");
   const [onboardingRunMode, setOnboardingRunMode] = useState<
-    "local-rawdog" | "local-sandbox" | "cloud" | ""
+    "local-rawdog" | "local-lifo" | "local-sandbox" | "cloud" | ""
   >("");
   const [onboardingCloudProvider, setOnboardingCloudProvider] = useState("");
   const [onboardingSmallModel, setOnboardingSmallModel] = useState(
@@ -1421,6 +1421,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [onboardingOpenRouterModel, setOnboardingOpenRouterModel] =
     useState("");
   const [onboardingPrimaryModel, setOnboardingPrimaryModel] = useState("");
+  const [onboardingDatabaseProvider, setOnboardingDatabaseProvider] = useState<
+    "pglite" | "postgres" | "docker-postgres"
+  >("pglite");
+  const [onboardingDatabaseConnectionString, setOnboardingDatabaseConnectionString] = useState("");
+  const [onboardingElizaosRunMode, setOnboardingElizaosRunMode] = useState<
+    "cloud-hosted" | "local-cloud-services" | ""
+  >("");
   const [onboardingTelegramToken, setOnboardingTelegramToken] = useState("");
   const [onboardingDiscordToken, setOnboardingDiscordToken] = useState("");
   const [onboardingWhatsAppSessionPath, setOnboardingWhatsAppSessionPath] =
@@ -1449,6 +1456,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
   >({});
   const [onboardingAvatar, setOnboardingAvatar] = useState(1);
   const [onboardingRestarting, setOnboardingRestarting] = useState(false);
+
+  // --- Dev mode + permissions ---
+  const devMode = onboardingOptions?.detectedEnvironment?.devMode ?? false;
+  const [permissionsState, setPermissionsState] =
+    useState<AllPermissionsState | null>(null);
+
+  /**
+   * Whether the permissions step should be shown in the onboarding wizard.
+   * Requires all three conditions:
+   * 1. User selected rawdog execution mode
+   * 2. Running in Electron (window.electron exists)
+   * 3. At least one required permission is not yet granted
+   */
+  const shouldShowPermissionsStep = useCallback((): boolean => {
+    if (onboardingRunMode !== "local-rawdog") return false;
+    if (!window.electron) return false;
+    if (!permissionsState) return true; // not loaded yet — show step to check
+    // Check if at least one required permission is missing
+    const requiredIds: SystemPermissionId[] = [
+      "accessibility",
+      "screen-recording",
+      "microphone",
+    ];
+    return requiredIds.some((id) => {
+      const s = permissionsState[id];
+      return s && s.status !== "granted" && s.status !== "not-applicable";
+    });
+  }, [onboardingRunMode, permissionsState]);
 
   // --- Command palette ---
   const [commandPaletteOpen, _setCommandPaletteOpen] = useState(false);
@@ -1942,6 +1977,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       try {
         const { messages } = await client.getConversationMessages(convId);
         setConversationMessages(messages);
+        // Extract the source from the last message to track per-conversation channel
+        const lastSource = [...messages].reverse().find((m) => m.source)?.source;
+        if (lastSource) {
+          setConversationSources((prev) => ({ ...prev, [convId]: lastSource }));
+        }
         return { ok: true };
       } catch (err) {
         const status = (err as { status?: number }).status;
@@ -2679,6 +2719,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
 
         let convId: string = activeConversationId ?? "";
+        let isNewConversation = false;
         if (!convId) {
           try {
             const { conversation } = await client.createConversation();
@@ -2686,6 +2727,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             setActiveConversationId(conversation.id);
             activeConversationIdRef.current = conversation.id;
             convId = conversation.id;
+            isNewConversation = true;
           } catch {
             return;
           }
@@ -2701,10 +2743,61 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const userMsgId = `temp-${now}`;
         const assistantMsgId = `temp-resp-${now}`;
 
+        // ── Coding mode: execute in real terminal ──────────────────────
+        if (activePersona === "coding") {
+          setConversationMessages((prev: ConversationMessage[]) => [
+            ...prev,
+            { id: userMsgId, role: "user", text, timestamp: now, source: "coding" },
+            { id: assistantMsgId, role: "assistant", text: `\`$ ${text}\` — running in terminal`, timestamp: now, source: "coding" },
+          ]);
+          setChatInput("");
+
+          // Record source for sidebar coloring
+          setConversationSources((prev) => ({ ...prev, [convId]: "coding" }));
+
+          // Auto-title
+          {
+            const currentConv = conversations.find((c) => c.id === convId);
+            const needsTitle =
+              isNewConversation ||
+              !currentConv?.title ||
+              currentConv.title === "New Chat";
+            if (needsTitle) {
+              const autoTitle =
+                text.length > 40 ? `${text.slice(0, 40)}\u2026` : text;
+              client
+                .renameConversation(convId, autoTitle)
+                .then(({ conversation }) => {
+                  setConversations((prev) =>
+                    prev.map((c) => (c.id === convId ? conversation : c)),
+                  );
+                })
+                .catch(() => {});
+            }
+          }
+
+          // Execute the command in the real terminal
+          try {
+            await client.runTerminalCommand(text);
+          } catch (err) {
+            setConversationMessages((prev) =>
+              prev.map((m) =>
+                m.id === assistantMsgId
+                  ? { ...m, text: `Failed to run command: ${err instanceof Error ? err.message : String(err)}` }
+                  : m,
+              ),
+            );
+          }
+          void loadConversations();
+          chatSendBusyRef.current = false;
+          return;
+        }
+
+        // ── Social mode: normal AI chat ────────────────────────────────
         setConversationMessages((prev: ConversationMessage[]) => [
           ...prev,
-          { id: userMsgId, role: "user", text, timestamp: now },
-          { id: assistantMsgId, role: "assistant", text: "", timestamp: now },
+          { id: userMsgId, role: "user", text, timestamp: now, source: activePersona },
+          { id: assistantMsgId, role: "assistant", text: "", timestamp: now, source: activePersona },
         ]);
         setChatInput("");
         setChatSending(true);
@@ -2748,6 +2841,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
               return changed ? next : prev;
             });
           }
+
+          // Record the source/channel for this conversation (for sidebar coloring)
+          setConversationSources((prev) => ({ ...prev, [convId]: activePersona }));
+
+          // Auto-generate a title for conversations that still have a generic name
+          {
+            const currentConv = conversations.find((c) => c.id === convId);
+            const needsTitle =
+              isNewConversation ||
+              !currentConv?.title ||
+              currentConv.title === "New Chat";
+            if (needsTitle) {
+              const autoTitle =
+                text.length > 40 ? `${text.slice(0, 40)}\u2026` : text;
+              client
+                .renameConversation(convId, autoTitle)
+                .then(({ conversation }) => {
+                  setConversations((prev) =>
+                    prev.map((c) => (c.id === convId ? conversation : c)),
+                  );
+                })
+                .catch(() => {});
+            }
+          }
+
           void loadConversations();
         } catch (err) {
           const abortError = err as Error;
@@ -2803,7 +2921,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
               );
             }
           } else {
-            await loadConversationMessages(convId);
+            // Show error in chat instead of silently reloading messages
+            // (which discards partial streaming text and looks like a "cut off").
+            const errorMsg =
+              err instanceof Error ? err.message : String(err);
+            console.error("[handleChatSend] streaming error:", err);
+            setConversationMessages((prev) =>
+              prev.map((message) =>
+                message.id === assistantMsgId
+                  ? {
+                      ...message,
+                      text: message.text
+                        ? `${message.text}\n\n[Error: ${errorMsg}]`
+                        : `[Error: ${errorMsg}]`,
+                    }
+                  : message,
+              ),
+            );
           }
         } finally {
           if (chatAbortRef.current === controller) {
@@ -2821,6 +2955,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       chatSending,
       chatPendingImages,
       activeConversationId,
+      activePersona,
+      conversations,
       loadConversationMessages,
       loadConversations,
       appendLocalCommandTurn,
@@ -3837,24 +3973,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const isLocalMode =
       onboardingRunMode === "local-rawdog" ||
+      onboardingRunMode === "local-lifo" ||
       onboardingRunMode === "local-sandbox";
-    const inventoryProviders: Array<{
-      chain: string;
-      rpcProvider: string;
-      rpcApiKey?: string;
-    }> = [];
-    if (isLocalMode) {
-      for (const chain of onboardingSelectedChains) {
-        const rpcProvider = onboardingRpcSelections[chain] || "elizacloud";
-        const rpcApiKey =
-          onboardingRpcKeys[`${chain}:${rpcProvider}`] || undefined;
-        inventoryProviders.push({ chain, rpcProvider, rpcApiKey });
-      }
-    }
 
     // Map the 3-mode selection to the API's runMode field
-    // "local-rawdog" and "local-sandbox" both map to "local" for backward compat
-    // Sandbox mode is additionally stored as a separate flag
     const apiRunMode = onboardingRunMode === "cloud" ? "cloud" : "local";
 
     onboardingFinishBusyRef.current = true;
@@ -3864,14 +3986,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       await client.submitOnboarding({
         name: onboardingName,
-        theme: onboardingTheme,
+        hostingChoice: onboardingHostingChoice || undefined,
+        theme: "milady",
         runMode: apiRunMode as "local" | "cloud",
         sandboxMode:
           onboardingRunMode === "local-sandbox"
             ? "standard"
-            : onboardingRunMode === "cloud"
+            : onboardingRunMode === "local-lifo"
               ? "light"
-              : "off",
+              : onboardingRunMode === "cloud"
+                ? "light"
+                : "off",
         bio: style?.bio ?? ["An autonomous AI agent."],
         systemPrompt,
         style: style?.style,
@@ -3890,18 +4015,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         primaryModel: isLocalMode
           ? onboardingPrimaryModel.trim() || undefined
           : undefined,
-        inventoryProviders:
-          inventoryProviders.length > 0 ? inventoryProviders : undefined,
-        // Connectors
-        telegramToken: onboardingTelegramToken.trim() || undefined,
-        discordToken: onboardingDiscordToken.trim() || undefined,
-        whatsappSessionPath: onboardingWhatsAppSessionPath.trim() || undefined,
-        twilioAccountSid: onboardingTwilioAccountSid.trim() || undefined,
-        twilioAuthToken: onboardingTwilioAuthToken.trim() || undefined,
-        twilioPhoneNumber: onboardingTwilioPhoneNumber.trim() || undefined,
-        blooioApiKey: onboardingBlooioApiKey.trim() || undefined,
-        blooioPhoneNumber: onboardingBlooioPhoneNumber.trim() || undefined,
-        githubToken: onboardingGithubToken.trim() || undefined,
+        // Database configuration
+        databaseProvider: onboardingDatabaseProvider,
+        databaseConnectionString:
+          onboardingDatabaseConnectionString.trim() || undefined,
       });
       setOnboardingComplete(true);
       setTab("chat");
@@ -3924,7 +4041,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     onboardingOptions,
     onboardingStyle,
     onboardingName,
-    onboardingTheme,
+    onboardingHostingChoice,
     onboardingRunMode,
     onboardingCloudProvider,
     onboardingSmallModel,
@@ -3932,216 +4049,69 @@ export function AppProvider({ children }: { children: ReactNode }) {
     onboardingProvider,
     onboardingApiKey,
     onboardingPrimaryModel,
-    onboardingSelectedChains,
-    onboardingRpcSelections,
-    onboardingRpcKeys,
-    onboardingTelegramToken,
-    onboardingDiscordToken,
-    onboardingWhatsAppSessionPath,
-    onboardingTwilioAccountSid,
-    onboardingTwilioAuthToken,
-    onboardingTwilioPhoneNumber,
-    onboardingBlooioApiKey,
-    onboardingBlooioPhoneNumber,
-    onboardingGithubToken,
+    onboardingDatabaseProvider,
+    onboardingDatabaseConnectionString,
     setTab,
   ]);
 
   const handleOnboardingNext = useCallback(
-    async (options?: OnboardingNextOptions) => {
-      const opts = onboardingOptions;
+    async (_options?: OnboardingNextOptions) => {
       switch (onboardingStep) {
         case "welcome":
-          setOnboardingStep("name");
+          setOnboardingStep("identity");
           break;
-        case "name":
-          setOnboardingStep("avatar");
+        case "identity":
+          setOnboardingStep("infrastructure");
           break;
-        case "avatar":
-          setOnboardingStep("style");
-          break;
-        case "style":
-          setOnboardingStep("theme");
-          break;
-        case "theme": {
-          setTheme(onboardingTheme);
-          // If drop is enabled and user hasn't minted, go to mint step
-          if (
-            dropStatus?.dropEnabled &&
-            !dropStatus.userHasMinted &&
-            !dropStatus.mintedOut
-          ) {
-            setOnboardingStep("mint");
+        case "infrastructure":
+          if (shouldShowPermissionsStep()) {
+            setOnboardingStep("permissions");
           } else {
-            setOnboardingStep("runMode");
+            setOnboardingStep("aiProvider");
           }
           break;
-        }
-        case "mint":
-          setOnboardingStep("runMode");
+        case "permissions":
+          setOnboardingStep("aiProvider");
           break;
-        case "runMode":
-          if (onboardingRunMode === "cloud") {
-            if (opts && opts.cloudProviders.length === 1) {
-              setOnboardingCloudProvider(opts.cloudProviders[0].id);
-            }
-            setOnboardingStep("cloudProvider");
-          } else if (onboardingRunMode === "local-sandbox") {
-            setOnboardingStep("dockerSetup");
-          } else {
-            // local-rawdog: skip docker, go straight to LLM provider
-            setOnboardingStep("llmProvider");
-          }
-          break;
-        case "dockerSetup":
-          setOnboardingStep("llmProvider");
-          break;
-        case "cloudProvider":
-          setOnboardingStep("modelSelection");
-          break;
-        case "modelSelection":
-          if (cloudConnected) {
-            setOnboardingStep("connectors");
-          } else {
-            setOnboardingStep("cloudLogin");
-          }
-          break;
-        case "cloudLogin":
-          setOnboardingStep("connectors");
-          break;
-        case "llmProvider":
-          setOnboardingStep("inventorySetup");
-          break;
-        case "inventorySetup":
-          setOnboardingStep("connectors");
-          break;
-        case "connectors":
-          setOnboardingStep("permissions");
-          break;
-        case "permissions": {
-          if (options?.allowPermissionBypass) {
-            await handleOnboardingFinish();
-            break;
-          }
-          try {
-            const permissions = await client.getPermissions();
-            const missingPermissions =
-              getMissingOnboardingPermissions(permissions);
-            if (missingPermissions.length > 0) {
-              const missingLabels = missingPermissions
-                .map((id) => ONBOARDING_PERMISSION_LABELS[id] ?? id)
-                .join(", ");
-              setActionNotice(
-                `Missing required permissions: ${missingLabels}. Grant them or use "Skip for Now".`,
-                "error",
-                5200,
-              );
-              return;
-            }
-          } catch (err) {
-            setActionNotice(
-              `Could not verify permissions (${err instanceof Error ? err.message : "unknown error"}). Use "Skip for Now" to continue.`,
-              "error",
-              5200,
-            );
-            return;
-          }
+        case "aiProvider":
+          // Trigger finish — launch step is rendered after submit
           await handleOnboardingFinish();
           break;
-        }
+        case "launch":
+          // Already finished — no-op (launch button handles this)
+          break;
       }
     },
     [
       onboardingStep,
-      onboardingOptions,
-      onboardingRunMode,
-      onboardingTheme,
-      setTheme,
-      cloudConnected,
-      setActionNotice,
       handleOnboardingFinish,
-      dropStatus?.dropEnabled,
-      dropStatus?.userHasMinted,
-      dropStatus?.mintedOut,
+      shouldShowPermissionsStep,
     ],
   );
 
   const handleOnboardingBack = useCallback(() => {
     switch (onboardingStep) {
-      case "name":
+      case "identity":
         setOnboardingStep("welcome");
         break;
-      case "avatar":
-        setOnboardingStep("name");
-        break;
-      case "style":
-        setOnboardingStep("avatar");
-        break;
-      case "theme":
-        setOnboardingStep("style");
-        break;
-      case "mint":
-        setOnboardingStep("theme");
-        break;
-      case "runMode":
-        if (
-          dropStatus?.dropEnabled &&
-          !dropStatus.userHasMinted &&
-          !dropStatus.mintedOut
-        ) {
-          setOnboardingStep("mint");
-        } else {
-          setOnboardingStep("theme");
-        }
-        break;
-      case "cloudProvider":
-        setOnboardingStep("runMode");
-        break;
-      case "modelSelection":
-        setOnboardingStep("cloudProvider");
-        break;
-      case "cloudLogin":
-        setOnboardingStep("modelSelection");
-        if (cloudLoginPollTimer.current) {
-          clearInterval(cloudLoginPollTimer.current);
-          cloudLoginPollTimer.current = null;
-        }
-        cloudLoginBusyRef.current = false;
-        setCloudLoginBusy(false);
-        setCloudLoginError(null);
-        break;
-      case "dockerSetup":
-        setOnboardingStep("runMode");
-        break;
-      case "llmProvider":
-        if (onboardingRunMode === "local-sandbox") {
-          setOnboardingStep("dockerSetup");
-        } else {
-          setOnboardingStep("runMode");
-        }
-        break;
-      case "inventorySetup":
-        setOnboardingStep("llmProvider");
-        break;
-      case "connectors":
-        // Go back to whichever path we came from
-        if (onboardingRunMode === "cloud") {
-          setOnboardingStep("modelSelection");
-        } else {
-          setOnboardingStep("inventorySetup");
-        }
+      case "infrastructure":
+        setOnboardingStep("identity");
         break;
       case "permissions":
-        setOnboardingStep("connectors");
+        setOnboardingStep("infrastructure");
+        break;
+      case "aiProvider":
+        if (shouldShowPermissionsStep()) {
+          setOnboardingStep("permissions");
+        } else {
+          setOnboardingStep("infrastructure");
+        }
+        break;
+      case "launch":
+        setOnboardingStep("aiProvider");
         break;
     }
-  }, [
-    onboardingStep,
-    onboardingRunMode,
-    dropStatus?.dropEnabled,
-    dropStatus?.userHasMinted,
-    dropStatus?.mintedOut,
-  ]);
+  }, [onboardingStep, shouldShowPermissionsStep]);
 
   // ── Cloud ──────────────────────────────────────────────────────────
 
@@ -4370,6 +4340,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }> = {
         tab: setTabRaw,
         chatInput: setChatInput,
+        activePersona: setActivePersona,
         chatAvatarVisible: setChatAvatarVisible,
         chatAgentVoiceMuted: setChatAgentVoiceMuted,
         chatAvatarSpeaking: setChatAvatarSpeaking,
@@ -4403,6 +4374,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         onboardingName: setOnboardingName,
         onboardingStyle: setOnboardingStyle,
         onboardingTheme: setOnboardingTheme,
+        onboardingHostingChoice: setOnboardingHostingChoice,
         onboardingRunMode: setOnboardingRunMode,
         onboardingCloudProvider: setOnboardingCloudProvider,
         onboardingSmallModel: setOnboardingSmallModel,
@@ -4413,6 +4385,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         onboardingRpcSelections: setOnboardingRpcSelections,
         onboardingOpenRouterModel: setOnboardingOpenRouterModel,
         onboardingPrimaryModel: setOnboardingPrimaryModel,
+        onboardingDatabaseProvider: setOnboardingDatabaseProvider,
+        onboardingDatabaseConnectionString: setOnboardingDatabaseConnectionString,
+        onboardingElizaosRunMode: setOnboardingElizaosRunMode,
         onboardingTelegramToken: setOnboardingTelegramToken,
         onboardingDiscordToken: setOnboardingDiscordToken,
         onboardingWhatsAppSessionPath: setOnboardingWhatsAppSessionPath,
@@ -5439,6 +5414,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     onboardingName,
     onboardingStyle,
     onboardingTheme,
+    onboardingHostingChoice,
     onboardingRunMode,
     onboardingCloudProvider,
     onboardingSmallModel,
@@ -5447,6 +5423,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     onboardingApiKey,
     onboardingOpenRouterModel,
     onboardingPrimaryModel,
+    onboardingRestarting,
+    onboardingDatabaseProvider,
+    onboardingDatabaseConnectionString,
+    onboardingElizaosRunMode,
+    onboardingTheme,
+    onboardingSubscriptionTab,
+    onboardingAvatar,
     onboardingTelegramToken,
     onboardingDiscordToken,
     onboardingWhatsAppSessionPath,
@@ -5456,12 +5439,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     onboardingBlooioApiKey,
     onboardingBlooioPhoneNumber,
     onboardingGithubToken,
-    onboardingSubscriptionTab,
     onboardingSelectedChains,
     onboardingRpcSelections,
     onboardingRpcKeys,
-    onboardingAvatar,
-    onboardingRestarting,
+    devMode,
+    permissionsState,
     commandPaletteOpen,
     commandQuery,
     commandActiveIndex,
@@ -5480,6 +5462,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     droppedFiles,
     shareIngestNotice,
     chatPendingImages,
+    activePersona,
+    conversationSources,
     activeGameApp,
     activeGameDisplayName,
     activeGameViewerUrl,

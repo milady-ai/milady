@@ -4,6 +4,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useApp } from "../AppContext";
+import { CHANNEL_COLORS } from "./stream/helpers";
 
 interface ConversationsSidebarProps {
   mobile?: boolean;
@@ -33,6 +34,7 @@ export function ConversationsSidebar({
   const {
     conversations,
     activeConversationId,
+    conversationSources,
     unreadConversations,
     handleNewConversation,
     handleSelectConversation,
@@ -145,6 +147,8 @@ export function ConversationsSidebar({
           sortedConversations.map((conv) => {
             const isActive = conv.id === activeConversationId;
             const isEditing = editingId === conv.id;
+            const convSource = conversationSources[conv.id];
+            const convColors = convSource ? CHANNEL_COLORS[convSource] : undefined;
 
             return (
               <div
@@ -152,9 +156,13 @@ export function ConversationsSidebar({
                 data-testid="conv-item"
                 data-active={isActive || undefined}
                 className={`flex items-center px-3 py-2 gap-2 cursor-pointer transition-colors border-l-[3px] ${
-                  isActive
-                    ? "bg-bg-hover border-l-accent"
-                    : "border-l-transparent hover:bg-bg-hover"
+                  isActive && convColors
+                    ? `bg-bg-hover ${convColors.border}`
+                    : isActive
+                      ? "bg-bg-hover border-l-accent"
+                      : convColors
+                        ? `${convColors.border} hover:bg-bg-hover`
+                        : "border-l-transparent hover:bg-bg-hover"
                 } group`}
               >
                 {isEditing ? (
@@ -183,11 +191,19 @@ export function ConversationsSidebar({
                         <span className="w-2 h-2 rounded-full bg-accent shrink-0" />
                       )}
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium truncate text-txt">
+                        <div className="flex items-center gap-1.5 font-medium truncate text-txt">
                           {conv.title}
+                          {convColors && (
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full shrink-0 ${convSource === "social" ? "bg-emerald-400" : convSource === "coding" ? "bg-amber-400" : convSource === "discord" ? "bg-indigo-400" : convSource === "retake" ? "bg-fuchsia-400" : "bg-accent"}`}
+                              title={convSource}
+                            />
+                          )}
                         </div>
-                        <div className="text-[11px] text-muted mt-0.5">
-                          {formatRelativeTime(conv.updatedAt)}
+                        <div className={`text-[11px] mt-0.5 ${convColors?.text ?? "text-muted"}`}>
+                          {convSource && convSource !== "social" && convSource !== "coding"
+                            ? `${convSource} · ${formatRelativeTime(conv.updatedAt)}`
+                            : formatRelativeTime(conv.updatedAt)}
                         </div>
                       </div>
                     </button>

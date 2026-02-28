@@ -20,6 +20,8 @@ export interface CloudLoginOptions {
   pollIntervalMs?: number;
   onBrowserUrl?: (url: string) => void;
   onPollStatus?: (status: string) => void;
+  /** Affiliate referral code to attach to the session creation request. */
+  affiliateRefCode?: string;
 }
 
 const DEFAULT_CLOUD_REQUEST_TIMEOUT_MS = 10_000;
@@ -66,13 +68,20 @@ export async function cloudLogin(
 
   logger.info("[cloud-auth] Creating auth session...");
 
+  const affiliateRefCode =
+    options.affiliateRefCode?.trim() ||
+    process.env.AFFILIATE_REF_CODE?.trim() ||
+    undefined;
+
   let createResponse: Response;
   try {
+    const sessionHeaders: Record<string, string> = { "Content-Type": "application/json" };
+    if (affiliateRefCode) sessionHeaders["X-Affiliate-Ref"] = affiliateRefCode;
     createResponse = await fetchWithTimeout(
       `${baseUrl}/api/auth/cli-session`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: sessionHeaders,
         body: JSON.stringify({ sessionId }),
       },
       requestTimeoutMs,

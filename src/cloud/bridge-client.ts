@@ -57,10 +57,12 @@ function isRedirectResponse(response: Response): boolean {
 export class ElizaCloudClient {
   private baseUrl: string;
   private apiKey: string;
+  private affiliateRefCode: string | undefined;
 
-  constructor(baseUrl: string, apiKey: string) {
+  constructor(baseUrl: string, apiKey: string, affiliateRefCode?: string) {
     this.baseUrl = baseUrl.replace(/\/+$/, "");
     this.apiKey = apiKey;
+    this.affiliateRefCode = affiliateRefCode || undefined;
   }
 
   async listAgents(): Promise<CloudAgent[]> {
@@ -117,9 +119,11 @@ export class ElizaCloudClient {
     channelType: ChatChannelType = "DM",
   ): Promise<string> {
     const url = `${this.baseUrl}/api/v1/milady/agents/${agentId}/bridge`;
+    const headers: Record<string, string> = { "Content-Type": "application/json", "X-Api-Key": this.apiKey };
+    if (this.affiliateRefCode) headers["X-Affiliate-Ref"] = this.affiliateRefCode;
     const response = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "X-Api-Key": this.apiKey },
+      headers,
       body: JSON.stringify({
         jsonrpc: "2.0",
         id: crypto.randomUUID(),
@@ -159,9 +163,11 @@ export class ElizaCloudClient {
     channelType: ChatChannelType = "DM",
   ): AsyncGenerator<{ type: string; data: Record<string, unknown> }> {
     const url = `${this.baseUrl}/api/v1/milady/agents/${agentId}/stream`;
+    const streamHeaders: Record<string, string> = { "Content-Type": "application/json", "X-Api-Key": this.apiKey };
+    if (this.affiliateRefCode) streamHeaders["X-Affiliate-Ref"] = this.affiliateRefCode;
     const response = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "X-Api-Key": this.apiKey },
+      headers: streamHeaders,
       body: JSON.stringify({
         jsonrpc: "2.0",
         id: crypto.randomUUID(),
@@ -246,12 +252,14 @@ export class ElizaCloudClient {
   async heartbeat(agentId: string): Promise<boolean> {
     const url = `${this.baseUrl}/api/v1/milady/agents/${agentId}/bridge`;
     try {
+      const hbHeaders: Record<string, string> = {
+        "Content-Type": "application/json",
+        "X-Api-Key": this.apiKey,
+      };
+      if (this.affiliateRefCode) hbHeaders["X-Affiliate-Ref"] = this.affiliateRefCode;
       const response = await fetch(url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Api-Key": this.apiKey,
-        },
+        headers: hbHeaders,
         body: JSON.stringify({ jsonrpc: "2.0", method: "heartbeat" }),
         redirect: "manual",
         signal: AbortSignal.timeout(10_000),
@@ -269,6 +277,7 @@ export class ElizaCloudClient {
     body?: unknown,
   ): Promise<ApiResponse<T>> {
     const headers: Record<string, string> = { "X-Api-Key": this.apiKey };
+    if (this.affiliateRefCode) headers["X-Affiliate-Ref"] = this.affiliateRefCode;
     if (body !== undefined) headers["Content-Type"] = "application/json";
 
     const response = await fetch(`${this.baseUrl}${path}`, {

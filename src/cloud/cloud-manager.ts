@@ -48,8 +48,17 @@ export class CloudManager {
       throw new Error(urlError);
     }
 
+    // Affiliate ref code: env var takes precedence, falls back to config
+    const affiliateRefCode =
+      process.env.AFFILIATE_REF_CODE?.trim() ||
+      this.cloudConfig.affiliateRefCode ||
+      undefined;
+
     const siteUrl = rawUrl.replace(/\/api\/v1\/?$/, "").replace(/\/+$/, "");
-    this.client = new ElizaCloudClient(siteUrl, apiKey);
+    this.client = new ElizaCloudClient(siteUrl, apiKey, affiliateRefCode);
+    if (affiliateRefCode) {
+      logger.info(`[cloud-manager] Affiliate ref code active: ${affiliateRefCode}`);
+    }
     logger.info(`[cloud-manager] Client initialised (baseUrl=${siteUrl})`);
   }
 

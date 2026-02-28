@@ -61,6 +61,7 @@ import {
   type ApplyPluginAutoEnableParams,
   applyPluginAutoEnable,
 } from "../config/plugin-auto-enable";
+import { resolveUserTier } from "../config/feature-manifest";
 import type { AgentConfig } from "../config/types.agents";
 import type { PluginInstallRecord } from "../config/types.milady";
 import {
@@ -78,6 +79,19 @@ import { SandboxManager, type SandboxMode } from "../services/sandbox-manager";
 import { diagnoseNoAIProvider } from "../services/version-compat";
 import { CORE_PLUGINS, OPTIONAL_CORE_PLUGINS } from "./core-plugins";
 import { createMiladyPlugin } from "./milady-plugin";
+
+// ---------------------------------------------------------------------------
+// Dev Mode
+// ---------------------------------------------------------------------------
+
+/**
+ * Active developer mode, set from the `MILADY_DEV_MODE` environment variable.
+ *
+ * - `"all"`     → All features unlocked, cloud login skippable, tier = enterprise
+ * - `"paygate"` → Simulates free-tier user — premium features locked, pay gates active
+ * - `false`     → Normal user behavior (env var unset or empty)
+ */
+export let activeDevMode: "all" | "paygate" | false = false;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -530,7 +544,7 @@ const OPTIONAL_PLUGIN_MAP: Readonly<Record<string, string>> = {
   "pi-ai": PI_AI_PLUGIN_PACKAGE,
   piAi: PI_AI_PLUGIN_PACKAGE,
   x402: "@elizaos/plugin-x402",
-  "coding-agent": "@elizaos/plugin-agent-orchestrator",
+  "claude-bridge": "@milady/plugin-claude-bridge",
   "twitch-streaming": "@milady/plugin-twitch-streaming",
   "youtube-streaming": "@milady/plugin-youtube-streaming",
 };
@@ -820,14 +834,6 @@ export function collectPluginNames(config: MiladyConfig): Set<string> {
   // installs) cannot accidentally re-introduce suppressed providers.
   applyProviderPrecedence();
 
-  // Enforce feature gating last so allow-list entries cannot bypass it.
-  if (shellPluginDisabled) {
-    pluginsToLoad.delete("@elizaos/plugin-shell");
-  }
-  if (isPluginExplicitlyDisabled("@elizaos/plugin-agent-orchestrator")) {
-    pluginsToLoad.delete("@elizaos/plugin-agent-orchestrator");
-  }
-
   return pluginsToLoad;
 }
 
@@ -1106,22 +1112,14 @@ async function resolveStaticElizaPlugin(
       // biome-ignore lint/suspicious/noTsIgnore: dynamic import
       // @ts-ignore
       return import("@elizaos/plugin-trajectory-logger");
-    case "@elizaos/plugin-agent-orchestrator":
+    case "@milady/plugin-claude-bridge":
       // biome-ignore lint/suspicious/noTsIgnore: dynamic import
       // @ts-ignore
-      return import("@elizaos/plugin-agent-orchestrator");
-    case "@elizaos/plugin-coding-agent":
-      // biome-ignore lint/suspicious/noTsIgnore: dynamic import
-      // @ts-ignore
-      return import("@elizaos/plugin-coding-agent");
+      return import("@milady/plugin-claude-bridge");
     case "@elizaos/plugin-cron":
       // biome-ignore lint/suspicious/noTsIgnore: dynamic import
       // @ts-ignore
       return import("@elizaos/plugin-cron");
-    case "@elizaos/plugin-shell":
-      // biome-ignore lint/suspicious/noTsIgnore: dynamic import
-      // @ts-ignore
-      return import("@elizaos/plugin-shell");
     case "@elizaos/plugin-plugin-manager":
       // biome-ignore lint/suspicious/noTsIgnore: dynamic import
       // @ts-ignore
@@ -1218,9 +1216,13 @@ async function resolvePlugins(
   const failedPlugins: Array<{ name: string; error: string }> = [];
   const repairedInstallRecords = new Set<string>();
 
+  const effectiveTier = resolveUserTier(activeDevMode);
+
   applyPluginAutoEnable({
     config,
     env: process.env,
+    userTier: effectiveTier,
+    devMode: activeDevMode,
   } satisfies ApplyPluginAutoEnableParams);
 
   const pluginsToLoad = collectPluginNames(config);
@@ -2150,26 +2152,6 @@ function installActionAliases(runtime: AgentRuntime): void {
     );
   }
 
-  // Compatibility alias: older prompts/docs still reference CODE_TASK,
-  // while plugin-agent-orchestrator exposes CREATE_TASK.
-  const createTaskAction = actions.find(
-    (action) => action?.name?.toUpperCase() === "CREATE_TASK",
-  );
-  if (createTaskAction) {
-    const similes = Array.isArray(createTaskAction.similes)
-      ? createTaskAction.similes
-      : [];
-    const hasCodeTaskAlias = similes.some(
-      (simile) => simile.toUpperCase() === "CODE_TASK",
-    );
-    if (!hasCodeTaskAlias) {
-      createTaskAction.similes = [...similes, "CODE_TASK"];
-      logger.info(
-        "[milady] Added action alias CODE_TASK -> CREATE_TASK for agent-orchestrator",
-      );
-    }
-  }
-
   runtimeWithAliases.__miladyActionAliasesInstalled = true;
 }
 
@@ -2405,6 +2387,31 @@ async function runFirstTimeSetup(config: MiladyConfig): Promise<MiladyConfig> {
 
   // ── Step 1: Welcome ────────────────────────────────────────────────────
   clack.intro("WELCOME TO MILADY!");
+
+  // ── Step 1b: Hosting choice ───────────────────────────────────────────
+  const hostingChoice = await clack.select({
+    message: "How are we running this?",
+    options: [
+      {
+        value: "local",
+        label: "Locally Hosting",
+        hint: "run everything on your own machine",
+      },
+      {
+        value: "elizaos",
+        label: "ElizaOS",
+        hint: "use the ElizaOS cloud platform",
+      },
+    ],
+  });
+
+  if (clack.isCancel(hostingChoice)) cancelOnboarding();
+
+  clack.log.message(
+    hostingChoice === "local"
+      ? "Running locally — got it!"
+      : "ElizaOS cloud — nice choice!",
+  );
 
   // ── Step 2: Name ───────────────────────────────────────────────────────
   const randomNames = pickRandomNames(4);
@@ -2767,6 +2774,7 @@ async function runFirstTimeSetup(config: MiladyConfig): Promise<MiladyConfig> {
       ...config.agents,
       list: updatedList,
     },
+    hosting: hostingChoice as "local" | "elizaos",
   };
 
   // Persist the provider API key and wallet keys in config.env so they
@@ -2942,6 +2950,18 @@ export async function startEliza(
     } else {
       throw err;
     }
+  }
+
+  // 1a-ii. Resolve developer mode from MILADY_DEV_MODE env var.
+  const rawDevMode = process.env.MILADY_DEV_MODE?.trim().toLowerCase();
+  activeDevMode =
+    rawDevMode === "true" || rawDevMode === "all"
+      ? "all"
+      : rawDevMode === "paygate"
+        ? "paygate"
+        : false;
+  if (activeDevMode) {
+    logger.info(`[milady] Dev mode active: ${activeDevMode}`);
   }
 
   // 1b. First-run onboarding — ask for agent name if not configured.

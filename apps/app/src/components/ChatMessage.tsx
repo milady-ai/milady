@@ -6,6 +6,7 @@ import { Check, Copy, RefreshCw, Trash2 } from "lucide-react";
 import { useCallback, useState } from "react";
 import type { ConversationMessage } from "../api-client";
 import { MessageContent } from "./MessageContent";
+import { CHANNEL_COLORS } from "./stream/helpers";
 
 interface ChatMessageProps {
   message: ConversationMessage;
@@ -41,6 +42,10 @@ export function ChatMessage({
   const isUser = message.role === "user";
   const agentInitial = agentName.trim().charAt(0).toUpperCase() || "A";
   const timestamp = formatTime(message.timestamp);
+  const personaColors =
+    message.source && (message.source === "social" || message.source === "coding")
+      ? CHANNEL_COLORS[message.source]
+      : undefined;
 
   const handleCopy = useCallback(() => {
     if (onCopy) {
@@ -100,7 +105,7 @@ export function ChatMessage({
               typeof message.source === "string" &&
               message.source &&
               message.source !== "client_chat" && (
-                <span className="text-[10px] text-muted opacity-60">
+                <span className={`text-[10px] opacity-60 ${personaColors?.text ?? "text-muted"}`}>
                   via {message.source}
                 </span>
               )}
@@ -112,7 +117,7 @@ export function ChatMessage({
           className={`relative group px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap break-words rounded-2xl ${
             isUser
               ? "bg-accent text-accent-foreground rounded-br-md"
-              : "bg-bg-accent border border-border text-txt rounded-bl-md"
+              : `bg-bg-accent border border-border text-txt rounded-bl-md${!isUser && personaColors ? ` border-l-2 ${personaColors.border}` : ""}`
           }`}
         >
           <MessageContent message={message} />
@@ -160,6 +165,11 @@ export function ChatMessage({
             )}
           </div>
         </div>
+        {!isUser && message.source === "coding" && (
+          <div className="text-[10px] text-amber-400 opacity-60 mt-1 ml-1">
+            Executed in terminal
+          </div>
+        )}
       </div>
     </article>
   );

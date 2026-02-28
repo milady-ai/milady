@@ -24,6 +24,7 @@ import {
   type VoicePlaybackStartEvent,
 } from "../hooks/useVoiceChat";
 import { ChatEmptyState, ChatMessage, TypingIndicator } from "./ChatMessage";
+import { PersonaSwitcher } from "./PersonaSwitcher";
 
 function nowMs(): number {
   return typeof performance !== "undefined" ? performance.now() : Date.now();
@@ -52,6 +53,7 @@ export function ChatView() {
     selectedVrmIndex,
     chatPendingImages,
     setChatPendingImages,
+    activePersona,
   } = useApp();
 
   const messagesRef = useRef<HTMLDivElement>(null);
@@ -459,6 +461,14 @@ export function ChatView() {
         </div>
       )}
 
+      {/* ── Persona switcher ────────────────────────────────────── */}
+      <div className="flex items-center justify-between pt-1 relative" style={{ zIndex: 1 }}>
+        <PersonaSwitcher />
+        {activePersona === "coding" && (
+          <span className="text-[10px] text-amber-400 opacity-70">Commands execute in terminal</span>
+        )}
+      </div>
+
       {/* ── Input row: mic + paperclip + textarea + send ───────────── */}
       <input
         ref={fileInputRef}
@@ -524,7 +534,11 @@ export function ChatView() {
             rows={1}
             aria-label="Chat message"
             placeholder={
-              voice.isListening ? "Listening..." : "Type a message..."
+              voice.isListening
+                ? "Listening..."
+                : activePersona === "coding"
+                  ? "Enter a command..."
+                  : "Type a message..."
             }
             value={chatInput}
             onChange={(e) => setState("chatInput", e.target.value)}

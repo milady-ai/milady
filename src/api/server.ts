@@ -27,10 +27,7 @@ import {
   type Task,
   type UUID,
 } from "@elizaos/core";
-import type {
-  PTYService,
-  SwarmEvent,
-} from "@elizaos/plugin-agent-orchestrator";
+
 import { listPiAiModelOptions } from "@elizaos/plugin-pi-ai";
 import { type WebSocket, WebSocketServer } from "ws";
 import type { CloudManager } from "../cloud/cloud-manager";
@@ -45,7 +42,13 @@ import { isConnectorConfigured } from "../config/plugin-auto-enable";
 import type { ConnectorConfig, CustomActionDef } from "../config/types.milady";
 import { EMOTE_BY_ID, EMOTE_CATALOG } from "../emotes/catalog";
 import { resolveDefaultAgentWorkspaceDir } from "../providers/workspace";
+import {
+  FEATURE_MANIFEST,
+  isFeatureAvailable,
+  resolveUserTier,
+} from "../config/feature-manifest";
 import { CORE_PLUGINS, OPTIONAL_CORE_PLUGINS } from "../runtime/core-plugins";
+import { activeDevMode } from "../runtime/eliza";
 import {
   buildTestHandler,
   registerCustomActionLive,
@@ -100,6 +103,8 @@ import {
 } from "./compat-utils";
 import { handleDatabaseRoute } from "./database";
 import { handleDiagnosticsRoutes } from "./diagnostics-routes";
+import { isDockerAvailable, setupDockerPostgres } from "./docker-db";
+import { handleSettingsRoutes, type SettingsRouteContext } from "./settings-routes";
 import { DropService } from "./drop-service";
 import {
   readJsonBody as parseJsonBody,
@@ -5402,200 +5407,7 @@ async function routeAutonomyTextToUser(
   });
 }
 
-// ── Coding Agent Chat Bridge ──────────────────────────────────────────
-
-/**
- * Get the SwarmCoordinator from the runtime services (if available).
- * The coordinator is registered by @elizaos/plugin-agent-orchestrator.
- */
-function getCoordinatorFromRuntime(runtime: AgentRuntime): {
-  setChatCallback?: (
-    cb: (text: string, source?: string) => Promise<void>,
-  ) => void;
-  setWsBroadcast?: (cb: (event: SwarmEvent) => void) => void;
-} | null {
-  // Try to get coordinator from runtime services
-  const coordinator = runtime.getService("SWARM_COORDINATOR");
-  if (coordinator)
-    return coordinator as ReturnType<typeof getCoordinatorFromRuntime>;
-  return null;
-}
-
-/**
- * Wire the SwarmCoordinator's chatCallback so coordinator messages
- * appear in the user's chat UI via the existing proactive-message flow.
- * Returns true if successfully wired.
- */
-function wireCodingAgentChatBridge(st: ServerState): boolean {
-  if (!st.runtime) return false;
-  const coordinator = getCoordinatorFromRuntime(st.runtime);
-  if (!coordinator?.setChatCallback) return false;
-  coordinator.setChatCallback(async (text: string, source?: string) => {
-    await routeAutonomyTextToUser(st, text, source ?? "coding-agent");
-  });
-  return true;
-}
-
-/**
- * Wire the SwarmCoordinator's wsBroadcast callback so coordinator events
- * are relayed to all WebSocket clients as "pty-session-event" messages.
- * Returns true if successfully wired.
- */
-function wireCodingAgentWsBridge(st: ServerState): boolean {
-  if (!st.runtime) return false;
-  const coordinator = getCoordinatorFromRuntime(st.runtime);
-  if (!coordinator?.setWsBroadcast) return false;
-  coordinator.setWsBroadcast((event: SwarmEvent) => {
-    // Preserve the coordinator's event type (task_registered, task_complete, etc.)
-    // as `eventType` so it doesn't overwrite the WS message dispatch type.
-    const { type: eventType, ...rest } = event;
-    st.broadcastWs?.({ type: "pty-session-event", eventType, ...rest });
-  });
-  return true;
-}
-
-/**
- * Fallback handler for /api/coding-agents/* routes when the plugin
- * doesn't export createCodingAgentRouteHandler.
- * Uses the AgentOrchestratorService (CODE_TASK) to provide task data.
- */
-async function handleCodingAgentsFallback(
-  runtime: AgentRuntime,
-  pathname: string,
-  method: string,
-  _req: http.IncomingMessage,
-  res: http.ServerResponse,
-): Promise<boolean> {
-  // GET /api/coding-agents/coordinator/status
-  if (
-    method === "GET" &&
-    pathname === "/api/coding-agents/coordinator/status"
-  ) {
-    const orchestratorService = runtime.getService("CODE_TASK") as {
-      getTasks?: () => Promise<
-        Array<{
-          id?: string;
-          name?: string;
-          description?: string;
-          metadata?: {
-            status?: string;
-            providerId?: string;
-            providerLabel?: string;
-            workingDirectory?: string;
-            progress?: number;
-            steps?: Array<{ status?: string }>;
-          };
-        }>
-      >;
-    } | null;
-
-    if (!orchestratorService?.getTasks) {
-      // Return empty status if service not available
-      json(res, {
-        supervisionLevel: "autonomous",
-        taskCount: 0,
-        tasks: [],
-        pendingConfirmations: 0,
-      });
-      return true;
-    }
-
-    try {
-      const tasks = await orchestratorService.getTasks();
-
-      // Map tasks to the CodingAgentSession format expected by frontend
-      const mappedTasks = tasks.map((task) => {
-        const meta = task.metadata ?? {};
-        // Map orchestrator status to frontend status
-        let status: string = "active";
-        switch (meta.status) {
-          case "completed":
-            status = "completed";
-            break;
-          case "failed":
-          case "error":
-            status = "error";
-            break;
-          case "cancelled":
-            status = "stopped";
-            break;
-          case "paused":
-            status = "blocked";
-            break;
-          case "running":
-            status = "active";
-            break;
-          case "pending":
-            status = "active";
-            break;
-          default:
-            status = "active";
-        }
-
-        return {
-          sessionId: task.id ?? "",
-          agentType: meta.providerId ?? "eliza",
-          label: meta.providerLabel ?? task.name ?? "Task",
-          originalTask: task.description ?? task.name ?? "",
-          workdir: meta.workingDirectory ?? process.cwd(),
-          status,
-          decisionCount: meta.steps?.length ?? 0,
-          autoResolvedCount:
-            meta.steps?.filter((s) => s.status === "completed").length ?? 0,
-        };
-      });
-
-      json(res, {
-        supervisionLevel: "autonomous",
-        taskCount: mappedTasks.length,
-        tasks: mappedTasks,
-        pendingConfirmations: 0,
-      });
-      return true;
-    } catch (e) {
-      error(res, `Failed to get coding agent status: ${e}`, 500);
-      return true;
-    }
-  }
-
-  // POST /api/coding-agents/:sessionId/stop - Stop a coding agent task
-  const stopMatch = pathname.match(/^\/api\/coding-agents\/([^/]+)\/stop$/);
-  if (method === "POST" && stopMatch) {
-    const sessionId = decodeURIComponent(stopMatch[1]);
-    const orchestratorService = runtime.getService("CODE_TASK") as {
-      cancelTask?: (taskId: string) => Promise<void>;
-    } | null;
-
-    if (!orchestratorService?.cancelTask) {
-      error(res, "Orchestrator service not available", 503);
-      return true;
-    }
-
-    try {
-      await orchestratorService.cancelTask(sessionId);
-      json(res, { ok: true });
-      return true;
-    } catch (e) {
-      error(res, `Failed to stop task: ${e}`, 500);
-      return true;
-    }
-  }
-
-  // Not handled by fallback
-  return false;
-}
-
-/**
- * Get the PTYConsoleBridge from the PTYService (if available).
- * Used by the WS PTY handlers to subscribe to output and forward input.
- */
-function getPtyConsoleBridge(st: ServerState) {
-  if (!st.runtime) return null;
-  const ptyService = st.runtime.getService(
-    "PTY_SERVICE",
-  ) as unknown as PTYService | null;
-  return ptyService?.consoleBridge ?? null;
-}
+// ── Coding Agent Chat Bridge (removed — replaced by Claude Agent Service) ──
 
 /**
  * Route non-conversation agent events into the active user chat.
@@ -6308,6 +6120,14 @@ async function handleRequest(
       );
     }
 
+    // Detect environment capabilities for onboarding infrastructure step
+    let dockerAvailable = false;
+    try {
+      dockerAvailable = await isDockerAvailable();
+    } catch {
+      /* ignore */
+    }
+
     json(res, {
       names: pickRandomNames(5),
       styles: STYLE_PRESETS,
@@ -6319,7 +6139,62 @@ async function handleRequest(
       inventoryProviders: getInventoryProviderOptions(),
       sharedStyleRules: "Keep responses brief. Be helpful and concise.",
       githubOAuthAvailable: Boolean(process.env.GITHUB_OAUTH_CLIENT_ID?.trim()),
+      databaseOptions: [
+        { id: "pglite", label: "PGLite (embedded)", description: "Zero-config local database. Recommended for most users." },
+        { id: "postgres", label: "PostgreSQL", description: "Connect to an existing PostgreSQL server." },
+        { id: "docker-postgres", label: "Docker PostgreSQL", description: "Auto-create a managed PostgreSQL container." },
+      ],
+      detectedEnvironment: {
+        dockerAvailable,
+        platform: process.platform,
+        arch: process.arch,
+        hasAffiliateRef: Boolean(process.env.AFFILIATE_REF_CODE?.trim()),
+        devMode: activeDevMode,
+      },
     });
+    return;
+  }
+
+  // ── GET /api/features ────────────────────────────────────────────────
+  if (method === "GET" && pathname === "/api/features") {
+    const userTier = resolveUserTier(activeDevMode);
+    const features = FEATURE_MANIFEST.map((entry) => {
+      const { available, reason, requiredTier } = isFeatureAvailable(
+        entry.id,
+        userTier,
+        activeDevMode,
+      );
+      // Check if feature is enabled in config
+      const featureConfig = state.config.features?.[entry.id];
+      const enabled =
+        featureConfig === true ||
+        (typeof featureConfig === "object" &&
+          featureConfig !== null &&
+          (featureConfig as Record<string, unknown>).enabled !== false);
+      return {
+        ...entry,
+        available,
+        enabled,
+        reason,
+        requiredTier: requiredTier ?? entry.requiredTier,
+      };
+    });
+    json(res, {
+      features,
+      currentTier: userTier,
+      devMode: activeDevMode,
+    });
+    return;
+  }
+
+  // ── POST /api/onboarding/setup-docker-db ──────────────────────────────
+  if (method === "POST" && pathname === "/api/onboarding/setup-docker-db") {
+    const result = await setupDockerPostgres();
+    if (result.success) {
+      json(res, { ok: true, credentials: result.credentials });
+    } else {
+      error(res, result.error ?? "Docker PostgreSQL setup failed", 500);
+    }
     return;
   }
 
@@ -6400,6 +6275,11 @@ async function handleRequest(
       }) as any;
     }
 
+    // ── Hosting choice (local vs elizaos) ─────────────────────────────────
+    if (body.hostingChoice) {
+      (config as Record<string, unknown>).hosting = body.hostingChoice as string;
+    }
+
     // ── Theme preference ──────────────────────────────────────────────────
     if (body.theme) {
       if (!config.ui) config.ui = {};
@@ -6432,6 +6312,44 @@ async function handleRequest(
         >
       ).mode = sandboxMode;
       logger.info(`[milady-api] Sandbox mode set to: ${sandboxMode}`);
+    }
+
+    // ── Database configuration ──────────────────────────────────────────
+    if (body.databaseProvider) {
+      if (!config.database) config.database = {};
+      const dbProvider = body.databaseProvider as string;
+      if (dbProvider === "pglite" || dbProvider === "postgres") {
+        config.database.provider = dbProvider as "pglite" | "postgres";
+      } else if (dbProvider === "docker-postgres") {
+        // docker-postgres is a UI concept; maps to "postgres" in config
+        config.database.provider = "postgres";
+      }
+      if (
+        (dbProvider === "postgres" || dbProvider === "docker-postgres") &&
+        body.databaseConnectionString &&
+        typeof body.databaseConnectionString === "string"
+      ) {
+        if (!config.database.postgres) config.database.postgres = {};
+        config.database.postgres.connectionString = body.databaseConnectionString.trim();
+      }
+      logger.info(`[milady-api] Database provider set to: ${dbProvider}`);
+    }
+
+    // ── Affiliate ref code ──────────────────────────────────────────────
+    const affiliateRefCode =
+      process.env.AFFILIATE_REF_CODE?.trim() ||
+      (typeof body.affiliateRefCode === "string" ? body.affiliateRefCode.trim() : "") ||
+      undefined;
+    if (affiliateRefCode) {
+      if (!config.cloud) config.cloud = {};
+      config.cloud.affiliateRefCode = affiliateRefCode;
+      logger.info(`[milady-api] Affiliate ref code persisted: ${affiliateRefCode}`);
+    }
+
+    // ── Default theme to milady if not specified ────────────────────────
+    if (!body.theme) {
+      if (!config.ui) config.ui = {};
+      if (!config.ui.theme) config.ui.theme = "milady";
     }
 
     if (runMode === "cloud") {
@@ -9891,6 +9809,22 @@ async function handleRequest(
     if (handled) return;
   }
 
+  // ── Settings routes (/api/settings/*) ─────────────────────────────────
+  if (pathname.startsWith("/api/settings/")) {
+    const handled = await handleSettingsRoutes({
+      req,
+      res,
+      method,
+      pathname,
+      readJsonBody: readJsonBody as SettingsRouteContext["readJsonBody"],
+      json,
+      error,
+      state: { config: state.config },
+      getInventoryProviderOptions,
+    });
+    if (handled) return;
+  }
+
   // ═══════════════════════════════════════════════════════════════════════
   // Conversation routes (/api/conversations/*)
   // ═══════════════════════════════════════════════════════════════════════
@@ -11275,64 +11209,39 @@ async function handleRequest(
     }
   }
 
-  // ── Coding Agent API (/api/coding-agents/*, /api/workspace/*, /api/issues/*) ──
-  if (
-    state.runtime &&
-    (pathname.startsWith("/api/coding-agents") ||
-      pathname.startsWith("/api/workspace") ||
-      pathname.startsWith("/api/issues"))
-  ) {
-    // Try to dynamically load the route handler from the local plugin first
-    let handled = false;
-
-    // Try @elizaos/plugin-coding-agent first (local workspace plugin)
+  // ── Claude Agent Service callback ──────────────────────────────────────
+  if (method === "POST" && pathname === "/api/claude-agent/callback") {
     try {
-      const codingAgentPlugin = await import("@elizaos/plugin-coding-agent");
-      if (codingAgentPlugin.createCodingAgentRouteHandler) {
-        const coordinator = codingAgentPlugin.getCoordinator?.(state.runtime);
-        const handler = codingAgentPlugin.createCodingAgentRouteHandler(
-          state.runtime,
-          coordinator,
-        );
-        handled = await handler(req, res, pathname);
+      const body = await readJsonBody(req, res);
+      if (!body) return;
+      const { taskId, status: taskStatus, result: taskResult, error: taskError } =
+        body as Record<string, unknown>;
+      if (taskId && taskStatus) {
+        const text =
+          taskStatus === "completed"
+            ? `Agent task ${String(taskId).slice(0, 8)} completed:\n${String(taskResult ?? "(no output)")}`
+            : `Agent task ${String(taskId).slice(0, 8)} failed: ${String(taskError ?? "unknown error")}`;
+        await routeAutonomyTextToUser(state, text, "claude-agent");
       }
+      json(res, { ok: true });
     } catch {
-      // Local plugin not available, try npm plugin
+      json(res, { ok: true });
     }
+    return;
+  }
 
-    // Fallback to @elizaos/plugin-agent-orchestrator (npm)
-    if (!handled) {
-      try {
-        const orchestratorPlugin = await import(
-          "@elizaos/plugin-agent-orchestrator"
-        );
-        if (orchestratorPlugin.createCodingAgentRouteHandler) {
-          const coordinator = orchestratorPlugin.getCoordinator?.(
-            state.runtime,
-          );
-          const handler = orchestratorPlugin.createCodingAgentRouteHandler(
-            state.runtime,
-            coordinator,
-          );
-          handled = await handler(req, res, pathname);
-        }
-      } catch {
-        // Plugin doesn't export these functions - skip routing
-      }
-    }
-
-    // Final fallback: Handle coding-agents routes using AgentOrchestratorService
-    if (!handled && pathname.startsWith("/api/coding-agents")) {
-      handled = await handleCodingAgentsFallback(
-        state.runtime,
-        pathname,
-        method,
-        req,
-        res,
+  if (method === "POST" && pathname === "/api/claude-agent/register") {
+    try {
+      const body = await readJsonBody(req, res);
+      if (!body) return;
+      logger.info(
+        `[milady-api] Claude Agent Service registered: ${JSON.stringify(body)}`,
       );
+      json(res, { ok: true, registered: true });
+    } catch {
+      json(res, { ok: true });
     }
-
-    if (handled) return;
+    return;
   }
 
   if (
@@ -12395,168 +12304,7 @@ async function handleRequest(
     return;
   }
 
-  // ── POST /api/terminal/run ──────────────────────────────────────────────
-  // Execute a shell command server-side and stream output via WebSocket.
-  if (method === "POST" && pathname === "/api/terminal/run") {
-    if (state.shellEnabled === false) {
-      error(res, "Shell access is disabled", 403);
-      return;
-    }
-
-    const body = await readJsonBody<{
-      command?: string;
-      clientId?: unknown;
-      terminalToken?: string;
-    }>(req, res);
-    if (!body) return;
-
-    const terminalRejection = resolveTerminalRunRejection(req, body);
-    if (terminalRejection) {
-      error(res, terminalRejection.reason, terminalRejection.status);
-      return;
-    }
-
-    const command = typeof body.command === "string" ? body.command.trim() : "";
-    if (!command) {
-      error(res, "Missing or empty command");
-      return;
-    }
-
-    // Guard against excessively long commands (likely injection or abuse)
-    if (command.length > 4096) {
-      error(res, "Command exceeds maximum length (4096 chars)", 400);
-      return;
-    }
-
-    // Prevent multiline/control-character payloads that can smuggle
-    // unintended command chains through a single request.
-    if (
-      command.includes("\n") ||
-      command.includes("\r") ||
-      command.includes("\0")
-    ) {
-      error(
-        res,
-        "Command must be a single line without control characters",
-        400,
-      );
-      return;
-    }
-
-    const targetClientId = resolveTerminalRunClientId(req, body);
-    if (!targetClientId) {
-      error(
-        res,
-        "Missing client id. Provide X-Milady-Client-Id header or clientId in the request body.",
-        400,
-      );
-      return;
-    }
-
-    const emitTerminalEvent = (payload: Record<string, unknown>) => {
-      if (isSharedTerminalClientId(targetClientId)) {
-        state.broadcastWs?.(payload);
-        return;
-      }
-      if (typeof state.broadcastWsToClientId !== "function") return;
-      state.broadcastWsToClientId(targetClientId, payload);
-    };
-
-    const { maxConcurrent, maxDurationMs } = resolveTerminalRunLimits();
-    if (activeTerminalRunCount >= maxConcurrent) {
-      error(
-        res,
-        `Too many active terminal runs (${maxConcurrent}). Wait for a command to finish.`,
-        429,
-      );
-      return;
-    }
-
-    // Respond immediately — output streams via WebSocket
-    json(res, { ok: true });
-
-    // Spawn in background and broadcast output
-    const { spawn } = await import("node:child_process");
-    const runId = `run-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-
-    emitTerminalEvent({
-      type: "terminal-output",
-      runId,
-      event: "start",
-      command,
-      maxDurationMs,
-    });
-
-    const proc = spawn(command, {
-      shell: true,
-      cwd: process.cwd(),
-      env: { ...process.env, FORCE_COLOR: "0" },
-    });
-
-    activeTerminalRunCount += 1;
-    let finalized = false;
-    const finalize = () => {
-      if (finalized) return;
-      finalized = true;
-      activeTerminalRunCount = Math.max(0, activeTerminalRunCount - 1);
-      clearTimeout(timeoutHandle);
-    };
-
-    const timeoutHandle = setTimeout(() => {
-      if (proc.killed) return;
-      proc.kill("SIGTERM");
-      emitTerminalEvent({
-        type: "terminal-output",
-        runId,
-        event: "timeout",
-        maxDurationMs,
-      });
-
-      setTimeout(() => {
-        if (!proc.killed) proc.kill("SIGKILL");
-      }, 3000);
-    }, maxDurationMs);
-
-    proc.stdout?.on("data", (chunk: Buffer) => {
-      emitTerminalEvent({
-        type: "terminal-output",
-        runId,
-        event: "stdout",
-        data: chunk.toString("utf-8"),
-      });
-    });
-
-    proc.stderr?.on("data", (chunk: Buffer) => {
-      emitTerminalEvent({
-        type: "terminal-output",
-        runId,
-        event: "stderr",
-        data: chunk.toString("utf-8"),
-      });
-    });
-
-    proc.on("close", (code: number | null) => {
-      finalize();
-      emitTerminalEvent({
-        type: "terminal-output",
-        runId,
-        event: "exit",
-        code: code ?? 1,
-      });
-    });
-
-    proc.on("error", (err: Error) => {
-      finalize();
-      emitTerminalEvent({
-        type: "terminal-output",
-        runId,
-        event: "error",
-        data: err.message,
-      });
-    });
-
-    return;
-  }
+  // ── POST /api/terminal/run (removed — replaced by Claude Agent Service) ──
 
   // ── Custom Actions CRUD ──────────────────────────────────────────────
 
@@ -13686,30 +13434,10 @@ export async function startApiServer(opts?: {
   const wss = new WebSocketServer({ noServer: true, maxPayload: 64 * 1024 });
   const wsClients = new Set<WebSocket>();
   const wsClientIds = new WeakMap<WebSocket, string>();
-  /** Per-WS-client PTY output subscriptions: sessionId → unsubscribe */
-  const wsClientPtySubscriptions = new WeakMap<
-    WebSocket,
-    Map<string, () => void>
-  >();
   bindRuntimeStreams(opts?.runtime ?? null);
   bindTrainingStream();
 
-  // Wire coding-agent bridges at initial boot (coordinator may not exist yet)
-  if (opts?.runtime) {
-    const chatOk = wireCodingAgentChatBridge(state);
-    const wsOk = wireCodingAgentWsBridge(state);
-    if (!chatOk || !wsOk) {
-      let wireAttempts = 0;
-      const wireInterval = setInterval(() => {
-        wireAttempts++;
-        const chatDone = chatOk || wireCodingAgentChatBridge(state);
-        const wsDone = wsOk || wireCodingAgentWsBridge(state);
-        if ((chatDone && wsDone) || wireAttempts >= 15) {
-          clearInterval(wireInterval);
-        }
-      }, 1000);
-    }
-  }
+  // (Coding-agent bridge wiring removed — replaced by Claude Agent Service)
 
   // Handle upgrade requests for WebSocket
   server.on("upgrade", (request, socket, head) => {
@@ -13785,103 +13513,8 @@ export async function startApiServer(opts?: {
         } else if (msg.type === "active-conversation") {
           state.activeConversationId =
             typeof msg.conversationId === "string" ? msg.conversationId : null;
-        } else if (
-          msg.type === "pty-subscribe" &&
-          typeof msg.sessionId === "string"
-        ) {
-          const bridge = getPtyConsoleBridge(state);
-          if (bridge) {
-            let subs = wsClientPtySubscriptions.get(ws);
-            if (!subs) {
-              subs = new Map();
-              wsClientPtySubscriptions.set(ws, subs);
-            }
-            // Don't double-subscribe
-            if (!subs.has(msg.sessionId)) {
-              const targetId = msg.sessionId;
-              const listener = (evt: { sessionId: string; data: string }) => {
-                if (evt.sessionId !== targetId) return;
-                if (ws.readyState === 1) {
-                  ws.send(
-                    JSON.stringify({
-                      type: "pty-output",
-                      sessionId: targetId,
-                      data: evt.data,
-                    }),
-                  );
-                }
-              };
-              bridge.on("session_output", listener);
-              subs.set(targetId, () => bridge.off("session_output", listener));
-            }
-          }
-        } else if (
-          msg.type === "pty-unsubscribe" &&
-          typeof msg.sessionId === "string"
-        ) {
-          const subs = wsClientPtySubscriptions.get(ws);
-          const unsub = subs?.get(msg.sessionId);
-          if (unsub) {
-            unsub();
-            subs?.delete(msg.sessionId);
-          }
-        } else if (
-          msg.type === "pty-input" &&
-          typeof msg.sessionId === "string" &&
-          typeof msg.data === "string"
-        ) {
-          // Only allow input to sessions this client has subscribed to
-          const subs = wsClientPtySubscriptions.get(ws);
-          if (!subs?.has(msg.sessionId)) {
-            logger.warn(
-              `[milady-api] pty-input rejected: client not subscribed to session ${msg.sessionId}`,
-            );
-          } else if (msg.data.length > 4096) {
-            logger.warn(
-              `[milady-api] pty-input rejected: payload too large (${msg.data.length} bytes) for session ${msg.sessionId}`,
-            );
-          } else {
-            const bridge = getPtyConsoleBridge(state);
-            if (bridge) {
-              logger.debug(
-                `[milady-api] pty-input: session=${msg.sessionId} len=${msg.data.length}`,
-              );
-              bridge.writeRaw(msg.sessionId, msg.data);
-            }
-          }
-        } else if (
-          msg.type === "pty-resize" &&
-          typeof msg.sessionId === "string"
-        ) {
-          // Only allow resize for sessions this client has subscribed to
-          const subs = wsClientPtySubscriptions.get(ws);
-          if (!subs?.has(msg.sessionId)) {
-            logger.warn(
-              `[milady-api] pty-resize rejected: client not subscribed to session ${msg.sessionId}`,
-            );
-          } else {
-            const bridge = getPtyConsoleBridge(state);
-            if (
-              bridge &&
-              typeof msg.cols === "number" &&
-              typeof msg.rows === "number" &&
-              Number.isFinite(msg.cols) &&
-              Number.isFinite(msg.rows) &&
-              Number.isInteger(msg.cols) &&
-              Number.isInteger(msg.rows) &&
-              msg.cols >= 1 &&
-              msg.cols <= 500 &&
-              msg.rows >= 1 &&
-              msg.rows <= 500
-            ) {
-              bridge.resize(msg.sessionId, msg.cols, msg.rows);
-            } else {
-              logger.warn(
-                `[milady-api] pty-resize rejected: invalid dimensions cols=${msg.cols} rows=${msg.rows}`,
-              );
-            }
-          }
         }
+        // (PTY subscribe/input/resize handlers removed — replaced by Claude Agent Service)
       } catch (err) {
         logger.error(
           `[milady-api] WebSocket message error: ${err instanceof Error ? err.message : err}`,
@@ -13891,12 +13524,6 @@ export async function startApiServer(opts?: {
 
     ws.on("close", () => {
       wsClients.delete(ws);
-      // Clean up any PTY output subscriptions for this client
-      const subs = wsClientPtySubscriptions.get(ws);
-      if (subs) {
-        for (const unsub of subs.values()) unsub();
-        subs.clear();
-      }
       addLog("info", "WebSocket client disconnected", "websocket", [
         "server",
         "websocket",
@@ -13908,12 +13535,6 @@ export async function startApiServer(opts?: {
         `[milady-api] WebSocket error: ${err instanceof Error ? err.message : err}`,
       );
       wsClients.delete(ws);
-      // Clean up PTY subscriptions on error too
-      const subs = wsClientPtySubscriptions.get(ws);
-      if (subs) {
-        for (const unsub of subs.values()) unsub();
-        subs.clear();
-      }
     });
   });
 
@@ -14068,22 +13689,7 @@ export async function startApiServer(opts?: {
     // Broadcast status update immediately after restart
     broadcastStatus();
 
-    // Wire coding-agent bridges (coordinator may not exist yet — retry)
-    {
-      const chatOk = wireCodingAgentChatBridge(state);
-      const wsOk = wireCodingAgentWsBridge(state);
-      if (!chatOk || !wsOk) {
-        let wireAttempts = 0;
-        const wireInterval = setInterval(() => {
-          wireAttempts++;
-          const chatDone = chatOk || wireCodingAgentChatBridge(state);
-          const wsDone = wsOk || wireCodingAgentWsBridge(state);
-          if ((chatDone && wsDone) || wireAttempts >= 15) {
-            clearInterval(wireInterval);
-          }
-        }, 1000);
-      }
-    }
+    // (Coding-agent bridge wiring removed — replaced by Claude Agent Service)
   };
 
   const updateStartup = (

@@ -532,6 +532,12 @@ export type CloudConfig = {
   inferenceMode?: CloudInferenceMode;
   /** Auto-deploy agents to cloud on creation. Default: false. */
   autoProvision?: boolean;
+  /**
+   * Affiliate referral code for revenue sharing on ElizaCloud proxied services.
+   * Set via AFFILIATE_REF_CODE env var or config. Sent as X-Affiliate-Ref header
+   * on all ElizaCloud API calls. ElizaCloud handles 50/50 split on the 20% markup.
+   */
+  affiliateRefCode?: string;
   /** Bridge settings for WebSocket communication with cloud agents. */
   bridge?: CloudBridgeConfig;
   /** Backup settings for agent state snapshots. */

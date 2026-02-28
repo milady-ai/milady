@@ -467,14 +467,13 @@ export class VrmEngine {
     const scaledWidth = width * scaleFactor;
     const scaledDepth = depth * scaleFactor;
 
-    // Frame on upper body: look at shoulder height, zoom in to crop below waist.
-    // Offset camera left so the model renders on the right side of the canvas.
+    // Frame on full body: show most of the character, looking at mid-torso.
     const upperBodyHeight = Math.max(
       scaledWidth,
-      scaledHeight * 0.55,
+      scaledHeight * 0.95,
       scaledDepth,
     );
-    const shoulderHeight = scaledHeight * 0.42;
+    const shoulderHeight = scaledHeight * 0.35;
 
     const fovRad = (camera.fov * Math.PI) / 180;
     const distance = (upperBodyHeight * 0.5) / Math.tan(fovRad * 0.5);

@@ -29,6 +29,16 @@ export const CHANNEL_COLORS: Record<
     bg: "bg-indigo-500/5",
     text: "text-indigo-400",
   },
+  social: {
+    border: "border-emerald-500/30",
+    bg: "bg-emerald-500/5",
+    text: "text-emerald-400",
+  },
+  coding: {
+    border: "border-amber-500/30",
+    bg: "bg-amber-500/5",
+    text: "text-amber-400",
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -67,6 +77,8 @@ export function getEventSource(event: StreamEventEnvelope): string {
 // ---------------------------------------------------------------------------
 
 export type AgentMode = "gaming" | "terminal" | "chatting" | "idle";
+
+export type Persona = "social" | "coding";
 
 // ---------------------------------------------------------------------------
 // Popout / Always-on-top
