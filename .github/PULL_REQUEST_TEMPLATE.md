@@ -1,6 +1,6 @@
-This PR will be reviewed by an AI agent. Provide clear context to help it assess your changes.
+This PR will be reviewed by an AI agent. Provide clear context so it can assess scope, risk, and testing. See [CONTRIBUTING.md](../CONTRIBUTING.md) and [AGENTS.md](../AGENTS.md) for scope and code standards.
 
-Aesthetic/UI changes that don't improve agent capability are out of scope and will be rejected.
+**Out of scope (will be rejected):** Aesthetic/UI-only changes that don't improve agent capability.
 
 ## Category
 - [ ] Bug fix
@@ -12,13 +12,13 @@ Aesthetic/UI changes that don't improve agent capability are out of scope and wi
 - [ ] Other
 
 ## What
-(brief description)
+(Brief description of the change.)
 
 ## Why
-(motivation)
+(Motivation and context. Include WHYs for non-obvious behavior; link to docs if you added or updated them.)
 
 ## How
-(implementation approach)
+(Implementation approach — key files, patterns, or tradeoffs.)
 
 ## Testing
-(what was tested, how to verify)
+(What you ran: `bun run check`, `bun run test`, manual steps. How reviewers can verify.)
