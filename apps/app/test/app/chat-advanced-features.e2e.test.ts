@@ -10,11 +10,19 @@
  * 6. Clear conversation
  */
 
+import http from "node:http";
 // @vitest-environment jsdom
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
-import http from "node:http";
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 // ---------------------------------------------------------------------------
 // Part 1: API Tests for Chat Endpoints
@@ -76,7 +84,11 @@ function createChatTestServer(): Promise<{
       title: "First conversation",
       messages: [
         { role: "user", content: "Hello", timestamp: new Date().toISOString() },
-        { role: "assistant", content: "Hi! How can I help?", timestamp: new Date().toISOString() },
+        {
+          role: "assistant",
+          content: "Hi! How can I help?",
+          timestamp: new Date().toISOString(),
+        },
       ],
     },
   ];
@@ -100,7 +112,10 @@ function createChatTestServer(): Promise<{
 
   const routes: Record<
     string,
-    (req: http.IncomingMessage, res: http.ServerResponse) => Promise<void> | void
+    (
+      req: http.IncomingMessage,
+      res: http.ServerResponse,
+    ) => Promise<void> | void
   > = {
     "GET /api/conversations": (_r, res) =>
       json(res, {
@@ -144,7 +159,10 @@ function createChatTestServer(): Promise<{
       };
       conversations.push(newConv);
       activeConversation = newConv.id;
-      json(res, { ok: true, conversation: { id: newConv.id, title: newConv.title } });
+      json(res, {
+        ok: true,
+        conversation: { id: newConv.id, title: newConv.title },
+      });
     },
     "DELETE /api/conversations": async (r, res) => {
       const url = new URL(r.url ?? "/", "http://localhost");
@@ -202,9 +220,13 @@ function createChatTestServer(): Promise<{
         close: () => new Promise<void>((r) => server.close(() => r())),
         getMessages: () => {
           const conv = conversations.find((c) => c.id === activeConversation);
-          return conv?.messages.map((m) => ({ role: m.role, content: m.content })) || [];
+          return (
+            conv?.messages.map((m) => ({ role: m.role, content: m.content })) ||
+            []
+          );
         },
-        getConversations: () => conversations.map((c) => ({ id: c.id, title: c.title })),
+        getConversations: () =>
+          conversations.map((c) => ({ id: c.id, title: c.title })),
       });
     });
   });
@@ -217,7 +239,8 @@ describe("Chat API", () => {
   let getConversations: () => Array<{ id: string; title: string }>;
 
   beforeAll(async () => {
-    ({ port, close, getMessages, getConversations } = await createChatTestServer());
+    ({ port, close, getMessages, getConversations } =
+      await createChatTestServer());
   });
 
   afterAll(async () => {
@@ -266,7 +289,11 @@ describe("Chat API", () => {
     const toDelete = convs[convs.length - 1];
     const initialCount = convs.length;
 
-    const { status } = await req(port, "DELETE", `/api/conversations?id=${toDelete.id}`);
+    const { status } = await req(
+      port,
+      "DELETE",
+      `/api/conversations?id=${toDelete.id}`,
+    );
     expect(status).toBe(200);
     expect(getConversations().length).toBe(initialCount - 1);
   });
@@ -304,7 +331,8 @@ vi.mock("../../src/AppContext", async () => {
 });
 
 vi.mock("../../src/components/ChatAvatar", () => ({
-  ChatAvatar: () => React.createElement("div", { "data-testid": "chat-avatar" }, "Avatar"),
+  ChatAvatar: () =>
+    React.createElement("div", { "data-testid": "chat-avatar" }, "Avatar"),
 }));
 
 vi.mock("../../src/components/MessageContent", () => ({
@@ -413,11 +441,11 @@ describe("ChatView UI", () => {
       tree = TestRenderer.create(React.createElement(ChatView));
     });
 
-    const inputs = tree!.root.findAll(
+    const inputs = tree?.root.findAll(
       (node) =>
         node.type === "input" ||
         node.type === "textarea" ||
-        (node.props?.contentEditable === true),
+        node.props?.contentEditable === true,
     );
     expect(inputs.length).toBeGreaterThanOrEqual(0);
   });
@@ -429,7 +457,7 @@ describe("ChatView UI", () => {
       tree = TestRenderer.create(React.createElement(ChatView));
     });
 
-    const sendButtons = tree!.root.findAll(
+    const sendButtons = tree?.root.findAll(
       (node) =>
         node.type === "button" &&
         (node.props["aria-label"]?.toLowerCase().includes("send") ||
@@ -447,7 +475,7 @@ describe("ChatView UI", () => {
       tree = TestRenderer.create(React.createElement(ChatView));
     });
 
-    const allText = JSON.stringify(tree!.toJSON());
+    const _allText = JSON.stringify(tree?.toJSON());
     // Should contain message content
     expect(tree).not.toBeNull();
   });

@@ -9,11 +9,19 @@
  * 5. Export file format validation
  */
 
+import http from "node:http";
 // @vitest-environment jsdom
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
-import http from "node:http";
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 // ---------------------------------------------------------------------------
 // Part 1: API Tests for Export/Import Endpoints
@@ -109,7 +117,10 @@ function createExportImportTestServer(): Promise<{
 
   const routes: Record<
     string,
-    (req: http.IncomingMessage, res: http.ServerResponse) => Promise<void> | void
+    (
+      req: http.IncomingMessage,
+      res: http.ServerResponse,
+    ) => Promise<void> | void
   > = {
     "GET /api/agent/export": (_r, res) =>
       json(res, {
@@ -139,7 +150,10 @@ function createExportImportTestServer(): Promise<{
         return json(res, { error: "Invalid conversation data" }, 400);
       }
 
-      json(res, { ok: true, importedCount: (body.conversations as unknown[]).length });
+      json(res, {
+        ok: true,
+        importedCount: (body.conversations as unknown[]).length,
+      });
     },
     "GET /api/settings/export": (_r, res) =>
       json(res, {
@@ -266,28 +280,42 @@ describe("Export/Import API", () => {
 
   describe("Conversation Export/Import", () => {
     it("GET /api/conversations/export returns conversations", async () => {
-      const { status, data } = await req(port, "GET", "/api/conversations/export");
+      const { status, data } = await req(
+        port,
+        "GET",
+        "/api/conversations/export",
+      );
       expect(status).toBe(200);
       expect(Array.isArray(data.conversations)).toBe(true);
     });
 
     it("POST /api/conversations/import accepts conversations", async () => {
-      const { status, data } = await req(port, "POST", "/api/conversations/import", {
-        conversations: [
-          {
-            id: "new-conv",
-            title: "Imported conversation",
-            messages: [],
-          },
-        ],
-      });
+      const { status, data } = await req(
+        port,
+        "POST",
+        "/api/conversations/import",
+        {
+          conversations: [
+            {
+              id: "new-conv",
+              title: "Imported conversation",
+              messages: [],
+            },
+          ],
+        },
+      );
       expect(status).toBe(200);
       expect(data.ok).toBe(true);
       expect(data.importedCount).toBe(1);
     });
 
     it("conversation import rejects invalid data", async () => {
-      const { status } = await req(port, "POST", "/api/conversations/import", {});
+      const { status } = await req(
+        port,
+        "POST",
+        "/api/conversations/import",
+        {},
+      );
       expect(status).toBe(400);
     });
   });
@@ -335,11 +363,13 @@ vi.mock("../../src/AppContext", async () => {
 });
 
 vi.mock("../../src/components/MediaSettingsSection", () => ({
-  MediaSettingsSection: () => React.createElement("div", null, "MediaSettingsSection"),
+  MediaSettingsSection: () =>
+    React.createElement("div", null, "MediaSettingsSection"),
 }));
 
 vi.mock("../../src/components/PermissionsSection", () => ({
-  PermissionsSection: () => React.createElement("div", null, "PermissionsSection"),
+  PermissionsSection: () =>
+    React.createElement("div", null, "PermissionsSection"),
 }));
 
 vi.mock("../../src/components/ProviderSwitcher", () => ({
@@ -390,13 +420,13 @@ function createExportImportUIState(): ExportImportState {
 
 describe("Export/Import UI", () => {
   let state: ExportImportState;
-  let exportCalled: boolean;
-  let importCalled: boolean;
+  let _exportCalled: boolean;
+  let _importCalled: boolean;
 
   beforeEach(() => {
     state = createExportImportUIState();
-    exportCalled = false;
-    importCalled = false;
+    _exportCalled = false;
+    _importCalled = false;
 
     vi.spyOn(window, "confirm").mockImplementation(() => true);
 
@@ -413,11 +443,11 @@ describe("Export/Import UI", () => {
       handleCloudDisconnect: vi.fn(),
       handleReset: vi.fn(),
       handleExport: async () => {
-        exportCalled = true;
+        _exportCalled = true;
         return { data: {}, exportedAt: new Date().toISOString() };
       },
       handleImport: async () => {
-        importCalled = true;
+        _importCalled = true;
       },
       setState: vi.fn(),
     }));
@@ -431,7 +461,7 @@ describe("Export/Import UI", () => {
     });
 
     // Look for Export text
-    const allText = JSON.stringify(tree!.toJSON());
+    const allText = JSON.stringify(tree?.toJSON());
     expect(allText).toContain("Export");
   });
 
@@ -442,7 +472,7 @@ describe("Export/Import UI", () => {
       tree = TestRenderer.create(React.createElement(SettingsView));
     });
 
-    const allText = JSON.stringify(tree!.toJSON());
+    const allText = JSON.stringify(tree?.toJSON());
     expect(allText).toContain("Import");
   });
 });

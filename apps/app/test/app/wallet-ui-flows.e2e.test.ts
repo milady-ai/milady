@@ -10,11 +10,19 @@
  * 6. Refresh functionality
  */
 
+import http from "node:http";
 // @vitest-environment jsdom
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
-import http from "node:http";
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 // ---------------------------------------------------------------------------
 // Part 1: API Tests for Wallet Endpoints
@@ -73,8 +81,18 @@ function createWalletTestServer(): Promise<{
   ];
 
   const nfts = [
-    { chain: "ethereum", name: "Cool NFT #1", imageUrl: "https://example.com/nft1.png", collectionName: "Cool Collection" },
-    { chain: "ethereum", name: "Cool NFT #2", imageUrl: "https://example.com/nft2.png", collectionName: "Cool Collection" },
+    {
+      chain: "ethereum",
+      name: "Cool NFT #1",
+      imageUrl: "https://example.com/nft1.png",
+      collectionName: "Cool Collection",
+    },
+    {
+      chain: "ethereum",
+      name: "Cool NFT #2",
+      imageUrl: "https://example.com/nft2.png",
+      collectionName: "Cool Collection",
+    },
   ];
 
   const addresses = {
@@ -132,7 +150,11 @@ function createWalletTestServer(): Promise<{
         port: typeof addr === "object" && addr ? addr.port : 0,
         close: () => new Promise<void>((r) => server.close(() => r())),
         getBalances: () =>
-          balances.map((b) => ({ chain: b.chain, symbol: b.symbol, balance: b.balance })),
+          balances.map((b) => ({
+            chain: b.chain,
+            symbol: b.symbol,
+            balance: b.balance,
+          })),
       });
     });
   });
@@ -236,14 +258,29 @@ type WalletState = {
 
 function createWalletUIState(): WalletState {
   return {
-    walletConfig: { chains: ["ethereum", "base", "polygon"], selectedChain: "ethereum" },
+    walletConfig: {
+      chains: ["ethereum", "base", "polygon"],
+      selectedChain: "ethereum",
+    },
     walletAddresses: {
       ethereum: "0x1234567890123456789012345678901234567890",
       base: "0x1234567890123456789012345678901234567890",
     },
     walletBalances: [
-      { chain: "ethereum", symbol: "ETH", name: "Ethereum", balance: "1.5", valueUsd: 3000 },
-      { chain: "ethereum", symbol: "USDC", name: "USD Coin", balance: "1000", valueUsd: 1000 },
+      {
+        chain: "ethereum",
+        symbol: "ETH",
+        name: "Ethereum",
+        balance: "1.5",
+        valueUsd: 3000,
+      },
+      {
+        chain: "ethereum",
+        symbol: "USDC",
+        name: "USD Coin",
+        balance: "1000",
+        valueUsd: 1000,
+      },
     ],
     walletNfts: {
       evm: [
@@ -303,7 +340,7 @@ describe("InventoryView UI", () => {
       tree = TestRenderer.create(React.createElement(InventoryView));
     });
 
-    const codeElements = tree!.root.findAll((node) => node.type === "code");
+    const _codeElements = tree?.root.findAll((node) => node.type === "code");
     // Should have address displayed
     expect(tree).not.toBeNull();
   });
@@ -315,7 +352,7 @@ describe("InventoryView UI", () => {
       tree = TestRenderer.create(React.createElement(InventoryView));
     });
 
-    const allText = JSON.stringify(tree!.toJSON());
+    const allText = JSON.stringify(tree?.toJSON());
     // Should show ETH or balance info
     expect(allText.includes("ETH") || allText.includes("1.5")).toBe(true);
   });
@@ -339,10 +376,12 @@ describe("InventoryView UI", () => {
       tree = TestRenderer.create(React.createElement(InventoryView));
     });
 
-    const copyButtons = tree!.root.findAll(
+    const copyButtons = tree?.root.findAll(
       (node) =>
         node.type === "button" &&
-        node.children.some((c) => typeof c === "string" && c.toLowerCase().includes("copy")),
+        node.children.some(
+          (c) => typeof c === "string" && c.toLowerCase().includes("copy"),
+        ),
     );
     expect(copyButtons.length).toBeGreaterThanOrEqual(0);
   });

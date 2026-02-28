@@ -38,22 +38,38 @@ vi.mock("../../src/AppContext", async () => {
 
 vi.mock("../../src/components/MediaSettingsSection", () => ({
   MediaSettingsSection: () =>
-    React.createElement("div", { "data-testid": "media-settings" }, "MediaSettingsSection"),
+    React.createElement(
+      "div",
+      { "data-testid": "media-settings" },
+      "MediaSettingsSection",
+    ),
 }));
 
 vi.mock("../../src/components/PermissionsSection", () => ({
   PermissionsSection: () =>
-    React.createElement("div", { "data-testid": "permissions" }, "PermissionsSection"),
+    React.createElement(
+      "div",
+      { "data-testid": "permissions" },
+      "PermissionsSection",
+    ),
 }));
 
 vi.mock("../../src/components/ProviderSwitcher", () => ({
   ProviderSwitcher: () =>
-    React.createElement("div", { "data-testid": "provider-switcher" }, "ProviderSwitcher"),
+    React.createElement(
+      "div",
+      { "data-testid": "provider-switcher" },
+      "ProviderSwitcher",
+    ),
 }));
 
 vi.mock("../../src/components/VoiceConfigView", () => ({
   VoiceConfigView: () =>
-    React.createElement("div", { "data-testid": "voice-config" }, "VoiceConfigView"),
+    React.createElement(
+      "div",
+      { "data-testid": "voice-config" },
+      "VoiceConfigView",
+    ),
 }));
 
 import { SettingsView } from "../../src/components/SettingsView";
@@ -93,8 +109,16 @@ function createSettingsState(): SettingsState {
     cloudLoginError: "",
     cloudDisconnecting: false,
     plugins: [
-      { name: "@elizaos/plugin-discord", enabled: true, description: "Discord connector" },
-      { name: "@elizaos/plugin-telegram", enabled: false, description: "Telegram connector" },
+      {
+        name: "@elizaos/plugin-discord",
+        enabled: true,
+        description: "Discord connector",
+      },
+      {
+        name: "@elizaos/plugin-telegram",
+        enabled: false,
+        description: "Telegram connector",
+      },
     ],
     pluginSaving: false,
     pluginSaveSuccess: false,
@@ -152,10 +176,12 @@ describe("SettingsView Sections", () => {
         tree = TestRenderer.create(React.createElement(SettingsView));
       });
 
-      const appearanceText = tree!.root.findAll(
+      const appearanceText = tree?.root.findAll(
         (node) =>
           node.type === "div" &&
-          node.children.some((c) => typeof c === "string" && c.includes("Appearance")),
+          node.children.some(
+            (c) => typeof c === "string" && c.includes("Appearance"),
+          ),
       );
       expect(appearanceText.length).toBeGreaterThan(0);
     });
@@ -168,13 +194,15 @@ describe("SettingsView Sections", () => {
       });
 
       // Look for theme buttons
-      const themeButtons = tree!.root.findAll(
+      const themeButtons = tree?.root.findAll(
         (node) =>
           node.type === "button" &&
           node.children.some(
             (c) =>
               typeof c === "string" &&
-              (c.includes("Milady") || c.includes("Dark") || c.includes("Light")),
+              (c.includes("Milady") ||
+                c.includes("Dark") ||
+                c.includes("Light")),
           ),
       );
       expect(themeButtons.length).toBeGreaterThanOrEqual(0);
@@ -187,10 +215,12 @@ describe("SettingsView Sections", () => {
         tree = TestRenderer.create(React.createElement(SettingsView));
       });
 
-      const darkButton = tree!.root.findAll(
+      const darkButton = tree?.root.findAll(
         (node) =>
           node.type === "button" &&
-          node.children.some((c) => typeof c === "string" && c.includes("Dark")),
+          node.children.some(
+            (c) => typeof c === "string" && c.includes("Dark"),
+          ),
       )[0];
 
       if (darkButton) {
@@ -211,7 +241,7 @@ describe("SettingsView Sections", () => {
       });
 
       // Current theme should have accent styling
-      const buttons = tree!.root.findAll((node) => node.type === "button");
+      const buttons = tree?.root.findAll((node) => node.type === "button");
       expect(buttons.length).toBeGreaterThan(0);
     });
   });
@@ -228,7 +258,7 @@ describe("SettingsView Sections", () => {
         tree = TestRenderer.create(React.createElement(SettingsView));
       });
 
-      const providerSection = tree!.root.findAll(
+      const providerSection = tree?.root.findAll(
         (node) => node.props?.["data-testid"] === "provider-switcher",
       );
       expect(providerSection.length).toBeGreaterThanOrEqual(0);
@@ -247,7 +277,7 @@ describe("SettingsView Sections", () => {
         tree = TestRenderer.create(React.createElement(SettingsView));
       });
 
-      const mediaSection = tree!.root.findAll(
+      const mediaSection = tree?.root.findAll(
         (node) => node.props?.["data-testid"] === "media-settings",
       );
       expect(mediaSection.length).toBeGreaterThanOrEqual(0);
@@ -266,7 +296,7 @@ describe("SettingsView Sections", () => {
         tree = TestRenderer.create(React.createElement(SettingsView));
       });
 
-      const voiceSection = tree!.root.findAll(
+      const voiceSection = tree?.root.findAll(
         (node) => node.props?.["data-testid"] === "voice-config",
       );
       expect(voiceSection.length).toBeGreaterThanOrEqual(0);
@@ -285,7 +315,7 @@ describe("SettingsView Sections", () => {
         tree = TestRenderer.create(React.createElement(SettingsView));
       });
 
-      const permSection = tree!.root.findAll(
+      const permSection = tree?.root.findAll(
         (node) => node.props?.["data-testid"] === "permissions",
       );
       expect(permSection.length).toBeGreaterThanOrEqual(0);
@@ -306,13 +336,14 @@ describe("SettingsView Sections", () => {
         tree = TestRenderer.create(React.createElement(SettingsView));
       });
 
-      const loginButtons = tree!.root.findAll(
+      const _loginButtons = tree?.root.findAll(
         (node) =>
           node.type === "button" &&
           node.children.some(
             (c) =>
               typeof c === "string" &&
-              (c.toLowerCase().includes("login") || c.toLowerCase().includes("connect")),
+              (c.toLowerCase().includes("login") ||
+                c.toLowerCase().includes("connect")),
           ),
       );
       // May or may not have login button depending on cloud state
@@ -329,11 +360,12 @@ describe("SettingsView Sections", () => {
         tree = TestRenderer.create(React.createElement(SettingsView));
       });
 
-      const disconnectButtons = tree!.root.findAll(
+      const _disconnectButtons = tree?.root.findAll(
         (node) =>
           node.type === "button" &&
           node.children.some(
-            (c) => typeof c === "string" && c.toLowerCase().includes("disconnect"),
+            (c) =>
+              typeof c === "string" && c.toLowerCase().includes("disconnect"),
           ),
       );
       expect(tree).not.toBeNull();
@@ -366,9 +398,10 @@ describe("SettingsView Sections", () => {
         tree = TestRenderer.create(React.createElement(SettingsView));
       });
 
-      const dangerText = tree!.root.findAll(
+      const dangerText = tree?.root.findAll(
         (node) =>
-          node.type === "span" && node.children.some((c) => c === "Danger Zone"),
+          node.type === "span" &&
+          node.children.some((c) => c === "Danger Zone"),
       );
       expect(dangerText.length).toBeGreaterThan(0);
     });
@@ -380,7 +413,7 @@ describe("SettingsView Sections", () => {
         tree = TestRenderer.create(React.createElement(SettingsView));
       });
 
-      const resetButton = tree!.root.findAll(
+      const resetButton = tree?.root.findAll(
         (node) =>
           node.type === "button" &&
           node.children.some((c) => typeof c === "string" && c === "Reset"),
@@ -408,7 +441,7 @@ describe("SettingsView Sections", () => {
       });
 
       // Should have navigation buttons/links
-      const navButtons = tree!.root.findAll((node) => node.type === "button");
+      const navButtons = tree?.root.findAll((node) => node.type === "button");
       expect(navButtons.length).toBeGreaterThan(0);
     });
 
@@ -420,7 +453,7 @@ describe("SettingsView Sections", () => {
       });
 
       const expectedSections = ["Appearance", "Voice", "Advanced"];
-      const allText = JSON.stringify(tree!.toJSON());
+      const allText = JSON.stringify(tree?.toJSON());
 
       for (const section of expectedSections) {
         expect(allText).toContain(section);
@@ -440,14 +473,15 @@ describe("SettingsView Sections", () => {
         tree = TestRenderer.create(React.createElement(SettingsView));
       });
 
-      const exportButtons = tree!.root.findAll(
+      const exportButtons = tree?.root.findAll(
         (node) =>
           node.type === "button" &&
           node.children.some(
             (c) =>
               (typeof c === "object" &&
                 c?.children?.some(
-                  (cc: unknown) => typeof cc === "string" && cc.includes("Export"),
+                  (cc: unknown) =>
+                    typeof cc === "string" && cc.includes("Export"),
                 )) ||
               (typeof c === "string" && c.includes("Export")),
           ),
@@ -462,14 +496,15 @@ describe("SettingsView Sections", () => {
         tree = TestRenderer.create(React.createElement(SettingsView));
       });
 
-      const importButtons = tree!.root.findAll(
+      const importButtons = tree?.root.findAll(
         (node) =>
           node.type === "button" &&
           node.children.some(
             (c) =>
               (typeof c === "object" &&
                 c?.children?.some(
-                  (cc: unknown) => typeof cc === "string" && cc.includes("Import"),
+                  (cc: unknown) =>
+                    typeof cc === "string" && cc.includes("Import"),
                 )) ||
               (typeof c === "string" && c.includes("Import")),
           ),
@@ -490,7 +525,7 @@ describe("SettingsView Sections", () => {
         tree = TestRenderer.create(React.createElement(SettingsView));
       });
 
-      const searchInputs = tree!.root.findAll(
+      const searchInputs = tree?.root.findAll(
         (node) =>
           node.type === "input" &&
           (node.props.placeholder?.toLowerCase().includes("search") ||

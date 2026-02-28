@@ -9,11 +9,19 @@
  * 5. Cloud error handling
  */
 
+import http from "node:http";
 // @vitest-environment jsdom
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
-import http from "node:http";
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 // ---------------------------------------------------------------------------
 // Part 1: API Tests for Cloud Endpoints
@@ -62,7 +70,11 @@ async function req(
 function createCloudTestServer(): Promise<{
   port: number;
   close: () => Promise<void>;
-  getState: () => { connected: boolean; userId: string | null; credits: number };
+  getState: () => {
+    connected: boolean;
+    userId: string | null;
+    credits: number;
+  };
 }> {
   const state = {
     connected: false,
@@ -87,7 +99,10 @@ function createCloudTestServer(): Promise<{
 
   const routes: Record<
     string,
-    (req: http.IncomingMessage, res: http.ServerResponse) => Promise<void> | void
+    (
+      req: http.IncomingMessage,
+      res: http.ServerResponse,
+    ) => Promise<void> | void
   > = {
     "GET /api/cloud/status": (_r, res) =>
       json(res, {
@@ -175,7 +190,11 @@ function createCloudTestServer(): Promise<{
 describe("Cloud API", () => {
   let port: number;
   let close: () => Promise<void>;
-  let getState: () => { connected: boolean; userId: string | null; credits: number };
+  let getState: () => {
+    connected: boolean;
+    userId: string | null;
+    credits: number;
+  };
 
   beforeAll(async () => {
     ({ port, close, getState } = await createCloudTestServer());
@@ -267,11 +286,13 @@ vi.mock("../../src/AppContext", async () => {
 });
 
 vi.mock("../../src/components/MediaSettingsSection", () => ({
-  MediaSettingsSection: () => React.createElement("div", null, "MediaSettingsSection"),
+  MediaSettingsSection: () =>
+    React.createElement("div", null, "MediaSettingsSection"),
 }));
 
 vi.mock("../../src/components/PermissionsSection", () => ({
-  PermissionsSection: () => React.createElement("div", null, "PermissionsSection"),
+  PermissionsSection: () =>
+    React.createElement("div", null, "PermissionsSection"),
 }));
 
 vi.mock("../../src/components/ProviderSwitcher", () => ({
@@ -322,13 +343,13 @@ function createCloudUIState(): CloudState {
 
 describe("Cloud Login UI", () => {
   let state: CloudState;
-  let loginCalled: boolean;
-  let disconnectCalled: boolean;
+  let _loginCalled: boolean;
+  let _disconnectCalled: boolean;
 
   beforeEach(() => {
     state = createCloudUIState();
-    loginCalled = false;
-    disconnectCalled = false;
+    _loginCalled = false;
+    _disconnectCalled = false;
 
     vi.spyOn(window, "confirm").mockImplementation(() => true);
 
@@ -342,13 +363,13 @@ describe("Cloud Login UI", () => {
       loadUpdateStatus: vi.fn(),
       handlePluginConfigSave: vi.fn(),
       handleCloudLogin: async () => {
-        loginCalled = true;
+        _loginCalled = true;
         state.cloudConnected = true;
         state.cloudUserId = "user-123";
         state.cloudCredits = 1000;
       },
       handleCloudDisconnect: async () => {
-        disconnectCalled = true;
+        _disconnectCalled = true;
         state.cloudConnected = false;
         state.cloudUserId = "";
         state.cloudCredits = 0;

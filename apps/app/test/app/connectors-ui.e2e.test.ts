@@ -9,11 +9,19 @@
  * 5. Connection status display
  */
 
+import http from "node:http";
 // @vitest-environment jsdom
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
-import http from "node:http";
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 // ---------------------------------------------------------------------------
 // Part 1: API Tests for Connector Endpoints
@@ -62,14 +70,43 @@ async function req(
 function createConnectorTestServer(): Promise<{
   port: number;
   close: () => Promise<void>;
-  getConnectors: () => Array<{ name: string; enabled: boolean; connected: boolean }>;
+  getConnectors: () => Array<{
+    name: string;
+    enabled: boolean;
+    connected: boolean;
+  }>;
 }> {
   const connectors = [
-    { name: "@elizaos/plugin-discord", enabled: false, connected: false, category: "connector" },
-    { name: "@elizaos/plugin-telegram", enabled: false, connected: false, category: "connector" },
-    { name: "@elizaos/plugin-signal", enabled: false, connected: false, category: "connector" },
-    { name: "@elizaos/plugin-whatsapp", enabled: false, connected: false, category: "connector" },
-    { name: "@elizaos/plugin-twitch", enabled: false, connected: false, category: "streaming" },
+    {
+      name: "@elizaos/plugin-discord",
+      enabled: false,
+      connected: false,
+      category: "connector",
+    },
+    {
+      name: "@elizaos/plugin-telegram",
+      enabled: false,
+      connected: false,
+      category: "connector",
+    },
+    {
+      name: "@elizaos/plugin-signal",
+      enabled: false,
+      connected: false,
+      category: "connector",
+    },
+    {
+      name: "@elizaos/plugin-whatsapp",
+      enabled: false,
+      connected: false,
+      category: "connector",
+    },
+    {
+      name: "@elizaos/plugin-twitch",
+      enabled: false,
+      connected: false,
+      category: "streaming",
+    },
   ];
 
   const json = (res: http.ServerResponse, data: unknown, status = 200) => {
@@ -89,7 +126,10 @@ function createConnectorTestServer(): Promise<{
 
   const routes: Record<
     string,
-    (req: http.IncomingMessage, res: http.ServerResponse) => Promise<void> | void
+    (
+      req: http.IncomingMessage,
+      res: http.ServerResponse,
+    ) => Promise<void> | void
   > = {
     "GET /api/plugins": (_r, res) =>
       json(res, {
@@ -179,7 +219,11 @@ function createConnectorTestServer(): Promise<{
 describe("Connector API", () => {
   let port: number;
   let close: () => Promise<void>;
-  let getConnectors: () => Array<{ name: string; enabled: boolean; connected: boolean }>;
+  let getConnectors: () => Array<{
+    name: string;
+    enabled: boolean;
+    connected: boolean;
+  }>;
 
   beforeAll(async () => {
     ({ port, close, getConnectors } = await createConnectorTestServer());
@@ -203,7 +247,9 @@ describe("Connector API", () => {
     });
     expect(status).toBe(200);
     expect(data.ok).toBe(true);
-    expect(getConnectors().find((c) => c.name.includes("discord"))?.enabled).toBe(true);
+    expect(
+      getConnectors().find((c) => c.name.includes("discord"))?.enabled,
+    ).toBe(true);
   });
 
   it("POST /api/plugins/toggle disables connector", async () => {
@@ -211,7 +257,9 @@ describe("Connector API", () => {
     await req(port, "POST", "/api/plugins/toggle", {
       name: "@elizaos/plugin-discord",
     });
-    expect(getConnectors().find((c) => c.name.includes("discord"))?.enabled).toBe(false);
+    expect(
+      getConnectors().find((c) => c.name.includes("discord"))?.enabled,
+    ).toBe(false);
   });
 
   it("GET /api/connectors/status returns connection status", async () => {
@@ -221,21 +269,35 @@ describe("Connector API", () => {
   });
 
   it("POST /api/connectors/connect establishes connection", async () => {
-    const { status, data } = await req(port, "POST", "/api/connectors/connect", {
-      name: "@elizaos/plugin-telegram",
-    });
+    const { status, data } = await req(
+      port,
+      "POST",
+      "/api/connectors/connect",
+      {
+        name: "@elizaos/plugin-telegram",
+      },
+    );
     expect(status).toBe(200);
     expect(data.ok).toBe(true);
-    expect(getConnectors().find((c) => c.name.includes("telegram"))?.connected).toBe(true);
+    expect(
+      getConnectors().find((c) => c.name.includes("telegram"))?.connected,
+    ).toBe(true);
   });
 
   it("POST /api/connectors/disconnect closes connection", async () => {
-    const { status, data } = await req(port, "POST", "/api/connectors/disconnect", {
-      name: "@elizaos/plugin-telegram",
-    });
+    const { status, data } = await req(
+      port,
+      "POST",
+      "/api/connectors/disconnect",
+      {
+        name: "@elizaos/plugin-telegram",
+      },
+    );
     expect(status).toBe(200);
     expect(data.ok).toBe(true);
-    expect(getConnectors().find((c) => c.name.includes("telegram"))?.connected).toBe(false);
+    expect(
+      getConnectors().find((c) => c.name.includes("telegram"))?.connected,
+    ).toBe(false);
   });
 });
 
@@ -341,7 +403,7 @@ describe("ConnectorsPageView UI", () => {
     });
 
     expect(tree).not.toBeNull();
-    const json = tree!.toJSON();
+    const json = tree?.toJSON();
     expect(json).not.toBeNull();
   });
 
@@ -352,10 +414,12 @@ describe("ConnectorsPageView UI", () => {
       tree = TestRenderer.create(React.createElement(ConnectorsPageView));
     });
 
-    const platformsButton = tree!.root.findAll(
+    const platformsButton = tree?.root.findAll(
       (node) =>
         node.type === "button" &&
-        node.children.some((c) => typeof c === "string" && c.includes("Platforms")),
+        node.children.some(
+          (c) => typeof c === "string" && c.includes("Platforms"),
+        ),
     );
     expect(platformsButton.length).toBeGreaterThan(0);
   });
@@ -367,10 +431,12 @@ describe("ConnectorsPageView UI", () => {
       tree = TestRenderer.create(React.createElement(ConnectorsPageView));
     });
 
-    const streamingButton = tree!.root.findAll(
+    const streamingButton = tree?.root.findAll(
       (node) =>
         node.type === "button" &&
-        node.children.some((c) => typeof c === "string" && c.includes("Streaming")),
+        node.children.some(
+          (c) => typeof c === "string" && c.includes("Streaming"),
+        ),
     );
     expect(streamingButton.length).toBeGreaterThan(0);
   });
@@ -382,7 +448,7 @@ describe("ConnectorsPageView UI", () => {
       tree = TestRenderer.create(React.createElement(ConnectorsPageView));
     });
 
-    const connectorsView = tree!.root.findAll(
+    const connectorsView = tree?.root.findAll(
       (node) => node.props?.["data-testid"] === "plugins-view-connectors",
     );
     expect(connectorsView.length).toBe(1);
@@ -395,17 +461,19 @@ describe("ConnectorsPageView UI", () => {
       tree = TestRenderer.create(React.createElement(ConnectorsPageView));
     });
 
-    const streamingButton = tree!.root.findAll(
+    const streamingButton = tree?.root.findAll(
       (node) =>
         node.type === "button" &&
-        node.children.some((c) => typeof c === "string" && c.includes("Streaming")),
+        node.children.some(
+          (c) => typeof c === "string" && c.includes("Streaming"),
+        ),
     )[0];
 
     await act(async () => {
       streamingButton.props.onClick();
     });
 
-    const streamingView = tree!.root.findAll(
+    const streamingView = tree?.root.findAll(
       (node) => node.props?.["data-testid"] === "plugins-view-streaming",
     );
     expect(streamingView.length).toBe(1);
@@ -419,10 +487,12 @@ describe("ConnectorsPageView UI", () => {
     });
 
     // Switch to streaming
-    const streamingButton = tree!.root.findAll(
+    const streamingButton = tree?.root.findAll(
       (node) =>
         node.type === "button" &&
-        node.children.some((c) => typeof c === "string" && c.includes("Streaming")),
+        node.children.some(
+          (c) => typeof c === "string" && c.includes("Streaming"),
+        ),
     )[0];
 
     await act(async () => {
@@ -430,17 +500,19 @@ describe("ConnectorsPageView UI", () => {
     });
 
     // Switch back to platforms
-    const platformsButton = tree!.root.findAll(
+    const platformsButton = tree?.root.findAll(
       (node) =>
         node.type === "button" &&
-        node.children.some((c) => typeof c === "string" && c.includes("Platforms")),
+        node.children.some(
+          (c) => typeof c === "string" && c.includes("Platforms"),
+        ),
     )[0];
 
     await act(async () => {
       platformsButton.props.onClick();
     });
 
-    const connectorsView = tree!.root.findAll(
+    const connectorsView = tree?.root.findAll(
       (node) => node.props?.["data-testid"] === "plugins-view-connectors",
     );
     expect(connectorsView.length).toBe(1);
@@ -482,7 +554,9 @@ describe("Connector Toggle Integration", () => {
 
   it("toggling Telegram connector updates state", () => {
     const handleToggle = mockUseApp().handlePluginToggle;
-    const telegramPlugin = state.plugins.find((p) => p.name.includes("telegram"));
+    const telegramPlugin = state.plugins.find((p) =>
+      p.name.includes("telegram"),
+    );
 
     expect(telegramPlugin?.enabled).toBe(false);
     handleToggle("@elizaos/plugin-telegram");
@@ -496,8 +570,14 @@ describe("Connector Toggle Integration", () => {
     handleToggle("@elizaos/plugin-telegram");
     handleToggle("@elizaos/plugin-signal");
 
-    expect(state.plugins.find((p) => p.name.includes("discord"))?.enabled).toBe(false);
-    expect(state.plugins.find((p) => p.name.includes("telegram"))?.enabled).toBe(true);
-    expect(state.plugins.find((p) => p.name.includes("signal"))?.enabled).toBe(true);
+    expect(state.plugins.find((p) => p.name.includes("discord"))?.enabled).toBe(
+      false,
+    );
+    expect(
+      state.plugins.find((p) => p.name.includes("telegram"))?.enabled,
+    ).toBe(true);
+    expect(state.plugins.find((p) => p.name.includes("signal"))?.enabled).toBe(
+      true,
+    );
   });
 });

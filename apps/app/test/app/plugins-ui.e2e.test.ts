@@ -10,11 +10,19 @@
  * 6. Plugin installation
  */
 
+import http from "node:http";
 // @vitest-environment jsdom
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
-import http from "node:http";
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 // ---------------------------------------------------------------------------
 // Part 1: API Tests for Plugin Endpoints
@@ -66,11 +74,36 @@ function createPluginTestServer(): Promise<{
   getPlugins: () => Array<{ name: string; enabled: boolean }>;
 }> {
   const plugins = [
-    { name: "@elizaos/plugin-openai", enabled: true, tags: ["llm"], description: "OpenAI provider" },
-    { name: "@elizaos/plugin-anthropic", enabled: false, tags: ["llm"], description: "Anthropic provider" },
-    { name: "@elizaos/plugin-discord", enabled: true, tags: ["connector"], description: "Discord connector" },
-    { name: "@elizaos/plugin-telegram", enabled: false, tags: ["connector"], description: "Telegram connector" },
-    { name: "@elizaos/plugin-image-gen", enabled: false, tags: ["media"], description: "Image generation" },
+    {
+      name: "@elizaos/plugin-openai",
+      enabled: true,
+      tags: ["llm"],
+      description: "OpenAI provider",
+    },
+    {
+      name: "@elizaos/plugin-anthropic",
+      enabled: false,
+      tags: ["llm"],
+      description: "Anthropic provider",
+    },
+    {
+      name: "@elizaos/plugin-discord",
+      enabled: true,
+      tags: ["connector"],
+      description: "Discord connector",
+    },
+    {
+      name: "@elizaos/plugin-telegram",
+      enabled: false,
+      tags: ["connector"],
+      description: "Telegram connector",
+    },
+    {
+      name: "@elizaos/plugin-image-gen",
+      enabled: false,
+      tags: ["media"],
+      description: "Image generation",
+    },
   ];
 
   const json = (res: http.ServerResponse, data: unknown, status = 200) => {
@@ -90,7 +123,10 @@ function createPluginTestServer(): Promise<{
 
   const routes: Record<
     string,
-    (req: http.IncomingMessage, res: http.ServerResponse) => Promise<void> | void
+    (
+      req: http.IncomingMessage,
+      res: http.ServerResponse,
+    ) => Promise<void> | void
   > = {
     "GET /api/plugins": (_r, res) => json(res, { plugins }),
     "POST /api/plugins/toggle": async (r, res) => {
@@ -111,8 +147,16 @@ function createPluginTestServer(): Promise<{
     "GET /api/plugins/marketplace": (_r, res) =>
       json(res, {
         available: [
-          { name: "@elizaos/plugin-voice", description: "Voice synthesis", installed: false },
-          { name: "@elizaos/plugin-web3", description: "Web3 integration", installed: false },
+          {
+            name: "@elizaos/plugin-voice",
+            description: "Voice synthesis",
+            installed: false,
+          },
+          {
+            name: "@elizaos/plugin-web3",
+            description: "Web3 integration",
+            installed: false,
+          },
         ],
       }),
     "POST /api/plugins/install": async (r, res) => {
@@ -162,7 +206,8 @@ function createPluginTestServer(): Promise<{
       ok({
         port: typeof addr === "object" && addr ? addr.port : 0,
         close: () => new Promise<void>((r) => server.close(() => r())),
-        getPlugins: () => plugins.map((p) => ({ name: p.name, enabled: p.enabled })),
+        getPlugins: () =>
+          plugins.map((p) => ({ name: p.name, enabled: p.enabled })),
       });
     });
   });
@@ -197,7 +242,9 @@ describe("Plugin API", () => {
 
     expect(status).toBe(200);
     expect(data.ok).toBe(true);
-    expect(getPlugins().find((p) => p.name.includes("anthropic"))?.enabled).toBe(!wasEnabled);
+    expect(
+      getPlugins().find((p) => p.name.includes("anthropic"))?.enabled,
+    ).toBe(!wasEnabled);
   });
 
   it("POST /api/plugins/config saves configuration", async () => {
@@ -275,7 +322,8 @@ vi.mock("../../src/components/config-renderer", () => ({
 }));
 
 vi.mock("../../src/components/WhatsAppQrOverlay", () => ({
-  WhatsAppQrOverlay: () => React.createElement("div", null, "WhatsAppQrOverlay"),
+  WhatsAppQrOverlay: () =>
+    React.createElement("div", null, "WhatsAppQrOverlay"),
 }));
 
 import { PluginsView } from "../../src/components/PluginsView";
@@ -302,9 +350,27 @@ type PluginState = {
 function createPluginUIState(): PluginState {
   return {
     plugins: [
-      { id: "plugin-openai", name: "@elizaos/plugin-openai", enabled: true, category: "ai-provider", description: "OpenAI" },
-      { id: "plugin-anthropic", name: "@elizaos/plugin-anthropic", enabled: false, category: "ai-provider", description: "Anthropic" },
-      { id: "plugin-discord", name: "@elizaos/plugin-discord", enabled: true, category: "connector", description: "Discord" },
+      {
+        id: "plugin-openai",
+        name: "@elizaos/plugin-openai",
+        enabled: true,
+        category: "ai-provider",
+        description: "OpenAI",
+      },
+      {
+        id: "plugin-anthropic",
+        name: "@elizaos/plugin-anthropic",
+        enabled: false,
+        category: "ai-provider",
+        description: "Anthropic",
+      },
+      {
+        id: "plugin-discord",
+        name: "@elizaos/plugin-discord",
+        enabled: true,
+        category: "connector",
+        description: "Discord",
+      },
     ],
     pluginStatusFilter: "all",
     pluginSearch: "",
@@ -351,7 +417,7 @@ describe("PluginsView UI", () => {
       tree = TestRenderer.create(React.createElement(PluginsView));
     });
 
-    const allText = JSON.stringify(tree!.toJSON());
+    const _allText = JSON.stringify(tree?.toJSON());
     // Should contain plugin-related text
     expect(tree).not.toBeNull();
   });
@@ -363,7 +429,7 @@ describe("PluginsView UI", () => {
       tree = TestRenderer.create(React.createElement(PluginsView));
     });
 
-    const inputs = tree!.root.findAll(
+    const inputs = tree?.root.findAll(
       (node) =>
         node.type === "input" &&
         (node.props.placeholder?.toLowerCase().includes("search") ||
@@ -420,7 +486,9 @@ describe("Plugin Toggle Integration", () => {
 
   it("toggling disabled plugin enables it", () => {
     const toggleFn = mockUseApp().handlePluginToggle;
-    const anthropicPlugin = state.plugins.find((p) => p.name.includes("anthropic"));
+    const anthropicPlugin = state.plugins.find((p) =>
+      p.name.includes("anthropic"),
+    );
 
     expect(anthropicPlugin?.enabled).toBe(false);
     toggleFn("@elizaos/plugin-anthropic");
@@ -433,7 +501,9 @@ describe("Plugin Toggle Integration", () => {
     toggleFn("@elizaos/plugin-openai");
     toggleFn("@elizaos/plugin-openai");
 
-    expect(state.plugins.find((p) => p.name.includes("openai"))?.enabled).toBe(true);
+    expect(state.plugins.find((p) => p.name.includes("openai"))?.enabled).toBe(
+      true,
+    );
   });
 });
 
@@ -504,7 +574,10 @@ describe("Plugin Configuration", () => {
       ...state,
       loadPlugins: vi.fn(),
       handlePluginToggle: vi.fn(),
-      handlePluginConfigSave: async (name: string, config: Record<string, unknown>) => {
+      handlePluginConfigSave: async (
+        name: string,
+        config: Record<string, unknown>,
+      ) => {
         configSaved = { name, config };
         state.pluginSaving = false;
         state.pluginSaveSuccess = true;

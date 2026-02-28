@@ -10,11 +10,19 @@
  * 6. Mode configuration
  */
 
+import http from "node:http";
 // @vitest-environment jsdom
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
-import http from "node:http";
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 // ---------------------------------------------------------------------------
 // Part 1: API Tests for Autonomous Mode Endpoints
@@ -115,7 +123,10 @@ function createAutonomousTestServer(): Promise<{
 
   const routes: Record<
     string,
-    (req: http.IncomingMessage, res: http.ServerResponse) => Promise<void> | void
+    (
+      req: http.IncomingMessage,
+      res: http.ServerResponse,
+    ) => Promise<void> | void
   > = {
     "GET /api/autonomous/status": (_r, res) =>
       json(res, {
@@ -165,7 +176,8 @@ function createAutonomousTestServer(): Promise<{
         json(res, { error: "Task not found" }, 404);
       }
     },
-    "GET /api/autonomous/config": (_r, res) => json(res, { config: state.config }),
+    "GET /api/autonomous/config": (_r, res) =>
+      json(res, { config: state.config }),
     "PUT /api/autonomous/config": async (r, res) => {
       const body = JSON.parse(await readBody(r)) as Record<string, unknown>;
       Object.assign(state.config, body.config);
@@ -268,9 +280,14 @@ describe("Autonomous Mode API", () => {
     const task = getState().tasks.find((t) => t.status === "pending");
     if (!task) return;
 
-    const { status, data } = await req(port, "POST", "/api/autonomous/tasks/execute", {
-      taskId: task.id,
-    });
+    const { status, data } = await req(
+      port,
+      "POST",
+      "/api/autonomous/tasks/execute",
+      {
+        taskId: task.id,
+      },
+    );
 
     expect(status).toBe(200);
     expect(data.ok).toBe(true);
@@ -285,9 +302,14 @@ describe("Autonomous Mode API", () => {
     const initialCount = getState().tasks.length;
     const taskToDelete = getState().tasks[getState().tasks.length - 1];
 
-    const { status, data } = await req(port, "DELETE", "/api/autonomous/tasks", {
-      taskId: taskToDelete.id,
-    });
+    const { status, data } = await req(
+      port,
+      "DELETE",
+      "/api/autonomous/tasks",
+      {
+        taskId: taskToDelete.id,
+      },
+    );
 
     expect(status).toBe(200);
     expect(data.ok).toBe(true);
@@ -373,6 +395,7 @@ const MockAutonomousView = () => {
     React.createElement(
       "button",
       {
+        type: "button",
         onClick: () => ctx.toggleAutonomousMode(),
         "data-testid": "toggle-btn",
       },
@@ -445,7 +468,7 @@ describe("Autonomous Mode UI", () => {
       tree = TestRenderer.create(React.createElement(MockAutonomousView));
     });
 
-    const status = tree!.root.findByProps({ "data-testid": "status" });
+    const status = tree?.root.findByProps({ "data-testid": "status" });
     expect(status.children[0]).toBe("Stopped");
   });
 
@@ -456,7 +479,7 @@ describe("Autonomous Mode UI", () => {
       tree = TestRenderer.create(React.createElement(MockAutonomousView));
     });
 
-    const taskList = tree!.root.findByProps({ "data-testid": "task-list" });
+    const taskList = tree?.root.findByProps({ "data-testid": "task-list" });
     expect(taskList.children.length).toBe(2);
   });
 
@@ -467,7 +490,7 @@ describe("Autonomous Mode UI", () => {
       tree = TestRenderer.create(React.createElement(MockAutonomousView));
     });
 
-    const toggleBtn = tree!.root.findByProps({ "data-testid": "toggle-btn" });
+    const toggleBtn = tree?.root.findByProps({ "data-testid": "toggle-btn" });
     expect(toggleBtn.children[0]).toBe("Enable");
 
     await act(async () => {
@@ -570,7 +593,9 @@ describe("Task Management Integration", () => {
     addFn("New automated task");
 
     expect(state.autonomousTasks.length).toBe(initialCount + 1);
-    expect(state.autonomousTasks[state.autonomousTasks.length - 1].status).toBe("pending");
+    expect(state.autonomousTasks[state.autonomousTasks.length - 1].status).toBe(
+      "pending",
+    );
   });
 
   it("executing task changes status to running", () => {
@@ -634,7 +659,9 @@ describe("Autonomous Config Integration", () => {
     mockUseApp.mockReset();
     mockUseApp.mockImplementation(() => ({
       ...state,
-      updateAutonomousConfig: (updates: Partial<AutonomousState["autonomousConfig"]>) => {
+      updateAutonomousConfig: (
+        updates: Partial<AutonomousState["autonomousConfig"]>,
+      ) => {
         Object.assign(state.autonomousConfig, updates);
       },
     }));
@@ -688,17 +715,22 @@ describe("Task Queue Management", () => {
     mockUseApp.mockImplementation(() => ({
       ...state,
       getNextPendingTask: () => {
-        return state.autonomousTasks.find((t) => t.status === "pending") || null;
+        return (
+          state.autonomousTasks.find((t) => t.status === "pending") || null
+        );
       },
       getRunningTasks: () => {
         return state.autonomousTasks.filter((t) => t.status === "running");
       },
       canExecuteMoreTasks: () => {
-        const running = state.autonomousTasks.filter((t) => t.status === "running").length;
+        const running = state.autonomousTasks.filter(
+          (t) => t.status === "running",
+        ).length;
         return running < state.autonomousConfig.maxConcurrentTasks;
       },
       getPendingTaskCount: () => {
-        return state.autonomousTasks.filter((t) => t.status === "pending").length;
+        return state.autonomousTasks.filter((t) => t.status === "pending")
+          .length;
       },
     }));
   });

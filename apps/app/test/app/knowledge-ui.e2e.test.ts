@@ -10,11 +10,19 @@
  * 6. Fragment viewing
  */
 
+import http from "node:http";
 // @vitest-environment jsdom
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
-import http from "node:http";
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 // ---------------------------------------------------------------------------
 // Part 1: API Tests for Knowledge Endpoints
@@ -63,7 +71,11 @@ async function req(
 function createKnowledgeTestServer(): Promise<{
   port: number;
   close: () => Promise<void>;
-  getDocuments: () => Array<{ id: string; title: string; fragmentCount: number }>;
+  getDocuments: () => Array<{
+    id: string;
+    title: string;
+    fragmentCount: number;
+  }>;
 }> {
   const documents: Array<{
     id: string;
@@ -108,15 +120,17 @@ function createKnowledgeTestServer(): Promise<{
 
   const routes: Record<
     string,
-    (req: http.IncomingMessage, res: http.ServerResponse) => Promise<void> | void
+    (
+      req: http.IncomingMessage,
+      res: http.ServerResponse,
+    ) => Promise<void> | void
   > = {
     "GET /api/knowledge/stats": (_r, res) =>
       json(res, {
         documentCount: documents.length,
         fragmentCount: documents.reduce((sum, d) => sum + d.fragmentCount, 0),
       }),
-    "GET /api/knowledge/documents": (_r, res) =>
-      json(res, { documents }),
+    "GET /api/knowledge/documents": (_r, res) => json(res, { documents }),
     "POST /api/knowledge/upload": async (r, res) => {
       const body = JSON.parse(await readBody(r)) as Record<string, unknown>;
       const newDoc = {
@@ -214,7 +228,11 @@ function createKnowledgeTestServer(): Promise<{
 describe("Knowledge API", () => {
   let port: number;
   let close: () => Promise<void>;
-  let getDocuments: () => Array<{ id: string; title: string; fragmentCount: number }>;
+  let getDocuments: () => Array<{
+    id: string;
+    title: string;
+    fragmentCount: number;
+  }>;
 
   beforeAll(async () => {
     ({ port, close, getDocuments } = await createKnowledgeTestServer());
@@ -251,9 +269,14 @@ describe("Knowledge API", () => {
 
   it("POST /api/knowledge/upload-url adds document from URL", async () => {
     const initialCount = getDocuments().length;
-    const { status, data } = await req(port, "POST", "/api/knowledge/upload-url", {
-      url: "https://example.com/document.html",
-    });
+    const { status, data } = await req(
+      port,
+      "POST",
+      "/api/knowledge/upload-url",
+      {
+        url: "https://example.com/document.html",
+      },
+    );
     expect(status).toBe(200);
     expect(data.ok).toBe(true);
     expect(getDocuments().length).toBe(initialCount + 1);
@@ -316,8 +339,18 @@ vi.mock("../../src/api-client", () => ({
     }),
     listKnowledgeDocuments: vi.fn().mockResolvedValue({
       documents: [
-        { id: "doc-1", title: "README.md", fragmentCount: 3, createdAt: new Date().toISOString() },
-        { id: "doc-2", title: "guide.pdf", fragmentCount: 10, createdAt: new Date().toISOString() },
+        {
+          id: "doc-1",
+          title: "README.md",
+          fragmentCount: 3,
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: "doc-2",
+          title: "guide.pdf",
+          fragmentCount: 10,
+          createdAt: new Date().toISOString(),
+        },
       ],
     }),
     getKnowledgeDocument: vi.fn().mockResolvedValue({
@@ -371,8 +404,18 @@ function createKnowledgeUIState(): KnowledgeState {
   return {
     knowledgeStats: { documentCount: 5, fragmentCount: 42 },
     knowledgeDocuments: [
-      { id: "doc-1", title: "README.md", fragmentCount: 3, createdAt: new Date().toISOString() },
-      { id: "doc-2", title: "guide.pdf", fragmentCount: 10, createdAt: new Date().toISOString() },
+      {
+        id: "doc-1",
+        title: "README.md",
+        fragmentCount: 3,
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: "doc-2",
+        title: "guide.pdf",
+        fragmentCount: 10,
+        createdAt: new Date().toISOString(),
+      },
     ],
     knowledgeLoading: false,
     knowledgeSearchResults: [],
@@ -414,7 +457,7 @@ describe("KnowledgeView UI", () => {
       tree = TestRenderer.create(React.createElement(KnowledgeView));
     });
 
-    const allText = JSON.stringify(tree!.toJSON());
+    const allText = JSON.stringify(tree?.toJSON());
     expect(allText).toContain("Documents");
   });
 
@@ -425,7 +468,7 @@ describe("KnowledgeView UI", () => {
       tree = TestRenderer.create(React.createElement(KnowledgeView));
     });
 
-    const allText = JSON.stringify(tree!.toJSON());
+    const allText = JSON.stringify(tree?.toJSON());
     expect(allText).toContain("Fragments");
   });
 
@@ -437,7 +480,7 @@ describe("KnowledgeView UI", () => {
     });
 
     // Look for file input or upload text
-    const inputs = tree!.root.findAll(
+    const _inputs = tree?.root.findAll(
       (node) => node.type === "input" && node.props.type === "file",
     );
     // May have file input for uploads
@@ -463,7 +506,7 @@ describe("KnowledgeView UI", () => {
       tree = TestRenderer.create(React.createElement(KnowledgeView));
     });
 
-    const searchInputs = tree!.root.findAll(
+    const searchInputs = tree?.root.findAll(
       (node) =>
         node.type === "input" &&
         (node.props.placeholder?.toLowerCase().includes("search") ||
@@ -521,7 +564,9 @@ describe("Knowledge Upload Integration", () => {
     const uploadFn = mockUseApp().uploadKnowledgeDocument;
     const initialCount = state.knowledgeDocuments.length;
 
-    const mockFile = new File(["test content"], "test.txt", { type: "text/plain" });
+    const mockFile = new File(["test content"], "test.txt", {
+      type: "text/plain",
+    });
     await uploadFn(mockFile);
 
     expect(uploadCalled).toBe(true);
@@ -616,6 +661,8 @@ describe("Knowledge Delete Integration", () => {
 
     expect(deleteCalled).toBe(true);
     expect(state.knowledgeDocuments.length).toBe(initialCount - 1);
-    expect(state.knowledgeDocuments.find((d) => d.id === "doc-1")).toBeUndefined();
+    expect(
+      state.knowledgeDocuments.find((d) => d.id === "doc-1"),
+    ).toBeUndefined();
   });
 });

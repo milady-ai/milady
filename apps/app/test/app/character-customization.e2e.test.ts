@@ -9,11 +9,19 @@
  * 5. Save functionality
  */
 
+import http from "node:http";
 // @vitest-environment jsdom
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
-import http from "node:http";
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 // ---------------------------------------------------------------------------
 // Part 1: API Tests for Character Endpoints
@@ -102,7 +110,10 @@ function createCharacterTestServer(): Promise<{
 
   const routes: Record<
     string,
-    (req: http.IncomingMessage, res: http.ServerResponse) => Promise<void> | void
+    (
+      req: http.IncomingMessage,
+      res: http.ServerResponse,
+    ) => Promise<void> | void
   > = {
     "GET /api/character": (_r, res) => json(res, { character }),
     "PUT /api/character": async (r, res) => {
@@ -164,7 +175,11 @@ function createCharacterTestServer(): Promise<{
 describe("Character API", () => {
   let port: number;
   let close: () => Promise<void>;
-  let getCharacter: ReturnType<typeof createCharacterTestServer> extends Promise<infer T> ? T["getCharacter"] : never;
+  let getCharacter: ReturnType<
+    typeof createCharacterTestServer
+  > extends Promise<infer T>
+    ? T["getCharacter"]
+    : never;
 
   beforeAll(async () => {
     ({ port, close, getCharacter } = await createCharacterTestServer());
@@ -194,28 +209,36 @@ describe("Character API", () => {
 
   it("PUT /api/character updates bio", async () => {
     const newBio = ["First line", "Second line"];
-    const { status } = await req(port, "PUT", "/api/character", { bio: newBio });
+    const { status } = await req(port, "PUT", "/api/character", {
+      bio: newBio,
+    });
     expect(status).toBe(200);
     expect(getCharacter().bio).toEqual(newBio);
   });
 
   it("PUT /api/character updates system prompt", async () => {
     const newSystem = "You are a specialized assistant for coding tasks";
-    const { status } = await req(port, "PUT", "/api/character", { system: newSystem });
+    const { status } = await req(port, "PUT", "/api/character", {
+      system: newSystem,
+    });
     expect(status).toBe(200);
     expect(getCharacter().system).toBe(newSystem);
   });
 
   it("PUT /api/character updates adjectives", async () => {
     const newAdj = ["creative", "analytical", "patient"];
-    const { status } = await req(port, "PUT", "/api/character", { adjectives: newAdj });
+    const { status } = await req(port, "PUT", "/api/character", {
+      adjectives: newAdj,
+    });
     expect(status).toBe(200);
     expect(getCharacter().adjectives).toEqual(newAdj);
   });
 
   it("PUT /api/character updates topics", async () => {
     const newTopics = ["AI", "machine learning", "neural networks"];
-    const { status } = await req(port, "PUT", "/api/character", { topics: newTopics });
+    const { status } = await req(port, "PUT", "/api/character", {
+      topics: newTopics,
+    });
     expect(status).toBe(200);
     expect(getCharacter().topics).toEqual(newTopics);
   });
@@ -226,7 +249,9 @@ describe("Character API", () => {
       chat: ["Keep it casual"],
       post: ["Be thorough"],
     };
-    const { status } = await req(port, "PUT", "/api/character", { style: newStyle });
+    const { status } = await req(port, "PUT", "/api/character", {
+      style: newStyle,
+    });
     expect(status).toBe(200);
     expect(getCharacter().style).toEqual(newStyle);
   });
@@ -271,7 +296,13 @@ vi.mock("../../src/api-client", () => ({
 }));
 
 vi.mock("../../src/components/AvatarSelector", () => ({
-  AvatarSelector: ({ value, onChange }: { value: number; onChange: (v: number) => void }) =>
+  AvatarSelector: ({
+    value,
+    onChange,
+  }: {
+    value: number;
+    onChange: (v: number) => void;
+  }) =>
     React.createElement(
       "div",
       { "data-testid": "avatar-selector" },
@@ -350,11 +381,11 @@ function createCharacterUIState(): CharacterState {
 
 describe("CharacterView UI", () => {
   let state: CharacterState;
-  let saveCharacterCalled: boolean;
+  let _saveCharacterCalled: boolean;
 
   beforeEach(() => {
     state = createCharacterUIState();
-    saveCharacterCalled = false;
+    _saveCharacterCalled = false;
 
     mockUseApp.mockReset();
     mockUseApp.mockImplementation(() => ({
@@ -363,7 +394,7 @@ describe("CharacterView UI", () => {
       loadRegistryStatus: vi.fn(),
       loadDropStatus: vi.fn(),
       handleSaveCharacter: async () => {
-        saveCharacterCalled = true;
+        _saveCharacterCalled = true;
         state.characterSaving = false;
         state.characterDirty = false;
       },
@@ -387,7 +418,7 @@ describe("CharacterView UI", () => {
     });
 
     expect(tree).not.toBeNull();
-    const json = tree!.toJSON();
+    const json = tree?.toJSON();
     expect(json).not.toBeNull();
   });
 
@@ -398,10 +429,11 @@ describe("CharacterView UI", () => {
       tree = TestRenderer.create(React.createElement(CharacterView));
     });
 
-    const nameInputs = tree!.root.findAll(
+    const nameInputs = tree?.root.findAll(
       (node) =>
         node.type === "input" &&
-        (node.props.value === "TestAgent" || node.props.placeholder?.includes("name")),
+        (node.props.value === "TestAgent" ||
+          node.props.placeholder?.includes("name")),
     );
     expect(nameInputs.length).toBeGreaterThanOrEqual(0); // May be rendered differently
   });
@@ -413,7 +445,7 @@ describe("CharacterView UI", () => {
       tree = TestRenderer.create(React.createElement(CharacterView));
     });
 
-    const textareas = tree!.root.findAll((node) => node.type === "textarea");
+    const textareas = tree?.root.findAll((node) => node.type === "textarea");
     expect(textareas.length).toBeGreaterThanOrEqual(0);
   });
 
@@ -425,7 +457,7 @@ describe("CharacterView UI", () => {
     });
 
     // Look for adjective tags
-    const spans = tree!.root.findAll(
+    const spans = tree?.root.findAll(
       (node) =>
         node.type === "span" &&
         node.children.some((c) => typeof c === "string" && c === "friendly"),
@@ -440,7 +472,7 @@ describe("CharacterView UI", () => {
       tree = TestRenderer.create(React.createElement(CharacterView));
     });
 
-    const spans = tree!.root.findAll(
+    const spans = tree?.root.findAll(
       (node) =>
         node.type === "span" &&
         node.children.some((c) => typeof c === "string" && c === "technology"),
@@ -455,13 +487,14 @@ describe("CharacterView UI", () => {
       tree = TestRenderer.create(React.createElement(CharacterView));
     });
 
-    const saveButtons = tree!.root.findAll(
+    const saveButtons = tree?.root.findAll(
       (node) =>
         node.type === "button" &&
         node.children.some(
           (c) =>
             typeof c === "string" &&
-            (c.toLowerCase().includes("save") || c.toLowerCase().includes("update")),
+            (c.toLowerCase().includes("save") ||
+              c.toLowerCase().includes("update")),
         ),
     );
     expect(saveButtons.length).toBeGreaterThanOrEqual(0);

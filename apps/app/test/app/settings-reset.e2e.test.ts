@@ -7,11 +7,19 @@
  * 3. Post-reset state: onboarding resets to welcome, data cleared
  */
 
+import http from "node:http";
 // @vitest-environment jsdom
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
-import http from "node:http";
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 // ---------------------------------------------------------------------------
 // Part 1: API Tests for /api/agent/reset
@@ -174,7 +182,7 @@ function createResetTestServer(): Promise<{
 describe("Agent Reset API", () => {
   let port: number;
   let close: () => Promise<void>;
-  let getState: () => {
+  let _getState: () => {
     agentState: string;
     onboardingComplete: boolean;
     conversationCount: number;
@@ -183,7 +191,7 @@ describe("Agent Reset API", () => {
   };
 
   beforeAll(async () => {
-    ({ port, close, getState } = await createResetTestServer());
+    ({ port, close, _getState } = await createResetTestServer());
   });
 
   afterAll(async () => {
@@ -292,10 +300,12 @@ vi.mock("../../src/AppContext", async () => {
 
 // Mock all heavy components to isolate SettingsView testing
 vi.mock("../../src/components/MediaSettingsSection", () => ({
-  MediaSettingsSection: () => React.createElement("div", null, "MediaSettingsSection"),
+  MediaSettingsSection: () =>
+    React.createElement("div", null, "MediaSettingsSection"),
 }));
 vi.mock("../../src/components/PermissionsSection", () => ({
-  PermissionsSection: () => React.createElement("div", null, "PermissionsSection"),
+  PermissionsSection: () =>
+    React.createElement("div", null, "PermissionsSection"),
 }));
 vi.mock("../../src/components/ProviderSwitcher", () => ({
   ProviderSwitcher: () => React.createElement("div", null, "ProviderSwitcher"),
@@ -412,13 +422,11 @@ describe("Settings Reset UI", () => {
     });
 
     expect(tree).not.toBeNull();
-    const renderedTree = tree!;
+    const renderedTree = tree;
 
     // Find the Danger Zone text
     const dangerZoneText = renderedTree.root.findAll(
-      (node) =>
-        node.type === "span" &&
-        node.children.includes("Danger Zone"),
+      (node) => node.type === "span" && node.children.includes("Danger Zone"),
     );
     expect(dangerZoneText.length).toBeGreaterThan(0);
   });
@@ -430,7 +438,7 @@ describe("Settings Reset UI", () => {
       tree = TestRenderer.create(React.createElement(SettingsView));
     });
 
-    const renderedTree = tree!;
+    const renderedTree = tree;
 
     // Find the Reset button
     const resetButtons = renderedTree.root.findAll(
@@ -450,7 +458,7 @@ describe("Settings Reset UI", () => {
       tree = TestRenderer.create(React.createElement(SettingsView));
     });
 
-    const renderedTree = tree!;
+    const renderedTree = tree;
 
     // Find and click the Reset button in Danger Zone
     const resetButton = renderedTree.root.findAll(
@@ -478,7 +486,7 @@ describe("Settings Reset UI", () => {
       tree = TestRenderer.create(React.createElement(SettingsView));
     });
 
-    const renderedTree = tree!;
+    const renderedTree = tree;
 
     // Verify pre-reset state
     expect(state.onboardingComplete).toBe(true);
@@ -520,7 +528,7 @@ describe("Settings Reset UI", () => {
       tree = TestRenderer.create(React.createElement(SettingsView));
     });
 
-    const renderedTree = tree!;
+    const renderedTree = tree;
 
     const originalComplete = state.onboardingComplete;
     const originalConvCount = state.conversations.length;
@@ -602,7 +610,7 @@ describe("Reset to Onboarding Flow Integration", () => {
       tree = TestRenderer.create(React.createElement(SettingsView));
     });
 
-    const renderedTree = tree!;
+    const renderedTree = tree;
 
     // Trigger reset
     const resetButton = renderedTree.root.findAll(
@@ -635,7 +643,7 @@ describe("Reset to Onboarding Flow Integration", () => {
       tree = TestRenderer.create(React.createElement(SettingsView));
     });
 
-    const renderedTree = tree!;
+    const renderedTree = tree;
 
     // Verify pre-reset
     expect(state.onboardingStyle).toBe("uwu~");
