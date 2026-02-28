@@ -83,7 +83,7 @@ describe("electron agent startup failure cleanup", () => {
     __electronTestState.isPackaged = true;
   });
 
-  it("closes API listener after failed start so next start does not hit EADDRINUSE", async () => {
+  it("keeps API server alive after failed runtime so UI can show error, then recovers on retry", async () => {
     const appPath = mkdtempSync(path.join(os.tmpdir(), "milady-agent-start-"));
     tempDirs.push(appPath);
     const distDir = path.join(appPath, "milady-dist");
@@ -95,10 +95,15 @@ describe("electron agent startup failure cleanup", () => {
 
     const manager = new AgentManager();
 
+    // First start: runtime throws, but API server stays up so the UI can
+    // connect and show the error (see docs/electron-startup.md).
     const first = await manager.start();
     expect(first.state).toBe("error");
-    expect(globalThis.__miladyAgentStartupTestState?.closes).toBe(1);
+    expect(first.port).toBe(42138);
+    expect(globalThis.__miladyAgentStartupTestState?.closes).toBe(0);
 
+    // Second start: start() closes the stale server, starts a fresh one,
+    // and this time the runtime succeeds (mock only throws on call 1).
     const second = await manager.start();
     expect(second.state).toBe("running");
     expect(globalThis.__miladyAgentStartupTestState?.starts).toBe(2);
