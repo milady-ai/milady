@@ -1,6 +1,6 @@
-This PR will be reviewed by an AI agent. Provide clear context so it can assess scope, risk, and testing. See [CONTRIBUTING.md](../CONTRIBUTING.md) and [AGENTS.md](../AGENTS.md) for scope and code standards.
+This PR will be reviewed by an AI agent. Provide clear context to help it assess your changes.
 
-**Out of scope (will be rejected):** Aesthetic/UI-only changes that don't improve agent capability.
+Aesthetic/UI changes that don't improve agent capability are out of scope and will be rejected.
 
 ## Category
 - [ ] Bug fix
@@ -12,13 +12,13 @@ This PR will be reviewed by an AI agent. Provide clear context so it can assess 
 - [ ] Other
 
 ## What
-(Brief description of the change.)
+(brief description)
 
 ## Why
-(Motivation and context. Include WHYs for non-obvious behavior; link to docs if you added or updated them.)
+(motivation)
 
 ## How
-(Implementation approach — key files, patterns, or tradeoffs.)
+(implementation approach)
 
 ## Testing
-(What you ran: `bun run check`, `bun run test`, manual steps. How reviewers can verify.)
+(what was tested, how to verify)
