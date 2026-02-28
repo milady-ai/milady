@@ -106,6 +106,7 @@ export function App() {
     activeGameViewerUrl,
     gameOverlayEnabled,
     setActionNotice,
+    devMode,
   } = useApp();
   const isPopout = useIsPopout();
   const contextMenu = useContextMenu();
@@ -336,6 +337,17 @@ export function App() {
 
   return (
     <BugReportProvider value={bugReport}>
+      {devMode && (
+        <div
+          className="fixed top-2 right-2 z-[9999] px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider pointer-events-none select-none"
+          style={{
+            background: devMode === "paygate" ? "rgba(239,68,68,0.85)" : "rgba(234,179,8,0.85)",
+            color: "#000",
+          }}
+        >
+          DEV MODE{devMode === "paygate" ? " (PAYGATE)" : ""}
+        </div>
+      )}
       {tab === "stream" && !streamPoppedOut ? (
         <div className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg">
           <Header />

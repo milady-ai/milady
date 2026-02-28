@@ -23,6 +23,7 @@ import {
   type SetStateAction,
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { useApp } from "../AppContext";
@@ -36,6 +37,21 @@ import {
 import { hasRequiredOnboardingPermissions } from "../onboarding-permissions";
 import { StatusBadge } from "./shared/ui-badges";
 import { Switch } from "./shared/ui-switch";
+
+declare global {
+  interface Window {
+    electron?: {
+      ipcRenderer: {
+        invoke: (channel: string, ...args: unknown[]) => Promise<unknown>;
+        on?: (channel: string, handler: (...args: unknown[]) => void) => void;
+        removeListener?: (
+          channel: string,
+          handler: (...args: unknown[]) => void,
+        ) => void;
+      };
+    };
+  }
+}
 
 /** Permission definition for UI rendering. */
 interface PermissionDef {
@@ -286,28 +302,88 @@ function CapabilityToggle({
   );
 }
 
-function usePermissionActions(
+/**
+ * Permission actions hook with Electron IPC bridge.
+ *
+ * When running inside Electron, permission requests go directly via IPC
+ * to the native layer (which can trigger OS dialogs). The result is then
+ * synced back to the HTTP server so the permission state stays consistent.
+ *
+ * When running in a browser (no Electron), falls back to the HTTP API.
+ */
+function usePermissionActionsWithIPC(
   setPermissions: Dispatch<SetStateAction<AllPermissionsState | null>>,
 ) {
+  const ipc = window.electron?.ipcRenderer;
+
+  // Listen for permission changes from the Electron main process
+  // (e.g. user manually grants in System Preferences).
+  useEffect(() => {
+    if (!ipc?.on) return;
+
+    const handler = (...args: unknown[]) => {
+      const perms = args[0] as AllPermissionsState | undefined;
+      if (perms && typeof perms === "object") {
+        setPermissions(perms);
+        // Sync back to server
+        void client.updatePermissionState(perms).catch(() => {});
+      }
+    };
+
+    ipc.on("permissions:changed", handler);
+    return () => {
+      ipc.removeListener?.("permissions:changed", handler);
+    };
+  }, [ipc, setPermissions]);
+
   const handleRequest = useCallback(
     async (id: SystemPermissionId) => {
       try {
-        const state = await client.requestPermission(id);
-        setPermissions((prev) => (prev ? { ...prev, [id]: state } : prev));
+        if (ipc) {
+          // Electron path — call native permission dialog directly
+          const result = (await ipc.invoke(
+            "permissions:request",
+            id,
+          )) as AllPermissionsState | null;
+          if (result && typeof result === "object") {
+            setPermissions(result);
+            // Sync state to server
+            void client.updatePermissionState(result).catch(() => {});
+          } else {
+            // Fallback: single-permission result
+            const state = await client.requestPermission(id);
+            setPermissions((prev) =>
+              prev ? { ...prev, [id]: state } : prev,
+            );
+          }
+        } else {
+          // Browser fallback — HTTP API
+          const state = await client.requestPermission(id);
+          setPermissions((prev) =>
+            prev ? { ...prev, [id]: state } : prev,
+          );
+        }
       } catch (err) {
         console.error("Failed to request permission:", err);
       }
     },
-    [setPermissions],
+    [ipc, setPermissions],
   );
 
-  const handleOpenSettings = useCallback(async (id: SystemPermissionId) => {
-    try {
-      await client.openPermissionSettings(id);
-    } catch (err) {
-      console.error("Failed to open settings:", err);
-    }
-  }, []);
+  const handleOpenSettings = useCallback(
+    async (id: SystemPermissionId) => {
+      try {
+        if (ipc) {
+          await ipc.invoke("permissions:openSettings", id);
+        } else {
+          await client.openPermissionSettings(id);
+        }
+      } catch (err) {
+        console.error("Failed to open settings:", err);
+      }
+    },
+    [ipc],
+  );
 
   return { handleRequest, handleOpenSettings };
 }
@@ -322,7 +398,7 @@ export function PermissionsSection() {
   const [refreshing, setRefreshing] = useState(false);
   const [shellEnabled, setShellEnabled] = useState(true);
   const { handleRequest, handleOpenSettings } =
-    usePermissionActions(setPermissions);
+    usePermissionActionsWithIPC(setPermissions);
 
   /** Load permissions on mount. */
   useEffect(() => {
@@ -506,7 +582,7 @@ export function PermissionsOnboardingSection({
   );
   const [loading, setLoading] = useState(true);
   const { handleRequest, handleOpenSettings } =
-    usePermissionActions(setPermissions);
+    usePermissionActionsWithIPC(setPermissions);
 
   useEffect(() => {
     void (async () => {

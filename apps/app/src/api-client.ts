@@ -395,6 +395,49 @@ export interface PiAiModelOption {
   isDefault: boolean;
 }
 
+export interface DatabaseOption {
+  id: string;
+  label: string;
+  description: string;
+}
+
+export interface DetectedEnvironment {
+  dockerAvailable: boolean;
+  platform: string;
+  arch: string;
+  hasAffiliateRef: boolean;
+  devMode: "all" | "paygate" | false;
+}
+
+// ── Feature tier types ────────────────────────────────────────────────────
+
+export type FeatureTier = "free" | "premium" | "enterprise";
+export type FeatureCategory =
+  | "execution"
+  | "ai"
+  | "media"
+  | "integration"
+  | "infrastructure"
+  | "advanced";
+
+export interface FeatureInfo {
+  id: string;
+  pluginName: string;
+  displayName: string;
+  description: string;
+  requiredTier: FeatureTier;
+  category: FeatureCategory;
+  available: boolean;
+  enabled: boolean;
+  reason?: string;
+}
+
+export interface FeaturesResponse {
+  features: FeatureInfo[];
+  currentTier: FeatureTier;
+  devMode: "all" | "paygate" | false;
+}
+
 export interface OnboardingOptions {
   names: string[];
   styles: StylePreset[];
@@ -410,6 +453,8 @@ export interface OnboardingOptions {
   inventoryProviders: InventoryProviderOption[];
   sharedStyleRules: string;
   githubOAuthAvailable?: boolean;
+  databaseOptions?: DatabaseOption[];
+  detectedEnvironment?: DetectedEnvironment;
 }
 
 /** Configuration for a single messaging connector. */
@@ -429,6 +474,7 @@ export interface ConnectorConfig {
 
 export interface OnboardingData {
   name: string;
+  hostingChoice?: "local" | "elizaos";
   theme: string;
   runMode: "local" | "cloud";
   /** Sandbox execution mode: "off" (rawdog), "light" (cloud), "standard" (local sandbox), "max". */
@@ -455,6 +501,12 @@ export interface OnboardingData {
   primaryModel?: string;
   openrouterModel?: string;
   subscriptionProvider?: string;
+  // Database configuration
+  databaseProvider?: "pglite" | "postgres" | "docker-postgres";
+  databaseConnectionString?: string;
+  // Affiliate
+  affiliateRefCode?: string;
+  // --- Legacy fields kept for backward compat (moved to settings) ---
   // Messaging channel setup
   channels?: Record<string, unknown>;
   // Inventory / wallet setup
@@ -1725,7 +1777,7 @@ declare global {
 const GENERIC_NO_RESPONSE_TEXT =
   "Sorry, I couldn't generate a response right now. Please try again.";
 const AGENT_TRANSFER_MIN_PASSWORD_LENGTH = 4;
-const DEFAULT_FETCH_TIMEOUT_MS = 10_000;
+const DEFAULT_FETCH_TIMEOUT_MS = 30_000;
 
 export class MiladyClient {
   private _baseUrl: string;
@@ -2005,6 +2057,56 @@ export class MiladyClient {
     await this.fetch("/api/onboarding", {
       method: "POST",
       body: JSON.stringify(data),
+    });
+  }
+
+  async setupDockerDb(): Promise<{
+    ok: boolean;
+    error?: string;
+    credentials?: {
+      connectionString: string;
+      host: string;
+      port: number;
+      database: string;
+      user: string;
+      password: string;
+    };
+  }> {
+    return this.fetch("/api/onboarding/setup-docker-db", { method: "POST" });
+  }
+
+  // ── Settings API (post-onboarding) ──────────────────────────────────
+  async updateTheme(theme: string): Promise<void> {
+    await this.fetch("/api/settings/theme", {
+      method: "POST",
+      body: JSON.stringify({ theme }),
+    });
+  }
+
+  async updateAvatar(avatar: string): Promise<void> {
+    await this.fetch("/api/settings/avatar", {
+      method: "POST",
+      body: JSON.stringify({ avatar }),
+    });
+  }
+
+  async updateConnectors(data: Record<string, unknown>): Promise<void> {
+    await this.fetch("/api/settings/connectors", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateInventory(
+    inventoryProviders: Array<{
+      chain: string;
+      rpcProvider: string;
+      rpcApiKey?: string;
+    }>,
+  ): Promise<void> {
+    await this.fetch("/api/settings/inventory", {
+      method: "POST",
+      body: JSON.stringify({ inventoryProviders }),
     });
   }
 
@@ -4110,6 +4212,30 @@ export class MiladyClient {
       "/api/permissions/shell",
     );
     return result.enabled;
+  }
+
+  // ── Feature manifest ───────────────────────────────────────────────────
+
+  /**
+   * Fetch all features with their availability status, tier, and enabled state.
+   */
+  async getFeatures(): Promise<FeaturesResponse> {
+    return this.fetch("/api/features");
+  }
+
+  // ── Permission state sync ─────────────────────────────────────────────
+
+  /**
+   * Push full permission state to the server (used after IPC-based updates
+   * to keep the HTTP layer in sync).
+   */
+  async updatePermissionState(
+    permissions: AllPermissionsState,
+  ): Promise<void> {
+    await this.fetch("/api/permissions/state", {
+      method: "PUT",
+      body: JSON.stringify(permissions),
+    });
   }
 
   disconnectWs(): void {
