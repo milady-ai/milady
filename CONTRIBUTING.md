@@ -80,6 +80,7 @@ If you are a coding agent submitting work:
 - **No secrets.** No real credentials, phone numbers, or live config in code.
 - **Minimal dependencies.** Don't add packages unless `src/` directly imports them.
 - **Commit messages:** concise, action-oriented (e.g., `milady: fix telegram reconnect on rate limit`)
+- **Electron agent startup:** Do not remove try/catch or `.catch()` in `apps/app/electron/src/native/agent.ts` as "excess" exception handling. Those guards keep the desktop app window usable when the runtime fails to load; see `docs/electron-startup.md`.
 
 ## Security
 

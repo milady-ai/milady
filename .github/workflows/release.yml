@@ -100,10 +100,16 @@ jobs:
         with:
           bun-version: latest
 
+      # For macos-x64, install under Rosetta so root node_modules gets x64 native
+      # binaries; copy-electron-plugins-and-deps copies from root into milady-dist.
       - name: Install root dependencies
         run: |
           for i in 1 2 3; do
-            bun install --frozen-lockfile && break
+            if [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
+              arch -x86_64 bun install --frozen-lockfile && break
+            else
+              bun install --frozen-lockfile && break
+            fi
             echo "Retry $i: bun install failed, retrying..."
             sleep 5
           done
@@ -172,17 +178,29 @@ jobs:
         run: bun run cap:sync:electron
         working-directory: apps/app
 
+      # For macos-x64, install under Rosetta so native modules (e.g. onnxruntime-node)
+      # get x64 binaries; otherwise the packaged DMG would contain arm64 .node files
+      # and fail on Intel with "Cannot find module .../darwin/x64/onnxruntime_binding.node".
       - name: Install Electron dependencies
         run: |
           for i in 1 2 3; do
-            bun install --no-save && break
+            if [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
+              arch -x86_64 bun install --no-save && break
+            else
+              bun install --no-save && break
+            fi
             echo "Retry $i: bun install failed, retrying..."
             sleep 5
           done
         working-directory: apps/app/electron
 
       - name: Build Electron app
-        run: bun run build
+        run: |
+          if [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
+            arch -x86_64 bun run build
+          else
+            bun run build
+          fi
         working-directory: apps/app/electron
 
       - name: Build Whisper universal binary (macOS)

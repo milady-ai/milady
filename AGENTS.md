@@ -48,6 +48,7 @@
 - Formatting/linting via Biome; run `bun run check` before commits.
 - Add brief code comments for tricky or non-obvious logic.
 - Aim to keep files under ~500 LOC; split/refactor when it improves clarity or testability.
+- **Do not remove exception-handling guards** in `apps/app/electron/src/native/agent.ts` as "excess" or during deslop/cleanup. The try/catch and `.catch()` there keep the desktop app usable when the runtime fails to load (API server stays up, UI can show error). See `docs/electron-startup.md`.
 - Naming: use **Milady** for product/app/docs headings; use `milady` for CLI command, package/binary, paths, and config keys.
 
 ## Dependencies

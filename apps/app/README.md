@@ -120,6 +120,10 @@ bun run android
 bun run plugin:build
 ```
 
+### Desktop app startup and errors
+
+If the embedded agent fails to load (e.g. missing native module), the app keeps the API server up so the UI can show an error instead of "Failed to fetch". See [Electron startup and exception handling](../../docs/electron-startup.md) for why the guards in `electron/src/native/agent.ts` exist and must not be removed.
+
 ### Tests
 
 ```bash
