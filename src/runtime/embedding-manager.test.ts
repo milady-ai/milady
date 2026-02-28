@@ -341,9 +341,7 @@ describe("MiladyEmbeddingManager", () => {
   describe("context window truncation", () => {
     it("should truncate text exceeding the context window limit", async () => {
       const contextSize = 100; // small context for easy testing
-      const mgr = new MiladyEmbeddingManager(
-        defaultConfig({ contextSize }),
-      );
+      const mgr = new MiladyEmbeddingManager(defaultConfig({ contextSize }));
 
       // SAFE_CHARS_PER_TOKEN = 2, so maxChars = 100 * 2 = 200
       const longText = "a".repeat(500);
@@ -359,9 +357,7 @@ describe("MiladyEmbeddingManager", () => {
 
     it("should pass text through unchanged when within context limit", async () => {
       const contextSize = 8192;
-      const mgr = new MiladyEmbeddingManager(
-        defaultConfig({ contextSize }),
-      );
+      const mgr = new MiladyEmbeddingManager(defaultConfig({ contextSize }));
 
       const shortText = "hello world";
       await mgr.generateEmbedding(shortText);
@@ -375,9 +371,7 @@ describe("MiladyEmbeddingManager", () => {
 
     it("should pass text at exactly the limit without truncating", async () => {
       const contextSize = 100;
-      const mgr = new MiladyEmbeddingManager(
-        defaultConfig({ contextSize }),
-      );
+      const mgr = new MiladyEmbeddingManager(defaultConfig({ contextSize }));
 
       // Exactly at limit: 100 * 2 = 200 chars
       const exactText = "b".repeat(200);
