@@ -48,10 +48,7 @@ describe("resolveApiUrl", () => {
   // define a minimal `window` on globalThis for the duration of each test.
   const g = globalThis as Record<string, unknown>;
 
-  function withWindow(
-    props: Record<string, unknown>,
-    fn: () => void,
-  ): void {
+  function withWindow(props: Record<string, unknown>, fn: () => void): void {
     const hadWindow = "window" in g;
     const savedWindow = g.window;
     g.window = { ...props };
