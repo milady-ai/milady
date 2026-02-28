@@ -130,14 +130,23 @@ jobs:
 
       - name: Build core
         run: |
-          bunx tsdown
-          bunx tsx scripts/write-build-info.ts
+          if [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
+            arch -x86_64 bun x tsdown
+            arch -x86_64 bun x tsx scripts/write-build-info.ts
+          else
+            bunx tsdown
+            bunx tsx scripts/write-build-info.ts
+          fi
           echo '{"type":"module"}' > dist/package.json
 
       - name: Install Capacitor app dependencies
         run: |
           for i in 1 2 3; do
-            bun install && break
+            if [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
+              arch -x86_64 bun install && break
+            else
+              bun install && break
+            fi
             echo "Retry $i: bun install failed, retrying..."
             sleep 5
           done
@@ -147,7 +156,11 @@ jobs:
         run: |
           for d in gateway swabble camera screencapture canvas desktop location talkmode agent; do
             echo "[plugin:$d] building..."
-            (cd plugins/$d && bun run build)
+            if [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
+              (cd plugins/$d && arch -x86_64 bun run build)
+            else
+              (cd plugins/$d && bun run build)
+            fi
           done
         working-directory: apps/app
         shell: bash
@@ -155,7 +168,11 @@ jobs:
       - name: Refresh Capacitor app dependencies
         run: |
           for i in 1 2 3; do
-            bun install && break
+            if [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
+              arch -x86_64 bun install && break
+            else
+              bun install && break
+            fi
             echo "Retry $i: bun install failed, retrying..."
             sleep 5
           done
@@ -175,7 +192,12 @@ jobs:
         working-directory: apps/app
 
       - name: Sync Electron
-        run: bun run cap:sync:electron
+        run: |
+          if [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
+            arch -x86_64 bun run cap:sync:electron
+          else
+            bun run cap:sync:electron
+          fi
         working-directory: apps/app
 
       # For macos-x64, install under Rosetta so native modules (e.g. onnxruntime-node)
@@ -205,14 +227,24 @@ jobs:
 
       - name: Build Whisper universal binary (macOS)
         if: matrix.platform.os == 'macos'
-        run: bun run build:whisper
+        run: |
+          if [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
+            arch -x86_64 bun run build:whisper
+          else
+            bun run build:whisper
+          fi
         working-directory: apps/app/electron
 
       # Transform dynamic plugin imports to static imports for Electron bundling.
       # Dynamic imports like `import("@elizaos/plugin-sql")` cannot be bundled
       # by tsdown/rolldown. This script transforms eliza.ts to use static imports.
       - name: Transform plugins for Electron bundling
-        run: bun run scripts/transform-plugins-for-electron.ts
+        run: |
+          if [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
+            arch -x86_64 bun run scripts/transform-plugins-for-electron.ts
+          else
+            bun run scripts/transform-plugins-for-electron.ts
+          fi
         working-directory: .
 
       # Build a custom dist specifically for the Electron app where all third-party
@@ -227,7 +259,11 @@ jobs:
           set -euo pipefail
           echo "Building standalone Electron dist with all node_modules inlined..."
 
-          bunx tsdown --config tsdown.electron.config.ts --no-clean
+          if [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
+            arch -x86_64 bun x tsdown --config tsdown.electron.config.ts --no-clean
+          else
+            bunx tsdown --config tsdown.electron.config.ts --no-clean
+          fi
 
           # Copy to milady-dist so electron-builder can pack it.
           rm -rf apps/app/electron/milady-dist
