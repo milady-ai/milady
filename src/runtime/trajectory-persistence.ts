@@ -174,8 +174,11 @@ function getRuntimeDb(runtime: IAgentRuntime): RuntimeDb | null {
     adapter?: {
       db?: RuntimeDb;
     };
+    databaseAdapter?: {
+      db?: RuntimeDb;
+    };
   };
-  const db = runtimeLike.adapter?.db;
+  const db = runtimeLike.adapter?.db || runtimeLike.databaseAdapter?.db;
   if (!db || typeof db.execute !== "function") return null;
   return db;
 }
@@ -257,7 +260,11 @@ async function ensureTrajectoriesTable(
     );
     initializedRuntimes.add(key);
     return true;
-  } catch {
+  } catch (err) {
+    console.error(
+      "[trajectory-persistence] ensureTrajectoriesTable error:",
+      err,
+    );
     return false;
   }
 }
@@ -732,7 +739,8 @@ async function saveTrajectory(
   try {
     await executeRawSql(runtime, sql);
     return true;
-  } catch {
+  } catch (err) {
+    console.error("[trajectory-persistence] saveTrajectory error:", err);
     return false;
   }
 }
@@ -820,7 +828,15 @@ export function installDatabaseTrajectoryLogger(runtime: IAgentRuntime): void {
   if (!hasRuntimeDb(runtime)) return;
 
   const logger = resolveTrajectoryLogger(runtime);
-  if (!logger) return;
+  if (!logger) {
+    console.warn(
+      "[trajectory-persistence] installDatabaseTrajectoryLogger: no logger found to patch",
+    );
+    return;
+  }
+  console.warn(
+    "[trajectory-persistence] installDatabaseTrajectoryLogger: patched logger!",
+  );
 
   const loggerObject = logger as unknown as object;
   if (patchedLoggers.has(loggerObject)) return;
@@ -867,9 +883,12 @@ export function installDatabaseTrajectoryLogger(runtime: IAgentRuntime): void {
     if (!normalized) return;
 
     void enqueueStepWrite(runtime, normalized.stepId, async () => {
+      console.warn("DEBUG: enqueueStepWrite running - step1");
       const tableReady = await ensureTrajectoriesTable(runtime);
+      console.warn("DEBUG: ensureTrajectoriesTable result:", tableReady);
       if (!tableReady) return;
       await appendLlmCall(runtime, normalized.stepId, normalized.params);
+      console.warn("DEBUG: appendLlmCall finished");
     });
   }) as unknown as (params: Record<string, unknown>) => void;
 

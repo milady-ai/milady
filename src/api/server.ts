@@ -1171,7 +1171,8 @@ function discoverPluginsFromManifest(): PluginEntry[] {
       const HIDDEN_KEYS = new Set(["VERCEL_OIDC_TOKEN"]);
       const entries = index.plugins
         .map((p) => {
-          const category = categorizePlugin(p.id);
+          // Use manifest category if available, otherwise fall back to hardcoded categorization
+          const category = p.category ?? categorizePlugin(p.id);
           const envKey = p.envKey;
           const filteredConfigKeys = p.configKeys.filter(
             (k) => !HIDDEN_KEYS.has(k),

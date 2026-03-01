@@ -23,6 +23,7 @@ import { InventoryView } from "./components/InventoryView";
 import { KnowledgeView } from "./components/KnowledgeView";
 import { LifoSandboxView } from "./components/LifoSandboxView";
 import { LoadingScreen } from "./components/LoadingScreen";
+import { MemoryDebugPanel } from "./components/MemoryDebugPanel";
 import { Nav } from "./components/Nav";
 import { OnboardingWizard } from "./components/OnboardingWizard";
 import { PairingView } from "./components/PairingView";
@@ -300,6 +301,16 @@ export function App() {
 
   const agentStarting = agentStatus?.state === "starting";
 
+  useEffect(() => {
+    const STARTUP_TIMEOUT_MS = 300_000;
+    if ((startupPhase as string) !== "ready" && !startupError) {
+      const timer = setTimeout(() => {
+        retryStartup();
+      }, STARTUP_TIMEOUT_MS);
+      return () => clearTimeout(timer);
+    }
+  }, [startupPhase, startupError, retryStartup]);
+
   // Pop-out mode — render only StreamView, skip startup gates.
   // Platform init is skipped in main.tsx; AppProvider hydrates WS in background.
   if (isPopout) {
@@ -430,6 +441,7 @@ export function App() {
         }}
       />
       <RestartBanner />
+      <MemoryDebugPanel />
       <BugReportModal />
       {actionNotice && (
         <div

@@ -410,6 +410,50 @@ export function SettingsView() {
     }
   }, []);
 
+  // Update active section based on scroll position
+  useEffect(() => {
+    const root = contentRef.current;
+    if (!root) return;
+
+    const handleScroll = () => {
+      const sections = SETTINGS_SECTIONS.map((s) => {
+        const el = root.querySelector(`#${s.id}`) as HTMLElement;
+        return { id: s.id, el };
+      }).filter((s) => s.el !== null);
+
+      if (sections.length === 0) return;
+
+      // If user scrolled to the very bottom, highlight the last section
+      if (
+        root.scrollHeight - Math.ceil(root.scrollTop) <=
+        root.clientHeight + 10
+      ) {
+        setActiveSection(sections[sections.length - 1].id);
+        return;
+      }
+
+      const rootRect = root.getBoundingClientRect();
+      let currentSection = sections[0].id;
+
+      for (const { id, el } of sections) {
+        const elRect = el.getBoundingClientRect();
+        // If the section's top is visible or scrolled past (allowing a 150px offset)
+        if (elRect.top - rootRect.top <= 150) {
+          currentSection = id;
+        }
+      }
+
+      setActiveSection((prev) =>
+        prev !== currentSection ? currentSection : prev,
+      );
+    };
+
+    root.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+
+    return () => root.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <div className="h-full flex flex-col lg:flex-row overflow-hidden bg-bg">
       <SettingsSidebar

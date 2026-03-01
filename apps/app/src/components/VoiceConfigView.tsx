@@ -218,10 +218,10 @@ export function VoiceConfigView() {
   const currentMode: VoiceMode = voiceConfig.mode ?? "own-key";
   const providerInfo = PROVIDERS.find((p) => p.id === currentProvider);
   const isConfigured =
-    currentProvider !== "elevenlabs"
-      ? true
-      : currentMode === "cloud"
-        ? cloudConnected
+    currentMode === "cloud"
+      ? cloudConnected
+      : currentProvider !== "elevenlabs"
+        ? true
         : Boolean(voiceConfig.elevenlabs?.apiKey);
 
   const handleProviderChange = useCallback((provider: VoiceProvider) => {
