@@ -35,4 +35,30 @@ describe("resolvePluginConfigMutationRejections", () => {
     );
     expect(rejections).toEqual([]);
   });
+
+  it("rejects dangerous process-level keys even when declared", () => {
+    const rejections = resolvePluginConfigMutationRejections(
+      [{ key: "NODE_OPTIONS" }],
+      { NODE_OPTIONS: "--require=/tmp/evil.js" },
+    );
+    expect(rejections).toEqual([
+      {
+        field: "NODE_OPTIONS",
+        message: "NODE_OPTIONS is blocked for security reasons",
+      },
+    ]);
+  });
+
+  it("rejects blocked legacy-prefixed runtime credentials", () => {
+    const rejections = resolvePluginConfigMutationRejections(
+      [{ key: "MILAIDY_API_TOKEN" }],
+      { MILAIDY_API_TOKEN: "secret" },
+    );
+    expect(rejections).toEqual([
+      {
+        field: "MILAIDY_API_TOKEN",
+        message: "MILAIDY_API_TOKEN is blocked for security reasons",
+      },
+    ]);
+  });
 });

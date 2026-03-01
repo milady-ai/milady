@@ -298,9 +298,29 @@ export const CONFIG_WRITE_ALLOWED_TOP_KEYS = new Set<string>([
 ]);
 
 const PLUGIN_CONFIG_BLOCKED_KEYS = new Set<string>([
+  // Process/runtime injection vectors
+  "LD_PRELOAD",
+  "LD_LIBRARY_PATH",
+  "DYLD_INSERT_LIBRARIES",
+  "DYLD_LIBRARY_PATH",
+  "NODE_OPTIONS",
+  "NODE_EXTRA_CA_CERTS",
+  "ELECTRON_RUN_AS_NODE",
+  // Host/system boundary vars
+  "PATH",
+  "HOME",
+  "SHELL",
+  // Sensitive runtime credentials
   "MILADY_API_TOKEN",
   "MILADY_WALLET_EXPORT_TOKEN",
   "MILADY_ADMIN_TOKEN",
+  // Backward-compat prefix support
+  "MILAIDY_API_TOKEN",
+  "MILAIDY_WALLET_EXPORT_TOKEN",
+  "MILAIDY_ADMIN_TOKEN",
+  // DB connection overrides
+  "DATABASE_URL",
+  "POSTGRES_URL",
 ]);
 
 export function resolvePluginConfigMutationRejections(
@@ -460,7 +480,7 @@ export function resolveWalletExportRejection(
     return {
       status: 401,
       reason:
-        "Missing export token. Provide X-Runtime-Export-Token header or exportToken in request body.",
+        "Missing export token. Provide X-Milady-Export-Token header or exportToken in request body.",
     };
   }
   if (supplied !== expected) {
@@ -3701,11 +3721,24 @@ async function handleRequest(
           default: p.default,
         }),
       );
+      const mutationRejections = resolvePluginConfigMutationRejections(
+        plugin.parameters.map((p) => ({ key: p.key })),
+        body.config,
+      );
+      if (mutationRejections.length > 0) {
+        json(
+          res,
+          { ok: false, plugin, validationErrors: mutationRejections },
+          422,
+        );
+        return;
+      }
+
       const configValidation = validatePluginConfig(
         pluginId,
         plugin.category,
         plugin.envKey,
-        Object.keys(body.config),
+        plugin.configKeys,
         body.config,
         pluginParamInfos,
       );
@@ -4833,15 +4866,12 @@ async function handleRequest(
   // SECURITY: Requires { confirm: true } in the request body to prevent
   // accidental exposure of private keys.
   if (method === "POST" && pathname === "/api/wallet/export") {
-    const body = await readJsonBody<{ confirm?: boolean }>(req, res);
+    const body = await readJsonBody<Record<string, unknown>>(req, res);
     if (!body) return;
 
-    if (!body.confirm) {
-      error(
-        res,
-        'Export requires explicit confirmation. Send { "confirm": true } in the request body.',
-        403,
-      );
+    const exportRejection = resolveWalletExportRejection(req, body);
+    if (exportRejection) {
+      error(res, exportRejection.reason, exportRejection.status);
       return;
     }
 
