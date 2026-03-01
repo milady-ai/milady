@@ -41,13 +41,15 @@ export async function handlePermissionRoutes(
   if (!pathname.startsWith("/api/permissions")) return false;
 
   // ── GET /api/permissions ───────────────────────────────────────────────
-  // Returns all system permission states
+  // Returns all system permission states (AllPermissionsState shape)
   if (method === "GET" && pathname === "/api/permissions") {
     const permStates = state.permissionStates ?? {};
+    // Return permission states at root level to match AllPermissionsState contract
     json(res, {
-      permissions: permStates,
-      platform: process.platform,
-      shellEnabled: state.shellEnabled ?? true,
+      ...permStates,
+      // Also include metadata for convenience
+      _platform: process.platform,
+      _shellEnabled: state.shellEnabled ?? true,
     });
     return true;
   }
@@ -190,9 +192,49 @@ export async function handlePermissionRoutes(
       permissions?: Record<string, PermissionState>;
     }>(req, res);
     if (!body) return true;
+
     if (body.permissions && typeof body.permissions === "object") {
       state.permissionStates = body.permissions;
+
+      // Auto-enable capabilities if their permissions are met and they aren't explicitly configured.
+      let configChanged = false;
+      state.config.plugins = state.config.plugins || {};
+      state.config.plugins.entries = state.config.plugins.entries || {};
+
+      const capabilities = [
+        { id: "browser", required: ["accessibility"] },
+        { id: "computeruse", required: ["accessibility", "screen-recording"] },
+        { id: "vision", required: ["screen-recording"] },
+        { id: "coding-agent", required: [] }
+      ];
+
+      for (const cap of capabilities) {
+        // If the user hasn't explicitly set enabled true/false in config:
+        if (state.config.plugins.entries[cap.id]?.enabled === undefined) {
+          // Check if all required permissions are granted (or not-applicable)
+          const allGranted = cap.required.every(permId => {
+            const pStatus = state.permissionStates?.[permId]?.status;
+            return pStatus === "granted" || pStatus === "not-applicable";
+          });
+
+          if (allGranted) {
+            state.config.plugins.entries[cap.id] = {
+              ...(state.config.plugins.entries[cap.id] || {}),
+              enabled: true
+            };
+            configChanged = true;
+          }
+        }
+      }
+
+      if (configChanged) {
+        saveConfig(state.config);
+        if (state.runtime) {
+          scheduleRuntimeRestart("Auto-enabled newly permitted capabilities");
+        }
+      }
     }
+
     json(res, { updated: true, permissions: state.permissionStates });
     return true;
   }
