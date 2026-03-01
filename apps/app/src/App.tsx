@@ -11,6 +11,7 @@ import { BugReportModal } from "./components/BugReportModal";
 import { CharacterView } from "./components/CharacterView";
 import { ChatView } from "./components/ChatView";
 import { CommandPalette } from "./components/CommandPalette";
+import { CompanionView } from "./components/CompanionView";
 import { ConnectorsPageView } from "./components/ConnectorsPageView";
 import { ConversationsSidebar } from "./components/ConversationsSidebar";
 import { CustomActionEditor } from "./components/CustomActionEditor";
@@ -22,6 +23,7 @@ import { InventoryView } from "./components/InventoryView";
 import { KnowledgeView } from "./components/KnowledgeView";
 import { LifoSandboxView } from "./components/LifoSandboxView";
 import { LoadingScreen } from "./components/LoadingScreen";
+import { MemoryDebugPanel } from "./components/MemoryDebugPanel";
 import { Nav } from "./components/Nav";
 import { OnboardingWizard } from "./components/OnboardingWizard";
 import { PairingView } from "./components/PairingView";
@@ -35,7 +37,7 @@ import { BugReportProvider, useBugReportState } from "./hooks/useBugReport";
 import { useContextMenu } from "./hooks/useContextMenu";
 import { useLifoAutoPopout } from "./hooks/useLifoAutoPopout";
 import { isLifoPopoutMode } from "./lifo-popout";
-import { APPS_ENABLED, pathForTab } from "./navigation";
+import { APPS_ENABLED, COMPANION_ENABLED, pathForTab } from "./navigation";
 
 const CHAT_MOBILE_BREAKPOINT_PX = 1024;
 
@@ -56,6 +58,8 @@ function ViewRouter() {
   switch (tab) {
     case "chat":
       return <ChatView />;
+    case "companion":
+      return COMPANION_ENABLED ? <CompanionView /> : <ChatView />;
     case "stream":
       return <StreamView />;
     case "apps":
@@ -297,6 +301,16 @@ export function App() {
 
   const agentStarting = agentStatus?.state === "starting";
 
+  useEffect(() => {
+    const STARTUP_TIMEOUT_MS = 300_000;
+    if ((startupPhase as string) !== "ready" && !startupError) {
+      const timer = setTimeout(() => {
+        retryStartup();
+      }, STARTUP_TIMEOUT_MS);
+      return () => clearTimeout(timer);
+    }
+  }, [startupPhase, startupError, retryStartup]);
+
   // Pop-out mode — render only StreamView, skip startup gates.
   // Platform init is skipped in main.tsx; AppProvider hydrates WS in background.
   if (isPopout) {
@@ -427,6 +441,7 @@ export function App() {
         }}
       />
       <RestartBanner />
+      <MemoryDebugPanel />
       <BugReportModal />
       {actionNotice && (
         <div

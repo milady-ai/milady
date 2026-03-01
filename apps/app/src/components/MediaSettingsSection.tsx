@@ -239,7 +239,7 @@ export function MediaSettingsSection() {
   const isProviderConfigured = useCallback(
     (category: MediaCategory): boolean => {
       const mode = getMode(category);
-      if (mode === "cloud") return true;
+      if (mode === "cloud") return cloudConnected;
 
       const provider = getProvider(category);
       const apiKeyField = getApiKeyField(category, provider);
@@ -251,7 +251,7 @@ export function MediaSettingsSection() {
       );
       return typeof value === "string" && value.length > 0;
     },
-    [getMode, getProvider, mediaConfig],
+    [getMode, getProvider, mediaConfig, cloudConnected],
   );
 
   if (loading) {
