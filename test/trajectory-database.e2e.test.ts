@@ -141,6 +141,7 @@ describe("Trajectory Database E2E", () => {
 
         const stepId = "test-real-db-step-001";
 
+        installDatabaseTrajectoryLogger(runtime);
         console.warn("DEBUG test: is logLlmCall patched?", loggerSvc.logLlmCall.toString().includes("enqueueStepWrite"));
 
         // Call the logger method using the trajectory_logger service.

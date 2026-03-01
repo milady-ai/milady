@@ -666,6 +666,15 @@ export interface AppState {
   pendingRestartReasons: string[];
   restartBannerDismissed: boolean;
 
+  // Backend connection state (for crash handling)
+  backendConnection: {
+    state: "connected" | "disconnected" | "reconnecting" | "failed";
+    reconnectAttempt: number;
+    maxReconnectAttempts: number;
+    showDisconnectedUI: boolean;
+  };
+  backendDisconnectedBannerDismissed: boolean;
+
   // Pairing
   pairingEnabled: boolean;
   pairingExpiresAt: number | null;
