@@ -1,5 +1,5 @@
 /**
- * REST API server for the Milaidy Control UI.
+ * REST API server for the Runtime Control UI.
  *
  * Exposes HTTP endpoints that the UI frontend expects, backed by the
  * ElizaOS AgentRuntime. Default port: 2138. In dev mode, the Vite UI
@@ -124,6 +124,7 @@ interface ServerState {
   runtime: AgentRuntime | null;
   config: MilaidyConfig;
   agentState:
+    | "starting"
     | "not_started"
     | "running"
     | "paused"
@@ -402,11 +403,11 @@ export async function persistConversationRoomTitle(
   const room = await runtime.getRoom(conversation.roomId);
   if (!room) return false;
   if (room.name === conversation.title) return false;
-  const adapter = runtime.adapter as
-    | { updateRoom?: (room: { id: UUID; name: string }) => Promise<void> }
-    | undefined;
-  if (!adapter || typeof adapter.updateRoom !== "function") return false;
-  await adapter.updateRoom({ id: conversation.roomId, name: conversation.title });
+  if (typeof runtime.adapter.updateRoom !== "function") return false;
+  await runtime.adapter.updateRoom({
+    ...room,
+    name: conversation.title,
+  });
   return true;
 }
 
@@ -459,7 +460,7 @@ export function resolveWalletExportRejection(
     return {
       status: 401,
       reason:
-        "Missing export token. Provide X-Milady-Export-Token header or exportToken in request body.",
+        "Missing export token. Provide X-Runtime-Export-Token header or exportToken in request body.",
     };
   }
   if (supplied !== expected) {
@@ -1775,6 +1776,31 @@ interface PolymarketMarketContext {
   noPrice: number | null;
 }
 
+function parsePolymarketOutcomePrices(pricesRaw: unknown): {
+  yesPrice: number | null;
+  noPrice: number | null;
+} {
+  const applyPrices = (arr: unknown[]): { yesPrice: number | null; noPrice: number | null } => {
+    const first = toFiniteNumber(arr[0]);
+    const second = toFiniteNumber(arr[1]);
+    return {
+      yesPrice: first != null ? (first <= 1 ? first * 100 : first) : null,
+      noPrice: second != null ? (second <= 1 ? second * 100 : second) : null,
+    };
+  };
+
+  if (Array.isArray(pricesRaw)) return applyPrices(pricesRaw);
+  if (typeof pricesRaw === "string" && pricesRaw.trim()) {
+    try {
+      const parsed = JSON.parse(pricesRaw) as unknown;
+      if (Array.isArray(parsed)) return applyPrices(parsed);
+    } catch {
+      // ignore malformed price payloads
+    }
+  }
+  return { yesPrice: null, noPrice: null };
+}
+
 const polymarketIntelCache: {
   hot: PolymarketMarketContext[];
   byQuery: Map<string, PolymarketMarketContext[]>;
@@ -1903,25 +1929,9 @@ async function fetchPolymarketMarketContext(
           (typeof row.endDate === "string" && row.endDate) ||
           (typeof row.end_date_iso === "string" && row.end_date_iso) ||
           null;
-        let yesPrice: number | null = null;
-        let noPrice: number | null = null;
-        const pricesRaw = row.outcomePrices;
-        const applyPrices = (arr: unknown[]): void => {
-          const first = toFiniteNumber(arr[0]);
-          const second = toFiniteNumber(arr[1]);
-          if (first != null) yesPrice = first <= 1 ? first * 100 : first;
-          if (second != null) noPrice = second <= 1 ? second * 100 : second;
-        };
-        if (Array.isArray(pricesRaw)) {
-          applyPrices(pricesRaw);
-        } else if (typeof pricesRaw === "string" && pricesRaw.trim()) {
-          try {
-            const parsed = JSON.parse(pricesRaw) as unknown;
-            if (Array.isArray(parsed)) applyPrices(parsed);
-          } catch {
-            // ignore malformed price payloads
-          }
-        }
+        const { yesPrice, noPrice } = parsePolymarketOutcomePrices(
+          row.outcomePrices,
+        );
         return {
           id,
           slug,
@@ -1934,7 +1944,7 @@ async function fetchPolymarketMarketContext(
           noPrice,
         } satisfies PolymarketMarketContext;
       })
-      .filter((r): r is PolymarketMarketContext => r != null);
+      .filter((r): r is NonNullable<typeof r> => r != null);
 
     const filtered = filterPolymarketMarkets(rows, topicHint);
     if (filtered.length === 0) continue;
@@ -2064,25 +2074,9 @@ async function fetchHotPolymarketMarkets(
         (typeof row.endDate === "string" && row.endDate) ||
         (typeof row.end_date_iso === "string" && row.end_date_iso) ||
         null;
-      let yesPrice: number | null = null;
-      let noPrice: number | null = null;
-      const pricesRaw = row.outcomePrices;
-      const applyPrices = (arr: unknown[]): void => {
-        const first = toFiniteNumber(arr[0]);
-        const second = toFiniteNumber(arr[1]);
-        if (first != null) yesPrice = first <= 1 ? first * 100 : first;
-        if (second != null) noPrice = second <= 1 ? second * 100 : second;
-      };
-      if (Array.isArray(pricesRaw)) {
-        applyPrices(pricesRaw);
-      } else if (typeof pricesRaw === "string" && pricesRaw.trim()) {
-        try {
-          const parsed = JSON.parse(pricesRaw) as unknown;
-          if (Array.isArray(parsed)) applyPrices(parsed);
-        } catch {
-          // ignore malformed price payloads
-        }
-      }
+      const { yesPrice, noPrice } = parsePolymarketOutcomePrices(
+        row.outcomePrices,
+      );
       return {
         id,
         slug,
@@ -2095,7 +2089,7 @@ async function fetchHotPolymarketMarkets(
         noPrice,
       } satisfies PolymarketMarketContext;
     })
-    .filter((r): r is PolymarketMarketContext => r != null);
+    .filter((r): r is NonNullable<typeof r> => r != null);
   const filtered = filterPolymarketMarkets(rows, topicHint);
   filtered.sort((a, b) => (b.volumeUsd ?? 0) - (a.volumeUsd ?? 0));
   const primary = filtered.slice(0, 5);
@@ -2222,6 +2216,15 @@ function getProviderOptions(): Array<{
 }> {
   return [
     {
+      id: "elizacloud",
+      name: "Eliza Cloud",
+      envKey: "ELIZAOS_CLOUD_API_KEY",
+      pluginName: "@elizaos/plugin-elizacloud",
+      keyPrefix: null,
+      description:
+        "Managed cloud models and services. Includes $5 free credits to start.",
+    },
+    {
       id: "anthropic",
       name: "Anthropic",
       envKey: "ANTHROPIC_API_KEY",
@@ -2299,7 +2302,7 @@ function getProviderOptions(): Array<{
       envKey: null,
       pluginName: "@elizaos/plugin-ollama",
       keyPrefix: null,
-      description: "Local models, no API key needed.",
+      description: "Local models, no API key needed. Requires Ollama running on this device.",
     },
   ];
 }
@@ -2394,7 +2397,7 @@ function applyCors(
     );
     res.setHeader(
       "Access-Control-Allow-Headers",
-      "Content-Type, Authorization, X-Milaidy-Token, X-Api-Key",
+      "Content-Type, Authorization, X-Runtime-Token, X-Api-Key",
     );
   }
 
@@ -3106,25 +3109,12 @@ async function handleRequest(
 
   // ── GET /api/onboarding/options ─────────────────────────────────────────
   if (method === "GET" && pathname === "/api/onboarding/options") {
-    // Provide a runtime-free hint for Ollama so UI can explain that the local
-    // server must be installed/running even though no API key is needed.
-    const ollamaReachable = await isOllamaReachable(
-      process.env.OLLAMA_API_ENDPOINT || "http://localhost:11434",
-    );
     json(res, {
       names: [...ONBOARDING_PRESET_NAMES],
       styles: STYLE_PRESETS,
-      providers: getProviderOptions().map((p) => {
-        if (p.id !== "ollama") return p;
-        return {
-          ...p,
-          description: ollamaReachable
-            ? "Local models, no API key needed. (Ollama detected)"
-            : "Local models, no API key needed. Requires Ollama running on this device.",
-        };
-      }),
+      providers: getProviderOptions(),
       sharedStyleRules:
-        "Be concise, grounded, and action-oriented. Milaidy is an agentic workspace with subtle milady degen signal.",
+        "Be concise, grounded, and action-oriented. Runtime is an agentic workspace with subtle milady degen signal.",
     });
     return;
   }
@@ -3332,7 +3322,7 @@ async function handleRequest(
       if (newRuntime) {
         state.runtime = newRuntime;
         state.agentState = "running";
-        state.agentName = newRuntime.character.name ?? "Milaidy";
+        state.agentName = newRuntime.character.name ?? "Runtime";
         state.startedAt = Date.now();
         state.model = detectRuntimeModel(newRuntime) ?? "unknown";
         json(res, {
@@ -3382,7 +3372,7 @@ async function handleRequest(
 
       // Also release any claimed @handles (and 48h locks) even if the state
       // directory cannot be fully removed for some reason. This keeps "Reset
-      // Milaidy" aligned with the UI expectation that a full reset makes the
+      // Runtime" aligned with the UI expectation that a full reset makes the
       // previous username available again on this server.
       try {
         const handleRegistry = handleRegistryPath();
@@ -3407,7 +3397,7 @@ async function handleRequest(
 
       // 3. Reset server state
       state.agentState = "stopped";
-      state.agentName = "Milaidy";
+      state.agentName = "Runtime";
       state.model = undefined;
       state.startedAt = undefined;
       state.config = {} as MilaidyConfig;
@@ -3639,7 +3629,7 @@ async function handleRequest(
           if (!existing) {
             plugin.validationErrors.push({
               field: "OLLAMA_API_ENDPOINT",
-              message: `Ollama is not reachable at ${endpoint}. Install and run Ollama on this device, then restart Milaidy.`,
+              message: `Ollama is not reachable at ${endpoint}. Install and run Ollama on this device, then restart Runtime.`,
             });
           }
         }
@@ -4644,6 +4634,8 @@ async function handleRequest(
     );
     const configStatus: WalletConfigStatus = {
       alchemyKeySet: Boolean(process.env.ALCHEMY_API_KEY),
+      infuraKeySet: Boolean(process.env.INFURA_API_KEY),
+      ankrKeySet: Boolean(process.env.ANKR_API_KEY),
       heliusKeySet: Boolean(process.env.HELIUS_API_KEY),
       birdeyeKeySet: Boolean(process.env.BIRDEYE_API_KEY),
       evmPublicSource: Boolean(addrs.evmAddress),
@@ -5474,7 +5466,7 @@ async function handleRequest(
         .map((t, i) => {
           const u = t.user.replace(/\s+/g, " ").slice(0, 200);
           const a = t.assistant.replace(/\s+/g, " ").slice(0, 240);
-          return `${i + 1}. User: ${u}\n   Milaidy: ${a}`;
+          return `${i + 1}. User: ${u}\n   Runtime: ${a}`;
         })
         .join("\n");
       return `Recent conversation turns:\n${packed}\n\n`;
@@ -5557,7 +5549,7 @@ async function handleRequest(
         )
         .map((p) => normalizeComponentName(p.name));
       replyText(
-        "Perfect. I’ll treat Markets & Apps as Milaidy integrations (not geography/industry markets).\n" +
+        "Perfect. I’ll treat Markets & Apps as Runtime integrations (not geography/industry markets).\n" +
           `Current integrations ready: ${enabledIntegrations.length ? enabledIntegrations.join(", ") : "none"}.\n` +
           "Next move: pick 1 distribution app and 1 execution app, then I’ll build your exact 5-step setup + run plan.",
       );
@@ -5567,7 +5559,7 @@ async function handleRequest(
     if (preferConversationFirst) {
       try {
         const dynamicPrompt =
-          `You are ${state.runtime!.character.name ?? "Milaidy"}, an execution-capable workspace operator.\n` +
+          `You are ${state.runtime!.character.name ?? "Runtime"}, an execution-capable workspace operator.\n` +
           "Priority behavior:\n" +
           "1) Understand the user's exact meaning from their wording; do not default to canned blocks.\n" +
           "2) If context is incomplete, ask one focused follow-up question.\n" +
@@ -5576,7 +5568,7 @@ async function handleRequest(
           "5) Never claim an unavailable integration/capability is ready.\n" +
           "6) Prefer one clear recommendation over long option menus.\n" +
           "7) Avoid meta narration (no 'quick summary', no 'continuing').\n" +
-          "8) In Milaidy context, 'Markets & Apps' means integrations/connectors configuration. Do not reinterpret this as geographic or industry market strategy unless the user explicitly asks go-to-market/geography/vertical strategy.\n\n" +
+          "8) In Runtime context, 'Markets & Apps' means integrations/connectors configuration. Do not reinterpret this as geographic or industry market strategy unless the user explicitly asks go-to-market/geography/vertical strategy.\n\n" +
           runtimeLimitationsContext +
           fastContext +
           `User message:\n${userText}`;
@@ -5778,7 +5770,7 @@ async function handleRequest(
     if (shouldTryEarlyDynamicReasoning) {
       try {
         const dynamicPrompt =
-          `You are ${state.runtime!.character.name ?? "Milaidy"}, an execution-capable workspace operator.\n` +
+          `You are ${state.runtime!.character.name ?? "Runtime"}, an execution-capable workspace operator.\n` +
           "Respond like a real conversation partner, not a template.\n" +
           "Rules:\n" +
           "1) Briefly acknowledge the user goal.\n" +
@@ -5786,7 +5778,7 @@ async function handleRequest(
           "3) If critical input is missing, ask only one focused question.\n" +
           "4) Do not invent unavailable integrations; use runtime context.\n" +
           "5) For money actions, require confirmations/limits before execution.\n" +
-          "6) In Milaidy context, 'Markets & Apps' means integrations/connectors configuration, not geography/industry strategy unless explicitly requested.\n\n" +
+          "6) In Runtime context, 'Markets & Apps' means integrations/connectors configuration, not geography/industry strategy unless explicitly requested.\n\n" +
           runtimeLimitationsContext +
           fastContext +
           `User message:\n${userText}`;
@@ -5942,7 +5934,7 @@ async function handleRequest(
         )
       ) {
         return (
-          "If you’re referring to how the Milaidy workspace works: I interpret your goal, map it to enabled providers/integrations, then execute with permissions and safety checks. " +
+          "If you’re referring to how the Runtime workspace works: I interpret your goal, map it to enabled providers/integrations, then execute with permissions and safety checks. " +
           "If a capability is blocked, I’ll tell you exactly what to enable next. Share your goal and I’ll run the next step."
         );
       }
@@ -5995,7 +5987,7 @@ async function handleRequest(
         replyText(
           `${yesLead}\n` +
             `Current status: not ready (${missing.length > 0 ? missing.join(", ") : `${componentLabel} disabled or not configured`}).\n` +
-            `Next: ${settingsTab} -> ${globalTarget.name} -> Manage, save, restart Milaidy.`,
+            `Next: ${settingsTab} -> ${globalTarget.name} -> Manage, save, restart Runtime.`,
         );
       }
       return;
@@ -6017,7 +6009,7 @@ async function handleRequest(
         .filter((p) => !p.enabled)
         .map((p) => p.name);
       replyText(
-        `In this Milaidy workspace, I only use in-app Markets & Apps integrations.\n` +
+        `In this Runtime workspace, I only use in-app Markets & Apps integrations.\n` +
           `Enabled for actions right now: ${enabled.length ? enabled.join(", ") : "none"}.\n` +
           `Available to enable: ${available.length ? available.slice(0, 5).join(", ") : "no additional trade/bet integrations detected"}.\n` +
           `If you want trading/betting here, enable Polymarket in Markets & Apps, then turn execution on in Security.`,
@@ -6055,25 +6047,25 @@ async function handleRequest(
           if (telegram.enabled && telegram.configured && missing.length === 0) {
             replyText(
               "Yes. Telegram is setup-ready here, so once you add your bot details and save, it should work.\n" +
-                "After saving, restart Milaidy and send one test post command.",
+                "After saving, restart Runtime and send one test post command.",
             );
           } else {
             replyText(
               "Yes, it can work once setup is complete.\n" +
                 `Current Telegram status: ${missing.length > 0 ? `missing ${missing.join(", ")}` : "not fully enabled/configured"}.\n` +
-                "Next: Markets & Apps -> Telegram -> Manage, fill required fields, save, restart Milaidy, then run a test message.",
+                "Next: Markets & Apps -> Telegram -> Manage, fill required fields, save, restart Runtime, then run a test message.",
             );
           }
           return;
         }
         replyText(
           "Yes, once the integration is fully configured in Markets & Apps, it should work.\n" +
-            "After saving credentials, restart Milaidy and run one smoke test action to confirm.",
+            "After saving credentials, restart Runtime and run one smoke test action to confirm.",
         );
         return;
       }
       replyText(
-        `Markets & Apps is where you manage external integrations Milaidy can use.\n` +
+        `Markets & Apps is where you manage external integrations Runtime can use.\n` +
           `Enabled now: ${enabled.length ? enabled.join(", ") : "none"}.\n` +
           `Available to connect: ${notEnabled.length ? notEnabled.slice(0, 4).join(", ") : "already configured"}.\n` +
           `Tell me one app (e.g. Discord, Telegram, Polymarket) and I’ll walk setup or execution.`,
@@ -6135,7 +6127,7 @@ async function handleRequest(
           );
         } else {
           replyText(
-            `Next for ${globalTarget.name}: ${settingsTab} -> ${globalTarget.name} -> Manage, complete required fields, save, restart Milaidy.\n` +
+            `Next for ${globalTarget.name}: ${settingsTab} -> ${globalTarget.name} -> Manage, complete required fields, save, restart Runtime.\n` +
               `Then send your direct command and I’ll execute through it.`,
           );
         }
@@ -6403,14 +6395,14 @@ async function handleRequest(
         "Perfect — here’s the quick setup guide:\n" +
           "1. Open Markets & Apps and enable your calendar connector (Google Calendar or Outlook).\n" +
           "2. Open Markets & Apps and enable your email connector (Gmail/SMTP or Outlook Mail).\n" +
-          "3. Add required credentials in Manage for each connector, save, then restart Milaidy.\n" +
+          "3. Add required credentials in Manage for each connector, save, then restart Runtime.\n" +
           "4. Come back with reminder time + timezone and your contact email, and I’ll draft the message and queue both actions.",
       );
       return;
     }
     if (capabilityIntent) {
       replyText(
-        `Milaidy can reason, plan, and execute through enabled platform components. ` +
+        `Runtime can reason, plan, and execute through enabled platform components. ` +
           `AI provider: ${aiProvidersReady.length ? aiProvidersReady.join(", ") : "not connected"}. ` +
           `Markets & Apps integrations: ${integrationsReady.length ? integrationsReady.join(", ") : "none enabled"}. ` +
           `For high-risk actions (trades/transfers/bets), execution requires permissions, confirmations, and limits.`,
@@ -6447,7 +6439,7 @@ async function handleRequest(
         .map((p) => p.name)
         .slice(0, 6);
       replyText(
-        `If you’re referring to how the Milaidy workspace works, here’s the flow:\n` +
+        `If you’re referring to how the Runtime workspace works, here’s the flow:\n` +
           `1) I understand your goal.\n` +
           `2) I plan the next action.\n` +
           `3) I execute only through enabled providers and integrations.\n` +
@@ -6475,7 +6467,7 @@ async function handleRequest(
         .map((p) => normalizeComponentName(p.name))
         .slice(0, 4);
       replyText(
-        `Milaidy workflow is simple: you give a goal, I reason on it, then execute through enabled components.\n` +
+        `Runtime workflow is simple: you give a goal, I reason on it, then execute through enabled components.\n` +
           `AI provider: ${providers.length ? providers.join(", ") : "not connected"}.\n` +
           `Markets & Apps integrations: ${integrations.length ? integrations.join(", ") : "none enabled"}.\n` +
           `For risky actions, confirmations + limits are enforced in Security.`,
@@ -6497,10 +6489,10 @@ async function handleRequest(
         .map((p) => normalizeComponentName(p.name))
         .slice(0, 4);
       const openerVariants = [
-        `Hey${openerName}, Milaidy workspace is live.\n` +
+        `Hey${openerName}, Runtime workspace is live.\n` +
           `I can plan and execute through AI Settings + Markets & Apps${readyComponents.length ? ` (${readyComponents.join(", ")})` : ""}.\n` +
           `Tell me your goal and I’ll take the next step.`,
-        `Hey${openerName}, Milaidy is live.\n` +
+        `Hey${openerName}, Runtime is live.\n` +
           `I can run tasks through AI Settings + Markets & Apps${readyComponents.length ? ` (${readyComponents.join(", ")})` : ""}.\n` +
           `Drop your first objective and I’ll route it.`,
         `Hey${openerName}, workspace is up.\n` +
@@ -6519,7 +6511,7 @@ async function handleRequest(
         .map((p) => normalizeComponentName(p.name))
         .slice(0, 6);
       replyText(
-        `Milaidy is an agent workspace: you chat goals, it plans, then executes through enabled providers/integrations.\n` +
+        `Runtime is an agent workspace: you chat goals, it plans, then executes through enabled providers/integrations.\n` +
           `Right now it can use: ${readyComponents.length ? readyComponents.join(", ") : "no ready components yet"}.\n` +
           `For money actions, confirmations and limits stay in control.\n` +
           `Tell me one task and I’ll walk it end-to-end.`,
@@ -6571,7 +6563,7 @@ async function handleRequest(
 
     if (securityControlsIntent) {
       replyText(
-        "In Milaidy, go to Security (right-side tab in the main nav).\n" +
+        "In Runtime, go to Security (right-side tab in the main nav).\n" +
           "Use Action confirmations for:\n" +
           "- Confirm before execution actions\n" +
           "- Confirm before spend/bet actions\n" +
@@ -6695,7 +6687,7 @@ async function handleRequest(
         }
         if (missing.length > 0) lines.push(`Blockers: ${missing.join(", ")}.`);
         lines.push(
-          "Do this: Markets & Apps -> Polymarket -> Manage, save, restart Milaidy.",
+          "Do this: Markets & Apps -> Polymarket -> Manage, save, restart Runtime.",
         );
         lines.push(
           walletConnected
@@ -6769,7 +6761,7 @@ async function handleRequest(
         const positiveConditional = chooseVariant(lower, [
           `Yes — once ${target.name} is configured and enabled, I can execute actions there with confirmation.`,
           `Yes — after setup is complete, I can run ${target.name} actions from chat with the required safety checks.`,
-          `Yes — once enabled and configured, ${target.name} actions are available through Milaidy.`,
+          `Yes — once enabled and configured, ${target.name} actions are available through Runtime.`,
         ] as const);
         const readyLead = chooseVariant(lower, [
           `Yes — ${target.name} can run with confirmation.`,
@@ -6792,7 +6784,7 @@ async function handleRequest(
           lines.push(`Missing: ${[...new Set(missingHuman)].join(", ")}.`);
         }
         lines.push(
-          `Next: ${settingsTab} -> ${target.name} -> Manage, save, restart Milaidy.`,
+          `Next: ${settingsTab} -> ${target.name} -> Manage, save, restart Runtime.`,
         );
         if (target.id === "polymarket") {
           lines.push(
@@ -6812,7 +6804,7 @@ async function handleRequest(
         lines.push(`${target.name} works like this:`);
         lines.push("1. You state the goal in chat.");
         lines.push(
-          "2. Milaidy maps it to this integration and validates setup/permissions.",
+          "2. Runtime maps it to this integration and validates setup/permissions.",
         );
         if (target.id === "polymarket") {
           lines.push(
@@ -6823,7 +6815,7 @@ async function handleRequest(
           );
         } else {
           lines.push(
-            "3. If setup is valid, Milaidy prepares and runs the action.",
+            "3. If setup is valid, Runtime prepares and runs the action.",
           );
           lines.push(
             "4. Result comes back in chat; errors include blocker + next step.",
@@ -6841,7 +6833,7 @@ async function handleRequest(
             }.`,
           );
           lines.push(
-            `To enable: ${settingsTab} -> ${target.name} -> Manage, save, restart Milaidy.`,
+            `To enable: ${settingsTab} -> ${target.name} -> Manage, save, restart Runtime.`,
           );
         } else {
           lines.push("");
@@ -6853,17 +6845,17 @@ async function handleRequest(
       if (asksHowToUseTarget) {
         const usageByCategory: Record<string, string> = {
           "ai-provider":
-            "Use this provider for Milaidy reasoning/generation after enabling and adding credentials.",
+            "Use this provider for Runtime reasoning/generation after enabling and adding credentials.",
           connector:
-            "Use this integration by asking Milaidy to perform actions through it (send/read/sync tasks).",
+            "Use this integration by asking Runtime to perform actions through it (send/read/sync tasks).",
           database:
-            "Use this as memory/state backend; Milaidy will persist and retrieve context through it.",
+            "Use this as memory/state backend; Runtime will persist and retrieve context through it.",
           feature:
-            "Use this runtime feature by asking Milaidy for the capability it unlocks.",
+            "Use this runtime feature by asking Runtime for the capability it unlocks.",
         };
         const usageLine =
           usageByCategory[target.category] ??
-          "Enable it, configure required fields, then ask Milaidy for the exact task.";
+          "Enable it, configure required fields, then ask Runtime for the exact task.";
         const lines: string[] = [];
         lines.push(`${target.name} operation model:`);
         lines.push(usageLine);
@@ -6871,7 +6863,7 @@ async function handleRequest(
           `Status: enabled=${target.enabled ? "yes" : "no"}, configured=${target.configured ? "yes" : "no"}${missing.length ? `, blockers=${missing.join(", ")}` : ""}.`,
         );
         lines.push(
-          `Next step: ${settingsTab} -> ${target.name} -> Manage, save, restart Milaidy.`,
+          `Next step: ${settingsTab} -> ${target.name} -> Manage, save, restart Runtime.`,
         );
         lines.push(
           "Then give me one concrete action and I’ll execute or explain blockers immediately.",
@@ -6895,7 +6887,7 @@ async function handleRequest(
             "3. Bot tab -> add a bot (if missing), then copy Bot Token -> use as DISCORD_API_TOKEN.",
           );
           lines.push(
-            "4. Paste both in Markets & Apps -> Discord -> Manage, save, restart Milaidy.",
+            "4. Paste both in Markets & Apps -> Discord -> Manage, save, restart Runtime.",
           );
           return lines.join("\n");
         }
@@ -6907,7 +6899,7 @@ async function handleRequest(
             "3. Copy the token BotFather returns -> TELEGRAM_BOT_TOKEN.",
           );
           lines.push(
-            "4. Paste it in Markets & Apps -> Telegram -> Manage, save, restart Milaidy.",
+            "4. Paste it in Markets & Apps -> Telegram -> Manage, save, restart Runtime.",
           );
           return lines.join("\n");
         }
@@ -6916,7 +6908,7 @@ async function handleRequest(
           lines.push("1. Open https://platform.openai.com/api-keys.");
           lines.push("2. Create a new secret key and copy it once.");
           lines.push(
-            "3. Paste in AI Settings -> OpenAI -> Manage (API key field), save, restart Milaidy.",
+            "3. Paste in AI Settings -> OpenAI -> Manage (API key field), save, restart Runtime.",
           );
           return lines.join("\n");
         }
@@ -6939,7 +6931,7 @@ async function handleRequest(
           lines.push(`You need: ${requiredKeys.join(", ")}.`);
         }
         lines.push(
-          `Then open ${settingsTab} -> ${target.name} -> Manage, save, restart Milaidy.`,
+          `Then open ${settingsTab} -> ${target.name} -> Manage, save, restart Runtime.`,
         );
         return lines.join("\n");
       }
@@ -6985,7 +6977,7 @@ async function handleRequest(
         );
       }
       lines.push("3. Save changes.");
-      lines.push("4. Restart Milaidy so plugin/runtime changes load.");
+      lines.push("4. Restart Runtime so plugin/runtime changes load.");
       if (target.id === "polymarket") {
         if (!walletConnected) {
           lines.push("5. Connect your wallet in Portfolio.");
@@ -7208,7 +7200,7 @@ async function handleRequest(
       try {
         const small = await state.runtime!.useModel(ModelType.TEXT_SMALL, {
           prompt:
-            `You are ${state.runtime!.character.name ?? "Milaidy"}. Reply helpfully and concisely to the user.\n\n` +
+            `You are ${state.runtime!.character.name ?? "Runtime"}. Reply helpfully and concisely to the user.\n\n` +
             runtimeLimitationsContext +
             fastContext +
             `User message:\n${userText}`,
@@ -7229,7 +7221,7 @@ async function handleRequest(
         try {
           const large = await state.runtime!.useModel(ModelType.TEXT_LARGE, {
             prompt:
-              `You are ${state.runtime!.character.name ?? "Milaidy"}. Reply helpfully and concisely to the user.\n\n` +
+              `You are ${state.runtime!.character.name ?? "Runtime"}. Reply helpfully and concisely to the user.\n\n` +
               runtimeLimitationsContext +
               fastContext +
               `User message:\n${userText}`,
@@ -7252,7 +7244,7 @@ async function handleRequest(
 
     try {
       const runtime = state.runtime;
-      const agentName = runtime.character.name ?? "Milaidy";
+      const agentName = runtime.character.name ?? "Runtime";
 
       const activeProvider = state.plugins.find(
         (p) => p.category === "ai-provider" && p.enabled,
@@ -7268,7 +7260,7 @@ async function handleRequest(
         if (looksPlaceholder(openaiKey)) {
           codedError(
             res,
-            "Provider authentication failed. Verify your OpenAI API key, then restart Milaidy.",
+            "Provider authentication failed. Verify your OpenAI API key, then restart Runtime.",
             "PROVIDER_AUTH",
             401,
           );
@@ -7291,7 +7283,7 @@ async function handleRequest(
         if (!reachable) {
           codedError(
             res,
-            "Provider not running: start Ollama on this device, then restart Milaidy.",
+            "Provider not running: start Ollama on this device, then restart Runtime.",
             "PROVIDER_NOT_RUNNING",
             503,
           );
@@ -7305,7 +7297,7 @@ async function handleRequest(
           const structured = await Promise.race([
             runtime.useModel(ModelType.TEXT_SMALL, {
               prompt:
-                `You are ${runtime.character.name ?? "Milaidy"}, an execution-focused workspace operator.\n` +
+                `You are ${runtime.character.name ?? "Runtime"}, an execution-focused workspace operator.\n` +
                 "Universal response policy (apply to every user input):\n" +
                 "1) Infer user intent and desired outcome from the latest message + recent context.\n" +
                 "2) Check capability/permission limits from runtime context before proposing execution.\n" +
@@ -7341,7 +7333,7 @@ async function handleRequest(
           const fast = await Promise.race([
             state.runtime!.useModel(ModelType.TEXT_SMALL, {
               prompt:
-                `You are ${state.runtime!.character.name ?? "Milaidy"}, an agentic workspace assistant built for autonomous execution across chat, wallets, and connected apps.\n` +
+                `You are ${state.runtime!.character.name ?? "Runtime"}, an agentic workspace assistant built for autonomous execution across chat, wallets, and connected apps.\n` +
                 "Respond clearly and directly. Do not mention internal tooling.\n\n" +
                 universalResponseStructure +
                 runtimeLimitationsContext +
@@ -7502,16 +7494,16 @@ async function handleRequest(
           combined.includes("401")
         ) {
           throw new Error(
-            `Provider authentication failed. ${providerHint} Verify your API key and selected model, then restart Milaidy.`,
+            `Provider authentication failed. ${providerHint} Verify your API key and selected model, then restart Runtime.`,
           );
         }
         if (combined.includes("no handler found for delegate type")) {
           throw new Error(
-            `Provider plugin is not available for the selected model. ${providerHint} Enable a model provider in AI Settings and restart Milaidy.`,
+            `Provider plugin is not available for the selected model. ${providerHint} Enable a model provider in AI Settings and restart Runtime.`,
           );
         }
         throw new Error(
-          `No assistant response was produced. ${providerHint}${runtimeReason}${directFallbackReason}${fallbackStatusReason} Verify provider key/model configuration and restart Milaidy.`,
+          `No assistant response was produced. ${providerHint}${runtimeReason}${directFallbackReason}${fallbackStatusReason} Verify provider key/model configuration and restart Runtime.`,
         );
       }
 
@@ -7571,7 +7563,7 @@ async function handleRequest(
           ) {
             codedError(
               res,
-              "Provider authentication failed. Verify your API key, then restart Milaidy.",
+              "Provider authentication failed. Verify your API key, then restart Runtime.",
               "PROVIDER_AUTH",
               401,
             );
@@ -7583,7 +7575,7 @@ async function handleRequest(
             const recovery = await Promise.race([
               state.runtime!.useModel(ModelType.TEXT_SMALL, {
                 prompt:
-                  `You are ${state.runtime!.character.name ?? "Milaidy"}.\n` +
+                  `You are ${state.runtime!.character.name ?? "Runtime"}.\n` +
                   "The previous generation timed out. Continue the user's request with a concise but complete answer.\n" +
                   "Rules:\n" +
                   "- Do not ask broad reset questions.\n" +
@@ -7649,21 +7641,21 @@ async function handleRequest(
         } else if (isAuth) {
           codedError(
             res,
-            "Provider authentication failed. Verify your API key, then restart Milaidy.",
+            "Provider authentication failed. Verify your API key, then restart Runtime.",
             "PROVIDER_AUTH",
             401,
           );
         } else if (isOllamaDown) {
           codedError(
             res,
-            "Provider not running: start Ollama on this device, then restart Milaidy.",
+            "Provider not running: start Ollama on this device, then restart Runtime.",
             "PROVIDER_NOT_RUNNING",
             503,
           );
         } else if (isProviderNotLoaded) {
           codedError(
             res,
-            "Provider not loaded yet. Restart Milaidy to apply your AI Settings.",
+            "Provider not loaded yet. Restart Runtime to apply your AI Settings.",
             "PROVIDER_RESTART_REQUIRED",
             503,
           );
@@ -7673,7 +7665,7 @@ async function handleRequest(
         ) {
           codedError(
             res,
-            "Provider error. Restart Milaidy to apply your AI Settings.",
+            "Provider error. Restart Runtime to apply your AI Settings.",
             "PROVIDER_RESTART_REQUIRED",
             503,
           );
@@ -7698,6 +7690,7 @@ async function handleRequest(
 export async function startApiServer(opts?: {
   port?: number;
   runtime?: AgentRuntime;
+  initialAgentState?: ServerState["agentState"];
   /**
    * Called when the UI requests a restart via `POST /api/agent/restart`.
    * Should stop the current runtime, create a new one, and return it.
@@ -7735,15 +7728,15 @@ export async function startApiServer(opts?: {
 
   const hasRuntime = opts?.runtime != null;
   const agentName = hasRuntime
-    ? (opts.runtime!.character.name ?? "Milaidy")
+    ? (opts.runtime!.character.name ?? "Runtime")
     : (config.agents?.list?.[0]?.name ??
       config.ui?.assistant?.name ??
-      "Milaidy");
+      "Runtime");
 
   const state: ServerState = {
     runtime: opts?.runtime ?? null,
     config,
-    agentState: hasRuntime ? "running" : "not_started",
+    agentState: opts?.initialAgentState ?? (hasRuntime ? "running" : "not_started"),
     agentName,
     model: hasRuntime
       ? (detectRuntimeModel(opts?.runtime ?? null) ?? "unknown")
@@ -7869,7 +7862,7 @@ export async function startApiServer(opts?: {
   const updateRuntime = (rt: AgentRuntime): void => {
     state.runtime = rt;
     state.agentState = "running";
-    state.agentName = rt.character.name ?? "Milaidy";
+    state.agentName = rt.character.name ?? "Runtime";
     state.startedAt = Date.now();
     addLog("info", `Runtime restarted — agent: ${state.agentName}`, "system");
   };
