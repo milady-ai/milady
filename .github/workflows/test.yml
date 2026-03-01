@@ -138,7 +138,6 @@ jobs:
           python-version: "3.12"
 
       - name: Install setuptools for distutils (Python 3.12+)
-        if: runner.os == 'macOS'
         run: pip install setuptools
 
       - name: Setup Bun
