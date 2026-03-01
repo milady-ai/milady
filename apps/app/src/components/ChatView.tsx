@@ -35,6 +35,7 @@ function isMobileViewport(): boolean {
 
 const CHAT_INPUT_MIN_HEIGHT_PX = 38;
 const CHAT_INPUT_MAX_HEIGHT_PX = 200;
+const MAX_CHAT_IMAGES = 4;
 
 export function ChatView() {
   const {
@@ -319,10 +320,9 @@ export function ChatView() {
 
       void Promise.all(readers).then((attachments) => {
         setChatPendingImages((prev) => {
-          const combined = [...prev, ...attachments];
-          // Mirror the server-side MAX_CHAT_IMAGES=4 limit so the user gets
-          // immediate feedback rather than a 400 after upload.
-          return combined.slice(0, 4);
+          const remainingSlots = Math.max(0, MAX_CHAT_IMAGES - prev.length);
+          if (remainingSlots === 0) return prev;
+          return [...prev, ...attachments.slice(0, remainingSlots)];
         });
       });
     },
