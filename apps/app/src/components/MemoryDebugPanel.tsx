@@ -15,10 +15,7 @@
  */
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import {
-  type MemorySample,
-  useMemoryMonitor,
-} from "../hooks/useMemoryMonitor";
+import { type MemorySample, useMemoryMonitor } from "../hooks/useMemoryMonitor";
 
 interface MemoryDebugPanelProps {
   /** Force enable in production (default: false, only shows in dev) */
@@ -33,7 +30,13 @@ function formatMB(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function MiniChart({ samples, maxSamples }: { samples: MemorySample[]; maxSamples: number }) {
+function MiniChart({
+  samples,
+  maxSamples,
+}: {
+  samples: MemorySample[];
+  maxSamples: number;
+}) {
   if (samples.length < 2) return null;
 
   const width = 120;
@@ -93,7 +96,12 @@ export function MemoryDebugPanel({
 
   const [minimized, setMinimized] = useState(initialMinimized);
   const [position, setPosition] = useState(initialPosition);
-  const dragOrigin = useRef<{ x: number; y: number; startX: number; startY: number } | null>(null);
+  const dragOrigin = useRef<{
+    x: number;
+    y: number;
+    startX: number;
+    startY: number;
+  } | null>(null);
 
   const { supported, metrics, trend, isLeaking, samples, clearHistory } =
     useMemoryMonitor({
@@ -102,14 +110,11 @@ export function MemoryDebugPanel({
       maxSamples: 40,
       leakThresholdMbPerMin: 1.0,
       onLeakDetected: (trendInfo, metricsInfo) => {
-        console.warn(
-          "[MemoryDebugPanel] Potential memory leak detected!",
-          {
-            growthRate: `${trendInfo.mbPerMinute.toFixed(2)} MB/min`,
-            currentHeap: formatMB(metricsInfo.usedHeapSize),
-            samples: trendInfo.sampleCount,
-          },
-        );
+        console.warn("[MemoryDebugPanel] Potential memory leak detected!", {
+          growthRate: `${trendInfo.mbPerMinute.toFixed(2)} MB/min`,
+          currentHeap: formatMB(metricsInfo.usedHeapSize),
+          samples: trendInfo.sampleCount,
+        });
       },
     });
 
@@ -168,6 +173,8 @@ export function MemoryDebugPanel({
 
   return (
     <div
+      role="dialog"
+      aria-label="Memory Debug Panel"
       className="fixed z-[9999] bg-bg border border-border rounded-lg shadow-lg text-xs font-mono select-none"
       style={{
         left: position.x,
@@ -181,9 +188,7 @@ export function MemoryDebugPanel({
         <div className="flex items-center gap-1.5">
           <span
             className={`w-2 h-2 rounded-full ${
-              isLeaking
-                ? "bg-danger animate-pulse"
-                : "bg-success"
+              isLeaking ? "bg-danger animate-pulse" : "bg-success"
             }`}
           />
           <span className="text-txt-muted">Memory</span>
@@ -196,7 +201,14 @@ export function MemoryDebugPanel({
               onClick={clearHistory}
               title="Clear history"
             >
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg
+                width="10"
+                height="10"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
                 <title>Clear</title>
                 <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
               </svg>
@@ -208,7 +220,14 @@ export function MemoryDebugPanel({
             onClick={() => setMinimized(!minimized)}
             title={minimized ? "Expand" : "Minimize"}
           >
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="10"
+              height="10"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <title>{minimized ? "Expand" : "Minimize"}</title>
               {minimized ? (
                 <polyline points="15 3 21 3 21 9" />
