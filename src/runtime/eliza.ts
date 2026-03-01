@@ -92,6 +92,7 @@ import {
   saveMiladyConfig,
 } from "../config/config";
 import { collectConfigEnvVars } from "../config/env-vars";
+import { resolveUserTier } from "../config/feature-manifest";
 import { resolveStateDir, resolveUserPath } from "../config/paths";
 import {
   type ApplyPluginAutoEnableParams,
@@ -115,6 +116,15 @@ import { diagnoseNoAIProvider } from "../services/version-compat";
 import { CORE_PLUGINS, OPTIONAL_CORE_PLUGINS } from "./core-plugins";
 import { createMiladyPlugin } from "./milady-plugin";
 import { installDatabaseTrajectoryLogger } from "./trajectory-persistence";
+
+/**
+ * Active developer mode, set from the `MILADY_DEV_MODE` environment variable.
+ *
+ * - `"all"`     → All features unlocked, cloud login skippable, tier = enterprise
+ * - `"paygate"` → Simulates free-tier user — premium features locked, pay gates active
+ * - `false`     → Normal user behavior (env var unset or empty)
+ */
+export let activeDevMode: "all" | "paygate" | false = false;
 
 /**
  * Map of @elizaos plugin names to their statically imported modules.
@@ -1202,6 +1212,8 @@ async function resolvePlugins(
   applyPluginAutoEnable({
     config,
     env: process.env,
+    userTier: resolveUserTier(activeDevMode),
+    devMode: activeDevMode,
   } satisfies ApplyPluginAutoEnableParams);
 
   const pluginsToLoad = collectPluginNames(config);
@@ -2925,6 +2937,20 @@ export async function startEliza(
       config = {} as MiladyConfig;
     } else {
       throw err;
+    }
+  }
+
+  // 1a-ii. Resolve developer mode from MILADY_DEV_MODE env var.
+  {
+    const rawDevMode = process.env.MILADY_DEV_MODE?.trim().toLowerCase();
+    activeDevMode =
+      rawDevMode === "true" || rawDevMode === "all"
+        ? "all"
+        : rawDevMode === "paygate"
+          ? "paygate"
+          : false;
+    if (activeDevMode) {
+      logger.info(`[milady] Dev mode active: ${activeDevMode}`);
     }
   }
 

@@ -76,6 +76,7 @@ import {
   splitCommandArgs,
 } from "./chat-commands";
 import { isLifoPopoutMode } from "./lifo-popout";
+import type { Persona } from "./components/stream/helpers";
 import { pathForTab, type Tab, tabFromPath } from "./navigation";
 
 // ── VRM helpers ─────────────────────────────────────────────────────────
@@ -665,6 +666,7 @@ export interface AppState {
   pairingBusy: boolean;
 
   // Chat
+  activePersona: Persona;
   chatInput: string;
   chatSending: boolean;
   chatFirstTokenReceived: boolean;
@@ -1140,6 +1142,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [pairingBusy, setPairingBusy] = useState(false);
 
   // --- Chat ---
+  const [activePersona, setActivePersona] = useState<Persona>("social");
   const [chatInput, setChatInput] = useState("");
   const [chatSending, setChatSending] = useState(false);
   const [chatFirstTokenReceived, setChatFirstTokenReceived] = useState(false);
@@ -4330,6 +4333,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         [S in keyof AppState]: (v: AppState[S]) => void;
       }> = {
         tab: setTabRaw,
+        activePersona: setActivePersona,
         chatInput: setChatInput,
         chatAvatarVisible: setChatAvatarVisible,
         chatAgentVoiceMuted: setChatAgentVoiceMuted,
@@ -5280,6 +5284,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     pairingCodeInput,
     pairingError,
     pairingBusy,
+    activePersona,
     chatInput,
     chatSending,
     chatFirstTokenReceived,

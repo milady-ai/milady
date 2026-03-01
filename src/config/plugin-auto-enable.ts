@@ -1,4 +1,8 @@
 import { SUBSCRIPTION_PROVIDER_MAP } from "../auth/types";
+import {
+  type FeatureTier,
+  isFeatureAvailable,
+} from "./feature-manifest";
 import type { MiladyConfig } from "./types";
 
 export interface ApplyPluginAutoEnableResult {
@@ -9,6 +13,10 @@ export interface ApplyPluginAutoEnableResult {
 export interface ApplyPluginAutoEnableParams {
   config: Partial<MiladyConfig>;
   env: NodeJS.ProcessEnv;
+  /** Effective user tier for feature gating. Defaults to "free". */
+  userTier?: FeatureTier;
+  /** Developer mode override. */
+  devMode?: "all" | "paygate" | false;
 }
 
 export const CONNECTOR_PLUGINS: Record<string, string> = {
@@ -251,7 +259,7 @@ function getSubscriptionProvider(config: unknown): string | undefined {
 export function applyPluginAutoEnable(
   params: ApplyPluginAutoEnableParams,
 ): ApplyPluginAutoEnableResult {
-  const { config, env } = params;
+  const { config, env, userTier = "free", devMode = false } = params;
   const changes: string[] = [];
   const updatedConfig = structuredClone(config) as MiladyConfig;
 
@@ -389,6 +397,14 @@ export function applyPluginAutoEnable(
           featureConfig !== null &&
           featureConfig.enabled !== false);
       if (!isEnabled) continue;
+
+      // Tier gating — skip feature if user's tier is insufficient.
+      const tierCheck = isFeatureAvailable(featureName, userTier, devMode);
+      if (!tierCheck.available) {
+        changes.push(`Skipped plugin: ${pluginName} (${tierCheck.reason})`);
+        continue;
+      }
+
       const pluginId = pluginName.includes("/plugin-")
         ? pluginName.slice(
             pluginName.lastIndexOf("/plugin-") + "/plugin-".length,

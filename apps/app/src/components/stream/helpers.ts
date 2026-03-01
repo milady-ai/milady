@@ -67,6 +67,7 @@ export function getEventSource(event: StreamEventEnvelope): string {
 // ---------------------------------------------------------------------------
 
 export type AgentMode = "gaming" | "terminal" | "chatting" | "idle";
+export type Persona = "social" | "coding";
 
 // ---------------------------------------------------------------------------
 // Popout / Always-on-top

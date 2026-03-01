@@ -40,11 +40,17 @@ import {
   type MiladyConfig,
   saveMiladyConfig,
 } from "../config/config";
+import {
+  FEATURE_MANIFEST,
+  isFeatureAvailable,
+  resolveUserTier,
+} from "../config/feature-manifest";
 import { resolveModelsCacheDir, resolveStateDir } from "../config/paths";
 import { isConnectorConfigured } from "../config/plugin-auto-enable";
 import type { ConnectorConfig, CustomActionDef } from "../config/types.milady";
 import { EMOTE_BY_ID, EMOTE_CATALOG } from "../emotes/catalog";
 import { resolveDefaultAgentWorkspaceDir } from "../providers/workspace";
+import { activeDevMode } from "../runtime/eliza";
 import { CORE_PLUGINS, OPTIONAL_CORE_PLUGINS } from "../runtime/core-plugins";
 import {
   buildTestHandler,
@@ -81,6 +87,8 @@ import {
   taskToTriggerSummary,
 } from "../triggers/runtime";
 import { parseClampedInteger } from "../utils/number-parsing";
+import { isDockerAvailable, setupDockerPostgres } from "./docker-db";
+import { handleSettingsRoutes, type SettingsRouteContext } from "./settings-routes";
 import { handleAgentAdminRoutes } from "./agent-admin-routes";
 import { handleAgentLifecycleRoutes } from "./agent-lifecycle-routes";
 import { detectRuntimeModel } from "./agent-model";
@@ -6311,6 +6319,14 @@ async function handleRequest(
       );
     }
 
+    // Detect environment capabilities for onboarding infrastructure step
+    let dockerAvailable = false;
+    try {
+      dockerAvailable = await isDockerAvailable();
+    } catch {
+      /* ignore */
+    }
+
     json(res, {
       names: pickRandomNames(5),
       styles: STYLE_PRESETS,
@@ -6322,7 +6338,51 @@ async function handleRequest(
       inventoryProviders: getInventoryProviderOptions(),
       sharedStyleRules: "Keep responses brief. Be helpful and concise.",
       githubOAuthAvailable: Boolean(process.env.GITHUB_OAUTH_CLIENT_ID?.trim()),
+      databaseOptions: [
+        { id: "pglite", label: "PGLite (embedded)", description: "Zero-config local database. Recommended for most users." },
+        { id: "postgres", label: "PostgreSQL", description: "Connect to an existing PostgreSQL server." },
+        { id: "docker-postgres", label: "Docker PostgreSQL", description: "Auto-create a managed PostgreSQL container." },
+      ],
+      detectedEnvironment: {
+        dockerAvailable,
+        platform: process.platform,
+        arch: process.arch,
+        hasAffiliateRef: Boolean(process.env.AFFILIATE_REF_CODE?.trim()),
+        devMode: activeDevMode,
+      },
     });
+    return;
+  }
+
+  // ── GET /api/features ────────────────────────────────────────────────────
+  if (method === "GET" && pathname === "/api/features") {
+    const userTier = resolveUserTier(activeDevMode);
+    const features = FEATURE_MANIFEST.map((entry) => {
+      const { available, reason, requiredTier } = isFeatureAvailable(
+        entry.id,
+        userTier,
+        activeDevMode,
+      );
+      const featureConfig = state.config.features?.[entry.id];
+      const enabled =
+        featureConfig === true ||
+        (typeof featureConfig === "object" &&
+          featureConfig !== null &&
+          (featureConfig as Record<string, unknown>).enabled !== false);
+      return { ...entry, available, enabled, reason, requiredTier: requiredTier ?? entry.requiredTier };
+    });
+    json(res, { features, currentTier: userTier, devMode: activeDevMode });
+    return;
+  }
+
+  // ── POST /api/onboarding/setup-docker-db ────────────────────────────────
+  if (method === "POST" && pathname === "/api/onboarding/setup-docker-db") {
+    const result = await setupDockerPostgres();
+    if (result.success) {
+      json(res, { ok: true, credentials: result.credentials });
+    } else {
+      error(res, result.error ?? "Docker PostgreSQL setup failed", 500);
+    }
     return;
   }
 
@@ -9890,6 +9950,22 @@ async function handleRequest(
   if (pathname.startsWith("/api/sandbox")) {
     const handled = await handleSandboxRoute(req, res, pathname, method, {
       sandboxManager: state.sandboxManager,
+    });
+    if (handled) return;
+  }
+
+  // ── Settings routes (/api/settings/*) ──────────────────────────────────
+  if (pathname.startsWith("/api/settings/")) {
+    const handled = await handleSettingsRoutes({
+      req,
+      res,
+      method,
+      pathname,
+      readJsonBody: readJsonBody as SettingsRouteContext["readJsonBody"],
+      json,
+      error,
+      state: { config: state.config },
+      getInventoryProviderOptions,
     });
     if (handled) return;
   }
