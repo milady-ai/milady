@@ -1,5 +1,5 @@
 /**
- * API client for the Milaidy backend.
+ * API client for the Runtime backend.
  *
  * Thin fetch wrapper + WebSocket for real-time chat/events.
  * Replaces the gateway WebSocket protocol entirely.
@@ -291,7 +291,7 @@ export class MilaidyClient {
 
   private async fetch<T>(path: string, init?: RequestInit): Promise<T> {
     if (!this.apiAvailable) {
-      throw new Error("Milaidy API is unavailable in this context");
+      throw new Error("Runtime API is unavailable in this context");
     }
     const makeRequest = async (token: string | null) => {
       const isChatRoute =
@@ -617,7 +617,7 @@ export class MilaidyClient {
         });
         return {
           text: v2.assistantMessage?.content ?? "No assistant response returned.",
-          agentName: "Milaidy",
+          agentName: "Runtime",
         };
       } catch (err) {
         const status = (err as { status?: number }).status;

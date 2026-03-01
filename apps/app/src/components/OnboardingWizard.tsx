@@ -847,7 +847,86 @@ export function OnboardingWizard() {
       case "llmProvider": {
         const isDark =
           onboardingTheme !== "milady" && onboardingTheme !== "qt314";
-        const providers = onboardingOptions?.providers ?? [];
+        const providersRaw = onboardingOptions?.providers ?? [];
+        const providerCanonical: Record<
+          string,
+          { name: string; description: string }
+        > = {
+          elizacloud: {
+            name: "Eliza Cloud",
+            description:
+              "Managed cloud models and services. Includes $5 free credits to start.",
+          },
+          anthropic: { name: "Anthropic", description: "Claude models." },
+          openai: { name: "OpenAI", description: "GPT models." },
+          openrouter: {
+            name: "OpenRouter",
+            description: "Access multiple models via one API key.",
+          },
+          "google-genai": {
+            name: "Gemini",
+            description: "Google's Gemini models.",
+          },
+          gemini: { name: "Gemini", description: "Google's Gemini models." },
+          xai: { name: "xAI (Grok)", description: "xAI's Grok models." },
+          grok: { name: "xAI (Grok)", description: "xAI's Grok models." },
+          groq: { name: "Groq", description: "Fast inference." },
+          deepseek: { name: "DeepSeek", description: "DeepSeek models." },
+          mistral: { name: "Mistral", description: "Mistral AI models." },
+          together: {
+            name: "Together AI",
+            description: "Open-source model hosting.",
+          },
+          ollama: {
+            name: "Ollama (local)",
+            description:
+              "Local models, no API key needed. Requires Ollama running on this device.",
+          },
+        };
+        const providersById = new Map<string, ProviderOption>(
+          providersRaw.map((p: ProviderOption) => [p.id, p]),
+        );
+        if (!providersById.has("elizacloud")) {
+          providersById.set("elizacloud", {
+            id: "elizacloud",
+            name: "Eliza Cloud",
+            envKey: "ELIZAOS_CLOUD_API_KEY",
+            pluginName: "@elizaos/plugin-elizacloud",
+            keyPrefix: null,
+            description:
+              "Managed cloud models and services. Includes $5 free credits to start.",
+          });
+        }
+        const orderedProviderIds = [
+          "elizacloud",
+          "anthropic",
+          "openai",
+          "openrouter",
+          "google-genai",
+          "xai",
+          "groq",
+          "deepseek",
+          "mistral",
+          "together",
+          "ollama",
+        ];
+        const providers: ProviderOption[] = [];
+        for (const id of orderedProviderIds) {
+          const p = providersById.get(id);
+          if (!p) continue;
+          const c = providerCanonical[id] ?? providerCanonical[p.id];
+          providers.push(
+            c ? ({ ...p, name: c.name, description: c.description } as ProviderOption) : p,
+          );
+        }
+        for (const p of providersById.values()) {
+          if (!providers.some((x) => x.id === p.id)) {
+            const c = providerCanonical[p.id];
+            providers.push(
+              c ? ({ ...p, name: c.name, description: c.description } as ProviderOption) : p,
+            );
+          }
+        }
         const cloudProviders = providers.filter(
           (p: ProviderOption) => p.id === "elizacloud",
         );
@@ -861,27 +940,7 @@ export function OnboardingWizard() {
             p.id !== "elizacloud",
         );
 
-        const providerOverrides: Record<
-          string,
-          { name: string; description?: string }
-        > = {
-          elizacloud: { name: "Eliza Cloud" },
-          "anthropic-subscription": {
-            name: "Claude Subscription",
-            description: "$20-200/mo Claude Pro/Max subscription",
-          },
-          "openai-subscription": {
-            name: "ChatGPT Subscription",
-            description: "$20-200/mo ChatGPT Plus/Pro subscription",
-          },
-          anthropic: { name: "Anthropic API Key" },
-          openai: { name: "OpenAI API Key" },
-          openrouter: { name: "OpenRouter" },
-          gemini: { name: "Google Gemini" },
-          grok: { name: "xAI (Grok)" },
-          groq: { name: "Groq" },
-          deepseek: { name: "DeepSeek" },
-        };
+        const providerOverrides: Record<string, { name: string; description?: string }> = {};
 
         const getProviderDisplay = (provider: ProviderOption) => {
           const override = providerOverrides[provider.id];

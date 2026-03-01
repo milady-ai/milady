@@ -93,16 +93,16 @@ export function titleForTab(tab: Tab): string {
     case "skills": return "Skills";
     case "config": return "Security";
     case "logs": return "Activity";
-    default: return "Milaidy";
+    default: return "Runtime";
   }
 }
 
 export function subtitleForTab(tab: Tab): string {
   switch (tab) {
-    case "chat": return "Chat with Milaidy.";
+    case "chat": return "Chat with Runtime.";
     case "inventory": return "Your tokens and NFTs in one place.";
     case "accounts": return "Manage account-level connections and identity settings.";
-    case "ai-setup": return "Configure Milaidy model and memory settings.";
+    case "ai-setup": return "Configure Runtime model and memory settings.";
     case "apps": return "Use user-facing actions like markets and social apps.";
     case "skills": return "View available skills.";
     case "config": return "Confirmations, wallet status, and security audit.";

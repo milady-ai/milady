@@ -1,5 +1,5 @@
 /**
- * Main Milaidy App component.
+ * Main Runtime App component.
  *
  * Single-agent dashboard with onboarding wizard, chat, plugins, skills,
  * config, and logs views.
@@ -8,6 +8,7 @@
 import { LitElement, html, css } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { guard } from "lit/directives/guard.js";
+import { keyed } from "lit/directives/keyed.js";
 import { repeat } from "lit/directives/repeat.js";
 import {
   client,
@@ -83,13 +84,13 @@ const CURATED_APPS: CuratedAppEntry[] = [
   {
     id: "slack",
     name: "Slack",
-    description: "Connect workspaces and run Slack actions from Milaidy.",
+    description: "Connect workspaces and run Slack actions from Runtime.",
     actionMode: "assistant",
   },
   {
     id: "whatsapp",
     name: "WhatsApp",
-    description: "Manage WhatsApp messaging workflows through Milaidy.",
+    description: "Manage WhatsApp messaging workflows through Runtime.",
     actionMode: "assistant",
   },
   {
@@ -113,7 +114,7 @@ const CURATED_APPS: CuratedAppEntry[] = [
   {
     id: "msteams",
     name: "Microsoft Teams",
-    description: "Run Teams actions and messaging workflows through Milaidy.",
+    description: "Run Teams actions and messaging workflows through Runtime.",
     actionMode: "assistant",
   },
   {
@@ -127,6 +128,43 @@ const CURATED_APP_ID_SET = new Set(CURATED_APPS.map((app) => app.id));
 const CURATED_APP_ORDER = new Map(CURATED_APPS.map((app, idx) => [app.id, idx]));
 
 type AppEntry = CuratedAppEntry;
+
+const AI_PROVIDER_COPY: Record<string, { name: string; description: string }> = {
+  elizacloud: {
+    name: "Eliza Cloud",
+    description: "Managed cloud models and services.",
+  },
+  anthropic: { name: "Anthropic", description: "Claude models." },
+  openai: { name: "OpenAI", description: "GPT models." },
+  openrouter: {
+    name: "OpenRouter",
+    description: "Access multiple models via one API key.",
+  },
+  "google-genai": { name: "Gemini", description: "Google's Gemini models." },
+  xai: { name: "xAI (Grok)", description: "xAI's Grok models." },
+  groq: { name: "Groq", description: "Fast inference." },
+  deepseek: { name: "DeepSeek", description: "DeepSeek models." },
+  mistral: { name: "Mistral", description: "Mistral AI models." },
+  together: { name: "Together AI", description: "Open-source model hosting." },
+  ollama: {
+    name: "Ollama (local)",
+    description: "Local models, no API key needed. Requires Ollama running on this device.",
+  },
+};
+
+const AI_PROVIDER_ALIASES: Record<string, string> = {
+  gemini: "google-genai",
+  grok: "xai",
+};
+
+function canonicalProviderId(id: string): string {
+  const key = (id || "").trim().toLowerCase();
+  return AI_PROVIDER_ALIASES[key] ?? key;
+}
+
+function providerCopyForId(id: string): { name: string; description: string } | null {
+  return AI_PROVIDER_COPY[canonicalProviderId(id)] ?? null;
+}
 
 interface ChatSession {
   id: string;
@@ -149,6 +187,36 @@ interface CharacterTheme {
   accent: string;
   surface: string;
 }
+
+type RuntimePresetProfile = CharacterTheme;
+
+const RUNTIME_PRESET_PROFILES: Record<string, RuntimePresetProfile> = {
+  Operator: { accent: "#4e6a8b", surface: "rgba(78,106,139,0.12)" },
+  Vanguard: { accent: "#c94f4f", surface: "rgba(201,79,79,0.12)" },
+  Strategist: { accent: "#8e44ad", surface: "rgba(142,68,173,0.12)" },
+  Scout: { accent: "#16a085", surface: "rgba(22,160,133,0.12)" },
+  Cipher: { accent: "#3f7ecf", surface: "rgba(63,126,207,0.12)" },
+  Nova: { accent: "#e2572f", surface: "rgba(226,87,47,0.12)" },
+};
+
+const RUNTIME_PRESET_NAMES = Object.keys(RUNTIME_PRESET_PROFILES);
+const BASE_RUNTIME_ACCENT = RUNTIME_PRESET_PROFILES.Operator.accent;
+const RUNTIME_HANDLE_SUFFIX_WORDS = [
+  "anchor",
+  "relay",
+  "beacon",
+  "engine",
+  "sector",
+  "lattice",
+  "kernel",
+  "ledger",
+  "atlas",
+  "vertex",
+  "axiom",
+  "zenith",
+  "forge",
+  "cadence",
+] as const;
 
 type ThemeTokenMap = Record<string, string>;
 
@@ -251,8 +319,8 @@ export class MilaidyApp extends LitElement {
   @state() onboardingDiscordToken = "";
   @state() onboardingFinishing = false;
   @state() providerSetupApplying = false;
-  @state() profileImageUrl = "/pfp.jpg";
-  @state() profileAccent = "#f57a3b";
+  @state() profileImageUrl = "/onboarding-logo-test-v3.png";
+  @state() profileAccent = BASE_RUNTIME_ACCENT;
   @state() userDisplayName = "@you";
   @state() userNameChangeLockedUntil: number | null = null;
   @state() accountNameInput = "";
@@ -300,6 +368,7 @@ export class MilaidyApp extends LitElement {
     limit: number;
     result: ChatSession[];
   } = { sourceRef: null, limit: 0, result: [] };
+  private avatarDataUriCache = new Map<string, string>();
   private curatedAppsCache: {
     sourceRef: PluginInfo[] | null;
     result: Array<{ app: AppEntry; plugin: PluginInfo | null }>;
@@ -476,7 +545,7 @@ export class MilaidyApp extends LitElement {
     }
 
     .pairing-actions {
-      margin-top: 12px;
+      margin-top: 24px;
       display: flex;
       gap: 10px;
     }
@@ -1857,6 +1926,47 @@ export class MilaidyApp extends LitElement {
       text-align: center;
     }
 
+    .onboarding-progress {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin: 0 0 14px;
+    }
+
+    .onboarding-progress-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--border-soft);
+      transition: transform 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .onboarding-progress-dot.active {
+      background: var(--accent);
+      transform: scale(1.15);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+    }
+
+    .onboarding-progress-dot.done {
+      background: color-mix(in srgb, var(--accent) 65%, var(--border-soft));
+    }
+
+    .onboarding-step {
+      animation: onboardingStepIn 260ms ease both;
+      will-change: transform, opacity;
+    }
+
+    @keyframes onboardingStepIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.995);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
     .onboarding h1 {
       font-size: 24px;
       font-weight: normal;
@@ -1882,15 +1992,47 @@ export class MilaidyApp extends LitElement {
       font-family: var(--font-body);
       font-size: 28px;
       font-weight: normal;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
       color: var(--text-strong);
     }
 
+    .onboarding-welcome-eyebrow {
+      display: block;
+      margin: 0 0 8px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: color-mix(in srgb, var(--accent) 68%, var(--text-strong));
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
     .onboarding-welcome-sub {
-      font-style: italic;
       color: var(--muted);
       font-size: 14px;
-      margin-bottom: 32px;
+      margin: 0 auto 16px;
+      max-width: 420px;
+      line-height: 1.55;
+    }
+
+    .onboarding-welcome-capability-line {
+      border: 1px solid var(--border-soft);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.7);
+      margin: 0 0 20px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+      text-align: left;
+    }
+
+    .onboarding-welcome-capability-line b {
+      color: var(--text-strong);
+      font-size: 12px;
     }
 
     .onboarding-speech {
@@ -1976,8 +2118,8 @@ export class MilaidyApp extends LitElement {
 
     .onboarding-option:hover {
       border-color: var(--accent);
-      transform: translateY(-1px);
-      box-shadow: 0 8px 18px rgba(74, 49, 26, 0.08);
+      transform: none;
+      box-shadow: inset 0 0 0 1px var(--accent);
     }
 
     .onboarding-option.selected {
@@ -1988,26 +2130,88 @@ export class MilaidyApp extends LitElement {
     .onboarding-option .label {
       font-weight: bold;
       font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .onboarding-option .hint {
       font-size: 12px;
       color: var(--muted);
       margin-top: 2px;
+      line-height: 1.35;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .onboarding-provider-badge {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgba(32, 125, 82, 0.45);
+      border-radius: 999px;
+      padding: 2px 8px;
+      color: #207d52;
+      background: rgba(32, 125, 82, 0.1);
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1;
+      white-space: nowrap;
     }
 
     .onboarding-input {
       width: 100%;
+      max-width: 100%;
       padding: 8px 12px;
       border: 1px solid var(--border);
       background: var(--card);
       font-size: 14px;
       margin-top: 8px;
+      box-sizing: border-box;
+      min-width: 0;
     }
 
     .onboarding-input:focus {
       border-color: var(--accent);
       outline: none;
+    }
+
+    .onboarding-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .onboarding-nav .btn,
+    .onboarding-nav .plugin-secondary-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0;
+      min-height: 36px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.1;
+      box-sizing: border-box;
+      vertical-align: middle;
+    }
+
+    .onboarding-nav .plugin-secondary-btn {
+      border: 1px solid color-mix(in srgb, var(--accent) 26%, var(--border));
+      background: color-mix(in srgb, var(--accent) 7%, var(--card));
+      color: var(--text-strong);
+      box-shadow: 0 2px 7px color-mix(in srgb, var(--accent) 16%, transparent);
+    }
+
+    .onboarding-nav .plugin-secondary-btn:hover {
+      transform: translateY(-1px);
+      border-color: color-mix(in srgb, var(--accent) 44%, var(--border));
+      background: color-mix(in srgb, var(--accent) 12%, var(--card));
+      box-shadow: 0 6px 14px color-mix(in srgb, var(--accent) 24%, transparent);
     }
 
     .theme-swatch-row {
@@ -2825,8 +3029,12 @@ export class MilaidyApp extends LitElement {
       display: flex;
       flex-direction: column;
       gap: 10px;
+      margin-top: 12px;
+      padding-top: 3px;
       content-visibility: auto;
       contain-intrinsic-size: 900px;
+      position: relative;
+      z-index: 2;
     }
 
     .plugin-item {
@@ -2838,8 +3046,9 @@ export class MilaidyApp extends LitElement {
       border-radius: 14px;
       background: linear-gradient(160deg, rgba(255, 255, 255, 0.93), rgba(255, 248, 240, 0.82));
       transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
-      overflow: hidden;
-      contain: layout paint style;
+      overflow: visible;
+      position: relative;
+      z-index: 0;
     }
 
     .apps-detail-card {
@@ -2852,6 +3061,7 @@ export class MilaidyApp extends LitElement {
       transform: translateY(-1px);
       box-shadow: 0 8px 20px rgba(75, 52, 25, 0.08);
       border-color: var(--border);
+      z-index: 3;
     }
 
     .plugin-item .plugin-name {
@@ -3078,14 +3288,14 @@ export class MilaidyApp extends LitElement {
 
     .plugin-dashboard {
       display: grid;
-      gap: 14px;
+      gap: 4px;
       margin-bottom: 14px;
     }
 
     .plugin-hero {
       border: 1px solid var(--border-soft);
       border-radius: 14px;
-      padding: 14px;
+      padding: 12px;
       background: linear-gradient(120deg, rgba(255, 253, 250, 0.96), rgba(252, 244, 234, 0.9));
       box-shadow: 0 14px 28px rgba(74, 49, 26, 0.08);
     }
@@ -3096,7 +3306,7 @@ export class MilaidyApp extends LitElement {
       justify-content: space-between;
       gap: 12px;
       flex-wrap: wrap;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .plugin-kpis {
@@ -3187,11 +3397,97 @@ export class MilaidyApp extends LitElement {
       background: rgba(245, 122, 59, 0.08);
     }
 
+    .elizacloud-cta {
+      margin-top: 10px;
+      padding: 14px;
+      border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border-soft));
+      border-radius: 14px;
+      background: color-mix(in srgb, var(--accent) 5%, var(--card));
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    .elizacloud-cta-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-strong);
+    }
+
+    .elizacloud-cta-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+
+    .elizacloud-cta-badge {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgba(32, 125, 82, 0.45);
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      color: #207d52;
+      background: rgba(32, 125, 82, 0.1);
+      white-space: nowrap;
+    }
+
+    .elizacloud-cta-sub {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+      max-width: 520px;
+    }
+
+    .elizacloud-cta-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .elizacloud-cta-btn {
+      margin-top: 0;
+      min-height: 34px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.1;
+      border: 1px solid color-mix(in srgb, var(--accent) 34%, var(--border));
+      background: color-mix(in srgb, var(--accent) 14%, var(--card));
+      color: var(--text-strong);
+      box-shadow: 0 2px 7px color-mix(in srgb, var(--accent) 18%, transparent);
+      cursor: pointer;
+      transition: box-shadow 120ms ease, background-color 120ms ease, border-color 120ms ease, transform 120ms ease;
+    }
+
+    .elizacloud-cta-btn:hover {
+      transform: translateY(-1px);
+      border-color: color-mix(in srgb, var(--accent) 64%, var(--border));
+      background: color-mix(in srgb, var(--accent) 28%, var(--card));
+      box-shadow: 0 6px 14px color-mix(in srgb, var(--accent) 30%, transparent);
+    }
+
+
     .plugin-toolbar {
       border: 1px solid var(--border-soft);
       border-radius: 12px;
       padding: 12px;
       background: linear-gradient(160deg, rgba(255, 255, 255, 0.88), rgba(255, 247, 237, 0.8));
+      position: relative;
+      z-index: 1;
     }
 
     .plugin-filters {
@@ -3619,6 +3915,10 @@ export class MilaidyApp extends LitElement {
         font-size: 24px;
       }
 
+      .onboarding-welcome-capability-line {
+        text-align: left;
+      }
+
       .plugin-state-tag,
       .plugin-category-tag {
         font-size: 9px;
@@ -3716,12 +4016,13 @@ export class MilaidyApp extends LitElement {
         if (!complete) {
           try {
             const options = await client.getOnboardingOptions();
-            this.onboardingOptions = options;
-            this.prefetchCharacterImages(options.names);
+            const normalized = this.normalizeOnboardingOptions(options);
+            this.onboardingOptions = normalized;
+            this.prefetchCharacterImages(normalized.names);
           } catch {
             // Avoid trapping users on "Loading onboarding..." forever when
             // options fetch fails but status endpoint is reachable.
-            const fallback = this.defaultOnboardingOptions();
+            const fallback = this.normalizeOnboardingOptions(this.defaultOnboardingOptions());
             this.onboardingOptions = fallback;
             this.prefetchCharacterImages(fallback.names);
             this.showUiNotice("Using fallback onboarding options. You can update provider settings later.");
@@ -3895,18 +4196,24 @@ export class MilaidyApp extends LitElement {
       const now = Date.now();
       const isStale = (lastLoadedAt: number, ttlMs: number): boolean =>
         lastLoadedAt <= 0 || now - lastLoadedAt > ttlMs;
+      const INVENTORY_TTL_MS = 30_000;
+      const WALLET_TTL_MS = 30_000;
+      const PLUGINS_TTL_MS = 60_000;
+      const EXTENSION_TTL_MS = 30_000;
+      const LOGS_TTL_MS = 20_000;
+      const SKILLS_TTL_MS = 60_000;
 
       if (tab === "inventory") {
-        if (isStale(this.inventoryLoadedAt, 15_000)) void this.loadInventory();
+        if (isStale(this.inventoryLoadedAt, INVENTORY_TTL_MS)) void this.loadInventory();
         return;
       }
       if (tab === "accounts") {
-        if (isStale(this.walletConfigLoadedAt, 15_000)) void this.loadWalletConfig();
-        if (isStale(this.inventoryLoadedAt, 15_000)) void this.loadInventory();
+        if (isStale(this.walletConfigLoadedAt, WALLET_TTL_MS)) void this.loadWalletConfig();
+        if (isStale(this.inventoryLoadedAt, INVENTORY_TTL_MS)) void this.loadInventory();
         return;
       }
       if (tab === "ai-setup") {
-        if (isStale(this.pluginsLoadedAt, 15_000)) void this.loadPlugins();
+        if (isStale(this.pluginsLoadedAt, PLUGINS_TTL_MS)) void this.loadPlugins();
         return;
       }
       if (tab === "apps") {
@@ -3914,16 +4221,16 @@ export class MilaidyApp extends LitElement {
         return;
       }
       if (tab === "skills") {
-        if (isStale(this.skillsLoadedAt, 30_000)) void this.loadSkills();
+        if (isStale(this.skillsLoadedAt, SKILLS_TTL_MS)) void this.loadSkills();
         return;
       }
       if (tab === "config") {
-        if (isStale(this.extensionCheckedAt, 15_000)) void this.checkExtensionStatus();
-        if (isStale(this.walletConfigLoadedAt, 15_000)) void this.loadWalletConfig();
+        if (isStale(this.extensionCheckedAt, EXTENSION_TTL_MS)) void this.checkExtensionStatus();
+        if (isStale(this.walletConfigLoadedAt, WALLET_TTL_MS)) void this.loadWalletConfig();
         return;
       }
       if (tab === "logs") {
-        if (isStale(this.logsLoadedAt, 10_000)) void this.loadLogs();
+        if (isStale(this.logsLoadedAt, LOGS_TTL_MS)) void this.loadLogs();
       }
     });
   }
@@ -4028,7 +4335,7 @@ export class MilaidyApp extends LitElement {
     try {
       const visualMinMs = 900;
       const started = Date.now();
-      this.setAgentStatus({ ...(this.agentStatus ?? { agentName: "Milaidy", model: undefined, uptime: undefined, startedAt: undefined }), state: "restarting" });
+      this.setAgentStatus({ ...(this.agentStatus ?? { agentName: "Runtime", model: undefined, uptime: undefined, startedAt: undefined }), state: "restarting" });
       const next = await client.restartAgent();
       const elapsed = Date.now() - started;
       if (elapsed < visualMinMs) {
@@ -4061,7 +4368,7 @@ export class MilaidyApp extends LitElement {
 
   private async handleReset(): Promise<void> {
     this.openActionConfirm({
-      title: "Reset Milaidy?",
+      title: "Reset Runtime?",
       body:
         "This will wipe config, memory, chats, and local app state. You will return to onboarding.",
       confirmLabel: "Reset everything",
@@ -4131,13 +4438,14 @@ export class MilaidyApp extends LitElement {
       this.logsLoadedAt = 0;
       this.walletConfigLoadedAt = 0;
       this.inventoryLoadedAt = 0;
-      this.profileImageUrl = "/pfp.jpg";
-      this.profileAccent = "#f57a3b";
+      this.profileImageUrl = "/onboarding-logo-test-v3.png";
+      this.profileAccent = BASE_RUNTIME_ACCENT;
       this.userDisplayName = "@you";
       this.accountNameInput = this.userDisplayName;
       this.userNameChangeLockedUntil = null;
       this.nameValidationMessage = null;
       this.clearThemeOverrides();
+      this.applyThemeFromAccent(this.profileAccent);
       this.extensionStatus = null;
       this.extensionChecking = false;
       this.walletAddresses = null;
@@ -4174,7 +4482,7 @@ export class MilaidyApp extends LitElement {
 
       // Re-fetch onboarding options for the wizard
       try {
-        const options = await client.getOnboardingOptions();
+        const options = this.normalizeOnboardingOptions(await client.getOnboardingOptions());
         this.onboardingOptions = options;
         this.prefetchCharacterImages(options.names);
       } catch { /* ignore */ }
@@ -4188,15 +4496,11 @@ export class MilaidyApp extends LitElement {
   private async handleChatSend(): Promise<void> {
     const text = this.chatInput.trim();
     if (!text || this.chatSending) return;
-    const activeProvider = this.plugins.find((p) => p.category === "ai-provider" && p.enabled) ?? null;
-    const chosenProviderId = (this.onboardingProvider ?? "").trim();
-    const chosenProvider =
-      chosenProviderId ? (this.plugins.find((p) => p.id === chosenProviderId) ?? null) : null;
-    const providerForChat = chosenProvider ?? activeProvider;
+    const providerForChat = this.getPreferredAiProviderForChat();
     const providerReady = Boolean(providerForChat && this.isChatProviderReady(providerForChat));
     if (!providerReady) {
       if (this.providerSetupApplying) {
-        this.showUiNotice("Applying model provider settings. Milaidy will unlock chat after restart.");
+        this.showUiNotice("Applying model provider settings. Runtime will unlock chat after restart.");
       } else {
         this.showUiNotice("Connect an AI provider in AI Settings to start chatting.");
         this.setTab("ai-setup");
@@ -4294,7 +4598,7 @@ export class MilaidyApp extends LitElement {
         }
 
         const errorText =
-          "This request is taking longer than expected. Send “continue” and Milaidy will resume in a shorter format.";
+          "This request is taking longer than expected. Send “continue” and Runtime will resume in a shorter format.";
         this.chatMessages = [
           ...this.chatMessages,
           { role: "assistant", text: errorText, timestamp: Date.now() },
@@ -4493,13 +4797,13 @@ export class MilaidyApp extends LitElement {
       return "Provider authentication failed. Please verify your API key.";
     }
     if (code === "PROVIDER_NOT_RUNNING") {
-      return "Provider not running. If you selected Ollama, install and start it on this device, then restart Milaidy.";
+      return "Provider not running. If you selected Ollama, install and start it on this device, then restart Runtime.";
     }
     if (code === "PROVIDER_TIMEOUT") {
       return "This request took too long. Try again or send a shorter prompt.";
     }
     if (code === "PROVIDER_RESTART_REQUIRED") {
-      return "Provider isn't ready yet. Try again. If it keeps failing, restart Milaidy to reload AI Settings.";
+      return "Provider isn't ready yet. Try again. If it keeps failing, restart Runtime to reload AI Settings.";
     }
     if (code === "AI_PROVIDER_REQUIRED") {
       return "Connect your AI provider key in AI Settings to chat.";
@@ -4528,7 +4832,7 @@ export class MilaidyApp extends LitElement {
       lower.includes("network request failed") ||
       lower.includes("econnrefused")
     ) {
-      return "Connection issue. Milaidy backend is not ready yet. Please wait a moment and try again.";
+      return "Connection issue. Runtime backend is not ready yet. Please wait a moment and try again.";
     }
 
     if (
@@ -4552,11 +4856,11 @@ export class MilaidyApp extends LitElement {
       lower.includes("no assistant response was produced") ||
       lower.includes("active provider")
     ) {
-      return "Model setup issue. Please check AI provider settings, then restart Milaidy.";
+      return "Model setup issue. Please check AI provider settings, then restart Runtime.";
     }
 
     if (lower.includes("agent is not running")) {
-      return "Milaidy is not running. Start the agent, then send again.";
+      return "Runtime is not running. Start the agent, then send again.";
     }
 
     if (lower.includes("429") || lower.includes("rate limit")) {
@@ -5407,12 +5711,21 @@ export class MilaidyApp extends LitElement {
   }
 
   private saveProfileAppearance(imageUrl: string, accent: string): void {
-    this.profileImageUrl = imageUrl;
-    this.profileAccent = accent;
-    this.applyThemeFromAccent(accent);
+    const nextImage = imageUrl || this.profileImageUrl;
+    const nextAccent = accent || this.profileAccent;
+    const imageChanged = this.profileImageUrl !== nextImage;
+    const accentChanged = this.profileAccent !== nextAccent;
+
+    if (!imageChanged && !accentChanged) return;
+
+    this.profileImageUrl = nextImage;
+    this.profileAccent = nextAccent;
+    if (accentChanged) {
+      this.applyThemeFromAccent(nextAccent);
+    }
     try {
-      localStorage.setItem(PROFILE_IMAGE_STORAGE_KEY, imageUrl);
-      localStorage.setItem(PROFILE_ACCENT_STORAGE_KEY, accent);
+      if (imageChanged) localStorage.setItem(PROFILE_IMAGE_STORAGE_KEY, nextImage);
+      if (accentChanged) localStorage.setItem(PROFILE_ACCENT_STORAGE_KEY, nextAccent);
     } catch {
       // ignore
     }
@@ -5470,28 +5783,13 @@ export class MilaidyApp extends LitElement {
   }
 
   private presetHandleSuffix(ownerId: string, base: string, attempt: number): string {
-    // Per-user deterministic suffix (varies by attempt) that looks "degen" but remains readable.
-    // Example: "@reimu_gm7k3" / "@reimu_wagmi2p9".
-    const words = [
-      "gm",
-      "wagmi",
-      "ape",
-      "based",
-      "alpha",
-      "send",
-      "moon",
-      "lfg",
-      "hodl",
-      "degen",
-      "rekt",
-      "chad",
-      "ser",
-      "fomo",
-    ] as const;
+    // Per-user deterministic suffix (varies by attempt) with Runtime-themed wording.
+    // Example: "@operator_core7k3f1" / "@operator_nexus2p9ad".
+    const baseHash = this.fnv1a32(`${ownerId}:${base}`);
     const h = this.fnv1a32(`${ownerId}:${base}:${attempt}`);
-    const word = words[h % words.length];
+    const word = RUNTIME_HANDLE_SUFFIX_WORDS[(baseHash + attempt) % RUNTIME_HANDLE_SUFFIX_WORDS.length];
     const encoded = h.toString(36);
-    // 5 chars gives ~60M combos per word (14 words => ~840M), enough to stay unique at scale.
+    // 5 chars gives ~60M combos per word, enough to stay unique at scale.
     const tail = encoded.padStart(5, "0").slice(-5);
     return `${word}${tail}`;
   }
@@ -5499,23 +5797,7 @@ export class MilaidyApp extends LitElement {
   private randomPresetHandleSuffix(): string {
     // Extra safety: if a deterministic suffix ever collides, fall back to randomness.
     // Stays within [a-z0-9_] so it survives normalizeUserHandle().
-    const words = [
-      "gm",
-      "wagmi",
-      "ape",
-      "based",
-      "alpha",
-      "send",
-      "moon",
-      "lfg",
-      "hodl",
-      "degen",
-      "rekt",
-      "chad",
-      "ser",
-      "fomo",
-    ] as const;
-    const word = words[Math.floor(Math.random() * words.length)];
+    const word = RUNTIME_HANDLE_SUFFIX_WORDS[Math.floor(Math.random() * RUNTIME_HANDLE_SUFFIX_WORDS.length)];
     const rand = crypto.getRandomValues(new Uint32Array(2));
     const chunk = ((BigInt(rand[0]!) << 32n) | BigInt(rand[1]!)).toString(36);
     const tail = chunk.padStart(10, "0").slice(-10);
@@ -5732,9 +6014,13 @@ export class MilaidyApp extends LitElement {
   private async ensureOnboardingOptionsLoaded(): Promise<void> {
     if (this.onboardingOptions) return;
     try {
-      this.onboardingOptions = await client.getOnboardingOptions();
+      this.onboardingOptions = this.normalizeOnboardingOptions(
+        await client.getOnboardingOptions(),
+      );
     } catch {
-      // ignore
+      this.onboardingOptions = this.normalizeOnboardingOptions(
+        this.defaultOnboardingOptions(),
+      );
     }
   }
 
@@ -5767,7 +6053,7 @@ export class MilaidyApp extends LitElement {
     const selectedStyle = opts.styles.find((s) => s.catchphrase === this.onboardingStyle);
     if (!selectedStyle) return;
 
-    const agentName = "Milaidy";
+    const agentName = "Runtime";
     const systemPrompt = selectedStyle.system
       ? selectedStyle.system.replace(/\{name\}/g, agentName)
       : `You are ${agentName}, an autonomous AI agent powered by ElizaOS. ${opts.sharedStyleRules}`;
@@ -5801,14 +6087,15 @@ export class MilaidyApp extends LitElement {
 
   private themeColorOptions(): ThemeColorOption[] {
     return [
-      { label: "Crimson", value: "#c0392b" },
-      { label: "Sun Gold", value: "#d4a017" },
-      { label: "Ocean Blue", value: "#3f7ecf" },
+      { label: "Slate", value: "#4e6a8b" },
+      { label: "Crimson", value: "#c94f4f" },
       { label: "Violet", value: "#8e44ad" },
       { label: "Mint", value: "#16a085" },
-      { label: "Forest", value: "#2d9a5f" },
-      { label: "Slate", value: "#4e6a8b" },
+      { label: "Ocean Blue", value: "#3f7ecf" },
       { label: "Coral", value: "#e2572f" },
+      { label: "Sun Gold", value: "#d4a017" },
+      { label: "Forest", value: "#2d9a5f" },
+      { label: "Apricot", value: "#ff7a59" },
     ];
   }
 
@@ -5817,24 +6104,12 @@ export class MilaidyApp extends LitElement {
     const presetNames = this.onboardingOptions?.names ?? [];
     const isPreset = presetNames.includes(name);
     if (!isPreset && this.onboardingCustomAccent) return this.onboardingCustomAccent;
-    return this.characterTheme(name || "milaidy").accent;
+    return this.characterTheme(name || RUNTIME_PRESET_NAMES[0] || "Runtime").accent;
   }
 
   private characterTheme(name: string): CharacterTheme {
-    const overrides: Record<string, CharacterTheme> = {
-      Reimu: { accent: "#c0392b", surface: "rgba(192,57,43,0.10)" },
-      Marisa: { accent: "#d4a017", surface: "rgba(212,160,23,0.12)" },
-      Sakuya: { accent: "#3f7ecf", surface: "rgba(63,126,207,0.12)" },
-      Remilia: { accent: "#8e44ad", surface: "rgba(142,68,173,0.12)" },
-      Koishi: { accent: "#16a085", surface: "rgba(22,160,133,0.12)" },
-      Yukari: { accent: "#2d9a5f", surface: "rgba(45,154,95,0.12)" },
-      Aya: { accent: "#a63d40", surface: "rgba(166,61,64,0.12)" },
-      Nitori: { accent: "#1f8f8a", surface: "rgba(31,143,138,0.12)" },
-      Sanae: { accent: "#2d9a5f", surface: "rgba(45,154,95,0.12)" },
-      Suwako: { accent: "#7b8f2c", surface: "rgba(123,143,44,0.12)" },
-      Miku: { accent: "#00a8a8", surface: "rgba(0,168,168,0.12)" },
-    };
-    if (overrides[name]) return overrides[name];
+    const preset = RUNTIME_PRESET_PROFILES[name];
+    if (preset) return { accent: preset.accent, surface: preset.surface };
 
     const palette = ["#f57a3b", "#3f7ecf", "#16a085", "#9c6dff", "#c94f4f", "#2d9a5f"];
     let hash = 0;
@@ -5843,53 +6118,71 @@ export class MilaidyApp extends LitElement {
     return { accent, surface: `${accent}1a` };
   }
 
-  private miladyTokenImage(tokenId: number): string {
-    return `https://www.miladymaker.net/milady/${tokenId}.png`;
-  }
+  private characterAvatarDataUri(label: string, accent: string): string {
+    const cacheKey = `${label}|${accent}`;
+    const cached = this.avatarDataUriCache.get(cacheKey);
+    if (cached) return cached;
 
-  private async canLoadImage(url: string): Promise<boolean> {
-    return await new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => resolve(true);
-      img.onerror = () => resolve(false);
-      img.src = url;
-    });
+    const safeAccent = /^#[0-9a-fA-F]{6}$/.test(accent) ? accent : "#4e6a8b";
+    const key = (label || "runtime").trim().toLowerCase();
+    let seed = 0;
+    for (let i = 0; i < key.length; i++) seed = (seed * 33 + key.charCodeAt(i)) | 0;
+    const variant = Math.abs(seed) % 4;
+    const ring = Math.abs(seed >> 3) % 3;
+    const tilt = (Math.abs(seed >> 5) % 15) - 7;
+
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+      <defs>
+        <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0%" stop-color="#10131a"/>
+          <stop offset="100%" stop-color="#1a2230"/>
+        </linearGradient>
+        <linearGradient id="glow" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0%" stop-color="${safeAccent}" stop-opacity="0.55"/>
+          <stop offset="100%" stop-color="${safeAccent}" stop-opacity="0.18"/>
+        </linearGradient>
+      </defs>
+      <rect width="256" height="256" rx="56" fill="url(#bg)"/>
+      <rect x="14" y="14" width="228" height="228" rx="48" fill="none" stroke="${safeAccent}" stroke-opacity="0.5" stroke-width="6"/>
+      <ellipse cx="128" cy="196" rx="74" ry="24" fill="${safeAccent}" fill-opacity="0.12"/>
+      <g transform="rotate(${tilt} 128 128)">
+        <circle cx="128" cy="92" r="34" fill="url(#glow)"/>
+        <circle cx="128" cy="92" r="31" fill="#111722"/>
+        <path d="M68 206c4-42 27-68 60-68s56 26 60 68" fill="url(#glow)"/>
+        <path d="M74 206c5-34 24-54 54-54s49 20 54 54" fill="#111722"/>
+      </g>
+      ${ring === 0 ? `<circle cx="128" cy="92" r="44" fill="none" stroke="${safeAccent}" stroke-opacity="0.33" stroke-width="3"/>` : ""}
+      ${ring === 1 ? `<path d="M88 102c14-16 66-16 80 0" fill="none" stroke="${safeAccent}" stroke-opacity="0.4" stroke-width="3"/>` : ""}
+      ${ring === 2 ? `<path d="M86 172c12-9 72-9 84 0" fill="none" stroke="${safeAccent}" stroke-opacity="0.38" stroke-width="3"/>` : ""}
+      ${variant === 0 ? `<circle cx="116" cy="90" r="3.6" fill="${safeAccent}" fill-opacity="0.9"/><circle cx="140" cy="90" r="3.6" fill="${safeAccent}" fill-opacity="0.9"/>` : ""}
+      ${variant === 1 ? `<rect x="112" y="88" width="9" height="4" rx="2" fill="${safeAccent}" fill-opacity="0.9"/><rect x="135" y="88" width="9" height="4" rx="2" fill="${safeAccent}" fill-opacity="0.9"/>` : ""}
+      ${variant === 2 ? `<path d="M112 94c4-4 8-4 12 0M132 94c4-4 8-4 12 0" fill="none" stroke="${safeAccent}" stroke-opacity="0.9" stroke-width="2.5" stroke-linecap="round"/>` : ""}
+      ${variant === 3 ? `<circle cx="128" cy="108" r="5" fill="${safeAccent}" fill-opacity="0.85"/>` : ""}
+    </svg>`;
+    const dataUri = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+    this.avatarDataUriCache.set(cacheKey, dataUri);
+    if (this.avatarDataUriCache.size > 256) {
+      const oldest = this.avatarDataUriCache.keys().next().value;
+      if (oldest) this.avatarDataUriCache.delete(oldest);
+    }
+    return dataUri;
   }
 
   private fallbackCharacterImage(name: string): string {
-    const fallbackTokenIds = [16, 19, 112, 241, 251, 339, 385, 777, 1024, 2048, 2571, 3317, 6819, 7577];
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) hash = (hash * 37 + name.charCodeAt(i)) | 0;
-    const tokenId = fallbackTokenIds[Math.abs(hash) % fallbackTokenIds.length];
-    return this.miladyTokenImage(tokenId);
+    const preset = RUNTIME_PRESET_PROFILES[name];
+    if (preset) {
+      return this.characterAvatarDataUri(name, preset.accent);
+    }
+    return this.characterAvatarDataUri(name, this.characterTheme(name).accent);
   }
 
   private async fetchCharacterImage(name: string): Promise<string> {
-    const normalized = name.trim().toLowerCase();
-    const namedCandidates = [
-      `https://www.miladymaker.net/milady/${encodeURIComponent(normalized)}.png`,
-      `https://www.miladymaker.net/milady/${encodeURIComponent(normalized)}.jpg`,
-      `https://www.miladymaker.net/milady/${encodeURIComponent(normalized)}.jpeg`,
-      `https://www.miladymaker.net/milady/${encodeURIComponent(normalized)}.webp`,
-    ];
-
-    for (const candidate of namedCandidates) {
-      if (await this.canLoadImage(candidate)) return candidate;
-    }
-
-    const fallback = this.fallbackCharacterImage(name);
-    try {
-      const ok = await this.canLoadImage(fallback);
-      if (ok) return fallback;
-    } catch {
-      // ignore
-    }
-    return this.miladyTokenImage(241);
+    return this.fallbackCharacterImage(name);
   }
 
   private async ensureCharacterImage(name: string): Promise<void> {
     const key = name.trim();
-    if (!key || this.characterImageByName[key]) return;
+    if (!key || !RUNTIME_PRESET_PROFILES[key] || this.characterImageByName[key]) return;
     const imageUrl = await this.fetchCharacterImage(key);
     this.characterImageByName = { ...this.characterImageByName, [key]: imageUrl };
     if (this.onboardingName.trim() === key) {
@@ -5903,21 +6196,36 @@ export class MilaidyApp extends LitElement {
     }
   }
 
-  private characterImage(name: string): string {
-    return this.characterImageByName[name] ?? this.fallbackCharacterImage(name);
+  private characterImage(name: string, accentOverride?: string): string {
+    const key = name.trim();
+    if (!key) return this.fallbackCharacterImage(RUNTIME_PRESET_NAMES[0] || "Runtime");
+    if (RUNTIME_PRESET_PROFILES[key]) {
+      return this.characterImageByName[key] ?? this.fallbackCharacterImage(key);
+    }
+    const accent = accentOverride ?? this.profileAccent ?? this.characterTheme(key).accent;
+    return this.characterAvatarDataUri(key, accent);
   }
 
   // --- Onboarding ---
 
+  private setOnboardingStep(next: number): void {
+    const bounded = Math.max(0, Math.min(3, next));
+    this.onboardingStep = bounded;
+  }
+
   private async handleOnboardingNext(): Promise<void> {
-    this.onboardingStep += 1;
+    this.setOnboardingStep(this.onboardingStep + 1);
+  }
+
+  private handleOnboardingBack(): void {
+    this.setOnboardingStep(this.onboardingStep - 1);
   }
 
   private async handleOnboardingFinish(): Promise<void> {
     if (!this.onboardingOptions || this.onboardingFinishing) return;
     this.onboardingFinishing = true;
     try {
-      const selectedProvider = this.onboardingOptions.providers.find(
+      const selectedProvider = this.onboardingProviderCatalog().find(
         (p) => p.id === this.onboardingProvider,
       );
       const needsKey = this.providerNeedsKey(selectedProvider);
@@ -5929,7 +6237,7 @@ export class MilaidyApp extends LitElement {
       const style = this.onboardingOptions.styles.find(
         (s) => s.catchphrase === this.onboardingStyle,
       );
-      const agentName = "Milaidy";
+      const agentName = "Runtime";
 
       const systemPrompt = style?.system
         ? style.system.replace(/\{name\}/g, agentName)
@@ -5990,11 +6298,11 @@ export class MilaidyApp extends LitElement {
       }
 
       // Lock in the chosen avatar image before leaving onboarding. This avoids
-      // persisting the default /pfp.jpg when image prefetch hasn't completed yet.
+      // persisting the default /onboarding-logo-test-v3.png when image prefetch hasn't completed yet.
       const selectedAvatarKey = this.onboardingName.trim();
       if (selectedAvatarKey) {
         await this.ensureCharacterImage(selectedAvatarKey);
-        this.saveProfileAppearance(this.characterImage(selectedAvatarKey), selectedAccent);
+        this.saveProfileAppearance(this.characterImage(selectedAvatarKey, selectedAccent), selectedAccent);
       } else {
         this.saveProfileAppearance(this.profileImageUrl, selectedAccent);
       }
@@ -6068,6 +6376,10 @@ export class MilaidyApp extends LitElement {
     }
   }
 
+  private onboardingProviderCatalog(): ProviderOption[] {
+    return this.normalizeOnboardingOptions(this.defaultOnboardingOptions()).providers;
+  }
+
   // --- Render ---
 
   render() {
@@ -6086,7 +6398,7 @@ export class MilaidyApp extends LitElement {
     return html`
       <div class="app-shell">
         <div class="bg-brand-layer" aria-hidden="true">
-          <img class="bg-brand-mark a" src="/pfp.jpg" alt="" />
+          <img class="bg-brand-mark a" src="/onboarding-logo-test-v3.png" alt="" />
         </div>
         ${this.renderHeader()}
         ${this.renderMobileTabbar()}
@@ -6159,7 +6471,7 @@ export class MilaidyApp extends LitElement {
           <div class="pairing-title">Pair This UI</div>
           <div class="pairing-sub">
             ${this.pairingEnabled
-              ? html`Enter the pairing code printed in the Milaidy server logs.${expires != null
+              ? html`Enter the pairing code printed in the Runtime server logs.${expires != null
                 ? html` Code expires in about ${expires} minute${expires === 1 ? "" : "s"}.` : ""}`
               : html`Pairing is disabled. Set <code>MILAIDY_PAIRING_DISABLED</code> to <code>0</code> to enable pairing.`}
           </div>
@@ -6208,13 +6520,9 @@ export class MilaidyApp extends LitElement {
   private renderHeader() {
     const status = this.agentStatus;
     const state = status?.state ?? "not_started";
+    const stateLabel = this.formatAgentStateLabel(state);
     const name = this.userDisplayName || "@you";
-    const chosenProviderId = (this.onboardingProvider ?? "").trim();
-    const chosenProvider =
-      chosenProviderId ? (this.plugins.find((p) => p.id === chosenProviderId) ?? null) : null;
-    const activeProvider =
-      this.plugins.find((p) => p.category === "ai-provider" && p.enabled) ?? null;
-    const providerForChat = chosenProvider ?? activeProvider;
+    const providerForChat = this.getPreferredAiProviderForChat();
     const providerConfigured = providerForChat ? this.isChatProviderReady(providerForChat) : false;
     const configuredProvider = providerConfigured ? providerForChat : null;
     const modelRaw = status?.model?.trim() ?? "";
@@ -6230,9 +6538,9 @@ export class MilaidyApp extends LitElement {
         <header>
           <div style="display:flex;align-items:center;gap:12px;">
             <div class="brand-block">
-              <img class="brand-mark" src="/pfp.jpg" alt="milAIdy" />
+              <img class="brand-mark" src="/onboarding-logo-test-v3.png" alt="Runtime" />
               <div class="brand-copy">
-                <span class="brand-title">milAIdy</span>
+                <span class="brand-title">Runtime</span>
                 <span class="brand-sub">Personal AI Workspace</span>
               </div>
             </div>
@@ -6242,7 +6550,7 @@ export class MilaidyApp extends LitElement {
               style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid ${this.profileAccent};"
               @error=${(e: Event) => {
                 const img = e.currentTarget as HTMLImageElement;
-                img.src = "/pfp.jpg";
+                img.src = "/onboarding-logo-test-v3.png";
               }}
             />
             <span class="logo">${name}</span>
@@ -6256,7 +6564,7 @@ export class MilaidyApp extends LitElement {
               Wallet: <b>${walletConnected ? "Connected" : "Not connected"}</b>
             </span>
           </div>
-          <span class="status-pill ${state}">${state}</span>
+          <span class="status-pill ${state}">${stateLabel}</span>
           ${state === "not_started" || state === "stopped" || state === "paused"
             ? html`<button class="lifecycle-btn" @click=${this.handleStart}>Start</button>`
             : state === "restarting"
@@ -6380,12 +6688,10 @@ export class MilaidyApp extends LitElement {
 
   private renderContextRail() {
     const state = this.agentStatus?.state ?? "not_started";
+    const stateLabel = this.formatAgentStateLabel(state);
     const enabledPlugins = this.plugins.filter((p) => p.enabled).length;
-    const activeProvider = this.plugins.find((p) => p.category === "ai-provider" && p.enabled) ?? null;
-    const chosenProviderId = (this.onboardingProvider ?? "").trim();
-    const chosenProvider =
-      chosenProviderId ? (this.plugins.find((p) => p.id === chosenProviderId) ?? null) : null;
-    const providerForChat = chosenProvider ?? activeProvider;
+    const activeProvider = this.getActiveAiProvider();
+    const providerForChat = this.getPreferredAiProviderForChat();
     const configuredProvider = this.plugins.find((p) => this.isChatProviderReady(p)) ?? null;
     const providerReady = Boolean(providerForChat && this.isChatProviderReady(providerForChat));
     const providerIssue =
@@ -6441,7 +6747,7 @@ export class MilaidyApp extends LitElement {
       <div class="rail-stack">
         <div class="rail-card">
           <div class="rail-title">Agent Status</div>
-          <div class="rail-strong">Milaidy · ${state}</div>
+          <div class="rail-strong">Runtime · ${stateLabel}</div>
           <div class="status-badge-grid">
             <div class="status-badge ${providerReady ? "ok" : "warn"}">Model Provider<b>${providerReady ? "Ready" : "Not Ready"}</b></div>
             <div class="status-badge ${enabledPlugins > 0 ? "ok" : "warn"}">Tools Loaded<b>${enabledPlugins}</b></div>
@@ -6450,7 +6756,7 @@ export class MilaidyApp extends LitElement {
             <div class="status-badge ${spendExecClass}">Bet Execution<b>${spendExecLabel}</b></div>
           </div>
           <div class="rail-sub" style="margin-top:8px;">
-            Chat happens in Chat. Settings tabs control what Milaidy can do.
+            Chat happens in Chat. Settings tabs control what Runtime can do.
           </div>
           <div class="rail-detail-list">
             <div class="rail-detail-item">
@@ -6521,7 +6827,7 @@ export class MilaidyApp extends LitElement {
 
     return html`
       <h2>Account</h2>
-      <p class="subtitle">Account information, selected theme, display name, wallet status, and Milaidy response mode.</p>
+      <p class="subtitle">Account information, selected theme, display name, wallet status, and Runtime response mode.</p>
 
       <div class="plugin-dashboard">
         <div class="plugin-item" style="flex-direction:column;align-items:stretch;">
@@ -6533,7 +6839,7 @@ export class MilaidyApp extends LitElement {
                 style="width:54px;height:54px;border-radius:12px;object-fit:cover;border:2px solid ${this.profileAccent};"
                 @error=${(e: Event) => {
                   const img = e.currentTarget as HTMLImageElement;
-                  img.src = "/pfp.jpg";
+                  img.src = "/onboarding-logo-test-v3.png";
                 }}
               />
               <div style="flex:1;min-width:0;">
@@ -6541,7 +6847,7 @@ export class MilaidyApp extends LitElement {
                   <div class="plugin-name">Profile</div>
                   <span class="plugin-state-tag ok">Active</span>
                 </div>
-                <div class="plugin-desc">Name used across your Milaidy workspace.</div>
+                <div class="plugin-desc">Name used across your Runtime workspace.</div>
               </div>
             </div>
           </div>
@@ -6598,7 +6904,11 @@ export class MilaidyApp extends LitElement {
                   class="theme-swatch ${this.profileAccent === c.value ? "selected" : ""}"
                   style="background:${c.value};"
                   title=${c.label}
-                  @click=${() => this.saveProfileAppearance(this.profileImageUrl, c.value)}
+                  @click=${() => {
+                    const baseName = this.userDisplayName.replace(/^@+/, "").trim();
+                    const avatar = baseName ? this.characterImage(baseName, c.value) : this.profileImageUrl;
+                    this.saveProfileAppearance(avatar, c.value);
+                  }}
                 >${this.profileAccent === c.value ? "✓" : ""}</button>
               `)}
             </div>
@@ -6629,8 +6939,8 @@ export class MilaidyApp extends LitElement {
           <div class="plugin-item-top">
             <div style="flex:1;">
               <div class="plugin-title-row">
-                <div class="plugin-name">Milaidy Response Mode</div>
-                <span class="plugin-state-tag">${this.onboardingStyle || "Default"}</span>
+                <div class="plugin-name">Runtime Response Mode</div>
+                <span class="plugin-state-tag">${this.formatResponseModeLabel(this.onboardingStyle)}</span>
               </div>
               <div class="plugin-desc">Your response mode is set. You can edit it anytime.</div>
             </div>
@@ -6643,6 +6953,64 @@ export class MilaidyApp extends LitElement {
         </div>
       </div>
     `;
+  }
+
+  private formatAgentStateLabel(state: string): string {
+    if (!state) return "Unknown";
+    return state
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
+  private getSelectedAiProvider(): PluginInfo | null {
+    const chosenProviderId = (this.onboardingProvider ?? "").trim();
+    if (!chosenProviderId) return null;
+    return this.plugins.find((p) => p.id === chosenProviderId) ?? null;
+  }
+
+  private getActiveAiProvider(): PluginInfo | null {
+    return this.plugins.find((p) => p.category === "ai-provider" && p.enabled) ?? null;
+  }
+
+  private getPreferredAiProviderForChat(): PluginInfo | null {
+    return this.getActiveAiProvider() ?? this.getSelectedAiProvider();
+  }
+
+  private formatResponseModeLabel(mode: string): string {
+    const raw = (mode ?? "").trim();
+    if (!raw) return "Default";
+    const lower = raw.toLowerCase();
+    if (lower === "concise and reliable." || lower === "concise and reliable") {
+      return "Runtime Core";
+    }
+    const brandedLabels: Record<string, string> = {
+      "uwu~": "Runtime Harmony",
+      "hell yeah": "Runtime Vanguard",
+      "lol k": "Runtime Pulse",
+      "noted.": "Runtime Precision",
+      "hehe~": "Runtime Flux",
+      "...": "Runtime Shadow",
+      "lmao kms": "Runtime Overdrive",
+    };
+    const mapped = brandedLabels[lower];
+    if (mapped) return mapped;
+    return raw.replace(/\bmilaidy\b/gi, "Runtime");
+  }
+
+  private formatResponseModeHint(hint: string): string {
+    const raw = (hint ?? "").trim();
+    if (!raw) return "";
+    const lower = raw.toLowerCase();
+    const brandedHints: Record<string, string> = {
+      "soft & sweet": "Warm and supportive",
+      "bold & fearless": "Decisive and direct",
+      "terminally online": "Fast, trend-aware output",
+      "composed & precise": "Structured, high-clarity responses",
+      "playful trickster": "Creative with controlled wit",
+      "quiet intensity": "Minimal words, high signal",
+      "unhinged & dark": "Aggressive edge mode",
+    };
+    return brandedHints[lower] ?? raw;
   }
 
   private renderView() {
@@ -6664,25 +7032,25 @@ export class MilaidyApp extends LitElement {
     const activeSession = this.chatSessions.find((s) => s.id === this.activeSessionId) ?? null;
     const sessionName = activeSession?.name ?? "Current Chat";
     const enabledToolCount = this.plugins.filter((p) => p.enabled).length;
-    const activeProvider = this.plugins.find((p) => p.category === "ai-provider" && p.enabled) ?? null;
-    const chosenProviderId = (this.onboardingProvider ?? "").trim();
-    const chosenProvider =
-      chosenProviderId ? (this.plugins.find((p) => p.id === chosenProviderId) ?? null) : null;
-    const providerForChat = chosenProvider ?? activeProvider;
+    const activeProvider = this.getActiveAiProvider();
+    const selectedProvider = this.getSelectedAiProvider();
+    const providerForChat = this.getPreferredAiProviderForChat();
     const chatProviderReady = providerForChat ? this.isChatProviderReady(providerForChat) : false;
     const chatProviderIssue =
       chatProviderReady
         ? null
         : this.providerSetupApplying
-          ? "Applying your model provider settings. Milaidy will unlock chat after restart."
-          : chosenProvider
-            ? !chosenProvider.enabled
-              ? `Enable ${chosenProvider.name} in AI Settings to unlock chat.`
-              : chosenProvider.validationErrors.length > 0
-                ? (chosenProvider.validationErrors[0]?.message ?? "Provider needs setup.")
-                : (chosenProvider.envKey ?? "").trim() && chosenProvider.id !== "ollama"
-                  ? `Add your ${chosenProvider.name} API key in AI Settings to unlock chat.`
+          ? "Applying your model provider settings. Runtime will unlock chat after restart."
+          : providerForChat
+            ? !providerForChat.enabled
+              ? `Enable ${providerForChat.name} in AI Settings to unlock chat.`
+              : providerForChat.validationErrors.length > 0
+                ? (providerForChat.validationErrors[0]?.message ?? "Provider needs setup.")
+                : (providerForChat.envKey ?? "").trim() && providerForChat.id !== "ollama"
+                  ? `Add your ${providerForChat.name} API key in AI Settings to unlock chat.`
                   : "Provider needs setup."
+          : selectedProvider
+            ? `Enable ${selectedProvider.name} in AI Settings to unlock chat.`
           : !activeProvider
             ? "Enable a model provider in AI Settings to start chatting."
             : activeProvider.validationErrors.length > 0
@@ -6714,7 +7082,7 @@ export class MilaidyApp extends LitElement {
 	      return html`
 	        <h2>Chat</h2>
 	        <div class="start-agent-box">
-	          <p>Milaidy is paused. Start the agent to begin chatting.</p>
+	          <p>Runtime is paused. Start the agent to begin chatting.</p>
 	          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
 	            <button class="btn" style="min-width:180px;" @click=${this.handleStart}>Start Agent</button>
 	            <button class="btn btn-outline" style="min-width:180px;" @click=${() => void this.toggleStyleSettings()}>Response mode</button>
@@ -6729,7 +7097,7 @@ export class MilaidyApp extends LitElement {
       <div class="chat-container">
         <div class="chat-header-row">
           <div class="chat-title-group">
-            <h2 class="chat-title">Milaidy Chat</h2>
+            <h2 class="chat-title">Runtime Chat</h2>
             <div class="chat-title-sub">Chat-based conversation with memory + tools</div>
             <div class="chat-header-chips">
               <span class="chat-head-chip">Session: ${sessionName}</span>
@@ -6747,10 +7115,10 @@ export class MilaidyApp extends LitElement {
           <span class="chat-presence-dot"></span>
           <span>
             ${this.chatSending
-              ? "Milaidy is working on your request."
+              ? "Runtime is working on your request."
               : this.chatResumePending
                 ? "Response stopped. Add context if needed, then press Start."
-                : "Milaidy is live."}
+                : "Runtime is live."}
           </span>
         </div>
         ${chatLockBanner}
@@ -6772,7 +7140,7 @@ export class MilaidyApp extends LitElement {
                 <div class="chat-empty">
                   <div class="chat-empty-title">Start your first conversation</div>
                   <div class="chat-empty-sub">
-                    Ask Milaidy for market context, portfolio insight, or connected-app actions.
+                    Ask Runtime for market context, portfolio insight, or connected-app actions.
                   </div>
 	                  <div class="chat-suggest-grid">
 	                    ${CHAT_QUICK_PROMPTS.slice(0, 4).map(
@@ -6793,15 +7161,15 @@ export class MilaidyApp extends LitElement {
                     <div class="chat-msg ${msg.role}">
                       <div class="chat-avatar ${msg.role === "assistant" ? "assistant" : ""}">
                         ${msg.role === "assistant"
-                          ? html`<img src="/pfp.jpg" alt="Milaidy" />`
+                          ? html`<img src="/onboarding-logo-test-v3.png" alt="Runtime" />`
                           : html`<img src=${this.profileImageUrl} alt="@you" @error=${(e: Event) => {
                             const img = e.currentTarget as HTMLImageElement;
-                            img.src = "/pfp.jpg";
+                            img.src = "/onboarding-logo-test-v3.png";
                           }} />`}
                       </div>
                       <div class="chat-body">
                         <div class="chat-meta">
-                          <span>${msg.role === "user" ? (this.userDisplayName || "@you") : "Milaidy"}</span>
+                          <span>${msg.role === "user" ? (this.userDisplayName || "@you") : "Runtime"}</span>
                           <span class="chat-time">${this.formatChatTime(msg.timestamp || Date.now())}</span>
                         </div>
                         <div class="chat-bubble">${this.renderChatBubbleText(msg)}</div>
@@ -6834,7 +7202,7 @@ export class MilaidyApp extends LitElement {
               ? "Connect a model provider in AI Settings to chat..."
               : this.chatResumePending
                 ? "Add new context before restarting..."
-                : "Message Milaidy..."}
+                : "Message Runtime..."}
             .value=${this.chatInput}
             @input=${this.handleChatInput}
             @keydown=${this.handleChatKeydown}
@@ -6870,12 +7238,12 @@ export class MilaidyApp extends LitElement {
                     <span class="chat-typing-signal" aria-hidden="true"></span>
                     <span class="chat-typing-dots"><span></span><span></span><span></span></span>
                     <span class="chat-typing-status">
-                      <span class="chat-typing-label">Milaidy is responding</span>
+                      <span class="chat-typing-label">Runtime is responding</span>
                       <span class="chat-typing-sub">live</span>
                     </span>
                   </span>
                 `
-              : html`<span>Milaidy can use enabled tools while staying in chat with you.</span>`}
+              : html`<span>Runtime can use enabled tools while staying in chat with you.</span>`}
           </div>
           <div class="chat-count">${inputLen}/12000</div>
         </div>
@@ -6933,9 +7301,9 @@ export class MilaidyApp extends LitElement {
     const styles = this.onboardingOptions?.styles ?? [];
     return html`
       <div class="chat-style-panel">
-        <div class="chat-style-panel-title">Milaidy Response Mode</div>
+        <div class="chat-style-panel-title">Runtime Response Mode</div>
         <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">
-          Choose how Milaidy responds in this workspace.
+          Choose how Runtime responds in this workspace.
         </div>
         ${styles.length === 0
           ? html`<div style="font-size:12px;color:var(--muted);">Loading style options...</div>`
@@ -6946,8 +7314,8 @@ export class MilaidyApp extends LitElement {
                     class="onboarding-option ${this.onboardingStyle === style.catchphrase ? "selected" : ""}"
                     @click=${() => { this.onboardingStyle = style.catchphrase; }}
                   >
-                    <div class="label">${style.catchphrase}</div>
-                    <div class="hint">${style.hint}</div>
+                    <div class="label">${this.formatResponseModeLabel(style.catchphrase)}</div>
+                    <div class="hint">${this.formatResponseModeHint(style.hint)}</div>
                   </div>
                 `)}
               </div>
@@ -7024,27 +7392,30 @@ export class MilaidyApp extends LitElement {
       : baseFiltered;
     const runtimeModelHint = (this.agentStatus?.model ?? "").trim().toLowerCase();
     const selectedProviderHint = (this.onboardingProvider ?? "").trim().toLowerCase();
-    const explicitSelectedAiProvider = viewMode === "ai"
+    const runtimeMatchedAiProvider = viewMode === "ai"
       ? filtered.find((p) => {
         if (p.category !== "ai-provider") return false;
         if (!p.enabled) return false;
         const id = p.id.toLowerCase();
         const name = p.name.toLowerCase();
-        const matchesRuntime =
+        return Boolean(
           runtimeModelHint &&
-          (runtimeModelHint.includes(id) || runtimeModelHint.includes(name));
-        const matchesSelected = selectedProviderHint && selectedProviderHint === id;
-        return Boolean(matchesRuntime || matchesSelected);
+          (runtimeModelHint.includes(id) || runtimeModelHint.includes(name)),
+        );
       }) ?? null
       : null;
-    const activeAiProvider = viewMode === "ai"
-      ? explicitSelectedAiProvider ?? filtered.find(
-        (p) =>
-          p.category === "ai-provider"
-          && p.enabled
-          && this.isPluginEffectivelyConfigured(p)
-          && p.validationErrors.length === 0,
+    const selectedEnabledAiProvider = viewMode === "ai"
+      ? filtered.find((p) =>
+        p.category === "ai-provider"
+        && p.enabled
+        && selectedProviderHint
+        && p.id.toLowerCase() === selectedProviderHint,
       ) ?? null
+      : null;
+    const activeAiProvider = viewMode === "ai"
+      ? runtimeMatchedAiProvider
+        ?? selectedEnabledAiProvider
+        ?? filtered.find((p) => p.category === "ai-provider" && p.enabled) ?? null
       : null;
     const orderedFiltered = (viewMode === "ai" || activeFilter === "all")
       ? [...filtered].sort((a, b) => {
@@ -7157,7 +7528,7 @@ export class MilaidyApp extends LitElement {
       <p class="subtitle">
         ${viewMode === "accounts"
           ? "Manage account-level connections here. Market/social app connections live in Markets & Apps."
-          : "Configure model, memory, and runtime modules for Milaidy."}
+          : "Configure model, memory, and runtime modules for Runtime."}
       </p>
 
       <div class="plugin-dashboard">
@@ -7170,7 +7541,7 @@ export class MilaidyApp extends LitElement {
               <div style="font-size:18px;font-weight:700;color:var(--text-strong);">
                 ${viewMode === "accounts"
                   ? "Manage account identity, wallet, and core user connection status"
-                  : "Set up Milaidy’s model and memory stack"}
+                  : "Set up Runtime’s model and memory stack"}
               </div>
             </div>
           </div>
@@ -7279,7 +7650,7 @@ export class MilaidyApp extends LitElement {
           `
         : html`
             <div class="plugin-list">
-              ${orderedFiltered.map((p) => {
+              ${repeat(orderedFiltered, (p) => p.id, (p) => {
                 const hasParams = p.parameters && p.parameters.length > 0;
                 const allParamsSet = hasParams ? p.parameters.every((param) => param.isSet) : true;
                 const settingsOpen = this.pluginSettingsOpen.has(p.id);
@@ -7382,23 +7753,24 @@ export class MilaidyApp extends LitElement {
 
                     ${hasParams
                       ? html`
-                          ${p.id === "elizacloud"
+                          ${p.id === "elizacloud" && !this.hasValidElizaCloudApiKeyConfigured(p)
                             ? html`
-                                <div style="margin-top:10px;padding:12px;border:1px solid var(--border);border-radius:12px;background:linear-gradient(180deg, rgba(30,136,229,0.10) 0%, rgba(30,136,229,0.04) 100%);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+                                <div class="elizacloud-cta">
                                   <div style="min-width:180px;">
-                                    <div style="font-size:12px;font-weight:700;color:var(--text-strong);">Eliza Cloud</div>
-                                    <div style="font-size:11px;color:var(--muted);">Login or get started, then add your API key below.</div>
+                                    <div class="elizacloud-cta-head">
+                                      <div class="elizacloud-cta-title">Eliza Cloud</div>
+                                      <span class="elizacloud-cta-badge">$5 Free to Start!</span>
+                                    </div>
+                                    <div class="elizacloud-cta-sub">Start free with $5 in credits. Create an account, then paste your API key below to activate.</div>
                                   </div>
-                                  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                                  <div class="elizacloud-cta-actions">
                                     <button
-                                      class="btn plugin-pill-btn"
-                                      style="font-size:12px;padding:7px 12px;"
+                                      class="elizacloud-cta-btn"
                                       @click=${() => this.openExternalUrl("https://www.elizacloud.ai/login")}
                                     >Login</button>
                                     <button
-                                      class="plugin-secondary-btn"
-                                      style="font-size:12px;padding:7px 12px;"
-                                      @click=${() => { window.open("https://www.elizacloud.ai/login?intent=signup", "_blank", "noopener,noreferrer"); }}
+                                      class="elizacloud-cta-btn"
+                                      @click=${() => this.openExternalUrl("https://www.elizacloud.ai/login?intent=signup")}
                                     >Get started</button>
                                   </div>
                                 </div>
@@ -7420,7 +7792,7 @@ export class MilaidyApp extends LitElement {
                                   ${p.category === "ai-provider" || p.category === "database"
                                     ? html`
                                         <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">
-                                          Provider and memory changes may require a restart to take effect. Milaidy will restart automatically after saving or toggling.
+                                          Provider and memory changes may require a restart to take effect. Runtime will restart automatically after saving or toggling.
                                         </div>
                                       `
                                     : ""}
@@ -7525,6 +7897,20 @@ export class MilaidyApp extends LitElement {
     const requiredParams = plugin.parameters.filter((param) => param.required);
     if (requiredParams.length === 0) return true;
     return requiredParams.every((param) => param.isSet || Boolean(param.default));
+  }
+
+  private hasValidElizaCloudApiKeyConfigured(plugin?: PluginInfo | null): boolean {
+    const target = plugin ?? this.plugins.find((p) => p.id === "elizacloud") ?? null;
+    if (!target || target.id !== "elizacloud") return false;
+    const keyParam = target.parameters.find((param) => param.key === "ELIZAOS_CLOUD_API_KEY");
+    if (!keyParam?.isSet) return false;
+    const hasKeyValidationError = target.validationErrors.some((err) => {
+      const field = String(err.field ?? "").toUpperCase();
+      const msg = String(err.message ?? "").toUpperCase();
+      return field === "ELIZAOS_CLOUD_API_KEY" || msg.includes("ELIZAOS_CLOUD_API_KEY");
+    });
+    if (hasKeyValidationError) return false;
+    return this.isPluginEffectivelyConfigured(target);
   }
 
   private isChatProviderReady(plugin: PluginInfo): boolean {
@@ -8125,7 +8511,7 @@ export class MilaidyApp extends LitElement {
       this.showUiNotice("Settings saved.");
       if (requiresRuntimeRestart) {
         const restartBefore = Number(this.agentStatus?.startedAt ?? 0);
-        this.showUiNotice("Applying provider settings. Restarting Milaidy...");
+        this.showUiNotice("Applying provider settings. Restarting Runtime...");
         await this.handleRestart();
         // Keep restart feedback visible and only mark loaded once restart settles.
         await this.waitForAgentAfterRestart();
@@ -8167,11 +8553,11 @@ export class MilaidyApp extends LitElement {
       await this.loadPlugins();
     }
 
-    const chosenProviderId = (this.onboardingProvider ?? "").trim();
     const targetId =
-      chosenProviderId && this.plugins.some((p) => p.id === chosenProviderId)
-        ? chosenProviderId
-        : (this.plugins.find((p) => p.category === "ai-provider")?.id ?? "");
+      this.getPreferredAiProviderForChat()?.id
+      ?? this.getSelectedAiProvider()?.id
+      ?? this.plugins.find((p) => p.category === "ai-provider")?.id
+      ?? "";
 
     if (!targetId) return;
     const next = new Set(this.pluginSettingsOpen);
@@ -8226,7 +8612,7 @@ export class MilaidyApp extends LitElement {
       if (requiresRuntimeRestart) {
         // Apply the toggle immediately in UI, then restart in background so
         // runtime-loaded plugin snapshots don't appear to "undo" the click.
-        this.showUiNotice("Applying model/memory change. Milaidy may need a restart to load it (restarting now).");
+        this.showUiNotice("Applying model/memory change. Runtime may need a restart to load it (restarting now).");
         void this.handleRestart();
         setTimeout(() => {
           void this.loadPlugins();
@@ -8468,20 +8854,11 @@ export class MilaidyApp extends LitElement {
   }
 
   private renderAvatarCustomizationPrompt() {
-    const choices = this.onboardingOptions?.names?.slice(0, 8) ?? [
-      "Reimu",
-      "Marisa",
-      "Sakuya",
-      "Remilia",
-      "Koishi",
-      "Aya",
-      "Nitori",
-      "Sanae",
-    ];
+    const choices = this.onboardingOptions?.names?.slice(0, 6) ?? RUNTIME_PRESET_NAMES;
 
     return html`
       <div class="setup-card" style="margin-top:12px;">
-        <h3 style="margin-bottom:4px;">Customize your Milaidy experience</h3>
+        <h3 style="margin-bottom:4px;">Customize your Runtime experience</h3>
         <p style="margin-bottom:10px;">
           Wallet connected. Choose your avatar to personalize your profile and color theme.
         </p>
@@ -8768,20 +9145,23 @@ export class MilaidyApp extends LitElement {
 
   private pluginDescription(plugin: PluginInfo): string {
     const idKey = `${plugin.id} ${plugin.name}`.toLowerCase();
-    if (idKey.includes("elizacloud") || idKey.includes("eliza cloud")) {
-      return "Managed cloud models and services. Includes $5 free credits to start.";
-    }
+    const directCopy = providerCopyForId(plugin.id);
+    if (directCopy) return directCopy.description;
+    if (idKey.includes("google")) return AI_PROVIDER_COPY["google-genai"].description;
+    if (idKey.includes("gemini")) return AI_PROVIDER_COPY["google-genai"].description;
+    if (idKey.includes("grok")) return AI_PROVIDER_COPY.xai.description;
     const fromPlugin = (plugin.description ?? "").trim();
     if (fromPlugin.length > 0) return fromPlugin;
     const key = idKey;
-    if (key.includes("openai")) return "Run Milaidy on OpenAI models.";
-    if (key.includes("anthropic")) return "Use Anthropic Claude models for Milaidy.";
-    if (key.includes("google") || key.includes("gemini")) return "Use Google Gemini models.";
-    if (key.includes("groq")) return "Low-latency model routing through Groq.";
-    if (key.includes("openrouter")) return "Route model calls through OpenRouter providers.";
-    if (key.includes("ollama")) return "Run local models through your Ollama endpoint.";
-    if (key.includes("local ai") || key.includes("local-ai") || key.includes("localai")) return "Run Milaidy with local AI inference providers.";
-    if (key.includes("xai")) return "Use xAI model endpoints.";
+    if (key.includes("openai")) return AI_PROVIDER_COPY.openai.description;
+    if (key.includes("anthropic")) return AI_PROVIDER_COPY.anthropic.description;
+    if (key.includes("google") || key.includes("gemini"))
+      return AI_PROVIDER_COPY["google-genai"].description;
+    if (key.includes("groq")) return AI_PROVIDER_COPY.groq.description;
+    if (key.includes("openrouter")) return AI_PROVIDER_COPY.openrouter.description;
+    if (key.includes("ollama")) return AI_PROVIDER_COPY.ollama.description;
+    if (key.includes("local ai") || key.includes("local-ai") || key.includes("localai")) return "Run Runtime with local AI inference providers.";
+    if (key.includes("xai")) return AI_PROVIDER_COPY.xai.description;
     if (key.includes("vercel")) return "Use Vercel AI Gateway/runtime integrations.";
     if (key.includes("sql")) return "Persist memory/state in SQL storage.";
     if (key.includes("localdb")) return "Store memory locally in embedded database storage.";
@@ -8800,10 +9180,10 @@ export class MilaidyApp extends LitElement {
     if (key.includes("auto-trader")) return "Automate Solana trading strategies and execution flows.";
     if (key.includes("acp")) return "Agent capability protocol runtime module.";
     return plugin.category === "ai-provider"
-      ? "Model module for Milaidy."
+      ? "Model module for Runtime."
       : plugin.category === "database"
-        ? "Memory module for Milaidy."
-        : "Runtime module for Milaidy.";
+        ? "Memory module for Runtime."
+        : "Runtime module for Runtime.";
   }
 
   private handleIconError(e: Event, fallback: string): void {
@@ -8913,7 +9293,7 @@ export class MilaidyApp extends LitElement {
         cluster,
         onWalletNotFound: walletNotFound?.(),
         appIdentity: {
-          name: "Milaidy",
+          name: "Runtime",
           uri: window.location.origin,
           icon: `${window.location.origin}/favicon.ico`,
         },
@@ -8952,8 +9332,8 @@ export class MilaidyApp extends LitElement {
         const isLocalDev =
           window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
         this.walletError = isLocalDev
-          ? "Mobile wallet adapter is unavailable in this UI build. Install UI deps, then reload, or open Milaidy in your Seeker wallet browser."
-          : "Mobile wallet adapter was not detected. Open Milaidy in your Seeker wallet browser and try again.";
+          ? "Mobile wallet adapter is unavailable in this UI build. Install UI deps, then reload, or open Runtime in your Seeker wallet browser."
+          : "Mobile wallet adapter was not detected. Open Runtime in your Seeker wallet browser and try again.";
         return;
       }
       await client.updateWalletConfig({ SOLANA_ADDRESS: mwaAddress });
@@ -8979,7 +9359,7 @@ export class MilaidyApp extends LitElement {
     this.selectedWalletLauncher = name;
     const connected = await this.connectInjectedSolanaWallet(name);
     if (connected) return;
-    this.walletConnectStatus = `Opened ${name}. Approve wallet connect and return to Milaidy.`;
+    this.walletConnectStatus = `Opened ${name}. Approve wallet connect and return to Runtime.`;
     window.open(url, "_blank");
   }
 
@@ -9037,7 +9417,7 @@ export class MilaidyApp extends LitElement {
     let walletLaunchers = [
       {
         name: "Phantom",
-        logo: "https://www.google.com/s2/favicons?domain=phantom.app&sz=64",
+        logo: "https://www.google.com/s2/favicons?domain=phantom.app&sz=128",
         hint: "Most-used Solana wallet",
         url: `https://phantom.app/ul/browse/${currentUrl}`,
         kind: "launch",
@@ -9208,8 +9588,8 @@ export class MilaidyApp extends LitElement {
                 </div>
                 <div style="font-size:12px;color:var(--muted);">
                   ${this.selectedWalletLauncher
-                    ? `After approving in ${this.selectedWalletLauncher}, Milaidy reads your wallet address automatically.`
-                    : "After wallet approval, Milaidy reads your wallet address automatically."}
+                    ? `After approving in ${this.selectedWalletLauncher}, Runtime reads your wallet address automatically.`
+                    : "After wallet approval, Runtime reads your wallet address automatically."}
                 </div>
               </div>
             `
@@ -9348,7 +9728,7 @@ export class MilaidyApp extends LitElement {
                   <div class="wallet-launcher-card">
                     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
                       <img
-                        src="https://www.google.com/s2/favicons?domain=phantom.app&sz=64"
+                        src="https://www.google.com/s2/favicons?domain=phantom.app&sz=128"
                         alt="Phantom logo"
                         style="width:28px;height:28px;border-radius:8px;object-fit:contain;background:#fff;border:1px solid var(--border-soft);padding:2px;"
                         loading="lazy"
@@ -9746,6 +10126,29 @@ export class MilaidyApp extends LitElement {
     return "";
   }
 
+  private chainLogoUrl(chain: string): string {
+    const c = chain.trim().toLowerCase();
+    if (c === "solana") {
+      return "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png";
+    }
+    if (c === "ethereum" || c === "mainnet") {
+      return "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png";
+    }
+    if (c === "base") {
+      return "https://raw.githubusercontent.com/base-org/brand-kit/main/logo/symbol/Base_Symbol_Blue.png";
+    }
+    if (c === "arbitrum") {
+      return "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/info/logo.png";
+    }
+    if (c === "optimism") {
+      return "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/optimism/info/logo.png";
+    }
+    if (c === "polygon") {
+      return "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png";
+    }
+    return "";
+  }
+
   private sortedBalances() {
     const rows = this.flattenBalances();
     const solRows = rows.filter((r) => r.chain === "Solana" && r.symbol.toUpperCase() === "SOL");
@@ -9862,6 +10265,7 @@ export class MilaidyApp extends LitElement {
       <div class="nft-grid">
         ${allNfts.map((nft) => {
           const icon = this.chainIcon(nft.chain);
+          const chainLogo = this.chainLogoUrl(nft.chain);
           return html`
             <div class="nft-card">
               ${nft.imageUrl
@@ -9872,7 +10276,18 @@ export class MilaidyApp extends LitElement {
                 <div class="nft-name">${nft.name}</div>
                 <div class="nft-collection">${nft.collectionName}</div>
                 <div class="nft-chain">
-                  <span class="chain-icon ${icon.cls}" style="width:12px;height:12px;line-height:12px;font-size:7px;">${icon.code}</span>
+                  ${chainLogo
+                    ? html`
+                        <img
+                          class="token-logo"
+                          src=${chainLogo}
+                          alt=${`${nft.chain} logo`}
+                          style="width:12px;height:12px;"
+                          loading="lazy"
+                          @error=${(e: Event) => this.handleIconError(e, "/brands/generic-app.svg")}
+                        />
+                      `
+                    : html`<span class="chain-icon ${icon.cls}" style="width:12px;height:12px;line-height:12px;font-size:7px;">${icon.code}</span>`}
                   ${nft.chain}
                 </div>
               </div>
@@ -10093,7 +10508,7 @@ export class MilaidyApp extends LitElement {
             </div>
           </div>
           <div style="font-size:12px;color:var(--muted);">
-            Controls whether Milaidy can execute spend/bet actions after confirmation.
+            Controls whether Runtime can execute spend/bet actions after confirmation.
           </div>
           ${!this.securitySpendGuardEnabled
             ? html`<div style="font-size:12px;color:var(--warn);">Spend guard is off. Spend limits, cooldown, and spend confirmation are currently bypassed.</div>`
@@ -10291,10 +10706,19 @@ export class MilaidyApp extends LitElement {
     return html`
       <div class="app-shell">
         <div class="onboarding">
-          ${this.onboardingStep === 0 ? this.renderOnboardingWelcome() : ""}
-          ${this.onboardingStep === 1 ? this.renderOnboardingName(opts) : ""}
-          ${this.onboardingStep === 2 ? this.renderOnboardingStyle(opts) : ""}
-          ${this.onboardingStep === 3 ? this.renderOnboardingProvider(opts) : ""}
+          <div class="onboarding-progress" aria-label="Onboarding progress">
+            ${[0, 1, 2, 3].map((step) => html`
+              <span class="onboarding-progress-dot ${this.onboardingStep === step ? "active" : this.onboardingStep > step ? "done" : ""}"></span>
+            `)}
+          </div>
+          ${keyed(this.onboardingStep, html`
+            <div class="onboarding-step">
+              ${this.onboardingStep === 0 ? this.renderOnboardingWelcome() : ""}
+              ${this.onboardingStep === 1 ? this.renderOnboardingName(opts) : ""}
+              ${this.onboardingStep === 2 ? this.renderOnboardingStyle(opts) : ""}
+              ${this.onboardingStep === 3 ? this.renderOnboardingProvider(opts) : ""}
+            </div>
+          `)}
         </div>
       </div>
     `;
@@ -10302,7 +10726,7 @@ export class MilaidyApp extends LitElement {
 
   private defaultOnboardingOptions(): OnboardingOptions {
     return {
-      names: ["Milaidy"],
+      names: [...RUNTIME_PRESET_NAMES],
       styles: [{
         catchphrase: "Concise and reliable.",
         hint: "Balanced",
@@ -10314,21 +10738,209 @@ export class MilaidyApp extends LitElement {
         messageExamples: [[{ user: "user", content: { text: "hello" } }]],
       }],
       providers: [
-        { id: "openai", name: "OpenAI", envKey: "OPENAI_API_KEY", pluginName: "@elizaos/plugin-openai", keyPrefix: "OPENAI", description: "GPT models." },
-        { id: "anthropic", name: "Anthropic", envKey: "ANTHROPIC_API_KEY", pluginName: "@elizaos/plugin-anthropic", keyPrefix: "ANTHROPIC", description: "Claude models." },
-        { id: "ollama", name: "Ollama", envKey: null, pluginName: "@elizaos/plugin-ollama", keyPrefix: null, description: "Local models." },
+        {
+          id: "elizacloud",
+          name: AI_PROVIDER_COPY.elizacloud.name,
+          envKey: "ELIZAOS_CLOUD_API_KEY",
+          pluginName: "@elizaos/plugin-elizacloud",
+          keyPrefix: null,
+          description: AI_PROVIDER_COPY.elizacloud.description,
+        },
+        {
+          id: "anthropic",
+          name: AI_PROVIDER_COPY.anthropic.name,
+          envKey: "ANTHROPIC_API_KEY",
+          pluginName: "@elizaos/plugin-anthropic",
+          keyPrefix: "sk-ant-",
+          description: AI_PROVIDER_COPY.anthropic.description,
+        },
+        {
+          id: "openai",
+          name: AI_PROVIDER_COPY.openai.name,
+          envKey: "OPENAI_API_KEY",
+          pluginName: "@elizaos/plugin-openai",
+          keyPrefix: "sk-",
+          description: AI_PROVIDER_COPY.openai.description,
+        },
+        {
+          id: "openrouter",
+          name: AI_PROVIDER_COPY.openrouter.name,
+          envKey: "OPENROUTER_API_KEY",
+          pluginName: "@elizaos/plugin-openrouter",
+          keyPrefix: "sk-or-",
+          description: AI_PROVIDER_COPY.openrouter.description,
+        },
+        {
+          id: "google-genai",
+          name: AI_PROVIDER_COPY["google-genai"].name,
+          envKey: "GOOGLE_API_KEY",
+          pluginName: "@elizaos/plugin-google-genai",
+          keyPrefix: null,
+          description: AI_PROVIDER_COPY["google-genai"].description,
+        },
+        {
+          id: "xai",
+          name: AI_PROVIDER_COPY.xai.name,
+          envKey: "XAI_API_KEY",
+          pluginName: "@elizaos/plugin-xai",
+          keyPrefix: "xai-",
+          description: AI_PROVIDER_COPY.xai.description,
+        },
+        {
+          id: "groq",
+          name: AI_PROVIDER_COPY.groq.name,
+          envKey: "GROQ_API_KEY",
+          pluginName: "@elizaos/plugin-groq",
+          keyPrefix: "gsk_",
+          description: AI_PROVIDER_COPY.groq.description,
+        },
+        {
+          id: "deepseek",
+          name: AI_PROVIDER_COPY.deepseek.name,
+          envKey: "DEEPSEEK_API_KEY",
+          pluginName: "@elizaos/plugin-deepseek",
+          keyPrefix: "sk-",
+          description: AI_PROVIDER_COPY.deepseek.description,
+        },
+        {
+          id: "mistral",
+          name: AI_PROVIDER_COPY.mistral.name,
+          envKey: "MISTRAL_API_KEY",
+          pluginName: "@elizaos/plugin-mistral",
+          keyPrefix: null,
+          description: AI_PROVIDER_COPY.mistral.description,
+        },
+        {
+          id: "together",
+          name: AI_PROVIDER_COPY.together.name,
+          envKey: "TOGETHER_API_KEY",
+          pluginName: "@elizaos/plugin-together",
+          keyPrefix: null,
+          description: AI_PROVIDER_COPY.together.description,
+        },
+        {
+          id: "ollama",
+          name: AI_PROVIDER_COPY.ollama.name,
+          envKey: null,
+          pluginName: "@elizaos/plugin-ollama",
+          keyPrefix: null,
+          description: AI_PROVIDER_COPY.ollama.description,
+        },
       ],
       sharedStyleRules: "Be clear and concise.",
     };
   }
 
+  private normalizeOnboardingOptions(options: OnboardingOptions): OnboardingOptions {
+    const fallback = this.defaultOnboardingOptions();
+    const byId = new Map<string, ProviderOption>();
+    for (const p of options.providers ?? []) byId.set(p.id, p);
+    for (const p of fallback.providers ?? []) {
+      if (!byId.has(p.id)) byId.set(p.id, p);
+    }
+
+    const canonical: Record<string, Partial<ProviderOption>> = {
+      elizacloud: {
+        id: "elizacloud",
+        name: AI_PROVIDER_COPY.elizacloud.name,
+        envKey: "ELIZAOS_CLOUD_API_KEY",
+        pluginName: "@elizaos/plugin-elizacloud",
+        keyPrefix: null,
+        description: AI_PROVIDER_COPY.elizacloud.description,
+      },
+      anthropic: {
+        name: AI_PROVIDER_COPY.anthropic.name,
+        description: AI_PROVIDER_COPY.anthropic.description,
+      },
+      openai: {
+        name: AI_PROVIDER_COPY.openai.name,
+        description: AI_PROVIDER_COPY.openai.description,
+      },
+      openrouter: {
+        name: AI_PROVIDER_COPY.openrouter.name,
+        description: AI_PROVIDER_COPY.openrouter.description,
+      },
+      "google-genai": {
+        name: AI_PROVIDER_COPY["google-genai"].name,
+        description: AI_PROVIDER_COPY["google-genai"].description,
+      },
+      gemini: {
+        name: AI_PROVIDER_COPY["google-genai"].name,
+        description: AI_PROVIDER_COPY["google-genai"].description,
+      },
+      xai: {
+        name: AI_PROVIDER_COPY.xai.name,
+        description: AI_PROVIDER_COPY.xai.description,
+      },
+      grok: {
+        name: AI_PROVIDER_COPY.xai.name,
+        description: AI_PROVIDER_COPY.xai.description,
+      },
+      groq: {
+        name: AI_PROVIDER_COPY.groq.name,
+        description: AI_PROVIDER_COPY.groq.description,
+      },
+      deepseek: {
+        name: AI_PROVIDER_COPY.deepseek.name,
+        description: AI_PROVIDER_COPY.deepseek.description,
+      },
+      mistral: {
+        name: AI_PROVIDER_COPY.mistral.name,
+        description: AI_PROVIDER_COPY.mistral.description,
+      },
+      together: {
+        name: AI_PROVIDER_COPY.together.name,
+        description: AI_PROVIDER_COPY.together.description,
+      },
+      ollama: {
+        name: AI_PROVIDER_COPY.ollama.name,
+        description: AI_PROVIDER_COPY.ollama.description,
+      },
+    };
+    for (const [id, patch] of Object.entries(canonical)) {
+      const current = byId.get(id);
+      if (!current) continue;
+      byId.set(id, { ...current, ...patch, id });
+    }
+
+    const desiredOrder = [
+      "elizacloud",
+      "anthropic",
+      "openai",
+      "openrouter",
+      "google-genai",
+      "xai",
+      "groq",
+      "deepseek",
+      "mistral",
+      "together",
+      "ollama",
+    ];
+    const ordered = desiredOrder
+      .map((id) => byId.get(id))
+      .filter((p): p is ProviderOption => Boolean(p));
+    for (const p of byId.values()) {
+      if (!ordered.some((x) => x.id === p.id)) ordered.push(p);
+    }
+
+    return {
+      ...options,
+      names: [...RUNTIME_PRESET_NAMES],
+      providers: ordered,
+    };
+  }
+
   private renderOnboardingWelcome() {
     return html`
-      <img class="onboarding-avatar" src="/pfp.jpg" alt="milAIdy" />
-      <h1 class="onboarding-welcome-title">Welcome to milAIdy!</h1>
+      <img class="onboarding-avatar" src="/onboarding-logo-test-v3.png" alt="Runtime" />
+      <div class="onboarding-welcome-eyebrow">Runtime Control Surface</div>
+      <h1 class="onboarding-welcome-title">Welcome to Runtime!</h1>
       <p class="onboarding-welcome-sub">
-        milAIdy is your AI assistant for chat, markets, and onchain moves. Set your profile identity, visual theme, and model provider to shape your personal command room.
+        Runtime is your AI operator for conversation, market execution, and onchain workflows. Configure your identity, theme, and model stack to run a command center built around your workflow.
       </p>
+      <div class="onboarding-welcome-capability-line">
+        <b>What Runtime can do:</b> chat with context, run coding tasks, and execute workflows across enabled plugins in one control surface.
+      </div>
       <button class="btn" @click=${() => void this.handleOnboardingNext()}>Start setup</button>
     `;
   }
@@ -10339,12 +10951,12 @@ export class MilaidyApp extends LitElement {
     const selectedCustomAccent = this.onboardingCustomAccent || colorOptions[0].value;
     const previewAccent = customSelected
       ? selectedCustomAccent
-      : this.characterTheme(this.onboardingName.trim() || opts.names[0] || "milaidy").accent;
+      : this.characterTheme(this.onboardingName.trim() || opts.names[0] || RUNTIME_PRESET_NAMES[0] || "Runtime").accent;
 
     return html`
       <img
         class="onboarding-avatar"
-        src=${this.characterImage(this.onboardingName.trim() || opts.names[0] || "milaidy")}
+        src=${this.characterImage(this.onboardingName.trim() || opts.names[0] || RUNTIME_PRESET_NAMES[0] || "Runtime", previewAccent)}
         alt="Profile preview"
         style="width:100px;height:100px;border:3px solid ${previewAccent};"
       />
@@ -10411,7 +11023,7 @@ export class MilaidyApp extends LitElement {
                 const accent = (!isPreset && this.onboardingCustomAccent)
                   ? this.onboardingCustomAccent
                   : this.characterTheme(nextName).accent;
-                this.saveProfileAppearance(this.profileImageUrl, accent);
+                this.saveProfileAppearance(this.characterImage(nextName, accent), accent);
                 this.applyThemeFromAccent(accent);
               }
             }}
@@ -10446,7 +11058,7 @@ export class MilaidyApp extends LitElement {
                       aria-label=${`Select ${opt.label}`}
                       @click=${() => {
                         this.onboardingCustomAccent = opt.value;
-                        this.saveProfileAppearance(this.profileImageUrl, opt.value);
+                        this.saveProfileAppearance(this.characterImage(this.onboardingName.trim(), opt.value), opt.value);
                         this.applyThemeFromAccent(opt.value);
                       }}
                     >${selected ? "✓" : ""}</button>
@@ -10456,11 +11068,14 @@ export class MilaidyApp extends LitElement {
             </div>
           `
         : ""}
-      <button
-        class="btn"
-        @click=${() => void this.handleOnboardingNext()}
-        ?disabled=${!this.onboardingName.trim()}
-      >Next</button>
+      <div class="onboarding-nav">
+        <button class="plugin-secondary-btn" @click=${this.handleOnboardingBack}>Back</button>
+        <button
+          class="btn"
+          @click=${() => void this.handleOnboardingNext()}
+          ?disabled=${!this.onboardingName.trim()}
+        >Next</button>
+      </div>
       ${this.nameValidationMessage
         ? html`<div style="margin-top:8px;font-size:12px;color:#c94f4f;">${this.nameValidationMessage}</div>`
         : ""}
@@ -10469,7 +11084,7 @@ export class MilaidyApp extends LitElement {
 
   private renderOnboardingStyle(opts: OnboardingOptions) {
     return html`
-      <img class="onboarding-avatar" src="/pfp.jpg" alt="milAIdy" style="width:100px;height:100px;" />
+      <img class="onboarding-avatar" src="/onboarding-logo-test-v3.png" alt="Runtime" style="width:100px;height:100px;" />
       <div class="onboarding-speech">Pick your response mode.</div>
       <div class="onboarding-options">
         ${opts.styles.map(
@@ -10482,35 +11097,49 @@ export class MilaidyApp extends LitElement {
                 this.applyThemeFromAccent(accent);
               }}
             >
-              <div class="label">${style.catchphrase}</div>
-              <div class="hint">${style.hint}</div>
+              <div class="label">${this.formatResponseModeLabel(style.catchphrase)}</div>
+              <div class="hint">${this.formatResponseModeHint(style.hint)}</div>
             </div>
           `,
         )}
       </div>
-      <button
-        class="btn"
-        @click=${() => void this.handleOnboardingNext()}
-        ?disabled=${!this.onboardingStyle}
-      >Next</button>
+      <div class="onboarding-nav">
+        <button class="plugin-secondary-btn" @click=${this.handleOnboardingBack}>Back</button>
+        <button
+          class="btn"
+          @click=${() => void this.handleOnboardingNext()}
+          ?disabled=${!this.onboardingStyle}
+        >Next</button>
+      </div>
     `;
   }
 
   private renderOnboardingProvider(opts: OnboardingOptions) {
-    const selected = opts.providers.find((p) => p.id === this.onboardingProvider);
+    const providers = this.onboardingProviderCatalog();
+    const selected = providers.find(
+      (p) => p.id === this.onboardingProvider,
+    );
     const needsKey = this.providerNeedsKey(selected);
     const hasKey = Boolean(this.onboardingApiKey.trim());
     const keyLooksValid = needsKey
       ? this.looksLikeApiKey(this.onboardingApiKey, selected?.keyPrefix ?? null)
       : true;
     const missingKey = Boolean(needsKey && !hasKey);
+    const elizaCloudConfigured = this.hasValidElizaCloudApiKeyConfigured();
+    const onboardingElizaKeyLooksValid =
+      this.onboardingProvider === "elizacloud" &&
+      this.looksLikeApiKey(this.onboardingApiKey, selected?.keyPrefix ?? null);
+    const shouldShowElizaCloudAuthActions =
+      this.onboardingProvider === "elizacloud" &&
+      !elizaCloudConfigured &&
+      !onboardingElizaKeyLooksValid;
     const finishLabel = this.onboardingFinishing
       ? "Entering..."
       : missingKey
         ? "Set up later"
         : needsKey && !keyLooksValid
           ? "Fix key"
-          : "Enter milAIdy";
+          : "Enter Runtime";
 
     const apiKeyBox = needsKey
       ? html`
@@ -10519,7 +11148,7 @@ export class MilaidyApp extends LitElement {
               API key required to chat with this provider
             </div>
             <div style="font-size:12px;color:var(--muted);line-height:1.35;">
-              Add your ${selected?.name ?? "provider"} key below. This is stored locally in your Milaidy config and never shown in plain text.
+              Add your ${selected?.name ?? "provider"} key below. This is stored locally in your Runtime config and never shown in plain text.
             </div>
           </div>
           <input
@@ -10537,43 +11166,85 @@ export class MilaidyApp extends LitElement {
         `
       : "";
 
+    const elizaCloudAuthBox =
+      shouldShowElizaCloudAuthActions
+        ? html`
+            <div class="elizacloud-cta" style="grid-column:1 / -1;">
+              <div style="min-width:180px;">
+                <div class="elizacloud-cta-head">
+                  <div class="elizacloud-cta-title">Eliza Cloud</div>
+                  <span class="elizacloud-cta-badge">$5 Free to Start!</span>
+                </div>
+                <div class="elizacloud-cta-sub">Start free with $5 in credits. Create an account, then paste your API key below to activate.</div>
+              </div>
+              <div class="elizacloud-cta-actions">
+                <button
+                  class="elizacloud-cta-btn"
+                  @click=${() => this.openExternalUrl("https://www.elizacloud.ai/login")}
+                >Login</button>
+                <button
+                  class="elizacloud-cta-btn"
+                  @click=${() => {
+                    this.openExternalUrl("https://www.elizacloud.ai/login?intent=signup");
+                  }}
+                >Get started</button>
+              </div>
+            </div>
+          `
+        : null;
+
     return html`
-      <img class="onboarding-avatar" src="/pfp.jpg" alt="milAIdy" style="width:100px;height:100px;" />
-      <div class="onboarding-speech">Choose the model provider that powers your milAIdy chats.</div>
+      <img class="onboarding-avatar" src="/onboarding-logo-test-v3.png" alt="Runtime" style="width:100px;height:100px;" />
+      <div class="onboarding-speech">Choose the model provider that powers your Runtime chats.</div>
       <div style="font-size:12px;color:var(--muted);margin-top:6px;">
-        Provider changes take effect after a restart. milAIdy will restart automatically after setup.
+        Provider changes take effect after a restart. Runtime will restart automatically after setup.
       </div>
       <div class="onboarding-options">
-        ${opts.providers.map(
-          (provider) => html`
-            <div
-              class="onboarding-option ${this.onboardingProvider === provider.id ? "selected" : ""}"
-              @click=${() => { this.onboardingProvider = provider.id; this.onboardingApiKey = ""; }}
-            >
-              <div class="label">${provider.name}</div>
-              <div class="hint">${provider.description}</div>
-            </div>
-            ${this.onboardingProvider === provider.id ? apiKeyBox : ""}
-            ${this.onboardingProvider === provider.id && provider.id === "ollama"
-              ? html`
-                  <div style="margin-top:10px;padding:10px 12px;border:1px solid var(--border);background:rgba(255,255,255,0.7);border-radius:12px;">
-                    <div style="font-weight:800;font-size:12px;color:var(--text-strong);margin-bottom:4px;">
-                      Ollama must be running on this device
+        ${providers.map(
+          (provider) => {
+            const selectedProvider = this.onboardingProvider === provider.id;
+            const showInlineElizaPromo =
+              provider.id === "elizacloud" &&
+              !(selectedProvider && shouldShowElizaCloudAuthActions);
+            return html`
+              <div
+                class="onboarding-option ${selectedProvider ? "selected" : ""}"
+                @click=${() => { this.onboardingProvider = provider.id; this.onboardingApiKey = ""; }}
+              >
+                <div class="label">
+                  ${provider.name}
+                  ${showInlineElizaPromo
+                    ? html`<span class="onboarding-provider-badge">$5 Free to Start!</span>`
+                    : ""}
+                </div>
+                <div class="hint">${provider.description}</div>
+              </div>
+              ${selectedProvider ? elizaCloudAuthBox : ""}
+              ${selectedProvider ? apiKeyBox : ""}
+              ${selectedProvider && provider.id === "ollama"
+                ? html`
+                    <div style="margin-top:10px;padding:10px 12px;border:1px solid var(--border);background:rgba(255,255,255,0.7);border-radius:12px;">
+                      <div style="font-weight:800;font-size:12px;color:var(--text-strong);margin-bottom:4px;">
+                        Ollama must be running on this device
+                      </div>
+                      <div style="font-size:12px;color:var(--muted);line-height:1.35;">
+                        Ollama has no API key, but it is a local server. If it isn't installed and running, chats will fail.
+                      </div>
                     </div>
-                    <div style="font-size:12px;color:var(--muted);line-height:1.35;">
-                      Ollama has no API key, but it is a local server. If it isn't installed and running, chats will fail.
-                    </div>
-                  </div>
-                `
-              : ""}
-          `,
+                  `
+                : ""}
+            `;
+          },
         )}
       </div>
-      <button
-        class="btn"
-        @click=${() => void this.handleOnboardingFinish()}
-        ?disabled=${this.onboardingFinishing || !this.onboardingProvider || (needsKey && hasKey && !keyLooksValid)}
-      >${finishLabel}</button>
+      <div class="onboarding-nav">
+        <button class="plugin-secondary-btn" @click=${this.handleOnboardingBack}>Back</button>
+        <button
+          class="btn"
+          @click=${() => void this.handleOnboardingFinish()}
+          ?disabled=${this.onboardingFinishing || !this.onboardingProvider || (needsKey && hasKey && !keyLooksValid)}
+        >${finishLabel}</button>
+      </div>
       ${missingKey
         ? html`
             <div style="margin-top:10px;font-size:12px;color:var(--muted);line-height:1.35;">
