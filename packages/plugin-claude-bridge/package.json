@@ -1,0 +1,47 @@
+{
+  "name": "@milady/plugin-claude-bridge",
+  "description": "Bridge plugin connecting ElizaOS to Claude Agent Service for coding, deployment, and analysis tasks",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "packageType": "plugin",
+  "platform": "node",
+  "license": "MIT",
+  "keywords": ["elizaos", "elizaos-plugin", "claude", "coding", "agent"],
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "bun": "./src/index.ts",
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "dependencies": {
+    "@elizaos/core": "next"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "bun run build.ts",
+    "test": "bun test"
+  },
+  "agentConfig": {
+    "pluginType": "elizaos:plugin:1.0.0",
+    "pluginParameters": {
+      "CLAUDE_AGENT_URL": {
+        "type": "string",
+        "description": "URL of the Claude Agent Service (defaults to http://localhost:3100)",
+        "required": false
+      }
+    }
+  }
+}

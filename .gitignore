@@ -36,6 +36,9 @@ apps/ui/test-results/
 vendor/
 plugins/plugin-blooio/
 
+# Runtime data directories
+data/
+
 # Local untracked files
 .local/
 .vscode/
