@@ -1,14 +1,20 @@
 /**
- * Onboarding wizard component — multi-step onboarding flow.
+ * Onboarding wizard component — 5-step onboarding flow.
+ *
+ * Steps:
+ *   1. welcome        — Hosting choice + restore from backup
+ *   2. identity        — Name + style combined
+ *   3. infrastructure  — Exec mode + database (local) / cloud config (elizaos)
+ *   4. aiProvider      — ElizaCloud login gate + provider selection
+ *   5. launch          — (handled by handleOnboardingFinish in AppContext)
  */
 
 import {
-  AlertTriangle,
-  CheckCircle,
   Cloud,
-  Lock,
-  Minus,
-  XCircle,
+  Database,
+  HardDrive,
+  Server,
+  Terminal,
   Zap,
 } from "lucide-react";
 import {
@@ -18,56 +24,17 @@ import {
   useRef,
   useState,
 } from "react";
-import { type OnboardingStep, THEMES, useApp } from "../AppContext";
+import { type OnboardingStep, useApp } from "../AppContext";
 import {
   type CloudProviderOption,
   client,
-  type InventoryProviderOption,
-  type ModelOption,
   type OpenRouterModelOption,
   type PiAiModelOption,
   type ProviderOption,
-  type RpcProviderOption,
-  type SandboxPlatformStatus,
   type StylePreset,
 } from "../api-client";
-import { resolveApiUrl } from "../asset-url";
 import { getProviderLogo } from "../provider-logos";
-import { AvatarSelector } from "./AvatarSelector";
 import { PermissionsOnboardingSection } from "./PermissionsSection";
-
-const SANDBOX_POLL_INTERVAL_MS = 3000;
-const SANDBOX_START_MAX_ATTEMPTS = 20;
-
-const inferPlatform = (): string => {
-  if (typeof navigator === "undefined") {
-    return "unknown";
-  }
-  if (navigator.platform.toLowerCase().includes("mac")) return "darwin";
-  if (navigator.platform.toLowerCase().includes("win")) return "win32";
-  if (navigator.platform.toLowerCase().includes("linux")) return "linux";
-  return "unknown";
-};
-
-function formatRequestError(err: unknown): string {
-  return err instanceof Error ? err.message : "unknown error";
-}
-
-function mapSandboxPlatform(status: SandboxPlatformStatus): {
-  installed: boolean;
-  running: boolean;
-  platform: string;
-  appleContainerAvailable: boolean;
-  engineRecommendation: string;
-} {
-  return {
-    installed: Boolean(status.dockerInstalled ?? status.dockerAvailable),
-    running: Boolean(status.dockerRunning),
-    platform: status.platform ?? inferPlatform(),
-    appleContainerAvailable: Boolean(status.appleContainerAvailable),
-    engineRecommendation: status.recommended ?? "docker",
-  };
-}
 
 // Platform detection for mobile — on iOS/Android only cloud mode is available
 let isMobilePlatform = false;
@@ -76,10 +43,13 @@ try {
   const plat = Capacitor.getPlatform();
   isMobilePlatform = plat === "ios" || plat === "android";
 } catch {
-  // Not in a Capacitor environment — check user agent as fallback
   if (typeof navigator !== "undefined") {
     isMobilePlatform = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   }
+}
+
+function formatRequestError(err: unknown): string {
+  return err instanceof Error ? err.message : "unknown error";
 }
 
 export function OnboardingWizard() {
@@ -88,7 +58,7 @@ export function OnboardingWizard() {
     onboardingOptions,
     onboardingName,
     onboardingStyle,
-    onboardingTheme,
+    onboardingHostingChoice,
     onboardingRunMode,
     onboardingCloudProvider,
     onboardingSmallModel,
@@ -97,19 +67,10 @@ export function OnboardingWizard() {
     onboardingApiKey,
     onboardingOpenRouterModel,
     onboardingPrimaryModel,
-    onboardingTelegramToken,
-    onboardingDiscordToken,
-    onboardingTwilioAccountSid,
-    onboardingTwilioAuthToken,
-    onboardingTwilioPhoneNumber,
-    onboardingBlooioApiKey,
-    onboardingBlooioPhoneNumber,
-    onboardingGithubToken,
     onboardingSubscriptionTab,
-    onboardingSelectedChains,
-    onboardingRpcSelections,
-    onboardingRpcKeys,
-    onboardingAvatar,
+    onboardingDatabaseProvider,
+    onboardingDatabaseConnectionString,
+    onboardingElizaosRunMode,
     onboardingRestarting,
     cloudConnected,
     cloudLoginBusy,
@@ -118,11 +79,18 @@ export function OnboardingWizard() {
     handleOnboardingNext,
     handleOnboardingBack,
     setState,
-    setTheme,
     handleCloudLogin,
-    mintFromDrop,
+    devMode,
   } = useApp();
 
+  // ── Local state ──────────────────────────────────────────────────────
+  const [customNameText, setCustomNameText] = useState("");
+  const [isCustomSelected, setIsCustomSelected] = useState(false);
+  const [dockerDbBusy, setDockerDbBusy] = useState(false);
+  const [dockerDbError, setDockerDbError] = useState<string | null>(null);
+  const [dockerDbSuccess, setDockerDbSuccess] = useState(false);
+
+  // OAuth state for subscriptions
   const [openaiOAuthStarted, setOpenaiOAuthStarted] = useState(false);
   const [openaiCallbackUrl, setOpenaiCallbackUrl] = useState("");
   const [openaiConnected, setOpenaiConnected] = useState(false);
@@ -131,10 +99,8 @@ export function OnboardingWizard() {
   const [anthropicCode, setAnthropicCode] = useState("");
   const [anthropicConnected, setAnthropicConnected] = useState(false);
   const [anthropicError, setAnthropicError] = useState("");
-  const [customNameText, setCustomNameText] = useState("");
-  const [isCustomSelected, setIsCustomSelected] = useState(false);
 
-  // ── Agent import during onboarding ──────────────────────────────────
+  // Import state
   const [showImport, setShowImport] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importPassword, setImportPassword] = useState("");
@@ -143,6 +109,8 @@ export function OnboardingWizard() {
   const [importSuccess, setImportSuccess] = useState<string | null>(null);
   const importFileRef = useRef<HTMLInputElement>(null);
   const importBusyRef = useRef(false);
+
+  // ── Handlers ─────────────────────────────────────────────────────────
 
   const handleImportAgent = useCallback(async () => {
     if (importBusyRef.current || importBusy) return;
@@ -174,7 +142,6 @@ export function OnboardingWizard() {
       );
       setImportPassword("");
       setImportFile(null);
-      // Reload after short delay to let user see success message
       setTimeout(() => {
         window.location.reload();
       }, 2000);
@@ -186,67 +153,35 @@ export function OnboardingWizard() {
     }
   }, [importBusy, importFile, importPassword]);
 
-  useEffect(() => {
-    if (onboardingStep === "theme") {
-      setTheme(onboardingTheme);
-    }
-  }, [onboardingStep, onboardingTheme, setTheme]);
-
-  const handleStyleSelect = (catchphrase: string) => {
-    setState("onboardingStyle", catchphrase);
-  };
-
-  const handleThemeSelect = (themeId: string) => {
-    setState("onboardingTheme", themeId as typeof onboardingTheme);
-    setTheme(themeId as typeof onboardingTheme);
-  };
-
   const handleRunModeSelect = (
-    mode: "local-rawdog" | "local-sandbox" | "cloud",
+    mode: "local-rawdog" | "local-lifo" | "local-sandbox" | "cloud",
   ) => {
     setState("onboardingRunMode", mode);
   };
 
-  const handleCloudProviderSelect = (providerId: string) => {
-    setState("onboardingCloudProvider", providerId);
-  };
-
-  const handleSmallModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setState("onboardingSmallModel", e.target.value);
-  };
-
-  const handleLargeModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setState("onboardingLargeModel", e.target.value);
-  };
-
-  const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleApiKeyChange = (e: ChangeEvent<HTMLInputElement>) => {
     setState("onboardingApiKey", e.target.value);
   };
 
-  const handleOpenRouterModelSelect = (modelId: string) => {
-    setState("onboardingOpenRouterModel", modelId);
-  };
-
-  const handleChainToggle = (chain: string) => {
-    const newSelected = new Set(onboardingSelectedChains);
-    if (newSelected.has(chain)) {
-      newSelected.delete(chain);
-    } else {
-      newSelected.add(chain);
+  const handleSetupDockerDb = async () => {
+    setDockerDbBusy(true);
+    setDockerDbError(null);
+    try {
+      const result = await client.setupDockerDb();
+      if (result.ok && result.credentials) {
+        setState(
+          "onboardingDatabaseConnectionString",
+          result.credentials.connectionString,
+        );
+        setDockerDbSuccess(true);
+      } else {
+        setDockerDbError(result.error ?? "Docker database setup failed");
+      }
+    } catch (err) {
+      setDockerDbError(formatRequestError(err));
+    } finally {
+      setDockerDbBusy(false);
     }
-    setState("onboardingSelectedChains", newSelected);
-  };
-
-  const handleRpcSelectionChange = (chain: string, provider: string) => {
-    setState("onboardingRpcSelections", {
-      ...onboardingRpcSelections,
-      [chain]: provider,
-    });
-  };
-
-  const handleRpcKeyChange = (chain: string, provider: string, key: string) => {
-    const keyName = `${chain}:${provider}`;
-    setState("onboardingRpcKeys", { ...onboardingRpcKeys, [keyName]: key });
   };
 
   const handleAnthropicStart = async () => {
@@ -322,11 +257,16 @@ export function OnboardingWizard() {
     }
   };
 
+  // ── Step rendering ───────────────────────────────────────────────────
+
   const renderStep = (step: OnboardingStep) => {
     switch (step) {
+      // ═══════════════════════════════════════════════════════════════════
+      // Step 1: Welcome + Hosting Choice
+      // ═══════════════════════════════════════════════════════════════════
       case "welcome":
         return (
-          <div className="max-w-[500px] mx-auto mt-10 text-center font-body">
+          <div className="max-w-[520px] mx-auto mt-10 text-center font-body">
             <img
               src="/android-chrome-512x512.png"
               alt="Avatar"
@@ -335,10 +275,60 @@ export function OnboardingWizard() {
             <h1 className="text-[28px] font-normal mb-1 text-txt-strong">
               ohhh uhhhh hey there!
             </h1>
-            <h1 className="text-[28px] font-normal mb-1 text-txt-strong">
+            <h1 className="text-[28px] font-normal mb-4 text-txt-strong">
               welcome to milady!
             </h1>
 
+            {/* Hosting choice */}
+            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
+              <h2 className="text-[22px] font-normal mb-1 text-txt-strong">
+                how are we running this?
+              </h2>
+            </div>
+            <div className="flex flex-col gap-3 max-w-[360px] mx-auto">
+              <button
+                type="button"
+                className={`px-5 py-4 border cursor-pointer bg-card transition-colors rounded-xl text-left ${
+                  onboardingHostingChoice === "local"
+                    ? "border-accent !bg-accent !text-accent-fg"
+                    : "border-border hover:border-accent"
+                }`}
+                onClick={() => setState("onboardingHostingChoice", "local")}
+              >
+                <div className="font-bold text-base">Locally Hosting</div>
+                <div
+                  className={`text-[12px] mt-1 ${
+                    onboardingHostingChoice === "local"
+                      ? "text-accent-fg/70"
+                      : "text-muted"
+                  }`}
+                >
+                  Run everything on your own machine
+                </div>
+              </button>
+              <button
+                type="button"
+                className={`px-5 py-4 border cursor-pointer bg-card transition-colors rounded-xl text-left ${
+                  onboardingHostingChoice === "elizaos"
+                    ? "border-accent !bg-accent !text-accent-fg"
+                    : "border-border hover:border-accent"
+                }`}
+                onClick={() => setState("onboardingHostingChoice", "elizaos")}
+              >
+                <div className="font-bold text-base">ElizaOS</div>
+                <div
+                  className={`text-[12px] mt-1 ${
+                    onboardingHostingChoice === "elizaos"
+                      ? "text-accent-fg/70"
+                      : "text-muted"
+                  }`}
+                >
+                  Use the ElizaOS cloud platform
+                </div>
+              </button>
+            </div>
+
+            {/* Restore from backup */}
             {!showImport ? (
               <button
                 type="button"
@@ -416,7 +406,10 @@ export function OnboardingWizard() {
           </div>
         );
 
-      case "name":
+      // ═══════════════════════════════════════════════════════════════════
+      // Step 2: Identity — Name + Style combined
+      // ═══════════════════════════════════════════════════════════════════
+      case "identity":
         return (
           <div className="max-w-[520px] mx-auto mt-10 text-center font-body">
             <img
@@ -424,13 +417,15 @@ export function OnboardingWizard() {
               alt="Avatar"
               className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
             />
-            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
+
+            {/* Name section */}
+            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-4 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
               <h2 className="text-[28px] font-normal mb-1 text-txt-strong">
                 ohhh... what's my name again?
               </h2>
             </div>
             <div className="flex flex-wrap gap-2 justify-center mx-auto mb-3">
-              {onboardingOptions?.names.slice(0, 6).map((name: string) => (
+              {onboardingOptions?.names.slice(0, 5).map((name: string) => (
                 <button
                   type="button"
                   key={name}
@@ -448,7 +443,7 @@ export function OnboardingWizard() {
                 </button>
               ))}
             </div>
-            <div className="max-w-[260px] mx-auto">
+            <div className="max-w-[260px] mx-auto mb-8">
               <div
                 className={`px-4 py-2.5 border cursor-text bg-card transition-colors rounded-full ${
                   isCustomSelected
@@ -459,7 +454,7 @@ export function OnboardingWizard() {
                 <input
                   type="text"
                   value={customNameText}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
                     setCustomNameText(e.target.value);
                     setState("onboardingName", e.target.value);
                     setIsCustomSelected(true);
@@ -473,61 +468,10 @@ export function OnboardingWizard() {
                 />
               </div>
             </div>
-          </div>
-        );
 
-      case "avatar":
-        return (
-          <div className="mx-auto mt-10 text-center font-body">
-            <img
-              src="/android-chrome-512x512.png"
-              alt="Avatar"
-              className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
-            />
-            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
-              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">
-                what body should i, uhhh, use?
-              </h2>
-            </div>
-            <div className="mx-auto">
-              <AvatarSelector
-                selected={onboardingAvatar}
-                onSelect={(i) => setState("onboardingAvatar", i)}
-                onUpload={(file) => {
-                  const previousAvatar = onboardingAvatar;
-                  const url = URL.createObjectURL(file);
-                  setState("customVrmUrl", url);
-                  setState("onboardingAvatar", 0);
-                  client
-                    .uploadCustomVrm(file)
-                    .then(() => {
-                      setState(
-                        "customVrmUrl",
-                        resolveApiUrl(`/api/avatar/vrm?t=${Date.now()}`),
-                      );
-                      requestAnimationFrame(() => URL.revokeObjectURL(url));
-                    })
-                    .catch(() => {
-                      setState("onboardingAvatar", previousAvatar);
-                      URL.revokeObjectURL(url);
-                    });
-                }}
-                showUpload
-              />
-            </div>
-          </div>
-        );
-
-      case "style":
-        return (
-          <div className="max-w-[520px] mx-auto mt-10 text-center font-body">
-            <img
-              src="/android-chrome-512x512.png"
-              alt="Avatar"
-              className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
-            />
-            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
-              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">
+            {/* Style section */}
+            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-4 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
+              <h2 className="text-[22px] font-normal mb-1 text-txt-strong">
                 whats my vibe?
               </h2>
             </div>
@@ -541,7 +485,9 @@ export function OnboardingWizard() {
                       ? "border-accent !bg-accent !text-accent-fg"
                       : "border-border hover:border-accent"
                   }`}
-                  onClick={() => handleStyleSelect(preset.catchphrase)}
+                  onClick={() =>
+                    setState("onboardingStyle", preset.catchphrase)
+                  }
                 >
                   <div className="font-bold text-sm">{preset.catchphrase}</div>
                   <div
@@ -559,371 +505,290 @@ export function OnboardingWizard() {
           </div>
         );
 
-      case "theme":
+      // ═══════════════════════════════════════════════════════════════════
+      // Step 3: Infrastructure — Exec mode + Database
+      // ═══════════════════════════════════════════════════════════════════
+      case "infrastructure":
         return (
-          <div className="max-w-[520px] mx-auto mt-10 text-center font-body">
+          <div className="max-w-[580px] mx-auto mt-10 text-center font-body">
             <img
               src="/android-chrome-512x512.png"
               alt="Avatar"
-              className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
+              className="w-[100px] h-[100px] rounded-full object-cover border-[3px] border-border mx-auto mb-4 block"
             />
-            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
-              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">
-                what colors do u like?
-              </h2>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-w-[600px] mx-auto">
-              {THEMES.map((theme) => (
-                <button
-                  type="button"
-                  key={theme.id}
-                  className={`px-2 py-3.5 border cursor-pointer bg-card transition-colors text-center rounded-lg ${
-                    onboardingTheme === theme.id
-                      ? "border-accent !bg-accent !text-accent-fg"
-                      : "border-border hover:border-accent"
-                  }`}
-                  onClick={() => handleThemeSelect(theme.id)}
-                >
-                  <div className="font-bold text-sm">{theme.label}</div>
-                </button>
-              ))}
-            </div>
+
+            {onboardingHostingChoice === "elizaos" ? (
+              /* ── ElizaOS path: Cloud login + sub-choice ─────────── */
+              <>
+                <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-4 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
+                  <h2 className="text-[24px] font-normal mb-1 text-txt-strong">
+                    connect to elizaos
+                  </h2>
+                  <p className="text-[13px] text-txt mt-1 opacity-70">
+                    log in to access cloud services
+                  </p>
+                </div>
+
+                {/* Cloud login */}
+                <div className="max-w-[400px] mx-auto mb-6">
+                  {cloudConnected ? (
+                    <div className="flex items-center gap-2 px-4 py-2.5 border border-green-500/30 bg-green-500/10 text-green-400 text-sm rounded-lg justify-center">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <title>Connected</title>
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      connected{cloudUserId ? ` (${cloudUserId})` : ""}
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="w-full px-6 py-2.5 border border-accent bg-accent text-accent-fg text-sm cursor-pointer rounded-full hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
+                      onClick={handleCloudLogin}
+                      disabled={cloudLoginBusy}
+                    >
+                      {cloudLoginBusy ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <span className="inline-block w-4 h-4 border-2 border-border border-t-accent rounded-full animate-spin" />
+                          connecting...
+                        </span>
+                      ) : (
+                        "connect account"
+                      )}
+                    </button>
+                  )}
+                  {cloudLoginError && (
+                    <p className="text-danger text-[13px] mt-2">
+                      {cloudLoginError}
+                    </p>
+                  )}
+                </div>
+
+                {/* Sub-choice: cloud hosted vs local + cloud services */}
+                {cloudConnected && (
+                  <div className="flex flex-col gap-3 max-w-[460px] mx-auto">
+                    <button
+                      type="button"
+                      className={`px-4 py-4 border cursor-pointer bg-card transition-colors rounded-lg text-left ${
+                        onboardingElizaosRunMode === "cloud-hosted"
+                          ? "border-accent !bg-accent !text-accent-fg"
+                          : "border-border hover:border-accent"
+                      }`}
+                      onClick={() => {
+                        setState("onboardingElizaosRunMode", "cloud-hosted");
+                        setState("onboardingRunMode", "cloud");
+                      }}
+                    >
+                      <div className="font-bold text-sm flex items-center gap-1.5">
+                        <Cloud className="w-4 h-4" /> Run in Cloud
+                      </div>
+                      <div className="text-[12px] mt-1 opacity-70">
+                        everything managed by ElizaOS — always on, no setup
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      className={`px-4 py-4 border cursor-pointer bg-card transition-colors rounded-lg text-left ${
+                        onboardingElizaosRunMode === "local-cloud-services"
+                          ? "border-accent !bg-accent !text-accent-fg"
+                          : "border-border hover:border-accent"
+                      }`}
+                      onClick={() => {
+                        setState(
+                          "onboardingElizaosRunMode",
+                          "local-cloud-services",
+                        );
+                        setState("onboardingRunMode", "local-rawdog");
+                      }}
+                    >
+                      <div className="font-bold text-sm flex items-center gap-1.5">
+                        <Server className="w-4 h-4" /> Run Locally with Cloud
+                        Services
+                      </div>
+                      <div className="text-[12px] mt-1 opacity-70">
+                        run on your machine, use ElizaOS for AI &amp; services
+                      </div>
+                    </button>
+                  </div>
+                )}
+
+                {/* If local+cloud: show execution mode + database pickers */}
+                {cloudConnected &&
+                  onboardingElizaosRunMode === "local-cloud-services" && (
+                    <>
+                      <div className="mt-6 mb-3 text-left max-w-[460px] mx-auto">
+                        <h3 className="text-sm font-bold text-txt-strong mb-2">
+                          Execution Mode
+                        </h3>
+                      </div>
+                      <ExecutionModePicker
+                        value={onboardingRunMode}
+                        onChange={handleRunModeSelect}
+                      />
+                      <div className="mt-6 mb-3 text-left max-w-[460px] mx-auto">
+                        <h3 className="text-sm font-bold text-txt-strong mb-2">
+                          Database
+                        </h3>
+                      </div>
+                      <DatabasePicker
+                        value={onboardingDatabaseProvider}
+                        connectionString={onboardingDatabaseConnectionString}
+                        onChange={(v) =>
+                          setState("onboardingDatabaseProvider", v)
+                        }
+                        onConnectionStringChange={(v) =>
+                          setState("onboardingDatabaseConnectionString", v)
+                        }
+                        onSetupDockerDb={handleSetupDockerDb}
+                        dockerDbBusy={dockerDbBusy}
+                        dockerDbError={dockerDbError}
+                        dockerDbSuccess={dockerDbSuccess}
+                        dockerAvailable={
+                          onboardingOptions?.detectedEnvironment
+                            ?.dockerAvailable ?? false
+                        }
+                      />
+                    </>
+                  )}
+
+                {/* If cloud hosted: show model selection */}
+                {cloudConnected &&
+                  onboardingElizaosRunMode === "cloud-hosted" && (
+                    <div className="mt-6 max-w-[460px] mx-auto">
+                      <CloudModelSelection
+                        cloudProviders={onboardingOptions?.cloudProviders ?? []}
+                        cloudProvider={onboardingCloudProvider}
+                        smallModel={onboardingSmallModel}
+                        largeModel={onboardingLargeModel}
+                        models={onboardingOptions?.models}
+                        onCloudProviderChange={(v) =>
+                          setState("onboardingCloudProvider", v)
+                        }
+                        onSmallModelChange={(v) =>
+                          setState("onboardingSmallModel", v)
+                        }
+                        onLargeModelChange={(v) =>
+                          setState("onboardingLargeModel", v)
+                        }
+                      />
+                    </div>
+                  )}
+              </>
+            ) : (
+              /* ── LOCAL path: Exec mode + Database ───────────────── */
+              <>
+                {/* Execution mode picker */}
+                <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-4 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
+                  <h2 className="text-[24px] font-normal mb-1 text-txt-strong">
+                    where should i live?
+                  </h2>
+                  <p className="text-[13px] text-txt mt-1 opacity-70">
+                    pick how u want me to run bb
+                  </p>
+                </div>
+
+                {isMobilePlatform ? (
+                  <MobileCloudOnly
+                    runMode={onboardingRunMode}
+                    onSelect={handleRunModeSelect}
+                  />
+                ) : (
+                  <ExecutionModePicker
+                    value={onboardingRunMode}
+                    onChange={handleRunModeSelect}
+                  />
+                )}
+
+                {/* Database picker */}
+                <div className="mt-8 mb-3 text-left max-w-[460px] mx-auto">
+                  <h3 className="text-sm font-bold text-txt-strong mb-1">
+                    Database
+                  </h3>
+                  <p className="text-[12px] text-muted">
+                    where should i store my memories?
+                  </p>
+                </div>
+                <DatabasePicker
+                  value={onboardingDatabaseProvider}
+                  connectionString={onboardingDatabaseConnectionString}
+                  onChange={(v) => setState("onboardingDatabaseProvider", v)}
+                  onConnectionStringChange={(v) =>
+                    setState("onboardingDatabaseConnectionString", v)
+                  }
+                  onSetupDockerDb={handleSetupDockerDb}
+                  dockerDbBusy={dockerDbBusy}
+                  dockerDbError={dockerDbError}
+                  dockerDbSuccess={dockerDbSuccess}
+                  dockerAvailable={
+                    onboardingOptions?.detectedEnvironment?.dockerAvailable ??
+                    false
+                  }
+                />
+              </>
+            )}
           </div>
         );
 
-      case "mint":
+      // ═══════════════════════════════════════════════════════════════════
+      // Step 3b: Permissions (rawdog + electron + missing permissions)
+      // ═══════════════════════════════════════════════════════════════════
+      case "permissions":
         return (
-          <div className="max-w-[520px] mx-auto mt-10 text-center font-body">
-            <img
-              src="/android-chrome-512x512.png"
-              alt="Avatar"
-              className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
+          <div className="max-w-[520px] mx-auto mt-10 font-body">
+            <PermissionsOnboardingSection
+              onContinue={(opts) => handleOnboardingNext(opts)}
             />
-            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
-              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">
-                mint ur drop!
-              </h2>
-              <p className="text-[13px] text-txt mt-1 opacity-70">
-                claim ur character to get started
-              </p>
-            </div>
-            <div className="flex flex-col gap-3 max-w-[460px] mx-auto">
-              <button
-                type="button"
-                className="px-4 py-3 bg-accent text-accent-fg font-bold rounded-lg cursor-pointer"
-                onClick={() => {
-                  mintFromDrop(false).then(() => handleOnboardingNext());
-                }}
-              >
-                Mint Character
-              </button>
-              <button
-                type="button"
-                className="px-4 py-3 bg-card border border-border text-txt font-bold rounded-lg hover:border-accent cursor-pointer"
-                onClick={() => handleOnboardingNext()}
-              >
-                Skip for now
-              </button>
-            </div>
           </div>
         );
 
-      case "runMode":
-        // On mobile (iOS/Android), only cloud is available
-        if (isMobilePlatform) {
-          // Auto-select cloud and show a simple confirmation
-          if (onboardingRunMode !== "cloud") {
-            handleRunModeSelect("cloud");
-          }
+      // ═══════════════════════════════════════════════════════════════════
+      // Step 4: AI Provider — ElizaCloud login gate + provider selection
+      // ═══════════════════════════════════════════════════════════════════
+      case "aiProvider": {
+        // For ElizaOS cloud-hosted path, provider is pre-configured — just confirm
+        if (
+          onboardingHostingChoice === "elizaos" &&
+          onboardingElizaosRunMode === "cloud-hosted"
+        ) {
           return (
             <div className="max-w-[520px] mx-auto mt-10 text-center font-body">
-              <img
-                src="/android-chrome-512x512.png"
-                alt="Avatar"
-                className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
-              />
               <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
-                <h2 className="text-[28px] font-normal mb-1 text-txt-strong">
-                  i'll live in the cloud~
+                <h2 className="text-[24px] font-normal mb-1 text-txt-strong">
+                  all set!
                 </h2>
                 <p className="text-[13px] text-txt mt-1 opacity-70">
-                  since ur on mobile i'll run on eliza cloud. i can still do
-                  everything — browse the web, manage ur stuff, and more
+                  ElizaOS will handle your AI provider. Click next to launch.
                 </p>
               </div>
-              <div className="flex flex-col gap-3 max-w-[460px] mx-auto">
-                <div className="px-4 py-4 border border-accent bg-accent text-accent-fg rounded-lg text-left">
-                  <div className="font-bold text-sm flex items-center gap-1.5">
-                    <Cloud className="w-4 h-4" /> cloud
-                  </div>
-                  <div className="text-[12px] mt-1 opacity-80">
-                    always on, works from any device, easiest setup
-                  </div>
+              <div className="max-w-[400px] mx-auto text-left">
+                <div className="px-4 py-3 border border-green-500/30 bg-green-500/10 text-green-400 text-sm rounded-lg">
+                  Cloud provider configured
+                  {onboardingCloudProvider
+                    ? ` (${onboardingCloudProvider})`
+                    : ""}
                 </div>
               </div>
             </div>
           );
         }
 
-        return (
-          <div className="max-w-[580px] mx-auto mt-10 text-center font-body">
-            <img
-              src="/android-chrome-512x512.png"
-              alt="Avatar"
-              className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
-            />
-            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
-              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">
-                where should i live?
-              </h2>
-              <p className="text-[13px] text-txt mt-1 opacity-70">
-                pick how u want me to run bb
-              </p>
-            </div>
-            <div className="flex flex-col gap-3 max-w-[460px] mx-auto">
-              <button
-                type="button"
-                className={`px-4 py-4 border cursor-pointer bg-card transition-colors rounded-lg text-left ${
-                  onboardingRunMode === "cloud"
-                    ? "border-accent !bg-accent !text-accent-fg"
-                    : "border-border hover:border-accent"
-                }`}
-                onClick={() => handleRunModeSelect("cloud")}
-              >
-                <div className="font-bold text-sm flex items-center gap-1.5">
-                  <Cloud className="w-4 h-4" /> cloud
-                </div>
-                <div className="text-[12px] mt-1 opacity-70">
-                  i run on eliza cloud. easiest setup, always on, can still use
-                  ur browser &amp; computer if u let me
-                </div>
-              </button>
-              <button
-                type="button"
-                className={`px-4 py-4 border cursor-pointer bg-card transition-colors rounded-lg text-left ${
-                  onboardingRunMode === "local-sandbox"
-                    ? "border-accent !bg-accent !text-accent-fg"
-                    : "border-border hover:border-accent"
-                }`}
-                onClick={() => handleRunModeSelect("local-sandbox")}
-              >
-                <div className="font-bold text-sm flex items-center gap-1.5">
-                  <Lock className="w-4 h-4" /> local (sandbox)
-                </div>
-                <div className="text-[12px] mt-1 opacity-70">
-                  i run on ur machine in a secure container. ur api keys stay
-                  hidden even from me. needs docker
-                </div>
-              </button>
-              <button
-                type="button"
-                className={`px-4 py-4 border cursor-pointer bg-card transition-colors rounded-lg text-left ${
-                  onboardingRunMode === "local-rawdog"
-                    ? "border-accent !bg-accent !text-accent-fg"
-                    : "border-border hover:border-accent"
-                }`}
-                onClick={() => handleRunModeSelect("local-rawdog")}
-              >
-                <div className="font-bold text-sm flex items-center gap-1.5">
-                  <Zap className="w-4 h-4" /> local (raw)
-                </div>
-                <div className="text-[12px] mt-1 opacity-70">
-                  i run directly on ur machine w full access. fastest &amp;
-                  simplest but no sandbox protection
-                </div>
-              </button>
-            </div>
-          </div>
-        );
+        // For ElizaOS local+cloud path, default provider to elizacloud
+        if (
+          onboardingHostingChoice === "elizaos" &&
+          onboardingElizaosRunMode === "local-cloud-services" &&
+          !onboardingProvider
+        ) {
+          setState("onboardingProvider", "elizacloud");
+        }
 
-      case "dockerSetup":
-        return <DockerSetupStep />;
-
-      case "cloudProvider":
-        return (
-          <div className="max-w-[520px] mx-auto mt-10 text-center font-body">
-            <img
-              src="/android-chrome-512x512.png"
-              alt="Avatar"
-              className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
-            />
-            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
-              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">
-                okay which cloud?
-              </h2>
-            </div>
-            <div className="flex flex-col gap-2 text-left max-w-[600px] mx-auto">
-              {onboardingOptions?.cloudProviders.map(
-                (provider: CloudProviderOption) => (
-                  <button
-                    type="button"
-                    key={provider.id}
-                    className={`w-full px-4 py-3 border cursor-pointer bg-card transition-colors rounded-lg text-left ${
-                      onboardingCloudProvider === provider.id
-                        ? "border-accent !bg-accent !text-accent-fg"
-                        : "border-border hover:border-accent"
-                    }`}
-                    onClick={() => handleCloudProviderSelect(provider.id)}
-                  >
-                    <div className="font-bold text-sm">{provider.name}</div>
-                    {provider.description && (
-                      <div
-                        className={`text-xs mt-0.5 ${
-                          onboardingCloudProvider === provider.id
-                            ? "text-accent-fg/70"
-                            : "text-muted"
-                        }`}
-                      >
-                        {provider.description}
-                      </div>
-                    )}
-                  </button>
-                ),
-              )}
-            </div>
-            {onboardingCloudProvider === "elizacloud" && (
-              <div className="max-w-[600px] mx-auto mt-4">
-                {cloudConnected ? (
-                  <div className="flex items-center gap-2 px-4 py-2.5 border border-green-500/30 bg-green-500/10 text-green-400 text-sm rounded-lg justify-center">
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <title>Connected</title>
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                    connected~
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    className="px-6 py-2.5 border border-accent bg-accent text-accent-fg text-sm cursor-pointer rounded-full hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
-                    onClick={handleCloudLogin}
-                    disabled={cloudLoginBusy}
-                  >
-                    {cloudLoginBusy ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <span className="inline-block w-4 h-4 border-2 border-border border-t-accent rounded-full animate-spin" />
-                        connecting...
-                      </span>
-                    ) : (
-                      "connect account"
-                    )}
-                  </button>
-                )}
-                {cloudLoginError && (
-                  <p className="text-danger text-[13px] mt-2">
-                    {cloudLoginError}
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-        );
-
-      case "modelSelection":
-        return (
-          <div className="max-w-[500px] mx-auto mt-10 text-center font-body">
-            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
-              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">
-                Model Selection
-              </h2>
-            </div>
-            <div className="flex flex-col gap-4 text-left max-w-[600px] mx-auto">
-              <div>
-                <span className="text-[13px] font-bold text-txt-strong block mb-2 text-left">
-                  Small Model:
-                </span>
-                <select
-                  value={onboardingSmallModel}
-                  onChange={handleSmallModelChange}
-                  className="w-full px-3 py-2 border border-border bg-card text-sm mt-2 focus:border-accent focus:outline-none"
-                >
-                  {onboardingOptions?.models?.small?.map(
-                    (model: ModelOption) => (
-                      <option key={model.id} value={model.id}>
-                        {model.name}
-                      </option>
-                    ),
-                  )}
-                </select>
-              </div>
-              <div>
-                <span className="text-[13px] font-bold text-txt-strong block mb-2 text-left">
-                  Large Model:
-                </span>
-                <select
-                  value={onboardingLargeModel}
-                  onChange={handleLargeModelChange}
-                  className="w-full px-3 py-2 border border-border bg-card text-sm mt-2 focus:border-accent focus:outline-none"
-                >
-                  {onboardingOptions?.models?.large?.map(
-                    (model: ModelOption) => (
-                      <option key={model.id} value={model.id}>
-                        {model.name}
-                      </option>
-                    ),
-                  )}
-                </select>
-              </div>
-            </div>
-          </div>
-        );
-
-      case "cloudLogin":
-        return (
-          <div className="max-w-[500px] mx-auto mt-10 text-center font-body">
-            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
-              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">
-                Cloud Login
-              </h2>
-            </div>
-            {cloudConnected ? (
-              <div className="max-w-[600px] mx-auto">
-                <p className="text-txt mb-2">Logged in successfully!</p>
-                {cloudUserId && (
-                  <p className="text-muted text-sm">User ID: {cloudUserId}</p>
-                )}
-              </div>
-            ) : (
-              <div className="max-w-[600px] mx-auto">
-                <p className="text-txt mb-4">
-                  Click the button below to log in to Eliza Cloud
-                </p>
-                <button
-                  type="button"
-                  className="px-6 py-2 border border-accent bg-accent text-accent-fg text-sm cursor-pointer hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed mt-5"
-                  onClick={handleCloudLogin}
-                  disabled={cloudLoginBusy}
-                >
-                  {cloudLoginBusy ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <span className="inline-block w-5 h-5 border-2 border-border border-t-accent rounded-full animate-spin" />
-                      Logging in...
-                    </span>
-                  ) : (
-                    "Login to Eliza Cloud"
-                  )}
-                </button>
-                {cloudLoginError && (
-                  <p className="text-danger text-[13px] mt-2.5">
-                    {cloudLoginError}
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-        );
-
-      case "llmProvider": {
-        const isDark =
-          onboardingTheme !== "milady" && onboardingTheme !== "qt314";
         const providers = onboardingOptions?.providers ?? [];
         const cloudProviders = providers.filter(
           (p: ProviderOption) => p.id === "elizacloud",
@@ -973,18 +838,7 @@ export function OnboardingWizard() {
           };
         };
 
-        const piAiModels = onboardingOptions?.piAiModels ?? [];
-        const piAiDefaultModel = onboardingOptions?.piAiDefaultModel ?? "";
-        const normalizedPrimaryModel = onboardingPrimaryModel.trim();
-        const hasKnownPiAiModel = piAiModels.some(
-          (model: PiAiModelOption) => model.id === normalizedPrimaryModel,
-        );
-        const piAiSelectValue =
-          normalizedPrimaryModel.length === 0
-            ? ""
-            : hasKnownPiAiModel
-              ? normalizedPrimaryModel
-              : "__custom__";
+        const isDark = true; // theme defaults to "milady" which is dark
 
         const handleProviderSelect = (providerId: string) => {
           setState("onboardingProvider", providerId);
@@ -995,18 +849,14 @@ export function OnboardingWizard() {
           }
         };
 
-        const renderProviderCard = (
-          provider: ProviderOption,
-          size: "lg" | "sm" = "sm",
-        ) => {
+        const renderProviderCard = (provider: ProviderOption) => {
           const display = getProviderDisplay(provider);
           const isSelected = onboardingProvider === provider.id;
-          const padding = size === "lg" ? "px-5 py-4" : "px-4 py-3";
           return (
             <button
               type="button"
               key={provider.id}
-              className={`${padding} border-[1.5px] cursor-pointer transition-all text-left flex items-center gap-3 rounded-lg ${
+              className={`px-4 py-3 border-[1.5px] cursor-pointer transition-all text-left flex items-center gap-3 rounded-lg ${
                 isSelected
                   ? "border-accent !bg-accent !text-accent-fg shadow-[0_0_0_3px_var(--accent),var(--shadow-md)]"
                   : "border-border bg-card hover:border-border-hover hover:bg-bg-hover hover:shadow-md hover:-translate-y-0.5"
@@ -1032,7 +882,7 @@ export function OnboardingWizard() {
           );
         };
 
-        // ── Phase 1: provider grid (no provider selected yet) ──────────
+        // ── Phase 1: provider grid (no provider selected yet) ──────
         if (!onboardingProvider) {
           return (
             <div className="w-full mx-auto mt-10 text-center font-body">
@@ -1065,13 +915,26 @@ export function OnboardingWizard() {
           );
         }
 
-        // ── Phase 2: config for the selected provider ─────────────────
+        // ── Phase 2: config for the selected provider ──────────────
         const selectedProvider = providers.find(
           (p: ProviderOption) => p.id === onboardingProvider,
         );
         const selectedDisplay = selectedProvider
           ? getProviderDisplay(selectedProvider)
           : { name: onboardingProvider, description: "" };
+
+        const piAiModels = onboardingOptions?.piAiModels ?? [];
+        const piAiDefaultModel = onboardingOptions?.piAiDefaultModel ?? "";
+        const normalizedPrimaryModel = onboardingPrimaryModel.trim();
+        const hasKnownPiAiModel = piAiModels.some(
+          (model: PiAiModelOption) => model.id === normalizedPrimaryModel,
+        );
+        const piAiSelectValue =
+          normalizedPrimaryModel.length === 0
+            ? ""
+            : hasKnownPiAiModel
+              ? normalizedPrimaryModel
+              : "__custom__";
 
         return (
           <div className="max-w-[520px] mx-auto mt-10 text-center font-body">
@@ -1481,7 +1344,9 @@ export function OnboardingWizard() {
                               ? "border-accent !bg-accent !text-accent-fg"
                               : "border-border bg-card hover:border-accent/50"
                           }`}
-                          onClick={() => handleOpenRouterModelSelect(model.id)}
+                          onClick={() =>
+                            setState("onboardingOpenRouterModel", model.id)
+                          }
                         >
                           <div className="font-bold text-sm">{model.name}</div>
                           {model.description && (
@@ -1499,400 +1364,22 @@ export function OnboardingWizard() {
         );
       }
 
-      case "inventorySetup": {
+      // ═══════════════════════════════════════════════════════════════════
+      // Step 5: Launch — handled by handleOnboardingFinish, this is a
+      // fallback in case we ever render the "launch" step directly
+      // ═══════════════════════════════════════════════════════════════════
+      case "launch":
         return (
-          <div className="w-full mx-auto mt-10 text-center font-body">
-            <img
-              src="/android-chrome-512x512.png"
-              alt="Avatar"
-              className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
-            />
+          <div className="max-w-[520px] mx-auto mt-10 text-center font-body">
             <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
               <h2 className="text-[28px] font-normal mb-1 text-txt-strong">
-                soooo can i have a wallet?
+                launching...
               </h2>
+              <p className="text-[13px] text-txt mt-1 opacity-70">
+                setting everything up for u~
+              </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left w-full px-4">
-              <h3 className="text-[13px] font-bold text-txt-strong col-span-full mb-2">
-                Select Chains:
-              </h3>
-              {onboardingOptions?.inventoryProviders.map(
-                (provider: InventoryProviderOption) => {
-                  const selectedRpc =
-                    onboardingRpcSelections[provider.id] ?? "elizacloud";
-                  const isElizaCloudRpc = selectedRpc === "elizacloud";
-                  return (
-                    <div
-                      key={provider.id}
-                      className="px-4 py-3 border rounded-lg border-border bg-card min-w-0"
-                    >
-                      <span className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={onboardingSelectedChains.has(provider.id)}
-                          onChange={() => handleChainToggle(provider.id)}
-                          className="cursor-pointer"
-                        />
-                        <span className="font-bold text-sm">
-                          {provider.name}
-                        </span>
-                      </span>
-                      {provider.description && (
-                        <p className="text-xs text-muted mt-0.5 ml-6">
-                          {provider.description}
-                        </p>
-                      )}
-                      {onboardingSelectedChains.has(provider.id) && (
-                        <div className="mt-3 ml-6">
-                          <span className="text-[13px] font-bold text-txt-strong block mb-2 text-left">
-                            RPC Provider:
-                          </span>
-                          <select
-                            value={selectedRpc}
-                            onChange={(e) =>
-                              handleRpcSelectionChange(
-                                provider.id,
-                                e.target.value,
-                              )
-                            }
-                            className="w-full px-3 py-2 border border-border bg-card text-sm mt-2 focus:border-accent focus:outline-none"
-                          >
-                            {provider.rpcProviders?.map(
-                              (rpc: RpcProviderOption) => (
-                                <option key={rpc.id} value={rpc.id}>
-                                  {rpc.name}
-                                </option>
-                              ),
-                            )}
-                          </select>
-                          {isElizaCloudRpc ? (
-                            <div className="mt-3">
-                              {cloudConnected ? (
-                                <div className="flex items-center gap-2 px-4 py-2.5 border border-green-500/30 bg-green-500/10 text-green-400 text-sm rounded-lg w-fit">
-                                  <svg
-                                    width="16"
-                                    height="16"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  >
-                                    <title>Connected</title>
-                                    <polyline points="20 6 9 17 4 12" />
-                                  </svg>
-                                  connected~ no keys needed
-                                </div>
-                              ) : (
-                                <div className="mt-2">
-                                  <p className="text-xs text-muted mb-2">
-                                    Eliza Cloud RPC — no keys necessary. Log in
-                                    to use.
-                                  </p>
-                                  <button
-                                    type="button"
-                                    className="px-6 py-2.5 border border-accent bg-accent text-accent-fg text-sm cursor-pointer rounded-full hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
-                                    onClick={handleCloudLogin}
-                                    disabled={cloudLoginBusy}
-                                  >
-                                    {cloudLoginBusy ? (
-                                      <span className="flex items-center justify-center gap-2">
-                                        <span className="inline-block w-4 h-4 border-2 border-border border-t-accent rounded-full animate-spin" />
-                                        connecting...
-                                      </span>
-                                    ) : (
-                                      "connect account"
-                                    )}
-                                  </button>
-                                  {cloudLoginError && (
-                                    <p className="text-danger text-[13px] mt-2">
-                                      {cloudLoginError}
-                                    </p>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            onboardingRpcSelections[provider.id] && (
-                              <div className="mt-3">
-                                <span className="text-[13px] font-bold text-txt-strong block mb-2 text-left">
-                                  RPC API Key (optional):
-                                </span>
-                                <input
-                                  type="password"
-                                  value={
-                                    onboardingRpcKeys[
-                                      `${provider.id}:${onboardingRpcSelections[provider.id]}`
-                                    ] ?? ""
-                                  }
-                                  onChange={(e) =>
-                                    handleRpcKeyChange(
-                                      provider.id,
-                                      onboardingRpcSelections[provider.id],
-                                      e.target.value,
-                                    )
-                                  }
-                                  placeholder="Optional API key"
-                                  className="w-full px-3 py-2 border border-border bg-card text-sm mt-2 focus:border-accent focus:outline-none"
-                                />
-                              </div>
-                            )
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                },
-              )}
-            </div>
-          </div>
-        );
-      }
-
-      case "connectors":
-        return (
-          <div className="w-full mx-auto mt-10 text-center font-body">
-            <img
-              src="/android-chrome-512x512.png"
-              alt="Avatar"
-              className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
-            />
-            <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
-              <h2 className="text-[28px] font-normal mb-1 text-txt-strong">
-                how do you want to reach me?
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left w-full max-w-[800px] mx-auto px-2">
-              {/* Telegram */}
-              <div
-                className={`px-4 py-3 border rounded-lg bg-card transition-colors min-w-0 ${onboardingTelegramToken.trim() ? "border-accent" : "border-border"}`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="font-bold text-sm text-txt-strong">
-                    Telegram
-                  </div>
-                  {onboardingTelegramToken.trim() && (
-                    <span className="text-[10px] text-accent border border-accent px-1.5 py-0.5 rounded">
-                      Configured
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-muted mb-3 mt-1">
-                  Get a bot token from{" "}
-                  <a
-                    href="https://t.me/BotFather"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-accent underline"
-                  >
-                    @BotFather
-                  </a>{" "}
-                  on Telegram
-                </p>
-                <input
-                  type="password"
-                  value={onboardingTelegramToken}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                    setState("onboardingTelegramToken", e.target.value)
-                  }
-                  placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
-                  className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none rounded"
-                />
-              </div>
-
-              {/* Discord */}
-              <div
-                className={`px-4 py-3 border rounded-lg bg-card transition-colors min-w-0 ${onboardingDiscordToken.trim() ? "border-accent" : "border-border"}`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="font-bold text-sm text-txt-strong">
-                    Discord
-                  </div>
-                  {onboardingDiscordToken.trim() && (
-                    <span className="text-[10px] text-accent border border-accent px-1.5 py-0.5 rounded">
-                      Configured
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-muted mb-3 mt-1">
-                  Only a bot token is needed.{" "}
-                  <a
-                    href="https://discord.com/developers/applications"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-accent hover:underline"
-                  >
-                    Create a bot →
-                  </a>
-                </p>
-                <input
-                  type="password"
-                  value={onboardingDiscordToken}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                    setState("onboardingDiscordToken", e.target.value)
-                  }
-                  placeholder="Discord bot token"
-                  className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none rounded"
-                />
-              </div>
-
-              {/* Twilio (SMS / Green Text) */}
-              <div
-                className={`px-4 py-3 border rounded-lg bg-card transition-colors min-w-0 ${onboardingTwilioAccountSid.trim() && onboardingTwilioAuthToken.trim() ? "border-accent" : "border-border"}`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="font-bold text-sm text-txt-strong">
-                    Twilio SMS
-                  </div>
-                  {onboardingTwilioAccountSid.trim() &&
-                    onboardingTwilioAuthToken.trim() && (
-                      <span className="text-[10px] text-accent border border-accent px-1.5 py-0.5 rounded">
-                        Configured
-                      </span>
-                    )}
-                </div>
-                <p className="text-xs text-muted mb-3 mt-1">
-                  SMS green-text messaging via{" "}
-                  <a
-                    href="https://www.twilio.com/console"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-accent underline"
-                  >
-                    Twilio Console
-                  </a>
-                </p>
-                <div className="flex flex-col gap-2">
-                  <input
-                    type="password"
-                    value={onboardingTwilioAccountSid}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      setState("onboardingTwilioAccountSid", e.target.value)
-                    }
-                    placeholder="Account SID"
-                    className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none rounded"
-                  />
-                  <input
-                    type="password"
-                    value={onboardingTwilioAuthToken}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      setState("onboardingTwilioAuthToken", e.target.value)
-                    }
-                    placeholder="Auth Token"
-                    className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none rounded"
-                  />
-                  <input
-                    type="tel"
-                    value={onboardingTwilioPhoneNumber}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      setState("onboardingTwilioPhoneNumber", e.target.value)
-                    }
-                    placeholder="+1234567890 (Twilio phone number)"
-                    className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none rounded"
-                  />
-                </div>
-              </div>
-
-              {/* Blooio (iMessage / Blue Text) */}
-              <div
-                className={`px-4 py-3 border rounded-lg bg-card transition-colors min-w-0 ${onboardingBlooioApiKey.trim() ? "border-accent" : "border-border"}`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="font-bold text-sm text-txt-strong">
-                    Blooio iMessage
-                  </div>
-                  {onboardingBlooioApiKey.trim() && (
-                    <span className="text-[10px] text-accent border border-accent px-1.5 py-0.5 rounded">
-                      Configured
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-muted mb-3 mt-1">
-                  Blue-text iMessage integration via{" "}
-                  <a
-                    href="https://blooio.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-accent underline"
-                  >
-                    Blooio
-                  </a>
-                </p>
-                <div className="flex flex-col gap-2">
-                  <input
-                    type="password"
-                    value={onboardingBlooioApiKey}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      setState("onboardingBlooioApiKey", e.target.value)
-                    }
-                    placeholder="Blooio API key"
-                    className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none rounded"
-                  />
-                  <input
-                    type="tel"
-                    value={onboardingBlooioPhoneNumber}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      setState("onboardingBlooioPhoneNumber", e.target.value)
-                    }
-                    placeholder="+1234567890 (your phone number)"
-                    className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none rounded"
-                  />
-                </div>
-              </div>
-
-              {/* GitHub */}
-              <div
-                className={`px-4 py-3 border rounded-lg bg-card transition-colors min-w-0 ${(onboardingGithubToken ?? "").trim() ? "border-accent" : "border-border"}`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="font-bold text-sm text-txt-strong">
-                    GitHub
-                  </div>
-                  {(onboardingGithubToken ?? "").trim() && (
-                    <span className="text-[10px] text-accent border border-accent px-1.5 py-0.5 rounded">
-                      Configured
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-muted mb-3 mt-1">
-                  For coding agents, PRs, and issue management.{" "}
-                  <a
-                    href="https://github.com/settings/tokens"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-accent underline"
-                  >
-                    Create a token
-                  </a>
-                </p>
-                <input
-                  type="password"
-                  value={onboardingGithubToken}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                    setState("onboardingGithubToken", e.target.value)
-                  }
-                  placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                  className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none rounded"
-                />
-                {onboardingOptions?.githubOAuthAvailable &&
-                  !(onboardingGithubToken ?? "").trim() && (
-                    <p className="text-[11px] text-muted mt-2">
-                      Or skip this — you'll be prompted to authorize via GitHub
-                      OAuth when needed.
-                    </p>
-                  )}
-              </div>
-            </div>
-          </div>
-        );
-
-      case "permissions":
-        return (
-          <div className="max-w-[600px] mx-auto mt-10 font-body">
-            <PermissionsOnboardingSection
-              onContinue={(options) => void handleOnboardingNext(options)}
-            />
+            <div className="inline-block w-8 h-8 border-2 border-border border-t-accent rounded-full animate-spin" />
           </div>
         );
 
@@ -1901,32 +1388,39 @@ export function OnboardingWizard() {
     }
   };
 
+  // ── canGoNext validation ─────────────────────────────────────────────
+
   const canGoNext = () => {
     switch (onboardingStep) {
       case "welcome":
-        return true;
-      case "name":
-        return onboardingName.trim().length > 0;
-      case "avatar":
-        return true; // always valid — defaults to 1
-      case "style":
-        return onboardingStyle.length > 0;
-      case "theme":
-        return true;
-      case "runMode":
+        return onboardingHostingChoice !== "";
+      case "identity":
+        return onboardingName.trim().length > 0 && onboardingStyle.length > 0;
+      case "infrastructure":
+        if (onboardingHostingChoice === "elizaos") {
+          if (!cloudConnected) return false;
+          if (!onboardingElizaosRunMode) return false;
+          if (onboardingElizaosRunMode === "cloud-hosted") {
+            return onboardingCloudProvider.length > 0;
+          }
+          // local-cloud-services: need run mode + database
+          return onboardingRunMode !== "";
+        }
+        // Local path: need run mode
         return onboardingRunMode !== "";
-      case "dockerSetup":
-        return true; // informational step, always valid
-      case "cloudProvider":
-        if (onboardingCloudProvider === "elizacloud") return cloudConnected;
-        return onboardingCloudProvider.length > 0;
-      case "modelSelection":
-        return (
-          onboardingSmallModel.length > 0 && onboardingLargeModel.length > 0
-        );
-      case "cloudLogin":
-        return cloudConnected;
-      case "llmProvider":
+      case "permissions":
+        // Permissions step can always be skipped
+        return true;
+      case "aiProvider":
+        // ElizaOS cloud-hosted: always valid (pre-configured)
+        if (
+          onboardingHostingChoice === "elizaos" &&
+          onboardingElizaosRunMode === "cloud-hosted"
+        ) {
+          return true;
+        }
+        // Provider must be selected
+        if (!onboardingProvider) return false;
         if (onboardingProvider === "anthropic-subscription") {
           return onboardingSubscriptionTab === "token"
             ? onboardingApiKey.length > 0
@@ -1940,26 +1434,23 @@ export function OnboardingWizard() {
           onboardingProvider === "ollama" ||
           onboardingProvider === "pi-ai"
         ) {
-          return true;
+          return onboardingProvider === "elizacloud"
+            ? cloudConnected || devMode === "all"
+            : true;
         }
         return onboardingProvider.length > 0 && onboardingApiKey.length > 0;
-      case "inventorySetup":
-        return true;
-      case "connectors":
-        return true; // fully optional — user can skip
-      case "permissions":
-        return true; // optional — user can skip and configure later
+      case "launch":
+        return false;
       default:
         return false;
     }
   };
 
   const canGoBack = onboardingStep !== "welcome";
-  const showPrimaryNext = onboardingStep !== "permissions";
 
-  /** On the llmProvider config screen, "back" returns to the provider grid. */
+  /** On the aiProvider config screen, "back" returns to the provider grid. */
   const handleBack = () => {
-    if (onboardingStep === "llmProvider" && onboardingProvider) {
+    if (onboardingStep === "aiProvider" && onboardingProvider) {
       setState("onboardingProvider", "");
       setState("onboardingApiKey", "");
       setState("onboardingPrimaryModel", "");
@@ -1970,6 +1461,11 @@ export function OnboardingWizard() {
 
   return (
     <div className="mx-auto px-4 pb-16 text-center font-body h-full overflow-y-auto">
+      {devMode && (
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 mb-2 rounded-full text-[11px] font-bold uppercase tracking-wider bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
+          [DEV] {devMode === "paygate" ? "paygate mode" : "all unlocked"}
+        </div>
+      )}
       {renderStep(onboardingStep)}
       <div className="flex gap-2 mt-8 justify-center">
         {canGoBack && (
@@ -1982,319 +1478,330 @@ export function OnboardingWizard() {
             back
           </button>
         )}
-        {showPrimaryNext && (
-          <button
-            type="button"
-            className="px-6 py-2 border border-accent bg-accent text-accent-fg text-sm cursor-pointer rounded-full hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
-            onClick={() => void handleOnboardingNext()}
-            disabled={!canGoNext() || onboardingRestarting}
-          >
-            {onboardingRestarting ? "restarting..." : "next"}
-          </button>
-        )}
+        <button
+          type="button"
+          className="px-6 py-2 border border-accent bg-accent text-accent-fg text-sm cursor-pointer rounded-full hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
+          onClick={() => void handleOnboardingNext()}
+          disabled={!canGoNext() || onboardingRestarting}
+        >
+          {onboardingRestarting ? "restarting..." : "next"}
+        </button>
       </div>
     </div>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Docker Setup Step — checks Docker availability and guides installation
+// Extracted sub-components
 // ═══════════════════════════════════════════════════════════════════════════
 
-function DockerSetupStep() {
-  const [checking, setChecking] = useState(true);
-  const [starting, setStarting] = useState(false);
-  const [startMessage, setStartMessage] = useState("");
-  const [dockerStatus, setDockerStatus] = useState<{
-    installed: boolean;
-    running: boolean;
-    platform: string;
-    appleContainerAvailable: boolean;
-    engineRecommendation: string;
-  } | null>(null);
-
-  const checkDocker = useCallback(async () => {
-    setChecking(true);
-    try {
-      const data = await client.getSandboxPlatform();
-      setDockerStatus(mapSandboxPlatform(data));
-    } catch {
-      setDockerStatus({
-        installed: false,
-        running: false,
-        platform: inferPlatform(),
-        appleContainerAvailable: false,
-        engineRecommendation: "docker",
-      });
-    }
-    setChecking(false);
-  }, []);
-
-  // Auto-start Docker and poll until it's ready
-  const handleStartDocker = async () => {
-    setStarting(true);
-    setStartMessage("starting docker...");
-    try {
-      const data = await client.startDocker();
-      if (data.success) {
-        setStartMessage(data.message || "starting up...");
-        // Poll every 3 seconds until Docker is running
-        for (let i = 0; i < SANDBOX_START_MAX_ATTEMPTS; i++) {
-          await new Promise((r) => setTimeout(r, SANDBOX_POLL_INTERVAL_MS));
-          setStartMessage(`waiting for docker to start... (${(i + 1) * 3}s)`);
-          try {
-            const status = await client.getSandboxPlatform();
-            if (status.dockerRunning) {
-              setDockerStatus((prev) =>
-                prev
-                  ? { ...prev, ...mapSandboxPlatform(status), running: true }
-                  : prev,
-              );
-              setStartMessage("docker is running!");
-              setStarting(false);
-              return;
-            }
-          } catch {
-            /* keep polling */
-          }
-        }
-        setStartMessage(
-          "docker is taking a while... try opening Docker Desktop manually",
-        );
-      } else {
-        setStartMessage(data.message || "could not auto-start docker");
-      }
-    } catch (err) {
-      setStartMessage(
-        `failed: ${err instanceof Error ? err.message : "unknown error"}`,
-      );
-    }
-    setStarting(false);
-  };
-
-  useEffect(() => {
-    void checkDocker();
-  }, [checkDocker]);
-
-  const getInstallUrl = () => {
-    if (!dockerStatus) return "https://docs.docker.com/get-docker/";
-    switch (dockerStatus.platform) {
-      case "darwin":
-        return "https://docs.docker.com/desktop/install/mac-install/";
-      case "win32":
-        return "https://docs.docker.com/desktop/install/windows-install/";
-      case "linux":
-        return "https://docs.docker.com/engine/install/";
-      default:
-        return "https://docs.docker.com/get-docker/";
-    }
-  };
-
-  const getPlatformName = () => {
-    if (!dockerStatus) return "your computer";
-    switch (dockerStatus.platform) {
-      case "darwin":
-        return "macOS";
-      case "win32":
-        return "Windows";
-      case "linux":
-        return "Linux";
-      default:
-        return "your computer";
-    }
-  };
-
-  if (checking) {
-    return (
-      <div className="max-w-[520px] mx-auto mt-10 text-center font-body">
-        <img
-          src="/android-chrome-512x512.png"
-          alt="Avatar"
-          className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block animate-pulse"
-        />
-        <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
-          <p>checking ur machine for sandbox stuff...</p>
+/** Execution mode picker — shared between local and elizaos paths. */
+function ExecutionModePicker({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (
+    mode: "local-rawdog" | "local-lifo" | "local-sandbox" | "cloud",
+  ) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-3 max-w-[460px] mx-auto">
+      <button
+        type="button"
+        className={`px-4 py-4 border cursor-pointer bg-card transition-colors rounded-lg text-left ${
+          value === "local-rawdog"
+            ? "border-accent !bg-accent !text-accent-fg"
+            : "border-border hover:border-accent"
+        }`}
+        onClick={() => onChange("local-rawdog")}
+      >
+        <div className="font-bold text-sm flex items-center gap-1.5">
+          <Zap className="w-4 h-4" /> elevated (raw)
         </div>
-      </div>
-    );
-  }
+        <div className="text-[12px] mt-1 opacity-70">
+          i run directly on ur machine w full access. fastest &amp; simplest but
+          no sandbox protection
+        </div>
+      </button>
+      <button
+        type="button"
+        className={`px-4 py-4 border cursor-pointer bg-card transition-colors rounded-lg text-left ${
+          value === "local-lifo"
+            ? "border-accent !bg-accent !text-accent-fg"
+            : "border-border hover:border-accent"
+        }`}
+        onClick={() => onChange("local-lifo")}
+      >
+        <div className="font-bold text-sm flex items-center gap-1.5">
+          <Terminal className="w-4 h-4" /> sandboxed (LIFO)
+        </div>
+        <div className="text-[12px] mt-1 opacity-70">
+          i run in a browser-based virtual environment. safe isolation, no
+          docker needed
+        </div>
+      </button>
+      <button
+        type="button"
+        className={`px-4 py-4 border cursor-pointer bg-card transition-colors rounded-lg text-left ${
+          value === "cloud"
+            ? "border-accent !bg-accent !text-accent-fg"
+            : "border-border hover:border-accent"
+        }`}
+        onClick={() => onChange("cloud")}
+      >
+        <div className="font-bold text-sm flex items-center gap-1.5">
+          <Cloud className="w-4 h-4" /> cloud
+        </div>
+        <div className="text-[12px] mt-1 opacity-70">
+          i run on eliza cloud. easiest setup, always on, can still use ur
+          browser &amp; computer if u let me
+        </div>
+      </button>
+    </div>
+  );
+}
 
-  const isInstalled = dockerStatus?.installed;
-  const isRunning = dockerStatus?.running;
-  const isReady = isInstalled && isRunning;
-  const hasAppleContainer = dockerStatus?.appleContainerAvailable;
+/** Mobile-only: auto-selects cloud mode. */
+function MobileCloudOnly({
+  runMode,
+  onSelect,
+}: {
+  runMode: string;
+  onSelect: (mode: "cloud") => void;
+}) {
+  useEffect(() => {
+    if (runMode !== "cloud") onSelect("cloud");
+  }, [runMode, onSelect]);
 
   return (
-    <div className="max-w-[540px] mx-auto mt-10 text-center font-body">
-      <img
-        src="/android-chrome-512x512.png"
-        alt="Avatar"
-        className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-border mx-auto mb-5 block"
-      />
-      <div className="onboarding-speech bg-card border border-border rounded-xl px-5 py-4 mx-auto mb-6 max-w-[600px] relative text-[15px] text-txt leading-relaxed">
-        {isReady ? (
-          <>
-            <h2 className="text-[24px] font-normal mb-2 text-txt-strong">
-              {hasAppleContainer
-                ? "omg ur set up perfectly"
-                : "nice, docker is ready"}
-            </h2>
-            <p className="text-[13px] opacity-70">
-              {hasAppleContainer
-                ? "found apple container on ur mac — thats the strongest isolation. each container gets its own tiny VM. very safe very cool"
-                : "docker is installed and running. i'll use it to keep myself sandboxed so i cant accidentally mess up ur stuff"}
-            </p>
-          </>
-        ) : isInstalled && !isRunning ? (
-          <>
-            <h2 className="text-[24px] font-normal mb-2 text-txt-strong">
-              docker is installed but sleeping
-            </h2>
-            <p className="text-[13px] opacity-70 mb-3">
-              i found docker on ur machine but the daemon isn't running yet.
-              lemme try to wake it up for u~
-            </p>
-          </>
-        ) : (
-          <>
-            <h2 className="text-[24px] font-normal mb-2 text-txt-strong">
-              need docker for sandbox mode
-            </h2>
-            <p className="text-[13px] opacity-70 mb-3">
-              to run me in a sandbox i need docker installed on{" "}
-              {getPlatformName()}. it's like a little apartment building where i
-              live safely separated from ur files
-            </p>
-            {dockerStatus?.platform === "win32" && (
-              <p className="text-[12px] opacity-60 mb-2">
-                on windows u also need WSL2 enabled — docker desktop will set it
-                up for u
-              </p>
-            )}
-            {dockerStatus?.platform === "darwin" && (
-              <p className="text-[12px] opacity-60 mb-2">
-                pro tip: if ur on apple silicon u can also install apple
-                container tools for even better isolation (brew install
-                apple/apple/container-tools)
-              </p>
-            )}
-          </>
-        )}
-      </div>
-
-      {/* Status indicators */}
-      <div className="flex flex-col gap-2 max-w-[400px] mx-auto mb-4">
-        <div
-          className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-left text-sm ${
-            isInstalled
-              ? "bg-green-50 border-green-200 text-green-800 dark:bg-green-950 dark:border-green-800 dark:text-green-200"
-              : "bg-red-50 border-red-200 text-red-800 dark:bg-red-950 dark:border-red-800 dark:text-red-200"
-          }`}
-        >
-          <span>
-            {isInstalled ? (
-              <CheckCircle className="w-4 h-4" />
-            ) : (
-              <XCircle className="w-4 h-4" />
-            )}
-          </span>
-          <span>Docker {isInstalled ? "installed" : "not found"}</span>
+    <div className="max-w-[460px] mx-auto">
+      <div className="px-4 py-4 border border-accent bg-accent text-accent-fg rounded-lg text-left">
+        <div className="font-bold text-sm flex items-center gap-1.5">
+          <Cloud className="w-4 h-4" /> cloud
         </div>
-
-        {isInstalled && (
-          <div
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-left text-sm ${
-              isRunning
-                ? "bg-green-50 border-green-200 text-green-800 dark:bg-green-950 dark:border-green-800 dark:text-green-200"
-                : "bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-950 dark:border-yellow-800 dark:text-yellow-200"
-            }`}
-          >
-            <span>
-              {isRunning ? (
-                <CheckCircle className="w-4 h-4" />
-              ) : (
-                <AlertTriangle className="w-4 h-4" />
-              )}
-            </span>
-            <span>Docker daemon {isRunning ? "running" : "not running"}</span>
-          </div>
-        )}
-
-        {dockerStatus?.platform === "darwin" && (
-          <div
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-left text-sm ${
-              hasAppleContainer
-                ? "bg-green-50 border-green-200 text-green-800 dark:bg-green-950 dark:border-green-800 dark:text-green-200"
-                : "bg-card border-border text-txt opacity-60"
-            }`}
-          >
-            <span>
-              {hasAppleContainer ? (
-                <CheckCircle className="w-4 h-4" />
-              ) : (
-                <Minus className="w-4 h-4" />
-              )}
-            </span>
-            <span>
-              Apple Container{" "}
-              {hasAppleContainer
-                ? "available (preferred)"
-                : "not installed (optional)"}
-            </span>
-          </div>
-        )}
+        <div className="text-[12px] mt-1 opacity-80">
+          since ur on mobile i'll run on eliza cloud. always on, works from any
+          device
+        </div>
       </div>
+    </div>
+  );
+}
 
-      {/* Start message */}
-      {startMessage && (
-        <p className="text-[13px] text-accent mb-3 animate-pulse">
-          {startMessage}
-        </p>
+/** Database provider picker. */
+function DatabasePicker({
+  value,
+  connectionString,
+  onChange,
+  onConnectionStringChange,
+  onSetupDockerDb,
+  dockerDbBusy,
+  dockerDbError,
+  dockerDbSuccess,
+  dockerAvailable,
+}: {
+  value: "pglite" | "postgres" | "docker-postgres";
+  connectionString: string;
+  onChange: (v: "pglite" | "postgres" | "docker-postgres") => void;
+  onConnectionStringChange: (v: string) => void;
+  onSetupDockerDb: () => void;
+  dockerDbBusy: boolean;
+  dockerDbError: string | null;
+  dockerDbSuccess: boolean;
+  dockerAvailable: boolean;
+}) {
+  return (
+    <div className="flex flex-col gap-2 max-w-[460px] mx-auto">
+      <button
+        type="button"
+        className={`px-4 py-3 border cursor-pointer bg-card transition-colors rounded-lg text-left ${
+          value === "pglite"
+            ? "border-accent !bg-accent !text-accent-fg"
+            : "border-border hover:border-accent"
+        }`}
+        onClick={() => onChange("pglite")}
+      >
+        <div className="font-bold text-sm flex items-center gap-1.5">
+          <HardDrive className="w-4 h-4" /> PGLite (embedded)
+        </div>
+        <div className="text-[12px] mt-1 opacity-70">
+          zero-config, built-in database. recommended for getting started
+        </div>
+      </button>
+
+      <button
+        type="button"
+        className={`px-4 py-3 border cursor-pointer bg-card transition-colors rounded-lg text-left ${
+          value === "postgres"
+            ? "border-accent !bg-accent !text-accent-fg"
+            : "border-border hover:border-accent"
+        }`}
+        onClick={() => onChange("postgres")}
+      >
+        <div className="font-bold text-sm flex items-center gap-1.5">
+          <Database className="w-4 h-4" /> PostgreSQL (remote)
+        </div>
+        <div className="text-[12px] mt-1 opacity-70">
+          connect to your own PostgreSQL server
+        </div>
+      </button>
+
+      {value === "postgres" && (
+        <div className="ml-2 mt-1">
+          <input
+            type="text"
+            value={connectionString}
+            onChange={(e) => onConnectionStringChange(e.target.value)}
+            placeholder="postgresql://user:pass@host:5432/dbname"
+            className="w-full px-3 py-2 border border-border bg-card text-sm font-mono focus:border-accent focus:outline-none rounded"
+          />
+        </div>
       )}
 
-      {/* Action buttons */}
-      <div className="flex gap-2 justify-center flex-wrap">
-        {!isInstalled && (
-          <a
-            href={getInstallUrl()}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-4 py-2 border border-accent bg-accent text-accent-fg text-sm cursor-pointer rounded-full hover:bg-accent-hover inline-block no-underline"
-          >
-            install docker
-          </a>
-        )}
-        {isInstalled && !isRunning && !starting && (
+      <button
+        type="button"
+        className={`px-4 py-3 border cursor-pointer bg-card transition-colors rounded-lg text-left ${
+          value === "docker-postgres"
+            ? "border-accent !bg-accent !text-accent-fg"
+            : "border-border hover:border-accent"
+        }`}
+        onClick={() => onChange("docker-postgres")}
+      >
+        <div className="font-bold text-sm flex items-center gap-1.5">
+          <Server className="w-4 h-4" /> Docker PostgreSQL (auto-managed)
+        </div>
+        <div className="text-[12px] mt-1 opacity-70">
+          auto-create a PostgreSQL container{" "}
+          {!dockerAvailable && "(requires Docker)"}
+        </div>
+      </button>
+
+      {value === "docker-postgres" && (
+        <div className="ml-2 mt-1">
+          {dockerDbSuccess ? (
+            <div className="px-3 py-2 border border-green-500/30 bg-green-500/10 text-green-400 text-sm rounded">
+              Docker PostgreSQL is ready
+            </div>
+          ) : (
+            <>
+              <button
+                type="button"
+                className="px-4 py-2 border border-accent bg-accent text-accent-fg text-sm cursor-pointer rounded hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
+                onClick={onSetupDockerDb}
+                disabled={dockerDbBusy || !dockerAvailable}
+              >
+                {dockerDbBusy
+                  ? "Setting up..."
+                  : !dockerAvailable
+                    ? "Docker not available"
+                    : "Setup Docker PostgreSQL"}
+              </button>
+              {dockerDbError && (
+                <p className="text-xs text-red-400 mt-1">{dockerDbError}</p>
+              )}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Cloud model selection — used in ElizaOS cloud-hosted path. */
+function CloudModelSelection({
+  cloudProviders,
+  cloudProvider,
+  smallModel,
+  largeModel,
+  models,
+  onCloudProviderChange,
+  onSmallModelChange,
+  onLargeModelChange,
+}: {
+  cloudProviders: CloudProviderOption[];
+  cloudProvider: string;
+  smallModel: string;
+  largeModel: string;
+  models?: {
+    small?: { id: string; name: string }[];
+    large?: { id: string; name: string }[];
+  };
+  onCloudProviderChange: (v: string) => void;
+  onSmallModelChange: (v: string) => void;
+  onLargeModelChange: (v: string) => void;
+}) {
+  return (
+    <div className="text-left">
+      <h3 className="text-sm font-bold text-txt-strong mb-3">Cloud Provider</h3>
+      <div className="flex flex-col gap-2 mb-4">
+        {cloudProviders.map((provider) => (
           <button
             type="button"
-            className="px-4 py-2 border border-accent bg-accent text-accent-fg text-sm cursor-pointer rounded-full hover:bg-accent-hover"
-            onClick={() => void handleStartDocker()}
+            key={provider.id}
+            className={`w-full px-4 py-3 border cursor-pointer bg-card transition-colors rounded-lg text-left ${
+              cloudProvider === provider.id
+                ? "border-accent !bg-accent !text-accent-fg"
+                : "border-border hover:border-accent"
+            }`}
+            onClick={() => onCloudProviderChange(provider.id)}
           >
-            start docker for me
+            <div className="font-bold text-sm">{provider.name}</div>
+            {provider.description && (
+              <div
+                className={`text-xs mt-0.5 ${
+                  cloudProvider === provider.id
+                    ? "text-accent-fg/70"
+                    : "text-muted"
+                }`}
+              >
+                {provider.description}
+              </div>
+            )}
           </button>
-        )}
-        {!starting && (
-          <button
-            type="button"
-            className="px-4 py-2 border border-border bg-transparent text-txt text-sm cursor-pointer rounded-full hover:bg-accent-subtle hover:text-accent"
-            onClick={() => void checkDocker()}
-          >
-            {isReady ? "re-check" : "check again"}
-          </button>
-        )}
+        ))}
       </div>
 
-      {isReady && (
-        <p className="text-[12px] text-txt opacity-50 mt-4">
-          using: {hasAppleContainer ? "Apple Container" : "Docker"} on{" "}
-          {getPlatformName()}
-        </p>
-      )}
-      {!isReady && !starting && (
-        <p className="text-[12px] text-txt opacity-40 mt-4">
-          u can still continue without docker — i just won't have sandbox
-          protection
-        </p>
+      {models && (
+        <>
+          <h3 className="text-sm font-bold text-txt-strong mb-2">
+            Model Selection
+          </h3>
+          <div className="flex flex-col gap-3">
+            <div>
+              <span className="text-[13px] text-txt-strong block mb-1">
+                Small Model:
+              </span>
+              <select
+                value={smallModel}
+                onChange={(e) => onSmallModelChange(e.target.value)}
+                className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none rounded"
+              >
+                {models.small?.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <span className="text-[13px] text-txt-strong block mb-1">
+                Large Model:
+              </span>
+              <select
+                value={largeModel}
+                onChange={(e) => onLargeModelChange(e.target.value)}
+                className="w-full px-3 py-2 border border-border bg-card text-sm focus:border-accent focus:outline-none rounded"
+              >
+                {models.large?.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

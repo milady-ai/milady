@@ -409,6 +409,20 @@ export interface PiAiModelOption {
   isDefault: boolean;
 }
 
+export interface DatabaseOption {
+  id: string;
+  label: string;
+  description: string;
+}
+
+export interface DetectedEnvironment {
+  dockerAvailable: boolean;
+  platform: string;
+  arch: string;
+  hasAffiliateRef: boolean;
+  devMode: "all" | "paygate" | false;
+}
+
 export interface OnboardingOptions {
   names: string[];
   styles: StylePreset[];
@@ -424,6 +438,8 @@ export interface OnboardingOptions {
   inventoryProviders: InventoryProviderOption[];
   sharedStyleRules: string;
   githubOAuthAvailable?: boolean;
+  databaseOptions?: DatabaseOption[];
+  detectedEnvironment?: DetectedEnvironment;
 }
 
 /** Configuration for a single messaging connector. */
@@ -443,6 +459,7 @@ export interface ConnectorConfig {
 
 export interface OnboardingData {
   name: string;
+  hostingChoice?: "local" | "elizaos";
   theme: string;
   runMode: "local" | "cloud";
   /** Sandbox execution mode: "off" (rawdog), "light" (cloud), "standard" (local sandbox), "max". */
@@ -469,6 +486,10 @@ export interface OnboardingData {
   primaryModel?: string;
   openrouterModel?: string;
   subscriptionProvider?: string;
+  // Messaging channel setup
+  // Database configuration
+  databaseProvider?: "pglite" | "postgres" | "docker-postgres";
+  databaseConnectionString?: string;
   // Messaging channel setup
   channels?: Record<string, unknown>;
   // Inventory / wallet setup
@@ -2029,6 +2050,21 @@ export class MiladyClient {
       method: "POST",
       body: JSON.stringify(data),
     });
+  }
+
+  async setupDockerDb(): Promise<{
+    ok: boolean;
+    error?: string;
+    credentials?: {
+      connectionString: string;
+      host: string;
+      port: number;
+      database: string;
+      user: string;
+      password: string;
+    };
+  }> {
+    return this.fetch("/api/onboarding/setup-docker-db", { method: "POST" });
   }
 
   async startAnthropicLogin(): Promise<{ authUrl: string }> {
