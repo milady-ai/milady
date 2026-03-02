@@ -11,11 +11,14 @@ import { cameraHandlers, getCameraManager } from "./camera";
 import { canvasHandlers, getCanvasManager } from "./canvas";
 import { desktopHandlers, getDesktopManager } from "./desktop";
 import { gatewayHandlers, getGatewayDiscovery } from "./gateway";
-import { locationHandlers, getLocationManager } from "./location";
-import { permissionsHandlers, getPermissionManager } from "./permissions";
-import { screenCaptureHandlers, getScreenCaptureManager } from "./screencapture";
-import { swabbleHandlers, getSwabbleManager } from "./swabble";
-import { talkModeHandlers, getTalkModeManager } from "./talkmode";
+import { getLocationManager, locationHandlers } from "./location";
+import { getPermissionManager, permissionsHandlers } from "./permissions";
+import {
+  getScreenCaptureManager,
+  screenCaptureHandlers,
+} from "./screencapture";
+import { getSwabbleManager, swabbleHandlers } from "./swabble";
+import { getTalkModeManager, talkModeHandlers } from "./talkmode";
 
 // Re-export managers for use in index.ts
 export {
@@ -37,7 +40,10 @@ const lifoHandlers: Record<string, (args: unknown[]) => Promise<unknown>> = {
     const opts = (options ?? {}) as { flag?: boolean; level?: string };
     const desktop = getDesktopManager();
     if (opts.flag) {
-      await desktop.setAlwaysOnTop({ flag: true, level: opts.level ?? "floating" });
+      await desktop.setAlwaysOnTop({
+        flag: true,
+        level: opts.level ?? "floating",
+      });
     } else {
       await desktop.setAlwaysOnTop({ flag: false });
     }
@@ -50,7 +56,10 @@ const lifoHandlers: Record<string, (args: unknown[]) => Promise<unknown>> = {
 };
 
 /** Context menu event-push handlers — sends data back to the renderer */
-const contextMenuHandlers: Record<string, (args: unknown[]) => Promise<unknown>> = {
+const contextMenuHandlers: Record<
+  string,
+  (args: unknown[]) => Promise<unknown>
+> = {
   "contextMenu:saveAsCommand": ([data]) => Promise.resolve(data),
   "contextMenu:askAgent": ([data]) => Promise.resolve(data),
   "contextMenu:createSkill": ([data]) => Promise.resolve(data),

@@ -5,5 +5,8 @@
  */
 
 export function getWhisperInfo(): { available: boolean; reason?: string } {
-  return { available: false, reason: "whisper-node not available in Electrobun yet" };
+  return {
+    available: false,
+    reason: "whisper-node not available in Electrobun yet",
+  };
 }

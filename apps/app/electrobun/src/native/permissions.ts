@@ -66,15 +66,28 @@ export class PermissionManager {
     this.cache.clear();
   }
 
-  async checkPermission(id: SystemPermissionId, forceRefresh = false): Promise<PermissionState> {
+  async checkPermission(
+    id: SystemPermissionId,
+    forceRefresh = false,
+  ): Promise<PermissionState> {
     if (!isPermissionApplicable(id, platform)) {
-      const state: PermissionState = { id, status: "not-applicable", lastChecked: Date.now(), canRequest: false };
+      const state: PermissionState = {
+        id,
+        status: "not-applicable",
+        lastChecked: Date.now(),
+        canRequest: false,
+      };
       this.setCache(id, state);
       return state;
     }
 
     if (id === "shell" && !this.shellEnabled) {
-      const state: PermissionState = { id, status: "denied", lastChecked: Date.now(), canRequest: false };
+      const state: PermissionState = {
+        id,
+        status: "denied",
+        lastChecked: Date.now(),
+        canRequest: false,
+      };
       this.setCache(id, state);
       return state;
     }
@@ -86,36 +99,72 @@ export class PermissionManager {
 
     let result: PermissionCheckResult;
     switch (platform) {
-      case "darwin": result = await darwin.checkPermission(id); break;
-      case "win32":  result = await win32.checkPermission(id); break;
-      case "linux":  result = await linux.checkPermission(id); break;
-      default: result = { status: "not-applicable", canRequest: false };
+      case "darwin":
+        result = await darwin.checkPermission(id);
+        break;
+      case "win32":
+        result = await win32.checkPermission(id);
+        break;
+      case "linux":
+        result = await linux.checkPermission(id);
+        break;
+      default:
+        result = { status: "not-applicable", canRequest: false };
     }
 
-    const state: PermissionState = { id, status: result.status, lastChecked: Date.now(), canRequest: result.canRequest };
+    const state: PermissionState = {
+      id,
+      status: result.status,
+      lastChecked: Date.now(),
+      canRequest: result.canRequest,
+    };
     this.setCache(id, state);
     return state;
   }
 
-  async checkAllPermissions(forceRefresh = false): Promise<AllPermissionsState> {
-    const results = await Promise.all(SYSTEM_PERMISSIONS.map((p) => this.checkPermission(p.id, forceRefresh)));
-    return results.reduce((acc, s) => { acc[s.id] = s; return acc; }, {} as AllPermissionsState);
+  async checkAllPermissions(
+    forceRefresh = false,
+  ): Promise<AllPermissionsState> {
+    const results = await Promise.all(
+      SYSTEM_PERMISSIONS.map((p) => this.checkPermission(p.id, forceRefresh)),
+    );
+    return results.reduce((acc, s) => {
+      acc[s.id] = s;
+      return acc;
+    }, {} as AllPermissionsState);
   }
 
   async requestPermission(id: SystemPermissionId): Promise<PermissionState> {
     if (!isPermissionApplicable(id, platform)) {
-      return { id, status: "not-applicable", lastChecked: Date.now(), canRequest: false };
+      return {
+        id,
+        status: "not-applicable",
+        lastChecked: Date.now(),
+        canRequest: false,
+      };
     }
 
     let result: PermissionCheckResult;
     switch (platform) {
-      case "darwin": result = await darwin.requestPermission(id); break;
-      case "win32":  result = await win32.requestPermission(id); break;
-      case "linux":  result = await linux.requestPermission(id); break;
-      default: result = { status: "not-applicable", canRequest: false };
+      case "darwin":
+        result = await darwin.requestPermission(id);
+        break;
+      case "win32":
+        result = await win32.requestPermission(id);
+        break;
+      case "linux":
+        result = await linux.requestPermission(id);
+        break;
+      default:
+        result = { status: "not-applicable", canRequest: false };
     }
 
-    const state: PermissionState = { id, status: result.status, lastChecked: Date.now(), canRequest: result.canRequest };
+    const state: PermissionState = {
+      id,
+      status: result.status,
+      lastChecked: Date.now(),
+      canRequest: result.canRequest,
+    };
     this.setCache(id, state);
     pushToRenderer("permissions:changed", { id });
     return state;
@@ -123,16 +172,30 @@ export class PermissionManager {
 
   async openSettings(id: SystemPermissionId): Promise<void> {
     switch (platform) {
-      case "darwin": await darwin.openPrivacySettings(id); break;
-      case "win32":  await win32.openPrivacySettings(id); break;
-      case "linux":  await linux.openPrivacySettings(id); break;
+      case "darwin":
+        await darwin.openPrivacySettings(id);
+        break;
+      case "win32":
+        await win32.openPrivacySettings(id);
+        break;
+      case "linux":
+        await linux.openPrivacySettings(id);
+        break;
     }
   }
 
-  async checkFeaturePermissions(featureId: string): Promise<{ granted: boolean; missing: SystemPermissionId[] }> {
-    const requiredPerms = SYSTEM_PERMISSIONS.filter((p) => p.requiredForFeatures.includes(featureId)).map((p) => p.id);
-    const states = await Promise.all(requiredPerms.map((id) => this.checkPermission(id)));
-    const missing = states.filter((s) => s.status !== "granted" && s.status !== "not-applicable").map((s) => s.id);
+  async checkFeaturePermissions(
+    featureId: string,
+  ): Promise<{ granted: boolean; missing: SystemPermissionId[] }> {
+    const requiredPerms = SYSTEM_PERMISSIONS.filter((p) =>
+      p.requiredForFeatures.includes(featureId),
+    ).map((p) => p.id);
+    const states = await Promise.all(
+      requiredPerms.map((id) => this.checkPermission(id)),
+    );
+    const missing = states
+      .filter((s) => s.status !== "granted" && s.status !== "not-applicable")
+      .map((s) => s.id);
     return { granted: missing.length === 0, missing };
   }
 
@@ -148,11 +211,17 @@ export function getPermissionManager(): PermissionManager {
   return permissionManager;
 }
 
-export const permissionsHandlers: Record<string, (args: unknown[]) => Promise<unknown>> = {
+export const permissionsHandlers: Record<
+  string,
+  (args: unknown[]) => Promise<unknown>
+> = {
   "permissions:getAll": ([forceRefresh]) =>
     getPermissionManager().checkAllPermissions(Boolean(forceRefresh)),
   "permissions:check": ([id, forceRefresh]) =>
-    getPermissionManager().checkPermission(id as SystemPermissionId, Boolean(forceRefresh)),
+    getPermissionManager().checkPermission(
+      id as SystemPermissionId,
+      Boolean(forceRefresh),
+    ),
   "permissions:request": ([id]) =>
     getPermissionManager().requestPermission(id as SystemPermissionId),
   "permissions:openSettings": ([id]) =>

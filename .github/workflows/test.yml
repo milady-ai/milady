@@ -116,7 +116,6 @@ jobs:
       - name: Run app startup/onboarding tests
         run: >
           bunx vitest run --config apps/app/vitest.config.ts
-          apps/app/test/electron/electron-startup.e2e.test.ts
           apps/app/test/electron/electron-plugin-entrypoints.e2e.test.ts
           apps/app/test/app/startup-chat.e2e.test.ts
           apps/app/test/app/startup-onboarding.e2e.test.ts
@@ -156,7 +155,7 @@ jobs:
       - name: Build web assets
         run: bun run --filter @milady/app build
 
-      - name: Build Electron app
+      - name: Build Electrobun app
         run: bun run --filter @milady/app build:electron
 
   electron-packaged-dmg-e2e:
@@ -190,13 +189,10 @@ jobs:
       - name: Build web assets
         run: bun run --filter @milady/app build
 
-      - name: Sync Electron platform
-        run: bun run --filter @milady/app cap:sync:electron
-
-      - name: Build standalone DMG
+      - name: Build Electrobun app
         run: |
-          cd apps/app/electron
-          bun run electron:make:dmg:test
+          cd apps/app/electrobun
+          bun run build
         continue-on-error: true
 
   cloud-live-e2e:

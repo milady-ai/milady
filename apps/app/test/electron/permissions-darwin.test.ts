@@ -62,7 +62,7 @@ import {
   requestCamera,
   requestMicrophone,
   requestPermission,
-} from "../../electron/src/native/permissions-darwin";
+} from "../../electrobun/src/native/permissions-darwin";
 import { execMock, mockExecResult } from "./helpers/exec-mock";
 
 // ---------------------------------------------------------------------------

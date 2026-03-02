@@ -317,7 +317,7 @@ describe("Electron Native Module Configuration", () => {
       packageRoot,
       "apps",
       "app",
-      "electron",
+      "electrobun",
       "package.json",
     );
     expect(fs.existsSync(electronPkgPath)).toBe(true);
@@ -336,7 +336,7 @@ describe("Electron Native Module Configuration", () => {
       packageRoot,
       "apps",
       "app",
-      "electron",
+      "electrobun",
       "package.json",
     );
     const electronPkg = JSON.parse(fs.readFileSync(electronPkgPath, "utf-8"));
@@ -354,7 +354,7 @@ describe("Electron Native Module Configuration", () => {
       packageRoot,
       "apps",
       "app",
-      "electron",
+      "electrobun",
       "package.json",
     );
     const electronPkg = JSON.parse(fs.readFileSync(electronPkgPath, "utf-8"));
@@ -419,7 +419,7 @@ describe("PTY Native Modules", () => {
       packageRoot,
       "apps",
       "app",
-      "electron",
+      "electrobun",
       "package.json",
     );
     const electronPkg = JSON.parse(fs.readFileSync(electronPkgPath, "utf-8"));
@@ -437,7 +437,7 @@ describe("Local Embedding Native Modules", () => {
       packageRoot,
       "apps",
       "app",
-      "electron",
+      "electrobun",
       "package.json",
     );
     const electronPkg = JSON.parse(fs.readFileSync(electronPkgPath, "utf-8"));

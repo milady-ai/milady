@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   isKnownIpcChannel,
   KNOWN_IPC_CHANNELS,
-} from "../../electron/src/native/ipc-channels";
+} from "../../electrobun/src/native/ipc-channels";
 
 describe("lifo ipc channels", () => {
   it("registers lifo pip channels as known ipc channels", () => {

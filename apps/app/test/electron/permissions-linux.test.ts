@@ -56,7 +56,7 @@ import {
   checkScreenRecording,
   openPrivacySettings,
   requestPermission,
-} from "../../electron/src/native/permissions-linux";
+} from "../../electrobun/src/native/permissions-linux";
 import { execMock, mockExecSequence } from "./helpers/exec-mock";
 
 // ---------------------------------------------------------------------------

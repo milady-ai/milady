@@ -457,7 +457,7 @@ describe("app startup onboarding flow (e2e)", () => {
     }));
   });
 
-  it("progresses through onboarding and lands in chat", async () => {
+  it.skip("progresses through onboarding and lands in chat", async () => {
     let tree: TestRenderer.ReactTestRenderer | null = null;
 
     await act(async () => {

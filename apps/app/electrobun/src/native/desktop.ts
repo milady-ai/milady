@@ -14,11 +14,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
 import {
-  ApplicationMenu,
-  BrowserWindow,
-  type MenuItemConfig,
-  ContextMenu,
+  type BrowserWindow,
   GlobalShortcut,
+  type MenuItemConfig,
   Tray,
   Utils,
 } from "electrobun";
@@ -160,11 +158,13 @@ export class DesktopManager {
 
   // MARK: Global Shortcuts
 
-  async registerShortcut(options: ShortcutOptions): Promise<{ success: boolean }> {
+  async registerShortcut(
+    options: ShortcutOptions,
+  ): Promise<{ success: boolean }> {
     if (this.shortcuts.has(options.id)) {
       // Unregister previous binding for this id
-      const prev = this.shortcuts.get(options.id)!;
-      GlobalShortcut.unregister(prev.accelerator);
+      const prev = this.shortcuts.get(options.id);
+      if (prev) GlobalShortcut.unregister(prev.accelerator);
     }
 
     const success = GlobalShortcut.register(options.accelerator, () => {
@@ -194,23 +194,31 @@ export class DesktopManager {
     this.shortcuts.clear();
   }
 
-  async isShortcutRegistered(options: { accelerator: string }): Promise<{ registered: boolean }> {
+  async isShortcutRegistered(options: {
+    accelerator: string;
+  }): Promise<{ registered: boolean }> {
     return { registered: GlobalShortcut.isRegistered(options.accelerator) };
   }
 
   // MARK: Auto-launch
 
-  async setAutoLaunch(options: { enabled: boolean; openAsHidden?: boolean }): Promise<void> {
+  async setAutoLaunch(options: {
+    enabled: boolean;
+    openAsHidden?: boolean;
+  }): Promise<void> {
     // Platform-specific auto-launch — best-effort
     if (process.platform === "darwin") {
-      const flag = options.enabled ? "--background" : "";
       const appPath = process.execPath;
       const script = options.enabled
         ? `osascript -e 'tell application "System Events" to make login item at end with properties {path:"${appPath}", hidden:${options.openAsHidden ? "true" : "false"}}'`
         : `osascript -e 'tell application "System Events" to delete login item "Milady"'`;
       await execAsync(script).catch(() => {});
     } else if (process.platform === "linux") {
-      const autostartDir = path.join(process.env.HOME ?? "", ".config", "autostart");
+      const autostartDir = path.join(
+        process.env.HOME ?? "",
+        ".config",
+        "autostart",
+      );
       const desktopFile = path.join(autostartDir, "milady.desktop");
       if (options.enabled) {
         fs.mkdirSync(autostartDir, { recursive: true });
@@ -219,13 +227,20 @@ export class DesktopManager {
           `[Desktop Entry]\nType=Application\nName=Milady\nExec=${process.execPath}\nHidden=false\nNoDisplay=false\nX-GNOME-Autostart-enabled=true\n`,
         );
       } else {
-        try { fs.unlinkSync(desktopFile); } catch { /* ignore */ }
+        try {
+          fs.unlinkSync(desktopFile);
+        } catch {
+          /* ignore */
+        }
       }
     }
     // Windows: registry-based (omitted for now)
   }
 
-  async getAutoLaunchStatus(): Promise<{ enabled: boolean; openAsHidden: boolean }> {
+  async getAutoLaunchStatus(): Promise<{
+    enabled: boolean;
+    openAsHidden: boolean;
+  }> {
     // Simplified: always return false on non-darwin platforms
     if (process.platform === "darwin") {
       try {
@@ -257,16 +272,14 @@ export class DesktopManager {
     if (!win) return;
     if (options.width !== undefined || options.height !== undefined) {
       const size = win.getSize();
-      win.setSize(
-        options.width ?? size.width,
-        options.height ?? size.height,
-      );
+      win.setSize(options.width ?? size.width, options.height ?? size.height);
     }
     if (options.x !== undefined || options.y !== undefined) {
       const pos = win.getPosition();
       win.setPosition(options.x ?? pos.x, options.y ?? pos.y);
     }
-    if (options.alwaysOnTop !== undefined) win.setAlwaysOnTop(options.alwaysOnTop);
+    if (options.alwaysOnTop !== undefined)
+      win.setAlwaysOnTop(options.alwaysOnTop);
     if (options.fullscreen !== undefined) win.setFullScreen(options.fullscreen);
     if (options.title !== undefined) win.setTitle(options.title);
   }
@@ -286,16 +299,28 @@ export class DesktopManager {
     win.setSize(options.width, options.height);
   }
 
-  async minimizeWindow(): Promise<void> { this.mainWindow?.minimize(); }
-  async maximizeWindow(): Promise<void> { this.mainWindow?.maximize(); }
-  async unmaximizeWindow(): Promise<void> { this.mainWindow?.unmaximize(); }
-  async closeWindow(): Promise<void> { this.mainWindow?.close(); }
-  async showWindow(): Promise<void> { this.mainWindow?.show(); }
+  async minimizeWindow(): Promise<void> {
+    this.mainWindow?.minimize();
+  }
+  async maximizeWindow(): Promise<void> {
+    this.mainWindow?.maximize();
+  }
+  async unmaximizeWindow(): Promise<void> {
+    this.mainWindow?.unmaximize();
+  }
+  async closeWindow(): Promise<void> {
+    this.mainWindow?.close();
+  }
+  async showWindow(): Promise<void> {
+    this.mainWindow?.show();
+  }
   async hideWindow(): Promise<void> {
     // Electrobun: minimize to tray instead of hide if no hide method
     this.mainWindow?.minimize();
   }
-  async focusWindow(): Promise<void> { this.mainWindow?.focus(); }
+  async focusWindow(): Promise<void> {
+    this.mainWindow?.focus();
+  }
 
   async isWindowMaximized(): Promise<{ maximized: boolean }> {
     return { maximized: this.mainWindow?.isMaximized() ?? false };
@@ -312,7 +337,10 @@ export class DesktopManager {
     return { focused: true };
   }
 
-  async setAlwaysOnTop(options: { flag: boolean; level?: string }): Promise<void> {
+  async setAlwaysOnTop(options: {
+    flag: boolean;
+    level?: string;
+  }): Promise<void> {
     this.mainWindow?.setAlwaysOnTop(options.flag);
   }
   async setFullscreen(options: { flag: boolean }): Promise<void> {
@@ -324,7 +352,9 @@ export class DesktopManager {
 
   // MARK: Notifications
 
-  async showNotification(options: NotificationOptions): Promise<{ id: string }> {
+  async showNotification(
+    options: NotificationOptions,
+  ): Promise<{ id: string }> {
     const id = `notification_${++this.notificationCounter}`;
     Utils.showNotification({
       title: options.title,
@@ -356,7 +386,10 @@ export class DesktopManager {
 
   async relaunch(): Promise<void> {
     // Electrobun doesn't expose relaunch directly — spawn a detached child
-    const child = spawn(process.execPath, [], { detached: true, stdio: "ignore" });
+    const child = spawn(process.execPath, [], {
+      detached: true,
+      stdio: "ignore",
+    });
     child.unref();
     Utils.quit();
   }
@@ -417,7 +450,10 @@ export class DesktopManager {
   }> {
     const text = Utils.clipboardReadText() ?? "";
     const formats = Utils.clipboardAvailableFormats();
-    return { text, hasImage: formats.includes("image/png") || formats.includes("image/tiff") };
+    return {
+      text,
+      hasImage: formats.includes("image/png") || formats.includes("image/tiff"),
+    };
   }
 
   async clearClipboard(): Promise<void> {
@@ -431,7 +467,9 @@ export class DesktopManager {
     try {
       const parsed = new URL(url);
       if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-        throw new Error(`Blocked openExternal for non-http(s) URL: ${parsed.protocol}`);
+        throw new Error(
+          `Blocked openExternal for non-http(s) URL: ${parsed.protocol}`,
+        );
       }
     } catch (err) {
       if (err instanceof TypeError) throw new Error(`Invalid URL: ${url}`);
@@ -483,20 +521,40 @@ export function getDesktopManager(): DesktopManager {
 // IPC handlers
 // ---------------------------------------------------------------------------
 
-export const desktopHandlers: Record<string, (args: unknown[]) => Promise<unknown>> = {
-  "desktop:createTray": ([options]) => getDesktopManager().createTray(options as TrayOptions),
-  "desktop:updateTray": ([options]) => getDesktopManager().updateTray(options as Partial<TrayOptions>),
+export const desktopHandlers: Record<
+  string,
+  (args: unknown[]) => Promise<unknown>
+> = {
+  "desktop:createTray": ([options]) =>
+    getDesktopManager().createTray(options as TrayOptions),
+  "desktop:updateTray": ([options]) =>
+    getDesktopManager().updateTray(options as Partial<TrayOptions>),
   "desktop:destroyTray": () => getDesktopManager().destroyTray(),
-  "desktop:setTrayMenu": ([options]) => Promise.resolve(getDesktopManager().setTrayMenu(options as { menu: TrayMenuItem[] })),
-  "desktop:registerShortcut": ([options]) => getDesktopManager().registerShortcut(options as ShortcutOptions),
-  "desktop:unregisterShortcut": ([options]) => getDesktopManager().unregisterShortcut(options as { id: string }),
-  "desktop:unregisterAllShortcuts": () => getDesktopManager().unregisterAllShortcuts(),
-  "desktop:isShortcutRegistered": ([options]) => getDesktopManager().isShortcutRegistered(options as { accelerator: string }),
-  "desktop:setAutoLaunch": ([options]) => getDesktopManager().setAutoLaunch(options as { enabled: boolean; openAsHidden?: boolean }),
-  "desktop:getAutoLaunchStatus": () => getDesktopManager().getAutoLaunchStatus(),
-  "desktop:setWindowOptions": ([options]) => getDesktopManager().setWindowOptions(options as WindowOptions),
+  "desktop:setTrayMenu": ([options]) =>
+    Promise.resolve(
+      getDesktopManager().setTrayMenu(options as { menu: TrayMenuItem[] }),
+    ),
+  "desktop:registerShortcut": ([options]) =>
+    getDesktopManager().registerShortcut(options as ShortcutOptions),
+  "desktop:unregisterShortcut": ([options]) =>
+    getDesktopManager().unregisterShortcut(options as { id: string }),
+  "desktop:unregisterAllShortcuts": () =>
+    getDesktopManager().unregisterAllShortcuts(),
+  "desktop:isShortcutRegistered": ([options]) =>
+    getDesktopManager().isShortcutRegistered(
+      options as { accelerator: string },
+    ),
+  "desktop:setAutoLaunch": ([options]) =>
+    getDesktopManager().setAutoLaunch(
+      options as { enabled: boolean; openAsHidden?: boolean },
+    ),
+  "desktop:getAutoLaunchStatus": () =>
+    getDesktopManager().getAutoLaunchStatus(),
+  "desktop:setWindowOptions": ([options]) =>
+    getDesktopManager().setWindowOptions(options as WindowOptions),
   "desktop:getWindowBounds": () => getDesktopManager().getWindowBounds(),
-  "desktop:setWindowBounds": ([options]) => getDesktopManager().setWindowBounds(options as WindowBounds),
+  "desktop:setWindowBounds": ([options]) =>
+    getDesktopManager().setWindowBounds(options as WindowBounds),
   "desktop:minimizeWindow": () => getDesktopManager().minimizeWindow(),
   "desktop:maximizeWindow": () => getDesktopManager().maximizeWindow(),
   "desktop:unmaximizeWindow": () => getDesktopManager().unmaximizeWindow(),
@@ -508,21 +566,32 @@ export const desktopHandlers: Record<string, (args: unknown[]) => Promise<unknow
   "desktop:isWindowMinimized": () => getDesktopManager().isWindowMinimized(),
   "desktop:isWindowVisible": () => getDesktopManager().isWindowVisible(),
   "desktop:isWindowFocused": () => getDesktopManager().isWindowFocused(),
-  "desktop:setAlwaysOnTop": ([options]) => getDesktopManager().setAlwaysOnTop(options as { flag: boolean; level?: string }),
-  "desktop:setFullscreen": ([options]) => getDesktopManager().setFullscreen(options as { flag: boolean }),
-  "desktop:setOpacity": ([options]) => getDesktopManager().setOpacity(options as { opacity: number }),
-  "desktop:showNotification": ([options]) => getDesktopManager().showNotification(options as NotificationOptions),
-  "desktop:closeNotification": ([options]) => getDesktopManager().closeNotification(options as { id: string }),
+  "desktop:setAlwaysOnTop": ([options]) =>
+    getDesktopManager().setAlwaysOnTop(
+      options as { flag: boolean; level?: string },
+    ),
+  "desktop:setFullscreen": ([options]) =>
+    getDesktopManager().setFullscreen(options as { flag: boolean }),
+  "desktop:setOpacity": ([options]) =>
+    getDesktopManager().setOpacity(options as { opacity: number }),
+  "desktop:showNotification": ([options]) =>
+    getDesktopManager().showNotification(options as NotificationOptions),
+  "desktop:closeNotification": ([options]) =>
+    getDesktopManager().closeNotification(options as { id: string }),
   "desktop:getPowerState": () => getDesktopManager().getPowerState(),
   "desktop:quit": () => getDesktopManager().quit(),
   "desktop:relaunch": () => getDesktopManager().relaunch(),
   "desktop:getVersion": () => getDesktopManager().getVersion(),
   "desktop:isPackaged": () => getDesktopManager().isPackaged(),
-  "desktop:getPath": ([options]) => getDesktopManager().getPath(options as { name: string }),
-  "desktop:writeToClipboard": ([options]) => getDesktopManager().writeToClipboard(options as ClipboardWriteOptions),
+  "desktop:getPath": ([options]) =>
+    getDesktopManager().getPath(options as { name: string }),
+  "desktop:writeToClipboard": ([options]) =>
+    getDesktopManager().writeToClipboard(options as ClipboardWriteOptions),
   "desktop:readFromClipboard": () => getDesktopManager().readFromClipboard(),
   "desktop:clearClipboard": () => getDesktopManager().clearClipboard(),
-  "desktop:openExternal": ([options]) => getDesktopManager().openExternal(options as { url: string }),
-  "desktop:showItemInFolder": ([options]) => getDesktopManager().showItemInFolder(options as { path: string }),
+  "desktop:openExternal": ([options]) =>
+    getDesktopManager().openExternal(options as { url: string }),
+  "desktop:showItemInFolder": ([options]) =>
+    getDesktopManager().showItemInFolder(options as { path: string }),
   "desktop:beep": () => getDesktopManager().beep(),
 };

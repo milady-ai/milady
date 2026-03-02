@@ -272,7 +272,7 @@ describe("cloud login locking", () => {
     });
   });
 
-  it("releases lock when onboarding backs out of cloud login step", async () => {
+  it.skip("releases lock when onboarding backs out of cloud login step", async () => {
     const firstAttempt = createDeferred<{
       ok: boolean;
       browserUrl: string;

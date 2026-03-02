@@ -1,10 +1,19 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { __electronTestState } from "electron";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { AgentManager } from "../../electron/src/native/agent";
+// Mock ipc-server to prevent actual WebSocket operations
+vi.mock("../../electrobun/src/ipc-server", () => ({
+  pushToRenderer: vi.fn(),
+  startIpcServer: vi.fn(),
+  stopIpcServer: vi.fn(),
+  handle: vi.fn(),
+  executeJavascript: vi.fn(),
+  getPort: vi.fn(),
+}));
+
+import { AgentManager } from "../../electrobun/src/native/agent";
 
 interface StartupTestState {
   started: boolean;
@@ -61,8 +70,7 @@ const ELIZA_JS_THROW_ONCE = `export async function startEliza() {
 }
 `;
 
-function writeTestDist(appPath: string, opts?: { elizaJs?: string }): void {
-  const distDir = path.join(appPath, "milady-dist");
+function writeTestDist(distDir: string, opts?: { elizaJs?: string }): void {
   writeFileSync(path.join(distDir, "server.js"), SERVER_JS, {
     encoding: "utf8",
   });
@@ -73,16 +81,20 @@ function writeTestDist(appPath: string, opts?: { elizaJs?: string }): void {
   );
 }
 
-describe("electron agent startup failure cleanup", () => {
+describe("electrobun agent startup failure cleanup", () => {
   const tempDirs: string[] = [];
+  const originalDistPath = process.env.MILADY_DIST_PATH;
 
   afterEach(() => {
     for (const dir of tempDirs.splice(0)) {
       rmSync(dir, { recursive: true, force: true });
     }
     globalThis.__miladyAgentStartupTestState = undefined;
-    __electronTestState.appPath = "";
-    __electronTestState.isPackaged = true;
+    if (originalDistPath === undefined) {
+      delete process.env.MILADY_DIST_PATH;
+    } else {
+      process.env.MILADY_DIST_PATH = originalDistPath;
+    }
   });
 
   it("keeps API server alive after failed runtime so UI can show error, then recovers on retry", async () => {
@@ -91,9 +103,8 @@ describe("electron agent startup failure cleanup", () => {
     const distDir = path.join(appPath, "milady-dist");
     rmSync(distDir, { recursive: true, force: true });
     mkdirSync(distDir, { recursive: true });
-    writeTestDist(appPath);
-    __electronTestState.appPath = appPath;
-    __electronTestState.isPackaged = true;
+    writeTestDist(distDir);
+    process.env.MILADY_DIST_PATH = distDir;
 
     const manager = new AgentManager();
 
@@ -130,9 +141,8 @@ describe("electron agent startup failure cleanup", () => {
       require("./nonexistent-native-binding.node");
       export function startEliza() {}
     `;
-    writeTestDist(appPath, { elizaJs: brokenEliza });
-    __electronTestState.appPath = appPath;
-    __electronTestState.isPackaged = true;
+    writeTestDist(distDir, { elizaJs: brokenEliza });
+    process.env.MILADY_DIST_PATH = distDir;
 
     const manager = new AgentManager();
     const result = await manager.start();

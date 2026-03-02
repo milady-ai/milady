@@ -49,7 +49,7 @@ import {
   checkPermission,
   openPrivacySettings,
   requestPermission,
-} from "../../electron/src/native/permissions-win32";
+} from "../../electrobun/src/native/permissions-win32";
 import { mockExecSequence } from "./helpers/exec-mock";
 
 // ---------------------------------------------------------------------------

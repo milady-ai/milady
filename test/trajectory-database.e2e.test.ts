@@ -16,6 +16,7 @@ import { startApiServer } from "../src/api/server";
 
 import pluginTrajectoryLogger from "@elizaos/plugin-trajectory-logger";
 import { default as pluginSql } from "@elizaos/plugin-sql";
+import { installDatabaseTrajectoryLogger } from "../src/runtime/trajectory-persistence";
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 

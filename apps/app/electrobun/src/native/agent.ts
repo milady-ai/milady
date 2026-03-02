@@ -23,9 +23,10 @@ let _logPath: string | null = null;
 function getLogPath(): string | null {
   if (_logPath !== null) return _logPath;
   try {
-    const userDataDir = process.env.MILADY_USER_DATA_DIR ?? Bun.env.HOME
-      ? path.join(Bun.env.HOME as string, ".config", "Milady")
-      : null;
+    const userDataDir =
+      (process.env.MILADY_USER_DATA_DIR ?? Bun.env.HOME)
+        ? path.join(Bun.env.HOME as string, ".config", "Milady")
+        : null;
     if (userDataDir) {
       fs.mkdirSync(userDataDir, { recursive: true });
       _logPath = path.join(userDataDir, "milady-startup.log");
@@ -130,7 +131,10 @@ export class AgentManager {
       try {
         await this.apiClose();
       } catch (err) {
-        console.warn("[Agent] Failed to close stale API server:", err instanceof Error ? err.message : err);
+        console.warn(
+          "[Agent] Failed to close stale API server:",
+          err instanceof Error ? err.message : err,
+        );
       } finally {
         this.apiClose = null;
         this.status.port = null;
@@ -138,7 +142,8 @@ export class AgentManager {
     }
     if (
       this.runtime &&
-      typeof (this.runtime as { stop?: () => Promise<void> }).stop === "function"
+      typeof (this.runtime as { stop?: () => Promise<void> }).stop ===
+        "function"
     ) {
       try {
         await (this.runtime as { stop: () => Promise<void> }).stop();
@@ -155,19 +160,22 @@ export class AgentManager {
 
     try {
       // Resolve milady dist — env override, then walk up to find project root dist/
-      const miladyDist = process.env.MILADY_DIST_PATH ?? (() => {
-        // Walk up from cwd looking for a dist/ dir with server.js (project root pattern)
-        let dir = process.cwd();
-        for (let i = 0; i < 10; i++) {
-          const candidate = path.join(dir, "dist");
-          if (fs.existsSync(path.join(candidate, "server.js"))) return candidate;
-          const legacy = path.join(dir, "milady-dist");
-          if (fs.existsSync(path.join(legacy, "server.js"))) return legacy;
-          dir = path.dirname(dir);
-          if (dir === path.dirname(dir)) break;
-        }
-        return path.resolve(process.cwd(), "milady-dist");
-      })();
+      const miladyDist =
+        process.env.MILADY_DIST_PATH ??
+        (() => {
+          // Walk up from cwd looking for a dist/ dir with server.js (project root pattern)
+          let dir = process.cwd();
+          for (let i = 0; i < 10; i++) {
+            const candidate = path.join(dir, "dist");
+            if (fs.existsSync(path.join(candidate, "server.js")))
+              return candidate;
+            const legacy = path.join(dir, "milady-dist");
+            if (fs.existsSync(path.join(legacy, "server.js"))) return legacy;
+            dir = path.dirname(dir);
+            if (dir === path.dirname(dir)) break;
+          }
+          return path.resolve(process.cwd(), "milady-dist");
+        })();
 
       diagnosticLog(`[Agent] milady dist: ${miladyDist}`);
 
@@ -210,42 +218,62 @@ export class AgentManager {
       });
 
       let actualPort: number | null = null;
-      let startEliza: ((opts: { headless: boolean }) => Promise<Record<string, unknown> | null>) | null = null;
+      let startEliza:
+        | ((opts: {
+            headless: boolean;
+          }) => Promise<Record<string, unknown> | null>)
+        | null = null;
       let apiUpdateRuntime: ((rt: unknown) => void) | null = null;
 
       if (serverModule?.startApiServer) {
-        const { port: resolvedPort, close, updateRuntime } =
-          await (serverModule.startApiServer as Function)({
-            port: apiPort,
-            initialAgentState: "starting",
-            onRestart: async () => {
-              console.log("[Agent] HTTP restart requested…");
-              const prev = this.runtime;
-              if (prev && typeof (prev as { stop?: () => Promise<void> }).stop === "function") {
-                try { await (prev as { stop: () => Promise<void> }).stop(); } catch { /* ignore */ }
+        const {
+          port: resolvedPort,
+          close,
+          updateRuntime,
+        } = await (
+          serverModule.startApiServer as (
+            opts: Record<string, unknown>,
+          ) => Promise<Record<string, unknown>>
+        )({
+          port: apiPort,
+          initialAgentState: "starting",
+          onRestart: async () => {
+            console.log("[Agent] HTTP restart requested…");
+            const prev = this.runtime;
+            if (
+              prev &&
+              typeof (prev as { stop?: () => Promise<void> }).stop ===
+                "function"
+            ) {
+              try {
+                await (prev as { stop: () => Promise<void> }).stop();
+              } catch {
+                /* ignore */
               }
-              if (!startEliza) return null;
-              const next = await startEliza({ headless: true });
-              if (!next) return null;
-              this.runtime = next as Record<string, unknown>;
-              apiUpdateRuntime?.(next);
-              const nextName =
-                (next as { character?: { name?: string } }).character?.name ?? "Milady";
-              this.status = {
-                ...this.status,
-                state: "running",
-                agentName: nextName,
-                port: actualPort,
-                startedAt: Date.now(),
-                error: null,
-              };
-              this.send("agent:status", this.status);
-              return next as Record<string, unknown>;
-            },
-          });
+            }
+            if (!startEliza) return null;
+            const next = await startEliza({ headless: true });
+            if (!next) return null;
+            this.runtime = next as Record<string, unknown>;
+            apiUpdateRuntime?.(next);
+            const nextName =
+              (next as { character?: { name?: string } }).character?.name ??
+              "Milady";
+            this.status = {
+              ...this.status,
+              state: "running",
+              agentName: nextName,
+              port: actualPort,
+              startedAt: Date.now(),
+              error: null,
+            };
+            this.send("agent:status", this.status);
+            return next as Record<string, unknown>;
+          },
+        });
         actualPort = resolvedPort as number;
         this.apiClose = close as () => Promise<void>;
-        apiUpdateRuntime = updateRuntime as ((rt: unknown) => void);
+        apiUpdateRuntime = updateRuntime as (rt: unknown) => void;
         diagnosticLog(`[Agent] API server on port ${actualPort}`);
       }
 
@@ -266,7 +294,9 @@ export class AgentManager {
       const resolvedStartEliza = elizaModule
         ? ((elizaModule.startEliza ??
             (elizaModule.default as Record<string, unknown>)?.startEliza) as
-            | ((opts: { headless: boolean }) => Promise<Record<string, unknown> | null>)
+            | ((opts: {
+                headless: boolean;
+              }) => Promise<Record<string, unknown> | null>)
             | undefined)
         : undefined;
 
@@ -297,14 +327,21 @@ export class AgentManager {
 
       if (!runtimeResult) {
         const reason = runtimeInitError ?? "Runtime failed to initialize";
-        this.status = { state: "error", agentName: null, port: actualPort, startedAt: null, error: reason };
+        this.status = {
+          state: "error",
+          agentName: null,
+          port: actualPort,
+          startedAt: null,
+          error: reason,
+        };
         this.send("agent:status", this.status);
         return this.status;
       }
 
       this.runtime = runtimeResult;
       const agentName =
-        (runtimeResult as { character?: { name?: string } }).character?.name ?? "Milady";
+        (runtimeResult as { character?: { name?: string } }).character?.name ??
+        "Milady";
       apiUpdateRuntime?.(runtimeResult);
 
       this.status = {
@@ -315,15 +352,22 @@ export class AgentManager {
         error: null,
       };
       this.send("agent:status", this.status);
-      diagnosticLog(`[Agent] Running — agent: ${agentName}, port: ${actualPort}`);
+      diagnosticLog(
+        `[Agent] Running — agent: ${agentName}, port: ${actualPort}`,
+      );
       return this.status;
     } catch (err) {
-      const msg = err instanceof Error ? (err.stack || err.message) : String(err);
+      const msg = err instanceof Error ? err.stack || err.message : String(err);
       if (
         this.runtime &&
-        typeof (this.runtime as { stop?: () => Promise<void> }).stop === "function"
+        typeof (this.runtime as { stop?: () => Promise<void> }).stop ===
+          "function"
       ) {
-        try { await (this.runtime as { stop: () => Promise<void> }).stop(); } catch { /* ignore */ }
+        try {
+          await (this.runtime as { stop: () => Promise<void> }).stop();
+        } catch {
+          /* ignore */
+        }
       }
       this.runtime = null;
       this.status = {
@@ -340,7 +384,8 @@ export class AgentManager {
   }
 
   async stop(): Promise<void> {
-    if (this.status.state !== "running" && this.status.state !== "starting") return;
+    if (this.status.state !== "running" && this.status.state !== "starting")
+      return;
     try {
       if (this.apiClose) {
         await this.apiClose();
@@ -348,12 +393,16 @@ export class AgentManager {
       }
       if (
         this.runtime &&
-        typeof (this.runtime as { stop?: () => Promise<void> }).stop === "function"
+        typeof (this.runtime as { stop?: () => Promise<void> }).stop ===
+          "function"
       ) {
         await (this.runtime as { stop: () => Promise<void> }).stop();
       }
     } catch (err) {
-      console.warn("[Agent] Error during shutdown:", err instanceof Error ? err.message : err);
+      console.warn(
+        "[Agent] Error during shutdown:",
+        err instanceof Error ? err.message : err,
+      );
     }
     this.runtime = null;
     this.status = {
@@ -386,7 +435,10 @@ export class AgentManager {
 
   dispose(): void {
     this.stop().catch((err) =>
-      console.warn("[Agent] dispose error:", err instanceof Error ? err.message : err),
+      console.warn(
+        "[Agent] dispose error:",
+        err instanceof Error ? err.message : err,
+      ),
     );
   }
 }
@@ -402,7 +454,10 @@ export function getAgentManager(): AgentManager {
 // IPC handlers — registered via dispatch registry, not ipcMain
 // ---------------------------------------------------------------------------
 
-export const agentHandlers: Record<string, (args: unknown[]) => Promise<unknown>> = {
+export const agentHandlers: Record<
+  string,
+  (args: unknown[]) => Promise<unknown>
+> = {
   "agent:start": async () => getAgentManager().start(),
   "agent:stop": async () => {
     await getAgentManager().stop();

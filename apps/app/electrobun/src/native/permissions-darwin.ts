@@ -22,7 +22,10 @@ export async function checkAccessibility(): Promise<PermissionCheckResult> {
     timeout: 5000,
   }).catch((err) => ({ stdout: "", stderr: String(err.message || "failed") }));
 
-  if (stderr && (stderr.includes("not allowed") || stderr.includes("assistive"))) {
+  if (
+    stderr &&
+    (stderr.includes("not allowed") || stderr.includes("assistive"))
+  ) {
     return { status: "denied", canRequest: false };
   }
   if (stdout.trim() === "true") return { status: "granted", canRequest: false };
@@ -36,7 +39,10 @@ export async function checkScreenRecording(): Promise<PermissionCheckResult> {
     { timeout: 5000 },
   ).catch((err) => ({ stdout: "", stderr: String(err.message || "failed") }));
 
-  if (stderr && (stderr.includes("not authorized") || stderr.includes("denied"))) {
+  if (
+    stderr &&
+    (stderr.includes("not authorized") || stderr.includes("denied"))
+  ) {
     return { status: "denied", canRequest: false };
   }
   return { status: "not-determined", canRequest: false };
@@ -45,7 +51,7 @@ export async function checkScreenRecording(): Promise<PermissionCheckResult> {
 export async function checkMicrophone(): Promise<PermissionCheckResult> {
   const { stdout } = await execAsync(
     `osascript -e 'use framework "AVFoundation"
-set auth to (current application)'\''s AVCaptureDevice'\''s authorizationStatusForMediaType:((current application)'\''s AVMediaTypeAudio)
+set auth to (current application)'''s AVCaptureDevice'''s authorizationStatusForMediaType:((current application)'''s AVMediaTypeAudio)
 return auth as integer'`,
     { timeout: 5000 },
   ).catch(() => ({ stdout: "-1" }));
@@ -60,7 +66,7 @@ return auth as integer'`,
 export async function checkCamera(): Promise<PermissionCheckResult> {
   const { stdout } = await execAsync(
     `osascript -e 'use framework "AVFoundation"
-set auth to (current application)'\''s AVCaptureDevice'\''s authorizationStatusForMediaType:((current application)'\''s AVMediaTypeVideo)
+set auth to (current application)'''s AVCaptureDevice'''s authorizationStatusForMediaType:((current application)'''s AVMediaTypeVideo)
 return auth as integer'`,
     { timeout: 5000 },
   ).catch(() => ({ stdout: "-1" }));
@@ -73,22 +79,33 @@ return auth as integer'`,
 
 export async function requestMicrophone(): Promise<PermissionCheckResult> {
   // Trigger permission prompt via AppleScript — best-effort in Electrobun context
-  await execAsync(`osascript -e 'tell application "System Events" to get microphone permission'`).catch(() => {});
+  await execAsync(
+    `osascript -e 'tell application "System Events" to get microphone permission'`,
+  ).catch(() => {});
   return checkMicrophone();
 }
 
 export async function requestCamera(): Promise<PermissionCheckResult> {
-  await execAsync(`osascript -e 'tell application "System Events" to get camera permission'`).catch(() => {});
+  await execAsync(
+    `osascript -e 'tell application "System Events" to get camera permission'`,
+  ).catch(() => {});
   return checkCamera();
 }
 
-export async function openPrivacySettings(permission: SystemPermissionId): Promise<void> {
+export async function openPrivacySettings(
+  permission: SystemPermissionId,
+): Promise<void> {
   const paneUrls: Record<string, string> = {
-    accessibility: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility",
-    "screen-recording": "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture",
-    microphone: "x-apple.systempreferences:com.apple.preference.security?Privacy_Microphone",
-    camera: "x-apple.systempreferences:com.apple.preference.security?Privacy_Camera",
-    shell: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles",
+    accessibility:
+      "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility",
+    "screen-recording":
+      "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture",
+    microphone:
+      "x-apple.systempreferences:com.apple.preference.security?Privacy_Microphone",
+    camera:
+      "x-apple.systempreferences:com.apple.preference.security?Privacy_Camera",
+    shell:
+      "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles",
   };
   const url = paneUrls[permission];
   if (url) {
@@ -96,27 +113,41 @@ export async function openPrivacySettings(permission: SystemPermissionId): Promi
   }
 }
 
-export async function checkPermission(id: SystemPermissionId): Promise<PermissionCheckResult> {
+export async function checkPermission(
+  id: SystemPermissionId,
+): Promise<PermissionCheckResult> {
   switch (id) {
-    case "accessibility": return checkAccessibility();
-    case "screen-recording": return checkScreenRecording();
-    case "microphone": return checkMicrophone();
-    case "camera": return checkCamera();
-    case "shell": return { status: "granted", canRequest: false };
-    default: return { status: "not-applicable", canRequest: false };
+    case "accessibility":
+      return checkAccessibility();
+    case "screen-recording":
+      return checkScreenRecording();
+    case "microphone":
+      return checkMicrophone();
+    case "camera":
+      return checkCamera();
+    case "shell":
+      return { status: "granted", canRequest: false };
+    default:
+      return { status: "not-applicable", canRequest: false };
   }
 }
 
-export async function requestPermission(id: SystemPermissionId): Promise<PermissionCheckResult> {
+export async function requestPermission(
+  id: SystemPermissionId,
+): Promise<PermissionCheckResult> {
   switch (id) {
-    case "microphone": return requestMicrophone();
-    case "camera": return requestCamera();
+    case "microphone":
+      return requestMicrophone();
+    case "camera":
+      return requestCamera();
     case "accessibility":
     case "screen-recording":
       await openPrivacySettings(id);
       await new Promise((r) => setTimeout(r, 500));
       return checkPermission(id);
-    case "shell": return { status: "granted", canRequest: false };
-    default: return { status: "not-applicable", canRequest: false };
+    case "shell":
+      return { status: "granted", canRequest: false };
+    default:
+      return { status: "not-applicable", canRequest: false };
   }
 }

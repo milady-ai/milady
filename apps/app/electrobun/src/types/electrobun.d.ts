@@ -32,9 +32,21 @@ export interface ElectrobunConfig {
     asarUnpack?: string[];
     cefVersion?: string;
     bunVersion?: string;
-    mac?: { codesign?: boolean; notarize?: boolean; bundleCEF?: boolean; defaultRenderer?: "native" | "cef"; icons?: string; [key: string]: any };
+    mac?: {
+      codesign?: boolean;
+      notarize?: boolean;
+      bundleCEF?: boolean;
+      defaultRenderer?: "native" | "cef";
+      icons?: string;
+      [key: string]: any;
+    };
     win?: { bundleCEF?: boolean; icon?: string; [key: string]: any };
-    linux?: { bundleCEF?: boolean; icon?: string; chromiumFlags?: Record<string, string | true>; [key: string]: any };
+    linux?: {
+      bundleCEF?: boolean;
+      icon?: string;
+      chromiumFlags?: Record<string, string | true>;
+      [key: string]: any;
+    };
   };
   runtime?: { exitOnLastWindowClosed?: boolean; [key: string]: any };
   release?: { baseUrl?: string; generatePatch?: boolean; [key: string]: any };
@@ -83,8 +95,18 @@ export interface WindowOptionsType {
   rpc?: any;
 }
 
-export type UpdateStatusType = "checking" | "available" | "not-available" | "downloading" | "downloaded" | "error";
-export interface UpdateStatusEntry { status: UpdateStatusType; timestamp: number; details?: any }
+export type UpdateStatusType =
+  | "checking"
+  | "available"
+  | "not-available"
+  | "downloading"
+  | "downloaded"
+  | "error";
+export interface UpdateStatusEntry {
+  status: UpdateStatusType;
+  timestamp: number;
+  details?: any;
+}
 export type UpdateStatusDetails = any;
 
 export interface TrayOptions {
@@ -95,9 +117,24 @@ export interface TrayOptions {
   height?: number;
 }
 
-export interface NotificationOptions { title: string; body?: string; subtitle?: string; silent?: boolean }
-export interface MessageBoxOptions { type?: string; buttons?: string[]; defaultId?: number; title?: string; message: string; detail?: string }
-export interface MessageBoxResponse { response: number; checkboxChecked?: boolean }
+export interface NotificationOptions {
+  title: string;
+  body?: string;
+  subtitle?: string;
+  silent?: boolean;
+}
+export interface MessageBoxOptions {
+  type?: string;
+  buttons?: string[];
+  defaultId?: number;
+  title?: string;
+  message: string;
+  detail?: string;
+}
+export interface MessageBoxResponse {
+  response: number;
+  checkboxChecked?: boolean;
+}
 export type Display = any;
 export type Rectangle = { x: number; y: number; width: number; height: number };
 export type Point = { x: number; y: number };
@@ -156,8 +193,18 @@ export declare const GlobalShortcut: {
 // ─── Updater ──────────────────────────────────────────────────────────────────
 
 export declare const Updater: {
-  checkForUpdate(): Promise<{ version: string; hash: string; updateAvailable: boolean }>;
-  updateInfo(): { version: string; hash: string; updateAvailable: boolean; updateReady: boolean; error: string };
+  checkForUpdate(): Promise<{
+    version: string;
+    hash: string;
+    updateAvailable: boolean;
+  }>;
+  updateInfo(): {
+    version: string;
+    hash: string;
+    updateAvailable: boolean;
+    updateReady: boolean;
+    error: string;
+  };
   getStatusHistory(): UpdateStatusEntry[];
   onStatusChange(cb: ((entry: UpdateStatusEntry) => void) | null): void;
   downloadUpdate(): Promise<void>;
@@ -232,7 +279,9 @@ export declare const Session: any;
 
 // ─── BuildConfig ──────────────────────────────────────────────────────────────
 
-export declare const BuildConfig: { get(): Promise<{ defaultRenderer: "native" | "cef"; [key: string]: any }> };
+export declare const BuildConfig: {
+  get(): Promise<{ defaultRenderer: "native" | "cef"; [key: string]: any }>;
+};
 export type BuildConfigType = any;
 
 // ─── BrowserView ─────────────────────────────────────────────────────────────

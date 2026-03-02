@@ -35,9 +35,9 @@ vi.mock("electron", () => ({
   BrowserWindow: vi.fn(),
 }));
 
-vi.mock("../../electron/src/native/permissions-darwin", () => mockDarwin);
-vi.mock("../../electron/src/native/permissions-win32", () => mockWin32);
-vi.mock("../../electron/src/native/permissions-linux", () => mockLinux);
+vi.mock("../../electrobun/src/native/permissions-darwin", () => mockDarwin);
+vi.mock("../../electrobun/src/native/permissions-win32", () => mockWin32);
+vi.mock("../../electrobun/src/native/permissions-linux", () => mockLinux);
 
 // ---------------------------------------------------------------------------
 // Import the module under test (after mocks are in place)
@@ -48,11 +48,11 @@ import {
   getPermissionManager,
   PermissionManager,
   registerPermissionsIPC,
-} from "../../electron/src/native/permissions";
+} from "../../electrobun/src/native/permissions";
 import type {
   PermissionCheckResult,
   SystemPermissionId,
-} from "../../electron/src/native/permissions-shared";
+} from "../../electrobun/src/native/permissions-shared";
 
 // ---------------------------------------------------------------------------
 // Helpers

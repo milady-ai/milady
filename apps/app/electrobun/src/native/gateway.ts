@@ -75,8 +75,8 @@ let bonjourModule: BonjourModuleProvider | null = null;
 
 async function loadDiscoveryModule(): Promise<"mdns" | "bonjour" | null> {
   try {
-    // @ts-ignore -- mdns is an optional dep; no types available
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // @ts-expect-error -- mdns is an optional dep; no types available
+    // biome-ignore lint/suspicious/noExplicitAny: optional dep with no types
     const mod = (await import("mdns")) as any;
     mdnsModule = (mod.default ?? mod) as MDNSModule;
     console.log("[Gateway] Loaded mdns module");
@@ -87,7 +87,9 @@ async function loadDiscoveryModule(): Promise<"mdns" | "bonjour" | null> {
 
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    bonjourModule = (await import("bonjour-service")) as unknown as BonjourModuleProvider;
+    bonjourModule = (await import(
+      "bonjour-service"
+    )) as unknown as BonjourModuleProvider;
     console.log("[Gateway] Loaded bonjour-service module");
     return "bonjour";
   } catch {
@@ -104,7 +106,9 @@ async function loadDiscoveryModule(): Promise<"mdns" | "bonjour" | null> {
     }
   }
 
-  console.warn("[Gateway] No mDNS/Bonjour module found. Install bonjour-service for local discovery.");
+  console.warn(
+    "[Gateway] No mDNS/Bonjour module found. Install bonjour-service for local discovery.",
+  );
   return null;
 }
 
@@ -124,7 +128,10 @@ export class GatewayDiscovery extends EventEmitter {
     status: string;
   }> {
     if (this._isDiscovering) {
-      return { gateways: Array.from(this.discoveredGateways.values()), status: "Already discovering" };
+      return {
+        gateways: Array.from(this.discoveredGateways.values()),
+        status: "Already discovering",
+      };
     }
 
     if (!this.discoveryType) {
@@ -152,39 +159,63 @@ export class GatewayDiscovery extends EventEmitter {
         setTimeout(() => this.stopDiscovery(), options.timeout);
       }
 
-      return { gateways: Array.from(this.discoveredGateways.values()), status: "Discovery started" };
+      return {
+        gateways: Array.from(this.discoveredGateways.values()),
+        status: "Discovery started",
+      };
     } catch (error) {
       this._isDiscovering = false;
-      return { gateways: [], status: error instanceof Error ? error.message : "Discovery failed" };
+      return {
+        gateways: [],
+        status: error instanceof Error ? error.message : "Discovery failed",
+      };
     }
   }
 
   private async startMDNSDiscovery(serviceType: string): Promise<void> {
     if (!mdnsModule) return;
     const [name, protocol] = serviceType.replace(/^_/, "").split("._");
-    this.browser = mdnsModule.createBrowser({ name, protocol: protocol ?? "tcp" });
+    this.browser = mdnsModule.createBrowser({
+      name,
+      protocol: protocol ?? "tcp",
+    });
     this.browser.on("serviceUp", (s) =>
-      this.handleServiceFound({ name: s.name ?? "Unknown", host: s.host ?? "localhost", port: s.port ?? 8080, txt: s.txtRecord, addresses: s.addresses }),
+      this.handleServiceFound({
+        name: s.name ?? "Unknown",
+        host: s.host ?? "localhost",
+        port: s.port ?? 8080,
+        txt: s.txtRecord,
+        addresses: s.addresses,
+      }),
     );
-    this.browser.on("serviceDown", (s) => this.handleServiceLost({ name: s.name, host: s.host, port: s.port }));
+    this.browser.on("serviceDown", (s) =>
+      this.handleServiceLost({ name: s.name, host: s.host, port: s.port }),
+    );
     (this.browser as MDNSBrowser).start();
   }
 
   private async startBonjourDiscovery(serviceType: string): Promise<void> {
     if (!bonjourModule) return;
-    const factory = typeof bonjourModule === "function" ? bonjourModule : bonjourModule.default;
+    const factory =
+      typeof bonjourModule === "function"
+        ? bonjourModule
+        : bonjourModule.default;
     if (!factory) return;
     const bonjour = factory();
     const type = serviceType.replace(/^_/, "").replace(/\._tcp$/, "");
     this.browser = bonjour.find({ type }) as BonjourBrowser;
     this.browser.on("up", (s) => this.handleServiceFound(s));
-    this.browser.on("down", (s) => this.handleServiceLost({ name: s.name, host: s.host, port: s.port }));
+    this.browser.on("down", (s) =>
+      this.handleServiceLost({ name: s.name, host: s.host, port: s.port }),
+    );
   }
 
   private handleServiceFound(service: BonjourService): void {
     const txt = service.txt ?? {};
-    const stableId = txt.id ?? `${service.name}-${service.host}:${service.port}`;
-    const tlsEnabled = txt.protocol === "wss" || this.parseBoolean(txt.tlsEnabled ?? txt.tls);
+    const stableId =
+      txt.id ?? `${service.name}-${service.host}:${service.port}`;
+    const tlsEnabled =
+      txt.protocol === "wss" || this.parseBoolean(txt.tlsEnabled ?? txt.tls);
     const gatewayPort = this.parseNumber(txt.gatewayPort) ?? service.port;
     const canvasPort = this.parseNumber(txt.canvasPort);
 
@@ -205,18 +236,32 @@ export class GatewayDiscovery extends EventEmitter {
     const isUpdate = this.discoveredGateways.has(stableId);
     this.discoveredGateways.set(stableId, endpoint);
     this.emit(isUpdate ? "updated" : "discovered", endpoint);
-    pushToRenderer("gateway:discovery", { type: isUpdate ? "updated" : "found", gateway: endpoint } as IpcValue);
+    pushToRenderer("gateway:discovery", {
+      type: isUpdate ? "updated" : "found",
+      gateway: endpoint,
+    } as IpcValue);
   }
 
-  private handleServiceLost(service: { name?: string; host?: string; port?: number }): void {
+  private handleServiceLost(service: {
+    name?: string;
+    host?: string;
+    port?: number;
+  }): void {
     for (const [id, gateway] of this.discoveredGateways) {
       const nameMatch = service.name && gateway.name === service.name;
-      const hostMatch = service.host && (gateway.host === service.host || gateway.lanHost === service.host);
-      const portMatch = service.port && (gateway.port === service.port || gateway.gatewayPort === service.port);
+      const hostMatch =
+        service.host &&
+        (gateway.host === service.host || gateway.lanHost === service.host);
+      const portMatch =
+        service.port &&
+        (gateway.port === service.port || gateway.gatewayPort === service.port);
       if (nameMatch || hostMatch || portMatch) {
         this.discoveredGateways.delete(id);
         this.emit("lost", gateway);
-        pushToRenderer("gateway:discovery", { type: "lost", gateway } as IpcValue);
+        pushToRenderer("gateway:discovery", {
+          type: "lost",
+          gateway,
+        } as IpcValue);
         break;
       }
     }
@@ -248,7 +293,7 @@ export class GatewayDiscovery extends EventEmitter {
   private parseNumber(value: string | undefined): number | undefined {
     if (!value) return undefined;
     const n = Number(value);
-    return isNaN(n) ? undefined : n;
+    return Number.isNaN(n) ? undefined : n;
   }
 
   dispose(): void {
@@ -265,11 +310,21 @@ export function getGatewayDiscovery(): GatewayDiscovery {
   return gatewayDiscovery;
 }
 
-export const gatewayHandlers: Record<string, (args: unknown[]) => Promise<unknown>> = {
-  "gateway:startDiscovery": ([options]) => getGatewayDiscovery().startDiscovery(options as DiscoveryOptions | undefined),
+export const gatewayHandlers: Record<
+  string,
+  (args: unknown[]) => Promise<unknown>
+> = {
+  "gateway:startDiscovery": ([options]) =>
+    getGatewayDiscovery().startDiscovery(
+      options as DiscoveryOptions | undefined,
+    ),
   "gateway:stopDiscovery": () => getGatewayDiscovery().stopDiscovery(),
   "gateway:getDiscoveredGateways": () =>
-    Promise.resolve({ gateways: getGatewayDiscovery().getDiscoveredGateways() }),
+    Promise.resolve({
+      gateways: getGatewayDiscovery().getDiscoveredGateways(),
+    }),
   "gateway:isDiscovering": () =>
-    Promise.resolve({ isDiscovering: getGatewayDiscovery().isDiscoveryActive() }),
+    Promise.resolve({
+      isDiscovering: getGatewayDiscovery().isDiscoveryActive(),
+    }),
 };

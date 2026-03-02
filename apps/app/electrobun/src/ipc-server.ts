@@ -23,9 +23,6 @@ let resolvedPort: number | null = null;
 /** The dist directory of the React app */
 let webDistDir = "";
 
-/** The JavaScript shim injected into the served HTML */
-let shimScript = "";
-
 /**
  * Register a handler for the given IPC channel.
  * Replaces ipcMain.handle(channel, handler).
@@ -250,8 +247,6 @@ export async function startIpcServer(opts: {
 }): Promise<{ port: number }> {
   webDistDir = opts.distDir;
   const preferredPort = opts.port ?? 18999;
-  shimScript = buildShim(preferredPort);
-
   // Try preferred port, fall back if busy
   for (let p = preferredPort; p < preferredPort + 20; p++) {
     try {
@@ -289,7 +284,12 @@ export async function startIpcServer(opts: {
             wsClients.delete(ws);
           },
           async message(ws, raw) {
-            let msg: { type: string; id: number; channel: string; args: unknown[] };
+            let msg: {
+              type: string;
+              id: number;
+              channel: string;
+              args: unknown[];
+            };
             try {
               msg = JSON.parse(raw as string);
             } catch {
@@ -307,8 +307,7 @@ export async function startIpcServer(opts: {
                   JSON.stringify({
                     type: "response",
                     id: msg.id,
-                    error:
-                      err instanceof Error ? err.message : String(err),
+                    error: err instanceof Error ? err.message : String(err),
                   }),
                 );
               }

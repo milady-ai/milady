@@ -5,10 +5,15 @@
  */
 
 function notAvailable(feature: string) {
-  return Promise.resolve({ error: `${feature} not available in Electrobun yet` });
+  return Promise.resolve({
+    error: `${feature} not available in Electrobun yet`,
+  });
 }
 
-export const swabbleHandlers: Record<string, (args: unknown[]) => Promise<unknown>> = {
+export const swabbleHandlers: Record<
+  string,
+  (args: unknown[]) => Promise<unknown>
+> = {
   "swabble:start": () => notAvailable("swabble:start"),
   "swabble:stop": () => Promise.resolve(),
   "swabble:isListening": () => Promise.resolve({ listening: false }),
