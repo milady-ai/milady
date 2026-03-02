@@ -34,7 +34,7 @@ export interface ElectrobunConfig {
     bunVersion?: string;
     mac?: { codesign?: boolean; notarize?: boolean; bundleCEF?: boolean; defaultRenderer?: "native" | "cef"; icons?: string; [key: string]: any };
     win?: { bundleCEF?: boolean; icon?: string; [key: string]: any };
-    linux?: { bundleCEF?: boolean; icon?: string; [key: string]: any };
+    linux?: { bundleCEF?: boolean; icon?: string; chromiumFlags?: Record<string, string | true>; [key: string]: any };
   };
   runtime?: { exitOnLastWindowClosed?: boolean; [key: string]: any };
   release?: { baseUrl?: string; generatePatch?: boolean; [key: string]: any };
