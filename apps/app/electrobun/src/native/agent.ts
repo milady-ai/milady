@@ -154,10 +154,20 @@ export class AgentManager {
     this.send("agent:status", this.status);
 
     try {
-      // Resolve milady dist — use cwd-relative path in dev, env override in production
-      const miladyDist =
-        process.env.MILADY_DIST_PATH ??
-        path.resolve(process.cwd(), "milady-dist");
+      // Resolve milady dist — env override, then walk up to find project root dist/
+      const miladyDist = process.env.MILADY_DIST_PATH ?? (() => {
+        // Walk up from cwd looking for a dist/ dir with server.js (project root pattern)
+        let dir = process.cwd();
+        for (let i = 0; i < 10; i++) {
+          const candidate = path.join(dir, "dist");
+          if (fs.existsSync(path.join(candidate, "server.js"))) return candidate;
+          const legacy = path.join(dir, "milady-dist");
+          if (fs.existsSync(path.join(legacy, "server.js"))) return legacy;
+          dir = path.dirname(dir);
+          if (dir === path.dirname(dir)) break;
+        }
+        return path.resolve(process.cwd(), "milady-dist");
+      })();
 
       diagnosticLog(`[Agent] milady dist: ${miladyDist}`);
 
