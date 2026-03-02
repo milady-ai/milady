@@ -6,8 +6,10 @@
     "strict": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "types": ["bun-types"],
-    "paths": {}
+    "types": ["@types/bun"],
+    "paths": {
+      "electrobun": ["./src/types/electrobun.d.ts"]
+    }
   },
   "include": ["src/**/*", "electrobun.config.ts"]
 }

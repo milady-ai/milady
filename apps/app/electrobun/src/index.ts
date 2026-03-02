@@ -175,8 +175,7 @@ async function main() {
   // Auto-update check
   if (process.env.MILADY_ELECTRON_DISABLE_AUTO_UPDATER !== "1") {
     try {
-      const updater = new Updater();
-      await updater.checkForUpdate();
+      await Updater.checkForUpdate();
     } catch (err) {
       console.warn("[Milady] Update check failed (non-fatal):", err instanceof Error ? err.message : err);
     }

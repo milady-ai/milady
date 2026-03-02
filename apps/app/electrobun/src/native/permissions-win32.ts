@@ -14,7 +14,6 @@
 
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
-import { shell } from "electron";
 import type {
   PermissionCheckResult,
   SystemPermissionId,
@@ -127,7 +126,7 @@ export async function openPrivacySettings(
 
   const url = settingsUrls[permission];
   if (url) {
-    await shell.openExternal(url);
+    await execAsync(`start "" "${url}"`).catch(() => {});
   }
 }
 

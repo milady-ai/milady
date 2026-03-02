@@ -260,7 +260,7 @@ export async function startIpcServer(opts: {
         fetch(req, srv) {
           // WebSocket upgrade
           if (req.headers.get("Upgrade")?.toLowerCase() === "websocket") {
-            srv.upgrade(req);
+            srv.upgrade(req, { data: null });
             return;
           }
 

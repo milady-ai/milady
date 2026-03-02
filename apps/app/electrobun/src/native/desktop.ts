@@ -9,13 +9,14 @@
  * Not available in Electrobun yet: power monitor events.
  */
 
-import { exec } from "node:child_process";
+import { exec, spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
 import {
   ApplicationMenu,
   BrowserWindow,
+  type MenuItemConfig,
   ContextMenu,
   GlobalShortcut,
   Tray,
@@ -92,15 +93,14 @@ interface ClipboardWriteOptions {
 // ---------------------------------------------------------------------------
 
 export class DesktopManager {
-  private mainWindow: ReturnType<typeof BrowserWindow.getAll>[0] | null = null;
-  private tray: ReturnType<typeof Tray.getAll>[0] | null = null;
+  private mainWindow: InstanceType<typeof BrowserWindow> | null = null;
+  private tray: InstanceType<typeof Tray> | null = null;
   private shortcuts = new Map<string, ShortcutOptions>();
   private notificationCounter = 0;
 
   /** Set main window reference (used for window management methods). */
   setMainWindow(win: unknown): void {
-    // Electrobun: get the first window by id or keep a reference
-    this.mainWindow = win as ReturnType<typeof BrowserWindow.getAll>[0];
+    this.mainWindow = win as InstanceType<typeof BrowserWindow>;
   }
 
   // MARK: Tray
@@ -144,22 +144,18 @@ export class DesktopManager {
     this.tray.setMenu(this.buildMenuItems(options.menu));
   }
 
-  private buildMenuItems(items: TrayMenuItem[]): Array<{
-    label?: string;
-    type?: string;
-    checked?: boolean;
-    enabled?: boolean;
-    action?: string;
-    submenu?: unknown[];
-  }> {
-    return items.map((item) => ({
-      label: item.label,
-      type: item.type,
-      checked: item.checked,
-      enabled: item.enabled !== false,
-      action: item.id,
-      submenu: item.submenu ? this.buildMenuItems(item.submenu) : undefined,
-    }));
+  private buildMenuItems(items: TrayMenuItem[]): MenuItemConfig[] {
+    return items.map((item): MenuItemConfig => {
+      if (item.type === "separator") return { type: "separator" };
+      return {
+        type: "normal",
+        label: item.label ?? "",
+        checked: item.checked,
+        enabled: item.enabled !== false,
+        action: item.id,
+        submenu: item.submenu ? this.buildMenuItems(item.submenu) : undefined,
+      };
+    });
   }
 
   // MARK: Global Shortcuts
@@ -359,9 +355,9 @@ export class DesktopManager {
   }
 
   async relaunch(): Promise<void> {
-    // Electrobun doesn't expose relaunch directly — attempt via exec
-    const execPath = process.execPath;
-    exec(`"${execPath}"`, { detached: true });
+    // Electrobun doesn't expose relaunch directly — spawn a detached child
+    const child = spawn(process.execPath, [], { detached: true, stdio: "ignore" });
+    child.unref();
     Utils.quit();
   }
 
@@ -392,7 +388,7 @@ export class DesktopManager {
     const nameMap: Record<string, string> = {
       home: paths.home ?? process.env.HOME ?? "",
       appData: paths.appData ?? "",
-      userData: paths.userData ?? "",
+      userData: paths.appData ?? "",
       temp: paths.temp ?? "/tmp",
       documents: paths.documents ?? "",
       downloads: paths.downloads ?? "",
@@ -406,12 +402,12 @@ export class DesktopManager {
 
   async writeToClipboard(options: ClipboardWriteOptions): Promise<void> {
     if (options.text !== undefined) {
-      await Utils.clipboardWriteText(options.text);
+      Utils.clipboardWriteText(options.text);
     } else if (options.image) {
       // Convert data URL to buffer for clipboard
       const base64 = options.image.replace(/^data:[^;]+;base64,/, "");
       const buf = Buffer.from(base64, "base64");
-      await Utils.clipboardWriteImage(buf as unknown as Uint8Array);
+      Utils.clipboardWriteImage(buf as unknown as Uint8Array);
     }
   }
 
@@ -419,13 +415,13 @@ export class DesktopManager {
     text?: string;
     hasImage: boolean;
   }> {
-    const text = await Utils.clipboardReadText().catch(() => "");
-    const formats = await Utils.clipboardAvailableFormats().catch(() => []);
+    const text = Utils.clipboardReadText() ?? "";
+    const formats = Utils.clipboardAvailableFormats();
     return { text, hasImage: formats.includes("image/png") || formats.includes("image/tiff") };
   }
 
   async clearClipboard(): Promise<void> {
-    await Utils.clipboardClear();
+    Utils.clipboardClear();
   }
 
   // MARK: Shell
@@ -491,7 +487,7 @@ export const desktopHandlers: Record<string, (args: unknown[]) => Promise<unknow
   "desktop:createTray": ([options]) => getDesktopManager().createTray(options as TrayOptions),
   "desktop:updateTray": ([options]) => getDesktopManager().updateTray(options as Partial<TrayOptions>),
   "desktop:destroyTray": () => getDesktopManager().destroyTray(),
-  "desktop:setTrayMenu": ([options]) => getDesktopManager().setTrayMenu(options as { menu: TrayMenuItem[] }),
+  "desktop:setTrayMenu": ([options]) => Promise.resolve(getDesktopManager().setTrayMenu(options as { menu: TrayMenuItem[] })),
   "desktop:registerShortcut": ([options]) => getDesktopManager().registerShortcut(options as ShortcutOptions),
   "desktop:unregisterShortcut": ([options]) => getDesktopManager().unregisterShortcut(options as { id: string }),
   "desktop:unregisterAllShortcuts": () => getDesktopManager().unregisterAllShortcuts(),

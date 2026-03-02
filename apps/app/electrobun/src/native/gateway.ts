@@ -75,8 +75,10 @@ let bonjourModule: BonjourModuleProvider | null = null;
 
 async function loadDiscoveryModule(): Promise<"mdns" | "bonjour" | null> {
   try {
-    const mod = (await import("mdns")) as { default?: MDNSModule } & Partial<MDNSModule>;
-    mdnsModule = mod.default ?? (mod as MDNSModule);
+    // @ts-ignore -- mdns is an optional dep; no types available
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mod = (await import("mdns")) as any;
+    mdnsModule = (mod.default ?? mod) as MDNSModule;
     console.log("[Gateway] Loaded mdns module");
     return "mdns";
   } catch {
@@ -84,7 +86,8 @@ async function loadDiscoveryModule(): Promise<"mdns" | "bonjour" | null> {
   }
 
   try {
-    bonjourModule = (await import("bonjour-service")) as BonjourModuleProvider;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    bonjourModule = (await import("bonjour-service")) as unknown as BonjourModuleProvider;
     console.log("[Gateway] Loaded bonjour-service module");
     return "bonjour";
   } catch {
@@ -235,6 +238,17 @@ export class GatewayDiscovery extends EventEmitter {
 
   isDiscoveryActive(): boolean {
     return this._isDiscovering;
+  }
+
+  private parseBoolean(value: string | undefined): boolean {
+    if (!value) return false;
+    return value === "true" || value === "1" || value === "yes";
+  }
+
+  private parseNumber(value: string | undefined): number | undefined {
+    if (!value) return undefined;
+    const n = Number(value);
+    return isNaN(n) ? undefined : n;
   }
 
   dispose(): void {

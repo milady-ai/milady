@@ -18,7 +18,6 @@
 import { exec } from "node:child_process";
 import { access, constants } from "node:fs/promises";
 import { promisify } from "node:util";
-import { shell } from "electron";
 import type {
   PermissionCheckResult,
   SystemPermissionId,
@@ -197,7 +196,7 @@ export async function openPrivacySettings(
   }
 
   // Fallback: try to open a file manager or terminal
-  await shell.openPath("/").catch(() => {});
+  await execAsync("xdg-open /").catch(() => {});
 }
 
 /**
