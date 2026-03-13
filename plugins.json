@@ -4713,9 +4713,12 @@
         "CLOB_WS_URL",
         "CLOB_API_KEY",
         "CLOB_API_SECRET",
-        "CLOB_API_PASSPHRASE"
+        "CLOB_API_PASSPHRASE",
+        "POLYMARKET_MAX_POSITION_PCT",
+        "POLYMARKET_MAX_SPREAD_PCT",
+        "POLYMARKET_MAX_TRADE_SIZE_USD"
       ],
-      "version": "2.0.0-alpha.4",
+      "version": "2.0.0",
       "pluginDeps": [
         "evm"
       ],
@@ -4757,6 +4760,27 @@
           "description": "API passphrase for authenticated CLOB operations.",
           "required": false,
           "sensitive": true
+        },
+        "POLYMARKET_MAX_POSITION_PCT": {
+          "type": "string",
+          "description": "Max % of portfolio in a single market before risk warning (default: 25).",
+          "required": false,
+          "default": "25",
+          "sensitive": false
+        },
+        "POLYMARKET_MAX_SPREAD_PCT": {
+          "type": "string",
+          "description": "Max bid-ask spread % before illiquidity warning (default: 10).",
+          "required": false,
+          "default": "10",
+          "sensitive": false
+        },
+        "POLYMARKET_MAX_TRADE_SIZE_USD": {
+          "type": "string",
+          "description": "Max single trade size in USD before warning (default: 100).",
+          "required": false,
+          "default": "100",
+          "sensitive": false
         }
       }
     },
