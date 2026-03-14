@@ -32,3 +32,5 @@ export {
   // Fetching
   fetchOrderBookSummary,
 } from "./orderBook";
+
+export { fetchUserPositions, fetchUserTotalValue, fetchUserTrades } from "./dataApi";
