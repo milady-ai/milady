@@ -306,3 +306,47 @@ export function deriveBestAsk(asks: BookEntry[]): BestPrice | null {
 
   return best;
 }
+
+// =============================================================================
+// Tick Size & Order Book Metadata
+// =============================================================================
+
+/**
+ * Round a price to the nearest valid tick size.
+ * Polymarket markets have variable tick sizes (0.01, 0.001, 0.0001).
+ * The tick_size is returned in the GET /book response.
+ */
+export function roundToTickSize(price: number, tickSize: string | undefined): number {
+  const tick = parseFloat(tickSize || "0");
+  const effectiveTick = tick > 0 ? tick : 0.01;
+  // Determine decimal places from the tick size to avoid floating point drift
+  const tickStr = effectiveTick.toString();
+  const decimalIndex = tickStr.indexOf(".");
+  const decimals = decimalIndex === -1 ? 0 : tickStr.length - decimalIndex - 1;
+  const rounded = Math.round(price / effectiveTick) * effectiveTick;
+  return parseFloat(rounded.toFixed(decimals));
+}
+
+/**
+ * Metadata parsed from the full CLOB order book response.
+ */
+export interface OrderBookMeta {
+  tickSize: string;
+  minOrderSize: string;
+  negRisk: boolean;
+  lastTradePrice: string | null;
+}
+
+/**
+ * Extract metadata from raw order book API response.
+ * The GET /book endpoint returns tick_size, min_order_size, neg_risk,
+ * and last_trade_price alongside bids/asks.
+ */
+export function parseOrderBookMetadata(raw: Record<string, unknown>): OrderBookMeta {
+  return {
+    tickSize: typeof raw.tick_size === "string" && raw.tick_size ? raw.tick_size : "0.01",
+    minOrderSize: typeof raw.min_order_size === "string" && raw.min_order_size ? raw.min_order_size : "1",
+    negRisk: raw.neg_risk === true,
+    lastTradePrice: typeof raw.last_trade_price === "string" ? raw.last_trade_price : null,
+  };
+}
