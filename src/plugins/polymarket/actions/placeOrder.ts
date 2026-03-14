@@ -25,7 +25,7 @@ import {
   sendError,
   sendUpdate,
 } from "../utils/llmHelpers";
-import { deriveBestAsk, deriveBestBid } from "../utils/orderBook";
+import { deriveBestAsk, deriveBestBid, roundToTickSize, parseOrderBookMetadata } from "../utils/orderBook";
 
 interface PlaceOrderParams {
   tokenId?: string;
@@ -428,7 +428,7 @@ export const placeOrderAction: Action = {
     let side = llmResult?.side?.toUpperCase() ?? "BUY";
     let price = llmResult?.price ?? 0;
     let orderType = llmResult?.orderType?.toUpperCase() ?? "GTC";
-    const feeRateBps = llmResult?.feeRateBps ?? "0";
+    const feeRateBps = llmResult?.feeRateBps;
     const marketName = llmResult?.marketName;
     const outcome = llmResult?.outcome;
     let marketQuestion = "";
@@ -653,9 +653,13 @@ export const placeOrderAction: Action = {
       return { success: false, text: `Client initialization failed: ${errMsg}`, error: errMsg };
     }
 
-    // Validate token exists by checking order book
+    // Validate token exists and get market metadata from order book
+    let tickSize: string = "0.01";
     try {
       const orderBook = await client.getOrderBook(tokenId);
+      // Extract market metadata (tick_size, neg_risk, min_order_size, last_trade_price)
+      const meta = parseOrderBookMetadata(orderBook as unknown as Record<string, unknown>);
+      tickSize = meta.tickSize;
       if (!orderBook || (!orderBook.bids?.length && !orderBook.asks?.length)) {
         runtime.logger.warn(`[placeOrderAction] Token ${tokenId.slice(0, 20)}... has no order book data`);
         await sendError(
@@ -696,8 +700,8 @@ export const placeOrderAction: Action = {
       };
     }
 
-    // Round price to valid tick size (typically 0.01)
-    price = Math.round(price * 100) / 100;
+    // Round price to market's actual tick size (0.01, 0.001, or 0.0001)
+    price = roundToTickSize(price, tickSize);
 
     // Ensure price is within valid range
     if (price <= 0 || price >= 1) {
@@ -716,7 +720,7 @@ export const placeOrderAction: Action = {
       price,
       side: side === "BUY" ? Side.BUY : Side.SELL,
       size,
-      feeRateBps: parseFloat(feeRateBps),
+      ...(feeRateBps != null ? { feeRateBps: parseFloat(feeRateBps) } : {}),
     };
 
     let orderResponse: OrderResponse;
@@ -729,7 +733,7 @@ export const placeOrderAction: Action = {
           price,
           amount: size,
           side: side === "BUY" ? Side.BUY : Side.SELL,
-          feeRateBps: parseFloat(feeRateBps),
+          ...(feeRateBps != null ? { feeRateBps: parseFloat(feeRateBps) } : {}),
           orderType: marketOrderType as ClobOrderType.FOK | ClobOrderType.FAK,
         };
         orderResponse = (await client.createAndPostMarketOrder(marketOrderArgs)) as OrderResponse;
@@ -799,11 +803,11 @@ export const placeOrderAction: Action = {
         `• Size: ${size} shares\n` +
         `• Total Value: $${totalValue}\n\n` +
         `**Order Response:**\n` +
-        `• Order ID: ${orderResponse.orderId ?? "Pending"}\n` +
+        `• Order ID: ${orderResponse.orderID ?? "Pending"}\n` +
         `• Status: ${orderResponse.status ?? "submitted"}`;
 
-      if (orderResponse.orderHashes?.length) {
-        responseText += `\n• Transaction Hash(es): ${orderResponse.orderHashes.join(", ")}`;
+      if (orderResponse.transactionsHashes?.length) {
+        responseText += `\n• Transaction Hash(es): ${orderResponse.transactionsHashes.join(", ")}`;
       }
 
       if (orderResponse.status === "matched") {
@@ -855,7 +859,7 @@ export const placeOrderAction: Action = {
       success: orderResponse.success ?? false,
       text: responseText,
       data: {
-        orderId: orderResponse.orderId ?? "",
+        orderId: orderResponse.orderID ?? "",
         status: orderResponse.status ?? "",
         tokenId,
         marketQuestion,

@@ -73,6 +73,25 @@ export interface OrderBook {
   asks: BookEntry[];
 }
 
+/**
+ * Full order book response from CLOB API GET /book
+ * Extends basic OrderBook with market metadata
+ */
+export interface OrderBookSummary extends OrderBook {
+  /** Minimum tick size (price increment) for this market */
+  tick_size: string;
+  /** Minimum order size for this market */
+  min_order_size: string;
+  /** Whether this is a negative risk market */
+  neg_risk: boolean;
+  /** Last trade price, null if no trades */
+  last_trade_price: string | null;
+  /** Hash of the order book snapshot */
+  hash?: string;
+  /** Timestamp of the order book snapshot */
+  timestamp?: string;
+}
+
 export interface TokenPrice {
   token_id: string;
   price: string;
@@ -168,9 +187,13 @@ export interface SignedOrder {
 export interface OrderResponse {
   success: boolean;
   errorMsg?: string;
-  orderId?: string;
-  orderHashes?: string[];
-  status?: "matched" | "delayed" | "unmatched";
+  /** Order ID — note: API returns capital "ID" */
+  orderID?: string;
+  status?: "live" | "matched" | "delayed" | "unmatched";
+  makingAmount?: string;
+  takingAmount?: string;
+  transactionsHashes?: string[];
+  tradeIDs?: string[];
 }
 
 export interface MarketOrderRequest {
@@ -457,6 +480,61 @@ export interface StartResearchParams {
   forceRefresh?: boolean;
   callbackAction?: "EVALUATE_TRADE" | "NOTIFY_ONLY";
   tradeParams?: ResearchTaskMetadata["tradeParams"];
+}
+
+// =============================================================================
+// Data API Types (https://data-api.polymarket.com)
+// =============================================================================
+
+/**
+ * Position from the Data API GET /positions endpoint.
+ * This is the authoritative source for user positions.
+ */
+export interface DataApiPosition {
+  proxyWallet: string;
+  asset: string;
+  conditionId: string;
+  size: number;
+  avgPrice: number;
+  initialValue: number;
+  currentValue: number;
+  cashPnl: number;
+  percentPnl: number;
+  totalBought: number;
+  realizedPnl: number;
+  curPrice: number;
+  redeemed: boolean;
+  mergeable: boolean;
+  title: string;
+  slug: string;
+  icon: string;
+  eventSlug: string;
+  outcome: string;
+  outcomeIndex: number;
+  oppositeAsset?: string;
+  endDate?: string;
+  neg_risk?: boolean;
+}
+
+/**
+ * Trade from the Data API GET /trades endpoint.
+ */
+export interface DataApiTrade {
+  proxyWallet: string;
+  side: "BUY" | "SELL";
+  asset: string;
+  conditionId: string;
+  size: number;
+  price: number;
+  timestamp: number;
+  title: string;
+  slug: string;
+  icon: string;
+  eventSlug: string;
+  outcome: string;
+  outcomeIndex: number;
+  name?: string;
+  transactionHash?: string;
 }
 
 // =============================================================================
