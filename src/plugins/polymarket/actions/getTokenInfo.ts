@@ -353,14 +353,58 @@ export const getTokenInfoAction: Action = {
       // If we have conditionId but not tokenId, get market first to find tokens
       let market: Market | null = null;
       if (conditionId) {
-        market = (await client.getMarket(conditionId)) as Market;
-        if (market?.tokens?.[0]) {
-          tokenId = market.tokens[0].token_id;
+        // Try CLOB API first (expects 0x-prefixed hex condition ID)
+        try {
+          market = (await client.getMarket(conditionId)) as Market;
+          if (market?.tokens?.[0]) {
+            tokenId = market.tokens[0].token_id;
+          }
+        } catch {
+          runtime.logger.info(
+            `[getTokenInfoAction] CLOB getMarket failed for "${conditionId?.slice(0, 20)}...", trying Gamma API`
+          );
+        }
+
+        // Fallback: try Gamma API (accepts numeric IDs and slugs)
+        if (!tokenId) {
+          try {
+            const gammaUrl = `https://gamma-api.polymarket.com/markets/${conditionId}`;
+            const gammaResp = await runtime.fetch(gammaUrl);
+            if (gammaResp.ok) {
+              const gammaMarket = (await gammaResp.json()) as Record<string, unknown>;
+              const clobTokenIds = gammaMarket.clobTokenIds as string | undefined;
+              const realConditionId = gammaMarket.conditionId as string | undefined;
+
+              // If Gamma gives us a real condition ID, try CLOB again
+              if (realConditionId && realConditionId !== conditionId) {
+                try {
+                  market = (await client.getMarket(realConditionId)) as Market;
+                  if (market?.tokens?.[0]) {
+                    tokenId = market.tokens[0].token_id;
+                  }
+                } catch {
+                  // Fall through to clobTokenIds parsing
+                }
+              }
+
+              // Direct token ID extraction from Gamma response
+              if (!tokenId && clobTokenIds) {
+                try {
+                  const ids = JSON.parse(clobTokenIds) as string[];
+                  if (ids.length > 0) tokenId = ids[0];
+                } catch {
+                  // Ignore parse error
+                }
+              }
+            }
+          } catch (err) {
+            runtime.logger.warn("[getTokenInfoAction] Gamma fallback failed:", err);
+          }
         }
       }
 
       if (!tokenId) {
-        throw new Error("Could not determine token ID from provided parameters.");
+        throw new Error("Could not determine token ID from provided parameters. The market may not exist on Polymarket.");
       }
 
       // Fetch order book first to validate token exists
