@@ -62,12 +62,15 @@ const configSchema = z.object({
   POLYMARKET_SIGNATURE_TYPE: z.string().optional(),
   POLYMARKET_FUNDER_ADDRESS: z.string().optional(),
   POLYMARKET_ALLOW_CREATE_API_KEY: z.string().optional().default("true"),
-  POLYMARKET_PROVIDER_STRICT: z
-    .string()
-    .optional()
-    .default("true"),
+  POLYMARKET_PROVIDER_STRICT: z.string().optional().default("true"),
   POLYMARKET_PROVIDER_CACHE_TTL_MS: z.string().optional(),
-});
+  // Keys from plugins.json that must be accepted during init()
+  CLOB_WS_URL: z.string().optional(),
+  POLYMARKET_MAX_POSITION_PCT: z.string().optional(),
+  POLYMARKET_MAX_SPREAD_PCT: z.string().optional(),
+  POLYMARKET_MAX_TRADE_SIZE_USD: z.string().optional(),
+  OPENAI_API_KEY: z.string().optional(),
+}).passthrough();
 
 export const polymarketPlugin: Plugin = {
   name: "polymarket",
@@ -84,7 +87,10 @@ export const polymarketPlugin: Plugin = {
     POLYMARKET_ALLOW_CREATE_API_KEY: process.env.POLYMARKET_ALLOW_CREATE_API_KEY,
     POLYMARKET_PROVIDER_STRICT: process.env.POLYMARKET_PROVIDER_STRICT,
     POLYMARKET_PROVIDER_CACHE_TTL_MS: process.env.POLYMARKET_PROVIDER_CACHE_TTL_MS,
-    // OpenAI is optional but required for research features
+    CLOB_WS_URL: process.env.CLOB_WS_URL,
+    POLYMARKET_MAX_POSITION_PCT: process.env.POLYMARKET_MAX_POSITION_PCT,
+    POLYMARKET_MAX_SPREAD_PCT: process.env.POLYMARKET_MAX_SPREAD_PCT,
+    POLYMARKET_MAX_TRADE_SIZE_USD: process.env.POLYMARKET_MAX_TRADE_SIZE_USD,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   },
   async init(config: Record<string, string>, runtime?: IAgentRuntime) {

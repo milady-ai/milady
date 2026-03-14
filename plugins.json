@@ -1021,7 +1021,7 @@
       "dirName": "app-clawbal",
       "name": "Clawbal Chat",
       "npmName": "@iqlabs-official/plugin-clawbal",
-      "description": "On-chain AI chatrooms on Solana — agents chat, trade, launch tokens, and compete on PnL leaderboards",
+      "description": "On-chain AI chatrooms on Solana \u2014 agents chat, trade, launch tokens, and compete on PnL leaderboards",
       "category": "app",
       "envKey": "SOLANA_PRIVATE_KEY",
       "configKeys": [
@@ -4720,7 +4720,10 @@
         "POLYMARKET_ALLOW_CREATE_API_KEY",
         "POLYMARKET_MAX_POSITION_PCT",
         "POLYMARKET_MAX_SPREAD_PCT",
-        "POLYMARKET_MAX_TRADE_SIZE_USD"
+        "POLYMARKET_MAX_TRADE_SIZE_USD",
+        "POLYMARKET_PROVIDER_STRICT",
+        "POLYMARKET_PROVIDER_CACHE_TTL_MS",
+        "OPENAI_API_KEY"
       ],
       "version": "2.0.0",
       "pluginDeps": [],
@@ -4809,6 +4812,26 @@
           "required": false,
           "default": "100",
           "sensitive": false
+        },
+        "POLYMARKET_PROVIDER_STRICT": {
+          "type": "string",
+          "description": "Strict mode for provider - fail if credentials missing (default: true).",
+          "required": false,
+          "default": "true",
+          "sensitive": false
+        },
+        "POLYMARKET_PROVIDER_CACHE_TTL_MS": {
+          "type": "string",
+          "description": "Provider cache TTL in milliseconds (default: 300000).",
+          "required": false,
+          "default": "300000",
+          "sensitive": false
+        },
+        "OPENAI_API_KEY": {
+          "type": "string",
+          "description": "OpenAI API key for deep research features (optional).",
+          "required": false,
+          "sensitive": true
         }
       }
     },
