@@ -18,7 +18,8 @@ export async function fetchUserPositions(
   runtime.logger.debug(`[dataApi] Fetching positions: ${url}`);
 
   try {
-    const response = await runtime.fetch(url);
+    const doFetch = runtime.fetch ?? globalThis.fetch;
+    const response = await doFetch(url);
     if (!response.ok) {
       runtime.logger.warn(`[dataApi] Positions fetch failed: ${response.status}`);
       return [];
@@ -53,7 +54,8 @@ export async function fetchUserTotalValue(
   runtime.logger.debug(`[dataApi] Fetching total value: ${url}`);
 
   try {
-    const response = await runtime.fetch(url);
+    const doFetch = runtime.fetch ?? globalThis.fetch;
+    const response = await doFetch(url);
     if (!response.ok) {
       runtime.logger.warn(`[dataApi] Value fetch failed: ${response.status}`);
       return 0;
@@ -88,7 +90,8 @@ export async function fetchUserTrades(
   runtime.logger.debug(`[dataApi] Fetching trades: ${url}`);
 
   try {
-    const response = await runtime.fetch(url);
+    const doFetch = runtime.fetch ?? globalThis.fetch;
+    const response = await doFetch(url);
     if (!response.ok) {
       runtime.logger.warn(`[dataApi] Trades fetch failed: ${response.status}`);
       return [];
