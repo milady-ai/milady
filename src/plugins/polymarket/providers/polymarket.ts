@@ -20,6 +20,7 @@ import type {
   PriceHistoryActivityData,
   TradeHistoryActivityData,
 } from "../types";
+import { Side } from "@polymarket/clob-client";
 import { initializeClobClient } from "../utils/clobClient";
 import { deriveBestBid } from "../utils/orderBook";
 
@@ -336,15 +337,33 @@ export const polymarketProvider: Provider = {
               const activePositions = accountState.positions.filter(
                 (p) => parseFloat(p.size) > 0
               );
-              for (const pos of activePositions.slice(0, 10)) {
+              const tokenIds = activePositions.slice(0, 10).map((p) => p.asset_id);
+
+              if (tokenIds.length > 0) {
                 try {
-                  const ob = (await client.getOrderBook(pos.asset_id)) as OrderBook;
-                  const bestBid = deriveBestBid(ob.bids ?? []);
-                  if (bestBid) {
-                    positionPrices.set(pos.asset_id, bestBid.price);
+                  // Batch fetch: single API call for all order books
+                  const bookParams = tokenIds.map((id) => ({ token_id: id, side: Side.BUY }));
+                  const orderBooks = await client.getOrderBooks(bookParams);
+                  for (const ob of orderBooks) {
+                    const book = ob as OrderBook;
+                    const bestBid = deriveBestBid(book.bids ?? []);
+                    if (bestBid && book.asset_id) {
+                      positionPrices.set(book.asset_id, bestBid.price);
+                    }
                   }
                 } catch {
-                  // Skip — price unavailable for this token
+                  // Fallback to serial fetching if batch fails
+                  for (const tokenId of tokenIds) {
+                    try {
+                      const ob = (await client.getOrderBook(tokenId)) as OrderBook;
+                      const bestBid = deriveBestBid(ob.bids ?? []);
+                      if (bestBid) {
+                        positionPrices.set(tokenId, bestBid.price);
+                      }
+                    } catch {
+                      // Skip
+                    }
+                  }
                 }
               }
             } catch {

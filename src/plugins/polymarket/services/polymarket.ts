@@ -32,10 +32,12 @@ import {
   type AuthenticationStatus,
   type BalanceAllowance,
   type CachedAccountState,
+  type DataApiPosition,
   type OpenOrder,
   type Position,
   type TradeEntry,
 } from "../types";
+import { fetchUserPositions } from "../utils/dataApi";
 
 export interface PolymarketWalletData {
   readonly address: string;
@@ -295,6 +297,24 @@ function calculatePositionsFromTrades(trades: TradeEntry[]): Position[] {
       average_price: pos.averagePrice.toFixed(6),
       realized_pnl: pos.realizedPnl.toFixed(6),
       unrealized_pnl: "0.000000", // Unrealized PnL requires current market price
+    }));
+}
+
+/**
+ * Convert Data API positions to internal Position format.
+ * Data API is the authoritative source — it includes all positions
+ * regardless of trade history pagination limits.
+ */
+function convertDataApiPositions(dataPositions: DataApiPosition[]): Position[] {
+  return dataPositions
+    .filter((p) => p.size !== 0)
+    .map((p) => ({
+      market: p.conditionId,
+      asset_id: p.asset,
+      size: String(p.size),
+      average_price: String(p.avgPrice),
+      realized_pnl: String(p.realizedPnl ?? 0),
+      unrealized_pnl: String(p.cashPnl ?? 0),
     }));
 }
 
@@ -994,8 +1014,31 @@ export class PolymarketService extends Service {
           ? apiKeysResult.value
           : { apiKeys: [], certRequired: null };
 
-      // Calculate positions from trade history
-      const positions = calculatePositionsFromTrades(recentTrades);
+      // Fetch positions from Data API (authoritative source)
+      // Falls back to calculating from trade history if Data API fails
+      let positions: Position[];
+      try {
+        const dataApiPositions = await fetchUserPositions(
+          this.polymarketRuntime,
+          this.walletAddress
+        );
+        if (dataApiPositions.length > 0) {
+          positions = convertDataApiPositions(dataApiPositions);
+          this.polymarketRuntime.logger.info(
+            `[PolymarketService] Got ${positions.length} positions from Data API`
+          );
+        } else {
+          positions = calculatePositionsFromTrades(recentTrades);
+          this.polymarketRuntime.logger.info(
+            `[PolymarketService] Data API returned 0 positions, calculated ${positions.length} from trades`
+          );
+        }
+      } catch {
+        positions = calculatePositionsFromTrades(recentTrades);
+        this.polymarketRuntime.logger.warn(
+          `[PolymarketService] Data API failed, calculated ${positions.length} positions from trades`
+        );
+      }
 
       // Fetch order scoring status for active orders
       let orderScoringStatus: Record<string, boolean> = {};

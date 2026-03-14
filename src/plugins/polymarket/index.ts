@@ -43,6 +43,10 @@ export { ResearchStatus as ResearchStatusEnum } from "./types";
 export { POLYGON_CHAIN_ID, DEFAULT_CLOB_API_URL, ACCOUNT_STATE_TTL_MS } from "./constants";
 export { ResearchStorageService } from "./services";
 export { researchTaskWorker, RESEARCH_TASK_NAME, TRADE_EVALUATION_TASK_NAME } from "./workers";
+export { fetchUserPositions, fetchUserTotalValue, fetchUserTrades } from "./utils/dataApi";
+export { roundToTickSize, parseOrderBookMetadata } from "./utils/orderBook";
+export { DATA_API_URL } from "./constants";
+export type { DataApiPosition, DataApiTrade, OrderBookSummary } from "./types";
 
 const configSchema = z.object({
   CLOB_API_URL: z
