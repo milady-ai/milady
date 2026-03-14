@@ -4709,7 +4709,6 @@
       "envKey": "CLOB_API_KEY",
       "configKeys": [
         "POLYMARKET_PRIVATE_KEY",
-        "EVM_PRIVATE_KEY",
         "CLOB_API_URL",
         "CLOB_WS_URL",
         "CLOB_API_KEY",
@@ -4732,12 +4731,6 @@
           "type": "string",
           "description": "Hex-encoded private key for Polymarket trading on Polygon.",
           "required": true,
-          "sensitive": true
-        },
-        "EVM_PRIVATE_KEY": {
-          "type": "string",
-          "description": "Alternative EVM private key (used if POLYMARKET_PRIVATE_KEY is not set).",
-          "required": false,
           "sensitive": true
         },
         "CLOB_API_URL": {

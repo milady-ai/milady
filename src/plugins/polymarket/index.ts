@@ -55,7 +55,7 @@ const configSchema = z.object({
     .optional()
     .default("https://clob.polymarket.com"),
   POLYMARKET_PRIVATE_KEY: z.string().min(1, "Private key cannot be empty").optional(),
-  EVM_PRIVATE_KEY: z.string().min(1, "Private key cannot be empty").optional(),
+  // EVM_PRIVATE_KEY is in BLOCKED_ENV_KEYS (security) — read from process.env only, not UI config
   CLOB_API_KEY: z.string().min(1, "CLOB API key cannot be empty").optional(),
   CLOB_API_SECRET: z.string().min(1, "CLOB API secret cannot be empty").optional(),
   CLOB_API_PASSPHRASE: z.string().min(1, "CLOB API passphrase cannot be empty").optional(),
@@ -78,7 +78,6 @@ export const polymarketPlugin: Plugin = {
   config: {
     CLOB_API_URL: process.env.CLOB_API_URL,
     POLYMARKET_PRIVATE_KEY: process.env.POLYMARKET_PRIVATE_KEY,
-    EVM_PRIVATE_KEY: process.env.EVM_PRIVATE_KEY,
     CLOB_API_KEY: process.env.CLOB_API_KEY,
     CLOB_API_SECRET: process.env.CLOB_API_SECRET,
     CLOB_API_PASSPHRASE: process.env.CLOB_API_PASSPHRASE,
