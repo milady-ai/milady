@@ -1,9 +1,13 @@
 export { cancelOrderAction } from "./cancelOrder";
 export { checkOrderScoringAction } from "./checkOrderScoring";
 export { closePositionAction } from "./closePosition";
+export { getBalanceAction } from "./getBalance";
 export { retrieveAllMarketsAction } from "./getMarkets";
 export { getOrderDetailsAction } from "./getOrderDetails";
+export { getPositionsAction } from "./getPositions";
+export { getRewardsAction } from "./getRewards";
 export { getTokenInfoAction } from "./getTokenInfo";
+export { getTradeHistoryAction } from "./getTradeHistory";
 export { getOrderBookDepthAction } from "./orderBook";
 export { placeOrderAction } from "./placeOrder";
 export { researchMarketAction } from "./researchMarket";

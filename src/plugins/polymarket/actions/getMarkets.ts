@@ -19,7 +19,15 @@ import {
   type Memory,
   type State,
 } from "@elizaos/core";
-import { GAMMA_API_URL, POLYMARKET_SERVICE_NAME } from "../constants";
+import {
+  GAMMA_API_URL,
+  GAMMA_RATE_LIMIT_EVENTS,
+  GAMMA_RATE_LIMIT_GENERAL,
+  GAMMA_RATE_LIMIT_SEARCH,
+  GAMMA_RATE_LIMIT_WINDOW_MS,
+  POLYMARKET_SERVICE_NAME,
+} from "../constants";
+import { TokenBucketRateLimiter } from "../utils/rateLimiter";
 import type { PolymarketService } from "../services/polymarket";
 import { retrieveAllMarketsTemplate } from "../templates";
 import type { MarketsActivityData, SimplifiedMarket } from "../types";
@@ -30,6 +38,27 @@ import {
   sendAcknowledgement,
   sendError,
 } from "../utils/llmHelpers";
+
+// =============================================================================
+// Rate Limiters (module-level singletons, shared across calls)
+// =============================================================================
+
+const windowMs = GAMMA_RATE_LIMIT_WINDOW_MS;
+const searchRateLimiter = new TokenBucketRateLimiter({
+  maxTokens: Math.floor(GAMMA_RATE_LIMIT_SEARCH * 0.8),
+  refillRate: Math.floor(GAMMA_RATE_LIMIT_SEARCH * 0.8),
+  refillIntervalMs: windowMs,
+});
+const eventsRateLimiter = new TokenBucketRateLimiter({
+  maxTokens: Math.floor(GAMMA_RATE_LIMIT_EVENTS * 0.8),
+  refillRate: Math.floor(GAMMA_RATE_LIMIT_EVENTS * 0.8),
+  refillIntervalMs: windowMs,
+});
+const generalRateLimiter = new TokenBucketRateLimiter({
+  maxTokens: Math.floor(GAMMA_RATE_LIMIT_GENERAL * 0.8),
+  refillRate: Math.floor(GAMMA_RATE_LIMIT_GENERAL * 0.8),
+  refillIntervalMs: windowMs,
+});
 
 // =============================================================================
 // Type Definitions
@@ -205,8 +234,9 @@ async function fetchGammaSearch(
   
   const url = `${GAMMA_API_URL}/public-search?${params.toString()}`;
   runtime.logger.debug(`[getMarkets] Fetching: ${url}`);
-  
+
   try {
+    await searchRateLimiter.waitForToken();
     const response = await runtime.fetch(url);
     
     if (!response.ok) {
@@ -241,6 +271,7 @@ async function fetchGammaEvents(
   }
   
   const url = `${GAMMA_API_URL}/events?${params.toString()}`;
+  await eventsRateLimiter.waitForToken();
   const response = await runtime.fetch(url);
   
   if (!response.ok) {
@@ -252,6 +283,7 @@ async function fetchGammaEvents(
 
 async function fetchGammaTags(runtime: IAgentRuntime): Promise<GammaTag[]> {
   try {
+    await generalRateLimiter.waitForToken();
     const response = await runtime.fetch(`${GAMMA_API_URL}/tags`);
     if (!response.ok) return [];
     return (await response.json()) as GammaTag[];

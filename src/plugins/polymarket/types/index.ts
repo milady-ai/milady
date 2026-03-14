@@ -78,8 +78,8 @@ export interface Market {
   readonly condition_id: string;
   /** Question ID of market which is the CTF question ID */
   readonly question_id: string;
-  /** Binary token pair for market */
-  readonly tokens: readonly [Token, Token];
+  /** Token array for market (binary has 2, multi-outcome has 3+) */
+  readonly tokens: readonly Token[];
   /** Rewards related data */
   readonly rewards: Rewards;
   /** Minimum limit order size */
@@ -138,7 +138,7 @@ export const MarketSchema = z.object({
  */
 export interface SimplifiedMarket {
   readonly condition_id: string;
-  readonly tokens: readonly [Token, Token];
+  readonly tokens: readonly Token[];
   readonly rewards: Rewards;
   readonly min_incentive_size: string;
   readonly max_incentive_spread: string;

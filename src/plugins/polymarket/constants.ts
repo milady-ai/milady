@@ -30,3 +30,10 @@ export const WS_MAX_RECONNECT_ATTEMPTS = 5;
 export const DEFAULT_PAGE_LIMIT = 100;
 export const MAX_PAGE_LIMIT = 500;
 export const END_CURSOR = "LTE=";
+
+// Gamma API Rate Limits (per 10-second window)
+export const GAMMA_RATE_LIMIT_GENERAL = 4000;
+export const GAMMA_RATE_LIMIT_EVENTS = 500;
+export const GAMMA_RATE_LIMIT_MARKETS = 300;
+export const GAMMA_RATE_LIMIT_SEARCH = 350;
+export const GAMMA_RATE_LIMIT_WINDOW_MS = 10_000;

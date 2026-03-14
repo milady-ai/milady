@@ -6,9 +6,13 @@ import {
   cancelOrderAction,
   checkOrderScoringAction,
   closePositionAction,
+  getBalanceAction,
   getOrderBookDepthAction,
   getOrderDetailsAction,
+  getPositionsAction,
+  getRewardsAction,
   getTokenInfoAction,
+  getTradeHistoryAction,
   placeOrderAction,
   researchMarketAction,
   retrieveAllMarketsAction,
@@ -42,6 +46,7 @@ export type {
 export { ResearchStatus as ResearchStatusEnum } from "./types";
 export { POLYGON_CHAIN_ID, DEFAULT_CLOB_API_URL, ACCOUNT_STATE_TTL_MS } from "./constants";
 export { ResearchStorageService } from "./services";
+export { getRewardsAction, getPositionsAction, getTradeHistoryAction, getBalanceAction } from "./actions";
 export { researchTaskWorker, RESEARCH_TASK_NAME, TRADE_EVALUATION_TASK_NAME } from "./workers";
 export { fetchUserPositions, fetchUserTotalValue, fetchUserTrades } from "./utils/dataApi";
 export { roundToTickSize, parseOrderBookMetadata } from "./utils/orderBook";
@@ -153,6 +158,11 @@ export const polymarketPlugin: Plugin = {
     cancelOrderAction,
     // Close/exit a position by selling all held shares
     closePositionAction,
+    // Portfolio & rewards — on-demand query actions
+    getRewardsAction,
+    getPositionsAction,
+    getTradeHistoryAction,
+    getBalanceAction,
     // Note: Account state (balances, active orders, trades, positions, order scoring)
     // is automatically provided by polymarketProvider via the service's cached state.
     // This data refreshes on startup and every 30 minutes.

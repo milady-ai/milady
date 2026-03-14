@@ -18,6 +18,7 @@ import type {
   OrderScoringActivityData,
   Position,
   PriceHistoryActivityData,
+  RewardsActivityData,
   TradeHistoryActivityData,
 } from "../types";
 import { Side } from "@polymarket/clob-client";
@@ -204,6 +205,11 @@ function formatActivityCursor(cursor: ActivityCursor): string {
     case "order_scoring": {
       const scoringData = data as OrderScoringActivityData;
       return `Checked order scoring ${timeAgo}\n  Orders checked: ${scoringData.orderIds.length}\n  Scoring: ${scoringData.scoringCount}, Not scoring: ${scoringData.notScoringCount}`;
+    }
+
+    case "rewards_earnings": {
+      const rewardsData = data as RewardsActivityData;
+      return `Checked LP rewards/earnings ${timeAgo}\n  Date: ${rewardsData.date}\n  Total: ${rewardsData.totalEarnings}`;
     }
 
     default:

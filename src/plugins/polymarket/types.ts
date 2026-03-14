@@ -15,7 +15,7 @@ export interface Rewards {
 export interface Market {
   condition_id: string;
   question_id: string;
-  tokens: [Token, Token];
+  tokens: Token[];
   rewards: Rewards;
   minimum_order_size: string;
   minimum_tick_size: string;
@@ -39,7 +39,7 @@ export interface Market {
 
 export interface SimplifiedMarket {
   condition_id: string;
-  tokens: [Token, Token];
+  tokens: Token[];
   rewards: Rewards;
   min_incentive_size: string;
   max_incentive_spread: string;
@@ -538,6 +538,20 @@ export interface DataApiTrade {
 }
 
 // =============================================================================
+// Rewards Activity Type (response types are from @polymarket/clob-client)
+// =============================================================================
+
+/**
+ * Activity data for rewards viewing
+ */
+export interface RewardsActivityData {
+  type: "rewards_earnings";
+  date: string;
+  totalEarnings: string;
+  marketCount: number;
+}
+
+// =============================================================================
 // Activity Cursor Types - Track last viewed items for context continuity
 // =============================================================================
 
@@ -550,7 +564,8 @@ export type ActivityType =
   | "order_details"
   | "price_history"
   | "trade_history"
-  | "order_scoring";
+  | "order_scoring"
+  | "rewards_earnings";
 
 /**
  * Summary of markets that were viewed
@@ -657,7 +672,8 @@ export type ActivityData =
   | OrderDetailsActivityData
   | PriceHistoryActivityData
   | TradeHistoryActivityData
-  | OrderScoringActivityData;
+  | OrderScoringActivityData
+  | RewardsActivityData;
 
 /**
  * Activity cursor entry - represents a single recorded activity
