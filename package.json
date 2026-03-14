@@ -194,6 +194,8 @@
     "cross-spawn": "^7.0.6",
     "dotenv": "^17.2.3",
     "drizzle-orm": "0.45.1",
+    "@ethersproject/wallet": "^5.8.0",
+    "@polymarket/clob-client": "^5.2.0",
     "ethers": "^6.16.0",
     "git-workspace-service": "0.4.4",
     "glob": "^13.0.0",
@@ -210,6 +212,7 @@
     "telegraf": "^4.16.3",
     "tesseract.js": "^6.0.1",
     "uuid": "^13.0.0",
+    "viem": "^2.21.0",
     "whisper-node": "^1.1.1",
     "ws": "^8.19.0",
     "zod": "^4.3.6"

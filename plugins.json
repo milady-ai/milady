@@ -4697,7 +4697,7 @@
       "id": "polymarket",
       "dirName": "plugin-polymarket",
       "name": "Polymarket",
-      "npmName": "@elizaos/plugin-polymarket",
+      "npmName": "@milady/plugin-polymarket",
       "description": "Multi-language Polymarket prediction markets plugin for elizaOS",
       "tags": [
         "polymarket",
@@ -4709,24 +4709,32 @@
       "envKey": "CLOB_API_KEY",
       "configKeys": [
         "POLYMARKET_PRIVATE_KEY",
+        "EVM_PRIVATE_KEY",
         "CLOB_API_URL",
         "CLOB_WS_URL",
         "CLOB_API_KEY",
         "CLOB_API_SECRET",
         "CLOB_API_PASSPHRASE",
+        "POLYMARKET_SIGNATURE_TYPE",
+        "POLYMARKET_FUNDER_ADDRESS",
+        "POLYMARKET_ALLOW_CREATE_API_KEY",
         "POLYMARKET_MAX_POSITION_PCT",
         "POLYMARKET_MAX_SPREAD_PCT",
         "POLYMARKET_MAX_TRADE_SIZE_USD"
       ],
       "version": "2.0.0",
-      "pluginDeps": [
-        "evm"
-      ],
+      "pluginDeps": [],
       "pluginParameters": {
         "POLYMARKET_PRIVATE_KEY": {
           "type": "string",
           "description": "Hex-encoded private key for Polymarket trading on Polygon.",
           "required": true,
+          "sensitive": true
+        },
+        "EVM_PRIVATE_KEY": {
+          "type": "string",
+          "description": "Alternative EVM private key (used if POLYMARKET_PRIVATE_KEY is not set).",
+          "required": false,
           "sensitive": true
         },
         "CLOB_API_URL": {
@@ -4760,6 +4768,26 @@
           "description": "API passphrase for authenticated CLOB operations.",
           "required": false,
           "sensitive": true
+        },
+        "POLYMARKET_SIGNATURE_TYPE": {
+          "type": "string",
+          "description": "Signature type: 0 for EOA, 1 for Gnosis Safe / Polymarket proxy wallet.",
+          "required": false,
+          "default": "0",
+          "sensitive": false
+        },
+        "POLYMARKET_FUNDER_ADDRESS": {
+          "type": "string",
+          "description": "Polymarket proxy wallet address (required when signature type is 1).",
+          "required": false,
+          "sensitive": false
+        },
+        "POLYMARKET_ALLOW_CREATE_API_KEY": {
+          "type": "string",
+          "description": "Allow auto-creation of CLOB API keys from private key (default: true).",
+          "required": false,
+          "default": "true",
+          "sensitive": false
         },
         "POLYMARKET_MAX_POSITION_PCT": {
           "type": "string",

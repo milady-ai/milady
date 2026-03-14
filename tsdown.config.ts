@@ -72,4 +72,14 @@ export default [
     inlineOnly: false,
     external: nativeExternals,
   },
+  {
+    entry: "src/plugins/polymarket/index.ts",
+    outDir: "dist/plugins/polymarket",
+    env,
+    fixedExtension: false,
+    platform: "node",
+    unbundle: true,
+    inlineOnly: false,
+    external: [...nativeExternals, "@polymarket/clob-client", "viem", "viem/accounts", "viem/chains"],
+  },
 ];
