@@ -10,7 +10,7 @@ import {
 import { POLYMARKET_SERVICE_NAME } from "../constants";
 import type { PolymarketService } from "../services/polymarket";
 import type { DataApiTrade, TradeHistoryActivityData } from "../types";
-import { getWalletAddress } from "../utils/clobClient";
+import { getPrivateKey, getWalletAddress } from "../utils/clobClient";
 import { fetchUserTrades } from "../utils/dataApi";
 import { callLLMWithTimeout } from "../utils/llmHelpers";
 
@@ -52,12 +52,10 @@ export const getTradeHistoryAction: Action = {
     "Fetches recent trade history from the Polymarket Data API. Can filter by market. Use when user asks about their trades, trade history, or recent fills.",
 
   validate: async (runtime: IAgentRuntime, _message: Memory, _state?: State): Promise<boolean> => {
-    const privateKey =
-      runtime.getSetting("WALLET_PRIVATE_KEY") ||
-      runtime.getSetting("PRIVATE_KEY") ||
-      runtime.getSetting("POLYMARKET_PRIVATE_KEY");
-    if (!privateKey) {
-      runtime.logger.warn("[getTradeHistoryAction] No private key configured");
+    try {
+      getPrivateKey(runtime);
+    } catch {
+      runtime.logger.warn("[getTradeHistoryAction] No private key configured.");
       return false;
     }
     return true;

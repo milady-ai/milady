@@ -1,4 +1,5 @@
 import { type IAgentRuntime, Service } from "@elizaos/core";
+import { formatBalance } from "../utils/balanceFormat";
 import { Wallet } from "@ethersproject/wallet";
 import { AssetType, ClobClient } from "@polymarket/clob-client";
 import type { ApiKeysResponse as ClobApiKeysResponse } from "@polymarket/clob-client";
@@ -582,7 +583,15 @@ export class PolymarketService extends Service {
     
     // Store the original signature type for later logic
     let effectiveSignatureType = signatureType;
-    
+
+    // If funder address is set but signature type isn't, auto-set to 2 (POLY_GNOSIS_SAFE)
+    if (funderAddress && (effectiveSignatureType === undefined || effectiveSignatureType === 0)) {
+      this.polymarketRuntime.logger.info(
+        `[PolymarketService] Funder address provided — auto-setting signatureType=2`
+      );
+      effectiveSignatureType = 2;
+    }
+
     // Try to detect proxy wallet if funder not set
     if (!funderAddress && this.walletAddress) {
       this.polymarketRuntime.logger.info(
@@ -1111,24 +1120,7 @@ export class PolymarketService extends Service {
       `[PolymarketService] Raw balance response: ${JSON.stringify(collateralResponse)}`
     );
 
-    // The CLOB API returns balance in atomic units (USDC has 6 decimals)
-    // However, some versions may return it already formatted - check if value is small
-    const USDC_DECIMALS = 6;
-    const formatBalance = (rawBalance: string | number | null | undefined): string => {
-      if (rawBalance === null || rawBalance === undefined) return "0";
-      const numValue = typeof rawBalance === "string" ? parseFloat(rawBalance) : rawBalance;
-      if (!Number.isFinite(numValue)) return "0";
-      
-      // If the value looks like it's already in decimal form (e.g., 9.5 not 9500000)
-      // then don't divide by 10^6
-      if (numValue > 0 && numValue < 1000) {
-        // Likely already formatted, return as-is with proper decimal places
-        return numValue.toFixed(6);
-      }
-      
-      // Otherwise assume atomic units and convert
-      return (numValue / Math.pow(10, USDC_DECIMALS)).toFixed(6);
-    };
+    // formatBalance is now imported from ../utils/balanceFormat
 
     const collateral: BalanceAllowance | null = collateralResponse
       ? {

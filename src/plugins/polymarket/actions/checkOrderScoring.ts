@@ -8,11 +8,11 @@ import {
   type State,
 } from "@elizaos/core";
 import type { ClobClient } from "@polymarket/clob-client";
-import { DEFAULT_CLOB_API_URL, POLYMARKET_SERVICE_NAME } from "../constants";
+import { POLYMARKET_SERVICE_NAME } from "../constants";
 import type { PolymarketService } from "../services/polymarket";
 import { checkOrderScoringTemplate } from "../templates";
 import type { AreOrdersScoringResponse, OrderScoringActivityData } from "../types";
-import { initializeClobClientWithCreds } from "../utils/clobClient";
+import { getPrivateKey, initializeClobClientWithCreds } from "../utils/clobClient";
 import { callLLMWithTimeout } from "../utils/llmHelpers";
 
 interface OfficialOrdersScoringParams {
@@ -34,43 +34,14 @@ export const checkOrderScoringAction: Action = {
   ),
   description: "Checks whether specific Polymarket order IDs are scoring (eligible for liquidity rewards). Use when user provides order ID(s) and asks about scoring/rewards status. Requires CLOB API credentials. Parameters: orderIds (array of order ID strings, required).",
 
-  validate: async (runtime: IAgentRuntime, message: Memory, _state?: State): Promise<boolean> => {
-    runtime.logger.info(
-      `[checkOrderScoringAction] Validate called for message: "${message.content?.text}"`
-    );
-    const clobApiUrl = runtime.getSetting("CLOB_API_URL") || DEFAULT_CLOB_API_URL;
-    const clobApiKey = runtime.getSetting("CLOB_API_KEY");
-    const clobApiSecret =
-      runtime.getSetting("CLOB_API_SECRET") || runtime.getSetting("CLOB_SECRET");
-    const clobApiPassphrase =
-      runtime.getSetting("CLOB_API_PASSPHRASE") || runtime.getSetting("CLOB_PASS_PHRASE");
-    const privateKey =
-      runtime.getSetting("WALLET_PRIVATE_KEY") ||
-      runtime.getSetting("PRIVATE_KEY") ||
-      runtime.getSetting("POLYMARKET_PRIVATE_KEY");
-
-    if (!clobApiUrl) {
-      runtime.logger.warn("[checkOrderScoringAction] CLOB_API_URL is required.");
+  validate: async (runtime: IAgentRuntime): Promise<boolean> => {
+    try {
+      getPrivateKey(runtime);
+      return true;
+    } catch {
+      runtime.logger.warn("[checkOrderScoringAction] No private key configured.");
       return false;
     }
-    if (!privateKey) {
-      runtime.logger.warn(
-        "[checkOrderScoringAction] A private key (WALLET_PRIVATE_KEY, PRIVATE_KEY, or POLYMARKET_PRIVATE_KEY) is required."
-      );
-      return false;
-    }
-    if (!clobApiKey || !clobApiSecret || !clobApiPassphrase) {
-      const missing: string[] = [];
-      if (!clobApiKey) missing.push("CLOB_API_KEY");
-      if (!clobApiSecret) missing.push("CLOB_API_SECRET or CLOB_SECRET");
-      if (!clobApiPassphrase) missing.push("CLOB_API_PASSPHRASE or CLOB_PASS_PHRASE");
-      runtime.logger.warn(
-        `[checkOrderScoringAction] Missing required API credentials for L2 authentication: ${missing.join(", ")}.`
-      );
-      return false;
-    }
-    runtime.logger.info("[checkOrderScoringAction] Validation passed");
-    return true;
   },
 
   handler: async (

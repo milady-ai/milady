@@ -20,13 +20,14 @@ import {
 import type { ClobClient } from "@polymarket/clob-client";
 import { POLYMARKET_SERVICE_NAME } from "../constants";
 import type { PolymarketService } from "../services/polymarket";
-import { initializeClobClientWithCreds } from "../utils/clobClient";
+import { getPrivateKey, initializeClobClientWithCreds } from "../utils/clobClient";
 import {
   callLLMWithTimeout,
   isLLMError,
   sendAcknowledgement,
   sendError,
 } from "../utils/llmHelpers";
+import { CancelOrderParamsSchema } from "../utils/llmSchemas";
 
 // =============================================================================
 // Types
@@ -104,12 +105,9 @@ export const cancelOrderAction: Action = {
   ],
 
   validate: async (runtime: IAgentRuntime): Promise<boolean> => {
-    const hasPrivateKey = Boolean(
-      runtime.getSetting("POLYMARKET_PRIVATE_KEY") ||
-        runtime.getSetting("EVM_PRIVATE_KEY") ||
-        runtime.getSetting("WALLET_PRIVATE_KEY")
-    );
-    if (!hasPrivateKey) {
+    try {
+      getPrivateKey(runtime);
+    } catch {
       runtime.logger.warn("[cancelOrderAction] No private key configured.");
       return false;
     }
@@ -143,7 +141,9 @@ export const cancelOrderAction: Action = {
         runtime,
         state,
         cancelOrderTemplate,
-        "cancelOrderAction"
+        "cancelOrderAction",
+        undefined,
+        CancelOrderParamsSchema as any
       );
 
       if (!isLLMError(llmResult) && llmResult) {

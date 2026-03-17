@@ -8,10 +8,10 @@ import {
   type State,
 } from "@elizaos/core";
 import type { ClobClient } from "@polymarket/clob-client";
-import { DEFAULT_CLOB_API_URL, POLYMARKET_SERVICE_NAME } from "../constants";
+import { POLYMARKET_SERVICE_NAME } from "../constants";
 import type { PolymarketService } from "../services/polymarket";
 import type { RewardsActivityData } from "../types";
-import { initializeClobClientWithCreds } from "../utils/clobClient";
+import { getPrivateKey, initializeClobClientWithCreds } from "../utils/clobClient";
 import { callLLMWithTimeout } from "../utils/llmHelpers";
 
 interface LLMRewardsResult {
@@ -56,29 +56,14 @@ export const getRewardsAction: Action = {
   description:
     "Retrieves LP rewards and earnings data from Polymarket. Can show daily earnings, total earnings, current reward markets, or raw rewards for a specific market. Requires CLOB API credentials.",
 
-  validate: async (runtime: IAgentRuntime, message: Memory, _state?: State): Promise<boolean> => {
-    const clobApiUrl = runtime.getSetting("CLOB_API_URL") || DEFAULT_CLOB_API_URL;
-    const privateKey =
-      runtime.getSetting("WALLET_PRIVATE_KEY") ||
-      runtime.getSetting("PRIVATE_KEY") ||
-      runtime.getSetting("POLYMARKET_PRIVATE_KEY");
-
-    if (!clobApiUrl || !privateKey) {
-      runtime.logger.warn("[getRewardsAction] Missing CLOB_API_URL or private key");
+  validate: async (runtime: IAgentRuntime): Promise<boolean> => {
+    try {
+      getPrivateKey(runtime);
+      return true;
+    } catch {
+      runtime.logger.warn("[getRewardsAction] No private key configured.");
       return false;
     }
-
-    const clobApiKey = runtime.getSetting("CLOB_API_KEY");
-    const clobApiSecret = runtime.getSetting("CLOB_API_SECRET") || runtime.getSetting("CLOB_SECRET");
-    const clobApiPassphrase =
-      runtime.getSetting("CLOB_API_PASSPHRASE") || runtime.getSetting("CLOB_PASS_PHRASE");
-
-    if (!clobApiKey || !clobApiSecret || !clobApiPassphrase) {
-      runtime.logger.warn("[getRewardsAction] Missing CLOB API credentials for L2 auth");
-      return false;
-    }
-
-    return true;
   },
 
   handler: async (

@@ -4,16 +4,14 @@ import { ClobClient } from "@polymarket/clob-client";
 import { DEFAULT_CLOB_API_URL, POLYGON_CHAIN_ID, POLYMARKET_SERVICE_NAME } from "../constants";
 import type { ApiKeyCreds } from "../types";
 
-function getPrivateKey(runtime: IAgentRuntime): `0x${string}` {
+export function getPrivateKey(runtime: IAgentRuntime): `0x${string}` {
   const privateKey =
     runtime.getSetting("POLYMARKET_PRIVATE_KEY") ||
-    runtime.getSetting("EVM_PRIVATE_KEY") ||
-    runtime.getSetting("WALLET_PRIVATE_KEY") ||
-    runtime.getSetting("PRIVATE_KEY");
+    runtime.getSetting("EVM_PRIVATE_KEY");
 
   if (!privateKey) {
     throw new Error(
-      "No private key found. Please set POLYMARKET_PRIVATE_KEY, EVM_PRIVATE_KEY, or WALLET_PRIVATE_KEY in your environment"
+      "No private key found. Please set POLYMARKET_PRIVATE_KEY or EVM_PRIVATE_KEY in your environment"
     );
   }
 

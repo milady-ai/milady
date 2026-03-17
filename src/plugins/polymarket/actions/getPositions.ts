@@ -10,7 +10,7 @@ import {
 import { POLYMARKET_SERVICE_NAME } from "../constants";
 import type { PolymarketService } from "../services/polymarket";
 import type { DataApiPosition, MarketsActivityData } from "../types";
-import { getWalletAddress } from "../utils/clobClient";
+import { getPrivateKey, getWalletAddress } from "../utils/clobClient";
 import { fetchUserPositions, fetchUserTotalValue } from "../utils/dataApi";
 
 export const getPositionsAction: Action = {
@@ -26,12 +26,10 @@ export const getPositionsAction: Action = {
     "Fetches current Polymarket positions and portfolio value on demand from the Data API. Use when the user explicitly asks about their positions, portfolio, or holdings. Does NOT require CLOB API credentials — only a wallet address.",
 
   validate: async (runtime: IAgentRuntime, _message: Memory, _state?: State): Promise<boolean> => {
-    const privateKey =
-      runtime.getSetting("WALLET_PRIVATE_KEY") ||
-      runtime.getSetting("PRIVATE_KEY") ||
-      runtime.getSetting("POLYMARKET_PRIVATE_KEY");
-    if (!privateKey) {
-      runtime.logger.warn("[getPositionsAction] No private key configured");
+    try {
+      getPrivateKey(runtime);
+    } catch {
+      runtime.logger.warn("[getPositionsAction] No private key configured.");
       return false;
     }
     return true;

@@ -20,7 +20,7 @@ describe("getBalanceAction", () => {
     expect(result).toBe(false);
   });
 
-  it("should require CLOB credentials even with private key", async () => {
+  it("should pass validate with private key alone (CLOB creds auto-derived)", async () => {
     const mockRuntime = {
       getSetting: (key: string) => {
         if (key === "POLYMARKET_PRIVATE_KEY") return "0xdeadbeef";
@@ -29,7 +29,7 @@ describe("getBalanceAction", () => {
       logger: { info: () => {}, warn: () => {}, error: () => {} },
     };
     const result = await getBalanceAction.validate(mockRuntime as any, {} as any);
-    expect(result).toBe(false); // No CLOB creds
+    expect(result).toBe(true); // Private key is sufficient; CLOB creds are auto-derived
   });
 
   it("should pass validate with all credentials", async () => {

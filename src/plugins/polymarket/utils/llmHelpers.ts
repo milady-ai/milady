@@ -6,6 +6,7 @@ import {
   ModelType,
   type State,
 } from "@elizaos/core";
+import type { ZodType } from "zod";
 import { LLM_CALL_TIMEOUT_MS } from "../constants";
 
 // =============================================================================
@@ -73,7 +74,8 @@ export async function callLLMWithTimeout<T>(
   state: State | undefined,
   template: string,
   _actionName: string,
-  timeoutMs: number = LLM_CALL_TIMEOUT_MS
+  timeoutMs: number = LLM_CALL_TIMEOUT_MS,
+  schema?: ZodType<T>
 ): Promise<T | null> {
   const composedPrompt = composePromptFromState({
     state: state ?? ({} as State),
@@ -102,8 +104,18 @@ export async function callLLMWithTimeout<T>(
       return null;
     }
 
-    const parsed = JSON.parse(jsonMatch[0]) as T;
-    return parsed;
+    const raw = JSON.parse(jsonMatch[0]);
+    if (schema) {
+      const result = schema.safeParse(raw);
+      if (!result.success) {
+        runtime.logger?.warn?.(
+          `[${_actionName}] LLM output failed schema validation: ${result.error.message}`
+        );
+        return null;
+      }
+      return result.data as T;
+    }
+    return raw as T;
   } catch (error) {
     if (error instanceof SyntaxError) {
       throw new Error(`Failed to parse LLM response as JSON: ${error.message}`);

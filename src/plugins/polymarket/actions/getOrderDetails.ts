@@ -8,11 +8,11 @@ import {
   type State,
 } from "@elizaos/core";
 import type { ClobClient } from "@polymarket/clob-client";
-import { DEFAULT_CLOB_API_URL, POLYMARKET_SERVICE_NAME } from "../constants";
+import { POLYMARKET_SERVICE_NAME } from "../constants";
 import type { PolymarketService } from "../services/polymarket";
 import { getOrderDetailsTemplate } from "../templates";
 import type { DetailedOrder, OrderDetailsActivityData } from "../types";
-import { initializeClobClientWithCreds } from "../utils/clobClient";
+import { getPrivateKey, initializeClobClientWithCreds } from "../utils/clobClient";
 import { callLLMWithTimeout, isLLMError } from "../utils/llmHelpers";
 
 interface LLMOrderDetailsResult {
@@ -30,43 +30,14 @@ export const getOrderDetailsAction: Action = {
   description:
     "Retrieves detailed information about a specific order by order ID. Use when the user asks about a particular order’s status, size, or fills. Do not use for listing all open orders or trade history; use getActiveOrdersAction or getTradeHistoryAction. Parameters: orderId (required). Requires full CLOB credentials.",
 
-  validate: async (runtime: IAgentRuntime, message: Memory, _state?: State): Promise<boolean> => {
-    runtime.logger.info(
-      `[getOrderDetailsAction] Validate called for message: "${message.content?.text}"`
-    );
-    const clobApiUrl = runtime.getSetting("CLOB_API_URL") || DEFAULT_CLOB_API_URL;
-    const clobApiKey = runtime.getSetting("CLOB_API_KEY");
-    const clobApiSecret =
-      runtime.getSetting("CLOB_API_SECRET") || runtime.getSetting("CLOB_SECRET");
-    const clobApiPassphrase =
-      runtime.getSetting("CLOB_API_PASSPHRASE") || runtime.getSetting("CLOB_PASS_PHRASE");
-    const privateKey =
-      runtime.getSetting("WALLET_PRIVATE_KEY") ||
-      runtime.getSetting("PRIVATE_KEY") ||
-      runtime.getSetting("POLYMARKET_PRIVATE_KEY");
-
-    if (!clobApiUrl) {
-      runtime.logger.warn("[getOrderDetailsAction] CLOB_API_URL is required.");
+  validate: async (runtime: IAgentRuntime): Promise<boolean> => {
+    try {
+      getPrivateKey(runtime);
+      return true;
+    } catch {
+      runtime.logger.warn("[getOrderDetailsAction] No private key configured.");
       return false;
     }
-    if (!privateKey) {
-      runtime.logger.warn(
-        "[getOrderDetailsAction] A private key (WALLET_PRIVATE_KEY, PRIVATE_KEY, or POLYMARKET_PRIVATE_KEY) is required."
-      );
-      return false;
-    }
-    if (!clobApiKey || !clobApiSecret || !clobApiPassphrase) {
-      const missing: string[] = [];
-      if (!clobApiKey) missing.push("CLOB_API_KEY");
-      if (!clobApiSecret) missing.push("CLOB_API_SECRET or CLOB_SECRET");
-      if (!clobApiPassphrase) missing.push("CLOB_API_PASSPHRASE or CLOB_PASS_PHRASE");
-      runtime.logger.warn(
-        `[getOrderDetailsAction] Missing required API credentials for L2 authentication: ${missing.join(", ")}.`
-      );
-      return false;
-    }
-    runtime.logger.info("[getOrderDetailsAction] Validation passed");
-    return true;
   },
 
   handler: async (

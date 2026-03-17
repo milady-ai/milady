@@ -4709,122 +4709,39 @@
       "envKey": "CLOB_API_KEY",
       "configKeys": [
         "POLYMARKET_PRIVATE_KEY",
-        "CLOB_API_URL",
-        "CLOB_WS_URL",
-        "CLOB_API_KEY",
-        "CLOB_API_SECRET",
-        "CLOB_API_PASSPHRASE",
-        "POLYMARKET_SIGNATURE_TYPE",
-        "POLYMARKET_FUNDER_ADDRESS",
-        "POLYMARKET_ALLOW_CREATE_API_KEY",
-        "POLYMARKET_MAX_POSITION_PCT",
-        "POLYMARKET_MAX_SPREAD_PCT",
         "POLYMARKET_MAX_TRADE_SIZE_USD",
-        "POLYMARKET_PROVIDER_STRICT",
-        "POLYMARKET_PROVIDER_CACHE_TTL_MS",
-        "OPENAI_API_KEY"
+        "POLYMARKET_MAX_POSITION_PCT",
+        "POLYMARKET_MAX_SPREAD_PCT"
       ],
       "version": "2.0.0",
       "pluginDeps": [],
       "pluginParameters": {
         "POLYMARKET_PRIVATE_KEY": {
           "type": "string",
-          "description": "Hex-encoded private key for Polymarket trading on Polygon.",
+          "description": "Your Polygon wallet private key (hex). Export from MetaMask: Account > Details > Export Private Key.",
           "required": true,
           "sensitive": true
         },
-        "CLOB_API_URL": {
+        "POLYMARKET_MAX_TRADE_SIZE_USD": {
           "type": "string",
-          "description": "Polymarket CLOB API URL.",
+          "description": "Max single trade size in USD. Orders above this are blocked.",
           "required": false,
-          "default": "https://clob.polymarket.com",
-          "sensitive": false
-        },
-        "CLOB_WS_URL": {
-          "type": "string",
-          "description": "Polymarket CLOB WebSocket URL for real-time updates.",
-          "required": false,
-          "default": "wss://ws-subscriptions-clob.polymarket.com/ws/",
-          "sensitive": false
-        },
-        "CLOB_API_KEY": {
-          "type": "string",
-          "description": "API key for authenticated CLOB operations.",
-          "required": false,
-          "sensitive": true
-        },
-        "CLOB_API_SECRET": {
-          "type": "string",
-          "description": "API secret for authenticated CLOB operations.",
-          "required": false,
-          "sensitive": true
-        },
-        "CLOB_API_PASSPHRASE": {
-          "type": "string",
-          "description": "API passphrase for authenticated CLOB operations.",
-          "required": false,
-          "sensitive": true
-        },
-        "POLYMARKET_SIGNATURE_TYPE": {
-          "type": "string",
-          "description": "Signature type: 0 for EOA, 1 for Gnosis Safe / Polymarket proxy wallet.",
-          "required": false,
-          "default": "0",
-          "sensitive": false
-        },
-        "POLYMARKET_FUNDER_ADDRESS": {
-          "type": "string",
-          "description": "Polymarket proxy wallet address (required when signature type is 1).",
-          "required": false,
-          "sensitive": false
-        },
-        "POLYMARKET_ALLOW_CREATE_API_KEY": {
-          "type": "string",
-          "description": "Allow auto-creation of CLOB API keys from private key (default: true).",
-          "required": false,
-          "default": "true",
+          "default": "100",
           "sensitive": false
         },
         "POLYMARKET_MAX_POSITION_PCT": {
           "type": "string",
-          "description": "Max % of portfolio in a single market before risk warning (default: 25).",
+          "description": "Max % of portfolio in a single market before risk warning.",
           "required": false,
           "default": "25",
           "sensitive": false
         },
         "POLYMARKET_MAX_SPREAD_PCT": {
           "type": "string",
-          "description": "Max bid-ask spread % before illiquidity warning (default: 10).",
+          "description": "Max bid-ask spread % before illiquidity warning.",
           "required": false,
           "default": "10",
           "sensitive": false
-        },
-        "POLYMARKET_MAX_TRADE_SIZE_USD": {
-          "type": "string",
-          "description": "Max single trade size in USD before warning (default: 100).",
-          "required": false,
-          "default": "100",
-          "sensitive": false
-        },
-        "POLYMARKET_PROVIDER_STRICT": {
-          "type": "string",
-          "description": "Strict mode for provider - fail if credentials missing (default: true).",
-          "required": false,
-          "default": "true",
-          "sensitive": false
-        },
-        "POLYMARKET_PROVIDER_CACHE_TTL_MS": {
-          "type": "string",
-          "description": "Provider cache TTL in milliseconds (default: 300000).",
-          "required": false,
-          "default": "300000",
-          "sensitive": false
-        },
-        "OPENAI_API_KEY": {
-          "type": "string",
-          "description": "OpenAI API key for deep research features (optional).",
-          "required": false,
-          "sensitive": true
         }
       }
     },

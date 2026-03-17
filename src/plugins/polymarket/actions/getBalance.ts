@@ -8,8 +8,7 @@ import {
   type State,
 } from "@elizaos/core";
 import { AssetType, type ClobClient } from "@polymarket/clob-client";
-import { DEFAULT_CLOB_API_URL } from "../constants";
-import { initializeClobClientWithCreds } from "../utils/clobClient";
+import { getPrivateKey, initializeClobClientWithCreds } from "../utils/clobClient";
 import { callLLMWithTimeout } from "../utils/llmHelpers";
 
 interface LLMBalanceResult {
@@ -46,25 +45,14 @@ export const getBalanceAction: Action = {
   description:
     "Checks USDC (collateral) balance and allowance, or conditional token balance for a specific token. Requires CLOB API credentials.",
 
-  validate: async (runtime: IAgentRuntime, _message: Memory, _state?: State): Promise<boolean> => {
-    const privateKey =
-      runtime.getSetting("WALLET_PRIVATE_KEY") ||
-      runtime.getSetting("PRIVATE_KEY") ||
-      runtime.getSetting("POLYMARKET_PRIVATE_KEY");
-    if (!privateKey) {
-      runtime.logger.warn("[getBalanceAction] No private key configured");
+  validate: async (runtime: IAgentRuntime): Promise<boolean> => {
+    try {
+      getPrivateKey(runtime);
+      return true;
+    } catch {
+      runtime.logger.warn("[getBalanceAction] No private key configured.");
       return false;
     }
-
-    const clobApiKey = runtime.getSetting("CLOB_API_KEY");
-    const clobApiSecret = runtime.getSetting("CLOB_API_SECRET") || runtime.getSetting("CLOB_SECRET");
-    const clobApiPassphrase =
-      runtime.getSetting("CLOB_API_PASSPHRASE") || runtime.getSetting("CLOB_PASS_PHRASE");
-    if (!clobApiKey || !clobApiSecret || !clobApiPassphrase) {
-      runtime.logger.warn("[getBalanceAction] Missing CLOB API credentials");
-      return false;
-    }
-    return true;
   },
 
   handler: async (

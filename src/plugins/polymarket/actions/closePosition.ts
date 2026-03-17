@@ -17,12 +17,12 @@ import {
   type State,
 } from "@elizaos/core";
 import type { ClobClient } from "@polymarket/clob-client";
-import { Side } from "@polymarket/clob-client";
+import { Side, OrderType as ClobOrderType } from "@polymarket/clob-client";
 import { POLYMARKET_SERVICE_NAME } from "../constants";
 import type { PolymarketService } from "../services/polymarket";
 import type { OrderBook, Position } from "../types";
-import { initializeClobClientWithCreds } from "../utils/clobClient";
-import { deriveBestBid } from "../utils/orderBook";
+import { getPrivateKey, initializeClobClientWithCreds } from "../utils/clobClient";
+import { deriveBestBid, parseOrderBookMetadata } from "../utils/orderBook";
 import {
   callLLMWithTimeout,
   isLLMError,
@@ -30,6 +30,7 @@ import {
   sendError,
   sendUpdate,
 } from "../utils/llmHelpers";
+import { ClosePositionParamsSchema } from "../utils/llmSchemas";
 
 // =============================================================================
 // Types
@@ -96,12 +97,9 @@ export const closePositionAction: Action = {
   ],
 
   validate: async (runtime: IAgentRuntime): Promise<boolean> => {
-    const hasPrivateKey = Boolean(
-      runtime.getSetting("POLYMARKET_PRIVATE_KEY") ||
-        runtime.getSetting("EVM_PRIVATE_KEY") ||
-        runtime.getSetting("WALLET_PRIVATE_KEY")
-    );
-    if (!hasPrivateKey) {
+    try {
+      getPrivateKey(runtime);
+    } catch {
       runtime.logger.warn("[closePositionAction] No private key configured.");
       return false;
     }
@@ -142,7 +140,9 @@ export const closePositionAction: Action = {
         runtime,
         state,
         closePositionTemplate,
-        "closePositionAction"
+        "closePositionAction",
+        undefined,
+        ClosePositionParamsSchema as any
       );
 
       if (!isLLMError(llmResult) && llmResult) {
@@ -225,6 +225,9 @@ export const closePositionAction: Action = {
         throw new Error("Failed to fetch order book. Cannot determine sell price.");
       }
 
+      const meta = parseOrderBookMetadata(orderBook as unknown as Record<string, unknown>);
+      const orderOptions = { tickSize: meta.tickSize as "0.1" | "0.01" | "0.001" | "0.0001", negRisk: meta.negRisk };
+
       const bestBidResult = deriveBestBid(orderBook.bids ?? []);
       if (!bestBidResult) {
         throw new Error(
@@ -239,11 +242,15 @@ export const closePositionAction: Action = {
       if (orderType === "market") {
         // Try FOK market order for immediate fill
         try {
-          orderResult = await client.createAndPostMarketOrder({
-            tokenID: tokenId,
-            side: Side.SELL,
-            amount: positionSize,
-          });
+          orderResult = await client.createAndPostMarketOrder(
+            {
+              tokenID: tokenId,
+              side: Side.SELL,
+              amount: positionSize,
+            },
+            orderOptions,
+            ClobOrderType.FOK
+          );
 
           responseText =
             `Position closed via market order.\n` +
@@ -254,13 +261,16 @@ export const closePositionAction: Action = {
           // FOK failed — fallback to limit at best bid
           runtime.logger.warn("[closePositionAction] Market order failed, falling back to limit:", err);
 
-          orderResult = await client.createAndPostOrder({
-            tokenID: tokenId,
-            side: Side.SELL,
-            price: bestBidResult.price,
-            size: positionSize,
-            feeRateBps: 0,
-          });
+          orderResult = await client.createAndPostOrder(
+            {
+              tokenID: tokenId,
+              side: Side.SELL,
+              price: bestBidResult.price,
+              size: positionSize,
+              feeRateBps: 0,
+            },
+            orderOptions
+          );
 
           responseText =
             `Market order failed (insufficient liquidity). Placed limit sell instead.\n` +
@@ -271,13 +281,16 @@ export const closePositionAction: Action = {
         }
       } else {
         // Limit order at best bid
-        orderResult = await client.createAndPostOrder({
-          tokenID: tokenId,
-          side: Side.SELL,
-          price: bestBidResult.price,
-          size: positionSize,
-          feeRateBps: 0,
-        });
+        orderResult = await client.createAndPostOrder(
+          {
+            tokenID: tokenId,
+            side: Side.SELL,
+            price: bestBidResult.price,
+            size: positionSize,
+            feeRateBps: 0,
+          },
+          orderOptions
+        );
 
         responseText =
           `Limit sell order placed to close position.\n` +

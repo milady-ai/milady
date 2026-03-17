@@ -17,7 +17,7 @@ import { GAMMA_API_URL, POLYMARKET_PROVIDER_CACHE_KEY, POLYMARKET_SERVICE_NAME }
 import type { PolymarketService } from "../services/polymarket";
 import { orderTemplate } from "../templates";
 import type { OrderResponse } from "../types";
-import { initializeClobClient, initializeClobClientWithCreds } from "../utils/clobClient";
+import { getPrivateKey, initializeClobClient, initializeClobClientWithCreds } from "../utils/clobClient";
 import {
   callLLMWithTimeout,
   isLLMError,
@@ -25,7 +25,14 @@ import {
   sendError,
   sendUpdate,
 } from "../utils/llmHelpers";
+import { PlaceOrderParamsSchema } from "../utils/llmSchemas";
 import { deriveBestAsk, deriveBestBid, roundToTickSize, parseOrderBookMetadata } from "../utils/orderBook";
+import {
+  computeMarketOrderAmount,
+  validateOrderBounds,
+  validateMinOrderSize,
+  validateBalance,
+} from "../utils/preTradeChecks";
 
 interface PlaceOrderParams {
   tokenId?: string;
@@ -374,13 +381,9 @@ export const placeOrderAction: Action = {
   ],
 
   validate: async (runtime: IAgentRuntime): Promise<boolean> => {
-    const privateKey =
-      runtime.getSetting("POLYMARKET_PRIVATE_KEY") ||
-      runtime.getSetting("EVM_PRIVATE_KEY") ||
-      runtime.getSetting("WALLET_PRIVATE_KEY") ||
-      runtime.getSetting("PRIVATE_KEY");
-
-    if (!privateKey) {
+    try {
+      getPrivateKey(runtime);
+    } catch {
       runtime.logger.warn("[placeOrderAction] Private key is required for trading");
       return false;
     }
@@ -416,7 +419,9 @@ export const placeOrderAction: Action = {
       runtime,
       state,
       orderTemplate,
-      "placeOrderAction"
+      "placeOrderAction",
+      undefined,
+      PlaceOrderParamsSchema as any
     );
 
     if (isLLMError(llmResult)) {
@@ -570,8 +575,8 @@ export const placeOrderAction: Action = {
           `[placeOrderAction] Converting $${dollarAmount} to ${size} shares at $${price.toFixed(4)}/share`
         );
       } else {
-        // If we don't have a price yet, estimate with 0.5
-        size = Math.floor(dollarAmount / 0.5);
+        // Price not yet known — set size to 0, will be recalculated after order book fetch (C6)
+        size = 0;
       }
     } else if (sharesInput > 0) {
       size = sharesInput;
@@ -601,12 +606,8 @@ export const placeOrderAction: Action = {
       price = price / 100; // Convert percentage to decimal
     }
 
-    // If no price specified, we need to get best available
-    if (price <= 0) {
-      // Default to 50% if we can't determine price
-      price = 0.5;
-      runtime.logger.warn("[placeOrderAction] No price specified, defaulting to $0.50");
-    }
+    // price <= 0 is OK here — we'll try to get it from the order book next.
+    // If still undetermined after order book lookup, we reject (H10).
 
     if (!["GTC", "FOK", "GTD", "FAK"].includes(orderType)) {
       orderType = "GTC";
@@ -655,10 +656,11 @@ export const placeOrderAction: Action = {
 
     // Validate token exists and get market metadata from order book
     let tickSize: string = "0.01";
+    let meta = { tickSize: "0.01", minOrderSize: "1", negRisk: false, lastTradePrice: null as string | null };
     try {
       const orderBook = await client.getOrderBook(tokenId);
       // Extract market metadata (tick_size, neg_risk, min_order_size, last_trade_price)
-      const meta = parseOrderBookMetadata(orderBook as unknown as Record<string, unknown>);
+      meta = parseOrderBookMetadata(orderBook as unknown as Record<string, unknown>);
       tickSize = meta.tickSize;
       if (!orderBook || (!orderBook.bids?.length && !orderBook.asks?.length)) {
         runtime.logger.warn(`[placeOrderAction] Token ${tokenId.slice(0, 20)}... has no order book data`);
@@ -700,6 +702,27 @@ export const placeOrderAction: Action = {
       };
     }
 
+    // H10: Reject if price could not be determined from any source
+    if (price <= 0) {
+      await sendError(
+        callback,
+        "Could not determine market price. Please specify a price explicitly.",
+        "No price available from market search or order book"
+      );
+      return { success: false, text: "Price undetermined", error: "price_undetermined" };
+    }
+
+    // C6 fix: recalculate size if we updated the price and user specified dollars
+    if (isDollarAmount && dollarAmount > 0) {
+      const newSize = Math.floor(dollarAmount / price);
+      if (newSize !== size) {
+        runtime.logger.info(
+          `[placeOrderAction] Recalculated size: ${size} -> ${newSize} shares at final price $${price.toFixed(4)}`
+        );
+        size = newSize;
+      }
+    }
+
     // Round price to market's actual tick size (0.01, 0.001, or 0.0001)
     price = roundToTickSize(price, tickSize);
 
@@ -707,6 +730,36 @@ export const placeOrderAction: Action = {
     if (price <= 0 || price >= 1) {
       await sendError(callback, `Invalid price: $${price}. Price must be between $0.01 and $0.99.`);
       return { success: false, text: `Invalid price: ${price}`, error: "invalid_price" };
+    }
+
+    // H3: Validate order bounds
+    const maxTradeSizeUsd = parseFloat(
+      String(runtime.getSetting("POLYMARKET_MAX_TRADE_SIZE_USD") || "100")
+    );
+    const boundsCheck = validateOrderBounds({ price, size, maxTradeSizeUsd });
+    if (!boundsCheck.valid) {
+      await sendError(callback, boundsCheck.reason!, "Pre-trade validation");
+      return { success: false, text: boundsCheck.reason!, error: "bounds_exceeded" };
+    }
+
+    // H8: Validate min order size
+    const minSizeCheck = validateMinOrderSize(size, meta.minOrderSize);
+    if (!minSizeCheck.valid) {
+      await sendError(callback, minSizeCheck.reason!, "Pre-trade validation");
+      return { success: false, text: minSizeCheck.reason!, error: "below_min_size" };
+    }
+
+    // H1: Validate balance
+    const polyService = runtime.getService(POLYMARKET_SERVICE_NAME) as PolymarketService | undefined;
+    const accountState = polyService?.getCachedAccountState();
+    const usdcBalance = accountState?.balances?.collateral
+      ? parseFloat(accountState.balances.collateral.balance)
+      : null;
+    const orderCost = price * size;
+    const balanceCheck = validateBalance(usdcBalance, orderCost);
+    if (!balanceCheck.valid) {
+      await sendError(callback, balanceCheck.reason!, "Pre-trade validation");
+      return { success: false, text: balanceCheck.reason!, error: "insufficient_balance" };
     }
 
     // Log order details before submission
@@ -728,20 +781,27 @@ export const placeOrderAction: Action = {
     try {
       if (orderType === "FOK" || orderType === "FAK") {
         const marketOrderType = orderType === "FAK" ? ClobOrderType.FAK : ClobOrderType.FOK;
+        const marketAmount = computeMarketOrderAmount(
+          side as "BUY" | "SELL", price, size, dollarAmount, isDollarAmount
+        );
         const marketOrderArgs = {
           tokenID: tokenId,
           price,
-          amount: size,
+          amount: marketAmount,
           side: side === "BUY" ? Side.BUY : Side.SELL,
           ...(feeRateBps != null ? { feeRateBps: parseFloat(feeRateBps) } : {}),
           orderType: marketOrderType as ClobOrderType.FOK | ClobOrderType.FAK,
         };
-        orderResponse = (await client.createAndPostMarketOrder(marketOrderArgs)) as OrderResponse;
+        orderResponse = (await client.createAndPostMarketOrder(
+          marketOrderArgs,
+          { tickSize: tickSize as "0.1" | "0.01" | "0.001" | "0.0001", negRisk: meta.negRisk },
+          marketOrderType
+        )) as OrderResponse;
       } else {
         const clobOrderType = orderType === "GTD" ? ClobOrderType.GTD : ClobOrderType.GTC;
         orderResponse = (await client.createAndPostOrder(
           orderArgs,
-          undefined,
+          { tickSize: tickSize as "0.1" | "0.01" | "0.001" | "0.0001", negRisk: meta.negRisk },
           clobOrderType
         )) as OrderResponse;
       }

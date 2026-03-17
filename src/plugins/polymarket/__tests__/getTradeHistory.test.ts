@@ -23,7 +23,7 @@ describe("getTradeHistoryAction", () => {
   it("should pass validate with private key", async () => {
     const mockRuntime = {
       getSetting: (key: string) => {
-        if (key === "WALLET_PRIVATE_KEY") return "0xdeadbeef";
+        if (key === "POLYMARKET_PRIVATE_KEY") return "0xdeadbeef";
         return undefined;
       },
       logger: { info: () => {}, warn: () => {}, error: () => {} },
