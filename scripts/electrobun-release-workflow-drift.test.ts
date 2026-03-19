@@ -3,6 +3,11 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
+const SERVER_TS_PATH = path.join(ROOT, "packages/autonomous/src/api/server.ts");
+const ELIZA_TS_PATH = path.join(
+  ROOT,
+  "packages/autonomous/src/runtime/eliza.ts",
+);
 const WORKFLOW_PATH = path.join(
   ROOT,
   ".github/workflows/release-electrobun.yml",
@@ -30,6 +35,10 @@ const MACOS_SMOKE_SCRIPT_PATH = path.join(
 const WINDOWS_PACKAGED_TEST_PATH = path.join(
   ROOT,
   "apps/app/test/electrobun-packaged/electrobun-windows-startup.e2e.spec.ts",
+);
+const ELECTROBUN_CONFIG_PATH = path.join(
+  ROOT,
+  "apps/app/electrobun/electrobun.config.ts",
 );
 
 describe("Electrobun release workflow drift", () => {
@@ -183,7 +192,7 @@ describe("Electrobun release workflow drift", () => {
 
     expect(workflow).toContain("name: Collect public release files");
     expect(workflow).toContain(' -name "*.dmg" -o \\');
-    expect(workflow).toContain(' -name "*Setup*.zip" -o \\');
+    expect(workflow).toContain(' -name "Milady-Setup-*.exe.zip" -o \\');
     expect(workflow).toContain(' -name "*Setup*.tar.gz" -o \\');
     expect(workflow).toContain(' -name "*.msix" \\');
     expect(workflow).not.toContain(' -name "*.exe" -o \\');
@@ -194,6 +203,28 @@ describe("Electrobun release workflow drift", () => {
     expect(workflow).toContain(' -name "*-update.json" \\');
     expect(workflow).toContain("files: release-files/*");
     expect(workflow).toContain("update-channel/");
+  });
+
+  it("installs Inno Setup 6.7.1 and builds a standalone Windows installer", () => {
+    const workflow = fs.readFileSync(WORKFLOW_PATH, "utf8");
+    const installIndex = workflow.lastIndexOf("name: Install Inno Setup 6.7.1");
+    const signIndex = workflow.indexOf("name: Sign Windows executables");
+    const buildIndex = workflow.indexOf("name: Build Inno Setup installer");
+
+    expect(workflow).toContain("name: Install Inno Setup 6.7.1");
+    expect(workflow).toContain("JRSoftware.InnoSetup");
+    expect(workflow).toContain("--version 6.7.1");
+    expect(workflow).toContain("name: Build Inno Setup installer");
+    expect(workflow).toContain("packaging/inno/build-inno.ps1");
+    expect(installIndex).toBeGreaterThan(signIndex);
+    expect(installIndex).toBeLessThan(buildIndex);
+    expect(workflow).toContain(
+      "name: Verify Windows public installer looks complete",
+    );
+    expect(workflow).toContain(
+      'Get-ChildItem -Path "apps/app/electrobun/artifacts" -File -Filter "Milady-Setup-*.exe"',
+    );
+    expect(workflow).toContain("$minimumBytes = 50MB");
   });
 
   it("treats the staged macOS app as an intermediate signed bundle, not a notarized final artifact", () => {
@@ -277,6 +308,32 @@ describe("Electrobun release workflow drift", () => {
     );
   });
 
+  it("includes heavy failure diagnostics in the Windows smoke test", () => {
+    const smokeScript = fs.readFileSync(WINDOWS_SMOKE_PATH, "utf8");
+
+    expect(smokeScript).toContain("Dump-PortDiagnostics");
+    expect(smokeScript).toContain("Dump-ProcessDiagnostics");
+    expect(smokeScript).toContain("Dump-FailureDiagnostics");
+    expect(smokeScript).toContain("periodic diagnostics at");
+    expect(smokeScript).toContain("FAILURE DIAGNOSTICS");
+    expect(smokeScript).toContain("netstat -ano");
+    expect(smokeScript).toContain("netsh advfirewall firewall");
+    expect(smokeScript).toContain("ANTHROPIC_API_KEY");
+  });
+
+  it("bundles plugins.json and package.json into milady-dist for packaged builds", () => {
+    const config = fs.readFileSync(ELECTROBUN_CONFIG_PATH, "utf8");
+
+    // plugins.json must be copied so discoverPluginsFromManifest() can find it
+    expect(config).toContain(
+      '"../../../plugins.json": "milady-dist/plugins.json"',
+    );
+    // package.json must be copied so findOwnPackageRoot() can match on package name
+    expect(config).toContain(
+      '"../../../package.json": "milady-dist/package.json"',
+    );
+  });
+
   it("reads the Windows packaged startup log from %APPDATA%", () => {
     const smokeScript = fs.readFileSync(WINDOWS_SMOKE_PATH, "utf8");
 
@@ -288,11 +345,17 @@ describe("Electrobun release workflow drift", () => {
     );
   });
 
-  it("prefers the live Windows build launcher and persists it for UI tests", () => {
+  it("can force installer-first Windows smoke validation and persists the launched binary for UI tests", () => {
     const smokeScript = fs.readFileSync(WINDOWS_SMOKE_PATH, "utf8");
     const workflow = fs.readFileSync(WORKFLOW_PATH, "utf8");
 
     expect(smokeScript).toContain("Find-Launcher $resolvedBuildDir");
+    expect(smokeScript).toContain(
+      '$requireInstaller = $env:MILADY_WINDOWS_SMOKE_REQUIRE_INSTALLER -eq "1"',
+    );
+    expect(smokeScript).toContain("Installing via Inno Setup:");
+    expect(smokeScript).toContain("/VERYSILENT");
+    expect(smokeScript).toContain("installed Inno package");
     expect(smokeScript).toContain(
       'Write-Host "Using $launcherSource launcher:',
     );
@@ -304,9 +367,24 @@ describe("Electrobun release workflow drift", () => {
       "MILADY_TEST_WINDOWS_LAUNCHER_PATH_FILE: $" +
         "{{ runner.temp }}\\milady-windows-ui-launcher.txt",
     );
+    // agent.ts sets MILADY_DISABLE_LOCAL_EMBEDDINGS=1 on Windows automatically;
+    // the workflow also sets it so the entire process tree inherits it.
     expect(workflow).toContain('MILADY_DISABLE_LOCAL_EMBEDDINGS: "1"');
+    expect(workflow).toContain('MILADY_WINDOWS_SMOKE_REQUIRE_INSTALLER: "1"');
+    expect(workflow).toContain(
+      "MILADY_TEST_WINDOWS_INSTALL_DIR: $" +
+        "{{ runner.temp }}\\milady-windows-installed",
+    );
     expect(workflow).toContain(
       'Add-Content -Path $env:GITHUB_ENV -Value "MILADY_TEST_WINDOWS_LAUNCHER_PATH=$launcherPath"',
+    );
+  });
+
+  it("passes ANTHROPIC_API_KEY to the Windows smoke test for full runtime init", () => {
+    const workflow = fs.readFileSync(WORKFLOW_PATH, "utf8");
+
+    expect(workflow).toContain(
+      "ANTHROPIC_API_KEY: $" + "{{ secrets.ANTHROPIC_API_KEY }}",
     );
   });
 
@@ -376,5 +454,47 @@ describe("Electrobun release workflow drift", () => {
     expect(windowsPackagedTest).not.toContain(
       "WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS",
     );
+  });
+
+  it("imports @elizaos/app-hyperscape/routes dynamically, not as a static top-level import", () => {
+    const serverSource = fs.readFileSync(SERVER_TS_PATH, "utf8");
+
+    // Must use dynamic import inside a try-catch so the API server can start
+    // even when the package is not installed.
+    expect(serverSource).toContain(
+      'await import(\n      "@elizaos/app-hyperscape/routes"',
+    );
+    // Must NOT have a top-level static import of the package
+    const lines = serverSource.split("\n");
+    const staticImports = lines.filter(
+      (line) =>
+        /^\s*import\s/.test(line) && line.includes("@elizaos/app-hyperscape"),
+    );
+    expect(staticImports).toHaveLength(0);
+  });
+
+  it("logs startApiServer failures to console.error so they are visible in packaged builds", () => {
+    const elizaSource = fs.readFileSync(ELIZA_TS_PATH, "utf8");
+
+    // The catch block around startApiServer must use console.error (not just logger.warn)
+    // so errors are written to stderr and visible in Electrobun agent.ts output.
+    expect(elizaSource).toContain("console.error(apiErrMsg)");
+  });
+
+  it("exits with process.exit(1) when startApiServer fails in server-only mode", () => {
+    const elizaSource = fs.readFileSync(ELIZA_TS_PATH, "utf8");
+
+    // Extract the catch block region for startApiServer
+    const catchIndex = elizaSource.indexOf("} catch (apiErr)");
+    expect(catchIndex).toBeGreaterThan(-1);
+
+    const catchBlock = elizaSource.slice(
+      catchIndex,
+      elizaSource.indexOf("// ── Server-only mode", catchIndex),
+    );
+
+    // Must check opts?.serverOnly and call process.exit(1)
+    expect(catchBlock).toContain("opts?.serverOnly");
+    expect(catchBlock).toContain("process.exit(1)");
   });
 });

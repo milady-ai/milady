@@ -51,10 +51,17 @@ const requiredWorkflowSnippets = [
   "bash apps/app/electrobun/scripts/smoke-test.sh",
   "Upload macOS smoke diagnostics",
   "wrapper-diagnostics.json",
-  "Stage Windows setup executables",
+  "Install Inno Setup 6.7.1",
+  "JRSoftware.InnoSetup",
+  "--version 6.7.1",
+  "Build Inno Setup installer",
+  "packaging/inno/build-inno.ps1",
+  "Verify Windows public installer looks complete",
+  'Get-ChildItem -Path "apps/app/electrobun/artifacts" -File -Filter "Milady-Setup-*.exe"',
+  "$minimumBytes = 50MB",
   "apps/app/electrobun/artifacts/*.exe",
   "name: Collect public release files",
-  '-name "*Setup*.zip" -o \\',
+  '-name "Milady-Setup-*.exe.zip" -o \\',
   '-name "*Setup*.tar.gz" -o \\',
   "name: Collect update channel files",
   '-name "*.tar.zst" -o \\',
@@ -73,6 +80,8 @@ const requiredWorkflowSnippets = [
     "{{ needs.prepare.outputs.env }}",
   "MILADY_ELECTROBUN_NOTARIZE: 0",
   'MILADY_DISABLE_LOCAL_EMBEDDINGS: "1"',
+  'MILADY_WINDOWS_SMOKE_REQUIRE_INSTALLER: "1"',
+  "ANTHROPIC_API_KEY: $" + "{{ secrets.ANTHROPIC_API_KEY }}",
   'Join-Path $PWD "apps/app/electrobun/node_modules/electrobun"',
   "if ($null -eq $resolvedRceditPackageJson)",
   '$resolvedRceditPackageJson = "$resolvedRceditPackageJson".Trim()',
@@ -82,6 +91,8 @@ const requiredElectrobunConfigSnippets = [
   'postBuild: "scripts/postwrap-sign-runtime-macos.ts"',
   'postWrap: "scripts/postwrap-diagnostics.ts"',
   'process.env.MILADY_ELECTROBUN_NOTARIZE !== "0"',
+  '"../../../plugins.json": "milady-dist/plugins.json"',
+  '"../../../package.json": "milady-dist/package.json"',
 ];
 const localPackHotspotPaths = [
   "dist/node_modules",
@@ -455,13 +466,24 @@ function assertWindowsSmokeScriptHasLeadingParamBlock() {
     "Find-Launcher $resolvedBuildDir",
     'Get-ChildItem -Path $resolvedArtifactsDir -File -Filter "*.tar.zst"',
     'Join-Path $env:APPDATA "Milady\\\\milady-startup.log"',
+    '$requireInstaller = $env:MILADY_WINDOWS_SMOKE_REQUIRE_INSTALLER -eq "1"',
+    "Installing via Inno Setup:",
+    "/VERYSILENT",
+    "installed Inno package",
     "$persistLauncherPathFile = $env:MILADY_TEST_WINDOWS_LAUNCHER_PATH_FILE",
     "Using $launcherSource launcher:",
     "Using packaged tarball:",
     "Find-Launcher $selfExtractionRoot",
     "Started extracted launcher:",
     "Runtime started -- agent: .* port:",
-    "Waiting for health endpoint at http://localhost:",
+    "Waiting for health endpoint at http://(?:localhost|127\\.0\\.0\\.1):",
+    "$handler.UseProxy = $false",
+    '--noproxy "127.0.0.1"',
+    "Dump-PortDiagnostics",
+    "Dump-ProcessDiagnostics",
+    "Dump-FailureDiagnostics",
+    "periodic diagnostics at",
+    "FAILURE DIAGNOSTICS",
   ];
   const missingSnippets = requiredSnippets.filter(
     (snippet) => !script.includes(snippet),
@@ -535,12 +557,84 @@ function assertMacSmokeScriptLaunchesPackagedLauncherDirectly() {
   }
 }
 
+function assertServerDynamicHyperscapeImport() {
+  const serverSource = readFileSync(
+    "packages/autonomous/src/api/server.ts",
+    "utf8",
+  );
+
+  // @elizaos/app-hyperscape/routes must be a dynamic import (lazy) so the
+  // API server can start without it. A static top-level import would crash
+  // the server when the package is not installed (e.g. Windows smoke test).
+  const lines = serverSource.split("\n");
+  const staticImports = lines.filter(
+    (line) =>
+      /^\s*import\s/.test(line) && line.includes("@elizaos/app-hyperscape"),
+  );
+  if (staticImports.length > 0) {
+    console.error(
+      "release-check: server.ts must NOT have a static import of @elizaos/app-hyperscape/routes. Use a dynamic import inside a try-catch.",
+    );
+    for (const line of staticImports) {
+      console.error(`  - ${line.trim()}`);
+    }
+    process.exit(1);
+  }
+
+  if (!serverSource.includes("@elizaos/app-hyperscape/routes")) {
+    console.error(
+      "release-check: server.ts must dynamically import @elizaos/app-hyperscape/routes.",
+    );
+    process.exit(1);
+  }
+}
+
+function assertStartApiServerCatchBlockSafety() {
+  const elizaSource = readFileSync(
+    "packages/autonomous/src/runtime/eliza.ts",
+    "utf8",
+  );
+
+  // The catch block around startApiServer must use console.error so errors
+  // are visible in packaged builds (Electrobun agent.ts reads stderr).
+  if (!elizaSource.includes("console.error(apiErrMsg)")) {
+    console.error(
+      "release-check: eliza.ts startApiServer catch block must use console.error(apiErrMsg) so errors are visible in packaged builds.",
+    );
+    process.exit(1);
+  }
+
+  // In server-only mode, a failed API server must be fatal.
+  const catchIndex = elizaSource.indexOf("} catch (apiErr)");
+  if (catchIndex === -1) {
+    console.error(
+      "release-check: eliza.ts must have a catch (apiErr) block around startApiServer.",
+    );
+    process.exit(1);
+  }
+  const catchBlock = elizaSource.slice(
+    catchIndex,
+    elizaSource.indexOf("// ── Server-only mode", catchIndex),
+  );
+  if (
+    !catchBlock.includes("opts?.serverOnly") ||
+    !catchBlock.includes("process.exit(1)")
+  ) {
+    console.error(
+      "release-check: eliza.ts startApiServer catch block must call process.exit(1) when opts?.serverOnly is true.",
+    );
+    process.exit(1);
+  }
+}
+
 function main() {
   assertReleaseWorkflowHasNotaryWrapper();
   assertElectrobunConfigHasPostWrapSigner();
   assertMacArtifactStagerLooksCorrect();
   assertWindowsSmokeScriptHasLeadingParamBlock();
   assertMacSmokeScriptLaunchesPackagedLauncherDirectly();
+  assertServerDynamicHyperscapeImport();
+  assertStartApiServerCatchBlockSafety();
   assertBundledAgentOrchestratorInstallFix();
   assertOrchestratorVersionPinned();
   const localHotspots = findLocalPackHotspots();

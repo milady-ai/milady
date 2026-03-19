@@ -316,7 +316,24 @@ async function waitForHealthy(
         signal: AbortSignal.timeout(2_000),
       });
       if (response.ok) {
-        return true;
+        const health = (await response.json().catch(() => null)) as {
+          ready?: boolean;
+          agentState?: string;
+          startup?: { phase?: string };
+        } | null;
+        if (!health) {
+          return true;
+        }
+        if (typeof health.ready === "boolean") {
+          if (health.ready) {
+            return true;
+          }
+        } else if (
+          health.agentState !== "starting" &&
+          health.agentState !== "restarting"
+        ) {
+          return true;
+        }
       }
     } catch {
       // Server not ready yet
@@ -512,6 +529,38 @@ export class AgentManager {
       await this.killChildProcess();
     }
 
+    // Kill any stale bun process holding the target port from a previous
+    // crash or unclean shutdown.  Without this, the server falls back to a
+    // dynamic port and agent.ts may not detect the change.
+    const targetPort = Number(process.env.MILADY_PORT) || DEFAULT_PORT;
+    try {
+      const lsofResult = Bun.spawnSync(["lsof", "-ti", `tcp:${targetPort}`]);
+      const pids = new TextDecoder()
+        .decode(lsofResult.stdout)
+        .trim()
+        .split("\n")
+        .filter(Boolean);
+      for (const pid of pids) {
+        const numPid = parseInt(pid, 10);
+        if (!Number.isNaN(numPid) && numPid !== process.pid) {
+          diagnosticLog(
+            `[Agent] Killing stale process ${numPid} on port ${targetPort}`,
+          );
+          try {
+            process.kill(numPid, "SIGKILL");
+          } catch {
+            // Process may have already exited
+          }
+        }
+      }
+      if (pids.length > 0) {
+        // Brief pause for the OS to release the port
+        await new Promise((r) => setTimeout(r, 500));
+      }
+    } catch {
+      // lsof not available or failed — proceed and let the port fallback handle it
+    }
+
     this.status = {
       state: "starting",
       agentName: null,
@@ -588,6 +637,12 @@ export class AgentManager {
         ...(process.env as Record<string, string>),
         MILADY_PORT: String(apiPort),
       };
+
+      // node-llama-cpp crashes Bun on Windows during packaged startup.
+      // Disable local embeddings until upstream fix lands.
+      if (process.platform === "win32") {
+        childEnv.MILADY_DISABLE_LOCAL_EMBEDDINGS = "1";
+      }
 
       if (nodePaths.length > 0) {
         childEnv.NODE_PATH = nodePaths.join(path.delimiter);

@@ -11,7 +11,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { logger } from "@elizaos/core";
-import type { StreamingDestination } from "@miladyai/plugin-streaming-base";
+import type { StreamingDestination } from "@miladyai/autonomous/api/stream-routes";
 
 // ---------------------------------------------------------------------------
 // Interfaces
@@ -277,6 +277,14 @@ export function writeStreamSettings(settings: StreamVisualSettings): void {
  *
  * Reads the active destination's overlay layout when available.
  */
+/** Parse STREAM_AVATAR_INDEX env var with range validation (0–999). */
+export function parseAvatarIndex(raw?: string): number | undefined {
+  if (!raw) return undefined;
+  const parsed = parseInt(raw, 10);
+  if (!Number.isFinite(parsed) || parsed < 0 || parsed > 999) return undefined;
+  return parsed;
+}
+
 export function getHeadlessCaptureConfig(destinationId?: string | null): {
   overlayLayout?: string;
   theme?: string;
@@ -288,10 +296,7 @@ export function getHeadlessCaptureConfig(destinationId?: string | null): {
     overlayLayout: getOverlayLayoutJson(destinationId) ?? undefined,
     theme: settings.theme ?? process.env.STREAM_THEME,
     avatarIndex:
-      settings.avatarIndex ??
-      (process.env.STREAM_AVATAR_INDEX
-        ? parseInt(process.env.STREAM_AVATAR_INDEX, 10)
-        : undefined),
+      settings.avatarIndex ?? parseAvatarIndex(process.env.STREAM_AVATAR_INDEX),
     destinationId: destinationId ?? undefined,
   };
 }

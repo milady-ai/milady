@@ -145,6 +145,9 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: packaging/pypi/dist/
+          # Falls back to API token when OIDC trusted publishing is not
+          # configured (e.g. first publish before the project exists on PyPI).
+          password: ${{ secrets.PYPI_API_TOKEN }}
 
   # ── Homebrew ───────────────────────────────────────────────────────────
   update-homebrew:
@@ -276,8 +279,12 @@ jobs:
 
       - name: Install build dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y debhelper devscripts fakeroot
+          for attempt in 1 2 3; do
+            sudo apt-get update && \
+            sudo apt-get install -y debhelper devscripts fakeroot && break
+            echo "apt-get attempt $attempt failed, retrying in 10s..."
+            sleep 10
+          done
 
       - name: Build .deb package
         run: |
