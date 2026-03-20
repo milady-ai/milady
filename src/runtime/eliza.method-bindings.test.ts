@@ -26,7 +26,7 @@ describe("installRuntimeMethodBindings", () => {
       getConversationLength: vi.fn(() => 0),
       getRoom: vi.fn(async () => ({ worldId: "world-from-room" })),
       createComponent,
-    } as unknown as AgentRuntime & {
+    } as AgentRuntime & {
       createComponent: (input: Record<string, unknown>) => Promise<boolean>;
     };
 
@@ -48,8 +48,41 @@ describe("installRuntimeMethodBindings", () => {
     );
   });
 
+  it("does not retry createComponent when room has no world (DM/client_chat)", async () => {
+    const createComponent = vi.fn().mockRejectedValueOnce({
+      cause: { constraint: "components_world_id_worlds_id_fk" },
+    });
+
+    const runtime = {
+      getSetting: vi.fn(() => null),
+      getConversationLength: vi.fn(() => 0),
+      getRoom: vi.fn(async () => ({ worldId: null })),
+      createComponent,
+    } as AgentRuntime & {
+      createComponent: (input: Record<string, unknown>) => Promise<boolean>;
+    };
+
+    installRuntimeMethodBindings(runtime);
+
+    const input = {
+      roomId: "room-dm",
+      worldId: "synthetic-world",
+      type: "information_claim",
+      data: {},
+    };
+
+    await expect(runtime.createComponent(input)).rejects.toEqual(
+      expect.objectContaining({
+        cause: expect.objectContaining({
+          constraint: "components_world_id_worlds_id_fk",
+        }),
+      }),
+    );
+    expect(createComponent).toHaveBeenCalledTimes(1);
+  });
+
   it("dedupes createEntities input and recovers via ensureEntityExists fallback", async () => {
-    const createEntities = vi.fn(async () => false);
+    const createEntities = vi.fn(async () => []);
     const ensureEntityExists = vi.fn(async () => true);
 
     const runtime = {
@@ -58,10 +91,10 @@ describe("installRuntimeMethodBindings", () => {
       createEntities,
       getEntitiesByIds: vi.fn(async () => []),
       ensureEntityExists,
-    } as unknown as AgentRuntime & {
+    } as AgentRuntime & {
       createEntities: (
         entities: Array<{ id: string; agentId: string; names: string[] }>,
-      ) => Promise<boolean>;
+      ) => Promise<string[]>;
     };
 
     installRuntimeMethodBindings(runtime);
@@ -71,7 +104,7 @@ describe("installRuntimeMethodBindings", () => {
 
     const ok = await runtime.createEntities([e1, e1, e2]);
 
-    expect(ok).toBe(true);
+    expect(ok).toEqual(["entity-1", "entity-2"]);
     expect(createEntities).toHaveBeenCalledTimes(1);
     const passed = createEntities.mock.calls[0][0] as Array<{ id: string }>;
     expect(passed.map((entity) => entity.id)).toEqual(["entity-1", "entity-2"]);
@@ -81,12 +114,12 @@ describe("installRuntimeMethodBindings", () => {
   it("serializes concurrent createEntities calls behind a mutex", async () => {
     const firstGate = createDeferred<void>();
     let firstCall = true;
-    const createEntities = vi.fn(async () => {
+    const createEntities = vi.fn(async (entities: Array<{ id: string }>) => {
       if (firstCall) {
         firstCall = false;
         await firstGate.promise;
       }
-      return true;
+      return entities.map((e) => e.id);
     });
 
     const runtime = {
@@ -94,10 +127,10 @@ describe("installRuntimeMethodBindings", () => {
       getConversationLength: vi.fn(() => 0),
       createEntities,
       getEntitiesByIds: vi.fn(async () => []),
-    } as unknown as AgentRuntime & {
+    } as AgentRuntime & {
       createEntities: (
         entities: Array<{ id: string; agentId: string; names: string[] }>,
-      ) => Promise<boolean>;
+      ) => Promise<string[]>;
     };
 
     installRuntimeMethodBindings(runtime);
@@ -113,8 +146,8 @@ describe("installRuntimeMethodBindings", () => {
     expect(createEntities).toHaveBeenCalledTimes(1);
 
     firstGate.resolve();
-    await expect(first).resolves.toBe(true);
-    await expect(second).resolves.toBe(true);
+    await expect(first).resolves.toEqual(["entity-a"]);
+    await expect(second).resolves.toEqual(["entity-b"]);
     expect(createEntities).toHaveBeenCalledTimes(2);
   });
 });

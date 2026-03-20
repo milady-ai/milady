@@ -27,6 +27,12 @@ import {
   EMPTY_HEARTBEAT_MENU_SNAPSHOT,
   type HeartbeatMenuSnapshot,
 } from "./application-menu";
+import { showBackgroundNoticeOnce } from "./background-notice";
+import {
+  type CloudAuthWindowLike,
+  CloudAuthWindowManager,
+  readNavigationEventUrl,
+} from "./cloud-auth-window";
 import { getAgentManager } from "./native/agent";
 import { getDesktopManager } from "./native/desktop";
 import { disposeNativeModules, initializeNativeModules } from "./native/index";
@@ -64,6 +70,11 @@ type HeartbeatMenuHealthResponse = {
 
 const HEARTBEAT_MENU_REFRESH_MS = 30_000;
 const CONFIG_EXPORT_FILE_NAME = "milady-config.json";
+// Browser surface stays off by default until the packaged WebGPU/browser path
+// is hardened across the supported desktop release targets.
+const BROWSER_SURFACE_ENABLED =
+  process.env.MILADY_ENABLE_BROWSER_SURFACE === "1";
+const FORCE_AUTOSTART_AGENT = process.env.MILADY_FORCE_AUTOSTART_AGENT === "1";
 let heartbeatMenuSnapshot: HeartbeatMenuSnapshot =
   EMPTY_HEARTBEAT_MENU_SNAPSHOT;
 let heartbeatMenuRefreshTimer: ReturnType<typeof setInterval> | null = null;
@@ -76,6 +87,7 @@ function setupApplicationMenu(): void {
   const isMac = process.platform === "darwin";
   const menu = buildApplicationMenu({
     isMac,
+    browserEnabled: BROWSER_SURFACE_ENABLED,
     heartbeatSnapshot: heartbeatMenuSnapshot,
     detachedWindows: surfaceWindowManager?.listWindows() ?? [],
   });
@@ -328,6 +340,7 @@ function scheduleStateSave(statePath: string, win: BrowserWindow): void {
 let currentWindow: BrowserWindow | null = null;
 let currentSendToWebview: SendToWebview | null = null;
 let surfaceWindowManager: SurfaceWindowManager | null = null;
+let cloudAuthWindowManager: CloudAuthWindowManager | null = null;
 let rendererUrlPromise: Promise<string> | null = null;
 let backgroundWindowPromise: Promise<void> | null = null;
 let isQuitting = false;
@@ -421,15 +434,27 @@ async function startRendererServer(): Promise<string> {
       ) {
         filePath = path.join(rendererDir, "index.html");
       }
+
+      let isGzipped = false;
+      let requestedExt = path.extname(filePath);
+
+      // Check for pre-compressed .gz file if the uncompressed file doesn't exist
+      if (!fs.existsSync(filePath) && fs.existsSync(`${filePath}.gz`)) {
+        filePath = `${filePath}.gz`;
+        isGzipped = true;
+      }
+
       // SPA fallback — serve index.html for unknown paths
       if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
         filePath = path.join(rendererDir, "index.html");
+        requestedExt = ".html";
+        isGzipped = false;
       }
+
       try {
         const content = fs.readFileSync(filePath);
-        const ext = path.extname(filePath);
         // Inject API base into HTML responses
-        if (ext === ".html" || filePath.endsWith("index.html")) {
+        if (requestedExt === ".html" || filePath.endsWith("index.html")) {
           const html = injectApiBaseIntoHtml(content.toString("utf8"));
           return new Response(html, {
             headers: {
@@ -438,12 +463,17 @@ async function startRendererServer(): Promise<string> {
             },
           });
         }
-        return new Response(content, {
-          headers: {
-            "Content-Type": mimeTypes[ext] ?? "application/octet-stream",
-            "Access-Control-Allow-Origin": "*",
-          },
-        });
+
+        const headers: Record<string, string> = {
+          "Content-Type": mimeTypes[requestedExt] ?? "application/octet-stream",
+          "Access-Control-Allow-Origin": "*",
+        };
+
+        if (isGzipped) {
+          headers["Content-Encoding"] = "gzip";
+        }
+
+        return new Response(content, { headers });
       } catch {
         return new Response("Not found", { status: 404 });
       }
@@ -529,8 +559,12 @@ function attachMainWindow(win: BrowserWindow): BrowserWindow {
   // The renderer is always served from localhost — any other navigation
   // (e.g. from a compromised plugin) should open in the default browser.
   win.webview.on("will-navigate", (event: unknown) => {
-    const e = event as { url?: string; preventDefault?: () => void };
-    const url = e.url ?? "";
+    const e = event as {
+      url?: string;
+      data?: { detail?: string };
+      preventDefault?: () => void;
+    };
+    const url = readNavigationEventUrl(e);
     try {
       const parsed = new URL(url);
       const isAllowed =
@@ -580,6 +614,7 @@ async function ensureBackgroundWindow(): Promise<void> {
     try {
       replacementWindow.minimize();
       console.log("[Main] Recreated minimized window after close");
+      showBackgroundRunNoticeOnce();
     } catch (err) {
       console.warn("[Main] Failed to minimize background window:", err);
     }
@@ -589,6 +624,20 @@ async function ensureBackgroundWindow(): Promise<void> {
   });
 
   await backgroundWindowPromise;
+}
+
+function showBackgroundRunNoticeOnce(): void {
+  try {
+    showBackgroundNoticeOnce({
+      fileSystem: fs,
+      userDataDir: Utils.paths.userData,
+      showNotification: (options) => {
+        Utils.showNotification(options);
+      },
+    });
+  } catch (error) {
+    console.warn("[Main] Failed to persist background notice marker:", error);
+  }
 }
 
 // ============================================================================
@@ -601,9 +650,10 @@ async function createSettingsWindow(tabHint?: string): Promise<void> {
 }
 
 function showMainSurface(surface: string): void {
-  const itemId = surface === "chat" ? "navigate-chat" : `navigate-${surface}`;
   void getDesktopManager().showWindow();
-  sendToActiveRenderer("desktopTrayMenuClick", { itemId });
+  sendToActiveRenderer("desktopTrayMenuClick", {
+    itemId: `show-main:${surface}`,
+  });
 }
 
 function resolveDefaultDialogPath(): string {
@@ -771,7 +821,7 @@ function wireRpcAndModules(
   win: BrowserWindow,
 ): (message: string, payload?: unknown) => void {
   // Access the rpc instance from the webview (set during window creation)
-  const rpc = win.webview.rpc as unknown as ElectrobunRpcInstance | undefined;
+  const rpc = win.webview.rpc as ElectrobunRpcInstance | undefined;
 
   // Create the sendToWebview callback that native modules use to push events.
   // Uses typed RPC push messages instead of JS evaluation.
@@ -881,7 +931,7 @@ async function syncPermissionsToRestApi(
   }
 }
 
-async function startAgent(win: BrowserWindow): Promise<void> {
+async function _startAgent(win: BrowserWindow): Promise<void> {
   const runtimeResolution = resolveDesktopRuntimeMode(
     process.env as Record<string, string | undefined>,
   );
@@ -1081,6 +1131,20 @@ function initializeBundledWebGPU(): void {
  * On Linux/Windows with CEF, upstream Electrobun support is needed.
  */
 function checkWebGpuBrowserSupport(): void {
+  if (!BROWSER_SURFACE_ENABLED) {
+    console.warn("[WebGPU Browser] Browser surface disabled in this build.");
+    setTimeout(() => {
+      sendToActiveRenderer("webgpu:browserStatus", {
+        available: false,
+        reason: "Browser surface disabled in this build.",
+        renderer: "unknown",
+        chromeBetaPath: null,
+        downloadUrl: null,
+      });
+    }, 2000);
+    return;
+  }
+
   const status = checkWebGpuSupport();
   if (status.available) {
     console.log(`[WebGPU Browser] ${status.reason}`);
@@ -1149,6 +1213,13 @@ async function main(): Promise<void> {
     },
     onRegistryChanged: () => setupApplicationMenu(),
   });
+  cloudAuthWindowManager = new CloudAuthWindowManager({
+    createWindow: (options) =>
+      new BrowserWindow(options) as unknown as CloudAuthWindowLike,
+    onWindowFocused: (window) => {
+      lastFocusedWindow = window as unknown as ManagedWindowLike;
+    },
+  });
 
   // Set up app menu after the window (and its message loop) exists.
   setupApplicationMenu();
@@ -1163,6 +1234,9 @@ async function main(): Promise<void> {
   // Wire settings window callback so menus and RPC can open it.
   getDesktopManager().setOpenSettingsCallback(() => {
     void createSettingsWindow();
+  });
+  getDesktopManager().setOpenExternalHandler((url) => {
+    return cloudAuthWindowManager?.open(url) ?? false;
   });
 
   // If launched with --hidden (e.g. auto-launch with openAsHidden), minimize immediately.
@@ -1209,9 +1283,29 @@ async function main(): Promise<void> {
     console.warn("[Main] Tray creation failed:", err);
   }
 
-  // Start agent in background
+  // Agent startup is now deferred until after onboarding completes.
+  // The renderer triggers agent start via the `agentStart` RPC handler
+  // when the user selects local mode and finishes onboarding.
+  // For sandbox/remote modes, no embedded agent is needed — the renderer
+  // connects directly to the cloud or remote API base.
+  //
+  // However, if an external API base is configured via env vars (e.g.
+  // MILADY_DESKTOP_API_BASE), inject it immediately so the renderer can
+  // connect without onboarding a local agent.
   if (currentWindow) {
-    void startAgent(currentWindow);
+    const rt = resolveDesktopRuntimeMode(
+      process.env as Record<string, string | undefined>,
+    );
+    if (rt.mode === "external" && rt.externalApi.base) {
+      pushApiBaseToRenderer(
+        currentWindow,
+        rt.externalApi.base,
+        process.env.MILADY_API_TOKEN,
+      );
+    } else if (FORCE_AUTOSTART_AGENT) {
+      console.log("[Main] Forcing embedded agent startup on boot.");
+      void _startAgent(currentWindow);
+    }
   }
 
   // Check for updates

@@ -139,7 +139,7 @@ Deep runtime introspection endpoint for advanced debugging. Returns detailed inf
     "serviceCount": 10
   },
   "order": {
-    "plugins": ["@elizaos/plugin-bootstrap", "..."],
+    "plugins": ["@elizaos/plugin-trust", "..."],
     "actions": ["CHAT", "..."],
     "providers": ["..."],
     "evaluators": ["..."],

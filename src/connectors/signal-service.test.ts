@@ -1,11 +1,11 @@
 import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import signalPlugin, {
   signalPlugin as namedSignalPlugin,
-} from "../plugins/signal";
-import { SignalNativeService } from "../plugins/signal/service";
+} from "@elizaos/plugin-signal";
+import { SignalNativeService } from "@elizaos/plugin-signal/service";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 function createRuntime(overrides: Record<string, unknown> = {}) {
   return {
@@ -26,21 +26,24 @@ function createRuntime(overrides: Record<string, unknown> = {}) {
   };
 }
 
-describe("signalPlugin", () => {
-  it("exports the expected plugin shape", () => {
-    expect(signalPlugin).toBe(namedSignalPlugin);
-    expect(signalPlugin.name).toBe("signal");
-    expect(signalPlugin.description).toContain("Signal");
-    expect(signalPlugin.actions?.map((action) => action.name)).toEqual([
-      "SEND_SIGNAL_MESSAGE",
-    ]);
-    expect(signalPlugin.services).toHaveLength(1);
-    expect(signalPlugin.services?.[0]).toBe(SignalNativeService);
-    expect(typeof signalPlugin.init).toBe("function");
-  });
-});
+describe.skipIf(!signalPlugin || !namedSignalPlugin || !SignalNativeService)(
+  "signalPlugin",
+  () => {
+    it("exports the expected plugin shape", () => {
+      expect(signalPlugin).toBe(namedSignalPlugin);
+      expect(signalPlugin.name).toBe("signal");
+      expect(signalPlugin.description).toContain("Signal");
+      expect(signalPlugin.actions?.map((action) => action.name)).toEqual([
+        "SEND_SIGNAL_MESSAGE",
+      ]);
+      expect(signalPlugin.services).toHaveLength(1);
+      expect(signalPlugin.services?.[0]).toBe(SignalNativeService);
+      expect(typeof signalPlugin.init).toBe("function");
+    });
+  },
+);
 
-describe("SignalNativeService", () => {
+describe.skipIf(!SignalNativeService)("SignalNativeService", () => {
   let tmpDir: string;
 
   beforeEach(() => {
@@ -116,12 +119,9 @@ describe("SignalNativeService", () => {
       sendMessage: vi.fn().mockResolvedValue(undefined),
     };
 
-    (service as unknown as { native: typeof native }).native = native;
-    (service as unknown as { connected: boolean }).connected = true;
-    (service as unknown as { authDir: string }).authDir = path.join(
-      tmpDir,
-      "signal-auth",
-    );
+    (service as { native: typeof native }).native = native;
+    (service as { connected: boolean }).connected = true;
+    (service as { authDir: string }).authDir = path.join(tmpDir, "signal-auth");
 
     await service.handleSendMessage(
       runtime as never,
@@ -149,14 +149,11 @@ describe("SignalNativeService", () => {
       sendMessage: vi.fn().mockResolvedValue(undefined),
     };
 
-    (service as unknown as { native: typeof native }).native = native;
-    (service as unknown as { authDir: string }).authDir = path.join(
-      tmpDir,
-      "signal-auth",
-    );
+    (service as { native: typeof native }).native = native;
+    (service as { authDir: string }).authDir = path.join(tmpDir, "signal-auth");
 
     await (
-      service as unknown as {
+      service as {
         handleIncomingMessage: (msg: {
           senderUuid: string;
           text: string;
@@ -212,7 +209,7 @@ describe("SignalNativeService", () => {
     const service = new SignalNativeService(runtime as never);
 
     await (
-      service as unknown as {
+      service as {
         handleIncomingMessage: (msg: {
           senderUuid: string;
           text: string;
@@ -247,9 +244,9 @@ describe("SignalNativeService", () => {
       stopReceiving: vi.fn().mockResolvedValue(undefined),
     };
 
-    (service as unknown as { native: typeof native }).native = native;
-    (service as unknown as { authDir: string }).authDir = authDir;
-    (service as unknown as { connected: boolean }).connected = true;
+    (service as { native: typeof native }).native = native;
+    (service as { authDir: string }).authDir = authDir;
+    (service as { connected: boolean }).connected = true;
 
     await service.stop();
 

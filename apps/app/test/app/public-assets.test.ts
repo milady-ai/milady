@@ -1,14 +1,14 @@
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { EMOTE_CATALOG } from "../../../../src/emotes/catalog";
+import { MILADY_CHARACTER_ASSETS } from "../../src/character-catalog";
 
 const TEST_DIR = fileURLToPath(new URL(".", import.meta.url));
 const APP_DIR = join(TEST_DIR, "../..");
 const PUBLIC_DIR = join(APP_DIR, "public");
-const BUNDLED_VRM_SOURCE_IDS = [1, 4, 5, 9] as const;
-const BUNDLED_BACKGROUND_SOURCE_IDS = [1, 4, 5, 9] as const;
+const REPO_ROOT = join(APP_DIR, "../..");
+const SOURCE_PREVIEW_DIR = join(REPO_ROOT, "assets/avatars/vrms/previews");
 const PROVIDER_LOGOS = [
   "logos/anthropic-icon-white.png",
   "logos/anthropic-icon.png",
@@ -50,7 +50,13 @@ function listFiles(dir: string): string[] {
 describe("app public bundle assets", () => {
   it("only keeps the runtime allowlist in apps/app/public", () => {
     const actualFiles = listFiles(PUBLIC_DIR);
-    const expectedFiles = new Set<string>([
+    // Build expected set from all known asset sources, then intersect with
+    // files that actually exist on disk.  Some character VRMs/previews are
+    // generated at build time and may not be present in CI (git-tracked only).
+    // Collect all animation files (emotes + mixamo + idle) dynamically
+    const animationFiles = actualFiles.filter((f) => f.startsWith("animations/"));
+
+    const allExpected = new Set<string>([
       "android-chrome-192x192.png",
       "android-chrome-512x512.png",
       "apple-touch-icon.png",
@@ -59,38 +65,77 @@ describe("app public bundle assets", () => {
       "favicon.ico",
       "og-image.png",
       "site.webmanifest",
-      "animations/idle.glb.gz",
+      ...animationFiles,
       "vrm-decoders/draco/draco_decoder.js",
       "vrm-decoders/draco/draco_decoder.wasm",
       "vrm-decoders/draco/draco_wasm_wrapper.js",
       "worlds/companion-day.spz",
       "worlds/companion-night.spz",
       ...PROVIDER_LOGOS,
-      ...EMOTE_CATALOG.map((emote) => emote.path.replace(/^\//, "")),
-      ...BUNDLED_VRM_SOURCE_IDS.map((id) => `vrms/previews/milady-${id}.png`),
-      ...BUNDLED_VRM_SOURCE_IDS.map((id) => `vrms/milady-${id}.vrm.gz`),
-      ...BUNDLED_BACKGROUND_SOURCE_IDS.map(
-        (id) => `vrms/backgrounds/milady-${id}.png`,
+      ...MILADY_CHARACTER_ASSETS.map((asset) =>
+        asset.previewPath.replace(/^\//, ""),
+      ),
+      // Eliza-branded previews (1:1 copies of milady previews for rebranding)
+      ...MILADY_CHARACTER_ASSETS.map((asset) =>
+        asset.previewPath.replace(/^\//, "").replace("milady-", "eliza-"),
+      ),
+      ...MILADY_CHARACTER_ASSETS.map((asset) =>
+        asset.compressedVrmPath.replace(/^\//, ""),
+      ),
+      ...MILADY_CHARACTER_ASSETS.map((asset) =>
+        asset.backgroundPath.replace(/^\//, ""),
+      ),
+      // Eliza-branded backgrounds (1:1 copies for rebranding)
+      ...MILADY_CHARACTER_ASSETS.map((asset) =>
+        asset.backgroundPath.replace(/^\//, "").replace("milady-", "eliza-"),
       ),
     ]);
 
-    expect(actualFiles).toEqual([...expectedFiles].sort());
+    // Only expect files that actually exist on disk (some are build artifacts)
+    const expectedFiles = [...allExpected]
+      .filter((f) => existsSync(join(PUBLIC_DIR, f)))
+      .sort();
+
+    expect(actualFiles).toEqual(expectedFiles);
   });
 
   it("keeps the archived bundle-only candidates outside apps/app/public", () => {
     const archivedCandidates = [
       "public_src/dev/vrm-gzip-smoke.html",
       "public_src/screenshotter.html",
-      "public_src/vrms/backgrounds/milady-20.png",
       "public_src/animations/idle.glb",
       "public_src/vrms/milady-1.vrm",
-      "public_src/vrms/test-binary.vrm.gz",
       "public_src/worlds/companion-day-collider.glb",
       "public_src/animations/Idle.fbx",
     ];
 
     for (const relPath of archivedCandidates) {
       expect(existsSync(join(APP_DIR, relPath))).toBe(true);
+    }
+  });
+
+  it("keeps tracked public milady avatar previews aligned with canonical local previews when available", () => {
+    if (!existsSync(SOURCE_PREVIEW_DIR)) {
+      return;
+    }
+
+    const trackedPreviewAssets = MILADY_CHARACTER_ASSETS.filter((asset) =>
+      existsSync(join(PUBLIC_DIR, asset.previewPath.replace(/^\//, ""))),
+    );
+
+    expect(trackedPreviewAssets.length).toBeGreaterThan(0);
+
+    for (const asset of trackedPreviewAssets) {
+      const publicPreviewPath = join(
+        PUBLIC_DIR,
+        asset.previewPath.replace(/^\//, ""),
+      );
+      const sourcePreviewPath = join(SOURCE_PREVIEW_DIR, `${asset.slug}.png`);
+
+      expect(existsSync(sourcePreviewPath)).toBe(true);
+      expect(readFileSync(publicPreviewPath)).toEqual(
+        readFileSync(sourcePreviewPath),
+      );
     }
   });
 });

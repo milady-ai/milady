@@ -25,11 +25,12 @@ const repoRoot = path.resolve(here, "..");
 const appDir = path.join(repoRoot, "apps/app");
 const electrobunDir = path.join(appDir, "electrobun");
 const skipApi = process.argv.includes("--no-api");
+const apiPort = String(process.env.MILADY_API_PORT || 31337);
 
 // Step 1: blocking vite build so electrobun has renderer assets to bundle
-console.log("\n[milady] Building renderer...");
+console.log("\n[eliza] Building renderer...");
 execSync("bun run vite build", { cwd: appDir, stdio: "inherit" });
-console.log("[milady] Renderer ready.\n");
+console.log("[eliza] Renderer ready.\n");
 
 // Step 2: start API + electrobun in parallel
 const services = [
@@ -41,8 +42,8 @@ const services = [
           args: ["--watch", "src/runtime/dev-server.ts"],
           cwd: repoRoot,
           env: {
-            MILADY_PORT: "31337",
-            MILADY_HEADLESS: "1",
+            ELIZA_PORT: apiPort,
+            ELIZA_HEADLESS: "1",
           },
         },
       ]
@@ -52,7 +53,19 @@ const services = [
     cmd: "bun",
     args: ["run", "dev"],
     cwd: electrobunDir,
-    env: { ELECTROBUN_SKIP_CODESIGN: "1" },
+    env: {
+      ELECTROBUN_SKIP_CODESIGN: "1",
+      ...(skipApi
+        ? {}
+        : {
+            // In desktop dev the API server runs as a sibling process, not as
+            // Electrobun's embedded runtime. Tell the shell to connect to that
+            // API directly so the renderer doesn't boot against the stale
+            // default embedded port and hang on the loader.
+            MILADY_API_PORT: apiPort,
+            MILADY_DESKTOP_API_BASE: `http://127.0.0.1:${apiPort}`,
+          }),
+    },
   },
 ];
 
@@ -93,7 +106,7 @@ for (const service of services) {
 }
 
 function cleanup() {
-  console.log("\n[milady] Shutting down desktop dev environment...");
+  console.log("\n[eliza] Shutting down desktop dev environment...");
   for (const child of children) {
     try {
       child.kill("SIGTERM");

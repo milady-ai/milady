@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Milady Cloud Agent — Slim Image
+# Eliza Cloud Agent — Slim Image
 #
 # Multi-stage build:
 #   1. builder  — full monorepo install + tsdown build
@@ -7,7 +7,7 @@
 #   3. runtime  — slim base with only what's needed
 #
 # The real Milady agent runtime runs via milady.mjs → dist/entry.js which
-# imports from @miladyai/autonomous (workspace package). The workspace packages
+# imports from @elizaos/autonomous (workspace package). The workspace packages
 # reference src/ via relative imports, so we keep src/ + packages/ alongside
 # dist/ and use tsx for TS resolution at runtime.
 #
@@ -24,7 +24,7 @@
 FROM node:22-bookworm AS builder
 
 # Install bun for fast dependency resolution
-RUN curl -fsSL https://bun.sh/install | bash
+RUN curl -fsSL https://bun.sh/install | bash -s "bun-v1.3.9"
 ENV PATH="/root/.bun/bin:${PATH}"
 
 WORKDIR /build
@@ -33,7 +33,7 @@ COPY . .
 # Skip native addon downloads during install
 ENV NODE_LLAMA_CPP_SKIP_DOWNLOAD="true"
 
-RUN bun install --ignore-scripts 2>&1 | tail -5
+RUN bun install --frozen-lockfile --ignore-scripts 2>&1 | tail -5
 
 # Run repo setup scripts (non-critical)
 RUN node ./scripts/link-browser-server.mjs 2>/dev/null || true
@@ -143,7 +143,7 @@ COPY --from=pruner --chown=agent:agent /build/package.json ./package.json
 # from ../../../../src/runtime/milady-plugin.ts)
 COPY --from=pruner --chown=agent:agent /build/src ./src
 
-# Copy workspace packages (especially @miladyai/autonomous which IS the runtime)
+# Copy workspace packages (especially @elizaos/autonomous which IS the runtime)
 COPY --from=pruner --chown=agent:agent /build/packages ./packages
 
 # Copy apps dir structure (some workspace links reference it)
@@ -160,6 +160,7 @@ COPY --from=pruner --chown=agent:agent /build/scripts ./scripts
 
 ENV NODE_ENV=production
 ENV MILADY_API_BIND="0.0.0.0"
+# PORT is used by cloud platforms (Railway, Fly.io); maps to MILADY_PORT locally
 ENV PORT=2138
 ENV BRIDGE_PORT=18790
 # Skip local model downloads

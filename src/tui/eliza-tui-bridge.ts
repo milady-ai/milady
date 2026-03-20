@@ -1,5 +1,9 @@
 import crypto from "node:crypto";
 import process from "node:process";
+
+/** Maximum accumulated streamed text before truncation (1MB). */
+const MAX_STREAMED_LENGTH = 1_000_000;
+
 import {
   type ActionEventPayload,
   type AgentRuntime,
@@ -28,21 +32,21 @@ import {
   mergeStreamingText,
   parseConversationStreamPayload,
 } from "./sse-parser.js";
-import { miladyMarkdownTheme, tuiTheme } from "./theme.js";
-import type { MiladyTUI } from "./tui-app.js";
+import { elizaMarkdownTheme, tuiTheme } from "./theme.js";
+import type { ElizaTUI } from "./tui-app.js";
 import { ApiModeWsClient } from "./ws-client.js";
 
 // NOTE: Room + world IDs are derived from the agentId so that switching
 // characters (which changes agentId) does not reuse the same persisted
 // conversation history / metadata.
-const TUI_USER_ID = stringToUuid("milady-tui-user") as UUID;
+const TUI_USER_ID = stringToUuid("eliza-tui-user") as UUID;
 
 interface ElizaTUIBridgeOptions {
   /** API base URL (enables API transport mode for chat). */
   apiBaseUrl?: string;
   /**
    * Optional API auth token override.
-   * - undefined: use MILADY_API_TOKEN from environment
+   * - undefined: use ELIZA_API_TOKEN from environment
    * - null/empty: suppress auth header forwarding
    */
   apiToken?: string | null;
@@ -79,11 +83,11 @@ interface ActionRouteDecision {
 export class ElizaTUIBridge {
   private isProcessing = false;
 
-  private showThinking = process.env.MILADY_TUI_SHOW_THINKING === "1";
+  private showThinking = process.env.ELIZA_TUI_SHOW_THINKING === "1";
   private showStructuredResponse =
-    process.env.MILADY_TUI_SHOW_STRUCTURED_RESPONSE === "1";
+    process.env.ELIZA_TUI_SHOW_STRUCTURED_RESPONSE === "1";
   private debugActionRouting =
-    process.env.MILADY_TUI_DEBUG_ACTION_ROUTING === "1";
+    process.env.ELIZA_TUI_DEBUG_ACTION_ROUTING === "1";
 
   private abortController: AbortController | null = null;
 
@@ -124,13 +128,13 @@ export class ElizaTUIBridge {
 
   constructor(
     private runtime: AgentRuntime,
-    private tui: MiladyTUI,
+    private tui: ElizaTUI,
     opts: ElizaTUIBridgeOptions = {},
   ) {
     const agentScope = String(this.runtime.agentId);
-    this.worldId = stringToUuid(`milady-tui-world:${agentScope}`) as UUID;
-    this.roomId = stringToUuid(`milady-tui-room:${agentScope}`) as UUID;
-    this.channelId = `milady-tui:${agentScope}`;
+    this.worldId = stringToUuid(`eliza-tui-world:${agentScope}`) as UUID;
+    this.roomId = stringToUuid(`eliza-tui-room:${agentScope}`) as UUID;
+    this.channelId = `eliza-tui:${agentScope}`;
 
     this.apiBaseUrl = opts.apiBaseUrl?.trim().replace(/\/+$/, "") || null;
     this.apiTokenOverride = opts.apiToken;
@@ -146,7 +150,7 @@ export class ElizaTUIBridge {
   }
 
   private getPiTuiCompat(): PiTUI {
-    return this.tui.getTUI() as unknown as PiTUI;
+    return this.tui.getTUI() as PiTUI;
   }
 
   private getActionEventRouteDecision(
@@ -208,7 +212,7 @@ export class ElizaTUIBridge {
     const activeRoom = decision.activeRoomId || "(unset)";
 
     process.stderr.write(
-      `[milady-tui] ${eventType} action=${actionName} mode=${mode} payloadRoom=${payloadRoom} activeRoom=${activeRoom} handled=${decision.shouldHandle} reason=${decision.reason}\n`,
+      `[eliza-tui] ${eventType} action=${actionName} mode=${mode} payloadRoom=${payloadRoom} activeRoom=${activeRoom} handled=${decision.shouldHandle} reason=${decision.reason}\n`,
     );
   }
 
@@ -220,15 +224,15 @@ export class ElizaTUIBridge {
     if (!this.apiBaseUrl) {
       await this.runtime.ensureWorldExists({
         id: this.worldId,
-        name: "Milady TUI",
+        name: "Eliza TUI",
         agentId: this.runtime.agentId,
       });
 
       await this.runtime.ensureRoomExists({
         id: this.roomId,
-        name: "Milady TUI",
+        name: "Eliza TUI",
         type: ChannelType.DM,
-        source: "milady-tui",
+        source: "eliza-tui",
         worldId: this.worldId,
         channelId: this.channelId,
         metadata: { ownership: { ownerId: TUI_USER_ID } },
@@ -238,10 +242,10 @@ export class ElizaTUIBridge {
         entityId: TUI_USER_ID,
         roomId: this.roomId,
         worldId: this.worldId,
-        worldName: "Milady TUI",
+        worldName: "Eliza TUI",
         userName: "User",
         name: "User",
-        source: "milady-tui",
+        source: "eliza-tui",
         type: ChannelType.DM,
         channelId: this.channelId,
         metadata: { ownership: { ownerId: TUI_USER_ID } },
@@ -253,7 +257,7 @@ export class ElizaTUIBridge {
         onMessage: (data) => this.handleApiWsMessage(data),
         onError: (error) => {
           process.stderr.write(
-            `[milady-tui] websocket error: ${error.message}\n`,
+            `[eliza-tui] websocket error: ${error.message}\n`,
           );
         },
       });
@@ -273,6 +277,7 @@ export class ElizaTUIBridge {
     ]);
 
     this.runtime.registerEvent(EventType.ACTION_STARTED, async (payload) => {
+      if (this.disposed) return;
       const p = payload as ActionEventPayload;
       const actionName = p.content.actions?.[0] ?? "action";
 
@@ -315,6 +320,7 @@ export class ElizaTUIBridge {
     });
 
     this.runtime.registerEvent(EventType.ACTION_COMPLETED, async (payload) => {
+      if (this.disposed) return;
       const p = payload as ActionEventPayload;
       const actionName = p.content.actions?.[0] ?? "action";
 
@@ -547,7 +553,7 @@ export class ElizaTUIBridge {
       roomId: this.roomId,
       content: {
         text,
-        source: "milady-tui",
+        source: "eliza-tui",
         channelType: ChannelType.DM,
       },
     });
@@ -712,6 +718,9 @@ export class ElizaTUIBridge {
 
         fullText = mergeStreamingText(fullText, chunk);
         this.streamedText = mergeStreamingText(this.streamedText, chunk);
+        if (this.streamedText.length > MAX_STREAMED_LENGTH) {
+          this.streamedText = this.streamedText.slice(0, MAX_STREAMED_LENGTH);
+        }
         this.ensureAssistantComponent();
         this.scheduleAssistantUpdate();
         return;
@@ -735,29 +744,40 @@ export class ElizaTUIBridge {
 
         fullText = mergeStreamingText(fullText, parsed.text);
         this.streamedText = mergeStreamingText(this.streamedText, parsed.text);
+        if (this.streamedText.length > MAX_STREAMED_LENGTH) {
+          this.streamedText = this.streamedText.slice(0, MAX_STREAMED_LENGTH);
+        }
         this.ensureAssistantComponent();
         this.scheduleAssistantUpdate();
       }
     };
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-      buffer += decoder.decode(value, { stream: true });
-      const drained = drainSseEvents(buffer);
-      buffer = drained.remaining;
+        buffer += decoder.decode(value, { stream: true });
+        const drained = drainSseEvents(buffer);
+        buffer = drained.remaining;
 
-      for (const rawEvent of drained.events) {
-        for (const payload of extractSseDataPayloads(rawEvent)) {
+        for (const rawEvent of drained.events) {
+          for (const payload of extractSseDataPayloads(rawEvent)) {
+            parsePayload(payload);
+          }
+        }
+      }
+
+      if (buffer.trim()) {
+        for (const payload of extractSseDataPayloads(buffer)) {
           parsePayload(payload);
         }
       }
-    }
-
-    if (buffer.trim()) {
-      for (const payload of extractSseDataPayloads(buffer)) {
-        parsePayload(payload);
+    } finally {
+      try {
+        reader.cancel();
+      } catch {
+        /* ignore cancel errors */
       }
     }
 
@@ -774,7 +794,7 @@ export class ElizaTUIBridge {
       return override || null;
     }
 
-    const token = process.env.MILADY_API_TOKEN?.trim();
+    const token = process.env.ELIZA_API_TOKEN?.trim();
     return token || null;
   }
 
@@ -873,8 +893,8 @@ export class ElizaTUIBridge {
 
     const component = new AssistantMessageComponent(
       this.showThinking,
-      miladyMarkdownTheme,
-      this.runtime.character?.name ?? "milady",
+      elizaMarkdownTheme,
+      this.runtime.character?.name ?? "eliza",
     );
     component.updateContent(text);
     component.finalize();
@@ -944,8 +964,8 @@ export class ElizaTUIBridge {
 
     this.currentAssistant = new AssistantMessageComponent(
       this.showThinking,
-      miladyMarkdownTheme,
-      this.runtime.character?.name ?? "milady",
+      elizaMarkdownTheme,
+      this.runtime.character?.name ?? "eliza",
     );
     this.lastAssistantForTurn = this.currentAssistant;
     this.tui.addToChatContainer(this.currentAssistant);

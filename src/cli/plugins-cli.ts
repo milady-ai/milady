@@ -1,3 +1,5 @@
+import os from "node:os";
+import nodePath from "node:path";
 import type { IAgentRuntime } from "@elizaos/core";
 import chalk from "chalk";
 import type { Command } from "commander";
@@ -6,6 +8,23 @@ import type {
   PluginManagerLike,
 } from "../services/plugin-manager-types";
 import { parseClampedInteger } from "../utils/number-parsing";
+
+/** Validate that a resolved plugin path is within allowed boundaries. */
+export function validatePluginPath(resolved: string): void {
+  const home = os.homedir();
+  const cwd = process.cwd();
+  if (
+    !nodePath.isAbsolute(resolved) ||
+    (!resolved.startsWith(home + nodePath.sep) &&
+      resolved !== home &&
+      !resolved.startsWith(cwd + nodePath.sep) &&
+      resolved !== cwd)
+  ) {
+    throw new Error(
+      `Plugin path ${resolved} is outside allowed boundaries (must be under ${home} or ${cwd})`,
+    );
+  }
+}
 
 /**
  * Normalize a user-provided plugin name to its fully-qualified form.
@@ -224,9 +243,9 @@ export function registerPluginsCli(program: Command): void {
         console.log();
       }
 
-      console.log(chalk.dim("Install a plugin: milady plugins install <name>"));
+      console.log(chalk.dim("Install a plugin: eliza plugins install <name>"));
       console.log(
-        chalk.dim("Search:           milady plugins list -q <keyword>"),
+        chalk.dim("Search:           eliza plugins list -q <keyword>"),
       );
       console.log();
     });
@@ -284,7 +303,7 @@ export function registerPluginsCli(program: Command): void {
       if (!info) {
         console.log(`\n${chalk.red("Not found:")} ${normalizedName}`);
         console.log(
-          chalk.dim("Run 'milady plugins search <keyword>' to find plugins.\n"),
+          chalk.dim("Run 'eliza plugins search <keyword>' to find plugins.\n"),
         );
         return;
       }
@@ -327,7 +346,7 @@ export function registerPluginsCli(program: Command): void {
       }
 
       console.log(
-        `\n  Install: ${chalk.cyan(`milady plugins install ${info.name}`)}\n`,
+        `\n  Install: ${chalk.cyan(`eliza plugins install ${info.name}`)}\n`,
       );
     });
 
@@ -417,7 +436,7 @@ export function registerPluginsCli(program: Command): void {
 
       if (plugins.length === 0) {
         console.log("\nNo plugins installed from the registry.\n");
-        console.log(chalk.dim("Install one: milady plugins install <name>\n"));
+        console.log(chalk.dim("Install one: eliza plugins install <name>\n"));
         return;
       }
 
@@ -445,7 +464,7 @@ export function registerPluginsCli(program: Command): void {
   // ── test ─────────────────────────────────────────────────────────────
   pluginsCommand
     .command("test")
-    .description("Validate custom drop-in plugins in ~/.milady/plugins/custom/")
+    .description("Validate custom drop-in plugins in ~/.eliza/plugins/custom/")
     .action(async () => {
       const nodePath = await import("node:path");
       const { pathToFileURL } = await import("node:url");
@@ -453,7 +472,7 @@ export function registerPluginsCli(program: Command): void {
       const { resolveStateDir, resolveUserPath } = await import(
         "../config/paths"
       );
-      const { loadMiladyConfig } = await import("../config/config");
+      const { loadElizaConfig } = await import("../config/config");
       const { CUSTOM_PLUGINS_DIRNAME, scanDropInPlugins, resolvePackageEntry } =
         await import("../runtime/eliza");
 
@@ -463,18 +482,20 @@ export function registerPluginsCli(program: Command): void {
       );
       const scanDirs = [customDir];
 
-      let config: ReturnType<typeof loadMiladyConfig> | null = null;
+      let config: ReturnType<typeof loadElizaConfig> | null = null;
       try {
-        config = loadMiladyConfig();
+        config = loadElizaConfig();
       } catch (err) {
         console.log(
           chalk.dim(
-            `  (Could not read milady.json: ${err instanceof Error ? err.message : String(err)} — scanning default directory only)\n`,
+            `  (Could not read eliza.json: ${err instanceof Error ? err.message : String(err)} — scanning default directory only)\n`,
           ),
         );
       }
       for (const p of config?.plugins?.load?.paths ?? []) {
-        scanDirs.push(resolveUserPath(p));
+        const rp = resolveUserPath(p);
+        validatePluginPath(rp);
+        scanDirs.push(rp);
       }
 
       console.log(
@@ -594,11 +615,12 @@ export function registerPluginsCli(program: Command): void {
       const _nodePath = await import("node:path");
       const nodeFs = await import("node:fs");
       const { resolveUserPath } = await import("../config/paths");
-      const { loadMiladyConfig, saveMiladyConfig } = await import(
+      const { loadElizaConfig, saveElizaConfig } = await import(
         "../config/config"
       );
 
       const resolved = resolveUserPath(rawPath);
+      validatePluginPath(resolved);
 
       if (
         !nodeFs.existsSync(resolved) ||
@@ -611,25 +633,29 @@ export function registerPluginsCli(program: Command): void {
         return;
       }
 
-      let config: ReturnType<typeof loadMiladyConfig>;
+      let config: ReturnType<typeof loadElizaConfig>;
       try {
-        config = loadMiladyConfig();
+        config = loadElizaConfig();
       } catch {
-        config = {} as ReturnType<typeof loadMiladyConfig>;
+        config = {} as ReturnType<typeof loadElizaConfig>;
       }
 
       if (!config.plugins) config.plugins = {};
       if (!config.plugins.load) config.plugins.load = {};
       if (!config.plugins.load.paths) config.plugins.load.paths = [];
 
-      const existing = config.plugins.load.paths.map(resolveUserPath);
+      const existing = config.plugins.load.paths.map((p: string) => {
+        const rp = resolveUserPath(p);
+        validatePluginPath(rp);
+        return rp;
+      });
       if (existing.includes(resolved)) {
         console.log(`\n${chalk.yellow("Already registered:")} ${rawPath}\n`);
         return;
       }
 
       config.plugins.load.paths.push(rawPath);
-      saveMiladyConfig(config);
+      saveElizaConfig(config);
 
       console.log(`\n${chalk.green("Added:")} ${rawPath} → ${resolved}`);
       console.log(
@@ -646,14 +672,14 @@ export function registerPluginsCli(program: Command): void {
       const { resolveStateDir, resolveUserPath } = await import(
         "../config/paths"
       );
-      const { loadMiladyConfig } = await import("../config/config");
+      const { loadElizaConfig } = await import("../config/config");
       const { CUSTOM_PLUGINS_DIRNAME, scanDropInPlugins } = await import(
         "../runtime/eliza"
       );
 
-      let config: ReturnType<typeof loadMiladyConfig> | null = null;
+      let config: ReturnType<typeof loadElizaConfig> | null = null;
       try {
-        config = loadMiladyConfig();
+        config = loadElizaConfig();
       } catch {
         // No config
       }
@@ -726,7 +752,7 @@ export function registerPluginsCli(program: Command): void {
       if (!plugin) {
         console.log(`\n${chalk.red("Not found:")} ${name}`);
         console.log(
-          chalk.dim("Run 'milady plugins list' to see available plugins.\n"),
+          chalk.dim("Run 'eliza plugins list' to see available plugins.\n"),
         );
         process.exitCode = 1;
         return;
@@ -838,15 +864,15 @@ export function registerPluginsCli(program: Command): void {
       }
 
       // Save to config and env
-      const { loadMiladyConfig, saveMiladyConfig } = await import(
+      const { loadElizaConfig, saveElizaConfig } = await import(
         "../config/config"
       );
 
-      let config: ReturnType<typeof loadMiladyConfig>;
+      let config: ReturnType<typeof loadElizaConfig>;
       try {
-        config = loadMiladyConfig();
+        config = loadElizaConfig();
       } catch {
-        config = {} as ReturnType<typeof loadMiladyConfig>;
+        config = {} as ReturnType<typeof loadElizaConfig>;
       }
 
       // Initialize plugin config structure
@@ -879,7 +905,7 @@ export function registerPluginsCli(program: Command): void {
         pluginConfig[key] = value;
       }
 
-      saveMiladyConfig(config);
+      saveElizaConfig(config);
 
       console.log(
         `\n${chalk.green("Success!")} Configuration saved for ${pluginName}.`,

@@ -69,6 +69,7 @@ const CHANNEL_TO_RPC: Record<string, string> = {
   // Desktop: Notifications
   "desktop:showNotification": "desktopShowNotification",
   "desktop:closeNotification": "desktopCloseNotification",
+  "desktop:showBackgroundNotice": "desktopShowBackgroundNotice",
 
   // Desktop: Power
   "desktop:getPowerState": "desktopGetPowerState",
@@ -293,7 +294,7 @@ const listenersByChannel: Record<string, Set<IpcListener>> = {};
 // If the built-in preload hasn't fired yet (rare edge case), stub it.
 if (typeof window.__electrobun === "undefined") {
   (
-    window as unknown as {
+    window as {
       __electrobun: {
         receiveMessageFromBun: (m: unknown) => void;
         receiveInternalMessageFromBun: (m: unknown) => void;

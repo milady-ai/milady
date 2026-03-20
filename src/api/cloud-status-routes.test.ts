@@ -1,12 +1,12 @@
 import type { AgentRuntime } from "@elizaos/core";
 import { afterEach, describe, expect, test, vi } from "vitest";
-import type { MiladyConfig } from "../config/config";
+import type { ElizaConfig } from "../config/config";
 
 const validateCloudBaseUrlMock = vi.hoisted(() =>
   vi.fn(async () => null as string | null),
 );
 
-vi.mock("@miladyai/autonomous/cloud/validate-url", () => ({
+vi.mock("@elizaos/autonomous/cloud/validate-url", () => ({
   validateCloudBaseUrl: validateCloudBaseUrlMock,
 }));
 
@@ -23,13 +23,13 @@ function runtimeWithCloudAuth(cloudAuth: unknown): AgentRuntime {
     getService: vi.fn((name: string) =>
       name === "CLOUD_AUTH" ? cloudAuth : null,
     ),
-  } as unknown as AgentRuntime;
+  } as unknown as unknown as AgentRuntime;
 }
 
 async function invoke(args: {
   method: string;
   pathname: string;
-  config?: MiladyConfig;
+  config?: ElizaConfig;
   runtime?: AgentRuntime | null;
 }): Promise<InvokeResult> {
   let status = 200;
@@ -40,7 +40,7 @@ async function invoke(args: {
     res: {} as never,
     method: args.method,
     pathname: args.pathname,
-    config: args.config ?? ({} as MiladyConfig),
+    config: args.config ?? ({} as ElizaConfig),
     runtime: args.runtime ?? null,
     json: (_res, data, code = 200) => {
       status = code;
@@ -70,7 +70,7 @@ describe("cloud status routes", () => {
       method: "GET",
       pathname: "/api/cloud/status",
       runtime: null,
-      config: {} as MiladyConfig,
+      config: {} as ElizaConfig,
     });
 
     expect(result.handled).toBe(true);
@@ -87,7 +87,7 @@ describe("cloud status routes", () => {
       method: "GET",
       pathname: "/api/cloud/status",
       runtime: null,
-      config: { cloud: { apiKey: "abc123" } } as MiladyConfig,
+      config: { cloud: { apiKey: "abc123" } } as ElizaConfig,
     });
 
     expect(result.handled).toBe(true);
@@ -107,7 +107,7 @@ describe("cloud status routes", () => {
       method: "GET",
       pathname: "/api/cloud/status",
       runtime: null,
-      config: { cloud: { enabled: true, apiKey: "abc123" } } as MiladyConfig,
+      config: { cloud: { enabled: true, apiKey: "abc123" } } as ElizaConfig,
     });
 
     expect(result.handled).toBe(true);
@@ -127,7 +127,7 @@ describe("cloud status routes", () => {
       method: "GET",
       pathname: "/api/cloud/status",
       runtime: null,
-      config: { cloud: { enabled: false, apiKey: "abc123" } } as MiladyConfig,
+      config: { cloud: { enabled: false, apiKey: "abc123" } } as ElizaConfig,
     });
 
     expect(result.handled).toBe(true);
@@ -153,7 +153,7 @@ describe("cloud status routes", () => {
       method: "GET",
       pathname: "/api/cloud/status",
       runtime,
-      config: { cloud: { enabled: true } } as MiladyConfig,
+      config: { cloud: { enabled: true } } as ElizaConfig,
     });
 
     expect(result.handled).toBe(true);
@@ -173,7 +173,7 @@ describe("cloud status routes", () => {
       method: "GET",
       pathname: "/api/cloud/credits",
       runtime: null,
-      config: {} as MiladyConfig,
+      config: {} as ElizaConfig,
     });
 
     expect(result.handled).toBe(true);
@@ -186,7 +186,7 @@ describe("cloud status routes", () => {
       status: 200,
       json: async () => ({ balance: 1.5 }),
     }));
-    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+    vi.stubGlobal("fetch", fetchMock as typeof fetch);
 
     const result = await invoke({
       method: "GET",
@@ -194,7 +194,7 @@ describe("cloud status routes", () => {
       runtime: null,
       config: {
         cloud: { apiKey: "abc123", baseUrl: "https://cloud.example" },
-      } as MiladyConfig,
+      } as ElizaConfig,
     });
 
     expect(result.handled).toBe(true);
@@ -216,6 +216,38 @@ describe("cloud status routes", () => {
     );
   });
 
+  test("falls back to api key credits when authenticated cloud auth has no client", async () => {
+    const runtime = runtimeWithCloudAuth({
+      isAuthenticated: () => true,
+      getClient: () => null,
+    });
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ balance: 3.25 }),
+    }));
+    vi.stubGlobal("fetch", fetchMock as typeof fetch);
+
+    const result = await invoke({
+      method: "GET",
+      pathname: "/api/cloud/credits",
+      runtime,
+      config: {
+        cloud: { apiKey: "abc123", baseUrl: "https://cloud.example" },
+      } as ElizaConfig,
+    });
+
+    expect(result.handled).toBe(true);
+    expect(result.payload).toEqual({
+      connected: true,
+      balance: 3.25,
+      low: false,
+      critical: false,
+      topUpUrl: "https://www.elizacloud.ai/dashboard/settings?tab=billing",
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   test("rejects unsafe cloud baseUrl before credit fetch", async () => {
     validateCloudBaseUrlMock.mockResolvedValueOnce(
       'Cloud base URL "http://127.0.0.1:1234/api/v1" points to a blocked address.',
@@ -225,7 +257,7 @@ describe("cloud status routes", () => {
       status: 200,
       json: async () => ({ balance: 1.5 }),
     }));
-    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+    vi.stubGlobal("fetch", fetchMock as typeof fetch);
 
     const result = await invoke({
       method: "GET",
@@ -233,7 +265,7 @@ describe("cloud status routes", () => {
       runtime: null,
       config: {
         cloud: { apiKey: "abc123", baseUrl: "http://127.0.0.1:1234" },
-      } as MiladyConfig,
+      } as ElizaConfig,
     });
 
     expect(result.handled).toBe(true);
@@ -252,14 +284,14 @@ describe("cloud status routes", () => {
         ok: false,
         status: 302,
         json: async () => ({}),
-      })) as unknown as typeof fetch,
+      })) as typeof fetch,
     );
 
     const result = await invoke({
       method: "GET",
       pathname: "/api/cloud/credits",
       runtime: null,
-      config: { cloud: { apiKey: "abc123" } } as MiladyConfig,
+      config: { cloud: { apiKey: "abc123" } } as ElizaConfig,
     });
 
     expect(result.handled).toBe(true);
@@ -277,14 +309,14 @@ describe("cloud status routes", () => {
         ok: true,
         status: 200,
         json: async () => ({ nope: true }),
-      })) as unknown as typeof fetch,
+      })) as typeof fetch,
     );
 
     const result = await invoke({
       method: "GET",
       pathname: "/api/cloud/credits",
       runtime: null,
-      config: { cloud: { apiKey: "abc123" } } as MiladyConfig,
+      config: { cloud: { apiKey: "abc123" } } as ElizaConfig,
     });
 
     expect(result.handled).toBe(true);
@@ -307,7 +339,7 @@ describe("cloud status routes", () => {
       method: "GET",
       pathname: "/api/cloud/credits",
       runtime,
-      config: {} as MiladyConfig,
+      config: {} as ElizaConfig,
     });
 
     expect(result.handled).toBe(true);
@@ -332,7 +364,7 @@ describe("cloud status routes", () => {
       method: "GET",
       pathname: "/api/cloud/credits",
       runtime,
-      config: {} as MiladyConfig,
+      config: {} as ElizaConfig,
     });
 
     expect(result.handled).toBe(true);
@@ -357,7 +389,7 @@ describe("cloud status routes", () => {
       method: "GET",
       pathname: "/api/cloud/credits",
       runtime,
-      config: {} as MiladyConfig,
+      config: {} as ElizaConfig,
     });
 
     expect(result.handled).toBe(true);

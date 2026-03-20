@@ -3,17 +3,15 @@ import http from "node:http";
 import path from "node:path";
 import {
   AgentRuntime,
-  ChannelType,
   type Content,
   elizaLogger,
   type Memory,
   type Plugin,
   stringToUuid,
-  type UUID,
 } from "@elizaos/core";
 import dotenv from "dotenv";
 import { CORE_PLUGINS } from "../runtime/core-plugins";
-import { createMiladyPlugin } from "../runtime/milady-plugin";
+import { createElizaPlugin } from "../runtime/eliza-plugin";
 import {
   type BenchmarkContext,
   type CapturedAction,
@@ -22,6 +20,25 @@ import {
   getCapturedAction,
   setBenchmarkContext,
 } from "./plugin";
+import {
+  type BenchmarkOutboxEntry,
+  type BenchmarkSession,
+  type BenchmarkTrajectoryStep,
+  capturedActionToParams,
+  coerceActions,
+  coerceParams,
+  composeBenchmarkPrompt,
+  createSession,
+  ensureBenchmarkSessionContext,
+  extractBenchmarkName,
+  extractRecord,
+  extractTaskId,
+  formatUnknownError,
+  normalizeBenchmarkContext,
+  resolvePort,
+  sessionKey,
+  toPlugin,
+} from "./server-utils.js";
 
 // Load environment variables BEFORE anything else
 // This ensures API keys are available when plugins initialize
@@ -61,7 +78,7 @@ function resolveAllowedOrigin(req: http.IncomingMessage): string {
 }
 
 function resolveBenchToken(): string | null {
-  const token = process.env.MILADY_BENCH_TOKEN?.trim();
+  const token = process.env.ELIZA_BENCH_TOKEN?.trim();
   return token || null;
 }
 
@@ -89,7 +106,7 @@ function checkBenchAuth(
     res.end(
       JSON.stringify({
         error:
-          "Benchmark server requires MILADY_BENCH_TOKEN to be set. " +
+          "Benchmark server requires ELIZA_BENCH_TOKEN to be set. " +
           "Generate one with: openssl rand -hex 32",
       }),
     );
@@ -111,47 +128,7 @@ function checkBenchAuth(
   return true;
 }
 
-const DEFAULT_PORT = 3939;
-const BENCHMARK_WORLD_ID = stringToUuid("milady-benchmark-world");
-const BENCHMARK_MESSAGE_SERVER_ID = stringToUuid(
-  "milady-benchmark-message-server",
-);
 
-interface BenchmarkSession {
-  benchmark: string;
-  taskId: string;
-  roomId: UUID;
-  relayRoomId: UUID;
-  userEntityId: UUID;
-}
-
-interface BenchmarkOutboxEntry {
-  kind: "direct" | "room";
-  targetId: string;
-  text: string;
-  source: string;
-  ts: number;
-}
-
-interface BenchmarkTrajectoryStep {
-  step: number;
-  startedAt: number;
-  finishedAt: number;
-  inputText: string;
-  promptText: string;
-  context?: Record<string, unknown>;
-  thought: string | null;
-  responseText: string;
-  actions: string[];
-  params: Record<string, unknown>;
-}
-
-function formatUnknownError(error: unknown): string {
-  if (error instanceof Error) {
-    return `${error.name}: ${error.message}`;
-  }
-  return String(error);
-}
 
 function disableManualCompactionAction(runtime: AgentRuntime): void {
   const runtimeWithActions = runtime as AgentRuntime & {
@@ -172,185 +149,6 @@ function disableManualCompactionAction(runtime: AgentRuntime): void {
   );
 }
 
-function toPlugin(candidate: unknown, source: string): Plugin {
-  if (!candidate || typeof candidate !== "object") {
-    throw new Error(`Plugin from ${source} was not an object`);
-  }
-
-  const pluginLike = candidate as { name?: unknown };
-  if (typeof pluginLike.name !== "string" || pluginLike.name.length === 0) {
-    throw new Error(`Plugin from ${source} was missing a valid name`);
-  }
-
-  return candidate as Plugin;
-}
-
-function resolvePort(): number {
-  const raw = process.env.MILADY_BENCH_PORT;
-  if (!raw) return DEFAULT_PORT;
-  const parsed = Number(raw);
-  if (!Number.isFinite(parsed) || parsed < 1 || parsed > 65535) {
-    elizaLogger.warn(
-      `[bench] Invalid MILADY_BENCH_PORT="${raw}"; using ${DEFAULT_PORT}`,
-    );
-    return DEFAULT_PORT;
-  }
-  return Math.floor(parsed);
-}
-
-function extractRecord(value: unknown): Record<string, unknown> | undefined {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return undefined;
-  }
-  return value as Record<string, unknown>;
-}
-
-function extractTaskId(context: Record<string, unknown> | undefined): string {
-  const bySnake = context?.task_id;
-  if (typeof bySnake === "string" && bySnake.trim()) return bySnake.trim();
-  const byCamel = context?.taskId;
-  if (typeof byCamel === "string" && byCamel.trim()) return byCamel.trim();
-  return "default-task";
-}
-
-function extractBenchmarkName(
-  context: Record<string, unknown> | undefined,
-): string {
-  const benchmark = context?.benchmark;
-  if (typeof benchmark === "string" && benchmark.trim()) {
-    return benchmark.trim();
-  }
-  return "unknown";
-}
-
-function composeBenchmarkPrompt(params: {
-  text: string;
-  context?: Record<string, unknown>;
-  image?: unknown;
-}): string {
-  const segments: string[] = [params.text.trim()];
-
-  if (params.context && Object.keys(params.context).length > 0) {
-    segments.push(
-      [
-        "BENCHMARK CONTEXT (authoritative):",
-        JSON.stringify(params.context, null, 2),
-      ].join("\n"),
-    );
-  }
-
-  if (params.image !== undefined) {
-    segments.push(
-      ["IMAGE PAYLOAD:", JSON.stringify(params.image, null, 2)].join("\n"),
-    );
-  }
-
-  segments.push(
-    "Respond using normal Eliza action output so actions/params can be executed and evaluated.",
-  );
-
-  return segments.join("\n\n");
-}
-
-function coerceActions(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter((entry): entry is string => typeof entry === "string");
-}
-
-function coerceParams(value: unknown): Record<string, unknown> {
-  if (value && typeof value === "object" && !Array.isArray(value)) {
-    return value as Record<string, unknown>;
-  }
-
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    try {
-      const parsed = JSON.parse(trimmed);
-      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-        return parsed as Record<string, unknown>;
-      }
-    } catch {
-      // fall through to XML parsing
-    }
-
-    if (trimmed.startsWith("<")) {
-      const paramsByAction: Record<string, unknown> = {};
-      const actionMatches = [
-        ...trimmed.matchAll(/<([A-Za-z0-9_-]+)>([\s\S]*?)<\/\1>/g),
-      ];
-      for (const [, actionName, actionBody] of actionMatches) {
-        const actionParams: Record<string, unknown> = {};
-        const fieldMatches = [
-          ...actionBody.matchAll(/<([A-Za-z0-9_-]+)>([\s\S]*?)<\/\1>/g),
-        ];
-        for (const [, fieldName, fieldValue] of fieldMatches) {
-          actionParams[fieldName] = fieldValue.trim();
-        }
-        paramsByAction[actionName] =
-          Object.keys(actionParams).length > 0
-            ? actionParams
-            : actionBody.trim();
-      }
-      if (Object.keys(paramsByAction).length > 0) {
-        return paramsByAction;
-      }
-    }
-  }
-
-  return {};
-}
-
-function normalizeBenchmarkContext(
-  session: BenchmarkSession,
-  context: Record<string, unknown> | undefined,
-): BenchmarkContext {
-  const normalized: Record<string, unknown> = {
-    ...(context ?? {}),
-    benchmark: session.benchmark,
-    taskId: session.taskId,
-  };
-
-  if (
-    !Array.isArray(normalized.actionSpace) &&
-    Array.isArray(normalized.action_space)
-  ) {
-    normalized.actionSpace = normalized.action_space;
-  }
-
-  if (normalized.task_id === undefined) {
-    normalized.task_id = session.taskId;
-  }
-
-  return normalized as BenchmarkContext;
-}
-
-function capturedActionToParams(
-  capturedAction: CapturedAction | null,
-): Record<string, unknown> {
-  if (!capturedAction) return {};
-
-  const benchmarkParams: Record<string, unknown> = {};
-  if (capturedAction.command) benchmarkParams.command = capturedAction.command;
-  if (capturedAction.toolName)
-    benchmarkParams.tool_name = capturedAction.toolName;
-  if (capturedAction.arguments)
-    benchmarkParams.arguments = capturedAction.arguments;
-  if (capturedAction.operation)
-    benchmarkParams.operation = capturedAction.operation;
-  if (capturedAction.elementId)
-    benchmarkParams.element_id = capturedAction.elementId;
-  if (capturedAction.value) benchmarkParams.value = capturedAction.value;
-
-  if (Object.keys(benchmarkParams).length === 0) {
-    return {};
-  }
-
-  return { BENCHMARK_ACTION: benchmarkParams };
-}
-
-function sessionKey(session: BenchmarkSession): string {
-  return `${session.benchmark}:${session.taskId}`;
-}
 
 async function collectSessionDiagnostics(
   runtime: AgentRuntime,
@@ -403,11 +201,11 @@ async function collectSessionDiagnostics(
 
   const providerNames = runtime.providers.map((provider) => provider.name);
   const evaluatorNames =
-    (runtime as unknown as { evaluators?: Array<{ name?: string }> }).evaluators
+    (runtime as { evaluators?: Array<{ name?: string }> }).evaluators
       ?.map((evaluator) => evaluator?.name ?? "")
       .filter((name) => name.length > 0) ?? [];
   const actionNames =
-    (runtime as unknown as { actions?: Array<{ name?: string }> }).actions
+    (runtime as { actions?: Array<{ name?: string }> }).actions
       ?.map((action) => action?.name?.toUpperCase() ?? "")
       .filter((name) => name.length > 0) ?? [];
 
@@ -450,98 +248,17 @@ async function collectSessionDiagnostics(
   };
 }
 
-async function ensureBenchmarkSessionContext(
-  runtime: AgentRuntime,
-  session: BenchmarkSession,
-): Promise<void> {
-  await runtime.ensureWorldExists({
-    id: BENCHMARK_WORLD_ID,
-    name: "Milady Benchmark World",
-    agentId: runtime.agentId,
-    messageServerId: BENCHMARK_MESSAGE_SERVER_ID,
-    metadata: {
-      type: "benchmark",
-      description: "World used for benchmark sessions",
-      extra: {
-        benchmark: session.benchmark,
-      },
-    },
-  });
-
-  // Use ChannelType.API to ensure the agent always responds to benchmark messages
-  // (API channel type bypasses shouldRespond evaluation)
-  await runtime.ensureRoomExists({
-    id: session.roomId,
-    name: `benchmark:${session.taskId}`,
-    source: "benchmark",
-    type: ChannelType.API,
-    channelId: `bench-${session.taskId}`,
-    messageServerId: BENCHMARK_MESSAGE_SERVER_ID,
-    worldId: BENCHMARK_WORLD_ID,
-    metadata: {
-      benchmark: session.benchmark,
-      taskId: session.taskId,
-    },
-  });
-
-  await runtime.ensureRoomExists({
-    id: session.relayRoomId,
-    name: "relay-room",
-    source: "benchmark",
-    type: ChannelType.API,
-    channelId: `relay-${session.taskId}`,
-    messageServerId: BENCHMARK_MESSAGE_SERVER_ID,
-    worldId: BENCHMARK_WORLD_ID,
-    metadata: {
-      benchmark: session.benchmark,
-      taskId: session.taskId,
-      role: "relay-room",
-    },
-  });
-
-  await runtime.ensureConnection({
-    entityId: session.userEntityId,
-    roomId: session.roomId,
-    worldId: BENCHMARK_WORLD_ID,
-    userName: "Benchmark User",
-    source: "benchmark",
-    channelId: `bench-${session.taskId}`,
-    type: ChannelType.API,
-    messageServerId: BENCHMARK_MESSAGE_SERVER_ID,
-    metadata: {
-      benchmark: session.benchmark,
-      taskId: session.taskId,
-      role: "benchmark-room",
-    },
-  });
-  await runtime.ensureParticipantInRoom(runtime.agentId, session.relayRoomId);
-}
-
-function createSession(taskId: string, benchmark: string): BenchmarkSession {
-  const normalizedTaskId = taskId.trim() || "default-task";
-  const normalizedBenchmark = benchmark.trim() || "unknown";
-  const seed = `${normalizedBenchmark}:${normalizedTaskId}:${Date.now()}:${Math.random()}`;
-
-  return {
-    benchmark: normalizedBenchmark,
-    taskId: normalizedTaskId,
-    roomId: stringToUuid(`benchmark-room:${seed}`),
-    relayRoomId: stringToUuid(`benchmark-relay:${seed}`),
-    userEntityId: stringToUuid(`benchmark-user:${seed}`),
-  };
-}
-
 // Proper robust server implementation
 export async function startBenchmarkServer() {
   const port = resolvePort();
   elizaLogger.info(
-    `[bench] Initializing milady benchmark runtime on port ${port}...`,
+    `[bench] Initializing eliza benchmark runtime on port ${port}...`,
   );
 
   // ═══════════════════════════════════════════════════════════════════════════
   // PLUGIN LOADING — Use full CORE_PLUGINS to test with realistic context
   // ═══════════════════════════════════════════════════════════════════════════
-  // We intentionally load the full Milady plugin set to ensure benchmarks test
+  // We intentionally load the full Eliza plugin set to ensure benchmarks test
   // the agent's ability to perform tasks despite context "pollution" from all
   // the default actions, providers, evaluators, etc. If the agent can still
   // succeed with a crowded context, it demonstrates sufficient context handling.
@@ -557,7 +274,7 @@ export async function startBenchmarkServer() {
     "@elizaos/plugin-elizacloud", // Requires elizaOS cloud auth, conflicts with local LLM
   ]);
 
-  // Load all CORE_PLUGINS — these are what the production Milady runtime uses
+  // Load all CORE_PLUGINS — these are what the production Eliza runtime uses
   for (const pluginName of CORE_PLUGINS) {
     if (skipPlugins.has(pluginName)) {
       elizaLogger.debug(
@@ -591,21 +308,21 @@ export async function startBenchmarkServer() {
     );
   }
 
-  // Load Milady plugin — provides workspace context, session keys, autonomous state,
+  // Load Eliza plugin — provides workspace context, session keys, autonomous state,
   // custom actions, and lifecycle actions (restart, trigger tasks)
   try {
-    const workspaceDir = process.env.MILADY_WORKSPACE_DIR ?? process.cwd();
-    const miladyPlugin = createMiladyPlugin({
+    const workspaceDir = process.env.ELIZA_WORKSPACE_DIR ?? process.cwd();
+    const elizaPlugin = createElizaPlugin({
       workspaceDir,
       agentId: "benchmark",
     });
-    plugins.push(toPlugin(miladyPlugin, "milady-plugin"));
+    plugins.push(toPlugin(elizaPlugin, "eliza-plugin"));
     elizaLogger.info(
-      `[bench] Loaded milady plugin with workspace: ${workspaceDir}`,
+      `[bench] Loaded eliza plugin with workspace: ${workspaceDir}`,
     );
   } catch (error: unknown) {
     elizaLogger.error(
-      `[bench] Failed to load milady plugin: ${formatUnknownError(error)}`,
+      `[bench] Failed to load eliza plugin: ${formatUnknownError(error)}`,
     );
   }
 
@@ -664,7 +381,7 @@ export async function startBenchmarkServer() {
   }
 
   // Load computer use plugin if enabled
-  if (process.env.MILADY_ENABLE_COMPUTERUSE) {
+  if (process.env.ELIZA_ENABLE_COMPUTERUSE) {
     try {
       process.env.COMPUTERUSE_ENABLED ??= "true";
       process.env.COMPUTERUSE_MODE ??= "local";
@@ -693,8 +410,8 @@ export async function startBenchmarkServer() {
 
   // Load mock plugin for testing (file is gitignored for local-only use)
   if (
-    process.env.MILADY_BENCH_MOCK === "true" ||
-    process.env.MILAIDY_BENCH_MOCK === "true"
+    process.env.ELIZA_BENCH_MOCK === "true" ||
+    process.env.MILADY_BENCH_MOCK === "true"
   ) {
     try {
       const mockLocation = "./mock-plugin.ts";
@@ -760,9 +477,7 @@ export async function startBenchmarkServer() {
 
   await runtime.initialize();
   disableManualCompactionAction(runtime);
-  const modelHandlers = (
-    runtime as unknown as { models?: Map<string, unknown[]> }
-  ).models;
+  const modelHandlers = (runtime as { models?: Map<string, unknown[]> }).models;
   const modelHandlerSummary = Object.fromEntries(
     [...(modelHandlers?.entries() ?? [])].map(([modelType, handlers]) => [
       modelType,
@@ -821,7 +536,7 @@ export async function startBenchmarkServer() {
     },
   };
 
-  const runtimeWithServiceOverride = runtime as unknown as {
+  const runtimeWithServiceOverride = runtime as {
     getService: (serviceType: string) => unknown;
   };
   const originalGetService =
@@ -834,7 +549,36 @@ export async function startBenchmarkServer() {
   };
 
   const sessions = new Map<string, BenchmarkSession>();
-  let activeSession: BenchmarkSession | null = null;
+  let lastSessionKey: string | null = null;
+
+  // Session TTL eviction (R4)
+  const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
+  const SESSION_SWEEP_INTERVAL_MS = 60_000;
+  const sessionCreatedAt = new Map<string, number>();
+
+  const evictStaleSessions = (): void => {
+    const now = Date.now();
+    for (const [key, createdAt] of sessionCreatedAt.entries()) {
+      if (now - createdAt > SESSION_TTL_MS) {
+        sessions.delete(key);
+        trajectoriesBySession.delete(key);
+        outboxBySession.delete(key);
+        sessionCreatedAt.delete(key);
+        for (const [k, v] of roomToSession.entries()) {
+          if (v === key) roomToSession.delete(k);
+        }
+        for (const [k, v] of entityToSession.entries()) {
+          if (v === key) entityToSession.delete(k);
+        }
+      }
+    }
+  };
+
+  const sweepInterval = setInterval(
+    evictStaleSessions,
+    SESSION_SWEEP_INTERVAL_MS,
+  );
+  sweepInterval.unref();
 
   const registerSessionRefs = (session: BenchmarkSession): void => {
     const key = sessionKey(session);
@@ -842,6 +586,9 @@ export async function startBenchmarkServer() {
     roomToSession.set(session.relayRoomId, key);
     entityToSession.set(session.userEntityId, key);
   };
+
+  const getLastSession = (): BenchmarkSession | null =>
+    lastSessionKey ? (sessions.get(lastSessionKey) ?? null) : null;
 
   const resolveSession = (
     taskId: string,
@@ -851,14 +598,15 @@ export async function startBenchmarkServer() {
     const key = `${benchmark}:${taskId}`;
     const existing = sessions.get(key);
     if (existing) {
-      activeSession = existing;
+      lastSessionKey = key;
       return existing;
     }
     if (!createIfMissing) return null;
     const created = createSession(taskId, benchmark);
     sessions.set(key, created);
+    sessionCreatedAt.set(key, Date.now());
     registerSessionRefs(created);
-    activeSession = created;
+    lastSessionKey = key;
     return created;
   };
 
@@ -883,11 +631,12 @@ export async function startBenchmarkServer() {
     }
 
     if (pathname === "/api/benchmark/health" && req.method === "GET") {
+      const activeSession = getLastSession();
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(
         JSON.stringify({
           status: "ready",
-          agent_name: runtime.character.name ?? "Milady",
+          agent_name: runtime.character.name ?? "Eliza",
           plugins: plugins.length,
           active_session: activeSession
             ? {
@@ -973,7 +722,7 @@ export async function startBenchmarkServer() {
       const benchmark = extractBenchmarkName(context);
       const session =
         resolveSession(taskId, benchmark, false) ??
-        activeSession ??
+        getLastSession() ??
         resolveSession("default-task", "unknown", false);
 
       if (!session) {
@@ -1008,7 +757,7 @@ export async function startBenchmarkServer() {
       const benchmark = extractBenchmarkName(context);
       const session =
         resolveSession(taskId, benchmark, false) ??
-        activeSession ??
+        getLastSession() ??
         resolveSession("default-task", "unknown", false);
 
       if (!session) {
@@ -1052,7 +801,7 @@ export async function startBenchmarkServer() {
         const benchmark = extractBenchmarkName(context);
         const session =
           resolveSession(taskId, benchmark, false) ??
-          activeSession ??
+          getLastSession() ??
           resolveSession("default-task", "unknown", false);
 
         if (!session) {
@@ -1089,11 +838,24 @@ export async function startBenchmarkServer() {
       });
       req.on("end", async () => {
         try {
-          const parsed = JSON.parse(body) as {
+          let parsed: {
             text?: unknown;
             context?: unknown;
             image?: unknown;
           };
+          try {
+            parsed = JSON.parse(body) as {
+              text?: unknown;
+              context?: unknown;
+              image?: unknown;
+            };
+          } catch {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(
+              JSON.stringify({ error: "Malformed JSON in request body" }),
+            );
+            return;
+          }
 
           const text =
             typeof parsed.text === "string" ? parsed.text.trim() : "";
@@ -1108,7 +870,7 @@ export async function startBenchmarkServer() {
           const benchmark = extractBenchmarkName(context);
           const session =
             resolveSession(taskId, benchmark, true) ??
-            activeSession ??
+            getLastSession() ??
             resolveSession("default-task", "unknown", true);
           if (!session) {
             throw new Error("Failed to resolve benchmark session");
@@ -1243,9 +1005,9 @@ export async function startBenchmarkServer() {
 
   server.listen(port, () => {
     elizaLogger.info(
-      `[bench] Milady benchmark server listening on port ${port}`,
+      `[bench] Eliza benchmark server listening on port ${port}`,
     );
-    console.log(`MILADY_BENCH_READY port=${port}`);
+    console.log(`ELIZA_BENCH_READY port=${port}`);
   });
 }
 

@@ -62,24 +62,4 @@ export default [
     // import that fails when the desktop runtime loads server.js via dynamic import().
     outputOptions: { codeSplitting: false },
   },
-  {
-    entry: "src/plugins/whatsapp/index.ts",
-    outDir: "dist/plugins/whatsapp",
-    env,
-    fixedExtension: false,
-    platform: "node",
-    unbundle: true,
-    inlineOnly: false,
-    external: nativeExternals,
-  },
-  {
-    entry: "src/plugins/polymarket/index.ts",
-    outDir: "dist/plugins/polymarket",
-    env,
-    fixedExtension: false,
-    platform: "node",
-    unbundle: true,
-    inlineOnly: false,
-    external: [...nativeExternals, "@polymarket/clob-client", "viem", "viem/accounts", "viem/chains"],
-  },
 ];

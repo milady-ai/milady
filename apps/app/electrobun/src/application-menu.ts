@@ -149,25 +149,46 @@ function buildCloudMenu(windows: ManagedWindowSnapshot[]): ApplicationMenuItem {
   };
 }
 
+function buildBrowserMenu(
+  windows: ManagedWindowSnapshot[],
+): ApplicationMenuItem {
+  return {
+    label: "Browser",
+    submenu: [
+      { label: "Open Browser Window", action: "new-window:browser" },
+      { type: "separator" },
+      ...buildOpenWindowItems(windows, "No open browser windows"),
+    ],
+  };
+}
+
 export function buildApplicationMenu({
   isMac,
+  browserEnabled,
   heartbeatSnapshot,
   detachedWindows,
 }: {
   isMac: boolean;
+  browserEnabled: boolean;
   heartbeatSnapshot: HeartbeatMenuSnapshot;
   detachedWindows: ManagedWindowSnapshot[];
 }): ApplicationMenuItem[] {
-  const pluginsWindows = detachedWindows.filter(
+  const visibleDetachedWindows = browserEnabled
+    ? detachedWindows
+    : detachedWindows.filter((window) => window.surface !== "browser");
+  const pluginsWindows = visibleDetachedWindows.filter(
     (window) => window.surface === "plugins",
   );
-  const connectorsWindows = detachedWindows.filter(
+  const connectorsWindows = visibleDetachedWindows.filter(
     (window) => window.surface === "connectors",
   );
-  const heartbeatWindows = detachedWindows.filter(
+  const heartbeatWindows = visibleDetachedWindows.filter(
     (window) => window.surface === "triggers",
   );
-  const cloudWindows = detachedWindows.filter(
+  const browserWindows = visibleDetachedWindows.filter(
+    (window) => window.surface === "browser",
+  );
+  const cloudWindows = visibleDetachedWindows.filter(
     (window) => window.surface === "cloud",
   );
 
@@ -233,6 +254,7 @@ export function buildApplicationMenu({
       ],
     },
     buildCloudMenu(cloudWindows),
+    ...(browserEnabled ? [buildBrowserMenu(browserWindows)] : []),
     buildSurfaceMenu("Plugins", "plugins", pluginsWindows),
     buildSurfaceMenu("Connectors", "connectors", connectorsWindows),
     buildSurfaceMenu(
@@ -255,6 +277,14 @@ export function buildApplicationMenu({
           : []),
         { type: "separator" },
         { label: "Show Milady", action: "show" },
+        ...(browserEnabled
+          ? [
+              {
+                label: "New Browser Window",
+                action: "new-window:browser",
+              } satisfies ApplicationMenuItem,
+            ]
+          : []),
         { label: "New Chat Window", action: "new-window:chat" },
         { label: "New Heartbeats Window", action: "new-window:triggers" },
         { label: "New Plugins Window", action: "new-window:plugins" },
@@ -262,7 +292,10 @@ export function buildApplicationMenu({
         { label: "New Cloud Window", action: "new-window:cloud" },
         { label: "Settings Window", action: "open-settings" },
         { type: "separator" },
-        ...buildOpenWindowItems(detachedWindows, "No open detached windows"),
+        ...buildOpenWindowItems(
+          visibleDetachedWindows,
+          "No open detached windows",
+        ),
       ] as ApplicationMenuItem[],
     },
   ];

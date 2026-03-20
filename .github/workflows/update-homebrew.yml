@@ -5,7 +5,7 @@
 # when a new GitHub release is published.
 #
 # Required secret: HOMEBREW_TAP_TOKEN
-#   A GitHub PAT with repo scope for milady-ai/homebrew-milady
+#   A GitHub PAT with repo scope for milady-ai/homebrew-tap
 
 name: Update Homebrew Tap
 
@@ -36,10 +36,10 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Triggering Homebrew update for version: $VERSION"
 
-      - name: Dispatch to homebrew-milady tap
+      - name: Dispatch to homebrew-tap
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
-          repository: milady-ai/homebrew-milady
+          repository: milady-ai/homebrew-tap
           event-type: update-homebrew
           client-payload: '{"version": "${{ steps.meta.outputs.version }}"}'

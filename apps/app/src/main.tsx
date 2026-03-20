@@ -5,37 +5,73 @@
  * features, and mounts the React application.
  */
 
-import "@miladyai/app-core/styles/styles.css";
+import { ErrorBoundary } from "./ErrorBoundary";
+import "@elizaos/app-core/styles/styles.css";
+import "./brand-gold.css";
+import "./onboarding-overrides.css";
 import "./native-plugin-entrypoints";
 
 import { App as CapacitorApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
 import { Keyboard } from "@capacitor/keyboard";
 import { StatusBar, Style } from "@capacitor/status-bar";
+import { App } from "@elizaos/app-core";
+import { client } from "@elizaos/app-core/api";
 // Import Capacitor bridge utilities
 import {
   initializeCapacitorBridge,
   initializeStorageBridge,
   isElectrobunRuntime,
-} from "@miladyai/app-core/bridge";
+} from "@elizaos/app-core/bridge";
+import type { BrandingConfig } from "@elizaos/app-core/config";
 import {
   AGENT_READY_EVENT,
   APP_PAUSE_EVENT,
   APP_RESUME_EVENT,
   COMMAND_PALETTE_EVENT,
   CONNECT_EVENT,
-  dispatchMiladyEvent,
+  dispatchElizaEvent as dispatchMiladyEvent,
   SHARE_TARGET_EVENT,
   TRAY_ACTION_EVENT,
-} from "@miladyai/app-core/events";
-import { applyLaunchConnectionFromUrl } from "@miladyai/app-core/platform";
-import { AppProvider } from "@miladyai/app-core/state";
+} from "@elizaos/app-core/events";
+import { applyLaunchConnectionFromUrl } from "@elizaos/app-core/platform";
+import { AppProvider } from "@elizaos/app-core/state";
 // Import the agent plugin
 import { Agent } from "@miladyai/capacitor-agent";
 import { Desktop } from "@miladyai/capacitor-desktop";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { App } from "./App";
+import { installLocalProviderCloudPreferencePatch } from "./cloud-preference-patch";
+import { CharacterEditor } from "./components/CharacterEditor";
+import { DesktopOnboardingRuntime } from "./DesktopOnboardingRuntime";
+import { DesktopSurfaceNavigationRuntime } from "./DesktopSurfaceNavigationRuntime";
+import { DetachedShellRoot } from "./DetachedShellRoot";
+import { installDesktopPermissionsClientPatch } from "./desktop-permissions-client";
+import {
+  applyForceFreshOnboardingReset,
+  installForceFreshOnboardingClientPatch,
+} from "./onboarding-reset";
+import {
+  isDetachedWindowShell,
+  resolveWindowShellRoute,
+  shouldInstallMainWindowOnboardingPatches,
+  syncDetachedShellLocation,
+} from "./window-shell";
+
+const MILADY_BRANDING: Partial<BrandingConfig> = {
+  appName: "Milady",
+  orgName: "milady-ai",
+  repoName: "milady",
+  docsUrl: "https://docs.milady.ai",
+  appUrl: "https://app.milady.ai",
+  bugReportUrl:
+    "https://github.com/milady-ai/milady/issues/new?template=bug_report.yml",
+  hashtag: "#MiladyAgent",
+  fileExtension: ".milady-agent",
+  packageScope: "miladyai",
+  // Cloud-only in production; local dev mode allows running a local backend.
+  cloudOnly: !import.meta.env.DEV,
+};
 
 /**
  * Platform detection utilities
@@ -47,13 +83,6 @@ const isAndroid = platform === "android";
 
 function isDesktopPlatform(): boolean {
   return isElectrobunRuntime();
-}
-
-function isSettingsShell(): boolean {
-  if (typeof window === "undefined") return false;
-  return (
-    new URLSearchParams(window.location.search).get("shell") === "settings"
-  );
 }
 
 function isWebPlatform(): boolean {
@@ -76,8 +105,47 @@ interface ShareTargetPayload {
 declare global {
   interface Window {
     __MILADY_SHARE_QUEUE__?: ShareTargetPayload[];
+    __MILADY_CHARACTER_EDITOR__?: typeof CharacterEditor;
+    __MILADY_API_BASE__?: string;
   }
 }
+
+const windowShellRoute = resolveWindowShellRoute();
+
+// Dev escape hatch: ?reset forces a truly fresh onboarding session by clearing
+// persisted state and temporarily suppressing stale backend resume config.
+if (shouldInstallMainWindowOnboardingPatches(windowShellRoute)) {
+  applyForceFreshOnboardingReset();
+  installForceFreshOnboardingClientPatch(client);
+}
+installLocalProviderCloudPreferencePatch(client);
+installDesktopPermissionsClientPatch(client);
+
+// Register custom character editor for app-core's ViewRouter to pick up
+window.__MILADY_CHARACTER_EDITOR__ = CharacterEditor;
+
+// Point Eliza Cloud API to the correct base URL.
+(window as Record<string, unknown>).__ELIZA_CLOUD_API_BASE__ =
+  import.meta.env.VITE_CLOUD_BASE ?? "https://www.elizacloud.ai";
+
+// Inject onboarding style presets so the frontend-only onboarding flow
+// can populate character data without an API call.
+import { STYLE_PRESETS } from "../../../src/onboarding-presets";
+
+(window as Record<string, unknown>).__APP_ONBOARDING_STYLES__ = STYLE_PRESETS;
+
+// Override the VRM asset roster with Milady characters so avatar URLs
+// resolve to milady-*.vrm.gz instead of the upstream eliza-*.vrm.gz.
+window.__APP_VRM_ASSETS__ = [
+  { title: "Chen", slug: "milady-1" },
+  { title: "Jin", slug: "milady-2" },
+  { title: "Kei", slug: "milady-3" },
+  { title: "Momo", slug: "milady-4" },
+  { title: "Rin", slug: "milady-5" },
+  { title: "Ryu", slug: "milady-6" },
+  { title: "Satoshi", slug: "milady-7" },
+  { title: "Yuki", slug: "milady-8" },
+];
 
 function dispatchShareTarget(payload: ShareTargetPayload): void {
   if (!window.__MILADY_SHARE_QUEUE__) {
@@ -384,11 +452,21 @@ function mountReactApp(): void {
   if (!rootEl) throw new Error("Root element #root not found");
 
   createRoot(rootEl).render(
-    <StrictMode>
-      <AppProvider>
-        <App />
-      </AppProvider>
-    </StrictMode>,
+    <ErrorBoundary>
+      <StrictMode>
+        <AppProvider branding={MILADY_BRANDING}>
+          {isDetachedWindowShell(windowShellRoute) ? (
+            <DetachedShellRoot route={windowShellRoute} />
+          ) : (
+            <>
+              <DesktopOnboardingRuntime />
+              <DesktopSurfaceNavigationRuntime />
+              <App />
+            </>
+          )}
+        </AppProvider>
+      </StrictMode>
+    </ErrorBoundary>,
   );
 }
 
@@ -448,6 +526,25 @@ function injectPopoutApiBase(): void {
   }
 }
 
+function injectDetachedShellApiBase(): void {
+  const apiBase = new URLSearchParams(window.location.search).get("apiBase");
+  if (apiBase) {
+    window.__MILADY_API_BASE__ = apiBase;
+  }
+}
+
+function applyStoredDetachedShellTheme(): void {
+  try {
+    const stored = localStorage.getItem("milady:ui-theme");
+    const theme = stored === "light" ? "light" : "dark";
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    document.documentElement.setAttribute("data-theme", theme);
+  } catch {
+    document.documentElement.classList.add("dark");
+    document.documentElement.setAttribute("data-theme", "dark");
+  }
+}
+
 /**
  * Main initialization
  */
@@ -472,25 +569,10 @@ async function main(): Promise<void> {
     return;
   }
 
-  if (isSettingsShell()) {
-    // Settings shell — inject the API base from URL params so the client
-    // connects to the same agent backend as the main window.
-    const settingsParams = new URLSearchParams(window.location.search);
-    const settingsApiBase = settingsParams.get("apiBase");
-    if (settingsApiBase) {
-      window.__MILADY_API_BASE__ = settingsApiBase;
-    }
-    // Apply stored theme (default to dark)
-    try {
-      const stored = localStorage.getItem("milady:ui-theme");
-      const theme = stored === "light" ? "light" : "dark";
-      document.documentElement.classList.toggle("dark", theme === "dark");
-      document.documentElement.setAttribute("data-theme", theme);
-    } catch {
-      document.documentElement.classList.add("dark");
-      document.documentElement.setAttribute("data-theme", "dark");
-    }
-    // Initialize storage and bridge so AppProvider can read cached auth state.
+  if (isDetachedWindowShell(windowShellRoute)) {
+    injectDetachedShellApiBase();
+    applyStoredDetachedShellTheme();
+    syncDetachedShellLocation(windowShellRoute);
     await initializeStorageBridge();
     initializeCapacitorBridge();
     mountReactApp();

@@ -1,5 +1,5 @@
+import { sendSignalMessage } from "@elizaos/plugin-signal/actions";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { sendSignalMessage } from "../plugins/signal/actions";
 
 function createRuntime(overrides: Record<string, unknown> = {}) {
   return {
@@ -21,7 +21,7 @@ function createMessage(overrides: Record<string, unknown> = {}) {
   };
 }
 
-describe("sendSignalMessage", () => {
+describe.skipIf(!sendSignalMessage)("sendSignalMessage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });

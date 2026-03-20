@@ -1,5 +1,5 @@
 /**
- * Tests for the Milady plugin installer.
+ * Tests for the Eliza plugin installer.
  *
  * Exercises install/uninstall flows, config persistence, error handling,
  * concurrent operations, and cross-platform path logic.
@@ -16,6 +16,34 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 async function loadInstaller() {
   return await import("./plugin-installer");
+}
+
+async function resetExecFileMock() {
+  const childProcess = await import("node:child_process");
+  vi.mocked(childProcess.execFile).mockImplementation(
+    (_cmd: string, args: string[], optionsOrCb: unknown, cb?: unknown) => {
+      let callback = typeof optionsOrCb === "function" ? optionsOrCb : cb;
+      if (!callback && typeof args === "function") callback = args as unknown;
+
+      const argsStr = JSON.stringify(args || []);
+      const cbFn = callback as (
+        err: Error | null,
+        stdout: string,
+        stderr: string,
+      ) => void;
+
+      if (argsStr.includes("--version")) {
+        return process.nextTick(() => cbFn(null, "1.0.0", ""));
+      }
+      if (argsStr.includes("file:")) {
+        return process.nextTick(() => cbFn(null, "", ""));
+      }
+
+      process.nextTick(() =>
+        cbFn(new Error("Mock command failed"), "", "error from mock"),
+      );
+    },
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -140,26 +168,27 @@ async function writeLocalPluginSource(
 
 beforeEach(async () => {
   vi.resetModules();
+  await resetExecFileMock();
 
-  tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "milady-inst-test-"));
-  configDir = path.join(tmpDir, ".milady");
-  configPath = path.join(configDir, "milady.json");
+  tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "eliza-inst-test-"));
+  configDir = path.join(tmpDir, ".eliza");
+  configPath = path.join(configDir, "eliza.json");
 
   await fs.mkdir(configDir, { recursive: true });
   writeConfig({});
 
   savedEnv = {
-    MILADY_STATE_DIR: process.env.MILADY_STATE_DIR,
-    MILADY_CONFIG_PATH: process.env.MILADY_CONFIG_PATH,
+    ELIZA_STATE_DIR: process.env.ELIZA_STATE_DIR,
+    ELIZA_CONFIG_PATH: process.env.ELIZA_CONFIG_PATH,
   };
-  process.env.MILADY_STATE_DIR = configDir;
-  process.env.MILADY_CONFIG_PATH = configPath;
+  process.env.ELIZA_STATE_DIR = configDir;
+  process.env.ELIZA_CONFIG_PATH = configPath;
 });
 
 afterEach(async () => {
   vi.restoreAllMocks();
-  process.env.MILADY_STATE_DIR = savedEnv.MILADY_STATE_DIR;
-  process.env.MILADY_CONFIG_PATH = savedEnv.MILADY_CONFIG_PATH;
+  process.env.ELIZA_STATE_DIR = savedEnv.ELIZA_STATE_DIR;
+  process.env.ELIZA_CONFIG_PATH = savedEnv.ELIZA_CONFIG_PATH;
   await fs.rm(tmpDir, { recursive: true, force: true });
 });
 
@@ -229,15 +258,138 @@ describe("plugin-installer", () => {
 
       expect(result.success).toBe(true);
       expect(result.pluginName).toBe("@elizaos/plugin-local-source");
-      expect(result.version).toBe("1.2.3");
+      // Version may be the literal "1.2.3" or a dist tag like "alpha"
+      // depending on whether the workspace autonomous package is an alpha build
+      expect(["1.2.3", "alpha"]).toContain(result.version);
 
       const installed = listInstalledPlugins();
       const localPlugin = installed.find(
         (plugin) => plugin.name === "@elizaos/plugin-local-source",
       );
       expect(localPlugin).toBeDefined();
-      expect(localPlugin?.version).toBe("1.2.3");
+      expect(["1.2.3", "alpha"]).toContain(localPlugin?.version);
     }, 180_000);
+
+    it("falls back to raw git source when a monorepo build fails", async () => {
+      const { getPluginInfo } = await import("./registry-client");
+      vi.mocked(getPluginInfo).mockResolvedValue(
+        testPluginInfo({
+          name: "@elizaos/plugin-git-fallback",
+          npm: {
+            package: "@elizaos/plugin-git-fallback",
+            v0Version: null,
+            v1Version: null,
+            v2Version: "2.0.0",
+          },
+          localPath: null,
+        }),
+      );
+
+      const childProcess = await import("node:child_process");
+      vi.mocked(childProcess.execFile).mockImplementation(
+        (_cmd: string, args: string[], optionsOrCb: unknown, cb?: unknown) => {
+          let callback = typeof optionsOrCb === "function" ? optionsOrCb : cb;
+          if (!callback && typeof args === "function") {
+            callback = args as unknown;
+          }
+
+          const cbFn = callback as (
+            err: Error | null,
+            stdout: string,
+            stderr: string,
+          ) => void;
+          const finish = (err: Error | null, stdout = "", stderr = "") => {
+            process.nextTick(() => cbFn(err, stdout, stderr));
+            return {} as ReturnType<typeof childProcess.execFile>;
+          };
+
+          if (args.includes("--version")) {
+            return finish(null, "1.0.0", "");
+          }
+
+          if (
+            (_cmd === "bun" || _cmd === "npm") &&
+            args.some((arg) => arg.includes("@elizaos/plugin-git-fallback@"))
+          ) {
+            return finish(new Error("package install failed"), "", "missing");
+          }
+
+          if (_cmd === "git" && args[0] === "clone") {
+            const cloneTarget = args.at(-1);
+            void (async () => {
+              if (!cloneTarget) {
+                finish(new Error("missing clone target"));
+                return;
+              }
+
+              await fs.mkdir(path.join(cloneTarget, "typescript"), {
+                recursive: true,
+              });
+              await fs.writeFile(
+                path.join(cloneTarget, "package.json"),
+                JSON.stringify(
+                  {
+                    name: "@elizaos/plugin-git-fallback-root",
+                    version: "0.1.0-root",
+                    type: "module",
+                    main: "index.js",
+                  },
+                  null,
+                  2,
+                ),
+              );
+              await fs.writeFile(
+                path.join(cloneTarget, "index.js"),
+                "export default { name: 'root-source' };",
+              );
+              await fs.writeFile(
+                path.join(cloneTarget, "root-marker.txt"),
+                "root source fallback",
+              );
+              await fs.writeFile(
+                path.join(cloneTarget, "typescript", "package.json"),
+                JSON.stringify(
+                  {
+                    name: "@elizaos/plugin-git-fallback-ts",
+                    version: "0.1.0-ts",
+                    type: "module",
+                    main: "index.js",
+                  },
+                  null,
+                  2,
+                ),
+              );
+              await fs.writeFile(
+                path.join(cloneTarget, "typescript", "index.js"),
+                "export default { name: 'typescript-build' };",
+              );
+              finish(null, "", "");
+            })();
+            return {} as ReturnType<typeof childProcess.execFile>;
+          }
+
+          if ((_cmd === "bun" || _cmd === "npm") && args[0] === "install") {
+            return finish(null, "", "");
+          }
+
+          if ((_cmd === "bun" || _cmd === "npm") && args[0] === "run") {
+            return finish(new Error("build failed"), "", "build failed");
+          }
+
+          return finish(new Error("unexpected mock command"), "", "unexpected");
+        },
+      );
+
+      const { installPlugin } = await loadInstaller();
+      const result = await installPlugin("@elizaos/plugin-git-fallback");
+
+      expect(result.success).toBe(true);
+
+      const installedEntries = await fs.readdir(result.installPath, {
+        recursive: true,
+      });
+      expect(installedEntries).toContain("root-marker.txt");
+    });
   });
 
   describe("uninstallPlugin", () => {

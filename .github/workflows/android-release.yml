@@ -85,7 +85,7 @@ jobs:
 
       - name: Sync Capacitor
         working-directory: apps/app
-        run: npx cap sync android
+        run: bun run cap:sync:android
 
       - name: Decode keystore
         run: |

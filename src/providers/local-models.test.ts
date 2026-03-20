@@ -25,7 +25,7 @@ describe("LocalModelManager", () => {
     // Use a unique temp directory for each test
     testCacheDir = join(
       tmpdir(),
-      `milady-test-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+      `eliza-test-${Date.now()}-${Math.random().toString(36).substring(7)}`,
     );
     mkdirSync(testCacheDir, { recursive: true });
     manager = new LocalModelManager({ cacheDir: testCacheDir });
@@ -84,6 +84,99 @@ describe("LocalModelManager", () => {
       // Create new manager to reload manifest
       const newManager = new LocalModelManager({ cacheDir: testCacheDir });
       expect(newManager.isModelDownloaded("test/model")).toBe(true);
+    });
+
+    it("deduplicates concurrent downloads for the same model", async () => {
+      const originalFetch = global.fetch;
+      let modelInfoRequests = 0;
+      let fileRequests = 0;
+
+      global.fetch = vi.fn(async (input: string | URL | Request) => {
+        const url =
+          typeof input === "string"
+            ? input
+            : input instanceof URL
+              ? input.href
+              : input.url;
+
+        if (url === "https://huggingface.co/api/models/test/model") {
+          modelInfoRequests++;
+          return new Response(
+            JSON.stringify({
+              siblings: [
+                { rfilename: "config.json" },
+                { rfilename: "model.safetensors" },
+              ],
+            }),
+            { status: 200, headers: { "Content-Type": "application/json" } },
+          );
+        }
+
+        if (url.includes("/resolve/main/")) {
+          fileRequests++;
+          await new Promise((resolve) => setTimeout(resolve, 10));
+          return new Response(new Uint8Array([1, 2, 3]), { status: 200 });
+        }
+
+        throw new Error(`Unexpected fetch URL: ${url}`);
+      }) as typeof global.fetch;
+
+      const [firstPath, secondPath] = await Promise.all([
+        manager.downloadModel("test/model"),
+        manager.downloadModel("test/model"),
+      ]);
+
+      expect(firstPath).toBe(secondPath);
+      expect(modelInfoRequests).toBe(1);
+      expect(fileRequests).toBe(2);
+      expect(manager.isModelDownloaded("test/model")).toBe(true);
+
+      global.fetch = originalFetch;
+    });
+
+    it("rejects incomplete downloads that miss required model files", async () => {
+      const originalFetch = global.fetch;
+
+      global.fetch = vi.fn(async (input: string | URL | Request) => {
+        const url =
+          typeof input === "string"
+            ? input
+            : input instanceof URL
+              ? input.href
+              : input.url;
+
+        if (url === "https://huggingface.co/api/models/test/incomplete") {
+          return new Response(
+            JSON.stringify({
+              siblings: [
+                { rfilename: "config.json" },
+                { rfilename: "model.safetensors" },
+              ],
+            }),
+            { status: 200, headers: { "Content-Type": "application/json" } },
+          );
+        }
+
+        if (url.endsWith("/config.json")) {
+          return new Response(new Uint8Array([1, 2, 3]), { status: 200 });
+        }
+
+        if (url.endsWith("/model.safetensors")) {
+          return new Response("missing", {
+            status: 404,
+            statusText: "Missing",
+          });
+        }
+
+        throw new Error(`Unexpected fetch URL: ${url}`);
+      }) as typeof global.fetch;
+
+      await expect(manager.downloadModel("test/incomplete")).rejects.toThrow(
+        "Model download incomplete",
+      );
+      expect(manager.isModelDownloaded("test/incomplete")).toBe(false);
+
+      global.fetch = originalFetch;
     });
   });
 
@@ -214,7 +307,7 @@ describe.skip("LocalModelManager Integration (requires network)", () => {
   let testCacheDir: string;
 
   beforeEach(() => {
-    testCacheDir = join(tmpdir(), `milady-integration-${Date.now()}`);
+    testCacheDir = join(tmpdir(), `eliza-integration-${Date.now()}`);
     mkdirSync(testCacheDir, { recursive: true });
     manager = new LocalModelManager({ cacheDir: testCacheDir });
   });
@@ -265,7 +358,7 @@ describe("LocalModelManager Error Handling", () => {
 
   beforeEach(() => {
     manager = new LocalModelManager({
-      cacheDir: join(tmpdir(), `milady-error-test-${Date.now()}`),
+      cacheDir: join(tmpdir(), `eliza-error-test-${Date.now()}`),
     });
   });
 

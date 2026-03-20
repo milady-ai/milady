@@ -73,7 +73,7 @@ import type {
   MediaConfig,
   VideoConfig,
   VisionConfig,
-} from "../config/types.milady";
+} from "../config/types.eliza";
 import {
   type AudioGenerationOptions,
   createAudioProvider,
@@ -279,10 +279,14 @@ describe("Vision Providers", () => {
       );
 
       expect(fetchMock).toHaveBeenCalledOnce();
-      const [url] = fetchMock.mock.calls[0];
+      const [url, init] = fetchMock.mock.calls[0];
       expect(url).toContain("generativelanguage.googleapis.com");
       expect(url).toContain("gemini-2.0-flash");
-      expect(url).toContain("key=google-test-api-key");
+      expect(url).not.toContain("key=");
+      expect(init?.headers).toHaveProperty(
+        "x-goog-api-key",
+        "google-test-api-key",
+      );
     });
 
     it("handles Google API errors", async () => {
@@ -337,6 +341,17 @@ describe("Vision Providers", () => {
       expect(result.success).toBe(false);
       expect(result.error).toContain("Anthropic error");
     });
+
+    it("handles Anthropic network errors gracefully", async () => {
+      fetchMock.mockRejectedValue(new Error("socket hang up"));
+
+      const provider = createVisionProvider(anthropicConfig, factoryOptions);
+      const result = await provider.analyze(defaultVisionOptions);
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("[anthropic] Network error");
+      expect(result.error).toContain("socket hang up");
+    });
   });
 
   describe("xAI Vision Provider", () => {
@@ -371,6 +386,21 @@ describe("Vision Providers", () => {
         "Authorization",
         "Bearer xai-test-key",
       );
+    });
+
+    it("handles malformed xAI responses gracefully", async () => {
+      fetchMock.mockResolvedValue(
+        new Response("not-json", {
+          status: 200,
+          headers: { "Content-Type": "text/plain" },
+        }),
+      );
+
+      const provider = createVisionProvider(xaiConfig, factoryOptions);
+      const result = await provider.analyze(defaultVisionOptions);
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("[xai] Network error");
     });
   });
 
@@ -818,6 +848,17 @@ describe("Audio Generation Providers", () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toContain("Suno error");
+    });
+
+    it("handles Suno network errors gracefully", async () => {
+      fetchMock.mockRejectedValue(new Error("upstream timeout"));
+
+      const provider = createAudioProvider(sunoConfig, factoryOptions);
+      const result = await provider.generate(defaultAudioOptions);
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("[suno] Network error");
+      expect(result.error).toContain("upstream timeout");
     });
   });
 });

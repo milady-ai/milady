@@ -111,9 +111,8 @@ const mockOpenExternal = electrobunBun.Utils.openExternal as ReturnType<
 const mockShowItemInFolder = electrobunBun.Utils.showItemInFolder as ReturnType<
   typeof vi.fn
 >;
-const mockSpawn = (
-  globalThis as unknown as { Bun: { spawn: ReturnType<typeof vi.fn> } }
-).Bun.spawn;
+const mockSpawn = (globalThis as { Bun: { spawn: ReturnType<typeof vi.fn> } })
+  .Bun.spawn;
 const mockIsAppActive = macEffects.isAppActive as ReturnType<typeof vi.fn>;
 const mockMakeKeyAndOrderFront = macEffects.makeKeyAndOrderFront as ReturnType<
   typeof vi.fn
@@ -186,6 +185,35 @@ describe("DesktopManager", () => {
         manager.openExternal({ url: "https://milady.ai" }),
       ).resolves.toBeUndefined();
       expect(mockOpenExternal).toHaveBeenCalledWith("https://milady.ai");
+    });
+
+    it("lets the in-app external handler capture trusted Eliza URLs", async () => {
+      const handler = vi.fn(
+        async (url: string) =>
+          url.includes("elizacloud.ai") || url.includes("elizaos.ai"),
+      );
+      manager.setOpenExternalHandler(handler);
+
+      await expect(
+        manager.openExternal({ url: "https://www.elizaos.ai/auth/cli-login" }),
+      ).resolves.toBeUndefined();
+
+      expect(handler).toHaveBeenCalledWith(
+        "https://www.elizaos.ai/auth/cli-login",
+      );
+      expect(mockOpenExternal).not.toHaveBeenCalled();
+    });
+
+    it("falls back to the system browser when the handler declines the URL", async () => {
+      const handler = vi.fn(() => false);
+      manager.setOpenExternalHandler(handler);
+
+      await expect(
+        manager.openExternal({ url: "https://milady.ai/docs" }),
+      ).resolves.toBeUndefined();
+
+      expect(handler).toHaveBeenCalledWith("https://milady.ai/docs");
+      expect(mockOpenExternal).toHaveBeenCalledWith("https://milady.ai/docs");
     });
 
     it("blocks non-http(s) protocols", async () => {
@@ -546,7 +574,7 @@ describe("DesktopManager", () => {
 
       mockIsAppActive.mockReturnValue(false);
       manager.setMainWindow(
-        fakeWindow as unknown as Parameters<DesktopManager["setMainWindow"]>[0],
+        fakeWindow as Parameters<DesktopManager["setMainWindow"]>[0],
       );
 
       await vi.advanceTimersByTimeAsync(600);

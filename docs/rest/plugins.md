@@ -339,10 +339,13 @@ Get the core manager status and available core plugins.
 ```json
 {
   "available": true,
-  "corePlugins": ["bootstrap", "knowledge", "sql"],
+  "corePlugins": ["knowledge", "sql"],
   "optionalCorePlugins": ["secrets-manager"]
 }
 ```
+
+- **knowledge** -- RAG knowledge retrieval
+- **sql** -- Database layer
 
 ---
 
@@ -355,7 +358,8 @@ List core and optional-core plugins with their enabled/loaded status.
 ```json
 {
   "core": [
-    { "name": "bootstrap", "loaded": true, "required": true }
+    { "name": "knowledge", "loaded": true, "required": true },
+    { "name": "sql", "loaded": true, "required": true }
   ],
   "optionalCore": [
     { "name": "secrets-manager", "loaded": true, "required": false, "enabled": true }
