@@ -29,7 +29,7 @@ import { TrajectoriesView } from "./TrajectoriesView";
 import { TrajectoryDetailView } from "./TrajectoryDetailView";
 
 type SubTab =
-  | "actions"
+  // | "actions"
   | "plugins"
   | "skills"
   | "fine-tuning"
@@ -40,11 +40,11 @@ type SubTab =
   | "logs";
 
 const SUB_TABS: Array<{ id: SubTab; label: string; description: string }> = [
-  {
-    id: "actions",
-    label: "Actions",
-    description: "Custom agent commands and workflows",
-  },
+  // {
+  //   id: "actions",
+  //   label: "Actions",
+  //   description: "Custom agent commands and workflows",
+  // },
   { id: "plugins", label: "Plugins", description: "Features and connectors" },
   { id: "skills", label: "Skills", description: "Custom agent skills" },
   // {
@@ -223,8 +223,6 @@ const SUBTAB_ICONS: Record<string, ReactNode> = {
 
 function mapTabToSubTab(tab: Tab): SubTab {
   switch (tab) {
-    case "actions":
-      return "actions";
     case "plugins":
       return "plugins";
     case "skills":
@@ -262,8 +260,8 @@ export function AdvancedPageView({ inModal }: { inModal?: boolean } = {}) {
 
   const renderContent = () => {
     switch (currentSubTab) {
-      case "actions":
-        return <CustomActionsView />;
+      // case "actions":
+      //   return <CustomActionsView />;
       case "plugins":
         return <PluginsPageView />;
       case "skills":
@@ -325,11 +323,10 @@ export function AdvancedPageView({ inModal }: { inModal?: boolean } = {}) {
                 <button
                   type="button"
                   key={subTab.id}
-                  className={`advanced-subtab-btn px-4 py-2 text-xs font-medium border-b-2 -mb-px transition-colors ${
-                    isActive
+                  className={`advanced-subtab-btn px-4 py-2 text-xs font-medium border-b-2 -mb-px transition-colors ${isActive
                       ? "border-accent text-txt"
                       : "border-transparent text-muted hover:text-txt hover:border-border"
-                  }`}
+                    }`}
                   onClick={() => handleSubTabChange(subTab.id)}
                   title={subTab.description}
                 >
@@ -348,15 +345,15 @@ export function AdvancedPageView({ inModal }: { inModal?: boolean } = {}) {
         style={
           inModal
             ? ({
-                "--accent": "var(--section-accent-advanced, #7b8fb5)",
-                "--surface": "rgba(255, 255, 255, 0.06)",
-                "--s-accent": "#7b8fb5",
-                "--s-text-txt": "#7b8fb5",
-                "--s-accent-glow": "rgba(123, 143, 181, 0.35)",
-                "--s-accent-subtle": "rgba(123, 143, 181, 0.12)",
-                "--s-grid-line": "rgba(123, 143, 181, 0.02)",
-                "--s-glow-edge": "rgba(123, 143, 181, 0.08)",
-              } as React.CSSProperties)
+              "--accent": "var(--section-accent-advanced, #7b8fb5)",
+              "--surface": "rgba(255, 255, 255, 0.06)",
+              "--s-accent": "#7b8fb5",
+              "--s-text-txt": "#7b8fb5",
+              "--s-accent-glow": "rgba(123, 143, 181, 0.35)",
+              "--s-accent-subtle": "rgba(123, 143, 181, 0.12)",
+              "--s-grid-line": "rgba(123, 143, 181, 0.02)",
+              "--s-glow-edge": "rgba(123, 143, 181, 0.08)",
+            } as React.CSSProperties)
             : undefined
         }
       >

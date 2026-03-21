@@ -141,7 +141,7 @@ describe("GET /api/wallet/keys", () => {
     }
   });
 
-  it("allows loopback requests without a token during active onboarding", async () => {
+  it("rejects loopback requests without a token during active onboarding", async () => {
     await fs.writeFile(
       path.join(tempDir, "eliza.json"),
       JSON.stringify({
@@ -152,14 +152,14 @@ describe("GET /api/wallet/keys", () => {
 
     const server = await startApiServer({ port: 0, runtime: RUNTIME_STUB });
     try {
-      // Loopback (127.0.0.1) requests are allowed without a token for local
-      // desktop onboarding flows.
+      // Sensitive routes require an API token even for loopback requests.
+      // Without ELIZA_API_TOKEN / MILADY_API_TOKEN the server returns 403.
       const { status } = await req(
         server.port,
         "GET",
         "/api/wallet/keys",
       );
-      expect(status).toBe(200);
+      expect(status).toBe(403);
     } finally {
       await server.close();
     }

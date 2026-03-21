@@ -249,7 +249,7 @@ async function handleMessageAndCollectText(
 }
 
 const modelProviderUnavailablePattern =
-  /exceeded your current quota|insufficient[_\s-]?quota|billing details|credit balance|rate limit|status code: 429|too many requests|invalid api key|unauthorized|authentication/i;
+  /exceeded your current quota|insufficient[_\s-]?quota|billing details|credit balance|rate limit|status code: 429|too many requests|invalid api key|unauthorized|authentication|no handler found for delegate type/i;
 
 let cachedModelProviderUnavailableReason: string | null = null;
 

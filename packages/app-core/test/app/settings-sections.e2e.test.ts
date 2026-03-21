@@ -89,6 +89,24 @@ vi.mock("@miladyai/app-core/components/VoiceConfigView", () => ({
     ),
 }));
 
+vi.mock("@miladyai/app-core/components/ReleaseCenterView", () => ({
+  ReleaseCenterView: () =>
+    React.createElement(
+      "div",
+      { "data-testid": "release-center" },
+      "ReleaseCenterView",
+    ),
+}));
+
+vi.mock("@miladyai/app-core/components/DesktopWorkspaceSection", () => ({
+  DesktopWorkspaceSection: () =>
+    React.createElement(
+      "div",
+      { "data-testid": "desktop-workspace" },
+      "DesktopWorkspaceSection",
+    ),
+}));
+
 import { SettingsView } from "@miladyai/app-core/components/SettingsView";
 
 type SettingsState = {

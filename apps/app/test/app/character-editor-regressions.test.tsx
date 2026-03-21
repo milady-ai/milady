@@ -166,7 +166,10 @@ function createAppState() {
       ],
     },
     selectedVrmIndex: 0,
-    t: vi.fn((value: string) => value),
+    t: vi.fn(
+      (value: string, options?: { defaultValue?: string }) =>
+        options?.defaultValue ?? value,
+    ),
     registryStatus: null,
     registryLoading: false,
     registryRegistering: false,
@@ -252,7 +255,7 @@ describe("CharacterEditor regressions", () => {
       (node) =>
         node.type === "button" &&
         Array.isArray(node.children) &&
-        node.children.includes("charactereditor.CustomizeBtn"),
+        node.children.includes("Customize"),
     );
     await act(async () => {
       customizeBtn.props.onClick();
@@ -321,7 +324,7 @@ describe("CharacterEditor regressions", () => {
       (node) =>
         node.type === "button" &&
         Array.isArray(node.children) &&
-        node.children.includes("charactereditor.CustomizeBtn"),
+        node.children.includes("Customize"),
     );
     await act(async () => {
       customizeBtn.props.onClick();
