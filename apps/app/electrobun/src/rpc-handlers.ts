@@ -108,6 +108,7 @@ export function registerRpcHandlers(
       return status;
     },
     agentStatus: async () => agent.getStatus(),
+    agentInspectExistingInstall: async () => agent.inspectExistingInstall(),
 
     // ---- Desktop: Tray ----
     desktopCreateTray: async (

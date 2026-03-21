@@ -3,7 +3,12 @@ import { useApp } from "@miladyai/app-core/state";
 
 export function WelcomeStep() {
   const branding = useBranding();
-  const { setState, t } = useApp();
+  const {
+    onboardingExistingInstallDetected,
+    handleOnboardingUseLocalBackend,
+    setState,
+    t,
+  } = useApp();
 
   const handleGetStarted = () => {
     // Default to Chen (blue-haired anime character) — character selection
@@ -11,6 +16,10 @@ export function WelcomeStep() {
     setState("onboardingStyle", "I'm here to help you.");
     setState("onboardingName", "Chen");
     setState("selectedVrmIndex", 1);
+    setState("onboardingStep", "connection");
+  };
+
+  const handleUseExistingSetup = () => {
     setState("onboardingStep", "connection");
   };
 
@@ -22,15 +31,41 @@ export function WelcomeStep() {
       <div className="onboarding-divider">
         <div className="onboarding-divider-diamond" />
       </div>
-      <p className="onboarding-desc">{t("onboarding.welcomeDesc")}</p>
+      <p className="onboarding-desc">
+        {onboardingExistingInstallDetected
+          ? t("onboarding.existingSetupDesc")
+          : t("onboarding.welcomeDesc")}
+      </p>
       <div className="onboarding-panel-footer">
-        <span />
+        {onboardingExistingInstallDetected ? (
+          <button
+            className="onboarding-back-link"
+            onClick={handleGetStarted}
+            type="button"
+          >
+            {t("onboarding.customSetup")}
+          </button>
+        ) : (
+          <button
+            className="onboarding-back-link"
+            onClick={() => handleOnboardingUseLocalBackend()}
+            type="button"
+          >
+            {t("onboarding.checkExistingSetup")}
+          </button>
+        )}
         <button
           className="onboarding-confirm-btn"
-          onClick={handleGetStarted}
+          onClick={
+            onboardingExistingInstallDetected
+              ? handleUseExistingSetup
+              : handleGetStarted
+          }
           type="button"
         >
-          {t("onboarding.getStarted")}
+          {onboardingExistingInstallDetected
+            ? t("onboarding.useExistingSetup")
+            : t("onboarding.getStarted")}
         </button>
       </div>
     </>

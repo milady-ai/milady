@@ -37,6 +37,21 @@ interface AgentStatus {
   error: string | null;
 }
 
+type ExistingElizaInstallSource =
+  | "config-path-env"
+  | "state-dir-env"
+  | "default-state-dir";
+
+export interface ExistingElizaInstallInfo {
+  detected: boolean;
+  stateDir: string;
+  configPath: string;
+  configExists: boolean;
+  stateDirExists: boolean;
+  hasStateEntries: boolean;
+  source: ExistingElizaInstallSource;
+}
+
 type SendToWebview = (message: string, payload?: unknown) => void;
 
 // Subprocess type from Bun.spawn
@@ -49,6 +64,7 @@ type BunSubprocess = ReturnType<typeof Bun.spawn>;
 const HEALTH_POLL_INTERVAL_MS = 500;
 const SIGTERM_GRACE_MS = 5_000;
 const WINDOWS_ABS_PATH_RE = /^[A-Za-z]:[\\/]/;
+const ELIZA_CONFIG_FILENAME = "eliza.json";
 
 export function getHealthPollTimeoutMs(
   env: NodeJS.ProcessEnv = process.env,
@@ -94,6 +110,120 @@ function resolveRelativePortable(base: string, relativePath: string): string {
   return isPosixAbsolutePath(base)
     ? path.posix.resolve(base, relativePath)
     : path.resolve(base, relativePath);
+}
+
+function normalizeEnvPath(value: string | undefined): string | null {
+  const trimmed = value?.trim();
+  return trimmed ? resolvePortablePath(trimmed) : null;
+}
+
+function listStateEntries(stateDir: string): string[] {
+  try {
+    return fs
+      .readdirSync(stateDir)
+      .filter(
+        (entry) => entry !== "." && entry !== ".." && entry !== ".DS_Store",
+      );
+  } catch {
+    return [];
+  }
+}
+
+function buildExistingElizaInstallCandidates(opts?: {
+  env?: NodeJS.ProcessEnv;
+  homedir?: string;
+}): Array<{
+  source: ExistingElizaInstallSource;
+  stateDir: string;
+  configPath: string;
+}> {
+  const env = opts?.env ?? process.env;
+  const homedir = opts?.homedir ?? os.homedir();
+  const configPathFromEnv =
+    normalizeEnvPath(env.MILADY_CONFIG_PATH) ??
+    normalizeEnvPath(env.ELIZA_CONFIG_PATH);
+  const stateDirFromEnv =
+    normalizeEnvPath(env.MILADY_STATE_DIR) ??
+    normalizeEnvPath(env.ELIZA_STATE_DIR);
+  const defaultStateDir = joinPortable(homedir, ".eliza");
+
+  const candidates = [
+    configPathFromEnv
+      ? {
+          source: "config-path-env" as const,
+          stateDir: dirnamePortable(configPathFromEnv),
+          configPath: configPathFromEnv,
+        }
+      : null,
+    stateDirFromEnv
+      ? {
+          source: "state-dir-env" as const,
+          stateDir: stateDirFromEnv,
+          configPath: joinPortable(stateDirFromEnv, ELIZA_CONFIG_FILENAME),
+        }
+      : null,
+    {
+      source: "default-state-dir" as const,
+      stateDir: defaultStateDir,
+      configPath: joinPortable(defaultStateDir, ELIZA_CONFIG_FILENAME),
+    },
+  ].filter((candidate): candidate is NonNullable<typeof candidate> =>
+    Boolean(candidate),
+  );
+
+  return candidates.filter(
+    (candidate, index, all) =>
+      all.findIndex(
+        (other) =>
+          other.stateDir === candidate.stateDir &&
+          other.configPath === candidate.configPath,
+      ) === index,
+  );
+}
+
+export function inspectExistingElizaInstall(opts?: {
+  env?: NodeJS.ProcessEnv;
+  homedir?: string;
+}): ExistingElizaInstallInfo {
+  const candidates = buildExistingElizaInstallCandidates(opts);
+
+  for (const candidate of candidates) {
+    const configExists = fs.existsSync(candidate.configPath);
+    const stateDirExists = fs.existsSync(candidate.stateDir);
+    const hasStateEntries =
+      stateDirExists && listStateEntries(candidate.stateDir).length > 0;
+
+    if (configExists || hasStateEntries) {
+      return {
+        detected: true,
+        stateDir: candidate.stateDir,
+        configPath: candidate.configPath,
+        configExists,
+        stateDirExists,
+        hasStateEntries,
+        source: candidate.source,
+      };
+    }
+  }
+
+  const fallback = candidates[0] ?? {
+    source: "default-state-dir" as const,
+    stateDir: joinPortable(opts?.homedir ?? os.homedir(), ".eliza"),
+    configPath: joinPortable(
+      joinPortable(opts?.homedir ?? os.homedir(), ".eliza"),
+      ELIZA_CONFIG_FILENAME,
+    ),
+  };
+
+  return {
+    detected: false,
+    stateDir: fallback.stateDir,
+    configPath: fallback.configPath,
+    configExists: false,
+    stateDirExists: fs.existsSync(fallback.stateDir),
+    hasStateEntries: false,
+    source: fallback.source,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -910,6 +1040,10 @@ export class AgentManager {
 
   getStatus(): AgentStatus {
     return { ...this.status };
+  }
+
+  inspectExistingInstall(): ExistingElizaInstallInfo {
+    return inspectExistingElizaInstall();
   }
 
   getPort(): number | null {

@@ -83,6 +83,8 @@ import {
 } from "../autonomy";
 import {
   getBackendStartupTimeoutMs,
+  inspectExistingElizaInstall,
+  isElectrobunRuntime,
   invokeDesktopBridgeRequest,
   scanProviderCredentials,
 } from "../bridge";
@@ -182,6 +184,10 @@ import {
   getTabForShellView,
   shouldStartAtCharacterSelectOnLaunch,
 } from "./shell-routing";
+import {
+  deriveDetectedProviderPrefill,
+  detectExistingOnboardingConnection,
+} from "./onboarding-bootstrap";
 
 const AGENT_STATUS_POLL_INTERVAL_MS = 500;
 const ONBOARDING_GREETING_READY_TIMEOUT_MS = 15_000;
@@ -851,6 +857,10 @@ export function AppProvider({
   );
   const [onboardingProvider, setOnboardingProvider] = useState("");
   const [onboardingApiKey, setOnboardingApiKey] = useState("");
+  const [
+    onboardingExistingInstallDetected,
+    setOnboardingExistingInstallDetected,
+  ] = useState(false);
   const [onboardingDetectedProviders, setOnboardingDetectedProviders] =
     useState<
       Array<{
@@ -1045,6 +1055,7 @@ export function AppProvider({
   const greetingEmoteTimerRef = useRef<number | null>(null);
   const companionStaleConversationRefreshRef = useRef<string | null>(null);
   const onboardingCompletionCommittedRef = useRef(false);
+  const forceLocalBootstrapRef = useRef(false);
   const chatAbortRef = useRef<AbortController | null>(null);
   /** Synchronous lock so same-tick chat submits cannot double-send. */
   const chatSendBusyRef = useRef(false);
@@ -4500,6 +4511,7 @@ export function AppProvider({
     onboardingLargeModel,
     onboardingProvider,
     onboardingApiKey,
+    onboardingExistingInstallDetected,
     onboardingDetectedProviders,
     onboardingRemoteApiBase,
     onboardingRemoteConnected,
@@ -4623,6 +4635,7 @@ export function AppProvider({
   }, [onboardingMode, onboardingStep, setOnboardingStep]);
 
   const handleOnboardingUseLocalBackend = useCallback(() => {
+    forceLocalBootstrapRef.current = true;
     client.setBaseUrl(null);
     client.setToken(null);
     setOnboardingRemoteConnecting(false);
@@ -4632,8 +4645,13 @@ export function AppProvider({
     setOnboardingRemoteToken("");
     setOnboardingCloudProvider("");
     setOnboardingRunMode("");
+    setActionNotice(
+      "Checking this device for an existing Eliza setup...",
+      "info",
+      3200,
+    );
     retryStartup();
-  }, [retryStartup]);
+  }, [retryStartup, setActionNotice]);
 
   const handleOnboardingRemoteConnect = useCallback(async () => {
     if (onboardingRemoteConnecting) return;
@@ -5022,6 +5040,22 @@ export function AppProvider({
     setEmotePickerOpen(false);
   }, []);
 
+  const applyDetectedProviders = useCallback(
+    (detected: Awaited<ReturnType<typeof scanProviderCredentials>>) => {
+      setOnboardingDetectedProviders(detected);
+
+      const prefill = deriveDetectedProviderPrefill(detected);
+      if (!prefill) {
+        return;
+      }
+
+      setOnboardingRunMode(prefill.runMode);
+      setOnboardingProvider(prefill.providerId);
+      setOnboardingApiKey(prefill.apiKey);
+    },
+    [],
+  );
+
   // ── Generic state setter ───────────────────────────────────────────
 
   const setState = useCallback(
@@ -5077,6 +5111,7 @@ export function AppProvider({
         onboardingLargeModel: setOnboardingLargeModel,
         onboardingProvider: setOnboardingProvider,
         onboardingApiKey: setOnboardingApiKey,
+        onboardingExistingInstallDetected: setOnboardingExistingInstallDetected,
         onboardingDetectedProviders: setOnboardingDetectedProviders,
         onboardingRemoteApiBase: setOnboardingRemoteApiBase,
         onboardingRemoteToken: setOnboardingRemoteToken,
@@ -5281,19 +5316,43 @@ export function AppProvider({
       setStartupPhase("starting-backend");
       setAuthRequired(false);
       setConnected(false);
+      setOnboardingExistingInstallDetected(false);
 
-      // If onboarding hasn't been completed yet (no persisted connection),
-      // skip all backend polling and go straight to onboarding with static
-      // data. The agent will be started (local mode) or provisioned (sandbox
-      // mode) only after onboarding completes. This ensures the entire
-      // onboarding flow — character selection, editing, provider config —
-      // works with zero server calls.
+      const forceLocalBootstrap = forceLocalBootstrapRef.current;
+      forceLocalBootstrapRef.current = false;
       const persistedConnection = loadPersistedConnectionMode();
+      const desktopExistingInstall =
+        !persistedConnection && isElectrobunRuntime()
+          ? await inspectExistingElizaInstall().catch(() => null)
+          : null;
+      const shouldPreferLocalBootstrap =
+        forceLocalBootstrap || Boolean(desktopExistingInstall?.detected);
+      const probedConnection = persistedConnection
+        ? null
+        : await detectExistingOnboardingConnection({
+            client,
+            timeoutMs: shouldPreferLocalBootstrap
+              ? Math.min(getBackendStartupTimeoutMs(), 30_000)
+              : Math.min(getBackendStartupTimeoutMs(), 3_500),
+          });
+      if (cancelled) {
+        return;
+      }
+      const restoredConnection =
+        persistedConnection ??
+        probedConnection?.connection ??
+        (shouldPreferLocalBootstrap ? { runMode: "local" } : null);
 
-      if (!persistedConnection) {
-        // Onboarding not completed — show it immediately without waiting
-        // for a backend. Populate onboardingOptions with static frontend
-        // data so handleOnboardingFinish doesn't early-return on null options.
+      setOnboardingExistingInstallDetected(
+        Boolean(
+          desktopExistingInstall?.detected ||
+            probedConnection?.detectedExistingInstall,
+        ),
+      );
+
+      if (!restoredConnection) {
+        // No reusable backend/config was found yet. Show static onboarding
+        // immediately so first-run users are not blocked on server startup.
         const injectedStyles =
           (typeof window !== "undefined" &&
             (window as unknown as Record<string, unknown>)
@@ -5310,42 +5369,41 @@ export function AppProvider({
           inventoryProviders: [],
           sharedStyleRules: "",
         });
+        try {
+          const detected = await scanProviderCredentials();
+          if (!cancelled) {
+            applyDetectedProviders(detected);
+          }
+        } catch {
+          // Non-fatal — credential scan is best-effort
+        }
         setStartupPhase("ready");
         setOnboardingComplete(false);
         setOnboardingLoading(false);
         return;
       }
 
-      // Restore connection from persisted state for returning users
-      if (persistedConnection) {
+      if (restoredConnection) {
         if (
-          persistedConnection.runMode === "cloud" &&
-          persistedConnection.cloudApiBase
+          restoredConnection.runMode === "cloud" &&
+          restoredConnection.cloudApiBase
         ) {
-          client.setBaseUrl(persistedConnection.cloudApiBase);
-          if (persistedConnection.cloudAuthToken) {
-            client.setToken(persistedConnection.cloudAuthToken);
+          client.setBaseUrl(restoredConnection.cloudApiBase);
+          if (restoredConnection.cloudAuthToken) {
+            client.setToken(restoredConnection.cloudAuthToken);
           }
         } else if (
-          persistedConnection.runMode === "remote" &&
-          persistedConnection.remoteApiBase
+          restoredConnection.runMode === "remote" &&
+          restoredConnection.remoteApiBase
         ) {
-          client.setBaseUrl(persistedConnection.remoteApiBase);
-          if (persistedConnection.remoteAccessToken) {
-            client.setToken(persistedConnection.remoteAccessToken);
+          client.setBaseUrl(restoredConnection.remoteApiBase);
+          if (restoredConnection.remoteAccessToken) {
+            client.setToken(restoredConnection.remoteAccessToken);
           }
-        } else if (
-          persistedConnection.runMode === "local" &&
-          !(
-            (typeof window !== "undefined" &&
-              (window as unknown as Record<string, unknown>)
-                .__MILADY_API_BASE__) ||
-            (typeof window !== "undefined" &&
-              (window as unknown as Record<string, unknown>).__ELIZA_API_BASE__)
-          )
-        ) {
-          // Local mode but no API base — need to start the agent first.
-          // Trigger agent start via RPC and then continue polling.
+        } else if (restoredConnection.runMode === "local") {
+          // Always nudge the local desktop/native startup path. The embedded
+          // agent start call is idempotent, and packaged shells can inject the
+          // API base before the local process is actually accepting requests.
           try {
             await invokeDesktopBridgeRequest({
               rpcMethod: "agentStart",
@@ -5453,14 +5511,7 @@ export function AppProvider({
               try {
                 const detected = await scanProviderCredentials();
                 if (detected.length > 0) {
-                  setOnboardingDetectedProviders(detected);
-                  // Auto-fill with the first detected provider
-                  const first = detected[0];
-                  if (first.apiKey) {
-                    setOnboardingRunMode("local");
-                    setOnboardingProvider(first.id);
-                    setOnboardingApiKey(first.apiKey);
-                  }
+                  applyDetectedProviders(detected);
                 }
               } catch {
                 // Non-fatal — credential scan is best-effort
@@ -6138,6 +6189,7 @@ export function AppProvider({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    applyDetectedProviders,
     appendAutonomousEvent,
     checkExtensionStatus,
     fetchAutonomyReplay,
@@ -6376,6 +6428,7 @@ export function AppProvider({
     onboardingLargeModel,
     onboardingProvider,
     onboardingApiKey,
+    onboardingExistingInstallDetected,
     onboardingDetectedProviders,
     onboardingRemoteApiBase,
     onboardingRemoteToken,
