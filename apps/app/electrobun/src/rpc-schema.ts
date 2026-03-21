@@ -110,6 +110,9 @@ export interface DesktopUpdaterSnapshot {
   currentHash?: string;
   channel?: string;
   baseUrl?: string;
+  appBundlePath?: string | null;
+  canAutoUpdate: boolean;
+  autoUpdateDisabledReason?: string | null;
   updateAvailable: boolean;
   updateReady: boolean;
   latestVersion?: string | null;

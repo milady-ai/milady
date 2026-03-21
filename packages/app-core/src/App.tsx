@@ -382,10 +382,6 @@ export function App() {
     );
   }
 
-  if (startupError) {
-    return <StartupFailureView error={startupError} onRetry={retryStartup} />;
-  }
-
   const shouldLoad = onboardingLoading || agentStarting;
   const [loaderFadingOut, setLoaderFadingOut] = useState(false);
   const showLoaderRef = useRef(true);
@@ -406,6 +402,10 @@ export function App() {
       return () => clearTimeout(timer);
     }
   }, [shouldLoad]);
+
+  if (startupError) {
+    return <StartupFailureView error={startupError} onRetry={retryStartup} />;
+  }
 
   if (authRequired && !shouldLoad) return <PairingView />;
   if (!onboardingComplete && !shouldLoad) return <OnboardingWizard />;

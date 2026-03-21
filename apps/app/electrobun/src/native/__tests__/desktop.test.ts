@@ -195,6 +195,7 @@ import * as electrobunBun from "electrobun/bun";
 import { DesktopManager, resetDesktopManagerForTesting } from "../desktop";
 import * as macEffects from "../mac-window-effects";
 
+const ORIGINAL_EXEC_PATH = process.execPath;
 const mockExistsSync = nodeFs.existsSync as ReturnType<typeof vi.fn>;
 const mockWriteFileSync = nodeFs.writeFileSync as ReturnType<typeof vi.fn>;
 const mockMkdirSync = nodeFs.mkdirSync as ReturnType<typeof vi.fn>;
@@ -216,6 +217,9 @@ const mockContextMenuOn = electrobunBun.ContextMenu.on as ReturnType<
 const mockShowContextMenu = electrobunBun.ContextMenu
   .showContextMenu as ReturnType<typeof vi.fn>;
 const mockBuildConfigGet = electrobunBun.BuildConfig.get as ReturnType<
+  typeof vi.fn
+>;
+const mockUpdaterApplyUpdate = electrobunBun.Updater.applyUpdate as ReturnType<
   typeof vi.fn
 >;
 const mockSessionFromPartition = electrobunBun.Session
@@ -253,6 +257,13 @@ function setPlatform(platform: string) {
   });
 }
 
+function setExecPath(execPath: string) {
+  Object.defineProperty(process, "execPath", {
+    value: execPath,
+    configurable: true,
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -280,6 +291,7 @@ describe("DesktopManager", () => {
       availableRenderers: ["native"],
       bunVersion: "1.2.3",
     });
+    mockUpdaterApplyUpdate.mockReset();
     mockSessionFromPartition
       .mockReset()
       .mockImplementation((partition: string) => ({
@@ -301,6 +313,7 @@ describe("DesktopManager", () => {
     resetDesktopManagerForTesting();
     // Restore platform to darwin (test host)
     setPlatform("darwin");
+    setExecPath(ORIGINAL_EXEC_PATH);
     delete process.env.NODE_ENV;
     delete process.env.ELECTROBUN_DEV;
     vi.useRealTimers();
@@ -565,6 +578,37 @@ describe("DesktopManager", () => {
       await manager.setDockIconVisibility({ visible: false });
 
       expect(mockSetDockIconVisible).toHaveBeenCalledWith(false);
+    });
+
+    it("reports auto-updates as unavailable outside Applications on macOS", async () => {
+      setPlatform("darwin");
+      setExecPath("/Volumes/Milady/Milady.app/Contents/MacOS/Milady");
+
+      const snapshot = await manager.getUpdaterState();
+
+      expect(snapshot.appBundlePath).toBe("/Volumes/Milady/Milady.app");
+      expect(snapshot.canAutoUpdate).toBe(false);
+      expect(snapshot.autoUpdateDisabledReason).toContain(
+        "Move Milady.app to /Applications",
+      );
+    });
+
+    it("blocks applying updates outside Applications on macOS", async () => {
+      setPlatform("darwin");
+      setExecPath("/Volumes/Milady/Milady.app/Contents/MacOS/Milady");
+
+      await expect(manager.applyUpdate()).rejects.toThrow(
+        "Move Milady.app to /Applications",
+      );
+      expect(mockUpdaterApplyUpdate).not.toHaveBeenCalled();
+    });
+
+    it("allows applying updates from Applications on macOS", async () => {
+      setPlatform("darwin");
+      setExecPath("/Applications/Milady.app/Contents/MacOS/Milady");
+
+      await expect(manager.applyUpdate()).resolves.toBeUndefined();
+      expect(mockUpdaterApplyUpdate).toHaveBeenCalledTimes(1);
     });
   });
 

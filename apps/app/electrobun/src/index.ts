@@ -1002,6 +1002,17 @@ async function _startAgent(win: BrowserWindow): Promise<void> {
 async function setupUpdater(): Promise<void> {
   const runUpdateCheck = async (notifyOnNoUpdate = false): Promise<void> => {
     try {
+      const updaterState = await getDesktopManager().getUpdaterState();
+      if (!updaterState.canAutoUpdate) {
+        if (updaterState.autoUpdateDisabledReason) {
+          console.info(
+            "[Updater] Skipping auto-update check:",
+            updaterState.autoUpdateDisabledReason,
+          );
+        }
+        return;
+      }
+
       const updateResult = await Updater.checkForUpdate();
       if (updateResult?.updateAvailable) {
         Updater.downloadUpdate().catch((err: unknown) => {

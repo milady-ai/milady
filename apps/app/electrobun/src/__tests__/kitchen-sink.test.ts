@@ -502,6 +502,9 @@ vi.mock("../native/desktop", async () => {
       checkForUpdates: vi.fn(() =>
         Promise.resolve({
           currentVersion: "1.0.0",
+          appBundlePath: "/Applications/Milady.app",
+          canAutoUpdate: true,
+          autoUpdateDisabledReason: null,
           updateAvailable: false,
           updateReady: false,
           latestVersion: null,
@@ -511,6 +514,9 @@ vi.mock("../native/desktop", async () => {
       getUpdaterState: vi.fn(() =>
         Promise.resolve({
           currentVersion: "1.0.0",
+          appBundlePath: "/Applications/Milady.app",
+          canAutoUpdate: true,
+          autoUpdateDisabledReason: null,
           updateAvailable: false,
           updateReady: false,
           latestVersion: null,

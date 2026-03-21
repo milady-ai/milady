@@ -1159,6 +1159,11 @@ X-GNOME-Autostart-enabled=true
   }
 
   async checkForUpdates(): Promise<DesktopUpdaterSnapshot> {
+    const availability = this.getUpdaterAvailability();
+    if (!availability.canAutoUpdate) {
+      return this.buildUpdaterSnapshot(undefined, availability);
+    }
+
     try {
       const result = await Updater.checkForUpdate();
       if (result?.updateAvailable) {
@@ -1168,12 +1173,24 @@ X-GNOME-Autostart-enabled=true
       }
       return await this.getUpdaterState();
     } catch (error) {
-      return this.buildUpdaterSnapshot(error);
+      return this.buildUpdaterSnapshot(error, availability);
     }
   }
 
   async getUpdaterState(): Promise<DesktopUpdaterSnapshot> {
     return this.buildUpdaterSnapshot();
+  }
+
+  async applyUpdate(): Promise<void> {
+    const availability = this.getUpdaterAvailability();
+    if (!availability.canAutoUpdate) {
+      throw new Error(
+        availability.autoUpdateDisabledReason ??
+          "Auto-update is unavailable for this installation.",
+      );
+    }
+
+    Updater.applyUpdate();
   }
 
   async getBuildInfo(): Promise<DesktopBuildInfo> {
@@ -1648,6 +1665,7 @@ X-GNOME-Autostart-enabled=true
 
   private async buildUpdaterSnapshot(
     error?: unknown,
+    availability = this.getUpdaterAvailability(),
   ): Promise<DesktopUpdaterSnapshot> {
     let currentVersion = "unknown";
     let currentHash: string | undefined;
@@ -1686,6 +1704,9 @@ X-GNOME-Autostart-enabled=true
       currentHash,
       channel,
       baseUrl,
+      appBundlePath: availability.appBundlePath,
+      canAutoUpdate: availability.canAutoUpdate,
+      autoUpdateDisabledReason: availability.autoUpdateDisabledReason,
       updateAvailable: Boolean(updateInfo.updateAvailable),
       updateReady: Boolean(updateInfo.updateReady),
       latestVersion: updateInfo.version ?? null,
@@ -1699,6 +1720,75 @@ X-GNOME-Autostart-enabled=true
           }
         : null,
     };
+  }
+
+  private getUpdaterAvailability(): {
+    appBundlePath: string | null;
+    canAutoUpdate: boolean;
+    autoUpdateDisabledReason: string | null;
+  } {
+    if (process.platform !== "darwin") {
+      return {
+        appBundlePath: null,
+        canAutoUpdate: true,
+        autoUpdateDisabledReason: null,
+      };
+    }
+
+    const appBundlePath = this.resolveMacAppBundlePath(process.execPath);
+    if (!appBundlePath) {
+      return {
+        appBundlePath: null,
+        canAutoUpdate: false,
+        autoUpdateDisabledReason:
+          "Milady must run from an installed .app bundle to enable in-place updates.",
+      };
+    }
+
+    const supportedRoots = [
+      "/Applications",
+      path.join(Utils.paths.home, "Applications"),
+    ].map((root) => path.resolve(root));
+    const normalizedBundlePath = path.resolve(appBundlePath);
+    const inApplications = supportedRoots.some((root) => {
+      const normalizedRoot = root.endsWith(path.sep)
+        ? root
+        : `${root}${path.sep}`;
+      return (
+        normalizedBundlePath === root ||
+        normalizedBundlePath.startsWith(normalizedRoot)
+      );
+    });
+
+    if (inApplications) {
+      return {
+        appBundlePath: normalizedBundlePath,
+        canAutoUpdate: true,
+        autoUpdateDisabledReason: null,
+      };
+    }
+
+    return {
+      appBundlePath: normalizedBundlePath,
+      canAutoUpdate: false,
+      autoUpdateDisabledReason: `Move ${path.basename(
+        normalizedBundlePath,
+      )} to /Applications to enable in-place desktop updates.`,
+    };
+  }
+
+  private resolveMacAppBundlePath(execPath: string): string | null {
+    let current = path.resolve(execPath);
+    while (true) {
+      if (current.endsWith(".app")) {
+        return current;
+      }
+      const parent = path.dirname(current);
+      if (parent === current) {
+        return null;
+      }
+      current = parent;
+    }
   }
 
   private resolvePreferredBrowserRenderer(
