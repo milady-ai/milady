@@ -1527,6 +1527,22 @@ function persistCompatOnboardingDefaults(
 
   const adminEntityId = stringToUuid(`${name}-admin-entity`);
   agents.defaults.adminEntityId = adminEntityId;
+
+  // Persist name/bio/system directly into agents.list[0] — the upstream
+  // body replay is not reliable in Bun so we write these fields here as a
+  // fallback to ensure the agent knows its own name after a restart.
+  if (!Array.isArray(agents.list) || agents.list.length === 0) {
+    (agents as Record<string, unknown>).list = [{ id: "main", default: true }];
+  }
+  const agentEntry = (agents.list as Record<string, unknown>[])[0];
+  agentEntry.name = name;
+  if (Array.isArray(body.bio)) {
+    agentEntry.bio = body.bio;
+  }
+  if (typeof body.systemPrompt === "string" && body.systemPrompt.trim()) {
+    agentEntry.system = body.systemPrompt.trim();
+  }
+
   saveElizaConfig(config);
   return adminEntityId;
 }
@@ -2401,6 +2417,11 @@ async function handleMiladyCompatRoute(
     }
     const rawBody = Buffer.concat(chunks);
 
+    // replayBody is what we push back to the upstream handler.  It starts
+    // as the original bytes but may be augmented with `runMode: "cloud"` if
+    // the client sent a cloud-managed connection (see below).
+    let replayBody = rawBody;
+
     try {
       const body = JSON.parse(rawBody.toString("utf8")) as Record<
         string,
@@ -2410,6 +2431,25 @@ async function handleMiladyCompatRoute(
       persistCompatOnboardingDefaults(body);
       if (typeof body.name === "string" && body.name.trim()) {
         state.pendingAgentName = body.name.trim();
+      }
+
+      // OnboardingData uses connection.kind === "cloud-managed" to signal
+      // cloud mode — there is no top-level `runMode` field in the type.
+      // The upstream handler reads `body.runMode`, so we detect the
+      // connection kind here and, if needed, inject `runMode: "cloud"` into
+      // the replayed body so upstream also sets cloud.enabled correctly.
+      const connection = body.connection as Record<string, unknown> | undefined;
+      const isCloudMode =
+        body.runMode === "cloud" ||
+        (connection !== null &&
+          typeof connection === "object" &&
+          connection.kind === "cloud-managed");
+
+      if (isCloudMode && body.runMode !== "cloud") {
+        replayBody = Buffer.from(
+          JSON.stringify({ ...body, runMode: "cloud" }),
+          "utf8",
+        );
       }
 
       // Mark onboarding complete in config — upstream also does this but
@@ -2423,7 +2463,7 @@ async function handleMiladyCompatRoute(
         (config.meta as Record<string, unknown>).onboardingComplete = true;
 
         // Also persist cloud mode if specified
-        if (body.runMode === "cloud") {
+        if (isCloudMode) {
           if (!config.cloud) {
             (config as Record<string, unknown>).cloud = {};
           }
@@ -2470,9 +2510,9 @@ async function handleMiladyCompatRoute(
     // sendJsonResponse prevents double-write).
     sendJsonResponse(res, 200, { ok: true });
 
-    // Push the raw bytes back into the request stream so the upstream
-    // can still consume the body for processing.
-    req.push(rawBody);
+    // Push the (possibly augmented) bytes back into the request stream so
+    // the upstream can still consume the body for processing.
+    req.push(replayBody);
     req.push(null);
     return false;
   }
