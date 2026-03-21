@@ -7,6 +7,11 @@ interface MeshStandardMaterialWithNodeProps {
   opacityNode?: unknown | null;
 }
 
+type TslNodeLike = {
+  add(value: unknown): unknown;
+  mul(value: unknown): unknown;
+};
+
 type TeleportFallbackShader = {
   uniforms: { uTeleportProgress: { value: number } };
   isOutgoing?: boolean;
@@ -163,15 +168,22 @@ export class VrmTeleportEffect {
               glowIntensity.mul(10.0).mul(glowActive).mul(dissolveAlpha),
             );
 
-            const origOpacity = mat.opacityNode as any;
-            mat.opacityNode = origOpacity
-              ? ((origOpacity.mul(dissolveAlpha) as any) ?? dissolveAlpha)
+            const nodeMaterial = mat as MeshStandardMaterialWithNodeProps &
+              THREE.Material;
+            const origOpacity = nodeMaterial.opacityNode as
+              | TslNodeLike
+              | null
+              | undefined;
+            nodeMaterial.opacityNode = origOpacity
+              ? (origOpacity.mul(dissolveAlpha) ?? dissolveAlpha)
               : dissolveAlpha;
 
-            const matWithEmissive = mat as any;
-            const origEmissive = matWithEmissive.emissiveNode as any;
-            matWithEmissive.emissiveNode = origEmissive
-              ? (origEmissive.add(emissiveBoost) as any)
+            const origEmissive = nodeMaterial.emissiveNode as
+              | TslNodeLike
+              | null
+              | undefined;
+            nodeMaterial.emissiveNode = origEmissive
+              ? origEmissive.add(emissiveBoost)
               : emissiveBoost;
 
             mat.alphaTest = 0.01;

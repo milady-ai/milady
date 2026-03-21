@@ -599,9 +599,14 @@ export function CharacterEditor({
       return;
     // Only apply defaults from the roster entry if this character is completely empty.
     // Otherwise, loading a custom character and falling back to a roster ID would wipe the custom data.
-    const isNamed = Boolean((currentCharacter as any).name?.trim());
+    const isNamed =
+      typeof currentCharacter.name === "string" &&
+      currentCharacter.name.trim().length > 0;
     const hasBioOrSystem = Boolean(
-      (currentCharacter as any).bio || (currentCharacter as any).system,
+      currentCharacter.bio ||
+        ("system" in currentCharacter &&
+          typeof currentCharacter.system === "string" &&
+          currentCharacter.system),
     );
     const hasMeaningfulContent = isNamed || hasBioOrSystem;
 
