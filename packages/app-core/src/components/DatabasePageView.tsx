@@ -51,7 +51,9 @@ export function DatabasePageView() {
       <div className="flex-1 min-h-0">
         {databaseSubTab === "tables" && <DatabaseView leftNav={leftNav} />}
         {databaseSubTab === "media" && <MediaGalleryView leftNav={leftNav} />}
-        {databaseSubTab === "vectors" && <VectorBrowserView leftNav={leftNav} />}
+        {databaseSubTab === "vectors" && (
+          <VectorBrowserView leftNav={leftNav} />
+        )}
       </div>
     </div>
   );

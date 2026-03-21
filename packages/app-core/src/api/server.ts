@@ -1497,7 +1497,7 @@ export function extractAndPersistOnboardingApiKey(
   return envKey;
 }
 
-function persistCompatOnboardingDefaults(
+export function persistCompatOnboardingDefaults(
   body: Record<string, unknown>,
 ): string | null {
   const name = typeof body.name === "string" ? body.name.trim() : "";
@@ -1534,6 +1534,30 @@ function persistCompatOnboardingDefaults(
 
   saveElizaConfig(config);
   return adminEntityId;
+}
+
+export function deriveCompatOnboardingReplayBody(
+  body: Record<string, unknown>,
+): {
+  isCloudMode: boolean;
+  replayBody:
+    | (Record<string, unknown> & { runMode: "cloud" })
+    | Record<string, unknown>;
+} {
+  const connection = body.connection as Record<string, unknown> | undefined;
+  const isCloudMode =
+    body.runMode === "cloud" ||
+    (connection !== null &&
+      typeof connection === "object" &&
+      connection.kind === "cloud-managed");
+
+  return {
+    isCloudMode,
+    replayBody:
+      isCloudMode && body.runMode !== "cloud"
+        ? { ...body, runMode: "cloud" as const }
+        : body,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -2427,18 +2451,11 @@ async function handleMiladyCompatRoute(
       // The upstream handler reads `body.runMode`, so we detect the
       // connection kind here and, if needed, inject `runMode: "cloud"` into
       // the replayed body so upstream also sets cloud.enabled correctly.
-      const connection = body.connection as Record<string, unknown> | undefined;
-      const isCloudMode =
-        body.runMode === "cloud" ||
-        (connection !== null &&
-          typeof connection === "object" &&
-          connection.kind === "cloud-managed");
+      const { isCloudMode, replayBody: replayBodyRecord } =
+        deriveCompatOnboardingReplayBody(body);
 
       if (isCloudMode && body.runMode !== "cloud") {
-        replayBody = Buffer.from(
-          JSON.stringify({ ...body, runMode: "cloud" }),
-          "utf8",
-        );
+        replayBody = Buffer.from(JSON.stringify(replayBodyRecord), "utf8");
       }
 
       // Mark onboarding complete in config — upstream also does this but
@@ -2884,12 +2901,10 @@ export function isSafeResetStateDir(
     return false;
   }
 
-  return normalizedState
-    .split(path.sep)
-    .some((segment) => {
-      const lower = segment.trim().toLowerCase();
-      return lower === ".eliza" || lower === ".milady";
-    });
+  return normalizedState.split(path.sep).some((segment) => {
+    const lower = segment.trim().toLowerCase();
+    return lower === ".eliza" || lower === ".milady";
+  });
 }
 
 export function findOwnPackageRoot(startDir: string): string {

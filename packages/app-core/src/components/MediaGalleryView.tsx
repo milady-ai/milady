@@ -278,160 +278,160 @@ export function MediaGalleryView({ leftNav }: { leftNav?: ReactNode }) {
       </div>
 
       <div className="flex-1 min-h-0 overflow-auto">
-      {error && (
-        <div className="p-2.5 border border-[var(--danger)] text-[var(--danger)] text-xs mb-3">
-          {error}
-        </div>
-      )}
-
-      {loading ? (
-        <div className="text-center py-16 text-[var(--muted)] text-sm italic">
-          {t("mediagalleryview.ScanningForMedia")}
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="text-center py-16">
-          <div className="text-[var(--muted)] text-sm mb-2">
-            {t("mediagalleryview.NoMediaFound")}
+        {error && (
+          <div className="p-2.5 border border-[var(--danger)] text-[var(--danger)] text-xs mb-3">
+            {error}
           </div>
-          <div className="text-[var(--muted)] text-xs">
-            {media.length === 0
-              ? "No images, videos, or audio files were detected in the database."
-              : "No items match the current filter."}
-          </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-          {filtered.map((item, i) => (
-            <button
-              type="button"
-              // biome-ignore lint/suspicious/noArrayIndexKey: composite key with index as tiebreaker
-              key={`${item.url}-${i}`}
-              className="bg-[var(--card)] border border-[var(--border)] p-0 cursor-pointer text-left hover:border-[var(--accent)] transition-colors group"
-              onClick={() => setLightboxItem(item)}
-            >
-              {/* Thumbnail area */}
-              <div className="w-full aspect-square bg-[var(--bg)] flex items-center justify-center overflow-hidden">
-                {item.type === "image" ? (
-                  <img
-                    src={normalizeMediaUrl(item.url)}
-                    alt={item.filename}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                    onError={(e) => {
-                      const image = e.target as HTMLImageElement;
-                      image.style.display = "none";
-                      if (image.parentElement) {
-                        image.parentElement.innerHTML =
-                          '<span style="font-size:24px">🖼</span>';
-                      }
-                    }}
-                  />
-                ) : item.type === "video" ? (
-                  <span className="text-2xl opacity-50">🎬</span>
-                ) : (
-                  <span className="text-2xl opacity-50">🎵</span>
-                )}
-              </div>
-              {/* Info */}
-              <div className="p-2">
-                <div className="text-[11px] text-[var(--txt)] truncate">
-                  {item.filename}
-                </div>
-                <div className="flex items-center gap-1 mt-1">
-                  <span
-                    className={`text-[9px] px-1.5 py-0.5 uppercase font-bold ${
-                      item.type === "image"
-                        ? "bg-blue-500/20 text-blue-400"
-                        : item.type === "video"
-                          ? "bg-purple-500/20 text-purple-400"
-                          : "bg-green-500/20 text-green-400"
-                    }`}
-                  >
-                    {item.type}
-                  </span>
-                  <span className="text-[9px] text-[var(--muted)] truncate">
-                    {item.source}
-                  </span>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      )}
+        )}
 
-      {/* Lightbox modal */}
-      {lightboxItem && (
-        <div
-          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-8"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setLightboxItem(null);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Escape" || e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              setLightboxItem(null);
-            }
-          }}
-          role="dialog"
-          aria-modal="true"
-        >
-          <div className="bg-[var(--card)] border border-[var(--border)] max-w-[90vw] max-h-[90vh] overflow-auto">
-            {/* Header */}
-            <div className="flex items-center justify-between p-3 border-b border-[var(--border)]">
-              <div className="text-xs text-[var(--txt)] font-medium truncate mr-4">
-                {lightboxItem.filename}
-              </div>
+        {loading ? (
+          <div className="text-center py-16 text-[var(--muted)] text-sm italic">
+            {t("mediagalleryview.ScanningForMedia")}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="text-[var(--muted)] text-sm mb-2">
+              {t("mediagalleryview.NoMediaFound")}
+            </div>
+            <div className="text-[var(--muted)] text-xs">
+              {media.length === 0
+                ? "No images, videos, or audio files were detected in the database."
+                : "No items match the current filter."}
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {filtered.map((item, i) => (
               <button
                 type="button"
-                className="text-[var(--muted)] hover:text-[var(--txt)] bg-transparent border-0 cursor-pointer text-lg px-2"
-                onClick={() => setLightboxItem(null)}
+                // biome-ignore lint/suspicious/noArrayIndexKey: composite key with index as tiebreaker
+                key={`${item.url}-${i}`}
+                className="bg-[var(--card)] border border-[var(--border)] p-0 cursor-pointer text-left hover:border-[var(--accent)] transition-colors group"
+                onClick={() => setLightboxItem(item)}
               >
-                ×
+                {/* Thumbnail area */}
+                <div className="w-full aspect-square bg-[var(--bg)] flex items-center justify-center overflow-hidden">
+                  {item.type === "image" ? (
+                    <img
+                      src={normalizeMediaUrl(item.url)}
+                      alt={item.filename}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      onError={(e) => {
+                        const image = e.target as HTMLImageElement;
+                        image.style.display = "none";
+                        if (image.parentElement) {
+                          image.parentElement.innerHTML =
+                            '<span style="font-size:24px">🖼</span>';
+                        }
+                      }}
+                    />
+                  ) : item.type === "video" ? (
+                    <span className="text-2xl opacity-50">🎬</span>
+                  ) : (
+                    <span className="text-2xl opacity-50">🎵</span>
+                  )}
+                </div>
+                {/* Info */}
+                <div className="p-2">
+                  <div className="text-[11px] text-[var(--txt)] truncate">
+                    {item.filename}
+                  </div>
+                  <div className="flex items-center gap-1 mt-1">
+                    <span
+                      className={`text-[9px] px-1.5 py-0.5 uppercase font-bold ${
+                        item.type === "image"
+                          ? "bg-blue-500/20 text-blue-400"
+                          : item.type === "video"
+                            ? "bg-purple-500/20 text-purple-400"
+                            : "bg-green-500/20 text-green-400"
+                      }`}
+                    >
+                      {item.type}
+                    </span>
+                    <span className="text-[9px] text-[var(--muted)] truncate">
+                      {item.source}
+                    </span>
+                  </div>
+                </div>
               </button>
-            </div>
-            {/* Content */}
-            <div className="p-4 flex items-center justify-center min-h-[200px]">
-              {lightboxItem.type === "image" ? (
-                <img
-                  src={normalizeMediaUrl(lightboxItem.url)}
-                  alt={lightboxItem.filename}
-                  className="max-w-full max-h-[70vh] object-contain"
-                />
-              ) : lightboxItem.type === "video" ? (
-                <video
-                  src={normalizeMediaUrl(lightboxItem.url)}
-                  controls
-                  className="max-w-full max-h-[70vh]"
+            ))}
+          </div>
+        )}
+
+        {/* Lightbox modal */}
+        {lightboxItem && (
+          <div
+            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-8"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setLightboxItem(null);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Escape" || e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setLightboxItem(null);
+              }
+            }}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="bg-[var(--card)] border border-[var(--border)] max-w-[90vw] max-h-[90vh] overflow-auto">
+              {/* Header */}
+              <div className="flex items-center justify-between p-3 border-b border-[var(--border)]">
+                <div className="text-xs text-[var(--txt)] font-medium truncate mr-4">
+                  {lightboxItem.filename}
+                </div>
+                <button
+                  type="button"
+                  className="text-[var(--muted)] hover:text-[var(--txt)] bg-transparent border-0 cursor-pointer text-lg px-2"
+                  onClick={() => setLightboxItem(null)}
                 >
-                  <track kind="captions" />
-                </video>
-              ) : (
-                <audio
-                  src={normalizeMediaUrl(lightboxItem.url)}
-                  controls
-                  className="w-full max-w-[400px]"
-                >
-                  <track kind="captions" />
-                </audio>
-              )}
-            </div>
-            {/* Footer info */}
-            <div className="p-3 border-t border-[var(--border)] text-[11px] text-[var(--muted)] flex gap-4">
-              <span>
-                {t("mediagalleryview.Type")} {lightboxItem.type}
-              </span>
-              <span>
-                {t("mediagalleryview.Source")} {lightboxItem.source}
-              </span>
-              {lightboxItem.createdAt && (
+                  ×
+                </button>
+              </div>
+              {/* Content */}
+              <div className="p-4 flex items-center justify-center min-h-[200px]">
+                {lightboxItem.type === "image" ? (
+                  <img
+                    src={normalizeMediaUrl(lightboxItem.url)}
+                    alt={lightboxItem.filename}
+                    className="max-w-full max-h-[70vh] object-contain"
+                  />
+                ) : lightboxItem.type === "video" ? (
+                  <video
+                    src={normalizeMediaUrl(lightboxItem.url)}
+                    controls
+                    className="max-w-full max-h-[70vh]"
+                  >
+                    <track kind="captions" />
+                  </video>
+                ) : (
+                  <audio
+                    src={normalizeMediaUrl(lightboxItem.url)}
+                    controls
+                    className="w-full max-w-[400px]"
+                  >
+                    <track kind="captions" />
+                  </audio>
+                )}
+              </div>
+              {/* Footer info */}
+              <div className="p-3 border-t border-[var(--border)] text-[11px] text-[var(--muted)] flex gap-4">
                 <span>
-                  {t("mediagalleryview.Date")} {lightboxItem.createdAt}
+                  {t("mediagalleryview.Type")} {lightboxItem.type}
                 </span>
-              )}
+                <span>
+                  {t("mediagalleryview.Source")} {lightboxItem.source}
+                </span>
+                {lightboxItem.createdAt && (
+                  <span>
+                    {t("mediagalleryview.Date")} {lightboxItem.createdAt}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
       </div>
     </div>
   );
