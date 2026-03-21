@@ -75,11 +75,7 @@ vi.mock("./components", () => {
     SettingsView: stub("SettingsView"),
     SharedCompanionScene: passthrough,
     ShellOverlays: stub("ShellOverlays"),
-    StartupFailureView: ({
-      error,
-    }: {
-      error: { message: string };
-    }) =>
+    StartupFailureView: ({ error }: { error: { message: string } }) =>
       React.createElement(
         "div",
         { "data-testid": "StartupFailureView" },
@@ -91,11 +87,7 @@ vi.mock("./components", () => {
 });
 
 vi.mock("./components/FlaminaGuide", () => ({
-  DeferredSetupChecklist: ({
-    children,
-  }: {
-    children?: React.ReactNode;
-  }) =>
+  DeferredSetupChecklist: ({ children }: { children?: React.ReactNode }) =>
     React.createElement(
       "div",
       { "data-testid": "DeferredSetupChecklist" },

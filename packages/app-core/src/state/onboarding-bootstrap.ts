@@ -116,13 +116,11 @@ export async function detectExistingOnboardingConnection(args: {
 
 export function deriveDetectedProviderPrefill(
   detected: readonly DetectedProviderCandidate[],
-):
-  | {
-      runMode: "local";
-      providerId: string;
-      apiKey: string;
-    }
-  | null {
+): {
+  runMode: "local";
+  providerId: string;
+  apiKey: string;
+} | null {
   for (const candidate of detected) {
     const providerId = candidate.id.trim();
     const apiKey = candidate.apiKey?.trim() ?? "";

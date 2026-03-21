@@ -272,13 +272,13 @@ export class VrmCameraManager {
 
     const yawRange = THREE.MathUtils.clamp(
       cameraAnimation.swayAmplitude * 4.2 +
-      cameraAnimation.rotationAmplitude * 3.8,
+        cameraAnimation.rotationAmplitude * 3.8,
       0.05,
       0.22,
     );
     const pitchRange = THREE.MathUtils.clamp(
       cameraAnimation.bobAmplitude * 1.8 +
-      cameraAnimation.rotationAmplitude * 1.4,
+        cameraAnimation.rotationAmplitude * 1.4,
       0.015,
       0.085,
     );

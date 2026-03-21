@@ -2844,12 +2844,10 @@ export function isSafeResetStateDir(
     return false;
   }
 
-  return normalizedState
-    .split(path.sep)
-    .some((segment) => {
-      const lower = segment.trim().toLowerCase();
-      return lower === ".eliza" || lower === ".milady";
-    });
+  return normalizedState.split(path.sep).some((segment) => {
+    const lower = segment.trim().toLowerCase();
+    return lower === ".eliza" || lower === ".milady";
+  });
 }
 
 export function findOwnPackageRoot(startDir: string): string {

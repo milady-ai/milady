@@ -151,11 +151,11 @@ describe("ReleaseCenterView auto-update guard", () => {
     expect(textOf(root)).toContain(
       "Move Milady.app to /Applications to enable in-place desktop updates.",
     );
-    expect(findButtonByText(root, "Check / Download Update").props.disabled).toBe(
-      true,
-    );
-    expect(findButtonByText(root, "Apply Downloaded Update").props.disabled).toBe(
-      true,
-    );
+    expect(
+      findButtonByText(root, "Check / Download Update").props.disabled,
+    ).toBe(true);
+    expect(
+      findButtonByText(root, "Apply Downloaded Update").props.disabled,
+    ).toBe(true);
   });
 });

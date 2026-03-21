@@ -3,9 +3,7 @@ import {
   runWithTrajectoryContext,
   setTrajectoryContextManager,
 } from "@elizaos/core";
-import {
-  installDatabaseTrajectoryLogger as upstreamInstall,
-} from "@elizaos/agent/runtime/trajectory-persistence";
+import { installDatabaseTrajectoryLogger as upstreamInstall } from "@elizaos/agent/runtime/trajectory-persistence";
 import { AsyncLocalStorage } from "node:async_hooks";
 
 export * from "@elizaos/agent/runtime/trajectory-persistence";
@@ -54,7 +52,11 @@ export async function installDatabaseTrajectoryLogger(runtime: any) {
   if (typeof originalUseModel !== "function") return;
 
   // Patch useModel on the instance to ensure trajectory context
-  runtime.useModel = async function (modelType: any, params: any, provider: any) {
+  runtime.useModel = async function (
+    modelType: any,
+    params: any,
+    provider: any,
+  ) {
     // Check if we already have a trajectory/step ID in context
     const context = getTrajectoryContext();
     if (context?.trajectoryStepId) {
@@ -76,7 +78,7 @@ export async function installDatabaseTrajectoryLogger(runtime: any) {
 
     try {
       return await runWithTrajectoryContext({ trajectoryStepId: stepId }, () =>
-        originalUseModel.call(this, modelType, params, provider)
+        originalUseModel.call(this, modelType, params, provider),
       );
     } finally {
       // Mark the orphan trajectory as completed immediately
