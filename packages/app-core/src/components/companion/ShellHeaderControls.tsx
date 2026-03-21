@@ -15,6 +15,11 @@ import { type ReactNode, useEffect, useState } from "react";
 
 export const HEADER_ICON_BUTTON_CLASSNAME =
   "inline-flex items-center justify-center w-11 h-11 min-w-[44px] min-h-[44px] border border-border/50 bg-bg/50 backdrop-blur-md cursor-pointer text-sm leading-none hover:border-accent hover:text-txt font-medium hover:-translate-y-0.5 transition-all duration-300 hover:shadow-[0_0_15px_rgba(var(--accent),0.5)] active:scale-95 rounded-xl text-txt shadow-sm";
+export const HEADER_BUTTON_STYLE = {
+  clipPath: "none",
+  WebkitClipPath: "none",
+  touchAction: "manipulation",
+} as const;
 
 type ShellHeaderTranslator = (key: string) => string;
 
@@ -159,12 +164,13 @@ export function ShellHeaderControls({
                     ? "border border-[#d8a108]/30 bg-bg/55 text-[#8a6500] shadow-sm dark:border-accent/25 dark:bg-bg/85 dark:text-[#f0b232]"
                     : "border border-transparent bg-transparent text-muted-strong hover:border-border/70 hover:bg-bg/85 hover:text-txt dark:text-muted dark:hover:border-border/60 dark:hover:bg-bg-hover/80 dark:hover:text-txt"
                 }`}
+                style={HEADER_BUTTON_STYLE}
                 aria-label={label}
                 aria-pressed={selected}
                 title={label}
                 data-testid={`ui-shell-toggle-${view}`}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="pointer-events-none h-4 w-4" />
               </button>
             );
           })}
@@ -195,13 +201,14 @@ export function ShellHeaderControls({
                 }
                 className={`${HEADER_ICON_BUTTON_CLASSNAME} sm:!w-auto sm:gap-1.5 sm:px-3.5`}
                 onClick={onToggleVoiceMute}
+                style={HEADER_BUTTON_STYLE}
               >
                 {chatAgentVoiceMuted ? (
-                  <VolumeX className="h-4 w-4 shrink-0" />
+                  <VolumeX className="pointer-events-none h-4 w-4 shrink-0" />
                 ) : (
-                  <Volume2 className="h-4 w-4 shrink-0" />
+                  <Volume2 className="pointer-events-none h-4 w-4 shrink-0" />
                 )}
-                <span className="hidden sm:inline">
+                <span className="pointer-events-none hidden sm:inline">
                   {t("companion.voiceToggle")}
                 </span>
               </button>
@@ -211,9 +218,10 @@ export function ShellHeaderControls({
                 title={t("companion.newChat")}
                 className={`${HEADER_ICON_BUTTON_CLASSNAME} sm:!w-auto sm:gap-1.5 sm:px-3.5`}
                 onClick={onNewChat}
+                style={HEADER_BUTTON_STYLE}
               >
-                <MessageCirclePlus className="h-4 w-4 shrink-0" />
-                <span className="hidden sm:inline">
+                <MessageCirclePlus className="pointer-events-none h-4 w-4 shrink-0" />
+                <span className="pointer-events-none hidden sm:inline">
                   {t("companion.newChatButton")}
                 </span>
               </button>
@@ -254,7 +262,7 @@ export function ShellHeaderControls({
             setUiTheme={setUiTheme}
             t={t}
             variant={controlsVariant}
-            className={`!h-10 !w-10 !min-h-10 !min-w-10 ${themeToggleClassName ?? ""}`}
+            className={`!h-11 !w-11 !min-h-[44px] !min-w-[44px] ${themeToggleClassName ?? ""}`}
           />
         </div>
         {trailingExtras}

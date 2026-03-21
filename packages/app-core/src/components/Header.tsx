@@ -5,6 +5,7 @@ import { AlertTriangle, CircleDollarSign, Menu } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import {
+  HEADER_BUTTON_STYLE,
   HEADER_ICON_BUTTON_CLASSNAME,
   ShellHeaderControls,
 } from "./companion/ShellHeaderControls";
@@ -145,8 +146,9 @@ export function Header({
             className={`hidden shrink-0 items-center gap-1.5 px-2.5 py-1.5 h-11 border rounded-md font-mono text-[11px] sm:text-xs no-underline transition-all duration-200 hover:border-accent hover:text-txt hover:shadow-sm sm:inline-flex ${elizaCloudCredits === null ? "border-muted text-muted" : creditColor}`}
             title={t("header.CloudCreditsBalanc")}
             onClick={openCloudBilling}
+            style={HEADER_BUTTON_STYLE}
           >
-            <CircleDollarSign className="w-3.5 h-3.5" />
+            <CircleDollarSign className="pointer-events-none w-3.5 h-3.5" />
             {cloudCreditsDisplay}
           </button>
         );
@@ -159,6 +161,7 @@ export function Header({
           className={`flex w-full items-center justify-between gap-3 px-3 py-3 border rounded-xl text-left no-underline transition-all duration-200 hover:border-accent hover:text-txt ${elizaCloudCredits === null ? "border-muted text-muted" : creditColor}`}
           title={t("header.CloudCreditsBalanc")}
           onClick={openCloudBilling}
+          style={HEADER_BUTTON_STYLE}
         >
           <span className="flex min-w-0 items-center gap-3">
             <CircleDollarSign className="h-4 w-4 shrink-0" />
@@ -261,8 +264,9 @@ export function Header({
                 onClick={() => setMobileMenuOpen(true)}
                 aria-label="Open navigation menu"
                 aria-expanded={mobileMenuOpen}
+                style={HEADER_BUTTON_STYLE}
               >
-                <Menu className="w-5 h-5" />
+                <Menu className="pointer-events-none w-5 h-5" />
               </button>
             ) : null
           }
@@ -280,23 +284,25 @@ export function Header({
                   <button
                     type="button"
                     key={group.label}
-                    className={`inline-flex items-center justify-center gap-0 xl:gap-1.5 shrink-0 px-2.5 md:px-3 xl:px-4 py-2 text-[12px] bg-transparent border border-transparent cursor-pointer transition-all duration-300 rounded-full ${
+                    data-testid={`header-nav-button-${primaryTab}`}
+                    className={`relative z-10 inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-0 xl:gap-1.5 shrink-0 px-3 md:px-3.5 xl:px-4 py-2.5 text-[12px] bg-transparent border border-transparent cursor-pointer transition-all duration-300 rounded-full ${
                       isActive
                         ? "text-accent font-bold bg-accent/15 shadow-[0_0_15px_rgba(var(--accent),0.18)] border-accent/40 ring-1 ring-inset ring-accent/20"
                         : "text-muted hover:text-txt hover:bg-bg-hover hover:border-border/50"
                     }`}
                     onClick={() => setTab(primaryTab)}
                     title={group.description}
+                    style={HEADER_BUTTON_STYLE}
                   >
                     <span
                       data-testid={`header-nav-icon-${primaryTab}`}
-                      className="inline-flex md:hidden xl:inline-flex"
+                      className="pointer-events-none inline-flex md:hidden xl:inline-flex"
                     >
                       <Icon className="w-4 h-4" />
                     </span>
                     <span
                       data-testid={`header-nav-label-${primaryTab}`}
-                      className="hidden md:inline"
+                      className="pointer-events-none hidden md:inline"
                     >
                       {t(NAV_LABEL_I18N_KEY[group.label] ?? group.label)}
                     </span>
@@ -322,6 +328,7 @@ export function Header({
             className="absolute inset-0 bg-black/30 backdrop-blur-sm w-full h-full border-0 cursor-pointer"
             onClick={() => setMobileMenuOpen(false)}
             aria-label="Close navigation menu"
+            style={HEADER_BUTTON_STYLE}
           />
 
           {/* Menu Panel */}
@@ -342,14 +349,17 @@ export function Header({
                             ? "border-accent/40 bg-accent/15 text-accent shadow-[0_0_15px_rgba(var(--accent),0.18)] ring-1 ring-inset ring-accent/20"
                             : "border-transparent bg-transparent text-txt hover:border-border/50 hover:bg-bg-hover"
                         }`}
-                        style={{ animationDelay: `${index * 50}ms` }}
+                        style={{
+                          ...HEADER_BUTTON_STYLE,
+                          animationDelay: `${index * 50}ms`,
+                        }}
                         onClick={() => {
                           setTab(primaryTab);
                           setMobileMenuOpen(false);
                         }}
                       >
                         <span
-                          className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 ${
+                          className={`pointer-events-none w-8 h-8 rounded-md flex items-center justify-center shrink-0 ${
                             isActive ? "bg-accent/20" : "bg-bg-accent"
                           }`}
                         >
@@ -357,7 +367,7 @@ export function Header({
                             className={`w-4 h-4 ${isActive ? "text-txt" : "text-muted"}`}
                           />
                         </span>
-                        <div className="flex-1 text-left">
+                        <div className="pointer-events-none flex-1 text-left">
                           <div className="font-medium">
                             {t(NAV_LABEL_I18N_KEY[group.label] ?? group.label)}
                           </div>

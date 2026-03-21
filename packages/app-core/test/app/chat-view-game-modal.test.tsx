@@ -624,7 +624,7 @@ describe("ChatView game-modal variant", () => {
     expect(textOf(tree.root).toLowerCase()).not.toContain("hi");
   });
 
-  it("routes transcript drags to companion camera while keeping the composer interactive", async () => {
+  it("keeps the companion transcript scrollable while leaving the composer interactive", async () => {
     mockUseApp.mockReturnValue(
       createContext({
         conversationMessages: [
@@ -652,10 +652,12 @@ describe("ChatView game-modal variant", () => {
       "data-no-camera-drag": "true",
     });
 
-    expect(String(messages.props.className)).toContain("pointer-events-none");
-    expect(String(messages.props.className)).toContain("select-none");
-    expect(String(messages.props.className)).toContain("overflow-hidden");
+    expect(messages.props["data-no-camera-drag"]).toBe(true);
+    expect(messages.props["data-no-camera-zoom"]).toBe(true);
+    expect(String(messages.props.className)).toContain("pointer-events-auto");
+    expect(String(messages.props.className)).toContain("overflow-y-auto");
     expect(messages.props.style.maskImage).toContain("linear-gradient");
+    expect(messages.props.style.touchAction).toBe("pan-y");
     expect(composer).toBeTruthy();
   });
 });

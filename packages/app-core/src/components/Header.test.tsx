@@ -46,11 +46,15 @@ vi.mock("lucide-react", () => ({
   CircleUserRound: () => React.createElement("span", null, "👤"),
   Bug: () => React.createElement("span", null, "🐛"),
   CircleDollarSign: () => React.createElement("span", null, "💰"),
+  MessageCirclePlus: () => React.createElement("span", null, "💬"),
   Menu: () => React.createElement("span", null, "☰"),
   Monitor: () => React.createElement("span", null, "🖥"),
+  PencilLine: () => React.createElement("span", null, "✏"),
   Smartphone: () => React.createElement("span", null, "📱"),
   UserRound: () => React.createElement("span", null, "👤"),
   Users: () => React.createElement("span", null, "👥"),
+  Volume2: () => React.createElement("span", null, "🔊"),
+  VolumeX: () => React.createElement("span", null, "🔇"),
   X: () => React.createElement("span", null, "✕"),
 }));
 
@@ -337,18 +341,23 @@ describe("Header", () => {
     const root = (testRenderer as ReactTestRenderer).root;
     const nav = root.findByType("nav");
     expect(String(nav.props.className)).toContain("hidden sm:flex");
+    const navButton = root.findByProps({
+      "data-testid": "header-nav-button-chat",
+    });
+    expect(String(navButton.props.className)).toContain("min-h-[44px]");
+    expect(navButton.props.style.clipPath).toBe("none");
     expect(
       String(
         root.findByProps({ "data-testid": "header-nav-icon-chat" }).props
           .className,
       ),
-    ).toContain("inline-flex md:hidden xl:inline-flex");
+    ).toContain("pointer-events-none");
     expect(
       String(
         root.findByProps({ "data-testid": "header-nav-label-chat" }).props
           .className,
       ),
-    ).toContain("hidden md:inline");
+    ).toContain("pointer-events-none");
     const desktopCreditButton = root.findByProps({
       "data-testid": "header-cloud-credits-desktop",
     });

@@ -595,10 +595,13 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
   // scrolling. Only smooth-scroll when the user has scrolled up and a new
   // message nudges them back down.
   useEffect(() => {
-    if (isGameModal) {
-      return;
-    }
-    if (!chatSending && visibleMsgs.length === 0) {
+    const displayedCompanionMessageCount =
+      (companionCarryover?.messages.length ?? 0) + gameModalVisibleMsgs.length;
+    if (
+      !chatSending &&
+      visibleMsgs.length === 0 &&
+      (!isGameModal || displayedCompanionMessageCount === 0)
+    ) {
       return;
     }
     const el = messagesRef.current;
@@ -609,7 +612,13 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
       top: el.scrollHeight,
       behavior: nearBottom ? "instant" : "smooth",
     });
-  }, [chatSending, isGameModal, visibleMsgs]);
+  }, [
+    chatSending,
+    companionCarryover,
+    gameModalVisibleMsgs,
+    isGameModal,
+    visibleMsgs,
+  ]);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -716,9 +725,11 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
       <div
         ref={messagesRef}
         data-testid="chat-messages-scroll"
+        data-no-camera-drag={isGameModal || undefined}
+        data-no-camera-zoom={isGameModal || undefined}
         className={
           isGameModal
-            ? "absolute inset-x-0 overflow-hidden select-none pointer-events-none"
+            ? "chat-native-scrollbar absolute inset-x-0 overflow-x-hidden overflow-y-auto pointer-events-auto"
             : "chat-native-scrollbar relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto py-2"
         }
         style={
@@ -727,8 +738,10 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
                 zIndex: 1,
                 top: COMPANION_MESSAGE_LAYER_TOP,
                 bottom: COMPANION_MESSAGE_LAYER_BOTTOM,
-                userSelect: "none",
-                WebkitUserSelect: "none",
+                overscrollBehavior: "contain",
+                touchAction: "pan-y",
+                userSelect: "text",
+                WebkitUserSelect: "text",
                 maskImage: COMPANION_MESSAGE_LAYER_MASK,
                 WebkitMaskImage: COMPANION_MESSAGE_LAYER_MASK,
               }
@@ -739,12 +752,12 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
       >
         {visibleMsgs.length === 0 && !chatSending ? (
           isGameModal ? (
-            <div className="flex h-full items-end px-1 py-4" />
+            <div className="flex min-h-full items-end px-1 py-4" />
           ) : (
             <ChatEmptyState agentName={agentName} />
           )
         ) : isGameModal ? (
-          <div className="flex h-full w-full flex-col justify-end gap-4 px-1 py-4">
+          <div className="flex min-h-full w-full flex-col justify-end gap-4 px-1 py-4">
             {companionCarryover?.messages.map((msg) => {
               const isUser = msg.role === "user";
               return (
