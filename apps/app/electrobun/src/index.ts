@@ -29,6 +29,7 @@ import {
   parseSettingsWindowAction,
 } from "./application-menu";
 import { showBackgroundNoticeOnce } from "./background-notice";
+import { isBrowserSurfaceEnabled } from "./browser-surface-flag";
 import {
   type CloudAuthWindowLike,
   CloudAuthWindowManager,
@@ -71,10 +72,12 @@ type HeartbeatMenuHealthResponse = {
 
 const HEARTBEAT_MENU_REFRESH_MS = 30_000;
 const CONFIG_EXPORT_FILE_NAME = "milady-config.json";
-// Browser surface stays off by default until the packaged WebGPU/browser path
-// is hardened across the supported desktop release targets.
-const BROWSER_SURFACE_ENABLED =
-  process.env.MILADY_ENABLE_BROWSER_SURFACE === "1";
+// Browser surface ships enabled by default. Set
+// MILADY_ENABLE_BROWSER_SURFACE=0 to force-disable it for local debugging or
+// release triage.
+const BROWSER_SURFACE_ENABLED = isBrowserSurfaceEnabled(
+  process.env as Record<string, string | undefined>,
+);
 let heartbeatMenuSnapshot: HeartbeatMenuSnapshot =
   EMPTY_HEARTBEAT_MENU_SNAPSHOT;
 let heartbeatMenuRefreshTimer: ReturnType<typeof setInterval> | null = null;
