@@ -37,20 +37,32 @@ describe("Electrobun test workflow drift", () => {
     );
   });
 
-  it("runs the canonical Electrobun release build graph on pull requests without publishing", () => {
+  it("validates the Electrobun release workflow contract on pull requests without running the full release matrix", () => {
     const workflow = fs.readFileSync(PR_RELEASE_WORKFLOW_PATH, "utf8");
 
+    expect(workflow).toContain("name: Validate Electrobun Release Workflow");
     expect(workflow).toContain("pull_request:");
     expect(workflow).toContain("branches: [main, develop]");
     expect(workflow).toContain("permissions:");
-    expect(workflow).toContain("contents: write");
-    expect(workflow).toContain("packages: write");
-    expect(workflow).toContain(
+    expect(workflow).toContain("contents: read");
+    expect(workflow).toContain('BUN_VERSION: "1.3.9"');
+    expect(workflow).toContain("name: Release Workflow Contract");
+    expect(workflow).toContain("bun install --frozen-lockfile --ignore-scripts");
+    expect(workflow).toContain("bun run postinstall");
+    expect(workflow).toContain("bunx vitest run");
+    expect(workflow).toContain("scripts/electrobun-release-workflow-drift.test.ts");
+    expect(workflow).toContain("scripts/electrobun-test-workflow-drift.test.ts");
+    expect(workflow).toContain("scripts/whisper-build-script-drift.test.ts");
+    expect(workflow).toContain("scripts/release-check.test.ts");
+    expect(workflow).toContain("bunx tsdown");
+    expect(workflow).toContain("node --import tsx scripts/write-build-info.ts");
+    expect(workflow).toContain("bun run release:check");
+    expect(workflow).not.toContain(
       "uses: ./.github/workflows/release-electrobun.yml",
     );
-    expect(workflow).toContain("draft: false");
-    expect(workflow).toContain("publish_release: false");
-    expect(workflow).toContain("publish_docker: false");
-    expect(workflow).toContain("secrets: inherit");
+    expect(workflow).not.toContain("publish_release: false");
+    expect(workflow).not.toContain("publish_docker: false");
+    expect(workflow).not.toContain("secrets: inherit");
+    expect(workflow).not.toContain("packages: write");
   });
 });
