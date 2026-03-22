@@ -904,7 +904,9 @@ export function CloudDashboard() {
             {t("elizaclouddashboard.CloudDashboard")}
           </h2>
           <span className="text-xs text-muted">·</span>
-          <span className="text-xs text-muted">{t("elizaclouddashboard.ManageInstance")}</span>
+          <span className="text-xs text-muted">
+            {t("elizaclouddashboard.ManageInstance")}
+          </span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -941,7 +943,9 @@ export function CloudDashboard() {
             onClick={handleRefresh}
             disabled={refreshing}
           >
-            <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${refreshing ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`w-3.5 h-3.5 mr-1.5 ${refreshing ? "animate-spin" : ""}`}
+            />
             {t("common.refresh")}
           </Button>
           <Button
@@ -963,11 +967,16 @@ export function CloudDashboard() {
           {/* ── Balance bar ───────────────────────────────────────── */}
           <div className="flex items-center justify-between py-4">
             <div className="flex items-baseline gap-3">
-              <span className={`text-3xl font-bold tracking-tight ${creditStatusColor}`}>
-                {cloudCurrency === "USD" ? "$" : `${cloudCurrency} `}{cloudBalance.toFixed(2)}
+              <span
+                className={`text-3xl font-bold tracking-tight ${creditStatusColor}`}
+              >
+                {cloudCurrency === "USD" ? "$" : `${cloudCurrency} `}
+                {cloudBalance.toFixed(2)}
               </span>
               <span className="text-sm text-muted">credits</span>
-              {billingLoading && <Loader2 className="h-4 w-4 animate-spin text-muted" />}
+              {billingLoading && (
+                <Loader2 className="h-4 w-4 animate-spin text-muted" />
+              )}
             </div>
             <span
               className={`rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
@@ -1014,7 +1023,9 @@ export function CloudDashboard() {
               <div className="rounded-xl border border-border/50 bg-bg/30 p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <CreditCard className="h-4 w-4 text-muted" />
-                  <span className="text-xs font-semibold">{t("elizaclouddashboard.PayWithCard")}</span>
+                  <span className="text-xs font-semibold">
+                    {t("elizaclouddashboard.PayWithCard")}
+                  </span>
                 </div>
                 <div className="flex flex-wrap gap-1.5 mb-3">
                   {BILLING_PRESET_AMOUNTS.map((amount) => (
@@ -1049,7 +1060,11 @@ export function CloudDashboard() {
                     disabled={checkoutBusy || billingLoading}
                     onClick={() => void handleStartCheckout()}
                   >
-                    {checkoutBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Pay"}
+                    {checkoutBusy ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      "Pay"
+                    )}
                   </Button>
                 </div>
               </div>
@@ -1058,7 +1073,9 @@ export function CloudDashboard() {
               <div className="rounded-xl border border-border/50 bg-bg/30 p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Wallet className="h-4 w-4 text-muted" />
-                  <span className="text-xs font-semibold">{t("elizaclouddashboard.PayWithCrypto")}</span>
+                  <span className="text-xs font-semibold">
+                    {t("elizaclouddashboard.PayWithCrypto")}
+                  </span>
                 </div>
                 <p className="text-[11px] text-muted mb-3">
                   {hasAgentWallet
@@ -1074,7 +1091,9 @@ export function CloudDashboard() {
                         {readString(cryptoQuote.currency) ?? "USDC"}{" "}
                         {readString(cryptoQuote.amount) ?? "0"}
                       </span>{" "}
-                      <span className="text-muted">on {readString(cryptoQuote.network) ?? "—"}</span>
+                      <span className="text-muted">
+                        on {readString(cryptoQuote.network) ?? "—"}
+                      </span>
                     </div>
                     {readString(cryptoQuote.payToAddress) && (
                       <code className="block rounded-lg border border-border/40 bg-bg/30 px-2 py-1.5 text-[10px] text-txt-strong break-all">
@@ -1087,7 +1106,11 @@ export function CloudDashboard() {
                           variant="outline"
                           size="sm"
                           className="rounded-lg text-xs h-8 flex-1"
-                          onClick={() => void openExternalUrl(readString(cryptoQuote.paymentLinkUrl) ?? "")}
+                          onClick={() =>
+                            void openExternalUrl(
+                              readString(cryptoQuote.paymentLinkUrl) ?? "",
+                            )
+                          }
                         >
                           <ExternalLink className="mr-1 h-3 w-3" />
                           Hosted
@@ -1098,13 +1121,21 @@ export function CloudDashboard() {
                         size="sm"
                         className="rounded-lg text-xs h-8 flex-1"
                         disabled={
-                          cryptoPayBusy || !hasAgentWallet || !hasWalletFunds ||
-                          readString(cryptoQuote.network)?.toLowerCase() !== "bsc" ||
-                          !readString(cryptoQuote.payToAddress) || !readString(cryptoQuote.amount)
+                          cryptoPayBusy ||
+                          !hasAgentWallet ||
+                          !hasWalletFunds ||
+                          readString(cryptoQuote.network)?.toLowerCase() !==
+                            "bsc" ||
+                          !readString(cryptoQuote.payToAddress) ||
+                          !readString(cryptoQuote.amount)
                         }
                         onClick={() => void handlePayCryptoFromAgentWallet()}
                       >
-                        {cryptoPayBusy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Pay from wallet"}
+                        {cryptoPayBusy ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          "Pay from wallet"
+                        )}
                       </Button>
                     </div>
                   </div>
@@ -1115,7 +1146,9 @@ export function CloudDashboard() {
                     disabled={cryptoBusy || billingLoading}
                     onClick={() => void handleCreateCryptoQuote()}
                   >
-                    {cryptoBusy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    {cryptoBusy ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : null}
                     {t("elizaclouddashboard.PayWithCrypto")}
                   </Button>
                 )}
@@ -1145,13 +1178,18 @@ export function CloudDashboard() {
               </div>
               <Switch
                 checked={autoTopUpEnabled}
-                onChange={(v) => dispatchAutoTopUpForm({ type: "setEnabled", value: v })}
+                onChange={(v) =>
+                  dispatchAutoTopUpForm({ type: "setEnabled", value: v })
+                }
                 aria-label={t("elizaclouddashboard.ToggleAutoTopUp")}
               />
             </div>
             <div className="flex items-end gap-3">
               <div className="flex-1 space-y-1">
-                <label htmlFor="cloud-auto-topup-threshold" className="text-[11px] text-muted">
+                <label
+                  htmlFor="cloud-auto-topup-threshold"
+                  className="text-[11px] text-muted"
+                >
                   Refill when below
                 </label>
                 <Input
@@ -1161,12 +1199,20 @@ export function CloudDashboard() {
                   max={String(autoTopUpMaxThreshold)}
                   step="1"
                   value={autoTopUpThreshold}
-                  onChange={(e) => dispatchAutoTopUpForm({ type: "setThreshold", value: e.target.value })}
+                  onChange={(e) =>
+                    dispatchAutoTopUpForm({
+                      type: "setThreshold",
+                      value: e.target.value,
+                    })
+                  }
                   className="rounded-lg bg-bg h-9"
                 />
               </div>
               <div className="flex-1 space-y-1">
-                <label htmlFor="cloud-auto-topup-amount" className="text-[11px] text-muted">
+                <label
+                  htmlFor="cloud-auto-topup-amount"
+                  className="text-[11px] text-muted"
+                >
                   Top-up amount
                 </label>
                 <Input
@@ -1176,17 +1222,26 @@ export function CloudDashboard() {
                   max={String(autoTopUpMaxAmount)}
                   step="1"
                   value={autoTopUpAmount}
-                  onChange={(e) => dispatchAutoTopUpForm({ type: "setAmount", value: e.target.value })}
+                  onChange={(e) =>
+                    dispatchAutoTopUpForm({
+                      type: "setAmount",
+                      value: e.target.value,
+                    })
+                  }
                   className="rounded-lg bg-bg h-9"
                 />
               </div>
               <Button
                 variant="outline"
                 className="rounded-lg h-9 px-4"
-                disabled={billingSettingsBusy || billingLoading || !autoTopUpForm.dirty}
+                disabled={
+                  billingSettingsBusy || billingLoading || !autoTopUpForm.dirty
+                }
                 onClick={() => void handleSaveBillingSettings()}
               >
-                {billingSettingsBusy ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
+                {billingSettingsBusy ? (
+                  <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                ) : null}
                 Save
               </Button>
             </div>
@@ -1292,7 +1347,11 @@ export function CloudDashboard() {
                       onClick={handleDeployAgent}
                       disabled={deploying || !deployAgentName.trim()}
                     >
-                      {deploying ? <Loader2 className="w-3 h-3 animate-spin" /> : t("elizaclouddashboard.Deploy")}
+                      {deploying ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        t("elizaclouddashboard.Deploy")
+                      )}
                     </Button>
                     <Button
                       variant="ghost"

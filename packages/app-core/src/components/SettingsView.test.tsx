@@ -84,7 +84,8 @@ vi.mock("./MediaSettingsSection", () => ({
 }));
 
 vi.mock("./PermissionsSection", () => ({
-  PermissionsSection: () => React.createElement("div", null, "PermissionsSection"),
+  PermissionsSection: () =>
+    React.createElement("div", null, "PermissionsSection"),
 }));
 
 vi.mock("./ProviderSwitcher", () => ({

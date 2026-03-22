@@ -72,7 +72,8 @@ const SUB_TABS: Array<{ id: SubTab; label: string; description: string }> = [
   {
     id: "desktop",
     label: "Desktop",
-    description: "Native runtime diagnostics, detached windows, file dialogs, clipboard, and shell controls",
+    description:
+      "Native runtime diagnostics, detached windows, file dialogs, clipboard, and shell controls",
   },
   // {
   //   id: "lifo",

@@ -308,18 +308,25 @@ export function ReleaseCenterView() {
     action();
   };
 
-  const appVersion = (updateStatus as AppReleaseStatus | null | undefined)?.currentVersion ?? "—";
+  const appVersion =
+    (updateStatus as AppReleaseStatus | null | undefined)?.currentVersion ??
+    "—";
   const desktopVersion = nativeUpdater?.currentVersion ?? "—";
   const channel = nativeUpdater?.channel ?? "—";
-  const latestVersion = (updateStatus as AppReleaseStatus | null | undefined)?.latestVersion ?? "Current";
-  const lastChecked = (updateStatus as AppReleaseStatus | null | undefined)?.lastCheckAt
+  const latestVersion =
+    (updateStatus as AppReleaseStatus | null | undefined)?.latestVersion ??
+    "Current";
+  const lastChecked = (updateStatus as AppReleaseStatus | null | undefined)
+    ?.lastCheckAt
     ? new Date((updateStatus as AppReleaseStatus).lastCheckAt!).toLocaleString()
     : "Not yet";
   const updaterStatus = nativeUpdater?.updateReady
     ? "Update ready"
     : nativeUpdater?.updateAvailable
       ? "Update available"
-      : (typeof nativeUpdater?.lastStatus === "string" ? nativeUpdater.lastStatus : "Idle");
+      : typeof nativeUpdater?.lastStatus === "string"
+        ? nativeUpdater.lastStatus
+        : "Idle";
 
   return (
     <div className="space-y-0">
@@ -371,7 +378,11 @@ export function ReleaseCenterView() {
           className="h-8 rounded-lg text-xs"
           disabled={busyAction === "check-updates" || updateLoading}
           onClick={() =>
-            void runAction("check-updates", checkForDesktopUpdate, "Desktop update check started.")
+            void runAction(
+              "check-updates",
+              checkForDesktopUpdate,
+              "Desktop update check started.",
+            )
           }
         >
           Check for Updates
@@ -382,7 +393,11 @@ export function ReleaseCenterView() {
             className="h-8 rounded-lg text-xs"
             disabled={busyAction === "apply-update"}
             onClick={() =>
-              void runAction("apply-update", applyDesktopUpdate, "Applying downloaded update.")
+              void runAction(
+                "apply-update",
+                applyDesktopUpdate,
+                "Applying downloaded update.",
+              )
             }
           >
             Apply Update
@@ -394,7 +409,11 @@ export function ReleaseCenterView() {
           className="h-8 rounded-lg text-xs"
           disabled={busyAction === "refresh" || updateLoading}
           onClick={() =>
-            void runAction("refresh", refreshReleaseState, "Release status refreshed.")
+            void runAction(
+              "refresh",
+              refreshReleaseState,
+              "Release status refreshed.",
+            )
           }
         >
           Refresh
@@ -405,7 +424,11 @@ export function ReleaseCenterView() {
           className="h-8 rounded-lg text-xs"
           disabled={busyAction === "detach-release"}
           onClick={() =>
-            void runAction("detach-release", detachReleaseCenter, "Detached release center opened.")
+            void runAction(
+              "detach-release",
+              detachReleaseCenter,
+              "Detached release center opened.",
+            )
           }
         >
           Open Release Center
@@ -435,7 +458,11 @@ export function ReleaseCenterView() {
             className="h-8 rounded-lg text-xs"
             disabled={busyAction === "open-release-notes"}
             onClick={() =>
-              void runAction("open-release-notes", openReleaseNotesWindow, "Release notes window opened.")
+              void runAction(
+                "open-release-notes",
+                openReleaseNotesWindow,
+                "Release notes window opened.",
+              )
             }
           >
             Open
@@ -445,10 +472,16 @@ export function ReleaseCenterView() {
             variant="ghost"
             className="h-8 rounded-lg text-xs text-muted"
             onClick={() =>
-              void runAction("reset-release-url", async () => {
-                setReleaseNotesUrlDirty(false);
-                setReleaseNotesUrl(normalizeReleaseNotesUrl(nativeUpdater?.baseUrl));
-              }, "Release notes URL reset.")
+              void runAction(
+                "reset-release-url",
+                async () => {
+                  setReleaseNotesUrlDirty(false);
+                  setReleaseNotesUrl(
+                    normalizeReleaseNotesUrl(nativeUpdater?.baseUrl),
+                  );
+                },
+                "Release notes URL reset.",
+              )
             }
           >
             Reset
