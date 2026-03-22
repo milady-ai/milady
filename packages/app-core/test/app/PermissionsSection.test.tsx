@@ -179,6 +179,50 @@ function ensureNavigatorPermissionMocks(): void {
   }
 }
 
+const BRIDGE_CHANNELS = {
+  permissionsGetAll: "permissions:getAll",
+  permissionsIsShellEnabled: "permissions:isShellEnabled",
+  permissionsGetPlatform: "permissions:getPlatform",
+  permissionsRequest: "permissions:request",
+  permissionsOpenSettings: "permissions:openSettings",
+  permissionsSetShellEnabled: "permissions:setShellEnabled",
+} as const;
+
+function installDesktopBridgeRpcMock(): void {
+  const requestEntries = Object.entries(BRIDGE_CHANNELS).map(
+    ([rpcMethod, ipcChannel]) => [
+      rpcMethod,
+      (params?: unknown) =>
+        mockInvokeDesktopBridgeRequest({
+          rpcMethod,
+          ipcChannel,
+          params,
+        }),
+    ],
+  );
+
+  (
+    window as typeof window & {
+      __MILADY_ELECTROBUN_RPC__?: Record<string, unknown>;
+    }
+  ).__MILADY_ELECTROBUN_RPC__ = {
+    request: Object.fromEntries(requestEntries),
+    onMessage: (message: string, listener: (payload: unknown) => void) => {
+      if (message === "permissionsChanged") {
+        permissionBridgeListener.current = listener;
+      }
+    },
+    offMessage: (message: string, listener: (payload: unknown) => void) => {
+      if (
+        message === "permissionsChanged" &&
+        permissionBridgeListener.current === listener
+      ) {
+        permissionBridgeListener.current = null;
+      }
+    },
+  };
+}
+
 // ====================================================================
 
 describe("PermissionsSection", () => {
@@ -204,6 +248,7 @@ describe("PermissionsSection", () => {
 
   beforeEach(() => {
     ensureNavigatorPermissionMocks();
+    installDesktopBridgeRpcMock();
     mockUseApp.mockReset();
     mockIsWeb.mockReturnValue(false);
     mockIsDesktop.mockReturnValue(true);
@@ -383,6 +428,42 @@ describe("PermissionsSection", () => {
     expect(text).not.toContain("permissionssection.OpenSettings");
   });
 
+  it("shows plain-English permission badges in desktop settings", async () => {
+    mockUseApp.mockReturnValue(baseContext());
+    mockInvokeDesktopBridgeRequest.mockImplementation(
+      async (options: { rpcMethod: string }) => {
+        if (options.rpcMethod === "permissionsGetAll") {
+          return {
+            ...defaultPermissions,
+            "screen-recording": {
+              id: "screen-recording",
+              status: "denied",
+              canRequest: false,
+            },
+          };
+        }
+        if (options.rpcMethod === "permissionsIsShellEnabled") {
+          return true;
+        }
+        if (options.rpcMethod === "permissionsGetPlatform") {
+          return "darwin";
+        }
+        return null;
+      },
+    );
+
+    let tree: TestRenderer.ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(PermissionsSection));
+    });
+
+    const text = collectText(tree?.root);
+    expect(text).toContain("Off in Settings");
+    expect(text).toContain("Not Asked");
+    expect(text).not.toContain("Denied");
+    expect(text).not.toContain("Not Set");
+  });
+
   it("reconciles camera status from renderer permissions when already granted", async () => {
     mockUseApp.mockReturnValue(baseContext());
     mockInvokeDesktopBridgeRequest.mockImplementation(
@@ -547,6 +628,80 @@ describe("PermissionsSection", () => {
       params: { forceRefresh: true },
     });
     expect(mockRefreshPermissions).not.toHaveBeenCalled();
+  });
+
+  it("rechecks permissions after opening settings", async () => {
+    vi.useFakeTimers();
+
+    try {
+      mockUseApp.mockReturnValue(baseContext());
+      mockInvokeDesktopBridgeRequest.mockImplementation(
+        async (options: { rpcMethod: string }) => {
+          if (options.rpcMethod === "permissionsGetAll") {
+            return {
+              ...defaultPermissions,
+              camera: {
+                id: "camera",
+                status: "denied",
+                canRequest: false,
+              },
+            };
+          }
+          if (options.rpcMethod === "permissionsIsShellEnabled") {
+            return true;
+          }
+          if (options.rpcMethod === "permissionsGetPlatform") {
+            return "darwin";
+          }
+          return null;
+        },
+      );
+
+      let tree: TestRenderer.ReactTestRenderer | undefined;
+      await act(async () => {
+        tree = TestRenderer.create(React.createElement(PermissionsSection));
+      });
+
+      const root = tree?.root;
+      expect(root).toBeDefined();
+      if (!root) {
+        throw new Error("PermissionsSection root not rendered");
+      }
+
+      const openSettingsButton = findButtonsByAriaLabel(
+        root,
+        "Open Settings Camera",
+      )[0];
+      expect(openSettingsButton).toBeDefined();
+
+      mockInvokeDesktopBridgeRequest.mockClear();
+
+      await act(async () => {
+        openSettingsButton.props.onClick();
+        await Promise.resolve();
+      });
+
+      const countRefreshCalls = () =>
+        mockInvokeDesktopBridgeRequest.mock.calls.filter(
+          ([options]) => options.rpcMethod === "permissionsGetAll",
+        ).length;
+
+      expect(countRefreshCalls()).toBe(1);
+
+      await act(async () => {
+        vi.advanceTimersByTime(1500);
+        await Promise.resolve();
+      });
+      expect(countRefreshCalls()).toBe(2);
+
+      await act(async () => {
+        vi.advanceTimersByTime(2500);
+        await Promise.resolve();
+      });
+      expect(countRefreshCalls()).toBe(3);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("refreshes from the bridge when permissionsChanged fires", async () => {

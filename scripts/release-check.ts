@@ -764,6 +764,36 @@ function assertInnoBuildScriptHasTimeoutAndHeartbeat() {
   }
 }
 
+function assertInnoTemplateTargetsBundledLauncher() {
+  const template = readFileSync("packaging/inno/Milady.iss", "utf8");
+  const requiredSnippets = [
+    '#define MyAppExeName "bin\\launcher.exe"',
+    "UninstallDisplayIcon={app}\\{#MyAppExeName}",
+    'Name: "{autoprograms}\\{#MyDefaultGroupName}\\{#MyAppName}"; Filename: "{app}\\{#MyAppExeName}"',
+    'Name: "{autodesktop}\\{#MyAppName}"; Filename: "{app}\\{#MyAppExeName}"; Tasks: desktopicon',
+  ];
+  const missingSnippets = requiredSnippets.filter(
+    (snippet) => !template.includes(snippet),
+  );
+
+  if (missingSnippets.length > 0) {
+    console.error(
+      "release-check: Milady.iss must point Windows shortcuts and uninstall metadata at bin\\launcher.exe.",
+    );
+    for (const snippet of missingSnippets) {
+      console.error(`  - ${snippet}`);
+    }
+    process.exit(1);
+  }
+
+  if (template.includes('#define MyAppExeName "launcher.exe"')) {
+    console.error(
+      "release-check: Milady.iss must not point Windows shortcuts at {app}\\launcher.exe; the bundled launcher lives under bin\\.",
+    );
+    process.exit(1);
+  }
+}
+
 function assertMacSmokeScriptLaunchesPackagedLauncherDirectly() {
   const script = readFileSync(
     "apps/app/electrobun/scripts/smoke-test.sh",
@@ -901,6 +931,7 @@ function main() {
   assertWindowsSmokeScriptHasLeadingParamBlock();
   assertWindowsInstallerProofScript();
   assertInnoBuildScriptHasTimeoutAndHeartbeat();
+  assertInnoTemplateTargetsBundledLauncher();
   assertMacSmokeScriptLaunchesPackagedLauncherDirectly();
   assertServerDynamicHyperscapeImport();
   assertStartApiServerCatchBlockSafety();

@@ -28,6 +28,14 @@ import type { ConfigUiHint } from "../types";
 import { ApiKeyConfig } from "./ApiKeyConfig";
 import { SubscriptionStatus } from "./SubscriptionStatus";
 
+const SUBSCRIPTION_PROVIDER_LABEL_FALLBACKS: Record<
+  SubscriptionProviderSelectionId,
+  string
+> = {
+  "anthropic-subscription": "Claude Subscription",
+  "openai-subscription": "ChatGPT Subscription",
+};
+
 interface PluginInfo {
   id: string;
   name: string;
@@ -69,6 +77,21 @@ interface ProviderSwitcherProps {
   handleCloudDisconnect?: () => Promise<void>;
   setState?: (key: string, value: unknown) => void;
   setTab?: (tab: string) => void;
+}
+
+function getSubscriptionProviderLabel(
+  provider: {
+    id: SubscriptionProviderSelectionId;
+    labelKey: string;
+  },
+  t: (key: string) => string,
+): string {
+  const translated = t(provider.labelKey);
+  if (translated !== provider.labelKey) {
+    return translated;
+  }
+
+  return SUBSCRIPTION_PROVIDER_LABEL_FALLBACKS[provider.id] ?? provider.id;
 }
 
 export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
@@ -517,7 +540,7 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
     { id: "pi-ai", label: t("providerswitcher.piAi"), disabled: false },
     ...SUBSCRIPTION_PROVIDER_SELECTIONS.map((provider) => ({
       id: provider.id,
-      label: t(provider.labelKey),
+      label: getSubscriptionProviderLabel(provider, t),
       disabled: false,
     })),
     ...allAiProviders.map((provider) => ({

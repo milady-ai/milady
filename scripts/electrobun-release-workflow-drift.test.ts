@@ -48,6 +48,7 @@ const WINDOWS_PACKAGED_BOOTSTRAP_HELPER_PATH = path.join(
   "apps/app/test/electrobun-packaged/windows-bootstrap.ts",
 );
 const INNO_BUILD_SCRIPT_PATH = path.join(ROOT, "packaging/inno/build-inno.ps1");
+const INNO_TEMPLATE_PATH = path.join(ROOT, "packaging/inno/Milady.iss");
 const ELECTROBUN_CONFIG_PATH = path.join(
   ROOT,
   "apps/app/electrobun/electrobun.config.ts",
@@ -375,6 +376,20 @@ describe("Electrobun release workflow drift", () => {
       'Join-Path $sourceDir "Resources\\app\\milady-dist\\entry.js"',
     );
     expect(script).toContain("Resolve-Path $sourceDir");
+  });
+
+  it("points Windows installer shortcuts at the bundled bin launcher", () => {
+    const template = fs.readFileSync(INNO_TEMPLATE_PATH, "utf8");
+
+    expect(template).toContain('#define MyAppExeName "bin\\launcher.exe"');
+    expect(template).toContain("UninstallDisplayIcon={app}\\{#MyAppExeName}");
+    expect(template).toContain(
+      'Name: "{autoprograms}\\{#MyDefaultGroupName}\\{#MyAppName}"; Filename: "{app}\\{#MyAppExeName}"',
+    );
+    expect(template).toContain(
+      'Name: "{autodesktop}\\{#MyAppName}"; Filename: "{app}\\{#MyAppExeName}"; Tasks: desktopicon',
+    );
+    expect(template).not.toContain('#define MyAppExeName "launcher.exe"');
   });
 
   it("bounds hung Inno compiler runs with heartbeat logging and a hard timeout", () => {
