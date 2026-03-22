@@ -21,6 +21,22 @@ function extractAddedDiffLines(diffChunks) {
     .join("\n");
 }
 
+function extractRemovedDiffLines(diffChunks) {
+  return diffChunks
+    .split("\n")
+    .filter((line) => line.startsWith("-") && !line.startsWith("---"))
+    .map((line) => line.slice(1))
+    .join("\n");
+}
+
+function countPatternMatches(text, pattern) {
+  const flags = pattern.flags.includes("g")
+    ? pattern.flags
+    : `${pattern.flags}g`;
+  const globalPattern = new RegExp(pattern.source, flags);
+  return [...text.matchAll(globalPattern)].length;
+}
+
 function normalizeExecError(error) {
   return {
     ok: false,
@@ -123,8 +139,12 @@ export function decisionFromFindings({ classification, issues }) {
 export function scanDiffTextForBlockedPatterns(diffChunks) {
   const issues = [];
   const addedLines = extractAddedDiffLines(diffChunks);
+  const removedLines = extractRemovedDiffLines(diffChunks);
 
-  if (ANY_TYPE_PATTERN.test(addedLines)) {
+  if (
+    countPatternMatches(addedLines, ANY_TYPE_PATTERN) >
+    countPatternMatches(removedLines, ANY_TYPE_PATTERN)
+  ) {
     issues.push(
       "Potential `any` usage introduced or modified. Verify strict typing is necessary.",
     );
