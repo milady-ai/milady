@@ -31,6 +31,9 @@ import {
   sendUpdate,
 } from "../utils/llmHelpers";
 import { ClosePositionParamsSchema } from "../utils/llmSchemas";
+import { evaluatePreTradeGate } from "../autonomous/gates/preTrade";
+import { storesInitialized, getThesisStore, getGoalStore, getTradeJournal } from "../autonomous/stores/registry";
+import { MAX_DAILY_LOSS_USD_DEFAULT } from "../constants";
 
 // =============================================================================
 // Types
@@ -238,6 +241,56 @@ export const closePositionAction: Action = {
 
       let responseText: string;
       let orderResult: unknown;
+
+      // ── Autonomous pre-trade gate (close mode) ────────────────────
+      const isAutonomous = Boolean((message.content as Record<string, unknown>)?.autonomous);
+      const thesisId = (message.content as Record<string, unknown>)?.thesisId as string | undefined;
+
+      if (storesInitialized()) {
+        try {
+          const maxDailyLoss = parseFloat(
+            runtime.getSetting("POLYMARKET_MAX_DAILY_LOSS_USD") || String(MAX_DAILY_LOSS_USD_DEFAULT)
+          );
+
+          // Pass real balance even for closes — the gate skips the balance check
+          // via isClose, but passing real data avoids fragility if logic changes.
+          const polyService = runtime.getService(POLYMARKET_SERVICE_NAME) as PolymarketService | undefined;
+          const closeAccountState = polyService?.getCachedAccountState();
+          const closeUsdcBalance = closeAccountState?.balances?.collateral
+            ? parseFloat(closeAccountState.balances.collateral.balance)
+            : 0;
+
+          const gateResult = await evaluatePreTradeGate(
+            {
+              tokenId, side: "sell", price: bestBidResult.price,
+              size: positionSize, isAutonomous, isClose: true,
+              thesisId,
+            },
+            { thesisStore: getThesisStore(), goalStore: getGoalStore(), tradeJournal: getTradeJournal() },
+            {
+              usdcBalance: closeUsdcBalance,
+              dailyLossUsd: getTradeJournal().getDailyRealizedPnl(),
+              maxDailyLossUsd: maxDailyLoss,
+              unrealizedPnl: 0,
+            }
+          );
+
+          // Closes are only blocked by balance/market-status checks
+          if (!gateResult.allowed) {
+            runtime.logger.warn(`[closePositionAction] Pre-trade gate blocked close: ${gateResult.reason}`);
+            await sendError(callback, gateResult.reason!, "Pre-trade gate");
+            return { success: false, text: gateResult.reason!, error: "gate_blocked" };
+          }
+
+          if (gateResult.warnings.length > 0) {
+            for (const w of gateResult.warnings) {
+              runtime.logger.warn(`[closePositionAction] Gate warning: ${w}`);
+            }
+          }
+        } catch (gateError) {
+          runtime.logger.warn(`[closePositionAction] Pre-trade gate error: ${gateError}`);
+        }
+      }
 
       if (orderType === "market") {
         // Try FOK market order for immediate fill
