@@ -82,6 +82,7 @@ const CONNECTORS = new Set([
   "twitch",
   "nextcloud-talk",
   "instagram",
+  "wechat",
 ]);
 
 const SOCIAL_CHAT_CONNECTORS = new Set([
@@ -156,6 +157,7 @@ const SETUP_GUIDE_ANCHORS = {
   tlon: "#tlon-urbit",
   zalo: "#zalo-vietnam-messaging",
   zalouser: "#zalo-user-personal",
+  wechat: "#wechat",
   acp: "#acp-agent-communication-protocol",
   mcp: "#mcp-model-context-protocol",
   iq: "#iq-solana-on-chain",
