@@ -349,10 +349,55 @@ jobs:
           chmod +x "$wrapper_dir/zip"
           echo "$wrapper_dir" >> "$GITHUB_PATH"
 
+      - name: Resolve electrobun package dir
+        id: resolve-electrobun
+        shell: bash
+        run: |
+          package_dir="$(node <<'NODE'
+          const { createRequire } = require("node:module");
+          const fs = require("node:fs");
+          const path = require("node:path");
+
+          const workspacePackageJson = path.resolve("apps/app/electrobun/package.json");
+          const req = createRequire(workspacePackageJson);
+          const entryPath = req.resolve("electrobun");
+          let packageDir = path.dirname(entryPath);
+
+          while (!fs.existsSync(path.join(packageDir, "package.json"))) {
+            const parentDir = path.dirname(packageDir);
+            if (parentDir === packageDir) {
+              throw new Error(
+                `Could not find electrobun package.json starting from ${entryPath}`,
+              );
+            }
+            packageDir = parentDir;
+          }
+
+          const manifestPath = path.join(packageDir, "package.json");
+          const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+          if (manifest.name !== "electrobun") {
+            throw new Error(
+              `Resolved unexpected package at ${manifestPath}: ${manifest.name}`,
+            );
+          }
+
+          process.stdout.write(packageDir);
+          NODE
+          )"
+
+          if [ -z "$package_dir" ]; then
+            echo "::error::Failed to resolve electrobun package directory"
+            exit 1
+          fi
+
+          echo "Resolved electrobun package dir: $package_dir"
+          echo "package-dir=$package_dir" >> "$GITHUB_OUTPUT"
+          echo "cache-dir=$package_dir/.cache" >> "$GITHUB_OUTPUT"
+
       - name: Cache local electrobun core downloads
         uses: actions/cache@v4
         with:
-          path: apps/app/electrobun/node_modules/electrobun/.cache
+          path: ${{ steps.resolve-electrobun.outputs.cache-dir }}
           key: electrobun-core-${{ matrix.platform.artifact-name }}-${{ hashFiles('apps/app/electrobun/package.json') }}
           restore-keys: electrobun-core-${{ matrix.platform.artifact-name }}-
 
@@ -360,26 +405,7 @@ jobs:
         if: matrix.platform.os == 'windows'
         shell: pwsh
         run: |
-          $electrobunDir = Join-Path $PWD "apps/app/electrobun/node_modules/electrobun"
-          $resolvedElectrobunDir = node -e @'
-            const fs = require("node:fs");
-            const packageDir = process.argv[1];
-            try {
-              process.stdout.write(fs.realpathSync(packageDir));
-            } catch (error) {
-              process.stdout.write(packageDir);
-            }
-          '@ $electrobunDir
-          if ($null -eq $resolvedElectrobunDir) {
-            $resolvedElectrobunDir = $electrobunDir
-          } elseif ($resolvedElectrobunDir -is [array]) {
-            $resolvedElectrobunDir = ($resolvedElectrobunDir -join "")
-          }
-          $resolvedElectrobunDir = "$resolvedElectrobunDir".Trim()
-          if ([string]::IsNullOrWhiteSpace($resolvedElectrobunDir)) {
-            $resolvedElectrobunDir = $electrobunDir
-          }
-          Write-Host "Resolved electrobun package dir: $resolvedElectrobunDir"
+          $resolvedElectrobunDir = '${{ steps.resolve-electrobun.outputs.package-dir }}'
 
           $resolvedRceditPackageJson = node -e @'
             const { createRequire } = require("node:module");
@@ -467,26 +493,7 @@ jobs:
         if: matrix.platform.os == 'windows'
         shell: pwsh
         run: |
-          $electrobunDir = Join-Path $PWD "apps/app/electrobun/node_modules/electrobun"
-          $resolvedElectrobunDir = node -e @'
-            const fs = require("node:fs");
-            const packageDir = process.argv[1];
-            try {
-              process.stdout.write(fs.realpathSync(packageDir));
-            } catch (error) {
-              process.stdout.write(packageDir);
-            }
-          '@ $electrobunDir
-          if ($null -eq $resolvedElectrobunDir) {
-            $resolvedElectrobunDir = $electrobunDir
-          } elseif ($resolvedElectrobunDir -is [array]) {
-            $resolvedElectrobunDir = ($resolvedElectrobunDir -join "")
-          }
-          $resolvedElectrobunDir = "$resolvedElectrobunDir".Trim()
-          if ([string]::IsNullOrWhiteSpace($resolvedElectrobunDir)) {
-            $resolvedElectrobunDir = $electrobunDir
-          }
-          Write-Host "Resolved electrobun package dir: $resolvedElectrobunDir"
+          $resolvedElectrobunDir = '${{ steps.resolve-electrobun.outputs.package-dir }}'
           $cacheDir     = Join-Path $resolvedElectrobunDir ".cache"
           $binDir       = Join-Path $resolvedElectrobunDir "bin"
           $cliBinary    = Join-Path $cacheDir "electrobun.exe"

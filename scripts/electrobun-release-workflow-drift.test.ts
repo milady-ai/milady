@@ -235,11 +235,27 @@ describe("Electrobun release workflow drift", () => {
     );
     expect(workflow).toContain("electrobun CLI checksum mismatch");
     expect(workflow).toContain("Verified electrobun CLI SHA256:");
+    expect(workflow).toContain("name: Resolve electrobun package dir");
+    expect(workflow).toContain("id: resolve-electrobun");
     expect(workflow).toContain(
-      "process.stdout.write(fs.realpathSync(packageDir));",
+      'const workspacePackageJson = path.resolve("apps/app/electrobun/package.json");',
+    );
+    expect(workflow).toContain('const entryPath = req.resolve("electrobun");');
+    expect(workflow).toContain(
+      "Could not find electrobun package.json starting from",
+    );
+    expect(workflow).toContain("Resolved unexpected package at");
+    expect(workflow).toContain(
+      'echo "package-dir=$package_dir" >> "$GITHUB_OUTPUT"',
     );
     expect(workflow).toContain(
-      'Write-Host "Resolved electrobun package dir: $resolvedElectrobunDir"',
+      'echo "cache-dir=$package_dir/.cache" >> "$GITHUB_OUTPUT"',
+    );
+    expect(workflow).toContain(
+      "$resolvedElectrobunDir = '" +
+        "$" +
+        "{{ steps.resolve-electrobun.outputs.package-dir }}" +
+        "'",
     );
     expect(workflow).toContain(
       '$cacheDir     = Join-Path $resolvedElectrobunDir ".cache"',
@@ -254,6 +270,9 @@ describe("Electrobun release workflow drift", () => {
       'Get-ChildItem -Path (Join-Path $PWD "node_modules\\.bun") -Directory -Filter "rcedit@*"',
     );
     expect(workflow).toContain("Seeding rcedit from $seedRceditDir");
+    expect(workflow).not.toContain(
+      'Join-Path $PWD "apps/app/electrobun/node_modules/electrobun"',
+    );
     expect(workflow).not.toContain('bun install -g "rcedit@4.0.1"');
   });
 
@@ -282,8 +301,14 @@ describe("Electrobun release workflow drift", () => {
 
     expect(stageIndex).toBeGreaterThan(-1);
     expect(cacheIndex).toBeGreaterThan(stageIndex);
+    expect(cacheIndex).toBeGreaterThan(
+      workflow.indexOf("name: Resolve electrobun package dir"),
+    );
     expect(workflow).toContain("name: Cache local electrobun core downloads");
     expect(workflow).toContain(
+      "path: $" + "{{ steps.resolve-electrobun.outputs.cache-dir }}",
+    );
+    expect(workflow).not.toContain(
       "path: apps/app/electrobun/node_modules/electrobun/.cache",
     );
     expect(workflow).not.toContain(

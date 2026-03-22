@@ -93,8 +93,19 @@ const requiredWorkflowSnippets = [
   "$expectedHash = $asset.digest.Substring(7).ToLowerInvariant()",
   "$actualHash = (Get-FileHash -Path $tarPath -Algorithm SHA256).Hash.ToLowerInvariant()",
   "electrobun CLI checksum mismatch",
-  "process.stdout.write(fs.realpathSync(packageDir));",
-  'Write-Host "Resolved electrobun package dir: $resolvedElectrobunDir"',
+  "name: Resolve electrobun package dir",
+  "id: resolve-electrobun",
+  'const workspacePackageJson = path.resolve("apps/app/electrobun/package.json");',
+  'const entryPath = req.resolve("electrobun");',
+  "Could not find electrobun package.json starting from",
+  "Resolved unexpected package at",
+  'echo "package-dir=$package_dir" >> "$GITHUB_OUTPUT"',
+  'echo "cache-dir=$package_dir/.cache" >> "$GITHUB_OUTPUT"',
+  "path: $" + "{{ steps.resolve-electrobun.outputs.cache-dir }}",
+  "$resolvedElectrobunDir = '" +
+    "$" +
+    "{{ steps.resolve-electrobun.outputs.package-dir }}" +
+    "'",
   '$cacheDir     = Join-Path $resolvedElectrobunDir ".cache"',
   '$resolvedRceditDir = Join-Path $resolvedElectrobunDir "node_modules\\rcedit"',
   '(Join-Path (Split-Path -Parent $resolvedElectrobunDir) "rcedit")',
@@ -113,7 +124,6 @@ const requiredWorkflowSnippets = [
   "path: apps/app/electrobun/artifacts/windows-installer-proof/**",
   "if: always() && matrix.platform.os == 'windows'",
   "ANTHROPIC_API_KEY: $" + "{{ secrets.ANTHROPIC_API_KEY }}",
-  'Join-Path $PWD "apps/app/electrobun/node_modules/electrobun"',
   "if ($null -eq $resolvedRceditPackageJson)",
   '$resolvedRceditPackageJson = "$resolvedRceditPackageJson".Trim()',
 ];
