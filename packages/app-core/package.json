@@ -87,7 +87,6 @@
     "@capacitor/keyboard": "8.0.0",
     "@capacitor/preferences": "^8.0.1",
     "@elizaos/agent": "alpha",
-    "@miladyai/plugin-wechat": "^0.1.0",
     "@lookingglass/webxr": "^0.6.0",
     "@miladyai/ui": "alpha",
     "@sparkjsdev/spark": "^0.1.10",
