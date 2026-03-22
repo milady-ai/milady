@@ -26,3 +26,5 @@ export type {
   CalibrationContext,
   ResearchContext,
 } from "./providers/portfolioIntelligence";
+export { evaluatePreTradeGate } from "./gates/preTrade";
+export type { PreTradeStores, PreTradeContext } from "./gates/preTrade";
