@@ -1,6 +1,6 @@
 # Build and release (CI, desktop binaries)
 
-`.github/workflows/release-electrobun.yml` is the canonical desktop release workflow. `.github/workflows/release.yml` remains a manual legacy desktop fallback only.
+`.github/workflows/release-electrobun.yml` is the canonical desktop release workflow and reusable desktop release-build graph. `.github/workflows/test-electrobun-release.yml` calls that same graph on pull requests in build-only mode, and `.github/workflows/release.yml` remains a manual legacy desktop fallback only.
 
 Why the release pipeline and desktop bundle work the way they do.
 
@@ -57,7 +57,8 @@ CI workflows that need Node (for node-gyp / native modules or npm registry) were
 
 ## Where this runs
 
-- **Electrobun release:** `.github/workflows/release-electrobun.yml` — on version tag push; builds macOS arm64, macOS x64, Windows x64, and Linux x64 Electrobun artifacts plus update channel files.
+- **Electrobun PR release validation:** `.github/workflows/test-electrobun-release.yml` — on pull requests; runs the same Electrobun release build matrix in build-only mode without creating a GitHub release.
+- **Electrobun release:** `.github/workflows/release-electrobun.yml` — on version tag push or manual dispatch; builds macOS arm64, macOS x64, Windows x64, and Linux x64 Electrobun artifacts plus update channel files.
 - **Legacy desktop compatibility stub:** `.github/workflows/release.yml` — manual workflow that only points maintainers at the Electrobun release path.
 - **Local desktop build:** From repo root, use the Electrobun path: `bun run build:desktop` for a local bundle build, then `bash apps/app/electrobun/scripts/smoke-test.sh` for packaged desktop verification.
 

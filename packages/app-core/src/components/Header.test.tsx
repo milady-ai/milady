@@ -387,10 +387,10 @@ describe("Header", () => {
       rightControlChildren[rightControlChildren.length - 1]?.props[
         "aria-label"
       ],
-    ).toBe("Open navigation menu");
+    ).toBe("aria.openNavMenu");
 
     const menuButton = root.findByProps({
-      "aria-label": "Open navigation menu",
+      "aria-label": "aria.openNavMenu",
     });
     expect(String(menuButton.props.className)).toContain("sm:hidden");
 

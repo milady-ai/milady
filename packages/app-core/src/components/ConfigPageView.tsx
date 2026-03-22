@@ -66,21 +66,21 @@ function CloudRpcStatus({
   if (connected) {
     return (
       <div className="flex items-center gap-2 text-xs">
-        <span className="inline-block w-2 h-2 rounded-full bg-[var(--ok)]" />
+        <span className="inline-block w-2 h-2 rounded-full bg-ok" />
         <span className="font-semibold">
           {t("configpageview.ConnectedToElizaCloud", {
             defaultValue: "Connected to Eliza Cloud",
           })}
         </span>
         {credits !== null && (
-          <span className="text-[var(--muted)] ml-auto">
+          <span className="text-muted ml-auto">
             {t("configpageview.Credits")}{" "}
             <span
               className={
                 creditsCritical
-                  ? "text-[var(--danger)] font-bold"
+                  ? "text-danger font-bold"
                   : creditsLow
-                    ? "rounded-md bg-[var(--warn-subtle)] px-1.5 py-0.5 text-[var(--text)] font-bold"
+                    ? "rounded-md bg-warn-subtle px-1.5 py-0.5 text-txt font-bold"
                     : ""
               }
             >
@@ -92,7 +92,7 @@ function CloudRpcStatus({
                 setState("cloudDashboardView", "billing");
                 setTab("settings");
               }}
-              className="ml-1.5 text-[10px] text-[var(--text)] underline decoration-[var(--accent)] underline-offset-2 hover:opacity-80 bg-transparent border-0 p-0 cursor-pointer"
+              className="ml-1.5 text-[10px] text-txt underline decoration-accent underline-offset-2 hover:opacity-80 bg-transparent border-0 p-0 cursor-pointer"
             >
               {t("configpageview.TopUp")}
             </button>
@@ -105,8 +105,8 @@ function CloudRpcStatus({
   return (
     <div className="flex items-center justify-between gap-2">
       <div className="flex items-center gap-2 text-xs">
-        <span className="inline-block w-2 h-2 rounded-full bg-[var(--muted)]" />
-        <span className="text-[var(--muted)]">
+        <span className="inline-block w-2 h-2 rounded-full bg-muted" />
+        <span className="text-muted">
           {t("configpageview.RequiresElizaCloud", {
             defaultValue: "Requires Eliza Cloud",
           })}
@@ -218,7 +218,7 @@ function RpcConfigSection<T extends string>({
   return (
     <div>
       <div className="text-xs font-bold mb-1">{title}</div>
-      <div className="text-[11px] text-[var(--muted)] mb-2">{description}</div>
+      <div className="text-[11px] text-muted mb-2">{description}</div>
 
       {renderRpcProviderButtons(
         options,
@@ -276,8 +276,8 @@ function renderRpcProviderButtons<T extends string>(
             key={provider.id}
             className={`flex min-h-[44px] items-center justify-center rounded-lg border px-3 py-2 text-center text-xs font-semibold leading-tight shadow-sm transition-colors ${
               active
-                ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)]"
-                : "border-[var(--border)] bg-[var(--card)] text-[var(--text)] hover:border-[var(--accent)] hover:bg-[var(--bg-hover)]"
+                ? "border-accent bg-accent text-accent-foreground"
+                : "border-border bg-card text-txt hover:border-accent hover:bg-bg-hover"
             }`}
             onClick={() => onSelect(provider.id)}
           >
@@ -639,7 +639,7 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
           <h2 className="text-lg font-bold mb-1">
             {t("configpageview.Config")}
           </h2>
-          <p className="text-[13px] text-[var(--muted)] mb-5">
+          <p className="text-[13px] text-muted mb-5">
             {t("configpageview.WalletProvidersAnd")}
           </p>
         </>
@@ -688,7 +688,27 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
       {elizaCloudConnected && <CloudServicesSection />}
 
       {/* Custom RPC — only show when user wants BYOK */}
-      {!elizaCloudConnected && (
+      {elizaCloudConnected ? (
+        <div className="flex items-center gap-3 rounded-xl border border-border/30 bg-surface/50 px-4 py-3 mt-4">
+          <svg
+            className="w-4 h-4 text-muted"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <title>Cloud</title>
+            <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
+          </svg>
+          <span className="text-sm text-muted">
+            {t("configpageview.UsingElizaCloudRpcs", {
+              defaultValue: "Using Eliza Cloud RPCs",
+            })}
+          </span>
+        </div>
+      ) : (
         <div className="mt-4 p-5 border border-border rounded-xl bg-card">
           <div className="flex items-center justify-between mb-4">
             <div className="font-bold text-sm">
@@ -698,7 +718,7 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
             </div>
             <button
               type="button"
-              className="settings-button flex items-center gap-1.5 text-[12px] text-[var(--muted)] hover:text-[var(--txt)] bg-transparent border border-[var(--border)] rounded-lg cursor-pointer transition-colors hover:border-[var(--accent)]"
+              className="settings-button flex items-center gap-1.5 text-[12px] text-muted hover:text-txt bg-transparent border border-border rounded-lg cursor-pointer transition-colors hover:border-accent"
               onClick={() => setSecretsOpen(true)}
             >
               <svg
@@ -762,7 +782,7 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
           </div>
 
           {legacyRpcWarning && (
-            <div className="mt-4 rounded-lg border border-[var(--warn)] bg-[var(--warn-subtle)] px-3 py-2 text-[11px] text-[var(--text)]">
+            <div className="mt-4 rounded-lg border border-warn bg-warn-subtle px-3 py-2 text-[11px] text-txt">
               {legacyRpcWarning}
             </div>
           )}
@@ -798,7 +818,7 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
           role="dialog"
           aria-modal="true"
         >
-          <div className="w-full max-w-2xl max-h-[80vh] border border-[var(--border)] bg-[var(--card)] p-5 shadow-lg flex flex-col">
+          <div className="w-full max-w-2xl max-h-[80vh] border border-border bg-card p-5 shadow-lg flex flex-col">
             <div className="flex items-center justify-between mb-4 flex-shrink-0">
               <div className="flex items-center gap-2">
                 <svg
@@ -810,7 +830,7 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="text-[var(--accent)]"
+                  className="text-accent"
                 >
                   <title>{t("configpageview.SecretsVault")}</title>
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
@@ -822,7 +842,7 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
               </div>
               <button
                 type="button"
-                className="text-[var(--muted)] hover:text-[var(--txt)] text-lg leading-none px-1 bg-transparent border-0 cursor-pointer"
+                className="text-muted hover:text-txt text-lg leading-none px-1 bg-transparent border-0 cursor-pointer"
                 onClick={() => setSecretsOpen(false)}
               >
                 {t("bugreportmodal.Times")}

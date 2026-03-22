@@ -223,7 +223,7 @@ export function ChatMessage({
                 onKeyDown={handleEditKeyDown}
                 className="w-full min-h-[110px] rounded-xl border border-white/20 bg-black/10 px-3 py-2 text-[15px] leading-[1.7] text-inherit outline-none focus:border-white/40"
                 style={{ fontFamily: "var(--font-chat)" }}
-                aria-label="Edit message"
+                aria-label={t("aria.editMessage")}
                 disabled={savingEdit}
               />
               <div className="flex items-center justify-end gap-2">
@@ -234,7 +234,7 @@ export function ChatMessage({
                   disabled={savingEdit}
                   className="h-8 px-3 text-xs text-inherit/80 hover:bg-black/10"
                 >
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
                 <Button
                   variant="outline"
@@ -298,8 +298,8 @@ export function ChatMessage({
                     onSpeak?.(message.id, message.text);
                   }}
                   className="w-7 h-7 rounded-md text-muted hover:text-txt hover:bg-bg-hover transition-colors"
-                  title="Play message"
-                  aria-label="Play message"
+                  title={t("aria.playMessage")}
+                  aria-label={t("aria.playMessage")}
                 >
                   <Volume2 className="w-3.5 h-3.5" />
                 </Button>
@@ -314,8 +314,8 @@ export function ChatMessage({
                     handleStartEditing();
                   }}
                   className="w-7 h-7 rounded-md text-muted hover:text-txt hover:bg-bg-hover transition-colors"
-                  title="Edit message"
-                  aria-label="Edit message"
+                  title={t("aria.editMessage")}
+                  aria-label={t("aria.editMessage")}
                 >
                   <Pencil className="w-3.5 h-3.5" />
                 </Button>
@@ -331,7 +331,7 @@ export function ChatMessage({
                   }}
                   className="w-7 h-7 rounded-md text-muted hover:text-danger hover:bg-danger/10 transition-colors"
                   title={t("chatmessage.DeleteMessage")}
-                  aria-label="Delete message"
+                  aria-label={t("aria.deleteMessage")}
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </Button>

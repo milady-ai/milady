@@ -31,6 +31,7 @@ const autonomousElizaPathCandidates = [
 ] as const;
 const requiredWorkflowSnippets = [
   'BUN_VERSION: "1.3.9"',
+  "workflow_call:",
   "name: Validate Release Inputs",
   "bun-version: $" + "{{ env.BUN_VERSION }}",
   "name: Release readiness checks",
@@ -39,6 +40,10 @@ const requiredWorkflowSnippets = [
   `bun install failed on attempt \${attempt}; retrying in 15 seconds`,
   "name: Ensure avatar assets",
   "node scripts/ensure-avatars.mjs",
+  "name: Prepare Whisper model artifact",
+  "bash apps/app/electrobun/scripts/ensure-whisper-model.sh base.en",
+  "name: Upload Whisper model artifact",
+  "name: whisper-model-base-en",
   "Install quiet macOS packaging wrappers",
   "apps/app/electrobun/scripts/hdiutil-wrapper.sh",
   "apps/app/electrobun/scripts/xcrun-wrapper.sh",
@@ -46,6 +51,8 @@ const requiredWorkflowSnippets = [
   "ELECTROBUN_REAL_HDIUTIL: /usr/bin/hdiutil",
   "ELECTROBUN_REAL_XCRUN: /usr/bin/xcrun",
   "ELECTROBUN_REAL_ZIP: /usr/bin/zip",
+  "name: Download Whisper model artifact",
+  "name: Seed Whisper model cache",
   "Stage desktop bundle inputs",
   "node scripts/desktop-build.mjs stage --variant=base --build-whisper",
   "Inject version.json into bundle (Windows)",
@@ -124,6 +131,34 @@ const forbiddenWorkflowSnippets = [
     "{{ matrix.platform.artifact-name }}" +
     "-$" +
     "{{ hashFiles('bun.lock') }}",
+];
+const requiredElectrobunPrWorkflowSnippets = [
+  "name: Validate Electrobun Release Workflow",
+  "pull_request:",
+  "branches: [main, develop]",
+  "workflow_dispatch:",
+  "permissions:",
+  "contents: read",
+  'BUN_VERSION: "1.3.9"',
+  "name: Release Workflow Contract",
+  "bun install --frozen-lockfile --ignore-scripts",
+  "bun run postinstall",
+  "bunx vitest run",
+  "scripts/electrobun-release-workflow-drift.test.ts",
+  "scripts/electrobun-test-workflow-drift.test.ts",
+  "scripts/whisper-build-script-drift.test.ts",
+  "scripts/release-check.test.ts",
+  "bunx tsdown",
+  "node --import tsx scripts/write-build-info.ts",
+  "bun run release:check",
+];
+const forbiddenElectrobunPrWorkflowSnippets = [
+  "uses: ./.github/workflows/release-electrobun.yml",
+  "publish_release: false",
+  "publish_docker: false",
+  "draft: false",
+  "secrets: inherit",
+  "packages: write",
 ];
 const requiredElectrobunConfigSnippets = [
   'postBuild: "scripts/postwrap-sign-runtime-macos.ts"',
@@ -504,6 +539,40 @@ function assertReleaseWorkflowHasNotaryWrapper() {
   }
 }
 
+function assertElectrobunPrWorkflowExists() {
+  const workflow = readFileSync(
+    ".github/workflows/test-electrobun-release.yml",
+    "utf8",
+  );
+  const missing = requiredElectrobunPrWorkflowSnippets.filter(
+    (snippet) => !workflow.includes(snippet),
+  );
+
+  if (missing.length > 0) {
+    console.error(
+      "release-check: Electrobun PR workflow is missing lightweight release-contract validation:",
+    );
+    for (const snippet of missing) {
+      console.error(`  - ${snippet}`);
+    }
+    process.exit(1);
+  }
+
+  const forbidden = forbiddenElectrobunPrWorkflowSnippets.filter((snippet) =>
+    workflow.includes(snippet),
+  );
+
+  if (forbidden.length > 0) {
+    console.error(
+      "release-check: Electrobun PR workflow still invokes the full reusable release pipeline:",
+    );
+    for (const snippet of forbidden) {
+      console.error(`  - ${snippet}`);
+    }
+    process.exit(1);
+  }
+}
+
 function assertElectrobunConfigHasPostWrapSigner() {
   const config = readFileSync(
     "apps/app/electrobun/electrobun.config.ts",
@@ -695,6 +764,36 @@ function assertInnoBuildScriptHasTimeoutAndHeartbeat() {
   }
 }
 
+function assertInnoTemplateTargetsBundledLauncher() {
+  const template = readFileSync("packaging/inno/Milady.iss", "utf8");
+  const requiredSnippets = [
+    '#define MyAppExeName "bin\\launcher.exe"',
+    "UninstallDisplayIcon={app}\\{#MyAppExeName}",
+    'Name: "{autoprograms}\\{#MyDefaultGroupName}\\{#MyAppName}"; Filename: "{app}\\{#MyAppExeName}"',
+    'Name: "{autodesktop}\\{#MyAppName}"; Filename: "{app}\\{#MyAppExeName}"; Tasks: desktopicon',
+  ];
+  const missingSnippets = requiredSnippets.filter(
+    (snippet) => !template.includes(snippet),
+  );
+
+  if (missingSnippets.length > 0) {
+    console.error(
+      "release-check: Milady.iss must point Windows shortcuts and uninstall metadata at bin\\launcher.exe.",
+    );
+    for (const snippet of missingSnippets) {
+      console.error(`  - ${snippet}`);
+    }
+    process.exit(1);
+  }
+
+  if (template.includes('#define MyAppExeName "launcher.exe"')) {
+    console.error(
+      "release-check: Milady.iss must not point Windows shortcuts at {app}\\launcher.exe; the bundled launcher lives under bin\\.",
+    );
+    process.exit(1);
+  }
+}
+
 function assertMacSmokeScriptLaunchesPackagedLauncherDirectly() {
   const script = readFileSync(
     "apps/app/electrobun/scripts/smoke-test.sh",
@@ -826,11 +925,13 @@ function assertStartApiServerCatchBlockSafety() {
 
 function main() {
   assertReleaseWorkflowHasNotaryWrapper();
+  assertElectrobunPrWorkflowExists();
   assertElectrobunConfigHasPostWrapSigner();
   assertMacArtifactStagerLooksCorrect();
   assertWindowsSmokeScriptHasLeadingParamBlock();
   assertWindowsInstallerProofScript();
   assertInnoBuildScriptHasTimeoutAndHeartbeat();
+  assertInnoTemplateTargetsBundledLauncher();
   assertMacSmokeScriptLaunchesPackagedLauncherDirectly();
   assertServerDynamicHyperscapeImport();
   assertStartApiServerCatchBlockSafety();

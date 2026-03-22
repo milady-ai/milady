@@ -101,6 +101,21 @@ function getSelect(tree: ReactTestRenderer): ReactTestInstance {
   );
 }
 
+function getSelectOptionLabels(tree: ReactTestRenderer): string[] {
+  return getSelect(tree)
+    .findAll((node: ReactTestInstance) => node.type === "option")
+    .map((node) => {
+      const children = node.props.children;
+      if (typeof children === "string") {
+        return children;
+      }
+      if (Array.isArray(children)) {
+        return children.join("");
+      }
+      return String(children ?? "");
+    });
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -296,5 +311,39 @@ describe("ProviderSwitcher provider dropdown default", () => {
     });
 
     expect(getSelectValue(tree)).toBe("anthropic-subscription");
+  });
+
+  it("shows plain-English subscription labels instead of raw translation keys", async () => {
+    mockGetConfig.mockResolvedValue({
+      models: {},
+      cloud: {
+        enabled: false,
+        inferenceMode: "byok",
+        services: { inference: false },
+      },
+      agents: {},
+      env: { vars: {} },
+    });
+    mockGetOnboardingOptions.mockResolvedValue({
+      models: [],
+      piAiModels: [],
+      piAiDefaultModel: "",
+    });
+    mockGetSubscriptionStatus.mockResolvedValue({ providers: [] });
+
+    let tree!: ReactTestRenderer;
+    await act(async () => {
+      tree = create(React.createElement(ProviderSwitcher, defaultProps()));
+    });
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+    });
+
+    const optionLabels = getSelectOptionLabels(tree);
+    expect(optionLabels).toContain("Claude Subscription");
+    expect(optionLabels).toContain("ChatGPT Subscription");
+    expect(optionLabels).not.toContain("providerswitcher.claudeSubscription");
+    expect(optionLabels).not.toContain("providerswitcher.chatgptSubscription");
   });
 });

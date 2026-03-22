@@ -13,66 +13,82 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("Avatar VRM Utilities", () => {
   describe("VRM_COUNT", () => {
-    it("is 4 for all bundled base avatars", () => {
-      expect(VRM_COUNT).toBe(4);
+    it("matches the bundled Milady avatar roster size", () => {
+      expect(VRM_COUNT).toBe(8);
     });
   });
 
   describe("getVrmUrl", () => {
-    it("returns correct path for base eliza VRMs (1-4)", () => {
-      const expectedSourceIds = [1, 4, 5, 9];
-      expectedSourceIds.forEach((sourceId, index) => {
-        expect(getVrmUrl(index + 1)).toBe(`/vrms/eliza-${sourceId}.vrm.gz`);
+    it("returns correct path for bundled Milady VRMs (1-8)", () => {
+      const expectedSlugs = [
+        "milady-1",
+        "milady-2",
+        "milady-3",
+        "milady-4",
+        "milady-5",
+        "milady-6",
+        "milady-7",
+        "milady-8",
+      ];
+      expectedSlugs.forEach((slug, index) => {
+        expect(getVrmUrl(index + 1)).toBe(`/vrms/${slug}.vrm.gz`);
       });
     });
 
     it("clamps out-of-range indices to avatar 1", () => {
-      expect(getVrmUrl(5)).toBe("/vrms/eliza-1.vrm.gz");
-      expect(getVrmUrl(34)).toBe("/vrms/eliza-1.vrm.gz");
-      expect(getVrmUrl(-3)).toBe("/vrms/eliza-1.vrm.gz");
-      expect(getVrmUrl(Number.NaN)).toBe("/vrms/eliza-1.vrm.gz");
-      expect(getVrmUrl(0)).toBe("/vrms/eliza-1.vrm.gz");
+      expect(getVrmUrl(9)).toBe("/vrms/milady-1.vrm.gz");
+      expect(getVrmUrl(34)).toBe("/vrms/milady-1.vrm.gz");
+      expect(getVrmUrl(-3)).toBe("/vrms/milady-1.vrm.gz");
+      expect(getVrmUrl(Number.NaN)).toBe("/vrms/milady-1.vrm.gz");
+      expect(getVrmUrl(0)).toBe("/vrms/milady-1.vrm.gz");
     });
   });
 
   describe("getVrmPreviewUrl", () => {
-    it("returns correct preview path for base VRMs (1-4)", () => {
-      const expectedSourceIds = [1, 4, 5, 9];
-      expectedSourceIds.forEach((sourceId, index) => {
-        expect(getVrmPreviewUrl(index + 1)).toBe(
-          `/vrms/previews/eliza-${sourceId}.png`,
-        );
+    it("returns correct preview path for bundled Milady VRMs (1-8)", () => {
+      const expectedSlugs = [
+        "milady-1",
+        "milady-2",
+        "milady-3",
+        "milady-4",
+        "milady-5",
+        "milady-6",
+        "milady-7",
+        "milady-8",
+      ];
+      expectedSlugs.forEach((slug, index) => {
+        expect(getVrmPreviewUrl(index + 1)).toBe(`/vrms/previews/${slug}.png`);
       });
     });
 
     it("clamps out-of-range preview indices to avatar 1", () => {
-      expect(getVrmPreviewUrl(5)).toBe("/vrms/previews/eliza-1.png");
-      expect(getVrmPreviewUrl(999)).toBe("/vrms/previews/eliza-1.png");
-      expect(getVrmPreviewUrl(-1)).toBe("/vrms/previews/eliza-1.png");
-      expect(getVrmPreviewUrl(0)).toBe("/vrms/previews/eliza-1.png");
+      expect(getVrmPreviewUrl(9)).toBe("/vrms/previews/milady-1.png");
+      expect(getVrmPreviewUrl(999)).toBe("/vrms/previews/milady-1.png");
+      expect(getVrmPreviewUrl(-1)).toBe("/vrms/previews/milady-1.png");
+      expect(getVrmPreviewUrl(0)).toBe("/vrms/previews/milady-1.png");
     });
   });
 
   describe("getVrmTitle", () => {
-    it("returns formatted title for base VRMs", () => {
-      expect(getVrmTitle(1)).toBe("ELIZA-01");
-      expect(getVrmTitle(2)).toBe("ELIZA-04");
-      expect(getVrmTitle(3)).toBe("ELIZA-05");
-      expect(getVrmTitle(4)).toBe("ELIZA-09");
+    it("returns roster titles for bundled Milady avatars", () => {
+      expect(getVrmTitle(1)).toBe("Chen");
+      expect(getVrmTitle(2)).toBe("Jin");
+      expect(getVrmTitle(3)).toBe("Kei");
+      expect(getVrmTitle(4)).toBe("Momo");
     });
 
     it("clamps out-of-range index to avatar 1", () => {
-      expect(getVrmTitle(5)).toBe("ELIZA-01");
+      expect(getVrmTitle(9)).toBe("Chen");
     });
   });
 
   describe("getCompanionBackgroundUrl", () => {
-    it("stays within the bundled 4-avatar background set", () => {
+    it("uses the fixed bundled Milady backgrounds for each theme", () => {
       expect(getCompanionBackgroundUrl("light")).toBe(
-        "/vrms/backgrounds/eliza-5.png",
+        "/vrms/backgrounds/milady-3.png",
       );
       expect(getCompanionBackgroundUrl("dark")).toBe(
-        "/vrms/backgrounds/eliza-9.png",
+        "/vrms/backgrounds/milady-4.png",
       );
     });
   });

@@ -114,7 +114,7 @@ export function SaveCommandModal({
             className="bg-transparent border-0 cursor-pointer text-lg h-6 w-6"
             style={{ color: "var(--muted)" }}
             onClick={onClose}
-            aria-label="Close dialog"
+            aria-label={t("aria.closeDialog")}
           >
             {t("bugreportmodal.Times")}
           </button>

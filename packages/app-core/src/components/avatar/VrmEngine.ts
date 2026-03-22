@@ -218,6 +218,7 @@ const SPARK_MAX_PIXEL_RADIUS = 96;
 const SPARK_MAX_PIXEL_RADIUS_NEAR = 28;
 const MAX_RENDERER_PIXEL_RATIO = 2;
 const AVATAR_RENDERER_OVERRIDE_KEY = "eliza.avatarRenderer";
+const LOOKING_GLASS_ENABLED_KEY = "eliza.avatarLookingGlass";
 const KNOWN_VRM_WEBGPU_WARNING =
   'TSL: "transformedNormalView" is deprecated. Use "normalView" instead.';
 
@@ -262,6 +263,20 @@ function getPreferredAvatarRendererBackend(): RendererBackend {
     return normalizedOverride;
   }
   return isElectrobunAvatarRuntime() ? "webgpu" : "webgl";
+}
+
+function isLookingGlassEnabled(): boolean {
+  if (typeof window === "undefined" || !isElectrobunAvatarRuntime()) {
+    return false;
+  }
+
+  try {
+    const raw = window.localStorage.getItem(LOOKING_GLASS_ENABLED_KEY);
+    const normalized = raw?.trim().toLowerCase();
+    return normalized === "1" || normalized === "true" || normalized === "on";
+  } catch {
+    return false;
+  }
 }
 
 function installKnownVrmWebGpuWarningFilter(): () => void {
@@ -1705,7 +1720,7 @@ export class VrmEngine {
         }
         this.renderer = renderer;
         this.rendererBackend = backend;
-        if (backend === "webgl") {
+        if (backend === "webgl" && isLookingGlassEnabled()) {
           // Looking Glass: create a SEPARATE hidden renderer so the main
           // canvas and camera are never affected by the XR polyfill.
           this.setupLookingGlass();

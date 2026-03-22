@@ -86,7 +86,7 @@ export function LogsView() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder={t("logsview.SearchLogs")}
-          aria-label="Search logs"
+          aria-label={t("aria.searchLogs")}
         />
 
         <Select

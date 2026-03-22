@@ -432,7 +432,7 @@ export function DesktopMediaControlPanel() {
 
   if (!desktopRuntime) {
     return (
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-muted)] px-3 py-3 text-xs text-[var(--muted)]">
+      <div className="rounded-xl border border-border bg-bg-muted px-3 py-3 text-xs text-muted">
         Native camera and screen capture controls are only available inside the
         Electrobun runtime.
       </div>
@@ -440,13 +440,13 @@ export function DesktopMediaControlPanel() {
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg-muted)] px-3 py-3">
+    <div className="flex flex-col gap-3 rounded-xl border border-border bg-bg-muted px-3 py-3">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-xs font-semibold text-[var(--text)]">
+          <div className="text-xs font-semibold text-txt">
             Native Capture Controls
           </div>
-          <div className="text-[10px] text-[var(--muted)]">
+          <div className="text-[10px] text-muted">
             Camera preview, capture, recording, and screencapture tools owned by
             the desktop runtime.
           </div>
@@ -480,15 +480,15 @@ export function DesktopMediaControlPanel() {
       )}
 
       <div className="grid gap-3 lg:grid-cols-2">
-        <div className="space-y-3 rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-3">
-          <div className="text-xs font-semibold text-[var(--text)]">Camera</div>
-          <div className="text-[10px] text-[var(--muted)]">
+        <div className="space-y-3 rounded-lg border border-border bg-card px-3 py-3">
+          <div className="text-xs font-semibold text-txt">Camera</div>
+          <div className="text-[10px] text-muted">
             Permission: {cameraPermission} · Recording:{" "}
             {cameraRecording ? "on" : "off"} · Duration:{" "}
             {cameraRecordingDuration}s
           </div>
           <select
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-2.5 py-1.5 text-xs"
+            className="w-full rounded-lg border border-border bg-bg px-2.5 py-1.5 text-xs"
             value={selectedCameraId}
             onChange={(event) => setSelectedCameraId(event.target.value)}
           >
@@ -662,22 +662,18 @@ export function DesktopMediaControlPanel() {
                 : "Start Camera Recording"}
             </Button>
           </div>
-          <div className="text-[11px] text-[var(--muted)]">
-            {lastPhotoStatus}
-          </div>
+          <div className="text-[11px] text-muted">{lastPhotoStatus}</div>
         </div>
 
-        <div className="space-y-3 rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-3">
-          <div className="text-xs font-semibold text-[var(--text)]">
-            Screen Capture
-          </div>
-          <div className="text-[10px] text-[var(--muted)]">
+        <div className="space-y-3 rounded-lg border border-border bg-card px-3 py-3">
+          <div className="text-xs font-semibold text-txt">Screen Capture</div>
+          <div className="text-[10px] text-muted">
             Permission: {screenPermission} · Recording:{" "}
             {screenRecording ? "on" : "off"} · Duration:{" "}
             {screenRecordingDuration}s{screenPaused ? " · paused" : ""}
           </div>
           <select
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-2.5 py-1.5 text-xs"
+            className="w-full rounded-lg border border-border bg-bg px-2.5 py-1.5 text-xs"
             value={selectedSourceId}
             onChange={(event) => setSelectedSourceId(event.target.value)}
           >
@@ -870,7 +866,7 @@ export function DesktopMediaControlPanel() {
               </Button>
             )}
           </div>
-          <div className="text-[11px] text-[var(--muted)] break-all">
+          <div className="text-[11px] text-muted break-all">
             {lastSavedPath
               ? `Last saved path: ${lastSavedPath}`
               : "No saved capture path yet."}
@@ -991,7 +987,7 @@ export function MediaSettingsSection() {
 
   if (loading) {
     return (
-      <div className="py-8 text-center text-[var(--muted)] text-xs">
+      <div className="py-8 text-center text-muted text-xs">
         {t("mediasettingssection.LoadingMediaConfig")}
       </div>
     );
@@ -1026,7 +1022,7 @@ export function MediaSettingsSection() {
                 <span>{t(CATEGORY_LABELS[cat])}</span>
                 <span
                   className={`ml-1.5 inline-block w-1.5 h-1.5 rounded-full ${
-                    catConfigured ? "bg-[var(--ok)]" : "bg-border-strong"
+                    catConfigured ? "bg-ok" : "bg-border-strong"
                   }`}
                 />
               </Button>
@@ -1037,7 +1033,7 @@ export function MediaSettingsSection() {
 
       {/* Mode toggle (cloud vs own-key) */}
       <div className="flex items-center gap-3">
-        <span className="text-xs font-semibold text-[var(--muted)]">
+        <span className="text-xs font-semibold text-muted">
           {t("mediasettingssection.APISource")}
         </span>
         <CloudSourceModeToggle
@@ -1058,8 +1054,8 @@ export function MediaSettingsSection() {
         <span
           className={`ml-auto rounded-full border px-2 py-0.5 text-[10px] ${
             configured
-              ? "border-[var(--ok)] bg-[var(--ok)]/10 text-[var(--text)]"
-              : "border-[var(--warn)] bg-[var(--warn-subtle)] text-[var(--text)]"
+              ? "border-ok bg-ok/10 text-txt"
+              : "border-warn bg-warn-subtle text-txt"
           }`}
         >
           {configured
@@ -1081,7 +1077,7 @@ export function MediaSettingsSection() {
       {/* Own-key mode: provider selection */}
       {currentMode === "own-key" && (
         <div className="flex flex-col gap-3">
-          <div className="text-xs font-semibold text-[var(--muted)]">
+          <div className="text-xs font-semibold text-muted">
             {t("mediasettingssection.Provider")}
           </div>
           <div
@@ -1161,7 +1157,7 @@ export function MediaSettingsSection() {
                 {t("mediasettingssection.Model")}
               </span>
               <select
-                className="px-2.5 py-1.5 border border-[var(--border)] bg-[var(--card)] text-xs focus:border-[var(--accent)] focus:outline-none rounded-lg"
+                className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg"
                 value={
                   (getNestedValue(
                     mediaConfig as Record<string, unknown>,
@@ -1226,7 +1222,7 @@ export function MediaSettingsSection() {
                   {t("mediasettingssection.Model")}
                 </span>
                 <select
-                  className="px-2.5 py-1.5 border border-[var(--border)] bg-[var(--card)] text-xs focus:border-[var(--accent)] focus:outline-none rounded-lg"
+                  className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg"
                   value={
                     (getNestedValue(
                       mediaConfig as Record<string, unknown>,
@@ -1250,7 +1246,7 @@ export function MediaSettingsSection() {
                   {t("mediasettingssection.Quality")}
                 </span>
                 <select
-                  className="px-2.5 py-1.5 border border-[var(--border)] bg-[var(--card)] text-xs focus:border-[var(--accent)] focus:outline-none rounded-lg"
+                  className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg"
                   value={
                     (getNestedValue(
                       mediaConfig as Record<string, unknown>,
@@ -1277,7 +1273,7 @@ export function MediaSettingsSection() {
                 {t("mediasettingssection.Model")}
               </span>
               <select
-                className="px-2.5 py-1.5 border border-[var(--border)] bg-[var(--card)] text-xs focus:border-[var(--accent)] focus:outline-none rounded-lg"
+                className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg"
                 value={
                   (getNestedValue(
                     mediaConfig as Record<string, unknown>,
@@ -1375,7 +1371,7 @@ export function MediaSettingsSection() {
                 {t("mediasettingssection.Model")}
               </span>
               <select
-                className="px-2.5 py-1.5 border border-[var(--border)] bg-[var(--card)] text-xs focus:border-[var(--accent)] focus:outline-none rounded-lg"
+                className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg"
                 value={
                   (getNestedValue(
                     mediaConfig as Record<string, unknown>,
@@ -1431,7 +1427,7 @@ export function MediaSettingsSection() {
                 {t("mediasettingssection.Model")}
               </span>
               <select
-                className="px-2.5 py-1.5 border border-[var(--border)] bg-[var(--card)] text-xs focus:border-[var(--accent)] focus:outline-none rounded-lg"
+                className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg"
                 value={
                   (getNestedValue(
                     mediaConfig as Record<string, unknown>,
@@ -1461,7 +1457,7 @@ export function MediaSettingsSection() {
                 {t("mediasettingssection.Model")}
               </span>
               <select
-                className="px-2.5 py-1.5 border border-[var(--border)] bg-[var(--card)] text-xs focus:border-[var(--accent)] focus:outline-none rounded-lg"
+                className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg"
                 value={
                   (getNestedValue(
                     mediaConfig as Record<string, unknown>,
@@ -1491,7 +1487,7 @@ export function MediaSettingsSection() {
                 {t("mediasettingssection.Model")}
               </span>
               <select
-                className="px-2.5 py-1.5 border border-[var(--border)] bg-[var(--card)] text-xs focus:border-[var(--accent)] focus:outline-none rounded-lg"
+                className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg"
                 value={
                   (getNestedValue(
                     mediaConfig as Record<string, unknown>,

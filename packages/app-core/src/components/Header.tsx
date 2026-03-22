@@ -263,7 +263,7 @@ export function Header({
                 type="button"
                 className={`sm:hidden ${HEADER_ICON_BUTTON_CLASSNAME}`}
                 onClick={() => setMobileMenuOpen(true)}
-                aria-label="Open navigation menu"
+                aria-label={t("aria.openNavMenu")}
                 aria-expanded={mobileMenuOpen}
                 style={HEADER_BUTTON_STYLE}
               >
@@ -321,14 +321,14 @@ export function Header({
           className="fixed inset-0 z-[140] sm:hidden"
           role="dialog"
           aria-modal="true"
-          aria-label="Navigation menu"
+          aria-label={t("aria.navMenu")}
         >
           {/* Backdrop */}
           <button
             type="button"
             className="absolute inset-0 bg-black/30 backdrop-blur-sm w-full h-full border-0 cursor-pointer"
             onClick={() => setMobileMenuOpen(false)}
-            aria-label="Close navigation menu"
+            aria-label={t("aria.closeNavMenu")}
             style={HEADER_BUTTON_STYLE}
           />
 

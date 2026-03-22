@@ -200,7 +200,7 @@ export function AvatarSelector({
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                aria-label="Upload"
+                aria-label={t("aria.upload")}
               >
                 <title>{t("avatarselector.UploadVRM")}</title>
                 {dragOver ? (
