@@ -22,6 +22,27 @@ on:
   push:
     tags:
       - "v*"
+  workflow_call:
+    inputs:
+      tag:
+        description: "Release tag override (e.g. v2.0.0-alpha.3)"
+        required: false
+        type: string
+      draft:
+        description: "Create the GitHub release as a draft"
+        required: false
+        type: boolean
+        default: false
+      publish_release:
+        description: "Create the GitHub release and upload updater files"
+        required: false
+        type: boolean
+        default: false
+      publish_docker:
+        description: "Publish the Docker image after the release step"
+        required: false
+        type: boolean
+        default: false
   workflow_dispatch:
     inputs:
       tag:
@@ -107,6 +128,19 @@ jobs:
 
       - name: Run repository postinstall patches
         run: bun run postinstall
+
+      - name: Prepare Whisper model artifact
+        run: |
+          bash apps/app/electrobun/scripts/ensure-whisper-model.sh base.en
+          mkdir -p .artifacts/whisper-model
+          cp "$HOME/.cache/milady/whisper/ggml-base.en.bin" .artifacts/whisper-model/ggml-base.en.bin
+
+      - name: Upload Whisper model artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: whisper-model-base-en
+          path: .artifacts/whisper-model/ggml-base.en.bin
+          if-no-files-found: error
 
       - name: Align version with release tag
         run: node scripts/align-electrobun-version.mjs
@@ -208,8 +242,21 @@ jobs:
             ~/.cache/milady/whisper
             node_modules/whisper-node/lib/whisper.cpp/main
             node_modules/whisper-node/lib/whisper.cpp/build
-          key: whisper-${{ matrix.platform.artifact-name }}-${{ hashFiles('apps/app/electrobun/scripts/build-whisper.sh', 'apps/app/electrobun/scripts/build-whisper-universal.sh') }}
+          key: whisper-${{ matrix.platform.artifact-name }}-${{ hashFiles('apps/app/electrobun/scripts/build-whisper.sh', 'apps/app/electrobun/scripts/build-whisper-universal.sh', 'apps/app/electrobun/scripts/ensure-whisper-model.sh') }}
           restore-keys: whisper-${{ matrix.platform.artifact-name }}-
+
+      - name: Download Whisper model artifact
+        if: matrix.platform.os == 'macos' || matrix.platform.os == 'linux'
+        uses: actions/download-artifact@v4
+        with:
+          name: whisper-model-base-en
+          path: .artifacts/whisper-model
+
+      - name: Seed Whisper model cache
+        if: matrix.platform.os == 'macos' || matrix.platform.os == 'linux'
+        run: |
+          mkdir -p "$HOME/.cache/milady/whisper"
+          cp .artifacts/whisper-model/ggml-base.en.bin "$HOME/.cache/milady/whisper/ggml-base.en.bin"
 
       - name: Align version with release tag
         run: node scripts/align-electrobun-version.mjs
@@ -1112,6 +1159,7 @@ jobs:
 
   release:
     name: Create Release
+    if: ${{ github.event_name != 'workflow_call' || inputs.publish_release }}
     needs: [prepare, build]
     runs-on: blacksmith-4vcpu-ubuntu-2404
     timeout-minutes: 10
@@ -1220,6 +1268,7 @@ jobs:
 
   publish-docker:
     name: Publish Docker Image
+    if: ${{ github.event_name != 'workflow_call' || inputs.publish_docker }}
     needs: [prepare, release]
     permissions:
       contents: read

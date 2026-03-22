@@ -59,6 +59,17 @@ describe("Electrobun startup bootstrap", () => {
     expect(source).toContain("[Main] Skipping embedded agent startup");
   });
 
+  it("does not load repo or ~/.eliza env files in packaged desktop builds", () => {
+    const source = fs.readFileSync(INDEX_PATH, "utf8");
+
+    expect(source).toContain(
+      'const isPackagedBuild = !normalizedModuleDir.includes("/src/");',
+    );
+    expect(source).toContain("if (isPackagedBuild) {");
+    expect(source).toContain("return;");
+    expect(source).toContain("MILADY_DESKTOP_API_BASE");
+  });
+
   it("shows a one-time background notice after recreating the minimized window", () => {
     const indexSource = fs.readFileSync(INDEX_PATH, "utf8");
     const noticeSource = fs.readFileSync(BACKGROUND_NOTICE_PATH, "utf8");

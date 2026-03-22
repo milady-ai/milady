@@ -464,7 +464,7 @@ function InstallModal({
                   type="text"
                   className="plugins-game-search-input"
                   style={{ flex: 1, minWidth: 200 }}
-                  placeholder="Search skills by keyword..."
+                  placeholder={t("skillsview.searchByKeyword")}
                   value={skillsMarketplaceQuery}
                   onChange={(e) =>
                     setState("skillsMarketplaceQuery", e.target.value)
@@ -1325,7 +1325,7 @@ function SkillsFullView() {
       <div className="flex flex-wrap items-center gap-3 mb-6 p-3 border border-border/40 bg-card/60 backdrop-blur-md rounded-2xl shadow-sm">
         <Input
           type="text"
-          placeholder="Filter skills..."
+          placeholder={t("skillsview.filterSkills")}
           value={filterText}
           onChange={(e) => setFilterText(e.target.value)}
           className="w-[240px] h-9 bg-bg/50 border-border/50 focus-visible:ring-accent rounded-xl text-xs"

@@ -102,5 +102,9 @@
   "zalouser": {
     "description": "Zalo personal-account connector for one-to-one messaging workflows.",
     "tags": ["connector", "messaging", "zalo", "personal-account"]
+  },
+  "wechat": {
+    "description": "WeChat connector for messaging via proxy API with QR code login.",
+    "tags": ["connector", "messaging", "wechat", "social"]
   }
 }

@@ -132,7 +132,9 @@ describe("parseAgentStatusFromMainMenuResetPayload", () => {
     expect(parseAgentStatusFromMainMenuResetPayload(null)).toBeNull();
     expect(parseAgentStatusFromMainMenuResetPayload(undefined)).toBeNull();
     expect(parseAgentStatusFromMainMenuResetPayload([])).toBeNull();
-    expect(parseAgentStatusFromMainMenuResetPayload({ itemId: "x" })).toBeNull();
+    expect(
+      parseAgentStatusFromMainMenuResetPayload({ itemId: "x" }),
+    ).toBeNull();
   });
 
   it("returns null when agentStatus is null or not a record", () => {

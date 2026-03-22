@@ -138,7 +138,9 @@ type RendererLike = Pick<
   toneMapping?: THREE.ToneMapping;
   toneMappingExposure?: number;
   xr?: THREE.WebGLRenderer["xr"];
-  setAnimationLoop?: (callback: ((time: number, frame?: any) => void) | null) => void;
+  setAnimationLoop?: (
+    callback: ((time: number, frame?: any) => void) | null,
+  ) => void;
 };
 
 type TeleportFallbackShader = {
@@ -216,6 +218,7 @@ const SPARK_MAX_PIXEL_RADIUS = 96;
 const SPARK_MAX_PIXEL_RADIUS_NEAR = 28;
 const MAX_RENDERER_PIXEL_RATIO = 2;
 const AVATAR_RENDERER_OVERRIDE_KEY = "eliza.avatarRenderer";
+const LOOKING_GLASS_ENABLED_KEY = "eliza.avatarLookingGlass";
 const KNOWN_VRM_WEBGPU_WARNING =
   'TSL: "transformedNormalView" is deprecated. Use "normalView" instead.';
 
@@ -260,6 +263,20 @@ function getPreferredAvatarRendererBackend(): RendererBackend {
     return normalizedOverride;
   }
   return isElectrobunAvatarRuntime() ? "webgpu" : "webgl";
+}
+
+function isLookingGlassEnabled(): boolean {
+  if (typeof window === "undefined" || !isElectrobunAvatarRuntime()) {
+    return false;
+  }
+
+  try {
+    const raw = window.localStorage.getItem(LOOKING_GLASS_ENABLED_KEY);
+    const normalized = raw?.trim().toLowerCase();
+    return normalized === "1" || normalized === "true" || normalized === "on";
+  } catch {
+    return false;
+  }
 }
 
 function installKnownVrmWebGpuWarningFilter(): () => void {
@@ -1703,7 +1720,7 @@ export class VrmEngine {
         }
         this.renderer = renderer;
         this.rendererBackend = backend;
-        if (backend === "webgl") {
+        if (backend === "webgl" && isLookingGlassEnabled()) {
           // Looking Glass: create a SEPARATE hidden renderer so the main
           // canvas and camera are never affected by the XR polyfill.
           this.setupLookingGlass();
@@ -1865,7 +1882,8 @@ export class VrmEngine {
     const lkgCanvas = document.createElement("canvas");
     lkgCanvas.width = 1;
     lkgCanvas.height = 1;
-    lkgCanvas.style.cssText = "position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-1;";
+    lkgCanvas.style.cssText =
+      "position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-1;";
     document.body.appendChild(lkgCanvas);
 
     const lkgR = new THREE.WebGLRenderer({
@@ -1889,11 +1907,11 @@ export class VrmEngine {
     vrBtn.id = "VRButton";
     // Override VRButton's default styles, then force hidden
     vrBtn.style.cssText =
-      "position:fixed;top:50%;left:20px;transform:translateY(-50%);"
-      + "padding:12px 24px;border:1px solid rgba(255,255,255,0.4);"
-      + "border-radius:8px;background:rgba(0,0,0,0.6);"
-      + "color:#fff;font:13px sans-serif;cursor:pointer;z-index:2147483647;"
-      + "pointer-events:auto;";
+      "position:fixed;top:50%;left:20px;transform:translateY(-50%);" +
+      "padding:12px 24px;border:1px solid rgba(255,255,255,0.4);" +
+      "border-radius:8px;background:rgba(0,0,0,0.6);" +
+      "color:#fff;font:13px sans-serif;cursor:pointer;z-index:2147483647;" +
+      "pointer-events:auto;";
     // Force hidden — must be set after cssText and re-applied if VRButton
     // resets its style (it uses a timeout to update button text/style).
     vrBtn.style.display = "none";

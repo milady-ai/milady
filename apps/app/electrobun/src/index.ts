@@ -1363,12 +1363,28 @@ function setupShutdown(cleanupFns: Array<() => void>): void {
  * main process can send the same `MILADY_API_TOKEN` as `dev-server.ts` when
  * calling loopback APIs (app menu reset, export, etc.). The dev API child
  * already loads dotenv; Electrobun did not until this ran.
+ *
+ * Packaged desktop builds must not load these files. On machines that also
+ * have a Milady/Eliza dev checkout, ~/.eliza/.env can contain
+ * MILADY_DESKTOP_API_BASE and related overrides that switch the packaged app
+ * into external mode and make launcher startup appear dead.
  */
 async function loadMiladyEnvFilesForMain(): Promise<void> {
+  const normalizedModuleDir = import.meta.dir.replaceAll("\\", "/");
+  const isPackagedBuild = !normalizedModuleDir.includes("/src/");
+  if (isPackagedBuild) {
+    return;
+  }
+
   try {
     const { config } = await import("dotenv");
-    const here = import.meta.dir.replaceAll("\\", "/");
-    const repoRootGuess = path.resolve(here, "..", "..", "..", "..");
+    const repoRootGuess = path.resolve(
+      normalizedModuleDir,
+      "..",
+      "..",
+      "..",
+      "..",
+    );
     for (const envPath of [
       path.join(repoRootGuess, ".env"),
       path.join(os.homedir(), ".eliza", ".env"),

@@ -1382,6 +1382,27 @@ export function getStylePresets(): typeof STYLE_PRESETS {
   return STYLE_PRESETS;
 }
 
+type CharacterPreset = {
+  id: string;
+  name: string;
+  catchphrase: string;
+  description: string;
+  avatarIndex: number;
+  voicePresetId?: string;
+};
+
+// Homepage still imports the older roster shape.
+export const CHARACTER_PRESETS: CharacterPreset[] = STYLE_PRESETS.map(
+  (preset) => ({
+    id: preset.name,
+    name: preset.name,
+    catchphrase: preset.catchphrase,
+    description: preset.hint ?? preset.bio[0] ?? "",
+    avatarIndex: preset.avatarIndex,
+    voicePresetId: preset.voicePresetId,
+  }),
+);
+
 /** Return a name → catchphrase mapping derived from STYLE_PRESETS. */
 export function getPresetNameMap(): Record<string, string> {
   const result: Record<string, string> = {};

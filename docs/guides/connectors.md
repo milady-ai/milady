@@ -40,6 +40,7 @@ Connectors are platform bridges that allow your agent to communicate across mess
 | Microsoft Teams | App ID + password | Yes | Yes (teams/channels) | No |
 | Google Chat | Service account | Yes | Yes (spaces) | Yes |
 | Twitter | API keys + tokens | DMs | N/A | No |
+| WeChat | Proxy API key + QR code | Yes | Yes | Yes |
 
 ---
 
@@ -445,6 +446,59 @@ See the [WhatsApp Integration Guide](/guides/whatsapp) for detailed setup instru
 - Action processing toggle
 - Dry run mode for testing
 - Configurable max tweet length (default: 4000)
+
+---
+
+## WeChat
+
+Connects to WeChat via a third-party proxy service using personal account login.
+
+### Setup Requirements
+
+1. Obtain an API key from the WeChat proxy service
+2. Configure the proxy URL and webhook port
+3. Scan QR code displayed in terminal on first startup
+
+### Privacy Notice
+
+The WeChat connector depends on a user-supplied proxy service. That proxy receives
+your connector API key plus the message payloads and metadata needed to relay
+incoming and outgoing WeChat traffic. Only point `proxyUrl` at infrastructure you
+operate yourself or explicitly trust for that message flow.
+
+### Key Configuration
+
+```json
+{
+  "connectors": {
+    "wechat": {
+      "apiKey": "<key>",
+      "proxyUrl": "https://...",
+      "webhookPort": 18790,
+      "deviceType": "ipad"
+    }
+  }
+}
+```
+
+| Field | Description |
+|-------|------------|
+| `apiKey` | **Required** -- Proxy service API key |
+| `proxyUrl` | **Required** -- Proxy service URL |
+| `webhookPort` | Webhook listener port (default: 18790) |
+| `deviceType` | Device emulation type: `ipad` or `mac` (default: `ipad`) |
+
+**Environment variables:** `WECHAT_API_KEY`
+
+**Multi-account:** Supported via `accounts` map (same pattern as WhatsApp).
+
+### Features
+
+- Text messaging in DMs (enabled by default)
+- Group chat support (enable with `features.groups: true`)
+- Image send/receive (enable with `features.images: true`)
+- QR code login with automatic session persistence
+- Multi-account support via accounts map
 
 ---
 

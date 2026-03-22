@@ -34,6 +34,7 @@ vi.mock("@elizaos/plugin-telegram", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-trajectory-logger", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-trust", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-twitch", () => ({ default: {} }));
+vi.mock("@miladyai/plugin-wechat", () => ({ default: {} }));
 
 import { CHANNEL_PLUGIN_MAP } from "../runtime/eliza";
 import {
@@ -41,7 +42,10 @@ import {
   CONNECTOR_PLUGINS,
   isConnectorConfigured,
 } from "./plugin-auto-enable";
-import { CONNECTOR_IDS } from "./schema";
+import { CONNECTOR_IDS, MILADY_LOCAL_CONNECTOR_IDS } from "./schema";
+
+/** Connectors registered locally in Milady, not in upstream @elizaos/agent. */
+const MILADY_LOCAL_CONNECTORS = new Set<string>(MILADY_LOCAL_CONNECTOR_IDS);
 
 function sorted(values: Iterable<string>): string[] {
   return [...values].sort();
@@ -53,6 +57,7 @@ describe("connector map parity", () => {
     const runtimeIds = sorted(Object.keys(CHANNEL_PLUGIN_MAP));
     const schemaIds = sorted(CONNECTOR_IDS);
 
+    // All three maps should have the same connector IDs
     expect(runtimeIds).toEqual(autoEnableIds);
     expect(schemaIds).toEqual(autoEnableIds);
   });
@@ -77,13 +82,13 @@ describe("connector map parity", () => {
   });
 
   it("has identical count across all three maps", () => {
-    expect(CONNECTOR_IDS).toHaveLength(19);
-    expect(Object.keys(CONNECTOR_PLUGINS)).toHaveLength(19);
-    expect(Object.keys(CHANNEL_PLUGIN_MAP)).toHaveLength(19);
+    const totalCount = Object.keys(CHANNEL_PLUGIN_MAP).length;
+    expect(CONNECTOR_IDS).toHaveLength(totalCount);
+    expect(Object.keys(CONNECTOR_PLUGINS)).toHaveLength(totalCount);
   });
 
   it("uses valid package name prefixes for all plugin mappings", () => {
-    const validPrefix = /^@(elizaos|elizaai)\//;
+    const validPrefix = /^@(elizaos|elizaai|miladyai)\//;
     for (const pkg of Object.values(CONNECTOR_PLUGINS)) {
       expect(pkg).toMatch(validPrefix);
     }
@@ -122,6 +127,7 @@ const CONNECTOR_CREDS: Record<string, Record<string, unknown>> = {
   retake: { accessToken: "rtk-token" },
   blooio: { apiKey: "blk-key" },
   twitch: { accessToken: "twitch-token" },
+  wechat: { apiKey: "key" },
 };
 
 describe("connector runtime parity", () => {
@@ -156,7 +162,7 @@ describe("connector runtime parity", () => {
     ).toBe(false);
   });
 
-  it("applyPluginAutoEnable enables all 19 connectors when configured", () => {
+  it("applyPluginAutoEnable enables all connectors when configured", () => {
     const connectors: Record<string, Record<string, unknown>> = {};
     for (const id of CONNECTOR_IDS) {
       connectors[id] = CONNECTOR_CREDS[id];
@@ -169,6 +175,9 @@ describe("connector runtime parity", () => {
     for (const id of CONNECTOR_IDS) {
       expect(allow).toContain(id);
     }
-    expect(changes).toHaveLength(19);
+    const expectedChangeCount =
+      CONNECTOR_IDS.length - MILADY_LOCAL_CONNECTORS.size;
+    // Milady-local connectors are injected before the upstream helper runs.
+    expect(changes).toHaveLength(expectedChangeCount);
   });
 });

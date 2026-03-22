@@ -29,9 +29,11 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { isElectrobunRuntime } from "../bridge";
 import { useApp } from "../state";
 import { CodingAgentSettingsSection } from "./CodingAgentSettingsSection";
 import { ConfigPageView } from "./ConfigPageView";
+import { DesktopWorkspaceSection } from "./DesktopWorkspaceSection";
 import { CloudDashboard } from "./ElizaCloudDashboard";
 import { MediaSettingsSection } from "./MediaSettingsSection";
 import { PermissionsSection } from "./PermissionsSection";
@@ -165,8 +167,8 @@ function SettingsSidebar({
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-3 px-2">
-          <div className="space-y-0.5">
+        <nav className="flex-1 py-4 px-3">
+          <div className="space-y-1.5">
             {sections.map((section) => {
               const Icon = section.icon;
               const isActive = activeSection === section.id;
@@ -714,6 +716,14 @@ export function SettingsView({
           description={t("settings.sections.advanced.desc")}
           className="p-4 sm:p-5 lg:p-6"
         >
+          {isElectrobunRuntime() && (
+            <div className="mb-6 pb-6 border-b border-border/40">
+              <h3 className="text-sm font-semibold text-txt mb-4">
+                {t("settings.sections.desktop.label")}
+              </h3>
+              <DesktopWorkspaceSection />
+            </div>
+          )}
           <AdvancedSection />
         </SectionCard>
       )}

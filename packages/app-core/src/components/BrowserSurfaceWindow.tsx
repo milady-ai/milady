@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import "../styles/browser-surface.css";
+import { useApp } from "../state";
 import {
   DEFAULT_BROWSER_HOME,
   normalizeBrowserAddressInput,
@@ -15,6 +16,7 @@ import {
 } from "./browser-surface";
 
 export function BrowserSurfaceWindow() {
+  const { t } = useApp();
   const webviewRef = useRef<WebviewTagElement | null>(null);
   const [webviewTagAvailable, setWebviewTagAvailable] = useState(false);
   const [addressValue, setAddressValue] = useState(DEFAULT_BROWSER_HOME);
@@ -166,14 +168,14 @@ export function BrowserSurfaceWindow() {
 
         <form className="browser-surface__address" onSubmit={handleSubmit}>
           <input
-            aria-label="Browser address"
+            aria-label={t("aria.browserAddress")}
             autoCapitalize="none"
             autoCorrect="off"
             className="browser-surface__address-input"
             onChange={(event) => {
               setAddressValue(event.target.value);
             }}
-            placeholder="Enter a URL or search"
+            placeholder={t("browsersurface.enterUrlOrSearch")}
             spellCheck={false}
             type="text"
             value={addressValue}

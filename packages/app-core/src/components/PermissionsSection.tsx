@@ -14,7 +14,7 @@
 
 import { Button } from "@miladyai/ui";
 import { Check } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   type AllPermissionsState,
   client,
@@ -143,6 +143,8 @@ const PERMISSION_BADGE_LABELS: Record<
   "not-applicable": { tone: "muted", label: "N/A" },
 };
 
+const SETTINGS_REFRESH_DELAYS_MS = [1500, 4000] as const;
+
 function translateWithFallback(
   t: (key: string) => string,
   key: string,
@@ -192,6 +194,28 @@ function getPermissionAction(
     label,
     type: "settings",
   };
+}
+
+function getPermissionBadge(
+  id: SystemPermissionId,
+  status: PermissionStatus,
+  platform: string,
+): { tone: "success" | "danger" | "warning" | "muted"; label: string } {
+  if (status === "denied") {
+    if (id === "shell") {
+      return { tone: "danger", label: "Off" };
+    }
+
+    if (platform === "darwin") {
+      return { tone: "danger", label: "Off in Settings" };
+    }
+  }
+
+  if (status === "not-determined") {
+    return { tone: "warning", label: "Not Asked" };
+  }
+
+  return PERMISSION_BADGE_LABELS[status];
 }
 
 type DesktopMediaPermissionId = Extract<
@@ -359,6 +383,7 @@ async function reconcileRendererMediaPermissions(
 function PermissionRow({
   def,
   status,
+  platform,
   canRequest,
   onRequest,
   onOpenSettings,
@@ -368,6 +393,7 @@ function PermissionRow({
 }: {
   def: PermissionDef;
   status: PermissionStatus;
+  platform: string;
   canRequest: boolean;
   onRequest: () => void;
   onOpenSettings: () => void;
@@ -377,6 +403,7 @@ function PermissionRow({
 }) {
   const { t } = useApp();
   const action = getPermissionAction(t, def.id, status, canRequest);
+  const badge = getPermissionBadge(def.id, status, platform);
 
   return (
     <div className="flex items-center gap-3 py-2.5 px-3 border-b border-[var(--border)] last:border-b-0">
@@ -385,8 +412,8 @@ function PermissionRow({
         <div className="flex items-center gap-2">
           <span className="font-semibold text-[13px]">{def.name}</span>
           <StatusBadge
-            label={PERMISSION_BADGE_LABELS[status].label}
-            tone={PERMISSION_BADGE_LABELS[status].tone}
+            label={badge.label}
+            tone={badge.tone}
             withDot
             className="rounded-full font-semibold"
           />
@@ -494,11 +521,24 @@ function useDesktopPermissionsState() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [shellEnabled, setShellEnabled] = useState(true);
+  const settingsRefreshTimersRef = useRef<number[]>([]);
 
   const applySnapshot = useCallback((snapshot: DesktopPermissionsSnapshot) => {
     setPermissions(snapshot.permissions);
     setPlatform(snapshot.platform);
     setShellEnabled(snapshot.shellEnabled);
+  }, []);
+
+  const clearScheduledSettingsRefreshes = useCallback(() => {
+    if (typeof window === "undefined") {
+      settingsRefreshTimersRef.current = [];
+      return;
+    }
+
+    for (const timerId of settingsRefreshTimersRef.current) {
+      window.clearTimeout(timerId);
+    }
+    settingsRefreshTimersRef.current = [];
   }, []);
 
   const loadPermissionsSnapshot = useCallback(
@@ -549,6 +589,26 @@ function useDesktopPermissionsState() {
     [applySnapshot, loadPermissionsSnapshot],
   );
 
+  const scheduleSettingsRefreshes = useCallback(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    clearScheduledSettingsRefreshes();
+
+    for (const delayMs of SETTINGS_REFRESH_DELAYS_MS) {
+      let timerId = 0;
+      timerId = window.setTimeout(() => {
+        settingsRefreshTimersRef.current =
+          settingsRefreshTimersRef.current.filter(
+            (currentTimerId) => currentTimerId !== timerId,
+          );
+        void replaceSnapshot(true);
+      }, delayMs);
+      settingsRefreshTimersRef.current.push(timerId);
+    }
+  }, [clearScheduledSettingsRefreshes, replaceSnapshot]);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -576,6 +636,12 @@ function useDesktopPermissionsState() {
       cancelled = true;
     };
   }, [applySnapshot, loadPermissionsSnapshot]);
+
+  useEffect(() => {
+    return () => {
+      clearScheduledSettingsRefreshes();
+    };
+  }, [clearScheduledSettingsRefreshes]);
 
   useEffect(() => {
     return subscribeDesktopBridgeEvent({
@@ -637,12 +703,16 @@ function useDesktopPermissionsState() {
         if (bridged === null) {
           await client.requestPermission(id);
         }
-        await replaceSnapshot(true);
+        const snapshot = await replaceSnapshot(true);
+        const status = snapshot.permissions[id]?.status;
+        if (status && status !== "granted" && status !== "not-applicable") {
+          scheduleSettingsRefreshes();
+        }
       } catch (err) {
         console.error("Failed to request permission:", err);
       }
     },
-    [replaceSnapshot],
+    [replaceSnapshot, scheduleSettingsRefreshes],
   );
 
   const handleOpenSettings = useCallback(
@@ -657,11 +727,12 @@ function useDesktopPermissionsState() {
           await client.openPermissionSettings(id);
         }
         await replaceSnapshot(true);
+        scheduleSettingsRefreshes();
       } catch (err) {
         console.error("Failed to open settings:", err);
       }
     },
-    [replaceSnapshot],
+    [replaceSnapshot, scheduleSettingsRefreshes],
   );
 
   const handleToggleShell = useCallback(
@@ -854,6 +925,7 @@ function DesktopPermissionsView() {
                 key={def.id}
                 def={def}
                 status={state?.status ?? "not-determined"}
+                platform={platform}
                 canRequest={state?.canRequest ?? false}
                 onRequest={() => handleRequest(def.id)}
                 onOpenSettings={() => handleOpenSettings(def.id)}

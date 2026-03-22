@@ -45,6 +45,15 @@ describe("connector configuration detection", () => {
         );
       case "twitch":
         return Boolean(config.accessToken);
+      case "wechat":
+        return Boolean(
+          config.apiKey ||
+            (config.accounts &&
+              typeof config.accounts === "object" &&
+              Object.values(
+                config.accounts as Record<string, Record<string, unknown>>,
+              ).some((acc) => acc.enabled !== false && Boolean(acc.apiKey))),
+        );
       default:
         return Boolean(config.token || config.apiKey || config.botToken);
     }
@@ -109,6 +118,27 @@ describe("connector configuration detection", () => {
       true,
     );
   });
+
+  it("detects WeChat with apiKey", () => {
+    expect(isConnectorConfigured("wechat", { apiKey: "key" })).toBe(true);
+  });
+
+  it("detects WeChat with multi-account", () => {
+    expect(
+      isConnectorConfigured("wechat", {
+        accounts: { main: { enabled: true, apiKey: "key" } },
+      }),
+    ).toBe(true);
+  });
+
+  it("rejects disabled WeChat", () => {
+    expect(
+      isConnectorConfigured("wechat", {
+        enabled: false,
+        apiKey: "key",
+      }),
+    ).toBe(false);
+  });
 });
 
 // ============================================================================
@@ -124,6 +154,7 @@ describe("plugin auto-enable mapping", () => {
     whatsapp: "@elizaos/plugin-whatsapp",
     slack: "@elizaos/plugin-slack",
     twitter: "@elizaos/plugin-twitter",
+    wechat: "@miladyai/plugin-wechat",
   };
 
   it("maps each connector to its correct plugin", () => {

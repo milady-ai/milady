@@ -1,7 +1,7 @@
 {
   "$schema": "plugin-index-v1",
-  "generatedAt": "2026-03-14T08:11:48.802Z",
-  "count": 105,
+  "generatedAt": "2026-03-22T08:36:32.187Z",
+  "count": 106,
   "plugins": [
     {
       "id": "acp",
@@ -137,7 +137,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#acp-agent-communication-protocol"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#acp-agent-communication-protocol"
     },
     {
       "id": "agent-orchestrator",
@@ -269,7 +269,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#anthropic"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#anthropic"
     },
     {
       "id": "auto-trader",
@@ -707,7 +707,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#blooio-sms-via-api"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#blooio-sms-via-api"
     },
     {
       "id": "bluebubbles",
@@ -793,7 +793,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#bluebubbles-imessage-from-any-platform"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#bluebubbles-imessage-from-any-platform"
     },
     {
       "id": "bluesky",
@@ -927,7 +927,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#bluesky"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#bluesky"
     },
     {
       "id": "browser",
@@ -1460,14 +1460,14 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#discord"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#discord"
     },
     {
       "id": "edge-tts",
       "dirName": "plugin-edge-tts",
       "name": "Edge Tts",
       "npmName": "@elizaos/plugin-edge-tts",
-      "description": "Text-to-speech via Microsoft Edge TTS cloud (no API key; outbound calls to Microsoft). Auto-loaded with the agent orchestrator for swarm TTS—set MILADY_DISABLE_EDGE_TTS=1 or disable plugins.entries.edge-tts to opt out.",
+      "description": "Free text-to-speech using Microsoft Edge TTS - no API key required",
       "tags": ["edge-tts", "edge", "text-to-speech"],
       "category": "feature",
       "envKey": null,
@@ -2122,7 +2122,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#farcaster"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#farcaster"
     },
     {
       "id": "feishu",
@@ -2180,7 +2180,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#feishu-lark"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#feishu-lark"
     },
     {
       "id": "form",
@@ -2265,7 +2265,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#github"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#github"
     },
     {
       "id": "gmail-watch",
@@ -2278,7 +2278,7 @@
       "envKey": null,
       "configKeys": [],
       "version": "2.0.0-alpha.4",
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#gmail-watch"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#gmail-watch"
     },
     {
       "id": "goals",
@@ -2430,7 +2430,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#google-chat"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#google-chat"
     },
     {
       "id": "google-genai",
@@ -2509,7 +2509,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#google-gemini"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#google-gemini"
     },
     {
       "id": "groq",
@@ -2567,7 +2567,7 @@
           "default": "Chip-PlayAI"
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#groq"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#groq"
     },
     {
       "id": "hedera",
@@ -2650,7 +2650,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#imessage-macos-only"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#imessage-macos-only"
     },
     {
       "id": "inmemorydb",
@@ -2706,7 +2706,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#instagram"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#instagram"
     },
     {
       "id": "iq",
@@ -3073,7 +3073,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#line"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#line"
     },
     {
       "id": "linear",
@@ -3185,7 +3185,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#local-ai"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#local-ai"
     },
     {
       "id": "local-embedding",
@@ -3465,7 +3465,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#matrix"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#matrix"
     },
     {
       "id": "mattermost",
@@ -3551,7 +3551,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#mattermost"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#mattermost"
     },
     {
       "id": "mcp",
@@ -3578,7 +3578,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#mcp-model-context-protocol"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#mcp-model-context-protocol"
     },
     {
       "id": "memory",
@@ -3797,7 +3797,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#microsoft-teams"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#microsoft-teams"
     },
     {
       "id": "mysticism",
@@ -3963,7 +3963,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#nextcloud-talk"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#nextcloud-talk"
     },
     {
       "id": "nostr",
@@ -4014,7 +4014,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#nostr"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#nostr"
     },
     {
       "id": "ollama",
@@ -4085,7 +4085,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#ollama-local-models"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#ollama-local-models"
     },
     {
       "id": "openai",
@@ -4237,7 +4237,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#openai"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#openai"
     },
     {
       "id": "openrouter",
@@ -4386,7 +4386,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#openrouter"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#openrouter"
     },
     {
       "id": "pdf",
@@ -4575,7 +4575,7 @@
           "width": "half"
         }
       },
-      "tags": ["retake", "streaming", "rtmp", "chat", "broadcast"]
+      "tags": ["streaming", "broadcast", "retake", "rtmp", "chat"]
     },
     {
       "id": "rlm",
@@ -5020,7 +5020,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#signal"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#signal"
     },
     {
       "id": "simple-voice",
@@ -5112,7 +5112,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#slack"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#slack"
     },
     {
       "id": "social-alpha",
@@ -5379,7 +5379,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#telegram"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#telegram"
     },
     {
       "id": "tlon",
@@ -5452,7 +5452,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#tlon-urbit"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#tlon-urbit"
     },
     {
       "id": "todo",
@@ -5722,7 +5722,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#twilio-sms--voice"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#twilio-sms--voice"
     },
     {
       "id": "twitch",
@@ -5735,10 +5735,10 @@
         "streaming",
         "twitch",
         "chat",
-        "rtmp",
         "social",
         "social-chat",
-        "messaging"
+        "messaging",
+        "rtmp"
       ],
       "category": "connector",
       "envKey": "TWITCH_ACCESS_TOKEN",
@@ -5811,7 +5811,7 @@
         }
       },
       "repository": "https://github.com/milady-ai/milady",
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#twitch"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#twitch"
     },
     {
       "id": "twitch-streaming",
@@ -5839,7 +5839,7 @@
       },
       "repository": "https://github.com/milady-ai/milady",
       "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#twitch-streaming",
-      "tags": ["twitch", "streaming", "rtmp", "broadcast", "twitch-streaming"]
+      "tags": ["streaming", "broadcast", "twitch-streaming", "twitch", "rtmp"]
     },
     {
       "id": "twitter",
@@ -6130,7 +6130,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#vercel-ai-gateway"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#vercel-ai-gateway"
     },
     {
       "id": "vision",
@@ -6236,7 +6236,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#whatsapp"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#whatsapp"
     },
     {
       "id": "x402",
@@ -6517,7 +6517,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#xai-grok"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#xai-grok"
     },
     {
       "id": "youtube-streaming",
@@ -6556,7 +6556,7 @@
       },
       "repository": "https://github.com/milady-ai/milady",
       "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#youtube-streaming",
-      "tags": ["youtube", "streaming", "rtmp", "broadcast", "youtube-streaming"]
+      "tags": ["streaming", "broadcast", "youtube-streaming", "youtube", "rtmp"]
     },
     {
       "id": "zalo",
@@ -6649,7 +6649,7 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#zalo-vietnam-messaging"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#zalo-vietnam-messaging"
     },
     {
       "id": "zalouser",
@@ -6743,7 +6743,29 @@
           "sensitive": false
         }
       },
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#zalo-user-personal"
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#zalo-user-personal"
+    },
+    {
+      "id": "wechat",
+      "dirName": "plugin-wechat",
+      "name": "WeChat",
+      "npmName": "@miladyai/plugin-wechat",
+      "description": "WeChat connector for messaging via proxy API with QR code login.",
+      "tags": ["connector", "messaging", "wechat", "social", "social-chat"],
+      "category": "connector",
+      "envKey": "WECHAT_API_KEY",
+      "configKeys": ["WECHAT_API_KEY"],
+      "version": "0.1.0",
+      "pluginParameters": {
+        "WECHAT_API_KEY": {
+          "type": "string",
+          "description": "API key for WeChat proxy service",
+          "required": true,
+          "sensitive": true
+        }
+      },
+      "repository": "https://github.com/milady-ai/milady/tree/main/packages/plugin-wechat",
+      "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#wechat"
     }
   ]
 }

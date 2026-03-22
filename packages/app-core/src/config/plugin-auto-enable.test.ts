@@ -41,6 +41,7 @@ vi.mock("@elizaos/plugin-telegram", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-trajectory-logger", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-trust", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-twitch", () => ({ default: {} }));
+vi.mock("@miladyai/plugin-wechat", () => ({ default: {} }));
 
 import { CHANNEL_PLUGIN_MAP } from "../runtime/eliza";
 import {
@@ -210,6 +211,30 @@ describe("applyPluginAutoEnable — connectors", () => {
     const { config } = applyPluginAutoEnable(params);
 
     expect(config.plugins?.allow).toContain("telegram");
+  });
+
+  it("enables wechat plugin when apiKey is configured", () => {
+    const params = makeParams({
+      config: {
+        connectors: {
+          wechat: { apiKey: "key" },
+        },
+      },
+    });
+    const { config } = applyPluginAutoEnable(params);
+    expect(config.plugins?.allow).toContain("wechat");
+  });
+
+  it("does not enable wechat when disabled", () => {
+    const params = makeParams({
+      config: {
+        connectors: {
+          wechat: { enabled: false, apiKey: "key" },
+        },
+      },
+    });
+    const { config } = applyPluginAutoEnable(params);
+    expect(config.plugins?.allow ?? []).not.toContain("wechat");
   });
 });
 
@@ -634,8 +659,8 @@ describe("CONNECTOR_PLUGINS", () => {
     expect(CONNECTOR_PLUGINS.discord).toBe("@elizaos/plugin-discord");
   });
 
-  it("contains 19 connector mappings", () => {
-    expect(Object.keys(CONNECTOR_PLUGINS)).toHaveLength(19);
+  it("contains 20 connector mappings", () => {
+    expect(Object.keys(CONNECTOR_PLUGINS)).toHaveLength(20);
   });
 
   it("maps retake to @elizaos/plugin-retake", () => {

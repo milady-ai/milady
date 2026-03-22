@@ -357,6 +357,37 @@ export function resolveFeishuPluginImportSpecifier(): string | null {
   return null;
 }
 
+const WECHAT_PLUGIN_PACKAGE_NAME = "@miladyai/plugin-wechat";
+const WECHAT_PLUGIN_LOCAL_ENTRY_CANDIDATES = [
+  "src/index.ts",
+  "dist/index.js",
+] as const;
+
+export function resolveWechatPluginImportSpecifier(): string | null {
+  if (isPackageImportResolvable(WECHAT_PLUGIN_PACKAGE_NAME)) {
+    return WECHAT_PLUGIN_PACKAGE_NAME;
+  }
+
+  const helperDir = path.dirname(fileURLToPath(import.meta.url));
+  const packageRoot = path.resolve(helperDir, "..", "..");
+
+  // Check node_modules
+  for (const relativeEntryPath of WECHAT_PLUGIN_LOCAL_ENTRY_CANDIDATES) {
+    const nodeModulesEntry = path.resolve(
+      packageRoot,
+      "node_modules",
+      "@miladyai",
+      "plugin-wechat",
+      relativeEntryPath,
+    );
+    if (existsSync(nodeModulesEntry)) {
+      return pathToFileURL(nodeModulesEntry).href;
+    }
+  }
+
+  return null;
+}
+
 /** Build a mock update check result with deterministic defaults. */
 export function buildMockUpdateCheckResult(
   overrides: Partial<MockUpdateCheckResult> = {},

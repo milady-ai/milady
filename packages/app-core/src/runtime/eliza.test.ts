@@ -47,11 +47,12 @@ vi.mock("@elizaos/plugin-telegram", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-trajectory-logger", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-trust", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-twitch", () => ({ default: {} }));
+vi.mock("@miladyai/plugin-wechat", () => ({ default: {} }));
 
 import { findPluginExport } from "../cli/plugins-cli";
 import type { ElizaConfig } from "../config/config";
 import { CONNECTOR_PLUGINS } from "../config/plugin-auto-enable";
-import { CONNECTOR_IDS } from "../config/schema";
+import { CONNECTOR_IDS, MILADY_LOCAL_CONNECTOR_IDS } from "../config/schema";
 // Import the plugin import specifier resolver by whichever name is exported.
 // The eliza workspace exports resolveElizaPluginImportSpecifier while the
 // npm-published @elizaos/agent package exports

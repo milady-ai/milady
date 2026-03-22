@@ -1,12 +1,14 @@
 import { getElectrobunRendererRpc } from "./electrobun-rpc";
 
-interface ElectrobunBrowserWindow extends Window {
+type ElectrobunBrowserWindow = Window & {
   __electrobunWindowId?: number;
   __electrobunWebviewId?: number;
-}
+};
 
 function getRuntimeWindow(): ElectrobunBrowserWindow | null {
-  const g = globalThis as typeof globalThis & { window?: ElectrobunBrowserWindow };
+  const g = globalThis as typeof globalThis & {
+    window?: ElectrobunBrowserWindow;
+  };
   if (typeof g.window !== "undefined") {
     return g.window;
   }

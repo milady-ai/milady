@@ -51,6 +51,7 @@ const AUTONOMY_MESSAGE_SERVER_ID = stringToUuid(
 const INTERNAL_CHANNEL_PLUGIN_OVERRIDES = {
   signal: "@elizaos/plugin-signal",
   whatsapp: "@elizaos/plugin-whatsapp",
+  wechat: "@miladyai/plugin-wechat",
 } as const;
 const LEGACY_INTERNAL_CHANNEL_PLUGIN_NAMES = new Map<string, string>(
   Object.entries({
@@ -218,7 +219,10 @@ export async function ensureMiladyTextToSpeechHandler(
   }
 
   const r = runtime as RuntimeWithModelRegistration;
-  if (typeof r.getModel !== "function" || typeof r.registerModel !== "function") {
+  if (
+    typeof r.getModel !== "function" ||
+    typeof r.registerModel !== "function"
+  ) {
     return;
   }
 
@@ -616,8 +620,7 @@ async function warmupEmbeddingModel(
 
   const preset = detectEmbeddingPreset();
   const modelsDir = process.env.MODELS_DIR ?? DEFAULT_MODELS_DIR;
-  let model =
-    process.env.LOCAL_EMBEDDING_MODEL?.trim() || preset.model;
+  let model = process.env.LOCAL_EMBEDDING_MODEL?.trim() || preset.model;
   let modelRepo =
     process.env.LOCAL_EMBEDDING_MODEL_REPO?.trim() || preset.modelRepo;
 
@@ -663,13 +666,7 @@ async function warmupEmbeddingModel(
   };
 
   try {
-    await ensureModel(
-      modelsDir,
-      modelRepo,
-      model,
-      false,
-      progressCb,
-    );
+    await ensureModel(modelsDir, modelRepo, model, false, progressCb);
   } catch (err) {
     // Non-fatal: the plugin will attempt its own download on first use
     logger.warn(

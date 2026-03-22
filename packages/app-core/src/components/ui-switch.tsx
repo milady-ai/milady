@@ -1,16 +1,38 @@
 import type { ButtonHTMLAttributes } from "react";
 
+type SwitchSize = "default" | "compact";
+
 type SwitchProps = Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
   "type" | "onChange" | "onClick" | "role" | "aria-checked"
 > & {
   checked: boolean;
   onChange: (next: boolean) => void;
+  size?: SwitchSize;
+  trackOnClass?: string;
+  trackOffClass?: string;
+  knobClass?: string;
+  disabledClassName?: string;
+};
+
+const SIZE_CLASS: Record<SwitchSize, string> = {
+  default: "w-10 h-6",
+  compact: "w-10 h-6",
+};
+
+const KNOB_TRAVEL_CLASS: Record<SwitchSize, string> = {
+  default: "translate-x-4",
+  compact: "translate-x-4",
 };
 
 export function Switch({
   checked,
   onChange,
+  size = "default",
+  trackOnClass = "bg-[var(--accent)]",
+  trackOffClass = "bg-[var(--border)]",
+  knobClass = "bg-white",
+  disabledClassName = "opacity-40 cursor-default",
   disabled,
   className = "",
   ...buttonProps
@@ -22,37 +44,13 @@ export function Switch({
       role="switch"
       aria-checked={checked}
       disabled={disabled}
-      className={`${disabled ? "opacity-40 cursor-default" : "cursor-pointer"} ${className}`}
-      style={{
-        position: "relative",
-        display: "inline-flex",
-        alignItems: "center",
-        width: 51,
-        height: 31,
-        borderRadius: 9999,
-        border: "none",
-        padding: 0,
-        background: checked ? "var(--accent, #4cd964)" : "#787880",
-        transition: "background 0.2s ease",
-        outline: "none",
-        flexShrink: 0,
-      }}
+      className={`relative inline-flex shrink-0 rounded-full transition-colors duration-200 focus:outline-none ${SIZE_CLASS[size]} ${checked ? trackOnClass : trackOffClass} ${disabled ? disabledClassName : "cursor-pointer"} ${className}`}
       onClick={() => {
         if (!disabled) onChange(!checked);
       }}
     >
       <span
-        style={{
-          position: "absolute",
-          top: 2,
-          left: checked ? 22 : 2,
-          width: 27,
-          height: 27,
-          borderRadius: 9999,
-          background: "#ffffff",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
-          transition: "left 0.2s ease",
-        }}
+        className={`pointer-events-none absolute top-1 left-1 h-4 w-4 rounded-full shadow-sm transition-transform duration-200 ${knobClass} ${checked ? KNOB_TRAVEL_CLASS[size] : ""}`}
       />
     </button>
   );

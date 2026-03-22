@@ -1,16 +1,15 @@
 /**
  * E2E tests for Settings Sections.
  *
- * Tests cover all 14 settings sections:
+ * Tests cover the settings shell sections and navigation:
  * 1. Appearance (theme selection)
  * 2. AI Model (provider, model selection)
  * 3. Integrations (GitHub, coding agents)
- * 4. Media (image, video, audio providers)
- * 5. Voice (TTS/STT configuration)
- * 6. Permissions
- * 7. Updates
- * 8. Cloud integration
- * 9-14. Advanced options
+ * 4. Media (image, video, audio, and voice providers)
+ * 5. Permissions
+ * 6. Updates
+ * 7. Cloud integration
+ * 8+. Advanced options
  */
 
 // @vitest-environment jsdom
@@ -511,7 +510,7 @@ describe("SettingsView Sections", () => {
       });
 
       const expectedSections = [
-        "settings.sections.voice.label",
+        "settings.sections.media.label",
         "nav.advanced",
       ];
       const allText = JSON.stringify(tree?.toJSON());
