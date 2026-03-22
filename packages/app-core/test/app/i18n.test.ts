@@ -23,6 +23,18 @@ describe("i18n helpers", () => {
     expect(normalizeLanguage(undefined)).toBe("en");
   });
 
+  it("normalizes Tagalog aliases and serves Tagalog translations", () => {
+    expect(UI_LANGUAGES).toContain("tl");
+    expect(normalizeLanguage("tl")).toBe("tl");
+    expect(normalizeLanguage("tl-PH")).toBe("tl");
+    expect(normalizeLanguage("fil")).toBe("tl");
+    expect(normalizeLanguage("fil-PH")).toBe("tl");
+    expect(t("tl", "settings.language")).toBe("Wika");
+    expect(createTranslator("tl")("chat.inputPlaceholder")).toBe(
+      "Mag-type ng mensahe...",
+    );
+  });
+
   it("falls back to english message when key is missing in selected locale", () => {
     expect(t("zh-CN", "nav.chat")).toBe("聊天");
     expect(t("zh-CN", "nonexistent.key")).toBe("nonexistent.key");
