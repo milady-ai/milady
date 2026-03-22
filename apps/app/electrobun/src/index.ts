@@ -491,7 +491,14 @@ function loadWindowState(statePath: string): WindowState {
     if (fs.existsSync(statePath)) {
       const data = JSON.parse(fs.readFileSync(statePath, "utf8"));
       if (typeof data.width === "number" && typeof data.height === "number") {
-        return { ...DEFAULT_WINDOW_STATE, ...data };
+        const state = { ...DEFAULT_WINDOW_STATE, ...data };
+        // Discard state saved while the window was minimized.  On Windows,
+        // minimized windows report position (-32000, -32000) and a tiny
+        // size, which makes the window invisible on next launch.
+        if (state.width < 200 || state.height < 200 || state.x < -16000) {
+          return DEFAULT_WINDOW_STATE;
+        }
+        return state;
       }
     }
   } catch {
@@ -508,6 +515,10 @@ function scheduleStateSave(statePath: string, win: BrowserWindow): void {
     try {
       const { x, y } = win.getPosition();
       const { width, height } = win.getSize();
+      // Skip saving when the window is minimized — Windows reports
+      // position (-32000, -32000) and a collapsed size, which would make
+      // the window invisible on next launch.
+      if (width < 200 || height < 200 || x < -16000) return;
       const dir = path.dirname(statePath);
       if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(
@@ -1468,6 +1479,54 @@ async function main(): Promise<void> {
   console.log(
     `[Env] desktopRuntimeMode=${runtimeResolution.mode} externalApi=${runtimeResolution.externalApi.base ?? "none"}`,
   );
+  // On Windows (CEF renderer), clear stale CEF profile data when the app
+  // version changes.  A leftover Partitions/default profile from a previous
+  // install causes "Cannot create profile at path" errors that cascade into
+  // GPU process crashes, rendering the UI unusable.  Clearing the CEF cache
+  // is safe — it only contains browser session state (cookies, caches,
+  // LevelDB stores) that CEF recreates on next launch.
+  if (process.platform === "win32") {
+    try {
+      const cefDir = path.join(Utils.paths.userData, "CEF");
+      const cefVersionMarker = path.join(cefDir, ".milady-version");
+      let currentVersion = "unknown";
+      try {
+        const pkgPath = path.join(import.meta.dir, "..", "package.json");
+        currentVersion =
+          JSON.parse(fs.readFileSync(pkgPath, "utf-8")).version ??
+          "unknown";
+      } catch {
+        // Fallback — version marker will still trigger cleanup on next real version.
+      }
+      let previousVersion: string | null = null;
+      try {
+        previousVersion = fs.readFileSync(cefVersionMarker, "utf-8").trim();
+      } catch {
+        // No marker — first run or pre-fix install.
+      }
+      if (previousVersion !== currentVersion && fs.existsSync(cefDir)) {
+        console.log(
+          `[Main] CEF version mismatch (${previousVersion ?? "none"} → ${currentVersion}), clearing stale CEF profile`,
+        );
+        // Remove everything except the version marker we're about to write.
+        for (const entry of fs.readdirSync(cefDir)) {
+          if (entry === ".milady-version") continue;
+          const entryPath = path.join(cefDir, entry);
+          try {
+            fs.rmSync(entryPath, { recursive: true, force: true });
+          } catch (err) {
+            console.warn(`[Main] Could not remove ${entryPath}:`, err);
+          }
+        }
+      }
+      // Write/update version marker so we don't clear again on next launch.
+      fs.mkdirSync(cefDir, { recursive: true });
+      fs.writeFileSync(cefVersionMarker, currentVersion);
+    } catch (err) {
+      console.warn("[Main] CEF profile cleanup failed (non-fatal):", err);
+    }
+  }
+
   initializeBundledWebGPU();
   checkWebGpuBrowserSupport();
   const cleanupFns: Array<() => void> = [];

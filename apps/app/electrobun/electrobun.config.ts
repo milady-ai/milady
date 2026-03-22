@@ -131,10 +131,18 @@ export default {
       defaultRenderer: "cef",
       icon: "assets/appIcon.ico",
       // Enable WebGPU in CEF on Windows.
+      // The GPU process sandbox causes STATUS_BREAKPOINT crashes
+      // (exit code -2147483645) on Windows during GPU initialization,
+      // cascading into a fully broken UI.  Running the GPU in-process
+      // with the sandbox disabled avoids the crash while keeping
+      // hardware-accelerated rendering active.
       chromiumFlags: {
         "enable-unsafe-webgpu": true,
         "enable-features": "Vulkan",
-      },
+        "in-process-gpu": true,
+        "disable-gpu-sandbox": true,
+        "no-sandbox": true,
+      } as unknown as Record<string, string | true>,
     },
   },
   release: {
