@@ -63,66 +63,67 @@ export const CONNECTION_RECOMMENDED_PROVIDER_IDS = [
  * Documentation-only transition hints (onboarding guide, onboarding changelog). **Why not executable:** the real machine is
  * `applyConnectionTransition`; this table can drift—prefer tests when changing behavior.
  */
-export const CONNECTION_TRANSITIONS: ReadonlyArray<ConnectionTransitionDocRow> = [
-  {
-    from: "hosting",
-    event: "selectLocalHosting",
-    to: "providerGrid",
-  },
-  {
-    from: "hosting",
-    event: "selectRemoteHosting",
-    to: "remoteBackend",
-  },
-  {
-    from: "hosting",
-    event: "selectElizaCloudHosting",
-    to: "elizaCloud_preProvider",
-  },
-  {
-    from: "remoteBackend",
-    event: "backRemoteOrGrid",
-    to: "hosting",
-    note: "When remoteConnected → effect useLocalBackend; else patch reset hosting",
-  },
-  {
-    from: "providerGrid",
-    event: "backRemoteOrGrid",
-    to: "hosting",
-    note: "When remoteConnected → effect useLocalBackend; else patch reset hosting",
-  },
-  {
-    from: "elizaCloud_preProvider",
-    event: "backElizaCloudPreProvider",
-    to: "hosting",
-  },
-  {
-    from: "providerGrid",
-    event: "selectProvider",
-    to: "providerDetail",
-  },
-  {
-    from: "providerDetail",
-    event: "clearProvider",
-    to: "providerGrid",
-  },
-  {
-    from: "providerDetail",
-    event: "setElizaCloudTab",
-    to: "same",
-  },
-  {
-    from: "providerDetail",
-    event: "setSubscriptionTab",
-    to: "same",
-  },
-  {
-    from: "hosting",
-    event: "forceCloudBootstrap",
-    to: "providerGrid",
-    note: "When forceCloud && runMode empty (steady UI)",
-  },
-];
+export const CONNECTION_TRANSITIONS: ReadonlyArray<ConnectionTransitionDocRow> =
+  [
+    {
+      from: "hosting",
+      event: "selectLocalHosting",
+      to: "providerGrid",
+    },
+    {
+      from: "hosting",
+      event: "selectRemoteHosting",
+      to: "remoteBackend",
+    },
+    {
+      from: "hosting",
+      event: "selectElizaCloudHosting",
+      to: "elizaCloud_preProvider",
+    },
+    {
+      from: "remoteBackend",
+      event: "backRemoteOrGrid",
+      to: "hosting",
+      note: "When remoteConnected → effect useLocalBackend; else patch reset hosting",
+    },
+    {
+      from: "providerGrid",
+      event: "backRemoteOrGrid",
+      to: "hosting",
+      note: "When remoteConnected → effect useLocalBackend; else patch reset hosting",
+    },
+    {
+      from: "elizaCloud_preProvider",
+      event: "backElizaCloudPreProvider",
+      to: "hosting",
+    },
+    {
+      from: "providerGrid",
+      event: "selectProvider",
+      to: "providerDetail",
+    },
+    {
+      from: "providerDetail",
+      event: "clearProvider",
+      to: "providerGrid",
+    },
+    {
+      from: "providerDetail",
+      event: "setElizaCloudTab",
+      to: "same",
+    },
+    {
+      from: "providerDetail",
+      event: "setSubscriptionTab",
+      to: "same",
+    },
+    {
+      from: "hosting",
+      event: "forceCloudBootstrap",
+      to: "providerGrid",
+      note: "When forceCloud && runMode empty (steady UI)",
+    },
+  ];
 
 /** **Why exported:** tests and docs; also shared by `derive` and `resolveConnectionUiSpec` so policy lives once. */
 export function getEffectiveRunMode(

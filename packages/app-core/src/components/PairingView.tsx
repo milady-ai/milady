@@ -2,10 +2,7 @@
  * Pairing view component — simple pairing screen for authentication.
  */
 
-import {
-  appNameInterpolationVars,
-  useBranding,
-} from "../config/branding";
+import { appNameInterpolationVars, useBranding } from "../config/branding";
 import { useApp } from "../state";
 
 export function PairingView() {

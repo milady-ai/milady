@@ -32,9 +32,11 @@ const baseSnap = (
 describe("connection-flow", () => {
   describe("deriveConnectionScreen", () => {
     it.each<
-      [name: string, snap: ConnectionFlowSnapshot, screen: ReturnType<
-        typeof deriveConnectionScreen
-      >]
+      [
+        name: string,
+        snap: ConnectionFlowSnapshot,
+        screen: ReturnType<typeof deriveConnectionScreen>,
+      ]
     >([
       ["hosting (web)", baseSnap(), "hosting"],
       [
@@ -107,26 +109,33 @@ describe("connection-flow", () => {
         baseSnap({ onboardingRunMode: "local", onboardingProvider: "gemini" }),
       ];
       for (const s of fixtures) {
-        expect(resolveConnectionUiSpec(s).screen).toBe(deriveConnectionScreen(s));
+        expect(resolveConnectionUiSpec(s).screen).toBe(
+          deriveConnectionScreen(s),
+        );
       }
     });
 
     it("hides hosting local card when native or cloudOnly", () => {
       expect(
-        resolveConnectionUiSpec(baseSnap({ isNative: true })).showHostingLocalCard,
+        resolveConnectionUiSpec(baseSnap({ isNative: true }))
+          .showHostingLocalCard,
       ).toBe(false);
       expect(
         resolveConnectionUiSpec(baseSnap({ cloudOnly: true }))
           .showHostingLocalCard,
       ).toBe(false);
-      expect(resolveConnectionUiSpec(baseSnap()).showHostingLocalCard).toBe(true);
+      expect(resolveConnectionUiSpec(baseSnap()).showHostingLocalCard).toBe(
+        true,
+      );
     });
   });
 
   describe("helpers", () => {
     it("getEffectiveRunMode maps forceCloud + empty run to local", () => {
       expect(
-        getEffectiveRunMode(baseSnap({ forceCloud: true, onboardingRunMode: "" })),
+        getEffectiveRunMode(
+          baseSnap({ forceCloud: true, onboardingRunMode: "" }),
+        ),
       ).toBe("local");
       expect(
         getEffectiveRunMode(
@@ -143,7 +152,9 @@ describe("connection-flow", () => {
         ),
       ).toBe(true);
       expect(
-        computeShowProviderSelection(baseSnap({ onboardingRemoteConnected: true })),
+        computeShowProviderSelection(
+          baseSnap({ onboardingRemoteConnected: true }),
+        ),
       ).toBe(true);
     });
   });
@@ -151,10 +162,9 @@ describe("connection-flow", () => {
   describe("applyConnectionTransition", () => {
     it("forceCloudBootstrap only when forceCloud and runMode empty", () => {
       expect(
-        applyConnectionTransition(
-          baseSnap({ forceCloud: false }),
-          { type: "forceCloudBootstrap" },
-        ),
+        applyConnectionTransition(baseSnap({ forceCloud: false }), {
+          type: "forceCloudBootstrap",
+        }),
       ).toBeNull();
       expect(
         applyConnectionTransition(
@@ -193,7 +203,9 @@ describe("connection-flow", () => {
 
     it("backRemoteOrGrid when connected is effect", () => {
       const s = baseSnap({ onboardingRemoteConnected: true });
-      expect(applyConnectionTransition(s, { type: "backRemoteOrGrid" })).toEqual({
+      expect(
+        applyConnectionTransition(s, { type: "backRemoteOrGrid" }),
+      ).toEqual({
         kind: "effect",
         effect: "useLocalBackend",
       });

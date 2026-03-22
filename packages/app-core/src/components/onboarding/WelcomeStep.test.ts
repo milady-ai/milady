@@ -10,7 +10,8 @@ const { useAppMock, useBrandingMock } = vi.hoisted(() => ({
 }));
 
 vi.mock("@miladyai/app-core/config", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@miladyai/app-core/config")>();
+  const actual =
+    await importOriginal<typeof import("@miladyai/app-core/config")>();
   return {
     ...actual,
     useBranding: () => useBrandingMock(),

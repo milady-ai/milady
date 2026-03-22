@@ -83,9 +83,7 @@ export function ConnectionRemoteBackendScreen({
             className="onboarding-input"
             placeholder={t("onboarding.remoteAccessKeyPlaceholder")}
             value={onboardingRemoteToken}
-            onChange={(e) =>
-              setState("onboardingRemoteToken", e.target.value)
-            }
+            onChange={(e) => setState("onboardingRemoteToken", e.target.value)}
           />
         </div>
 

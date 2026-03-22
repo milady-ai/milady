@@ -72,9 +72,7 @@ export function ConnectionElizaCloudPreProviderScreen({
                   : "2px solid transparent",
               cursor: "pointer",
             }}
-            onClick={() =>
-              dispatch({ type: "setElizaCloudTab", tab: "login" })
-            }
+            onClick={() => dispatch({ type: "setElizaCloudTab", tab: "login" })}
           >
             {t("onboarding.login")}
           </button>

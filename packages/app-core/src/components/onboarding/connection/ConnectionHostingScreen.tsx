@@ -63,9 +63,7 @@ export function ConnectionHostingScreen({
           onClick={() => dispatch({ type: "selectElizaCloudHosting" })}
         >
           <div style={{ flex: 1 }}>
-            <div className="onboarding-provider-name">
-              {t("header.Cloud")}
-            </div>
+            <div className="onboarding-provider-name">{t("header.Cloud")}</div>
             <div className="onboarding-provider-desc">
               {t("onboarding.hostingElizaCloudDesc")}
             </div>
