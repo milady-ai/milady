@@ -3,6 +3,28 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-06-25" description="Week of June 19–25" tags={["Feature", "Update", "Fix"]}>
+## Browser surface on by default
+
+The desktop app now enables the native browser surface by default, giving you in-app browsing without any extra configuration. If you prefer to disable it, set `MILADY_ENABLE_BROWSER_SURFACE=0` in your environment.
+
+## Release center
+
+A new Release Center view in the [desktop app](/apps/desktop) gives you a dedicated surface for managing updates, viewing release notes, and inspecting your current build — all in one place instead of scattered across menus.
+
+## Updates
+
+- **Desktop menus fully wired** — The native application menu and system tray now connect to all available desktop actions, including chat, cloud, voice, media, and window controls. Previously, some menu items were stale or partially functional.
+
+## Bug fixes
+
+- Fixed agent name reverting to the default after restarting — your chosen name, bio, and system prompt now persist correctly across restarts
+- Fixed Eliza Cloud not activating after selecting it during [onboarding](/guides/beginners-user-guide) — cloud mode is now detected reliably regardless of how the onboarding payload is structured
+- Fixed a desktop startup crash caused by a React hook-order error
+- Fixed legacy local installs being forced back into onboarding — existing configurations are now recognized during startup
+- Fixed macOS desktop self-update failing when the app is launched from outside `/Applications`, which previously triggered App Management permission prompts
+</Update>
+
 <Update label="2026-06-18" description="Week of June 12–18" tags={["Feature", "Update", "Fix"]}>
 ## Simplified cloud onboarding
 
