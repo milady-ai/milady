@@ -23,6 +23,7 @@
 | `src/plugins/polymarket/autonomous/stores/goalStore.ts` | GoalStore — portfolio goal management |
 | `src/plugins/polymarket/autonomous/stores/tradeJournal.ts` | TradeJournal — trade entry/exit recording |
 | `src/plugins/polymarket/autonomous/stores/decisionQueue.ts` | DecisionQueue — ring buffer for scanner output (Phase 3 uses, but type needed now) |
+| `src/plugins/polymarket/autonomous/stores/registry.ts` | Singleton store manager — creates stores once at plugin init, provides getters |
 | `src/plugins/polymarket/autonomous/providers/portfolioIntelligence.ts` | Autonomy-loop provider assembling full trading context |
 | `src/plugins/polymarket/autonomous/gates/preTrade.ts` | Pre-trade gate pure function |
 | `src/plugins/polymarket/autonomous/index.ts` | Re-exports all autonomous components |
@@ -1105,10 +1106,11 @@ git commit -m "feat(polymarket): add TradeJournal with daily PnL and outcome cla
 
 ---
 
-### Task 5: Create DecisionQueue stub and autonomous index
+### Task 5: Create DecisionQueue stub, store registry, and autonomous index
 
 **Files:**
 - Create: `src/plugins/polymarket/autonomous/stores/decisionQueue.ts`
+- Create: `src/plugins/polymarket/autonomous/stores/registry.ts`
 - Create: `src/plugins/polymarket/autonomous/index.ts`
 
 - [ ] **Step 1: Write DecisionQueue stub**
@@ -1150,7 +1152,73 @@ export class DecisionQueue {
 }
 ```
 
-- [ ] **Step 2: Write autonomous index re-exporting all modules**
+- [ ] **Step 2: Write store registry (singleton manager)**
+
+The stores must be singletons shared across action handlers, the provider, and the gate. The registry creates them once during plugin init and provides access via getter functions. This is the critical piece that makes the pre-trade gate work — without it, each action handler would create empty ephemeral stores.
+
+```typescript
+// src/plugins/polymarket/autonomous/stores/registry.ts
+import { ThesisStore } from "./thesisStore";
+import { GoalStore } from "./goalStore";
+import { TradeJournal } from "./tradeJournal";
+import { DecisionQueue } from "./decisionQueue";
+
+let thesisStore: ThesisStore | null = null;
+let goalStore: GoalStore | null = null;
+let tradeJournal: TradeJournal | null = null;
+let decisionQueue: DecisionQueue | null = null;
+
+export interface StoreRegistryOptions {
+  maxActiveTheses?: number;
+}
+
+/** Call once during plugin init to create singleton store instances. */
+export function initializeStores(options?: StoreRegistryOptions): void {
+  thesisStore = new ThesisStore({ maxActiveTheses: options?.maxActiveTheses });
+  goalStore = new GoalStore();
+  tradeJournal = new TradeJournal();
+  decisionQueue = new DecisionQueue();
+}
+
+/** Get the singleton ThesisStore. Throws if not initialized. */
+export function getThesisStore(): ThesisStore {
+  if (!thesisStore) throw new Error("Autonomous stores not initialized. Call initializeStores() first.");
+  return thesisStore;
+}
+
+/** Get the singleton GoalStore. Throws if not initialized. */
+export function getGoalStore(): GoalStore {
+  if (!goalStore) throw new Error("Autonomous stores not initialized. Call initializeStores() first.");
+  return goalStore;
+}
+
+/** Get the singleton TradeJournal. Throws if not initialized. */
+export function getTradeJournal(): TradeJournal {
+  if (!tradeJournal) throw new Error("Autonomous stores not initialized. Call initializeStores() first.");
+  return tradeJournal;
+}
+
+/** Get the singleton DecisionQueue. Throws if not initialized. */
+export function getDecisionQueue(): DecisionQueue {
+  if (!decisionQueue) throw new Error("Autonomous stores not initialized. Call initializeStores() first.");
+  return decisionQueue;
+}
+
+/** Check if stores have been initialized (for graceful fallback in action handlers). */
+export function storesInitialized(): boolean {
+  return thesisStore !== null;
+}
+
+/** Reset all stores (for testing only). */
+export function resetStores(): void {
+  thesisStore = null;
+  goalStore = null;
+  tradeJournal = null;
+  decisionQueue = null;
+}
+```
+
+- [ ] **Step 3: Write autonomous index re-exporting all modules**
 
 ```typescript
 // src/plugins/polymarket/autonomous/index.ts
@@ -1161,6 +1229,16 @@ export { GoalStore } from "./stores/goalStore";
 export { TradeJournal } from "./stores/tradeJournal";
 export { DecisionQueue } from "./stores/decisionQueue";
 export type { DecisionQueueItem } from "./stores/decisionQueue";
+export {
+  initializeStores,
+  getThesisStore,
+  getGoalStore,
+  getTradeJournal,
+  getDecisionQueue,
+  storesInitialized,
+  resetStores,
+} from "./stores/registry";
+export type { StoreRegistryOptions } from "./stores/registry";
 ```
 
 Note: `portfolioIntelligence` provider and `preTrade` gate will be added to this index in later tasks.
@@ -1173,8 +1251,8 @@ Expected: all tests PASS
 - [ ] **Step 4: Commit**
 
 ```bash
-git add src/plugins/polymarket/autonomous/stores/decisionQueue.ts src/plugins/polymarket/autonomous/index.ts
-git commit -m "feat(polymarket): add DecisionQueue stub and autonomous module index"
+git add src/plugins/polymarket/autonomous/stores/decisionQueue.ts src/plugins/polymarket/autonomous/stores/registry.ts src/plugins/polymarket/autonomous/index.ts
+git commit -m "feat(polymarket): add DecisionQueue stub, store registry, and autonomous module index"
 ```
 
 ---
@@ -1923,6 +2001,24 @@ In `src/plugins/polymarket/index.ts`, add these fields inside `configSchema` (af
   POLYMARKET_MAX_DAILY_LOSS_USD: z.string().optional(),
 ```
 
+Add this import at the top of `index.ts` (after the existing imports around line 23):
+
+```typescript
+import { initializeStores } from "./autonomous/stores/registry";
+import { MAX_ACTIVE_THESES_DEFAULT } from "./constants";
+```
+
+Inside the `init()` function, after the research task worker registration block (after line 127), add:
+
+```typescript
+        // Initialize autonomous trading stores (singleton registry)
+        const maxTheses = parseInt(
+          runtime.getSetting("POLYMARKET_MAX_ACTIVE_THESES") || String(MAX_ACTIVE_THESES_DEFAULT), 10
+        );
+        initializeStores({ maxActiveTheses: maxTheses });
+        logger.info("Polymarket autonomous stores initialized");
+```
+
 Add corresponding entries to the `config` object (after `OPENAI_API_KEY` at line 98):
 
 ```typescript
@@ -1965,9 +2061,7 @@ At the top of `placeOrder.ts`, add the import (after existing imports around lin
 
 ```typescript
 import { evaluatePreTradeGate } from "../autonomous/gates/preTrade";
-import { ThesisStore } from "../autonomous/stores/thesisStore";
-import { GoalStore } from "../autonomous/stores/goalStore";
-import { TradeJournal } from "../autonomous/stores/tradeJournal";
+import { storesInitialized, getThesisStore, getGoalStore, getTradeJournal } from "../autonomous/stores/registry";
 import { MAX_DAILY_LOSS_USD_DEFAULT } from "../constants";
 ```
 
@@ -1975,64 +2069,62 @@ After the balance check block (line 763) and before the "Log order details" comm
 
 ```typescript
     // ── Autonomous pre-trade gate ──────────────────────────────────
-    // Reads from autonomous stores if available. For user-requested trades,
-    // the gate only warns. For autonomous trades, it can block or adjust.
+    // Uses singleton stores from registry (initialized during plugin init).
+    // For user-requested trades, the gate only warns.
+    // For autonomous trades, it can block or adjust.
     const isAutonomous = Boolean((message.content as Record<string, unknown>)?.autonomous);
     const thesisId = (message.content as Record<string, unknown>)?.thesisId as string | undefined;
 
-    try {
-      // Stores are singletons — create lightweight instances that will be
-      // replaced with runtime-managed instances when Phase 2 lands
-      const thesisStore = new ThesisStore();
-      const goalStore = new GoalStore();
-      const tradeJournal = new TradeJournal();
-      const maxDailyLoss = parseFloat(
-        runtime.getSetting("POLYMARKET_MAX_DAILY_LOSS_USD") || String(MAX_DAILY_LOSS_USD_DEFAULT)
-      );
-
-      const gateResult = await evaluatePreTradeGate(
-        {
-          tokenId, side: side.toLowerCase() as "buy" | "sell",
-          price, size, dollarAmount, orderType,
-          thesisId, isAutonomous, isClose: false,
-        },
-        { thesisStore, goalStore, tradeJournal },
-        {
-          usdcBalance: usdcBalance ?? 0,
-          dailyLossUsd: tradeJournal.getDailyRealizedPnl(),
-          maxDailyLossUsd: maxDailyLoss,
-          unrealizedPnl: 0, // TODO: compute from positions in Phase 2
-        }
-      );
-
-      if (!gateResult.allowed) {
-        runtime.logger.warn(`[placeOrderAction] Pre-trade gate blocked: ${gateResult.reason}`);
-        await sendError(callback, gateResult.reason!, "Pre-trade gate");
-        return { success: false, text: gateResult.reason!, error: "gate_blocked" };
-      }
-
-      if (gateResult.warnings.length > 0) {
-        for (const w of gateResult.warnings) {
-          runtime.logger.warn(`[placeOrderAction] Gate warning: ${w}`);
-        }
-      }
-
-      if (isAutonomous && gateResult.adjustedSize && gateResult.adjustedSize !== size) {
-        runtime.logger.info(
-          `[placeOrderAction] Gate adjusted size: ${size} → ${gateResult.adjustedSize} (conviction-based)`
+    if (storesInitialized()) {
+      try {
+        const maxDailyLoss = parseFloat(
+          runtime.getSetting("POLYMARKET_MAX_DAILY_LOSS_USD") || String(MAX_DAILY_LOSS_USD_DEFAULT)
         );
-        size = gateResult.adjustedSize;
+
+        const gateResult = await evaluatePreTradeGate(
+          {
+            tokenId, side: side.toLowerCase() as "buy" | "sell",
+            price, size, dollarAmount, orderType,
+            thesisId, isAutonomous, isClose: false,
+          },
+          { thesisStore: getThesisStore(), goalStore: getGoalStore(), tradeJournal: getTradeJournal() },
+          {
+            usdcBalance: usdcBalance ?? 0,
+            dailyLossUsd: getTradeJournal().getDailyRealizedPnl(),
+            maxDailyLossUsd: maxDailyLoss,
+            unrealizedPnl: 0, // TODO: compute from positions in Phase 2
+          }
+        );
+
+        if (!gateResult.allowed) {
+          runtime.logger.warn(`[placeOrderAction] Pre-trade gate blocked: ${gateResult.reason}`);
+          await sendError(callback, gateResult.reason!, "Pre-trade gate");
+          return { success: false, text: gateResult.reason!, error: "gate_blocked" };
+        }
+
+        if (gateResult.warnings.length > 0) {
+          for (const w of gateResult.warnings) {
+            runtime.logger.warn(`[placeOrderAction] Gate warning: ${w}`);
+          }
+        }
+
+        if (isAutonomous && gateResult.adjustedSize && gateResult.adjustedSize !== size) {
+          runtime.logger.info(
+            `[placeOrderAction] Gate adjusted size: ${size} → ${gateResult.adjustedSize} (conviction-based)`
+          );
+          size = gateResult.adjustedSize;
+        }
+      } catch (gateError) {
+        // Gate failure should not block user trades — log and continue
+        runtime.logger.warn(`[placeOrderAction] Pre-trade gate error: ${gateError}`);
       }
-    } catch (gateError) {
-      // Gate failure should not block user trades — log and continue
-      runtime.logger.warn(`[placeOrderAction] Pre-trade gate error: ${gateError}`);
     }
 ```
 
 - [ ] **Step 2: Verify existing placeOrder tests still pass**
 
 Run: `cd /Users/pleasures/Desktop/milady && bunx vitest run src/plugins/polymarket/__tests__/placeOrder.test.ts`
-Expected: PASS (gate creates empty stores, which won't block user-requested trades)
+Expected: PASS (stores not initialized in test env, so `storesInitialized()` returns false and gate is skipped)
 
 - [ ] **Step 3: Verify all autonomous tests still pass**
 
@@ -2059,9 +2151,7 @@ At the top of `closePosition.ts`, add the import (after existing imports):
 
 ```typescript
 import { evaluatePreTradeGate } from "../autonomous/gates/preTrade";
-import { ThesisStore } from "../autonomous/stores/thesisStore";
-import { GoalStore } from "../autonomous/stores/goalStore";
-import { TradeJournal } from "../autonomous/stores/tradeJournal";
+import { storesInitialized, getThesisStore, getGoalStore, getTradeJournal } from "../autonomous/stores/registry";
 import { MAX_DAILY_LOSS_USD_DEFAULT } from "../constants";
 ```
 
@@ -2072,43 +2162,50 @@ Before the `if (orderType === "market")` check at line 242, insert:
       const isAutonomous = Boolean((message.content as Record<string, unknown>)?.autonomous);
       const thesisId = (message.content as Record<string, unknown>)?.thesisId as string | undefined;
 
-      try {
-        const thesisStore = new ThesisStore();
-        const goalStore = new GoalStore();
-        const tradeJournal = new TradeJournal();
-        const maxDailyLoss = parseFloat(
-          runtime.getSetting("POLYMARKET_MAX_DAILY_LOSS_USD") || String(MAX_DAILY_LOSS_USD_DEFAULT)
-        );
+      if (storesInitialized()) {
+        try {
+          const maxDailyLoss = parseFloat(
+            runtime.getSetting("POLYMARKET_MAX_DAILY_LOSS_USD") || String(MAX_DAILY_LOSS_USD_DEFAULT)
+          );
 
-        const gateResult = await evaluatePreTradeGate(
-          {
-            tokenId, side: "sell", price: bestBidResult.price,
-            size: positionSize, isAutonomous, isClose: true,
-            thesisId,
-          },
-          { thesisStore, goalStore, tradeJournal },
-          {
-            usdcBalance: 0, // Not relevant for closes
-            dailyLossUsd: tradeJournal.getDailyRealizedPnl(),
-            maxDailyLossUsd: maxDailyLoss,
-            unrealizedPnl: 0,
+          // Pass real balance even for closes — the gate skips the balance check
+          // via isClose, but passing real data avoids fragility if logic changes.
+          const polyService = runtime.getService(POLYMARKET_SERVICE_NAME) as PolymarketService | undefined;
+          const closeAccountState = polyService?.getCachedAccountState();
+          const closeUsdcBalance = closeAccountState?.balances?.collateral
+            ? parseFloat(closeAccountState.balances.collateral.balance)
+            : 0;
+
+          const gateResult = await evaluatePreTradeGate(
+            {
+              tokenId, side: "sell", price: bestBidResult.price,
+              size: positionSize, isAutonomous, isClose: true,
+              thesisId,
+            },
+            { thesisStore: getThesisStore(), goalStore: getGoalStore(), tradeJournal: getTradeJournal() },
+            {
+              usdcBalance: closeUsdcBalance,
+              dailyLossUsd: getTradeJournal().getDailyRealizedPnl(),
+              maxDailyLossUsd: maxDailyLoss,
+              unrealizedPnl: 0,
+            }
+          );
+
+          // Closes are only blocked by balance/market-status checks
+          if (!gateResult.allowed) {
+            runtime.logger.warn(`[closePositionAction] Pre-trade gate blocked close: ${gateResult.reason}`);
+            await sendError(callback, gateResult.reason!, "Pre-trade gate");
+            return { success: false, text: gateResult.reason!, error: "gate_blocked" };
           }
-        );
 
-        // Closes are only blocked by balance/market-status checks
-        if (!gateResult.allowed) {
-          runtime.logger.warn(`[closePositionAction] Pre-trade gate blocked close: ${gateResult.reason}`);
-          await sendError(callback, gateResult.reason!, "Pre-trade gate");
-          return { success: false, text: gateResult.reason!, error: "gate_blocked" };
-        }
-
-        if (gateResult.warnings.length > 0) {
-          for (const w of gateResult.warnings) {
-            runtime.logger.warn(`[closePositionAction] Gate warning: ${w}`);
+          if (gateResult.warnings.length > 0) {
+            for (const w of gateResult.warnings) {
+              runtime.logger.warn(`[closePositionAction] Gate warning: ${w}`);
+            }
           }
+        } catch (gateError) {
+          runtime.logger.warn(`[closePositionAction] Pre-trade gate error: ${gateError}`);
         }
-      } catch (gateError) {
-        runtime.logger.warn(`[closePositionAction] Pre-trade gate error: ${gateError}`);
       }
 ```
 
@@ -2123,6 +2220,35 @@ Expected: all PASS
 git add src/plugins/polymarket/actions/closePosition.ts
 git commit -m "feat(polymarket): integrate pre-trade gate into closePositionAction (close mode)"
 ```
+
+---
+
+### Deferred Gate Checks (explicitly deferred to Phase 2+)
+
+The following spec requirements are **intentionally omitted** from the Phase 1 gate implementation:
+
+**Hard blocks deferred:**
+- Market closed/inactive check (requires market metadata fetch — will be added when scanner provides market state)
+- Duplicate position check (requires position data linked to theses — needs Phase 2 thesis-position mapping)
+
+**Soft adjustments deferred:**
+- Concentration limit (requires portfolio value computation)
+- Spread-too-wide check (requires live order book fetch in gate — expensive)
+- Drawdown proximity scaling (requires historical drawdown tracking)
+- Calibration discount (requires Phase 2 calibration records)
+
+**Advisory warnings deferred:**
+- Correlated positions warning (requires thesis-position mapping)
+- Time decay risk warning (requires market resolution date data)
+
+**What Phase 1 gate actually enforces:**
+- Balance sufficiency (all trades)
+- Daily loss limit hard block (autonomous) / warning (user-requested)
+- No thesis = no autonomous trade
+- Thesis invalidated/retired = no autonomous trade
+- Hard goal violations
+- Conviction-based size adjustment (autonomous trades with thesis)
+- Negative thesis performance warning
 
 ---
 
@@ -2141,8 +2267,10 @@ Expected: no type errors in polymarket plugin files
 - [ ] **Step 3: Final commit with all files verified**
 
 ```bash
-git add -A src/plugins/polymarket/
 git status
-# Verify only expected files are staged
+# Verify only expected files are staged — should see autonomous/ new files
+# and modified constants.ts, index.ts, placeOrder.ts, closePosition.ts
+# Do NOT use git add -A — add specific files to avoid committing unintended changes
+git add src/plugins/polymarket/autonomous/ src/plugins/polymarket/constants.ts src/plugins/polymarket/index.ts src/plugins/polymarket/actions/placeOrder.ts src/plugins/polymarket/actions/closePosition.ts src/plugins/polymarket/__tests__/autonomous/
 git commit -m "feat(polymarket): Phase 1 complete — autonomous data model, stores, pre-trade gate, portfolio context"
 ```
