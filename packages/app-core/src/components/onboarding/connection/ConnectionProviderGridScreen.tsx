@@ -68,7 +68,10 @@ export function ConnectionProviderGridScreen({
               type="button"
               key={p.id}
               className={`onboarding-provider-card${isRecommended ? " onboarding-provider-card--recommended" : ""}${detectedLabel ? " onboarding-provider-card--detected" : ""}`}
-              style={{ gridColumn: isRecommended ? "span 2" : "span 1", minWidth: 0 }}
+              style={{
+                gridColumn: isRecommended ? "span 2" : "span 1",
+                minWidth: 0,
+              }}
               onClick={() =>
                 dispatch({ type: "selectProvider", providerId: p.id })
               }

@@ -1080,11 +1080,15 @@ export function PermissionsOnboardingSection({
 
   // Mobile (Capacitor): streaming permissions
   if (isNative && !isDesktopPlatform()) {
-    return <MobileOnboardingPermissions onContinue={onContinue} onBack={onBack} />;
+    return (
+      <MobileOnboardingPermissions onContinue={onContinue} onBack={onBack} />
+    );
   }
 
   // Desktop shell: existing permission flow
-  return <DesktopOnboardingPermissions onContinue={onContinue} onBack={onBack} />;
+  return (
+    <DesktopOnboardingPermissions onContinue={onContinue} onBack={onBack} />
+  );
 }
 
 function DesktopOnboardingPermissions({

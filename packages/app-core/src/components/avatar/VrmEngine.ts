@@ -633,7 +633,11 @@ export class VrmEngine {
 
   private splatCache = new Map<
     string,
-    { mesh: SparkSplatMesh; worldAnchor: THREE.Vector3; worldRevealRadius: number }
+    {
+      mesh: SparkSplatMesh;
+      worldAnchor: THREE.Vector3;
+      worldRevealRadius: number;
+    }
   >();
   private readonly cameraManager = new VrmCameraManager();
   private emoteAction: THREE.AnimationAction | null = null;
