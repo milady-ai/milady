@@ -100,6 +100,7 @@ All `@elizaos/*` packages use the `alpha` dist-tag. When developing locally, `bu
 | Dashboard UI | 2138 | `MILADY_PORT` |
 | Gateway | 18789 | `MILADY_GATEWAY_PORT` |
 | Home Dashboard | 2142 | `MILADY_HOME_PORT` |
+| WeChat Webhook | 18790 | `MILADY_WECHAT_WEBHOOK_PORT` |
 
 ## Common Pitfalls
 
