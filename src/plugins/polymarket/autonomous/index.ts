@@ -16,3 +16,13 @@ export {
   resetStores,
 } from "./stores/registry";
 export type { StoreRegistryOptions } from "./stores/registry";
+export { formatPortfolioContext } from "./providers/portfolioIntelligence";
+export type {
+  PortfolioContextData,
+  PositionContext,
+  ThesisContext,
+  GoalContext,
+  OutcomeContext,
+  CalibrationContext,
+  ResearchContext,
+} from "./providers/portfolioIntelligence";
