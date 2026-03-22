@@ -1,6 +1,7 @@
 #import <Cocoa/Cocoa.h>
 #import <ApplicationServices/ApplicationServices.h>
 #import <AVFoundation/AVFoundation.h>
+#import <Availability.h>
 #import <CoreGraphics/CoreGraphics.h>
 
 static NSString *const kElectrobunVibrancyViewIdentifier =
@@ -82,6 +83,11 @@ static void miladyRunWindowResizeLoop(NSWindow *window,
 - (nullable NSCursor *)miladyCursorForKind {
 	switch (self.miladyKind) {
 		case MiladyResizeStripKindBottomRightCorner:
+			// GitHub's macOS builders may use a pre-15 AppKit SDK where the new
+			// frame resize cursor API is not declared yet.
+#if defined(MAC_OS_VERSION_15_0) &&                                      \
+	defined(__MAC_OS_X_VERSION_MAX_ALLOWED) &&                           \
+	__MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_VERSION_15_0
 			if (@available(macOS 15.0, *)) {
 				return [NSCursor
 					frameResizeCursorFromPosition:
@@ -89,6 +95,7 @@ static void miladyRunWindowResizeLoop(NSWindow *window,
 									 inDirections:
 						 NSCursorFrameResizeDirectionsAll];
 			}
+#endif
 			return [NSCursor crosshairCursor];
 		case MiladyResizeStripKindRightEdge:
 			return [NSCursor resizeLeftRightCursor];
