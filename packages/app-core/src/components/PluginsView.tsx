@@ -874,7 +874,12 @@ function subgroupForPlugin(plugin: PluginInfo): string {
 }
 
 type StatusFilter = "all" | "enabled" | "disabled";
-type PluginsViewMode = "all" | "all-social" | "connectors" | "streaming" | "social";
+type PluginsViewMode =
+  | "all"
+  | "all-social"
+  | "connectors"
+  | "streaming"
+  | "social";
 type SubgroupTag = { id: string; label: string; count: number };
 
 function comparePlugins(left: PluginInfo, right: PluginInfo): number {
