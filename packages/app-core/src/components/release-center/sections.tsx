@@ -41,6 +41,8 @@ export function ReleaseStatusSection({
   onRefresh: () => void;
 }) {
   const appReleaseTone = updateStatus?.updateAvailable ? "warning" : "good";
+  const autoUpdateDisabled =
+    nativeUpdater != null && !nativeUpdater.canAutoUpdate;
   const nativeReleaseTone = nativeUpdater?.updateReady
     ? "good"
     : nativeUpdater?.updateAvailable
@@ -130,6 +132,10 @@ export function ReleaseStatusSection({
             value={nativeUpdater?.latestVersion ?? "Current"}
           />
           <DefinitionRow
+            label="App bundle"
+            value={nativeUpdater?.appBundlePath ?? "Unknown"}
+          />
+          <DefinitionRow
             label="Last status"
             value={nativeUpdater?.lastStatus?.message ?? "Idle"}
           />
@@ -137,10 +143,15 @@ export function ReleaseStatusSection({
             label="Status time"
             value={formatTimestamp(nativeUpdater?.lastStatus?.timestamp)}
           />
+          {autoUpdateDisabled && nativeUpdater?.autoUpdateDisabledReason ? (
+            <div className="mt-3 rounded-xl border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning">
+              {nativeUpdater.autoUpdateDisabledReason}
+            </div>
+          ) : null}
           <div className="mt-3 flex flex-wrap gap-2">
             <Button
               size="sm"
-              disabled={busyAction === "check-updates"}
+              disabled={busyAction === "check-updates" || autoUpdateDisabled}
               onClick={onCheckForUpdates}
             >
               Check / Download Update
@@ -149,7 +160,9 @@ export function ReleaseStatusSection({
               size="sm"
               variant="outline"
               disabled={
-                busyAction === "apply-update" || !nativeUpdater?.updateReady
+                busyAction === "apply-update" ||
+                autoUpdateDisabled ||
+                !nativeUpdater?.updateReady
               }
               onClick={onApplyUpdate}
             >

@@ -468,6 +468,7 @@ export interface AppState {
   onboardingLargeModel: string;
   onboardingProvider: string;
   onboardingApiKey: string;
+  onboardingExistingInstallDetected: boolean;
   onboardingDetectedProviders: Array<{
     id: string;
     source: string;

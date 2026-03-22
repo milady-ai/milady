@@ -50,6 +50,16 @@ export interface DetectedProvider {
   status?: string;
 }
 
+export interface ExistingElizaInstallInfo {
+  detected: boolean;
+  stateDir: string;
+  configPath: string;
+  configExists: boolean;
+  stateDirExists: boolean;
+  hasStateEntries: boolean;
+  source: "config-path-env" | "state-dir-env" | "default-state-dir";
+}
+
 export async function scanProviderCredentials(): Promise<DetectedProvider[]> {
   const result = await invokeDesktopBridgeRequest<{
     providers: DetectedProvider[];
@@ -59,6 +69,13 @@ export async function scanProviderCredentials(): Promise<DetectedProvider[]> {
     params: { context: "onboarding" },
   });
   return result?.providers ?? [];
+}
+
+export async function inspectExistingElizaInstall(): Promise<ExistingElizaInstallInfo | null> {
+  return invokeDesktopBridgeRequest<ExistingElizaInstallInfo>({
+    rpcMethod: "agentInspectExistingInstall",
+    ipcChannel: "agent:inspectExistingInstall",
+  });
 }
 
 export function subscribeDesktopBridgeEvent(options: {

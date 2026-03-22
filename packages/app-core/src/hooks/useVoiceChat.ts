@@ -1161,7 +1161,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
           if (config?.provider === "edge" && config.edge?.voice) {
             const edgeVoiceName = config.edge.voice;
             selectedVoice = voices.find(
-              (v) => v.voiceURI === edgeVoiceName || v.name === edgeVoiceName
+              (v) => v.voiceURI === edgeVoiceName || v.name === edgeVoiceName,
             );
 
             if (!selectedVoice) {
@@ -1192,12 +1192,13 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
           }
 
           if (!selectedVoice) {
-            selectedVoice = voices.find(
-              (v) =>
-                v.lang === "en-US" &&
-                !v.name.toLowerCase().includes("alex") &&
-                !v.name.toLowerCase().includes("david")
-            ) || voices.find((v) => v.lang.startsWith("en"));
+            selectedVoice =
+              voices.find(
+                (v) =>
+                  v.lang === "en-US" &&
+                  !v.name.toLowerCase().includes("alex") &&
+                  !v.name.toLowerCase().includes("david"),
+              ) || voices.find((v) => v.lang.startsWith("en"));
           }
 
           if (selectedVoice) {

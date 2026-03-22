@@ -6,7 +6,11 @@ vi.mock("../../config/config", () => ({
 }));
 
 import { loadElizaConfig, saveElizaConfig } from "../../config/config";
-import { extractAndPersistOnboardingApiKey } from "../server";
+import {
+  deriveCompatOnboardingReplayBody,
+  extractAndPersistOnboardingApiKey,
+  persistCompatOnboardingDefaults,
+} from "../server";
 
 const mockLoadElizaConfig = loadElizaConfig as ReturnType<typeof vi.fn>;
 const mockSaveElizaConfig = saveElizaConfig as ReturnType<typeof vi.fn>;
@@ -193,5 +197,90 @@ describe("extractAndPersistOnboardingApiKey", () => {
     });
 
     expect(result).toBeNull();
+  });
+});
+
+describe("persistCompatOnboardingDefaults", () => {
+  beforeEach(() => {
+    mockSaveElizaConfig.mockClear();
+  });
+
+  it("persists the compat admin entity id and agent metadata into agents.list", () => {
+    const config = {
+      agents: {
+        defaults: {},
+      },
+    } as Record<string, unknown>;
+    mockLoadElizaConfig.mockReturnValue(config);
+
+    const adminEntityId = persistCompatOnboardingDefaults({
+      name: "Milady",
+      bio: ["A compat bio line"],
+      systemPrompt: "You are Milady.",
+    });
+
+    expect(adminEntityId).toEqual(expect.any(String));
+    expect(mockSaveElizaConfig).toHaveBeenCalledTimes(1);
+
+    const savedConfig = mockSaveElizaConfig.mock.calls[0][0];
+    expect(savedConfig.agents.defaults.adminEntityId).toBe(adminEntityId);
+    expect(savedConfig.agents.list[0]).toMatchObject({
+      id: "main",
+      default: true,
+      name: "Milady",
+      bio: ["A compat bio line"],
+      system: "You are Milady.",
+    });
+  });
+
+  it("returns null when compat onboarding has no usable name", () => {
+    const result = persistCompatOnboardingDefaults({
+      name: "   ",
+      bio: ["ignored"],
+    });
+
+    expect(result).toBeNull();
+    expect(mockSaveElizaConfig).not.toHaveBeenCalled();
+  });
+});
+
+describe("deriveCompatOnboardingReplayBody", () => {
+  it("injects runMode=cloud for cloud-managed onboarding connections", () => {
+    const body = {
+      name: "Milady",
+      connection: {
+        kind: "cloud-managed",
+        provider: "elizacloud",
+      },
+    } as Record<string, unknown>;
+
+    const result = deriveCompatOnboardingReplayBody(body);
+
+    expect(result.isCloudMode).toBe(true);
+    expect(result.replayBody).toMatchObject({
+      name: "Milady",
+      runMode: "cloud",
+      connection: {
+        kind: "cloud-managed",
+        provider: "elizacloud",
+      },
+    });
+    expect(body.runMode).toBeUndefined();
+  });
+
+  it("leaves non-cloud onboarding payloads unchanged", () => {
+    const body = {
+      name: "Milady",
+      runMode: "local",
+      connection: {
+        kind: "local-provider",
+        provider: "openai",
+      },
+    } as Record<string, unknown>;
+
+    const result = deriveCompatOnboardingReplayBody(body);
+
+    expect(result.isCloudMode).toBe(false);
+    expect(result.replayBody).toBe(body);
   });
 });

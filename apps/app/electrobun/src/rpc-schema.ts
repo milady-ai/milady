@@ -110,6 +110,9 @@ export interface DesktopUpdaterSnapshot {
   currentHash?: string;
   channel?: string;
   baseUrl?: string;
+  appBundlePath?: string | null;
+  canAutoUpdate: boolean;
+  autoUpdateDisabledReason?: string | null;
   updateAvailable: boolean;
   updateReady: boolean;
   latestVersion?: string | null;
@@ -346,6 +349,24 @@ export interface MessageBoxResult {
   response: number;
 }
 
+export interface EmbeddedAgentStatus {
+  state: "not_started" | "starting" | "running" | "stopped" | "error";
+  agentName: string | null;
+  port: number | null;
+  startedAt: number | null;
+  error: string | null;
+}
+
+export interface ExistingElizaInstallInfo {
+  detected: boolean;
+  stateDir: string;
+  configPath: string;
+  configExists: boolean;
+  stateDirExists: boolean;
+  hasStateEntries: boolean;
+  source: "config-path-env" | "state-dir-env" | "default-state-dir";
+}
+
 // ============================================================================
 // RPC Schema
 // ============================================================================
@@ -353,6 +374,16 @@ export interface MessageBoxResult {
 export type MiladyRPCSchema = {
   bun: RPCSchema<{
     requests: {
+      // ---- Agent ----
+      agentStart: { params: undefined; response: EmbeddedAgentStatus };
+      agentStop: { params: undefined; response: { ok: true } };
+      agentRestart: { params: undefined; response: EmbeddedAgentStatus };
+      agentStatus: { params: undefined; response: EmbeddedAgentStatus };
+      agentInspectExistingInstall: {
+        params: undefined;
+        response: ExistingElizaInstallInfo;
+      };
+
       // ---- Desktop: Tray ----
       desktopCreateTray: { params: TrayOptions; response: undefined };
       desktopUpdateTray: { params: Partial<TrayOptions>; response: undefined };
@@ -1083,6 +1114,7 @@ export const CHANNEL_TO_RPC_METHOD: Record<string, string> = {
   "agent:stop": "agentStop",
   "agent:restart": "agentRestart",
   "agent:status": "agentStatus",
+  "agent:inspectExistingInstall": "agentInspectExistingInstall",
 
   // Desktop: Tray
   "desktop:createTray": "desktopCreateTray",

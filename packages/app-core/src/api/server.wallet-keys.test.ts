@@ -154,11 +154,7 @@ describe("GET /api/wallet/keys", () => {
     try {
       // Sensitive routes require an API token even for loopback requests.
       // Without ELIZA_API_TOKEN / MILADY_API_TOKEN the server returns 403.
-      const { status } = await req(
-        server.port,
-        "GET",
-        "/api/wallet/keys",
-      );
+      const { status } = await req(server.port, "GET", "/api/wallet/keys");
       expect(status).toBe(403);
     } finally {
       await server.close();

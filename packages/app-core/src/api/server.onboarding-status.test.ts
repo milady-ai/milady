@@ -241,4 +241,40 @@ describe("GET /api/onboarding/status", () => {
       await cleanupTempDir(tempDir);
     }
   });
+
+  it("returns complete for a legacy agent workspace config in ~/.eliza", async () => {
+    const tempDir = await fs.mkdtemp(
+      path.join(os.tmpdir(), "eliza-onboarding-status-"),
+    );
+    process.env.ELIZA_STATE_DIR = tempDir;
+    process.env.MILADY_STATE_DIR = tempDir;
+    await fs.writeFile(
+      path.join(tempDir, "eliza.json"),
+      JSON.stringify({
+        logging: { level: "error" },
+        agents: {
+          defaults: {
+            workspace: path.join(tempDir, "agents", "main"),
+            adminEntityId: "legacy-admin-entity",
+          },
+        },
+      }),
+    );
+
+    const server = await startApiServer({ port: 0, runtime: RUNTIME_STUB });
+
+    try {
+      const { status, data } = await req(
+        server.port,
+        "GET",
+        "/api/onboarding/status",
+      );
+
+      expect(status).toBe(200);
+      expect(data.complete).toBe(true);
+    } finally {
+      await server.close();
+      await cleanupTempDir(tempDir);
+    }
+  });
 });

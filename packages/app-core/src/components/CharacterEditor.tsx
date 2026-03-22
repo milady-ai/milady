@@ -546,7 +546,7 @@ export function CharacterEditor({
       if (applyDefaults) {
         applyCharacterDefaults(entry);
       }
-      
+
       if (isNewCharacter && entry.catchphrase) {
         // Immediate cleanup of old character's speech
         voice.stopSpeaking();
@@ -557,7 +557,7 @@ export function CharacterEditor({
           }
           setVoiceTesting(false);
         }
-        
+
         // Queue greeting animation to play after the VRM teleport-in dissolve finishes
         pendingGreetingRef.current = {
           characterId: entry.id,
@@ -599,13 +599,20 @@ export function CharacterEditor({
       return;
     // Only apply defaults from the roster entry if this character is completely empty.
     // Otherwise, loading a custom character and falling back to a roster ID would wipe the custom data.
-    const isNamed = Boolean((currentCharacter as any).name?.trim());
+    const isNamed =
+      typeof currentCharacter.name === "string" &&
+      currentCharacter.name.trim().length > 0;
     const hasBioOrSystem = Boolean(
-      (currentCharacter as any).bio || (currentCharacter as any).system
+      currentCharacter.bio ||
+        ("system" in currentCharacter &&
+          typeof currentCharacter.system === "string" &&
+          currentCharacter.system),
     );
     const hasMeaningfulContent = isNamed || hasBioOrSystem;
 
-    const entry = activeCharacterRosterEntry ?? (!hasMeaningfulContent ? characterRoster[0] : null);
+    const entry =
+      activeCharacterRosterEntry ??
+      (!hasMeaningfulContent ? characterRoster[0] : null);
     if (!entry) return;
 
     // Suppress dirty-tracking during programmatic auto-select
@@ -938,7 +945,11 @@ export function CharacterEditor({
   if (characterLoading && !characterData) {
     return (
       <div className="ce-root">
-        <div className="ce-loading">{t("charactereditor.LoadingCharacterData", { defaultValue: "Loading character data..." })}</div>
+        <div className="ce-loading">
+          {t("charactereditor.LoadingCharacterData", {
+            defaultValue: "Loading character data...",
+          })}
+        </div>
       </div>
     );
   }
@@ -947,385 +958,541 @@ export function CharacterEditor({
   return (
     <div className="ce-layout-container">
       <div className={`ce-root${customizing ? " ce-root--editor-active" : ""}`}>
-      {/* ── Character Roster (when NOT customizing) ────────────────── */}
-      {!customizing && (
-        <div className="ce-roster-wrap">
-          <CharacterRoster
-            entries={characterRoster}
-            selectedId={
-              selectedCharacterId ?? activeCharacterRosterEntry?.id ?? null
-            }
-            onSelect={handleSelectCharacter}
-          />
-        </div>
-      )}
-
-      {customizing && (
-        <div className="ce-page-tabs-row">
-          <div className="ce-page-tabs">
-            <button
-              type="button"
-              className={`ce-page-tab ${activePage === "identity" ? "ce-page-tab--active" : ""}`}
-              onClick={() => setActivePage("identity")}
-            >
-              {t("charactereditor.TabCharacter", { defaultValue: "Character" })}
-            </button>
-            <button
-              type="button"
-              className={`ce-page-tab ${activePage === "style" ? "ce-page-tab--active" : ""}`}
-              onClick={() => {
-                setRightTab("style");
-                setActivePage("style");
-              }}
-            >
-              {t("charactereditor.TabStyles", { defaultValue: "Styles" })}
-            </button>
-            <button
-              type="button"
-              className={`ce-page-tab ${activePage === "examples" ? "ce-page-tab--active" : ""}`}
-              onClick={() => {
-                setRightTab("examples");
-                setActivePage("examples");
-              }}
-            >
-              {t("charactereditor.TabExamples", { defaultValue: "Examples" })}
-            </button>
+        {/* ── Character Roster (when NOT customizing) ────────────────── */}
+        {!customizing && (
+          <div className="ce-roster-wrap">
+            <CharacterRoster
+              entries={characterRoster}
+              selectedId={
+                selectedCharacterId ?? activeCharacterRosterEntry?.id ?? null
+              }
+              onSelect={handleSelectCharacter}
+            />
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="ce-reset-btn"
-            onClick={handleResetToDefaults}
-            disabled={!activeCharacterRosterEntry}
-            title={t("charactereditor.ResetToDefaults", { defaultValue: "Reset to Defaults" })}
-          >
-            <RotateCcw className="h-4 w-4 mr-1" />
-            {t("charactereditor.Reset", { defaultValue: "Reset" })}
-          </Button>
-        </div>
-      )}
+        )}
 
-      {customizing && (
-        <div className="ce-panels ce-panels--single">
-          {/* ── LEFT PANEL (Character identity) ───────────────────────── */}
-          <div
-            className={`ce-panel ce-panel-left ${activePage !== "identity" ? "ce-panel--hidden" : ""}`}
-          >
-            {/* Name + Voice (50/50 split) */}
-            <section className="ce-section">
-              <div className="ce-name-voice-row">
-                <div className="ce-name-voice-col">
-                  <div className="ce-section-header">
-                    <span className="ce-label">{t("charactereditor.Name", { defaultValue: "Name" })}</span>
-                  </div>
-                  <Input
-                    type="text"
-                    value={d.name ?? ""}
-                    placeholder={t("charactereditor.AgentNamePlaceholder", { defaultValue: "Agent name" })}
-                    onChange={(
-                      e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-                    ) => handleFieldEdit("name", e.target.value)}
-                    className="ce-input"
-                  />
-                </div>
-                <div className="ce-name-voice-col">
-                  <div className="ce-section-header">
-                    <span className="ce-label">{t("charactereditor.Voice", { defaultValue: "Voice" })}</span>
-                  </div>
-                  <div className="ce-voice-inline">
-                    <ThemedSelect
-                      value={voiceSelectValue}
-                      groups={
-                        useElevenLabs
-                          ? ELEVENLABS_VOICE_GROUPS
-                          : EDGE_VOICE_GROUPS
-                      }
-                      onChange={(id: string) => {
-                        const allVoices = useElevenLabs
-                          ? PREMADE_VOICES
-                          : EDGE_BACKUP_VOICES;
-                        const preset = allVoices.find((p) => p.id === id);
-                        if (preset) handleSelectPreset(preset);
-                      }}
-                      placeholder={t("charactereditor.SelectAVoice", { defaultValue: "Select a voice" })}
-                      menuPlacement="bottom"
-                      className="ce-voice-inline-select"
-                      triggerClassName="h-8 rounded-md border-border/50 bg-bg/65 px-3 py-0 text-[11px] shadow-inner backdrop-blur-sm"
-                      menuClassName="border-border/60 bg-bg/92 shadow-2xl backdrop-blur-md"
+        {customizing && (
+          <div className="ce-page-tabs-row">
+            <div className="ce-page-tabs">
+              <button
+                type="button"
+                className={`ce-page-tab ${activePage === "identity" ? "ce-page-tab--active" : ""}`}
+                onClick={() => setActivePage("identity")}
+              >
+                {t("charactereditor.TabCharacter", {
+                  defaultValue: "Character",
+                })}
+              </button>
+              <button
+                type="button"
+                className={`ce-page-tab ${activePage === "style" ? "ce-page-tab--active" : ""}`}
+                onClick={() => {
+                  setRightTab("style");
+                  setActivePage("style");
+                }}
+              >
+                {t("charactereditor.TabStyles", { defaultValue: "Styles" })}
+              </button>
+              <button
+                type="button"
+                className={`ce-page-tab ${activePage === "examples" ? "ce-page-tab--active" : ""}`}
+                onClick={() => {
+                  setRightTab("examples");
+                  setActivePage("examples");
+                }}
+              >
+                {t("charactereditor.TabExamples", { defaultValue: "Examples" })}
+              </button>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="ce-reset-btn"
+              onClick={handleResetToDefaults}
+              disabled={!activeCharacterRosterEntry}
+              title={t("charactereditor.ResetToDefaults", {
+                defaultValue: "Reset to Defaults",
+              })}
+            >
+              <RotateCcw className="h-4 w-4 mr-1" />
+              {t("charactereditor.Reset", { defaultValue: "Reset" })}
+            </Button>
+          </div>
+        )}
+
+        {customizing && (
+          <div className="ce-panels ce-panels--single">
+            {/* ── LEFT PANEL (Character identity) ───────────────────────── */}
+            <div
+              className={`ce-panel ce-panel-left ${activePage !== "identity" ? "ce-panel--hidden" : ""}`}
+            >
+              {/* Name + Voice (50/50 split) */}
+              <section className="ce-section">
+                <div className="ce-name-voice-row">
+                  <div className="ce-name-voice-col">
+                    <div className="ce-section-header">
+                      <span className="ce-label">
+                        {t("charactereditor.Name", { defaultValue: "Name" })}
+                      </span>
+                    </div>
+                    <Input
+                      type="text"
+                      value={d.name ?? ""}
+                      placeholder={t("charactereditor.AgentNamePlaceholder", {
+                        defaultValue: "Agent name",
+                      })}
+                      onChange={(
+                        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+                      ) => handleFieldEdit("name", e.target.value)}
+                      className="ce-input"
                     />
-                    <Button
-                      type="button"
-                      variant={voiceTesting ? "destructive" : "outline"}
-                      size="icon"
-                      className="ce-voice-test-btn"
-                      onClick={() => {
-                        if (voiceTesting) {
-                          handleStopTest();
-                        } else if (activeVoicePreset?.previewUrl) {
-                          setVoiceTesting(true);
-                          const audio = new Audio(activeVoicePreset.previewUrl);
-                          audio.onended = () => {
-                            setVoiceTesting(false);
-                            setVoiceTestAudio(null);
-                          };
-                          audio.onerror = () => {
-                            setVoiceTesting(false);
-                            setVoiceTestAudio(null);
-                          };
-                          setVoiceTestAudio(audio);
-                          audio.play().catch(() => {
-                            setVoiceTesting(false);
-                            setVoiceTestAudio(null);
-                          });
+                  </div>
+                  <div className="ce-name-voice-col">
+                    <div className="ce-section-header">
+                      <span className="ce-label">
+                        {t("charactereditor.Voice", { defaultValue: "Voice" })}
+                      </span>
+                    </div>
+                    <div className="ce-voice-inline">
+                      <ThemedSelect
+                        value={voiceSelectValue}
+                        groups={
+                          useElevenLabs
+                            ? ELEVENLABS_VOICE_GROUPS
+                            : EDGE_VOICE_GROUPS
                         }
-                      }}
-                      aria-label={
-                        voiceTesting ? "Stop voice preview" : "Preview voice"
-                      }
-                      disabled={!activeVoicePreset || voiceLoading}
-                    >
-                      {voiceTesting ? (
-                        <VolumeX className="h-3.5 w-3.5" />
-                      ) : (
-                        <Volume2 className="h-3.5 w-3.5" />
-                      )}
-                    </Button>
+                        onChange={(id: string) => {
+                          const allVoices = useElevenLabs
+                            ? PREMADE_VOICES
+                            : EDGE_BACKUP_VOICES;
+                          const preset = allVoices.find((p) => p.id === id);
+                          if (preset) handleSelectPreset(preset);
+                        }}
+                        placeholder={t("charactereditor.SelectAVoice", {
+                          defaultValue: "Select a voice",
+                        })}
+                        menuPlacement="bottom"
+                        className="ce-voice-inline-select"
+                        triggerClassName="h-8 rounded-md border-border/50 bg-bg/65 px-3 py-0 text-[11px] shadow-inner backdrop-blur-sm"
+                        menuClassName="border-border/60 bg-bg/92 shadow-2xl backdrop-blur-md"
+                      />
+                      <Button
+                        type="button"
+                        variant={voiceTesting ? "destructive" : "outline"}
+                        size="icon"
+                        className="ce-voice-test-btn"
+                        onClick={() => {
+                          if (voiceTesting) {
+                            handleStopTest();
+                          } else if (activeVoicePreset?.previewUrl) {
+                            setVoiceTesting(true);
+                            const audio = new Audio(
+                              activeVoicePreset.previewUrl,
+                            );
+                            audio.onended = () => {
+                              setVoiceTesting(false);
+                              setVoiceTestAudio(null);
+                            };
+                            audio.onerror = () => {
+                              setVoiceTesting(false);
+                              setVoiceTestAudio(null);
+                            };
+                            setVoiceTestAudio(audio);
+                            audio.play().catch(() => {
+                              setVoiceTesting(false);
+                              setVoiceTestAudio(null);
+                            });
+                          }
+                        }}
+                        aria-label={
+                          voiceTesting ? "Stop voice preview" : "Preview voice"
+                        }
+                        disabled={!activeVoicePreset || voiceLoading}
+                      >
+                        {voiceTesting ? (
+                          <VolumeX className="h-3.5 w-3.5" />
+                        ) : (
+                          <Volume2 className="h-3.5 w-3.5" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </section>
-            
-            {/* Avatar Selector */}
-            <section className="ce-section ce-section--avatar">
-              <div className="ce-section-header">
-                <span className="ce-label">{t("charactereditor.Avatar", { defaultValue: "Avatar" })}</span>
-              </div>
-              <AvatarSelector
-                selected={selectedVrmIndex}
-                onSelect={(index: number) => {
-                  setState("selectedVrmIndex", index);
-                  if (index > 0) {
-                    setState("customVrmUrl", "");
-                  }
-                }}
-                onUpload={(file: File) => {
-                  // The backend or state manager will handle the actual upload
-                  // and update customVrmUrl. For now we just set the index.
-                  setState("selectedVrmIndex", 0);
-                }}
-              />
-            </section>
+              </section>
 
-            {/* Bio / About Me */}
-            <section className="ce-section ce-section--grow">
-              <div className="ce-section-header">
-                <span className="ce-label">{t("charactereditor.AboutMe", { defaultValue: "About Me" })}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="ce-regen-btn"
-                  onClick={() => void handleGenerate("bio")}
-                  disabled={generating === "bio"}
-                >
-                  {generating === "bio" ? t("charactereditor.Generating", { defaultValue: "generating..." }) : t("charactereditor.Regenerate", { defaultValue: "regenerate" })}
-                </Button>
-              </div>
-              <Textarea
-                value={bioText}
-                rows={4}
-                placeholder={t("charactereditor.AboutMePlaceholder", { defaultValue: "Describe who your agent is..." })}
-                onChange={(
-                  e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-                ) => handleFieldEdit("bio", e.target.value)}
-                className="ce-textarea ce-textarea--compact"
-              />
-            </section>
+              {/* Avatar Selector */}
+              <section className="ce-section ce-section--avatar">
+                <div className="ce-section-header">
+                  <span className="ce-label">
+                    {t("charactereditor.Avatar", { defaultValue: "Avatar" })}
+                  </span>
+                </div>
+                <AvatarSelector
+                  selected={selectedVrmIndex}
+                  onSelect={(index: number) => {
+                    setState("selectedVrmIndex", index);
+                    if (index > 0) {
+                      setState("customVrmUrl", "");
+                    }
+                  }}
+                  onUpload={(file: File) => {
+                    // The backend or state manager will handle the actual upload
+                    // and update customVrmUrl. For now we just set the index.
+                    setState("selectedVrmIndex", 0);
+                  }}
+                />
+              </section>
 
-            {/* System Prompt / Directions */}
-            <section className="ce-section ce-section--grow">
-              <div className="ce-section-header">
-                <span className="ce-label">{t("charactereditor.SystemPrompt", { defaultValue: "System Prompt" })}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="ce-regen-btn"
-                  onClick={() => void handleGenerate("system")}
-                  disabled={generating === "system"}
-                >
-                  {generating === "system" ? t("charactereditor.Generating") : t("charactereditor.Regenerate")}
-                </Button>
-              </div>
-              <Textarea
-                value={d.system ?? ""}
-                rows={4}
-                maxLength={10000}
-                placeholder={t("charactereditor.SystemPromptPlaceholder", { defaultValue: "Write in first person..." })}
-                onChange={(
-                  e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-                ) => handleFieldEdit("system", e.target.value)}
-                className="ce-textarea ce-textarea--compact"
-              />
-            </section>
-          </div>
+              {/* Bio / About Me */}
+              <section className="ce-section ce-section--grow">
+                <div className="ce-section-header">
+                  <span className="ce-label">
+                    {t("charactereditor.AboutMe", { defaultValue: "About Me" })}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ce-regen-btn"
+                    onClick={() => void handleGenerate("bio")}
+                    disabled={generating === "bio"}
+                  >
+                    {generating === "bio"
+                      ? t("charactereditor.Generating", {
+                          defaultValue: "generating...",
+                        })
+                      : t("charactereditor.Regenerate", {
+                          defaultValue: "regenerate",
+                        })}
+                  </Button>
+                </div>
+                <Textarea
+                  value={bioText}
+                  rows={4}
+                  placeholder={t("charactereditor.AboutMePlaceholder", {
+                    defaultValue: "Describe who your agent is...",
+                  })}
+                  onChange={(
+                    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+                  ) => handleFieldEdit("bio", e.target.value)}
+                  className="ce-textarea ce-textarea--compact"
+                />
+              </section>
 
-          {/* ── RIGHT PANEL ───────────────────────────────────────────── */}
-          <div
-            className={`ce-panel ce-panel-right ${activePage === "identity" ? "ce-panel--hidden" : ""}`}
-          >
-            {/* Style Rules */}
-            <section
-              className="ce-section ce-section--grow"
-              style={{ display: rightTab === "style" ? undefined : "none" }}
+              {/* System Prompt / Directions */}
+              <section className="ce-section ce-section--grow">
+                <div className="ce-section-header">
+                  <span className="ce-label">
+                    {t("charactereditor.SystemPrompt", {
+                      defaultValue: "System Prompt",
+                    })}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ce-regen-btn"
+                    onClick={() => void handleGenerate("system")}
+                    disabled={generating === "system"}
+                  >
+                    {generating === "system"
+                      ? t("charactereditor.Generating")
+                      : t("charactereditor.Regenerate")}
+                  </Button>
+                </div>
+                <Textarea
+                  value={d.system ?? ""}
+                  rows={4}
+                  maxLength={10000}
+                  placeholder={t("charactereditor.SystemPromptPlaceholder", {
+                    defaultValue: "Write in first person...",
+                  })}
+                  onChange={(
+                    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+                  ) => handleFieldEdit("system", e.target.value)}
+                  className="ce-textarea ce-textarea--compact"
+                />
+              </section>
+            </div>
+
+            {/* ── RIGHT PANEL ───────────────────────────────────────────── */}
+            <div
+              className={`ce-panel ce-panel-right ${activePage === "identity" ? "ce-panel--hidden" : ""}`}
             >
-              <div className="ce-section-header">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="ce-regen-btn"
-                  onClick={() => void handleGenerate("style", "replace")}
-                  disabled={generating === "style"}
-                >
-                  {generating === "style" ? t("charactereditor.Generating") : t("charactereditor.Regenerate")}
-                </Button>
-              </div>
-              <div className="ce-style-sections">
-                {STYLE_SECTION_KEYS.map((key) => {
-                  const items = d.style?.[key] ?? [];
-                  return (
-                    <div
-                      key={key}
-                      className="ce-style-group"
-                      data-testid={`style-section-${key}`}
-                    >
-                      <div className="ce-style-entries">
-                        {items.length > 0 ? (
-                          items.map((item, index) => (
-                            <div
-                              key={`${key}:${item}`}
-                              className="ce-style-entry"
-                            >
-                              <span className="ce-style-entry-num">
-                                {index + 1}
-                              </span>
-                              <Textarea
-                                value={styleEntryDrafts[key]?.[index] ?? item}
-                                rows={1}
-                                onChange={(
-                                  e: ChangeEvent<
-                                    HTMLInputElement | HTMLTextAreaElement
-                                  >,
-                                ) =>
-                                  handleStyleEntryDraftChange(
-                                    key,
-                                    index,
-                                    e.target.value,
-                                  )
-                                }
-                                onBlur={() =>
-                                  handleCommitStyleEntry(key, index)
-                                }
-                                className="ce-style-entry-input"
-                              />
-                              <button
-                                type="button"
-                                className="ce-style-entry-remove"
-                                onClick={() =>
-                                  handleRemoveStyleEntry(key, index)
-                                }
-                                title="Remove"
+              {/* Style Rules */}
+              <section
+                className="ce-section ce-section--grow"
+                style={{ display: rightTab === "style" ? undefined : "none" }}
+              >
+                <div className="ce-section-header">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ce-regen-btn"
+                    onClick={() => void handleGenerate("style", "replace")}
+                    disabled={generating === "style"}
+                  >
+                    {generating === "style"
+                      ? t("charactereditor.Generating")
+                      : t("charactereditor.Regenerate")}
+                  </Button>
+                </div>
+                <div className="ce-style-sections">
+                  {STYLE_SECTION_KEYS.map((key) => {
+                    const items = d.style?.[key] ?? [];
+                    return (
+                      <div
+                        key={key}
+                        className="ce-style-group"
+                        data-testid={`style-section-${key}`}
+                      >
+                        <div className="ce-style-entries">
+                          {items.length > 0 ? (
+                            items.map((item, index) => (
+                              <div
+                                key={`${key}:${item}`}
+                                className="ce-style-entry"
                               >
-                                <svg
-                                  width="10"
-                                  height="10"
-                                  viewBox="0 0 10 10"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="1.5"
-                                  strokeLinecap="round"
-                                  aria-hidden="true"
+                                <span className="ce-style-entry-num">
+                                  {index + 1}
+                                </span>
+                                <Textarea
+                                  value={styleEntryDrafts[key]?.[index] ?? item}
+                                  rows={1}
+                                  onChange={(
+                                    e: ChangeEvent<
+                                      HTMLInputElement | HTMLTextAreaElement
+                                    >,
+                                  ) =>
+                                    handleStyleEntryDraftChange(
+                                      key,
+                                      index,
+                                      e.target.value,
+                                    )
+                                  }
+                                  onBlur={() =>
+                                    handleCommitStyleEntry(key, index)
+                                  }
+                                  className="ce-style-entry-input"
+                                />
+                                <button
+                                  type="button"
+                                  className="ce-style-entry-remove"
+                                  onClick={() =>
+                                    handleRemoveStyleEntry(key, index)
+                                  }
+                                  title="Remove"
                                 >
-                                  <path d="M2 2l6 6M8 2l-6 6" />
-                                </svg>
-                              </button>
+                                  <svg
+                                    width="10"
+                                    height="10"
+                                    viewBox="0 0 10 10"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="1.5"
+                                    strokeLinecap="round"
+                                    aria-hidden="true"
+                                  >
+                                    <path d="M2 2l6 6M8 2l-6 6" />
+                                  </svg>
+                                </button>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="ce-style-empty">
+                              {STYLE_SECTION_EMPTY_STATES[key]}
                             </div>
-                          ))
-                        ) : (
-                          <div className="ce-style-empty">
-                            {STYLE_SECTION_EMPTY_STATES[key]}
-                          </div>
-                        )}
-                      </div>
-                      <div className="ce-style-add">
-                        <Input
-                          type="text"
-                          value={pendingStyleEntries[key]}
-                          placeholder={STYLE_SECTION_PLACEHOLDERS[key]}
-                          onChange={(
-                            e: ChangeEvent<
-                              HTMLInputElement | HTMLTextAreaElement
-                            >,
-                          ) =>
-                            handlePendingStyleEntryChange(key, e.target.value)
-                          }
-                          onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              handleAddStyleEntry(key);
+                          )}
+                        </div>
+                        <div className="ce-style-add">
+                          <Input
+                            type="text"
+                            value={pendingStyleEntries[key]}
+                            placeholder={STYLE_SECTION_PLACEHOLDERS[key]}
+                            onChange={(
+                              e: ChangeEvent<
+                                HTMLInputElement | HTMLTextAreaElement
+                              >,
+                            ) =>
+                              handlePendingStyleEntryChange(key, e.target.value)
                             }
+                            onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                handleAddStyleEntry(key);
+                              }
+                            }}
+                            className="ce-input ce-input--sm"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="ce-regen-btn"
+                            onClick={() => handleAddStyleEntry(key)}
+                            disabled={!pendingStyleEntries[key].trim()}
+                          >
+                            + add
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+
+              {/* Chat Examples */}
+              <section
+                className="ce-section ce-section--grow"
+                style={{
+                  display: rightTab === "examples" ? undefined : "none",
+                }}
+              >
+                <div className="ce-section-header">
+                  <span className="ce-label">
+                    {t("charactereditor.ChatExamples", {
+                      defaultValue: "Chat Examples",
+                    })}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ce-regen-btn"
+                    onClick={() =>
+                      void handleGenerate("chatExamples", "replace")
+                    }
+                    disabled={generating === "chatExamples"}
+                  >
+                    {generating === "chatExamples"
+                      ? t("charactereditor.Generating")
+                      : t("charactereditor.Generate", {
+                          defaultValue: "generate",
+                        })}
+                  </Button>
+                </div>
+                <div className="ce-examples-list">
+                  {normalizedMessageExamples.map((convo, ci) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: order is static in designer
+                    <div key={`convo-${ci}`} className="ce-example-convo">
+                      <div className="ce-example-convo-header">
+                        <span className="ce-example-convo-label">
+                          {t("charactereditor.ConversationN", {
+                            defaultValue: `Conversation ${ci + 1}`,
+                          }).replace("{n}", String(ci + 1))}
+                        </span>
+                        <button
+                          type="button"
+                          className="ce-style-entry-remove"
+                          onClick={() => {
+                            const updated = [...normalizedMessageExamples];
+                            updated.splice(ci, 1);
+                            handleFieldEdit("messageExamples", updated);
                           }}
-                          className="ce-input ce-input--sm"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="ce-regen-btn"
-                          onClick={() => handleAddStyleEntry(key)}
-                          disabled={!pendingStyleEntries[key].trim()}
                         >
-                          + add
-                        </Button>
+                          <svg
+                            width="10"
+                            height="10"
+                            viewBox="0 0 10 10"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            aria-hidden="true"
+                          >
+                            <path d="M2 2l6 6M8 2l-6 6" />
+                          </svg>
+                        </button>
+                      </div>
+                      <div className="ce-example-messages">
+                        {convo.examples.map((msg, mi) => (
+                          // biome-ignore lint/suspicious/noArrayIndexKey: order is static in designer
+                          <div
+                            key={`msg-${ci}-${mi}`}
+                            className="ce-example-msg"
+                          >
+                            <span
+                              className={`ce-example-msg-role ${msg.name === "{{user1}}" ? "" : "ce-example-msg-role--agent"}`}
+                            >
+                              {msg.name === "{{user1}}" ? "user" : "agent"}
+                            </span>
+                            <input
+                              type="text"
+                              value={msg.content?.text ?? ""}
+                              onChange={(e) => {
+                                const updated = [...normalizedMessageExamples];
+                                const convoClone = {
+                                  examples: [...updated[ci].examples],
+                                };
+                                convoClone.examples[mi] = {
+                                  ...convoClone.examples[mi],
+                                  content: { text: e.target.value },
+                                };
+                                updated[ci] = convoClone;
+                                handleFieldEdit("messageExamples", updated);
+                              }}
+                              className="ce-example-msg-input"
+                            />
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            </section>
+                  ))}
+                  {normalizedMessageExamples.length === 0 && (
+                    <div className="ce-style-empty">
+                      {t("charactereditor.NoChatExamples", {
+                        defaultValue: "No chat examples yet.",
+                      })}
+                    </div>
+                  )}
+                </div>
+              </section>
 
-            {/* Chat Examples */}
-            <section
-              className="ce-section ce-section--grow"
-              style={{
-                display: rightTab === "examples" ? undefined : "none",
-              }}
-            >
-              <div className="ce-section-header">
-                <span className="ce-label">{t("charactereditor.ChatExamples", { defaultValue: "Chat Examples" })}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="ce-regen-btn"
-                  onClick={() => void handleGenerate("chatExamples", "replace")}
-                  disabled={generating === "chatExamples"}
-                >
-                  {generating === "chatExamples" ? t("charactereditor.Generating") : t("charactereditor.Generate", { defaultValue: "generate" })}
-                </Button>
-              </div>
-              <div className="ce-examples-list">
-                {normalizedMessageExamples.map((convo, ci) => (
-                  // biome-ignore lint/suspicious/noArrayIndexKey: order is static in designer
-                  <div key={`convo-${ci}`} className="ce-example-convo">
-                    <div className="ce-example-convo-header">
-                      <span className="ce-example-convo-label">
-                        {t("charactereditor.ConversationN", { defaultValue: `Conversation ${ci + 1}` }).replace("{n}", String(ci + 1))}
-                      </span>
+              {/* Post Examples */}
+              <section
+                className="ce-section ce-section--grow"
+                style={{
+                  display: rightTab === "examples" ? undefined : "none",
+                }}
+              >
+                <div className="ce-section-header">
+                  <span className="ce-label">
+                    {t("charactereditor.PostExamples", {
+                      defaultValue: "Post Examples",
+                    })}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ce-regen-btn"
+                    onClick={() =>
+                      void handleGenerate("postExamples", "replace")
+                    }
+                    disabled={generating === "postExamples"}
+                  >
+                    {generating === "postExamples"
+                      ? t("charactereditor.Generating")
+                      : t("charactereditor.Generate")}
+                  </Button>
+                </div>
+                <div className="ce-examples-list">
+                  {(d.postExamples ?? []).map((post, pi) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: order is static in designer
+                    <div key={`post-${pi}`} className="ce-example-post">
+                      <input
+                        type="text"
+                        value={post}
+                        onChange={(e) => {
+                          const updated = [...(d.postExamples ?? [])];
+                          updated[pi] = e.target.value;
+                          handleFieldEdit("postExamples", updated);
+                        }}
+                        className="ce-example-msg-input"
+                      />
                       <button
                         type="button"
                         className="ce-style-entry-remove"
                         onClick={() => {
-                          const updated = [...normalizedMessageExamples];
-                          updated.splice(ci, 1);
-                          handleFieldEdit("messageExamples", updated);
+                          const updated = [...(d.postExamples ?? [])];
+                          updated.splice(pi, 1);
+                          handleFieldEdit("postExamples", updated);
                         }}
                       >
                         <svg
@@ -1342,118 +1509,30 @@ export function CharacterEditor({
                         </svg>
                       </button>
                     </div>
-                    <div className="ce-example-messages">
-                      {convo.examples.map((msg, mi) => (
-                        // biome-ignore lint/suspicious/noArrayIndexKey: order is static in designer
-                        <div key={`msg-${ci}-${mi}`} className="ce-example-msg">
-                          <span
-                            className={`ce-example-msg-role ${msg.name === "{{user1}}" ? "" : "ce-example-msg-role--agent"}`}
-                          >
-                            {msg.name === "{{user1}}" ? "user" : "agent"}
-                          </span>
-                          <input
-                            type="text"
-                            value={msg.content?.text ?? ""}
-                            onChange={(e) => {
-                              const updated = [...normalizedMessageExamples];
-                              const convoClone = {
-                                examples: [...updated[ci].examples],
-                              };
-                              convoClone.examples[mi] = {
-                                ...convoClone.examples[mi],
-                                content: { text: e.target.value },
-                              };
-                              updated[ci] = convoClone;
-                              handleFieldEdit("messageExamples", updated);
-                            }}
-                            className="ce-example-msg-input"
-                          />
-                        </div>
-                      ))}
+                  ))}
+                  {(d.postExamples ?? []).length === 0 && (
+                    <div className="ce-style-empty">
+                      {t("charactereditor.NoPostExamples", {
+                        defaultValue: "No post examples yet.",
+                      })}
                     </div>
-                  </div>
-                ))}
-                {normalizedMessageExamples.length === 0 && (
-                  <div className="ce-style-empty">{t("charactereditor.NoChatExamples", { defaultValue: "No chat examples yet." })}</div>
-                )}
-              </div>
-            </section>
-
-            {/* Post Examples */}
-            <section
-              className="ce-section ce-section--grow"
-              style={{
-                display: rightTab === "examples" ? undefined : "none",
-              }}
-            >
-              <div className="ce-section-header">
-                <span className="ce-label">{t("charactereditor.PostExamples", { defaultValue: "Post Examples" })}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="ce-regen-btn"
-                  onClick={() => void handleGenerate("postExamples", "replace")}
-                  disabled={generating === "postExamples"}
-                >
-                  {generating === "postExamples" ? t("charactereditor.Generating") : t("charactereditor.Generate")}
-                </Button>
-              </div>
-              <div className="ce-examples-list">
-                {(d.postExamples ?? []).map((post, pi) => (
-                  // biome-ignore lint/suspicious/noArrayIndexKey: order is static in designer
-                  <div key={`post-${pi}`} className="ce-example-post">
-                    <input
-                      type="text"
-                      value={post}
-                      onChange={(e) => {
-                        const updated = [...(d.postExamples ?? [])];
-                        updated[pi] = e.target.value;
-                        handleFieldEdit("postExamples", updated);
-                      }}
-                      className="ce-example-msg-input"
-                    />
-                    <button
-                      type="button"
-                      className="ce-style-entry-remove"
-                      onClick={() => {
-                        const updated = [...(d.postExamples ?? [])];
-                        updated.splice(pi, 1);
-                        handleFieldEdit("postExamples", updated);
-                      }}
-                    >
-                      <svg
-                        width="10"
-                        height="10"
-                        viewBox="0 0 10 10"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        aria-hidden="true"
-                      >
-                        <path d="M2 2l6 6M8 2l-6 6" />
-                      </svg>
-                    </button>
-                  </div>
-                ))}
-                {(d.postExamples ?? []).length === 0 && (
-                  <div className="ce-style-empty">{t("charactereditor.NoPostExamples", { defaultValue: "No post examples yet." })}</div>
-                )}
-                <button
-                  type="button"
-                  className="ce-add-post-btn"
-                  onClick={() => {
-                    const updated = [...(d.postExamples ?? []), ""];
-                    handleFieldEdit("postExamples", updated);
-                  }}
-                >
-                  + {t("charactereditor.AddPost", { defaultValue: "Add Post" })}
-                </button>
-              </div>
-            </section>
+                  )}
+                  <button
+                    type="button"
+                    className="ce-add-post-btn"
+                    onClick={() => {
+                      const updated = [...(d.postExamples ?? []), ""];
+                      handleFieldEdit("postExamples", updated);
+                    }}
+                  >
+                    +{" "}
+                    {t("charactereditor.AddPost", { defaultValue: "Add Post" })}
+                  </button>
+                </div>
+              </section>
+            </div>
           </div>
-        </div>
-      )}
+        )}
       </div>
 
       {/* ── Footer ─────────────────────────────────────────────────── */}
@@ -1481,7 +1560,9 @@ export function CharacterEditor({
             disabled={characterSaving || voiceSaving || !hasPendingChanges}
             onClick={() => void handleSaveAll()}
           >
-            {characterSaving || voiceSaving ? t("charactereditor.Saving", { defaultValue: "saving..." }) : t("charactereditor.Save", { defaultValue: "Save" })}
+            {characterSaving || voiceSaving
+              ? t("charactereditor.Saving", { defaultValue: "saving..." })
+              : t("charactereditor.Save", { defaultValue: "Save" })}
           </Button>
 
           {/* Toggle between Customize and Select — always present, just text changes */}
@@ -1500,7 +1581,11 @@ export function CharacterEditor({
               }
             }}
           >
-            {customizing ? t("charactereditor.SelectBtn", { defaultValue: "Select" }) : t("charactereditor.CustomizeBtn", { defaultValue: "Customize" })}
+            {customizing
+              ? t("charactereditor.SelectBtn", { defaultValue: "Select" })
+              : t("charactereditor.CustomizeBtn", {
+                  defaultValue: "Customize",
+                })}
           </Button>
         </div>
       </div>

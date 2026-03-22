@@ -29,7 +29,12 @@ import {
   parseSettingsWindowAction,
 } from "./application-menu";
 import { showBackgroundNoticeOnce } from "./background-notice";
-import { readNavigationEventUrl } from "./cloud-auth-window";
+import { isBrowserSurfaceEnabled } from "./browser-surface-flag";
+import {
+  type CloudAuthWindowLike,
+  CloudAuthWindowManager,
+  readNavigationEventUrl,
+} from "./cloud-auth-window";
 import { configureDesktopLocalApiAuth, getAgentManager } from "./native/agent";
 import { getDesktopManager } from "./native/desktop";
 import { disposeNativeModules, initializeNativeModules } from "./native/index";
@@ -67,10 +72,12 @@ type HeartbeatMenuHealthResponse = {
 
 const HEARTBEAT_MENU_REFRESH_MS = 30_000;
 const CONFIG_EXPORT_FILE_NAME = "milady-config.json";
-// Browser surface stays off by default until the packaged WebGPU/browser path
-// is hardened across the supported desktop release targets.
-const BROWSER_SURFACE_ENABLED =
-  process.env.MILADY_ENABLE_BROWSER_SURFACE === "1";
+// Browser surface ships enabled by default. Set
+// MILADY_ENABLE_BROWSER_SURFACE=0 to force-disable it for local debugging or
+// release triage.
+const BROWSER_SURFACE_ENABLED = isBrowserSurfaceEnabled(
+  process.env as Record<string, string | undefined>,
+);
 let heartbeatMenuSnapshot: HeartbeatMenuSnapshot =
   EMPTY_HEARTBEAT_MENU_SNAPSHOT;
 let heartbeatMenuRefreshTimer: ReturnType<typeof setInterval> | null = null;
@@ -1024,6 +1031,17 @@ async function _startAgent(win: BrowserWindow): Promise<void> {
 async function setupUpdater(): Promise<void> {
   const runUpdateCheck = async (notifyOnNoUpdate = false): Promise<void> => {
     try {
+      const updaterState = await getDesktopManager().getUpdaterState();
+      if (!updaterState.canAutoUpdate) {
+        if (updaterState.autoUpdateDisabledReason) {
+          console.info(
+            "[Updater] Skipping auto-update check:",
+            updaterState.autoUpdateDisabledReason,
+          );
+        }
+        return;
+      }
+
       const updateResult = await Updater.checkForUpdate();
       if (updateResult?.updateAvailable) {
         Updater.downloadUpdate().catch((err: unknown) => {

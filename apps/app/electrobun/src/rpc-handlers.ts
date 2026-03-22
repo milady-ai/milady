@@ -9,7 +9,7 @@ import fs from "node:fs";
  * Called once during app startup after the BrowserView is created.
  */
 
-import { Updater, Utils } from "electrobun/bun";
+import { Utils } from "electrobun/bun";
 import { setAgentReady } from "./agent-ready-state";
 import { showBackgroundNoticeOnce } from "./background-notice";
 import { getAgentManager } from "./native/agent";
@@ -108,6 +108,7 @@ export function registerRpcHandlers(
       return status;
     },
     agentStatus: async () => agent.getStatus(),
+    agentInspectExistingInstall: async () => agent.inspectExistingInstall(),
 
     // ---- Desktop: Tray ----
     desktopCreateTray: async (
@@ -192,9 +193,7 @@ export function registerRpcHandlers(
     // ---- Desktop: App ----
     desktopQuit: async () => desktop.quit(),
     desktopRelaunch: async () => desktop.relaunch(),
-    desktopApplyUpdate: async () => {
-      Updater.applyUpdate();
-    },
+    desktopApplyUpdate: async () => desktop.applyUpdate(),
     desktopCheckForUpdates: async () => desktop.checkForUpdates(),
     desktopGetUpdaterState: async () => desktop.getUpdaterState(),
     desktopGetVersion: async () => desktop.getVersion(),

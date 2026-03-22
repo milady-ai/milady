@@ -128,6 +128,10 @@ Restart the agent runtime. Returns `409` if a restart is already in progress and
 
 Wipe config, workspace (memory), oauth tokens, and return to onboarding state. Stops the runtime, deletes the `~/.milady/` state directory (with safety checks to prevent deletion of system paths), and resets all server state.
 
+This is a sensitive endpoint with stricter authorization:
+- In `development` or `dev` environments (`NODE_ENV`), no token is required.
+- In all other environments, a valid `MILADY_API_TOKEN` must be configured and included in the request. Returns `403` if no token is configured.
+
 **Response**
 
 ```json

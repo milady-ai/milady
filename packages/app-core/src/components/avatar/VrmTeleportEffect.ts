@@ -7,6 +7,11 @@ interface MeshStandardMaterialWithNodeProps {
   opacityNode?: unknown | null;
 }
 
+type TslNodeLike = {
+  add(value: unknown): unknown;
+  mul(value: unknown): unknown;
+};
+
 type TeleportFallbackShader = {
   uniforms: { uTeleportProgress: { value: number } };
   isOutgoing?: boolean;
@@ -68,9 +73,15 @@ export class VrmTeleportEffect {
   private sparkles: TeleportSparkleSystem | null = null;
   private revealStarted = false;
 
-  public get teleportProgress() { return this.progress; }
-  public get teleportCompleteTime() { return this.completeTime; }
-  public get isRevealStarted() { return this.revealStarted; }
+  public get teleportProgress() {
+    return this.progress;
+  }
+  public get teleportCompleteTime() {
+    return this.completeTime;
+  }
+  public get isRevealStarted() {
+    return this.revealStarted;
+  }
 
   public resetState() {
     this.progress = 1.0;
@@ -98,46 +109,82 @@ export class VrmTeleportEffect {
       const applyTslDissolve = (targetVrm: VRM, isOutgoing: boolean) => {
         targetVrm.scene.traverse((obj: THREE.Object3D) => {
           if (!(obj instanceof THREE.Mesh)) return;
-          const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+          const mats = Array.isArray(obj.material)
+            ? obj.material
+            : [obj.material];
           for (const mat of mats) {
             if (!mat.isNodeMaterial || mat.userData._dissolveApplied) continue;
             appliedNodeDissolve = true;
             mat.userData._dissolveApplied = true;
             mat.userData._origOpacityNode = mat.opacityNode ?? null;
-            mat.userData._origEmissiveNode = (mat as MeshStandardMaterialWithNodeProps).emissiveNode ?? null;
+            mat.userData._origEmissiveNode =
+              (mat as MeshStandardMaterialWithNodeProps).emissiveNode ?? null;
             mat.userData._origAlphaTest = mat.alphaTest;
 
             const worldY = tsl.positionWorld.y;
-            const threshold = uProgress.mul(TELEPORT_DISSOLVE_END_Y - TELEPORT_DISSOLVE_START_Y).add(TELEPORT_DISSOLVE_START_Y);
+            const threshold = uProgress
+              .mul(TELEPORT_DISSOLVE_END_Y - TELEPORT_DISSOLVE_START_Y)
+              .add(TELEPORT_DISSOLVE_START_Y);
             const diff = worldY.sub(threshold);
 
-            const nx = tsl.sin(tsl.positionWorld.x.mul(18.0).add(worldY.mul(12.0)));
-            const ny = tsl.cos(worldY.mul(15.0).add(tsl.positionWorld.z.mul(10.0)));
-            const nz = tsl.sin(tsl.positionWorld.z.mul(18.0).add(tsl.positionWorld.x.mul(10.0)));
+            const nx = tsl.sin(
+              tsl.positionWorld.x.mul(18.0).add(worldY.mul(12.0)),
+            );
+            const ny = tsl.cos(
+              worldY.mul(15.0).add(tsl.positionWorld.z.mul(10.0)),
+            );
+            const nz = tsl.sin(
+              tsl.positionWorld.z.mul(18.0).add(tsl.positionWorld.x.mul(10.0)),
+            );
             const noise = nx.add(ny).add(nz).div(3.0).add(1.0).mul(0.5);
             const ratio = diff.div(0.3).clamp(0.0, 1.0);
 
             const baseAlpha = tsl.step(ratio, noise);
-            const dissolveAlpha = isOutgoing ? tsl.float(1.0).sub(baseAlpha) : baseAlpha;
+            const dissolveAlpha = isOutgoing
+              ? tsl.float(1.0).sub(baseAlpha)
+              : baseAlpha;
 
             const edgeDist = diff.abs();
             const glowWidth = tsl.float(0.08);
-            const glowIntensity = tsl.float(1.0).sub(edgeDist.div(glowWidth).clamp(0.0, 1.0));
+            const glowIntensity = tsl
+              .float(1.0)
+              .sub(edgeDist.div(glowWidth).clamp(0.0, 1.0));
             const hueShift = tsl.fract(worldY.mul(3.0).add(uProgress.mul(2.0)));
-            const holoR = tsl.smoothstep(tsl.float(0.3), tsl.float(0.7), hueShift).mul(0.8).add(0.2);
+            const holoR = tsl
+              .smoothstep(tsl.float(0.3), tsl.float(0.7), hueShift)
+              .mul(0.8)
+              .add(0.2);
             const holoG = tsl.float(0.9);
-            const holoB = tsl.smoothstep(tsl.float(0.7), tsl.float(0.3), hueShift).mul(0.8).add(0.2);
+            const holoB = tsl
+              .smoothstep(tsl.float(0.7), tsl.float(0.3), hueShift)
+              .mul(0.8)
+              .add(0.2);
             const holoColor = tsl.vec3(holoR, holoG, holoB);
 
-            const glowActive = tsl.step(tsl.float(0.001), uProgress).mul(tsl.float(1.0).sub(tsl.step(tsl.float(0.999), uProgress)));
-            const emissiveBoost = holoColor.mul(glowIntensity.mul(10.0).mul(glowActive).mul(dissolveAlpha));
+            const glowActive = tsl
+              .step(tsl.float(0.001), uProgress)
+              .mul(tsl.float(1.0).sub(tsl.step(tsl.float(0.999), uProgress)));
+            const emissiveBoost = holoColor.mul(
+              glowIntensity.mul(10.0).mul(glowActive).mul(dissolveAlpha),
+            );
 
-            const origOpacity = mat.opacityNode as any;
-            mat.opacityNode = origOpacity ? (((origOpacity).mul(dissolveAlpha) as any) ?? dissolveAlpha) : dissolveAlpha;
+            const nodeMaterial = mat as MeshStandardMaterialWithNodeProps &
+              THREE.Material;
+            const origOpacity = nodeMaterial.opacityNode as
+              | TslNodeLike
+              | null
+              | undefined;
+            nodeMaterial.opacityNode = origOpacity
+              ? (origOpacity.mul(dissolveAlpha) ?? dissolveAlpha)
+              : dissolveAlpha;
 
-            const matWithEmissive = mat as any;
-            const origEmissive = matWithEmissive.emissiveNode as any;
-            matWithEmissive.emissiveNode = origEmissive ? ((origEmissive).add(emissiveBoost) as any) : emissiveBoost;
+            const origEmissive = nodeMaterial.emissiveNode as
+              | TslNodeLike
+              | null
+              | undefined;
+            nodeMaterial.emissiveNode = origEmissive
+              ? origEmissive.add(emissiveBoost)
+              : emissiveBoost;
 
             mat.alphaTest = 0.01;
             mat.needsUpdate = true;
@@ -151,7 +198,10 @@ export class VrmTeleportEffect {
         applyTslDissolve(outgoingVrm, true);
       }
     } catch (err) {
-      console.warn("[VrmTeleportEffect] TSL dissolve unavailable, showing instantly:", err);
+      console.warn(
+        "[VrmTeleportEffect] TSL dissolve unavailable, showing instantly:",
+        err,
+      );
     }
 
     if (!appliedNodeDissolve) {
@@ -163,7 +213,9 @@ export class VrmTeleportEffect {
 
     await new Promise((resolve) => setTimeout(resolve, 0));
     if (typeof window !== "undefined") {
-      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      await new Promise((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(resolve)),
+      );
     }
 
     if (onAborted()) return;
@@ -172,7 +224,11 @@ export class VrmTeleportEffect {
     this.startSparkles(vrm, avatarParent);
   }
 
-  public update(stableDelta: number, elapsedTime: number, onComplete?: () => void): void {
+  public update(
+    stableDelta: number,
+    elapsedTime: number,
+    onComplete?: () => void,
+  ): void {
     if (this.progress < 1.0) {
       this.progress += stableDelta * 2.8; // ~0.35 seconds duration
       if (this.progress > 1.0) this.progress = 1.0;
@@ -198,7 +254,11 @@ export class VrmTeleportEffect {
     this.resetState();
   }
 
-  private applyFallbackDissolve(vrm: VRM, isOutgoing: boolean, renderer: THREE.WebGLRenderer | null): void {
+  private applyFallbackDissolve(
+    vrm: VRM,
+    isOutgoing: boolean,
+    renderer: THREE.WebGLRenderer | null,
+  ): void {
     vrm.scene.traverse((obj: THREE.Object3D) => {
       if (!(obj instanceof THREE.Mesh)) return;
       const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
@@ -219,7 +279,8 @@ export class VrmTeleportEffect {
         mat.onBeforeCompile = (
           shader: Parameters<THREE.Material["onBeforeCompile"]>[0],
         ) => {
-          shader.uniforms.uTeleportProgress = shaderRef.uniforms.uTeleportProgress;
+          shader.uniforms.uTeleportProgress =
+            shaderRef.uniforms.uTeleportProgress;
           shader.vertexShader = `
 varying vec3 vTeleportWorldPosition;
 ${shader.vertexShader}
@@ -238,24 +299,26 @@ float teleportSmoothNoise(vec3 p) {
   return (nx + ny + nz) / 3.0 * 0.5 + 0.5;
 }
 ${shader.fragmentShader}
-`.replace(
-            "#include <alphatest_fragment>",
-            `float teleportThreshold = mix(${TELEPORT_DISSOLVE_START_Y.toFixed(1)}, ${TELEPORT_DISSOLVE_END_Y.toFixed(1)}, uTeleportProgress);
+`
+            .replace(
+              "#include <alphatest_fragment>",
+              `float teleportThreshold = mix(${TELEPORT_DISSOLVE_START_Y.toFixed(1)}, ${TELEPORT_DISSOLVE_END_Y.toFixed(1)}, uTeleportProgress);
 float teleportDiff = vTeleportWorldPosition.y - teleportThreshold;
 float teleportRatio = clamp(teleportDiff / 0.3, 0.0, 1.0);
 float teleportNoise = teleportSmoothNoise(vTeleportWorldPosition);
 ${isOutgoing ? "if (teleportNoise >= teleportRatio) discard;" : "if (teleportNoise < teleportRatio) discard;"}
 #include <alphatest_fragment>`,
-          ).replace(
-            "#include <emissivemap_fragment>",
-            `#include <emissivemap_fragment>
+            )
+            .replace(
+              "#include <emissivemap_fragment>",
+              `#include <emissivemap_fragment>
             float teleportGlowDist = abs(teleportDiff);
             float teleportGlowIntensity = 1.0 - clamp(teleportGlowDist / 0.08, 0.0, 1.0);
             vec3 teleportHoloColor = vec3(0.3, 0.9, 0.8);
             float teleportGlowActive = step(0.001, uTeleportProgress) * (1.0 - step(0.999, uTeleportProgress));
             float teleportDissolveAlpha = ${isOutgoing ? "1.0 - step(teleportRatio, teleportNoise)" : "step(teleportRatio, teleportNoise)"};
-            totalEmissiveRadiance += teleportHoloColor * (teleportGlowIntensity * 10.0 * teleportGlowActive * teleportDissolveAlpha);`
-          );
+            totalEmissiveRadiance += teleportHoloColor * (teleportGlowIntensity * 10.0 * teleportGlowActive * teleportDissolveAlpha);`,
+            );
 
           const originalOnBeforeCompile = mat.userData._origOnBeforeCompile;
           if (typeof originalOnBeforeCompile === "function") {
@@ -264,7 +327,8 @@ ${isOutgoing ? "if (teleportNoise >= teleportRatio) discard;" : "if (teleportNoi
         };
         const origCacheKey = mat.userData._origCustomProgramCacheKey;
         mat.customProgramCacheKey = () => {
-          const baseKey = typeof origCacheKey === "function" ? origCacheKey.call(mat) : "";
+          const baseKey =
+            typeof origCacheKey === "function" ? origCacheKey.call(mat) : "";
           return `${baseKey}:${mat.type}:teleport-dissolve-fallback:${isOutgoing ? "out" : "in"}`;
         };
         mat.needsUpdate = true;
@@ -406,14 +470,18 @@ ${isOutgoing ? "if (teleportNoise >= teleportRatio) discard;" : "if (teleportNoi
     for (const mat of this.dissolvedMaterials) {
       if (mat.userData._dissolveApplied) {
         if (mat.userData._origOpacityNode !== undefined) {
-          (mat as MeshStandardMaterialWithNodeProps).opacityNode = mat.userData._origOpacityNode ?? null;
+          (mat as MeshStandardMaterialWithNodeProps).opacityNode =
+            mat.userData._origOpacityNode ?? null;
         }
         if (mat.userData._origEmissiveNode !== undefined) {
-          (mat as MeshStandardMaterialWithNodeProps).emissiveNode = mat.userData._origEmissiveNode ?? null;
+          (mat as MeshStandardMaterialWithNodeProps).emissiveNode =
+            mat.userData._origEmissiveNode ?? null;
         }
         mat.alphaTest = mat.userData._origAlphaTest ?? 0;
-        mat.onBeforeCompile = mat.userData._origOnBeforeCompile ?? mat.onBeforeCompile;
-        mat.customProgramCacheKey = mat.userData._origCustomProgramCacheKey ?? mat.customProgramCacheKey;
+        mat.onBeforeCompile =
+          mat.userData._origOnBeforeCompile ?? mat.onBeforeCompile;
+        mat.customProgramCacheKey =
+          mat.userData._origCustomProgramCacheKey ?? mat.customProgramCacheKey;
         delete mat.userData._dissolveApplied;
         delete mat.userData._origOpacityNode;
         delete mat.userData._origEmissiveNode;

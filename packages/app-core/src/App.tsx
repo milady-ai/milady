@@ -382,15 +382,12 @@ export function App() {
     );
   }
 
-  if (startupError) {
-    return <StartupFailureView error={startupError} onRetry={retryStartup} />;
-  }
-
   // Agent startup must not hide onboarding: after reset the runtime often goes
   // to "starting" while we need to show the wizard immediately.
   const blockOnboardingForShell = onboardingLoading;
   const showFullScreenLoader =
     onboardingComplete && (onboardingLoading || agentStarting);
+
   const [loaderFadingOut, setLoaderFadingOut] = useState(false);
   const showLoaderRef = useRef(true);
   const [showLoader, setShowLoader] = useState(true);
@@ -410,6 +407,11 @@ export function App() {
       return () => clearTimeout(timer);
     }
   }, [showFullScreenLoader]);
+
+  // After loader hooks (stable hook order); do not return startupError before useState above.
+  if (startupError) {
+    return <StartupFailureView error={startupError} onRetry={retryStartup} />;
+  }
 
   if (authRequired && !blockOnboardingForShell) return <PairingView />;
   if (!onboardingComplete && !blockOnboardingForShell) {
