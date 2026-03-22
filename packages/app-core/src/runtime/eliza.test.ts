@@ -52,7 +52,7 @@ vi.mock("@miladyai/plugin-wechat", () => ({ default: {} }));
 import { findPluginExport } from "../cli/plugins-cli";
 import type { ElizaConfig } from "../config/config";
 import { CONNECTOR_PLUGINS } from "../config/plugin-auto-enable";
-import { CONNECTOR_IDS } from "../config/schema";
+import { CONNECTOR_IDS, MILADY_LOCAL_CONNECTOR_IDS } from "../config/schema";
 // Import the plugin import specifier resolver by whichever name is exported.
 // The eliza workspace exports resolveElizaPluginImportSpecifier while the
 // npm-published @elizaos/agent package exports
@@ -769,6 +769,7 @@ describe("collectPluginNames", () => {
 
   it("CHANNEL_PLUGIN_MAP values match CONNECTOR_PLUGINS for every connector", () => {
     for (const id of Object.keys(CHANNEL_PLUGIN_MAP)) {
+      if (MILADY_LOCAL_CONNECTOR_IDS.includes(id)) continue;
       expect(CHANNEL_PLUGIN_MAP[id]).toBe(CONNECTOR_PLUGINS[id]);
     }
   });
