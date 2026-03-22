@@ -1493,8 +1493,7 @@ async function main(): Promise<void> {
       try {
         const pkgPath = path.join(import.meta.dir, "..", "package.json");
         currentVersion =
-          JSON.parse(fs.readFileSync(pkgPath, "utf-8")).version ??
-          "unknown";
+          JSON.parse(fs.readFileSync(pkgPath, "utf-8")).version ?? "unknown";
       } catch {
         // Fallback — version marker will still trigger cleanup on next real version.
       }
