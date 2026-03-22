@@ -9,6 +9,7 @@ import {
   resolveRunnableTestFiles,
   runChecks,
   scanDiffTextForBlockedPatterns,
+  splitRunnableTestFiles,
   scopeVerdictFor,
 } from "../../../../scripts/pre-review-local.mjs";
 
@@ -206,5 +207,20 @@ index 1234567..89abcde 100644
     );
 
     expect(resolved).toEqual(["kept.test.ts"]);
+  });
+
+  it("routes only root e2e tests to the e2e config runner", () => {
+    expect(
+      splitRunnableTestFiles([
+        "packages/app-core/src/components/SettingsView.test.tsx",
+        "packages/app-core/test/app/settings-sections.e2e.test.ts",
+        "test/health-endpoint.e2e.test.ts",
+        "apps/homepage/src/routes/home.test.tsx",
+      ]),
+    ).toEqual({
+      repoTests: ["packages/app-core/src/components/SettingsView.test.tsx"],
+      repoE2eTests: ["test/health-endpoint.e2e.test.ts"],
+      homepageTests: ["src/routes/home.test.tsx"],
+    });
   });
 });
