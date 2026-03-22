@@ -633,6 +633,7 @@ const DEFAULT_ICONS: Record<string, LucideIcon> = {
   tlon: Tornado,
   zalo: Circle,
   zalouser: Circle,
+  wechat: Phone,
   // Features — voice & audio
   "edge-tts": Volume2,
   elevenlabs: Mic,
