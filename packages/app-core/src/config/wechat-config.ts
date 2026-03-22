@@ -5,9 +5,7 @@ export const WECHAT_PLUGIN_PACKAGE = "@pjflacko/plugin-wechat" as const;
  * Detect whether the WeChat connector block in `connectors.wechat` is
  * sufficiently configured to auto-enable the plugin.
  */
-export function isWechatConfigured(
-  config: Record<string, unknown>,
-): boolean {
+export function isWechatConfigured(config: Record<string, unknown>): boolean {
   if (config.enabled === false) return false;
 
   // Single-account: top-level apiKey

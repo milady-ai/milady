@@ -116,7 +116,7 @@ Single-account (simple):
   "connectors": {
     "wechat": {
       "enabled": true,
-      "apiKey": "wc_live_xxx",
+      "apiKey": "<key>",
       "proxyUrl": "https://...",
       "webhookPort": 18790,
       "deviceType": "ipad",
@@ -139,13 +139,13 @@ Multi-account:
       "accounts": {
         "main": {
           "enabled": true,
-          "apiKey": "wc_live_xxx",
+          "apiKey": "<key>",
           "proxyUrl": "https://...",
           "deviceType": "ipad"
         },
         "secondary": {
           "enabled": true,
-          "apiKey": "wc_live_yyy",
+          "apiKey": "<key2>",
           "proxyUrl": "https://...",
           "deviceType": "mac"
         }

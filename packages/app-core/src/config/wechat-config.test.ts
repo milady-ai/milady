@@ -3,7 +3,7 @@ import { isWechatConfigured } from "./wechat-config";
 
 describe("isWechatConfigured", () => {
   it("returns true when apiKey is present", () => {
-    expect(isWechatConfigured({ apiKey: "wc_live_xxx" })).toBe(true);
+    expect(isWechatConfigured({ apiKey: "key" })).toBe(true);
   });
 
   it("returns false for empty config", () => {
@@ -11,16 +11,14 @@ describe("isWechatConfigured", () => {
   });
 
   it("returns false when explicitly disabled", () => {
-    expect(isWechatConfigured({ enabled: false, apiKey: "wc_live_xxx" })).toBe(
-      false,
-    );
+    expect(isWechatConfigured({ enabled: false, apiKey: "key" })).toBe(false);
   });
 
   it("returns true with multi-account containing enabled account with apiKey", () => {
     expect(
       isWechatConfigured({
         accounts: {
-          main: { enabled: true, apiKey: "wc_live_xxx" },
+          main: { enabled: true, apiKey: "key" },
         },
       }),
     ).toBe(true);
@@ -30,7 +28,7 @@ describe("isWechatConfigured", () => {
     expect(
       isWechatConfigured({
         accounts: {
-          main: { enabled: false, apiKey: "wc_live_xxx" },
+          main: { enabled: false, apiKey: "key" },
         },
       }),
     ).toBe(false);
@@ -44,8 +42,8 @@ describe("isWechatConfigured", () => {
     expect(
       isWechatConfigured({
         accounts: {
-          main: { enabled: true, apiKey: "wc_live_xxx" },
-          secondary: { enabled: false, apiKey: "wc_live_yyy" },
+          main: { enabled: true, apiKey: "key" },
+          secondary: { enabled: false, apiKey: "key2" },
         },
       }),
     ).toBe(true);

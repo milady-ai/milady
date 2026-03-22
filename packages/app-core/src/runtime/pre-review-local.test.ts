@@ -41,6 +41,13 @@ describe("pre-review-local helpers", () => {
         message: "add helper script",
       }),
     ).toBe("feature");
+
+    expect(
+      classificationFromInputs({
+        branch: "feat/add-wechat-connector",
+        message: "add connector wiring",
+      }),
+    ).toBe("feature");
   });
 
   it("maps classification to scope verdict", () => {
@@ -122,6 +129,18 @@ index 1234567..89abcde 100644
     );
     expect(issues.some((issue) => issue.includes("secret-like string"))).toBe(
       true,
+    );
+  });
+
+  it("ignores short apiKey placeholders in docs examples", () => {
+    const diff = `
++      "apiKey": "<key>",
++      "proxyUrl": "https://proxy.example.com"
+`;
+
+    const issues = scanDiffTextForBlockedPatterns(diff);
+    expect(issues.some((issue) => issue.includes("secret-like string"))).toBe(
+      false,
     );
   });
 

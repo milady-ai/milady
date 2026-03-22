@@ -48,11 +48,11 @@ describe("connector configuration detection", () => {
       case "wechat":
         return Boolean(
           config.apiKey ||
-          (config.accounts &&
-            typeof config.accounts === "object" &&
-            Object.values(config.accounts as Record<string, Record<string, unknown>>).some(
-              (acc) => acc.enabled !== false && Boolean(acc.apiKey),
-            )),
+            (config.accounts &&
+              typeof config.accounts === "object" &&
+              Object.values(
+                config.accounts as Record<string, Record<string, unknown>>,
+              ).some((acc) => acc.enabled !== false && Boolean(acc.apiKey))),
         );
       default:
         return Boolean(config.token || config.apiKey || config.botToken);
@@ -120,20 +120,23 @@ describe("connector configuration detection", () => {
   });
 
   it("detects WeChat with apiKey", () => {
-    expect(isConnectorConfigured("wechat", { apiKey: "wc_live_xxx" })).toBe(true);
+    expect(isConnectorConfigured("wechat", { apiKey: "key" })).toBe(true);
   });
 
   it("detects WeChat with multi-account", () => {
     expect(
       isConnectorConfigured("wechat", {
-        accounts: { main: { enabled: true, apiKey: "wc_live_xxx" } },
+        accounts: { main: { enabled: true, apiKey: "key" } },
       }),
     ).toBe(true);
   });
 
   it("rejects disabled WeChat", () => {
     expect(
-      isConnectorConfigured("wechat", { enabled: false, apiKey: "wc_live_xxx" }),
+      isConnectorConfigured("wechat", {
+        enabled: false,
+        apiKey: "key",
+      }),
     ).toBe(false);
   });
 });

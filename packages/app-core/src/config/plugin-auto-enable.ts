@@ -22,16 +22,12 @@ export function applyPluginAutoEnable(
   const config = params.config as Record<string, unknown>;
 
   // Inject WeChat before upstream runs (upstream doesn't know about wechat)
-  const connectors = config?.connectors as
-    | Record<string, unknown>
-    | undefined;
-  const wechatBlock = connectors?.wechat as
-    | Record<string, unknown>
-    | undefined;
+  const connectors = config?.connectors as Record<string, unknown> | undefined;
+  const wechatBlock = connectors?.wechat as Record<string, unknown> | undefined;
 
   if (wechatBlock && isWechatConfigured(wechatBlock)) {
-    const plugins = ((config.plugins ??= {}) as Record<string, unknown>);
-    const allow = ((plugins.allow ??= []) as string[]);
+    const plugins = (config.plugins ??= {}) as Record<string, unknown>;
+    const allow = (plugins.allow ??= []) as string[];
     if (!allow.includes("wechat")) {
       allow.push("wechat");
     }

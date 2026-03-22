@@ -128,7 +128,7 @@ const CONNECTOR_CREDS: Record<string, Record<string, unknown>> = {
   retake: { accessToken: "rtk-token" },
   blooio: { apiKey: "blk-key" },
   twitch: { accessToken: "twitch-token" },
-  wechat: { apiKey: "wc_live_test" },
+  wechat: { apiKey: "key" },
 };
 
 describe("connector runtime parity", () => {

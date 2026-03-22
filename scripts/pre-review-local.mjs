@@ -90,7 +90,7 @@ export function classificationFromInputs({ branch, message }) {
   const content = `${branch} ${message}`.toLowerCase();
 
   if (
-    /(redesign|restyle|theme|font|layout|css|visual|icon|logo|dark mode|animation|aesthetic)/.test(
+    /\b(redesign|restyle|theme|font|layout|css|visual|icon|logo|animation|aesthetic)\b|\bdark mode\b/.test(
       content,
     )
   ) {

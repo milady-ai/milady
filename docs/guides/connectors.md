@@ -455,7 +455,7 @@ Connects to WeChat via a third-party proxy service using personal account login.
 
 ### Setup Requirements
 
-1. Obtain an API key from the WeChat proxy service (format: `wc_live_xxxxxxxxxxxxxxxx`)
+1. Obtain an API key from the WeChat proxy service
 2. Configure the proxy URL and webhook port
 3. Scan QR code displayed in terminal on first startup
 
@@ -465,7 +465,7 @@ Connects to WeChat via a third-party proxy service using personal account login.
 {
   "connectors": {
     "wechat": {
-      "apiKey": "wc_live_xxx",
+      "apiKey": "<key>",
       "proxyUrl": "https://...",
       "webhookPort": 18790,
       "deviceType": "ipad"

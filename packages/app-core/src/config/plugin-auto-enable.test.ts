@@ -217,7 +217,7 @@ describe("applyPluginAutoEnable — connectors", () => {
     const params = makeParams({
       config: {
         connectors: {
-          wechat: { apiKey: "wc_live_test" },
+          wechat: { apiKey: "key" },
         },
       },
     });
@@ -229,7 +229,7 @@ describe("applyPluginAutoEnable — connectors", () => {
     const params = makeParams({
       config: {
         connectors: {
-          wechat: { enabled: false, apiKey: "wc_live_test" },
+          wechat: { enabled: false, apiKey: "key" },
         },
       },
     });

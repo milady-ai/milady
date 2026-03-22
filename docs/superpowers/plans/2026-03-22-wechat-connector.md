@@ -146,7 +146,7 @@ import { isWechatConfigured } from "../wechat-config";
 
 describe("isWechatConfigured", () => {
   it("returns true when apiKey is present", () => {
-    expect(isWechatConfigured({ apiKey: "wc_live_xxx" })).toBe(true);
+    expect(isWechatConfigured({ apiKey: "key" })).toBe(true);
   });
 
   it("returns false for empty config", () => {
@@ -154,14 +154,14 @@ describe("isWechatConfigured", () => {
   });
 
   it("returns false when explicitly disabled", () => {
-    expect(isWechatConfigured({ enabled: false, apiKey: "wc_live_xxx" })).toBe(false);
+    expect(isWechatConfigured({ enabled: false, apiKey: "key" })).toBe(false);
   });
 
   it("returns true with multi-account containing enabled account with apiKey", () => {
     expect(
       isWechatConfigured({
         accounts: {
-          main: { enabled: true, apiKey: "wc_live_xxx" },
+          main: { enabled: true, apiKey: "key" },
         },
       }),
     ).toBe(true);
@@ -171,7 +171,7 @@ describe("isWechatConfigured", () => {
     expect(
       isWechatConfigured({
         accounts: {
-          main: { enabled: false, apiKey: "wc_live_xxx" },
+          main: { enabled: false, apiKey: "key" },
         },
       }),
     ).toBe(false);
@@ -185,8 +185,8 @@ describe("isWechatConfigured", () => {
     expect(
       isWechatConfigured({
         accounts: {
-          main: { enabled: true, apiKey: "wc_live_xxx" },
-          secondary: { enabled: false, apiKey: "wc_live_yyy" },
+          main: { enabled: true, apiKey: "key" },
+          secondary: { enabled: false, apiKey: "key2" },
         },
       }),
     ).toBe(true);
@@ -393,7 +393,7 @@ it("uses valid package name prefixes for all plugin mappings", () => {
 Add wechat to CONNECTOR_CREDS:
 
 ```typescript
-wechat: { apiKey: "wc_live_test" },
+wechat: { apiKey: "key" },
 ```
 
 **Important:** The `it.each` tests that call upstream `isConnectorConfigured("wechat", ...)` may fail if the upstream default case returns `false` for unknown connector IDs. Verify by reading the upstream `isConnectorConfigured` source in `node_modules/@elizaos/agent`. If the default case checks `config.apiKey`, it will pass. If it returns `false`, skip wechat in the `it.each` for `isConnectorConfigured` tests by filtering local connectors:
@@ -500,7 +500,7 @@ it("enables wechat plugin when apiKey is configured", () => {
   const params = makeParams({
     config: {
       connectors: {
-        wechat: { apiKey: "wc_live_test" },
+        wechat: { apiKey: "key" },
       },
     },
   });
@@ -512,7 +512,7 @@ it("does not enable wechat when disabled", () => {
   const params = makeParams({
     config: {
       connectors: {
-        wechat: { enabled: false, apiKey: "wc_live_test" },
+        wechat: { enabled: false, apiKey: "key" },
       },
     },
   });
@@ -564,20 +564,20 @@ case "wechat":
 
 ```typescript
 it("detects WeChat with apiKey", () => {
-  expect(isConnectorConfigured("wechat", { apiKey: "wc_live_xxx" })).toBe(true);
+  expect(isConnectorConfigured("wechat", { apiKey: "key" })).toBe(true);
 });
 
 it("detects WeChat with multi-account", () => {
   expect(
     isConnectorConfigured("wechat", {
-      accounts: { main: { enabled: true, apiKey: "wc_live_xxx" } },
+      accounts: { main: { enabled: true, apiKey: "key" } },
     }),
   ).toBe(true);
 });
 
 it("rejects disabled WeChat", () => {
   expect(
-    isConnectorConfigured("wechat", { enabled: false, apiKey: "wc_live_xxx" }),
+    isConnectorConfigured("wechat", { enabled: false, apiKey: "key" }),
   ).toBe(false);
 });
 ```
@@ -695,7 +695,7 @@ describe("WeChat Connector - Configuration", () => {
   it("validates single-account configuration", () => {
     const config = {
       enabled: true,
-      apiKey: "wc_live_xxx",
+      apiKey: "key",
       proxyUrl: "https://proxy.example.com",
       webhookPort: 18790,
       deviceType: "ipad" as const,
@@ -707,8 +707,8 @@ describe("WeChat Connector - Configuration", () => {
   it("validates multi-account configuration", () => {
     const config = {
       accounts: {
-        main: { enabled: true, apiKey: "wc_live_xxx", deviceType: "ipad" as const },
-        secondary: { enabled: true, apiKey: "wc_live_yyy", deviceType: "mac" as const },
+        main: { enabled: true, apiKey: "key", deviceType: "ipad" as const },
+        secondary: { enabled: true, apiKey: "key2", deviceType: "mac" as const },
       },
     };
     expect(Object.keys(config.accounts)).toHaveLength(2);
@@ -764,7 +764,7 @@ Connects to WeChat via a third-party proxy service using personal account login.
 {
   "connectors": {
     "wechat": {
-      "apiKey": "wc_live_xxx",
+      "apiKey": "<key>",
       "proxyUrl": "https://...",
       "webhookPort": 18790,
       "deviceType": "ipad"
