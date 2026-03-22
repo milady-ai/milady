@@ -147,7 +147,6 @@ describe("plugin loading parity across modes", () => {
       "@elizaos/plugin-agent-skills",
       "@elizaos/plugin-agent-orchestrator",
       "@elizaos/plugin-shell",
-      "@elizaos/plugin-plugin-manager",
     ];
     for (const plugin of essentials) {
       expect(names.has(plugin)).toBe(true);

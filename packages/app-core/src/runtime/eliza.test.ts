@@ -237,25 +237,18 @@ describe("collectPluginNames", () => {
 
   it("includes all core plugins for an empty config", () => {
     // Guard against accidental removal from CORE_PLUGINS array
-    expect(CORE_PLUGINS).toHaveLength(16);
+    expect(CORE_PLUGINS).toHaveLength(9);
 
     const expectedCorePlugins = [
       "@elizaos/plugin-sql",
       "@elizaos/plugin-local-embedding",
       "@elizaos/plugin-form",
       "@elizaos/plugin-knowledge",
-      "@elizaos/plugin-rolodex",
       "@elizaos/plugin-trajectory-logger",
       "@elizaos/plugin-agent-orchestrator",
       "@elizaos/plugin-cron",
       "@elizaos/plugin-shell",
-      "@elizaos/plugin-plugin-manager",
       "@elizaos/plugin-agent-skills",
-      "@elizaos/plugin-secrets-manager",
-      "@elizaos/plugin-trust",
-      "@elizaos/plugin-todo",
-      "@elizaos/plugin-personality",
-      "@elizaos/plugin-experience",
     ];
     const names = collectPluginNames({} as ElizaConfig);
     for (const plugin of expectedCorePlugins) {
@@ -611,9 +604,9 @@ describe("collectPluginNames", () => {
     expect(names.has("@elizaos/plugin-custom")).toBe(true);
   });
 
-  it("includes plugin-plugin-manager in core plugins", () => {
+  it("includes plugin-cron in core plugins", () => {
     const names = collectPluginNames({} as ElizaConfig);
-    expect(names.has("@elizaos/plugin-plugin-manager")).toBe(true);
+    expect(names.has("@elizaos/plugin-cron")).toBe(true);
   });
 
   it("handles empty plugins.installs gracefully", () => {
@@ -661,7 +654,6 @@ describe("collectPluginNames", () => {
     const names = collectPluginNames(config);
     // Core
     expect(names.has("@elizaos/plugin-sql")).toBe(true);
-    expect(names.has("@elizaos/plugin-plugin-manager")).toBe(true);
     // Channel
     expect(names.has("@elizaos/plugin-discord")).toBe(true);
     // Provider

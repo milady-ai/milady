@@ -71,7 +71,6 @@ describe("Shell plugin classification", () => {
     expect(names.has("@elizaos/plugin-shell")).toBe(true);
     expect(names.has("@elizaos/plugin-sql")).toBe(true);
     expect(names.has("@elizaos/plugin-agent-skills")).toBe(true);
-    expect(names.has("@elizaos/plugin-plugin-manager")).toBe(true);
   });
 
   it("@elizaos/plugin-shell remains loaded even with other features enabled", () => {

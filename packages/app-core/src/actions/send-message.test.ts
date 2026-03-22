@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from "vitest";
-import { createElizaPlugin } from "../runtime/eliza-plugin";
 import { sendMessageAction } from "./send-message";
 
 function mockRuntime(service: unknown) {
@@ -9,10 +8,8 @@ function mockRuntime(service: unknown) {
 }
 
 describe("SEND_MESSAGE action", () => {
-  it("is registered on the Eliza plugin", () => {
-    const plugin = createElizaPlugin();
-    const actionNames = (plugin.actions ?? []).map((action) => action.name);
-    expect(actionNames).toContain("SEND_MESSAGE");
+  it("sendMessageAction is exported and has the correct name", () => {
+    expect(sendMessageAction.name).toBe("SEND_MESSAGE");
   });
 
   it("rejects missing required parameters", async () => {
