@@ -2,8 +2,6 @@ node_modules
 **/node_modules/
 .env
 dist
-!packages/plugin-wechat/dist/
-!packages/plugin-wechat/dist/**
 storybook-static
 coverage
 tmp/
