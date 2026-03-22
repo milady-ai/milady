@@ -345,9 +345,20 @@ interface PreTradeGateResult {
 | Correlated positions | "You already have 3 positions under this thesis" |
 | Time decay risk | "Market resolves in <24h, limited time to exit if wrong" |
 
+### Open vs Close Distinction
+
+The gate distinguishes between **opening new exposure** (buys into new or existing positions) and **reducing existing exposure** (sells to exit positions). Position closes bypass the following hard blocks:
+- **Thesis invalidated** — the whole point of invalidation is to trigger closes
+- **Daily loss limit** — when the agent is losing, closing positions stops the bleeding
+- **No thesis** — closing a position doesn't need a thesis justification
+
+Position closes still go through: balance sufficiency (need gas), market closed/inactive (can't trade resolved markets). Soft adjustments (spread check, price tightening) still apply to closes to prevent bad fills on illiquid exits.
+
+This is implemented by passing `isClose: true` to `evaluatePreTradeGate` from `closePositionAction`, which skips the exposure-opening checks.
+
 ### Autonomy vs User-Requested
 
-User-requested trades have a softer gate than autonomous trades. If a human says "bet $50 on X," the gate warns but doesn't block (unless it's a hard goal violation). When the agent trades autonomously, the gate is strict — no thesis = no trade, low conviction = reduced size. This prevents the LLM from YOLO-ing the portfolio while respecting human agency.
+User-requested trades have a softer gate than autonomous trades. If a human says "bet $50 on X," the gate warns but doesn't block (unless it's a hard goal violation or daily loss limit). When the agent trades autonomously, the gate is strict — no thesis = no trade, low conviction = reduced size. This prevents the LLM from YOLO-ing the portfolio while respecting human agency.
 
 ---
 
