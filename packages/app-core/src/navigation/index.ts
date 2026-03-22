@@ -50,6 +50,7 @@ export type Tab =
   | "voice"
   | "runtime"
   | "database"
+  | "desktop"
   | "settings"
   | "logs"
   | "security";
@@ -161,6 +162,7 @@ const TAB_PATHS: Record<Tab, string> = {
   voice: "/voice",
   runtime: "/runtime",
   database: "/database",
+  desktop: "/desktop",
   settings: "/settings",
   logs: "/logs",
   security: "/security",

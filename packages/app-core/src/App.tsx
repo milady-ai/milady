@@ -202,7 +202,7 @@ function ViewRouter({
       case "voice":
         return (
           <TabScrollView className="settings-scroll-region">
-            <SettingsView key="settings-voice" initialSection="voice" />
+            <SettingsView key="settings-media" initialSection="media" />
           </TabScrollView>
         );
       case "settings":
@@ -219,6 +219,7 @@ function ViewRouter({
       case "trajectories":
       case "runtime":
       case "database":
+      case "desktop":
       case "lifo":
       case "logs":
       case "security":

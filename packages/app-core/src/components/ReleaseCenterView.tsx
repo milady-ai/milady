@@ -1,16 +1,10 @@
+import { Button, Input } from "@miladyai/ui";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   invokeDesktopBridgeRequest,
   isElectrobunRuntime,
   subscribeDesktopBridgeEvent,
 } from "../bridge";
-import {
-  BuildRuntimeSection,
-  ReleaseNotesSection,
-  ReleaseStatusSection,
-  SessionControlsSection,
-  WgpuSurfaceSection,
-} from "./release-center/sections";
 import {
   normalizeReleaseNotesUrl,
   summarizeError,
@@ -314,158 +308,153 @@ export function ReleaseCenterView() {
     action();
   };
 
+  const appVersion = (updateStatus as AppReleaseStatus | null | undefined)?.currentVersion ?? "—";
+  const desktopVersion = nativeUpdater?.currentVersion ?? "—";
+  const channel = nativeUpdater?.channel ?? "—";
+  const latestVersion = (updateStatus as AppReleaseStatus | null | undefined)?.latestVersion ?? "Current";
+  const lastChecked = (updateStatus as AppReleaseStatus | null | undefined)?.lastCheckAt
+    ? new Date((updateStatus as AppReleaseStatus).lastCheckAt!).toLocaleString()
+    : "Not yet";
+  const updaterStatus = nativeUpdater?.updateReady
+    ? "Update ready"
+    : nativeUpdater?.updateAvailable
+      ? "Update available"
+      : (typeof nativeUpdater?.lastStatus === "string" ? nativeUpdater.lastStatus : "Idle");
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-0">
       {actionError ? (
-        <div className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive mb-3">
           {actionError}
         </div>
       ) : null}
       {actionMessage ? (
-        <div className="rounded-xl border border-ok/30 bg-ok/10 px-4 py-3 text-sm text-ok">
+        <div className="rounded-lg border border-ok/30 bg-ok/10 px-3 py-2 text-xs text-ok mb-3">
           {actionMessage}
         </div>
       ) : null}
 
-      <div className="grid gap-4 xl:grid-cols-2">
-        <ReleaseStatusSection
-          busyAction={busyAction}
-          nativeUpdater={nativeUpdater}
-          updateLoading={updateLoading}
-          updateStatus={updateStatus as AppReleaseStatus | null | undefined}
-          onApplyUpdate={() =>
-            void runAction(
-              "apply-update",
-              applyDesktopUpdate,
-              "Applying downloaded update.",
-            )
-          }
-          onCheckForUpdates={() =>
-            void runAction(
-              "check-updates",
-              checkForDesktopUpdate,
-              "Desktop update check started.",
-            )
-          }
-          onDetach={() =>
-            void runAction(
-              "detach-release",
-              detachReleaseCenter,
-              "Detached release center opened.",
-            )
-          }
-          onRefresh={() =>
-            void runAction(
-              "refresh",
-              refreshReleaseState,
-              "Release status refreshed.",
-            )
-          }
-        />
-
-        <ReleaseNotesSection
-          busyAction={busyAction}
-          nativeUpdater={nativeUpdater}
-          releaseNotesUrl={releaseNotesUrl}
-          releaseNotesWindow={releaseNotesWindow}
-          onOpenWindow={() =>
-            void runAction(
-              "open-release-notes",
-              openReleaseNotesWindow,
-              "Release notes window opened.",
-            )
-          }
-          onReleaseNotesUrlChange={(value) => {
-            setReleaseNotesUrlDirty(true);
-            setReleaseNotesUrl(value);
-          }}
-          onResetUrl={() =>
-            void runAction(
-              "reset-release-url",
-              async () => {
-                setReleaseNotesUrlDirty(false);
-                setReleaseNotesUrl(
-                  normalizeReleaseNotesUrl(nativeUpdater?.baseUrl),
-                );
-              },
-              "Release notes URL reset from updater metadata.",
-            )
-          }
-        />
-
-        <BuildRuntimeSection
-          buildInfo={buildInfo}
-          busyAction={busyAction}
-          dockVisible={dockVisible}
-          nativeUpdater={nativeUpdater}
-          onToggleDock={() =>
-            void runAction(
-              "toggle-dock",
-              toggleDockIcon,
-              dockVisible ? "Dock icon hidden." : "Dock icon shown.",
-            )
-          }
-        />
-
-        <SessionControlsSection
-          busyAction={busyAction}
-          sessionSnapshots={sessionSnapshots}
-          onClearCookies={(partition) =>
-            void runAction(
-              `clear-cookies:${partition}`,
-              () => clearCookiesOnly(partition),
-              `Cleared cookies for ${partition}.`,
-            )
-          }
-          onClearSession={(partition) =>
-            void runAction(
-              `clear-session:${partition}`,
-              () => clearSession(partition),
-              `Cleared storage for ${partition}.`,
-            )
-          }
-        />
+      {/* ── Version info rows ─────────────────────────────────── */}
+      <div className="grid grid-cols-2 gap-x-8 gap-y-2 py-3 text-xs">
+        <div className="flex justify-between">
+          <span className="text-muted">App</span>
+          <span className="font-semibold text-txt">{appVersion}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-muted">Desktop</span>
+          <span className="font-semibold text-txt">{desktopVersion}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-muted">Channel</span>
+          <span className="font-semibold text-txt">{channel}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-muted">Latest</span>
+          <span className="font-semibold text-txt">{latestVersion}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-muted">Last checked</span>
+          <span className="font-semibold text-txt">{lastChecked}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-muted">Status</span>
+          <span className="font-semibold text-txt">{updaterStatus}</span>
+        </div>
       </div>
 
-      <WgpuSurfaceSection
-        webGpuStatus={webGpuStatus}
-        wgpuHidden={wgpuHidden}
-        wgpuPassthrough={wgpuPassthrough}
-        wgpuReady={wgpuReady}
-        wgpuRef={wgpuRef}
-        wgpuTagAvailable={wgpuTagAvailable}
-        wgpuTransparent={wgpuTransparent}
-        onRunTest={() =>
-          runWgpuAction(
-            () => wgpuRef.current?.runTest?.(),
-            "WGPU test requested.",
-          )
-        }
-        onToggleHidden={() => {
-          const next = !wgpuHidden;
-          setWgpuHidden(next);
-          runWgpuAction(
-            () => wgpuRef.current?.toggleHidden?.(next),
-            next ? "WGPU preview hidden." : "WGPU preview shown.",
-          );
-        }}
-        onTogglePassthrough={() => {
-          const next = !wgpuPassthrough;
-          setWgpuPassthrough(next);
-          runWgpuAction(
-            () => wgpuRef.current?.togglePassthrough?.(next),
-            next ? "WGPU passthrough enabled." : "WGPU passthrough disabled.",
-          );
-        }}
-        onToggleTransparent={() => {
-          const next = !wgpuTransparent;
-          setWgpuTransparent(next);
-          runWgpuAction(
-            () => wgpuRef.current?.toggleTransparent?.(next),
-            next ? "WGPU transparency enabled." : "WGPU transparency disabled.",
-          );
-        }}
-      />
+      <hr className="border-border/40" />
+
+      {/* ── Actions ───────────────────────────────────────────── */}
+      <div className="flex flex-wrap gap-2 py-3">
+        <Button
+          size="sm"
+          className="h-8 rounded-lg text-xs"
+          disabled={busyAction === "check-updates" || updateLoading}
+          onClick={() =>
+            void runAction("check-updates", checkForDesktopUpdate, "Desktop update check started.")
+          }
+        >
+          Check for Updates
+        </Button>
+        {nativeUpdater?.updateReady && (
+          <Button
+            size="sm"
+            className="h-8 rounded-lg text-xs"
+            disabled={busyAction === "apply-update"}
+            onClick={() =>
+              void runAction("apply-update", applyDesktopUpdate, "Applying downloaded update.")
+            }
+          >
+            Apply Update
+          </Button>
+        )}
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-8 rounded-lg text-xs"
+          disabled={busyAction === "refresh" || updateLoading}
+          onClick={() =>
+            void runAction("refresh", refreshReleaseState, "Release status refreshed.")
+          }
+        >
+          Refresh
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-8 rounded-lg text-xs"
+          disabled={busyAction === "detach-release"}
+          onClick={() =>
+            void runAction("detach-release", detachReleaseCenter, "Detached release center opened.")
+          }
+        >
+          Open Release Center
+        </Button>
+      </div>
+
+      <hr className="border-border/40" />
+
+      {/* ── Release Notes ─────────────────────────────────────── */}
+      <div className="py-3">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-xs font-semibold text-txt">Release Notes</span>
+        </div>
+        <div className="flex gap-2">
+          <Input
+            type="text"
+            className="h-8 rounded-lg bg-bg text-xs flex-1"
+            value={releaseNotesUrl}
+            onChange={(e) => {
+              setReleaseNotesUrlDirty(true);
+              setReleaseNotesUrl(e.target.value);
+            }}
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 rounded-lg text-xs"
+            disabled={busyAction === "open-release-notes"}
+            onClick={() =>
+              void runAction("open-release-notes", openReleaseNotesWindow, "Release notes window opened.")
+            }
+          >
+            Open
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8 rounded-lg text-xs text-muted"
+            onClick={() =>
+              void runAction("reset-release-url", async () => {
+                setReleaseNotesUrlDirty(false);
+                setReleaseNotesUrl(normalizeReleaseNotesUrl(nativeUpdater?.baseUrl));
+              }, "Release notes URL reset.")
+            }
+          >
+            Reset
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

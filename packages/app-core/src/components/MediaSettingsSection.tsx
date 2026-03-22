@@ -28,8 +28,9 @@ import {
   CloudSourceModeToggle,
 } from "./CloudSourceControls";
 import { ConfigSaveFooter } from "./ConfigSaveFooter";
+import { VoiceConfigView } from "./VoiceConfigView";
 
-type MediaCategory = "image" | "video" | "audio" | "vision";
+type MediaCategory = "image" | "video" | "audio" | "vision" | "voice";
 
 export const DESKTOP_MEDIA_CLICK_AUDIT: readonly DesktopClickAuditItem[] = [
   {
@@ -188,6 +189,7 @@ const CATEGORY_LABELS: Record<MediaCategory, string> = {
   video: "mediasettingssection.VideoGeneration",
   audio: "mediasettingssection.AudioMusic",
   vision: "mediasettingssection.VisionAnalysis",
+  voice: "settings.sections.voice.label",
 };
 
 function getProvidersForCategory(category: MediaCategory): ProviderOption[] {
@@ -200,6 +202,8 @@ function getProvidersForCategory(category: MediaCategory): ProviderOption[] {
       return AUDIO_PROVIDERS;
     case "vision":
       return VISION_PROVIDERS;
+    case "voice":
+      return [];
   }
 }
 
@@ -907,7 +911,7 @@ export function MediaSettingsSection() {
   // Get current category config
   const getCategoryConfig = useCallback(
     (category: MediaCategory) => {
-      return (mediaConfig[category] ?? {}) as Record<string, unknown>;
+      return ((mediaConfig as Record<string, unknown>)[category] ?? {}) as Record<string, unknown>;
     },
     [mediaConfig],
   );
@@ -936,7 +940,7 @@ export function MediaSettingsSection() {
       setMediaConfig((prev) => ({
         ...prev,
         [category]: {
-          ...(prev[category] ?? {}),
+          ...((prev as Record<string, unknown>)[category] as Record<string, unknown> ?? {}),
           ...updates,
         },
       }));
@@ -973,6 +977,7 @@ export function MediaSettingsSection() {
   // Check if provider is configured
   const isProviderConfigured = useCallback(
     (category: MediaCategory): boolean => {
+      if (category === "voice") return true;
       const mode = getMode(category);
       if (mode === "cloud") return elizaCloudConnected;
 
@@ -997,17 +1002,18 @@ export function MediaSettingsSection() {
     );
   }
 
-  const currentMode = getMode(activeTab);
-  const currentProvider = getProvider(activeTab);
-  const providers = getProvidersForCategory(activeTab);
-  const apiKeyField = getApiKeyField(activeTab, currentProvider);
+  const isVoiceTab = activeTab === "voice";
+  const currentMode = isVoiceTab ? ("cloud" as MediaMode) : getMode(activeTab);
+  const currentProvider = isVoiceTab ? "cloud" : getProvider(activeTab);
+  const providers = isVoiceTab ? [] : getProvidersForCategory(activeTab);
+  const apiKeyField = isVoiceTab ? null : getApiKeyField(activeTab, currentProvider);
   const configured = isProviderConfigured(activeTab);
 
   return (
     <div className="flex flex-col gap-4">
       {/* Category tabs */}
       <div className="flex gap-1 rounded-xl border border-border bg-card/50 p-1 shrink-0">
-        {(["image", "video", "audio", "vision"] as MediaCategory[]).map(
+        {(["image", "video", "audio", "vision", "voice"] as MediaCategory[]).map(
           (cat) => {
             const active = activeTab === cat;
             const catConfigured = isProviderConfigured(cat);
@@ -1035,6 +1041,11 @@ export function MediaSettingsSection() {
         )}
       </div>
 
+      {/* Voice tab — render VoiceConfigView instead of media config */}
+      {activeTab === "voice" ? (
+        <VoiceConfigView />
+      ) : (
+      <>
       {/* Mode toggle (cloud vs own-key) */}
       <div className="flex items-center gap-3">
         <span className="text-xs font-semibold text-[var(--muted)]">
@@ -1517,8 +1528,6 @@ export function MediaSettingsSection() {
         </div>
       )}
 
-      <DesktopMediaControlPanel />
-
       <ConfigSaveFooter
         dirty={dirty}
         saving={saving}
@@ -1526,6 +1535,8 @@ export function MediaSettingsSection() {
         saveSuccess={saveSuccess}
         onSave={() => void handleSave()}
       />
+      </>
+      )}
     </div>
   );
 }

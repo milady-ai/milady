@@ -23,6 +23,7 @@ import type { Tab } from "@miladyai/app-core/navigation";
 import { useApp } from "@miladyai/app-core/state";
 import React, { type ReactNode, useState } from "react";
 import { CustomActionsView } from "./CustomActionsView";
+import { DesktopWorkspaceSection } from "./DesktopWorkspaceSection";
 import { FineTuningView } from "./FineTuningView";
 import { LifoSandboxView } from "./LifoSandboxView";
 import { TrajectoriesView } from "./TrajectoriesView";
@@ -36,6 +37,7 @@ type SubTab =
   | "trajectories"
   | "runtime"
   | "database"
+  | "desktop"
   | "lifo"
   | "logs";
 
@@ -66,6 +68,11 @@ const SUB_TABS: Array<{ id: SubTab; label: string; description: string }> = [
     id: "database",
     label: "Database",
     description: "Tables, media, and vector browser",
+  },
+  {
+    id: "desktop",
+    label: "Desktop",
+    description: "Native runtime diagnostics, detached windows, file dialogs, clipboard, and shell controls",
   },
   // {
   //   id: "lifo",
@@ -168,6 +175,23 @@ const SUBTAB_ICONS: Record<string, ReactNode> = {
       <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
     </svg>
   ),
+  desktop: (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+      <line x1="8" y1="21" x2="16" y2="21" />
+      <line x1="12" y1="17" x2="12" y2="21" />
+    </svg>
+  ),
   lifo: (
     <svg
       width="20"
@@ -235,6 +259,8 @@ function mapTabToSubTab(tab: Tab): SubTab {
       return "runtime";
     case "database":
       return "database";
+    case "desktop":
+      return "desktop";
     case "lifo":
       return "lifo";
     case "logs":
@@ -284,6 +310,8 @@ export function AdvancedPageView({ inModal }: { inModal?: boolean } = {}) {
         return <RuntimeView />;
       case "database":
         return <DatabasePageView />;
+      case "desktop":
+        return <DesktopWorkspaceSection />;
       case "lifo":
         return <LifoSandboxView />;
       case "logs":

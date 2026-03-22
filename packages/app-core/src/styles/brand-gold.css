@@ -135,6 +135,9 @@
   --border-subtle: #1c1c24;
   --input: var(--gunmetal);
 
+  --accent-foreground: #e8e8ec;
+  --primary-foreground: #e8e8ec;
+
   --header-bar-bg: var(--jet-black);
   --header-bar-fg: #e8e8ec;
   --section-bar-bg: var(--rich-black);
