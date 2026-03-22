@@ -26,6 +26,7 @@ const COMPANION_ZOOM_STORAGE_KEY = "milady.companion.zoom.v1";
 const DEFAULT_COMPANION_ZOOM = 0.95;
 const CAMERA_DRAG_IGNORE_SELECTOR =
   'button, a, label, input, textarea, select, option, [role="button"], [role="listbox"], [role="tab"], [aria-expanded], [aria-haspopup], [contenteditable="true"], [data-no-camera-drag="true"]';
+const CAMERA_ZOOM_IGNORE_SELECTOR = '[data-no-camera-zoom="true"]';
 const NON_TEXT_INPUT_TYPES = new Set([
   "button",
   "checkbox",
@@ -80,6 +81,12 @@ function hasFocusedTextEntry(): boolean {
 function shouldIgnoreCameraDrag(target: EventTarget | null): boolean {
   return target instanceof Element
     ? Boolean(target.closest(CAMERA_DRAG_IGNORE_SELECTOR))
+    : false;
+}
+
+function shouldIgnoreCameraZoom(target: EventTarget | null): boolean {
+  return target instanceof Element
+    ? Boolean(target.closest(CAMERA_ZOOM_IGNORE_SELECTOR))
     : false;
 }
 
@@ -310,6 +317,9 @@ function CompanionSceneSurface({
   const handleRootWheelCapture = useCallback(
     (event: ReactWheelEvent<HTMLDivElement>) => {
       if (!active || !interactive) return;
+      if (shouldIgnoreCameraZoom(event.target)) {
+        return;
+      }
       if (hasFocusedTextEntry()) {
         if (event.ctrlKey) {
           event.preventDefault();

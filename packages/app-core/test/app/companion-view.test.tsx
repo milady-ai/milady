@@ -577,6 +577,50 @@ describe("CompanionView", () => {
     expect(preventDefault).toHaveBeenCalledTimes(1);
   });
 
+  it("does not zoom the companion camera while the transcript handles wheel scroll", async () => {
+    mockUseApp.mockReturnValue(createContext());
+
+    let tree: TestRenderer.ReactTestRenderer | null = null;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(CompanionView));
+    });
+
+    const setCompanionZoomNormalized = vi.fn();
+    await act(async () => {
+      const ready = viewerPropsRef.current?.onEngineReady as
+        | ((value: unknown) => void)
+        | undefined;
+      ready?.({
+        setPaused: vi.fn(),
+        setCameraAnimation: vi.fn(),
+        setPointerParallaxEnabled: vi.fn(),
+        setDragOrbitTarget: vi.fn(),
+        resetDragOrbit: vi.fn(),
+        setCompanionZoomNormalized,
+      });
+    });
+    setCompanionZoomNormalized.mockClear();
+
+    const root = tree?.root.findByProps({
+      "data-testid": "companion-root",
+    });
+    const transcript = document.createElement("div");
+    transcript.setAttribute("data-no-camera-zoom", "true");
+    const preventDefault = vi.fn();
+
+    await act(async () => {
+      root?.props.onWheelCapture({
+        target: transcript,
+        deltaY: 120,
+        deltaMode: 0,
+        preventDefault,
+      });
+    });
+
+    expect(setCompanionZoomNormalized).not.toHaveBeenCalled();
+    expect(preventDefault).not.toHaveBeenCalled();
+  });
+
   it("zooms the companion camera from pinch input", async () => {
     mockUseApp.mockReturnValue(createContext());
 

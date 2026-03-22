@@ -1,6 +1,7 @@
 import type { WebviewTagElement } from "electrobun/view";
 import {
   type FormEvent,
+  createElement,
   useEffect,
   useEffectEvent,
   useRef,
@@ -15,6 +16,7 @@ import {
 
 export function BrowserSurfaceWindow() {
   const webviewRef = useRef<WebviewTagElement | null>(null);
+  const [webviewTagAvailable, setWebviewTagAvailable] = useState(false);
   const [addressValue, setAddressValue] = useState(DEFAULT_BROWSER_HOME);
   const [currentUrl, setCurrentUrl] = useState(DEFAULT_BROWSER_HOME);
   const [canGoBack, setCanGoBack] = useState(false);
@@ -53,8 +55,22 @@ export function BrowserSurfaceWindow() {
   });
 
   useEffect(() => {
+    setWebviewTagAvailable(
+      typeof window !== "undefined" &&
+        Boolean(window.customElements.get("electrobun-webview")),
+    );
+  }, []);
+
+  useEffect(() => {
     const webview = webviewRef.current;
-    if (!webview) return;
+    if (
+      !webviewTagAvailable ||
+      !webview ||
+      typeof webview.on !== "function" ||
+      typeof webview.off !== "function"
+    ) {
+      return;
+    }
 
     const handleNavigation = (event: any) => {
       const nextUrl = readBrowserNavigationUrl(event.detail);
@@ -91,7 +107,12 @@ export function BrowserSurfaceWindow() {
       webview.off("dom-ready", handleDomReady);
       webview.off("new-window-open", handleNewWindowOpen);
     };
-  }, []);
+  }, [
+    applyNavigationUrl,
+    navigateTo,
+    syncNavigationState,
+    webviewTagAvailable,
+  ]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -174,16 +195,20 @@ export function BrowserSurfaceWindow() {
       </div>
 
       <div className="browser-surface__viewport">
-        {/* @ts-expect-error — electrobun-webview is an Electrobun custom element */}
-        <electrobun-webview
-          className="browser-surface__webview"
-          partition="milady-browser"
-          ref={(node: HTMLElement | null) => {
-            webviewRef.current = node as WebviewTagElement | null;
-          }}
-          sandbox=""
-          src={DEFAULT_BROWSER_HOME}
-        />
+        {webviewTagAvailable ? (
+          createElement("electrobun-webview", {
+            className: "browser-surface__webview",
+            partition: "milady-browser",
+            ref: (node: HTMLElement | null) => {
+              webviewRef.current = node as WebviewTagElement | null;
+            },
+            src: DEFAULT_BROWSER_HOME,
+          })
+        ) : (
+          <div className="flex flex-1 items-center justify-center bg-black/5 px-6 text-center text-sm text-muted">
+            Browser surface is only available in the Electrobun desktop runtime.
+          </div>
+        )}
       </div>
     </div>
   );
