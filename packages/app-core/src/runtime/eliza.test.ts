@@ -769,7 +769,6 @@ describe("collectPluginNames", () => {
 
   it("CHANNEL_PLUGIN_MAP values match CONNECTOR_PLUGINS for every connector", () => {
     for (const id of Object.keys(CHANNEL_PLUGIN_MAP)) {
-      if (MILADY_LOCAL_CONNECTOR_IDS.includes(id)) continue;
       expect(CHANNEL_PLUGIN_MAP[id]).toBe(CONNECTOR_PLUGINS[id]);
     }
   });

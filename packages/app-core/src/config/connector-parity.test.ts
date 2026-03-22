@@ -57,10 +57,9 @@ describe("connector map parity", () => {
     const runtimeIds = sorted(Object.keys(CHANNEL_PLUGIN_MAP));
     const schemaIds = sorted(CONNECTOR_IDS);
 
-    // Runtime = upstream + local overrides
-    expect(runtimeIds).toEqual(sorted([...autoEnableIds, ...MILADY_LOCAL_CONNECTORS]));
-    // Schema = upstream + local
-    expect(schemaIds).toEqual(sorted([...autoEnableIds, ...MILADY_LOCAL_CONNECTORS]));
+    // All three maps should have the same connector IDs
+    expect(runtimeIds).toEqual(autoEnableIds);
+    expect(schemaIds).toEqual(autoEnableIds);
   });
 
   it("keeps runtime and auto-enable package mappings aligned", () => {
@@ -73,7 +72,6 @@ describe("connector map parity", () => {
     for (const [connectorId, pluginName] of Object.entries(
       CHANNEL_PLUGIN_MAP,
     )) {
-      if (MILADY_LOCAL_CONNECTORS.has(connectorId)) continue; // local-only, not in upstream
       expect(CONNECTOR_PLUGINS[connectorId]).toBe(pluginName);
     }
   });
@@ -84,11 +82,10 @@ describe("connector map parity", () => {
   });
 
   it("has identical count across all three maps", () => {
-    const upstreamCount = 19;
-    const localCount = MILADY_LOCAL_CONNECTORS.size;
-    expect(CONNECTOR_IDS).toHaveLength(upstreamCount + localCount);
-    expect(Object.keys(CONNECTOR_PLUGINS)).toHaveLength(upstreamCount);
-    expect(Object.keys(CHANNEL_PLUGIN_MAP)).toHaveLength(upstreamCount + localCount);
+    const totalCount = 20; // 19 upstream + 1 Milady-local (wechat)
+    expect(CONNECTOR_IDS).toHaveLength(totalCount);
+    expect(Object.keys(CONNECTOR_PLUGINS)).toHaveLength(totalCount);
+    expect(Object.keys(CHANNEL_PLUGIN_MAP)).toHaveLength(totalCount);
   });
 
   it("uses valid package name prefixes for all plugin mappings", () => {
