@@ -1,7 +1,7 @@
 # Polymarket Autonomous Trading Layer — Design Spec
 
 **Date:** 2026-03-22
-**Status:** Draft
+**Status:** Review-corrected draft (spec review iteration 1 applied)
 **Scope:** Add fully autonomous trading capability to the Polymarket plugin, enabling the agent to develop theses, set portfolio goals, proactively discover markets, make independent trading decisions, and learn from outcomes.
 
 ---
@@ -16,9 +16,8 @@ The elizaOS runtime provides:
 - **AutonomyService** — 30s thinking loop, calls providers → LLM → actions → evaluators
 - **PlanningService** — Multi-step tactical plan creation and execution
 - **MemoryService** — Long-term memory extraction (episodic, semantic, procedural)
-- **TaskService** — Background task workers (used by research already)
+- **TaskService** — Background task workers with `metadata.updateInterval` for recurring execution (used by research already)
 - **AwarenessRegistry** — Runtime self-awareness injected into LLM context
-- **Cron plugin** — Scheduled recurring tasks
 
 ### The Gap
 
@@ -135,6 +134,7 @@ interface TradeJournalEntry {
   side: "buy" | "sell";
   entryPrice: number;
   entrySize: number;
+  entryTimestamp: number;          // Actual fill timestamp (may differ from createdAt)
   exitPrice?: number;
   exitTimestamp?: number;
   realizedPnl?: number;
@@ -163,7 +163,7 @@ interface ConvictionUpdate {
 
 ```typescript
 interface CalibrationRecord {
-  convictionBucket: number;       // 50-60, 60-70, 70-80, 80-90, 90-100
+  convictionBucket: number;       // Lower bound of bucket: 50, 60, 70, 80, 90 (represents 50-59, 60-69, etc.)
   totalTrades: number;
   wins: number;
   expectedWinRate: number;        // Midpoint of bucket
@@ -174,9 +174,15 @@ interface CalibrationRecord {
 
 ### Storage
 
-All structures use the elizaOS long-term memory system:
+All structures use the elizaOS long-term memory system. The `LongTermMemory` interface has `content: string` and `metadata?: Record<string, JsonValue>`. Serialization strategy:
+
+- **`content` field:** Human-readable summary text (used for embedding and vector search). For a thesis: the thesis statement + category + conviction. For a journal entry: "BUY 500 YES @ $0.62 on 'AI regulation' thesis, conviction 82."
+- **`metadata` field:** Full structured data as JSON (the complete interface object). All queries by ID, thesisId, tradeId, status, etc. operate on metadata fields.
+- **Lookup:** Direct queries (by ID, by status) use metadata filtering. Similarity queries ("do I have a thesis about this?") use vector search on the embedded content text.
+
+Memory types:
 - **Theses and goals:** `SEMANTIC` type — embedded for vector search (find related theses by topic)
-- **Journal entries and conviction updates:** `EPISODIC` type — chronological, queryable by tradeId/thesisId
+- **Journal entries and conviction updates:** `EPISODIC` type — chronological, queryable by tradeId/thesisId via metadata
 - **Calibration records:** `SEMANTIC` type — rolling, recalculated during reflection
 - **Lessons learned:** `PROCEDURAL` type — surfaced in future reflections and thesis formation
 
@@ -252,18 +258,34 @@ Conviction 70-80: 6 trades, 42% win rate (expected 75%) — overconfident ⚠️
 - **Goal violations surface as warnings.** LLM sees constraint proximity before proposing trades, not after.
 - **Recent outcomes with lessons.** Keeps the feedback loop tight — agent sees its own past reasoning and whether it worked.
 - **Calibration data.** Agent sees its own accuracy history to self-correct overconfidence.
+- **Cached output.** Provider output is cached with a 5-minute TTL to avoid hitting API rate limits on every 30s autonomy tick. The cache is invalidated immediately when a trade executes or a thesis changes (event-driven invalidation via the stores).
 
 ---
 
 ## 5. Pre-Trade Gate (S3)
 
-Replaces the advisory-only `tradeRiskEvaluator` with a blocking validation layer. Hooks into `placeOrderAction` and `closePositionAction` after LLM param extraction, before SDK order submission.
+Replaces the advisory-only `tradeRiskEvaluator` with a blocking validation layer. **Not** an elizaOS evaluator or hook — it's a pure function exported from `autonomous/gates/preTrade.ts` and called directly inside the existing action handlers.
+
+### Implementation
+
+The pre-trade gate is a stateless function that reads from stores:
+
+```typescript
+// autonomous/gates/preTrade.ts
+export async function evaluatePreTradeGate(params: PreTradeGateParams): Promise<PreTradeGateResult>
+```
+
+It is **not** a service or singleton — it's imported and called. It reads ThesisStore, GoalStore, and PolymarketService cache to make its assessment, but holds no state of its own.
 
 ### Integration Point
 
+`placeOrderAction.ts` and `closePositionAction.ts` are **directly modified** to import and call `evaluatePreTradeGate` after LLM param extraction, before SDK order submission:
+
 ```typescript
 // In placeOrderAction handler, after param extraction:
-const gateResult = await preTradeGate.evaluate({
+import { evaluatePreTradeGate } from "../autonomous/gates/preTrade";
+
+const gateResult = await evaluatePreTradeGate({
   runtime, tokenId, side, price, size, dollarAmount, orderType,
   thesisId,       // Required for autonomous trades, optional for user-requested
   isAutonomous,   // true = stricter rules
@@ -273,9 +295,9 @@ if (!gateResult.allowed) {
   // Block trade, write reason to memory, inform callback
   return;
 }
-// Apply adjustments
-if (gateResult.adjustedSize) size = gateResult.adjustedSize;
-if (gateResult.adjustedPrice) price = gateResult.adjustedPrice;
+// Apply adjustments (only for autonomous trades — user-requested trades keep original params)
+if (isAutonomous && gateResult.adjustedSize) size = gateResult.adjustedSize;
+if (isAutonomous && gateResult.adjustedPrice) price = gateResult.adjustedPrice;
 // Proceed with existing order flow...
 ```
 
@@ -297,11 +319,12 @@ interface PreTradeGateResult {
 | Check | Rule | Rationale |
 |---|---|---|
 | Balance sufficiency | `orderCost > availableBalance * 0.95` | Never spend last 5% — need gas and flexibility |
+| Daily loss limit breached | Realized + unrealized losses today exceed `POLYMARKET_MAX_DAILY_LOSS_USD` | Hard circuit breaker — not a goal the LLM can override or the agent can modify. Halts ALL autonomous trading for the rest of the calendar day (UTC). User-requested trades still warn but don't block. |
 | No thesis | Autonomous trades must have a `thesisId` | Prevents random LLM-driven gambling |
 | Thesis invalidated | `thesis.status === "invalidated"` | Don't add to positions on dead theses |
 | Hard goal violation | Trade would breach a `priority: "hard"` goal | Goals are constraints, not suggestions |
 | Market closed/inactive | Market is closed or resolved | Can't trade resolved markets |
-| Duplicate position | Already holds >0 shares AND no thesis-based reason to add | Prevents accidental doubling |
+| Duplicate position (autonomous only) | Already holds >0 shares of this token AND trade has a different thesisId than existing position's thesis, or no thesisId | Prevents accidental doubling across unrelated theses. Adding to a position under the same thesis is allowed. |
 
 ### Soft Adjustments (trade modified)
 
@@ -372,6 +395,13 @@ Key design choice: Agent must state `invalidationCriteria` upfront. Forces pre-c
 **Stage 6: Update.** Conviction changes are logged with full audit trail. Agent can see its own conviction trajectory over time.
 
 **Stage 7: Retirement.** Thesis moves to `retired` (played out, no more markets) or `invalidated` (invalidation criterion met). Positions under invalidated theses are closed. Lessons extracted first.
+
+**Position close failure handling:** When thesis invalidation triggers position closes, each close is attempted independently. If a close fails (illiquid market, API error, market already resolved):
+1. The position is marked `close_pending` in the journal with the error reason.
+2. The thesis still moves to `invalidated` status (don't keep a dead thesis alive because of a stuck position).
+3. The failed close is pushed to the decision queue as a `critical` alert for retry on the next autonomy tick.
+4. After 3 failed close attempts, the position alert escalates to the user via callback message: "Unable to close position on [market] — manual intervention may be needed."
+5. The pre-trade gate blocks any new trades under an invalidated thesis regardless of whether existing positions have been closed.
 
 ### Thesis Store Interface
 
@@ -524,14 +554,15 @@ Respects existing `TokenBucketRateLimiter`. Runs at low priority — user-initia
 
 ### Scheduling
 
-Registered as recurring task during plugin init:
+Registered as a recurring task during plugin init via the `Task` interface's `metadata.updateInterval`:
 
 ```typescript
 runtime.registerTaskWorker(marketScannerWorker);
 await runtime.createTask({
   name: "POLYMARKET_MARKET_SCANNER",
-  recurring: true,
-  intervalMs: 2 * 60 * 60 * 1000, // 2 hours
+  metadata: {
+    updateInterval: 2 * 60 * 60 * 1000, // 2 hours
+  },
 });
 ```
 
@@ -623,6 +654,8 @@ Each phase is independently useful and testable.
 - Configuration keys for all thresholds
 
 **Value:** Agent stops being blind in autonomy loop. Trades have guardrails. Foundation for everything else.
+
+**Note on standalone viability:** In Phase 1, no thesis formation exists yet (that's Phase 2). The pre-trade gate's "no thesis = no autonomous trade" rule means Phase 1 **effectively blocks all autonomous trading** — which is intentional and correct. Phase 1 makes the agent portfolio-aware and adds guardrails to user-requested trades. Autonomous trading activates when Phase 2 lands the thesis system.
 
 ### Phase 2: Thesis System + Strategy Evaluator
 
@@ -719,15 +752,39 @@ New environment variables (all optional with sensible defaults):
 | `POLYMARKET_MAX_RESEARCH_PER_SCAN` | `2` | Max research triggers per scan |
 | `POLYMARKET_SCAN_TIMEOUT_MS` | `300000` | Scanner timeout (5m) |
 | `POLYMARKET_BALANCE_RESERVE_PCT` | `5` | % of balance to always reserve |
+| `POLYMARKET_MAX_DAILY_LOSS_USD` | `50` | Hard daily loss limit (realized + unrealized). Halts autonomous trading for the day when breached. Not overridable by the agent. |
 
 ---
 
-## 13. Risks and Mitigations
+## 13. Cross-Cutting Concerns
+
+### LLM Output Validation
+
+All LLM structured outputs (thesis formation S4, reflection S5, autonomous decisions S7) **must** be validated with Zod schemas before use. This inherits the C5 fix pattern from the Phase 1 audit. Each structured output type gets a corresponding Zod schema in `autonomous/types.ts`. If validation fails, the output is discarded and logged — the agent skips the action rather than propagating malformed data.
+
+### Decision Queue Bounds
+
+The decision queue (`decisionQueue.ts`) is an in-memory ring buffer:
+- **Max depth:** 100 items. Oldest items evicted when full.
+- **Staleness:** Items older than 6 hours are auto-expired on read (market conditions change).
+- **Persistence:** Not persisted across restarts. Scanner re-populates on next cycle. This is acceptable because stale opportunities shouldn't survive a restart anyway.
+- **Urgency queue:** Critical alerts have a separate 20-item buffer that is never evicted by age (only by capacity). Critical items are processed first.
+
+### Concurrency
+
+The autonomy loop (30s tick), market scanner (2h), and strategy evaluator (6h) all read and write thesis/goal/journal stores. Concurrency model:
+- **Stores use optimistic concurrency** — each record has an `updatedAt` timestamp. Writers check-and-set: if `updatedAt` changed since read, the write is retried (max 3 retries).
+- **Decision queue is append-only from scanner, consume-only from decision action** — no concurrent writers beyond the scanner.
+- **Reflection holds a short lock on thesis store** — during conviction batch updates (typically <100ms), other writers queue. This prevents the decision action from trading on a thesis whose conviction is mid-update.
+
+---
+
+## 14. Risks and Mitigations
 
 | Risk | Mitigation |
 |---|---|
 | LLM hallucinated thesis leads to bad trades | Pre-trade gate requires thesis with invalidation criteria. Conviction-based sizing limits exposure on new theses. |
-| Runaway trading in volatile markets | Cadence control (min 15m between trades). Kill switch. Max drawdown goal as hard constraint. |
+| Runaway trading in volatile markets | Cadence control (min 15m between trades). Kill switch. Hard daily loss limit (`POLYMARKET_MAX_DAILY_LOSS_USD`) halts all autonomous trading when breached — not a soft goal, cannot be overridden by the agent. |
 | Research costs (OpenAI) accumulate | Max 2 research triggers per scan. Scanner budget configurable. |
 | Thesis sprawl (too many unfocused theses) | Max active theses cap. Contradiction detection. Conviction decay auto-flagging. |
 | Agent becomes overconfident | Calibration tracking discounts conviction for position sizing. Self-assessment in reflection. |
