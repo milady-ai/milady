@@ -33,6 +33,9 @@ import {
   validateMinOrderSize,
   validateBalance,
 } from "../utils/preTradeChecks";
+import { evaluatePreTradeGate } from "../autonomous/gates/preTrade";
+import { storesInitialized, getThesisStore, getGoalStore, getTradeJournal } from "../autonomous/stores/registry";
+import { MAX_DAILY_LOSS_USD_DEFAULT } from "../constants";
 
 interface PlaceOrderParams {
   tokenId?: string;
@@ -760,6 +763,58 @@ export const placeOrderAction: Action = {
     if (!balanceCheck.valid) {
       await sendError(callback, balanceCheck.reason!, "Pre-trade validation");
       return { success: false, text: balanceCheck.reason!, error: "insufficient_balance" };
+    }
+
+    // ── Autonomous pre-trade gate ──────────────────────────────────
+    // Uses singleton stores from registry (initialized during plugin init).
+    // For user-requested trades, the gate only warns.
+    // For autonomous trades, it can block or adjust.
+    const isAutonomous = Boolean((message.content as Record<string, unknown>)?.autonomous);
+    const thesisId = (message.content as Record<string, unknown>)?.thesisId as string | undefined;
+
+    if (storesInitialized()) {
+      try {
+        const maxDailyLoss = parseFloat(
+          runtime.getSetting("POLYMARKET_MAX_DAILY_LOSS_USD") || String(MAX_DAILY_LOSS_USD_DEFAULT)
+        );
+
+        const gateResult = await evaluatePreTradeGate(
+          {
+            tokenId, side: side.toLowerCase() as "buy" | "sell",
+            price, size, dollarAmount, orderType,
+            thesisId, isAutonomous, isClose: false,
+          },
+          { thesisStore: getThesisStore(), goalStore: getGoalStore(), tradeJournal: getTradeJournal() },
+          {
+            usdcBalance: usdcBalance ?? 0,
+            dailyLossUsd: getTradeJournal().getDailyRealizedPnl(),
+            maxDailyLossUsd: maxDailyLoss,
+            unrealizedPnl: 0, // TODO: compute from positions in Phase 2
+          }
+        );
+
+        if (!gateResult.allowed) {
+          runtime.logger.warn(`[placeOrderAction] Pre-trade gate blocked: ${gateResult.reason}`);
+          await sendError(callback, gateResult.reason!, "Pre-trade gate");
+          return { success: false, text: gateResult.reason!, error: "gate_blocked" };
+        }
+
+        if (gateResult.warnings.length > 0) {
+          for (const w of gateResult.warnings) {
+            runtime.logger.warn(`[placeOrderAction] Gate warning: ${w}`);
+          }
+        }
+
+        if (isAutonomous && gateResult.adjustedSize && gateResult.adjustedSize !== size) {
+          runtime.logger.info(
+            `[placeOrderAction] Gate adjusted size: ${size} → ${gateResult.adjustedSize} (conviction-based)`
+          );
+          size = gateResult.adjustedSize;
+        }
+      } catch (gateError) {
+        // Gate failure should not block user trades — log and continue
+        runtime.logger.warn(`[placeOrderAction] Pre-trade gate error: ${gateError}`);
+      }
     }
 
     // Log order details before submission
