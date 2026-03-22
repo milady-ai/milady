@@ -27,14 +27,14 @@ import path from "node:path";
 import process from "node:process";
 import { ethers } from "ethers";
 import JSON5 from "json5";
+import { CAPACITOR_PLUGIN_NAMES } from "../apps/app/scripts/capacitor-plugin-names.mjs";
 import { capacitorPluginsBuildNeeded } from "./lib/capacitor-plugin-build-needed.mjs";
-import { signalSpawnedProcessTree } from "./lib/kill-process-tree.mjs";
 import {
   coerceBoolean,
   resolveOnchainPreference,
 } from "./lib/dev-ui-onchain.mjs";
 import { buildVisionDepsFailureMessage } from "./lib/dev-ui-vision.mjs";
-import { CAPACITOR_PLUGIN_NAMES } from "../apps/app/scripts/capacitor-plugin-names.mjs";
+import { signalSpawnedProcessTree } from "./lib/kill-process-tree.mjs";
 
 const API_PORT = Number(process.env.MILADY_API_PORT) || 31337;
 
@@ -1107,7 +1107,9 @@ function startVite() {
           forcePlugins ||
           capacitorPluginsBuildNeeded(pluginsDir, CAPACITOR_PLUGIN_NAMES)
         ) {
-          console.log(`  ${green(logPrefix)} Building plugins for ${appDir}...`);
+          console.log(
+            `  ${green(logPrefix)} Building plugins for ${appDir}...`,
+          );
           execSync(hasBun ? "bun run plugin:build" : "npm run plugin:build", {
             cwd: appAbs,
             stdio: "inherit",

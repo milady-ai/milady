@@ -40,9 +40,8 @@ import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { createConnection } from "node:net";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-
-import { killUiListenPort } from "./lib/kill-ui-listen-port.mjs";
 import { signalSpawnedProcessTree } from "./lib/kill-process-tree.mjs";
+import { killUiListenPort } from "./lib/kill-ui-listen-port.mjs";
 import { viteRendererBuildNeeded } from "./lib/vite-renderer-dist-stale.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -192,10 +191,16 @@ async function launch() {
   );
 
   if (!skipApi) {
-    pushChild("api", "bun", ["--watch", "packages/app-core/src/runtime/dev-server.ts"], repoRoot, {
-      ELIZA_PORT: apiPort,
-      ELIZA_HEADLESS: "1",
-    });
+    pushChild(
+      "api",
+      "bun",
+      ["--watch", "packages/app-core/src/runtime/dev-server.ts"],
+      repoRoot,
+      {
+        ELIZA_PORT: apiPort,
+        ELIZA_HEADLESS: "1",
+      },
+    );
   }
 
   if (viteRollupWatch) {

@@ -112,10 +112,7 @@ export function viteRendererBuildNeeded(appDir, repoRoot) {
     for (const ent of pluginDirs) {
       if (!ent.isDirectory()) continue;
       const pluginSrc = path.join(pluginsRoot, ent.name, "src");
-      if (
-        fs.existsSync(pluginSrc) &&
-        maxMtimeUnder(pluginSrc) > distMtime
-      ) {
+      if (fs.existsSync(pluginSrc) && maxMtimeUnder(pluginSrc) > distMtime) {
         return true;
       }
     }

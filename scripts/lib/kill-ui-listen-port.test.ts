@@ -22,9 +22,9 @@ describe("parseNetstatListeningPids", () => {
   TCP    127.0.0.1:2138         0.0.0.0:0              LISTENING       111
   TCP    [::1]:2138             [::]:0                 LISTENING       222
 `;
-    expect(parseNetstatListeningPids(sample, 2138).sort((a, b) => a - b)).toEqual(
-      [111, 222],
-    );
+    expect(
+      parseNetstatListeningPids(sample, 2138).sort((a, b) => a - b),
+    ).toEqual([111, 222]);
   });
 
   it("dedupes the same PID", () => {

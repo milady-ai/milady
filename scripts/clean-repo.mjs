@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { spawnSync } from "node:child_process";
 /**
  * Remove build outputs and tool caches so the next `bun run build` / dev run is cold.
  *
@@ -12,7 +13,6 @@
 import { existsSync, readdirSync, rmSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { spawnSync } from "node:child_process";
 
 import { CAPACITOR_PLUGIN_NAMES } from "../apps/app/scripts/capacitor-plugin-names.mjs";
 
@@ -27,7 +27,9 @@ function rmPath(label, abs) {
     rmSync(abs, { recursive: true, force: true });
     console.log(`  removed ${label}`);
   } catch (err) {
-    console.warn(`  skip ${label}: ${err instanceof Error ? err.message : err}`);
+    console.warn(
+      `  skip ${label}: ${err instanceof Error ? err.message : err}`,
+    );
   }
 }
 
@@ -37,7 +39,9 @@ function rmFile(label, abs) {
     rmSync(abs, { force: true });
     console.log(`  removed ${label}`);
   } catch (err) {
-    console.warn(`  skip ${label}: ${err instanceof Error ? err.message : err}`);
+    console.warn(
+      `  skip ${label}: ${err instanceof Error ? err.message : err}`,
+    );
   }
 }
 
@@ -61,7 +65,10 @@ function rmPluginDists() {
   const pluginsRoot = path.join(root, "apps", "app", "plugins");
   if (!existsSync(pluginsRoot)) return;
   for (const name of CAPACITOR_PLUGIN_NAMES) {
-    rmPath(`apps/app/plugins/${name}/dist`, path.join(pluginsRoot, name, "dist"));
+    rmPath(
+      `apps/app/plugins/${name}/dist`,
+      path.join(pluginsRoot, name, "dist"),
+    );
   }
   // Any extra plugin dirs (not in canonical list) still get dist removed
   try {
@@ -88,7 +95,10 @@ function main() {
   rmPath("apps/homepage/.vite", path.join(root, "apps", "homepage", ".vite"));
 
   rmPath("packages/ui/dist", path.join(root, "packages", "ui", "dist"));
-  rmPath("packages/app-core/dist", path.join(root, "packages", "app-core", "dist"));
+  rmPath(
+    "packages/app-core/dist",
+    path.join(root, "packages", "app-core", "dist"),
+  );
 
   rmPluginDists();
 
@@ -100,20 +110,44 @@ function main() {
   rmPath("test/contracts/out", path.join(root, "test", "contracts", "out"));
   rmPath("test/contracts/cache", path.join(root, "test", "contracts", "cache"));
 
-  rmPath("apps/app/test-results", path.join(root, "apps", "app", "test-results"));
-  rmPath("apps/app/playwright-report", path.join(root, "apps", "app", "playwright-report"));
+  rmPath(
+    "apps/app/test-results",
+    path.join(root, "apps", "app", "test-results"),
+  );
+  rmPath(
+    "apps/app/playwright-report",
+    path.join(root, "apps", "app", "playwright-report"),
+  );
 
   if (deep) {
-    rmPath("apps/app/electrobun/build", path.join(root, "apps", "app", "electrobun", "build"));
-    rmPath("apps/app/electrobun/artifacts", path.join(root, "apps", "app", "electrobun", "artifacts"));
+    rmPath(
+      "apps/app/electrobun/build",
+      path.join(root, "apps", "app", "electrobun", "build"),
+    );
+    rmPath(
+      "apps/app/electrobun/artifacts",
+      path.join(root, "apps", "app", "electrobun", "artifacts"),
+    );
     rmFile(
       "apps/app/electrobun/src/preload.js (regenerate: cd apps/app/electrobun && bun run build:preload)",
       path.join(root, "apps", "app", "electrobun", "src", "preload.js"),
     );
-    rmPath("apps/app/electron/app-build", path.join(root, "apps", "app", "electron", "app-build"));
-    rmPath("apps/app/electron/milady-dist", path.join(root, "apps", "app", "electron", "milady-dist"));
-    rmPath("apps/app/electron/tsc-out", path.join(root, "apps", "app", "electron", "tsc-out"));
-    rmPath("apps/app/electron/build", path.join(root, "apps", "app", "electron", "build"));
+    rmPath(
+      "apps/app/electron/app-build",
+      path.join(root, "apps", "app", "electron", "app-build"),
+    );
+    rmPath(
+      "apps/app/electron/milady-dist",
+      path.join(root, "apps", "app", "electron", "milady-dist"),
+    );
+    rmPath(
+      "apps/app/electron/tsc-out",
+      path.join(root, "apps", "app", "electron", "tsc-out"),
+    );
+    rmPath(
+      "apps/app/electron/build",
+      path.join(root, "apps", "app", "electron", "build"),
+    );
     rmPath("dist-electron", path.join(root, "dist-electron"));
   }
 
@@ -128,7 +162,9 @@ function main() {
       env: process.env,
     });
     if ((r.status ?? 1) !== 0) {
-      console.warn("  bun pm cache rm exited non-zero (ignored if bun unavailable)");
+      console.warn(
+        "  bun pm cache rm exited non-zero (ignored if bun unavailable)",
+      );
     }
   }
 

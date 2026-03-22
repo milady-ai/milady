@@ -1,4 +1,10 @@
-import { mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  utimesSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -60,13 +66,20 @@ describe("viteRendererBuildNeeded", () => {
       mkdirSync(join(root, "packages", "app-core", "src"), { recursive: true });
       writeFileSync(join(app, "src", "main.tsx"), "export {}\n");
       writeFileSync(join(app, "dist", "index.html"), "<html></html>\n");
-      writeFileSync(join(root, "packages", "app-core", "src", "x.ts"), "export {}\n");
+      writeFileSync(
+        join(root, "packages", "app-core", "src", "x.ts"),
+        "export {}\n",
+      );
       const old = new Date("2000-01-01");
       const mid = new Date("2010-01-01");
       const newer = new Date("2020-01-01");
       utimesSync(join(app, "dist", "index.html"), old, old);
       utimesSync(join(app, "src", "main.tsx"), mid, mid);
-      utimesSync(join(root, "packages", "app-core", "src", "x.ts"), newer, newer);
+      utimesSync(
+        join(root, "packages", "app-core", "src", "x.ts"),
+        newer,
+        newer,
+      );
       expect(viteRendererBuildNeeded(app, root)).toBe(true);
     } finally {
       rmSync(root, { recursive: true, force: true });

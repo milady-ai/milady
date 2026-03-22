@@ -289,7 +289,7 @@ export default defineConfig({
   build: {
     outDir: path.resolve(here, "dist"),
     // Watch + incremental: avoid wiping dist each cycle; keeps Electrobun reloads fast.
-    emptyOutDir: desktopFastDist ? false : true,
+    emptyOutDir: !desktopFastDist,
     sourcemap: desktopFastDist ? false : enableAppSourceMaps,
     target: "es2022",
     minify: desktopFastDist ? false : undefined,

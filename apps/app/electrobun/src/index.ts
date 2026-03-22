@@ -30,11 +30,7 @@ import {
 } from "./application-menu";
 import { showBackgroundNoticeOnce } from "./background-notice";
 import { isBrowserSurfaceEnabled } from "./browser-surface-flag";
-import {
-  type CloudAuthWindowLike,
-  CloudAuthWindowManager,
-  readNavigationEventUrl,
-} from "./cloud-auth-window";
+import { readNavigationEventUrl } from "./cloud-auth-window";
 import { configureDesktopLocalApiAuth, getAgentManager } from "./native/agent";
 import { getDesktopManager } from "./native/desktop";
 import { disposeNativeModules, initializeNativeModules } from "./native/index";
