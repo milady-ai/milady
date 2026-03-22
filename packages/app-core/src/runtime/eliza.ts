@@ -51,6 +51,7 @@ const AUTONOMY_MESSAGE_SERVER_ID = stringToUuid(
 const INTERNAL_CHANNEL_PLUGIN_OVERRIDES = {
   signal: "@elizaos/plugin-signal",
   whatsapp: "@elizaos/plugin-whatsapp",
+  wechat: "@miladyai/plugin-wechat",
 } as const;
 const LEGACY_INTERNAL_CHANNEL_PLUGIN_NAMES = new Map<string, string>(
   Object.entries({
