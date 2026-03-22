@@ -47,11 +47,17 @@ describe("Electrobun test workflow drift", () => {
     expect(workflow).toContain("contents: read");
     expect(workflow).toContain('BUN_VERSION: "1.3.9"');
     expect(workflow).toContain("name: Release Workflow Contract");
-    expect(workflow).toContain("bun install --frozen-lockfile --ignore-scripts");
+    expect(workflow).toContain(
+      "bun install --frozen-lockfile --ignore-scripts",
+    );
     expect(workflow).toContain("bun run postinstall");
     expect(workflow).toContain("bunx vitest run");
-    expect(workflow).toContain("scripts/electrobun-release-workflow-drift.test.ts");
-    expect(workflow).toContain("scripts/electrobun-test-workflow-drift.test.ts");
+    expect(workflow).toContain(
+      "scripts/electrobun-release-workflow-drift.test.ts",
+    );
+    expect(workflow).toContain(
+      "scripts/electrobun-test-workflow-drift.test.ts",
+    );
     expect(workflow).toContain("scripts/whisper-build-script-drift.test.ts");
     expect(workflow).toContain("scripts/release-check.test.ts");
     expect(workflow).toContain("bunx tsdown");
