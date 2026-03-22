@@ -5,6 +5,7 @@ import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { type AgentRuntime, logger, stringToUuid } from "@elizaos/core";
+import { StewardApiError, type PolicyResult } from "@stwd/sdk";
 
 // Re-export the full upstream server API.
 export * from "@elizaos/agent/api/server";
@@ -803,6 +804,23 @@ function sendJsonErrorResponse(
   message: string,
 ): void {
   sendJsonResponse(res, status, { error: message });
+}
+
+function getStewardPolicyResults(error: StewardApiError): PolicyResult[] {
+  if (
+    error.data &&
+    typeof error.data === "object" &&
+    "results" in error.data &&
+    Array.isArray(error.data.results)
+  ) {
+    return error.data.results as PolicyResult[];
+  }
+
+  return [];
+}
+
+function isStewardPolicyRejection(error: unknown): error is StewardApiError {
+  return error instanceof StewardApiError && error.status === 403;
 }
 
 function getConfiguredCompatAgentName(): string | null {
@@ -2806,6 +2824,21 @@ async function handleMiladyCompatRoute(
         },
       });
     } catch (err) {
+      if (isStewardPolicyRejection(err)) {
+        sendJsonResponse(res, 403, {
+          ok: false,
+          mode: "steward",
+          executed: false,
+          requiresUserSignature: false,
+          error: err.message,
+          execution: {
+            status: "rejected",
+            policyResults: getStewardPolicyResults(err),
+          },
+        });
+        return true;
+      }
+
       sendJsonErrorResponse(
         res,
         500,
@@ -3005,6 +3038,21 @@ async function handleMiladyCompatRoute(
         },
       });
     } catch (err) {
+      if (isStewardPolicyRejection(err)) {
+        sendJsonResponse(res, 403, {
+          ok: false,
+          mode: "steward",
+          executed: false,
+          requiresUserSignature: false,
+          error: err.message,
+          execution: {
+            status: "rejected",
+            policyResults: getStewardPolicyResults(err),
+          },
+        });
+        return true;
+      }
+
       sendJsonErrorResponse(
         res,
         500,

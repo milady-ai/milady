@@ -194,13 +194,23 @@ export async function signTransactionWithOptionalSteward<TLocal>(params: {
       };
     }
 
-    return {
-      mode: "steward",
-      pendingApproval: true,
-      policyResults: result.results,
-    };
+    if ("results" in result) {
+      return {
+        mode: "steward",
+        pendingApproval: true,
+        policyResults: result.results,
+      };
+    }
+
+    throw new Error("Steward returned an unsigned transaction unexpectedly");
   } catch (error) {
-    console.warn('[steward-bridge] Steward unreachable, falling back to local signing');
+    if (error instanceof StewardApiError && error.status === 403) {
+      throw error;
+    }
+
+    console.warn(
+      "[steward-bridge] Steward unreachable, falling back to local signing",
+    );
     return {
       mode: "local",
       pendingApproval: false,

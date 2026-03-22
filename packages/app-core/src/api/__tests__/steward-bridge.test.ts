@@ -190,6 +190,61 @@ describe("steward bridge", () => {
     expect(fallback).toHaveBeenCalledTimes(1);
   });
 
+  it("does not fall back on policy rejection (403)", async () => {
+    const { StewardApiError } = await import("@stwd/sdk");
+    const policyError = new StewardApiError("Policy rejected", 403);
+    mockSignTransaction.mockRejectedValueOnce(policyError);
+    const fallback = vi.fn().mockResolvedValue({ hash: "0xlocal-hash" });
+
+    await expect(
+      signTransactionWithOptionalSteward({
+        env: {
+          STEWARD_API_URL: "https://steward.example",
+          STEWARD_AGENT_ID: "agent-1",
+        } as NodeJS.ProcessEnv,
+        evmAddress: "0x123",
+        tx: {
+          to: "0x000000000000000000000000000000000000dead",
+          value: "0",
+          chainId: 56,
+        },
+        fallback,
+      }),
+    ).rejects.toBe(policyError);
+
+    expect(fallback).not.toHaveBeenCalled();
+  });
+
+  it("still falls back on non-policy Steward errors", async () => {
+    const { StewardApiError } = await import("@stwd/sdk");
+    mockSignTransaction.mockRejectedValueOnce(
+      new StewardApiError("Unknown agent", 404),
+    );
+    const fallback = vi.fn().mockResolvedValue({ hash: "0xlocal-hash" });
+
+    const result = await signTransactionWithOptionalSteward({
+      env: {
+        STEWARD_API_URL: "https://steward.example",
+        STEWARD_AGENT_ID: "agent-1",
+      } as NodeJS.ProcessEnv,
+      evmAddress: "0x123",
+      tx: {
+        to: "0x000000000000000000000000000000000000dead",
+        value: "0",
+        chainId: 56,
+      },
+      fallback,
+    });
+
+    expect(result).toMatchObject({
+      mode: "local",
+      fallbackUsed: true,
+      stewardError: "Unknown agent",
+      result: { hash: "0xlocal-hash" },
+    });
+    expect(fallback).toHaveBeenCalledTimes(1);
+  });
+
   it("serves the steward status endpoint", async () => {
     process.env.STEWARD_API_URL = "https://steward.example";
     process.env.STEWARD_AGENT_ID = "agent-1";
