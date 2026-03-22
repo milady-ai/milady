@@ -92,6 +92,8 @@ const hoisted = vi.hoisted(() => {
     toneMapping: 0,
     toneMappingExposure: 1.0,
     outputColorSpace: "",
+    xr: { enabled: false },
+    setAnimationLoop: vi.fn(),
   };
   const mockWebGpuRendererInstance = {
     setPixelRatio: vi.fn(),
@@ -202,6 +204,8 @@ vi.mock("three", () => {
     toneMapping = hoisted.mockRendererInstance.toneMapping;
     toneMappingExposure = hoisted.mockRendererInstance.toneMappingExposure;
     outputColorSpace = hoisted.mockRendererInstance.outputColorSpace;
+    xr = hoisted.mockRendererInstance.xr;
+    setAnimationLoop = hoisted.mockRendererInstance.setAnimationLoop;
   }
 
   class MockScene {
@@ -515,6 +519,24 @@ vi.mock("three/examples/jsm/controls/OrbitControls.js", () => ({
   },
 }));
 
+vi.mock("three/examples/jsm/webxr/VRButton.js", () => ({
+  VRButton: {
+    createButton: vi.fn(() => ({
+      id: "",
+      style: { cssText: "", display: "" },
+      dataset: {},
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    })),
+  },
+}));
+
+vi.mock("@lookingglass/webxr", () => ({
+  LookingGlassWebXRPolyfill: class MockLookingGlassWebXRPolyfill {
+    constructor(_options?: unknown) {}
+  },
+}));
+
 vi.mock("@miladyai/app-core/utils", () => ({
   resolveAppAssetUrl: vi.fn((p: string) => `/mock/${p}`),
 }));
@@ -566,7 +588,20 @@ Object.assign(globalThis, {
       width: 0,
       height: 0,
       getContext: vi.fn(() => mockCanvas2d),
+      style: { cssText: "", display: "" },
     })),
+    getElementById: vi.fn(() => null),
+    body: {
+      appendChild: vi.fn(),
+      removeChild: vi.fn(),
+      style: { background: "" },
+    },
+  },
+  MutationObserver: class MockMutationObserver {
+    observe = vi.fn();
+    disconnect = vi.fn();
+    takeRecords = vi.fn(() => []);
+    constructor(_callback?: unknown) {}
   },
 });
 
@@ -712,14 +747,25 @@ describe("VrmEngine", () => {
       engine.setup(canvas, vi.fn());
       await waitForEngineReady(engine);
 
-      expect(globalThis.requestAnimationFrame).toHaveBeenCalledTimes(1);
+      // The engine uses renderer.setAnimationLoop when available.
+      // setupLookingGlass also calls setAnimationLoop on a separate LKG
+      // renderer — but both share the same mock, so the count is 2.
+      expect(
+        hoisted.mockRendererInstance.setAnimationLoop,
+      ).toHaveBeenCalledTimes(1);
 
       engine.setPaused(true);
-      expect(globalThis.cancelAnimationFrame).toHaveBeenCalledTimes(1);
+      // Pausing calls setAnimationLoop(null) to stop the loop
+      expect(
+        hoisted.mockRendererInstance.setAnimationLoop,
+      ).toHaveBeenLastCalledWith(null);
       expect(hoisted.mockRendererInstance.dispose).not.toHaveBeenCalled();
 
       engine.setPaused(false);
-      expect(globalThis.requestAnimationFrame).toHaveBeenCalledTimes(2);
+      // Resuming calls setAnimationLoop again with a callback
+      expect(
+        hoisted.mockRendererInstance.setAnimationLoop,
+      ).toHaveBeenCalledTimes(3);
     });
 
     it("waits for the renderer to finish initializing", async () => {
@@ -788,7 +834,7 @@ describe("VrmEngine", () => {
       await waitForEngineReady(engine);
 
       expect(engine.isInitialized()).toBe(true);
-      expect(globalThis.requestAnimationFrame).toHaveBeenCalled();
+      expect(hoisted.mockRendererInstance.setAnimationLoop).toHaveBeenCalled();
     });
 
     it("cleans up WebGL resources during dispose()", async () => {

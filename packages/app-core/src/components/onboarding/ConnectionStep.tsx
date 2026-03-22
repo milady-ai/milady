@@ -12,17 +12,17 @@ import { ONBOARDING_PROVIDER_CATALOG } from "@elizaos/agent/contracts/onboarding
 import type { ProviderOption } from "@miladyai/app-core/api";
 import { useBranding } from "@miladyai/app-core/config";
 import { isNative } from "@miladyai/app-core/platform";
-import type { AppState } from "../../state/types";
+import { useCallback, useEffect, useMemo } from "react";
 import {
   applyConnectionTransition,
   CONNECTION_RECOMMENDED_PROVIDER_IDS,
-  resolveConnectionUiSpec,
   type ConnectionEvent,
   type ConnectionFlowSnapshot,
   type ConnectionStatePatch,
+  resolveConnectionUiSpec,
 } from "../../onboarding/connection-flow";
 import { useApp } from "../../state";
-import { useCallback, useEffect, useMemo } from "react";
+import type { AppState } from "../../state/types";
 import { ConnectionProviderDetailScreen } from "./connection/ConnectionProviderDetailScreen";
 import {
   ConnectionUiRoot,

@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 
+import { GlobalEmoteOverlay } from "@miladyai/app-core/components/GlobalEmoteOverlay";
 import { APP_EMOTE_EVENT } from "@miladyai/app-core/events";
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { GlobalEmoteOverlay } from "@miladyai/app-core/components/GlobalEmoteOverlay";
 
 describe("GlobalEmoteOverlay", () => {
   beforeEach(() => {

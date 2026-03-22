@@ -10,7 +10,6 @@
  * These exercise the financial transaction logic paths that the hooks
  * encapsulate, without requiring a React rendering environment.
  */
-import { describe, expect, it, vi } from "vitest";
 
 import {
   HEX_ADDRESS_RE,
@@ -22,6 +21,7 @@ import {
   type TranslatorFn,
   type WalletRecentTrade,
 } from "@miladyai/app-core/components/companion/walletUtils";
+import { describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Helpers

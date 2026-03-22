@@ -300,6 +300,7 @@ interface StreamingPermissionsOnboardingViewProps {
   description: string;
   mode: StreamingPermissionMode;
   onContinue: (options?: { allowPermissionBypass?: boolean }) => void;
+  onBack?: () => void;
   testId: string;
   title: string;
 }
@@ -308,6 +309,7 @@ export function StreamingPermissionsOnboardingView({
   description,
   mode,
   onContinue,
+  onBack,
   testId,
   title,
 }: StreamingPermissionsOnboardingViewProps) {
@@ -381,7 +383,18 @@ export function StreamingPermissionsOnboardingView({
         })}
       </div>
 
-      <div className="flex flex-wrap justify-center gap-3">
+      <div className="onboarding-panel-footer">
+        {onBack ? (
+          <button
+            className="onboarding-back-link"
+            onClick={() => onBack()}
+            type="button"
+          >
+            {translateWithFallback(t, "onboarding.back", "Back")}
+          </button>
+        ) : (
+          <span />
+        )}
         <button
           type="button"
           data-testid="permissions-onboarding-continue"

@@ -3,14 +3,35 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
-const SERVER_TS_PATH = path.join(
-  ROOT,
-  "node_modules/@elizaos/agent/packages/agent/src/api/server.js",
-);
-const ELIZA_TS_PATH = path.join(
-  ROOT,
-  "node_modules/@elizaos/agent/packages/agent/src/runtime/eliza.js",
-);
+const SERVER_TS_PATH = fs.existsSync(
+  path.join(
+    ROOT,
+    "node_modules/@elizaos/agent/packages/agent/src/api/server.ts",
+  ),
+)
+  ? path.join(
+      ROOT,
+      "node_modules/@elizaos/agent/packages/agent/src/api/server.ts",
+    )
+  : path.join(
+      ROOT,
+      "node_modules/@elizaos/agent/packages/agent/src/api/server.js",
+    );
+
+const ELIZA_TS_PATH = fs.existsSync(
+  path.join(
+    ROOT,
+    "node_modules/@elizaos/agent/packages/agent/src/runtime/eliza.ts",
+  ),
+)
+  ? path.join(
+      ROOT,
+      "node_modules/@elizaos/agent/packages/agent/src/runtime/eliza.ts",
+    )
+  : path.join(
+      ROOT,
+      "node_modules/@elizaos/agent/packages/agent/src/runtime/eliza.js",
+    );
 const WORKFLOW_PATH = path.join(
   ROOT,
   ".github/workflows/release-electrobun.yml",

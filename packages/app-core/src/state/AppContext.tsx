@@ -84,8 +84,8 @@ import {
 import {
   getBackendStartupTimeoutMs,
   inspectExistingElizaInstall,
-  isElectrobunRuntime,
   invokeDesktopBridgeRequest,
+  isElectrobunRuntime,
   scanProviderCredentials,
 } from "../bridge";
 import {
@@ -123,6 +123,12 @@ import {
   openExternalUrl,
   resolveApiUrl,
 } from "../utils";
+import {
+  computeAgentDeadlineExtensions,
+  getAgentReadyTimeoutMs,
+} from "./agent-startup-timing";
+import { completeResetLocalStateAfterServerWipe as runCompleteResetLocalStateAfterServerWipe } from "./complete-reset-local-state-after-wipe";
+import { handleResetAppliedFromMainCore } from "./handle-reset-applied-from-main";
 import {
   type ActionNotice,
   AGENT_TRANSFER_MIN_PASSWORD_LENGTH,
@@ -187,25 +193,17 @@ import {
   type UiTheme,
 } from "./internal";
 import {
-  computeAgentDeadlineExtensions,
-  getAgentReadyTimeoutMs,
-} from "./agent-startup-timing";
-import { completeResetLocalStateAfterServerWipe as runCompleteResetLocalStateAfterServerWipe } from "./complete-reset-local-state-after-wipe";
-import { handleResetAppliedFromMainCore } from "./handle-reset-applied-from-main";
+  deriveDetectedProviderPrefill,
+  detectExistingOnboardingConnection,
+} from "./onboarding-bootstrap";
 import {
   deriveUiShellModeForTab,
   getTabForShellView,
   shouldStartAtCharacterSelectOnLaunch,
 } from "./shell-routing";
-import {
-  deriveDetectedProviderPrefill,
-  detectExistingOnboardingConnection,
-} from "./onboarding-bootstrap";
 
 const AGENT_STATUS_POLL_INTERVAL_MS = 500;
 const ONBOARDING_GREETING_READY_TIMEOUT_MS = 15_000;
-
-export { AGENT_READY_TIMEOUT_MS } from "./types";
 
 export {
   type ActionNotice,
@@ -273,6 +271,7 @@ export {
   useApp,
   VRM_COUNT,
 } from "./internal";
+export { AGENT_READY_TIMEOUT_MS } from "./types";
 
 import {
   ConfirmModal,
@@ -5817,7 +5816,20 @@ export function AppProvider({
             const resumeConnection = deriveOnboardingResumeConnection(config);
             const resumeFields = deriveOnboardingResumeFields(resumeConnection);
             onboardingResumeConnectionRef.current = resumeConnection;
-            setOnboardingOptions(options);
+
+            const injectedStyles =
+              (typeof window !== "undefined" &&
+                (window as unknown as Record<string, unknown>)
+                  .__APP_ONBOARDING_STYLES__) ||
+              [];
+
+            setOnboardingOptions({
+              ...options,
+              styles:
+                (injectedStyles as StylePreset[]).length > 0
+                  ? (injectedStyles as StylePreset[])
+                  : options.styles,
+            });
 
             // Auto-detect AI provider credentials from local CLI installs.
             // Only auto-fill if no existing connection config was found.

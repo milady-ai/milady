@@ -621,9 +621,7 @@ describe("AppsView", () => {
 
     // The extension panel ID is not registered, so no extension UI should render.
     // Hyperscape API calls should NOT be made when the extension is absent.
-    expect(
-      mockClientFns.listHyperscapeEmbeddedAgents,
-    ).not.toHaveBeenCalled();
+    expect(mockClientFns.listHyperscapeEmbeddedAgents).not.toHaveBeenCalled();
   });
 
   it("opens app details and can return to the app list", async () => {

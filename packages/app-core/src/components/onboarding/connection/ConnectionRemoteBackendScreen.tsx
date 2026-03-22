@@ -1,8 +1,8 @@
+import { appNameInterpolationVars, useBranding } from "../../../config";
 import type {
   ConnectionEffect,
   ConnectionEvent,
 } from "../../../onboarding/connection-flow";
-import { appNameInterpolationVars, useBranding } from "../../../config";
 import { useApp } from "../../../state";
 
 export function ConnectionRemoteBackendScreen({

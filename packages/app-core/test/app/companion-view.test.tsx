@@ -254,8 +254,13 @@ describe("CompanionView", () => {
     const content = text(tree?.root);
     // Should render the mock VrmViewer text
     expect(content).toContain("VrmViewer");
-    // Should render the mock ChatModalView text
-    expect(content).toContain("ChatModalView");
+    // ChatModalView is gated behind avatarReady (VRM teleport), so it won't
+    // render until the avatar finishes loading. Verify the header overlay is
+    // present instead (rendered with opacity 0 while waiting).
+    const headerOverlay = tree?.root.findAllByProps({
+      "data-testid": "companion-header-chat-controls",
+    });
+    expect(headerOverlay.length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders centered companion header chat controls", async () => {
@@ -304,8 +309,7 @@ describe("CompanionView", () => {
     await act(async () => {
       newChatButton?.props.onClick();
     });
-    expect(handleStartDraftConversation).toHaveBeenCalledTimes(1);
-    expect(handleNewConversation).not.toHaveBeenCalled();
+    expect(handleNewConversation).toHaveBeenCalledTimes(1);
   });
 
   it("keeps the shared companion scene wrapper height-bounded", async () => {

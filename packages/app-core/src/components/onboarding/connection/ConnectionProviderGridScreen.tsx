@@ -1,10 +1,10 @@
+import type { ProviderOption } from "../../../api";
+import { appNameInterpolationVars, useBranding } from "../../../config";
 import type {
   ConnectionEffect,
   ConnectionEvent,
 } from "../../../onboarding/connection-flow";
 import { CONNECTION_RECOMMENDED_PROVIDER_IDS } from "../../../onboarding/connection-flow";
-import type { ProviderOption } from "../../../api";
-import { appNameInterpolationVars, useBranding } from "../../../config";
 import { getProviderLogo } from "../../../providers";
 import { useApp } from "../../../state";
 
@@ -55,7 +55,10 @@ export function ConnectionProviderGridScreen({
       <div className="onboarding-question">
         {t("onboarding.chooseProvider")}
       </div>
-      <div className="onboarding-provider-grid">
+      <div
+        className="onboarding-provider-grid"
+        style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}
+      >
         {sortedProviders.map((p: ProviderOption) => {
           const display = getProviderDisplay(p);
           const isRecommended = recommendedIds.has(p.id);
@@ -65,6 +68,7 @@ export function ConnectionProviderGridScreen({
               type="button"
               key={p.id}
               className={`onboarding-provider-card${isRecommended ? " onboarding-provider-card--recommended" : ""}${detectedLabel ? " onboarding-provider-card--detected" : ""}`}
+              style={{ gridColumn: isRecommended ? "span 2" : "span 1", minWidth: 0 }}
               onClick={() =>
                 dispatch({ type: "selectProvider", providerId: p.id })
               }

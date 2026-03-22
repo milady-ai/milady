@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
-import TestRenderer, { act } from "react-test-renderer";
-import { describe, expect, it, vi } from "vitest";
 
 import { AvatarSelector } from "@miladyai/app-core/components/AvatarSelector";
+import TestRenderer, { act } from "react-test-renderer";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@miladyai/app-core/state", () => ({
   useApp: () => ({ t: (k: string) => k }),

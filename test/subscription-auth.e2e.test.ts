@@ -3,6 +3,7 @@ import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import type { OAuthCredentials } from "@elizaos/agent/auth/types";
+import { startApiServer } from "@miladyai/app-core/src/api/server";
 import {
   afterAll,
   beforeAll,
@@ -12,7 +13,6 @@ import {
   it,
   vi,
 } from "vitest";
-import { startApiServer } from "@miladyai/app-core/src/api/server";
 
 const authMocks = vi.hoisted(() => ({
   getSubscriptionStatus: vi.fn(() => [{ id: "openai-codex" }]),

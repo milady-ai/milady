@@ -80,13 +80,10 @@ vi.mock("@miladyai/app-core/src/components/OnboardingWizard", () => ({
 vi.mock("@miladyai/app-core/src/components/ChatView", () => ({
   ChatView: () => React.createElement("div", null, "ChatView"),
 }));
-vi.mock(
-  "@miladyai/app-core/src/components/ConversationsSidebar",
-  () => ({
-    ConversationsSidebar: () =>
-      React.createElement("div", null, "ConversationsSidebar"),
-  }),
-);
+vi.mock("@miladyai/app-core/src/components/ConversationsSidebar", () => ({
+  ConversationsSidebar: () =>
+    React.createElement("div", null, "ConversationsSidebar"),
+}));
 vi.mock("@miladyai/app-core/src/components/AppsPageView", () => ({
   AppsPageView: () => React.createElement("div", null, "AppsPageView"),
 }));

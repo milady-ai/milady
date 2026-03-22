@@ -12,12 +12,6 @@ import {
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("Avatar VRM Utilities", () => {
-  describe("VRM_COUNT", () => {
-    it("matches the bundled Milady avatar roster size", () => {
-      expect(VRM_COUNT).toBe(8);
-    });
-  });
-
   describe("getVrmUrl", () => {
     it("returns correct path for bundled Milady VRMs (1-8)", () => {
       const expectedSlugs = [
@@ -75,15 +69,23 @@ describe("Avatar VRM Utilities", () => {
       expect(getVrmTitle(2)).toBe("Jin");
       expect(getVrmTitle(3)).toBe("Kei");
       expect(getVrmTitle(4)).toBe("Momo");
+      expect(getVrmTitle(5)).toBe("Rin");
+      expect(getVrmTitle(6)).toBe("Ryu");
+      expect(getVrmTitle(7)).toBe("Satoshi");
+      expect(getVrmTitle(8)).toBe("Yuki");
     });
 
     it("clamps out-of-range index to avatar 1", () => {
       expect(getVrmTitle(9)).toBe("Chen");
     });
+
+    it("matches the bundled Milady avatar roster size", () => {
+      expect(VRM_COUNT).toBe(8);
+    });
   });
 
   describe("getCompanionBackgroundUrl", () => {
-    it("uses the fixed bundled Milady backgrounds for each theme", () => {
+    it("stays within the bundled avatar background set", () => {
       expect(getCompanionBackgroundUrl("light")).toBe(
         "/vrms/backgrounds/milady-3.png",
       );

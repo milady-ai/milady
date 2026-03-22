@@ -1,5 +1,5 @@
-import type { ConnectionEvent } from "../../../onboarding/connection-flow";
 import { appNameInterpolationVars, useBranding } from "../../../config";
+import type { ConnectionEvent } from "../../../onboarding/connection-flow";
 import { useApp } from "../../../state";
 
 export function ConnectionHostingScreen({

@@ -29,12 +29,12 @@ import {
   type Plugin,
   stringToUuid,
 } from "@elizaos/core";
-import dotenv from "dotenv";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   extractPlugin,
   resolveTelegramPluginImportSpecifier,
 } from "@miladyai/app-core/src/test-support/test-helpers";
+import dotenv from "dotenv";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Environment Setup

@@ -25,12 +25,12 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { logger, type Plugin } from "@elizaos/core";
-import dotenv from "dotenv";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   extractPlugin,
   resolveFarcasterPluginImportSpecifier,
 } from "@miladyai/app-core/src/test-support/test-helpers";
+import dotenv from "dotenv";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Environment Setup

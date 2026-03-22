@@ -35,8 +35,6 @@ import {
   stringToUuid,
   type UUID,
 } from "@elizaos/core";
-import dotenv from "dotenv";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { validateRuntimeContext } from "@miladyai/app-core/src/api/plugin-validation";
 import { startApiServer } from "@miladyai/app-core/src/api/server";
 import { ensureAgentWorkspace } from "@miladyai/app-core/src/providers/workspace";
@@ -45,6 +43,8 @@ import {
   isPackageImportResolvable,
   type PluginModuleShape,
 } from "@miladyai/app-core/src/test-support/test-helpers";
+import dotenv from "dotenv";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Environment

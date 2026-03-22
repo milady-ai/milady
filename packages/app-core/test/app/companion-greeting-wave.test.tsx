@@ -418,9 +418,9 @@ describe("companion greeting wave", () => {
     });
   });
 
-  it("does not wave when creating a new chat with a non-persisted greeting", async () => {
-    // Override createConversation to return a non-persisted greeting —
-    // the wave should only fire for persisted greetings.
+  it("waves when creating a new chat even with a non-persisted greeting", async () => {
+    // createConversation returns a non-persisted greeting — the wave now
+    // fires for any greeting with text, regardless of persisted flag.
     mockClient.createConversation.mockResolvedValue({
       conversation: {
         id: "conv-created",
@@ -447,7 +447,8 @@ describe("companion greeting wave", () => {
       vi.advanceTimersByTime(1400);
     });
 
-    expect(events).toHaveLength(0);
+    expect(events).toHaveLength(1);
+    expect(events[0].emoteId).toBe("wave");
 
     await act(async () => {
       tree.unmount();

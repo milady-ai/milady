@@ -6,6 +6,7 @@
  * without this file importing the large detail component tree (optional tree-shaking / clearer dependency direction).
  */
 import type { ReactNode } from "react";
+import type { ProviderOption } from "../../../api";
 import type {
   ConnectionEffect,
   ConnectionEvent,
@@ -15,7 +16,6 @@ import { ConnectionElizaCloudPreProviderScreen } from "./ConnectionElizaCloudPre
 import { ConnectionHostingScreen } from "./ConnectionHostingScreen";
 import { ConnectionProviderGridScreen } from "./ConnectionProviderGridScreen";
 import { ConnectionRemoteBackendScreen } from "./ConnectionRemoteBackendScreen";
-import type { ProviderOption } from "../../../api";
 
 export type ConnectionUiSharedProps = {
   dispatch: (event: ConnectionEvent) => void;

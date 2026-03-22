@@ -5,12 +5,12 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { AgentRuntime, createCharacter, logger } from "@elizaos/core";
 import { default as pluginSql } from "@elizaos/plugin-sql";
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { startApiServer } from "@miladyai/app-core/src/api/server";
 import {
   DatabaseTrajectoryLogger,
   flushTrajectoryWrites,
 } from "@miladyai/app-core/src/runtime/trajectory-persistence";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 const _testDir = path.dirname(fileURLToPath(import.meta.url));
 

@@ -33,6 +33,40 @@ import {
   warnStaleBunCache,
 } from "./patch-bun-exports.mjs";
 
+const _MOCK_MILADY_CATALOG = {
+  assets: [
+    { id: 1, slug: "milady-1", title: "Chen", sourceName: "Chen" },
+    { id: 2, slug: "milady-2", title: "Tanya", sourceName: "Tanya" },
+    { id: 3, slug: "milady-3", title: "Ayane", sourceName: "Ayane" },
+    { id: 4, slug: "milady-4", title: "Ling", sourceName: "Ling" },
+  ],
+  injectedCharacters: [
+    {
+      catchphrase: "I can't wait!",
+      name: "Rin",
+      avatarAssetId: 1,
+      voicePresetId: "alice",
+      avatarAsset: {
+        id: 1,
+        slug: "milady-1",
+        title: "Chen",
+        sourceName: "Chen",
+      },
+    },
+    {
+      catchphrase: "Let's get to work!",
+      name: "Ai",
+      avatarAssetId: 2,
+      voicePresetId: "sarah",
+      avatarAsset: {
+        id: 2,
+        slug: "milady-2",
+        title: "Jin",
+        sourceName: "Jin",
+      },
+    },
+  ],
+};
 describe("patch-bun-exports", () => {
   it("applyPatchToPackageJson removes bun and default when src/index.ts is missing", () => {
     const tmp = mkdtempSync(join(tmpdir(), "patch-bun-exports-test-"));

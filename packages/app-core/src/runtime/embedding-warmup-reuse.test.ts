@@ -2,11 +2,11 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { EMBEDDING_PRESETS } from "./embedding-presets.js";
 import {
   embeddingGgufFilePresent,
   findExistingEmbeddingModelForWarmupReuse,
 } from "./embedding-manager-support.js";
+import { EMBEDDING_PRESETS } from "./embedding-presets.js";
 
 describe("embedding warmup reuse (MODELS_DIR)", () => {
   const dirs: string[] = [];

@@ -32,7 +32,7 @@ describe("DesktopOnboardingRuntime", () => {
     isElectrobunRuntimeMock.mockReturnValue(true);
     useAppMock.mockReturnValue({
       onboardingLoading: false,
-      onboardingStep: "senses",
+      onboardingStep: "permissions",
     });
   });
 
@@ -68,7 +68,7 @@ describe("DesktopOnboardingRuntime", () => {
     isElectrobunRuntimeMock.mockReturnValue(false);
     useAppMock.mockReturnValue({
       onboardingLoading: false,
-      onboardingStep: "senses",
+      onboardingStep: "permissions",
     });
 
     await act(async () => {

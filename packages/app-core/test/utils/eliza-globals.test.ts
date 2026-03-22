@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 
-import { afterEach, describe, expect, it } from "vitest";
 import {
   clearElizaApiBase,
   clearElizaApiToken,
@@ -9,6 +8,7 @@ import {
   setElizaApiBase,
   setElizaApiToken,
 } from "@miladyai/app-core/utils/eliza-globals";
+import { afterEach, describe, expect, it } from "vitest";
 
 declare global {
   interface Window {

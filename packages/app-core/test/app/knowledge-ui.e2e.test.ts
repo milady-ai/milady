@@ -600,13 +600,9 @@ describe("KnowledgeView UI", () => {
     expect(chooseFolderButton).toBeUndefined();
     expect(searchForm?.props.className).toContain("max-w-[500px]");
     expect(chooseFilesButton?.props.className).toContain("h-10");
-    expect(chooseFilesButton?.props.className).toContain(
-      "text-txt",
-    );
+    expect(chooseFilesButton?.props.className).toContain("text-txt");
     expect(searchButton?.props.className).toContain("h-10");
-    expect(searchButton?.props.className).toContain(
-      "text-txt",
-    );
+    expect(searchButton?.props.className).toContain("text-txt");
   });
 
   it("shows loading state when knowledgeLoading is true", async () => {

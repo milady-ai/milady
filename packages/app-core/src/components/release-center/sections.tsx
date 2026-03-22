@@ -2,9 +2,9 @@ import { Button, Input } from "@miladyai/ui";
 import { createElement } from "react";
 import {
   DefinitionRow,
-  StatusPill,
   formatTimestamp,
   partitionDescription,
+  StatusPill,
 } from "./shared";
 import type {
   AppReleaseStatus,

@@ -1,10 +1,10 @@
 import type { Tab } from "@miladyai/app-core/navigation";
-import { describe, expect, it } from "vitest";
 import {
   deriveUiShellModeForTab,
   getTabForShellView,
   shouldStartAtCharacterSelectOnLaunch,
 } from "@miladyai/app-core/state/shell-routing";
+import { describe, expect, it } from "vitest";
 
 describe("shell routing helpers", () => {
   it("derives companion mode only for the companion tab", () => {

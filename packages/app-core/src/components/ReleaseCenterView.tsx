@@ -5,21 +5,21 @@ import {
   isElectrobunRuntime,
   subscribeDesktopBridgeEvent,
 } from "../bridge";
+import { useApp } from "../state";
+import { openDesktopSurfaceWindow } from "../utils/desktop-workspace";
 import {
   normalizeReleaseNotesUrl,
   summarizeError,
 } from "./release-center/shared";
-import { useApp } from "../state";
-import { openDesktopSurfaceWindow } from "../utils/desktop-workspace";
 import {
-  DEFAULT_RELEASE_NOTES_URL,
-  RELEASE_NOTES_PARTITION,
-  SESSION_PARTITIONS,
   type AppReleaseStatus,
+  DEFAULT_RELEASE_NOTES_URL,
   type DesktopBuildInfo,
   type DesktopReleaseNotesWindowInfo,
   type DesktopSessionSnapshot,
   type DesktopUpdaterSnapshot,
+  RELEASE_NOTES_PARTITION,
+  SESSION_PARTITIONS,
   type WebGpuBrowserStatus,
   type WgpuTagElement,
 } from "./release-center/types";

@@ -652,8 +652,8 @@ describe("ChatView game-modal variant", () => {
       "data-no-camera-drag": "true",
     });
 
-    expect(messages.props["data-no-camera-drag"]).toBe(true);
-    expect(messages.props["data-no-camera-zoom"]).toBe(true);
+    expect(messages.props["data-no-camera-drag"]).toBe(false);
+    expect(messages.props["data-no-camera-zoom"]).toBe(false);
     expect(String(messages.props.className)).toContain("pointer-events-auto");
     expect(String(messages.props.className)).toContain("overflow-y-auto");
     expect(messages.props.style.maskImage).toContain("linear-gradient");

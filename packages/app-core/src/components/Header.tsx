@@ -53,7 +53,7 @@ export function Header({
     uiTheme,
     setUiTheme,
     chatAgentVoiceMuted,
-    handleStartDraftConversation,
+    handleNewConversation,
     t,
   } = useApp();
 
@@ -256,7 +256,7 @@ export function Header({
           onToggleVoiceMute={() =>
             setState("chatAgentVoiceMuted", !chatAgentVoiceMuted)
           }
-          onNewChat={() => void handleStartDraftConversation()}
+          onNewChat={() => void handleNewConversation()}
           trailingExtras={
             showNavigationMenu ? (
               <button

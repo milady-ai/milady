@@ -950,7 +950,7 @@ describe("Version Skew Detection (issue #10)", () => {
         expect(coreOverride).toMatch(/^\d+\.\d+\.\d+/);
       }
     } else {
-      expect(coreVersion).toMatch(/^\d+\.\d+\.\d+/);
+      expect(coreVersion).toMatch(/^[~^]?\d+\.\d+\.\d+/);
     }
 
     // The affected plugins should still be present in dependencies

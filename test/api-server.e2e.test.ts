@@ -23,10 +23,10 @@ import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import type { AgentRuntime, Content, Task, UUID } from "@elizaos/core";
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { WebSocket } from "ws";
 import { startApiServer } from "@miladyai/app-core/src/api/server";
 import { AGENT_NAME_POOL } from "@miladyai/app-core/src/runtime/onboarding-names";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { WebSocket } from "ws";
 
 vi.mock("@miladyai/app-core/src/services/mcp-marketplace", () => ({
   searchMcpMarketplace: vi
@@ -1874,7 +1874,7 @@ describe("API Server E2E (no runtime)", () => {
           "/api/conversations",
           {
             title: "Bootstrap greeting test",
-            bootstrapGreeting: true,
+            includeGreeting: true,
             lang: "en",
           },
         );

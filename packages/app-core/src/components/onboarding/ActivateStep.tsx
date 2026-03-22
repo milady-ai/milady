@@ -3,8 +3,13 @@ import { useBranding } from "../../config/branding";
 
 export function ActivateStep() {
   const branding = useBranding();
-  const { onboardingName, handleOnboardingNext, t, onboardingRestarting } =
-    useApp();
+  const {
+    onboardingName,
+    handleOnboardingNext,
+    handleOnboardingBack,
+    t,
+    onboardingRestarting,
+  } = useApp();
 
   return (
     <>
@@ -21,7 +26,13 @@ export function ActivateStep() {
       </div>
       <p className="onboarding-desc">{t("onboarding.allConfigured")}</p>
       <div className="onboarding-panel-footer">
-        <span />
+        <button
+          className="onboarding-back-link"
+          onClick={() => handleOnboardingBack()}
+          type="button"
+        >
+          {t("onboarding.back")}
+        </button>
         <button
           className="onboarding-confirm-btn"
           onClick={() => handleOnboardingNext()}

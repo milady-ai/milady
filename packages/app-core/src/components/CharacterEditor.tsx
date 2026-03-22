@@ -12,24 +12,24 @@ import {
   VOICE_CONFIG_UPDATED_EVENT,
 } from "@miladyai/app-core/events";
 import {
-  STYLE_PRESETS,
   type MiladyStylePreset,
+  STYLE_PRESETS,
 } from "@miladyai/app-core/onboarding-presets";
 import { useApp } from "@miladyai/app-core/state";
 import { normalizeCharacterMessageExamples } from "@miladyai/app-core/utils/character-message-examples";
-import { useChatAvatarVoiceBridge, useVoiceChat } from "../hooks";
 import {
   EDGE_BACKUP_VOICES,
   PREMADE_VOICES,
   sanitizeApiKey,
 } from "@miladyai/app-core/voice";
 import { Button, Input, Textarea, ThemedSelect } from "@miladyai/ui";
+import { useChatAvatarVoiceBridge, useVoiceChat } from "../hooks";
+import { AvatarSelector } from "./AvatarSelector";
 import {
   CharacterRoster,
   type CharacterRosterEntry,
   resolveRosterEntries,
 } from "./CharacterRoster";
-import { AvatarSelector } from "./AvatarSelector";
 
 /* Inline SVG icon helpers – avoids adding lucide-react as a dependency. */
 const svgBase = {

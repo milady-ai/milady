@@ -589,7 +589,7 @@ describe("PluginsView game modal", () => {
       "data-testid": "plugins-subgroup-sidebar",
     })[0];
     expect(sidebar).toBeDefined();
-    expect(text(sidebar)).toContain("Plugin Types");
+    expect(text(sidebar)).toContain("PLUGIN TYPES");
     expect(text(sidebar)).toContain("All");
     expect(text(sidebar)).toContain("AI Providers");
     expect(text(sidebar)).toContain("Connectors");

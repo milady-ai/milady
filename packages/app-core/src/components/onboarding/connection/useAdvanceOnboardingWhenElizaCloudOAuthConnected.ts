@@ -1,5 +1,5 @@
-import type { AppState } from "../../../state/types";
 import { useEffect, useRef } from "react";
+import type { AppState } from "../../../state/types";
 
 type ElizaCloudTab = AppState["onboardingElizaCloudTab"];
 

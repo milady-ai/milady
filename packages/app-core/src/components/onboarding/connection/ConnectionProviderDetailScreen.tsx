@@ -1,4 +1,6 @@
 import { ONBOARDING_PROVIDER_CATALOG } from "@elizaos/agent/contracts/onboarding";
+import type { ChangeEvent } from "react";
+import { useState } from "react";
 import type {
   OpenRouterModelOption,
   PiAiModelOption,
@@ -6,13 +8,11 @@ import type {
 } from "../../../api";
 import { client } from "../../../api";
 import { useBranding } from "../../../config";
-import type { ChangeEvent } from "react";
-import { useState } from "react";
-import { useAdvanceOnboardingWhenElizaCloudOAuthConnected } from "./useAdvanceOnboardingWhenElizaCloudOAuthConnected";
 import type { ConnectionEvent } from "../../../onboarding/connection-flow";
 import { getProviderLogo } from "../../../providers";
 import { useApp } from "../../../state";
 import { openExternalUrl } from "../../../utils";
+import { useAdvanceOnboardingWhenElizaCloudOAuthConnected } from "./useAdvanceOnboardingWhenElizaCloudOAuthConnected";
 
 function formatRequestError(err: unknown): string {
   if (err instanceof Error) {

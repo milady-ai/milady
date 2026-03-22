@@ -1,10 +1,10 @@
 import {
   type AgentRuntime,
-  type Plugin,
   AutonomyService,
   ChannelType,
   logger,
   ModelType,
+  type Plugin,
   stringToUuid,
 } from "@elizaos/core";
 

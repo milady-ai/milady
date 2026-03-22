@@ -137,7 +137,6 @@ export function retargetMixamoGltfToVrm(
           values,
         ),
       );
-      continue;
     }
   }
 

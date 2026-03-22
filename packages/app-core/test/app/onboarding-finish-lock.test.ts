@@ -203,24 +203,24 @@ function permissionState(
   return { status, canRequest, lastChecked: Date.now() };
 }
 
-async function advanceToActivate(getApi: () => ProbeApi) {
+async function advanceToLaunch(getApi: () => ProbeApi) {
   for (let i = 0; i < 20; i += 1) {
-    if (getApi().getOnboardingStep() === "activate") return;
+    if (getApi().getOnboardingStep() === "launch") return;
     await act(async () => {
       await getApi().handleOnboardingNext();
     });
   }
-  throw new Error("Failed to reach activate onboarding step");
+  throw new Error("Failed to reach launch onboarding step");
 }
 
-async function advanceToSenses(getApi: () => ProbeApi) {
+async function advanceToPermissions(getApi: () => ProbeApi) {
   for (let i = 0; i < 20; i += 1) {
-    if (getApi().getOnboardingStep() === "senses") return;
+    if (getApi().getOnboardingStep() === "permissions") return;
     await act(async () => {
       await getApi().handleOnboardingNext();
     });
   }
-  throw new Error("Failed to reach senses onboarding step");
+  throw new Error("Failed to reach permissions onboarding step");
 }
 
 async function waitForOnboardingOptions(getApi: () => ProbeApi) {
@@ -245,12 +245,10 @@ async function waitForOnboardingCompletion(getApi: () => ProbeApi) {
   throw new Error("Onboarding did not complete");
 }
 
-function configureOnboardingConnection(api: ProbeApi) {
+function configureOnboardingProviders(api: ProbeApi) {
   api.setState("onboardingRunMode", "local");
   api.setState("onboardingProvider", "openai");
   api.setState("onboardingApiKey", "sk-test-onboarding-key");
-  // Switch to custom flow so steps go connection→rpc→senses→activate
-  api.setState("onboardingStep", "connection");
 }
 
 describe("onboarding finish locking", () => {
@@ -408,9 +406,9 @@ describe("onboarding finish locking", () => {
 
     await waitForOnboardingOptions(requireApi);
     await act(async () => {
-      configureOnboardingConnection(requireApi());
+      configureOnboardingProviders(requireApi());
     });
-    await advanceToActivate(requireApi);
+    await advanceToLaunch(requireApi);
 
     await act(async () => {
       void api?.handleOnboardingNext();
@@ -458,9 +456,9 @@ describe("onboarding finish locking", () => {
 
     await waitForOnboardingOptions(requireApi);
     await act(async () => {
-      configureOnboardingConnection(requireApi());
+      configureOnboardingProviders(requireApi());
     });
-    await advanceToActivate(requireApi);
+    await advanceToLaunch(requireApi);
 
     await act(async () => {
       await api?.handleOnboardingNext();
@@ -512,9 +510,9 @@ describe("onboarding finish locking", () => {
 
     await waitForOnboardingOptions(requireApi);
     await act(async () => {
-      configureOnboardingConnection(requireApi());
+      configureOnboardingProviders(requireApi());
     });
-    await advanceToSenses(requireApi);
+    await advanceToPermissions(requireApi);
 
     await act(async () => {
       await api?.handleOnboardingNext();
@@ -556,9 +554,9 @@ describe("onboarding finish locking", () => {
 
     await waitForOnboardingOptions(requireApi);
     await act(async () => {
-      configureOnboardingConnection(requireApi());
+      configureOnboardingProviders(requireApi());
     });
-    await advanceToActivate(requireApi);
+    await advanceToLaunch(requireApi);
 
     await act(async () => {
       await api?.handleOnboardingNext();
@@ -640,9 +638,9 @@ describe("onboarding finish locking", () => {
 
     await waitForOnboardingOptions(requireApi);
     await act(async () => {
-      configureOnboardingConnection(requireApi());
+      configureOnboardingProviders(requireApi());
     });
-    await advanceToActivate(requireApi);
+    await advanceToLaunch(requireApi);
 
     await act(async () => {
       await api?.handleOnboardingNext();

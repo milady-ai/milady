@@ -152,8 +152,8 @@ describe("ConversationsSidebar game-modal variant", () => {
     await act(async () => {
       newChatButtons[0].props.onClick();
     });
-    expect(handleStartDraftConversation).toHaveBeenCalledTimes(1);
-    expect(handleNewConversation).not.toHaveBeenCalled();
+    expect(handleNewConversation).toHaveBeenCalledTimes(1);
+    expect(handleStartDraftConversation).not.toHaveBeenCalled();
 
     const convItems = tree?.root.findAll(
       (node) =>

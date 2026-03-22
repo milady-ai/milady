@@ -268,9 +268,9 @@ describe("ConnectionStep", () => {
     });
 
     const text = collectText(tree?.root as TestRenderer.ReactTestInstance);
-    // Should show provider name and change button
+    // Should show provider name and back/confirm buttons
     expect(text).toContain("OpenAI");
-    expect(text).toContain("settings.change");
+    expect(text).toContain("onboarding.back");
   });
 
   it("renders remote backend fields for self-hosted cloud connections", async () => {

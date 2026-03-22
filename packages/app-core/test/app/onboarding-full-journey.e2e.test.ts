@@ -147,8 +147,7 @@ vi.mock("@miladyai/app-core/components", async () => {
     Header: () => React.createElement("div", null, "Header"),
     InventoryView: () => React.createElement("div", null, "InventoryView"),
     KnowledgeView: () => React.createElement("div", null, "KnowledgeView"),
-    LifoSandboxView: () =>
-      React.createElement("div", null, "LifoSandboxView"),
+    LifoSandboxView: () => React.createElement("div", null, "LifoSandboxView"),
     OnboardingWizard: () => {
       const state = mockUseApp();
       if (state.onboardingStep === "welcome") {
@@ -273,20 +272,17 @@ vi.mock("@miladyai/app-core/src/components/CommandPalette", () => ({
 vi.mock("@miladyai/app-core/src/components/EmotePicker", () => ({
   EmotePicker: () => React.createElement("div", null, "EmotePicker"),
 }));
-vi.mock(
-  "@miladyai/app-core/src/components/onboarding/PermissionsStep",
-  () => ({
-    PermissionsStep: () =>
-      React.createElement(
-        "button",
-        {
-          onClick: () => mockUseApp().handleOnboardingNext(),
-          type: "button",
-        },
-        "permissions-continue",
-      ),
-  }),
-);
+vi.mock("@miladyai/app-core/src/components/onboarding/PermissionsStep", () => ({
+  PermissionsStep: () =>
+    React.createElement(
+      "button",
+      {
+        onClick: () => mockUseApp().handleOnboardingNext(),
+        type: "button",
+      },
+      "permissions-continue",
+    ),
+}));
 vi.mock("@miladyai/app-core/src/components/ConversationsSidebar", () => ({
   ConversationsSidebar: () =>
     React.createElement("div", null, "ConversationsSidebar"),
@@ -303,8 +299,7 @@ vi.mock("@miladyai/app-core/src/components/AppsPageView", () => ({
   AppsPageView: () => React.createElement("div", null, "AppsPageView"),
 }));
 vi.mock("@miladyai/app-core/src/components/AdvancedPageView", () => ({
-  AdvancedPageView: () =>
-    React.createElement("div", null, "AdvancedPageView"),
+  AdvancedPageView: () => React.createElement("div", null, "AdvancedPageView"),
 }));
 vi.mock("@miladyai/app-core/src/components/CharacterEditor", () => ({
   CharacterEditor: () => React.createElement("div", null, "CharacterEditor"),
@@ -323,8 +318,7 @@ vi.mock("@miladyai/app-core/src/components/KnowledgeView", () => ({
   KnowledgeView: () => React.createElement("div", null, "KnowledgeView"),
 }));
 vi.mock("@miladyai/app-core/src/components/LifoSandboxView", () => ({
-  LifoSandboxView: () =>
-    React.createElement("div", null, "LifoSandboxView"),
+  LifoSandboxView: () => React.createElement("div", null, "LifoSandboxView"),
 }));
 vi.mock("@miladyai/app-core/src/components/PairingView", () => ({
   PairingView: () => React.createElement("div", null, "PairingView"),

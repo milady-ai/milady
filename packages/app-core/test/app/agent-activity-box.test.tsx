@@ -1,8 +1,8 @@
 import type { CodingAgentSession } from "@miladyai/app-core/api";
+import { AgentActivityBox } from "@miladyai/app-core/components/AgentActivityBox";
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { describe, expect, it } from "vitest";
-import { AgentActivityBox } from "@miladyai/app-core/components/AgentActivityBox";
 
 function makeSession(
   overrides: Partial<CodingAgentSession> = {},

@@ -53,9 +53,7 @@ describe("PairingView", () => {
     expect(listItems).toContain("pairingview.EnablePairingOnTh");
 
     const docsLink = tree.root.find((node) => node.type === "a");
-    expect(docsLink.props.href).toContain(
-      "docs/api-reference.mdx",
-    );
+    expect(docsLink.props.href).toContain("docs/api-reference.mdx");
     expect(docsLink.children.join("")).toBe("pairingview.PairingSetupDocs");
   });
 

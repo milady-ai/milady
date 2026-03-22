@@ -1,5 +1,5 @@
-import * as THREE from "three";
 import type { VRM } from "@pixiv/three-vrm";
+import * as THREE from "three";
 
 /** Three.js NodeMaterial exposes emissiveNode/opacityNode but they are not in public MeshStandardMaterial types. */
 interface MeshStandardMaterialWithNodeProps {
@@ -285,9 +285,14 @@ export class VrmTeleportEffect {
 varying vec3 vTeleportWorldPosition;
 ${shader.vertexShader}
 `.replace(
-            "#include <worldpos_vertex>",
-            `#include <worldpos_vertex>
-vTeleportWorldPosition = worldPosition.xyz;`,
+            "#include <project_vertex>",
+            `vec4 teleportWorldPosTemp = vec4( transformed, 1.0 );
+#ifdef USE_INSTANCING
+teleportWorldPosTemp = instanceMatrix * teleportWorldPosTemp;
+#endif
+teleportWorldPosTemp = modelMatrix * teleportWorldPosTemp;
+vTeleportWorldPosition = teleportWorldPosTemp.xyz;
+#include <project_vertex>`,
           );
           shader.fragmentShader = `
 uniform float uTeleportProgress;

@@ -1,0 +1,1220 @@
+
+ RUN  v2.1.9 /Users/shawwalters/eliza-workspace/milady/apps/app
+
+ ↓ ../../packages/app-core/test/app/character-customization.e2e.test.ts (31 tests | 31 skipped)
+ ↓ ../../packages/app-core/test/app/milady-bar-settings.test.tsx (46 tests | 46 skipped)
+ ↓ ../../packages/app-core/test/app/milady-bar-regression.test.tsx (28 tests | 28 skipped)
+ ↓ ../../packages/app-core/test/app/milady-bar.test.tsx (32 tests | 32 skipped)
+ ↓ ../../packages/app-core/test/app/character-save-journey.test.ts (49 tests | 49 skipped)
+ ✓ ../../packages/app-core/test/app/autonomous-workflows.e2e.test.ts (28 tests) 47ms
+ ✓ ../../packages/app-core/test/app/chat-journey.test.ts (16 tests) 144ms
+ ✓ ../../packages/app-core/test/app/chat-send-lock.test.ts (17 tests) 167ms
+ ✓ ../../packages/app-core/test/app/app-context-autonomy-events.test.ts (3 tests) 111ms
+ ✓ ../../packages/app-core/test/app/settings-sections.e2e.test.ts (18 tests) 144ms
+ ✓ ../../packages/app-core/test/app/chat-view.test.tsx (18 tests) 112ms
+ ✓ ../../packages/app-core/test/app/chat-advanced-features.e2e.test.ts (24 tests) 68ms
+ ✓ ../../packages/app-core/test/app/plugins-view-game-modal.test.tsx (11 tests) 101ms
+ ✓ ../../packages/app-core/test/app/settings-reset.e2e.test.ts (14 tests) 97ms
+ ✓ ../../packages/app-core/test/app/PermissionsSection.test.tsx (9 tests) 113ms
+ ✓ ../../packages/app-core/test/app/chat-view-game-modal.test.tsx (15 tests) 82ms
+ ✓ ../../packages/app-core/test/app/apps-view.test.ts (10 tests) 143ms
+ ↓ ../../packages/app-core/test/app/triggers-view.e2e.test.ts (1 test | 1 skipped)
+stdout | test/app/onboarding-step-resume.test.tsx > AppProvider onboarding step resume > starts at initial onboarding step when forced fresh onboarding is enabled
+PROBE RENDER: true welcome  
+APP STATE: starting-backend loading null
+
+ ✓ test/app/onboarding-step-resume.test.tsx (6 tests | 4 skipped) 69ms
+ ✓ ../../packages/app-core/test/app/shell-mode-switching.e2e.test.ts (8 tests) 136ms
+ ✓ ../../packages/app-core/test/app/startup-onboarding.e2e.test.ts (4 tests) 61ms
+ ✓ ../../packages/app-core/test/app/onboarding-full-journey.e2e.test.ts (9 tests) 153ms
+ ✓ ../../packages/app-core/test/app/pages-navigation-smoke.e2e.test.ts (4 tests) 102ms
+ ✓ ../../packages/app-core/test/app/export-import-flows.e2e.test.ts (23 tests) 238ms
+ ✓ ../../packages/app-core/test/app/onboarding-e2e-journey.test.ts (29 tests) 225ms
+ ✓ ../../packages/app-core/test/app/plugins-ui.e2e.test.ts (18 tests) 170ms
+ ✓ ../../packages/app-core/test/app/onboarding-finish-lock.test.ts (6 tests) 3130ms
+   ✓ onboarding finish locking > requires permissions check before finishing unless user explicitly skips 1022ms
+   ✓ onboarding finish locking > does not create an empty conversation after onboarding completes 1019ms
+   ✓ onboarding finish locking > waits for the restarted agent before restoring an empty conversation greeting 1035ms
+ ✓ ../../packages/app-core/test/app/companion-view.test.tsx (12 tests) 232ms
+ ✓ ../../packages/app-core/test/app/knowledge-ui.e2e.test.ts (19 tests) 274ms
+ ✓ ../../packages/app-core/test/app/PermissionsOnboarding.test.tsx (5 tests) 71ms
+ ✓ ../../packages/app-core/test/app/connectors-ui.e2e.test.ts (12 tests) 135ms
+ ✓ ../../packages/app-core/test/app/wallet-ui-flows.e2e.test.ts (17 tests) 71ms
+ ✓ ../../packages/app-core/test/app/cloud-login-flow.e2e.test.ts (16 tests) 178ms
+ ✓ ../../packages/app-core/test/app/advanced-trajectory-fine-tuning.e2e.test.ts (2 tests) 50ms
+ ✓ ../../packages/app-core/test/app/companion-greeting-wave.test.tsx (2 tests) 151ms
+ ✓ ../../packages/app-core/test/app/companion-stale-conversation.test.tsx (2 tests) 205ms
+ ✓ ../../packages/app-core/test/app/cloud-login-lock.test.ts (4 tests) 289ms
+ ✓ ../../packages/app-core/test/app/game-view.test.ts (9 tests) 101ms
+ ✓ ../../packages/app-core/test/app/startup-conversation-restore.test.tsx (2 tests) 147ms
+ ✓ ../../packages/app-core/test/app/vrm-viewer.test.tsx (4 tests) 164ms
+stdout | ../../packages/app-core/test/app/fine-tuning-view.test.ts > FineTuningView > builds dataset from form inputs
+TREE DUMP: {
+  "type": "div",
+  "props": {
+    "className": "space-y-6 pb-8"
+  },
+  "children": [
+    {
+      "type": "section",
+      "props": {
+        "className": "border border-border bg-card p-4"
+      },
+      "children": [
+        {
+          "type": "div",
+          "props": {
+            "className": "flex items-center justify-between gap-3"
+          },
+          "children": [
+            {
+              "type": "div",
+              "props": {},
+              "children": [
+                {
+                  "type": "h2",
+                  "props": {
+                    "className": "text-lg font-semibold"
+                  },
+                  "children": [
+                    "finetuningview.FineTuning"
+                  ]
+                },
+                {
+                  "type": "p",
+                  "props": {
+                    "className": "text-xs text-muted mt-1"
+                  },
+                  "children": [
+                    "finetuningview.BuildDatasetsFrom"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "button",
+              "props": {
+                "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-bg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-border bg-card hover:bg-bg-hover rounded-md px-3 py-1 h-7 text-xs shadow-sm hover:border-accent",
+                "ref": null
+              },
+              "children": [
+                "finetuningview.RefreshAll"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "props": {
+        "className": "border border-border bg-card p-4"
+      },
+      "children": [
+        {
+          "type": "h3",
+          "props": {
+            "className": "text-sm font-bold mb-3"
+          },
+          "children": [
+            "finetuningview.Status"
+          ]
+        },
+        {
+          "type": "div",
+          "props": {
+            "className": "grid grid-cols-2 md:grid-cols-6 gap-2 text-xs"
+          },
+          "children": [
+            {
+              "type": "div",
+              "props": {},
+              "children": [
+                "finetuningview.Runtime",
+                " ",
+                "ready"
+              ]
+            },
+            {
+              "type": "div",
+              "props": {},
+              "children": [
+                "finetuningview.RunningJobs",
+                " ",
+                "0"
+              ]
+            },
+            {
+              "type": "div",
+              "props": {},
+              "children": [
+                "finetuningview.QueuedJobs",
+                " ",
+                "0"
+              ]
+            },
+            {
+              "type": "div",
+              "props": {},
+              "children": [
+                "finetuningview.Datasets",
+                " ",
+                "1"
+              ]
+            },
+            {
+              "type": "div",
+              "props": {},
+              "children": [
+                "finetuningview.Models",
+                " ",
+                "1"
+              ]
+            },
+            {
+              "type": "div",
+              "props": {},
+              "children": [
+                "finetuningview.FailedJobs",
+                " ",
+                "0"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "props": {
+        "className": "border border-border bg-card p-4"
+      },
+      "children": [
+        {
+          "type": "div",
+          "props": {
+            "className": "flex items-center justify-between gap-3 mb-3"
+          },
+          "children": [
+            {
+              "type": "h3",
+              "props": {
+                "className": "text-sm font-bold"
+              },
+              "children": [
+                "finetuningview.Trajectories"
+              ]
+            },
+            {
+              "type": "button",
+              "props": {
+                "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-bg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-border bg-card hover:bg-bg-hover rounded-md px-2 py-1 h-6 text-xs shadow-sm hover:border-accent",
+                "ref": null
+              },
+              "children": [
+                "common.refresh"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "div",
+          "props": {
+            "className": "space-y-3"
+          },
+          "children": [
+            {
+              "type": "div",
+              "props": {
+                "className": "text-xs text-muted"
+              },
+              "children": [
+                "1",
+                " ",
+                "finetuningview.trajectoryRowsAvai"
+              ]
+            },
+            {
+              "type": "div",
+              "props": {
+                "className": "grid grid-cols-1 xl:grid-cols-2 gap-4"
+              },
+              "children": [
+                {
+                  "type": "div",
+                  "props": {
+                    "className": "border border-border"
+                  },
+                  "children": [
+                    {
+                      "type": "div",
+                      "props": {
+                        "className": "px-2 py-1 text-[11px] border-b border-border text-muted"
+                      },
+                      "children": [
+                        "finetuningview.LatestTrajectories"
+                      ]
+                    },
+                    {
+                      "type": "div",
+                      "props": {
+                        "className": "max-h-72 overflow-auto"
+                      },
+                      "children": [
+                        {
+                          "type": "button",
+                          "props": {
+                            "className": "inline-flex gap-2 whitespace-nowrap font-medium ring-offset-bg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-txt w-full h-auto text-left justify-start flex-col items-start px-2 py-2 border-b border-border rounded-none hover:bg-bg-hover text-xs",
+                            "ref": null
+                          },
+                          "children": [
+                            {
+                              "type": "div",
+                              "props": {
+                                "className": "font-mono"
+                              },
+                              "children": [
+                                "trajectory-1"
+                              ]
+                            },
+                            {
+                              "type": "div",
+                              "props": {
+                                "className": "text-muted mt-1"
+                              },
+                              "children": [
+                                "finetuningview.Calls",
+                                " ",
+                                "3",
+                                " ",
+                                "finetuningview.Reward",
+                                " ",
+                                "2",
+                                " ·",
+                                " ",
+                                "12/31/1969, 4:00:00 PM"
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "div",
+                  "props": {
+                    "className": "border border-border p-2"
+                  },
+                  "children": [
+                    {
+                      "type": "div",
+                      "props": {
+                        "className": "text-[11px] text-muted mb-2"
+                      },
+                      "children": [
+                        "finetuningview.SelectedTrajectory"
+                      ]
+                    },
+                    {
+                      "type": "div",
+                      "props": {
+                        "className": "text-xs text-muted"
+                      },
+                      "children": [
+                        "finetuningview.ChooseATrajectory"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "props": {
+        "className": "border border-border bg-card p-4"
+      },
+      "children": [
+        {
+          "type": "h3",
+          "props": {
+            "className": "text-sm font-bold mb-3"
+          },
+          "children": [
+            "finetuningview.Datasets1"
+          ]
+        },
+        {
+          "type": "div",
+          "props": {
+            "className": "grid grid-cols-1 md:grid-cols-4 gap-2 mb-3"
+          },
+          "children": [
+            {
+              "type": "input",
+              "props": {
+                "className": "flex w-full rounded-md border ring-offset-bg file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 px-2 py-1 h-8 text-sm bg-bg border-border focus-visible:ring-accent",
+                "ref": null,
+                "value": "250",
+                "placeholder": "Limit trajectories"
+              },
+              "children": null
+            },
+            {
+              "type": "input",
+              "props": {
+                "className": "flex w-full rounded-md border ring-offset-bg file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 px-2 py-1 h-8 text-sm bg-bg border-border focus-visible:ring-accent",
+                "ref": null,
+                "value": "1",
+                "placeholder": "Min LLM calls per trajectory"
+              },
+              "children": null
+            },
+            {
+              "type": "button",
+              "props": {
+                "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-bg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-border bg-card hover:bg-bg-hover rounded-md px-3 py-1 h-8 text-xs shadow-sm hover:border-accent disabled:opacity-50",
+                "ref": null,
+                "disabled": false
+              },
+              "children": [
+                "Build Dataset"
+              ]
+            },
+            {
+              "type": "button",
+              "props": {
+                "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-bg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-border bg-card hover:bg-bg-hover rounded-md px-3 py-1 h-8 text-xs shadow-sm hover:border-accent",
+                "ref": null
+              },
+              "children": [
+                "finetuningview.RefreshDatasets"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "div",
+          "props": {
+            "className": "space-y-2 max-h-52 overflow-auto"
+          },
+          "children": [
+            {
+              "type": "label",
+              "props": {
+                "className": "flex items-center gap-2 text-xs border border-border px-2 py-2 cursor-pointer"
+              },
+              "children": [
+                {
+                  "type": "input",
+                  "props": {
+                    "type": "radio",
+                    "name": "dataset-select",
+                    "checked": true
+                  },
+                  "children": null
+                },
+                {
+                  "type": "span",
+                  "props": {
+                    "className": "font-mono"
+                  },
+                  "children": [
+                    "dataset-1"
+                  ]
+                },
+                {
+                  "type": "span",
+                  "props": {
+                    "className": "text-muted"
+                  },
+                  "children": [
+                    "42",
+                    " ",
+                    "finetuningview.samples",
+                    " ",
+                    "11",
+                    " ",
+                    "finetuningview.trajectories"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "props": {
+        "className": "border border-border bg-card p-4"
+      },
+      "children": [
+        {
+          "type": "h3",
+          "props": {
+            "className": "text-sm font-bold mb-3"
+          },
+          "children": [
+            "finetuningview.TrainingJobs"
+          ]
+        },
+        {
+          "type": "div",
+          "props": {
+            "className": "grid grid-cols-1 md:grid-cols-3 gap-2 mb-3"
+          },
+          "children": [
+            {
+              "type": "select",
+              "props": {
+                "className": "px-2 py-1 border border-border bg-bg text-sm",
+                "value": "dataset-1"
+              },
+              "children": [
+                {
+                  "type": "option",
+                  "props": {
+                    "value": ""
+                  },
+                  "children": [
+                    "finetuningview.AutoBuildDatasetF"
+                  ]
+                },
+                {
+                  "type": "option",
+                  "props": {
+                    "value": "dataset-1"
+                  },
+                  "children": [
+                    "dataset-1"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "select",
+              "props": {
+                "className": "px-2 py-1 border border-border bg-bg text-sm",
+                "value": "cpu"
+              },
+              "children": [
+                {
+                  "type": "option",
+                  "props": {
+                    "value": "cpu"
+                  },
+                  "children": [
+                    "finetuningview.cpu"
+                  ]
+                },
+                {
+                  "type": "option",
+                  "props": {
+                    "value": "mlx"
+                  },
+                  "children": [
+                    "finetuningview.mlx"
+                  ]
+                },
+                {
+                  "type": "option",
+                  "props": {
+                    "value": "cuda"
+                  },
+                  "children": [
+                    "finetuningview.cuda"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "input",
+              "props": {
+                "className": "flex w-full rounded-md border ring-offset-bg file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 px-2 py-1 h-8 text-sm bg-bg border-border focus-visible:ring-accent",
+                "ref": null,
+                "value": "",
+                "placeholder": "finetuningview.BaseModelOptional"
+              },
+              "children": null
+            },
+            {
+              "type": "input",
+              "props": {
+                "className": "flex w-full rounded-md border ring-offset-bg file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 px-2 py-1 h-8 text-sm bg-bg border-border focus-visible:ring-accent",
+                "ref": null,
+                "value": "",
+                "placeholder": "finetuningview.IterationsOptional"
+              },
+              "children": null
+            },
+            {
+              "type": "input",
+              "props": {
+                "className": "flex w-full rounded-md border ring-offset-bg file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 px-2 py-1 h-8 text-sm bg-bg border-border focus-visible:ring-accent",
+                "ref": null,
+                "value": "",
+                "placeholder": "finetuningview.BatchSizeOptional"
+              },
+              "children": null
+            },
+            {
+              "type": "input",
+              "props": {
+                "className": "flex w-full rounded-md border ring-offset-bg file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 px-2 py-1 h-8 text-sm bg-bg border-border focus-visible:ring-accent",
+                "ref": null,
+                "value": "",
+                "placeholder": "finetuningview.LearningRateOptio"
+              },
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "div",
+          "props": {
+            "className": "flex gap-2 mb-3"
+          },
+          "children": [
+            {
+              "type": "button",
+              "props": {
+                "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-bg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-border bg-card hover:bg-bg-hover rounded-md px-3 py-1 h-8 text-xs shadow-sm hover:border-accent disabled:opacity-50",
+                "ref": null,
+                "disabled": true
+              },
+              "children": [
+                "Start Training Job"
+              ]
+            },
+            {
+              "type": "button",
+              "props": {
+                "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-bg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-border bg-card hover:bg-bg-hover rounded-md px-3 py-1 h-8 text-xs shadow-sm hover:border-accent",
+                "ref": null
+              },
+              "children": [
+                "finetuningview.RefreshJobs"
+              ]
+            },
+            {
+              "type": "div",
+              "props": {
+                "className": "text-xs text-warn flex items-center"
+              },
+              "children": [
+                "finetuningview.ActiveJob",
+                " ",
+                {
+                  "type": "span",
+                  "props": {
+                    "className": "font-mono ml-1"
+                  },
+                  "children": [
+                    "job-1"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "div",
+          "props": {
+            "className": "grid grid-cols-1 xl:grid-cols-2 gap-4"
+          },
+          "children": [
+            {
+              "type": "div",
+              "props": {
+                "className": "border border-border max-h-72 overflow-auto"
+              },
+              "children": [
+                {
+                  "type": "div",
+                  "props": {
+                    "className": "px-2 py-2 border-b border-border text-xs bg-bg-hover"
+                  },
+                  "children": [
+                    {
+                      "type": "div",
+                      "props": {
+                        "className": "flex items-center justify-between gap-2"
+                      },
+                      "children": [
+                        {
+                          "type": "button",
+                          "props": {
+                            "className": "inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-bg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-primary underline-offset-4 hover:underline font-mono text-left w-auto h-auto p-0 justify-start",
+                            "ref": null
+                          },
+                          "children": [
+                            "job-1"
+                          ]
+                        },
+                        {
+                          "type": "button",
+                          "props": {
+                            "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-bg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border bg-card rounded-md px-2 py-0.5 h-6 text-[11px] border-border hover:border-danger hover:bg-danger/10 text-danger shadow-sm disabled:opacity-50",
+                            "ref": null,
+                            "disabled": false
+                          },
+                          "children": [
+                            "Cancel"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "div",
+                      "props": {
+                        "className": "text-muted mt-1"
+                      },
+                      "children": [
+                        "running",
+                        " · ",
+                        "40%",
+                        " · ",
+                        "training"
+                      ]
+                    },
+                    {
+                      "type": "div",
+                      "props": {
+                        "className": "text-muted"
+                      },
+                      "children": [
+                        "12/31/1969, 4:00:00 PM"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "div",
+              "props": {
+                "className": "border border-border p-2"
+              },
+              "children": [
+                {
+                  "type": "div",
+                  "props": {
+                    "className": "text-[11px] text-muted mb-2"
+                  },
+                  "children": [
+                    "finetuningview.SelectedJobLogs"
+                  ]
+                },
+                {
+                  "type": "div",
+                  "props": {
+                    "className": "space-y-2"
+                  },
+                  "children": [
+                    {
+                      "type": "div",
+                      "props": {
+                        "className": "text-xs"
+                      },
+                      "children": [
+                        {
+                          "type": "span",
+                          "props": {
+                            "className": "font-semibold"
+                          },
+                          "children": [
+                            "finetuningview.Status1"
+                          ]
+                        },
+                        " ",
+                        "running",
+                        " · ",
+                        "40%",
+                        " ",
+                        "· ",
+                        "training"
+                      ]
+                    },
+                    {
+                      "type": "div",
+                      "props": {
+                        "className": "text-xs"
+                      },
+                      "children": [
+                        {
+                          "type": "span",
+                          "props": {
+                            "className": "font-semibold"
+                          },
+                          "children": [
+                            "finetuningview.Dataset"
+                          ]
+                        },
+                        " ",
+                        {
+                          "type": "span",
+                          "props": {
+                            "className": "font-mono"
+                          },
+                          "children": [
+                            "dataset-1"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "textarea",
+                      "props": {
+                        "readOnly": true,
+                        "value": "training step 1",
+                        "className": "w-full min-h-56 px-2 py-1 border border-border bg-bg text-[11px] font-mono"
+                      },
+                      "children": null
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "props": {
+        "className": "border border-border bg-card p-4"
+      },
+      "children": [
+        {
+          "type": "h3",
+          "props": {
+            "className": "text-sm font-bold mb-3"
+          },
+          "children": [
+            "finetuningview.TrainedModels"
+          ]
+        },
+        {
+          "type": "div",
+          "props": {
+            "className": "grid grid-cols-1 xl:grid-cols-2 gap-4"
+          },
+          "children": [
+            {
+              "type": "div",
+              "props": {
+                "className": "border border-border max-h-72 overflow-auto"
+              },
+              "children": [
+                {
+                  "type": "button",
+                  "props": {
+                    "className": "inline-flex gap-2 whitespace-nowrap font-medium ring-offset-bg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-bg-accent hover:text-txt w-full h-auto text-left justify-start flex-col items-start px-2 py-2 border-b border-border rounded-none text-xs bg-bg-hover",
+                    "ref": null
+                  },
+                  "children": [
+                    {
+                      "type": "div",
+                      "props": {
+                        "className": "font-mono"
+                      },
+                      "children": [
+                        "model-1",
+                        " "
+                      ]
+                    },
+                    {
+                      "type": "div",
+                      "props": {
+                        "className": "text-muted mt-1"
+                      },
+                      "children": [
+                        "finetuningview.backend",
+                        " ",
+                        "cpu"
+                      ]
+                    },
+                    {
+                      "type": "div",
+                      "props": {
+                        "className": "text-muted"
+                      },
+                      "children": [
+                        "finetuningview.benchmark",
+                        " ",
+                        "not_run"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "div",
+              "props": {
+                "className": "border border-border p-2"
+              },
+              "children": [
+                {
+                  "type": "div",
+                  "props": {
+                    "className": "text-[11px] text-muted mb-2"
+                  },
+                  "children": [
+                    "finetuningview.ModelActions"
+                  ]
+                },
+                {
+                  "type": "div",
+                  "props": {
+                    "className": "space-y-2"
+                  },
+                  "children": [
+                    {
+                      "type": "div",
+                      "props": {
+                        "className": "text-xs"
+                      },
+                      "children": [
+                        {
+                          "type": "span",
+                          "props": {
+                            "className": "font-semibold"
+                          },
+                          "children": [
+                            "finetuningview.Model"
+                          ]
+                        },
+                        " ",
+                        {
+                          "type": "span",
+                          "props": {
+                            "className": "font-mono"
+                          },
+                          "children": [
+                            "model-1"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "div",
+                      "props": {
+                        "className": "text-xs"
+                      },
+                      "children": [
+                        {
+                          "type": "span",
+                          "props": {
+                            "className": "font-semibold"
+                          },
+                          "children": [
+                            "finetuningview.AdapterPath"
+                          ]
+                        },
+                        " ",
+                        {
+                          "type": "span",
+                          "props": {
+                            "className": "font-mono"
+                          },
+                          "children": [
+                            "/tmp/out/adapter"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "input",
+                      "props": {
+                        "className": "flex rounded-md border ring-offset-bg file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full px-2 py-1 h-8 text-sm bg-bg border-border focus-visible:ring-accent",
+                        "ref": null,
+                        "value": "",
+                        "placeholder": "Ollama model name (optional)"
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "input",
+                      "props": {
+                        "className": "flex rounded-md border ring-offset-bg file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full px-2 py-1 h-8 text-sm bg-bg border-border focus-visible:ring-accent",
+                        "ref": null,
+                        "value": "",
+                        "placeholder": "Base model for Ollama (optional)"
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "input",
+                      "props": {
+                        "className": "flex rounded-md border ring-offset-bg file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full px-2 py-1 h-8 text-sm bg-bg border-border focus-visible:ring-accent",
+                        "ref": null,
+                        "value": "http://localhost:11434",
+                        "placeholder": "finetuningview.OllamaURL"
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "button",
+                      "props": {
+                        "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-bg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-border bg-card hover:bg-bg-hover rounded-md px-3 py-1 h-8 text-xs shadow-sm hover:border-accent disabled:opacity-50",
+                        "ref": null,
+                        "disabled": false
+                      },
+                      "children": [
+                        "Import To Ollama"
+                      ]
+                    },
+                    {
+                      "type": "input",
+                      "props": {
+                        "className": "flex rounded-md border ring-offset-bg file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full px-2 py-1 h-8 text-sm bg-bg border-border focus-visible:ring-accent",
+                        "ref": null,
+                        "value": "",
+                        "placeholder": "Provider model (e.g. \"ollama/my-model\")"
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "div",
+                      "props": {
+                        "className": "flex gap-2"
+                      },
+                      "children": [
+                        {
+                          "type": "button",
+                          "props": {
+                            "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-bg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-border bg-card hover:bg-bg-hover rounded-md px-3 py-1 h-8 text-xs shadow-sm hover:border-accent disabled:opacity-50",
+                            "ref": null,
+                            "disabled": false
+                          },
+                          "children": [
+                            "Activate Model"
+                          ]
+                        },
+                        {
+                          "type": "button",
+                          "props": {
+                            "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-bg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-border bg-card hover:bg-bg-hover rounded-md px-3 py-1 h-8 text-xs shadow-sm hover:border-accent disabled:opacity-50",
+                            "ref": null,
+                            "disabled": false
+                          },
+                          "children": [
+                            "Benchmark"
+                          ]
+                        },
+                        {
+                          "type": "button",
+                          "props": {
+                            "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-bg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-border bg-card hover:bg-bg-hover rounded-md px-3 py-1 h-8 text-xs shadow-sm hover:border-accent disabled:opacity-50",
+                            "ref": null,
+                            "disabled": false
+                          },
+                          "children": [
+                            "Run Smoke Prompt"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "props": {
+        "className": "border border-border bg-card p-4"
+      },
+      "children": [
+        {
+          "type": "h3",
+          "props": {
+            "className": "text-sm font-bold mb-3"
+          },
+          "children": [
+            "finetuningview.LiveTrainingEvents"
+          ]
+        },
+        {
+          "type": "div",
+          "props": {
+            "className": "max-h-56 overflow-auto border border-border"
+          },
+          "children": [
+            {
+              "type": "div",
+              "props": {
+                "className": "p-3 text-xs text-muted"
+              },
+              "children": [
+                "finetuningview.NoLiveEventsYet"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+ ✓ test/plugins/desktop.test.ts (38 tests) 87ms
+ ✓ ../../packages/app-core/test/app/custom-actions-smoke.test.ts (1 test) 153ms
+ ✓ ../../packages/app-core/test/app/vrm-stage.test.tsx (7 tests) 108ms
+ ✓ ../../packages/app-core/test/app/fine-tuning-view.test.ts (6 tests) 508ms
+ ✓ test/app/character-editor-regressions.test.tsx (2 tests) 114ms
+ ✓ test/app/talkmode-electrobun-rpc.test.ts (2 tests) 9ms
+ ✓ ../../packages/app-core/test/app/startup-chat.e2e.test.ts (6 tests) 85ms
+ ✓ test/app/swabble-web-rpc.test.ts (2 tests) 7ms
+ ✓ test/app/detached-shell-root.test.tsx (11 tests) 105ms
+ ✓ test/app/swabble-electrobun-rpc.test.ts (2 tests) 34ms
+ ✓ ../../packages/app-core/test/app/vector-browser.async-cleanup.test.tsx (1 test) 385ms
+   ✓ VectorBrowserView async cleanup > disposes the renderer if the component unmounts during canvas attach 384ms
+ ✓ ../../packages/app-core/test/app/wallet-api-save-lock.test.ts (2 tests) 126ms
+ ✓ ../../packages/app-core/test/app/agent-transfer-lock.test.ts (2 tests) 72ms
+ ✓ test/plugins/location.test.ts (16 tests) 30ms
+ ✓ ../../packages/app-core/test/app/lifecycle-lock.test.ts (2 tests) 145ms
+ ✓ ../../packages/app-core/test/app/conversations-sidebar-game-modal.test.tsx (2 tests) 67ms
+ ✓ ../../packages/app-core/test/app/trajectories-view.test.tsx (2 tests) 82ms
+ ✓ ../../packages/app-core/test/app/update-channel-lock.test.ts (2 tests) 101ms
+ ✓ ../../packages/app-core/test/app/pairing-lock.test.ts (2 tests) 129ms
+ ✓ test/plugins/swabble.test.ts (11 tests) 8ms
+ ✓ test/plugins/canvas.test.ts (15 tests) 38ms
+ ✓ test/app/desktop-permissions-client.test.ts (2 tests) 6ms
+ ✓ ../../packages/app-core/test/app/lifo-popout-utils.test.ts (32 tests) 22ms
+ ✓ ../../packages/app-core/test/app/chat-message.test.tsx (5 tests) 126ms
+ ✓ ../../packages/app-core/test/app/command-palette.test.tsx (3 tests) 48ms
+ ✓ ../../packages/app-core/test/app/header-status.test.tsx (3 tests) 44ms
+ ✓ test/plugins/talkmode.test.ts (14 tests) 9ms
+ ✓ ../../packages/app-core/test/app/connection-mode-persistence.test.ts (17 tests) 6672ms
+   ✓ fresh install detection (startup) > skips backend polling on fresh install (no persisted mode, no API base) 532ms
+   ✓ MiladyClient.provisionCloudSandbox > provisions a sandbox agent through create → provision → poll 4051ms
+   ✓ MiladyClient.provisionCloudSandbox > throws on provisioning failure 2003ms
+ ✓ test/app/location-electrobun-rpc.test.ts (3 tests) 10ms
+ ✓ test/app/desktop-tray-runtime.test.tsx (4 tests) 57ms
+ ✓ ../../packages/app-core/test/app/chat-composer.test.tsx (8 tests) 110ms
+ ✓ ../../packages/app-core/test/app/desktop-utils.test.ts (5 tests) 6ms
+ ✓ ../../packages/app-core/test/app/game-view-auth-session.test.tsx (1 test) 85ms
+ ✓ ../../packages/app-core/test/app/api-client-electron-fallback.test.ts (3 tests) 7ms
+ ✓ ../../packages/app-core/test/app/api-client-electrobun-fallback.test.ts (3 tests) 7ms
+ ✓ ../../packages/app-core/test/app/confirm-modal.test.tsx (6 tests) 90ms
+ ✓ test/app/character-roster-a11y.test.tsx (6 tests) 21ms
+ ✓ test/app/screencapture-electrobun-rpc.test.ts (3 tests) 7ms
+ ✓ ../../packages/app-core/test/app/settings-control-styles.test.tsx (6 tests) 36ms
+ ✓ ../../packages/app-core/test/onboarding/useAdvanceOnboardingWhenElizaCloudOAuthConnected.test.tsx (4 tests) 17ms
+ ✓ ../../packages/app-core/test/app/events.test.ts (7 tests) 6ms
+ ✓ test/plugins/screencapture.test.ts (9 tests) 8ms
+ ✓ ../../packages/app-core/test/app/bsc-trade-panel.test.tsx (2 tests) 95ms
+ ✓ ../../packages/app-core/test/app/startup-asset-missing.e2e.test.ts (1 test) 94ms
+ ✓ test/app/gateway-electrobun-rpc.test.ts (2 tests) 5ms
+ ✓ ../../packages/app-core/test/app/global-emote-overlay.test.tsx (2 tests) 78ms
+ ✓ ../../packages/app-core/test/app/startup-backend-missing.e2e.test.ts (1 test) 119ms
+ ✓ test/app/onboarding-reset.test.ts (2 tests) 8ms
+ ✓ ../../packages/app-core/test/app/startup-token-401.e2e.test.ts (1 test) 23ms
+ ✓ test/app/desktop-electrobun-rpc.test.ts (4 tests) 11ms
+ ✓ test/app/desktop-surface-navigation-runtime.test.tsx (3 tests) 14ms
+ ✓ ../../packages/app-core/test/app/api-client-ws.test.ts (2 tests) 4ms
+ ✓ ../../packages/app-core/test/app/shortcuts-overlay.test.tsx (3 tests) 17ms
+ ✓ ../../packages/app-core/test/app/plugin-bridge.test.ts (11 tests) 8ms
+ ✓ ../../packages/app-core/test/app/electrobun-rpc-bridge.test.ts (3 tests) 4ms
+ ✓ test/app/agent-web-electrobun-fallback.test.ts (1 test) 6ms
+ ✓ ../../packages/app-core/test/app/permissions-section.test.ts (31 tests) 12ms
+ ✓ ../../packages/app-core/test/app/companion-scene-host.test.tsx (1 test) 12ms
+ ✓ ../../packages/app-core/test/app/wallet-hooks.test.ts (29 tests) 20ms
+ ✓ ../../packages/app-core/test/app/open-external-url.test.ts (3 tests) 5ms
+ ✓ ../../packages/app-core/test/utils/eliza-globals.test.ts (6 tests) 8ms
+ ✓ ../../packages/app-core/test/app/avatar-selector.test.tsx (2 tests) 38ms
+ ✓ ../../packages/app-core/test/app/retake-capture.test.ts (2 tests) 33ms
+ ✓ ../../packages/app-core/test/app/stream-helpers.test.ts (1 test) 9ms
+ ✓ ../../packages/app-core/test/app/theme-toggle.test.tsx (1 test) 14ms
+ ✓ ../../packages/app-core/test/app/stream-status-bar.test.tsx (2 tests) 33ms
+ ✓ ../../packages/app-core/test/app/chat-stream-api-client.test.tsx (12 tests) 67ms
+ ✓ ../../packages/app-core/test/app/cloud-api.e2e.test.ts (7 tests) 57ms
+ ✓ ../../packages/app-core/test/app/stream-popout-navigation.test.tsx (1 test) 9ms
+ ✓ ../../packages/app-core/test/app/custom-avatar-api-client.test.ts (11 tests) 9ms
+ ✓ test/plugins/gateway.test.ts (27 tests) 15ms
+ ✓ test/plugins/camera.test.ts (35 tests) 11ms
+ ✓ ../../packages/app-core/test/app/vector-browser.e2e.test.ts (15 tests) 87ms
+ ✓ test/app/cloud-preference-patch.test.ts (8 tests) 8ms
+ ↓ ../../packages/app-core/test/capacitor-plugins.e2e.test.ts (48 tests | 48 skipped)
+ ✓ ../../packages/app-core/test/app/onboarding-steps.test.tsx (13 tests) 52ms
+ ✓ ../../packages/app-core/test/app/i18n.test.ts (10 tests) 20ms
+ ✓ ../../packages/app-core/test/app/memory-monitor.test.ts (10 tests) 5ms
+ ✓ ../../packages/app-core/test/avatar/voice-chat.test.ts (18 tests) 9ms
+ ✓ test/app/public-assets.test.ts (3 tests) 13ms
+ ✓ test/app/desktop-onboarding-runtime.test.tsx (2 tests) 17ms
+ ✓ ../../packages/app-core/test/app/chat-modal-view.test.tsx (4 tests) 18ms
+ ✓ ../../packages/app-core/test/app/inventory-bsc-view.test.ts (13 tests) 189ms
+ ✓ test/app/brand-gold.test.ts (5 tests) 4ms
+ ✓ ../../packages/app-core/test/avatar/avatar-selector.test.ts (14 tests) 5ms
+ ✓ ../../packages/app-core/test/app/autonomy-events.test.ts (6 tests) 6ms
+ ✓ ../../packages/app-core/test/app/triggers-navigation.test.ts (9 tests) 5ms
+ ✓ ../../packages/app-core/test/app/api-client.ws-reconnect.test.ts (4 tests) 7ms
+ ✓ ../../packages/app-core/test/app/AppContext.pty-sessions.test.tsx (11 tests) 4ms
+ ✓ ../../packages/app-core/test/app/bug-report-modal.test.tsx (14 tests) 122ms
+ ✓ ../../packages/app-core/test/app/training-api-client.test.ts (2 tests) 10ms
+ ✓ ../../packages/app-core/test/app/conversations-sidebar.test.tsx (3 tests) 40ms
+ ✓ ../../packages/app-core/test/avatar/mixamo-vrm-rig-map.test.ts (9 tests) 6ms
+ ✓ ../../packages/app-core/test/app/sse-interruption.test.ts (4 tests) 15ms
+ ✓ ../../packages/app-core/test/app/api-client.ws-max-reconnect.test.ts (4 tests) 8ms
+ ✓ ../../packages/app-core/test/app/agent-activity-box.test.tsx (6 tests) 19ms
+ ✓ ../../packages/app-core/test/avatar/voice-chat-streaming-text.test.ts (14 tests) 29ms
+ ✓ ../../packages/app-core/test/app/sandbox-api-client.test.ts (2 tests) 6ms
+ ✓ ../../packages/app-core/test/utils/assistant-text.test.ts (11 tests) 4ms
+ ✓ ../../packages/app-core/test/app/apps-page-view.test.ts (3 tests) 15ms
+ ✓ test/app/window-shell.test.ts (4 tests) 7ms
+ ✓ ../../packages/app-core/test/app/character-action-bar-visibility.test.ts (5 tests) 4ms
+ ✓ ../../packages/app-core/test/avatar/asset-url.test.ts (8 tests) 3ms
+ ✓ ../../packages/app-core/test/utils/streaming-text.test.ts (16 tests) 4ms
+ ✓ ../../packages/app-core/test/app/triggers-api-client.test.ts (2 tests) 5ms
+ ✓ ../../packages/app-core/test/app/chat-routine-filter.test.ts (11 tests) 9ms
+ ✓ ../../packages/app-core/test/app/pairing-view.test.tsx (2 tests) 18ms
+ ✓ ../../packages/app-core/test/app/command-registry.test.ts (7 tests) 5ms
+ ✓ test/bridge/electrobun-runtime.test.ts (4 tests) 3ms
+ ✓ ../../packages/app-core/test/app/api-client-timeout.test.ts (2 tests) 18ms
+ ✓ ../../packages/app-core/test/app/plugins-view-toggle-restart.test.ts (1 test) 41ms
+ ✓ test/app/config-page-wallet-rpc.test.ts (2 tests) 3ms
+ ✓ ../../packages/app-core/test/app/chat-language-header.test.ts (2 tests) 9ms
+ ✓ ../../packages/app-core/test/app/loading-screen.test.tsx (3 tests) 42ms
+ ✓ ../../packages/app-core/test/utils/package-exports.test.ts (27 tests) 5ms
+ ✓ ../../packages/app-core/test/app/shell-mode-tab-memory.test.tsx (4 tests) 2ms
+ ✓ ../../packages/app-core/test/app/startup-timeout.test.tsx (2 tests) 18ms
+ ✓ ../../packages/app-core/test/ui/command-palette-commands.test.ts (3 tests) 3ms
+ ✓ ../../packages/app-core/test/runtime/embedding-warmup-policy.test.ts (5 tests) 2ms
+ ✓ test/app/browser-surface.test.ts (3 tests) 4ms
+ ✓ test/electrobun-packaged/windows-bootstrap.test.ts (5 tests) 2ms
+ ✓ ../../packages/app-core/test/ui/ui-renderer.test.ts (5 tests) 3ms
+ ✓ ../../packages/app-core/test/state/agent-startup-timing.test.ts (3 tests) 3ms
+ ✓ ../../packages/app-core/test/runtime/milady-startup-overlay.test.ts (2 tests) 2ms
+ ✓ ../../packages/app-core/test/app/lifo-safe-endpoint.test.ts (7 tests) 2ms
+ ✓ ../../packages/app-core/test/runtime/embedding-presets-milady.test.ts (2 tests) 2ms
+ ✓ test/app/vite-config.test.ts (1 test) 132ms
+ ✓ ../../packages/app-core/test/app/knowledge-upload-helpers.test.ts (6 tests) 11ms
+ ✓ ../../packages/app-core/test/app/restart-banner.test.tsx (9 tests) 18ms
+ ✓ ../../packages/app-core/test/app/MessageContent.test.tsx (36 tests) 26ms
+ ✓ ../../packages/app-core/test/app/confirm-delete-control.test.ts (3 tests) 14ms
+ ✓ ../../packages/app-core/test/app/startup-failure-view.test.tsx (3 tests) 23ms
+ ✓ ../../packages/app-core/test/app/onboarding-language.test.tsx (2 tests) 21ms
+ ✓ ../../packages/app-core/test/app/secrets-view.test.tsx (1 test) 43ms
+ ✓ ../../packages/app-core/test/app/save-command-modal.test.tsx (3 tests) 36ms
+ ✓ ../../packages/app-core/test/app/provider-dropdown-default.test.tsx (4 tests) 256ms
+ ✓ test/plugins/package-metadata.test.ts (9 tests) 5ms
+ ✓ ../../packages/app-core/test/state/parsers-startup.test.ts (1 test) 2ms
+ ✓ ../../packages/app-core/test/app/shared-switch.test.ts (3 tests) 12ms
+ ✓ ../../packages/app-core/test/app/shell-overlays.test.tsx (4 tests) 12ms
+ ✓ ../../packages/app-core/test/app/navigation.test.tsx (2 tests) 2ms
+ ✓ ../../packages/app-core/test/app/shared-format.test.ts (4 tests) 17ms
+
+ Test Files  175 passed | 7 skipped (182)
+      Tests  1324 passed | 239 skipped (1563)
+   Start at  23:57:15
+   Duration  23.55s (transform 15.06s, setup 6.70s, collect 127.52s, tests 19.88s, environment 132.11s, prepare 21.00s)
+

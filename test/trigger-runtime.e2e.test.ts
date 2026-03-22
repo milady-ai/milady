@@ -6,8 +6,8 @@ import {
   type Task,
   type UUID,
 } from "@elizaos/core";
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { startApiServer } from "@miladyai/app-core/src/api/server";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 type JsonPrimitive = string | number | boolean | null;
 type JsonValue = JsonPrimitive | JsonObject | JsonArray;

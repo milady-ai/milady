@@ -159,12 +159,10 @@ describe("ConversationsSidebar", () => {
     expect(handleDeleteConversation).toHaveBeenCalledWith("conv-1");
   });
 
-  it("starts a draft chat instead of creating a persisted conversation immediately", async () => {
-    const handleStartDraftConversation = vi.fn(async () => {});
+  it("calls handleNewConversation immediately when New Chat is clicked", async () => {
     const handleNewConversation = vi.fn(async () => {});
     mockUseApp.mockReturnValue(
       createContext({
-        handleStartDraftConversation,
         handleNewConversation,
       }),
     );
@@ -179,7 +177,6 @@ describe("ConversationsSidebar", () => {
       newChatButton.props.onClick();
     });
 
-    expect(handleStartDraftConversation).toHaveBeenCalledTimes(1);
-    expect(handleNewConversation).not.toHaveBeenCalled();
+    expect(handleNewConversation).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 
+import { ChatComposer } from "@miladyai/app-core/components/ChatComposer";
 import React, { createRef } from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ChatComposer } from "@miladyai/app-core/components/ChatComposer";
 
 function createVoiceState(
   overrides?: Partial<React.ComponentProps<typeof ChatComposer>["voice"]>,
@@ -58,7 +58,7 @@ function renderComposer(
       typeof button.props.onPointerUp === "function",
   );
   const speakerButton = buttons.find(
-    (button) => button.props["aria-label"] === "Agent voice on",
+    (button) => button.props["aria-label"] === "aria.agentVoiceOn",
   );
 
   if (!micButton) {
@@ -148,7 +148,9 @@ describe("ChatComposer mic controls", () => {
 
     expect(String(micButton.props.className)).toContain("bg-accent");
     expect(String(micButton.props.className)).toContain("text-white");
-    expect(String(micButton.props.className)).toContain("shadow-[0_0_15px_rgba(var(--accent)");
+    expect(String(micButton.props.className)).toContain(
+      "shadow-[0_0_15px_rgba(var(--accent)",
+    );
   });
 
   it("keeps the default chat input neutral while listening", () => {

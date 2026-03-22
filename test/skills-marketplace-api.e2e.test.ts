@@ -12,8 +12,8 @@
 
 import http from "node:http";
 import type { AgentRuntime } from "@elizaos/core";
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { startApiServer } from "@miladyai/app-core/src/api/server";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mock skill-catalog-client — returns fixture data instead of reading files

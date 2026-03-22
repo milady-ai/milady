@@ -1,4 +1,3 @@
-import { describe, expect, it, vi } from "vitest";
 import {
   getKnowledgeUploadFilename,
   type KnowledgeUploadFile,
@@ -10,6 +9,7 @@ import {
   MAX_KNOWLEDGE_IMAGE_PROCESSING_BYTES,
   maybeCompressKnowledgeUploadImage,
 } from "@miladyai/app-core/components/knowledge-upload-image";
+import { describe, expect, it, vi } from "vitest";
 
 function makeUploadFile(
   name: string,

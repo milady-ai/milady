@@ -39,6 +39,8 @@ export function hasRequiredOnboardingPermissions(
 // ── Platform init ───────────────────────────────────────────────────────
 
 export { applyLaunchConnectionFromUrl } from "./browser-launch";
+export * from "./cloud-preference-patch";
+export * from "./desktop-permissions-client";
 export {
   type DeepLinkHandlers,
   dispatchShareTarget,
@@ -56,7 +58,5 @@ export {
   setupPlatformStyles,
 } from "./init";
 export * from "./lifo";
-export * from "./cloud-preference-patch";
-export * from "./desktop-permissions-client";
 export * from "./onboarding-reset";
 export * from "./window-shell";

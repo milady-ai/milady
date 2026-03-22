@@ -14,7 +14,10 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 const ROOT = path.resolve(import.meta.dirname, "../..");
-const CHARACTER_VIEW_PATH = path.join(ROOT, "src/components/CharacterEditor.tsx");
+const CHARACTER_VIEW_PATH = path.join(
+  ROOT,
+  "src/components/CharacterEditor.tsx",
+);
 const BASE_CSS_PATH = path.join(ROOT, "src/styles/base.css");
 
 describe("Character action bar visibility in companion mode", () => {

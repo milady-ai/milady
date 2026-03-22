@@ -124,6 +124,78 @@ const { fetchMock, mockClient, wsHandlers, invokeDesktopBridgeRequestMock } =
         })),
         hasCustomVrm: vi.fn(async () => false),
         hasCustomBackground: vi.fn(async () => false),
+        getPermissions: vi.fn(async () => ({
+          accessibility: {
+            id: "accessibility",
+            status: "granted",
+            lastChecked: Date.now(),
+            canRequest: false,
+          },
+          "screen-recording": {
+            id: "screen-recording",
+            status: "granted",
+            lastChecked: Date.now(),
+            canRequest: false,
+          },
+          microphone: {
+            id: "microphone",
+            status: "granted",
+            lastChecked: Date.now(),
+            canRequest: false,
+          },
+          camera: {
+            id: "camera",
+            status: "granted",
+            lastChecked: Date.now(),
+            canRequest: false,
+          },
+          shell: {
+            id: "shell",
+            status: "granted",
+            lastChecked: Date.now(),
+            canRequest: false,
+          },
+        })),
+        getOnboardingOptions: vi.fn(async () => ({
+          names: ["Milady"],
+          styles: [],
+          providers: [],
+          cloudProviders: [],
+          models: { small: [], large: [] },
+          sharedStyleRules: "",
+        })),
+        submitOnboarding: vi.fn(async () => ({ ok: true })),
+        restartAgent: vi.fn(async () => ({
+          state: "running",
+          agentName: "Eliza",
+          model: undefined,
+          startedAt: undefined,
+          uptime: undefined,
+        })),
+        getBaseUrl: vi.fn(() => "http://localhost:2138"),
+        setBaseUrl: vi.fn(),
+        setToken: vi.fn(),
+        resetConnection: vi.fn(),
+        cloudLogin: vi.fn(async () => ({
+          ok: false,
+          browserUrl: "",
+          sessionId: "",
+        })),
+        cloudLoginPoll: vi.fn(async () => ({ status: "pending" as const })),
+        cloudLoginDirect: vi.fn(async () => ({
+          ok: false,
+          browserUrl: "",
+          sessionId: "",
+        })),
+        cloudLoginPollDirect: vi.fn(async () => ({
+          status: "pending" as const,
+        })),
+        getCloudCredits: vi.fn(async () => ({
+          balance: 0,
+          low: false,
+          critical: false,
+        })),
+        getAgentSelfStatus: vi.fn(async () => null),
       },
     };
   });
@@ -134,7 +206,21 @@ vi.mock("@miladyai/app-core/api", () => ({
 }));
 
 vi.mock("@miladyai/app-core/bridge", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@miladyai/app-core/bridge")>();
+  const actual =
+    await importOriginal<typeof import("@miladyai/app-core/bridge")>();
+  return {
+    ...actual,
+    getBackendStartupTimeoutMs: () => 1000,
+    invokeDesktopBridgeRequest: invokeDesktopBridgeRequestMock,
+    scanProviderCredentials: vi.fn(async () => []),
+  };
+});
+
+// AppContext imports the bridge via a relative path ("../bridge") which
+// resolves to the real source, NOT the test stub alias.  Mock it too so
+// invokeDesktopBridgeRequest calls inside AppContext are intercepted.
+vi.mock("../../src/bridge/index", async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
   return {
     ...actual,
     getBackendStartupTimeoutMs: () => 1000,
@@ -225,7 +311,10 @@ describe("AppContext autonomy replay", () => {
   const originalFetch = globalThis.fetch;
 
   beforeEach(() => {
-    localStorage.setItem("eliza:connection-mode", JSON.stringify({ runMode: "local" }));
+    localStorage.setItem(
+      "eliza:connection-mode",
+      JSON.stringify({ runMode: "local" }),
+    );
     window.history.replaceState({}, "", "/chat");
     Object.assign(window, {
       setTimeout: globalThis.setTimeout,
@@ -234,6 +323,7 @@ describe("AppContext autonomy replay", () => {
       clearInterval: globalThis.clearInterval,
     });
     Object.assign(document.documentElement, { setAttribute: vi.fn() });
+
     Object.defineProperty(globalThis, "fetch", {
       value: fetchMock,
       writable: true,
@@ -360,6 +450,83 @@ describe("AppContext autonomy replay", () => {
     });
     mockClient.hasCustomVrm.mockResolvedValue(false);
     mockClient.hasCustomBackground.mockResolvedValue(false);
+    mockClient.getPermissions.mockResolvedValue({
+      accessibility: {
+        id: "accessibility",
+        status: "granted",
+        lastChecked: Date.now(),
+        canRequest: false,
+      },
+      "screen-recording": {
+        id: "screen-recording",
+        status: "granted",
+        lastChecked: Date.now(),
+        canRequest: false,
+      },
+      microphone: {
+        id: "microphone",
+        status: "granted",
+        lastChecked: Date.now(),
+        canRequest: false,
+      },
+      camera: {
+        id: "camera",
+        status: "granted",
+        lastChecked: Date.now(),
+        canRequest: false,
+      },
+      shell: {
+        id: "shell",
+        status: "granted",
+        lastChecked: Date.now(),
+        canRequest: false,
+      },
+    });
+    mockClient.getOnboardingOptions.mockResolvedValue({
+      names: ["Milady"],
+      styles: [],
+      providers: [],
+      cloudProviders: [],
+      models: { small: [], large: [] },
+      sharedStyleRules: "",
+    });
+    mockClient.submitOnboarding.mockResolvedValue({ ok: true });
+    mockClient.restartAgent.mockResolvedValue({
+      state: "running",
+      agentName: "Eliza",
+      model: undefined,
+      startedAt: undefined,
+      uptime: undefined,
+    });
+    mockClient.getBaseUrl.mockReturnValue("http://localhost:2138");
+    mockClient.setBaseUrl.mockImplementation(() => {});
+    mockClient.setToken.mockImplementation(() => {});
+    mockClient.resetConnection.mockImplementation(() => {});
+    mockClient.cloudLogin.mockResolvedValue({
+      ok: false,
+      browserUrl: "",
+      sessionId: "",
+    });
+    mockClient.cloudLoginPoll.mockResolvedValue({ status: "pending" });
+    mockClient.cloudLoginDirect.mockResolvedValue({
+      ok: false,
+      browserUrl: "",
+      sessionId: "",
+    });
+    mockClient.cloudLoginPollDirect.mockResolvedValue({ status: "pending" });
+    mockClient.getCloudCredits.mockResolvedValue({
+      balance: 0,
+      low: false,
+      critical: false,
+    });
+    mockClient.getAgentSelfStatus.mockResolvedValue(null);
+    mockClient.saveStreamSettings.mockResolvedValue(undefined);
+    mockClient.getAgentEvents.mockResolvedValue({
+      events: [],
+      latestEventId: null,
+      totalBuffered: 0,
+      replayed: true,
+    });
   });
 
   afterEach(() => {

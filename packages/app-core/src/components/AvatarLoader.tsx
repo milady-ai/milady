@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 function useLinearProgress(durationMs: number) {
   const [progress, setProgress] = useState(0);

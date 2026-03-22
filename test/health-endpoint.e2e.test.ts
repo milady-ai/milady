@@ -5,8 +5,8 @@
  */
 
 import http from "node:http";
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { startApiServer } from "@miladyai/app-core/src/api/server";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 vi.mock("@miladyai/app-core/src/services/mcp-marketplace", () => ({
   searchMcpMarketplace: vi.fn().mockResolvedValue({ results: [] }),

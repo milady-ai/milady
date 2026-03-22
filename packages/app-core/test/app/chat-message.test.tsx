@@ -84,7 +84,7 @@ describe("ChatMessage actions", () => {
       ).length,
     ).toBeGreaterThan(0);
     expect(
-      tree.root.findByProps({ "aria-label": "Play message" }),
+      tree.root.findByProps({ "aria-label": "aria.playMessage" }),
     ).toBeDefined();
   });
 
@@ -113,7 +113,7 @@ describe("ChatMessage actions", () => {
       tree.root.findByProps({ "aria-label": "Copy message" }),
     ).toBeDefined();
     expect(
-      tree.root.findByProps({ "aria-label": "Play message" }),
+      tree.root.findByProps({ "aria-label": "aria.playMessage" }),
     ).toBeDefined();
   });
 
@@ -139,7 +139,7 @@ describe("ChatMessage actions", () => {
       );
     });
 
-    const playButton = tree.root.findByProps({ "aria-label": "Play message" });
+    const playButton = tree.root.findByProps({ "aria-label": "aria.playMessage" });
     await act(async () => {
       playButton.props.onClick();
     });
@@ -169,12 +169,12 @@ describe("ChatMessage actions", () => {
       );
     });
 
-    const editButton = tree.root.findByProps({ "aria-label": "Edit message" });
+    const editButton = tree.root.findByProps({ "aria-label": "aria.editMessage" });
     await act(async () => {
       editButton.props.onClick();
     });
 
-    const textarea = tree.root.findByProps({ "aria-label": "Edit message" });
+    const textarea = tree.root.findByProps({ "aria-label": "aria.editMessage" });
     await act(async () => {
       textarea.props.onChange({ target: { value: "edited text" } });
     });

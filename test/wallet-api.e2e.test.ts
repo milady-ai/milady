@@ -8,8 +8,8 @@
 import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { startApiServer } from "@miladyai/app-core/src/api/server";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 const WALLET_EXPORT_TEST_TOKEN = "wallet-export-e2e-step-up-token";
 

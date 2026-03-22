@@ -322,6 +322,7 @@ vi.mock("@miladyai/app-core/config", () => ({
 }));
 
 import { client } from "@miladyai/app-core/api";
+
 const CharacterView = () => React.createElement("div", null, "CharacterView");
 
 type CharacterData = {

@@ -12,8 +12,8 @@
  * This validates the API layer, error handling, and request/response formats.
  */
 import http from "node:http";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { startApiServer } from "@miladyai/app-core/src/api/server";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 // ---------------------------------------------------------------------------
 // HTTP helpers

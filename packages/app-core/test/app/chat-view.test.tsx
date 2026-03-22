@@ -677,7 +677,7 @@ describe("ChatView", () => {
     const buttons = tree?.root.findAllByType("button" as React.ElementType);
 
     const attachButton = buttons.find(
-      (node) => node.props["aria-label"] === "Attach image",
+      (node) => node.props["aria-label"] === "aria.attachImage",
     );
     expect(attachButton).toBeDefined();
 

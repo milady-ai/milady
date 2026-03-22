@@ -171,13 +171,10 @@ vi.mock("@miladyai/app-core/src/components/StreamView", () => ({
   StreamView: () => React.createElement("section", null, "StreamView Ready"),
 }));
 
-vi.mock(
-  "@miladyai/app-core/src/components/ConversationsSidebar",
-  () => ({
-    ConversationsSidebar: () =>
-      React.createElement("aside", null, "ConversationsSidebar"),
-  }),
-);
+vi.mock("@miladyai/app-core/src/components/ConversationsSidebar", () => ({
+  ConversationsSidebar: () =>
+    React.createElement("aside", null, "ConversationsSidebar"),
+}));
 
 vi.mock("@miladyai/app-core/src/components/CustomActionsPanel", () => ({
   CustomActionsPanel: () =>
@@ -296,13 +293,10 @@ vi.mock("@miladyai/app-core/src/components/TrajectoriesView", () => ({
     React.createElement("section", null, "TrajectoriesView Ready"),
 }));
 
-vi.mock(
-  "@miladyai/app-core/src/components/TrajectoryDetailView",
-  () => ({
-    TrajectoryDetailView: () =>
-      React.createElement("section", null, "TrajectoryDetailView Ready"),
-  }),
-);
+vi.mock("@miladyai/app-core/src/components/TrajectoryDetailView", () => ({
+  TrajectoryDetailView: () =>
+    React.createElement("section", null, "TrajectoryDetailView Ready"),
+}));
 
 vi.mock("@miladyai/app-core/src/components/LifoSandboxView", () => ({
   LifoSandboxView: () =>

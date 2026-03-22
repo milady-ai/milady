@@ -1,4 +1,4 @@
-import { CHARACTER_PRESETS } from "@miladyai/app-core/onboarding-presets";
+import { STYLE_PRESETS } from "@miladyai/app-core/onboarding-presets";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AgentProvider, useAgents } from "../../lib/AgentProvider";
@@ -25,10 +25,10 @@ function CreateAgentInner() {
   const [bio, setBio] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const preset = CHARACTER_PRESETS.find((p) => p.id === selectedPreset);
+  const preset = STYLE_PRESETS.find((p) => p.id === selectedPreset);
 
   const handleSelect = useCallback((presetId: string) => {
-    const p = CHARACTER_PRESETS.find((c) => c.id === presetId);
+    const p = STYLE_PRESETS.find((c) => c.id === presetId);
     setSelectedPreset(presetId);
     setAgentName(p?.name ?? "");
     setBio(p?.description ?? "");
@@ -95,7 +95,7 @@ function CreateAgentInner() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {CHARACTER_PRESETS.map((p) => (
+              {STYLE_PRESETS.map((p) => (
                 <button
                   key={p.id}
                   type="button"

@@ -71,7 +71,7 @@ vi.mock("@miladyai/app-core/api", () => ({
   },
 }));
 
-vi.mock("@miladyai/app-core/bridge", () => ({
+vi.mock("../../src/bridge", () => ({
   invokeDesktopBridgeRequest: mockInvokeDesktopBridgeRequest,
   subscribeDesktopBridgeEvent: mockSubscribeDesktopBridgeEvent,
 }));

@@ -462,7 +462,9 @@ describe.skip("TriggersView UI E2E", () => {
   let server: { port: number; close: () => Promise<void> } | null = null;
   let runtimeHarness: TriggerRuntimeHarness;
   let startApiServerFn:
-    | ((...args: unknown[]) => Promise<{ port: number; close: () => Promise<void> }>)
+    | ((
+        ...args: unknown[]
+      ) => Promise<{ port: number; close: () => Promise<void> }>)
     | null = null;
 
   beforeAll(async () => {

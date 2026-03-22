@@ -138,7 +138,7 @@ describe("Onboarding language mode", () => {
       );
     }
 
-    expect(collectText(tree.root)).toContain("onboarding.connect");
+    expect(collectText(tree.root)).toContain("onboarding.stepName.welcome");
   });
 
   it("shows chinese copy when uiLanguage is zh-CN", async () => {
@@ -156,7 +156,7 @@ describe("Onboarding language mode", () => {
     }
 
     const text = collectText(tree.root);
-    expect(text).toContain("onboarding.connect");
     expect(text).toContain("onboarding.stepName.welcome");
+    expect(text).toContain("onboarding.stepName.hosting");
   });
 });

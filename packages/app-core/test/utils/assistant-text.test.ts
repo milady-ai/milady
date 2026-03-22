@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import { stripAssistantStageDirections } from "@miladyai/app-core/utils/assistant-text";
+import { describe, expect, it } from "vitest";
 
 describe("stripAssistantStageDirections", () => {
   it("strips asterisk-wrapped stage directions", () => {
@@ -75,7 +75,7 @@ describe("stripAssistantStageDirections", () => {
     // Pure CJK wrapped in asterisks (should NOT be stripped because it contains non-ASCII characters)
     const result2 = stripAssistantStageDirections("*我想写一句名言*");
     expect(result2).toContain("我想写一句名言");
-    
+
     // Mixed English stage direction with Chinese text inside it (should NOT be stripped)
     const result3 = stripAssistantStageDirections("*smiles and says 你好*");
     expect(result3).toContain("smiles and says 你好");

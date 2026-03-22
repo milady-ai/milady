@@ -1,10 +1,15 @@
 // @vitest-environment jsdom
 
-import { ShortcutsOverlay } from "@miladyai/app-core/components";
-import { COMMON_SHORTCUTS } from "@miladyai/app-core/hooks";
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("@miladyai/app-core/state", () => ({
+  useApp: () => ({ t: (key: string) => key }),
+}));
+
+import { ShortcutsOverlay } from "@miladyai/app-core/components";
+import { COMMON_SHORTCUTS } from "@miladyai/app-core/hooks";
 
 let addListenerSpy: ReturnType<typeof vi.spyOn>;
 
@@ -53,7 +58,7 @@ describe("ShortcutsOverlay", () => {
     });
 
     const dialog = tree.root.findByProps({ role: "dialog" });
-    expect(dialog.props["aria-label"]).toBe("Keyboard shortcuts");
+    expect(dialog.props["aria-label"]).toBe("aria.keyboardShortcuts");
     expect(findText(tree.root, "Open command palette")).toHaveLength(1);
     expect(tree.root.findAllByType("kbd" as React.ElementType)).toHaveLength(
       COMMON_SHORTCUTS.length,

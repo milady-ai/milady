@@ -2,7 +2,7 @@ import { PermissionsOnboardingSection } from "@miladyai/app-core/components";
 import { useApp } from "@miladyai/app-core/state";
 
 export function PermissionsStep() {
-  const { handleOnboardingNext, t } = useApp();
+  const { handleOnboardingNext, handleOnboardingBack, t } = useApp();
 
   return (
     <>
@@ -14,6 +14,7 @@ export function PermissionsStep() {
       </div>
       <PermissionsOnboardingSection
         onContinue={(options) => void handleOnboardingNext(options)}
+        onBack={() => handleOnboardingBack()}
       />
     </>
   );

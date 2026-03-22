@@ -13,7 +13,7 @@ import {
   isNative,
   isWeb,
   platform,
-} from "@miladyai/app-core/bridge";
+} from "../../src/bridge/plugin-bridge";
 import { describe, expect, it, vi } from "vitest";
 
 describe("plugin-bridge", () => {

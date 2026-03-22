@@ -291,24 +291,18 @@ vi.mock("@miladyai/app-core/src/components/CommandPalette", () => ({
 vi.mock("@miladyai/app-core/src/components/EmotePicker", () => ({
   EmotePicker: () => React.createElement("div", null, "EmotePicker"),
 }));
-vi.mock(
-  "@miladyai/app-core/src/components/onboarding/PermissionsStep",
-  () => ({
-    PermissionsStep: () =>
-      React.createElement(
-        "button",
-        { onClick: () => mockUseApp().handleOnboardingNext(), type: "button" },
-        "permissions-continue",
-      ),
-  }),
-);
-vi.mock(
-  "@miladyai/app-core/src/components/ConversationsSidebar",
-  () => ({
-    ConversationsSidebar: () =>
-      React.createElement("div", null, "ConversationsSidebar"),
-  }),
-);
+vi.mock("@miladyai/app-core/src/components/onboarding/PermissionsStep", () => ({
+  PermissionsStep: () =>
+    React.createElement(
+      "button",
+      { onClick: () => mockUseApp().handleOnboardingNext(), type: "button" },
+      "permissions-continue",
+    ),
+}));
+vi.mock("@miladyai/app-core/src/components/ConversationsSidebar", () => ({
+  ConversationsSidebar: () =>
+    React.createElement("div", null, "ConversationsSidebar"),
+}));
 vi.mock("@miladyai/app-core/src/components/CustomActionsPanel", () => ({
   CustomActionsPanel: () =>
     React.createElement("div", null, "CustomActionsPanel"),

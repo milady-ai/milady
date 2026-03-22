@@ -1,8 +1,8 @@
 import http from "node:http";
 import type { AgentRuntime, Memory, MessagePayload } from "@elizaos/core";
 import { createUniqueUuid } from "@elizaos/core";
-import { describe, expect, it } from "vitest";
 import { startApiServer } from "@miladyai/app-core/src/api/server";
+import { describe, expect, it } from "vitest";
 
 let trajectoryLoggerPlugin: { name: string; actions?: unknown[] } | null = null;
 try {

@@ -853,7 +853,7 @@ export function HeartbeatsView() {
                       if (!hasLoadedRuns) {
                         return (
                           <div className="py-6 text-sm text-muted/70 flex items-center gap-2">
-                            <div className="w-4 h-4 border-2 border-muted/30 border-t-muted/80 rounded-full animate-spin"></div>{" "}
+                            <div className="w-4 h-4 border-2 border-muted/30 border-t-muted/80 rounded-full animate-spin" />{" "}
                             {t("databaseview.Loading")}
                           </div>
                         );

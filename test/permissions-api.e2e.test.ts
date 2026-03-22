@@ -13,8 +13,8 @@
  * NO MOCKS - all tests spin up a real HTTP server.
  */
 import http from "node:http";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { startApiServer } from "@miladyai/app-core/src/api/server";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 function saveEnv(...keys: string[]): { restore: () => void } {
   const prev = new Map<string, string | undefined>();

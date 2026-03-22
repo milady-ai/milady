@@ -5,12 +5,12 @@
 import { describe, expect, it } from "vitest";
 import {
   applyConnectionTransition,
+  type ConnectionFlowSnapshot,
   computeShowProviderSelection,
   deriveConnectionScreen,
   getEffectiveRunMode,
   mergeConnectionSnapshot,
   resolveConnectionUiSpec,
-  type ConnectionFlowSnapshot,
 } from "../connection-flow";
 
 const baseSnap = (

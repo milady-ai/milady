@@ -135,22 +135,6 @@ function SettingsSidebar({
   return (
     <aside className="flex w-full shrink-0 self-stretch flex-col">
       <div className="flex flex-1 flex-col overflow-y-auto">
-        {/* Brand header */}
-        <div className="px-4 py-4 border-b border-border">
-          <div className="flex items-center justify-between">
-            <p className="font-mono text-[10px] font-medium text-txt tracking-[0.12em]">
-              SETTINGS
-            </p>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex size-6 items-center justify-center text-muted transition-colors hover:text-txt"
-              aria-label="Close settings"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
 
         {/* Search */}
         <div className="px-3 py-3 border-b border-border">

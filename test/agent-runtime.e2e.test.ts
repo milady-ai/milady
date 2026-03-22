@@ -27,8 +27,6 @@ import {
   stringToUuid,
   type UUID,
 } from "@elizaos/core";
-import dotenv from "dotenv";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { startApiServer } from "@miladyai/app-core/src/api/server";
 import { ensureAgentWorkspace } from "@miladyai/app-core/src/providers/workspace";
 import { configureLocalEmbeddingPlugin } from "@miladyai/app-core/src/runtime/eliza";
@@ -36,6 +34,8 @@ import {
   extractPlugin,
   type PluginModuleShape,
 } from "@miladyai/app-core/src/test-support/test-helpers";
+import dotenv from "dotenv";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Environment

@@ -1,7 +1,7 @@
 import type { WebviewTagElement } from "electrobun/view";
 import {
-  type FormEvent,
   createElement,
+  type FormEvent,
   useEffect,
   useEffectEvent,
   useRef,

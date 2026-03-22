@@ -32,9 +32,7 @@ const {
 /** Mirrors `hasRequiredOnboardingPermissions` without importing `platform` (avoids bridge/init). */
 const { hasRequiredOnboardingPermissionsForTest } = vi.hoisted(() => {
   const REQUIRED = ["accessibility", "screen-recording", "microphone"] as const;
-  function isGranted(
-    status: string | undefined,
-  ): boolean {
+  function isGranted(status: string | undefined): boolean {
     return status === "granted" || status === "not-applicable";
   }
   return {
@@ -74,7 +72,7 @@ vi.mock("@miladyai/app-core/api", () => ({
   },
 }));
 
-vi.mock("@miladyai/app-core/bridge", () => ({
+vi.mock("../../src/bridge", () => ({
   invokeDesktopBridgeRequest: mockInvokeDesktopBridgeRequest,
   subscribeDesktopBridgeEvent: mockSubscribeDesktopBridgeEvent,
 }));
