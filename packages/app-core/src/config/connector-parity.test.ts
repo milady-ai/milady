@@ -42,7 +42,10 @@ import {
   CONNECTOR_PLUGINS,
   isConnectorConfigured,
 } from "./plugin-auto-enable";
-import { CONNECTOR_IDS } from "./schema";
+import { CONNECTOR_IDS, MILADY_LOCAL_CONNECTOR_IDS } from "./schema";
+
+/** Connectors registered locally in Milady, not in upstream @elizaos/agent. */
+const MILADY_LOCAL_CONNECTORS = new Set<string>(MILADY_LOCAL_CONNECTOR_IDS);
 
 function sorted(values: Iterable<string>): string[] {
   return [...values].sort();
@@ -54,8 +57,10 @@ describe("connector map parity", () => {
     const runtimeIds = sorted(Object.keys(CHANNEL_PLUGIN_MAP));
     const schemaIds = sorted(CONNECTOR_IDS);
 
-    expect(runtimeIds).toEqual(autoEnableIds);
-    expect(schemaIds).toEqual(autoEnableIds);
+    // Runtime = upstream + local overrides
+    expect(runtimeIds).toEqual(sorted([...autoEnableIds, ...MILADY_LOCAL_CONNECTORS]));
+    // Schema = upstream + local
+    expect(schemaIds).toEqual(sorted([...autoEnableIds, ...MILADY_LOCAL_CONNECTORS]));
   });
 
   it("keeps runtime and auto-enable package mappings aligned", () => {
@@ -68,6 +73,7 @@ describe("connector map parity", () => {
     for (const [connectorId, pluginName] of Object.entries(
       CHANNEL_PLUGIN_MAP,
     )) {
+      if (MILADY_LOCAL_CONNECTORS.has(connectorId)) continue; // local-only, not in upstream
       expect(CONNECTOR_PLUGINS[connectorId]).toBe(pluginName);
     }
   });
@@ -78,13 +84,15 @@ describe("connector map parity", () => {
   });
 
   it("has identical count across all three maps", () => {
-    expect(CONNECTOR_IDS).toHaveLength(19);
-    expect(Object.keys(CONNECTOR_PLUGINS)).toHaveLength(19);
-    expect(Object.keys(CHANNEL_PLUGIN_MAP)).toHaveLength(19);
+    const upstreamCount = 19;
+    const localCount = MILADY_LOCAL_CONNECTORS.size;
+    expect(CONNECTOR_IDS).toHaveLength(upstreamCount + localCount);
+    expect(Object.keys(CONNECTOR_PLUGINS)).toHaveLength(upstreamCount);
+    expect(Object.keys(CHANNEL_PLUGIN_MAP)).toHaveLength(upstreamCount + localCount);
   });
 
   it("uses valid package name prefixes for all plugin mappings", () => {
-    const validPrefix = /^@(elizaos|elizaai)\//;
+    const validPrefix = /^@(elizaos|elizaai|miladyai)\//;
     for (const pkg of Object.values(CONNECTOR_PLUGINS)) {
       expect(pkg).toMatch(validPrefix);
     }
@@ -123,6 +131,7 @@ const CONNECTOR_CREDS: Record<string, Record<string, unknown>> = {
   retake: { accessToken: "rtk-token" },
   blooio: { apiKey: "blk-key" },
   twitch: { accessToken: "twitch-token" },
+  wechat: { apiKey: "wc_live_test" },
 };
 
 describe("connector runtime parity", () => {
@@ -157,7 +166,7 @@ describe("connector runtime parity", () => {
     ).toBe(false);
   });
 
-  it("applyPluginAutoEnable enables all 19 connectors when configured", () => {
+  it("applyPluginAutoEnable enables all connectors when configured", () => {
     const connectors: Record<string, Record<string, unknown>> = {};
     for (const id of CONNECTOR_IDS) {
       connectors[id] = CONNECTOR_CREDS[id];
@@ -170,6 +179,8 @@ describe("connector runtime parity", () => {
     for (const id of CONNECTOR_IDS) {
       expect(allow).toContain(id);
     }
+    // Upstream reports changes for its 19 connectors; local connectors
+    // are injected by the Milady wrapper before upstream runs.
     expect(changes).toHaveLength(19);
   });
 });
