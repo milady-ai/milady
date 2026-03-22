@@ -41,6 +41,13 @@ describe("pre-review-local helpers", () => {
         message: "add helper script",
       }),
     ).toBe("feature");
+
+    expect(
+      classificationFromInputs({
+        branch: "feat/add-wechat-connector",
+        message: "add connector wiring",
+      }),
+    ).toBe("feature");
   });
 
   it("maps classification to scope verdict", () => {
@@ -110,6 +117,23 @@ index 1234567..89abcde 100644
     expect(issues.some((issue) => issue.includes("`any` usage"))).toBe(false);
   });
 
+  it("ignores formatting-only any diffs when count stays flat", () => {
+    const diff = `
+diff --git a/src/example.ts b/src/example.ts
+index 1234567..89abcde 100644
+--- a/src/example.ts
++++ b/src/example.ts
+@@ -1 +1,3 @@
+-  setAnimationLoop?: (callback: ((time: number, frame?: any) => void) | null) => void;
++  setAnimationLoop?: (
++    callback: ((time: number, frame?: any) => void) | null,
++  ) => void;
+`;
+
+    const issues = scanDiffTextForBlockedPatterns(diff);
+    expect(issues.some((issue) => issue.includes("`any` usage"))).toBe(false);
+  });
+
   it("flags ts-ignore and secret-like assignments", () => {
     const diff = `
 + // @ts-ignore temporary
@@ -122,6 +146,18 @@ index 1234567..89abcde 100644
     );
     expect(issues.some((issue) => issue.includes("secret-like string"))).toBe(
       true,
+    );
+  });
+
+  it("ignores short apiKey placeholders in docs examples", () => {
+    const diff = `
++      "apiKey": "<key>",
++      "proxyUrl": "https://proxy.example.com"
+`;
+
+    const issues = scanDiffTextForBlockedPatterns(diff);
+    expect(issues.some((issue) => issue.includes("secret-like string"))).toBe(
+      false,
     );
   });
 

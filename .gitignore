@@ -3,7 +3,6 @@ node_modules
 .env
 dist
 storybook-static
-.superpowers/
 coverage
 tmp/
 apps/app/electron/build/

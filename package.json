@@ -37,6 +37,7 @@
     "apps/*/plugins/*",
     "apps/app/electrobun",
     "packages/app-core",
+    "packages/plugin-wechat",
     "packages/ui",
     "deploy/cloud-agent-template"
   ],

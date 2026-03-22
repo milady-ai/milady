@@ -357,7 +357,7 @@ export function resolveFeishuPluginImportSpecifier(): string | null {
   return null;
 }
 
-const WECHAT_PLUGIN_PACKAGE_NAME = "@pjflacko/plugin-wechat";
+const WECHAT_PLUGIN_PACKAGE_NAME = "@miladyai/plugin-wechat";
 
 export function resolveWechatPluginImportSpecifier(): string | null {
   if (isPackageImportResolvable(WECHAT_PLUGIN_PACKAGE_NAME)) {

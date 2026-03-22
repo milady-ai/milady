@@ -34,7 +34,7 @@ vi.mock("@elizaos/plugin-telegram", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-trajectory-logger", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-trust", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-twitch", () => ({ default: {} }));
-vi.mock("@pjflacko/plugin-wechat", () => ({ default: {} }));
+vi.mock("@miladyai/plugin-wechat", () => ({ default: {} }));
 
 import { CHANNEL_PLUGIN_MAP } from "../runtime/eliza";
 import {
@@ -82,14 +82,13 @@ describe("connector map parity", () => {
   });
 
   it("has identical count across all three maps", () => {
-    const totalCount = 20; // 19 upstream + 1 Milady-local (wechat)
+    const totalCount = Object.keys(CHANNEL_PLUGIN_MAP).length;
     expect(CONNECTOR_IDS).toHaveLength(totalCount);
     expect(Object.keys(CONNECTOR_PLUGINS)).toHaveLength(totalCount);
-    expect(Object.keys(CHANNEL_PLUGIN_MAP)).toHaveLength(totalCount);
   });
 
   it("uses valid package name prefixes for all plugin mappings", () => {
-    const validPrefix = /^@(elizaos|elizaai|pjflacko)\//;
+    const validPrefix = /^@(elizaos|elizaai|miladyai)\//;
     for (const pkg of Object.values(CONNECTOR_PLUGINS)) {
       expect(pkg).toMatch(validPrefix);
     }
@@ -128,7 +127,7 @@ const CONNECTOR_CREDS: Record<string, Record<string, unknown>> = {
   retake: { accessToken: "rtk-token" },
   blooio: { apiKey: "blk-key" },
   twitch: { accessToken: "twitch-token" },
-  wechat: { apiKey: "wc_live_test" },
+  wechat: { apiKey: "key" },
 };
 
 describe("connector runtime parity", () => {
@@ -176,8 +175,9 @@ describe("connector runtime parity", () => {
     for (const id of CONNECTOR_IDS) {
       expect(allow).toContain(id);
     }
-    // Upstream reports changes for its 19 connectors; local connectors
-    // are injected by the Milady wrapper before upstream runs.
-    expect(changes).toHaveLength(19);
+    const expectedChangeCount =
+      CONNECTOR_IDS.length - MILADY_LOCAL_CONNECTORS.size;
+    // Milady-local connectors are injected before the upstream helper runs.
+    expect(changes).toHaveLength(expectedChangeCount);
   });
 });

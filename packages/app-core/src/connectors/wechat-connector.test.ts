@@ -49,7 +49,7 @@ describe("WeChat Connector - Configuration", () => {
   it("validates single-account configuration", () => {
     const config = {
       enabled: true,
-      apiKey: "wc_live_xxx",
+      apiKey: "key",
       proxyUrl: "https://proxy.example.com",
       webhookPort: 18790,
       deviceType: "ipad" as const,
@@ -61,8 +61,16 @@ describe("WeChat Connector - Configuration", () => {
   it("validates multi-account configuration", () => {
     const config = {
       accounts: {
-        main: { enabled: true, apiKey: "wc_live_xxx", deviceType: "ipad" as const },
-        secondary: { enabled: true, apiKey: "wc_live_yyy", deviceType: "mac" as const },
+        main: {
+          enabled: true,
+          apiKey: "key",
+          deviceType: "ipad" as const,
+        },
+        secondary: {
+          enabled: true,
+          apiKey: "key2",
+          deviceType: "mac" as const,
+        },
       },
     };
     expect(Object.keys(config.accounts)).toHaveLength(2);

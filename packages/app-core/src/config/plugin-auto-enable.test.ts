@@ -41,7 +41,7 @@ vi.mock("@elizaos/plugin-telegram", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-trajectory-logger", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-trust", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-twitch", () => ({ default: {} }));
-vi.mock("@pjflacko/plugin-wechat", () => ({ default: {} }));
+vi.mock("@miladyai/plugin-wechat", () => ({ default: {} }));
 
 import { CHANNEL_PLUGIN_MAP } from "../runtime/eliza";
 import {
@@ -217,7 +217,7 @@ describe("applyPluginAutoEnable — connectors", () => {
     const params = makeParams({
       config: {
         connectors: {
-          wechat: { apiKey: "wc_live_test" },
+          wechat: { apiKey: "key" },
         },
       },
     });
@@ -229,7 +229,7 @@ describe("applyPluginAutoEnable — connectors", () => {
     const params = makeParams({
       config: {
         connectors: {
-          wechat: { enabled: false, apiKey: "wc_live_test" },
+          wechat: { enabled: false, apiKey: "key" },
         },
       },
     });
