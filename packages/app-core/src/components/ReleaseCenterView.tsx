@@ -327,6 +327,8 @@ export function ReleaseCenterView() {
       : typeof nativeUpdater?.lastStatus === "string"
         ? nativeUpdater.lastStatus
         : "Idle";
+  const autoUpdateDisabled =
+    nativeUpdater != null && !nativeUpdater.canAutoUpdate;
 
   return (
     <div className="space-y-0">
@@ -369,6 +371,12 @@ export function ReleaseCenterView() {
         </div>
       </div>
 
+      {autoUpdateDisabled && nativeUpdater?.autoUpdateDisabledReason ? (
+        <div className="rounded-lg border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning">
+          {nativeUpdater.autoUpdateDisabledReason}
+        </div>
+      ) : null}
+
       <hr className="border-border/40" />
 
       {/* ── Actions ───────────────────────────────────────────── */}
@@ -376,7 +384,11 @@ export function ReleaseCenterView() {
         <Button
           size="sm"
           className="h-8 rounded-lg text-xs"
-          disabled={busyAction === "check-updates" || updateLoading}
+          disabled={
+            busyAction === "check-updates" ||
+            updateLoading ||
+            autoUpdateDisabled
+          }
           onClick={() =>
             void runAction(
               "check-updates",
@@ -385,13 +397,13 @@ export function ReleaseCenterView() {
             )
           }
         >
-          Check for Updates
+          Check / Download Update
         </Button>
         {nativeUpdater?.updateReady && (
           <Button
             size="sm"
             className="h-8 rounded-lg text-xs"
-            disabled={busyAction === "apply-update"}
+            disabled={busyAction === "apply-update" || autoUpdateDisabled}
             onClick={() =>
               void runAction(
                 "apply-update",
@@ -400,7 +412,7 @@ export function ReleaseCenterView() {
               )
             }
           >
-            Apply Update
+            Apply Downloaded Update
           </Button>
         )}
         <Button
@@ -431,7 +443,7 @@ export function ReleaseCenterView() {
             )
           }
         >
-          Open Release Center
+          Open Detached Release Center
         </Button>
       </div>
 
@@ -465,7 +477,7 @@ export function ReleaseCenterView() {
               )
             }
           >
-            Open
+            Open BrowserView Window
           </Button>
           <Button
             size="sm"
@@ -484,7 +496,7 @@ export function ReleaseCenterView() {
               )
             }
           >
-            Reset
+            Reset URL
           </Button>
         </div>
       </div>
