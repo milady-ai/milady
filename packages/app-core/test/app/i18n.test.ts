@@ -27,8 +27,10 @@ describe("i18n helpers", () => {
     expect(UI_LANGUAGES).toContain("tl");
     expect(normalizeLanguage("tl")).toBe("tl");
     expect(normalizeLanguage("tl-PH")).toBe("tl");
+    expect(normalizeLanguage("tl-US")).toBe("tl");
     expect(normalizeLanguage("fil")).toBe("tl");
     expect(normalizeLanguage("fil-PH")).toBe("tl");
+    expect(normalizeLanguage("fil-CA")).toBe("tl");
     expect(t("tl", "settings.language")).toBe("Wika");
     expect(createTranslator("tl")("chat.inputPlaceholder")).toBe(
       "Mag-type ng mensahe...",
