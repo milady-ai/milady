@@ -5,6 +5,7 @@ import path from "node:path";
 import type { AgentRuntime } from "@elizaos/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  createStewardClient,
   getStewardBridgeStatus,
   signTransactionWithOptionalSteward,
 } from "../steward-bridge";
@@ -13,6 +14,7 @@ import { startApiServer } from "../server";
 const mockSignTransaction = vi.fn();
 const mockGetAgent = vi.fn();
 const mockListAgents = vi.fn();
+const mockConstructorArgs: unknown[] = [];
 
 vi.mock("@stwd/sdk", () => {
   class StewardApiError extends Error {
@@ -28,7 +30,9 @@ vi.mock("@stwd/sdk", () => {
   }
 
   class StewardClient {
-    constructor(_config: unknown) {}
+    constructor(config: unknown) {
+      mockConstructorArgs.push(config);
+    }
 
     signTransaction = mockSignTransaction;
     getAgent = mockGetAgent;
@@ -59,6 +63,7 @@ const ENV_KEYS = [
   "MILADY_STATE_DIR",
   "STEWARD_API_URL",
   "STEWARD_API_KEY",
+  "STEWARD_AGENT_TOKEN",
   "STEWARD_TENANT_ID",
   "STEWARD_AGENT_ID",
   "ELIZA_API_TOKEN",
@@ -113,6 +118,7 @@ describe("steward bridge", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    mockConstructorArgs.length = 0;
     for (const key of ENV_KEYS) {
       delete process.env[key];
     }
@@ -212,5 +218,68 @@ describe("steward bridge", () => {
     } finally {
       await server.close();
     }
+  });
+
+  it("passes STEWARD_AGENT_TOKEN as bearerToken to the StewardClient", () => {
+    const env = {
+      STEWARD_API_URL: "https://steward.example",
+      STEWARD_AGENT_TOKEN: "jwt-token-123",
+      STEWARD_API_KEY: "key-456",
+      STEWARD_TENANT_ID: "tenant-789",
+    } as NodeJS.ProcessEnv;
+
+    const client = createStewardClient({ env });
+
+    expect(client).not.toBeNull();
+    expect(mockConstructorArgs).toHaveLength(1);
+    expect(mockConstructorArgs[0]).toMatchObject({
+      baseUrl: "https://steward.example",
+      bearerToken: "jwt-token-123",
+      apiKey: "key-456",
+      tenantId: "tenant-789",
+    });
+  });
+
+  it("omits bearerToken when STEWARD_AGENT_TOKEN is not set", () => {
+    const env = {
+      STEWARD_API_URL: "https://steward.example",
+      STEWARD_API_KEY: "key-456",
+    } as NodeJS.ProcessEnv;
+
+    createStewardClient({ env });
+
+    expect(mockConstructorArgs).toHaveLength(1);
+    expect(mockConstructorArgs[0]).toMatchObject({
+      baseUrl: "https://steward.example",
+      apiKey: "key-456",
+    });
+    expect((mockConstructorArgs[0] as Record<string, unknown>).bearerToken).toBeUndefined();
+  });
+
+  it("logs a warning when falling back to local signing", async () => {
+    const { StewardApiError } = await import("@stwd/sdk");
+    mockSignTransaction.mockRejectedValueOnce(
+      new StewardApiError("Connection refused", 0),
+    );
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const fallback = vi.fn().mockResolvedValue({ hash: "0xlocal" });
+
+    await signTransactionWithOptionalSteward({
+      env: {
+        STEWARD_API_URL: "https://steward.example",
+        STEWARD_AGENT_ID: "agent-1",
+      } as NodeJS.ProcessEnv,
+      tx: {
+        to: "0x000000000000000000000000000000000000dead",
+        value: "0",
+        chainId: 1,
+      },
+      fallback,
+    });
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      "[steward-bridge] Steward unreachable, falling back to local signing",
+    );
+    warnSpy.mockRestore();
   });
 });

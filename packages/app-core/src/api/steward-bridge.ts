@@ -80,6 +80,7 @@ export function createStewardClient(
 
   return new StewardClient({
     baseUrl,
+    bearerToken: normalizeEnvValue(env.STEWARD_AGENT_TOKEN) ?? undefined,
     apiKey: normalizeEnvValue(env.STEWARD_API_KEY) ?? undefined,
     tenantId: normalizeEnvValue(env.STEWARD_TENANT_ID) ?? undefined,
   });
@@ -199,6 +200,7 @@ export async function signTransactionWithOptionalSteward<TLocal>(params: {
       policyResults: result.results,
     };
   } catch (error) {
+    console.warn('[steward-bridge] Steward unreachable, falling back to local signing');
     return {
       mode: "local",
       pendingApproval: false,
