@@ -151,7 +151,7 @@ describe("plugin auto-enable mapping", () => {
     whatsapp: "@elizaos/plugin-whatsapp",
     slack: "@elizaos/plugin-slack",
     twitter: "@elizaos/plugin-twitter",
-    wechat: "@miladyai/plugin-wechat",
+    wechat: "@pjflacko/plugin-wechat",
   };
 
   it("maps each connector to its correct plugin", () => {
