@@ -74,7 +74,7 @@ export class ThesisStore {
     const existing = this.theses.get(update.thesisId);
     if (!existing) throw new Error(`Thesis ${update.thesisId} not found`);
     existing.conviction = update.newConviction;
-    existing.updatedAt = Date.now();
+    existing.updatedAt = Math.max(Date.now(), existing.updatedAt + 1);
     this.convictionLog.push({ ...update });
   }
 
