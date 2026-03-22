@@ -164,7 +164,7 @@
     "@elizaos/prompts": "^2.0.0-alpha.93",
     "@elizaos/skills": "^2.0.0-alpha.93",
     "@hapi/boom": "^10.0.1",
-    "@stwd/sdk": "0.2.0",
+    "@stwd/sdk": "^0.3.0",
     "@lunchtable/plugin-ltcg": "^0.1.0",
     "@miladyai/app-core": "workspace:*",
     "@noble/curves": "^2.0.1",
@@ -221,7 +221,7 @@
   "overrides": {
     "drizzle-orm": "0.45.1",
     "ai": "6.0.30",
-    "@stwd/sdk": "0.2.0",
+    "@stwd/sdk": "^0.3.0",
     "libsignal": "git+https://github.com/whiskeysockets/libsignal-node.git#1c30d7d7e76a3b0aa120b04dc6a26f5a12dccf67",
     "pty-manager": "1.9.8"
   },
