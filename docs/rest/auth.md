@@ -149,6 +149,15 @@ Submit a pairing code to receive the API token. Rate-limited by IP address.
 | `410` | Pairing code expired — a new code has been automatically generated |
 | `429` | Too many attempts — rate limit exceeded (5 per 10 minutes per IP) |
 
+## Sensitive endpoint authorization
+
+Certain endpoints (such as `POST /api/agent/reset`) are classified as sensitive and require stricter authorization than standard API routes:
+
+- In `development` or `dev` environments (set via `NODE_ENV`), sensitive endpoints are accessible without a token.
+- In all other environments (including when `NODE_ENV` is unset), a valid `MILADY_API_TOKEN` must be configured **and** included in the request. If no API token is configured, the server returns `403 Forbidden` with the message "Sensitive endpoint requires API token authentication".
+
+This means that in production, sensitive endpoints are never accessible without explicit token authentication — even from localhost.
+
 ## CORS
 
 The API server includes these auth-related headers in CORS preflight responses:

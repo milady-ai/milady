@@ -101,6 +101,12 @@ Returns the available options for the onboarding wizard — random name suggesti
 
 Submit the initial agent configuration. Creates or updates the Milady config file with the agent's name, personality, AI provider credentials, connector tokens, and theme preferences. The agent will be restarted with the new configuration.
 
+The agent's `name`, `bio`, and `systemPrompt` are persisted directly into the config file as a reliable fallback, ensuring the agent retains its identity after a restart.
+
+**Cloud mode detection**: cloud mode can be signalled in two ways:
+- Setting `runMode` to `"cloud"` explicitly
+- Setting `connection.kind` to `"cloud-managed"` — the server automatically infers cloud mode and injects `runMode: "cloud"` into the internal processing pipeline
+
 **Request Body**
 
 | Field | Type | Required | Description |
@@ -114,7 +120,8 @@ Submit the initial agent configuration. Creates or updates the Milady config fil
 | `postExamples` | string[] | No | Example social media posts |
 | `messageExamples` | array | No | Example message conversations |
 | `theme` | string | No | UI theme — `milady`, `qt314`, `web2000`, `programmer`, `haxor`, or `psycho` |
-| `runMode` | string | No | `local` or `cloud` (defaults to `local`) |
+| `runMode` | string | No | `local` or `cloud` (defaults to `local`). Can also be inferred from the `connection` field |
+| `connection` | object | No | Connection descriptor. When `connection.kind` is `"cloud-managed"`, the server treats this as cloud mode and automatically injects `runMode: "cloud"` even if `runMode` is not explicitly set |
 | `provider` | string | No | AI provider ID (e.g. `openai`, `anthropic`, `anthropic-subscription`) |
 | `providerApiKey` | string | No | API key for the selected provider |
 | `cloudProvider` | string | No | Cloud provider ID when `runMode` is `cloud` |
@@ -130,6 +137,21 @@ Submit the initial agent configuration. Creates or updates the Milady config fil
 | `blooioApiKey` | string | No | Bloo.io API key |
 | `blooioPhoneNumber` | string | No | Bloo.io phone number |
 | `inventoryProviders` | array | No | RPC/inventory provider configs — `[{ chain, rpcProvider, rpcApiKey }]` |
+
+**Example: cloud mode via connection descriptor**
+
+```json
+{
+  "name": "Milady",
+  "bio": ["A helpful AI assistant"],
+  "connection": {
+    "kind": "cloud-managed"
+  },
+  "provider": "anthropic"
+}
+```
+
+In this example, `runMode` is not set, but the server infers cloud mode from `connection.kind` and enables `cloud.enabled` in the config.
 
 **Response**
 
