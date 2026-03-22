@@ -706,6 +706,8 @@ function setupMockUseApp(state: AppHarnessState) {
     },
     handleOnboardingNext,
     handleOnboardingBack,
+    handleOnboardingJumpToStep: vi.fn(),
+    goToOnboardingStep: vi.fn(),
     handleCloudLogin: vi.fn(async () => {
       state.elizaCloudConnected = true;
       state.elizaCloudUserId = "test-user";

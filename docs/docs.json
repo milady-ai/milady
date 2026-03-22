@@ -50,6 +50,8 @@
               "guides/beginners-development-guide",
               "guides/learning-paths",
               "guides/developer-playbook",
+              "guides/onboarding-ui-flow",
+              "guides/electrobun-mac-window-chrome",
               "guides/first-extension-walkthrough",
               "guides/autonomous-mode",
               "guides/hooks",
@@ -78,6 +80,7 @@
             "pages": [
               "apps/overview",
               "apps/desktop",
+              "apps/desktop-local-development",
               "apps/desktop/native-modules",
               "apps/desktop/deep-linking",
               "apps/mobile",

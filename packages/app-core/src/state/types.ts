@@ -690,6 +690,10 @@ export interface AppActions {
   // Onboarding
   handleOnboardingNext: (options?: OnboardingNextOptions) => Promise<void>;
   handleOnboardingBack: () => void;
+  /** Jump to an earlier step in the active track (sidebar); backward-only. */
+  handleOnboardingJumpToStep: (step: OnboardingStep) => void;
+  /** Set onboarding step and sync Flamina guide (e.g. welcome → connection). */
+  goToOnboardingStep: (step: OnboardingStep) => void;
   handleOnboardingRemoteConnect: () => Promise<void>;
   handleOnboardingUseLocalBackend: () => void;
 

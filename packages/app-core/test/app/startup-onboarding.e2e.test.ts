@@ -594,6 +594,8 @@ describe("app startup onboarding flow (e2e)", () => {
       },
       handleOnboardingNext,
       handleOnboardingBack,
+      handleOnboardingJumpToStep: vi.fn(),
+      goToOnboardingStep: vi.fn(),
       handleCloudLogin: async () => {
         state.elizaCloudConnected = true;
         state.elizaCloudUserId = "test-user";

@@ -127,6 +127,7 @@ export function ConversationsSidebar({
           ? "flex flex-col h-full bg-black/20 backdrop-blur-md"
           : `${mobile ? "w-full min-w-0 h-full" : "w-48 min-w-48 xl:w-60 xl:min-w-60 border-r"} border-border bg-bg flex flex-col overflow-y-auto text-[13px]`
       }
+      data-no-window-drag=""
       data-testid="conversations-sidebar"
       data-variant={variant}
       onPointerDown={() => setMenuConversation(null)}

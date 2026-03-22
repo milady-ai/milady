@@ -1,5 +1,15 @@
 import type { ManagedWindowSnapshot } from "./surface-windows";
 
+/**
+ * OS menu bar structure for Electrobun. Each **`action`** is emitted as
+ * `application-menu-clicked` and handled in `index.ts`. **Why a pure builder:**
+ * tests and reviewers can diff menu shape without reading IPC wiring.
+ *
+ * **`reset-milady`** is forwarded to the webview (see `menu-reset-milady`) so
+ * **`handleReset`** in `AppProvider` owns confirm + API + React state. **Why not
+ * reset from the main process:** duplicate HTTP/auth and drift from Settings.
+ */
+
 type ApplicationMenuRole =
   | "about"
   | "services"
@@ -254,6 +264,7 @@ export function buildApplicationMenu({
         },
         { label: "Restart Agent", action: "restart-agent" },
         { label: "Relaunch Milady", action: "relaunch" },
+        { label: "Reset Milady…", action: "reset-milady" },
         { type: "separator" },
         ...(isMac
           ? [

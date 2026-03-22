@@ -716,6 +716,7 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
       <div
         ref={messagesRef}
         data-testid="chat-messages-scroll"
+        data-no-window-drag={isGameModal ? undefined : ""}
         className={
           isGameModal
             ? "absolute inset-x-0 overflow-hidden select-none pointer-events-none"

@@ -39,7 +39,15 @@ bun install && bun run build
 bun run dev:desktop
 ```
 
+For **why** the desktop dev commands spawn multiple processes, how **Ctrl-C** and **Quit** behave, and **environment variables** (`MILADY_DESKTOP_VITE_WATCH`, `MILADY_RENDERER_URL`, etc.), see **[Desktop local development](./desktop-local-development)**.
+
 In development mode, the Electrobun app resolves the Milady distribution from the repository root's `dist/` directory. In packaged builds, assets are copied into the app bundle under `Resources/app/milady-dist/`.
+
+## macOS frameless window chrome (hiddenInset)
+
+On **macOS**, the main window uses **`hiddenInset`** (no classic title bar; traffic lights inset). The WKWebView fills the client area, so **window move** and **inner-edge resize** are implemented with **native `NSView` overlays** above the web view — not with CSS resize cursors alone. **Why:** WebKit owns the pointer over page pixels; tracking areas on the `contentView` underneath led to unreliable cursors and flicker when AppKit and WebKit both tried to set `NSCursor`.
+
+Strip **thickness** can track the current **`NSScreen`** when the host passes `height: 0` into native layout (see main-process `applyMacOSWindowEffects` and FFI `setNativeDragRegion`). Full architecture, z-order, and file map: [Electrobun macOS window chrome](/guides/electrobun-mac-window-chrome).
 
 ## Desktop Runtime Modes
 
@@ -65,6 +73,16 @@ On startup, the Electrobun shell and `AgentManager` coordinate these steps:
 ### Port Configuration
 
 The expected local API port is determined by `MILADY_PORT` (default: **2138**). In `local` mode the child runtime is started with that port request, but if the runtime binds a different port Electrobun detects it from stdout and updates the renderer API base dynamically. In `disabled` mode, the same expected local port is used for a separately managed local server.
+
+### Native application menu (e.g. macOS **Milady** menu)
+
+The OS menu bar template is built in **`apps/app/electrobun/src/application-menu.ts`** and wired in **`index.ts`** (`application-menu-clicked`). **Why a data file:** the same structure is validated by tests and stays free of platform branches scattered through the main process.
+
+| Item (example) | Action id | Behavior |
+|----------------|-----------|----------|
+| **Reset Milady…** | `reset-milady` | Focuses the main window and sends **`desktopTrayMenuClick`** with **`itemId: "menu-reset-milady"`** to the renderer. **Why not reset only in the main process:** the renderer already owns **`handleReset`** — native confirm + **`POST /api/agent/reset`**, onboarding state, and persistence — so the menu reuses one implementation and stays consistent with Settings. |
+
+Confirmation and API reset run in **`AppProvider`** (`handleReset`); the menu does not bypass that flow.
 
 ### Agent Status States
 

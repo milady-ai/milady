@@ -76,6 +76,10 @@ curl -fsSLO https://github.com/milady-ai/milady/releases/latest/download/SHA256S
 shasum -a 256 --check --ignore-missing SHA256SUMS.txt
 ```
 
+### Desktop: reset app data
+
+**Milady → Reset Milady…** (menu bar) asks for confirmation, then wipes embedded agent config and returns you to onboarding—the same **`handleReset`** path as Settings, so behavior stays in one place. **Why:** power users need a fast factory reset without hunting through Settings. See **[Desktop app](docs/apps/desktop.md)** (section *Native application menu*).
+
 ---
 
 ## Getting Started
@@ -508,6 +512,15 @@ bun run dev          # starts API (:31337) + Vite UI (:2138) with hot reload
 
 This auto-kills zombie processes on the dev ports, waits for the API to be healthy, then starts the Vite dev server with proxy.
 
+### Desktop shell (Electrobun)
+
+```bash
+bun run dev:desktop        # API + Electrobun; skips vite build when apps/app/dist is fresh
+bun run dev:desktop:watch  # + Vite dev server and MILADY_RENDERER_URL (HMR for UI work)
+```
+
+**Why a separate flow:** the desktop stack runs **multiple processes** (orchestrator, Vite and/or built assets, API, Electrobun). See **[docs/apps/desktop-local-development.md](docs/apps/desktop-local-development.md)** for signals, shutdown when you quit the app, and env vars.
+
 ```bash
 bun run check        # typecheck + lint (run before committing)
 bun run test         # parallel test suite
@@ -521,6 +534,7 @@ See **[DEVELOPMENT.md](./DEVELOPMENT.md)** for the full development guide includ
 
 - **[Plugin resolution and NODE_PATH](docs/plugin-resolution-and-node-path.md)** — Why we set `NODE_PATH` in three places so dynamic plugin imports resolve when building from source (CLI, desktop dev, Electrobun).
 - **[Build and release](docs/build-and-release.md)** — Why the release pipeline uses strict shell, retries, setup-node v3/Blacksmith, Bun cache, timeouts; why size-report pipelines handle SIGPIPE; why Windows plugin build uses `npx -p typescript tsc`.
+- **[Desktop local development](docs/apps/desktop-local-development.md)** — Why `dev:desktop` / `dev:desktop:watch` orchestrate Vite, API, and Electrobun; HMR vs `vite build --watch`; Ctrl-C, Quit, and `detached` children.
 
 ---
 

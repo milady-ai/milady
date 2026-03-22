@@ -604,6 +604,8 @@ function setupMock(state: AppHarnessState) {
     },
     handleOnboardingNext,
     handleOnboardingBack,
+    handleOnboardingJumpToStep: vi.fn(),
+    goToOnboardingStep: vi.fn(),
     handleReset,
     handleCloudLogin: vi.fn(async () => {
       state.elizaCloudConnected = true;

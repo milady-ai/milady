@@ -1,6 +1,7 @@
 import {
   invokeDesktopBridgeRequest,
   isElectrobunRuntime,
+  subscribeDesktopBridgeEvent,
 } from "@miladyai/app-core/bridge";
 import { TRAY_ACTION_EVENT } from "@miladyai/app-core/events";
 import { useApp } from "@miladyai/app-core/state";
@@ -144,11 +145,34 @@ export function DesktopTrayRuntime() {
   const {
     agentStatus,
     handleRestart,
+    handleReset,
     handleStart,
     handleStop,
     setTab,
     switchShellView,
   } = useApp();
+
+  // App menu "Reset Milady…" reuses the same push channel as tray `navigate-*`.
+  // WHY: Electrobun already bridges `desktopTrayMenuClick`; no new IPC type needed.
+  // WHY handleReset here: one implementation with Settings (confirm + API + state).
+  useEffect(() => {
+    if (!isElectrobunRuntime()) {
+      return;
+    }
+
+    return subscribeDesktopBridgeEvent({
+      rpcMessage: "desktopTrayMenuClick",
+      ipcChannel: "desktop:trayMenuClick",
+      listener: (payload) => {
+        const itemId =
+          (payload as { itemId?: string } | null | undefined)?.itemId ?? "";
+        if (itemId !== "menu-reset-milady") {
+          return;
+        }
+        void handleReset();
+      },
+    });
+  }, [handleReset]);
 
   useEffect(() => {
     if (!isElectrobunRuntime()) {

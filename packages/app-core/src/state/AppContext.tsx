@@ -107,6 +107,12 @@ import {
   type Tab,
   tabFromPath,
 } from "../navigation";
+import {
+  canRevertOnboardingTo,
+  getFlaminaTopicForOnboardingStep,
+  resolveOnboardingNextStep,
+  resolveOnboardingPreviousStep,
+} from "../onboarding/flow";
 import { buildOnboardingConnectionConfig } from "../onboarding-config";
 import {
   alertDesktopMessage,
@@ -125,6 +131,7 @@ import {
   applyUiTheme,
   asApiLikeError,
   type ChatTurnUsage,
+  clearPersistedConnectionMode,
   clearPersistedOnboardingStep,
   deriveOnboardingResumeConnection,
   deriveOnboardingResumeFields,
@@ -408,21 +415,6 @@ function isRemoteApiBase(baseUrl: string): boolean {
     );
   } catch {
     return false;
-  }
-}
-
-function getFlaminaTopicForOnboardingStep(
-  step: OnboardingStep,
-): AppState["onboardingActiveGuide"] {
-  switch (step) {
-    case "connection":
-      return "provider";
-    case "rpc":
-      return "rpc";
-    case "senses":
-      return "permissions";
-    default:
-      return null;
   }
 }
 
@@ -2322,6 +2314,16 @@ export function AppProvider({
     setStartupRetryNonce((prev) => prev + 1);
   }, []);
 
+  /**
+   * Wipes server-side agent config (`POST /api/agent/reset`) and local UI state.
+   *
+   * **WHY clear `clearPersistedConnectionMode` + `setBaseUrl(null)` / `setToken(null)`**
+   * after the API call: the server no longer matches cloud/remote session data; leaving
+   * persisted mode or client base pointed at Eliza Cloud made the next screen look
+   * “stuck” or skipped onboarding.
+   *
+   * **WHY Eliza Cloud state cleared:** avoid showing “connected” after config wipe.
+   */
   const handleReset = useCallback(async () => {
     if (lifecycleBusyRef.current) {
       const activeAction =
@@ -2343,10 +2345,29 @@ export function AppProvider({
       type: "warning",
     });
     if (!confirmed) return;
-    if (!beginLifecycleAction("reset")) return;
+    if (!beginLifecycleAction("reset")) {
+      setActionNotice(
+        "Another agent operation is still running. Wait for it to finish, then try Reset again.",
+        "info",
+        4200,
+      );
+      return;
+    }
     setActionNotice(LIFECYCLE_MESSAGES.reset.progress, "info", 3200);
     try {
       await client.resetAgent();
+      // Local persistence + client must match wiped server (see JSDoc on handleReset).
+      clearPersistedConnectionMode();
+      client.setBaseUrl(null);
+      client.setToken(null);
+      setElizaCloudEnabled(false);
+      setElizaCloudConnected(false);
+      setElizaCloudCredits(null);
+      setElizaCloudCreditsLow(false);
+      setElizaCloudCreditsCritical(false);
+      setElizaCloudTopUpUrl("/cloud/billing");
+      setElizaCloudUserId(null);
+      setElizaCloudLoginError(null);
       setAgentStatus(null);
       onboardingCompletionCommittedRef.current = false;
       setOnboardingComplete(false);
@@ -4516,21 +4537,28 @@ export function AppProvider({
     elizaCloudConnected,
   ]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: t is stable but defined later
-  const handleOnboardingNext = useCallback(
-    async (options?: OnboardingNextOptions) => {
-      const CLOUD_STEPS: OnboardingStep[] = ["welcome", "cloudLogin"];
-      const CUSTOM_STEPS: OnboardingStep[] = [
-        "connection",
-        "rpc",
-        "senses",
-        "activate",
-      ];
-      const isCustomFlow = CUSTOM_STEPS.includes(onboardingStep);
-      const STEP_ORDER = isCustomFlow ? CUSTOM_STEPS : CLOUD_STEPS;
+  // ── Onboarding motion (flow graph: packages/app-core/src/onboarding/flow.ts) ──
+  // WHY split from flow.ts: advance/revert need handleCloudLoginRef, finish,
+  // provider auto-fill, and dozens of state fields—keeping them here avoids a
+  // giant deps struct and stale-closure traps. WHY goToOnboardingStep: Welcome
+  // "Get Started" must not use raw setState(onboardingStep) alone or advanced
+  // mode's Flamina guide desyncs from the visible step.
 
+  const goToOnboardingStep = useCallback(
+    (step: OnboardingStep) => {
+      setOnboardingStep(step);
+      setOnboardingActiveGuide(
+        onboardingMode === "advanced"
+          ? getFlaminaTopicForOnboardingStep(step)
+          : null,
+      );
+    },
+    [onboardingMode, setOnboardingStep],
+  );
+
+  const advanceOnboarding = useCallback(
+    async (options?: OnboardingNextOptions) => {
       // ── Cloud flow ──────────────────────────────────────────────────
-      // "welcome" → trigger cloud login, advance to cloudLogin
       if (onboardingStep === "welcome") {
         try {
           await handleCloudLoginRef.current();
@@ -4539,7 +4567,6 @@ export function AppProvider({
         }
       }
 
-      // "cloudLogin" → cloud login succeeded, finish onboarding immediately
       if (onboardingStep === "cloudLogin") {
         await handleOnboardingFinish();
         return;
@@ -4581,10 +4608,8 @@ export function AppProvider({
         }
       }
 
-      // Advance to next step
-      const currentIndex = STEP_ORDER.indexOf(onboardingStep);
-      if (currentIndex < STEP_ORDER.length - 1) {
-        const nextStep = STEP_ORDER[currentIndex + 1];
+      const nextStep = resolveOnboardingNextStep(onboardingStep);
+      if (nextStep) {
         setOnboardingStep(nextStep);
         setOnboardingActiveGuide(
           onboardingMode === "advanced"
@@ -4593,34 +4618,49 @@ export function AppProvider({
         );
       }
     },
-    [onboardingMode, onboardingStep, handleOnboardingFinish],
+    [
+      addDeferredOnboardingTask,
+      handleOnboardingFinish,
+      onboardingDetectedProviders,
+      onboardingMode,
+      onboardingOptions?.providers,
+      onboardingProvider,
+      onboardingRunMode,
+      onboardingStep,
+      setOnboardingStep,
+    ],
   );
 
-  const handleOnboardingBack = useCallback(() => {
-    const CLOUD_STEPS: OnboardingStep[] = ["welcome", "cloudLogin"];
-    const CUSTOM_STEPS: OnboardingStep[] = [
-      "connection",
-      "rpc",
-      "senses",
-      "activate",
-    ];
-    const isCustomFlow = CUSTOM_STEPS.includes(onboardingStep);
-    const STEP_ORDER = isCustomFlow ? CUSTOM_STEPS : CLOUD_STEPS;
+  const handleOnboardingNext = useCallback(
+    async (options?: OnboardingNextOptions) => advanceOnboarding(options),
+    [advanceOnboarding],
+  );
 
-    const currentIndex = STEP_ORDER.indexOf(onboardingStep);
-    if (currentIndex > 0) {
-      const previousStep = STEP_ORDER[currentIndex - 1];
-      setOnboardingStep(previousStep);
+  const revertOnboarding = useCallback(() => {
+    const previousStep = resolveOnboardingPreviousStep(onboardingStep);
+    if (!previousStep) return;
+    setOnboardingStep(previousStep);
+    setOnboardingActiveGuide(
+      onboardingMode === "advanced"
+        ? getFlaminaTopicForOnboardingStep(previousStep)
+        : null,
+    );
+  }, [onboardingMode, onboardingStep, setOnboardingStep]);
+
+  const handleOnboardingBack = revertOnboarding;
+
+  const handleOnboardingJumpToStep = useCallback(
+    (target: OnboardingStep) => {
+      if (!canRevertOnboardingTo({ current: onboardingStep, target })) return;
+      setOnboardingStep(target);
       setOnboardingActiveGuide(
         onboardingMode === "advanced"
-          ? getFlaminaTopicForOnboardingStep(previousStep)
+          ? getFlaminaTopicForOnboardingStep(target)
           : null,
       );
-    } else if (isCustomFlow) {
-      // Going back from first custom step → back to welcome
-      setOnboardingStep("welcome");
-    }
-  }, [onboardingMode, onboardingStep, setOnboardingStep]);
+    },
+    [onboardingMode, onboardingStep, setOnboardingStep],
+  );
 
   const handleOnboardingUseLocalBackend = useCallback(() => {
     client.setBaseUrl(null);
@@ -6515,6 +6555,8 @@ export function AppProvider({
     handleCharacterMessageExamplesInput,
     handleOnboardingNext,
     handleOnboardingBack,
+    handleOnboardingJumpToStep,
+    goToOnboardingStep,
     handleOnboardingRemoteConnect,
     handleOnboardingUseLocalBackend,
     handleCloudLogin,

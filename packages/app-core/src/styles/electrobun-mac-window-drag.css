@@ -1,0 +1,58 @@
+/**
+ * macOS Electrobun main window uses titleBarStyle "hiddenInset" (no native title bar).
+ *
+ * WHY this file exists:
+ * - Chromium honors -webkit-app-region for drag/no-drag regions.
+ * - System WKWebView often does not — actual move/resize chrome lives in
+ *   apps/app/electrobun/native/macos/window-effects.mm (see docs/guides/electrobun-mac-window-chrome.md).
+ * - We still ship these rules so CEF or future web engines get sensible defaults
+ *   without duplicating policy only in native code.
+ *
+ * html.milady-electrobun-frameless is toggled from apps/app/src/main.tsx
+ * (main macOS Electrobun shell only; detached shells skip it).
+ */
+html.milady-electrobun-frameless body {
+  -webkit-app-region: drag;
+}
+
+html.milady-electrobun-frameless a,
+html.milady-electrobun-frameless button,
+html.milady-electrobun-frameless input,
+html.milady-electrobun-frameless textarea,
+html.milady-electrobun-frameless select,
+html.milady-electrobun-frameless option,
+html.milady-electrobun-frameless label,
+html.milady-electrobun-frameless summary,
+html.milady-electrobun-frameless iframe,
+html.milady-electrobun-frameless canvas,
+html.milady-electrobun-frameless video,
+html.milady-electrobun-frameless audio,
+html.milady-electrobun-frameless electrobun-wgpu,
+html.milady-electrobun-frameless [role="button"],
+html.milady-electrobun-frameless [role="link"],
+html.milady-electrobun-frameless [role="menuitem"],
+html.milady-electrobun-frameless [role="menuitemcheckbox"],
+html.milady-electrobun-frameless [role="menuitemradio"],
+html.milady-electrobun-frameless [role="option"],
+html.milady-electrobun-frameless [role="radio"],
+html.milady-electrobun-frameless [role="checkbox"],
+html.milady-electrobun-frameless [role="switch"],
+html.milady-electrobun-frameless [role="tab"],
+html.milady-electrobun-frameless [role="slider"],
+html.milady-electrobun-frameless [role="listbox"],
+html.milady-electrobun-frameless [role="combobox"],
+html.milady-electrobun-frameless [role="spinbutton"],
+html.milady-electrobun-frameless [role="textbox"],
+html.milady-electrobun-frameless [role="searchbox"],
+html.milady-electrobun-frameless [contenteditable="true"],
+html.milady-electrobun-frameless [aria-haspopup],
+html.milady-electrobun-frameless [data-shell-scroll-region="true"],
+html.milady-electrobun-frameless [data-no-window-drag="true"],
+html.milady-electrobun-frameless [data-no-camera-drag="true"] {
+  -webkit-app-region: no-drag;
+}
+
+/* Onboarding full-screen VRM canvas would otherwise stay no-drag (companion rule above). */
+html.milady-electrobun-frameless .onboarding-screen canvas {
+  -webkit-app-region: drag;
+}

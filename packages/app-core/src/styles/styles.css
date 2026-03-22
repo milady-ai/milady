@@ -2,6 +2,7 @@
 @import "./base.css";
 @import "./anime.css";
 @import "./onboarding-game.css";
+@import "./electrobun-mac-window-drag.css";
 
 @source "..";
 @source "../../../apps/app/src";

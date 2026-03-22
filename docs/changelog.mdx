@@ -3,6 +3,61 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-03-21" description="App onboarding architecture" tags={["Update"]}>
+## Data-driven onboarding UI (app-core)
+
+The dashboard onboarding wizard now derives **step order**, **back navigation**, and the **sidebar step list** from a small pure module (`@miladyai/app-core/onboarding/flow`) instead of duplicating arrays in `AppContext` and the nav component. **Why:** duplicate lists drifted and made “go back” hard to keep consistent.
+
+- **Forward motion** is still orchestrated in `AppProvider` as `advanceOnboarding` (wrapped by `handleOnboardingNext`) so cloud login, `handleOnboardingFinish`, and provider auto-fill run in the correct order before the step index changes.
+- **Back** uses `resolveOnboardingPreviousStep` (including **connection → welcome**, even though `welcome` is not listed in the custom-flow sidebar).
+- **Sidebar:** completed steps are **clickable** to jump backward only (`handleOnboardingJumpToStep`), validated with the same rules as repeated Back—**forward** sidebar jumps are intentionally disallowed so finish/login validation cannot be skipped.
+- **Welcome “Get Started”** uses `goToOnboardingStep("connection")` so advanced mode can sync the Flamina guide in one place instead of raw `setState` on the step alone.
+
+Developer guide: [Onboarding UI flow](/guides/onboarding-ui-flow).
+
+## Connection step: pure subflow + view registry
+
+Inside the **`connection`** wizard step (hosting, remote backend, Eliza Cloud, neural link, provider detail), routing and navigation patches now live in **`@miladyai/app-core/onboarding/connection-flow`** — still **pure** (no React), with Vitest table coverage. **Why:** the old single file mixed a large `if` tree with OAuth and API calls, so branch order and `setState` clusters were hard to test and easy to break.
+
+- **`deriveConnectionScreen`** and **`resolveConnectionUiSpec`** answer “which shell to show” from a snapshot (including steady-state **`forceCloud`** routing so tests match post-bootstrap UI).
+- **`applyConnectionTransition`** returns either a **patch** (applied via `setState` in `ConnectionStep`) or an **effect** token for **`useLocalBackend`** — **why:** disconnecting the remote client and `retryStartup` are not pure and must stay in `AppContext`.
+- **React** is split into `ConnectionStep` (snapshot + dispatch + bootstrap `useEffect`) and `components/onboarding/connection/*` (one component per screen). **Why:** keeps the pure module importable from tests without jsdom, and shrinks review surface when changing one path.
+
+See the same guide: [Onboarding UI flow](/guides/onboarding-ui-flow) (section *Connection step subflow*).
+
+## Desktop dev orchestrator (`dev-platform`)
+
+`scripts/dev-platform.mjs` (used by `bun run dev:desktop` / `dev:desktop:watch`) was tightened so local desktop development matches how people actually work. **Why:** the stack is multiple processes (Vite, API, Electrobun); without explicit rules, Ctrl-C, app quit, and port reuse felt broken or “stuck.”
+
+- **`dev:desktop:watch` defaults to the Vite dev server + `MILADY_RENDERER_URL`** so the UI gets **HMR** instead of paying for a full Rollup `vite build --watch` on every save (still opt-in via `MILADY_DESKTOP_VITE_BUILD_WATCH=1` when you need production watch output).
+- **Unix children are spawned `detached`** so **TTY Ctrl-C hits the orchestrator only** — Electrobun no longer eats the first SIGINT while Vite/API keep the parent alive on open pipes.
+- **Quitting from the app** (Electrobun exits) now **stops Vite and the API** and exits the script; previously the terminal could hang after “App quitting…” because siblings kept running.
+- **Shutdown** exits as soon as all children are gone (short **SIGKILL** fallback), and a **second Ctrl-C** force-exits; **Windows** UI port cleanup uses `netstat`/`taskkill` when `lsof` is unavailable.
+- **Renderer skip / stale `dist`** logic lives in `scripts/lib/vite-renderer-dist-stale.mjs` with tests; **scoped process kill** remains in `scripts/lib/kill-process-tree.mjs` so unrelated Bun processes are not targeted.
+
+Guide (with rationale): [Desktop local development](/apps/desktop-local-development).
+
+## Branding and `{{appName}}` in i18n (app-core)
+
+Locale strings that mention the product name use **`{{appName}}`** in JSON templates. **`appNameInterpolationVars(branding)`** in `config/branding.ts` supplies the value (default **`Eliza`**; shells override via `BrandingContext`, e.g. Milady). **Why:** one interpolation key matches all locales; missing vars left raw `{{appName}}` in the UI. **Why a helper:** every `t(key, …)` site stays consistent and picks the same fallback when `appName` is empty.
+
+## System access (permissions) onboarding: single Continue
+
+The **senses** / system-access step no longer shows separate **Skip** and **Continue** actions. One **Continue** always advances the wizard to the next step (`activate`). **Why:** two buttons implied different outcomes but both were easy to misread; grant state is still visible per permission. **`allowPermissionBypass`** remains on `handleOnboardingNext` for tests and edge tooling, but the permissions UI does not send it.
+
+## Eliza Cloud OAuth: auto-advance in the connection step
+
+After browser/OAuth login succeeds on the **Login** tab (pre-provider and provider-detail Eliza Cloud panels), the app calls **`handleOnboardingNext()`** once—same idea as **`CloudLoginStep`**. **Why:** an extra Confirm click added no value once “connected” is shown. **Why only on the Login tab:** API-key entry still requires an explicit Confirm so we do not advance on partial input. Implementation: **`useAdvanceOnboardingWhenElizaCloudOAuthConnected`** (`components/onboarding/connection/`).
+
+## Desktop: Reset Milady (app menu) + reliable post-reset onboarding
+
+- **Milady** application menu includes **Reset Milady…** (`reset-milady`). The main process shows the window and pushes **`desktopTrayMenuClick`** with **`menu-reset-milady`**; the renderer runs **`handleReset()`**, which already confirms and calls **`POST /api/agent/reset`**. **Why push to the renderer:** reset needs the same `MiladyClient`, confirmation dialog, and state teardown as Settings—not a duplicate main-process API client.
+- **`handleReset`** now clears **persisted connection mode**, resets **API base/token** toward the embedded agent, and clears **Eliza Cloud** UI flags. **Why:** otherwise the UI could stay pointed at cloud/remote after the server wiped config, so onboarding looked “stuck” or never appeared.
+- **`App` shell:** onboarding is no longer blocked by **`agentStatus === "starting"`**. **Why:** right after a reset the agent often returns to `starting`; the old gate kept the main shell (or loader) visible instead of **`OnboardingWizard`**, so reset looked like it did nothing after confirm.
+
+Docs: [Desktop app](/apps/desktop) (application menu), [Onboarding UI flow](/guides/onboarding-ui-flow).
+</Update>
+
 <Update label="2026-06-18" description="Week of June 12–18" tags={["Feature", "Update", "Fix"]}>
 ## Simplified cloud onboarding
 

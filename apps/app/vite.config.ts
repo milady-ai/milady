@@ -16,6 +16,8 @@ const miladyRoot = path.resolve(here, "../..");
 // The dev script sets MILADY_API_PORT; default to 31337 for standalone vite dev.
 const apiPort = Number(process.env.MILADY_API_PORT) || 31337;
 const enableAppSourceMaps = process.env.MILADY_APP_SOURCEMAP === "1";
+/** Set by scripts/dev-platform.mjs for `vite build --watch` (Electrobun desktop). */
+const desktopFastDist = process.env.MILADY_DESKTOP_VITE_FAST_DIST === "1";
 
 /**
  * Dev-only middleware that handles CORS for the desktop custom-scheme origin
@@ -286,9 +288,13 @@ export default defineConfig({
   },
   build: {
     outDir: path.resolve(here, "dist"),
-    emptyOutDir: true,
-    sourcemap: enableAppSourceMaps,
+    // Watch + incremental: avoid wiping dist each cycle; keeps Electrobun reloads fast.
+    emptyOutDir: desktopFastDist ? false : true,
+    sourcemap: desktopFastDist ? false : enableAppSourceMaps,
     target: "es2022",
+    minify: desktopFastDist ? false : undefined,
+    cssMinify: desktopFastDist ? false : undefined,
+    reportCompressedSize: !desktopFastDist,
     rollupOptions: {
       input: {
         main: path.resolve(here, "index.html"),

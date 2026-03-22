@@ -930,9 +930,11 @@ export function PermissionsSection() {
 }
 
 /**
- * PermissionsOnboardingSection — Simplified view for onboarding wizard.
+ * Onboarding **senses** step: system / streaming permissions with a single **Continue**.
  *
- * Shows only essential permissions with clear CTAs.
+ * **WHY one button:** “Skip” vs “Continue” duplicated intent and confused users; grant
+ * state stays visible on each row. **`onContinue()`** always advances the wizard; the
+ * legacy `allowPermissionBypass` flag is only for tests / programmatic use, not these UIs.
  */
 /** Onboarding section for mobile — streaming permissions to cloud sandbox. */
 function MobileOnboardingPermissions({
@@ -1042,8 +1044,10 @@ function DesktopOnboardingPermissions({
           )}
         </div>
         <Button
+          type="button"
           variant="default"
-          onClick={() => onContinue({ allowPermissionBypass: true })}
+          data-testid="permissions-onboarding-continue"
+          onClick={() => onContinue()}
         >
           {translateWithFallback(t, "onboarding.savedMyKeys", "Continue")}
         </Button>
@@ -1155,27 +1159,15 @@ function DesktopOnboardingPermissions({
 
       <div className="flex flex-wrap justify-center gap-3">
         <Button
-          variant="outline"
+          type="button"
+          variant="default"
           size="sm"
-          className="h-auto min-w-[8.5rem] px-4 py-2 text-[11px] leading-tight opacity-70"
-          onClick={() => onContinue({ allowPermissionBypass: true })}
+          data-testid="permissions-onboarding-continue"
+          className="h-auto min-w-[8.5rem] bg-accent border-accent px-4 py-2 text-[11px] leading-tight text-accent-foreground"
+          onClick={() => onContinue()}
         >
-          {translateWithFallback(
-            t,
-            "permissionssection.SkipForNow",
-            "Skip for Now",
-          )}
+          {translateWithFallback(t, "onboarding.savedMyKeys", "Continue")}
         </Button>
-        {allGranted && (
-          <Button
-            variant="default"
-            size="sm"
-            className="h-auto min-w-[8.5rem] bg-accent border-accent px-4 py-2 text-[11px] leading-tight text-accent-foreground"
-            onClick={() => onContinue()}
-          >
-            {translateWithFallback(t, "onboarding.savedMyKeys", "Continue")}
-          </Button>
-        )}
       </div>
     </div>
   );

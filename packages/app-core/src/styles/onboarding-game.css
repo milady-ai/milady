@@ -233,6 +233,26 @@
   color: rgba(240, 185, 11, 0.8);
 }
 
+button.onboarding-step-item.onboarding-step-item--clickable {
+  cursor: pointer;
+  width: 100%;
+  border: none;
+  background: transparent;
+  margin: 0;
+  padding: 19px 0;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+}
+button.onboarding-step-item.onboarding-step-item--clickable:focus-visible {
+  outline: 2px solid rgba(240, 185, 11, 0.55);
+  outline-offset: 3px;
+}
+button.onboarding-step-item.onboarding-step-item--clickable:hover
+  .onboarding-step-name {
+  color: rgba(240, 238, 250, 0.85);
+}
+
 /* === RIGHT PANEL — Content === */
 .onboarding-right {
   display: flex;

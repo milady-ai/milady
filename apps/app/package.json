@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --force",
+    "dev": "vite",
     "preview": "vite preview",
     "design-review": "node --import tsx test/design-review/run-design-review.ts",
     "test": "vitest run --config vitest.config.ts",

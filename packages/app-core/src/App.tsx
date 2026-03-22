@@ -386,13 +386,17 @@ export function App() {
     return <StartupFailureView error={startupError} onRetry={retryStartup} />;
   }
 
-  const shouldLoad = onboardingLoading || agentStarting;
+  // Agent startup must not hide onboarding: after reset the runtime often goes
+  // to "starting" while we need to show the wizard immediately.
+  const blockOnboardingForShell = onboardingLoading;
+  const showFullScreenLoader =
+    onboardingComplete && (onboardingLoading || agentStarting);
   const [loaderFadingOut, setLoaderFadingOut] = useState(false);
   const showLoaderRef = useRef(true);
   const [showLoader, setShowLoader] = useState(true);
 
   useEffect(() => {
-    if (shouldLoad) {
+    if (showFullScreenLoader) {
       showLoaderRef.current = true;
       setShowLoader(true);
       setLoaderFadingOut(false);
@@ -405,10 +409,12 @@ export function App() {
       }, 800);
       return () => clearTimeout(timer);
     }
-  }, [shouldLoad]);
+  }, [showFullScreenLoader]);
 
-  if (authRequired && !shouldLoad) return <PairingView />;
-  if (!onboardingComplete && !shouldLoad) return <OnboardingWizard />;
+  if (authRequired && !blockOnboardingForShell) return <PairingView />;
+  if (!onboardingComplete && !blockOnboardingForShell) {
+    return <OnboardingWizard />;
+  }
 
   const shellContent = companionShellVisible ? (
     <CompanionShell tab={effectiveTab} actionNotice={actionNotice} />

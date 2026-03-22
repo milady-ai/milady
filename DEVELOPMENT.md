@@ -47,8 +47,15 @@ The script waits for the API to be healthy before starting Vite, so you won't se
 bun run dev:ui           # UI only (API assumed running separately)
 bun run dev:home         # Home dashboard instead of main app
 bun run dev:desktop      # Desktop app (Electrobun)
+bun run dev:desktop:watch   # Desktop + Vite dev server (HMR) for UI work
 ELIZA_DEV_LOG_LEVEL=debug bun run dev   # verbose API logs
 ```
+
+### Desktop shell (`dev:desktop`)
+
+The Electrobun app is started by `scripts/dev-platform.mjs`, which also manages the dashboard API and (in watch mode) the Vite dev server. **Why documented separately:** several Bun processes and signal paths are **intentional** — without context it is easy to mistake them for leaks or broken Ctrl-C.
+
+Full rationale (env vars, Quit vs terminal, Rollup watch opt-in): **[docs/apps/desktop-local-development.md](docs/apps/desktop-local-development.md)**. Short index: **[scripts/README.md](scripts/README.md)**.
 
 ### Hot Reload
 

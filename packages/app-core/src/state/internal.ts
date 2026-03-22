@@ -1,3 +1,13 @@
+// Onboarding wizard graph (pure); see docs/guides/onboarding-ui-flow.md
+export {
+  canRevertOnboardingTo,
+  getFlaminaTopicForOnboardingStep,
+  getOnboardingNavMetas,
+  getStepOrderForCurrentStep,
+  isOnboardingCustomFlowStep,
+  resolveOnboardingNextStep,
+  resolveOnboardingPreviousStep,
+} from "../onboarding/flow";
 export {
   deriveOnboardingResumeConnection,
   deriveOnboardingResumeFields,

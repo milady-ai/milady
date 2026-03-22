@@ -349,4 +349,12 @@ describe("buildApplicationMenu", () => {
     expect(parseSettingsWindowAction("open-settings-media")).toBe("media");
     expect(parseSettingsWindowAction("show")).toBeUndefined();
   });
+
+  it("Milady menu includes Reset Milady action", () => {
+    const milady = getMenu("Milady");
+    const actions = (milady?.submenu ?? [])
+      .filter((i): i is { action: string } => typeof i.action === "string")
+      .map((i) => i.action);
+    expect(actions).toContain("reset-milady");
+  });
 });

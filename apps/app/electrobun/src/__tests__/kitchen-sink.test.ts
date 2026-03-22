@@ -3730,10 +3730,9 @@ describe("applyMacOSWindowEffects — native effect constants", () => {
   });
 
   it("drag region constants cover title bar height", () => {
-    // MAC_NATIVE_DRAG_REGION_HEIGHT=40 covers standard title bar
-    const dragHeight = 40;
-    expect(dragHeight).toBeGreaterThanOrEqual(38); // standard macOS title bar
-    expect(dragHeight).toBeLessThanOrEqual(60); // not too tall
+    // MAC_NATIVE_DRAG_REGION_HEIGHT=0 — native per-screen depth (see window-effects.mm)
+    const dragHeight = 0;
+    expect(dragHeight).toBe(0);
   });
 
   it("applyMacOSWindowEffects is a no-op on non-darwin when called via macEffects", () => {
@@ -3752,7 +3751,7 @@ describe("applyMacOSWindowEffects — native effect constants", () => {
         macEffects.setTrafficLightsPosition(fakePtr, 14, 12),
       ).not.toThrow();
       expect(() =>
-        macEffects.setNativeDragRegion(fakePtr, 92, 40),
+        macEffects.setNativeDragRegion(fakePtr, 92, 0),
       ).not.toThrow();
     } finally {
       Object.defineProperty(process, "platform", {
@@ -3780,6 +3779,7 @@ describe("Application menu structure — expected items", () => {
           { label: "Settings...", action: "open-settings" },
           { label: "Restart Agent", action: "restart-agent" },
           { label: "Relaunch Milady", action: "relaunch" },
+          { label: "Reset Milady…", action: "reset-milady" },
           { role: "quit" },
         ],
       },
@@ -3841,6 +3841,7 @@ describe("Application menu structure — expected items", () => {
     expect(miladyActions).toContain("check-for-updates");
     expect(miladyActions).toContain("open-settings");
     expect(miladyActions).toContain("restart-agent");
+    expect(miladyActions).toContain("reset-milady");
   });
 
   it("Edit menu contains all standard editing roles", () => {
@@ -4035,7 +4036,7 @@ describe("Window vibrancy and macOS effects (automated)", () => {
     expect(source).toContain("MAC_TRAFFIC_LIGHTS_Y = 12");
   });
 
-  it("drag region constants are x=92, height=40 in index.ts source", async () => {
+  it("drag region constants are x=92, height=0 (per-screen native) in index.ts source", async () => {
     const fs = await vi.importActual<typeof import("node:fs")>("node:fs");
     const path = await vi.importActual<typeof import("node:path")>("node:path");
     const source = fs.readFileSync(
@@ -4043,7 +4044,7 @@ describe("Window vibrancy and macOS effects (automated)", () => {
       "utf8",
     );
     expect(source).toContain("MAC_NATIVE_DRAG_REGION_X = 92");
-    expect(source).toContain("MAC_NATIVE_DRAG_REGION_HEIGHT = 40");
+    expect(source).toContain("MAC_NATIVE_DRAG_REGION_HEIGHT = 0");
   });
 
   it.todo(
@@ -4496,6 +4497,7 @@ describe("Application menu (automated)", () => {
     );
     expect(menuSource).toContain("check-for-updates");
     expect(menuSource).toContain("restart-agent");
+    expect(menuSource).toContain("reset-milady");
   });
 
   it("Edit menu includes undo, redo, cut, copy, paste, selectAll roles", async () => {
@@ -4529,6 +4531,17 @@ describe("Application menu (automated)", () => {
       "utf8",
     );
     expect(indexSource).toContain('"check-for-updates"');
+  });
+
+  it("reset-milady menu action forwards to renderer for reset + confirmation", async () => {
+    const fs = await vi.importActual<typeof import("node:fs")>("node:fs");
+    const path = await vi.importActual<typeof import("node:path")>("node:path");
+    const indexSource = fs.readFileSync(
+      path.resolve(__dirname, "../index.ts"),
+      "utf8",
+    );
+    expect(indexSource).toContain('"reset-milady"');
+    expect(indexSource).toContain("menu-reset-milady");
   });
 
   it.todo("Keyboard shortcut Cmd+Q triggers quit (e2e)");

@@ -17,6 +17,7 @@ import {
   existsSync,
   mkdtempSync,
   readFileSync,
+  realpathSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -26,11 +27,14 @@ import path from "node:path";
 import process from "node:process";
 import { ethers } from "ethers";
 import JSON5 from "json5";
+import { capacitorPluginsBuildNeeded } from "./lib/capacitor-plugin-build-needed.mjs";
+import { signalSpawnedProcessTree } from "./lib/kill-process-tree.mjs";
 import {
   coerceBoolean,
   resolveOnchainPreference,
 } from "./lib/dev-ui-onchain.mjs";
 import { buildVisionDepsFailureMessage } from "./lib/dev-ui-vision.mjs";
+import { CAPACITOR_PLUGIN_NAMES } from "../apps/app/scripts/capacitor-plugin-names.mjs";
 
 const API_PORT = Number(process.env.MILADY_API_PORT) || 31337;
 
@@ -594,7 +598,7 @@ async function bootstrapOnchainDev() {
       anvilExit,
     ]);
   } catch (err) {
-    anvil.kill("SIGTERM");
+    signalSpawnedProcessTree(anvil, "SIGTERM");
     const stderr = getBufferedStderr();
     const msg = err instanceof Error ? err.message : String(err);
     throw new Error(
@@ -605,7 +609,7 @@ async function bootstrapOnchainDev() {
   const provider = new ethers.JsonRpcProvider(ANVIL_RPC_URL);
   const network = await provider.getNetwork();
   if (Number(network.chainId) !== ANVIL_CHAIN_ID) {
-    anvil.kill("SIGTERM");
+    signalSpawnedProcessTree(anvil, "SIGTERM");
     throw new Error(
       `Anvil chain id mismatch: expected ${ANVIL_CHAIN_ID}, got ${network.chainId}`,
     );
@@ -651,7 +655,7 @@ async function bootstrapOnchainDev() {
       }
     }
     if (!registryArtifactPath || !collectionArtifactPath) {
-      anvil.kill("SIGTERM");
+      signalSpawnedProcessTree(anvil, "SIGTERM");
       throw new Error(
         "Missing contract artifacts under test/contracts/out. Run `cd test/contracts && forge build --skip Harness`.",
       );
@@ -688,13 +692,13 @@ async function bootstrapOnchainDev() {
     collectionContract.getCollectionDetails(),
   ]);
   if (Number(totalAgents) !== 0) {
-    anvil.kill("SIGTERM");
+    signalSpawnedProcessTree(anvil, "SIGTERM");
     throw new Error(
       `Registry verification failed: expected totalAgents=0, got ${totalAgents}`,
     );
   }
   if (Number(collectionDetails[1]) !== 0) {
-    anvil.kill("SIGTERM");
+    signalSpawnedProcessTree(anvil, "SIGTERM");
     throw new Error(
       `Collection verification failed: expected currentSupply=0, got ${collectionDetails[1]}`,
     );
@@ -728,7 +732,7 @@ async function bootstrapOnchainDev() {
       const msg =
         "Anchor workspace not found (no Anchor.toml). Skipping anchor localnet bootstrap.";
       if (anchorRequired) {
-        anvil.kill("SIGTERM");
+        signalSpawnedProcessTree(anvil, "SIGTERM");
         throw new Error(msg);
       }
       console.log(`  ${green(logPrefix)} ${dim(msg)}`);
@@ -736,7 +740,7 @@ async function bootstrapOnchainDev() {
       const msg =
         "Anchor CLI not found in PATH. Skipping anchor localnet bootstrap.";
       if (anchorRequired) {
-        anvil.kill("SIGTERM");
+        signalSpawnedProcessTree(anvil, "SIGTERM");
         throw new Error(msg);
       }
       console.log(`  ${green(logPrefix)} ${dim(msg)}`);
@@ -769,11 +773,11 @@ async function bootstrapOnchainDev() {
         anchor = anchorProc;
         anchorConfigured = true;
       } catch (err) {
-        anchorProc.kill("SIGTERM");
+        signalSpawnedProcessTree(anchorProc, "SIGTERM");
         const stderr = getAnchorStderr();
         const msg = err instanceof Error ? err.message : String(err);
         if (anchorRequired) {
-          anvil.kill("SIGTERM");
+          signalSpawnedProcessTree(anvil, "SIGTERM");
           throw new Error(
             `Failed to start anchor localnet: ${msg}${stderr ? `\n${stderr}` : ""}`,
           );
@@ -937,50 +941,69 @@ function waitForPort(port, { timeout = 120_000, interval = 500 } = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// Orphan cleanup — kill leftover processes from a previous crash / SIGKILL
+// Orphan cleanup (startup only) — never kills arbitrary Bun; PID/name-wide pkill is avoided.
+// Only processes whose command line ties them to this repo or Milady workspace dirs.
 // ---------------------------------------------------------------------------
 
 function killOrphanedWorkspaceProcesses() {
   if (process.platform === "win32") return; // spawn-helper is Unix only
 
+  let repoRoot;
   try {
-    // Kill orphaned node-pty spawn-helpers and any processes running inside
-    // .eliza/workspaces (or legacy .elizaai/workspaces) that survived a crash.
-    const out = execSync(
-      `ps axo pid,command 2>/dev/null | grep -E '\\.mil(aidy|ady)/workspaces' | grep -v grep`,
-      { encoding: "utf-8", stdio: ["pipe", "pipe", "ignore"] },
-    );
-    const pids = out
-      .split("\n")
-      .map((l) => l.trim().split(/\s+/)[0])
-      .filter(Boolean);
-    if (pids.length) {
-      console.log(
-        `[dev-ui] Killing ${pids.length} orphaned workspace process(es)…`,
-      );
-      execSync(`kill -9 ${pids.join(" ")} 2>/dev/null`, { stdio: "ignore" });
-    }
+    repoRoot = realpathSync(cwd);
   } catch {
-    // No orphans found — clean slate
+    repoRoot = cwd;
   }
 
+  let psOut;
   try {
-    // Kill orphaned pty-worker processes (Node workers from pty-manager)
-    const out = execSync(
-      `ps axo pid,command 2>/dev/null | grep 'pty-worker.js' | grep -v grep`,
-      { encoding: "utf-8", stdio: ["pipe", "pipe", "ignore"] },
-    );
-    const pids = out
-      .split("\n")
-      .map((l) => l.trim().split(/\s+/)[0])
-      .filter(Boolean);
-    if (pids.length) {
-      console.log(`[dev-ui] Killing ${pids.length} orphaned pty-worker(s)…`);
-      execSync(`kill -9 ${pids.join(" ")} 2>/dev/null`, { stdio: "ignore" });
-    }
+    psOut = execSync("ps axo pid=,command=", {
+      encoding: "utf8",
+      maxBuffer: 10 * 1024 * 1024,
+      stdio: ["pipe", "pipe", "ignore"],
+    });
   } catch {
-    // No orphans found
+    return;
   }
+
+  const workspaceDirRe =
+    /\.milady\/workspaces|\.miladyai\/workspaces|\.eliza\/workspaces|\.elizaai\/workspaces/i;
+  const ptyWorkerRe = /pty-worker\.js/i;
+
+  const workspacePids = [];
+  const ptyPids = [];
+
+  for (const line of psOut.split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    const sp = trimmed.indexOf(" ");
+    if (sp < 1) continue;
+    const pidStr = trimmed.slice(0, sp).trim();
+    const cmd = trimmed.slice(sp + 1);
+    const pid = Number.parseInt(pidStr, 10);
+    if (!Number.isFinite(pid) || pid <= 0) continue;
+
+    if (workspaceDirRe.test(cmd)) {
+      workspacePids.push(pid);
+      continue;
+    }
+    if (ptyWorkerRe.test(cmd) && cmd.includes(repoRoot)) {
+      ptyPids.push(pid);
+    }
+  }
+
+  const killPids = (label, pids) => {
+    if (!pids.length) return;
+    console.log(`[dev-ui] Killing ${pids.length} orphaned ${label}…`);
+    try {
+      execSync(`kill -9 ${pids.join(" ")} 2>/dev/null`, { stdio: "ignore" });
+    } catch {
+      /* ignore */
+    }
+  };
+
+  killPids("workspace process(es)", workspacePids);
+  killPids("repo-scoped pty-worker(s)", ptyPids);
 }
 
 // ---------------------------------------------------------------------------
@@ -1018,27 +1041,30 @@ let tempOnchainDir = null;
 let shuttingDown = false;
 
 function terminateChild(proc, signal = "SIGTERM") {
-  if (!proc || proc.killed) return;
-  try {
-    proc.kill(signal);
-  } catch {
-    // Best effort.
-  }
+  if (!proc) return;
+  const sig = signal === "SIGKILL" ? "SIGKILL" : "SIGTERM";
+  signalSpawnedProcessTree(proc, sig);
 }
 
 function cleanup(exitCode = 0) {
-  if (shuttingDown) return;
+  if (shuttingDown) {
+    console.log("\n[eliza] Force exit.");
+    process.exit(exitCode === 0 ? 1 : exitCode);
+    return;
+  }
   shuttingDown = true;
 
-  terminateChild(viteProcess);
-  terminateChild(apiProcess);
-  terminateChild(anchorProcess);
-  terminateChild(anvilProcess);
+  terminateChild(viteProcess, "SIGTERM");
+  terminateChild(apiProcess, "SIGTERM");
+  terminateChild(anchorProcess, "SIGTERM");
+  terminateChild(anvilProcess, "SIGTERM");
 
-  // Give children a moment to propagate SIGTERM, then sweep orphans
   setTimeout(() => {
-    killOrphanedWorkspaceProcesses();
-  }, 200);
+    terminateChild(viteProcess, "SIGKILL");
+    terminateChild(apiProcess, "SIGKILL");
+    terminateChild(anchorProcess, "SIGKILL");
+    terminateChild(anvilProcess, "SIGKILL");
+  }, 1500).unref();
 
   if (tempOnchainDir) {
     try {
@@ -1050,11 +1076,14 @@ function cleanup(exitCode = 0) {
 
   setTimeout(() => {
     process.exit(exitCode);
-  }, 600).unref();
+  }, 1800).unref();
 }
 
 process.on("SIGINT", () => cleanup(0));
 process.on("SIGTERM", () => cleanup(0));
+if (process.platform !== "win32") {
+  process.on("SIGHUP", () => cleanup(0));
+}
 
 function startVite() {
   const pkgPath = path.join(cwd, appDir, "package.json");
@@ -1062,12 +1091,33 @@ function startVite() {
     try {
       const pkg = JSON.parse(readFileSync(pkgPath, "utf-8"));
       if (pkg.scripts?.["plugin:build"]) {
-        console.log(`  ${green(logPrefix)} Building plugins for ${appDir}...`);
-        execSync(hasBun ? "bun run plugin:build" : "npm run plugin:build", {
-          cwd: path.join(cwd, appDir),
-          stdio: "inherit",
-          env: process.env,
-        });
+        const appAbs = path.join(cwd, appDir);
+        const pluginsDir = path.join(appAbs, "plugins");
+        const forcePlugins =
+          process.env.MILADY_DEV_PLUGIN_BUILD === "1" ||
+          process.env.MILADY_DEV_PLUGIN_BUILD === "always";
+        const skipPlugins =
+          process.env.MILADY_DEV_PLUGIN_BUILD === "0" ||
+          process.env.MILADY_SKIP_PLUGIN_BUILD === "1";
+        if (skipPlugins) {
+          console.log(
+            `  ${green(logPrefix)} ${dim("Skipping Capacitor plugin build (MILADY_SKIP_PLUGIN_BUILD=1).")}`,
+          );
+        } else if (
+          forcePlugins ||
+          capacitorPluginsBuildNeeded(pluginsDir, CAPACITOR_PLUGIN_NAMES)
+        ) {
+          console.log(`  ${green(logPrefix)} Building plugins for ${appDir}...`);
+          execSync(hasBun ? "bun run plugin:build" : "npm run plugin:build", {
+            cwd: appAbs,
+            stdio: "inherit",
+            env: process.env,
+          });
+        } else {
+          console.log(
+            `  ${green(logPrefix)} ${dim("Capacitor plugins dist up to date (skip rimraf/tsc/rollup). Set MILADY_DEV_PLUGIN_BUILD=1 to force.")}`,
+          );
+        }
       }
     } catch (err) {
       console.error(
@@ -1078,8 +1128,18 @@ function startVite() {
   }
 
   const viteCmd = hasBun ? "bunx" : "npx";
-  // Rebuild optimized deps so patched @elizaos packages are reflected in dev.
-  viteProcess = spawn(viteCmd, ["vite", "--force", "--port", String(UI_PORT)], {
+  const viteForce =
+    process.env.MILADY_VITE_FORCE === "1" ||
+    process.env.ELIZA_VITE_FORCE === "1";
+  const viteArgs = viteForce
+    ? ["vite", "--force", "--port", String(UI_PORT)]
+    : ["vite", "--port", String(UI_PORT)];
+  if (viteForce) {
+    console.log(
+      `  ${green(logPrefix)} ${dim("Vite --force (MILADY_VITE_FORCE=1): re-optimizing deps.")}`,
+    );
+  }
+  viteProcess = spawn(viteCmd, viteArgs, {
     cwd: path.join(cwd, appDir),
     env: {
       ...process.env,

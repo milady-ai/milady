@@ -11,6 +11,8 @@ import {
 } from "node:fs";
 import path from "node:path";
 
+import { signalSpawnedProcessTree } from "./lib/kill-process-tree.mjs";
+
 const ROOT = process.cwd();
 const ARGS = process.argv.slice(2);
 
@@ -127,7 +129,7 @@ function stopWatchers() {
   }
   if (activeBuildProcess) {
     activeBuildProcess.removeAllListeners();
-    if (!activeBuildProcess.killed) activeBuildProcess.kill();
+    signalSpawnedProcessTree(activeBuildProcess, "SIGTERM");
     activeBuildProcess = null;
   }
 }

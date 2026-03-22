@@ -146,3 +146,9 @@ Submit the initial agent configuration. Creates or updates the Milady config fil
 | 400 | Missing or invalid agent name |
 | 400 | Invalid `runMode` value |
 | 500 | Failed to save configuration |
+
+---
+
+## Related: in-app wizard (frontend)
+
+The HTTP API above backs **server** configuration. The **React onboarding wizard** (step order, back/next, sidebar) is documented separately because it uses client-side flow helpers and must stay aligned with UI navigation without duplicating step lists. See [Onboarding UI flow](/guides/onboarding-ui-flow).

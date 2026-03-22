@@ -2,7 +2,10 @@
  * Pairing view component — simple pairing screen for authentication.
  */
 
-import { useBranding } from "../config/branding";
+import {
+  appNameInterpolationVars,
+  useBranding,
+} from "../config/branding";
 import { useApp } from "../state";
 
 export function PairingView() {
@@ -92,7 +95,12 @@ export function PairingView() {
           <p>{t("pairingview.NextSteps")}</p>
           <ol className="list-decimal pl-5 space-y-1">
             <li>{t("pairingview.AskTheServerOwner")}</li>
-            <li>{t("pairingview.EnablePairingOnTh")}</li>
+            <li>
+              {t(
+                "pairingview.EnablePairingOnTh",
+                appNameInterpolationVars(branding),
+              )}
+            </li>
           </ol>
           <a
             href={`https://github.com/${branding.orgName}/${branding.repoName}/blob/develop/docs/api-reference.mdx`}

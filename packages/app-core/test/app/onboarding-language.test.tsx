@@ -104,6 +104,8 @@ function createOnboardingContext(
     elizaCloudLoginError: "",
     handleOnboardingNext: vi.fn(async () => {}),
     handleOnboardingBack: vi.fn(),
+    handleOnboardingJumpToStep: vi.fn(),
+    goToOnboardingStep: vi.fn(),
     handleOnboardingRemoteConnect: vi.fn(async () => {}),
     handleOnboardingUseLocalBackend: vi.fn(),
     setState: vi.fn(),

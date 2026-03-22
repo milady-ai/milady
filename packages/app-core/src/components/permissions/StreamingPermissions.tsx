@@ -383,20 +383,10 @@ export function StreamingPermissionsOnboardingView({
 
       <div className="flex flex-wrap justify-center gap-3">
         <Button
-          variant="outline"
-          size="sm"
-          className="h-auto min-w-[8.5rem] px-4 py-2 text-[11px] leading-tight opacity-70"
-          onClick={() => onContinue({ allowPermissionBypass: true })}
-        >
-          {translateWithFallback(
-            t,
-            "permissionssection.SkipForNow",
-            "Skip for Now",
-          )}
-        </Button>
-        <Button
+          type="button"
           variant="default"
           size="sm"
+          data-testid="permissions-onboarding-continue"
           className="h-auto min-w-[8.5rem] bg-accent border-accent px-4 py-2 text-[11px] leading-tight text-accent-foreground"
           onClick={() => onContinue()}
         >

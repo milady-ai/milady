@@ -114,6 +114,23 @@ declare global {
 
 const windowShellRoute = resolveWindowShellRoute();
 
+/**
+ * Adds `milady-electrobun-frameless` for CSS `-webkit-app-region` (Chromium/CEF).
+ * macOS WKWebView move/resize are still driven by native overlays in
+ * window-effects.mm; this class mainly marks the shell and helps non-WK engines.
+ */
+function shouldEnableElectrobunMacWindowDrag(): boolean {
+  if (!isElectrobunRuntime() || typeof document === "undefined") return false;
+  if (isDetachedWindowShell(windowShellRoute)) return false;
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent;
+  return /Mac/i.test(ua) && !/(iPhone|iPad|iPod)/i.test(ua);
+}
+
+if (shouldEnableElectrobunMacWindowDrag()) {
+  document.documentElement.classList.add("milady-electrobun-frameless");
+}
+
 // Dev escape hatch: ?reset forces a truly fresh onboarding session by clearing
 // persisted state and temporarily suppressing stale backend resume config.
 if (shouldInstallMainWindowOnboardingPatches(windowShellRoute)) {

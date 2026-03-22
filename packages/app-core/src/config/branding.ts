@@ -47,8 +47,11 @@ export interface BrandingConfig {
   cloudOnly?: boolean;
 }
 
+/** Default for i18n copy that uses `{{appName}}` (e.g. "Where should {{appName}} run?"). */
+export const DEFAULT_APP_DISPLAY_NAME = "Eliza";
+
 export const DEFAULT_BRANDING: BrandingConfig = {
-  appName: "Eliza",
+  appName: DEFAULT_APP_DISPLAY_NAME,
   orgName: "elizaos",
   repoName: "eliza",
   docsUrl: "https://docs.elizaos.ai",
@@ -64,4 +67,12 @@ export const BrandingContext = createContext<BrandingConfig>(DEFAULT_BRANDING);
 
 export function useBranding(): BrandingConfig {
   return useContext(BrandingContext);
+}
+
+/** Pass to `t(key, appNameInterpolationVars(branding))` when the string contains `{{appName}}`. */
+export function appNameInterpolationVars(branding: BrandingConfig): {
+  appName: string;
+} {
+  const name = branding.appName?.trim();
+  return { appName: name || DEFAULT_APP_DISPLAY_NAME };
 }
