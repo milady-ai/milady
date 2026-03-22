@@ -6,7 +6,9 @@ interface ElectrobunBrowserWindow extends Window {
 }
 
 function getRuntimeWindow(): ElectrobunBrowserWindow | null {
-  const g = globalThis as typeof globalThis & { window?: ElectrobunBrowserWindow };
+  const g = globalThis as typeof globalThis & {
+    window?: ElectrobunBrowserWindow;
+  };
   if (typeof g.window !== "undefined") {
     return g.window;
   }

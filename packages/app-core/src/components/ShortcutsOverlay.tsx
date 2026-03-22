@@ -85,7 +85,7 @@ export function ShortcutsOverlay() {
       }}
       role="dialog"
       aria-modal="true"
-      aria-label="Keyboard shortcuts"
+      aria-label={t("aria.keyboardShortcuts")}
       tabIndex={-1}
     >
       <div
@@ -110,7 +110,7 @@ export function ShortcutsOverlay() {
             onClick={() => setOpen(false)}
             className="p-1 rounded transition-colors"
             style={{ color: "var(--muted)" }}
-            aria-label="Close"
+            aria-label={t("aria.close")}
           >
             <X className="w-4 h-4" />
           </button>

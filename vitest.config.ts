@@ -65,7 +65,19 @@ export default defineConfig({
               ),
             },
           ]
-        : []),
+        : [
+            {
+              // Stub @elizaos/agent sub-path imports when the package is absent
+              // so transitive imports (e.g. contracts/wallet) don't break tests.
+              find: /^@elizaos\/agent(\/.*)?$/,
+              replacement: path.join(
+                repoRoot,
+                "test",
+                "stubs",
+                "empty-module.mjs",
+              ),
+            },
+          ]),
       ...(appCoreSourceRoot
         ? [
             {

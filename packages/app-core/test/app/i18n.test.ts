@@ -23,6 +23,20 @@ describe("i18n helpers", () => {
     expect(normalizeLanguage(undefined)).toBe("en");
   });
 
+  it("normalizes Tagalog aliases and serves Tagalog translations", () => {
+    expect(UI_LANGUAGES).toContain("tl");
+    expect(normalizeLanguage("tl")).toBe("tl");
+    expect(normalizeLanguage("tl-PH")).toBe("tl");
+    expect(normalizeLanguage("tl-US")).toBe("tl");
+    expect(normalizeLanguage("fil")).toBe("tl");
+    expect(normalizeLanguage("fil-PH")).toBe("tl");
+    expect(normalizeLanguage("fil-CA")).toBe("tl");
+    expect(t("tl", "settings.language")).toBe("Wika");
+    expect(createTranslator("tl")("chat.inputPlaceholder")).toBe(
+      "Mag-type ng mensahe...",
+    );
+  });
+
   it("falls back to english message when key is missing in selected locale", () => {
     expect(t("zh-CN", "nav.chat")).toBe("聊天");
     expect(t("zh-CN", "nonexistent.key")).toBe("nonexistent.key");
@@ -91,6 +105,19 @@ describe("i18n helpers", () => {
       });
 
       expect(missingInEnglish, `unexpected keys in ${language}`).toEqual([]);
+    }
+  });
+
+  it("all locales have the same number of keys as en.json", () => {
+    const enKeys = Object.keys(MESSAGES.en);
+    for (const [lang, messages] of Object.entries(MESSAGES)) {
+      if (lang === "en") continue;
+      const localeKeys = Object.keys(messages as Record<string, string>);
+      const missing = enKeys.filter((k) => !localeKeys.includes(k));
+      expect(
+        missing,
+        `${lang} is missing keys: ${missing.join(", ")}`,
+      ).toHaveLength(0);
     }
   });
 

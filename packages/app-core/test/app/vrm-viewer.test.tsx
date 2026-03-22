@@ -34,10 +34,12 @@ vi.mock("@miladyai/app-core/components/avatar/VrmEngine", () => {
 
     private readyPromise: Promise<void>;
     private resolveReadyPromise: () => void = () => {};
+    private rejectReadyPromise: (error?: unknown) => void = () => {};
 
     constructor() {
-      this.readyPromise = new Promise<void>((resolve) => {
+      this.readyPromise = new Promise<void>((resolve, reject) => {
         this.resolveReadyPromise = resolve;
+        this.rejectReadyPromise = reject;
       });
       MockVrmEngine.instances.push(this);
     }
@@ -48,6 +50,10 @@ vi.mock("@miladyai/app-core/components/avatar/VrmEngine", () => {
 
     resolveReady(): void {
       this.resolveReadyPromise();
+    }
+
+    rejectReady(error: unknown): void {
+      this.rejectReadyPromise(error);
     }
   }
 
@@ -68,6 +74,7 @@ type MockVrmEngineInstance = {
   setWorldUrl: ReturnType<typeof vi.fn>;
   loadVrmFromUrl: ReturnType<typeof vi.fn>;
   resolveReady: () => void;
+  rejectReady: (error: unknown) => void;
 };
 
 function getMockInstances(): MockVrmEngineInstance[] {
@@ -290,6 +297,71 @@ describe("VrmViewer", () => {
     expect(instance?.setWorldUrl).toHaveBeenLastCalledWith(
       "/worlds/companion-night.spz",
     );
+
+    await act(async () => {
+      renderer?.unmount();
+    });
+  });
+
+  it("surfaces renderer init failures as load errors without retrying VRM or world loads", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const onEngineState = vi.fn();
+    let renderer: TestRenderer.ReactTestRenderer | null = null;
+
+    await act(async () => {
+      renderer = TestRenderer.create(
+        <VrmViewer
+          vrmPath="/vrms/eliza-1.vrm.gz"
+          worldUrl="/worlds/companion-day.spz"
+          mouthOpen={0}
+          onEngineState={onEngineState}
+        />,
+        {
+          createNodeMock: (element) => {
+            if (element.type === "canvas") {
+              return {
+                getBoundingClientRect: () => ({
+                  width: 640,
+                  height: 480,
+                  top: 0,
+                  left: 0,
+                  bottom: 480,
+                  right: 640,
+                  x: 0,
+                  y: 0,
+                  toJSON: () => ({}),
+                }),
+              };
+            }
+            return null;
+          },
+        },
+      );
+    });
+
+    const [instance] = getMockInstances();
+
+    await act(async () => {
+      instance?.rejectReady(new Error("Error creating WebGL context."));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(onEngineState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        vrmLoaded: false,
+        loadError: "Error creating WebGL context.",
+      }),
+    );
+    expect(instance?.setWorldUrl).not.toHaveBeenCalled();
+    expect(instance?.loadVrmFromUrl).not.toHaveBeenCalled();
+
+    const warningLabels = warnSpy.mock.calls.map((call) => call[0]);
+    expect(warningLabels).toContain("Failed to initialize VRM renderer:");
+    expect(warningLabels).not.toContain("Failed to load VRM:");
+    expect(warningLabels).not.toContain("Failed to load splat world:");
+
+    warnSpy.mockRestore();
 
     await act(async () => {
       renderer?.unmount();

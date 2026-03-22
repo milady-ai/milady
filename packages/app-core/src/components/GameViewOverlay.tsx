@@ -89,7 +89,7 @@ export function GameViewOverlay() {
             className="font-bold text-[11px] truncate flex-1 text-left cursor-inherit bg-transparent border-0"
             style={{ color: "rgba(240,238,250,0.92)" }}
             onMouseDown={handleDragStart}
-            aria-label="Drag overlay"
+            aria-label={t("aria.dragOverlay")}
           >
             {activeGameDisplayName || "Game"}
           </button>

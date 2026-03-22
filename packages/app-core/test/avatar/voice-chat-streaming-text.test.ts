@@ -2,6 +2,7 @@ import { __voiceChatInternals } from "@miladyai/app-core/hooks";
 import { describe, expect, it } from "vitest";
 
 const {
+  splitFirstSentence,
   remainderAfter,
   queueableSpeechPrefix,
   resolveEffectiveVoiceConfig,
@@ -92,5 +93,42 @@ describe("useVoiceChat streaming text helpers", () => {
 
   it("returns empty text when only stage directions remain", () => {
     expect(toSpeakableText("*waves* (quietly) [off mic]")).toBe("");
+  });
+});
+
+describe("splitFirstSentence edge cases", () => {
+  it("does not split on abbreviation periods", () => {
+    const result = splitFirstSentence("Dr. Smith went to the store. He bought milk.");
+    expect(result.firstSentence).toBe("Dr. Smith went to the store.");
+    expect(result.remainder).toBe("He bought milk.");
+    expect(result.complete).toBe(true);
+  });
+
+  it("does not split on decimal numbers", () => {
+    const result = splitFirstSentence("The price is 3.14 dollars. That is cheap.");
+    expect(result.firstSentence).toBe("The price is 3.14 dollars.");
+    expect(result.remainder).toBe("That is cheap.");
+    expect(result.complete).toBe(true);
+  });
+
+  it("handles ellipsis correctly", () => {
+    const result = splitFirstSentence("Well... I think so. Maybe not.");
+    expect(result.firstSentence).toBe("Well... I think so.");
+    expect(result.remainder).toBe("Maybe not.");
+    expect(result.complete).toBe(true);
+  });
+
+  it("does not split on URLs", () => {
+    const result = splitFirstSentence("Visit https://example.com for details. It is free.");
+    expect(result.firstSentence).toBe("Visit https://example.com for details.");
+    expect(result.remainder).toBe("It is free.");
+    expect(result.complete).toBe(true);
+  });
+
+  it("handles text with no punctuation under 180 chars", () => {
+    const result = splitFirstSentence("Hello world this has no ending");
+    expect(result.complete).toBe(false);
+    expect(result.firstSentence).toBe("Hello world this has no ending");
+    expect(result.remainder).toBe("");
   });
 });

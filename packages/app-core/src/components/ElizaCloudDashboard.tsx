@@ -1594,6 +1594,7 @@ function AgentDetailSidebar({
   agent: CloudCompatAgent | undefined;
   onClose: () => void;
 }) {
+  const { t } = useApp();
   const [logs, setLogs] = useState<string>("");
   const [statusDetail, setStatusDetail] = useState<StatusDetail | null>(null);
   const logsEndRef = useRef<HTMLDivElement>(null);
@@ -1637,7 +1638,7 @@ function AgentDetailSidebar({
   return (
     <div className="space-y-4 animate-in slide-in-from-right-8 duration-300">
       <SectionCard
-        title="Agent Details"
+        title={t("elizaclouddashboard.agentDetails")}
         className="border-accent/40 bg-accent/5 backdrop-blur-xl rounded-3xl shadow-sm relative overflow-hidden"
       >
         <button

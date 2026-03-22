@@ -27,7 +27,7 @@ export function ConnectionFailedBanner() {
           className="h-4 w-4 shrink-0 animate-spin"
           viewBox="0 0 24 24"
           fill="none"
-          aria-label="Reconnecting"
+          aria-label={t("aria.reconnecting")}
           role="img"
         >
           <circle

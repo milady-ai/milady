@@ -778,6 +778,19 @@ describe("VrmEngine", () => {
       expect(hoisted.mockWebGpuRendererInstance.init).toHaveBeenCalledTimes(1);
     });
 
+    it("keeps Looking Glass disabled by default on Electrobun WebGL startup", async () => {
+      (
+        window as Window & { __electrobunWindowId?: number }
+      ).__electrobunWindowId = 1;
+      const canvas = createMockCanvas();
+
+      engine.setup(canvas, vi.fn(), { rendererPreference: "webgl" });
+      await waitForEngineReady(engine);
+
+      expect(engine.isInitialized()).toBe(true);
+      expect(globalThis.requestAnimationFrame).toHaveBeenCalled();
+    });
+
     it("cleans up WebGL resources during dispose()", async () => {
       const canvas = createMockCanvas();
       engine.setup(canvas, vi.fn());
