@@ -73,8 +73,6 @@ vi.mock("./onboarding/PermissionsStep", () => ({
   PermissionsStep: () => React.createElement("div", null, "PermissionsStep"),
 }));
 
-
-
 vi.mock("./onboarding/WelcomeStep", () => ({
   WelcomeStep: () => React.createElement("div", null, "WelcomeStep"),
 }));

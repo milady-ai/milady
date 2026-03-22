@@ -275,9 +275,13 @@ export function ChatComposer({
               : `${COMPOSER_ICON_BUTTON_CLASSNAME} select-none border border-border/50 bg-bg/50 backdrop-blur-md text-txt shadow-sm transition-all duration-300 hover:border-accent hover:text-txt hover:shadow-[0_0_15px_rgba(var(--accent),0.5)] active:scale-95`
           }
           onClick={onToggleAgentVoice}
-          aria-label={agentVoiceEnabled ? t("aria.agentVoiceOn") : t("aria.agentVoiceOff")}
+          aria-label={
+            agentVoiceEnabled ? t("aria.agentVoiceOn") : t("aria.agentVoiceOff")
+          }
           aria-pressed={agentVoiceEnabled}
-          title={agentVoiceEnabled ? t("aria.agentVoiceOn") : t("aria.agentVoiceOff")}
+          title={
+            agentVoiceEnabled ? t("aria.agentVoiceOn") : t("aria.agentVoiceOff")
+          }
         >
           {agentVoiceEnabled ? (
             <Volume2 className="h-4 w-4" />

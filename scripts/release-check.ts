@@ -864,9 +864,9 @@ function assertStartApiServerCatchBlockSafety() {
 }
 
 function main() {
-assertReleaseWorkflowHasNotaryWrapper();
-assertElectrobunPrWorkflowExists();
-assertElectrobunConfigHasPostWrapSigner();
+  assertReleaseWorkflowHasNotaryWrapper();
+  assertElectrobunPrWorkflowExists();
+  assertElectrobunConfigHasPostWrapSigner();
   assertMacArtifactStagerLooksCorrect();
   assertWindowsSmokeScriptHasLeadingParamBlock();
   assertWindowsInstallerProofScript();

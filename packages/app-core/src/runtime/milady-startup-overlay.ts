@@ -20,7 +20,9 @@ let snapshot: Snapshot | null = null;
 const STALE_MS = 120_000;
 
 /** Extract a 0–100 percentage from progress strings like "45% of 95 MB". */
-export function parseEmbeddingProgressPercent(detail: string | undefined): number | undefined {
+export function parseEmbeddingProgressPercent(
+  detail: string | undefined,
+): number | undefined {
   if (!detail) return undefined;
   const m = detail.match(/(\d+(?:\.\d+)?)\s*%/);
   if (!m) return undefined;
@@ -50,9 +52,10 @@ export function clearMiladyStartupEmbeddingProgress(): void {
 /**
  * Fields merged into the JSON `startup` object on GET /api/status (Milady compat layer).
  */
-export function getMiladyStartupEmbeddingAugmentation():
-  | Record<string, unknown>
-  | null {
+export function getMiladyStartupEmbeddingAugmentation(): Record<
+  string,
+  unknown
+> | null {
   if (!snapshot) return null;
   if (Date.now() - snapshot.updatedAt > STALE_MS) {
     snapshot = null;

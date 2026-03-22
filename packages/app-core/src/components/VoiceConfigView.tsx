@@ -218,9 +218,7 @@ export function DesktopTalkModePanel() {
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-lg border border-border bg-card px-2.5 py-2 text-[11px]">
           <div className="text-[10px] text-muted">State</div>
-          <div className="font-semibold text-txt">
-            {panelState.state}
-          </div>
+          <div className="font-semibold text-txt">{panelState.state}</div>
         </div>
         <div className="rounded-lg border border-border bg-card px-2.5 py-2 text-[11px]">
           <div className="text-[10px] text-muted">Enabled</div>

@@ -11,7 +11,10 @@ import {
   dispatchWindowEvent,
   VOICE_CONFIG_UPDATED_EVENT,
 } from "@miladyai/app-core/events";
-import { STYLE_PRESETS, type MiladyStylePreset } from "@miladyai/app-core/onboarding-presets";
+import {
+  STYLE_PRESETS,
+  type MiladyStylePreset,
+} from "@miladyai/app-core/onboarding-presets";
 import { useApp } from "@miladyai/app-core/state";
 import { normalizeCharacterMessageExamples } from "@miladyai/app-core/utils/character-message-examples";
 import { useChatAvatarVoiceBridge, useVoiceChat } from "../hooks";
@@ -300,7 +303,7 @@ export function CharacterEditor({
     interruptOnSpeech: false,
     lang: "en-US",
     voiceConfig: voiceConfig as any,
-    onTranscript: () => { },
+    onTranscript: () => {},
   });
 
   useChatAvatarVoiceBridge({
@@ -333,7 +336,11 @@ export function CharacterEditor({
         );
         return {
           ...serverPreset,
-          name: localMeta?.name ?? (("name" in serverPreset) ? (serverPreset as unknown as {name: string}).name : undefined),
+          name:
+            localMeta?.name ??
+            ("name" in serverPreset
+              ? (serverPreset as unknown as { name: string }).name
+              : undefined),
           avatarIndex: localMeta?.avatarIndex,
           voicePresetId: localMeta?.voicePresetId,
           greetingAnimation: localMeta?.greetingAnimation,
@@ -354,9 +361,9 @@ export function CharacterEditor({
     "Agent";
   const normalizedMessageExamples = Array.isArray(d.messageExamples)
     ? normalizeCharacterMessageExamples(
-      d.messageExamples,
-      fallbackCharacterName,
-    )
+        d.messageExamples,
+        fallbackCharacterName,
+      )
     : [];
   const bioText =
     typeof d.bio === "string"
@@ -452,7 +459,7 @@ export function CharacterEditor({
             setSelectedVoicePresetId(preset?.id ?? null);
           }
         }
-      } catch { }
+      } catch {}
       setVoiceLoading(false);
     })();
   }, []);
@@ -557,7 +564,7 @@ export function CharacterEditor({
                 },
               },
             })
-            .catch(() => { });
+            .catch(() => {});
         }
       }
       if (applyDefaults) {
@@ -621,9 +628,9 @@ export function CharacterEditor({
       currentCharacter.name.trim().length > 0;
     const hasBioOrSystem = Boolean(
       currentCharacter.bio ||
-      ("system" in currentCharacter &&
-        typeof currentCharacter.system === "string" &&
-        currentCharacter.system),
+        ("system" in currentCharacter &&
+          typeof currentCharacter.system === "string" &&
+          currentCharacter.system),
     );
     const hasMeaningfulContent = isNamed || hasBioOrSystem;
 
@@ -865,7 +872,7 @@ export function CharacterEditor({
               if (parsed.chat) handleStyleEdit("chat", parsed.chat.join("\n"));
               if (parsed.post) handleStyleEdit("post", parsed.post.join("\n"));
             }
-          } catch { }
+          } catch {}
         } else if (field === "chatExamples") {
           const formatted = normalizeCharacterMessageExamples(
             generated,
@@ -887,7 +894,7 @@ export function CharacterEditor({
                 handleCharacterArrayInput("postExamples", parsed.join("\n"));
               }
             }
-          } catch { }
+          } catch {}
         }
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Generation failed";
@@ -1162,11 +1169,11 @@ export function CharacterEditor({
                   >
                     {generating === "bio"
                       ? t("charactereditor.Generating", {
-                        defaultValue: "generating...",
-                      })
+                          defaultValue: "generating...",
+                        })
                       : t("charactereditor.Regenerate", {
-                        defaultValue: "regenerate",
-                      })}
+                          defaultValue: "regenerate",
+                        })}
                   </Button>
                 </div>
                 <Textarea
@@ -1367,8 +1374,8 @@ export function CharacterEditor({
                     {generating === "chatExamples"
                       ? t("charactereditor.Generating")
                       : t("charactereditor.Generate", {
-                        defaultValue: "generate",
-                      })}
+                          defaultValue: "generate",
+                        })}
                   </Button>
                 </div>
                 <div className="ce-examples-list">
@@ -1625,8 +1632,8 @@ export function CharacterEditor({
               {customizing
                 ? t("charactereditor.SelectBtn", { defaultValue: "Select" })
                 : t("charactereditor.CustomizeBtn", {
-                  defaultValue: "Customize",
-                })}
+                    defaultValue: "Customize",
+                  })}
             </Button>
           </div>
         </div>

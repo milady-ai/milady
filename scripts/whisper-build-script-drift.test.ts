@@ -46,6 +46,6 @@ describe("Whisper build script drift", () => {
     expect(helper).toContain("Restoring whisper model from cache");
     expect(helper).toContain("Downloading model attempt");
     expect(helper).toContain('bash models/download-ggml-model.sh "$MODEL"');
-    expect(helper).toContain("retrying in ${RETRY_DELAY_SECONDS}s");
+    expect(helper).toContain(`retrying in \${RETRY_DELAY_SECONDS}s`);
   });
 });

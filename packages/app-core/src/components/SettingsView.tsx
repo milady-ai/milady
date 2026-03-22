@@ -685,11 +685,17 @@ export function SettingsView({
         </SectionCard>
       )}
 
-{visibleSectionIds.has("media-voice") && (
-        <SectionCard id="media-voice" title={t("settings.sections.mediavoice.label")} description={t("settings.sections.mediavoice.desc")}>
+      {visibleSectionIds.has("media-voice") && (
+        <SectionCard
+          id="media-voice"
+          title={t("settings.sections.mediavoice.label")}
+          description={t("settings.sections.mediavoice.desc")}
+        >
           <MediaSettingsSection />
           <div className="mt-6 pt-6 border-t border-border/40">
-            <h3 className="text-sm font-semibold text-txt mb-4">{t("settings.sections.voice.label")}</h3>
+            <h3 className="text-sm font-semibold text-txt mb-4">
+              {t("settings.sections.voice.label")}
+            </h3>
             <VoiceConfigView />
           </div>
         </SectionCard>
@@ -726,7 +732,9 @@ export function SettingsView({
         >
           {isElectrobunRuntime() && (
             <div className="mb-6 pb-6 border-b border-border/40">
-              <h3 className="text-sm font-semibold text-txt mb-4">{t("settings.sections.desktop.label")}</h3>
+              <h3 className="text-sm font-semibold text-txt mb-4">
+                {t("settings.sections.desktop.label")}
+              </h3>
               <DesktopWorkspaceSection />
             </div>
           )}

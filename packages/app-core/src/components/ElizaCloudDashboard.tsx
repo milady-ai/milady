@@ -1594,6 +1594,7 @@ function AgentDetailSidebar({
   agent: CloudCompatAgent | undefined;
   onClose: () => void;
 }) {
+  const { t } = useApp();
   const [logs, setLogs] = useState<string>("");
   const [statusDetail, setStatusDetail] = useState<StatusDetail | null>(null);
   const logsEndRef = useRef<HTMLDivElement>(null);

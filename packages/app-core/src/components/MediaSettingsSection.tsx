@@ -662,15 +662,11 @@ export function DesktopMediaControlPanel() {
                 : "Start Camera Recording"}
             </Button>
           </div>
-          <div className="text-[11px] text-muted">
-            {lastPhotoStatus}
-          </div>
+          <div className="text-[11px] text-muted">{lastPhotoStatus}</div>
         </div>
 
         <div className="space-y-3 rounded-lg border border-border bg-card px-3 py-3">
-          <div className="text-xs font-semibold text-txt">
-            Screen Capture
-          </div>
+          <div className="text-xs font-semibold text-txt">Screen Capture</div>
           <div className="text-[10px] text-muted">
             Permission: {screenPermission} · Recording:{" "}
             {screenRecording ? "on" : "off"} · Duration:{" "}

@@ -1206,7 +1206,9 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
             {isActive && (
               <span className="absolute left-0 top-0 bottom-0 w-0.5 bg-accent" />
             )}
-            <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? "text-accent" : ""}`} />
+            <Icon
+              className={`w-3.5 h-3.5 shrink-0 ${isActive ? "text-accent" : ""}`}
+            />
             <span className="truncate min-w-0 flex-1">{tag.label}</span>
             <span
               className={`rounded-full px-1.5 py-0.5 text-[10px] tabular-nums leading-none ${
@@ -2707,7 +2709,9 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
         </aside>
       )}
 
-      <div className={`flex-1 min-w-0 ${showDesktopSubgroupSidebar ? "px-5 py-6 sm:px-8 sm:py-8 lg:px-10" : ""}`}>
+      <div
+        className={`flex-1 min-w-0 ${showDesktopSubgroupSidebar ? "px-5 py-6 sm:px-8 sm:py-8 lg:px-10" : ""}`}
+      >
         {showToolbar && (
           <div className="flex items-center gap-3 mb-4 flex-wrap">
             <div className="relative flex-1 min-w-[220px]">
