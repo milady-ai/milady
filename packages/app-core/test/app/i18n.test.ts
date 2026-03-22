@@ -94,6 +94,19 @@ describe("i18n helpers", () => {
     }
   });
 
+  it("all locales have the same number of keys as en.json", () => {
+    const enKeys = Object.keys(MESSAGES.en);
+    for (const [lang, messages] of Object.entries(MESSAGES)) {
+      if (lang === "en") continue;
+      const localeKeys = Object.keys(messages as Record<string, string>);
+      const missing = enKeys.filter((k) => !localeKeys.includes(k));
+      expect(
+        missing,
+        `${lang} is missing keys: ${missing.join(", ")}`,
+      ).toHaveLength(0);
+    }
+  });
+
   it("keeps production UI source files free of hardcoded Chinese text", () => {
     const candidates = [
       path.resolve(process.cwd(), "src"),

@@ -65,6 +65,35 @@ describe("resolveStreamingUpdate", () => {
   });
 });
 
+describe("mergeStreamingText edge cases", () => {
+  it("handles case-different resend (snapshot)", () => {
+    const result = mergeStreamingText("Hello world", "Hello World");
+    expect(result).toBe("Hello World");
+  });
+
+  it("handles punctuation-different resend", () => {
+    const result = mergeStreamingText("Hello world", "Hello world.");
+    expect(result).toBe("Hello world.");
+  });
+
+  it("does not create false overlap with short common prefix", () => {
+    const result = mergeStreamingText("I went to the store", "I like cats");
+    expect(result).toBe("I like cats");
+  });
+
+  it("handles trailing whitespace differences", () => {
+    const result = mergeStreamingText("Hello ", "Hello world");
+    expect(result).toBe("Hello world");
+  });
+
+  it("handles unicode normalization differences", () => {
+    const nfc = "caf\u00e9";
+    const nfd = "cafe\u0301";
+    const result = mergeStreamingText(nfc, nfd);
+    expect(result).toBe(nfd);
+  });
+});
+
 describe("computeStreamingDelta", () => {
   it("emits only appended text for cumulative snapshots", () => {
     expect(computeStreamingDelta("Hello", "Hello world")).toBe(" world");

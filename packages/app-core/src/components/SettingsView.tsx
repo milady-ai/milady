@@ -18,8 +18,6 @@ import {
   Download,
   Image,
   Loader2,
-  Mic,
-  Monitor,
   RefreshCw,
   Search,
   Shield,
@@ -31,6 +29,7 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { isElectrobunRuntime } from "../bridge";
 import { useApp } from "../state";
 import { CodingAgentSettingsSection } from "./CodingAgentSettingsSection";
 import { ConfigPageView } from "./ConfigPageView";
@@ -75,22 +74,10 @@ const SETTINGS_SECTIONS: SettingsSectionDef[] = [
     description: "settings.sections.walletrpc.desc",
   },
   {
-    id: "desktop",
-    label: "Desktop Workspace",
-    icon: Monitor,
-    description: "Native window, clipboard, dialog, and detached surface tools",
-  },
-  {
-    id: "media",
-    label: "settings.sections.media.label",
+    id: "media-voice",
+    label: "settings.sections.mediavoice.label",
     icon: Image,
-    description: "settings.sections.media.desc",
-  },
-  {
-    id: "voice",
-    label: "settings.sections.voice.label",
-    icon: Mic,
-    description: "settings.sections.voice.desc",
+    description: "settings.sections.mediavoice.desc",
   },
   {
     id: "permissions",
@@ -147,7 +134,7 @@ function SettingsSidebar({
   const { t } = useApp();
 
   return (
-    <aside className="hidden w-52 shrink-0 self-stretch border-r border-border bg-bg-accent xl:sticky xl:top-0 xl:flex xl:h-screen">
+    <aside className="hidden w-[16rem] shrink-0 self-stretch border-r border-border/50 bg-bg/35 backdrop-blur-xl xl:sticky xl:top-0 xl:flex xl:h-screen">
       <div className="flex flex-1 flex-col overflow-y-auto">
         {/* Brand header */}
         <div className="px-4 py-4 border-b border-border">
@@ -181,8 +168,8 @@ function SettingsSidebar({
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-3 px-2">
-          <div className="space-y-0.5">
+        <nav className="flex-1 py-4 px-3">
+          <div className="space-y-1.5">
             {sections.map((section) => {
               const Icon = section.icon;
               const isActive = activeSection === section.id;
@@ -192,20 +179,25 @@ function SettingsSidebar({
                   type="button"
                   onClick={() => onSectionChange(section.id)}
                   aria-current={isActive ? "page" : undefined}
-                  className={`group w-full flex items-center gap-2.5 text-left px-3 py-2 relative
-                    font-mono text-[11px] tracking-wide transition-all duration-150
+                  className={`group w-full flex items-center gap-2.5 text-left px-3 py-2.5 rounded-2xl border transition-all duration-150
+                    text-sm font-semibold
                     ${
                       isActive
-                        ? "text-txt bg-surface"
-                        : "text-muted hover:text-txt hover:bg-surface/50"
+                        ? "border-accent/40 bg-accent/10 text-txt shadow-[0_10px_30px_rgba(var(--accent),0.08)]"
+                        : "border-transparent bg-transparent text-muted hover:border-border/60 hover:bg-card/55 hover:text-txt"
                     }`}
                 >
-                  {isActive && (
-                    <span className="absolute left-0 top-0 bottom-0 w-0.5 bg-accent" />
-                  )}
-                  <Icon
-                    className={`w-3.5 h-3.5 shrink-0 ${isActive ? "text-accent" : ""}`}
-                  />
+                  <div
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border ${
+                      isActive
+                        ? "border-accent/30 bg-accent/18"
+                        : "border-border/50 bg-bg-accent/80"
+                    }`}
+                  >
+                    <Icon
+                      className={`w-3.5 h-3.5 ${isActive ? "text-accent" : ""}`}
+                    />
+                  </div>
                   <span className="truncate">{t(section.label)}</span>
                 </button>
               );
@@ -693,36 +685,19 @@ export function SettingsView({
         </SectionCard>
       )}
 
-      {visibleSectionIds.has("desktop") && (
+      {visibleSectionIds.has("media-voice") && (
         <SectionCard
-          id="desktop"
-          title="Desktop Workspace"
-          description="Native runtime diagnostics, detached windows, file dialogs, clipboard, and shell controls."
-          className="p-4 sm:p-5 lg:p-6"
-        >
-          <DesktopWorkspaceSection />
-        </SectionCard>
-      )}
-
-      {visibleSectionIds.has("media") && (
-        <SectionCard
-          id="media"
-          title={t("settings.sections.media.label")}
-          description={t("settings.sections.media.desc")}
-          className="p-4 sm:p-5 lg:p-6"
+          id="media-voice"
+          title={t("settings.sections.mediavoice.label")}
+          description={t("settings.sections.mediavoice.desc")}
         >
           <MediaSettingsSection />
-        </SectionCard>
-      )}
-
-      {visibleSectionIds.has("voice") && (
-        <SectionCard
-          id="voice"
-          title={t("settings.sections.voice.label")}
-          description={t("settings.sections.voice.desc")}
-          className="p-4 sm:p-5 lg:p-6"
-        >
-          <VoiceConfigView />
+          <div className="mt-6 pt-6 border-t border-border/40">
+            <h3 className="text-sm font-semibold text-txt mb-4">
+              {t("settings.sections.voice.label")}
+            </h3>
+            <VoiceConfigView />
+          </div>
         </SectionCard>
       )}
 
@@ -755,6 +730,14 @@ export function SettingsView({
           description={t("settings.sections.advanced.desc")}
           className="p-4 sm:p-5 lg:p-6"
         >
+          {isElectrobunRuntime() && (
+            <div className="mb-6 pb-6 border-b border-border/40">
+              <h3 className="text-sm font-semibold text-txt mb-4">
+                {t("settings.sections.desktop.label")}
+              </h3>
+              <DesktopWorkspaceSection />
+            </div>
+          )}
           <AdvancedSection />
         </SectionCard>
       )}

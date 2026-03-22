@@ -32,6 +32,9 @@ export function computeAgentDeadlineExtensions(options: {
     return next;
   }
   next = Math.max(next, now + AGENT_STARTING_SLIDE_MS);
-  next = Math.min(next, options.agentWaitStartedAt + AGENT_STARTUP_ABSOLUTE_MAX_MS);
+  next = Math.min(
+    next,
+    options.agentWaitStartedAt + AGENT_STARTUP_ABSOLUTE_MAX_MS,
+  );
   return next;
 }

@@ -109,7 +109,9 @@ export function AvatarLoader({
               background: "var(--text-strong)",
               boxShadow: "0 0 8px rgba(255, 255, 255, 0.3)",
               transition:
-                typeof progress === "number" ? "width 0.3s ease-out" : "width 0.1s linear",
+                typeof progress === "number"
+                  ? "width 0.3s ease-out"
+                  : "width 0.1s linear",
               animation: "none",
             }}
           />

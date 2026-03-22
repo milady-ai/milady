@@ -60,23 +60,8 @@ echo "[whisper-universal] Result: $(file main)"
 lipo -detailed_info main
 echo ""
 
-# --- Download model if not already present ---
-mkdir -p "$WHISPER_MODEL_DIR"
-mkdir -p "$WHISPER_MODEL_CACHE_DIR"
-
-if [ -f "$WHISPER_MODEL_PATH" ]; then
-  echo "[whisper-universal] === Whisper model already present: $WHISPER_MODEL_PATH ==="
-elif [ -f "$WHISPER_MODEL_CACHE_PATH" ]; then
-  echo "[whisper-universal] === Restoring whisper model from cache: $WHISPER_MODEL_CACHE_PATH ==="
-  cp "$WHISPER_MODEL_CACHE_PATH" "$WHISPER_MODEL_PATH"
-else
-  echo "[whisper-universal] === Downloading model: $WHISPER_MODEL_FILENAME ==="
-  bash models/download-ggml-model.sh "$MODEL"
-fi
-
-if [ -f "$WHISPER_MODEL_PATH" ]; then
-  cp "$WHISPER_MODEL_PATH" "$WHISPER_MODEL_CACHE_PATH"
-fi
+# --- Ensure model is available ---
+bash "$SCRIPT_DIR/ensure-whisper-model.sh" "$MODEL"
 
 # --- Verify both slices execute ---
 echo "[whisper-universal] === Verifying arm64 execution ==="

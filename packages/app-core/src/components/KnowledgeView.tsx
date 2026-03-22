@@ -158,7 +158,7 @@ function UploadZone({
       }}
       onDragLeave={() => setDragOver(false)}
       onDrop={handleDrop}
-      aria-label="Knowledge upload controls"
+      aria-label={t("aria.knowledgeUpload")}
     >
       <input
         ref={fileInputRef}

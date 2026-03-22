@@ -169,7 +169,7 @@ export function DesktopTalkModePanel() {
 
   if (!desktopRuntime) {
     return (
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-muted)] px-3 py-3 text-xs text-[var(--muted)]">
+      <div className="rounded-xl border border-border bg-bg-muted px-3 py-3 text-xs text-muted">
         Desktop talk mode controls are only available inside the Electrobun
         runtime.
       </div>
@@ -177,13 +177,13 @@ export function DesktopTalkModePanel() {
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg-muted)] px-3 py-3">
+    <div className="flex flex-col gap-3 rounded-xl border border-border bg-bg-muted px-3 py-3">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-xs font-semibold text-[var(--text)]">
+          <div className="text-xs font-semibold text-txt">
             Desktop Talk Mode
           </div>
-          <div className="text-[10px] text-[var(--muted)]">
+          <div className="text-[10px] text-muted">
             Native voice loop controls, speech output, and whisper diagnostics.
           </div>
         </div>
@@ -216,27 +216,25 @@ export function DesktopTalkModePanel() {
       )}
 
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] px-2.5 py-2 text-[11px]">
-          <div className="text-[10px] text-[var(--muted)]">State</div>
-          <div className="font-semibold text-[var(--text)]">
-            {panelState.state}
-          </div>
+        <div className="rounded-lg border border-border bg-card px-2.5 py-2 text-[11px]">
+          <div className="text-[10px] text-muted">State</div>
+          <div className="font-semibold text-txt">{panelState.state}</div>
         </div>
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] px-2.5 py-2 text-[11px]">
-          <div className="text-[10px] text-[var(--muted)]">Enabled</div>
-          <div className="font-semibold text-[var(--text)]">
+        <div className="rounded-lg border border-border bg-card px-2.5 py-2 text-[11px]">
+          <div className="text-[10px] text-muted">Enabled</div>
+          <div className="font-semibold text-txt">
             {panelState.enabled ? "Yes" : "No"}
           </div>
         </div>
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] px-2.5 py-2 text-[11px]">
-          <div className="text-[10px] text-[var(--muted)]">Speaking</div>
-          <div className="font-semibold text-[var(--text)]">
+        <div className="rounded-lg border border-border bg-card px-2.5 py-2 text-[11px]">
+          <div className="text-[10px] text-muted">Speaking</div>
+          <div className="font-semibold text-txt">
             {panelState.speaking ? "Yes" : "No"}
           </div>
         </div>
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] px-2.5 py-2 text-[11px]">
-          <div className="text-[10px] text-[var(--muted)]">Whisper</div>
-          <div className="font-semibold text-[var(--text)]">
+        <div className="rounded-lg border border-border bg-card px-2.5 py-2 text-[11px]">
+          <div className="text-[10px] text-muted">Whisper</div>
+          <div className="font-semibold text-txt">
             {panelState.whisperAvailable
               ? panelState.whisperModel || "Available"
               : "Unavailable"}
@@ -246,7 +244,7 @@ export function DesktopTalkModePanel() {
 
       <Input
         type="text"
-        className="bg-[var(--card)] text-xs"
+        className="bg-card text-xs"
         value={phrase}
         onChange={(event) => setPhrase(event.target.value)}
         placeholder="Speech test phrase"
@@ -464,17 +462,17 @@ function WakeWordSection({
   }, [enabled, buildConfig]);
 
   return (
-    <div className="flex flex-col gap-3 pt-4 border-t border-[var(--border)]">
+    <div className="flex flex-col gap-3 pt-4 border-t border-border">
       {/* Subsection header + enable toggle */}
       <div className="flex items-center justify-between">
-        <div className="text-xs font-semibold text-[var(--muted)]">
+        <div className="text-xs font-semibold text-muted">
           {t("voiceconfigview.WakeWord")}
         </div>
         <button
           type="button"
           onClick={() => void handleToggle()}
           className={`relative inline-flex h-5 w-9 cursor-pointer items-center rounded-full transition-colors ${
-            enabled ? "bg-[var(--accent)]" : "bg-[var(--border)]"
+            enabled ? "bg-accent" : "bg-border"
           }`}
           aria-label={enabled ? "Disable wake word" : "Enable wake word"}
         >
@@ -491,11 +489,11 @@ function WakeWordSection({
         <span className="text-xs font-semibold">
           {t("voiceconfigview.Triggers")}
         </span>
-        <div className="flex flex-wrap gap-1 p-1.5 border border-[var(--border)] bg-[var(--card)] min-h-[2rem]">
+        <div className="flex flex-wrap gap-1 p-1.5 border border-border bg-card min-h-[2rem]">
           {triggers.map((t) => (
             <span
               key={t}
-              className="flex items-center gap-1 rounded-full border border-[var(--accent)] bg-[var(--accent)]/10 px-1.5 py-0.5 text-[10px] text-[var(--text)]"
+              className="flex items-center gap-1 rounded-full border border-accent bg-accent/10 px-1.5 py-0.5 text-[10px] text-txt"
             >
               {t}
               {triggers.length > 1 && (
@@ -526,7 +524,7 @@ function WakeWordSection({
             }}
           />
         </div>
-        <div className="text-[10px] text-[var(--muted)]">
+        <div className="text-[10px] text-muted">
           {t("voiceconfigview.PressEnterOrComma")}
         </div>
       </div>
@@ -537,7 +535,7 @@ function WakeWordSection({
           <span className="text-xs font-semibold">
             {t("voiceconfigview.WakeSensitivity")}
           </span>
-          <span className="text-[10px] text-[var(--muted)]">
+          <span className="text-[10px] text-muted">
             {sensitivity.toFixed(2)}s
           </span>
         </div>
@@ -547,13 +545,12 @@ function WakeWordSection({
           max={2.0}
           step={0.05}
           value={sensitivity}
-          className="w-full"
-          style={{ accentColor: "var(--accent)" }}
+          className="w-full accent-accent"
           onChange={(e) =>
             void handleSensitivityChange(parseFloat(e.target.value))
           }
         />
-        <div className="text-[10px] text-[var(--muted)]">
+        <div className="text-[10px] text-muted">
           {t("voiceconfigview.LowerMoreSensiti")}
         </div>
       </div>
@@ -589,9 +586,9 @@ function WakeWordSection({
         <span className="text-xs font-semibold">
           {t("voiceconfigview.Microphone")}
         </span>
-        <div className="h-1.5 w-full bg-[var(--border)] overflow-hidden">
+        <div className="h-1.5 w-full bg-border overflow-hidden">
           <div
-            className="h-full bg-[var(--ok)] transition-all duration-75"
+            className="h-full bg-ok transition-all duration-75"
             style={{ width: `${Math.min(audioLevel * 100, 100)}%` }}
           />
         </div>
@@ -760,7 +757,7 @@ export function VoiceConfigView() {
 
   if (loading) {
     return (
-      <div className="py-4 text-center text-[var(--muted)] text-xs">
+      <div className="py-4 text-center text-muted text-xs">
         {t("voiceconfigview.LoadingVoiceConfig")}
       </div>
     );
@@ -775,7 +772,7 @@ export function VoiceConfigView() {
     <div className="flex flex-col gap-4">
       {/* Provider selection */}
       <div className="flex flex-col gap-2">
-        <div className="text-xs font-semibold text-[var(--muted)]">
+        <div className="text-xs font-semibold text-muted">
           {t("voiceconfigview.TTSProvider")}
         </div>
         <div className="flex gap-2">
@@ -798,7 +795,7 @@ export function VoiceConfigView() {
       </div>
 
       {/* Status */}
-      <div className="flex items-center justify-between py-2 px-3 border border-[var(--border)] bg-[var(--bg-muted)]">
+      <div className="flex items-center justify-between py-2 px-3 border border-border bg-bg-muted">
         <span className="text-xs">
           {currentProvider === "elevenlabs"
             ? `ElevenLabs — ${currentMode === "cloud" ? t("voiceconfigview.ServedViaElizaCloud") : t("voiceconfigview.RequiresApiKey")}`
@@ -807,8 +804,8 @@ export function VoiceConfigView() {
         <span
           className={`rounded-full border px-1.5 py-0.5 text-[10px] ${
             isConfigured
-              ? "border-[var(--ok)] bg-[var(--ok)]/10 text-[var(--text)]"
-              : "border-[var(--warn)] bg-[var(--warn-subtle)] text-[var(--text)]"
+              ? "border-ok bg-ok/10 text-txt"
+              : "border-warn bg-warn-subtle text-txt"
           }`}
         >
           {isConfigured
@@ -822,7 +819,7 @@ export function VoiceConfigView() {
         <div className="flex flex-col gap-3">
           {/* API source mode */}
           <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-semibold text-[var(--muted)]">
+            <span className="text-xs font-semibold text-muted">
               {t("voiceconfigview.APISource")}
             </span>
             <CloudSourceModeToggle
@@ -855,18 +852,18 @@ export function VoiceConfigView() {
                 }
                 onChange={(e) => handleApiKeyChange(e.target.value)}
               />
-              <div className="text-[10px] text-[var(--muted)]">
+              <div className="text-[10px] text-muted">
                 {t("voiceconfigview.GetYourKeyAt")}{" "}
                 <a
                   href="https://elevenlabs.io"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[var(--text)] underline decoration-[var(--accent)] underline-offset-2 hover:opacity-80"
+                  className="text-txt underline decoration-accent underline-offset-2 hover:opacity-80"
                 >
                   {t("voiceconfigview.elevenlabsIo")}
                 </a>
               </div>
-              <div className="text-[10px] text-[var(--muted)]">
+              <div className="text-[10px] text-muted">
                 {t("voiceconfigview.FastPathDefaultE")}
                 {DEFAULT_ELEVEN_FAST_MODEL}`).
               </div>
@@ -887,15 +884,15 @@ export function VoiceConfigView() {
                     type="button"
                     className={`h-auto flex flex-col items-start py-2.5 px-3 text-left rounded-lg border transition-all cursor-pointer ${
                       active
-                        ? "border-[var(--accent)] bg-[var(--accent)]/8 text-[var(--text)]"
-                        : "border-[var(--border)] bg-[var(--bg-accent)] text-[var(--text)] hover:border-[var(--border-strong)] hover:bg-[var(--bg-hover)]"
+                        ? "border-accent bg-accent/8 text-txt"
+                        : "border-border bg-bg-accent text-txt hover:border-border hover:bg-bg-hover"
                     }`}
                     onClick={() => handleVoiceSelect(preset.voiceId)}
                   >
                     <div className="font-semibold text-xs truncate w-full">
                       {preset.name}
                     </div>
-                    <div className="text-[10px] text-[var(--muted)] truncate w-full">
+                    <div className="text-[10px] text-muted truncate w-full">
                       {preset.hint}
                     </div>
                   </button>
@@ -941,14 +938,14 @@ export function VoiceConfigView() {
 
       {/* Edge TTS settings */}
       {currentProvider === "edge" && (
-        <div className="py-2 px-3 border border-[var(--border)] bg-[var(--bg-muted)] text-xs text-[var(--muted)]">
+        <div className="py-2 px-3 border border-border bg-bg-muted text-xs text-muted">
           {t("voiceconfigview.EdgeTTSUsesMicros")}
         </div>
       )}
 
       {/* Simple voice settings */}
       {currentProvider === "simple-voice" && (
-        <div className="py-2 px-3 border border-[var(--border)] bg-[var(--bg-muted)] text-xs text-[var(--muted)]">
+        <div className="py-2 px-3 border border-border bg-bg-muted text-xs text-muted">
           {t("voiceconfigview.SimpleVoiceUsesYo")}
         </div>
       )}

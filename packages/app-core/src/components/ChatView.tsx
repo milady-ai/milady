@@ -553,6 +553,17 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
     setState,
     uiLanguage,
   });
+  // Stop any in-flight voice playback when the user switches conversations.
+  // This prevents old audio from bleeding into the new conversation.
+  // Safe to call here: the new conversation's greeting speech won't be queued
+  // until after this effect runs (effects fire after state updates settle).
+  const prevConversationIdRef = useRef(activeConversationId);
+  useEffect(() => {
+    if (prevConversationIdRef.current === activeConversationId) return;
+    prevConversationIdRef.current = activeConversationId;
+    stopSpeaking();
+  }, [activeConversationId, stopSpeaking]);
+
   const handleChatAvatarSpeakingChange = useCallback(
     (isSpeaking: boolean) => {
       setState("chatAvatarSpeaking", isSpeaking);
@@ -722,7 +733,7 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
 
   return (
     <section
-      aria-label="Chat workspace"
+      aria-label={t("aria.chatWorkspace")}
       className={`flex flex-col flex-1 min-h-0 relative${isGameModal ? " overflow-visible px-2 sm:px-3 pointer-events-none" : ""}${imageDragOver ? " ring-2 ring-accent ring-inset" : ""}`}
       onDragOver={(e) => {
         e.preventDefault();
@@ -746,19 +757,19 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
         style={
           isGameModal
             ? {
-              zIndex: 1,
-              top: COMPANION_MESSAGE_LAYER_TOP,
-              bottom: COMPANION_MESSAGE_LAYER_BOTTOM,
-              overscrollBehavior: "contain",
-              touchAction: "pan-y",
-              userSelect: "text",
-              WebkitUserSelect: "text",
-              maskImage: COMPANION_MESSAGE_LAYER_MASK,
-              WebkitMaskImage: COMPANION_MESSAGE_LAYER_MASK,
-            }
+                zIndex: 1,
+                top: COMPANION_MESSAGE_LAYER_TOP,
+                bottom: COMPANION_MESSAGE_LAYER_BOTTOM,
+                overscrollBehavior: "contain",
+                touchAction: "pan-y",
+                userSelect: "text",
+                WebkitUserSelect: "text",
+                maskImage: COMPANION_MESSAGE_LAYER_MASK,
+                WebkitMaskImage: COMPANION_MESSAGE_LAYER_MASK,
+              }
             : {
-              zIndex: 1,
-            }
+                zIndex: 1,
+              }
         }
       >
         {visibleMsgs.length === 0 && !chatSending ? (
@@ -780,10 +791,11 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
                   style={{ opacity: gameModalCarryoverOpacity }}
                 >
                   <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-3 text-[15px] leading-relaxed ${isUser
-                      ? "bg-accent/85 text-white rounded-br-sm"
-                      : "border border-white/10 bg-black/45 text-white/95 rounded-bl-sm backdrop-blur-md"
-                      }`}
+                    className={`max-w-[85%] rounded-2xl px-4 py-3 text-[15px] leading-relaxed ${
+                      isUser
+                        ? "bg-accent/85 text-white rounded-br-sm"
+                        : "border border-white/10 bg-black/45 text-white/95 rounded-bl-sm backdrop-blur-md"
+                    }`}
                   >
                     <div
                       className="break-words"
@@ -804,10 +816,11 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
                   className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-3 text-[15px] leading-relaxed ${isUser
-                      ? "bg-accent/85 text-white rounded-br-sm"
-                      : "border border-white/10 bg-black/45 text-white/95 rounded-bl-sm backdrop-blur-md"
-                      }`}
+                    className={`max-w-[85%] rounded-2xl px-4 py-3 text-[15px] leading-relaxed ${
+                      isUser
+                        ? "bg-accent/85 text-white rounded-br-sm"
+                        : "border border-white/10 bg-black/45 text-white/95 rounded-bl-sm backdrop-blur-md"
+                    }`}
                   >
                     <div
                       className="break-words"
@@ -878,7 +891,10 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
 
       {/* Share ingest notice */}
       {shareIngestNotice && (
-        <div className={`text-xs text-ok py-1 relative${isGameModal ? " pointer-events-auto" : ""}`} style={{ zIndex: 1 }}>
+        <div
+          className={`text-xs text-ok py-1 relative${isGameModal ? " pointer-events-auto" : ""}`}
+          style={{ zIndex: 1 }}
+        >
           {shareIngestNotice}
         </div>
       )}

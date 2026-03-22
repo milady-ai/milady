@@ -2578,11 +2578,14 @@ export class MiladyClient {
     }
     // Return whatever we get after timeout
     const final = await this.getStatus();
-    console.warn("[milady][reset][client] restartAndWait: timed out — returning last status", {
-      state: final.state,
-      waitedMs: Date.now() - t0,
-      maxWaitMs,
-    });
+    console.warn(
+      "[milady][reset][client] restartAndWait: timed out — returning last status",
+      {
+        state: final.state,
+        waitedMs: Date.now() - t0,
+        maxWaitMs,
+      },
+    );
     return final;
   }
 

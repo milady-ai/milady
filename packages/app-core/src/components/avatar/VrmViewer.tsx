@@ -154,6 +154,7 @@ export function VrmViewer(props: VrmViewerProps) {
   const currentVrmPathRef = useRef<string>("");
   const currentWorldPathRef = useRef<string>("");
   const worldLoadPromiseRef = useRef<Promise<void> | null>(null);
+  const rendererInitFailedRef = useRef(false);
   const pointerStateRef = useRef<{
     active: boolean;
     id: number | null;
@@ -185,6 +186,39 @@ export function VrmViewer(props: VrmViewerProps) {
   onEngineReadyRef.current = props.onEngineReady;
   onEngineStateRef.current = props.onEngineState;
   onRevealStartRef.current = props.onRevealStart;
+
+  const reportRendererInitFailure = useEffectEvent((error: unknown) => {
+    rendererInitFailedRef.current = true;
+    currentVrmPathRef.current = "";
+    currentWorldPathRef.current = "";
+    worldLoadPromiseRef.current = null;
+    revealStartedRef.current = false;
+
+    const fallbackMessage =
+      error instanceof Error && error.message.trim()
+        ? error.message
+        : "Failed to initialize VRM renderer.";
+    const currentState = engineRef.current?.getState();
+
+    onEngineStateRef.current?.(
+      currentState
+        ? {
+            ...currentState,
+            vrmLoaded: false,
+            revealStarted: false,
+            loadError: currentState.loadError ?? fallbackMessage,
+          }
+        : {
+            vrmLoaded: false,
+            vrmName: null,
+            loadError: fallbackMessage,
+            idlePlaying: false,
+            idleTime: 0,
+            idleTracks: 0,
+            revealStarted: false,
+          },
+    );
+  });
 
   const syncDebugRegistry = useEffectEvent(() => {
     if (!import.meta.env.DEV) return;
@@ -272,6 +306,8 @@ export function VrmViewer(props: VrmViewerProps) {
         onEngineReadyRef.current?.(engine);
       },
       (error) => {
+        if (!mountedRef.current) return;
+        reportRendererInitFailure(error);
         console.warn("Failed to initialize VRM renderer:", error);
       },
     );
@@ -295,7 +331,7 @@ export function VrmViewer(props: VrmViewerProps) {
 
   useEffect(() => {
     const engine = engineRef.current;
-    if (!engine) return;
+    if (!engine || rendererInitFailedRef.current) return;
     engine.setPaused(!(props.active ?? true));
   }, [props.active]);
 
@@ -375,6 +411,7 @@ export function VrmViewer(props: VrmViewerProps) {
         onEngineStateRef.current?.(state);
       } catch (err) {
         if (err instanceof Error && err.name === "AbortError") return;
+        if (rendererInitFailedRef.current) return;
         if (currentVrmPathRef.current === vrmUrl) {
           currentVrmPathRef.current = "";
         }
@@ -392,7 +429,7 @@ export function VrmViewer(props: VrmViewerProps) {
 
   useEffect(() => {
     const engine = engineRef.current;
-    if (!engine) return;
+    if (!engine || rendererInitFailedRef.current) return;
 
     const worldUrl = props.worldUrl ?? "";
     if (worldUrl === currentWorldPathRef.current) return;
@@ -406,6 +443,7 @@ export function VrmViewer(props: VrmViewerProps) {
         if (!mountedRef.current || abortController.signal.aborted) return;
         await engine.setWorldUrl(worldUrl || null);
       } catch (err) {
+        if (rendererInitFailedRef.current) return;
         console.warn("Failed to load splat world:", err);
       } finally {
         if (worldLoadPromiseRef.current === worldLoadPromise) {

@@ -225,6 +225,50 @@ function toSpeakableText(input: string): string {
   return capSpeechLength(normalized);
 }
 
+/** Common abbreviations that end with a period but are not sentence endings. */
+const ABBREV_RE =
+  /(?:Mr|Mrs|Ms|Dr|Jr|Sr|St|vs|etc|approx|Prof|Rev|Gen|Sgt|Lt|Col|Maj|Capt|Corp|Pvt|Ave|Blvd|dept|est|govt|assn)$/;
+
+/**
+ * Replace URLs with placeholders so their internal dots are not treated as
+ * sentence boundaries.  Returns the cleaned string and a restore function.
+ */
+function shelterUrls(input: string): {
+  text: string;
+  restore: (s: string) => string;
+} {
+  const urls: string[] = [];
+  const text = input.replace(/https?:\/\/\S+/g, (m) => {
+    urls.push(m);
+    return `__URL${urls.length - 1}__`;
+  });
+  return {
+    text,
+    restore: (s: string) =>
+      s.replace(/__URL(\d+)__/g, (_, i) => urls[Number(i)] ?? _),
+  };
+}
+
+/**
+ * Test whether a period match at `index` inside `value` is a real sentence
+ * boundary (not an abbreviation or decimal).
+ */
+function isRealSentenceEnd(value: string, matchIndex: number): boolean {
+  // Decimal: digit immediately before the period → not a sentence end.
+  if (matchIndex > 0 && /\d/.test(value[matchIndex - 1]!)) {
+    // Check if a digit also follows the period (e.g. "3.14")
+    if (matchIndex + 1 < value.length && /\d/.test(value[matchIndex + 1]!)) {
+      return false;
+    }
+  }
+
+  // Known abbreviation before the period.
+  const before = value.slice(0, matchIndex);
+  if (ABBREV_RE.test(before)) return false;
+
+  return true;
+}
+
 function splitFirstSentence(text: string): {
   complete: boolean;
   firstSentence: string;
@@ -233,12 +277,30 @@ function splitFirstSentence(text: string): {
   const value = collapseWhitespace(text);
   if (!value) return { complete: false, firstSentence: "", remainder: "" };
 
+  // Shelter URLs so their dots don't trigger splits.
+  const { text: sheltered, restore } = shelterUrls(value);
+
+  // Match sentence-ending punctuation (. ! ?) with optional closing quotes/brackets.
   const boundary = /([.!?]+(?:["')\]]+)?)(?:\s|$)/g;
-  const match = boundary.exec(value);
-  if (match && typeof match.index === "number") {
+  let match: RegExpExecArray | null = null;
+  while (true) {
+    match = boundary.exec(sheltered);
+    if (!match || typeof match.index !== "number") break;
+
+    const punctChar = match[1]![0];
+
+    // For periods, apply extra heuristics to skip abbreviations, decimals,
+    // and ellipses.
+    if (punctChar === ".") {
+      // Ellipsis ("...") is a mid-sentence pause, not a sentence boundary.
+      if (match[1]!.length >= 3) continue;
+      // Single period: skip abbreviations and decimals.
+      if (!isRealSentenceEnd(sheltered, match.index)) continue;
+    }
+
     const endIndex = match.index + match[0].length;
-    const firstSentence = value.slice(0, endIndex).trim();
-    const remainder = value.slice(endIndex).trim();
+    const firstSentence = restore(sheltered.slice(0, endIndex).trim());
+    const remainder = restore(sheltered.slice(endIndex).trim());
     if (firstSentence.length > 0) {
       return { complete: true, firstSentence, remainder };
     }
@@ -285,16 +347,25 @@ function queueableSpeechPrefix(text: string, isFinal: boolean): string {
   if (!value) return "";
   if (isFinal) return value;
 
+  const { text: sheltered, restore } = shelterUrls(value);
+
   let lastSentenceEnd = 0;
   const boundary = /([.!?]+(?:["')\]]+)?)(?:\s|$)/g;
   let match: RegExpExecArray | null = null;
   while (true) {
-    match = boundary.exec(value);
+    match = boundary.exec(sheltered);
     if (!match || typeof match.index !== "number") break;
+
+    const punctChar = match[1]![0];
+    if (punctChar === ".") {
+      if (match[1]!.length >= 3) continue; // Ellipsis — not a sentence boundary.
+      if (!isRealSentenceEnd(sheltered, match.index)) continue;
+    }
+
     lastSentenceEnd = match.index + match[0].length;
   }
   if (lastSentenceEnd > 0) {
-    return value.slice(0, lastSentenceEnd).trim();
+    return restore(sheltered.slice(0, lastSentenceEnd).trim());
   }
 
   // Fallback for long content with no punctuation yet.

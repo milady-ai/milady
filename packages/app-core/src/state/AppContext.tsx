@@ -190,9 +190,7 @@ import {
   computeAgentDeadlineExtensions,
   getAgentReadyTimeoutMs,
 } from "./agent-startup-timing";
-import {
-  completeResetLocalStateAfterServerWipe as runCompleteResetLocalStateAfterServerWipe,
-} from "./complete-reset-local-state-after-wipe";
+import { completeResetLocalStateAfterServerWipe as runCompleteResetLocalStateAfterServerWipe } from "./complete-reset-local-state-after-wipe";
 import { handleResetAppliedFromMainCore } from "./handle-reset-applied-from-main";
 import {
   deriveUiShellModeForTab,
@@ -437,7 +435,10 @@ function isRemoteApiBase(baseUrl: string): boolean {
 /** Verbose trace for Settings / menu “Reset agent” — filter DevTools by `[milady][reset]`. */
 const RESET_LOG_PREFIX = "[milady][reset]";
 
-function logResetDebug(message: string, detail?: Record<string, unknown>): void {
+function logResetDebug(
+  message: string,
+  detail?: Record<string, unknown>,
+): void {
   if (detail !== undefined && Object.keys(detail).length > 0) {
     console.debug(`${RESET_LOG_PREFIX} ${message}`, detail);
   } else {
@@ -2547,10 +2548,14 @@ export function AppProvider({
       true,
     );
     const resetStartedAt = performance.now();
-    logResetInfo("handleReset: starting (POST /api/agent/reset + restart path)", {
-      electrobun: isElectrobunRuntime(),
-      apiBase: client.getBaseUrl() || "(empty — will resolve after reconnect)",
-    });
+    logResetInfo(
+      "handleReset: starting (POST /api/agent/reset + restart path)",
+      {
+        electrobun: isElectrobunRuntime(),
+        apiBase:
+          client.getBaseUrl() || "(empty — will resolve after reconnect)",
+      },
+    );
     logResetInfo(
       "handleReset: tip — reset logs also appear in this window (filter [milady][reset]); API terminal only shows server-side routes",
     );
@@ -2642,10 +2647,13 @@ export function AppProvider({
 
       await completeResetLocalStateAfterServerWipe(postResetAgentStatus);
       const elapsedMs = Math.round(performance.now() - resetStartedAt);
-      logResetInfo("handleReset: success — local UI reset; see server logs for API", {
-        elapsedMs,
-        finalAgentState: postResetAgentStatus?.state ?? null,
-      });
+      logResetInfo(
+        "handleReset: success — local UI reset; see server logs for API",
+        {
+          elapsedMs,
+          finalAgentState: postResetAgentStatus?.state ?? null,
+        },
+      );
       setActionNotice(LIFECYCLE_MESSAGES.reset.success, "success", 3200);
     } catch (err) {
       logResetWarn("handleReset: failed before local UI could reset", err);
@@ -3203,12 +3211,14 @@ export function AppProvider({
           const userMessageCount = conversationMessagesRef.current.filter(
             (m) => m.role === "user" && !m.id.startsWith("temp-"),
           ).length;
-          
+
           if (userMessageCount === 1) {
             // It was 1 before this turn was persisted, so this makes it the 2nd
-            void client.renameConversation(convId, "", { generate: true }).then(() => {
-              void loadConversations();
-            });
+            void client
+              .renameConversation(convId, "", { generate: true })
+              .then(() => {
+                void loadConversations();
+              });
           } else {
             void loadConversations();
           }
@@ -4838,7 +4848,6 @@ export function AppProvider({
 
   const advanceOnboarding = useCallback(
     async (options?: OnboardingNextOptions) => {
-
       if (
         onboardingStep === "providers" &&
         onboardingRunMode === "local" &&

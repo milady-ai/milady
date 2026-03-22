@@ -131,6 +131,34 @@ describe("Electrobun release workflow drift", () => {
     expect(workflow).toContain(`bun install failed after \${attempt} attempts`);
   });
 
+  it("prepares one shared whisper model artifact before desktop staging", () => {
+    const workflow = fs.readFileSync(WORKFLOW_PATH, "utf8");
+    const prepareModelIndex = workflow.indexOf(
+      "name: Prepare Whisper model artifact",
+    );
+    const uploadModelIndex = workflow.indexOf(
+      "name: Upload Whisper model artifact",
+    );
+    const downloadModelIndex = workflow.indexOf(
+      "name: Download Whisper model artifact",
+    );
+    const seedModelIndex = workflow.indexOf("name: Seed Whisper model cache");
+    const stageIndex = workflow.indexOf("name: Stage desktop bundle inputs");
+
+    expect(prepareModelIndex).toBeGreaterThan(-1);
+    expect(uploadModelIndex).toBeGreaterThan(prepareModelIndex);
+    expect(downloadModelIndex).toBeGreaterThan(-1);
+    expect(seedModelIndex).toBeGreaterThan(downloadModelIndex);
+    expect(stageIndex).toBeGreaterThan(seedModelIndex);
+    expect(workflow).toContain(
+      "bash apps/app/electrobun/scripts/ensure-whisper-model.sh base.en",
+    );
+    expect(workflow).toContain("name: whisper-model-base-en");
+    expect(workflow).toContain(
+      'cp "$HOME/.cache/milady/whisper/ggml-base.en.bin"',
+    );
+  });
+
   it("does not restore Bun install cache during desktop builds", () => {
     const workflow = fs.readFileSync(WORKFLOW_PATH, "utf8");
     const buildJobLabel = "name: Build $" + "{{ matrix.platform.name }}";
