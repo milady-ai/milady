@@ -9,9 +9,13 @@ const { useAppMock, useBrandingMock } = vi.hoisted(() => ({
   useBrandingMock: vi.fn(),
 }));
 
-vi.mock("@miladyai/app-core/config", () => ({
-  useBranding: () => useBrandingMock(),
-}));
+vi.mock("@miladyai/app-core/config", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@miladyai/app-core/config")>();
+  return {
+    ...actual,
+    useBranding: () => useBrandingMock(),
+  };
+});
 
 vi.mock("@miladyai/app-core/state", () => ({
   useApp: () => useAppMock(),
@@ -28,10 +32,12 @@ describe("WelcomeStep", () => {
   it("offers a local existing-setup check on first run", async () => {
     const handleOnboardingUseLocalBackend = vi.fn();
     const setState = vi.fn();
+    const goToOnboardingStep = vi.fn();
     useAppMock.mockReturnValue({
       onboardingExistingInstallDetected: false,
       handleOnboardingUseLocalBackend,
       setState,
+      goToOnboardingStep,
       t: (key: string) => key,
     });
 
@@ -62,16 +68,18 @@ describe("WelcomeStep", () => {
     );
     expect(setState).toHaveBeenCalledWith("onboardingName", "Chen");
     expect(setState).toHaveBeenCalledWith("selectedVrmIndex", 1);
-    expect(setState).toHaveBeenCalledWith("onboardingStep", "connection");
+    expect(goToOnboardingStep).toHaveBeenCalledWith("connection");
   });
 
   it("lets users continue with an already detected setup without resetting onboarding", async () => {
     const handleOnboardingUseLocalBackend = vi.fn();
     const setState = vi.fn();
+    const goToOnboardingStep = vi.fn();
     useAppMock.mockReturnValue({
       onboardingExistingInstallDetected: true,
       handleOnboardingUseLocalBackend,
       setState,
+      goToOnboardingStep,
       t: (key: string) => key,
     });
 
