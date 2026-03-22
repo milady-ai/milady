@@ -21,6 +21,8 @@ import { tradeRiskEvaluator } from "./evaluators";
 import { polymarketProvider } from "./providers";
 import { PolymarketService } from "./services";
 import { researchTaskWorker } from "./workers";
+import { initializeStores } from "./autonomous/stores/registry";
+import { MAX_ACTIVE_THESES_DEFAULT } from "./constants";
 export { initializeClobClient, initializeClobClientWithCreds, getWalletAddress } from "./utils/clobClient";
 export type {
   AccountBalances,
@@ -75,6 +77,18 @@ const configSchema = z.object({
   POLYMARKET_MAX_SPREAD_PCT: z.string().optional(),
   POLYMARKET_MAX_TRADE_SIZE_USD: z.string().optional(),
   OPENAI_API_KEY: z.string().optional(),
+  POLYMARKET_AUTONOMOUS_ENABLED: z.string().optional().default("true"),
+  POLYMARKET_AUTONOMOUS_TRADE_ENABLED: z.string().optional().default("true"),
+  POLYMARKET_MAX_ACTIVE_THESES: z.string().optional(),
+  POLYMARKET_MIN_TRADE_CONVICTION: z.string().optional(),
+  POLYMARKET_CONVICTION_DECAY_THRESHOLD: z.string().optional(),
+  POLYMARKET_REFLECTION_INTERVAL_MS: z.string().optional(),
+  POLYMARKET_SCAN_INTERVAL_MS: z.string().optional(),
+  POLYMARKET_MIN_TRADE_INTERVAL_MS: z.string().optional(),
+  POLYMARKET_MAX_RESEARCH_PER_SCAN: z.string().optional(),
+  POLYMARKET_SCAN_TIMEOUT_MS: z.string().optional(),
+  POLYMARKET_BALANCE_RESERVE_PCT: z.string().optional(),
+  POLYMARKET_MAX_DAILY_LOSS_USD: z.string().optional(),
 }).passthrough();
 
 export const polymarketPlugin: Plugin = {
@@ -96,6 +110,18 @@ export const polymarketPlugin: Plugin = {
     POLYMARKET_MAX_SPREAD_PCT: process.env.POLYMARKET_MAX_SPREAD_PCT,
     POLYMARKET_MAX_TRADE_SIZE_USD: process.env.POLYMARKET_MAX_TRADE_SIZE_USD,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    POLYMARKET_AUTONOMOUS_ENABLED: process.env.POLYMARKET_AUTONOMOUS_ENABLED,
+    POLYMARKET_AUTONOMOUS_TRADE_ENABLED: process.env.POLYMARKET_AUTONOMOUS_TRADE_ENABLED,
+    POLYMARKET_MAX_ACTIVE_THESES: process.env.POLYMARKET_MAX_ACTIVE_THESES,
+    POLYMARKET_MIN_TRADE_CONVICTION: process.env.POLYMARKET_MIN_TRADE_CONVICTION,
+    POLYMARKET_CONVICTION_DECAY_THRESHOLD: process.env.POLYMARKET_CONVICTION_DECAY_THRESHOLD,
+    POLYMARKET_REFLECTION_INTERVAL_MS: process.env.POLYMARKET_REFLECTION_INTERVAL_MS,
+    POLYMARKET_SCAN_INTERVAL_MS: process.env.POLYMARKET_SCAN_INTERVAL_MS,
+    POLYMARKET_MIN_TRADE_INTERVAL_MS: process.env.POLYMARKET_MIN_TRADE_INTERVAL_MS,
+    POLYMARKET_MAX_RESEARCH_PER_SCAN: process.env.POLYMARKET_MAX_RESEARCH_PER_SCAN,
+    POLYMARKET_SCAN_TIMEOUT_MS: process.env.POLYMARKET_SCAN_TIMEOUT_MS,
+    POLYMARKET_BALANCE_RESERVE_PCT: process.env.POLYMARKET_BALANCE_RESERVE_PCT,
+    POLYMARKET_MAX_DAILY_LOSS_USD: process.env.POLYMARKET_MAX_DAILY_LOSS_USD,
   },
   async init(config: Record<string, string>, runtime?: IAgentRuntime) {
     try {
@@ -124,6 +150,13 @@ export const polymarketPlugin: Plugin = {
             "OPENAI_API_KEY not configured. Deep research features will be unavailable."
           );
         }
+
+        // Initialize autonomous trading stores (singleton registry)
+        const maxTheses = parseInt(
+          runtime.getSetting("POLYMARKET_MAX_ACTIVE_THESES") || String(MAX_ACTIVE_THESES_DEFAULT), 10
+        );
+        initializeStores({ maxActiveTheses: maxTheses });
+        logger.info("Polymarket autonomous stores initialized");
       }
 
       logger.info("Polymarket plugin initialized successfully");

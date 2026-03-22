@@ -37,3 +37,18 @@ export const GAMMA_RATE_LIMIT_EVENTS = 500;
 export const GAMMA_RATE_LIMIT_MARKETS = 300;
 export const GAMMA_RATE_LIMIT_SEARCH = 350;
 export const GAMMA_RATE_LIMIT_WINDOW_MS = 10_000;
+
+// Autonomous trading configuration defaults
+export const AUTONOMOUS_ENABLED_DEFAULT = true;
+export const AUTONOMOUS_TRADE_ENABLED_DEFAULT = true;
+export const MAX_ACTIVE_THESES_DEFAULT = 10;
+export const MIN_TRADE_CONVICTION_DEFAULT = 50;
+export const CONVICTION_DECAY_THRESHOLD_DEFAULT = 30;
+export const REFLECTION_INTERVAL_MS_DEFAULT = 6 * 60 * 60 * 1000; // 6 hours
+export const SCAN_INTERVAL_MS_DEFAULT = 2 * 60 * 60 * 1000; // 2 hours
+export const MIN_TRADE_INTERVAL_MS_DEFAULT = 15 * 60 * 1000; // 15 minutes
+export const MAX_RESEARCH_PER_SCAN_DEFAULT = 2;
+export const SCAN_TIMEOUT_MS_DEFAULT = 5 * 60 * 1000; // 5 minutes
+export const BALANCE_RESERVE_PCT_DEFAULT = 5;
+export const MAX_DAILY_LOSS_USD_DEFAULT = 50;
+export const PORTFOLIO_PROVIDER_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
