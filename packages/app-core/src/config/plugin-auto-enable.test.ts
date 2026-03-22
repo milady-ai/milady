@@ -212,6 +212,30 @@ describe("applyPluginAutoEnable — connectors", () => {
 
     expect(config.plugins?.allow).toContain("telegram");
   });
+
+  it("enables wechat plugin when apiKey is configured", () => {
+    const params = makeParams({
+      config: {
+        connectors: {
+          wechat: { apiKey: "wc_live_test" },
+        },
+      },
+    });
+    const { config } = applyPluginAutoEnable(params);
+    expect(config.plugins?.allow).toContain("wechat");
+  });
+
+  it("does not enable wechat when disabled", () => {
+    const params = makeParams({
+      config: {
+        connectors: {
+          wechat: { enabled: false, apiKey: "wc_live_test" },
+        },
+      },
+    });
+    const { config } = applyPluginAutoEnable(params);
+    expect(config.plugins?.allow ?? []).not.toContain("wechat");
+  });
 });
 
 // ============================================================================
@@ -635,8 +659,8 @@ describe("CONNECTOR_PLUGINS", () => {
     expect(CONNECTOR_PLUGINS.discord).toBe("@elizaos/plugin-discord");
   });
 
-  it("contains 19 connector mappings", () => {
-    expect(Object.keys(CONNECTOR_PLUGINS)).toHaveLength(19);
+  it("contains 20 connector mappings", () => {
+    expect(Object.keys(CONNECTOR_PLUGINS)).toHaveLength(20);
   });
 
   it("maps retake to @elizaos/plugin-retake", () => {

@@ -4,9 +4,16 @@ export * from "@elizaos/agent/config/plugin-auto-enable";
 // Override applyPluginAutoEnable to inject WeChat auto-enable before upstream.
 import {
   applyPluginAutoEnable as _upstreamApplyPluginAutoEnable,
+  CONNECTOR_PLUGINS as _upstreamConnectorPlugins,
   type ApplyPluginAutoEnableParams,
   type ApplyPluginAutoEnableResult,
 } from "@elizaos/agent/config/plugin-auto-enable";
+
+// Extend upstream CONNECTOR_PLUGINS with Milady-local connectors.
+export const CONNECTOR_PLUGINS: Record<string, string> = {
+  ..._upstreamConnectorPlugins,
+  wechat: "@miladyai/plugin-wechat",
+};
 import { isWechatConfigured } from "./wechat-config";
 
 export function applyPluginAutoEnable(
