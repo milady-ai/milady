@@ -10,6 +10,47 @@ tl;dr: local AI gf that's actually fast and doesn't phone home
 
 ---
 
+## BSC / BNB Chain Integration
+
+Milady ships with native **BNB Smart Chain (BSC)** support — your agent can trade tokens, track meme launches, and interact with DeFi on BSC out of the box.
+
+### Trading (PancakeSwap)
+
+The built-in `EXECUTE_TRADE` action lets your agent swap tokens on BSC via PancakeSwap. Supports buy/sell with configurable slippage.
+
+To enable BSC trading, add to your `.env` or `~/.eliza/.env`:
+
+```bash
+EVM_PRIVATE_KEY=0x...                    # wallet private key (hex, 0x-prefixed)
+ELIZA_TRADE_PERMISSION_MODE=agent        # "agent" for autonomous, "user" for manual confirm
+```
+
+Optional RPC configuration (defaults to public BSC RPC):
+
+```bash
+ALCHEMY_API_KEY=...                      # or use ANKR_API_KEY / INFURA_API_KEY
+EVM_RPC_PROVIDER=alchemy                 # alchemy | infura | ankr | elizacloud
+```
+
+Once configured, just tell your agent: *"buy 0.1 BNB of \<token address\>"* or *"sell all my \<token\>"*.
+
+### Meme Token Discovery (Binance Skills Hub)
+
+Install the **meme-rush** skill from [Binance Skills Hub](https://github.com/binance/binance-skills-hub) to track meme token launches across BSC and Solana:
+
+- **Meme Rush** — real-time token lists from Pump.fun, Four.meme across new, finalizing, and migrated stages
+- **Topic Rush** — AI-powered market hot topics with tokens ranked by net inflow
+
+Install from the Skills Marketplace in the app, or ask your agent to install it.
+
+### Wallet
+
+Milady auto-generates EVM and Solana wallet addresses on startup. For BSC trading you need to import your own private key (see above). If connected to **Eliza Cloud**, managed wallets via Privy are available without local key management.
+
+View your agent's wallet addresses in the Settings tab or ask: *"what's my wallet address?"*
+
+---
+
 ## Downloads
 
 ### Desktop App (recommended for normies)
@@ -34,6 +75,13 @@ cd ~/Downloads
 curl -fsSLO https://github.com/milady-ai/milady/releases/latest/download/SHA256SUMS.txt
 shasum -a 256 --check --ignore-missing SHA256SUMS.txt
 ```
+
+### Desktop: reset app data
+
+**Milady → Reset Milady…** (menu bar) confirms in the **native** dialog, then the **main process** calls **`POST /api/agent/reset`**, restarts the agent (embedded or external API), and tells the renderer to apply the **same local state wipe** as the end of Settings reset (onboarding, API client, cloud UI, conversations). **Why main does HTTP:** on macOS/WKWebView, the webview can fail to run **`fetch`** immediately after a native dialog, so a renderer-only reset looked stuck. **Why the renderer still runs teardown:** one implementation of “clear UI + `MiladyClient`” avoids duplicating logic in TypeScript main vs React.
+
+- **Docs:** [Desktop app](docs/apps/desktop.md) (native application menu section), [Main-process reset — WHYs](docs/apps/desktop-main-process-reset.md)
+- **Optional network / TTS:** with the agent orchestrator loaded, Edge TTS may call **Microsoft’s cloud** unless you set **`MILADY_DISABLE_EDGE_TTS=1`** — see [Environment variables](docs/cli/environment.md#runtime-behavior) and [TTS plugin](docs/plugin-registry/tts.md)
 
 ---
 
@@ -327,7 +375,7 @@ Don't want the TUI? Run headless:
 milady start --headless
 ```
 
-Logs go to `~/.milady/logs/`. Daemonize with your favorite process manager.
+Logs go to `stdout/stderr (or configure LOG_FILE)`. Daemonize with your favorite process manager.
 
 ---
 
@@ -351,8 +399,10 @@ Logs go to `~/.milady/logs/`. Daemonize with your favorite process manager.
 
 | Service | Default | Env Override |
 |---------|---------|--------------|
+| API + WebSocket | `31337` | `MILADY_API_PORT` |
 | Gateway (API + WebSocket) | `18789` | `MILADY_GATEWAY_PORT` |
 | Dashboard (Web UI) | `2138` | `MILADY_PORT` |
+| Home Dashboard | `2142` | `MILADY_HOME_PORT` |
 
 ```bash
 # custom ports
@@ -407,7 +457,7 @@ ollama pull gemma3:4b
 
 > **⚠️ Known issue:** The `@elizaos/plugin-ollama` has an SDK version incompatibility with the current AI SDK. Use Ollama's **OpenAI-compatible endpoint** as a workaround:
 
-Edit `~/.milady/milady.json`:
+Edit `~/.eliza/eliza.json`:
 
 ```json5
 {
@@ -465,6 +515,15 @@ bun run dev          # starts API (:31337) + Vite UI (:2138) with hot reload
 
 This auto-kills zombie processes on the dev ports, waits for the API to be healthy, then starts the Vite dev server with proxy.
 
+### Desktop shell (Electrobun)
+
+```bash
+bun run dev:desktop        # API + Electrobun; skips vite build when apps/app/dist is fresh
+bun run dev:desktop:watch  # + Vite dev server and MILADY_RENDERER_URL (HMR for UI work)
+```
+
+**Why a separate flow:** the desktop stack runs **multiple processes** (orchestrator, Vite and/or built assets, API, Electrobun). See **[docs/apps/desktop-local-development.md](docs/apps/desktop-local-development.md)** for signals, shutdown when you quit the app, and env vars.
+
 ```bash
 bun run check        # typecheck + lint (run before committing)
 bun run test         # parallel test suite
@@ -478,6 +537,10 @@ See **[DEVELOPMENT.md](./DEVELOPMENT.md)** for the full development guide includ
 
 - **[Plugin resolution and NODE_PATH](docs/plugin-resolution-and-node-path.md)** — Why we set `NODE_PATH` in three places so dynamic plugin imports resolve when building from source (CLI, desktop dev, Electrobun).
 - **[Build and release](docs/build-and-release.md)** — Why the release pipeline uses strict shell, retries, setup-node v3/Blacksmith, Bun cache, timeouts; why size-report pipelines handle SIGPIPE; why Windows plugin build uses `npx -p typescript tsc`.
+- **[Desktop local development](docs/apps/desktop-local-development.md)** — Why `dev:desktop` / `dev:desktop:watch` orchestrate Vite, API, and Electrobun; HMR vs `vite build --watch`; Ctrl-C, Quit, and `detached` children.
+- **[Desktop main-process reset](docs/apps/desktop-main-process-reset.md)** — Why **Reset Milady…** runs HTTP in the Electrobun main process after native confirm, how the renderer syncs UI state, reachable API probing (`res.ok`), and where tests live.
+- **[Changelog](docs/changelog.mdx)** — Shipped features and fixes with rationale (**WHY** bullets in each update).
+- **[Roadmap](docs/ROADMAP.md)** — Direction and follow-ups; points to changelog for what already landed.
 
 ---
 
@@ -493,9 +556,9 @@ Read [CONTRIBUTING.md](./CONTRIBUTING.md) for the full details.
 
 ## License
 
-**Viral Public License**
+**MIT License**
 
-free to use, free to modify, free to distribute. if you build on this, keep it open. that's the deal.
+free to use, free to modify, free to distribute. see [LICENSE](LICENSE) for details.
 
 ---
 

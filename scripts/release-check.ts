@@ -22,25 +22,28 @@ const forbiddenPrefixes = ["dist/Milady.app/"];
 const orchestratorPackageName = "@elizaos/plugin-agent-orchestrator";
 const orchestratorBrokenLifecycleTarget = "./scripts/ensure-node-pty.mjs";
 const autonomousServerPathCandidates = [
-  "node_modules/@elizaos/autonomous/packages/autonomous/src/api/server.js",
-  "packages/autonomous/src/api/server.ts",
+  "node_modules/@elizaos/agent/packages/agent/src/api/server.js",
+  "packages/agent/src/api/server.ts",
 ] as const;
 const autonomousElizaPathCandidates = [
-  "node_modules/@elizaos/autonomous/packages/autonomous/src/runtime/eliza.js",
-  "packages/autonomous/src/runtime/eliza.ts",
+  "node_modules/@elizaos/agent/packages/agent/src/runtime/eliza.js",
+  "packages/agent/src/runtime/eliza.ts",
 ] as const;
 const requiredWorkflowSnippets = [
   'BUN_VERSION: "1.3.9"',
+  "workflow_call:",
   "name: Validate Release Inputs",
   "bun-version: $" + "{{ env.BUN_VERSION }}",
   "name: Release readiness checks",
   "run: bun run release:check",
   "for attempt in 1 2 3; do",
   `bun install failed on attempt \${attempt}; retrying in 15 seconds`,
-  "key: bun-electrobun-validate-$" + "{{ hashFiles('bun.lock') }}",
-  "restore-keys: bun-electrobun-validate-",
   "name: Ensure avatar assets",
   "node scripts/ensure-avatars.mjs",
+  "name: Prepare Whisper model artifact",
+  "bash apps/app/electrobun/scripts/ensure-whisper-model.sh base.en",
+  "name: Upload Whisper model artifact",
+  "name: whisper-model-base-en",
   "Install quiet macOS packaging wrappers",
   "apps/app/electrobun/scripts/hdiutil-wrapper.sh",
   "apps/app/electrobun/scripts/xcrun-wrapper.sh",
@@ -48,6 +51,8 @@ const requiredWorkflowSnippets = [
   "ELECTROBUN_REAL_HDIUTIL: /usr/bin/hdiutil",
   "ELECTROBUN_REAL_XCRUN: /usr/bin/xcrun",
   "ELECTROBUN_REAL_ZIP: /usr/bin/zip",
+  "name: Download Whisper model artifact",
+  "name: Seed Whisper model cache",
   "Stage desktop bundle inputs",
   "node scripts/desktop-build.mjs stage --variant=base --build-whisper",
   "Inject version.json into bundle (Windows)",
@@ -92,18 +97,69 @@ const requiredWorkflowSnippets = [
   'Write-Host "Resolved electrobun package dir: $resolvedElectrobunDir"',
   '$cacheDir     = Join-Path $resolvedElectrobunDir ".cache"',
   '$resolvedRceditDir = Join-Path $resolvedElectrobunDir "node_modules\\rcedit"',
+  '(Join-Path (Split-Path -Parent $resolvedElectrobunDir) "rcedit")',
+  'Get-ChildItem -Path (Join-Path $PWD "node_modules\\.bun") -Directory -Filter "rcedit@*"',
+  "Seeding rcedit from $seedRceditDir",
   "node scripts/desktop-build.mjs package --env=$" +
     "{{ needs.prepare.outputs.env }}",
   "MILADY_ELECTROBUN_NOTARIZE: 0",
   'MILADY_DISABLE_LOCAL_EMBEDDINGS: "1"',
   'MILADY_WINDOWS_SMOKE_REQUIRE_INSTALLER: "1"',
   "MILADY_TEST_WINDOWS_INSTALL_DIR: C:\\mi",
+  "name: Run Windows clean installer proof",
+  "verify-windows-installer-proof.ps1",
+  "MILADY_TEST_WINDOWS_PROOF_INSTALL_DIR: C:\\mi-proof",
+  "name: Upload Windows installer proof artifact",
+  "path: apps/app/electrobun/artifacts/windows-installer-proof/**",
+  "if: always() && matrix.platform.os == 'windows'",
   "ANTHROPIC_API_KEY: $" + "{{ secrets.ANTHROPIC_API_KEY }}",
   'Join-Path $PWD "apps/app/electrobun/node_modules/electrobun"',
   "if ($null -eq $resolvedRceditPackageJson)",
   '$resolvedRceditPackageJson = "$resolvedRceditPackageJson".Trim()',
 ];
-const forbiddenWorkflowSnippets = [' -name "*.exe" -o \\'];
+const forbiddenWorkflowSnippets = [
+  ' -name "*.exe" -o \\',
+  'bun install -g "rcedit@4.0.1"',
+  "name: Cache Bun install",
+  "path: ~/.bun/install/cache",
+  "restore-keys: bun-electrobun-validate-",
+  "restore-keys: bun-electrobun-$" +
+    "{{ matrix.platform.artifact-name }}" +
+    "-",
+  "key: bun-electrobun-validate-$" + "{{ hashFiles('bun.lock') }}",
+  "key: bun-electrobun-$" +
+    "{{ matrix.platform.artifact-name }}" +
+    "-$" +
+    "{{ hashFiles('bun.lock') }}",
+];
+const requiredElectrobunPrWorkflowSnippets = [
+  "name: Validate Electrobun Release Workflow",
+  "pull_request:",
+  "branches: [main, develop]",
+  "workflow_dispatch:",
+  "permissions:",
+  "contents: read",
+  'BUN_VERSION: "1.3.9"',
+  "name: Release Workflow Contract",
+  "bun install --frozen-lockfile --ignore-scripts",
+  "bun run postinstall",
+  "bunx vitest run",
+  "scripts/electrobun-release-workflow-drift.test.ts",
+  "scripts/electrobun-test-workflow-drift.test.ts",
+  "scripts/whisper-build-script-drift.test.ts",
+  "scripts/release-check.test.ts",
+  "bunx tsdown",
+  "node --import tsx scripts/write-build-info.ts",
+  "bun run release:check",
+];
+const forbiddenElectrobunPrWorkflowSnippets = [
+  "uses: ./.github/workflows/release-electrobun.yml",
+  "publish_release: false",
+  "publish_docker: false",
+  "draft: false",
+  "secrets: inherit",
+  "packages: write",
+];
 const requiredElectrobunConfigSnippets = [
   'postBuild: "scripts/postwrap-sign-runtime-macos.ts"',
   'postWrap: "scripts/postwrap-diagnostics.ts"',
@@ -124,6 +180,11 @@ type RootPackageJson = {
   files?: string[];
   scripts?: Record<string, string>;
 };
+const cloudAgentTemplateReleaseDependencies = [
+  "@elizaos/core",
+  "@elizaos/plugin-elizacloud",
+  "@elizaos/plugin-sql",
+] as const;
 
 /**
  * Returns true if the version specifier is an exact pinned version
@@ -272,6 +333,22 @@ export function hasLifecycleScriptReferencingMissingFile(
   return !pathExists(resolve(packageDir, relativeTarget));
 }
 
+export function findFloatingDependencySpecs(
+  pkg: RootPackageJson,
+  dependencyNames: readonly string[],
+): Array<{ name: string; specifier: string }> {
+  const dependencies = pkg.dependencies ?? {};
+
+  return dependencyNames.flatMap((name) => {
+    const specifier = dependencies[name];
+    if (!isExactVersionSpecifier(specifier)) {
+      return [{ name, specifier: specifier ?? "<missing>" }];
+    }
+
+    return [];
+  });
+}
+
 function readExistingReleaseCheckFile(
   label: string,
   candidates: readonly string[],
@@ -408,6 +485,26 @@ function assertOrchestratorVersionPinned() {
   }
 }
 
+function assertCloudAgentTemplateDependenciesPinned() {
+  const cloudAgentPackage = JSON.parse(
+    readFileSync("deploy/cloud-agent-template/package.json", "utf8"),
+  ) as RootPackageJson;
+  const floating = findFloatingDependencySpecs(
+    cloudAgentPackage,
+    cloudAgentTemplateReleaseDependencies,
+  );
+
+  if (floating.length > 0) {
+    console.error(
+      "release-check: deploy/cloud-agent-template/package.json must pin release dependencies to exact versions.",
+    );
+    for (const dependency of floating) {
+      console.error(`  - ${dependency.name}: ${dependency.specifier}`);
+    }
+    process.exit(1);
+  }
+}
+
 function assertReleaseWorkflowHasNotaryWrapper() {
   const workflow = readFileSync(
     ".github/workflows/release-electrobun.yml",
@@ -434,6 +531,40 @@ function assertReleaseWorkflowHasNotaryWrapper() {
   if (forbidden.length > 0) {
     console.error(
       "release-check: release workflow still exposes raw bootstrap artifacts on the public GitHub release:",
+    );
+    for (const snippet of forbidden) {
+      console.error(`  - ${snippet}`);
+    }
+    process.exit(1);
+  }
+}
+
+function assertElectrobunPrWorkflowExists() {
+  const workflow = readFileSync(
+    ".github/workflows/test-electrobun-release.yml",
+    "utf8",
+  );
+  const missing = requiredElectrobunPrWorkflowSnippets.filter(
+    (snippet) => !workflow.includes(snippet),
+  );
+
+  if (missing.length > 0) {
+    console.error(
+      "release-check: Electrobun PR workflow is missing lightweight release-contract validation:",
+    );
+    for (const snippet of missing) {
+      console.error(`  - ${snippet}`);
+    }
+    process.exit(1);
+  }
+
+  const forbidden = forbiddenElectrobunPrWorkflowSnippets.filter((snippet) =>
+    workflow.includes(snippet),
+  );
+
+  if (forbidden.length > 0) {
+    console.error(
+      "release-check: Electrobun PR workflow still invokes the full reusable release pipeline:",
     );
     for (const snippet of forbidden) {
       console.error(`  - ${snippet}`);
@@ -479,7 +610,7 @@ function assertMacArtifactStagerLooksCorrect() {
     'codesign --verify --deep --strict --verbose=2 "$STAGED_APP_PATH"',
     "hdiutil create \\",
     "retry_command 3 20 xcrun notarytool submit \\",
-    'retry_command 5 15 xcrun stapler staple "$TEMP_DMG_PATH"',
+    'retry_command 8 20 xcrun stapler staple "$TEMP_DMG_PATH"',
     'mv "$TEMP_DMG_PATH" "$FINAL_DMG_PATH"',
   ];
   const missing = requiredSnippets.filter(
@@ -551,6 +682,12 @@ function assertWindowsSmokeScriptHasLeadingParamBlock() {
     "Waiting for health endpoint at http://(?:localhost|127\\.0\\.0\\.1):",
     "$handler.UseProxy = $false",
     '--noproxy "127.0.0.1"',
+    "function Test-BackendProbeStatus",
+    "function Test-StartupLogFatalLine",
+    "Cleared stale startup log:",
+    "optional plugin",
+    "Fatal startup lines detected:",
+    "-SkipHttpErrorCheck",
     "Dump-PortDiagnostics",
     "Dump-ProcessDiagnostics",
     "Dump-FailureDiagnostics",
@@ -568,6 +705,91 @@ function assertWindowsSmokeScriptHasLeadingParamBlock() {
     for (const snippet of missingSnippets) {
       console.error(`  - ${snippet}`);
     }
+    process.exit(1);
+  }
+}
+
+function assertWindowsInstallerProofScript() {
+  const script = readFileSync(
+    "apps/app/electrobun/scripts/verify-windows-installer-proof.ps1",
+    "utf8",
+  );
+
+  const requiredSnippets = [
+    "Milady-Setup-*.exe",
+    "smoke-test-windows.ps1",
+    "MILADY_WINDOWS_SMOKE_REQUIRE_INSTALLER",
+    "Start Menu",
+    "unins*.exe",
+    "proof-summary.json",
+  ];
+  const missingSnippets = requiredSnippets.filter(
+    (snippet) => !script.includes(snippet),
+  );
+
+  if (missingSnippets.length > 0) {
+    console.error(
+      "release-check: verify-windows-installer-proof.ps1 is missing required clean-install proof logic.",
+    );
+    for (const snippet of missingSnippets) {
+      console.error(`  - ${snippet}`);
+    }
+    process.exit(1);
+  }
+}
+
+function assertInnoBuildScriptHasTimeoutAndHeartbeat() {
+  const script = readFileSync("packaging/inno/build-inno.ps1", "utf8");
+  const requiredSnippets = [
+    "$isccTimeout = [TimeSpan]::FromMinutes(25)",
+    "$isccHeartbeatInterval = [TimeSpan]::FromSeconds(30)",
+    "Write-Host \"Starting ISCC.exe: $isccPath $($isccArgumentDisplay -join ' ')\"",
+    "Start-Process -FilePath $isccPath",
+    'Write-Host "ISCC.exe still running after $([math]::Round($elapsed.TotalMinutes, 1)) minutes..."',
+    "Stop-Process -Id $isccProcess.Id -Force",
+    'throw "ISCC.exe timed out after $([int]$isccTimeout.TotalMinutes) minutes while building the Windows installer."',
+  ];
+  const missingSnippets = requiredSnippets.filter(
+    (snippet) => !script.includes(snippet),
+  );
+
+  if (missingSnippets.length > 0) {
+    console.error(
+      "release-check: build-inno.ps1 must supervise ISCC.exe with heartbeat logging and a hard timeout.",
+    );
+    for (const snippet of missingSnippets) {
+      console.error(`  - ${snippet}`);
+    }
+    process.exit(1);
+  }
+}
+
+function assertInnoTemplateTargetsBundledLauncher() {
+  const template = readFileSync("packaging/inno/Milady.iss", "utf8");
+  const requiredSnippets = [
+    '#define MyAppExeName "bin\\launcher.exe"',
+    "UninstallDisplayIcon={app}\\{#MyAppExeName}",
+    'Name: "{autoprograms}\\{#MyDefaultGroupName}\\{#MyAppName}"; Filename: "{app}\\{#MyAppExeName}"',
+    'Name: "{autodesktop}\\{#MyAppName}"; Filename: "{app}\\{#MyAppExeName}"; Tasks: desktopicon',
+  ];
+  const missingSnippets = requiredSnippets.filter(
+    (snippet) => !template.includes(snippet),
+  );
+
+  if (missingSnippets.length > 0) {
+    console.error(
+      "release-check: Milady.iss must point Windows shortcuts and uninstall metadata at bin\\launcher.exe.",
+    );
+    for (const snippet of missingSnippets) {
+      console.error(`  - ${snippet}`);
+    }
+    process.exit(1);
+  }
+
+  if (template.includes('#define MyAppExeName "launcher.exe"')) {
+    console.error(
+      "release-check: Milady.iss must not point Windows shortcuts at {app}\\launcher.exe; the bundled launcher lives under bin\\.",
+    );
     process.exit(1);
   }
 }
@@ -611,6 +833,8 @@ function assertMacSmokeScriptLaunchesPackagedLauncherDirectly() {
     'echo "Packaged renderer asset check PASSED (wrapper archive)."',
     'echo "Launcher: $' + "{LAUNCHER_PATH:-<unset>}" + '"',
     'local launcher_stdout="$' + "{LAUNCHER_STDOUT:-}" + '"',
+    "backend_health_probe_satisfied()",
+    '[[ "$status" == "200" || "$status" == "401" ]]',
     "Launcher exited before the first health probe; continuing to wait for packaged app handoff...",
     'dump_failure_diagnostics "backend startup log reported a failure"',
     'dump_failure_diagnostics "backend never reported a started port"',
@@ -701,14 +925,19 @@ function assertStartApiServerCatchBlockSafety() {
 
 function main() {
   assertReleaseWorkflowHasNotaryWrapper();
+  assertElectrobunPrWorkflowExists();
   assertElectrobunConfigHasPostWrapSigner();
   assertMacArtifactStagerLooksCorrect();
   assertWindowsSmokeScriptHasLeadingParamBlock();
+  assertWindowsInstallerProofScript();
+  assertInnoBuildScriptHasTimeoutAndHeartbeat();
+  assertInnoTemplateTargetsBundledLauncher();
   assertMacSmokeScriptLaunchesPackagedLauncherDirectly();
   assertServerDynamicHyperscapeImport();
   assertStartApiServerCatchBlockSafety();
   assertBundledAgentOrchestratorInstallFix();
   assertOrchestratorVersionPinned();
+  assertCloudAgentTemplateDependenciesPinned();
   const localHotspots = findLocalPackHotspots();
   if (shouldSkipExactPackDryRun(localHotspots)) {
     runFastLocalPackCheck(localHotspots);

@@ -171,6 +171,7 @@ These variables control elizaOS runtime initialization behavior.
 | `ELIZA_CONFIG_PATH` | Override the path to `milady.json`. | `~/.milady/milady.json` |
 | `MILADY_DISABLE_WORKSPACE_PLUGIN_OVERRIDES` | When set to `1`, disables loading plugin overrides from workspace directories. | (unset) |
 | `MILADY_BUNDLED_VERSION` | Override the bundled version string returned by the version resolver. Used in special packaging scenarios. | (unset) |
+| `MILADY_DISABLE_EDGE_TTS` | When set to `1`, `true`, or `yes`, Milady does **not** auto-load `@elizaos/plugin-edge-tts` when `@elizaos/plugin-agent-orchestrator` is enabled (orchestrator-driven flows use `TEXT_TO_SPEECH`). Without this, the bundled `node-edge-tts` client **contacts Microsoft’s Edge TTS cloud service** even though no API key is required—there is still an outbound network call to Microsoft. To opt out while keeping other plugins: set this variable, or set `plugins.entries["edge-tts"].enabled` to `false` in `milady.json`. Alias: `ELIZA_DISABLE_EDGE_TTS`. | (unset — Edge TTS is auto-loaded with the agent orchestrator) |
 
 ---
 

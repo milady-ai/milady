@@ -24,7 +24,6 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   patchAgentSkillsCatalogFetch,
-  patchAppCoreMiladyAssets,
   patchAutonomousMiladyOnboardingPresets,
   patchAutonomousTypeError,
   patchBrokenElizaCoreRuntimeDists,
@@ -34,10 +33,17 @@ import {
   patchNobleHashesCompat,
   patchPluginVisionPermissionHandling,
   patchProperLockfileSignalExitCompat,
+  warnStaleBunCache,
 } from "./lib/patch-bun-exports.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
+
+// ---------------------------------------------------------------------------
+// Bust stale Bun cache entries for @elizaos packages.
+// See warnStaleBunCache() in lib/patch-bun-exports.mjs for details.
+// ---------------------------------------------------------------------------
+warnStaleBunCache(root);
 
 // ---------------------------------------------------------------------------
 // Patch @elizaos packages whose exports["."].bun points to ./src/index.ts.
@@ -65,7 +71,6 @@ patchNobleHashesCompat(root);
 patchProperLockfileSignalExitCompat(root);
 patchBrokenElizaCoreRuntimeDists(root);
 patchAutonomousMiladyOnboardingPresets(root);
-patchAppCoreMiladyAssets(root);
 patchAutonomousTypeError(root);
 patchPluginVisionPermissionHandling(root);
 
@@ -170,21 +175,21 @@ function patchPluginSqlUUID() {
 patchPluginSqlUUID();
 
 /**
- * Patch @elizaos/autonomous ensureBrowserServerLink() file extension.
+ * Patch @elizaos/agent ensureBrowserServerLink() file extension.
  *
  * The upstream code checks for `dist/index` without `.js` extension, but
  * existsSync() requires the full filename. Fix to `dist/index.js`.
  * Remove once the upstream adds the extension.
  */
 function patchBrowserServerIndexExtension() {
-  const searchDirs = [resolve(root, "node_modules/@elizaos/autonomous")];
+  const searchDirs = [resolve(root, "node_modules/@elizaos/agent")];
   const bunCacheDir = resolve(root, "node_modules/.bun");
   if (existsSync(bunCacheDir)) {
     try {
       for (const entry of readdirSync(bunCacheDir)) {
         if (entry.startsWith("@elizaos+autonomous@")) {
           searchDirs.push(
-            resolve(bunCacheDir, entry, "node_modules/@elizaos/autonomous"),
+            resolve(bunCacheDir, entry, "node_modules/@elizaos/agent"),
           );
         }
       }
@@ -221,7 +226,7 @@ function patchBrowserServerIndexExtension() {
 patchBrowserServerIndexExtension();
 
 /**
- * Patch @elizaos/autonomous server reset safety check.
+ * Patch @elizaos/agent server reset safety check.
  *
  * The upstream isSafeResetStateDir only allows state directories whose path
  * contains ".eliza" or "eliza" as a segment. Since Milady sets ELIZA_NAMESPACE
@@ -232,7 +237,7 @@ patchBrowserServerIndexExtension();
 function patchAutonomousResetAllowedSegments() {
   const serverJs = resolve(
     root,
-    "node_modules/@elizaos/autonomous/packages/autonomous/src/api/server.js",
+    "node_modules/@elizaos/agent/packages/agent/src/api/server.js",
   );
   if (!existsSync(serverJs)) {
     console.log(
@@ -268,131 +273,6 @@ function patchAutonomousResetAllowedSegments() {
   );
 }
 patchAutonomousResetAllowedSegments();
-
-/**
- * Patch @elizaos/app-core AvatarLoader to use a linear determinate progress bar
- * that fills from 0% to 100% before the world is shown, instead of the upstream
- * indeterminate sine-wave animation.
- * Remove once upstream ships a determinate loader.
- */
-function patchAvatarLoaderLinearProgress() {
-  const loaderPaths = [];
-  const seenRealpaths = new Set();
-
-  // Main install
-  addUniquePath(
-    loaderPaths,
-    seenRealpaths,
-    resolve(root, "node_modules/@elizaos/app-core/components/AvatarLoader.js"),
-  );
-
-  // Bun cache
-  const bunCacheDir = resolve(root, "node_modules/.bun");
-  if (existsSync(bunCacheDir)) {
-    try {
-      for (const entry of readdirSync(bunCacheDir)) {
-        if (entry.startsWith("@elizaos+app-core@")) {
-          addUniquePath(
-            loaderPaths,
-            seenRealpaths,
-            resolve(
-              bunCacheDir,
-              entry,
-              "node_modules/@elizaos/app-core/components/AvatarLoader.js",
-            ),
-          );
-        }
-      }
-    } catch {}
-  }
-
-  let patched = 0;
-  for (const target of loaderPaths) {
-    if (!existsSync(target)) continue;
-    const src = readFileSync(target, "utf8");
-
-    // Skip if already patched
-    if (src.includes("useLinearProgress")) continue;
-    // Skip if the indeterminate animation pattern isn't found
-    if (!src.includes("avatar-loader-progress")) continue;
-
-    const replacement = `import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { useEffect, useState } from "react";
-function useLinearProgress(duration) {
-    const [progress, setProgress] = useState(0);
-    useEffect(() => {
-        const start = Date.now();
-        const tick = () => {
-            const elapsed = Date.now() - start;
-            const pct = Math.min(elapsed / duration, 1) * 100;
-            setProgress(pct);
-            if (pct < 100) requestAnimationFrame(tick);
-        };
-        const raf = requestAnimationFrame(tick);
-        return () => cancelAnimationFrame(raf);
-    }, [duration]);
-    return Math.round(progress);
-}
-export function AvatarLoader({ label = "Initializing entity", fullScreen = false, fadingOut = false, }) {
-    const progress = useLinearProgress(3000);
-    return (_jsx("div", { style: {
-            position: fullScreen ? "fixed" : "absolute",
-            inset: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: fullScreen ? "#0c0e14" : "transparent",
-            zIndex: 10,
-            opacity: fadingOut ? 0 : 1,
-            transition: "opacity 0.8s ease-out",
-            pointerEvents: fadingOut ? "none" : "auto",
-        }, children: _jsxs("div", { style: {
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-                gap: 12,
-                width: 280,
-            }, children: [_jsxs("div", { style: {
-                        fontFamily: "var(--mono, monospace)",
-                        fontSize: 12,
-                        fontWeight: 400,
-                        letterSpacing: "0.35em",
-                        textTransform: "uppercase",
-                        color: "rgba(255, 255, 255, 0.7)",
-                        userSelect: "none",
-                    }, children: ["LOADING", _jsx("span", { className: "loading-screen__dots" })] }), _jsx("div", { style: {
-                        width: "100%",
-                        height: 3,
-                        background: "rgba(255, 255, 255, 0.1)",
-                        overflow: "hidden",
-                    }, children: _jsx("div", { style: {
-                            width: progress + "%",
-                            height: "100%",
-                            background: "rgba(255, 255, 255, 0.85)",
-                            boxShadow: "0 0 8px rgba(255, 255, 255, 0.3)",
-                            transition: "width 0.1s linear",
-                        } }) }), _jsx("div", { style: {
-                        fontFamily: "var(--mono, monospace)",
-                        fontSize: 10,
-                        fontWeight: 400,
-                        letterSpacing: "0.12em",
-                        textTransform: "uppercase",
-                        color: "rgba(255, 255, 255, 0.3)",
-                        userSelect: "none",
-                    }, children: label })] }) }));
-}
-`;
-    writeFileSync(target, replacement, "utf8");
-    patched++;
-    console.log(
-      `[patch-deps] Applied AvatarLoader linear progress patch: ${target}`,
-    );
-  }
-  if (patched > 0) {
-    console.log(`[patch-deps] AvatarLoader: patched ${patched} file(s).`);
-  }
-}
-patchAvatarLoaderLinearProgress();
 
 /**
  * Vite caches prebundled dependencies under node_modules/.vite. When patch-deps

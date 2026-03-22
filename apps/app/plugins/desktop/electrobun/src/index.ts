@@ -19,7 +19,7 @@ import type { PluginListenerHandle } from "@capacitor/core";
 import {
   invokeDesktopBridgeRequest,
   subscribeDesktopBridgeEvent,
-} from "@elizaos/app-core/bridge/electrobun-rpc";
+} from "@miladyai/app-core/bridge/electrobun-rpc.js";
 import type {
   AutoLaunchOptions,
   DesktopPlugin,
@@ -34,7 +34,7 @@ import type {
   TrayOptions,
   WindowBounds,
   WindowOptions,
-} from "../../src/definitions";
+} from "@miladyai/app-core/src/definitions";
 
 type DesktopEventPayloads = {
   trayClick: TrayClickEvent;

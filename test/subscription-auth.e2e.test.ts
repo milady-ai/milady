@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import http from "node:http";
 import os from "node:os";
 import path from "node:path";
-import type { OAuthCredentials } from "@elizaos/autonomous/auth/types";
+import type { OAuthCredentials } from "@elizaos/agent/auth/types";
 import {
   afterAll,
   beforeAll,
@@ -12,7 +12,7 @@ import {
   it,
   vi,
 } from "vitest";
-import { startApiServer } from "../src/api/server";
+import { startApiServer } from "@miladyai/app-core/src/api/server";
 
 const authMocks = vi.hoisted(() => ({
   getSubscriptionStatus: vi.fn(() => [{ id: "openai-codex" }]),
@@ -23,7 +23,7 @@ const authMocks = vi.hoisted(() => ({
   deleteCredentials: vi.fn(),
 }));
 
-vi.mock("@elizaos/autonomous/auth/index", () => ({
+vi.mock("@elizaos/agent/auth/index", () => ({
   getSubscriptionStatus: authMocks.getSubscriptionStatus,
   startAnthropicLogin: authMocks.startAnthropicLogin,
   startCodexLogin: authMocks.startCodexLogin,
@@ -31,7 +31,7 @@ vi.mock("@elizaos/autonomous/auth/index", () => ({
   applySubscriptionCredentials: authMocks.applySubscriptionCredentials,
   deleteCredentials: authMocks.deleteCredentials,
 }));
-vi.mock("@elizaos/autonomous/auth", () => ({
+vi.mock("@elizaos/agent/auth", () => ({
   getSubscriptionStatus: authMocks.getSubscriptionStatus,
   startAnthropicLogin: authMocks.startAnthropicLogin,
   startCodexLogin: authMocks.startCodexLogin,

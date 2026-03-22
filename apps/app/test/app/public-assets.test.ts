@@ -1,8 +1,8 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+import { MILADY_CHARACTER_ASSETS } from "@miladyai/app-core/character-catalog";
 import { describe, expect, it } from "vitest";
-import { MILADY_CHARACTER_ASSETS } from "../../src/character-catalog";
 
 const TEST_DIR = fileURLToPath(new URL(".", import.meta.url));
 const APP_DIR = join(TEST_DIR, "../..");
@@ -54,7 +54,9 @@ describe("app public bundle assets", () => {
     // files that actually exist on disk.  Some character VRMs/previews are
     // generated at build time and may not be present in CI (git-tracked only).
     // Collect all animation files (emotes + mixamo + idle) dynamically
-    const animationFiles = actualFiles.filter((f) => f.startsWith("animations/"));
+    const animationFiles = actualFiles.filter((f) =>
+      f.startsWith("animations/"),
+    );
 
     const allExpected = new Set<string>([
       "android-chrome-192x192.png",

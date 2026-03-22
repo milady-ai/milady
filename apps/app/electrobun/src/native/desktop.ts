@@ -25,10 +25,15 @@ import * as fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import Electrobun, {
+  type ApplicationMenuItemConfig,
+  BrowserView,
   type BrowserWindow,
+  BuildConfig,
+  ContextMenu,
   GlobalShortcut,
   type MenuItemConfig,
   Screen,
+  Session,
   Tray,
   Updater,
   Utils,
@@ -37,6 +42,11 @@ import type {
   ClipboardReadResult,
   ClipboardWriteOptions,
   CursorPosition,
+  DesktopBuildInfo,
+  DesktopReleaseNotesWindowInfo,
+  DesktopSessionSnapshot,
+  DesktopSessionStorageType,
+  DesktopUpdaterSnapshot,
   DisplayInfo,
   FileDialogOptions,
   FileDialogResult,
@@ -57,6 +67,7 @@ import {
   makeKeyAndOrderFront,
   orderOut,
 } from "./mac-window-effects";
+import { checkWebGpuSupport } from "./webgpu-browser-support";
 
 // ============================================================================
 // Types
@@ -114,6 +125,17 @@ const PATH_NAME_MAP: Record<string, string | (() => string)> = {
   videos: Utils.paths.videos,
 };
 
+const DEFAULT_RELEASE_NOTES_URL = "https://milady.ai/releases/";
+const RELEASE_NOTES_PARTITION = "persist:milady-release-notes";
+
+let activeDesktopManager: DesktopManager | null = null;
+let nativeContextMenuEventsInstalled = false;
+
+export function resetDesktopManagerForTesting(): void {
+  activeDesktopManager = null;
+  nativeContextMenuEventsInstalled = false;
+}
+
 // ============================================================================
 // DesktopManager
 // ============================================================================
@@ -128,6 +150,8 @@ const PATH_NAME_MAP: Record<string, string | (() => string)> = {
 export class DesktopManager {
   private mainWindow: BrowserWindow | null = null;
   private tray: Tray | null = null;
+  private releaseNotesWindow: BrowserWindow | null = null;
+  private releaseNotesView: BrowserView | null = null;
   private shortcuts: Map<string, ShortcutOptions> = new Map();
   private notificationCounter = 0;
   private sendToWebview: SendToWebview | null = null;
@@ -137,7 +161,19 @@ export class DesktopManager {
   private _appActive = false;
 
   // Callback to open the settings window (set by index.ts)
-  private openSettingsCallback: (() => void) | null = null;
+  private openSettingsCallback: ((tabHint?: string) => void) | null = null;
+  private openSurfaceWindowCallback:
+    | ((
+        surface:
+          | "chat"
+          | "browser"
+          | "release"
+          | "triggers"
+          | "plugins"
+          | "connectors"
+          | "cloud",
+      ) => void)
+    | null = null;
   private openExternalHandler:
     | ((url: string) => boolean | Promise<boolean>)
     | null = null;
@@ -145,13 +181,15 @@ export class DesktopManager {
   // Track menu items for context-menu-clicked matching
   private trayMenuItems: Map<string, TrayMenuItem> = new Map();
   private trayClickHandler: (() => void) | null = null;
-  private applicationMenuHandler:
-    | ((e: { data?: { action?: string } }) => void)
-    | null = null;
   private contextMenuHandler: ((action: string) => void) | null = null;
   private windowEventHandlers: Partial<
     Record<"focus" | "blur" | "close" | "resize" | "move", () => void>
   > = {};
+
+  constructor() {
+    activeDesktopManager = this;
+    this.ensureNativeContextMenuEvents();
+  }
 
   // MARK: - Configuration
 
@@ -178,8 +216,26 @@ export class DesktopManager {
   /**
    * Set the callback used to open the settings window from menus.
    */
-  setOpenSettingsCallback(cb: () => void): void {
+  setOpenSettingsCallback(cb: (tabHint?: string) => void): void {
     this.openSettingsCallback = cb;
+  }
+
+  /**
+   * Set the callback used to open detached surface windows from RPC or menus.
+   */
+  setOpenSurfaceWindowCallback(
+    cb: (
+      surface:
+        | "chat"
+        | "browser"
+        | "release"
+        | "triggers"
+        | "plugins"
+        | "connectors"
+        | "cloud",
+    ) => void,
+  ): void {
+    this.openSurfaceWindowCallback = cb;
   }
 
   /**
@@ -194,8 +250,24 @@ export class DesktopManager {
   /**
    * Open the settings window via the registered callback.
    */
-  openSettings(): void {
-    this.openSettingsCallback?.();
+  openSettings(tabHint?: string): void {
+    this.openSettingsCallback?.(tabHint);
+  }
+
+  /**
+   * Open a detached surface window via the registered callback.
+   */
+  openSurfaceWindow(
+    surface:
+      | "chat"
+      | "browser"
+      | "release"
+      | "triggers"
+      | "plugins"
+      | "connectors"
+      | "cloud",
+  ): void {
+    this.openSurfaceWindowCallback?.(surface);
   }
 
   private getWindow(): BrowserWindow {
@@ -208,6 +280,66 @@ export class DesktopManager {
   private send(message: string, payload?: unknown): void {
     if (this.sendToWebview) {
       this.sendToWebview(message, payload);
+    }
+  }
+
+  private ensureNativeContextMenuEvents(): void {
+    activeDesktopManager = this;
+    if (nativeContextMenuEventsInstalled) {
+      return;
+    }
+
+    nativeContextMenuEventsInstalled = true;
+    ContextMenu.on("context-menu-clicked", (event) => {
+      activeDesktopManager?.handleNativeContextMenuClick(
+        event as {
+          data?: {
+            action?: string;
+            data?: { text?: string };
+          };
+        },
+      );
+    });
+  }
+
+  private handleNativeContextMenuClick(event: {
+    data?: { action?: string; data?: { text?: string } };
+  }): void {
+    const action = event.data?.action;
+    const text = event.data?.data?.text?.trim();
+
+    if (!action) {
+      return;
+    }
+
+    if (action === "copy-selection") {
+      if (text) {
+        Utils.clipboardWriteText(text);
+      }
+      return;
+    }
+
+    if (!text) {
+      return;
+    }
+
+    if (action === "ask-agent") {
+      this.send("contextMenu:askAgent", { text });
+      return;
+    }
+
+    if (action === "quote-in-chat") {
+      this.send("contextMenu:quoteInChat", { text });
+      return;
+    }
+
+    if (action === "create-skill") {
+      this.send("contextMenu:createSkill", { text });
+      return;
+    }
+
+    if (action === "save-as-command") {
+      this.send("contextMenu:saveAsCommand", { text });
     }
   }
 
@@ -335,10 +467,6 @@ export class DesktopManager {
     };
     this.tray.on("tray-clicked", this.trayClickHandler);
 
-    // Context menu item clicks come through the global event bus.
-    // This single handler covers both native actions (show/quit) and
-    // renderer notifications, eliminating the need for a duplicate handler
-    // in index.ts.
     const triggerAgentRestart = () => {
       // Lazy import to avoid circular dependency (agent → desktop → agent).
       import("./agent").then(({ getAgentManager }) => {
@@ -349,23 +477,6 @@ export class DesktopManager {
           });
       });
     };
-
-    this.applicationMenuHandler = (e: { data?: { action?: string } }) => {
-      if (e?.data?.action === "show") {
-        void this.showWindow().catch((err: unknown) => {
-          console.warn(
-            "[Desktop] Failed to show window from application menu:",
-            err,
-          );
-        });
-      } else if (e?.data?.action === "restart-agent") {
-        triggerAgentRestart();
-      }
-    };
-    Electrobun.events.on(
-      "application-menu-clicked",
-      this.applicationMenuHandler,
-    );
 
     // Tray menu item clicks fire "tray-clicked" on the global event bus
     // (NOT "context-menu-clicked" — that's for right-click context menus).
@@ -404,16 +515,10 @@ export class DesktopManager {
     this.removeEventHandler(this.tray, "tray-clicked", this.trayClickHandler);
     this.removeEventHandler(
       Electrobun.events,
-      "application-menu-clicked",
-      this.applicationMenuHandler,
-    );
-    this.removeEventHandler(
-      Electrobun.events,
       "tray-clicked",
       this.contextMenuHandler,
     );
     this.trayClickHandler = null;
-    this.applicationMenuHandler = null;
     this.contextMenuHandler = null;
   }
 
@@ -1053,6 +1158,237 @@ X-GNOME-Autostart-enabled=true
     return { path: Utils.paths.userData };
   }
 
+  async checkForUpdates(): Promise<DesktopUpdaterSnapshot> {
+    const availability = this.getUpdaterAvailability();
+    if (!availability.canAutoUpdate) {
+      return this.buildUpdaterSnapshot(undefined, availability);
+    }
+
+    try {
+      const result = await Updater.checkForUpdate();
+      if (result?.updateAvailable) {
+        void Updater.downloadUpdate().catch((error: unknown) => {
+          console.warn("[Desktop] Failed to download update:", error);
+        });
+      }
+      return await this.getUpdaterState();
+    } catch (error) {
+      return this.buildUpdaterSnapshot(error, availability);
+    }
+  }
+
+  async getUpdaterState(): Promise<DesktopUpdaterSnapshot> {
+    return this.buildUpdaterSnapshot();
+  }
+
+  async applyUpdate(): Promise<void> {
+    const availability = this.getUpdaterAvailability();
+    if (!availability.canAutoUpdate) {
+      throw new Error(
+        availability.autoUpdateDisabledReason ??
+          "Auto-update is unavailable for this installation.",
+      );
+    }
+
+    Updater.applyUpdate();
+  }
+
+  async getBuildInfo(): Promise<DesktopBuildInfo> {
+    const config = await BuildConfig.get();
+    return {
+      platform: process.platform,
+      arch: process.arch,
+      defaultRenderer: config.defaultRenderer,
+      availableRenderers: config.availableRenderers,
+      cefVersion: config.cefVersion,
+      bunVersion: config.bunVersion,
+      runtime: config.runtime,
+    };
+  }
+
+  async getDockIconVisibility(): Promise<{ visible: boolean }> {
+    if (process.platform !== "darwin") {
+      return { visible: true };
+    }
+
+    return {
+      visible: Utils.isDockIconVisible?.() ?? true,
+    };
+  }
+
+  async setDockIconVisibility(options: {
+    visible: boolean;
+  }): Promise<{ visible: boolean }> {
+    if (process.platform === "darwin") {
+      Utils.setDockIconVisible?.(options.visible);
+    }
+
+    return this.getDockIconVisibility();
+  }
+
+  async showSelectionContextMenu(options: {
+    text: string;
+  }): Promise<{ shown: boolean }> {
+    const text = options.text.trim();
+    if (!text) {
+      return { shown: false };
+    }
+
+    const menu: ApplicationMenuItemConfig[] = [
+      {
+        type: "normal",
+        label: "Ask Agent",
+        action: "ask-agent",
+        data: { text },
+      },
+      {
+        type: "normal",
+        label: "Quote in Chat",
+        action: "quote-in-chat",
+        data: { text },
+      },
+      {
+        type: "normal",
+        label: "Create Skill",
+        action: "create-skill",
+        data: { text },
+      },
+      {
+        type: "normal",
+        label: "Save as Command",
+        action: "save-as-command",
+        data: { text },
+      },
+      { type: "separator" },
+      {
+        type: "normal",
+        label: "Copy Selection",
+        action: "copy-selection",
+        data: { text },
+      },
+    ];
+
+    ContextMenu.showContextMenu(menu);
+    return { shown: true };
+  }
+
+  async getSessionSnapshot(options: {
+    partition: string;
+  }): Promise<DesktopSessionSnapshot> {
+    return this.readSessionSnapshot(options.partition);
+  }
+
+  async clearSessionData(options: {
+    partition: string;
+    storageTypes?: DesktopSessionStorageType[] | "all";
+    clearCookies?: boolean;
+  }): Promise<DesktopSessionSnapshot> {
+    const session = this.getSession(options.partition);
+    const shouldClearCookies =
+      options.clearCookies === true ||
+      options.storageTypes === "all" ||
+      options.storageTypes?.includes("cookies");
+
+    if (shouldClearCookies) {
+      session.cookies.clear();
+    }
+
+    if (!options.storageTypes || options.storageTypes === "all") {
+      session.clearStorageData("all");
+    } else {
+      const storageTypes = options.storageTypes.filter(
+        (type) => type !== "cookies",
+      );
+      if (storageTypes.length > 0) {
+        session.clearStorageData(
+          storageTypes as Exclude<DesktopSessionStorageType, "cookies">[],
+        );
+      }
+    }
+
+    return this.readSessionSnapshot(options.partition);
+  }
+
+  async getWebGpuBrowserStatus(): Promise<
+    ReturnType<typeof checkWebGpuSupport>
+  > {
+    const config = await BuildConfig.get();
+    return checkWebGpuSupport(this.resolvePreferredBrowserRenderer(config));
+  }
+
+  async openReleaseNotesWindow(options: {
+    url: string;
+    title?: string;
+  }): Promise<DesktopReleaseNotesWindowInfo> {
+    const url = this.normalizeReleaseNotesUrl(options.url);
+    const title = options.title?.trim() || "Milady Release Notes";
+
+    if (this.releaseNotesWindow && this.releaseNotesView) {
+      this.releaseNotesWindow.setTitle(title);
+      if (this.releaseNotesView.url !== url) {
+        this.releaseNotesView.loadURL(url);
+      }
+      this.releaseNotesWindow.focus();
+      return {
+        url,
+        windowId: this.releaseNotesWindow.id,
+        webviewId: this.releaseNotesView.id,
+      };
+    }
+
+    const buildConfig = await BuildConfig.get();
+    const renderer = this.resolvePreferredBrowserRenderer(buildConfig);
+    const win = new Electrobun.BrowserWindow({
+      title,
+      frame: {
+        x: 170,
+        y: 110,
+        width: 1180,
+        height: 860,
+      },
+      renderer,
+      transparent: false,
+      titleBarStyle: "default",
+    });
+
+    // BrowserWindow always creates a default webview. Remove it so the
+    // manual BrowserView becomes the only live browsing surface.
+    win.webview.remove();
+
+    const view = new BrowserView({
+      url,
+      renderer,
+      windowId: win.id,
+      partition: RELEASE_NOTES_PARTITION,
+      sandbox: true,
+      navigationRules: JSON.stringify(
+        this.buildReleaseNotesNavigationRules(url),
+      ),
+      frame: {
+        x: 0,
+        y: 0,
+        width: win.frame.width,
+        height: win.frame.height,
+      },
+    });
+
+    win.on("close", () => {
+      this.releaseNotesView?.remove();
+      this.releaseNotesWindow = null;
+      this.releaseNotesView = null;
+    });
+
+    this.releaseNotesWindow = win;
+    this.releaseNotesView = view;
+    win.focus();
+
+    return {
+      url,
+      windowId: win.id,
+      webviewId: view.id,
+    };
+  }
+
   // MARK: - Clipboard
 
   async writeToClipboard(options: ClipboardWriteOptions): Promise<void> {
@@ -1284,6 +1620,190 @@ X-GNOME-Autostart-enabled=true
     return iconPath;
   }
 
+  private getSession(partition: string) {
+    const normalized = partition.trim() || "persist:default";
+    if (normalized === "persist:default") {
+      return Session.defaultSession;
+    }
+    return Session.fromPartition(normalized);
+  }
+
+  private readSessionSnapshot(partition: string): DesktopSessionSnapshot {
+    const session = this.getSession(partition);
+    const cookies = session.cookies.get().map((cookie) => ({
+      name: cookie.name,
+      domain: cookie.domain,
+      path: cookie.path,
+      secure: cookie.secure,
+      httpOnly: cookie.httpOnly,
+      session: cookie.session,
+      expirationDate: cookie.expirationDate,
+    }));
+
+    return {
+      partition: session.partition,
+      persistent: session.partition.startsWith("persist:"),
+      cookieCount: cookies.length,
+      cookies,
+    };
+  }
+
+  private normalizeReleaseNotesUrl(url: string): string {
+    const trimmed = url.trim() || DEFAULT_RELEASE_NOTES_URL;
+    const parsed = new URL(trimmed);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      throw new Error("Release notes URL must use http or https");
+    }
+    return parsed.toString();
+  }
+
+  private buildReleaseNotesNavigationRules(url: string): string[] {
+    const parsed = new URL(url);
+    const origin = parsed.origin.replace(/\/+$/, "");
+    return [parsed.toString(), `${origin}/*`];
+  }
+
+  private async buildUpdaterSnapshot(
+    error?: unknown,
+    availability = this.getUpdaterAvailability(),
+  ): Promise<DesktopUpdaterSnapshot> {
+    let currentVersion = "unknown";
+    let currentHash: string | undefined;
+    let channel: string | undefined;
+    let baseUrl: string | undefined;
+    let snapshotError =
+      error instanceof Error ? error.message : error ? String(error) : null;
+
+    try {
+      const localInfo = await Updater.getLocallocalInfo();
+      currentVersion = localInfo.version;
+      currentHash = localInfo.hash;
+      channel = localInfo.channel;
+      baseUrl = localInfo.baseUrl;
+    } catch (localError) {
+      if (!snapshotError) {
+        snapshotError =
+          localError instanceof Error
+            ? localError.message
+            : String(localError ?? "Unknown updater error");
+      }
+    }
+
+    const updateInfo =
+      (Updater.updateInfo?.() as Partial<{
+        version: string;
+        hash: string;
+        updateAvailable: boolean;
+        updateReady: boolean;
+        error: string;
+      }>) ?? {};
+    const lastStatusEntry = Updater.getStatusHistory?.().at(-1) ?? null;
+
+    return {
+      currentVersion,
+      currentHash,
+      channel,
+      baseUrl,
+      appBundlePath: availability.appBundlePath,
+      canAutoUpdate: availability.canAutoUpdate,
+      autoUpdateDisabledReason: availability.autoUpdateDisabledReason,
+      updateAvailable: Boolean(updateInfo.updateAvailable),
+      updateReady: Boolean(updateInfo.updateReady),
+      latestVersion: updateInfo.version ?? null,
+      latestHash: updateInfo.hash ?? null,
+      error: updateInfo.error || snapshotError,
+      lastStatus: lastStatusEntry
+        ? {
+            status: lastStatusEntry.status,
+            message: lastStatusEntry.message,
+            timestamp: lastStatusEntry.timestamp,
+          }
+        : null,
+    };
+  }
+
+  private getUpdaterAvailability(): {
+    appBundlePath: string | null;
+    canAutoUpdate: boolean;
+    autoUpdateDisabledReason: string | null;
+  } {
+    if (process.platform !== "darwin") {
+      return {
+        appBundlePath: null,
+        canAutoUpdate: true,
+        autoUpdateDisabledReason: null,
+      };
+    }
+
+    const appBundlePath = this.resolveMacAppBundlePath(process.execPath);
+    if (!appBundlePath) {
+      return {
+        appBundlePath: null,
+        canAutoUpdate: false,
+        autoUpdateDisabledReason:
+          "Milady must run from an installed .app bundle to enable in-place updates.",
+      };
+    }
+
+    const supportedRoots = [
+      "/Applications",
+      path.join(Utils.paths.home, "Applications"),
+    ].map((root) => path.resolve(root));
+    const normalizedBundlePath = path.resolve(appBundlePath);
+    const inApplications = supportedRoots.some((root) => {
+      const normalizedRoot = root.endsWith(path.sep)
+        ? root
+        : `${root}${path.sep}`;
+      return (
+        normalizedBundlePath === root ||
+        normalizedBundlePath.startsWith(normalizedRoot)
+      );
+    });
+
+    if (inApplications) {
+      return {
+        appBundlePath: normalizedBundlePath,
+        canAutoUpdate: true,
+        autoUpdateDisabledReason: null,
+      };
+    }
+
+    return {
+      appBundlePath: normalizedBundlePath,
+      canAutoUpdate: false,
+      autoUpdateDisabledReason: `Move ${path.basename(
+        normalizedBundlePath,
+      )} to /Applications to enable in-place desktop updates.`,
+    };
+  }
+
+  private resolveMacAppBundlePath(execPath: string): string | null {
+    let current = path.resolve(execPath);
+    while (true) {
+      if (current.endsWith(".app")) {
+        return current;
+      }
+      const parent = path.dirname(current);
+      if (parent === current) {
+        return null;
+      }
+      current = parent;
+    }
+  }
+
+  private resolvePreferredBrowserRenderer(
+    buildInfo: Awaited<ReturnType<typeof BuildConfig.get>>,
+  ): "native" | "cef" {
+    if (
+      process.platform === "linux" &&
+      buildInfo.availableRenderers.includes("cef")
+    ) {
+      return "cef";
+    }
+
+    return buildInfo.defaultRenderer;
+  }
+
   /**
    * Clean up all resources.
    */
@@ -1294,6 +1814,9 @@ X-GNOME-Autostart-enabled=true
     }
     this.teardownWindowEvents(this.mainWindow);
     this.mainWindow = null;
+    this.releaseNotesView?.remove();
+    this.releaseNotesView = null;
+    this.releaseNotesWindow = null;
     this.unregisterAllShortcuts();
     void this.destroyTray();
     this.trayMenuItems.clear();

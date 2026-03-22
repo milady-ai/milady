@@ -12,7 +12,7 @@ import type { PluginListenerHandle } from "@capacitor/core";
 import {
   invokeDesktopBridgeRequest,
   subscribeDesktopBridgeEvent,
-} from "@elizaos/app-core/bridge/electrobun-rpc";
+} from "@miladyai/app-core/bridge/electrobun-rpc.js";
 import type {
   GatewayConnectOptions,
   GatewayConnectResult,
@@ -28,7 +28,7 @@ import type {
   GatewayStateEvent,
   JsonObject,
   JsonValue,
-} from "../../src/definitions";
+} from "@miladyai/app-core/src/definitions";
 
 type EventCallback<T> = (event: T) => void;
 type GatewayEventData =

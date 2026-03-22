@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "jsx": "react-jsx",
     "allowImportingTsExtensions": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
@@ -16,22 +17,21 @@
     "useDefineForClassFields": false,
     "baseUrl": ".",
     "paths": {
-      "@elizaos/autonomous/*": [
-        "./node_modules/@elizaos/autonomous/packages/autonomous/src/*"
-      ]
+      "@miladyai/ui": ["./packages/ui/src/index.ts"],
+      "@miladyai/ui/*": ["./packages/ui/src/*"],
+      "@elizaos/agent/*": ["./node_modules/@elizaos/agent/packages/agent/src/*"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["packages/app-core/src/**/*"],
   "exclude": [
     "node_modules",
     "node_modules/.bun",
     "dist",
-    "packages",
     "plugins",
-    "src/**/*.test.ts",
-    "src/**/*.test.tsx",
-    "src/**/test-helpers.ts",
-    "src/services/training-service.ts",
-    "src/plugins/retake/**"
+    "packages/app-core/src/**/*.test.ts",
+    "packages/app-core/src/**/*.test.tsx",
+    "packages/app-core/src/**/test-helpers.ts",
+    "packages/app-core/src/services/training-service.ts",
+    "packages/app-core/src/plugins/retake/**"
   ]
 }

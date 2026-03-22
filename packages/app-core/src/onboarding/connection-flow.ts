@@ -1,0 +1,322 @@
+/**
+ * Pure connection onboarding subflow: screen derivation, UI spec, and state transitions.
+ *
+ * ## Why this file exists
+ * The connection step had a very large React component where **branch order** and **setState blobs** were easy to break
+ * and hard to test. This module holds **only** deterministic logic: given a snapshot, which screen; given an event, which
+ * patch (or which *effect* the shell must run). **Why no React:** Vitest can run without jsdom; no accidental imports from
+ * `components/`; reducers stay total and mock-free except for snapshots.
+ *
+ * ## Branch order (keep in sync with `ConnectionUiRoot` + screen components)
+ * Mirrors the old outer `if` ladder: `if (!showProviderSelection)` then grid vs detail.
+ *
+ * 1. **showProviderSelection** = `onboardingRemoteConnected || effectiveRunMode === "local"`.
+ *    **effectiveRunMode:** if `forceCloud && onboardingRunMode === ""`, use `"local"`. **Why:** matches UI after the
+ *    bootstrap `useEffect` in `ConnectionStep` so tests and `deriveConnectionScreen` describe steady state, not a one-frame
+ *    hosting flash on native/cloud-only builds.
+ * 2. If `!showProviderSelection`:
+ *    - `!effectiveRunMode` → **hosting**
+ *    - `onboardingCloudProvider === "remote"` → **remoteBackend**
+ *    - else → **elizaCloud_preProvider**
+ * 3. If `showProviderSelection && !onboardingProvider` → **providerGrid**
+ * 4. Else → **providerDetail**
+ *
+ * **Why two Eliza screens:** pre-provider Eliza (hosting path) and Eliza chosen from the neural link are different shells
+ * (back button, confirm, copy). Collapsing them breaks navigation.
+ *
+ * Tests: `tests/connection-flow.test.ts`
+ */
+
+import type {
+  ConnectionEvent,
+  ConnectionFlowSnapshot,
+  ConnectionScreen,
+  ConnectionStatePatch,
+  ConnectionTransitionDocRow,
+  ConnectionTransitionResult,
+  ConnectionUiSpec,
+} from "./types";
+
+export type {
+  ConnectionEffect,
+  ConnectionEvent,
+  ConnectionFlowSnapshot,
+  ConnectionScreen,
+  ConnectionStatePatch,
+  ConnectionTransitionDocRow,
+  ConnectionTransitionResult,
+  ConnectionUiSpec,
+} from "./types";
+
+/**
+ * Recommended neural-link grid ids. **Why duplicated from UI:** the pure module must not import React components; keeping
+ * the list here lets tests assert grid policy without rendering. **Drift risk:** if you change recommendations in the UI,
+ * update this constant and `ConnectionStep` / grid screen (see README in `components/onboarding/connection/`).
+ */
+export const CONNECTION_RECOMMENDED_PROVIDER_IDS = [
+  "elizacloud",
+  "anthropic-subscription",
+  "openai-subscription",
+] as const;
+
+/**
+ * Documentation-only transition hints (onboarding guide, onboarding changelog). **Why not executable:** the real machine is
+ * `applyConnectionTransition`; this table can drift—prefer tests when changing behavior.
+ */
+export const CONNECTION_TRANSITIONS: ReadonlyArray<ConnectionTransitionDocRow> =
+  [
+    {
+      from: "hosting",
+      event: "selectLocalHosting",
+      to: "providerGrid",
+    },
+    {
+      from: "hosting",
+      event: "selectRemoteHosting",
+      to: "remoteBackend",
+    },
+    {
+      from: "hosting",
+      event: "selectElizaCloudHosting",
+      to: "elizaCloud_preProvider",
+    },
+    {
+      from: "remoteBackend",
+      event: "backRemoteOrGrid",
+      to: "hosting",
+      note: "When remoteConnected → effect useLocalBackend; else patch reset hosting",
+    },
+    {
+      from: "providerGrid",
+      event: "backRemoteOrGrid",
+      to: "hosting",
+      note: "When remoteConnected → effect useLocalBackend; else patch reset hosting",
+    },
+    {
+      from: "elizaCloud_preProvider",
+      event: "backElizaCloudPreProvider",
+      to: "hosting",
+    },
+    {
+      from: "providerGrid",
+      event: "selectProvider",
+      to: "providerDetail",
+    },
+    {
+      from: "providerDetail",
+      event: "clearProvider",
+      to: "providerGrid",
+    },
+    {
+      from: "providerDetail",
+      event: "setElizaCloudTab",
+      to: "same",
+    },
+    {
+      from: "providerDetail",
+      event: "setSubscriptionTab",
+      to: "same",
+    },
+    {
+      from: "hosting",
+      event: "forceCloudBootstrap",
+      to: "providerGrid",
+      note: "When forceCloud && runMode empty (steady UI)",
+    },
+  ];
+
+/** **Why exported:** tests and docs; also shared by `derive` and `resolveConnectionUiSpec` so policy lives once. */
+export function getEffectiveRunMode(
+  snapshot: ConnectionFlowSnapshot,
+): "local" | "cloud" | "" {
+  if (snapshot.forceCloud && snapshot.onboardingRunMode === "") {
+    return "local";
+  }
+  return snapshot.onboardingRunMode;
+}
+
+/** True when the neural link grid path is active (local run mode or already connected to remote). */
+export function computeShowProviderSelection(
+  snapshot: ConnectionFlowSnapshot,
+): boolean {
+  return (
+    snapshot.onboardingRemoteConnected ||
+    getEffectiveRunMode(snapshot) === "local"
+  );
+}
+
+/**
+ * **Precedence matters:** if multiple conditions could match, order must match `ConnectionUiRoot` / legacy `ConnectionStep`
+ * outer returns. Add a `tests/connection-flow.test.ts` row for every new edge case.
+ */
+export function deriveConnectionScreen(
+  snapshot: ConnectionFlowSnapshot,
+): ConnectionScreen {
+  const show = computeShowProviderSelection(snapshot);
+  const run = getEffectiveRunMode(snapshot);
+  if (!show) {
+    if (!run) return "hosting";
+    if (snapshot.onboardingCloudProvider === "remote") return "remoteBackend";
+    return "elizaCloud_preProvider";
+  }
+  if (!snapshot.onboardingProvider) return "providerGrid";
+  return "providerDetail";
+}
+
+/** Single object for React: screen + flags + current tab ids. **Invariant:** `screen` always equals `deriveConnectionScreen(snapshot)` — enforced in tests. */
+export function resolveConnectionUiSpec(
+  snapshot: ConnectionFlowSnapshot,
+): ConnectionUiSpec {
+  const screen = deriveConnectionScreen(snapshot);
+  const effectiveRunMode = getEffectiveRunMode(snapshot);
+  const showProviderSelection = computeShowProviderSelection(snapshot);
+  return {
+    screen,
+    effectiveRunMode,
+    showProviderSelection,
+    showHostingLocalCard: !snapshot.isNative && !snapshot.cloudOnly,
+    forceCloud: snapshot.forceCloud,
+    providerId: snapshot.onboardingProvider,
+    elizaCloudTab: snapshot.onboardingElizaCloudTab,
+    subscriptionTab: snapshot.onboardingSubscriptionTab,
+  };
+}
+
+const resetCloudSelectionPatch = (): ConnectionStatePatch => ({
+  onboardingCloudProvider: "",
+  onboardingApiKey: "",
+  onboardingRemoteError: null,
+  onboardingRemoteConnecting: false,
+});
+
+const resetHostingSelectionPatch = (): ConnectionStatePatch => ({
+  ...resetCloudSelectionPatch(),
+  onboardingRunMode: "",
+});
+
+/**
+ * Pure transition step. **Returns `null`** when the event is a no-op for this snapshot (e.g. bootstrap when not forced).
+ * **Never** call `client` or async login here—return `effect` and let `ConnectionStep` invoke AppContext.
+ */
+export function applyConnectionTransition(
+  snapshot: ConnectionFlowSnapshot,
+  event: ConnectionEvent,
+): ConnectionTransitionResult | null {
+  switch (event.type) {
+    case "forceCloudBootstrap": {
+      if (!snapshot.forceCloud || snapshot.onboardingRunMode !== "") {
+        return null;
+      }
+      return {
+        kind: "patch",
+        patch: {
+          onboardingRunMode: "local",
+          onboardingProvider: "",
+          onboardingApiKey: "",
+          onboardingPrimaryModel: "",
+        },
+      };
+    }
+    case "selectLocalHosting":
+      return {
+        kind: "patch",
+        patch: {
+          onboardingRunMode: "local",
+          onboardingCloudProvider: "",
+          onboardingRemoteError: null,
+          onboardingRemoteConnecting: false,
+        },
+      };
+    case "selectRemoteHosting":
+      return {
+        kind: "patch",
+        patch: {
+          onboardingRunMode: "cloud",
+          onboardingCloudProvider: "remote",
+          onboardingProvider: "",
+          onboardingApiKey: "",
+          onboardingPrimaryModel: "",
+        },
+      };
+    case "selectElizaCloudHosting":
+      return {
+        kind: "patch",
+        patch: {
+          onboardingRunMode: "cloud",
+          onboardingCloudProvider: "elizacloud",
+          onboardingProvider: "",
+          onboardingApiKey: "",
+          onboardingPrimaryModel: "",
+        },
+      };
+    case "backRemoteOrGrid": {
+      // Why effect when connected: matches legacy handleRemoteBack / grid back — must clear client base URL + retryStartup.
+      if (snapshot.onboardingRemoteConnected) {
+        return { kind: "effect", effect: "useLocalBackend" };
+      }
+      return { kind: "patch", patch: resetHostingSelectionPatch() };
+    }
+    case "backElizaCloudPreProvider":
+      return { kind: "patch", patch: resetHostingSelectionPatch() };
+    case "selectProvider": {
+      const detected = snapshot.onboardingDetectedProviders?.find(
+        (d) => d.id === event.providerId,
+      );
+      const patch: ConnectionStatePatch = {
+        onboardingProvider: event.providerId,
+        onboardingApiKey: detected?.apiKey ?? "",
+        onboardingPrimaryModel: "",
+      };
+      if (event.providerId === "anthropic-subscription") {
+        patch.onboardingSubscriptionTab = "token";
+      }
+      return { kind: "patch", patch };
+    }
+    case "clearProvider":
+      return {
+        kind: "patch",
+        patch: {
+          onboardingProvider: "",
+          onboardingApiKey: "",
+          onboardingPrimaryModel: "",
+        },
+      };
+    case "setElizaCloudTab":
+      return {
+        kind: "patch",
+        patch: { onboardingElizaCloudTab: event.tab },
+      };
+    case "setSubscriptionTab":
+      return {
+        kind: "patch",
+        patch: { onboardingSubscriptionTab: event.tab },
+      };
+  }
+}
+
+/**
+ * For tests: merge patch into snapshot fields that affect **routing** only. **Why ignore apiKey/primaryModel:** they are not
+ * on `ConnectionFlowSnapshot`; `deriveConnectionScreen` does not read them.
+ */
+export function mergeConnectionSnapshot(
+  base: ConnectionFlowSnapshot,
+  patch: ConnectionStatePatch,
+): ConnectionFlowSnapshot {
+  const next: ConnectionFlowSnapshot = { ...base };
+  if (patch.onboardingRunMode !== undefined) {
+    next.onboardingRunMode = patch.onboardingRunMode;
+  }
+  if (patch.onboardingCloudProvider !== undefined) {
+    next.onboardingCloudProvider = patch.onboardingCloudProvider;
+  }
+  if (patch.onboardingProvider !== undefined) {
+    next.onboardingProvider = patch.onboardingProvider;
+  }
+  if (patch.onboardingElizaCloudTab !== undefined) {
+    next.onboardingElizaCloudTab = patch.onboardingElizaCloudTab;
+  }
+  if (patch.onboardingSubscriptionTab !== undefined) {
+    next.onboardingSubscriptionTab = patch.onboardingSubscriptionTab;
+  }
+  return next;
+}

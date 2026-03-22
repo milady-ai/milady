@@ -5,25 +5,26 @@
  * features, and mounts the React application.
  */
 
-import { ErrorBoundary } from "./ErrorBoundary";
-import "@elizaos/app-core/styles/styles.css";
-import "./brand-gold.css";
-import "./onboarding-overrides.css";
+import { ErrorBoundary } from "@miladyai/app-core/components";
+import "@miladyai/app-core/styles/styles.css";
+import "@miladyai/app-core/styles/brand-gold.css";
+
 import "./native-plugin-entrypoints";
 
 import { App as CapacitorApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
 import { Keyboard } from "@capacitor/keyboard";
 import { StatusBar, Style } from "@capacitor/status-bar";
-import { App } from "@elizaos/app-core";
-import { client } from "@elizaos/app-core/api";
+import { App } from "@miladyai/app-core/App";
+import { client } from "@miladyai/app-core/api";
 // Import Capacitor bridge utilities
 import {
   initializeCapacitorBridge,
   initializeStorageBridge,
   isElectrobunRuntime,
-} from "@elizaos/app-core/bridge";
-import type { BrandingConfig } from "@elizaos/app-core/config";
+} from "@miladyai/app-core/bridge";
+import { CharacterEditor } from "@miladyai/app-core/components";
+import type { BrandingConfig } from "@miladyai/app-core/config";
 import {
   AGENT_READY_EVENT,
   APP_PAUSE_EVENT,
@@ -33,30 +34,31 @@ import {
   dispatchElizaEvent as dispatchMiladyEvent,
   SHARE_TARGET_EVENT,
   TRAY_ACTION_EVENT,
-} from "@elizaos/app-core/events";
-import { applyLaunchConnectionFromUrl } from "@elizaos/app-core/platform";
-import { AppProvider } from "@elizaos/app-core/state";
+} from "@miladyai/app-core/events";
+import {
+  applyForceFreshOnboardingReset,
+  applyLaunchConnectionFromUrl,
+  installDesktopPermissionsClientPatch,
+  installForceFreshOnboardingClientPatch,
+  installLocalProviderCloudPreferencePatch,
+  isDetachedWindowShell,
+  resolveWindowShellRoute,
+  shouldInstallMainWindowOnboardingPatches,
+  syncDetachedShellLocation,
+} from "@miladyai/app-core/platform";
+import {
+  DESKTOP_TRAY_MENU_ITEMS,
+  DesktopOnboardingRuntime,
+  DesktopSurfaceNavigationRuntime,
+  DesktopTrayRuntime,
+  DetachedShellRoot,
+} from "@miladyai/app-core/shell";
+import { AppProvider } from "@miladyai/app-core/state";
 // Import the agent plugin
 import { Agent } from "@miladyai/capacitor-agent";
 import { Desktop } from "@miladyai/capacitor-desktop";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { installLocalProviderCloudPreferencePatch } from "./cloud-preference-patch";
-import { CharacterEditor } from "./components/CharacterEditor";
-import { DesktopOnboardingRuntime } from "./DesktopOnboardingRuntime";
-import { DesktopSurfaceNavigationRuntime } from "./DesktopSurfaceNavigationRuntime";
-import { DetachedShellRoot } from "./DetachedShellRoot";
-import { installDesktopPermissionsClientPatch } from "./desktop-permissions-client";
-import {
-  applyForceFreshOnboardingReset,
-  installForceFreshOnboardingClientPatch,
-} from "./onboarding-reset";
-import {
-  isDetachedWindowShell,
-  resolveWindowShellRoute,
-  shouldInstallMainWindowOnboardingPatches,
-  syncDetachedShellLocation,
-} from "./window-shell";
 
 const MILADY_BRANDING: Partial<BrandingConfig> = {
   appName: "Milady",
@@ -112,31 +114,49 @@ declare global {
 
 const windowShellRoute = resolveWindowShellRoute();
 
+/**
+ * Adds `milady-electrobun-frameless` for CSS `-webkit-app-region` (Chromium/CEF).
+ * macOS WKWebView move/resize are still driven by native overlays in
+ * window-effects.mm; this class mainly marks the shell and helps non-WK engines.
+ */
+function shouldEnableElectrobunMacWindowDrag(): boolean {
+  if (!isElectrobunRuntime() || typeof document === "undefined") return false;
+  if (isDetachedWindowShell(windowShellRoute)) return false;
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent;
+  return /Mac/i.test(ua) && !/(iPhone|iPad|iPod)/i.test(ua);
+}
+
+if (shouldEnableElectrobunMacWindowDrag()) {
+  document.documentElement.classList.add("milady-electrobun-frameless");
+}
+
 // Dev escape hatch: ?reset forces a truly fresh onboarding session by clearing
 // persisted state and temporarily suppressing stale backend resume config.
 if (shouldInstallMainWindowOnboardingPatches(windowShellRoute)) {
   applyForceFreshOnboardingReset();
-  installForceFreshOnboardingClientPatch(client);
+  installForceFreshOnboardingClientPatch(client as never);
 }
-installLocalProviderCloudPreferencePatch(client);
-installDesktopPermissionsClientPatch(client);
+installLocalProviderCloudPreferencePatch(client as never);
+installDesktopPermissionsClientPatch(client as never);
 
 // Register custom character editor for app-core's ViewRouter to pick up
 window.__MILADY_CHARACTER_EDITOR__ = CharacterEditor;
 
 // Point Eliza Cloud API to the correct base URL.
-(window as Record<string, unknown>).__ELIZA_CLOUD_API_BASE__ =
+(window as unknown as Record<string, unknown>).__ELIZA_CLOUD_API_BASE__ =
   import.meta.env.VITE_CLOUD_BASE ?? "https://www.elizacloud.ai";
 
 // Inject onboarding style presets so the frontend-only onboarding flow
 // can populate character data without an API call.
-import { STYLE_PRESETS } from "../../../src/onboarding-presets";
+import { STYLE_PRESETS } from "@miladyai/app-core/onboarding-presets";
 
-(window as Record<string, unknown>).__APP_ONBOARDING_STYLES__ = STYLE_PRESETS;
+(window as unknown as Record<string, unknown>).__APP_ONBOARDING_STYLES__ =
+  STYLE_PRESETS;
 
 // Override the VRM asset roster with Milady characters so avatar URLs
 // resolve to milady-*.vrm.gz instead of the upstream eliza-*.vrm.gz.
-window.__APP_VRM_ASSETS__ = [
+(window as unknown as Record<string, unknown>).__APP_VRM_ASSETS__ = [
   { title: "Chen", slug: "milady-1" },
   { title: "Jin", slug: "milady-2" },
   { title: "Kei", slug: "milady-3" },
@@ -394,16 +414,7 @@ async function initializeDesktopShell(): Promise<void> {
 
     // Tray actions routed to the renderer as app-level events.
     await Desktop.setTrayMenu({
-      menu: [
-        { id: "tray-open-chat", label: "Open Chat" },
-        { id: "tray-open-workbench", label: "Open Workbench" },
-        { id: "tray-toggle-pause", label: "Pause/Resume Agent" },
-        { id: "tray-restart", label: "Restart Agent" },
-        { id: "tray-notify", label: "Send Test Notification" },
-        { id: "tray-sep-1", type: "separator" },
-        { id: "tray-show-window", label: "Show Window" },
-        { id: "tray-hide-window", label: "Hide Window" },
-      ],
+      menu: [...DESKTOP_TRAY_MENU_ITEMS],
     });
 
     await Desktop.addListener(
@@ -461,6 +472,7 @@ function mountReactApp(): void {
             <>
               <DesktopOnboardingRuntime />
               <DesktopSurfaceNavigationRuntime />
+              <DesktopTrayRuntime />
               <App />
             </>
           )}
@@ -529,7 +541,41 @@ function injectPopoutApiBase(): void {
 function injectDetachedShellApiBase(): void {
   const apiBase = new URLSearchParams(window.location.search).get("apiBase");
   if (apiBase) {
-    window.__MILADY_API_BASE__ = apiBase;
+    // Validate apiBase the same way as injectPopoutApiBase() to prevent
+    // open-redirect / SSRF via crafted detached-shell URLs.
+    try {
+      const parsed = new URL(apiBase);
+      const host = parsed.hostname;
+      const allowPrivateHttp =
+        /^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(host) ||
+        /^192\.168\.\d{1,3}\.\d{1,3}$/.test(host) ||
+        /^172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}$/.test(host) ||
+        /^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.\d{1,3}\.\d{1,3}$/.test(
+          host,
+        ) ||
+        host.endsWith(".local") ||
+        host.endsWith(".internal") ||
+        host.endsWith(".ts.net");
+      if (
+        host === "localhost" ||
+        host === "127.0.0.1" ||
+        host === "::1" ||
+        host === window.location.hostname ||
+        parsed.protocol === "https:" ||
+        (parsed.protocol === "http:" && allowPrivateHttp)
+      ) {
+        window.__MILADY_API_BASE__ = apiBase;
+      } else {
+        console.warn("[Milady] Rejected non-local apiBase:", host);
+      }
+    } catch {
+      // Relative URL — only allow paths starting with "/" but not "//" (protocol-relative)
+      if (apiBase.startsWith("/") && !apiBase.startsWith("//")) {
+        window.__MILADY_API_BASE__ = apiBase;
+      } else {
+        console.warn("[Milady] Rejected invalid relative apiBase:", apiBase);
+      }
+    }
   }
 }
 

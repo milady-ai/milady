@@ -1,8 +1,13 @@
+// Import bridge entrypoints directly (not `bridge/index`): loading the barrel
+// pulls `capacitor-bridge` first and Vitest can end up with inconsistent module
+// instances so `getElectrobunRendererRpc()` and `isElectrobunRuntime()` disagree.
+
+import { afterEach, describe, expect, it } from "vitest";
+import { getElectrobunRendererRpc } from "../../../../packages/app-core/src/bridge/electrobun-rpc";
 import {
   getBackendStartupTimeoutMs,
   isElectrobunRuntime,
-} from "@elizaos/app-core/bridge";
-import { afterEach, describe, expect, it } from "vitest";
+} from "../../../../packages/app-core/src/bridge/electrobun-runtime";
 
 const originalWindow = globalThis.window;
 
@@ -51,5 +56,23 @@ describe("electrobun runtime detection", () => {
     });
 
     expect(isElectrobunRuntime()).toBe(true);
+  });
+
+  it("detects Electrobun when only the Milady renderer RPC bridge is present", () => {
+    Object.defineProperty(globalThis, "window", {
+      value: {
+        __MILADY_ELECTROBUN_RPC__: {
+          onMessage: () => {},
+          offMessage: () => {},
+          request: {},
+        },
+      },
+      configurable: true,
+      writable: true,
+    });
+
+    expect(getElectrobunRendererRpc()).toBeDefined();
+    expect(isElectrobunRuntime()).toBe(true);
+    expect(getBackendStartupTimeoutMs()).toBe(180_000);
   });
 });

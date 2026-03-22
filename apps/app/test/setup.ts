@@ -36,7 +36,7 @@ console.error = (...args: unknown[]) => {
 };
 
 // ---------------------------------------------------------------------------
-// Mock @elizaos/app-core bridge modules — the real electrobun RPC module
+// Mock @miladyai/app-core bridge modules — the real electrobun RPC module
 // relies on native Electrobun bindings that are unavailable in the test
 // environment.
 // ---------------------------------------------------------------------------
@@ -56,7 +56,7 @@ function isInjectedElectrobunRuntime(): boolean {
   );
 }
 
-vi.mock("@elizaos/app-core/bridge/electrobun-rpc", () => {
+vi.mock("@miladyai/app-core/bridge/electrobun-rpc.js", () => {
   function getElectrobunRendererRpc() {
     if (typeof window === "undefined") return null;
     const w = window as unknown as Record<string, unknown>;
@@ -106,7 +106,7 @@ vi.mock("@elizaos/app-core/bridge/electrobun-rpc", () => {
   };
 });
 
-vi.mock("@elizaos/app-core/bridge", () => {
+vi.mock("@miladyai/app-core/bridge", () => {
   function getElectrobunRendererRpc() {
     if (typeof window === "undefined") return null;
     const w = window as unknown as Record<string, unknown>;
@@ -153,6 +153,37 @@ vi.mock("@elizaos/app-core/bridge", () => {
     initializeCapacitorBridge: () => {},
     initializeStorageBridge: async () => {},
     ElectrobunRendererRpc: {},
+    platform: "web",
+    isWeb: () => true,
+    isNative: false,
+    isIOS: false,
+    isAndroid: false,
+    isDesktop: () => false,
+    isMacOS: () => false,
+    getPluginCapabilities: () => ({
+      gateway: { available: true, websocket: true, discovery: false },
+      voiceWake: { available: false },
+      talkMode: { available: false, elevenlabs: true },
+      camera: { available: false },
+      location: { available: false, gps: false, background: false },
+      screenCapture: { available: false },
+      canvas: { available: true },
+      desktop: { available: false, tray: false, shortcuts: false, menu: false },
+    }),
+    isFeatureAvailable: (feature: string) => {
+      const map: Record<string, boolean> = {
+        gatewayDiscovery: false,
+        voiceWake: false,
+        talkMode: false,
+        elevenlabs: true,
+        camera: false,
+        location: false,
+        backgroundLocation: false,
+        screenCapture: false,
+        desktopTray: false,
+      };
+      return map[feature] ?? false;
+    },
   };
 });
 

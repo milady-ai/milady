@@ -26,7 +26,7 @@ describe("AgentProvider hosted fallback", () => {
       >("../lib/runtime-config");
       return {
         ...actual,
-        CLOUD_BASE: "https://www.dev.elizacloud.ai",
+        CLOUD_BASE: "https://www.elizacloud.ai",
         isHostedRuntime: () => true,
         shouldAllowPublicSandboxDiscoveryFallback: () => false,
       };

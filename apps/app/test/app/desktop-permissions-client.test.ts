@@ -6,11 +6,12 @@ const { invokeDesktopBridgeRequestMock } = vi.hoisted(() => ({
   invokeDesktopBridgeRequestMock: vi.fn(),
 }));
 
-vi.mock("@elizaos/app-core/bridge", () => ({
+vi.mock("@miladyai/app-core/bridge", () => ({
   invokeDesktopBridgeRequest: invokeDesktopBridgeRequestMock,
+  isElectrobunRuntime: () => true,
 }));
 
-import { installDesktopPermissionsClientPatch } from "../../src/desktop-permissions-client";
+import { installDesktopPermissionsClientPatch } from "@miladyai/app-core/platform";
 
 describe("desktop permissions client patch", () => {
   beforeEach(() => {

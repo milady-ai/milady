@@ -35,12 +35,6 @@ export const ELIZA_BUILD_STEPS = [
     args: ["run", "build"],
     label: "@elizaos/skills",
   },
-  {
-    check: path.join("packages", "ui", "dist", "index.js"),
-    cwd: path.join("packages", "ui"),
-    args: ["run", "build"],
-    label: "@elizaos/ui",
-  },
 ];
 
 function toDisplayPath(targetPath) {

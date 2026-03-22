@@ -34,12 +34,15 @@ describe("Electrobun startup bootstrap", () => {
   it("validates the built preload before creating the BrowserWindow", () => {
     const source = fs.readFileSync(INDEX_PATH, "utf8");
     const validateIndex = source.indexOf(
-      "const preload = readBuiltPreloadScript(import.meta.dir);",
+      "preload = readBuiltPreloadScript(import.meta.dir);",
     );
     const browserWindowIndex = source.indexOf("const win = new BrowserWindow(");
 
     expect(validateIndex).toBeGreaterThan(-1);
     expect(browserWindowIndex).toBeGreaterThan(validateIndex);
+    expect(source).toContain(
+      'console.error("[Main] Failed to read preload script:", err);',
+    );
   });
 
   it("resolves the initial renderer API base from desktop runtime mode", () => {
@@ -54,6 +57,17 @@ describe("Electrobun startup bootstrap", () => {
 
     expect(source).toContain('if (runtimeResolution.mode !== "local")');
     expect(source).toContain("[Main] Skipping embedded agent startup");
+  });
+
+  it("does not load repo or ~/.eliza env files in packaged desktop builds", () => {
+    const source = fs.readFileSync(INDEX_PATH, "utf8");
+
+    expect(source).toContain(
+      'const isPackagedBuild = !normalizedModuleDir.includes("/src/");',
+    );
+    expect(source).toContain("if (isPackagedBuild) {");
+    expect(source).toContain("return;");
+    expect(source).toContain("MILADY_DESKTOP_API_BASE");
   });
 
   it("shows a one-time background notice after recreating the minimized window", () => {

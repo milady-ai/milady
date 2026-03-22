@@ -12,11 +12,12 @@ interface RuntimeWindow extends Window {
 }
 
 function getRuntimeWindow(): RuntimeWindow | null {
-  if (typeof window === "undefined") {
+  const g = globalThis as typeof globalThis & { window?: RuntimeWindow };
+  if (typeof g.window === "undefined") {
     return null;
   }
 
-  return window as RuntimeWindow;
+  return g.window;
 }
 
 export function getElectrobunRendererRpc(): ElectrobunRendererRpc | null {
@@ -28,16 +29,30 @@ export function getElectrobunRendererRpc(): ElectrobunRendererRpc | null {
   );
 }
 
+function hasElectrobunRendererBridge(): boolean {
+  const rpc = getElectrobunRendererRpc();
+  return Boolean(
+    rpc &&
+      typeof rpc.onMessage === "function" &&
+      rpc.request &&
+      typeof rpc.request === "object",
+  );
+}
+
 export function isElectrobunRuntime(): boolean {
   const runtimeWindow = getRuntimeWindow();
   if (!runtimeWindow) {
     return false;
   }
 
-  return (
+  if (
     typeof runtimeWindow.__electrobunWindowId === "number" ||
     typeof runtimeWindow.__electrobunWebviewId === "number"
-  );
+  ) {
+    return true;
+  }
+
+  return hasElectrobunRendererBridge();
 }
 
 export function getBackendStartupTimeoutMs(): number {

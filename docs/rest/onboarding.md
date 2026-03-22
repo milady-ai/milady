@@ -6,6 +6,15 @@ description: "REST API endpoints for the first-run onboarding flow — checking 
 
 The onboarding API drives the first-run setup wizard. It lets you check whether the agent has been configured, retrieve available provider and style options, and submit the initial configuration (agent name, personality, AI provider, connectors, etc.).
 
+## Cloud provisioning bypass
+
+When the agent is running as a cloud-provisioned container, onboarding is bypassed automatically. The bypass activates only when **both** conditions are met:
+
+1. `MILADY_CLOUD_PROVISIONED=1` (or `ELIZA_CLOUD_PROVISIONED=1`) is set
+2. `MILADY_API_TOKEN` (or `ELIZA_API_TOKEN`) is configured
+
+When cloud provisioned, `GET /api/onboarding/status` returns `{ "complete": true }` so the frontend skips the setup wizard and goes directly to chat. A container with only the cloud flag but no API token falls through to the normal onboarding flow.
+
 ## Endpoints
 
 | Method | Path | Description |
@@ -18,7 +27,7 @@ The onboarding API drives the first-run setup wizard. It lets you check whether 
 
 ### GET /api/onboarding/status
 
-Returns whether the initial setup has been completed. Onboarding is considered complete when a config file exists and the `agents` section is populated.
+Returns whether the initial setup has been completed. Onboarding is considered complete when a config file exists and the `agents` section is populated. For cloud-provisioned containers, this always returns `{ "complete": true }`.
 
 **Response**
 
@@ -30,7 +39,7 @@ Returns whether the initial setup has been completed. Onboarding is considered c
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `complete` | boolean | `true` if the config file exists and contains an agents section |
+| `complete` | boolean | `true` if the config file exists and contains an agents section, or if the agent is cloud provisioned |
 
 ---
 
@@ -92,6 +101,12 @@ Returns the available options for the onboarding wizard — random name suggesti
 
 Submit the initial agent configuration. Creates or updates the Milady config file with the agent's name, personality, AI provider credentials, connector tokens, and theme preferences. The agent will be restarted with the new configuration.
 
+The agent's `name`, `bio`, and `systemPrompt` are persisted directly into the config file as a reliable fallback, ensuring the agent retains its identity after a restart.
+
+**Cloud mode detection**: cloud mode can be signalled in two ways:
+- Setting `runMode` to `"cloud"` explicitly
+- Setting `connection.kind` to `"cloud-managed"` — the server automatically infers cloud mode and injects `runMode: "cloud"` into the internal processing pipeline
+
 **Request Body**
 
 | Field | Type | Required | Description |
@@ -105,7 +120,8 @@ Submit the initial agent configuration. Creates or updates the Milady config fil
 | `postExamples` | string[] | No | Example social media posts |
 | `messageExamples` | array | No | Example message conversations |
 | `theme` | string | No | UI theme — `milady`, `qt314`, `web2000`, `programmer`, `haxor`, or `psycho` |
-| `runMode` | string | No | `local` or `cloud` (defaults to `local`) |
+| `runMode` | string | No | `local` or `cloud` (defaults to `local`). Can also be inferred from the `connection` field |
+| `connection` | object | No | Connection descriptor. When `connection.kind` is `"cloud-managed"`, the server treats this as cloud mode and automatically injects `runMode: "cloud"` even if `runMode` is not explicitly set |
 | `provider` | string | No | AI provider ID (e.g. `openai`, `anthropic`, `anthropic-subscription`) |
 | `providerApiKey` | string | No | API key for the selected provider |
 | `cloudProvider` | string | No | Cloud provider ID when `runMode` is `cloud` |
@@ -122,6 +138,21 @@ Submit the initial agent configuration. Creates or updates the Milady config fil
 | `blooioPhoneNumber` | string | No | Bloo.io phone number |
 | `inventoryProviders` | array | No | RPC/inventory provider configs — `[{ chain, rpcProvider, rpcApiKey }]` |
 
+**Example: cloud mode via connection descriptor**
+
+```json
+{
+  "name": "Milady",
+  "bio": ["A helpful AI assistant"],
+  "connection": {
+    "kind": "cloud-managed"
+  },
+  "provider": "anthropic"
+}
+```
+
+In this example, `runMode` is not set, but the server infers cloud mode from `connection.kind` and enables `cloud.enabled` in the config.
+
 **Response**
 
 ```json
@@ -137,3 +168,9 @@ Submit the initial agent configuration. Creates or updates the Milady config fil
 | 400 | Missing or invalid agent name |
 | 400 | Invalid `runMode` value |
 | 500 | Failed to save configuration |
+
+---
+
+## Related: in-app wizard (frontend)
+
+The HTTP API above backs **server** configuration. The **React onboarding wizard** (step order, back/next, sidebar) is documented separately because it uses client-side flow helpers and must stay aligned with UI navigation without duplicating step lists. See [Onboarding UI flow](/guides/onboarding-ui-flow).

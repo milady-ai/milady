@@ -4,7 +4,7 @@ import {
   getElectrobunRendererRpc,
   invokeDesktopBridgeRequest,
   subscribeDesktopBridgeEvent,
-} from "@elizaos/app-core/bridge/electrobun-rpc";
+} from "@miladyai/app-core/bridge/electrobun-rpc.js";
 import type {
   SwabbleAudioLevelEvent,
   SwabbleConfig,
@@ -17,7 +17,7 @@ import type {
   SwabbleStateEvent,
   SwabbleTranscriptEvent,
   SwabbleWakeWordEvent,
-} from "../../src/definitions";
+} from "@miladyai/app-core/src/definitions";
 
 type EventCallback<T> = (event: T) => void;
 type SwabbleEvent =

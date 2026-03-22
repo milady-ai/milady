@@ -3,6 +3,142 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-03-22" description="Desktop reset reliability, tests, disclosures" tags={["Update", "Fix", "Docs"]}>
+## Main-process menu reset + renderer sync (Electrobun)
+
+**Reset Milady…** now runs **confirm + `POST /api/agent/reset` + restart + status poll** in the **main process**, then pushes **`desktopTrayMenuClick`** with **`menu-reset-milady-applied`** so the renderer runs the same **local UI wipe** as after Settings reset (`completeResetLocalStateAfterServerWipe`). **Why:** native dialogs on WKWebView could leave the webview not processing `fetch`/RPC on the same turn, so reset appeared to hang after confirm.
+
+- **Reachable API base:** main probes candidates (embedded loopback port first, then configured base) with **`GET /api/status`** and only accepts **`res.ok`**—not arbitrary HTTP status—so a 403/500 URL is not chosen for reset. **Why:** external dev API and embedded agent can disagree on port; blind env URL POSTs failed silently.
+- **Testable core** lives in **`menu-reset-from-main.ts`** with Vitest coverage; **`handleResetAppliedFromMainCore`** and **`completeResetLocalStateAfterServerWipe`** are extracted for renderer unit tests. **Why:** 100+ lines of critical logic cannot rely on “string contained in `index.ts`” alone.
+
+Guide: [Desktop main-process reset](/apps/desktop-main-process-reset).
+
+## Edge TTS disclosure (`MILADY_DISABLE_EDGE_TTS`)
+
+`@elizaos/plugin-edge-tts` (via `node-edge-tts`) contacts **Microsoft’s Edge TTS cloud** when loaded; Milady **auto-loads** it with **`@elizaos/plugin-agent-orchestrator`** for swarm `TEXT_TO_SPEECH`. **Why document:** no API key does not mean “no network.” Opt-out: **`MILADY_DISABLE_EDGE_TTS=1`** (alias **`ELIZA_DISABLE_EDGE_TTS`**) or `plugins.entries["edge-tts"].enabled: false`; mirrored in **`brand-env.ts`**. Registry **`plugins.json`** description and env table updated.
+
+Docs: [Environment variables](/cli/environment#runtime-behavior), [TTS plugin](/plugin-registry/tts).
+
+## Vitest: `packages/app-core/test/**` and `*.test.tsx` under `src/`
+
+Root **`vitest.config.ts`** now includes **`packages/app-core/test/**/*.test.ts(x)`** and **`packages/app-core/src/**/*.test.tsx`**, and excludes **`packages/app-core/test/**/*.e2e.test.*`** from the default unit job (e2e still uses **`vitest.e2e.config.ts`**). **Why:** harness tests under `test/state`, `test/runtime`, etc. were skipped; a single explicit `OnboardingWizard.test.tsx` path was brittle for future colocated TSX tests.
+
+See [Contributing — Testing](/guides/contributing) (subsection *`packages/app-core` in the root Vitest config*).
+
+## Desktop tray: RPC wait timeout cleanup
+
+**`DesktopTrayRuntime`** stores the 10s “RPC not ready” timer and clears it on effect teardown and when attach succeeds. **Why:** avoid post-unmount `clearInterval` / warn after fast navigation.
+
+</Update>
+
+<Update label="2026-03-21" description="App onboarding architecture" tags={["Update"]}>
+## Data-driven onboarding UI (app-core)
+
+The dashboard onboarding wizard now derives **step order**, **back navigation**, and the **sidebar step list** from a small pure module (`@miladyai/app-core/onboarding/flow`) instead of duplicating arrays in `AppContext` and the nav component. **Why:** duplicate lists drifted and made “go back” hard to keep consistent.
+
+- **Forward motion** is still orchestrated in `AppProvider` as `advanceOnboarding` (wrapped by `handleOnboardingNext`) so cloud login, `handleOnboardingFinish`, and provider auto-fill run in the correct order before the step index changes.
+- **Back** uses `resolveOnboardingPreviousStep` (including **connection → welcome**, even though `welcome` is not listed in the custom-flow sidebar).
+- **Sidebar:** completed steps are **clickable** to jump backward only (`handleOnboardingJumpToStep`), validated with the same rules as repeated Back—**forward** sidebar jumps are intentionally disallowed so finish/login validation cannot be skipped.
+- **Welcome “Get Started”** uses `goToOnboardingStep("connection")` so advanced mode can sync the Flamina guide in one place instead of raw `setState` on the step alone.
+
+Developer guide: [Onboarding UI flow](/guides/onboarding-ui-flow).
+
+## Connection step: pure subflow + view registry
+
+Inside the **`connection`** wizard step (hosting, remote backend, Eliza Cloud, neural link, provider detail), routing and navigation patches now live in **`@miladyai/app-core/onboarding/connection-flow`** — still **pure** (no React), with Vitest table coverage. **Why:** the old single file mixed a large `if` tree with OAuth and API calls, so branch order and `setState` clusters were hard to test and easy to break.
+
+- **`deriveConnectionScreen`** and **`resolveConnectionUiSpec`** answer “which shell to show” from a snapshot (including steady-state **`forceCloud`** routing so tests match post-bootstrap UI).
+- **`applyConnectionTransition`** returns either a **patch** (applied via `setState` in `ConnectionStep`) or an **effect** token for **`useLocalBackend`** — **why:** disconnecting the remote client and `retryStartup` are not pure and must stay in `AppContext`.
+- **React** is split into `ConnectionStep` (snapshot + dispatch + bootstrap `useEffect`) and `components/onboarding/connection/*` (one component per screen). **Why:** keeps the pure module importable from tests without jsdom, and shrinks review surface when changing one path.
+
+See the same guide: [Onboarding UI flow](/guides/onboarding-ui-flow) (section *Connection step subflow*).
+
+## Desktop dev orchestrator (`dev-platform`)
+
+`scripts/dev-platform.mjs` (used by `bun run dev:desktop` / `dev:desktop:watch`) was tightened so local desktop development matches how people actually work. **Why:** the stack is multiple processes (Vite, API, Electrobun); without explicit rules, Ctrl-C, app quit, and port reuse felt broken or “stuck.”
+
+- **`dev:desktop:watch` defaults to the Vite dev server + `MILADY_RENDERER_URL`** so the UI gets **HMR** instead of paying for a full Rollup `vite build --watch` on every save (still opt-in via `MILADY_DESKTOP_VITE_BUILD_WATCH=1` when you need production watch output).
+- **Unix children are spawned `detached`** so **TTY Ctrl-C hits the orchestrator only** — Electrobun no longer eats the first SIGINT while Vite/API keep the parent alive on open pipes.
+- **Quitting from the app** (Electrobun exits) now **stops Vite and the API** and exits the script; previously the terminal could hang after “App quitting…” because siblings kept running.
+- **Shutdown** exits as soon as all children are gone (short **SIGKILL** fallback), and a **second Ctrl-C** force-exits; **Windows** UI port cleanup uses `netstat`/`taskkill` when `lsof` is unavailable.
+- **Renderer skip / stale `dist`** logic lives in `scripts/lib/vite-renderer-dist-stale.mjs` with tests; **scoped process kill** remains in `scripts/lib/kill-process-tree.mjs` so unrelated Bun processes are not targeted.
+
+Guide (with rationale): [Desktop local development](/apps/desktop-local-development).
+
+## Branding and `{{appName}}` in i18n (app-core)
+
+Locale strings that mention the product name use **`{{appName}}`** in JSON templates. **`appNameInterpolationVars(branding)`** in `config/branding.ts` supplies the value (default **`Eliza`**; shells override via `BrandingContext`, e.g. Milady). **Why:** one interpolation key matches all locales; missing vars left raw `{{appName}}` in the UI. **Why a helper:** every `t(key, …)` site stays consistent and picks the same fallback when `appName` is empty.
+
+## System access (permissions) onboarding: single Continue
+
+The **senses** / system-access step no longer shows separate **Skip** and **Continue** actions. One **Continue** always advances the wizard to the next step (`activate`). **Why:** two buttons implied different outcomes but both were easy to misread; grant state is still visible per permission. **`allowPermissionBypass`** remains on `handleOnboardingNext` for tests and edge tooling, but the permissions UI does not send it.
+
+## Eliza Cloud OAuth: auto-advance in the connection step
+
+After browser/OAuth login succeeds on the **Login** tab (pre-provider and provider-detail Eliza Cloud panels), the app calls **`handleOnboardingNext()`** once—same idea as **`CloudLoginStep`**. **Why:** an extra Confirm click added no value once “connected” is shown. **Why only on the Login tab:** API-key entry still requires an explicit Confirm so we do not advance on partial input. Implementation: **`useAdvanceOnboardingWhenElizaCloudOAuthConnected`** (`components/onboarding/connection/`).
+
+## Desktop: Reset Milady (app menu) + reliable post-reset onboarding
+
+- **Milady** application menu includes **Reset Milady…** (`reset-milady`). An early iteration pushed **`menu-reset-milady`** to the renderer so **`handleReset()`** owned confirm + API—**why:** one `MiladyClient` and the same teardown as Settings. **Update (changelog **2026-03-22**):** confirm + **`POST /api/agent/reset`** + restart now run in the **main process** (WKWebView could stall renderer `fetch` after native dialogs); the renderer syncs via **`menu-reset-milady-applied`**. Deep dive: [Desktop main-process reset](/apps/desktop-main-process-reset).
+- **`handleReset`** / **`completeResetLocalStateAfterServerWipe`** clear **persisted connection mode**, **API base/token**, and **Eliza Cloud** UI flags after a server wipe. **Why:** otherwise the UI stayed pointed at cloud/remote after config reset, so onboarding looked “stuck.”
+- **`App` shell:** onboarding is no longer blocked by **`agentStatus === "starting"`**. **Why:** right after a reset the agent often returns to `starting`; the old gate kept the main shell (or loader) visible instead of **`OnboardingWizard`**, so reset looked like it did nothing after confirm.
+
+Docs: [Desktop app](/apps/desktop) (application menu), [Onboarding UI flow](/guides/onboarding-ui-flow).
+</Update>
+
+<Update label="2026-06-25" description="Week of June 19–25" tags={["Feature", "Update", "Fix"]}>
+## Browser surface on by default
+
+The desktop app now enables the native browser surface by default, giving you in-app browsing without any extra configuration. If you prefer to disable it, set `MILADY_ENABLE_BROWSER_SURFACE=0` in your environment.
+
+## Release center
+
+A new Release Center view in the [desktop app](/apps/desktop) gives you a dedicated surface for managing updates, viewing release notes, and inspecting your current build — all in one place instead of scattered across menus.
+
+## Updates
+
+- **Desktop menus fully wired** — The native application menu and system tray now connect to all available desktop actions, including chat, cloud, voice, media, and window controls. Previously, some menu items were stale or partially functional.
+
+## Bug fixes
+
+- Fixed agent name reverting to the default after restarting — your chosen name, bio, and system prompt now persist correctly across restarts
+- Fixed Eliza Cloud not activating after selecting it during [onboarding](/guides/beginners-user-guide) — cloud mode is now detected reliably regardless of how the onboarding payload is structured
+- Fixed a desktop startup crash caused by a React hook-order error
+- Fixed legacy local installs being forced back into onboarding — existing configurations are now recognized during startup
+- Fixed macOS desktop self-update failing when the app is launched from outside `/Applications`, which previously triggered App Management permission prompts
+</Update>
+
+<Update label="2026-06-18" description="Week of June 12–18" tags={["Feature", "Update", "Fix"]}>
+## Simplified cloud onboarding
+
+First-run setup for cloud users is now a streamlined three-step flow — welcome, cloud login, and companion chat — replacing the previous six-step wizard. Cloud-provisioned containers also skip pairing and onboarding entirely when a platform API token is configured, so managed deployments start instantly.
+
+## Cloud dashboard with local-first agent management
+
+The cloud [dashboard](/apps/dashboard) now discovers and manages both local and cloud agents in a unified view. Authentication is reactive — switching agents or environments no longer requires a page refresh. Agent health probes run in parallel in the background, so the dashboard loads quickly even when managing multiple agents. A new credits and billing section shows your balance, budgets, and usage at a glance.
+
+## Knowledge image and MDX uploads
+
+The [knowledge base](/guides/knowledge) now accepts image files and `.mdx` documents. Image uploads are automatically described using your agent's vision model (or stored as a reference entry if vision is unavailable) instead of failing with a "binary data" error. MDX files are processed as markdown, making it easy to import documentation directly.
+
+## Homepage redesign
+
+The homepage has been simplified to a single-page layout with a download dropdown for all platforms, a Try Cloud call-to-action, and a cleaner mobile experience. Install command pills are now readable on phone-sized screens, and deep links work reliably on the hosted dashboard.
+
+## Updates
+
+- **Eliza Cloud as a first-class TTS provider** — Eliza Cloud now appears as its own voice provider in [settings](/apps/dashboard/settings) instead of being nested under ElevenLabs. This eliminates the confusing provider-plus-source selection and ensures the correct voice catalog loads for your chosen provider.
+- **All coding agents visible in settings** — The [coding agents](/guides/coding-swarms) settings section now correctly displays all installed agents (Claude, Gemini, Codex, Aider). Previously, only Aider appeared because the settings UI wasn't matching full adapter names from the preflight API.
+- **Coding agent settings load without flicker** — Revisiting the coding agents settings page no longer shows a loading skeleton. The preflight data is cached after the first visit so subsequent navigations render immediately.
+- **Mobile dashboard improvements** — Navigation spacing, content responsiveness, and layout on phone-sized screens have been tightened across both the homepage and dashboard.
+
+## Bug fixes
+
+- Fixed plugin services not starting during registration — services declared by plugins (like the PTY service for coding agents) are now eagerly started, resolving 503 errors on coding agent preflight
+- Fixed cloud auth endpoints returning 401 by updating to the current session-based login flow
+- Fixed hosted auth flow silently falling back to public sandbox discovery when tokens were stale — credentials are now scoped per cloud host and cleared properly on expiry
+</Update>
+
 <Update label="2026-04-16" description="Week of April 10–16" tags={["Feature", "Update", "Fix"]}>
 ## Keyboard shortcuts overlay
 
@@ -29,6 +165,8 @@ LLM calls made by the swarm orchestrator are now tagged with source metadata and
 - Fixed duplicate terminal output when opening a coding agent panel
 - Fixed VRM avatars and 3D assets silently failing to load when the server returned HTML instead of binary data
 - Fixed memory monitoring — a new debug panel is available for tracking heap usage during long-running sessions
+</Update>
+
 <Update label="2026-06-11" description="Week of June 5–11" tags={["Update", "Fix"]}>
 ## Unified provider configuration
 

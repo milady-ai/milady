@@ -9,7 +9,11 @@ Milady is a local-first AI assistant built on [elizaOS](https://github.com/eliza
 ```bash
 bun install          # runs postinstall hooks automatically
 bun run dev          # API on :31337, UI on :2138 with hot reload
+bun run dev:desktop  # Electrobun; skips vite build when apps/app/dist is up to date
+bun run dev:desktop:watch  # Vite **dev** server + Electrobun `MILADY_RENDERER_URL` (HMR). Rollup watch: also set MILADY_DESKTOP_VITE_BUILD_WATCH=1
 ```
+
+Desktop dev rationale (signals, Quit, `detached` children): `docs/apps/desktop-local-development.md`.
 
 Optional — link a local Eliza checkout for live package development:
 ```bash
@@ -58,15 +62,15 @@ packages/               Internal packages
 Dynamic plugin imports (`import("@elizaos/plugin-foo")`) need NODE_PATH set to the repo root's `node_modules`. This is set in three places — all three are required:
 1. `src/runtime/eliza.ts` — module-level, before dynamic imports
 2. `scripts/run-node.mjs` — child process env
-3. `apps/app/electron/src/native/agent.ts` — Electron main process
+3. `apps/app/electrobun/src/native/agent.ts` — Electrobun main process
 
 See `docs/plugin-resolution-and-node-path.md`.
 
 ### Bun exports patch (do not remove)
 `scripts/patch-deps.mjs` removes dead `exports["."].bun` entries from `@elizaos` packages that point to missing `src/` paths. Without this, Bun fails to resolve plugins at runtime.
 
-### Electron startup guards (do not remove)
-The try/catch blocks in `apps/app/electron/src/native/agent.ts` keep the desktop window usable when the runtime fails. See `docs/electron-startup.md`.
+### Electrobun startup guards (do not remove)
+The try/catch blocks in `apps/app/electrobun/src/native/agent.ts` keep the desktop window usable when the runtime fails.
 
 ## Config
 
@@ -95,10 +99,22 @@ All `@elizaos/*` packages use the `alpha` dist-tag. When developing locally, `bu
 | API + WebSocket | 31337 | `MILADY_API_PORT` |
 | Dashboard UI | 2138 | `MILADY_PORT` |
 | Gateway | 18789 | `MILADY_GATEWAY_PORT` |
+| Home Dashboard | 2142 | `MILADY_HOME_PORT` |
 
 ## Common Pitfalls
 
-- **`bun install` fails on native deps**: TensorFlow, canvas, whisper-node require native build tools. Set `ELIZA_SKIP_NATIVE=1` or install Xcode CLI tools / build-essential.
+- **`bun install` fails on native deps**: TensorFlow, canvas, whisper-node require native build tools. On macOS install Xcode CLI tools (`xcode-select --install`). On Linux install `build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev`. Set `MILADY_NO_VISION_DEPS=1` to skip optional vision deps (camera, etc.).
+- **Avatar assets missing**: `bun install` clones VRM models from GitHub. On restricted networks set `SKIP_AVATAR_CLONE=1` and manually copy avatars to `apps/app/public/vrms/`.
 - **Plugin not found at runtime**: Ensure NODE_PATH is set. Run `bun run repair` to re-run postinstall.
-- **Stale Vite cache after patching deps**: `bun run dev` passes `--force` to Vite automatically. If issues persist, delete `apps/app/.vite/`.
+- **Stale Vite cache after patching deps**: run `MILADY_VITE_FORCE=1 bun run dev` (or delete `apps/app/.vite/`). Dev no longer passes `--force` by default so dependency pre-bundling can cache between runs.
+- **Cold rebuild / stuck artifacts**: `bun run clean` removes root `dist`, UI + Capacitor plugin `dist`, `apps/app/.vite`, Turbo, Foundry test `out/`/`cache`, Playwright output, and `node_modules/.cache` under main workspaces. `bun run clean:deep` also removes Electrobun `build/`/`artifacts/` and generated `preload.js`, plus Electron pack dirs. For a global Bun store wipe (affects all projects): `MILADY_CLEAN_GLOBAL_TOOL_CACHE=1 bun run clean`.
 - **Config file not found**: The actual path is `~/.eliza/eliza.json`, not `~/.milady/milady.json`.
+- **Lock file blocking install**: If postinstall times out with a lock error, delete `.eliza-repo-setup.lock` in the repo root.
+
+## Setup Environment Variables
+
+| Variable | Purpose | Default |
+|----------|---------|---------|
+| `MILADY_NO_VISION_DEPS` | Skip vision dep install (camera/fswebcam) | `0` |
+| `SKIP_AVATAR_CLONE` | Skip VRM avatar download during install | `0` |
+| `ELIZA_SKIP_LOCAL_ELIZA` | Use npm packages instead of `../eliza` workspace | `0` |

@@ -39,6 +39,7 @@
 - Type-check/build: `bun run build` (runs tsdown + UI build)
 - Lint/format: `bun run check`
 - Run CLI in dev: `bun run milady ...` or `bun run dev:cli`
+- Desktop (Electrobun): `bun run dev:desktop` skips a full Vite build when `apps/app/dist` is fresh; `bun run dev:desktop:watch` runs the Vite dev server and sets `MILADY_RENDERER_URL` for HMR (Rollup `vite build --watch`: add `MILADY_DESKTOP_VITE_BUILD_WATCH=1`). Rationale: `docs/apps/desktop-local-development.md`.
 - Tests: `bun run test` (parallel unit + playwright), `bun run test:e2e`, `bun run test:live`
 - Coverage: `bun run test:coverage`
 

@@ -22,6 +22,27 @@ on:
   push:
     tags:
       - "v*"
+  workflow_call:
+    inputs:
+      tag:
+        description: "Release tag override (e.g. v2.0.0-alpha.3)"
+        required: false
+        type: string
+      draft:
+        description: "Create the GitHub release as a draft"
+        required: false
+        type: boolean
+        default: false
+      publish_release:
+        description: "Create the GitHub release and upload updater files"
+        required: false
+        type: boolean
+        default: false
+      publish_docker:
+        description: "Publish the Docker image after the release step"
+        required: false
+        type: boolean
+        default: false
   workflow_dispatch:
     inputs:
       tag:
@@ -43,7 +64,7 @@ permissions:
 
 env:
   CI: "true"
-  BUN_VERSION: "1.3.9" # pinned: 1.3.10 clean-lockfile breaks Windows frozen installs
+  BUN_VERSION: "1.3.9" # pinned: 1.3.10 clean-lockfile breaks Windows frozen installs — NOTE: repo standard is 1.3.10
 
 jobs:
   prepare:
@@ -102,18 +123,24 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Cache Bun install
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: bun-electrobun-validate-${{ hashFiles('bun.lock') }}
-          restore-keys: bun-electrobun-validate-
-
       - name: Install root dependencies
         run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Run repository postinstall patches
         run: bun run postinstall
+
+      - name: Prepare Whisper model artifact
+        run: |
+          bash apps/app/electrobun/scripts/ensure-whisper-model.sh base.en
+          mkdir -p .artifacts/whisper-model
+          cp "$HOME/.cache/milady/whisper/ggml-base.en.bin" .artifacts/whisper-model/ggml-base.en.bin
+
+      - name: Upload Whisper model artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: whisper-model-base-en
+          path: .artifacts/whisper-model/ggml-base.en.bin
+          if-no-files-found: error
 
       - name: Align version with release tag
         run: node scripts/align-electrobun-version.mjs
@@ -177,13 +204,6 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Cache Bun install
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: bun-electrobun-${{ matrix.platform.artifact-name }}-${{ hashFiles('bun.lock') }}
-          restore-keys: bun-electrobun-${{ matrix.platform.artifact-name }}-
-
       - name: Install root dependencies
         # --ignore-scripts skips native dependency install scripts (e.g. @tensorflow/tfjs-node
         # which has no pre-built binary for Node 22 on Windows and fails to compile).
@@ -222,8 +242,21 @@ jobs:
             ~/.cache/milady/whisper
             node_modules/whisper-node/lib/whisper.cpp/main
             node_modules/whisper-node/lib/whisper.cpp/build
-          key: whisper-${{ matrix.platform.artifact-name }}-${{ hashFiles('apps/app/electrobun/scripts/build-whisper.sh', 'apps/app/electrobun/scripts/build-whisper-universal.sh') }}
+          key: whisper-${{ matrix.platform.artifact-name }}-${{ hashFiles('apps/app/electrobun/scripts/build-whisper.sh', 'apps/app/electrobun/scripts/build-whisper-universal.sh', 'apps/app/electrobun/scripts/ensure-whisper-model.sh') }}
           restore-keys: whisper-${{ matrix.platform.artifact-name }}-
+
+      - name: Download Whisper model artifact
+        if: matrix.platform.os == 'macos' || matrix.platform.os == 'linux'
+        uses: actions/download-artifact@v4
+        with:
+          name: whisper-model-base-en
+          path: .artifacts/whisper-model
+
+      - name: Seed Whisper model cache
+        if: matrix.platform.os == 'macos' || matrix.platform.os == 'linux'
+        run: |
+          mkdir -p "$HOME/.cache/milady/whisper"
+          cp .artifacts/whisper-model/ggml-base.en.bin "$HOME/.cache/milady/whisper/ggml-base.en.bin"
 
       - name: Align version with release tag
         run: node scripts/align-electrobun-version.mjs
@@ -347,14 +380,6 @@ jobs:
             $resolvedElectrobunDir = $electrobunDir
           }
           Write-Host "Resolved electrobun package dir: $resolvedElectrobunDir"
-          $globalNodeModules = Join-Path $env:USERPROFILE ".bun\install\global\node_modules"
-          $globalRceditDir = Join-Path $globalNodeModules "rcedit"
-          $globalRceditExe = Join-Path $globalRceditDir "bin\rcedit-x64.exe"
-
-          if (-not (Test-Path $globalRceditExe)) {
-            Write-Host "Installing global rcedit helper..."
-            bun install -g "rcedit@4.0.1"
-          }
 
           $resolvedRceditPackageJson = node -e @'
             const { createRequire } = require("node:module");
@@ -384,13 +409,44 @@ jobs:
           $resolvedRceditExe = Join-Path $resolvedRceditDir "bin\rcedit-x64.exe"
 
           if (-not (Test-Path $resolvedRceditExe)) {
-            Write-Warning "Electrobun resolved rcedit without a bundled binary at $resolvedRceditExe; copying known-good package into place."
+            Write-Warning "Electrobun resolved rcedit without a bundled binary at $resolvedRceditExe; copying the workspace-installed package into place."
+            $seedRceditCandidates = @(
+              (Join-Path (Split-Path -Parent $resolvedElectrobunDir) "rcedit")
+            )
+            $seedRceditCandidates += Get-ChildItem -Path (Join-Path $PWD "node_modules\.bun") -Directory -Filter "rcedit@*" -ErrorAction SilentlyContinue |
+              Sort-Object Name -Descending |
+              ForEach-Object { Join-Path $_.FullName "node_modules\rcedit" }
+
+            $seedRceditDir = ""
+            foreach ($candidate in $seedRceditCandidates) {
+              if ($null -eq $candidate) {
+                continue
+              }
+
+              $candidatePath = "$candidate".Trim()
+              if ([string]::IsNullOrWhiteSpace($candidatePath)) {
+                continue
+              }
+
+              $candidateExe = Join-Path $candidatePath "bin\rcedit-x64.exe"
+              if (Test-Path $candidateExe) {
+                $seedRceditDir = $candidatePath
+                break
+              }
+            }
+
+            if ([string]::IsNullOrWhiteSpace($seedRceditDir)) {
+              Write-Error "Could not find a workspace-installed rcedit package with rcedit-x64.exe"
+              exit 1
+            }
+
+            Write-Host "Seeding rcedit from $seedRceditDir"
             $resolvedNodeModulesDir = Split-Path -Parent $resolvedRceditDir
             New-Item -ItemType Directory -Force -Path $resolvedNodeModulesDir | Out-Null
             if (Test-Path $resolvedRceditDir) {
               Remove-Item -Recurse -Force $resolvedRceditDir
             }
-            Copy-Item -Recurse -Force $globalRceditDir $resolvedNodeModulesDir
+            Copy-Item -Recurse -Force $seedRceditDir $resolvedNodeModulesDir
           }
 
           if (-not (Test-Path $resolvedRceditExe)) {
@@ -740,6 +796,32 @@ jobs:
           Add-Content -Path $env:GITHUB_ENV -Value "MILADY_TEST_WINDOWS_LAUNCHER_PATH=$launcherPath"
           Write-Host "Reusing packaged Windows launcher for Playwright: $launcherPath"
 
+      - name: Run Windows clean installer proof
+        if: matrix.platform.os == 'windows'
+        shell: pwsh
+        env:
+          # Keep behavior aligned with packaged smoke: agent runtime should not
+          # fail waiting on local embedding model setup in CI.
+          MILADY_DISABLE_LOCAL_EMBEDDINGS: "1"
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          MILADY_TEST_WINDOWS_PROOF_INSTALL_DIR: C:\mi-proof
+        run: |
+          Remove-Item $env:MILADY_TEST_WINDOWS_PROOF_INSTALL_DIR -Recurse -Force -ErrorAction SilentlyContinue
+          pwsh -File apps/app/electrobun/scripts/verify-windows-installer-proof.ps1 `
+            -ArtifactsDir (Join-Path $PWD "apps/app/electrobun/artifacts") `
+            -BuildDir (Join-Path $PWD "apps/app/electrobun/build") `
+            -ProofInstallDir $env:MILADY_TEST_WINDOWS_PROOF_INSTALL_DIR `
+            -OutputDir (Join-Path $PWD "apps/app/electrobun/artifacts/windows-installer-proof")
+
+      - name: Upload Windows installer proof artifact
+        if: always() && matrix.platform.os == 'windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: electrobun-windows-installer-proof
+          path: apps/app/electrobun/artifacts/windows-installer-proof/**
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Run Windows packaged renderer bootstrap check
         if: matrix.platform.os == 'windows'
         run: |
@@ -766,8 +848,25 @@ jobs:
             exit 1
           }
           New-Item -ItemType Directory -Force -Path $artifactsDir | Out-Null
+          $publicInstaller = Get-ChildItem -Path $artifactsDir -File -Filter "Milady-Setup-*.exe" -ErrorAction SilentlyContinue |
+            Sort-Object LastWriteTime -Descending |
+            Select-Object -First 1
           foreach ($setupExecutable in $setupExecutables) {
-            Copy-Item $setupExecutable.FullName -Destination $artifactsDir -Force
+            $destinationPath = Join-Path $artifactsDir $setupExecutable.Name
+            if (
+              $publicInstaller -and
+              $publicInstaller.Name -eq $setupExecutable.Name -and
+              $publicInstaller.Length -ge 50MB -and
+              $setupExecutable.Length -lt $publicInstaller.Length
+            ) {
+              Write-Warning "Skipping build setup stub that would overwrite verified public installer: $($setupExecutable.FullName)"
+              continue
+            }
+            if (Test-Path $destinationPath) {
+              Write-Host "Skipping setup executable already present in artifacts: $destinationPath"
+              continue
+            }
+            Copy-Item $setupExecutable.FullName -Destination $destinationPath -Force
             Write-Host "Staged Windows setup executable: $($setupExecutable.Name)"
           }
 
@@ -810,6 +909,28 @@ jobs:
           if ($failed -gt 0) {
             exit 1
           }
+
+      - name: Re-verify Windows public installer before upload
+        if: matrix.platform.os == 'windows'
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem -Path "apps/app/electrobun/artifacts" -File -Filter "Milady-Setup-*.exe" -ErrorAction SilentlyContinue |
+            Sort-Object LastWriteTime -Descending |
+            Select-Object -First 1
+
+          if (-not $installer) {
+            Write-Error "No public Windows installer found in apps/app/electrobun/artifacts after staging/signing."
+            exit 1
+          }
+
+          $minimumBytes = 50MB
+          if ($installer.Length -lt $minimumBytes) {
+            Write-Error "Public Windows installer regressed below standalone size threshold: $($installer.FullName) ($($installer.Length) bytes)"
+            exit 1
+          }
+
+          Write-Host "Public installer still valid for release upload: $($installer.Name)"
+          Write-Host "Installer size: $([math]::Round($installer.Length / 1MB, 1)) MB"
 
       - name: Build MSIX package
         if: matrix.platform.os == 'windows'
@@ -979,7 +1100,27 @@ jobs:
         shell: pwsh
         run: |
           $artifactsDir = Join-Path $PWD "apps/app/electrobun/artifacts"
-          $exeFiles = Get-ChildItem -Path $artifactsDir -Filter "*.exe"
+          $canonicalInstallers = Get-ChildItem -Path $artifactsDir -File -Filter "Milady-Setup-*.exe" -ErrorAction SilentlyContinue |
+            Sort-Object LastWriteTime -Descending
+          if (-not $canonicalInstallers) {
+            Write-Error "No canonical Windows installer found before compression."
+            exit 1
+          }
+          if ($canonicalInstallers.Count -gt 1) {
+            Write-Error "Multiple canonical Windows installers found before compression."
+            $canonicalInstallers | ForEach-Object { Write-Host "  - $($_.FullName)" }
+            exit 1
+          }
+
+          $canonicalInstaller = $canonicalInstallers | Select-Object -First 1
+          $otherSetupExecutables = Get-ChildItem -Path $artifactsDir -File -Filter "*Setup*.exe" -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -ne $canonicalInstaller.FullName }
+          foreach ($extraSetup in $otherSetupExecutables) {
+            Write-Warning "Removing non-canonical setup executable before upload: $($extraSetup.FullName)"
+            Remove-Item $extraSetup.FullName -Force -ErrorAction SilentlyContinue
+          }
+
+          $exeFiles = Get-ChildItem -Path $artifactsDir -File -Filter "*.exe" -ErrorAction SilentlyContinue
           foreach ($exe in $exeFiles) {
             $zipPath = $exe.FullName + ".zip"
             Write-Host "Compressing $($exe.Name) -> $($exe.Name).zip"
@@ -1018,6 +1159,7 @@ jobs:
 
   release:
     name: Create Release
+    if: ${{ github.event_name != 'workflow_call' || inputs.publish_release }}
     needs: [prepare, build]
     runs-on: blacksmith-4vcpu-ubuntu-2404
     timeout-minutes: 10
@@ -1126,6 +1268,7 @@ jobs:
 
   publish-docker:
     name: Publish Docker Image
+    if: ${{ github.event_name != 'workflow_call' || inputs.publish_docker }}
     needs: [prepare, release]
     permissions:
       contents: read

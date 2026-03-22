@@ -9,15 +9,11 @@ on:
     branches: [main, develop]
     paths:
       - "src/benchmark/**"
-      - "package.json"
-      - "vitest.config.ts"
       - ".github/workflows/benchmark-tests.yml"
   pull_request:
     branches: [main, develop]
     paths:
       - "src/benchmark/**"
-      - "package.json"
-      - "vitest.config.ts"
       - ".github/workflows/benchmark-tests.yml"
   workflow_dispatch:
 

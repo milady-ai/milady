@@ -10,7 +10,6 @@ const appArgMatch = process.argv.find((a) => a.startsWith("--app="));
 const appName = appArgMatch ? appArgMatch.split("=")[1] : "app";
 const APP_DIR = path.join(ROOT, "apps", appName);
 const ELECTROBUN_DIR = path.join(APP_DIR, "electrobun");
-const DIST_PACKAGE_JSON = path.join(ROOT, "dist", "package.json");
 const PROFILE_EXCLUDED_OPTIONAL_PACKS = {
   full: [],
   "no-streaming": ["streaming"],
@@ -204,11 +203,6 @@ function ensureAppDirs() {
   }
 }
 
-function writeDistPackageJson() {
-  fs.mkdirSync(path.dirname(DIST_PACKAGE_JSON), { recursive: true });
-  fs.writeFileSync(DIST_PACKAGE_JSON, '{"type":"module"}\n');
-}
-
 function findLatestMacAppBundle() {
   const buildRoot = path.join(ELECTROBUN_DIR, "build");
   if (!fs.existsSync(buildRoot)) {
@@ -248,7 +242,6 @@ function stageDesktopBuild() {
     cwd: ROOT,
     label: "Building core runtime bundle with tsdown",
   });
-  writeDistPackageJson();
 
   runNode(["--import", "tsx", "scripts/write-build-info.ts"], {
     cwd: ROOT,

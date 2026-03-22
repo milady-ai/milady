@@ -6,7 +6,7 @@ import { CLOUD_BASE, rewriteAgentUiUrl } from "./runtime-config";
  * then returns the rewritten redirect URL (waifu.fun → milady.ai).
  *
  * Works against both the local Express backend (localhost:3000) and the
- * Vercel proxy (dev.elizacloud.ai).  The local backend exposes the route
+ * Vercel proxy (elizacloud.ai).  The local backend exposes the route
  * at `/api/agents/:id/pairing-token` with `Authorization: Bearer`, while
  * the Vercel deployment rewrites to the same backend via milady-api.shad0w.xyz.
  */

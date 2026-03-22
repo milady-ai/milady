@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   bundlesDependency,
+  findFloatingDependencySpecs,
   findLocalPackHotspots,
   hasLifecycleScriptReferencingMissingFile,
   isExactVersion,
@@ -95,6 +96,24 @@ describe("release-check package guards", () => {
     expect(isExactVersion("2.0.0-alpha.87")).toBe(true);
     expect(isExactVersion("0.0.1-beta.1")).toBe(true);
     expect(isExactVersion("3.2.1-rc.0")).toBe(true);
+  });
+
+  it("flags floating release dependencies in the cloud-agent template", () => {
+    expect(
+      findFloatingDependencySpecs(
+        {
+          dependencies: {
+            "@elizaos/core": "alpha",
+            "@elizaos/plugin-elizacloud": "2.0.0-alpha.7",
+            "@elizaos/plugin-sql": "^2.0.0-alpha.17",
+          },
+        },
+        ["@elizaos/core", "@elizaos/plugin-elizacloud", "@elizaos/plugin-sql"],
+      ),
+    ).toEqual([
+      { name: "@elizaos/core", specifier: "alpha" },
+      { name: "@elizaos/plugin-sql", specifier: "^2.0.0-alpha.17" },
+    ]);
   });
 
   it("accepts only strict semver specifiers for orchestrator release pins", () => {

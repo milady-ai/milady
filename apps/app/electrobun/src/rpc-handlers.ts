@@ -9,7 +9,8 @@ import fs from "node:fs";
  * Called once during app startup after the BrowserView is created.
  */
 
-import { Updater, Utils } from "electrobun/bun";
+import { Utils } from "electrobun/bun";
+import { setAgentReady } from "./agent-ready-state";
 import { showBackgroundNoticeOnce } from "./background-notice";
 import { getAgentManager } from "./native/agent";
 import { getCameraManager } from "./native/camera";
@@ -26,6 +27,7 @@ import { getPermissionManager } from "./native/permissions";
 import { getScreenCaptureManager } from "./native/screencapture";
 import { getSwabbleManager } from "./native/swabble";
 import { getTalkModeManager } from "./native/talkmode";
+import { isDetachedSurface } from "./surface-windows";
 
 /** Push current OS permission states to the agent REST API in-process. */
 async function syncPermissionsToRestApi(): Promise<void> {
@@ -88,13 +90,40 @@ export function registerRpcHandlers(
 
   rpc?.setRequestHandler?.({
     // ---- Agent ----
-    agentStart: async () => agent.start(),
+    agentStart: async () => {
+      const status = await agent.start();
+      if (status.state === "running") {
+        setAgentReady(true);
+      }
+      return status;
+    },
     agentStop: async () => {
       await agent.stop();
+      setAgentReady(false);
       return { ok: true };
     },
-    agentRestart: async () => agent.restart(),
+    agentRestart: async () => {
+      const status = await agent.restart();
+      setAgentReady(status.state === "running");
+      return status;
+    },
+    agentRestartClearLocalDb: async () => {
+      console.log("[RPC][reset] agentRestartClearLocalDb invoked");
+      try {
+        const status = await agent.restartClearingLocalDb();
+        console.log("[RPC][reset] agentRestartClearLocalDb done", {
+          state: status.state,
+          port: status.port,
+        });
+        setAgentReady(status.state === "running");
+        return status;
+      } catch (err) {
+        console.error("[RPC][reset] agentRestartClearLocalDb failed", err);
+        throw err;
+      }
+    },
     agentStatus: async () => agent.getStatus(),
+    agentInspectExistingInstall: async () => agent.inspectExistingInstall(),
 
     // ---- Desktop: Tray ----
     desktopCreateTray: async (
@@ -179,16 +208,51 @@ export function registerRpcHandlers(
     // ---- Desktop: App ----
     desktopQuit: async () => desktop.quit(),
     desktopRelaunch: async () => desktop.relaunch(),
-    desktopApplyUpdate: async () => {
-      Updater.applyUpdate();
-    },
+    desktopApplyUpdate: async () => desktop.applyUpdate(),
+    desktopCheckForUpdates: async () => desktop.checkForUpdates(),
+    desktopGetUpdaterState: async () => desktop.getUpdaterState(),
     desktopGetVersion: async () => desktop.getVersion(),
+    desktopGetBuildInfo: async () => desktop.getBuildInfo(),
     desktopIsPackaged: async () => desktop.isPackaged(),
+    desktopGetDockIconVisibility: async () => desktop.getDockIconVisibility(),
+    desktopSetDockIconVisibility: async (
+      params: Parameters<typeof desktop.setDockIconVisibility>[0],
+    ) => desktop.setDockIconVisibility(params),
     desktopGetPath: async (params: Parameters<typeof desktop.getPath>[0]) =>
       desktop.getPath(params),
     desktopBeep: async () => desktop.beep(),
-    desktopOpenSettingsWindow: async () => {
-      desktop.openSettings();
+    desktopShowSelectionContextMenu: async (
+      params: Parameters<typeof desktop.showSelectionContextMenu>[0],
+    ) => desktop.showSelectionContextMenu(params),
+    desktopGetSessionSnapshot: async (
+      params: Parameters<typeof desktop.getSessionSnapshot>[0],
+    ) => desktop.getSessionSnapshot(params),
+    desktopClearSessionData: async (
+      params: Parameters<typeof desktop.clearSessionData>[0],
+    ) => desktop.clearSessionData(params),
+    desktopGetWebGpuBrowserStatus: async () => desktop.getWebGpuBrowserStatus(),
+    desktopOpenReleaseNotesWindow: async (
+      params: Parameters<typeof desktop.openReleaseNotesWindow>[0],
+    ) => desktop.openReleaseNotesWindow(params),
+    desktopOpenSettingsWindow: async (
+      params: { tabHint?: string } | undefined,
+    ) => {
+      desktop.openSettings(params?.tabHint);
+    },
+    desktopOpenSurfaceWindow: async (params: {
+      surface:
+        | "chat"
+        | "browser"
+        | "release"
+        | "triggers"
+        | "plugins"
+        | "connectors"
+        | "cloud";
+    }) => {
+      if (!isDetachedSurface(params.surface)) {
+        return;
+      }
+      desktop.openSurfaceWindow(params.surface);
     },
 
     // ---- Desktop: Screen ----

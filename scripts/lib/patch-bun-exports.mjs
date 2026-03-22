@@ -34,7 +34,9 @@ export function findPackageJsonPaths(root, pkgName) {
  * cache). Exported so tests and other patch helpers share the same lookup.
  */
 export function findPackageFilePaths(root, pkgName, relativePath) {
-  const candidates = [resolve(root, "node_modules", pkgName, relativePath)];
+  const candidates = [];
+  const mainPath = resolve(root, "node_modules", pkgName, relativePath);
+  if (existsSync(mainPath)) candidates.push(mainPath);
   const bunCache = resolve(root, "node_modules/.bun");
   if (existsSync(bunCache)) {
     const safeNames = new Set([
@@ -65,6 +67,7 @@ function hasRequiredFiles(dirPath, relativePaths) {
 export function repairElizaCoreRuntimeDist(targetPkgDir, sourcePkgDir) {
   if (!targetPkgDir || !sourcePkgDir) return false;
   if (targetPkgDir === sourcePkgDir) return false;
+  if (!existsSync(targetPkgDir)) return false;
   if (!hasRequiredFiles(sourcePkgDir, ELIZA_CORE_RUNTIME_FILES)) return false;
   if (hasRequiredFiles(targetPkgDir, ELIZA_CORE_RUNTIME_FILES)) return false;
 
@@ -104,6 +107,90 @@ export function patchBrokenElizaCoreRuntimeDists(root, log = console.log) {
     }
   }
   return patched;
+}
+
+/**
+ * Detect stale Bun module cache and warn the user.
+ *
+ * Bun's content-addressable cache deduplicates packages by tarball hash. When
+ * upstream publishes multiple versions with identical (stale) build artifacts,
+ * they share a hash and Bun serves stale content. We can't safely remove
+ * entries during postinstall (symlinks break), so we detect the condition
+ * and tell the user to run `bun run repair` which does:
+ *   rm -rf node_modules/.bun && bun install
+ *
+ * Runs once per package.json version (stamp-guarded).
+ *
+ * Bun cache entry format: @scope+pkg@version+contenthash
+ * e.g. @elizaos+core@2.0.0-alpha.77+f9c270f5561f2899
+ */
+export function warnStaleBunCache(root, log = console.log) {
+  const bunCacheDir = resolve(root, "node_modules/.bun");
+  if (!existsSync(bunCacheDir)) return 0;
+
+  // Only check once per package.json version.
+  const pkgJsonPath = resolve(root, "package.json");
+  const stampPath = resolve(bunCacheDir, ".bust-cache-stamp");
+  if (existsSync(pkgJsonPath) && existsSync(stampPath)) {
+    try {
+      const pkgVersion =
+        JSON.parse(readFileSync(pkgJsonPath, "utf8")).version || "";
+      const stamp = readFileSync(stampPath, "utf8").trim();
+      if (stamp === pkgVersion) return 0;
+    } catch {}
+  }
+
+  const prefixes = [
+    "@elizaos+core@",
+    "@elizaos+autonomous@",
+    "@elizaos+app-core@",
+    "@elizaos+prompts@",
+    "@elizaos+skills@",
+    "@elizaos+tui@",
+  ];
+  let staleCount = 0;
+
+  let allEntries;
+  try {
+    allEntries = readdirSync(bunCacheDir);
+  } catch (err) {
+    log(`[patch-deps] Warning: failed to read Bun cache: ${err.message}`);
+    return 0;
+  }
+
+  for (const prefix of prefixes) {
+    const entries = allEntries.filter((e) => e.startsWith(prefix));
+    if (entries.length < 2) continue;
+
+    // Group by content hash (the part after the last '+')
+    const byHash = new Map();
+    for (const entry of entries) {
+      const plusIdx = entry.lastIndexOf("+");
+      if (plusIdx === -1 || plusIdx === entry.length - 1) continue;
+      const hash = entry.slice(plusIdx + 1);
+      if (!byHash.has(hash)) byHash.set(hash, []);
+      byHash.get(hash).push(entry);
+    }
+
+    for (const [, group] of byHash) {
+      if (group.length >= 2) staleCount += group.length - 1;
+    }
+  }
+
+  // Write stamp regardless so we don't re-check every install.
+  try {
+    const pkgVersion = existsSync(pkgJsonPath)
+      ? JSON.parse(readFileSync(pkgJsonPath, "utf8")).version || ""
+      : "";
+    writeFileSync(stampPath, pkgVersion, "utf8");
+  } catch {}
+
+  if (staleCount > 0) {
+    log(
+      `[patch-deps] ⚠️  Detected ${staleCount} stale Bun cache entries. Run: rm -rf node_modules/.bun && bun install`,
+    );
+  }
+  return staleCount;
 }
 
 /**
@@ -346,43 +433,11 @@ export function patchMissingLifecycleScript(
   return patched;
 }
 
-function loadMiladyCharacterCatalog(root) {
-  const catalogPath = resolve(root, "apps/app/characters/catalog.json");
-  const rawCatalog = JSON.parse(readFileSync(catalogPath, "utf8"));
-  const assets = Array.isArray(rawCatalog.assets) ? rawCatalog.assets : [];
-  const injectedCharacters = Array.isArray(rawCatalog.injectedCharacters)
-    ? rawCatalog.injectedCharacters
-    : [];
-
-  if (assets.length === 0) {
-    throw new Error(
-      `[patch-deps] Missing bundled avatar assets in ${catalogPath}.`,
-    );
-  }
-
-  const assetById = new Map(assets.map((asset) => [asset.id, asset]));
-  const normalizedInjectedCharacters = injectedCharacters.map((character) => {
-    const avatarAsset = assetById.get(character.avatarAssetId);
-    if (!avatarAsset) {
-      throw new Error(
-        `[patch-deps] Unknown avatarAssetId ${character.avatarAssetId} in ${catalogPath}.`,
-      );
-    }
-
-    return {
-      ...character,
-      avatarAsset,
-    };
-  });
-
-  return {
-    assets,
-    injectedCharacters: normalizedInjectedCharacters,
-  };
-}
-
 function loadMiladyOnboardingPresetsSource(root, targetPath) {
-  const sourcePath = resolve(root, "src/onboarding-presets.ts");
+  const sourcePath = resolve(
+    root,
+    "packages/app-core/src/onboarding-presets.ts",
+  );
   const source = readFileSync(sourcePath, "utf8");
   if (!targetPath?.endsWith(".js")) {
     return source;
@@ -395,267 +450,6 @@ function loadMiladyOnboardingPresetsSource(root, targetPath) {
       target: ts.ScriptTarget.ES2022,
     },
   }).outputText;
-}
-
-function toAppCoreRelativeAssetPath(path) {
-  return String(path).replace(/^\/+/, "");
-}
-
-function buildAppCoreMiladyVrmStateSource(catalog) {
-  const assetEntries = catalog.assets
-    .map(
-      (asset) => `  {
-    title: ${JSON.stringify(asset.title)},
-    vrmPath: resolveAppAssetUrl(${JSON.stringify(
-      toAppCoreRelativeAssetPath(`/vrms/${asset.slug}.vrm.gz`),
-    )}),
-    previewPath: resolveAppAssetUrl(${JSON.stringify(
-      toAppCoreRelativeAssetPath(`/vrms/previews/${asset.slug}.png`),
-    )}),
-    backgroundPath: resolveAppAssetUrl(${JSON.stringify(
-      toAppCoreRelativeAssetPath(`/vrms/backgrounds/${asset.slug}.png`),
-    )}),
-  },`,
-    )
-    .join("\n");
-
-  return `import { resolveAppAssetUrl } from "../utils/asset-url";
-/** Bundled Milady VRM asset roster. Generated from apps/app/characters/catalog.json. */
-const BUNDLED_VRM_ASSETS = [
-${assetEntries}
-];
-export const VRM_COUNT = BUNDLED_VRM_ASSETS.length;
-export function getVrmCount() {
-    return VRM_COUNT;
-}
-function normalizeAvatarIndex(index) {
-    if (!Number.isFinite(index))
-        return 1;
-    const n = Math.trunc(index);
-    if (n === 0)
-        return 0;
-    if (n < 1 || n > VRM_COUNT)
-        return 1;
-    return n;
-}
-function resolveBundledVrmAsset(index) {
-    const normalized = normalizeAvatarIndex(index);
-    const safe = normalized > 0 ? normalized : 1;
-    return BUNDLED_VRM_ASSETS[safe - 1] ?? BUNDLED_VRM_ASSETS[0];
-}
-/** Resolve a bundled VRM index (1–N) to its public asset URL. */
-export function getVrmUrl(index) {
-    return resolveBundledVrmAsset(index).vrmPath;
-}
-/** Resolve a bundled VRM index (1–N) to its preview thumbnail URL. */
-export function getVrmPreviewUrl(index) {
-    return resolveBundledVrmAsset(index).previewPath;
-}
-/** Resolve a bundled VRM index (1-N) to its custom background URL. */
-export function getVrmBackgroundUrl(index) {
-    return resolveBundledVrmAsset(index).backgroundPath;
-}
-const COMPANION_THEME_BACKGROUND_INDEX = {
-    light: 3,
-    dark: 4,
-};
-/** Resolve the fixed companion-mode background for the current UI theme. */
-export function getCompanionBackgroundUrl(theme) {
-    return getVrmBackgroundUrl(COMPANION_THEME_BACKGROUND_INDEX[theme]);
-}
-/** Human-readable roster title for bundled avatars. */
-export function getVrmTitle(index) {
-    return resolveBundledVrmAsset(index).title;
-}
-/** Whether a bundled index points to the official Eliza avatar set. */
-export function isOfficialVrmIndex(_index) {
-    return false;
-}
-/** Whether a VRM index requires an explicit 180° face-camera flip instead of auto-detection. */
-export function getVrmNeedsFlip(index) {
-    const normalized = normalizeAvatarIndex(index);
-    if (normalized <= VRM_COUNT)
-        return false;
-    return false;
-}
-export { normalizeAvatarIndex };
-`;
-}
-
-function buildAppCoreMiladyVrmTypesSource(catalog) {
-  return `import type { UiTheme } from "./ui-preferences";
-export declare const VRM_COUNT = ${catalog.assets.length};
-export declare function getVrmCount(): number;
-declare function normalizeAvatarIndex(index: number): number;
-/** Resolve a bundled VRM index (1–N) to its public asset URL. */
-export declare function getVrmUrl(index: number): string;
-/** Resolve a bundled VRM index (1–N) to its preview thumbnail URL. */
-export declare function getVrmPreviewUrl(index: number): string;
-/** Resolve a bundled VRM index (1-N) to its custom background URL. */
-export declare function getVrmBackgroundUrl(index: number): string;
-/** Resolve the fixed companion-mode background for the current UI theme. */
-export declare function getCompanionBackgroundUrl(theme: UiTheme): string;
-/** Human-readable roster title for bundled avatars. */
-export declare function getVrmTitle(index: number): string;
-/** Whether a bundled index points to the official Eliza avatar set. */
-export declare function isOfficialVrmIndex(_index: number): boolean;
-/** Whether a VRM index requires an explicit 180° face-camera flip instead of auto-detection. */
-export declare function getVrmNeedsFlip(index: number): boolean;
-export { normalizeAvatarIndex };
-`;
-}
-
-function buildIdentityPresetsSource(catalog) {
-  const entries = catalog.injectedCharacters
-    .map(
-      (character) =>
-        `    ${JSON.stringify(character.catchphrase)}: { name: ${JSON.stringify(character.name)}, avatarIndex: ${character.avatarAsset.id} },`,
-    )
-    .join("\n");
-
-  return `const IDENTITY_PRESETS = {
-${entries}
-};`;
-}
-
-function buildCharacterPresetMetaSource(catalog) {
-  const entries = catalog.injectedCharacters
-    .map(
-      (character) =>
-        `    ${JSON.stringify(character.catchphrase)}: { name: ${JSON.stringify(character.name)}, avatarIndex: ${character.avatarAsset.id}, voicePresetId: ${JSON.stringify(character.voicePresetId ?? null)} },`,
-    )
-    .join("\n");
-
-  return `const CHARACTER_PRESET_META = {
-${entries}
-};`;
-}
-
-/**
- * @elizaos/app-core alpha.53 still ships the upstream Eliza avatar roster
- * (4 slots pointing at eliza-1/4/5/9), but Milady owns the asset catalog.
- * Patch the published bundle so runtime avatar URLs and injected characters
- * derive from apps/app/characters/catalog.json.
- */
-export function applyAppCoreMiladyVrmStatePatch(filePath, catalog) {
-  if (!existsSync(filePath)) return false;
-
-  const compatSource = readFileSync(filePath, "utf8");
-  const generatedSource = buildAppCoreMiladyVrmStateSource(catalog);
-  if (compatSource === generatedSource) return false;
-
-  writeFileSync(filePath, generatedSource, "utf8");
-  return true;
-}
-
-/**
- * Keep the published app-core declaration file in sync with the runtime VRM
- * patch so TS consumers see the catalog-driven bundled roster size.
- */
-export function applyAppCoreMiladyVrmTypesPatch(filePath, catalog) {
-  if (!existsSync(filePath)) return false;
-
-  const compatSource = readFileSync(filePath, "utf8");
-  const generatedSource = buildAppCoreMiladyVrmTypesSource(catalog);
-  if (compatSource === generatedSource) return false;
-
-  writeFileSync(filePath, generatedSource, "utf8");
-  return true;
-}
-
-/**
- * The default VRM fallback path in VrmViewer must point at the first bundled
- * Milady asset so initial renders still succeed before state loads.
- */
-export function applyAppCoreMiladyVrmViewerPatch(filePath, catalog) {
-  if (!existsSync(filePath)) return false;
-
-  const compatSource = readFileSync(filePath, "utf8");
-  const defaultAsset = catalog.assets[0];
-  const updatedSource = compatSource.replace(
-    /const DEFAULT_VRM_PATH = resolveAppAssetUrl\(".*?"\);/,
-    `const DEFAULT_VRM_PATH = resolveAppAssetUrl(${JSON.stringify(
-      toAppCoreRelativeAssetPath(`/vrms/${defaultAsset.slug}.vrm.gz`),
-    )});`,
-  );
-  if (updatedSource === compatSource) return false;
-
-  writeFileSync(filePath, updatedSource, "utf8");
-  return true;
-}
-
-export function applyAppCoreMiladyIdentityStepPatch(filePath, catalog) {
-  if (!existsSync(filePath)) return false;
-
-  const compatSource = readFileSync(filePath, "utf8");
-  let updatedSource = compatSource.replace(
-    /const IDENTITY_PRESETS = \{[\s\S]*?\};/,
-    buildIdentityPresetsSource(catalog),
-  );
-  updatedSource = updatedSource.replaceAll(
-    "styles.slice(0, 4)",
-    `styles.slice(0, ${catalog.injectedCharacters.length})`,
-  );
-  if (updatedSource === compatSource) return false;
-
-  writeFileSync(filePath, updatedSource, "utf8");
-  return true;
-}
-
-export function applyAppCoreMiladyCharacterViewPatch(filePath, catalog) {
-  if (!existsSync(filePath)) return false;
-
-  const compatSource = readFileSync(filePath, "utf8");
-  let updatedSource = compatSource.replace(
-    /const CHARACTER_PRESET_META = \{[\s\S]*?\};/,
-    buildCharacterPresetMetaSource(catalog),
-  );
-  updatedSource = updatedSource.replace(
-    /\(index % \d+\) \+ 1/,
-    `(index % ${catalog.assets.length}) + 1`,
-  );
-  updatedSource = updatedSource.replace(
-    /characterRoster\.slice\(0, \d+\)/,
-    `characterRoster.slice(0, ${catalog.injectedCharacters.length})`,
-  );
-  if (updatedSource === compatSource) return false;
-
-  writeFileSync(filePath, updatedSource, "utf8");
-  return true;
-}
-
-/**
- * Patch App.js ViewRouter to check for a custom character editor component
- * registered on window.__MILADY_CHARACTER_EDITOR__ before falling back to the
- * built-in CharacterView.
- */
-export function applyAppCoreMiladyViewRouterPatch(filePath) {
-  if (!existsSync(filePath)) return false;
-
-  const compatSource = readFileSync(filePath, "utf8");
-
-  // Already patched?
-  if (compatSource.includes("__MILADY_CHARACTER_EDITOR__")) return false;
-
-  const oldCase = `case "character":
-            case "character-select":
-                return (_jsx(TabScrollView, { children: _jsx(CharacterView, { sceneOverlay: characterSceneVisible }) }));`;
-
-  if (!compatSource.includes(oldCase)) return false;
-
-  const newCase = `case "character":
-            case "character-select": {
-                const _CE = typeof window !== "undefined" && window.__MILADY_CHARACTER_EDITOR__;
-                return _CE
-                    ? _jsx(TabScrollView, { children: _jsx(_CE, { sceneOverlay: characterSceneVisible }) })
-                    : _jsx(TabScrollView, { children: _jsx(CharacterView, { sceneOverlay: characterSceneVisible }) });
-            }`;
-
-  const updatedSource = compatSource.replace(oldCase, newCase);
-  if (updatedSource === compatSource) return false;
-
-  writeFileSync(filePath, updatedSource, "utf8");
-  return true;
 }
 
 /**
@@ -713,17 +507,17 @@ export function patchAutonomousMiladyOnboardingPresets(
   const candidates = [
     ...findPackageFilePaths(
       root,
-      "@elizaos/autonomous",
-      "packages/autonomous/src/onboarding-presets.js",
+      "@elizaos/agent",
+      "packages/agent/src/onboarding-presets.js",
     ),
     ...findPackageFilePaths(
       root,
-      "@elizaos/autonomous",
+      "@elizaos/agent",
       "src/onboarding-presets.js",
     ),
     ...findPackageFilePaths(
       root,
-      "@elizaos/autonomous",
+      "@elizaos/agent",
       "src/onboarding-presets.ts",
     ),
   ];
@@ -737,74 +531,8 @@ export function patchAutonomousMiladyOnboardingPresets(
     }
     patched = true;
     log(
-      "[patch-deps] Patched @elizaos/autonomous packages/autonomous/src/onboarding-presets.js: onboarding presets now derive from Milady.",
+      "[patch-deps] Patched @elizaos/agent packages/agent/src/onboarding-presets.js: onboarding presets now derive from Milady.",
     );
-  }
-
-  return patched;
-}
-
-/**
- * Patch all installed @elizaos/app-core copies so bundled avatar URLs and
- * injected character metadata resolve from Milady's shared asset catalog.
- */
-export function patchAppCoreMiladyAssets(
-  root,
-  log = console.log,
-  catalog = loadMiladyCharacterCatalog(root),
-) {
-  const patchTargets = [
-    {
-      relativePath: "state/vrm.js",
-      apply: applyAppCoreMiladyVrmStatePatch,
-      description: "runtime avatar roster now derives from the shared catalog",
-    },
-    {
-      relativePath: "state/vrm.d.ts",
-      apply: applyAppCoreMiladyVrmTypesPatch,
-      description:
-        "type declarations now expose the catalog-driven roster size",
-    },
-    {
-      relativePath: "components/avatar/VrmViewer.js",
-      apply: applyAppCoreMiladyVrmViewerPatch,
-      description: "default VRM fallback now targets the first catalog asset",
-    },
-    {
-      relativePath: "components/onboarding/IdentityStep.js",
-      apply: applyAppCoreMiladyIdentityStepPatch,
-      description:
-        "onboarding character presets now derive from the shared catalog",
-    },
-    {
-      relativePath: "components/CharacterView.js",
-      apply: applyAppCoreMiladyCharacterViewPatch,
-      description:
-        "character roster metadata now derives from the shared catalog",
-    },
-    {
-      relativePath: "App.js",
-      apply: (filePath) => applyAppCoreMiladyViewRouterPatch(filePath),
-      description:
-        "ViewRouter now checks for window.__MILADY_CHARACTER_EDITOR__ override",
-    },
-  ];
-
-  let patched = false;
-  for (const target of patchTargets) {
-    const candidates = findPackageFilePaths(
-      root,
-      "@elizaos/app-core",
-      target.relativePath,
-    );
-
-    for (const filePath of candidates) {
-      if (!target.apply(filePath, catalog)) continue;
-      patched = true;
-      log(
-        `[patch-deps] Patched @elizaos/app-core ${target.relativePath}: ${target.description}.`,
-      );
-    }
   }
 
   return patched;
@@ -1110,7 +838,7 @@ export function patchProperLockfileSignalExitCompat(root, log = console.log) {
 export function patchAutonomousTypeError(root, log = console.log) {
   const candidates = findPackageFilePaths(
     root,
-    "@elizaos/autonomous",
+    "@elizaos/agent",
     "src/api/server.ts",
   );
   let patched = false;
@@ -1126,7 +854,7 @@ export function patchAutonomousTypeError(root, log = console.log) {
       );
       writeFileSync(filePath, source, "utf8");
       patched = true;
-      log("[patch-deps] Patched @elizaos/autonomous type error in server.ts");
+      log("[patch-deps] Patched @elizaos/agent type error in server.ts");
     }
   }
   return patched;

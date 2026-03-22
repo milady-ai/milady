@@ -5,17 +5,18 @@
  *
  * Steps:
  *   1. tsdown (backend bundle)
- *   2. Write dist/package.json with {"type":"module"}
- *   3. Write build info
- *   4. Build all Capacitor plugins
- *   5. vite build the app (renderer)
+ *   2. Write build info + dist/package.json (write-build-info.ts)
+ *   3. Build all Capacitor plugins
+ *   4. vite build the app (renderer)
  *
  * Usage:
  *   node scripts/build-win.mjs [--skip-plugins] [--skip-install]
  */
 import { execSync } from "node:child_process";
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
+
+import { CAPACITOR_PLUGIN_NAMES } from "../apps/app/scripts/capacitor-plugin-names.mjs";
 
 const rootDir = resolve(import.meta.dirname, "..");
 const appDir = join(rootDir, "apps", "app");
@@ -40,36 +41,17 @@ function run(cmd, opts = {}) {
 
 try {
   // Step 1: tsdown build
-  console.log("\n=== Step 1/5: tsdown (backend bundle) ===");
+  console.log("\n=== Step 1/4: tsdown (backend bundle) ===");
   run("npx tsdown", { cwd: rootDir });
 
-  // Step 2: dist/package.json
-  console.log("\n=== Step 2/5: Write dist/package.json ===");
-  const distDir = join(rootDir, "dist");
-  if (!existsSync(distDir)) mkdirSync(distDir, { recursive: true });
-  writeFileSync(join(distDir, "package.json"), '{"type":"module"}\n');
-  console.log("  Written dist/package.json");
+  // Step 2: write-build-info (also writes dist/package.json)
+  console.log("\n=== Step 2/4: Write build info ===");
+  run("node --import tsx scripts/write-build-info.ts", { cwd: rootDir });
 
-  // Step 3: write-build-info
-  console.log("\n=== Step 3/5: Write build info ===");
-  run("bun scripts/write-build-info.ts", { cwd: rootDir });
-
-  // Step 4: Build plugins
+  // Step 3: Build plugins
   if (!skipPlugins) {
-    console.log("\n=== Step 4/5: Build Capacitor plugins ===");
-    // Authoritative plugin list — must match apps/app/package.json plugin:build
-    // script. When adding or removing a plugin, update both locations.
-    const plugins = [
-      "gateway",
-      "swabble",
-      "camera",
-      "screencapture",
-      "canvas",
-      "desktop",
-      "location",
-      "talkmode",
-      "agent",
-    ];
+    console.log("\n=== Step 3/4: Build Capacitor plugins ===");
+    const plugins = CAPACITOR_PLUGIN_NAMES;
     for (const plugin of plugins) {
       const pluginDir = join(appDir, "plugins", plugin);
       if (!existsSync(pluginDir)) {
@@ -80,11 +62,11 @@ try {
       run("bun run build", { cwd: pluginDir });
     }
   } else {
-    console.log("\n=== Step 4/5: Skipping plugins (--skip-plugins) ===");
+    console.log("\n=== Step 3/4: Skipping plugins (--skip-plugins) ===");
   }
 
-  // Step 5: vite build
-  console.log("\n=== Step 5/5: vite build ===");
+  // Step 4: vite build
+  console.log("\n=== Step 4/4: vite build ===");
   if (!skipInstall) {
     run("bun install --ignore-scripts", { cwd: appDir });
   }

@@ -94,6 +94,19 @@ attach_dmg_with_retry() {
   return 1
 }
 
+backend_health_probe_status() {
+  local url="$1"
+  curl -sS -o /dev/null -w "%{http_code}" --connect-timeout 3 "$url" 2>/dev/null || printf "000"
+}
+
+backend_health_probe_satisfied() {
+  local url="$1"
+  local status
+  status="$(backend_health_probe_status "$url")"
+  # A 401 still proves the packaged backend is running and enforcing auth.
+  [[ "$status" == "200" || "$status" == "401" ]]
+}
+
 ensure_diagnostics_dir() {
   if [[ -z "$SMOKE_DIAGNOSTICS_DIR" ]]; then
     SMOKE_DIAGNOSTICS_DIR="$(mktemp -d /tmp/milady-smoke-diagnostics.XXXXXX)"
@@ -672,7 +685,7 @@ while [[ $SECONDS -lt $DEADLINE ]]; do
     fi
   fi
   if [[ -n "$BACKEND_PORT" ]]; then
-    if curl -fsS "http://127.0.0.1:${BACKEND_PORT}/api/health" >/dev/null; then
+    if backend_health_probe_satisfied "http://127.0.0.1:${BACKEND_PORT}/api/health"; then
       echo "Backend health check PASSED on port $BACKEND_PORT."
       break
     fi
@@ -690,7 +703,7 @@ if [[ -z "$BACKEND_PORT" ]]; then
   exit 1
 fi
 
-if ! curl -fsS "http://127.0.0.1:${BACKEND_PORT}/api/health" >/dev/null; then
+if ! backend_health_probe_satisfied "http://127.0.0.1:${BACKEND_PORT}/api/health"; then
   echo "ERROR: Backend did not answer /api/health on port $BACKEND_PORT"
   [[ -f "$STARTUP_LOG" ]] && tail -n 120 "$STARTUP_LOG"
   echo ""
@@ -732,7 +745,7 @@ echo "Waiting ${LIVENESS_TIMEOUT}s for liveness..."
 sleep "$LIVENESS_TIMEOUT"
 LIVE_PID="$(find_live_packaged_pid)"
 if [[ -n "$LIVE_PID" ]] && kill -0 "$LIVE_PID" 2>/dev/null; then
-  if curl -fsS "http://127.0.0.1:${BACKEND_PORT}/api/health" >/dev/null; then
+  if backend_health_probe_satisfied "http://127.0.0.1:${BACKEND_PORT}/api/health"; then
     echo "App process ($LIVE_PID) and backend still healthy after ${LIVENESS_TIMEOUT}s — liveness check PASSED."
   else
     echo "ERROR: App stayed open but backend health check failed after ${LIVENESS_TIMEOUT}s."
@@ -743,7 +756,7 @@ if [[ -n "$LIVE_PID" ]] && kill -0 "$LIVE_PID" 2>/dev/null; then
     dump_failure_diagnostics "backend liveness check failed after startup"
     exit 1
   fi
-elif curl -fsS "http://127.0.0.1:${BACKEND_PORT}/api/health" >/dev/null; then
+elif backend_health_probe_satisfied "http://127.0.0.1:${BACKEND_PORT}/api/health"; then
   echo "WARNING: No packaged app process was detected after ${LIVENESS_TIMEOUT}s, but the packaged backend remained healthy."
   echo "         Treating backend liveness as the release gate for this launcher path."
 else

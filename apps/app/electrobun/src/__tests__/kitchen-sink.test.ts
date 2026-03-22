@@ -128,6 +128,11 @@ vi.mock("electrobun/bun", () => {
     localInfo: { version: vi.fn(() => "1.0.0") },
   };
 
+  const mockContextMenu = {
+    on: vi.fn(),
+    showContextMenu: vi.fn(),
+  };
+
   const mockElectrobunEvents = {
     on: vi.fn(),
     off: vi.fn(),
@@ -146,6 +151,7 @@ vi.mock("electrobun/bun", () => {
     Screen: mockScreen,
     Utils: mockUtils,
     Updater: mockUpdater,
+    ContextMenu: mockContextMenu,
     Electrobun: mockElectrobun,
   };
 });
@@ -211,6 +217,15 @@ vi.mock("../native/agent", () => ({
         error: null,
       }),
     ),
+    restartClearingLocalDb: vi.fn(() =>
+      Promise.resolve({
+        state: "running",
+        agentName: "Milady",
+        port: 2138,
+        startedAt: Date.now(),
+        error: null,
+      }),
+    ),
     getStatus: vi.fn(() => ({
       state: "not_started",
       agentName: null,
@@ -227,6 +242,7 @@ vi.mock("../native/agent", () => ({
     start = vi.fn();
     stop = vi.fn();
     restart = vi.fn();
+    restartClearingLocalDb = vi.fn();
     getStatus = vi.fn();
     getPort = vi.fn(() => null);
     setSendToWebview = vi.fn();
@@ -493,9 +509,78 @@ vi.mock("../native/desktop", async () => {
       ),
       quit: vi.fn(() => Promise.resolve()),
       relaunch: vi.fn(() => Promise.resolve()),
+      checkForUpdates: vi.fn(() =>
+        Promise.resolve({
+          currentVersion: "1.0.0",
+          appBundlePath: "/Applications/Milady.app",
+          canAutoUpdate: true,
+          autoUpdateDisabledReason: null,
+          updateAvailable: false,
+          updateReady: false,
+          latestVersion: null,
+          lastStatus: null,
+        }),
+      ),
+      getUpdaterState: vi.fn(() =>
+        Promise.resolve({
+          currentVersion: "1.0.0",
+          appBundlePath: "/Applications/Milady.app",
+          canAutoUpdate: true,
+          autoUpdateDisabledReason: null,
+          updateAvailable: false,
+          updateReady: false,
+          latestVersion: null,
+          lastStatus: null,
+        }),
+      ),
       isPackaged: vi.fn(() => Promise.resolve({ packaged: false })),
+      getBuildInfo: vi.fn(() =>
+        Promise.resolve({
+          platform: "darwin",
+          arch: "arm64",
+          defaultRenderer: "native",
+          availableRenderers: ["native"],
+        }),
+      ),
+      getDockIconVisibility: vi.fn(() => Promise.resolve({ visible: true })),
+      setDockIconVisibility: vi.fn(() => Promise.resolve({ visible: true })),
       getPath: vi.fn(() => Promise.resolve({ path: "/mock/path" })),
+      showSelectionContextMenu: vi.fn(() => Promise.resolve({ shown: true })),
+      getSessionSnapshot: vi.fn(() =>
+        Promise.resolve({
+          partition: "persist:default",
+          persistent: true,
+          cookieCount: 0,
+          cookies: [],
+        }),
+      ),
+      clearSessionData: vi.fn(() =>
+        Promise.resolve({
+          partition: "persist:default",
+          persistent: true,
+          cookieCount: 0,
+          cookies: [],
+        }),
+      ),
+      getWebGpuBrowserStatus: vi.fn(() =>
+        Promise.resolve({
+          available: false,
+          reason: "test",
+          renderer: "native",
+          chromeBetaPath: null,
+          downloadUrl: null,
+        }),
+      ),
+      openReleaseNotesWindow: vi.fn(() =>
+        Promise.resolve({
+          url: "https://milady.ai/releases/",
+          windowId: 1,
+          webviewId: 2,
+        }),
+      ),
       openExternal: vi.fn(() => Promise.resolve()),
+      openSettings: vi.fn(() => Promise.resolve()),
+      openSurfaceWindow: vi.fn(() => Promise.resolve()),
     })),
   };
 });
@@ -604,6 +689,9 @@ describe("Channel mapping — requests", () => {
     expect(CHANNEL_TO_RPC_METHOD["agent:start"]).toBe("agentStart");
     expect(CHANNEL_TO_RPC_METHOD["agent:stop"]).toBe("agentStop");
     expect(CHANNEL_TO_RPC_METHOD["agent:restart"]).toBe("agentRestart");
+    expect(CHANNEL_TO_RPC_METHOD["agent:restartClearLocalDb"]).toBe(
+      "agentRestartClearLocalDb",
+    );
     expect(CHANNEL_TO_RPC_METHOD["agent:status"]).toBe("agentStatus");
   });
 
@@ -3661,10 +3749,9 @@ describe("applyMacOSWindowEffects — native effect constants", () => {
   });
 
   it("drag region constants cover title bar height", () => {
-    // MAC_NATIVE_DRAG_REGION_HEIGHT=40 covers standard title bar
-    const dragHeight = 40;
-    expect(dragHeight).toBeGreaterThanOrEqual(38); // standard macOS title bar
-    expect(dragHeight).toBeLessThanOrEqual(60); // not too tall
+    // MAC_NATIVE_DRAG_REGION_HEIGHT=0 — native per-screen depth (see window-effects.mm)
+    const dragHeight = 0;
+    expect(dragHeight).toBe(0);
   });
 
   it("applyMacOSWindowEffects is a no-op on non-darwin when called via macEffects", () => {
@@ -3683,7 +3770,7 @@ describe("applyMacOSWindowEffects — native effect constants", () => {
         macEffects.setTrafficLightsPosition(fakePtr, 14, 12),
       ).not.toThrow();
       expect(() =>
-        macEffects.setNativeDragRegion(fakePtr, 92, 40),
+        macEffects.setNativeDragRegion(fakePtr, 92, 0),
       ).not.toThrow();
     } finally {
       Object.defineProperty(process, "platform", {
@@ -3699,7 +3786,7 @@ describe("applyMacOSWindowEffects — native effect constants", () => {
 // ============================================================================
 
 describe("Application menu structure — expected items", () => {
-  it("setupApplicationMenu menu definition has Milady, Edit, View, Window menus", () => {
+  it("setupApplicationMenu menu definition includes desktop and surface menus", () => {
     // The menu structure is defined in index.ts setupApplicationMenu.
     // We verify the expected structure as a contract test.
     const menuDef = [
@@ -3707,10 +3794,29 @@ describe("Application menu structure — expected items", () => {
         label: "Milady",
         submenu: [
           { role: "about" },
-          { label: "Show Milady", action: "show" },
           { label: "Check for Updates", action: "check-for-updates" },
+          { label: "Settings...", action: "open-settings" },
           { label: "Restart Agent", action: "restart-agent" },
+          { label: "Relaunch Milady", action: "relaunch" },
+          { label: "Reset Milady…", action: "reset-milady" },
           { role: "quit" },
+        ],
+      },
+      {
+        label: "Desktop",
+        submenu: [
+          { label: "Desktop Workspace", action: "open-settings-desktop" },
+          { label: "Voice Controls", action: "open-settings-voice" },
+          { label: "Media Controls", action: "open-settings-media" },
+          { label: "Show Milady", action: "show" },
+          { label: "Focus Milady", action: "focus-main-window" },
+        ],
+      },
+      {
+        label: "Chat",
+        submenu: [
+          { label: "Show in Main Window", action: "show-main:chat" },
+          { label: "Open New Chat Window", action: "new-window:chat" },
         ],
       },
       {
@@ -3738,17 +3844,23 @@ describe("Application menu structure — expected items", () => {
       },
       {
         label: "Window",
-        submenu: [{ role: "minimize" }],
+        submenu: [
+          { role: "minimize" },
+          { label: "Show Milady", action: "show" },
+          { label: "Focus Milady", action: "focus-main-window" },
+          { label: "New Chat Window", action: "new-window:chat" },
+        ],
       },
     ];
-    expect(menuDef).toHaveLength(4);
+    expect(menuDef).toHaveLength(6);
     expect(menuDef[0].label).toBe("Milady");
     const miladyActions = menuDef[0].submenu
       .filter((i) => "action" in i)
       .map((i) => (i as { action: string }).action);
-    expect(miladyActions).toContain("show");
     expect(miladyActions).toContain("check-for-updates");
+    expect(miladyActions).toContain("open-settings");
     expect(miladyActions).toContain("restart-agent");
+    expect(miladyActions).toContain("reset-milady");
   });
 
   it("Edit menu contains all standard editing roles", () => {
@@ -3760,18 +3872,32 @@ describe("Application menu structure — expected items", () => {
 
   it("tray menu structure has expected item IDs", () => {
     const trayMenu = [
-      { id: "show", label: "Show Milady", type: "normal" },
+      { id: "tray-open-chat", label: "Open Chat", type: "normal" },
+      { id: "tray-open-plugins", label: "Open Plugins", type: "normal" },
+      {
+        id: "tray-open-desktop-workspace",
+        label: "Open Desktop Workspace",
+        type: "normal",
+      },
       { id: "sep1", type: "separator" },
-      { id: "check-for-updates", label: "Check for Updates", type: "normal" },
+      {
+        id: "tray-toggle-lifecycle",
+        label: "Start/Stop Agent",
+        type: "normal",
+      },
+      { id: "tray-restart", label: "Restart Agent", type: "normal" },
+      { id: "tray-notify", label: "Send Test Notification", type: "normal" },
       { id: "sep2", type: "separator" },
-      { id: "restart-agent", label: "Restart Agent", type: "normal" },
+      { id: "tray-show-window", label: "Show Window", type: "normal" },
+      { id: "tray-hide-window", label: "Hide Window", type: "normal" },
       { id: "sep3", type: "separator" },
       { id: "quit", label: "Quit", type: "normal" },
     ];
     const ids = trayMenu.map((i) => i.id);
-    expect(ids).toContain("show");
-    expect(ids).toContain("check-for-updates");
-    expect(ids).toContain("restart-agent");
+    expect(ids).toContain("tray-open-chat");
+    expect(ids).toContain("tray-open-desktop-workspace");
+    expect(ids).toContain("tray-toggle-lifecycle");
+    expect(ids).toContain("tray-restart");
     expect(ids).toContain("quit");
   });
 });
@@ -3862,26 +3988,37 @@ describe("Tray icon and menu (automated)", () => {
     expect(Tray).toHaveBeenCalled();
   });
 
-  it("tray menu contains Show, Check for Updates, Restart Agent, Quit items", () => {
+  it("tray menu contains desktop navigation, lifecycle, and quit items", () => {
     const trayMenu = [
-      { id: "show", label: "Show Milady", type: "normal" as const },
+      { id: "tray-open-chat", label: "Open Chat", type: "normal" as const },
+      {
+        id: "tray-open-desktop-workspace",
+        label: "Open Desktop Workspace",
+        type: "normal" as const,
+      },
       { id: "sep1", type: "separator" as const },
       {
-        id: "check-for-updates",
-        label: "Check for Updates",
+        id: "tray-toggle-lifecycle",
+        label: "Start/Stop Agent",
+        type: "normal" as const,
+      },
+      { id: "tray-restart", label: "Restart Agent", type: "normal" as const },
+      {
+        id: "tray-show-window",
+        label: "Show Window",
         type: "normal" as const,
       },
       { id: "sep2", type: "separator" as const },
-      { id: "restart-agent", label: "Restart Agent", type: "normal" as const },
-      { id: "sep3", type: "separator" as const },
       { id: "quit", label: "Quit", type: "normal" as const },
     ];
     const actionIds = trayMenu
       .filter((i) => i.type === "normal")
       .map((i) => i.id);
-    expect(actionIds).toContain("show");
-    expect(actionIds).toContain("check-for-updates");
-    expect(actionIds).toContain("restart-agent");
+    expect(actionIds).toContain("tray-open-chat");
+    expect(actionIds).toContain("tray-open-desktop-workspace");
+    expect(actionIds).toContain("tray-toggle-lifecycle");
+    expect(actionIds).toContain("tray-restart");
+    expect(actionIds).toContain("tray-show-window");
     expect(actionIds).toContain("quit");
   });
 
@@ -3918,7 +4055,7 @@ describe("Window vibrancy and macOS effects (automated)", () => {
     expect(source).toContain("MAC_TRAFFIC_LIGHTS_Y = 12");
   });
 
-  it("drag region constants are x=92, height=40 in index.ts source", async () => {
+  it("drag region constants are x=92, height=0 (per-screen native) in index.ts source", async () => {
     const fs = await vi.importActual<typeof import("node:fs")>("node:fs");
     const path = await vi.importActual<typeof import("node:path")>("node:path");
     const source = fs.readFileSync(
@@ -3926,7 +4063,7 @@ describe("Window vibrancy and macOS effects (automated)", () => {
       "utf8",
     );
     expect(source).toContain("MAC_NATIVE_DRAG_REGION_X = 92");
-    expect(source).toContain("MAC_NATIVE_DRAG_REGION_HEIGHT = 40");
+    expect(source).toContain("MAC_NATIVE_DRAG_REGION_HEIGHT = 0");
   });
 
   it.todo(
@@ -4379,6 +4516,7 @@ describe("Application menu (automated)", () => {
     );
     expect(menuSource).toContain("check-for-updates");
     expect(menuSource).toContain("restart-agent");
+    expect(menuSource).toContain("reset-milady");
   });
 
   it("Edit menu includes undo, redo, cut, copy, paste, selectAll roles", async () => {
@@ -4412,6 +4550,19 @@ describe("Application menu (automated)", () => {
       "utf8",
     );
     expect(indexSource).toContain('"check-for-updates"');
+  });
+
+  it("reset-milady menu action wires main-process reset and applied payload (see menu-reset-from-main.test.ts for behavior)", async () => {
+    const fs = await vi.importActual<typeof import("node:fs")>("node:fs");
+    const path = await vi.importActual<typeof import("node:path")>("node:path");
+    const indexSource = fs.readFileSync(
+      path.resolve(__dirname, "../index.ts"),
+      "utf8",
+    );
+    expect(indexSource).toContain('"reset-milady"');
+    expect(indexSource).toContain("resetMiladyFromApplicationMenu");
+    expect(indexSource).toContain("runMainMenuResetAfterApiBaseResolved");
+    expect(indexSource).toContain("menu-reset-milady-applied");
   });
 
   it.todo("Keyboard shortcut Cmd+Q triggers quit (e2e)");
@@ -4571,6 +4722,14 @@ describe("Agent lifecycle (automated)", () => {
     expect(status.state).toBe("running");
   });
 
+  it("agentRestartClearLocalDb returns running status", async () => {
+    const { handlers } = await captureHandlers();
+    const status = (await handlers.agentRestartClearLocalDb()) as {
+      state: string;
+    };
+    expect(status.state).toBe("running");
+  });
+
   it("agentStatus returns current status shape", async () => {
     const { handlers } = await captureHandlers();
     const status = (await handlers.agentStatus()) as {
@@ -4639,4 +4798,25 @@ describe("Updater (automated)", () => {
   it.todo("Check for updates contacts the release server (network)");
   it.todo("Applying update relaunches the app (e2e)");
   it.todo("Update check works on both canary and stable channels (network)");
+});
+
+describe("RPC handler delegation — desktop", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("desktopOpenSurfaceWindow ignores invalid surfaces", async () => {
+    const desktopModule = await import("../native/desktop");
+    const getDesktopManagerMock = desktopModule.getDesktopManager as Mock;
+
+    getDesktopManagerMock.mockClear();
+    const { handlers } = await captureHandlers();
+    const manager = getDesktopManagerMock.mock.results.at(-1)?.value;
+
+    expect(manager).toBeDefined();
+    await expect(
+      handlers.desktopOpenSurfaceWindow?.({ surface: "evil" } as never),
+    ).resolves.toBeUndefined();
+    expect(manager?.openSurfaceWindow).not.toHaveBeenCalled();
+  });
 });

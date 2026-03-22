@@ -1,0 +1,976 @@
+// @vitest-environment jsdom
+/**
+ * End-to-end tests for the full onboarding journey:
+ *
+ * 1. Progress through every onboarding step and land on the character
+ *    editor / avatar creator (character-select tab).
+ * 2. Reset the agent, return to onboarding, and complete a second pass
+ *    cleanly — proving the full reset cycle works.
+ */
+import React from "react";
+import TestRenderer, { act } from "react-test-renderer";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+type OnboardingStep =
+  | "welcome"
+  | "identity"
+  | "connection"
+  | "rpc"
+  | "senses"
+  | "activate";
+
+type FlaminaGuideTopic = "provider" | "rpc" | "permissions" | "voice";
+
+type AppHarnessState = {
+  onboardingLoading: boolean;
+  startupStatus:
+    | "loading"
+    | "onboarding"
+    | "ready"
+    | "auth-blocked"
+    | "recoverable-error";
+  startupError: null;
+  authRequired: boolean;
+  onboardingComplete: boolean;
+  tab: string;
+  actionNotice: null;
+  onboardingStep: OnboardingStep;
+  onboardingMode: "basic" | "advanced";
+  onboardingActiveGuide: FlaminaGuideTopic | null;
+  onboardingDeferredTasks: FlaminaGuideTopic[];
+  postOnboardingChecklistDismissed: boolean;
+  onboardingOptions: ReturnType<typeof onboardingOptions> | null;
+  onboardingName: string;
+  onboardingStyle: string;
+  onboardingTheme: string;
+  onboardingRunMode: "local" | "cloud" | "";
+  onboardingCloudProvider: string;
+  onboardingSmallModel: string;
+  onboardingLargeModel: string;
+  onboardingProvider: string;
+  onboardingApiKey: string;
+  onboardingRemoteApiBase: string;
+  onboardingRemoteToken: string;
+  onboardingRemoteConnecting: boolean;
+  onboardingRemoteError: string;
+  onboardingRemoteConnected: boolean;
+  onboardingOpenRouterModel: string;
+  onboardingPrimaryModel: string;
+  onboardingTelegramToken: string;
+  onboardingDiscordToken: string;
+  onboardingTwilioAccountSid: string;
+  onboardingTwilioAuthToken: string;
+  onboardingTwilioPhoneNumber: string;
+  onboardingBlooioApiKey: string;
+  onboardingBlooioPhoneNumber: string;
+  onboardingSubscriptionTab: "token" | "oauth";
+  onboardingSelectedChains: Set<string>;
+  onboardingRpcSelections: Record<string, string>;
+  onboardingRpcKeys: Record<string, string>;
+  onboardingAvatar: number;
+  selectedVrmIndex: number;
+  customBackgroundUrl: string;
+  onboardingRestarting: boolean;
+  elizaCloudConnected: boolean;
+  elizaCloudLoginBusy: boolean;
+  elizaCloudLoginError: string;
+  elizaCloudUserId: string;
+  uiShellMode: string;
+  plugins: unknown[];
+  conversations: unknown[];
+  elizaCloudCredits: null;
+  agentStatus: null;
+  [key: string]: unknown;
+};
+
+// ── Hoisted mocks ─────────────────────────────────────────────────────
+
+const { companionOverlayTabs, mockUseApp } = vi.hoisted(() => ({
+  companionOverlayTabs: new Set([
+    "companion",
+    "skills",
+    "character",
+    "character-select",
+    "settings",
+    "plugins",
+    "advanced",
+    "actions",
+    "triggers",
+    "fine-tuning",
+    "trajectories",
+    "runtime",
+    "database",
+    "logs",
+    "security",
+    "apps",
+    "connectors",
+    "knowledge",
+    "lifo",
+    "stream",
+    "wallets",
+  ]),
+  mockUseApp: vi.fn(),
+}));
+
+vi.mock("@miladyai/app-core/state", async () => {
+  const actual = await vi.importActual("@miladyai/app-core/state");
+  return {
+    ...actual,
+    useApp: () => mockUseApp(),
+  };
+});
+
+vi.mock("@miladyai/app-core/components", async () => {
+  const actual = await vi.importActual<
+    typeof import("@miladyai/app-core/components")
+  >("@miladyai/app-core/components");
+  return {
+    ...actual,
+    AdvancedPageView: () =>
+      React.createElement("div", null, "AdvancedPageView"),
+    AppsPageView: () => React.createElement("div", null, "AppsPageView"),
+    CharacterEditor: () => React.createElement("div", null, "CharacterEditor"),
+    ChatView: () => React.createElement("div", null, "ChatView"),
+    ConnectorsPageView: () =>
+      React.createElement("div", null, "ConnectorsPageView"),
+    CommandPalette: () => React.createElement("div", null, "CommandPalette"),
+    CompanionShell: ({ tab }: { tab: string }) =>
+      React.createElement("main", null, `CompanionShell:${tab}`),
+    CompanionView: () => React.createElement("div", null, "CompanionView"),
+    ConversationsSidebar: () =>
+      React.createElement("div", null, "ConversationsSidebar"),
+    CustomActionEditor: () =>
+      React.createElement("div", null, "CustomActionEditor"),
+    CustomActionsPanel: () =>
+      React.createElement("div", null, "CustomActionsPanel"),
+    EmotePicker: () => React.createElement("div", null, "EmotePicker"),
+    Header: () => React.createElement("div", null, "Header"),
+    InventoryView: () => React.createElement("div", null, "InventoryView"),
+    KnowledgeView: () => React.createElement("div", null, "KnowledgeView"),
+    LifoSandboxView: () =>
+      React.createElement("div", null, "LifoSandboxView"),
+    OnboardingWizard: () => {
+      const state = mockUseApp();
+      if (state.onboardingStep === "welcome") {
+        return React.createElement(
+          "button",
+          {
+            onClick: () => state.handleOnboardingNext(),
+            type: "button",
+          },
+          "onboarding.getStarted",
+        );
+      }
+      if (state.onboardingStep === "identity") {
+        return React.createElement(
+          "div",
+          { "data-testid": "identity-step" },
+          React.createElement(
+            "div",
+            { "data-testid": "character-roster" },
+            `roster:avatar-${state.selectedVrmIndex ?? 1}`,
+          ),
+          React.createElement(
+            "button",
+            {
+              onClick: () => {
+                // Simulate selecting a character with avatar
+                state.setState?.("onboardingStyle", "chaotic");
+                state.setState?.("onboardingName", "TestAgent");
+                state.setState?.("selectedVrmIndex", 2);
+                state.handleOnboardingNext();
+              },
+              type: "button",
+            },
+            "onboarding.chooseAgent",
+          ),
+        );
+      }
+      if (state.onboardingStep === "connection") {
+        if (!state.onboardingRunMode) {
+          return React.createElement(
+            "button",
+            {
+              onClick: () => {
+                state.setState?.("onboardingRunMode", "local");
+              },
+              type: "button",
+            },
+            "onboarding.hostingLocal",
+          );
+        }
+        return React.createElement(
+          "button",
+          {
+            onClick: () => state.handleOnboardingNext(),
+            type: "button",
+          },
+          "onboarding.confirm",
+        );
+      }
+      if (state.onboardingStep === "rpc") {
+        return React.createElement(
+          "button",
+          {
+            onClick: () => state.handleOnboardingNext(),
+            type: "button",
+          },
+          "onboarding.rpcSkip",
+        );
+      }
+      if (state.onboardingStep === "senses") {
+        return React.createElement(
+          "button",
+          {
+            onClick: () => state.handleOnboardingNext(),
+            type: "button",
+          },
+          "permissions-continue",
+        );
+      }
+      // activate
+      return React.createElement(
+        "button",
+        {
+          onClick: () => state.handleOnboardingNext(),
+          type: "button",
+        },
+        "onboarding.enter",
+      );
+    },
+    PairingView: () => React.createElement("div", null, "PairingView"),
+    PermissionsOnboardingSection: ({
+      onContinue,
+    }: {
+      onContinue: (options?: { allowPermissionBypass?: boolean }) => void;
+    }) =>
+      React.createElement(
+        "button",
+        { onClick: () => onContinue(), type: "button" },
+        "permissions-continue",
+      ),
+    SettingsView: () => React.createElement("div", null, "SettingsView"),
+    SharedCompanionScene: ({
+      children,
+    }: {
+      active: boolean;
+      children: React.ReactNode;
+    }) => React.createElement(React.Fragment, null, children),
+    ShellOverlays: () => null,
+    StreamView: () => React.createElement("div", null, "StreamView"),
+  };
+});
+
+vi.mock("@miladyai/app-core/src/components/Header", () => ({
+  Header: () => React.createElement("div", null, "Header"),
+}));
+vi.mock("@miladyai/app-core/src/components/Nav", () => ({
+  Nav: () => React.createElement("div", null, "Nav"),
+}));
+vi.mock("@miladyai/app-core/src/components/CommandPalette", () => ({
+  CommandPalette: () => React.createElement("div", null, "CommandPalette"),
+}));
+vi.mock("@miladyai/app-core/src/components/EmotePicker", () => ({
+  EmotePicker: () => React.createElement("div", null, "EmotePicker"),
+}));
+vi.mock(
+  "@miladyai/app-core/src/components/onboarding/PermissionsStep",
+  () => ({
+    PermissionsStep: () =>
+      React.createElement(
+        "button",
+        {
+          onClick: () => mockUseApp().handleOnboardingNext(),
+          type: "button",
+        },
+        "permissions-continue",
+      ),
+  }),
+);
+vi.mock("@miladyai/app-core/src/components/ConversationsSidebar", () => ({
+  ConversationsSidebar: () =>
+    React.createElement("div", null, "ConversationsSidebar"),
+}));
+vi.mock("@miladyai/app-core/src/components/CustomActionsPanel", () => ({
+  CustomActionsPanel: () =>
+    React.createElement("div", null, "CustomActionsPanel"),
+}));
+vi.mock("@miladyai/app-core/src/components/CustomActionEditor", () => ({
+  CustomActionEditor: () =>
+    React.createElement("div", null, "CustomActionEditor"),
+}));
+vi.mock("@miladyai/app-core/src/components/AppsPageView", () => ({
+  AppsPageView: () => React.createElement("div", null, "AppsPageView"),
+}));
+vi.mock("@miladyai/app-core/src/components/AdvancedPageView", () => ({
+  AdvancedPageView: () =>
+    React.createElement("div", null, "AdvancedPageView"),
+}));
+vi.mock("@miladyai/app-core/src/components/CharacterEditor", () => ({
+  CharacterEditor: () => React.createElement("div", null, "CharacterEditor"),
+}));
+vi.mock("@miladyai/app-core/src/components/TriggersView", () => ({
+  TriggersView: () => React.createElement("div", null, "TriggersView"),
+}));
+vi.mock("@miladyai/app-core/src/components/ConnectorsPageView", () => ({
+  ConnectorsPageView: () =>
+    React.createElement("div", null, "ConnectorsPageView"),
+}));
+vi.mock("@miladyai/app-core/src/components/InventoryView", () => ({
+  InventoryView: () => React.createElement("div", null, "InventoryView"),
+}));
+vi.mock("@miladyai/app-core/src/components/KnowledgeView", () => ({
+  KnowledgeView: () => React.createElement("div", null, "KnowledgeView"),
+}));
+vi.mock("@miladyai/app-core/src/components/LifoSandboxView", () => ({
+  LifoSandboxView: () =>
+    React.createElement("div", null, "LifoSandboxView"),
+}));
+vi.mock("@miladyai/app-core/src/components/PairingView", () => ({
+  PairingView: () => React.createElement("div", null, "PairingView"),
+}));
+vi.mock("@miladyai/app-core/src/components/ChatView", () => ({
+  ChatView: () => React.createElement("div", null, "ChatView"),
+}));
+vi.mock("@miladyai/app-core/components/AvatarLoader", () => ({
+  AvatarLoader: () => React.createElement("div", null, "AvatarLoader"),
+}));
+vi.mock("@miladyai/app-core/src/components/CompanionView", () => ({
+  CompanionView: () => React.createElement("div", null, "CompanionView"),
+}));
+vi.mock("@miladyai/app-core/src/components/ChatModalView.js", () => ({
+  ChatModalView: () => React.createElement("div", null, "ChatModalView"),
+}));
+vi.mock("@miladyai/app-core/src/components/AvatarSelector", () => ({
+  AvatarSelector: () => React.createElement("div", null, "AvatarSelector"),
+}));
+vi.mock("@miladyai/app-core/src/components/companion/VrmStage", () => ({
+  VrmStage: () => React.createElement("div", null, "VrmStage"),
+}));
+vi.mock("@miladyai/app-core/src/components/StreamView", () => ({
+  StreamView: () => React.createElement("div", null, "StreamView"),
+}));
+vi.mock("@miladyai/app-core/src/components/CompanionShell", () => ({
+  COMPANION_OVERLAY_TABS: companionOverlayTabs,
+  CompanionShell: ({ tab }: { tab: string }) =>
+    React.createElement("main", null, `CompanionShell:${tab}`),
+  useCompanionShell: () => ({}),
+}));
+
+vi.mock(
+  "@miladyai/app-core/src/components/companion/CompanionSceneHost",
+  async () => {
+    const React = await vi.importActual<typeof import("react")>("react");
+    return {
+      SharedCompanionScene: ({
+        children,
+      }: {
+        active: boolean;
+        children: React.ReactNode;
+      }) => React.createElement(React.Fragment, null, children),
+      CompanionSceneHost: () => null,
+      useSharedCompanionScene: () => true,
+    };
+  },
+);
+
+import { App } from "@miladyai/app-core/src/App";
+
+// ── Helpers ──────────────────────────────────────────────────────────
+
+function onboardingOptions() {
+  return {
+    names: ["Eliza"],
+    styles: [
+      {
+        catchphrase: "chaotic",
+        hint: "chaotic good",
+        bio: ["bio"],
+        system: "You are {{name}}",
+        style: { all: [], chat: [], post: [] },
+        adjectives: [],
+        postExamples: [],
+        messageExamples: [[{ name: "User", content: { text: "hello" } }]],
+      },
+    ],
+    providers: [
+      {
+        id: "ollama",
+        name: "Ollama",
+        envKey: null,
+        pluginName: "@elizaos/plugin-ollama",
+        keyPrefix: null,
+        description: "Use local Ollama",
+      },
+    ],
+    cloudProviders: [
+      {
+        id: "openrouter",
+        name: "OpenRouter",
+        description: "Cloud provider",
+      },
+    ],
+    models: {
+      small: [
+        {
+          id: "small-model",
+          name: "Small",
+          provider: "openrouter",
+          description: "small",
+        },
+      ],
+      large: [
+        {
+          id: "large-model",
+          name: "Large",
+          provider: "openrouter",
+          description: "large",
+        },
+      ],
+    },
+    inventoryProviders: [
+      {
+        id: "evm",
+        name: "EVM",
+        description: "EVM chains",
+        rpcProviders: [
+          {
+            id: "elizacloud",
+            name: "Eliza Cloud",
+            description: "Managed RPC",
+            envKey: null,
+            requiresKey: false,
+          },
+        ],
+      },
+    ],
+    sharedStyleRules: "",
+  };
+}
+
+function createHarnessState(
+  overrides?: Partial<AppHarnessState>,
+): AppHarnessState {
+  return {
+    onboardingLoading: false,
+    startupStatus: "onboarding",
+    startupError: null,
+    authRequired: false,
+    onboardingComplete: false,
+    tab: "chat",
+    actionNotice: null,
+    onboardingStep: "identity",
+    onboardingMode: "basic",
+    onboardingActiveGuide: null,
+    onboardingDeferredTasks: [],
+    postOnboardingChecklistDismissed: false,
+    onboardingOptions: onboardingOptions(),
+    onboardingName: "Eliza",
+    onboardingStyle: "",
+    onboardingTheme: "eliza",
+    onboardingRunMode: "",
+    onboardingCloudProvider: "",
+    onboardingSmallModel: "small-model",
+    onboardingLargeModel: "large-model",
+    onboardingProvider: "",
+    onboardingApiKey: "",
+    onboardingRemoteApiBase: "",
+    onboardingRemoteToken: "",
+    onboardingRemoteConnecting: false,
+    onboardingRemoteError: "",
+    onboardingRemoteConnected: false,
+    onboardingOpenRouterModel: "",
+    onboardingPrimaryModel: "",
+    onboardingTelegramToken: "",
+    onboardingDiscordToken: "",
+    onboardingTwilioAccountSid: "",
+    onboardingTwilioAuthToken: "",
+    onboardingTwilioPhoneNumber: "",
+    onboardingBlooioApiKey: "",
+    onboardingBlooioPhoneNumber: "",
+    onboardingSubscriptionTab: "token",
+    onboardingSelectedChains: new Set(["evm"]),
+    onboardingRpcSelections: {},
+    onboardingRpcKeys: {},
+    onboardingAvatar: 1,
+    selectedVrmIndex: 1,
+    customBackgroundUrl: "",
+    onboardingRestarting: false,
+    elizaCloudConnected: false,
+    elizaCloudLoginBusy: false,
+    elizaCloudLoginError: "",
+    elizaCloudUserId: "",
+    plugins: [],
+    conversations: [],
+    elizaCloudCredits: null,
+    uiShellMode: "native",
+    agentStatus: null,
+    ...overrides,
+  };
+}
+
+function textOf(node: TestRenderer.ReactTestInstance): string {
+  return node.children
+    .map((child) => (typeof child === "string" ? child : textOf(child)))
+    .join("");
+}
+
+function hasText(
+  node: TestRenderer.ReactTestInstance,
+  target: string,
+): boolean {
+  return textOf(node).includes(target);
+}
+
+function clickButton(
+  tree: TestRenderer.ReactTestRenderer,
+  labelFragment: string,
+): void {
+  const button = tree.root.findAll(
+    (node) => node.type === "button" && hasText(node, labelFragment),
+  )[0];
+  if (!button) {
+    throw new Error(`Button containing "${labelFragment}" not found`);
+  }
+  button.props.onClick();
+}
+
+async function rerender(tree: TestRenderer.ReactTestRenderer): Promise<void> {
+  await act(async () => {
+    tree.update(React.createElement(App));
+  });
+}
+
+const STEP_ORDER: OnboardingStep[] = [
+  "identity",
+  "connection",
+  "rpc",
+  "senses",
+  "activate",
+];
+
+function setupMock(state: AppHarnessState) {
+  const handleOnboardingNext = vi.fn(async () => {
+    if (state.onboardingStep === "activate") {
+      state.onboardingComplete = true;
+      state.startupStatus = "ready";
+      state.uiShellMode = "native";
+      state.tab = "character-select";
+      return;
+    }
+    const idx = STEP_ORDER.indexOf(state.onboardingStep);
+    if (idx >= 0 && idx < STEP_ORDER.length - 1) {
+      state.onboardingStep = STEP_ORDER[idx + 1];
+    }
+  });
+
+  const handleOnboardingBack = vi.fn(() => {
+    const idx = STEP_ORDER.indexOf(state.onboardingStep);
+    if (idx > 0) {
+      state.onboardingStep = STEP_ORDER[idx - 1];
+    }
+  });
+
+  const handleReset = vi.fn(async () => {
+    // Simulate the real handleReset — wipes state and returns to onboarding
+    state.onboardingComplete = false;
+    state.startupStatus = "onboarding";
+    state.onboardingStep = "identity";
+    state.onboardingStyle = "";
+    state.onboardingName = "Eliza";
+    state.onboardingRunMode = "";
+    state.onboardingProvider = "";
+    state.onboardingApiKey = "";
+    state.selectedVrmIndex = 1;
+    state.onboardingDeferredTasks = [];
+    state.conversations = [];
+    state.plugins = [];
+    state.tab = "chat";
+    state.agentStatus = null;
+  });
+
+  mockUseApp.mockReset();
+  mockUseApp.mockImplementation(() => ({
+    t: (k: string) => k,
+    ...state,
+    setState: (key: string, value: unknown) => {
+      state[key] = value;
+    },
+    setTheme: (theme: string) => {
+      state.onboardingTheme = theme;
+    },
+    setTab: (tab: string) => {
+      state.tab = tab;
+    },
+    handleOnboardingNext,
+    handleOnboardingBack,
+    handleOnboardingJumpToStep: vi.fn(),
+    goToOnboardingStep: vi.fn(),
+    handleReset,
+    handleCloudLogin: vi.fn(async () => {
+      state.elizaCloudConnected = true;
+      state.elizaCloudUserId = "test-user";
+    }),
+    handleOnboardingRemoteConnect: vi.fn(async () => {}),
+    handleOnboardingUseLocalBackend: vi.fn(),
+    requestGreeting: vi.fn(async () => ({
+      text: "hello",
+      agentName: "Eliza",
+      generated: true,
+      persisted: false,
+    })),
+  }));
+
+  return { handleOnboardingNext, handleOnboardingBack, handleReset };
+}
+
+/** Drive through every onboarding step until completion. */
+async function driveOnboardingToCompletion(
+  tree: TestRenderer.ReactTestRenderer,
+  state: AppHarnessState,
+) {
+  for (let i = 0; i < 25 && !state.onboardingComplete; i += 1) {
+    if (
+      state.onboardingStep === "connection" &&
+      state.onboardingRunMode === "local" &&
+      !state.onboardingProvider
+    ) {
+      state.onboardingProvider = "ollama";
+      await rerender(tree);
+    }
+
+    if (state.onboardingStep === "identity") {
+      clickButton(tree, "onboarding.chooseAgent");
+    } else if (state.onboardingStep === "connection") {
+      if (!state.onboardingRunMode) {
+        clickButton(tree, "onboarding.hostingLocal");
+      } else {
+        clickButton(tree, "onboarding.confirm");
+      }
+    } else if (state.onboardingStep === "rpc") {
+      clickButton(tree, "onboarding.rpcSkip");
+    } else if (state.onboardingStep === "senses") {
+      clickButton(tree, "permissions-continue");
+    } else if (state.onboardingStep === "activate") {
+      clickButton(tree, "onboarding.enter");
+    }
+    await rerender(tree);
+  }
+}
+
+// =====================================================================
+//  1. Full onboarding journey → avatar creator
+// =====================================================================
+
+describe("onboarding journey to avatar creator (e2e)", () => {
+  let state: AppHarnessState;
+
+  beforeEach(() => {
+    state = createHarnessState();
+    setupMock(state);
+  });
+
+  it("progresses through all onboarding steps and reaches the character editor", async () => {
+    let tree: TestRenderer.ReactTestRenderer | null = null;
+
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(App));
+    });
+    if (!tree) throw new Error("failed to render App");
+
+    // Verify we start in onboarding
+    expect(state.onboardingComplete).toBe(false);
+    expect(textOf(tree.root)).not.toContain("CharacterEditor");
+
+    await driveOnboardingToCompletion(tree, state);
+
+    expect(state.onboardingComplete).toBe(true);
+    expect(state.startupStatus).toBe("ready");
+
+    // After onboarding finishes, the tab should be character-select
+    // which renders the CharacterView (avatar creator / character editor)
+    expect(state.tab).toBe("character-select");
+
+    const renderedText = textOf(tree.root);
+    expect(renderedText).toContain("CharacterEditor");
+    expect(renderedText).not.toContain("OnboardingWizard");
+
+    tree.unmount();
+  });
+
+  it("identity step selects an avatar and carries it through to completion", async () => {
+    let tree: TestRenderer.ReactTestRenderer | null = null;
+
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(App));
+    });
+    if (!tree) throw new Error("failed to render App");
+
+    // At identity step, the roster should show current avatar
+    expect(state.onboardingStep).toBe("identity");
+    expect(textOf(tree.root)).toContain("roster:avatar-1");
+
+    // Click choose agent — this sets avatar to 2, name to TestAgent
+    clickButton(tree, "onboarding.chooseAgent");
+    await rerender(tree);
+
+    // Avatar selection should be persisted in state
+    expect(state.selectedVrmIndex).toBe(2);
+    expect(state.onboardingName).toBe("TestAgent");
+    expect(state.onboardingStyle).toBe("chaotic");
+
+    // Finish the rest of the onboarding
+    await driveOnboardingToCompletion(tree, state);
+
+    // Avatar index should still be 2 after finishing onboarding
+    expect(state.selectedVrmIndex).toBe(2);
+    expect(state.onboardingComplete).toBe(true);
+
+    tree.unmount();
+  });
+
+  it("each onboarding step is visited in order", async () => {
+    const visitedSteps: OnboardingStep[] = [];
+
+    let tree: TestRenderer.ReactTestRenderer | null = null;
+
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(App));
+    });
+    if (!tree) throw new Error("failed to render App");
+
+    for (let i = 0; i < 25 && !state.onboardingComplete; i += 1) {
+      if (!visitedSteps.includes(state.onboardingStep)) {
+        visitedSteps.push(state.onboardingStep);
+      }
+
+      if (
+        state.onboardingStep === "connection" &&
+        state.onboardingRunMode === "local" &&
+        !state.onboardingProvider
+      ) {
+        state.onboardingProvider = "ollama";
+        await rerender(tree);
+      }
+
+      if (state.onboardingStep === "identity") {
+        clickButton(tree, "onboarding.chooseAgent");
+      } else if (state.onboardingStep === "connection") {
+        if (!state.onboardingRunMode) {
+          clickButton(tree, "onboarding.hostingLocal");
+        } else {
+          clickButton(tree, "onboarding.confirm");
+        }
+      } else if (state.onboardingStep === "rpc") {
+        clickButton(tree, "onboarding.rpcSkip");
+      } else if (state.onboardingStep === "senses") {
+        clickButton(tree, "permissions-continue");
+      } else if (state.onboardingStep === "activate") {
+        clickButton(tree, "onboarding.enter");
+      }
+      await rerender(tree);
+    }
+
+    expect(visitedSteps).toEqual([
+      "identity",
+      "connection",
+      "rpc",
+      "senses",
+      "activate",
+    ]);
+
+    tree.unmount();
+  });
+
+  it("navigating to character-select after onboarding shows CharacterView", async () => {
+    // Start already completed
+    state.onboardingComplete = true;
+    state.startupStatus = "ready";
+    state.tab = "character-select";
+    state.uiShellMode = "native";
+
+    let tree: TestRenderer.ReactTestRenderer | null = null;
+
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(App));
+    });
+    if (!tree) throw new Error("failed to render App");
+
+    const renderedText = textOf(tree.root);
+    expect(renderedText).toContain("CharacterEditor");
+    expect(renderedText).not.toContain("OnboardingWizard");
+    expect(renderedText).not.toContain("CompanionView");
+
+    tree.unmount();
+  });
+});
+
+// =====================================================================
+//  2. Full agent reset → re-onboarding cycle
+// =====================================================================
+
+describe("agent reset and re-onboarding (e2e)", () => {
+  let state: AppHarnessState;
+  let mocks: ReturnType<typeof setupMock>;
+
+  beforeEach(() => {
+    state = createHarnessState();
+    mocks = setupMock(state);
+  });
+
+  it("reset clears all state and returns to onboarding", async () => {
+    let tree: TestRenderer.ReactTestRenderer | null = null;
+
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(App));
+    });
+    if (!tree) throw new Error("failed to render App");
+
+    // Complete onboarding first
+    await driveOnboardingToCompletion(tree, state);
+    expect(state.onboardingComplete).toBe(true);
+    expect(state.tab).toBe("character-select");
+
+    // Now reset the agent
+    await act(async () => {
+      await mocks.handleReset();
+    });
+    await rerender(tree);
+
+    // Verify state was wiped
+    expect(state.onboardingComplete).toBe(false);
+    expect(state.startupStatus).toBe("onboarding");
+    expect(state.onboardingStep).toBe("identity");
+    expect(state.onboardingStyle).toBe("");
+    expect(state.onboardingRunMode).toBe("");
+    expect(state.onboardingProvider).toBe("");
+    expect(state.selectedVrmIndex).toBe(1);
+    expect(state.conversations).toEqual([]);
+    expect(state.plugins).toEqual([]);
+
+    // UI should show onboarding again
+    const renderedText = textOf(tree.root);
+    expect(renderedText).not.toContain("CharacterEditor");
+    expect(renderedText).not.toContain("ChatView");
+
+    tree.unmount();
+  });
+
+  it("can complete a full onboarding after reset", async () => {
+    let tree: TestRenderer.ReactTestRenderer | null = null;
+
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(App));
+    });
+    if (!tree) throw new Error("failed to render App");
+
+    // First pass: complete onboarding
+    await driveOnboardingToCompletion(tree, state);
+    expect(state.onboardingComplete).toBe(true);
+
+    // Reset
+    await act(async () => {
+      await mocks.handleReset();
+    });
+    await rerender(tree);
+    expect(state.onboardingComplete).toBe(false);
+
+    // Second pass: complete onboarding again from scratch
+    await driveOnboardingToCompletion(tree, state);
+
+    expect(state.onboardingComplete).toBe(true);
+    expect(state.startupStatus).toBe("ready");
+    expect(state.tab).toBe("character-select");
+
+    const renderedText = textOf(tree.root);
+    expect(renderedText).toContain("CharacterEditor");
+
+    tree.unmount();
+  });
+
+  it("reset preserves the ability to select a different avatar on re-onboarding", async () => {
+    let tree: TestRenderer.ReactTestRenderer | null = null;
+
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(App));
+    });
+    if (!tree) throw new Error("failed to render App");
+
+    // First pass: identity step sets avatar to 2
+    clickButton(tree, "onboarding.chooseAgent");
+    await rerender(tree);
+    expect(state.selectedVrmIndex).toBe(2);
+
+    // Complete the rest
+    await driveOnboardingToCompletion(tree, state);
+    expect(state.onboardingComplete).toBe(true);
+
+    // Reset — avatar should go back to default
+    await act(async () => {
+      await mocks.handleReset();
+    });
+    await rerender(tree);
+    expect(state.selectedVrmIndex).toBe(1);
+
+    // Second pass: the identity step should show default avatar
+    expect(state.onboardingStep).toBe("identity");
+    expect(textOf(tree.root)).toContain("roster:avatar-1");
+
+    tree.unmount();
+  });
+
+  it("reset during mid-onboarding returns to the first step", async () => {
+    let tree: TestRenderer.ReactTestRenderer | null = null;
+
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(App));
+    });
+    if (!tree) throw new Error("failed to render App");
+
+    // Advance partway through onboarding (to connection step)
+    clickButton(tree, "onboarding.chooseAgent");
+    await rerender(tree);
+    expect(state.onboardingStep).toBe("connection");
+
+    // Reset mid-flow
+    await act(async () => {
+      await mocks.handleReset();
+    });
+    await rerender(tree);
+
+    // Should be back at the start
+    expect(state.onboardingStep).toBe("identity");
+    expect(state.onboardingComplete).toBe(false);
+    expect(state.onboardingStyle).toBe("");
+
+    tree.unmount();
+  });
+
+  it("multiple resets do not corrupt state", async () => {
+    let tree: TestRenderer.ReactTestRenderer | null = null;
+
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(App));
+    });
+    if (!tree) throw new Error("failed to render App");
+
+    for (let cycle = 0; cycle < 3; cycle += 1) {
+      // Complete onboarding
+      await driveOnboardingToCompletion(tree, state);
+      expect(state.onboardingComplete).toBe(true);
+
+      // Reset
+      await act(async () => {
+        await mocks.handleReset();
+      });
+      await rerender(tree);
+      expect(state.onboardingComplete).toBe(false);
+      expect(state.onboardingStep).toBe("identity");
+    }
+
+    // One final completion to prove it still works
+    await driveOnboardingToCompletion(tree, state);
+    expect(state.onboardingComplete).toBe(true);
+    expect(textOf(tree.root)).toContain("CharacterEditor");
+  });
+});

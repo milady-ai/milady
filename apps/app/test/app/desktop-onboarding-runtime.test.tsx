@@ -11,16 +11,17 @@ const { invokeDesktopBridgeRequestMock, isElectrobunRuntimeMock, useAppMock } =
     useAppMock: vi.fn(),
   }));
 
-vi.mock("@elizaos/app-core/bridge", () => ({
+vi.mock("@miladyai/app-core/bridge", () => ({
   invokeDesktopBridgeRequest: invokeDesktopBridgeRequestMock,
   isElectrobunRuntime: isElectrobunRuntimeMock,
 }));
 
-vi.mock("@elizaos/app-core/state", () => ({
+vi.mock("@miladyai/app-core/state", () => ({
   useApp: useAppMock,
+  CUSTOM_ONBOARDING_STEPS: [],
 }));
 
-import { DesktopOnboardingRuntime } from "../../src/DesktopOnboardingRuntime";
+import { DesktopOnboardingRuntime } from "@miladyai/app-core/shell";
 
 describe("DesktopOnboardingRuntime", () => {
   beforeEach(() => {

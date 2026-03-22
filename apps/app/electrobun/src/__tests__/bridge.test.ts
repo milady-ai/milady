@@ -10,6 +10,9 @@ describe("CHANNEL_TO_RPC_METHOD mapping", () => {
     expect(CHANNEL_TO_RPC_METHOD["agent:start"]).toBe("agentStart");
     expect(CHANNEL_TO_RPC_METHOD["agent:stop"]).toBe("agentStop");
     expect(CHANNEL_TO_RPC_METHOD["agent:restart"]).toBe("agentRestart");
+    expect(CHANNEL_TO_RPC_METHOD["agent:restartClearLocalDb"]).toBe(
+      "agentRestartClearLocalDb",
+    );
     expect(CHANNEL_TO_RPC_METHOD["agent:status"]).toBe("agentStatus");
   });
 
@@ -59,6 +62,24 @@ describe("CHANNEL_TO_RPC_METHOD mapping", () => {
   it("maps the background notice channel correctly", () => {
     expect(CHANNEL_TO_RPC_METHOD["desktop:showBackgroundNotice"]).toBe(
       "desktopShowBackgroundNotice",
+    );
+  });
+
+  it("maps detached settings and surface window channels correctly", () => {
+    expect(CHANNEL_TO_RPC_METHOD["desktop:openSettingsWindow"]).toBe(
+      "desktopOpenSettingsWindow",
+    );
+    expect(CHANNEL_TO_RPC_METHOD["desktop:openSurfaceWindow"]).toBe(
+      "desktopOpenSurfaceWindow",
+    );
+    expect(CHANNEL_TO_RPC_METHOD["desktop:openReleaseNotesWindow"]).toBe(
+      "desktopOpenReleaseNotesWindow",
+    );
+    expect(CHANNEL_TO_RPC_METHOD["desktop:checkForUpdates"]).toBe(
+      "desktopCheckForUpdates",
+    );
+    expect(CHANNEL_TO_RPC_METHOD["desktop:getBuildInfo"]).toBe(
+      "desktopGetBuildInfo",
     );
   });
 

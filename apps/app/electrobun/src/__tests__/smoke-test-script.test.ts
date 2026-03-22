@@ -65,6 +65,16 @@ describe("smoke-test.sh", () => {
     );
   });
 
+  it("treats auth-protected health probes as proof the packaged backend is alive", () => {
+    const script = fs.readFileSync(SMOKE_TEST_PATH, "utf8");
+
+    expect(script).toContain("backend_health_probe_satisfied() {");
+    expect(script).toContain(
+      "# A 401 still proves the packaged backend is running and enforcing auth.",
+    );
+    expect(script).toContain('[[ "$status" == "200" || "$status" == "401" ]]');
+  });
+
   it("asserts the packaged bundle and executables keep the Milady identifier", () => {
     const script = fs.readFileSync(SMOKE_TEST_PATH, "utf8");
 

@@ -1,10 +1,10 @@
-import { describe, expect, it, vi } from "vitest";
 import {
   installLocalProviderCloudPreferencePatch,
   normalizeConfigForLocalProviderPreference,
   shouldMaskInactiveCloudStatus,
   shouldPreferLocalProviderConfig,
-} from "../../src/cloud-preference-patch";
+} from "@miladyai/app-core/platform";
+import { describe, expect, it, vi } from "vitest";
 
 describe("cloud preference patch", () => {
   it("normalizes inactive cloud config when a Claude subscription is already configured", () => {
@@ -113,6 +113,88 @@ describe("cloud preference patch", () => {
         },
       }),
     ).toBe(false);
+  });
+
+  it("regression: cloud.enabled=true prevents masking even with local provider configured", () => {
+    // This is the exact scenario that caused the login→logout loop:
+    // User logs into cloud → persistCloudLoginStatus sets cloud.enabled=true + apiKey
+    // → shouldPreferLocalProviderConfig was returning true because inferenceMode wasn't "cloud"
+    // → cloud status was masked → user appeared logged out immediately
+    const config = {
+      cloud: {
+        enabled: true,
+        apiKey: "eliza-freshly-logged-in-key",
+        inferenceMode: "byok",
+      },
+      agents: {
+        defaults: {
+          subscriptionProvider: "anthropic-subscription",
+          model: { primary: "anthropic" },
+        },
+      },
+    };
+
+    expect(shouldPreferLocalProviderConfig(config)).toBe(false);
+    expect(normalizeConfigForLocalProviderPreference(config)).toEqual(config);
+  });
+
+  it("regression: freshly logged in user cloud status is not masked", () => {
+    const config = {
+      cloud: {
+        enabled: true,
+        apiKey: "eliza-freshly-logged-in-key",
+        inferenceMode: "byok",
+      },
+      agents: {
+        defaults: {
+          subscriptionProvider: "anthropic-subscription",
+        },
+      },
+    };
+
+    expect(
+      shouldMaskInactiveCloudStatus({
+        config,
+        status: {
+          enabled: true,
+          connected: true,
+          hasApiKey: true,
+        },
+      }),
+    ).toBe(false);
+  });
+
+  it("cloud.enabled undefined still allows masking when other conditions met", () => {
+    const config = {
+      cloud: {
+        apiKey: "eliza-stale-key",
+        inferenceMode: "byok",
+      },
+      agents: {
+        defaults: {
+          subscriptionProvider: "anthropic-subscription",
+        },
+      },
+    };
+
+    expect(shouldPreferLocalProviderConfig(config)).toBe(true);
+  });
+
+  it("cloud.enabled false still allows masking when other conditions met", () => {
+    const config = {
+      cloud: {
+        enabled: false,
+        apiKey: "eliza-stale-key",
+        inferenceMode: "byok",
+      },
+      agents: {
+        defaults: {
+          subscriptionProvider: "anthropic-subscription",
+        },
+      },
+    };
+
+    expect(shouldPreferLocalProviderConfig(config)).toBe(true);
   });
 
   it("patches client getters so onboarding and cloud badges ignore stale cloud state", async () => {

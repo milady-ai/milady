@@ -1,0 +1,98 @@
+export type ElectrobunRequestHandler = (params?: unknown) => Promise<unknown>;
+
+export type ElectrobunMessageListener = (payload: unknown) => void;
+
+export interface ElectrobunRendererRpc {
+  request: Record<string, ElectrobunRequestHandler>;
+  onMessage: (messageName: string, listener: ElectrobunMessageListener) => void;
+  offMessage: (
+    messageName: string,
+    listener: ElectrobunMessageListener,
+  ) => void;
+}
+
+interface DesktopBridgeWindow extends Window {
+  __MILADY_ELECTROBUN_RPC__?: ElectrobunRendererRpc;
+}
+
+function getDesktopBridgeWindow(): DesktopBridgeWindow | null {
+  const g = globalThis as typeof globalThis & { window?: DesktopBridgeWindow };
+  if (typeof g.window !== "undefined") {
+    return g.window;
+  }
+  if (typeof window !== "undefined") {
+    return window as DesktopBridgeWindow;
+  }
+  return null;
+}
+
+export function getElectrobunRendererRpc(): ElectrobunRendererRpc | undefined {
+  return getDesktopBridgeWindow()?.__MILADY_ELECTROBUN_RPC__;
+}
+
+export async function invokeDesktopBridgeRequest<T>(options: {
+  rpcMethod: string;
+  ipcChannel: string;
+  params?: unknown;
+}): Promise<T | null> {
+  const rpc = getElectrobunRendererRpc();
+  const request = rpc?.request?.[options.rpcMethod];
+  if (request) {
+    return (await request(options.params)) as T;
+  }
+
+  return null;
+}
+
+export interface DetectedProvider {
+  id: string;
+  source: string;
+  apiKey?: string;
+  authMode?: string;
+  cliInstalled: boolean;
+  status?: string;
+}
+
+export interface ExistingElizaInstallInfo {
+  detected: boolean;
+  stateDir: string;
+  configPath: string;
+  configExists: boolean;
+  stateDirExists: boolean;
+  hasStateEntries: boolean;
+  source: "config-path-env" | "state-dir-env" | "default-state-dir";
+}
+
+export async function scanProviderCredentials(): Promise<DetectedProvider[]> {
+  const result = await invokeDesktopBridgeRequest<{
+    providers: DetectedProvider[];
+  }>({
+    rpcMethod: "credentialsScanProviders",
+    ipcChannel: "credentials:scanProviders",
+    params: { context: "onboarding" },
+  });
+  return result?.providers ?? [];
+}
+
+export async function inspectExistingElizaInstall(): Promise<ExistingElizaInstallInfo | null> {
+  return invokeDesktopBridgeRequest<ExistingElizaInstallInfo>({
+    rpcMethod: "agentInspectExistingInstall",
+    ipcChannel: "agent:inspectExistingInstall",
+  });
+}
+
+export function subscribeDesktopBridgeEvent(options: {
+  rpcMessage: string;
+  ipcChannel: string;
+  listener: ElectrobunMessageListener;
+}): () => void {
+  const rpc = getElectrobunRendererRpc();
+  if (rpc) {
+    rpc.onMessage(options.rpcMessage, options.listener);
+    return () => {
+      rpc.offMessage(options.rpcMessage, options.listener);
+    };
+  }
+
+  return () => {};
+}

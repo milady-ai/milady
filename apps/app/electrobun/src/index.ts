@@ -26,14 +26,17 @@ import {
   buildApplicationMenu,
   EMPTY_HEARTBEAT_MENU_SNAPSHOT,
   type HeartbeatMenuSnapshot,
+  parseSettingsWindowAction,
 } from "./application-menu";
 import { showBackgroundNoticeOnce } from "./background-notice";
+import { isBrowserSurfaceEnabled } from "./browser-surface-flag";
+import { readNavigationEventUrl } from "./cloud-auth-window";
 import {
-  type CloudAuthWindowLike,
-  CloudAuthWindowManager,
-  readNavigationEventUrl,
-} from "./cloud-auth-window";
-import { getAgentManager } from "./native/agent";
+  buildMainMenuResetApiCandidates,
+  pickReachableMenuResetApiBase,
+  runMainMenuResetAfterApiBaseResolved,
+} from "./menu-reset-from-main";
+import { configureDesktopLocalApiAuth, getAgentManager } from "./native/agent";
 import { getDesktopManager } from "./native/desktop";
 import { disposeNativeModules, initializeNativeModules } from "./native/index";
 import {
@@ -70,11 +73,12 @@ type HeartbeatMenuHealthResponse = {
 
 const HEARTBEAT_MENU_REFRESH_MS = 30_000;
 const CONFIG_EXPORT_FILE_NAME = "milady-config.json";
-// Browser surface stays off by default until the packaged WebGPU/browser path
-// is hardened across the supported desktop release targets.
-const BROWSER_SURFACE_ENABLED =
-  process.env.MILADY_ENABLE_BROWSER_SURFACE === "1";
-const FORCE_AUTOSTART_AGENT = process.env.MILADY_FORCE_AUTOSTART_AGENT === "1";
+// Browser surface ships enabled by default. Set
+// MILADY_ENABLE_BROWSER_SURFACE=0 to force-disable it for local debugging or
+// release triage.
+const BROWSER_SURFACE_ENABLED = isBrowserSurfaceEnabled(
+  process.env as Record<string, string | undefined>,
+);
 let heartbeatMenuSnapshot: HeartbeatMenuSnapshot =
   EMPTY_HEARTBEAT_MENU_SNAPSHOT;
 let heartbeatMenuRefreshTimer: ReturnType<typeof setInterval> | null = null;
@@ -83,6 +87,13 @@ let heartbeatMenuRefreshTimer: ReturnType<typeof setInterval> | null = null;
 // App Menu
 // ============================================================================
 
+import {
+  isAgentReady,
+  onAgentReadyChange,
+  setAgentReady,
+} from "./agent-ready-state";
+import { DEFAULT_PORT } from "./constants";
+
 function setupApplicationMenu(): void {
   const isMac = process.platform === "darwin";
   const menu = buildApplicationMenu({
@@ -90,11 +101,15 @@ function setupApplicationMenu(): void {
     browserEnabled: BROWSER_SURFACE_ENABLED,
     heartbeatSnapshot: heartbeatMenuSnapshot,
     detachedWindows: surfaceWindowManager?.listWindows() ?? [],
+    agentReady: isAgentReady(),
   });
   ApplicationMenu.setApplicationMenu(
     menu as unknown as Parameters<typeof ApplicationMenu.setApplicationMenu>[0],
   );
 }
+
+// Refresh the application menu whenever agent readiness changes.
+onAgentReadyChange(() => setupApplicationMenu());
 
 function summarizeDesktopActionError(error: unknown, fallback: string): string {
   const message = error instanceof Error ? error.message : fallback;
@@ -114,7 +129,16 @@ function buildApiRequestHeaders(contentType?: string): Record<string, string> {
   if (contentType) {
     headers["Content-Type"] = contentType;
   }
-  const apiToken = process.env.MILADY_API_TOKEN?.trim();
+  let apiToken =
+    process.env.MILADY_API_TOKEN?.trim() ?? process.env.ELIZA_API_TOKEN?.trim();
+  if (!apiToken) {
+    const rt = resolveDesktopRuntimeMode(
+      process.env as Record<string, string | undefined>,
+    );
+    if (rt.mode === "local") {
+      apiToken = configureDesktopLocalApiAuth().trim();
+    }
+  }
   if (apiToken) {
     headers.Authorization = `Bearer ${apiToken}`;
   }
@@ -127,6 +151,145 @@ function resolveHeartbeatMenuApiBase(): string | null {
     return `http://127.0.0.1:${port}`;
   }
   return resolveInitialApiBase(process.env);
+}
+
+/**
+ * Picks a loopback API base the main process can actually reach.
+ *
+ * **WHY:** `resolveHeartbeatMenuApiBase()` falls back to `resolveInitialApiBase`,
+ * which in **external** mode is `MILADY_DESKTOP_API_BASE` (often :31337). If that
+ * dev server is down but the **embedded** agent is still running on a dynamic
+ * port, menu Reset must not blindly POST to the dead env URL.
+ */
+async function resolveReachableApiBaseForMainReset(): Promise<string | null> {
+  const candidates = buildMainMenuResetApiCandidates({
+    embeddedPort: getAgentManager().getStatus().port,
+    configuredBase: resolveInitialApiBase(process.env),
+  });
+  if (candidates.length === 0) {
+    return null;
+  }
+  const base = await pickReachableMenuResetApiBase({
+    candidates,
+    fetchImpl: fetch,
+    buildHeaders: buildApiRequestHeaders,
+  });
+  if (base) {
+    console.info("[Main][reset] Using reachable API base", {
+      base,
+      tried: candidates,
+    });
+  } else {
+    console.warn("[Main][reset] No reachable API base among candidates", {
+      tried: candidates,
+    });
+  }
+  return base;
+}
+
+/**
+ * App menu "Reset Milady…" — confirm + HTTP reset + restart in the **main process**.
+ *
+ * **WHY not renderer `fetch`:** after native `showMessageBox`, WKWebView may not run
+ * network/bridge work on the same turn, so reset appeared hung. **WHY push
+ * `menu-reset-milady-applied`:** renderer must still run the same local wipe as
+ * Settings (`completeResetLocalStateAfterServerWipe`); main only supplies a fresh
+ * `/api/status` snapshot as `agentStatus`. Orchestration core: `menu-reset-from-main.ts`.
+ *
+ * @see `docs/apps/desktop-main-process-reset.md`
+ */
+async function resetMiladyFromApplicationMenu(): Promise<void> {
+  console.info(
+    "[Main][reset] App menu: Reset Milady — confirm + POST /api/agent/reset + restart (main process)",
+  );
+  await getDesktopManager()
+    .showWindow()
+    .catch((err: unknown) => {
+      console.warn(
+        "[Main][reset] showWindow failed (continuing):",
+        err instanceof Error ? err.message : err,
+      );
+    });
+
+  const box = await Utils.showMessageBox({
+    type: "warning",
+    title: "Reset Agent",
+    message:
+      "This will reset the agent: config, cloud keys, and local agent database (conversations / memory).",
+    detail:
+      "Downloaded GGUF embedding models are kept. You will return to the onboarding wizard.",
+    buttons: ["Reset", "Cancel"],
+    defaultId: 0,
+    cancelId: 1,
+  });
+  const response =
+    box && typeof box === "object" && "response" in box
+      ? (box as { response: number }).response
+      : typeof box === "number"
+        ? box
+        : 1;
+  if (response !== 0) {
+    console.info("[Main][reset] User cancelled native confirm");
+    return;
+  }
+
+  const apiBase = await resolveReachableApiBaseForMainReset();
+  if (!apiBase) {
+    Utils.showNotification({
+      title: "Reset Failed",
+      body: "Could not reach the Milady API (tried embedded port and MILADY_DESKTOP_API_BASE / defaults). Start the agent or dev server, or fix your API base env.",
+    });
+    return;
+  }
+
+  try {
+    const runtimeMode = resolveDesktopRuntimeMode(
+      process.env as Record<string, string | undefined>,
+    );
+
+    await runMainMenuResetAfterApiBaseResolved({
+      apiBase,
+      fetchImpl: fetch,
+      buildHeaders: buildApiRequestHeaders,
+      useEmbeddedRestart: runtimeMode.mode === "local",
+      restartEmbeddedClearingLocalDb: () =>
+        getAgentManager().restartClearingLocalDb(),
+      pushEmbeddedApiBaseToRenderer: (port, apiToken) => {
+        if (currentWindow) {
+          pushApiBaseToRenderer(
+            currentWindow,
+            `http://127.0.0.1:${port}`,
+            apiToken,
+          );
+        }
+      },
+      getLocalApiAuthToken: () => configureDesktopLocalApiAuth(),
+      postExternalAgentRestart: async () => {
+        try {
+          await fetch(`${apiBase}/api/agent/restart`, {
+            method: "POST",
+            headers: buildApiRequestHeaders(),
+          });
+        } catch {
+          /* 409 / race while restarting — poll below */
+        }
+      },
+      resolveApiBaseForStatusPoll: () =>
+        resolveHeartbeatMenuApiBase() ?? apiBase,
+      sendMenuResetAppliedToRenderer: (payload) => {
+        sendToActiveRenderer("desktopTrayMenuClick", payload);
+      },
+    });
+    console.info(
+      "[Main][reset] Pushed menu-reset-milady-applied to renderer with /api/status snapshot",
+    );
+  } catch (err) {
+    console.error("[Main][reset] Main-process reset failed:", err);
+    Utils.showNotification({
+      title: "Reset Failed",
+      body: summarizeDesktopActionError(err, "Reset failed"),
+    });
+  }
 }
 
 async function fetchHeartbeatMenuSnapshot(
@@ -232,14 +395,27 @@ function startHeartbeatMenuRefresh(): void {
 }
 
 // ============================================================================
-// macOS Native Window Effects (vibrancy, shadow, traffic lights, drag region)
+// macOS Native Window Effects (vibrancy, shadow, traffic lights, drag + resize)
 // ============================================================================
+// hiddenInset removes the title bar; WKWebView fills the client area. Native
+// NSViews above the web view handle move (top strip) and inner-edge resize
+// (right/bottom/BR). See docs/guides/electrobun-mac-window-chrome.md (WHYs).
 
 const MAC_TRAFFIC_LIGHTS_X = 14;
 const MAC_TRAFFIC_LIGHTS_Y = 12;
+/** Left inset of the drag strip so it clears the traffic lights. */
 const MAC_NATIVE_DRAG_REGION_X = 92;
-const MAC_NATIVE_DRAG_REGION_HEIGHT = 40;
+/**
+ * Top drag strip height == right/bottom/BR overlay thickness (points).
+ * `0` → native derives depth from `window.screen` (HiDPI / ultrawide); positive pins.
+ */
+const MAC_NATIVE_DRAG_REGION_HEIGHT = 0;
 
+/**
+ * Vibrancy, shadow, traffic lights, and native chrome layout. Re-calls native
+ * layout whenever the window or webview subtree may have reordered so the drag
+ * view stays above WKWebView.
+ */
 function applyMacOSWindowEffects(win: BrowserWindow): void {
   if (process.platform !== "darwin") return;
 
@@ -265,17 +441,29 @@ function applyMacOSWindowEffects(win: BrowserWindow): void {
       MAC_NATIVE_DRAG_REGION_HEIGHT,
     );
 
-  alignButtons();
-  alignDragRegion();
-  setTimeout(() => {
+  const alignChrome = () => {
     alignButtons();
     alignDragRegion();
-  }, 120);
+  };
 
-  win.on("resize", () => {
-    alignButtons();
-    alignDragRegion();
-  });
+  alignChrome();
+  setTimeout(alignChrome, 120);
+
+  win.on("resize", alignChrome);
+  // Display (NSScreen) changes without a resize edge case — depth uses window.screen.
+  win.on("move", alignChrome);
+
+  // WKWebView is often inserted or reordered after first layout; restack native
+  // views so drag/resize strips stay hit-testable above the page.
+  try {
+    win.webview.on("dom-ready", () => {
+      alignChrome();
+      setTimeout(alignChrome, 50);
+      setTimeout(alignChrome, 300);
+    });
+  } catch {
+    // webview may not accept listeners yet in some embed paths
+  }
 
   console.log("[MacEffects] Native macOS window effects applied");
 }
@@ -340,7 +528,6 @@ function scheduleStateSave(statePath: string, win: BrowserWindow): void {
 let currentWindow: BrowserWindow | null = null;
 let currentSendToWebview: SendToWebview | null = null;
 let surfaceWindowManager: SurfaceWindowManager | null = null;
-let cloudAuthWindowManager: CloudAuthWindowManager | null = null;
 let rendererUrlPromise: Promise<string> | null = null;
 let backgroundWindowPromise: Promise<void> | null = null;
 let isQuitting = false;
@@ -348,6 +535,15 @@ let lastFocusedWindow: ManagedWindowLike | null = null;
 
 function sendToActiveRenderer(message: string, payload?: unknown): void {
   currentSendToWebview?.(message, payload);
+  if (!currentSendToWebview) {
+    const level =
+      message === "desktopTrayMenuClick" ? console.warn : console.debug;
+    level.call(
+      console,
+      "[Main] Dropped renderer message (no window):",
+      message,
+    );
+  }
 }
 
 // ============================================================================
@@ -403,13 +599,20 @@ async function startRendererServer(): Promise<string> {
   const initialApiBase = resolveInitialApiBase(
     process.env as Record<string, string | undefined>,
   );
+  const initialApiToken =
+    resolveDesktopRuntimeMode(process.env as Record<string, string | undefined>)
+      .mode === "local"
+      ? configureDesktopLocalApiAuth()
+      : (process.env.MILADY_API_TOKEN?.trim() ??
+        process.env.ELIZA_API_TOKEN?.trim() ??
+        "");
 
   // Inject the API base into index.html so it's available before React mounts.
   function injectApiBaseIntoHtml(html: string): string {
     if (!initialApiBase) {
       return html;
     }
-    const script = `<script>window.__MILADY_API_BASE__=${JSON.stringify(initialApiBase)};</script>`;
+    const script = `<script>window.__MILADY_API_BASE__=${JSON.stringify(initialApiBase)};${initialApiToken ? `Object.defineProperty(window,"__MILADY_API_TOKEN__",{value:${JSON.stringify(initialApiToken)},configurable:true,writable:true,enumerable:false});` : ""}</script>`;
     // Inject before </head> if present, otherwise before <body>
     if (html.includes("</head>")) {
       return html.replace("</head>", `${script}</head>`);
@@ -485,7 +688,9 @@ async function startRendererServer(): Promise<string> {
 }
 
 async function resolveRendererUrl(): Promise<string> {
-  // Resolve the renderer URL — prefer env override (dev HMR), then built-in static server
+  // Prefer MILADY_RENDERER_URL / VITE_DEV_SERVER_URL when set (e.g. dev-platform.mjs watch mode).
+  // Why: Vite HMR only works against the dev server; serving pre-built dist from this static
+  // server would force a full rebuild for every UI change.
   let rendererUrl =
     process.env.MILADY_RENDERER_URL ?? process.env.VITE_DEV_SERVER_URL ?? "";
 
@@ -515,7 +720,13 @@ async function createMainWindow(): Promise<BrowserWindow> {
   // Read the pre-built webview bridge preload (built by `bun run build:preload`).
   // The preload runs in the webview context after Electrobun's built-in preload,
   // setting up Milady's direct Electrobun RPC bridge on the window.
-  const preload = readBuiltPreloadScript(import.meta.dir);
+  let preload: string;
+  try {
+    preload = readBuiltPreloadScript(import.meta.dir);
+  } catch (err) {
+    console.error("[Main] Failed to read preload script:", err);
+    preload = "// preload unavailable";
+  }
 
   const win = new BrowserWindow({
     title: "Milady",
@@ -899,12 +1110,16 @@ function injectApiBase(win: BrowserWindow): void {
       runtimeResolution.externalApi.base,
       process.env.MILADY_API_TOKEN,
     );
+    setAgentReady(true);
     return;
   }
 
   const agent = getAgentManager();
-  const port = agent.getPort() ?? (Number(process.env.MILADY_PORT) || 2138);
-  pushApiBaseToRenderer(win, `http://127.0.0.1:${port}`);
+  const port =
+    agent.getPort() ?? (Number(process.env.MILADY_PORT) || DEFAULT_PORT);
+  const apiToken = configureDesktopLocalApiAuth();
+  pushApiBaseToRenderer(win, `http://127.0.0.1:${port}`, apiToken);
+  setAgentReady(true);
 }
 
 // ============================================================================
@@ -945,12 +1160,14 @@ async function _startAgent(win: BrowserWindow): Promise<void> {
   }
 
   const agent = getAgentManager();
+  const apiToken = configureDesktopLocalApiAuth();
 
   try {
     const status = await agent.start();
 
     if (status.state === "running" && status.port) {
-      pushApiBaseToRenderer(win, `http://127.0.0.1:${status.port}`);
+      pushApiBaseToRenderer(win, `http://127.0.0.1:${status.port}`, apiToken);
+      setAgentReady(true);
       // Sync real OS permission states to the REST API so the renderer
       // can display them and capability toggles can unlock.
       // Pass startup=true so the backend skips scheduling a restart for
@@ -969,6 +1186,17 @@ async function _startAgent(win: BrowserWindow): Promise<void> {
 async function setupUpdater(): Promise<void> {
   const runUpdateCheck = async (notifyOnNoUpdate = false): Promise<void> => {
     try {
+      const updaterState = await getDesktopManager().getUpdaterState();
+      if (!updaterState.canAutoUpdate) {
+        if (updaterState.autoUpdateDisabledReason) {
+          console.info(
+            "[Updater] Skipping auto-update check:",
+            updaterState.autoUpdateDisabledReason,
+          );
+        }
+        return;
+      }
+
       const updateResult = await Updater.checkForUpdate();
       if (updateResult?.updateAvailable) {
         Updater.downloadUpdate().catch((err: unknown) => {
@@ -1035,10 +1263,13 @@ async function setupUpdater(): Promise<void> {
           void refreshHeartbeatMenuSnapshot();
         } else if (action === "relaunch") {
           void getDesktopManager().relaunch();
-        } else if (action === "open-settings") {
-          void createSettingsWindow();
-        } else if (action?.startsWith("open-settings-")) {
-          void createSettingsWindow(action);
+        } else if (action === "reset-milady") {
+          void resetMiladyFromApplicationMenu();
+        } else if (
+          action === "open-settings" ||
+          action?.startsWith("open-settings-")
+        ) {
+          void createSettingsWindow(parseSettingsWindowAction(action));
         } else if (action?.startsWith("new-window:")) {
           const surface = action.slice("new-window:".length);
           if (surfaceWindowManager && isDetachedSurface(surface)) {
@@ -1050,6 +1281,20 @@ async function setupUpdater(): Promise<void> {
         } else if (action?.startsWith("show-main:")) {
           const surface = action.slice("show-main:".length);
           showMainSurface(surface);
+        } else if (action === "focus-main-window") {
+          void getDesktopManager().focusWindow();
+        } else if (action === "hide-main-window") {
+          void getDesktopManager().hideWindow();
+        } else if (action === "maximize-main-window") {
+          void getDesktopManager().maximizeWindow();
+        } else if (action === "restore-main-window") {
+          void getDesktopManager().unmaximizeWindow();
+        } else if (action === "desktop-notify") {
+          void getDesktopManager().showNotification({
+            title: "Milady Desktop",
+            body: "Native application menu actions are wired and responding.",
+            urgency: "normal",
+          });
         } else if (action === "restart-agent") {
           getAgentManager()
             .restart()
@@ -1113,6 +1358,46 @@ function setupShutdown(cleanupFns: Array<() => void>): void {
 // Bootstrap
 // ============================================================================
 
+/**
+ * Load repo-root and ~/.eliza/.env into `process.env` (non-destructive) so the
+ * main process can send the same `MILADY_API_TOKEN` as `dev-server.ts` when
+ * calling loopback APIs (app menu reset, export, etc.). The dev API child
+ * already loads dotenv; Electrobun did not until this ran.
+ *
+ * Packaged desktop builds must not load these files. On machines that also
+ * have a Milady/Eliza dev checkout, ~/.eliza/.env can contain
+ * MILADY_DESKTOP_API_BASE and related overrides that switch the packaged app
+ * into external mode and make launcher startup appear dead.
+ */
+async function loadMiladyEnvFilesForMain(): Promise<void> {
+  const normalizedModuleDir = import.meta.dir.replaceAll("\\", "/");
+  const isPackagedBuild = !normalizedModuleDir.includes("/src/");
+  if (isPackagedBuild) {
+    return;
+  }
+
+  try {
+    const { config } = await import("dotenv");
+    const repoRootGuess = path.resolve(
+      normalizedModuleDir,
+      "..",
+      "..",
+      "..",
+      "..",
+    );
+    for (const envPath of [
+      path.join(repoRootGuess, ".env"),
+      path.join(os.homedir(), ".eliza", ".env"),
+    ]) {
+      if (fs.existsSync(envPath)) {
+        config({ path: envPath, override: false });
+      }
+    }
+  } catch {
+    /* dotenv may be unavailable in minimal installs */
+  }
+}
+
 function initializeBundledWebGPU(): void {
   if (!WGPU.native.available) {
     console.log(
@@ -1168,6 +1453,7 @@ function checkWebGpuBrowserSupport(): void {
 }
 
 async function main(): Promise<void> {
+  await loadMiladyEnvFilesForMain();
   console.log("[Main] Starting Milady (Electrobun)...");
   const normalizedModuleDir = import.meta.dir.replaceAll("\\", "/");
   const runtimeResolution = resolveDesktopRuntimeMode(
@@ -1213,14 +1499,6 @@ async function main(): Promise<void> {
     },
     onRegistryChanged: () => setupApplicationMenu(),
   });
-  cloudAuthWindowManager = new CloudAuthWindowManager({
-    createWindow: (options) =>
-      new BrowserWindow(options) as unknown as CloudAuthWindowLike,
-    onWindowFocused: (window) => {
-      lastFocusedWindow = window as unknown as ManagedWindowLike;
-    },
-  });
-
   // Set up app menu after the window (and its message loop) exists.
   setupApplicationMenu();
   startHeartbeatMenuRefresh();
@@ -1231,12 +1509,15 @@ async function main(): Promise<void> {
     }
   });
 
-  // Wire settings window callback so menus and RPC can open it.
-  getDesktopManager().setOpenSettingsCallback(() => {
-    void createSettingsWindow();
+  // Wire detached window callbacks so menus and RPC can open them.
+  getDesktopManager().setOpenSettingsCallback((tabHint) => {
+    void createSettingsWindow(tabHint);
   });
-  getDesktopManager().setOpenExternalHandler((url) => {
-    return cloudAuthWindowManager?.open(url) ?? false;
+  getDesktopManager().setOpenSurfaceWindowCallback((surface) => {
+    if (!surfaceWindowManager) {
+      return;
+    }
+    void surfaceWindowManager.openSurfaceWindow(surface);
   });
 
   // If launched with --hidden (e.g. auto-launch with openAsHidden), minimize immediately.
@@ -1262,19 +1543,42 @@ async function main(): Promise<void> {
       tooltip: "Milady",
       title: "Milady",
       menu: [
-        { id: "show", label: "Show Milady", type: "normal" },
-        { id: "sep1", type: "separator" },
-        { id: "navigate-triggers", label: "Open Heartbeats", type: "normal" },
+        { id: "tray-open-chat", label: "Open Chat", type: "normal" },
+        { id: "tray-open-plugins", label: "Open Plugins", type: "normal" },
         {
-          id: "refresh-heartbeats",
-          label: "Refresh Heartbeats",
+          id: "tray-open-desktop-workspace",
+          label: "Open Desktop Workspace",
           type: "normal",
         },
-        { id: "sep1b", type: "separator" },
-        { id: "check-for-updates", label: "Check for Updates", type: "normal" },
+        {
+          id: "tray-open-voice-controls",
+          label: "Open Voice Controls",
+          type: "normal",
+        },
+        {
+          id: "tray-open-media-controls",
+          label: "Open Media Controls",
+          type: "normal",
+        },
+        { id: "sep1", type: "separator" },
+        {
+          id: "tray-toggle-lifecycle",
+          label: "Start/Stop Agent",
+          type: "normal",
+        },
+        {
+          id: "tray-restart",
+          label: "Restart Agent",
+          type: "normal",
+        },
+        {
+          id: "tray-notify",
+          label: "Send Test Notification",
+          type: "normal",
+        },
         { id: "sep2", type: "separator" },
-        { id: "restart-agent", label: "Restart Agent", type: "normal" },
-        { id: "relaunch", label: "Relaunch Milady", type: "normal" },
+        { id: "tray-show-window", label: "Show Window", type: "normal" },
+        { id: "tray-hide-window", label: "Hide Window", type: "normal" },
         { id: "sep3", type: "separator" },
         { id: "quit", label: "Quit", type: "normal" },
       ],
@@ -1283,15 +1587,14 @@ async function main(): Promise<void> {
     console.warn("[Main] Tray creation failed:", err);
   }
 
-  // Agent startup is now deferred until after onboarding completes.
-  // The renderer triggers agent start via the `agentStart` RPC handler
-  // when the user selects local mode and finishes onboarding.
-  // For sandbox/remote modes, no embedded agent is needed — the renderer
-  // connects directly to the cloud or remote API base.
+  // Agent startup: in local mode, start the embedded agent immediately.
+  // The renderer's deferred RPC start path doesn't work reliably because
+  // injectApiBaseIntoHtml sets window.__MILADY_API_BASE__ before React
+  // mounts, causing the renderer to skip the agentStart RPC call and
+  // poll a port where nothing is listening.
   //
-  // However, if an external API base is configured via env vars (e.g.
-  // MILADY_DESKTOP_API_BASE), inject it immediately so the renderer can
-  // connect without onboarding a local agent.
+  // In external mode (env vars like MILADY_DESKTOP_API_BASE), inject the
+  // API base immediately — the agent is already running externally.
   if (currentWindow) {
     const rt = resolveDesktopRuntimeMode(
       process.env as Record<string, string | undefined>,
@@ -1302,9 +1605,16 @@ async function main(): Promise<void> {
         rt.externalApi.base,
         process.env.MILADY_API_TOKEN,
       );
-    } else if (FORCE_AUTOSTART_AGENT) {
-      console.log("[Main] Forcing embedded agent startup on boot.");
-      void _startAgent(currentWindow);
+    } else if (rt.mode === "local") {
+      // In local mode the embedded agent must be started by the main process.
+      // The renderer's deferred-start RPC path is skipped when
+      // window.__MILADY_API_BASE__ is already injected (which it always is
+      // in local mode via injectApiBaseIntoHtml), so the main process must
+      // ensure the agent is running before the renderer starts polling.
+      console.log("[Main] Starting embedded agent (local mode).");
+      _startAgent(currentWindow).catch((err) => {
+        console.error("[Main] Agent auto-start failed:", err);
+      });
     }
   }
 

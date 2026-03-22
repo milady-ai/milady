@@ -118,6 +118,13 @@ Stop-MiladyProcesses
 $env:ELECTROBUN_CONSOLE = "1"
 $env:MILADY_FORCE_AUTOSTART_AGENT = "1"
 
+# Reset stale startup logs before launch so fatal classification only applies
+# to this run.
+if (Test-Path $startupLog) {
+  Remove-Item $startupLog -Force -ErrorAction SilentlyContinue
+  Write-Host "Cleared stale startup log: $startupLog"
+}
+
 if (Test-Path $selfExtractionRoot) {
   Remove-Item $selfExtractionRoot -Recurse -Force -ErrorAction SilentlyContinue
 }
@@ -258,6 +265,53 @@ function Dump-PortDiagnostics([int]$Port) {
   Write-Host "--- end netstat ---"
 }
 
+function Test-BackendProbeStatus([int]$StatusCode) {
+  # A 401 still proves the packaged backend is running and enforcing auth.
+  return $StatusCode -eq 200 -or $StatusCode -eq 401
+}
+
+function Test-StartupLogFatalLine([string]$Line) {
+  if ([string]::IsNullOrWhiteSpace($Line)) {
+    return $false
+  }
+
+  $trimmedLine = $Line.Trim()
+
+  $knownBenignPatterns = @(
+    "optional plugin",
+    "optional provider",
+    "failed to load optional plugin",
+    "plugin not installed"
+  )
+
+  foreach ($pattern in $knownBenignPatterns) {
+    if ($trimmedLine -match [regex]::Escape($pattern)) {
+      return $false
+    }
+  }
+
+  if ($trimmedLine -match "Cannot find module" -and $trimmedLine -match "@elizaos/plugin-") {
+    return $false
+  }
+
+  $fatalPatterns = @(
+    "Failed to start:",
+    "Child process exited with code",
+    "Error: Cannot find module",
+    "UnhandledPromiseRejection",
+    "Unhandled Exception",
+    "Error: listen EADDRINUSE"
+  )
+
+  foreach ($pattern in $fatalPatterns) {
+    if ($trimmedLine -match [regex]::Escape($pattern)) {
+      return $true
+    }
+  }
+
+  return $false
+}
+
 function Dump-ProcessDiagnostics() {
   Write-Host "--- Bun/launcher processes ---"
   try {
@@ -367,9 +421,12 @@ try {
 
     if (Test-Path $startupLog) {
       $recentLog = Get-Content $startupLog -Tail 200 -ErrorAction SilentlyContinue
-      if ($recentLog -match 'Cannot find module|Child process exited with code|Failed to start:') {
+      $fatalLines = @($recentLog | Where-Object { Test-StartupLogFatalLine $_ })
+      if ($fatalLines.Count -gt 0) {
         Write-Host "Recent startup log:"
         $recentLog
+        Write-Host "Fatal startup lines detected:"
+        $fatalLines
         throw "Windows packaged app reported a startup failure."
       }
     }
@@ -398,10 +455,11 @@ try {
         $client.Timeout = [TimeSpan]::FromSeconds(3)
         $task = $client.GetAsync($uri)
         $task.Wait()
-        if ($task.Result.IsSuccessStatusCode) {
+        $statusCode = [int]$task.Result.StatusCode
+        if (Test-BackendProbeStatus $statusCode) {
           $healthy = $true
           $healthCheckMethod = "HttpClient(no-proxy)"
-          Write-Host "Backend health check passed on port $port (via HttpClient, proxy bypassed)."
+          Write-Host "Backend health check passed on port $port (via HttpClient, proxy bypassed, HTTP $statusCode)."
           break
         }
       } catch {
@@ -418,10 +476,10 @@ try {
       if (-not $healthy) {
         try {
           $curlResult = & "$env:SystemRoot\System32\curl.exe" -s -o NUL -w "%{http_code}" $uri --connect-timeout 3 --noproxy "127.0.0.1" 2>$null
-          if ($curlResult -eq "200") {
+          if ($curlResult -eq "200" -or $curlResult -eq "401") {
             $healthy = $true
             $healthCheckMethod = "curl.exe"
-            Write-Host "Backend health check passed on port $port (via curl.exe)."
+            Write-Host "Backend health check passed on port $port (via curl.exe, HTTP $curlResult)."
             break
           }
         } catch {}
@@ -430,11 +488,11 @@ try {
       # Method 3: Invoke-WebRequest with -NoProxy (PowerShell 7+).
       if (-not $healthy) {
         try {
-          $response = Invoke-WebRequest -Uri $uri -UseBasicParsing -TimeoutSec 3 -NoProxy
-          if ($response.StatusCode -ge 200 -and $response.StatusCode -lt 300) {
+          $response = Invoke-WebRequest -Uri $uri -UseBasicParsing -TimeoutSec 3 -NoProxy -SkipHttpErrorCheck
+          if (Test-BackendProbeStatus ([int]$response.StatusCode)) {
             $healthy = $true
             $healthCheckMethod = "Invoke-WebRequest(-NoProxy)"
-            Write-Host "Backend health check passed on port $port (via Invoke-WebRequest -NoProxy)."
+            Write-Host "Backend health check passed on port $port (via Invoke-WebRequest -NoProxy, HTTP $($response.StatusCode))."
             break
           }
         } catch {}

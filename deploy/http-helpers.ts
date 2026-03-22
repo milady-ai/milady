@@ -1,1 +1,1 @@
-export { readRequestBody } from "../src/api/http-helpers";
+export { readRequestBody } from "@miladyai/app-core/api";

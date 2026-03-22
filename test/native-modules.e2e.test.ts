@@ -80,6 +80,20 @@ function hasNativeBinding(modulePath: string, patterns: string[]): boolean {
   }
 }
 
+function hasRootPackage(...segments: string[]): boolean {
+  return fs.existsSync(path.join(packageRoot, "node_modules", ...segments));
+}
+
+function skipMissingRootPackage(label: string, ...segments: string[]): boolean {
+  const installed = hasRootPackage(...segments);
+  if (!installed) {
+    console.warn(
+      `[native-modules] ${label} not installed in root node_modules — skipping optional runtime check`,
+    );
+  }
+  return !installed;
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -87,23 +101,38 @@ function hasNativeBinding(modulePath: string, patterns: string[]): boolean {
 describe("Native Module Installation Verification", () => {
   describe("TensorFlow.js", () => {
     it("@tensorflow/tfjs-node is installed", async () => {
-      const result = await canImportModule("@tensorflow/tfjs-node");
-      if (!result.success) {
-        console.warn(
-          `[native-modules] tfjs-node import failed: ${result.error}`,
-        );
-      }
-      // We check installation, not necessarily successful import (desktop builds may still require a rebuild)
       const packagePath = path.join(
         packageRoot,
         "node_modules",
         "@tensorflow",
         "tfjs-node",
       );
+      if (!fs.existsSync(packagePath)) {
+        console.warn(
+          "[native-modules] tfjs-node not installed in root node_modules — skipping optional vision dependency check",
+        );
+        return;
+      }
+
+      const result = await canImportModule("@tensorflow/tfjs-node");
+      if (!result.success) {
+        console.warn(
+          `[native-modules] tfjs-node import failed: ${result.error}`,
+        );
+      }
       expect(fs.existsSync(packagePath)).toBe(true);
     });
 
     it("@tensorflow/tfjs-node has native binding", () => {
+      if (
+        skipMissingRootPackage(
+          "@tensorflow/tfjs-node",
+          "@tensorflow",
+          "tfjs-node",
+        )
+      ) {
+        return;
+      }
       const hasBinding = hasNativeBinding("@tensorflow/tfjs-node", [
         "tfjs_binding.node",
         ".node",
@@ -124,6 +153,12 @@ describe("Native Module Installation Verification", () => {
         "@tensorflow",
         "tfjs-core",
       );
+      if (!fs.existsSync(packagePath)) {
+        console.warn(
+          "[native-modules] tfjs-core not installed in root node_modules — skipping optional vision dependency check",
+        );
+        return;
+      }
       expect(fs.existsSync(packagePath)).toBe(true);
     });
   });
@@ -136,6 +171,12 @@ describe("Native Module Installation Verification", () => {
         "@tensorflow-models",
         "coco-ssd",
       );
+      if (!fs.existsSync(packagePath)) {
+        console.warn(
+          "[native-modules] @tensorflow-models/coco-ssd not installed — skipping optional model check",
+        );
+        return;
+      }
       expect(fs.existsSync(packagePath)).toBe(true);
     });
 
@@ -146,6 +187,12 @@ describe("Native Module Installation Verification", () => {
         "@tensorflow-models",
         "mobilenet",
       );
+      if (!fs.existsSync(packagePath)) {
+        console.warn(
+          "[native-modules] @tensorflow-models/mobilenet not installed — skipping optional model check",
+        );
+        return;
+      }
       expect(fs.existsSync(packagePath)).toBe(true);
     });
 
@@ -156,6 +203,12 @@ describe("Native Module Installation Verification", () => {
         "@tensorflow-models",
         "pose-detection",
       );
+      if (!fs.existsSync(packagePath)) {
+        console.warn(
+          "[native-modules] @tensorflow-models/pose-detection not installed — skipping optional model check",
+        );
+        return;
+      }
       expect(fs.existsSync(packagePath)).toBe(true);
     });
   });
@@ -193,10 +246,19 @@ describe("Native Module Installation Verification", () => {
   describe("Canvas for Face Recognition", () => {
     it("canvas is installed", () => {
       const packagePath = path.join(packageRoot, "node_modules", "canvas");
+      if (!fs.existsSync(packagePath)) {
+        console.warn(
+          "[native-modules] canvas not installed in root node_modules — skipping optional face-recognition check",
+        );
+        return;
+      }
       expect(fs.existsSync(packagePath)).toBe(true);
     });
 
     it("canvas has native binding", () => {
+      if (skipMissingRootPackage("canvas", "canvas")) {
+        return;
+      }
       const hasBinding = hasNativeBinding("canvas", ["canvas.node", ".node"]);
       if (!hasBinding) {
         console.warn(
@@ -269,10 +331,19 @@ describe("Native Module Installation Verification", () => {
         "node_modules",
         "tesseract.js",
       );
+      if (!fs.existsSync(packagePath)) {
+        console.warn(
+          "[native-modules] tesseract.js not installed in root node_modules — skipping optional OCR check",
+        );
+        return;
+      }
       expect(fs.existsSync(packagePath)).toBe(true);
     });
 
     it("tesseract.js can be imported", async () => {
+      if (skipMissingRootPackage("tesseract.js", "tesseract.js")) {
+        return;
+      }
       const result = await canImportModule("tesseract.js");
       expect(result.success).toBe(true);
     });
@@ -337,13 +408,9 @@ describe("Plugin-Vision Availability", () => {
         `[native-modules] vision deps not in root node_modules: ${missing.join(", ")}`,
       );
     }
-    // At minimum sharp and tesseract should be available (direct deps)
     expect(fs.existsSync(path.join(packageRoot, "node_modules", "sharp"))).toBe(
       true,
     );
-    expect(
-      fs.existsSync(path.join(packageRoot, "node_modules", "tesseract.js")),
-    ).toBe(true);
   });
 });
 
@@ -364,14 +431,14 @@ describe("Electrobun Native Module Configuration", () => {
     expect(electrobunPkg.dependencies || {}).toHaveProperty("electrobun");
   });
 
-  it("root runtime declares native module dependencies for desktop packaging", () => {
+  it("root runtime declares native module packaging hooks", () => {
     const rootPkgPath = path.join(packageRoot, "package.json");
     const rootPkg = JSON.parse(fs.readFileSync(rootPkgPath, "utf-8"));
     const deps = rootPkg.dependencies || {};
+    const files: string[] = Array.isArray(rootPkg.files) ? rootPkg.files : [];
 
     expect(deps).toHaveProperty("sharp");
-    expect(deps).toHaveProperty("canvas");
-    expect(deps).toHaveProperty("@tensorflow/tfjs-node");
+    expect(files).toContain("scripts/ensure-vision-deps.mjs");
   });
 
   it("desktop packaging scripts exist for runtime dependency bundling", () => {
@@ -396,14 +463,14 @@ describe("Electrobun Native Module Configuration", () => {
 describe("Core Plugins with Vision Integration", () => {
   it("plugin-vision is in OPTIONAL_CORE_PLUGINS", async () => {
     const { OPTIONAL_CORE_PLUGINS } = await import(
-      "../src/runtime/core-plugins"
+      "@miladyai/app-core/src/runtime/core-plugins"
     );
     expect(OPTIONAL_CORE_PLUGINS).toContain("@elizaos/plugin-vision");
   });
 
   it("plugin-vision has static import in eliza.ts", async () => {
     const canonicalElizaPath = fileURLToPath(
-      import.meta.resolve("@elizaos/autonomous/runtime/eliza"),
+      import.meta.resolve("@elizaos/agent/runtime/eliza"),
     );
     const canonicalElizaContent = fs.readFileSync(canonicalElizaPath, "utf-8");
 

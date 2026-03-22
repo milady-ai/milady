@@ -5,14 +5,18 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react-swc";
 import type { Plugin } from "vite";
 import { defineConfig } from "vite";
-import { MILADY_CHARACTER_ASSETS } from "./src/character-catalog";
 
+// Keep this as a workspace-relative import so Vite transpiles the TS module
+// while bundling the config instead of asking Node to load a package-exported
+// .ts file directly in CI.
 const here = path.dirname(fileURLToPath(import.meta.url));
 const miladyRoot = path.resolve(here, "../..");
 
 // The dev script sets MILADY_API_PORT; default to 31337 for standalone vite dev.
 const apiPort = Number(process.env.MILADY_API_PORT) || 31337;
 const enableAppSourceMaps = process.env.MILADY_APP_SOURCEMAP === "1";
+/** Set by scripts/dev-platform.mjs for `vite build --watch` (Electrobun desktop). */
+const desktopFastDist = process.env.MILADY_DESKTOP_VITE_FAST_DIST === "1";
 
 /**
  * Dev-only middleware that handles CORS for the desktop custom-scheme origin
@@ -50,92 +54,6 @@ function desktopCorsPlugin(): Plugin {
   };
 }
 
-/**
- * Serves raw VRM and animation files from public_src for the screenshotter.
- * Public ships .vrm.gz and .glb.gz; the screenshotter needs uncompressed .vrm and .glb.
- */
-function publicSrcPlugin(): Plugin {
-  const publicSrc = path.resolve(here, "public_src");
-  const charactersVrm = path.resolve(here, "characters", "vrm");
-  const assetById = new Map(
-    MILADY_CHARACTER_ASSETS.map((asset) => [asset.id, asset]),
-  );
-  return {
-    name: "public-src",
-    configureServer(server) {
-      server.middlewares.use((req, res, next) => {
-        const url = req.url?.split("?")[0] ?? "";
-        const vrmMatch = url.match(/^\/vrms\/milady-(\d+)\.vrm$/);
-        if (vrmMatch) {
-          const index = Number(vrmMatch[1]);
-          const asset = assetById.get(index);
-          const charFile =
-            asset && path.join(charactersVrm, asset.sourceVrmFilename);
-          const publicSrcFile = path.join(
-            publicSrc,
-            "vrms",
-            `milady-${index}.vrm`,
-          );
-          const file =
-            charFile && fs.existsSync(charFile) ? charFile : publicSrcFile;
-          if (fs.existsSync(file)) {
-            res.setHeader("Content-Type", "model/gltf-binary");
-            fs.createReadStream(file).pipe(res);
-            return;
-          }
-        }
-        if (url.startsWith("/animations/") && url.endsWith(".glb")) {
-          const file = path.join(publicSrc, url.slice(1)); // url is /animations/..., slice(1) makes it animations/...
-          if (fs.existsSync(file)) {
-            res.setHeader("Content-Type", "model/gltf-binary");
-            fs.createReadStream(file).pipe(res);
-            return;
-          }
-        }
-        if (url.startsWith("/public_src/")) {
-          if (url === "/public_src/screenshotter.html") {
-            return next();
-          }
-          const file = path.join(publicSrc, url.slice("/public_src/".length));
-          if (fs.existsSync(file) && fs.statSync(file).isFile()) {
-            const ext = path.extname(file);
-            const types: Record<string, string> = {
-              ".html": "text/html",
-              ".png": "image/png",
-              ".jpg": "image/jpeg",
-            };
-            if (types[ext]) res.setHeader("Content-Type", types[ext]);
-            fs.createReadStream(file).pipe(res);
-            return;
-          }
-        }
-        next();
-      });
-    },
-  };
-}
-
-/**
- * Redirects the upstream @elizaos/app-core CharacterRoster to milady's
- * version so CharacterView picks up the correct preset meta (catchphrases,
- * avatar indices, character names).
- */
-function characterOverridePlugin(): Plugin {
-  const miladyRoster = path.resolve(here, "src/components/CharacterRoster.tsx");
-  const miladyEditor = path.resolve(here, "src/components/CharacterEditor.tsx");
-  return {
-    name: "milady-character-override",
-    enforce: "pre",
-    resolveId(source, importer) {
-      if (!importer || !importer.includes("app-core")) return;
-      if (!importer.includes("components/") && !importer.includes("App.tsx"))
-        return;
-      if (source === "./CharacterRoster") return miladyRoster;
-      if (source === "./CharacterView") return miladyEditor;
-    },
-  };
-}
-
 function sparkWasmDataUrlPlugin(): Plugin {
   return {
     name: "spark-wasm-data-url",
@@ -155,14 +73,32 @@ function sparkWasmDataUrlPlugin(): Plugin {
   };
 }
 
+function watchWorkspacePackagesPlugin(): Plugin {
+  return {
+    name: "watch-workspace-packages",
+    configureServer(server) {
+      server.watcher.add(path.resolve(miladyRoot, "packages"));
+      server.watcher.on("change", (file) => {
+        if (file.includes("/packages/")) {
+          if (file.endsWith("package.json")) {
+            server.restart();
+          } else {
+            // Force a full reload on any other package file change (e.g. ts/tsx files)
+            server.ws.send({ type: "full-reload" });
+          }
+        }
+      });
+    },
+  };
+}
+
 export default defineConfig({
   root: here,
   base: "./",
   publicDir: path.resolve(here, "public"),
   plugins: [
-    characterOverridePlugin(),
-    publicSrcPlugin(),
     sparkWasmDataUrlPlugin(),
+    watchWorkspacePackagesPlugin(),
     tailwindcss(),
     react(),
     desktopCorsPlugin(),
@@ -174,7 +110,13 @@ export default defineConfig({
     target: "es2022",
   },
   resolve: {
-    dedupe: ["react", "react-dom", "three", "@sparkjsdev/spark"],
+    dedupe: [
+      "react",
+      "react-dom",
+      "three",
+      "@sparkjsdev/spark",
+      "@miladyai/app-core",
+    ],
     alias: [
       // Capacitor plugins — resolve to local plugin sources
       {
@@ -213,6 +155,64 @@ export default defineConfig({
         find: /^@miladyai\/capacitor-talkmode$/,
         replacement: path.resolve(here, "plugins/talkmode/src/index.ts"),
       },
+      // Force local @miladyai/app-core when workspace-linked (prevents stale
+      // bun cache copies from overriding the symlinked local source).
+      ...(() => {
+        const appCorePkgPath = path.resolve(
+          miladyRoot,
+          "packages/app-core/package.json",
+        );
+        const appCorePkgDir = path.dirname(appCorePkgPath);
+        const appCorePkg = JSON.parse(fs.readFileSync(appCorePkgPath, "utf8"));
+
+        const generatedAliases = [];
+
+        for (const [key, value] of Object.entries(appCorePkg.exports || {})) {
+          if (typeof value === "string") {
+            const aliasKey =
+              key === "."
+                ? "@miladyai/app-core"
+                : `@miladyai/app-core/${key.replace(/^\.\//, "")}`;
+            // If the package exports something ending with .js instead of .ts, we check for .ts locally
+            // But the exports in app-core point directly to .ts, .tsx, .css, so we can just resolve it
+            const targetPath = path.resolve(appCorePkgDir, value);
+
+            generatedAliases.push({
+              find: new RegExp(`^${aliasKey}$`),
+              replacement: targetPath,
+            });
+            // Also map .js extension for users importing it as .js
+            if (!aliasKey.endsWith(".js") && !aliasKey.endsWith(".css")) {
+              generatedAliases.push({
+                find: new RegExp(`^${aliasKey}\\.js$`),
+                replacement: targetPath,
+              });
+            }
+          }
+        }
+
+        const uiSource = path.resolve(miladyRoot, "packages/ui/src");
+        const autonomousSource = path.resolve(
+          miladyRoot,
+          "node_modules/@elizaos/agent/packages/agent/src",
+        );
+
+        return [
+          ...generatedAliases,
+          {
+            find: /^@miladyai\/ui$/,
+            replacement: path.join(uiSource, "index.ts"),
+          },
+          {
+            find: /^@miladyai\/ui\/(.*)$/,
+            replacement: `${uiSource}/$1/index.ts`, // assumes subpaths are directories
+          },
+          {
+            find: /^@elizaos\/agent$/,
+            replacement: path.join(autonomousSource, "index.ts"),
+          },
+        ];
+      })(),
     ],
   },
   optimizeDeps: {
@@ -221,9 +221,13 @@ export default defineConfig({
   },
   build: {
     outDir: path.resolve(here, "dist"),
-    emptyOutDir: true,
-    sourcemap: enableAppSourceMaps,
+    // Watch + incremental: avoid wiping dist each cycle; keeps Electrobun reloads fast.
+    emptyOutDir: !desktopFastDist,
+    sourcemap: desktopFastDist ? false : enableAppSourceMaps,
     target: "es2022",
+    minify: desktopFastDist ? false : undefined,
+    cssMinify: desktopFastDist ? false : undefined,
+    reportCompressedSize: !desktopFastDist,
     rollupOptions: {
       input: {
         main: path.resolve(here, "index.html"),
@@ -251,6 +255,14 @@ export default defineConfig({
       "/api": {
         target: `http://localhost:${apiPort}`,
         changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on("error", (_err, _req, res) => {
+            if (!res.headersSent) {
+              res.writeHead(502, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ error: "API server unavailable" }));
+            }
+          });
+        },
       },
       "/ws": {
         target: `ws://localhost:${apiPort}`,

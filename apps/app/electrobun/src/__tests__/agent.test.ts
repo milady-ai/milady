@@ -353,6 +353,60 @@ describe("AgentManager", () => {
       expect(mockSpawn).toHaveBeenCalledTimes(1);
     });
 
+    it("authenticates local health and agent probes with the desktop API token", async () => {
+      const originalMiladyToken = process.env.MILADY_API_TOKEN;
+      const originalElizaToken = process.env.ELIZA_API_TOKEN;
+      process.env.MILADY_API_TOKEN = "desktop-local-token";
+      delete process.env.ELIZA_API_TOKEN;
+
+      try {
+        const mockProc = createMockProcess();
+        mockSpawn.mockReturnValue(mockProc);
+
+        mockFetch.mockResolvedValueOnce(makeHealthyResponse());
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ agents: [{ name: "Milady" }] }),
+        });
+
+        await manager.start();
+
+        const expectedHeaders = {
+          Authorization: "Bearer desktop-local-token",
+          "X-Api-Key": "desktop-local-token",
+          "X-Api-Token": "desktop-local-token",
+        };
+
+        expect(mockFetch).toHaveBeenNthCalledWith(
+          1,
+          "http://127.0.0.1:2138/api/health",
+          expect.objectContaining({
+            headers: expectedHeaders,
+            signal: expect.anything(),
+          }),
+        );
+        expect(mockFetch).toHaveBeenNthCalledWith(
+          2,
+          "http://127.0.0.1:2138/api/agents",
+          expect.objectContaining({
+            headers: expectedHeaders,
+            signal: expect.anything(),
+          }),
+        );
+      } finally {
+        if (originalMiladyToken === undefined) {
+          delete process.env.MILADY_API_TOKEN;
+        } else {
+          process.env.MILADY_API_TOKEN = originalMiladyToken;
+        }
+        if (originalElizaToken === undefined) {
+          delete process.env.ELIZA_API_TOKEN;
+        } else {
+          process.env.ELIZA_API_TOKEN = originalElizaToken;
+        }
+      }
+    });
+
     it("spawns bun process with the canonical runtime entry when present", async () => {
       const mockProc = createMockProcess();
       mockSpawn.mockReturnValue(mockProc);
@@ -668,6 +722,25 @@ describe("AgentManager", () => {
       expect(status.state).toBe("running");
       expect(status.agentName).toBe("Agent2");
       expect(mockSpawn).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("restartClearingLocalDb()", () => {
+    it("is a no-op in external API mode (no spawn, no throw)", async () => {
+      const originalApiBase = process.env.MILADY_DESKTOP_API_BASE;
+      process.env.MILADY_DESKTOP_API_BASE = "http://127.0.0.1:31337";
+
+      try {
+        const status = await manager.restartClearingLocalDb();
+        expect(status.state).toBe("not_started");
+        expect(mockSpawn).not.toHaveBeenCalled();
+      } finally {
+        if (originalApiBase === undefined) {
+          delete process.env.MILADY_DESKTOP_API_BASE;
+        } else {
+          process.env.MILADY_DESKTOP_API_BASE = originalApiBase;
+        }
+      }
     });
   });
 

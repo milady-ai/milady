@@ -1467,11 +1467,12 @@
       "dirName": "plugin-edge-tts",
       "name": "Edge Tts",
       "npmName": "@elizaos/plugin-edge-tts",
-      "description": "Free text-to-speech using Microsoft Edge TTS - no API key required",
+      "description": "Text-to-speech via Microsoft Edge TTS cloud (no API key; outbound calls to Microsoft). Auto-loaded with the agent orchestrator for swarm TTS—set MILADY_DISABLE_EDGE_TTS=1 or disable plugins.entries.edge-tts to opt out.",
       "tags": ["edge-tts", "edge", "text-to-speech"],
       "category": "feature",
       "envKey": null,
       "configKeys": [
+        "MILADY_DISABLE_EDGE_TTS",
         "EDGE_TTS_VOICE",
         "EDGE_TTS_LANG",
         "EDGE_TTS_OUTPUT_FORMAT",
@@ -1483,6 +1484,12 @@
       ],
       "version": "2.0.0-alpha.4",
       "pluginParameters": {
+        "MILADY_DISABLE_EDGE_TTS": {
+          "type": "string",
+          "description": "Milady: set to 1/true/yes in environment or ~/.milady/.env to skip auto-loading this plugin when agent orchestrator is enabled (avoids Microsoft Edge TTS cloud requests). Alias ELIZA_DISABLE_EDGE_TTS.",
+          "required": false,
+          "sensitive": false
+        },
         "EDGE_TTS_VOICE": {
           "type": "string",
           "description": "Voice ID to use for synthesis (e.g., en-US-MichelleNeural, en-GB-SoniaNeural)",

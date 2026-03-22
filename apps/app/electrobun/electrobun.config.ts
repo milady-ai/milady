@@ -1,4 +1,14 @@
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { ElectrobunConfig } from "electrobun";
+
+const electrobunDir = path.dirname(fileURLToPath(import.meta.url));
+const libMacWindowEffectsDylib = path.join(
+  electrobunDir,
+  "src",
+  "libMacWindowEffects.dylib",
+);
 
 export default {
   app: {
@@ -55,9 +65,9 @@ export default {
       // package.json is needed so findOwnPackageRoot() can match on the
       // "milady" package name. dist/package.json only has {"type":"module"}.
       "../../../package.json": "milady-dist/package.json",
-      // libMacWindowEffects.dylib is macOS-only — only copy when building on macOS.
-      // On Windows/Linux this file does not exist and the copy would fail the build.
-      ...(process.platform === "darwin"
+      // Optional native blur (run build:native-effects locally). Omit when missing to avoid noisy copy errors in dev.
+      ...(process.platform === "darwin" &&
+      fs.existsSync(libMacWindowEffectsDylib)
         ? { "src/libMacWindowEffects.dylib": "libMacWindowEffects.dylib" }
         : {}),
     },

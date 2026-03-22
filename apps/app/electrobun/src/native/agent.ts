@@ -17,11 +17,13 @@
  * remote -- it simply connects to `http://localhost:{port}`.
  */
 
+import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
 import { resolveDesktopRuntimeMode } from "../api-base";
+import { DEFAULT_PORT } from "../constants";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -35,6 +37,21 @@ interface AgentStatus {
   error: string | null;
 }
 
+type ExistingElizaInstallSource =
+  | "config-path-env"
+  | "state-dir-env"
+  | "default-state-dir";
+
+export interface ExistingElizaInstallInfo {
+  detected: boolean;
+  stateDir: string;
+  configPath: string;
+  configExists: boolean;
+  stateDirExists: boolean;
+  hasStateEntries: boolean;
+  source: ExistingElizaInstallSource;
+}
+
 type SendToWebview = (message: string, payload?: unknown) => void;
 
 // Subprocess type from Bun.spawn
@@ -44,10 +61,10 @@ type BunSubprocess = ReturnType<typeof Bun.spawn>;
 // Constants
 // ---------------------------------------------------------------------------
 
-const DEFAULT_PORT = 2138;
 const HEALTH_POLL_INTERVAL_MS = 500;
 const SIGTERM_GRACE_MS = 5_000;
 const WINDOWS_ABS_PATH_RE = /^[A-Za-z]:[\\/]/;
+const ELIZA_CONFIG_FILENAME = "eliza.json";
 
 export function getHealthPollTimeoutMs(
   env: NodeJS.ProcessEnv = process.env,
@@ -95,6 +112,120 @@ function resolveRelativePortable(base: string, relativePath: string): string {
     : path.resolve(base, relativePath);
 }
 
+function normalizeEnvPath(value: string | undefined): string | null {
+  const trimmed = value?.trim();
+  return trimmed ? resolvePortablePath(trimmed) : null;
+}
+
+function listStateEntries(stateDir: string): string[] {
+  try {
+    return fs
+      .readdirSync(stateDir)
+      .filter(
+        (entry) => entry !== "." && entry !== ".." && entry !== ".DS_Store",
+      );
+  } catch {
+    return [];
+  }
+}
+
+function buildExistingElizaInstallCandidates(opts?: {
+  env?: NodeJS.ProcessEnv;
+  homedir?: string;
+}): Array<{
+  source: ExistingElizaInstallSource;
+  stateDir: string;
+  configPath: string;
+}> {
+  const env = opts?.env ?? process.env;
+  const homedir = opts?.homedir ?? os.homedir();
+  const configPathFromEnv =
+    normalizeEnvPath(env.MILADY_CONFIG_PATH) ??
+    normalizeEnvPath(env.ELIZA_CONFIG_PATH);
+  const stateDirFromEnv =
+    normalizeEnvPath(env.MILADY_STATE_DIR) ??
+    normalizeEnvPath(env.ELIZA_STATE_DIR);
+  const defaultStateDir = joinPortable(homedir, ".eliza");
+
+  const candidates = [
+    configPathFromEnv
+      ? {
+          source: "config-path-env" as const,
+          stateDir: dirnamePortable(configPathFromEnv),
+          configPath: configPathFromEnv,
+        }
+      : null,
+    stateDirFromEnv
+      ? {
+          source: "state-dir-env" as const,
+          stateDir: stateDirFromEnv,
+          configPath: joinPortable(stateDirFromEnv, ELIZA_CONFIG_FILENAME),
+        }
+      : null,
+    {
+      source: "default-state-dir" as const,
+      stateDir: defaultStateDir,
+      configPath: joinPortable(defaultStateDir, ELIZA_CONFIG_FILENAME),
+    },
+  ].filter((candidate): candidate is NonNullable<typeof candidate> =>
+    Boolean(candidate),
+  );
+
+  return candidates.filter(
+    (candidate, index, all) =>
+      all.findIndex(
+        (other) =>
+          other.stateDir === candidate.stateDir &&
+          other.configPath === candidate.configPath,
+      ) === index,
+  );
+}
+
+export function inspectExistingElizaInstall(opts?: {
+  env?: NodeJS.ProcessEnv;
+  homedir?: string;
+}): ExistingElizaInstallInfo {
+  const candidates = buildExistingElizaInstallCandidates(opts);
+
+  for (const candidate of candidates) {
+    const configExists = fs.existsSync(candidate.configPath);
+    const stateDirExists = fs.existsSync(candidate.stateDir);
+    const hasStateEntries =
+      stateDirExists && listStateEntries(candidate.stateDir).length > 0;
+
+    if (configExists || hasStateEntries) {
+      return {
+        detected: true,
+        stateDir: candidate.stateDir,
+        configPath: candidate.configPath,
+        configExists,
+        stateDirExists,
+        hasStateEntries,
+        source: candidate.source,
+      };
+    }
+  }
+
+  const fallback = candidates[0] ?? {
+    source: "default-state-dir" as const,
+    stateDir: joinPortable(opts?.homedir ?? os.homedir(), ".eliza"),
+    configPath: joinPortable(
+      joinPortable(opts?.homedir ?? os.homedir(), ".eliza"),
+      ELIZA_CONFIG_FILENAME,
+    ),
+  };
+
+  return {
+    detected: false,
+    stateDir: fallback.stateDir,
+    configPath: fallback.configPath,
+    configExists: false,
+    stateDirExists: fs.existsSync(fallback.stateDir),
+    hasStateEntries: false,
+    source: fallback.source,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Diagnostic logging
 // ---------------------------------------------------------------------------
@@ -122,6 +253,54 @@ export function resolveConfigDir(opts?: {
     return joinPortable(roaming, "Milady");
   }
   return joinPortable(homedir, ".config", "Milady");
+}
+
+export function ensureDesktopApiToken(
+  env: NodeJS.ProcessEnv = process.env,
+): string {
+  const existing = getDesktopApiToken(env);
+  if (existing) {
+    env.MILADY_API_TOKEN = existing;
+    env.ELIZA_API_TOKEN = existing;
+    return existing;
+  }
+
+  const generated = crypto.randomBytes(16).toString("hex");
+  env.MILADY_API_TOKEN = generated;
+  env.ELIZA_API_TOKEN = generated;
+  diagnosticLog(
+    "[Agent] Generated local API token for embedded desktop runtime",
+  );
+  return generated;
+}
+
+export function configureDesktopLocalApiAuth(
+  env: NodeJS.ProcessEnv = process.env,
+): string {
+  const token = ensureDesktopApiToken(env);
+  env.MILADY_PAIRING_DISABLED = "1";
+  env.ELIZA_PAIRING_DISABLED = "1";
+  return token;
+}
+
+function getDesktopApiToken(
+  env: NodeJS.ProcessEnv = process.env,
+): string | null {
+  const token =
+    env.MILADY_API_TOKEN?.trim() ?? env.ELIZA_API_TOKEN?.trim() ?? "";
+  return token || null;
+}
+
+function getDesktopApiHeaders(
+  env: NodeJS.ProcessEnv = process.env,
+): Record<string, string> | undefined {
+  const token = getDesktopApiToken(env);
+  if (!token) return undefined;
+  return {
+    Authorization: `Bearer ${token}`,
+    "X-Api-Key": token,
+    "X-Api-Token": token,
+  };
 }
 
 let diagnosticLogPath: string | null = null;
@@ -307,12 +486,14 @@ async function waitForHealthy(
   timeoutMs: number = getHealthPollTimeoutMs(),
 ): Promise<boolean> {
   const deadline = Date.now() + timeoutMs;
+  const headers = getDesktopApiHeaders();
 
   while (Date.now() < deadline) {
     const port = getPort();
     const url = `http://127.0.0.1:${port}/api/health`;
     try {
       const response = await fetch(url, {
+        headers,
         signal: AbortSignal.timeout(2_000),
       });
       if (response.ok) {
@@ -450,12 +631,24 @@ function resolvePgliteDataDir(): string {
   );
 }
 
+/**
+ * Removes only the PGLite database folder (agent memory / conversations).
+ * GGUF embedding weights live under `MODELS_DIR` / `~/.eliza/models` by default — never deleted here.
+ */
 function deletePgliteDataDir(): void {
   const dir = resolvePgliteDataDir();
+  if (path.basename(dir) !== ".elizadb") {
+    diagnosticLog(
+      `[Agent] deletePgliteDataDir: refused — basename must be .elizadb, got: ${dir}`,
+    );
+    return;
+  }
   try {
     if (fs.existsSync(dir)) {
       fs.rmSync(dir, { recursive: true, force: true });
-      diagnosticLog(`[Agent] Deleted corrupt PGLite data dir: ${dir}`);
+      diagnosticLog(
+        `[Agent] Deleted PGLite data dir (GGUF model cache elsewhere): ${dir}`,
+      );
     }
   } catch (err) {
     diagnosticLog(
@@ -520,6 +713,8 @@ export class AgentManager {
       diagnosticLog(`[Agent] ${reason}`);
       throw new Error(reason);
     }
+
+    configureDesktopLocalApiAuth();
 
     // Reset per-startup flags
     this.pgliteRecoveryDone = false;
@@ -855,8 +1050,48 @@ export class AgentManager {
     return this.start();
   }
 
+  /**
+   * Used after `POST /api/agent/reset`: stop the child, delete local PGLite
+   * (conversations / agent memory under ~/.milady/workspace/.eliza/.elizadb),
+   * then start fresh. Does not remove downloaded **GGUF** models (`MODELS_DIR`,
+   * default ~/.eliza/models), env-backed wallet keys, or eliza.json (the API
+   * reset already rewrote config on disk).
+   *
+   * When `MILADY_DESKTOP_API_BASE` points at an external dev API (e.g. :31337),
+   * the embedded child is never used — this is a no-op so the renderer can
+   * bounce the real API via `POST /api/agent/restart` instead.
+   */
+  async restartClearingLocalDb(): Promise<AgentStatus> {
+    const runtimeMode = resolveDesktopRuntimeMode(
+      process.env as Record<string, string | undefined>,
+    );
+    if (runtimeMode.mode !== "local") {
+      diagnosticLog(
+        `[Agent] restartClearingLocalDb skipped — mode=${runtimeMode.mode} externalBase=${runtimeMode.externalApi.base ?? "n/a"} source=${runtimeMode.externalApi.source ?? "n/a"} (renderer uses POST /api/agent/restart)`,
+      );
+      return this.getStatus();
+    }
+
+    diagnosticLog(
+      `[Agent] restartClearingLocalDb: local mode — stop → rm PGLite (${resolvePgliteDataDir()}) → start`,
+    );
+    await this.stop();
+    this.hasPgliteError = false;
+    this.pgliteRecoveryDone = false;
+    deletePgliteDataDir();
+    const next = await this.start();
+    diagnosticLog(
+      `[Agent] restartClearingLocalDb: start() finished state=${next.state} port=${next.port ?? "null"}`,
+    );
+    return next;
+  }
+
   getStatus(): AgentStatus {
     return { ...this.status };
+  }
+
+  inspectExistingInstall(): ExistingElizaInstallInfo {
+    return inspectExistingElizaInstall();
   }
 
   getPort(): number | null {
@@ -1013,7 +1248,9 @@ export class AgentManager {
    */
   private async fetchAgentName(port: number): Promise<string> {
     try {
+      const headers = getDesktopApiHeaders();
       const response = await fetch(`http://127.0.0.1:${port}/api/agents`, {
+        headers,
         signal: AbortSignal.timeout(5_000),
       });
       if (response.ok) {

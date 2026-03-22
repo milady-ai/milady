@@ -1,11 +1,11 @@
-import { describe, expect, it, vi } from "vitest";
 import {
   parseWindowShellRoute,
   resolveDetachedShellPathname,
   resolveDetachedShellTarget,
   shouldInstallMainWindowOnboardingPatches,
   syncDetachedShellLocation,
-} from "../../src/window-shell";
+} from "@miladyai/app-core/platform";
+import { describe, expect, it, vi } from "vitest";
 
 describe("window shell routing", () => {
   it("parses detached settings and surface routes", () => {

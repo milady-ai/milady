@@ -47,3 +47,7 @@ apps/app/ios
 # Homepage static site
 apps/homepage/out
 apps/homepage/.next
+
+# Ignored caches
+.ruff_cache/
+cache/voice/

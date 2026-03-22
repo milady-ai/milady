@@ -105,7 +105,7 @@ describe("hasInstalledElizaDependencies", () => {
 });
 
 describe("getElizaPackageLinks", () => {
-  it("links Milady package entries to the sibling eliza checkout", () => {
+  it("links sibling Eliza package entries into Milady workspaces", () => {
     const tempRoot = mkdtempSync(
       path.join(os.tmpdir(), "milady-setup-eliza-links-"),
     );
@@ -135,10 +135,6 @@ describe("getElizaPackageLinks", () => {
       expect(expectedLinks).toEqual(
         expect.arrayContaining([
           {
-            linkPath: path.join(miladyRoot, "node_modules/@elizaos/autonomous"),
-            targetPath: path.join(elizaRoot, "packages/autonomous"),
-          },
-          {
             linkPath: path.join(miladyRoot, "node_modules/@elizaos/app-core"),
             targetPath: path.join(elizaRoot, "packages/app-core"),
           },
@@ -155,6 +151,24 @@ describe("getElizaPackageLinks", () => {
               "apps/home/node_modules/@elizaos/app-core",
             ),
             targetPath: path.join(elizaRoot, "packages/app-core"),
+          },
+          {
+            linkPath: path.join(miladyRoot, "node_modules/@elizaos/autonomous"),
+            targetPath: path.join(elizaRoot, "packages/autonomous"),
+          },
+          {
+            linkPath: path.join(
+              miladyRoot,
+              "apps/app/node_modules/@elizaos/autonomous",
+            ),
+            targetPath: path.join(elizaRoot, "packages/autonomous"),
+          },
+          {
+            linkPath: path.join(
+              miladyRoot,
+              "apps/home/node_modules/@elizaos/autonomous",
+            ),
+            targetPath: path.join(elizaRoot, "packages/autonomous"),
           },
           {
             linkPath: path.join(miladyRoot, "node_modules/@elizaos/ui"),

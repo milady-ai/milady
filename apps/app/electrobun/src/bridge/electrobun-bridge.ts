@@ -28,6 +28,7 @@ const CHANNEL_TO_RPC: Record<string, string> = {
   "agent:start": "agentStart",
   "agent:stop": "agentStop",
   "agent:restart": "agentRestart",
+  "agent:restartClearLocalDb": "agentRestartClearLocalDb",
   "agent:status": "agentStatus",
 
   // Desktop: Tray
@@ -77,10 +78,22 @@ const CHANNEL_TO_RPC: Record<string, string> = {
   // Desktop: App
   "desktop:quit": "desktopQuit",
   "desktop:relaunch": "desktopRelaunch",
+  "desktop:checkForUpdates": "desktopCheckForUpdates",
+  "desktop:getUpdaterState": "desktopGetUpdaterState",
   "desktop:getVersion": "desktopGetVersion",
+  "desktop:getBuildInfo": "desktopGetBuildInfo",
   "desktop:isPackaged": "desktopIsPackaged",
+  "desktop:getDockIconVisibility": "desktopGetDockIconVisibility",
+  "desktop:setDockIconVisibility": "desktopSetDockIconVisibility",
   "desktop:getPath": "desktopGetPath",
   "desktop:beep": "desktopBeep",
+  "desktop:showSelectionContextMenu": "desktopShowSelectionContextMenu",
+  "desktop:getSessionSnapshot": "desktopGetSessionSnapshot",
+  "desktop:clearSessionData": "desktopClearSessionData",
+  "desktop:getWebGpuBrowserStatus": "desktopGetWebGpuBrowserStatus",
+  "desktop:openReleaseNotesWindow": "desktopOpenReleaseNotesWindow",
+  "desktop:openSettingsWindow": "desktopOpenSettingsWindow",
+  "desktop:openSurfaceWindow": "desktopOpenSurfaceWindow",
 
   // Desktop: Screen
   "desktop:getPrimaryDisplay": "desktopGetPrimaryDisplay",
@@ -307,17 +320,20 @@ if (typeof window.__electrobun === "undefined") {
 }
 
 // Use Electroview.defineRPC to create the webview-side RPC.
-// We use `any` here because the schema types are defined in the Bun-side
-// rpc-schema.ts and we can't import that in a browser bundle. The proxy
-// is dynamically dispatched at runtime regardless.
-
-// biome-ignore lint/suspicious/noExplicitAny: payload shape varies per message, typed at call sites
-function dispatchMessage(messageName: string, payload: any): void {
+// The schema types are defined in the Bun-side rpc-schema.ts and are not
+// imported into the browser bundle, so message payloads stay opaque here.
+function dispatchMessage(messageName: string, payload: unknown): void {
   // apiBaseUpdate is handled separately for __MILADY_API_BASE__
   if (messageName === "apiBaseUpdate") {
     const p = payload as { base: string; token?: string };
     window.__MILADY_API_BASE__ = p.base;
-    if (p.token) window.__MILADY_API_TOKEN__ = p.token;
+    if (p.token)
+      Object.defineProperty(window, "__MILADY_API_TOKEN__", {
+        value: p.token,
+        writable: true,
+        enumerable: false,
+        configurable: true,
+      });
   }
 
   // Dispatch to all registered ipcRenderer.on() listeners

@@ -1,0 +1,100 @@
+/** Unit tests for onboarding `flow.ts` — unified 5-step flow. */
+import { describe, expect, it } from "vitest";
+import {
+  canRevertOnboardingTo,
+  getFlaminaTopicForOnboardingStep,
+  getOnboardingNavMetas,
+  getStepOrder,
+  resolveOnboardingNextStep,
+  resolveOnboardingPreviousStep,
+} from "../flow";
+
+describe("onboarding flow", () => {
+  describe("getStepOrder", () => {
+    it("returns unified 5-step order", () => {
+      expect(getStepOrder()).toEqual([
+        "welcome",
+        "hosting",
+        "providers",
+        "permissions",
+        "launch",
+      ]);
+    });
+  });
+
+  describe("resolveOnboardingNextStep", () => {
+    it("advances through all steps", () => {
+      expect(resolveOnboardingNextStep("welcome")).toBe("hosting");
+      expect(resolveOnboardingNextStep("hosting")).toBe("providers");
+      expect(resolveOnboardingNextStep("providers")).toBe("permissions");
+      expect(resolveOnboardingNextStep("permissions")).toBe("launch");
+      expect(resolveOnboardingNextStep("launch")).toBe(null);
+    });
+  });
+
+  describe("resolveOnboardingPreviousStep", () => {
+    it("steps back through all steps", () => {
+      expect(resolveOnboardingPreviousStep("welcome")).toBe(null);
+      expect(resolveOnboardingPreviousStep("hosting")).toBe("welcome");
+      expect(resolveOnboardingPreviousStep("providers")).toBe("hosting");
+      expect(resolveOnboardingPreviousStep("permissions")).toBe("providers");
+      expect(resolveOnboardingPreviousStep("launch")).toBe("permissions");
+    });
+  });
+
+  describe("canRevertOnboardingTo", () => {
+    it("allows backward jump", () => {
+      expect(
+        canRevertOnboardingTo({ current: "providers", target: "hosting" }),
+      ).toBe(true);
+      expect(
+        canRevertOnboardingTo({ current: "launch", target: "welcome" }),
+      ).toBe(true);
+    });
+    it("disallows same-step jump", () => {
+      expect(
+        canRevertOnboardingTo({ current: "providers", target: "providers" }),
+      ).toBe(false);
+    });
+    it("disallows forward jump", () => {
+      expect(
+        canRevertOnboardingTo({ current: "welcome", target: "hosting" }),
+      ).toBe(false);
+    });
+  });
+
+  describe("getOnboardingNavMetas", () => {
+    it("returns all 5 steps regardless of current step", () => {
+      const metas = getOnboardingNavMetas("providers", false);
+      expect(metas.map((m) => m.id)).toEqual([
+        "welcome",
+        "hosting",
+        "providers",
+        "permissions",
+        "launch",
+      ]);
+    });
+    it("returns same steps when cloudOnly", () => {
+      const metas = getOnboardingNavMetas("welcome", true);
+      expect(metas.map((m) => m.id)).toEqual([
+        "welcome",
+        "hosting",
+        "providers",
+        "permissions",
+        "launch",
+      ]);
+    });
+  });
+
+  describe("getFlaminaTopicForOnboardingStep", () => {
+    it("maps advanced guide topics", () => {
+      expect(getFlaminaTopicForOnboardingStep("providers")).toBe("provider");
+      expect(getFlaminaTopicForOnboardingStep("permissions")).toBe(
+        "permissions",
+      );
+      expect(getFlaminaTopicForOnboardingStep("welcome")).toBe(null);
+      expect(getFlaminaTopicForOnboardingStep("hosting")).toBe(null);
+      expect(getFlaminaTopicForOnboardingStep("launch")).toBe(null);
+    });
+  });
+});
