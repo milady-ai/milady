@@ -6,7 +6,15 @@ import tl from "./locales/tl.json";
 import vi from "./locales/vi.json";
 import zhCN from "./locales/zh-CN.json";
 
-export const UI_LANGUAGES = ["en", "zh-CN", "ko", "es", "pt", "vi", "tl"] as const;
+export const UI_LANGUAGES = [
+  "en",
+  "zh-CN",
+  "ko",
+  "es",
+  "pt",
+  "vi",
+  "tl",
+] as const;
 
 export type UiLanguage = (typeof UI_LANGUAGES)[number];
 

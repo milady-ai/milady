@@ -39,7 +39,13 @@ export function normalizeLanguage(input: unknown): UiLanguage {
   if (lower.startsWith("es")) return "es";
   if (lower.startsWith("pt")) return "pt";
   if (lower.startsWith("vi")) return "vi";
-  if (lower === "tl" || lower === "tl-ph" || lower === "fil" || lower === "fil-ph") return "tl";
+  if (
+    lower === "tl" ||
+    lower === "tl-ph" ||
+    lower === "fil" ||
+    lower === "fil-ph"
+  )
+    return "tl";
   return DEFAULT_UI_LANGUAGE;
 }
 
