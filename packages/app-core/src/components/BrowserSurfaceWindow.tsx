@@ -107,7 +107,12 @@ export function BrowserSurfaceWindow() {
       webview.off("dom-ready", handleDomReady);
       webview.off("new-window-open", handleNewWindowOpen);
     };
-  }, [applyNavigationUrl, navigateTo, syncNavigationState, webviewTagAvailable]);
+  }, [
+    applyNavigationUrl,
+    navigateTo,
+    syncNavigationState,
+    webviewTagAvailable,
+  ]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -201,8 +206,7 @@ export function BrowserSurfaceWindow() {
           })
         ) : (
           <div className="flex flex-1 items-center justify-center bg-black/5 px-6 text-center text-sm text-muted">
-            Browser surface is only available in the Electrobun desktop
-            runtime.
+            Browser surface is only available in the Electrobun desktop runtime.
           </div>
         )}
       </div>

@@ -60,12 +60,17 @@ describe("BrowserSurfaceWindow", () => {
     const getSpy = vi
       .spyOn(window.customElements, "get")
       .mockImplementation((name: string) =>
-        name === "electrobun-webview" ? FakeElectrobunWebview : originalGet(name),
+        name === "electrobun-webview"
+          ? FakeElectrobunWebview
+          : originalGet(name),
       );
     const originalCreateElement = document.createElement.bind(document);
     const createSpy = vi
       .spyOn(document, "createElement")
-      .mockImplementation(((tagName: string, options?: ElementCreationOptions) =>
+      .mockImplementation(((
+        tagName: string,
+        options?: ElementCreationOptions,
+      ) =>
         originalCreateElement(
           tagName === "electrobun-webview" ? elementName : tagName,
           options,
