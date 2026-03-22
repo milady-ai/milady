@@ -374,9 +374,6 @@
     "packages/plugin-wechat": {
       "name": "@miladyai/plugin-wechat",
       "version": "0.1.0",
-      "dependencies": {
-        "zod": "^4.3.6",
-      },
       "devDependencies": {
         "@elizaos/core": "alpha",
         "tsdown": "^0.12.0",

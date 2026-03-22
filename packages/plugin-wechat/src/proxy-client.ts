@@ -14,7 +14,7 @@ export class ProxyClient {
 
   constructor(account: ResolvedWechatAccount) {
     this.apiKey = account.apiKey;
-    this.baseUrl = account.proxyUrl.replace(/\/$/, "");
+    this.baseUrl = normalizeProxyUrl(account.proxyUrl);
     this.accountId = account.id;
   }
 
@@ -70,7 +70,7 @@ export class ProxyClient {
     if (res.code !== SUCCESS && res.code !== 1002) {
       throw new Error(`getStatus failed: ${res.message ?? res.code}`);
     }
-    return res.data!;
+    return requireData(res, "getStatus");
   }
 
   async getQRCode(): Promise<string> {
@@ -78,7 +78,7 @@ export class ProxyClient {
     if (res.code !== SUCCESS) {
       throw new Error(`getQRCode failed: ${res.message ?? res.code}`);
     }
-    return res.data!.qrCodeUrl;
+    return requireData(res, "getQRCode").qrCodeUrl;
   }
 
   async checkLogin(): Promise<{
@@ -96,7 +96,7 @@ export class ProxyClient {
     if (res.code !== SUCCESS && res.code !== 1002) {
       throw new Error(`checkLogin failed: ${res.message ?? res.code}`);
     }
-    return res.data!;
+    return requireData(res, "checkLogin");
   }
 
   async sendText(to: string, text: string): Promise<void> {
@@ -134,7 +134,7 @@ export class ProxyClient {
     if (res.code !== SUCCESS) {
       throw new Error(`getContacts failed: ${res.message ?? res.code}`);
     }
-    return res.data!;
+    return requireData(res, "getContacts");
   }
 
   async registerWebhook(url: string): Promise<void> {
@@ -160,4 +160,23 @@ export class LoginExpiredError extends Error {
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function normalizeProxyUrl(proxyUrl: string): string {
+  const parsed = new URL(proxyUrl);
+  if (parsed.protocol !== "https:") {
+    throw new Error("[wechat] proxyUrl must use https://");
+  }
+  if (parsed.username || parsed.password) {
+    throw new Error("[wechat] proxyUrl must not include credentials");
+  }
+  parsed.hash = "";
+  return parsed.toString().replace(/\/$/, "");
+}
+
+function requireData<T>(response: ProxyApiResponse<T>, action: string): T {
+  if (response.data === undefined) {
+    throw new Error(`${action} failed: missing response data`);
+  }
+  return response.data;
 }

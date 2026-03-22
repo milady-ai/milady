@@ -3,6 +3,7 @@ import {
   type IncomingMessage,
   type ServerResponse,
 } from "node:http";
+import type { AddressInfo } from "node:net";
 import type { WechatMessageContext, WechatMessageType } from "./types";
 
 const WECHAT_TYPE_MAP: Record<
@@ -13,51 +14,68 @@ const WECHAT_TYPE_MAP: Record<
   80001: { type: "text", scope: "group" },
 };
 
+const DEFAULT_MAX_REQUEST_BODY_BYTES = 1024 * 1024;
+
 export interface CallbackServerOptions {
   port: number;
-  apiKey: string;
-  onMessage: (msg: WechatMessageContext) => void;
+  accounts: Array<{ accountId: string; apiKey: string }>;
+  onMessage: (accountId: string, msg: WechatMessageContext) => void;
   signal?: AbortSignal;
-  accountId?: string;
+  maxBodyBytes?: number;
 }
 
-export function startCallbackServer(options: CallbackServerOptions): {
-  close: () => void;
+export async function startCallbackServer(
+  options: CallbackServerOptions,
+): Promise<{
+  close: () => Promise<void>;
   port: number;
-} {
-  const { port, apiKey, onMessage, signal, accountId } = options;
+}> {
+  const {
+    port,
+    accounts,
+    onMessage,
+    signal,
+    maxBodyBytes = DEFAULT_MAX_REQUEST_BODY_BYTES,
+  } = options;
 
   const server = createServer((req: IncomingMessage, res: ServerResponse) => {
-    // Only accept POST to webhook path
-    const expectedPath = accountId
-      ? `/webhook/wechat/${accountId}`
-      : "/webhook/wechat";
-
-    if (req.method !== "POST" || !req.url?.startsWith(expectedPath)) {
+    const account = resolveWebhookAccount(req.url, accounts);
+    if (req.method !== "POST" || !account) {
       res.writeHead(404);
       res.end("Not Found");
       return;
     }
 
-    // Validate API key
-    const incomingKey = req.headers["x-api-key"];
-    if (incomingKey !== apiKey) {
+    const incomingKey = readHeaderValue(req.headers["x-api-key"]);
+    if (incomingKey !== account.apiKey) {
       res.writeHead(401);
       res.end("Unauthorized");
       return;
     }
 
     let body = "";
+    let bodyBytes = 0;
     req.on("data", (chunk: Buffer) => {
+      bodyBytes += chunk.length;
+      if (bodyBytes > maxBodyBytes) {
+        res.writeHead(413);
+        res.end("Payload Too Large");
+        req.destroy();
+        return;
+      }
       body += chunk.toString();
     });
 
     req.on("end", () => {
+      if (res.writableEnded) {
+        return;
+      }
+
       try {
         const payload = JSON.parse(body) as Record<string, unknown>;
         const message = normalizePayload(payload);
         if (message) {
-          onMessage(message);
+          onMessage(account.accountId, message);
         }
         res.writeHead(200);
         res.end("OK");
@@ -66,16 +84,40 @@ export function startCallbackServer(options: CallbackServerOptions): {
         res.end("Bad Request");
       }
     });
+
+    req.on("error", () => {
+      if (res.writableEnded) {
+        return;
+      }
+
+      res.writeHead(400);
+      res.end("Bad Request");
+    });
   });
 
-  server.listen(port, () => {
-    console.log(`[wechat] Webhook server listening on port ${port}`);
+  await new Promise<void>((resolve, reject) => {
+    const handleListening = () => {
+      server.off("error", handleError);
+      resolve();
+    };
+    const handleError = (error: Error) => {
+      server.off("listening", handleListening);
+      reject(error);
+    };
+
+    server.once("listening", handleListening);
+    server.once("error", handleError);
+    server.listen(port);
   });
+
+  const address = server.address() as AddressInfo | null;
+  const listeningPort = address?.port ?? port;
+  console.log(`[wechat] Webhook server listening on port ${listeningPort}`);
 
   server.on("error", (err: Error) => {
     if ((err as NodeJS.ErrnoException).code === "EADDRINUSE") {
       console.error(
-        `[wechat] Port ${port} already in use — webhook server failed to start`,
+        `[wechat] Port ${listeningPort} already in use — webhook server failed to start`,
       );
     } else {
       console.error(`[wechat] Webhook server error:`, err);
@@ -83,18 +125,69 @@ export function startCallbackServer(options: CallbackServerOptions): {
   });
 
   if (signal) {
-    signal.addEventListener("abort", () => {
-      server.close();
-    });
+    signal.addEventListener(
+      "abort",
+      () => {
+        void closeServer(server);
+      },
+      { once: true },
+    );
   }
 
   return {
-    close: () => server.close(),
-    port,
+    close: () => closeServer(server),
+    port: listeningPort,
   };
 }
 
-function normalizePayload(
+function resolveWebhookAccount(
+  rawUrl: string | undefined,
+  accounts: Array<{ accountId: string; apiKey: string }>,
+) {
+  if (!rawUrl) {
+    return null;
+  }
+
+  const pathname = new URL(rawUrl, "http://localhost").pathname;
+  if (pathname === "/webhook/wechat" && accounts.length === 1) {
+    return accounts[0];
+  }
+
+  const match = /^\/webhook\/wechat\/([^/]+)$/.exec(pathname);
+  if (!match) {
+    return null;
+  }
+
+  const accountId = decodeURIComponent(match[1]);
+  return accounts.find((account) => account.accountId === accountId) ?? null;
+}
+
+function readHeaderValue(
+  value: string | string[] | undefined,
+): string | undefined {
+  if (Array.isArray(value)) {
+    return value[0];
+  }
+  return value;
+}
+
+function closeServer(server: ReturnType<typeof createServer>): Promise<void> {
+  if (!server.listening) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve, reject) => {
+    server.close((error) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      resolve();
+    });
+  });
+}
+
+export function normalizePayload(
   payload: Record<string, unknown>,
 ): WechatMessageContext | null {
   // Support two payload formats: nested "raw" and flattened "proxy"

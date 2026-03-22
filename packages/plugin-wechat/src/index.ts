@@ -1,4 +1,5 @@
 import { WechatChannel } from "./channel";
+import { deliverIncomingWechatMessage } from "./runtime-bridge";
 import type { WechatConfig, WechatMessageContext } from "./types";
 
 export interface Plugin {
@@ -32,12 +33,18 @@ const wechatPlugin: Plugin = {
 
     channel = new WechatChannel({
       config: wechatConfig,
-      onMessage: (accountId: string, msg: WechatMessageContext) => {
-        console.log(
-          `[wechat] Message from ${msg.sender} (account: ${accountId}): ${msg.content.slice(0, 100)}`,
-        );
-        // TODO: Route to elizaOS runtime message handler
-        // This will be wired up when integrating with the actual @elizaos/core types
+      onMessage: async (accountId: string, msg: WechatMessageContext) => {
+        await deliverIncomingWechatMessage({
+          runtime,
+          accountId,
+          message: msg,
+          sendText: async (replyAccountId, to, text) => {
+            if (!channel) {
+              throw new Error("[wechat] Channel is not available for replies");
+            }
+            await channel.sendText(replyAccountId, to, text);
+          },
+        });
       },
     });
 
@@ -56,9 +63,10 @@ const wechatPlugin: Plugin = {
 };
 
 export default wechatPlugin;
-export { wechatPlugin };
-export type { WechatConfig, WechatMessageContext } from "./types";
+export { Bot } from "./bot";
 export { WechatChannel } from "./channel";
 export { ProxyClient } from "./proxy-client";
-export { Bot } from "./bot";
 export { ReplyDispatcher } from "./reply-dispatcher";
+export { deliverIncomingWechatMessage } from "./runtime-bridge";
+export type { WechatConfig, WechatMessageContext } from "./types";
+export { wechatPlugin };

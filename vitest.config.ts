@@ -1,5 +1,3 @@
-import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
@@ -173,6 +171,7 @@ export default defineConfig({
       "packages/app-core/test/**/*.test.ts",
       "packages/app-core/test/**/*.test.tsx",
       "packages/plugin-retake/src/**/*.test.ts",
+      "packages/plugin-wechat/src/**/*.test.ts",
       "src/**/*.test.ts",
       "scripts/**/*.test.ts",
       "apps/app/electrobun/src/**/*.test.ts",

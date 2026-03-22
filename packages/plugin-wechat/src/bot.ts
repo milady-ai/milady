@@ -5,14 +5,16 @@ const DEDUP_MAX_ENTRIES = 1000;
 const DEDUP_CLEANUP_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 
 export interface BotOptions {
-  onMessage: (msg: WechatMessageContext) => void;
+  onMessage: (msg: WechatMessageContext) => void | Promise<void>;
   featuresGroups?: boolean;
   featuresImages?: boolean;
 }
 
 export class Bot {
   private readonly seen = new Map<string, number>();
-  private readonly onMessage: (msg: WechatMessageContext) => void;
+  private readonly onMessage: (
+    msg: WechatMessageContext,
+  ) => void | Promise<void>;
   private readonly featuresGroups: boolean;
   private readonly featuresImages: boolean;
   private cleanupTimer: ReturnType<typeof setInterval> | null = null;
@@ -49,7 +51,9 @@ export class Bot {
       return;
     }
 
-    this.onMessage(message);
+    void Promise.resolve(this.onMessage(message)).catch((error: unknown) => {
+      console.error("[wechat] Failed to process inbound message:", error);
+    });
   }
 
   private isDuplicate(messageId: string): boolean {

@@ -358,6 +358,10 @@ export function resolveFeishuPluginImportSpecifier(): string | null {
 }
 
 const WECHAT_PLUGIN_PACKAGE_NAME = "@miladyai/plugin-wechat";
+const WECHAT_PLUGIN_LOCAL_ENTRY_CANDIDATES = [
+  "src/index.ts",
+  "dist/index.js",
+] as const;
 
 export function resolveWechatPluginImportSpecifier(): string | null {
   if (isPackageImportResolvable(WECHAT_PLUGIN_PACKAGE_NAME)) {
@@ -368,16 +372,17 @@ export function resolveWechatPluginImportSpecifier(): string | null {
   const packageRoot = path.resolve(helperDir, "..", "..");
 
   // Check node_modules
-  const nodeModulesEntry = path.resolve(
-    packageRoot,
-    "node_modules",
-    "@miladyai",
-    "plugin-wechat",
-    "dist",
-    "index.js",
-  );
-  if (existsSync(nodeModulesEntry)) {
-    return pathToFileURL(nodeModulesEntry).href;
+  for (const relativeEntryPath of WECHAT_PLUGIN_LOCAL_ENTRY_CANDIDATES) {
+    const nodeModulesEntry = path.resolve(
+      packageRoot,
+      "node_modules",
+      "@miladyai",
+      "plugin-wechat",
+      relativeEntryPath,
+    );
+    if (existsSync(nodeModulesEntry)) {
+      return pathToFileURL(nodeModulesEntry).href;
+    }
   }
 
   return null;

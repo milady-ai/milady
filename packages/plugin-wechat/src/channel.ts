@@ -1,6 +1,6 @@
 import { Bot } from "./bot";
 import { startCallbackServer } from "./callback-server";
-import { ProxyClient, LoginExpiredError } from "./proxy-client";
+import { LoginExpiredError, ProxyClient } from "./proxy-client";
 import { ReplyDispatcher } from "./reply-dispatcher";
 import type {
   ResolvedWechatAccount,
@@ -11,10 +11,14 @@ import { displayQRUrl } from "./utils/qrcode";
 
 const HEALTH_CHECK_INTERVAL_MS = 60_000;
 const LOGIN_POLL_INTERVAL_MS = 5_000;
+const LOGIN_TIMEOUT_MS = 5 * 60_000;
 
 export interface ChannelOptions {
   config: WechatConfig;
-  onMessage: (accountId: string, msg: WechatMessageContext) => void;
+  onMessage: (
+    accountId: string,
+    msg: WechatMessageContext,
+  ) => void | Promise<void>;
 }
 
 export class WechatChannel {
@@ -22,7 +26,7 @@ export class WechatChannel {
   private readonly onMessage: (
     accountId: string,
     msg: WechatMessageContext,
-  ) => void;
+  ) => void | Promise<void>;
   private readonly accounts = new Map<
     string,
     {
@@ -31,7 +35,10 @@ export class WechatChannel {
       bot: Bot;
     }
   >();
-  private callbackServer: { close: () => void; port: number } | null = null;
+  private readonly callbackServers: Array<{
+    close: () => Promise<void>;
+    port: number;
+  }> = [];
   private healthTimer: ReturnType<typeof setInterval> | null = null;
   private abortController: AbortController | null = null;
 
@@ -49,14 +56,26 @@ export class WechatChannel {
       return;
     }
 
-    // Start webhook server (shared across accounts)
-    const webhookPort = resolved[0].webhookPort;
-    this.callbackServer = startCallbackServer({
-      port: webhookPort,
-      apiKey: resolved[0].apiKey,
-      onMessage: (msg) => this.routeIncoming(msg),
-      signal: this.abortController.signal,
-    });
+    const webhookAccountsByPort = new Map<
+      number,
+      Array<{ accountId: string; apiKey: string }>
+    >();
+    for (const account of resolved) {
+      const existing = webhookAccountsByPort.get(account.webhookPort) ?? [];
+      existing.push({ accountId: account.id, apiKey: account.apiKey });
+      webhookAccountsByPort.set(account.webhookPort, existing);
+    }
+
+    for (const [webhookPort, accounts] of webhookAccountsByPort) {
+      this.callbackServers.push(
+        await startCallbackServer({
+          port: webhookPort,
+          accounts,
+          onMessage: (accountId, msg) => this.routeIncoming(accountId, msg),
+          signal: this.abortController.signal,
+        }),
+      );
+    }
 
     // Initialize each account
     for (const account of resolved) {
@@ -72,12 +91,7 @@ export class WechatChannel {
 
       // Login flow
       await this.ensureLoggedIn(account.id, client);
-
-      // Register webhook
-      const webhookUrl =
-        account.webhookPort === webhookPort
-          ? `http://localhost:${webhookPort}/webhook/wechat/${account.id}`
-          : `http://localhost:${account.webhookPort}/webhook/wechat/${account.id}`;
+      const webhookUrl = `http://localhost:${account.webhookPort}/webhook/wechat/${account.id}`;
 
       try {
         await client.registerWebhook(webhookUrl);
@@ -115,7 +129,10 @@ export class WechatChannel {
       this.abortController = null;
     }
 
-    this.callbackServer = null;
+    const servers = this.callbackServers.splice(0);
+    await Promise.all(
+      servers.map((server) => server.close().catch(() => undefined)),
+    );
   }
 
   async sendText(accountId: string, to: string, text: string): Promise<void> {
@@ -155,13 +172,16 @@ export class WechatChannel {
     }
   }
 
-  private routeIncoming(msg: WechatMessageContext): void {
-    // Route to first account's bot (multi-account routing by webhook path
-    // is handled by the callback server)
-    const firstEntry = this.accounts.values().next();
-    if (!firstEntry.done) {
-      firstEntry.value.bot.handleIncoming(msg);
+  private routeIncoming(accountId: string, msg: WechatMessageContext): void {
+    const entry = this.accounts.get(accountId);
+    if (!entry) {
+      console.warn(
+        `[wechat] Received webhook for unknown account "${accountId}"`,
+      );
+      return;
     }
+
+    entry.bot.handleIncoming(msg);
   }
 
   private async ensureLoggedIn(
@@ -183,8 +203,8 @@ export class WechatChannel {
     const qrUrl = await client.getQRCode();
     displayQRUrl(qrUrl);
 
-    // Poll login
-    while (true) {
+    const deadline = Date.now() + LOGIN_TIMEOUT_MS;
+    while (Date.now() < deadline) {
       await sleep(LOGIN_POLL_INTERVAL_MS);
 
       if (this.abortController?.signal.aborted) {
@@ -206,6 +226,10 @@ export class WechatChannel {
         );
       }
     }
+
+    throw new Error(
+      `[wechat] Login timed out for account "${accountId}" after ${Math.round(LOGIN_TIMEOUT_MS / 1000)} seconds`,
+    );
   }
 
   private async healthCheck(): Promise<void> {

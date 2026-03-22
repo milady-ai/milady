@@ -10,13 +10,10 @@
     "url": "https://github.com/milady-ai/milady.git",
     "directory": "packages/plugin-wechat"
   },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
   "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
+    ".": "./src/index.ts"
   },
   "files": [
     "dist",
@@ -29,11 +26,12 @@
     "test:watch": "vitest",
     "clean": "rm -rf dist"
   },
-  "dependencies": {
-    "zod": "^4.3.6"
-  },
   "peerDependencies": {
     "@elizaos/core": ">=2.0.0-alpha"
+  },
+  "publishConfig": {
+    "access": "public",
+    "directory": "dist"
   },
   "devDependencies": {
     "@elizaos/core": "alpha",
