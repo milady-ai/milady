@@ -5,5 +5,5 @@
 import { PluginsView } from "./PluginsView";
 
 export function PluginsPageView() {
-  return <PluginsView inModal />;
+  return <PluginsView mode="all-social" inModal />;
 }

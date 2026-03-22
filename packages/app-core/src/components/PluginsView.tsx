@@ -874,7 +874,7 @@ function subgroupForPlugin(plugin: PluginInfo): string {
 }
 
 type StatusFilter = "all" | "enabled" | "disabled";
-type PluginsViewMode = "all" | "connectors" | "streaming" | "social";
+type PluginsViewMode = "all" | "all-social" | "connectors" | "streaming" | "social";
 type SubgroupTag = { id: string; label: string; count: number };
 
 function comparePlugins(left: PluginInfo, right: PluginInfo): number {
@@ -1087,9 +1087,9 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
   const dragRef = useRef<string | null>(null);
-  const isSocialMode = mode === "social";
+  const isSocialMode = mode === "social" || mode === "all-social";
   const isConnectorLikeMode = mode === "connectors" || mode === "social";
-  const resultLabel = isSocialMode ? "connectors" : label.toLowerCase();
+  const resultLabel = mode === "social" ? "connectors" : label.toLowerCase();
   const searchPlaceholder = isSocialMode
     ? "Search..."
     : `Search ${label.toLowerCase()}...`;
@@ -3149,6 +3149,8 @@ export function PluginsView({
         ? "Connectors"
         : mode === "streaming"
           ? "Streaming"
-          : "Plugins";
+          : mode === "all-social"
+            ? "Plugins"
+            : "Plugins";
   return <PluginListView label={label} mode={mode} inModal={inModal} />;
 }
