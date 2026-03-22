@@ -12,7 +12,7 @@ import {
 // Extend upstream CONNECTOR_PLUGINS with Milady-local connectors.
 export const CONNECTOR_PLUGINS: Record<string, string> = {
   ..._upstreamConnectorPlugins,
-  wechat: "@pjflacko/plugin-wechat",
+  wechat: "@miladyai/plugin-wechat",
 };
 import { isWechatConfigured } from "./wechat-config";
 

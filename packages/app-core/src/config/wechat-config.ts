@@ -1,5 +1,5 @@
 /** WeChat connector plugin package name. */
-export const WECHAT_PLUGIN_PACKAGE = "@pjflacko/plugin-wechat" as const;
+export const WECHAT_PLUGIN_PACKAGE = "@miladyai/plugin-wechat" as const;
 
 /**
  * Detect whether the WeChat connector block in `connectors.wechat` is
