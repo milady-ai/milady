@@ -1081,8 +1081,8 @@ export function AppProvider({
   const greetingInFlightConversationRef = useRef<string | null>(null);
   const greetingEmoteTimerRef = useRef<number | null>(null);
   const companionStaleConversationRefreshRef = useRef<string | null>(null);
-  /** Tracks whether the native-mode (chat tab) initial empty-state reset has fired. */
-  const nativeInitialEmptyShownRef = useRef(false);
+  /** Tracks the previous tab so we detect fresh entries into the chat tab. */
+  const prevTabRef = useRef<string | null>(null);
   const onboardingCompletionCommittedRef = useRef(false);
   const forceLocalBootstrapRef = useRef(false);
   const chatAbortRef = useRef<AbortController | null>(null);
@@ -2805,23 +2805,19 @@ export function AppProvider({
     uiShellMode,
   ]);
 
-  // ── Native mode: show empty new-chat screen on first visit ──────────
-  // When the user opens the chat tab (native / dev mode) for the first
-  // time in this session, clear the active conversation so they see the
-  // ChatEmptyState with the avatar + suggestion prompts rather than
-  // resuming a previous conversation.  The sidebar still shows history
-  // for manual selection.
+  // ── Native mode: start a fresh chat with a greeting on every visit ──
+  // Every time the user navigates to the chat tab (native / dev mode),
+  // create a new conversation with a bootstrap greeting (one of the
+  // agent's catchphrases) so they always land on a fresh chat.  The
+  // sidebar still shows conversation history for manual selection.
   useEffect(() => {
-    if (tab !== "chat") return;
-    if (nativeInitialEmptyShownRef.current) return;
     if (startupPhase !== "ready") return;
+    const enteringChat = tab === "chat" && prevTabRef.current !== "chat";
+    prevTabRef.current = tab;
+    if (!enteringChat) return;
 
-    nativeInitialEmptyShownRef.current = true;
-    setActiveConversationId(null);
-    activeConversationIdRef.current = null;
-    conversationMessagesRef.current = [];
-    setConversationMessages([]);
-  }, [tab, startupPhase]);
+    void handleNewConversation();
+  }, [tab, startupPhase, handleNewConversation]);
 
   const appendLocalCommandTurn = useCallback(
     (userText: string, assistantText: string) => {
