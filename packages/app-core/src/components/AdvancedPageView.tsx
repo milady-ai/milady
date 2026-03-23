@@ -20,7 +20,7 @@ import {
   SkillsView,
 } from "@miladyai/app-core/components";
 import type { Tab } from "@miladyai/app-core/navigation";
-import { useApp } from "@miladyai/app-core/state";
+import { useNavigation } from "../state/NavigationContext";
 import React, { type ReactNode, useState } from "react";
 import { CustomActionsView } from "./CustomActionsView";
 import { DesktopWorkspaceSection } from "./DesktopWorkspaceSection";
@@ -202,7 +202,7 @@ function mapTabToSubTab(tab: Tab): SubTab {
 }
 
 export function AdvancedPageView({ inModal }: { inModal?: boolean } = {}) {
-  const { tab, setTab } = useApp();
+  const { tab, setTab } = useNavigation();
   const [selectedTrajectoryId, setSelectedTrajectoryId] = useState<
     string | null
   >(null);
