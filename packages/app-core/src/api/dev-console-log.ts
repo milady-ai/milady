@@ -11,7 +11,12 @@
 import fs from "node:fs";
 import path from "node:path";
 
-/** Limits which file the API may tail (env is untrusted even on loopback). */
+/**
+ * Limits which file the API may tail (env is untrusted even on loopback).
+ * Requires basename `desktop-dev-console.log` **and** an immediate parent
+ * directory named `.milady` (so `/tmp/desktop-dev-console.log` and
+ * `/.evil/desktop-dev-console.log` are rejected).
+ */
 export function isAllowedDevConsoleLogPath(absPath: string): boolean {
   const norm = path.normalize(absPath);
   if (path.basename(norm) !== "desktop-dev-console.log") return false;

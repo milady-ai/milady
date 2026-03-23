@@ -29,7 +29,7 @@ describe("browser surface helpers", () => {
     );
   });
 
-  it("allows only https or localhost http as browser shell seed URLs", () => {
+  it("allows https and http on localhost, loopback, and private LAN ranges as shell seed URLs", () => {
     expect(isAllowedBrowserStartUrl("https://elizacloud.ai")).toBe(true);
     expect(isAllowedBrowserStartUrl("http://localhost:3000")).toBe(true);
     expect(isAllowedBrowserStartUrl("http://192.168.1.1")).toBe(true);

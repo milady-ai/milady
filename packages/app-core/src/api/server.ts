@@ -48,6 +48,7 @@ import {
   isAllowedDevConsoleLogPath,
   readDevConsoleLogTail,
 } from "./dev-console-log";
+import { resolveMiladyDevCorsAllowOrigin } from "./milady-dev-cors-origin";
 import { parseAllowedLoopbackHttpUrl } from "./dev-loopback-url";
 import { resolveDevStackFromEnv } from "./dev-stack";
 import {
@@ -3703,37 +3704,10 @@ function patchHttpCreateServerForMiladyCompat(
       // header, fetch() fails with "access control checks". We only consult
       // Referer when Origin is *empty* so a malicious page cannot supply a
       // forbidden Origin and get a reflection from Referer.
-      const originHeader = req.headers.origin ?? "";
-      const allowOrigin = (() => {
-        if (
-          /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(
-            originHeader,
-          )
-        ) {
-          return originHeader;
-        }
-        if (originHeader !== "") {
-          return null;
-        }
-        const ref = req.headers.referer;
-        if (!ref) return null;
-        try {
-          const u = new URL(ref);
-          if (u.protocol !== "http:" && u.protocol !== "https:") return null;
-          const h = u.hostname.toLowerCase();
-          if (
-            h === "localhost" ||
-            h === "127.0.0.1" ||
-            h === "[::1]" ||
-            h === "::1"
-          ) {
-            return u.origin;
-          }
-        } catch {
-          return null;
-        }
-        return null;
-      })();
+      const allowOrigin = resolveMiladyDevCorsAllowOrigin(
+        req.headers.origin ?? "",
+        req.headers.referer,
+      );
 
       if (allowOrigin) {
         res.setHeader("Access-Control-Allow-Origin", allowOrigin);

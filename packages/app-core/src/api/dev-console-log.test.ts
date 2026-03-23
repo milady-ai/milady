@@ -21,6 +21,11 @@ describe("dev-console-log", () => {
     expect(
       isAllowedDevConsoleLogPath("/tmp/.evil/desktop-dev-console.log"),
     ).toBe(false);
+    expect(
+      isAllowedDevConsoleLogPath(
+        "/repo/.milady/subdir/desktop-dev-console.log",
+      ),
+    ).toBe(false);
     expect(isAllowedDevConsoleLogPath("/etc/passwd")).toBe(false);
   });
 

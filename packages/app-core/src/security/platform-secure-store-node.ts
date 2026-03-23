@@ -14,6 +14,8 @@
  * `docs/guides/platform-secure-store.md` (macOS Node implementation + accepted risk).
  */
 import { execFile, spawn } from "node:child_process";
+import { access, constants as fsConstants } from "node:fs/promises";
+import path from "node:path";
 import { promisify } from "node:util";
 
 import {
@@ -73,14 +75,22 @@ function secretToolStoreWithStdin(
   });
 }
 
+/** True if `secret-tool` is on `PATH` and executable — no shell (security-sensitive probe). */
 async function secretToolOnPath(): Promise<boolean> {
   if (process.platform === "win32") return false;
-  try {
-    await execFileAsync("sh", ["-c", "command -v secret-tool >/dev/null 2>&1"]);
-    return true;
-  } catch {
-    return false;
+  const segments = (process.env.PATH ?? "")
+    .split(path.delimiter)
+    .filter(Boolean);
+  for (const dir of segments) {
+    const candidate = path.join(dir, "secret-tool");
+    try {
+      await access(candidate, fsConstants.X_OK);
+      return true;
+    } catch {
+      /* try next PATH segment */
+    }
   }
+  return false;
 }
 
 function macErrReason(
