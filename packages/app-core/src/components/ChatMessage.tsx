@@ -396,4 +396,51 @@ export function TypingIndicator({
   );
 }
 
-// ChatEmptyState removed
+export function ChatEmptyState({
+  agentName,
+  onSuggestion,
+}: {
+  agentName: string;
+  onSuggestion: (text: string) => void;
+}) {
+  const { selectedVrmIndex } = useApp();
+  const avatarIndex = selectedVrmIndex > 0 ? selectedVrmIndex : 1;
+  const avatarSrc = getVrmPreviewUrl(avatarIndex);
+
+  const suggestions = [
+    `Hey ${agentName}, what can you do?`,
+    `Tell me about yourself, ${agentName}`,
+    `What's happening in crypto today?`,
+    `Help me set up my wallet`,
+  ];
+
+  return (
+    <div className="flex flex-col items-center justify-center gap-6 px-4 py-12">
+      <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-border shadow-lg">
+        <img
+          src={avatarSrc}
+          alt={`${agentName} avatar`}
+          className="w-full h-full object-cover"
+        />
+      </div>
+
+      <div className="text-center">
+        <h2 className="text-lg font-semibold text-txt">{agentName}</h2>
+        <p className="text-sm text-muted mt-1">Start a conversation</p>
+      </div>
+
+      <div className="flex flex-col gap-2 w-full max-w-sm">
+        {suggestions.map((suggestion) => (
+          <button
+            key={suggestion}
+            type="button"
+            onClick={() => onSuggestion(suggestion)}
+            className="w-full text-left px-4 py-3 rounded-xl border border-border bg-bg-hover/50 text-sm text-txt hover:bg-bg-hover hover:border-border-strong transition-colors"
+          >
+            {suggestion}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}

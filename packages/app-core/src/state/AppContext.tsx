@@ -279,6 +279,7 @@ import {
   useConfirm,
   usePrompt,
 } from "../components/ConfirmModal";
+import { isDefaultConversationTitle } from "../components/conversations/conversation-utils";
 import { buildWalletRpcUpdateRequest } from "../wallet-rpc";
 
 const GREETING_EMOTE_DELAY_MS = 1400;
@@ -1080,6 +1081,8 @@ export function AppProvider({
   const greetingInFlightConversationRef = useRef<string | null>(null);
   const greetingEmoteTimerRef = useRef<number | null>(null);
   const companionStaleConversationRefreshRef = useRef<string | null>(null);
+  /** Tracks whether the native-mode (chat tab) initial empty-state reset has fired. */
+  const nativeInitialEmptyShownRef = useRef(false);
   const onboardingCompletionCommittedRef = useRef(false);
   const forceLocalBootstrapRef = useRef(false);
   const chatAbortRef = useRef<AbortController | null>(null);
@@ -1612,9 +1615,24 @@ export function AppProvider({
     Conversation[] | null
   > => {
     try {
-      const { conversations: c } = await client.listConversations();
-      setConversations(c);
-      return c;
+      const { conversations: serverConvs } = await client.listConversations();
+      setConversations((prev) => {
+        // Preserve local fallback titles when the server still returns a
+        // default placeholder (the AI-generated title hasn't landed yet).
+        const localTitleMap = new Map(prev.map((c) => [c.id, c.title]));
+        return serverConvs.map((sc) => {
+          const localTitle = localTitleMap.get(sc.id);
+          if (
+            localTitle &&
+            !isDefaultConversationTitle(localTitle) &&
+            isDefaultConversationTitle(sc.title)
+          ) {
+            return { ...sc, title: localTitle };
+          }
+          return sc;
+        });
+      });
+      return serverConvs;
     } catch {
       return null;
     }
@@ -2750,6 +2768,11 @@ export function AppProvider({
     ],
   );
 
+  // When a companion conversation goes stale (all messages older than the
+  // threshold), clear the active conversation so the user sees a fresh
+  // empty dock.  A new server-side conversation is only created when the
+  // user actually sends a message (handled by `sendChatText`'s on-demand
+  // creation path).
   useEffect(() => {
     if (uiShellMode !== "companion" || tab !== "companion") {
       companionStaleConversationRefreshRef.current = null;
@@ -2770,14 +2793,35 @@ export function AppProvider({
     }
 
     companionStaleConversationRefreshRef.current = activeConversationId;
-    void handleNewConversation();
+    // Clear the active conversation instead of eagerly creating a new one.
+    // The user will see an empty chat dock; a conversation is created
+    // on-demand when they type their first message.
+    resetConversationDraftState();
   }, [
     activeConversationId,
     conversationMessages,
-    handleNewConversation,
+    resetConversationDraftState,
     tab,
     uiShellMode,
   ]);
+
+  // ── Native mode: show empty new-chat screen on first visit ──────────
+  // When the user opens the chat tab (native / dev mode) for the first
+  // time in this session, clear the active conversation so they see the
+  // ChatEmptyState with the avatar + suggestion prompts rather than
+  // resuming a previous conversation.  The sidebar still shows history
+  // for manual selection.
+  useEffect(() => {
+    if (tab !== "chat") return;
+    if (nativeInitialEmptyShownRef.current) return;
+    if (startupPhase !== "ready") return;
+
+    nativeInitialEmptyShownRef.current = true;
+    setActiveConversationId(null);
+    activeConversationIdRef.current = null;
+    conversationMessagesRef.current = [];
+    setConversationMessages([]);
+  }, [tab, startupPhase]);
 
   const appendLocalCommandTurn = useCallback(
     (userText: string, assistantText: string) => {
@@ -3104,13 +3148,7 @@ export function AppProvider({
 
         // Eagerly rename "New Chat" using a snippet of the first message
         const activeConv = conversations.find((c) => c.id === convId);
-        if (
-          activeConv &&
-          (!activeConv.title ||
-            activeConv.title === "New Chat" ||
-            activeConv.title === "companion.newChat" ||
-            activeConv.title === "conversations.newChatTitle")
-        ) {
+        if (activeConv && isDefaultConversationTitle(activeConv.title)) {
           const fallbackTitle =
             text.length > 15 ? `${text.slice(0, 15)}...` : text;
           setConversations((prev) =>
@@ -3118,6 +3156,9 @@ export function AppProvider({
               c.id === convId ? { ...c, title: fallbackTitle } : c,
             ),
           );
+          // Persist the fallback title server-side so loadConversations()
+          // doesn't revert it back to "New Chat" before the AI title lands.
+          void client.renameConversation(convId, fallbackTitle);
         }
 
         const now = Date.now();
@@ -3360,13 +3401,7 @@ export function AppProvider({
 
         // Eagerly rename "New Chat" using a snippet of the first message
         const activeConv = conversations.find((c) => c.id === convId);
-        if (
-          activeConv &&
-          (!activeConv.title ||
-            activeConv.title === "New Chat" ||
-            activeConv.title === "companion.newChat" ||
-            activeConv.title === "conversations.newChatTitle")
-        ) {
+        if (activeConv && isDefaultConversationTitle(activeConv.title)) {
           const fallbackTitle =
             trimmed.length > 15 ? `${trimmed.slice(0, 15)}...` : trimmed;
           setConversations((prev) =>
@@ -3374,6 +3409,7 @@ export function AppProvider({
               c.id === convId ? { ...c, title: fallbackTitle } : c,
             ),
           );
+          void client.renameConversation(convId, fallbackTitle);
         }
 
         const now = Date.now();

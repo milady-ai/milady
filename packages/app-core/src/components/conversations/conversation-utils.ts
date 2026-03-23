@@ -1,5 +1,22 @@
 import { VRM_COUNT } from "../../state";
 
+/**
+ * Returns `true` when the title is empty or one of the well-known default
+ * placeholder strings that the backend / i18n layer may assign to a new
+ * conversation before a real (AI-generated or user-provided) title is set.
+ */
+export function isDefaultConversationTitle(
+  title: string | undefined | null,
+): boolean {
+  if (!title) return true;
+  return (
+    title === "New Chat" ||
+    title === "Chat" ||
+    title === "companion.newChat" ||
+    title === "conversations.newChatTitle"
+  );
+}
+
 export function getLocalizedConversationTitle(
   title: string | undefined | null,
   t: (
@@ -7,11 +24,11 @@ export function getLocalizedConversationTitle(
     vars?: Record<string, string | number | boolean | null | undefined>,
   ) => string,
 ): string {
-  if (!title || title === "New Chat" || title === "companion.newChat") {
+  if (isDefaultConversationTitle(title)) {
     const localized = t("companion.newChat");
     return localized === "companion.newChat" ? "New Chat" : localized;
   }
-  return title;
+  return title as string;
 }
 
 export const BROWSER_CAPABILITY_PLUGIN_IDS = new Set([
