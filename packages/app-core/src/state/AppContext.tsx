@@ -7022,6 +7022,32 @@ export function AppProvider({
     systemWarnings,
   ]);
 
+  const navigationValue = useMemo(
+    () => ({
+      tab,
+      uiShellMode,
+      lastNativeTab,
+      appsSubTab,
+      agentSubTab,
+      pluginsSubTab,
+      databaseSubTab,
+      setTab,
+      setTabRaw,
+      setUiShellMode,
+      switchUiShellMode,
+      switchShellView,
+      setAppsSubTab,
+      setAgentSubTab,
+      setPluginsSubTab,
+      setDatabaseSubTab,
+    }),
+    [
+      tab, uiShellMode, lastNativeTab,
+      appsSubTab, agentSubTab, pluginsSubTab, databaseSubTab,
+      setTab, setTabRaw, setUiShellMode, switchUiShellMode, switchShellView,
+    ],
+  );
+
   const mergedBranding = useMemo(
     () => ({ ...DEFAULT_BRANDING, ...brandingOverride }),
     [brandingOverride],
@@ -7030,7 +7056,7 @@ export function AppProvider({
   return (
     <BrandingContext.Provider value={mergedBranding}>
       <TranslationProvider uiLanguage={uiLanguage}>
-        <NavigationProvider activeGameViewerUrl={activeGameViewerUrl}>
+        <NavigationProvider value={navigationValue}>
           <LifecycleProvider>
             <ChatProvider>
               <AppContext.Provider value={value}>

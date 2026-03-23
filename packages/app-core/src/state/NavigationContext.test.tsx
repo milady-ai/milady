@@ -1,47 +1,63 @@
 // @vitest-environment jsdom
-import { act, renderHook } from "@testing-library/react";
+import { renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it } from "vitest";
-import { NavigationProvider } from "./NavigationContext";
+import { NavigationProvider, useNavigation } from "./NavigationContext";
+import type { NavigationContextValue } from "./NavigationContext";
 
-// Import the hook directly since it's not publicly exported
-import { useNavigation } from "./NavigationContext";
+const defaultValue: NavigationContextValue = {
+  tab: "companion",
+  uiShellMode: "companion",
+  lastNativeTab: "chat",
+  appsSubTab: "browse",
+  agentSubTab: "character",
+  pluginsSubTab: "features",
+  databaseSubTab: "tables",
+  setTab: () => {},
+  setTabRaw: () => {},
+  setUiShellMode: () => {},
+  switchUiShellMode: () => {},
+  switchShellView: () => {},
+  setAppsSubTab: () => {},
+  setAgentSubTab: () => {},
+  setPluginsSubTab: () => {},
+  setDatabaseSubTab: () => {},
+};
 
 function wrapper({ children }: { children: ReactNode }) {
-  return <NavigationProvider>{children}</NavigationProvider>;
+  return (
+    <NavigationProvider value={defaultValue}>{children}</NavigationProvider>
+  );
 }
 
 describe("NavigationProvider", () => {
-  it("defaults to companion tab", () => {
+  it("provides navigation values from AppProvider", () => {
     const { result } = renderHook(() => useNavigation(), { wrapper });
     expect(result.current.tab).toBe("companion");
     expect(result.current.uiShellMode).toBe("companion");
   });
 
-  it("setTab updates tab", () => {
-    const { result } = renderHook(() => useNavigation(), { wrapper });
-    act(() => {
-      result.current.setTab("settings");
-    });
-    expect(result.current.tab).toBe("settings");
-  });
-
-  it("switchUiShellMode to native uses lastNativeTab", () => {
-    const { result } = renderHook(() => useNavigation(), { wrapper });
-    // Switch to native — should use whatever lastNativeTab is
-    act(() => {
-      result.current.switchUiShellMode("native");
-    });
-    expect(result.current.uiShellMode).toBe("native");
-    // Tab should be a non-companion tab
-    expect(result.current.tab).not.toBe("companion");
-  });
-
-  it("sub-tabs have correct defaults", () => {
+  it("exposes sub-tab defaults", () => {
     const { result } = renderHook(() => useNavigation(), { wrapper });
     expect(result.current.appsSubTab).toBe("browse");
     expect(result.current.agentSubTab).toBe("character");
     expect(result.current.pluginsSubTab).toBe("features");
     expect(result.current.databaseSubTab).toBe("tables");
+  });
+
+  it("passes through custom values", () => {
+    const custom: NavigationContextValue = {
+      ...defaultValue,
+      tab: "settings",
+      uiShellMode: "native",
+    };
+    const customWrapper = ({ children }: { children: ReactNode }) => (
+      <NavigationProvider value={custom}>{children}</NavigationProvider>
+    );
+    const { result } = renderHook(() => useNavigation(), {
+      wrapper: customWrapper,
+    });
+    expect(result.current.tab).toBe("settings");
+    expect(result.current.uiShellMode).toBe("native");
   });
 });
