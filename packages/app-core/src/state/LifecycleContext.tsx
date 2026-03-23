@@ -40,6 +40,13 @@ export interface LifecycleContextValue {
   backendConnection: AppState["backendConnection"];
   backendDisconnectedBannerDismissed: boolean;
   systemWarnings: string[];
+  // Cloud (read-only — affects UI gating in multiple components)
+  elizaCloudConnected: boolean;
+  elizaCloudEnabled: boolean;
+  // Actions (cross-cutting — used by many components)
+  setActionNotice: (text: string, tone?: "info" | "success" | "error", ttlMs?: number) => void;
+  copyToClipboard: (text: string) => Promise<void>;
+  dismissSystemWarning: (message: string) => void;
 }
 
 const LifecycleCtx = createContext<LifecycleContextValue | null>(null);
@@ -93,6 +100,11 @@ export function useLifecycle(): LifecycleContextValue {
       },
       backendDisconnectedBannerDismissed: false,
       systemWarnings: [],
+      elizaCloudConnected: false,
+      elizaCloudEnabled: false,
+      setActionNotice: () => {},
+      copyToClipboard: async () => {},
+      dismissSystemWarning: () => {},
     };
   }
   throw new Error(

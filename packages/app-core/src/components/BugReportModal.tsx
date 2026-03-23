@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { client } from "../api";
 import { useBranding } from "../config/branding";
 import { useBugReport, useTimeout } from "../hooks";
-import { useApp } from "../state";
+import { useLifecycle } from "../state/LifecycleContext";
 import { useTranslation } from "../state/TranslationContext";
 import { openExternalUrl } from "../utils";
 
@@ -36,7 +36,7 @@ export function BugReportModal() {
   const { setTimeout } = useTimeout();
 
   const { t } = useTranslation();
-  const { copyToClipboard } = useApp();
+  const { copyToClipboard } = useLifecycle();
   const branding = useBranding();
   const { isOpen, close } = useBugReport();
   const [form, setForm] = useState<BugReportForm>(EMPTY_FORM);

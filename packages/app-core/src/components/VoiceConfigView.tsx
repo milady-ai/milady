@@ -20,7 +20,7 @@ import { invokeDesktopBridgeRequest, isElectrobunRuntime } from "../bridge";
 import { getSwabblePlugin, type SwabbleConfig } from "../bridge/native-plugins";
 import { dispatchWindowEvent, VOICE_CONFIG_UPDATED_EVENT } from "../events";
 import { useTimeout } from "../hooks";
-import { useApp } from "../state";
+import { useLifecycle } from "../state/LifecycleContext";
 import { useTranslation } from "../state/TranslationContext";
 import type { DesktopClickAuditItem } from "../utils";
 import { PREMADE_VOICES, sanitizeApiKey, VOICE_PROVIDERS } from "../voice";
@@ -602,7 +602,7 @@ export function VoiceConfigView() {
   const { setTimeout } = useTimeout();
 
   const { t } = useTranslation();
-  const { elizaCloudConnected } = useApp();
+  const { elizaCloudConnected } = useLifecycle();
   const [voiceConfig, setVoiceConfig] = useState<VoiceConfig>({});
   const [swabbleServerConfig, setSwabbleServerConfig] =
     useState<Partial<SwabbleConfig> | null>(null);
