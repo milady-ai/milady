@@ -6,6 +6,7 @@ import {
   VRM_COUNT,
 } from "@miladyai/app-core/state";
 import { resolveAppAssetUrl } from "@miladyai/app-core/utils";
+import { useTranslation } from "../state/TranslationContext";
 import {
   memo,
   type ReactNode,
@@ -130,7 +131,8 @@ function CompanionSceneSurface({
   children?: ReactNode;
 }) {
   useRenderGuard("CompanionSceneHost");
-  const { selectedVrmIndex, customVrmUrl, uiTheme, t, tab } = useApp();
+  const { t } = useTranslation();
+  const { selectedVrmIndex, customVrmUrl, uiTheme, tab } = useApp();
   const rootRef = useRef<HTMLDivElement | null>(null);
   const stageEnginesRef = useRef(new Set<VrmEngine>());
   const companionZoomRef = useRef(DEFAULT_COMPANION_ZOOM);

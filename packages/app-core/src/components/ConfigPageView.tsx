@@ -68,7 +68,8 @@ function CloudRpcStatus({
   loginBusy,
   onLogin,
 }: CloudRpcStatusProps) {
-  const { t, setState, setTab } = useApp();
+  const { t } = useTranslation();
+  const { setState, setTab } = useApp();
   if (connected) {
     return (
       <div className="flex items-center gap-2 text-xs">

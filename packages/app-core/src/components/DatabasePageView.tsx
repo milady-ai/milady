@@ -4,12 +4,14 @@
 
 import { Button } from "@miladyai/ui";
 import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 import { DatabaseView } from "./DatabaseView";
 import { MediaGalleryView } from "./MediaGalleryView";
 import { VectorBrowserView } from "./VectorBrowserView";
 
 export function DatabasePageView() {
-  const { t, databaseSubTab, setState } = useApp();
+  const { t } = useTranslation();
+  const { databaseSubTab, setState } = useApp();
   const dbTabs = [
     {
       id: "tables" as const,

@@ -1,8 +1,10 @@
 import { PermissionsOnboardingSection } from "@miladyai/app-core/components";
 import { useApp } from "@miladyai/app-core/state";
+import { useTranslation } from "../../state/TranslationContext";
 
 export function PermissionsStep() {
-  const { handleOnboardingNext, handleOnboardingBack, t } = useApp();
+  const { t } = useTranslation();
+  const { handleOnboardingNext, handleOnboardingBack } = useApp();
 
   return (
     <>

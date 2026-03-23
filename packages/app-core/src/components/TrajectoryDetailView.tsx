@@ -64,7 +64,8 @@ function estimateCost(
 }
 
 function CodeBlock({ content, label }: { content: string; label: string }) {
-  const { t, copyToClipboard } = useApp();
+  const { t } = useTranslation();
+  const { copyToClipboard } = useApp();
   const [expanded, setExpanded] = useState(false);
   const lines = content.split("\n").length;
   const shouldTruncate = !expanded && lines > 20;

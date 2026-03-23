@@ -66,6 +66,20 @@ const MIGRATED_FILES = [
   "config/config-field.tsx",
   "config/config-renderer.tsx",
   "config/ui-renderer.tsx",
+  // Round 3 — split t from mixed useApp destructuring
+  "components/TrajectoryDetailView.tsx",
+  "components/BugReportModal.tsx",
+  "components/CompanionSceneHost.tsx",
+  "components/DatabasePageView.tsx",
+  "components/FineTuningView.tsx",
+  "components/ChatMessage.tsx",
+  "components/EmotePicker.tsx",
+  "components/BscTradePanel.tsx",
+  "components/onboarding/PermissionsStep.tsx",
+  "components/onboarding/IdentityStep.tsx",
+  "components/onboarding/OnboardingStepNav.tsx",
+  "components/onboarding/connection/ConnectionProviderGridScreen.tsx",
+  "components/onboarding/connection/ConnectionHostingScreen.tsx",
 ];
 
 describe("useTranslation migration", () => {

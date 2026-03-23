@@ -491,7 +491,8 @@ function InlinePluginConfig({ pluginId: rawPluginId }: { pluginId: string }) {
   const [dismissed, setDismissed] = useState(false);
   const mountedRef = useRef(true);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const { setActionNotice, loadPlugins, t } = useApp();
+  const { t } = useTranslation();
+  const { setActionNotice, loadPlugins } = useApp();
 
   // Track mount state — reset to true on each mount (needed for StrictMode
   // which unmounts/remounts and would leave the ref false otherwise).

@@ -5,6 +5,7 @@ import { client } from "../api";
 import { useBranding } from "../config/branding";
 import { useBugReport, useTimeout } from "../hooks";
 import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 import { openExternalUrl } from "../utils";
 
 const ENV_OPTIONS = ["macOS", "Windows", "Linux", "Other"] as const;
@@ -34,7 +35,8 @@ const EMPTY_FORM: BugReportForm = {
 export function BugReportModal() {
   const { setTimeout } = useTimeout();
 
-  const { copyToClipboard, t } = useApp();
+  const { t } = useTranslation();
+  const { copyToClipboard } = useApp();
   const branding = useBranding();
   const { isOpen, close } = useBugReport();
   const [form, setForm] = useState<BugReportForm>(EMPTY_FORM);

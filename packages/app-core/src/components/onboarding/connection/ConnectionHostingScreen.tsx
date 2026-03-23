@@ -1,6 +1,7 @@
 import { appNameInterpolationVars, useBranding } from "../../../config";
 import type { ConnectionEvent } from "../../../onboarding/connection-flow";
 import { useApp } from "../../../state";
+import { useTranslation } from "../../../state/TranslationContext";
 
 export function ConnectionHostingScreen({
   showHostingLocalCard,
@@ -10,7 +11,8 @@ export function ConnectionHostingScreen({
   dispatch: (event: ConnectionEvent) => void;
 }) {
   const branding = useBranding();
-  const { t, handleOnboardingBack } = useApp();
+  const { t } = useTranslation();
+  const { handleOnboardingBack } = useApp();
 
   return (
     <>
