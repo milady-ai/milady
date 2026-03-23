@@ -178,7 +178,9 @@ function resolveCurrentElizaReleaseChannel(): "alpha" | "next" | null {
       return "next";
     }
   } catch (err) {
-    logger.warn(`[plugin-installer] Failed to detect release channel from @elizaos/agent: ${err instanceof Error ? err.message : String(err)}`);
+    logger.warn(
+      `[plugin-installer] Failed to detect release channel from @elizaos/agent: ${err instanceof Error ? err.message : String(err)}`,
+    );
   }
 
   return null;
@@ -211,7 +213,9 @@ export async function detectPackageManager(): Promise<"bun" | "npm"> {
       await execFileAsync(cmd, ["--version"]);
       return cmd;
     } catch (err) {
-      logger.debug(`[plugin-installer] ${cmd} not available: ${err instanceof Error ? err.message : String(err)}`);
+      logger.debug(
+        `[plugin-installer] ${cmd} not available: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
   }
   return "npm";
@@ -609,7 +613,9 @@ async function readInstalledVersion(
       return pkg.version;
     }
   } catch (err) {
-    logger.warn(`[plugin-installer] Failed to read installed version for ${packageName}: ${err instanceof Error ? err.message : String(err)}`);
+    logger.warn(
+      `[plugin-installer] Failed to read installed version for ${packageName}: ${err instanceof Error ? err.message : String(err)}`,
+    );
   }
   return fallbackVersion;
 }
@@ -626,7 +632,9 @@ async function remoteBranchExists(
     );
     return stdout.trim().length > 0;
   } catch (err) {
-    logger.debug(`[plugin-installer] Failed to check remote branch "${branch}": ${err instanceof Error ? err.message : String(err)}`);
+    logger.debug(
+      `[plugin-installer] Failed to check remote branch "${branch}": ${err instanceof Error ? err.message : String(err)}`,
+    );
     return false;
   }
 }
@@ -653,7 +661,9 @@ async function listRemoteBranches(gitUrl: string): Promise<string[]> {
     }
     return branches;
   } catch (err) {
-    logger.warn(`[plugin-installer] Failed to list remote branches for ${gitUrl}: ${err instanceof Error ? err.message : String(err)}`);
+    logger.warn(
+      `[plugin-installer] Failed to list remote branches for ${gitUrl}: ${err instanceof Error ? err.message : String(err)}`,
+    );
     return [];
   }
 }
@@ -777,7 +787,9 @@ async function resolveEntryPoint(
     await fs.access(nmPath);
     return nmPath;
   } catch (err) {
-    logger.debug(`[plugin-installer] npm layout not found for ${packageName}: ${err instanceof Error ? err.message : String(err)}`);
+    logger.debug(
+      `[plugin-installer] npm layout not found for ${packageName}: ${err instanceof Error ? err.message : String(err)}`,
+    );
   }
 
   // Direct layout (git clone): check for package.json in targetDir
@@ -786,7 +798,9 @@ async function resolveEntryPoint(
     await fs.access(pkgPath);
     return targetDir;
   } catch (err) {
-    logger.debug(`[plugin-installer] No package.json found in ${targetDir}: ${err instanceof Error ? err.message : String(err)}`);
+    logger.debug(
+      `[plugin-installer] No package.json found in ${targetDir}: ${err instanceof Error ? err.message : String(err)}`,
+    );
   }
 
   return null;

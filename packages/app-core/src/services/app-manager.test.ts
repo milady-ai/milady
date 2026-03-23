@@ -249,8 +249,6 @@ class FakeAgentRuntime implements IAgentRuntime {
     this.services.get(type)?.push(service);
   }
 
-
-
   getAgent = async () => null;
   getAgents = async () => [];
   getAgentsByIds = async () => [];

@@ -276,9 +276,15 @@ describe("POST /api/agent/reset", () => {
 
     const server = await startApiServer({ port: 0, runtime: RUNTIME_STUB });
     try {
-      const { status } = await req(server.port, "POST", "/api/agent/reset", undefined, {
-        "x-eliza-token": "reset-token",
-      });
+      const { status } = await req(
+        server.port,
+        "POST",
+        "/api/agent/reset",
+        undefined,
+        {
+          "x-eliza-token": "reset-token",
+        },
+      );
       expect(status).toBe(200);
 
       const savedConfig = JSON.parse(

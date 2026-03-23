@@ -7,13 +7,10 @@ import { fileURLToPath } from "node:url";
 import { type AgentRuntime, logger } from "@elizaos/core";
 import { StewardApiError, type PolicyResult } from "@stwd/sdk";
 
-
 import { handleCloudCompatRoute } from "@elizaos/agent/api/cloud-compat-routes";
 // Override the wallet export rejection function with the hardened version
 // that adds rate limiting, audit logging, and a forced confirmation delay.
-import {
-  startApiServer as upstreamStartApiServer,
-} from "@elizaos/agent/api/server";
+import { startApiServer as upstreamStartApiServer } from "@elizaos/agent/api/server";
 import { loadElizaConfig, saveElizaConfig } from "../config/config";
 import {
   ensureRuntimeSqlCompatibility,
@@ -81,7 +78,6 @@ import {
 } from "../security/wallet-os-store-actions";
 import { getCloudSecret } from "./cloud-secrets";
 
-
 // ---------------------------------------------------------------------------
 // Import from extracted modules for use within this file
 // ---------------------------------------------------------------------------
@@ -104,11 +100,7 @@ import {
 // Module-level constants and types that stay in server.ts
 // ---------------------------------------------------------------------------
 
-const PACKAGE_ROOT_NAMES = new Set([
-  "eliza",
-  "elizaai",
-  "elizaos",
-]);
+const PACKAGE_ROOT_NAMES = new Set(["eliza", "elizaai", "elizaos"]);
 
 type PluginCategory =
   | "ai-provider"
@@ -1681,7 +1673,6 @@ async function handleDatabaseRowsCompatRoute(
   return true;
 }
 
-
 type TradePermissionMode = "user-sign-only" | "manual-local-key" | "agent-auto";
 
 const AGENT_AUTOMATION_HEADER = "x-milady-agent-action";
@@ -1762,7 +1753,6 @@ async function handleMiladyCompatRoute(
 ): Promise<boolean> {
   const method = (req.method ?? "GET").toUpperCase();
   const url = new URL(req.url ?? "/", "http://localhost");
-
 
   // Eliza Cloud thin-client proxy (compat agents, jobs, …) — was missing from the
   // compat wrapper, so the dashboard saw 404 on `/api/cloud/compat/agents`.
@@ -2434,7 +2424,8 @@ async function handleMiladyCompatRoute(
         return true;
       }
 
-      const finalHash = "txHash" in executionResult ? executionResult.txHash : "";
+      const finalHash =
+        "txHash" in executionResult ? executionResult.txHash : "";
       const finalNonce = null;
       const finalGasLimit = "0";
       const finalMode = executionResult.mode;
@@ -2666,7 +2657,8 @@ async function handleMiladyCompatRoute(
         return true;
       }
 
-      const finalHash = "txHash" in executionResult ? executionResult.txHash : "";
+      const finalHash =
+        "txHash" in executionResult ? executionResult.txHash : "";
       const finalNonce = null;
       const finalGasLimit = "0";
 
@@ -2865,9 +2857,7 @@ async function handleMiladyCompatRoute(
     sendJsonResponse(
       res,
       200,
-      _filterConfigEnvForResponse(
-        loadElizaConfig() as Record<string, unknown>,
-      ),
+      _filterConfigEnvForResponse(loadElizaConfig() as Record<string, unknown>),
     );
     return true;
   }

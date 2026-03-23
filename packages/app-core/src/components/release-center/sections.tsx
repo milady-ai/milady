@@ -15,11 +15,7 @@ import type {
   WebGpuBrowserStatus,
   WgpuTagElement,
 } from "./types";
-import {
-
-  RELEASE_NOTES_PARTITION,
-  SESSION_PARTITIONS,
-} from "./types";
+import { RELEASE_NOTES_PARTITION, SESSION_PARTITIONS } from "./types";
 
 export function ReleaseStatusSection({
   busyAction,

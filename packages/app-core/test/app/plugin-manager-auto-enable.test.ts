@@ -6,22 +6,14 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
-// ── Mock config module before importing eliza.ts ────────────────────────
-
-const mockLoadElizaConfig = vi.fn();
-const mockSaveElizaConfig = vi.fn();
-
-// Mock config module used by plugin-manager-guard.ts
-vi.mock("../../src/config/config.js", () => ({
-  loadElizaConfig: (...args: unknown[]) => mockLoadElizaConfig(...args),
-  saveElizaConfig: (...args: unknown[]) => mockSaveElizaConfig(...args),
-}));
-
+import * as elizaConfig from "../../src/config/config";
 import {
   ensurePluginManagerAllowed,
   _resetPluginManagerChecked,
 } from "../../src/runtime/plugin-manager-guard";
+
+const mockLoadElizaConfig = vi.fn();
+const mockSaveElizaConfig = vi.fn();
 
 describe("ensurePluginManagerAllowed", () => {
   const prevEnv = process.env.MILADY_DISABLE_PLUGIN_MANAGER_AUTO_ENABLE;
@@ -31,9 +23,16 @@ describe("ensurePluginManagerAllowed", () => {
     mockLoadElizaConfig.mockReset();
     mockSaveElizaConfig.mockReset();
     delete process.env.MILADY_DISABLE_PLUGIN_MANAGER_AUTO_ENABLE;
+    vi.spyOn(elizaConfig, "loadElizaConfig").mockImplementation(
+      mockLoadElizaConfig as never,
+    );
+    vi.spyOn(elizaConfig, "saveElizaConfig").mockImplementation(
+      mockSaveElizaConfig as never,
+    );
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     if (prevEnv !== undefined) {
       process.env.MILADY_DISABLE_PLUGIN_MANAGER_AUTO_ENABLE = prevEnv;
     } else {

@@ -98,7 +98,12 @@ import { getBootConfig, setBootConfig } from "../config/boot-config";
 import { BrandingContext, DEFAULT_BRANDING } from "../config/branding";
 import { type AppEmoteEventDetail, dispatchAppEmoteEvent } from "../events";
 import type { UiLanguage } from "../i18n";
-import { COMPANION_ENABLED, pathForTab, type Tab, tabFromPath } from "../navigation";
+import {
+  COMPANION_ENABLED,
+  pathForTab,
+  type Tab,
+  tabFromPath,
+} from "../navigation";
 import {
   canRevertOnboardingTo,
   getFlaminaTopicForOnboardingStep,
@@ -7145,11 +7150,7 @@ function AppProviderInner({
     if (elizaCloudAuthRejected) {
       if (!elizaCloudAuthNoticeSentRef.current) {
         elizaCloudAuthNoticeSentRef.current = true;
-        setActionNotice(
-          t("notice.elizaCloudAuthRejected"),
-          "error",
-          14_000,
-        );
+        setActionNotice(t("notice.elizaCloudAuthRejected"), "error", 14_000);
       }
     } else {
       elizaCloudAuthNoticeSentRef.current = false;

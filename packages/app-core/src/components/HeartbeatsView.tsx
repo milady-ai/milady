@@ -609,10 +609,7 @@ export function HeartbeatsView() {
                     <Select
                       value={form.triggerType}
                       onValueChange={(value) =>
-                        setField(
-                          "triggerType",
-                          value as TriggerType,
-                        )
+                        setField("triggerType", value as TriggerType)
                       }
                     >
                       <SelectTrigger className={SELECT_CLASS}>
@@ -622,7 +619,9 @@ export function HeartbeatsView() {
                         <SelectItem value="interval">
                           {t("triggersview.RepeatingInterval")}
                         </SelectItem>
-                        <SelectItem value="once">{t("triggersview.OneTime")}</SelectItem>
+                        <SelectItem value="once">
+                          {t("triggersview.OneTime")}
+                        </SelectItem>
                         <SelectItem value="cron">
                           {t("triggersview.CronSchedule")}
                         </SelectItem>
@@ -637,10 +636,7 @@ export function HeartbeatsView() {
                     <Select
                       value={form.wakeMode}
                       onValueChange={(value) =>
-                        setField(
-                          "wakeMode",
-                          value as TriggerWakeMode,
-                        )
+                        setField("wakeMode", value as TriggerWakeMode)
                       }
                     >
                       <SelectTrigger className={SELECT_CLASS}>
@@ -677,10 +673,7 @@ export function HeartbeatsView() {
                       <Select
                         value={form.durationUnit}
                         onValueChange={(value) =>
-                          setField(
-                            "durationUnit",
-                            value as DurationUnit,
-                          )
+                          setField("durationUnit", value as DurationUnit)
                         }
                       >
                         <SelectTrigger className={SELECT_CLASS}>

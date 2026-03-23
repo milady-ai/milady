@@ -83,13 +83,7 @@ describe("sanitizeSpeechText – Unicode / CJK preservation", () => {
   });
 
   it("does not produce ',,' or empty output from CJK input", () => {
-    const inputs = [
-      "你好",
-      "你好！",
-      "你好，世界",
-      "请说你好",
-      "我是AI助手",
-    ];
+    const inputs = ["你好", "你好！", "你好，世界", "请说你好", "我是AI助手"];
     for (const input of inputs) {
       const result = sanitizeSpeechText(input);
       expect(result).not.toBe(",,");
@@ -106,7 +100,8 @@ describe("sanitizeSpeechText – Unicode / CJK preservation", () => {
   });
 
   it("preserves CJK text through full pipeline (thinking tags + directions + punctuation)", () => {
-    const input = "<think>analyzing</think> *nods* 你好！我叫小明。(quietly) 很高兴认识你。";
+    const input =
+      "<think>analyzing</think> *nods* 你好！我叫小明。(quietly) 很高兴认识你。";
     const result = sanitizeSpeechText(input);
     expect(result).not.toContain("analyzing");
     expect(result).not.toContain("nods");

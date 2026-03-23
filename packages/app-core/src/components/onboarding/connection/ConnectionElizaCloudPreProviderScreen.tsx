@@ -41,7 +41,12 @@ export function ConnectionElizaCloudPreProviderScreen({
 
   return (
     <>
-      <div className="text-xs tracking-[0.3em] uppercase text-[rgba(240,238,250,0.62)] font-semibold text-center mb-0" style={{ textShadow: '0 2px 10px rgba(3,5,10,0.55)' }}>Eliza Cloud</div>
+      <div
+        className="text-xs tracking-[0.3em] uppercase text-[rgba(240,238,250,0.62)] font-semibold text-center mb-0"
+        style={{ textShadow: "0 2px 10px rgba(3,5,10,0.55)" }}
+      >
+        Eliza Cloud
+      </div>
       <div className="onboarding-divider">
         <div className="w-1.5 h-1.5 bg-[rgba(240,185,11,0.4)] rotate-45 shrink-0" />
       </div>
@@ -186,7 +191,9 @@ export function ConnectionElizaCloudPreProviderScreen({
                   </p>
                 );
               })()}
-            <p className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3">{t("onboarding.freeCredits")}</p>
+            <p className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3">
+              {t("onboarding.freeCredits")}
+            </p>
           </div>
         ) : (
           <div>

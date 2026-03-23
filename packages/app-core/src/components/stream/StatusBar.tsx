@@ -1,7 +1,16 @@
 import { isElectrobunRuntime } from "@miladyai/app-core/bridge";
 import { getBootConfig } from "@miladyai/app-core/config";
 import { useApp } from "@miladyai/app-core/state";
-import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Slider } from "@miladyai/ui";
+import {
+  Button,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Slider,
+} from "@miladyai/ui";
 import {
   ChevronDown,
   ExternalLink,

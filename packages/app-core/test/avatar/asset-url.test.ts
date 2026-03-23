@@ -1,3 +1,7 @@
+import {
+  DEFAULT_BOOT_CONFIG,
+  setBootConfig,
+} from "@miladyai/app-core/config";
 import { resolveApiUrl, resolveAppAssetUrl } from "@miladyai/app-core/utils";
 import { describe, expect, it } from "vitest";
 
@@ -74,12 +78,18 @@ describe("resolveApiUrl", () => {
     expect(resolveApiUrl("/api/avatar/vrm")).toBe("/api/avatar/vrm");
   });
 
-  it("prefixes with __MILADY_API_BASE__ when set", () => {
-    withWindow({ __MILADY_API_BASE__: "http://localhost:2138" }, () => {
+  it("prefixes with boot config apiBase when set", () => {
+    setBootConfig({
+      ...DEFAULT_BOOT_CONFIG,
+      apiBase: "http://localhost:2138",
+    });
+    try {
       expect(resolveApiUrl("/api/avatar/vrm")).toBe(
         "http://localhost:2138/api/avatar/vrm",
       );
-    });
+    } finally {
+      setBootConfig({ ...DEFAULT_BOOT_CONFIG });
+    }
   });
 
   it("handles empty string base gracefully (falsy → passthrough)", () => {

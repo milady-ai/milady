@@ -14,7 +14,9 @@ function mockReq(headers: http.IncomingHttpHeaders = {}): http.IncomingMessage {
 
 describe("extractAuthToken", () => {
   it("extracts Bearer token from Authorization header", () => {
-    const token = extractAuthToken(mockReq({ authorization: "Bearer my-secret" }));
+    const token = extractAuthToken(
+      mockReq({ authorization: "Bearer my-secret" }),
+    );
     expect(token).toBe("my-secret");
   });
 
@@ -42,7 +44,10 @@ describe("extractAuthToken", () => {
 
   it("prefers Authorization header over X-Eliza-Token", () => {
     const token = extractAuthToken(
-      mockReq({ authorization: "Bearer bearer-tok", "x-eliza-token": "alt-tok" }),
+      mockReq({
+        authorization: "Bearer bearer-tok",
+        "x-eliza-token": "alt-tok",
+      }),
     );
     expect(token).toBe("bearer-tok");
   });
@@ -73,14 +78,16 @@ describe("isAuthorized (global API auth gate)", () => {
 
   it("rejects when token has different length than expected", () => {
     process.env.ELIZA_API_TOKEN = "secret-token";
-    expect(isAuthorized(mockReq({ authorization: "Bearer short" }))).toBe(false);
+    expect(isAuthorized(mockReq({ authorization: "Bearer short" }))).toBe(
+      false,
+    );
   });
 
   it("accepts when ELIZA_API_TOKEN is set and correct Bearer token provided", () => {
     process.env.ELIZA_API_TOKEN = "secret-token";
-    expect(isAuthorized(mockReq({ authorization: "Bearer secret-token" }))).toBe(
-      true,
-    );
+    expect(
+      isAuthorized(mockReq({ authorization: "Bearer secret-token" })),
+    ).toBe(true);
   });
 
   it("accepts when ELIZA_API_TOKEN is set and correct X-Api-Key provided", () => {
@@ -90,7 +97,9 @@ describe("isAuthorized (global API auth gate)", () => {
 
   it("accepts when ELIZA_API_TOKEN is set and correct X-Eliza-Token provided", () => {
     process.env.ELIZA_API_TOKEN = "secret-token";
-    expect(isAuthorized(mockReq({ "x-eliza-token": "secret-token" }))).toBe(true);
+    expect(isAuthorized(mockReq({ "x-eliza-token": "secret-token" }))).toBe(
+      true,
+    );
   });
 
   it("accepts any request when ELIZA_API_TOKEN is unset (open access)", () => {

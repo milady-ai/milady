@@ -11,8 +11,6 @@ import {
   type ResolvedInjectedCharacter,
 } from "./config/boot-config";
 
-
-
 function getResolved() {
   const catalog = getBootConfig().characterCatalog;
   if (!catalog) {
@@ -36,7 +34,8 @@ export function getMiladyCharacterAssets(): ResolvedCharacterAsset[] {
 
 export const MILADY_CHARACTER_ASSET_COUNT = 0;
 
-export const DEFAULT_MILADY_CHARACTER_ASSET: ResolvedCharacterAsset | null = null;
+export const DEFAULT_MILADY_CHARACTER_ASSET: ResolvedCharacterAsset | null =
+  null;
 
 export function getMiladyCharacterAsset(
   id: number,

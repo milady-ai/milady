@@ -41,14 +41,24 @@ export function RpcStep() {
   if (!mode) {
     return (
       <>
-        <div className="text-xs tracking-[0.3em] uppercase text-[rgba(240,238,250,0.62)] font-semibold text-center mb-0" style={{ textShadow: '0 2px 10px rgba(3,5,10,0.55)' }}>
+        <div
+          className="text-xs tracking-[0.3em] uppercase text-[rgba(240,238,250,0.62)] font-semibold text-center mb-0"
+          style={{ textShadow: "0 2px 10px rgba(3,5,10,0.55)" }}
+        >
           {t("onboarding.rpcTitle")}
         </div>
         <div className="onboarding-divider">
           <div className="w-1.5 h-1.5 bg-[rgba(240,185,11,0.4)] rotate-45 shrink-0" />
         </div>
-        <div className="text-xl font-light leading-[1.4] text-[rgba(240,238,250,0.95)] text-center mb-[18px]" style={{ textShadow: '0 2px 10px rgba(3,5,10,0.55)' }}>{t("onboarding.rpcQuestion")}</div>
-        <p className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3">{t("onboarding.rpcDesc")}</p>
+        <div
+          className="text-xl font-light leading-[1.4] text-[rgba(240,238,250,0.95)] text-center mb-[18px]"
+          style={{ textShadow: "0 2px 10px rgba(3,5,10,0.55)" }}
+        >
+          {t("onboarding.rpcQuestion")}
+        </div>
+        <p className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3">
+          {t("onboarding.rpcDesc")}
+        </p>
 
         <div
           style={{
@@ -80,10 +90,16 @@ export function RpcStep() {
             style={{ justifyContent: "center" }}
           >
             <div>
-              <div className="text-xs text-[rgba(240,238,250,0.88)] leading-[1.3]" style={{ textShadow: '0 1px 8px rgba(3,5,10,0.6)' }}>
+              <div
+                className="text-xs text-[rgba(240,238,250,0.88)] leading-[1.3]"
+                style={{ textShadow: "0 1px 8px rgba(3,5,10,0.6)" }}
+              >
                 {t("onboarding.rpcElizaCloud")}
               </div>
-              <div className="text-[10px] text-[rgba(240,238,250,0.58)] leading-[1.3] line-clamp-2" style={{ textShadow: '0 1px 8px rgba(3,5,10,0.5)' }}>
+              <div
+                className="text-[10px] text-[rgba(240,238,250,0.58)] leading-[1.3] line-clamp-2"
+                style={{ textShadow: "0 1px 8px rgba(3,5,10,0.5)" }}
+              >
                 {t("onboarding.rpcElizaCloudDesc")}
               </div>
             </div>
@@ -97,10 +113,16 @@ export function RpcStep() {
             style={{ justifyContent: "center" }}
           >
             <div>
-              <div className="text-xs text-[rgba(240,238,250,0.88)] leading-[1.3]" style={{ textShadow: '0 1px 8px rgba(3,5,10,0.6)' }}>
+              <div
+                className="text-xs text-[rgba(240,238,250,0.88)] leading-[1.3]"
+                style={{ textShadow: "0 1px 8px rgba(3,5,10,0.6)" }}
+              >
                 {t("onboarding.rpcBringKeys")}
               </div>
-              <div className="text-[10px] text-[rgba(240,238,250,0.58)] leading-[1.3] line-clamp-2" style={{ textShadow: '0 1px 8px rgba(3,5,10,0.5)' }}>
+              <div
+                className="text-[10px] text-[rgba(240,238,250,0.58)] leading-[1.3] line-clamp-2"
+                style={{ textShadow: "0 1px 8px rgba(3,5,10,0.5)" }}
+              >
                 Alchemy, QuickNode, Helius
               </div>
             </div>
@@ -131,7 +153,10 @@ export function RpcStep() {
   if (mode === "cloud") {
     return (
       <>
-        <div className="text-xs tracking-[0.3em] uppercase text-[rgba(240,238,250,0.62)] font-semibold text-center mb-0" style={{ textShadow: '0 2px 10px rgba(3,5,10,0.55)' }}>
+        <div
+          className="text-xs tracking-[0.3em] uppercase text-[rgba(240,238,250,0.62)] font-semibold text-center mb-0"
+          style={{ textShadow: "0 2px 10px rgba(3,5,10,0.55)" }}
+        >
           {t("onboarding.rpcTitle")}
         </div>
         <div className="onboarding-divider">
@@ -224,7 +249,9 @@ export function RpcStep() {
                     </p>
                   );
                 })()}
-              <p className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3">{t("onboarding.freeCredits")}</p>
+              <p className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3">
+                {t("onboarding.freeCredits")}
+              </p>
             </>
           )}
         </div>
@@ -260,7 +287,10 @@ export function RpcStep() {
   // ── BYOK mode ───────────────────────────────────────────────────────
   return (
     <>
-      <div className="text-xs tracking-[0.3em] uppercase text-[rgba(240,238,250,0.62)] font-semibold text-center mb-0" style={{ textShadow: '0 2px 10px rgba(3,5,10,0.55)' }}>
+      <div
+        className="text-xs tracking-[0.3em] uppercase text-[rgba(240,238,250,0.62)] font-semibold text-center mb-0"
+        style={{ textShadow: "0 2px 10px rgba(3,5,10,0.55)" }}
+      >
         {t("onboarding.rpcTitle")}
         <button
           type="button"

@@ -8,7 +8,14 @@ import type {
 } from "@miladyai/app-core/api";
 import type { createTranslator } from "@miladyai/app-core/i18n";
 import type { AppState } from "@miladyai/app-core/state";
-import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@miladyai/ui";
+import {
+  Button,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@miladyai/ui";
 import { CHAIN_CONFIGS, PRIMARY_CHAIN_KEYS } from "../chainConfig";
 
 type InventoryToolbarStateKey = "inventoryView" | "inventorySort";

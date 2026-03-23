@@ -1957,8 +1957,7 @@ export interface VerificationMessageResponse {
 import { getBootConfig, setBootConfig } from "../config/boot-config";
 
 declare global {
-  interface Window {
-  }
+  interface Window {}
 }
 
 // ---------------------------------------------------------------------------
@@ -2003,7 +2002,6 @@ export class MiladyClient {
     this._uiLanguage = lang || null;
   }
 
-
   private static generateClientId(): string {
     const random =
       typeof globalThis.crypto?.randomUUID === "function"
@@ -2026,11 +2024,7 @@ export class MiladyClient {
     this._token = token?.trim() || stored || null;
     // Priority: explicit arg > session storage > boot config > same origin (Vite proxy)
     const bootBase = getBootConfig().apiBase;
-    this._baseUrl =
-      baseUrl ??
-      storedBase ??
-      bootBase ??
-      "";
+    this._baseUrl = baseUrl ?? storedBase ?? bootBase ?? "";
   }
 
   /**
@@ -2053,7 +2047,8 @@ export class MiladyClient {
   private get apiToken(): string | null {
     if (this._token) return this._token;
     const bootToken = getBootConfig().apiToken;
-    if (typeof bootToken === "string" && bootToken.trim()) return bootToken.trim();
+    if (typeof bootToken === "string" && bootToken.trim())
+      return bootToken.trim();
     return null;
   }
 
@@ -4493,6 +4488,20 @@ export class MiladyClient {
         return;
       }
 
+      // Legacy SSE: `{ "text": "..." }` without `type` (older stream stacks).
+      if (
+        parsed.type === undefined &&
+        typeof parsed.text === "string" &&
+        parsed.text.length > 0
+      ) {
+        const chunk = parsed.text;
+        const nextFullText = mergeStreamingText(fullText, chunk);
+        if (nextFullText === fullText) return;
+        fullText = nextFullText;
+        onToken(chunk, fullText);
+        return;
+      }
+
       if (parsed.type === "token") {
         const chunk = parsed.text ?? "";
         const nextFullText =
@@ -5756,6 +5765,9 @@ export class MiladyClient {
     throw new Error("Provisioning timed out after 2 minutes");
   }
 }
+
+/** Compatibility alias for tests and legacy imports — use {@link MiladyClient}. */
+export { MiladyClient as ElizaClient };
 
 // Singleton
 export const client = new MiladyClient();

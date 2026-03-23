@@ -7,4 +7,5 @@
 import type { CharacterCatalogData } from "@miladyai/app-core/config";
 import catalog from "../characters/catalog.json" with { type: "json" };
 
-export const MILADY_CHARACTER_CATALOG: CharacterCatalogData = catalog as CharacterCatalogData;
+export const MILADY_CHARACTER_CATALOG: CharacterCatalogData =
+  catalog as CharacterCatalogData;

@@ -158,7 +158,9 @@ describe("resolveWebSocketUpgradeRejection", () => {
     delete process.env.ELIZA_API_TOKEN;
     process.env.ELIZA_ALLOWED_ORIGINS = "https://trusted.example.com";
     const rejection = resolveWebSocketUpgradeRejection(
-      mockReq({ origin: "https://trusted.example.com" }) as http.IncomingMessage,
+      mockReq({
+        origin: "https://trusted.example.com",
+      }) as http.IncomingMessage,
       new URL("ws://localhost/ws"),
     );
     expect(rejection).toBeNull();

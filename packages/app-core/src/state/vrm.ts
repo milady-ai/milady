@@ -50,7 +50,8 @@ export function getVrmUrl(index: number): string {
 /** Resolve a bundled VRM index (1–N) to its preview thumbnail URL. */
 export function getVrmPreviewUrl(index: number): string {
   const assets = getAssets();
-  if (assets.length === 0) return resolveAppAssetUrl("vrms/previews/default.png");
+  if (assets.length === 0)
+    return resolveAppAssetUrl("vrms/previews/default.png");
   const n = normalizeAvatarIndex(index);
   const safe = n > 0 ? n : 1;
   const slug = assets[safe - 1]?.slug ?? assets[0]?.slug ?? "default";
@@ -60,7 +61,8 @@ export function getVrmPreviewUrl(index: number): string {
 /** Resolve a bundled VRM index (1-N) to its custom background URL. */
 export function getVrmBackgroundUrl(index: number): string {
   const assets = getAssets();
-  if (assets.length === 0) return resolveAppAssetUrl("vrms/backgrounds/default.png");
+  if (assets.length === 0)
+    return resolveAppAssetUrl("vrms/backgrounds/default.png");
   const n = normalizeAvatarIndex(index);
   const safe = n > 0 ? n : 1;
   const slug = assets[safe - 1]?.slug ?? assets[0]?.slug ?? "default";
@@ -95,4 +97,3 @@ export function isOfficialVrmIndex(_index: number): boolean {
 export function getVrmNeedsFlip(_index: number): boolean {
   return false;
 }
-

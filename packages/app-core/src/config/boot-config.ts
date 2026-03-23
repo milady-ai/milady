@@ -117,8 +117,7 @@ export function getBootConfig(): AppBootConfig {
 // React context
 // ---------------------------------------------------------------------------
 
-export const AppBootContext =
-  createContext<AppBootConfig>(DEFAULT_BOOT_CONFIG);
+export const AppBootContext = createContext<AppBootConfig>(DEFAULT_BOOT_CONFIG);
 
 /** Read the boot config from a React component. */
 export function useBootConfig(): AppBootConfig {
@@ -150,7 +149,9 @@ export function resolveCharacterCatalog(catalog: CharacterCatalogData): {
   injectedCharacters: ResolvedInjectedCharacter[];
   injectedCharacterCount: number;
   getAsset: (id: number) => ResolvedCharacterAsset | null;
-  getInjectedCharacter: (catchphrase: string) => ResolvedInjectedCharacter | null;
+  getInjectedCharacter: (
+    catchphrase: string,
+  ) => ResolvedInjectedCharacter | null;
 } {
   const assets = resolveAssets(catalog);
   const assetById = new Map(assets.map((a) => [a.id, a]));

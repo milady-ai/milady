@@ -102,10 +102,14 @@ export function LoadingScreen({
               }}
             />
           </div>
-          <div className="font-mono text-[13px] font-normal tracking-[0.15em] text-white/60 min-w-[48px] text-right select-none">{progress} %</div>
+          <div className="font-mono text-[13px] font-normal tracking-[0.15em] text-white/60 min-w-[48px] text-right select-none">
+            {progress} %
+          </div>
         </div>
 
-        <div className="font-mono text-[11px] font-normal tracking-[0.12em] uppercase text-white/35 select-none">{label}</div>
+        <div className="font-mono text-[11px] font-normal tracking-[0.12em] uppercase text-white/35 select-none">
+          {label}
+        </div>
       </div>
     </div>
   );

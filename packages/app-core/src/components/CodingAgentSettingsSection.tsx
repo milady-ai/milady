@@ -349,7 +349,9 @@ export function CodingAgentSettingsSection() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="fixed">{t("codingagentsettingssection.Fixed")}</SelectItem>
+            <SelectItem value="fixed">
+              {t("codingagentsettingssection.Fixed")}
+            </SelectItem>
             <SelectItem value="ranked">
               {t("codingagentsettingssection.RankedAutoSelect")}
             </SelectItem>
@@ -481,9 +483,7 @@ export function CodingAgentSettingsSection() {
           </span>
           <Select
             value={aiderProvider}
-            onValueChange={(value) =>
-              setPref("PARALLAX_AIDER_PROVIDER", value)
-            }
+            onValueChange={(value) => setPref("PARALLAX_AIDER_PROVIDER", value)}
           >
             <SelectTrigger className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none shadow-sm rounded-lg">
               <SelectValue />
@@ -511,14 +511,21 @@ export function CodingAgentSettingsSection() {
           <Select
             value={powerfulValue || "__default__"}
             onValueChange={(value) =>
-              setPref(`${prefix}_MODEL_POWERFUL`, value === "__default__" ? "" : value)
+              setPref(
+                `${prefix}_MODEL_POWERFUL`,
+                value === "__default__" ? "" : value,
+              )
             }
           >
             <SelectTrigger className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none shadow-sm rounded-lg">
-              <SelectValue placeholder={t("codingagentsettingssection.Default")} />
+              <SelectValue
+                placeholder={t("codingagentsettingssection.Default")}
+              />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="__default__">{t("codingagentsettingssection.Default")}</SelectItem>
+              <SelectItem value="__default__">
+                {t("codingagentsettingssection.Default")}
+              </SelectItem>
               {modelOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
@@ -534,14 +541,21 @@ export function CodingAgentSettingsSection() {
           <Select
             value={fastValue || "__default__"}
             onValueChange={(value) =>
-              setPref(`${prefix}_MODEL_FAST`, value === "__default__" ? "" : value)
+              setPref(
+                `${prefix}_MODEL_FAST`,
+                value === "__default__" ? "" : value,
+              )
             }
           >
             <SelectTrigger className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none shadow-sm rounded-lg">
-              <SelectValue placeholder={t("codingagentsettingssection.Default")} />
+              <SelectValue
+                placeholder={t("codingagentsettingssection.Default")}
+              />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="__default__">{t("codingagentsettingssection.Default")}</SelectItem>
+              <SelectItem value="__default__">
+                {t("codingagentsettingssection.Default")}
+              </SelectItem>
               {modelOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}

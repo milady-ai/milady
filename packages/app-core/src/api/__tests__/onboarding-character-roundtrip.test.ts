@@ -121,7 +121,9 @@ describe("Onboarding → Character round-trip", () => {
     expect(character.adjectives).toContain("gentle");
 
     expect(Array.isArray(character.topics)).toBe(true);
-    expect((character.topics as string[]).length).toBe(chenPreset.topics!.length);
+    expect((character.topics as string[]).length).toBe(
+      chenPreset.topics!.length,
+    );
     expect(character.topics).toContain("emotional intelligence");
     expect(character.topics).toContain("design thinking");
 

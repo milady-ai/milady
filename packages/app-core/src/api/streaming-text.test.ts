@@ -156,7 +156,9 @@ describe("mergeStreamingText – CJK / Unicode preservation", () => {
     // CJK characters are already NFC but verify no corruption
     const input = "你好世界";
     const normalized = input.normalize("NFC");
-    expect(mergeStreamingText(normalized, `${normalized}！`)).toBe("你好世界！");
+    expect(mergeStreamingText(normalized, `${normalized}！`)).toBe(
+      "你好世界！",
+    );
   });
 });
 

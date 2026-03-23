@@ -38,21 +38,30 @@ export function ConnectionProviderGridScreen({
 
   return (
     <>
-      <div className="text-xs tracking-[0.3em] uppercase text-[rgba(240,238,250,0.62)] font-semibold text-center mb-0" style={{ textShadow: '0 2px 10px rgba(3,5,10,0.55)' }}>
+      <div
+        className="text-xs tracking-[0.3em] uppercase text-[rgba(240,238,250,0.62)] font-semibold text-center mb-0"
+        style={{ textShadow: "0 2px 10px rgba(3,5,10,0.55)" }}
+      >
         {t("onboarding.neuralLinkTitle")}
       </div>
       <div className="onboarding-divider">
         <div className="w-1.5 h-1.5 bg-[rgba(240,185,11,0.4)] rotate-45 shrink-0" />
       </div>
       {onboardingRemoteConnected && (
-        <p className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3" style={{ marginBottom: "1rem" }}>
+        <p
+          className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3"
+          style={{ marginBottom: "1rem" }}
+        >
           {t(
             "onboarding.remoteConnectedDesc",
             appNameInterpolationVars(branding),
           )}
         </p>
       )}
-      <div className="text-xl font-light leading-[1.4] text-[rgba(240,238,250,0.95)] text-center mb-[18px]" style={{ textShadow: '0 2px 10px rgba(3,5,10,0.55)' }}>
+      <div
+        className="text-xl font-light leading-[1.4] text-[rgba(240,238,250,0.95)] text-center mb-[18px]"
+        style={{ textShadow: "0 2px 10px rgba(3,5,10,0.55)" }}
+      >
         {t("onboarding.chooseProvider")}
       </div>
       <div
@@ -82,20 +91,34 @@ export function ConnectionProviderGridScreen({
                 className="w-6 h-6 rounded-md object-contain shrink-0"
               />
               <div>
-                <div className="text-xs text-[rgba(240,238,250,0.88)] leading-[1.3]" style={{ textShadow: '0 1px 8px rgba(3,5,10,0.6)' }}>{display.name}</div>
+                <div
+                  className="text-xs text-[rgba(240,238,250,0.88)] leading-[1.3]"
+                  style={{ textShadow: "0 1px 8px rgba(3,5,10,0.6)" }}
+                >
+                  {display.name}
+                </div>
                 {display.description && (
-                  <div className="text-[10px] text-[rgba(240,238,250,0.58)] leading-[1.3] line-clamp-2" style={{ textShadow: '0 1px 8px rgba(3,5,10,0.5)' }}>
+                  <div
+                    className="text-[10px] text-[rgba(240,238,250,0.58)] leading-[1.3] line-clamp-2"
+                    style={{ textShadow: "0 1px 8px rgba(3,5,10,0.5)" }}
+                  >
                     {display.description}
                   </div>
                 )}
               </div>
               {detectedLabel && (
-                <span className="text-[9px] tracking-[0.08em] uppercase bg-[rgba(34,197,94,0.2)] text-[rgba(34,197,94,0.94)] px-2 py-0.5 rounded-full font-semibold ml-auto shrink-0 whitespace-nowrap" style={{ textShadow: '0 1px 6px rgba(3,5,10,0.45)' }}>
+                <span
+                  className="text-[9px] tracking-[0.08em] uppercase bg-[rgba(34,197,94,0.2)] text-[rgba(34,197,94,0.94)] px-2 py-0.5 rounded-full font-semibold ml-auto shrink-0 whitespace-nowrap"
+                  style={{ textShadow: "0 1px 6px rgba(3,5,10,0.45)" }}
+                >
                   {detectedLabel}
                 </span>
               )}
               {isRecommended && !detectedLabel && (
-                <span className="text-[9px] tracking-[0.08em] uppercase text-[rgba(240,238,250,0.94)] bg-[rgba(240,185,11,0.18)] px-2 py-0.5 rounded-full font-semibold ml-auto shrink-0 whitespace-nowrap" style={{ textShadow: '0 1px 6px rgba(3,5,10,0.45)' }}>
+                <span
+                  className="text-[9px] tracking-[0.08em] uppercase text-[rgba(240,238,250,0.94)] bg-[rgba(240,185,11,0.18)] px-2 py-0.5 rounded-full font-semibold ml-auto shrink-0 whitespace-nowrap"
+                  style={{ textShadow: "0 1px 6px rgba(3,5,10,0.45)" }}
+                >
                   {t("onboarding.recommended") ?? "Recommended"}
                 </span>
               )}

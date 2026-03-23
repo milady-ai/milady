@@ -14,7 +14,15 @@ import { formatTime } from "@miladyai/app-core/components";
 import { useIntervalWhenDocumentVisible } from "@miladyai/app-core/hooks";
 import { useApp } from "@miladyai/app-core/state";
 import { confirmDesktopAction } from "@miladyai/app-core/utils";
-import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@miladyai/ui";
+import {
+  Button,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@miladyai/ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   parsePositiveFloat,
@@ -731,13 +739,19 @@ export function FineTuningView() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
           <Select
             value={selectedDatasetId || "__auto__"}
-            onValueChange={(value) => setSelectedDatasetId(value === "__auto__" ? "" : value)}
+            onValueChange={(value) =>
+              setSelectedDatasetId(value === "__auto__" ? "" : value)
+            }
           >
             <SelectTrigger className="px-2 py-1 border border-border bg-bg text-sm h-auto">
-              <SelectValue placeholder={t("finetuningview.AutoBuildDatasetF")} />
+              <SelectValue
+                placeholder={t("finetuningview.AutoBuildDatasetF")}
+              />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="__auto__">{t("finetuningview.AutoBuildDatasetF")}</SelectItem>
+              <SelectItem value="__auto__">
+                {t("finetuningview.AutoBuildDatasetF")}
+              </SelectItem>
               {datasets.map((dataset) => (
                 <SelectItem key={dataset.id} value={dataset.id}>
                   {dataset.id}

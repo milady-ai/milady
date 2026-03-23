@@ -3,8 +3,7 @@ import { Capacitor, type PluginListenerHandle } from "@capacitor/core";
 type NativePlugin = Record<string, unknown>;
 
 /** Capacitor.Plugins exists in Capacitor 3.x but is deprecated; type for compatibility. */
-interface CapacitorWithPlugins {
-}
+interface CapacitorWithPlugins {}
 
 /** Window may have Capacitor injected at runtime (Electron/native shells). */
 interface WindowWithCapacitor extends Window {

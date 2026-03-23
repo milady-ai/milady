@@ -266,7 +266,10 @@ describe("persistCompatOnboardingDefaults", () => {
     });
     expect(agent.adjectives).toEqual(["warm", "gentle"]);
     expect(agent.topics).toEqual(["emotional intelligence", "design thinking"]);
-    expect(agent.postExamples).toEqual(["goodnight everyone", "you've got this"]);
+    expect(agent.postExamples).toEqual([
+      "goodnight everyone",
+      "you've got this",
+    ]);
     expect(agent.messageExamples).toHaveLength(1);
   });
 

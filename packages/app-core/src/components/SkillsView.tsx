@@ -814,11 +814,7 @@ function EditSkillModal({
               <div className="text-sm font-medium" style={{ color: "#ef4444" }}>
                 {error}
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => loadSource()}
-              >
+              <Button variant="outline" size="sm" onClick={() => loadSource()}>
                 {t("common.retry")}
               </Button>
             </div>
@@ -851,11 +847,7 @@ function EditSkillModal({
             ) : null}
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onClose}
-            >
+            <Button variant="outline" size="sm" onClick={onClose}>
               {hasChanges ? "Discard" : "Close"}
             </Button>
             <Button

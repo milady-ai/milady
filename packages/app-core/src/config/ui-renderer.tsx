@@ -10,7 +10,13 @@
  *   - Event bindings via on.press / on.change
  */
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@miladyai/ui";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@miladyai/ui";
 import React, {
   createContext,
   useCallback,
@@ -564,12 +570,20 @@ const SelectComponent: ComponentFn = (props, _children, ctx, el) => {
           handleBlur();
         }}
       >
-        <SelectTrigger className={`${INPUT_CLS}${errors?.length ? " border-[var(--destructive)]" : ""}`}>
-          <SelectValue placeholder={props.placeholder ? String(props.placeholder) : undefined} />
+        <SelectTrigger
+          className={`${INPUT_CLS}${errors?.length ? " border-[var(--destructive)]" : ""}`}
+        >
+          <SelectValue
+            placeholder={
+              props.placeholder ? String(props.placeholder) : undefined
+            }
+          />
         </SelectTrigger>
         <SelectContent>
           {props.placeholder ? (
-            <SelectItem value="__none__">{String(props.placeholder)}</SelectItem>
+            <SelectItem value="__none__">
+              {String(props.placeholder)}
+            </SelectItem>
           ) : null}
           {options.map((o) => (
             <SelectItem key={o.value} value={o.value}>

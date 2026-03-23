@@ -49,8 +49,7 @@ export function SaveCommandModal({
 
   const validate = useCallback((value: string) => {
     if (!value) return t("savecommandmodal.nameRequired");
-    if (!NAME_PATTERN.test(value))
-      return t("savecommandmodal.nameFormat");
+    if (!NAME_PATTERN.test(value)) return t("savecommandmodal.nameFormat");
     return "";
   }, []);
 
@@ -74,7 +73,12 @@ export function SaveCommandModal({
   const preview = text.length > 120 ? `${text.slice(0, 120)}...` : text;
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) onClose();
+      }}
+    >
       <DialogContent className="w-full max-w-md p-0 overflow-hidden rounded-xl">
         <DialogHeader className="px-5 py-3 shrink-0 border-b border-border">
           <DialogTitle className="font-bold text-sm">
@@ -94,9 +98,7 @@ export function SaveCommandModal({
             {t("savecommandmodal.CommandName")}
           </label>
           <div className="flex items-center gap-1">
-            <span className="text-sm text-muted">
-              /
-            </span>
+            <span className="text-sm text-muted">/</span>
             <Input
               id={inputId}
               ref={inputRef}
@@ -145,18 +147,10 @@ export function SaveCommandModal({
         </div>
 
         <DialogFooter className="px-5 py-3 border-t border-border">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onClose}
-          >
+          <Button variant="outline" size="sm" onClick={onClose}>
             {t("common.cancel")}
           </Button>
-          <Button
-            variant="default"
-            size="sm"
-            onClick={handleSubmit}
-          >
+          <Button variant="default" size="sm" onClick={handleSubmit}>
             {t("apikeyconfig.save")}
           </Button>
         </DialogFooter>

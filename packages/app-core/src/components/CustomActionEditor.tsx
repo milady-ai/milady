@@ -4,7 +4,15 @@ import {
   client,
 } from "@miladyai/app-core/api";
 import { useApp } from "@miladyai/app-core/state";
-import { Button, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@miladyai/ui";
+import {
+  Button,
+  Checkbox,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@miladyai/ui";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 

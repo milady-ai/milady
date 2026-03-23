@@ -6,7 +6,10 @@ export function PermissionsStep() {
 
   return (
     <>
-      <div className="text-xs tracking-[0.3em] uppercase text-[rgba(240,238,250,0.62)] font-semibold text-center mb-0" style={{ textShadow: '0 2px 10px rgba(3,5,10,0.55)' }}>
+      <div
+        className="text-xs tracking-[0.3em] uppercase text-[rgba(240,238,250,0.62)] font-semibold text-center mb-0"
+        style={{ textShadow: "0 2px 10px rgba(3,5,10,0.55)" }}
+      >
         {t("onboarding.systemAccessTitle")}
       </div>
       <div className="onboarding-divider">

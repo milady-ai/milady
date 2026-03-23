@@ -3,15 +3,43 @@
  */
 
 import {
+  DEFAULT_BOOT_CONFIG,
+  setBootConfig,
+  type BundledVrmAsset,
+} from "@miladyai/app-core/config";
+import {
   getCompanionBackgroundUrl,
   getVrmPreviewUrl,
   getVrmTitle,
   getVrmUrl,
   VRM_COUNT,
 } from "@miladyai/app-core/state";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+/** Roster matching historical bundled Milady avatars — injected via boot config for unit tests. */
+const MILADY_BUNDLED_ASSETS: BundledVrmAsset[] = [
+  { title: "Chen", slug: "milady-1" },
+  { title: "Jin", slug: "milady-2" },
+  { title: "Kei", slug: "milady-3" },
+  { title: "Momo", slug: "milady-4" },
+  { title: "Rin", slug: "milady-5" },
+  { title: "Ryu", slug: "milady-6" },
+  { title: "Satoshi", slug: "milady-7" },
+  { title: "Yuki", slug: "milady-8" },
+];
 
 describe("Avatar VRM Utilities", () => {
+  beforeEach(() => {
+    setBootConfig({
+      ...DEFAULT_BOOT_CONFIG,
+      vrmAssets: MILADY_BUNDLED_ASSETS,
+    });
+  });
+
+  afterEach(() => {
+    setBootConfig({ ...DEFAULT_BOOT_CONFIG });
+  });
+
   describe("getVrmUrl", () => {
     it("returns correct path for bundled Milady VRMs (1-8)", () => {
       const expectedSlugs = [

@@ -90,14 +90,22 @@ export function IdentityStep() {
   if (showImport) {
     return (
       <div className="flex flex-col items-center gap-3 w-full max-w-[400px]">
-        <div className="text-xs tracking-[0.3em] uppercase text-[rgba(240,238,250,0.62)] font-semibold text-center mb-0" style={{ textShadow: '0 2px 10px rgba(3,5,10,0.55)' }}>
+        <div
+          className="text-xs tracking-[0.3em] uppercase text-[rgba(240,238,250,0.62)] font-semibold text-center mb-0"
+          style={{ textShadow: "0 2px 10px rgba(3,5,10,0.55)" }}
+        >
           {t("settings.importAgent")}
         </div>
         <div className="onboarding-divider">
           <div className="w-1.5 h-1.5 bg-[rgba(240,185,11,0.4)] rotate-45 shrink-0" />
         </div>
 
-        <p className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3 mb-1" style={{ textShadow: '0 2px 10px rgba(3,5,10,0.45)' }}>{t("onboarding.importDesc")}</p>
+        <p
+          className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3 mb-1"
+          style={{ textShadow: "0 2px 10px rgba(3,5,10,0.45)" }}
+        >
+          {t("onboarding.importDesc")}
+        </p>
 
         <input
           type="file"
@@ -121,12 +129,18 @@ export function IdentityStep() {
         />
 
         {importError && (
-          <p className="text-sm text-[var(--danger)] text-center leading-relaxed mt-3 !mb-0" style={{ textShadow: '0 2px 10px rgba(3,5,10,0.45)' }}>
+          <p
+            className="text-sm text-[var(--danger)] text-center leading-relaxed mt-3 !mb-0"
+            style={{ textShadow: "0 2px 10px rgba(3,5,10,0.45)" }}
+          >
             {importError}
           </p>
         )}
         {importSuccess && (
-          <p className="text-sm text-[var(--ok)] text-center leading-relaxed mt-3 !mb-0" style={{ textShadow: '0 2px 10px rgba(3,5,10,0.45)' }}>
+          <p
+            className="text-sm text-[var(--ok)] text-center leading-relaxed mt-3 !mb-0"
+            style={{ textShadow: "0 2px 10px rgba(3,5,10,0.45)" }}
+          >
             {importSuccess}
           </p>
         )}
@@ -162,14 +176,34 @@ export function IdentityStep() {
   const selected = entries.find((e) => e.catchphrase === selectedId);
 
   return (
-    <div className="flex flex-col items-center gap-3 w-full" style={{ animation: 'onboarding-content-fade-in 0.6s ease both' }}>
+    <div
+      className="flex flex-col items-center gap-3 w-full"
+      style={{ animation: "onboarding-content-fade-in 0.6s ease both" }}
+    >
       {/* Selected character info — floats above the roster */}
-      <div className="text-center" style={{ animation: 'onboarding-content-fade-in 0.5s ease 0.1s both' }}>
-        <div className="text-[28px] font-bold tracking-[0.12em] uppercase text-[rgba(240,238,250,0.95)] transition-all duration-300 max-md:text-xl" style={{ textShadow: '0 0 30px rgba(240,185,11,0.3), 0 2px 12px rgba(3,5,10,0.65)' }}>{selected?.name ?? ""}</div>
+      <div
+        className="text-center"
+        style={{ animation: "onboarding-content-fade-in 0.5s ease 0.1s both" }}
+      >
+        <div
+          className="text-[28px] font-bold tracking-[0.12em] uppercase text-[rgba(240,238,250,0.95)] transition-all duration-300 max-md:text-xl"
+          style={{
+            textShadow:
+              "0 0 30px rgba(240,185,11,0.3), 0 2px 12px rgba(3,5,10,0.65)",
+          }}
+        >
+          {selected?.name ?? ""}
+        </div>
       </div>
 
       {/* ── Roster bar ── */}
-      <div className="flex flex-nowrap items-end justify-center gap-0 w-full max-w-[900px] px-2 max-md:px-1 max-md:max-w-full border-t border-white/5 bg-black/50 p-4 pb-8 backdrop-blur-md" style={{ animation: 'ob-roster-slide-up 0.5s cubic-bezier(0.25,0.46,0.45,0.94) 0.15s both' }}>
+      <div
+        className="flex flex-nowrap items-end justify-center gap-0 w-full max-w-[900px] px-2 max-md:px-1 max-md:max-w-full border-t border-white/5 bg-black/50 p-4 pb-8 backdrop-blur-md"
+        style={{
+          animation:
+            "ob-roster-slide-up 0.5s cubic-bezier(0.25,0.46,0.45,0.94) 0.15s both",
+        }}
+      >
         <CharacterRoster
           entries={entries}
           selectedId={selectedId}
@@ -180,7 +214,10 @@ export function IdentityStep() {
       </div>
 
       {/* ── Actions row ── */}
-      <div className="flex flex-col items-center gap-2 pb-6 max-md:pb-4" style={{ animation: 'onboarding-content-fade-in 0.5s ease 0.3s both' }}>
+      <div
+        className="flex flex-col items-center gap-2 pb-6 max-md:pb-4"
+        style={{ animation: "onboarding-content-fade-in 0.5s ease 0.3s both" }}
+      >
         <button
           className="onboarding-confirm-btn"
           onClick={() => handleOnboardingNext()}

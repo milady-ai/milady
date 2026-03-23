@@ -316,7 +316,6 @@ export function StreamingPermissionsOnboardingView({
   const { checking, permStates, requestPermission } =
     useStreamingPermissions(mode);
 
-
   if (checking) {
     return (
       <div className="text-center py-8">

@@ -176,9 +176,14 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
 
   describe("POST /api/wallet/generate", () => {
     it("rejects unauthenticated wallet generation with 401", async () => {
-      const { status, data } = await authReq(port, "POST", "/api/wallet/generate", {
-        body: { chain: "evm" },
-      });
+      const { status, data } = await authReq(
+        port,
+        "POST",
+        "/api/wallet/generate",
+        {
+          body: { chain: "evm" },
+        },
+      );
       expect(status).toBe(401);
       expect(data.error).toMatch(/unauthorized/i);
     });
@@ -192,10 +197,15 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("rejects wallet generation with wrong token", async () => {
-      const { status, data } = await authReq(port, "POST", "/api/wallet/generate", {
-        body: { chain: "evm" },
-        token: WRONG_TOKEN,
-      });
+      const { status, data } = await authReq(
+        port,
+        "POST",
+        "/api/wallet/generate",
+        {
+          body: { chain: "evm" },
+          token: WRONG_TOKEN,
+        },
+      );
       expect(status).toBe(401);
       expect(data.error).toMatch(/unauthorized/i);
     });
@@ -203,9 +213,14 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
 
   describe("PUT /api/wallet/config", () => {
     it("rejects unauthenticated wallet config update with 401", async () => {
-      const { status, data } = await authReq(port, "PUT", "/api/wallet/config", {
-        body: { alchemyApiKey: "stolen" },
-      });
+      const { status, data } = await authReq(
+        port,
+        "PUT",
+        "/api/wallet/config",
+        {
+          body: { alchemyApiKey: "stolen" },
+        },
+      );
       expect(status).toBe(401);
       expect(data.error).toMatch(/unauthorized/i);
     });
@@ -219,10 +234,15 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("rejects wallet config update with wrong token", async () => {
-      const { status, data } = await authReq(port, "PUT", "/api/wallet/config", {
-        body: { alchemyApiKey: "stolen" },
-        token: WRONG_TOKEN,
-      });
+      const { status, data } = await authReq(
+        port,
+        "PUT",
+        "/api/wallet/config",
+        {
+          body: { alchemyApiKey: "stolen" },
+          token: WRONG_TOKEN,
+        },
+      );
       expect(status).toBe(401);
       expect(data.error).toMatch(/unauthorized/i);
     });
@@ -232,7 +252,11 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
 
   describe("POST /api/agent/restart", () => {
     it("rejects unauthenticated agent restart with 401", async () => {
-      const { status, data } = await authReq(port, "POST", "/api/agent/restart");
+      const { status, data } = await authReq(
+        port,
+        "POST",
+        "/api/agent/restart",
+      );
       expect(status).toBe(401);
       expect(data.error).toMatch(/unauthorized/i);
     });
@@ -246,9 +270,14 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("rejects agent restart with wrong token", async () => {
-      const { status, data } = await authReq(port, "POST", "/api/agent/restart", {
-        token: WRONG_TOKEN,
-      });
+      const { status, data } = await authReq(
+        port,
+        "POST",
+        "/api/agent/restart",
+        {
+          token: WRONG_TOKEN,
+        },
+      );
       expect(status).toBe(401);
       expect(data.error).toMatch(/unauthorized/i);
     });
@@ -268,9 +297,14 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("accepts authenticated connector deletion", async () => {
-      const { status } = await authReq(port, "DELETE", "/api/connectors/telegram", {
-        token: TOKEN,
-      });
+      const { status } = await authReq(
+        port,
+        "DELETE",
+        "/api/connectors/telegram",
+        {
+          token: TOKEN,
+        },
+      );
       expect(status).not.toBe(401);
     });
 
@@ -362,9 +396,14 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
 
   describe("POST /api/wallet/import", () => {
     it("rejects unauthenticated wallet import with 401", async () => {
-      const { status, data } = await authReq(port, "POST", "/api/wallet/import", {
-        body: { chain: "evm", privateKey: "0xSTOLEN" },
-      });
+      const { status, data } = await authReq(
+        port,
+        "POST",
+        "/api/wallet/import",
+        {
+          body: { chain: "evm", privateKey: "0xSTOLEN" },
+        },
+      );
       expect(status).toBe(401);
       expect(data.error).toMatch(/unauthorized/i);
     });
@@ -378,10 +417,15 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("rejects wallet import with wrong token", async () => {
-      const { status, data } = await authReq(port, "POST", "/api/wallet/import", {
-        body: { chain: "evm", privateKey: "0xSTOLEN" },
-        token: WRONG_TOKEN,
-      });
+      const { status, data } = await authReq(
+        port,
+        "POST",
+        "/api/wallet/import",
+        {
+          body: { chain: "evm", privateKey: "0xSTOLEN" },
+          token: WRONG_TOKEN,
+        },
+      );
       expect(status).toBe(401);
       expect(data.error).toMatch(/unauthorized/i);
     });
@@ -391,9 +435,14 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
 
   describe("POST /api/wallet/export", () => {
     it("rejects unauthenticated wallet export with 401", async () => {
-      const { status, data } = await authReq(port, "POST", "/api/wallet/export", {
-        body: { chain: "evm" },
-      });
+      const { status, data } = await authReq(
+        port,
+        "POST",
+        "/api/wallet/export",
+        {
+          body: { chain: "evm" },
+        },
+      );
       expect(status).toBe(401);
       expect(data.error).toMatch(/unauthorized/i);
     });
@@ -408,10 +457,15 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("rejects wallet export with wrong token", async () => {
-      const { status, data } = await authReq(port, "POST", "/api/wallet/export", {
-        body: { chain: "evm" },
-        token: WRONG_TOKEN,
-      });
+      const { status, data } = await authReq(
+        port,
+        "POST",
+        "/api/wallet/export",
+        {
+          body: { chain: "evm" },
+          token: WRONG_TOKEN,
+        },
+      );
       expect(status).toBe(401);
       expect(data.error).toMatch(/unauthorized/i);
     });
@@ -421,9 +475,14 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
 
   describe("POST /api/terminal/run", () => {
     it("rejects unauthenticated terminal execution with 401", async () => {
-      const { status, data } = await authReq(port, "POST", "/api/terminal/run", {
-        body: { command: "echo hacked" },
-      });
+      const { status, data } = await authReq(
+        port,
+        "POST",
+        "/api/terminal/run",
+        {
+          body: { command: "echo hacked" },
+        },
+      );
       expect(status).toBe(401);
       expect(data.error).toMatch(/unauthorized/i);
     });
@@ -437,10 +496,15 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("rejects terminal execution with wrong token", async () => {
-      const { status, data } = await authReq(port, "POST", "/api/terminal/run", {
-        body: { command: "echo hacked" },
-        token: WRONG_TOKEN,
-      });
+      const { status, data } = await authReq(
+        port,
+        "POST",
+        "/api/terminal/run",
+        {
+          body: { command: "echo hacked" },
+          token: WRONG_TOKEN,
+        },
+      );
       expect(status).toBe(401);
       expect(data.error).toMatch(/unauthorized/i);
     });

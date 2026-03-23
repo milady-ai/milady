@@ -166,7 +166,9 @@ export async function signTransactionWithOptionalSteward(params: {
   });
 
   if (!client || !agentId) {
-    throw new Error("Steward credentials and agent ID must be provided to sign transactions.");
+    throw new Error(
+      "Steward credentials and agent ID must be provided to sign transactions.",
+    );
   }
 
   try {

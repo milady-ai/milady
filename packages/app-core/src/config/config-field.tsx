@@ -9,7 +9,13 @@
  *  - ConfigField wrapper component (label + renderer + help + errors)
  */
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@miladyai/ui";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@miladyai/ui";
 import { ChevronDown, X } from "lucide-react";
 import React, { useCallback, useRef, useState } from "react";
 import { Switch } from "@miladyai/ui";
@@ -383,8 +389,18 @@ export function RenderSelectField(props: FieldRenderProps) {
         if (open) fireAction(props, "click");
       }}
     >
-      <SelectTrigger className={INPUT_CLS} data-config-key={props.key} data-field-type="select">
-        <SelectValue placeholder={!props.required ? t("config-field.None", { defaultValue: "None" }) : undefined} />
+      <SelectTrigger
+        className={INPUT_CLS}
+        data-config-key={props.key}
+        data-field-type="select"
+      >
+        <SelectValue
+          placeholder={
+            !props.required
+              ? t("config-field.None", { defaultValue: "None" })
+              : undefined
+          }
+        />
       </SelectTrigger>
       <SelectContent>
         {!props.required && (

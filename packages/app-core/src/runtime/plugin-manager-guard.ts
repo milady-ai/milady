@@ -6,7 +6,7 @@
  */
 
 import { logger } from "@elizaos/core";
-import { loadElizaConfig, saveElizaConfig } from "../config/config.js";
+import { loadElizaConfig, saveElizaConfig } from "../config/config";
 
 let _checked = false;
 

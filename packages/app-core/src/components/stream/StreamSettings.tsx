@@ -8,7 +8,17 @@
  */
 
 import { useApp } from "@miladyai/app-core/state";
-import { Button, Checkbox, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Switch } from "@miladyai/ui";
+import {
+  Button,
+  Checkbox,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Switch,
+} from "@miladyai/ui";
 import { useState } from "react";
 import type { StreamSourceType } from "./helpers";
 import { isSupportedStreamUrl, STREAM_SOURCE_LABELS } from "./helpers";
@@ -94,7 +104,10 @@ function ConfigField({
             value={typeof value === "string" ? value : String(field.default)}
             onValueChange={(val) => onChange(fieldKey, val)}
           >
-            <SelectTrigger id={`config-${fieldKey}`} className="bg-bg-muted border border-border text-txt text-[12px] rounded px-2 py-1 cursor-pointer h-auto">
+            <SelectTrigger
+              id={`config-${fieldKey}`}
+              className="bg-bg-muted border border-border text-txt text-[12px] rounded px-2 py-1 cursor-pointer h-auto"
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

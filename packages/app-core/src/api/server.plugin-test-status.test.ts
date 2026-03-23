@@ -15,11 +15,7 @@ vi.mock("../services/mcp-marketplace", () => ({
 }));
 
 /** POST helper matching the original req(port, path, token?) convenience signature. */
-function postReq(
-  port: number,
-  path: string,
-  token?: string,
-) {
+function postReq(port: number, path: string, token?: string) {
   const headers: Record<string, string> | undefined = token
     ? { Authorization: `Bearer ${token}` }
     : undefined;

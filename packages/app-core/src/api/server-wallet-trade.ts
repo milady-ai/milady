@@ -130,4 +130,3 @@ export function resolveWalletExportRejection(
     normalizeCompatRejection(hardenedGuard(...args)),
   );
 }
-

@@ -1,4 +1,3 @@
-
 // Override applyPluginAutoEnable to inject WeChat auto-enable before upstream.
 import {
   applyPluginAutoEnable as _upstreamApplyPluginAutoEnable,

@@ -77,7 +77,13 @@ describe("deriveUiShellModeForTab", () => {
     // Users can freely switch between native and companion mode at runtime.
     // deriveUiShellModeForTab must correctly return "native" for all
     // non-companion tabs so mode switching keeps working.
-    for (const tab of ["chat", "plugins", "knowledge", "wallets", "stream"] as const) {
+    for (const tab of [
+      "chat",
+      "plugins",
+      "knowledge",
+      "wallets",
+      "stream",
+    ] as const) {
       expect(deriveUiShellModeForTab(tab)).toBe("native");
     }
   });

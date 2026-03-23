@@ -201,7 +201,10 @@ export function useCanvasWindow(
               ipcChannel: "canvas:destroyWindow",
               params: { id },
             }).catch((err: unknown) => {
-              console.warn("[useCanvasWindow] canvas:destroyWindow cleanup failed", err);
+              console.warn(
+                "[useCanvasWindow] canvas:destroyWindow cleanup failed",
+                err,
+              );
             });
           }
           return;
@@ -325,7 +328,10 @@ export function useCanvasWindow(
           ipcChannel: "canvas:destroyWindow",
           params: { id },
         }).catch((err: unknown) => {
-          console.warn("[useCanvasWindow] canvas:destroyWindow teardown failed", err);
+          console.warn(
+            "[useCanvasWindow] canvas:destroyWindow teardown failed",
+            err,
+          );
         });
       }
     };

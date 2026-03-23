@@ -172,7 +172,7 @@
 /* ── Settings page controls ─────────────────────────────────────────── */
 
 .settings-page-content
-  :is(button.inline-flex, a.inline-flex):not([role="switch"]) {
+:is(button.inline-flex, a.inline-flex):not([role="switch"]) {
   min-height: 2.625rem;
   padding-inline: 1rem;
   border-radius: calc(var(--radius-lg) + 2px);
@@ -369,7 +369,6 @@ kbd {
     scroll-behavior: auto !important;
   }
 }
-
 
 /* ── Wallet Terminal redesign (wt__) ──────────────────────────────── */
 

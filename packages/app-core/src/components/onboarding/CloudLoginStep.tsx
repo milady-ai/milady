@@ -29,27 +29,44 @@ export function CloudLoginStep() {
 
   return (
     <>
-      <div className="text-xs tracking-[0.3em] uppercase text-[rgba(240,238,250,0.62)] font-semibold text-center mb-0" style={{ textShadow: '0 2px 10px rgba(3,5,10,0.55)' }}>
+      <div
+        className="text-xs tracking-[0.3em] uppercase text-[rgba(240,238,250,0.62)] font-semibold text-center mb-0"
+        style={{ textShadow: "0 2px 10px rgba(3,5,10,0.55)" }}
+      >
         {t("onboarding.cloudLoginTitle")}
       </div>
       <div className="onboarding-divider">
         <div className="w-1.5 h-1.5 bg-[rgba(240,185,11,0.4)] rotate-45 shrink-0" />
       </div>
-      <p className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3" style={{ textShadow: '0 2px 10px rgba(3,5,10,0.45)' }}>{t("onboarding.cloudLoginDesc")}</p>
+      <p
+        className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3"
+        style={{ textShadow: "0 2px 10px rgba(3,5,10,0.45)" }}
+      >
+        {t("onboarding.cloudLoginDesc")}
+      </p>
 
       {elizaCloudConnected ? (
-        <p className="text-sm text-[var(--ok)] text-center leading-relaxed mt-3" style={{ textShadow: '0 2px 10px rgba(3,5,10,0.45)' }}>
+        <p
+          className="text-sm text-[var(--ok)] text-center leading-relaxed mt-3"
+          style={{ textShadow: "0 2px 10px rgba(3,5,10,0.45)" }}
+        >
           {t("onboarding.cloudLoginConnected")}
         </p>
       ) : elizaCloudLoginBusy ? (
-        <div className="flex items-center gap-2 text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3" style={{ textShadow: '0 2px 10px rgba(3,5,10,0.45)' }}>
+        <div
+          className="flex items-center gap-2 text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3"
+          style={{ textShadow: "0 2px 10px rgba(3,5,10,0.45)" }}
+        >
           <span className="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
           {t("onboarding.cloudLoginBusy")}
         </div>
       ) : (
         <>
           {elizaCloudLoginError && (
-            <p className="text-sm text-[var(--danger)] text-center leading-relaxed mt-3 !mb-2" style={{ textShadow: '0 2px 10px rgba(3,5,10,0.45)' }}>
+            <p
+              className="text-sm text-[var(--danger)] text-center leading-relaxed mt-3 !mb-2"
+              style={{ textShadow: "0 2px 10px rgba(3,5,10,0.45)" }}
+            >
               {elizaCloudLoginError}
             </p>
           )}

@@ -6,8 +6,6 @@ describe("CONFIG_WRITE_ALLOWED_TOP_KEYS", () => {
     expect(CONFIG_WRITE_ALLOWED_TOP_KEYS.has("connectors")).toBe(true);
   });
 
-
-
   it("does not allow unknown top-level keys", () => {
     expect(CONFIG_WRITE_ALLOWED_TOP_KEYS.has("__proto__")).toBe(false);
     expect(CONFIG_WRITE_ALLOWED_TOP_KEYS.has("notARealTopLevelKey")).toBe(

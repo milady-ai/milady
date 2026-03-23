@@ -121,14 +121,18 @@ describe("resolveWalletExportRejection", () => {
   it("accepts a valid token from header (with nonce flow)", () => {
     process.env.ELIZA_WALLET_EXPORT_TOKEN = "secret-token";
     const nonceResult = resolveWalletExportRejection(
-      mockReq({ "x-eliza-export-token": "secret-token" }) as http.IncomingMessage,
+      mockReq({
+        "x-eliza-export-token": "secret-token",
+      }) as http.IncomingMessage,
       { confirm: true, requestNonce: true } as never,
     );
     const nonce = extractNonce(nonceResult);
     const now = Date.now();
     vi.spyOn(Date, "now").mockReturnValue(now + 11_000);
     const rejection = resolveWalletExportRejection(
-      mockReq({ "x-eliza-export-token": "secret-token" }) as http.IncomingMessage,
+      mockReq({
+        "x-eliza-export-token": "secret-token",
+      }) as http.IncomingMessage,
       { confirm: true, exportNonce: nonce } as never,
     );
     expect(rejection).toBeNull();
@@ -138,7 +142,9 @@ describe("resolveWalletExportRejection", () => {
   it("prefers header token over body token (header valid, with nonce flow)", () => {
     process.env.ELIZA_WALLET_EXPORT_TOKEN = "secret-token";
     const nonceResult = resolveWalletExportRejection(
-      mockReq({ "x-eliza-export-token": "secret-token" }) as http.IncomingMessage,
+      mockReq({
+        "x-eliza-export-token": "secret-token",
+      }) as http.IncomingMessage,
       {
         confirm: true,
         exportToken: "wrong-token",
@@ -149,7 +155,9 @@ describe("resolveWalletExportRejection", () => {
     const now = Date.now();
     vi.spyOn(Date, "now").mockReturnValue(now + 11_000);
     const rejection = resolveWalletExportRejection(
-      mockReq({ "x-eliza-export-token": "secret-token" }) as http.IncomingMessage,
+      mockReq({
+        "x-eliza-export-token": "secret-token",
+      }) as http.IncomingMessage,
       {
         confirm: true,
         exportToken: "wrong-token",
@@ -163,7 +171,9 @@ describe("resolveWalletExportRejection", () => {
   it("rejects when header token is invalid even if body token is correct", () => {
     process.env.ELIZA_WALLET_EXPORT_TOKEN = "secret-token";
     const rejection = resolveWalletExportRejection(
-      mockReq({ "x-eliza-export-token": "wrong-token" }) as http.IncomingMessage,
+      mockReq({
+        "x-eliza-export-token": "wrong-token",
+      }) as http.IncomingMessage,
       { confirm: true, exportToken: "secret-token" },
     );
     expect(rejection).toEqual({ status: 401, reason: "Invalid export token." });

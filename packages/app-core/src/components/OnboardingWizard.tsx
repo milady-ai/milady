@@ -103,7 +103,23 @@ export function OnboardingWizard() {
   }
 
   return (
-    <div className="w-screen h-screen bg-transparent relative overflow-hidden" style={{ '--text': 'rgba(240,238,250,0.94)', '--muted': 'rgba(240,238,250,0.66)', '--border': 'rgba(255,255,255,0.14)', '--card': 'rgba(10,14,20,0.28)', '--ok': 'rgba(240,185,11,0.92)', '--ok-muted': 'rgba(240,185,11,0.34)', '--ok-subtle': 'rgba(240,185,11,0.12)', '--accent': 'rgba(240,185,11,0.94)', '--accent-foreground': 'rgba(240,238,250,0.94)', '--danger': 'rgb(248,113,113)' } as React.CSSProperties}>
+    <div
+      className="w-screen h-screen bg-transparent relative overflow-hidden"
+      style={
+        {
+          "--text": "rgba(240,238,250,0.94)",
+          "--muted": "rgba(240,238,250,0.66)",
+          "--border": "rgba(255,255,255,0.14)",
+          "--card": "rgba(10,14,20,0.28)",
+          "--ok": "rgba(240,185,11,0.92)",
+          "--ok-muted": "rgba(240,185,11,0.34)",
+          "--ok-subtle": "rgba(240,185,11,0.12)",
+          "--accent": "rgba(240,185,11,0.94)",
+          "--accent-foreground": "rgba(240,238,250,0.94)",
+          "--danger": "rgb(248,113,113)",
+        } as React.CSSProperties
+      }
+    >
       {/* Keep browser E2E runs lightweight and deterministic by skipping VRM boot. */}
       {disableVrm ? (
         <div
@@ -160,7 +176,7 @@ export function OnboardingWizard() {
         </svg>
         <svg
           className="absolute w-9 h-9 pointer-events-none z-30 top-5 right-5 -scale-x-100 onboarding-corner-anim"
-          style={{ animationDelay: '1s' }}
+          style={{ animationDelay: "1s" }}
           viewBox="0 0 36 36"
           fill="none"
           stroke="rgba(240,185,11,0.18)"
@@ -178,7 +194,7 @@ export function OnboardingWizard() {
         </svg>
         <svg
           className="absolute w-9 h-9 pointer-events-none z-30 bottom-5 left-5 -scale-y-100 onboarding-corner-anim"
-          style={{ animationDelay: '2s' }}
+          style={{ animationDelay: "2s" }}
           viewBox="0 0 36 36"
           fill="none"
           stroke="rgba(240,185,11,0.18)"
@@ -196,7 +212,7 @@ export function OnboardingWizard() {
         </svg>
         <svg
           className="absolute w-9 h-9 pointer-events-none z-30 bottom-5 right-5 -scale-100 onboarding-corner-anim"
-          style={{ animationDelay: '3s' }}
+          style={{ animationDelay: "3s" }}
           viewBox="0 0 36 36"
           fill="none"
           stroke="rgba(240,185,11,0.18)"

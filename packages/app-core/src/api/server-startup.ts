@@ -24,11 +24,7 @@ function syncElizaEnvToMilady(): void {
   if (aliases) syncElizaEnvToBrand(aliases);
 }
 
-const PACKAGE_ROOT_NAMES = new Set([
-  "eliza",
-  "elizaai",
-  "elizaos",
-]);
+const PACKAGE_ROOT_NAMES = new Set(["eliza", "elizaai", "elizaos"]);
 
 /**
  * Register additional package root names for findOwnPackageRoot().

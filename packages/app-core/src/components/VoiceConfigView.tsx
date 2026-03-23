@@ -581,7 +581,9 @@ function WakeWordSection({
               >
                 <div className="font-semibold">{m.id}</div>
                 {m.hintKey && (
-                  <div className="text-[10px] opacity-70 mt-0.5">{t(m.hintKey)}</div>
+                  <div className="text-[10px] opacity-70 mt-0.5">
+                    {t(m.hintKey)}
+                  </div>
                 )}
               </Button>
             );

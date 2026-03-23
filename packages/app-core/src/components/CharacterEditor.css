@@ -1,0 +1,4 @@
+/**
+ * Character editor layout — `CharacterEditor.tsx` uses `ce-*` class names.
+ * Complex rules live here; keep TSX lean. Host shells may override tokens.
+ */

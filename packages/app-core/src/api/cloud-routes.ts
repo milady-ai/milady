@@ -13,8 +13,6 @@ import { createIntegrationTelemetrySpan } from "../diagnostics/integration-obser
 import { disconnectUnifiedCloudConnection } from "./cloud-connection";
 import { clearCloudSecrets, scrubCloudSecretsFromEnv } from "./cloud-secrets";
 
-
-
 export interface CloudRouteState {
   config: ElizaConfig;
   cloudManager: CloudManager | null;

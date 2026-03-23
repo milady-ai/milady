@@ -117,6 +117,15 @@ export default defineConfig({
     setupFiles: [path.join(here, "test/setup.ts")],
     environment: "node",
     alias: {
+      "@miladyai/vrm-utils": path.join(
+        here,
+        "..",
+        "..",
+        "packages",
+        "vrm-utils",
+        "src",
+        "index.ts",
+      ),
       "@elizaos/skills": path.join(here, "test/__mocks__/elizaos-skills.ts"),
       "@miladyai/capacitor-gateway": path.join(
         here,
@@ -159,7 +168,9 @@ export default defineConfig({
     globals: true,
     server: {
       deps: {
-        inline: ["@miladyai/app-core"],
+        // zod must be inlined or `import { z } from "zod"` can resolve with a broken
+        // interop shape in the Vitest SSR pre-bundle (e.g. config-catalog.ts).
+        inline: ["@miladyai/app-core", "zod"],
       },
     },
   },

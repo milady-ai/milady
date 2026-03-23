@@ -219,7 +219,10 @@ export function BrowserSurfaceWindow() {
           </button>
         </div>
 
-        <form className="flex min-w-0 flex-1 items-center gap-2" onSubmit={handleSubmit}>
+        <form
+          className="flex min-w-0 flex-1 items-center gap-2"
+          onSubmit={handleSubmit}
+        >
           <input
             aria-label={t("aria.browserAddress")}
             autoCapitalize="none"
@@ -249,7 +252,9 @@ export function BrowserSurfaceWindow() {
         >
           {isLoading ? "Loading" : "Ready"}
         </span>
-        <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{currentUrl}</span>
+        <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">
+          {currentUrl}
+        </span>
       </div>
 
       <div

@@ -120,6 +120,10 @@ export class GatewayElectrobun implements GatewayPlugin {
   // MARK: - Connection Methods
 
   async connect(options: GatewayConnectOptions): Promise<GatewayConnectResult> {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
     if (this.ws) {
       this.closed = true;
       this.ws.close();
@@ -343,6 +347,40 @@ export class GatewayElectrobun implements GatewayPlugin {
       message: `Connection lost: ${reason}`,
       code: String(code),
       willRetry: true,
+    } as GatewayErrorEvent);
+
+    this.scheduleReconnect();
+  }
+
+  private scheduleReconnect(): void {
+    if (this.closed || this.reconnectTimer) {
+      return;
+    }
+
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
+      this.backoffMs = Math.min(this.backoffMs * 1.7, 15_000);
+      this.establishConnection();
+    }, this.backoffMs);
+  }
+
+  private notifyStateChange(
+    state: GatewayStateEvent["state"],
+    reason?: string,
+  ): void {
+    this.notifyListeners("stateChange", {
+      state,
+      reason,
+    } as GatewayStateEvent);
+  }
+
+  private getPlatform(): string {
+    if (typeof navigator !== "undefined") {
+      return navigator.platform || "desktop";
+    }
+    return "electrobun";
+  }
+
   // MARK: - Discovery Methods
 
   async startDiscovery(
@@ -418,6 +456,91 @@ export class GatewayElectrobun implements GatewayPlugin {
     return {
       gateways: Array.from(this.discoveredGateways.values()),
       status: this.isDiscovering ? "Discovering" : "Idle",
+    };
+  }
+
+  async disconnect(): Promise<void> {
+    this.closed = true;
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+    if (this.ws) {
+      this.ws.close(1000, "Client disconnect");
+      this.ws = null;
+    }
+    this.sessionId = null;
+    this.protocol = null;
+    this.notifyStateChange("disconnected", "Client disconnect");
+  }
+
+  async isConnected(): Promise<{ connected: boolean }> {
+    return {
+      connected: this.ws !== null && this.ws.readyState === WebSocket.OPEN,
+    };
+  }
+
+  async send(options: GatewaySendOptions): Promise<GatewaySendResult> {
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      return {
+        ok: false,
+        error: {
+          code: "NOT_CONNECTED",
+          message: "Not connected to gateway",
+        },
+      };
+    }
+
+    const id = generateUUID();
+    const frame = {
+      type: "req",
+      id,
+      method: options.method,
+      params: options.params || {},
+    };
+
+    return new Promise<GatewaySendResult>((resolve) => {
+      const timeout = setTimeout(() => {
+        this.pending.delete(id);
+        resolve({
+          ok: false,
+          error: {
+            code: "TIMEOUT",
+            message: "Request timed out",
+          },
+        });
+      }, 60_000);
+
+      this.pending.set(id, {
+        resolve,
+        reject: (error: Error) => {
+          clearTimeout(timeout);
+          resolve({
+            ok: false,
+            error: {
+              code: "ERROR",
+              message: error.message,
+            },
+          });
+        },
+        timeout,
+      });
+
+      this.ws?.send(JSON.stringify(frame));
+    });
+  }
+
+  async getConnectionInfo(): Promise<{
+    url: string | null;
+    sessionId: string | null;
+    protocol: number | null;
+    role: string | null;
+  }> {
+    return {
+      url: this.options?.url || null,
+      sessionId: this.sessionId,
+      protocol: this.protocol,
+      role: this.role,
     };
   }
 
@@ -516,8 +639,9 @@ export class GatewayElectrobun implements GatewayPlugin {
     };
   }
 
-  async removeAllListeners(): Promise<void> 
+  async removeAllListeners(): Promise<void> {
     this.listeners = [];
+  }
 }
 
 // Export the plugin instance

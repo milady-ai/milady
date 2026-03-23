@@ -3,10 +3,7 @@
  */
 
 import { Keyboard } from "@capacitor/keyboard";
-import {
-  isIOS,
-  isNative,
-} from "@miladyai/app-core/platform";
+import { isIOS, isNative } from "@miladyai/app-core/platform";
 import {
   type ReactNode,
   useCallback,

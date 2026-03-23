@@ -295,10 +295,7 @@ export { normalizeUiShellMode };
 
 export function loadUiShellMode(): UiShellMode {
   return tryLocalStorage(
-    () =>
-      normalizeUiShellMode(
-        localStorage.getItem(UI_SHELL_MODE_STORAGE_KEY),
-      ),
+    () => normalizeUiShellMode(localStorage.getItem(UI_SHELL_MODE_STORAGE_KEY)),
     "companion",
   );
 }
@@ -338,9 +335,7 @@ function normalizeLastNativeTab(tab: unknown): Tab {
 export function loadLastNativeTab(): Tab {
   return tryLocalStorage(
     () =>
-      normalizeLastNativeTab(
-        localStorage.getItem(LAST_NATIVE_TAB_STORAGE_KEY),
-      ),
+      normalizeLastNativeTab(localStorage.getItem(LAST_NATIVE_TAB_STORAGE_KEY)),
     "chat",
   );
 }

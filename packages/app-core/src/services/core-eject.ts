@@ -127,7 +127,9 @@ async function pathExists(targetPath: string): Promise<boolean> {
     await fs.access(targetPath);
     return true;
   } catch (err) {
-    logger.debug(`[core-eject] pathExists check failed for ${targetPath}: ${err instanceof Error ? err.message : String(err)}`);
+    logger.debug(
+      `[core-eject] pathExists check failed for ${targetPath}: ${err instanceof Error ? err.message : String(err)}`,
+    );
     return false;
   }
 }
@@ -145,7 +147,9 @@ async function readCorePackageVersion(
       return parsed.version.trim();
     }
   } catch (err) {
-    logger.warn(`[core-eject] Failed to read core package version: ${err instanceof Error ? err.message : String(err)}`);
+    logger.warn(
+      `[core-eject] Failed to read core package version: ${err instanceof Error ? err.message : String(err)}`,
+    );
   }
   return "unknown";
 }
@@ -159,7 +163,9 @@ async function resolveInstalledCoreVersion(): Promise<string> {
       return npmVersion.trim();
     }
   } catch (err) {
-    logger.warn(`[core-eject] Registry lookup for installed core version failed: ${err instanceof Error ? err.message : String(err)}`);
+    logger.warn(
+      `[core-eject] Registry lookup for installed core version failed: ${err instanceof Error ? err.message : String(err)}`,
+    );
   }
 
   try {
@@ -171,7 +177,9 @@ async function resolveInstalledCoreVersion(): Promise<string> {
       return pkg.version.trim();
     }
   } catch (err) {
-    logger.warn(`[core-eject] Failed to resolve installed core version via require: ${err instanceof Error ? err.message : String(err)}`);
+    logger.warn(
+      `[core-eject] Failed to resolve installed core version via require: ${err instanceof Error ? err.message : String(err)}`,
+    );
   }
 
   return "unknown";
@@ -219,7 +227,9 @@ async function readUpstreamMetadata(): Promise<UpstreamMetadata | null> {
           : 0,
     };
   } catch (err) {
-    logger.warn(`[core-eject] Failed to read upstream metadata: ${err instanceof Error ? err.message : String(err)}`);
+    logger.warn(
+      `[core-eject] Failed to read upstream metadata: ${err instanceof Error ? err.message : String(err)}`,
+    );
     return null;
   }
 }
@@ -445,7 +455,9 @@ export function syncCore(): Promise<CoreSyncResult> {
       ["rev-parse", "--is-shallow-repository"],
       monorepoDir,
     ).catch((err: unknown) => {
-      logger.warn(`[core-eject] Failed to check shallow status: ${err instanceof Error ? err.message : String(err)}`);
+      logger.warn(
+        `[core-eject] Failed to check shallow status: ${err instanceof Error ? err.message : String(err)}`,
+      );
       return "false";
     });
 
@@ -460,7 +472,9 @@ export function syncCore(): Promise<CoreSyncResult> {
           },
         );
       } catch (err) {
-        logger.warn(`[core-eject] git fetch --unshallow failed, continuing with normal fetch: ${err instanceof Error ? err.message : String(err)}`);
+        logger.warn(
+          `[core-eject] git fetch --unshallow failed, continuing with normal fetch: ${err instanceof Error ? err.message : String(err)}`,
+        );
       }
     }
 
@@ -492,7 +506,9 @@ export function syncCore(): Promise<CoreSyncResult> {
           ["diff", "--name-only", "--diff-filter=U"],
           monorepoDir,
         ).catch((diffErr: unknown) => {
-          logger.warn(`[core-eject] Failed to list merge conflicts: ${diffErr instanceof Error ? (diffErr as Error).message : String(diffErr)}`);
+          logger.warn(
+            `[core-eject] Failed to list merge conflicts: ${diffErr instanceof Error ? (diffErr as Error).message : String(diffErr)}`,
+          );
           return "";
         });
         const conflicts = conflictsRaw
@@ -581,7 +597,9 @@ export function reinjectCore(): Promise<CoreReinjectResult> {
         await fs.rmdir(coreBaseDir());
       }
     } catch (err) {
-      logger.warn(`[core-eject] Best-effort cleanup of empty core dir failed: ${err instanceof Error ? err.message : String(err)}`);
+      logger.warn(
+        `[core-eject] Best-effort cleanup of empty core dir failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
 
     await writeTsconfigCorePaths(null);
@@ -636,16 +654,23 @@ export async function getCoreStatus(): Promise<CoreStatus> {
   const version = await readCorePackageVersion(packageDir);
   const commitHash = await gitStdout(["rev-parse", "HEAD"], monorepoDir).catch(
     (err: unknown) => {
-      logger.warn(`[core-eject] Failed to read HEAD commit hash: ${err instanceof Error ? err.message : String(err)}`);
+      logger.warn(
+        `[core-eject] Failed to read HEAD commit hash: ${err instanceof Error ? err.message : String(err)}`,
+      );
       return null;
     },
   );
   const localChanges =
-    (await gitStdout(["status", "--porcelain"], monorepoDir).catch((err: unknown) => {
-      logger.warn(`[core-eject] Failed to check local changes: ${err instanceof Error ? err.message : String(err)}`);
-      return "";
-    }))
-      .length > 0;
+    (
+      await gitStdout(["status", "--porcelain"], monorepoDir).catch(
+        (err: unknown) => {
+          logger.warn(
+            `[core-eject] Failed to check local changes: ${err instanceof Error ? err.message : String(err)}`,
+          );
+          return "";
+        },
+      )
+    ).length > 0;
 
   return {
     ejected: true,

@@ -115,7 +115,9 @@ async function readPackageNameVersion(pluginDir: string): Promise<{
       version = pkg.version.trim();
     }
   } catch (err) {
-    logger.warn(`[plugin-eject] Failed to read package.json in ${pluginDir}: ${err instanceof Error ? err.message : String(err)}`);
+    logger.warn(
+      `[plugin-eject] Failed to read package.json in ${pluginDir}: ${err instanceof Error ? err.message : String(err)}`,
+    );
   }
   return { name, version };
 }
@@ -161,7 +163,9 @@ async function readUpstreamMetadata(
           : 0,
     };
   } catch (err) {
-    logger.warn(`[plugin-eject] Failed to read upstream metadata for ${pluginDir}: ${err instanceof Error ? err.message : String(err)}`);
+    logger.warn(
+      `[plugin-eject] Failed to read upstream metadata for ${pluginDir}: ${err instanceof Error ? err.message : String(err)}`,
+    );
     return null;
   }
 }
@@ -200,7 +204,9 @@ async function maybeRunBuild(cwd: string): Promise<void> {
     };
     if (!pkg.scripts?.build) return;
   } catch (err) {
-    logger.warn(`[plugin-eject] Failed to read package.json for build check in ${cwd}: ${err instanceof Error ? err.message : String(err)}`);
+    logger.warn(
+      `[plugin-eject] Failed to read package.json for build check in ${cwd}: ${err instanceof Error ? err.message : String(err)}`,
+    );
     return;
   }
 
@@ -454,7 +460,9 @@ export function syncPlugin(pluginId: string): Promise<SyncResult> {
       ["rev-parse", "--is-shallow-repository"],
       pluginDir,
     ).catch((err: unknown) => {
-      logger.warn(`[plugin-eject] Failed to check shallow status: ${err instanceof Error ? err.message : String(err)}`);
+      logger.warn(
+        `[plugin-eject] Failed to check shallow status: ${err instanceof Error ? err.message : String(err)}`,
+      );
       return "false";
     });
     if (isShallow === "true") {
@@ -468,7 +476,9 @@ export function syncPlugin(pluginId: string): Promise<SyncResult> {
           },
         );
       } catch (err) {
-        logger.warn(`[plugin-eject] git fetch --unshallow failed, continuing with normal fetch: ${err instanceof Error ? err.message : String(err)}`);
+        logger.warn(
+          `[plugin-eject] git fetch --unshallow failed, continuing with normal fetch: ${err instanceof Error ? err.message : String(err)}`,
+        );
       }
     }
 
@@ -500,7 +510,9 @@ export function syncPlugin(pluginId: string): Promise<SyncResult> {
           ["diff", "--name-only", "--diff-filter=U"],
           pluginDir,
         ).catch((diffErr: unknown) => {
-          logger.warn(`[plugin-eject] Failed to list merge conflicts: ${diffErr instanceof Error ? diffErr.message : String(diffErr)}`);
+          logger.warn(
+            `[plugin-eject] Failed to list merge conflicts: ${diffErr instanceof Error ? diffErr.message : String(diffErr)}`,
+          );
           return "";
         });
         const conflicts = conflictsRaw

@@ -911,8 +911,6 @@ describe("applyConnectorSecretsToEnv", () => {
     expect(() => applyConnectorSecretsToEnv(config)).not.toThrow();
   });
 
-
-
   it("copies Signal account, httpUrl, and cliPath from config to env", () => {
     const config = {
       connectors: {

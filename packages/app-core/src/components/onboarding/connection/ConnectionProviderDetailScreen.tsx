@@ -1,5 +1,11 @@
 import { ONBOARDING_PROVIDER_CATALOG } from "@elizaos/agent/contracts/onboarding";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@miladyai/ui";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@miladyai/ui";
 import type { ChangeEvent } from "react";
 import { useState } from "react";
 import type {
@@ -236,7 +242,10 @@ export function ConnectionProviderDetailScreen({
 
   return (
     <>
-      <div className="text-xs tracking-[0.3em] uppercase text-[rgba(240,238,250,0.62)] font-semibold text-center mb-0" style={{ textShadow: '0 2px 10px rgba(3,5,10,0.55)' }}>
+      <div
+        className="text-xs tracking-[0.3em] uppercase text-[rgba(240,238,250,0.62)] font-semibold text-center mb-0"
+        style={{ textShadow: "0 2px 10px rgba(3,5,10,0.55)" }}
+      >
         <span
           style={{
             display: "flex",
@@ -407,7 +416,9 @@ export function ConnectionProviderDetailScreen({
                     </p>
                   );
                 })()}
-              <p className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3">{t("onboarding.freeCredits")}</p>
+              <p className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3">
+                {t("onboarding.freeCredits")}
+              </p>
             </div>
           ) : (
             <div>
@@ -571,7 +582,10 @@ export function ConnectionProviderDetailScreen({
                 </svg>
                 {t("onboarding.connectedToClaude")}
               </div>
-              <p className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3" style={{ textAlign: "center" }}>
+              <p
+                className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3"
+                style={{ textAlign: "center" }}
+              >
                 {t("onboarding.claudeSubscriptionReady")}
               </p>
             </div>
@@ -591,7 +605,10 @@ export function ConnectionProviderDetailScreen({
               >
                 {t("onboarding.loginWithAnthropic")}
               </button>
-              <p className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3" style={{ textAlign: "center" }}>
+              <p
+                className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3"
+                style={{ textAlign: "center" }}
+              >
                 {t("onboarding.requiresClaudeSub")}
               </p>
               {anthropicError && (
@@ -693,7 +710,10 @@ export function ConnectionProviderDetailScreen({
                 </svg>
                 {t("onboarding.connectedToChatGPT")}
               </div>
-              <p className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3" style={{ textAlign: "center" }}>
+              <p
+                className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3"
+                style={{ textAlign: "center" }}
+              >
                 {t("onboarding.chatgptSubscriptionReady")}
               </p>
             </div>
@@ -713,7 +733,10 @@ export function ConnectionProviderDetailScreen({
               >
                 {t("onboarding.loginWithOpenAI")}
               </button>
-              <p className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3" style={{ textAlign: "center" }}>
+              <p
+                className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3"
+                style={{ textAlign: "center" }}
+              >
                 {t("onboarding.requiresChatGPTSub")}
               </p>
             </div>
@@ -846,7 +869,9 @@ export function ConnectionProviderDetailScreen({
         )}
 
       {onboardingProvider === "ollama" && (
-        <p className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3">{t("onboarding.ollamaNoConfig")}</p>
+        <p className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3">
+          {t("onboarding.ollamaNoConfig")}
+        </p>
       )}
 
       {onboardingProvider === "pi-ai" && (
@@ -873,7 +898,10 @@ export function ConnectionProviderDetailScreen({
                     }
                     return;
                   }
-                  setState("onboardingPrimaryModel", next === "__default__" ? "" : next);
+                  setState(
+                    "onboardingPrimaryModel",
+                    next === "__default__" ? "" : next,
+                  );
                 }}
               >
                 <SelectTrigger className="onboarding-input">
@@ -918,7 +946,10 @@ export function ConnectionProviderDetailScreen({
               placeholder="provider/model (e.g. anthropic/claude-3.5-sonnet)"
             />
           )}
-          <p className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3" style={{ textAlign: "left" }}>
+          <p
+            className="text-sm text-[rgba(240,238,250,0.62)] text-center leading-relaxed mt-3"
+            style={{ textAlign: "left" }}
+          >
             {t("onboarding.piCredentialsHint")}
             {piAiModels.length > 0
               ? t("onboarding.piDropdownHint")
@@ -959,11 +990,17 @@ export function ConnectionProviderDetailScreen({
                     style={{ width: "100%" }}
                   >
                     <div>
-                      <div className="text-xs text-[rgba(240,238,250,0.88)] leading-[1.3]" style={{ textShadow: '0 1px 8px rgba(3,5,10,0.6)' }}>
+                      <div
+                        className="text-xs text-[rgba(240,238,250,0.88)] leading-[1.3]"
+                        style={{ textShadow: "0 1px 8px rgba(3,5,10,0.6)" }}
+                      >
                         {model.name}
                       </div>
                       {model.description && (
-                        <div className="text-[10px] text-[rgba(240,238,250,0.58)] leading-[1.3] line-clamp-2" style={{ textShadow: '0 1px 8px rgba(3,5,10,0.5)' }}>
+                        <div
+                          className="text-[10px] text-[rgba(240,238,250,0.58)] leading-[1.3] line-clamp-2"
+                          style={{ textShadow: "0 1px 8px rgba(3,5,10,0.5)" }}
+                        >
                           {model.description}
                         </div>
                       )}
