@@ -282,9 +282,19 @@ function findCompatibleLogger(
   const score = (logger: TrajectoryLoggerApi): number => {
     const ctorName =
       (logger as { constructor?: { name?: string } }).constructor?.name ?? "";
+    const capabilityDescription =
+      typeof (logger as { capabilityDescription?: unknown })
+        .capabilityDescription === "string"
+        ? (logger as { capabilityDescription: string }).capabilityDescription
+        : "";
+    const normalizedCtor = ctorName.toLowerCase();
+    const normalizedCapability = capabilityDescription.toLowerCase();
     let points = 0;
     // Prefer the DB-backed logger when multiple trajectory services are present.
     if (ctorName === "DatabaseTrajectoryLogger") points += 100;
+    if (normalizedCtor.includes("database")) points += 40;
+    if (normalizedCapability.includes("database-backed")) points += 80;
+    if (normalizedCapability.includes("trajectory logging service")) points += 20;
     if (typeof (logger as { logLlmCall?: unknown }).logLlmCall === "function") {
       points += 10;
     }
