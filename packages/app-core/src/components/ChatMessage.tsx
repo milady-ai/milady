@@ -5,6 +5,7 @@
 import type { ConversationMessage } from "@miladyai/app-core/api";
 import { useTimeout } from "@miladyai/app-core/hooks";
 import { getVrmPreviewUrl, useApp } from "@miladyai/app-core/state";
+import { useTranslation } from "../state/TranslationContext";
 import { Button } from "@miladyai/ui";
 import { Check, Copy, Pencil, Trash2, Volume2 } from "lucide-react";
 import {
@@ -39,7 +40,8 @@ export function ChatMessage({
 }: ChatMessageProps) {
   const { setTimeout } = useTimeout();
 
-  const { copyToClipboard, t } = useApp();
+  const { t } = useTranslation();
+  const { copyToClipboard } = useApp();
   const [copied, setCopied] = useState(false);
   const [showActions, setShowActions] = useState(false);
   const [supportsHover, setSupportsHover] = useState(() =>

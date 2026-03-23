@@ -7,6 +7,7 @@ import type {
 import { CONNECTION_RECOMMENDED_PROVIDER_IDS } from "../../../onboarding/connection-flow";
 import { getProviderLogo } from "../../../providers";
 import { useApp } from "../../../state";
+import { useTranslation } from "../../../state/TranslationContext";
 
 const recommendedIds = new Set<string>(CONNECTION_RECOMMENDED_PROVIDER_IDS);
 
@@ -34,7 +35,8 @@ export function ConnectionProviderGridScreen({
   getDetectedLabel: (providerId: string) => string | null;
 }) {
   const branding = useBranding();
-  const { t, onboardingRemoteConnected } = useApp();
+  const { t } = useTranslation();
+  const { onboardingRemoteConnected } = useApp();
 
   return (
     <>

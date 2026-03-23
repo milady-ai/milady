@@ -507,7 +507,8 @@ export function SettingsView({
   onClose?: () => void;
   initialSection?: string;
 } = {}) {
-  const { t, loadPlugins, setTab } = useApp();
+  const { t } = useTranslation();
+  const { loadPlugins, setTab } = useApp();
   const [activeSection, setActiveSection] = useState(
     initialSection ?? "ai-model",
   );

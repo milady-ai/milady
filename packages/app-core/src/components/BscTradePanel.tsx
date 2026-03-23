@@ -15,6 +15,7 @@ import type {
   BscTradeTxStatusResponse,
 } from "@miladyai/app-core/api";
 import { useApp } from "@miladyai/app-core/state";
+import { useTranslation } from "../state/TranslationContext";
 import { Button, Input } from "@miladyai/ui";
 import { useCallback, useState } from "react";
 import { HEX_ADDRESS_RE } from "./companion/walletUtils";
@@ -52,7 +53,8 @@ export function TradePanel({
   executeBscTrade,
   getBscTradeTxStatus,
 }: TradePanelProps) {
-  const { t, copyToClipboard, setActionNotice } = useApp();
+  const { t } = useTranslation();
+  const { copyToClipboard, setActionNotice } = useApp();
   const [quickTokenAddress, setQuickTokenAddress] = useState("");
   const [quickAmount, setQuickAmount] = useState(DEFAULT_QUICK_AMOUNT);
   const [latestQuote, setLatestQuote] = useState<BscTradeQuoteResponse | null>(

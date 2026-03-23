@@ -8,6 +8,7 @@ import {
 } from "../events";
 import { useTimeout } from "../hooks";
 import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 
 // Types
 interface EmoteItem {
@@ -206,7 +207,8 @@ const CATEGORY_LABELS: Record<string, string> = {
 export function EmotePicker() {
   const { setTimeout } = useTimeout();
 
-  const { emotePickerOpen, openEmotePicker, closeEmotePicker, t } = useApp();
+  const { t } = useTranslation();
+  const { emotePickerOpen, openEmotePicker, closeEmotePicker } = useApp();
   const [search, setSearch] = useState("");
   const [playing, setPlaying] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);

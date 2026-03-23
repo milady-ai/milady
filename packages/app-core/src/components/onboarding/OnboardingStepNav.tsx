@@ -6,11 +6,13 @@
  * (enforced in AppContext via canRevertOnboardingTo).
  */
 import { useApp } from "@miladyai/app-core/state";
+import { useTranslation } from "../../state/TranslationContext";
 import { useBranding } from "../../config/branding";
 import { getOnboardingNavMetas } from "../../onboarding/flow";
 
 export function OnboardingStepNav() {
-  const { onboardingStep, handleOnboardingJumpToStep, t } = useApp();
+  const { t } = useTranslation();
+  const { onboardingStep, handleOnboardingJumpToStep } = useApp();
   const branding = useBranding();
 
   const isCloudOnly = !!branding.cloudOnly;

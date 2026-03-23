@@ -1,5 +1,6 @@
 import { STYLE_PRESETS } from "@miladyai/app-core/onboarding-presets";
 import { getVrmPreviewUrl, useApp } from "@miladyai/app-core/state";
+import { useTranslation } from "../../state/TranslationContext";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   CharacterRoster,
@@ -12,7 +13,8 @@ import {
 const FRONTEND_PRESETS = resolveRosterEntries(STYLE_PRESETS);
 
 export function IdentityStep() {
-  const { onboardingStyle, handleOnboardingNext, setState, t } = useApp();
+  const { t } = useTranslation();
+  const { onboardingStyle, handleOnboardingNext, setState } = useApp();
 
   const entries = FRONTEND_PRESETS;
   const selectedId = onboardingStyle || entries[0]?.catchphrase || "";
