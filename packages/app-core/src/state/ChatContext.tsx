@@ -1,27 +1,19 @@
 /**
- * Chat context — extracted from AppContext.
+ * Chat context — a bridge layer for AppContext's chat state.
  *
- * Owns the chat state that changes at high frequency: messages,
- * input text, sending status, conversations, and voice state.
+ * AppProvider owns the chat state (messages, conversations, input,
+ * sending status, voice) and passes it through ChatProvider.
+ * Components use useChatState() to read only chat state without
+ * subscribing to all of AppContext.
+ *
  * This is the hottest render path — every keystroke and streaming
- * token triggers updates here. Isolating it prevents settings,
- * plugins, onboarding, and other views from re-rendering.
+ * token triggers updates. Isolating it prevents settings, plugins,
+ * onboarding, and wallet views from re-rendering.
  *
- * Phase 1: State + setters only. The complex callbacks (handleChatSend,
- * etc.) remain in AppContext and read from this context via refs.
- * Components can use useChatState() for read-only chat state without
- * subscribing to the full AppContext.
+ * Single source of truth — AppProvider passes its own state here.
  */
 
-import {
-  createContext,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { createContext, type ReactNode, useContext } from "react";
 import type {
   CodingAgentSession,
   Conversation,
@@ -32,12 +24,6 @@ import type {
 } from "../api";
 import type { AutonomyRunHealthMap } from "../autonomy";
 import type { ChatTurnUsage } from "./types";
-import {
-  loadChatAvatarVisible,
-  loadChatMode,
-  loadChatVoiceMuted,
-  loadCompanionMessageCutoffTs,
-} from "./internal";
 
 // ── Types ───────────────────────────────────────────────────────────
 
@@ -50,7 +36,6 @@ export interface ChatStateValue {
   chatAgentVoiceMuted: boolean;
   chatMode: ConversationMode;
   chatAvatarSpeaking: boolean;
-
   conversations: Conversation[];
   activeConversationId: string | null;
   companionMessageCutoffTs: number;
@@ -61,206 +46,38 @@ export interface ChatStateValue {
   ptySessions: CodingAgentSession[];
   unreadConversations: Set<string>;
   chatPendingImages: ImageAttachment[];
-  droppedFiles: File[];
-  shareIngestNotice: string | null;
-
-  // Setters — exposed so AppContext callbacks can update chat state
-  setChatInput: (v: string) => void;
-  setChatSending: (v: boolean) => void;
-  setChatFirstTokenReceived: (v: boolean) => void;
-  setChatLastUsage: (v: ChatTurnUsage | null) => void;
-  setChatAvatarVisible: (v: boolean) => void;
-  setChatAgentVoiceMuted: (v: boolean) => void;
-  setChatMode: (v: ConversationMode) => void;
-  setChatAvatarSpeaking: (v: boolean) => void;
-
-  setConversations: React.Dispatch<React.SetStateAction<Conversation[]>>;
-  setActiveConversationId: (v: string | null) => void;
-  setCompanionMessageCutoffTs: (v: number) => void;
-  setConversationMessages: React.Dispatch<
-    React.SetStateAction<ConversationMessage[]>
-  >;
-  setAutonomousEvents: React.Dispatch<
-    React.SetStateAction<StreamEventEnvelope[]>
-  >;
-  setAutonomousLatestEventId: (v: string | null) => void;
-  setAutonomousRunHealthByRunId: React.Dispatch<
-    React.SetStateAction<AutonomyRunHealthMap>
-  >;
-  setPtySessions: React.Dispatch<React.SetStateAction<CodingAgentSession[]>>;
-  setUnreadConversations: React.Dispatch<React.SetStateAction<Set<string>>>;
-  setChatPendingImages: React.Dispatch<
-    React.SetStateAction<ImageAttachment[]>
-  >;
-  setDroppedFiles: React.Dispatch<React.SetStateAction<File[]>>;
-  setShareIngestNotice: (v: string | null) => void;
-
-  // Refs for synchronous access from callbacks
-  activeConversationIdRef: React.RefObject<string | null>;
-  conversationMessagesRef: React.RefObject<ConversationMessage[]>;
+  droppedFiles: string[];
+  shareIngestNotice: string;
 }
 
 const ChatCtx = createContext<ChatStateValue | null>(null);
 
 // ── Provider ────────────────────────────────────────────────────────
 
-export function ChatProvider({ children }: { children: ReactNode }) {
-  const [chatInput, setChatInput] = useState("");
-  const [chatSending, setChatSending] = useState(false);
-  const [chatFirstTokenReceived, setChatFirstTokenReceived] = useState(false);
-  const [chatLastUsage, setChatLastUsage] = useState<ChatTurnUsage | null>(
-    null,
-  );
-  const [chatAvatarVisible, setChatAvatarVisible] = useState(
-    loadChatAvatarVisible,
-  );
-  const [chatAgentVoiceMuted, setChatAgentVoiceMuted] =
-    useState(loadChatVoiceMuted);
-  const [chatMode, setChatMode] = useState<ConversationMode>(loadChatMode);
-  const [chatAvatarSpeaking, setChatAvatarSpeaking] = useState(false);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [activeConversationId, setActiveConversationId] = useState<
-    string | null
-  >(null);
-  const [companionMessageCutoffTs, setCompanionMessageCutoffTs] = useState(
-    loadCompanionMessageCutoffTs,
-  );
-  const [conversationMessages, setConversationMessages] = useState<
-    ConversationMessage[]
-  >([]);
-  const [autonomousEvents, setAutonomousEvents] = useState<
-    StreamEventEnvelope[]
-  >([]);
-  const [autonomousLatestEventId, setAutonomousLatestEventId] = useState<
-    string | null
-  >(null);
-  const [autonomousRunHealthByRunId, setAutonomousRunHealthByRunId] =
-    useState<AutonomyRunHealthMap>({});
-  const [ptySessions, setPtySessions] = useState<CodingAgentSession[]>([]);
-  const [unreadConversations, setUnreadConversations] = useState<Set<string>>(
-    new Set(),
-  );
-  const [chatPendingImages, setChatPendingImages] = useState<
-    ImageAttachment[]
-  >([]);
-  const [droppedFiles, setDroppedFiles] = useState<File[]>([]);
-  const [shareIngestNotice, setShareIngestNotice] = useState<string | null>(
-    null,
-  );
-
-  const activeConversationIdRef = useRef<string | null>(null);
-  const conversationMessagesRef = useRef<ConversationMessage[]>([]);
-
-  // Keep refs in sync
-  const setActiveConversationIdWrapped = useCallback(
-    (v: string | null) => {
-      activeConversationIdRef.current = v;
-      setActiveConversationId(v);
-    },
-    [],
-  );
-
-  const setConversationMessagesWrapped: React.Dispatch<
-    React.SetStateAction<ConversationMessage[]>
-  > = useCallback(
-    (v: React.SetStateAction<ConversationMessage[]>) => {
-      setConversationMessages((prev) => {
-        const next = typeof v === "function" ? v(prev) : v;
-        conversationMessagesRef.current = next;
-        return next;
-      });
-    },
-    [],
-  );
-
-  const value = useMemo<ChatStateValue>(
-    () => ({
-      chatInput,
-      chatSending,
-      chatFirstTokenReceived,
-      chatLastUsage,
-      chatAvatarVisible,
-      chatAgentVoiceMuted,
-      chatMode,
-      chatAvatarSpeaking,
-
-      conversations,
-      activeConversationId,
-      companionMessageCutoffTs,
-      conversationMessages,
-      autonomousEvents,
-      autonomousLatestEventId,
-      autonomousRunHealthByRunId,
-      ptySessions,
-      unreadConversations,
-      chatPendingImages,
-      droppedFiles,
-      shareIngestNotice,
-      setChatInput,
-      setChatSending,
-      setChatFirstTokenReceived,
-      setChatLastUsage,
-      setChatAvatarVisible,
-      setChatAgentVoiceMuted,
-      setChatMode,
-      setChatAvatarSpeaking,
-
-      setConversations,
-      setActiveConversationId: setActiveConversationIdWrapped,
-      setCompanionMessageCutoffTs,
-      setConversationMessages: setConversationMessagesWrapped,
-      setAutonomousEvents,
-      setAutonomousLatestEventId,
-      setAutonomousRunHealthByRunId,
-      setPtySessions,
-      setUnreadConversations,
-      setChatPendingImages,
-      setDroppedFiles,
-      setShareIngestNotice,
-      activeConversationIdRef,
-      conversationMessagesRef,
-    }),
-    [
-      chatInput,
-      chatSending,
-      chatFirstTokenReceived,
-      chatLastUsage,
-      chatAvatarVisible,
-      chatAgentVoiceMuted,
-      chatMode,
-      chatAvatarSpeaking,
-
-      conversations,
-      activeConversationId,
-      companionMessageCutoffTs,
-      conversationMessages,
-      autonomousEvents,
-      autonomousLatestEventId,
-      autonomousRunHealthByRunId,
-      ptySessions,
-      unreadConversations,
-      chatPendingImages,
-      droppedFiles,
-      shareIngestNotice,
-      setActiveConversationIdWrapped,
-      setConversationMessagesWrapped,
-    ],
-  );
-
+/**
+ * Accepts a pre-built value from AppProvider. No internal state — single
+ * source of truth remains in AppProvider.
+ */
+export function ChatProvider({
+  children,
+  value,
+}: {
+  children: ReactNode;
+  value: ChatStateValue;
+}) {
   return <ChatCtx.Provider value={value}>{children}</ChatCtx.Provider>;
 }
 
 // ── Hook ────────────────────────────────────────────────────────────
 
 /**
- * Use this hook for read-only chat state or chat setters.
- * Components that only need chat data should prefer this over useApp().
+ * Read-only chat state. Components that only need chat data should
+ * prefer this over useApp() to avoid re-rendering on unrelated changes.
  */
 export function useChatState(): ChatStateValue {
   const ctx = useContext(ChatCtx);
   if (ctx) return ctx;
   if (typeof process !== "undefined" && process.env.NODE_ENV === "test") {
-    const noop = () => {};
     return {
       chatInput: "",
       chatSending: false,
@@ -281,29 +98,7 @@ export function useChatState(): ChatStateValue {
       unreadConversations: new Set<string>(),
       chatPendingImages: [],
       droppedFiles: [],
-      shareIngestNotice: null,
-      setChatInput: noop,
-      setChatSending: noop,
-      setChatFirstTokenReceived: noop,
-      setChatLastUsage: noop,
-      setChatAvatarVisible: noop,
-      setChatAgentVoiceMuted: noop,
-      setChatMode: noop,
-      setChatAvatarSpeaking: noop,
-      setConversations: noop as ChatStateValue["setConversations"],
-      setActiveConversationId: noop,
-      setCompanionMessageCutoffTs: noop,
-      setConversationMessages: noop as ChatStateValue["setConversationMessages"],
-      setAutonomousEvents: noop as ChatStateValue["setAutonomousEvents"],
-      setAutonomousLatestEventId: noop,
-      setAutonomousRunHealthByRunId: noop as ChatStateValue["setAutonomousRunHealthByRunId"],
-      setPtySessions: noop as ChatStateValue["setPtySessions"],
-      setUnreadConversations: noop as ChatStateValue["setUnreadConversations"],
-      setChatPendingImages: noop as ChatStateValue["setChatPendingImages"],
-      setDroppedFiles: noop as ChatStateValue["setDroppedFiles"],
-      setShareIngestNotice: noop,
-      activeConversationIdRef: { current: null },
-      conversationMessagesRef: { current: [] },
+      shareIngestNotice: "",
     };
   }
   throw new Error(

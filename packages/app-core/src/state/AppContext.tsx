@@ -7077,6 +7077,39 @@ export function AppProvider({
     ],
   );
 
+  const chatValue = useMemo(
+    () => ({
+      chatInput,
+      chatSending,
+      chatFirstTokenReceived,
+      chatLastUsage,
+      chatAvatarVisible,
+      chatAgentVoiceMuted,
+      chatMode,
+      chatAvatarSpeaking,
+      conversations,
+      activeConversationId,
+      companionMessageCutoffTs,
+      conversationMessages,
+      autonomousEvents,
+      autonomousLatestEventId,
+      autonomousRunHealthByRunId,
+      ptySessions,
+      unreadConversations,
+      chatPendingImages,
+      droppedFiles,
+      shareIngestNotice,
+    }),
+    [
+      chatInput, chatSending, chatFirstTokenReceived, chatLastUsage,
+      chatAvatarVisible, chatAgentVoiceMuted, chatMode, chatAvatarSpeaking,
+      conversations, activeConversationId, companionMessageCutoffTs,
+      conversationMessages, autonomousEvents, autonomousLatestEventId,
+      autonomousRunHealthByRunId, ptySessions, unreadConversations,
+      chatPendingImages, droppedFiles, shareIngestNotice,
+    ],
+  );
+
   const mergedBranding = useMemo(
     () => ({ ...DEFAULT_BRANDING, ...brandingOverride }),
     [brandingOverride],
@@ -7087,7 +7120,7 @@ export function AppProvider({
       <TranslationProvider uiLanguage={uiLanguage}>
         <NavigationProvider value={navigationValue}>
           <LifecycleProvider value={lifecycleValue}>
-            <ChatProvider>
+            <ChatProvider value={chatValue}>
               <AppContext.Provider value={value}>
                 {children}
                 <ConfirmModal {...modalProps} />
