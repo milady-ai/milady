@@ -1,5 +1,6 @@
 import type http from "node:http";
 import { logger } from "@elizaos/core";
+import type { AgentRuntime, Service } from "@elizaos/core";
 import { normalizeCloudSiteUrl } from "../cloud/base-url";
 import { validateCloudBaseUrl } from "../cloud/validate-url";
 import { sendJson, sendJsonError } from "./http-helpers";
@@ -12,8 +13,16 @@ interface CloudProxyConfigLike {
   };
 }
 
+interface CloudAuthBillingService {
+  isAuthenticated: () => boolean;
+  getClient: () => {
+    get: <T>(path: string) => Promise<T>;
+  };
+}
+
 export interface CloudBillingRouteState {
   config: CloudProxyConfigLike;
+  runtime?: AgentRuntime | null;
 }
 
 const PROXY_TIMEOUT_MS = 15_000;
@@ -356,7 +365,12 @@ export async function handleCloudBillingRoute(
   if (!pathname.startsWith("/api/cloud/billing")) return false;
 
   const apiKey = state.config.cloud?.apiKey?.trim();
-  if (!apiKey) {
+  const cloudAuth = state.runtime?.getService<Service & CloudAuthBillingService>(
+    "CLOUD_AUTH",
+  );
+  const authConnected = Boolean(cloudAuth?.isAuthenticated());
+
+  if (!apiKey && !authConnected) {
     sendJsonError(
       res,
       "Not connected to Eliza Cloud. Please log in first.",
@@ -369,6 +383,76 @@ export async function handleCloudBillingRoute(
   const urlError = await validateCloudBaseUrl(baseUrl);
   if (urlError) {
     sendJsonError(res, urlError, 502);
+    return true;
+  }
+
+  if (!apiKey && authConnected) {
+    const client = cloudAuth?.getClient();
+    if (!client) {
+      sendJsonError(
+        res,
+        "Connected session is missing billing client. Reconnect Eliza Cloud.",
+        401,
+      );
+      return true;
+    }
+
+    if (pathname === "/api/cloud/billing/summary" && method === "GET") {
+      const creditResponse =
+        await client.get<Record<string, unknown>>("/credits/balance");
+      const rawBalance =
+        typeof creditResponse?.balance === "number"
+          ? creditResponse.balance
+          : typeof (creditResponse?.data as Record<string, unknown>)
+                ?.balance === "number"
+            ? ((creditResponse.data as Record<string, unknown>)
+                .balance as number)
+            : undefined;
+      if (typeof rawBalance !== "number") {
+        sendJsonError(res, "Unexpected cloud credits response", 502);
+        return true;
+      }
+      const balance = rawBalance;
+      sendJson(res, {
+        success: true,
+        balance,
+        currency: "USD",
+        topUpUrl: `${baseUrl}/dashboard/settings?tab=billing`,
+        embeddedCheckoutEnabled: false,
+        hostedCheckoutEnabled: true,
+        cryptoEnabled: false,
+        low: balance < 2,
+        critical: balance < 0.5,
+      });
+      return true;
+    }
+
+    if (pathname === "/api/cloud/billing/settings" && method === "GET") {
+      sendJson(res, {
+        success: true,
+        settings: {
+          autoTopUp: {
+            enabled: false,
+            amount: null,
+            threshold: null,
+            hasPaymentMethod: false,
+          },
+          limits: {
+            minAmount: 1,
+            maxAmount: 1000,
+            minThreshold: 1,
+            maxThreshold: 1000,
+          },
+        },
+      });
+      return true;
+    }
+
+    sendJsonError(
+      res,
+      "This billing action requires API-key cloud login. Reconnect Eliza Cloud from Settings.",
+      409,
+    );
     return true;
   }
 

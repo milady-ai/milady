@@ -15,6 +15,7 @@ import type {
 } from "@elizaos/core";
 import { AgentEventService } from "@elizaos/core";
 import { emoteAction } from "../actions/emote";
+import { executeTradeAction } from "../actions/execute-trade";
 import { restartAction } from "../actions/restart";
 import { sendMessageAction } from "../actions/send-message";
 import {
@@ -26,7 +27,9 @@ import {
 } from "../actions/stream-control";
 import { switchStreamSourceAction } from "../actions/switch-stream-source";
 import { terminalAction } from "../actions/terminal";
+import { transferTokenAction } from "../actions/transfer-token";
 import { adminTrustProvider } from "../providers/admin-trust";
+import { checkBalanceAction } from "../actions/check-balance";
 
 import { createSessionKeyProvider } from "../providers/session-bridge";
 import {
@@ -137,6 +140,9 @@ export function createElizaPlugin(config?: ElizaPluginConfig): Plugin {
       terminalAction,
       createTriggerTaskAction,
       emoteAction,
+      checkBalanceAction,
+      executeTradeAction,
+      transferTokenAction,
       // switchStreamSourceAction,
       // goLiveAction,
       // goOfflineAction,

@@ -1,29 +1,15 @@
 /**
- * TRANSFER_TOKEN action — transfers tokens or native BNB to another address.
- *
- * When triggered the action:
- *   1. Validates parameters (toAddress 0x format, amount > 0, assetSymbol non-empty)
- *   2. POSTs to the local transfer execution API with agent automation header
- *   3. Returns structured result: execution status, txHash, explorer URL,
- *      or unsigned TX info if user-sign mode
- *
- * All business logic (permissions, safety caps, signing) is handled
- * server-side — this action is a thin wrapper.
- *
- * @module actions/transfer-token
+ * TRANSFER_TOKEN action - transfers tokens or native BNB to another address.
  */
 
-import type { Action, ActionExample, HandlerOptions, HandlerCallback, IAgentRuntime } from "@elizaos/core";
+import type { Action, HandlerOptions, IAgentRuntime } from "@elizaos/core";
 import {
   buildAuthHeaders,
   WALLET_ACTION_API_PORT,
   walletActionFetch,
-} from "./wallet-action-shared.js";
+} from "./wallet-action-shared";
 
-/** Timeout for the transfer API call (includes on-chain confirmation). */
 const TRANSFER_TIMEOUT_MS = 60_000;
-
-/** Matches a 0x-prefixed 40-hex-char EVM address. */
 const EVM_ADDRESS_RE = /^0x[0-9a-fA-F]{40}$/;
 const SOLANA_ADDRESS_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 const VALID_CHAINS = ["bsc", "base", "solana"] as const;
@@ -31,12 +17,9 @@ type TransferChain = (typeof VALID_CHAINS)[number];
 
 export const transferTokenAction: Action = {
   name: "TRANSFER_TOKEN",
-
   similes: ["SEND_TOKEN", "TRANSFER", "SEND", "SEND_BNB", "SEND_CRYPTO", "PAY"],
-
   description:
-    "Transfer tokens on BSC, Base, or Solana. Use this when a user asks to send, transfer, or pay tokens.",
-
+    "Transfer tokens on BSC, Base, or Solana. Use this when a user asks to send, transfer, or pay tokens to a recipient address.",
   validate: async (runtime: IAgentRuntime): Promise<boolean> => {
     return Boolean(
       runtime.getSetting("EVM_PRIVATE_KEY") ||
@@ -45,8 +28,7 @@ export const transferTokenAction: Action = {
           runtime.getSetting("PRIVY_AGENT_USER_ID")),
     );
   },
-
-  handler: async (_runtime, _message, _state, options, callback?: HandlerCallback) => {
+  handler: async (_runtime, _message, _state, options) => {
     try {
       const params = (options as HandlerOptions | undefined)?.parameters;
       const rawChain =
@@ -59,75 +41,64 @@ export const transferTokenAction: Action = {
         ? (rawChain as TransferChain)
         : "bsc";
 
-      // ── Validate toAddress ─────────────────────────────────────────────
       const toAddress =
         typeof params?.toAddress === "string"
           ? params.toAddress.trim()
           : undefined;
-
       const hasValidAddress =
         chain === "solana"
           ? Boolean(toAddress && SOLANA_ADDRESS_RE.test(toAddress))
           : Boolean(toAddress && EVM_ADDRESS_RE.test(toAddress));
       if (!hasValidAddress) {
-        const text =
+        return {
+          text:
             chain === "solana"
               ? "I need a valid Solana recipient address (base58)."
-              : "I need a valid recipient EVM address (0x-prefixed, 40 hex chars).";
-        if (callback) callback({ text, action: "TRANSFER_TOKEN_FAILED" });
-        return { text, success: false };
+              : "I need a valid recipient EVM address (0x-prefixed, 40 hex chars).",
+          success: false,
+        };
       }
 
-      // ── Validate amount ────────────────────────────────────────────────
       const amountRaw =
         typeof params?.amount === "string"
           ? params.amount.trim()
           : typeof params?.amount === "number"
             ? String(params.amount)
             : undefined;
-
       if (
         !amountRaw ||
         Number.isNaN(Number(amountRaw)) ||
         Number(amountRaw) <= 0
       ) {
-        const text = "I need a positive numeric amount for the transfer.";
-        if (callback) callback({ text, action: "TRANSFER_TOKEN_FAILED" });
-        return { text, success: false };
+        return {
+          text: "I need a positive numeric amount for the transfer.",
+          success: false,
+        };
       }
 
-      // ── Validate assetSymbol ───────────────────────────────────────────
       const assetSymbol =
         typeof params?.assetSymbol === "string"
           ? params.assetSymbol.trim()
           : undefined;
-
       if (!assetSymbol) {
-        const text = "I need an asset symbol (e.g. BNB, USDT, USDC) for the transfer.";
-        if (callback) callback({ text, action: "TRANSFER_TOKEN_FAILED" });
-        return { text, success: false };
+        return {
+          text: "I need an asset symbol (e.g. BNB, USDT, USDC) for the transfer.",
+          success: false,
+        };
       }
-
       if (!/^[A-Za-z0-9]{1,20}$/.test(assetSymbol)) {
-        const text = "Invalid asset symbol format.";
-        if (callback) callback({ text, action: "TRANSFER_TOKEN_FAILED" });
-        return { text, success: false };
+        return { text: "Invalid asset symbol format.", success: false };
       }
 
-      // ── Optional tokenAddress ──────────────────────────────────────────
       const tokenAddress =
         typeof params?.tokenAddress === "string" &&
         params.tokenAddress.trim() !== ""
           ? params.tokenAddress.trim()
           : undefined;
-
       if (tokenAddress && !EVM_ADDRESS_RE.test(tokenAddress)) {
-        const text = "Invalid token address format.";
-        if (callback) callback({ text, action: "TRANSFER_TOKEN_FAILED" });
-        return { text, success: false };
+        return { text: "Invalid token address format.", success: false };
       }
 
-      // ── POST to transfer execution API ─────────────────────────────────
       const body: Record<string, unknown> = {
         chain,
         toAddress,
@@ -135,10 +106,7 @@ export const transferTokenAction: Action = {
         assetSymbol,
         confirm: true,
       };
-
-      if (tokenAddress) {
-        body.tokenAddress = tokenAddress;
-      }
+      if (tokenAddress) body.tokenAddress = tokenAddress;
 
       const response = await walletActionFetch(
         `http://127.0.0.1:${WALLET_ACTION_API_PORT}/api/wallet/transfer/execute`,
@@ -158,9 +126,10 @@ export const transferTokenAction: Action = {
           string,
           string
         >;
-        const text = `Transfer failed on ${chain.toUpperCase()}: ${errBody.error ?? `HTTP ${response.status}`}`;
-        if (callback) callback({ text, action: "TRANSFER_TOKEN_FAILED" });
-        return { text, success: false };
+        return {
+          text: `Transfer failed on ${chain.toUpperCase()}: ${errBody.error ?? `HTTP ${response.status}`}`,
+          success: false,
+        };
       }
 
       const result = (await response.json()) as {
@@ -168,36 +137,28 @@ export const transferTokenAction: Action = {
         mode: string;
         executed: boolean;
         requiresUserSignature: boolean;
-        toAddress: string;
-        amount: string;
-        assetSymbol: string;
         unsignedTx?: Record<string, unknown>;
         execution?: {
           hash: string;
           explorerUrl: string;
           status: string;
-          blockNumber: number | null;
         };
         error?: string;
       };
 
       if (!result.ok) {
-        const text = `Transfer failed: ${result.error ?? "unknown error"}`;
-        if (callback) callback({ text, action: "TRANSFER_TOKEN_FAILED" });
-        return { text, success: false };
+        return {
+          text: `Transfer failed: ${result.error ?? "unknown error"}`,
+          success: false,
+        };
       }
 
-      // ── Build human-readable response ──────────────────────────────────
       if (result.executed && result.execution) {
-        const text =
+        return {
+          text:
             `Transfer executed successfully on ${chain.toUpperCase()}! Sent ${amountRaw} ${assetSymbol} to ${toAddress} via ${result.mode} mode.\n` +
             `TX: ${result.execution.explorerUrl}\n` +
-            `Status: ${result.execution.status}`;
-            
-        if (callback) callback({ text, action: "TRANSFER_TOKEN_SUCCESS" });
-        
-        return {
-          text,
+            `Status: ${result.execution.status}`,
           success: true,
           values: {
             chain,
@@ -218,19 +179,14 @@ export const transferTokenAction: Action = {
             txHash: result.execution.hash,
             explorerUrl: result.execution.explorerUrl,
             executed: true,
-          } as any,
+          },
         };
       }
 
-      // user-sign mode — transfer was prepared but not executed on-chain
-      const text =
-          `Transfer prepared in ${result.mode} mode. ` +
-          `A user signature is required to send ${amountRaw} ${assetSymbol} on ${chain.toUpperCase()} to ${toAddress}.`;
-          
-      if (callback) callback({ text, action: "TRANSFER_TOKEN_SUCCESS" });
-      
       return {
-        text,
+        text:
+          `Transfer prepared in ${result.mode} mode. ` +
+          `A user signature is required to send ${amountRaw} ${assetSymbol} on ${chain.toUpperCase()} to ${toAddress}.`,
         success: true,
         values: {
           chain,
@@ -250,15 +206,15 @@ export const transferTokenAction: Action = {
           requiresUserSignature: true,
           executed: false,
           unsignedTx: result.unsignedTx,
-        } as any,
+        },
       };
     } catch (err) {
-      const text = `Transfer failed: ${err instanceof Error ? err.message : String(err)}`;
-      if (callback) callback({ text, action: "TRANSFER_TOKEN_FAILED" });
-      return { text, success: false };
+      return {
+        text: `Transfer failed: ${err instanceof Error ? err.message : String(err)}`,
+        success: false,
+      };
     }
   },
-
   parameters: [
     {
       name: "toAddress",
@@ -268,21 +224,19 @@ export const transferTokenAction: Action = {
     },
     {
       name: "amount",
-      description:
-        'Human-readable transfer amount (e.g. "1.5" BNB, "100" USDT)',
+      description: "Human-readable transfer amount (e.g. 1.5 BNB, 100 USDT).",
       required: true,
       schema: { type: "string" as const },
     },
     {
       name: "assetSymbol",
-      description: 'Token symbol to transfer (e.g. "BNB", "USDT", "USDC")',
+      description: "Token symbol to transfer (e.g. BNB, USDT, USDC).",
       required: true,
       schema: { type: "string" as const },
     },
     {
       name: "tokenAddress",
-      description:
-        "Token contract address for custom tokens (optional, not needed for native BNB)",
+      description: "Token contract address for custom tokens (optional).",
       required: false,
       schema: { type: "string" as const },
     },
@@ -293,33 +247,4 @@ export const transferTokenAction: Action = {
       schema: { type: "string" as const },
     },
   ],
-
-  examples: [
-    [
-      {
-        name: "{{name1}}",
-        content: { text: "Send 1.5 BNB to 0x1234567890abcdef1234567890abcdef12345678" },
-      },
-      {
-        name: "{{agentName}}",
-        content: {
-          text: "I am initiating the transfer. Please wait while I broadcast the transaction.",
-          action: "TRANSFER_TOKEN",
-        },
-      },
-    ],
-    [
-      {
-        name: "{{name1}}",
-        content: { text: "Transfer 50 USDC on Solana to abcdefg..." },
-      },
-      {
-        name: "{{agentName}}",
-        content: {
-          text: "I'll submit the transfer instruction to the Solana network.",
-          actions: ["TRANSFER_TOKEN"],
-        },
-      },
-    ],
-  ] as ActionExample[][],
 };

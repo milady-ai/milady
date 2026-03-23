@@ -99,6 +99,8 @@ import {
 import {
   ensurePrivyWalletsForCustomUser,
   isPrivyWalletProvisioningEnabled,
+  privySendEvmTransaction,
+  resolvePrivyEvmWalletByCustomUserId,
 } from "../services/privy-wallets.js";
 import type { SandboxManager } from "../services/sandbox-manager.js";
 import {
@@ -3167,15 +3169,6 @@ async function generateChatResponse(
     responseText = text;
     opts?.onSnapshot?.(text);
   };
-  const claimStreamSource = (
-    source: Exclude<StreamSource, "unset">,
-  ): boolean => {
-    if (activeStreamSource === "unset") {
-      activeStreamSource = source;
-      return true;
-    }
-    return activeStreamSource === source;
-  };
   const appendIncomingText = (incoming: string): void => {
     const update = resolveStreamingUpdate(responseText, incoming);
     if (update.kind === "noop") return;
@@ -3240,7 +3233,9 @@ async function generateChatResponse(
 
         const chunk = extractCompatTextContent(content);
         if (!chunk) return [];
-        if (!claimStreamSource("callback")) return [];
+        if (activeStreamSource === "unset") {
+          activeStreamSource = "callback";
+        }
         appendIncomingText(chunk);
         return [];
       },
@@ -3251,7 +3246,10 @@ async function generateChatResponse(
                 throw new Error("client_disconnected");
               }
               if (!chunk) return;
-              if (!claimStreamSource("onStreamChunk")) return;
+              if (activeStreamSource === "callback") return;
+              if (activeStreamSource === "unset") {
+                activeStreamSource = "onStreamChunk";
+              }
               appendIncomingText(chunk);
             }
           : undefined,
@@ -5101,49 +5099,18 @@ function getInventoryProviderOptions(): Array<{
 }
 
 function ensureWalletKeysInEnvAndConfig(config: ElizaConfig): boolean {
-  const missingEvm =
-    typeof process.env.EVM_PRIVATE_KEY !== "string" ||
-    !process.env.EVM_PRIVATE_KEY.trim();
-  const missingSolana =
-    typeof process.env.SOLANA_PRIVATE_KEY !== "string" ||
-    !process.env.SOLANA_PRIVATE_KEY.trim();
-
-  if (!missingEvm && !missingSolana) {
-    return false;
+  // Promote keys from persisted config.env into process.env if not already set.
+  // This guards against edge cases where startup hydration ran but keys were
+  // subsequently cleared, or where this is called before hydration completes.
+  const persistedEnv = (config.env ?? {}) as Record<string, string>;
+  if (persistedEnv.EVM_PRIVATE_KEY?.trim() && !process.env.EVM_PRIVATE_KEY?.trim()) {
+    process.env.EVM_PRIVATE_KEY = persistedEnv.EVM_PRIVATE_KEY.trim();
+  }
+  if (persistedEnv.SOLANA_PRIVATE_KEY?.trim() && !process.env.SOLANA_PRIVATE_KEY?.trim()) {
+    process.env.SOLANA_PRIVATE_KEY = persistedEnv.SOLANA_PRIVATE_KEY.trim();
   }
 
-  try {
-    const walletKeys = generateWalletKeys();
-    if (
-      !config.env ||
-      typeof config.env !== "object" ||
-      Array.isArray(config.env)
-    ) {
-      config.env = {};
-    }
-    const envConfig = config.env as Record<string, string>;
-
-    if (missingEvm) {
-      envConfig.EVM_PRIVATE_KEY = walletKeys.evmPrivateKey;
-      process.env.EVM_PRIVATE_KEY = walletKeys.evmPrivateKey;
-      logger.info(`[eliza-api] Generated EVM wallet: ${walletKeys.evmAddress}`);
-    }
-
-    if (missingSolana) {
-      envConfig.SOLANA_PRIVATE_KEY = walletKeys.solanaPrivateKey;
-      process.env.SOLANA_PRIVATE_KEY = walletKeys.solanaPrivateKey;
-      logger.info(
-        `[eliza-api] Generated Solana wallet: ${walletKeys.solanaAddress}`,
-      );
-    }
-
-    return true;
-  } catch (err) {
-    logger.warn(
-      `[eliza-api] Failed to generate wallet keys: ${err instanceof Error ? err.message : String(err)}`,
-    );
-    return false;
-  }
+  return false;
 }
 
 // ---------------------------------------------------------------------------
@@ -5170,6 +5137,16 @@ export function resolveTradePermissionMode(
     raw === "agent-auto"
   ) {
     return raw;
+  }
+  // When a local EVM key or Privy agent wallet is configured, default to
+  // manual-local-key so chat-initiated transfers (isAgent=false) can execute
+  // without requiring the user to explicitly configure a permission mode.
+  if (
+    process.env.EVM_PRIVATE_KEY?.trim() ||
+    (isPrivyWalletProvisioningEnabled() &&
+      process.env.PRIVY_AGENT_USER_ID?.trim())
+  ) {
+    return "manual-local-key";
   }
   return "user-sign-only";
 }
@@ -12694,6 +12671,7 @@ async function handleRequest(
   // Execute or prepare a BNB/ERC-20 token transfer.
   if (method === "POST" && pathname === "/api/wallet/transfer/execute") {
     const body = await readJsonBody<{
+      chain?: string;
       toAddress?: string;
       amount?: string;
       assetSymbol?: string;
@@ -12711,6 +12689,14 @@ async function handleRequest(
       return;
     }
 
+    const chainRaw =
+      typeof body.chain === "string" ? body.chain.trim().toLowerCase() : "bsc";
+    const chain = chainRaw === "base" || chainRaw === "solana" ? chainRaw : "bsc";
+    const isSolana = chain === "solana";
+    const isBase = chain === "base";
+    const chainId = isBase ? 8453 : 56;
+    const explorerBase = isBase ? "https://basescan.org" : "https://bscscan.com";
+
     const tradePermissionMode = resolveTradePermissionMode(state.config);
     const isAgentRequest = isAgentAutomationRequest(req);
     const hasLocalKey = Boolean(process.env.EVM_PRIVATE_KEY?.trim());
@@ -12721,29 +12707,45 @@ async function handleRequest(
     const addrs = getWalletAddresses();
     const walletRpcReadiness = resolveWalletRpcReadiness(state.config);
 
+    const toAddressInput = body.toAddress.trim();
     let toAddress: string;
-    try {
-      toAddress = ethers.getAddress(body.toAddress.trim());
-    } catch {
-      error(res, "Invalid toAddress — must be a valid EVM address", 400);
-      return;
+    if (isSolana) {
+      const solanaAddressRe = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+      if (!solanaAddressRe.test(toAddressInput)) {
+        error(res, "Invalid toAddress - must be a valid Solana address", 400);
+        return;
+      }
+      toAddress = toAddressInput;
+    } else {
+      try {
+        toAddress = ethers.getAddress(toAddressInput);
+      } catch {
+        error(res, "Invalid toAddress - must be a valid EVM address", 400);
+        return;
+      }
     }
 
-    const isBnb = body.assetSymbol.toUpperCase() === "BNB";
+    const assetUpper = body.assetSymbol.toUpperCase();
+    const isNativeAsset =
+      assetUpper === "BNB" || assetUpper === "ETH" || assetUpper === "SOL";
 
-    // Fetch actual token decimals to avoid wrong amounts for USDC (6), USDT (6), etc.
     let decimals = 18;
-    if (body.tokenAddress) {
+    if (!isSolana && body.tokenAddress) {
+      const primaryRpc =
+        resolvePrimaryBscRpcUrl({
+          rpcUrls: isBase
+            ? walletRpcReadiness.baseRpcUrls
+            : walletRpcReadiness.bscRpcUrls,
+          cloudManagedAccess: walletRpcReadiness.cloudManagedAccess,
+        }) ??
+        (isBase
+          ? "https://base.publicnode.com/"
+          : "https://bsc-dataseed1.binance.org/");
       try {
         const tokenContract = new ethers.Contract(
           body.tokenAddress,
           ["function decimals() view returns (uint8)"],
-          new ethers.JsonRpcProvider(
-            resolvePrimaryBscRpcUrl({
-              rpcUrls: walletRpcReadiness.bscRpcUrls,
-              cloudManagedAccess: walletRpcReadiness.cloudManagedAccess,
-            }) ?? "https://bsc-dataseed1.binance.org/",
-          ),
+          new ethers.JsonRpcProvider(primaryRpc),
         );
         decimals = Number(await tokenContract.decimals());
       } catch {
@@ -12751,52 +12753,142 @@ async function handleRequest(
       }
     }
 
-    // Build unsigned transfer tx for user-sign mode
     const unsignedTx = {
-      chainId: 56,
-      from: addrs.evmAddress ?? null,
-      to: isBnb ? toAddress : (body.tokenAddress ?? toAddress),
-      data: isBnb
-        ? "0x"
-        : (() => {
-            const iface = new ethers.Interface([
-              "function transfer(address to, uint256 amount) returns (bool)",
-            ]);
-            return iface.encodeFunctionData("transfer", [
-              toAddress,
-              ethers.parseUnits(body.amount?.trim(), decimals),
-            ]);
-          })(),
-      valueWei: isBnb ? ethers.parseEther(body.amount.trim()).toString() : "0",
-      explorerUrl: "https://bscscan.com",
+      chain,
+      chainId: isSolana ? "solana" : chainId,
+      from: isSolana ? addrs.solanaAddress ?? null : addrs.evmAddress ?? null,
+      to: isNativeAsset || isSolana ? toAddress : (body.tokenAddress ?? toAddress),
+      data: isSolana
+        ? ""
+        : isNativeAsset
+          ? "0x"
+          : (() => {
+              const iface = new ethers.Interface([
+                "function transfer(address to, uint256 amount) returns (bool)",
+              ]);
+              return iface.encodeFunctionData("transfer", [
+                toAddress,
+                ethers.parseUnits(body.amount?.trim(), decimals),
+              ]);
+            })(),
+      valueWei:
+        isSolana || !isNativeAsset
+          ? "0"
+          : ethers.parseEther(body.amount.trim()).toString(),
+      explorerUrl: isSolana ? "https://solscan.io" : explorerBase,
       assetSymbol: body.assetSymbol,
       amount: body.amount.trim(),
       tokenAddress: body.tokenAddress,
     };
 
-    if (!hasLocalKey || !canExecuteLocally || body.confirm !== true) {
+    const privyAgentUserId = process.env.PRIVY_AGENT_USER_ID?.trim() || null;
+    const hasPrivyAgent = Boolean(
+      !isSolana &&
+        !hasLocalKey &&
+        isPrivyWalletProvisioningEnabled() &&
+        privyAgentUserId,
+    );
+
+    if (
+      isSolana ||
+      (!hasLocalKey && !hasPrivyAgent) ||
+      !canExecuteLocally ||
+      body.confirm !== true
+    ) {
       json(res, {
         ok: true,
-        mode: hasLocalKey && canExecuteLocally ? "local-key" : "user-sign",
+        mode:
+          isSolana ||
+          (!(hasLocalKey && canExecuteLocally) &&
+            !(hasPrivyAgent && canExecuteLocally))
+            ? "user-sign"
+            : "local-key",
         executed: false,
         requiresUserSignature: true,
+        chain,
         toAddress,
         amount: body.amount.trim(),
         assetSymbol: body.assetSymbol,
         tokenAddress: body.tokenAddress,
         unsignedTx,
+        ...(isSolana
+          ? {
+              note: "Solana local execution is not enabled yet; use user-sign flow.",
+            }
+          : {}),
       });
       return;
     }
 
-    // Execute locally
+    // ── Privy cloud signing ────────────────────────────────────────────
+    if (hasPrivyAgent) {
+      try {
+        const privyWallet = await resolvePrivyEvmWalletByCustomUserId(
+          privyAgentUserId!,
+        );
+        if (!privyWallet) {
+          error(
+            res,
+            "Privy EVM wallet not found for agent. Provision one via POST /api/privy/login.",
+            503,
+          );
+          return;
+        }
+
+        const valueHex = `0x${BigInt(unsignedTx.valueWei).toString(16)}`;
+        const txHash = await privySendEvmTransaction(privyWallet.id, {
+          from: privyWallet.address,
+          to: unsignedTx.to as string,
+          value: valueHex,
+          data: (unsignedTx.data as string) || "0x",
+          chainId,
+        });
+
+        json(res, {
+          ok: true,
+          mode: "privy",
+          executed: true,
+          requiresUserSignature: false,
+          chain,
+          toAddress,
+          amount: body.amount.trim(),
+          assetSymbol: body.assetSymbol,
+          tokenAddress: body.tokenAddress,
+          unsignedTx,
+          execution: {
+            hash: txHash,
+            nonce: null,
+            gasLimit: "0",
+            valueWei: unsignedTx.valueWei,
+            explorerUrl: `${explorerBase}/tx/${txHash}`,
+            blockNumber: null,
+            status: "pending",
+          },
+        });
+        return;
+      } catch (err) {
+        error(
+          res,
+          `Privy transfer failed: ${err instanceof Error ? err.message : String(err)}`,
+          500,
+        );
+        return;
+      }
+    }
+
     const rpcUrl = resolvePrimaryBscRpcUrl({
-      rpcUrls: walletRpcReadiness.bscRpcUrls,
+      rpcUrls: isBase
+        ? walletRpcReadiness.baseRpcUrls
+        : walletRpcReadiness.bscRpcUrls,
       cloudManagedAccess: walletRpcReadiness.cloudManagedAccess,
     });
 
     if (!rpcUrl) {
-      error(res, "BSC RPC not configured for local execution.", 503);
+      error(
+        res,
+        `${chain.toUpperCase()} RPC not configured for local execution.`,
+        503,
+      );
       return;
     }
 
@@ -12812,7 +12904,7 @@ async function handleRequest(
         to: unsignedTx.to,
         data: unsignedTx.data,
         value: BigInt(unsignedTx.valueWei),
-        chainId: unsignedTx.chainId,
+        chainId,
       };
 
       const txResponse = await wallet.sendTransaction(txReq);
@@ -12825,6 +12917,7 @@ async function handleRequest(
         mode: "local-key",
         executed: true,
         requiresUserSignature: false,
+        chain,
         toAddress,
         amount: body.amount.trim(),
         assetSymbol: body.assetSymbol,
@@ -12835,7 +12928,7 @@ async function handleRequest(
           nonce,
           gasLimit: txResponse.gasLimit?.toString() ?? "0",
           valueWei: unsignedTx.valueWei,
-          explorerUrl: `https://bscscan.com/tx/${txResponse.hash}`,
+          explorerUrl: `${explorerBase}/tx/${txResponse.hash}`,
           blockNumber: null,
           status: "pending",
         },
@@ -12853,7 +12946,7 @@ async function handleRequest(
     return;
   }
 
-  // ── POST /api/wallet/production-defaults ───────────────────────────────
+  // -- POST /api/wallet/production-defaults ───────────────────────────────
   // Apply opinionated production wallet configuration defaults.
   // Sets sensible BSC RPC and trade permission defaults when not already
   // configured.
@@ -16548,22 +16641,15 @@ export async function startApiServer(opts?: {
     "BIRDEYE_API_KEY",
     "SOLANA_RPC_URL",
   ] as const;
+  const walletKeys = new Set(["EVM_PRIVATE_KEY", "SOLANA_PRIVATE_KEY"]);
   for (const key of envKeysToHydrate) {
     const value = persistedEnv?.[key];
-    if (typeof value === "string" && value.trim() && !process.env[key]) {
-      process.env[key] = value.trim();
-    }
-  }
-
-  // Self-heal older configs where wallet keys were never provisioned
-  // (e.g. RPC/cloud configured outside onboarding).
-  if (ensureWalletKeysInEnvAndConfig(config)) {
-    try {
-      saveElizaConfig(config);
-    } catch (err) {
-      logger.warn(
-        `[eliza-api] Failed to persist generated wallet keys: ${err instanceof Error ? err.message : err}`,
-      );
+    if (typeof value === "string" && value.trim()) {
+      // Wallet keys always take precedence from config (overwrite any env default).
+      // Other keys only set if not already present.
+      if (walletKeys.has(key) || !process.env[key]) {
+        process.env[key] = value.trim();
+      }
     }
   }
 

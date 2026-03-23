@@ -1,8 +1,6 @@
 /**
  * Shared constants and helpers for wallet action handlers
  * (execute-trade, transfer-token, check-balance).
- *
- * @module actions/wallet-action-shared
  */
 
 /** API port for loopback wallet API calls. Shared across all wallet actions. */

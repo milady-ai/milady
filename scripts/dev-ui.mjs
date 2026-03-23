@@ -258,10 +258,10 @@ function resolveMiladyConfigPath() {
 
   const explicitStateDir = process.env.ELIZA_STATE_DIR?.trim();
   if (explicitStateDir) {
-    return path.join(path.resolve(explicitStateDir), "eliza.json");
+    return path.join(path.resolve(explicitStateDir), `${cliName}.json`);
   }
 
-  return path.join(os.homedir(), ".eliza", "eliza.json");
+  return path.join(os.homedir(), `.${cliName}`, `${cliName}.json`);
 }
 
 function loadMiladyConfigForDev() {
@@ -498,14 +498,18 @@ function createOnchainDevConfig({
     config.env && typeof config.env === "object" && !Array.isArray(config.env)
       ? { ...config.env }
       : {};
-  nextEnv.EVM_PRIVATE_KEY = evmPrivateKey;
+  // Only inject the Anvil test key if the user hasn't configured their own wallet.
+  // This avoids overwriting a real configured key with a public dev key.
+  // if (!nextEnv.EVM_PRIVATE_KEY) {
+  //   nextEnv.EVM_PRIVATE_KEY = evmPrivateKey;
+  // }
   if (solanaRpcUrl) {
     nextEnv.SOLANA_RPC_URL = solanaRpcUrl;
   }
   config.env = nextEnv;
 
-  const tempDir = mkdtempSync(path.join(os.tmpdir(), "eliza-dev-onchain-"));
-  const configPath = path.join(tempDir, "eliza.json");
+  const tempDir = mkdtempSync(path.join(os.tmpdir(), `${cliName}-dev-onchain-`));
+  const configPath = path.join(tempDir, `${cliName}.json`);
   writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`, "utf-8");
   return { configPath, tempDir };
 }
@@ -800,7 +804,6 @@ async function bootstrapOnchainDev() {
   return {
     env: {
       ELIZA_CONFIG_PATH: configPath,
-      EVM_PRIVATE_KEY: DEFAULT_EVM_DEV_PRIVATE_KEY,
       ELIZA_DEV_CHAIN_ID: String(ANVIL_CHAIN_ID),
       ELIZA_DEV_CHAIN_RPC: ANVIL_RPC_URL,
       ELIZA_DEV_REGISTRY_ADDRESS: registryAddress,

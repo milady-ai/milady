@@ -31,6 +31,11 @@ interface WalletExportRequestBody {
   exportToken?: string;
 }
 
+interface WalletExportPasswordBody {
+  password?: string;
+  persist?: boolean;
+}
+
 interface WalletExportRejectionLike {
   status: 401 | 403;
   reason: string;
@@ -50,6 +55,15 @@ const WALLET_CONFIG_COMPAT_KEYS = new Set([
   "BSC_RPC_URL",
   "SOLANA_RPC_URL",
 ]);
+
+const LOCAL_WALLET_PLACEHOLDER_RE =
+  /^\[?\s*(REDACTED|PLACEHOLDER|TODO|CHANGEME|EMPTY)\s*]?$/i;
+
+function hasNonPlaceholderSecret(value: string | undefined): boolean {
+  if (typeof value !== "string") return false;
+  const trimmed = value.trim();
+  return trimmed.length > 0 && !LOCAL_WALLET_PLACEHOLDER_RE.test(trimmed);
+}
 
 function resolveWalletConfigUpdateRequest(
   body: unknown,
@@ -263,13 +277,12 @@ export async function handleWalletRoutes(
     try {
       saveConfig(config);
     } catch (err) {
-      logger.warn(
-        `[api] Config save failed: ${String(err)}`,
-      );
+      logger.warn(`[api] Config save failed: ${String(err)}`);
     }
 
     json(res, {
       ok: true,
+      success: true,
       chain,
       address: result.address,
     });
@@ -319,9 +332,7 @@ export async function handleWalletRoutes(
     try {
       saveConfig(config);
     } catch (err) {
-      logger.warn(
-        `[api] Config save failed: ${String(err)}`,
-      );
+      logger.warn(`[api] Config save failed: ${String(err)}`);
     }
 
     json(res, { ok: true, wallets: generated });
@@ -367,6 +378,16 @@ export async function handleWalletRoutes(
       ],
       evmAddress: addresses.evmAddress,
       solanaAddress: addresses.solanaAddress,
+      localEvmKeyPresent: hasNonPlaceholderSecret(process.env.EVM_PRIVATE_KEY),
+      localSolanaKeyPresent: hasNonPlaceholderSecret(
+        process.env.SOLANA_PRIVATE_KEY,
+      ),
+      managedEvmAddressPresent: hasNonPlaceholderSecret(
+        process.env.ELIZA_MANAGED_EVM_ADDRESS,
+      ),
+      managedSolanaAddressPresent: hasNonPlaceholderSecret(
+        process.env.ELIZA_MANAGED_SOLANA_ADDRESS,
+      ),
     };
     json(res, configStatus);
     return true;
@@ -388,14 +409,10 @@ export async function handleWalletRoutes(
 
     applyWalletRpcConfigUpdate(config, updateRequest);
 
-    ensureWalletKeysInEnvAndConfig(config);
-
     try {
       saveConfig(config);
     } catch (err) {
-      logger.warn(
-        `[api] Config save failed: ${String(err)}`,
-      );
+      logger.warn(`[api] Config save failed: ${String(err)}`);
     }
 
     json(res, { ok: true });
@@ -428,6 +445,50 @@ export async function handleWalletRoutes(
         ? { privateKey: solanaKey, address: addresses.solanaAddress }
         : null,
     });
+    return true;
+  }
+
+  // GET /api/wallet/export-password/status
+  if (method === "GET" && pathname === "/api/wallet/export-password/status") {
+    const configured = Boolean(process.env.ELIZA_WALLET_EXPORT_TOKEN?.trim());
+    const persisted = Boolean(
+      (config.env as Record<string, unknown> | undefined)
+        ?.ELIZA_WALLET_EXPORT_TOKEN,
+    );
+    json(res, { configured, persisted });
+    return true;
+  }
+
+  // POST /api/wallet/export-password
+  if (method === "POST" && pathname === "/api/wallet/export-password") {
+    const body = await readJsonBody<WalletExportPasswordBody>(req, res);
+    if (!body) return true;
+
+    const password = body.password?.trim() ?? "";
+    if (password.length < 8) {
+      error(res, "Export password must be at least 8 characters.", 400);
+      return true;
+    }
+
+    process.env.ELIZA_WALLET_EXPORT_TOKEN = password;
+    const shouldPersist = body.persist !== false;
+
+    if (shouldPersist) {
+      if (!config.env) config.env = {};
+      (config.env as Record<string, string>).ELIZA_WALLET_EXPORT_TOKEN =
+        password;
+      try {
+        saveConfig(config);
+      } catch (err) {
+        logger.warn(
+          `[wallet] Failed to persist export password: ${String(err)}`,
+        );
+        json(res, { ok: true, persisted: false });
+        return true;
+      }
+    }
+
+    json(res, { ok: true, persisted: shouldPersist });
     return true;
   }
 

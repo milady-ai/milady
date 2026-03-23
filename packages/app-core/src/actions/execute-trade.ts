@@ -13,11 +13,12 @@
  * @module actions/execute-trade
  */
 
-import type { Action, HandlerOptions, IAgentRuntime } from "@elizaos/core";
+import type { Action, ActionExample, HandlerOptions, HandlerCallback, IAgentRuntime } from "@elizaos/core";
 import { logger } from "@elizaos/core";
 import {
   buildAuthHeaders,
   WALLET_ACTION_API_PORT,
+  walletActionFetch,
 } from "./wallet-action-shared.js";
 
 /** Timeout for the trade API call (includes on-chain confirmation). */
@@ -39,6 +40,46 @@ function isValidParam(val: unknown): val is string {
   );
 }
 
+// --- NEW TYPES AND HELPERS ---
+interface WalletTradeResponse {
+  success: boolean;
+  error?: string;
+  txHash?: string;
+  amountIn?: string;
+  amountOut?: number;
+  amountOutStr?: string;
+  explorerUrl?: string;
+  side: string;
+  mode: string;
+  tokenAddress: string;
+  executed: boolean;
+  requiresUserSignature: boolean;
+  unsignedTx?: Record<string, unknown>;
+  quote?: Record<string, unknown>;
+  execution?: {
+    hash: string;
+    explorerUrl: string;
+    status: string;
+    blockNumber: number | null;
+  };
+}
+
+function formatTradeSuccess(data: WalletTradeResponse): string {
+  if (data.executed && data.execution) {
+    return (
+      `Trade executed successfully! ${data.side.toUpperCase()} via ${data.mode} mode.\n` +
+      `TX: ${data.execution.explorerUrl}\n` +
+      `Status: ${data.execution.status}`
+    );
+  }
+  // user-sign mode — trade was quoted but not executed on-chain
+  return (
+    `Trade prepared in ${data.mode} mode. ` +
+    `A user signature is required to complete the ${data.side}.`
+  );
+}
+// --- END NEW TYPES AND HELPERS ---
+
 export const executeTradeAction: Action = {
   name: "EXECUTE_TRADE",
 
@@ -56,7 +97,7 @@ export const executeTradeAction: Action = {
     return Boolean(hasWallet);
   },
 
-  handler: async (_runtime, _message, _state, options) => {
+  handler: async (_runtime, _message, _state, options, callback?: HandlerCallback) => {
     try {
       const params = (options as HandlerOptions | undefined)?.parameters;
       logger.debug(
@@ -72,10 +113,9 @@ export const executeTradeAction: Action = {
         typeof rawSide === "string" ? rawSide.trim().toLowerCase() : undefined;
 
       if (side !== "buy" && side !== "sell") {
-        return {
-          text: 'I need a valid trade side ("buy" or "sell").',
-          success: false,
-        };
+        const text = 'I need a valid trade side ("buy" or "sell").';
+        if (callback) callback({ text, action: "EXECUTE_TRADE_FAILED" });
+        return { text, success: false };
       }
 
       // ── Resolve tokenAddress ─────────────────────────────────────────
@@ -86,10 +126,9 @@ export const executeTradeAction: Action = {
         typeof rawAddr === "string" ? rawAddr.trim() : undefined;
 
       if (!tokenAddress || !BSC_ADDRESS_RE.test(tokenAddress)) {
-        return {
-          text: "I need a valid BSC token contract address (0x-prefixed, 40 hex chars).",
-          success: false,
-        };
+        const text = "I need a valid BSC token contract address (0x-prefixed, 40 hex chars).";
+        if (callback) callback({ text, action: "EXECUTE_TRADE_FAILED" });
+        return { text, success: false };
       }
 
       // ── Resolve amount ───────────────────────────────────────────────
@@ -105,10 +144,9 @@ export const executeTradeAction: Action = {
         Number.isNaN(Number(amountRaw)) ||
         Number(amountRaw) <= 0
       ) {
-        return {
-          text: "I need a positive numeric amount for the trade.",
-          success: false,
-        };
+        const text = "I need a positive numeric amount for the trade.";
+        if (callback) callback({ text, action: "EXECUTE_TRADE_FAILED" });
+        return { text, success: false };
       }
 
       // ── Resolve slippageBps ──────────────────────────────────────────
@@ -121,10 +159,9 @@ export const executeTradeAction: Action = {
             : 300;
 
       if (Number.isNaN(slippageBps) || slippageBps < 0) {
-        return {
-          text: "slippageBps must be a non-negative number.",
-          success: false,
-        };
+        const text = "slippageBps must be a non-negative number.";
+        if (callback) callback({ text, action: "EXECUTE_TRADE_FAILED" });
+        return { text, success: false };
       }
 
       logger.debug(
@@ -132,7 +169,7 @@ export const executeTradeAction: Action = {
       );
 
       // ── POST to trade execution API ──────────────────────────────────
-      const response = await fetch(
+      const response = await walletActionFetch(
         `http://127.0.0.1:${WALLET_ACTION_API_PORT}/api/wallet/trade/execute`,
         {
           method: "POST",
@@ -153,94 +190,47 @@ export const executeTradeAction: Action = {
       );
 
       if (!response.ok) {
-        const body = (await response.json().catch(() => ({}))) as Record<
-          string,
-          string
-        >;
-        return {
-          text: `Trade failed: ${body.error ?? `HTTP ${response.status}`}`,
-          success: false,
-        };
+        let errMessage = `HTTP ${response.status}`;
+        try {
+          const errData = await response.json();
+          if (errData?.error) errMessage = errData.error;
+        } catch {
+          /* ignore json error */
+        }
+        const text = `Trade service failed: ${errMessage}`;
+        if (callback) callback({ text, action: "EXECUTE_TRADE_FAILED" });
+        return { text, success: false };
       }
 
-      const result = (await response.json()) as {
-        ok: boolean;
-        side: string;
-        mode: string;
-        quote?: Record<string, unknown>;
-        executed: boolean;
-        requiresUserSignature: boolean;
-        unsignedTx?: Record<string, unknown>;
-        execution?: {
-          hash: string;
-          explorerUrl: string;
-          status: string;
-          blockNumber: number | null;
-        };
-        error?: string;
-      };
-
-      logger.debug(
-        `[EXECUTE_TRADE] API response:`,
-        JSON.stringify({
-          ok: result.ok,
-          side: result.side,
-          mode: result.mode,
-          executed: result.executed,
-          requiresUserSignature: result.requiresUserSignature,
-          hasExecution: !!result.execution,
-          error: result.error,
-        }),
-      );
-
-      if (!result.ok) {
-        return {
-          text: `Trade failed: ${result.error ?? "unknown error"}`,
-          success: false,
-        };
+      const rawData = await response.json();
+      if (rawData.success !== true) {
+        const text = `Trade failed: ${rawData.error || "Unknown error"}`;
+        if (callback) callback({ text, action: "EXECUTE_TRADE_FAILED" });
+        return { text, success: false };
       }
 
-      // ── Build human-readable response ────────────────────────────────
-      if (result.executed && result.execution) {
-        return {
-          text:
-            `Trade executed successfully! ${side.toUpperCase()} via ${result.mode} mode.\n` +
-            `TX: ${result.execution.explorerUrl}\n` +
-            `Status: ${result.execution.status}`,
-          success: true,
-          data: {
-            side,
-            tokenAddress,
-            amount: amountRaw,
-            mode: result.mode,
-            txHash: result.execution.hash,
-            explorerUrl: result.execution.explorerUrl,
-            executed: true,
-          },
-        };
+      const data = rawData as WalletTradeResponse;
+      const text = formatTradeSuccess(data);
+
+      if (callback) {
+        callback({ text, action: "EXECUTE_TRADE_SUCCESS" });
       }
 
-      // user-sign mode — trade was quoted but not executed on-chain
       return {
-        text:
-          `Trade prepared in ${result.mode} mode. ` +
-          `A user signature is required to complete the ${side}.`,
+        text,
         success: true,
-        data: {
-          side,
-          tokenAddress,
-          amount: amountRaw,
-          mode: result.mode,
-          requiresUserSignature: true,
-          executed: false,
-          unsignedTx: result.unsignedTx,
+        values: {
+          txHash: data.txHash,
+          amountIn: data.amountIn,
+          amountOut: data.amountOutStr || String(data.amountOut),
+          explorerUrl: data.explorerUrl,
         },
+        data: data as any,
       };
     } catch (err) {
-      return {
-        text: `Trade failed: ${err instanceof Error ? err.message : String(err)}`,
-        success: false,
-      };
+      const text = `Trade execution failed: ${err instanceof Error ? err.message : String(err)}`;
+      if (callback) callback({ text, action: "EXECUTE_TRADE_FAILED" });
+      return { text, success: false };
     }
   },
 
@@ -272,4 +262,33 @@ export const executeTradeAction: Action = {
       schema: { type: "number" as const },
     },
   ],
+
+  examples: [
+    [
+      {
+        name: "{{name1}}",
+        content: { text: "Buy 0.1 BNB worth of CAKE on BSC" },
+      },
+      {
+        name: "{{agentName}}",
+        content: {
+          text: "I'll execute that buy order for you right now.",
+          action: "EXECUTE_TRADE",
+        },
+      },
+    ],
+    [
+      {
+        name: "{{name1}}",
+        content: { text: "Can you swap 100 USDC for WBNB?" },
+      },
+      {
+        name: "{{agentName}}",
+        content: {
+          text: "I am preparing the trade. Please wait a moment while I route this transaction.",
+          action: "EXECUTE_TRADE",
+        },
+      },
+    ],
+  ] as ActionExample[][],
 };

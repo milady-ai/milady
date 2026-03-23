@@ -52,7 +52,7 @@ describe("TRANSFER_TOKEN action", () => {
 
   it("has parameter definitions", () => {
     expect(transferTokenAction.parameters).toBeDefined();
-    expect(transferTokenAction.parameters?.length).toBe(4);
+    expect(transferTokenAction.parameters?.length).toBe(5);
 
     const names = transferTokenAction.parameters?.map((p) => p.name);
     expect(names).toContain("toAddress");
@@ -79,7 +79,22 @@ describe("TRANSFER_TOKEN action", () => {
     expect(result).toBe(true);
   });
 
-  it("validate returns true when PRIVY_APP_ID is set", async () => {
+  it("validate returns true when PRIVY_APP_ID and PRIVY_AGENT_USER_ID are set", async () => {
+    const mockRuntime = {
+      getSetting: (key: string) => {
+        if (key === "PRIVY_APP_ID") return "app-123";
+        if (key === "PRIVY_AGENT_USER_ID") return "milady-agent";
+        return undefined;
+      },
+    };
+    const result = await transferTokenAction.validate(
+      mockRuntime as never,
+      {} as never,
+    );
+    expect(result).toBe(true);
+  });
+
+  it("validate returns false when PRIVY_APP_ID is set but PRIVY_AGENT_USER_ID is missing", async () => {
     const mockRuntime = {
       getSetting: (key: string) =>
         key === "PRIVY_APP_ID" ? "app-123" : undefined,
@@ -88,7 +103,7 @@ describe("TRANSFER_TOKEN action", () => {
       mockRuntime as never,
       {} as never,
     );
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
   it("validate returns false when no wallet is configured", async () => {
@@ -298,11 +313,11 @@ describe("TRANSFER_TOKEN action", () => {
     // Verify fetch was called with correct args
     expect(mockFetch).toHaveBeenCalledOnce();
     const [url, opts] = mockFetch.mock.calls[0] as [string, RequestInit];
-    expect(url).toBe("http://127.0.0.1:2138/api/wallet/transfer/execute");
+    expect(url).toBe("http://127.0.0.1:31337/api/wallet/transfer/execute");
     expect(opts.method).toBe("POST");
     expect(
       (opts.headers as Record<string, string>)["X-Eliza-Agent-Action"],
-    ).toBe("1");
+    ).toBeUndefined();
     expect((opts.headers as Record<string, string>)["Content-Type"]).toBe(
       "application/json",
     );

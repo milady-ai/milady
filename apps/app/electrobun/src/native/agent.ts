@@ -72,6 +72,32 @@ const HEALTH_POLL_INTERVAL_MS = 500;
 const SIGTERM_GRACE_MS = 5_000;
 const WINDOWS_ABS_PATH_RE = /^[A-Za-z]:[\\/]/;
 const ELIZA_CONFIG_FILENAME = "eliza.json";
+const WALLET_ENV_KEYS = ["EVM_PRIVATE_KEY", "SOLANA_PRIVATE_KEY"] as const;
+
+export function allowInheritedWalletEnvKeys(
+  env: NodeJS.ProcessEnv = process.env,
+): boolean {
+  const raw = env.MILADY_ALLOW_INHERITED_WALLET_KEYS?.trim().toLowerCase();
+  return raw === "1" || raw === "true" || raw === "yes" || raw === "on";
+}
+
+export function stripInheritedWalletEnvKeys(
+  childEnv: Record<string, string>,
+  env: NodeJS.ProcessEnv = process.env,
+): string[] {
+  if (allowInheritedWalletEnvKeys(env)) {
+    return [];
+  }
+
+  const removed: string[] = [];
+  for (const key of WALLET_ENV_KEYS) {
+    if (childEnv[key]) {
+      delete childEnv[key];
+      removed.push(key);
+    }
+  }
+  return removed;
+}
 
 export function getHealthPollTimeoutMs(
   env: NodeJS.ProcessEnv = process.env,
@@ -868,6 +894,18 @@ export class AgentManager {
         ...(process.env as Record<string, string>),
         MILADY_PORT: String(apiPort),
       };
+
+      // Security hardening: wallet private keys must come from the active
+      // state/config flow (import/generate) and not from ambient parent env.
+      const removedWalletEnvKeys = stripInheritedWalletEnvKeys(
+        childEnv,
+        process.env,
+      );
+      for (const key of removedWalletEnvKeys) {
+        diagnosticLog(
+          `[Agent] Stripped inherited ${key} from child env (set MILADY_ALLOW_INHERITED_WALLET_KEYS=1 to opt in)`,
+        );
+      }
 
       // node-llama-cpp crashes Bun on Windows during packaged startup.
       // Disable local embeddings until upstream fix lands.

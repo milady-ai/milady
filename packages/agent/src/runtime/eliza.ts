@@ -434,10 +434,7 @@ async function waitForTrajectoryLoggerService(
       ? runtimeLike.getServiceRegistrationStatus("trajectory_logger")
       : "unknown";
 
-  if (
-    registrationStatus !== "pending" &&
-    registrationStatus !== "registering"
-  ) {
+  if (registrationStatus === "failed") {
     return;
   }
 

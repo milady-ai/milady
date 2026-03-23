@@ -661,7 +661,7 @@ describe("Wallet API E2E", () => {
   // ── Onboarding key generation ──────────────────────────────────────────
 
   describe("Wallet key generation during onboarding", () => {
-    it("generates keys when not present", async () => {
+    it("does not generate keys implicitly when not present", async () => {
       const savedEvm = process.env.EVM_PRIVATE_KEY;
       const savedSol = process.env.SOLANA_PRIVATE_KEY;
       delete process.env.EVM_PRIVATE_KEY;
@@ -676,16 +676,16 @@ describe("Wallet API E2E", () => {
           systemPrompt: "You are a test agent.",
         });
 
-        expect(process.env.EVM_PRIVATE_KEY).toBeDefined();
-        expect(process.env.SOLANA_PRIVATE_KEY).toBeDefined();
+        expect(process.env.EVM_PRIVATE_KEY).toBeUndefined();
+        expect(process.env.SOLANA_PRIVATE_KEY).toBeUndefined();
 
         const { data } = await req(
           freshServer.port,
           "GET",
           "/api/wallet/addresses",
         );
-        expect(data.evmAddress).toBeDefined();
-        expect(data.solanaAddress).toBeDefined();
+        expect(data.evmAddress).toBeNull();
+        expect(data.solanaAddress).toBeNull();
       } finally {
         await freshServer.close();
         if (savedEvm) process.env.EVM_PRIVATE_KEY = savedEvm;

@@ -66,11 +66,13 @@ import type {
   WalletBalancesResponse,
   WalletConfigStatus,
   WalletConfigUpdateRequest,
+  WalletImportResult,
   WalletNftsResponse,
   WalletRpcChain,
   WalletRpcCredentialKey,
   WalletRpcSelections,
   TradePermissionMode as WalletTradePermissionMode,
+  WalletChain,
   WalletTradingProfileResponse,
   WalletTradingProfileSourceFilter,
   WalletTradingProfileWindow,
@@ -139,8 +141,10 @@ export type {
   VisionProvider,
   WalletAddresses,
   WalletBalancesResponse,
+  WalletChain,
   WalletConfigStatus,
   WalletConfigUpdateRequest,
+  WalletImportResult,
   WalletNftsResponse,
   WalletRpcChain,
   WalletRpcCredentialKey,
@@ -279,6 +283,23 @@ export interface ApplyProductionWalletDefaultsResponse {
   tradePermissionMode: "user-sign-only";
   bscExecutionEnabled: false;
   clearedSecrets: string[];
+}
+
+export interface WalletGenerateResponse {
+  ok: boolean;
+  wallets: Array<{ chain: WalletChain; address: string }>;
+}
+
+export interface PrivyStatusResponse {
+  enabled: boolean;
+  configured: boolean;
+}
+
+export interface PrivyLoginResponse {
+  ok: boolean;
+  userId?: string;
+  evmAddress?: string | null;
+  solanaAddress?: string | null;
 }
 
 export interface AgentSelfStatusSnapshot {
@@ -1087,6 +1108,11 @@ export interface PluginInstallResult {
 export interface WalletExportResult {
   evm: { privateKey: string; address: string | null } | null;
   solana: { privateKey: string; address: string | null } | null;
+}
+
+export interface WalletExportPasswordStatus {
+  configured: boolean;
+  persisted: boolean;
 }
 
 // Software Updates
@@ -3366,6 +3392,52 @@ export class MiladyClient {
     return this.fetch("/api/wallet/export", {
       method: "POST",
       body: JSON.stringify({ confirm: true, exportToken }),
+    });
+  }
+  async generateWallet(
+    chain: "evm" | "solana" | "both" = "both",
+  ): Promise<WalletGenerateResponse> {
+    return this.fetch("/api/wallet/generate", {
+      method: "POST",
+      body: JSON.stringify({ chain }),
+    });
+  }
+  async importWallet(
+    privateKey: string,
+    chain?: WalletChain,
+  ): Promise<WalletImportResult> {
+    return this.fetch("/api/wallet/import", {
+      method: "POST",
+      body: JSON.stringify({
+        privateKey,
+        ...(chain ? { chain } : {}),
+      }),
+    });
+  }
+
+  async setWalletExportPassword(
+    password: string,
+    opts?: { persist?: boolean },
+  ): Promise<{ ok: boolean; persisted: boolean }> {
+    return this.fetch("/api/wallet/export-password", {
+      method: "POST",
+      body: JSON.stringify({
+        password,
+        persist: opts?.persist ?? true,
+      }),
+    });
+  }
+
+  async getWalletExportPasswordStatus(): Promise<WalletExportPasswordStatus> {
+    return this.fetch("/api/wallet/export-password/status");
+  }
+  async getPrivyStatus(): Promise<PrivyStatusResponse> {
+    return this.fetch("/api/privy/status");
+  }
+  async loginPrivy(userId: string): Promise<PrivyLoginResponse> {
+    return this.fetch("/api/privy/login", {
+      method: "POST",
+      body: JSON.stringify({ userId }),
     });
   }
 

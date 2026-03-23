@@ -276,12 +276,29 @@ function collectCandidates(
 function findCompatibleLogger(
   candidates: unknown[],
 ): TrajectoryLoggerApi | null {
-  for (const candidate of candidates) {
-    if (isRouteCompatibleTrajectoryLogger(candidate)) {
-      return candidate;
+  const compatible = candidates.filter(isRouteCompatibleTrajectoryLogger);
+  if (compatible.length === 0) return null;
+
+  const score = (logger: TrajectoryLoggerApi): number => {
+    const ctorName =
+      (logger as { constructor?: { name?: string } }).constructor?.name ?? "";
+    let points = 0;
+    // Prefer the DB-backed logger when multiple trajectory services are present.
+    if (ctorName === "DatabaseTrajectoryLogger") points += 100;
+    if (typeof (logger as { logLlmCall?: unknown }).logLlmCall === "function") {
+      points += 10;
     }
-  }
-  return null;
+    if (
+      typeof (logger as { getLlmCallLogs?: unknown }).getLlmCallLogs ===
+      "function"
+    ) {
+      points += 1;
+    }
+    return points;
+  };
+
+  compatible.sort((a, b) => score(b) - score(a));
+  return compatible[0] ?? null;
 }
 
 async function getTrajectoryLogger(
@@ -300,7 +317,7 @@ async function getTrajectoryLogger(
       : "unknown";
 
   if (
-    (status === "pending" || status === "registering") &&
+    status !== "failed" &&
     typeof runtimeLike.getServiceLoadPromise === "function"
   ) {
     try {

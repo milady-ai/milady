@@ -55,6 +55,11 @@ interface TrajectoriesViewProps {
   onSelectTrajectory?: (id: string) => void;
 }
 
+function formatTrajectoryId(id: string): string {
+  if (id.length <= 16) return id;
+  return `${id.slice(0, 8)}...${id.slice(-6)}`;
+}
+
 export function TrajectoriesView({
   onSelectTrajectory,
 }: TrajectoriesViewProps) {
@@ -184,6 +189,18 @@ export function TrajectoriesView({
     setSearchQuery("");
     setPage(0);
   };
+
+  const handleCopyTrajectoryId = useCallback(async (id: string) => {
+    try {
+      await navigator.clipboard.writeText(id);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to copy trajectory ID to clipboard.",
+      );
+    }
+  }, []);
 
   const hasActiveFilters =
     statusFilter !== "" || sourceFilter !== "" || searchQuery !== "";
@@ -415,6 +432,7 @@ export function TrajectoriesView({
                 <th className="text-left px-2 py-1.5 font-medium">
                   {t("trajectoriesview.Time")}
                 </th>
+                <th className="text-left px-2 py-1.5 font-medium">ID</th>
                 <th className="text-left px-2 py-1.5 font-medium">
                   {t("trajectoriesview.Source")}
                 </th>
@@ -446,6 +464,25 @@ export function TrajectoriesView({
                   >
                     <td className="px-2 py-1.5 text-muted whitespace-nowrap">
                       {formatTrajectoryTimestamp(traj.createdAt, "smart")}
+                    </td>
+                    <td className="px-2 py-1.5 font-mono">
+                      <div className="inline-flex items-center gap-1">
+                        <span title={traj.id}>{formatTrajectoryId(traj.id)}</span>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-5 px-1.5 py-0 text-[10px]"
+                          title="Copy trajectory ID"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            void handleCopyTrajectoryId(traj.id);
+                          }}
+                        >
+                          Copy
+                        </Button>
+                      </div>
                     </td>
                     <td className="px-2 py-1.5">
                       <span

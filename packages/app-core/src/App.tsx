@@ -404,7 +404,7 @@ export function App() {
   const agentStarting = agentStatus?.state === "starting";
 
   const showFullScreenLoader =
-    onboardingComplete && (onboardingLoading || agentStarting);
+    onboardingLoading || (onboardingComplete && agentStarting);
 
   const [startupElapsedSec, setStartupElapsedSec] = useState(0);
   useEffect(() => {

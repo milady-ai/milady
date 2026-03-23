@@ -105,6 +105,7 @@ function UploadZone({
   onFilesUpload,
   onUrlUpload,
   uploading,
+  uploadsBlocked,
   uploadStatus,
 }: {
   onFilesUpload: (
@@ -113,6 +114,7 @@ function UploadZone({
   ) => void;
   onUrlUpload: (url: string, options: KnowledgeUploadOptions) => void;
   uploading: boolean;
+  uploadsBlocked: boolean;
   uploadStatus: { current: number; total: number; filename: string } | null;
 }) {
   const { t } = useApp();
@@ -128,34 +130,34 @@ function UploadZone({
       e.preventDefault();
       setDragOver(false);
       const files = Array.from(e.dataTransfer.files) as KnowledgeUploadFile[];
-      if (files.length > 0 && !uploading) {
+      if (files.length > 0 && !uploading && !uploadsBlocked) {
         onFilesUpload(files, { includeImageDescriptions });
       }
     },
-    [includeImageDescriptions, onFilesUpload, uploading],
+    [includeImageDescriptions, onFilesUpload, uploading, uploadsBlocked],
   );
 
   const handleFileSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
-      if (files && files.length > 0 && !uploading) {
+      if (files && files.length > 0 && !uploading && !uploadsBlocked) {
         onFilesUpload(Array.from(files) as KnowledgeUploadFile[], {
           includeImageDescriptions,
         });
       }
       e.target.value = "";
     },
-    [includeImageDescriptions, onFilesUpload, uploading],
+    [includeImageDescriptions, onFilesUpload, uploading, uploadsBlocked],
   );
 
   const handleUrlSubmit = useCallback(() => {
     const url = urlInput.trim();
-    if (url && !uploading) {
+    if (url && !uploading && !uploadsBlocked) {
       onUrlUpload(url, { includeImageDescriptions });
       setUrlInput("");
       setShowUrlInput(false);
     }
-  }, [includeImageDescriptions, urlInput, uploading, onUrlUpload]);
+  }, [includeImageDescriptions, urlInput, uploading, uploadsBlocked, onUrlUpload]);
 
   return (
     <fieldset
@@ -182,7 +184,7 @@ function UploadZone({
           size="sm"
           className="h-10 px-4 text-[11px] font-semibold"
           onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
+          disabled={uploading || uploadsBlocked}
         >
           {t("knowledgeview.ChooseFiles")}
         </Button>
@@ -191,7 +193,7 @@ function UploadZone({
           size="sm"
           className="h-10 px-4 text-[11px] font-semibold hover:text-txt"
           onClick={() => setShowUrlInput(!showUrlInput)}
-          disabled={uploading}
+          disabled={uploading || uploadsBlocked}
         >
           {t("knowledgeview.AddFromURL")}
         </Button>
@@ -201,7 +203,7 @@ function UploadZone({
             onCheckedChange={(checked) =>
               setIncludeImageDescriptions(!!checked)
             }
-            disabled={uploading}
+            disabled={uploading || uploadsBlocked}
           />
           {t("knowledgeview.IncludeAIImageDes")}
         </label>
@@ -211,7 +213,7 @@ function UploadZone({
           dragOver
             ? "border-accent/50 bg-accent/5"
             : "border border-dashed border-border/30 bg-card/10"
-        } ${uploading ? "opacity-60" : ""}`}
+        } ${uploading || uploadsBlocked ? "opacity-60" : ""}`}
       >
         {(dragOver || uploading) && (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted/80">
@@ -225,7 +227,9 @@ function UploadZone({
 
         {!dragOver && !uploading && !showUrlInput && (
           <div className="text-[11px] text-muted/60 text-center py-0.5">
-            Drop files here to upload
+            {uploadsBlocked
+              ? "Knowledge service is loading. Uploads unlock automatically."
+              : "Drop files here to upload"}
           </div>
         )}
 
@@ -243,7 +247,7 @@ function UploadZone({
                 value={urlInput}
                 onChange={(e) => setUrlInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleUrlSubmit()}
-                disabled={uploading}
+                disabled={uploading || uploadsBlocked}
                 className="h-10 flex-1 bg-bg/60 border-border/50 text-xs shadow-none"
               />
               <Button
@@ -251,7 +255,7 @@ function UploadZone({
                 size="sm"
                 className="h-10 px-4 text-[11px] font-semibold"
                 onClick={handleUrlSubmit}
-                disabled={!urlInput.trim() || uploading}
+                disabled={!urlInput.trim() || uploading || uploadsBlocked}
               >
                 {t("settings.import")}
               </Button>
@@ -597,6 +601,17 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
   const [isServiceLoading, setIsServiceLoading] = useState(false);
   const serviceRetryRef = useRef(0);
 
+  const isKnowledgeServiceUnavailable = useCallback((err: unknown): boolean => {
+    const status = (err as { status?: number })?.status;
+    if (status !== 503) return false;
+    const message = err instanceof Error ? err.message.toLowerCase() : "";
+    return (
+      message.includes("knowledge service") ||
+      message.includes("service is still loading") ||
+      message.includes("service not available")
+    );
+  }, []);
+
   const loadData = useCallback(async () => {
     setLoading(true);
     setLoadError(null);
@@ -728,6 +743,15 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
 
   const handleFilesUpload = useCallback(
     async (files: KnowledgeUploadFile[], options: KnowledgeUploadOptions) => {
+      if (isServiceLoading) {
+        setActionNotice(
+          "Knowledge service is still loading. Please retry in a few seconds.",
+          "info",
+          3200,
+        );
+        return;
+      }
+
       const unsupportedFiles = files.filter(
         (file) => !isSupportedKnowledgeFile(file),
       );
@@ -769,6 +793,9 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
       let successful = 0;
 
       const normalizeUploadError = (err: unknown): string => {
+        if (isKnowledgeServiceUnavailable(err)) {
+          return "Knowledge service is still loading. Please retry shortly.";
+        }
         const message =
           err instanceof Error ? err.message : "Unknown upload error";
         const status = (err as Error & { status?: number })?.status;
@@ -835,6 +862,9 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
               }
             }
           } catch (err) {
+            if (isKnowledgeServiceUnavailable(err)) {
+              setIsServiceLoading(true);
+            }
             const message = normalizeUploadError(err);
             for (const batchItem of batchToUpload) {
               failures.push(`${batchItem.filename}: ${message}`);
@@ -927,11 +957,25 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
         setUploadStatus(null);
       }
     },
-    [buildKnowledgeUploadRequest, loadData, setActionNotice],
+    [
+      buildKnowledgeUploadRequest,
+      isKnowledgeServiceUnavailable,
+      isServiceLoading,
+      loadData,
+      setActionNotice,
+    ],
   );
 
   const handleUrlUpload = useCallback(
     async (url: string, options: KnowledgeUploadOptions) => {
+      if (isServiceLoading) {
+        setActionNotice(
+          "Knowledge service is still loading. Please retry in a few seconds.",
+          "info",
+          3200,
+        );
+        return;
+      }
       setUploading(true);
       try {
         const result = await client.uploadKnowledgeFromUrl(url, {
@@ -952,6 +996,9 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
         }
         loadData();
       } catch (err) {
+        if (isKnowledgeServiceUnavailable(err)) {
+          setIsServiceLoading(true);
+        }
         const message =
           err instanceof Error ? err.message : "Unknown import error";
         setActionNotice(`Failed to import from URL: ${message}`, "error", 5000);
@@ -959,7 +1006,7 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
         setUploading(false);
       }
     },
-    [loadData, setActionNotice],
+    [isKnowledgeServiceUnavailable, isServiceLoading, loadData, setActionNotice],
   );
 
   const handleSearch = useCallback(
@@ -1089,6 +1136,7 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
           onFilesUpload={handleFilesUpload}
           onUrlUpload={handleUrlUpload}
           uploading={uploading}
+          uploadsBlocked={isServiceLoading}
           uploadStatus={uploadStatus}
         />
       </div>

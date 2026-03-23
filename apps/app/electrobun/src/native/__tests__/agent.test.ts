@@ -11,11 +11,13 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 import {
+  allowInheritedWalletEnvKeys,
   configureDesktopLocalApiAuth,
   ensureDesktopApiToken,
   getMiladyDistFallbackCandidates,
   inspectExistingElizaInstall,
   resolveConfigDir,
+  stripInheritedWalletEnvKeys,
 } from "../agent";
 
 // ---------------------------------------------------------------------------
@@ -230,5 +232,49 @@ describe("inspectExistingElizaInstall", () => {
     expect(result.source).toBe("config-path-env");
 
     fs.rmSync(homeDir, { recursive: true, force: true });
+  });
+});
+
+describe("wallet env inheritance guard", () => {
+  it("blocks inherited wallet env keys by default", () => {
+    const env: NodeJS.ProcessEnv = {};
+    expect(allowInheritedWalletEnvKeys(env)).toBe(false);
+  });
+
+  it("allows inherited wallet env keys only when explicitly enabled", () => {
+    const env: NodeJS.ProcessEnv = {
+      MILADY_ALLOW_INHERITED_WALLET_KEYS: "1",
+    };
+    expect(allowInheritedWalletEnvKeys(env)).toBe(true);
+  });
+
+  it("strips inherited wallet keys from child env when not opted in", () => {
+    const childEnv: Record<string, string> = {
+      EVM_PRIVATE_KEY: "0xabc",
+      SOLANA_PRIVATE_KEY: "sol-key",
+      PATH: "C:\\Windows\\System32",
+    };
+
+    const removed = stripInheritedWalletEnvKeys(childEnv, {});
+
+    expect(removed).toEqual(["EVM_PRIVATE_KEY", "SOLANA_PRIVATE_KEY"]);
+    expect(childEnv.EVM_PRIVATE_KEY).toBeUndefined();
+    expect(childEnv.SOLANA_PRIVATE_KEY).toBeUndefined();
+    expect(childEnv.PATH).toBe("C:\\Windows\\System32");
+  });
+
+  it("keeps inherited wallet keys when explicitly opted in", () => {
+    const childEnv: Record<string, string> = {
+      EVM_PRIVATE_KEY: "0xabc",
+      SOLANA_PRIVATE_KEY: "sol-key",
+    };
+
+    const removed = stripInheritedWalletEnvKeys(childEnv, {
+      MILADY_ALLOW_INHERITED_WALLET_KEYS: "true",
+    });
+
+    expect(removed).toEqual([]);
+    expect(childEnv.EVM_PRIVATE_KEY).toBe("0xabc");
+    expect(childEnv.SOLANA_PRIVATE_KEY).toBe("sol-key");
   });
 });

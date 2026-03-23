@@ -299,6 +299,69 @@ function pickAddresses(wallets: PrivyWalletSummary[]): PrivyWalletAddresses {
   return { evmAddress, solanaAddress };
 }
 
+/**
+ * Look up a Privy user by custom auth ID and return their EVM wallet.
+ * Returns null if the user or EVM wallet does not exist (does not create anything).
+ */
+export async function resolvePrivyEvmWalletByCustomUserId(
+  customUserId: string,
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<PrivyWalletSummary | null> {
+  const config = assertPrivyConfig(env);
+  const user = await getUserByCustomAuthId(config, customUserId.trim());
+  if (!user) return null;
+  const wallets = await listUserWallets(config, user.id);
+  return wallets.find((w) => w.chain === "ethereum") ?? null;
+}
+
+/**
+ * Sign and broadcast an EVM transaction using a Privy server wallet.
+ * The wallet must already exist; use resolvePrivyEvmWalletByCustomUserId to get the wallet ID.
+ * Returns the transaction hash on success.
+ */
+export async function privySendEvmTransaction(
+  walletId: string,
+  tx: {
+    from: string;
+    to: string;
+    value: string; // hex-encoded (e.g. "0x0")
+    data: string; // hex-encoded (e.g. "0x")
+    chainId: number;
+  },
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<string> {
+  const config = assertPrivyConfig(env);
+  const caip2 = `eip155:${tx.chainId}`;
+
+  const result = await privyRequest<{
+    method?: string;
+    data?: { hash?: unknown };
+  }>(config, `/wallets/${encodeURIComponent(walletId)}/rpc`, {
+    method: "POST",
+    body: JSON.stringify({
+      method: "eth_sendTransaction",
+      params: [
+        {
+          from: tx.from,
+          to: tx.to,
+          value: tx.value,
+          data: tx.data,
+          chainId: `0x${tx.chainId.toString(16)}`,
+        },
+      ],
+      caip2,
+    }),
+  });
+
+  const hash = result?.data?.hash;
+  if (typeof hash !== "string" || !hash.startsWith("0x")) {
+    throw new Error(
+      "Privy sendTransaction returned an invalid or missing tx hash",
+    );
+  }
+  return hash;
+}
+
 export async function ensurePrivyWalletsForCustomUser(
   customUserId: string,
   chains: PrivyWalletChain[] = ["ethereum", "solana"],

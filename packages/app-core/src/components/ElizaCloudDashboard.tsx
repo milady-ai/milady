@@ -346,6 +346,7 @@ export function CloudDashboard() {
     loadDropStatus,
     walletAddresses,
     walletBalances,
+    loadBalances,
     retryStartup,
     setActionNotice,
     setState,
@@ -768,6 +769,7 @@ export function CloudDashboard() {
         setCryptoPayResult(
           `Submitted ${currency} payment: ${result.execution.hash}`,
         );
+        void loadBalances();
         setActionNotice(
           "Crypto payment submitted from the agent wallet.",
           "success",
@@ -792,7 +794,7 @@ export function CloudDashboard() {
     } finally {
       setCryptoPayBusy(false);
     }
-  }, [cryptoQuote, setActionNotice]);
+  }, [cryptoQuote, loadBalances, setActionNotice]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -815,6 +817,13 @@ export function CloudDashboard() {
       void fetchBillingData();
     }
   }, [fetchBillingData, fetchCloudAgents, loadDropStatus, elizaCloudConnected]);
+
+  useEffect(() => {
+    if (!elizaCloudConnected) return;
+    if (walletBalances) return;
+    if (!walletAddresses?.evmAddress && !walletAddresses?.solanaAddress) return;
+    void loadBalances();
+  }, [elizaCloudConnected, loadBalances, walletAddresses, walletBalances]);
 
   // Drop cached billing / agents when disconnected so we never show stale balances
   // after context clears credits (local state would otherwise outlive AppContext).

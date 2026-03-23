@@ -213,6 +213,10 @@ export interface WalletConfigStatus {
   evmChains: string[];
   evmAddress: string | null;
   solanaAddress: string | null;
+  localEvmKeyPresent?: boolean;
+  localSolanaKeyPresent?: boolean;
+  managedEvmAddressPresent?: boolean;
+  managedSolanaAddressPresent?: boolean;
 }
 
 export type TradePermissionMode =

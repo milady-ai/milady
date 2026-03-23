@@ -23,6 +23,8 @@ export const DEFAULT_PUBLIC_AVALANCHE_RPC_URLS = [
 ] as const;
 export const DEFAULT_PUBLIC_SOLANA_RPC_URLS = [
   "https://api.mainnet-beta.solana.com",
+  "https://solana-rpc.publicnode.com",
+  "https://rpc.ankr.com/solana",
 ] as const;
 
 type WalletCapableConfig = Pick<ElizaConfig, "cloud" | "env"> & {
@@ -386,7 +388,7 @@ export function resolveBscRpcUrls(
       process.env.BSC_RPC_URL,
       buildCloudEvmRpcUrl("bsc", options),
     ],
-    options.cloudManagedAccess ? DEFAULT_PUBLIC_BSC_RPC_URLS : [],
+    DEFAULT_PUBLIC_BSC_RPC_URLS,
   );
 }
 
@@ -395,7 +397,7 @@ export function resolveEthereumRpcUrls(
 ): string[] {
   return uniqueRpcUrls(
     [process.env.ETHEREUM_RPC_URL, buildCloudEvmRpcUrl("mainnet", options)],
-    options.cloudManagedAccess ? DEFAULT_PUBLIC_ETHEREUM_RPC_URLS : [],
+    DEFAULT_PUBLIC_ETHEREUM_RPC_URLS,
   );
 }
 
@@ -404,7 +406,7 @@ export function resolveBaseRpcUrls(
 ): string[] {
   return uniqueRpcUrls(
     [process.env.BASE_RPC_URL, buildCloudEvmRpcUrl("base", options)],
-    options.cloudManagedAccess ? DEFAULT_PUBLIC_BASE_RPC_URLS : [],
+    DEFAULT_PUBLIC_BASE_RPC_URLS,
   );
 }
 
@@ -413,7 +415,7 @@ export function resolveAvalancheRpcUrls(
 ): string[] {
   return uniqueRpcUrls(
     [process.env.AVALANCHE_RPC_URL, buildCloudEvmRpcUrl("avalanche", options)],
-    options.cloudManagedAccess ? DEFAULT_PUBLIC_AVALANCHE_RPC_URLS : [],
+    DEFAULT_PUBLIC_AVALANCHE_RPC_URLS,
   );
 }
 
@@ -422,7 +424,7 @@ export function resolveSolanaRpcUrls(
 ): string[] {
   return uniqueRpcUrls(
     [process.env.SOLANA_RPC_URL, buildCloudSolanaRpcUrl(options)],
-    options.cloudManagedAccess ? DEFAULT_PUBLIC_SOLANA_RPC_URLS : [],
+    DEFAULT_PUBLIC_SOLANA_RPC_URLS,
   );
 }
 

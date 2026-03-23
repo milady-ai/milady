@@ -151,6 +151,7 @@ import {
   loadCompanionVrmPowerMode,
   loadLastNativeTab,
   loadPersistedConnectionMode,
+  loadPersistedOnboardingComplete,
   loadPersistedOnboardingStep,
   loadUiTheme,
   mergeStreamingText,
@@ -1929,22 +1930,34 @@ function AppProviderInner({
   );
 
   const executeBscTrade = useCallback(
-    async (request: BscTradeExecuteRequest): Promise<BscTradeExecuteResponse> =>
-      client.executeBscTrade(request),
-    [],
+    async (request: BscTradeExecuteRequest): Promise<BscTradeExecuteResponse> => {
+      const result = await client.executeBscTrade(request);
+      // Keep wallet UI current after local executions.
+      if (result.executed) {
+        void loadBalances();
+      }
+      return result;
+    },
+    [loadBalances],
   );
 
   const executeBscTransfer = useCallback(
     async (
       request: BscTransferExecuteRequest,
-    ): Promise<BscTransferExecuteResponse> =>
-      client.executeBscTransfer(request),
-    [],
+    ): Promise<BscTransferExecuteResponse> => {
+      const result = await client.executeBscTransfer(request);
+      // Keep wallet UI current after local executions.
+      if (result.executed) {
+        void loadBalances();
+      }
+      return result;
+    },
+    [loadBalances],
   );
 
   const loadInventory = useCallback(async () => {
-    await loadWalletConfig();
-  }, [loadWalletConfig]);
+    await Promise.all([loadWalletConfig(), loadBalances()]);
+  }, [loadWalletConfig, loadBalances]);
 
   const loadCharacter = useCallback(async () => {
     setCharacterLoading(true);
@@ -4609,9 +4622,10 @@ function AppProviderInner({
     });
     if (!confirmed) return;
     const exportToken = await promptModal({
-      title: "Wallet Export Token",
-      message: "Enter your wallet export token (MILADY_WALLET_EXPORT_TOKEN):",
-      placeholder: "MILADY_WALLET_EXPORT_TOKEN",
+      title: "Wallet Export Password",
+      message:
+        "Enter your wallet export password (the one you set in Wallets).",
+      placeholder: "Wallet export password",
       confirmLabel: "Export",
       cancelLabel: "Cancel",
     });
@@ -6226,7 +6240,9 @@ function AppProviderInner({
       const restoredConnection =
         persistedConnection ??
         probedConnection?.connection ??
-        (shouldPreferLocalBootstrap ? { runMode: "local" } : null);
+        (shouldPreferLocalBootstrap || loadPersistedOnboardingComplete()
+          ? { runMode: "local" as const }
+          : null);
 
       setOnboardingExistingInstallDetected(
         Boolean(
@@ -6323,6 +6339,10 @@ function AppProviderInner({
           if (complete) {
             clearPersistedOnboardingStep();
             onboardingResumeConnectionRef.current = null;
+            // Persist connection mode so future restarts skip the probe
+            if (!persistedConnection && restoredConnection) {
+              savePersistedConnectionMode(restoredConnection);
+            }
           }
           setOnboardingComplete(sessionOnboardingComplete);
           onboardingNeedsOptions = !sessionOnboardingComplete;

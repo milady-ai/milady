@@ -1,0 +1,14 @@
+{
+  "verified": {
+    "0xaaaa": {
+      "timestamp": "2026-03-23T19:40:24.507Z",
+      "tweetUrl": "https://x.com/a/status/1",
+      "handle": "a"
+    },
+    "0xbbbb": {
+      "timestamp": "2026-03-23T19:40:24.513Z",
+      "tweetUrl": "https://x.com/b/status/2",
+      "handle": "b"
+    }
+  }
+}

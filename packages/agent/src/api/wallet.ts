@@ -87,6 +87,31 @@ export {
 const FETCH_TIMEOUT_MS = 15_000;
 export const MANAGED_EVM_ADDRESS_ENV_KEY = "ELIZA_MANAGED_EVM_ADDRESS";
 export const MANAGED_SOLANA_ADDRESS_ENV_KEY = "ELIZA_MANAGED_SOLANA_ADDRESS";
+const KNOWN_PUBLIC_TEST_EVM_PRIVATE_KEYS = new Set([
+  // Hardhat/Anvil default test keys (public, not safe for real funds).
+  "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+  "59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d",
+]);
+
+function normalizeEvmPrivateKeyForCompare(key: string): string {
+  const trimmed = key.trim();
+  return (trimmed.startsWith("0x") ? trimmed.slice(2) : trimmed).toLowerCase();
+}
+
+export function isKnownPublicTestEvmPrivateKey(key: string): boolean {
+  const normalized = normalizeEvmPrivateKeyForCompare(key);
+  return KNOWN_PUBLIC_TEST_EVM_PRIVATE_KEYS.has(normalized);
+}
+
+export function allowPublicTestWalletKeys(
+  env: NodeJS.ProcessEnv = process.env,
+): boolean {
+  if (env.NODE_ENV === "test") {
+    return true;
+  }
+  const raw = env.MILADY_ALLOW_PUBLIC_TEST_WALLET_KEYS?.trim().toLowerCase();
+  return raw === "1" || raw === "true" || raw === "yes" || raw === "on";
+}
 
 // ── EVM key derivation (secp256k1 via @noble/curves + keccak-256) ─────
 
@@ -324,6 +349,18 @@ export function importWallet(
 ): WalletImportResult {
   const trimmed = privateKey.trim();
   if (chain === "evm") {
+    if (
+      isKnownPublicTestEvmPrivateKey(trimmed) &&
+      !allowPublicTestWalletKeys()
+    ) {
+      return {
+        success: false,
+        chain,
+        address: null,
+        error:
+          "Public test/dev EVM private keys are blocked. Generate or import your own wallet key.",
+      };
+    }
     const v = validateEvmPrivateKey(trimmed);
     if (!v.valid)
       return { success: false, chain, address: null, error: v.error };

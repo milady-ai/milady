@@ -1,39 +1,23 @@
 /**
- * CHECK_BALANCE action — retrieves wallet balances across chains.
- *
- * When triggered the action:
- *   1. GETs wallet balances from the local API
- *   2. Optionally filters by chain (bsc, ethereum, base, solana)
- *   3. Formats a human-readable summary with addresses, native balances,
- *      USD values, and top token holdings
- *
- * All balance fetching logic is handled server-side — this action is a
- * thin wrapper that formats the response for the LLM.
- *
- * @module actions/check-balance
+ * CHECK_BALANCE action - retrieves wallet balances across chains.
  */
 
-import type { Action, ActionExample, HandlerOptions, HandlerCallback } from "@elizaos/core";
+import type { Action, HandlerOptions } from "@elizaos/core";
 import type {
   EvmChainBalance,
   WalletBalancesResponse,
-} from "@miladyai/shared/contracts";
+} from "../contracts/wallet";
 import {
   buildAuthHeaders,
   WALLET_ACTION_API_PORT,
   walletActionFetch,
-} from "./wallet-action-shared.js";
+} from "./wallet-action-shared";
 
-/** Timeout for the balance API call. */
 const BALANCE_TIMEOUT_MS = 10_000;
-
-/** Maximum token holdings to display per chain. */
 const MAX_TOKENS_PER_CHAIN = 10;
 
 const VALID_CHAINS = ["all", "bsc", "ethereum", "base", "solana"] as const;
 type ValidChain = (typeof VALID_CHAINS)[number];
-
-// ── Formatting helpers ──────────────────────────────────────────────────────
 
 function shortenAddress(address: string): string {
   if (address.length <= 10) return address;
@@ -105,13 +89,9 @@ function formatSolana(
   return lines.join("\n");
 }
 
-function formatBalances(
-  data: WalletBalancesResponse,
-  chain: ValidChain,
-): string {
+function formatBalances(data: WalletBalancesResponse, chain: ValidChain): string {
   const sections: string[] = [];
 
-  // EVM chains
   if (data.evm && chain !== "solana") {
     const chains =
       chain === "all"
@@ -123,7 +103,6 @@ function formatBalances(
     }
   }
 
-  // Solana
   if (data.solana && (chain === "all" || chain === "solana")) {
     sections.push(formatSolana(data.solana));
   }
@@ -138,11 +117,8 @@ function formatBalances(
   return `Wallet Balances:\n\n${sections.join("\n\n")}`;
 }
 
-// ── Action ──────────────────────────────────────────────────────────────────
-
 export const checkBalanceAction: Action = {
   name: "CHECK_BALANCE",
-
   similes: [
     "GET_BALANCE",
     "WALLET_BALANCE",
@@ -151,29 +127,20 @@ export const checkBalanceAction: Action = {
     "PORTFOLIO",
     "HOLDINGS",
   ],
-
   description:
-    "Check wallet balances across chains. Use this when a user asks about " +
-    "their balance, portfolio, holdings, or wallet contents. " +
-    "IMPORTANT: DO NOT hallucinate or guess the balance. ONLY use the data returned by this action AFTER it completes. Do not reply with a balance in the same turn as calling this action.",
-
+    "Check wallet balances across chains. Use this when a user asks about their balance, portfolio, holdings, or wallet contents.",
   validate: async () => true,
-
-  handler: async (_runtime, _message, _state, options, callback?: HandlerCallback) => {
+  handler: async (_runtime, _message, _state, options) => {
     try {
       const params = (options as HandlerOptions | undefined)?.parameters;
-
-      // ── Extract optional chain parameter ─────────────────────────────
       const rawChain =
         typeof params?.chain === "string"
           ? params.chain.trim().toLowerCase()
           : "all";
-
       const chain: ValidChain = VALID_CHAINS.includes(rawChain as ValidChain)
         ? (rawChain as ValidChain)
         : "all";
 
-      // ── Fetch balances from API ──────────────────────────────────────
       const response = await walletActionFetch(
         `http://127.0.0.1:${WALLET_ACTION_API_PORT}/api/wallet/balances`,
         {
@@ -185,24 +152,14 @@ export const checkBalanceAction: Action = {
       );
 
       if (!response.ok) {
-        const text = `Failed to fetch wallet balances (HTTP ${response.status}).`;
-        if (callback) {
-          callback({ text, action: "CHECK_BALANCE_FAILED" });
-        }
-        return { text, success: false };
+        return {
+          text: `Failed to fetch wallet balances (HTTP ${response.status}).`,
+          success: false,
+        };
       }
 
       const data = (await response.json()) as WalletBalancesResponse;
-
-      // ── Format and return ────────────────────────────────────────────
       const text = formatBalances(data, chain);
-
-      if (callback) {
-        callback({
-          text,
-          action: "CHECK_BALANCE_RESPONSE",
-        });
-      }
 
       return {
         text,
@@ -218,14 +175,12 @@ export const checkBalanceAction: Action = {
         },
       };
     } catch (err) {
-      const text = `Failed to fetch wallet balances: ${err instanceof Error ? err.message : String(err)}`;
-      if (callback) {
-        callback({ text, action: "CHECK_BALANCE_FAILED" });
-      }
-      return { text, success: false };
+      return {
+        text: `Failed to fetch wallet balances: ${err instanceof Error ? err.message : String(err)}`,
+        success: false,
+      };
     }
   },
-
   parameters: [
     {
       name: "chain",
@@ -235,33 +190,4 @@ export const checkBalanceAction: Action = {
       schema: { type: "string" as const },
     },
   ],
-
-  examples: [
-    [
-      {
-        name: "{{name1}}",
-        content: { text: "What's my solana balance?" },
-      },
-      {
-        name: "{{agentName}}",
-        content: {
-          text: "I'll fetch your Solana wallet balance right now.",
-          action: "CHECK_BALANCE",
-        },
-      },
-    ],
-    [
-      {
-        name: "{{name1}}",
-        content: { text: "Can you check my wallet holdings on all chains?" },
-      },
-      {
-        name: "{{agentName}}",
-        content: {
-          text: "Let me retrieve your portfolio and token holdings across all chains.",
-          action: "CHECK_BALANCE",
-        },
-      },
-    ],
-  ] as ActionExample[][],
 };
