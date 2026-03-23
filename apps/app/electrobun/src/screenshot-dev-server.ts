@@ -96,6 +96,16 @@ export function startScreenshotDevServer(): (() => void) | undefined {
     }
   });
 
+  server.on("error", (err: NodeJS.ErrnoException) => {
+    if (err.code === "EADDRINUSE") {
+      console.warn(
+        `[ScreenshotDev] Failed to start loopback server on 127.0.0.1:${port}: port in use — set MILADY_SCREENSHOT_SERVER_PORT to a free port or stop the other process`,
+      );
+    } else {
+      console.warn("[ScreenshotDev] Server error:", err.message);
+    }
+  });
+
   server.listen(port, "127.0.0.1", () => {
     console.log(
       `[ScreenshotDev] http://127.0.0.1:${port}/cursor-screenshot.png (loopback only` +
