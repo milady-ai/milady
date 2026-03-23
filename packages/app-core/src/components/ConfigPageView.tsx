@@ -18,6 +18,7 @@ import {
   type JsonSchemaObject,
 } from "../config";
 import { useApp } from "../state";
+import { useNavigation } from "../state/NavigationContext";
 import { useTranslation } from "../state/TranslationContext";
 import type { ConfigUiHint } from "../types";
 import {
@@ -69,7 +70,8 @@ function CloudRpcStatus({
   onLogin,
 }: CloudRpcStatusProps) {
   const { t } = useTranslation();
-  const { setState, setTab } = useApp();
+  const { setTab } = useNavigation();
+  const { setState } = useApp();
   if (connected) {
     return (
       <div className="flex items-center gap-2 text-xs">

@@ -10,7 +10,7 @@ import {
   type TrajectoryDetailResult,
   type TrajectoryLlmCall,
 } from "@miladyai/app-core/api";
-import { useApp } from "@miladyai/app-core/state";
+import { useLifecycle } from "@miladyai/app-core/state";
 import { useTranslation } from "../state/TranslationContext";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -65,7 +65,7 @@ function estimateCost(
 
 function CodeBlock({ content, label }: { content: string; label: string }) {
   const { t } = useTranslation();
-  const { copyToClipboard } = useApp();
+  const { copyToClipboard } = useLifecycle();
   const [expanded, setExpanded] = useState(false);
   const lines = content.split("\n").length;
   const shouldTruncate = !expanded && lines > 20;
