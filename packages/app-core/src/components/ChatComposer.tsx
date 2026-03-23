@@ -88,9 +88,9 @@ export function ChatComposer({
     ? t("chat.agentStarting")
     : voice.isListening
       ? voice.captureMode === "push-to-talk"
-        ? "Release to send..."
+        ? t("chat.releaseToSend")
         : !chatInput.trim()
-          ? "Listening..."
+          ? t("chat.listening")
           : t("chat.inputPlaceholder")
       : t("chat.inputPlaceholder");
 
@@ -209,7 +209,7 @@ export function ChatComposer({
               ? t("chat.agentStarting")
               : voice.isListening
                 ? voice.captureMode === "push-to-talk"
-                  ? "Release to send"
+                  ? t("chat.releaseToSend")
                   : t("chat.stopListening")
                 : t("chat.voiceInput")
           }
@@ -219,9 +219,9 @@ export function ChatComposer({
               ? t("chat.agentStarting")
               : voice.isListening
                 ? voice.captureMode === "push-to-talk"
-                  ? "Release to send"
+                  ? t("chat.releaseToSend")
                   : t("chat.stopListening")
-                : "Click to dictate. Hold to talk and send."
+                : t("chat.clickToDictate")
           }
           disabled={isComposerLocked}
         >

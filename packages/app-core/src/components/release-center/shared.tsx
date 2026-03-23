@@ -1,3 +1,5 @@
+import { formatDateTime } from "../format";
+
 export function summarizeError(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
@@ -11,11 +13,12 @@ export function normalizeReleaseNotesUrl(url?: string | null): string {
   }
 }
 
+/**
+ * Delegates to the canonical {@link formatDateTime} from `../format.ts`,
+ * preserving the original "Not yet" fallback used in release-center views.
+ */
 export function formatTimestamp(timestamp?: number | null): string {
-  if (!timestamp) {
-    return "Not yet";
-  }
-  return new Date(timestamp).toLocaleString();
+  return formatDateTime(timestamp, { fallback: "Not yet" });
 }
 
 export function StatusPill({

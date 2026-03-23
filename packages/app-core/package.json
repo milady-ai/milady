@@ -71,7 +71,6 @@
     "./styles/onboarding-game.css": "./src/styles/onboarding-game.css",
     "./styles/styles.css": "./src/styles/styles.css",
     "./shell": "./src/shell/index.ts",
-    "./styles/browser-surface.css": "./src/styles/browser-surface.css",
     "./styles/brand-gold.css": "./src/styles/brand-gold.css",
     "./character-catalog": "./src/character-catalog.ts"
   },
@@ -90,6 +89,7 @@
     "@miladyai/plugin-wechat": "workspace:*",
     "@lookingglass/webxr": "^0.6.0",
     "@miladyai/ui": "alpha",
+    "@miladyai/vrm-utils": "workspace:*",
     "@sparkjsdev/spark": "^0.1.10",
     "lucide-react": "^0.575.0",
     "three": "^0.182.0",

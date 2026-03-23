@@ -1,16 +1,7 @@
 import type { AgentRuntime } from "@elizaos/core";
 import { describe, expect, it, vi } from "vitest";
 import { installRuntimeMethodBindings } from "./eliza";
-
-function createDeferred<T>() {
-  let resolve!: (value: T | PromiseLike<T>) => void;
-  let reject!: (reason?: unknown) => void;
-  const promise = new Promise<T>((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-  return { promise, resolve, reject };
-}
+import { createDeferred } from "../../../../test/helpers/test-utils";
 
 describe("installRuntimeMethodBindings", () => {
   it("retries createComponent with room worldId after components/world FK violation", async () => {

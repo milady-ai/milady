@@ -35,7 +35,7 @@ import { useIntervalWhenDocumentVisible } from "../hooks/useDocumentVisibility";
 import { useApp } from "../state";
 import { openDesktopInAppBrowser, openExternalUrl } from "../utils";
 import { StripeEmbeddedCheckout } from "./StripeEmbeddedCheckout";
-import { Switch } from "./ui-switch";
+import { Switch } from "@miladyai/ui";
 
 const ELIZA_CLOUD_LOGIN_URL =
   "https://www.elizacloud.ai/login?returnTo=%2Fdashboard%2Feliza";
@@ -44,36 +44,37 @@ const ELIZA_CLOUD_INSTANCES_URL = "https://www.elizacloud.ai/dashboard/eliza";
 const ELIZA_CLOUD_WEB_URL = "https://elizacloud.ai";
 const BILLING_PRESET_AMOUNTS = [10, 25, 100];
 
-const STATUS_BADGE: Record<string, { label: string; className: string }> = {
+const STATUS_BADGE: Record<string, { i18nKey: string; className: string }> = {
   running: {
-    label: "Running",
+    i18nKey: "elizaclouddashboard.statusRunning",
     className: "bg-ok/10 text-ok border-ok/20",
   },
   queued: {
-    label: "Queued",
+    i18nKey: "elizaclouddashboard.statusQueued",
     className: "bg-warn/10 text-warn border-warn/20",
   },
   provisioning: {
-    label: "Provisioning",
+    i18nKey: "elizaclouddashboard.statusProvisioning",
     className: "bg-accent/10 text-txt border-accent/20",
   },
   stopped: {
-    label: "Stopped",
+    i18nKey: "elizaclouddashboard.statusStopped",
     className: "bg-muted/10 text-muted border-border/40",
   },
   failed: {
-    label: "Failed",
+    i18nKey: "elizaclouddashboard.statusFailed",
     className: "bg-danger/10 text-danger border-danger/20",
   },
 };
 
 function AgentStatusBadge({ status }: { status: string }) {
+  const { t } = useApp();
   const badge = STATUS_BADGE[status] ?? STATUS_BADGE.stopped;
   return (
     <span
       className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border ${badge?.className}`}
     >
-      {badge?.label}
+      {t(badge?.i18nKey)}
     </span>
   );
 }
@@ -93,6 +94,7 @@ function CloudAgentCard({
   onLaunch: (id: string) => void;
   onSelect?: (id: string) => void;
 }) {
+  const { t } = useApp();
   return (
     // biome-ignore lint/a11y/useSemanticElements: cannot use button due to nested buttons
     <div
@@ -111,7 +113,7 @@ function CloudAgentCard({
         <div className="flex items-center gap-2">
           <Server className="w-4 h-4 text-txt shrink-0" />
           <span className="font-bold text-sm text-txt-strong truncate max-w-[140px]">
-            {agent.agent_name || "Unnamed Agent"}
+            {agent.agent_name || t("elizaclouddashboard.unnamedAgent")}
           </span>
         </div>
         <AgentStatusBadge status={agent.status} />
@@ -119,13 +121,13 @@ function CloudAgentCard({
 
       <div className="text-[11px] text-muted space-y-1">
         <div className="flex justify-between">
-          <span>Node</span>
+          <span>{t("elizaclouddashboard.node")}</span>
           <span className="font-mono text-txt-strong/70">
             {agent.node_id?.slice(0, 8) ?? "—"}
           </span>
         </div>
         <div className="flex justify-between">
-          <span>Created</span>
+          <span>{t("elizaclouddashboard.created")}</span>
           <span className="text-txt-strong/70">
             {new Date(agent.created_at).toLocaleDateString()}
           </span>
@@ -148,13 +150,13 @@ function CloudAgentCard({
           ) : (
             <ExternalLink className="w-3 h-3 mr-1" />
           )}
-          Open
+          {t("elizaclouddashboard.open")}
         </Button>
 
         <Button
           variant="outline"
           size="sm"
-          className="settings-icon-button rounded-xl h-8 text-xs border-danger/30 text-danger hover:bg-danger/10"
+          className="px-0 rounded-xl h-8 text-xs border-danger/30 text-danger hover:bg-danger/10"
           onClick={(event) => {
             event.stopPropagation();
             onDelete(agent.agent_id);
@@ -927,13 +929,13 @@ export function CloudDashboard() {
         </Button>
         <p className="mt-4 text-xs text-muted/60">
           {t("elizaclouddashboard.NewToElizaCloud")}{" "}
-          <button
-            type="button"
-            className="text-txt underline hover:text-txt-hover transition-colors p-0 border-0 bg-transparent cursor-pointer font-inherit text-xs align-baseline"
+          <Button
+            variant="link"
+            className="p-0 h-auto font-inherit text-xs align-baseline"
             onClick={() => void handleLearnMoreElizaCloud()}
           >
             {t("elizaclouddashboard.LearnMore")}
-          </button>
+          </Button>
         </p>
       </div>
     );
@@ -1236,7 +1238,7 @@ export function CloudDashboard() {
               </div>
               <Switch
                 checked={autoTopUpEnabled}
-                onChange={(v) =>
+                onCheckedChange={(v) =>
                   dispatchAutoTopUpForm({ type: "setEnabled", value: v })
                 }
                 aria-label={t("elizaclouddashboard.ToggleAutoTopUp")}
@@ -1428,14 +1430,14 @@ export function CloudDashboard() {
                     </Button>
                   </div>
                 ) : (
-                  <button
-                    type="button"
-                    className="flex items-center gap-2 w-full py-3 text-xs text-muted hover:text-txt transition-colors"
+                  <Button
+                    variant="ghost"
+                    className="flex items-center gap-2 w-full py-3 text-xs text-muted hover:text-txt h-auto justify-start"
                     onClick={() => setShowDeployForm(true)}
                   >
                     <Plus className="w-4 h-4" />
                     {t("elizaclouddashboard.DeployNewAgent")}
-                  </button>
+                  </Button>
                 )}
               </div>
             )}
@@ -1552,13 +1554,14 @@ function AgentDetailSidebar({
         title={t("elizaclouddashboard.agentDetails")}
         className="border-accent/40 bg-accent/5 backdrop-blur-xl rounded-3xl shadow-sm relative overflow-hidden"
       >
-        <button
-          type="button"
-          className="absolute top-4 right-4 p-1 rounded-full hover:bg-bg/50 transition-colors text-muted hover:text-txt-strong"
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-4 right-4 p-1 rounded-full text-muted hover:text-txt-strong"
           onClick={onClose}
         >
           <X className="w-5 h-5" />
-        </button>
+        </Button>
 
         <div className="mt-4 space-y-4">
           <div className="grid grid-cols-2 gap-4">

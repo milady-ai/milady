@@ -1,50 +1,7 @@
-import http from "node:http";
 import type { AgentRuntime, UUID } from "@elizaos/core";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { req } from "../../../../test/helpers/http";
 import { startApiServer } from "./server";
-
-function req(
-  port: number,
-  method: string,
-  path: string,
-  body?: Record<string, unknown>,
-): Promise<{ status: number; data: Record<string, unknown> }> {
-  return new Promise((resolve, reject) => {
-    const payload = body ? JSON.stringify(body) : undefined;
-    const request = http.request(
-      {
-        hostname: "127.0.0.1",
-        port,
-        path,
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          ...(payload
-            ? { "Content-Length": String(Buffer.byteLength(payload)) }
-            : {}),
-        },
-      },
-      (response) => {
-        const chunks: Buffer[] = [];
-        response.on("data", (chunk: Buffer) => chunks.push(chunk));
-        response.on("end", () => {
-          const raw = Buffer.concat(chunks).toString("utf-8");
-          let data: Record<string, unknown> = {};
-          try {
-            data = JSON.parse(raw) as Record<string, unknown>;
-          } catch {
-            data = { _raw: raw };
-          }
-          resolve({ status: response.statusCode ?? 0, data });
-        });
-      },
-    );
-
-    request.on("error", reject);
-    if (payload) request.write(payload);
-    request.end();
-  });
-}
 
 describe("conversation message truncation route", () => {
   let port: number;

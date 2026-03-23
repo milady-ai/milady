@@ -133,7 +133,7 @@ export async function checkForUpdate(options?: {
   } catch (err) {
     // If config is unwritable the cache interval won't persist and the
     // registry gets queried on every startup — worth surfacing.
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = String(err);
     process.stderr.write(
       `[eliza] Warning: could not save update-check metadata: ${msg}\n`,
     );

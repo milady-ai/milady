@@ -7,6 +7,12 @@
 
 import React from "react";
 import { vi } from "vitest";
+import {
+  createMockStorage,
+  hasStorageApi,
+  installCanvasMocks,
+  suppressReactTestConsoleErrors,
+} from "../../../test/helpers/browser-mocks";
 
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean | undefined;
@@ -15,25 +21,7 @@ declare global {
 globalThis.React = React;
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
-const originalConsoleError = console.error.bind(console);
-
-function shouldIgnoreTestConsoleError(args: unknown[]): boolean {
-  const first = args[0];
-  return (
-    typeof first === "string" &&
-    (first.includes("react-test-renderer is deprecated") ||
-      first.includes(
-        "The current testing environment is not configured to support act(...)",
-      ))
-  );
-}
-
-console.error = (...args: unknown[]) => {
-  if (shouldIgnoreTestConsoleError(args)) {
-    return;
-  }
-  originalConsoleError(...args);
-};
+suppressReactTestConsoleErrors();
 
 // ---------------------------------------------------------------------------
 // Mock @miladyai/app-core bridge modules — the real electrobun RPC module
@@ -56,7 +44,8 @@ function isInjectedElectrobunRuntime(): boolean {
   );
 }
 
-vi.mock("@miladyai/app-core/bridge/electrobun-rpc.js", () => {
+// Shared bridge mock implementation — used by both module paths
+function createBridgeMock(extraExports: Record<string, unknown> = {}) {
   function getElectrobunRendererRpc() {
     if (typeof window === "undefined") return null;
     const w = window as unknown as Record<string, unknown>;
@@ -103,56 +92,16 @@ vi.mock("@miladyai/app-core/bridge/electrobun-rpc.js", () => {
     initializeCapacitorBridge: () => {},
     initializeStorageBridge: async () => {},
     ElectrobunRendererRpc: {},
+    ...extraExports,
   };
-});
+}
 
-vi.mock("@miladyai/app-core/bridge", () => {
-  function getElectrobunRendererRpc() {
-    if (typeof window === "undefined") return null;
-    const w = window as unknown as Record<string, unknown>;
-    return (
-      (w.__ELIZA_ELECTROBUN_RPC__ as unknown) ??
-      (w.__MILADY_ELECTROBUN_RPC__ as unknown) ??
-      null
-    );
-  }
+vi.mock("@miladyai/app-core/bridge/electrobun-rpc.js", () =>
+  createBridgeMock(),
+);
 
-  return {
-    getElectrobunRendererRpc,
-    isElectrobunRuntime: isInjectedElectrobunRuntime,
-    getBackendStartupTimeoutMs: () =>
-      isInjectedElectrobunRuntime() ? 180_000 : 30_000,
-    invokeDesktopBridgeRequest: async (options: {
-      rpcMethod: string;
-      params?: unknown;
-    }) => {
-      const rpc = getElectrobunRendererRpc() as Record<string, unknown> | null;
-      const request = (rpc?.request as RpcRequestMap)?.[options.rpcMethod];
-      if (request) return await request(options.params);
-      return null;
-    },
-    subscribeDesktopBridgeEvent: (options: {
-      rpcMessage: string;
-      listener: (payload: unknown) => void;
-    }) => {
-      const rpc = getElectrobunRendererRpc() as Record<string, unknown> | null;
-      if (rpc) {
-        (rpc.onMessage as RpcMessageHandler)(
-          options.rpcMessage,
-          options.listener,
-        );
-        return () => {
-          (rpc.offMessage as RpcMessageHandler)(
-            options.rpcMessage,
-            options.listener,
-          );
-        };
-      }
-      return () => {};
-    },
-    initializeCapacitorBridge: () => {},
-    initializeStorageBridge: async () => {},
-    ElectrobunRendererRpc: {},
+vi.mock("@miladyai/app-core/bridge", () =>
+  createBridgeMock({
     platform: "web",
     isWeb: () => true,
     isNative: false,
@@ -184,8 +133,8 @@ vi.mock("@miladyai/app-core/bridge", () => {
       };
       return map[feature] ?? false;
     },
-  };
-});
+  }),
+);
 
 // ---------------------------------------------------------------------------
 // Mock @capacitor/core
@@ -327,38 +276,6 @@ if (typeof globalThis.document === "undefined") {
   });
 }
 
-// Simple in-memory storage mock
-function createMockStorage(): Storage {
-  const store = new Map<string, string>();
-  return {
-    getItem: vi.fn((key: string) => store.get(key) ?? null),
-    setItem: vi.fn((key: string, value: string) => {
-      store.set(key, value);
-    }),
-    removeItem: vi.fn((key: string) => {
-      store.delete(key);
-    }),
-    clear: vi.fn(() => {
-      store.clear();
-    }),
-    get length() {
-      return store.size;
-    },
-    key: vi.fn((index: number) => [...store.keys()][index] ?? null),
-  } as Storage;
-}
-
-function hasStorageApi(value: unknown): value is Storage {
-  return Boolean(
-    value &&
-      typeof value === "object" &&
-      typeof (value as Storage).getItem === "function" &&
-      typeof (value as Storage).setItem === "function" &&
-      typeof (value as Storage).removeItem === "function" &&
-      typeof (value as Storage).clear === "function",
-  );
-}
-
 if (!hasStorageApi(globalThis.localStorage)) {
   Object.defineProperty(globalThis, "localStorage", {
     value: createMockStorage(),
@@ -419,61 +336,7 @@ if (typeof globalThis.window === "undefined") {
   }
 }
 
-if (typeof globalThis.HTMLCanvasElement !== "undefined") {
-  const createCanvas2DContext = (): CanvasRenderingContext2D =>
-    ({
-      fillRect: vi.fn(),
-      clearRect: vi.fn(),
-      getImageData: vi.fn(() => ({
-        data: new Uint8ClampedArray(0),
-        width: 0,
-        height: 0,
-      })),
-      putImageData: vi.fn(),
-      drawImage: vi.fn(),
-      beginPath: vi.fn(),
-      closePath: vi.fn(),
-      moveTo: vi.fn(),
-      lineTo: vi.fn(),
-      stroke: vi.fn(),
-      fill: vi.fn(),
-      arc: vi.fn(),
-      rect: vi.fn(),
-      save: vi.fn(),
-      restore: vi.fn(),
-      translate: vi.fn(),
-      rotate: vi.fn(),
-      scale: vi.fn(),
-      transform: vi.fn(),
-      setTransform: vi.fn(),
-      resetTransform: vi.fn(),
-      fillText: vi.fn(),
-      strokeText: vi.fn(),
-      measureText: vi.fn(() => ({ width: 0 })),
-      createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
-      createRadialGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
-      createPattern: vi.fn(() => null),
-      canvas: document.createElement("canvas"),
-      lineWidth: 1,
-      globalAlpha: 1,
-      fillStyle: "#000",
-      strokeStyle: "#000",
-    }) as CanvasRenderingContext2D;
-
-  Object.defineProperty(globalThis.HTMLCanvasElement.prototype, "getContext", {
-    value: vi.fn((contextType: string) =>
-      contextType === "2d" ? createCanvas2DContext() : null,
-    ),
-    writable: true,
-    configurable: true,
-  });
-
-  Object.defineProperty(globalThis.HTMLCanvasElement.prototype, "toDataURL", {
-    value: vi.fn(() => "data:image/png;base64,dGVzdA=="),
-    writable: true,
-    configurable: true,
-  });
-}
+installCanvasMocks();
 
 if (typeof globalThis.WebSocket === "undefined") {
   class MockWebSocket {

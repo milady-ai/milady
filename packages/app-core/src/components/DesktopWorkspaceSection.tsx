@@ -92,7 +92,7 @@ export const DESKTOP_WORKSPACE_CLICK_AUDIT: readonly DesktopClickAuditItem[] = [
   {
     id: "desktop-relaunch-app",
     entryPoint: "settings:desktop",
-    label: "Relaunch Milady",
+    label: "Relaunch app",
     expectedAction: "Relaunch the desktop shell.",
     runtimeRequirement: "desktop",
     coverage: "automated",
@@ -527,7 +527,7 @@ export function DesktopWorkspaceSection() {
                       rpcMethod: "desktopShowNotification",
                       ipcChannel: "desktop:showNotification",
                       params: {
-                        title: "Milady Desktop",
+                        title: "Desktop",
                         body: "Desktop workspace notification test.",
                         urgency: "normal",
                       },
@@ -568,7 +568,7 @@ export function DesktopWorkspaceSection() {
               }
               disabled={busyAction === "desktop-relaunch-app"}
             >
-              Relaunch Milady
+              Relaunch
             </Button>
             <Button
               variant="outline"

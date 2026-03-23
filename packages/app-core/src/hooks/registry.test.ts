@@ -8,7 +8,6 @@
  * - createHookEvent (factory for HookEvent objects)
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
-
 import {
   clearHooks,
   createHookEvent,

@@ -758,7 +758,7 @@ export async function startBenchmarkServer() {
             }),
           );
         } catch (err: unknown) {
-          const errorMessage = err instanceof Error ? err.message : String(err);
+          const errorMessage = String(err);
           elizaLogger.error(`[bench] Reset error: ${formatUnknownError(err)}`);
           res.writeHead(500, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ error: errorMessage }));

@@ -270,58 +270,42 @@ async function ethCall(
 }
 
 async function readWrappedNativeAddress(rpcUrls: string[]): Promise<string> {
-  try {
-    const encoded = ROUTER_IFACE.encodeFunctionData("WETH", []);
-    const call = await ethCall(rpcUrls, PANCAKE_SWAP_V2_ROUTER, encoded);
-    const decoded = ROUTER_IFACE.decodeFunctionResult("WETH", call.result);
-    const wrappedNative = decoded[0];
-    if (typeof wrappedNative !== "string" || !wrappedNative) {
-      throw new Error("Router WETH() returned an invalid address.");
-    }
-    return ethers.getAddress(wrappedNative);
-  } catch (err) {
-    logger.warn(
-      `[bsc-trade] failed to read router WETH(), falling back to WBNB constant: ${
-        err instanceof Error ? err.message : String(err)
-      }`,
-    );
-    return BSC_WBNB_FALLBACK;
+  const encoded = ROUTER_IFACE.encodeFunctionData("WETH", []);
+  const call = await ethCall(rpcUrls, PANCAKE_SWAP_V2_ROUTER, encoded);
+  const decoded = ROUTER_IFACE.decodeFunctionResult("WETH", call.result);
+  const wrappedNative = decoded[0];
+  
+  if (typeof wrappedNative !== "string" || !wrappedNative) {
+    throw new Error("Router WETH() returned an invalid address.");
   }
+  
+  return ethers.getAddress(wrappedNative);
 }
 
-export async function readTokenDecimals(
-  rpcUrls: string[],
-  tokenAddress: string,
-): Promise<number> {
-  try {
-    const encoded = ERC20_IFACE.encodeFunctionData("decimals", []);
-    const call = await ethCall(rpcUrls, tokenAddress, encoded);
-    const decoded = ERC20_IFACE.decodeFunctionResult("decimals", call.result);
-    const decimals = decoded[0];
-    if (typeof decimals !== "bigint") return 18;
-    const parsed = Number(decimals);
-    if (!Number.isFinite(parsed) || parsed < 0) return 18;
-    return parsed;
-  } catch {
-    return 18;
-  }
+export async function readTokenDecimals(rpcUrls: string[], tokenAddress: string): Promise<number> {
+  const encoded = ERC20_IFACE.encodeFunctionData("decimals", []);
+  const call = await ethCall(rpcUrls, tokenAddress, encoded);
+  const decoded = ERC20_IFACE.decodeFunctionResult("decimals", call.result);
+  const decimals = decoded[0];
+  
+  if (typeof decimals !== "bigint") return 18;
+  
+  const parsed = Number(decimals);
+  if (!Number.isFinite(parsed) || parsed < 0) return 18;
+  
+  return parsed;
 }
 
-async function readTokenSymbol(
-  rpcUrls: string[],
-  tokenAddress: string,
-): Promise<string> {
-  try {
-    const encoded = ERC20_IFACE.encodeFunctionData("symbol", []);
-    const call = await ethCall(rpcUrls, tokenAddress, encoded);
-    const decoded = ERC20_IFACE.decodeFunctionResult("symbol", call.result);
-    const symbol = decoded[0];
-    if (typeof symbol === "string" && symbol.trim()) {
-      return symbol.trim().slice(0, 16);
-    }
-  } catch {
-    // Ignore and fall back to a deterministic symbol-like label.
+async function readTokenSymbol(rpcUrls: string[], tokenAddress: string): Promise<string> {
+  const encoded = ERC20_IFACE.encodeFunctionData("symbol", []);
+  const call = await ethCall(rpcUrls, tokenAddress, encoded);
+  const decoded = ERC20_IFACE.decodeFunctionResult("symbol", call.result);
+  const symbol = decoded[0];
+  
+  if (typeof symbol === "string" && symbol.trim()) {
+    return symbol.trim().slice(0, 16);
   }
+  
   return `TKN-${tokenAddress.slice(2, 6).toUpperCase()}`;
 }
 

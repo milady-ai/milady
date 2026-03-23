@@ -1,43 +1,7 @@
-/**
- * GpuWindow Native Module for Electrobun
- *
- * Manages floating always-on-top companion windows backed by native GPU
- * surfaces (GpuWindow + WGPUView) using Electrobun's bundled Dawn WebGPU.
- *
- * Each GpuWindow automatically gets a full-coverage WGPUView at construction.
- * The renderer can trigger creation/destruction/resize via RPC. The native
- * handle exposed by WGPUView.getNativeHandle() can be passed to a WGPU
- * render loop on the Bun side for CPU→GPU avatar compositing outside the
- * main webview.
- *
- * Lifecycle:
- *   gpuWindowCreate  → creates GpuWindow (always-on-top, transparent)
- *   gpuWindowShow    → focuses/shows the window
- *   gpuWindowHide    → minimizes the window
- *   gpuWindowSetBounds → repositions/resizes and syncs the WGPUView frame
- *   gpuWindowDestroy → closes window and removes WGPUView
- *   gpuWindowGetInfo → returns current id, frame, and wgpuViewId
- *
- * WGPUView (in main window):
- *   gpuViewCreate    → adds a WGPUView to the main BrowserWindow at a given frame
- *   gpuViewSetFrame  → resizes the WGPUView (call when companion area changes)
- *   gpuViewSetTransparent → makes the view background transparent/opaque
- *   gpuViewSetHidden → show/hide without destroying
- *   gpuViewGetNativeHandle → returns the native Metal/D3D12 layer handle
- *   gpuViewDestroy   → removes the WGPUView
- *
- * Push events:
- *   gpuWindowClosed  → fired by the native close event (Bun → webview)
- */
-
 import { GpuWindow, WGPUView } from "electrobun/bun";
 import type { GpuViewInfo, GpuWindowInfo, WindowBounds } from "../rpc-schema";
 
 type SendToWebview = (message: string, payload?: unknown) => void;
-
-// ============================================================================
-// GpuWindowManager
-// ============================================================================
 
 export class GpuWindowManager {
   private sendToWebview: SendToWebview | null = null;
@@ -48,10 +12,6 @@ export class GpuWindowManager {
   setSendToWebview(fn: SendToWebview): void {
     this.sendToWebview = fn;
   }
-
-  // --------------------------------------------------------------------------
-  // GpuWindow — floating companion window
-  // --------------------------------------------------------------------------
 
   /**
    * Create a floating GPU-accelerated companion window.
@@ -170,10 +130,6 @@ export class GpuWindowManager {
     return { windows };
   }
 
-  // --------------------------------------------------------------------------
-  // WGPUView — GPU surface inside an existing BrowserWindow
-  // --------------------------------------------------------------------------
-
   /**
    * Attach a WGPUView to the main BrowserWindow at the given frame.
    * This lets the Bun side render GPU content inside the companion UI
@@ -266,10 +222,6 @@ export class GpuWindowManager {
     }
     return { views };
   }
-
-  // --------------------------------------------------------------------------
-  // Lifecycle
-  // --------------------------------------------------------------------------
 
   dispose(): void {
     for (const [id, win] of this.gpuWindows.entries()) {

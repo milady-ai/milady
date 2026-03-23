@@ -45,52 +45,33 @@ export const emoteAction: Action = {
   },
 
   handler: async (_runtime, _message, _state, options) => {
-    try {
-      type EmoteParams = { emote?: string };
-      const params = (options as HandlerOptions | undefined)?.parameters as
-        | EmoteParams
-        | undefined;
-      const emoteId =
-        typeof params?.emote === "string" ? params.emote.trim() : "";
+    const params = (options as HandlerOptions | undefined)?.parameters as
+      | { emote?: string }
+      | undefined;
+    const emoteId = params?.emote?.trim();
 
-      if (!emoteId) {
-        return { text: "", success: false };
-      }
+    if (!emoteId) return { text: "", success: false };
 
-      // Look up the emote in the catalog.
-      const emote = AGENT_EMOTE_BY_ID.get(emoteId);
-      if (!emote) {
-        return {
-          text: "",
-          success: false,
-        };
-      }
+    // Look up the emote in the catalog.
+    const emote = AGENT_EMOTE_BY_ID.get(emoteId);
+    if (!emote) return { text: "", success: false };
 
-      // POST to the local API server to trigger the emote.
-      const response = await fetch(`http://localhost:${API_PORT}/api/emote`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ emoteId: emote.id }),
-      });
+    // POST to the local API server to trigger the emote.
+    const response = await fetch(`http://localhost:${API_PORT}/api/emote`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ emoteId: emote.id }),
+    });
 
-      if (!response.ok) {
-        return {
-          text: "",
-          success: false,
-        };
-      }
-
-      return {
-        text: "",
-        success: true,
-        data: { emoteId: emote.id },
-      };
-    } catch {
-      return {
-        text: "",
-        success: false,
-      };
+    if (!response.ok) {
+      throw new Error(`Request to /api/emote failed with HTTP ${response.status}`);
     }
+
+    return {
+      text: "",
+      success: true,
+      data: { emoteId: emote.id },
+    };
   },
 
   parameters: [

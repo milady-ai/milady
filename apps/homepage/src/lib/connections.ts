@@ -14,7 +14,11 @@ export function getConnections(): StoredConnection[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
-  } catch {
+  } catch (err) {
+    console.warn(
+      "[connections] Failed to load connections from localStorage:",
+      err,
+    );
     return [];
   }
 }

@@ -67,91 +67,24 @@ export async function wireCoordinatorBridgesWhenReady<S extends WirableState>(
     swarmSynthesis: false,
   };
 
-  try {
-    // 1. Immediate attempt
-    result.chat = await wireChatBridge(state);
-    result.ws = await wireWsBridge(state);
-    result.eventRouting = await wireEventRouting(state);
-    result.swarmSynthesis = wireSwarmSynthesis
-      ? await wireSwarmSynthesis(state)
-      : false;
+  result.chat = await wireChatBridge(state);
+  result.ws = await wireWsBridge(state);
+  result.eventRouting = await wireEventRouting(state);
+  result.swarmSynthesis = wireSwarmSynthesis
+    ? await wireSwarmSynthesis(state)
+    : false;
 
-    if (result.chat && result.ws && result.eventRouting) {
-      logger.debug?.(
-        `[eliza-api] Coordinator bridges wired immediately (${context})`,
-      );
-      return result;
-    }
-
-    // 2. Poll for SWARM_COORDINATOR service to appear
-    const runtime = state.runtime;
-    if (!runtime) {
-      logger.warn(
-        `[eliza-api] Coordinator wiring skipped (${context}): no runtime`,
-      );
-      return result;
-    }
-
-    const deadline = Date.now() + POLL_TIMEOUT_MS;
-    let serviceFound = false;
-
-    while (Date.now() < deadline) {
-      await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
-
-      const svc = runtime.getService("SWARM_COORDINATOR");
-      if (svc) {
-        serviceFound = true;
-        logger.debug?.(
-          `[eliza-api] SWARM_COORDINATOR service detected (${context})`,
-        );
-        break;
-      }
-    }
-
-    if (!serviceFound) {
-      // Service never appeared — log at debug level only. This is normal
-      // if the orchestrator plugin is disabled or not configured.
-      logger.debug?.(
-        `[eliza-api] SWARM_COORDINATOR not available after ${POLL_TIMEOUT_MS / 1000}s (${context}) — coding agent features disabled`,
-      );
-      return result;
-    }
-
-    // 3. Service loaded — retry failed bridges
-    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      if (!result.chat) result.chat = await wireChatBridge(state);
-      if (!result.ws) result.ws = await wireWsBridge(state);
-      if (!result.eventRouting)
-        result.eventRouting = await wireEventRouting(state);
-      if (!result.swarmSynthesis && wireSwarmSynthesis)
-        result.swarmSynthesis = await wireSwarmSynthesis(state);
-
-      if (result.chat && result.ws && result.eventRouting) {
-        logger.debug?.(
-          `[eliza-api] Coordinator bridges wired after service load (${context}, attempt ${attempt + 1})`,
-        );
-        return result;
-      }
-
-      // Brief delay before next retry
-      await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
-    }
-
-    // 4. Exhausted retries after service load — this is a real problem
+  if (result.chat && result.ws && result.eventRouting) {
+    logger.debug?.(
+      `[eliza-api] Coordinator bridges wired immediately (${context})`,
+    );
+  } else {
     broadcastWarning(
       state,
       result,
       context,
-      "retries exhausted after service load",
+      "bridges failed to wire immediately",
       !!wireSwarmSynthesis,
-    );
-    logger.warn(
-      `[eliza-api] Coordinator wiring incomplete after ${MAX_RETRIES} retries (${context})`,
-    );
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    logger.warn(
-      `[eliza-api] Coordinator wiring error (${context}): ${message}`,
     );
   }
 

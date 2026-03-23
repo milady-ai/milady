@@ -120,75 +120,13 @@ export async function handleCloudCompatRoute(
   const upstreamUrl = `${baseUrl}${compatPath}${queryString}`;
   const headers = buildAuthHeaders(state.config);
 
-  try {
     let body: string | undefined;
     if (method !== "GET" && method !== "HEAD") {
       body = await readBody(req);
     }
 
-    let upstreamRes: Response;
-    try {
-      upstreamRes = await fetchUpstream(upstreamUrl, method, headers, body);
-    } catch (firstErr) {
-      if (
-        firstErr instanceof Response ||
-        (firstErr instanceof Error &&
-          "code" in firstErr &&
-          (firstErr as { code: string }).code === "REDIRECT")
-      ) {
-        throw firstErr;
-      }
-      throw firstErr;
-    }
-
-    if (upstreamRes.status === 503) {
-      logger.info(
-        `[cloud-compat] Got 503 from upstream, retrying after ${RETRY_BACKOFF_MS}ms: ${compatPath}`,
-      );
-      await new Promise((resolve) => setTimeout(resolve, RETRY_BACKOFF_MS));
-      try {
-        upstreamRes = await fetchUpstream(upstreamUrl, method, headers, body);
-      } catch {
-        // Keep the original 503 response.
-      }
-    }
-
-    const responseData = await upstreamRes.json().catch(() => ({
-      success: false,
-      error: `HTTP ${upstreamRes.status}`,
-    }));
-
+    const upstreamRes = await fetchUpstream(upstreamUrl, method, headers, body);
+    const responseData = await upstreamRes.json();
     sendJson(res, responseData, upstreamRes.status);
     return true;
-  } catch (err) {
-    if (
-      err instanceof Error &&
-      "code" in err &&
-      (err as { code: string }).code === "REDIRECT"
-    ) {
-      sendJsonError(
-        res,
-        "Eliza Cloud request was redirected; redirects are not allowed",
-        502,
-      );
-      return true;
-    }
-
-    const isTimeout =
-      err instanceof Error &&
-      (err.name === "TimeoutError" ||
-        err.name === "AbortError" ||
-        err.message.toLowerCase().includes("timeout"));
-
-    if (isTimeout) {
-      logger.warn(`[cloud-compat] Upstream request timed out: ${compatPath}`);
-      sendJsonError(res, "Eliza Cloud request timed out", 504);
-    } else {
-      logger.warn(
-        `[cloud-compat] Upstream request failed: ${compatPath} — ${err instanceof Error ? err.message : String(err)}`,
-      );
-      sendJsonError(res, "Failed to reach Eliza Cloud", 502);
-    }
-    return true;
-  }
 }

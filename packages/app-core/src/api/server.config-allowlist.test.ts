@@ -6,9 +6,7 @@ describe("CONFIG_WRITE_ALLOWED_TOP_KEYS", () => {
     expect(CONFIG_WRITE_ALLOWED_TOP_KEYS.has("connectors")).toBe(true);
   });
 
-  it("keeps legacy channels support for backward compatibility", () => {
-    expect(CONFIG_WRITE_ALLOWED_TOP_KEYS.has("channels")).toBe(true);
-  });
+
 
   it("does not allow unknown top-level keys", () => {
     expect(CONFIG_WRITE_ALLOWED_TOP_KEYS.has("__proto__")).toBe(false);

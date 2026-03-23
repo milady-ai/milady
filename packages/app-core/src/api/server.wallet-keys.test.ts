@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
-import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import type { AgentRuntime } from "@elizaos/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { req } from "../../../../test/helpers/http";
 import { startApiServer } from "./server";
 
 vi.mock("../services/mcp-marketplace", () => ({
@@ -22,32 +22,6 @@ async function cleanupTempDir(dir: string): Promise<void> {
   } catch {
     // ignore
   }
-}
-
-function req(
-  port: number,
-  method: string,
-  requestPath: string,
-  headers: Record<string, string> = {},
-): Promise<{ status: number; data: Record<string, unknown> }> {
-  return new Promise((resolve, reject) => {
-    const request = http.request(
-      { hostname: "127.0.0.1", port, path: requestPath, method, headers },
-      (response) => {
-        const chunks: Buffer[] = [];
-        response.on("data", (chunk: Buffer) => chunks.push(chunk));
-        response.on("end", () => {
-          const raw = Buffer.concat(chunks).toString("utf-8");
-          resolve({
-            status: response.statusCode ?? 0,
-            data: JSON.parse(raw) as Record<string, unknown>,
-          });
-        });
-      },
-    );
-    request.on("error", reject);
-    request.end();
-  });
 }
 
 const RUNTIME_STUB = {
@@ -115,6 +89,7 @@ describe("GET /api/wallet/keys", () => {
         server.port,
         "GET",
         "/api/wallet/keys",
+        undefined,
         { "x-eliza-token": "onboarding-token" },
       );
       expect(status).toBe(403);
@@ -196,6 +171,7 @@ describe("GET /api/wallet/keys", () => {
         server.port,
         "GET",
         "/api/wallet/keys",
+        undefined,
         { "x-eliza-token": "valid-token" },
       );
       expect(status).toBe(200);
@@ -269,9 +245,8 @@ describe("POST /api/agent/reset", () => {
         server.port,
         "POST",
         "/api/agent/reset",
-        {
-          "x-eliza-token": "reset-token",
-        },
+        undefined,
+        { "x-eliza-token": "reset-token" },
       );
       expect(status).toBe(200);
       expect(data).toMatchObject({ ok: true });
@@ -301,7 +276,7 @@ describe("POST /api/agent/reset", () => {
 
     const server = await startApiServer({ port: 0, runtime: RUNTIME_STUB });
     try {
-      const { status } = await req(server.port, "POST", "/api/agent/reset", {
+      const { status } = await req(server.port, "POST", "/api/agent/reset", undefined, {
         "x-eliza-token": "reset-token",
       });
       expect(status).toBe(200);

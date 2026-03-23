@@ -1,12 +1,3 @@
-/**
- * Cross-platform AC vs battery hints for companion GPU policy (`desktop:getPowerState`).
- *
- * - **macOS:** handled in `DesktopManager.getPowerState` via `pmset` (not here).
- * - **Linux:** under `/sys/class/power_supply`, entries with `type` === `Battery` and `status` === `Discharging`.
- * - **Windows:** `System.Windows.Forms.SystemInformation.PowerStatus.PowerLineStatus`
- *   (`Offline` = on battery). Avoids mis-reading `Win32_Battery.BatteryStatus` (1 is "Other", not discharging).
- */
-
 import * as fs from "node:fs";
 import path from "node:path";
 

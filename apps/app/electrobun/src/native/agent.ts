@@ -1,29 +1,3 @@
-/**
- * Agent Native Module for Electrobun
- *
- * Embeds the Milady agent runtime (ElizaOS) as an isolated child process
- * using Bun.spawn() and exposes it to the webview via RPC messages.
- *
- * Instead of dynamically importing the runtime into the main process
- * (which requires fighting ASAR, CJS/ESM mismatch, and NODE_PATH hacks),
- * we spawn a separate Bun process that runs the canonical CLI/server entry
- * (`entry.js start`). This gives us:
- *   - Clean process isolation (native module crashes don't kill the UI)
- *   - No ESM/CJS import gymnastics
- *   - Simple lifecycle management via SIGTERM/SIGKILL
- *   - stdout/stderr streaming for diagnostics
- *
- * The renderer never needs to know whether the API server is embedded or
- * remote -- it simply connects to `http://localhost:{port}`.
- *
- * **Port policy (WHY):** we resolve a **free** loopback port from `MILADY_PORT`
- * (see `findFirstAvailableLoopbackPort`) instead of SIGKILL-ing listeners by
- * default, so two Milady apps can run side by side. Optional
- * `MILADY_AGENT_RECLAIM_STALE_PORT=1` restores lsof-based reclaim for
- * single-instance dev. After a successful start we mirror the bound API port
- * into `process.env` so main-process HTTP (menus, probes) matches the child.
- */
-
 import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
@@ -32,10 +6,6 @@ import path from "node:path";
 import { resolveDesktopRuntimeMode } from "../api-base";
 import { DEFAULT_PORT } from "../constants";
 import { findFirstAvailableLoopbackPort } from "./loopback-port";
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
 
 interface AgentStatus {
   state: "not_started" | "starting" | "running" | "stopped" | "error";
@@ -64,10 +34,6 @@ type SendToWebview = (message: string, payload?: unknown) => void;
 
 // Subprocess type from Bun.spawn
 type BunSubprocess = ReturnType<typeof Bun.spawn>;
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
 
 const HEALTH_POLL_INTERVAL_MS = 500;
 const SIGTERM_GRACE_MS = 5_000;
@@ -234,10 +200,6 @@ export function inspectExistingElizaInstall(opts?: {
   };
 }
 
-// ---------------------------------------------------------------------------
-// Diagnostic logging
-// ---------------------------------------------------------------------------
-
 /**
  * Resolve the platform-appropriate config directory for Milady.
  *   Windows: %APPDATA%\Milady  (e.g. C:\Users\X\AppData\Roaming\Milady)
@@ -350,10 +312,6 @@ function shortError(err: unknown, maxLen = 280): string {
   if (oneLine.length <= maxLen) return oneLine;
   return `${oneLine.slice(0, maxLen)}...`;
 }
-
-// ---------------------------------------------------------------------------
-// Path resolution
-// ---------------------------------------------------------------------------
 
 /**
  * Resolve the milady-dist directory.
@@ -485,10 +443,6 @@ function resolveRuntimeEntryPath(miladyDistPath: string): string | null {
   return null;
 }
 
-// ---------------------------------------------------------------------------
-// Health check polling
-// ---------------------------------------------------------------------------
-
 async function waitForHealthy(
   getPort: () => number,
   timeoutMs: number = getHealthPollTimeoutMs(),
@@ -531,10 +485,6 @@ async function waitForHealthy(
   }
   return false;
 }
-
-// ---------------------------------------------------------------------------
-// Stdout watcher for "listening on port" detection
-// ---------------------------------------------------------------------------
 
 async function watchStdoutForReady(
   stream: ReadableStream<Uint8Array>,
@@ -702,10 +652,6 @@ function deletePgliteDataDir(): void {
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// AgentManager -- singleton
-// ---------------------------------------------------------------------------
 
 export class AgentManager {
   private sendToWebview: SendToWebview | null = null;
@@ -1152,10 +1098,6 @@ export class AgentManager {
     );
   }
 
-  // -----------------------------------------------------------------------
-  // Private helpers
-  // -----------------------------------------------------------------------
-
   private emitStatus(): void {
     if (this.sendToWebview) {
       this.sendToWebview("agentStatusUpdate", this.status);
@@ -1307,10 +1249,6 @@ export class AgentManager {
     return "Milady";
   }
 }
-
-// ---------------------------------------------------------------------------
-// Singleton
-// ---------------------------------------------------------------------------
 
 let agentManager: AgentManager | null = null;
 

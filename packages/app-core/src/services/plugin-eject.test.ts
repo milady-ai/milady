@@ -3,7 +3,6 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
 let mockedStateDir = "";
 
 vi.mock("node:child_process", () => ({
@@ -11,11 +10,7 @@ vi.mock("node:child_process", () => ({
 }));
 
 vi.mock("@elizaos/core", () => ({
-  logger: {
-    warn: vi.fn(),
-    info: vi.fn(),
-    error: vi.fn(),
-  },
+  logger: { info: vi.fn(), warn: vi.fn(), debug: vi.fn(), error: vi.fn() },
 }));
 
 vi.mock("./registry-client", () => ({

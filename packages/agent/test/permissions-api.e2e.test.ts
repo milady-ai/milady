@@ -12,25 +12,13 @@
  *
  * NO MOCKS - all tests spin up a real HTTP server.
  */
-import http from "node:http";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { startApiServer } from "../src/api/server";
-
-function saveEnv(...keys: string[]): { restore: () => void } {
-  const prev = new Map<string, string | undefined>();
-  for (const key of keys) prev.set(key, process.env[key]);
-  return {
-    restore: () => {
-      for (const [key, value] of prev) {
-        if (value === undefined) delete process.env[key];
-        else process.env[key] = value;
-      }
-    },
-  };
-}
+import { req as _req } from "../../../test/helpers/http";
+import { saveEnv } from "../../../test/helpers/test-utils";
 
 // ---------------------------------------------------------------------------
-// HTTP helper
+// Thin wrapper — adapts { headers } opts to the shared helper's flat headers
 // ---------------------------------------------------------------------------
 
 interface ReqOptions {
@@ -43,44 +31,8 @@ function req(
   path: string,
   body?: Record<string, unknown>,
   opts?: ReqOptions,
-): Promise<{
-  status: number;
-  headers: http.IncomingHttpHeaders;
-  data: Record<string, unknown>;
-}> {
-  return new Promise((resolve, reject) => {
-    const b = body ? JSON.stringify(body) : undefined;
-    const r = http.request(
-      {
-        hostname: "127.0.0.1",
-        port,
-        path,
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          ...(b ? { "Content-Length": Buffer.byteLength(b) } : {}),
-          ...(opts?.headers ?? {}),
-        },
-      },
-      (res) => {
-        const ch: Buffer[] = [];
-        res.on("data", (c: Buffer) => ch.push(c));
-        res.on("end", () => {
-          const raw = Buffer.concat(ch).toString("utf-8");
-          let data: Record<string, unknown> = {};
-          try {
-            data = JSON.parse(raw) as Record<string, unknown>;
-          } catch {
-            data = { _raw: raw };
-          }
-          resolve({ status: res.statusCode ?? 0, headers: res.headers, data });
-        });
-      },
-    );
-    r.on("error", reject);
-    if (b) r.write(b);
-    r.end();
-  });
+) {
+  return _req(port, method, path, body, opts?.headers);
 }
 
 // ---------------------------------------------------------------------------

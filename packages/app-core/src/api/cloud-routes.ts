@@ -13,12 +13,7 @@ import { createIntegrationTelemetrySpan } from "../diagnostics/integration-obser
 import { disconnectUnifiedCloudConnection } from "./cloud-connection";
 import { clearCloudSecrets, scrubCloudSecretsFromEnv } from "./cloud-secrets";
 
-// Re-export the public API from the decoupled secrets module so existing
-// consumers can still import from "./cloud-routes".
-export {
-  _resetCloudSecretsForTesting,
-  getCloudSecret,
-} from "./cloud-secrets";
+
 
 export interface CloudRouteState {
   config: ElizaConfig;

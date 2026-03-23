@@ -126,7 +126,8 @@ async function pathExists(targetPath: string): Promise<boolean> {
   try {
     await fs.access(targetPath);
     return true;
-  } catch {
+  } catch (err) {
+    logger.debug(`[core-eject] pathExists check failed for ${targetPath}: ${err instanceof Error ? err.message : String(err)}`);
     return false;
   }
 }
@@ -143,8 +144,8 @@ async function readCorePackageVersion(
     if (typeof parsed.version === "string" && parsed.version.trim()) {
       return parsed.version.trim();
     }
-  } catch {
-    // Fall through to unknown.
+  } catch (err) {
+    logger.warn(`[core-eject] Failed to read core package version: ${err instanceof Error ? err.message : String(err)}`);
   }
   return "unknown";
 }
@@ -157,8 +158,8 @@ async function resolveInstalledCoreVersion(): Promise<string> {
     if (typeof npmVersion === "string" && npmVersion.trim()) {
       return npmVersion.trim();
     }
-  } catch {
-    // Registry fallback failed.
+  } catch (err) {
+    logger.warn(`[core-eject] Registry lookup for installed core version failed: ${err instanceof Error ? err.message : String(err)}`);
   }
 
   try {
@@ -169,8 +170,8 @@ async function resolveInstalledCoreVersion(): Promise<string> {
     if (typeof pkg.version === "string" && pkg.version.trim()) {
       return pkg.version.trim();
     }
-  } catch {
-    // Keep unknown fallback.
+  } catch (err) {
+    logger.warn(`[core-eject] Failed to resolve installed core version via require: ${err instanceof Error ? err.message : String(err)}`);
   }
 
   return "unknown";
@@ -217,7 +218,8 @@ async function readUpstreamMetadata(): Promise<UpstreamMetadata | null> {
           ? parsed.localCommits
           : 0,
     };
-  } catch {
+  } catch (err) {
+    logger.warn(`[core-eject] Failed to read upstream metadata: ${err instanceof Error ? err.message : String(err)}`);
     return null;
   }
 }
@@ -442,7 +444,10 @@ export function syncCore(): Promise<CoreSyncResult> {
     const isShallow = await gitStdout(
       ["rev-parse", "--is-shallow-repository"],
       monorepoDir,
-    ).catch(() => "false");
+    ).catch((err: unknown) => {
+      logger.warn(`[core-eject] Failed to check shallow status: ${err instanceof Error ? err.message : String(err)}`);
+      return "false";
+    });
 
     if (isShallow === "true") {
       try {
@@ -454,8 +459,8 @@ export function syncCore(): Promise<CoreSyncResult> {
             env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
           },
         );
-      } catch {
-        // Continue with normal fetch.
+      } catch (err) {
+        logger.warn(`[core-eject] git fetch --unshallow failed, continuing with normal fetch: ${err instanceof Error ? err.message : String(err)}`);
       }
     }
 
@@ -486,7 +491,10 @@ export function syncCore(): Promise<CoreSyncResult> {
         const conflictsRaw = await gitStdout(
           ["diff", "--name-only", "--diff-filter=U"],
           monorepoDir,
-        ).catch(() => "");
+        ).catch((diffErr: unknown) => {
+          logger.warn(`[core-eject] Failed to list merge conflicts: ${diffErr instanceof Error ? (diffErr as Error).message : String(diffErr)}`);
+          return "";
+        });
         const conflicts = conflictsRaw
           .split("\n")
           .map((line) => line.trim())
@@ -572,8 +580,8 @@ export function reinjectCore(): Promise<CoreReinjectResult> {
       if (entries.length === 0) {
         await fs.rmdir(coreBaseDir());
       }
-    } catch {
-      // Best effort cleanup.
+    } catch (err) {
+      logger.warn(`[core-eject] Best-effort cleanup of empty core dir failed: ${err instanceof Error ? err.message : String(err)}`);
     }
 
     await writeTsconfigCorePaths(null);
@@ -627,10 +635,16 @@ export async function getCoreStatus(): Promise<CoreStatus> {
 
   const version = await readCorePackageVersion(packageDir);
   const commitHash = await gitStdout(["rev-parse", "HEAD"], monorepoDir).catch(
-    () => null,
+    (err: unknown) => {
+      logger.warn(`[core-eject] Failed to read HEAD commit hash: ${err instanceof Error ? err.message : String(err)}`);
+      return null;
+    },
   );
   const localChanges =
-    (await gitStdout(["status", "--porcelain"], monorepoDir).catch(() => ""))
+    (await gitStdout(["status", "--porcelain"], monorepoDir).catch((err: unknown) => {
+      logger.warn(`[core-eject] Failed to check local changes: ${err instanceof Error ? err.message : String(err)}`);
+      return "";
+    }))
       .length > 0;
 
   return {

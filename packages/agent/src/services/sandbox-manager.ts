@@ -258,7 +258,7 @@ export class SandboxManager {
           this.emitEvent({
             timestamp: Date.now(),
             type: "error",
-            detail: `Browser container start failed: ${err instanceof Error ? err.message : String(err)}`,
+            detail: `Browser container start failed: ${String(err)}`,
           });
           // Non-fatal: sandbox can work without browser
         }
@@ -275,7 +275,7 @@ export class SandboxManager {
       this.emitEvent({
         timestamp: Date.now(),
         type: "error",
-        detail: `Sandbox start failed: ${err instanceof Error ? err.message : String(err)}`,
+        detail: `Sandbox start failed: ${String(err)}`,
       });
       this.setState("degraded");
       throw err;
@@ -319,7 +319,7 @@ export class SandboxManager {
       this.emitEvent({
         timestamp: Date.now(),
         type: "error",
-        detail: `Recovery failed: ${err instanceof Error ? err.message : String(err)}`,
+        detail: `Recovery failed: ${String(err)}`,
       });
       this.setState("degraded");
     }
@@ -337,7 +337,7 @@ export class SandboxManager {
       this.emitEvent({
         timestamp: Date.now(),
         type: "error",
-        detail: `Sandbox stop error: ${err instanceof Error ? err.message : String(err)}`,
+        detail: `Sandbox stop error: ${String(err)}`,
       });
     }
 
@@ -399,7 +399,7 @@ export class SandboxManager {
       return {
         exitCode: 1,
         stdout: "",
-        stderr: `Exec error: ${err instanceof Error ? err.message : String(err)}`,
+        stderr: `Exec error: ${String(err)}`,
         durationMs: Date.now() - start,
         executedInSandbox: false,
       };

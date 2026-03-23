@@ -24,14 +24,7 @@ vi.mock("@miladyai/app-core/api", () => ({
 }));
 
 import { PluginsView } from "@miladyai/app-core/components/PluginsView";
-
-function createDeferred<T>() {
-  let resolve!: (value: T | PromiseLike<T>) => void;
-  const promise = new Promise<T>((res) => {
-    resolve = res;
-  });
-  return { promise, resolve };
-}
+import { createDeferred } from "../../../../test/helpers/test-utils";
 
 function baseContext() {
   return {

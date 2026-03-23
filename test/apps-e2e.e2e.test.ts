@@ -12,23 +12,25 @@
  * - Full launch -> plugin install -> viewer URL points to running server
  * - Webclient is accessible at the viewer URL
  */
-import http from "node:http";
 import net from "node:net";
 import { startApiServer } from "@miladyai/app-core/src/api/server";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { req } from "./helpers/http";
 
 // ---------------------------------------------------------------------------
 // HTTP helper
 // ---------------------------------------------------------------------------
 
+type JsonPrimitive = string | number | boolean | null;
+type JsonValue = JsonPrimitive | JsonObject | JsonArray;
+interface JsonObject {
+  [key: string]: JsonValue;
+}
+type JsonArray = JsonValue[];
+
 interface ApiResponse {
   status: number;
   data: JsonValue;
-}
-
-interface RequestPayload {
-  body?: string;
-  contentType?: string;
 }
 
 interface AppEntry {
@@ -40,21 +42,6 @@ interface AppEntry {
   launchUrl?: string | null;
 }
 
-type JsonPrimitive = string | number | boolean | null;
-type JsonValue = JsonPrimitive | JsonObject | JsonArray;
-interface JsonObject {
-  [key: string]: JsonValue;
-}
-type JsonArray = JsonValue[];
-
-function parseJson(raw: string): JsonValue {
-  try {
-    return JSON.parse(raw) as JsonValue;
-  } catch {
-    return { _raw: raw };
-  }
-}
-
 function asObject(value: JsonValue): JsonObject {
   if (!value || typeof value !== "object" || Array.isArray(value)) return {};
   return value;
@@ -64,95 +51,25 @@ function asArray(value: JsonValue): JsonArray {
   return Array.isArray(value) ? value : [];
 }
 
-function requestApi(
-  port: number,
-  method: string,
-  path: string,
-  payload?: RequestPayload,
-): Promise<ApiResponse> {
-  return new Promise((resolve, reject) => {
-    const body = payload?.body;
-    const contentType = payload?.contentType ?? "application/json";
-    let settled = false;
-
-    const finish = (result: ApiResponse) => {
-      if (settled) return;
-      settled = true;
-      resolve(result);
-    };
-
-    const fail = (err: Error) => {
-      if (settled) return;
-      settled = true;
-      reject(err);
-    };
-
-    const req = http.request(
-      {
-        hostname: "127.0.0.1",
-        port,
-        path,
-        method,
-        headers: {
-          ...(body
-            ? {
-                "Content-Type": contentType,
-                "Content-Length": Buffer.byteLength(body),
-                Connection: "close",
-              }
-            : {}),
-        },
-      },
-      (res) => {
-        const chunks: Buffer[] = [];
-        const flush = () => {
-          const raw = Buffer.concat(chunks).toString("utf-8");
-          finish({
-            status: res.statusCode ?? 0,
-            data: parseJson(raw),
-          });
-        };
-        res.on("data", (c: Buffer) => chunks.push(c));
-        res.on("end", flush);
-        res.on("aborted", flush);
-        res.on("close", flush);
-        res.on("error", fail);
-      },
-    );
-    req.on("error", (err: Error & { code?: string }) => {
-      fail(err);
-    });
-    req.setTimeout(15_000, () => {
-      req.destroy(new Error(`Request timed out: ${method} ${path}`));
-    });
-    if (body) req.write(body);
-    req.end();
-  });
-}
-
-function api(
+async function api(
   port: number,
   method: string,
   path: string,
   body?: JsonObject,
 ): Promise<ApiResponse> {
-  return requestApi(port, method, path, {
-    body: body ? JSON.stringify(body) : undefined,
-    contentType: "application/json",
-  });
+  const result = await req(port, method, path, body as Record<string, unknown>);
+  return { status: result.status, data: result.data as JsonValue };
 }
 
-function rawApi(
+async function rawApi(
   port: number,
   method: string,
   path: string,
   rawBody: string,
   contentType = "application/json",
 ): Promise<ApiResponse> {
-  return requestApi(port, method, path, {
-    body: rawBody,
-    contentType,
-  });
+  const result = await req(port, method, path, rawBody, contentType);
+  return { status: result.status, data: result.data as JsonValue };
 }
 
 function toAppList(data: JsonValue): AppEntry[] {

@@ -19,7 +19,7 @@ export const logLevelAction: Action = {
   description:
     "Set the log level for the current session (trace, debug, info, warn, error).",
   validate: async (_runtime: IAgentRuntime, _message: Memory) => {
-    return true; // Always allowed for now, maybe restrict to admins later
+    return true;
   },
   handler: async (
     runtime: IAgentRuntime,

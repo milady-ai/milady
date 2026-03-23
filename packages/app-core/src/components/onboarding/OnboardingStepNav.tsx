@@ -19,7 +19,7 @@ export function OnboardingStepNav() {
   const currentIndex = activeSteps.findIndex((s) => s.id === onboardingStep);
 
   return (
-    <div className="onboarding-left">
+    <div className="flex flex-col justify-center py-[60px] pl-[90px] pr-0 relative z-10 max-md:flex-row max-md:justify-center max-md:p-4">
       <div className={`onboarding-step-list step-${Math.max(0, currentIndex)}`}>
         {activeSteps.map((step, i) => {
           let state = "";
@@ -39,7 +39,7 @@ export function OnboardingStepNav() {
                 onClick={() => handleOnboardingJumpToStep(step.id)}
               >
                 <div className="onboarding-step-dot" />
-                <div className="onboarding-step-info">
+                <div className="flex flex-col gap-0.5">
                   <span className="onboarding-step-name">{t(step.name)}</span>
                   <span className="onboarding-step-sub">
                     {t(step.subtitle)}
@@ -58,7 +58,7 @@ export function OnboardingStepNav() {
                 : {})}
             >
               <div className="onboarding-step-dot" />
-              <div className="onboarding-step-info">
+              <div className="flex flex-col gap-0.5">
                 <span className="onboarding-step-name">{t(step.name)}</span>
                 <span className="onboarding-step-sub">{t(step.subtitle)}</span>
               </div>

@@ -69,7 +69,7 @@ async function loadHandlerModule(
 
     return handler as HookHandler;
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = String(err);
     logger.error(`[hooks] Failed to load handler ${handlerPath}: ${msg}`);
     return null;
   }
@@ -240,7 +240,7 @@ export async function loadHooks(
           result.failed.push(legacyHandler.module);
         }
       } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
+        const msg = String(err);
         logger.warn(`[hooks] Failed to load legacy handler: ${msg}`);
         result.failed.push(legacyHandler.module);
       }

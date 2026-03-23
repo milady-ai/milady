@@ -1,10 +1,3 @@
-/**
- * Shared permission types and registry.
- *
- * Duplicated from the earlier desktop runtime permissions module to avoid
- * cross-workspace imports during compilation.
- */
-
 export type SystemPermissionId =
   | "accessibility"
   | "screen-recording"

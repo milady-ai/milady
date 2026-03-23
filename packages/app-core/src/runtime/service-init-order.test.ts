@@ -9,7 +9,6 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
 vi.mock("@elizaos/core", () => ({
   logger: { info: vi.fn(), warn: vi.fn(), debug: vi.fn(), error: vi.fn() },
 }));

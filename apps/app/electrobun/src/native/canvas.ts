@@ -1,12 +1,3 @@
-/**
- * Canvas Native Module for Electrobun
- *
- * Creates auxiliary BrowserWindow instances for web navigation,
- * script execution, and popout windows (A2UI, embeds, etc.).
- *
- * Uses Electrobun's BrowserWindow + BrowserView for each canvas window.
- */
-
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";

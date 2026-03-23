@@ -231,7 +231,10 @@ async function fetchCloudCreditsByApiKey(
     );
   }
 
-  const creditResponse = (await response.json().catch(() => ({}))) as {
+  const creditResponse = (await response.json().catch((err: unknown) => {
+    console.warn("[cloud-connection] Failed to parse credit balance response JSON:", err);
+    return {};
+  })) as {
     balance?: unknown;
     data?: { balance?: unknown };
     error?: unknown;

@@ -8,9 +8,8 @@ import {
   resolveCloudBaseUrl,
 } from "./cloud-compat-routes";
 
-// Mock dependencies
 vi.mock("@elizaos/core", () => ({
-  logger: { warn: vi.fn(), info: vi.fn() },
+  logger: { info: vi.fn(), warn: vi.fn(), debug: vi.fn(), error: vi.fn() },
 }));
 
 vi.mock("@elizaos/agent/cloud/validate-url", () => ({

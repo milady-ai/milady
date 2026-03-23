@@ -49,7 +49,7 @@ export function Sidebar({ active, onChange }: SidebarProps) {
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span
                   className={`w-1.5 h-1.5 rounded-full ${
-                    authed ? "bg-emerald-400 status-pulse" : "bg-text-muted/40"
+                    authed ? "bg-emerald-400 animate-[status-pulse_2s_ease-in-out_infinite]" : "bg-text-muted/40"
                   }`}
                 />
                 <span className="font-mono text-[10px] text-text-subtle tracking-wide">

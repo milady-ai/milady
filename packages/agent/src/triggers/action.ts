@@ -331,8 +331,7 @@ export const createTriggerTaskAction: Action = {
         },
       };
     } catch (error) {
-      const messageText =
-        error instanceof Error ? error.message : "Failed to create trigger";
+        const messageText = String(error) || "Failed to create trigger";
       return {
         success: false,
         text: messageText,

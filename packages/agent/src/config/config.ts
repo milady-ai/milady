@@ -40,7 +40,7 @@ export function loadElizaConfig(): ElizaConfig {
     } catch (err) {
       console.warn(
         `[eliza] Failed to auto-create ~/.eliza/skills.json: ${
-          err instanceof Error ? err.message : String(err)
+          String(err)
         }`,
       );
     }
@@ -74,7 +74,7 @@ export function loadElizaConfig(): ElizaConfig {
     } catch (err) {
       console.warn(
         `[eliza] Failed to load ~/.eliza/skills.json: ${
-          err instanceof Error ? err.message : String(err)
+          String(err)
         }`,
       );
     }

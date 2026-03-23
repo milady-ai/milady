@@ -1,18 +1,3 @@
-/**
- * Credential Auto-Detection for AI Providers
- *
- * Scans well-known file locations, environment variables, and the macOS
- * Keychain to detect installed AI CLI credentials. Used during onboarding
- * to pre-fill the connection step.
- *
- * Sources checked:
- * - ~/.codex/auth.json (OpenAI via Codex CLI)
- * - ~/.claude/.credentials.json (Anthropic via Claude Code)
- * - macOS Keychain: "Claude Code-credentials" (Anthropic OAuth)
- * - Environment variables: OPENAI_API_KEY, ANTHROPIC_API_KEY
- * - CLI availability: `which claude`, `which codex`
- */
-
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";

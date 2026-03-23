@@ -121,16 +121,7 @@ vi.mock("@miladyai/app-core/api", () => ({
 }));
 
 import { AppProvider, useApp } from "@miladyai/app-core/state";
-
-function createDeferred<T>() {
-  let resolve!: (value: T | PromiseLike<T>) => void;
-  let reject!: (reason?: unknown) => void;
-  const promise = new Promise<T>((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-  return { promise, resolve, reject };
-}
+import { createDeferred } from "../../../../test/helpers/test-utils";
 
 type ProbeApi = {
   setChatInput: (text: string) => void;
@@ -853,7 +844,7 @@ describe("chat journey", () => {
       });
 
       expect(mockClient.createConversation).toHaveBeenCalledWith(undefined, {
-        bootstrapGreeting: true,
+        includeGreeting: true,
         lang: "en",
       });
 

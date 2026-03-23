@@ -14,7 +14,6 @@
 import { EventEmitter } from "node:events";
 import { Writable } from "node:stream";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
 // Mock child_process (used by decodeMp3ToPcm and Edge TTS)
 vi.mock("node:child_process", () => ({
   spawn: vi.fn(),
@@ -22,12 +21,7 @@ vi.mock("node:child_process", () => ({
 
 // Suppress logger noise
 vi.mock("@elizaos/core", () => ({
-  logger: {
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-    debug: vi.fn(),
-  },
+  logger: { info: vi.fn(), warn: vi.fn(), debug: vi.fn(), error: vi.fn() },
 }));
 
 import { spawn } from "node:child_process";

@@ -1,8 +1,7 @@
-import { Button } from "@miladyai/ui";
+import { Button, StatusBadge } from "@miladyai/ui";
 import { Check, Cloud } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useApp } from "../../state";
-import { StatusBadge } from "../ui-badges";
 import { PermissionIcon } from "./PermissionIcon";
 
 type MediaPermissionState = "granted" | "denied" | "prompt" | "unknown";
@@ -316,8 +315,7 @@ export function StreamingPermissionsOnboardingView({
   const { t } = useApp();
   const { checking, permStates, requestPermission } =
     useStreamingPermissions(mode);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  void useAllPermissionsGranted(permStates);
+
 
   if (checking) {
     return (
@@ -383,7 +381,7 @@ export function StreamingPermissionsOnboardingView({
         })}
       </div>
 
-      <div className="onboarding-panel-footer">
+      <div className="flex justify-between items-center gap-6 mt-[18px] pt-3.5 border-t border-white/[0.08]">
         {onBack ? (
           <button
             className="onboarding-back-link"

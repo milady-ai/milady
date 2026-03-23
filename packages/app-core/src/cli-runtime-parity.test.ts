@@ -10,6 +10,7 @@
  *   - Config env vars are applied identically
  */
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { envSnapshot } from "../../../../test/helpers/test-utils";
 import type { ElizaConfig } from "./config/config";
 // Shared presets used by both CLI and API server
 import { SHARED_STYLE_RULES, STYLE_PRESETS } from "./onboarding-presets";
@@ -20,29 +21,6 @@ import {
   collectPluginNames,
   resolvePrimaryModel,
 } from "./runtime/eliza";
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-/** Save and restore a set of env keys around each test. */
-function envSnapshot(keys: string[]): {
-  save: () => void;
-  restore: () => void;
-} {
-  const saved = new Map<string, string | undefined>();
-  return {
-    save() {
-      for (const k of keys) saved.set(k, process.env[k]);
-    },
-    restore() {
-      for (const [k, v] of saved) {
-        if (v === undefined) delete process.env[k];
-        else process.env[k] = v;
-      }
-    },
-  };
-}
 
 // ---------------------------------------------------------------------------
 // Shared presets parity

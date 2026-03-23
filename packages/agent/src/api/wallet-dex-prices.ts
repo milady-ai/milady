@@ -112,7 +112,7 @@ export async function fetchDexScreenerPrices(
         );
       } catch (err) {
         logger.warn(
-          `[wallet] DexScreener fetch failed for chain ${chain}: ${err instanceof Error ? err.message : err}`,
+          `[wallet] DexScreener fetch failed for chain ${chain}: ${String(err)}`,
         );
       }
     }),
@@ -150,7 +150,7 @@ export async function fetchDexPaprikaPrices(
         }
       } catch (err) {
         logger.warn(
-          `[wallet] DexPaprika fetch failed for ${addr}: ${err instanceof Error ? err.message : err}`,
+          `[wallet] DexPaprika fetch failed for ${addr}: ${String(err)}`,
         );
       }
     }),

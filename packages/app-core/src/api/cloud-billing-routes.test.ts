@@ -6,7 +6,7 @@ import type { CloudBillingRouteState } from "./cloud-billing-routes";
 import { handleCloudBillingRoute } from "./cloud-billing-routes";
 
 vi.mock("@elizaos/core", () => ({
-  logger: { warn: vi.fn() },
+  logger: { info: vi.fn(), warn: vi.fn(), debug: vi.fn(), error: vi.fn() },
 }));
 
 vi.mock("@elizaos/agent/cloud/validate-url", () => ({

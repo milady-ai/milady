@@ -103,7 +103,7 @@ export function OnboardingWizard() {
   }
 
   return (
-    <div className="onboarding-screen">
+    <div className="w-screen h-screen bg-transparent relative overflow-hidden" style={{ '--text': 'rgba(240,238,250,0.94)', '--muted': 'rgba(240,238,250,0.66)', '--border': 'rgba(255,255,255,0.14)', '--card': 'rgba(10,14,20,0.28)', '--ok': 'rgba(240,185,11,0.92)', '--ok-muted': 'rgba(240,185,11,0.34)', '--ok-subtle': 'rgba(240,185,11,0.12)', '--accent': 'rgba(240,185,11,0.94)', '--accent-foreground': 'rgba(240,238,250,0.94)', '--danger': 'rgb(248,113,113)' } as React.CSSProperties}>
       {/* Keep browser E2E runs lightweight and deterministic by skipping VRM boot. */}
       {disableVrm ? (
         <div
@@ -142,7 +142,7 @@ export function OnboardingWizard() {
       >
         {/* Corner decorations */}
         <svg
-          className="onboarding-corner onboarding-corner--tl"
+          className="absolute w-9 h-9 pointer-events-none z-30 top-5 left-5 onboarding-corner-anim"
           viewBox="0 0 36 36"
           fill="none"
           stroke="rgba(240,185,11,0.18)"
@@ -159,7 +159,8 @@ export function OnboardingWizard() {
           />
         </svg>
         <svg
-          className="onboarding-corner onboarding-corner--tr"
+          className="absolute w-9 h-9 pointer-events-none z-30 top-5 right-5 -scale-x-100 onboarding-corner-anim"
+          style={{ animationDelay: '1s' }}
           viewBox="0 0 36 36"
           fill="none"
           stroke="rgba(240,185,11,0.18)"
@@ -176,7 +177,8 @@ export function OnboardingWizard() {
           />
         </svg>
         <svg
-          className="onboarding-corner onboarding-corner--bl"
+          className="absolute w-9 h-9 pointer-events-none z-30 bottom-5 left-5 -scale-y-100 onboarding-corner-anim"
+          style={{ animationDelay: '2s' }}
           viewBox="0 0 36 36"
           fill="none"
           stroke="rgba(240,185,11,0.18)"
@@ -193,7 +195,8 @@ export function OnboardingWizard() {
           />
         </svg>
         <svg
-          className="onboarding-corner onboarding-corner--br"
+          className="absolute w-9 h-9 pointer-events-none z-30 bottom-5 right-5 -scale-100 onboarding-corner-anim"
+          style={{ animationDelay: '3s' }}
           viewBox="0 0 36 36"
           fill="none"
           stroke="rgba(240,185,11,0.18)"
@@ -231,7 +234,7 @@ export function OnboardingWizard() {
         </div>
 
         {/* ── Standard overlaid UI — step nav + content panel ── */}
-        <div className="onboarding-ui-overlay">
+        <div className="absolute inset-0 z-20 flex justify-between pointer-events-none [&>*]:pointer-events-auto max-md:flex-col">
           <OnboardingStepNav />
           <OnboardingPanel step={onboardingStep}>
             {renderStep()}

@@ -90,9 +90,7 @@ class FakeAgentRuntime implements IAgentRuntime {
   }
   async getGoals() {
     return [];
-  } // If getGoals exists in IDatabaseAdapter? Wait, I didn't see it in database.ts!
-  // It was removed or I missed it. IDatabaseAdapter does NOT have getGoals in the file I read.
-  // So I will remove getGoals stub.
+  }
 
   async getRoom() {
     return null;
@@ -251,17 +249,7 @@ class FakeAgentRuntime implements IAgentRuntime {
     this.services.get(type)?.push(service);
   }
 
-  // Missing DB methods from IDatabaseAdapter coverage (since 'any' cast on databaseAdapter property isn't enough?)
-  // NO, IAgentRuntime extends IDatabaseAdapter, so FakeAgentRuntime MUST implement them.
-  // I need to be careful. I added most of them.
-  // getGoals was removed.
-  // createGoal, removeGoal, removeAllGoals, updateGoal - are those in IDatabaseAdapter?
-  // Checking database.ts again... I did NOT see 'Goal' related methods in IDatabaseAdapter interface.
-  // So I should remove them.
-  // Same for getActorDetails, getAccountById, createAccount ?
-  // In database.ts: getAgent, getAgents, createAgent, updateAgent, deleteAgent.
-  // NO getAccountById, createAccount.
-  // NO getActorDetails.
+
 
   getAgent = async () => null;
   getAgents = async () => [];

@@ -6,6 +6,7 @@
  * resolve to file:///vrms/1.vrm and fail. We lock the asset base URL once from
  * initial startup and resolve assets against that stable base.
  */
+import { getBootConfig } from "../config/boot-config";
 
 type AssetUrlResolveOptions = {
   currentUrl?: string;
@@ -98,13 +99,10 @@ export function resolveAppAssetUrl(
  * Resolve an API path (e.g. "/api/avatar/vrm") to a full URL reachable from
  * the renderer. In desktop shells the page origin is electrobun:// or
  * file://, so bare /api/... paths resolve to the SPA instead of the backend.
- * This helper prefixes with window.__MILADY_API_BASE__ when available.
+ * This helper reads the API base from the boot config.
  */
 export function resolveApiUrl(apiPath: string): string {
-  if (typeof window !== "undefined") {
-    const base = (window as unknown as Record<string, unknown>)
-      .__MILADY_API_BASE__ as string | undefined;
-    if (base) return `${base}${apiPath}`;
-  }
+  const base = getBootConfig().apiBase;
+  if (base) return `${base}${apiPath}`;
   return apiPath;
 }

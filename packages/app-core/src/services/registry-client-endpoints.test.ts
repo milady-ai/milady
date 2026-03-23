@@ -16,7 +16,7 @@ import {
 
 // Suppress logger calls
 vi.mock("@elizaos/core", () => ({
-  logger: { warn: vi.fn(), info: vi.fn(), error: vi.fn(), debug: vi.fn() },
+  logger: { info: vi.fn(), warn: vi.fn(), debug: vi.fn(), error: vi.fn() },
 }));
 
 // ═════════════════════════════════════════════════════════════════════════

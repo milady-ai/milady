@@ -1,3 +1,4 @@
+export * from "./boot-config";
 export * from "./branding";
 export * from "./config-catalog";
 export * from "./config-renderer";

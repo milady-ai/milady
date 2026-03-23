@@ -725,8 +725,7 @@ export type ElizaConfig = {
   approvals?: ApprovalsConfig;
   session?: SessionConfig;
   web?: WebConfig;
-  /** @deprecated Use `connectors` instead. Kept for backward compatibility during migration. */
-  channels?: Record<string, ConnectorConfig>;
+
   cron?: CronConfig;
   hooks?: HooksConfig;
   discovery?: DiscoveryConfig;

@@ -279,7 +279,7 @@ function parseGithubUrl(rawUrl: string): {
     url = new URL(rawUrl);
   } catch (err) {
     throw new Error(
-      `Invalid GitHub URL: ${err instanceof Error ? err.message : String(err)}`,
+      `Invalid GitHub URL: ${String(err)}`,
     );
   }
 
@@ -399,7 +399,7 @@ function inferRepository(skill: Record<string, unknown>): string | null {
       return normalizeRepo(value);
     } catch (err) {
       logger.debug(
-        `[skill-marketplace] Failed to normalize repo: ${err instanceof Error ? err.message : err}`,
+        `[skill-marketplace] Failed to normalize repo: ${String(err)}`,
       );
     }
   }
@@ -415,7 +415,7 @@ function inferRepository(skill: Record<string, unknown>): string | null {
       }
     } catch (err) {
       logger.debug(
-        `[skill-marketplace] Failed to normalize repo: ${err instanceof Error ? err.message : err}`,
+        `[skill-marketplace] Failed to normalize repo: ${String(err)}`,
       );
     }
   }
@@ -545,7 +545,7 @@ export async function searchSkillsMarketplace(
     });
   } catch (err) {
     searchSpan.failure({ error: err });
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = String(err);
     throw new Error(
       msg.includes("aborted") || msg.includes("timeout")
         ? `Skills marketplace request timed out after ${FETCH_TIMEOUT_MS / 1000}s`

@@ -47,11 +47,6 @@ vi.mock("node:os", () => {
   return { default: fns, ...fns };
 });
 
-vi.mock("node:path", async () => {
-  const actual = await vi.importActual<typeof import("node:path")>("node:path");
-  return { default: actual, ...actual };
-});
-
 vi.mock("../rpc-schema", () => ({}));
 
 // electrobun/bun must be mocked before module import so PATH_NAME_MAP (which

@@ -26,11 +26,11 @@ export function ConnectionRemoteBackendScreen({
 
   return (
     <>
-      <div className="onboarding-section-title">
+      <div className="text-xs tracking-[0.3em] uppercase text-[rgba(240,238,250,0.62)] font-semibold text-center mb-0" style={{ textShadow: '0 2px 10px rgba(3,5,10,0.55)' }}>
         {t("onboarding.remoteTitle", appNameInterpolationVars(branding))}
       </div>
       <div className="onboarding-divider">
-        <div className="onboarding-divider-diamond" />
+        <div className="w-1.5 h-1.5 bg-[rgba(240,185,11,0.4)] rotate-45 shrink-0" />
       </div>
       <div
         style={{
@@ -98,7 +98,7 @@ export function ConnectionRemoteBackendScreen({
           </p>
         )}
       </div>
-      <div className="onboarding-panel-footer">
+      <div className="flex justify-between items-center gap-6 mt-[18px] pt-3.5 border-t border-white/[0.08]">
         <button
           className="onboarding-back-link"
           onClick={() => {

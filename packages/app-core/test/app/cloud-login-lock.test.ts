@@ -77,14 +77,7 @@ vi.mock("@miladyai/app-core/api", () => ({
 
 import type { AppState } from "@miladyai/app-core/state";
 import { AppProvider, useApp } from "@miladyai/app-core/state";
-
-function createDeferred<T>() {
-  let resolve!: (value: T | PromiseLike<T>) => void;
-  const promise = new Promise<T>((res) => {
-    resolve = res;
-  });
-  return { promise, resolve };
-}
+import { createDeferred } from "../../../../test/helpers/test-utils";
 
 type ProbeApi = {
   setState: (key: string, value: unknown) => void;

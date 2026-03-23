@@ -27,6 +27,8 @@ import { startApiServer } from "@miladyai/app-core/src/api/server";
 import { AGENT_NAME_POOL } from "@miladyai/app-core/src/runtime/onboarding-names";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { WebSocket } from "ws";
+import { req } from "./helpers/http";
+import { createDeferred } from "./helpers/test-utils";
 
 vi.mock("@miladyai/app-core/src/services/mcp-marketplace", () => ({
   searchMcpMarketplace: vi
@@ -55,54 +57,6 @@ vi.mock("@elizaos/plugin-todo", () => ({
     },
   }),
 }));
-
-// ---------------------------------------------------------------------------
-// HTTP helper (identical to the one in agent-runtime.e2e.test.ts)
-// ---------------------------------------------------------------------------
-
-function req(
-  port: number,
-  method: string,
-  p: string,
-  body?: Record<string, unknown>,
-): Promise<{
-  status: number;
-  headers: http.IncomingHttpHeaders;
-  data: Record<string, unknown>;
-}> {
-  return new Promise((resolve, reject) => {
-    const b = body ? JSON.stringify(body) : undefined;
-    const r = http.request(
-      {
-        hostname: "127.0.0.1",
-        port,
-        path: p,
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          ...(b ? { "Content-Length": Buffer.byteLength(b) } : {}),
-        },
-      },
-      (res) => {
-        const ch: Buffer[] = [];
-        res.on("data", (c: Buffer) => ch.push(c));
-        res.on("end", () => {
-          const raw = Buffer.concat(ch).toString("utf-8");
-          let data: Record<string, unknown> = {};
-          try {
-            data = JSON.parse(raw) as Record<string, unknown>;
-          } catch {
-            data = { _raw: raw };
-          }
-          resolve({ status: res.statusCode ?? 0, headers: res.headers, data });
-        });
-      },
-    );
-    r.on("error", reject);
-    if (b) r.write(b);
-    r.end();
-  });
-}
 
 function reqRaw(
   port: number,
@@ -254,13 +208,6 @@ function waitForWsMessage(
   });
 }
 
-function createDeferred<T>() {
-  let resolve!: (value: T | PromiseLike<T>) => void;
-  const promise = new Promise<T>((res) => {
-    resolve = res;
-  });
-  return { promise, resolve };
-}
 
 type TestAgentEvent = {
   runId: string;
@@ -1230,7 +1177,7 @@ describe("API Server E2E (no runtime)", () => {
       }
     });
 
-    it("POST /api/chat no longer proxies trajectory logger routing through deprecated fallback", async () => {
+    it("POST /api/chat does not proxy trajectory logger routing through deprecated fallback", async () => {
       const starts: Array<{ stepId: string }> = [];
       const ends: Array<{ stepId: string; status?: string }> = [];
       const persistentLlmCalls: Array<{ stepId: string; model?: string }> = [];
@@ -1566,7 +1513,7 @@ describe("API Server E2E (no runtime)", () => {
           query.count === 1 ? ([{ createdAt: restoredAt }] as never[]) : [],
         getCache: async () => null,
         setCache: async () => {},
-      } as unknown as unknown as AgentRuntime;
+      } as unknown as AgentRuntime;
 
       const streamServer = await startApiServer({ port: 0, runtime });
       try {
@@ -1617,7 +1564,7 @@ describe("API Server E2E (no runtime)", () => {
           query.count === 1 ? ([{ createdAt: restoredAt }] as never[]) : [],
         getCache: async () => null,
         setCache: async () => {},
-      } as unknown as unknown as AgentRuntime;
+      } as unknown as AgentRuntime;
 
       const streamServer = await startApiServer({ port: 0, runtime });
       try {
@@ -3063,7 +3010,7 @@ describe("API Server E2E (no runtime)", () => {
         createTask: async () => crypto.randomUUID() as UUID,
         updateTask: async () => {},
         deleteTask: async () => {},
-      } as unknown as unknown as AgentRuntime;
+      } as unknown as AgentRuntime;
 
       const streamServer = await startApiServer({ port: 0, runtime });
       const streamPort = streamServer.port;

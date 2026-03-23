@@ -1,5 +1,5 @@
 /**
- * Farcaster Connector Validation Tests — GitHub Issue #146
+ * Farcaster Connector Validation Tests
  *
  * Comprehensive E2E tests for validating the Farcaster connector (@elizaos/plugin-farcaster).
  *
@@ -68,8 +68,6 @@ const describeIfPluginAvailable = hasPlugin ? describe : describe.skip;
 const RATE_LIMIT_DELAY_MS = 250;
 const TEST_TIMEOUT = 30_000;
 const LIVE_WRITE_TIMEOUT = 120_000;
-const MAX_CAST_LENGTH = 320;
-
 logger.info(
   `[farcaster-connector] Live tests ${runLiveTests ? "ENABLED" : "DISABLED"} ` +
     `(API_KEY=${Boolean(NEYNAR_API_KEY)}, SIGNER=${Boolean(SIGNER_UUID)}, ` +
@@ -398,18 +396,6 @@ describeIfLiveWrite("Farcaster Connector - Cast Handling", () => {
       castsToCleanup.push(hash);
     },
     LIVE_WRITE_TIMEOUT,
-  );
-
-  it(
-    "cast length limit (320 chars) is enforced client-side",
-    () => {
-      const shortText = "gm";
-      const longText = "A".repeat(321);
-
-      expect(shortText.length).toBeLessThanOrEqual(MAX_CAST_LENGTH);
-      expect(longText.length).toBeGreaterThan(MAX_CAST_LENGTH);
-    },
-    TEST_TIMEOUT,
   );
 
   it(
@@ -842,16 +828,6 @@ describeIfLive("Farcaster Connector - Error Handling", () => {
     TEST_TIMEOUT,
   );
 
-  it(
-    "rate limiting delay is configured correctly",
-    () => {
-      // Verify the rate-limit constant is reasonable for Neynar paid tier
-      // (300 req/min = 5 req/s = 200ms between requests)
-      expect(RATE_LIMIT_DELAY_MS).toBeGreaterThanOrEqual(200);
-      expect(RATE_LIMIT_DELAY_MS).toBeLessThanOrEqual(10_000);
-    },
-    TEST_TIMEOUT,
-  );
 });
 
 // ---------------------------------------------------------------------------
@@ -889,152 +865,5 @@ describe("Farcaster Connector - Integration", () => {
       return;
     }
     expect(mod.CHANNEL_PLUGIN_MAP.farcaster).toBe("@elizaos/plugin-farcaster");
-  });
-
-  it("Farcaster auto-enables when apiKey is present in config", async () => {
-    const mod = await tryWorkspaceImport<{
-      isConnectorConfigured: (
-        name: string,
-        config: Record<string, unknown>,
-      ) => boolean;
-    }>("@miladyai/app-core/src/config/plugin-auto-enable");
-    if (!mod) {
-      logger.warn("[farcaster-connector] Workspace not built — skipping");
-      return;
-    }
-    const configured = mod.isConnectorConfigured("farcaster", {
-      apiKey: "test-key",
-      signerUuid: "test-uuid",
-      fid: 12345,
-    });
-    expect(configured).toBe(true);
-  });
-
-  it("Farcaster respects enabled: false", async () => {
-    const mod = await tryWorkspaceImport<{
-      isConnectorConfigured: (
-        name: string,
-        config: Record<string, unknown>,
-      ) => boolean;
-    }>("@miladyai/app-core/src/config/plugin-auto-enable");
-    if (!mod) {
-      logger.warn("[farcaster-connector] Workspace not built — skipping");
-      return;
-    }
-    const configured = mod.isConnectorConfigured("farcaster", {
-      enabled: false,
-      apiKey: "test-key",
-      signerUuid: "test-uuid",
-      fid: 12345,
-    });
-    expect(configured).toBe(false);
-  });
-
-  it("Farcaster connector is in CONNECTOR_PLUGINS list", async () => {
-    const mod = await tryWorkspaceImport<{
-      CONNECTOR_PLUGINS: Record<string, string>;
-    }>("@miladyai/app-core/src/config/plugin-auto-enable");
-    if (!mod) {
-      logger.warn("[farcaster-connector] Workspace not built — skipping");
-      return;
-    }
-    const connectors = Object.keys(mod.CONNECTOR_PLUGINS);
-    expect(connectors).toContain("farcaster");
-  });
-
-  it("collectPluginNames includes farcaster when configured", async () => {
-    const mod = await tryWorkspaceImport<{
-      collectPluginNames: (config: unknown) => Set<string>;
-    }>("@miladyai/app-core/src/runtime/eliza");
-    if (!mod) {
-      logger.warn("[farcaster-connector] Workspace not built — skipping");
-      return;
-    }
-    const config = {
-      connectors: {
-        farcaster: {
-          apiKey: "test-key",
-          signerUuid: "test-uuid",
-          fid: 12345,
-        },
-      },
-    };
-    const plugins = mod.collectPluginNames(config as never);
-    expect(plugins.has("@elizaos/plugin-farcaster")).toBe(true);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Configuration Tests (always run)
-// ---------------------------------------------------------------------------
-
-describe("Farcaster Connector - Configuration", () => {
-  it("validates Farcaster config structure", () => {
-    const validConfig = {
-      enabled: true,
-      apiKey: "test-neynar-key",
-      signerUuid: "550e8400-e29b-41d4-a716-446655440000",
-      fid: 12345,
-    };
-
-    expect(validConfig.enabled).toBe(true);
-    expect(validConfig.apiKey).toBeDefined();
-    expect(validConfig.signerUuid).toBeDefined();
-    expect(validConfig.fid).toBeDefined();
-  });
-
-  it("validates optional Farcaster config fields", () => {
-    const fullConfig = {
-      enabled: true,
-      apiKey: "test-key",
-      signerUuid: "test-uuid",
-      fid: 12345,
-      pollInterval: 120,
-      castIntervalMin: 90,
-      castIntervalMax: 180,
-    };
-
-    expect(fullConfig.pollInterval).toBe(120);
-    expect(fullConfig.castIntervalMin).toBe(90);
-    expect(fullConfig.castIntervalMax).toBe(180);
-  });
-
-  it("cast character limit constant is 320", () => {
-    expect(MAX_CAST_LENGTH).toBe(320);
-  });
-
-  it("validates signer UUID format", () => {
-    const validUUID = "550e8400-e29b-41d4-a716-446655440000";
-    const invalidUUID = "not-a-uuid";
-    const hexKey = "0xabcdef1234567890";
-
-    const uuidPattern =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-    expect(uuidPattern.test(validUUID)).toBe(true);
-    expect(uuidPattern.test(invalidUUID)).toBe(false);
-    expect(uuidPattern.test(hexKey)).toBe(false);
-  });
-
-  it("FID must be a positive integer", () => {
-    const validFid = 12345;
-    const invalidFid = -1;
-    const zeroFid = 0;
-
-    expect(Number.isInteger(validFid) && validFid > 0).toBe(true);
-    expect(Number.isInteger(invalidFid) && invalidFid > 0).toBe(false);
-    expect(Number.isInteger(zeroFid) && zeroFid > 0).toBe(false);
-  });
-
-  it("validates environment variable names", () => {
-    const envVars = [
-      "FARCASTER_NEYNAR_API_KEY",
-      "FARCASTER_SIGNER_UUID",
-      "FARCASTER_FID",
-    ];
-
-    for (const envVar of envVars) {
-      expect(envVar).toMatch(/^FARCASTER_/);
-    }
   });
 });

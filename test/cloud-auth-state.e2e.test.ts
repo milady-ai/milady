@@ -1,65 +1,10 @@
 import fs from "node:fs";
-import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import { startApiServer } from "@miladyai/app-core/src/api/server";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-
-type JsonObject = Record<string, unknown>;
-
-function req(
-  port: number,
-  method: string,
-  p: string,
-): Promise<{
-  status: number;
-  data: JsonObject;
-}> {
-  return new Promise((resolve, reject) => {
-    const request = http.request(
-      {
-        hostname: "127.0.0.1",
-        port,
-        path: p,
-        method,
-      },
-      (res) => {
-        const chunks: Buffer[] = [];
-        res.on("data", (chunk: Buffer) => chunks.push(chunk));
-        res.on("end", () => {
-          const raw = Buffer.concat(chunks).toString("utf-8");
-          let data: JsonObject = {};
-          try {
-            data = JSON.parse(raw) as JsonObject;
-          } catch {
-            data = { _raw: raw };
-          }
-          resolve({ status: res.statusCode ?? 0, data });
-        });
-      },
-    );
-    request.on("error", reject);
-    request.end();
-  });
-}
-
-function saveEnv(...keys: string[]): { restore: () => void } {
-  const saved: Record<string, string | undefined> = {};
-  for (const key of keys) {
-    saved[key] = process.env[key];
-  }
-  return {
-    restore() {
-      for (const key of keys) {
-        if (saved[key] === undefined) {
-          delete process.env[key];
-        } else {
-          process.env[key] = saved[key];
-        }
-      }
-    },
-  };
-}
+import { req } from "./helpers/http";
+import { saveEnv } from "./helpers/test-utils";
 
 describe("Cloud auth status persistence", () => {
   let port = 0;

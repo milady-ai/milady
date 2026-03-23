@@ -85,7 +85,7 @@ export async function checkCloudAvailability(
 
     return null; // Available!
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = String(err);
     if (msg.includes("timed out") || msg.includes("timeout")) {
       return "Could not reach Eliza Cloud (request timed out). Check your internet connection.";
     }
@@ -134,7 +134,7 @@ async function runCloudAuth(
     spinner.stop("✓ Logged in to Eliza Cloud!");
     return result;
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = String(err);
     spinner.stop(`Login failed: ${msg}`);
     return null;
   }
@@ -218,7 +218,7 @@ async function provisionCloudAgent(
       } catch (pollErr) {
         // Transient polling error — keep trying
         logger.debug(
-          `[cloud-onboarding] Poll error: ${pollErr instanceof Error ? pollErr.message : pollErr}`,
+          `[cloud-onboarding] Poll error: ${String(pollErr)}`,
         );
       }
     }
@@ -230,7 +230,7 @@ async function provisionCloudAgent(
     // Return the ID anyway — user can reconnect later
     return { agentId };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = String(err);
     spinner.stop(`Failed to create cloud agent: ${msg}`);
     return null;
   }

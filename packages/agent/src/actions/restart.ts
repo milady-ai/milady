@@ -48,33 +48,26 @@ export const restartAction: Action = {
 
   handler: async (runtime, message, _state, options) => {
     // This action declares parameters, so the runtime provides HandlerOptions.
-    const params = (options as HandlerOptions | undefined)?.parameters;
-    const reason =
-      typeof params?.reason === "string" ? params.reason : undefined;
+    const params = (options as HandlerOptions | undefined)?.parameters as { reason?: string } | undefined;
+    const reason = params?.reason;
 
     const restartText = reason ? `Restarting… (${reason})` : "Restarting…";
 
     logger.info(`[eliza] ${restartText}`);
 
     // Persist a "Restarting…" memory so it shows up in the message log.
-    try {
-      const restartMemory: Memory = {
-        id: crypto.randomUUID() as UUID,
-        entityId: runtime.agentId,
-        roomId: message.roomId,
-        worldId: message.worldId,
-        content: {
-          text: restartText,
-          source: "eliza",
-          type: "system",
-        },
-      };
-      await runtime.createMemory(restartMemory, "messages");
-    } catch (err) {
-      // Non-fatal — the restart still proceeds even if the memory write fails.
-      const msg = err instanceof Error ? err.message : String(err);
-      logger.warn(`[eliza] Could not persist restart memory: ${msg}`);
-    }
+    const restartMemory: Memory = {
+      id: crypto.randomUUID() as UUID,
+      entityId: runtime.agentId,
+      roomId: message.roomId,
+      worldId: message.worldId,
+      content: {
+        text: restartText,
+        source: "eliza",
+        type: "system",
+      },
+    };
+    await runtime.createMemory(restartMemory, "messages");
 
     // Schedule the restart slightly after returning so the response can be
     // delivered to the user / channel before the process bounces.

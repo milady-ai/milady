@@ -21,14 +21,6 @@ vi.mock("node:os", () => {
   };
 });
 
-vi.mock("node:path", async () => {
-  const actual = await vi.importActual<typeof import("node:path")>("node:path");
-  return {
-    default: actual,
-    ...actual,
-  };
-});
-
 import {
   scanAndValidateProviderCredentials,
   scanProviderCredentials,

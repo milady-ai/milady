@@ -18,7 +18,7 @@ import {
 // ── Mocks ────────────────────────────────────────────────────────────────
 
 vi.mock("@elizaos/core", () => ({
-  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
+  logger: { info: vi.fn(), warn: vi.fn(), debug: vi.fn(), error: vi.fn() },
 }));
 
 const mockFetch = vi.fn();

@@ -1,13 +1,8 @@
-/**
- * Trigger action helpers — extracted from AppContext.
- *
- * Pure functions for trigger CRUD operations that can be used
- * by any provider implementation.
- */
+/** Trigger action helpers — CRUD operations for triggers. */
 
 import type {
   CreateTriggerRequest,
-  ElizaClient,
+  MiladyClient,
   TriggerRunRecord,
   TriggerSummary,
   UpdateTriggerRequest,
@@ -25,7 +20,7 @@ export function sortTriggersByNextRun(
 }
 
 export interface TriggerActionContext {
-  client: ElizaClient;
+  client: MiladyClient;
   setTriggers: (fn: (prev: TriggerSummary[]) => TriggerSummary[]) => void;
   setTriggerRunsById: (
     fn: (

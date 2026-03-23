@@ -1,11 +1,3 @@
-/**
- * Shared button class strings for consistent styling across views.
- *
- * These CSS class strings complement the `Button` component for cases where
- * a plain HTML `button` element is used or Tailwind class composition is
- * preferred over the variant prop.
- */
-
 export const btnPrimary =
   "px-4 py-2 text-sm font-medium bg-[var(--accent)] text-[var(--accent-foreground,#1a1f26)] border border-[var(--accent)] cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-default rounded-lg";
 

@@ -1,8 +1,9 @@
-import http from "node:http";
 import type { AgentRuntime, Memory, MessagePayload } from "@elizaos/core";
 import { createUniqueUuid } from "@elizaos/core";
 import { startApiServer } from "@miladyai/app-core/src/api/server";
 import { describe, expect, it } from "vitest";
+import { req } from "./helpers/http";
+import { type RawSqlQuery, sqlText } from "./helpers/sql";
 
 let trajectoryLoggerPlugin: { name: string; actions?: unknown[] } | null = null;
 try {
@@ -56,20 +57,6 @@ type StoredTrajectory = {
   steps: StoredStep[];
   metadata: Record<string, unknown>;
 };
-
-interface RawSqlQuery {
-  queryChunks?: Array<{
-    value?: string[];
-  }>;
-}
-
-function sqlText(query: RawSqlQuery): string {
-  const chunks = query.queryChunks ?? [];
-  return chunks
-    .map((chunk) => (Array.isArray(chunk.value) ? chunk.value.join("") : ""))
-    .join("")
-    .trim();
-}
 
 function parseLimitOffset(query: string): { limit: number; offset: number } {
   const limitMatch = /limit\s+(\d+)/i.exec(query);
@@ -613,49 +600,6 @@ class FakeSqlDb {
 
     return { rows: [] };
   }
-}
-
-function req(
-  port: number,
-  method: string,
-  p: string,
-  body?: Record<string, unknown>,
-): Promise<{
-  status: number;
-  data: Record<string, unknown>;
-}> {
-  return new Promise((resolve, reject) => {
-    const payload = body ? JSON.stringify(body) : undefined;
-    const request = http.request(
-      {
-        hostname: "127.0.0.1",
-        port,
-        path: p,
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          ...(payload ? { "Content-Length": Buffer.byteLength(payload) } : {}),
-        },
-      },
-      (response) => {
-        const chunks: Buffer[] = [];
-        response.on("data", (chunk: Buffer) => chunks.push(chunk));
-        response.on("end", () => {
-          const raw = Buffer.concat(chunks).toString("utf-8");
-          let data: Record<string, unknown> = {};
-          try {
-            data = JSON.parse(raw) as Record<string, unknown>;
-          } catch {
-            data = { _raw: raw };
-          }
-          resolve({ status: response.statusCode ?? 0, data });
-        });
-      },
-    );
-    request.on("error", reject);
-    if (payload) request.write(payload);
-    request.end();
-  });
 }
 
 describe.skipIf(!trajectoryLoggerPlugin)(

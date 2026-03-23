@@ -9,8 +9,8 @@
  * that throw domain-specific errors, and mock config to enable initialization.
  */
 
-import http from "node:http";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { req } from "../../../../test/helpers/http";
 
 // ── Error-throwing service mocks ────────────────────────────────────────────
 
@@ -93,48 +93,6 @@ vi.mock("@elizaos/agent/services/mcp-marketplace", () => ({
   searchMcpMarketplace: vi.fn().mockResolvedValue({ results: [] }),
   getMcpServerDetails: vi.fn().mockResolvedValue(null),
 }));
-
-// ── HTTP helper ─────────────────────────────────────────────────────────────
-
-function req(
-  port: number,
-  method: string,
-  path: string,
-  body?: Record<string, unknown>,
-): Promise<{ status: number; data: Record<string, unknown> }> {
-  return new Promise((resolve, reject) => {
-    const b = body ? JSON.stringify(body) : undefined;
-    const r = http.request(
-      {
-        hostname: "127.0.0.1",
-        port,
-        path,
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          ...(b ? { "Content-Length": Buffer.byteLength(b) } : {}),
-        },
-      },
-      (res) => {
-        const chunks: Buffer[] = [];
-        res.on("data", (c: Buffer) => chunks.push(c));
-        res.on("end", () => {
-          const raw = Buffer.concat(chunks).toString("utf-8");
-          let data: Record<string, unknown> = {};
-          try {
-            data = JSON.parse(raw) as Record<string, unknown>;
-          } catch {
-            data = { _raw: raw };
-          }
-          resolve({ status: res.statusCode ?? 0, data });
-        });
-      },
-    );
-    r.on("error", reject);
-    if (b) r.write(b);
-    r.end();
-  });
-}
 
 // ── Tests ───────────────────────────────────────────────────────────────────
 

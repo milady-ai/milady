@@ -1,5 +1,5 @@
 /**
- * Discord Connector Validation Tests — GitHub Issue #143
+ * Discord Connector Validation Tests
  *
  * Comprehensive E2E tests for validating the Discord connector (@elizaos/plugin-discord).
  *
@@ -66,56 +66,6 @@ logger.info(
 // ---------------------------------------------------------------------------
 
 const TEST_TIMEOUT = 30_000; // 30 seconds for Discord API operations
-const DISCORD_HARNESS_REASON =
-  "requires a dedicated Discord integration harness (guild, channels, counterpart user, and media fixtures)";
-
-const messageHandlingChecks = [
-  "can receive text messages",
-  "can send text messages",
-  "handles DM functionality",
-  "handles long message chunking (2000 char limit)",
-  "renders markdown correctly",
-  "supports threading",
-] as const;
-
-const discordSpecificChecks = [
-  "implements slash commands",
-  "renders embeds",
-  "handles reactions",
-  "processes user mentions (@user)",
-  "processes role mentions (@role)",
-  "processes @everyone/@here mentions",
-] as const;
-
-const mediaAttachmentChecks = [
-  "receives images",
-  "receives files",
-  "sends images",
-  "sends files",
-  "sends images via embeds",
-] as const;
-
-const permissionsAndChannelsChecks = [
-  "enforces channel permissions",
-  "works in threads",
-  "supports voice channel text chat",
-  "handles multiple guilds",
-] as const;
-
-const errorHandlingChecks = [
-  "handles rate limiting with backoff",
-  "implements reconnection logic",
-  "provides helpful error messages for permission issues",
-] as const;
-
-function defineSkippedDiscordHarnessChecks(
-  titles: readonly string[],
-  reason = DISCORD_HARNESS_REASON,
-): void {
-  for (const title of titles) {
-    it.skip(`${title} (${reason})`, () => {});
-  }
-}
 
 // ---------------------------------------------------------------------------
 // 1. Setup & Authentication Tests
@@ -193,7 +143,7 @@ describeIfPluginAvailable("Discord Connector - Setup & Authentication", () => {
         character,
         plugins: [discordPlugin],
         token: process.env.DISCORD_BOT_TOKEN,
-        databaseAdapter: undefined as never, // Using in-memory for tests
+        databaseAdapter: undefined as never,
         serverUrl: "http://localhost:3000",
       });
     }, TEST_TIMEOUT);
@@ -206,29 +156,6 @@ describeIfPluginAvailable("Discord Connector - Setup & Authentication", () => {
         runtime = null;
       }
     });
-
-    it(
-      "successfully authenticates with Discord bot token",
-      async () => {
-        expect(runtime).not.toBeNull();
-        expect(process.env.DISCORD_BOT_TOKEN).toBeDefined();
-        // If runtime was created without throwing, authentication was successful
-        expect(true).toBe(true);
-      },
-      TEST_TIMEOUT,
-    );
-
-    it(
-      "bot goes online after connection",
-      async () => {
-        // This test validates that the bot successfully connects to Discord gateway
-        // In a real scenario, we would check the bot's online status
-        // For now, we verify that the runtime is initialized
-        expect(runtime).not.toBeNull();
-        logger.info("[discord-connector] Bot connection test passed");
-      },
-      TEST_TIMEOUT,
-    );
 
     it(
       "provides helpful error for invalid token",
@@ -272,45 +199,6 @@ describeIfPluginAvailable("Discord Connector - Setup & Authentication", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// 2. Message Handling Tests
-// ---------------------------------------------------------------------------
-
-describeIfLive("Discord Connector - Message Handling", () => {
-  defineSkippedDiscordHarnessChecks(messageHandlingChecks);
-});
-
-// ---------------------------------------------------------------------------
-// 3. Discord-Specific Features Tests
-// ---------------------------------------------------------------------------
-
-describeIfLive("Discord Connector - Discord-Specific Features", () => {
-  defineSkippedDiscordHarnessChecks(discordSpecificChecks);
-});
-
-// ---------------------------------------------------------------------------
-// 4. Media & Attachments Tests
-// ---------------------------------------------------------------------------
-
-describeIfLive("Discord Connector - Media & Attachments", () => {
-  defineSkippedDiscordHarnessChecks(mediaAttachmentChecks);
-});
-
-// ---------------------------------------------------------------------------
-// 5. Permissions & Channels Tests
-// ---------------------------------------------------------------------------
-
-describeIfLive("Discord Connector - Permissions & Channels", () => {
-  defineSkippedDiscordHarnessChecks(permissionsAndChannelsChecks);
-});
-
-// ---------------------------------------------------------------------------
-// 6. Error Handling Tests
-// ---------------------------------------------------------------------------
-
-describeIfLive("Discord Connector - Error Handling", () => {
-  defineSkippedDiscordHarnessChecks(errorHandlingChecks);
-});
 
 // ---------------------------------------------------------------------------
 // Integration Tests
@@ -324,146 +212,4 @@ describe("Discord Connector - Integration", () => {
     expect(CONNECTOR_PLUGINS.discord).toBe("@elizaos/plugin-discord");
   });
 
-  it("Discord uses DISCORD_BOT_TOKEN environment variable", () => {
-    // Discord connector expects DISCORD_BOT_TOKEN env var
-    // This is documented in src/runtime/eliza.ts:135
-    const expectedEnvVar = "DISCORD_BOT_TOKEN";
-    expect(expectedEnvVar).toBe("DISCORD_BOT_TOKEN");
-
-    // Verify env var can be set and read
-    const originalValue = process.env.DISCORD_BOT_TOKEN;
-    process.env.DISCORD_BOT_TOKEN = "test-token-value";
-    expect(process.env.DISCORD_BOT_TOKEN).toBe("test-token-value");
-
-    // Restore original value
-    if (originalValue === undefined) {
-      delete process.env.DISCORD_BOT_TOKEN;
-    } else {
-      process.env.DISCORD_BOT_TOKEN = originalValue;
-    }
-  });
-
-  it("Discord is included in connector list", async () => {
-    const { CONNECTOR_PLUGINS } = await import(
-      "@miladyai/app-core/src/config/plugin-auto-enable"
-    );
-    const connectors = Object.keys(CONNECTOR_PLUGINS);
-    expect(connectors).toContain("discord");
-  });
-
-  it("Discord connector can be enabled/disabled via config", () => {
-    const config1 = { connectors: { discord: { enabled: true } } };
-    const config2 = { connectors: { discord: { enabled: false } } };
-
-    expect(config1.connectors.discord.enabled).toBe(true);
-    expect(config2.connectors.discord.enabled).toBe(false);
-  });
-
-  it("Discord auto-enables when token is present in config", () => {
-    // Documented in src/config/plugin-auto-enable.ts
-    // Discord auto-enables when connectors.discord.token is set
-    const configWithToken = {
-      connectors: {
-        discord: {
-          enabled: true,
-          token: "test-token-123",
-        },
-      },
-    };
-
-    expect(configWithToken.connectors.discord.token).toBeDefined();
-    expect(configWithToken.connectors.discord.enabled).toBe(true);
-  });
-
-  it("Discord respects explicit disable even with token present", () => {
-    // Even if token exists, enabled: false should disable
-    const configDisabled = {
-      connectors: {
-        discord: {
-          enabled: false,
-          token: "test-token-123",
-        },
-      },
-    };
-
-    expect(configDisabled.connectors.discord.token).toBeDefined();
-    expect(configDisabled.connectors.discord.enabled).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Configuration Tests
-// ---------------------------------------------------------------------------
-
-describe("Discord Connector - Configuration", () => {
-  it("validates Discord configuration schema", async () => {
-    // Test configuration structure from zod-schema.providers-core.ts
-    const validConfig = {
-      enabled: true,
-      token: "test-token",
-      dm: {
-        enabled: true,
-        policy: "pairing" as const,
-      },
-      guilds: {},
-      actions: {
-        reactions: true,
-        messages: true,
-      },
-    };
-
-    expect(validConfig.enabled).toBe(true);
-    expect(validConfig.dm.policy).toBe("pairing");
-  });
-
-  it("supports multi-account configuration", async () => {
-    const multiAccountConfig = {
-      token: "main-token",
-      accounts: {
-        "main-bot": {
-          token: "bot-1-token",
-        },
-        "secondary-bot": {
-          token: "bot-2-token",
-        },
-      },
-    };
-
-    expect(multiAccountConfig.accounts).toBeDefined();
-    expect(Object.keys(multiAccountConfig.accounts)).toHaveLength(2);
-  });
-
-  it("validates message chunking configuration", async () => {
-    const chunkConfig = {
-      maxLinesPerMessage: 17,
-      textChunkLimit: 2000,
-      chunkMode: "length" as const,
-    };
-
-    expect(chunkConfig.maxLinesPerMessage).toBe(17);
-    expect(chunkConfig.textChunkLimit).toBe(2000);
-  });
-
-  it("validates PluralKit integration config", async () => {
-    const pluralkitConfig = {
-      pluralkit: {
-        enabled: true,
-        token: "pk-token-123",
-      },
-    };
-
-    expect(pluralkitConfig.pluralkit.enabled).toBe(true);
-  });
-
-  it("validates privileged intents configuration", async () => {
-    const intentsConfig = {
-      intents: {
-        presence: true,
-        guildMembers: true,
-      },
-    };
-
-    expect(intentsConfig.intents.presence).toBe(true);
-    expect(intentsConfig.intents.guildMembers).toBe(true);
-  });
 });

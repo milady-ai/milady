@@ -22,7 +22,6 @@ import {
 } from "vitest";
 import type { InternalHooksConfig } from "../config/types.hooks";
 import type { ElizaHookMetadata, HookEntry } from "./types";
-
 // ---------------------------------------------------------------------------
 // mocks
 // ---------------------------------------------------------------------------

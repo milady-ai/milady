@@ -879,7 +879,7 @@ export async function importAgent(
       );
     }
     throw new AgentExportError(
-      `Decryption failed: ${err instanceof Error ? err.message : String(err)}`,
+      `Decryption failed: ${String(err)}`,
     );
   }
 
@@ -891,7 +891,7 @@ export async function importAgent(
   } catch (err) {
     if (err instanceof AgentExportError) throw err;
     throw new AgentExportError(
-      `Decompression failed — the file may be corrupt: ${err instanceof Error ? err.message : String(err)}`,
+      `Decompression failed — the file may be corrupt: ${String(err)}`,
     );
   }
 
@@ -901,7 +901,7 @@ export async function importAgent(
     rawPayload = JSON.parse(jsonString) as Record<string, unknown>;
   } catch (err) {
     throw new AgentExportError(
-      `JSON parse failed — the export data is malformed: ${err instanceof Error ? err.message : String(err)}`,
+      `JSON parse failed — the export data is malformed: ${String(err)}`,
     );
   }
 

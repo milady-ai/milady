@@ -7,17 +7,10 @@ import { getWalletAddresses } from "../../api/wallet.js";
 import { resolveWalletRpcReadiness } from "../../api/wallet-rpc.js";
 import { loadElizaConfig } from "../../config/config.js";
 import type { AwarenessContributor } from "../../contracts/awareness.js";
-
-// Stub until server.ts exports these (deferred to integration PR)
-function resolveTradePermissionMode(_config?: unknown): string {
-  return process.env.ELIZA_TRADE_PERMISSION_MODE ?? "disabled";
-}
-function canUseLocalTradeExecution(
-  _mode?: string,
-  _isAgent?: boolean,
-): boolean {
-  return resolveTradePermissionMode() !== "disabled";
-}
+import {
+  canUseLocalTradeExecution,
+  resolveTradePermissionMode,
+} from "../../api/server-wallet-trade.js";
 
 function shorten(address: string | null): string | null {
   if (!address) return null;

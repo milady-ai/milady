@@ -101,9 +101,6 @@ export function installClaudeCodeStealthFetchInterceptor(): void {
         const parsed = JSON.parse(body) as Record<string, unknown>;
         const updated = addSystemPrefix(parsed) as Record<string, unknown>;
         body = JSON.stringify(updated);
-        console.log(
-          `[stealth] Patched Anthropic request for ${String(updated.model ?? "unknown-model")}`,
-        );
       } catch {
         console.log(
           "[stealth] Anthropic request body was not JSON; skipping system prefix",
@@ -137,5 +134,4 @@ export function installClaudeCodeStealthFetchInterceptor(): void {
   globalThis.fetch = stealthFetch as typeof globalThis.fetch;
 
   (globalThis as Record<symbol, unknown>)[STEALTH_GUARD] = true;
-  console.log("[stealth] Claude Code setup token runtime support enabled");
 }

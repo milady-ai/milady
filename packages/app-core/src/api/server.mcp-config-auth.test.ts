@@ -8,41 +8,41 @@ vi.mock("@elizaos/plugin-agent-orchestrator", () => ({
 
 import { extractAuthToken, isAuthorized } from "./server";
 
-function req(headers: http.IncomingHttpHeaders = {}): http.IncomingMessage {
+function mockReq(headers: http.IncomingHttpHeaders = {}): http.IncomingMessage {
   return createMockHeadersRequest(headers) as http.IncomingMessage;
 }
 
 describe("extractAuthToken", () => {
   it("extracts Bearer token from Authorization header", () => {
-    const token = extractAuthToken(req({ authorization: "Bearer my-secret" }));
+    const token = extractAuthToken(mockReq({ authorization: "Bearer my-secret" }));
     expect(token).toBe("my-secret");
   });
 
   it("extracts token from X-Eliza-Token header", () => {
-    const token = extractAuthToken(req({ "x-eliza-token": "eliza-tok" }));
+    const token = extractAuthToken(mockReq({ "x-eliza-token": "eliza-tok" }));
     expect(token).toBe("eliza-tok");
   });
 
   it("extracts token from X-Api-Key header", () => {
-    const token = extractAuthToken(req({ "x-api-key": "api-key-val" }));
+    const token = extractAuthToken(mockReq({ "x-api-key": "api-key-val" }));
     expect(token).toBe("api-key-val");
   });
 
   it("returns null when no auth header is present", () => {
-    const token = extractAuthToken(req());
+    const token = extractAuthToken(mockReq());
     expect(token).toBeNull();
   });
 
   it("trims whitespace from extracted tokens", () => {
     const token = extractAuthToken(
-      req({ authorization: "Bearer  padded-token  " }),
+      mockReq({ authorization: "Bearer  padded-token  " }),
     );
     expect(token).toBe("padded-token");
   });
 
   it("prefers Authorization header over X-Eliza-Token", () => {
     const token = extractAuthToken(
-      req({ authorization: "Bearer bearer-tok", "x-eliza-token": "alt-tok" }),
+      mockReq({ authorization: "Bearer bearer-tok", "x-eliza-token": "alt-tok" }),
     );
     expect(token).toBe("bearer-tok");
   });
@@ -61,45 +61,45 @@ describe("isAuthorized (global API auth gate)", () => {
 
   it("rejects when ELIZA_API_TOKEN is set and no token provided", () => {
     process.env.ELIZA_API_TOKEN = "secret-token";
-    expect(isAuthorized(req())).toBe(false);
+    expect(isAuthorized(mockReq())).toBe(false);
   });
 
   it("rejects when ELIZA_API_TOKEN is set and wrong token provided", () => {
     process.env.ELIZA_API_TOKEN = "secret-token";
-    expect(isAuthorized(req({ authorization: "Bearer wrong-token" }))).toBe(
+    expect(isAuthorized(mockReq({ authorization: "Bearer wrong-token" }))).toBe(
       false,
     );
   });
 
   it("rejects when token has different length than expected", () => {
     process.env.ELIZA_API_TOKEN = "secret-token";
-    expect(isAuthorized(req({ authorization: "Bearer short" }))).toBe(false);
+    expect(isAuthorized(mockReq({ authorization: "Bearer short" }))).toBe(false);
   });
 
   it("accepts when ELIZA_API_TOKEN is set and correct Bearer token provided", () => {
     process.env.ELIZA_API_TOKEN = "secret-token";
-    expect(isAuthorized(req({ authorization: "Bearer secret-token" }))).toBe(
+    expect(isAuthorized(mockReq({ authorization: "Bearer secret-token" }))).toBe(
       true,
     );
   });
 
   it("accepts when ELIZA_API_TOKEN is set and correct X-Api-Key provided", () => {
     process.env.ELIZA_API_TOKEN = "secret-token";
-    expect(isAuthorized(req({ "x-api-key": "secret-token" }))).toBe(true);
+    expect(isAuthorized(mockReq({ "x-api-key": "secret-token" }))).toBe(true);
   });
 
   it("accepts when ELIZA_API_TOKEN is set and correct X-Eliza-Token provided", () => {
     process.env.ELIZA_API_TOKEN = "secret-token";
-    expect(isAuthorized(req({ "x-eliza-token": "secret-token" }))).toBe(true);
+    expect(isAuthorized(mockReq({ "x-eliza-token": "secret-token" }))).toBe(true);
   });
 
   it("accepts any request when ELIZA_API_TOKEN is unset (open access)", () => {
     delete process.env.ELIZA_API_TOKEN;
-    expect(isAuthorized(req())).toBe(true);
+    expect(isAuthorized(mockReq())).toBe(true);
   });
 
   it("accepts any request when ELIZA_API_TOKEN is empty string", () => {
     process.env.ELIZA_API_TOKEN = "   ";
-    expect(isAuthorized(req())).toBe(true);
+    expect(isAuthorized(mockReq())).toBe(true);
   });
 });

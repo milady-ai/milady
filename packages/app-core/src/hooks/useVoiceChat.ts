@@ -1066,7 +1066,9 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
           await ctx.resume();
         } catch {
           // Force a fresh context if resume fails
-          ctx.close().catch(() => {});
+          ctx.close().catch((err: unknown) => {
+            console.warn("[useVoiceChat] AudioContext.close() failed", err);
+          });
           ctx = new AudioContext();
           sharedAudioCtx = ctx;
         }

@@ -1,4 +1,5 @@
 import {
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -173,14 +174,15 @@ export function ConversationsSidebar({
             <div className="text-xs uppercase tracking-wide text-muted">
               {t("conversations.chats")}
             </div>
-            <button
-              type="button"
-              className="inline-flex items-center justify-center w-7 h-7 border border-border bg-card text-sm text-muted cursor-pointer hover:border-accent hover:text-txt transition-colors"
+            <Button
+              variant="outline"
+              size="icon"
+              className="w-7 h-7"
               onClick={onClose}
               aria-label={t("conversations.closePanel")}
             >
               {t("bugreportmodal.Times")}
-            </button>
+            </Button>
           </div>
         )}
 
@@ -191,12 +193,12 @@ export function ConversationsSidebar({
               : "p-3 border-b border-border"
           }
         >
-          <button
-            type="button"
+          <Button
+            variant="outline"
             className={
               isGameModal
-                ? "w-full py-2 px-3 rounded-lg border border-accent/60 bg-accent/10 text-txt font-medium text-sm transition-all hover:bg-accent/20 hover:border-accent hover:shadow-[0_0_15px_rgba(240,178,50,0.15)] active:scale-[0.98]"
-                : "w-full px-3 py-1.5 border border-accent rounded-md bg-transparent text-txt text-[12px] font-medium cursor-pointer transition-colors hover:bg-accent hover:text-accent-fg"
+                ? "w-full py-2 px-3 rounded-lg border-accent/60 bg-accent/10 text-txt font-medium text-sm hover:bg-accent/20 hover:border-accent hover:shadow-[0_0_15px_rgba(240,178,50,0.15)] active:scale-[0.98]"
+                : "w-full px-3 py-1.5 border-accent text-txt text-[12px] font-medium hover:bg-accent hover:text-accent-fg"
             }
             onClick={() => {
               handleNewConversation();
@@ -204,7 +206,7 @@ export function ConversationsSidebar({
             }}
           >
             {t("conversations.newChat")}
-          </button>
+          </Button>
         </div>
 
         <div

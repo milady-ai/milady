@@ -35,11 +35,6 @@ vi.mock("node:os", () => ({
   tmpdir: vi.fn(() => "/tmp"),
 }));
 
-vi.mock("node:path", async () => {
-  const actual = await vi.importActual<typeof import("node:path")>("node:path");
-  return { default: actual, ...actual };
-});
-
 vi.stubGlobal("fetch", vi.fn());
 
 // Mock the rpc-schema so TalkModeConfig / TalkModeState resolve without

@@ -23,10 +23,11 @@ export function StreamTerminal() {
     });
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll when lines change
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  });
+  }, [lines]);
 
   useEffect(() => {
     const unbind = client.onWsEvent(

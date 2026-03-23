@@ -1,9 +1,6 @@
 export * from "./components/ui/badge";
 export * from "./components/ui/banner";
-
-// Atoms
 export * from "./components/ui/button";
-// Molecules
 export * from "./components/ui/card";
 export * from "./components/ui/chat-atoms";
 export * from "./components/ui/checkbox";
@@ -40,5 +37,6 @@ export * from "./components/ui/themed-select";
 export * from "./components/ui/tooltip";
 export * from "./components/ui/tooltip-extended";
 export * from "./components/ui/typography";
+export * from "./hooks";
 export * from "./lib/button-styles";
 export * from "./lib/utils";

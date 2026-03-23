@@ -61,7 +61,7 @@ export interface HeadingProps
 
 export const Heading = React.forwardRef<HTMLHeadingElement, HeadingProps>(
   ({ className, level = "h1", ...props }, ref) => {
-    const Comp = level || "h1";
+    const Comp = level!;
     return (
       <Comp
         ref={ref}

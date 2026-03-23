@@ -1,11 +1,3 @@
-/**
- * Camera Native Module for Electrobun
- *
- * Camera access in Electrobun uses getUserMedia directly in the renderer
- * WebView (WKWebKit supports it on macOS). The Bun side only manages
- * permission status — actual capture happens client-side.
- */
-
 export class CameraManager {
   setSendToWebview(_fn: (message: string, payload?: unknown) => void): void {}
 

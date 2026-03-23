@@ -43,13 +43,26 @@ vi.mock("../utils/desktop-workspace", async () => {
   };
 });
 
-vi.mock("@miladyai/ui", () => ({
-  Button: ({
+vi.mock("@miladyai/ui", () => {
+  const passthrough = ({
     children,
     ...props
-  }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
-    React.createElement("button", { type: "button", ...props }, children),
-}));
+  }: React.PropsWithChildren<Record<string, unknown>>) =>
+    React.createElement("div", props, children);
+  return {
+    Button: ({
+      children,
+      ...props
+    }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
+      React.createElement("button", { type: "button", ...props }, children),
+    Card: passthrough,
+    CardContent: passthrough,
+    CardHeader: passthrough,
+    CardTitle: passthrough,
+    CardDescription: passthrough,
+    Switch: passthrough,
+  };
+});
 
 vi.mock("lucide-react", () => ({
   Monitor: () => React.createElement("span", null, "monitor"),

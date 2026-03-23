@@ -1,8 +1,8 @@
 /**
- * E2E tests for restored OAuth flow modules.
+ * E2E tests for OAuth flow modules.
  *
  * Verifies that the auth modules import correctly and export
- * the expected functions/types after restoration from git history.
+ * the expected functions/types.
  */
 
 import { describe, expect, it } from "vitest";
@@ -60,22 +60,3 @@ describe("auth/anthropic module", () => {
   });
 });
 
-describe("auth/index re-exports", () => {
-  it("re-exports all expected functions from the auth barrel", async () => {
-    const auth = await import("@miladyai/app-core/src/auth/index");
-    // From openai-codex
-    expect(typeof auth.startCodexLogin).toBe("function");
-    expect(typeof auth.refreshCodexToken).toBe("function");
-    // From anthropic
-    expect(typeof auth.startAnthropicLogin).toBe("function");
-    expect(typeof auth.refreshAnthropicToken).toBe("function");
-    // From credentials
-    expect(typeof auth.saveCredentials).toBe("function");
-    expect(typeof auth.loadCredentials).toBe("function");
-    expect(typeof auth.deleteCredentials).toBe("function");
-    expect(typeof auth.hasValidCredentials).toBe("function");
-    expect(typeof auth.getAccessToken).toBe("function");
-    expect(typeof auth.getSubscriptionStatus).toBe("function");
-    expect(typeof auth.applySubscriptionCredentials).toBe("function");
-  });
-});

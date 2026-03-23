@@ -136,7 +136,7 @@ export class ElizaEmbeddingManager {
       getLogger().error(
         `${getLogPrefix()} Embedding generation failed: ${err}`,
       );
-      return new Array(this.dimensions).fill(0);
+      throw err;
     } finally {
       this.inFlightCount -= 1;
       if (this.inFlightCount === 0 && this.drainResolve) {

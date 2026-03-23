@@ -1,5 +1,3 @@
-// Re-export everything from upstream
-export * from "@elizaos/agent/config/plugin-auto-enable";
 
 // Override applyPluginAutoEnable to inject WeChat auto-enable before upstream.
 import {

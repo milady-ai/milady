@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { createMockHeadersRequest } from "../test-support/test-helpers";
 import { normalizeWsClientId, resolveTerminalRunClientId } from "./server";
 
-function req(
+function mockReq(
   headers: http.IncomingHttpHeaders = {},
 ): Pick<http.IncomingMessage, "headers"> {
   return createMockHeadersRequest(headers) as Pick<
@@ -27,28 +27,28 @@ describe("normalizeWsClientId", () => {
 
 describe("resolveTerminalRunClientId", () => {
   it("prefers X-Eliza-Client-Id header over request body", () => {
-    const request = req({ "x-eliza-client-id": "header-client" });
+    const request = mockReq({ "x-eliza-client-id": "header-client" });
     expect(
       resolveTerminalRunClientId(request, { clientId: "body-client" }),
     ).toBe("header-client");
   });
 
   it("accepts first value from multi-value header", () => {
-    const request = req({
+    const request = mockReq({
       "x-eliza-client-id": ["first-client", "second-client"],
     });
     expect(resolveTerminalRunClientId(request, null)).toBe("first-client");
   });
 
   it("falls back to body client id when header is invalid", () => {
-    const request = req({ "x-eliza-client-id": "bad$id" });
+    const request = mockReq({ "x-eliza-client-id": "bad$id" });
     expect(
       resolveTerminalRunClientId(request, { clientId: "body-client" }),
     ).toBe("body-client");
   });
 
   it("returns null when neither header nor body has a valid client id", () => {
-    const request = req();
+    const request = mockReq();
     expect(
       resolveTerminalRunClientId(request, { clientId: "bad$id" }),
     ).toBeNull();

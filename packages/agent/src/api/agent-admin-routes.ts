@@ -123,15 +123,7 @@ export async function handleAgentAdminRoutes(
   if (method === "POST" && pathname === "/api/agent/reset") {
     try {
       if (state.runtime) {
-        try {
-          await state.runtime.stop();
-        } catch (stopErr) {
-          const message =
-            stopErr instanceof Error ? stopErr.message : String(stopErr);
-          logWarn(
-            `[eliza-api] Error stopping runtime during reset: ${message}`,
-          );
-        }
+        await state.runtime.stop();
         state.runtime = null;
       }
 

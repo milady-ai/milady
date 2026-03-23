@@ -1,18 +1,3 @@
-/**
- * Loopback port allocation for the Electrobun embedded agent.
- *
- * **Why this exists:** the desktop shell used to run `lsof` + SIGKILL on the
- * preferred `MILADY_PORT` before spawn so a crashed child would “release” the
- * port. That also killed **unrelated** listeners (e.g. a second Milady with its
- * own state dir). We now **probe** 127.0.0.1:preferred, preferred+1, … and pass
- * the first free port to `entry.js start`.
- *
- * **Why bind-then-close:** a TCP listen check is portable (macOS/Linux/Windows)
- * and races only briefly with another process grabbing the same port between
- * probe and child bind—acceptable for local dev and desktop; the child’s stdout
- * + health poll still reconcile the final bind.
- */
-
 import { createServer } from "node:net";
 
 function tryBindOnce(

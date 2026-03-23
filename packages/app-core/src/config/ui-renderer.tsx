@@ -10,6 +10,7 @@
  *   - Event bindings via on.press / on.change
  */
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@miladyai/ui";
 import React, {
   createContext,
   useCallback,
@@ -556,21 +557,27 @@ const SelectComponent: ComponentFn = (props, _children, ctx, el) => {
       {props.label ? (
         <span className="text-xs font-semibold">{String(props.label)}</span>
       ) : null}
-      <select
-        className={`${INPUT_CLS} appearance-auto${errors?.length ? " border-[var(--destructive)]" : ""}`}
-        value={String(value ?? "")}
-        onChange={(e) => handleChange(e.target.value)}
-        onBlur={handleBlur}
+      <Select
+        value={String(value ?? "") || "__none__"}
+        onValueChange={(v) => {
+          handleChange(v === "__none__" ? "" : v);
+          handleBlur();
+        }}
       >
-        {props.placeholder ? (
-          <option value="">{String(props.placeholder)}</option>
-        ) : null}
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
+        <SelectTrigger className={`${INPUT_CLS}${errors?.length ? " border-[var(--destructive)]" : ""}`}>
+          <SelectValue placeholder={props.placeholder ? String(props.placeholder) : undefined} />
+        </SelectTrigger>
+        <SelectContent>
+          {props.placeholder ? (
+            <SelectItem value="__none__">{String(props.placeholder)}</SelectItem>
+          ) : null}
+          {options.map((o) => (
+            <SelectItem key={o.value} value={o.value}>
+              {o.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
       {errors?.length ? (
         <div className="flex flex-col gap-0.5">
           {errors.map((err) => (

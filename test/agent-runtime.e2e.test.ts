@@ -36,6 +36,7 @@ import {
 } from "@miladyai/app-core/src/test-support/test-helpers";
 import dotenv from "dotenv";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { withTimeout, sleep } from "./helpers/test-utils";
 
 // ---------------------------------------------------------------------------
 // Environment
@@ -134,29 +135,6 @@ function http$(
   });
 }
 
-function withTimeout<T>(
-  promise: Promise<T>,
-  ms: number,
-  label: string,
-): Promise<T> {
-  let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    timeoutHandle = setTimeout(() => {
-      reject(new Error(`${label} timed out after ${ms}ms`));
-    }, ms);
-  });
-  return Promise.race([promise, timeoutPromise]).finally(() => {
-    if (timeoutHandle) {
-      clearTimeout(timeoutHandle);
-    }
-  });
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
 
 const modelProviderUnavailablePattern =
   /exceeded your current quota|insufficient[_\s-]?quota|billing details|credit balance|rate limit|status code: 429|too many requests|invalid api key|unauthorized|authentication/i;

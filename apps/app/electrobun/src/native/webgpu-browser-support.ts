@@ -1,29 +1,6 @@
-/**
- * WebGPU Browser Support — cross-platform detection and lifecycle.
- *
- * Determines whether WebGPU is available in the current Electrobun
- * renderer (WKWebView on macOS, CEF on Linux/Windows), locates
- * Chrome Beta when needed, and provides download URLs.
- *
- * On macOS 26+, WKWebView exposes `navigator.gpu` natively.
- * On Linux and Windows, CEF needs `--enable-unsafe-webgpu` and
- * potentially Vulkan flags, which require upstream Electrobun support.
- * As a fallback, Chrome Beta can be used for WebGPU testing.
- *
- * **WHY `getMacOSMajorVersion` exists:** `os.release()` reports **Darwin**, not the
- * macOS marketing major. Through Sequoia, `Darwin − 9` matched 11–15; on Tahoe,
- * macOS **26** runs Darwin **25**, so a single `− 9` rule yields **16** and breaks
- * both log text and the “≥ 26” WKWebView gate. See repo doc
- * `docs/apps/electrobun-darwin-macos-webgpu-version.md`.
- */
-
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
 
 export interface WebGpuSupportStatus {
   /** Whether WebGPU is expected to be available in the webview renderer. */
@@ -46,10 +23,6 @@ export interface ChromeBetaDetection {
   /** Platform-specific download URL for Chrome Beta. */
   downloadUrl: string;
 }
-
-// ---------------------------------------------------------------------------
-// Chrome Beta Detection
-// ---------------------------------------------------------------------------
 
 const CHROME_BETA_PATHS: Record<string, string[]> = {
   darwin: [
@@ -125,10 +98,6 @@ export function getChromeBetaDownloadUrl(): string {
   );
 }
 
-// ---------------------------------------------------------------------------
-// WebGPU Chromium Flags (for CEF / Chrome Beta)
-// ---------------------------------------------------------------------------
-
 /**
  * Returns the Chromium command-line flags needed to enable WebGPU.
  * These are only applicable to CEF or Chrome Beta — WKWebView does
@@ -144,10 +113,6 @@ export function getWebGpuChromiumFlags(): string[] {
 
   return flags;
 }
-
-// ---------------------------------------------------------------------------
-// macOS Version Detection
-// ---------------------------------------------------------------------------
 
 /**
  * Returns the macOS **marketing** major (11, 12, … 26, 27, …), derived from
@@ -189,10 +154,6 @@ export function getMacOSMajorVersion(): number | null {
     return null;
   }
 }
-
-// ---------------------------------------------------------------------------
-// Main API
-// ---------------------------------------------------------------------------
 
 /**
  * Check WebGPU support for the current platform and renderer.

@@ -264,7 +264,7 @@ export async function handleWalletRoutes(
       saveConfig(config);
     } catch (err) {
       logger.warn(
-        `[api] Config save failed: ${err instanceof Error ? err.message : err}`,
+        `[api] Config save failed: ${String(err)}`,
       );
     }
 
@@ -320,7 +320,7 @@ export async function handleWalletRoutes(
       saveConfig(config);
     } catch (err) {
       logger.warn(
-        `[api] Config save failed: ${err instanceof Error ? err.message : err}`,
+        `[api] Config save failed: ${String(err)}`,
       );
     }
 
@@ -394,7 +394,7 @@ export async function handleWalletRoutes(
       saveConfig(config);
     } catch (err) {
       logger.warn(
-        `[api] Config save failed: ${err instanceof Error ? err.message : err}`,
+        `[api] Config save failed: ${String(err)}`,
       );
     }
 

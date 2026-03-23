@@ -16,17 +16,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
 // ── Mocks ────────────────────────────────────────────────────────────────
 
 // Mock @elizaos/core logger
 vi.mock("@elizaos/core", () => ({
-  logger: {
-    info: vi.fn(),
-    warn: vi.fn(),
-    debug: vi.fn(),
-    error: vi.fn(),
-  },
+  logger: { info: vi.fn(), warn: vi.fn(), debug: vi.fn(), error: vi.fn() },
 }));
 
 // Mock resolveStateDir to use a temp dir

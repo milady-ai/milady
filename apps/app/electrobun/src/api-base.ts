@@ -1,10 +1,3 @@
-/**
- * API Base Resolution for Electrobun
- *
- * Resolves the external API base URL from environment variables and provides
- * utilities to inject it into the webview via RPC messages.
- */
-
 import { DEFAULT_PORT } from "./constants";
 
 type ExternalApiBaseEnvKey =
@@ -158,15 +151,7 @@ export function resolveRendererFacingApiBase(
 
 /**
  * Push the API base URL (and optional token) to the renderer via typed
- * RPC message instead of evaluating arbitrary JS (CSP-safe).
- *
- * The renderer-side bridge registers a handler for `apiBaseUpdate`
- * that writes the values to `window.__MILADY_API_BASE__` and
- * `window.__MILADY_API_TOKEN__`.
- */
-/**
- * Structural type for the send proxy on an Electrobun RPC instance.
- * Scoped to only the message this module needs to send.
+ * RPC message (CSP-safe). The renderer bridge handles `apiBaseUpdate`.
  */
 type ApiBaseUpdateRpc = {
   send?: {

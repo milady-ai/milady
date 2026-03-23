@@ -8,6 +8,13 @@ export function getLogPrefix(): string {
     return cachedPrefix;
   }
 
+  // Check APP_CLI_NAME env var first (set by the host app).
+  const appCliName = process.env.APP_CLI_NAME?.trim();
+  if (appCliName) {
+    cachedPrefix = `[${appCliName}]`;
+    return cachedPrefix;
+  }
+
   // Also check if CLI passed --name
   const nameArgMatch = process.argv.find((a) => a.startsWith("--name="));
   if (nameArgMatch) {

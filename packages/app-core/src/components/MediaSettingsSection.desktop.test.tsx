@@ -16,13 +16,25 @@ vi.mock("../bridge", () => ({
   isElectrobunRuntime: isElectrobunRuntimeMock,
 }));
 
-vi.mock("@miladyai/ui", () => ({
-  Button: ({
+vi.mock("@miladyai/ui", () => {
+  const passthrough = ({
     children,
     ...props
-  }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
-    React.createElement("button", { type: "button", ...props }, children),
-}));
+  }: React.PropsWithChildren<Record<string, unknown>>) =>
+    React.createElement("div", props, children);
+  return {
+    Button: ({
+      children,
+      ...props
+    }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
+      React.createElement("button", { type: "button", ...props }, children),
+    Select: passthrough,
+    SelectTrigger: passthrough,
+    SelectValue: passthrough,
+    SelectContent: passthrough,
+    SelectItem: passthrough,
+  };
+});
 
 import { DesktopMediaControlPanel } from "./MediaSettingsSection";
 

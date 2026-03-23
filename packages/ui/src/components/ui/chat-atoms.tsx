@@ -1,14 +1,4 @@
-/**
- * Chat sub-components that have no app-level context dependency.
- *
- * These complement the full `ChatMessage` component (which stays in
- * `apps/app` because it uses `useApp()` for i18n and the `MessageContent`
- * renderer). Extracted here so they can be reused by any app.
- */
-
 import { Button } from "./button";
-
-/* ── TypingIndicator ─────────────────────────────────────────────────── */
 
 export function TypingIndicator({
   agentName,
@@ -59,8 +49,6 @@ export function TypingIndicator({
     </div>
   );
 }
-
-/* ── ChatEmptyState ──────────────────────────────────────────────────── */
 
 export interface ChatEmptyStateProps {
   agentName: string;

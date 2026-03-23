@@ -20,50 +20,7 @@
 
 import http from "node:http";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-
-// ---------------------------------------------------------------------------
-// HTTP helper
-// ---------------------------------------------------------------------------
-
-async function req(
-  port: number,
-  method: string,
-  path: string,
-  body?: Record<string, unknown>,
-): Promise<{ status: number; data: Record<string, unknown> }> {
-  return new Promise((resolve, reject) => {
-    const payload = body ? JSON.stringify(body) : undefined;
-    const r = http.request(
-      {
-        hostname: "127.0.0.1",
-        port,
-        path,
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          ...(payload ? { "Content-Length": Buffer.byteLength(payload) } : {}),
-        },
-      },
-      (res) => {
-        const chunks: Buffer[] = [];
-        res.on("data", (c: Buffer) => chunks.push(c));
-        res.on("end", () => {
-          const raw = Buffer.concat(chunks).toString("utf-8");
-          let data: Record<string, unknown> = {};
-          try {
-            data = JSON.parse(raw) as Record<string, unknown>;
-          } catch {
-            data = { _raw: raw };
-          }
-          resolve({ status: res.statusCode ?? 0, data });
-        });
-      },
-    );
-    r.on("error", reject);
-    if (payload) r.write(payload);
-    r.end();
-  });
-}
+import { req } from "../../../../test/helpers/http";
 
 // ---------------------------------------------------------------------------
 // Test server (mirrors real API server endpoints without heavy deps)

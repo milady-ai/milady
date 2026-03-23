@@ -1,8 +1,4 @@
-/**
- * Provider logo mapping — maps AI provider IDs to their logo image paths.
- *
- * Migrated from apps/app/src/provider-logos.ts.
- */
+/** Provider logo mapping — maps AI provider IDs to their logo image paths. */
 
 export {
   getOnboardingProviderFamily,

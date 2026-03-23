@@ -6,6 +6,7 @@
  */
 
 import { useApp } from "@miladyai/app-core/state";
+import { Button } from "@miladyai/ui";
 import { useCallback, useState } from "react";
 import { TradePanel } from "./BscTradePanel";
 import {
@@ -81,14 +82,13 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
   // ── Derived data (hook) ───────────────────────────────────────────
   const {
     chainFocus,
-    bnbBalance,
-    bscHasError,
     allNfts,
     focusedChainError,
     focusedChainName,
     visibleRows,
     totalUsd,
     visibleChainErrors,
+    focusedNativeBalance,
   } = useInventoryData({
     walletBalances,
     walletAddresses,
@@ -152,7 +152,8 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
         cfg?.heliusKeySet ||
         cloudManagedAccess),
   );
-  const tradeReady = bnbBalance >= BSC_GAS_THRESHOLD;
+  const tradeReady = true;
+  const bnbBalance = Number.parseFloat(focusedNativeBalance ?? "0") || 0;
   const addresses = [
     evmAddr ? { label: "EVM", address: evmAddr } : null,
     solAddr ? { label: "Solana", address: solAddr } : null,
@@ -281,17 +282,14 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
           <p className="text-xs text-muted mb-3">
             {t("wallet.noOnchainWalletHint")}
           </p>
-          <button
-            type="button"
-            className={`px-4 py-1.5 border cursor-pointer text-xs font-mono ${
-              inModal
-                ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground,#1a1f26)] rounded-md hover:opacity-90"
-                : "border-accent bg-accent text-accent-fg hover:bg-accent-hover hover:border-accent-hover"
-            }`}
+          <Button
+            variant="default"
+            size="sm"
+            className="font-mono"
             onClick={() => setTab("settings")}
           >
             {t("nav.settings")}
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -328,14 +326,15 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
         {inlineError?.message && (
           <div className="flex items-center gap-2 border-l-2 border-danger/70 pl-3 py-1 text-[11px] text-danger">
             <span>{inlineError.message}</span>
-            <button
-              type="button"
-              className="text-[11px] font-medium text-danger underline cursor-pointer"
+            <Button
+              variant="link"
+              size="sm"
+              className="text-[11px] font-medium text-danger h-auto p-0"
               onClick={() => void loadBalances()}
               title={inlineError.retryTitle ?? t("common.retry")}
             >
               {t("common.retry")}
-            </button>
+            </Button>
           </div>
         )}
 
@@ -345,17 +344,18 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
               {headerWarning.title}
             </div>
             <div className="mt-1 text-muted">{headerWarning.body}</div>
-            <button
-              type="button"
-              className="mt-1 text-[11px] font-medium text-accent cursor-pointer"
+            <Button
+              variant="link"
+              size="sm"
+              className="mt-1 text-[11px] font-medium text-accent h-auto p-0"
               onClick={goToRpcSettings}
             >
               {headerWarning.actionLabel}
-            </button>
+            </Button>
           </div>
         )}
 
-        {chainFocus === "bsc" && evmAddr && !bscHasError && (
+        {chainFocus === "bsc" && evmAddr && (
           <TradePanel
             tradeReady={tradeReady}
             bnbBalance={bnbBalance}

@@ -10,10 +10,10 @@
  * @see INTEGRATION_DOD_MAP.md — "Skills marketplace" and "Skill catalog"
  */
 
-import http from "node:http";
 import type { AgentRuntime } from "@elizaos/core";
 import { startApiServer } from "@miladyai/app-core/src/api/server";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { req as http$ } from "./helpers/http";
 
 // ---------------------------------------------------------------------------
 // Mock skill-catalog-client — returns fixture data instead of reading files
@@ -124,50 +124,6 @@ vi.mock("@miladyai/app-core/src/services/mcp-marketplace", () => ({
   searchMcpMarketplace: vi.fn().mockResolvedValue({ results: [] }),
   getMcpServerDetails: vi.fn().mockResolvedValue(null),
 }));
-
-// ---------------------------------------------------------------------------
-// HTTP helper (matches existing test conventions)
-// ---------------------------------------------------------------------------
-
-function http$(
-  port: number,
-  method: string,
-  urlPath: string,
-  body?: Record<string, unknown>,
-): Promise<{ status: number; data: Record<string, unknown> }> {
-  return new Promise((resolve, reject) => {
-    const b = body ? JSON.stringify(body) : undefined;
-    const req = http.request(
-      {
-        hostname: "127.0.0.1",
-        port,
-        path: urlPath,
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          ...(b ? { "Content-Length": Buffer.byteLength(b) } : {}),
-        },
-      },
-      (res) => {
-        const ch: Buffer[] = [];
-        res.on("data", (c: Buffer) => ch.push(c));
-        res.on("end", () => {
-          const raw = Buffer.concat(ch).toString("utf-8");
-          let data: Record<string, unknown> = {};
-          try {
-            data = JSON.parse(raw) as Record<string, unknown>;
-          } catch {
-            data = { _raw: raw };
-          }
-          resolve({ status: res.statusCode ?? 0, data });
-        });
-      },
-    );
-    req.on("error", reject);
-    if (b) req.write(b);
-    req.end();
-  });
-}
 
 // ---------------------------------------------------------------------------
 // Test suite

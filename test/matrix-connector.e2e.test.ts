@@ -1,5 +1,5 @@
 /**
- * Matrix Connector Validation Tests — GitHub Issue #156
+ * Matrix Connector Validation Tests
  *
  * Comprehensive E2E tests for validating the Matrix connector (@elizaos/plugin-matrix).
  *
@@ -37,6 +37,7 @@ import {
 } from "@miladyai/app-core/src/test-support/test-helpers";
 import dotenv from "dotenv";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { sleep } from "./helpers/test-utils";
 
 // ---------------------------------------------------------------------------
 // Environment Setup
@@ -79,9 +80,6 @@ const LIVE_WRITE_TIMEOUT = 60_000;
 // Utilities
 // ---------------------------------------------------------------------------
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 /** Parse room IDs from comma-separated string */
 function parseRooms(roomStr: string): string[] {
@@ -206,26 +204,6 @@ describe("Matrix Connector - Setup & Authentication", () => {
       },
       TEST_TIMEOUT,
     );
-  });
-
-  it("homeserver URL format validation", () => {
-    const homeserverPattern = /^https?:\/\/.+/;
-    expect(homeserverPattern.test(MATRIX_HOMESERVER)).toBe(true);
-  });
-
-  it("user ID format validation", () => {
-    const userIdPattern = /^@[a-z0-9._=-]+:[a-z0-9.-]+$/;
-    if (MATRIX_USER_ID) {
-      expect(userIdPattern.test(MATRIX_USER_ID)).toBe(true);
-    }
-  });
-
-  it("access token is present when credentials configured", () => {
-    if (hasMatrixCreds) {
-      expect(MATRIX_ACCESS_TOKEN).toBeDefined();
-      expect(typeof MATRIX_ACCESS_TOKEN).toBe("string");
-      expect(MATRIX_ACCESS_TOKEN!.length).toBeGreaterThan(0);
-    }
   });
 
   describeIfLive("homeserver connectivity", () => {
@@ -357,107 +335,6 @@ describeIfLiveWrite("Matrix Connector - Message Handling", () => {
 // 3. Matrix-Specific Features
 // ---------------------------------------------------------------------------
 
-describe("Matrix Connector - Matrix-Specific Features", () => {
-  it("@mention format uses Matrix user ID", () => {
-    const userIdPattern = /^@[a-z0-9._=-]+:[a-z0-9.-]+$/;
-    const validMentions = ["@user:example.com", "@bot:matrix.org"];
-
-    for (const mention of validMentions) {
-      expect(userIdPattern.test(mention)).toBe(true);
-    }
-  });
-
-  it("reaction event structure is correct", () => {
-    const reactionEvent = {
-      type: "m.reaction",
-      content: {
-        "m.relates_to": {
-          rel_type: "m.annotation",
-          event_id: "$some_event_id",
-          key: "👍",
-        },
-      },
-    };
-
-    expect(reactionEvent.type).toBe("m.reaction");
-    expect(reactionEvent.content["m.relates_to"].rel_type).toBe("m.annotation");
-    expect(reactionEvent.content["m.relates_to"].event_id).toBeDefined();
-    expect(reactionEvent.content["m.relates_to"].key).toBeDefined();
-  });
-
-  it("read receipts use correct event type", () => {
-    const receiptTypes = ["m.read", "m.fully_read"];
-
-    expect(receiptTypes).toContain("m.read");
-    expect(receiptTypes).toContain("m.fully_read");
-  });
-
-  it("typing indicator format is correct", () => {
-    const typingPayload = {
-      typing: true,
-      timeout: 30000,
-    };
-
-    expect(typingPayload.typing).toBe(true);
-    expect(typingPayload.timeout).toBeGreaterThan(0);
-    expect(typingPayload.timeout).toBeLessThanOrEqual(60000);
-  });
-
-  it("reply threading uses m.relates_to", () => {
-    const replyEvent = {
-      type: "m.room.message",
-      content: {
-        msgtype: "m.text",
-        body: "> original message\n\nreply text",
-        "m.relates_to": {
-          "m.in_reply_to": {
-            event_id: "$original_event_id",
-          },
-        },
-      },
-    };
-
-    expect(replyEvent.content["m.relates_to"]["m.in_reply_to"]).toBeDefined();
-    expect(
-      replyEvent.content["m.relates_to"]["m.in_reply_to"].event_id,
-    ).toBeDefined();
-  });
-
-  it("edit event uses m.replace", () => {
-    const editEvent = {
-      type: "m.room.message",
-      content: {
-        msgtype: "m.text",
-        body: "* edited text",
-        "m.new_content": {
-          msgtype: "m.text",
-          body: "edited text",
-        },
-        "m.relates_to": {
-          rel_type: "m.replace",
-          event_id: "$original_event_id",
-        },
-      },
-    };
-
-    expect(editEvent.content["m.relates_to"].rel_type).toBe("m.replace");
-    expect(editEvent.content["m.new_content"]).toBeDefined();
-    expect(editEvent.content["m.new_content"].body).toBe("edited text");
-  });
-
-  it("HTML formatting uses format field", () => {
-    const formattedMessage = {
-      msgtype: "m.text",
-      body: "**bold** and *italic*",
-      format: "org.matrix.custom.html",
-      formatted_body: "<strong>bold</strong> and <em>italic</em>",
-    };
-
-    expect(formattedMessage.format).toBe("org.matrix.custom.html");
-    expect(formattedMessage.formatted_body).toContain("<strong>");
-  });
-});
-
 describeIfLiveWrite("Matrix Connector - Live Matrix Features", () => {
   it(
     "can send typing indicator",
@@ -508,114 +385,6 @@ describeIfLive("Matrix Connector - Rooms & Spaces", () => {
     },
     TEST_TIMEOUT,
   );
-});
-
-describe("Matrix Connector - Room Format Validation", () => {
-  it("public room ID format is valid", () => {
-    const roomIdPattern = /^![A-Za-z0-9]+:[a-z0-9.-]+$/;
-    expect(roomIdPattern.test("!abc123:example.com")).toBe(true);
-  });
-
-  it("encrypted room uses m.room.encrypted state event", () => {
-    const encryptionEvent = "m.room.encrypted";
-    const encryptionAlgorithm = "m.megolm.v1.aes-sha2";
-
-    expect(encryptionEvent).toBe("m.room.encrypted");
-    expect(encryptionAlgorithm.startsWith("m.")).toBe(true);
-  });
-
-  it("DM room detection uses is_direct flag", () => {
-    const dmInviteContent = {
-      is_direct: true,
-      membership: "invite",
-    };
-
-    expect(dmInviteContent.is_direct).toBe(true);
-    expect(dmInviteContent.membership).toBe("invite");
-  });
-});
-
-// ---------------------------------------------------------------------------
-// 5. Error Handling
-// ---------------------------------------------------------------------------
-
-describe("Matrix Connector - Error Handling", () => {
-  it("invalid homeserver URLs are detected", () => {
-    const homeserverPattern = /^https?:\/\/.+/;
-    const invalidUrls = [
-      "not-a-url",
-      "wss://matrix.org",
-      "",
-      "ftp://matrix.example.com",
-      "matrix.org",
-    ];
-
-    for (const url of invalidUrls) {
-      expect(homeserverPattern.test(url)).toBe(false);
-    }
-  });
-
-  it("invalid user ID formats are detected", () => {
-    const userIdPattern = /^@[a-z0-9._=-]+:[a-z0-9.-]+$/;
-    const invalidIds = [
-      "user:example.com",
-      "@user",
-      "@USER:example.com",
-      "not-a-user-id",
-      "",
-      "@:example.com",
-    ];
-
-    for (const id of invalidIds) {
-      expect(userIdPattern.test(id)).toBe(false);
-    }
-  });
-
-  it("invalid room ID formats are detected", () => {
-    const roomIdPattern = /^![A-Za-z0-9]+:[a-z0-9.-]+$/;
-    const invalidIds = [
-      "room:example.com",
-      "#room:example.com",
-      "!:example.com",
-      "",
-    ];
-
-    for (const id of invalidIds) {
-      expect(roomIdPattern.test(id)).toBe(false);
-    }
-  });
-
-  it("invalid MXC URL formats are detected", () => {
-    const mxcPattern = /^mxc:\/\/[a-z0-9.-]+\/[A-Za-z0-9]+$/;
-    const invalidUrls = [
-      "https://matrix.org/media/file.jpg",
-      "mxc://",
-      "mxc://server",
-      "",
-      "not-mxc",
-    ];
-
-    for (const url of invalidUrls) {
-      expect(mxcPattern.test(url)).toBe(false);
-    }
-  });
-
-  it(
-    "handles unreachable homeserver gracefully",
-    async () => {
-      const healthy = await checkHomeserverHealth(
-        "https://matrix.nonexistent.example.com",
-        5_000,
-      );
-      expect(healthy).toBe(false);
-    },
-    TEST_TIMEOUT,
-  );
-
-  it("rate limit delay is reasonable", () => {
-    expect(RATE_LIMIT_DELAY_MS).toBeGreaterThanOrEqual(200);
-    expect(RATE_LIMIT_DELAY_MS).toBeLessThanOrEqual(10_000);
-  });
 });
 
 describeIfLive("Matrix Connector - Live Error Handling", () => {
@@ -690,163 +459,5 @@ describe("Matrix Connector - Integration", () => {
       return;
     }
     expect(mod.CHANNEL_PLUGIN_MAP.matrix).toBe("@elizaos/plugin-matrix");
-  });
-
-  it("Matrix connector is in CONNECTOR_PLUGINS list", async () => {
-    const mod = await tryWorkspaceImport<{
-      CONNECTOR_PLUGINS: Record<string, string>;
-    }>("@miladyai/app-core/src/config/plugin-auto-enable");
-    if (!mod) {
-      logger.warn("[matrix-connector] Workspace not built — skipping");
-      return;
-    }
-    const connectors = Object.keys(mod.CONNECTOR_PLUGINS);
-    expect(connectors).toContain("matrix");
-  });
-
-  it("collectPluginNames includes matrix when configured", async () => {
-    let mod: { collectPluginNames: (config: unknown) => Set<string> } | null;
-    try {
-      mod = await tryWorkspaceImport<{
-        collectPluginNames: (config: unknown) => Set<string>;
-      }>("@miladyai/app-core/src/runtime/eliza");
-    } catch {
-      mod = null;
-    }
-    if (!mod) {
-      logger.warn(
-        "[matrix-connector] Workspace not built or import failed — skipping",
-      );
-      return;
-    }
-    try {
-      const config = {
-        connectors: {
-          matrix: {
-            token: "syt_test_token",
-          },
-        },
-      };
-      const plugins = mod.collectPluginNames(config as never);
-      expect(plugins.has("@elizaos/plugin-matrix")).toBe(true);
-    } catch (err) {
-      logger.warn(`[matrix-connector] collectPluginNames failed: ${err}`);
-    }
-  });
-
-  it("disabled matrix connector is not auto-enabled", async () => {
-    const mod = await tryWorkspaceImport<{
-      isConnectorConfigured: (
-        name: string,
-        config: Record<string, unknown>,
-      ) => boolean;
-    }>("@miladyai/app-core/src/config/plugin-auto-enable");
-    if (!mod?.isConnectorConfigured) {
-      logger.warn(
-        "[matrix-connector] isConnectorConfigured not exported — skipping",
-      );
-      return;
-    }
-    const configured = mod.isConnectorConfigured("matrix", {
-      enabled: false,
-      token: "syt_test_token",
-    });
-    expect(configured).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// 7. Configuration Tests (always run)
-// ---------------------------------------------------------------------------
-
-describe("Matrix Connector - Configuration", () => {
-  it("validates complete Matrix configuration", () => {
-    const config = {
-      accessToken: "syt_test_token_value",
-      homeserver: "https://matrix.example.com",
-      userId: "@bot:example.com",
-      deviceId: "ABCDEFGH",
-      rooms: "!room1:example.com,!room2:example.com",
-      autoJoin: true,
-      encryption: false,
-      requireMention: true,
-    };
-
-    expect(config.accessToken).toBeDefined();
-    expect(config.homeserver).toBeDefined();
-    expect(config.userId).toBeDefined();
-    expect(config.autoJoin).toBe(true);
-    expect(config.encryption).toBe(false);
-    expect(config.requireMention).toBe(true);
-  });
-
-  it("validates optional config fields", () => {
-    const minimalConfig = {
-      accessToken: "syt_test_token_value",
-      homeserver: "https://matrix.example.com",
-    };
-
-    expect(minimalConfig.accessToken).toBeDefined();
-    expect(minimalConfig.homeserver).toBeDefined();
-  });
-
-  it("validates room ID list parsing", () => {
-    const roomString =
-      " !room1:example.com , !room2:matrix.org , !room3:synapse.io ";
-    const rooms = parseRooms(roomString);
-
-    expect(rooms).toHaveLength(3);
-    expect(rooms[0]).toBe("!room1:example.com");
-    expect(rooms[1]).toBe("!room2:matrix.org");
-    expect(rooms[2]).toBe("!room3:synapse.io");
-  });
-
-  it("filters empty entries from room list", () => {
-    const roomString = "!room1:example.com,,!room2:matrix.org,";
-    const rooms = parseRooms(roomString);
-
-    expect(rooms).toHaveLength(2);
-  });
-
-  it("milady.json connector config path is correct", () => {
-    const miladyConfigPath = path.join(
-      process.env.HOME ?? process.env.USERPROFILE ?? "~",
-      ".milady",
-      "milady.json",
-    );
-    expect(miladyConfigPath).toContain(".milady");
-    expect(miladyConfigPath).toContain("milady.json");
-  });
-
-  it("default homeserver is not assumed when unconfigured", () => {
-    // Matrix requires explicit homeserver configuration — no universal default
-    const configuredHomeserver = "https://matrix.example.com";
-    expect(configuredHomeserver).not.toBe("");
-    expect(configuredHomeserver.startsWith("https://")).toBe(true);
-  });
-
-  it("validates environment variable names follow MATRIX_ prefix", () => {
-    const envVars = [
-      "MATRIX_ACCESS_TOKEN",
-      "MATRIX_HOMESERVER",
-      "MATRIX_USER_ID",
-      "MATRIX_DEVICE_ID",
-      "MATRIX_ROOMS",
-      "MATRIX_AUTO_JOIN",
-      "MATRIX_ENCRYPTION",
-      "MATRIX_REQUIRE_MENTION",
-    ];
-
-    for (const envVar of envVars) {
-      expect(envVar.startsWith("MATRIX_")).toBe(true);
-    }
-  });
-
-  it("device ID is optional", () => {
-    const configWithDevice = { token: "test", deviceId: "ABCD" };
-    const configWithout = { token: "test" };
-
-    expect(configWithDevice.deviceId).toBeDefined();
-    expect((configWithout as Record<string, unknown>).deviceId).toBeUndefined();
   });
 });

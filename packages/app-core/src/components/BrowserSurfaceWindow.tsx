@@ -8,7 +8,6 @@ import {
   useRef,
   useState,
 } from "react";
-import "../styles/browser-surface.css";
 import { parseWindowShellRoute } from "../platform/window-shell";
 import { useApp } from "../state";
 import {
@@ -17,6 +16,39 @@ import {
   normalizeBrowserAddressInput,
   readBrowserNavigationUrl,
 } from "./browser-surface";
+
+/* ── Shared style constants ─────────────────────────────────────────── */
+
+const goldGradientStyle = {
+  borderColor: "rgba(232, 217, 168, 0.5)",
+  background:
+    "linear-gradient(135deg, var(--burnished-gold, #7a5a1f) 0%, var(--classic-gold, #cfaf5a) 58%, var(--highlight-gold, #f2d27a) 100%)",
+  color: "#1a1a1a",
+  boxShadow:
+    "0 0 16px rgba(242, 210, 122, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.08)",
+} as const;
+
+const navBtnBase =
+  "h-10 px-[0.95rem] rounded-[0.8rem] border border-[rgba(94,97,102,0.72)] bg-[rgba(30,31,35,0.95)] text-[color:var(--chrome-highlight,#f5f7fa)] text-[0.9rem] font-semibold cursor-pointer transition-[background,border-color,color,box-shadow] duration-150 hover:enabled:bg-[rgba(42,45,49,0.98)] hover:enabled:border-[rgba(201,204,209,0.35)] disabled:opacity-[0.42] disabled:cursor-not-allowed";
+
+const toolbarStyle = {
+  border: "1px solid rgba(122, 90, 31, 0.45)",
+  background:
+    "linear-gradient(180deg, rgba(30, 31, 35, 0.96), rgba(18, 18, 20, 0.92))",
+  boxShadow:
+    "0 16px 40px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.05)",
+} as const;
+
+const viewportStyle = {
+  border: "1px solid rgba(42, 45, 49, 0.98)",
+  boxShadow:
+    "0 24px 60px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.03)",
+} as const;
+
+const containerStyle = {
+  background:
+    "radial-gradient(circle at top, rgba(242, 210, 122, 0.08), transparent 28%), linear-gradient(180deg, rgba(18, 18, 20, 0.98), rgba(11, 11, 12, 1))",
+} as const;
 
 function readBrowserShellSeedUrl(): string | null {
   if (typeof window === "undefined") return null;
@@ -136,11 +168,17 @@ export function BrowserSurfaceWindow() {
   };
 
   return (
-    <div className="browser-surface">
-      <header className="browser-surface__toolbar">
-        <div className="browser-surface__controls">
+    <div
+      className="flex min-h-full flex-col gap-3.5 p-4 text-[color:var(--text-strong,#f5f7fa)]"
+      style={containerStyle}
+    >
+      <header
+        className="flex items-center gap-3 rounded-2xl p-3 max-[900px]:flex-col max-[900px]:items-stretch"
+        style={toolbarStyle}
+      >
+        <div className="flex shrink-0 items-center gap-2 max-[900px]:flex-wrap">
           <button
-            className="browser-surface__nav-btn"
+            className={navBtnBase}
             disabled={!canGoBack}
             onClick={() => {
               webviewRef.current?.goBack();
@@ -150,7 +188,7 @@ export function BrowserSurfaceWindow() {
             Back
           </button>
           <button
-            className="browser-surface__nav-btn"
+            className={navBtnBase}
             disabled={!canGoForward}
             onClick={() => {
               webviewRef.current?.goForward();
@@ -160,7 +198,7 @@ export function BrowserSurfaceWindow() {
             Forward
           </button>
           <button
-            className="browser-surface__nav-btn"
+            className={navBtnBase}
             onClick={() => {
               setIsLoading(true);
               webviewRef.current?.reload();
@@ -170,22 +208,23 @@ export function BrowserSurfaceWindow() {
             Reload
           </button>
           <button
-            className="browser-surface__nav-btn browser-surface__nav-btn--accent"
+            className={navBtnBase}
             onClick={() => {
               navigateTo(DEFAULT_BROWSER_HOME);
             }}
+            style={goldGradientStyle}
             type="button"
           >
             Home
           </button>
         </div>
 
-        <form className="browser-surface__address" onSubmit={handleSubmit}>
+        <form className="flex min-w-0 flex-1 items-center gap-2" onSubmit={handleSubmit}>
           <input
             aria-label={t("aria.browserAddress")}
             autoCapitalize="none"
             autoCorrect="off"
-            className="browser-surface__address-input"
+            className="h-10 w-full min-w-0 rounded-[0.8rem] border border-[rgba(94,97,102,0.72)] bg-[rgba(11,11,12,0.95)] px-[0.9rem] text-[0.95rem] text-[color:var(--chrome-highlight,#f5f7fa)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] outline-none focus:border-[rgba(232,217,168,0.48)] focus:shadow-[0_0_0_1px_rgba(232,217,168,0.36),0_0_16px_rgba(242,210,122,0.12)]"
             onChange={(event) => {
               setAddressValue(event.target.value);
             }}
@@ -194,26 +233,32 @@ export function BrowserSurfaceWindow() {
             type="text"
             value={addressValue}
           />
-          <button className="browser-surface__go-btn" type="submit">
+          <button
+            className={navBtnBase}
+            style={goldGradientStyle}
+            type="submit"
+          >
             Go
           </button>
         </form>
       </header>
 
-      <div className="browser-surface__status">
+      <div className="flex min-w-0 items-center gap-3 px-0.5 text-[0.82rem] text-[color:var(--text-muted,#a1a1aa)]">
         <span
-          className="browser-surface__status-indicator"
-          data-loading={isLoading}
+          className={`shrink-0 rounded-full border border-[rgba(94,97,102,0.72)] bg-[rgba(30,31,35,0.9)] px-[0.55rem] py-[0.2rem] ${isLoading ? "border-[rgba(232,217,168,0.42)] text-[color:var(--highlight-gold,#f2d27a)]" : ""}`}
         >
           {isLoading ? "Loading" : "Ready"}
         </span>
-        <span className="browser-surface__status-url">{currentUrl}</span>
+        <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{currentUrl}</span>
       </div>
 
-      <div className="browser-surface__viewport">
+      <div
+        className="flex min-h-0 flex-1 overflow-hidden rounded-[1.1rem] bg-white"
+        style={viewportStyle}
+      >
         {webviewTagAvailable ? (
           createElement("electrobun-webview", {
-            className: "browser-surface__webview",
+            className: "h-full min-h-0 w-full bg-white",
             partition: "milady-browser",
             ref: (node: HTMLElement | null) => {
               webviewRef.current = node as WebviewTagElement | null;

@@ -21,7 +21,7 @@ vi.mock("three/examples/jsm/loaders/FBXLoader.js", () => ({
   },
 }));
 
-vi.mock("./retargetMixamoGltfToVrm", () => ({
+vi.mock("@miladyai/vrm-utils", () => ({
   retargetMixamoGltfToVrm: hoisted.retargetGltfMock,
 }));
 

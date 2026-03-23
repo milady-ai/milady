@@ -12,9 +12,9 @@
  *
  * Run: MILADY_LIVE_TEST=1 npx vitest run -c vitest.e2e.config.ts test/api-auth-live.e2e.test.ts
  */
-import http from "node:http";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { req } from "./helpers/http";
 
 const liveTestsEnabled = process.env.MILADY_LIVE_TEST === "1";
 
@@ -48,52 +48,6 @@ const hasLLM =
 const hasEvmKey = Boolean(process.env.EVM_PRIVATE_KEY?.trim());
 const _hasSolKey = Boolean(process.env.SOLANA_PRIVATE_KEY?.trim());
 const canRun = liveTestsEnabled && hasLLM && hasEvmKey;
-
-// ---------------------------------------------------------------------------
-// HTTP helper with auth support
-// ---------------------------------------------------------------------------
-
-function req(
-  port: number,
-  method: string,
-  p: string,
-  body?: Record<string, unknown>,
-  headers?: Record<string, string>,
-): Promise<{ status: number; data: Record<string, unknown> }> {
-  return new Promise((resolve, reject) => {
-    const b = body ? JSON.stringify(body) : undefined;
-    const r = http.request(
-      {
-        hostname: "127.0.0.1",
-        port,
-        path: p,
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          ...(b ? { "Content-Length": Buffer.byteLength(b) } : {}),
-          ...(headers ?? {}),
-        },
-      },
-      (res) => {
-        const ch: Buffer[] = [];
-        res.on("data", (c: Buffer) => ch.push(c));
-        res.on("end", () => {
-          const raw = Buffer.concat(ch).toString("utf-8");
-          let data: Record<string, unknown> = {};
-          try {
-            data = JSON.parse(raw) as Record<string, unknown>;
-          } catch {
-            data = { _raw: raw };
-          }
-          resolve({ status: res.statusCode ?? 0, data });
-        });
-      },
-    );
-    r.on("error", reject);
-    if (b) r.write(b);
-    r.end();
-  });
-}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 1. LIVE: AUTHENTICATED FULL FLOW (Auth + Onboarding + Wallet + LLM Chat)

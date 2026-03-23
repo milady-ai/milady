@@ -103,7 +103,7 @@ export function CreditsPanel() {
 
   if (!authed) {
     return (
-      <div className="border border-border bg-surface animate-fade-up">
+      <div className="border border-border bg-surface animate-[fade-up_0.4s_ease-out_both]">
         <div className="px-4 py-2.5 bg-dark-secondary border-b border-border">
           <span className="font-mono text-xs text-text-muted">
             $ credits --status
@@ -143,7 +143,7 @@ export function CreditsPanel() {
   const pricing = creditsSummary?.pricing;
 
   return (
-    <div className="space-y-6 max-w-5xl animate-fade-up">
+    <div className="space-y-6 max-w-5xl animate-[fade-up_0.4s_ease-out_both]">
       {/* Header */}
       <div>
         <h2 className="font-mono text-lg font-medium text-text-light tracking-wide">

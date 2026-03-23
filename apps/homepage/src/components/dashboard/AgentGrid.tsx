@@ -56,13 +56,13 @@ export function AgentGrid() {
   // Loading skeleton
   if (loading) {
     return (
-      <div className="space-y-6 animate-fade-up">
+      <div className="space-y-6 animate-[fade-up_0.4s_ease-out_both]">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="h-6 w-28 bg-surface animate-shimmer" />
-            <div className="h-4 w-44 bg-surface animate-shimmer mt-2" />
+            <div className="h-6 w-28 bg-surface animate-[shimmer_1.8s_ease-in-out_infinite] bg-[linear-gradient(90deg,var(--color-surface)_0%,var(--color-surface-elevated)_40%,var(--color-surface)_80%)] bg-[length:200%_100%]" />
+            <div className="h-4 w-44 bg-surface animate-[shimmer_1.8s_ease-in-out_infinite] bg-[linear-gradient(90deg,var(--color-surface)_0%,var(--color-surface-elevated)_40%,var(--color-surface)_80%)] bg-[length:200%_100%] mt-2" />
           </div>
-          <div className="h-10 w-28 bg-surface animate-shimmer" />
+          <div className="h-10 w-28 bg-surface animate-[shimmer_1.8s_ease-in-out_infinite] bg-[linear-gradient(90deg,var(--color-surface)_0%,var(--color-surface-elevated)_40%,var(--color-surface)_80%)] bg-[length:200%_100%]" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -107,7 +107,7 @@ export function AgentGrid() {
       {error && (
         <div
           className="flex items-center justify-between gap-4 px-4 py-3 
-          border border-red-500/30 bg-red-500/5 animate-fade-up"
+          border border-red-500/30 bg-red-500/5 animate-[fade-up_0.4s_ease-out_both]"
         >
           <div className="flex items-center gap-3">
             <span className="w-2 h-2 rounded-full bg-red-500" />
@@ -138,7 +138,7 @@ export function AgentGrid() {
 
       {/* Refreshing indicator */}
       {(isRefreshing || isCreating) && agents.length > 0 && (
-        <div className="flex items-center gap-2 font-mono text-[10px] text-text-subtle animate-fade-up">
+        <div className="flex items-center gap-2 font-mono text-[10px] text-text-subtle animate-[fade-up_0.4s_ease-out_both]">
           <svg
             aria-hidden="true"
             className="w-3 h-3 animate-spin"
@@ -185,7 +185,7 @@ export function AgentGrid() {
           {agents.map((agent, i) => (
             <div
               key={agent.id}
-              className="animate-fade-up"
+              className="animate-[fade-up_0.4s_ease-out_both]"
               style={{ animationDelay: `${i * 40}ms` }}
             >
               <AgentCard
@@ -225,7 +225,7 @@ export function AgentGrid() {
 
       {/* Detail panel */}
       {selected && (
-        <div className="animate-fade-up">
+        <div className="animate-[fade-up_0.4s_ease-out_both]">
           <AgentDetail
             agent={{
               agentName: selected.name,
@@ -248,7 +248,7 @@ export function AgentGrid() {
 function AgentCardSkeleton({ delay = 0 }: { delay?: number }) {
   return (
     <div
-      className="border border-border bg-surface animate-fade-up"
+      className="border border-border bg-surface animate-[fade-up_0.4s_ease-out_both]"
       style={{ animationDelay: `${delay}ms` }}
     >
       {/* Left accent */}
@@ -256,27 +256,27 @@ function AgentCardSkeleton({ delay = 0 }: { delay?: number }) {
 
       <div className="p-4 pb-0">
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 bg-surface-elevated animate-shimmer" />
+          <div className="w-12 h-12 bg-surface-elevated animate-[shimmer_1.8s_ease-in-out_infinite] bg-[linear-gradient(90deg,var(--color-surface)_0%,var(--color-surface-elevated)_40%,var(--color-surface)_80%)] bg-[length:200%_100%]" />
           <div className="flex-1">
-            <div className="h-4 w-28 bg-surface-elevated animate-shimmer" />
-            <div className="h-3 w-20 bg-surface-elevated animate-shimmer mt-1.5" />
+            <div className="h-4 w-28 bg-surface-elevated animate-[shimmer_1.8s_ease-in-out_infinite] bg-[linear-gradient(90deg,var(--color-surface)_0%,var(--color-surface-elevated)_40%,var(--color-surface)_80%)] bg-[length:200%_100%]" />
+            <div className="h-3 w-20 bg-surface-elevated animate-[shimmer_1.8s_ease-in-out_infinite] bg-[linear-gradient(90deg,var(--color-surface)_0%,var(--color-surface-elevated)_40%,var(--color-surface)_80%)] bg-[length:200%_100%] mt-1.5" />
           </div>
-          <div className="h-7 w-16 bg-surface-elevated animate-shimmer" />
+          <div className="h-7 w-16 bg-surface-elevated animate-[shimmer_1.8s_ease-in-out_infinite] bg-[linear-gradient(90deg,var(--color-surface)_0%,var(--color-surface-elevated)_40%,var(--color-surface)_80%)] bg-[length:200%_100%]" />
         </div>
       </div>
 
       <div className="grid grid-cols-4 gap-px mt-4 bg-border-subtle">
         {[1, 2, 3, 4].map((i) => (
           <div key={i} className="bg-surface px-3 py-2.5">
-            <div className="h-2 w-8 bg-surface-elevated animate-shimmer mb-1" />
-            <div className="h-4 w-10 bg-surface-elevated animate-shimmer" />
+            <div className="h-2 w-8 bg-surface-elevated animate-[shimmer_1.8s_ease-in-out_infinite] bg-[linear-gradient(90deg,var(--color-surface)_0%,var(--color-surface-elevated)_40%,var(--color-surface)_80%)] bg-[length:200%_100%] mb-1" />
+            <div className="h-4 w-10 bg-surface-elevated animate-[shimmer_1.8s_ease-in-out_infinite] bg-[linear-gradient(90deg,var(--color-surface)_0%,var(--color-surface-elevated)_40%,var(--color-surface)_80%)] bg-[length:200%_100%]" />
           </div>
         ))}
       </div>
 
       <div className="flex items-center justify-between gap-2 p-3 bg-dark-secondary/50">
-        <div className="h-7 w-16 bg-surface-elevated animate-shimmer" />
-        <div className="h-7 w-20 bg-surface-elevated animate-shimmer" />
+        <div className="h-7 w-16 bg-surface-elevated animate-[shimmer_1.8s_ease-in-out_infinite] bg-[linear-gradient(90deg,var(--color-surface)_0%,var(--color-surface-elevated)_40%,var(--color-surface)_80%)] bg-[length:200%_100%]" />
+        <div className="h-7 w-20 bg-surface-elevated animate-[shimmer_1.8s_ease-in-out_infinite] bg-[linear-gradient(90deg,var(--color-surface)_0%,var(--color-surface-elevated)_40%,var(--color-surface)_80%)] bg-[length:200%_100%]" />
       </div>
     </div>
   );
@@ -286,7 +286,7 @@ function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
   const { isAuthenticated: authed } = useAuth();
 
   return (
-    <div className="border border-border bg-surface animate-fade-up">
+    <div className="border border-border bg-surface animate-[fade-up_0.4s_ease-out_both]">
       {/* Terminal header */}
       <div className="px-4 py-2.5 bg-dark-secondary border-b border-border">
         <span className="font-mono text-xs text-text-muted">

@@ -5,7 +5,6 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
 // ── Mock ethers ──────────────────────────────────────────────────────────
 
 const mockBalanceOf = vi.fn();
@@ -42,12 +41,7 @@ vi.mock("@elizaos/agent/api/twitter-verify", () => ({
 // ── Mock @elizaos/core logger ────────────────────────────────────────────
 
 vi.mock("@elizaos/core", () => ({
-  logger: {
-    info: vi.fn(),
-    warn: vi.fn(),
-    debug: vi.fn(),
-    error: vi.fn(),
-  },
+  logger: { info: vi.fn(), warn: vi.fn(), debug: vi.fn(), error: vi.fn() },
 }));
 
 // ── Import after mocks ──────────────────────────────────────────────────

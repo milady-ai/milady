@@ -1,9 +1,6 @@
 /**
  * Quick-trade panel — token address input, amount presets, buy/sell,
  * quote display, execution confirmation, and tx status tracking.
- *
- * Extracted from InventoryView to keep that component focused on
- * portfolio display and chain navigation.
  */
 
 import type {

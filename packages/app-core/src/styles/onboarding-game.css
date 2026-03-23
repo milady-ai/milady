@@ -1,90 +1,8 @@
-/* === Onboarding Game Screen === */
+/* === Onboarding Game Screen — @keyframes, pseudo-elements, and state-dependent rules === */
 
-.onboarding-screen {
-  width: 100vw;
-  height: 100vh;
-  background: transparent;
-  --text: rgba(240, 238, 250, 0.94);
-  --muted: rgba(240, 238, 250, 0.66);
-  --border: rgba(255, 255, 255, 0.14);
-  --card: rgba(10, 14, 20, 0.28);
-  --ok: rgba(240, 185, 11, 0.92);
-  --ok-muted: rgba(240, 185, 11, 0.34);
-  --ok-subtle: rgba(240, 185, 11, 0.12);
-  --accent: rgba(240, 185, 11, 0.94);
-  --accent-foreground: rgba(240, 238, 250, 0.94);
-  --danger: rgb(248, 113, 113);
-  position: relative;
-  overflow: hidden;
-}
-
-/* Background image layer */
-.onboarding-bg {
-  position: absolute;
-  inset: -20px;
-  background-size: cover;
-  background-position: center;
-  filter: blur(6px);
-  z-index: 0;
-  animation: onboarding-bg-drift 30s ease-in-out infinite alternate;
-}
-
-.onboarding-bg-overlay {
-  position: absolute;
-  inset: 0;
-  background: none;
-  z-index: 1;
-  pointer-events: none;
-}
-
-@keyframes onboarding-bg-drift {
-  0% {
-    transform: scale(1.08) translate(0, 0);
-  }
-
-  50% {
-    transform: scale(1.1) translate(-8px, 4px);
-  }
-
-  100% {
-    transform: scale(1.08) translate(4px, -3px);
-  }
-}
-
-/* Corner decorations */
-.onboarding-corner {
-  position: absolute;
-  width: 36px;
-  height: 36px;
-  pointer-events: none;
-  z-index: 30;
+/* Corner decoration animation */
+.onboarding-corner-anim {
   animation: onboarding-corner-breathe 4s ease-in-out infinite;
-}
-
-.onboarding-corner--tl {
-  top: 20px;
-  left: 20px;
-}
-
-.onboarding-corner--tr {
-  top: 20px;
-  right: 20px;
-  transform: scaleX(-1);
-  animation-delay: 1s;
-}
-
-.onboarding-corner--bl {
-  bottom: 20px;
-  left: 20px;
-  transform: scaleY(-1);
-  animation-delay: 2s;
-}
-
-.onboarding-corner--br {
-  bottom: 20px;
-  right: 20px;
-  transform: scale(-1);
-  animation-delay: 3s;
 }
 
 @keyframes onboarding-corner-breathe {
@@ -98,42 +16,17 @@
   }
 }
 
-/* === UI OVERLAY — positions step nav and content panel over the VRM === */
-.onboarding-ui-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 20;
-  display: flex;
-  justify-content: space-between;
-  pointer-events: none;
-}
-
-.onboarding-ui-overlay > * {
-  pointer-events: auto;
-}
-
-/* === LEFT PANEL — Step Navigation === */
-.onboarding-left {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 60px 0 60px 90px;
-  position: relative;
-  z-index: 10;
-}
-
+/* === Step list — pseudo-element progress line === */
 .onboarding-step-list {
   display: flex;
   flex-direction: column;
   position: relative;
 }
 
-/* Vertical connecting line — hidden, replaced by progress-only line */
 .onboarding-step-list::before {
   display: none;
 }
 
-/* Progress fill line — only connects completed + active dots */
 .onboarding-step-list::after {
   content: "";
   position: absolute;
@@ -174,6 +67,7 @@
   height: calc((100% - 28px) * 5 / 5);
 }
 
+/* Step item — state variants control child styling */
 .onboarding-step-item {
   display: flex;
   align-items: center;
@@ -217,12 +111,6 @@
     box-shadow: 0 0 20px rgba(240, 185, 11, 0.7);
     transform: rotate(45deg) scale(1.15);
   }
-}
-
-.onboarding-step-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
 }
 
 .onboarding-step-name {
@@ -275,17 +163,7 @@ button.onboarding-step-item.onboarding-step-item--clickable:hover
   color: rgba(240, 238, 250, 0.85);
 }
 
-/* === RIGHT PANEL — Content === */
-.onboarding-right {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 40px 56px 40px 0;
-  position: relative;
-  z-index: 10;
-}
-
-/* Glassmorphism panel */
+/* === Panel — scrollbar pseudo-elements, child stagger, permission overrides === */
 .onboarding-panel {
   background: rgba(10, 14, 20, 0.16);
   backdrop-filter: blur(40px) saturate(1.4);
@@ -376,7 +254,7 @@ button.onboarding-step-item.onboarding-step-item--clickable:hover
   }
 }
 
-/* Diamond ornament divider */
+/* Diamond ornament divider — pseudo-element lines */
 .onboarding-divider {
   display: flex;
   align-items: center;
@@ -397,38 +275,7 @@ button.onboarding-step-item.onboarding-step-item--clickable:hover
   );
 }
 
-.onboarding-divider-diamond {
-  width: 6px;
-  height: 6px;
-  background: rgba(240, 185, 11, 0.4);
-  transform: rotate(45deg);
-  flex-shrink: 0;
-}
-
-/* Section title (uppercase label) */
-.onboarding-section-title {
-  font-size: 12px;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: rgba(240, 238, 250, 0.62);
-  font-weight: 600;
-  text-align: center;
-  text-shadow: 0 2px 10px rgba(3, 5, 10, 0.55);
-  margin-bottom: 0;
-}
-
-/* Question text */
-.onboarding-question {
-  font-size: 20px;
-  font-weight: 300;
-  line-height: 1.4;
-  color: rgba(240, 238, 250, 0.95);
-  text-align: center;
-  text-shadow: 0 2px 10px rgba(3, 5, 10, 0.55);
-  margin-bottom: 18px;
-}
-
-/* Game-style text input */
+/* Game-style text input — :focus and ::placeholder */
 .onboarding-input {
   width: 100%;
   padding: 16px 20px;
@@ -455,211 +302,7 @@ button.onboarding-step-item.onboarding-step-item--clickable:hover
   color: rgba(240, 238, 250, 0.4);
 }
 
-/* Description text */
-.onboarding-desc {
-  font-size: 14px;
-  color: rgba(240, 238, 250, 0.62);
-  text-align: center;
-  line-height: 1.6;
-  text-shadow: 0 2px 10px rgba(3, 5, 10, 0.45);
-  margin-top: 12px;
-}
-
-/* Pill buttons (language selection) */
-.onboarding-pill-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
-  margin-bottom: 16px;
-}
-
-.onboarding-pill {
-  padding: 10px 22px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 100px;
-  color: rgba(240, 238, 250, 0.6);
-  font-size: 14px;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.onboarding-pill:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
-  color: rgba(240, 238, 250, 0.85);
-}
-
-.onboarding-pill--selected {
-  background: rgba(240, 185, 11, 0.12);
-  border-color: rgba(240, 185, 11, 0.4);
-  color: var(--text);
-}
-
-/* Permission items */
-.onboarding-permission-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.onboarding-permission-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 6px;
-  transition: all 0.3s;
-}
-
-.onboarding-permission-item--granted {
-  border-color: rgba(240, 185, 11, 0.2);
-  background: rgba(240, 185, 11, 0.04);
-}
-
-.onboarding-permission-name {
-  font-size: 14px;
-  color: rgba(240, 238, 250, 0.7);
-  letter-spacing: 0.02em;
-}
-
-.onboarding-permission-status {
-  font-size: 12px;
-  color: rgba(240, 238, 250, 0.3);
-}
-
-.onboarding-permission-item--granted .onboarding-permission-status {
-  color: rgba(240, 185, 11, 0.7);
-}
-
-/* Provider cards (connection step) */
-.onboarding-provider-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 16px;
-}
-
-.onboarding-provider-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 10px 14px;
-  min-height: 52px;
-  background: rgba(10, 14, 20, 0.24);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s;
-  text-align: left;
-  backdrop-filter: blur(18px) saturate(1.2);
-  -webkit-backdrop-filter: blur(18px) saturate(1.2);
-}
-
-.onboarding-provider-card > div:last-child {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 2px;
-}
-
-.onboarding-provider-card:hover {
-  background: rgba(10, 14, 20, 0.34);
-  border-color: rgba(255, 255, 255, 0.16);
-}
-
-.onboarding-provider-card--selected {
-  background: rgba(240, 185, 11, 0.12);
-  border-color: rgba(240, 185, 11, 0.34);
-}
-
-.onboarding-provider-icon {
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-
-.onboarding-provider-name {
-  font-size: 12px;
-  color: rgba(240, 238, 250, 0.88);
-  line-height: 1.3;
-  text-shadow: 0 1px 8px rgba(3, 5, 10, 0.6);
-}
-
-.onboarding-provider-desc {
-  font-size: 10px;
-  color: rgba(240, 238, 250, 0.58);
-  line-height: 1.3;
-  min-height: calc(1.3em * 2);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-shadow: 0 1px 8px rgba(3, 5, 10, 0.5);
-}
-
-.onboarding-provider-card--recommended {
-  border-color: rgba(240, 185, 11, 0.24);
-  background: rgba(240, 185, 11, 0.1);
-}
-
-.onboarding-provider-card--recommended:hover {
-  border-color: rgba(240, 185, 11, 0.4);
-  background: rgba(240, 185, 11, 0.14);
-}
-
-.onboarding-provider-badge {
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(240, 238, 250, 0.94);
-  background: rgba(240, 185, 11, 0.18);
-  padding: 2px 8px;
-  border-radius: 100px;
-  font-weight: 600;
-  margin-left: auto;
-  flex-shrink: 0;
-  white-space: nowrap;
-  text-shadow: 0 1px 6px rgba(3, 5, 10, 0.45);
-}
-
-.onboarding-provider-card--detected {
-  border-color: rgba(34, 197, 94, 0.24);
-  background: rgba(34, 197, 94, 0.08);
-}
-
-.onboarding-provider-card--detected:hover {
-  border-color: rgba(34, 197, 94, 0.4);
-  background: rgba(34, 197, 94, 0.12);
-}
-
-.onboarding-provider-badge--detected {
-  background: rgba(34, 197, 94, 0.2);
-  color: rgba(34, 197, 94, 0.94);
-}
-
-/* Panel footer */
-.onboarding-panel-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 24px;
-  margin-top: 18px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-/* Back link */
+/* Back link — :hover */
 .onboarding-back-link {
   font-size: 10px;
   color: rgba(240, 238, 250, 0.62);
@@ -679,7 +322,7 @@ button.onboarding-step-item.onboarding-step-item--clickable:hover
   color: rgba(240, 238, 250, 0.9);
 }
 
-/* Confirm/CTA button */
+/* Confirm/CTA button — :hover, :disabled, ripple child */
 .onboarding-confirm-btn {
   display: inline-flex;
   align-items: center;
@@ -731,16 +374,61 @@ button.onboarding-step-item.onboarding-step-item--clickable:hover
   }
 }
 
-/* Identity typewriter cursor */
-@keyframes onboarding-cursor-blink {
-  0%,
-  100% {
-    opacity: 1;
-  }
+/* Provider cards — :hover and variant states */
+.onboarding-provider-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px;
+  min-height: 52px;
+  background: rgba(10, 14, 20, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: left;
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+}
 
-  50% {
-    opacity: 0;
-  }
+.onboarding-provider-card > div:last-child {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+}
+
+.onboarding-provider-card:hover {
+  background: rgba(10, 14, 20, 0.34);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.onboarding-provider-card--selected {
+  background: rgba(240, 185, 11, 0.12);
+  border-color: rgba(240, 185, 11, 0.34);
+}
+
+.onboarding-provider-card--recommended {
+  border-color: rgba(240, 185, 11, 0.24);
+  background: rgba(240, 185, 11, 0.1);
+}
+
+.onboarding-provider-card--recommended:hover {
+  border-color: rgba(240, 185, 11, 0.4);
+  background: rgba(240, 185, 11, 0.14);
+}
+
+.onboarding-provider-card--detected {
+  border-color: rgba(34, 197, 94, 0.24);
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.onboarding-provider-card--detected:hover {
+  border-color: rgba(34, 197, 94, 0.4);
+  background: rgba(34, 197, 94, 0.12);
 }
 
 /* === Permissions section overrides — hide duplicate title === */
@@ -783,7 +471,6 @@ button.onboarding-step-item.onboarding-step-item--clickable:hover
 }
 
 /* Override Tailwind utilities on PermissionsSection using doubled selectors for specificity */
-/* Make permission card borders translucent */
 .onboarding-panel.onboarding-panel .flex.items-center.gap-4.p-4.border {
   background: rgba(10, 14, 20, 0.26);
   border-color: rgba(255, 255, 255, 0.12);
@@ -831,76 +518,7 @@ button.onboarding-step-item.onboarding-step-item--clickable:hover
   letter-spacing: 0.05em;
 }
 
-/* === IDENTITY STEP — Overwatch-style bottom character select === */
-
-/* Full-screen overlay container for identity step — no glass panel */
-.ob-identity-overlay {
-  flex: 1;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding-bottom: 0;
-  pointer-events: auto;
-}
-
-/* Root identity layout — stacks info, roster, actions at the bottom */
-.ob-identity {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  animation: onboarding-content-fade-in 0.6s ease both;
-}
-
-/* Selected character info */
-.ob-identity-info {
-  text-align: center;
-  animation: onboarding-content-fade-in 0.5s ease 0.1s both;
-}
-
-.ob-identity-name {
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(240, 238, 250, 0.95);
-  text-shadow:
-    0 0 30px rgba(240, 185, 11, 0.3),
-    0 2px 12px rgba(3, 5, 10, 0.65);
-  transition: all 0.3s ease;
-}
-
-.ob-identity-catchphrase {
-  font-size: 14px;
-  font-style: italic;
-  color: rgba(240, 185, 11, 0.7);
-  letter-spacing: 0.05em;
-  margin-top: 2px;
-  text-shadow: 0 2px 10px rgba(3, 5, 10, 0.55);
-}
-
-.ob-identity-hint {
-  font-size: 12px;
-  color: rgba(240, 238, 250, 0.45);
-  margin-top: 8px;
-  letter-spacing: 0.04em;
-}
-
-/* ── Roster bar — horizontal row pinned to bottom ── */
-.ob-identity-roster {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 0;
-  width: 100%;
-  max-width: 900px;
-  padding: 0 0.5rem;
-  animation: ob-roster-slide-up 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.15s
-    both;
-}
-
+/* Roster slide-up animation */
 @keyframes ob-roster-slide-up {
   from {
     opacity: 0;
@@ -913,148 +531,8 @@ button.onboarding-step-item.onboarding-step-item--clickable:hover
   }
 }
 
-/* Individual character card */
-.ob-identity-card {
-  position: relative;
-  flex: 1 1 0;
-  min-width: 0;
-  text-align: center;
-  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  cursor: pointer;
-  border: none;
-  background: none;
-  padding: 0;
-  margin: 0 -6px;
-  opacity: 0.5;
-  transform: translateY(12px);
-  filter: brightness(0.7);
-}
-
-.ob-identity-card:hover {
-  opacity: 0.85;
-  transform: translateY(4px);
-  filter: brightness(0.9);
-  z-index: 5;
-}
-
-.ob-identity-card--active {
-  opacity: 1;
-  z-index: 10;
-  transform: translateY(-8px);
-  filter: brightness(1);
-}
-
-.ob-identity-card--active:hover {
-  transform: translateY(-8px);
-  filter: brightness(1);
-}
-
-/* Frame border */
-.ob-identity-card-frame {
-  position: relative;
-  aspect-ratio: 14 / 18;
-  width: 100%;
-  padding: 2px;
-  transition: all 0.25s;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.ob-identity-card-frame--active {
-  background: linear-gradient(
-    180deg,
-    rgba(240, 185, 11, 0.9),
-    rgba(240, 185, 11, 0.5)
-  );
-  box-shadow:
-    0 0 24px rgba(240, 185, 11, 0.35),
-    0 4px 16px rgba(0, 0, 0, 0.3);
-}
-
-/* Inner image container */
-.ob-identity-card-inner {
-  position: relative;
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
-  background: rgba(10, 14, 20, 0.5);
-}
-
-.ob-identity-card-img {
-  height: 100%;
-  width: 100%;
-  object-fit: cover;
-  object-position: center top;
-  transition: transform 0.25s ease-out;
-}
-
-.ob-identity-card-img--active {
-  transform: scale(1.06);
-}
-
-/* Name label at bottom of card */
-.ob-identity-card-label {
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-}
-
-.ob-identity-card-name {
-  padding: 3px 36px 3px 10px;
-  font-size: clamp(8px, 1.2vw, 11px);
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.8);
-  background: rgba(0, 0, 0, 0.55);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-transform: uppercase;
-}
-
-.ob-identity-card-name--active {
-  background: rgba(0, 0, 0, 0.75);
-  color: rgba(240, 185, 11, 0.95);
-  box-shadow: inset 0 1px 0 rgba(240, 185, 11, 0.15);
-}
-
-/* ── Actions row ── */
-.ob-identity-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding-bottom: 24px;
-  animation: onboarding-content-fade-in 0.5s ease 0.3s both;
-}
-
-.ob-identity-restore {
-  background: transparent;
-  border: none;
-  color: rgba(240, 238, 250, 0.35);
-  font-size: 11px;
-  cursor: pointer;
-  text-decoration: underline;
-  font-family: inherit;
-  padding: 4px 8px;
-  transition: color 0.3s;
-}
-
-.ob-identity-restore:hover {
-  color: rgba(240, 238, 250, 0.65);
-}
-
 /* === RESPONSIVE === */
 @media (max-width: 768px) {
-  .onboarding-ui-overlay {
-    flex-direction: column;
-  }
-
-  .onboarding-left {
-    flex-direction: row;
-    justify-content: center;
-    padding: 16px;
-  }
-
   .onboarding-step-list {
     flex-direction: row;
     gap: 16px;
@@ -1074,145 +552,5 @@ button.onboarding-step-item.onboarding-step-item--clickable:hover
 
   .onboarding-step-sub {
     display: none;
-  }
-
-  .onboarding-right {
-    padding: 16px;
-  }
-
-  /* Identity bottom bar responsive */
-  .ob-identity-roster {
-    padding: 0 0.25rem;
-    max-width: 100%;
-  }
-
-  .ob-identity-card {
-    margin: 0 -8px;
-  }
-
-  .ob-identity-name {
-    font-size: 20px;
-  }
-
-  .ob-identity-actions {
-    padding-bottom: 16px;
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════════════════ */
-/* Character Editor roster (ce-roster) — used in CharacterView           */
-/* ═══════════════════════════════════════════════════════════════════════ */
-
-.ce-roster {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 0;
-  width: 100%;
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 0 0.5rem;
-}
-
-.ce-roster-card {
-  position: relative;
-  flex: 1 1 0;
-  min-width: 0;
-  text-align: center;
-  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  cursor: pointer;
-  border: none;
-  background: none;
-  padding: 0;
-  margin: 0 -12px;
-  opacity: 0.55;
-  filter: brightness(0.75);
-}
-
-.ce-roster-card:hover {
-  opacity: 0.9;
-  filter: brightness(0.95);
-  z-index: 5;
-}
-
-.ce-roster-card--active {
-  opacity: 1;
-  z-index: 10;
-  filter: brightness(1);
-}
-
-.ce-roster-card-frame {
-  position: relative;
-  aspect-ratio: 14 / 18;
-  width: 100%;
-  padding: 2px;
-  transition: all 0.25s;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.ce-roster-card-frame--active {
-  background: linear-gradient(
-    180deg,
-    rgba(240, 185, 11, 0.9),
-    rgba(240, 185, 11, 0.5)
-  );
-  box-shadow:
-    0 0 24px rgba(240, 185, 11, 0.35),
-    0 4px 16px rgba(0, 0, 0, 0.3);
-}
-
-.ce-roster-card-inner {
-  position: relative;
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
-  background: rgba(10, 14, 20, 0.5);
-}
-
-.ce-roster-card-img {
-  height: 100%;
-  width: 100%;
-  object-fit: cover;
-  object-position: center top;
-  transition: transform 0.25s ease-out;
-}
-
-.ce-roster-card-img--active {
-  transform: scale(1.06);
-}
-
-.ce-roster-card-label {
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-}
-
-.ce-roster-card-name {
-  padding: 3px 36px 3px 10px;
-  font-size: clamp(8px, 1.2vw, 11px);
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.8);
-  background: rgba(0, 0, 0, 0.55);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-transform: uppercase;
-}
-
-.ce-roster-card-name--active {
-  background: rgba(0, 0, 0, 0.75);
-  color: rgba(240, 185, 11, 0.95);
-  box-shadow: inset 0 1px 0 rgba(240, 185, 11, 0.15);
-}
-
-@media (max-width: 768px) {
-  .ce-roster {
-    padding: 0 0.25rem;
-  }
-
-  .ce-roster-card {
-    margin: 0 -8px;
   }
 }

@@ -69,7 +69,7 @@ async function resolveRegistryEndpointUrlRejection(rawUrl: string): Promise<{
     parsed = parseRegistryEndpointUrl(rawUrl);
   } catch (error) {
     return {
-      rejection: error instanceof Error ? error.message : String(error),
+      rejection: String(error),
       endpoint: null,
     };
   }
@@ -220,7 +220,7 @@ async function fetchSingleEndpoint(
     return plugins;
   } catch (err) {
     logger.warn(
-      `[registry-client] Endpoint "${label}" (${url}) failed: ${err instanceof Error ? err.message : String(err)}`,
+      `[registry-client] Endpoint "${label}" (${url}) failed: ${String(err)}`,
     );
     return null;
   }

@@ -1,8 +1,6 @@
 import * as React from "react";
 import { cn } from "../../lib/utils";
 
-/* ── SectionCard ─────────────────────────────────────────────────────── */
-
 export interface SectionCardProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Section title shown in the header */
   title?: string;

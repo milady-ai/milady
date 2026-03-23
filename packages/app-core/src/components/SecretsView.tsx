@@ -65,8 +65,8 @@ function loadPinnedKeys(): Set<string> {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return new Set(JSON.parse(raw) as string[]);
-  } catch {
-    /* ignore */
+  } catch (err) {
+    console.warn("[SecretsView] Failed to load pinned keys from localStorage:", err);
   }
   return new Set();
 }
@@ -74,8 +74,8 @@ function loadPinnedKeys(): Set<string> {
 function savePinnedKeys(keys: Set<string>) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify([...keys]));
-  } catch {
-    /* ignore */
+  } catch (err) {
+    console.warn("[SecretsView] Failed to save pinned keys to localStorage:", err);
   }
 }
 
@@ -220,13 +220,13 @@ export function SecretsView() {
     return (
       <div className="text-center py-8">
         <p className="text-[var(--danger)] text-[13px] mb-2">{error}</p>
-        <button
-          type="button"
-          className="bg-transparent border-0 text-[13px] text-[var(--text)] underline decoration-[var(--accent)] underline-offset-2 cursor-pointer hover:opacity-80"
+        <Button
+          variant="link"
+          className="text-[13px] text-[var(--text)] decoration-[var(--accent)]"
           onClick={load}
         >
           {t("common.retry")}
-        </button>
+        </Button>
       </div>
     );
   }
@@ -273,9 +273,9 @@ export function SecretsView() {
       {/* Vault secrets grouped by category */}
       {grouped.map(({ category, label, secrets: catSecrets }) => (
         <div key={category} className="mb-6">
-          <button
-            type="button"
-            className="flex items-center gap-2 w-full bg-transparent border-0 cursor-pointer text-left mb-3"
+          <Button
+            variant="ghost"
+            className="flex items-center gap-2 w-full text-left mb-3 h-auto p-0"
             onClick={() => toggleCollapse(category)}
           >
             <ChevronDown
@@ -292,7 +292,7 @@ export function SecretsView() {
             <span className="text-[12px] text-[var(--muted)]">
               ({catSecrets.length})
             </span>
-          </button>
+          </Button>
 
           {!collapsed.has(category) && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -383,13 +383,14 @@ function SecretPicker({
           <span className="text-[14px] font-semibold text-[var(--txt)]">
             {t("secretsview.AddSecretsToVault")}
           </span>
-          <button
-            type="button"
-            className="text-[var(--muted)] bg-transparent border-0 cursor-pointer text-[16px] hover:text-[var(--txt)]"
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-[var(--muted)] text-[16px] hover:text-[var(--txt)] h-6 w-6"
             onClick={onClose}
           >
             x
-          </button>
+          </Button>
         </div>
         <Input
           type="text"
@@ -517,14 +518,15 @@ function SecretCard({
           )}
           {/* Remove from vault — only if not set (set secrets always show) or if explicitly pinned */}
           {isPinned && !secret.isSet && (
-            <button
-              type="button"
-              className="text-[11px] text-[var(--muted)] bg-transparent border-0 cursor-pointer hover:text-[var(--danger)]"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[11px] text-[var(--muted)] hover:text-[var(--danger)] h-auto p-0"
               onClick={onRemove}
               title={t("secretsview.RemoveFromVault")}
             >
               x
-            </button>
+            </Button>
           )}
         </div>
       </div>

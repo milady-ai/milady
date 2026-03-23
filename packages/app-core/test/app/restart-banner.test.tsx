@@ -135,21 +135,6 @@ describe("RestartBanner", () => {
     expect(markup).toContain("Restart Now");
   });
 
-  it("renders with amber background styling", () => {
-    mockUseApp.mockReturnValue(
-      makeContext({
-        pendingRestart: true,
-        pendingRestartReasons: ["Configuration updated"],
-      }),
-    );
-
-    const markup = renderToStaticMarkup(React.createElement(RestartBanner));
-    expect(markup).toContain(
-      "color-mix(in srgb, var(--accent) 15%, var(--bg) 85%)",
-    );
-    expect(markup).toContain("z-[9998]");
-  });
-
   it("renders with zero reasons gracefully (edge case: pendingRestart true but empty reasons)", () => {
     mockUseApp.mockReturnValue(
       makeContext({

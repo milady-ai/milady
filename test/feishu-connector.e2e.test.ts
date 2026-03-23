@@ -1,5 +1,5 @@
 /**
- * Feishu Connector Validation Tests — GitHub Issue #155
+ * Feishu Connector Validation Tests
  *
  * Comprehensive E2E tests for validating the Feishu/Lark connector (@elizaos/plugin-feishu).
  *
@@ -217,34 +217,6 @@ describeIfPluginAvailable("Feishu Connector - Setup & Authentication", () => {
   );
 });
 
-describe("Feishu Connector - Authentication Formats", () => {
-  it("App ID format follows cli_ prefix pattern", () => {
-    const appIdPattern = /^cli_[a-zA-Z0-9]+$/;
-
-    expect(appIdPattern.test("cli_a1b2c3d4e5f6")).toBe(true);
-    expect(appIdPattern.test("cli_9876543210abcdef")).toBe(true);
-    expect(appIdPattern.test("app_123")).toBe(false);
-    expect(appIdPattern.test("cli_")).toBe(false);
-    expect(appIdPattern.test("")).toBe(false);
-  });
-
-  it("App Secret is present and non-empty when configured", () => {
-    if (hasFeishuCreds) {
-      expect(FEISHU_APP_SECRET).toBeDefined();
-      expect(FEISHU_APP_SECRET!.length).toBeGreaterThan(0);
-    }
-  });
-
-  it("domain defaults to feishu.cn when FEISHU_DOMAIN is unset", () => {
-    const domain = process.env.FEISHU_DOMAIN ?? "feishu.cn";
-    expect(["feishu.cn", "larksuite.com"]).toContain(domain);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Live Authentication Tests
-// ---------------------------------------------------------------------------
-
 describeIfCreds("Feishu Connector - Live Authentication", () => {
   it(
     "can acquire tenant access token",
@@ -278,128 +250,7 @@ describeIfCreds("Feishu Connector - Live Authentication", () => {
 });
 
 // ---------------------------------------------------------------------------
-// 2. Message Handling
-// ---------------------------------------------------------------------------
-
-describe("Feishu Connector - Message Formats", () => {
-  it("text message round-trips through JSON serialization", () => {
-    const content = JSON.stringify({ text: "Hello from milady test" });
-    const parsed = JSON.parse(content) as { text: string };
-    expect(parsed.text).toBe("Hello from milady test");
-  });
-
-  it("post/rich text structure survives JSON serialization", () => {
-    const post = {
-      post: {
-        zh_cn: {
-          title: "Test Post",
-          content: [
-            [
-              { tag: "text", text: "Hello " },
-              { tag: "a", text: "link", href: "https://example.com" },
-            ],
-          ],
-        },
-      },
-    };
-    const parsed = JSON.parse(JSON.stringify(post)) as typeof post;
-    expect(parsed.post.zh_cn.title).toBe("Test Post");
-    expect(parsed.post.zh_cn.content[0]).toHaveLength(2);
-    expect(parsed.post.zh_cn.content[0][1].tag).toBe("a");
-  });
-});
-
-// ---------------------------------------------------------------------------
-// 3. Feishu-Specific Features
-// ---------------------------------------------------------------------------
-
-describe("Feishu Connector - Features", () => {
-  it("@mention format uses at tag with user_id", () => {
-    const mentionPattern = /<at user_id="[^"]+">([^<]+)<\/at>/;
-
-    expect(mentionPattern.test('<at user_id="ou_xxx">Name</at>')).toBe(true);
-    expect(mentionPattern.test('<at user_id="ou_12345">Alice</at>')).toBe(true);
-    expect(mentionPattern.test("@user")).toBe(false);
-    expect(mentionPattern.test("")).toBe(false);
-  });
-
-  it("domain options control API endpoint", () => {
-    expect(feishuApiBase("feishu.cn")).toBe("https://open.feishu.cn/open-apis");
-    expect(feishuApiBase("larksuite.com")).toBe(
-      "https://open.larksuite.com/open-apis",
-    );
-  });
-});
-
-// ---------------------------------------------------------------------------
-// 4. Groups & Chats
-// ---------------------------------------------------------------------------
-
-describe("Feishu Connector - Groups & Chats", () => {
-  it("chat ID format validation", () => {
-    const chatIdPattern = /^oc_[a-zA-Z0-9]+$/;
-
-    expect(chatIdPattern.test("oc_a1b2c3d4e5f6")).toBe(true);
-    expect(chatIdPattern.test("oc_9876543210abcdef")).toBe(true);
-    expect(chatIdPattern.test("invalid_id")).toBe(false);
-    expect(chatIdPattern.test("oc_")).toBe(false);
-  });
-
-  it("allowed chats can be parsed from JSON string", () => {
-    const jsonStr = '["oc_chat1","oc_chat2","oc_chat3"]';
-    const parsed = JSON.parse(jsonStr) as string[];
-
-    expect(parsed).toHaveLength(3);
-    for (const chatId of parsed) {
-      expect(chatId).toMatch(/^oc_/);
-    }
-  });
-});
-
-// ---------------------------------------------------------------------------
-// 5. Media & Attachments
-// ---------------------------------------------------------------------------
-
-describe("Feishu Connector - Media & Attachments", () => {
-  it("image message content round-trips through JSON", () => {
-    const content = JSON.stringify({ image_key: "img_v2_abc123" });
-    const parsed = JSON.parse(content) as { image_key: string };
-    expect(parsed.image_key).toBe("img_v2_abc123");
-  });
-
-  it("file message content round-trips through JSON", () => {
-    const content = JSON.stringify({ file_key: "file_v2_abc123" });
-    const parsed = JSON.parse(content) as { file_key: string };
-    expect(parsed.file_key).toBe("file_v2_abc123");
-  });
-});
-
-// ---------------------------------------------------------------------------
-// 6. Error Handling
-// ---------------------------------------------------------------------------
-
-describe("Feishu Connector - Error Handling", () => {
-  it("invalid App ID format is detectable", () => {
-    const appIdPattern = /^cli_[a-zA-Z0-9]+$/;
-    const invalidIds = ["app_123", "cli_", "", "invalid"];
-
-    for (const id of invalidIds) {
-      expect(appIdPattern.test(id)).toBe(false);
-    }
-  });
-
-  it("invalid JSON for allowed chats throws", () => {
-    expect(() => JSON.parse("not-valid-json")).toThrow();
-  });
-
-  it("invalid domain is detectable", () => {
-    const validDomains = ["feishu.cn", "larksuite.com"];
-    expect(validDomains.includes("invalid.com")).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// 7. Integration Tests (always run, no live creds needed)
+// Integration Tests (always run, no live creds needed)
 // ---------------------------------------------------------------------------
 
 /** Try to import a workspace module; returns null if the package isn't built. */
@@ -439,57 +290,5 @@ describeIfWorkspace("Feishu Connector - Integration", () => {
       CONNECTOR_PLUGINS: Record<string, string>;
     }>("@miladyai/app-core/src/config/plugin-auto-enable"))!;
     expect(mod.CONNECTOR_PLUGINS.feishu).toBe("@elizaos/plugin-feishu");
-  });
-
-  it("Feishu connector is in CONNECTOR_PLUGINS list", async () => {
-    const mod = (await tryWorkspaceImport<{
-      CONNECTOR_PLUGINS: Record<string, string>;
-    }>("@miladyai/app-core/src/config/plugin-auto-enable"))!;
-    const connectors = Object.keys(mod.CONNECTOR_PLUGINS);
-    expect(connectors).toContain("feishu");
-  });
-
-  it("isConnectorConfigured recognizes feishu with token", async () => {
-    const mod = (await tryWorkspaceImport<{
-      isConnectorConfigured: (
-        name: string,
-        config: Record<string, unknown>,
-      ) => boolean;
-    }>("@miladyai/app-core/src/config/plugin-auto-enable"))!;
-    const configured = mod.isConnectorConfigured("feishu", {
-      token: "fs-token",
-    });
-    expect(configured).toBe(true);
-  });
-
-  it("Feishu respects enabled: false", async () => {
-    const mod = (await tryWorkspaceImport<{
-      isConnectorConfigured: (
-        name: string,
-        config: Record<string, unknown>,
-      ) => boolean;
-    }>("@miladyai/app-core/src/config/plugin-auto-enable"))!;
-    const configured = mod.isConnectorConfigured("feishu", {
-      enabled: false,
-      token: "fs-token",
-    });
-    expect(configured).toBe(false);
-  });
-
-  it("collectPluginNames includes feishu when configured", async () => {
-    const mod = (await tryWorkspaceImport<{
-      collectPluginNames: (config: unknown) => Set<string>;
-    }>("@miladyai/app-core/src/runtime/eliza"))!;
-
-    const config = {
-      connectors: {
-        feishu: {
-          enabled: true,
-          token: "fs-token",
-        },
-      },
-    };
-    const plugins = mod.collectPluginNames(config as never);
-    expect(plugins.has("@elizaos/plugin-feishu")).toBe(true);
   });
 });

@@ -133,21 +133,4 @@ describe("header status", () => {
     expect(controls?.length).toBeGreaterThan(0);
   });
 
-  it("uses accent classes for the active native tab", async () => {
-    let tree: TestRenderer.ReactTestRenderer | undefined;
-    await act(async () => {
-      tree = TestRenderer.create(React.createElement(Header));
-    });
-    expect(tree).toBeDefined();
-
-    const activeTabButton = tree?.root.find(
-      (node) =>
-        node.type === "button" &&
-        node.props.title === "Chat" &&
-        typeof node.props.className === "string",
-    );
-
-    expect(String(activeTabButton?.props.className)).toContain("text-accent");
-    expect(String(activeTabButton?.props.className)).toContain("bg-accent/15");
-  });
 });

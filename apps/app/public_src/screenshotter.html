@@ -33,7 +33,7 @@
 <div class="grid" id="grid"></div>
 
 <script type="module">
-import { MILADY_CHARACTER_ASSETS } from "@miladyai/app-core/character-catalog";
+import { getMiladyCharacterAssets } from "@miladyai/app-core/character-catalog";
 
 /**
  * Import Three.js and three-vrm. Vite resolves these when screenshotter is an entry point.
@@ -55,7 +55,7 @@ async function loadModules() {
   };
 }
 
-const vrmAssets = MILADY_CHARACTER_ASSETS;
+const vrmAssets = getMiladyCharacterAssets();
 const CANVAS_W = 400;
 const CANVAS_H = 400;
 const grid = document.getElementById('grid');

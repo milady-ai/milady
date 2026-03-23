@@ -22,10 +22,7 @@ import {
   buildCharacterFromConfig,
   collectPluginNames,
 } from "../src/runtime/eliza";
-
-// ---------------------------------------------------------------------------
-// Env snapshot helper
-// ---------------------------------------------------------------------------
+import { saveEnv } from "../../../test/helpers/test-utils";
 
 const ALL_PROVIDER_KEYS = [
   "ELIZAOS_CLOUD_ENABLED",
@@ -55,30 +52,12 @@ const LIVE_PROVIDER_KEY_SNAPSHOT = {
   elizaCloudApiKey: process.env.ELIZAOS_CLOUD_API_KEY,
 };
 
-function envSnapshot(keys: string[]): {
-  save: () => void;
-  restore: () => void;
-} {
-  const saved = new Map<string, string | undefined>();
-  return {
-    save() {
-      for (const k of keys) saved.set(k, process.env[k]);
-    },
-    restore() {
-      for (const [k, v] of saved) {
-        if (v === undefined) delete process.env[k];
-        else process.env[k] = v;
-      }
-    },
-  };
-}
-
-const snap = envSnapshot(ALL_PROVIDER_KEYS);
+let envBackup: { restore: () => void };
 beforeEach(() => {
-  snap.save();
+  envBackup = saveEnv(...ALL_PROVIDER_KEYS);
   for (const k of ALL_PROVIDER_KEYS) delete process.env[k];
 });
-afterEach(() => snap.restore());
+afterEach(() => envBackup.restore());
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 1. Provider plugin selection — no allowlist

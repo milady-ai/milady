@@ -497,52 +497,6 @@ describe("AgentCard regression", () => {
   });
 });
 
-/* ------------------------------------------------------------------ */
-/*  AuthGate                                                           */
-/* ------------------------------------------------------------------ */
-describe("AuthGate", () => {
-  it("renders children when authenticated", async () => {
-    localStorage.setItem("milady-cloud-token", "test-key");
-    let result: ReturnType<typeof render>;
-    await act(async () => {
-      const { AuthGate } = await import("../components/dashboard/AuthGate");
-      result = render(
-        <AuthGate>
-          <div>Dashboard Content</div>
-        </AuthGate>,
-      );
-    });
-    expect(result?.getByText("Dashboard Content")).toBeTruthy();
-  });
-
-  it("renders children when not authenticated", async () => {
-    let result: ReturnType<typeof render>;
-    await act(async () => {
-      const { AuthGate } = await import("../components/dashboard/AuthGate");
-      result = render(
-        <AuthGate>
-          <div>Dashboard Content</div>
-        </AuthGate>,
-      );
-    });
-    expect(result?.getByText("Dashboard Content")).toBeTruthy();
-  });
-
-  it("does not block the dashboard anymore", async () => {
-    let result: ReturnType<typeof render>;
-    await act(async () => {
-      const { AuthGate } = await import("../components/dashboard/AuthGate");
-      result = render(
-        <AuthGate>
-          <div>child</div>
-        </AuthGate>,
-      );
-    });
-    expect(result?.queryByText("Sign in with Eliza Cloud")).toBeNull();
-    expect(result?.getByText("child")).toBeTruthy();
-  });
-});
-
 describe("CreateAgentForm", () => {
   it("shows a Sign In button for unauthenticated users", () => {
     vi.spyOn(auth, "isAuthenticated").mockReturnValue(false);

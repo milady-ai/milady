@@ -5,7 +5,5 @@
  * without hitting module resolution errors.
  */
 export class LookingGlassWebXRPolyfill {
-  constructor(_options?: Record<string, unknown>) {
-    // no-op in test environment
-  }
+  constructor(_options?: Record<string, unknown>) {}
 }

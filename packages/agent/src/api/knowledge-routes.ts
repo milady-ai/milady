@@ -866,32 +866,22 @@ export async function handleKnowledgeRoutes(
         (document.metadata as Record<string, unknown>)
           ?.includeImageDescriptions === true;
       if (includeDescriptions && runtime) {
-        // Try to describe the image via the runtime's vision model
-        try {
-          const { ModelType } = await import("@elizaos/core");
-          const dataUri = `data:${contentType};base64,${content}`;
-          const description = await runtime.useModel(
-            ModelType.IMAGE_DESCRIPTION,
-            {
-              imageUrl: dataUri,
-              prompt: `Describe this image in detail for a knowledge base. Focus on text content, data, charts, and key visual elements. Image filename: ${document.filename}`,
-            },
-          );
-          const descText =
-            typeof description === "string"
-              ? description
-              : (description as { description?: string }).description ||
-                "Image uploaded";
-          content = `[Image: ${document.filename}]\n\n${descText}`;
-          contentType = "text/plain";
-        } catch (err) {
-          // Vision failed — store as a reference entry
-          content = `[Image: ${document.filename}] — Image uploaded. Vision description unavailable.`;
-          contentType = "text/plain";
-          warnings.push(
-            `Vision description failed for ${document.filename}: ${err instanceof Error ? err.message : String(err)}`,
-          );
-        }
+        const { ModelType } = await import("@elizaos/core");
+        const dataUri = `data:${contentType};base64,${content}`;
+        const description = await runtime.useModel(
+          ModelType.IMAGE_DESCRIPTION,
+          {
+            imageUrl: dataUri,
+            prompt: `Describe this image in detail for a knowledge base. Focus on text content, data, charts, and key visual elements. Image filename: ${document.filename}`,
+          },
+        );
+        const descText =
+          typeof description === "string"
+            ? description
+            : (description as { description?: string }).description ||
+              "Image uploaded";
+        content = `[Image: ${document.filename}]\n\n${descText}`;
+        contentType = "text/plain";
       } else {
         // No vision requested — store as a reference entry
         content = `[Image: ${document.filename}] — Image uploaded without text extraction.`;
@@ -1027,8 +1017,7 @@ export async function handleKnowledgeRoutes(
           index,
           ok: false,
           filename,
-          error:
-            err instanceof Error ? err.message : "Failed to upload document",
+          error: String(err),
         });
       }
     }
@@ -1063,18 +1052,8 @@ export async function handleKnowledgeRoutes(
     const urlToFetch = body.url.trim();
 
     // Fetch and process the URL content
-    let content: string;
-    let contentType: string;
-    let filename: string;
-    try {
-      ({ content, contentType, filename } = await fetchUrlContent(urlToFetch));
-    } catch (err) {
-      error(
-        res,
-        err instanceof Error ? err.message : "Failed to fetch URL content",
-      );
-      return true;
-    }
+    const { content, contentType, filename } =
+      await fetchUrlContent(urlToFetch);
 
     const result = await knowledgeService.addKnowledge({
       agentId,

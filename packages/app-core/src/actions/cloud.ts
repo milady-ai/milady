@@ -1,10 +1,6 @@
-/**
- * Cloud action helpers — extracted from AppContext.
- *
- * Pure functions for Eliza Cloud status polling and credit management.
- */
+/** Cloud action helpers — Eliza Cloud status polling and credit management. */
 
-import type { ElizaClient } from "../api/client";
+import type { MiladyClient } from "../api/client";
 
 export interface CloudStatusResult {
   enabled: boolean;
@@ -17,7 +13,7 @@ export interface CloudStatusResult {
 }
 
 export async function pollCloudStatus(
-  client: ElizaClient,
+  client: MiladyClient,
 ): Promise<CloudStatusResult> {
   const cloudStatus = await client.getCloudStatus().catch(() => null);
   if (!cloudStatus) {

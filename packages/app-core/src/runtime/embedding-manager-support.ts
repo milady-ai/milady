@@ -2,6 +2,7 @@ import fs from "node:fs";
 import https from "node:https";
 import os from "node:os";
 import path from "node:path";
+import { formatByteSize } from "../components/format.js";
 import { getLogPrefix } from "../utils/log-prefix.js";
 import { EMBEDDING_PRESETS } from "./embedding-presets.js";
 
@@ -319,12 +320,13 @@ export function isMiladyEmbeddingWarmupReuseDisabled(): boolean {
   return raw === "1" || raw === "true" || raw === "yes";
 }
 
+/** Alias for the shared byte-size formatter with precision tuned for download progress. */
 function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
-  if (bytes < 1024 * 1024 * 1024)
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+  return formatByteSize(bytes, {
+    kbPrecision: 0,
+    mbPrecision: 1,
+    gbPrecision: 2,
+  });
 }
 
 function downloadFile(

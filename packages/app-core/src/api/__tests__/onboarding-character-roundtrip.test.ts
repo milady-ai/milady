@@ -18,7 +18,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { STYLE_PRESETS } from "../../onboarding-presets";
 
-// ── Mock the config module so we can capture what gets saved ──────────
 let savedConfig: Record<string, unknown> = {};
 
 vi.mock("../../config/config", () => ({
@@ -30,7 +29,6 @@ vi.mock("../../config/config", () => ({
 
 import { persistCompatOnboardingDefaults } from "../server";
 
-// ── Mock the plugin imports so buildCharacterFromConfig doesn't blow up ──
 vi.mock("@elizaos/plugin-agent-orchestrator", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-agent-skills", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-anthropic", () => ({ default: {} }));
@@ -76,8 +74,6 @@ describe("Onboarding → Character round-trip", () => {
   });
 
   it("Chen preset: all personality fields survive persist → build round-trip", () => {
-    // ── Step 1: Simulate the onboarding submission body ──────────────
-    // This is what the frontend sends via submitOnboarding().
     const systemPrompt = chenPreset.system.replace(/\{\{name\}\}/g, "Chen");
     const onboardingBody = {
       name: "Chen",
@@ -90,11 +86,9 @@ describe("Onboarding → Character round-trip", () => {
       messageExamples: chenPreset.messageExamples,
     };
 
-    // ── Step 2: persistCompatOnboardingDefaults writes to config ─────
     const adminEntityId = persistCompatOnboardingDefaults(onboardingBody);
     expect(adminEntityId).toBeTruthy();
 
-    // ── Step 3: Verify the saved config has ALL fields ───────────────
     const agents = savedConfig.agents as Record<string, unknown>;
     expect(agents).toBeTruthy();
     const list = agents.list as Record<string, unknown>[];
@@ -110,51 +104,33 @@ describe("Onboarding → Character round-trip", () => {
     expect(agentEntry.postExamples).toEqual(chenPreset.postExamples);
     expect(agentEntry.messageExamples).toEqual(chenPreset.messageExamples);
 
-    // ── Step 4: Build character from the persisted config ────────────
-    // This is what happens when the agent restarts.
+    // Build character from persisted config (simulates agent restart)
     const character = buildCharacterFromConfig(savedConfig as ElizaConfig);
 
-    // ── Step 5: Verify the built character has ALL personality data ──
     expect(character.name).toBe("Chen");
-
-    // Bio should be the preset bio (array of strings with {{name}})
     expect(Array.isArray(character.bio)).toBe(true);
     expect((character.bio as string[]).length).toBe(chenPreset.bio.length);
-
-    // System prompt should be populated
     expect(character.system).toBe(systemPrompt);
-
-    // Style rules should be fully populated
     expect(character.style).toBeTruthy();
     expect(character.style?.all?.length).toBeGreaterThan(0);
     expect(character.style?.chat?.length).toBeGreaterThan(0);
     expect(character.style?.post?.length).toBeGreaterThan(0);
-
-    // Adjectives should be populated
     expect(character.adjectives).toBeTruthy();
     expect(character.adjectives?.length).toBe(chenPreset.adjectives.length);
     expect(character.adjectives).toContain("warm");
     expect(character.adjectives).toContain("gentle");
 
-    // Topics should be populated
     expect(Array.isArray(character.topics)).toBe(true);
-    expect((character.topics as string[]).length).toBe(
-      chenPreset.topics!.length,
-    );
+    expect((character.topics as string[]).length).toBe(chenPreset.topics!.length);
     expect(character.topics).toContain("emotional intelligence");
     expect(character.topics).toContain("design thinking");
 
-    // Post examples should be populated
     expect(character.postExamples.length).toBeGreaterThan(0);
     expect(character.postExamples).toContain("you've got this");
-
-    // Message examples should be populated and normalized
     expect(character.messageExamples.length).toBeGreaterThan(0);
   });
 
   it("name-only config: preset fallback populates all character fields", () => {
-    // ── Simulate a config where only the name was saved (worst case) ─
-    // This tests the bundled preset fallback path.
     savedConfig = {
       agents: { list: [{ id: "main", name: "Chen" }] },
     };
@@ -162,17 +138,12 @@ describe("Onboarding → Character round-trip", () => {
     const character = buildCharacterFromConfig(savedConfig as ElizaConfig);
 
     expect(character.name).toBe("Chen");
-
-    // Even with name-only config, the bundled preset should fill everything
     expect(character.style).toBeTruthy();
     expect(character.style?.all?.length).toBeGreaterThan(0);
-
     expect(character.adjectives).toBeTruthy();
     expect(character.adjectives?.length).toBeGreaterThan(0);
-
     expect(Array.isArray(character.topics)).toBe(true);
     expect((character.topics as string[]).length).toBeGreaterThan(0);
-
     expect(character.postExamples.length).toBeGreaterThan(0);
     expect(character.messageExamples.length).toBeGreaterThan(0);
   });
@@ -206,15 +177,12 @@ describe("Onboarding → Character round-trip", () => {
   });
 
   it("all preset characters have complete data after round-trip", () => {
-    // Verify every bundled preset character works end-to-end
     for (const preset of STYLE_PRESETS) {
       savedConfig = {};
-      const systemPrompt = preset.system.replace(/\{\{name\}\}/g, preset.name);
-
       persistCompatOnboardingDefaults({
         name: preset.name,
         bio: preset.bio,
-        systemPrompt,
+        systemPrompt: preset.system.replace(/\{\{name\}\}/g, preset.name),
         style: preset.style,
         adjectives: preset.adjectives,
         topics: preset.topics,
@@ -225,22 +193,10 @@ describe("Onboarding → Character round-trip", () => {
       const character = buildCharacterFromConfig(savedConfig as ElizaConfig);
 
       expect(character.name).toBe(preset.name);
-      expect(character.style?.all?.length).toBeGreaterThan(
-        0,
-        `${preset.name}: style.all should not be empty`,
-      );
-      expect(character.adjectives?.length).toBeGreaterThan(
-        0,
-        `${preset.name}: adjectives should not be empty`,
-      );
-      expect(character.postExamples.length).toBeGreaterThan(
-        0,
-        `${preset.name}: postExamples should not be empty`,
-      );
-      expect(character.messageExamples.length).toBeGreaterThan(
-        0,
-        `${preset.name}: messageExamples should not be empty`,
-      );
+      expect(character.style?.all?.length).toBeGreaterThan(0);
+      expect(character.adjectives?.length).toBeGreaterThan(0);
+      expect(character.postExamples.length).toBeGreaterThan(0);
+      expect(character.messageExamples.length).toBeGreaterThan(0);
 
       if (preset.topics && preset.topics.length > 0) {
         expect(

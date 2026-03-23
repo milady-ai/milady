@@ -202,10 +202,10 @@ export function createWorkspaceProvider(options?: {
         };
       } catch (err) {
         logger.warn(
-          `[workspace-provider] Failed to load workspace context: ${err instanceof Error ? err.message : err}`,
+          `[workspace-provider] Failed to load workspace context: ${String(err)}`,
         );
         return {
-          text: `[Workspace context unavailable: ${err instanceof Error ? err.message : err}]`,
+          text: `[Workspace context unavailable: ${String(err)}]`,
           data: {},
         };
       }

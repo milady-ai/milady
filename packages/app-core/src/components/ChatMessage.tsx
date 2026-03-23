@@ -10,6 +10,7 @@ import { Check, Copy, Pencil, Trash2, Volume2 } from "lucide-react";
 import {
   type KeyboardEvent,
   type TouchEvent,
+  memo,
   useCallback,
   useEffect,
   useRef,
@@ -28,7 +29,7 @@ interface ChatMessageProps {
   onDelete?: (messageId: string) => void;
 }
 
-export function ChatMessage({
+export const ChatMessage = memo(function ChatMessage({
   message,
   isGrouped = false,
   agentName = "Agent",
@@ -342,11 +343,11 @@ export function ChatMessage({
       </div>
     </article>
   );
-}
+});
 
 /* ── Typing Indicator ────────────────────────────────────────────────── */
 
-export function TypingIndicator({
+export const TypingIndicator = memo(function TypingIndicator({
   agentName,
   agentAvatarSrc,
 }: {
@@ -394,6 +395,6 @@ export function TypingIndicator({
       </div>
     </div>
   );
-}
+});
 
 // ChatEmptyState removed

@@ -8,8 +8,8 @@
  * auth on mutation routes.
  */
 
-import http from "node:http";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { req } from "../../../../test/helpers/http";
 import { startApiServer } from "./server";
 
 // Prevent mcp-marketplace import side effects
@@ -18,43 +18,17 @@ vi.mock("../services/mcp-marketplace", () => ({
   getMcpServerDetails: vi.fn().mockResolvedValue(null),
 }));
 
-// ── HTTP helper ─────────────────────────────────────────────────────────────
-
-function req(
+/** Convenience wrapper: translates the old `{ body, token }` call convention. */
+function authReq(
   port: number,
   method: string,
   path: string,
   opts?: { body?: Record<string, unknown>; token?: string },
-): Promise<{ status: number; data: Record<string, unknown> }> {
-  return new Promise((resolve, reject) => {
-    const b = opts?.body ? JSON.stringify(opts.body) : undefined;
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-    };
-    if (b) headers["Content-Length"] = String(Buffer.byteLength(b));
-    if (opts?.token) headers.Authorization = `Bearer ${opts.token}`;
-
-    const r = http.request(
-      { hostname: "127.0.0.1", port, path, method, headers },
-      (res) => {
-        const chunks: Buffer[] = [];
-        res.on("data", (c: Buffer) => chunks.push(c));
-        res.on("end", () => {
-          const raw = Buffer.concat(chunks).toString("utf-8");
-          let data: Record<string, unknown> = {};
-          try {
-            data = JSON.parse(raw) as Record<string, unknown>;
-          } catch {
-            data = { _raw: raw };
-          }
-          resolve({ status: res.statusCode ?? 0, data });
-        });
-      },
-    );
-    r.on("error", reject);
-    if (b) r.write(b);
-    r.end();
-  });
+) {
+  const headers: Record<string, string> | undefined = opts?.token
+    ? { Authorization: `Bearer ${opts.token}` }
+    : undefined;
+  return req(port, method, path, opts?.body, headers);
 }
 
 // ── Tests ───────────────────────────────────────────────────────────────────
@@ -86,7 +60,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
 
   describe("PUT /api/config", () => {
     it("rejects unauthenticated config mutation with 401", async () => {
-      const { status, data } = await req(port, "PUT", "/api/config", {
+      const { status, data } = await authReq(port, "PUT", "/api/config", {
         body: { agentName: "hacked" },
       });
       expect(status).toBe(401);
@@ -94,7 +68,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("accepts authenticated config mutation", async () => {
-      const { status } = await req(port, "PUT", "/api/config", {
+      const { status } = await authReq(port, "PUT", "/api/config", {
         body: { agentName: "TestAgent" },
         token: TOKEN,
       });
@@ -102,7 +76,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("rejects config mutation with wrong token", async () => {
-      const { status, data } = await req(port, "PUT", "/api/config", {
+      const { status, data } = await authReq(port, "PUT", "/api/config", {
         body: { agentName: "hacked" },
         token: WRONG_TOKEN,
       });
@@ -115,7 +89,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
 
   describe("PUT /api/secrets", () => {
     it("rejects unauthenticated secrets update with 401", async () => {
-      const { status, data } = await req(port, "PUT", "/api/secrets", {
+      const { status, data } = await authReq(port, "PUT", "/api/secrets", {
         body: { OPENAI_API_KEY: "stolen" },
       });
       expect(status).toBe(401);
@@ -123,7 +97,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("accepts authenticated secrets update", async () => {
-      const { status } = await req(port, "PUT", "/api/secrets", {
+      const { status } = await authReq(port, "PUT", "/api/secrets", {
         body: {},
         token: TOKEN,
       });
@@ -131,7 +105,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("rejects secrets update with wrong token", async () => {
-      const { status, data } = await req(port, "PUT", "/api/secrets", {
+      const { status, data } = await authReq(port, "PUT", "/api/secrets", {
         body: { OPENAI_API_KEY: "stolen" },
         token: WRONG_TOKEN,
       });
@@ -144,7 +118,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
 
   describe("POST /api/connectors", () => {
     it("rejects unauthenticated connector creation with 401", async () => {
-      const { status, data } = await req(port, "POST", "/api/connectors", {
+      const { status, data } = await authReq(port, "POST", "/api/connectors", {
         body: { name: "telegram", config: {} },
       });
       expect(status).toBe(401);
@@ -152,7 +126,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("accepts authenticated connector creation", async () => {
-      const { status } = await req(port, "POST", "/api/connectors", {
+      const { status } = await authReq(port, "POST", "/api/connectors", {
         body: { name: "telegram", config: {} },
         token: TOKEN,
       });
@@ -160,7 +134,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("rejects connector creation with wrong token", async () => {
-      const { status, data } = await req(port, "POST", "/api/connectors", {
+      const { status, data } = await authReq(port, "POST", "/api/connectors", {
         body: { name: "telegram", config: {} },
         token: WRONG_TOKEN,
       });
@@ -173,7 +147,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
 
   describe("PUT /api/mcp/config", () => {
     it("rejects unauthenticated MCP config update with 401", async () => {
-      const { status, data } = await req(port, "PUT", "/api/mcp/config", {
+      const { status, data } = await authReq(port, "PUT", "/api/mcp/config", {
         body: { servers: {} },
       });
       expect(status).toBe(401);
@@ -181,7 +155,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("accepts authenticated MCP config update", async () => {
-      const { status } = await req(port, "PUT", "/api/mcp/config", {
+      const { status } = await authReq(port, "PUT", "/api/mcp/config", {
         body: { servers: {} },
         token: TOKEN,
       });
@@ -189,7 +163,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("rejects MCP config update with wrong token", async () => {
-      const { status, data } = await req(port, "PUT", "/api/mcp/config", {
+      const { status, data } = await authReq(port, "PUT", "/api/mcp/config", {
         body: { servers: {} },
         token: WRONG_TOKEN,
       });
@@ -202,7 +176,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
 
   describe("POST /api/wallet/generate", () => {
     it("rejects unauthenticated wallet generation with 401", async () => {
-      const { status, data } = await req(port, "POST", "/api/wallet/generate", {
+      const { status, data } = await authReq(port, "POST", "/api/wallet/generate", {
         body: { chain: "evm" },
       });
       expect(status).toBe(401);
@@ -210,7 +184,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("accepts authenticated wallet generation", async () => {
-      const { status } = await req(port, "POST", "/api/wallet/generate", {
+      const { status } = await authReq(port, "POST", "/api/wallet/generate", {
         body: { chain: "evm" },
         token: TOKEN,
       });
@@ -218,7 +192,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("rejects wallet generation with wrong token", async () => {
-      const { status, data } = await req(port, "POST", "/api/wallet/generate", {
+      const { status, data } = await authReq(port, "POST", "/api/wallet/generate", {
         body: { chain: "evm" },
         token: WRONG_TOKEN,
       });
@@ -229,7 +203,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
 
   describe("PUT /api/wallet/config", () => {
     it("rejects unauthenticated wallet config update with 401", async () => {
-      const { status, data } = await req(port, "PUT", "/api/wallet/config", {
+      const { status, data } = await authReq(port, "PUT", "/api/wallet/config", {
         body: { alchemyApiKey: "stolen" },
       });
       expect(status).toBe(401);
@@ -237,7 +211,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("accepts authenticated wallet config update", async () => {
-      const { status } = await req(port, "PUT", "/api/wallet/config", {
+      const { status } = await authReq(port, "PUT", "/api/wallet/config", {
         body: {},
         token: TOKEN,
       });
@@ -245,7 +219,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("rejects wallet config update with wrong token", async () => {
-      const { status, data } = await req(port, "PUT", "/api/wallet/config", {
+      const { status, data } = await authReq(port, "PUT", "/api/wallet/config", {
         body: { alchemyApiKey: "stolen" },
         token: WRONG_TOKEN,
       });
@@ -258,13 +232,13 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
 
   describe("POST /api/agent/restart", () => {
     it("rejects unauthenticated agent restart with 401", async () => {
-      const { status, data } = await req(port, "POST", "/api/agent/restart");
+      const { status, data } = await authReq(port, "POST", "/api/agent/restart");
       expect(status).toBe(401);
       expect(data.error).toMatch(/unauthorized/i);
     });
 
     it("accepts authenticated agent restart", async () => {
-      const { status } = await req(port, "POST", "/api/agent/restart", {
+      const { status } = await authReq(port, "POST", "/api/agent/restart", {
         token: TOKEN,
       });
       // 501 is expected (no onRestart handler), but NOT 401
@@ -272,7 +246,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("rejects agent restart with wrong token", async () => {
-      const { status, data } = await req(port, "POST", "/api/agent/restart", {
+      const { status, data } = await authReq(port, "POST", "/api/agent/restart", {
         token: WRONG_TOKEN,
       });
       expect(status).toBe(401);
@@ -294,7 +268,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("accepts authenticated connector deletion", async () => {
-      const { status } = await req(port, "DELETE", "/api/connectors/telegram", {
+      const { status } = await authReq(port, "DELETE", "/api/connectors/telegram", {
         token: TOKEN,
       });
       expect(status).not.toBe(401);
@@ -327,7 +301,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("accepts authenticated MCP server creation", async () => {
-      const { status } = await req(port, "POST", "/api/mcp/config/server", {
+      const { status } = await authReq(port, "POST", "/api/mcp/config/server", {
         body: { name: "test-server", command: "echo" },
         token: TOKEN,
       });
@@ -388,7 +362,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
 
   describe("POST /api/wallet/import", () => {
     it("rejects unauthenticated wallet import with 401", async () => {
-      const { status, data } = await req(port, "POST", "/api/wallet/import", {
+      const { status, data } = await authReq(port, "POST", "/api/wallet/import", {
         body: { chain: "evm", privateKey: "0xSTOLEN" },
       });
       expect(status).toBe(401);
@@ -396,7 +370,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("accepts authenticated wallet import", async () => {
-      const { status } = await req(port, "POST", "/api/wallet/import", {
+      const { status } = await authReq(port, "POST", "/api/wallet/import", {
         body: { chain: "evm", privateKey: "0xTEST" },
         token: TOKEN,
       });
@@ -404,7 +378,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("rejects wallet import with wrong token", async () => {
-      const { status, data } = await req(port, "POST", "/api/wallet/import", {
+      const { status, data } = await authReq(port, "POST", "/api/wallet/import", {
         body: { chain: "evm", privateKey: "0xSTOLEN" },
         token: WRONG_TOKEN,
       });
@@ -417,7 +391,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
 
   describe("POST /api/wallet/export", () => {
     it("rejects unauthenticated wallet export with 401", async () => {
-      const { status, data } = await req(port, "POST", "/api/wallet/export", {
+      const { status, data } = await authReq(port, "POST", "/api/wallet/export", {
         body: { chain: "evm" },
       });
       expect(status).toBe(401);
@@ -425,7 +399,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("accepts authenticated wallet export", async () => {
-      const { status } = await req(port, "POST", "/api/wallet/export", {
+      const { status } = await authReq(port, "POST", "/api/wallet/export", {
         body: { chain: "evm" },
         token: TOKEN,
       });
@@ -434,7 +408,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("rejects wallet export with wrong token", async () => {
-      const { status, data } = await req(port, "POST", "/api/wallet/export", {
+      const { status, data } = await authReq(port, "POST", "/api/wallet/export", {
         body: { chain: "evm" },
         token: WRONG_TOKEN,
       });
@@ -447,7 +421,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
 
   describe("POST /api/terminal/run", () => {
     it("rejects unauthenticated terminal execution with 401", async () => {
-      const { status, data } = await req(port, "POST", "/api/terminal/run", {
+      const { status, data } = await authReq(port, "POST", "/api/terminal/run", {
         body: { command: "echo hacked" },
       });
       expect(status).toBe(401);
@@ -455,7 +429,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("accepts authenticated terminal execution", async () => {
-      const { status } = await req(port, "POST", "/api/terminal/run", {
+      const { status } = await authReq(port, "POST", "/api/terminal/run", {
         body: { command: "echo test" },
         token: TOKEN,
       });
@@ -463,7 +437,7 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     });
 
     it("rejects terminal execution with wrong token", async () => {
-      const { status, data } = await req(port, "POST", "/api/terminal/run", {
+      const { status, data } = await authReq(port, "POST", "/api/terminal/run", {
         body: { command: "echo hacked" },
         token: WRONG_TOKEN,
       });

@@ -79,7 +79,10 @@ export function CharacterRoster({
   }
 
   return (
-    <div className="ce-roster" data-testid={`${testIdPrefix}-roster-grid`}>
+    <div
+      className="flex flex-nowrap items-end justify-center gap-0 w-full max-w-[min(100%,900px)] px-4 box-border max-[600px]:!grid max-[600px]:!grid-cols-4 max-[600px]:gap-y-6 max-[600px]:gap-x-0 max-[600px]:px-[2.35rem] max-[600px]:pb-6 max-[600px]:max-w-full max-[600px]:w-full"
+      data-testid={`${testIdPrefix}-roster-grid`}
+    >
       {entries.map((entry) => {
         const isSelected = selectedId === entry.id;
 
@@ -87,18 +90,27 @@ export function CharacterRoster({
           <button
             key={entry.id}
             type="button"
-            className={`ce-roster-card ${isSelected ? "ce-roster-card--active" : ""}`}
+            className={`relative flex-[1_1_0] max-w-36 min-w-0 text-center transition-all duration-300 ease-out cursor-pointer border-none bg-none p-0 mx-[-5rem] opacity-[0.85] hover:opacity-100 max-[600px]:!mx-[-0.85rem] max-[600px]:!max-w-none max-[600px]:opacity-[0.65]${isSelected ? " opacity-100 z-10 max-[600px]:opacity-100" : ""}`}
             onClick={() => onSelect(entry)}
             data-testid={`${testIdPrefix}-preset-${entry.id}`}
             aria-label={`${entry.name}${entry.catchphrase ? ` — ${entry.catchphrase}` : ""}`}
             aria-pressed={isSelected}
           >
             <div
-              className={`ce-roster-card-frame ${isSelected ? "ce-roster-card-frame--active" : ""}`}
-              style={{ clipPath: SLANT_CLIP }}
+              className="relative aspect-[14/15] w-full p-0.5 transition-all duration-300 bg-border"
+              style={{
+                clipPath: SLANT_CLIP,
+                ...(isSelected
+                  ? {
+                      background:
+                        "linear-gradient(135deg, var(--burnished-gold) 0%, var(--classic-gold) 58%, var(--highlight-gold) 100%)",
+                      boxShadow: "0 0 20px var(--gold-glow)",
+                    }
+                  : {}),
+              }}
             >
               <div
-                className="ce-roster-card-inner"
+                className="relative h-full w-full overflow-hidden"
                 style={{ clipPath: SLANT_CLIP }}
               >
                 {isSelected && (
@@ -111,12 +123,20 @@ export function CharacterRoster({
                   src={getVrmPreviewUrl(entry.avatarIndex)}
                   alt={entry.name}
                   draggable={false}
-                  className={`ce-roster-card-img ${isSelected ? "ce-roster-card-img--active" : ""}`}
+                  className={`h-full w-full object-cover transition-transform duration-300 ease-out${isSelected ? " scale-[1.04]" : ""}`}
                 />
-                <div className="ce-roster-card-label">
+                <div className="absolute inset-x-0 bottom-0">
                   <div
-                    className={`ce-roster-card-name ${isSelected ? "ce-roster-card-name--active" : ""}`}
-                    style={{ clipPath: INSET_CLIP }}
+                    className={`py-0.5 pr-9 pl-2.5 text-[clamp(8px,1.2vw,11px)] font-semibold text-white whitespace-nowrap overflow-hidden text-ellipsis text-right${isSelected ? " bg-black/[0.78]" : " bg-black/60"}`}
+                    style={{
+                      clipPath: INSET_CLIP,
+                      ...(isSelected
+                        ? {
+                            boxShadow:
+                              "inset 0 1px 0 rgba(255,255,255,0.08)",
+                          }
+                        : {}),
+                    }}
                   >
                     {entry.name}
                   </div>

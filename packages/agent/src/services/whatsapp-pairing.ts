@@ -156,7 +156,7 @@ export class WhatsAppPairingSession {
                 type: "whatsapp-status",
                 accountId: this.options.accountId,
                 status: "error",
-                error: err instanceof Error ? err.message : String(err),
+                error: String(err),
               });
             });
           }, 3000);

@@ -7,7 +7,7 @@ const DEFAULT_CLOUD_BASE =
 const DEFAULT_LOCAL_AGENT_BASE = "http://localhost:2138";
 const DEFAULT_SANDBOX_DISCOVERY_URL = "https://sandboxes.waifu.fun/agents";
 const DEFAULT_AGENT_UI_BASE_DOMAIN = "milady.ai";
-const LEGACY_CLOUD_TOKEN_STORAGE_KEY = "milady-cloud-token";
+const CLOUD_TOKEN_STORAGE_PREFIX = "milady-cloud-token";
 
 function normalizeUrl(value: string | undefined, fallback: string): string {
   const candidate = value?.trim();
@@ -43,14 +43,6 @@ export const AGENT_UI_BASE_DOMAIN = normalizeHostname(
   DEFAULT_AGENT_UI_BASE_DOMAIN,
 );
 
-export function isHostedRuntime(): boolean {
-  if (typeof window === "undefined") return false;
-  return !(
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1"
-  );
-}
-
 /**
  * Public sandbox discovery is disabled everywhere.  The sandbox endpoint
  * lists ALL running agents across the cluster — unauthenticated users
@@ -64,13 +56,11 @@ export function shouldAllowPublicSandboxDiscoveryFallback(): boolean {
 export function getCloudTokenStorageKey(): string {
   try {
     const origin = new URL(CLOUD_BASE).origin.replace(/^https?:\/\//, "");
-    return `${LEGACY_CLOUD_TOKEN_STORAGE_KEY}:${origin}`;
+    return `${CLOUD_TOKEN_STORAGE_PREFIX}:${origin}`;
   } catch {
-    return LEGACY_CLOUD_TOKEN_STORAGE_KEY;
+    return CLOUD_TOKEN_STORAGE_PREFIX;
   }
 }
-
-export { LEGACY_CLOUD_TOKEN_STORAGE_KEY };
 
 export function getSandboxDiscoveryUrls(): string[] {
   const urls = [

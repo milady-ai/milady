@@ -55,7 +55,7 @@ function TypewriterLoop() {
   return (
     <>
       {display}
-      <span className="inline-block w-[0.06em] h-[0.8em] bg-brand ml-[0.04em] align-middle cursor-blink" />
+      <span className="inline-block w-[0.06em] h-[0.8em] bg-brand ml-[0.04em] align-middle animate-[cursor-blink_1s_step-end_infinite]" />
     </>
   );
 }
@@ -142,7 +142,7 @@ export function HeroInstallDock() {
       {/* Version badge — terminal style */}
       <div className="flex items-center gap-3 font-mono text-[10px] sm:text-[11px] tracking-wider">
         <div className="flex items-center gap-2 px-3 py-1.5 bg-brand/5 border border-brand/20">
-          <span className="w-1.5 h-1.5 rounded-full bg-brand status-pulse" />
+          <span className="w-1.5 h-1.5 rounded-full bg-brand animate-[status-pulse_2s_ease-in-out_infinite]" />
           <span className="text-brand">{tagName}</span>
         </div>
         <span className="text-text-subtle">{publishedAt}</span>

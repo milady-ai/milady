@@ -16,15 +16,33 @@ vi.mock("../bridge", () => ({
   isElectrobunRuntime: isElectrobunRuntimeMock,
 }));
 
-vi.mock("@miladyai/ui", () => ({
-  Button: ({
+vi.mock("@miladyai/ui", () => {
+  const passthrough = ({
     children,
     ...props
-  }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
-    React.createElement("button", { type: "button", ...props }, children),
-  Input: ({ ...props }: React.InputHTMLAttributes<HTMLInputElement>) =>
-    React.createElement("input", props),
-}));
+  }: React.PropsWithChildren<Record<string, unknown>>) =>
+    React.createElement("div", props, children);
+  return {
+    Button: ({
+      children,
+      ...props
+    }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
+      React.createElement("button", { type: "button", ...props }, children),
+    Input: ({ ...props }: React.InputHTMLAttributes<HTMLInputElement>) =>
+      React.createElement("input", props),
+    Card: passthrough,
+    CardContent: passthrough,
+    CardHeader: passthrough,
+    CardTitle: passthrough,
+    CardDescription: passthrough,
+    Select: passthrough,
+    SelectTrigger: passthrough,
+    SelectValue: passthrough,
+    SelectContent: passthrough,
+    SelectItem: passthrough,
+    Switch: passthrough,
+  };
+});
 
 import { DesktopTalkModePanel } from "./VoiceConfigView";
 

@@ -8,7 +8,17 @@
  *   - Status badges (Configured / Needs Setup)
  */
 
-import { Button, Input } from "@miladyai/ui";
+import {
+  Button,
+  Input,
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@miladyai/ui";
 import { useCallback, useEffect, useState } from "react";
 import {
   type AudioGenProvider,
@@ -32,8 +42,7 @@ import {
   CloudConnectionStatus,
   CloudSourceModeToggle,
 } from "./CloudSourceControls";
-import { ConfigSaveFooter } from "./ConfigSaveFooter";
-import { Switch } from "./ui-switch";
+import { SaveFooter, Switch } from "@miladyai/ui";
 import { VoiceConfigView } from "./VoiceConfigView";
 
 type MediaCategory = "image" | "video" | "audio" | "vision" | "voice";
@@ -514,21 +523,25 @@ export function DesktopMediaControlPanel() {
             {cameraRecording ? "on" : "off"} · Duration:{" "}
             {cameraRecordingDuration}s
           </div>
-          <select
-            className="w-full rounded-lg border border-border bg-bg px-2.5 py-1.5 text-xs"
+          <Select
             value={selectedCameraId}
-            onChange={(event) => setSelectedCameraId(event.target.value)}
+            onValueChange={(value) => setSelectedCameraId(value)}
           >
-            {cameraDevices.length === 0 ? (
-              <option value="">No camera devices</option>
-            ) : (
-              cameraDevices.map((device) => (
-                <option key={device.deviceId} value={device.deviceId}>
-                  {device.label || device.deviceId}
-                </option>
-              ))
-            )}
-          </select>
+            <SelectTrigger className="w-full rounded-lg border border-border bg-bg px-2.5 py-1.5 text-xs">
+              <SelectValue placeholder="No camera devices" />
+            </SelectTrigger>
+            <SelectContent>
+              {cameraDevices.length === 0 ? (
+                <SelectItem value="__none__">No camera devices</SelectItem>
+              ) : (
+                cameraDevices.map((device) => (
+                  <SelectItem key={device.deviceId} value={device.deviceId}>
+                    {device.label || device.deviceId}
+                  </SelectItem>
+                ))
+              )}
+            </SelectContent>
+          </Select>
           <div className="flex flex-wrap gap-2">
             <Button
               variant="outline"
@@ -699,21 +712,25 @@ export function DesktopMediaControlPanel() {
             {screenRecording ? "on" : "off"} · Duration:{" "}
             {screenRecordingDuration}s{screenPaused ? " · paused" : ""}
           </div>
-          <select
-            className="w-full rounded-lg border border-border bg-bg px-2.5 py-1.5 text-xs"
+          <Select
             value={selectedSourceId}
-            onChange={(event) => setSelectedSourceId(event.target.value)}
+            onValueChange={(value) => setSelectedSourceId(value)}
           >
-            {screenSources.length === 0 ? (
-              <option value="">No screen sources</option>
-            ) : (
-              screenSources.map((source) => (
-                <option key={source.id} value={source.id}>
-                  {source.name}
-                </option>
-              ))
-            )}
-          </select>
+            <SelectTrigger className="w-full rounded-lg border border-border bg-bg px-2.5 py-1.5 text-xs">
+              <SelectValue placeholder="No screen sources" />
+            </SelectTrigger>
+            <SelectContent>
+              {screenSources.length === 0 ? (
+                <SelectItem value="__none__">No screen sources</SelectItem>
+              ) : (
+                screenSources.map((source) => (
+                  <SelectItem key={source.id} value={source.id}>
+                    {source.name}
+                  </SelectItem>
+                ))
+              )}
+            </SelectContent>
+          </Select>
           <div className="flex flex-wrap gap-2">
             <Button
               variant="outline"
@@ -1128,7 +1145,7 @@ export function MediaSettingsSection() {
               <Switch
                 className="shrink-0"
                 checked={companionAnimateWhenHidden}
-                onChange={(v) => setCompanionAnimateWhenHidden(v)}
+                onCheckedChange={(v) => setCompanionAnimateWhenHidden(v)}
                 aria-label={t("settings.companionAnimateWhenHidden.title")}
               />
             </div>
@@ -1326,62 +1343,68 @@ export function MediaSettingsSection() {
                     <span className="text-xs font-semibold">
                       {t("mediasettingssection.Model")}
                     </span>
-                    <select
-                      className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg"
+                    <Select
                       value={
                         (getNestedValue(
                           mediaConfig as Record<string, unknown>,
                           "image.fal.model",
                         ) as string) ?? "fal-ai/flux-pro"
                       }
-                      onChange={(e) =>
-                        updateNestedValue("image.fal.model", e.target.value)
+                      onValueChange={(value) =>
+                        updateNestedValue("image.fal.model", value)
                       }
                     >
-                      <optgroup label={t("mediasettingssection.Flux")}>
-                        <option value="fal-ai/flux-pro">
-                          {t("mediasettingssection.FluxPro")}
-                        </option>
-                        <option value="fal-ai/flux-pro/v1.1">
-                          {t("mediasettingssection.FluxProV11")}
-                        </option>
-                        <option value="fal-ai/flux-pro/kontext">
-                          {t("mediasettingssection.FluxKontextPro")}
-                        </option>
-                        <option value="fal-ai/flux-2-flex">
-                          {t("mediasettingssection.Flux2Flex")}
-                        </option>
-                        <option value="fal-ai/flux/dev">
-                          {t("mediasettingssection.FluxDev")}
-                        </option>
-                        <option value="fal-ai/flux/schnell">
-                          {t("mediasettingssection.FluxSchnell")}
-                        </option>
-                        <option value="fal-ai/fast-flux">
-                          {t("mediasettingssection.FastFlux")}
-                        </option>
-                      </optgroup>
-                      <optgroup label={t("mediasettingssection.OtherModels")}>
-                        <option value="fal-ai/nano-banana-pro">
-                          {t("mediasettingssection.NanoBananaProGoo")}
-                        </option>
-                        <option value="fal-ai/recraft/v3/text-to-image">
-                          {t("mediasettingssection.RecraftV3")}
-                        </option>
-                        <option value="fal-ai/kling-image/v3/text-to-image">
-                          {t("mediasettingssection.KlingImageV3")}
-                        </option>
-                        <option value="fal-ai/kling-image/o3/text-to-image">
-                          {t("mediasettingssection.KlingImageO3")}
-                        </option>
-                        <option value="xai/grok-imagine-image">
-                          {t("mediasettingssection.GrokImagineXAI")}
-                        </option>
-                        <option value="fal-ai/stable-diffusion-3">
-                          {t("mediasettingssection.StableDiffusion3")}
-                        </option>
-                      </optgroup>
-                    </select>
+                      <SelectTrigger className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>{t("mediasettingssection.Flux")}</SelectLabel>
+                          <SelectItem value="fal-ai/flux-pro">
+                            {t("mediasettingssection.FluxPro")}
+                          </SelectItem>
+                          <SelectItem value="fal-ai/flux-pro/v1.1">
+                            {t("mediasettingssection.FluxProV11")}
+                          </SelectItem>
+                          <SelectItem value="fal-ai/flux-pro/kontext">
+                            {t("mediasettingssection.FluxKontextPro")}
+                          </SelectItem>
+                          <SelectItem value="fal-ai/flux-2-flex">
+                            {t("mediasettingssection.Flux2Flex")}
+                          </SelectItem>
+                          <SelectItem value="fal-ai/flux/dev">
+                            {t("mediasettingssection.FluxDev")}
+                          </SelectItem>
+                          <SelectItem value="fal-ai/flux/schnell">
+                            {t("mediasettingssection.FluxSchnell")}
+                          </SelectItem>
+                          <SelectItem value="fal-ai/fast-flux">
+                            {t("mediasettingssection.FastFlux")}
+                          </SelectItem>
+                        </SelectGroup>
+                        <SelectGroup>
+                          <SelectLabel>{t("mediasettingssection.OtherModels")}</SelectLabel>
+                          <SelectItem value="fal-ai/nano-banana-pro">
+                            {t("mediasettingssection.NanoBananaProGoo")}
+                          </SelectItem>
+                          <SelectItem value="fal-ai/recraft/v3/text-to-image">
+                            {t("mediasettingssection.RecraftV3")}
+                          </SelectItem>
+                          <SelectItem value="fal-ai/kling-image/v3/text-to-image">
+                            {t("mediasettingssection.KlingImageV3")}
+                          </SelectItem>
+                          <SelectItem value="fal-ai/kling-image/o3/text-to-image">
+                            {t("mediasettingssection.KlingImageO3")}
+                          </SelectItem>
+                          <SelectItem value="xai/grok-imagine-image">
+                            {t("mediasettingssection.GrokImagineXAI")}
+                          </SelectItem>
+                          <SelectItem value="fal-ai/stable-diffusion-3">
+                            {t("mediasettingssection.StableDiffusion3")}
+                          </SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
                   </div>
                 )}
 
@@ -1391,317 +1414,347 @@ export function MediaSettingsSection() {
                       <span className="text-xs font-semibold">
                         {t("mediasettingssection.Model")}
                       </span>
-                      <select
-                        className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg"
+                      <Select
                         value={
                           (getNestedValue(
                             mediaConfig as Record<string, unknown>,
                             "image.openai.model",
                           ) as string) ?? "dall-e-3"
                         }
-                        onChange={(e) =>
+                        onValueChange={(value) =>
                           updateNestedValue(
                             "image.openai.model",
-                            e.target.value,
+                            value,
                           )
                         }
                       >
-                        <option value="dall-e-3">
-                          {t("mediasettingssection.DALLE3")}
-                        </option>
-                        <option value="dall-e-2">
-                          {t("mediasettingssection.DALLE2")}
-                        </option>
-                      </select>
+                        <SelectTrigger className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="dall-e-3">
+                            {t("mediasettingssection.DALLE3")}
+                          </SelectItem>
+                          <SelectItem value="dall-e-2">
+                            {t("mediasettingssection.DALLE2")}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="flex-1 flex flex-col gap-1.5">
                       <span className="text-xs font-semibold">
                         {t("mediasettingssection.Quality")}
                       </span>
-                      <select
-                        className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg"
+                      <Select
                         value={
                           (getNestedValue(
                             mediaConfig as Record<string, unknown>,
                             "image.openai.quality",
                           ) as string) ?? "standard"
                         }
-                        onChange={(e) =>
+                        onValueChange={(value) =>
                           updateNestedValue(
                             "image.openai.quality",
-                            e.target.value,
+                            value,
                           )
                         }
                       >
-                        <option value="standard">
-                          {t("mediasettingssection.Standard")}
-                        </option>
-                        <option value="hd">HD</option>
-                      </select>
+                        <SelectTrigger className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="standard">
+                            {t("mediasettingssection.Standard")}
+                          </SelectItem>
+                          <SelectItem value="hd">HD</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 )}
 
-                {/* Video FAL model selection */}
-                {activeTab === "video" && currentProvider === "fal" && (
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-xs font-semibold">
-                      {t("mediasettingssection.Model")}
-                    </span>
-                    <select
-                      className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg"
-                      value={
-                        (getNestedValue(
-                          mediaConfig as Record<string, unknown>,
-                          "video.fal.model",
-                        ) as string) ??
-                        "fal-ai/kling-video/v3/pro/text-to-video"
-                      }
-                      onChange={(e) =>
-                        updateNestedValue("video.fal.model", e.target.value)
-                      }
-                    >
-                      <optgroup label={t("mediasettingssection.TextToVideo")}>
-                        <option value="fal-ai/veo3.1">
+
+              {/* Video FAL model selection */}
+              {activeTab === "video" && currentProvider === "fal" && (
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-xs font-semibold">
+                    {t("mediasettingssection.Model")}
+                  </span>
+                  <Select
+                    value={
+                      (getNestedValue(
+                        mediaConfig as Record<string, unknown>,
+                        "video.fal.model",
+                      ) as string) ?? "fal-ai/kling-video/v3/pro/text-to-video"
+                    }
+                    onValueChange={(value) =>
+                      updateNestedValue("video.fal.model", value)
+                    }
+                  >
+                    <SelectTrigger className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>{t("mediasettingssection.TextToVideo")}</SelectLabel>
+                        <SelectItem value="fal-ai/veo3.1">
                           {t("mediasettingssection.Veo31Google")}
-                        </option>
-                        <option value="fal-ai/veo3.1/fast">
+                        </SelectItem>
+                        <SelectItem value="fal-ai/veo3.1/fast">
                           {t("mediasettingssection.Veo31Fast")}
-                        </option>
-                        <option value="fal-ai/sora-2/text-to-video">
+                        </SelectItem>
+                        <SelectItem value="fal-ai/sora-2/text-to-video">
                           {t("mediasettingssection.Sora2")}
-                        </option>
-                        <option value="fal-ai/sora-2/text-to-video/pro">
+                        </SelectItem>
+                        <SelectItem value="fal-ai/sora-2/text-to-video/pro">
                           {t("mediasettingssection.Sora2Pro")}
-                        </option>
-                        <option value="fal-ai/kling-video/v3/pro/text-to-video">
+                        </SelectItem>
+                        <SelectItem value="fal-ai/kling-video/v3/pro/text-to-video">
                           {t("mediasettingssection.Kling30Pro")}
-                        </option>
-                        <option value="fal-ai/kling-video/v3/standard/text-to-video">
+                        </SelectItem>
+                        <SelectItem value="fal-ai/kling-video/v3/standard/text-to-video">
                           {t("mediasettingssection.Kling30")}
-                        </option>
-                        <option value="fal-ai/kling-video/o3/pro/text-to-video">
+                        </SelectItem>
+                        <SelectItem value="fal-ai/kling-video/o3/pro/text-to-video">
                           {t("mediasettingssection.KlingO3Pro")}
-                        </option>
-                        <option value="fal-ai/kling-video/o3/standard/text-to-video">
+                        </SelectItem>
+                        <SelectItem value="fal-ai/kling-video/o3/standard/text-to-video">
                           {t("mediasettingssection.KlingO3")}
-                        </option>
-                        <option value="xai/grok-imagine-video/text-to-video">
+                        </SelectItem>
+                        <SelectItem value="xai/grok-imagine-video/text-to-video">
                           {t("mediasettingssection.GrokVideoXAI")}
-                        </option>
-                        <option value="fal-ai/minimax/video-01-live">
+                        </SelectItem>
+                        <SelectItem value="fal-ai/minimax/video-01-live">
                           {t("mediasettingssection.MinimaxHailuo")}
-                        </option>
-                        <option value="fal-ai/hunyuan-video">
+                        </SelectItem>
+                        <SelectItem value="fal-ai/hunyuan-video">
                           {t("mediasettingssection.HunyuanVideo")}
-                        </option>
-                        <option value="fal-ai/mochi-v1">
+                        </SelectItem>
+                        <SelectItem value="fal-ai/mochi-v1">
                           {t("mediasettingssection.Mochi1")}
-                        </option>
-                        <option value="fal-ai/wan/v2.2-a14b/text-to-video">
+                        </SelectItem>
+                        <SelectItem value="fal-ai/wan/v2.2-a14b/text-to-video">
                           {t("mediasettingssection.Wan22")}
-                        </option>
-                      </optgroup>
-                      <optgroup label={t("mediasettingssection.ImageToVideo")}>
-                        <option value="fal-ai/kling-video/v3/pro/image-to-video">
+                        </SelectItem>
+                      </SelectGroup>
+                      <SelectGroup>
+                        <SelectLabel>{t("mediasettingssection.ImageToVideo")}</SelectLabel>
+                        <SelectItem value="fal-ai/kling-video/v3/pro/image-to-video">
                           {t("mediasettingssection.Kling30Pro")}
-                        </option>
-                        <option value="fal-ai/kling-video/o3/standard/image-to-video">
+                        </SelectItem>
+                        <SelectItem value="fal-ai/kling-video/o3/standard/image-to-video">
                           {t("mediasettingssection.KlingO3")}
-                        </option>
-                        <option value="fal-ai/veo3.1/image-to-video">
+                        </SelectItem>
+                        <SelectItem value="fal-ai/veo3.1/image-to-video">
                           {t("mediasettingssection.Veo31")}
-                        </option>
-                        <option value="fal-ai/veo3.1/fast/image-to-video">
+                        </SelectItem>
+                        <SelectItem value="fal-ai/veo3.1/fast/image-to-video">
                           {t("mediasettingssection.Veo31Fast")}
-                        </option>
-                        <option value="fal-ai/sora-2/image-to-video">
+                        </SelectItem>
+                        <SelectItem value="fal-ai/sora-2/image-to-video">
                           {t("mediasettingssection.Sora2")}
-                        </option>
-                        <option value="fal-ai/sora-2/image-to-video/pro">
+                        </SelectItem>
+                        <SelectItem value="fal-ai/sora-2/image-to-video/pro">
                           {t("mediasettingssection.Sora2Pro")}
-                        </option>
-                        <option value="xai/grok-imagine-video/image-to-video">
+                        </SelectItem>
+                        <SelectItem value="xai/grok-imagine-video/image-to-video">
                           {t("mediasettingssection.GrokXAI")}
-                        </option>
-                        <option value="fal-ai/minimax/video-01-live/image-to-video">
+                        </SelectItem>
+                        <SelectItem value="fal-ai/minimax/video-01-live/image-to-video">
                           {t("mediasettingssection.MinimaxHailuo")}
-                        </option>
-                        <option value="fal-ai/luma-dream-machine/image-to-video">
+                        </SelectItem>
+                        <SelectItem value="fal-ai/luma-dream-machine/image-to-video">
                           {t("mediasettingssection.LumaDreamMachine")}
-                        </option>
-                        <option value="fal-ai/pixverse/v4.5/image-to-video">
+                        </SelectItem>
+                        <SelectItem value="fal-ai/pixverse/v4.5/image-to-video">
                           {t("mediasettingssection.PixverseV45")}
-                        </option>
-                        <option value="fal-ai/ltx-2-19b/image-to-video">
+                        </SelectItem>
+                        <SelectItem value="fal-ai/ltx-2-19b/image-to-video">
                           {t("mediasettingssection.LTX219B")}
-                        </option>
-                      </optgroup>
-                    </select>
-                  </div>
-                )}
+                        </SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
-                {/* Audio Suno model selection */}
-                {activeTab === "audio" && currentProvider === "suno" && (
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-xs font-semibold">
-                      {t("mediasettingssection.Model")}
-                    </span>
-                    <select
-                      className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg"
-                      value={
-                        (getNestedValue(
-                          mediaConfig as Record<string, unknown>,
-                          "audio.suno.model",
-                        ) as string) ?? "chirp-v3.5"
-                      }
-                      onChange={(e) =>
-                        updateNestedValue("audio.suno.model", e.target.value)
-                      }
-                    >
-                      <option value="chirp-v3.5">
+              {/* Audio Suno model selection */}
+              {activeTab === "audio" && currentProvider === "suno" && (
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-xs font-semibold">
+                    {t("mediasettingssection.Model")}
+                  </span>
+                  <Select
+                    value={
+                      (getNestedValue(
+                        mediaConfig as Record<string, unknown>,
+                        "audio.suno.model",
+                      ) as string) ?? "chirp-v3.5"
+                    }
+                    onValueChange={(value) =>
+                      updateNestedValue("audio.suno.model", value)
+                    }
+                  >
+                    <SelectTrigger className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="chirp-v3.5">
                         {t("mediasettingssection.ChirpV35")}
-                      </option>
-                      <option value="chirp-v3">
+                      </SelectItem>
+                      <SelectItem value="chirp-v3">
                         {t("mediasettingssection.ChirpV3")}
-                      </option>
-                    </select>
-                  </div>
-                )}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
-                {/* Audio ElevenLabs duration */}
-                {activeTab === "audio" && currentProvider === "elevenlabs" && (
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-xs font-semibold">
-                      {t("mediasettingssection.MaxDurationSecond")}
-                    </span>
-                    <Input
-                      type="number"
-                      min={0.5}
-                      max={22}
-                      step={0.5}
-                      className="h-9 px-3 py-2 bg-card border-border text-xs rounded-lg shadow-sm focus-visible:ring-1 focus-visible:ring-accent w-24"
-                      value={
-                        (getNestedValue(
-                          mediaConfig as Record<string, unknown>,
-                          "audio.elevenlabs.duration",
-                        ) as number) ?? 5
-                      }
-                      onChange={(e) =>
-                        updateNestedValue(
-                          "audio.elevenlabs.duration",
-                          parseFloat(e.target.value),
-                        )
-                      }
-                    />
-                  </div>
-                )}
+              {/* Audio ElevenLabs duration */}
+              {activeTab === "audio" && currentProvider === "elevenlabs" && (
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-xs font-semibold">
+                    {t("mediasettingssection.MaxDurationSecond")}
+                  </span>
+                  <Input
+                    type="number"
+                    min={0.5}
+                    max={22}
+                    step={0.5}
+                    className="h-9 px-3 py-2 bg-card border-border text-xs rounded-lg shadow-sm focus-visible:ring-1 focus-visible:ring-accent w-24"
+                    value={
+                      (getNestedValue(
+                        mediaConfig as Record<string, unknown>,
+                        "audio.elevenlabs.duration",
+                      ) as number) ?? 5
+                    }
+                    onChange={(e) =>
+                      updateNestedValue(
+                        "audio.elevenlabs.duration",
+                        parseFloat(e.target.value),
+                      )
+                    }
+                  />
+                </div>
+              )}
 
-                {/* Vision model selection */}
-                {activeTab === "vision" && currentProvider === "openai" && (
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-xs font-semibold">
-                      {t("mediasettingssection.Model")}
-                    </span>
-                    <select
-                      className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg"
-                      value={
-                        (getNestedValue(
-                          mediaConfig as Record<string, unknown>,
-                          "vision.openai.model",
-                        ) as string) ?? "gpt-4o"
-                      }
-                      onChange={(e) =>
-                        updateNestedValue("vision.openai.model", e.target.value)
-                      }
-                    >
-                      <option value="gpt-4o">
+              {/* Vision model selection */}
+              {activeTab === "vision" && currentProvider === "openai" && (
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-xs font-semibold">
+                    {t("mediasettingssection.Model")}
+                  </span>
+                  <Select
+                    value={
+                      (getNestedValue(
+                        mediaConfig as Record<string, unknown>,
+                        "vision.openai.model",
+                      ) as string) ?? "gpt-4o"
+                    }
+                    onValueChange={(value) =>
+                      updateNestedValue("vision.openai.model", value)
+                    }
+                  >
+                    <SelectTrigger className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="gpt-4o">
                         {t("mediasettingssection.GPT4o")}
-                      </option>
-                      <option value="gpt-4o-mini">
+                      </SelectItem>
+                      <SelectItem value="gpt-4o-mini">
                         {t("mediasettingssection.GPT4oMini")}
-                      </option>
-                      <option value="gpt-4-turbo">
+                      </SelectItem>
+                      <SelectItem value="gpt-4-turbo">
                         {t("mediasettingssection.GPT4Turbo")}
-                      </option>
-                    </select>
-                  </div>
-                )}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
-                {activeTab === "vision" && currentProvider === "google" && (
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-xs font-semibold">
-                      {t("mediasettingssection.Model")}
-                    </span>
-                    <select
-                      className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg"
-                      value={
-                        (getNestedValue(
-                          mediaConfig as Record<string, unknown>,
-                          "vision.google.model",
-                        ) as string) ?? "gemini-2.0-flash"
-                      }
-                      onChange={(e) =>
-                        updateNestedValue("vision.google.model", e.target.value)
-                      }
-                    >
-                      <option value="gemini-2.0-flash">
+              {activeTab === "vision" && currentProvider === "google" && (
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-xs font-semibold">
+                    {t("mediasettingssection.Model")}
+                  </span>
+                  <Select
+                    value={
+                      (getNestedValue(
+                        mediaConfig as Record<string, unknown>,
+                        "vision.google.model",
+                      ) as string) ?? "gemini-2.0-flash"
+                    }
+                    onValueChange={(value) =>
+                      updateNestedValue("vision.google.model", value)
+                    }
+                  >
+                    <SelectTrigger className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="gemini-2.0-flash">
                         {t("mediasettingssection.Gemini20Flash")}
-                      </option>
-                      <option value="gemini-1.5-pro">
+                      </SelectItem>
+                      <SelectItem value="gemini-1.5-pro">
                         {t("mediasettingssection.Gemini15Pro")}
-                      </option>
-                      <option value="gemini-1.5-flash">
+                      </SelectItem>
+                      <SelectItem value="gemini-1.5-flash">
                         {t("mediasettingssection.Gemini15Flash")}
-                      </option>
-                    </select>
-                  </div>
-                )}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
-                {activeTab === "vision" && currentProvider === "anthropic" && (
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-xs font-semibold">
-                      {t("mediasettingssection.Model")}
-                    </span>
-                    <select
-                      className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg"
-                      value={
-                        (getNestedValue(
-                          mediaConfig as Record<string, unknown>,
-                          "vision.anthropic.model",
-                        ) as string) ?? "claude-sonnet-4-20250514"
-                      }
-                      onChange={(e) =>
-                        updateNestedValue(
-                          "vision.anthropic.model",
-                          e.target.value,
-                        )
-                      }
-                    >
-                      <option value="claude-sonnet-4-20250514">
+              {activeTab === "vision" && currentProvider === "anthropic" && (
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-xs font-semibold">
+                    {t("mediasettingssection.Model")}
+                  </span>
+                  <Select
+                    value={
+                      (getNestedValue(
+                        mediaConfig as Record<string, unknown>,
+                        "vision.anthropic.model",
+                      ) as string) ?? "claude-sonnet-4-20250514"
+                    }
+                    onValueChange={(value) =>
+                      updateNestedValue(
+                        "vision.anthropic.model",
+                        value,
+                      )
+                    }
+                  >
+                    <SelectTrigger className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="claude-sonnet-4-20250514">
                         {t("mediasettingssection.ClaudeSonnet4")}
-                      </option>
-                      <option value="claude-3-5-sonnet-20241022">
+                      </SelectItem>
+                      <SelectItem value="claude-3-5-sonnet-20241022">
                         {t("mediasettingssection.Claude35Sonnet")}
-                      </option>
-                      <option value="claude-3-haiku-20240307">
+                      </SelectItem>
+                      <SelectItem value="claude-3-haiku-20240307">
                         {t("mediasettingssection.Claude3Haiku")}
-                      </option>
-                    </select>
-                  </div>
-                )}
-              </div>
-            )}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+          )}
 
-            <ConfigSaveFooter
-              dirty={dirty}
-              saving={saving}
-              saveError={saveError}
-              saveSuccess={saveSuccess}
-              onSave={() => void handleSave()}
-            />
-          </>
-        )}
+          <SaveFooter
+            dirty={dirty}
+            saving={saving}
+            saveError={saveError}
+            saveSuccess={saveSuccess}
+            onSave={() => void handleSave()}
+          />
+        </>
+      )}
       </div>
     </div>
   );

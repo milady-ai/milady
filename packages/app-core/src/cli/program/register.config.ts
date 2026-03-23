@@ -57,7 +57,7 @@ export function registerConfigCli(program: Command) {
     .option("--json", "Output as raw JSON")
     .action(async (opts: { all?: boolean; json?: boolean }) => {
       const { loadElizaConfig } = await import("../../config/config");
-      const { buildConfigSchema } = await import("../../config/schema");
+      const { buildConfigSchema } = await import("@elizaos/agent/config/schema");
 
       let config: ElizaConfig | undefined;
       try {

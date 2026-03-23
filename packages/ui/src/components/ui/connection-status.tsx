@@ -29,13 +29,24 @@ export interface ConnectionStatusProps
   state: ConnectionState;
   /** Custom label — overrides the default state label */
   label?: string;
+  /** Override label for "Connected" state */
+  connectedLabel?: string;
+  /** Override label for "Disconnected" state */
+  disconnectedLabel?: string;
+  /** Override label for "Error" state */
+  errorLabel?: string;
 }
 
 export const ConnectionStatus = React.forwardRef<
   HTMLDivElement,
   ConnectionStatusProps
->(({ state, label, className, ...props }, ref) => {
+>(({ state, label, connectedLabel, disconnectedLabel, errorLabel, className, ...props }, ref) => {
   const styles = STATE_STYLES[state];
+  const overrideLabels: Record<ConnectionState, string | undefined> = {
+    connected: connectedLabel,
+    disconnected: disconnectedLabel,
+    error: errorLabel,
+  };
   return (
     <div
       ref={ref}
@@ -47,7 +58,7 @@ export const ConnectionStatus = React.forwardRef<
       {...props}
     >
       <span className={cn("h-2 w-2 rounded-full", styles.dot)} />
-      {label ?? styles.label}
+      {label ?? overrideLabels[state] ?? styles.label}
     </div>
   );
 });

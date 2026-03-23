@@ -18,7 +18,7 @@ const PREVIEW_LOGS = [
 
 export function LogsPanel() {
   return (
-    <div className="animate-fade-up">
+    <div className="animate-[fade-up_0.4s_ease-out_both]">
       {/* Terminal-style container */}
       <div className="border border-border bg-surface">
         <div className="px-4 py-2.5 bg-dark-secondary border-b border-border flex items-center justify-between">

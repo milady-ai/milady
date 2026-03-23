@@ -284,7 +284,7 @@ export function isOptionalImportError(
   error: unknown,
   extraMarkers: readonly string[] = [],
 ): boolean {
-  const message = error instanceof Error ? error.message : String(error);
+  const message = String(error);
   return OPTIONAL_IMPORT_ERROR_MARKERS.concat(extraMarkers).some((marker) =>
     message.includes(marker),
   );

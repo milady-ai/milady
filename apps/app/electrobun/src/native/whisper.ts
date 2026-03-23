@@ -1,16 +1,3 @@
-/**
- * Whisper Native Module for Electrobun
- *
- * Two transcription paths:
- * 1. transcribeBunSpawn — calls whisper.cpp binary directly via Bun.spawn()
- *    (preferred; bypasses shelljs/whisper-node compatibility issues with Bun)
- * 2. transcribe — attempts to load whisper-node via dynamic import (fallback)
- *
- * Audio helpers:
- * - writeWavFile — writes Float32 PCM to a 16-bit PCM RIFF WAV file
- * - parseWhisperOutput — parses whisper.cpp stdout into WhisperResult
- */
-
 import fs from "node:fs";
 import path from "node:path";
 
@@ -35,15 +22,10 @@ export interface WhisperToken {
   probability: number;
 }
 
-// ============================================================================
-// whisper.cpp binary path resolution.
-//
 // Resolution order (first existing path wins):
-//   1. MILADY_WHISPER_BIN / MILADY_WHISPER_MODEL env vars (explicit override)
-//   2. Relative to import.meta.dir (dev mode: src/native/ → node_modules)
-//   3. Relative to process.cwd() (alternate dev layouts)
-// ============================================================================
-
+//   1. MILADY_WHISPER_BIN / MILADY_WHISPER_MODEL env vars
+//   2. Relative to import.meta.dir
+//   3. Relative to process.cwd()
 function resolveWhisperPath(
   envVar: string,
   relativeFromMeta: string,
@@ -74,10 +56,6 @@ const WHISPER_MODEL = resolveWhisperPath(
 export function isWhisperBinaryAvailable(): boolean {
   return fs.existsSync(WHISPER_BIN) && fs.existsSync(WHISPER_MODEL);
 }
-
-// ============================================================================
-// WAV file writer
-// ============================================================================
 
 /**
  * Write Float32 PCM samples to a 16-bit PCM RIFF WAV file.
@@ -124,10 +102,6 @@ export function writeWavFile(
   fs.writeFileSync(filePath, buffer);
 }
 
-// ============================================================================
-// whisper.cpp output parser
-// ============================================================================
-
 /**
  * Parse whisper.cpp stdout into a WhisperResult.
  *
@@ -173,10 +147,6 @@ function parseTimestamp(ts: string): number {
   return hours * 3600 + minutes * 60 + secs;
 }
 
-// ============================================================================
-// Bun.spawn-based transcription
-// ============================================================================
-
 /**
  * Transcribe an audio file using the whisper.cpp binary directly.
  * Returns null if the binary is not available.
@@ -209,10 +179,6 @@ export async function transcribeBunSpawn(
     return null;
   }
 }
-
-// ============================================================================
-// Legacy whisper-node dynamic import (fallback)
-// ============================================================================
 
 let whisperAvailable = false;
 let whisperModule: Record<string, unknown> | null = null;

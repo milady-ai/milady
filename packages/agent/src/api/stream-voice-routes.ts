@@ -82,7 +82,7 @@ export async function handleStreamVoiceRoute(
     } catch (err) {
       error(
         res,
-        err instanceof Error ? err.message : "Failed to read voice config",
+        String(err),
         500,
       );
     }
@@ -118,7 +118,7 @@ export async function handleStreamVoiceRoute(
     } catch (err) {
       error(
         res,
-        err instanceof Error ? err.message : "Failed to save voice settings",
+        String(err),
         500,
       );
     }
@@ -180,7 +180,7 @@ export async function handleStreamVoiceRoute(
       const speaking = await ttsStreamBridge.speak(text, resolved);
       json(res, { ok: true, speaking });
     } catch (err) {
-      error(res, err instanceof Error ? err.message : "TTS speak failed", 500);
+      error(res, String(err), 500);
     }
     return true;
   }
@@ -216,7 +216,7 @@ export async function onAgentMessage(
     await deps.ttsStreamBridge.speak(speakableText, resolved);
   } catch (err) {
     logger.warn(
-      `[stream-voice] Auto-TTS failed: ${err instanceof Error ? err.message : String(err)}`,
+      `[stream-voice] Auto-TTS failed: ${String(err)}`,
     );
   }
 }

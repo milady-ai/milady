@@ -30,8 +30,6 @@ export function statusToneForBoolean(
   return condition ? onTone : offTone;
 }
 
-/* ── StatusBadge ─────────────────────────────────────────────────────── */
-
 export interface StatusBadgeProps
   extends React.HTMLAttributes<HTMLSpanElement> {
   label: string;
@@ -62,8 +60,6 @@ export const StatusBadge = React.forwardRef<HTMLSpanElement, StatusBadgeProps>(
 );
 StatusBadge.displayName = "StatusBadge";
 
-/* ── StatusDot ───────────────────────────────────────────────────────── */
-
 export interface StatusDotProps extends React.HTMLAttributes<HTMLSpanElement> {
   status: string;
 }
@@ -92,8 +88,6 @@ export const StatusDot = React.forwardRef<HTMLSpanElement, StatusDotProps>(
   },
 );
 StatusDot.displayName = "StatusDot";
-
-/* ── StatCard ────────────────────────────────────────────────────────── */
 
 export interface StatCardProps extends React.HTMLAttributes<HTMLDivElement> {
   label: string;

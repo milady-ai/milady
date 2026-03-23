@@ -1,8 +1,6 @@
 /**
  * Chat command utilities — slash command parsing, saved command management,
  * and the typed command registry.
- *
- * Migrated from apps/app/src/chat-commands.ts and command-registry.ts.
  */
 
 import type { Tab } from "../navigation";

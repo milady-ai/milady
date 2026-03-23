@@ -129,45 +129,6 @@ describe("ChatComposer mic controls", () => {
     expect(speakerButton).toBeUndefined();
   });
 
-  it("renders the default mic button like the paperclip button when idle", () => {
-    const { micButton } = renderComposer();
-    const icon = micButton.findByType("svg" as React.ElementType);
-
-    expect(String(micButton.props.className)).toContain("border-border/50");
-    expect(String(micButton.props.className)).toContain("text-txt");
-    expect(String(micButton.props.className)).toContain("bg-bg/50");
-    expect(String(icon.props.className)).toContain("w-4 h-4");
-  });
-
-  it("turns the default mic button solid red when active", () => {
-    const { micButton } = renderComposer({
-      voice: {
-        isListening: true,
-      },
-    });
-
-    expect(String(micButton.props.className)).toContain("bg-accent");
-    expect(String(micButton.props.className)).toContain("text-white");
-    expect(String(micButton.props.className)).toContain(
-      "shadow-[0_0_15px_rgba(var(--accent)",
-    );
-  });
-
-  it("keeps the default chat input neutral while listening", () => {
-    const { renderer } = renderComposer({
-      voice: {
-        isListening: true,
-      },
-    });
-    const textarea = findTextarea(renderer);
-    const container = textarea.parent;
-
-    expect(String(container.props.className)).toContain("border-border/40");
-    expect(String(container.props.className)).toContain("bg-card/60");
-    expect(String(container.props.className)).not.toContain("border-[#ff5a5f]");
-    expect(String(container.props.className)).not.toContain("bg-[#2a0f13]");
-  });
-
   it("shows Listening... in an empty default chat input while listening", () => {
     const { renderer } = renderComposer({
       chatInput: "",

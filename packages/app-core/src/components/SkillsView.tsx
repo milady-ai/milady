@@ -6,7 +6,7 @@
  * throughout the app (--bg, --card, --border, --accent, --muted, --txt, etc.).
  */
 
-import { Button, Input } from "@miladyai/ui";
+import { Button, Input, StatusBadge, Switch } from "@miladyai/ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import type {
@@ -18,8 +18,6 @@ import { client } from "../api";
 import { useTimeout } from "../hooks";
 import { useApp } from "../state";
 import { ConfirmDeleteControl } from "./confirm-delete-control";
-import { StatusBadge } from "./ui-badges";
-import { Switch } from "./ui-switch";
 
 /* ── Skill Card ─────────────────────────────────────────────────────── */
 
@@ -70,12 +68,12 @@ function SkillCard({
           <StatusBadge
             label={
               skill.scanStatus === "blocked" || skill.scanStatus === "critical"
-                ? "Blocked"
+                ? t("skillsview.statusBlocked")
                 : skill.scanStatus === "warning"
-                  ? "Warning"
+                  ? t("skillsview.statusWarning")
                   : skill.enabled
-                    ? "Active"
-                    : "Inactive"
+                    ? t("skillsview.statusActive")
+                    : t("skillsview.statusInactive")
             }
             tone={
               skill.scanStatus === "blocked" ||
@@ -94,11 +92,7 @@ function SkillCard({
             <Switch
               checked={skill.enabled}
               disabled={skillToggleAction === skill.id}
-              onChange={(val) => onToggle(skill.id, val)}
-              size="compact"
-              trackOnClass="bg-[var(--accent)]"
-              trackOffClass="bg-[var(--border)]"
-              knobClass="bg-white shadow-sm"
+              onCheckedChange={(val) => onToggle(skill.id, val)}
             />
           )}
           {isQuarantined && !isReviewing && (
@@ -121,7 +115,7 @@ function SkillCard({
           {skill.name}
         </div>
         <div className="text-[11px] text-[var(--muted)] line-clamp-2 min-h-[2em]">
-          {skill.description || "No description provided"}
+          {skill.description || t("skillsview.noDescription")}
         </div>
       </div>
 
@@ -139,8 +133,8 @@ function SkillCard({
           triggerClassName="h-7 px-3 text-[11px] font-bold text-danger hover:bg-danger/10 hover:text-danger-foreground transition-colors rounded-md"
           confirmClassName="px-3 py-1 text-[11px] font-bold bg-danger text-danger-foreground hover:bg-danger/90 transition-colors rounded-md shadow-sm"
           cancelClassName="px-3 py-1 text-[11px] font-bold text-muted border border-border/40 hover:text-txt transition-colors rounded-md"
-          confirmLabel="Yes"
-          cancelLabel="No"
+          confirmLabel={t("conversations.deleteYes")}
+          cancelLabel={t("conversations.deleteNo")}
           onConfirm={() => onDelete(skill.id, skill.name)}
         />
         <span className="flex-1" />
@@ -399,25 +393,14 @@ function InstallModal({
               Add skills from the marketplace or a GitHub repository.
             </div>
           </div>
-          <button
-            type="button"
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: "50%",
-              border: "1px solid var(--border)",
-              background: "transparent",
-              color: "var(--muted)",
-              cursor: "pointer",
-              fontSize: 14,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+          <Button
+            variant="outline"
+            size="icon"
+            className="w-7 h-7 rounded-full text-sm text-muted"
             onClick={onClose}
           >
             ×
-          </button>
+          </Button>
         </div>
 
         {/* Tabs */}
@@ -806,20 +789,14 @@ function EditSkillModal({
               {navigator.platform.includes("Mac") ? "⌘S" : "Ctrl+S"}{" "}
               {t("skillsview.toSave")}
             </span>
-            <button
-              type="button"
-              className="bg-transparent border-0 cursor-pointer text-lg px-2 transition-colors"
-              style={{ color: "var(--muted)" }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = "var(--text)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = "var(--muted)";
-              }}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-lg px-2 text-muted hover:text-txt"
               onClick={onClose}
             >
               ×
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -837,18 +814,13 @@ function EditSkillModal({
               <div className="text-sm font-medium" style={{ color: "#ef4444" }}>
                 {error}
               </div>
-              <button
-                type="button"
-                className="px-3 py-1.5 text-xs font-medium rounded cursor-pointer transition-colors"
-                style={{
-                  background: "var(--bg-hover)",
-                  border: "1px solid var(--border)",
-                  color: "var(--text)",
-                }}
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => loadSource()}
               >
                 {t("common.retry")}
-              </button>
+              </Button>
             </div>
           ) : (
             <textarea
@@ -879,32 +851,21 @@ function EditSkillModal({
             ) : null}
           </div>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              className="px-3 py-1.5 text-xs font-medium rounded cursor-pointer transition-colors"
-              style={{
-                background: "transparent",
-                border: "1px solid var(--border)",
-                color: "var(--muted)",
-              }}
+            <Button
+              variant="outline"
+              size="sm"
               onClick={onClose}
             >
               {hasChanges ? "Discard" : "Close"}
-            </button>
-            <button
-              type="button"
-              className="px-3 py-1.5 text-xs font-medium rounded cursor-pointer transition-colors"
-              style={{
-                background: saveSuccess ? "#22c55e" : "#f0b232",
-                border: "none",
-                color: saveSuccess ? "#fff" : "#000",
-                opacity: saving || !hasChanges ? 0.5 : 1,
-              }}
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
               onClick={() => handleSave()}
               disabled={saving || !hasChanges}
             >
               {saving ? "Saving..." : saveSuccess ? "Saved" : "Save"}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

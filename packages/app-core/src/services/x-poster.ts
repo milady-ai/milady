@@ -136,7 +136,10 @@ export async function postToX(args: {
       signal: AbortSignal.timeout(12_000),
     });
 
-    const payload = (await response.json().catch(() => ({}))) as {
+    const payload = (await response.json().catch((err: unknown) => {
+      console.warn("[x-poster] Failed to parse X API response JSON:", err);
+      return {};
+    })) as {
       data?: { id?: string };
       errors?: Array<{ detail?: string; message?: string }>;
       title?: string;

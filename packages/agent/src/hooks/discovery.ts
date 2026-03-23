@@ -147,7 +147,7 @@ async function loadHookFromDir(
 
     return { hook, frontmatter, metadata };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = String(err);
     logger.warn(`[hooks] Error loading hook from ${dir}: ${msg}`);
     return null;
   }
@@ -173,7 +173,7 @@ async function scanHooksDir(
       }
     }
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = String(err);
     logger.warn(`[hooks] Error scanning ${dir}: ${msg}`);
   }
 

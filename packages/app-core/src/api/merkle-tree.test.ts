@@ -13,16 +13,10 @@
 
 import { ethers } from "ethers";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
 // ── Mocks ────────────────────────────────────────────────────────────────
 
 vi.mock("@elizaos/core", () => ({
-  logger: {
-    info: vi.fn(),
-    warn: vi.fn(),
-    debug: vi.fn(),
-    error: vi.fn(),
-  },
+  logger: { info: vi.fn(), warn: vi.fn(), debug: vi.fn(), error: vi.fn() },
 }));
 
 // Mock twitter-verify's getVerifiedAddresses

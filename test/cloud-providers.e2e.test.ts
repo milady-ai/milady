@@ -23,10 +23,7 @@ import {
   collectPluginNames,
 } from "@miladyai/app-core/src/runtime/eliza";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-
-// ---------------------------------------------------------------------------
-// Env snapshot helper
-// ---------------------------------------------------------------------------
+import { envSnapshot } from "./helpers/test-utils";
 
 const ALL_PROVIDER_KEYS = [
   "ELIZAOS_CLOUD_ENABLED",
@@ -57,28 +54,10 @@ const LIVE_PROVIDER_KEY_SNAPSHOT = {
   elizaCloudApiKey: process.env.ELIZAOS_CLOUD_API_KEY,
 };
 
-function envSnapshot(keys: string[]): {
-  save: () => void;
-  restore: () => void;
-} {
-  const saved = new Map<string, string | undefined>();
-  return {
-    save() {
-      for (const k of keys) saved.set(k, process.env[k]);
-    },
-    restore() {
-      for (const [k, v] of saved) {
-        if (v === undefined) delete process.env[k];
-        else process.env[k] = v;
-      }
-    },
-  };
-}
-
-const snap = envSnapshot(ALL_PROVIDER_KEYS);
+let snap: ReturnType<typeof envSnapshot>;
 beforeEach(() => {
-  snap.save();
-  for (const k of ALL_PROVIDER_KEYS) delete process.env[k];
+  snap = envSnapshot(ALL_PROVIDER_KEYS);
+  snap.clear();
 });
 afterEach(() => snap.restore());
 

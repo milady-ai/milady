@@ -4,6 +4,7 @@
 
 import {
   Button,
+  Checkbox,
   Dialog,
   DialogContent,
   DialogHeader,
@@ -256,7 +257,7 @@ function AdvancedSection() {
           <button
             type="button"
             onClick={openExportModal}
-            className="settings-card-button flex items-center gap-4 border border-border/50 bg-card/60 text-left backdrop-blur-md transition-all group hover:-translate-y-0.5 hover:border-accent hover:shadow-[0_4px_20px_rgba(var(--accent),0.1)]"
+            className="min-h-[5.5rem] p-5 rounded-[calc(var(--radius-xl)+2px)] flex items-center gap-4 border border-border/50 bg-card/60 text-left backdrop-blur-md transition-all group hover:-translate-y-0.5 hover:border-accent hover:shadow-[0_4px_20px_rgba(var(--accent),0.1)]"
             aria-haspopup="dialog"
           >
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-border/50 bg-bg-accent p-3 shadow-sm transition-all group-hover:border-accent group-hover:bg-accent">
@@ -275,7 +276,7 @@ function AdvancedSection() {
           <button
             type="button"
             onClick={openImportModal}
-            className="settings-card-button flex items-center gap-4 border border-border/50 bg-card/60 text-left backdrop-blur-md transition-all group hover:-translate-y-0.5 hover:border-accent hover:shadow-[0_4px_20px_rgba(var(--accent),0.1)]"
+            className="min-h-[5.5rem] p-5 rounded-[calc(var(--radius-xl)+2px)] flex items-center gap-4 border border-border/50 bg-card/60 text-left backdrop-blur-md transition-all group hover:-translate-y-0.5 hover:border-accent hover:shadow-[0_4px_20px_rgba(var(--accent),0.1)]"
             aria-haspopup="dialog"
           >
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-border/50 bg-bg-accent p-3 shadow-sm transition-all group-hover:border-accent group-hover:bg-accent">
@@ -352,11 +353,10 @@ function AdvancedSection() {
                 className="rounded-lg bg-bg"
               />
               <label className="flex items-center gap-2 text-sm text-muted">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={exportIncludeLogs}
-                  onChange={(e) =>
-                    setState("exportIncludeLogs", e.target.checked)
+                  onCheckedChange={(checked) =>
+                    setState("exportIncludeLogs", !!checked)
                   }
                 />
 
@@ -379,7 +379,7 @@ function AdvancedSection() {
               <Button
                 variant="outline"
                 size="sm"
-                className="settings-button rounded-lg"
+                className="min-h-[2.625rem] px-4 rounded-[calc(var(--radius-lg)+2px)]"
                 onClick={closeExportModal}
               >
                 {t("common.cancel")}
@@ -387,7 +387,7 @@ function AdvancedSection() {
               <Button
                 variant="default"
                 size="sm"
-                className="settings-button rounded-lg"
+                className="min-h-[2.625rem] px-4 rounded-[calc(var(--radius-lg)+2px)]"
                 disabled={exportBusy}
                 onClick={() => void handleAgentExport()}
               >
@@ -424,9 +424,9 @@ function AdvancedSection() {
               <div className="text-sm font-medium text-txt-strong">
                 {t("settingsview.BackupFile")}
               </div>
-              <button
-                type="button"
-                className="settings-button flex w-full items-center justify-between gap-3 rounded-lg border border-border bg-bg text-left transition-colors hover:bg-bg-hover"
+              <Button
+                variant="outline"
+                className="min-h-[2.625rem] px-4 rounded-[calc(var(--radius-lg)+2px)] flex w-full items-center justify-between gap-3 text-left"
                 onClick={() => importFileInputRef.current?.click()}
               >
                 <span className="min-w-0 flex-1 truncate text-sm text-txt">
@@ -437,7 +437,7 @@ function AdvancedSection() {
                     ? t("settings.change", { defaultValue: "Change" })
                     : t("settings.browse", { defaultValue: "Browse" })}
                 </span>
-              </button>
+              </Button>
             </div>
 
             <div className="space-y-2">
@@ -472,7 +472,7 @@ function AdvancedSection() {
               <Button
                 variant="outline"
                 size="sm"
-                className="settings-button rounded-lg"
+                className="min-h-[2.625rem] px-4 rounded-[calc(var(--radius-lg)+2px)]"
                 onClick={closeImportModal}
               >
                 {t("common.cancel")}
@@ -480,7 +480,7 @@ function AdvancedSection() {
               <Button
                 variant="default"
                 size="sm"
-                className="settings-button rounded-lg"
+                className="min-h-[2.625rem] px-4 rounded-[calc(var(--radius-lg)+2px)]"
                 disabled={importBusy}
                 onClick={() => void handleAgentImport()}
               >
@@ -716,13 +716,13 @@ export function SettingsView({
           description={t("settings.noMatchingSettingsDescription")}
           className="p-4 sm:p-5 lg:p-6"
         >
-          <button
-            type="button"
-            className="settings-button inline-flex items-center rounded-lg border border-border text-sm font-medium text-txt transition-colors hover:bg-bg-hover"
+          <Button
+            variant="outline"
+            className="min-h-[2.625rem] px-4 rounded-[calc(var(--radius-lg)+2px)]"
             onClick={() => setSearchQuery("")}
           >
             {t("settingsview.ClearSearch")}
-          </button>
+          </Button>
         </SectionCard>
       )}
     </>

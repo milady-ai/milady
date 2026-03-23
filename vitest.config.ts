@@ -178,6 +178,8 @@ export default defineConfig({
       "apps/app/electrobun/src/**/*.test.tsx",
       "apps/chrome-extension/**/*.test.ts",
       "apps/chrome-extension/**/*.test.tsx",
+      "packages/ui/src/**/*.test.ts",
+      "packages/ui/src/**/*.test.tsx",
       "test/api-server.e2e.test.ts",
       "test/format-error.test.ts",
       "test/trajectory-database.e2e.test.ts",

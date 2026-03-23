@@ -13,9 +13,9 @@ export function Dashboard() {
   const [section, setSection] = useState<DashboardSection>("agents");
   const { isAuthenticated: authed } = useAuth();
 
-  // Snap back to agents section if user signs out while on credits/billing
+  // Snap back to agents section if user signs out while on credits
   useEffect(() => {
-    if (!authed && (section === "credits" || section === "billing")) {
+    if (!authed && section === "credits") {
       setSection("agents");
     }
   }, [authed, section]);
@@ -58,7 +58,6 @@ function DashboardContent({ section }: { section: DashboardSection }) {
     case "logs":
       return <LogsPanel />;
     case "credits":
-    case "billing": // billing is deprecated, falls through to credits
       return <CreditsPanel />;
   }
 }

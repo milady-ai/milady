@@ -8,7 +8,7 @@
  */
 
 import { useApp } from "@miladyai/app-core/state";
-import { Button, Checkbox, Input, Switch } from "@miladyai/ui";
+import { Button, Checkbox, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Switch } from "@miladyai/ui";
 import { useState } from "react";
 import type { StreamSourceType } from "./helpers";
 import { isSupportedStreamUrl, STREAM_SOURCE_LABELS } from "./helpers";
@@ -90,18 +90,21 @@ function ConfigField({
           className="flex flex-col gap-0.5"
         >
           <span className="text-[11px] text-muted">{field.label}</span>
-          <select
-            id={`config-${fieldKey}`}
+          <Select
             value={typeof value === "string" ? value : String(field.default)}
-            onChange={(e) => onChange(fieldKey, e.target.value)}
-            className="bg-bg-muted border border-border text-txt text-[12px] rounded px-2 py-1 cursor-pointer"
+            onValueChange={(val) => onChange(fieldKey, val)}
           >
-            {field.options?.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger id={`config-${fieldKey}`} className="bg-bg-muted border border-border text-txt text-[12px] rounded px-2 py-1 cursor-pointer h-auto">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {field.options?.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </label>
       );
     case "color":

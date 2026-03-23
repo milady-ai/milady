@@ -32,12 +32,6 @@ const AVATAR_CHANGE_WAVE_EMOTE: AppEmoteEventDetail = {
   showOverlay: false,
 };
 
-/** @deprecated No longer used — kept for API compatibility. */
-export type VrmStageAvatarEntry = {
-  vrmPath: string;
-  fallbackPreviewUrl: string;
-};
-
 /**
  * VrmStage — single persistent VRM engine that swaps only the character model
  * when `vrmPath` changes. The world background (Gaussian splat) stays
@@ -53,9 +47,6 @@ export const VrmStage = memo(function VrmStage({
   onEngineReady,
   onRevealStart,
   playWaveOnAvatarChange = false,
-  // Kept in the type signature for backwards compat but ignored — the single
-  // engine handles character swaps without preloading separate layers.
-  preloadAvatars: _preloadAvatars = [],
   onLayerEngineReady: _onLayerEngineReady,
   companionVrmPowerMode = "balanced",
   companionHalfFramerateMode = "when_saving_power",
@@ -72,9 +63,8 @@ export const VrmStage = memo(function VrmStage({
   onLayerEngineReady?: (vrmPath: string, engine: VrmEngine) => void;
   onRevealStart?: () => void;
   playWaveOnAvatarChange?: boolean;
-  preloadAvatars?: readonly VrmStageAvatarEntry[];
-  companionVrmPowerMode?: CompanionVrmPowerMode;
-  companionHalfFramerateMode?: CompanionHalfFramerateMode;
+  companionVrmPowerMode?: any;
+  companionHalfFramerateMode?: any;
   companionAnimateWhenHidden?: boolean;
   t: TranslateFn;
 }) {

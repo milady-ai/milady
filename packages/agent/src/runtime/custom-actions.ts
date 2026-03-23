@@ -571,7 +571,7 @@ function defToAction(def: CustomActionDef): Action {
         };
       } catch (err) {
         return {
-          text: `Action failed: ${err instanceof Error ? err.message : String(err)}`,
+          text: `Action failed: ${String(err)}`,
           success: false,
         };
       }

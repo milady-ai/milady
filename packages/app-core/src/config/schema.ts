@@ -1,5 +1,3 @@
-// Re-export everything from upstream
-export * from "@elizaos/agent/config/schema";
 
 // Override CONNECTOR_IDS to include Milady-local connectors.
 // The wildcard re-export above is shadowed by this explicit named export.

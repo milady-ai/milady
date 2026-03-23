@@ -92,7 +92,7 @@ async function fetchFromNetwork(): Promise<Map<string, RegistryPluginInfo>> {
     });
   } catch (err) {
     logger.warn(
-      `[registry-client] generated-registry/index fallback failed: ${err instanceof Error ? err.message : String(err)}`,
+      `[registry-client] generated-registry/index fallback failed: ${String(err)}`,
     );
     throw err;
   }
@@ -241,7 +241,7 @@ export async function getRegistryPlugins(): Promise<
   memoryCache = { plugins, fetchedAt: Date.now() };
   writeFileCache(plugins).catch((err) =>
     logger.warn(
-      `[registry-client] Cache write failed: ${err instanceof Error ? err.message : String(err)}`,
+      `[registry-client] Cache write failed: ${String(err)}`,
     ),
   );
 

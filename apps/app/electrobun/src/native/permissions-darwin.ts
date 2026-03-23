@@ -1,9 +1,3 @@
-/**
- * macOS permission checks backed by native APIs, with session-aware fallback
- * handling for permissions that do not expose a full denied/not-determined
- * distinction through preflight checks alone.
- */
-
 import { dlopen, FFIType } from "bun:ffi";
 import { existsSync, readFileSync } from "node:fs";
 import os from "node:os";

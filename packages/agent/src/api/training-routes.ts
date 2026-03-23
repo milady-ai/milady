@@ -202,7 +202,7 @@ export async function handleTrainingRoutes(
       });
       json(res, { job }, 201);
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
+      const message = String(err);
       error(res, message, 400);
     }
     return true;
@@ -227,7 +227,7 @@ export async function handleTrainingRoutes(
       const job = await trainingService.cancelJob(jobId);
       json(res, { job });
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
+      const message = String(err);
       error(res, message, 404);
     }
     return true;
@@ -269,7 +269,7 @@ export async function handleTrainingRoutes(
       const model = await trainingService.importModelToOllama(modelId, body);
       json(res, { model });
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
+      const message = String(err);
       error(res, message, 400);
     }
     return true;
@@ -289,7 +289,7 @@ export async function handleTrainingRoutes(
       );
       json(res, result);
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
+      const message = String(err);
       error(res, message, 400);
     }
     return true;
@@ -304,7 +304,7 @@ export async function handleTrainingRoutes(
       const result = await trainingService.benchmarkModel(modelId);
       json(res, result);
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
+      const message = String(err);
       error(res, message, 400);
     }
     return true;

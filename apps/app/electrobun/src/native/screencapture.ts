@@ -1,24 +1,3 @@
-/**
- * Screen Capture Native Module for Electrobun
- *
- * Frame capture strategy:
- *
- * 1. App-window capture (default, no gameUrl):
- *    Uses native CLI screenshot tools to capture real pixel data from the screen.
- *    - macOS: `screencapture -x -t jpg <tmpPath>` (no sound, no shadow)
- *    - Linux: `scrot --quality 70 <tmpPath>`, falling back to ImageMagick `import`
- *    - Windows: PowerShell `System.Drawing.CopyFromScreen` for native capture.
- *    The temp JPEG file is read, POSTed to the stream endpoint, then deleted.
- *
- * 2. Game URL capture (gameUrl provided):
- *    Creates a BrowserWindow for the game URL and captures its canvas/video
- *    content via JS. No offscreen `paint` event in Electrobun, so we poll.
- *
- * The captured JPEG frames are POSTed to the stream endpoint (e.g.
- * /api/stream/frame). The MJPEG monitor (GET /api/stream/screen) on the agent
- * server receives these frames for live view.
- */
-
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -45,11 +24,6 @@ function isAllowedCaptureUrl(url: string): boolean {
   }
 }
 
-/**
- * Structural type for accessing evaluateJavascriptWithResponse via requestProxy.
- * requestProxy is present at runtime on every createRPC result but is not
- * part of the base RPCWithTransport interface exported by electrobun.
- */
 type WebviewEvalRpc = {
   requestProxy?: {
     evaluateJavascriptWithResponse?: (params: {
@@ -58,44 +32,9 @@ type WebviewEvalRpc = {
   };
 };
 
-/**
- * Minimal structural type for a webview — only the `rpc` property is used
- * by ScreenCaptureManager. Using a structural type (not Webview) allows
- * both real webviews and test mocks to satisfy this interface.
- */
 type Webview = { rpc?: unknown };
 
 type SendToWebview = (message: string, payload?: unknown) => void;
-
-// JS injected into the webview to capture its visible content as a JPEG data URL.
-// Uses html2canvas-style approach via native canvas.drawImage(document.body).
-// Note: cross-origin iframes will be blank (canvas taint).
-const _CAPTURE_SCRIPT = (_quality: number) => `
-(function() {
-  try {
-    var canvas = document.createElement('canvas');
-    var dpr = window.devicePixelRatio || 1;
-    canvas.width = Math.min(window.innerWidth * dpr, 1920);
-    canvas.height = Math.min(window.innerHeight * dpr, 1080);
-    var ctx = canvas.getContext('2d');
-    if (!ctx) return null;
-    // Attempt to capture via foreignObject SVG technique
-    var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + canvas.width + '" height="' + canvas.height + '">'
-      + '<foreignObject width="100%" height="100%">'
-      + '<div xmlns="http://www.w3.org/1999/xhtml" style="transform:scale(' + (1/dpr) + ');transform-origin:top left;width:' + (canvas.width*dpr) + 'px;height:' + (canvas.height*dpr) + 'px;">'
-      + document.documentElement.outerHTML
-      + '</div></foreignObject></svg>';
-    var img = new Image();
-    var blob = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
-    var url = URL.createObjectURL(blob);
-    // Sync path isn't possible — return a sentinel to use async path
-    URL.revokeObjectURL(url);
-    return null; // fallback to simpler approach
-  } catch(e) {
-    return null;
-  }
-})()
-`;
 
 export class ScreenCaptureManager {
   private frameCaptureActive = false;
@@ -114,22 +53,8 @@ export class ScreenCaptureManager {
     // Native CLI capture does not use the webview reference; retained for RPC compat.
   }
 
-  /**
-   * Override the capture target webview. Pass null to revert to mainWebview.
-   * Used when a StreamView is popped out to a separate window.
-   *
-   * NOTE: Since screen capture was moved to native CLI tools on all platforms
-   * (screencapture on macOS, PowerShell on Windows, scrot/import on Linux),
-   * this override is intentionally inert — frame capture always captures the
-   * full screen, not a specific webview. The setter is retained because it is
-   * wired into the RPC schema (screencapture:setCaptureTarget) and called by
-   * StreamView popout logic. Removing it would require coordinated changes
-   * across rpc-schema.ts, rpc-handlers.ts, electrobun-bridge.ts, and the
-   * renderer.
-   */
-  setCaptureTarget(_webview: Webview | null): void {
-    // Intentionally inert — see docblock above.
-  }
+  /** Intentionally inert — native CLI tools capture the full screen, not a webview. */
+  setCaptureTarget(_webview: Webview | null): void {}
 
   async getSources() {
     return {

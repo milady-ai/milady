@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { AgentRuntime, createCharacter, logger } from "@elizaos/core";
 import { default as pluginSql } from "@elizaos/plugin-sql";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { withTimeout } from "../../../test/helpers/test-utils";
 import { startApiServer } from "../src/api/server";
 import {
   DatabaseTrajectoryLogger,
@@ -59,23 +60,6 @@ function _http$(
   });
 }
 
-function withTimeout<T>(
-  promise: Promise<T>,
-  ms: number,
-  label: string,
-): Promise<T> {
-  let timeoutHandle: NodeJS.Timeout | null = null;
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    timeoutHandle = setTimeout(() => {
-      reject(new Error(`${label} timed out after ${ms}ms`));
-    }, ms);
-  });
-  return Promise.race([promise, timeoutPromise]).finally(() => {
-    if (timeoutHandle) {
-      clearTimeout(timeoutHandle);
-    }
-  });
-}
 
 describe("Trajectory Database E2E", () => {
   let runtime: AgentRuntime;

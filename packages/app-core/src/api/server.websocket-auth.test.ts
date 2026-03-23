@@ -6,7 +6,7 @@ import {
 } from "./../test-support/test-helpers";
 import { resolveWebSocketUpgradeRejection } from "./server";
 
-function req(
+function mockReq(
   headers: http.IncomingHttpHeaders = {},
 ): Pick<http.IncomingMessage, "headers"> {
   return createMockHeadersRequest(headers) as Pick<
@@ -37,7 +37,7 @@ describe("resolveWebSocketUpgradeRejection", () => {
 
   it("rejects non-/ws paths", () => {
     const rejection = resolveWebSocketUpgradeRejection(
-      req() as http.IncomingMessage,
+      mockReq() as http.IncomingMessage,
       new URL("ws://localhost/not-ws"),
     );
     expect(rejection).toEqual({ status: 404, reason: "Not found" });
@@ -46,7 +46,7 @@ describe("resolveWebSocketUpgradeRejection", () => {
   it("rejects disallowed origins", () => {
     delete process.env.ELIZA_API_TOKEN;
     const rejection = resolveWebSocketUpgradeRejection(
-      req({ origin: "https://evil.example" }) as http.IncomingMessage,
+      mockReq({ origin: "https://evil.example" }) as http.IncomingMessage,
       new URL("ws://localhost/ws"),
     );
     expect(rejection).toEqual({ status: 403, reason: "Origin not allowed" });
@@ -55,7 +55,7 @@ describe("resolveWebSocketUpgradeRejection", () => {
   it("rejects unauthenticated upgrades when API token is enabled", () => {
     process.env.ELIZA_API_TOKEN = "test-token";
     const rejection = resolveWebSocketUpgradeRejection(
-      req() as http.IncomingMessage,
+      mockReq() as http.IncomingMessage,
       new URL("ws://localhost/ws"),
     );
     expect(rejection).toEqual({ status: 401, reason: "Unauthorized" });
@@ -64,7 +64,7 @@ describe("resolveWebSocketUpgradeRejection", () => {
   it("accepts valid bearer token", () => {
     process.env.ELIZA_API_TOKEN = "test-token";
     const rejection = resolveWebSocketUpgradeRejection(
-      req({ authorization: "Bearer test-token" }) as http.IncomingMessage,
+      mockReq({ authorization: "Bearer test-token" }) as http.IncomingMessage,
       new URL("ws://localhost/ws"),
     );
     expect(rejection).toBeNull();
@@ -75,7 +75,7 @@ describe("resolveWebSocketUpgradeRejection", () => {
     delete process.env.ELIZA_ALLOW_WS_QUERY_TOKEN;
 
     const rejection = resolveWebSocketUpgradeRejection(
-      req() as http.IncomingMessage,
+      mockReq() as http.IncomingMessage,
       new URL("ws://localhost/ws?token=test-token"),
     );
     expect(rejection).toEqual({ status: 401, reason: "Unauthorized" });
@@ -85,7 +85,7 @@ describe("resolveWebSocketUpgradeRejection", () => {
     process.env.ELIZA_API_TOKEN = "test-token";
     process.env.ELIZA_ALLOW_WS_QUERY_TOKEN = "1";
     const rejection = resolveWebSocketUpgradeRejection(
-      req() as http.IncomingMessage,
+      mockReq() as http.IncomingMessage,
       new URL("ws://localhost/ws?token=test-token"),
     );
     expect(rejection).toBeNull();
@@ -94,7 +94,7 @@ describe("resolveWebSocketUpgradeRejection", () => {
   it("accepts when token auth is disabled and origin is local", () => {
     delete process.env.ELIZA_API_TOKEN;
     const rejection = resolveWebSocketUpgradeRejection(
-      req({ origin: "http://localhost:5173" }) as http.IncomingMessage,
+      mockReq({ origin: "http://localhost:5173" }) as http.IncomingMessage,
       new URL("ws://localhost/ws"),
     );
     expect(rejection).toBeNull();
@@ -106,7 +106,7 @@ describe("resolveWebSocketUpgradeRejection", () => {
   ])("accepts IPv6 local origin when token auth is disabled (%s)", (origin) => {
     delete process.env.ELIZA_API_TOKEN;
     const rejection = resolveWebSocketUpgradeRejection(
-      req({ origin }) as http.IncomingMessage,
+      mockReq({ origin }) as http.IncomingMessage,
       new URL("ws://localhost/ws"),
     );
     expect(rejection).toBeNull();
@@ -115,7 +115,7 @@ describe("resolveWebSocketUpgradeRejection", () => {
   it("rejects invalid bearer token", () => {
     process.env.ELIZA_API_TOKEN = "test-token";
     const rejection = resolveWebSocketUpgradeRejection(
-      req({ authorization: "Bearer wrong-token" }) as http.IncomingMessage,
+      mockReq({ authorization: "Bearer wrong-token" }) as http.IncomingMessage,
       new URL("ws://localhost/ws"),
     );
     expect(rejection).toEqual({ status: 401, reason: "Unauthorized" });
@@ -124,7 +124,7 @@ describe("resolveWebSocketUpgradeRejection", () => {
   it("accepts X-Eliza-Token header auth", () => {
     process.env.ELIZA_API_TOKEN = "test-token";
     const rejection = resolveWebSocketUpgradeRejection(
-      req({ "x-eliza-token": "test-token" }) as http.IncomingMessage,
+      mockReq({ "x-eliza-token": "test-token" }) as http.IncomingMessage,
       new URL("ws://localhost/ws"),
     );
     expect(rejection).toBeNull();
@@ -134,7 +134,7 @@ describe("resolveWebSocketUpgradeRejection", () => {
     process.env.ELIZA_API_TOKEN = "test-token";
     process.env.ELIZA_ALLOW_WS_QUERY_TOKEN = "1";
     const rejection = resolveWebSocketUpgradeRejection(
-      req() as http.IncomingMessage,
+      mockReq() as http.IncomingMessage,
       new URL("ws://localhost/ws?token=wrong-token"),
     );
     expect(rejection).toEqual({ status: 401, reason: "Unauthorized" });
@@ -148,7 +148,7 @@ describe("resolveWebSocketUpgradeRejection", () => {
   ])("accepts app-protocol origins (%s)", (origin) => {
     delete process.env.ELIZA_API_TOKEN;
     const rejection = resolveWebSocketUpgradeRejection(
-      req({ origin }) as http.IncomingMessage,
+      mockReq({ origin }) as http.IncomingMessage,
       new URL("ws://localhost/ws"),
     );
     expect(rejection).toBeNull();
@@ -158,7 +158,7 @@ describe("resolveWebSocketUpgradeRejection", () => {
     delete process.env.ELIZA_API_TOKEN;
     process.env.ELIZA_ALLOWED_ORIGINS = "https://trusted.example.com";
     const rejection = resolveWebSocketUpgradeRejection(
-      req({ origin: "https://trusted.example.com" }) as http.IncomingMessage,
+      mockReq({ origin: "https://trusted.example.com" }) as http.IncomingMessage,
       new URL("ws://localhost/ws"),
     );
     expect(rejection).toBeNull();
@@ -167,7 +167,7 @@ describe("resolveWebSocketUpgradeRejection", () => {
   it("accepts upgrade when no origin header is present", () => {
     delete process.env.ELIZA_API_TOKEN;
     const rejection = resolveWebSocketUpgradeRejection(
-      req() as http.IncomingMessage,
+      mockReq() as http.IncomingMessage,
       new URL("ws://localhost/ws"),
     );
     expect(rejection).toBeNull();
@@ -176,7 +176,7 @@ describe("resolveWebSocketUpgradeRejection", () => {
   it("rejects whitespace-only bearer token", () => {
     process.env.ELIZA_API_TOKEN = "test-token";
     const rejection = resolveWebSocketUpgradeRejection(
-      req({ authorization: "Bearer   " }) as http.IncomingMessage,
+      mockReq({ authorization: "Bearer   " }) as http.IncomingMessage,
       new URL("ws://localhost/ws"),
     );
     expect(rejection).toEqual({ status: 401, reason: "Unauthorized" });
@@ -186,7 +186,7 @@ describe("resolveWebSocketUpgradeRejection", () => {
     process.env.ELIZA_API_TOKEN = "test-token";
     process.env.ELIZA_ALLOW_WS_QUERY_TOKEN = "1";
     const rejection = resolveWebSocketUpgradeRejection(
-      req() as http.IncomingMessage,
+      mockReq() as http.IncomingMessage,
       new URL("ws://localhost/ws?apiKey=test-token"),
     );
     expect(rejection).toBeNull();
@@ -196,7 +196,7 @@ describe("resolveWebSocketUpgradeRejection", () => {
     process.env.ELIZA_API_TOKEN = "test-token";
     process.env.ELIZA_ALLOW_WS_QUERY_TOKEN = "1";
     const rejection = resolveWebSocketUpgradeRejection(
-      req() as http.IncomingMessage,
+      mockReq() as http.IncomingMessage,
       new URL("ws://localhost/ws?api_key=test-token"),
     );
     expect(rejection).toBeNull();
@@ -206,7 +206,7 @@ describe("resolveWebSocketUpgradeRejection", () => {
     delete process.env.ELIZA_API_TOKEN;
     process.env.ELIZA_ALLOW_NULL_ORIGIN = "1";
     const rejection = resolveWebSocketUpgradeRejection(
-      req({ origin: "null" }) as http.IncomingMessage,
+      mockReq({ origin: "null" }) as http.IncomingMessage,
       new URL("ws://localhost/ws"),
     );
     expect(rejection).toBeNull();

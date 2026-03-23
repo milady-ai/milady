@@ -1,10 +1,3 @@
-/**
- * TalkMode Native Module for Electrobun
- *
- * Provides text-to-speech via ElevenLabs API (fetch-based, works in Bun)
- * and speech-to-text via Whisper (if available) or Web Speech API fallback.
- */
-
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";

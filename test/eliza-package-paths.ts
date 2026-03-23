@@ -84,8 +84,7 @@ export function getInstalledPackageRoot(
   } catch {
     try {
       const entryPath = scopedRequire.resolve(packageName);
-      const entryDir = path.dirname(entryPath);
-      return path.basename(entryDir) === "src" ? entryDir : entryDir;
+      return path.dirname(entryPath);
     } catch {
       return undefined;
     }

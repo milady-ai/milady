@@ -23,50 +23,11 @@ import {
   it,
   vi,
 } from "vitest";
+import { req } from "../../../../test/helpers/http";
 
 // ---------------------------------------------------------------------------
 // Part 1: API Tests for Wallet Endpoints
 // ---------------------------------------------------------------------------
-
-async function req(
-  port: number,
-  method: string,
-  path: string,
-  body?: Record<string, unknown>,
-): Promise<{ status: number; data: Record<string, unknown> }> {
-  return new Promise((resolve, reject) => {
-    const payload = body ? JSON.stringify(body) : undefined;
-    const r = http.request(
-      {
-        hostname: "127.0.0.1",
-        port,
-        path,
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          ...(payload ? { "Content-Length": Buffer.byteLength(payload) } : {}),
-        },
-      },
-      (res) => {
-        const chunks: Buffer[] = [];
-        res.on("data", (c: Buffer) => chunks.push(c));
-        res.on("end", () => {
-          const raw = Buffer.concat(chunks).toString("utf-8");
-          let data: Record<string, unknown> = {};
-          try {
-            data = JSON.parse(raw) as Record<string, unknown>;
-          } catch {
-            data = { _raw: raw };
-          }
-          resolve({ status: res.statusCode ?? 0, data });
-        });
-      },
-    );
-    r.on("error", reject);
-    if (payload) r.write(payload);
-    r.end();
-  });
-}
 
 function createWalletTestServer(): Promise<{
   port: number;
@@ -371,22 +332,6 @@ describe("InventoryView UI", () => {
     expect(tree).not.toBeNull();
   });
 
-  it("renders copy button for address", async () => {
-    let tree: TestRenderer.ReactTestRenderer | null = null;
-
-    await act(async () => {
-      tree = TestRenderer.create(React.createElement(InventoryView));
-    });
-
-    const copyButtons = tree?.root.findAll(
-      (node) =>
-        node.type === "button" &&
-        node.children.some(
-          (c) => typeof c === "string" && c.toLowerCase().includes("copy"),
-        ),
-    );
-    expect(copyButtons.length).toBeGreaterThanOrEqual(0);
-  });
 });
 
 // ---------------------------------------------------------------------------

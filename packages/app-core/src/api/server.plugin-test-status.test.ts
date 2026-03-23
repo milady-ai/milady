@@ -5,8 +5,8 @@
  * See issue #1172 — UX Persona Audit.
  */
 
-import http from "node:http";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { req } from "../../../../test/helpers/http";
 import { startApiServer } from "./server";
 
 vi.mock("../services/mcp-marketplace", () => ({
@@ -14,38 +14,16 @@ vi.mock("../services/mcp-marketplace", () => ({
   getMcpServerDetails: vi.fn().mockResolvedValue(null),
 }));
 
-function req(
+/** POST helper matching the original req(port, path, token?) convenience signature. */
+function postReq(
   port: number,
   path: string,
   token?: string,
-): Promise<{ status: number; data: Record<string, unknown> }> {
-  return new Promise((resolve, reject) => {
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      "Content-Length": "0",
-    };
-    if (token) headers.Authorization = `Bearer ${token}`;
-    const r = http.request(
-      { hostname: "127.0.0.1", port, path, method: "POST", headers },
-      (res) => {
-        const chunks: Buffer[] = [];
-        res.on("data", (c: Buffer) => chunks.push(c));
-        res.on("end", () => {
-          let data: Record<string, unknown> = {};
-          try {
-            data = JSON.parse(
-              Buffer.concat(chunks).toString("utf-8"),
-            ) as Record<string, unknown>;
-          } catch {
-            data = {};
-          }
-          resolve({ status: res.statusCode ?? 0, data });
-        });
-      },
-    );
-    r.on("error", reject);
-    r.end();
-  });
+) {
+  const headers: Record<string, string> | undefined = token
+    ? { Authorization: `Bearer ${token}` }
+    : undefined;
+  return req(port, "POST", path, undefined, headers);
 }
 
 describe("POST /api/plugins/:id/test — HTTP status codes (P4-01)", () => {
@@ -81,14 +59,14 @@ describe("POST /api/plugins/:id/test — HTTP status codes (P4-01)", () => {
   });
 
   it("returns 422 when Telegram bot token is not configured", async () => {
-    const { status, data } = await req(port, "/api/plugins/telegram/test");
+    const { status, data } = await postReq(port, "/api/plugins/telegram/test");
     expect(status).toBe(422);
     expect(data.success).toBe(false);
     expect(typeof data.error).toBe("string");
   });
 
   it("returns JSON body with success:false on 422 response", async () => {
-    const { data } = await req(port, "/api/plugins/telegram/test");
+    const { data } = await postReq(port, "/api/plugins/telegram/test");
     expect(data).toMatchObject({
       success: false,
       pluginId: "telegram",
@@ -96,7 +74,7 @@ describe("POST /api/plugins/:id/test — HTTP status codes (P4-01)", () => {
   });
 
   it("does NOT return 200 for a failed Telegram test", async () => {
-    const { status } = await req(port, "/api/plugins/telegram/test");
+    const { status } = await postReq(port, "/api/plugins/telegram/test");
     expect(status).not.toBe(200);
   });
 

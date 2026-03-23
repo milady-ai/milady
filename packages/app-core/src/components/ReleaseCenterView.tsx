@@ -13,7 +13,6 @@ import {
 } from "./release-center/shared";
 import {
   type AppReleaseStatus,
-  DEFAULT_RELEASE_NOTES_URL,
   type DesktopBuildInfo,
   type DesktopReleaseNotesWindowInfo,
   type DesktopSessionSnapshot,
@@ -25,6 +24,8 @@ import {
 } from "./release-center/types";
 
 export function ReleaseCenterView() {
+  const { appUrl } = useBranding();
+  const defaultReleaseNotesUrl = `${appUrl}/releases/`;
   const desktopRuntime = isElectrobunRuntime();
   const { loadUpdateStatus, updateLoading, updateStatus } = useApp();
 
@@ -44,7 +45,7 @@ export function ReleaseCenterView() {
   const [releaseNotesWindow, setReleaseNotesWindow] =
     useState<DesktopReleaseNotesWindowInfo | null>(null);
   const [releaseNotesUrl, setReleaseNotesUrl] = useState(
-    DEFAULT_RELEASE_NOTES_URL,
+    defaultReleaseNotesUrl,
   );
   const [releaseNotesUrlDirty, setReleaseNotesUrlDirty] = useState(false);
   const [wgpuTagAvailable, setWgpuTagAvailable] = useState(false);
@@ -248,7 +249,7 @@ export function ReleaseCenterView() {
         ipcChannel: "desktop:openReleaseNotesWindow",
         params: {
           url: releaseNotesUrl,
-          title: "Milady Release Notes",
+          title: "Release Notes",
         },
       });
     setReleaseNotesWindow(info);
@@ -503,3 +504,4 @@ export function ReleaseCenterView() {
     </div>
   );
 }
+import { useBranding } from "../config/branding";

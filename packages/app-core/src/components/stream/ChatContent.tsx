@@ -66,10 +66,11 @@ export function ChatContent({
     return exchanges.sort((a, b) => a.ts - b.ts).slice(-10);
   }, [events, messages]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll when exchanges change
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  });
+  }, [recentExchanges]);
 
   return (
     <div

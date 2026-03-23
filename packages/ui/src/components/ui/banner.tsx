@@ -52,7 +52,7 @@ export const Banner = React.forwardRef<HTMLDivElement, BannerProps>(
     },
     ref,
   ) => {
-    const Icon = ICONS[variant ?? "info"];
+    const Icon = ICONS[variant!];
 
     return (
       <div

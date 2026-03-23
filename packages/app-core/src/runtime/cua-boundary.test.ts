@@ -50,29 +50,8 @@ vi.mock("@elizaos/plugin-trust", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-twitch", () => ({ default: {} }));
 vi.mock("@miladyai/plugin-wechat", () => ({ default: {} }));
 
+import { envSnapshot } from "../../../../../test/helpers/test-utils";
 import { collectPluginNames } from "./eliza";
-
-// ---------------------------------------------------------------------------
-// helpers
-// ---------------------------------------------------------------------------
-
-function envSnapshot(keys: string[]): {
-  save: () => void;
-  restore: () => void;
-} {
-  const saved = new Map<string, string | undefined>();
-  return {
-    save() {
-      for (const k of keys) saved.set(k, process.env[k]);
-    },
-    restore() {
-      for (const [k, v] of saved) {
-        if (v === undefined) delete process.env[k];
-        else process.env[k] = v;
-      }
-    },
-  };
-}
 
 const EMPTY_CONFIG: ElizaConfig = {} as ElizaConfig;
 

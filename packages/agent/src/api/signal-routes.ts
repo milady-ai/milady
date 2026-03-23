@@ -120,7 +120,7 @@ export async function handleSignalRoute(
     void session.start().catch((err) => {
       console.error(
         `[signal] Pairing session failed for ${accountId}:`,
-        err instanceof Error ? err.message : String(err),
+        String(err),
       );
       state.signalPairingSessions.delete(accountId);
     });
@@ -218,7 +218,7 @@ export async function handleSignalRoute(
     } catch (err) {
       console.warn(
         `[signal] Logout failed for ${accountId}:`,
-        err instanceof Error ? err.message : String(err),
+        String(err),
       );
     }
 

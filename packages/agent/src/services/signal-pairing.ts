@@ -80,7 +80,7 @@ export class SignalPairingSession {
         type: "signal-status",
         accountId: this.options.accountId,
         status: "error",
-        error: `Failed to load dependencies: ${err instanceof Error ? err.message : String(err)}`,
+        error: `Failed to load dependencies: ${String(err)}`,
       });
       return;
     }
@@ -141,7 +141,7 @@ export class SignalPairingSession {
     } catch (err) {
       if (this.aborted) return;
 
-      const errMsg = err instanceof Error ? err.message : String(err);
+      const errMsg = String(err);
       console.error(`${LOG_PREFIX} Linking failed:`, errMsg);
 
       this.setStatus("error");

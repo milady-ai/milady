@@ -14,8 +14,6 @@ const Skeleton = React.forwardRef<
 ));
 Skeleton.displayName = "Skeleton";
 
-/* ── Skeleton Variants ───────────────────────────────────────────────── */
-
 function SkeletonLine({
   width = "100%",
   className = "",

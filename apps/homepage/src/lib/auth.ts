@@ -1,9 +1,4 @@
-import {
-  CLOUD_BASE,
-  getCloudTokenStorageKey,
-  isHostedRuntime,
-  LEGACY_CLOUD_TOKEN_STORAGE_KEY,
-} from "./runtime-config";
+import { CLOUD_BASE, getCloudTokenStorageKey } from "./runtime-config";
 
 export const CLOUD_AUTH_CHANGED_EVENT = "milady-cloud-auth-changed";
 
@@ -17,23 +12,16 @@ function getActiveTokenStorageKey(): string {
 }
 
 export function getToken(): string | null {
-  const scopedToken = localStorage.getItem(getActiveTokenStorageKey());
-  if (scopedToken != null) return scopedToken;
-  if (!isHostedRuntime()) {
-    return localStorage.getItem(LEGACY_CLOUD_TOKEN_STORAGE_KEY);
-  }
-  return null;
+  return localStorage.getItem(getActiveTokenStorageKey());
 }
 
 export function setToken(token: string): void {
   localStorage.setItem(getActiveTokenStorageKey(), token);
-  localStorage.removeItem(LEGACY_CLOUD_TOKEN_STORAGE_KEY);
   emitAuthChanged();
 }
 
 export function clearToken(): void {
   localStorage.removeItem(getActiveTokenStorageKey());
-  localStorage.removeItem(LEGACY_CLOUD_TOKEN_STORAGE_KEY);
   emitAuthChanged();
 }
 
@@ -76,31 +64,11 @@ export async function cloudLoginPoll(
 export interface CloudAgent {
   id: string;
   name: string;
-  /** Backend returns agentName; normalized to name by fetchCloudAgents(). */
   agentName?: string;
   status: string;
   model?: string;
   createdAt?: string;
   updatedAt?: string;
-}
-
-export async function fetchCloudAgents(): Promise<CloudAgent[]> {
-  const token = getToken();
-  if (!token) return [];
-  try {
-    const res = await fetch(`${CLOUD_BASE}/api/v1/milady/agents`, {
-      headers: { "X-Api-Key": token },
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    const raw: CloudAgent[] = Array.isArray(data)
-      ? data
-      : (data.agents ?? data.data ?? []);
-    // Backend returns agentName; normalize to name
-    return raw.map((a) => ({ ...a, name: a.name || a.agentName || a.id }));
-  } catch {
-    return [];
-  }
 }
 
 export async function fetchWithAuth(

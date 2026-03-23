@@ -350,7 +350,7 @@ export function validateEvmPrivateKey(key: string): KeyValidationResult {
       valid: false,
       chain: "evm",
       address: null,
-      error: `Derivation failed: ${err instanceof Error ? err.message : err}`,
+      error: `Derivation failed: ${String(err)}`,
     };
   }
 }
@@ -377,7 +377,7 @@ export function validateSolanaPrivateKey(key: string): KeyValidationResult {
       valid: false,
       chain: "solana",
       address: null,
-      error: `Invalid key: ${err instanceof Error ? err.message : err}`,
+      error: `Invalid key: ${String(err)}`,
     };
   }
 }
@@ -590,7 +590,7 @@ export async function fetchSolanaBalances(
     solBalance = ((data.result?.value ?? 0) / 1e9).toFixed(9);
   } catch (err) {
     logger.warn(
-      `SOL balance fetch failed: ${err instanceof Error ? err.message : err}`,
+      `SOL balance fetch failed: ${String(err)}`,
     );
   }
 
@@ -639,7 +639,7 @@ export async function fetchSolanaBalances(
     }
   } catch (err) {
     logger.warn(
-      `Solana token fetch failed: ${err instanceof Error ? err.message : err}`,
+      `Solana token fetch failed: ${String(err)}`,
     );
   }
 
@@ -680,7 +680,7 @@ export async function fetchSolanaNativeBalanceViaRpc(
       const solBalance = ((data.result?.value ?? 0) / 1e9).toFixed(9);
       return { solBalance, solValueUsd: "0", tokens: [] };
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = String(err);
       errors.push(`${describeRpcEndpoint(rpcUrl)}: ${msg}`);
     }
   }

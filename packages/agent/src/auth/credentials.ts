@@ -187,7 +187,7 @@ export async function applySubscriptionCredentials(config?: {
       applyClaudeCodeStealth();
     } catch (err) {
       logger.warn(
-        `[auth] Failed to apply Claude stealth: ${err instanceof Error ? err.message : err}`,
+        `[auth] Failed to apply Claude stealth: ${String(err)}`,
       );
     }
   }

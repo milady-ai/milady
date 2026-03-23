@@ -8,7 +8,7 @@ import type {
 } from "@miladyai/app-core/api";
 import type { createTranslator } from "@miladyai/app-core/i18n";
 import type { AppState } from "@miladyai/app-core/state";
-import { Button } from "@miladyai/ui";
+import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@miladyai/ui";
 import { CHAIN_CONFIGS, PRIMARY_CHAIN_KEYS } from "../chainConfig";
 
 type InventoryToolbarStateKey = "inventoryView" | "inventorySort";
@@ -107,38 +107,49 @@ export function InventoryToolbar({
           </button>
         </div>
 
-        <select
-          data-testid="wallet-chain-select"
-          aria-label={t("wallet.chain")}
-          className="h-8 min-w-32 border border-border bg-bg px-2.5 text-xs text-txt"
+        <Select
           value={chainFocus}
-          onChange={(event) => onChainChange(event.target.value)}
+          onValueChange={(value) => onChainChange(value)}
         >
-          <option value="all">{t("wallet.all")}</option>
-          {PRIMARY_CHAIN_KEYS.map((key) => (
-            <option key={key} value={key}>
-              {CHAIN_CONFIGS[key].name}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger
+            data-testid="wallet-chain-select"
+            aria-label={t("wallet.chain")}
+            className="h-8 min-w-32 border border-border bg-bg px-2.5 text-xs text-txt"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("wallet.all")}</SelectItem>
+            {PRIMARY_CHAIN_KEYS.map((key) => (
+              <SelectItem key={key} value={key}>
+                {CHAIN_CONFIGS[key].name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         {inventoryView === "tokens" && (
-          <select
-            data-testid="wallet-sort-select"
-            aria-label={t("wallet.sort")}
-            className="h-8 min-w-28 border border-border bg-bg px-2.5 text-xs text-txt"
+          <Select
             value={inventorySort}
-            onChange={(event) => {
-              const nextSort = event.target.value;
+            onValueChange={(nextSort) => {
               if (isInventorySort(nextSort)) {
                 setState("inventorySort", nextSort);
               }
             }}
           >
-            <option value="value">{t("wallet.value")}</option>
-            <option value="chain">{t("wallet.chain")}</option>
-            <option value="symbol">{t("wallet.name")}</option>
-          </select>
+            <SelectTrigger
+              data-testid="wallet-sort-select"
+              aria-label={t("wallet.sort")}
+              className="h-8 min-w-28 border border-border bg-bg px-2.5 text-xs text-txt"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="value">{t("wallet.value")}</SelectItem>
+              <SelectItem value="chain">{t("wallet.chain")}</SelectItem>
+              <SelectItem value="symbol">{t("wallet.name")}</SelectItem>
+            </SelectContent>
+          </Select>
         )}
 
         <Button

@@ -482,7 +482,6 @@ export const analyzeImageAction: Action = {
   ],
 };
 
-// Export all media actions
 export const mediaActions = [
   generateImageAction,
   generateVideoAction,

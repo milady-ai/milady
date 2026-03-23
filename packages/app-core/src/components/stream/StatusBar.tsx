@@ -1,6 +1,7 @@
 import { isElectrobunRuntime } from "@miladyai/app-core/bridge";
+import { getBootConfig } from "@miladyai/app-core/config";
 import { useApp } from "@miladyai/app-core/state";
-import { Button, Input, Slider } from "@miladyai/ui";
+import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Slider } from "@miladyai/ui";
 import {
   ChevronDown,
   ExternalLink,
@@ -317,25 +318,31 @@ export function StatusBar({
 
         {/* Destination selector — always visible when destinations exist */}
         {!isPip && destinations.length > 0 && (
-          <select
-            className="bg-bg-muted text-txt border border-border text-[11px] rounded px-1.5 py-0.5 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+          <Select
             value={activeDestination?.id ?? ""}
             disabled={isLive || !streamAvailable}
-            title={
-              !streamAvailable
-                ? "Install and enable the streaming plugin to change destinations"
-                : isLive
-                  ? "Stop stream to change destination"
-                  : "Select destination"
-            }
-            onChange={(e) => onDestinationChange(e.target.value)}
+            onValueChange={(value) => onDestinationChange(value)}
           >
-            {destinations.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger
+              className="bg-bg-muted text-txt border border-border text-[11px] rounded px-1.5 py-0.5 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed h-auto w-auto"
+              title={
+                !streamAvailable
+                  ? "Install and enable the streaming plugin to change destinations"
+                  : isLive
+                    ? "Stop stream to change destination"
+                    : "Select destination"
+              }
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {destinations.map((d) => (
+                <SelectItem key={d.id} value={d.id}>
+                  {d.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         )}
 
         {/* Settings gear */}
@@ -420,8 +427,7 @@ export function StatusBar({
             className="px-2 py-0.5 h-6 rounded bg-bg-muted hover:bg-accent/20 hover:text-txt transition-colors"
             title={t("statusbar.PopOutStreamView")}
             onClick={() => {
-              const apiBase = (window as unknown as Record<string, unknown>)
-                .__MILADY_API_BASE__ as string | undefined;
+              const apiBase = getBootConfig().apiBase;
               const base = window.location.origin || "";
               const sep =
                 window.location.protocol === "file:" ||

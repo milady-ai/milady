@@ -28,12 +28,7 @@ vi.mock("node:child_process", () => ({
 
 // Suppress logger noise in test output.
 vi.mock("@elizaos/core", () => ({
-  logger: {
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-    debug: vi.fn(),
-  },
+  logger: { info: vi.fn(), warn: vi.fn(), debug: vi.fn(), error: vi.fn() },
 }));
 
 import { execSync, spawn } from "node:child_process";

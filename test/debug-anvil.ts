@@ -13,11 +13,9 @@ async function main() {
   console.log(`Funded wallet: ${anvil.fundedWallet.address}`);
 
   try {
-    // Check nonce before deployment
     const nonceBefore = await anvil.fundedWallet.getNonce();
     console.log(`Nonce before deployment: ${nonceBefore}`);
 
-    // Check balance
     const balance = await anvil.fundedWallet.provider?.getBalance(
       anvil.fundedWallet.address,
     );
@@ -28,7 +26,6 @@ async function main() {
     console.log(`Registry deployed at: ${contracts.registry.address}`);
     console.log(`Collection deployed at: ${contracts.collection.address}`);
 
-    // Check nonce after deployment
     const nonceAfter = await anvil.fundedWallet.getNonce();
     console.log(`Nonce after deployment: ${nonceAfter}`);
 
@@ -41,4 +38,4 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+main();

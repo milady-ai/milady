@@ -239,41 +239,35 @@ describe("persistCompatOnboardingDefaults", () => {
     } as Record<string, unknown>;
     mockLoadElizaConfig.mockReturnValue(config);
 
-    const style = {
-      all: ["be brief"],
-      chat: ["lowercase"],
-      post: ["no emoji"],
-    };
-    const adjectives = ["warm", "gentle"];
-    const topics = ["emotional intelligence", "design thinking"];
-    const postExamples = ["goodnight everyone", "you've got this"];
-    const messageExamples = [
-      [
-        { user: "{{user1}}", content: { text: "hi" } },
-        { user: "Chen", content: { text: "hey there!" } },
-      ],
-    ];
-
     persistCompatOnboardingDefaults({
       name: "Chen",
       bio: ["A warm analyst."],
       systemPrompt: "You are Chen.",
-      style,
-      adjectives,
-      topics,
-      postExamples,
-      messageExamples,
+      style: { all: ["be brief"], chat: ["lowercase"], post: ["no emoji"] },
+      adjectives: ["warm", "gentle"],
+      topics: ["emotional intelligence", "design thinking"],
+      postExamples: ["goodnight everyone", "you've got this"],
+      messageExamples: [
+        [
+          { user: "{{user1}}", content: { text: "hi" } },
+          { user: "Chen", content: { text: "hey there!" } },
+        ],
+      ],
     });
 
     expect(mockSaveElizaConfig).toHaveBeenCalledTimes(1);
     const saved = mockSaveElizaConfig.mock.calls[0][0];
     const agent = saved.agents.list[0];
     expect(agent.name).toBe("Chen");
-    expect(agent.style).toEqual(style);
-    expect(agent.adjectives).toEqual(adjectives);
-    expect(agent.topics).toEqual(topics);
-    expect(agent.postExamples).toEqual(postExamples);
-    expect(agent.messageExamples).toEqual(messageExamples);
+    expect(agent.style).toEqual({
+      all: ["be brief"],
+      chat: ["lowercase"],
+      post: ["no emoji"],
+    });
+    expect(agent.adjectives).toEqual(["warm", "gentle"]);
+    expect(agent.topics).toEqual(["emotional intelligence", "design thinking"]);
+    expect(agent.postExamples).toEqual(["goodnight everyone", "you've got this"]);
+    expect(agent.messageExamples).toHaveLength(1);
   });
 
   it("skips non-array/non-object character fields gracefully", () => {

@@ -636,7 +636,7 @@ export interface ConversationGreeting {
 }
 
 export interface CreateConversationOptions {
-  bootstrapGreeting?: boolean;
+  includeGreeting?: boolean;
   lang?: string;
 }
 
@@ -1954,10 +1954,10 @@ export interface VerificationMessageResponse {
 // System Permissions
 // ---------------------------------------------------------------------------
 
+import { getBootConfig, setBootConfig } from "../config/boot-config";
+
 declare global {
   interface Window {
-    __MILADY_API_BASE__?: string;
-    __MILADY_API_TOKEN__?: string;
   }
 }
 
@@ -2003,18 +2003,6 @@ export class MiladyClient {
     this._uiLanguage = lang || null;
   }
 
-  private static resolveDesktopLocalFallbackBase(): string {
-    if (typeof window === "undefined") return "";
-    const proto = window.location.protocol;
-    // In the desktop shell the main process injects the live API base
-    // once the embedded agent has bound a port. Avoid eager localhost probes
-    // to prevent noisy ERR_CONNECTION_REFUSED logs during startup.
-    if (proto === "electrobun:") return "";
-    if (proto === "file:") {
-      return "http://localhost:2138";
-    }
-    return "";
-  }
 
   private static generateClientId(): string {
     const random =
@@ -2036,33 +2024,27 @@ export class MiladyClient {
         : null;
     this._explicitBase = baseUrl != null || Boolean(storedBase?.trim());
     this._token = token?.trim() || stored || null;
-    // Priority: explicit arg > desktop-injected global > same origin (Vite proxy)
-    const injectedBase =
-      typeof window !== "undefined" ? window.__MILADY_API_BASE__ : undefined;
+    // Priority: explicit arg > session storage > boot config > same origin (Vite proxy)
+    const bootBase = getBootConfig().apiBase;
     this._baseUrl =
       baseUrl ??
       storedBase ??
-      injectedBase ??
-      MiladyClient.resolveDesktopLocalFallbackBase();
+      bootBase ??
+      "";
   }
 
   /**
    * Resolve the API base URL lazily.
-   * In the desktop shell the main process injects window.__MILADY_API_BASE__ after the
-   * page loads (once the agent runtime starts). Re-checking on every call
-   * ensures we pick up the injected value even if it wasn't set at construction.
+   * In the desktop shell the main process injects the API base after the
+   * page loads (once the agent runtime starts). Re-checking the boot config
+   * on every call ensures we pick up the injected value even if it wasn't
+   * set at construction.
    */
   private get baseUrl(): string {
-    if (!this._explicitBase && typeof window !== "undefined") {
-      const injected = window.__MILADY_API_BASE__;
-      // In the desktop shell the API base can be injected after initial render. Always
-      // prefer the injected value when present so the client can switch away
-      // from the localhost fallback once the main process publishes the real
-      // endpoint.
-      if (injected && injected !== this._baseUrl) {
-        this._baseUrl = injected;
-      } else if (!this._baseUrl) {
-        this._baseUrl = MiladyClient.resolveDesktopLocalFallbackBase();
+    if (!this._explicitBase) {
+      const bootBase = getBootConfig().apiBase;
+      if (bootBase && bootBase !== this._baseUrl) {
+        this._baseUrl = bootBase;
       }
     }
     return this._baseUrl;
@@ -2070,9 +2052,8 @@ export class MiladyClient {
 
   private get apiToken(): string | null {
     if (this._token) return this._token;
-    if (typeof window === "undefined") return null;
-    const injected = window.__MILADY_API_TOKEN__;
-    if (typeof injected === "string" && injected.trim()) return injected.trim();
+    const bootToken = getBootConfig().apiToken;
+    if (typeof bootToken === "string" && bootToken.trim()) return bootToken.trim();
     return null;
   }
 
@@ -2091,15 +2072,16 @@ export class MiladyClient {
 
   setToken(token: string | null): void {
     this._token = token?.trim() || null;
+    // Update boot config so other consumers see the new token.
+    const config = getBootConfig();
+    setBootConfig({ ...config, apiToken: this._token ?? undefined });
     if (typeof window !== "undefined") {
       if (this._token) {
-        window.__MILADY_API_TOKEN__ = this._token;
         window.sessionStorage.setItem(
           SESSION_STORAGE_API_TOKEN_KEY,
           this._token,
         );
       } else {
-        delete window.__MILADY_API_TOKEN__;
         window.sessionStorage.removeItem(SESSION_STORAGE_API_TOKEN_KEY);
       }
     }
@@ -2114,12 +2096,13 @@ export class MiladyClient {
     this._explicitBase = normalized.length > 0;
     this._baseUrl = normalized;
     this.disconnectWs();
+    // Update boot config so other consumers (resolveApiUrl, etc.) see the new base.
+    const config = getBootConfig();
+    setBootConfig({ ...config, apiBase: normalized || undefined });
     if (typeof window !== "undefined") {
       if (normalized) {
-        window.__MILADY_API_BASE__ = normalized;
         window.sessionStorage.setItem(SESSION_STORAGE_API_BASE_KEY, normalized);
       } else {
-        delete window.__MILADY_API_BASE__;
         window.sessionStorage.removeItem(SESSION_STORAGE_API_BASE_KEY);
       }
     }
@@ -4547,12 +4530,6 @@ export class MiladyClient {
       if (parsed.type === "error") {
         throw new Error(parsed.message ?? "generation failed");
       }
-
-      // Backward compatibility with legacy stream payloads: { text: "..." }
-      if (parsed.text) {
-        fullText = mergeStreamingText(fullText, parsed.text);
-        onToken(parsed.text, fullText);
-      }
     };
 
     // Contract: the API must emit `data: {"type":"done",...}` or
@@ -4664,9 +4641,7 @@ export class MiladyClient {
       method: "POST",
       body: JSON.stringify({
         title,
-        ...(options?.bootstrapGreeting === true
-          ? { bootstrapGreeting: true }
-          : {}),
+        ...(options?.includeGreeting === true ? { includeGreeting: true } : {}),
         ...(typeof options?.lang === "string" && options.lang.trim()
           ? { lang: options.lang.trim() }
           : {}),
@@ -4804,13 +4779,6 @@ export class MiladyClient {
     return this.fetch(`/api/conversations/${encodeURIComponent(id)}`, {
       method: "DELETE",
     });
-  }
-
-  /** @deprecated Prefer {@link sendChatRest} — WebSocket chat may silently drop messages. */
-  sendChat(text: string): void {
-    if (this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify({ type: "chat", text }));
-    }
   }
 
   // ── Database API ──────────────────────────────────────────────────────
@@ -5788,11 +5756,6 @@ export class MiladyClient {
     throw new Error("Provisioning timed out after 2 minutes");
   }
 }
-
-/** @deprecated Use MiladyClient directly. */
-export type ElizaClient = MiladyClient;
-/** @deprecated Use MiladyClient directly. */
-export const ElizaClient = MiladyClient;
 
 // Singleton
 export const client = new MiladyClient();

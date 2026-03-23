@@ -18,10 +18,7 @@ import {
   collectPluginNames,
 } from "@miladyai/app-core/src/runtime/eliza";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-
-// ---------------------------------------------------------------------------
-// Env snapshot helper
-// ---------------------------------------------------------------------------
+import { envSnapshot } from "./helpers/test-utils";
 
 const CLOUD_ENV_KEYS = [
   "ELIZAOS_CLOUD_ENABLED",
@@ -33,33 +30,15 @@ const CLOUD_ENV_KEYS = [
   "LARGE_MODEL",
 ];
 
-function envSnapshot(keys: string[]): {
-  save: () => void;
-  restore: () => void;
-} {
-  const saved = new Map<string, string | undefined>();
-  return {
-    save() {
-      for (const k of keys) saved.set(k, process.env[k]);
-    },
-    restore() {
-      for (const [k, v] of saved) {
-        if (v === undefined) delete process.env[k];
-        else process.env[k] = v;
-      }
-    },
-  };
-}
-
 // ═══════════════════════════════════════════════════════════════════════════
 // 1. applyCloudConfigToEnv — unit tests
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe("applyCloudConfigToEnv — cloud credential persistence", () => {
-  const snap = envSnapshot(CLOUD_ENV_KEYS);
+  let snap: ReturnType<typeof envSnapshot>;
   beforeEach(() => {
-    snap.save();
-    for (const k of CLOUD_ENV_KEYS) delete process.env[k];
+    snap = envSnapshot(CLOUD_ENV_KEYS);
+    snap.clear();
   });
   afterEach(() => snap.restore());
 
@@ -121,10 +100,10 @@ describe("applyCloudConfigToEnv — cloud credential persistence", () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe("collectPluginNames — cloud plugin inclusion", () => {
-  const snap = envSnapshot(CLOUD_ENV_KEYS);
+  let snap: ReturnType<typeof envSnapshot>;
   beforeEach(() => {
-    snap.save();
-    for (const k of CLOUD_ENV_KEYS) delete process.env[k];
+    snap = envSnapshot(CLOUD_ENV_KEYS);
+    snap.clear();
   });
   afterEach(() => snap.restore());
 
@@ -151,10 +130,10 @@ describe("collectPluginNames — cloud plugin inclusion", () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe("buildCharacterFromConfig — cloud secret propagation", () => {
-  const snap = envSnapshot(CLOUD_ENV_KEYS);
+  let snap: ReturnType<typeof envSnapshot>;
   beforeEach(() => {
-    snap.save();
-    for (const k of CLOUD_ENV_KEYS) delete process.env[k];
+    snap = envSnapshot(CLOUD_ENV_KEYS);
+    snap.clear();
   });
   afterEach(() => snap.restore());
 
@@ -181,11 +160,11 @@ describe("buildCharacterFromConfig — cloud secret propagation", () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe("Cloud login persistence — simulated end-to-end", () => {
-  const snap = envSnapshot(CLOUD_ENV_KEYS);
+  let snap: ReturnType<typeof envSnapshot>;
 
   beforeEach(() => {
-    snap.save();
-    for (const k of CLOUD_ENV_KEYS) delete process.env[k];
+    snap = envSnapshot(CLOUD_ENV_KEYS);
+    snap.clear();
   });
   afterEach(() => snap.restore());
 

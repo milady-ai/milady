@@ -30,7 +30,7 @@ export function OnboardingPanel({ step, children }: OnboardingPanelProps) {
   }, [step]);
 
   return (
-    <div className="onboarding-right">
+    <div className="flex flex-col justify-center py-10 pr-14 pl-0 relative z-10 max-md:p-4">
       <div className="onboarding-panel" ref={panelRef}>
         {children}
       </div>

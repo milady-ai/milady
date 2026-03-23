@@ -4,7 +4,7 @@ import {
   alertDesktopMessage,
   confirmDesktopAction,
 } from "@miladyai/app-core/utils";
-import { Button, Input } from "@miladyai/ui";
+import { Button, Input, Switch } from "@miladyai/ui";
 import { useCallback, useEffect, useState } from "react";
 import { CustomActionEditor } from "./CustomActionEditor";
 
@@ -274,13 +274,11 @@ export function CustomActionsView() {
               {/* Actions Row */}
               <div className="flex items-center justify-between pt-2 border-t border-border">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
+                  <Switch
                     checked={action.enabled}
-                    onChange={(e) =>
-                      handleToggleEnabled(action.id, e.target.checked)
+                    onCheckedChange={(checked) =>
+                      handleToggleEnabled(action.id, !!checked)
                     }
-                    className="cursor-pointer"
                   />
                   <span className="text-xs text-muted">
                     {t("customactionsview.Enabled")}

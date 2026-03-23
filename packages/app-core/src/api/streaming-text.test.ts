@@ -111,3 +111,79 @@ describe("computeStreamingDelta", () => {
     expect(computeStreamingDelta("world", "Hello world")).toBe("Hello world");
   });
 });
+
+describe("mergeStreamingText – CJK / Unicode preservation", () => {
+  it("appends CJK delta to existing text", () => {
+    expect(mergeStreamingText("你", "好")).toBe("你好");
+  });
+
+  it("accepts cumulative CJK snapshot", () => {
+    expect(mergeStreamingText("你好", "你好世界")).toBe("你好世界");
+  });
+
+  it("handles CJK-only overlap", () => {
+    expect(mergeStreamingText("你好世", "世界")).toBe("你好世界");
+  });
+
+  it("preserves mixed CJK and ASCII", () => {
+    expect(mergeStreamingText("Hello ", "你好")).toBe("Hello 你好");
+  });
+
+  it("handles Korean streaming", () => {
+    expect(mergeStreamingText("안녕", "안녕하세요")).toBe("안녕하세요");
+  });
+
+  it("handles Japanese streaming (hiragana + kanji)", () => {
+    expect(mergeStreamingText("こんに", "こんにちは")).toBe("こんにちは");
+  });
+
+  it("preserves fullwidth punctuation in CJK text", () => {
+    expect(mergeStreamingText("你好", "你好，世界！")).toBe("你好，世界！");
+  });
+
+  it("does not corrupt CJK characters into commas or empty", () => {
+    const result = mergeStreamingText("", "你好");
+    expect(result).toBe("你好");
+    expect(result).not.toBe(",,");
+    expect(result).not.toMatch(/^[,\s]*$/);
+  });
+
+  it("handles emoji in streaming", () => {
+    expect(mergeStreamingText("Hello 😀", "Hello 😀🎉")).toBe("Hello 😀🎉");
+  });
+
+  it("handles CJK with NFC normalization", () => {
+    // CJK characters are already NFC but verify no corruption
+    const input = "你好世界";
+    const normalized = input.normalize("NFC");
+    expect(mergeStreamingText(normalized, `${normalized}！`)).toBe("你好世界！");
+  });
+});
+
+describe("computeStreamingDelta – CJK preservation", () => {
+  it("emits CJK delta for cumulative snapshot", () => {
+    expect(computeStreamingDelta("你好", "你好世界")).toBe("世界");
+  });
+
+  it("emits fullwidth punctuation in delta", () => {
+    expect(computeStreamingDelta("你好", "你好！")).toBe("！");
+  });
+});
+
+describe("resolveStreamingUpdate – CJK preservation", () => {
+  it("appends CJK text correctly", () => {
+    expect(resolveStreamingUpdate("你好", "你好世界")).toEqual({
+      kind: "append",
+      nextText: "你好世界",
+      emittedText: "世界",
+    });
+  });
+
+  it("replaces revised CJK snapshot", () => {
+    expect(resolveStreamingUpdate("你好世", "你好世界！")).toEqual({
+      kind: "append",
+      nextText: "你好世界！",
+      emittedText: "界！",
+    });
+  });
+});

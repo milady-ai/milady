@@ -76,15 +76,6 @@ vi.mock("../../src/bridge", () => ({
   subscribeDesktopBridgeEvent: mockSubscribeDesktopBridgeEvent,
 }));
 
-vi.mock("@miladyai/app-core/components/ui-badges", () => ({
-  StatusBadge: ({ label }: { label: string }) =>
-    React.createElement("span", { "data-testid": "status-badge" }, label),
-}));
-
-vi.mock("@miladyai/app-core/components/ui-switch", () => ({
-  Switch: () => React.createElement("span", null, "switch"),
-}));
-
 vi.mock("@miladyai/ui", () => ({
   Button: ({
     children,
@@ -99,6 +90,9 @@ vi.mock("@miladyai/ui", () => ({
       { type: "button", onClick, ...rest },
       children,
     ),
+  StatusBadge: ({ label }: { label: string }) =>
+    React.createElement("span", { "data-testid": "status-badge" }, label),
+  Switch: () => React.createElement("span", null, "switch"),
 }));
 
 vi.mock("lucide-react", () => ({

@@ -341,46 +341,28 @@ export async function handleCharacterRoutes(
       }
 
       // Persist character fields to DB so edits survive restarts
-      try {
-        const charData = {
-          name: character.name,
-          bio: character.bio,
-          system: character.system,
-          adjectives: character.adjectives,
-          topics: (character as { topics?: string[] }).topics,
-          style: character.style,
-          messageExamples: character.messageExamples,
-          postExamples: character.postExamples,
-        };
-        await state.runtime.updateAgent(state.runtime.agentId, {
-          name: character.name,
-          metadata: {
-            ...(
-              state.runtime.character as { metadata?: Record<string, unknown> }
-            ).metadata,
-            character: charData,
-          },
-        });
-      } catch (dbErr) {
-        // Non-fatal: config sync below is the legacy fallback
-        logger.warn(
-          `[character-routes] Failed to persist character to DB: ${dbErr instanceof Error ? dbErr.message : dbErr}`,
-        );
-      }
+      const charData = {
+        name: character.name,
+        bio: character.bio,
+        system: character.system,
+        adjectives: character.adjectives,
+        topics: (character as { topics?: string[] }).topics,
+        style: character.style,
+        messageExamples: character.messageExamples,
+        postExamples: character.postExamples,
+      };
+      await state.runtime.updateAgent(state.runtime.agentId, {
+        name: character.name,
+        metadata: {
+          ...(
+            state.runtime.character as { metadata?: Record<string, unknown> }
+          ).metadata,
+          character: charData,
+        },
+      });
     }
 
-    try {
-      syncRuntimeCharacterToConfig(state, saveConfig);
-    } catch (err) {
-      error(
-        res,
-        err instanceof Error
-          ? `Failed to persist character: ${err.message}`
-          : "Failed to persist character",
-        500,
-      );
-      return true;
-    }
+    syncRuntimeCharacterToConfig(state, saveConfig);
 
     if (body.name) state.agentName = String(body.name);
     json(res, { ok: true, character: body, agentName: state.agentName });
@@ -425,18 +407,12 @@ export async function handleCharacterRoutes(
 
     const prompt = buildGeneratePrompt(body.field, body.context, body.mode);
 
-    try {
-      const result = await runtime.useModel(ModelType.TEXT_SMALL, {
-        prompt,
-        temperature: 0.8,
-        maxTokens: 1500,
-      });
-      json(res, { generated: String(result) });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "generation failed";
-      logger.error(`[character-generate] ${message}`);
-      error(res, message, 500);
-    }
+    const result = await runtime.useModel(ModelType.TEXT_SMALL, {
+      prompt,
+      temperature: 0.8,
+      maxTokens: 1500,
+    });
+    json(res, { generated: String(result) });
     return true;
   }
 

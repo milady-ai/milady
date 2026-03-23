@@ -1,5 +1,4 @@
 import crypto from "node:crypto";
-import http from "node:http";
 import {
   type AgentRuntime,
   stringToUuid,
@@ -8,79 +7,11 @@ import {
 } from "@elizaos/core";
 import { startApiServer } from "@miladyai/app-core/src/api/server";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-
-type JsonPrimitive = string | number | boolean | null;
-type JsonValue = JsonPrimitive | JsonObject | JsonArray;
-type JsonArray = JsonValue[];
-interface JsonObject {
-  [key: string]: JsonValue;
-}
-
-interface ApiResponse {
-  status: number;
-  data: JsonValue;
-}
+import { req } from "./helpers/http";
 
 interface TriggerRuntimeHarness {
   runtime: AgentRuntime;
   injectAutonomousInstruction: ReturnType<typeof vi.fn>;
-}
-
-function parseJson(raw: string): JsonValue {
-  try {
-    return JSON.parse(raw) as JsonValue;
-  } catch {
-    return { raw };
-  }
-}
-
-function asObject(value: JsonValue): JsonObject {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
-  return value;
-}
-
-function asArray(value: JsonValue): JsonArray {
-  if (!Array.isArray(value)) return [];
-  return value;
-}
-
-function requestApi(
-  port: number,
-  method: string,
-  path: string,
-  body?: JsonObject,
-): Promise<ApiResponse> {
-  return new Promise((resolve, reject) => {
-    const payload = body ? JSON.stringify(body) : undefined;
-    const request = http.request(
-      {
-        hostname: "127.0.0.1",
-        port,
-        path,
-        method,
-        headers: payload
-          ? {
-              "Content-Type": "application/json",
-              "Content-Length": Buffer.byteLength(payload),
-            }
-          : undefined,
-      },
-      (response) => {
-        const chunks: Buffer[] = [];
-        response.on("data", (chunk: Buffer) => chunks.push(chunk));
-        response.on("end", () => {
-          const raw = Buffer.concat(chunks).toString("utf-8");
-          resolve({
-            status: response.statusCode ?? 0,
-            data: parseJson(raw),
-          });
-        });
-      },
-    );
-    request.on("error", reject);
-    if (payload) request.write(payload);
-    request.end();
-  });
 }
 
 function createTriggerRuntimeHarness(): TriggerRuntimeHarness {
@@ -191,7 +122,7 @@ describe("Trigger runtime E2E", () => {
       throw new Error("Server was not initialized");
     }
 
-    const createResponse = await requestApi(
+    const createResponse = await req(
       server.port,
       "POST",
       "/api/triggers",
@@ -205,42 +136,42 @@ describe("Trigger runtime E2E", () => {
     );
 
     expect(createResponse.status).toBe(201);
-    const createBody = asObject(createResponse.data);
-    const trigger = asObject(createBody.trigger ?? null);
+    const createBody = createResponse.data as Record<string, unknown>;
+    const trigger = (createBody.trigger ?? {}) as Record<string, unknown>;
     const triggerId = String(trigger.id ?? "");
     expect(triggerId.length).toBeGreaterThan(0);
 
-    const executeResponse = await requestApi(
+    const executeResponse = await req(
       server.port,
       "POST",
       `/api/triggers/${encodeURIComponent(triggerId)}/execute`,
     );
     expect(executeResponse.status).toBe(200);
-    const executeBody = asObject(executeResponse.data);
-    const executeResult = asObject(executeBody.result ?? null);
+    const executeBody = executeResponse.data as Record<string, unknown>;
+    const executeResult = (executeBody.result ?? {}) as Record<string, unknown>;
     expect(executeResult.status).toBe("success");
     expect(harness.injectAutonomousInstruction).toHaveBeenCalledTimes(1);
 
-    const runsResponse = await requestApi(
+    const runsResponse = await req(
       server.port,
       "GET",
       `/api/triggers/${encodeURIComponent(triggerId)}/runs`,
     );
     expect(runsResponse.status).toBe(200);
-    const runsBody = asObject(runsResponse.data);
-    const runs = asArray(runsBody.runs ?? []);
+    const runsBody = runsResponse.data as Record<string, unknown>;
+    const runs = (runsBody.runs ?? []) as unknown[];
     expect(runs.length).toBe(1);
-    const run = asObject(runs[0] ?? null);
+    const run = (runs[0] ?? {}) as Record<string, unknown>;
     expect(run.status).toBe("success");
     expect(run.source).toBe("manual");
 
-    const healthResponse = await requestApi(
+    const healthResponse = await req(
       server.port,
       "GET",
       "/api/triggers/health",
     );
     expect(healthResponse.status).toBe(200);
-    const health = asObject(healthResponse.data);
+    const health = healthResponse.data as Record<string, unknown>;
     expect(Number(health.totalExecutions ?? 0)).toBeGreaterThanOrEqual(1);
     expect(Number(health.totalFailures ?? 0)).toBe(0);
   });

@@ -25,7 +25,7 @@ export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
       role="dialog"
       aria-modal="true"
     >
-      <div className="bg-surface border border-border rounded-sm p-6 w-full max-w-md mx-4 space-y-5 animate-fade-up shadow-2xl">
+      <div className="bg-surface border border-border rounded-sm p-6 w-full max-w-md mx-4 space-y-5 animate-[fade-up_0.4s_ease-out_both] shadow-2xl">
         <div>
           <h3 className="text-lg font-medium text-text-light">
             Connect Remote Agent

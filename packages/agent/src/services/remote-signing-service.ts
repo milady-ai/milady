@@ -238,7 +238,7 @@ export class RemoteSigningService {
         humanConfirmed,
       };
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : String(err);
+      const errorMsg = String(err);
 
       this.auditLog?.record({
         type: "signing_request_rejected",

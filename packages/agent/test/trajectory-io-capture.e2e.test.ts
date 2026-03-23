@@ -16,27 +16,12 @@ import path from "node:path";
 import { AgentRuntime, createCharacter, logger } from "@elizaos/core";
 import { default as pluginSql } from "@elizaos/plugin-sql";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { withTimeout } from "../../../test/helpers/test-utils";
 import {
   DatabaseTrajectoryLogger,
   flushTrajectoryWrites,
 } from "../src/runtime/trajectory-persistence";
 
-function withTimeout<T>(
-  promise: Promise<T>,
-  ms: number,
-  label: string,
-): Promise<T> {
-  let handle: NodeJS.Timeout | null = null;
-  const tp = new Promise<never>((_, reject) => {
-    handle = setTimeout(
-      () => reject(new Error(`${label} timed out after ${ms}ms`)),
-      ms,
-    );
-  });
-  return Promise.race([promise, tp]).finally(() => {
-    if (handle) clearTimeout(handle);
-  });
-}
 
 describe("Trajectory I/O Capture E2E", () => {
   let runtime: AgentRuntime;

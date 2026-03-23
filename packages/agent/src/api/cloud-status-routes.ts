@@ -154,70 +154,40 @@ export async function handleCloudStatusRoutes(
         return true;
       }
 
-      try {
-        const balance = await fetchCloudCreditsByApiKey(
-          resolvedBaseUrl,
-          configApiKey,
-        );
-        if (typeof balance !== "number") {
-          json(res, {
-            balance: null,
-            connected: true,
-            error: "unexpected response",
-          });
-          return true;
-        }
-        const low = balance < 2.0;
-        const critical = balance < 0.5;
-        json(res, {
-          connected: true,
-          balance,
-          low,
-          critical,
-          topUpUrl: CLOUD_BILLING_URL,
-        });
-      } catch (err) {
-        const msg =
-          err instanceof Error ? err.message : "cloud API unreachable";
-        logger.debug(
-          `[cloud/credits] Failed to fetch balance via API key: ${msg}`,
-        );
-        json(res, { balance: null, connected: true, error: msg });
+      const balance = await fetchCloudCreditsByApiKey(
+        resolvedBaseUrl,
+        configApiKey,
+      );
+      if (typeof balance !== "number") {
+        throw new Error("unexpected response");
       }
+      const low = balance < 2.0;
+      const critical = balance < 0.5;
+      json(res, {
+        connected: true,
+        balance,
+        low,
+        critical,
+        topUpUrl: CLOUD_BILLING_URL,
+      });
       return true;
     }
 
-    let balance: number;
     const client = cloudAuth.getClient();
-    try {
-      const creditResponse =
-        await client.get<Record<string, unknown>>("/credits/balance");
-      const rawBalance =
-        typeof creditResponse?.balance === "number"
-          ? creditResponse.balance
-          : typeof (creditResponse?.data as Record<string, unknown>)
-                ?.balance === "number"
-            ? ((creditResponse.data as Record<string, unknown>)
-                .balance as number)
-            : undefined;
-      if (typeof rawBalance !== "number") {
-        logger.debug(
-          `[cloud/credits] Unexpected response shape: ${JSON.stringify(creditResponse)}`,
-        );
-        json(res, {
-          balance: null,
-          connected: true,
-          error: "unexpected response",
-        });
-        return true;
-      }
-      balance = rawBalance;
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "cloud API unreachable";
-      logger.debug(`[cloud/credits] Failed to fetch balance: ${msg}`);
-      json(res, { balance: null, connected: true, error: msg });
-      return true;
+    const creditResponse =
+      await client.get<Record<string, unknown>>("/credits/balance");
+    const rawBalance =
+      typeof creditResponse?.balance === "number"
+        ? creditResponse.balance
+        : typeof (creditResponse?.data as Record<string, unknown>)
+              ?.balance === "number"
+          ? ((creditResponse.data as Record<string, unknown>)
+              .balance as number)
+          : undefined;
+    if (typeof rawBalance !== "number") {
+      throw new Error(`Unexpected response shape: ${JSON.stringify(creditResponse)}`);
     }
+    const balance = rawBalance;
 
     const low = balance < 2.0;
     const critical = balance < 0.5;

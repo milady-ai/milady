@@ -177,8 +177,8 @@ function resolveCurrentElizaReleaseChannel(): "alpha" | "next" | null {
     if (version.includes("next")) {
       return "next";
     }
-  } catch {
-    // Fall back to registry metadata below.
+  } catch (err) {
+    logger.warn(`[plugin-installer] Failed to detect release channel from @elizaos/agent: ${err instanceof Error ? err.message : String(err)}`);
   }
 
   return null;
@@ -210,8 +210,8 @@ export async function detectPackageManager(): Promise<"bun" | "npm"> {
     try {
       await execFileAsync(cmd, ["--version"]);
       return cmd;
-    } catch {
-      // not available
+    } catch (err) {
+      logger.debug(`[plugin-installer] ${cmd} not available: ${err instanceof Error ? err.message : String(err)}`);
     }
   }
   return "npm";
@@ -608,8 +608,8 @@ async function readInstalledVersion(
     if (typeof pkg.version === "string" && pkg.version.length > 0) {
       return pkg.version;
     }
-  } catch {
-    // Keep fallback version.
+  } catch (err) {
+    logger.warn(`[plugin-installer] Failed to read installed version for ${packageName}: ${err instanceof Error ? err.message : String(err)}`);
   }
   return fallbackVersion;
 }
@@ -625,7 +625,8 @@ async function remoteBranchExists(
       { env: { ...process.env, GIT_TERMINAL_PROMPT: "0" } },
     );
     return stdout.trim().length > 0;
-  } catch {
+  } catch (err) {
+    logger.debug(`[plugin-installer] Failed to check remote branch "${branch}": ${err instanceof Error ? err.message : String(err)}`);
     return false;
   }
 }
@@ -651,7 +652,8 @@ async function listRemoteBranches(gitUrl: string): Promise<string[]> {
       }
     }
     return branches;
-  } catch {
+  } catch (err) {
+    logger.warn(`[plugin-installer] Failed to list remote branches for ${gitUrl}: ${err instanceof Error ? err.message : String(err)}`);
     return [];
   }
 }
@@ -774,8 +776,8 @@ async function resolveEntryPoint(
   try {
     await fs.access(nmPath);
     return nmPath;
-  } catch {
-    // not npm layout
+  } catch (err) {
+    logger.debug(`[plugin-installer] npm layout not found for ${packageName}: ${err instanceof Error ? err.message : String(err)}`);
   }
 
   // Direct layout (git clone): check for package.json in targetDir
@@ -783,8 +785,8 @@ async function resolveEntryPoint(
   try {
     await fs.access(pkgPath);
     return targetDir;
-  } catch {
-    // no package.json
+  } catch (err) {
+    logger.debug(`[plugin-installer] No package.json found in ${targetDir}: ${err instanceof Error ? err.message : String(err)}`);
   }
 
   return null;

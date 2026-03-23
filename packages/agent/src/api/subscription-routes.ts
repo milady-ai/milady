@@ -52,7 +52,7 @@ export async function handleSubscriptionRoutes(
       json(res, { providers: getSubscriptionStatus() });
     } catch (err) {
       logger.error(
-        `[api] Failed to get subscription status: ${err instanceof Error ? err.stack : err}`,
+        `[api] Failed to get subscription status: ${String(err)}`,
       );
       error(res, "Failed to get subscription status", 500);
     }
@@ -67,7 +67,7 @@ export async function handleSubscriptionRoutes(
       json(res, { authUrl: flow.authUrl });
     } catch (err) {
       logger.error(
-        `[api] Failed to start Anthropic login: ${err instanceof Error ? err.stack : err}`,
+        `[api] Failed to start Anthropic login: ${String(err)}`,
       );
       error(res, "Failed to start Anthropic login", 500);
     }
@@ -101,7 +101,7 @@ export async function handleSubscriptionRoutes(
     } catch (err) {
       delete state._anthropicFlow;
       logger.error(
-        `[api] Anthropic exchange failed: ${err instanceof Error ? err.stack : err}`,
+        `[api] Anthropic exchange failed: ${String(err)}`,
       );
       error(res, "Anthropic exchange failed", 500);
     }
@@ -126,7 +126,7 @@ export async function handleSubscriptionRoutes(
       json(res, { success: true });
     } catch (err) {
       logger.error(
-        `[api] Failed to save setup token: ${err instanceof Error ? err.stack : err}`,
+        `[api] Failed to save setup token: ${String(err)}`,
       );
       error(res, "Failed to save setup token", 500);
     }
@@ -171,7 +171,7 @@ export async function handleSubscriptionRoutes(
       });
     } catch (err) {
       logger.error(
-        `[api] Failed to start OpenAI login: ${err instanceof Error ? err.stack : err}`,
+        `[api] Failed to start OpenAI login: ${String(err)}`,
       );
       error(res, "Failed to start OpenAI login", 500);
     }
@@ -216,7 +216,7 @@ export async function handleSubscriptionRoutes(
         clearTimeout(state._codexFlowTimer);
         delete state._codexFlowTimer;
         logger.error(
-          `[api] OpenAI exchange failed: ${err instanceof Error ? err.stack : err}`,
+          `[api] OpenAI exchange failed: ${String(err)}`,
         );
         error(res, "OpenAI exchange failed", 500);
         return true;
@@ -233,7 +233,7 @@ export async function handleSubscriptionRoutes(
       });
     } catch (err) {
       logger.error(
-        `[api] OpenAI exchange failed: ${err instanceof Error ? err.stack : err}`,
+        `[api] OpenAI exchange failed: ${String(err)}`,
       );
       error(res, "OpenAI exchange failed", 500);
     }
@@ -249,7 +249,7 @@ export async function handleSubscriptionRoutes(
         json(res, { success: true });
       } catch (err) {
         logger.error(
-          `[api] Failed to delete credentials: ${err instanceof Error ? err.stack : err}`,
+          `[api] Failed to delete credentials: ${String(err)}`,
         );
         error(res, "Failed to delete credentials", 500);
       }

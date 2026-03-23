@@ -8,7 +8,7 @@ vi.mock("@elizaos/plugin-agent-orchestrator", () => ({
 
 import { resolveTerminalRunRejection } from "./server";
 
-function req(
+function mockReq(
   headers: http.IncomingHttpHeaders = {},
 ): Pick<http.IncomingMessage, "headers"> {
   return createMockHeadersRequest(headers) as Pick<
@@ -40,7 +40,7 @@ describe("resolveTerminalRunRejection", () => {
     delete process.env.ELIZA_TERMINAL_RUN_TOKEN;
 
     const rejection = resolveTerminalRunRejection(
-      req() as http.IncomingMessage,
+      mockReq() as http.IncomingMessage,
       {},
     );
 
@@ -52,7 +52,7 @@ describe("resolveTerminalRunRejection", () => {
     delete process.env.ELIZA_TERMINAL_RUN_TOKEN;
 
     const rejection = resolveTerminalRunRejection(
-      req() as http.IncomingMessage,
+      mockReq() as http.IncomingMessage,
       {},
     );
 
@@ -68,7 +68,7 @@ describe("resolveTerminalRunRejection", () => {
     process.env.ELIZA_TERMINAL_RUN_TOKEN = "terminal-secret";
 
     const rejection = resolveTerminalRunRejection(
-      req() as http.IncomingMessage,
+      mockReq() as http.IncomingMessage,
       {},
     );
 
@@ -84,7 +84,7 @@ describe("resolveTerminalRunRejection", () => {
     process.env.ELIZA_TERMINAL_RUN_TOKEN = "terminal-secret";
 
     const rejection = resolveTerminalRunRejection(
-      req() as http.IncomingMessage,
+      mockReq() as http.IncomingMessage,
       { terminalToken: "wrong" },
     );
 
@@ -99,7 +99,7 @@ describe("resolveTerminalRunRejection", () => {
     process.env.ELIZA_TERMINAL_RUN_TOKEN = "terminal-secret";
 
     const rejection = resolveTerminalRunRejection(
-      req({
+      mockReq({
         "x-eliza-terminal-token": "terminal-secret",
       }) as http.IncomingMessage,
       {},
@@ -113,7 +113,7 @@ describe("resolveTerminalRunRejection", () => {
     process.env.ELIZA_TERMINAL_RUN_TOKEN = "terminal-secret";
 
     const rejection = resolveTerminalRunRejection(
-      req() as http.IncomingMessage,
+      mockReq() as http.IncomingMessage,
       { terminalToken: "terminal-secret" },
     );
 
@@ -125,7 +125,7 @@ describe("resolveTerminalRunRejection", () => {
     process.env.ELIZA_TERMINAL_RUN_TOKEN = "terminal-secret";
 
     const rejection = resolveTerminalRunRejection(
-      req() as http.IncomingMessage,
+      mockReq() as http.IncomingMessage,
       {},
     );
 

@@ -14,15 +14,16 @@
  * NO MOCKS — all tests spin up a real HTTP server.
  */
 import fs from "node:fs";
-import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { WebSocket } from "ws";
 import { startApiServer } from "../src/api/server";
+import { req as _req } from "../../../test/helpers/http";
+import { saveEnv } from "../../../test/helpers/test-utils";
 
 // ---------------------------------------------------------------------------
-// HTTP helper — supports custom headers and origin injection
+// Thin wrapper — adapts { headers, origin } opts to the shared helper
 // ---------------------------------------------------------------------------
 
 interface ReqOptions {
@@ -36,45 +37,12 @@ function req(
   p: string,
   body?: Record<string, unknown>,
   opts?: ReqOptions,
-): Promise<{
-  status: number;
-  headers: http.IncomingHttpHeaders;
-  data: Record<string, unknown>;
-}> {
-  return new Promise((resolve, reject) => {
-    const b = body ? JSON.stringify(body) : undefined;
-    const r = http.request(
-      {
-        hostname: "127.0.0.1",
-        port,
-        path: p,
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          ...(b ? { "Content-Length": Buffer.byteLength(b) } : {}),
-          ...(opts?.origin ? { Origin: opts.origin } : {}),
-          ...(opts?.headers ?? {}),
-        },
-      },
-      (res) => {
-        const ch: Buffer[] = [];
-        res.on("data", (c: Buffer) => ch.push(c));
-        res.on("end", () => {
-          const raw = Buffer.concat(ch).toString("utf-8");
-          let data: Record<string, unknown> = {};
-          try {
-            data = JSON.parse(raw) as Record<string, unknown>;
-          } catch {
-            data = { _raw: raw };
-          }
-          resolve({ status: res.statusCode ?? 0, headers: res.headers, data });
-        });
-      },
-    );
-    r.on("error", reject);
-    if (b) r.write(b);
-    r.end();
-  });
+) {
+  const headers: Record<string, string> = {
+    ...(opts?.origin ? { Origin: opts.origin } : {}),
+    ...(opts?.headers ?? {}),
+  };
+  return _req(port, method, p, body, Object.keys(headers).length ? headers : undefined);
 }
 
 type WsConnectResult = { kind: "open" } | { kind: "rejected"; status?: number };
@@ -107,23 +75,6 @@ function connectWs(
     );
     ws.on("error", () => finish({ kind: "rejected" }));
   });
-}
-
-// ---------------------------------------------------------------------------
-// Env save/restore helper
-// ---------------------------------------------------------------------------
-
-function saveEnv(...keys: string[]): { restore: () => void } {
-  const saved: Record<string, string | undefined> = {};
-  for (const key of keys) saved[key] = process.env[key];
-  return {
-    restore() {
-      for (const key of keys) {
-        if (saved[key] === undefined) delete process.env[key];
-        else process.env[key] = saved[key];
-      }
-    },
-  };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

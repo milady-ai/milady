@@ -92,7 +92,7 @@ export function Nav() {
 
           {/* Version indicator */}
           <div className="ml-3 flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-brand status-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-brand animate-[status-pulse_2s_ease-in-out_infinite]" />
             <span className="font-mono text-[10px] text-text-subtle tracking-wider">
               {releaseData.release.tagName}
             </span>

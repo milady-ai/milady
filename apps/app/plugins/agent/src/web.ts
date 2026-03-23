@@ -14,26 +14,16 @@ import type { AgentPlugin, AgentStatus, ChatResult } from "./definitions";
  * app shell HTML, so we bail early.
  */
 export class AgentWeb extends WebPlugin implements AgentPlugin {
-  private desktopLocalFallbackBase(): string {
-    if (typeof window === "undefined") return "";
-    const proto = window.location.protocol;
-    if (proto === "electrobun:" || proto === "file:") {
-      const desktopApiBase = (window as unknown as Record<string, unknown>)
-        .__MILADY_API_BASE__;
-      return typeof desktopApiBase === "string" && desktopApiBase.trim()
-        ? desktopApiBase
-        : "http://localhost:2138";
-    }
-    return "";
-  }
-
   private apiBase(): string {
     const global =
       typeof window !== "undefined"
         ? (window as unknown as Record<string, unknown>).__MILADY_API_BASE__
         : undefined;
     if (typeof global === "string" && global.trim().length > 0) return global;
-    return this.desktopLocalFallbackBase();
+
+    throw new Error(
+      "No API base URL provided for Agent services. Ensure __MILADY_API_BASE__ is set.",
+    );
   }
 
   private apiToken(): string | null {

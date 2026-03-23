@@ -159,27 +159,15 @@ export async function handleCloudRoute(
       timeoutMs: CLOUD_LOGIN_CREATE_TIMEOUT_MS,
     });
 
-    let createRes: Response;
-    try {
-      createRes = await fetchWithTimeout(
-        `${baseUrl}/api/auth/cli-session`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionId }),
-        },
-        CLOUD_LOGIN_CREATE_TIMEOUT_MS,
-      );
-    } catch (fetchErr) {
-      if (isTimeoutError(fetchErr)) {
-        loginCreateSpan.failure({ error: fetchErr, statusCode: 504 });
-        sendJsonError(res, "Eliza Cloud login request timed out", 504);
-        return true;
-      }
-      loginCreateSpan.failure({ error: fetchErr, statusCode: 502 });
-      sendJsonError(res, "Failed to reach Eliza Cloud", 502);
-      return true;
-    }
+    const createRes = await fetchWithTimeout(
+      `${baseUrl}/api/auth/cli-session`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId }),
+      },
+      CLOUD_LOGIN_CREATE_TIMEOUT_MS,
+    );
 
     if (isRedirectResponse(createRes)) {
       loginCreateSpan.failure({
@@ -234,37 +222,11 @@ export async function handleCloudRoute(
       operation: "login_poll_status",
       timeoutMs: CLOUD_LOGIN_POLL_TIMEOUT_MS,
     });
-    let pollRes: Response;
-    try {
-      pollRes = await fetchWithTimeout(
-        `${baseUrl}/api/auth/cli-session/${encodeURIComponent(sessionId)}`,
-        {},
-        CLOUD_LOGIN_POLL_TIMEOUT_MS,
-      );
-    } catch (fetchErr) {
-      if (isTimeoutError(fetchErr)) {
-        loginPollSpan.failure({ error: fetchErr, statusCode: 504 });
-        sendJson(
-          res,
-          {
-            status: "error",
-            error: "Eliza Cloud status request timed out",
-          },
-          504,
-        );
-        return true;
-      }
-      loginPollSpan.failure({ error: fetchErr, statusCode: 502 });
-      sendJson(
-        res,
-        {
-          status: "error",
-          error: "Failed to reach Eliza Cloud",
-        },
-        502,
-      );
-      return true;
-    }
+    const pollRes = await fetchWithTimeout(
+      `${baseUrl}/api/auth/cli-session/${encodeURIComponent(sessionId)}`,
+      {},
+      CLOUD_LOGIN_POLL_TIMEOUT_MS,
+    );
 
     if (isRedirectResponse(pollRes)) {
       loginPollSpan.failure({
@@ -300,21 +262,11 @@ export async function handleCloudRoute(
       return true;
     }
 
-    let data: {
+    const data = (await pollRes.json()) as {
       status: string;
       apiKey?: string;
       keyPrefix?: string;
     };
-    try {
-      data = (await pollRes.json()) as {
-        status: string;
-        apiKey?: string;
-        keyPrefix?: string;
-      };
-    } catch (parseErr) {
-      loginPollSpan.failure({ error: parseErr, statusCode: pollRes.status });
-      throw parseErr;
-    }
     loginPollSpan.success({ statusCode: pollRes.status });
 
     if (data.status === "authenticated" && data.apiKey) {
@@ -324,39 +276,24 @@ export async function handleCloudRoute(
       cloud.enabled = true;
       cloud.apiKey = data.apiKey;
       (state.config as Record<string, unknown>).cloud = cloud;
-      try {
-        state.saveConfig?.(state.config);
-        logger.info("[cloud-login] API key saved to config file");
-      } catch (saveErr) {
-        logger.error(
-          `[cloud-login] Failed to save config: ${saveErr instanceof Error ? saveErr.message : saveErr}`,
-        );
-      }
+      state.saveConfig?.(state.config);
+      logger.info("[cloud-login] API key saved to config file");
 
       process.env.ELIZAOS_CLOUD_API_KEY = data.apiKey;
       process.env.ELIZAOS_CLOUD_ENABLED = "true";
 
       if (state.runtime) {
-        try {
-          if (!state.runtime.character.secrets) {
-            state.runtime.character.secrets = {};
-          }
-          const secrets = state.runtime.character.secrets as Record<
-            string,
-            string
-          >;
-          secrets.ELIZAOS_CLOUD_API_KEY = data.apiKey;
-          secrets.ELIZAOS_CLOUD_ENABLED = "true";
-
-          await state.runtime.updateAgent(state.runtime.agentId, {
-            secrets: { ...secrets },
-          });
-          logger.info("[cloud-login] API key persisted to agent DB record");
-        } catch (dbErr) {
-          logger.warn(
-            `[cloud-login] DB persistence failed (non-fatal): ${dbErr instanceof Error ? dbErr.message : dbErr}`,
-          );
+        if (!state.runtime.character.secrets) {
+          state.runtime.character.secrets = {};
         }
+        const secrets = state.runtime.character.secrets as Record<string, string>;
+        secrets.ELIZAOS_CLOUD_API_KEY = data.apiKey;
+        secrets.ELIZAOS_CLOUD_ENABLED = "true";
+
+        await state.runtime.updateAgent(state.runtime.agentId, {
+          secrets: { ...secrets },
+        });
+        logger.info("[cloud-login] API key persisted to agent DB record");
       }
 
       if (
@@ -489,36 +426,21 @@ export async function handleCloudRoute(
     delete cloud.apiKey;
     (state.config as Record<string, unknown>).cloud = cloud;
 
-    try {
-      state.saveConfig?.(state.config);
-    } catch (saveErr) {
-      logger.warn(
-        `[cloud-login] Failed to save cloud disconnect state: ${saveErr instanceof Error ? saveErr.message : saveErr}`,
-      );
-    }
+    state.saveConfig?.(state.config);
 
     delete process.env.ELIZAOS_CLOUD_API_KEY;
     delete process.env.ELIZAOS_CLOUD_ENABLED;
 
     if (state.runtime) {
-      try {
-        if (!state.runtime.character.secrets) {
-          state.runtime.character.secrets = {};
-        }
-        const secrets = state.runtime.character.secrets as Record<
-          string,
-          string | number | boolean
-        >;
-        delete secrets.ELIZAOS_CLOUD_API_KEY;
-        delete secrets.ELIZAOS_CLOUD_ENABLED;
-        await state.runtime.updateAgent(state.runtime.agentId, {
-          secrets: { ...secrets },
-        });
-      } catch (dbErr) {
-        logger.warn(
-          `[cloud-login] Failed to clear cloud secrets from agent DB: ${dbErr instanceof Error ? dbErr.message : dbErr}`,
-        );
+      if (!state.runtime.character.secrets) {
+        state.runtime.character.secrets = {};
       }
+      const secrets = state.runtime.character.secrets as Record<string, string | number | boolean>;
+      delete secrets.ELIZAOS_CLOUD_API_KEY;
+      delete secrets.ELIZAOS_CLOUD_ENABLED;
+      await state.runtime.updateAgent(state.runtime.agentId, {
+        secrets: { ...secrets },
+      });
     }
 
     sendJson(res, { ok: true, status: "disconnected" });

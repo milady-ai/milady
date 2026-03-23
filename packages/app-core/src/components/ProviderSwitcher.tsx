@@ -1,12 +1,9 @@
 /**
  * ProviderSwitcher — Provider grid, cloud settings, and switching logic.
- *
- * Extracted from SettingsView.tsx for decomposition (P2 §10).
- * Composes SubscriptionStatus and ApiKeyConfig sub-components.
  */
 
-import { Button, Input } from "@miladyai/ui";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@miladyai/ui";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { client, type OnboardingOptions, type PluginParamDef } from "../api";
 import {
   ConfigRenderer,
@@ -290,23 +287,30 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
   }, [subscriptionStatus]);
 
   /* ── Derived ──────────────────────────────────────────────────── */
-  const allAiProviders = [
-    ...plugins.filter((p) => p.category === "ai-provider"),
-  ].sort((left, right) => {
-    const leftCatalog = getOnboardingProviderOption(
-      normalizeAiProviderPluginId(left.id),
-    );
-    const rightCatalog = getOnboardingProviderOption(
-      normalizeAiProviderPluginId(right.id),
-    );
-    if (leftCatalog && rightCatalog) {
-      return leftCatalog.order - rightCatalog.order;
-    }
-    if (leftCatalog) return -1;
-    if (rightCatalog) return 1;
-    return left.name.localeCompare(right.name);
-  });
-  const enabledAiProviders = allAiProviders.filter((p) => p.enabled);
+  const allAiProviders = useMemo(
+    () =>
+      [...plugins.filter((p) => p.category === "ai-provider")].sort(
+        (left, right) => {
+          const leftCatalog = getOnboardingProviderOption(
+            normalizeAiProviderPluginId(left.id),
+          );
+          const rightCatalog = getOnboardingProviderOption(
+            normalizeAiProviderPluginId(right.id),
+          );
+          if (leftCatalog && rightCatalog) {
+            return leftCatalog.order - rightCatalog.order;
+          }
+          if (leftCatalog) return -1;
+          if (rightCatalog) return 1;
+          return left.name.localeCompare(right.name);
+        },
+      ),
+    [plugins],
+  );
+  const enabledAiProviders = useMemo(
+    () => allAiProviders.filter((p) => p.enabled),
+    [allAiProviders],
+  );
 
   const [selectedProviderId, setSelectedProviderId] = useState<string | null>(
     () => (elizaCloudEnabled ? "__cloud__" : null),
@@ -326,32 +330,46 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
     }
   }, [cloudHandlesInference, piAiEnabled, selectedProviderId]);
 
-  const resolvedSelectedId =
-    selectedProviderId === "__cloud__"
-      ? "__cloud__"
-      : selectedProviderId === "pi-ai"
-        ? "pi-ai"
-        : selectedProviderId &&
-            (allAiProviders.some((p) => p.id === selectedProviderId) ||
-              isSubscriptionProviderSelectionId(selectedProviderId))
-          ? selectedProviderId
-          : cloudHandlesInference
-            ? "__cloud__"
-            : piAiEnabled
-              ? "pi-ai"
-              : anthropicConnected
-                ? "anthropic-subscription"
-                : openaiConnected
-                  ? "openai-subscription"
-                  : (enabledAiProviders[0]?.id ?? null);
+  const resolvedSelectedId = useMemo(
+    () =>
+      selectedProviderId === "__cloud__"
+        ? "__cloud__"
+        : selectedProviderId === "pi-ai"
+          ? "pi-ai"
+          : selectedProviderId &&
+              (allAiProviders.some((p) => p.id === selectedProviderId) ||
+                isSubscriptionProviderSelectionId(selectedProviderId))
+            ? selectedProviderId
+            : cloudHandlesInference
+              ? "__cloud__"
+              : piAiEnabled
+                ? "pi-ai"
+                : anthropicConnected
+                  ? "anthropic-subscription"
+                  : openaiConnected
+                    ? "openai-subscription"
+                    : (enabledAiProviders[0]?.id ?? null),
+    [
+      allAiProviders,
+      anthropicConnected,
+      cloudHandlesInference,
+      enabledAiProviders,
+      openaiConnected,
+      piAiEnabled,
+      selectedProviderId,
+    ],
+  );
 
-  const selectedProvider =
-    resolvedSelectedId &&
-    resolvedSelectedId !== "__cloud__" &&
-    resolvedSelectedId !== "pi-ai" &&
-    !isSubscriptionProviderSelectionId(resolvedSelectedId)
-      ? (allAiProviders.find((p) => p.id === resolvedSelectedId) ?? null)
-      : null;
+  const selectedProvider = useMemo(
+    () =>
+      resolvedSelectedId &&
+      resolvedSelectedId !== "__cloud__" &&
+      resolvedSelectedId !== "pi-ai" &&
+      !isSubscriptionProviderSelectionId(resolvedSelectedId)
+        ? (allAiProviders.find((p) => p.id === resolvedSelectedId) ?? null)
+        : null,
+    [allAiProviders, resolvedSelectedId],
+  );
 
   /* ── Handlers ─────────────────────────────────────────────────── */
   const handleSwitchProvider = useCallback(
@@ -519,7 +537,7 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
   );
   const piAiModelSelectValue =
     normalizedPiAiModelSpec.length === 0
-      ? ""
+      ? "__default__"
       : hasKnownPiAiModel
         ? normalizedPiAiModelSpec
         : "__custom__";
@@ -560,7 +578,7 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
           <Button
             variant="link"
             size="sm"
-            className="settings-compact-button text-txt underline p-0 h-auto"
+            className="min-h-[auto] px-0 text-txt underline p-0 h-auto"
             onClick={() => {
               setTab("plugins");
             }}
@@ -583,12 +601,9 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
         >
           {t("providerswitcher.selectAIProvider")}
         </label>
-        <select
-          id="provider-switcher-select"
-          className="w-full px-3 pr-8 py-2.5 border border-[var(--border)] bg-[var(--card)] text-[13px] rounded-lg transition-all duration-200 focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 focus:outline-none hover:border-[var(--border-hover)]"
+        <Select
           value={resolvedSelectedId ?? "__cloud__"}
-          onChange={(e) => {
-            const nextId = e.target.value;
+          onValueChange={(nextId) => {
             if (nextId === "__cloud__") {
               void handleSelectCloud();
               return;
@@ -604,16 +619,24 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
             void handleSwitchProvider(nextId);
           }}
         >
-          {providerChoices.map((choice) => (
-            <option
-              key={choice.id}
-              value={choice.id}
-              disabled={choice.disabled}
-            >
-              {choice.label}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger
+            id="provider-switcher-select"
+            className="w-full px-3 py-2.5 border border-[var(--border)] bg-[var(--card)] text-[13px] rounded-lg transition-all duration-200 focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 focus:outline-none hover:border-[var(--border-hover)]"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {providerChoices.map((choice) => (
+              <SelectItem
+                key={choice.id}
+                value={choice.id}
+                disabled={choice.disabled}
+              >
+                {choice.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <p className="text-[11px] text-[var(--muted)] mt-1.5">
           {t("providerswitcher.chooseYourPreferredProvider")}
         </p>
@@ -837,34 +860,39 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
 
           {piAiModelOptions && piAiModelOptions.length > 0 ? (
             <>
-              <select
-                id="pi-ai-model-override"
+              <Select
                 value={piAiModelSelectValue}
-                onChange={(e) => {
-                  const next = e.target.value;
+                onValueChange={(next) => {
                   if (next === "__custom__") {
                     if (piAiModelSelectValue !== "__custom__") {
                       setPiAiModelSpec("");
                     }
                     return;
                   }
-                  setPiAiModelSpec(next);
+                  setPiAiModelSpec(next === "__default__" ? "" : next);
                 }}
-                className="w-full px-2.5 py-[8px] border border-[var(--border)] bg-[var(--card)] text-[13px] transition-colors focus:border-[var(--accent)] focus:outline-none"
               >
-                <option value="">
-                  {t("providerswitcher.usePiDefaultModel")}
-                  {piAiDefaultModelSpec ? ` (${piAiDefaultModelSpec})` : ""}
-                </option>
-                {piAiModelOptions.map((model) => (
-                  <option key={model.id} value={model.id}>
-                    {model.name} ({model.provider})
-                  </option>
-                ))}
-                <option value="__custom__">
-                  {t("providerswitcher.customModelSpec")}
-                </option>
-              </select>
+                <SelectTrigger
+                  id="pi-ai-model-override"
+                  className="w-full px-2.5 py-[8px] border border-[var(--border)] bg-[var(--card)] text-[13px] transition-colors focus:border-[var(--accent)] focus:outline-none"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__default__">
+                    {t("providerswitcher.usePiDefaultModel")}
+                    {piAiDefaultModelSpec ? ` (${piAiDefaultModelSpec})` : ""}
+                  </SelectItem>
+                  {piAiModelOptions.map((model) => (
+                    <SelectItem key={model.id} value={model.id}>
+                      {model.name} ({model.provider})
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="__custom__">
+                    {t("providerswitcher.customModelSpec")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
 
               {piAiModelSelectValue === "__custom__" && (
                 <Input

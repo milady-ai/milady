@@ -64,7 +64,10 @@ export function AppsView() {
     try {
       const [list, installed] = await Promise.all([
         client.listApps(),
-        client.listInstalledApps().catch(() => []),
+        client.listInstalledApps().catch((err: unknown) => {
+          console.warn("[AppsView] Failed to list installed apps:", err);
+          return [];
+        }),
       ]);
       setApps(list);
       setActiveAppNames(new Set(installed.map((app) => app.name)));

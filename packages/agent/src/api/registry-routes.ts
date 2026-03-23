@@ -86,7 +86,7 @@ export async function handleRegistryRoutes(
     } catch (err) {
       error(
         res,
-        `Failed to fetch registry: ${err instanceof Error ? err.message : String(err)}`,
+        `Failed to fetch registry: ${String(err)}`,
         502,
       );
     }
@@ -112,7 +112,7 @@ export async function handleRegistryRoutes(
     } catch (err) {
       error(
         res,
-        `Failed to look up plugin: ${err instanceof Error ? err.message : String(err)}`,
+        `Failed to look up plugin: ${String(err)}`,
         502,
       );
     }
@@ -138,7 +138,7 @@ export async function handleRegistryRoutes(
     } catch (err) {
       error(
         res,
-        `Search failed: ${err instanceof Error ? err.message : String(err)}`,
+        `Search failed: ${String(err)}`,
         502,
       );
     }
@@ -153,7 +153,7 @@ export async function handleRegistryRoutes(
     } catch (err) {
       error(
         res,
-        `Refresh failed: ${err instanceof Error ? err.message : String(err)}`,
+        `Refresh failed: ${String(err)}`,
         502,
       );
     }

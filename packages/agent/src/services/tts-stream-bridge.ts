@@ -148,7 +148,7 @@ class TtsStreamBridge implements ITtsStreamBridge {
       return true;
     } catch (err) {
       logger.error(
-        `${TAG} TTS generation failed: ${err instanceof Error ? err.message : String(err)}`,
+        `${TAG} TTS generation failed: ${String(err)}`,
       );
       return false;
     }
@@ -293,7 +293,7 @@ class TtsStreamBridge implements ITtsStreamBridge {
       });
     } catch (err) {
       throw new Error(
-        `Edge TTS failed (node-edge-tts may not be installed): ${err instanceof Error ? err.message : String(err)}`,
+        `Edge TTS failed (node-edge-tts may not be installed): ${String(err)}`,
       );
     }
   }

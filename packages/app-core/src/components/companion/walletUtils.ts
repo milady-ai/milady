@@ -284,7 +284,3 @@ export async function fetchTokenMetadata(
   }
 }
 
-/** @deprecated Use `fetchTokenMetadata(address, "bsc")` instead. */
-export const fetchBscTokenMetadata = (
-  contractAddress: string,
-): Promise<TokenMetadata | null> => fetchTokenMetadata(contractAddress, "bsc");

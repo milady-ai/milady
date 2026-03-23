@@ -5,7 +5,6 @@
 import { Keyboard } from "@capacitor/keyboard";
 import {
   isIOS,
-  isLifoPopoutValue,
   isNative,
 } from "@miladyai/app-core/platform";
 import {
@@ -100,16 +99,14 @@ function resolveAgentLoaderCopy(
   return { label: `Starting systems${elapsed}` };
 }
 
-/** Check if we're in pop-out mode (StreamView only, no chrome).
- *  Legacy LIFO popout values are ignored so the normal app shell still loads. */
+/** Check if we're in pop-out mode (StreamView only, no chrome). */
 function useIsPopout(): boolean {
   const [popout] = useState(() => {
     if (typeof window === "undefined") return false;
     const params = new URLSearchParams(
       window.location.search || window.location.hash.split("?")[1] || "",
     );
-    if (!params.has("popout")) return false;
-    return !isLifoPopoutValue(params.get("popout"));
+    return params.has("popout") && params.get("popout") !== "false";
   });
   return popout;
 }
@@ -201,13 +198,13 @@ function ViewRouter({
         );
       case "voice":
         return (
-          <TabScrollView className="settings-scroll-region">
+          <TabScrollView className="[scrollbar-gutter:stable] [scroll-padding-top:7rem]">
             <SettingsView key="settings-media" initialSection="media" />
           </TabScrollView>
         );
       case "settings":
         return (
-          <TabScrollView className="settings-scroll-region">
+          <TabScrollView className="[scrollbar-gutter:stable] [scroll-padding-top:7rem]">
             <SettingsView key="settings-root" />
           </TabScrollView>
         );

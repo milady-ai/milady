@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { createMockHeadersRequest } from "../test-support/test-helpers";
 import { resolveHyperscapeAuthorizationHeader } from "./server";
 
-function req(
+function mockReq(
   headers: http.IncomingHttpHeaders = {},
 ): Pick<http.IncomingMessage, "headers"> {
   return createMockHeadersRequest(headers) as Pick<
@@ -27,7 +27,7 @@ describe("resolveHyperscapeAuthorizationHeader", () => {
     delete process.env.HYPERSCAPE_AUTH_TOKEN;
 
     const auth = resolveHyperscapeAuthorizationHeader(
-      req({ authorization: "Bearer eliza-control-token" }),
+      mockReq({ authorization: "Bearer eliza-control-token" }),
     );
 
     expect(auth).toBeNull();
@@ -37,7 +37,7 @@ describe("resolveHyperscapeAuthorizationHeader", () => {
     process.env.HYPERSCAPE_AUTH_TOKEN = "hyperscape-secret";
 
     const auth = resolveHyperscapeAuthorizationHeader(
-      req({ authorization: "Bearer eliza-control-token" }),
+      mockReq({ authorization: "Bearer eliza-control-token" }),
     );
 
     expect(auth).toBe("Bearer hyperscape-secret");
@@ -46,7 +46,7 @@ describe("resolveHyperscapeAuthorizationHeader", () => {
   it("preserves Bearer prefix on HYPERSCAPE_AUTH_TOKEN", () => {
     process.env.HYPERSCAPE_AUTH_TOKEN = "Bearer hyperscape-secret";
 
-    const auth = resolveHyperscapeAuthorizationHeader(req());
+    const auth = resolveHyperscapeAuthorizationHeader(mockReq());
 
     expect(auth).toBe("Bearer hyperscape-secret");
   });

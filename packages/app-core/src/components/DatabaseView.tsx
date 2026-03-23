@@ -9,7 +9,7 @@
 import { Badge, Button, Input, Textarea } from "@miladyai/ui";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { ReactNode } from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   type ColumnInfo,
   client,
@@ -475,10 +475,14 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
     void init();
   }, [loadStatus, loadTables]);
 
-  const filteredTables = tables.filter(
-    (t) =>
-      !sidebarSearch ||
-      t.name.toLowerCase().includes(sidebarSearch.toLowerCase()),
+  const filteredTables = useMemo(
+    () =>
+      tables.filter(
+        (t) =>
+          !sidebarSearch ||
+          t.name.toLowerCase().includes(sidebarSearch.toLowerCase()),
+      ),
+    [tables, sidebarSearch],
   );
 
   return (

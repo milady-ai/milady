@@ -381,13 +381,14 @@ export function MediaGalleryView({ leftNav }: { leftNav?: ReactNode }) {
                 <div className="text-xs text-[var(--txt)] font-medium truncate mr-4">
                   {lightboxItem.filename}
                 </div>
-                <button
-                  type="button"
-                  className="text-[var(--muted)] hover:text-[var(--txt)] bg-transparent border-0 cursor-pointer text-lg px-2"
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-[var(--muted)] hover:text-[var(--txt)] text-lg px-2"
                   onClick={() => setLightboxItem(null)}
                 >
                   ×
-                </button>
+                </Button>
               </div>
               {/* Content */}
               <div className="p-4 flex items-center justify-center min-h-[200px]">

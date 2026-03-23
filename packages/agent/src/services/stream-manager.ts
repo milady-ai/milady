@@ -505,7 +505,7 @@ class StreamManager {
         logger.info(`${TAG} Auto-restart successful`);
       } catch (err) {
         logger.error(
-          `${TAG} Auto-restart failed: ${err instanceof Error ? err.message : String(err)}`,
+          `${TAG} Auto-restart failed: ${String(err)}`,
         );
         // start() failed before spawning FFmpeg — no exit event will fire,
         // so manually chain the next restart attempt if retries remain.

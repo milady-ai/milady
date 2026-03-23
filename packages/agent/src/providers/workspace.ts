@@ -299,7 +299,7 @@ async function ensureGitRepo(dir: string, isBrandNewWorkspace: boolean) {
     });
   } catch (err) {
     logWarn(
-      `[workspace] git init failed: ${err instanceof Error ? err.message : err}`,
+      `[workspace] git init failed: ${String(err)}`,
     );
   }
 }

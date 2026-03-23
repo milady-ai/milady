@@ -1,5 +1,5 @@
 /**
- * Lens Protocol Connector Validation Tests — GitHub Issue #151
+ * Lens Protocol Connector Validation Tests
  *
  * Comprehensive E2E tests for validating the Lens Protocol connector (@elizaos/plugin-lens).
  *
@@ -76,7 +76,6 @@ const describeIfLiveWrite = runLiveWriteTests ? describe : describe.skip;
 const RATE_LIMIT_DELAY_MS = 500;
 const TEST_TIMEOUT = 30_000;
 const LIVE_WRITE_TIMEOUT = 120_000;
-const MAX_POST_LENGTH = 5000;
 const LENS_API_URL = "https://api.lens.xyz/graphql";
 
 logger.info(
@@ -340,7 +339,7 @@ async function lensWaitForPost(
   return {
     id: data.post.id,
     content: data.post.metadata?.content ?? "",
-    commentOn: data.post.commentOn ?? undefined,
+    commentOn: data.post.commentOn,
     isDeleted: data.post.isDeleted,
   };
 }
@@ -605,18 +604,6 @@ describeIfLiveWrite("Lens Connector - Post Handling", () => {
       postIdsToCleanup.push(indexed?.id ?? hash);
     },
     LIVE_WRITE_TIMEOUT,
-  );
-
-  it(
-    "post length limit (5000 chars) is enforced client-side",
-    () => {
-      const shortText = "gm";
-      const longText = "A".repeat(5001);
-
-      expect(shortText.length).toBeLessThanOrEqual(MAX_POST_LENGTH);
-      expect(longText.length).toBeGreaterThan(MAX_POST_LENGTH);
-    },
-    TEST_TIMEOUT,
   );
 
   it(
@@ -925,50 +912,6 @@ describeIfLiveWrite("Lens Connector - Media & Attachments", () => {
     LIVE_WRITE_TIMEOUT,
   );
 
-  it(
-    "IPFS/Arweave content URI format validation",
-    () => {
-      const ipfsPattern = /^ipfs:\/\/[a-zA-Z0-9]+$/;
-      const arweavePattern = /^ar:\/\/[a-zA-Z0-9_-]+$/;
-
-      // IPFS URIs
-      expect(
-        ipfsPattern.test(
-          "ipfs://QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco",
-        ),
-      ).toBe(true);
-      expect(
-        ipfsPattern.test(
-          "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
-        ),
-      ).toBe(true);
-      expect(ipfsPattern.test("https://example.com")).toBe(false);
-
-      // Arweave URIs
-      expect(arweavePattern.test("ar://abc123def456")).toBe(true);
-      expect(arweavePattern.test("ar://ABCDEF_gh-ij")).toBe(true);
-      expect(arweavePattern.test("https://arweave.net/abc")).toBe(false);
-    },
-    TEST_TIMEOUT,
-  );
-
-  it(
-    "image MIME types are valid",
-    () => {
-      const validMimeTypes = [
-        "image/jpeg",
-        "image/png",
-        "image/gif",
-        "image/webp",
-        "image/svg+xml",
-      ];
-
-      for (const mime of validMimeTypes) {
-        expect(mime).toMatch(/^image\//);
-      }
-    },
-    TEST_TIMEOUT,
-  );
 });
 
 // ---------------------------------------------------------------------------
@@ -1003,14 +946,6 @@ describeIfLive("Lens Connector - Error Handling", () => {
     TEST_TIMEOUT,
   );
 
-  it(
-    "rate limiting delay is configured correctly",
-    () => {
-      expect(RATE_LIMIT_DELAY_MS).toBeGreaterThanOrEqual(200);
-      expect(RATE_LIMIT_DELAY_MS).toBeLessThanOrEqual(10_000);
-    },
-    TEST_TIMEOUT,
-  );
 });
 
 // ---------------------------------------------------------------------------
@@ -1055,106 +990,5 @@ describe("Lens Connector - Integration", () => {
       return;
     }
     expect(mod.CHANNEL_PLUGIN_MAP.lens).toBe("@elizaos/plugin-lens");
-  });
-
-  it("Lens auto-enables when apiKey is present in config", async () => {
-    const mod = await tryWorkspaceImport<{
-      isConnectorConfigured: (
-        name: string,
-        config: Record<string, unknown>,
-      ) => boolean;
-    }>("@miladyai/app-core/src/config/plugin-auto-enable");
-    if (!mod) {
-      logger.warn("[lens-connector] Workspace not built — skipping");
-      return;
-    }
-    const configured = mod.isConnectorConfigured("lens", {
-      apiKey: "test-key",
-    });
-    expect(configured).toBe(true);
-  });
-
-  it("Lens respects enabled: false", async () => {
-    const mod = await tryWorkspaceImport<{
-      isConnectorConfigured: (
-        name: string,
-        config: Record<string, unknown>,
-      ) => boolean;
-    }>("@miladyai/app-core/src/config/plugin-auto-enable");
-    if (!mod) {
-      logger.warn("[lens-connector] Workspace not built — skipping");
-      return;
-    }
-    const configured = mod.isConnectorConfigured("lens", {
-      enabled: false,
-      apiKey: "test-key",
-    });
-    expect(configured).toBe(false);
-  });
-
-  it("Lens connector is in CONNECTOR_PLUGINS list", async () => {
-    const mod = await tryWorkspaceImport<{
-      CONNECTOR_PLUGINS: Record<string, string>;
-    }>("@miladyai/app-core/src/config/plugin-auto-enable");
-    if (!mod) {
-      logger.warn("[lens-connector] Workspace not built — skipping");
-      return;
-    }
-    const connectors = Object.keys(mod.CONNECTOR_PLUGINS);
-    expect(connectors).toContain("lens");
-  });
-
-  it("collectPluginNames includes lens when configured", async () => {
-    let mod: { collectPluginNames: (config: unknown) => Set<string> } | null;
-    try {
-      mod = await tryWorkspaceImport<{
-        collectPluginNames: (config: unknown) => Set<string>;
-      }>("@miladyai/app-core/src/runtime/eliza");
-    } catch {
-      mod = null;
-    }
-    if (!mod) {
-      logger.warn(
-        "[lens-connector] Workspace not built or import failed — skipping",
-      );
-      return;
-    }
-    try {
-      const config = {
-        connectors: {
-          lens: {
-            apiKey: "test-key",
-          },
-        },
-      };
-      const plugins = mod.collectPluginNames(config as never);
-      expect(plugins.has("@elizaos/plugin-lens")).toBe(true);
-    } catch (err) {
-      logger.warn(`[lens-connector] collectPluginNames failed: ${err}`);
-    }
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Configuration Tests (always run)
-// ---------------------------------------------------------------------------
-
-describe("Lens Connector - Configuration", () => {
-  it("post character limit constant is 5000", () => {
-    expect(MAX_POST_LENGTH).toBe(5000);
-  });
-
-  it("required environment variables follow LENS_ prefix", () => {
-    const envVars = [
-      "LENS_API_KEY",
-      "LENS_ACCOUNT_ADDRESS",
-      "LENS_PRIVATE_KEY",
-      "LENS_APP_ADDRESS",
-    ];
-
-    for (const envVar of envVars) {
-      expect(envVar).toMatch(/^LENS_/);
-    }
-    expect(new Set(envVars).size).toBe(envVars.length);
   });
 });

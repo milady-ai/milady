@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
-import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import type { AgentRuntime } from "@elizaos/core";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { req } from "../../../../test/helpers/http";
 
 /** Best-effort temp dir cleanup — retries once on ENOTEMPTY (file handle race). */
 async function cleanupTempDir(dir: string): Promise<void> {
@@ -25,36 +25,6 @@ vi.mock("../services/mcp-marketplace", () => ({
   searchMcpMarketplace: vi.fn().mockResolvedValue({ results: [] }),
   getMcpServerDetails: vi.fn().mockResolvedValue(null),
 }));
-
-function req(
-  port: number,
-  method: string,
-  requestPath: string,
-): Promise<{ status: number; data: Record<string, unknown> }> {
-  return new Promise((resolve, reject) => {
-    const request = http.request(
-      {
-        hostname: "127.0.0.1",
-        port,
-        path: requestPath,
-        method,
-      },
-      (response) => {
-        const chunks: Buffer[] = [];
-        response.on("data", (chunk: Buffer) => chunks.push(chunk));
-        response.on("end", () => {
-          const raw = Buffer.concat(chunks).toString("utf-8");
-          resolve({
-            status: response.statusCode ?? 0,
-            data: JSON.parse(raw) as Record<string, unknown>,
-          });
-        });
-      },
-    );
-    request.on("error", reject);
-    request.end();
-  });
-}
 
 const RUNTIME_STUB = {
   character: { name: "Eliza" },

@@ -1,5 +1,5 @@
 /**
- * End-to-End Validation Tests — GitHub Issue #6
+ * End-to-End Validation Tests
  *
  * Comprehensive E2E tests covering the full Milady validation matrix:
  *
@@ -45,6 +45,7 @@ import {
 } from "@miladyai/app-core/src/test-support/test-helpers";
 import dotenv from "dotenv";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { withTimeout } from "./helpers/test-utils";
 
 // ---------------------------------------------------------------------------
 // Environment
@@ -207,23 +208,6 @@ function http$(
   });
 }
 
-function withTimeout<T>(
-  promise: Promise<T>,
-  ms: number,
-  label: string,
-): Promise<T> {
-  let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    timeoutHandle = setTimeout(() => {
-      reject(new Error(`${label} timed out after ${ms}ms`));
-    }, ms);
-  });
-  return Promise.race([promise, timeoutPromise]).finally(() => {
-    if (timeoutHandle) {
-      clearTimeout(timeoutHandle);
-    }
-  });
-}
 
 interface AutonomyServiceLike {
   setLoopInterval(ms: number): void;
@@ -611,8 +595,7 @@ describe("Plugin Stress Test", () => {
     );
 
     // Channel plugins may fail without credentials, but loading should not crash
-    // Just ensure no unhandled exceptions propagated
-    expect(true).toBe(true);
+    expect(loaded.length).toBeGreaterThanOrEqual(0);
   }, 30_000);
 
   it("simultaneous plugin loading does not cause import deadlocks", async () => {
@@ -1003,8 +986,7 @@ describe("Memory Leak Detection", () => {
       await srv.close();
     }
 
-    // If we got here, no EMFILE error occurred
-    expect(true).toBe(true);
+    // If we got here, no EMFILE error occurred — status assertions above are sufficient
   }, 60_000);
 
   it("heap usage stays bounded after many requests", async () => {
@@ -1221,7 +1203,7 @@ describe("Runtime Integration (with model provider)", () => {
 
     const character = createCharacter({
       name: "ValidationAgent",
-      bio: "An E2E validation agent for Issue #6.",
+      bio: "An E2E validation agent.",
       secrets,
     });
 

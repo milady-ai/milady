@@ -76,8 +76,7 @@ export type WgpuTagElement = HTMLElement & {
   off?: (event: "ready", listener: (event: CustomEvent) => void) => void;
 };
 
-export const DEFAULT_RELEASE_NOTES_URL = "https://milady.ai/releases/";
-export const RELEASE_NOTES_PARTITION = "persist:milady-release-notes";
+export const RELEASE_NOTES_PARTITION = "persist:app-release-notes";
 export const SESSION_PARTITIONS = [
   { partition: "persist:default", label: "Default app session" },
   { partition: RELEASE_NOTES_PARTITION, label: "Release notes BrowserView" },

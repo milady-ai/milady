@@ -1,7 +1,4 @@
-/**
- * Synthetic showcase plugin that demonstrates all 23 field renderers.
- * Extracted from PluginsView.tsx to reduce file size.
- */
+/** Synthetic showcase plugin that demonstrates all 23 field renderers. */
 
 import type { PluginInfo } from "../../api";
 

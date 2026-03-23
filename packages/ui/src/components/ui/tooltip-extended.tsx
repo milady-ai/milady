@@ -1,27 +1,6 @@
-/**
- * Extended tooltip components for contextual help, icon buttons, guided
- * tours, and spotlight onboarding overlays.
- *
- * All exports here are framework-agnostic (no app context dependency).
- *
- * Note: The Radix-based `Tooltip` is exported from `./tooltip`. This file
- * exports a custom CSS-only hover tooltip (`HoverTooltip`), `IconTooltip`,
- * `Spotlight`, and `useGuidedTour`.
- */
-
 import { X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-/* ── HoverTooltip ────────────────────────────────────────────────────── */
-
-/**
- * CSS-only hover tooltip that wraps any element in a `<button>` and shows
- * a floating content panel on hover/focus. Supports controlled `visible`
- * mode and an optional dismiss button.
- *
- * Use `IconTooltip` for a div-based (non-button) variant that is safe to
- * wrap interactive children.
- */
 export interface HoverTooltipProps {
   children: React.ReactNode;
   content: React.ReactNode;
@@ -122,14 +101,6 @@ export function HoverTooltip({
   );
 }
 
-/* ── IconTooltip ─────────────────────────────────────────────────────── */
-
-/**
- * Lightweight tooltip for icon buttons.
- *
- * Uses a `<div>` wrapper (not `<button>`) so it can safely wrap interactive
- * elements like icon buttons without nesting buttons.
- */
 export function IconTooltip({
   children,
   label,
@@ -141,7 +112,7 @@ export function IconTooltip({
   label: string;
   shortcut?: string;
   position?: "top" | "bottom";
-  /** Long labels: wrap and cap width (native `title` is unreliable in embedded WebViews). */
+  /** Long labels: wrap and cap width. */
   multiline?: boolean;
 }) {
   const posClass =
@@ -171,8 +142,6 @@ export function IconTooltip({
     </div>
   );
 }
-
-/* ── Spotlight ───────────────────────────────────────────────────────── */
 
 export interface SpotlightProps {
   target: string;
@@ -220,7 +189,6 @@ export function Spotlight({
 
   return (
     <div className="fixed inset-0 z-[300] pointer-events-none">
-      {/* Backdrop with cutout */}
       <div
         className="absolute inset-0 bg-black/60 pointer-events-auto"
         style={{
@@ -239,7 +207,6 @@ export function Spotlight({
         }}
       />
 
-      {/* Tooltip card */}
       <div
         className="absolute bg-card border border-border rounded-xl shadow-2xl p-5 max-w-sm pointer-events-auto"
         style={{
@@ -300,8 +267,6 @@ export function Spotlight({
     </div>
   );
 }
-
-/* ── useGuidedTour ───────────────────────────────────────────────────── */
 
 export interface TourStep {
   target: string;

@@ -64,7 +64,7 @@ function extractUuidFromUrl(url: string): string | null {
  * The pairing token is exchanged by the agent's nginx Lua router or
  * /pair page for a real API key stored in sessionStorage.
  */
-export async function openWebUIWithPairingToken(
+async function openWebUIWithPairingToken(
   agentUrl: string,
   cloudApiKey: string,
 ): Promise<void> {

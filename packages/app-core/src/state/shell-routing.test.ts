@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  deriveUiShellModeForTab,
   getTabForShellView,
   shouldStartAtCharacterSelectOnLaunch,
 } from "./shell-routing";
+import { COMPANION_ENABLED } from "../navigation";
 
 describe("shouldStartAtCharacterSelectOnLaunch", () => {
   const baseParams = {
@@ -59,6 +61,43 @@ describe("shouldStartAtCharacterSelectOnLaunch", () => {
         urlTab: "chat",
       }),
     ).toBe(false);
+  });
+});
+
+describe("deriveUiShellModeForTab", () => {
+  it("returns companion for the companion tab", () => {
+    expect(deriveUiShellModeForTab("companion")).toBe("companion");
+  });
+
+  it("returns native for the chat tab", () => {
+    expect(deriveUiShellModeForTab("chat")).toBe("native");
+  });
+
+  it("returns native for non-companion tabs (runtime switching)", () => {
+    // Users can freely switch between native and companion mode at runtime.
+    // deriveUiShellModeForTab must correctly return "native" for all
+    // non-companion tabs so mode switching keeps working.
+    for (const tab of ["chat", "plugins", "knowledge", "wallets", "stream"] as const) {
+      expect(deriveUiShellModeForTab(tab)).toBe("native");
+    }
+  });
+});
+
+describe("startup tab default (regression: no base-UI flash)", () => {
+  // Regression: tab previously defaulted to "chat", which rendered the
+  // native/base UI on first paint. An async effect later switched to
+  // "companion", causing a visible flash. The initial tab must be
+  // "companion" when COMPANION_ENABLED so the very first render shows
+  // companion mode — but users can still switch to native mode afterwards.
+  it("initial tab defaults to companion when COMPANION_ENABLED", () => {
+    const initialTab = COMPANION_ENABLED ? "companion" : "chat";
+    if (COMPANION_ENABLED) {
+      expect(initialTab).toBe("companion");
+      expect(deriveUiShellModeForTab(initialTab)).toBe("companion");
+    } else {
+      expect(initialTab).toBe("chat");
+      expect(deriveUiShellModeForTab(initialTab)).toBe("native");
+    }
   });
 });
 

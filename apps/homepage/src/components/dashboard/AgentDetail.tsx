@@ -113,7 +113,7 @@ export function AgentDetail({
           {/* Window controls aesthetic */}
           <div className="flex items-center gap-1.5">
             <span
-              className={`w-2.5 h-2.5 rounded-full ${stateColors.bg} ${agent.state === "running" ? "status-pulse" : ""}`}
+              className={`w-2.5 h-2.5 rounded-full ${stateColors.bg} ${agent.state === "running" ? "animate-[status-pulse_2s_ease-in-out_infinite]" : ""}`}
             />
           </div>
 

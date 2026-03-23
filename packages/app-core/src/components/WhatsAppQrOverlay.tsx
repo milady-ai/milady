@@ -1,3 +1,4 @@
+import { Button } from "@miladyai/ui";
 import { useEffect, useRef } from "react";
 import { useWhatsAppPairing } from "../hooks";
 import { useApp } from "../state";
@@ -60,14 +61,14 @@ export function WhatsAppQrOverlay({
             : "WhatsApp is paired. Auth state is saved for automatic reconnection."}
         </div>
         {!onConnected && (
-          <button
-            type="button"
-            className="mt-2 px-2.5 py-1 text-[10px] bg-transparent cursor-pointer transition-colors"
-            style={{ border: "1px solid #ef4444", color: "#ef4444" }}
+          <Button
+            variant="destructive"
+            size="sm"
+            className="mt-2 text-[10px]"
             onClick={() => void disconnect()}
           >
             {t("providerswitcher.disconnect")}
-          </button>
+          </Button>
         )}
       </div>
     );
@@ -88,17 +89,18 @@ export function WhatsAppQrOverlay({
             ? "QR code expired. Please try again."
             : (error ?? "An error occurred.")}
         </div>
-        <button
-          type="button"
-          className="px-3 py-1.5 text-[11px] bg-transparent cursor-pointer transition-colors"
-          style={{ border: "1px solid #f0b232", color: "#f0b232" }}
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-[11px]"
+          style={{ borderColor: "#f0b232", color: "#f0b232" }}
           onClick={() => {
             firedRef.current = false;
             void startPairing();
           }}
         >
           {t("whatsappqroverlay.TryAgain")}
-        </button>
+        </Button>
       </div>
     );
   }
@@ -122,17 +124,18 @@ export function WhatsAppQrOverlay({
         >
           {t("whatsappqroverlay.UsesAnUnofficialW")}
         </div>
-        <button
-          type="button"
-          className="px-3 py-1.5 text-[11px] bg-transparent cursor-pointer transition-colors"
-          style={{ border: "1px solid #f0b232", color: "#f0b232" }}
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-[11px]"
+          style={{ borderColor: "#f0b232", color: "#f0b232" }}
           onClick={() => {
             firedRef.current = false;
             void startPairing();
           }}
         >
           {t("whatsappqroverlay.ConnectWhatsApp")}
-        </button>
+        </Button>
       </div>
     );
   }
@@ -212,17 +215,14 @@ export function WhatsAppQrOverlay({
               {t("whatsappqroverlay.QRRefreshesAutomat")}
             </span>
           </div>
-          <button
-            type="button"
-            className="mt-3 px-2.5 py-1 text-[10px] cursor-pointer transition-colors"
-            style={{
-              border: "1px solid var(--border)",
-              color: "var(--muted)",
-            }}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="mt-3 text-[10px] text-muted"
             onClick={() => void stopPairing()}
           >
             {t("common.cancel")}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -37,6 +37,7 @@ import {
 } from "@elizaos/core";
 import dotenv from "dotenv";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { withTimeout } from "../../../test/helpers/test-utils";
 import { validateRuntimeContext } from "../src/api/plugin-validation";
 import { startApiServer } from "../src/api/server";
 import { ensureAgentWorkspace } from "../src/providers/workspace";
@@ -188,23 +189,6 @@ function http$(
   });
 }
 
-function withTimeout<T>(
-  promise: Promise<T>,
-  ms: number,
-  label: string,
-): Promise<T> {
-  let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    timeoutHandle = setTimeout(() => {
-      reject(new Error(`${label} timed out after ${ms}ms`));
-    }, ms);
-  });
-  return Promise.race([promise, timeoutPromise]).finally(() => {
-    if (timeoutHandle) {
-      clearTimeout(timeoutHandle);
-    }
-  });
-}
 
 interface AutonomyServiceLike {
   setLoopInterval(ms: number): void;

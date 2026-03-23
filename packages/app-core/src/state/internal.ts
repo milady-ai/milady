@@ -46,7 +46,9 @@ export {
   loadCompanionVrmPowerMode,
   loadLastNativeTab,
   loadPersistedConnectionMode,
+  loadPersistedOnboardingComplete,
   loadPersistedOnboardingStep,
+  savePersistedOnboardingComplete,
   loadUiLanguage,
   loadUiShellMode,
   loadUiTheme,
@@ -101,6 +103,11 @@ export {
   type StartupPhase,
   type UiShellMode,
 } from "./types";
+export {
+  TranslationProvider,
+  type TranslationContextValue,
+  useTranslation,
+} from "./TranslationContext";
 export { AppContext, useApp } from "./useApp";
 export {
   getCompanionBackgroundUrl,
@@ -108,7 +115,6 @@ export {
   getVrmPreviewUrl,
   getVrmTitle,
   getVrmUrl,
-  isOfficialVrmIndex,
   normalizeAvatarIndex,
   VRM_COUNT,
 } from "./vrm";

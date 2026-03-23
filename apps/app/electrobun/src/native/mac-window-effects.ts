@@ -1,23 +1,3 @@
-/**
- * macOS Native Window Effects — Bun FFI wrapper
- *
- * Loads libMacWindowEffects.dylib once and exposes typed helpers for:
- * - NSVisualEffectView vibrancy
- * - Window shadow
- * - Traffic light button positioning
- * - Native drag + resize chrome (`setNativeDragRegion` → `setNativeWindowDragRegion`
- *   in `native/macos/window-effects.mm`)
- * - Window hide/show via orderOut / makeKeyAndOrderFront
- * - Focus detection via isKeyWindow
- *
- * WHY ObjC++ in a dylib: keeps Cocoa code out of the Bun bundle and matches how
- * Electrobun expects native helpers to ship beside the main process.
- *
- * Architecture / WHYs for drag & resize: `docs/guides/electrobun-mac-window-chrome.md`.
- *
- * All functions are no-ops on non-macOS platforms.
- */
-
 import { dlopen, FFIType, type Pointer } from "bun:ffi";
 import { existsSync } from "node:fs";
 import { join } from "node:path";

@@ -90,13 +90,7 @@ function Probe(props: { onReady: (api: ProbeApi) => void }) {
   return null;
 }
 
-function createDeferred<T>() {
-  let resolve!: (value: T | PromiseLike<T>) => void;
-  const promise = new Promise<T>((res) => {
-    resolve = res;
-  });
-  return { promise, resolve };
-}
+import { createDeferred } from "../../../../test/helpers/test-utils";
 
 describe("update channel locking", () => {
   beforeEach(() => {

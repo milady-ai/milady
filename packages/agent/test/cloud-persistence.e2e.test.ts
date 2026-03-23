@@ -17,10 +17,7 @@ import {
   buildCharacterFromConfig,
   collectPluginNames,
 } from "../src/runtime/eliza";
-
-// ---------------------------------------------------------------------------
-// Env snapshot helper
-// ---------------------------------------------------------------------------
+import { saveEnv } from "../../../test/helpers/test-utils";
 
 const CLOUD_ENV_KEYS = [
   "ELIZAOS_CLOUD_ENABLED",
@@ -32,35 +29,17 @@ const CLOUD_ENV_KEYS = [
   "LARGE_MODEL",
 ];
 
-function envSnapshot(keys: string[]): {
-  save: () => void;
-  restore: () => void;
-} {
-  const saved = new Map<string, string | undefined>();
-  return {
-    save() {
-      for (const k of keys) saved.set(k, process.env[k]);
-    },
-    restore() {
-      for (const [k, v] of saved) {
-        if (v === undefined) delete process.env[k];
-        else process.env[k] = v;
-      }
-    },
-  };
-}
-
 // ═══════════════════════════════════════════════════════════════════════════
 // 1. applyCloudConfigToEnv — unit tests
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe("applyCloudConfigToEnv — cloud credential persistence", () => {
-  const snap = envSnapshot(CLOUD_ENV_KEYS);
+  let envBackup: { restore: () => void };
   beforeEach(() => {
-    snap.save();
+    envBackup = saveEnv(...CLOUD_ENV_KEYS);
     for (const k of CLOUD_ENV_KEYS) delete process.env[k];
   });
-  afterEach(() => snap.restore());
+  afterEach(() => envBackup.restore());
 
   it("sets ELIZAOS_CLOUD_API_KEY from config", () => {
     const config = {
@@ -120,12 +99,12 @@ describe("applyCloudConfigToEnv — cloud credential persistence", () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe("collectPluginNames — cloud plugin inclusion", () => {
-  const snap = envSnapshot(CLOUD_ENV_KEYS);
+  let envBackup: { restore: () => void };
   beforeEach(() => {
-    snap.save();
+    envBackup = saveEnv(...CLOUD_ENV_KEYS);
     for (const k of CLOUD_ENV_KEYS) delete process.env[k];
   });
-  afterEach(() => snap.restore());
+  afterEach(() => envBackup.restore());
 
   it("includes cloud plugin when config.cloud.enabled is true", () => {
     const config = { cloud: { enabled: true } } as ElizaConfig;
@@ -150,12 +129,12 @@ describe("collectPluginNames — cloud plugin inclusion", () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe("buildCharacterFromConfig — cloud secret propagation", () => {
-  const snap = envSnapshot(CLOUD_ENV_KEYS);
+  let envBackup: { restore: () => void };
   beforeEach(() => {
-    snap.save();
+    envBackup = saveEnv(...CLOUD_ENV_KEYS);
     for (const k of CLOUD_ENV_KEYS) delete process.env[k];
   });
-  afterEach(() => snap.restore());
+  afterEach(() => envBackup.restore());
 
   it("includes ELIZAOS_CLOUD_API_KEY in character.secrets", () => {
     process.env.ELIZAOS_CLOUD_API_KEY = "ck-secret-test";

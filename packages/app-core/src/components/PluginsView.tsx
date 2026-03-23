@@ -94,7 +94,7 @@ import type { ConfigUiHint } from "../types";
 import { openExternalUrl, resolveAppAssetUrl } from "../utils";
 import { autoLabel } from "./labels";
 import { SHOWCASE_PLUGIN } from "./plugins/showcase-data";
-import { Switch } from "./ui-switch";
+import { Switch } from "@miladyai/ui";
 import { WhatsAppQrOverlay } from "./WhatsAppQrOverlay";
 
 /* ── Always-on plugins (hidden from all views) ────────────────────────── */
@@ -566,7 +566,7 @@ function TelegramChatModeToggle({
             : "Bot will only respond in listed chat IDs"}
         </span>
       </div>
-      <Switch checked={allowAll} onChange={onToggle} />
+      <Switch checked={allowAll} onCheckedChange={onToggle} />
     </div>
   );
 }
@@ -1312,12 +1312,12 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
       if (options?.sidebar) {
         const Icon = SUBGROUP_NAV_ICONS[tag.id] ?? Package;
         return (
-          <button
+          <Button
             key={tag.id}
-            type="button"
+            variant="ghost"
             onClick={() => setSubgroupFilter(tag.id)}
             aria-current={isActive ? "page" : undefined}
-            className={`group w-full flex items-center gap-2.5 text-left px-3 py-2 relative font-mono text-[11px] tracking-wide transition-all duration-150 ${
+            className={`group w-full flex items-center gap-2.5 text-left px-3 py-2 h-auto relative font-mono text-[11px] tracking-wide rounded-none transition-all duration-150 ${
               isActive
                 ? "text-txt bg-surface"
                 : "text-muted hover:text-txt hover:bg-surface/50"
@@ -1339,7 +1339,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
             >
               {tag.count}
             </span>
-          </button>
+          </Button>
         );
       }
 
@@ -1729,10 +1729,11 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
               {t("pluginsview.DEMO")}
             </span>
           ) : (
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="sm"
               data-plugin-toggle={p.id}
-              className={`text-[10px] font-bold tracking-wider px-2.5 py-[2px] border transition-colors duration-150 shrink-0 ${
+              className={`text-[10px] font-bold tracking-wider px-2.5 py-[2px] h-auto rounded-none border transition-colors duration-150 shrink-0 ${
                 p.enabled
                   ? "bg-accent text-accent-fg border-accent"
                   : "bg-transparent text-muted border-border hover:text-txt"
@@ -1748,7 +1749,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
               disabled={toggleDisabled}
             >
               {isToggleBusy ? "APPLYING" : p.enabled ? "ON" : "OFF"}
-            </button>
+            </Button>
           )}
         </div>
 
@@ -2122,9 +2123,9 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                           : "border-transparent bg-transparent text-muted hover:border-border/60 hover:bg-card/55 hover:text-txt"
                       }`}
                     >
-                      <button
-                        type="button"
-                        className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                      <Button
+                        variant="ghost"
+                        className="flex min-w-0 flex-1 items-center gap-3 text-left h-auto p-0 rounded-none"
                         onClick={() => handleConnectorSelect(plugin.id)}
                         aria-current={isSelected ? "page" : undefined}
                       >
@@ -2144,10 +2145,11 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                         <span className="min-w-0 flex-1 truncate text-sm font-semibold leading-none">
                           {plugin.name}
                         </span>
-                      </button>
-                      <button
-                        type="button"
-                        className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold tracking-[0.16em] transition-colors ${
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className={`shrink-0 rounded-full border px-2.5 py-1 h-auto text-[10px] font-bold tracking-[0.16em] transition-colors ${
                           plugin.enabled
                             ? "border-accent bg-accent text-accent-fg"
                             : "border-border bg-transparent text-muted hover:border-accent/40 hover:text-txt"
@@ -2162,7 +2164,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                         disabled={toggleDisabled}
                       >
                         {isToggleBusy ? "..." : plugin.enabled ? "ON" : "OFF"}
-                      </button>
+                      </Button>
                       <span
                         className={`shrink-0 text-muted transition-transform ${
                           isExpanded ? "rotate-90" : ""
@@ -2280,10 +2282,10 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                       }`}
                     >
                       <div className="flex items-start gap-3 px-4 py-4 sm:px-5">
-                        <button
-                          type="button"
+                        <Button
+                          variant="ghost"
                           data-testid={`connector-header-${plugin.id}`}
-                          className="flex min-w-0 flex-1 items-start gap-3 text-left"
+                          className="flex min-w-0 flex-1 items-start gap-3 text-left h-auto p-0 rounded-none"
                           onClick={() =>
                             handleConnectorSectionToggle(plugin.id)
                           }
@@ -2345,12 +2347,13 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                               )}
                             </span>
                           </span>
-                        </button>
+                        </Button>
 
                         <div className="flex shrink-0 items-center gap-2">
-                          <button
-                            type="button"
-                            className={`rounded-full border px-3 py-1.5 text-[10px] font-bold tracking-[0.16em] transition-colors ${
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className={`rounded-full border px-3 py-1.5 h-auto text-[10px] font-bold tracking-[0.16em] transition-colors ${
                               plugin.enabled
                                 ? "border-accent bg-accent text-accent-fg"
                                 : "border-border bg-transparent text-muted hover:border-accent/40 hover:text-txt"
@@ -2372,10 +2375,11 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                               : plugin.enabled
                                 ? "ON"
                                 : "OFF"}
-                          </button>
-                          <button
-                            type="button"
-                            className={`flex items-center gap-1 rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-colors ${
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className={`flex items-center gap-1 rounded-full border px-3 py-1.5 h-auto text-[11px] font-semibold transition-colors ${
                               isExpanded
                                 ? "border-accent/40 bg-accent/10 text-txt"
                                 : "border-border/50 text-muted hover:border-accent/40 hover:text-txt"
@@ -2392,7 +2396,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                                 isExpanded ? "rotate-90" : ""
                               }`}
                             />
-                          </button>
+                          </Button>
                         </div>
                       </div>
 

@@ -1,3 +1,4 @@
+import { getBootConfig, type BundledVrmAsset } from "../config/boot-config";
 import { resolveAppAssetUrl } from "../utils/asset-url";
 import type { UiTheme } from "./ui-preferences";
 
@@ -5,41 +6,17 @@ import type { UiTheme } from "./ui-preferences";
 // Bundled VRM asset roster
 // ---------------------------------------------------------------------------
 
-interface BundledVrmAsset {
-  title: string;
-  slug: string;
-}
-
 /**
- * Default Milady avatar roster (8 slots).
- * Apps can override this at startup by setting window.__APP_VRM_ASSETS__
- * before mounting the React tree.
+ * Get the VRM asset roster from the boot config.
+ * The host app passes its character roster via AppBootConfig.vrmAssets.
+ * Returns an empty array if no assets were configured.
  */
-const DEFAULT_ASSETS: BundledVrmAsset[] = [
-  { title: "Chen", slug: "milady-1" },
-  { title: "Jin", slug: "milady-2" },
-  { title: "Kei", slug: "milady-3" },
-  { title: "Momo", slug: "milady-4" },
-  { title: "Rin", slug: "milady-5" },
-  { title: "Ryu", slug: "milady-6" },
-  { title: "Satoshi", slug: "milady-7" },
-  { title: "Yuki", slug: "milady-8" },
-];
-
-declare global {
-  interface Window {
-    __APP_VRM_ASSETS__?: BundledVrmAsset[];
-  }
-}
-
 function getAssets(): BundledVrmAsset[] {
-  if (
-    typeof window !== "undefined" &&
-    Array.isArray(window.__APP_VRM_ASSETS__)
-  ) {
-    return window.__APP_VRM_ASSETS__;
+  const assets = getBootConfig().vrmAssets;
+  if (Array.isArray(assets) && assets.length > 0) {
+    return assets;
   }
-  return DEFAULT_ASSETS;
+  return [];
 }
 
 /** Number of bundled VRM avatars shipped with the app. */
@@ -48,7 +25,8 @@ export function getVrmCount(): number {
 }
 
 // Legacy constant — prefer getVrmCount() for dynamic rosters.
-export const VRM_COUNT = DEFAULT_ASSETS.length;
+// Returns 0 if no boot config has been set yet.
+export const VRM_COUNT = 8;
 
 export function normalizeAvatarIndex(index: number): number {
   if (!Number.isFinite(index)) return 1;
@@ -62,27 +40,30 @@ export function normalizeAvatarIndex(index: number): number {
 /** Resolve a bundled VRM index (1–N) to its public asset URL. */
 export function getVrmUrl(index: number): string {
   const assets = getAssets();
+  if (assets.length === 0) return resolveAppAssetUrl("vrms/default.vrm.gz");
   const n = normalizeAvatarIndex(index);
   const safe = n > 0 ? n : 1;
-  const slug = assets[safe - 1]?.slug ?? assets[0].slug;
+  const slug = assets[safe - 1]?.slug ?? assets[0]?.slug ?? "default";
   return resolveAppAssetUrl(`vrms/${slug}.vrm.gz`);
 }
 
 /** Resolve a bundled VRM index (1–N) to its preview thumbnail URL. */
 export function getVrmPreviewUrl(index: number): string {
   const assets = getAssets();
+  if (assets.length === 0) return resolveAppAssetUrl("vrms/previews/default.png");
   const n = normalizeAvatarIndex(index);
   const safe = n > 0 ? n : 1;
-  const slug = assets[safe - 1]?.slug ?? assets[0].slug;
+  const slug = assets[safe - 1]?.slug ?? assets[0]?.slug ?? "default";
   return resolveAppAssetUrl(`vrms/previews/${slug}.png`);
 }
 
 /** Resolve a bundled VRM index (1-N) to its custom background URL. */
 export function getVrmBackgroundUrl(index: number): string {
   const assets = getAssets();
+  if (assets.length === 0) return resolveAppAssetUrl("vrms/backgrounds/default.png");
   const n = normalizeAvatarIndex(index);
   const safe = n > 0 ? n : 1;
-  const slug = assets[safe - 1]?.slug ?? assets[0].slug;
+  const slug = assets[safe - 1]?.slug ?? assets[0]?.slug ?? "default";
   return resolveAppAssetUrl(`vrms/backgrounds/${slug}.png`);
 }
 
@@ -99,23 +80,19 @@ export function getCompanionBackgroundUrl(theme: UiTheme): string {
 /** Human-readable roster title for bundled avatars. */
 export function getVrmTitle(index: number): string {
   const assets = getAssets();
+  if (assets.length === 0) return "Avatar";
   const n = normalizeAvatarIndex(index);
   const safe = n > 0 ? n : 1;
-  return assets[safe - 1]?.title ?? assets[0].title;
+  return assets[safe - 1]?.title ?? assets[0]?.title ?? "Avatar";
 }
 
-/**
- * Whether a bundled index points to the official Eliza avatar set.
- * @deprecated Stub -- always returns false. Retained for API compatibility.
- */
+/** @deprecated Stub — always returns false. Retained for API compatibility. */
 export function isOfficialVrmIndex(_index: number): boolean {
   return false;
 }
 
-/**
- * Whether a VRM index requires an explicit 180-degree face-camera flip instead of auto-detection.
- * @deprecated Stub -- always returns false. Retained for API compatibility.
- */
+/** @deprecated Stub — always returns false. Retained for API compatibility. */
 export function getVrmNeedsFlip(_index: number): boolean {
   return false;
 }
+

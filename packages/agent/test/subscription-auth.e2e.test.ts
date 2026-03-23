@@ -1,5 +1,4 @@
 import fs from "node:fs/promises";
-import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import {
@@ -13,6 +12,8 @@ import {
 } from "vitest";
 import { startApiServer } from "@miladyai/agent/api/server";
 import type { OAuthCredentials } from "@miladyai/agent/auth/types";
+import { req } from "../../../test/helpers/http";
+import { saveEnv } from "../../../test/helpers/test-utils";
 
 const authMocks = vi.hoisted(() => ({
   getSubscriptionStatus: vi.fn(() => [{ id: "openai-codex" }]),
@@ -48,67 +49,6 @@ const {
   applySubscriptionCredentials,
   deleteCredentials,
 } = authMocks;
-
-interface ReqResponse {
-  status: number;
-  data: Record<string, unknown>;
-}
-
-function req(
-  port: number,
-  method: string,
-  requestPath: string,
-  body?: Record<string, unknown>,
-): Promise<ReqResponse> {
-  return new Promise((resolve, reject) => {
-    const payload = body ? JSON.stringify(body) : undefined;
-    const request = http.request(
-      {
-        hostname: "127.0.0.1",
-        port,
-        path: requestPath,
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          ...(payload ? { "Content-Length": Buffer.byteLength(payload) } : {}),
-        },
-      },
-      (response) => {
-        const chunks: Buffer[] = [];
-        response.on("data", (chunk: Buffer) => chunks.push(chunk));
-        response.on("end", () => {
-          const raw = Buffer.concat(chunks).toString("utf-8");
-          let data: Record<string, unknown> = {};
-          try {
-            data = JSON.parse(raw) as Record<string, unknown>;
-          } catch {
-            data = { _raw: raw };
-          }
-          resolve({ status: response.statusCode ?? 0, data });
-        });
-      },
-    );
-
-    request.on("error", reject);
-    if (payload) request.write(payload);
-    request.end();
-  });
-}
-
-function saveEnv(...keys: string[]): { restore: () => void } {
-  const saved: Record<string, string | undefined> = {};
-  for (const key of keys) {
-    saved[key] = process.env[key];
-  }
-  return {
-    restore() {
-      for (const key of keys) {
-        if (saved[key] === undefined) delete process.env[key];
-        else process.env[key] = saved[key];
-      }
-    },
-  };
-}
 
 function makeCredentials(expires = Date.now() + 60_000): OAuthCredentials {
   return {

@@ -1,10 +1,3 @@
-/**
- * Windows Permission Checks
- *
- * Windows manages permissions via Settings app.
- * Camera/microphone permissions are per-app in Windows 10+.
- */
-
 import type {
   PermissionCheckResult,
   SystemPermissionId,

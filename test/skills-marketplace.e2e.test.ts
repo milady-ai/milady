@@ -10,9 +10,9 @@
  * Uses real API server with mocked marketplace services.
  */
 
-import http from "node:http";
 import { startApiServer } from "@miladyai/app-core/src/api/server";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { req } from "./helpers/http";
 
 // ---------------------------------------------------------------------------
 // Mock mcp-marketplace — returns fixture data
@@ -70,50 +70,6 @@ vi.mock("@elizaos/agent/services/skill-catalog-client", () => ({
   refreshCatalog: vi.fn().mockResolvedValue([]),
   getTrendingSkills: vi.fn().mockResolvedValue([]),
 }));
-
-// ---------------------------------------------------------------------------
-// HTTP helper
-// ---------------------------------------------------------------------------
-
-function req(
-  port: number,
-  method: string,
-  urlPath: string,
-  body?: Record<string, unknown>,
-): Promise<{ status: number; data: Record<string, unknown> }> {
-  return new Promise((resolve, reject) => {
-    const b = body ? JSON.stringify(body) : undefined;
-    const r = http.request(
-      {
-        hostname: "127.0.0.1",
-        port,
-        path: urlPath,
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          ...(b ? { "Content-Length": Buffer.byteLength(b) } : {}),
-        },
-      },
-      (res) => {
-        const ch: Buffer[] = [];
-        res.on("data", (c: Buffer) => ch.push(c));
-        res.on("end", () => {
-          const raw = Buffer.concat(ch).toString("utf-8");
-          let data: Record<string, unknown> = {};
-          try {
-            data = JSON.parse(raw) as Record<string, unknown>;
-          } catch {
-            data = { _raw: raw };
-          }
-          resolve({ status: res.statusCode ?? 0, data });
-        });
-      },
-    );
-    r.on("error", reject);
-    if (b) r.write(b);
-    r.end();
-  });
-}
 
 // ---------------------------------------------------------------------------
 // Tests

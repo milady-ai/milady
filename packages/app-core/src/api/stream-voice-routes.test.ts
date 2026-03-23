@@ -45,12 +45,7 @@ vi.mock("../services/tts-stream-bridge", () => ({
 }));
 
 vi.mock("@elizaos/core", () => ({
-  logger: {
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-    debug: vi.fn(),
-  },
+  logger: { info: vi.fn(), warn: vi.fn(), debug: vi.fn(), error: vi.fn() },
 }));
 
 import { ttsStreamBridge } from "../services/tts-stream-bridge";

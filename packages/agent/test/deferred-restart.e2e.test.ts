@@ -6,59 +6,11 @@
  * broadcasts include them, and that POST /api/agent/restart clears them.
  */
 
-import http from "node:http";
 import type { AgentRuntime } from "@elizaos/core";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { WebSocket } from "ws";
 import { startApiServer } from "../src/api/server";
-
-// ---------------------------------------------------------------------------
-// HTTP helper (same pattern as api-server.e2e.test.ts)
-// ---------------------------------------------------------------------------
-
-function req(
-  port: number,
-  method: string,
-  p: string,
-  body?: Record<string, unknown>,
-): Promise<{
-  status: number;
-  headers: http.IncomingHttpHeaders;
-  data: Record<string, unknown>;
-}> {
-  return new Promise((resolve, reject) => {
-    const b = body ? JSON.stringify(body) : undefined;
-    const r = http.request(
-      {
-        hostname: "127.0.0.1",
-        port,
-        path: p,
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          ...(b ? { "Content-Length": Buffer.byteLength(b) } : {}),
-        },
-      },
-      (res) => {
-        const ch: Buffer[] = [];
-        res.on("data", (c: Buffer) => ch.push(c));
-        res.on("end", () => {
-          const raw = Buffer.concat(ch).toString("utf-8");
-          let data: Record<string, unknown> = {};
-          try {
-            data = JSON.parse(raw) as Record<string, unknown>;
-          } catch {
-            data = { _raw: raw };
-          }
-          resolve({ status: res.statusCode ?? 0, headers: res.headers, data });
-        });
-      },
-    );
-    r.on("error", reject);
-    if (b) r.write(b);
-    r.end();
-  });
-}
+import { req } from "../../../test/helpers/http";
 
 // ---------------------------------------------------------------------------
 // Helpers

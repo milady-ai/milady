@@ -434,14 +434,6 @@ function makeUnauthenticatedAgentStatus(): AgentStatus {
   };
 }
 
-/**
- * Check if this is a Milady-hosted agent URL (milady.ai or waifu.fun).
- * These agents have known endpoint structures and don't need legacy fallbacks.
- */
-function isMiladyAgent(url: string): boolean {
-  return /milady\.ai|waifu\.fun/i.test(url);
-}
-
 export class CloudApiClient {
   private baseUrl: string;
   private type: ConnectionType;
@@ -512,17 +504,7 @@ export class CloudApiClient {
       throw new Error(`API ${primary.status}: /api/health`);
     }
 
-    // Only try legacy /health fallback for non-Milady agents.
-    // Milady agents always have /api/health, so 404 means something is wrong.
-    if (isMiladyAgent(this.baseUrl)) {
-      throw new Error(`API ${primary.status}: /api/health`);
-    }
-
-    const fallback = await this.rawFetch("/health", fetchOpts);
-    if (!fallback.ok) {
-      throw new Error(`API ${fallback.status}: /health`);
-    }
-    return fallback.json();
+    throw new Error(`API ${primary.status}: /api/health`);
   }
 
   async getAgentStatus(options?: {
@@ -569,23 +551,7 @@ export class CloudApiClient {
       throw new Error(`API ${primary.status}: /api/status`);
     }
 
-    // Only try legacy /api/agent/status fallback for non-Milady agents.
-    // Milady agents always have /api/status, so 404/error means something is wrong.
-    if (isMiladyAgent(this.baseUrl)) {
-      throw new Error(`API ${primary.status}: /api/status`);
-    }
-
-    const legacy = await this.rawFetch("/api/agent/status", fetchOpts);
-    if (legacy.ok) {
-      return legacy.json();
-    }
-    if (legacy.status === 401 || legacy.status === 403) {
-      if (!this.authToken) {
-        return makeUnauthenticatedAgentStatus();
-      }
-      throw new Error(`API ${legacy.status}: /api/agent/status`);
-    }
-    throw new Error(`API ${legacy.status}: /api/agent/status`);
+    throw new Error(`API ${primary.status}: /api/status`);
   }
 
   async startAgent(): Promise<{ ok: boolean; status: { state: string } }> {

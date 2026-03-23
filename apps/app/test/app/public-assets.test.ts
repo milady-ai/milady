@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
-import { MILADY_CHARACTER_ASSETS } from "@miladyai/app-core/character-catalog";
+import { getMiladyCharacterAssets } from "@miladyai/app-core/character-catalog";
 import { describe, expect, it } from "vitest";
 
 const TEST_DIR = fileURLToPath(new URL(".", import.meta.url));
@@ -74,21 +74,21 @@ describe("app public bundle assets", () => {
       "worlds/companion-day.spz",
       "worlds/companion-night.spz",
       ...PROVIDER_LOGOS,
-      ...MILADY_CHARACTER_ASSETS.map((asset) =>
+      ...getMiladyCharacterAssets().map((asset) =>
         asset.previewPath.replace(/^\//, ""),
       ),
       // Eliza-branded previews (1:1 copies of milady previews for rebranding)
-      ...MILADY_CHARACTER_ASSETS.map((asset) =>
+      ...getMiladyCharacterAssets().map((asset) =>
         asset.previewPath.replace(/^\//, "").replace("milady-", "eliza-"),
       ),
-      ...MILADY_CHARACTER_ASSETS.map((asset) =>
+      ...getMiladyCharacterAssets().map((asset) =>
         asset.compressedVrmPath.replace(/^\//, ""),
       ),
-      ...MILADY_CHARACTER_ASSETS.map((asset) =>
+      ...getMiladyCharacterAssets().map((asset) =>
         asset.backgroundPath.replace(/^\//, ""),
       ),
       // Eliza-branded backgrounds (1:1 copies for rebranding)
-      ...MILADY_CHARACTER_ASSETS.map((asset) =>
+      ...getMiladyCharacterAssets().map((asset) =>
         asset.backgroundPath.replace(/^\//, "").replace("milady-", "eliza-"),
       ),
     ]);
@@ -121,7 +121,7 @@ describe("app public bundle assets", () => {
       return;
     }
 
-    const trackedPreviewAssets = MILADY_CHARACTER_ASSETS.filter((asset) =>
+    const trackedPreviewAssets = getMiladyCharacterAssets().filter((asset) =>
       existsSync(join(PUBLIC_DIR, asset.previewPath.replace(/^\//, ""))),
     );
 

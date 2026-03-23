@@ -1,7 +1,7 @@
 import { type CustomActionDef, client } from "@miladyai/app-core/api";
 import { useApp } from "@miladyai/app-core/state";
 import { confirmDesktopAction } from "@miladyai/app-core/utils";
-import { Button, Input } from "@miladyai/ui";
+import { Button, Input, Switch } from "@miladyai/ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface CustomActionsPanelProps {
@@ -247,11 +247,10 @@ export function CustomActionsPanel({
 
                   <div className="flex items-center gap-2 pt-1 border-t border-border">
                     <label className="flex items-center gap-1 cursor-pointer text-xs text-muted">
-                      <input
-                        type="checkbox"
+                      <Switch
                         checked={action.enabled}
-                        onChange={() => handleToggleEnabled(action)}
-                        className="w-3 h-3 cursor-pointer accent-accent"
+                        onCheckedChange={() => handleToggleEnabled(action)}
+                        className="scale-75"
                       />
                       <span>{t("customactionsview.Enabled")}</span>
                     </label>

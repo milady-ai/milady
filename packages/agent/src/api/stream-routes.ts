@@ -610,7 +610,7 @@ export async function handleStreamRoute(
         destination: dest.id,
       });
     } catch (err) {
-      error(res, err instanceof Error ? err.message : "Failed to go live", 500);
+      error(res, String(err), 500);
     }
     return true;
   }
@@ -641,7 +641,7 @@ export async function handleStreamRoute(
     } catch (err) {
       error(
         res,
-        err instanceof Error ? err.message : "Failed to go offline",
+        String(err),
         500,
       );
     }
@@ -714,7 +714,7 @@ export async function handleStreamRoute(
     } catch (err) {
       error(
         res,
-        err instanceof Error ? err.message : "Stream start failed",
+        String(err),
         500,
       );
     }
@@ -729,7 +729,7 @@ export async function handleStreamRoute(
     } catch (err) {
       error(
         res,
-        err instanceof Error ? err.message : "Stream stop failed",
+        String(err),
         500,
       );
     }
@@ -771,7 +771,7 @@ export async function handleStreamRoute(
     } catch (err) {
       error(
         res,
-        err instanceof Error ? err.message : "Failed to set volume",
+        String(err),
         500,
       );
     }
@@ -788,7 +788,7 @@ export async function handleStreamRoute(
         volume: state.streamManager.getVolume(),
       });
     } catch (err) {
-      error(res, err instanceof Error ? err.message : "Failed to mute", 500);
+      error(res, String(err), 500);
     }
     return true;
   }
@@ -803,7 +803,7 @@ export async function handleStreamRoute(
         volume: state.streamManager.getVolume(),
       });
     } catch (err) {
-      error(res, err instanceof Error ? err.message : "Failed to unmute", 500);
+      error(res, String(err), 500);
     }
     return true;
   }
@@ -844,7 +844,7 @@ export async function handleStreamRoute(
     } catch (err) {
       error(
         res,
-        err instanceof Error ? err.message : "Failed to set destination",
+        String(err),
         500,
       );
     }
@@ -861,7 +861,7 @@ export async function handleStreamRoute(
     } catch (err) {
       error(
         res,
-        err instanceof Error ? err.message : "Failed to read overlay layout",
+        String(err),
         500,
       );
     }
@@ -889,7 +889,7 @@ export async function handleStreamRoute(
     } catch (err) {
       error(
         res,
-        err instanceof Error ? err.message : "Failed to save overlay layout",
+        String(err),
         500,
       );
     }
@@ -904,7 +904,7 @@ export async function handleStreamRoute(
     } catch (err) {
       error(
         res,
-        err instanceof Error ? err.message : "Failed to read settings",
+        String(err),
         500,
       );
     }
@@ -930,7 +930,7 @@ export async function handleStreamRoute(
     } catch (err) {
       error(
         res,
-        err instanceof Error ? err.message : "Failed to save settings",
+        String(err),
         500,
       );
     }
@@ -1014,7 +1014,7 @@ export async function handleStreamRoute(
     } catch (err) {
       error(
         res,
-        err instanceof Error ? err.message : "Failed to switch source",
+        String(err),
         500,
       );
     }

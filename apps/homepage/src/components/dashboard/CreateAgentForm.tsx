@@ -200,12 +200,12 @@ export function CreateAgentForm({
     const deploySteps = getDeploySteps();
 
     return (
-      <div className="border border-border bg-surface animate-fade-up">
+      <div className="border border-border bg-surface animate-[fade-up_0.4s_ease-out_both]">
         {/* Terminal header bar */}
         <div className="flex items-center gap-3 px-4 py-2.5 bg-dark-secondary border-b border-border">
           <div className="flex items-center gap-1.5">
             <span
-              className={`w-2.5 h-2.5 rounded-full ${step === "done" ? "bg-emerald-500" : "bg-brand status-pulse"}`}
+              className={`w-2.5 h-2.5 rounded-full ${step === "done" ? "bg-emerald-500" : "bg-brand animate-[status-pulse_2s_ease-in-out_infinite]"}`}
             />
           </div>
           <span className="font-mono text-xs text-text-muted">
@@ -271,7 +271,7 @@ export function CreateAgentForm({
   // Error state — terminal error output
   if (step === "error") {
     return (
-      <div className="border border-border bg-surface animate-fade-up">
+      <div className="border border-border bg-surface animate-[fade-up_0.4s_ease-out_both]">
         {/* Terminal header bar */}
         <div className="flex items-center gap-3 px-4 py-2.5 bg-dark-secondary border-b border-border">
           <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
@@ -319,7 +319,7 @@ export function CreateAgentForm({
   // Form state — unauthenticated
   if (!authenticated) {
     return (
-      <div className="border border-border bg-surface animate-fade-up">
+      <div className="border border-border bg-surface animate-[fade-up_0.4s_ease-out_both]">
         {/* Terminal header */}
         <div className="flex items-center gap-3 px-4 py-2.5 bg-dark-secondary border-b border-border">
           <span className="w-2.5 h-2.5 rounded-full bg-text-muted/40" />
@@ -332,7 +332,7 @@ export function CreateAgentForm({
             <span className="text-brand">$</span>{" "}
             <span className="text-text-light">milady deploy</span>{" "}
             <span className="text-text-muted">--new</span>
-            <span className="inline-block w-2 h-4 bg-brand/70 ml-1 cursor-blink" />
+            <span className="inline-block w-2 h-4 bg-brand/70 ml-1 animate-[cursor-blink_1s_step-end_infinite]" />
           </div>
 
           {/* Auth required message */}
@@ -396,7 +396,7 @@ export function CreateAgentForm({
 
   // Form state — authenticated
   return (
-    <div className="border border-border bg-surface animate-fade-up">
+    <div className="border border-border bg-surface animate-[fade-up_0.4s_ease-out_both]">
       {/* Terminal header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-dark-secondary border-b border-border">
         <div className="flex items-center gap-3">

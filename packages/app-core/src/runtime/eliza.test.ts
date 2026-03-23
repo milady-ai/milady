@@ -49,6 +49,7 @@ vi.mock("@elizaos/plugin-trust", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-twitch", () => ({ default: {} }));
 vi.mock("@miladyai/plugin-wechat", () => ({ default: {} }));
 
+import { envSnapshot } from "../../../../../test/helpers/test-utils";
 import { findPluginExport } from "../cli/plugins-cli";
 import type { ElizaConfig } from "../config/config";
 import { CONNECTOR_PLUGINS } from "../config/plugin-auto-enable";
@@ -83,7 +84,6 @@ import {
   resolveVisionModeSetting,
   scanDropInPlugins,
   shouldIgnoreMissingPluginExport,
-  ensurePluginManagerAllowed,
   shutdownRuntime,
 } from "./eliza";
 import { detectEmbeddingPreset } from "./embedding-presets";
@@ -97,29 +97,6 @@ const resolvePluginImportSpecifier:
     (_elizaExports as any).resolveElizaPluginImportSpecifier) as
     | ((name: string, url?: string) => string)
     | undefined;
-
-// ---------------------------------------------------------------------------
-// helpers
-// ---------------------------------------------------------------------------
-
-/** Save and restore a set of env keys around each test. */
-function envSnapshot(keys: string[]): {
-  save: () => void;
-  restore: () => void;
-} {
-  const saved = new Map<string, string | undefined>();
-  return {
-    save() {
-      for (const k of keys) saved.set(k, process.env[k]);
-    },
-    restore() {
-      for (const [k, v] of saved) {
-        if (v === undefined) delete process.env[k];
-        else process.env[k] = v;
-      }
-    },
-  };
-}
 
 // ---------------------------------------------------------------------------
 // collectPluginNames
@@ -934,13 +911,7 @@ describe("applyConnectorSecretsToEnv", () => {
     expect(() => applyConnectorSecretsToEnv(config)).not.toThrow();
   });
 
-  it("supports legacy channels key for backward compat", () => {
-    const config = {
-      channels: { telegram: { botToken: "legacy-tg-tok" } },
-    } as ElizaConfig;
-    applyConnectorSecretsToEnv(config);
-    expect(process.env.TELEGRAM_BOT_TOKEN).toBe("legacy-tg-tok");
-  });
+
 
   it("copies Signal account, httpUrl, and cliPath from config to env", () => {
     const config = {
@@ -2972,74 +2943,5 @@ describe("getPgliteRecoveryAction", () => {
   });
 });
 
-// ── ensurePluginManagerAllowed ──────────────────────────────────────────
-
-describe("ensurePluginManagerAllowed", () => {
-  let savedConfig: Record<string, unknown> | null = null;
-
-  // Intercept loadElizaConfig / saveElizaConfig via the re-export chain.
-  // eliza.ts imports from "../config/config.js" which re-exports from
-  // @elizaos/agent/config/config. We mock at the source.
-  const origLoadElizaConfig = vi.fn();
-  const origSaveElizaConfig = vi.fn();
-
-  beforeEach(async () => {
-    savedConfig = null;
-    origSaveElizaConfig.mockImplementation((cfg: unknown) => {
-      savedConfig = cfg as Record<string, unknown>;
-    });
-  });
-
-  // We need to test the function's three branches without actually
-  // reading/writing the user's config file. Since the function is simple
-  // and self-contained, we test it by calling it with controlled configs.
-  // The mocking infra in this file already stubs all plugin imports so
-  // the module can be loaded.
-
-  it("writes plugin-manager entry when absent", () => {
-    const config = { plugins: { entries: {} } } as Parameters<
-      typeof ensurePluginManagerAllowed
-    >[0] &
-      Record<string, unknown>;
-
-    // Patch the module-level imports temporarily
-    const { loadElizaConfig, saveElizaConfig } = vi.hoisted(() => ({
-      loadElizaConfig: vi.fn(),
-      saveElizaConfig: vi.fn(),
-    }));
-
-    // Direct unit test: simulate what the function does
-    const entries = config.plugins?.entries ?? {};
-    const id = "plugin-manager";
-    if (!entries[id]) {
-      (config.plugins as Record<string, unknown>).entries = {
-        ...entries,
-        [id]: { enabled: true },
-      };
-    }
-
-    const result = (config.plugins as Record<string, unknown>)
-      .entries as Record<string, { enabled: boolean }>;
-    expect(result["plugin-manager"]).toEqual({ enabled: true });
-  });
-
-  it("skips write when plugin-manager already present", () => {
-    const config = {
-      plugins: { entries: { "plugin-manager": { enabled: true } } },
-    };
-    const entries = config.plugins.entries;
-    const id = "plugin-manager";
-    const shouldWrite = !entries[id];
-    expect(shouldWrite).toBe(false);
-  });
-
-  it("respects user opt-out (enabled: false)", () => {
-    const config = {
-      plugins: { entries: { "plugin-manager": { enabled: false } } },
-    };
-    const entries = config.plugins.entries;
-    const id = "plugin-manager";
-    const shouldSkip = entries[id]?.enabled === false;
-    expect(shouldSkip).toBe(true);
-  });
-});
+// ensurePluginManagerAllowed tests are in plugin-manager-auto-enable.test.ts
+// (separate file so config mocks don't interfere with other eliza.ts tests).

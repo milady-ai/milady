@@ -1,10 +1,3 @@
-/**
- * Permission Manager for Electrobun
- *
- * Unified permission checking across macOS, Windows, and Linux.
- * Shared implementation ported forward to Electrobun; no runtime-specific APIs required.
- */
-
 import type {
   AllPermissionsState,
   PermissionCheckResult,

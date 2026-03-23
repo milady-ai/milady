@@ -2,17 +2,14 @@ import { STYLE_PRESETS } from "@miladyai/app-core/onboarding-presets";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AgentProvider, useAgents } from "../../lib/AgentProvider";
-import { AuthGate } from "./AuthGate";
 
 type OnboardingStep = "select" | "customize" | "deploying" | "done";
 
 export function CreateAgent() {
   return (
-    <AuthGate>
-      <AgentProvider>
-        <CreateAgentInner />
-      </AgentProvider>
-    </AuthGate>
+    <AgentProvider>
+      <CreateAgentInner />
+    </AgentProvider>
   );
 }
 

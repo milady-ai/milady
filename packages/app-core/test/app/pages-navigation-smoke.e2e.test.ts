@@ -455,13 +455,6 @@ describe("pages navigation smoke (e2e)", () => {
     warnSpy.mockRestore();
   });
 
-  it("clicks every Advanced sub-page and renders non-empty valid content", async () => {
-    // Removed because this test was attempting to interact with buttons that are part of components
-    // that are fully mocked in this test (e.g. Advanced sub-pages use internal Navigation UI
-    // that isn't rendered when replacing the entire Views with simple tokens).
-    expect(true).toBe(true);
-  });
-
   it("renders every tab value directly with non-empty valid content", async () => {
     const errorSpy = vi.spyOn(console, "error");
     const warnSpy = vi.spyOn(console, "warn");

@@ -1,10 +1,3 @@
-/**
- * TagEditor — add/remove string tags with chip display.
- *
- * Fully generic; no app-context dependency. Callers pass translated labels
- * via props (with English defaults so the component works out-of-the-box).
- */
-
 import { useState } from "react";
 import { cn } from "../../lib/utils";
 import { Button } from "./button";

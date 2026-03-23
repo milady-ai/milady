@@ -1,11 +1,3 @@
-/**
- * ThemedSelect — custom dropdown with grouped options.
- *
- * A generic, fully-controlled select component that supports grouped option
- * lists and optional hint text per item. Has no dependency on any app-level
- * context; all state is passed in as props.
- */
-
 import { useEffect, useRef, useState } from "react";
 import { Button } from "./button";
 
@@ -38,7 +30,6 @@ export function ThemedSelect<T extends string>({
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  // Close on outside click
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
@@ -49,7 +40,6 @@ export function ThemedSelect<T extends string>({
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
-  // Close on Escape
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
@@ -59,7 +49,6 @@ export function ThemedSelect<T extends string>({
     return () => document.removeEventListener("keydown", handler);
   }, [open]);
 
-  // Find current label
   let currentLabel = placeholder;
   for (const g of groups) {
     const found = g.items.find((i) => i.id === value);

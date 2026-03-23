@@ -21,10 +21,7 @@ export const APPS_ENABLED = false; // import.meta.env.DEV;
 
 /** Stream routes stay addressable; the nav hides the tab unless streaming is enabled. */
 export const STREAM_ENABLED = true;
-/**
- * Companion tab — enabled by default since the VRM companion UI launch.
- * Previously opt-in; now opt-out via VITE_ENABLE_COMPANION_MODE=false.
- */
+/** Companion tab — enabled by default; opt-out via VITE_ENABLE_COMPANION_MODE=false. */
 export const COMPANION_ENABLED =
   String(import.meta.env.VITE_ENABLE_COMPANION_MODE ?? "true").toLowerCase() !==
   "false";

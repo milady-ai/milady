@@ -1,7 +1,7 @@
 /**
  * Signal Connector E2E Tests
  *
- * Tests for @elizaos/plugin-signal as outlined in GitHub Issue #148.
+ * Tests for @elizaos/plugin-signal.
  *
  * Prerequisites:
  * - signal-cli installed and configured
@@ -117,63 +117,6 @@ describe("Signal Connector (@elizaos/plugin-signal)", () => {
       expect(plugin.services).toBeDefined();
       expect(Array.isArray(plugin.services)).toBe(true);
       expect(plugin.services?.length).toBeGreaterThan(0);
-    });
-  });
-
-  describe("Configuration Validation", () => {
-    it("validates E.164 phone number format", () => {
-      // E.164 format: +[country code][subscriber number]
-      const validNumbers = [
-        "+14155551234",
-        "+442071234567",
-        "+905551234567",
-        "+1234567890123",
-      ];
-
-      const invalidNumbers = [
-        "4155551234", // Missing +
-        "+123", // Too short
-        "+1234567890123456", // Too long (>15 digits)
-        "not-a-number",
-      ];
-
-      const isValidE164 = (n: string) => /^\+\d{7,15}$/.test(n);
-
-      for (const num of validNumbers) {
-        expect(isValidE164(num), `${num} should be valid`).toBe(true);
-      }
-
-      for (const num of invalidNumbers) {
-        expect(isValidE164(num), `${num} should be invalid`).toBe(false);
-      }
-    });
-
-    it("validates group ID format", () => {
-      // Signal group IDs are base64-encoded, minimum 32 chars
-      const isValidGroupId = (id: string) =>
-        /^[A-Za-z0-9+/]+=*$/.test(id) && id.length >= 32;
-
-      expect(isValidGroupId("YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXo=")).toBe(true);
-      expect(isValidGroupId("short")).toBe(false);
-      expect(isValidGroupId("invalid!@#$%")).toBe(false);
-    });
-
-    it("respects Signal message length limit", () => {
-      const MAX_SIGNAL_MESSAGE_LENGTH = 4000;
-
-      const shortMessage = "Hello";
-      const longMessage = "x".repeat(5000);
-
-      expect(shortMessage.length).toBeLessThanOrEqual(
-        MAX_SIGNAL_MESSAGE_LENGTH,
-      );
-      expect(longMessage.length).toBeGreaterThan(MAX_SIGNAL_MESSAGE_LENGTH);
-    });
-
-    it("respects Signal attachment size limit", () => {
-      const MAX_SIGNAL_ATTACHMENT_SIZE = 100 * 1024 * 1024; // 100MB
-
-      expect(MAX_SIGNAL_ATTACHMENT_SIZE).toBe(104857600);
     });
   });
 

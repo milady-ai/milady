@@ -124,7 +124,7 @@ export async function handleWhatsAppRoute(
     } catch (err) {
       json(
         res,
-        { ok: false, error: err instanceof Error ? err.message : String(err) },
+        { ok: false, error: String(err) },
         500,
       );
     }
@@ -224,7 +224,7 @@ export async function handleWhatsAppRoute(
     } catch (logoutErr) {
       console.warn(
         `[whatsapp] Logout failed for ${accountId}, deleting auth files directly:`,
-        logoutErr instanceof Error ? logoutErr.message : String(logoutErr),
+        String(logoutErr),
       );
       const authDir = path.join(state.workspaceDir, "whatsapp-auth", accountId);
       try {

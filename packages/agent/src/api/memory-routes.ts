@@ -326,14 +326,10 @@ export async function handleMemoryRoutes(
 
     const prompt = buildQuickContextPrompt({ query, memories, knowledge });
     let answer = "I couldn't generate a quick answer right now.";
-    try {
-      const response = await runtime.useModel(ModelType.TEXT_SMALL, { prompt });
-      const text = typeof response === "string" ? response : String(response);
-      if (text.trim()) {
-        answer = text.trim();
-      }
-    } catch {
-      // Keep fallback answer.
+    const response = await runtime.useModel(ModelType.TEXT_SMALL, { prompt });
+    const text = typeof response === "string" ? response : String(response);
+    if (text.trim()) {
+      answer = text.trim();
     }
 
     json(res, {

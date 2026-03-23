@@ -17,24 +17,13 @@ export const sendMessageAction: Action = {
   validate: async () => true,
 
   handler: async (runtime, _message, _state, options) => {
-    type SendMessageParams = {
-      targetType?: string;
+    const params = (options as HandlerOptions | undefined)?.parameters as {
+      targetType?: "user" | "room";
       source?: string;
       target?: string;
       text?: string;
-    };
-    const params = (options as HandlerOptions | undefined)?.parameters as
-      | SendMessageParams
-      | undefined;
-    const targetType =
-      params?.targetType === "user" || params?.targetType === "room"
-        ? params.targetType
-        : null;
-    const source =
-      typeof params?.source === "string" ? params.source.trim() : "";
-    const target =
-      typeof params?.target === "string" ? params.target.trim() : "";
-    const text = typeof params?.text === "string" ? params.text.trim() : "";
+    } | undefined;
+    const { targetType, source, target, text } = params || {};
 
     if (!targetType || !source || !target || !text) {
       return {

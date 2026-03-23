@@ -374,7 +374,6 @@ export async function handleCloudBillingRoute(
 
   const headers = buildAuthHeaders(state.config);
 
-  try {
     const fullUrl = new URL(req.url ?? pathname, "http://localhost");
 
     if (pathname === "/api/cloud/billing/summary" && method === "GET") {
@@ -559,42 +558,4 @@ export async function handleCloudBillingRoute(
     const responseData = await readJsonResponse(upstreamResponse);
     sendJson(res, responseData, upstreamResponse.status);
     return true;
-  } catch (err) {
-    if (
-      err instanceof Error &&
-      "code" in err &&
-      (err as { code: string }).code === "REDIRECT"
-    ) {
-      sendJsonError(
-        res,
-        "Eliza Cloud billing request was redirected; redirects are not allowed",
-        502,
-      );
-      return true;
-    }
-
-    const isTimeout =
-      err instanceof Error &&
-      (err.name === "TimeoutError" ||
-        err.name === "AbortError" ||
-        err.message.toLowerCase().includes("timeout"));
-
-    if (isTimeout) {
-      logger.warn("[cloud-billing] Upstream billing request timed out");
-      sendJsonError(res, "Eliza Cloud billing request timed out", 504);
-    } else if (
-      err instanceof Error &&
-      err.message === "Request body too large"
-    ) {
-      sendJsonError(res, err.message, 413);
-    } else if (err instanceof SyntaxError) {
-      sendJsonError(res, "Invalid JSON request body", 400);
-    } else {
-      logger.warn(
-        `[cloud-billing] Upstream billing request failed: ${err instanceof Error ? err.message : String(err)}`,
-      );
-      sendJsonError(res, "Failed to reach Eliza Cloud billing", 502);
-    }
-    return true;
-  }
 }

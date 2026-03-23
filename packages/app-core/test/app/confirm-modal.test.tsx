@@ -4,11 +4,11 @@
 (globalThis as Record<string, unknown>).__TEST_RENDERER__ = true;
 
 import {
-  ConfirmModal,
-  PromptModal,
+  ConfirmDialog as ConfirmModal,
+  PromptDialog as PromptModal,
   useConfirm,
   usePrompt,
-} from "@miladyai/app-core/components";
+} from "@miladyai/ui";
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";

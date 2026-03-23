@@ -1,8 +1,4 @@
-/**
- * SubscriptionStatus — Anthropic and OpenAI subscription connection panels.
- *
- * Extracted from SettingsView.tsx for decomposition (P2 §10).
- */
+/** SubscriptionStatus — Anthropic and OpenAI subscription connection panels. */
 
 import { Button, Input } from "@miladyai/ui";
 import { useCallback, useRef, useState } from "react";

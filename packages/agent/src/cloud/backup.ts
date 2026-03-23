@@ -22,7 +22,7 @@ export class BackupScheduler {
     this.timer = setInterval(() => {
       this.client.snapshot(this.agentId).catch((err) => {
         logger.warn(
-          `[cloud-backup] Auto-backup failed: ${err instanceof Error ? err.message : String(err)}`,
+          `[cloud-backup] Auto-backup failed: ${String(err)}`,
         );
       });
     }, this.intervalMs);
@@ -43,7 +43,7 @@ export class BackupScheduler {
   async finalSnapshot(): Promise<void> {
     await this.client.snapshot(this.agentId).catch((err) => {
       logger.warn(
-        `[cloud-backup] Final snapshot failed: ${err instanceof Error ? err.message : String(err)}`,
+        `[cloud-backup] Final snapshot failed: ${String(err)}`,
       );
     });
   }

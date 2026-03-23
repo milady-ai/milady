@@ -206,7 +206,6 @@ if (!shouldBuild()) {
   runNode();
 } else {
   logRunner("Building TypeScript (dist is stale).");
-  // Eliza MIGRATION: Use bunx for faster builds
   const bunxArgs = [compiler];
   const buildCmd = process.platform === "win32" ? "cmd.exe" : "bunx";
   const buildArgs =

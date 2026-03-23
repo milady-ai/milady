@@ -1194,20 +1194,18 @@ if (uiOnly) {
   );
 
   // Determine on-chain preference — env var wins (CI/scripts), otherwise ask.
-  if (!uiOnly) {
-    const resolved = await resolveOnchainPreference({
-      env: process.env,
-      isTTY: !!process.stdin.isTTY,
-      whichFn: (cmd) => which(cmd),
-      promptFn: (question, defaultYes) => promptYesNo(question, defaultYes),
-      installFn: () => installFoundry(),
-    });
-    onchainEnabled = resolved.onchainEnabled;
-    anchorRequested = resolved.anchorRequested;
+  const resolved = await resolveOnchainPreference({
+    env: process.env,
+    isTTY: !!process.stdin.isTTY,
+    whichFn: (cmd) => which(cmd),
+    promptFn: (question, defaultYes) => promptYesNo(question, defaultYes),
+    installFn: () => installFoundry(),
+  });
+  onchainEnabled = resolved.onchainEnabled;
+  anchorRequested = resolved.anchorRequested;
 
-    if (onchainEnabled) {
-      killPort(ANVIL_PORT);
-    }
+  if (onchainEnabled) {
+    killPort(ANVIL_PORT);
   }
 
   let chainEnv = {};

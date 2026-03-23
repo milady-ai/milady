@@ -151,7 +151,7 @@ export function AgentCard({
       {/* Status accent bar - left edge */}
       <div
         className={`absolute left-0 top-0 bottom-0 w-1 transition-all duration-300
-          ${stateConfig.bg} ${isLive || isProvisioning ? "status-pulse" : ""}`}
+          ${stateConfig.bg} ${isLive || isProvisioning ? "animate-[status-pulse_2s_ease-in-out_infinite]" : ""}`}
       />
 
       {/* Card body */}
@@ -196,7 +196,7 @@ export function AgentCard({
           >
             <span
               className={`w-2 h-2 rounded-full ${stateConfig.bg}
-                ${isLive || isProvisioning ? "status-pulse" : ""}`}
+                ${isLive || isProvisioning ? "animate-[status-pulse_2s_ease-in-out_infinite]" : ""}`}
             />
             <span
               className={`font-mono text-[11px] font-medium tracking-wide ${stateConfig.color}`}

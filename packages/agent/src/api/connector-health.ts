@@ -92,12 +92,8 @@ export class ConnectorHealthMonitor {
     const pluginName = CONNECTOR_PLUGIN_MAP[name.toLowerCase()];
     if (!pluginName) return "unknown";
 
-    try {
-      const service = this.runtime.getService(pluginName);
-      if (service) return "ok";
-    } catch {
-      // getService may throw if runtime is shutting down
-    }
+    const service = this.runtime.getService(pluginName);
+    if (service) return "ok";
 
     // Also check runtime.clients if available
     const clients = (

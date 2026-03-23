@@ -759,7 +759,7 @@ async function fetchEvmChainBalancesViaRpc(
         error: null,
       };
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = String(err);
       errors.push(`${describeRpcEndpoint(rpcUrl)}: ${msg}`);
     }
   }

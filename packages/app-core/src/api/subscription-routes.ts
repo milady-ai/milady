@@ -23,6 +23,6 @@ export async function handleSubscriptionRoutes(
   return handleAutonomousSubscriptionRoutes({
     ...ctx,
     saveConfig: (config: unknown) => ctx.saveConfig(config as ElizaConfig),
-    loadSubscriptionAuth: async () => (await import("../auth/index")) as never,
+    loadSubscriptionAuth: async () => (await import("../auth/credentials.js")) as never,
   } as never);
 }

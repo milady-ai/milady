@@ -14,68 +14,13 @@
  * NO MOCKS — all tests spin up a real HTTP server.
  */
 import fs from "node:fs";
-import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import { startApiServer } from "@miladyai/app-core/src/api/server";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { WebSocket } from "ws";
-
-// ---------------------------------------------------------------------------
-// HTTP helper — supports custom headers and origin injection
-// ---------------------------------------------------------------------------
-
-interface ReqOptions {
-  headers?: Record<string, string>;
-  origin?: string;
-}
-
-function req(
-  port: number,
-  method: string,
-  p: string,
-  body?: Record<string, unknown>,
-  opts?: ReqOptions,
-): Promise<{
-  status: number;
-  headers: http.IncomingHttpHeaders;
-  data: Record<string, unknown>;
-}> {
-  return new Promise((resolve, reject) => {
-    const b = body ? JSON.stringify(body) : undefined;
-    const r = http.request(
-      {
-        hostname: "127.0.0.1",
-        port,
-        path: p,
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          ...(b ? { "Content-Length": Buffer.byteLength(b) } : {}),
-          ...(opts?.origin ? { Origin: opts.origin } : {}),
-          ...(opts?.headers ?? {}),
-        },
-      },
-      (res) => {
-        const ch: Buffer[] = [];
-        res.on("data", (c: Buffer) => ch.push(c));
-        res.on("end", () => {
-          const raw = Buffer.concat(ch).toString("utf-8");
-          let data: Record<string, unknown> = {};
-          try {
-            data = JSON.parse(raw) as Record<string, unknown>;
-          } catch {
-            data = { _raw: raw };
-          }
-          resolve({ status: res.statusCode ?? 0, headers: res.headers, data });
-        });
-      },
-    );
-    r.on("error", reject);
-    if (b) r.write(b);
-    r.end();
-  });
-}
+import { req } from "./helpers/http";
+import { saveEnv } from "./helpers/test-utils";
 
 type WsConnectResult = { kind: "open" } | { kind: "rejected"; status?: number };
 
@@ -114,23 +59,6 @@ function connectWs(
       finish({ kind: "rejected", status });
     });
   });
-}
-
-// ---------------------------------------------------------------------------
-// Env save/restore helper
-// ---------------------------------------------------------------------------
-
-function saveEnv(...keys: string[]): { restore: () => void } {
-  const saved: Record<string, string | undefined> = {};
-  for (const key of keys) saved[key] = process.env[key];
-  return {
-    restore() {
-      for (const key of keys) {
-        if (saved[key] === undefined) delete process.env[key];
-        else process.env[key] = saved[key];
-      }
-    },
-  };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -234,7 +162,7 @@ describe("Non-loopback binding enforces auth without explicit token", () => {
 
   it("accepts the generated token", async () => {
     const { status } = await req(port, "GET", "/api/status", undefined, {
-      headers: { Authorization: `Bearer ${generatedToken}` },
+      Authorization: `Bearer ${generatedToken}`,
     });
     expect(status).toBe(200);
   });
@@ -286,14 +214,14 @@ describe("Token auth gate (MILADY_API_TOKEN set)", () => {
 
   it("rejects requests with wrong token (401)", async () => {
     const { status } = await req(port, "GET", "/api/status", undefined, {
-      headers: { Authorization: "Bearer wrong-token" },
+      Authorization: "Bearer wrong-token",
     });
     expect(status).toBe(401);
   });
 
   it("rejects requests with empty Bearer value (401)", async () => {
     const { status } = await req(port, "GET", "/api/status", undefined, {
-      headers: { Authorization: "Bearer " },
+      Authorization: "Bearer ",
     });
     expect(status).toBe(401);
   });
@@ -302,7 +230,7 @@ describe("Token auth gate (MILADY_API_TOKEN set)", () => {
 
   it("accepts Bearer token in Authorization header", async () => {
     const { status, data } = await req(port, "GET", "/api/status", undefined, {
-      headers: { Authorization: `Bearer ${TEST_TOKEN}` },
+      Authorization: `Bearer ${TEST_TOKEN}`,
     });
     expect(status).toBe(200);
     expect(typeof data.agentName).toBe("string");
@@ -310,21 +238,21 @@ describe("Token auth gate (MILADY_API_TOKEN set)", () => {
 
   it("accepts token via X-Milady-Token header", async () => {
     const { status } = await req(port, "GET", "/api/status", undefined, {
-      headers: { "X-Milady-Token": TEST_TOKEN },
+      "X-Milady-Token": TEST_TOKEN,
     });
     expect(status).toBe(200);
   });
 
   it("accepts token via X-Api-Key header", async () => {
     const { status } = await req(port, "GET", "/api/status", undefined, {
-      headers: { "X-Api-Key": TEST_TOKEN },
+      "X-Api-Key": TEST_TOKEN,
     });
     expect(status).toBe(200);
   });
 
   it("Bearer header is case-insensitive", async () => {
     const { status } = await req(port, "GET", "/api/status", undefined, {
-      headers: { Authorization: `bearer ${TEST_TOKEN}` },
+      Authorization: `bearer ${TEST_TOKEN}`,
     });
     expect(status).toBe(200);
   });
@@ -399,7 +327,7 @@ describe("Token auth gate (MILADY_API_TOKEN set)", () => {
   });
 
   it("all protected endpoints work with valid token", async () => {
-    const auth = { headers: { Authorization: `Bearer ${TEST_TOKEN}` } };
+    const auth = { Authorization: `Bearer ${TEST_TOKEN}` };
     const endpoints: Array<[string, string]> = [
       ["GET", "/api/status"],
       ["GET", "/api/config"],
@@ -417,7 +345,7 @@ describe("Token auth gate (MILADY_API_TOKEN set)", () => {
   });
 
   it("terminal run auth gate accepts valid token", async () => {
-    const auth = { headers: { Authorization: `Bearer ${TEST_TOKEN}` } };
+    const auth = { Authorization: `Bearer ${TEST_TOKEN}` };
     const { status } = await req(
       port,
       "POST",
@@ -430,7 +358,7 @@ describe("Token auth gate (MILADY_API_TOKEN set)", () => {
   });
 
   it("protects sensitive config mutation surfaces with token auth", async () => {
-    const auth = { headers: { Authorization: `Bearer ${TEST_TOKEN}` } };
+    const auth = { Authorization: `Bearer ${TEST_TOKEN}` };
 
     const mutationRequests: Array<{
       method: string;
@@ -532,7 +460,7 @@ describe("CORS origin restrictions", () => {
       "GET",
       "/api/status",
       undefined,
-      { origin: `http://localhost:${port}` },
+      { Origin: `http://localhost:${port}` },
     );
     expect(status).toBe(200);
     expect(headers["access-control-allow-origin"]).toBe(
@@ -546,7 +474,7 @@ describe("CORS origin restrictions", () => {
       "GET",
       "/api/status",
       undefined,
-      { origin: `http://127.0.0.1:${port}` },
+      { Origin: `http://127.0.0.1:${port}` },
     );
     expect(status).toBe(200);
     expect(headers["access-control-allow-origin"]).toBe(
@@ -556,7 +484,7 @@ describe("CORS origin restrictions", () => {
 
   it("rejects non-local origin", async () => {
     const { status, data } = await req(port, "GET", "/api/status", undefined, {
-      origin: "https://evil.example.com",
+      Origin: "https://evil.example.com",
     });
     expect(status).toBe(403);
     expect(data.error).toContain("Origin not allowed");
@@ -564,21 +492,21 @@ describe("CORS origin restrictions", () => {
 
   it("allows capacitor origin", async () => {
     const { status } = await req(port, "GET", "/api/status", undefined, {
-      origin: "capacitor://localhost",
+      Origin: "capacitor://localhost",
     });
     expect(status).toBe(200);
   });
 
   it("allows electrobun origin", async () => {
     const { status } = await req(port, "GET", "/api/status", undefined, {
-      origin: "electrobun://-",
+      Origin: "electrobun://-",
     });
     expect(status).toBe(200);
   });
 
   it("CORS preflight (OPTIONS) returns 204", async () => {
     const { status } = await req(port, "OPTIONS", "/api/status", undefined, {
-      origin: `http://localhost:${port}`,
+      Origin: `http://localhost:${port}`,
     });
     expect(status).toBe(204);
   });
@@ -592,7 +520,7 @@ describe("CORS origin restrictions", () => {
         "GET",
         "/api/status",
         undefined,
-        { origin: "https://custom.example.com" },
+        { Origin: "https://custom.example.com" },
       );
       expect(status).toBe(200);
       expect(headers["access-control-allow-origin"]).toBe(
@@ -607,7 +535,7 @@ describe("CORS origin restrictions", () => {
   it("null origin rejected by default, allowed with env flag", async () => {
     // Rejected by default
     const { status: s1 } = await req(port, "GET", "/api/status", undefined, {
-      origin: "null",
+      Origin: "null",
     });
     expect(s1).toBe(403);
 
@@ -616,7 +544,7 @@ describe("CORS origin restrictions", () => {
     process.env.ELIZA_ALLOW_NULL_ORIGIN = "1";
     try {
       const { status: s2 } = await req(port, "GET", "/api/status", undefined, {
-        origin: "null",
+        Origin: "null",
       });
       expect(s2).toBe(200);
     } finally {
@@ -821,7 +749,7 @@ describe("Auth + wallet integration", () => {
     envBackup.restore();
   });
 
-  const auth = { headers: { Authorization: `Bearer wallet-auth-test-token` } };
+  const auth = { Authorization: `Bearer wallet-auth-test-token` };
 
   it("wallet addresses require auth", async () => {
     const { status } = await req(port, "GET", "/api/wallet/addresses");
@@ -916,7 +844,7 @@ describe("Auth + agent lifecycle", () => {
     fs.rmSync(tmpConfigDir, { recursive: true, force: true });
   });
 
-  const auth = { headers: { Authorization: `Bearer lifecycle-auth-token` } };
+  const auth = { Authorization: `Bearer lifecycle-auth-token` };
 
   it("onboarding POST requires auth", async () => {
     const { status } = await req(port, "POST", "/api/onboarding", {
@@ -1041,19 +969,19 @@ describe("Auth edge cases and security", () => {
     // Tokens of different lengths should both return 401
     // and take roughly the same time (timing-safe)
     const { status: s1 } = await req(port, "GET", "/api/status", undefined, {
-      headers: { Authorization: "Bearer a" },
+      Authorization: "Bearer a",
     });
     expect(s1).toBe(401);
 
     const { status: s2 } = await req(port, "GET", "/api/status", undefined, {
-      headers: { Authorization: `Bearer ${"a".repeat(1000)}` },
+      Authorization: `Bearer ${"a".repeat(1000)}`,
     });
     expect(s2).toBe(401);
   });
 
   it("token with whitespace padding is trimmed", async () => {
     const { status } = await req(port, "GET", "/api/status", undefined, {
-      headers: { Authorization: `Bearer  ${TEST_TOKEN}  ` },
+      Authorization: `Bearer  ${TEST_TOKEN}  `,
     });
     expect(status).toBe(200);
   });
@@ -1061,27 +989,27 @@ describe("Auth edge cases and security", () => {
   it("CORS + auth work together correctly", async () => {
     // Valid origin + valid token = success
     const { status: s1 } = await req(port, "GET", "/api/status", undefined, {
-      origin: "http://localhost:3000",
-      headers: { Authorization: `Bearer ${TEST_TOKEN}` },
+      Origin: "http://localhost:3000",
+      Authorization: `Bearer ${TEST_TOKEN}`,
     });
     expect(s1).toBe(200);
 
     // Invalid origin = blocked before auth check
     const { status: s2 } = await req(port, "GET", "/api/status", undefined, {
-      origin: "https://evil.example.com",
-      headers: { Authorization: `Bearer ${TEST_TOKEN}` },
+      Origin: "https://evil.example.com",
+      Authorization: `Bearer ${TEST_TOKEN}`,
     });
     expect(s2).toBe(403);
 
     // Valid origin + no token = auth failure
     const { status: s3 } = await req(port, "GET", "/api/status", undefined, {
-      origin: "http://localhost:3000",
+      Origin: "http://localhost:3000",
     });
     expect(s3).toBe(401);
   });
 
   it("concurrent authenticated requests don't interfere", async () => {
-    const auth = { headers: { Authorization: `Bearer ${TEST_TOKEN}` } };
+    const auth = { Authorization: `Bearer ${TEST_TOKEN}` };
     const results = await Promise.all(
       Array.from({ length: 20 }, () =>
         req(port, "GET", "/api/status", undefined, auth),

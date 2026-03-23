@@ -82,7 +82,7 @@ export async function cloudLogin(
       );
     }
     throw new Error(
-      `Failed to create auth session: ${err instanceof Error ? err.message : String(err)}`,
+      `Failed to create auth session: ${String(err)}`,
     );
   }
 
@@ -128,7 +128,7 @@ export async function cloudLogin(
         );
       }
       throw new Error(
-        `Cloud login polling failed: ${err instanceof Error ? err.message : String(err)}`,
+        `Cloud login polling failed: ${String(err)}`,
       );
     }
 

@@ -171,14 +171,6 @@ describe("Onboarding Avatar Step", () => {
     expect(styleIdx).toBe(avatarIdx + 1);
   });
 
-  it("avatar step is always valid (defaults to 1)", () => {
-    const onboardingAvatar = 1; // default
-    const canGoNext = true; // avatar step always allows next
-    expect(canGoNext).toBe(true);
-    expect(onboardingAvatar).toBeGreaterThanOrEqual(0);
-    expect(onboardingAvatar).toBeLessThanOrEqual(VRM_COUNT);
-  });
-
   it("onboarding saves avatar to selectedVrmIndex on next", () => {
     let selectedVrmIndex = 1;
     const onboardingAvatar = 4;

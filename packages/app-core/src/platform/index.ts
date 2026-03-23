@@ -1,8 +1,4 @@
-/**
- * Platform utilities — onboarding permissions and platform initialization helpers.
- *
- * Migrated from apps/app/src/onboarding-permissions.ts and main.tsx.
- */
+/** Platform utilities — onboarding permissions and platform initialization helpers. */
 
 import type {
   AllPermissionsState,

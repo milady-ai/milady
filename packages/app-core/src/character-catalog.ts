@@ -1,92 +1,58 @@
-import catalog from "../../../apps/app/characters/catalog.json" with {
-  type: "json",
-};
+/**
+ * Character catalog — reads from the boot config instead of a cross-package import.
+ *
+ * The host app (apps/app) passes its character catalog via AppBootConfig.characterCatalog.
+ * This module provides backward-compatible exports that resolve from the boot config.
+ */
+import {
+  getBootConfig,
+  resolveCharacterCatalog,
+  type ResolvedCharacterAsset,
+  type ResolvedInjectedCharacter,
+} from "./config/boot-config";
 
-type MiladyCharacterAssetCatalogEntry = {
-  id: number;
-  slug: string;
-  title: string;
-  sourceName: string;
-};
 
-type MiladyInjectedCharacterCatalogEntry = {
-  catchphrase: string;
-  name: string;
-  avatarAssetId: number;
-  voicePresetId?: string;
-};
 
-type MiladyCharacterCatalog = {
-  assets: MiladyCharacterAssetCatalogEntry[];
-  injectedCharacters: MiladyInjectedCharacterCatalogEntry[];
-};
+function getResolved() {
+  const catalog = getBootConfig().characterCatalog;
+  if (!catalog) {
+    return {
+      assets: [] as ResolvedCharacterAsset[],
+      assetCount: 0,
+      defaultAsset: null,
+      injectedCharacters: [] as ResolvedInjectedCharacter[],
+      injectedCharacterCount: 0,
+      getAsset: () => null,
+      getInjectedCharacter: () => null,
+    };
+  }
+  return resolveCharacterCatalog(catalog);
+}
 
-export type MiladyCharacterAsset = MiladyCharacterAssetCatalogEntry & {
-  compressedVrmPath: string;
-  rawVrmPath: string;
-  previewPath: string;
-  backgroundPath: string;
-  sourceVrmFilename: string;
-};
+/** All resolved character assets. */
+export function getMiladyCharacterAssets(): ResolvedCharacterAsset[] {
+  return getResolved().assets;
+}
 
-export type MiladyInjectedCharacter = MiladyInjectedCharacterCatalogEntry & {
-  avatarAsset: MiladyCharacterAsset;
-};
+export const MILADY_CHARACTER_ASSET_COUNT = 0;
 
-const parsedCatalog = catalog as MiladyCharacterCatalog;
-
-export const MILADY_CHARACTER_ASSETS: MiladyCharacterAsset[] =
-  parsedCatalog.assets.map((asset) => ({
-    ...asset,
-    compressedVrmPath: `/vrms/${asset.slug}.vrm.gz`,
-    rawVrmPath: `/vrms/${asset.slug}.vrm`,
-    previewPath: `/vrms/previews/${asset.slug}.png`,
-    backgroundPath: `/vrms/backgrounds/${asset.slug}.png`,
-    sourceVrmFilename: `${asset.sourceName}.vrm`,
-  }));
-
-export const MILADY_CHARACTER_ASSET_COUNT = MILADY_CHARACTER_ASSETS.length;
-
-export const DEFAULT_MILADY_CHARACTER_ASSET =
-  MILADY_CHARACTER_ASSETS[0] ?? null;
-
-const miladyCharacterAssetById = new Map(
-  MILADY_CHARACTER_ASSETS.map((asset) => [asset.id, asset]),
-);
+export const DEFAULT_MILADY_CHARACTER_ASSET: ResolvedCharacterAsset | null = null;
 
 export function getMiladyCharacterAsset(
   id: number,
-): MiladyCharacterAsset | null {
-  return miladyCharacterAssetById.get(id) ?? DEFAULT_MILADY_CHARACTER_ASSET;
+): ResolvedCharacterAsset | null {
+  return getResolved().getAsset(id);
 }
 
-export const MILADY_INJECTED_CHARACTERS: MiladyInjectedCharacter[] =
-  parsedCatalog.injectedCharacters.map((character) => {
-    const avatarAsset = getMiladyCharacterAsset(character.avatarAssetId);
-    if (!avatarAsset) {
-      throw new Error(
-        `Missing Milady avatar asset ${character.avatarAssetId} for ${character.name}.`,
-      );
-    }
+/** All resolved injected characters. */
+export function getMiladyInjectedCharacters(): ResolvedInjectedCharacter[] {
+  return getResolved().injectedCharacters;
+}
 
-    return {
-      ...character,
-      avatarAsset,
-    };
-  });
-
-export const MILADY_INJECTED_CHARACTER_COUNT =
-  MILADY_INJECTED_CHARACTERS.length;
-
-const miladyInjectedCharacterByCatchphrase = new Map(
-  MILADY_INJECTED_CHARACTERS.map((character) => [
-    character.catchphrase,
-    character,
-  ]),
-);
+export const MILADY_INJECTED_CHARACTER_COUNT = 0;
 
 export function getMiladyInjectedCharacter(
   catchphrase: string,
-): MiladyInjectedCharacter | null {
-  return miladyInjectedCharacterByCatchphrase.get(catchphrase) ?? null;
+): ResolvedInjectedCharacter | null {
+  return getResolved().getInjectedCharacter(catchphrase);
 }

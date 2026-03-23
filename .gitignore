@@ -26,6 +26,9 @@ packages/*/src/**/*.d.ts.map
 src/plugins/**/*.d.ts
 src/plugins/**/*.d.ts.map
 
+# Compiled JS build outputs inside source dirs (packages/ui uses tsx source directly)
+packages/ui/src/**/*.js
+
 # Lock files (managed at repo root)
 package-lock.json
 bun.lockb

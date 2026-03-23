@@ -33,84 +33,37 @@ export const switchStreamSourceAction: Action = {
   validate: async () => true,
 
   handler: async (_runtime, _message, _state, options) => {
-    try {
-      type SwitchStreamSourceParams = {
-        sourceType?: string;
-        customUrl?: string;
-      };
-      const params = (options as HandlerOptions | undefined)?.parameters as
-        | SwitchStreamSourceParams
-        | undefined;
+    const params = (options as HandlerOptions | undefined)?.parameters as {
+      sourceType?: string;
+      customUrl?: string;
+    } | undefined;
 
-      // ── Extract parameters ───────────────────────────────────────────
-      const rawSourceType =
-        typeof params?.sourceType === "string"
-          ? params.sourceType.trim()
-          : "stream-tab";
-
-      const sourceType: ValidSourceType = VALID_SOURCE_TYPES.includes(
-        rawSourceType as ValidSourceType,
-      )
-        ? (rawSourceType as ValidSourceType)
-        : "stream-tab";
-
-      if (
-        !VALID_SOURCE_TYPES.includes(rawSourceType as ValidSourceType) &&
-        rawSourceType !== ""
-      ) {
-        return {
-          text: `Invalid sourceType "${rawSourceType}". Must be one of: ${VALID_SOURCE_TYPES.join(", ")}.`,
-          success: false,
-        };
-      }
-
-      const customUrl =
-        typeof params?.customUrl === "string"
-          ? params.customUrl.trim()
-          : undefined;
-
-      // ── Validate custom-url requirement ─────────────────────────────
-      if (sourceType === "custom-url" && !customUrl) {
-        return {
-          text: 'customUrl is required when sourceType is "custom-url".',
-          success: false,
-        };
-      }
-
-      // ── POST to stream source API ───────────────────────────────────
-      const response = await fetch(
-        `http://127.0.0.1:${API_PORT}/api/stream/source`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sourceType, customUrl }),
-          signal: AbortSignal.timeout(10_000),
-        },
-      );
-
-      if (!response.ok) {
-        return {
-          text: `Failed to switch stream source (HTTP ${response.status}).`,
-          success: false,
-        };
-      }
-
-      // ── Format and return ────────────────────────────────────────────
-      const label =
-        sourceType === "custom-url"
-          ? `${sourceType} (${customUrl})`
-          : sourceType;
-
-      return {
-        text: `Switched stream source to ${label}.`,
-        success: true,
-      };
-    } catch (err) {
-      return {
-        text: `Failed to switch stream source: ${err instanceof Error ? err.message : String(err)}`,
-        success: false,
-      };
+    const sourceType = params?.sourceType?.trim() as ValidSourceType | undefined;
+    if (!sourceType || !VALID_SOURCE_TYPES.includes(sourceType)) {
+      throw new Error(`Invalid sourceType. Must be one of: ${VALID_SOURCE_TYPES.join(", ")}.`);
     }
+
+    const customUrl = params?.customUrl?.trim();
+    if (sourceType === "custom-url" && !customUrl) {
+      throw new Error('customUrl is required when sourceType is "custom-url".');
+    }
+
+    const response = await fetch(`http://127.0.0.1:${API_PORT}/api/stream/source`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sourceType, customUrl }),
+      signal: AbortSignal.timeout(10_000),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to switch stream source (HTTP ${response.status}).`);
+    }
+
+    const label = sourceType === "custom-url" ? `${sourceType} (${customUrl})` : sourceType;
+    return {
+      text: `Switched stream source to ${label}.`,
+      success: true,
+    };
   },
 
   parameters: [

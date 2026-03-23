@@ -7,7 +7,7 @@ import {
 import { resolveWalletExportRejection } from "./server";
 import { _resetForTesting } from "./wallet-export-guard";
 
-function req(
+function mockReq(
   headers: http.IncomingHttpHeaders = {},
 ): Pick<http.IncomingMessage, "headers"> {
   return createMockHeadersRequest(headers) as Pick<
@@ -48,7 +48,7 @@ describe("resolveWalletExportRejection", () => {
   it("rejects when confirmation is missing", () => {
     delete process.env.ELIZA_WALLET_EXPORT_TOKEN;
     const rejection = resolveWalletExportRejection(
-      req() as http.IncomingMessage,
+      mockReq() as http.IncomingMessage,
       {},
     );
     expect(rejection?.status).toBe(403);
@@ -58,7 +58,7 @@ describe("resolveWalletExportRejection", () => {
   it("rejects when export token feature is disabled", () => {
     delete process.env.ELIZA_WALLET_EXPORT_TOKEN;
     const rejection = resolveWalletExportRejection(
-      req() as http.IncomingMessage,
+      mockReq() as http.IncomingMessage,
       { confirm: true },
     );
     expect(rejection).toEqual({
@@ -71,7 +71,7 @@ describe("resolveWalletExportRejection", () => {
   it("rejects when export token is missing", () => {
     process.env.ELIZA_WALLET_EXPORT_TOKEN = "secret-token";
     const rejection = resolveWalletExportRejection(
-      req() as http.IncomingMessage,
+      mockReq() as http.IncomingMessage,
       { confirm: true },
     );
     expect(rejection).toEqual({
@@ -84,7 +84,7 @@ describe("resolveWalletExportRejection", () => {
   it("rejects when export token is invalid", () => {
     process.env.ELIZA_WALLET_EXPORT_TOKEN = "secret-token";
     const rejection = resolveWalletExportRejection(
-      req() as http.IncomingMessage,
+      mockReq() as http.IncomingMessage,
       { confirm: true, exportToken: "wrong-token" },
     );
     expect(rejection).toEqual({ status: 401, reason: "Invalid export token." });
@@ -94,7 +94,7 @@ describe("resolveWalletExportRejection", () => {
     process.env.ELIZA_WALLET_EXPORT_TOKEN = "secret-token";
     // Phase 1: request a nonce
     const nonceResult = resolveWalletExportRejection(
-      req() as http.IncomingMessage,
+      mockReq() as http.IncomingMessage,
       {
         confirm: true,
         exportToken: "secret-token",
@@ -107,7 +107,7 @@ describe("resolveWalletExportRejection", () => {
     vi.spyOn(Date, "now").mockReturnValue(now + 11_000);
     // Phase 2: submit with nonce
     const rejection = resolveWalletExportRejection(
-      req() as http.IncomingMessage,
+      mockReq() as http.IncomingMessage,
       {
         confirm: true,
         exportToken: "secret-token",
@@ -121,14 +121,14 @@ describe("resolveWalletExportRejection", () => {
   it("accepts a valid token from header (with nonce flow)", () => {
     process.env.ELIZA_WALLET_EXPORT_TOKEN = "secret-token";
     const nonceResult = resolveWalletExportRejection(
-      req({ "x-eliza-export-token": "secret-token" }) as http.IncomingMessage,
+      mockReq({ "x-eliza-export-token": "secret-token" }) as http.IncomingMessage,
       { confirm: true, requestNonce: true } as never,
     );
     const nonce = extractNonce(nonceResult);
     const now = Date.now();
     vi.spyOn(Date, "now").mockReturnValue(now + 11_000);
     const rejection = resolveWalletExportRejection(
-      req({ "x-eliza-export-token": "secret-token" }) as http.IncomingMessage,
+      mockReq({ "x-eliza-export-token": "secret-token" }) as http.IncomingMessage,
       { confirm: true, exportNonce: nonce } as never,
     );
     expect(rejection).toBeNull();
@@ -138,7 +138,7 @@ describe("resolveWalletExportRejection", () => {
   it("prefers header token over body token (header valid, with nonce flow)", () => {
     process.env.ELIZA_WALLET_EXPORT_TOKEN = "secret-token";
     const nonceResult = resolveWalletExportRejection(
-      req({ "x-eliza-export-token": "secret-token" }) as http.IncomingMessage,
+      mockReq({ "x-eliza-export-token": "secret-token" }) as http.IncomingMessage,
       {
         confirm: true,
         exportToken: "wrong-token",
@@ -149,7 +149,7 @@ describe("resolveWalletExportRejection", () => {
     const now = Date.now();
     vi.spyOn(Date, "now").mockReturnValue(now + 11_000);
     const rejection = resolveWalletExportRejection(
-      req({ "x-eliza-export-token": "secret-token" }) as http.IncomingMessage,
+      mockReq({ "x-eliza-export-token": "secret-token" }) as http.IncomingMessage,
       {
         confirm: true,
         exportToken: "wrong-token",
@@ -163,7 +163,7 @@ describe("resolveWalletExportRejection", () => {
   it("rejects when header token is invalid even if body token is correct", () => {
     process.env.ELIZA_WALLET_EXPORT_TOKEN = "secret-token";
     const rejection = resolveWalletExportRejection(
-      req({ "x-eliza-export-token": "wrong-token" }) as http.IncomingMessage,
+      mockReq({ "x-eliza-export-token": "wrong-token" }) as http.IncomingMessage,
       { confirm: true, exportToken: "secret-token" },
     );
     expect(rejection).toEqual({ status: 401, reason: "Invalid export token." });
@@ -172,7 +172,7 @@ describe("resolveWalletExportRejection", () => {
   it("treats whitespace-only env token as disabled", () => {
     process.env.ELIZA_WALLET_EXPORT_TOKEN = "   ";
     const rejection = resolveWalletExportRejection(
-      req() as http.IncomingMessage,
+      mockReq() as http.IncomingMessage,
       { confirm: true },
     );
     expect(rejection).toEqual({
@@ -185,7 +185,7 @@ describe("resolveWalletExportRejection", () => {
   it("rejects confirm: false explicitly", () => {
     process.env.ELIZA_WALLET_EXPORT_TOKEN = "secret-token";
     const rejection = resolveWalletExportRejection(
-      req() as http.IncomingMessage,
+      mockReq() as http.IncomingMessage,
       { confirm: false },
     );
     expect(rejection?.status).toBe(403);
@@ -195,7 +195,7 @@ describe("resolveWalletExportRejection", () => {
   it("treats whitespace-only body exportToken as missing", () => {
     process.env.ELIZA_WALLET_EXPORT_TOKEN = "secret-token";
     const rejection = resolveWalletExportRejection(
-      req() as http.IncomingMessage,
+      mockReq() as http.IncomingMessage,
       { confirm: true, exportToken: "   " },
     );
     expect(rejection).toEqual({
@@ -208,7 +208,7 @@ describe("resolveWalletExportRejection", () => {
   it("treats whitespace-only header X-Eliza-Export-Token as missing", () => {
     process.env.ELIZA_WALLET_EXPORT_TOKEN = "secret-token";
     const rejection = resolveWalletExportRejection(
-      req({ "x-eliza-export-token": "   " }) as http.IncomingMessage,
+      mockReq({ "x-eliza-export-token": "   " }) as http.IncomingMessage,
       { confirm: true },
     );
     expect(rejection).toEqual({

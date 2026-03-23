@@ -44,18 +44,10 @@ export interface InventoryDataOutput {
   tokenRows: TokenRow[];
   sortedRows: TokenRow[];
   chainErrors: EvmChainBalance[];
-  /** @deprecated Use focusChainHasError instead */
-  bscHasError: boolean;
   focusChainHasError: boolean;
   allNfts: NftItem[];
-  /** @deprecated Use primaryChain instead */
-  bscChain: EvmChainBalance | null;
   primaryChain: EvmChainBalance | null;
-  /** @deprecated Use primaryNativeBalance (number) instead */
-  bnbBalance: number;
   primaryNativeBalanceNum: number;
-  /** @deprecated Use focusedRows instead */
-  bscRows: TokenRow[];
   focusedRows: TokenRow[];
   visibleRows: TokenRow[];
   totalUsd: number;
@@ -64,11 +56,7 @@ export interface InventoryDataOutput {
   focusedChainError: string | null;
   focusedNativeBalance: string | null;
   focusedNativeSymbol: string | null;
-  /** @deprecated Use primaryChainError instead */
-  bscChainError: string | null;
   primaryChainError: string | null;
-  /** @deprecated Use primaryNativeBalance instead */
-  bscNativeBalance: string | null;
   primaryNativeBalance: string | null;
 }
 
@@ -435,15 +423,10 @@ export function useInventoryData({
     tokenRows,
     sortedRows,
     chainErrors,
-    bscHasError,
     focusChainHasError,
     allNfts,
-    // Backwards-compat aliases
-    bscChain: primaryChain,
     primaryChain,
-    bnbBalance: primaryNativeBalanceNum,
     primaryNativeBalanceNum,
-    bscRows,
     focusedRows,
     visibleRows,
     totalUsd,
@@ -452,9 +435,7 @@ export function useInventoryData({
     focusedChainError: focusedChain?.error ?? null,
     focusedNativeBalance: focusedChain?.nativeBalance ?? null,
     focusedNativeSymbol: focusedChain?.nativeSymbol ?? null,
-    bscChainError: primaryChainError,
     primaryChainError,
-    bscNativeBalance: primaryNativeBalance,
     primaryNativeBalance,
   };
 }

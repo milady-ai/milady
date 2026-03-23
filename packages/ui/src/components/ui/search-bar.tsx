@@ -1,10 +1,3 @@
-/**
- * SearchBar — a self-contained search input with submit button.
- *
- * Fully generic; no app-context dependency. Callers pass the placeholder
- * and loading state directly.
- */
-
 import { useCallback, useState } from "react";
 import { Button } from "./button";
 import { Input } from "./input";

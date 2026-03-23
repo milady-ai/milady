@@ -1,10 +1,3 @@
-/**
- * Native Module Registry for Electrobun
- *
- * Initializes all native modules, wires up sendToWebview callbacks,
- * and provides centralized dispose for clean shutdown.
- */
-
 import type { BrowserWindow } from "electrobun/bun";
 import { getAgentManager } from "./agent";
 import { getCameraManager } from "./camera";
@@ -20,9 +13,6 @@ import { getTalkModeManager } from "./talkmode";
 
 type SendToWebview = (message: string, payload?: unknown) => void;
 
-/**
- * Initialize all native modules with the main window and sendToWebview callback.
- */
 export function initializeNativeModules(
   mainWindow: BrowserWindow,
   sendToWebview: SendToWebview,
@@ -45,9 +35,6 @@ export function initializeNativeModules(
   getTalkModeManager().setSendToWebview(sendToWebview);
 }
 
-/**
- * Dispose all native modules. Called on app quit.
- */
 export function disposeNativeModules(): void {
   getAgentManager().dispose();
   getCameraManager().dispose();

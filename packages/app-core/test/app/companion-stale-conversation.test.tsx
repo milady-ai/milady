@@ -362,7 +362,7 @@ describe("companion stale conversation rollover", () => {
     await waitFor(() => {
       expect(mockClient.createConversation).toHaveBeenCalledTimes(1);
       expect(mockClient.createConversation).toHaveBeenCalledWith(undefined, {
-        bootstrapGreeting: true,
+        includeGreeting: true,
         lang: "en",
       });
       expect(mockClient.sendWsMessage.mock.calls).toEqual(

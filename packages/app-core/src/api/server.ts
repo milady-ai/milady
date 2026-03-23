@@ -4,29 +4,17 @@ import http from "node:http";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { type AgentRuntime, logger, stringToUuid } from "@elizaos/core";
+import { type AgentRuntime, logger } from "@elizaos/core";
 import { StewardApiError, type PolicyResult } from "@stwd/sdk";
 
-// Re-export the full upstream server API.
-export * from "@elizaos/agent/api/server";
 
 import { handleCloudCompatRoute } from "@elizaos/agent/api/cloud-compat-routes";
 // Override the wallet export rejection function with the hardened version
 // that adds rate limiting, audit logging, and a forced confirmation delay.
 import {
-  ensureApiTokenForBindHost as upstreamEnsureApiTokenForBindHost,
-  injectApiBaseIntoHtml as upstreamInjectApiBaseIntoHtml,
-  isSafeResetStateDir as upstreamIsSafeResetStateDir,
-  resolveCorsOrigin as upstreamResolveCorsOrigin,
-  resolveMcpTerminalAuthorizationRejection as upstreamResolveMcpTerminalAuthorizationRejection,
-  resolveTerminalRunClientId as upstreamResolveTerminalRunClientId,
-  resolveTerminalRunRejection as upstreamResolveTerminalRunRejection,
-  resolveWalletExportRejection as upstreamResolveWalletExportRejection,
-  resolveWebSocketUpgradeRejection as upstreamResolveWebSocketUpgradeRejection,
   startApiServer as upstreamStartApiServer,
 } from "@elizaos/agent/api/server";
 import { loadElizaConfig, saveElizaConfig } from "../config/config";
-import { sanitizeSpeechText } from "../utils/spoken-text";
 import {
   ensureRuntimeSqlCompatibility,
   executeRawSql,
@@ -57,22 +45,26 @@ import {
 } from "./steward-bridge";
 import { getWalletAddresses } from "./wallet";
 import { fetchEvmNfts } from "./wallet-evm-balance";
-import {
-  type WalletExportRejection as CompatWalletExportRejection,
-  createHardenedExportGuard,
-} from "./wallet-export-guard";
 import { resolveWalletRpcReadiness } from "./wallet-rpc";
 import { recordWalletTradeLedgerEntry } from "./wallet-trading-profile";
 
-const hardenedGuard = createHardenedExportGuard(
-  resolveCompatWalletExportRejection,
-);
 const require = createRequire(import.meta.url);
 
 import {
-  syncElizaEnvToMilady,
-  syncMiladyEnvToEliza,
-} from "../config/brand-env.js";
+  getBootConfig,
+  syncBrandEnvToEliza,
+  syncElizaEnvToBrand,
+} from "../config/boot-config.js";
+
+function syncMiladyEnvToEliza(): void {
+  const aliases = getBootConfig().envAliases;
+  if (aliases) syncBrandEnvToEliza(aliases);
+}
+
+function syncElizaEnvToMilady(): void {
+  const aliases = getBootConfig().envAliases;
+  if (aliases) syncElizaEnvToBrand(aliases);
+}
 // Lazy-imported to avoid circular dependency with runtime/eliza.ts
 const lazyEnsureTTS = () =>
   import("../runtime/eliza.js").then((m) => m.ensureMiladyTextToSpeechHandler);
@@ -89,18 +81,30 @@ import {
 } from "../security/wallet-os-store-actions";
 import { getCloudSecret } from "./cloud-secrets";
 
-const HEADER_ALIASES = [
-  ["x-milady-token", "x-eliza-token"],
-  ["x-milady-export-token", "x-eliza-export-token"],
-  ["x-milady-client-id", "x-eliza-client-id"],
-  ["x-milady-terminal-token", "x-eliza-terminal-token"],
-  ["x-milady-ui-language", "x-eliza-ui-language"],
-  ["x-milady-agent-action", "x-eliza-agent-action"],
-] as const;
+
+// ---------------------------------------------------------------------------
+// Import from extracted modules for use within this file
+// ---------------------------------------------------------------------------
+
+import { mirrorCompatHeaders } from "./server-cloud-tts";
+import { handleCloudTtsPreviewRoute as _handleCloudTtsPreviewRoute } from "./server-cloud-tts";
+import { filterConfigEnvForResponse as _filterConfigEnvForResponse } from "./server-config-filter";
+import {
+  extractAndPersistOnboardingApiKey as _extractAndPersistOnboardingApiKey,
+  persistCompatOnboardingDefaults as _persistCompatOnboardingDefaults,
+  deriveCompatOnboardingReplayBody as _deriveCompatOnboardingReplayBody,
+  isCloudProvisioned as _isCloudProvisioned,
+} from "./server-onboarding-compat";
+import {
+  resolveTradePermissionMode as _resolveTradePermissionMode,
+  canUseLocalTradeExecution as _canUseLocalTradeExecution,
+} from "./server-wallet-trade";
+
+// ---------------------------------------------------------------------------
+// Module-level constants and types that stay in server.ts
+// ---------------------------------------------------------------------------
 
 const PACKAGE_ROOT_NAMES = new Set([
-  "milady",
-  "miladyai",
   "eliza",
   "elizaai",
   "elizaos",
@@ -197,327 +201,9 @@ const CAPABILITY_FEATURE_IDS = new Set([
   "coding-agent",
 ]);
 
-function normalizeSecretEnvValue(value: string | undefined): string | null {
-  const trimmed = value?.trim();
-  if (!trimmed) {
-    return null;
-  }
-  if (
-    trimmed === "REDACTED" ||
-    trimmed === "[REDACTED]" ||
-    /^\*+$/.test(trimmed)
-  ) {
-    return null;
-  }
-  return trimmed;
-}
-
-export function resolveElevenLabsApiKeyForCloudMode(
-  env: NodeJS.ProcessEnv = process.env,
-): string | null {
-  const directKey = normalizeSecretEnvValue(env.ELEVENLABS_API_KEY);
-  if (directKey) {
-    return directKey;
-  }
-  if (env.ELIZAOS_CLOUD_ENABLED !== "true") {
-    return null;
-  }
-  if (env.ELIZA_CLOUD_TTS_DISABLED === "true") {
-    return null;
-  }
-  return normalizeSecretEnvValue(env.ELIZAOS_CLOUD_API_KEY);
-}
-
-export function ensureCloudTtsApiKeyAlias(
-  env: NodeJS.ProcessEnv = process.env,
-): boolean {
-  const directKey = normalizeSecretEnvValue(env.ELEVENLABS_API_KEY);
-  if (directKey) {
-    return false;
-  }
-  const cloudBackedKey = resolveElevenLabsApiKeyForCloudMode(env);
-  if (!cloudBackedKey) {
-    return false;
-  }
-  env.ELEVENLABS_API_KEY = cloudBackedKey;
-  return true;
-}
-
-export function resolveCloudTtsBaseUrl(
-  env: NodeJS.ProcessEnv = process.env,
-): string {
-  const configured = env.ELIZAOS_CLOUD_BASE_URL?.trim();
-  const fallback = "https://www.elizacloud.ai/api/v1";
-  const base = configured && configured.length > 0 ? configured : fallback;
-
-  try {
-    const parsed = new URL(base);
-    let path = parsed.pathname.replace(/\/+$/, "");
-    if (!path || path === "/") {
-      path = "/api/v1";
-    }
-    parsed.pathname = path;
-    return parsed.toString().replace(/\/$/, "");
-  } catch {
-    return fallback;
-  }
-}
-
-function resolveCloudTtsCandidateUrls(
-  env: NodeJS.ProcessEnv = process.env,
-): string[] {
-  const base = resolveCloudTtsBaseUrl(env).replace(/\/+$/, "");
-  const candidates = new Set<string>();
-  const addBase = (baseUrl: string): void => {
-    const trimmed = baseUrl.replace(/\/+$/, "");
-    candidates.add(`${trimmed}/voice/tts`);
-    candidates.add(`${trimmed}/audio/speech`);
-  };
-
-  addBase(base);
-  try {
-    const parsed = new URL(base);
-    if (parsed.hostname.startsWith("www.")) {
-      parsed.hostname = parsed.hostname.slice(4);
-      addBase(parsed.toString());
-    } else {
-      parsed.hostname = `www.${parsed.hostname}`;
-      addBase(parsed.toString());
-    }
-  } catch {
-    // no-op
-  }
-
-  return [...candidates];
-}
-
-const SUPPORTED_CLOUD_TTS_VOICES = new Set([
-  "alloy",
-  "ash",
-  "ballad",
-  "coral",
-  "echo",
-  "nova",
-  "sage",
-  "shimmer",
-  "verse",
-]);
-
-function resolveCloudVoiceName(
-  requestedVoice: unknown,
-  env: NodeJS.ProcessEnv = process.env,
-): string {
-  const requested =
-    typeof requestedVoice === "string"
-      ? requestedVoice.trim().toLowerCase()
-      : "";
-  if (requested && SUPPORTED_CLOUD_TTS_VOICES.has(requested)) {
-    return requested;
-  }
-  const configured = env.ELIZAOS_CLOUD_TTS_VOICE?.trim().toLowerCase();
-  if (configured && SUPPORTED_CLOUD_TTS_VOICES.has(configured)) {
-    return configured;
-  }
-  return "nova";
-}
-
-function resolveCloudApiKey(
-  env: NodeJS.ProcessEnv = process.env,
-): string | null {
-  const envKey = normalizeSecretEnvValue(env.ELIZAOS_CLOUD_API_KEY);
-  if (envKey) {
-    return envKey;
-  }
-
-  try {
-    const config = loadElizaConfig();
-    const configKey = normalizeSecretEnvValue(
-      typeof config.cloud?.apiKey === "string"
-        ? config.cloud.apiKey
-        : undefined,
-    );
-    if (configKey) {
-      return configKey;
-    }
-  } catch {
-    // ignore config load errors and continue with secret store fallback
-  }
-
-  const sealedKey = normalizeSecretEnvValue(
-    getCloudSecret("ELIZAOS_CLOUD_API_KEY"),
-  );
-  if (sealedKey) {
-    return sealedKey;
-  }
-
-  return null;
-}
-
-async function readRawRequestBody(req: http.IncomingMessage): Promise<Buffer> {
-  const chunks: Buffer[] = [];
-  for await (const chunk of req) {
-    chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
-  }
-  return Buffer.concat(chunks);
-}
-
-async function handleCloudTtsPreviewRoute(
-  req: http.IncomingMessage,
-  res: http.ServerResponse,
-): Promise<boolean> {
-  const cloudApiKey = resolveCloudApiKey();
-  if (!cloudApiKey) {
-    sendJsonErrorResponse(
-      res,
-      401,
-      "Eliza Cloud is not connected. Connect your Eliza Cloud account first.",
-    );
-    return true;
-  }
-
-  const rawBody = await readRawRequestBody(req);
-  let body: Record<string, unknown>;
-  try {
-    body = JSON.parse(rawBody.toString("utf8")) as Record<string, unknown>;
-  } catch {
-    sendJsonErrorResponse(res, 400, "Invalid JSON request body");
-    return true;
-  }
-
-  const text = sanitizeSpeechText(
-    typeof body.text === "string" ? body.text : "",
-  );
-  if (!text) {
-    sendJsonErrorResponse(res, 400, "Missing text");
-    return true;
-  }
-
-  const cloudModel =
-    (typeof body.modelId === "string" && body.modelId.trim()) ||
-    process.env.ELIZAOS_CLOUD_TTS_MODEL?.trim() ||
-    "gpt-5-mini-tts";
-  const cloudVoice = resolveCloudVoiceName(body.voiceId);
-  const cloudInstructions = process.env.ELIZAOS_CLOUD_TTS_INSTRUCTIONS?.trim();
-  const cloudUrls = resolveCloudTtsCandidateUrls();
-
-  try {
-    let lastStatus = 0;
-    let lastDetails = "unknown error";
-    let cloudResponse: Response | null = null;
-    for (const cloudUrl of cloudUrls) {
-      const attempt = await fetch(cloudUrl, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${cloudApiKey}`,
-          "x-api-key": cloudApiKey,
-          "Content-Type": "application/json",
-          Accept: "audio/mpeg",
-        },
-        body: JSON.stringify({
-          text,
-          input: text,
-          model: cloudModel,
-          modelId: cloudModel,
-          voice: cloudVoice,
-          voiceId: cloudVoice,
-          format: "mp3",
-          ...(cloudInstructions ? { instructions: cloudInstructions } : {}),
-        }),
-      });
-
-      if (attempt.ok) {
-        cloudResponse = attempt;
-        break;
-      }
-
-      lastStatus = attempt.status;
-      lastDetails = await attempt.text().catch(() => "unknown error");
-    }
-    if (!cloudResponse) {
-      sendJsonErrorResponse(
-        res,
-        502,
-        `Eliza Cloud TTS failed (${lastStatus || 502}): ${lastDetails}`,
-      );
-      return true;
-    }
-
-    const audioBuffer = Buffer.from(await cloudResponse.arrayBuffer());
-    res.statusCode = 200;
-    res.setHeader("Content-Type", "audio/mpeg");
-    res.setHeader("Cache-Control", "no-store");
-    res.end(audioBuffer);
-    return true;
-  } catch (err) {
-    sendJsonErrorResponse(
-      res,
-      502,
-      `Eliza Cloud TTS request failed: ${err instanceof Error ? err.message : String(err)}`,
-    );
-    return true;
-  }
-}
-
-function mirrorCompatHeaders(req: Pick<http.IncomingMessage, "headers">): void {
-  for (const [miladyHeader, elizaHeader] of HEADER_ALIASES) {
-    const miladyValue = req.headers[miladyHeader];
-    const elizaValue = req.headers[elizaHeader];
-
-    if (miladyValue != null && elizaValue == null) {
-      req.headers[elizaHeader] = miladyValue;
-    }
-
-    if (elizaValue != null && miladyValue == null) {
-      req.headers[miladyHeader] = elizaValue;
-    }
-  }
-}
-
-function normalizeCompatReason(reason: string): string {
-  return reason
-    .replaceAll("MILADY_WALLET_EXPORT_TOKEN", "ELIZA_WALLET_EXPORT_TOKEN")
-    .replaceAll("MILADY_TERMINAL_RUN_TOKEN", "ELIZA_TERMINAL_RUN_TOKEN")
-    .replaceAll("X-Milady-Export-Token", "X-Eliza-Export-Token")
-    .replaceAll("X-Milady-Terminal-Token", "X-Eliza-Terminal-Token");
-}
-
-function normalizeCompatRejection<
-  T extends { status: number; reason: string } | null,
->(rejection: T): T {
-  if (!rejection) {
-    return rejection;
-  }
-
-  return {
-    ...rejection,
-    reason: normalizeCompatReason(rejection.reason),
-  } as T;
-}
-
-function runWithCompatAuthContext<T>(
-  req: Pick<http.IncomingMessage, "headers">,
-  operation: () => T,
-): T {
-  syncElizaEnvToMilady();
-  syncMiladyEnvToEliza();
-  mirrorCompatHeaders(req);
-
-  try {
-    return operation();
-  } finally {
-    syncMiladyEnvToEliza();
-    syncElizaEnvToMilady();
-  }
-}
-
-function resolveCompatWalletExportRejection(
-  ...args: Parameters<typeof upstreamResolveWalletExportRejection>
-): CompatWalletExportRejection | null {
-  const [req] = args;
-  return runWithCompatAuthContext(req, () =>
-    normalizeCompatRejection(upstreamResolveWalletExportRejection(...args)),
-  );
-}
+// ---------------------------------------------------------------------------
+// Internal helpers used by the monkey-patch handler (stay in server.ts)
+// ---------------------------------------------------------------------------
 
 function extractHeaderValue(
   value: string | string[] | undefined,
@@ -529,8 +215,6 @@ function extractHeaderValue(
 }
 
 function getCompatApiToken(): string | null {
-  // Milady-first priority matches BRAND_ENV_ALIASES ordering in brand-env.ts
-  // where MILADY_API_TOKEN is the primary (index 0) key.
   const token =
     process.env.MILADY_API_TOKEN?.trim() ?? process.env.ELIZA_API_TOKEN?.trim();
   return token ? token : null;
@@ -659,7 +343,6 @@ function ensureCompatSensitiveRouteAuthorized(
   res: http.ServerResponse,
 ): boolean {
   if (!getCompatApiToken()) {
-    // In development mode, allow sensitive endpoints without a token.
     if (isDevEnvironment()) {
       return true;
     }
@@ -674,7 +357,7 @@ function ensureCompatSensitiveRouteAuthorized(
   return ensureCompatApiAuthorized(req, res);
 }
 
-const MAX_BODY_BYTES = 1_048_576; // 1 MB
+const MAX_BODY_BYTES = 1_048_576;
 async function readCompatJsonBody(
   req: http.IncomingMessage,
   res: http.ServerResponse,
@@ -733,7 +416,7 @@ function resolveCompatConfigPaths(): {
   return { elizaConfigPath, miladyConfigPath };
 }
 
-function syncCompatConfigFiles(): void {
+export function syncCompatConfigFiles(): void {
   const { elizaConfigPath, miladyConfigPath } = resolveCompatConfigPaths();
   if (
     !elizaConfigPath ||
@@ -762,49 +445,6 @@ function syncCompatConfigFiles(): void {
 function maskValue(value: string): string {
   if (value.length <= 8) return "****";
   return `${value.slice(0, 4)}...${value.slice(-4)}`;
-}
-
-/**
- * Env keys that must never be returned in GET /api/config responses.
- * Covers private keys, auth tokens, and database credentials.
- * Keys are stored and matched case-insensitively (uppercased).
- */
-export const SENSITIVE_ENV_RESPONSE_KEYS = new Set([
-  // Wallet private keys
-  "EVM_PRIVATE_KEY",
-  "SOLANA_PRIVATE_KEY",
-  // Auth / step-up tokens
-  "ELIZA_API_TOKEN",
-  "MILADY_API_TOKEN",
-  "ELIZA_WALLET_EXPORT_TOKEN",
-  "ELIZA_TERMINAL_RUN_TOKEN",
-  "HYPERSCAPE_AUTH_TOKEN",
-  // Cloud API keys
-  "ELIZAOS_CLOUD_API_KEY",
-  // Third-party auth tokens
-  "GITHUB_TOKEN",
-  // Database connection strings (may contain credentials)
-  "DATABASE_URL",
-  "POSTGRES_URL",
-]);
-
-/**
- * Strip sensitive env vars from a config object before it is sent in a GET
- * /api/config response. Returns a shallow-cloned config with a filtered env
- * block — the original object is never mutated.
- */
-export function filterConfigEnvForResponse(
-  config: Record<string, unknown>,
-): Record<string, unknown> {
-  const env = config.env;
-  if (!env || typeof env !== "object" || Array.isArray(env)) return config;
-
-  const filteredEnv: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(env as Record<string, unknown>)) {
-    if (SENSITIVE_ENV_RESPONSE_KEYS.has(key.toUpperCase())) continue;
-    filteredEnv[key] = value;
-  }
-  return { ...config, env: filteredEnv };
 }
 
 function sendJsonResponse(
@@ -1517,141 +1157,6 @@ function findNearestFile(
 }
 
 // ---------------------------------------------------------------------------
-// Onboarding API key persistence
-// ---------------------------------------------------------------------------
-
-const ONBOARDING_PROVIDER_ENV_KEYS: Record<string, string> = {
-  // Provider IDs match the upstream onboarding catalog in
-  // @elizaos/agent/contracts/onboarding.ts
-  anthropic: "ANTHROPIC_API_KEY",
-  openai: "OPENAI_API_KEY",
-  groq: "GROQ_API_KEY",
-  grok: "XAI_API_KEY",
-  xai: "XAI_API_KEY", // alias — catalog uses "grok", keep both
-  gemini: "GOOGLE_GENERATIVE_AI_API_KEY",
-  "google-genai": "GOOGLE_GENERATIVE_AI_API_KEY", // alias — keep both
-  openrouter: "OPENROUTER_API_KEY",
-  deepseek: "DEEPSEEK_API_KEY",
-  mistral: "MISTRAL_API_KEY",
-  together: "TOGETHER_API_KEY",
-  zai: "ZAI_API_KEY",
-};
-
-/**
- * Extract `connection.apiKey` from an onboarding request body and persist it
- * to eliza.json + process.env. Returns the env key name if persisted, or null.
- */
-export function extractAndPersistOnboardingApiKey(
-  body: Record<string, unknown>,
-): string | null {
-  const connection = body.connection as Record<string, unknown> | undefined;
-  if (
-    !connection ||
-    typeof connection.provider !== "string" ||
-    typeof connection.apiKey !== "string" ||
-    connection.apiKey.trim().length === 0
-  ) {
-    return null;
-  }
-
-  const envKey = ONBOARDING_PROVIDER_ENV_KEYS[connection.provider];
-  if (!envKey) {
-    return null;
-  }
-
-  const config = loadElizaConfig();
-  if (!config.env || typeof config.env !== "object") {
-    (config as Record<string, unknown>).env = {};
-  }
-  (config.env as Record<string, string>)[envKey] = connection.apiKey as string;
-  (config as Record<string, unknown>).subscriptionProvider =
-    connection.provider;
-  saveElizaConfig(config);
-  process.env[envKey] = connection.apiKey as string;
-  console.log(`[onboarding] Persisted ${envKey} from connection.apiKey`);
-  return envKey;
-}
-
-export function persistCompatOnboardingDefaults(
-  body: Record<string, unknown>,
-): string | null {
-  const name = typeof body.name === "string" ? body.name.trim() : "";
-  if (!name) {
-    return null;
-  }
-
-  const config = loadElizaConfig();
-  if (!config.agents || typeof config.agents !== "object") {
-    (config as Record<string, unknown>).agents = {};
-  }
-  const agents = config.agents as NonNullable<typeof config.agents>;
-  if (!agents.defaults || typeof agents.defaults !== "object") {
-    agents.defaults = {};
-  }
-
-  const adminEntityId = stringToUuid(`${name}-admin-entity`);
-  agents.defaults.adminEntityId = adminEntityId;
-
-  // Persist all character fields into agents.list[0] — the upstream body
-  // replay via req.push() is not reliable in Bun so we write every field
-  // here to ensure the full character survives a restart even when upstream
-  // never processes the replayed body.
-  if (!Array.isArray(agents.list) || agents.list.length === 0) {
-    (agents as Record<string, unknown>).list = [{ id: "main", default: true }];
-  }
-  const agentEntry = (agents.list as Record<string, unknown>[])[0];
-  agentEntry.name = name;
-  if (Array.isArray(body.bio)) {
-    agentEntry.bio = body.bio;
-  }
-  if (typeof body.systemPrompt === "string" && body.systemPrompt.trim()) {
-    agentEntry.system = body.systemPrompt.trim();
-  }
-  if (body.style && typeof body.style === "object") {
-    agentEntry.style = body.style;
-  }
-  if (Array.isArray(body.adjectives)) {
-    agentEntry.adjectives = body.adjectives;
-  }
-  if (Array.isArray(body.topics)) {
-    agentEntry.topics = body.topics;
-  }
-  if (Array.isArray(body.postExamples)) {
-    agentEntry.postExamples = body.postExamples;
-  }
-  if (Array.isArray(body.messageExamples)) {
-    agentEntry.messageExamples = body.messageExamples;
-  }
-
-  saveElizaConfig(config);
-  return adminEntityId;
-}
-
-export function deriveCompatOnboardingReplayBody(
-  body: Record<string, unknown>,
-): {
-  isCloudMode: boolean;
-  replayBody:
-    | (Record<string, unknown> & { runMode: "cloud" })
-    | Record<string, unknown>;
-} {
-  const connection = body.connection as Record<string, unknown> | undefined;
-  const isCloudMode =
-    body.runMode === "cloud" ||
-    (connection !== null &&
-      typeof connection === "object" &&
-      connection.kind === "cloud-managed");
-
-  return {
-    isCloudMode,
-    replayBody:
-      isCloudMode && body.runMode !== "cloud"
-        ? { ...body, runMode: "cloud" as const }
-        : body,
-  };
-}
-
-// ---------------------------------------------------------------------------
 // Plugin manifest
 // ---------------------------------------------------------------------------
 
@@ -1751,9 +1256,6 @@ function buildPluginListResponse(runtime: AgentRuntime | null): {
     const pluginId = normalizePluginId(entry.id);
     const parameters = buildPluginParamDefs(entry.pluginParameters);
     const active = isPluginLoaded(pluginId, entry.npmName, loadedNames);
-    // If the plugin is actively loaded at runtime it must be reported as
-    // enabled regardless of what the static config says — otherwise the
-    // frontend can show a plugin as "disabled" while it is actually running.
     const enabled =
       active ||
       (typeof configEntries[pluginId]?.enabled === "boolean"
@@ -1989,7 +1491,6 @@ function persistCompatPluginMutation(
         config.env[key] = value;
         nextConfig[key] = value;
       } else {
-        // Empty string = clear the saved value
         delete config.env[key];
         delete nextConfig[key];
       }
@@ -1999,7 +1500,6 @@ function persistCompatPluginMutation(
 
     saveElizaConfig(config);
 
-    // Only mutate process.env after config is persisted successfully
     for (const [key, value] of Object.entries(values)) {
       if (value.trim()) {
         process.env[key] = value;
@@ -2128,8 +1628,6 @@ async function handleDatabaseRowsCompatRoute(
 
   const filters: string[] = [];
   if (search) {
-    // Escape LIKE-special characters, then wrap with % wildcards via sqlLiteral
-    // to avoid SQL injection through string interpolation.
     const likeEscaped = search
       .replace(/\\/g, "\\\\")
       .replace(/%/g, "\\%")
@@ -2183,30 +1681,6 @@ async function handleDatabaseRowsCompatRoute(
   return true;
 }
 
-/**
- * Check if this is a cloud-provisioned container.
- *
- * Cloud-provisioned containers (e.g., Eliza Cloud, enterprise deployments) skip
- * pairing and onboarding since the platform handles setup and authentication.
- *
- * Security: The bypass ONLY activates when BOTH conditions are met:
- * 1. MILADY_CLOUD_PROVISIONED=1 (or ELIZA_CLOUD_PROVISIONED=1)
- * 2. MILADY_API_TOKEN (or ELIZA_API_TOKEN) is configured
- *
- * This ensures that only platform-managed containers with proper auth can skip
- * onboarding. A container with just CLOUD_PROVISIONED=1 but no token would be
- * unauthenticated and must go through normal onboarding.
- */
-export function isCloudProvisioned(): boolean {
-  const hasCloudFlag =
-    process.env.MILADY_CLOUD_PROVISIONED === "1" ||
-    process.env.ELIZA_CLOUD_PROVISIONED === "1";
-
-  // Security guard: only bypass when the platform has also set an API token
-  const hasApiToken = Boolean(getCompatApiToken());
-
-  return hasCloudFlag && hasApiToken;
-}
 
 type TradePermissionMode = "user-sign-only" | "manual-local-key" | "agent-auto";
 
@@ -2288,6 +1762,7 @@ async function handleMiladyCompatRoute(
 ): Promise<boolean> {
   const method = (req.method ?? "GET").toUpperCase();
   const url = new URL(req.url ?? "/", "http://localhost");
+
 
   // Eliza Cloud thin-client proxy (compat agents, jobs, …) — was missing from the
   // compat wrapper, so the dashboard saw 404 on `/api/cloud/compat/agents`.
@@ -2423,17 +1898,15 @@ async function handleMiladyCompatRoute(
   // Cloud-provisioned containers skip onboarding — the platform handles setup.
   // Return { complete: true } so the frontend goes directly to chat.
   if (method === "GET" && url.pathname === "/api/onboarding/status") {
-    if (isCloudProvisioned()) {
+    if (_isCloudProvisioned()) {
       sendJsonResponse(res, 200, { complete: true });
       return true;
     }
-    // Let upstream handle non-cloud containers
     return false;
   }
 
-  // Cloud-provisioned containers don't need pairing — auth is handled by platform.
   if (method === "GET" && url.pathname === "/api/auth/status") {
-    if (isCloudProvisioned()) {
+    if (_isCloudProvisioned()) {
       sendJsonResponse(res, 200, {
         required: false,
         pairingEnabled: false,
@@ -2441,7 +1914,6 @@ async function handleMiladyCompatRoute(
       });
       return true;
     }
-    // Non-cloud: return normal pairing status
     const required = Boolean(getCompatApiToken());
     const enabled = pairingEnabled();
     if (enabled) {
@@ -2501,18 +1973,13 @@ async function handleMiladyCompatRoute(
   }
 
   if (method === "POST" && url.pathname === "/api/tts/cloud") {
-    return await handleCloudTtsPreviewRoute(req, res);
+    return await _handleCloudTtsPreviewRoute(req, res);
   }
 
   if (method === "POST" && url.pathname === "/api/tts/elevenlabs") {
     return false;
   }
 
-  // The task-backed compat handler is only used as a fallback when the
-  // runtime has no native todo database.  When runtime.db is present the
-  // upstream handler serves /api/workbench/todos instead.  Both handlers
-  // MUST return the same response shape — callers cannot distinguish which
-  // path served the response.
   if (
     !runtimeHasTodoDatabase(state.current) &&
     url.pathname.startsWith("/api/workbench/todos") &&
@@ -2563,7 +2030,6 @@ async function handleMiladyCompatRoute(
     });
   }
 
-  // ── POST /api/agent/reset — Wipe config and restart onboarding ──────
   if (method === "POST" && url.pathname === "/api/agent/reset") {
     if (!ensureCompatSensitiveRouteAuthorized(req, res)) {
       logger.warn(
@@ -2577,15 +2043,12 @@ async function handleMiladyCompatRoute(
         "[milady][reset] POST /api/agent/reset: loading config, will clear onboarding flag, agents list, cloud apiKey (GGUF / MODELS_DIR untouched)",
       );
       const config = loadElizaConfig();
-      // Clear onboarding state so the welcome screen shows again
       if (config.meta) {
         delete (config.meta as Record<string, unknown>).onboardingComplete;
       }
-      // Clear agent list
       if (config.agents) {
         (config.agents as Record<string, unknown>).list = [];
       }
-      // Clear cloud connection
       if (config.cloud) {
         delete (config.cloud as Record<string, unknown>).enabled;
         delete (config.cloud as Record<string, unknown>).apiKey;
@@ -2694,6 +2157,7 @@ async function handleMiladyCompatRoute(
   // that token is missing. The route is also permanently disabled once
   // onboardingComplete flips true so the backup screen cannot be reopened as a
   // general-purpose key export endpoint.
+
   if (method === "GET" && url.pathname === "/api/wallet/keys") {
     if (!ensureCompatSensitiveRouteAuthorized(req, res)) {
       return true;
@@ -2719,10 +2183,6 @@ async function handleMiladyCompatRoute(
         solanaAddress: addresses.solanaAddress ?? "",
       });
     } catch {
-      // Intentionally still return the raw keys with blank addresses. Address
-      // derivation can fail independently of key generation, and the backup
-      // step must still let the user save the generated secrets before
-      // onboarding completes.
       sendJsonResponse(res, 200, {
         evmPrivateKey: evmKey,
         evmAddress: "",
@@ -2748,7 +2208,6 @@ async function handleMiladyCompatRoute(
       solana: { nfts: unknown[] } | null;
     } = {
       evm: [],
-      // Solana NFT indexing is not exposed through the compat server yet.
       solana: null,
     };
 
@@ -2821,8 +2280,8 @@ async function handleMiladyCompatRoute(
     }
 
     const config = loadElizaConfig();
-    const tradePermissionMode = resolveTradePermissionMode(config);
-    const canExecuteLocally = canUseLocalTradeExecution(
+    const tradePermissionMode = _resolveTradePermissionMode(config);
+    const canExecuteLocally = _canUseLocalTradeExecution(
       tradePermissionMode,
       isAgentAutomationRequest(req),
     );
@@ -2906,17 +2365,6 @@ async function handleMiladyCompatRoute(
             value: unsignedApprovalTx.valueWei,
             chainId: unsignedApprovalTx.chainId,
           },
-          fallback: async () => {
-            if (!rpcUrl) {
-              throw new Error("BSC RPC not configured for local execution.");
-            }
-            return sendLocalWalletTransaction(rpcUrl, {
-              to: unsignedApprovalTx.to,
-              data: unsignedApprovalTx.data,
-              value: BigInt(unsignedApprovalTx.valueWei),
-              chainId: unsignedApprovalTx.chainId,
-            });
-          },
         });
 
         if (
@@ -2941,10 +2389,7 @@ async function handleMiladyCompatRoute(
           return true;
         }
 
-        approvalHash =
-          approvalResult.mode === "steward"
-            ? approvalResult.txHash
-            : approvalResult.result.hash;
+        approvalHash = "txHash" in approvalResult ? approvalResult.txHash : "";
 
         if (approvalResult.mode === "steward" && rpcUrl) {
           const provider = new ethers.JsonRpcProvider(rpcUrl);
@@ -2963,17 +2408,6 @@ async function handleMiladyCompatRoute(
           data: unsignedTx.data,
           value: unsignedTx.valueWei,
           chainId: unsignedTx.chainId,
-        },
-        fallback: async () => {
-          if (!rpcUrl) {
-            throw new Error("BSC RPC not configured for local execution.");
-          }
-          return sendLocalWalletTransaction(rpcUrl, {
-            to: unsignedTx.to,
-            data: unsignedTx.data,
-            value: BigInt(unsignedTx.valueWei),
-            chainId: unsignedTx.chainId,
-          });
         },
       });
 
@@ -3000,18 +2434,9 @@ async function handleMiladyCompatRoute(
         return true;
       }
 
-      const finalHash =
-        executionResult.mode === "steward"
-          ? executionResult.txHash
-          : executionResult.result.hash;
-      const finalNonce =
-        executionResult.mode === "steward"
-          ? null
-          : executionResult.result.nonce;
-      const finalGasLimit =
-        executionResult.mode === "steward"
-          ? "0"
-          : executionResult.result.gasLimit;
+      const finalHash = "txHash" in executionResult ? executionResult.txHash : "";
+      const finalNonce = null;
+      const finalGasLimit = "0";
       const finalMode = executionResult.mode;
 
       try {
@@ -3123,8 +2548,8 @@ async function handleMiladyCompatRoute(
     }
 
     const config = loadElizaConfig();
-    const tradePermissionMode = resolveTradePermissionMode(config);
-    const canExecuteLocally = canUseLocalTradeExecution(
+    const tradePermissionMode = _resolveTradePermissionMode(config);
+    const canExecuteLocally = _canUseLocalTradeExecution(
       tradePermissionMode,
       isAgentAutomationRequest(req),
     );
@@ -3147,25 +2572,21 @@ async function handleMiladyCompatRoute(
     const isBnb = assetSymbol.toUpperCase() === "BNB";
     let decimals = 18;
     if (typeof body.tokenAddress === "string" && body.tokenAddress.trim()) {
+      const provider = new ethers.JsonRpcProvider(
+        resolvePrimaryBscRpcUrl({
+          rpcUrls: rpcReadiness.bscRpcUrls,
+          cloudManagedAccess: rpcReadiness.cloudManagedAccess,
+        }) ?? "https://bsc-dataseed1.binance.org/",
+      );
       try {
-        const provider = new ethers.JsonRpcProvider(
-          resolvePrimaryBscRpcUrl({
-            rpcUrls: rpcReadiness.bscRpcUrls,
-            cloudManagedAccess: rpcReadiness.cloudManagedAccess,
-          }) ?? "https://bsc-dataseed1.binance.org/",
+        const tokenContract = new ethers.Contract(
+          body.tokenAddress,
+          ["function decimals() view returns (uint8)"],
+          provider,
         );
-        try {
-          const tokenContract = new ethers.Contract(
-            body.tokenAddress,
-            ["function decimals() view returns (uint8)"],
-            provider,
-          );
-          decimals = Number(await tokenContract.decimals());
-        } finally {
-          provider.destroy();
-        }
-      } catch {
-        // Fall back to 18 decimals.
+        decimals = Number(await tokenContract.decimals());
+      } finally {
+        provider.destroy();
       }
     }
 
@@ -3221,17 +2642,6 @@ async function handleMiladyCompatRoute(
           value: unsignedTx.valueWei,
           chainId: unsignedTx.chainId,
         },
-        fallback: async () => {
-          if (!rpcUrl) {
-            throw new Error("BSC RPC not configured for local execution.");
-          }
-          return sendLocalWalletTransaction(rpcUrl, {
-            to: unsignedTx.to,
-            data: unsignedTx.data,
-            value: BigInt(unsignedTx.valueWei),
-            chainId: unsignedTx.chainId,
-          });
-        },
       });
 
       if (
@@ -3256,18 +2666,9 @@ async function handleMiladyCompatRoute(
         return true;
       }
 
-      const finalHash =
-        executionResult.mode === "steward"
-          ? executionResult.txHash
-          : executionResult.result.hash;
-      const finalNonce =
-        executionResult.mode === "steward"
-          ? null
-          : executionResult.result.nonce;
-      const finalGasLimit =
-        executionResult.mode === "steward"
-          ? "0"
-          : executionResult.result.gasLimit;
+      const finalHash = "txHash" in executionResult ? executionResult.txHash : "";
+      const finalNonce = null;
+      const finalGasLimit = "0";
 
       sendJsonResponse(res, 200, {
         ok: true,
@@ -3321,40 +2722,29 @@ async function handleMiladyCompatRoute(
 
     const pluginResponse = buildPluginListResponse(state.current);
     const manifestPath = resolvePluginManifestPath();
-    console.log(
+    logger.debug(
       `[api/plugins] manifest=${manifestPath ?? "NOT_FOUND"} total=${pluginResponse.plugins.length} runtime=${state.current ? "active" : "null"}`,
     );
     sendJsonResponse(res, 200, pluginResponse);
     return true;
   }
 
-  // ── POST /api/onboarding — Persist connection.apiKey ───────────────
-  // The frontend sends provider and API key nested inside `body.connection`
-  // but the upstream handler reads `body.provider` and `body.providerApiKey`
-  // (top-level). Bridge the gap by persisting the key from `connection` here
-  // before upstream processes the request.
   if (method === "POST" && url.pathname === "/api/onboarding") {
     if (!ensureCompatApiAuthorized(req, res)) {
       return true;
     }
 
-    // Read the body, persist the key, then push bytes back so upstream
-    // can re-read the same body from the request stream.
     const chunks: Buffer[] = [];
     try {
       for await (const chunk of req) {
         chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
       }
     } catch {
-      // Stream error — signal end-of-stream and bail out
       req.push(null);
       return false;
     }
     const rawBody = Buffer.concat(chunks);
 
-    // replayBody is what we push back to the upstream handler.  It starts
-    // as the original bytes but may be augmented with `runMode: "cloud"` if
-    // the client sent a cloud-managed connection (see below).
     let replayBody = rawBody;
 
     try {
@@ -3362,27 +2752,19 @@ async function handleMiladyCompatRoute(
         string,
         unknown
       >;
-      extractAndPersistOnboardingApiKey(body);
-      persistCompatOnboardingDefaults(body);
+      _extractAndPersistOnboardingApiKey(body);
+      _persistCompatOnboardingDefaults(body);
       if (typeof body.name === "string" && body.name.trim()) {
         state.pendingAgentName = body.name.trim();
       }
 
-      // OnboardingData uses connection.kind === "cloud-managed" to signal
-      // cloud mode — there is no top-level `runMode` field in the type.
-      // The upstream handler reads `body.runMode`, so we detect the
-      // connection kind here and, if needed, inject `runMode: "cloud"` into
-      // the replayed body so upstream also sets cloud.enabled correctly.
       const { isCloudMode, replayBody: replayBodyRecord } =
-        deriveCompatOnboardingReplayBody(body);
+        _deriveCompatOnboardingReplayBody(body);
 
       if (isCloudMode && body.runMode !== "cloud") {
         replayBody = Buffer.from(JSON.stringify(replayBodyRecord), "utf8");
       }
 
-      // Mark onboarding complete in config — upstream also does this but
-      // the req.push body replay may not work reliably in Bun, so we
-      // ensure the flag is set here as well.
       try {
         const config = loadElizaConfig();
         if (!config.meta) {
@@ -3390,21 +2772,19 @@ async function handleMiladyCompatRoute(
         }
         (config.meta as Record<string, unknown>).onboardingComplete = true;
 
-        // Also persist cloud mode if specified
         if (isCloudMode) {
           if (!config.cloud) {
             (config as Record<string, unknown>).cloud = {};
           }
           (config.cloud as Record<string, unknown>).enabled = true;
 
-          // Ensure the cloud API key survives — it was set by
-          // persistCloudLoginStatus, then scrubbed from process.env into
-          // the sealed cloud secrets store. Read it back from there.
           const existingApiKey = (config.cloud as Record<string, unknown>)
             .apiKey;
           if (!existingApiKey) {
-            const { getCloudSecret } = await import("./cloud-secrets");
-            const sealedKey = getCloudSecret("ELIZAOS_CLOUD_API_KEY");
+            const { getCloudSecret: getSecret } = await import(
+              "./cloud-secrets"
+            );
+            const sealedKey = getSecret("ELIZAOS_CLOUD_API_KEY");
             if (sealedKey) {
               (config.cloud as Record<string, unknown>).apiKey = sealedKey;
             }
@@ -3430,22 +2810,13 @@ async function handleMiladyCompatRoute(
       // JSON parse failed — let upstream handle the error
     }
 
-    // Send the response early so the 10-second client timeout doesn't
-    // fire — the upstream handler triggers an agent restart which can
-    // block much longer than the client allows. The upstream handler
-    // will still receive the body and process the onboarding config,
-    // but won't be able to write headers (headersSent check in
-    // sendJsonResponse prevents double-write).
     sendJsonResponse(res, 200, { ok: true });
 
-    // Push the (possibly augmented) bytes back into the request stream so
-    // the upstream can still consume the body for processing.
     req.push(replayBody);
     req.push(null);
     return false;
   }
 
-  // ── GET /api/onboarding/status — Check config and DB ─────────────────
   if (method === "GET" && url.pathname === "/api/onboarding/status") {
     if (!ensureCompatApiAuthorized(req, res)) {
       return true;
@@ -3454,7 +2825,6 @@ async function handleMiladyCompatRoute(
     const config = loadElizaConfig();
     let complete = false;
 
-    // Approximate upstream hasPersistedOnboardingState
     if ((config.meta as Record<string, unknown>)?.onboardingComplete === true) {
       complete = true;
     } else if (
@@ -3469,7 +2839,6 @@ async function handleMiladyCompatRoute(
       complete = true;
     }
 
-    // If config says incomplete, check the DB if available
     if (!complete && state.current?.adapter?.db) {
       try {
         const { rows } = await executeRawSql(
@@ -3479,7 +2848,7 @@ async function handleMiladyCompatRoute(
         if (rows && rows.length > 0 && Number(rows[0].count) > 0) {
           complete = true;
         }
-      } catch (err) {
+      } catch {
         // Ignore DB query errors
       }
     }
@@ -3496,7 +2865,9 @@ async function handleMiladyCompatRoute(
     sendJsonResponse(
       res,
       200,
-      filterConfigEnvForResponse(loadElizaConfig() as Record<string, unknown>),
+      _filterConfigEnvForResponse(
+        loadElizaConfig() as Record<string, unknown>,
+      ),
     );
     return true;
   }
@@ -3529,7 +2900,6 @@ async function handleMiladyCompatRoute(
     return true;
   }
 
-  // ── POST /api/plugins/:id/test — Test connector connectivity
   const testMatch =
     method === "POST" && url.pathname.match(/^\/api\/plugins\/([^/]+)\/test$/);
   if (testMatch) {
@@ -3585,8 +2955,6 @@ async function handleMiladyCompatRoute(
     return true;
   }
 
-  // ── POST /api/plugins/:id/reveal — Return unmasked secret value
-  // Only allow revealing plugin-related config keys, not arbitrary env vars.
   const REVEALABLE_KEY_PREFIXES = [
     "OPENAI_",
     "ANTHROPIC_",
@@ -3667,7 +3035,7 @@ async function handleMiladyCompatRoute(
   return handleDatabaseRowsCompatRoute(req, res, state.current, url.pathname);
 }
 
-function patchHttpCreateServerForMiladyCompat(
+export function patchHttpCreateServerForMiladyCompat(
   state?: CompatRuntimeState,
 ): () => void {
   const originalCreateServer = http.createServer.bind(http);
@@ -3775,171 +3143,6 @@ function patchHttpCreateServerForMiladyCompat(
   };
 }
 
-/**
- * Hardened wallet export rejection function.
- *
- * Wraps the upstream token validation with per-IP rate limiting (1 per 10 min),
- * audit logging (IP + UA), and a 10s confirmation delay via single-use nonces.
- */
-export function resolveWalletExportRejection(
-  ...args: Parameters<typeof upstreamResolveWalletExportRejection>
-): CompatWalletExportRejection | null {
-  const [req] = args;
-  return runWithCompatAuthContext(req, () =>
-    normalizeCompatRejection(hardenedGuard(...args)),
-  );
-}
-
-export function resolveMcpTerminalAuthorizationRejection(
-  ...args: Parameters<typeof upstreamResolveMcpTerminalAuthorizationRejection>
-): ReturnType<typeof upstreamResolveMcpTerminalAuthorizationRejection> {
-  const [req] = args;
-  return runWithCompatAuthContext(req, () =>
-    normalizeCompatRejection(
-      upstreamResolveMcpTerminalAuthorizationRejection(...args),
-    ),
-  );
-}
-
-export function resolveTerminalRunRejection(
-  ...args: Parameters<typeof upstreamResolveTerminalRunRejection>
-): ReturnType<typeof upstreamResolveTerminalRunRejection> {
-  const [req] = args;
-  return runWithCompatAuthContext(req, () =>
-    normalizeCompatRejection(upstreamResolveTerminalRunRejection(...args)),
-  );
-}
-
-export function resolveWebSocketUpgradeRejection(
-  ...args: Parameters<typeof upstreamResolveWebSocketUpgradeRejection>
-): ReturnType<typeof upstreamResolveWebSocketUpgradeRejection> {
-  const [req] = args;
-  return runWithCompatAuthContext(req, () =>
-    upstreamResolveWebSocketUpgradeRejection(...args),
-  );
-}
-
-export function resolveTerminalRunClientId(
-  ...args: Parameters<typeof upstreamResolveTerminalRunClientId>
-): ReturnType<typeof upstreamResolveTerminalRunClientId> {
-  const [req] = args;
-  return runWithCompatAuthContext(req, () =>
-    upstreamResolveTerminalRunClientId(...args),
-  );
-}
-
-export function injectApiBaseIntoHtml(
-  ...args: Parameters<typeof upstreamInjectApiBaseIntoHtml>
-): ReturnType<typeof upstreamInjectApiBaseIntoHtml> {
-  const [, externalBase] = args;
-  const trimmedBase = externalBase?.trim();
-  const injected = upstreamInjectApiBaseIntoHtml(...args);
-
-  if (!trimmedBase) {
-    return injected;
-  }
-
-  const legacySnippet = `window.__MILADY_API_BASE__=${JSON.stringify(trimmedBase)};`;
-  const compatSnippet = `${legacySnippet}window.__ELIZA_API_BASE__=${JSON.stringify(trimmedBase)};`;
-  const text = injected.toString("utf8");
-
-  if (text.includes("window.__ELIZA_API_BASE__")) {
-    return injected;
-  }
-
-  if (!text.includes(legacySnippet)) {
-    return injected;
-  }
-
-  return Buffer.from(text.replace(legacySnippet, compatSnippet), "utf8");
-}
-
-export function isSafeResetStateDir(
-  ...args: Parameters<typeof upstreamIsSafeResetStateDir>
-): ReturnType<typeof upstreamIsSafeResetStateDir> {
-  if (upstreamIsSafeResetStateDir(...args)) {
-    return true;
-  }
-
-  const [resolvedState, homeDir] = args;
-  const normalizedState = path.resolve(resolvedState);
-  const normalizedHome = path.resolve(homeDir);
-  const parsedRoot = path.parse(normalizedState).root;
-
-  if (normalizedState === parsedRoot || normalizedState === normalizedHome) {
-    return false;
-  }
-
-  const relativeToHome = path.relative(normalizedHome, normalizedState);
-  const isUnderHome =
-    relativeToHome.length > 0 &&
-    !relativeToHome.startsWith("..") &&
-    !path.isAbsolute(relativeToHome);
-  if (!isUnderHome) {
-    return false;
-  }
-
-  return normalizedState.split(path.sep).some((segment) => {
-    const lower = segment.trim().toLowerCase();
-    return lower === ".eliza" || lower === ".milady";
-  });
-}
-
-export function findOwnPackageRoot(startDir: string): string {
-  let dir = startDir;
-
-  for (let i = 0; i < 10; i += 1) {
-    const packageJsonPath = path.join(dir, "package.json");
-    if (fs.existsSync(packageJsonPath)) {
-      try {
-        const pkg = JSON.parse(fs.readFileSync(packageJsonPath, "utf8")) as {
-          name?: unknown;
-        };
-        const packageName =
-          typeof pkg.name === "string" ? pkg.name.toLowerCase() : "";
-
-        if (PACKAGE_ROOT_NAMES.has(packageName)) {
-          return dir;
-        }
-
-        if (fs.existsSync(path.join(dir, "plugins.json"))) {
-          return dir;
-        }
-      } catch {
-        // Keep walking upward until we find a readable package root.
-      }
-    }
-
-    const parent = path.dirname(dir);
-    if (parent === dir) {
-      break;
-    }
-    dir = parent;
-  }
-
-  return startDir;
-}
-
-export function ensureApiTokenForBindHost(
-  ...args: Parameters<typeof upstreamEnsureApiTokenForBindHost>
-): ReturnType<typeof upstreamEnsureApiTokenForBindHost> {
-  syncMiladyEnvToEliza();
-  const result = upstreamEnsureApiTokenForBindHost(...args);
-  syncElizaEnvToMilady();
-  return result;
-}
-
-export function resolveCorsOrigin(
-  ...args: Parameters<typeof upstreamResolveCorsOrigin>
-): ReturnType<typeof upstreamResolveCorsOrigin> {
-  syncElizaEnvToMilady();
-  syncMiladyEnvToEliza();
-  const result = upstreamResolveCorsOrigin(...args);
-  syncMiladyEnvToEliza();
-  syncElizaEnvToMilady();
-  return result;
-}
-
 export async function startApiServer(
   ...args: Parameters<typeof upstreamStartApiServer>
 ): Promise<Awaited<ReturnType<typeof upstreamStartApiServer>>> {
@@ -3986,21 +3189,4 @@ export async function startApiServer(
   } finally {
     restoreCreateServer();
   }
-}
-
-/**
- * Build the Authorization header value to use when forwarding requests to
- * Hyperscape. Returns `null` when no token is configured.
- *
- * - When `HYPERSCAPE_AUTH_TOKEN` is set, its value is used (prefixed with
- *   "Bearer " if not already present) regardless of any incoming header.
- * - When the env var is unset, returns `null` so callers know not to forward
- *   any credentials.
- */
-export function resolveHyperscapeAuthorizationHeader(
-  _req: Pick<http.IncomingMessage, "headers">,
-): string | null {
-  const token = process.env.HYPERSCAPE_AUTH_TOKEN;
-  if (!token) return null;
-  return token.startsWith("Bearer ") ? token : `Bearer ${token}`;
 }

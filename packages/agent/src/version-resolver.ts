@@ -47,7 +47,7 @@ function readVersionFromBuildInfo(requireFn: NodeRequire): string | null {
   return null;
 }
 
-/** @deprecated Use resolveElizaVersion instead */
+
 
 export function resolveElizaVersion(moduleUrl: string): string {
   const requireFn = createRequire(moduleUrl);

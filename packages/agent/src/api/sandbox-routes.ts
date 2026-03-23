@@ -57,7 +57,7 @@ export async function handleSandboxRoute(
     } catch (err) {
       sendJson(res, 500, {
         success: false,
-        error: `Failed to start Docker: ${err instanceof Error ? err.message : String(err)}`,
+        error: `Failed to start Docker: ${String(err)}`,
       });
     }
     return true;
@@ -90,7 +90,7 @@ export async function handleSandboxRoute(
       sendJson(res, 200, mgr.getStatus());
     } catch (err) {
       sendJson(res, 500, {
-        error: `Failed to start sandbox: ${err instanceof Error ? err.message : String(err)}`,
+        error: `Failed to start sandbox: ${String(err)}`,
       });
     }
     return true;
@@ -103,7 +103,7 @@ export async function handleSandboxRoute(
       sendJson(res, 200, mgr.getStatus());
     } catch (err) {
       sendJson(res, 500, {
-        error: `Failed to stop sandbox: ${err instanceof Error ? err.message : String(err)}`,
+        error: `Failed to stop sandbox: ${String(err)}`,
       });
     }
     return true;
@@ -116,7 +116,7 @@ export async function handleSandboxRoute(
       sendJson(res, 200, mgr.getStatus());
     } catch (err) {
       sendJson(res, 500, {
-        error: `Recovery failed: ${err instanceof Error ? err.message : String(err)}`,
+        error: `Recovery failed: ${String(err)}`,
       });
     }
     return true;
@@ -167,7 +167,7 @@ export async function handleSandboxRoute(
       res.end(screenshot);
     } catch (err) {
       sendJson(res, 500, {
-        error: `Screenshot failed: ${err instanceof Error ? err.message : String(err)}`,
+        error: `Screenshot failed: ${String(err)}`,
       });
     }
     return true;
@@ -214,7 +214,7 @@ export async function handleSandboxRoute(
       });
     } catch (err) {
       sendJson(res, 500, {
-        error: `Screenshot failed: ${err instanceof Error ? err.message : String(err)}`,
+        error: `Screenshot failed: ${String(err)}`,
       });
     }
     return true;
@@ -301,7 +301,7 @@ export async function handleSandboxRoute(
       });
     } catch (err) {
       sendJson(res, 500, {
-        error: `Audio recording failed: ${err instanceof Error ? err.message : String(err)}`,
+        error: `Audio recording failed: ${String(err)}`,
       });
     }
     return true;
@@ -334,7 +334,7 @@ export async function handleSandboxRoute(
       sendJson(res, 200, { success: true });
     } catch (err) {
       sendJson(res, 500, {
-        error: `Audio playback failed: ${err instanceof Error ? err.message : String(err)}`,
+        error: `Audio playback failed: ${String(err)}`,
       });
     }
     return true;
@@ -357,7 +357,7 @@ export async function handleSandboxRoute(
       sendJson(res, 200, { success: true, x, y, button });
     } catch (err) {
       sendJson(res, 500, {
-        error: `Click failed: ${err instanceof Error ? err.message : String(err)}`,
+        error: `Click failed: ${String(err)}`,
       });
     }
     return true;
@@ -380,7 +380,7 @@ export async function handleSandboxRoute(
       sendJson(res, 200, { success: true, length: text.length });
     } catch (err) {
       sendJson(res, 500, {
-        error: `Type failed: ${err instanceof Error ? err.message : String(err)}`,
+        error: `Type failed: ${String(err)}`,
       });
     }
     return true;
@@ -403,7 +403,7 @@ export async function handleSandboxRoute(
       sendJson(res, 200, { success: true, keys });
     } catch (err) {
       sendJson(res, 500, {
-        error: `Keypress failed: ${err instanceof Error ? err.message : String(err)}`,
+        error: `Keypress failed: ${String(err)}`,
       });
     }
     return true;
@@ -429,7 +429,7 @@ export async function handleSandboxRoute(
       sendJson(res, result.success ? 200 : 403, result);
     } catch (err) {
       sendJson(res, 400, {
-        error: `Invalid request: ${err instanceof Error ? err.message : String(err)}`,
+        error: `Invalid request: ${String(err)}`,
       });
     }
     return true;
@@ -1434,7 +1434,7 @@ function attemptDockerStart(): {
   } catch (err) {
     return {
       success: false,
-      message: `Failed: ${err instanceof Error ? err.message : String(err)}`,
+      message: `Failed: ${String(err)}`,
       waitMs: 0,
     };
   }

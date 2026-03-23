@@ -23,7 +23,7 @@ import {
 } from "@miladyai/app-core/components";
 import { useApp } from "@miladyai/app-core/state";
 import { confirmDesktopAction } from "@miladyai/app-core/utils";
-import { Button, Input } from "@miladyai/ui";
+import { Button, Checkbox, Input } from "@miladyai/ui";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   isKnowledgeImageFile,
@@ -188,12 +188,10 @@ function UploadZone({
           {t("knowledgeview.AddFromURL")}
         </Button>
         <label className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-md border border-border/30 bg-bg/40 px-3 text-[11px] text-muted/80 transition-colors hover:text-muted">
-          <input
-            type="checkbox"
+          <Checkbox
             checked={includeImageDescriptions}
-            onChange={(e) => setIncludeImageDescriptions(e.target.checked)}
+            onCheckedChange={(checked) => setIncludeImageDescriptions(!!checked)}
             disabled={uploading}
-            className="accent-accent h-3.5 w-3.5 rounded border-border/50 bg-bg/50"
           />
           {t("knowledgeview.IncludeAIImageDes")}
         </label>
@@ -1029,13 +1027,14 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
       {loadError && !isServiceLoading && (
         <div className="flex items-center justify-between mb-4 px-3 py-2 rounded border border-[var(--danger)] bg-[var(--danger)]/10 text-sm text-[var(--danger)]">
           <span>{loadError}</span>
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
+            className="ml-3 px-2 py-1 text-xs border-[var(--danger)] text-[var(--danger)] hover:bg-[var(--danger)]/20"
             onClick={() => loadData()}
-            className="ml-3 px-2 py-1 text-xs border border-[var(--danger)] rounded hover:bg-[var(--danger)]/20 transition-colors"
           >
             {t("common.retry")}
-          </button>
+          </Button>
         </div>
       )}
 

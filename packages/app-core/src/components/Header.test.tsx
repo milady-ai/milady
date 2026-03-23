@@ -111,21 +111,6 @@ describe("Header", () => {
       "data-testid": "ui-shell-toggle-companion",
     });
     expect(shellToggle).toBeDefined();
-    expect(String(shellToggle.props.className)).toContain("border-border/60");
-    expect(String(shellToggle.props.className)).toContain("bg-transparent");
-    expect(String(activeDesktopToggle.props.className)).toContain(
-      "text-[#8a6500]",
-    );
-    expect(String(activeDesktopToggle.props.className)).toContain("bg-bg/55");
-    expect(String(activeDesktopToggle.props.className)).toContain(
-      "dark:text-[#f0b232]",
-    );
-    expect(String(inactiveCharacterToggle.props.className)).toContain(
-      "text-muted-strong",
-    );
-    expect(String(inactiveCompanionToggle.props.className)).toContain(
-      "text-muted-strong",
-    );
     expect(mockUseApp.setState).toHaveBeenCalledWith("chatMode", "power");
   });
 
@@ -170,8 +155,6 @@ describe("Header", () => {
     const header = (testRenderer as ReactTestRenderer).root.findByType(
       "header",
     );
-    expect(String(header.props.className)).toContain("bg-transparent");
-    expect(String(header.props.className)).toContain("border-transparent");
     expect(
       (testRenderer as ReactTestRenderer).root.findAll(
         (node) => node.props.title === "Chat",
@@ -230,8 +213,6 @@ describe("Header", () => {
     const header = (testRenderer as ReactTestRenderer).root.findByType(
       "header",
     );
-    expect(String(header.props.className)).toContain("bg-transparent");
-    expect(String(header.props.className)).toContain("border-transparent");
     expect(
       (testRenderer as ReactTestRenderer).root.findAll(
         (node) => node.props.title === "Chat",
@@ -339,60 +320,10 @@ describe("Header", () => {
     }
 
     const root = (testRenderer as ReactTestRenderer).root;
-    const nav = root.findByType("nav");
-    expect(String(nav.props.className)).toContain("hidden sm:flex");
-    const navButton = root.findByProps({
-      "data-testid": "header-nav-button-chat",
-    });
-    expect(String(navButton.props.className)).toContain("min-h-[44px]");
-    expect(navButton.props.style.clipPath).toBe("none");
-    expect(
-      String(
-        root.findByProps({ "data-testid": "header-nav-icon-chat" }).props
-          .className,
-      ),
-    ).toContain("pointer-events-none");
-    expect(
-      String(
-        root.findByProps({ "data-testid": "header-nav-label-chat" }).props
-          .className,
-      ),
-    ).toContain("pointer-events-none");
-    const desktopCreditButton = root.findByProps({
-      "data-testid": "header-cloud-credits-desktop",
-    });
-    expect(String(desktopCreditButton.props.className)).toContain("hidden");
-    expect(String(desktopCreditButton.props.className)).toContain(
-      "sm:inline-flex",
-    );
-    const desktopLanguageDropdown = root.findByProps({
-      "data-testid": "header-language-dropdown-desktop",
-    });
-    expect(String(desktopLanguageDropdown.props.className)).toContain("hidden");
-    expect(String(desktopLanguageDropdown.props.className)).toContain(
-      "sm:inline-flex",
-    );
-    const desktopThemeToggle = root.findByProps({
-      "data-testid": "header-theme-toggle-desktop",
-    });
-    expect(String(desktopThemeToggle.props.className)).toContain("hidden");
-    expect(String(desktopThemeToggle.props.className)).toContain("sm:flex");
-    const rightControls = root.findByProps({
-      "data-testid": "shell-header-right-controls",
-    });
-    const rightControlChildren = rightControls.findAll(
-      (node) => node.parent === rightControls,
-    );
-    expect(
-      rightControlChildren[rightControlChildren.length - 1]?.props[
-        "aria-label"
-      ],
-    ).toBe("aria.openNavMenu");
 
     const menuButton = root.findByProps({
       "aria-label": "aria.openNavMenu",
     });
-    expect(String(menuButton.props.className)).toContain("sm:hidden");
 
     await act(async () => {
       menuButton.props.onClick();

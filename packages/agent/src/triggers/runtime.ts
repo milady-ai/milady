@@ -247,7 +247,7 @@ export async function executeTriggerTask(
     await dispatchInstruction(runtime, task.id, trigger);
   } catch (error) {
     status = "error";
-    errorMessage = error instanceof Error ? error.message : String(error);
+    errorMessage = String(error);
     runtime.logger.error(
       {
         src: "trigger-runtime",

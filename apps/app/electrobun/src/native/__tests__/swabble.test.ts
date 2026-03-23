@@ -32,11 +32,6 @@ vi.mock("node:os", () => ({
   tmpdir: vi.fn(() => "/tmp"),
 }));
 
-vi.mock("node:path", async () => {
-  const actual = await vi.importActual<typeof import("node:path")>("node:path");
-  return { default: actual, ...actual };
-});
-
 import { SwabbleManager } from "../swabble";
 // ---------------------------------------------------------------------------
 // Module under test (and typed refs to mocked fns)

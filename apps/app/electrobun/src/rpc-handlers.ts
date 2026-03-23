@@ -1,13 +1,4 @@
 import fs from "node:fs";
-/**
- * RPC Handler Registration for Electrobun
- *
- * Maps each RPC request method from MiladyRPCSchema.bun.requests
- * to the corresponding native module method. This is the Bun-side
- * equivalent of main-process request handler registration.
- *
- * Called once during app startup after the BrowserView is created.
- */
 
 import { Utils } from "electrobun/bun";
 import { setAgentReady } from "./agent-ready-state";
@@ -109,19 +100,9 @@ export function registerRpcHandlers(
       return status;
     },
     agentRestartClearLocalDb: async () => {
-      console.log("[RPC][reset] agentRestartClearLocalDb invoked");
-      try {
-        const status = await agent.restartClearingLocalDb();
-        console.log("[RPC][reset] agentRestartClearLocalDb done", {
-          state: status.state,
-          port: status.port,
-        });
-        setAgentReady(status.state === "running");
-        return status;
-      } catch (err) {
-        console.error("[RPC][reset] agentRestartClearLocalDb failed", err);
-        throw err;
-      }
+      const status = await agent.restartClearingLocalDb();
+      setAgentReady(status.state === "running");
+      return status;
     },
     agentStatus: async () => agent.getStatus(),
     agentInspectExistingInstall: async () => agent.inspectExistingInstall(),
@@ -591,6 +572,4 @@ export function registerRpcHandlers(
     ) => gpuWindow.getViewNativeHandle(params),
     gpuViewList: async () => gpuWindow.listViews(),
   });
-
-  console.log("[RPC] All handlers registered");
 }

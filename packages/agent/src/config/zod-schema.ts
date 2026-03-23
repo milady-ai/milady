@@ -552,8 +552,7 @@ export const ElizaSchema = z
       .optional(),
     connectors: ConnectorsSchema,
     streaming: StreamingSchema,
-    /** @deprecated Use `connectors`. Kept for backward compatibility. */
-    channels: ConnectorsSchema,
+
     discovery: z
       .object({
         wideArea: z
