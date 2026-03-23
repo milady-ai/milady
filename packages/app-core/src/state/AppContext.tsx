@@ -2805,19 +2805,22 @@ export function AppProvider({
     uiShellMode,
   ]);
 
-  // ── Native mode: start a fresh chat with a greeting on every visit ──
-  // Every time the user navigates to the chat tab (native / dev mode),
-  // create a new conversation with a bootstrap greeting (one of the
-  // agent's catchphrases) so they always land on a fresh chat.  The
-  // sidebar still shows conversation history for manual selection.
+  // ── Native mode: ensure a conversation exists on entry ──────────────
+  // Companion and native mode share the same active conversation.  When
+  // the user switches to the chat tab and no conversation is active yet
+  // (e.g. they haven't typed in companion mode), create one with a
+  // bootstrap greeting so the agent greets them with a catchphrase.
+  // If a conversation already exists (started in companion mode), it
+  // carries over seamlessly.
   useEffect(() => {
     if (startupPhase !== "ready") return;
     const enteringChat = tab === "chat" && prevTabRef.current !== "chat";
     prevTabRef.current = tab;
     if (!enteringChat) return;
+    if (activeConversationId) return; // already have one from companion mode
 
     void handleNewConversation();
-  }, [tab, startupPhase, handleNewConversation]);
+  }, [tab, startupPhase, handleNewConversation, activeConversationId]);
 
   const appendLocalCommandTurn = useCallback(
     (userText: string, assistantText: string) => {
