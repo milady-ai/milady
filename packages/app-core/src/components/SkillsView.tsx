@@ -17,6 +17,7 @@ import type {
 import { client } from "../api";
 import { useTimeout } from "../hooks";
 import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 import { ConfirmDeleteControl } from "./confirm-delete-control";
 import { StatusBadge } from "./ui-badges";
 import { Switch } from "./ui-switch";
@@ -48,7 +49,7 @@ function SkillCard({
   onAcknowledge: (id: string) => void;
   onDismissReview: () => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const isQuarantined =
     skill.scanStatus === "warning" || skill.scanStatus === "critical";
   const isBlocked = skill.scanStatus === "blocked";
@@ -242,7 +243,7 @@ function MarketplaceCard({
   onInstall: (item: SkillMarketplaceResult) => void;
   onUninstall: (skillId: string, name: string) => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const isInstalling = skillsMarketplaceAction === `install:${item.id}`;
   const isUninstalling = skillsMarketplaceAction === `uninstall:${item.id}`;
   const sourceLabel = item.repository || item.slug || item.id;
@@ -343,7 +344,7 @@ function InstallModal({
   setState: ReturnType<typeof useApp>["setState"];
   onClose: () => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [tab, setTab] = useState<InstallTab>("search");
 
   return (
@@ -611,7 +612,7 @@ function CreateSkillForm({
   onCancel: () => void;
   onCreate: () => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   return (
     <div className="border border-[var(--accent)]/40 bg-[var(--card)] mb-4">
       <div className="px-4 py-3 border-b border-[var(--border)]">
@@ -680,7 +681,7 @@ function EditSkillModal({
   onClose: () => void;
   onSaved: () => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [content, setContent] = useState("");
   const [originalContent, setOriginalContent] = useState("");
   const [loading, setLoading] = useState(true);

@@ -1,5 +1,5 @@
 import { isElectrobunRuntime } from "@miladyai/app-core/bridge";
-import { useApp } from "@miladyai/app-core/state";
+import { useTranslation } from "../../state/TranslationContext";
 import { Button, Input, Slider } from "@miladyai/ui";
 import {
   ChevronDown,
@@ -76,7 +76,7 @@ export function StatusBar({
   onSourceChange: (sourceType: StreamSourceType, customUrl?: string) => void;
   onOpenSettings?: () => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const isElectrobun = isElectrobunRuntime();
   const isLive = streamLive;
   const [pinned, setPinned] = useState(IS_POPOUT); // popout starts pinned

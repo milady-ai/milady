@@ -11,6 +11,7 @@ import {
   type TrajectoryLlmCall,
 } from "@miladyai/app-core/api";
 import { useApp } from "@miladyai/app-core/state";
+import { useTranslation } from "../state/TranslationContext";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -120,7 +121,7 @@ function LlmCallCard({
   call: TrajectoryLlmCall;
   index: number;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [showSystem, setShowSystem] = useState(false);
   const promptTokens = call.promptTokens ?? 0;
   const completionTokens = call.completionTokens ?? 0;
@@ -227,7 +228,7 @@ export function TrajectoryDetailView({
   trajectoryId,
   onBack,
 }: TrajectoryDetailViewProps) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<TrajectoryDetailResult | null>(null);
   const [error, setError] = useState<string | null>(null);

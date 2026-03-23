@@ -1,0 +1,58 @@
+/**
+ * Regression test: components that only need t() must use useTranslation(),
+ * not useApp(). This prevents them from re-rendering on unrelated state
+ * changes (chat keystrokes, plugin saves, agent status polls, etc.).
+ *
+ * If this test fails, the listed file has regressed to using useApp()
+ * for translation only. Replace `const { t } = useApp()` with
+ * `const { t } = useTranslation()` and import from "../state/TranslationContext".
+ */
+
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { describe, expect, it } from "vitest";
+
+const ROOT = resolve(import.meta.dirname, "..");
+
+/** Files that have been migrated to useTranslation and must stay migrated. */
+const MIGRATED_FILES = [
+  "components/ApiKeyConfig.tsx",
+  "components/BrowserSurfaceWindow.tsx",
+  "components/CloudSourceControls.tsx",
+  "components/CustomActionEditor.tsx",
+  "components/LifoMonitorPanel.tsx",
+  "components/LifoSandboxView.tsx",
+  "components/MediaGalleryView.tsx",
+  "components/ShortcutsOverlay.tsx",
+  "components/SubscriptionStatus.tsx",
+  "components/stream/ActivityFeed.tsx",
+  "components/stream/ChatContent.tsx",
+  "components/stream/ChatTicker.tsx",
+  "components/stream/IdleContent.tsx",
+  "components/stream/StatusBar.tsx",
+  "components/stream/StreamSettings.tsx",
+  "components/stream/StreamTerminal.tsx",
+  "components/stream/StreamVoiceConfig.tsx",
+  "components/stream/overlays/built-in/ActionTickerWidget.tsx",
+  "components/stream/overlays/built-in/CustomHtmlWidget.tsx",
+  "components/stream/overlays/built-in/PeonHudWidget.tsx",
+];
+
+describe("useTranslation migration", () => {
+  for (const rel of MIGRATED_FILES) {
+    it(`${rel} uses useTranslation, not useApp for t()`, () => {
+      const filePath = resolve(ROOT, rel);
+      const content = readFileSync(filePath, "utf8");
+
+      // Should NOT have `const { t } = useApp()`
+      const useAppTOnly = /const\s*\{\s*t\s*\}\s*=\s*useApp\(\)/.test(content);
+      expect(
+        useAppTOnly,
+        `${rel} regressed: replace \`const { t } = useApp()\` with \`const { t } = useTranslation()\``,
+      ).toBe(false);
+
+      // Should have useTranslation import
+      expect(content).toContain("useTranslation");
+    });
+  }
+});
