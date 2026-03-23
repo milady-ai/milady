@@ -42,6 +42,7 @@ import { STYLE_PRESETS } from "@miladyai/agent/onboarding-presets";
 import type { StylePreset as MiladyStylePreset } from "@miladyai/agent/contracts/onboarding";
 import { normalizeCharacterMessageExamples } from "../utils/character-message-examples";
 import { ensureRuntimeSqlCompatibility } from "../utils/sql-compat";
+import { ensurePluginManagerAllowed } from "./plugin-manager-guard.js";
 import type { EmbeddingProgressCallback } from "./embedding-manager-support.js";
 import {
   DEFAULT_MODELS_DIR,
@@ -707,6 +708,10 @@ export async function bootElizaRuntime(
 ): Promise<Awaited<ReturnType<typeof upstreamBootElizaRuntime>>> {
   syncMiladyEnvToEliza();
 
+  // Ensure the plugin-manager plugin is enabled in the user's config so the
+  // dashboard "Install Plugin" button works (upstream has it commented out).
+  ensurePluginManagerAllowed();
+
   try {
     // Eagerly download the embedding model before the full runtime boot.
     // This way the TUI loading screen (or server logs) can show download
@@ -736,6 +741,7 @@ export async function startEliza(
   options?: StartElizaOptionsExt,
 ): Promise<Awaited<ReturnType<typeof upstreamStartEliza>>> {
   syncMiladyEnvToEliza();
+  ensurePluginManagerAllowed();
 
   try {
     // Eagerly download the embedding model with progress reporting
