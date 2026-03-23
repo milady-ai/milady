@@ -1,5 +1,5 @@
 import { useRenderGuard } from "@miladyai/app-core/hooks";
-import { useApp } from "@miladyai/app-core/state";
+import { useChatState } from "../state/ChatContext";
 import { memo, useEffect, useState } from "react";
 import { ChatView } from "./ChatView.js";
 import { ConversationsSidebar } from "./ConversationsSidebar.js";
@@ -55,7 +55,7 @@ export const ChatModalView = memo(function ChatModalView({
   onSidebarClose,
 }: ChatModalViewProps) {
   useRenderGuard("ChatModalView");
-  const { activeConversationId } = useApp();
+  const { activeConversationId } = useChatState();
 
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const isNarrow = useIsNarrowViewport();
