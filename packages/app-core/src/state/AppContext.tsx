@@ -281,6 +281,10 @@ import {
   useConfirm,
   usePrompt,
 } from "../components/ConfirmModal";
+import { ChatProvider } from "./ChatContext";
+import { LifecycleProvider } from "./LifecycleContext";
+import { NavigationProvider } from "./NavigationContext";
+import { TranslationProvider } from "./TranslationContext";
 import { buildWalletRpcUpdateRequest } from "../wallet-rpc";
 
 const GREETING_EMOTE_DELAY_MS = 1400;
@@ -5383,6 +5387,16 @@ export function AppProvider({
 
   // ── Generic state setter ───────────────────────────────────────────
 
+  /**
+   * @deprecated Use typed setters from the appropriate sub-context instead:
+   * - Chat state: `useChatState()` — setChatInput, setChatMode, etc.
+   * - Navigation: `useNavigation()` — setTab, setUiShellMode, etc.
+   * - Lifecycle: `useLifecycle()` — setStartupPhase, setActionNotice, etc.
+   * - Translation: `useTranslation()` — read-only t() function
+   *
+   * This generic dispatcher remains for backwards compatibility during
+   * the incremental migration. New code should use typed setters.
+   */
   const setState = useCallback(
     <K extends keyof AppState>(key: K, value: AppState[K]) => {
       const setterMap: Partial<{
@@ -6593,7 +6607,8 @@ export function AppProvider({
 
   const t = useMemo(() => createTranslator(uiLanguage), [uiLanguage]);
 
-  const value: AppContextValue = {
+  // biome-ignore lint/correctness/useExhaustiveDependencies: callbacks are stable via useCallback; only state vars trigger re-creation
+  const value: AppContextValue = useMemo(() => ({
     // Translations
     t,
     // State
@@ -6938,7 +6953,74 @@ export function AppProvider({
     setActionNotice,
     setState,
     copyToClipboard,
-  };
+  // biome-ignore lint/correctness/useExhaustiveDependencies: state vars listed; callbacks stable via useCallback
+  }), [
+    t, tab, uiShellMode, uiLanguage, uiTheme,
+    connected, agentStatus, onboardingComplete, onboardingUiRevealNonce,
+    onboardingLoading, startupPhase, startupStatus, startupError,
+    authRequired, actionNotice, lifecycleBusy, lifecycleAction,
+    pendingRestart, pendingRestartReasons, restartBannerDismissed,
+    backendConnection, backendDisconnectedBannerDismissed,
+    pairingEnabled, pairingExpiresAt, pairingCodeInput, pairingError, pairingBusy,
+    chatInput, chatSending, chatFirstTokenReceived, chatLastUsage,
+    chatAvatarVisible, chatAgentVoiceMuted, chatMode, chatAvatarSpeaking,
+    conversations, activeConversationId, companionMessageCutoffTs,
+    conversationMessages, autonomousEvents, autonomousLatestEventId,
+    autonomousRunHealthByRunId, ptySessions, unreadConversations,
+    triggers, triggersLoading, triggersSaving, triggerRunsById, triggerHealth, triggerError,
+    plugins, pluginFilter, pluginStatusFilter, pluginSearch, pluginSettingsOpen,
+    pluginAdvancedOpen, pluginSaving, pluginSaveSuccess,
+    skills, skillsSubTab, skillCreateFormOpen, skillCreateName, skillCreateDescription,
+    skillCreating, skillReviewReport, skillReviewId, skillReviewLoading, skillToggleAction,
+    skillsMarketplaceQuery, skillsMarketplaceResults, skillsMarketplaceError,
+    skillsMarketplaceLoading, skillsMarketplaceAction, skillsMarketplaceManualGithubUrl,
+    logs, logSources, logTags, logTagFilter, logLevelFilter, logSourceFilter,
+    walletAddresses, walletConfig, walletBalances, walletNfts, walletLoading, walletNftsLoading,
+    inventoryView, walletExportData, walletExportVisible, walletApiKeySaving,
+    inventorySort, inventoryChainFocus, walletError,
+    registryStatus, registryLoading, registryRegistering, registryError,
+    dropStatus, dropLoading, mintInProgress, mintResult, mintError, mintShiny,
+    whitelistStatus, whitelistLoading,
+    characterData, characterLoading, characterSaving, characterSaveSuccess,
+    characterSaveError, characterDraft, selectedVrmIndex, customVrmUrl, customBackgroundUrl,
+    elizaCloudEnabled, elizaCloudConnected, elizaCloudCredits, elizaCloudCreditsLow,
+    elizaCloudCreditsCritical, elizaCloudTopUpUrl, elizaCloudUserId,
+    cloudDashboardView, elizaCloudLoginBusy, elizaCloudLoginError, elizaCloudDisconnecting,
+    updateStatus, updateLoading, updateChannelSaving,
+    extensionStatus, extensionChecking,
+    storePlugins, storeSearch, storeFilter, storeLoading, storeInstalling, storeUninstalling,
+    storeError, storeDetailPlugin, storeSubTab,
+    catalogSkills, catalogTotal, catalogPage, catalogTotalPages, catalogSort,
+    catalogSearch, catalogLoading, catalogError, catalogDetailSkill,
+    catalogInstalling, catalogUninstalling,
+    workbenchLoading, workbench, workbenchTasksAvailable, workbenchTriggersAvailable, workbenchTodosAvailable,
+    exportBusy, exportPassword, exportIncludeLogs, exportError, exportSuccess,
+    importBusy, importPassword, importFile, importError, importSuccess,
+    droppedFiles, shareIngestNotice, chatPendingImages,
+    activeGameApp, activeGameDisplayName, activeGameViewerUrl, activeGameSandbox,
+    activeGamePostMessageAuth, activeGamePostMessagePayload, gameOverlayEnabled,
+    appsSubTab, agentSubTab, pluginsSubTab, databaseSubTab,
+    configRaw, configText,
+    commandPaletteOpen, commandQuery, commandActiveIndex,
+    emotePickerOpen,
+    mcpConfiguredServers, mcpServerStatuses, mcpMarketplaceQuery, mcpMarketplaceResults,
+    mcpMarketplaceLoading, mcpAction, mcpAddingServer, mcpAddingResult, mcpEnvInputs, mcpHeaderInputs,
+    onboardingStep, onboardingMode, onboardingActiveGuide, onboardingDeferredTasks,
+    postOnboardingChecklistDismissed, onboardingOptions, onboardingName, onboardingOwnerName,
+    onboardingStyle, onboardingRunMode, onboardingCloudProvider,
+    onboardingSmallModel, onboardingLargeModel, onboardingProvider, onboardingApiKey,
+    onboardingExistingInstallDetected, onboardingDetectedProviders,
+    onboardingRemoteApiBase, onboardingRemoteToken, onboardingRemoteConnecting,
+    onboardingRemoteError, onboardingRemoteConnected,
+    onboardingOpenRouterModel, onboardingPrimaryModel,
+    onboardingTelegramToken, onboardingDiscordToken, onboardingWhatsAppSessionPath,
+    onboardingTwilioAccountSid, onboardingTwilioAuthToken, onboardingTwilioPhoneNumber,
+    onboardingBlooioApiKey, onboardingBlooioPhoneNumber, onboardingGithubToken,
+    onboardingSubscriptionTab, onboardingElizaCloudTab,
+    onboardingSelectedChains, onboardingRpcSelections, onboardingRpcKeys,
+    onboardingAvatar, onboardingRestarting,
+    systemWarnings,
+  ]);
 
   const mergedBranding = useMemo(
     () => ({ ...DEFAULT_BRANDING, ...brandingOverride }),
@@ -6947,11 +7029,19 @@ export function AppProvider({
 
   return (
     <BrandingContext.Provider value={mergedBranding}>
-      <AppContext.Provider value={value}>
-        {children}
-        <ConfirmModal {...modalProps} />
-        <PromptModal {...promptModalProps} />
-      </AppContext.Provider>
+      <TranslationProvider uiLanguage={uiLanguage}>
+        <NavigationProvider activeGameViewerUrl={activeGameViewerUrl}>
+          <LifecycleProvider>
+            <ChatProvider>
+              <AppContext.Provider value={value}>
+                {children}
+                <ConfirmModal {...modalProps} />
+                <PromptModal {...promptModalProps} />
+              </AppContext.Provider>
+            </ChatProvider>
+          </LifecycleProvider>
+        </NavigationProvider>
+      </TranslationProvider>
     </BrandingContext.Provider>
   );
 }
