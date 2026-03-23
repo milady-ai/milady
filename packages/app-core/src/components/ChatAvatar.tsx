@@ -9,7 +9,7 @@ import {
   type AppEmoteEventDetail,
   STOP_EMOTE_EVENT,
 } from "@miladyai/app-core/events";
-import { getVrmPreviewUrl, getVrmUrl, useApp } from "@miladyai/app-core/state";
+import { getVrmPreviewUrl, getVrmUrl, useCharacter } from "@miladyai/app-core/state";
 import { resolveAppAssetUrl } from "@miladyai/app-core/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AvatarLoader } from "./AvatarLoader";
@@ -27,7 +27,7 @@ export function ChatAvatar({
   mouthOpen = 0,
   isSpeaking = false,
 }: ChatAvatarProps) {
-  const { selectedVrmIndex, customVrmUrl } = useApp();
+  const { selectedVrmIndex, customVrmUrl } = useCharacter();
 
   // Resolve VRM path from selected index or custom upload
   const vrmPath =

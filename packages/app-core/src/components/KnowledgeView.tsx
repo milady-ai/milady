@@ -21,7 +21,7 @@ import {
   formatByteSize,
   formatShortDate,
 } from "@miladyai/app-core/components";
-import { useApp } from "@miladyai/app-core/state";
+import { useLifecycle } from "@miladyai/app-core/state";
 import { useTranslation } from "../state/TranslationContext";
 import { confirmDesktopAction } from "@miladyai/app-core/utils";
 import { Button, Input } from "@miladyai/ui";
@@ -571,7 +571,7 @@ function DocumentDetailModal({
 
 export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
   const { t } = useTranslation();
-  const { setActionNotice } = useApp();
+  const { setActionNotice } = useLifecycle();
   const setActionNoticeRef = useRef(setActionNotice);
   setActionNoticeRef.current = setActionNotice;
   const [searchQuery, setSearchQuery] = useState("");

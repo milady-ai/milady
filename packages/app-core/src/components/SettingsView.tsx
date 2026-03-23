@@ -31,6 +31,7 @@ import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isElectrobunRuntime } from "../bridge";
 import { useApp } from "../state";
+import { useNavigation } from "../state/NavigationContext";
 import { useTranslation } from "../state/TranslationContext";
 import { CodingAgentSettingsSection } from "./CodingAgentSettingsSection";
 import { ConfigPageView } from "./ConfigPageView";
@@ -508,7 +509,8 @@ export function SettingsView({
   initialSection?: string;
 } = {}) {
   const { t } = useTranslation();
-  const { loadPlugins, setTab } = useApp();
+  const { setTab } = useNavigation();
+  const { loadPlugins } = useApp();
   const [activeSection, setActiveSection] = useState(
     initialSection ?? "ai-model",
   );

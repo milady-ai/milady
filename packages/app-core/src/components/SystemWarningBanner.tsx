@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useApp } from "../state";
+import { useLifecycle } from "../state/LifecycleContext";
 
 const AUTO_DISMISS_MS = 20_000;
 
@@ -8,7 +8,7 @@ const AUTO_DISMISS_MS = 20_000;
  * broadcast via WebSocket `system-warning` events.
  */
 export function SystemWarningBanner() {
-  const { systemWarnings, dismissSystemWarning, backendConnection } = useApp();
+  const { systemWarnings, dismissSystemWarning, backendConnection } = useLifecycle();
   const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
     new Map(),
   );

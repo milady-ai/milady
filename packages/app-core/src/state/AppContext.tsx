@@ -281,6 +281,7 @@ import {
   useConfirm,
   usePrompt,
 } from "../components/ConfirmModal";
+import { CharacterProvider } from "./CharacterContext";
 import { ChatProvider } from "./ChatContext";
 import { LifecycleProvider } from "./LifecycleContext";
 import { NavigationProvider } from "./NavigationContext";
@@ -7067,6 +7068,11 @@ export function AppProvider({
       backendConnection,
       backendDisconnectedBannerDismissed,
       systemWarnings,
+      elizaCloudConnected,
+      elizaCloudEnabled,
+      setActionNotice,
+      copyToClipboard,
+      dismissSystemWarning,
     }),
     [
       connected, agentStatus, onboardingComplete, onboardingLoading,
@@ -7074,6 +7080,8 @@ export function AppProvider({
       actionNotice, lifecycleBusy, lifecycleAction,
       pendingRestart, pendingRestartReasons, restartBannerDismissed,
       backendConnection, backendDisconnectedBannerDismissed, systemWarnings,
+      elizaCloudConnected, elizaCloudEnabled,
+      setActionNotice, copyToClipboard, dismissSystemWarning,
     ],
   );
 
@@ -7110,6 +7118,16 @@ export function AppProvider({
     ],
   );
 
+  const characterValue = useMemo(
+    () => ({
+      selectedVrmIndex,
+      customVrmUrl,
+      customBackgroundUrl,
+      uiTheme,
+    }),
+    [selectedVrmIndex, customVrmUrl, customBackgroundUrl, uiTheme],
+  );
+
   const mergedBranding = useMemo(
     () => ({ ...DEFAULT_BRANDING, ...brandingOverride }),
     [brandingOverride],
@@ -7121,11 +7139,13 @@ export function AppProvider({
         <NavigationProvider value={navigationValue}>
           <LifecycleProvider value={lifecycleValue}>
             <ChatProvider value={chatValue}>
-              <AppContext.Provider value={value}>
-                {children}
-                <ConfirmModal {...modalProps} />
-                <PromptModal {...promptModalProps} />
-              </AppContext.Provider>
+              <CharacterProvider value={characterValue}>
+                <AppContext.Provider value={value}>
+                  {children}
+                  <ConfirmModal {...modalProps} />
+                  <PromptModal {...promptModalProps} />
+                </AppContext.Provider>
+              </CharacterProvider>
             </ChatProvider>
           </LifecycleProvider>
         </NavigationProvider>
