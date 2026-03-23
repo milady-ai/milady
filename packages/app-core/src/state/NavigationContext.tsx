@@ -1,34 +1,27 @@
 /**
- * Navigation context — extracted from AppContext.
+ * Navigation context — a bridge layer for AppContext's navigation state.
  *
- * Owns tab, shell mode, sub-tabs, and navigation actions.
- * Almost every component reads `tab` or `uiShellMode` — isolating
- * these prevents the entire tree from re-rendering on unrelated
- * state changes (e.g. chat keystrokes, plugin saves).
+ * AppProvider owns the navigation state (tab, shell mode, sub-tabs) and
+ * passes it through NavigationProvider. Components use useNavigation()
+ * to read only navigation state without subscribing to all of AppContext.
+ *
+ * This is NOT a duplicate of AppContext state — AppProvider passes its
+ * own state objects here. Single source of truth, two access patterns:
+ * - useApp().tab (legacy — re-renders on all state changes)
+ * - useNavigation().tab (preferred — re-renders only on navigation changes)
  */
 
 import {
   createContext,
   type ReactNode,
-  useCallback,
   useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
 } from "react";
-import { COMPANION_ENABLED, type Tab, pathForTab } from "../navigation";
-import {
-  deriveUiShellModeForTab,
-  getTabForShellView,
-} from "./shell-routing";
+import type { Tab } from "../navigation";
 import type { ShellView } from "./types";
 import type { UiShellMode } from "./ui-preferences";
-import {
-  loadLastNativeTab,
-  normalizeUiShellMode,
-  saveLastNativeTab,
-} from "./internal";
+
+// Re-export for consumers
+export type { Tab } from "../navigation";
 
 // ── Types ───────────────────────────────────────────────────────────
 
@@ -55,136 +48,17 @@ const NavigationCtx = createContext<NavigationContextValue | null>(null);
 
 // ── Provider ────────────────────────────────────────────────────────
 
+/**
+ * Accepts a pre-built value from AppProvider. No internal state — single
+ * source of truth remains in AppProvider.
+ */
 export function NavigationProvider({
   children,
-  activeGameViewerUrl = "",
+  value,
 }: {
   children: ReactNode;
-  activeGameViewerUrl?: string;
+  value: NavigationContextValue;
 }) {
-  const [lastNativeTab, setLastNativeTabState] =
-    useState<Tab>(loadLastNativeTab);
-  const [tab, _setTabRawInner] = useState<Tab>(
-    COMPANION_ENABLED ? "companion" : "chat",
-  );
-  const setTabRaw = useCallback((t: Tab) => {
-    _setTabRawInner(t);
-  }, []);
-
-  const uiShellMode = deriveUiShellModeForTab(tab);
-
-  // Sub-tabs
-  const [appsSubTab, setAppsSubTab] = useState<"browse" | "games">("browse");
-  const [agentSubTab, setAgentSubTab] = useState<
-    "character" | "inventory" | "knowledge"
-  >("character");
-  const [pluginsSubTab, setPluginsSubTab] = useState<
-    "features" | "connectors" | "plugins"
-  >("features");
-  const [databaseSubTab, setDatabaseSubTab] = useState<
-    "tables" | "media" | "vectors"
-  >("tables");
-
-  // Remember last native tab for shell switching
-  useEffect(() => {
-    const shouldRemember =
-      tab !== "companion" && tab !== "character" && tab !== "character-select";
-    if (!shouldRemember) return;
-    setLastNativeTabState((prev) => {
-      if (prev === tab) return prev;
-      saveLastNativeTab(tab);
-      return tab;
-    });
-  }, [tab]);
-
-  const setTab = useCallback(
-    (newTab: Tab) => {
-      setTabRaw(newTab);
-      if (newTab === "apps") {
-        setAppsSubTab(activeGameViewerUrl.trim() ? "games" : "browse");
-      }
-      const path = pathForTab(newTab);
-      try {
-        if (window.location.protocol === "file:") {
-          window.location.hash = path;
-        } else {
-          window.history.pushState(null, "", path);
-        }
-      } catch (err) {
-        console.warn("[milady][nav] failed to update browser location", err);
-      }
-    },
-    [activeGameViewerUrl, setTabRaw],
-  );
-
-  const setUiShellMode = useCallback(
-    (mode: UiShellMode) => {
-      const nextMode = normalizeUiShellMode(mode);
-      if (nextMode === "companion") {
-        setTab("companion");
-        return;
-      }
-      setTab(lastNativeTab);
-    },
-    [lastNativeTab, setTab],
-  );
-
-  const switchUiShellMode = useCallback(
-    (mode: UiShellMode) => {
-      const nextMode = normalizeUiShellMode(mode);
-      if (nextMode === uiShellMode) return;
-      if (nextMode === "native") {
-        setTab(lastNativeTab);
-        return;
-      }
-      setTab("companion");
-    },
-    [lastNativeTab, setTab, uiShellMode],
-  );
-
-  const switchShellView = useCallback(
-    (view: ShellView) => {
-      const nextTab = getTabForShellView(view, lastNativeTab);
-      setTab(nextTab);
-    },
-    [lastNativeTab, setTab],
-  );
-
-  const value = useMemo<NavigationContextValue>(
-    () => ({
-      tab,
-      uiShellMode,
-      lastNativeTab,
-      appsSubTab,
-      agentSubTab,
-      pluginsSubTab,
-      databaseSubTab,
-      setTab,
-      setTabRaw,
-      setUiShellMode,
-      switchUiShellMode,
-      switchShellView,
-      setAppsSubTab,
-      setAgentSubTab,
-      setPluginsSubTab,
-      setDatabaseSubTab,
-    }),
-    [
-      tab,
-      uiShellMode,
-      lastNativeTab,
-      appsSubTab,
-      agentSubTab,
-      pluginsSubTab,
-      databaseSubTab,
-      setTab,
-      setTabRaw,
-      setUiShellMode,
-      switchUiShellMode,
-      switchShellView,
-    ],
-  );
-
   return (
     <NavigationCtx.Provider value={value}>
       {children}

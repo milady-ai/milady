@@ -1,11 +1,11 @@
 export * from "./AppContext";
 // Sub-context providers are exported for composition inside AppProvider.
-// Consumer hooks (useChatState, useNavigation, useLifecycle) are NOT
-// re-exported here to prevent split-brain — all reads should go through
-// useApp() until AppContext's duplicate state is fully removed.
+// Navigation is safe to consume directly — AppContext reads from
+// NavigationProvider (no duplicate state).
 export { ChatProvider } from "./ChatContext";
 export { LifecycleProvider } from "./LifecycleContext";
-export { NavigationProvider } from "./NavigationContext";
+export { NavigationProvider, useNavigation } from "./NavigationContext";
+export type { NavigationContextValue } from "./NavigationContext";
 export * from "./parsers";
 export * from "./persistence";
 export { TranslationProvider } from "./TranslationContext";
