@@ -1,7 +1,7 @@
 import { Button } from "@miladyai/ui";
 import { Check, Cloud } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useApp } from "../../state";
+import { useTranslation } from "../../state/TranslationContext";
 import { StatusBadge } from "../ui-badges";
 import { PermissionIcon } from "./PermissionIcon";
 
@@ -216,7 +216,7 @@ export function StreamingPermissionsSettingsView({
   testId,
   title,
 }: StreamingPermissionsSettingsViewProps) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const { checking, permStates, requestPermission } =
     useStreamingPermissions(mode);
 
@@ -313,7 +313,7 @@ export function StreamingPermissionsOnboardingView({
   testId,
   title,
 }: StreamingPermissionsOnboardingViewProps) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const { checking, permStates, requestPermission } =
     useStreamingPermissions(mode);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

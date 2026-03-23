@@ -34,6 +34,7 @@ import {
   isWebPlatform,
 } from "../platform";
 import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 import { PermissionIcon } from "./permissions/PermissionIcon";
 import {
   StreamingPermissionsOnboardingView,
@@ -401,7 +402,7 @@ function PermissionRow({
   shellEnabled: boolean;
   onToggleShell?: (enabled: boolean) => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const action = getPermissionAction(t, def.id, status, canRequest);
   const badge = getPermissionBadge(def.id, status, platform);
 
@@ -462,7 +463,7 @@ function CapabilityToggle({
   permissionsGranted: boolean;
   onToggle: (enabled: boolean) => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const enabled = plugin?.enabled ?? false;
   const available = plugin !== null;
   const canEnable = permissionsGranted && available;
@@ -770,7 +771,7 @@ function useDesktopPermissionsState() {
 
 /** Mobile (Capacitor) permission UI for streaming to cloud sandbox. */
 function MobilePermissionsView() {
-  const { t } = useApp();
+  const { t } = useTranslation();
   return (
     <StreamingPermissionsSettingsView
       mode="mobile"
@@ -791,7 +792,7 @@ function MobilePermissionsView() {
 
 /** Web browser permission UI — uses getUserMedia. */
 function WebPermissionsView() {
-  const { t } = useApp();
+  const { t } = useTranslation();
   return (
     <StreamingPermissionsSettingsView
       mode="web"
@@ -811,7 +812,7 @@ function WebPermissionsView() {
 }
 
 function DesktopPermissionsView() {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const { plugins, handlePluginToggle } = useApp();
   const {
     handleOpenSettings,
@@ -1016,7 +1017,7 @@ function MobileOnboardingPermissions({
   onContinue: (options?: { allowPermissionBypass?: boolean }) => void;
   onBack?: () => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   return (
     <StreamingPermissionsOnboardingView
       mode="mobile"
@@ -1045,7 +1046,7 @@ function WebOnboardingPermissions({
   onContinue: (options?: { allowPermissionBypass?: boolean }) => void;
   onBack?: () => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   return (
     <StreamingPermissionsOnboardingView
       mode="web"
@@ -1098,7 +1099,7 @@ function DesktopOnboardingPermissions({
   onContinue: (options?: { allowPermissionBypass?: boolean }) => void;
   onBack?: () => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const { handleOpenSettings, handleRequest, loading, permissions } =
     useDesktopPermissionsState();
 

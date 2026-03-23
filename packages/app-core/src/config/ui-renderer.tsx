@@ -17,7 +17,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 import { confirmDesktopAction, resolveAppAssetUrl } from "../utils";
 import { getByPath, setByPath } from "./config-catalog";
 import type {
@@ -829,7 +829,7 @@ const TableComponent: ComponentFn = (props) => {
 };
 
 const CarouselComponent: ComponentFn = (props) => {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const items =
     (props.items as Array<{ title: string; description: string }>) ?? [];
   const [current, setCurrent] = useState(0);
@@ -1590,7 +1590,7 @@ const COMPONENTS: Record<string, ComponentFn> = {
 // ══════════════════════════════════════════════════════════════════════
 
 function ElementRenderer({ elementId }: { elementId: string }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const ctx = useUiCtx();
   const el = ctx.spec.elements[elementId];
   if (!el) return null;

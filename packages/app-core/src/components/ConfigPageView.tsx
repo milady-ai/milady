@@ -18,6 +18,7 @@ import {
   type JsonSchemaObject,
 } from "../config";
 import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 import type { ConfigUiHint } from "../types";
 import {
   buildWalletRpcUpdateRequest,
@@ -337,7 +338,7 @@ const CLOUD_SERVICE_DEFS: {
 /* ToggleSwitch — thin wrapper around shared Switch for Cloud Services */
 
 function CloudServicesSection() {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [services, setServices] = useState<Record<CloudServiceKey, boolean>>({
     inference: true,
     rpc: true,

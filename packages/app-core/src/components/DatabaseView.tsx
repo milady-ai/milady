@@ -18,7 +18,7 @@ import {
   type TableInfo,
   type TableRowsResponse,
 } from "../api";
-import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 
 type DbView = "tables" | "query";
 type SortDir = "asc" | "desc" | null;
@@ -93,7 +93,7 @@ function CellPopover({
   value: string;
   onClose: () => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -148,7 +148,7 @@ function ResultsGrid({
   onSort?: (col: string) => void;
   onCellClick?: (value: string) => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   return (
     <div
       className="overflow-auto border border-border/40 bg-card/40 backdrop-blur-md rounded-2xl shadow-inner"
@@ -266,7 +266,7 @@ function PaginationBar({
   onPrev: () => void;
   onNext: () => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const start = offset + 1;
   const end = Math.min(offset + limit, total);
   const hasPrev = offset > 0;
@@ -306,7 +306,7 @@ function PaginationBar({
 // ── Main component ────────────────────────────────────────────────────
 
 export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [dbStatus, setDbStatus] = useState<DatabaseStatus | null>(null);
   const [tables, setTables] = useState<TableInfo[]>([]);
   const [selectedTable, setSelectedTable] = useState("");

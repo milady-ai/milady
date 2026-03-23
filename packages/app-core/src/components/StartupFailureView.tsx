@@ -1,6 +1,6 @@
 import { useBranding } from "../config/branding";
 import type { StartupErrorState } from "../state";
-import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 
 const REASON_LABELS: Record<StartupErrorState["reason"], string> = {
   "backend-timeout": "Backend Timeout",
@@ -19,7 +19,7 @@ export function StartupFailureView({
   error,
   onRetry,
 }: StartupFailureViewProps) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const branding = useBranding();
   const isBackendUnreachable = error.reason === "backend-unreachable";
 

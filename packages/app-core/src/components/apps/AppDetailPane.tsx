@@ -1,6 +1,6 @@
 import { Button } from "@miladyai/ui";
 import type { RegistryAppInfo } from "../../api";
-import { useApp } from "../../state";
+import { useTranslation } from "../../state/TranslationContext";
 import { getAppDetailExtension } from "./extensions/registry";
 import { CATEGORY_LABELS, getAppEmoji } from "./helpers";
 
@@ -27,7 +27,7 @@ export function AppDetailPane({
   onOpenCurrentGame,
   onOpenCurrentGameInNewTab,
 }: AppDetailPaneProps) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const DetailExtension = getAppDetailExtension(app);
 
   if (compact) {

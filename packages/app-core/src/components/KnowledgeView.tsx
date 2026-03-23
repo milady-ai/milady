@@ -22,6 +22,7 @@ import {
   formatShortDate,
 } from "@miladyai/app-core/components";
 import { useApp } from "@miladyai/app-core/state";
+import { useTranslation } from "../state/TranslationContext";
 import { confirmDesktopAction } from "@miladyai/app-core/utils";
 import { Button, Input } from "@miladyai/ui";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -107,7 +108,7 @@ function UploadZone({
   uploading: boolean;
   uploadStatus: { current: number; total: number; filename: string } | null;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [dragOver, setDragOver] = useState(false);
   const [urlInput, setUrlInput] = useState("");
   const [showUrlInput, setShowUrlInput] = useState(false);
@@ -264,7 +265,7 @@ function SearchResults({
   results: KnowledgeSearchResult[];
   onClear: () => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   return (
     <div className="mb-8 animate-in fade-in slide-in-from-top-4 duration-300">
       <div className="flex items-center justify-between mb-4 border-b border-border/40 pb-3">
@@ -326,7 +327,7 @@ function DocumentCard({
   onDelete: (id: string) => void;
   deleting: boolean;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   return (
     <div className="flex items-center justify-between p-4 border border-border/40 bg-card/40 backdrop-blur-md rounded-xl shadow-sm hover:shadow-[0_0_15px_rgba(var(--accent),0.1)] hover:border-accent/50 transition-all group">
       <button
@@ -395,7 +396,7 @@ function DocumentDetailModal({
   documentId: string;
   onClose: () => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [doc, setDoc] = useState<KnowledgeDocument | null>(null);
   const [fragments, setFragments] = useState<KnowledgeFragment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -569,7 +570,7 @@ function DocumentDetailModal({
 /* ── Main KnowledgeView Component ───────────────────────────────────── */
 
 export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const { setActionNotice } = useApp();
   const setActionNoticeRef = useRef(setActionNotice);
   setActionNoticeRef.current = setActionNotice;

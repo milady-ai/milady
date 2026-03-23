@@ -14,6 +14,7 @@ import {
 } from "@miladyai/app-core/state";
 import { alertDesktopMessage } from "@miladyai/app-core/utils";
 import { useCallback, useRef, useState } from "react";
+import { useTranslation } from "../state/TranslationContext";
 
 export interface AvatarSelectorProps {
   /** Currently selected index (1-N for bundled, 0 for custom) */
@@ -65,7 +66,7 @@ export function AvatarSelector({
   fullWidth = false,
   loading = false,
 }: AvatarSelectorProps) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
 

@@ -14,7 +14,7 @@ import {
   type RuntimeOrderItem,
   type RuntimeServiceOrderItem,
 } from "../api";
-import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 import { formatDateTime } from "./format";
 
 type RuntimeSectionKey =
@@ -165,7 +165,7 @@ function TreeNode(props: {
 }
 
 function OrderCard(props: { title: string; entries: RuntimeOrderItem[] }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const { title, entries } = props;
   return (
     <div className="border border-border bg-card rounded-2xl p-3 min-h-[150px]">
@@ -188,7 +188,7 @@ function OrderCard(props: { title: string; entries: RuntimeOrderItem[] }) {
 }
 
 function ServicesOrderCard(props: { entries: RuntimeServiceOrderItem[] }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const { entries } = props;
   return (
     <div className="border border-border bg-card rounded-2xl p-3 min-h-[150px]">
@@ -226,7 +226,7 @@ function ServicesOrderCard(props: { entries: RuntimeServiceOrderItem[] }) {
 }
 
 export function RuntimeView() {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [snapshot, setSnapshot] = useState<RuntimeDebugSnapshot | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

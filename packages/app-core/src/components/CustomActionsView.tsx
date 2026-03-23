@@ -1,5 +1,5 @@
 import { type CustomActionDef, client } from "@miladyai/app-core/api";
-import { useApp } from "@miladyai/app-core/state";
+import { useTranslation } from "../state/TranslationContext";
 import {
   alertDesktopMessage,
   confirmDesktopAction,
@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from "react";
 import { CustomActionEditor } from "./CustomActionEditor";
 
 export function CustomActionsView() {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [actions, setActions] = useState<CustomActionDef[]>([]);
   const [search, setSearch] = useState("");
   const [editorOpen, setEditorOpen] = useState(false);

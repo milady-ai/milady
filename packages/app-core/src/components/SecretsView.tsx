@@ -11,7 +11,7 @@ import { ChevronDown } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { SecretInfo } from "../api";
 import { client } from "../api";
-import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 
 /* ── Constants ──────────────────────────────────────────────────────── */
 
@@ -82,7 +82,7 @@ function savePinnedKeys(keys: Set<string>) {
 /* ── Component ──────────────────────────────────────────────────────── */
 
 export function SecretsView() {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [allSecrets, setAllSecrets] = useState<SecretInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -357,7 +357,7 @@ function SecretPicker({
   onAdd: (key: string) => void;
   onClose: () => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   // Group available by category
   const grouped = useMemo(() => {
     return groupSecretsByCategory(available);
@@ -479,7 +479,7 @@ function SecretCard({
   onDraftChange: (val: string) => void;
   onRemove: () => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const enabledPlugins = secret.usedBy.filter((u) => u.enabled);
   const pluginList = secret.usedBy
     .map((u) => u.pluginName || u.pluginId)

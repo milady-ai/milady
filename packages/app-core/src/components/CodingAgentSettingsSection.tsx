@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { AgentPreflightResult } from "../api";
 import { client } from "../api";
 import { useTimeout } from "../hooks";
-import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 import { ConfigSaveFooter } from "./ConfigSaveFooter";
 
 type AgentTab = "claude" | "gemini" | "codex" | "aider";
@@ -102,7 +102,7 @@ const ENV_PREFIX: Record<AgentTab, string> = {
 
 export function CodingAgentSettingsSection() {
   const { setTimeout } = useTimeout();
-  const { t } = useApp();
+  const { t } = useTranslation();
 
   const [activeTab, setActiveTab] = useState<AgentTab>("claude");
   const [loading, setLoading] = useState(true);

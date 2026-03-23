@@ -22,6 +22,7 @@ import {
   type UiSpec,
 } from "@miladyai/app-core/config";
 import { useApp } from "@miladyai/app-core/state";
+import { useTranslation } from "../state/TranslationContext";
 import type { ConfigUiHint } from "@miladyai/app-core/types";
 import { stripAssistantStageDirections } from "@miladyai/app-core/utils";
 import { Button } from "@miladyai/ui";
@@ -724,7 +725,7 @@ function InlinePluginConfig({ pluginId: rawPluginId }: { pluginId: string }) {
 // ── UiSpec block ────────────────────────────────────────────────────
 
 function UiSpecBlock({ spec, raw }: { spec: UiSpec; raw: string }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const { sendActionMessage } = useApp();
   const [showRaw, setShowRaw] = useState(false);
 

@@ -12,7 +12,7 @@
 import { ChevronDown, X } from "lucide-react";
 import React, { useCallback, useRef, useState } from "react";
 import { Switch } from "../components/ui-switch";
-import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 import type { DynamicValue } from "../types";
 import type { FieldRenderer, FieldRenderProps } from "./config-catalog";
 import { resolveDynamic } from "./config-catalog";
@@ -334,7 +334,7 @@ export function renderUrlField(props: FieldRenderProps) {
 
 /** Dropdown select. Options from hint.options or schema.enum. */
 export function RenderSelectField(props: FieldRenderProps) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const enhancedOptions = (props.hint as Record<string, unknown>).options as
     | Array<{ value: string; label: string; description?: string }>
     | undefined;
@@ -407,7 +407,7 @@ function SearchableSelectInner({
   options: Array<{ value: string; label: string; description?: string }>;
   effectiveValue: string;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const matchingOpt = options.find((o) => o.value === effectiveValue);
   const [inputVal, setInputVal] = useState(
     matchingOpt?.label ?? effectiveValue,
@@ -869,7 +869,7 @@ export function renderJsonField(props: FieldRenderProps) {
 }
 
 function JsonFieldInner({ fp: props }: { fp: FieldRenderProps }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const initial = props.isSet ? String(props.value ?? "") : "";
   const [jsonError, setJsonError] = useState<string | null>(null);
 
@@ -987,7 +987,7 @@ function ArrayItem({
   onMoveDown: () => void;
   onBlur: () => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-1">
       {!readonly && (
@@ -1039,7 +1039,7 @@ function ArrayItem({
 }
 
 function ArrayFieldInner({ fp: props }: { fp: FieldRenderProps }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const rawVal = props.isSet ? props.value : [];
   const initialItems: string[] = Array.isArray(rawVal)
     ? rawVal.map(String)
@@ -1124,7 +1124,7 @@ export function renderKeyValueField(props: FieldRenderProps) {
 }
 
 function KeyValueFieldInner({ fp: props }: { fp: FieldRenderProps }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const rawVal = props.isSet ? props.value : {};
   const initialPairs: Array<{ key: string; value: string }> =
     rawVal && typeof rawVal === "object" && !Array.isArray(rawVal)
@@ -1248,7 +1248,7 @@ export function renderDatetimeField(props: FieldRenderProps) {
 
 /** File path text input with path traversal guard. */
 export function RenderFileField(props: FieldRenderProps) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const value = props.isSet ? String(props.value ?? "") : "";
   const placeholder =
     (props.hint.placeholder as string | undefined) ?? "/path/to/file";
@@ -1285,7 +1285,7 @@ export function RenderFileField(props: FieldRenderProps) {
 
 /** Placeholder for plugin-provided custom React components. */
 export function RenderCustomField(props: FieldRenderProps) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const componentName = (props.hint as Record<string, unknown>).component as
     | string
     | undefined;
@@ -1469,7 +1469,7 @@ function processSimpleInline(text: string, key: number): React.ReactNode {
 }
 
 function MarkdownFieldInner(props: FieldRenderProps) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [preview, setPreview] = useState(false);
   const value = typeof props.value === "string" ? props.value : "";
 
@@ -1541,7 +1541,7 @@ export const renderMarkdownField: FieldRenderer = (props) => (
 // ── 21. Checkbox Group ───────────────────────────────────────────────────
 
 function CheckboxGroupInner(props: FieldRenderProps) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const selected = new Set(
     Array.isArray(props.value)
       ? (props.value as string[])
@@ -1649,7 +1649,7 @@ export const renderGroupField: FieldRenderer = (props) => {
 // ── 23. Table ────────────────────────────────────────────────────────────
 
 function TableFieldInner(props: FieldRenderProps) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const MAX_TABLE_ROWS = 50;
   const columns: Array<{ key: string; label: string }> = ((
     props.hint as Record<string, unknown>
@@ -1807,7 +1807,7 @@ export function ConfigField({
   renderer: FieldRenderer;
   pluginId?: string;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const label = renderProps.hint.label ?? renderProps.key;
   const envKey = renderProps.key;
   const labelDiffersFromKey = label !== envKey;
