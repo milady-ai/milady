@@ -5,20 +5,22 @@
 import type React from "react";
 import { useEffect } from "react";
 import { useApp } from "../state";
+import { useNavigation } from "../state/NavigationContext";
 import { AppsView } from "./AppsView";
 import { GameView } from "./GameView";
 
 export function AppsPageView({ inModal }: { inModal?: boolean } = {}) {
-  const { appsSubTab, activeGameViewerUrl, setState } = useApp();
+  const { appsSubTab, setAppsSubTab } = useNavigation();
+  const { activeGameViewerUrl } = useApp();
   const hasActiveGame =
     typeof activeGameViewerUrl === "string" &&
     activeGameViewerUrl.trim().length > 0;
 
   useEffect(() => {
     if (appsSubTab === "games" && !hasActiveGame) {
-      setState("appsSubTab", "browse");
+      setAppsSubTab("browse");
     }
-  }, [appsSubTab, hasActiveGame, setState]);
+  }, [appsSubTab, hasActiveGame, setAppsSubTab]);
 
   if (appsSubTab === "games" && hasActiveGame) {
     return <GameView />;

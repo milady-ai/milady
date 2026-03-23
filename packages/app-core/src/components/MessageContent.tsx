@@ -22,6 +22,7 @@ import {
   type UiSpec,
 } from "@miladyai/app-core/config";
 import { useApp } from "@miladyai/app-core/state";
+import { useLifecycle } from "../state/LifecycleContext";
 import { useTranslation } from "../state/TranslationContext";
 import type { ConfigUiHint } from "@miladyai/app-core/types";
 import { stripAssistantStageDirections } from "@miladyai/app-core/utils";
@@ -492,7 +493,8 @@ function InlinePluginConfig({ pluginId: rawPluginId }: { pluginId: string }) {
   const mountedRef = useRef(true);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { t } = useTranslation();
-  const { setActionNotice, loadPlugins } = useApp();
+  const { setActionNotice } = useLifecycle();
+  const { loadPlugins } = useApp();
 
   // Track mount state — reset to true on each mount (needed for StrictMode
   // which unmounts/remounts and would leave the ref false otherwise).

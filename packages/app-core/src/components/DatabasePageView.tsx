@@ -3,7 +3,7 @@
  */
 
 import { Button } from "@miladyai/ui";
-import { useApp } from "../state";
+import { useNavigation } from "../state/NavigationContext";
 import { useTranslation } from "../state/TranslationContext";
 import { DatabaseView } from "./DatabaseView";
 import { MediaGalleryView } from "./MediaGalleryView";
@@ -11,7 +11,7 @@ import { VectorBrowserView } from "./VectorBrowserView";
 
 export function DatabasePageView() {
   const { t } = useTranslation();
-  const { databaseSubTab, setState } = useApp();
+  const { databaseSubTab, setDatabaseSubTab } = useNavigation();
   const dbTabs = [
     {
       id: "tables" as const,
@@ -39,7 +39,7 @@ export function DatabasePageView() {
               ? "bg-accent text-accent-fg shadow-[0_0_15px_rgba(var(--accent),0.4)] border border-accent/50 scale-105"
               : "text-muted hover:text-txt hover:bg-bg-hover hover:border-border/50"
           }`}
-          onClick={() => setState("databaseSubTab", tab.id)}
+          onClick={() => setDatabaseSubTab(tab.id)}
         >
           {tab.label}
         </Button>

@@ -55,6 +55,7 @@ import {
 import type { Tab } from "./navigation";
 import { APPS_ENABLED, COMPANION_ENABLED } from "./navigation";
 import { useApp } from "./state";
+import { useNavigation } from "./state/NavigationContext";
 
 const CHAT_MOBILE_BREAKPOINT_PX = 1024;
 
@@ -148,7 +149,7 @@ function ViewRouter({
 }: {
   characterSceneVisible?: boolean;
 }) {
-  const { tab } = useApp();
+  const { tab } = useNavigation();
   const view = (() => {
     switch (tab) {
       case "chat":

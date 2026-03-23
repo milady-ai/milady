@@ -1,6 +1,6 @@
 import { subscribeDesktopBridgeEvent } from "@miladyai/app-core/bridge";
 import type { Tab } from "@miladyai/app-core/navigation";
-import { useApp } from "@miladyai/app-core/state";
+import { useNavigation } from "../state/NavigationContext";
 import { useEffect } from "react";
 
 const MAIN_SURFACE_TABS = new Set<Tab>([
@@ -18,7 +18,7 @@ const MAIN_NAVIGATION_TABS = new Set<Tab>([
 ]);
 
 export function DesktopSurfaceNavigationRuntime() {
-  const { setTab, switchShellView } = useApp();
+  const { setTab, switchShellView } = useNavigation();
 
   useEffect(() => {
     return subscribeDesktopBridgeEvent({
