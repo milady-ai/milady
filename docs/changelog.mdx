@@ -3,6 +3,47 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-03-23" description="WeChat connector, settings redesign, Windows fixes" tags={["Feature", "Update", "Fix"]}>
+## WeChat connector
+
+Your agent can now connect to WeChat, the 21st supported messaging platform. The connector supports text and image messaging in both direct messages and group chats, multi-account management, and QR code login. Install it with `milady plugins install wechat` and configure it in your [social settings](/guides/connectors).
+
+## Tagalog language support
+
+The dashboard is now available in Tagalog (Filipino), bringing the total to seven supported languages. All 1,150 UI strings are translated, with technical terms kept in English. Your browser language is auto-detected — or switch manually from the language dropdown.
+
+## Settings redesign
+
+The [settings](/apps/dashboard/settings) page has been overhauled with a cleaner sidebar layout, consolidated Media and Voice into a single section, and moved Desktop Workspace under Advanced. Toggle switches are now unified to a consistent iOS-style design across the dashboard. The wallet and RPC section adds a cloud-vs-custom mode selector so you can switch between Eliza Cloud RPCs and your own endpoints in one click.
+
+## Telegram connector improvements
+
+The [Telegram connector](/connectors/telegram) now includes an "Allow all chats" toggle so you don't need to manually list every chat ID. Advanced settings like API Root and Test Chat ID are collapsed by default to reduce clutter, and the status indicator no longer shows a false "needs setup" warning when only optional fields are empty.
+
+## Plugins sidebar layout
+
+The [plugins](/plugins/overview) view now uses the same sidebar list layout as connectors — icon, name, ON/OFF badge, and chevron — making it easier to browse and configure plugins without switching between different UI patterns.
+
+## Updates
+
+- **Onboarding flow rewrite** — The [onboarding wizard](/guides/beginners-user-guide) now derives step order, back navigation, and the sidebar step list from a single source of truth. Back navigation works reliably (including connection → welcome), completed steps are clickable to jump backward, and forward sidebar jumps are blocked so login/finish validation can't be skipped.
+- **Cloud dashboard streamlined** — The [cloud dashboard](/guides/cloud) billing view is now a compact single-page layout with flat agent lists and simplified card nesting, making it faster to scan your agents and credits at a glance.
+- **Voice streaming quality** — Streaming text merge now handles Unicode normalization, abbreviations, decimal numbers, URLs, and ellipses correctly, so text-to-speech no longer splits sentences at unexpected points.
+- **i18n completeness** — Added 88+ missing translation keys across all non-English locales and replaced 29 hardcoded English strings with translatable calls. A regression test now enforces key parity across all locales.
+- **Browser surface stability** — The in-app browser window no longer crashes on mount in the desktop app. URL entry in the address bar now drives the webview reliably.
+- **Companion scrolling restored** — The companion transcript is scrollable again without hijacking camera zoom, and header navigation buttons have larger hit targets.
+
+## Bug fixes
+
+- Fixed the Windows desktop app crashing on startup due to a GPU sandbox initialization failure — the UI now renders correctly with hardware acceleration preserved
+- Fixed Windows desktop app getting stuck in a launch loop when window position was saved while minimized (coordinates like -32000, -32000)
+- Fixed stale browser engine profile data from previous versions causing startup errors on Windows — profile data is now cleared automatically on upgrade
+- Fixed the VRM avatar loader hanging on Windows by disabling the new WebGL rendering path unless explicitly opted in
+- Fixed a crash on macOS when building against older SDKs due to an unguarded resize cursor API call
+- Fixed the desktop "Reset Milady" menu action not completing reliably — reset now runs in the main process with proper API reachability probing and renderer sync
+- Fixed wallet private key export being accessible without authentication in development environments
+</Update>
+
 <Update label="2026-03-22" description="Desktop reset reliability, tests, disclosures" tags={["Update", "Fix", "Docs"]}>
 ## Main-process menu reset + renderer sync (Electrobun)
 
