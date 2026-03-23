@@ -9276,8 +9276,28 @@ async function handleRequest(
         );
       }
 
-      // If autoRestart is not explicitly false, restart the agent
-      if (body.autoRestart !== false && result.requiresRestart) {
+      // If autoRestart is requested and the runtime supports it, restart now.
+      // Otherwise fall back to deferred restart (UI must trigger manually).
+      const shouldAutoRestart =
+        body.autoRestart !== false && result.requiresRestart;
+      let restarting = false;
+
+      if (shouldAutoRestart && ctx?.onRestart) {
+        scheduleRuntimeRestart(`Plugin ${result.pluginName} installed`);
+        // Fire restart in background — don't block the response
+        ctx.onRestart().then((newRuntime) => {
+          if (newRuntime) {
+            state.runtime = newRuntime;
+            state.agentState = "running";
+            state.pendingRestartReasons.length = 0;
+            ctx.onRuntimeSwapped?.();
+            logger.info(`[eliza-api] Agent restarted after plugin install: ${result.pluginName}`);
+          }
+        }).catch((err) => {
+          logger.error(`[eliza-api] Auto-restart after plugin install failed: ${err instanceof Error ? err.message : err}`);
+        });
+        restarting = true;
+      } else if (shouldAutoRestart) {
         scheduleRuntimeRestart(`Plugin ${result.pluginName} installed`);
       }
 
@@ -9289,9 +9309,12 @@ async function handleRequest(
           installPath: result.installPath,
         },
         requiresRestart: result.requiresRestart,
-        message: result.requiresRestart
-          ? `${result.pluginName} installed. Agent will restart to load it.`
-          : `${result.pluginName} installed.`,
+        restarting,
+        message: restarting
+          ? `${result.pluginName} installed. Agent is restarting...`
+          : result.requiresRestart
+            ? `${result.pluginName} installed. Restart required to activate.`
+            : `${result.pluginName} installed.`,
       });
     } catch (err) {
       error(
@@ -9326,7 +9349,24 @@ async function handleRequest(
         return;
       }
 
-      if (body.autoRestart !== false && result.requiresRestart) {
+      const shouldAutoRestart =
+        body.autoRestart !== false && result.requiresRestart;
+      let restarting = false;
+
+      if (shouldAutoRestart && ctx?.onRestart) {
+        scheduleRuntimeRestart(`Plugin ${pluginName} uninstalled`);
+        ctx.onRestart().then((newRuntime) => {
+          if (newRuntime) {
+            state.runtime = newRuntime;
+            state.agentState = "running";
+            state.pendingRestartReasons.length = 0;
+            ctx.onRuntimeSwapped?.();
+          }
+        }).catch((err) => {
+          logger.error(`[eliza-api] Auto-restart after plugin uninstall failed: ${err instanceof Error ? err.message : err}`);
+        });
+        restarting = true;
+      } else if (shouldAutoRestart) {
         scheduleRuntimeRestart(`Plugin ${pluginName} uninstalled`);
       }
 
@@ -9334,9 +9374,12 @@ async function handleRequest(
         ok: true,
         pluginName: result.pluginName,
         requiresRestart: result.requiresRestart,
-        message: result.requiresRestart
-          ? `${pluginName} uninstalled. Agent will restart.`
-          : `${pluginName} uninstalled.`,
+        restarting,
+        message: restarting
+          ? `${pluginName} uninstalled. Agent is restarting...`
+          : result.requiresRestart
+            ? `${pluginName} uninstalled. Restart required.`
+            : `${pluginName} uninstalled.`,
       });
     } catch (err) {
       error(
