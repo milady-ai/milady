@@ -154,7 +154,7 @@ Editors and coding agents **do not** see the native Electrobun window, hear audi
 **Why this exists**
 
 1. **Multi-process truth** — Health is not one PID. Vite, the API, and Electrobun can disagree on ports; logs are interleaved. A single JSON endpoint and one log file avoid “grep five terminals.”
-2. **Security vs convenience** — Screenshot and log tail endpoints are **loopback-only**; the screenshot path uses a **session token** between Electrobun and the API proxy; the log API only tails a file named **`desktop-dev-console.log`**. **Why:** local-first does not mean “any process on the LAN may pull your screen.”
+2. **Security vs convenience** — Screenshot and log tail endpoints are **loopback-only**; the Electrobun upstream accepts **`Authorization: Bearer <MILADY_SCREENSHOT_SERVER_TOKEN>`** only (**why:** query-string tokens would leak via access logs, Referer, and history). The Milady API proxy already forwards **Bearer** to that upstream. The log API only tails a file named **`desktop-dev-console.log`**. **Why:** local-first does not mean “any process on the LAN may pull your screen.”
 3. **Opt-out defaults** — Screenshot and aggregated logging are **on** for `dev:desktop` / `dev:desktop:watch` because agents and humans debugging together benefit; both disable with **`MILADY_DESKTOP_SCREENSHOT_SERVER=0`** and **`MILADY_DESKTOP_DEV_LOG=0`** so you can shrink attack surface or disk I/O.
 4. **Cursor does not auto-poll** — Discovery is **documentation + `.cursor/rules`** (see repo) plus you asking the agent to run `curl` or read a file. **Why:** the product does not silently scan your machine; hooks are there when instructed.
 
@@ -174,7 +174,7 @@ Script: `scripts/desktop-stack-status.mjs` (with `scripts/lib/desktop-stack-stat
 
 **Loopback only.** Proxies Electrobun’s dev server (default **`127.0.0.1:31339`**, override with **`MILADY_SCREENSHOT_SERVER_PORT`**) which uses the same **OS-level capture** as `ScreenCaptureManager.takeScreenshot()` (e.g. macOS `screencapture`). **Not** webview-only pixels.
 
-**Why proxy through the API:** one URL on the familiar API port; token stays in env between orchestrator-spawned children. **Why full screen first:** window-ID capture is platform-specific; this path reuses existing, tested code.
+**Why proxy through the API:** one URL on the familiar API port; the proxy sends **`Authorization: Bearer`** to Electrobun (**why:** never `?token=` on the inner hop — avoids log/Referer leakage). The API **parses `MILADY_ELECTROBUN_SCREENSHOT_URL`** and **rejects non-loopback hosts** before `fetch` (**why:** mis-set or injected env must not SSRF from the API process). **Why full screen first:** window-ID capture is platform-specific; this path reuses existing, tested code.
 
 **Bind failures (`EADDRINUSE`):** Electrobun’s `screenshot-dev-server.ts` registers **`server.on("error")`** before **`listen()`**. **Why:** if the default port is already taken (second Milady stack, stray process), Node would otherwise emit an **unhandled** `'error'` on the HTTP server and could **crash the desktop shell**. You’ll see a **`[ScreenshotDev]`** warning in logs; set **`MILADY_SCREENSHOT_SERVER_PORT`** to a free port or stop the conflicting listener.
 
@@ -182,7 +182,7 @@ Script: `scripts/desktop-stack-status.mjs` (with `scripts/lib/desktop-stack-stat
 
 Prefixed **vite / api / electrobun** lines are mirrored to **`.milady/desktop-dev-console.log`** (session banner on each orchestrator start). **`GET /api/dev/console-log`** (loopback) returns a **text tail**; query **`maxLines`** (default 400, cap 5000) and **`maxBytes`** (default 256000).
 
-**Why a file:** agents can `read_file` the path from `desktopDevLog.filePath` without HTTP. **Why HTTP tail:** avoids reading multi-megabyte logs into context; caps prevent OOM. **Why basename allow-list:** `MILADY_DESKTOP_DEV_LOG_PATH` could otherwise be pointed at arbitrary files.
+**Why a file:** agents can `read_file` the path from `desktopDevLog.filePath` without HTTP. **Why HTTP tail:** avoids reading multi-megabyte logs into context; caps prevent OOM. **Why basename + `.milady` parent:** `MILADY_DESKTOP_DEV_LOG_PATH` could otherwise aim at `/tmp/evil/desktop-dev-console.log` with a matching basename; the API only allows paths whose **immediate parent directory is `.milady`** (dev-platform uses `<repo>/.milady/desktop-dev-console.log`).
 
 ## Related source
 

@@ -1,20 +1,26 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   isAllowedDevConsoleLogPath,
   readDevConsoleLogTail,
 } from "./dev-console-log.js";
 
 describe("dev-console-log", () => {
-  it("isAllowedDevConsoleLogPath only allows the expected basename", () => {
+  it("isAllowedDevConsoleLogPath requires basename and .milady parent", () => {
     expect(isAllowedDevConsoleLogPath("/tmp/desktop-dev-console.log")).toBe(
-      true,
+      false,
     );
+    expect(
+      isAllowedDevConsoleLogPath("/tmp/.milady/desktop-dev-console.log"),
+    ).toBe(true);
     expect(
       isAllowedDevConsoleLogPath("/repo/.milady/desktop-dev-console.log"),
     ).toBe(true);
+    expect(
+      isAllowedDevConsoleLogPath("/tmp/.evil/desktop-dev-console.log"),
+    ).toBe(false);
     expect(isAllowedDevConsoleLogPath("/etc/passwd")).toBe(false);
   });
 

@@ -1,8 +1,9 @@
 /**
  * Tail read for `GET /api/dev/console-log`.
  *
- * **Why basename allow-list:** `MILADY_DESKTOP_DEV_LOG_PATH` is process env; a malicious or mistaken
- * value could otherwise point at arbitrary files. Only `desktop-dev-console.log` is accepted.
+ * **Why basename + `.milady` parent allow-list:** `MILADY_DESKTOP_DEV_LOG_PATH` is process env; basename
+ * alone would still allow `/tmp/.evil/desktop-dev-console.log`. Dev-platform writes under
+ * `<repo>/.milady/desktop-dev-console.log`; require the immediate parent directory to be `.milady`.
  *
  * **Why byte window + line cap:** agents should not load multi-hour logs into context; reading the
  * tail from the end of the file keeps memory bounded.
@@ -12,7 +13,9 @@ import path from "node:path";
 
 /** Limits which file the API may tail (env is untrusted even on loopback). */
 export function isAllowedDevConsoleLogPath(absPath: string): boolean {
-  return path.basename(absPath) === "desktop-dev-console.log";
+  const norm = path.normalize(absPath);
+  if (path.basename(norm) !== "desktop-dev-console.log") return false;
+  return path.basename(path.dirname(norm)) === ".milady";
 }
 
 export type ReadDevConsoleLogResult =

@@ -35,7 +35,7 @@ Produces `src/libMacWindowEffects.dylib` (consumed via Bun FFI at runtime).
 
 ## Dev screenshot loopback (`src/screenshot-dev-server.ts`)
 
-When **`MILADY_DESKTOP_SCREENSHOT_SERVER`** is enabled (root **`dev:desktop` / `dev:desktop:watch`** sets it by default), the main process listens on **`127.0.0.1:31339`** (override **`MILADY_SCREENSHOT_SERVER_PORT`**) and serves **`/cursor-screenshot.png`** so the Milady API can proxy **`GET /api/dev/cursor-screenshot`**. **Why in Electrobun:** OS-level capture (`ScreenCaptureManager` / `screencapture`) runs in the native shell, not the API process. **Why `server.on("error")` before `listen()`:** bind failures (**`EADDRINUSE`**) must not become an unhandled **`error`** event (that can crash the desktop). Logs show **`[ScreenshotDev]`** with a port hint instead.
+When **`MILADY_DESKTOP_SCREENSHOT_SERVER`** is enabled (root **`dev:desktop` / `dev:desktop:watch`** sets it by default), the main process listens on **`127.0.0.1:31339`** (override **`MILADY_SCREENSHOT_SERVER_PORT`**) and serves **`/cursor-screenshot.png`** so the Milady API can proxy **`GET /api/dev/cursor-screenshot`**. **Auth:** **`Authorization: Bearer <MILADY_SCREENSHOT_SERVER_TOKEN>`** only (**why:** query params would surface in logs and Referer). **Why in Electrobun:** OS-level capture (`ScreenCaptureManager` / `screencapture`) runs in the native shell, not the API process. **Why `server.on("error")` before `listen()`:** bind failures (**`EADDRINUSE`**) must not become an unhandled **`error`** event (that can crash the desktop). Logs show **`[ScreenshotDev]`** with a port hint instead.
 
 See [Desktop local development — observability](../../docs/apps/desktop-local-development.md).
 

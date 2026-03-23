@@ -48,6 +48,7 @@ import {
   isAllowedDevConsoleLogPath,
   readDevConsoleLogTail,
 } from "./dev-console-log";
+import { parseAllowedLoopbackHttpUrl } from "./dev-loopback-url";
 import { resolveDevStackFromEnv } from "./dev-stack";
 import {
   getStewardBridgeStatus,
@@ -2329,12 +2330,20 @@ async function handleMiladyCompatRoute(
       });
       return true;
     }
+    const upstreamUrl = parseAllowedLoopbackHttpUrl(upstream);
+    if (!upstreamUrl) {
+      sendJsonResponse(res, 502, {
+        error: "invalid MILADY_ELECTROBUN_SCREENSHOT_URL",
+        hint: "URL must be http(s) with hostname 127.0.0.1, localhost, or ::1 (SSRF hardening). Example: http://127.0.0.1:31339",
+      });
+      return true;
+    }
     const token = process.env.MILADY_SCREENSHOT_SERVER_TOKEN?.trim() ?? "";
-    const base = upstream.replace(/\/$/, "");
-    const target = `${base}/cursor-screenshot.png`;
+    const target = `${upstreamUrl.origin}/cursor-screenshot.png`;
     try {
       const r = await fetch(target, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
+        redirect: "error",
       });
       if (!r.ok) {
         const text = await r.text().catch(() => "");

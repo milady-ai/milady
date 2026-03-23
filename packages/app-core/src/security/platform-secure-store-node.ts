@@ -1,3 +1,18 @@
+/**
+ * ## SECURITY — macOS Keychain writes (`security add-generic-password`)
+ *
+ * For **non-interactive** use, Apple’s CLI expects the password via **`-w <value>`**. Alternatives
+ * discussed in review (stdin pipe, `sh` + temp file + `cat`) still end up passing the secret on the
+ * **`security` process argv** when the tool is invoked, or they rely on a TTY prompt that Node does
+ * not provide. **Hex (`-X`)** is still reversible and ends up on argv.
+ *
+ * **Accepted residual risk (this Node backend):** the private key is visible in **`ps` to the same
+ * user (and root)** for the short lifetime of the `security` child — same class of exposure as many
+ * shell Keychain examples. **Linux** uses `secret-tool` with **stdin** (`secretToolStoreWithStdin`),
+ * which avoids argv for the secret bytes. **Follow-up:** call **Security.framework** / **SecItemAdd**
+ * via a small native helper or **Bun FFI** so secrets never cross argv — see
+ * `docs/guides/platform-secure-store.md` (macOS Node implementation + accepted risk).
+ */
 import { execFile, spawn } from "node:child_process";
 import { promisify } from "node:util";
 
@@ -107,7 +122,7 @@ class MacOSKeychainPlatformSecureStore implements PlatformSecureStore {
   ): Promise<SecureStoreGetResult> {
     const account = keychainAccountForSecretKind(vaultId, kind);
     try {
-      const { stdout, stderr } = await execFileAsync(
+      const { stdout } = await execFileAsync(
         "security",
         [
           "find-generic-password",

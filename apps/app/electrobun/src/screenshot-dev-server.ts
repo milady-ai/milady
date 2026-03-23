@@ -11,8 +11,9 @@
  * generates a session token and the API proxy adds a single URL on the familiar API port.
  *
  * Enable with MILADY_DESKTOP_SCREENSHOT_SERVER=`1` / `true` / `yes` (dev-platform sets `1` by default
- * for `dev:desktop:*`). Port: MILADY_SCREENSHOT_SERVER_PORT (default 31339). Auth: MILADY_SCREENSHOT_SERVER_TOKEN
- * as Bearer or ?token=.
+ * for `dev:desktop:*`). Port: MILADY_SCREENSHOT_SERVER_PORT (default 31339). When set, auth is
+ * **`Authorization: Bearer <MILADY_SCREENSHOT_SERVER_TOKEN>`** only (**why:** a `?token=` query would
+ * leak into HTTP access logs, Referer, and shell history; the Milady API proxy already uses Bearer).
  *
  * **Why 503 with no PNG on macOS:** `takeScreenshot()` runs `screencapture`; without **Screen Recording**
  * for this app (or the parent terminal), TCC blocks capture and no file is produced—indistinguishable
@@ -62,8 +63,7 @@ export function startScreenshotDevServer(): (() => void) | undefined {
 
       if (token) {
         const auth = req.headers.authorization;
-        const q = u.searchParams.get("token");
-        const ok = auth === `Bearer ${token}` || (q != null && q === token);
+        const ok = auth === `Bearer ${token}`;
         if (!ok) {
           res.writeHead(401, { "Content-Type": "text/plain; charset=utf-8" });
           res.end("unauthorized");

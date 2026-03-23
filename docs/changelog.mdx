@@ -3,6 +3,21 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-03-24" description="Security: Keychain argv note, screenshot Bearer-only auth" tags={["Security", "Docs"]}>
+## Platform secure store — document macOS `security` CLI argv exposure
+
+**Why:** `MacOSKeychainPlatformSecureStore.set` calls `security add-generic-password -w <secret>`. The secret is on the child **argv** briefly (visible in `ps` to same-user / root). Linux `secret-tool store` uses **stdin** instead.
+
+**Docs:** [Platform secure store — macOS Node implementation](/guides/platform-secure-store#macos-keychain-cli-argv) (mitigations, read/delete behavior, follow-up: Security.framework / Bun FFI). **Code comment:** `packages/app-core/src/security/platform-secure-store-node.ts`. **Wallet doc** links the same anchor.
+
+## Dev screenshot server — drop `?token=` query auth
+
+**Why:** A query param leaks into HTTP access logs, Referer, and browser history. Risk is low (loopback + dev-only) but unnecessary: the Milady API proxy already uses **`Authorization: Bearer`**.
+
+**Change:** `apps/app/electrobun/src/screenshot-dev-server.ts` accepts **Bearer only**. **Docs:** `docs/apps/desktop-local-development.md`, `docs/guides/platform-secure-store.md` (cross-reference), `apps/app/electrobun/README.md`.
+
+</Update>
+
 <Update label="2026-03-24" description="Chat conversation list: delete confirm, rename modal + Suggest, title tooltips, modal stacking" tags={["Feature", "Fix", "UX"]}>
 ## Chat — conversation sidebar (dashboard + companion game shell)
 
