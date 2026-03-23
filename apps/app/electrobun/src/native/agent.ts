@@ -816,6 +816,29 @@ export class AgentManager {
         MILADY_PORT: String(apiPort),
       };
 
+      // OS-store hydration is opt-in for CLI (`MILADY_WALLET_OS_STORE=1`). Embedded
+      // desktop defaults to on when unset so migrate-to-keychain keeps working.
+      if (
+        (process.platform === "darwin" || process.platform === "linux") &&
+        childEnv.MILADY_WALLET_OS_STORE === undefined
+      ) {
+        childEnv.MILADY_WALLET_OS_STORE = "1";
+      }
+
+      if (
+        process.platform === "darwin" &&
+        !childEnv.MILADY_MACOS_KEYCHAIN_HELPER
+      ) {
+        const bundledHelper = joinPortable(
+          miladyDistPath,
+          "bin",
+          "milady-keychain-store",
+        );
+        if (fs.existsSync(bundledHelper)) {
+          childEnv.MILADY_MACOS_KEYCHAIN_HELPER = bundledHelper;
+        }
+      }
+
       // node-llama-cpp crashes Bun on Windows during packaged startup.
       // Disable local embeddings until upstream fix lands.
       if (process.platform === "win32") {

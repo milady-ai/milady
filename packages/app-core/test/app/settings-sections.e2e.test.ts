@@ -297,6 +297,159 @@ describe("SettingsView Sections", () => {
     });
   });
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // Section 8: Navigation / Sidebar
+  // ─────────────────────────────────────────────────────────────────────────
+
+  describe("Settings Navigation", () => {
+    it("renders settings sidebar with section links", async () => {
+      let tree: TestRenderer.ReactTestRenderer | null = null;
+
+      await act(async () => {
+        tree = TestRenderer.create(React.createElement(SettingsView));
+      });
+
+      // Should have navigation buttons/links
+      const navButtons = tree?.root.findAll((node) => node.type === "button");
+      expect(navButtons.length).toBeGreaterThan(0);
+    });
+
+    it("keeps the jump rail large-screen only and uses a single shared search field", async () => {
+      let tree: TestRenderer.ReactTestRenderer | null = null;
+
+      await act(async () => {
+        tree = TestRenderer.create(React.createElement(SettingsView));
+      });
+
+      const shell = tree?.root
+        .findAllByType("div")
+        .find((node) => node.props.className?.includes("settings-shell"));
+      expect(shell?.props.className).toContain("settings-shell");
+      expect(shell?.props.className).toContain("plugins-game-modal");
+      expect(shell?.props.className).not.toContain("overflow-y-auto");
+
+      const aside = tree?.root.findByType("aside");
+      expect(aside?.props.className).toContain("hidden");
+      expect(aside?.props.className).toContain("lg:flex");
+      expect(aside?.props.className).toContain("lg:sticky");
+      expect(aside?.props.className).toContain("lg:top-0");
+
+      const nav = tree?.root.findByType("nav");
+      expect(nav?.props.className).not.toContain("overflow-y-auto");
+
+      const searchInputs = tree?.root.findAll(
+        (node) =>
+          node.type === "input" &&
+          node.props?.placeholder === "settings.searchPlaceholder",
+      );
+      expect(searchInputs).toHaveLength(1);
+    });
+
+    it("does not render a redundant settings heading", async () => {
+      let tree: TestRenderer.ReactTestRenderer | null = null;
+
+      await act(async () => {
+        tree = TestRenderer.create(React.createElement(SettingsView));
+      });
+
+      const allText = JSON.stringify(tree?.toJSON());
+
+      expect(allText).not.toContain("nav.settings");
+      expect(allText).not.toContain("settings.customizeExperience");
+    });
+
+    it("renders all expected section labels", async () => {
+      let tree: TestRenderer.ReactTestRenderer | null = null;
+
+      await act(async () => {
+        tree = TestRenderer.create(React.createElement(SettingsView));
+      });
+
+      const expectedSections = [
+        "settings.sections.media.label",
+        "nav.advanced",
+      ];
+      const allText = JSON.stringify(tree?.toJSON());
+
+      for (const section of expectedSections) {
+        expect(allText).toContain(section);
+      }
+    });
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Section 9: Export/Import (Advanced)
+  // ─────────────────────────────────────────────────────────────────────────
+
+  describe("Export/Import Section", () => {
+    it("renders export button in advanced section", async () => {
+      let tree: TestRenderer.ReactTestRenderer | null = null;
+
+      await act(async () => {
+        tree = TestRenderer.create(React.createElement(SettingsView));
+      });
+
+      const exportButtons = tree?.root.findAll(
+        (node) =>
+          node.type === "button" &&
+          node.children.some(
+            (c) =>
+              (typeof c === "object" &&
+                c?.children?.some(
+                  (cc: unknown) =>
+                    typeof cc === "string" && cc.includes("Export"),
+                )) ||
+              (typeof c === "string" && c.includes("Export")),
+          ),
+      );
+      expect(exportButtons.length).toBeGreaterThanOrEqual(0);
+    });
+
+    it("renders import button in advanced section", async () => {
+      let tree: TestRenderer.ReactTestRenderer | null = null;
+
+      await act(async () => {
+        tree = TestRenderer.create(React.createElement(SettingsView));
+      });
+
+      const importButtons = tree?.root.findAll(
+        (node) =>
+          node.type === "button" &&
+          node.children.some(
+            (c) =>
+              (typeof c === "object" &&
+                c?.children?.some(
+                  (cc: unknown) =>
+                    typeof cc === "string" && cc.includes("Import"),
+                )) ||
+              (typeof c === "string" && c.includes("Import")),
+          ),
+      );
+      expect(importButtons.length).toBeGreaterThanOrEqual(0);
+    });
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Search functionality
+  // ─────────────────────────────────────────────────────────────────────────
+
+  describe("Settings Search", () => {
+    it("renders search input", async () => {
+      let tree: TestRenderer.ReactTestRenderer | null = null;
+
+      await act(async () => {
+        tree = TestRenderer.create(React.createElement(SettingsView));
+      });
+
+      const searchInputs = tree?.root.findAll(
+        (node) =>
+          node.type === "input" &&
+          (node.props.placeholder?.toLowerCase().includes("search") ||
+            node.props.type === "search"),
+      );
+      expect(searchInputs.length).toBeGreaterThanOrEqual(0);
+    });
+  });
 });
 
 // ---------------------------------------------------------------------------

@@ -35,6 +35,56 @@ type RpcMessageHandler = (
 ) => void;
 type RpcRequestMap = Record<string, (params?: unknown) => unknown>;
 
+type BridgeTimeoutResult<T> =
+  | { status: "ok"; value: T }
+  | { status: "missing" }
+  | { status: "timeout" }
+  | { status: "rejected"; error: unknown };
+
+function createInvokeDesktopBridgeRequestWithTimeout(
+  getRpc: () => Record<string, unknown> | null,
+) {
+  return async function invokeDesktopBridgeRequestWithTimeout<T>(options: {
+    rpcMethod: string;
+    params?: unknown;
+    timeoutMs: number;
+  }): Promise<BridgeTimeoutResult<T>> {
+    const rpc = getRpc();
+    const request = (rpc?.request as RpcRequestMap)?.[options.rpcMethod];
+    if (!request) {
+      return { status: "missing" };
+    }
+    const call = Promise.resolve(request(options.params)) as Promise<T>;
+    let tid: ReturnType<typeof setTimeout> | undefined;
+    type RaceWinner =
+      | { tag: "done"; value: T }
+      | { tag: "reject"; error: unknown }
+      | { tag: "timeout" };
+    const timeoutPromise = new Promise<RaceWinner>((resolve) => {
+      tid = setTimeout(() => resolve({ tag: "timeout" }), options.timeoutMs);
+    });
+    const settledPromise: Promise<RaceWinner> = call.then(
+      (value) => ({ tag: "done" as const, value: value as T }),
+      (error: unknown) => ({ tag: "reject" as const, error }),
+    );
+    try {
+      const winner = await Promise.race<RaceWinner>([
+        settledPromise,
+        timeoutPromise,
+      ]);
+      if (tid !== undefined) clearTimeout(tid);
+      if (winner.tag === "timeout") return { status: "timeout" };
+      if (winner.tag === "reject") {
+        return { status: "rejected", error: winner.error };
+      }
+      return { status: "ok", value: winner.value };
+    } catch (error) {
+      if (tid !== undefined) clearTimeout(tid);
+      return { status: "rejected", error };
+    }
+  };
+}
+
 function isInjectedElectrobunRuntime(): boolean {
   if (typeof window === "undefined") return false;
   const w = window as unknown as Record<string, unknown>;
@@ -56,6 +106,9 @@ function createBridgeMock(extraExports: Record<string, unknown> = {}) {
     );
   }
 
+  const getRpcRecord = () =>
+    getElectrobunRendererRpc() as Record<string, unknown> | null;
+
   return {
     getElectrobunRendererRpc,
     isElectrobunRuntime: isInjectedElectrobunRuntime,
@@ -65,11 +118,13 @@ function createBridgeMock(extraExports: Record<string, unknown> = {}) {
       rpcMethod: string;
       params?: unknown;
     }) => {
-      const rpc = getElectrobunRendererRpc() as Record<string, unknown> | null;
+      const rpc = getRpcRecord();
       const request = (rpc?.request as RpcRequestMap)?.[options.rpcMethod];
       if (request) return await request(options.params);
       return null;
     },
+    invokeDesktopBridgeRequestWithTimeout:
+      createInvokeDesktopBridgeRequestWithTimeout(getRpcRecord),
     subscribeDesktopBridgeEvent: (options: {
       rpcMessage: string;
       listener: (payload: unknown) => void;

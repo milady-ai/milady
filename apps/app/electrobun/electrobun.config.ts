@@ -9,6 +9,10 @@ const libMacWindowEffectsDylib = path.join(
   "src",
   "libMacWindowEffects.dylib",
 );
+const miladyKeychainStoreBin = path.join(
+  electrobunDir,
+  "../../../packages/app-core/native/macos/milady-keychain-store/.build/release/milady-keychain-store",
+);
 
 export default {
   app: {
@@ -69,6 +73,12 @@ export default {
       ...(process.platform === "darwin" &&
       fs.existsSync(libMacWindowEffectsDylib)
         ? { "src/libMacWindowEffects.dylib": "libMacWindowEffects.dylib" }
+        : {}),
+      ...(process.platform === "darwin" && fs.existsSync(miladyKeychainStoreBin)
+        ? {
+            "../../../packages/app-core/native/macos/milady-keychain-store/.build/release/milady-keychain-store":
+              "milady-dist/bin/milady-keychain-store",
+          }
         : {}),
     },
     mac: {

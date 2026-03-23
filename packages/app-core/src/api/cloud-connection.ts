@@ -177,20 +177,10 @@ export function resolveCloudConnectionSnapshot(
       ? (config.cloud as Record<string, unknown>)
       : undefined;
   const explicitlyDisabled = cloudRecord?.enabled === false;
-  const provider =
-    typeof cloudRecord?.provider === "string"
-      ? cloudRecord.provider.trim().toLowerCase()
-      : "";
-  const inferenceMode =
-    typeof cloudRecord?.inferenceMode === "string"
-      ? cloudRecord.inferenceMode.trim().toLowerCase()
-      : "";
   const enabled =
     !explicitlyDisabled &&
     (config.cloud?.enabled === true ||
-      getCloudSecret("ELIZAOS_CLOUD_ENABLED") === "true" ||
-      provider === "elizacloud" ||
-      inferenceMode === "cloud");
+      getCloudSecret("ELIZAOS_CLOUD_ENABLED") === "true");
   const apiKey = resolveCloudApiKey(config);
   const cloudAuth = getCloudAuth(runtime);
   const authConnected = Boolean(cloudAuth?.isAuthenticated?.());

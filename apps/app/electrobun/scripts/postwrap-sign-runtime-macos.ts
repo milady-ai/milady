@@ -311,6 +311,14 @@ function shouldRun(env: NodeJS.ProcessEnv = process.env): boolean {
   return true;
 }
 
+function resolveMiladyKeychainHelperPath(
+  runtimeNodeModulesPath: string,
+): string | null {
+  const miladyDist = path.dirname(runtimeNodeModulesPath);
+  const helper = joinPortable(miladyDist, "bin", "milady-keychain-store");
+  return fs.existsSync(helper) ? helper : null;
+}
+
 function main(): void {
   if (!shouldRun()) {
     console.log("[runtime-sign] skipping nested runtime codesign");
@@ -339,8 +347,15 @@ function main(): void {
     }
   }
 
+  const keychainHelper = resolveMiladyKeychainHelperPath(
+    runtimeNodeModulesPath,
+  );
+  if (keychainHelper && signRuntimeFile(keychainHelper, developerId)) {
+    signedCount += 1;
+  }
+
   console.log(
-    `[runtime-sign] signed ${signedCount} Mach-O file(s) under ${runtimeNodeModulesPath}`,
+    `[runtime-sign] signed ${signedCount} Mach-O file(s) under milady-dist (node_modules + optional bin helper)`,
   );
 }
 

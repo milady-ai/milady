@@ -7,7 +7,7 @@
 // @vitest-environment jsdom
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // ── Hoisted mocks ─────────────────────────────────────────────────────
 
@@ -19,15 +19,45 @@ const { mockUseApp, mockIsWeb, mockIsDesktop, mockIsNative } = vi.hoisted(
     mockIsNative: { value: false },
   }),
 );
-const {
-  mockGetPermissions,
-  mockInvokeDesktopBridgeRequest,
-  mockSubscribeDesktopBridgeEvent,
-} = vi.hoisted(() => ({
+const { mockGetPermissions } = vi.hoisted(() => ({
   mockGetPermissions: vi.fn(),
-  mockInvokeDesktopBridgeRequest: vi.fn(),
-  mockSubscribeDesktopBridgeEvent: vi.fn(),
 }));
+
+const {
+  rpcPermissionsGetAll,
+  rpcPermissionsIsShellEnabled,
+  rpcPermissionsGetPlatform,
+  rpcOnMessage,
+  rpcOffMessage,
+} = vi.hoisted(() => ({
+  rpcPermissionsGetAll: vi.fn(),
+  rpcPermissionsIsShellEnabled: vi.fn(),
+  rpcPermissionsGetPlatform: vi.fn(),
+  rpcOnMessage: vi.fn(
+    (_message: string, _listener: (payload: unknown) => void) => {},
+  ),
+  rpcOffMessage: vi.fn(),
+}));
+
+type MiladyTestWindow = Window & {
+  __MILADY_ELECTROBUN_RPC__?: {
+    request: Record<string, (params?: unknown) => unknown>;
+    onMessage: typeof rpcOnMessage;
+    offMessage: typeof rpcOffMessage;
+  };
+};
+
+function installMiladyDesktopRpc(): void {
+  (window as MiladyTestWindow).__MILADY_ELECTROBUN_RPC__ = {
+    request: {
+      permissionsGetAll: (params) => rpcPermissionsGetAll(params),
+      permissionsIsShellEnabled: () => rpcPermissionsIsShellEnabled(),
+      permissionsGetPlatform: () => rpcPermissionsGetPlatform(),
+    },
+    onMessage: rpcOnMessage,
+    offMessage: rpcOffMessage,
+  };
+}
 
 /** Mirrors `hasRequiredOnboardingPermissions` without importing `platform` (avoids bridge/init). */
 const { hasRequiredOnboardingPermissionsForTest } = vi.hoisted(() => {
@@ -70,11 +100,6 @@ vi.mock("@miladyai/app-core/api", () => ({
     openPermissionSettings: vi.fn(),
     setShellEnabled: vi.fn(),
   },
-}));
-
-vi.mock("../../src/bridge", () => ({
-  invokeDesktopBridgeRequest: mockInvokeDesktopBridgeRequest,
-  subscribeDesktopBridgeEvent: mockSubscribeDesktopBridgeEvent,
 }));
 
 vi.mock("@miladyai/ui", () => ({
@@ -185,13 +210,17 @@ function ensureNavigatorPermissionMocks(): void {
 describe("PermissionsOnboardingSection", () => {
   beforeEach(() => {
     ensureNavigatorPermissionMocks();
+    installMiladyDesktopRpc();
     mockUseApp.mockReset();
     mockIsWeb.mockReturnValue(false);
     mockIsDesktop.mockReturnValue(true);
     mockIsNative.value = false;
     mockGetPermissions.mockReset();
-    mockInvokeDesktopBridgeRequest.mockReset();
-    mockSubscribeDesktopBridgeEvent.mockReset();
+    rpcPermissionsGetAll.mockReset();
+    rpcPermissionsIsShellEnabled.mockReset();
+    rpcPermissionsGetPlatform.mockReset();
+    rpcOnMessage.mockReset();
+    rpcOffMessage.mockReset();
     mockGetPermissions.mockResolvedValue({
       accessibility: { status: "granted", canRequest: false },
       "screen-recording": { status: "granted", canRequest: false },
@@ -199,30 +228,22 @@ describe("PermissionsOnboardingSection", () => {
       camera: { status: "granted", canRequest: false },
       shell: { status: "granted", canRequest: false },
     });
-    mockInvokeDesktopBridgeRequest.mockImplementation(
-      async (options: { rpcMethod: string }) => {
-        if (options.rpcMethod === "permissionsGetAll") {
-          return {
-            accessibility: { status: "granted", canRequest: false },
-            "screen-recording": { status: "granted", canRequest: false },
-            microphone: { status: "granted", canRequest: false },
-            camera: { status: "granted", canRequest: false },
-            shell: { status: "granted", canRequest: false },
-          };
-        }
-        if (options.rpcMethod === "permissionsIsShellEnabled") {
-          return true;
-        }
-        if (options.rpcMethod === "permissionsGetPlatform") {
-          return "darwin";
-        }
-        return null;
-      },
-    );
-    mockSubscribeDesktopBridgeEvent.mockImplementation(() => () => {});
+    rpcPermissionsGetAll.mockResolvedValue({
+      accessibility: { status: "granted", canRequest: false },
+      "screen-recording": { status: "granted", canRequest: false },
+      microphone: { status: "granted", canRequest: false },
+      camera: { status: "granted", canRequest: false },
+      shell: { status: "granted", canRequest: false },
+    });
+    rpcPermissionsIsShellEnabled.mockResolvedValue(true);
+    rpcPermissionsGetPlatform.mockResolvedValue("darwin");
     vi.mocked(navigator.permissions.query).mockReset();
     vi.mocked(navigator.mediaDevices.getUserMedia).mockReset();
     vi.mocked(navigator.mediaDevices.enumerateDevices).mockReset();
+  });
+
+  afterEach(() => {
+    delete (window as MiladyTestWindow).__MILADY_ELECTROBUN_RPC__;
   });
 
   it("renders web auto-continue view when isWebPlatform() is true", async () => {
@@ -315,11 +336,7 @@ describe("PermissionsOnboardingSection", () => {
     // Should show system permissions title and grant UI
     expect(text).toContain("System Permissions");
     expect(text).toContain("Continue");
-    expect(mockInvokeDesktopBridgeRequest).toHaveBeenCalledWith({
-      rpcMethod: "permissionsGetAll",
-      ipcChannel: "permissions:getAll",
-      params: undefined,
-    });
+    expect(rpcPermissionsGetAll).toHaveBeenCalledWith(undefined);
     expect(mockGetPermissions).not.toHaveBeenCalled();
 
     const continueBtn = root.findByProps({
@@ -338,26 +355,13 @@ describe("PermissionsOnboardingSection", () => {
     mockIsNative.value = false;
     const onContinue = vi.fn();
     mockUseApp.mockReturnValue(baseContext());
-    mockInvokeDesktopBridgeRequest.mockImplementation(
-      async (options: { rpcMethod: string }) => {
-        if (options.rpcMethod === "permissionsGetAll") {
-          return {
-            accessibility: { status: "denied", canRequest: false },
-            "screen-recording": { status: "granted", canRequest: false },
-            microphone: { status: "granted", canRequest: false },
-            camera: { status: "granted", canRequest: false },
-            shell: { status: "granted", canRequest: false },
-          };
-        }
-        if (options.rpcMethod === "permissionsIsShellEnabled") {
-          return true;
-        }
-        if (options.rpcMethod === "permissionsGetPlatform") {
-          return "darwin";
-        }
-        return null;
-      },
-    );
+    rpcPermissionsGetAll.mockResolvedValue({
+      accessibility: { status: "denied", canRequest: false },
+      "screen-recording": { status: "granted", canRequest: false },
+      microphone: { status: "granted", canRequest: false },
+      camera: { status: "granted", canRequest: false },
+      shell: { status: "granted", canRequest: false },
+    });
 
     let tree: TestRenderer.ReactTestRenderer | undefined;
     await act(async () => {
@@ -391,26 +395,13 @@ describe("PermissionsOnboardingSection", () => {
     mockIsNative.value = false;
     const onContinue = vi.fn();
     mockUseApp.mockReturnValue(baseContext());
-    mockInvokeDesktopBridgeRequest.mockImplementation(
-      async (options: { rpcMethod: string }) => {
-        if (options.rpcMethod === "permissionsGetAll") {
-          return {
-            accessibility: { status: "granted", canRequest: false },
-            "screen-recording": { status: "granted", canRequest: false },
-            microphone: { status: "granted", canRequest: false },
-            camera: { status: "not-determined", canRequest: true },
-            shell: { status: "granted", canRequest: false },
-          };
-        }
-        if (options.rpcMethod === "permissionsIsShellEnabled") {
-          return true;
-        }
-        if (options.rpcMethod === "permissionsGetPlatform") {
-          return "darwin";
-        }
-        return null;
-      },
-    );
+    rpcPermissionsGetAll.mockResolvedValue({
+      accessibility: { status: "granted", canRequest: false },
+      "screen-recording": { status: "granted", canRequest: false },
+      microphone: { status: "granted", canRequest: false },
+      camera: { status: "not-determined", canRequest: true },
+      shell: { status: "granted", canRequest: false },
+    });
     vi.mocked(navigator.permissions.query).mockImplementation(
       async ({ name }: { name: PermissionName }) =>
         ({

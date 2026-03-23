@@ -122,7 +122,7 @@ describe("cloud status routes", () => {
     });
   });
 
-  test("reports cloud as enabled when inferenceMode is cloud without explicit enabled flag", async () => {
+  test("does not treat inferenceMode cloud as enabled without explicit opt-in", async () => {
     const result = await invoke({
       method: "GET",
       pathname: "/api/cloud/status",
@@ -133,13 +133,13 @@ describe("cloud status routes", () => {
     expect(result.handled).toBe(true);
     expect(result.payload).toEqual({
       connected: false,
-      enabled: true,
+      enabled: false,
       hasApiKey: false,
       reason: "runtime_not_started",
     });
   });
 
-  test("reports cloud as enabled when provider is elizacloud", async () => {
+  test("does not treat provider elizacloud as enabled without explicit opt-in", async () => {
     const result = await invoke({
       method: "GET",
       pathname: "/api/cloud/status",
@@ -150,7 +150,7 @@ describe("cloud status routes", () => {
     expect(result.handled).toBe(true);
     expect(result.payload).toEqual({
       connected: false,
-      enabled: true,
+      enabled: false,
       hasApiKey: false,
       reason: "runtime_not_started",
     });

@@ -7,8 +7,13 @@ describe("isWalletOsStoreReadEnabled", () => {
     delete process.env.MILADY_WALLET_OS_STORE;
   });
 
-  it("defaults to enabled", () => {
+  it("defaults to disabled when unset", () => {
     delete process.env.MILADY_WALLET_OS_STORE;
+    expect(isWalletOsStoreReadEnabled()).toBe(false);
+  });
+
+  it.each(["1", "true", "on", "yes", "TRUE", "ON"])("enables for %s", (v) => {
+    process.env.MILADY_WALLET_OS_STORE = v;
     expect(isWalletOsStoreReadEnabled()).toBe(true);
   });
 
@@ -21,6 +26,11 @@ describe("isWalletOsStoreReadEnabled", () => {
     "OFF",
   ])("disables for %s", (v) => {
     process.env.MILADY_WALLET_OS_STORE = v;
+    expect(isWalletOsStoreReadEnabled()).toBe(false);
+  });
+
+  it("disables for unknown tokens (fail closed)", () => {
+    process.env.MILADY_WALLET_OS_STORE = "maybe";
     expect(isWalletOsStoreReadEnabled()).toBe(false);
   });
 });

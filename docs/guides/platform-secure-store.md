@@ -124,32 +124,30 @@ When loading wallet keys into the signing layer:
 - **Integration:** optional macOS CI job or manual checklist; never commit real keys.
 - **Security review:** ensure logs never print values; audit bridge IPC auth (loopback token, etc.).
 
-## macOS Node implementation: `security` CLI and argv exposure {#macos-keychain-cli-argv}
+## macOS Node implementation: stdin helper + `security` reads {#macos-keychain-cli-argv}
 
-The current **Node** backend (`packages/app-core/src/security/platform-secure-store-node.ts`, class `MacOSKeychainPlatformSecureStore`) shells out to Apple’s **`security`** tool.
+The **Node** backend (`packages/app-core/src/security/platform-secure-store-node.ts`, `MacOSKeychainPlatformSecureStore`) uses:
 
-### Writes (`add-generic-password -w <secret>`)
+### Writes — `milady-keychain-store` (Security.framework)
 
-**Issue:** The private key (or other secret) is passed as a **command-line argument** to `security`. While the `execFile` call is short-lived, the value can appear **momentarily in process listings** (`ps`, Activity Monitor, etc.) for the same user and for **root** — a known limitation of invoking CLI tools that only accept secrets via `-w`.
+A small **Swift** helper under `packages/app-core/native/macos/milady-keychain-store/` calls **SecItemAdd** after **SecItemDelete** for the same service/account. The secret is read from **stdin** (one line), matching the **Linux** `secret-tool store` stdin model — **not** on the helper’s argv.
 
-**Contrast (Linux):** `secret-tool store` receives the secret on **stdin** (`secretToolStoreWithStdin`), so it does not sit in argv.
+**Build (repo dev / CI on macOS):**
 
-**Mitigations today:** keep using the store only from trusted contexts; avoid `ps` scraping on shared admin sessions; treat this as **defense-in-depth** alongside “no plaintext in config.”
+```bash
+cd packages/app-core/native/macos/milady-keychain-store && swift build -c release
+```
 
-**Follow-up (recommended):** replace CLI writes with **Security.framework** (Objective-C/Swift) or **Bun FFI** to the Keychain APIs so the secret never crosses argv. Reads use `find-generic-password -w` where `-w` means “write password to stdout” — the **secret bytes are not duplicated in argv** for that subcommand; only the **set** path is argv-sensitive.
+The runtime looks for `.build/release/milady-keychain-store` next to the compiled `platform-secure-store-node` module, or use **`MILADY_MACOS_KEYCHAIN_HELPER`** with an absolute path to the binary.
+
+**Packaged desktop:** place the release-built helper at **`milady-dist/bin/milady-keychain-store`**. Electrobun’s embedded agent sets **`MILADY_MACOS_KEYCHAIN_HELPER`** automatically when that file exists.
+
+If the helper is missing, **set** returns an error (migrate / wallet write fails with a clear message).
 
 ### Reads and deletes
 
-- **Read:** `find-generic-password … -w` — `-w` requests stdout output; arguments are service/account identifiers only.
-- **Delete:** `delete-generic-password` — no secret material on the command line.
-
-### Accepted residual risk — Node `security` **writes** (until native helper)
-
-Code review (**PR #1239**) flagged that **`add-generic-password -w <secret>`** places the raw key on the **`security` child argv**, briefly visible to **`ps`** for the same macOS user (and root). We **document** this rather than pretending temp files or shell wrappers remove argv exposure: any pattern that ends in `security … -w …` still passes the secret as an argument unless we call **Security.framework** directly.
-
-**Threat model we accept today:** local, same-user “shoulder surf” or automation scraping `ps` during the **milliseconds** the child runs — not remote attackers. **Linux** in the same module uses **stdin** and does **not** have this argv class.
-
-**Follow-up (blocking-class hardening):** ship a tiny **native** helper (Swift / ObjC / FFI) that calls **SecItemAdd** / **SecItemUpdate** so the secret never crosses argv.
+- **Read:** `security find-generic-password … -w` — `-w` means “emit password on stdout”; argv carries only service/account identifiers.
+- **Delete:** `security delete-generic-password` — no secret material on argv.
 
 ## Screenshot dev token (separate concern)
 

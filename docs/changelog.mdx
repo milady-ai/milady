@@ -3,12 +3,28 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
-<Update label="2026-03-24" description="Security: Keychain argv note, screenshot Bearer-only auth" tags={["Security", "Docs"]}>
-## Platform secure store — document macOS `security` CLI argv exposure
+<Update label="2026-03-24" description="Security: Keychain stdin helper, cloud opt-in, wallet store gates" tags={["Security", "Docs"]}>
+## macOS Keychain writes — `milady-keychain-store` (stdin, Security.framework)
 
-**Why:** `MacOSKeychainPlatformSecureStore.set` calls `security add-generic-password -w <secret>`. The secret is on the child **argv** briefly (visible in `ps` to same-user / root). Linux `secret-tool store` uses **stdin** instead.
+**Why:** `security add-generic-password -w` put private keys on **argv** (`ps`-visible). **Fix:** Swift helper `packages/app-core/native/macos/milady-keychain-store` reads the secret on **stdin** and calls **SecItemAdd**; override path with **`MILADY_MACOS_KEYCHAIN_HELPER`**. Reads still use `security find-generic-password` (secret on stdout, not argv).
 
-**Docs:** [Platform secure store — macOS Node implementation](/guides/platform-secure-store#macos-keychain-cli-argv) (mitigations, read/delete behavior, follow-up: Security.framework / Bun FFI). **Code comment:** `packages/app-core/src/security/platform-secure-store-node.ts`. **Wallet doc** links the same anchor.
+**Docs:** [Platform secure store — macOS](/guides/platform-secure-store#macos-keychain-cli-argv), [environment](/cli/environment#server-configuration).
+
+## Cloud `enabled` — explicit opt-in only
+
+**Why:** `resolveCloudConnectionSnapshot` treated `inferenceMode: "cloud"` or `provider: "elizacloud"` as enabled without `cloud.enabled: true`, so stale config could re-enable cloud after upgrade.
+
+**Fix:** `enabled` is true only when `cloud.enabled === true` or **`ELIZAOS_CLOUD_ENABLED=true`** secret (and not `enabled: false`). **Tests:** `packages/app-core/src/api/cloud-status-routes.test.ts`.
+
+## Wallet OS-store hydration — opt-in; desktop embedded API defaults on
+
+**Why:** Reading keys from the OS store into **`process.env`** should not run unless the user (or trusted shell) opts in.
+
+**Fix:** **`MILADY_WALLET_OS_STORE=1` / `true` / `on` / `yes`** enables hydration; unset is **off**. **Electrobun** embedded agent sets **`MILADY_WALLET_OS_STORE=1`** when unset so migrate-to-keychain still works on desktop.
+
+## `GET /api/wallet/os-store` — sensitive-route auth parity
+
+**Why:** Status JSON includes **`vaultId`**; matches **`POST`** by requiring **`ensureCompatSensitiveRouteAuthorized`** (token in prod; dev unchanged).
 
 ## Dev screenshot server — drop `?token=` query auth
 

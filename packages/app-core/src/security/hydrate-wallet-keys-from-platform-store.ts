@@ -16,6 +16,8 @@ const WALLET_ENV_PAIRS: [keyof NodeJS.ProcessEnv, SecureStoreSecretKind][] = [
  * Fills `process.env` wallet keys from the OS secret store when the key is
  * unset/blank. Runs before upstream `startApiServer` merges `config.env`, so
  * persisted config only fills gaps the store did not supply.
+ *
+ * Gated by **`MILADY_WALLET_OS_STORE`** (`1` / `true` / `on` / `yes`); unset is off.
  */
 export async function hydrateWalletKeysFromNodePlatformSecureStore(): Promise<void> {
   if (!isWalletOsStoreReadEnabled()) {

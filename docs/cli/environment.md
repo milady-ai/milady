@@ -41,6 +41,8 @@ These variables control the API server and network behavior.
 | `MILADY_ALLOWED_ORIGINS` | Comma-separated list of additional CORS origins allowed by the API server. | (unset) |
 | `MILADY_ALLOW_NULL_ORIGIN` | When set to `1`, allows the `null` origin in CORS (useful for file:// or desktop clients). | (unset) |
 | `MILADY_WALLET_EXPORT_TOKEN` | Auth token for the wallet export API endpoint. When unset, wallet exports are disabled. | (unset) |
+| `MILADY_WALLET_OS_STORE` | When `1` / `true` / `on` / `yes`, the API process **hydrates** `EVM_PRIVATE_KEY` / `SOLANA_PRIVATE_KEY` from the OS secret store at startup if env keys are blank. Unset defaults to **off** (opt-in). Set `0` / `false` / `off` / `no` to force off. The **Electrobun** embedded agent sets `1` when this variable is unset so desktop wallets keep working after keychain migrate. | (unset → off; desktop child may default `1`) |
+| `MILADY_MACOS_KEYCHAIN_HELPER` | Absolute path to the **`milady-keychain-store`** binary (Swift helper) for macOS Keychain **writes** without putting secrets on argv. If unset, the runtime searches `packages/app-core/native/macos/milady-keychain-store/.build/release/milady-keychain-store` relative to the compiled module. | (unset) |
 | `API_PORT` / `SERVER_PORT` | Alternative port overrides used by some runtime actions. Prefer `MILADY_PORT`. | (unset) |
 
 ---

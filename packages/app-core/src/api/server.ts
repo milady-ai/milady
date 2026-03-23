@@ -2078,7 +2078,7 @@ async function handleMiladyCompatRoute(
 
   // ── GET/POST /api/wallet/os-store (Keychain / Secret Service) ───────
   if (method === "GET" && url.pathname === "/api/wallet/os-store") {
-    if (!ensureCompatApiAuthorized(req, res)) {
+    if (!ensureCompatSensitiveRouteAuthorized(req, res)) {
       return true;
     }
 

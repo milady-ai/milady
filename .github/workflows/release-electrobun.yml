@@ -556,6 +556,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Build milady-keychain-store (macOS)
+        if: matrix.platform.os == 'macos'
+        run: |
+          set -euo pipefail
+          cd packages/app-core/native/macos/milady-keychain-store
+          swift build -c release
+          chmod +x .build/release/milady-keychain-store
+
       - name: Build Electrobun app
         run: |
           if [ "${{ matrix.platform.os }}" = "macos" ] && [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
