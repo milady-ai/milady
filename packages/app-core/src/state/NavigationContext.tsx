@@ -17,7 +17,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { type Tab, pathForTab } from "../navigation";
+import { COMPANION_ENABLED, type Tab, pathForTab } from "../navigation";
 import {
   deriveUiShellModeForTab,
   getTabForShellView,
@@ -54,8 +54,6 @@ export interface NavigationContextValue {
 const NavigationCtx = createContext<NavigationContextValue | null>(null);
 
 // ── Provider ────────────────────────────────────────────────────────
-
-const COMPANION_ENABLED = true;
 
 export function NavigationProvider({
   children,

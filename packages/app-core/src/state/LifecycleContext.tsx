@@ -266,18 +266,52 @@ export function useLifecycle(): LifecycleContextValue {
   const ctx = useContext(LifecycleCtx);
   if (ctx) return ctx;
   if (typeof process !== "undefined" && process.env.NODE_ENV === "test") {
-    return new Proxy({} as LifecycleContextValue, {
-      get(_, prop) {
-        if (prop === "startupStatus") return "ready";
-        if (prop === "startupPhase") return "ready";
-        if (prop === "systemWarnings") return [];
-        if (prop === "pendingRestartReasons") return [];
-        if (prop === "agentStatusRef") return { current: null };
-        return typeof prop === "string" && prop.startsWith("set")
-          ? () => {}
-          : null;
+    const noop = () => {};
+    return {
+      connected: false,
+      agentStatus: null,
+      onboardingComplete: false,
+      onboardingUiRevealNonce: 0,
+      onboardingLoading: false,
+      startupPhase: "ready" as StartupPhase,
+      startupStatus: "ready" as AppState["startupStatus"],
+      startupError: null,
+      startupRetryNonce: 0,
+      authRequired: false,
+      actionNotice: null,
+      lifecycleBusy: false,
+      lifecycleAction: null,
+      pendingRestart: false,
+      pendingRestartReasons: [],
+      restartBannerDismissed: false,
+      backendConnection: {
+        state: "disconnected" as const,
+        reconnectAttempt: 0,
+        maxReconnectAttempts: 15,
+        showDisconnectedUI: false,
       },
-    });
+      backendDisconnectedBannerDismissed: false,
+      systemWarnings: [],
+      setConnected: noop,
+      setAgentStatus: noop,
+      setOnboardingComplete: noop,
+      setOnboardingUiRevealNonce: noop as LifecycleContextValue["setOnboardingUiRevealNonce"],
+      setOnboardingLoading: noop,
+      setStartupPhase: noop,
+      setStartupError: noop,
+      setStartupRetryNonce: noop as LifecycleContextValue["setStartupRetryNonce"],
+      setAuthRequired: noop,
+      setActionNotice: noop as LifecycleContextValue["setActionNotice"],
+      setLifecycleBusy: noop,
+      setLifecycleAction: noop,
+      setPendingRestart: noop,
+      setPendingRestartReasons: noop as LifecycleContextValue["setPendingRestartReasons"],
+      setRestartBannerDismissed: noop,
+      setBackendConnection: noop as LifecycleContextValue["setBackendConnection"],
+      setBackendDisconnectedBannerDismissed: noop,
+      setSystemWarnings: noop as LifecycleContextValue["setSystemWarnings"],
+      agentStatusRef: { current: null },
+    };
   }
   throw new Error(
     "useLifecycle must be used within LifecycleProvider or AppProvider",

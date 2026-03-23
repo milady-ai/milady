@@ -8,7 +8,7 @@ export { LifecycleProvider } from "./LifecycleContext";
 export { NavigationProvider } from "./NavigationContext";
 export * from "./parsers";
 export * from "./persistence";
-export { TranslationProvider, useTranslation } from "./TranslationContext";
+export { TranslationProvider } from "./TranslationContext";
 export type { TranslateFn } from "./TranslationContext";
 export * from "./types";
 export * from "./useApp";
