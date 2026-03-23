@@ -1,6 +1,6 @@
 import { Button } from "@miladyai/ui";
 import type { RegistryAppInfo } from "../../api";
-import { useApp } from "../../state";
+import { useTranslation } from "../../state/TranslationContext";
 import { getAppEmoji, getAppShortName } from "./helpers";
 
 interface AppsCatalogGridProps {
@@ -36,7 +36,7 @@ export function AppsCatalogGrid({
   onSelectApp,
   onToggleActiveOnly,
 }: AppsCatalogGridProps) {
-  const { t } = useApp();
+  const { t } = useTranslation();
 
   return (
     <>

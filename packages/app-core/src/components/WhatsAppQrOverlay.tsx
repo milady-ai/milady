@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useWhatsAppPairing } from "../hooks";
-import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 
 interface WhatsAppQrOverlayProps {
   accountId?: string;
@@ -21,7 +21,7 @@ export function WhatsAppQrOverlay({
     stopPairing,
     disconnect,
   } = useWhatsAppPairing(accountId);
-  const { t } = useApp();
+  const { t } = useTranslation();
 
   // Fire onConnected once when status transitions to "connected"
   const firedRef = useRef(false);

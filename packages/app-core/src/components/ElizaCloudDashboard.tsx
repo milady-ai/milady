@@ -33,6 +33,7 @@ import {
   client,
 } from "../api";
 import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 import { Switch } from "./ui-switch";
 import { openExternalUrl } from "../utils";
 import { StripeEmbeddedCheckout } from "./StripeEmbeddedCheckout";
@@ -1432,7 +1433,7 @@ function AgentDetailSidebar({
   agent: CloudCompatAgent | undefined;
   onClose: () => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [logs, setLogs] = useState<string>("");
   const [statusDetail, setStatusDetail] = useState<StatusDetail | null>(null);
   const logsEndRef = useRef<HTMLDivElement>(null);

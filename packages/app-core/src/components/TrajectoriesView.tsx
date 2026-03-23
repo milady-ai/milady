@@ -12,7 +12,7 @@ import {
   type TrajectoryRecord,
   type TrajectoryStats,
 } from "@miladyai/app-core/api";
-import { useApp } from "@miladyai/app-core/state";
+import { useTranslation } from "../state/TranslationContext";
 import { confirmDesktopAction } from "@miladyai/app-core/utils";
 import {
   Button,
@@ -58,7 +58,7 @@ interface TrajectoriesViewProps {
 export function TrajectoriesView({
   onSelectTrajectory,
 }: TrajectoriesViewProps) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState<TrajectoryListResult | null>(null);
   const [stats, setStats] = useState<TrajectoryStats | null>(null);

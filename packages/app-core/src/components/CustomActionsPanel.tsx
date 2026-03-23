@@ -1,5 +1,5 @@
 import { type CustomActionDef, client } from "@miladyai/app-core/api";
-import { useApp } from "@miladyai/app-core/state";
+import { useTranslation } from "../state/TranslationContext";
 import { confirmDesktopAction } from "@miladyai/app-core/utils";
 import { Button, Input } from "@miladyai/ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -27,7 +27,7 @@ export function CustomActionsPanel({
   onClose,
   onOpenEditor,
 }: CustomActionsPanelProps) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [actions, setActions] = useState<CustomActionDef[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");

@@ -4,7 +4,7 @@
 
 import { Input } from "@miladyai/ui";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 
 interface SaveCommandModalProps {
   open: boolean;
@@ -21,7 +21,7 @@ export function SaveCommandModal({
   onSave,
   onClose,
 }: SaveCommandModalProps) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);

@@ -1,12 +1,13 @@
 import { isElectrobunRuntime } from "../bridge";
 import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 
 /**
  * Banner shown during WebSocket reconnection attempts (amber) and
  * after all attempts are exhausted (red). Offers Retry when failed.
  */
 export function ConnectionFailedBanner() {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const bannerTop = isElectrobunRuntime() ? 40 : 0;
   const {
     backendConnection,

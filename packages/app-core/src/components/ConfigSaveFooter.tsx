@@ -1,5 +1,5 @@
 import { Button } from "@miladyai/ui";
-import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 
 export function ConfigSaveFooter({
   dirty,
@@ -14,7 +14,7 @@ export function ConfigSaveFooter({
   saveSuccess: boolean;
   onSave: () => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   if (!dirty) {
     return null;
   }

@@ -11,7 +11,7 @@ import { Button, Input } from "@miladyai/ui";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { client, type QueryResult, type TableInfo } from "../api";
-import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 import { createVectorBrowserRenderer, THREE } from "./vector-browser-three";
 
 const PAGE_SIZE = 25;
@@ -306,7 +306,7 @@ function VectorGraph({
   memories: MemoryRecord[];
   onSelect: (mem: MemoryRecord) => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
@@ -543,7 +543,7 @@ function VectorGraph3D({
   memories: MemoryRecord[];
   onSelect: (mem: MemoryRecord) => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -1038,7 +1038,7 @@ function MemoryDetailModal({
   memory: MemoryRecord;
   onClose: () => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   return (
     <div
       className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-8"
@@ -1149,7 +1149,7 @@ function MemoryDetailModal({
 // ── Main component ─────────────────────────────────────────────────────
 
 export function VectorBrowserView({ leftNav }: { leftNav?: ReactNode }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [tables, setTables] = useState<TableInfo[]>([]);
   const [selectedTable, setSelectedTable] = useState("");
   const [memories, setMemories] = useState<MemoryRecord[]>([]);

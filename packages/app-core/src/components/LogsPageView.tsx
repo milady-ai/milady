@@ -1,8 +1,8 @@
-import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 import { LogsView } from "./LogsView";
 
 export function LogsPageView() {
-  const { t } = useApp();
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col h-full">
       <h2 className="text-lg font-bold mb-1">{t("bugreportmodal.Logs")}</h2>

@@ -22,6 +22,7 @@ import {
 import { invokeDesktopBridgeRequest, isElectrobunRuntime } from "../bridge";
 import { useTimeout } from "../hooks";
 import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 import type { DesktopClickAuditItem } from "../utils";
 import {
   CloudConnectionStatus,
@@ -884,7 +885,7 @@ export function DesktopMediaControlPanel() {
 export function MediaSettingsSection() {
   const { setTimeout } = useTimeout();
 
-  const { t } = useApp();
+  const { t } = useTranslation();
   const { elizaCloudConnected } = useApp();
   const [mediaConfig, setMediaConfig] = useState<MediaConfig>({});
   const [loading, setLoading] = useState(true);

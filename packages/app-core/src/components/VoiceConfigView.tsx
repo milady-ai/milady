@@ -21,6 +21,7 @@ import { getSwabblePlugin, type SwabbleConfig } from "../bridge/native-plugins";
 import { dispatchWindowEvent, VOICE_CONFIG_UPDATED_EVENT } from "../events";
 import { useTimeout } from "../hooks";
 import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 import type { DesktopClickAuditItem } from "../utils";
 import { PREMADE_VOICES, sanitizeApiKey, VOICE_PROVIDERS } from "../voice";
 import {
@@ -334,7 +335,7 @@ function WakeWordSection({
 }: {
   serverConfig?: Partial<SwabbleConfig> | null;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [triggers, setTriggers] = useState<string[]>(["eliza"]);
   const [triggerInput, setTriggerInput] = useState("");
   const [sensitivity, setSensitivity] = useState(0.45);
@@ -600,7 +601,7 @@ function WakeWordSection({
 export function VoiceConfigView() {
   const { setTimeout } = useTimeout();
 
-  const { t } = useApp();
+  const { t } = useTranslation();
   const { elizaCloudConnected } = useApp();
   const [voiceConfig, setVoiceConfig] = useState<VoiceConfig>({});
   const [swabbleServerConfig, setSwabbleServerConfig] =

@@ -19,6 +19,7 @@ import React, {
   useState,
 } from "react";
 import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 import type { ConfigUiHint, PluginUiTheme } from "../types";
 import type {
   FieldRegistry,
@@ -190,7 +191,7 @@ function ValidationSummary({
   fieldLabels,
   pluginId,
 }: ValidationSummaryProps) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const errorEntries = [...fieldErrors.entries()].filter(
     ([, errors]) => errors.length > 0,
   );
@@ -646,7 +647,7 @@ function ConfigProgressText({
     total: number;
   };
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   return (
     <div className="flex items-center justify-between mb-1.5">
       <span className="text-[12px] font-semibold text-[var(--warning,#f39c12)]">
@@ -672,7 +673,7 @@ function AdvancedSectionToggle({
   advancedOpen: boolean;
   setAdvancedOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   return (
     <button
       type="button"
