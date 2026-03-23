@@ -260,24 +260,51 @@ export function useChatState(): ChatStateValue {
   const ctx = useContext(ChatCtx);
   if (ctx) return ctx;
   if (typeof process !== "undefined" && process.env.NODE_ENV === "test") {
-    return new Proxy({} as ChatStateValue, {
-      get(_, prop) {
-        if (prop === "conversations") return [];
-        if (prop === "conversationMessages") return [];
-        if (prop === "autonomousEvents") return [];
-        if (prop === "ptySessions") return [];
-        if (prop === "unreadConversations") return new Set();
-        if (prop === "chatPendingImages") return [];
-        if (prop === "droppedFiles") return [];
-        if (prop === "chatInput") return "";
-        if (prop === "activeConversationId") return null;
-        if (prop === "activeConversationIdRef") return { current: null };
-        if (prop === "conversationMessagesRef") return { current: [] };
-        return typeof prop === "string" && prop.startsWith("set")
-          ? () => {}
-          : null;
-      },
-    });
+    const noop = () => {};
+    return {
+      chatInput: "",
+      chatSending: false,
+      chatFirstTokenReceived: false,
+      chatLastUsage: null,
+      chatAvatarVisible: false,
+      chatAgentVoiceMuted: false,
+      chatMode: "simple" as ConversationMode,
+      chatAvatarSpeaking: false,
+      conversations: [],
+      activeConversationId: null,
+      companionMessageCutoffTs: 0,
+      conversationMessages: [],
+      autonomousEvents: [],
+      autonomousLatestEventId: null,
+      autonomousRunHealthByRunId: {},
+      ptySessions: [],
+      unreadConversations: new Set<string>(),
+      chatPendingImages: [],
+      droppedFiles: [],
+      shareIngestNotice: null,
+      setChatInput: noop,
+      setChatSending: noop,
+      setChatFirstTokenReceived: noop,
+      setChatLastUsage: noop,
+      setChatAvatarVisible: noop,
+      setChatAgentVoiceMuted: noop,
+      setChatMode: noop,
+      setChatAvatarSpeaking: noop,
+      setConversations: noop as ChatStateValue["setConversations"],
+      setActiveConversationId: noop,
+      setCompanionMessageCutoffTs: noop,
+      setConversationMessages: noop as ChatStateValue["setConversationMessages"],
+      setAutonomousEvents: noop as ChatStateValue["setAutonomousEvents"],
+      setAutonomousLatestEventId: noop,
+      setAutonomousRunHealthByRunId: noop as ChatStateValue["setAutonomousRunHealthByRunId"],
+      setPtySessions: noop as ChatStateValue["setPtySessions"],
+      setUnreadConversations: noop as ChatStateValue["setUnreadConversations"],
+      setChatPendingImages: noop as ChatStateValue["setChatPendingImages"],
+      setDroppedFiles: noop as ChatStateValue["setDroppedFiles"],
+      setShareIngestNotice: noop,
+      activeConversationIdRef: { current: null },
+      conversationMessagesRef: { current: [] },
+    };
   }
   throw new Error(
     "useChatState must be used within ChatProvider or AppProvider",
