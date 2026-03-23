@@ -31,6 +31,7 @@
     "@capacitor/keyboard": "8.0.0",
     "@capacitor/status-bar": "^8.0.1",
     "@miladyai/app-core": "workspace:*",
+    "@miladyai/shared": "workspace:*",
     "@miladyai/capacitor-agent": "workspace:*",
     "@miladyai/capacitor-camera": "workspace:*",
     "@miladyai/capacitor-canvas": "workspace:*",

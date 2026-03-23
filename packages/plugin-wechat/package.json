@@ -27,7 +27,7 @@
     "clean": "rm -rf dist"
   },
   "peerDependencies": {
-    "@elizaos/core": "alpha",
+    "@elizaos/core": "alpha"
   },
   "publishConfig": {
     "access": "public",
