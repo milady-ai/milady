@@ -12,6 +12,7 @@ import {
 } from "@miladyai/app-core/api";
 import { formatTime } from "@miladyai/app-core/components";
 import { useApp } from "@miladyai/app-core/state";
+import { useLifecycle } from "../state/LifecycleContext";
 import { useTranslation } from "../state/TranslationContext";
 import { confirmDesktopAction } from "@miladyai/app-core/utils";
 import { Button, Input } from "@miladyai/ui";
@@ -83,7 +84,8 @@ function summarizeAvailability(reason?: string): string {
 
 export function FineTuningView() {
   const { t } = useTranslation();
-  const { handleRestart, setActionNotice } = useApp();
+  const { setActionNotice } = useLifecycle();
+  const { handleRestart } = useApp();
 
   const [pageLoading, setPageLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);

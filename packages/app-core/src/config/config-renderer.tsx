@@ -18,7 +18,6 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { useApp } from "../state";
 import { useTranslation } from "../state/TranslationContext";
 import type { ConfigUiHint, PluginUiTheme } from "../types";
 import type {
@@ -560,8 +559,8 @@ export const ConfigRenderer = forwardRef<
     return Object.keys(style).length > 0 ? style : undefined;
   }, [theme]);
 
-  // ── useApp for i18n ─────────────────────────────────────────────────
-  const { t: tFn } = useApp();
+  // ── translation ────────────────────────────────────────────────────
+  const { t: tFn } = useTranslation();
 
   // ── Empty state ──────────────────────────────────────────────────────
 
