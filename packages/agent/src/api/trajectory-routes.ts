@@ -316,6 +316,14 @@ async function getTrajectoryLogger(
 ): Promise<TrajectoryLoggerApi | null> {
   const runtimeLike = runtime as TrajectoryLoggerRuntimeLike;
 
+  // Prefer the direct service handle when available and compatible.
+  if (typeof runtimeLike.getService === "function") {
+    const direct = runtimeLike.getService("trajectory_logger");
+    if (isRouteCompatibleTrajectoryLogger(direct)) {
+      return direct;
+    }
+  }
+
   // Fast path: service already available.
   const immediate = findCompatibleLogger(collectCandidates(runtimeLike));
   if (immediate) return immediate;

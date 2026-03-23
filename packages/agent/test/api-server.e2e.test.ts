@@ -2427,6 +2427,130 @@ describe("API Server E2E (no runtime)", () => {
       }
     });
 
+    it("GET /api/trajectories/:id prefers direct getService logger when multiple compatible loggers exist", async () => {
+      const trajectoryId = "preferred-direct-logger-trajectory";
+
+      const syntheticLikeLogger = {
+        isEnabled: () => true,
+        setEnabled: () => {},
+        listTrajectories: async () => ({
+          trajectories: [],
+          total: 0,
+          offset: 0,
+          limit: 50,
+        }),
+        getTrajectoryDetail: async () => ({
+          id: trajectoryId,
+          agentId: "chat-stream-agent",
+          metadata: { source: "client_chat" },
+          startTime: Date.now() - 1000,
+          endTime: Date.now(),
+          durationMs: 1000,
+          steps: [],
+          metrics: { finalStatus: "completed" },
+        }),
+        getStats: async () => ({
+          totalTrajectories: 0,
+          totalSteps: 0,
+          totalLlmCalls: 0,
+          totalPromptTokens: 0,
+          totalCompletionTokens: 0,
+          averageDurationMs: 0,
+          averageReward: 0,
+          bySource: {},
+          byStatus: {},
+          byScenario: {},
+        }),
+        deleteTrajectories: async () => 0,
+        clearAllTrajectories: async () => 0,
+        exportTrajectories: async () => ({
+          data: "[]",
+          filename: "trajectories.json",
+          mimeType: "application/json",
+        }),
+      };
+
+      const directLogger = {
+        isEnabled: () => true,
+        setEnabled: () => {},
+        listTrajectories: async () => ({
+          trajectories: [],
+          total: 0,
+          offset: 0,
+          limit: 50,
+        }),
+        getTrajectoryDetail: async () => ({
+          id: trajectoryId,
+          agentId: "chat-stream-agent",
+          metadata: { source: "client_chat" },
+          startTime: Date.now() - 1000,
+          endTime: Date.now(),
+          durationMs: 1000,
+          steps: [
+            {
+              id: "step-1",
+              timestamp: Date.now(),
+              llmCalls: [
+                {
+                  provider: "openai",
+                  model: "gpt-5.4-mini",
+                  prompt: "check balance",
+                  response: "balance is 1",
+                  promptTokens: 11,
+                  completionTokens: 7,
+                  latencyMs: 42,
+                },
+              ],
+            },
+          ],
+          metrics: { finalStatus: "completed" },
+        }),
+        getStats: async () => ({
+          totalTrajectories: 1,
+          totalSteps: 1,
+          totalLlmCalls: 1,
+          totalPromptTokens: 11,
+          totalCompletionTokens: 7,
+          averageDurationMs: 1000,
+          averageReward: 0,
+          bySource: { client_chat: 1 },
+          byStatus: { completed: 1 },
+          byScenario: {},
+        }),
+        deleteTrajectories: async () => 0,
+        clearAllTrajectories: async () => 0,
+        exportTrajectories: async () => ({
+          data: "[]",
+          filename: "trajectories.json",
+          mimeType: "application/json",
+        }),
+      };
+
+      const runtime = createRuntimeForChatSseTests({
+        getServicesByType: (serviceType) =>
+          serviceType === "trajectory_logger" ? [syntheticLikeLogger] : [],
+        getService: (serviceType) =>
+          serviceType === "trajectory_logger" ? directLogger : null,
+      }) as AgentRuntime & { adapter?: unknown };
+      runtime.adapter = {};
+
+      const streamServer = await startApiServer({ port: 0, runtime });
+      try {
+        const res = await req(
+          streamServer.port,
+          "GET",
+          `/api/trajectories/${encodeURIComponent(trajectoryId)}`,
+        );
+        expect(res.status).toBe(200);
+        expect(Array.isArray(res.data.llmCalls)).toBe(true);
+        const llmCalls = res.data.llmCalls as Array<Record<string, unknown>>;
+        expect(llmCalls).toHaveLength(1);
+        expect(String(llmCalls[0]?.model)).toBe("gpt-5.4-mini");
+      } finally {
+        await streamServer.close();
+      }
+    });
+
     it("GET /api/trajectories returns 503 when no route-compatible logger is available", async () => {
       const runtime = createRuntimeForChatSseTests({
         getServicesByType: (serviceType) =>
