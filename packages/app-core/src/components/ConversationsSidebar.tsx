@@ -100,6 +100,11 @@ export function ConversationsSidebar({
       data-variant={variant}
       onPointerDown={() => setMenuConversation(null)}
     >
+      {/*
+        Radix Tooltip requires TooltipProvider above any Tooltip. One provider
+        for the whole sidebar avoids N providers per row. Delays keep tooltips
+        from flashing on accidental pointer passes across narrow list items.
+      */}
       <TooltipProvider delayDuration={280} skipDelayDuration={120}>
       <ConversationRenameDialog
         open={renameTarget !== null}

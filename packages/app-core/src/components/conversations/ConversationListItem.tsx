@@ -34,6 +34,11 @@ interface ConversationListItemProps {
   ) => void;
 }
 
+/**
+ * Ellipsis is CSS `truncate` driven by flex `min-w-0` (width-based), not a char cap.
+ * We only wrap in Tooltip when scrollWidth > clientWidth so short titles stay quiet.
+ * ResizeObserver + window resize re-run the check when the sidebar rail width changes.
+ */
 function TruncatingConversationTitle({
   displayTitle,
   isGameModal,

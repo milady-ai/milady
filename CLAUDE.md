@@ -10,9 +10,9 @@ Milady is a local-first AI assistant built on [elizaOS](https://github.com/eliza
 bun install          # runs postinstall hooks automatically
 bun run dev          # API on :31337, UI on :2138 with hot reload (defaults; busy ports → next free + env sync)
 bun run dev:desktop  # Electrobun; skips vite build when apps/app/dist is up to date
-bun run dev:desktop:watch  # Vite **dev** server + Electrobun `MILADY_RENDERER_URL` (HMR). Orchestrator pre-picks free API/UI loopback ports when defaults are in use so proxy + env match. Rollup watch: also set MILADY_DESKTOP_VITE_BUILD_WATCH=1
+bun run dev:desktop:watch  # Vite **dev** server + Electrobun `MILADY_RENDERER_URL` (HMR). Orchestrator pre-picks free API/UI loopback ports when defaults are in use so proxy + env match. **Why:** Electrobun injects `__MILADY_API_BASE__` as the **Vite origin** in watch so WKWebView uses same-origin `/api` (Vite proxy) instead of cross-port CORS to the API. Rollup watch: also set MILADY_DESKTOP_VITE_BUILD_WATCH=1
 
-Desktop dev observability (agents cannot see the native window; Cursor does not auto-poll localhost): `GET /api/dev/stack` on the API; `bun run desktop:stack-status -- --json`; default-on aggregated log (`.milady/desktop-dev-console.log`) + `GET /api/dev/console-log` (loopback tail); default-on screenshot proxy `GET /api/dev/cursor-screenshot` (loopback, full-screen OS capture). Opt-out: `MILADY_DESKTOP_SCREENSHOT_SERVER=0`, `MILADY_DESKTOP_DEV_LOG=0`. See `docs/apps/desktop-local-development.md` and `.cursor/rules/milady-desktop-dev-observability.mdc`.
+Desktop dev observability (agents cannot see the native window; Cursor does not auto-poll localhost): `GET /api/dev/stack` on the API; `bun run desktop:stack-status -- --json`; default-on aggregated log (`.milady/desktop-dev-console.log`) + `GET /api/dev/console-log` (loopback tail); default-on screenshot proxy `GET /api/dev/cursor-screenshot` (loopback, full-screen OS capture). **macOS:** Screen Recording must be allowed for Milady-dev or the terminal running `bun`/Electrobun — **why:** `screencapture` is TCC-gated; else 503/502 (see doc, not token). Opt-out: `MILADY_DESKTOP_SCREENSHOT_SERVER=0`, `MILADY_DESKTOP_DEV_LOG=0`. See `docs/apps/desktop-local-development.md` and `.cursor/rules/milady-desktop-dev-observability.mdc`.
 ```
 
 Desktop dev rationale (signals, Quit, `detached` children): `docs/apps/desktop-local-development.md`.
@@ -70,6 +70,9 @@ See `docs/plugin-resolution-and-node-path.md`.
 
 ### Bun exports patch (do not remove)
 `scripts/patch-deps.mjs` removes dead `exports["."].bun` entries from `@elizaos` packages that point to missing `src/` paths. Without this, Bun fails to resolve plugins at runtime.
+
+### Eliza core/agent dist patches (do not remove casually)
+The same `patch-deps.mjs` run patches **installed** `@elizaos/core` and `@elizaos/agent` **dist** for Milady-specific UX: streaming **TTS guard**, **retry placeholder** removal (no fake repeated lines in chat), conversation SSE **`done` before persist**, and **`client_chat` evaluate** deferred so auth stalls do not block streams. **Why:** published alpha builds lag behaviors we need for dashboard/desktop chat; each patch is idempotent and documented in `docs/plugin-resolution-and-node-path.md` (*Milady postinstall patches for Eliza core and agent*) and `docs/changelog.mdx`. Remove only when upstream equivalents ship.
 
 ### Electrobun startup guards (do not remove)
 The try/catch blocks in `apps/app/electrobun/src/native/agent.ts` keep the desktop window usable when the runtime fails.

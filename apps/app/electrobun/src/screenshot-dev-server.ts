@@ -13,6 +13,10 @@
  * Enable with MILADY_DESKTOP_SCREENSHOT_SERVER=`1` / `true` / `yes` (dev-platform sets `1` by default
  * for `dev:desktop:*`). Port: MILADY_SCREENSHOT_SERVER_PORT (default 31339). Auth: MILADY_SCREENSHOT_SERVER_TOKEN
  * as Bearer or ?token=.
+ *
+ * **Why 503 with no PNG on macOS:** `takeScreenshot()` runs `screencapture`; without **Screen Recording**
+ * for this app (or the parent terminal), TCC blocks capture and no file is produced—indistinguishable
+ * from other failures here, so we return JSON `{ error: … }` and rely on docs + API proxy `hint`.
  */
 
 import http from "node:http";
@@ -69,6 +73,7 @@ export function startScreenshotDevServer(): (() => void) | undefined {
 
       const shot = await getScreenCaptureManager().takeScreenshot();
       if (!shot.available || !shot.data) {
+        // WHY 503: macOS often means Screen Recording off for this process; see module doc + desktop-local-development.md
         res.writeHead(503, {
           "Content-Type": "application/json; charset=utf-8",
         });
@@ -96,6 +101,8 @@ export function startScreenshotDevServer(): (() => void) | undefined {
     }
   });
 
+  // WHY before listen(): Node emits "error" on bind failure (e.g. EADDRINUSE).
+  // Without a listener, that becomes an unhandled error and can crash Electrobun.
   server.on("error", (err: NodeJS.ErrnoException) => {
     const inUse = err.code === "EADDRINUSE";
     console.warn(

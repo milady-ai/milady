@@ -41,15 +41,49 @@ A live 3D avatar rendered with Three.js and `@pixiv/three-vrm`:
 - Select from 8 built-in VRM models via the `selectedVrmIndex` state.
 - Toggle avatar visibility and agent voice mute via the two control buttons in the Autonomous Panel's Chat Controls section.
 
-## Conversations Sidebar
+<a id="conversations-sidebar-whys" />
 
-The `ConversationsSidebar` component manages multiple conversations:
+## Conversations Sidebar: actions, titles, and modals (WHYs)
 
-- **Conversation list** — sorted by most recently updated. Each entry shows the title, a relative timestamp (e.g., "5m ago", "2d ago"), and an unread indicator for conversations with new messages.
-- **Create new** — a "New Chat" button at the top creates a fresh conversation thread.
-- **Rename** — double-click a conversation title to enter inline edit mode. Press Enter to save or Escape to cancel.
-- **Delete** — each conversation has a delete button that removes the thread permanently.
-- **Unread tracking** — the `unreadConversations` set tracks which conversations have new messages the user has not yet viewed.
+The `ConversationsSidebar` component (and the same list in **companion game-modal** / **mobile** full-screen chat) manages multiple threads. Layout is intentionally **narrow** on desktop (`w-48` / `xl:w-60`) and **full-width** in mobile overlay—so actions must stay usable without stealing horizontal space from titles.
+
+### List and navigation
+
+- **Sort order** — conversations are sorted by **most recently updated** (`updatedAt`). **Why:** the list is a recency-driven switcher, not an arbitrary static order.
+- **Titles** — each row shows the conversation title (localized placeholder for default names like “New Chat”). **Why:** users recognize threads by topic, not internal IDs.
+- **Unread** — an accent dot marks conversations with new messages the user has not opened since the last send. **Why:** multi-tab chat needs lightweight attention signal without toast spam.
+- **New Chat** — top button creates a new thread and selects it. **Why:** explicit affordance beats hidden shortcuts for new users.
+
+### Delete (hover ×, confirm)
+
+- On **desktop**, a **×** appears on **row hover** (keyboard: focus-within). On **mobile**, the control stays visible—there is no hover. **Why:** avoid permanent icon clutter; touch users still get a tap target.
+- **×** does **not** delete immediately. It expands **Delete?** with **Yes** / **No**. **Why:** destructive actions in a dense list need a second step; mis-taps are common on trackpads and phones.
+- Right-click (context menu) → **Delete conversation** follows the same confirm path. **Why:** one mental model for “remove thread.”
+
+**Code:** `ConversationListItem`, `ConversationsSidebar` (`confirmDeleteId`, `handleDeleteConversation`).
+
+### Rename (pencil, context menu, modal)
+
+- **Pencil** on hover (same visibility rules as delete) or **context menu → Rename conversation** opens a **modal** with:
+  - Free-text **topic title** (saved with `handleRenameConversation` → `PATCH` without `generate`).
+  - **Suggest** — calls `suggestConversationTitle` → `renameConversation(id, "", { generate: true })`, same mechanism as **automatic** title generation after early user messages. **Why:** one server contract for “LLM-derived title from thread context”; users can **edit** the suggestion before **Save**.
+- **Why a modal instead of inline edit:** inline inputs in a ~12–15rem rail truncate badly, blur on accidental click-away, and fight delete/rename affordances in one row. A modal gives space for helper copy and **Suggest** without redesigning the whole shell.
+
+### Long titles — width-based ellipsis and tooltip
+
+- Titles **ellipsis** based on **available flex width** (`min-w-0`, `truncate`, `flex-1` on the label region), not a fixed character count. **Why:** sidebar width changes (`xl:w-60`, game-modal rail, mobile); character caps look wrong on retina vs. low-DPI or after localization.
+- When the label is **actually clipped** (`scrollWidth > clientWidth`), hovering shows a **tooltip** with the **full** title. **Why:** no redundant tooltips on short names; `ResizeObserver` + window resize re-measure when the rail width changes.
+
+**Code:** `TruncatingConversationTitle` in `ConversationListItem.tsx`; `TooltipProvider` wraps the sidebar list so Radix tooltips have a provider. **Why:** tooltips require a provider ancestor; wrapping once avoids per-row providers.
+
+### Rename modal stacking (why `createPortal` + high z-index)
+
+- **Symptom:** only the **dimmed** backdrop appeared; the **form** was invisible.
+- **Cause:** **stacking contexts**. Examples: mobile chat wraps the sidebar in **`fixed inset-0 z-[120]`** (`App.tsx`); companion **game-modal** uses **`z-[100]`** shells. Radix `Dialog` defaulted to **`z-50`**, so overlay/content could paint **under** those layers while still dimming content below—depending on portal target and paint order.
+- **Fix:** `ConversationRenameDialog` portals to **`document.body`** with an explicit **large `z-index`** and plain visibility (no Radix **enter animation** on this dialog). **`@miladyai/ui` `Dialog`** uses raised **`z-[160]` / `z-[170]`** so **other** app modals stay above the same shells.
+- **Vitest:** when **`VITEST`** is set, the dialog renders **inline** (no `createPortal` to `document.body`). **Why:** `react-test-renderer` does not support mixing its tree with a DOM portal to `body`.
+
+**Code:** `ConversationRenameDialog.tsx`, `packages/ui/src/components/ui/dialog.tsx`.
 
 ## Autonomous Panel
 

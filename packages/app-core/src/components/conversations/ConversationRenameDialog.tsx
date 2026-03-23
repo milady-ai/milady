@@ -4,7 +4,20 @@ import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useApp } from "../../state";
 
-/** Above Electrobun / companion / mobile chat stacking (see App.tsx z-[120], ChatModalView z-[100]). */
+/**
+ * Rename modal: we intentionally avoid @miladyai/ui Radix Dialog here.
+ *
+ * Why createPortal(document.body) + huge z-index:
+ * - Mobile chat wraps the sidebar in `fixed inset-0 z-[120]`; game-modal shells use
+ *   z-[100]. Radix Dialog defaulted to z-50, so users saw only the dim layer while the
+ *   panel painted under those full-screen stacks.
+ * - Portaling to body with an explicit z-index avoids ancestor stacking contexts inside
+ *   the sidebar tree. No Radix enter animation on this surface avoids “invisible panel”
+ *   edge cases in WKWebView / layered UIs.
+ *
+ * Why isVitest() skips the portal:
+ * - react-test-renderer cannot mix createPortal(…, document.body) with the test tree.
+ */
 const RENAME_LAYER_Z = 50_000;
 
 function isVitest(): boolean {

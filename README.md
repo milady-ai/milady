@@ -12,6 +12,10 @@ tl;dr: local AI gf that's actually fast and doesn't phone home
 
 Milady is **not** a full IDE: the product bet is **fewer wasted GPU frames and wakeups** when you are not looking at the app—especially **on battery**—while keeping the **companion visually strong** when you are. Background polling, off-screen WebGL, and battery-aware render quality are tuned toward that (see [Desktop — battery and energy](docs/apps/desktop.md#battery-and-energy-use-macos)). Comparing to **Cursor** or other heavy dev tools is **workload-dependent**; the north star is **great UX per watt** for a local assistant, not matching an editor’s surface area.
 
+### After `bun install`: why the repo patches `@elizaos/*`
+
+`postinstall` runs **`scripts/patch-deps.mjs`**. Besides fixing **dead `exports["."].bun` → missing `./src`** (so Bun resolves plugins), Milady patches **published `@elizaos/core` and `@elizaos/agent` dist** for chat/streaming behavior (retry placeholder removal, SSE `done` ordering, deferred `evaluate` for dashboard chat). **Why:** alpha tarballs can leave the UI stuck “replying,” duplicate fake retry text in transcripts, or block streams on slow persistence—without waiting for upstream releases. Details and removal criteria live in **[Plugin resolution — Milady postinstall patches](docs/plugin-resolution-and-node-path.md#milady-postinstall-patches-for-eliza-core-and-agent)** and the **[Changelog](docs/changelog.mdx)**.
+
 ---
 
 ## BSC / BNB Chain Integration
@@ -86,6 +90,14 @@ shasum -a 256 --check --ignore-missing SHA256SUMS.txt
 
 - **Docs:** [Desktop app](docs/apps/desktop.md) (native application menu section), [Main-process reset — WHYs](docs/apps/desktop-main-process-reset.md)
 - **Optional network / TTS:** with the agent orchestrator loaded, Edge TTS may call **Microsoft’s cloud** unless you set **`MILADY_DISABLE_EDGE_TTS=1`** — see [Environment variables](docs/cli/environment.md#runtime-behavior) and [TTS plugin](docs/plugin-registry/tts.md)
+
+### Desktop: Eliza Cloud disconnect, preload RPC, detached browser layout
+
+**Eliza Cloud → Disconnect** on the dashboard prefers a **main-process** RPC (**native confirm + API disconnect**) for the same **WKWebView-after-native-dialog** reason as **Reset Milady**; the UI also **holds “disconnected”** until login starts again when **`/api/cloud/status`** could still say connected briefly. **Why document it:** symptoms look like “RPC timeout” or “toast lied” without that context.
+
+After changing **Electrobun preload / bridge** code, rebuild from the repo root: **`bun run build:preload`** (runs `apps/app/electrobun`). **Why:** the preload bundle sets a **long `maxRequestTime`** on renderer RPC; Electrobun’s default **1s** breaks native dialogs + slow main HTTP.
+
+**Detached** chat / browser / settings windows need an explicit **viewport height chain** so the in-app browser fills the window; see [Desktop webview, RPC, and Eliza Cloud disconnect](docs/apps/desktop-webview-eliza-cloud.md).
 
 ---
 
@@ -305,6 +317,8 @@ milady config set <k> <v> # set a config value
 milady dashboard          # open web UI in browser
 milady dashboard --port 3000  # custom port
 ```
+
+**Chat conversation list:** delete (hover **×**, confirm first), rename (**pencil** or right-click → modal with optional **Suggest** title from the model), and **truncated titles** with a hover tooltip when text is clipped—tuned for **narrow sidebars** and **desktop/mobile companion** layouts. **Why modals portal to `document.body`:** full-screen shells (e.g. mobile chat overlay) used to sit **above** Radix dialog z-index, so you’d see a dim screen without the form. See **[Chat — Conversations Sidebar](docs/dashboard/chat.md#conversations-sidebar-whys)**.
 
 ### Models
 
@@ -528,7 +542,7 @@ bun run dev:desktop        # API + Electrobun; skips vite build when apps/app/di
 bun run dev:desktop:watch  # + Vite dev server and MILADY_RENDERER_URL (HMR for UI work)
 ```
 
-**Why a separate flow:** the desktop stack runs **multiple processes** (orchestrator, Vite and/or built assets, API, Electrobun). The orchestrator **pre-allocates** free **API** and **Vite** ports when defaults are taken so every child gets consistent env—**why:** misaligned ports cause blank UI or 502s on `/api`. See **[docs/apps/desktop-local-development.md](docs/apps/desktop-local-development.md)** (including [when default ports are busy](docs/apps/desktop-local-development.md#when-default-ports-are-busy)) for signals, shutdown when you quit the app, and env vars.
+**Why a separate flow:** the desktop stack runs **multiple processes** (orchestrator, Vite and/or built assets, API, Electrobun). The orchestrator **pre-allocates** free **API** and **Vite** ports when defaults are taken so every child gets consistent env—**why:** misaligned ports cause blank UI or 502s on `/api`. In **watch** mode, Electrobun sets **`window.__MILADY_API_BASE__` to the Vite loopback origin** (not the raw API port) so the WKWebView stays **same-origin** with `/api` and the Vite **proxy** reaches the agent—**why:** cross-port `fetch` hit strict CORS and *access control checks* failures. See **[docs/apps/desktop-local-development.md](docs/apps/desktop-local-development.md)** ([renderer API base](docs/apps/desktop-local-development.md#renderer-api-base-vite-proxy-vs-direct-api-port), [when default ports are busy](docs/apps/desktop-local-development.md#when-default-ports-are-busy)) for signals, shutdown when you quit the app, and env vars.
 
 **IDE / agent hooks** — Editors and agents do not see the native window or auto-discover localhost. **Why we added hooks:** with desktop dev running, the API exposes **`GET /api/dev/stack`** (JSON: ports, renderer URL, which features are on). **`bun run desktop:stack-status -- --json`** probes ports and merges stack + health + status. By default, **`.milady/desktop-dev-console.log`** mirrors prefixed child logs and **`GET /api/dev/cursor-screenshot`** (loopback) returns a full-screen PNG via OS capture — both are opt-out via env (see doc). Cursor uses **`.cursor/rules/milady-desktop-dev-observability.mdc`** plus that guide.
 
@@ -545,7 +559,7 @@ See **[DEVELOPMENT.md](./DEVELOPMENT.md)** for the full development guide includ
 
 - **[Plugin resolution and NODE_PATH](docs/plugin-resolution-and-node-path.md)** — Why we set `NODE_PATH` in three places so dynamic plugin imports resolve when building from source (CLI, desktop dev, Electrobun).
 - **[Build and release](docs/build-and-release.md)** — Why the release pipeline uses strict shell, retries, setup-node v3/Blacksmith, Bun cache, timeouts; why size-report pipelines handle SIGPIPE; why Windows plugin build uses `npx -p typescript tsc`.
-- **[Desktop local development](docs/apps/desktop-local-development.md)** — Why `dev:desktop` / `dev:desktop:watch` orchestrate Vite, API, and Electrobun; HMR vs `vite build --watch`; Ctrl-C, Quit, and `detached` children; **IDE/agent observability** (`/api/dev/stack`, aggregated console, screenshot proxy, WHY loopback and opt-out).
+- **[Desktop local development](docs/apps/desktop-local-development.md)** — Why `dev:desktop` / `dev:desktop:watch` orchestrate Vite, API, and Electrobun; **why `__MILADY_API_BASE__` follows the Vite origin in watch** (WKWebView CORS + `/api` proxy); HMR vs `vite build --watch`; Ctrl-C, Quit, and `detached` children; **IDE/agent observability** (`/api/dev/stack`, aggregated console, screenshot proxy, WHY loopback and opt-out); **macOS Screen Recording** for the dev screenshot proxy (WHY TCC / 503 vs token).
 - **[Desktop main-process reset](docs/apps/desktop-main-process-reset.md)** — Why **Reset Milady…** runs HTTP in the Electrobun main process after native confirm, how the renderer syncs UI state, reachable API probing (`res.ok`), and where tests live.
 - **[Darwin vs macOS version (Electrobun WebGPU)](docs/apps/electrobun-darwin-macos-webgpu-version.md)** — Why **`uname -r` / `os.release()`** is not the macOS marketing major after Tahoe, how we map **Darwin 25 → macOS 26**, and why the WebGPU gate used to print “macOS 16.”
 - **[Changelog](docs/changelog.mdx)** — Shipped features and fixes with rationale (**WHY** bullets in each update).

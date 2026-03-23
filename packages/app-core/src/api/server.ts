@@ -2338,6 +2338,9 @@ async function handleMiladyCompatRoute(
       });
       if (!r.ok) {
         const text = await r.text().catch(() => "");
+        const isCaptureUnavailable =
+          r.status === 503 &&
+          /screen capture failed|capture failed|unavailable/i.test(text);
         sendJsonResponse(
           res,
           r.status === 401 || r.status === 403 ? r.status : 502,
@@ -2345,6 +2348,11 @@ async function handleMiladyCompatRoute(
             error: "upstream screenshot failed",
             status: r.status,
             detail: text.slice(0, 200),
+            ...(isCaptureUnavailable
+              ? {
+                  hint: "macOS: grant Screen Recording for Milady-dev or the terminal/Bun process running Electrobun (screencapture is TCC-gated). See docs/apps/desktop-local-development.md#macos-screen-recording-screenshot-proxy",
+                }
+              : {}),
           },
         );
         return true;
@@ -3675,9 +3683,17 @@ function patchHttpCreateServerForMiladyCompat(
         patchCompatStatusResponse(req, res, state);
       }
 
-      // CORS: allow local renderer servers (Vite, static loopback, WKWebView).
-      // WKWebView sometimes omits `Origin` on cross-port fetches; allow Referer
-      // only when Origin is absent so we never reflect an arbitrary Origin.
+      // --- Milady dev CORS (loopback only) ------------------------------------
+      // Dashboard / Vite / Electrobun webviews load from one loopback port and may
+      // call the API on another. Browsers require Access-Control-Allow-Origin for
+      // cross-port reads. We mirror the request Origin when it matches localhost,
+      // 127.0.0.1, or [::1] over http(s).
+      //
+      // **Why Referer fallback:** WKWebView sometimes sends no `Origin` on fetches
+      // that are still cross-origin from the API’s point of view. Without any ACAO
+      // header, fetch() fails with "access control checks". We only consult
+      // Referer when Origin is *empty* so a malicious page cannot supply a
+      // forbidden Origin and get a reflection from Referer.
       const originHeader = req.headers.origin ?? "";
       const allowOrigin = (() => {
         if (

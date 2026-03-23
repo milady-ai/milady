@@ -6,6 +6,8 @@ description: Install and use the Milady desktop application on macOS, Windows, a
 
 The Milady desktop app wraps the companion UI in a native Electrobun shell, adding system-level features like tray icons, global keyboard shortcuts, native notifications, and native OS capability bridges. Electrobun can either launch the canonical Milady runtime locally or connect the UI to an already-running local or remote runtime.
 
+The renderer uses the same dashboard React bundle as the browser. **Chat thread list** behavior (delete confirm, rename modal, **Suggest** title, width-based truncation + tooltips, and **why** rename modals portal to `document.body` for stacking above full-screen shells) is documented in **[Chat — Conversations Sidebar](../dashboard/chat.md#conversations-sidebar-whys)**.
+
 ## Download and Install
 
 ### macOS
@@ -40,7 +42,7 @@ bun install && bun run build
 bun run dev:desktop
 ```
 
-For **why** the desktop dev commands spawn multiple processes, how **Ctrl-C** and **Quit** behave, **environment variables** (`MILADY_DESKTOP_VITE_WATCH`, `MILADY_RENDERER_URL`, etc.), and **IDE/agent observability** (`GET /api/dev/stack`, aggregated console log, screenshot proxy — *why* loopback, defaults, and opt-out), see **[Desktop local development](./desktop-local-development)**.
+For **why** the desktop dev commands spawn multiple processes, how **Ctrl-C** and **Quit** behave, **environment variables** (`MILADY_DESKTOP_VITE_WATCH`, `MILADY_RENDERER_URL`, etc.), **why `__MILADY_API_BASE__` tracks the Vite origin in watch** (WKWebView CORS + `/api` proxy), and **IDE/agent observability** (`GET /api/dev/stack`, aggregated console log, screenshot proxy — *why* loopback, defaults, opt-out, and **macOS Screen Recording** for `screencapture`), see **[Desktop local development](./desktop-local-development)**.
 
 In development mode, the Electrobun app resolves the Milady distribution from the repository root's `dist/` directory. In packaged builds, assets are copied into the app bundle under `Resources/app/milady-dist/`.
 
@@ -131,6 +133,8 @@ The OS menu bar template is built in **`apps/app/electrobun/src/application-menu
 | **Reset Milady…** | `reset-milady` | **Main process:** shows the window, native confirm, then **`POST /api/agent/reset`**, embedded restart or **`POST /api/agent/restart`**, poll **`/api/status`**, and pushes **`desktopTrayMenuClick`** with **`itemId: "menu-reset-milady-applied"`** + **`agentStatus`**. **Renderer:** **`handleResetAppliedFromMain`** runs the same **local UI wipe** as the end of Settings **`handleReset`** (`completeResetLocalStateAfterServerWipe`). **Why main owns HTTP:** after native dialogs, WKWebView can defer renderer **`fetch`/bridge** work, so reset looked hung; **why renderer still wipes UI:** one place for onboarding, `MiladyClient` base URL, cloud flags, and conversation lists so the menu cannot drift from Settings. |
 
 **Settings** still uses **`handleReset`** (webview confirm + full flow). **Legacy:** tray may still emit **`menu-reset-milady`** for older paths; see [Desktop main-process reset](./desktop-main-process-reset.md) for sequence, probes, and tests.
+
+**Eliza Cloud disconnect** follows the same **main-process-first** pattern where possible (**`agentCloudDisconnectWithConfirm`**) so the renderer is not responsible for **`fetch`** immediately after a native confirm; credit polling also avoids snapping back to “connected” when status lags. See [Desktop webview, RPC, and Eliza Cloud disconnect](./desktop-webview-eliza-cloud.md).
 
 ### Agent Status States
 

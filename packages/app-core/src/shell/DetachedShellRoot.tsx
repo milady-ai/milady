@@ -106,6 +106,7 @@ function DetachedShellContent({ route }: DetachedShellRootProps): JSX.Element {
   }
 }
 
+/** Detached pop-out windows: fill the flex chain from main.tsx (h-screen) into `main` + surfaces. */
 export function DetachedShellRoot({
   route,
 }: DetachedShellRootProps): JSX.Element {

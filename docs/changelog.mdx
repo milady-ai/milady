@@ -3,6 +3,95 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-03-24" description="Chat conversation list: delete confirm, rename modal + Suggest, title tooltips, modal stacking" tags={["Feature", "Fix", "UX"]}>
+## Chat — conversation sidebar (dashboard + companion game shell)
+
+**Why:** the thread list ships on **narrow rails** and **full-screen mobile** chat; users need **safe delete**, **usable rename**, **readable long titles**, and modals that are not hidden under **Electrobun / nested overlays**.
+
+### Delete (hover **×**) with confirmation
+
+**Why:** discoverability without permanent clutter (hover/focus on desktop; always-visible control on mobile). **Why confirm:** one mis-click must not remove a thread.
+
+### Rename — modal + **Suggest**
+
+**Why:** inline edit in a ~12–15rem rail is cramped; **Suggest** reuses `PATCH` **`generate: true`** (same path as automatic title generation) so users can edit before save.
+
+### Long titles
+
+**Why width-based `truncate` + tooltip only when clipped:** sidebar width and localization change; character caps lie. **`ResizeObserver`** keeps “is truncated” correct when the rail resizes.
+
+### Rename modal “dim only” fix
+
+**Why:** `z-50` Radix dialog sat **under** shells like mobile **`z-[120]`** and game-modal **`z-[100]`**. **Fix:** `createPortal(document.body)` + very high z-index for `ConversationRenameDialog`; raised **`@miladyai/ui` `Dialog`** z-index for other modals. **Vitest:** inline render when **`VITEST`** — **why:** `react-test-renderer` + `createPortal` to `body` are incompatible.
+
+**Docs:** [Chat — Conversations Sidebar](/dashboard/chat#conversations-sidebar-whys). **Code:** `ConversationsSidebar.tsx`, `ConversationListItem.tsx`, `ConversationRenameDialog.tsx`, `packages/ui/.../dialog.tsx`.
+
+</Update>
+
+<Update label="2026-03-24" description="Desktop: Eliza Cloud disconnect, Electrobun RPC timeout, detached window layout, preload build" tags={["Fix", "Desktop", "DevEx"]}>
+## Eliza Cloud disconnect (Electrobun + dashboard)
+
+**Problem:** After confirming **Disconnect**, nothing happened, or **`RPC request timed out`**, or a green “disconnected” toast appeared while **credits / HEALTHY** stayed on screen.
+
+**WHYs**
+
+1. **WKWebView after native dialogs** — Renderer **`fetch`** / bridge work can **defer** right after a native sheet (same theme as [main-process reset](/apps/desktop-main-process-reset)). **Fix:** **`agentCloudDisconnectWithConfirm`** runs **native confirm + `POST /api/cloud/disconnect`** in **Bun main**, with renderer fallback + timeouts (`AppContext`, `rpc-handlers`, `cloud-disconnect-from-main`).
+2. **Electrobun default `maxRequestTime` = 1000ms** — Outgoing renderer RPC rejects while the user reads the sheet or main HTTP runs. **Fix:** **`maxRequestTime: 600_000`** in **`electrobun-direct-rpc`** (preload bundle). **Rebuild:** `bun run build:preload` from repo root (see [Desktop local development](/apps/desktop-local-development)).
+3. **Poll overwrote disconnected UI** — **`pollCloudCredits`** after disconnect could re-apply **`connected: true`** from a **laggy** **`/api/cloud/status`**. **Fix:** **`elizaCloudPreferDisconnectedUntilLoginRef`** keeps the **Connect** screen until login starts or the server reports disconnected.
+
+**Docs:** [Desktop webview, RPC, and Eliza Cloud disconnect](/apps/desktop-webview-eliza-cloud).
+
+## Detached Milady Browser window: content height
+
+**Problem:** Window chrome looked fine; the **in-app browser** viewport did not fill the area below the toolbar.
+
+**WHY:** **`#root`** had no viewport height, so **`flex-1`** on nested columns could not resolve — classic flex + percent-height pitfall.
+
+**Fix:** **`h-screen`** wrapper in **`apps/app/src/main.tsx`** for **`DetachedShellRoot`**, **`h-full` + column `main`** in **`DetachedShellRoot`**, **`flex: 1; min-height: 0`** on **`.browser-surface`**.
+
+**Docs:** [Desktop webview, RPC, and Eliza Cloud disconnect](/apps/desktop-webview-eliza-cloud#detached-windows-chat-browser-settings-pop-outs-content-height).
+
+## Repo root: `bun run build:preload`
+
+**WHY:** Developers ran **`bun run build:preload`** from the monorepo root and hit “script not found”; the script lived only under **`apps/app/electrobun`**.
+
+**Fix:** Root **`package.json`** adds **`build:preload`** → **`cd apps/app/electrobun && bun run build:preload`**. Preload validation errors mention both paths.
+
+</Update>
+
+<Update label="2026-03-23" description="Eliza postinstall patches, screenshot bind errors, API bootstrap" tags={["Fix", "Update", "DevEx"]}>
+## Postinstall patches (`@elizaos/core`, `@elizaos/agent`)
+
+**Why:** Published Eliza packages ship behaviors that break Milady chat UX or block streams until upstream changes land. `bun install` runs `scripts/patch-deps.mjs` (via `run-repo-setup.mjs`) so every clone gets the same fixes.
+
+- **Streaming retry placeholder** — `@elizaos/core`’s `ValidationStreamExtractor.signalRetry` used to push a fixed `onChunk` line (`-- that's not right, let me start again:`) on every structured-output retry when `hasRichConsumer` is false. **Why remove it:** that string was literal framework code, not the model—three parse retries meant three identical lines in the transcript. **`retry_start` stream events are unchanged.** Implementation: `patchElizaCoreStreamingRetryPlaceholder` in `scripts/lib/patch-bun-exports.mjs`.
+- **Conversation SSE: `done` before persist** — `POST /api/conversations/:id/messages/stream` in `@elizaos/agent` awaited persistence before emitting the terminal SSE `done`. **Why reorder:** if `persistAssistantConversationMemory` hangs (DB lock, slow I/O), the HTTP body never finished and the dashboard stayed in “sending”. **`done` is emitted first; persist runs in try/catch** (`scripts/lib/patch-agent-conversation-stream.mjs`).
+- **`client_chat`: defer `evaluate()`** — The message service awaited `runtime.evaluate()` after the assistant reply; evaluators can call `TEXT_LARGE` again. **Why defer:** on Eliza Cloud **401**, evaluate could stall forever, so `handleMessage` never returned, SSE never closed, and Milady looked stuck “replying”. Evaluate runs in the **background** for `client_chat` only (`scripts/lib/patch-eliza-core-client-chat-eval.mjs`).
+
+Docs: [Plugin resolution — Milady postinstall patches](/plugin-resolution-and-node-path#milady-postinstall-patches-for-eliza-core-and-agent).
+
+## Screenshot dev server: listen errors do not crash Electrobun
+
+**Problem:** `http.Server` emits `error` when `listen()` fails (e.g. **`EADDRINUSE`** if `MILADY_SCREENSHOT_SERVER_PORT` / default **31339** is taken). With no listener, Node treats it as an **unhandled** `'error'` and the desktop shell can exit.
+
+**Fix:** Register **`server.on("error", …)`** before **`listen()`**, log a **`[ScreenshotDev]`** warning (with a hint to change env or free the port), and keep the app running—the API proxy to `/api/dev/cursor-screenshot` simply won’t work until the port is free.
+
+**Code:** `apps/app/electrobun/src/screenshot-dev-server.ts`. **Docs:** [Desktop local development — screenshot proxy](/apps/desktop-local-development#full-screen-png--get-apidevcursor-screenshot).
+
+## API server: Edge TTS registration before `updateRuntime` publishes the runtime
+
+**Why:** `ensureMiladyTextToSpeechHandler` is **lazy-imported** from `runtime/eliza.ts` to avoid a circular dependency with `server.ts`. The `updateRuntime` wrapper must call **`(await lazyEnsureTTS())(runtime)`**, not a bare symbol. It also **awaits** SQL compatibility + TTS **before** the upstream handler runs so the first streamed reply does not hit **`useModel(TEXT_TO_SPEECH)`** while the handler is still registering (spurious “No handler” logs).
+
+**Code:** `packages/app-core/src/api/server.ts` (`startApiServerWithMiladyCompat`).
+
+## Character presets: `style` backfill vs protobuf `StyleGuides`
+
+**Why:** Upstream types treat `character.style` as protobuf **`StyleGuides`** (`$typeName`, etc.). Milady bundled presets are plain **`{ all, chat, post }` string arrays**, which match runtime usage. A **double cast** (`unknown` → non-null style) documents that we intentionally skip constructing the full protobuf message while keeping TypeScript strict mode happy.
+
+**Code:** `packages/app-core/src/runtime/eliza.ts` (`buildCharacterFromConfig`).
+
+</Update>
+
 <Update label="2026-03-23" description="WeChat connector, settings redesign, Windows fixes" tags={["Feature", "Update", "Fix"]}>
 ## WeChat connector
 

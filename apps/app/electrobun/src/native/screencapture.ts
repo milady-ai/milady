@@ -146,6 +146,8 @@ export class ScreenCaptureManager {
     try {
       let proc: ReturnType<typeof Bun.spawn>;
       if (process.platform === "darwin") {
+        // WHY stderr ignored: screencapture prints TCC denial to stderr; we only detect failure by missing output file.
+        // Dev screenshot proxy docs: macOS Screen Recording for Milady-dev or parent terminal.
         proc = Bun.spawn(["screencapture", "-x", "-t", "png", tmpPath], {
           stdout: "ignore",
           stderr: "ignore",

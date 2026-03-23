@@ -33,9 +33,27 @@ Produces `src/libMacWindowEffects.dylib` (consumed via Bun FFI at runtime).
 | `bun run test` | Vitest (`src/__tests__`, etc.) |
 | `bun run build:native-effects` | Compile macOS `window-effects.mm` → dylib |
 
+## Dev screenshot loopback (`src/screenshot-dev-server.ts`)
+
+When **`MILADY_DESKTOP_SCREENSHOT_SERVER`** is enabled (root **`dev:desktop` / `dev:desktop:watch`** sets it by default), the main process listens on **`127.0.0.1:31339`** (override **`MILADY_SCREENSHOT_SERVER_PORT`**) and serves **`/cursor-screenshot.png`** so the Milady API can proxy **`GET /api/dev/cursor-screenshot`**. **Why in Electrobun:** OS-level capture (`ScreenCaptureManager` / `screencapture`) runs in the native shell, not the API process. **Why `server.on("error")` before `listen()`:** bind failures (**`EADDRINUSE`**) must not become an unhandled **`error`** event (that can crash the desktop). Logs show **`[ScreenshotDev]`** with a port hint instead.
+
+See [Desktop local development — observability](../../docs/apps/desktop-local-development.md).
+
 ## WebGPU status log and macOS version (Darwin)
 
 Startup logs **`[WebGPU Browser] …`** use **`os.release()`**, which reports the **Darwin** kernel major (e.g. **25.x** on **macOS 26** Tahoe)—not the macOS marketing major in About This Mac. **Why it matters:** a single **`Darwin − 9`** rule matched macOS 11–15 but labeled Tahoe as “macOS 16” and wrong-feature-gated WKWebView WebGPU. **`getMacOSMajorVersion()`** in **`src/native/webgpu-browser-support.ts`** implements the two-part mapping; full **WHYs** and the reference table: **[Darwin vs macOS version (Electrobun WebGPU)](../../docs/apps/electrobun-darwin-macos-webgpu-version.md)**.
+
+## Renderer-facing API base (`__MILADY_API_BASE__`) — **why** Vite watch uses the UI origin
+
+The main process pushes **`apiBaseUpdate`** so the webview sets **`window.__MILADY_API_BASE__`** before/during UI boot.
+
+**Watch / HMR (`MILADY_RENDERER_URL`):** when that env points at a **loopback** `http(s):` dev server (Vite), we set the base to **that origin** (e.g. `http://127.0.0.1:2138`), not `http://127.0.0.1:<MILADY_API_PORT>`.
+
+**Why:** the loaded document is same-origin with Vite. If the client targeted the API port directly, **`fetch`** would be **cross-origin**; **WKWebView** often blocks those responses (CORS / missing `Origin`) and devtools fill with *access control checks* errors. REST is supposed to hit **`/api` on the Vite host** and use the **Vite → API proxy** (`apps/app/vite.config.ts`).
+
+**Static / packaged UI:** no loopback dev URL → base remains **`http://127.0.0.1:<embedded-agent-port>`**. **External** mode still uses **`MILADY_DESKTOP_API_BASE`** (etc.) only.
+
+**Code:** `resolveRendererFacingApiBase` in `src/api-base.ts`; `injectApiBase` / `_startAgent` / menu reset in `src/index.ts`. **Docs:** [Desktop local development — Renderer API base](../../docs/apps/desktop-local-development.md#renderer-api-base-vite-proxy-vs-direct-api-port).
 
 ## Related repo docs
 

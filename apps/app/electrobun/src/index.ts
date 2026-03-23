@@ -1105,6 +1105,11 @@ function wireSettingsRpc(win: BrowserWindow): void {
 // ============================================================================
 // API Base Injection
 // ============================================================================
+//
+// **Why `resolveRendererFacingApiBase`:** In watch mode the page origin is Vite
+// (`MILADY_RENDERER_URL`). The client must use that origin for `/api` so the Vite
+// proxy runs same-origin in WKWebView. See `api-base.ts` JSDoc and
+// docs/apps/desktop-local-development.md (renderer API base).
 
 function injectApiBase(win: BrowserWindow): void {
   const runtimeResolution = resolveDesktopRuntimeMode(

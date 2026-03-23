@@ -1974,6 +1974,8 @@ export function AppProvider({
     }
     // Trust `connected` from the server snapshot (it already folds in API key + CLOUD_AUTH).
     const isConnected = Boolean(cloudStatus.connected);
+    // After disconnect, ignore transient `connected: true` so credits/HEALTHY do not snap back
+    // before the user starts Connect again (ordering, cache, or proxy vs direct API mismatch).
     if (isConnected && elizaCloudPreferDisconnectedUntilLoginRef.current) {
       lastElizaCloudPollConnectedRef.current = false;
       return false;
@@ -4052,6 +4054,9 @@ export function AppProvider({
     [loadConversations, setActionNotice],
   );
 
+  // Same PATCH contract as automatic title generation after early messages: empty title +
+  // generate:true asks the runtime to derive a title from thread context. UI may still
+  // let the user edit before a manual rename save.
   const suggestConversationTitle = useCallback(
     async (id: string) => {
       try {

@@ -82,6 +82,7 @@
               "apps/desktop",
               "apps/electrobun-darwin-macos-webgpu-version",
               "apps/desktop-local-development",
+              "apps/desktop-webview-eliza-cloud",
               "apps/desktop/native-modules",
               "apps/desktop/deep-linking",
               "apps/mobile",

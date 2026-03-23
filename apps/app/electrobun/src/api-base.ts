@@ -133,9 +133,19 @@ export function resolveHttpLoopbackRendererOriginForApiClient(
 }
 
 /**
- * Base URL the **renderer** should use for `MiladyClient` (REST + relative `/api`).
- * Prefer the Vite/dev-server origin when `MILADY_RENDERER_URL` points at loopback;
- * otherwise the real API listen port on 127.0.0.1.
+ * Base URL the **renderer** should use for `MiladyClient` (REST + WebSocket URL
+ * derivation). This is not always the same as “where the agent listens.”
+ *
+ * **Why prefer Vite origin in watch:** The webview document is loaded from
+ * `MILADY_RENDERER_URL` (e.g. `http://127.0.0.1:2138`). If we injected the API
+ * port (`:31337`) as `__MILADY_API_BASE__`, every request would be cross-origin.
+ * WKWebView enforces CORS and may omit `Origin`, so responses without
+ * `Access-Control-Allow-Origin` fail. Same-origin `/api` on the Vite host uses the
+ * existing dev proxy — no duplicate HTTP server.
+ *
+ * **Why fall back to `127.0.0.1:<port>`:** Static server, `file:`, or no dev URL —
+ * the UI must talk to the embedded agent directly. **External** mode bypasses
+ * this helper at call sites that only push env-configured bases.
  */
 export function resolveRendererFacingApiBase(
   env: Record<string, string | undefined>,

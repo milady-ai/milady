@@ -1,3 +1,5 @@
+/* flex-1 + min-height:0 participates in parent column flex; min-height:100% breaks when #root
+   chain is not all explicit heights (see detached shell + main.tsx h-screen wrapper). */
 .browser-surface {
   display: flex;
   flex-direction: column;

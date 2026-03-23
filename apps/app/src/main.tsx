@@ -467,6 +467,8 @@ function mountReactApp(): void {
       <StrictMode>
         <AppProvider branding={MILADY_BRANDING}>
           {isDetachedWindowShell(windowShellRoute) ? (
+            // Viewport-sized flex root: #root has no intrinsic height, so nested flex-1 (browser
+            // surface + electrobun-webview) needs h-screen here to fill the native window.
             <div className="flex h-screen min-h-0 w-screen flex-col overflow-hidden">
               <DetachedShellRoot route={windowShellRoute} />
             </div>

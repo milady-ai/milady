@@ -42,6 +42,20 @@ MILADY_DESKTOP_VITE_WATCH=1 MILADY_DESKTOP_VITE_BUILD_WATCH=1 bun scripts/dev-pl
 | `MILADY_DESKTOP_SCREENSHOT_SERVER` | **Default on** for `dev:desktop` / `dev:desktop:watch`: Electrobun listens on `127.0.0.1:MILADY_SCREENSHOT_SERVER_PORT` (default **31339**); the Milady API proxies **`GET /api/dev/cursor-screenshot`** (loopback) as a **full-screen PNG** for agents/tools (macOS needs Screen Recording permission). Set to **`0`**, **`false`**, **`no`**, or **`off`** to disable. |
 | `MILADY_DESKTOP_DEV_LOG` | **Default on:** child logs (vite / api / electrobun) are mirrored to **`.milady/desktop-dev-console.log`** at the repo root. **`GET /api/dev/console-log`** on the API (loopback) returns a tail (`?maxLines=`, `?maxBytes=`). Set to **`0`** / **`false`** / **`no`** / **`off`** to disable. |
 
+### Renderer API base: Vite proxy vs direct API port
+
+In **`dev:desktop:watch`**, the orchestrator sets **`MILADY_RENDERER_URL`** to your Vite dev URL (e.g. `http://127.0.0.1:2138`). The Electrobun main process injects **`window.__MILADY_API_BASE__`** so `MiladyClient` knows where to call REST + WebSocket helpers.
+
+**Why not always `http://127.0.0.1:${MILADY_API_PORT}`?** The webview’s **document origin** is the **Vite** host/port. If `__MILADY_API_BASE__` points at the **API** port instead, every `fetch('/api/...')` becomes **cross-origin** (different port). **WKWebView** applies strict CORS; some builds omit **`Origin`**, so Milady’s API might not echo **`Access-Control-Allow-Origin`**, and you see *access control checks* failures (and HMR can look broken in the same session).
+
+**What we do instead:** when `MILADY_RENDERER_URL` or **`VITE_DEV_SERVER_URL`** is **`http:` or `https:`** with a **loopback** hostname (`localhost`, `127.0.0.1`, `[::1]`), the shell sets **`__MILADY_API_BASE__` to that URL’s `origin`** (same as the page). The client then calls **`/api/...` on the Vite origin**; Vite’s **`proxy`** forwards to the real API (**`MILADY_API_PORT`**). Same-origin in the webview, no new server.
+
+**When the direct API URL is still used:** built renderer served from Electrobun’s static server, **`file:`**, or any case where those env vars are unset / non-loopback — then **`http://127.0.0.1:<embedded-agent-port>`** is correct. **External** desktop mode (`MILADY_DESKTOP_API_BASE`, etc.) is unchanged.
+
+**Related server behavior:** the Milady API HTTP wrapper adds loopback CORS headers; if **`Origin`** is missing, it may fall back to a loopback **`Referer`** (**why:** WKWebView quirk). See `packages/app-core/src/api/server.ts` (`patchHttpCreateServerForMiladyCompat`).
+
+**Code:** `resolveRendererFacingApiBase` / `resolveHttpLoopbackRendererOriginForApiClient` in `apps/app/electrobun/src/api-base.ts`; callers in `apps/app/electrobun/src/index.ts`.
+
 ### When default ports are busy
 
 `scripts/dev-platform.mjs` runs **`dev:desktop`** and **`dev:desktop:watch`**. Before starting long-lived children it **probes loopback TCP** starting at:
@@ -72,6 +86,24 @@ cd apps/app/electrobun && bun run build:native-effects
 ```
 
 More detail: [Electrobun shell package](https://github.com/milady-ai/milady/tree/main/apps/app/electrobun) (README: *macOS window chrome*), and [Electrobun macOS window chrome](../guides/electrobun-mac-window-chrome.md).
+
+## Electrobun preload (`build:preload`) and RPC `maxRequestTime`
+
+The webview loads **`preload.js`** built from **`apps/app/electrobun`** (bridge + **`electrobun-direct-rpc.ts`**). **When to rebuild:** after editing anything that ships in that bundle (RPC wiring, `defineRPC` options, preload validation messages).
+
+```bash
+# From repo root (recommended)
+bun run build:preload
+
+# Equivalent
+cd apps/app/electrobun && bun run build:preload
+```
+
+**WHY a root script:** contributors often run commands from the monorepo root; a missing root alias produced confusing “script not found” errors.
+
+**WHY `maxRequestTime` is raised in preload:** Electrobun’s shared RPC layer defaults **`maxRequestTime` to 1000ms** for **renderer → Bun** requests. Handlers that show **native** dialogs or await **main-process `fetch`** to the API routinely exceed 1s; the webview then errors with **`RPC request timed out`** even though main is still working. Milady sets **600_000ms** (10 minutes) in **`Electroview.defineRPC`** so disconnect, reset, file pickers, and similar flows can complete.
+
+Deep dive (disconnect UI guard, detached window flex chain): [Desktop webview, RPC, and Eliza Cloud disconnect](./desktop-webview-eliza-cloud.md).
 
 ## macOS: Local Network permission (gateway discovery)
 
@@ -140,9 +172,11 @@ Script: `scripts/desktop-stack-status.mjs` (with `scripts/lib/desktop-stack-stat
 
 ### Full-screen PNG — `GET /api/dev/cursor-screenshot`
 
-**Loopback only.** Proxies Electrobun’s dev server (default **`127.0.0.1:31339`**) which uses the same **OS-level capture** as `ScreenCaptureManager.takeScreenshot()` (e.g. macOS `screencapture`). **Not** webview-only pixels.
+**Loopback only.** Proxies Electrobun’s dev server (default **`127.0.0.1:31339`**, override with **`MILADY_SCREENSHOT_SERVER_PORT`**) which uses the same **OS-level capture** as `ScreenCaptureManager.takeScreenshot()` (e.g. macOS `screencapture`). **Not** webview-only pixels.
 
 **Why proxy through the API:** one URL on the familiar API port; token stays in env between orchestrator-spawned children. **Why full screen first:** window-ID capture is platform-specific; this path reuses existing, tested code.
+
+**Bind failures (`EADDRINUSE`):** Electrobun’s `screenshot-dev-server.ts` registers **`server.on("error")`** before **`listen()`**. **Why:** if the default port is already taken (second Milady stack, stray process), Node would otherwise emit an **unhandled** `'error'` on the HTTP server and could **crash the desktop shell**. You’ll see a **`[ScreenshotDev]`** warning in logs; set **`MILADY_SCREENSHOT_SERVER_PORT`** to a free port or stop the conflicting listener.
 
 ### Aggregated console — file + `GET /api/dev/console-log`
 
@@ -163,10 +197,13 @@ Prefixed **vite / api / electrobun** lines are mirrored to **`.milady/desktop-de
 | `scripts/desktop-stack-status.mjs` | CLI entry for agents (`--json`) |
 | `packages/app-core/src/api/dev-stack.ts` | Payload for `GET /api/dev/stack` |
 | `packages/app-core/src/api/dev-console-log.ts` | Safe tail read for `GET /api/dev/console-log` |
-| `apps/app/electrobun/src/index.ts` | `resolveRendererUrl()`; starts screenshot dev server when enabled |
+| `apps/app/electrobun/src/index.ts` | `resolveRendererUrl()`; `resolveRendererFacingApiBase` for `__MILADY_API_BASE__`; screenshot dev server when enabled |
+| `apps/app/electrobun/src/api-base.ts` | `resolveRendererFacingApiBase` — Vite loopback origin vs direct API port (**why:** WKWebView CORS) |
 | `apps/app/electrobun/src/screenshot-dev-server.ts` | Loopback PNG server (proxied as `/api/dev/cursor-screenshot`) |
+| `apps/app/electrobun/src/bridge/electrobun-direct-rpc.ts` | Preload RPC bridge; **`maxRequestTime`** override (**why:** default 1s vs native dialogs / main HTTP) |
 
 ## See also
 
+- [Desktop webview, RPC, and Eliza Cloud disconnect](./desktop-webview-eliza-cloud.md) — WKWebView height chain, preload timeout, cloud disconnect
 - [Desktop app (Electrobun)](/apps/desktop) — runtime modes, IPC, downloads
 - [Electrobun startup and exception handling](../electrobun-startup.md) — why main-process try/catch stays

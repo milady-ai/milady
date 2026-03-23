@@ -19,7 +19,8 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      // Above app shells (e.g. mobile conversation overlay z-[120], game modal z-[100], header z-[140])
+      // z-50 sat under mobile chat (z-[120]) and game-modal (z-[100]), so modals looked
+      // “dim only.” Keep overlay below content (170) but above those shells.
       "fixed inset-0 z-[160] bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className,
     )}

@@ -14,6 +14,13 @@
  *
  * 3) @elizaos/core: Strips the hard-coded streaming retry line pushed to
  *    onChunk on each parse retry (avoids triple "-- that's not right..." in chat).
+ *
+ * 4) @elizaos/agent: Conversation SSE emits terminal `done` before persisting
+ *    assistant text so a hung DB write does not strand the dashboard in "sending".
+ *    See scripts/lib/patch-agent-conversation-stream.mjs.
+ *
+ * 5) @elizaos/core: For client_chat, defers evaluate() so Cloud 401 / stalled
+ *    evaluators do not block SSE completion. See patch-eliza-core-client-chat-eval.mjs.
  */
 import {
   existsSync,

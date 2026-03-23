@@ -73,3 +73,18 @@ Some `@elizaos` packages (e.g. `@elizaos/plugin-coding-agent`) publish a `packag
 **What happens:** Bun's resolver prefers the `"bun"` export condition. It tries to load `./src/index.ts`, the file is missing, and we get "Cannot find module … from …/src/runtime/eliza.ts" even though the package is in `node_modules`. Bun does not fall back to the `"import"` condition when the `"bun"` target is missing.
 
 **Our fix:** `scripts/patch-deps.mjs` runs after `bun install` via `scripts/run-repo-setup.mjs` (used by `postinstall` and the app build bootstrap). It finds `@elizaos/plugin-coding-agent` (and any other package we add) and, if `exports["."].bun` points to `./src/index.ts` and that file does not exist, removes the `"bun"` and `"default"` conditions that reference `src/`. After the patch, only `"import"` (and similar) remain, so Bun resolves to `./dist/index.js`. **Why we only patch when the file is missing:** In a development workspace where the plugin is checked out with `src/` present, we leave the package unchanged so upstream workflows still work.
+
+## Milady postinstall patches for Eliza core and agent
+
+Beyond `package.json` **exports**, Milady rewrites **installed JavaScript** under `@elizaos/core` and `@elizaos/agent` when upstream behavior hurts Milady until releases catch up. All logic is in `scripts/patch-deps.mjs` and `scripts/lib/patch-*.mjs` (with Vitest coverage where practical). Patches are **idempotent** (markers or substring checks prevent double application).
+
+| Patch | Target | Why |
+|-------|--------|-----|
+| **Streaming TTS guard** | `@elizaos/core` | Dashboard chat passes `onStreamChunk`; core otherwise called `useModel(TEXT_TO_SPEECH)` even when no handler was registered yet, throwing and spamming logs. Guard with `getModel(TEXT_TO_SPEECH)` first. |
+| **Streaming retry placeholder** | `@elizaos/core` | `ValidationStreamExtractor.signalRetry` injected a fixed `onChunk` apology on every structured-output retry (non-rich stream), duplicating fake lines in the saved message. Removed; `retry_start` events unchanged. |
+| **Conversation SSE: `done` before persist** | `@elizaos/agent` | Stream awaited persistence before emitting terminal `done`; hung DB I/O stranded the client in “sending”. Emit `done` first, then persist in try/catch. |
+| **`client_chat`: defer `evaluate()`** | `@elizaos/core` | `evaluate()` after reply could recall the LLM; on Cloud **401** the promise might never settle, so SSE never closed. Background evaluate for `client_chat` only. |
+
+**Remove when:** upstream ships equivalent fixes; then delete the patch function and its `patch-deps.mjs` call, and run `bun run test` / `bun run check`.
+
+**Changelog:** see the technical **2026-03-23** entry in `docs/changelog.mdx`.

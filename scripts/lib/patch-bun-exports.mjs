@@ -225,6 +225,10 @@ const ELIZA_CORE_STREAM_RETRY_PLACEHOLDER_BROWSER_TO = `this.state="retrying";`;
  * fixed apology line for non-rich streaming consumers on every parse/validation
  * retry. That duplicates in the saved message (e.g. 3× with maxRetries 3).
  * Remove the placeholder; `emitEvent({ eventType: "retry_start" })` is unchanged.
+ *
+ * WHY patch dist instead of forking core: postinstall keeps `bun install` reproducible
+ * and documents removal when upstream drops the placeholder. See
+ * docs/plugin-resolution-and-node-path.md and docs/changelog.mdx.
  */
 export function patchElizaCoreStreamingRetryPlaceholder(
   root,

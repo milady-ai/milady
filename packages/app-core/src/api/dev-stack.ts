@@ -93,6 +93,7 @@ export function resolveDevStackFromEnv(
       'Electrobun also binds an ephemeral localhost port for its own RPC (see launcher logs: "Server started at http://localhost:…"). That channel is not this API.',
       "With dev:desktop:watch, open desktop.rendererUrl in a browser or Browser MCP for UI parity when native-only bridges are not required.",
       "Full-screen PNG for agents: with desktop dev (screenshot server on by default), GET /api/dev/cursor-screenshot on the API (loopback). Capture uses OS screen APIs, not webview-only pixels.",
+      "On macOS, Screen Recording (TCC) must be granted to the process that runs screencapture (often the Electrobun app or the terminal); without it, upstream returns 503 and the API may return 502 with a hint in the JSON body.",
       "Aggregated vite/api/electrobun lines: GET /api/dev/console-log?maxLines=400&maxBytes=256000 (loopback) or read desktopDevLog.filePath.",
     ],
   };

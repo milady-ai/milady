@@ -248,8 +248,11 @@ export default defineConfig({
     host: true,
     port: uiPort,
     strictPort: true,
-    // WKWebView (Electrobun) can build broken HMR / source-map URLs when the
-    // client advertises 0.0.0.0; pin the HMR endpoint to loopback.
+    // **Why pin HMR to 127.0.0.1:** `host: true` binds 0.0.0.0. The default HMR
+    // client URL can advertise a hostname that WKWebView resolves incorrectly,
+    // yielding broken WebSocket / client URLs and console noise (e.g. bad blob or
+    // source-map paths). Loopback keeps Electrobun’s webview aligned with where
+    // humans open the same Vite URL in a normal browser on the same machine.
     hmr: {
       host: "127.0.0.1",
       port: uiPort,

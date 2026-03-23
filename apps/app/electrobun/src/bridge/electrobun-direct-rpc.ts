@@ -10,6 +10,9 @@
  * `window.__MILADY_ELECTROBUN_RPC__` is the only public desktop bridge exposed
  * to renderer code. It mirrors the native Electrobun RPC surface directly:
  * `request.<method>(params)` plus `onMessage(<message>, listener)`.
+ *
+ * WHY `maxRequestTime` below: Electrobun defaults outgoing renderer RPC to ~1s; native dialogs and
+ * main-process HTTP exceed that and surface as "RPC request timed out" in the webview.
  */
 
 import { Electroview } from "electrobun/view";
