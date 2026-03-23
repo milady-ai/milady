@@ -1,16 +1,13 @@
 import { useCallback, useState } from "react";
 import { isElectrobunRuntime } from "../bridge";
 import { useApp } from "../state";
+import { useLifecycle } from "../state/LifecycleContext";
+import { useTranslation } from "../state/TranslationContext";
 
 export function RestartBanner() {
-  const {
-    pendingRestart,
-    pendingRestartReasons,
-    restartBannerDismissed,
-    dismissRestartBanner,
-    triggerRestart,
-    t,
-  } = useApp();
+  const { t } = useTranslation();
+  const { pendingRestart, pendingRestartReasons, restartBannerDismissed } = useLifecycle();
+  const { dismissRestartBanner, triggerRestart } = useApp();
 
   const [restarting, setRestarting] = useState(false);
 

@@ -1,5 +1,6 @@
 import { isElectrobunRuntime } from "../bridge";
 import { useApp } from "../state";
+import { useLifecycle } from "../state/LifecycleContext";
 import { useTranslation } from "../state/TranslationContext";
 
 /**
@@ -9,12 +10,8 @@ import { useTranslation } from "../state/TranslationContext";
 export function ConnectionFailedBanner() {
   const { t } = useTranslation();
   const bannerTop = isElectrobunRuntime() ? 40 : 0;
-  const {
-    backendConnection,
-    backendDisconnectedBannerDismissed,
-    dismissBackendDisconnectedBanner,
-    retryBackendConnection,
-  } = useApp();
+  const { backendConnection, backendDisconnectedBannerDismissed } = useLifecycle();
+  const { dismissBackendDisconnectedBanner, retryBackendConnection } = useApp();
 
   if (!backendConnection) return null;
 

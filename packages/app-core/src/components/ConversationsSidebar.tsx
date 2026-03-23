@@ -6,6 +6,8 @@ import {
 } from "@miladyai/ui";
 import { useEffect, useRef, useState } from "react";
 import { useApp } from "../state";
+import { useChatState } from "../state/ChatContext";
+import { useTranslation } from "../state/TranslationContext";
 import { ConversationListItem } from "./conversations/ConversationListItem";
 
 type ConversationsSidebarVariant = "default" | "game-modal";
@@ -21,15 +23,13 @@ export function ConversationsSidebar({
   onClose,
   variant = "default",
 }: ConversationsSidebarProps) {
+  const { t } = useTranslation();
+  const { conversations, activeConversationId, unreadConversations } = useChatState();
   const {
-    conversations,
-    activeConversationId,
-    unreadConversations,
     handleNewConversation,
     handleSelectConversation,
     handleDeleteConversation,
     handleRenameConversation,
-    t,
   } = useApp();
 
   const [editingId, setEditingId] = useState<string | null>(null);
