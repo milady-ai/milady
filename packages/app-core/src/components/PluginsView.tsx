@@ -1438,12 +1438,26 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
   const handleInstallPlugin = async (pluginId: string, npmName: string) => {
     setInstallingPlugins((prev) => new Set(prev).add(pluginId));
     try {
-      await client.installRegistryPlugin(npmName);
-      await loadPlugins();
+      await client.installRegistryPlugin(npmName, true);
       setActionNotice(
-        `${npmName} installed. Restart required to activate.`,
+        `${npmName} installed — restarting agent to activate...`,
         "success",
       );
+      // Give the agent time to restart, then refresh the plugin list
+      setTimeout(async () => {
+        try {
+          await loadPlugins();
+        } catch {
+          // Agent may still be restarting — retry once more
+          setTimeout(async () => {
+            try {
+              await loadPlugins();
+            } catch {
+              /* ignore */
+            }
+          }, 5000);
+        }
+      }, 3000);
     } catch (err) {
       setActionNotice(
         `Failed to install ${npmName}: ${err instanceof Error ? err.message : "unknown error"}`,
