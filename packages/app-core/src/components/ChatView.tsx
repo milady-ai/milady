@@ -35,7 +35,7 @@ import {
 } from "react";
 import { AgentActivityBox } from "./AgentActivityBox";
 import { ChatComposer } from "./ChatComposer";
-import { ChatEmptyState, ChatMessage, TypingIndicator } from "./ChatMessage";
+import { ChatMessage, TypingIndicator } from "./ChatMessage";
 import { MessageContent } from "./MessageContent";
 
 function nowMs(): number {
@@ -776,13 +776,7 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
           isGameModal ? (
             <div className="flex min-h-full items-end px-1 py-4" />
           ) : (
-            <ChatEmptyState
-              agentName={agentName}
-              onSuggestion={(text) => {
-                setState("chatInput", text);
-                window.setTimeout(() => void handleChatSend(), 50);
-              }}
-            />
+            <TypingIndicator agentName={agentName} agentAvatarSrc={agentAvatarSrc} />
           )
         ) : isGameModal ? (
           <div className="flex min-h-full w-full flex-col justify-end gap-4 px-1 py-4">
