@@ -825,7 +825,9 @@ describe("VrmEngine", () => {
 
       const extractLoopCallback = (): (() => void) => {
         const calls = hoisted.mockRendererInstance.setAnimationLoop.mock.calls;
-        const withFn = [...calls].reverse().find((c) => typeof c[0] === "function");
+        const withFn = [...calls]
+          .reverse()
+          .find((c) => typeof c[0] === "function");
         expect(withFn?.[0]).toBeTypeOf("function");
         return withFn![0] as () => void;
       };
@@ -834,7 +836,8 @@ describe("VrmEngine", () => {
       hoisted.mockRendererInstance.render.mockClear();
 
       for (let i = 0; i < 10; i += 1) loopCb();
-      const rendersFullRate = hoisted.mockRendererInstance.render.mock.calls.length;
+      const rendersFullRate =
+        hoisted.mockRendererInstance.render.mock.calls.length;
       expect(rendersFullRate).toBe(10);
 
       hoisted.mockRendererInstance.render.mockClear();

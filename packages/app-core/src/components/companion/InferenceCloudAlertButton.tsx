@@ -84,53 +84,53 @@ function InferenceTooltipPortal(props: {
   );
 }
 
-export const InferenceCloudAlertButton = memo(function InferenceCloudAlertButton(
-  props: InferenceCloudAlertButtonProps,
-) {
-  const { notice, onPointerDown, onClick } = props;
-  const isDanger = notice.variant === "danger";
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const [tipOpen, setTipOpen] = useState(false);
-  const tipId = useId();
+export const InferenceCloudAlertButton = memo(
+  function InferenceCloudAlertButton(props: InferenceCloudAlertButtonProps) {
+    const { notice, onPointerDown, onClick } = props;
+    const isDanger = notice.variant === "danger";
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    const [tipOpen, setTipOpen] = useState(false);
+    const tipId = useId();
 
-  const showTip = useCallback(() => {
-    setTipOpen(true);
-  }, []);
+    const showTip = useCallback(() => {
+      setTipOpen(true);
+    }, []);
 
-  const hideTip = useCallback(() => {
-    setTipOpen(false);
-  }, []);
+    const hideTip = useCallback(() => {
+      setTipOpen(false);
+    }, []);
 
-  return (
-    <div
-      className="relative inline-flex"
-      onPointerEnter={showTip}
-      onPointerLeave={hideTip}
-    >
-      <button
-        ref={buttonRef}
-        type="button"
-        className={`inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border shadow-sm ${
-          isDanger
-            ? "border-danger/40 bg-danger/15 text-danger hover:bg-danger/25"
-            : "border-warn/40 bg-warn/15 text-warn hover:bg-warn/25"
-        }`}
-        aria-label={notice.tooltip}
-        aria-describedby={tipOpen ? tipId : undefined}
-        data-testid="companion-inference-cloud-alert"
-        onPointerDown={onPointerDown}
-        onClick={onClick}
-        onFocus={showTip}
-        onBlur={hideTip}
+    return (
+      <div
+        className="relative inline-flex"
+        onPointerEnter={showTip}
+        onPointerLeave={hideTip}
       >
-        <AlertTriangle className="pointer-events-none h-5 w-5 shrink-0" />
-      </button>
-      <InferenceTooltipPortal
-        open={tipOpen}
-        anchorRef={buttonRef}
-        text={notice.tooltip}
-        tipId={tipId}
-      />
-    </div>
-  );
-});
+        <button
+          ref={buttonRef}
+          type="button"
+          className={`inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border shadow-sm ${
+            isDanger
+              ? "border-danger/40 bg-danger/15 text-danger hover:bg-danger/25"
+              : "border-warn/40 bg-warn/15 text-warn hover:bg-warn/25"
+          }`}
+          aria-label={notice.tooltip}
+          aria-describedby={tipOpen ? tipId : undefined}
+          data-testid="companion-inference-cloud-alert"
+          onPointerDown={onPointerDown}
+          onClick={onClick}
+          onFocus={showTip}
+          onBlur={hideTip}
+        >
+          <AlertTriangle className="pointer-events-none h-5 w-5 shrink-0" />
+        </button>
+        <InferenceTooltipPortal
+          open={tipOpen}
+          anchorRef={buttonRef}
+          text={notice.tooltip}
+          tipId={tipId}
+        />
+      </div>
+    );
+  },
+);

@@ -41,11 +41,7 @@ export function ConversationRenameDialog({
   initialTitle,
   onClose,
 }: ConversationRenameDialogProps) {
-  const {
-    handleRenameConversation,
-    suggestConversationTitle,
-    t,
-  } = useApp();
+  const { handleRenameConversation, suggestConversationTitle, t } = useApp();
   const titleId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [draft, setDraft] = useState(initialTitle);
@@ -140,7 +136,10 @@ export function ConversationRenameDialog({
         </button>
 
         <div className="flex flex-col space-y-1.5 pr-8 text-left">
-          <h2 id={titleId} className="text-lg font-semibold leading-none tracking-tight">
+          <h2
+            id={titleId}
+            className="text-lg font-semibold leading-none tracking-tight"
+          >
             {t("conversations.renameDialogTitle")}
           </h2>
         </div>
@@ -204,10 +203,7 @@ export function ConversationRenameDialog({
               className="bg-accent text-accent-fg hover:opacity-90"
               onClick={() => void handleSave()}
               disabled={
-                !conversationId ||
-                !draft.trim() ||
-                saving ||
-                suggesting
+                !conversationId || !draft.trim() || saving || suggesting
               }
             >
               {saving

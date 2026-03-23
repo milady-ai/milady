@@ -67,9 +67,7 @@ export const CompanionView = memo(function CompanionView() {
 
   const hasInterruptedAssistant = useMemo(
     () =>
-      conversationMessages.some(
-        (m) => m.role === "assistant" && m.interrupted,
-      ),
+      conversationMessages.some((m) => m.role === "assistant" && m.interrupted),
     [conversationMessages],
   );
 

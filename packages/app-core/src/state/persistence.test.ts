@@ -154,7 +154,9 @@ describe("companion VRM power mode persistence", () => {
       localStorage.setItem("eliza:companion-efficiency", "0");
       localStorage.setItem("eliza:companion-quality-on-battery", "1");
       expect(loadCompanionVrmPowerMode()).toBe("quality");
-      expect(localStorage.getItem("eliza:companion-quality-on-battery")).toBeNull();
+      expect(
+        localStorage.getItem("eliza:companion-quality-on-battery"),
+      ).toBeNull();
     });
   });
 

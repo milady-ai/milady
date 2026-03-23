@@ -38,8 +38,7 @@ export function resolveCompanionInferenceNotice(args: {
 
   const disconnectedCloudRelevant =
     !elizaCloudConnected &&
-    (elizaCloudEnabled ||
-      modelLooksLikeElizaCloudHosted(chatLastUsageModel));
+    (elizaCloudEnabled || modelLooksLikeElizaCloudHosted(chatLastUsageModel));
 
   if (disconnectedCloudRelevant) {
     return {

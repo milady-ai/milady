@@ -212,8 +212,7 @@ export function VrmViewer(props: VrmViewerProps) {
   onEngineReadyRef.current = props.onEngineReady;
   onEngineStateRef.current = props.onEngineState;
   onRevealStartRef.current = props.onRevealStart;
-  companionVrmPowerModeRef.current =
-    props.companionVrmPowerMode ?? "balanced";
+  companionVrmPowerModeRef.current = props.companionVrmPowerMode ?? "balanced";
   companionAnimateWhenHiddenRef.current =
     props.companionAnimateWhenHidden ?? false;
   companionHalfFramerateModeRef.current =
@@ -223,13 +222,11 @@ export function VrmViewer(props: VrmViewerProps) {
     const engine = engineRef.current;
     if (!engine || rendererInitFailedRef.current) return;
     const docVisible =
-      typeof document === "undefined" ||
-      document.visibilityState === "visible";
+      typeof document === "undefined" || document.visibilityState === "visible";
     const active = activeRef.current;
     const animateHidden = companionAnimateWhenHiddenRef.current;
     const shouldPause = !active || (!docVisible && !animateHidden);
-    const minimalWhileRunning =
-      Boolean(animateHidden) && !docVisible && active;
+    const minimalWhileRunning = Boolean(animateHidden) && !docVisible && active;
     engine.setPaused(shouldPause);
     engine.setMinimalBackgroundMode(minimalWhileRunning);
     if (docVisible) {

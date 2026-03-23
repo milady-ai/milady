@@ -2350,9 +2350,7 @@ export class MiladyClient {
     return this.fetch("/api/wallet/os-store");
   }
 
-  async postWalletOsStoreAction(
-    action: "migrate" | "delete",
-  ): Promise<{
+  async postWalletOsStoreAction(action: "migrate" | "delete"): Promise<{
     ok: boolean;
     migrated?: string[];
     failed?: string[];

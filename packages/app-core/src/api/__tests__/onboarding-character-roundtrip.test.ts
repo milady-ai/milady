@@ -97,7 +97,7 @@ describe("Onboarding → Character round-trip", () => {
     // ── Step 3: Verify the saved config has ALL fields ───────────────
     const agents = savedConfig.agents as Record<string, unknown>;
     expect(agents).toBeTruthy();
-    const list = (agents.list as Record<string, unknown>[]);
+    const list = agents.list as Record<string, unknown>[];
     expect(list).toHaveLength(1);
     const agentEntry = list[0];
 
@@ -209,10 +209,7 @@ describe("Onboarding → Character round-trip", () => {
     // Verify every bundled preset character works end-to-end
     for (const preset of STYLE_PRESETS) {
       savedConfig = {};
-      const systemPrompt = preset.system.replace(
-        /\{\{name\}\}/g,
-        preset.name,
-      );
+      const systemPrompt = preset.system.replace(/\{\{name\}\}/g, preset.name);
 
       persistCompatOnboardingDefaults({
         name: preset.name,

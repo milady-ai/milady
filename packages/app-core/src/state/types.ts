@@ -65,10 +65,7 @@ export type { UiShellMode } from "./ui-preferences";
 export type CompanionVrmPowerMode = "quality" | "balanced" | "efficiency";
 
 /** When to cap the companion VRM loop at ~half the display refresh rate. */
-export type CompanionHalfFramerateMode =
-  | "off"
-  | "when_saving_power"
-  | "always";
+export type CompanionHalfFramerateMode = "off" | "when_saving_power" | "always";
 export type ShellView = "companion" | "character" | "desktop";
 
 /** Emitted after each tab/shell-related layout commit (see `navigation` on app context). */

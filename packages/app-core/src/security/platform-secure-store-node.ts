@@ -43,10 +43,13 @@ function secretToolStoreWithStdin(
         return;
       }
       reject(
-        Object.assign(new Error(stderr.trim() || `secret-tool exited ${code}`), {
-          stderr,
-          code,
-        }),
+        Object.assign(
+          new Error(stderr.trim() || `secret-tool exited ${code}`),
+          {
+            stderr,
+            code,
+          },
+        ),
       );
     });
     const line = secretLine.endsWith("\n") ? secretLine : `${secretLine}\n`;
@@ -58,17 +61,17 @@ function secretToolStoreWithStdin(
 async function secretToolOnPath(): Promise<boolean> {
   if (process.platform === "win32") return false;
   try {
-    await execFileAsync("sh", [
-      "-c",
-      "command -v secret-tool >/dev/null 2>&1",
-    ]);
+    await execFileAsync("sh", ["-c", "command -v secret-tool >/dev/null 2>&1"]);
     return true;
   } catch {
     return false;
   }
 }
 
-function macErrReason(stderr: string, code: number | null): SecureStoreGetResult {
+function macErrReason(
+  stderr: string,
+  code: number | null,
+): SecureStoreGetResult {
   const s = stderr.toLowerCase();
   if (
     s.includes("could not be found") ||
@@ -239,7 +242,9 @@ class LinuxSecretToolPlatformSecureStore implements PlatformSecureStore {
       return {
         ok: false,
         reason: "error",
-        message: String(e.stderr ?? err).trim().slice(0, 300),
+        message: String(e.stderr ?? err)
+          .trim()
+          .slice(0, 300),
       };
     }
   }
@@ -296,10 +301,5 @@ export function createNodePlatformSecureStore(): PlatformSecureStore {
 export function isWalletOsStoreReadEnabled(): boolean {
   const raw = process.env.MILADY_WALLET_OS_STORE?.trim().toLowerCase();
   if (!raw) return true;
-  return !(
-    raw === "0" ||
-    raw === "false" ||
-    raw === "off" ||
-    raw === "no"
-  );
+  return !(raw === "0" || raw === "false" || raw === "off" || raw === "no");
 }

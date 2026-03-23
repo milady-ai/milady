@@ -244,7 +244,8 @@ function extractVoiceText(input: string): string {
     if (start >= 0) {
       const contentStart = start + openTag.length;
       const end = text.indexOf(closeTag, contentStart);
-      text = end >= 0 ? text.slice(contentStart, end) : text.slice(contentStart);
+      text =
+        end >= 0 ? text.slice(contentStart, end) : text.slice(contentStart);
     } else {
       // <response> present but no <text> yet — nothing speakable.
       return "";

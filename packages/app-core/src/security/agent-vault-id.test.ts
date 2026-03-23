@@ -43,8 +43,8 @@ describe("agent-vault-id", () => {
   });
 
   it("keychainAccountForSecretKind encodes vault + kind", () => {
-    expect(keychainAccountForSecretKind("mldy1-abc", "wallet.evm_private_key")).toBe(
-      "mldy1-abc:wallet.evm_private_key",
-    );
+    expect(
+      keychainAccountForSecretKind("mldy1-abc", "wallet.evm_private_key"),
+    ).toBe("mldy1-abc:wallet.evm_private_key");
   });
 });

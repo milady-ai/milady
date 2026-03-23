@@ -24,7 +24,9 @@ export function resolveCanonicalStateDir(): string {
 /**
  * Opaque vault id for OS secret stores: `mldy1-` + first 16 chars of base64url(sha256(canonicalStateDir)).
  */
-export function deriveAgentVaultId(canonicalStateDir = resolveCanonicalStateDir()): string {
+export function deriveAgentVaultId(
+  canonicalStateDir = resolveCanonicalStateDir(),
+): string {
   const hash = createHash("sha256").update(canonicalStateDir, "utf8").digest();
   const token = Buffer.from(hash).toString("base64url").slice(0, 16);
   return `mldy1-${token}`;

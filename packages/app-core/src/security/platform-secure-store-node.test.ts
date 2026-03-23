@@ -12,11 +12,15 @@ describe("isWalletOsStoreReadEnabled", () => {
     expect(isWalletOsStoreReadEnabled()).toBe(true);
   });
 
-  it.each(["0", "false", "off", "no", "FALSE", "OFF"])(
-    "disables for %s",
-    (v) => {
-      process.env.MILADY_WALLET_OS_STORE = v;
-      expect(isWalletOsStoreReadEnabled()).toBe(false);
-    },
-  );
+  it.each([
+    "0",
+    "false",
+    "off",
+    "no",
+    "FALSE",
+    "OFF",
+  ])("disables for %s", (v) => {
+    process.env.MILADY_WALLET_OS_STORE = v;
+    expect(isWalletOsStoreReadEnabled()).toBe(false);
+  });
 });

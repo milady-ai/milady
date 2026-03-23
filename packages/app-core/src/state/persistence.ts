@@ -115,7 +115,10 @@ export function loadCompanionAnimateWhenHidden(): boolean {
 
 export function saveCompanionAnimateWhenHidden(enabled: boolean): void {
   try {
-    localStorage.setItem(COMPANION_ANIMATE_WHEN_HIDDEN_KEY, enabled ? "1" : "0");
+    localStorage.setItem(
+      COMPANION_ANIMATE_WHEN_HIDDEN_KEY,
+      enabled ? "1" : "0",
+    );
   } catch {
     // ignore
   }
@@ -132,7 +135,10 @@ const COMPANION_HALF_FRAMERATE_VALUES = new Set<CompanionHalfFramerateMode>([
 export function normalizeCompanionHalfFramerateMode(
   raw: string | null | undefined,
 ): CompanionHalfFramerateMode {
-  if (raw && COMPANION_HALF_FRAMERATE_VALUES.has(raw as CompanionHalfFramerateMode)) {
+  if (
+    raw &&
+    COMPANION_HALF_FRAMERATE_VALUES.has(raw as CompanionHalfFramerateMode)
+  ) {
     return raw as CompanionHalfFramerateMode;
   }
   return "when_saving_power";

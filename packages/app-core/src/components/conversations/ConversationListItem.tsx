@@ -1,9 +1,4 @@
-import {
-  Button,
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@miladyai/ui";
+import { Button, Tooltip, TooltipContent, TooltipTrigger } from "@miladyai/ui";
 import { PencilLine, X } from "lucide-react";
 import type React from "react";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
@@ -239,7 +234,11 @@ export function ConversationListItem({
               onRequestRename(conv);
             }}
           >
-            <PencilLine className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
+            <PencilLine
+              className="h-3.5 w-3.5"
+              strokeWidth={2.25}
+              aria-hidden
+            />
           </button>
         ) : null}
 

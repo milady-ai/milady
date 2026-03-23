@@ -2111,7 +2111,8 @@ export class VrmEngine {
   setMinimalBackgroundMode(enabled: boolean): void {
     if (this.minimalBackgroundMode === enabled) return;
     if (enabled) {
-      this.worldVisibleBeforeMinimalBackground = this.worldMesh?.visible ?? false;
+      this.worldVisibleBeforeMinimalBackground =
+        this.worldMesh?.visible ?? false;
       this.sparkVisibleBeforeMinimalBackground =
         this.sparkRenderer?.visible ?? true;
       if (this.worldMesh) this.worldMesh.visible = false;
