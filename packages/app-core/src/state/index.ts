@@ -3,7 +3,8 @@ export * from "./AppContext";
 // Navigation is safe to consume directly — AppContext reads from
 // NavigationProvider (no duplicate state).
 export { ChatProvider } from "./ChatContext";
-export { LifecycleProvider } from "./LifecycleContext";
+export { LifecycleProvider, useLifecycle } from "./LifecycleContext";
+export type { LifecycleContextValue } from "./LifecycleContext";
 export { NavigationProvider, useNavigation } from "./NavigationContext";
 export type { NavigationContextValue } from "./NavigationContext";
 export * from "./parsers";

@@ -7048,6 +7048,35 @@ export function AppProvider({
     ],
   );
 
+  const lifecycleValue = useMemo(
+    () => ({
+      connected,
+      agentStatus,
+      onboardingComplete,
+      onboardingLoading,
+      startupPhase,
+      startupStatus,
+      startupError,
+      authRequired,
+      actionNotice,
+      lifecycleBusy,
+      lifecycleAction,
+      pendingRestart,
+      pendingRestartReasons,
+      restartBannerDismissed,
+      backendConnection,
+      backendDisconnectedBannerDismissed,
+      systemWarnings,
+    }),
+    [
+      connected, agentStatus, onboardingComplete, onboardingLoading,
+      startupPhase, startupStatus, startupError, authRequired,
+      actionNotice, lifecycleBusy, lifecycleAction,
+      pendingRestart, pendingRestartReasons, restartBannerDismissed,
+      backendConnection, backendDisconnectedBannerDismissed, systemWarnings,
+    ],
+  );
+
   const mergedBranding = useMemo(
     () => ({ ...DEFAULT_BRANDING, ...brandingOverride }),
     [brandingOverride],
@@ -7057,7 +7086,7 @@ export function AppProvider({
     <BrandingContext.Provider value={mergedBranding}>
       <TranslationProvider uiLanguage={uiLanguage}>
         <NavigationProvider value={navigationValue}>
-          <LifecycleProvider>
+          <LifecycleProvider value={lifecycleValue}>
             <ChatProvider>
               <AppContext.Provider value={value}>
                 {children}
