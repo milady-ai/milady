@@ -1,11 +1,11 @@
 import type { StreamEventEnvelope } from "@miladyai/app-core/api";
 import { formatTime } from "@miladyai/app-core/components";
-import { useApp } from "@miladyai/app-core/state";
+import { useTranslation } from "../../state/TranslationContext";
 import { useMemo } from "react";
 import { getEventText } from "./helpers";
 
 export function IdleContent({ events }: { events: StreamEventEnvelope[] }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const latestThought = useMemo(
     () =>
       [...events]

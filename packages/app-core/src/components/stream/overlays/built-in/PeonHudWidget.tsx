@@ -5,7 +5,7 @@
  * and recent activity count. Inspired by the peon-ping "jarvis" theme.
  */
 
-import { useApp } from "@miladyai/app-core/state";
+import { useTranslation } from "../../../../state/TranslationContext";
 import { useEffect, useMemo, useRef } from "react";
 import { registerWidget } from "../registry";
 import type { WidgetDefinition, WidgetRenderProps } from "../types";
@@ -89,7 +89,7 @@ function PeonHud({
   agentMode,
   agentName,
 }: WidgetRenderProps) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const accentColor = (instance.config.accentColor as string) ?? "#00e5ff";
   const showLabel = (instance.config.showLabel as boolean) ?? true;
   const showEventCount = (instance.config.showEventCount as boolean) ?? true;

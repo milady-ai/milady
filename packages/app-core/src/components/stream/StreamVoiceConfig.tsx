@@ -7,7 +7,7 @@
 
 import { client } from "@miladyai/app-core/api";
 import { useTimeout } from "@miladyai/app-core/hooks";
-import { useApp } from "@miladyai/app-core/state";
+import { useTranslation } from "../../state/TranslationContext";
 import { Button } from "@miladyai/ui";
 import { Volume2, VolumeX } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -25,7 +25,7 @@ interface VoiceStatus {
 export function StreamVoiceConfig({ streamLive }: { streamLive: boolean }) {
   const { setTimeout } = useTimeout();
 
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [status, setStatus] = useState<VoiceStatus | null>(null);
   const [loading, setLoading] = useState(false);
   const [speaking, setSpeaking] = useState(false);

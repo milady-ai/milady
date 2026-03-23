@@ -3,14 +3,14 @@
  * Follows the ChatTicker pattern.
  */
 
-import { useApp } from "@miladyai/app-core/state";
+import { useTranslation } from "../../../../state/TranslationContext";
 import { useMemo } from "react";
 import { getEventText } from "../../helpers";
 import { registerWidget } from "../registry";
 import type { WidgetDefinition, WidgetRenderProps } from "../types";
 
 function ActionTicker({ instance, events }: WidgetRenderProps) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const maxItems = (instance.config.maxItems as number) ?? 8;
 
   const items = useMemo(() => {

@@ -10,7 +10,7 @@ import { Button, Input } from "@miladyai/ui";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { client, type QueryResult } from "../api";
-import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 import { resolveAppAssetUrl } from "../utils";
 
 type MediaType = "all" | "image" | "video" | "audio";
@@ -158,7 +158,7 @@ function collectStrings(obj: unknown, out: Set<string>) {
 }
 
 export function MediaGalleryView({ leftNav }: { leftNav?: ReactNode }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

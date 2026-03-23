@@ -14,7 +14,7 @@ import {
   type LifoRuntime,
   normalizeTerminalText,
 } from "@miladyai/app-core/platform";
-import { useApp } from "@miladyai/app-core/state";
+import { useTranslation } from "../state/TranslationContext";
 
 interface TerminalOutputEvent {
   event?: unknown;
@@ -32,7 +32,7 @@ function formatError(error: unknown): string {
 }
 
 export function LifoSandboxView({ inModal }: { inModal?: boolean } = {}) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const terminalRef = useRef<HTMLDivElement | null>(null);
   const explorerRef = useRef<HTMLDivElement | null>(null);
   const runtimeRef = useRef<LifoRuntime | null>(null);

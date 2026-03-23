@@ -7,7 +7,7 @@
  *   3. Stream source selector (stream-tab, game, custom-url)
  */
 
-import { useApp } from "@miladyai/app-core/state";
+import { useTranslation } from "../../state/TranslationContext";
 import { Button, Checkbox, Input, Switch } from "@miladyai/ui";
 import { useState } from "react";
 import type { StreamSourceType } from "./helpers";
@@ -156,7 +156,7 @@ function WidgetRow({
   onToggle: () => void;
   onUpdate: (patch: Partial<Pick<WidgetInstance, "config">>) => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const def = getAllWidgets().find((d) => d.type === instance.type);
   const hasConfig = def && Object.keys(def.configSchema).length > 0;
@@ -234,7 +234,7 @@ export function StreamSettings({
   overlayLayout,
   onClose,
 }: StreamSettingsProps) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [section, setSection] = useState<Section>("channel");
   const [customUrlInput, setCustomUrlInput] = useState(
     streamSource.type === "custom-url" ? (streamSource.url ?? "") : "",

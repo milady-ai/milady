@@ -12,7 +12,7 @@ import {
   getStoredSubscriptionProvider,
   type SubscriptionProviderSelectionId,
 } from "../providers";
-import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 import { openExternalUrl } from "../utils";
 
 function formatRequestError(err: unknown): string {
@@ -108,7 +108,7 @@ export function SubscriptionStatus({
 }: SubscriptionStatusProps) {
   const { setTimeout } = useTimeout();
 
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [subscriptionTab, setSubscriptionTab] = useState<"token" | "oauth">(
     "token",
   );

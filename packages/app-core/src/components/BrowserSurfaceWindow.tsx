@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 import "../styles/browser-surface.css";
-import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 import {
   DEFAULT_BROWSER_HOME,
   normalizeBrowserAddressInput,
@@ -16,7 +16,7 @@ import {
 } from "./browser-surface";
 
 export function BrowserSurfaceWindow() {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const webviewRef = useRef<WebviewTagElement | null>(null);
   const [webviewTagAvailable, setWebviewTagAvailable] = useState(false);
   const [addressValue, setAddressValue] = useState(DEFAULT_BROWSER_HOME);

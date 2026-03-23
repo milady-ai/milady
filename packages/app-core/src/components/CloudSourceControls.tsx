@@ -1,5 +1,5 @@
 import { Button } from "@miladyai/ui";
-import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 
 export type CloudSourceMode = "cloud" | "own-key";
 
@@ -56,7 +56,7 @@ export function CloudConnectionStatus({
   connectedText?: string;
   disconnectedText: string;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const resolvedConnectedText = connectedText ?? "Connected to Eliza Cloud";
   return (
     <div className="flex items-center justify-between py-2.5 px-3 border border-[var(--border)] bg-[var(--bg-muted)]">

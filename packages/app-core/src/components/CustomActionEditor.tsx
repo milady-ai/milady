@@ -3,7 +3,7 @@ import {
   type CustomActionHandler,
   client,
 } from "@miladyai/app-core/api";
-import { useApp } from "@miladyai/app-core/state";
+import { useTranslation } from "../state/TranslationContext";
 import { Button } from "@miladyai/ui";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -314,7 +314,7 @@ export function CustomActionEditor({
   onSave,
   onClose,
 }: CustomActionEditorProps) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [similesInput, setSimilesInput] = useState("");

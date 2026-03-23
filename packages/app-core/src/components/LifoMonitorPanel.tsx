@@ -1,6 +1,6 @@
 import { Button } from "@miladyai/ui";
 import type { SandboxBrowserEndpoints, SandboxWindowInfo } from "../api/client";
-import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 
 interface LifoMonitorPanelProps {
   monitorOnline: boolean;
@@ -37,7 +37,7 @@ export function LifoMonitorPanel({
   setMonitorOnline,
   setMonitorError,
 }: LifoMonitorPanelProps) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   return (
     <div className="grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-3">
       <div className="rounded-xl border border-border overflow-hidden bg-panel min-h-[320px]">
