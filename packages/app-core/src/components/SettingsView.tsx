@@ -31,6 +31,7 @@ import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isElectrobunRuntime } from "../bridge";
 import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 import { CodingAgentSettingsSection } from "./CodingAgentSettingsSection";
 import { ConfigPageView } from "./ConfigPageView";
 import { DesktopWorkspaceSection } from "./DesktopWorkspaceSection";
@@ -130,7 +131,7 @@ function SettingsSidebar({
   onSearchChange: (query: string) => void;
   onClose: () => void;
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
 
   return (
     <aside className="hidden w-[16rem] shrink-0 self-stretch lg:sticky lg:top-0 lg:flex lg:h-screen">
@@ -190,7 +191,7 @@ function UpdatesSection() {
 /* ── Advanced Section ─────────────────────────────────────────────────── */
 
 function AdvancedSection() {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const {
     handleReset,
     exportBusy,

@@ -21,7 +21,7 @@
  * whatever JavaScript the remote page serves.
  */
 
-import { useApp } from "@miladyai/app-core/state";
+import { useTranslation } from "../../../../state/TranslationContext";
 import { useRef } from "react";
 import { registerWidget } from "../registry";
 import type { WidgetDefinition, WidgetRenderProps } from "../types";
@@ -31,7 +31,7 @@ const INLINE_CSP =
   "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline';";
 
 function CustomHtml({ instance }: WidgetRenderProps) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const mode = (instance.config.mode as string) ?? "inline";
   const htmlContent = (instance.config.html as string) ?? "";
   const cssContent = (instance.config.css as string) ?? "";

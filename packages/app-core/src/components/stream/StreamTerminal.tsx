@@ -1,5 +1,5 @@
 import { client } from "@miladyai/app-core/api";
-import { useApp } from "@miladyai/app-core/state";
+import { useTranslation } from "../../state/TranslationContext";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface TerminalLine {
@@ -10,7 +10,7 @@ interface TerminalLine {
 }
 
 export function StreamTerminal() {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [lines, setLines] = useState<TerminalLine[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const lineIdRef = useRef(0);

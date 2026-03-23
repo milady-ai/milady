@@ -1,6 +1,6 @@
 import type { StreamEventEnvelope } from "@miladyai/app-core/api";
 import { formatTime } from "@miladyai/app-core/components";
-import { useApp } from "@miladyai/app-core/state";
+import { useTranslation } from "../../state/TranslationContext";
 import { useEffect, useRef } from "react";
 import {
   CHANNEL_COLORS,
@@ -10,7 +10,7 @@ import {
 } from "./helpers";
 
 export function ActivityFeed({ events }: { events: StreamEventEnvelope[] }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const feedRef = useRef<HTMLDivElement>(null);
   const prevLenRef = useRef(0);
 

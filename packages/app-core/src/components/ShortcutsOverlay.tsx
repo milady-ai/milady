@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { COMMON_SHORTCUTS } from "../hooks";
-import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 
 function formatKey(shortcut: (typeof COMMON_SHORTCUTS)[number]): string {
   const isMac =
@@ -26,7 +26,7 @@ function formatKey(shortcut: (typeof COMMON_SHORTCUTS)[number]): string {
 }
 
 export function ShortcutsOverlay() {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {

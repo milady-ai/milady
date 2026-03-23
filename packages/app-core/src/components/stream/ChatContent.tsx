@@ -2,7 +2,7 @@ import type {
   ConversationMessage,
   StreamEventEnvelope,
 } from "@miladyai/app-core/api";
-import { useApp } from "@miladyai/app-core/state";
+import { useTranslation } from "../../state/TranslationContext";
 import { useEffect, useMemo, useRef } from "react";
 import { CHANNEL_COLORS, getEventSource, getEventText } from "./helpers";
 
@@ -13,7 +13,7 @@ export function ChatContent({
   events: StreamEventEnvelope[];
   messages: ConversationMessage[];
 }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const recentExchanges = useMemo(() => {

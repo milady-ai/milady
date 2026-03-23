@@ -1,10 +1,10 @@
 import type { StreamEventEnvelope } from "@miladyai/app-core/api";
-import { useApp } from "@miladyai/app-core/state";
+import { useTranslation } from "../../state/TranslationContext";
 import { useMemo } from "react";
 import { CHANNEL_COLORS } from "./helpers";
 
 export function ChatTicker({ events }: { events: StreamEventEnvelope[] }) {
-  const { t } = useApp();
+  const { t } = useTranslation();
   // Build ticker entries directly from inbound message events (retake, discord, etc.)
   const recent = useMemo(() => {
     const entries: Array<{

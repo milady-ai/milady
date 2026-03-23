@@ -12,7 +12,7 @@ import {
   type JsonSchemaObject,
 } from "../config";
 import { useTimeout } from "../hooks";
-import { useApp } from "../state";
+import { useTranslation } from "../state/TranslationContext";
 import type { ConfigUiHint } from "../types";
 import { autoLabel } from "./labels";
 
@@ -46,7 +46,7 @@ export function ApiKeyConfig({
 }: ApiKeyConfigProps) {
   const { setTimeout } = useTimeout();
 
-  const { t } = useApp();
+  const { t } = useTranslation();
   const [pluginFieldValues, setPluginFieldValues] = useState<
     Record<string, Record<string, string>>
   >({});
