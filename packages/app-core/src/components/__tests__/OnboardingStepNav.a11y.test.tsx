@@ -26,9 +26,21 @@ vi.mock("../../../config/branding", () => ({
 
 vi.mock("../../../onboarding/flow", () => ({
   getOnboardingNavMetas: () => [
-    { id: "welcome", name: "onboarding.stepName.welcome", subtitle: "onboarding.stepSub.welcome" },
-    { id: "hosting", name: "onboarding.stepName.hosting", subtitle: "onboarding.stepSub.hosting" },
-    { id: "activate", name: "onboarding.stepName.activate", subtitle: "onboarding.stepSub.activate" },
+    {
+      id: "welcome",
+      name: "onboarding.stepName.welcome",
+      subtitle: "onboarding.stepSub.welcome",
+    },
+    {
+      id: "hosting",
+      name: "onboarding.stepName.hosting",
+      subtitle: "onboarding.stepSub.hosting",
+    },
+    {
+      id: "activate",
+      name: "onboarding.stepName.activate",
+      subtitle: "onboarding.stepSub.activate",
+    },
   ],
 }));
 
@@ -53,9 +65,7 @@ describe("OnboardingStepNav accessibility", () => {
     });
     // "hosting" is current (index=1), "welcome" is done (clickable → Button),
     // "hosting" and "activate" are non-clickable → role=listitem
-    const items = tree?.root.findAll(
-      (node) => node.props.role === "listitem",
-    );
+    const items = tree?.root.findAll((node) => node.props.role === "listitem");
     expect(items?.length).toBeGreaterThanOrEqual(2); // hosting (active) + activate (future)
   });
 
@@ -93,7 +103,9 @@ describe("OnboardingStepNav accessibility", () => {
     );
     expect(buttons?.length).toBeGreaterThanOrEqual(1);
     // Label should contain the step name and "completed"
-    expect(buttons?.[0].props["aria-label"]).toContain("onboarding.stepName.welcome");
+    expect(buttons?.[0].props["aria-label"]).toContain(
+      "onboarding.stepName.welcome",
+    );
     expect(buttons?.[0].props["aria-label"]).toContain("onboarding.completed");
   });
 });

@@ -11,11 +11,7 @@ describe("/api/dev/stack auth guard", () => {
     // Read the server source to verify the auth guard is present
     const fs = await import("node:fs");
     const path = await import("node:path");
-    const serverPath = path.resolve(
-      import.meta.dirname,
-      "..",
-      "server.ts",
-    );
+    const serverPath = path.resolve(import.meta.dirname, "..", "server.ts");
     const source = fs.readFileSync(serverPath, "utf-8");
 
     // Find the dev/stack route handler

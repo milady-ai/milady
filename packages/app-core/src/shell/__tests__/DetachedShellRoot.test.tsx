@@ -14,24 +14,34 @@ vi.mock("@miladyai/app-core/state", () => ({
 vi.mock("@miladyai/app-core/components", () => ({
   ChatView: () => React.createElement("div", null, "ChatView"),
   CloudDashboard: () => React.createElement("div", null, "CloudDashboard"),
-  CodingAgentSettingsSection: () => React.createElement("div", null, "CodingAgentSettingsSection"),
+  CodingAgentSettingsSection: () =>
+    React.createElement("div", null, "CodingAgentSettingsSection"),
   ConfigPageView: () => React.createElement("div", null, "ConfigPageView"),
-  ConnectorsPageView: () => React.createElement("div", null, "ConnectorsPageView"),
-  ConversationsSidebar: () => React.createElement("div", null, "ConversationsSidebar"),
+  ConnectorsPageView: () =>
+    React.createElement("div", null, "ConnectorsPageView"),
+  ConversationsSidebar: () =>
+    React.createElement("div", null, "ConversationsSidebar"),
   HeartbeatsView: () => React.createElement("div", null, "HeartbeatsView"),
-  MediaSettingsSection: () => React.createElement("div", null, "MediaSettingsSection"),
+  MediaSettingsSection: () =>
+    React.createElement("div", null, "MediaSettingsSection"),
   PairingView: () => React.createElement("div", null, "PairingView"),
-  PermissionsSection: () => React.createElement("div", null, "PermissionsSection"),
+  PermissionsSection: () =>
+    React.createElement("div", null, "PermissionsSection"),
   PluginsPageView: () => React.createElement("div", null, "PluginsPageView"),
   ProviderSwitcher: () => React.createElement("div", null, "ProviderSwitcher"),
-  ReleaseCenterView: () => React.createElement("div", null, "ReleaseCenterView"),
+  ReleaseCenterView: () =>
+    React.createElement("div", null, "ReleaseCenterView"),
   SettingsView: () => React.createElement("div", null, "SettingsView"),
-  StartupFailureView: () => React.createElement("div", null, "StartupFailureView"),
+  StartupFailureView: () =>
+    React.createElement("div", null, "StartupFailureView"),
   VoiceConfigView: () => React.createElement("div", null, "VoiceConfigView"),
 }));
 
 vi.mock("../../components", () => ({
-  BrowserSurfaceWindow: () => React.createElement("div", null, "BrowserSurfaceWindow"),
+  BrowserSurfaceWindow: () =>
+    React.createElement("div", null, "BrowserSurfaceWindow"),
+  ConversationsSidebar: () =>
+    React.createElement("div", null, "ConversationsSidebar"),
 }));
 
 vi.mock("../../platform/window-shell", () => ({
