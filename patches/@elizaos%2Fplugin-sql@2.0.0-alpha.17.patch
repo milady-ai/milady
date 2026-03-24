@@ -147,3 +147,105 @@ diff --git a/dist/cjs/index.node.cjs b/dist/cjs/index.node.cjs
          import_core10.logger.error({
            src: "plugin:sql",
            type: params.type,
+
+diff --git a/dist/browser/index.browser.js b/dist/browser/index.browser.js
+--- a/dist/browser/index.browser.js
++++ b/dist/browser/index.browser.js
+@@ -1776,8 +1776,8 @@ function generateCreateTableSQL(fullTableName, table) {
+   const foreignKeys = table.foreignKeys || {};
+   for (const [fkName, fkDef] of Object.entries(foreignKeys)) {
+     const fk = fkDef;
+-    const fkSQL = `ALTER TABLE "${schema}"."${tableName}" ADD CONSTRAINT "${fkName}" FOREIGN KEY (${fk.columnsFrom.map((c) => `"${c}"`).join(", ")}) REFERENCES "${fk.schemaTo || "public"}"."${fk.tableTo}" (${fk.columnsTo.map((c) => `"${c}"`).join(", ")})${fk.onDelete ? ` ON DELETE ${fk.onDelete}` : ""}${fk.onUpdate ? ` ON UPDATE ${fk.onUpdate}` : ""};`;
+-    fkSQLs.push(fkSQL);
++    const fkBody = `ALTER TABLE "${schema}"."${tableName}" ADD CONSTRAINT "${fkName}" FOREIGN KEY (${fk.columnsFrom.map((c) => `"${c}"`).join(", ")}) REFERENCES "${fk.schemaTo || "public"}"."${fk.tableTo}" (${fk.columnsTo.map((c) => `"${c}"`).join(", ")})${fk.onDelete ? ` ON DELETE ${fk.onDelete}` : ""}${fk.onUpdate ? ` ON UPDATE ${fk.onUpdate}` : ""}`;
++    fkSQLs.push(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '${fkName.replace(/'/g, "''")}') THEN ${fkBody}; END IF; END $$;`);
+   }
+   return { tableSQL, fkSQLs };
+ }
+@@ -1960,14 +1960,14 @@ function generateCreateForeignKeySQL(fk) {
+   const tableFrom = fk.tableFrom;
+   const columnsFrom = fk.columnsFrom.map((c) => `"${c}"`).join(", ");
+   const columnsTo = fk.columnsTo.map((c) => `"${c}"`).join(", ");
+-  let sql21 = `ALTER TABLE "${schemaFrom}"."${tableFrom}" ADD CONSTRAINT "${fk.name}" FOREIGN KEY (${columnsFrom}) REFERENCES "${schemaTo}"."${fk.tableTo}" (${columnsTo})`;
++  let fkBody = `ALTER TABLE "${schemaFrom}"."${tableFrom}" ADD CONSTRAINT "${fk.name}" FOREIGN KEY (${columnsFrom}) REFERENCES "${schemaTo}"."${fk.tableTo}" (${columnsTo})`;
+   if (fk.onDelete) {
+-    sql21 += ` ON DELETE ${fk.onDelete}`;
++    fkBody += ` ON DELETE ${fk.onDelete}`;
+   }
+   if (fk.onUpdate) {
+-    sql21 += ` ON UPDATE ${fk.onUpdate}`;
++    fkBody += ` ON UPDATE ${fk.onUpdate}`;
+   }
+-  return `${sql21};`;
++  return `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '${fk.name.replace(/'/g, "''")}') THEN ${fkBody}; END IF; END $$;`;
+ }
+ function generateDropForeignKeySQL(fk) {
+   const [schema, tableName] = fk.tableFrom ? fk.tableFrom.includes(".") ? fk.tableFrom.split(".") : ["public", fk.tableFrom] : ["public", ""];
+
+diff --git a/dist/node/index.node.js b/dist/node/index.node.js
+--- a/dist/node/index.node.js
++++ b/dist/node/index.node.js
+@@ -1922,8 +1922,8 @@ function generateCreateTableSQL(fullTableName, table) {
+   const foreignKeys = table.foreignKeys || {};
+   for (const [fkName, fkDef] of Object.entries(foreignKeys)) {
+     const fk = fkDef;
+-    const fkSQL = `ALTER TABLE "${schema}"."${tableName}" ADD CONSTRAINT "${fkName}" FOREIGN KEY (${fk.columnsFrom.map((c) => `"${c}"`).join(", ")}) REFERENCES "${fk.schemaTo || "public"}"."${fk.tableTo}" (${fk.columnsTo.map((c) => `"${c}"`).join(", ")})${fk.onDelete ? ` ON DELETE ${fk.onDelete}` : ""}${fk.onUpdate ? ` ON UPDATE ${fk.onUpdate}` : ""};`;
+-    fkSQLs.push(fkSQL);
++    const fkBody = `ALTER TABLE "${schema}"."${tableName}" ADD CONSTRAINT "${fkName}" FOREIGN KEY (${fk.columnsFrom.map((c) => `"${c}"`).join(", ")}) REFERENCES "${fk.schemaTo || "public"}"."${fk.tableTo}" (${fk.columnsTo.map((c) => `"${c}"`).join(", ")})${fk.onDelete ? ` ON DELETE ${fk.onDelete}` : ""}${fk.onUpdate ? ` ON UPDATE ${fk.onUpdate}` : ""}`;
++    fkSQLs.push(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '${fkName.replace(/'/g, "''")}') THEN ${fkBody}; END IF; END $$;`);
+   }
+   return { tableSQL, fkSQLs };
+ }
+@@ -2106,14 +2106,14 @@ function generateCreateForeignKeySQL(fk) {
+   const tableFrom = fk.tableFrom;
+   const columnsFrom = fk.columnsFrom.map((c) => `"${c}"`).join(", ");
+   const columnsTo = fk.columnsTo.map((c) => `"${c}"`).join(", ");
+-  let sql21 = `ALTER TABLE "${schemaFrom}"."${tableFrom}" ADD CONSTRAINT "${fk.name}" FOREIGN KEY (${columnsFrom}) REFERENCES "${schemaTo}"."${fk.tableTo}" (${columnsTo})`;
++  let fkBody = `ALTER TABLE "${schemaFrom}"."${tableFrom}" ADD CONSTRAINT "${fk.name}" FOREIGN KEY (${columnsFrom}) REFERENCES "${schemaTo}"."${fk.tableTo}" (${columnsTo})`;
+   if (fk.onDelete) {
+-    sql21 += ` ON DELETE ${fk.onDelete}`;
++    fkBody += ` ON DELETE ${fk.onDelete}`;
+   }
+   if (fk.onUpdate) {
+-    sql21 += ` ON UPDATE ${fk.onUpdate}`;
++    fkBody += ` ON UPDATE ${fk.onUpdate}`;
+   }
+-  return `${sql21};`;
++  return `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '${fk.name.replace(/'/g, "''")}') THEN ${fkBody}; END IF; END $$;`;
+ }
+ function generateDropForeignKeySQL(fk) {
+   const [schema, tableName] = fk.tableFrom ? fk.tableFrom.includes(".") ? fk.tableFrom.split(".") : ["public", fk.tableFrom] : ["public", ""];
+
+diff --git a/dist/cjs/index.node.cjs b/dist/cjs/index.node.cjs
+--- a/dist/cjs/index.node.cjs
++++ b/dist/cjs/index.node.cjs
+@@ -1972,8 +1972,8 @@ function generateCreateTableSQL(fullTableName, table) {
+   const foreignKeys = table.foreignKeys || {};
+   for (const [fkName, fkDef] of Object.entries(foreignKeys)) {
+     const fk = fkDef;
+-    const fkSQL = `ALTER TABLE "${schema}"."${tableName}" ADD CONSTRAINT "${fkName}" FOREIGN KEY (${fk.columnsFrom.map((c) => `"${c}"`).join(", ")}) REFERENCES "${fk.schemaTo || "public"}"."${fk.tableTo}" (${fk.columnsTo.map((c) => `"${c}"`).join(", ")})${fk.onDelete ? ` ON DELETE ${fk.onDelete}` : ""}${fk.onUpdate ? ` ON UPDATE ${fk.onUpdate}` : ""};`;
+-    fkSQLs.push(fkSQL);
++    const fkBody = `ALTER TABLE "${schema}"."${tableName}" ADD CONSTRAINT "${fkName}" FOREIGN KEY (${fk.columnsFrom.map((c) => `"${c}"`).join(", ")}) REFERENCES "${fk.schemaTo || "public"}"."${fk.tableTo}" (${fk.columnsTo.map((c) => `"${c}"`).join(", ")})${fk.onDelete ? ` ON DELETE ${fk.onDelete}` : ""}${fk.onUpdate ? ` ON UPDATE ${fk.onUpdate}` : ""}`;
++    fkSQLs.push(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '${fkName.replace(/'/g, "''")}') THEN ${fkBody}; END IF; END $$;`);
+   }
+   return { tableSQL, fkSQLs };
+ }
+@@ -2156,14 +2156,14 @@ function generateCreateForeignKeySQL(fk) {
+   const tableFrom = fk.tableFrom;
+   const columnsFrom = fk.columnsFrom.map((c) => `"${c}"`).join(", ");
+   const columnsTo = fk.columnsTo.map((c) => `"${c}"`).join(", ");
+-  let sql21 = `ALTER TABLE "${schemaFrom}"."${tableFrom}" ADD CONSTRAINT "${fk.name}" FOREIGN KEY (${columnsFrom}) REFERENCES "${schemaTo}"."${fk.tableTo}" (${columnsTo})`;
++  let fkBody = `ALTER TABLE "${schemaFrom}"."${tableFrom}" ADD CONSTRAINT "${fk.name}" FOREIGN KEY (${columnsFrom}) REFERENCES "${schemaTo}"."${fk.tableTo}" (${columnsTo})`;
+   if (fk.onDelete) {
+-    sql21 += ` ON DELETE ${fk.onDelete}`;
++    fkBody += ` ON DELETE ${fk.onDelete}`;
+   }
+   if (fk.onUpdate) {
+-    sql21 += ` ON UPDATE ${fk.onUpdate}`;
++    fkBody += ` ON UPDATE ${fk.onUpdate}`;
+   }
+-  return `${sql21};`;
++  return `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '${fk.name.replace(/'/g, "''")}') THEN ${fkBody}; END IF; END $$;`;
+ }
+ function generateDropForeignKeySQL(fk) {
+   const [schema, tableName] = fk.tableFrom ? fk.tableFrom.includes(".") ? fk.tableFrom.split(".") : ["public", fk.tableFrom] : ["public", ""];
