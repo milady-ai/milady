@@ -652,7 +652,7 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
   // Track composer height so the message layer bottom adjusts dynamically
   useEffect(() => {
     const el = composerRef.current;
-    if (!el) return;
+    if (!el || typeof ResizeObserver === "undefined") return;
     const ro = new ResizeObserver(([entry]) => {
       if (entry) setComposerHeight(entry.contentRect.height);
     });

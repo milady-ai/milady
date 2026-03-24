@@ -72,6 +72,7 @@ export function ChatComposer({
     () => typeof window !== "undefined" && window.innerWidth < 310,
   );
   useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
     const mq = window.matchMedia("(max-width: 309px)");
     const sync = () => setIsNarrow(mq.matches);
     sync();
