@@ -583,7 +583,27 @@ function CompanionSceneSurface({
   );
 }
 
-export const CompanionSceneHost = memo(CompanionSceneSurface);
+// Custom comparator ignores `children` — children are overlaid via CSS
+// absolute positioning and never affect the 3D canvas.  Without this,
+// every App re-render (e.g. chat input keystrokes) recreates the children
+// JSX tree, breaking memo and causing 20+ renders/sec on the WebGL scene.
+//
+// Safety: children (shellContent in App.tsx) include ViewRouter which receives
+// characterSceneVisible as a prop. This is safe because when companionShellVisible
+// is true, shellContent is <CompanionShell/> — ViewRouter only renders in the
+// non-companion branch and is never a child of CompanionSceneHost in that case.
+// The `interactive` prop already tracks `companionShellVisible || characterSceneVisible`,
+// so scene-relevant visibility changes always trigger re-renders.
+export const companionSceneHostAreEqual = (
+  prev: { active: boolean; interactive?: boolean },
+  next: { active: boolean; interactive?: boolean },
+): boolean =>
+  prev.active === next.active && prev.interactive === next.interactive;
+
+export const CompanionSceneHost = memo(
+  CompanionSceneSurface,
+  companionSceneHostAreEqual,
+);
 
 export function SharedCompanionScene({
   active,
