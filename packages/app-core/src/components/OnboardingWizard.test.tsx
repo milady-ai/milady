@@ -82,6 +82,11 @@ describe("OnboardingWizard", () => {
   beforeEach(() => {
     mockUseApp.mockReset();
     mockVrmStage.mockClear();
+    vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("keeps the day scene and light tokens when the UI theme is light", async () => {
@@ -174,6 +179,47 @@ describe("OnboardingWizard", () => {
     expect(layout?.props.className).toContain("justify-between");
     expect(layout?.props.className).toContain("items-center");
     expect(layout?.props.className).toContain("overflow-hidden");
+  });
+
+  it("locks and restores document scroll styles while onboarding is mounted", async () => {
+    mockUseApp.mockReturnValue({
+      onboardingStep: "hosting",
+      selectedVrmIndex: 1,
+      customVrmUrl: "",
+      uiLanguage: "en",
+      uiTheme: "dark",
+      setState: vi.fn(),
+      t: (key: string) => key,
+      onboardingUiRevealNonce: 0,
+      companionVrmPowerMode: "balanced",
+      companionHalfFramerateMode: "when_saving_power",
+      companionAnimateWhenHidden: false,
+    });
+
+    document.documentElement.style.overflow = "auto";
+    document.documentElement.style.overscrollBehavior = "auto";
+    document.body.style.overflow = "auto";
+    document.body.style.overscrollBehavior = "auto";
+
+    let tree: ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(<OnboardingWizard />);
+    });
+
+    expect(document.documentElement.style.overflow).toBe("hidden");
+    expect(document.documentElement.style.overscrollBehavior).toBe("none");
+    expect(document.body.style.overflow).toBe("hidden");
+    expect(document.body.style.overscrollBehavior).toBe("none");
+    expect(window.scrollTo).toHaveBeenCalled();
+
+    await act(async () => {
+      tree?.unmount();
+    });
+
+    expect(document.documentElement.style.overflow).toBe("auto");
+    expect(document.documentElement.style.overscrollBehavior).toBe("auto");
+    expect(document.body.style.overflow).toBe("auto");
+    expect(document.body.style.overscrollBehavior).toBe("auto");
   });
 
   describe("onboarding overlay reveal fallback", () => {

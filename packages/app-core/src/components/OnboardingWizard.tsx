@@ -101,6 +101,36 @@ export function OnboardingWizard() {
     };
   }, []);
 
+  // Onboarding-enter guard: force viewport origin back to top-left.
+  // WHY: stale shell/webview scroll offsets can survive between sessions and
+  // make the onboarding overlay appear displaced on first render.
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof document === "undefined") {
+      return;
+    }
+
+    const applyViewportOrigin = () => {
+      if (typeof window.scrollTo === "function") {
+        try {
+          window.scrollTo(0, 0);
+        } catch {
+          // jsdom does not implement scrollTo; ignore in tests.
+        }
+      }
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+
+    applyViewportOrigin();
+    const raf = window.requestAnimationFrame(applyViewportOrigin);
+    const timeout = window.setTimeout(applyViewportOrigin, 60);
+
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.clearTimeout(timeout);
+    };
+  }, []);
+
   // Overlay stays opacity 0 until VrmStage calls onRevealStart. After Reset Milady (or
   // any remount), the engine sometimes never emits reveal — user sees only the avatar.
   useEffect(() => {

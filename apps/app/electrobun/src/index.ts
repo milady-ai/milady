@@ -736,6 +736,24 @@ function normalizeMainWindowZoom(win: BrowserWindow): void {
   }
 }
 
+/**
+ * Clear stale webview scroll offset before onboarding/app shell interaction.
+ *
+ * WHY: some persisted renderer states can reopen scrolled away from origin,
+ * which visually displaces fixed onboarding overlays on first paint.
+ */
+function normalizeMainWindowScroll(win: BrowserWindow): void {
+  try {
+    win.webview.executeJavascript(`
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    `);
+  } catch (error) {
+    console.warn("[Main] Failed to normalize renderer scroll origin:", error);
+  }
+}
+
 function attachMainWindow(win: BrowserWindow): BrowserWindow {
   const sendToWebview = wireRpcAndModules(win);
   currentWindow = win;
@@ -744,6 +762,8 @@ function attachMainWindow(win: BrowserWindow): BrowserWindow {
 
   win.webview.on("dom-ready", () => {
     normalizeMainWindowZoom(win);
+    normalizeMainWindowScroll(win);
+    setTimeout(() => normalizeMainWindowScroll(win), 80);
     injectApiBase(win);
   });
 

@@ -65,6 +65,8 @@ describe("Electrobun startup bootstrap", () => {
     expect(source).toContain("function normalizeMainWindowZoom");
     expect(source).toContain("win.setPageZoom(1);");
     expect(source).toContain("normalizeMainWindowZoom(win);");
+    expect(source).toContain("function normalizeMainWindowScroll");
+    expect(source).toContain("normalizeMainWindowScroll(win);");
   });
 
   it("does not load repo or ~/.eliza env files in packaged desktop builds", () => {
