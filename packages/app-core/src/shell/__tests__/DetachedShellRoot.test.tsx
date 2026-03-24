@@ -37,11 +37,23 @@ vi.mock("@miladyai/app-core/components", () => ({
   VoiceConfigView: () => React.createElement("div", null, "VoiceConfigView"),
 }));
 
+// Mock relative to the component under test (shell/DetachedShellRoot.tsx)
+// which imports BrowserSurfaceWindow from "../../components" → apps/app/src/components
 vi.mock("../../components", () => ({
   BrowserSurfaceWindow: () =>
     React.createElement("div", null, "BrowserSurfaceWindow"),
   ConversationsSidebar: () =>
     React.createElement("div", null, "ConversationsSidebar"),
+  ChatView: () => React.createElement("div", null, "ChatView"),
+  CloudDashboard: () => React.createElement("div", null, "CloudDashboard"),
+  ConnectorsPageView: () =>
+    React.createElement("div", null, "ConnectorsPageView"),
+  HeartbeatsView: () => React.createElement("div", null, "HeartbeatsView"),
+  PluginsPageView: () => React.createElement("div", null, "PluginsPageView"),
+  SettingsView: () => React.createElement("div", null, "SettingsView"),
+  StartupFailureView: () =>
+    React.createElement("div", null, "StartupFailureView"),
+  PairingView: () => React.createElement("div", null, "PairingView"),
 }));
 
 vi.mock("../../platform/window-shell", () => ({
