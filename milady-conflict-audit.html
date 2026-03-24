@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Milady Codebase Conflict Audit — 2026-03-24</title>
+<style>
+:root { --bg: #0d1117; --card: #161b22; --border: #30363d; --text: #e6edf3; --muted: #8b949e; --red: #f85149; --orange: #d29922; --green: #3fb950; --blue: #58a6ff; --purple: #bc8cff; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding: 2rem; max-width: 1200px; margin: 0 auto; }
+h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+.subtitle { color: var(--muted); margin-bottom: 2rem; }
+.stats { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+.stat { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.5rem; min-width: 120px; }
+.stat-value { font-size: 2rem; font-weight: 700; }
+.stat-label { color: var(--muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.high .stat-value { color: var(--red); }
+.medium .stat-value { color: var(--orange); }
+.low .stat-value { color: var(--green); }
+.total .stat-value { color: var(--blue); }
+.phase { margin-bottom: 2rem; }
+.phase-header { background: var(--card); border: 1px solid var(--border); border-radius: 8px 8px 0 0; padding: 1rem 1.5rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+.phase-header:hover { border-color: var(--blue); }
+.phase-header h2 { font-size: 1.2rem; }
+.phase-count { background: var(--border); border-radius: 12px; padding: 0.2rem 0.8rem; font-size: 0.85rem; }
+.phase-body { border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; }
+.phase-body.collapsed { display: none; }
+.task { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); }
+.task:last-child { border-bottom: none; }
+.task-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+.task-id { font-weight: 700; font-family: monospace; }
+.sev { padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+.sev-high { background: rgba(248,81,73,0.15); color: var(--red); }
+.sev-medium { background: rgba(210,153,34,0.15); color: var(--orange); }
+.sev-low { background: rgba(63,185,80,0.15); color: var(--green); }
+.task-type { color: var(--purple); font-size: 0.8rem; font-weight: 600; }
+.task-title { font-weight: 600; }
+.task-file { color: var(--muted); font-size: 0.85rem; font-family: monospace; margin: 0.25rem 0; }
+.task-desc { color: var(--muted); font-size: 0.9rem; }
+.task-check { width: 18px; height: 18px; accent-color: var(--green); cursor: pointer; }
+.deps { color: var(--blue); font-size: 0.8rem; margin-left: 0.5rem; }
+.toggle { font-size: 1.2rem; transition: transform 0.2s; }
+.toggle.open { transform: rotate(90deg); }
+.filter-bar { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.filter-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
+.filter-btn.active { border-color: var(--blue); background: rgba(88,166,255,0.1); }
+.filter-btn:hover { border-color: var(--blue); }
+</style>
+</head>
+<body>
+<h1>Milady Codebase Conflict Audit</h1>
+<p class="subtitle">Last updated: 2026-03-24 | 57 validated issues across 6 phases</p>
+
+<div class="stats">
+  <div class="stat high"><div class="stat-value">11</div><div class="stat-label">High</div></div>
+  <div class="stat medium"><div class="stat-value">28</div><div class="stat-label">Medium</div></div>
+  <div class="stat low"><div class="stat-value">18</div><div class="stat-label">Low</div></div>
+  <div class="stat total"><div class="stat-value">57</div><div class="stat-label">Total</div></div>
+</div>
+
+<div class="filter-bar">
+  <button class="filter-btn active" onclick="filterSev('all')">All</button>
+  <button class="filter-btn" onclick="filterSev('high')">HIGH</button>
+  <button class="filter-btn" onclick="filterSev('medium')">MEDIUM</button>
+  <button class="filter-btn" onclick="filterSev('low')">LOW</button>
+</div>
+
+<div id="phases"></div>
+
+<script>
+const phases = [
+  { name: "Phase 0: Config Alignment", desc: "Unify port defaults, env var precedence, and runtime configuration", tasks: [
+    { id: "T01", sev: "high", type: "CONFIG", title: "eliza.ts port resolution reads ELIZA_PORT twice, ignoring MILADY_API_PORT", file: "packages/agent/src/runtime/eliza.ts:4465", desc: "Duplicate ELIZA_PORT read. MILADY_PORT and MILADY_API_PORT never consulted. Fix: use MILADY_API_PORT > MILADY_PORT > ELIZA_PORT > 31337." },
+    { id: "T02", sev: "high", type: "CONFIG", title: "server.ts bind-address reads ELIZA_API_BIND twice, ignoring MILADY_API_BIND", file: "packages/agent/src/api/server.ts:5648-5649,5689-5690,16905-16906", desc: "Three locations duplicate ELIZA_API_BIND. Fix: change second to MILADY_API_BIND." },
+    { id: "T03", sev: "medium", type: "CONFIG", title: "Runtime Dockerfiles missing NODE_PATH for plugin resolution", file: "Dockerfile, deploy/Dockerfile.cloud-*", desc: "Fix: add ENV NODE_PATH=/app/node_modules to every runtime stage." },
+    { id: "T04", sev: "medium", type: "CONFIG", title: "Dual getCloudSecret() with incompatible signatures", file: "packages/app-core/src/api/cloud-secrets.ts, security/cloud-secret-store.ts", desc: "Fix: rename one and update all call sites." },
+    { id: "T05", sev: "medium", type: "CONFIG", title: "Bidirectional env-var sync drops updates under concurrency", file: "packages/app-core/src/config/brand-env.ts:6-30", desc: "Fix: single canonical variable; make aliases read-only." },
+    { id: "T06", sev: "medium", type: "CONFIG", title: "Non-loopback API bind requires token but no startup check", file: ".env.example:47-50", desc: "Fix: refuse to start if bind is non-loopback and token is empty." },
+    { id: "T07", sev: "medium", type: "CONFIG", title: "Gateway bind defaults to 'lan' with no brand-env alias", file: "deploy/docker-compose.yml:26", desc: "Fix: add alias to brand-env.ts, document in .env.example." },
+    { id: "T08", sev: "medium", type: "CONFIG", title: "Electrobun DEFAULT_PORT (2138) used as API fallback", file: "apps/app/electrobun/src/constants.ts:1", desc: "Fix: add DEFAULT_API_PORT = 31337. Depends on T01.", deps: "T01" },
+    { id: "T09", sev: "low", type: "CONFIG", title: "package.json main points to nonexistent build/ dir", file: "package.json:42", desc: "Fix: update to dist/index.js." },
+    { id: "T10", sev: "low", type: "CONFIG", title: "Sandbox env vars undocumented in .env.example", file: ".env.example, sandbox-manager.ts", desc: "Fix: add documentation section." },
+    { id: "T11", sev: "low", type: "CONFIG", title: "docker-compose references missing cloud session keys", file: "deploy/docker-compose.yml:4-10", desc: "Fix: add to .env.example with comments." },
+    { id: "T12", sev: "low", type: "CONFIG", title: "Main Dockerfile missing ENV MILADY_PORT=2138", file: "Dockerfile:172-184", desc: "Fix: add for consistency with other Dockerfiles." },
+    { id: "T13", sev: "low", type: "CONFIG", title: "ELIZA_ALLOWED_HOSTS=* only in Dockerfile.ci", file: "Dockerfile.ci:59", desc: "Fix: document host policy per build variant." },
+  ]},
+  { name: "Phase 1: Security", desc: "Fix privilege escalation, secret exposure, auth bypasses, sandboxing gaps", tasks: [
+    { id: "T14", sev: "high", type: "SECURITY", title: "Main Dockerfile runs as root — no USER directive", file: "Dockerfile (runtime stage)", desc: "Fix: add USER node before CMD." },
+    { id: "T15", sev: "high", type: "SECURITY", title: "Wallet private keys returned in plaintext via POST /api/wallet/export", file: "packages/agent/src/api/wallet-routes.ts:406-432", desc: "Fix: never return raw private keys over HTTP." },
+    { id: "T16", sev: "high", type: "SECURITY", title: "macOS Keychain key exposure via process arguments", file: "packages/app-core/src/security/platform-secure-store-node.ts:152-172", desc: "Fix: pipe secret via stdin instead of argv." },
+    { id: "T17", sev: "high", type: "SECURITY", title: "Plugin installer inherits full process.env including API keys", file: "packages/app-core/src/services/plugin-installer.ts:583-714", desc: "Fix: explicit allowlist of safe env vars." },
+    { id: "T18", sev: "high", type: "SECURITY", title: "SandboxManager orphans Docker containers on crash", file: "packages/agent/src/services/sandbox-manager.ts:183-326", desc: "Fix: register signal handlers in constructor. Depends on T06.", deps: "T06" },
+    { id: "T19", sev: "medium", type: "SECURITY", title: "Chrome extension WebSocket unauthenticated", file: "apps/chrome-extension/background.js:74,88-91", desc: "Fix: validate MILADY_API_TOKEN in WebSocket upgrade." },
+    { id: "T20", sev: "medium", type: "SECURITY", title: "GET /api/config returns raw API keys", file: "packages/app-core/src/api/server.ts:2011-2017", desc: "Fix: filter to safe UI-relevant subset." },
+    { id: "T21", sev: "medium", type: "SECURITY", title: "BrowserSurfaceWindow sandbox='' provides no restrictions", file: "apps/app/src/BrowserSurfaceWindow.tsx:184", desc: "Fix: block file://, data://, javascript:// URLs." },
+    { id: "T22", sev: "medium", type: "SECURITY", title: "Pairing code logged via console.warn()", file: "packages/app-core/src/api/server.ts:283-285", desc: "Fix: use debug-level logger." },
+    { id: "T23", sev: "medium", type: "SECURITY", title: "Sandbox container credentials not filtered", file: "packages/agent/src/services/sandbox-manager.ts:145-163", desc: "Fix: explicit allowlist of container env vars." },
+    { id: "T24", sev: "medium", type: "SECURITY", title: "Git URL validation skipped at clone call site", file: "packages/app-core/src/services/plugin-installer.ts:702-714", desc: "Fix: validate URL before clone." },
+    { id: "T25", sev: "medium", type: "SECURITY", title: "Plugin entry point missing symlink validation", file: "packages/app-core/src/services/plugin-installer.ts:308-361", desc: "Fix: resolve real paths, verify within install dir." },
+    { id: "T26", sev: "medium", type: "SECURITY", title: "process.kill() for port reclaim kills arbitrary processes", file: "apps/app/electrobun/src/native/agent.ts:650-660", desc: "Fix: verify process name before killing." },
+    { id: "T27", sev: "low", type: "SECURITY", title: "maskValue() exposes first/last 4 chars of secrets", file: "packages/app-core/src/api/server.ts:433-436", desc: "Fix: return [redacted]." },
+    { id: "T28", sev: "low", type: "SECURITY", title: "Chrome extension requests debugger permission", file: "apps/chrome-extension/manifest.json:12", desc: "Fix: audit; remove if unused." },
+  ]},
+  { name: "Phase 2: Error Handling", desc: "Prevent silent failures and crashes", tasks: [
+    { id: "T29", sev: "high", type: "ERROR", title: "Electrobun agent startup failure swallowed — no user feedback", file: "apps/app/electrobun/src/index.ts:982-984", desc: "Fix: call setAgentReady(false) and push error via RPC." },
+    { id: "T30", sev: "medium", type: "ERROR", title: "Unhandled async errors in workbench todo route", file: "packages/app-core/src/api/server.ts:934-1110", desc: "Fix: wrap runtime calls in try/catch." },
+    { id: "T31", sev: "medium", type: "ERROR", title: "Unguarded fetch in API server", file: "packages/app-core/src/api/server.ts:490,508,2050", desc: "Fix: wrap in try/catch." },
+    { id: "T32", sev: "medium", type: "ERROR", title: "SandboxManager missing try-finally on container creation", file: "packages/agent/src/services/sandbox-manager.ts:194-259", desc: "Fix: wrap in try-finally. Depends on T18.", deps: "T18" },
+    { id: "T33", sev: "medium", type: "ERROR", title: "Browser container failure doesn't roll back main container", file: "packages/agent/src/services/sandbox-manager.ts:229-241", desc: "Fix: make failure fatal or expose browserAvailable flag." },
+    { id: "T34", sev: "medium", type: "ERROR", title: "Chrome extension WebSocket no exponential backoff", file: "apps/chrome-extension/background.js:118-145", desc: "Fix: 1s base, 30s max, jitter." },
+    { id: "T35", sev: "medium", type: "ERROR", title: "Wallet config save failures silently ignored", file: "packages/agent/src/api/wallet-routes.ts:263-325", desc: "Fix: surface failure to user." },
+    { id: "T36", sev: "medium", type: "ERROR", title: "Agent port published before health check", file: "apps/app/electrobun/src/native/agent.ts:791-895", desc: "Fix: delay port until health check passes." },
+    { id: "T37", sev: "low", type: "ERROR", title: "Signal handlers stack on repeated dashboard invocation", file: "packages/app-core/src/cli/program/register.dashboard.ts:162-163", desc: "Fix: use process.once()." },
+    { id: "T38", sev: "low", type: "ERROR", title: "CLI async handlers lack error catching", file: "packages/app-core/src/cli/program/register.start.ts:87-97", desc: "Fix: wrap in try/catch." },
+    { id: "T39", sev: "low", type: "ERROR", title: "Orphaned heartbeat timer on agent failure", file: "apps/app/electrobun/src/index.ts:1381-1386", desc: "Fix: clear on startup failure." },
+    { id: "T40", sev: "low", type: "ERROR", title: "Telegram bot fire-and-forget startup", file: "packages/app-core/src/runtime/eliza.ts:611-620", desc: "Fix: surface failure or expose health check." },
+  ]},
+  { name: "Phase 3: Logic & Race Conditions", desc: "Fix signal conflicts, state machine races, behavioral inconsistencies", tasks: [
+    { id: "T41", sev: "high", type: "LOGIC", title: "Signal handler double registration — wrapper + upstream", file: "packages/app-core/src/runtime/eliza.ts:855 + packages/agent/src/runtime/eliza.ts:4420", desc: "Fix: upstream should accept option to skip signal handlers." },
+    { id: "T42", sev: "medium", type: "LOGIC", title: "Signal stacking — interactive and serverOnly paths", file: "packages/agent/src/runtime/eliza.ts:4420,4680", desc: "Fix: add mutual exclusion." },
+    { id: "T43", sev: "medium", type: "LOGIC", title: "Dead code — unreachable duplicate onboarding/status handler", file: "packages/app-core/src/api/server.ts:2122,3125", desc: "Fix: merge or remove dead code." },
+    { id: "T44", sev: "medium", type: "LOGIC", title: "Multiple injectApiBase() paths with no ordering", file: "apps/app/electrobun/src/index.ts:573,639,964,1214", desc: "Fix: single ownership." },
+    { id: "T45", sev: "medium", type: "LOGIC", title: "SandboxManager concurrent start() — same container name", file: "packages/agent/src/services/sandbox-manager.ts:221,287", desc: "Fix: use crypto.randomUUID()." },
+    { id: "T46", sev: "medium", type: "LOGIC", title: "Signing policy replay cache eviction allows bypass", file: "packages/agent/src/services/signing-policy.ts:218-229", desc: "Fix: bound both data structures." },
+    { id: "T47", sev: "low", type: "LOGIC", title: "HTTP 410 for expired pairing code (should be 408)", file: "packages/app-core/src/api/server.ts:1760-1767", desc: "Fix: return 408." },
+    { id: "T48", sev: "low", type: "LOGIC", title: "Pairing rate limiter ignores proxy headers", file: "packages/app-core/src/api/server.ts:1751,291-307", desc: "Fix: parse X-Forwarded-For when configured." },
+    { id: "T49", sev: "low", type: "LOGIC", title: "IPv6 normalization returns non-canonical on failure", file: "packages/agent/src/security/network-policy.ts:49-68", desc: "Fix: reject connection if canonicalization fails." },
+  ]},
+  { name: "Phase 4: Build & Deploy", desc: "Docker consistency, build artifacts, safe deployment", tasks: [
+    { id: "T50", sev: "high", type: "GAP", title: "Main Dockerfile missing HEALTHCHECK", file: "Dockerfile (runtime stage)", desc: "Fix: add HEALTHCHECK. Depends on T14.", deps: "T14" },
+    { id: "T51", sev: "medium", type: "GAP", title: "Main Dockerfile has no EXPOSE directive", file: "Dockerfile", desc: "Fix: add EXPOSE 2138." },
+    { id: "T52", sev: "medium", type: "CONFIG", title: "PORT vs MILADY_PORT inconsistent across Dockerfiles", file: "Dockerfile:183, deploy/Dockerfile.cloud-*", desc: "Fix: standardize on ENV MILADY_PORT=2138." },
+    { id: "T53", sev: "medium", type: "CONFIG", title: "docker-compose volume mounts may conflict", file: "deploy/docker-compose.yml:13-14", desc: "Fix: document paths must be independent." },
+    { id: "T54", sev: "low", type: "CONFIG", title: "Inconsistent base image across Dockerfiles", file: "All Dockerfiles", desc: "Fix: standardize or document reason." },
+  ]},
+  { name: "Phase 5: UX Polish", desc: "Missing feedback, maintenance hazards, edge cases", tasks: [
+    { id: "T55", sev: "low", type: "GAP", title: "Workbench todos endpoint has no pagination", file: "packages/app-core/src/api/server.ts:737-744", desc: "Fix: add limit and offset." },
+    { id: "T56", sev: "low", type: "GAP", title: "Unrecognized ?shell= values silently degrade", file: "apps/app/src/window-shell.ts:23-52", desc: "Fix: add console.warn() and never exhaustiveness." },
+    { id: "T57", sev: "low", type: "GAP", title: "REVEALABLE_KEY_PREFIXES will drift as plugins evolve", file: "packages/app-core/src/api/server.ts:2106-2149", desc: "Fix: let plugins declare own prefixes." },
+  ]},
+];
+
+const STORAGE_KEY = "milady-audit-checks";
+let checks = {};
+try { checks = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch(e) {}
+let sevFilter = "all";
+
+function filterSev(s) {
+  sevFilter = s;
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.toggle("active", b.textContent.trim().toLowerCase() === s));
+  render();
+}
+
+function togglePhase(i) {
+  const body = document.getElementById("phase-body-" + i);
+  const toggle = document.getElementById("toggle-" + i);
+  body.classList.toggle("collapsed");
+  toggle.classList.toggle("open");
+}
+
+function toggleCheck(id) {
+  checks[id] = !checks[id];
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(checks));
+  render();
+}
+
+function render() {
+  const container = document.getElementById("phases");
+  container.innerHTML = phases.map((phase, i) => {
+    const filtered = phase.tasks.filter(t => sevFilter === "all" || t.sev === sevFilter);
+    if (filtered.length === 0) return "";
+    const done = filtered.filter(t => checks[t.id]).length;
+    return `<div class="phase">
+      <div class="phase-header" onclick="togglePhase(${i})">
+        <h2><span id="toggle-${i}" class="toggle open">▶</span> ${phase.name}</h2>
+        <span class="phase-count">${done}/${filtered.length} done</span>
+      </div>
+      <div class="phase-body" id="phase-body-${i}">
+        ${filtered.map(t => `<div class="task" style="${checks[t.id] ? 'opacity:0.5' : ''}">
+          <div class="task-header">
+            <input type="checkbox" class="task-check" ${checks[t.id] ? 'checked' : ''} onclick="toggleCheck('${t.id}')">
+            <span class="task-id">${t.id}</span>
+            <span class="sev sev-${t.sev}">${t.sev.toUpperCase()}</span>
+            <span class="task-type">${t.type}</span>
+            <span class="task-title">${t.title}</span>
+            ${t.deps ? `<span class="deps">depends on ${t.deps}</span>` : ""}
+          </div>
+          <div class="task-file">${t.file}</div>
+          <div class="task-desc">${t.desc}</div>
+        </div>`).join("")}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+render();
+</script>
+</body>
+</html>

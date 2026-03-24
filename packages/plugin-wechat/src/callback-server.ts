@@ -250,7 +250,8 @@ export function normalizePayload(
     : undefined;
 
   // Media URL extraction (images, voice, video, files)
-  const hasMedia = msgType === "image" || msgType === "voice" || msgType === "video" || msgType === "file";
+  const mediaTypes = new Set(["image", "voice", "video", "file"]);
+  const hasMedia = mediaTypes.has(msgType);
   const imageUrl = hasMedia
     ? String(data.imageUrl ?? data.mediaUrl ?? data.url ?? data.fileUrl ?? "")
     : undefined;

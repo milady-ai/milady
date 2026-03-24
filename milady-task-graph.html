@@ -3,172 +3,162 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Milady Task Graph — 2026-03-24</title>
+<title>Milady Task Graph — Dependency View</title>
 <style>
-:root { --bg: #0d1117; --surface: #161b22; --border: #30363d; --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff; --high: #f85149; --medium: #d29922; --low: #8b949e; --green: #3fb950; }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 2rem; }
-h1 { font-size: 1.6rem; margin-bottom: 0.3rem; }
-.sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 2rem; }
-.graph-container { display: flex; flex-direction: column; gap: 2rem; max-width: 1400px; margin: 0 auto; }
-.phase-row { display: flex; gap: 1rem; align-items: flex-start; }
-.phase-label { writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); font-weight: 700; font-size: 0.8rem; color: var(--accent); padding: 0.5rem; min-width: 30px; text-align: center; letter-spacing: 0.1em; text-transform: uppercase; }
-.cards { display: flex; flex-wrap: wrap; gap: 0.5rem; flex: 1; }
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem 0.8rem; width: 200px; cursor: pointer; transition: border-color 0.15s; position: relative; }
-.card:hover { border-color: var(--accent); }
-.card-id { font-weight: 700; font-size: 0.75rem; color: var(--accent); }
-.card-title { font-size: 0.75rem; margin-top: 2px; line-height: 1.3; }
-.card .sev-dot { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; border-radius: 50%; }
-.dot-high { background: var(--high); }
-.dot-medium { background: var(--medium); }
-.dot-low { background: var(--low); }
-.card-dep { font-size: 0.65rem; color: var(--muted); margin-top: 4px; }
-.card.done { opacity: 0.4; }
-.card.done .card-title { text-decoration: line-through; }
+:root { --bg: #0d1117; --card: #161b22; --border: #30363d; --text: #e6edf3; --muted: #8b949e; --red: #f85149; --orange: #d29922; --green: #3fb950; --blue: #58a6ff; --purple: #bc8cff; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding: 2rem; }
+h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+.subtitle { color: var(--muted); margin-bottom: 2rem; }
+.graph-container { display: flex; gap: 1.5rem; overflow-x: auto; padding-bottom: 1rem; }
+.phase-col { min-width: 280px; max-width: 320px; flex-shrink: 0; }
+.phase-title { background: var(--card); border: 1px solid var(--border); border-radius: 8px 8px 0 0; padding: 0.75rem 1rem; font-weight: 700; font-size: 0.95rem; position: sticky; top: 0; z-index: 1; }
+.phase-tasks { border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; }
+.node { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+.node:last-child { border-bottom: none; }
+.node:hover { background: rgba(88,166,255,0.05); }
+.node-id { font-family: monospace; font-weight: 700; font-size: 0.85rem; }
+.node-sev { display: inline-block; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.7rem; font-weight: 600; margin-left: 0.5rem; }
+.node-sev.high { background: rgba(248,81,73,0.15); color: var(--red); }
+.node-sev.medium { background: rgba(210,153,34,0.15); color: var(--orange); }
+.node-sev.low { background: rgba(63,185,80,0.15); color: var(--green); }
+.node-title { font-size: 0.85rem; margin-top: 0.25rem; }
+.node-dep { color: var(--blue); font-size: 0.75rem; margin-top: 0.25rem; }
 .legend { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
-.legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: var(--muted); }
+.legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--muted); }
 .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
-.stats { display: flex; gap: 2rem; margin-bottom: 1.5rem; }
-.stat { text-align: center; }
-.stat-num { font-size: 2rem; font-weight: 700; }
-.stat-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; }
-svg.dep-lines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
-.tooltip { display: none; position: fixed; background: #1c2128; border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; max-width: 350px; z-index: 100; font-size: 0.8rem; }
-.tooltip .tt-file { color: var(--accent); font-family: monospace; font-size: 0.75rem; }
-.tooltip .tt-desc { margin-top: 0.3rem; color: var(--muted); }
-.tooltip .tt-fix { margin-top: 0.5rem; background: var(--bg); padding: 0.5rem; border-radius: 4px; font-family: monospace; font-size: 0.7rem; white-space: pre-wrap; }
+.legend-dot.high { background: var(--red); }
+.legend-dot.medium { background: var(--orange); }
+.legend-dot.low { background: var(--green); }
+.summary { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; }
+.summary h2 { font-size: 1.1rem; margin-bottom: 0.75rem; }
+.summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+.summary-item { font-size: 0.9rem; }
+.summary-label { color: var(--muted); }
+.critical-path { margin-top: 1rem; padding: 0.75rem 1rem; background: rgba(248,81,73,0.05); border: 1px solid rgba(248,81,73,0.2); border-radius: 6px; }
+.critical-path h3 { font-size: 0.95rem; color: var(--red); margin-bottom: 0.5rem; }
+.critical-path p { font-size: 0.85rem; color: var(--muted); font-family: monospace; }
 </style>
 </head>
 <body>
-<h1>Milady Task Dependency Graph</h1>
-<p class="sub">48 tasks across 6 phases — hover for details, click to toggle done</p>
+<h1>Milady Task Graph — Dependency View</h1>
+<p class="subtitle">57 tasks across 6 phases | 2026-03-24</p>
 
 <div class="legend">
-  <div class="legend-item"><div class="legend-dot" style="background:var(--high)"></div> HIGH</div>
-  <div class="legend-item"><div class="legend-dot" style="background:var(--medium)"></div> MEDIUM</div>
-  <div class="legend-item"><div class="legend-dot" style="background:var(--low)"></div> LOW</div>
-  <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Done</div>
+  <div class="legend-item"><div class="legend-dot high"></div> HIGH (11)</div>
+  <div class="legend-item"><div class="legend-dot medium"></div> MEDIUM (28)</div>
+  <div class="legend-item"><div class="legend-dot low"></div> LOW (18)</div>
 </div>
 
-<div class="stats" id="stats"></div>
+<div class="summary">
+  <h2>Execution Summary</h2>
+  <div class="summary-grid">
+    <div class="summary-item"><span class="summary-label">Total tasks:</span> 57</div>
+    <div class="summary-item"><span class="summary-label">Dependency chains:</span> 4</div>
+    <div class="summary-item"><span class="summary-label">Parallelizable within phase:</span> ~90%</div>
+    <div class="summary-item"><span class="summary-label">Estimated effort:</span> ~40-60 hrs</div>
+  </div>
+  <div class="critical-path">
+    <h3>Critical Dependency Chains</h3>
+    <p>T01 → T08 (port defaults feed into Electrobun API base)</p>
+    <p>T06 → T18 → T32 (auth enforcement → sandbox cleanup → container try-finally)</p>
+    <p>T14 → T50 (Dockerfile USER → HEALTHCHECK)</p>
+  </div>
+</div>
+
 <div class="graph-container" id="graph"></div>
-<div class="tooltip" id="tooltip"></div>
 
 <script>
-const tasks = [
-  // Phase 0
-  {id:"T01",sev:"high",title:"eliza.ts wrong port default (2138)",file:"packages/agent/src/runtime/eliza.ts:4465",desc:"ELIZA_PORT checked twice, MILADY_API_PORT ignored, fallback 2138 not 31337.",fix:"Change to Number(process.env.MILADY_API_PORT || process.env.MILADY_PORT || process.env.ELIZA_PORT) || 31337",phase:0},
-  {id:"T02",sev:"high",title:"Docker PORT mapping inconsistent",file:"Dockerfile:182, deploy/*",desc:"PORT→MILADY_PORT mapping missing in cloud-slim CMD.",fix:"Standardize PORT→MILADY_PORT mapping in all CMDs.",phase:0},
-  {id:"T03",sev:"medium",title:"Dev server MILADY_PORT as API fallback",file:"packages/app-core/src/runtime/dev-server.ts:39-44",desc:"MILADY_PORT (UI) in API fallback chain causes port collision.",fix:"Remove MILADY_PORT from API port fallback.",phase:0},
-  {id:"T04",sev:"medium",title:"MILADY_WECHAT_WEBHOOK_PORT unused",file:"CLAUDE.md, plugin-wechat/channel.ts",desc:"Documented env var never read in code.",fix:"Wire env var or remove from docs.",phase:0},
-  {id:"T05",sev:"medium",title:"Docker state dir paths differ",file:"Dockerfile:174 vs deploy/*",desc:"Root sets /data/.milady; others default to ~/.eliza/.",fix:"Standardize state dir across Dockerfiles.",phase:0},
-  {id:"T06",sev:"medium",title:"API port docs ambiguity",file:".env.example, CLAUDE.md",desc:"Dev-only vs prod port semantics unclear.",fix:"Add clarifying comments.",phase:0},
-  {id:"T07",sev:"medium",title:"Electrobun DEFAULT_PORT wrong",file:"electrobun/constants.ts, index.ts:1055",desc:"Uses 2138 (UI) instead of 31337 (API) as fallback.",fix:"Use MILADY_API_PORT with fallback 31337.",phase:0,dep:"T01"},
-  // Phase 1
-  {id:"T08",sev:"high",title:"Hooks loader code injection",file:"hooks/loader.ts:210-248",desc:"Legacy handlers loaded from ~/.eliza/hooks without restriction.",fix:"Restrict to bundled dirs; require opt-in for user dirs.",phase:1},
-  {id:"T09",sev:"high",title:"WS token in URL params",file:"app-core/api/client.ts:4198-4201",desc:"Auth token in WebSocket URL leaks via logs/referrer.",fix:"Auth via message payload; make URL tokens opt-in.",phase:1},
-  {id:"T10",sev:"medium",title:"CSP allows unsafe-inline/eval",file:"apps/app/index.html:12-13",desc:"Weakens XSS protection.",fix:"Switch to nonce-based CSP.",phase:1},
-  {id:"T11",sev:"medium",title:"Unvalidated RPC token",file:"electrobun-bridge.ts:31-37",desc:"apiBaseUpdate accepts arbitrary tokens.",fix:"Validate against initialized token.",phase:1},
-  {id:"T12",sev:"medium",title:"Popout API base injection",file:"main.tsx:466-476",desc:"apiBase from URL params with weak validation.",fix:"Restrict to trusted origin allowlist.",phase:1},
-  {id:"T13",sev:"medium",title:"RTMP credentials exposed",file:"custom-rtmp/index.ts:18-35",desc:"Streaming key returned as-is.",fix:"Redact in return value.",phase:1},
-  // Phase 2
-  {id:"T14",sev:"medium",title:"Unhandled rejections in triggerHook",file:"hooks/registry.ts:21-58",desc:"Deferred async rejections escape try/catch.",fix:"Wrap with Promise.resolve().catch().",phase:2},
-  {id:"T15",sev:"medium",title:"Cloud login swallows errors",file:"useCloudLogin.ts:81-104",desc:"Only checks 'expired'; other errors poll forever.",fix:"Add error discrimination and max-error counter.",phase:2},
-  {id:"T16",sev:"medium",title:"Agent ready without health check",file:"electrobun/index.ts:1040-1065",desc:"External API base marked ready without verification.",fix:"Add /api/health check before setAgentReady.",phase:2,dep:"T07"},
-  {id:"T17",sev:"medium",title:"ErrorBoundary no tracking",file:"ErrorBoundary.tsx:22-24",desc:"Console-only error logging.",fix:"Integrate error tracking service.",phase:2},
-  {id:"T18",sev:"low",title:"Stream voice exposes internals",file:"stream-voice-routes.ts:85,121,183",desc:"String(err) may include stack traces.",fix:"Return generic error; log full details server-side.",phase:2},
-  // Phase 3
-  {id:"T19",sev:"high",title:"Lifecycle state race condition",file:"agent-lifecycle-routes.ts:36-92",desc:"No state guards on start/stop/pause/resume.",fix:"Add state machine with valid transitions.",phase:3},
-  {id:"T20",sev:"high",title:"API base pushed before agent starts",file:"electrobun/index.ts:1053-1065",desc:"Renderer boots with wrong port (2138).",fix:"Defer push until agent emits port.",phase:3,dep:"T07"},
-  {id:"T21",sev:"medium",title:"Double signal handler registration",file:"eliza.ts:4420,4680",desc:"SIGINT/SIGTERM registered twice in serverOnly mode.",fix:"Register once outside conditional blocks.",phase:3},
-  {id:"T22",sev:"medium",title:"Stream auto-restart race",file:"stream-manager.ts:488-516",desc:"Timer callback races with stop().",fix:"Add generation counter check.",phase:3},
-  {id:"T23",sev:"medium",title:"onRestart fire-and-forget",file:"eliza.ts:4469-4637",desc:"Async restart not awaited.",fix:"Await callback; block requests during transition.",phase:3},
-  {id:"T24",sev:"medium",title:"Pause/resume skip restart guard",file:"agent-lifecycle-routes.ts:65,80",desc:"Can overwrite 'restarting' state.",fix:"Add restarting guard.",phase:3,dep:"T19"},
-  {id:"T25",sev:"medium",title:"Premature SIGKILL in dev-ui",file:"dev-ui.mjs:1062-1079",desc:"Unref timers kill children during graceful shutdown.",fix:"Await child exit before escalating.",phase:3},
-  {id:"T26",sev:"low",title:"IPv6 normalization fallback",file:"network-policy.ts:49-68",desc:"Non-canonical IP used on canonicalization failure.",fix:"Reject connection on failure.",phase:3},
-  {id:"T27",sev:"low",title:"Timezone silent UTC fallback",file:"scheduling.ts:158-190",desc:"Invalid timezone returns 0 without error.",fix:"Validate and throw on invalid.",phase:3},
-  // Phase 4
-  {id:"T28",sev:"high",title:"Bun version mismatch (1.3.10/1.3.9)",file:"Dockerfile vs Dockerfile.slim, deploy/*",desc:"CI and root use 1.3.10; others use 1.3.9.",fix:"Pin all to same version via build arg.",phase:4},
-  {id:"T29",sev:"high",title:"Missing --import tsx in CMD",file:"Dockerfile:183, deploy/Dockerfile:84",desc:"Without tsx, TypeScript packages fail to resolve.",fix:"Add --import tsx to all CMD entries.",phase:4},
-  {id:"T30",sev:"high",title:"CI smoke skips plugin build",file:"docker-ci-smoke.sh, build-docker.yml:125",desc:"Smoke test doesn't replicate full CI sequence.",fix:"Add plugin build step to smoke script.",phase:4},
-  {id:"T31",sev:"medium",title:"Mismatched base images",file:"cloud-slim (bookworm vs bookworm-slim)",desc:"Builder/runtime use different base images.",fix:"Standardize to slim or document reason.",phase:4},
-  {id:"T32",sev:"medium",title:"User context mismatch",file:"cloud-slim (agent), deploy (node), root (root)",desc:"Inconsistent user contexts across Dockerfiles.",fix:"Standardize on non-root user.",phase:4},
-  {id:"T33",sev:"medium",title:"tsx unpinned in CI/slim",file:"Dockerfile.ci:49, Dockerfile.slim:332",desc:"Could pull breaking major version.",fix:"Pin to tsx@4 everywhere.",phase:4},
-  {id:"T34",sev:"medium",title:"Healthcheck paths differ",file:"Dockerfile.ci vs cloud-slim vs root",desc:"/api/health vs /health vs none.",fix:"Standardize to /api/health.",phase:4},
-  {id:"T35",sev:"medium",title:"Build command inconsistency",file:"Dockerfile (bun run build) vs slim (npx tsdown)",desc:"Different resolution paths.",fix:"Use bun run build consistently.",phase:4},
-  {id:"T36",sev:"low",title:"Missing EXPOSE in root Dockerfile",file:"Dockerfile",desc:"Other Dockerfiles have EXPOSE.",fix:"Add EXPOSE 2138.",phase:4},
-  {id:"T37",sev:"low",title:"Duplicate ENV in Dockerfile",file:"Dockerfile stages",desc:"PATH and NODE_LLAMA_CPP_SKIP_DOWNLOAD duplicated.",fix:"Remove from builder stage.",phase:4},
-  {id:"T38",sev:"low",title:"Undocumented Dockerfile roles",file:"build-docker.yml:218",desc:"Which Dockerfile is prod source of truth unclear.",fix:"Add purpose comment to each.",phase:4},
-  {id:"T39",sev:"low",title:".dockerignore.ci swap undocumented",file:"build-docker.yml:187",desc:"CI swaps file silently.",fix:"Document in CONTRIBUTING.md.",phase:4},
-  // Phase 5
-  {id:"T40",sev:"medium",title:"Missing single conversation GET",file:"packages/agent/src/api/server.ts",desc:"No GET /api/conversations/:id endpoint.",fix:"Add endpoint returning conversation metadata.",phase:5},
-  {id:"T41",sev:"medium",title:"TTS listener leak on detach",file:"tts-stream-bridge.ts:76-93",desc:"Error listener not removed in detach().",fix:"Store ref; remove in detach().",phase:5},
-  {id:"T42",sev:"medium",title:"setInterval leak on failed restart",file:"stream-manager.ts:409-477",desc:"Orphaned _restartDecayTimer on failure.",fix:"Clear timer before new autoRestart().",phase:5},
-  {id:"T43",sev:"medium",title:"Tracking state lost on restart failure",file:"stream-manager.ts:157-201",desc:"startedAt/frameCount not restored in catch.",fix:"Restore in catch block.",phase:5},
-  {id:"T44",sev:"low",title:"Stale container ID after recovery",file:"sandbox-manager.ts:285-326",desc:"containerId not nulled on createMainContainer() failure.",fix:"Set null before recovery attempt.",phase:5},
-  {id:"T45",sev:"low",title:"Approval memory leak",file:"remote-signing-service.ts:180-189",desc:"Expired approvals not cleaned without explicit call.",fix:"Add periodic cleanup timer.",phase:5},
-  {id:"T46",sev:"low",title:"Audit log not persisted",file:"audit-log.ts:55-147",desc:"In-memory only; lost on exit.",fix:"Add periodic flush to disk.",phase:5},
-  {id:"T47",sev:"low",title:"Cleanup flag inconsistency",file:"dev-ui.mjs vs eliza.ts",desc:"Module vs closure scoped shutdown flags.",fix:"Add force-exit on second SIGINT.",phase:5},
-  {id:"T48",sev:"low",title:"Homepage no API proxy",file:"apps/homepage/vite.config.ts",desc:"No proxy unlike main app.",fix:"Document why omitted.",phase:5}
+const phases = [
+  { title: "Phase 0: Config", tasks: [
+    {id:"T01",sev:"high",title:"Port resolution duplicates ELIZA_PORT"},
+    {id:"T02",sev:"high",title:"Bind address duplicates ELIZA_API_BIND"},
+    {id:"T03",sev:"medium",title:"Dockerfiles missing NODE_PATH"},
+    {id:"T04",sev:"medium",title:"Dual getCloudSecret() signatures"},
+    {id:"T05",sev:"medium",title:"Bidirectional env sync race"},
+    {id:"T06",sev:"medium",title:"No startup auth token enforcement"},
+    {id:"T07",sev:"medium",title:"Gateway bind 'lan' no alias"},
+    {id:"T08",sev:"medium",title:"DEFAULT_PORT 2138 as API fallback",dep:"T01"},
+    {id:"T09",sev:"low",title:"package.json main → build/"},
+    {id:"T10",sev:"low",title:"Sandbox env vars undocumented"},
+    {id:"T11",sev:"low",title:"Compose cloud keys undocumented"},
+    {id:"T12",sev:"low",title:"Dockerfile missing MILADY_PORT env"},
+    {id:"T13",sev:"low",title:"ALLOWED_HOSTS only in CI"},
+  ]},
+  { title: "Phase 1: Security", tasks: [
+    {id:"T14",sev:"high",title:"Dockerfile runs as root"},
+    {id:"T15",sev:"high",title:"Wallet export returns plaintext keys"},
+    {id:"T16",sev:"high",title:"Keychain key in process args"},
+    {id:"T17",sev:"high",title:"Plugin installer leaks process.env"},
+    {id:"T18",sev:"high",title:"Sandbox orphans containers",dep:"T06"},
+    {id:"T19",sev:"medium",title:"Chrome ext WS unauthenticated"},
+    {id:"T20",sev:"medium",title:"GET /api/config leaks API keys"},
+    {id:"T21",sev:"medium",title:"BrowserSurface sandbox empty"},
+    {id:"T22",sev:"medium",title:"Pairing code in console.warn"},
+    {id:"T23",sev:"medium",title:"Sandbox container env not filtered"},
+    {id:"T24",sev:"medium",title:"Git URL skip at clone site"},
+    {id:"T25",sev:"medium",title:"Plugin symlink validation missing"},
+    {id:"T26",sev:"medium",title:"Port reclaim kills arbitrary PIDs"},
+    {id:"T27",sev:"low",title:"maskValue leaks 8 chars"},
+    {id:"T28",sev:"low",title:"Chrome ext debugger permission"},
+  ]},
+  { title: "Phase 2: Error Handling", tasks: [
+    {id:"T29",sev:"high",title:"Agent startup failure swallowed"},
+    {id:"T30",sev:"medium",title:"Workbench todo unhandled awaits"},
+    {id:"T31",sev:"medium",title:"API server unguarded fetch"},
+    {id:"T32",sev:"medium",title:"Sandbox missing try-finally",dep:"T18"},
+    {id:"T33",sev:"medium",title:"Browser container no rollback"},
+    {id:"T34",sev:"medium",title:"Chrome ext WS no backoff"},
+    {id:"T35",sev:"medium",title:"Wallet save failure silent"},
+    {id:"T36",sev:"medium",title:"Port before health check"},
+    {id:"T37",sev:"low",title:"Dashboard signal handler stacking"},
+    {id:"T38",sev:"low",title:"CLI async handlers no catch"},
+    {id:"T39",sev:"low",title:"Orphaned heartbeat timer"},
+    {id:"T40",sev:"low",title:"Telegram fire-and-forget"},
+  ]},
+  { title: "Phase 3: Logic & Races", tasks: [
+    {id:"T41",sev:"high",title:"Double signal handler registration"},
+    {id:"T42",sev:"medium",title:"Signal stacking interactive+serverOnly"},
+    {id:"T43",sev:"medium",title:"Dead onboarding/status handler"},
+    {id:"T44",sev:"medium",title:"injectApiBase() ordering race"},
+    {id:"T45",sev:"medium",title:"Sandbox concurrent start() naming"},
+    {id:"T46",sev:"medium",title:"Signing replay cache bypass"},
+    {id:"T47",sev:"low",title:"HTTP 410 for expired pairing"},
+    {id:"T48",sev:"low",title:"Rate limiter no proxy headers"},
+    {id:"T49",sev:"low",title:"IPv6 non-canonical fallback"},
+  ]},
+  { title: "Phase 4: Build & Deploy", tasks: [
+    {id:"T50",sev:"high",title:"Dockerfile missing HEALTHCHECK",dep:"T14"},
+    {id:"T51",sev:"medium",title:"Dockerfile missing EXPOSE"},
+    {id:"T52",sev:"medium",title:"PORT vs MILADY_PORT inconsistent"},
+    {id:"T53",sev:"medium",title:"Compose volume mount conflict"},
+    {id:"T54",sev:"low",title:"Inconsistent base image"},
+  ]},
+  { title: "Phase 5: UX Polish", tasks: [
+    {id:"T55",sev:"low",title:"Todos no pagination"},
+    {id:"T56",sev:"low",title:"Unrecognized ?shell= silent"},
+    {id:"T57",sev:"low",title:"REVEALABLE_KEY_PREFIXES drift"},
+  ]},
 ];
 
-const phaseNames = ["Config Alignment","Security","Error Handling","Logic & Races","Build & Deploy","UX & Cleanup"];
-const saved = JSON.parse(localStorage.getItem('milady-task-checks') || '{}');
-
-function renderStats() {
-  const done = tasks.filter(t => saved[t.id]).length;
-  const high = tasks.filter(t => t.sev === 'high' && !saved[t.id]).length;
-  const med = tasks.filter(t => t.sev === 'medium' && !saved[t.id]).length;
-  const low = tasks.filter(t => t.sev === 'low' && !saved[t.id]).length;
-  document.getElementById('stats').innerHTML = `
-    <div class="stat"><div class="stat-num" style="color:var(--accent)">${done}/48</div><div class="stat-label">Done</div></div>
-    <div class="stat"><div class="stat-num" style="color:var(--high)">${high}</div><div class="stat-label">High Open</div></div>
-    <div class="stat"><div class="stat-num" style="color:var(--medium)">${med}</div><div class="stat-label">Med Open</div></div>
-    <div class="stat"><div class="stat-num" style="color:var(--low)">${low}</div><div class="stat-label">Low Open</div></div>
-  `;
-}
-
-function renderGraph() {
-  const container = document.getElementById('graph');
-  container.innerHTML = '';
-  phaseNames.forEach((name, pi) => {
-    const phaseTasks = tasks.filter(t => t.phase === pi);
-    const row = document.createElement('div');
-    row.className = 'phase-row';
-    row.innerHTML = `<div class="phase-label">Phase ${pi}: ${name}</div><div class="cards">${
-      phaseTasks.map(t => `
-        <div class="card ${saved[t.id] ? 'done' : ''}" data-id="${t.id}" onclick="toggle('${t.id}')" onmouseenter="showTip(event,'${t.id}')" onmouseleave="hideTip()">
-          <div class="sev-dot dot-${saved[t.id] ? 'done' : t.sev}" ${saved[t.id] ? 'style="background:var(--green)"' : ''}></div>
-          <div class="card-id">${t.id}</div>
-          <div class="card-title">${t.title}</div>
-          ${t.dep ? `<div class="card-dep">→ ${t.dep}</div>` : ''}
+const container = document.getElementById("graph");
+container.innerHTML = phases.map(phase => `
+  <div class="phase-col">
+    <div class="phase-title">${phase.title}</div>
+    <div class="phase-tasks">
+      ${phase.tasks.map(t => `
+        <div class="node">
+          <div>
+            <span class="node-id">${t.id}</span>
+            <span class="node-sev ${t.sev}">${t.sev.toUpperCase()}</span>
+          </div>
+          <div class="node-title">${t.title}</div>
+          ${t.dep ? `<div class="node-dep">← depends on ${t.dep}</div>` : ""}
         </div>
-      `).join('')
-    }</div>`;
-    container.appendChild(row);
-  });
-}
-
-function toggle(id) {
-  saved[id] = !saved[id];
-  localStorage.setItem('milady-task-checks', JSON.stringify(saved));
-  renderStats();
-  renderGraph();
-}
-
-function showTip(e, id) {
-  const t = tasks.find(x => x.id === id);
-  const tip = document.getElementById('tooltip');
-  tip.innerHTML = `<strong>${t.id} — ${t.sev.toUpperCase()}/${t.phase}</strong><br><span class="tt-file">${t.file}</span><div class="tt-desc">${t.desc}</div><div class="tt-fix">${t.fix}</div>`;
-  tip.style.display = 'block';
-  tip.style.left = Math.min(e.clientX + 10, window.innerWidth - 370) + 'px';
-  tip.style.top = Math.min(e.clientY + 10, window.innerHeight - 200) + 'px';
-}
-
-function hideTip() { document.getElementById('tooltip').style.display = 'none'; }
-
-renderStats();
-renderGraph();
+      `).join("")}
+    </div>
+  </div>
+`).join("");
 </script>
 </body>
 </html>
