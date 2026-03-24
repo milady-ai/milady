@@ -51,7 +51,8 @@ const COMPANION_VISIBLE_MESSAGE_LIMIT = 2;
 const COMPANION_HISTORY_HOLD_MS = 30_000;
 const COMPANION_HISTORY_FADE_MS = 5_000;
 const COMPANION_MESSAGE_LAYER_TOP = "calc(-100% + 1.5rem)";
-const COMPANION_MESSAGE_LAYER_BOTTOM = "4rem";
+const COMPANION_MESSAGE_LAYER_BOTTOM_FALLBACK = "4rem";
+const COMPANION_COMPOSER_GAP_PX = 10;
 const COMPANION_MESSAGE_LAYER_MASK =
   "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.28) 6%, rgba(0,0,0,0.82) 12%, black 17%, black 100%)";
 
@@ -509,6 +510,8 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
   const messagesRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const composerRef = useRef<HTMLDivElement>(null);
+  const [composerHeight, setComposerHeight] = useState(0);
   const [imageDragOver, setImageDragOver] = useState(false);
   const [ptyDrawerSessionId, setPtyDrawerSessionId] = useState<string | null>(
     null,
@@ -646,6 +649,17 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
       ta.scrollHeight > CHAT_INPUT_MAX_HEIGHT_PX ? "auto" : "hidden";
   }, [chatInput]);
 
+  // Track composer height so the message layer bottom adjusts dynamically
+  useEffect(() => {
+    const el = composerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => {
+      if (entry) setComposerHeight(entry.contentRect.height);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (isComposerLocked) return;
     if (e.key === "Enter" && !e.shiftKey) {
@@ -744,7 +758,7 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
             ? {
                 zIndex: 1,
                 top: COMPANION_MESSAGE_LAYER_TOP,
-                bottom: COMPANION_MESSAGE_LAYER_BOTTOM,
+                bottom: composerHeight > 0 ? `${composerHeight + COMPANION_COMPOSER_GAP_PX}px` : COMPANION_MESSAGE_LAYER_BOTTOM_FALLBACK,
                 overscrollBehavior: "contain",
                 touchAction: "pan-y",
                 userSelect: "text",
@@ -977,6 +991,7 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
       {isGameModal ? (
         /* ── Game-modal composer ──────────────────────────────────────── */
         <div
+          ref={composerRef}
           className="mt-auto pt-2.5 relative pointer-events-auto"
           data-no-camera-drag="true"
           style={{ zIndex: 1 }}
