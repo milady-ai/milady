@@ -136,6 +136,15 @@ export async function getStewardBridgeStatus(
   }
 }
 
+/** Check if Steward env vars are configured (synchronous, no network). */
+export function isStewardConfigured(
+  env: NodeJS.ProcessEnv = process.env,
+): boolean {
+  const url = normalizeEnvValue(env.STEWARD_API_URL);
+  const agentId = resolveStewardAgentId(env);
+  return Boolean(url && agentId);
+}
+
 export function formatStewardError(error: unknown): string {
   if (error instanceof StewardApiError) {
     return error.message;

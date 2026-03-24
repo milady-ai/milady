@@ -122,6 +122,7 @@ import {
 import { resolveDevStackFromEnv } from "./dev-stack";
 import {
   getStewardBridgeStatus,
+  isStewardConfigured,
   signTransactionWithOptionalSteward,
 } from "./steward-bridge";
 
@@ -1907,6 +1908,7 @@ interface LocalSignedTransactionResult {
   gasLimit: string;
 }
 
+/** @deprecated Use signTransactionWithOptionalSteward() via steward-bridge instead. */
 async function _sendLocalWalletTransaction(
   rpcUrl: string,
   tx: {
@@ -2412,6 +2414,28 @@ async function handleMiladyCompatRoute(
       return true;
     }
 
+    // When Steward is configured, return masked keys with Steward status
+    if (isStewardConfigured()) {
+      try {
+        const addresses = getWalletAddresses();
+        const stewardStatus = await getStewardBridgeStatus({ evmAddress: addresses.evmAddress });
+        sendJsonResponse(res, 200, {
+          evmPrivateKey: "[managed-by-steward]",
+          evmAddress: addresses.evmAddress ?? stewardStatus.evmAddress ?? "",
+          solanaPrivateKey: "[managed-by-steward]",
+          solanaAddress: addresses.solanaAddress ?? "",
+          steward: {
+            configured: true,
+            connected: stewardStatus.connected,
+            agentId: stewardStatus.agentId,
+          },
+        });
+        return true;
+      } catch {
+        // fall through to legacy path
+      }
+    }
+
     const evmKey = process.env.EVM_PRIVATE_KEY ?? "";
     const solKey = process.env.SOLANA_PRIVATE_KEY ?? "";
 
@@ -2529,6 +2553,8 @@ async function handleMiladyCompatRoute(
     const addresses = getWalletAddresses();
     const walletAddress = addresses.evmAddress ?? null;
     const hasLocalKey = Boolean(process.env.EVM_PRIVATE_KEY?.trim());
+    const hasStewardSigner = isStewardConfigured();
+    const canSign = hasLocalKey || hasStewardSigner;
     const rpcReadiness = resolveWalletRpcReadiness(config);
 
     try {
@@ -2576,11 +2602,11 @@ async function handleMiladyCompatRoute(
         requiresApproval = true;
       }
 
-      if (!hasLocalKey || !canExecuteLocally || body.confirm !== true) {
+      if (!canSign || !canExecuteLocally || body.confirm !== true) {
         sendJsonResponse(res, 200, {
           ok: true,
           side: quote.side,
-          mode: hasLocalKey && canExecuteLocally ? "local-key" : "user-sign",
+          mode: canSign && canExecuteLocally ? (hasStewardSigner ? "steward" : "local-key") : "user-sign",
           quote,
           executed: false,
           requiresUserSignature: true,
@@ -2796,6 +2822,8 @@ async function handleMiladyCompatRoute(
       isAgentAutomationRequest(req),
     );
     const hasLocalKey = Boolean(process.env.EVM_PRIVATE_KEY?.trim());
+    const hasStewardSigner = isStewardConfigured();
+    const canSign = hasLocalKey || hasStewardSigner;
     const addresses = getWalletAddresses();
     const rpcReadiness = resolveWalletRpcReadiness(config);
 
@@ -2855,10 +2883,10 @@ async function handleMiladyCompatRoute(
         typeof body.tokenAddress === "string" ? body.tokenAddress : undefined,
     };
 
-    if (!hasLocalKey || !canExecuteLocally || body.confirm !== true) {
+    if (!canSign || !canExecuteLocally || body.confirm !== true) {
       sendJsonResponse(res, 200, {
         ok: true,
-        mode: hasLocalKey && canExecuteLocally ? "local-key" : "user-sign",
+        mode: canSign && canExecuteLocally ? (hasStewardSigner ? "steward" : "local-key") : "user-sign",
         executed: false,
         requiresUserSignature: true,
         toAddress,
