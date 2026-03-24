@@ -99,6 +99,7 @@
     "generate:plugins": "bun scripts/generate-plugin-index.js",
     "milady": "bun scripts/run-node.mjs",
     "postinstall": "node scripts/run-repo-setup.mjs",
+    "pre-commit:local": "bun scripts/pre-commit-review.mjs",
     "pre-review:local": "bun scripts/pre-review-local.mjs",
     "prepack": "scripts/rt.sh run build",
     "prepare": "node -e \"try{require('child_process').execSync('git config core.hooksPath git-hooks',{stdio:'ignore'})}catch{}\"",

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+#
+# Pre-commit hook: enforces fast PR hygiene checks before commit.
+#
+
+if [ "${MILADY_SKIP_PRE_COMMIT_REVIEW:-0}" = "1" ]; then
+  exit 0
+fi
+
+if command -v bun >/dev/null 2>&1; then
+  echo "Running pre-commit review checks..."
+  if ! bun run pre-commit:local; then
+    echo ""
+    echo "🚫  Pre-commit review checks failed."
+    echo "    Fix the issue(s) above, or set MILADY_SKIP_PRE_COMMIT_REVIEW=1 to bypass once."
+    echo ""
+    exit 1
+  fi
+fi
+
+exit 0

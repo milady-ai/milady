@@ -84,6 +84,20 @@ If you are a coding agent submitting work:
 - **NODE_PATH setup:** Do not remove the `NODE_PATH` code in `src/runtime/eliza.ts`, `scripts/run-node.mjs`, or `apps/app/electrobun/src/native/agent.ts`. It ensures dynamic plugin imports resolve correctly; see `docs/plugin-resolution-and-node-path.md`.
 - **Bun exports patch:** Do not remove the `patchBunExports` logic in `scripts/patch-deps.mjs`. It fixes plugin load failures under Bun when a published package's `exports["."].bun` points to a missing `src/` path; see "Bun and published package exports" in `docs/plugin-resolution-and-node-path.md`.
 
+### Local Git Gates (Required)
+
+Milady uses repo-managed hooks (`git config core.hooksPath git-hooks`) to enforce review hygiene before code leaves your machine:
+
+- **pre-commit** runs `bun run pre-commit:local` and blocks commits when:
+  - your branch is behind `origin/develop`,
+  - behavioral source files are staged without staged tests.
+- **pre-push** runs `bun run pre-review:local` and blocks unsafe pushes.
+
+Bypass is available for emergencies only:
+
+- `MILADY_SKIP_PRE_COMMIT_REVIEW=1` (pre-commit)
+- `MILADY_SKIP_PRE_REVIEW=1` (pre-push)
+
 ## Security
 
 We assume adversarial intent on all contributions until proven otherwise. The review agent checks for:
