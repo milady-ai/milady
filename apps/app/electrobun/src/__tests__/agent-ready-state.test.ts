@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import {
+  clearAgentReadyListeners,
   isAgentReady,
+  offAgentReadyChange,
   onAgentReadyChange,
   setAgentReady,
 } from "../agent-ready-state";
@@ -9,7 +11,7 @@ describe("agent-ready-state", () => {
   beforeEach(() => {
     // Reset to default state
     setAgentReady(false);
-    onAgentReadyChange(() => {});
+    clearAgentReadyListeners();
   });
 
   it("returns false initially", () => {
@@ -52,14 +54,28 @@ describe("agent-ready-state", () => {
     expect(received).toBe(false);
   });
 
-  it("replacing listener stops old one and fires new one", () => {
+  it("multiple listeners all fire", () => {
+    const calls1: boolean[] = [];
+    const calls2: boolean[] = [];
+
+    onAgentReadyChange((ready) => calls1.push(ready));
+    onAgentReadyChange((ready) => calls2.push(ready));
+
+    setAgentReady(true);
+    expect(calls1).toEqual([true]);
+    expect(calls2).toEqual([true]);
+  });
+
+  it("offAgentReadyChange removes a specific listener", () => {
     const oldCalls: boolean[] = [];
     const newCalls: boolean[] = [];
 
-    onAgentReadyChange((ready) => oldCalls.push(ready));
+    const oldListener = (ready: boolean) => oldCalls.push(ready);
+    onAgentReadyChange(oldListener);
     setAgentReady(true);
     expect(oldCalls).toEqual([true]);
 
+    offAgentReadyChange(oldListener);
     onAgentReadyChange((ready) => newCalls.push(ready));
     setAgentReady(false);
     expect(oldCalls).toEqual([true]); // old listener not called again

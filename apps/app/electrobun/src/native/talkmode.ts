@@ -188,9 +188,12 @@ export class TalkModeManager {
       );
 
       if (!resp.ok) {
-        console.error(
-          `[TalkMode] ElevenLabs API error: ${resp.status} ${resp.statusText}`,
-        );
+        const errorMsg = `ElevenLabs API error: ${resp.status} ${resp.statusText}`;
+        console.error(`[TalkMode] ${errorMsg}`);
+        this.sendToWebview?.("talkmodeError", {
+          source: "elevenlabs",
+          message: errorMsg,
+        });
         this.setState("error");
         return;
       }
@@ -211,7 +214,12 @@ export class TalkModeManager {
       if (err instanceof Error && err.name === "AbortError") {
         console.log("[TalkMode] ElevenLabs TTS aborted by stopSpeaking()");
       } else {
+        const errorMsg = err instanceof Error ? err.message : String(err);
         console.error("[TalkMode] ElevenLabs TTS error:", err);
+        this.sendToWebview?.("talkmodeError", {
+          source: "elevenlabs",
+          message: errorMsg,
+        });
         this.setState("error");
       }
     } finally {

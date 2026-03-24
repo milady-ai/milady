@@ -300,11 +300,18 @@ export async function handleCloudRoute(
       return true;
     }
 
-    const data = (await pollRes.json()) as {
-      status: string;
-      apiKey?: string;
-      keyPrefix?: string;
-    };
+    let data: { status: string; apiKey?: string; keyPrefix?: string };
+    try {
+      data = (await pollRes.json()) as {
+        status: string;
+        apiKey?: string;
+        keyPrefix?: string;
+      };
+    } catch (parseErr) {
+      loginPollSpan.failure({ error: parseErr, statusCode: pollRes.status });
+      sendJson(res, { status: "error", error: "Eliza Cloud returned invalid JSON" }, 502);
+      return true;
+    }
     loginPollSpan.success({ statusCode: pollRes.status });
 
     if (data.status === "authenticated" && data.apiKey) {

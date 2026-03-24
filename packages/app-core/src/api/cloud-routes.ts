@@ -83,6 +83,10 @@ async function persistCloudLoginStatus(args: {
   try {
     saveElizaConfig(args.state.config);
     logger.info("[cloud-login] Saved cloud API key to config file");
+    logger.warn(
+      "[cloud-login] Cloud API key is stored in cleartext in ~/.eliza/eliza.json. " +
+        "Ensure this file has restrictive permissions (chmod 600).",
+    );
   } catch (saveErr) {
     logger.error(
       `[cloud-login] Failed to save cloud API key to config: ${saveErr instanceof Error ? saveErr.message : String(saveErr)}`,
@@ -270,7 +274,11 @@ export async function handleCloudRoute(
       };
     } catch (parseErr) {
       loginPollSpan.failure({ error: parseErr, statusCode: pollRes.status });
-      throw parseErr;
+      sendJson(res, 502, {
+        status: "error",
+        error: "Eliza Cloud returned invalid JSON",
+      });
+      return true;
     }
 
     loginPollSpan.success({ statusCode: pollRes.status });

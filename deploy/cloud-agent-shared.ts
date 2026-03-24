@@ -60,7 +60,8 @@ export function startCloudAgent(userConfig: CloudAgentConfig = {}): void {
   const PORT = userConfig.port ?? Number(process.env.PORT ?? "2138");
   const BRIDGE_PORT =
     userConfig.bridgePort ?? Number(process.env.BRIDGE_PORT ?? "18790");
-  const BRIDGE_SECRET = userConfig.bridgeSecret ?? "";
+  const BRIDGE_SECRET = userConfig.bridgeSecret || crypto.randomUUID();
+  const bridgeSecretGenerated = !userConfig.bridgeSecret;
   const MAX_BODY_BYTES = userConfig.maxBodyBytes ?? 1_048_576;
   const MAX_MEMORIES = userConfig.maxMemories ?? 0;
   const enableChatMode = userConfig.enableChatMode ?? false;
@@ -73,6 +74,7 @@ export function startCloudAgent(userConfig: CloudAgentConfig = {}): void {
     config: {} as Record<string, unknown>,
     workspaceFiles: {} as Record<string, string>,
     startedAt: new Date().toISOString(),
+    lastActivityAt: new Date().toISOString(),
   };
 
   /** Trim memories array to MAX_MEMORIES, removing oldest entries first. */
@@ -206,6 +208,7 @@ export function startCloudAgent(userConfig: CloudAgentConfig = {}): void {
             },
           );
 
+          state.lastActivityAt = new Date().toISOString();
           state.memories.push({ role: "user", text, timestamp: Date.now() });
           state.memories.push({
             role: "assistant",
@@ -247,6 +250,7 @@ export function startCloudAgent(userConfig: CloudAgentConfig = {}): void {
             },
           );
 
+          state.lastActivityAt = new Date().toISOString();
           state.memories.push({ role: "user", text, timestamp: Date.now() });
           state.memories.push({
             role: "assistant",
@@ -307,14 +311,34 @@ export function startCloudAgent(userConfig: CloudAgentConfig = {}): void {
 
   // ─── Health endpoint ──────────────────────────────────────────────────
 
+  /** Consider the runtime hung if no activity for 10 minutes after init. */
+  const HUNG_RUNTIME_THRESHOLD_MS = 10 * 60_000;
+
   const healthServer = http.createServer((req, res) => {
     if (req.method === "GET" && req.url === "/health") {
+      const lastActivityAge =
+        Date.now() - new Date(state.lastActivityAt).getTime();
+      const possiblyHung =
+        agentRuntime !== null &&
+        state.memories.length > 0 &&
+        lastActivityAge > HUNG_RUNTIME_THRESHOLD_MS;
+
+      let status: string;
+      if (!agentRuntime) {
+        status = "initializing";
+      } else if (possiblyHung) {
+        status = "possibly_hung";
+      } else {
+        status = "healthy";
+      }
+
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(
         JSON.stringify({
-          status: agentRuntime ? "healthy" : "initializing",
+          status,
           uptime: process.uptime(),
           startedAt: state.startedAt,
+          lastActivityAt: state.lastActivityAt,
           memoryUsage: process.memoryUsage().rss,
           runtimeReady: agentRuntime !== null,
         }),
@@ -369,7 +393,14 @@ export function startCloudAgent(userConfig: CloudAgentConfig = {}): void {
 
     if (req.method === "POST" && req.url === "/api/restore") {
       const body = await readBody(req);
-      const incoming = JSON.parse(body) as Partial<typeof state>;
+      let incoming: Partial<typeof state>;
+      try {
+        incoming = JSON.parse(body) as Partial<typeof state>;
+      } catch {
+        res.writeHead(400);
+        res.end(JSON.stringify({ error: "Invalid JSON" }));
+        return;
+      }
       if (incoming.memories) state.memories = incoming.memories;
       if (incoming.config) state.config = incoming.config;
       if (incoming.workspaceFiles)
@@ -389,12 +420,19 @@ export function startCloudAgent(userConfig: CloudAgentConfig = {}): void {
       }
 
       const body = await readBody(req);
-      const rpc = JSON.parse(body) as {
+      let rpc: {
         jsonrpc: string;
         id?: string | number;
         method?: string;
         params?: BridgeRpcParams;
       };
+      try {
+        rpc = JSON.parse(body);
+      } catch {
+        res.writeHead(400);
+        res.end(JSON.stringify({ error: "Invalid JSON" }));
+        return;
+      }
 
       if (rpc.method !== "message.send") {
         res.writeHead(400, { "Content-Type": "application/json" });
@@ -436,12 +474,19 @@ export function startCloudAgent(userConfig: CloudAgentConfig = {}): void {
 
     if (req.method === "POST" && req.url === "/bridge") {
       const body = await readBody(req);
-      const rpc = JSON.parse(body) as {
+      let rpc: {
         jsonrpc: string;
         id?: string | number;
         method?: string;
         params?: BridgeRpcParams;
       };
+      try {
+        rpc = JSON.parse(body);
+      } catch {
+        res.writeHead(400);
+        res.end(JSON.stringify({ error: "Invalid JSON" }));
+        return;
+      }
 
       if (rpc.method === "message.send") {
         if (!agentRuntime) {
@@ -528,11 +573,17 @@ export function startCloudAgent(userConfig: CloudAgentConfig = {}): void {
     res.end(JSON.stringify({ error: "Not Found" }));
   });
 
-  bridgeServer.listen(BRIDGE_PORT, "0.0.0.0", () => {
-    console.log(`[cloud-agent] Bridge server listening on port ${BRIDGE_PORT}`);
-    if (!BRIDGE_SECRET) {
+  const bridgeBindAddress = bridgeSecretGenerated ? "127.0.0.1" : "0.0.0.0";
+  bridgeServer.listen(BRIDGE_PORT, bridgeBindAddress, () => {
+    console.log(
+      `[cloud-agent] Bridge server listening on ${bridgeBindAddress}:${BRIDGE_PORT}`,
+    );
+    if (bridgeSecretGenerated) {
       console.warn(
-        "[cloud-agent] WARNING: BRIDGE_SECRET is not set — bridge server is running without authentication",
+        "[cloud-agent] CRITICAL: No BRIDGE_SECRET configured — generated ephemeral secret and bound to 127.0.0.1 only",
+      );
+      console.log(
+        `[cloud-agent] Generated BRIDGE_SECRET: ${BRIDGE_SECRET}`,
       );
     }
   });
@@ -554,5 +605,6 @@ export function startCloudAgent(userConfig: CloudAgentConfig = {}): void {
     })
     .catch((err) => {
       console.error("[cloud-agent] Runtime init failed:", err);
+      process.exit(1);
     });
 }

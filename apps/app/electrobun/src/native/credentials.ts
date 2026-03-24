@@ -205,12 +205,23 @@ function scanEnvCredentials(): DetectedProvider[] {
   return results;
 }
 
+/** Mask a credential string, showing only the last 4 characters. */
+function maskApiKey(key: string | undefined): string | undefined {
+  if (!key) return key;
+  if (key.length <= 4) return "****";
+  return "****" + key.slice(-4);
+}
+
+/** Mask API keys in provider results before returning over IPC. */
+function maskProviders(providers: DetectedProvider[]): DetectedProvider[] {
+  return providers.map((p) => ({ ...p, apiKey: maskApiKey(p.apiKey) }));
+}
+
 /**
- * Scan all known credential sources and return detected providers.
- * Checks files → keychain → env vars, deduplicating by provider ID
- * (first match wins per provider).
+ * Internal: collect raw providers with full API keys.
+ * Only used within this module for validation; never exported.
  */
-export async function scanProviderCredentials(): Promise<DetectedProvider[]> {
+async function scanProviderCredentialsRaw(): Promise<DetectedProvider[]> {
   const home = os.homedir();
   const detected = new Map<string, DetectedProvider>();
 
@@ -239,11 +250,25 @@ export async function scanProviderCredentials(): Promise<DetectedProvider[]> {
   return Array.from(detected.values());
 }
 
+/**
+ * Scan all known credential sources and return detected providers.
+ * Checks files → keychain → env vars, deduplicating by provider ID
+ * (first match wins per provider).
+ *
+ * API keys are masked in the returned results (last 4 chars only) to
+ * prevent accidental exposure via IPC or logging.
+ */
+export async function scanProviderCredentials(): Promise<DetectedProvider[]> {
+  return maskProviders(await scanProviderCredentialsRaw());
+}
+
 export async function scanAndValidateProviderCredentials(): Promise<
   DetectedProvider[]
 > {
-  const providers = await scanProviderCredentials();
-  return Promise.all(providers.map(validateProvider));
+  // Validate with full keys, then mask before returning
+  const raw = await scanProviderCredentialsRaw();
+  const validated = await Promise.all(raw.map(validateProvider));
+  return maskProviders(validated);
 }
 
 /**

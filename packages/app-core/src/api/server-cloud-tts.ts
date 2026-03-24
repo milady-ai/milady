@@ -158,6 +158,11 @@ export function resolveCloudTtsBaseUrl(
 ): string {
   const configured = env.ELIZAOS_CLOUD_BASE_URL?.trim();
   const fallback = "https://www.elizacloud.ai/api/v1";
+  if (!configured || configured.length === 0) {
+    console.warn(
+      "[cloud-tts] ELIZAOS_CLOUD_BASE_URL not set; falling back to default cloud TTS endpoint",
+    );
+  }
   const base = configured && configured.length > 0 ? configured : fallback;
 
   try {

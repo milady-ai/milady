@@ -169,7 +169,17 @@ export async function signTransactionWithOptionalSteward(params: {
       "Steward credentials and agent ID must be provided to sign transactions.",
     );
   }
-  const result = await client.signTransaction(agentId, params.tx);
+
+  // Basic tx shape validation before sending to steward.
+  const tx = params.tx;
+  if (!tx || typeof tx !== "object") {
+    throw new Error("Transaction input is required and must be an object.");
+  }
+  if (!("to" in tx) || typeof tx.to !== "string" || !tx.to.trim()) {
+    throw new Error("Transaction must include a valid 'to' address.");
+  }
+
+  const result = await client.signTransaction(agentId, tx);
   if ("txHash" in result) {
     return {
       mode: "steward",

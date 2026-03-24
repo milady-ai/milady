@@ -36,6 +36,36 @@ interface WalletExportRejectionLike {
   reason: string;
 }
 
+// Rate limiter for wallet export: max 5 attempts per 15 minutes per IP.
+const WALLET_EXPORT_MAX_ATTEMPTS = 5;
+const WALLET_EXPORT_WINDOW_MS = 15 * 60_000;
+const walletExportAttempts = new Map<
+  string,
+  { count: number; resetAt: number }
+>();
+
+function rateLimitWalletExport(req: http.IncomingMessage): boolean {
+  const key = req.socket?.remoteAddress ?? "unknown";
+  const now = Date.now();
+  // Lazy sweep
+  if (walletExportAttempts.size > 50) {
+    for (const [k, v] of walletExportAttempts) {
+      if (now > v.resetAt) walletExportAttempts.delete(k);
+    }
+  }
+  const current = walletExportAttempts.get(key);
+  if (!current || now > current.resetAt) {
+    walletExportAttempts.set(key, {
+      count: 1,
+      resetAt: now + WALLET_EXPORT_WINDOW_MS,
+    });
+    return true;
+  }
+  if (current.count >= WALLET_EXPORT_MAX_ATTEMPTS) return false;
+  current.count += 1;
+  return true;
+}
+
 const WALLET_CONFIG_COMPAT_KEYS = new Set([
   "ALCHEMY_API_KEY",
   "INFURA_API_KEY",
@@ -405,6 +435,11 @@ export async function handleWalletRoutes(
 
   // POST /api/wallet/export
   if (method === "POST" && pathname === "/api/wallet/export") {
+    if (!rateLimitWalletExport(req)) {
+      error(res, "Too many export attempts. Try again later.", 429);
+      return true;
+    }
+
     const body = await readJsonBody<WalletExportRequestBody>(req, res);
     if (!body) return true;
 
@@ -418,7 +453,9 @@ export async function handleWalletRoutes(
     const solanaKey = process.env.SOLANA_PRIVATE_KEY ?? null;
     const addresses = deps.getWalletAddresses();
 
-    logger.warn("[wallet] Private keys exported via API");
+    logger.warn(
+      `[wallet] Private keys exported via API (ip=${req.socket?.remoteAddress ?? "unknown"})`,
+    );
 
     json(res, {
       evm: evmKey

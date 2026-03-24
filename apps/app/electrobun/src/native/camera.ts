@@ -41,8 +41,8 @@ export class CameraManager {
       const state = await getPermissionManager().checkPermission("camera");
       return { status: state.status };
     }
-    // Non-macOS: renderer's getUserMedia handles permission natively
-    return { status: "granted" };
+    // Non-macOS: native permission state is unknown; renderer must request via getUserMedia
+    return { status: "prompt" };
   }
 
   async requestPermissions(): Promise<{ status: string }> {
@@ -51,7 +51,8 @@ export class CameraManager {
       const state = await getPermissionManager().requestPermission("camera");
       return { status: state.status };
     }
-    return { status: "granted" };
+    // Non-macOS: renderer handles permission prompts via getUserMedia
+    return { status: "prompt" };
   }
 
   dispose(): void {}

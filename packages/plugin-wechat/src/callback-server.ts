@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import {
   createServer,
   type IncomingMessage,
@@ -57,7 +58,7 @@ export async function startCallbackServer(
     }
 
     const incomingKey = readHeaderValue(req.headers["x-api-key"]);
-    if (incomingKey !== account.apiKey) {
+    if (!incomingKey || !safeCompare(incomingKey, account.apiKey)) {
       res.writeHead(401);
       res.end("Unauthorized");
       return;
@@ -179,6 +180,17 @@ function readHeaderValue(
     return value[0];
   }
   return value;
+}
+
+function safeCompare(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) {
+    // Compare against itself to burn constant time, then return false
+    timingSafeEqual(bufA, bufA);
+    return false;
+  }
+  return timingSafeEqual(bufA, bufB);
 }
 
 function closeServer(server: ReturnType<typeof createServer>): Promise<void> {

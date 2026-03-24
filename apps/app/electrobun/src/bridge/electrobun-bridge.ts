@@ -57,7 +57,6 @@ for (const [channel, rpcName] of Object.entries(PUSH_CHANNEL_TO_RPC)) {
 type IpcListener = (...args: unknown[]) => void;
 
 const listenersByRpcMessage: Record<string, Set<IpcListener>> = {};
-const listenersByChannel: Record<string, Set<IpcListener>> = {};
 
 // ============================================================================
 // Electrobun RPC Setup
@@ -141,8 +140,6 @@ const electrobunAPI = {
         listenersByRpcMessage[rpcMessage] = new Set();
       }
       listenersByRpcMessage[rpcMessage].add(listener);
-
-      listenersByChannel[rpcMessage].add(listener);
     },
 
     once: (channel: string, listener: IpcListener): void => {
@@ -155,12 +152,10 @@ const electrobunAPI = {
 
     removeListener: (rpcMessage: string, listener: IpcListener): void => {
       listenersByRpcMessage[rpcMessage]?.delete(listener);
-      listenersByChannel[rpcMessage]?.delete(listener);
     },
 
     removeAllListeners: (rpcMessage: string): void => {
       delete listenersByRpcMessage[rpcMessage];
-      delete listenersByChannel[rpcMessage];
     },
   },
 

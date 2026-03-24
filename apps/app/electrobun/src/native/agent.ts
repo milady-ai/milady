@@ -347,7 +347,7 @@ function shortError(err: unknown, maxLen = 280): string {
       : String(err);
   const oneLine = raw.replace(/\s+/g, " ").trim();
   if (oneLine.length <= maxLen) return oneLine;
-  return `${oneLine.slice(0, maxLen)}...`;
+  return `${oneLine.slice(0, maxLen)}... (see logs for full details)`;
 }
 
 // ---------------------------------------------------------------------------
@@ -491,11 +491,17 @@ function resolveRuntimeEntryPath(miladyDistPath: string): string | null {
 async function waitForHealthy(
   getPort: () => number,
   timeoutMs: number = getHealthPollTimeoutMs(),
+  childProcess?: BunSubprocess | null,
 ): Promise<boolean> {
   const deadline = Date.now() + timeoutMs;
   const headers = getDesktopApiHeaders();
 
   while (Date.now() < deadline) {
+    // Bail early if the child process has already exited
+    if (childProcess && childProcess.exitCode !== null) {
+      return false;
+    }
+
     const port = getPort();
     const url = `http://127.0.0.1:${port}/api/health`;
     try {
@@ -977,7 +983,11 @@ export class AgentManager {
         `[Agent] Waiting for health endpoint at http://127.0.0.1:${apiPort}/api/health ...`,
       );
       const healthPollTimeoutMs = getHealthPollTimeoutMs();
-      const healthy = await waitForHealthy(() => apiPort, healthPollTimeoutMs);
+      const healthy = await waitForHealthy(
+        () => apiPort,
+        healthPollTimeoutMs,
+        proc,
+      );
 
       if (!healthy) {
         // Check if process already exited

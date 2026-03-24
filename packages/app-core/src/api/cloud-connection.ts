@@ -279,12 +279,20 @@ async function fetchCloudCreditsByApiKey(
   return typeof rawBalance === "number" ? rawBalance : null;
 }
 
+/** Configurable credit thresholds. Override via env vars if defaults don't fit. */
+const CREDIT_LOW_THRESHOLD = Number(
+  process.env.MILADY_CREDIT_LOW_THRESHOLD ?? "2.0",
+);
+const CREDIT_CRITICAL_THRESHOLD = Number(
+  process.env.MILADY_CREDIT_CRITICAL_THRESHOLD ?? "0.5",
+);
+
 function withCreditFlags(balance: number): CloudCreditsResponse {
   return {
     connected: true,
     balance,
-    low: balance < 2.0,
-    critical: balance < 0.5,
+    low: balance < CREDIT_LOW_THRESHOLD,
+    critical: balance < CREDIT_CRITICAL_THRESHOLD,
     topUpUrl: CLOUD_BILLING_URL,
   };
 }
@@ -407,6 +415,8 @@ async function clearCloudAuthService(
     seen.add(method);
     try {
       await method.call(cloudAuth);
+      // First successful clear method is sufficient — stop trying remaining ones.
+      break;
     } catch (err) {
       logger.warn(
         `[cloud/disconnect] Failed to invoke CLOUD_AUTH.${methodName}: ${

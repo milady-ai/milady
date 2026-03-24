@@ -126,6 +126,11 @@ const logRunner = (message) => {
 /** Exit code used by the restart action to signal "restart requested". */
 const RESTART_EXIT_CODE = 75;
 
+/** Guard against infinite restart loops. */
+const MAX_RESTARTS_IN_WINDOW = 5;
+const RESTART_WINDOW_MS = 60_000;
+const restartTimestamps = [];
+
 const runNode = () => {
   const { runtime, warning } = chooseMiladyRuntime({
     requestedRuntime: process.env.ELIZA_RUNTIME,
@@ -156,6 +161,23 @@ const runNode = () => {
     // Re-run the full runner (including the build-staleness check) so any
     // source changes are compiled before the new process starts.
     if (exitCode === RESTART_EXIT_CODE) {
+      // Guard against rapid restart loops.
+      const now = Date.now();
+      restartTimestamps.push(now);
+      // Trim timestamps outside the window.
+      while (
+        restartTimestamps.length > 0 &&
+        restartTimestamps[0] < now - RESTART_WINDOW_MS
+      ) {
+        restartTimestamps.shift();
+      }
+      if (restartTimestamps.length > MAX_RESTARTS_IN_WINDOW) {
+        logRunner(
+          `Restart loop detected: ${restartTimestamps.length} restarts in ${RESTART_WINDOW_MS / 1000}s — aborting.`,
+        );
+        process.exit(1);
+      }
+
       logRunner("Restart requested — relaunching...");
 
       // Re-check whether a rebuild is needed (source files may have changed).

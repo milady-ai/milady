@@ -271,6 +271,7 @@ export interface BscTradeQuoteResponse {
   minReceive: BscTradeQuoteLeg;
   price: string;
   preflight: BscTradePreflightResponse;
+  quotedAt?: number;
 }
 
 export interface BscTradeExecuteRequest {

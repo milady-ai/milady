@@ -6,6 +6,7 @@ import type {
 
 const SUCCESS = 1000;
 const LOGIN_NEEDED = 1001;
+const REQUEST_TIMEOUT_MS = 30_000;
 
 export class ProxyClient {
   private readonly apiKey: string;
@@ -39,6 +40,7 @@ export class ProxyClient {
           method: "POST",
           headers,
           body: body ? JSON.stringify(body) : undefined,
+          signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
         });
 
         if (res.status === 429) {

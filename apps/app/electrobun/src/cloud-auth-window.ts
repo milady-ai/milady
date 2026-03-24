@@ -171,6 +171,9 @@ export class CloudAuthWindowManager {
 
   open(url: string): boolean {
     if (!isTrustedElizaUrl(url)) {
+      console.warn(
+        `[CloudAuthWindow] Rejected open(): URL is not a trusted Eliza origin: ${url}`,
+      );
       return false;
     }
 

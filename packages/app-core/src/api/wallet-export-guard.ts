@@ -22,7 +22,7 @@ interface WalletExportRequestBody {
 }
 
 export interface WalletExportRejection {
-  status: 401 | 403 | 429;
+  status: 400 | 401 | 402 | 403 | 429;
   reason: string;
 }
 
@@ -64,8 +64,8 @@ if (typeof sweepTimer === "object" && "unref" in sweepTimer) {
  * because this is a local server — trusting XFF would let attackers spoof
  * IPs to bypass rate limits and nonce IP binding.
  */
-function getClientIp(req: http.IncomingMessage): string {
-  return req.socket?.remoteAddress ?? "unknown";
+function getClientIp(req: http.IncomingMessage): string | null {
+  return req.socket?.remoteAddress ?? null;
 }
 
 function getUserAgent(req: http.IncomingMessage): string {
@@ -208,6 +208,23 @@ export function createHardenedExportGuard(
   ): WalletExportRejection | null => {
     const ip = getClientIp(req);
     const ua = getUserAgent(req);
+
+    // Reject requests with no identifiable client IP — without an IP,
+    // rate-limit and nonce-binding keys collapse, letting unrelated
+    // requests share a single bucket.
+    if (!ip) {
+      recordAudit({
+        timestamp: new Date().toISOString(),
+        ip: "unknown",
+        userAgent: ua,
+        outcome: "rejected",
+        reason: "No client IP available on socket",
+      });
+      return {
+        status: 400,
+        reason: "Unable to determine client IP; request rejected.",
+      };
+    }
 
     // 1. Run upstream validation first (token check, confirm flag)
     const upstreamRejection = upstream(req, body);

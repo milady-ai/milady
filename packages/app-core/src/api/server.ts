@@ -310,12 +310,12 @@ function normalizePairingCode(code: string): string {
 }
 
 function generatePairingCode(): string {
-  const bytes = crypto.randomBytes(8);
+  const bytes = crypto.randomBytes(12);
   let raw = "";
   for (let i = 0; i < bytes.length; i += 1) {
     raw += PAIRING_ALPHABET[bytes[i] % PAIRING_ALPHABET.length];
   }
-  return `${raw.slice(0, 4)}-${raw.slice(4, 8)}`;
+  return `${raw.slice(0, 4)}-${raw.slice(4, 8)}-${raw.slice(8, 12)}`;
 }
 
 function ensurePairingCode(): string | null {
@@ -328,7 +328,7 @@ function ensurePairingCode(): string | null {
     pairingCode = generatePairingCode();
     pairingExpiresAt = now + PAIRING_TTL_MS;
     console.warn(
-      `[milady-api] Pairing code: ${pairingCode} (valid for 10 minutes)`,
+      `[milady-api] Pairing code: ${pairingCode.slice(0, 4)}**** (valid for 10 minutes)`,
     );
   }
 
@@ -1678,10 +1678,15 @@ function persistCompatPluginMutation(
     saveElizaConfig(config);
 
     for (const [key, value] of Object.entries(values)) {
-      if (value.trim()) {
-        process.env[key] = value;
-      } else {
-        delete process.env[key];
+      try {
+        if (value.trim()) {
+          process.env[key] = value;
+        } else {
+          delete process.env[key];
+        }
+      } catch {
+        // process.env may be read-only in sandboxed or frozen environments.
+        // Config is already persisted to disk above, so this is non-fatal.
       }
     }
   } else {
@@ -2203,6 +2208,9 @@ async function handleMiladyCompatRoute(
   }
 
   if (method === "POST" && url.pathname === "/api/tts/elevenlabs") {
+    // Intentional passthrough: ElevenLabs TTS is handled by the upstream
+    // Eliza server handler, not by the Milady API layer. Returning false
+    // lets the request fall through to the next handler in the chain.
     return false;
   }
 

@@ -33,8 +33,9 @@ function isLocalCanvasOrigin(url: string): boolean {
 
 /**
  * Returns true only for URLs that are safe for privileged canvas eval.
- * This intentionally permits local web content, local files, and blank
- * initialization pages. It does not rely on prefix matching.
+ * Only permits localhost/127.0.0.1 web content and blank initialization
+ * pages. file:// URLs are rejected to prevent local filesystem access.
+ * It does not rely on prefix matching.
  */
 function isInternalCanvasEvalUrl(url: string): boolean {
   if (url === "" || url === "about:blank") {
@@ -43,11 +44,7 @@ function isInternalCanvasEvalUrl(url: string): boolean {
 
   try {
     const parsed = new URL(url);
-    return (
-      parsed.protocol === "file:" ||
-      parsed.hostname === "localhost" ||
-      parsed.hostname === "127.0.0.1"
-    );
+    return parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1";
   } catch {
     return false;
   }
@@ -129,9 +126,9 @@ export class CanvasManager {
   async navigate(options: {
     id: string;
     url: string;
-  }): Promise<{ available: boolean }> {
+  }): Promise<{ available: boolean; reason?: string }> {
     const canvas = this.windows.get(options.id);
-    if (!canvas) return { available: false };
+    if (!canvas) return { available: false, reason: "window_not_found" };
 
     const url = options.url ?? "";
     // Validate URL scheme and host before loading to prevent open redirect
@@ -149,7 +146,7 @@ export class CanvasManager {
 
     if (!allowed) {
       console.warn(`[Canvas] Blocked navigation to disallowed URL: ${url}`);
-      return { available: false };
+      return { available: false, reason: "url_not_allowed" };
     }
 
     canvas.window.webview.loadURL(url);

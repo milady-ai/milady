@@ -25,7 +25,8 @@ const FETCH_TIMEOUT_MS = 15_000;
 const BSC_CHAIN_ID = 56;
 const MIN_GAS_BNB = "0.005";
 const DEFAULT_SLIPPAGE_BPS = 300;
-const MAX_SLIPPAGE_BPS = 5_000;
+const MAX_SLIPPAGE_BPS = 1_000;
+const SLIPPAGE_WARNING_THRESHOLD_BPS = 300;
 
 export const PANCAKE_SWAP_V2_ROUTER = ethers.getAddress(
   "0x10ED43C718714eb63d5aA57B78B54704E256024E",
@@ -172,7 +173,17 @@ function clampSlippageBps(value: number | undefined): number {
   }
   const rounded = Math.round(value);
   if (rounded < 1) return 1;
-  if (rounded > MAX_SLIPPAGE_BPS) return MAX_SLIPPAGE_BPS;
+  if (rounded > MAX_SLIPPAGE_BPS) {
+    console.warn(
+      `[bsc-trade] Slippage ${rounded} bps exceeds max ${MAX_SLIPPAGE_BPS} bps, clamping`,
+    );
+    return MAX_SLIPPAGE_BPS;
+  }
+  if (rounded > SLIPPAGE_WARNING_THRESHOLD_BPS) {
+    console.warn(
+      `[bsc-trade] High slippage requested: ${rounded} bps (${(rounded / 100).toFixed(1)}%)`,
+    );
+  }
   return rounded;
 }
 
@@ -588,6 +599,7 @@ export async function buildBscTradeQuote(
     },
     price: formatPrice(amountInFormatted, amountOutFormatted),
     preflight,
+    quotedAt: Date.now(),
   };
 }
 

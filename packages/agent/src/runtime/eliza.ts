@@ -30,7 +30,16 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 type ClackModule = typeof import("@clack/prompts");
 let _clack: ClackModule | null = null;
 async function loadClack(): Promise<ClackModule> {
-  if (!_clack) _clack = await import("@clack/prompts");
+  if (!_clack) {
+    try {
+      _clack = await import("@clack/prompts");
+    } catch (err) {
+      throw new Error(
+        `@clack/prompts is required for first-time setup but could not be loaded: ${(err as Error).message ?? err}. ` +
+          `Install it with: bun add @clack/prompts`,
+      );
+    }
+  }
   return _clack;
 }
 
@@ -346,6 +355,15 @@ export function configureLocalEmbeddingPlugin(
 /** Extract a human-readable error message from an unknown thrown value. */
 function formatError(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
+}
+
+/** Redact username segments from filesystem paths to avoid leaking user info in logs. */
+function redactUserSegments(filepath: string): string {
+  // Replace /Users/<name>/ or /home/<name>/ with /Users/<redacted>/ etc.
+  return filepath.replace(
+    /\/(Users|home)\/[^/]+\//g,
+    "/$1/<redacted>/",
+  );
 }
 
 type RuntimeAdapterWithClose = {
@@ -1375,6 +1393,10 @@ async function resolvePlugins(
   const failedPlugins: Array<{ name: string; error: string }> = [];
   const repairedInstallRecords = new Set<string>();
 
+  // NOTE: Auto-enable runs before dependency validation intentionally.
+  // It mutates config.plugins.allow based on env vars and connector config
+  // so that collectPluginNames() includes auto-enabled plugins. Dependency
+  // validation happens later during plugin init when the runtime is available.
   applyPluginAutoEnable({
     config,
     env: process.env,
@@ -1501,7 +1523,7 @@ async function resolvePlugins(
             }
           } catch (npmErr) {
             logger.warn(
-              `[eliza] Node_modules resolution failed for ${pluginName} (${formatError(npmErr)}). Trying installed path at ${installRecord.installPath}.`,
+              `[eliza] Node_modules resolution failed for ${pluginName} (${formatError(npmErr)}). Trying installed path at ${redactUserSegments(installRecord.installPath)}.`,
             );
             mod = await importFromPath(installRecord.installPath, pluginName);
           }
@@ -1511,7 +1533,7 @@ async function resolvePlugins(
             mod = await importFromPath(installRecord.installPath, pluginName);
           } catch (installErr) {
             logger.warn(
-              `[eliza] Installed plugin ${pluginName} failed at ${installRecord.installPath} (${formatError(installErr)}). Falling back to node_modules resolution.`,
+              `[eliza] Installed plugin ${pluginName} failed at ${redactUserSegments(installRecord.installPath)} (${formatError(installErr)}). Falling back to node_modules resolution.`,
             );
             const staticMod = await resolveStaticElizaPlugin(pluginName);
             mod = staticMod
@@ -1542,10 +1564,12 @@ async function resolvePlugins(
       const pluginInstance = findRuntimePluginExport(mod);
 
       if (pluginInstance) {
-        // Wrap the plugin's init function with an error boundary
+        // Wrap the plugin's init function with an error boundary.
+        // Core plugins re-throw on init failure; optional plugins degrade gracefully.
         const wrappedPlugin = wrapPluginWithErrorBoundary(
           pluginName,
           pluginInstance,
+          { isCore },
         );
         logger.debug(`[eliza] ✓ Loaded plugin: ${pluginName}`);
         return { name: pluginName, plugin: wrappedPlugin };
@@ -1590,7 +1614,12 @@ async function resolvePlugins(
     }
   }
 
-  // Load all plugins in parallel for faster startup
+  // Load all plugins in parallel for faster startup.
+  // SECURITY NOTE: Plugins that modify process.env during import or init
+  // may race with each other. This is an accepted trade-off for startup
+  // performance. Critical env vars (database, AI provider keys) are set
+  // before this point in buildCharacterFromConfig / resolveDbEnv.
+  logger.info(`[eliza] Loading ${pluginsToLoad.size} plugins...`);
   const pluginResults = await Promise.all(
     Array.from(pluginsToLoad).map(loadSinglePlugin),
   );
@@ -1676,6 +1705,7 @@ export function repairBrokenInstallRecord(
 function wrapPluginWithErrorBoundary(
   pluginName: string,
   plugin: Plugin,
+  options?: { isCore?: boolean },
 ): Plugin {
   const wrapped: Plugin = { ...plugin };
 
@@ -1689,8 +1719,12 @@ function wrapPluginWithErrorBoundary(
         logger.error(
           `[eliza] Plugin "${pluginName}" crashed during init: ${formatError(err)}`,
         );
-        // Surface the error but don't rethrow — the agent continues
-        // without this plugin's init having completed.
+        // Core plugins are essential — re-throw so the agent does not
+        // start in an undefined state (e.g. missing database adapter).
+        if (options?.isCore) {
+          throw err;
+        }
+        // Optional plugins continue in degraded mode.
         logger.warn(
           `[eliza] Plugin "${pluginName}" will run in degraded mode (init failed)`,
         );
@@ -3822,12 +3856,17 @@ export async function startEliza(
     }
   }
 
-  // 2f. Apply subscription-based credentials (Claude Max, Codex Max)
+  // 2f. Apply subscription-based credentials (Claude Max, Codex Max).
+  //     Failure is non-fatal — the agent can still start with other providers.
+  //     Config is NOT rolled back on failure; partial mutations may persist in
+  //     the in-memory config but are not saved to disk until explicit save.
   try {
     const { applySubscriptionCredentials } = await import("../auth/index");
     await applySubscriptionCredentials(config);
   } catch (err) {
-    logger.warn(`[eliza] Failed to apply subscription credentials: ${err}`);
+    logger.warn(
+      `[eliza] Failed to apply subscription credentials (agent will continue without them): ${formatError(err)}`,
+    );
   }
 
   // 2g. Cloud mode — if the user chose cloud during onboarding (or on a
@@ -3836,7 +3875,7 @@ export async function startEliza(
   if (
     config.cloud?.enabled &&
     config.cloud?.apiKey &&
-    config.cloud?.agentId &&
+    config.cloud?.agentId?.trim() &&
     config.cloud?.runtime === "cloud"
   ) {
     return startInCloudMode(config, config.cloud.agentId, opts);

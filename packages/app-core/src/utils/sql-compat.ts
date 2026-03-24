@@ -15,7 +15,8 @@ export function sanitizeIdentifier(
   const trimmed = value.trim();
   if (!trimmed) return null;
   const sanitized = trimmed.replace(/[^a-zA-Z0-9_]/g, "");
-  return sanitized.length > 0 ? sanitized : null;
+  if (sanitized.length === 0 || sanitized.length > 128) return null;
+  return sanitized;
 }
 
 export function sqlLiteral(value: string): string {

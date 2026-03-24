@@ -272,11 +272,8 @@ export class DesktopManager {
     this.openSurfaceWindowCallback?.(surface, browse);
   }
 
-  private getWindow(): BrowserWindow {
-    if (!this.mainWindow) {
-      throw new Error("Main window not available");
-    }
-    return this.mainWindow;
+  private getWindow(): BrowserWindow | null {
+    return this.mainWindow ?? null;
   }
 
   private send(message: string, payload?: unknown): void {
@@ -795,6 +792,7 @@ X-GNOME-Autostart-enabled=true
 
   async setWindowOptions(options: WindowOptions): Promise<void> {
     const win = this.getWindow();
+    if (!win) return;
 
     if (options.width !== undefined || options.height !== undefined) {
       const { width: currentW, height: currentH } = win.getSize();
@@ -832,6 +830,7 @@ X-GNOME-Autostart-enabled=true
 
   async getWindowBounds(): Promise<WindowBounds> {
     const win = this.getWindow();
+    if (!win) return { x: 0, y: 0, width: 0, height: 0 };
     const { x, y } = win.getPosition();
     const { width, height } = win.getSize();
     return { x, y, width, height };
@@ -839,28 +838,29 @@ X-GNOME-Autostart-enabled=true
 
   async setWindowBounds(options: WindowBounds): Promise<void> {
     const win = this.getWindow();
+    if (!win) return;
     win.setPosition(options.x, options.y);
     win.setSize(options.width, options.height);
   }
 
   async minimizeWindow(): Promise<void> {
-    this.getWindow().minimize();
+    this.getWindow()?.minimize();
   }
 
   async unminimizeWindow(): Promise<void> {
-    this.getWindow().unminimize();
+    this.getWindow()?.unminimize();
   }
 
   async maximizeWindow(): Promise<void> {
-    this.getWindow().maximize();
+    this.getWindow()?.maximize();
   }
 
   async unmaximizeWindow(): Promise<void> {
-    this.getWindow().unmaximize();
+    this.getWindow()?.unmaximize();
   }
 
   async closeWindow(): Promise<void> {
-    this.getWindow().close();
+    this.getWindow()?.close();
   }
 
   async showWindow(): Promise<void> {
@@ -891,20 +891,23 @@ X-GNOME-Autostart-enabled=true
   }
 
   async focusWindow(): Promise<void> {
-    this.getWindow().focus();
+    this.getWindow()?.focus();
   }
 
   async isWindowMaximized(): Promise<{ maximized: boolean }> {
-    return { maximized: this.getWindow().isMaximized() };
+    const win = this.getWindow();
+    return { maximized: win ? win.isMaximized() : false };
   }
 
   async isWindowMinimized(): Promise<{ minimized: boolean }> {
-    return { minimized: this.getWindow().isMinimized() };
+    const win = this.getWindow();
+    return { minimized: win ? win.isMinimized() : false };
   }
 
   async isWindowVisible(): Promise<{ visible: boolean }> {
     if (this._windowHidden) return { visible: false };
     const win = this.getWindow();
+    if (!win) return { visible: false };
     return { visible: !win.isMinimized() };
   }
 
@@ -914,11 +917,11 @@ X-GNOME-Autostart-enabled=true
 
   async setAlwaysOnTop(options: SetAlwaysOnTopOptions): Promise<void> {
     // Electrobun setAlwaysOnTop takes a boolean — ignore level
-    this.getWindow().setAlwaysOnTop(options.flag);
+    this.getWindow()?.setAlwaysOnTop(options.flag);
   }
 
   async setFullscreen(options: SetFullscreenOptions): Promise<void> {
-    this.getWindow().setFullScreen(options.flag);
+    this.getWindow()?.setFullScreen(options.flag);
   }
 
   async setOpacity(_options: SetOpacityOptions): Promise<void> {

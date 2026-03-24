@@ -39,6 +39,7 @@ export class WechatChannel {
     close: () => Promise<void>;
     port: number;
   }> = [];
+  private readonly loginPromises = new Map<string, Promise<void>>();
   private healthTimer: ReturnType<typeof setInterval> | null = null;
   private abortController: AbortController | null = null;
 
@@ -67,14 +68,22 @@ export class WechatChannel {
     }
 
     for (const [webhookPort, accounts] of webhookAccountsByPort) {
-      this.callbackServers.push(
-        await startCallbackServer({
-          port: webhookPort,
-          accounts,
-          onMessage: (accountId, msg) => this.routeIncoming(accountId, msg),
-          signal: this.abortController.signal,
-        }),
-      );
+      try {
+        this.callbackServers.push(
+          await startCallbackServer({
+            port: webhookPort,
+            accounts,
+            onMessage: (accountId, msg) => this.routeIncoming(accountId, msg),
+            signal: this.abortController.signal,
+          }),
+        );
+      } catch (err) {
+        const accountIds = accounts.map((a) => a.accountId).join(", ");
+        console.error(
+          `[wechat] Failed to bind webhook server on port ${webhookPort} for accounts [${accountIds}]:`,
+          err,
+        );
+      }
     }
 
     // Initialize each account
@@ -102,6 +111,9 @@ export class WechatChannel {
         console.error(
           `[wechat] Failed to register webhook for "${account.id}":`,
           err,
+        );
+        throw new Error(
+          `Webhook registration failed for account "${account.id}": ${err instanceof Error ? err.message : String(err)}`,
         );
       }
     }
@@ -188,6 +200,22 @@ export class WechatChannel {
     accountId: string,
     client: ProxyClient,
   ): Promise<void> {
+    const existing = this.loginPromises.get(accountId);
+    if (existing) {
+      return existing;
+    }
+
+    const promise = this.doLogin(accountId, client).finally(() => {
+      this.loginPromises.delete(accountId);
+    });
+    this.loginPromises.set(accountId, promise);
+    return promise;
+  }
+
+  private async doLogin(
+    accountId: string,
+    client: ProxyClient,
+  ): Promise<void> {
     const status = await client.getStatus();
 
     if (status.loginState === "logged_in") {
@@ -203,7 +231,8 @@ export class WechatChannel {
     const qrUrl = await client.getQRCode();
     displayQRUrl(qrUrl);
 
-    const deadline = Date.now() + LOGIN_TIMEOUT_MS;
+    const timeoutMs = this.config.loginTimeoutMs ?? LOGIN_TIMEOUT_MS;
+    const deadline = Date.now() + timeoutMs;
     while (Date.now() < deadline) {
       await sleep(LOGIN_POLL_INTERVAL_MS);
 
@@ -228,7 +257,7 @@ export class WechatChannel {
     }
 
     throw new Error(
-      `[wechat] Login timed out for account "${accountId}" after ${Math.round(LOGIN_TIMEOUT_MS / 1000)} seconds`,
+      `[wechat] Login timed out for account "${accountId}" after ${Math.round(timeoutMs / 1000)} seconds`,
     );
   }
 

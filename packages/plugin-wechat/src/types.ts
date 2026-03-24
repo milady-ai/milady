@@ -19,6 +19,7 @@ export interface WechatConfig {
   proxyUrl?: string;
   webhookPort?: number;
   deviceType?: DeviceType;
+  loginTimeoutMs?: number;
   accounts?: Record<string, WechatAccountConfig>;
   features?: {
     images?: boolean;
