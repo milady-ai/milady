@@ -1,7 +1,9 @@
 // Looking Glass WebXR polyfill — loaded dynamically in setupLookingGlass()
 // to avoid an eager WebSocket connection to ws://localhost:11222/driver on
 // every page load (the module connects on import).
-type LookingGlassWebXRPolyfillType = new (opts: Record<string, unknown>) => unknown;
+type LookingGlassWebXRPolyfillType = new (
+  opts: Record<string, unknown>,
+) => unknown;
 import { resolveAppAssetUrl } from "@miladyai/app-core/utils";
 import {
   MToonMaterialLoaderPlugin,
@@ -1975,7 +1977,8 @@ export class VrmEngine {
       try {
         // @ts-expect-error - No type definitions available for lookingglass/webxr yet
         const mod = await import("@lookingglass/webxr");
-        const Ctor = mod.LookingGlassWebXRPolyfill as LookingGlassWebXRPolyfillType;
+        const Ctor =
+          mod.LookingGlassWebXRPolyfill as LookingGlassWebXRPolyfillType;
         sharedLkgPolyfill = new Ctor({
           inlineView: 1,
           targetY: 1.0,
