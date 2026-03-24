@@ -52,9 +52,7 @@ async function waitForTrajectoryCall(
     response?: string;
   };
 }> {
-  // Allow more time on slow CI runners — trajectory persistence is async
-  // and the PGlite write may lag behind the API response.
-  for (let attempt = 0; attempt < 120; attempt += 1) {
+  for (let attempt = 0; attempt < 60; attempt += 1) {
     const list = await req(port, "GET", "/api/trajectories?limit=20");
     const trajectories = Array.isArray(list.data.trajectories)
       ? (list.data.trajectories as Array<{ id?: string }>)
@@ -85,7 +83,7 @@ async function waitForTrajectoryCall(
       }
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
 
   throw new Error("Timed out waiting for trajectory prompt/response roundtrip");
@@ -297,11 +295,10 @@ describe("Trajectory logger chat roundtrip", () => {
     await db.close();
   });
 
-  // TODO: This test is flaky on CI — the trajectory plugin's async persistence
-  // pipeline doesn't guarantee the LLM call data is in the DB by the time the
-  // detail API is polled. The MESSAGE_RECEIVED/MESSAGE_SENT event lifecycle
-  // needs to be wired through the test's mock messageService for the trajectory
-  // step to complete and persist. See: trajectory-plugin-chat-roundtrip.e2e.test.ts
+  // Skipped: the test's mock messageService doesn't wire MESSAGE_RECEIVED /
+  // MESSAGE_SENT events through the trajectory plugin's lifecycle, so the
+  // trajectory step never completes and LLM call data is never persisted.
+  // Tracking issue: https://github.com/milady-ai/milady/issues/1269
   it.skip("captures chat prompt and response through the trajectories API", async () => {
     if (!server) {
       throw new Error("API server did not start");
@@ -316,25 +313,6 @@ describe("Trajectory logger chat roundtrip", () => {
     });
     expect(chat.status).toBe(200);
     expect(String(chat.data.text ?? "")).toBe(expectedResponse);
-
-    // Force-flush any in-memory trajectories to the database.
-    // The async persistence pipeline may not have completed by the
-    // time the API response returns, especially on slow CI runners.
-    const activeTrajectories = (trajectoryLogger as unknown as {
-      activeTrajectories?: Map<string, unknown>;
-    }).activeTrajectories;
-    if (activeTrajectories) {
-      for (const [trajId] of activeTrajectories) {
-        try {
-          await (trajectoryLogger as unknown as {
-            persistTrajectory: (id: string, traj: unknown, status: string) => Promise<void>;
-          }).persistTrajectory(trajId, activeTrajectories.get(trajId), "completed");
-        } catch {
-          // Best-effort flush
-        }
-      }
-    }
-    await new Promise((resolve) => setTimeout(resolve, 500));
 
     const list = await req(server.port, "GET", "/api/trajectories?limit=20");
     expect(list.status).toBe(200);
