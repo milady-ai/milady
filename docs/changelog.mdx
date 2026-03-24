@@ -3,6 +3,26 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-03-24" description="Heartbeat templates, Steward bridge, dashboard performance" tags={["Feature", "Update", "Fix"]}>
+## Heartbeat templates and detail view
+
+The [heartbeats](/guides/triggers) page now includes starter templates and the ability to save your own, so you can create new triggers from proven patterns instead of starting from scratch. A new detail view lets you click any heartbeat to see its schedule, run history, and success/failure statistics at a glance. You can also pause, resume, and duplicate heartbeats directly from the detail view without opening the editor.
+
+## Steward bridge for wallet transactions
+
+Wallet trade and transfer endpoints now support delegated signing through the Steward bridge. When configured, your agent routes transactions through an external policy service that can approve, reject, or hold them for review before they are broadcast. A new status endpoint lets you check whether Steward is connected and which agent identity is in use. See the [wallet API reference](/rest/wallet) for details.
+
+## Updates
+
+- **Dashboard performance** — The dashboard UI is significantly faster. State management has been restructured so that typing in chat, polling agent status, and browsing settings no longer cause unrelated parts of the UI to re-render. Navigation, translation, and lifecycle updates are now isolated, which means smoother interactions across the board.
+- **Onboarding visual polish** — The [onboarding wizard](/guides/beginners-user-guide) has refreshed button styling with improved contrast, a cleaner provider grid layout with proper dark mode support, and new pill-style tabs replacing the previous underline design.
+
+## Bug fixes
+
+- Fixed the desktop app briefly flashing the wrong chat UI on startup before switching to companion mode — the app now opens directly to the correct view
+
+</Update>
+
 <Update label="2026-03-23" description="WeChat connector, settings redesign, Windows fixes" tags={["Feature", "Update", "Fix"]}>
 ## WeChat connector
 
