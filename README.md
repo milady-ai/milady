@@ -319,9 +319,11 @@ milady models test        # test if your API keys work
 ### Plugins
 
 ```bash
-milady plugins list       # what's installed
-milady plugins add <name> # install a plugin
-milady plugins remove <name>
+milady plugins list            # browse registry plugins
+milady plugins installed       # what's installed
+milady plugins install <name>  # install a plugin
+milady plugins uninstall <name>
+milady plugins search <query>  # search by keyword
 ```
 
 ### Misc
@@ -446,10 +448,18 @@ Or use `~/.eliza/.env` for secrets.
 | [Anthropic](https://anthropic.com) | `ANTHROPIC_API_KEY` | **recommended** — claude is cracked |
 | [OpenAI](https://openai.com) | `OPENAI_API_KEY` | gpt-4o, o1, the classics |
 | [OpenRouter](https://openrouter.ai) | `OPENROUTER_API_KEY` | 100+ models one API |
+| [Google Gemini](https://ai.google.dev) | `GOOGLE_API_KEY` | gemini pro, flash, ultra |
 | [Ollama](https://ollama.ai) | — | local, free, no API key, full privacy |
 | [Groq](https://groq.com) | `GROQ_API_KEY` | fast af |
 | [xAI](https://x.ai) | `XAI_API_KEY` | grok, based |
 | [DeepSeek](https://deepseek.com) | `DEEPSEEK_API_KEY` | reasoning arc |
+| [Mistral](https://mistral.ai) | `MISTRAL_API_KEY` | mistral + mixtral |
+| [Together AI](https://together.ai) | `TOGETHER_API_KEY` | open-source model hosting |
+| [Cohere](https://cohere.com) | `COHERE_API_KEY` | command R+ and embed |
+| [Perplexity](https://perplexity.ai) | `PERPLEXITY_API_KEY` | search-augmented gen |
+| [Vercel AI Gateway](https://sdk.vercel.ai) | `AI_GATEWAY_API_KEY` | unified gateway |
+
+See [Model Providers](/docs/model-providers.mdx) for the full list of 19 supported providers.
 
 ### Using Ollama (local models)
 

@@ -144,11 +144,16 @@
               "connectors/signal",
               "connectors/imessage",
               "connectors/bluebubbles",
+              "connectors/blooio",
               "connectors/msteams",
               "connectors/googlechat",
               "connectors/farcaster",
+              "connectors/twitch",
               "connectors/mattermost",
-              "connectors/wechat"
+              "connectors/wechat",
+              "connectors/matrix",
+              "connectors/feishu",
+              "connectors/nostr"
             ]
           },
           {
@@ -258,7 +263,10 @@
               "plugin-registry/platform/msteams",
               "plugin-registry/platform/googlechat",
               "plugin-registry/platform/mattermost",
-              "plugin-registry/platform/wechat"
+              "plugin-registry/platform/wechat",
+              "plugin-registry/platform/matrix",
+              "plugin-registry/platform/feishu",
+              "plugin-registry/platform/nostr"
             ]
           },
           {

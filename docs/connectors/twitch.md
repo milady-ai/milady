@@ -1,10 +1,10 @@
 ---
 title: Twitch Connector
 sidebarTitle: Twitch
-description: Connect your agent to Twitch using the @elizaos/plugin-twitch package.
+description: Connect your agent to Twitch for live chat and channel interactions using the @elizaos/plugin-twitch package.
 ---
 
-Connect your agent to Twitch for channel chat messaging and interaction.
+Connect your agent to Twitch for live chat monitoring, channel events, and audience interactions.
 
 ## Overview
 
@@ -16,20 +16,44 @@ The Twitch connector is an external elizaOS plugin that bridges your agent to Tw
 |-------|-------|
 | Package | `@elizaos/plugin-twitch` |
 | Config key | `connectors.twitch` |
-| Auto-enable trigger | `accessToken`, `clientId`, or `enabled: true` |
+| Auto-enable trigger | `accessToken`, `clientId`, or `enabled: true` in connector config |
 
 ## Minimal Configuration
+
+In your character file:
 
 ```json
 {
   "connectors": {
     "twitch": {
-      "accessToken": "your-twitch-access-token",
-      "clientId": "your-twitch-client-id"
+      "clientId": "YOUR_CLIENT_ID",
+      "accessToken": "YOUR_ACCESS_TOKEN"
     }
   }
 }
 ```
+
+## Disabling
+
+To explicitly disable the connector even when credentials are present:
+
+```json
+{
+  "connectors": {
+    "twitch": {
+      "clientId": "YOUR_CLIENT_ID",
+      "accessToken": "YOUR_ACCESS_TOKEN",
+      "enabled": false
+    }
+  }
+}
+```
+
+## Auto-Enable Mechanism
+
+The `plugin-auto-enable.ts` module checks `connectors.twitch` in your character config. If any of the fields `accessToken` or `clientId` is truthy, or `enabled` is explicitly `true` (and `enabled` is not explicitly `false`), the runtime automatically loads `@elizaos/plugin-twitch`.
+
+No environment variable is required to trigger auto-enable — it is driven entirely by the connector config object.
 
 ## Environment Variables
 
@@ -45,6 +69,29 @@ The Twitch connector is an external elizaOS plugin that bridges your agent to Tw
 3. Add the credentials to `connectors.twitch` in your config or set the environment variables
 4. Start your agent — the Twitch connector will auto-enable
 
-## Streaming
+## Full Configuration Reference
 
-For live-streaming output to Twitch (separate from chat), use `@elizaos/plugin-twitch-streaming`. See [Streaming](/skills/streaming).
+All fields are defined under `connectors.twitch` in your character file.
+
+### Core Fields
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `clientId` | string | — | Twitch application Client ID |
+| `accessToken` | string | — | OAuth access token with chat scopes |
+| `enabled` | boolean | — | Explicitly enable/disable |
+
+### Features
+
+- Live chat monitoring and response
+- Channel event handling
+- Audience interaction management
+
+### Streaming
+
+A separate streaming plugin (`@elizaos/plugin-twitch-streaming`) is available for live stream management. It is configured under the `streaming.twitch` config key rather than `connectors.twitch`. See the streaming documentation for details.
+
+## Related
+
+- [Connectors overview](/guides/connectors)
+- [Configuration reference](/configuration)
