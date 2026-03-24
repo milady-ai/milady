@@ -2125,6 +2125,10 @@ async function handleMiladyCompatRoute(
   // Cloud-provisioned containers skip onboarding — the platform handles setup.
   // Return { complete: true } so the frontend goes directly to chat.
   if (method === "GET" && url.pathname === "/api/onboarding/status") {
+    if (!ensureCompatApiAuthorized(req, res)) {
+      return true;
+    }
+
     if (_isCloudProvisioned()) {
       sendJsonResponse(res, 200, { complete: true });
       return true;
@@ -3128,18 +3132,6 @@ async function handleMiladyCompatRoute(
     req.push(replayBody);
     req.push(null);
     return false;
-  }
-
-  if (method === "GET" && url.pathname === "/api/onboarding/status") {
-    if (!ensureCompatApiAuthorized(req, res)) {
-      return true;
-    }
-
-    const config = loadElizaConfig();
-    sendJsonResponse(res, 200, {
-      complete: hasCompatPersistedOnboardingState(config),
-    });
-    return true;
   }
 
   if (method === "GET" && url.pathname === "/api/config") {

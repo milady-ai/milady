@@ -42,6 +42,8 @@ describe("GET /api/onboarding/status", () => {
     "ELIZA_STATE_DIR",
     "MILADY_STATE_DIR",
     "MILADY_CONFIG_PATH",
+    "MILADY_API_TOKEN",
+    "ELIZA_API_TOKEN",
     "EVM_PRIVATE_KEY",
     "SOLANA_PRIVATE_KEY",
   ] as const;
@@ -99,6 +101,39 @@ describe("GET /api/onboarding/status", () => {
 
       expect(status).toBe(200);
       expect(data.complete).toBe(false);
+    } finally {
+      await server.close();
+      await cleanupTempDir(tempDir);
+    }
+  });
+
+  it("requires auth when an API token is configured", async () => {
+    const tempDir = await fs.mkdtemp(
+      path.join(os.tmpdir(), "eliza-onboarding-status-"),
+    );
+    process.env.ELIZA_STATE_DIR = tempDir;
+    process.env.MILADY_STATE_DIR = tempDir;
+    process.env.ELIZA_API_TOKEN = "test-onboarding-token";
+    await fs.writeFile(
+      path.join(tempDir, "eliza.json"),
+      JSON.stringify({ logging: { level: "error" } }),
+    );
+
+    const server = await startApiServer({ port: 0, runtime: RUNTIME_STUB });
+
+    try {
+      const unauth = await req(server.port, "GET", "/api/onboarding/status");
+      expect(unauth.status).toBe(401);
+
+      const authed = await req(
+        server.port,
+        "GET",
+        "/api/onboarding/status",
+        undefined,
+        { Authorization: "Bearer test-onboarding-token" },
+      );
+      expect(authed.status).toBe(200);
+      expect(typeof authed.data.complete).toBe("boolean");
     } finally {
       await server.close();
       await cleanupTempDir(tempDir);
