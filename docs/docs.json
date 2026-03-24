@@ -153,7 +153,9 @@
               "connectors/wechat",
               "connectors/matrix",
               "connectors/feishu",
-              "connectors/nostr"
+              "connectors/nostr",
+              "connectors/lens",
+              "connectors/retake"
             ]
           },
           {
@@ -245,7 +247,13 @@
               "plugin-registry/llm/groq",
               "plugin-registry/llm/ollama",
               "plugin-registry/llm/openrouter",
-              "plugin-registry/llm/deepseek"
+              "plugin-registry/llm/deepseek",
+              "plugin-registry/llm/xai",
+              "plugin-registry/llm/mistral",
+              "plugin-registry/llm/cohere",
+              "plugin-registry/llm/together",
+              "plugin-registry/llm/perplexity",
+              "plugin-registry/llm/vercel-ai-gateway"
             ]
           },
           {
@@ -260,13 +268,17 @@
               "plugin-registry/platform/signal",
               "plugin-registry/platform/imessage",
               "plugin-registry/platform/bluebubbles",
+              "plugin-registry/platform/blooio",
               "plugin-registry/platform/msteams",
               "plugin-registry/platform/googlechat",
               "plugin-registry/platform/mattermost",
+              "plugin-registry/platform/twitch",
               "plugin-registry/platform/wechat",
               "plugin-registry/platform/matrix",
               "plugin-registry/platform/feishu",
-              "plugin-registry/platform/nostr"
+              "plugin-registry/platform/nostr",
+              "plugin-registry/platform/lens",
+              "plugin-registry/platform/retake"
             ]
           },
           {

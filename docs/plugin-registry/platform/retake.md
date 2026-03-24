@@ -1,7 +1,7 @@
 ---
 title: "Retake Plugin"
 sidebarTitle: "Retake"
-description: "Retake connector for Milady — messaging and streaming integration."
+description: "Retake connector for Milady — messaging and streaming integration with the Retake platform."
 ---
 
 The Retake plugin connects Milady agents to the Retake platform, supporting both messaging and streaming output.
@@ -52,9 +52,15 @@ The plugin auto-enables when any of these are present:
 
 ## Features
 
-- Retake platform messaging
-- Session management
+- Retake platform messaging and interaction
+- Session management and message routing
+- Streaming output as a destination
 
 ## Streaming
 
-Retake also supports streaming output as a destination. See [Streaming](/skills/streaming) for details.
+Retake also functions as a streaming destination. When configured, agent output can be streamed live to the Retake platform alongside or instead of messaging.
+
+## Related
+
+- [Twitch Plugin](/plugin-registry/platform/twitch) — Another platform with streaming support
+- [Connectors Guide](/guides/connectors#retake) — Full configuration reference

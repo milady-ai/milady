@@ -1,10 +1,10 @@
 ---
 title: "Mistral Plugin"
 sidebarTitle: "Mistral"
-description: "Mistral AI model provider for Milady."
+description: "Mistral AI model provider for Milady — open-weight and commercial models with strong multilingual and coding capabilities."
 ---
 
-The Mistral plugin connects Milady agents to Mistral AI models.
+The Mistral plugin connects Milady agents to Mistral AI models, offering both open-weight and commercial models with competitive performance, especially for European languages and code generation.
 
 **Package:** `@elizaos/plugin-mistral`
 
@@ -26,7 +26,7 @@ export MISTRAL_API_KEY=your-mistral-api-key
 
 | Environment Variable | Required | Description |
 |---------------------|----------|-------------|
-| `MISTRAL_API_KEY` | Yes | Mistral AI API key from [mistral.ai](https://mistral.ai) |
+| `MISTRAL_API_KEY` | Yes | Mistral AI API key from [console.mistral.ai](https://console.mistral.ai) |
 
 ### milady.json Example
 
@@ -42,3 +42,30 @@ export MISTRAL_API_KEY=your-mistral-api-key
   }
 }
 ```
+
+## Supported Models
+
+| Model | Context | Best For |
+|-------|---------|---------|
+| `mistral-large-latest` | 128k | Complex reasoning, multilingual |
+| `mistral-medium-latest` | 32k | Balanced performance |
+| `mistral-small-latest` | 32k | Fast, cost-efficient tasks |
+| `open-mistral-nemo` | 128k | Long-context, open-weight |
+| `codestral-latest` | 32k | Code generation and completion |
+| `mistral-embed` | 8k | Text embeddings |
+
+## Features
+
+- Streaming responses
+- Tool use / function calling
+- Strong multilingual performance (especially European languages)
+- Code generation (Codestral)
+- Embeddings for semantic search
+- Structured JSON output
+- Guardrail-friendly moderation endpoint
+
+## Related
+
+- [Groq Plugin](/plugin-registry/llm/groq) — Fast inference for open-weight models
+- [OpenRouter Plugin](/plugin-registry/llm/openrouter) — Route between Mistral and other providers
+- [Model Providers](/runtime/models) — Compare all providers
