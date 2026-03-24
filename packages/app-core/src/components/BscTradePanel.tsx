@@ -10,6 +10,7 @@ import type {
   BscTradeQuoteRequest,
   BscTradeQuoteResponse,
   BscTradeTxStatusResponse,
+  StewardPolicyResult,
 } from "@miladyai/app-core/api";
 import { useApp } from "@miladyai/app-core/state";
 import { Button, Input } from "@miladyai/ui";
@@ -239,7 +240,32 @@ export function TradePanel({
       });
       setLatestExecution(result);
       if (result?.executed && result?.execution) {
-        // Already executed on-chain
+        if (result.mode === "steward") {
+          setActionNotice(
+            "Trade signed via Steward vault and submitted on-chain.",
+            "success",
+            4600,
+          );
+        }
+      } else if (result?.mode === "steward" && !result?.requiresUserSignature) {
+        // Steward pending approval or rejection
+        const execStatus = result.execution?.status;
+        if (
+          result.approval?.status === "pending_approval" ||
+          execStatus === "pending_approval"
+        ) {
+          setActionNotice(
+            "Transaction is waiting for Steward policy approval.",
+            "info",
+            6000,
+          );
+        } else if (!result.ok || execStatus === "rejected") {
+          const reason =
+            result.execution?.policyResults?.find((p) => p.reason)?.reason ??
+            result.error ??
+            "Policy rejected";
+          setActionNotice(`Steward policy rejected: ${reason}`, "error", 6000);
+        }
       } else if (result?.requiresUserSignature) {
         setActionNotice(
           "Sign swap transaction in your wallet to complete the trade.",
@@ -281,6 +307,30 @@ export function TradePanel({
 
   // ── Render helpers ──────────────────────────────────────────────────
 
+  function renderPolicyResults(policyResults?: StewardPolicyResult[]) {
+    if (!policyResults?.length) return null;
+    return (
+      <div className="mt-1 space-y-0.5">
+        {policyResults.map((p) => (
+          <div
+            key={p.policyId ?? p.name ?? p.status}
+            className="text-muted text-[10px]"
+          >
+            {p.name && <span className="font-mono">{p.name}: </span>}
+            <span
+              className={
+                p.status === "rejected" ? "text-red-400" : "text-yellow-400"
+              }
+            >
+              {p.status}
+            </span>
+            {p.reason && <span> — {p.reason}</span>}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   function renderExecutionResult() {
     if (!latestExecution) return null;
 
@@ -290,7 +340,7 @@ export function TradePanel({
 
       return (
         <div className="border border-border p-2 text-xs space-y-1">
-          <div>
+          <div className="flex items-center gap-1">
             <a
               href={explorerUrl}
               target="_blank"
@@ -299,6 +349,11 @@ export function TradePanel({
             >
               {t("bsctradepanel.ViewTx")} {shortHash}
             </a>
+            {latestExecution.mode === "steward" && (
+              <span className="text-[10px] text-purple-400 ml-1">
+                🔐 Steward
+              </span>
+            )}
           </div>
           {status === "pending" && (
             <div className="flex items-center gap-2">
@@ -323,6 +378,49 @@ export function TradePanel({
           )}
         </div>
       );
+    }
+
+    // Steward: pending approval
+    if (
+      latestExecution.mode === "steward" &&
+      !latestExecution.requiresUserSignature &&
+      !latestExecution.executed
+    ) {
+      const execStatus = latestExecution.execution?.status;
+      const isPending =
+        latestExecution.approval?.status === "pending_approval" ||
+        execStatus === "pending_approval";
+      const isRejected = !latestExecution.ok || execStatus === "rejected";
+
+      if (isPending) {
+        return (
+          <div className="border border-border p-2 text-xs space-y-1">
+            <div className="flex items-center gap-1 text-yellow-500">
+              <span>🔐</span>
+              <span>Waiting for Steward policy approval…</span>
+            </div>
+            {renderPolicyResults(
+              latestExecution.approval?.policyResults ??
+                latestExecution.execution?.policyResults,
+            )}
+          </div>
+        );
+      }
+
+      if (isRejected) {
+        return (
+          <div className="border border-border p-2 text-xs space-y-1">
+            <div className="flex items-center gap-1 text-red-500">
+              <span>🚫</span>
+              <span>Steward policy rejected this transaction</span>
+            </div>
+            {latestExecution.error && (
+              <div className="text-muted">{latestExecution.error}</div>
+            )}
+            {renderPolicyResults(latestExecution.execution?.policyResults)}
+          </div>
+        );
+      }
     }
 
     if (latestExecution.requiresUserSignature) {

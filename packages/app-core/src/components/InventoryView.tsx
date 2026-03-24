@@ -5,9 +5,10 @@
  * inside the ./inventory/ directory.
  */
 
+import type { StewardStatusResponse } from "@miladyai/app-core/api";
 import { useApp } from "@miladyai/app-core/state";
 import { Button } from "@miladyai/ui";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { TradePanel } from "./BscTradePanel";
 import {
   CHAIN_CONFIGS,
@@ -16,11 +17,11 @@ import {
   resolveChainKey,
 } from "./chainConfig";
 import {
+  BSC_GAS_READY_THRESHOLD,
   loadTrackedBscTokens,
   loadTrackedTokens,
   removeTrackedBscToken,
   saveTrackedTokens,
-  BSC_GAS_READY_THRESHOLD,
   type TrackedToken,
 } from "./inventory";
 import { InventoryToolbar } from "./inventory/InventoryToolbar";
@@ -52,6 +53,7 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
     getBscTradePreflight,
     getBscTradeQuote,
     getBscTradeTxStatus,
+    getStewardStatus,
     copyToClipboard,
     t,
   } = useApp();
@@ -62,6 +64,24 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
   );
   const [trackedBscTokens, setTrackedBscTokens] =
     useState(loadTrackedBscTokens);
+
+  // ── Steward status ────────────────────────────────────────────────
+  const [stewardStatus, setStewardStatus] =
+    useState<StewardStatusResponse | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getStewardStatus()
+      .then((s) => {
+        if (!cancelled) setStewardStatus(s);
+      })
+      .catch(() => {
+        /* steward not available — ignore */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [getStewardStatus]);
 
   // ── RPC + wallet readiness ───────────────────────────────────────
   const cfg = walletConfig;
@@ -316,6 +336,22 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
         loadBalances={loadBalances}
         loadNfts={loadNfts}
       />
+
+      {stewardStatus?.connected && (
+        <div
+          className="mt-2 flex items-center gap-1.5 text-[11px] text-purple-400"
+          data-testid="steward-status-badge"
+        >
+          <span>🔐</span>
+          <span>Steward vault connected</span>
+          {stewardStatus.evmAddress && (
+            <span className="text-muted font-mono ml-1">
+              {stewardStatus.evmAddress.slice(0, 6)}…
+              {stewardStatus.evmAddress.slice(-4)}
+            </span>
+          )}
+        </div>
+      )}
 
       <div className="mt-3 flex flex-col gap-2">
         {walletError && (

@@ -425,17 +425,49 @@ export interface WalletTradingProfileResponse {
   recentSwaps: WalletTradingProfileRecentSwap[];
 }
 
+/** Result from a Steward policy evaluation. */
+export interface StewardPolicyResult {
+  policyId?: string;
+  name?: string;
+  status: "approved" | "rejected" | "pending";
+  reason?: string;
+}
+
+/** Steward pending-approval or rejection info attached to a tx step. */
+export interface StewardApprovalInfo {
+  status: "pending_approval" | "rejected";
+  policyResults?: StewardPolicyResult[];
+}
+
+/** Response from GET /api/wallet/steward-status. */
+export interface StewardStatusResponse {
+  configured: boolean;
+  available: boolean;
+  connected: boolean;
+  baseUrl?: string;
+  agentId?: string;
+  evmAddress?: string;
+  error?: string | null;
+}
+
 export interface BscTradeExecuteResponse {
   ok: boolean;
   side: BscTradeSide;
-  mode: "local-key" | "user-sign";
+  mode: "local-key" | "user-sign" | "steward";
   quote: BscTradeQuoteResponse;
   executed: boolean;
   requiresUserSignature: boolean;
   unsignedTx: BscUnsignedTradeTx;
   unsignedApprovalTx?: BscUnsignedApprovalTx;
   requiresApproval?: boolean;
-  execution?: BscTradeExecutionResult;
+  execution?: BscTradeExecutionResult & {
+    status?: string;
+    policyResults?: StewardPolicyResult[];
+  };
+  /** Present when the approval tx is pending Steward policy review. */
+  approval?: StewardApprovalInfo;
+  /** Steward error message on policy rejection (403). */
+  error?: string;
 }
 
 export interface BscTransferExecuteRequest {
@@ -470,7 +502,7 @@ export interface BscTransferExecutionResult {
 
 export interface BscTransferExecuteResponse {
   ok: boolean;
-  mode: "local-key" | "user-sign";
+  mode: "local-key" | "user-sign" | "steward";
   executed: boolean;
   requiresUserSignature: boolean;
   toAddress: string;
@@ -478,7 +510,12 @@ export interface BscTransferExecuteResponse {
   assetSymbol: string;
   tokenAddress?: string;
   unsignedTx: BscUnsignedTransferTx;
-  execution?: BscTransferExecutionResult;
+  execution?: BscTransferExecutionResult & {
+    status?: string;
+    policyResults?: StewardPolicyResult[];
+  };
+  /** Steward error message on policy rejection (403). */
+  error?: string;
 }
 
 export type WalletChain = "evm" | "solana";

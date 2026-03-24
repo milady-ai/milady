@@ -32,6 +32,7 @@ import {
   type BscTradeTxStatusResponse,
   type BscTransferExecuteRequest,
   type BscTransferExecuteResponse,
+  type StewardStatusResponse,
   type CatalogSkill,
   type CharacterData,
   type CodingAgentSession,
@@ -1982,6 +1983,11 @@ function AppProviderInner({
   const getBscTradeTxStatus = useCallback(
     async (hash: string): Promise<BscTradeTxStatusResponse> =>
       client.getBscTradeTxStatus(hash),
+    [],
+  );
+
+  const getStewardStatus = useCallback(
+    async () => client.getStewardStatus(),
     [],
   );
 
@@ -7720,6 +7726,7 @@ function AppProviderInner({
     getBscTradePreflight,
     getBscTradeQuote,
     getBscTradeTxStatus,
+    getStewardStatus,
     loadWalletTradingProfile,
     handleWalletApiKeySave,
     handleExportKeys,

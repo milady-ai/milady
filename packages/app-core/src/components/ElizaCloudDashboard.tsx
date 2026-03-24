@@ -771,13 +771,39 @@ export function CloudDashboard() {
       });
 
       if (result.executed && result.execution?.hash) {
+        const stewardNote =
+          result.mode === "steward" ? " (via Steward vault)" : "";
         setCryptoPayResult(
-          `Submitted ${currency} payment: ${result.execution.hash}`,
+          `Submitted ${currency} payment: ${result.execution.hash}${stewardNote}`,
         );
         setActionNotice(
-          "Crypto payment submitted from the agent wallet.",
+          `Crypto payment submitted from the agent wallet${stewardNote}.`,
           "success",
         );
+      } else if (result.mode === "steward" && !result.requiresUserSignature) {
+        // Steward pending approval or rejection
+        const execStatus = result.execution?.status;
+        if (execStatus === "pending_approval") {
+          setCryptoPayResult(
+            "Transfer is waiting for Steward policy approval.",
+          );
+          setActionNotice(
+            "Transaction pending Steward policy approval.",
+            "info",
+            6000,
+          );
+        } else if (!result.ok || execStatus === "rejected") {
+          const reason =
+            result.execution?.policyResults?.find((p) => p.reason)?.reason ??
+            result.error ??
+            "Policy rejected";
+          setCryptoPayResult(`Steward policy rejected: ${reason}`);
+          setActionNotice(
+            `Steward policy rejected the transfer: ${reason}`,
+            "error",
+            6000,
+          );
+        }
       } else if (result.requiresUserSignature) {
         setCryptoPayResult(
           "Cloud returned an unsigned payment request. Sign it from the wallet flow to complete payment.",

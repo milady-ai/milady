@@ -36,6 +36,7 @@ import type {
   SkillInfo,
   SkillMarketplaceResult,
   SkillScanReportSummary,
+  StewardStatusResponse,
   StreamEventEnvelope,
   SystemPermissionId,
   TriggerHealthSnapshot,
@@ -698,6 +699,7 @@ export interface AppActions {
     request: BscTradeQuoteRequest,
   ) => Promise<BscTradeQuoteResponse>;
   getBscTradeTxStatus: (hash: string) => Promise<BscTradeTxStatusResponse>;
+  getStewardStatus: () => Promise<StewardStatusResponse>;
   loadWalletTradingProfile: (
     window?: WalletTradingProfileWindow,
     source?: WalletTradingProfileSourceFilter,

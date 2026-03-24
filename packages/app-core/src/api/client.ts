@@ -62,6 +62,9 @@ import type {
   EvmTokenBalance,
   SolanaNft,
   SolanaTokenBalance,
+  StewardApprovalInfo,
+  StewardPolicyResult,
+  StewardStatusResponse,
   WalletAddresses,
   WalletBalancesResponse,
   WalletConfigStatus,
@@ -128,6 +131,9 @@ export type {
   RpcProviderOption,
   SolanaNft,
   SolanaTokenBalance,
+  StewardApprovalInfo,
+  StewardPolicyResult,
+  StewardStatusResponse,
   StylePreset,
   SubscriptionProviderStatus,
   SubscriptionStatusResponse,
@@ -3461,6 +3467,10 @@ export class MiladyClient {
     return this.fetch(
       `/api/wallet/trade/tx-status?hash=${encodeURIComponent(hash)}`,
     );
+  }
+
+  async getStewardStatus(): Promise<StewardStatusResponse> {
+    return this.fetch("/api/wallet/steward-status");
   }
 
   async getWalletTradingProfile(
