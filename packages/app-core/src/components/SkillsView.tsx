@@ -8,17 +8,13 @@
 
 import {
   Button,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogPortal,
-  DialogTitle,
   Input,
   StatusBadge,
   Switch,
   Textarea,
 } from "@miladyai/ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import type {
   SkillInfo,
   SkillMarketplaceResult,
@@ -350,39 +346,48 @@ function InstallModal({
   const { t } = useApp();
   const [tab, setTab] = useState<InstallTab>("search");
 
-  return (
-    <Dialog
-      open
-      onOpenChange={(v) => {
-        if (!v) onClose();
-      }}
-    >
-      <DialogContent className="max-w-2xl max-h-[80vh] p-0 flex flex-col overflow-hidden rounded-2xl">
+  useEffect(() => {
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onEsc);
+    return () => window.removeEventListener("keydown", onEsc);
+  }, [onClose]);
+
+  return createPortal(
+    <div className="fixed inset-0 z-[200] flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/80" onClick={onClose} />
+      <div className="relative z-10 w-full max-w-2xl max-h-[80vh] mx-4 flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
         {/* Header */}
-        <DialogHeader
-          className="px-5 py-4"
+        <div
+          className="flex items-center justify-between px-5 py-4"
           style={{ borderBottom: "1px solid var(--border)" }}
         >
-          <DialogTitle
-            style={{
-              fontSize: 13,
-              fontWeight: 800,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-            }}
-          >
-            Install Skill
-          </DialogTitle>
-          <div
-            style={{
-              fontSize: 11,
-              color: "var(--muted)",
-              marginTop: 2,
-            }}
-          >
-            Add skills from the marketplace or a GitHub repository.
+          <div>
+            <h2
+              style={{
+                fontSize: 13,
+                fontWeight: 800,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+              }}
+            >
+              Install Skill
+            </h2>
+            <div
+              style={{
+                fontSize: 11,
+                color: "var(--muted)",
+                marginTop: 2,
+              }}
+            >
+              Add skills from the marketplace or a GitHub repository.
+            </div>
           </div>
-        </DialogHeader>
+          <button onClick={onClose} className="rounded-sm p-1 text-muted hover:text-txt transition-colors" aria-label="Close">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </div>
 
         {/* Tabs */}
         <div
@@ -560,8 +565,9 @@ function InstallModal({
             </div>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -696,6 +702,14 @@ function EditSkillModal({
     setSaving(false);
   };
 
+  useEffect(() => {
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onEsc);
+    return () => window.removeEventListener("keydown", onEsc);
+  }, [onClose]);
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if ((e.metaKey || e.ctrlKey) && e.key === "s") {
       e.preventDefault();
@@ -715,23 +729,19 @@ function EditSkillModal({
     }
   };
 
-  return (
-    <Dialog
-      open
-      onOpenChange={(v) => {
-        if (!v) onClose();
-      }}
-    >
-      <DialogContent className="max-w-4xl h-[85vh] p-0 flex flex-col overflow-hidden rounded-xl">
+  return createPortal(
+    <div className="fixed inset-0 z-[200] flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/80" onClick={onClose} />
+      <div className="relative z-10 w-full max-w-4xl h-[85vh] mx-4 flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-2xl">
         {/* Header */}
-        <DialogHeader
-          className="flex items-center justify-between px-5 py-3 shrink-0 flex-row"
+        <div
+          className="flex items-center justify-between px-5 py-3 shrink-0"
           style={{ borderBottom: "1px solid var(--border)" }}
         >
           <div className="flex items-center gap-3 min-w-0">
-            <DialogTitle className="font-semibold text-sm truncate">
+            <h2 className="font-semibold text-sm truncate">
               {skillName}
-            </DialogTitle>
+            </h2>
             <span
               className="text-[10px] font-mono px-1.5 py-0.5"
               style={{
@@ -766,7 +776,7 @@ function EditSkillModal({
               ×
             </Button>
           </div>
-        </DialogHeader>
+        </div>
 
         {/* Editor body */}
         <div className="flex-1 overflow-hidden">
@@ -843,8 +853,9 @@ function EditSkillModal({
             </Button>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -1081,53 +1092,34 @@ function SkillsModalView() {
         )}
       </div>
 
-      {/* Portal modals to body so they escape the 3D transform stacking context */}
-      <Dialog
-        open={!!editingSkill}
-        onOpenChange={(open) => {
-          if (!open) setEditingSkill(null);
-        }}
-      >
-        <DialogPortal>
-          {editingSkill && (
-            <EditSkillModal
-              skillId={editingSkill.id}
-              skillName={editingSkill.name}
-              onClose={() => setEditingSkill(null)}
-              onSaved={() => void refreshSkills()}
-            />
-          )}
-        </DialogPortal>
-      </Dialog>
+      {editingSkill && (
+        <EditSkillModal
+          skillId={editingSkill.id}
+          skillName={editingSkill.name}
+          onClose={() => setEditingSkill(null)}
+          onSaved={() => void refreshSkills()}
+        />
+      )}
 
-      <Dialog
-        open={installModalOpen}
-        onOpenChange={(open) => {
-          if (!open) setInstallModalOpen(false);
-        }}
-      >
-        <DialogPortal>
-          {installModalOpen && (
-            <InstallModal
-              skills={skills}
-              skillsMarketplaceQuery={skillsMarketplaceQuery}
-              skillsMarketplaceResults={skillsMarketplaceResults}
-              skillsMarketplaceError={skillsMarketplaceError}
-              skillsMarketplaceLoading={skillsMarketplaceLoading}
-              skillsMarketplaceAction={skillsMarketplaceAction}
-              skillsMarketplaceManualGithubUrl={
-                skillsMarketplaceManualGithubUrl
-              }
-              searchSkillsMarketplace={searchSkillsMarketplace}
-              installSkillFromMarketplace={installSkillFromMarketplace}
-              uninstallMarketplaceSkill={uninstallMarketplaceSkill}
-              installSkillFromGithubUrl={installSkillFromGithubUrl}
-              setState={setState}
-              onClose={() => setInstallModalOpen(false)}
-            />
-          )}
-        </DialogPortal>
-      </Dialog>
+      {installModalOpen && (
+        <InstallModal
+          skills={skills}
+          skillsMarketplaceQuery={skillsMarketplaceQuery}
+          skillsMarketplaceResults={skillsMarketplaceResults}
+          skillsMarketplaceError={skillsMarketplaceError}
+          skillsMarketplaceLoading={skillsMarketplaceLoading}
+          skillsMarketplaceAction={skillsMarketplaceAction}
+          skillsMarketplaceManualGithubUrl={
+            skillsMarketplaceManualGithubUrl
+          }
+          searchSkillsMarketplace={searchSkillsMarketplace}
+          installSkillFromMarketplace={installSkillFromMarketplace}
+          uninstallMarketplaceSkill={uninstallMarketplaceSkill}
+          installSkillFromGithubUrl={installSkillFromGithubUrl}
+          setState={setState}
+          onClose={() => setInstallModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

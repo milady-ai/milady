@@ -450,7 +450,7 @@ export function RuntimeView() {
         })}
       </div>
 
-      <div className="flex-1 min-h-0 border border-border bg-card rounded-2xl overflow-auto p-2">
+      <div className="min-h-[300px] border border-border bg-card rounded-2xl overflow-auto p-2">
         {error ? (
           <div className="border border-danger/30 bg-danger/10 rounded-xl p-3 text-xs text-danger m-2">
             {error}

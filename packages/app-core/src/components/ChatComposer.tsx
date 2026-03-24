@@ -6,6 +6,7 @@ import {
   type RefObject,
   useEffect,
   useRef,
+  useState,
 } from "react";
 
 type ChatComposerVariant = "default" | "game-modal";
@@ -67,6 +68,17 @@ export function ChatComposer({
   onStopSpeaking,
   onToggleAgentVoice,
 }: ChatComposerProps) {
+  const [isNarrow, setIsNarrow] = useState(
+    () => typeof window !== "undefined" && window.innerWidth < 310,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 309px)");
+    const sync = () => setIsNarrow(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
   const isGameModal = variant === "game-modal";
   const showVoiceButton = isGameModal || voice.supported;
   const defaultMicButtonClassName = voice.isListening
@@ -86,6 +98,7 @@ export function ChatComposer({
         : t("chat.send")
       : t("chat.stopSpeaking");
   const actionButtonLabel = isGameModal ? undefined : actionButtonTitle;
+  const inputPlaceholder = isNarrow ? "Message..." : t("chat.inputPlaceholder");
   const defaultTextareaPlaceholder = isAgentStarting
     ? t("chat.agentStarting")
     : voice.isListening
@@ -93,8 +106,8 @@ export function ChatComposer({
         ? t("chat.releaseToSend")
         : !chatInput.trim()
           ? t("chat.listening")
-          : t("chat.inputPlaceholder")
-      : t("chat.inputPlaceholder");
+          : inputPlaceholder
+      : inputPlaceholder;
 
   useEffect(() => {
     return () => {
@@ -257,7 +270,7 @@ export function ChatComposer({
                   ? voice.captureMode === "push-to-talk"
                     ? "Release to send..."
                     : t("chat.listening")
-                  : t("chat.inputPlaceholder")
+                  : inputPlaceholder
               : defaultTextareaPlaceholder
           }
           value={chatInput}
