@@ -13,6 +13,12 @@ Most scripts here are invoked from **root `package.json`** (`bun run …`). This
 
 **Full guide (WHYs for signals, `detached`, HMR vs Rollup watch, multiple `bun` PIDs):** [Desktop local development](../docs/apps/desktop-local-development.md)
 
+## Bun Version Guidance (Windows Dev Scripts)
+
+- Recommended: **Bun 1.3.x stable** for local `dev:win` flows.
+- Canary builds can change ESM/CJS interop behavior and may break startup scripts unexpectedly.
+- `scripts/dev-ui.mjs` now prints a startup advisory when it detects a canary or non-1.3 Bun version.
+
 ### Supporting modules (`scripts/lib/`)
 
 | Module | Why it exists |

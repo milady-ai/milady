@@ -33,6 +33,7 @@ import {
   coerceBoolean,
   resolveOnchainPreference,
 } from "./lib/dev-ui-onchain.mjs";
+import { getBunVersionAdvisory } from "./lib/bun-version-guard.mjs";
 import { buildVisionDepsFailureMessage } from "./lib/dev-ui-vision.mjs";
 import { signalSpawnedProcessTree } from "./lib/kill-process-tree.mjs";
 import { resolveModuleDefault } from "./lib/module-interop.mjs";
@@ -88,6 +89,11 @@ function getCliName() {
 
 const cliName = getCliName();
 const logPrefix = `[${cliName}]`;
+const bunVersionAdvisory = getBunVersionAdvisory();
+
+if (bunVersionAdvisory) {
+  console.warn(`${logPrefix} ${bunVersionAdvisory}`);
+}
 
 const cwd = process.cwd();
 const uiOnly = process.argv.includes("--ui-only");
