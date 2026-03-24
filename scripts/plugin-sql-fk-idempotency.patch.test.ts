@@ -13,7 +13,9 @@ describe("plugin-sql FK idempotency patch", () => {
     expect(patch).toContain(
       "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '",
     );
-    expect(patch).toContain("function generateCreateTableSQL(fullTableName, table)");
+    expect(patch).toContain(
+      "function generateCreateTableSQL(fullTableName, table)",
+    );
     expect(patch).toContain("function generateCreateForeignKeySQL(fk)");
   });
 });
