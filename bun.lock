@@ -49,6 +49,7 @@
         "@miladyai/app-core": "workspace:*",
         "@noble/curves": "^2.0.1",
         "@opinion-labs/opinion-clob-sdk": "0.5.2",
+        "@stwd/eliza-plugin": "^0.2.0",
         "@stwd/sdk": "^0.3.0",
         "@whiskeysockets/baileys": "7.0.0-rc.9",
         "ai": "6.0.30",
@@ -1670,6 +1671,8 @@
     "@storybook/test": ["@storybook/test@8.6.18", "", { "dependencies": { "@storybook/global": "^5.0.0", "@storybook/instrumenter": "8.6.18", "@testing-library/dom": "10.4.0", "@testing-library/jest-dom": "6.5.0", "@testing-library/user-event": "14.5.2", "@vitest/expect": "2.0.5", "@vitest/spy": "2.0.5" }, "peerDependencies": { "storybook": "^8.6.18" } }, "sha512-u/RwfWMyHcH0N2hqfMTw2CoZ58IXdeED3b8NmcHc8bmERB3byI5vVAkwYbcD7+WeRHIiym38ZHi0SRn+IpkO3Q=="],
 
     "@storybook/theming": ["@storybook/theming@8.6.18", "", { "peerDependencies": { "storybook": "^8.2.0 || ^8.3.0-0 || ^8.4.0-0 || ^8.5.0-0 || ^8.6.0-0" } }, "sha512-n6OEjEtHupa2PdTwWzRepr7cO8NkDd4rgF6BKLitRbujOspLxzMBEqdphs+QLcuiCIgf33SqmEA64QWnbSMhPw=="],
+
+    "@stwd/eliza-plugin": ["@stwd/eliza-plugin@0.2.0", "", { "dependencies": { "@stwd/sdk": "0.3.0" }, "peerDependencies": { "@elizaos/core": ">=2.0.0-alpha.50" } }, "sha512-57l+59TV7bUU5gfmL+BC65kkliKyoVcfrBkDxlNXh9fy1Ug8ADDA/Gl0BCdz5Hz8O1wIjlQ7HKQk1L9oAEMm1Q=="],
 
     "@stwd/sdk": ["@stwd/sdk@0.3.0", "", {}, "sha512-GUx+6lskxFA9PTlPtfVeZbKiIb0mZelBNjvodr8fiayyJIyJVbAzmr2gMLhbM88AGSqqp+BH6ur2GUhBosFl+Q=="],
 
