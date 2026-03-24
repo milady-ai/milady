@@ -37,7 +37,8 @@ export const transferTokenAction: Action = {
   validate: async (runtime: IAgentRuntime): Promise<boolean> => {
     return Boolean(
       runtime.getSetting("EVM_PRIVATE_KEY") ||
-        runtime.getSetting("PRIVY_APP_ID"),
+        runtime.getSetting("PRIVY_APP_ID") ||
+        runtime.getSetting("STEWARD_API_URL"), // Steward provides the wallet
     );
   },
 

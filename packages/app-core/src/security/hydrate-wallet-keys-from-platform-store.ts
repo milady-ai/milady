@@ -10,6 +10,9 @@ import {
 const WALLET_ENV_PAIRS: [keyof NodeJS.ProcessEnv, SecureStoreSecretKind][] = [
   ["EVM_PRIVATE_KEY", "wallet.evm_private_key"],
   ["SOLANA_PRIVATE_KEY", "wallet.solana_private_key"],
+  ["STEWARD_API_URL", "steward.api_url"],
+  ["STEWARD_AGENT_ID", "steward.agent_id"],
+  ["STEWARD_AGENT_TOKEN", "steward.agent_token"],
 ];
 
 /**

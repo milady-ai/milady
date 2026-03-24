@@ -40,6 +40,7 @@ export const walletContributor: AwarenessContributor = {
     const config = loadElizaConfig();
     const tradeMode = resolveTradePermissionMode(config);
     const localSigner = Boolean(process.env.EVM_PRIVATE_KEY?.trim());
+    const stewardConfigured = Boolean(process.env.STEWARD_API_URL?.trim());
     const bscRpc = resolveWalletRpcReadiness(config).managedBscRpcReady;
 
     const parts: string[] = [];
@@ -47,6 +48,7 @@ export const walletContributor: AwarenessContributor = {
     if (hasSol) parts.push(`SOL ${shorten(addrs.solanaAddress)}`);
     if (bscRpc) parts.push("BSC-RPC ready");
     if (localSigner) parts.push("signer");
+    else if (stewardConfigured) parts.push("steward-signer");
     parts.push(tradeMode);
 
     return `Wallet: ${parts.join(" | ")}`;
@@ -60,6 +62,9 @@ export const walletContributor: AwarenessContributor = {
     const config = loadElizaConfig();
     const tradeMode = resolveTradePermissionMode(config);
     const localSigner = Boolean(process.env.EVM_PRIVATE_KEY?.trim());
+    const stewardConfigured = Boolean(process.env.STEWARD_API_URL?.trim());
+    const stewardAgentId =
+      process.env.STEWARD_AGENT_ID ?? process.env.MILADY_STEWARD_AGENT_ID ?? "";
     const bscRpc = resolveWalletRpcReadiness(config).managedBscRpcReady;
     const canUserTrade = canUseLocalTradeExecution(tradeMode, false);
     const canAgentTrade = canUseLocalTradeExecution(tradeMode, true);
@@ -68,6 +73,9 @@ export const walletContributor: AwarenessContributor = {
     lines.push(`EVM address: ${addrs.evmAddress ?? "none"}`);
     lines.push(`Solana address: ${addrs.solanaAddress ?? "none"}`);
     lines.push(`Local signer: ${localSigner ? "available" : "not set"}`);
+    lines.push(
+      `Steward vault: ${stewardConfigured ? `configured${stewardAgentId ? ` (agent: ${stewardAgentId.slice(0, 8)}...)` : ""}` : "not configured"}`,
+    );
     lines.push(`Trade permission mode: ${tradeMode}`);
     lines.push(`Can user execute trades: ${canUserTrade}`);
     lines.push(`Can agent auto-trade: ${canAgentTrade}`);

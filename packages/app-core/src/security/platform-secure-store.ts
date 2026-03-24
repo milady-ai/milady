@@ -11,7 +11,10 @@
 /** Logical secret slot within a vault (one Milady state profile). */
 export type SecureStoreSecretKind =
   | "wallet.evm_private_key"
-  | "wallet.solana_private_key";
+  | "wallet.solana_private_key"
+  | "steward.api_url"
+  | "steward.agent_id"
+  | "steward.agent_token";
 
 export type SecureStoreUnavailableReason =
   | "not_found"

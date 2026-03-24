@@ -52,7 +52,8 @@ export const executeTradeAction: Action = {
   validate: async (runtime: IAgentRuntime) => {
     const hasWallet =
       runtime.getSetting("EVM_PRIVATE_KEY") ||
-      runtime.getSetting("PRIVY_APP_ID");
+      runtime.getSetting("PRIVY_APP_ID") ||
+      runtime.getSetting("STEWARD_API_URL"); // Steward provides the wallet
     return Boolean(hasWallet);
   },
 
