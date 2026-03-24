@@ -4,22 +4,14 @@ const PREVIEW_LOGS = [
   {
     id: "log-3",
     time: "00:00:02",
-    level: "INFO",
-    msg: "Connecting to providers",
-  },
-  { id: "log-4", time: "00:00:03", level: "DEBUG", msg: "Memory store ready" },
-  {
-    id: "log-5",
-    time: "00:00:04",
-    level: "INFO",
-    msg: "Ready to receive messages",
+    level: "DEBUG",
+    msg: "Memory store ready",
   },
 ] as const;
 
 export function LogsPanel() {
   return (
     <div className="animate-[fade-up_0.4s_ease-out_both]">
-      {/* Terminal-style container */}
       <div className="border border-border bg-surface">
         <div className="px-4 py-2.5 bg-dark-secondary border-b border-border flex items-center justify-between">
           <span className="font-mono text-xs text-text-muted">
@@ -31,9 +23,9 @@ export function LogsPanel() {
           </div>
         </div>
 
-        <div className="p-6 min-h-[320px]">
-          {/* Fake log lines - decorative preview */}
-          <div className="space-y-2 mb-8 opacity-30">
+        <div className="p-6 min-h-[200px]">
+          {/* Preview log lines - muted */}
+          <div className="space-y-2 mb-8 opacity-20">
             {PREVIEW_LOGS.map((line) => (
               <div
                 key={line.id}
@@ -46,11 +38,7 @@ export function LogsPanel() {
                   className={
                     line.level === "DEBUG"
                       ? "text-text-subtle"
-                      : line.level === "WARN"
-                        ? "text-amber-400"
-                        : line.level === "ERROR"
-                          ? "text-red-400"
-                          : "text-emerald-400/70"
+                      : "text-emerald-400/70"
                   }
                 >
                   [{line.level}]
@@ -58,39 +46,15 @@ export function LogsPanel() {
                 <span className="text-text-muted">{line.msg}</span>
               </div>
             ))}
-            <div className="flex items-start gap-3 font-mono text-[11px]">
-              <span className="text-text-subtle tabular-nums">00:00:05</span>
-              <span className="text-text-subtle">[...]</span>
-              <span className="text-text-muted/50">waiting for connection</span>
-              <span className="inline-block w-2 h-3.5 bg-text-muted/20 ml-1" />
-            </div>
           </div>
 
-          {/* Info message */}
-          <div className="text-center py-6">
+          <div className="text-center py-4">
             <h3 className="font-mono text-sm text-text-light mb-2">
               NO LOG STREAM
             </h3>
             <p className="font-mono text-xs text-text-muted max-w-sm mx-auto leading-relaxed">
               Select an agent from the Agents panel to stream live logs.
-              <br />
-              Log levels, timestamps, and structured output will appear here.
             </p>
-          </div>
-        </div>
-
-        {/* Bottom status bar */}
-        <div className="px-4 py-2 bg-dark-secondary border-t border-border flex items-center justify-between">
-          <span className="font-mono text-[10px] text-text-subtle">
-            0 lines
-          </span>
-          <div className="flex items-center gap-3">
-            <span className="font-mono text-[10px] text-text-subtle">
-              FILTER: ALL
-            </span>
-            <span className="font-mono text-[10px] text-text-subtle">
-              LEVEL: DEBUG+
-            </span>
           </div>
         </div>
       </div>

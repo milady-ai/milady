@@ -29,13 +29,20 @@ function isNetworkBind(): boolean {
   return bind !== "127.0.0.1" && bind !== "localhost" && bind !== "::1";
 }
 
+function shouldDisableAutoConnectionKey(): boolean {
+  return (
+    process.env.MILADY_DISABLE_AUTO_API_TOKEN === "1" ||
+    process.env.ELIZA_DISABLE_AUTO_API_TOKEN === "1"
+  );
+}
+
 async function startAction() {
   // Auto-generate a connection key only when binding to a network address
   // and no token is already configured. Localhost access stays open.
   const existingToken =
     process.env.MILADY_API_TOKEN?.trim() || process.env.ELIZA_API_TOKEN?.trim();
 
-  if (!existingToken && isNetworkBind()) {
+  if (!existingToken && isNetworkBind() && !shouldDisableAutoConnectionKey()) {
     generateConnectionKey();
   }
 

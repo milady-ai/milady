@@ -101,6 +101,45 @@ function stopProp(handler: () => void) {
   };
 }
 
+function PlayIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="w-3 h-3"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+    >
+      <path d="M8 6.82v10.36c0 .79.87 1.27 1.54.84l8.16-5.18a1 1 0 0 0 0-1.68L9.54 5.98A1 1 0 0 0 8 6.82Z" />
+    </svg>
+  );
+}
+
+function PauseIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="w-3 h-3"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+    >
+      <path d="M7 5.5A1.5 1.5 0 0 1 8.5 4h1A1.5 1.5 0 0 1 11 5.5v13A1.5 1.5 0 0 1 9.5 20h-1A1.5 1.5 0 0 1 7 18.5v-13Zm6 0A1.5 1.5 0 0 1 14.5 4h1A1.5 1.5 0 0 1 17 5.5v13a1.5 1.5 0 0 1-1.5 1.5h-1A1.5 1.5 0 0 1 13 18.5v-13Z" />
+    </svg>
+  );
+}
+
+function StopIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="w-3 h-3"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+    >
+      <rect x="6" y="6" width="12" height="12" rx="1.5" />
+    </svg>
+  );
+}
+
 export function AgentCard({
   agent,
   source,
@@ -198,29 +237,48 @@ export function AgentCard({
           </div>
         </div>
 
-        {/* Stats grid - data-dense Bloomberg style */}
-        <div className="grid grid-cols-4 gap-px mt-4 bg-border-subtle">
-          <StatCell label="UPTIME" value={formatUptime(agent.uptime)} />
-          <StatCell
-            label="MEMORY"
-            value={
-              agent.memories !== undefined ? String(agent.memories) : "\u2014"
-            }
-          />
-          <StatCell
-            label="HEARTBEAT"
-            value={formatRelativeTime(lastHeartbeat) || "\u2014"}
-          />
-          <StatCell
-            label="COST"
-            value={
-              billing?.costPerHour !== undefined
-                ? `$${billing.costPerHour.toFixed(2)}`
-                : "\u2014"
-            }
-            accent
-          />
-        </div>
+        {/* Stats grid - only show cells with real data */}
+        {(() => {
+          const stats: { label: string; value: string; accent?: boolean }[] = [
+            { label: "UPTIME", value: formatUptime(agent.uptime) },
+            {
+              label: "MEMORY",
+              value:
+                agent.memories !== undefined
+                  ? String(agent.memories)
+                  : "\u2014",
+            },
+          ];
+          const hb = formatRelativeTime(lastHeartbeat);
+          if (hb) {
+            stats.push({ label: "HEARTBEAT", value: hb });
+          }
+          if (billing?.costPerHour !== undefined) {
+            stats.push({
+              label: "COST",
+              value: `$${billing.costPerHour.toFixed(2)}`,
+              accent: true,
+            });
+          }
+          const cols =
+            stats.length <= 2
+              ? "grid-cols-2"
+              : stats.length === 3
+                ? "grid-cols-3"
+                : "grid-cols-4";
+          return (
+            <div className={`grid ${cols} gap-px mt-4 bg-border-subtle`}>
+              {stats.map((s) => (
+                <StatCell
+                  key={s.label}
+                  label={s.label}
+                  value={s.value}
+                  accent={s.accent}
+                />
+              ))}
+            </div>
+          );
+        })()}
 
         {/* Actions row */}
         <div className="flex items-center justify-between gap-2 p-3 bg-dark-secondary/50">
@@ -230,7 +288,7 @@ export function AgentCard({
               <ActionBtn
                 onClick={stopProp(onPlay)}
                 variant="success"
-                icon="\u25B6"
+                icon={<PlayIcon />}
                 label="Start"
               />
             )}
@@ -238,7 +296,7 @@ export function AgentCard({
               <ActionBtn
                 onClick={stopProp(onResume)}
                 variant="success"
-                icon="\u25B6"
+                icon={<PlayIcon />}
                 label="Resume"
               />
             )}
@@ -246,7 +304,7 @@ export function AgentCard({
               <ActionBtn
                 onClick={stopProp(onPause)}
                 variant="warn"
-                icon="\u23F8"
+                icon={<PauseIcon />}
                 label="Pause"
               />
             )}
@@ -256,7 +314,7 @@ export function AgentCard({
                 <ActionBtn
                   onClick={stopProp(onStop)}
                   variant="danger"
-                  icon="\u25A0"
+                  icon={<StopIcon />}
                   label="Stop"
                 />
               )}
@@ -350,7 +408,7 @@ function ActionBtn({
 }: {
   onClick: (e: React.MouseEvent) => void;
   variant: "success" | "warn" | "danger";
-  icon: string;
+  icon: React.ReactNode;
   label: string;
 }) {
   const colors = {
@@ -368,7 +426,7 @@ function ActionBtn({
         font-mono text-[11px] font-medium border transition-all duration-150
         ${colors[variant]}`}
     >
-      <span className="text-xs">{icon}</span>
+      <span className="inline-flex items-center justify-center">{icon}</span>
       {label}
     </button>
   );

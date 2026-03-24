@@ -214,7 +214,7 @@ export function AgentGrid() {
                 onOpenUI={() => {
                   const url = getWebUIUrl(agent);
                   if (!url) return;
-                  openWebUI(url, agent.source);
+                  openWebUI(url, agent.source, agent.cloudAgentId);
                 }}
                 selected={selectedId === agent.id}
               />

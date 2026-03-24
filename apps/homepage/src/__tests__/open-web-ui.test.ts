@@ -101,8 +101,48 @@ describe("open-web-ui", () => {
       expect(popup.location.href).toBeTruthy();
     });
 
-    // Pairing redirect URL is rewritten to milady.ai (canonical domain)
+    // Pairing redirect URL is rewritten to the canonical milady.ai domain
     expect(popup.location.href).toContain("milady.ai");
+    expect(popup.location.href).not.toContain("waifu.fun");
     expect(popup.location.href).toContain("token=pair-token");
+  });
+
+  it("prefers the provided cloud agent id over parsing the URL", async () => {
+    vi.mocked(getToken).mockReturnValue("test-api-key");
+
+    const popup = {
+      closed: false,
+      document: {
+        title: "",
+        body: { style: { margin: "" }, innerHTML: "" },
+      },
+      location: { href: "" },
+    };
+    vi.spyOn(window, "open").mockImplementation(
+      () => popup as unknown as Window,
+    );
+
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          redirectUrl: "https://sandbox-host.waifu.fun/pair?token=pair-token",
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ),
+    );
+
+    openWebUI("https://sandbox-host.milady.ai", "cloud", "cloud-agent-123");
+
+    await vi.waitFor(() => {
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+    });
+
+    expect(fetchSpy.mock.calls[0]?.[0]).toContain(
+      "/api/v1/milady/agents/cloud-agent-123/pairing-token",
+    );
+
+    await vi.waitFor(() => {
+      expect(popup.location.href).toContain("pair-token");
+    });
   });
 });

@@ -129,7 +129,13 @@ export function AgentDetail({
           {webUIUrl && (
             <button
               type="button"
-              onClick={() => openWebUI(webUIUrl, managedAgent.source)}
+              onClick={() =>
+                openWebUI(
+                  webUIUrl,
+                  managedAgent.source,
+                  managedAgent.cloudAgentId,
+                )
+              }
               className="flex items-center gap-1.5 px-3 py-1.5 
                 bg-brand text-dark font-mono text-[11px] font-semibold tracking-wide
                 hover:bg-brand-hover transition-colors"

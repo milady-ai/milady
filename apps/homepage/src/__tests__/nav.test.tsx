@@ -6,18 +6,27 @@ import { releaseData } from "../generated/release-data";
 
 afterEach(cleanup);
 
-function renderNav() {
+function renderNav(initialEntries = ["/dashboard"]) {
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={initialEntries}>
       <Nav />
     </MemoryRouter>,
   );
 }
 
 describe("Nav", () => {
+  it("shows the simplified dashboard nav without removed landing anchors", () => {
+    const { container } = renderNav();
+    expect(container.textContent).toContain("MILADY");
+    expect(container.textContent).toContain("DASHBOARD");
+    expect(container.textContent).not.toContain("INSTALL");
+    expect(container.textContent).not.toContain("PRIVACY");
+    expect(container.textContent).not.toContain("FEATURES");
+    expect(container.textContent).not.toContain("COMPARE");
+  });
+
   it("releases button links to the release page URL", () => {
     const { container } = renderNav();
-    // New design uses uppercase "RELEASES"
     const releasesLink = Array.from(container.querySelectorAll("a")).find(
       (a) => a.textContent?.trim() === "RELEASES",
     );
@@ -26,8 +35,7 @@ describe("Nav", () => {
   });
 
   it("Dashboard link navigates to /dashboard (not external)", () => {
-    const { container } = renderNav();
-    // New design uses uppercase "DASHBOARD"
+    const { container } = renderNav(["/onboard"]);
     const dashboardLink = Array.from(container.querySelectorAll("a")).find(
       (a) => a.textContent?.trim() === "DASHBOARD",
     );

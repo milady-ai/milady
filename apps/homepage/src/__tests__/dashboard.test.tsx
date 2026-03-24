@@ -203,6 +203,17 @@ describe("AgentCard", () => {
     expect(screen.queryByText("Resume")).toBeNull();
   });
 
+  it("renders svg icons for pause and stop controls", () => {
+    const { container } = render(
+      <AgentCard {...baseProps} agent={makeAgent({ state: "running" })} />,
+    );
+    const pauseButton = screen.getByText("Pause").closest("button");
+    const stopButton = screen.getByText("Stop").closest("button");
+    expect(pauseButton?.querySelector("svg")).toBeTruthy();
+    expect(stopButton?.querySelector("svg")).toBeTruthy();
+    expect(container.querySelectorAll("button svg").length).toBeGreaterThan(0);
+  });
+
   it("calls onStop when Stop is clicked", () => {
     const onStop = vi.fn();
     render(

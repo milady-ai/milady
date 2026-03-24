@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
+import { useAgents } from "../../lib/AgentProvider";
 import { CloudClient, type CreditBalance } from "../../lib/cloud-api";
 import { useAuth } from "../../lib/useAuth";
 
 const SECTIONS = [
   { id: "agents", label: "Agents", shortcut: "1" },
-  { id: "metrics", label: "Metrics", shortcut: "2" },
-  { id: "logs", label: "Logs", shortcut: "3" },
+  { id: "metrics", label: "Metrics", shortcut: "2", requiresAgents: true },
+  { id: "logs", label: "Logs", shortcut: "3", requiresAgents: true },
   { id: "credits", label: "Credits", shortcut: "4", requiresAuth: true },
 ] as const;
 
@@ -18,7 +19,13 @@ interface SidebarProps {
 
 export function Sidebar({ active, onChange }: SidebarProps) {
   const { isAuthenticated: authed, token, signOut } = useAuth();
-  const visibleSections = SECTIONS.filter((s) => !s.requiresAuth || authed);
+  const { agents } = useAgents();
+  const hasAgents = agents.length > 0;
+  const visibleSections = SECTIONS.filter(
+    (s) =>
+      (!s.requiresAuth || authed) &&
+      (!("requiresAgents" in s && s.requiresAgents) || hasAgents),
+  );
   const [credits, setCredits] = useState<CreditBalance | null>(null);
 
   useEffect(() => {

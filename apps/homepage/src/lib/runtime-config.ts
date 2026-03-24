@@ -1,9 +1,31 @@
-const DEFAULT_CLOUD_BASE =
-  typeof window !== "undefined" &&
-  (window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1")
-    ? "http://localhost:3000"
-    : "https://www.elizacloud.ai";
+const ELIZA_CLOUD_HOSTS = new Set([
+  "elizacloud.ai",
+  "www.elizacloud.ai",
+  "dev.elizacloud.ai",
+]);
+
+function normalizeCloudHost(hostname: string): string {
+  return hostname.trim().toLowerCase().replace(/\.+$/, "");
+}
+
+function resolveDefaultCloudBase(): string {
+  if (typeof window === "undefined") {
+    return "https://elizacloud.ai";
+  }
+
+  const hostname = normalizeCloudHost(window.location.hostname);
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
+    return "http://localhost:3000";
+  }
+
+  if (ELIZA_CLOUD_HOSTS.has(hostname)) {
+    return `${window.location.protocol}//${window.location.host}`;
+  }
+
+  return "https://elizacloud.ai";
+}
+
+const DEFAULT_CLOUD_BASE = resolveDefaultCloudBase();
 const DEFAULT_LOCAL_AGENT_BASE = "http://localhost:2138";
 const DEFAULT_SANDBOX_DISCOVERY_URL = "https://sandboxes.waifu.fun/agents";
 const DEFAULT_AGENT_UI_BASE_DOMAIN = "milady.ai";
@@ -55,8 +77,15 @@ export function shouldAllowPublicSandboxDiscoveryFallback(): boolean {
 
 export function getCloudTokenStorageKey(): string {
   try {
-    const origin = new URL(CLOUD_BASE).origin.replace(/^https?:\/\//, "");
-    return `${CLOUD_TOKEN_STORAGE_PREFIX}:${origin}`;
+    const url = new URL(CLOUD_BASE);
+    const hostname = normalizeCloudHost(url.hostname);
+    const storageHost =
+      hostname === "www.elizacloud.ai"
+        ? "elizacloud.ai"
+        : url.port
+          ? `${hostname}:${url.port}`
+          : hostname;
+    return `${CLOUD_TOKEN_STORAGE_PREFIX}:${storageHost}`;
   } catch {
     return CLOUD_TOKEN_STORAGE_PREFIX;
   }

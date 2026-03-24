@@ -20,6 +20,9 @@ describe("Router", () => {
       </MemoryRouter>,
     );
     expect(document.querySelector("#top")).toBeTruthy();
+    expect(screen.getAllByText("MILADY").length).toBeGreaterThan(0);
+    expect(screen.getByText("Try Cloud")).toBeTruthy();
+    expect(screen.queryByText("DASHBOARD")).toBeNull();
   });
 
   it("renders dashboard at /dashboard", () => {
@@ -29,5 +32,7 @@ describe("Router", () => {
       </MemoryRouter>,
     );
     expect(screen.getByTestId("dashboard")).toBeTruthy();
+    expect(screen.getAllByText("MILADY").length).toBeGreaterThan(0);
+    expect(screen.getByText("DASHBOARD")).toBeTruthy();
   });
 });

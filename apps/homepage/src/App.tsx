@@ -170,6 +170,25 @@ function DownloadDropdown() {
   );
 }
 
+function CloudIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="w-4 h-4 opacity-60"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M7 18h9a4 4 0 0 0 .4-7.98A6 6 0 0 0 5.1 8.7 4.5 4.5 0 0 0 7 18Z" />
+      <path d="M12 10v8" />
+      <path d="m9.5 15 2.5 3 2.5-3" />
+    </svg>
+  );
+}
+
 export function Homepage() {
   return (
     <div
@@ -205,13 +224,13 @@ export function Homepage() {
         </section>
 
         {/* CTA buttons — bottom center */}
-        <div className="relative z-50 flex items-center justify-center gap-4 pb-10">
+        <div className="relative z-50 flex items-center justify-center gap-4 pb-10 px-4">
           <DownloadDropdown />
           <a
             href={DASHBOARD_URL}
             className="flex items-center gap-2 px-6 py-3 border border-text-subtle/30 text-text-muted font-mono text-[11px] tracking-[0.15em] uppercase hover:border-text-muted/50 hover:text-text-light transition-all"
           >
-            <img src="/eliza-cloud.png" alt="" className="w-4 h-4 opacity-60" />
+            <CloudIcon />
             Try Cloud
           </a>
         </div>

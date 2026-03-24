@@ -2,8 +2,7 @@ import { getToken } from "./auth";
 import { CLOUD_BASE, rewriteAgentUiUrl } from "./runtime-config";
 
 /**
- * Fetches a pairing token from the cloud backend for the given agent UUID,
- * then returns the rewritten redirect URL (waifu.fun → milady.ai).
+ * Fetches a pairing token from the cloud backend for the given cloud agent ID.
  *
  * Works against both the local Express backend (localhost:3000) and the
  * Vercel proxy (elizacloud.ai).  The local backend exposes the route
@@ -11,12 +10,11 @@ import { CLOUD_BASE, rewriteAgentUiUrl } from "./runtime-config";
  * the Vercel deployment rewrites to the same backend via milady-api.shad0w.xyz.
  */
 async function fetchPairingRedirectUrl(
-  agentUuid: string,
+  agentId: string,
   apiKey: string,
 ): Promise<string> {
-  // The Eliza Cloud backend mounts the route at /api/v1/milady/agents/:id/pairing-token
   const res = await fetch(
-    `${CLOUD_BASE}/api/v1/milady/agents/${agentUuid}/pairing-token`,
+    `${CLOUD_BASE}/api/v1/milady/agents/${agentId}/pairing-token`,
     {
       method: "POST",
       headers: {
@@ -67,6 +65,7 @@ function extractUuidFromUrl(url: string): string | null {
 async function openWebUIWithPairingToken(
   agentUrl: string,
   cloudApiKey: string,
+  agentId?: string,
 ): Promise<void> {
   // Open popup synchronously to avoid popup blockers
   const popup = window.open("", "_blank");
@@ -89,15 +88,17 @@ async function openWebUIWithPairingToken(
     // cross-origin write may fail
   }
 
-  // Extract the sandbox UUID from the agent URL
-  const agentUuid = extractUuidFromUrl(agentUrl);
-  if (!agentUuid) {
+  const pairingAgentId = agentId ?? extractUuidFromUrl(agentUrl);
+  if (!pairingAgentId) {
     popup.location.href = rewriteAgentUiUrl(agentUrl);
     return;
   }
 
   try {
-    const redirectUrl = await fetchPairingRedirectUrl(agentUuid, cloudApiKey);
+    const redirectUrl = await fetchPairingRedirectUrl(
+      pairingAgentId,
+      cloudApiKey,
+    );
     if (popup.closed) return;
     popup.location.href = redirectUrl;
   } catch (err) {
@@ -125,10 +126,11 @@ export function openWebUIDirect(url: string): void {
 export function openWebUI(
   agentUrl: string,
   source: "local" | "remote" | "cloud",
+  agentId?: string,
 ): void {
   const cloudToken = getToken();
   if (source !== "local" && cloudToken) {
-    openWebUIWithPairingToken(agentUrl, cloudToken);
+    openWebUIWithPairingToken(agentUrl, cloudToken, agentId);
   } else {
     openWebUIDirect(agentUrl);
   }

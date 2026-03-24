@@ -5938,6 +5938,13 @@ function isLoopbackBindHost(host: string): boolean {
 }
 
 export function ensureApiTokenForBindHost(host: string): void {
+  if (
+    process.env.MILADY_DISABLE_AUTO_API_TOKEN === "1" ||
+    process.env.ELIZA_DISABLE_AUTO_API_TOKEN === "1"
+  ) {
+    return;
+  }
+
   const token = (
     process.env.ELIZA_API_TOKEN ?? process.env.ELIZA_API_TOKEN
   )?.trim();
