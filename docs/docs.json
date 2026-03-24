@@ -135,11 +135,20 @@
             "group": "Social",
             "pages": [
               "guides/connectors",
-              "guides/whatsapp",
               "connectors/discord",
               "connectors/telegram",
               "connectors/twitter",
-              "connectors/slack"
+              "connectors/slack",
+              "guides/whatsapp",
+              "connectors/whatsapp",
+              "connectors/signal",
+              "connectors/imessage",
+              "connectors/bluebubbles",
+              "connectors/msteams",
+              "connectors/googlechat",
+              "connectors/farcaster",
+              "connectors/mattermost",
+              "connectors/wechat"
             ]
           },
           {
@@ -248,7 +257,8 @@
               "plugin-registry/platform/bluebubbles",
               "plugin-registry/platform/msteams",
               "plugin-registry/platform/googlechat",
-              "plugin-registry/platform/mattermost"
+              "plugin-registry/platform/mattermost",
+              "plugin-registry/platform/wechat"
             ]
           },
           {

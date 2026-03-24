@@ -20,7 +20,7 @@ A plugin is a self-contained module that registers one or more of:
 <CardGroup cols={2}>
 
 <Card title="Core Plugins" icon="cube" href="/plugin-registry/knowledge">
-  Essential plugins that ship with every Milady installation — knowledge, database, secrets, cron, and shell.
+  Essential plugins that ship with every Milady installation — knowledge, database, form, cron, shell, agent-skills, trajectory-logger, and agent-orchestrator.
 </Card>
 
 <Card title="Model Providers" icon="brain" href="/plugin-registry/llm/openai">
@@ -47,7 +47,7 @@ Plugins are loaded during runtime initialization in this order:
 
 1. **Milady plugin** — The bridge plugin (`createMiladyPlugin()`) providing workspace context, session keys, emotes, custom actions, and lifecycle actions. Always first in the plugins array.
 2. **Pre-registered plugins** — `@elizaos/plugin-sql` and `@elizaos/plugin-local-embedding` are pre-registered before `runtime.initialize()` to prevent race conditions.
-3. **Core plugins** — Always loaded: `sql`, `local-embedding`, `secrets-manager`, `form`, `knowledge`, `rolodex`, `trajectory-logger`, `agent-orchestrator`, `cron`, `shell`, `plugin-manager`, `agent-skills`, `pdf` (see `src/runtime/core-plugins.ts`).
+3. **Core plugins** — Always loaded: `sql`, `local-embedding`, `form`, `knowledge`, `trajectory-logger`, `agent-orchestrator`, `cron`, `shell`, `agent-skills` (see `src/runtime/core-plugins.ts`). Additional plugins like `pdf`, `browser`, `computeruse`, `obsidian`, `vision`, `edge-tts`, and `elevenlabs` are optional and loaded when their feature flags or environment variables are configured.
 4. **Connector plugins** — Loaded when channel config is present in `connectors` (e.g., Discord, Telegram, Slack).
 5. **Provider plugins** — Loaded when the corresponding API key env var is set (e.g., `ANTHROPIC_API_KEY` enables `@elizaos/plugin-anthropic`).
 6. **Feature plugins** — Loaded when feature flags or `plugins.entries` are enabled in `milady.json`.
