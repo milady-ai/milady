@@ -69,12 +69,16 @@ function pushFrameToSubscribers(frame: Buffer): void {
   const headerBuf = Buffer.from(header, "ascii");
   const trailer = Buffer.from("\r\n", "ascii");
   const chunk = Buffer.concat([headerBuf, frame, trailer]);
+  const failed: ServerResponse[] = [];
   for (const sub of mjpegSubscribers) {
     try {
       sub.write(chunk);
     } catch {
-      mjpegSubscribers.delete(sub);
+      failed.push(sub);
     }
+  }
+  for (const sub of failed) {
+    mjpegSubscribers.delete(sub);
   }
 }
 

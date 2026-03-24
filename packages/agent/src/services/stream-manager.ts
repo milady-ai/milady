@@ -504,9 +504,8 @@ class StreamManager {
         this._frameCount = savedFrameCount;
         logger.info(`${TAG} Auto-restart successful`);
       } catch (err) {
-        logger.error(
-          `${TAG} Auto-restart failed: ${String(err)}`,
-        );
+        this._running = false;
+        logger.error(`${TAG} Auto-restart failed: ${String(err)}`);
         // start() failed before spawning FFmpeg — no exit event will fire,
         // so manually chain the next restart attempt if retries remain.
         if (!this._intentionalStop && this._config) {

@@ -48,6 +48,8 @@ export class ProxyClient {
           const delay = retryAfter
             ? Number.parseInt(retryAfter, 10) * 1000
             : Math.min(1000 * 2 ** attempt, 8000);
+          // Consume the response body to release the connection
+          await res.text().catch(() => {});
           await sleep(delay);
           continue;
         }
