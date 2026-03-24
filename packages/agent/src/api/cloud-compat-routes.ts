@@ -128,10 +128,7 @@ async function parseUpstreamJsonResponse(
   }
 }
 
-function handleUpstreamError(
-  error: unknown,
-  res: http.ServerResponse,
-): void {
+function handleUpstreamError(error: unknown, res: http.ServerResponse): void {
   if (error instanceof Error) {
     const errorCode = (error as { code?: string }).code;
     if (errorCode === "REDIRECT") {
@@ -208,6 +205,9 @@ export async function handleCloudCompatRoute(
     if (parsed.kind === "json") {
       // Cloud API may not have all routes deployed yet. Return a friendlier
       // message instead of a raw 404 so the dashboard can show "coming soon".
+      // TODO: Remove or refine this unconditional 404 intercept when Cloud
+      // goes to production — legitimate 404s (e.g. agent not found) will be
+      // incorrectly masked as "coming soon".
       if (upstreamRes.status === 404) {
         sendJson(
           res,

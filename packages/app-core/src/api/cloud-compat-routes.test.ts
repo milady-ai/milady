@@ -13,21 +13,20 @@ vi.mock("@elizaos/core", async (importOriginal) => ({
   logger: { info: vi.fn(), warn: vi.fn(), debug: vi.fn(), error: vi.fn() },
 }));
 
-vi.mock("@miladyai/agent/cloud/validate-url", () => ({
+const { sendJson, sendJsonError, validateCloudBaseUrl } = vi.hoisted(() => ({
+  sendJson: vi.fn(),
+  sendJsonError: vi.fn(),
   validateCloudBaseUrl: vi.fn(() => Promise.resolve(null)),
 }));
 
-vi.mock("@miladyai/agent/api/http-helpers", () => ({
-  sendJson: vi.fn(),
-  sendJsonError: vi.fn(),
+vi.mock("@miladyai/agent/cloud/validate-url", () => ({
+  validateCloudBaseUrl,
 }));
 
-const { sendJson, sendJsonError } = await import(
-  "@miladyai/agent/api/http-helpers"
-);
-const { validateCloudBaseUrl } = await import(
-  "@miladyai/agent/cloud/validate-url"
-);
+vi.mock("@miladyai/agent/api/http-helpers", () => ({
+  sendJson,
+  sendJsonError,
+}));
 
 function makeState(
   overrides?: Partial<ElizaConfig["cloud"]>,
@@ -258,6 +257,33 @@ describe("cloud-compat-routes", () => {
         expect.anything(),
         "Failed to reach Eliza Cloud: ECONNREFUSED",
         502,
+      );
+    });
+
+    it("returns CLOUD_NOT_READY on upstream 404 JSON response", async () => {
+      const mockResponse = new Response(
+        JSON.stringify({ error: "Not Found" }),
+        { status: 404, headers: { "Content-Type": "application/json" } },
+      );
+      vi.mocked(fetch).mockResolvedValue(mockResponse);
+
+      const result = await handleCloudCompatRoute(
+        makeReq({ url: "/api/cloud/compat/agents" }),
+        makeRes(),
+        "/api/cloud/compat/agents",
+        "GET",
+        makeState(),
+      );
+
+      expect(result).toBe(true);
+      expect(sendJson).toHaveBeenCalledWith(
+        expect.anything(),
+        {
+          success: false,
+          error: "This Cloud feature is not available yet.",
+          code: "CLOUD_NOT_READY",
+        },
+        404,
       );
     });
 

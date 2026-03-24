@@ -404,7 +404,7 @@ export function CloudDashboard() {
       if (!mountedRef.current) return;
       const msg =
         err instanceof Error ? err.message : "Failed to load cloud agents";
-      if (msg.includes("not available yet") || msg.includes("CLOUD_NOT_READY")) {
+      if (msg.includes("not available yet")) {
         setCloudNotReady(true);
       } else {
         setAgentsError(msg);
@@ -1398,73 +1398,75 @@ export function CloudDashboard() {
           <hr className="border-border/40" />
 
           {/* ── Agent list ────────────────────────────────────── */}
-          <div className={`py-4 ${cloudNotReady ? "hidden" : ""}`}>
-            {agentsLoading && cloudAgents.length === 0 ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-5 h-5 text-muted animate-spin" />
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {cloudAgents.map((agent) => (
-                  <CloudAgentCard
-                    key={agent.agent_id}
-                    agent={agent}
-                    onDelete={handleDeleteAgent}
-                    deleting={deletingAgentId === agent.agent_id}
-                    launching={launchingAgentId === agent.agent_id}
-                    onLaunch={handleLaunchAgent}
-                    onSelect={(id) => setSelectedAgentId(id)}
-                  />
-                ))}
-
-                {showDeployForm ? (
-                  <div className="flex items-center gap-2 py-2">
-                    <Input
-                      placeholder={t("elizaclouddashboard.AgentName")}
-                      value={deployAgentName}
-                      onChange={(e) => setDeployAgentName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") void handleDeployAgent();
-                        if (e.key === "Escape") setShowDeployForm(false);
-                      }}
-                      disabled={deploying}
-                      className="h-8 rounded-lg bg-bg text-xs flex-1"
+          {!cloudNotReady && (
+            <div className="py-4">
+              {agentsLoading && cloudAgents.length === 0 ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-5 h-5 text-muted animate-spin" />
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {cloudAgents.map((agent) => (
+                    <CloudAgentCard
+                      key={agent.agent_id}
+                      agent={agent}
+                      onDelete={handleDeleteAgent}
+                      deleting={deletingAgentId === agent.agent_id}
+                      launching={launchingAgentId === agent.agent_id}
+                      onLaunch={handleLaunchAgent}
+                      onSelect={(id) => setSelectedAgentId(id)}
                     />
-                    <Button
-                      size="sm"
-                      className="h-8 rounded-lg text-xs"
-                      onClick={handleDeployAgent}
-                      disabled={deploying || !deployAgentName.trim()}
-                    >
-                      {deploying ? (
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                      ) : (
-                        t("elizaclouddashboard.Deploy")
-                      )}
-                    </Button>
+                  ))}
+
+                  {showDeployForm ? (
+                    <div className="flex items-center gap-2 py-2">
+                      <Input
+                        placeholder={t("elizaclouddashboard.AgentName")}
+                        value={deployAgentName}
+                        onChange={(e) => setDeployAgentName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") void handleDeployAgent();
+                          if (e.key === "Escape") setShowDeployForm(false);
+                        }}
+                        disabled={deploying}
+                        className="h-8 rounded-lg bg-bg text-xs flex-1"
+                      />
+                      <Button
+                        size="sm"
+                        className="h-8 rounded-lg text-xs"
+                        onClick={handleDeployAgent}
+                        disabled={deploying || !deployAgentName.trim()}
+                      >
+                        {deploying ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          t("elizaclouddashboard.Deploy")
+                        )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 rounded-lg text-xs text-muted"
+                        onClick={() => setShowDeployForm(false)}
+                        disabled={deploying}
+                      >
+                        {t("common.cancel")}
+                      </Button>
+                    </div>
+                  ) : (
                     <Button
                       variant="ghost"
-                      size="sm"
-                      className="h-8 rounded-lg text-xs text-muted"
-                      onClick={() => setShowDeployForm(false)}
-                      disabled={deploying}
+                      className="flex items-center gap-2 w-full py-3 text-xs text-muted hover:text-txt h-auto justify-start"
+                      onClick={() => setShowDeployForm(true)}
                     >
-                      {t("common.cancel")}
+                      <Plus className="w-4 h-4" />
+                      {t("elizaclouddashboard.DeployNewAgent")}
                     </Button>
-                  </div>
-                ) : (
-                  <Button
-                    variant="ghost"
-                    className="flex items-center gap-2 w-full py-3 text-xs text-muted hover:text-txt h-auto justify-start"
-                    onClick={() => setShowDeployForm(true)}
-                  >
-                    <Plus className="w-4 h-4" />
-                    {t("elizaclouddashboard.DeployNewAgent")}
-                  </Button>
-                )}
-              </div>
-            )}
-          </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* ── Agent detail ──────────────────────────────────── */}
           {selectedAgentId && selectedAgent && (
