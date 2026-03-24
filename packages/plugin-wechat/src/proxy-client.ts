@@ -11,11 +11,13 @@ export class ProxyClient {
   private readonly apiKey: string;
   private readonly baseUrl: string;
   private readonly accountId: string;
+  private readonly deviceType: string;
 
   constructor(account: ResolvedWechatAccount) {
     this.apiKey = account.apiKey;
     this.baseUrl = normalizeProxyUrl(account.proxyUrl);
     this.accountId = account.id;
+    this.deviceType = account.deviceType ?? "ipad";
   }
 
   private async request<T>(
@@ -27,6 +29,7 @@ export class ProxyClient {
       "Content-Type": "application/json",
       "X-API-Key": this.apiKey,
       "X-Account-ID": this.accountId,
+      "X-Device-Type": this.deviceType,
     };
 
     let lastError: Error | undefined;

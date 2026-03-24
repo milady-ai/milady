@@ -10,8 +10,18 @@ const WECHAT_TYPE_MAP: Record<
   number,
   { type: WechatMessageType; scope: "private" | "group" }
 > = {
+  // Private message types
   60001: { type: "text", scope: "private" },
+  60002: { type: "image", scope: "private" },
+  60003: { type: "voice", scope: "private" },
+  60004: { type: "video", scope: "private" },
+  60005: { type: "file", scope: "private" },
+  // Group message types
   80001: { type: "text", scope: "group" },
+  80002: { type: "image", scope: "group" },
+  80003: { type: "voice", scope: "group" },
+  80004: { type: "video", scope: "group" },
+  80005: { type: "file", scope: "group" },
 };
 
 const DEFAULT_MAX_REQUEST_BODY_BYTES = 1024 * 1024;
@@ -203,20 +213,19 @@ export function normalizePayload(
   const typeCode = Number(data.type ?? data.msgType ?? 0);
   const mapping = WECHAT_TYPE_MAP[typeCode];
 
-  // For unmapped types, check if it looks like an image
   let msgType: WechatMessageType = "unknown";
   let scope: "private" | "group" = "private";
 
   if (mapping) {
     msgType = mapping.type;
     scope = mapping.scope;
-  } else if (typeCode >= 60002 && typeCode <= 60010) {
-    // Private media types
-    msgType = "image";
+  } else if (typeCode >= 60006 && typeCode <= 60010) {
+    // Unmapped private media — treat as file
+    msgType = "file";
     scope = "private";
-  } else if (typeCode >= 80002 && typeCode <= 80010) {
-    // Group media types
-    msgType = "image";
+  } else if (typeCode >= 80006 && typeCode <= 80010) {
+    // Unmapped group media — treat as file
+    msgType = "file";
     scope = "group";
   }
 
@@ -240,11 +249,11 @@ export function normalizePayload(
     ? String(data.roomName ?? data.groupName ?? threadId ?? "")
     : undefined;
 
-  // Image URL extraction
-  const imageUrl =
-    msgType === "image"
-      ? String(data.imageUrl ?? data.mediaUrl ?? data.url ?? "")
-      : undefined;
+  // Media URL extraction (images, voice, video, files)
+  const hasMedia = msgType === "image" || msgType === "voice" || msgType === "video" || msgType === "file";
+  const imageUrl = hasMedia
+    ? String(data.imageUrl ?? data.mediaUrl ?? data.url ?? data.fileUrl ?? "")
+    : undefined;
 
   return {
     id: msgId,
