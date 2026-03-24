@@ -23,7 +23,7 @@ while read local_ref local_sha remote_ref remote_sha; do
   done
 done
 
-# Run pre-review checks (any, @ts-ignore, secrets scan)
+# Run pre-review checks (any, ts-directive suppressions, secrets scan)
 # Skip if MILADY_SKIP_PRE_REVIEW=1 for emergency pushes
 if [ "${MILADY_SKIP_PRE_REVIEW:-0}" != "1" ]; then
   if command -v bun >/dev/null 2>&1; then

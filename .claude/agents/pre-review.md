@@ -16,7 +16,7 @@ bun run pre-review:local
 ```
 This runs `scripts/pre-review-local.mjs` which checks:
 - Net `any` type additions in diff
-- `@ts-ignore` / `@ts-nocheck` additions
+- TypeScript directive suppression (ts-ignore / ts-nocheck) additions
 - Secret-like tokens in added lines (API keys, tokens, passwords)
 
 ### 2. Biome lint + format
