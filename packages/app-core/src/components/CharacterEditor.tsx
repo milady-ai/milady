@@ -1047,6 +1047,8 @@ export function CharacterEditor({
   return (
     <div
       className="absolute inset-0 z-10 flex flex-col pointer-events-none pt-[4.5rem] px-6 pb-3 max-md:px-3 max-md:pb-2 max-md:pt-[4.5rem] [&>*]:pointer-events-auto"
+      data-no-camera-zoom="true"
+      data-no-camera-drag="true"
       onWheel={(e) => e.stopPropagation()}
     >
       <div
