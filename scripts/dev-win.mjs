@@ -4,6 +4,7 @@
  *
  * Usage:
  *   node scripts/dev-win.mjs [--ui-only]
+ *   node scripts/dev-win.mjs [--ui-only] [--preflight]
  */
 import { execSync } from "node:child_process";
 import { join, resolve } from "node:path";

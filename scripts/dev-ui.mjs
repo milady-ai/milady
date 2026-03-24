@@ -11,6 +11,7 @@
  * Usage:
  *   node scripts/dev-ui.mjs            # starts both API + UI
  *   node scripts/dev-ui.mjs --ui-only  # starts only the vite UI (API assumed running)
+ *   node scripts/dev-ui.mjs --preflight # startup sanity checks only (no long-running servers)
  */
 import { execSync, spawn } from "node:child_process";
 import {
@@ -97,6 +98,7 @@ if (bunVersionAdvisory) {
 
 const cwd = process.cwd();
 const uiOnly = process.argv.includes("--ui-only");
+const preflightOnly = process.argv.includes("--preflight");
 const devLogLevel =
   (process.env.ELIZA_DEV_LOG_LEVEL ?? process.env.LOG_LEVEL ?? "info")
     .trim()
@@ -1186,7 +1188,21 @@ function startVite() {
   });
 }
 
-if (uiOnly) {
+function runPreflightChecks() {
+  if (typeof JSON5?.parse !== "function") {
+    throw new Error(
+      "Preflight failed: JSON5.parse is unavailable. Check module export interop.",
+    );
+  }
+  console.log(`  ${green(logPrefix)} ${green("Preflight checks passed.")}`);
+  console.log(
+    `  ${green(logPrefix)} ${dim("Validated: module interop + startup script wiring.")}`,
+  );
+}
+
+if (preflightOnly) {
+  runPreflightChecks();
+} else if (uiOnly) {
   startVite();
 } else {
   console.log(`${orange(`\n${cliName} dev mode`)}\n`);
