@@ -168,3 +168,63 @@ Known test gap:
 ### If synthetic detail still appears
 - Next patch should force detail-route fallback to DB-backed trajectory source for that ID,
   even if list/source logger differs.
+
+## Latest Update (Action Execution + Todo Spam + Windows Dev)
+
+### 1) Chat action reliability patch (callback output now visible)
+- Root issue: wallet actions in `packages/agent/src/actions/*` returned text but did not emit callback payloads, so users saw narration like "checking..." without the actual balance/transfer result in chat.
+- Fixes:
+  - `CHECK_BALANCE` now emits callback events:
+    - success: `CHECK_BALANCE_RESPONSE`
+    - failure: `CHECK_BALANCE_FAILED`
+  - `TRANSFER_TOKEN` now emits callback events:
+    - success: `TRANSFER_TOKEN_SUCCESS`
+    - failure: `TRANSFER_TOKEN_FAILED`
+
+Files:
+- `packages/agent/src/actions/check-balance.ts`
+- `packages/agent/src/actions/transfer-token.ts`
+
+### 2) Malformed XML action recovery path already in API server
+- `generateChatResponse` contains defensive recovery for malformed XML action payloads and can execute parsed fallback actions when core callback path does not fire.
+- Added logging around callback firing and malformed payload recovery to make failures diagnosable.
+
+File:
+- `packages/agent/src/api/server.ts`
+
+### 3) Todo query spam containment (current state)
+- User reports repeated:
+  - `Error getting todos: Failed query ... from "todos"...`
+- Prior circuit-breaker based on thrown errors was insufficient because plugin-todo logs and swallows many DB failures internally.
+- Added hard default-off guards:
+  - Runtime plugin load:
+    - `@elizaos/plugin-todo` is removed unless `MILADY_ENABLE_TODO_PLUGIN=1`.
+  - API todo DB integration:
+    - todo DB service is skipped unless `MILADY_ENABLE_TODO_DB=1`.
+- This prevents recurring todo DB query attempts in default dev flow and reduces noisy logs.
+
+Files:
+- `packages/agent/src/runtime/eliza.ts`
+- `packages/agent/src/api/server.ts`
+
+### 4) Windows dev startup fix for no-localnet mode
+- `dev:no-localnet` updated to Windows-safe startup:
+  - uses `node scripts/dev-win.mjs` under env wrapper instead of invoking `scripts/rt.sh`.
+
+File:
+- `package.json`
+
+### Tests run after latest fixes (passing)
+- `bun test packages/agent/test/api-server.e2e.test.ts --filter "POST /api/chat"`
+- `bun test packages/agent/test/api-server.e2e.test.ts --filter "workbench CRUD"`
+- `bun test packages/agent/test/api-server.e2e.test.ts --filter "workbench"`
+
+### Required manual verification now
+1. Fully stop and restart Milady.
+2. In chat:
+   - ask for balance (`how much SOL is in your wallet?`) and verify actual balance result appears (not just narration).
+3. Watch terminal:
+   - confirm `Error getting todos ... from "todos"` does not repeat in normal workflow.
+4. If needed to re-enable todo plugin/db intentionally for debugging:
+   - `MILADY_ENABLE_TODO_PLUGIN=1`
+   - `MILADY_ENABLE_TODO_DB=1`

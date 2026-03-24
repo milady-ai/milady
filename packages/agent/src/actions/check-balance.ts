@@ -2,7 +2,7 @@
  * CHECK_BALANCE action - retrieves wallet balances across chains.
  */
 
-import type { Action, HandlerOptions } from "@elizaos/core";
+import type { Action, HandlerCallback, HandlerOptions } from "@elizaos/core";
 import type {
   EvmChainBalance,
   WalletBalancesResponse,
@@ -130,7 +130,7 @@ export const checkBalanceAction: Action = {
   description:
     "Check wallet balances across chains. Use this when a user asks about their balance, portfolio, holdings, or wallet contents.",
   validate: async () => true,
-  handler: async (_runtime, _message, _state, options) => {
+  handler: async (_runtime, _message, _state, options, callback?: HandlerCallback) => {
     try {
       const params = (options as HandlerOptions | undefined)?.parameters;
       const rawChain =
@@ -152,14 +152,14 @@ export const checkBalanceAction: Action = {
       );
 
       if (!response.ok) {
-        return {
-          text: `Failed to fetch wallet balances (HTTP ${response.status}).`,
-          success: false,
-        };
+        const text = `Failed to fetch wallet balances (HTTP ${response.status}).`;
+        if (callback) callback({ text, action: "CHECK_BALANCE_FAILED" });
+        return { text, success: false };
       }
 
       const data = (await response.json()) as WalletBalancesResponse;
       const text = formatBalances(data, chain);
+      if (callback) callback({ text, action: "CHECK_BALANCE_RESPONSE" });
 
       return {
         text,
@@ -175,10 +175,9 @@ export const checkBalanceAction: Action = {
         },
       };
     } catch (err) {
-      return {
-        text: `Failed to fetch wallet balances: ${err instanceof Error ? err.message : String(err)}`,
-        success: false,
-      };
+      const text = `Failed to fetch wallet balances: ${err instanceof Error ? err.message : String(err)}`;
+      if (callback) callback({ text, action: "CHECK_BALANCE_FAILED" });
+      return { text, success: false };
     }
   },
   parameters: [

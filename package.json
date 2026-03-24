@@ -77,7 +77,7 @@
     "check": "scripts/rt.sh run typecheck && scripts/rt.sh run lint",
     "db:check": "bunx vitest run packages/app-core/src/api/database.security.test.ts packages/app-core/src/api/database.readonly-query-guard.test.ts && bunx vitest run --config vitest.e2e.config.ts packages/agent/test/database-api.e2e.test.ts",
     "dev": "scripts/rt.sh scripts/dev-ui.mjs --name=milady",
-    "dev:no-localnet": "node scripts/run-with-env.mjs ELIZA_DEV_ONCHAIN=0 -- scripts/rt.sh scripts/dev-ui.mjs --name=milady",
+    "dev:no-localnet": "node scripts/run-with-env.mjs ELIZA_DEV_ONCHAIN=0 -- node scripts/dev-win.mjs --name=milady",
     "dev:ui": "scripts/rt.sh scripts/dev-ui.mjs --name=milady --ui-only",
     "dev:desktop": "bun scripts/dev-platform.mjs",
     "dev:desktop:watch": "MILADY_DESKTOP_VITE_WATCH=1 bun scripts/dev-platform.mjs",

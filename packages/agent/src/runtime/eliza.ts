@@ -740,6 +740,12 @@ export function findRuntimePluginExport(mod: PluginModuleShape): Plugin | null {
  */
 /** @internal Exported for testing. */
 export function collectPluginNames(config: ElizaConfig): Set<string> {
+  const todoPluginExplicitlyEnabled = (() => {
+    const raw = process.env.MILADY_ENABLE_TODO_PLUGIN;
+    if (!raw) return false;
+    const normalized = raw.trim().toLowerCase();
+    return normalized === "1" || normalized === "true" || normalized === "yes";
+  })();
   const shellPluginDisabled = config.features?.shellEnabled === false;
   const localEmbeddingsExplicitlyDisabled = (() => {
     const raw = process.env.ELIZA_DISABLE_LOCAL_EMBEDDINGS;
@@ -1025,6 +1031,9 @@ export function collectPluginNames(config: ElizaConfig): Set<string> {
   }
   if (isPluginExplicitlyDisabled("@elizaos/plugin-agent-orchestrator")) {
     pluginsToLoad.delete("@elizaos/plugin-agent-orchestrator");
+  }
+  if (!todoPluginExplicitlyEnabled) {
+    pluginsToLoad.delete("@elizaos/plugin-todo");
   }
 
   return pluginsToLoad;

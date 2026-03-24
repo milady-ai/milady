@@ -536,6 +536,8 @@ interface ServerState {
     string,
     import("../services/signal-pairing.js").SignalPairingSession
   >;
+  /** Circuit-breaker for plugin-todo DB calls after query failures. */
+  todoDataServiceDisabled: boolean;
 }
 
 interface ShareIngestItem {
@@ -3145,6 +3147,159 @@ function writeSseJson(
   writeSseData(res, JSON.stringify(payload), event);
 }
 
+type FallbackParsedAction = {
+  name: string;
+  parameters: Record<string, string>;
+};
+
+function inferBalanceChainFromText(input: string): "all" | "solana" | "bsc" | "base" | "ethereum" {
+  const normalized = input.toLowerCase();
+  if (/\bsol(?:ana)?\b/.test(normalized)) return "solana";
+  if (/\b(bsc|bnb|binance)\b/.test(normalized)) return "bsc";
+  if (/\bbase\b/.test(normalized)) return "base";
+  if (/\b(eth|ethereum)\b/.test(normalized)) return "ethereum";
+  return "all";
+}
+
+function shouldForceCheckBalanceFallback(
+  parsedActions: FallbackParsedAction[],
+  userText: string,
+  responseText: string,
+): boolean {
+  if (parsedActions.length === 0) return false;
+  const nonReplyActions = parsedActions.filter(
+    (a) => a.name !== "REPLY" && a.name !== "NONE" && a.name !== "IGNORE",
+  );
+  if (nonReplyActions.length > 0) return false;
+
+  const combined = `${userText}\n${responseText}`.toLowerCase();
+  const balanceIntent =
+    /\b(balance|wallet|holdings|portfolio|funds|how much)\b/.test(combined) ||
+    /\b(check(ing)?|look(ing)? up|fetch(ing)?)\b/.test(combined);
+  return balanceIntent;
+}
+
+function parseFallbackActionBlocks(value: unknown): FallbackParsedAction[] {
+  const rawValues: string[] = [];
+  if (typeof value === "string") {
+    rawValues.push(value);
+  } else if (Array.isArray(value)) {
+    for (const entry of value) {
+      if (typeof entry === "string" && entry.trim().length > 0) {
+        rawValues.push(entry);
+      }
+    }
+  }
+
+  const parsed: FallbackParsedAction[] = [];
+  for (const raw of rawValues) {
+    const xmlActionMatches = Array.from(
+      raw.matchAll(/<action\b[^>]*>([\s\S]*?)<\/action>/gi),
+    );
+    if (xmlActionMatches.length === 0) {
+      const normalized = raw.trim().toUpperCase();
+      if (/^[A-Z0-9_]+$/.test(normalized)) {
+        parsed.push({ name: normalized, parameters: {} });
+      }
+      continue;
+    }
+
+    for (const [, block = ""] of xmlActionMatches) {
+      const nameMatch = block.match(/<name>\s*([A-Za-z0-9_]+)\s*<\/name>/i);
+      if (!nameMatch) continue;
+      const params: Record<string, string> = {};
+      const paramsMatch = block.match(/<params>([\s\S]*?)<\/params>/i);
+      if (paramsMatch?.[1]) {
+        const paramPairs = paramsMatch[1].matchAll(
+          /<([A-Za-z_][A-Za-z0-9_-]*)>\s*([^<]+?)\s*<\/\1>/g,
+        );
+        for (const [, key, val] of paramPairs) {
+          params[key] = val.trim();
+        }
+      }
+      parsed.push({
+        name: nameMatch[1].trim().toUpperCase(),
+        parameters: params,
+      });
+    }
+  }
+
+  return parsed;
+}
+
+async function executeFallbackParsedActions(
+  runtime: AgentRuntime,
+  message: ReturnType<typeof createMessageMemory>,
+  parsedActions: FallbackParsedAction[],
+  appendIncomingText: (incoming: string) => void,
+  onActionCallback: (actionTag: string, hasText: boolean) => void,
+): Promise<void> {
+  const runtimeActions = Array.isArray((runtime as { actions?: unknown[] }).actions)
+    ? ((runtime as { actions: unknown[] }).actions as Array<{
+        name?: string;
+        similes?: string[];
+        validate?: (...args: unknown[]) => unknown;
+        handler?: (...args: unknown[]) => unknown;
+      }>)
+    : [];
+
+  const lookup = new Map<string, (typeof runtimeActions)[number]>();
+  for (const action of runtimeActions) {
+    if (typeof action.name === "string") {
+      lookup.set(action.name.toUpperCase(), action);
+    }
+    if (Array.isArray(action.similes)) {
+      for (const alias of action.similes) {
+        if (typeof alias === "string") {
+          lookup.set(alias.toUpperCase(), action);
+        }
+      }
+    }
+  }
+
+  for (const parsed of parsedActions) {
+    if (parsed.name === "REPLY" || parsed.name === "NONE" || parsed.name === "IGNORE") {
+      continue;
+    }
+    const action = lookup.get(parsed.name);
+    if (!action || typeof action.handler !== "function") continue;
+
+    if (typeof action.validate === "function") {
+      const valid = await Promise.resolve(
+        action.validate(runtime, message, undefined),
+      );
+      if (!valid) continue;
+    }
+
+    await Promise.resolve(
+      action.handler(
+        runtime,
+        message,
+        undefined,
+        { parameters: parsed.parameters },
+        async (content: unknown) => {
+          const contentRecord =
+            content && typeof content === "object"
+              ? (content as Record<string, unknown>)
+              : {};
+          const actionTag =
+            typeof contentRecord.action === "string"
+              ? contentRecord.action
+              : parsed.name;
+          const chunk =
+            contentRecord && typeof contentRecord === "object"
+              ? extractCompatTextContent(contentRecord as Content)
+              : "";
+          onActionCallback(actionTag, Boolean(chunk));
+          if (chunk) appendIncomingText(chunk);
+          return [];
+        },
+        [],
+      ),
+    );
+  }
+}
+
 async function generateChatResponse(
   runtime: AgentRuntime,
   message: ReturnType<typeof createMessageMemory>,
@@ -3208,6 +3363,7 @@ async function generateChatResponse(
         ReturnType<NonNullable<AgentRuntime["messageService"]>["handleMessage"]>
       >
     | undefined;
+  let actionCallbacksSeen = 0;
   let _handlerError: unknown = null;
   try {
     result = await runtime.messageService?.handleMessage(
@@ -3221,6 +3377,7 @@ async function generateChatResponse(
         // Trace action callback invocations so we can verify handlers execute.
         const actionTag = (content as Record<string, unknown>)?.action;
         if (actionTag) {
+          actionCallbacksSeen += 1;
           runtime.logger?.info(
             {
               src: "eliza-api",
@@ -3310,6 +3467,72 @@ async function generateChatResponse(
       },
       "[eliza-api] Chat response metadata",
     );
+
+    const parsedFallbackActions = parseFallbackActionBlocks(rc?.actions);
+    const userText = String(extractCompatTextContent(message.content) ?? "");
+    const modelText = String(extractCompatTextContent(result.responseContent) ?? "");
+    const fallbackActionsToRun = [...parsedFallbackActions];
+
+    if (
+      shouldForceCheckBalanceFallback(
+        fallbackActionsToRun,
+        userText,
+        modelText,
+      ) &&
+      !fallbackActionsToRun.some((a) => a.name === "CHECK_BALANCE")
+    ) {
+      fallbackActionsToRun.push({
+        name: "CHECK_BALANCE",
+        parameters: { chain: inferBalanceChainFromText(userText) },
+      });
+      runtime.logger?.warn(
+        {
+          src: "eliza-api",
+          inferredChain: inferBalanceChainFromText(userText),
+        },
+        "[eliza-api] Injecting CHECK_BALANCE fallback for REPLY-only malformed action payload",
+      );
+    }
+
+    const hasRawXmlActionPayload = Array.isArray(rc?.actions)
+      ? (rc?.actions as unknown[]).some(
+          (entry) => typeof entry === "string" && entry.includes("<action"),
+        )
+      : typeof rc?.actions === "string" && rc.actions.includes("<action");
+
+    // Core occasionally returns raw XML action blobs in a single action slot.
+    // In that case, tool actions are not reliably executed. Recover here by
+    // parsing and executing non-REPLY actions directly.
+    if (
+      actionCallbacksSeen === 0 &&
+      hasRawXmlActionPayload &&
+      fallbackActionsToRun.length > 0
+    ) {
+      runtime.logger?.warn(
+        {
+          src: "eliza-api",
+          parsedActions: fallbackActionsToRun.map((a) => a.name),
+        },
+        "[eliza-api] Recovering from malformed XML action payload",
+      );
+      await executeFallbackParsedActions(
+        runtime,
+        message,
+        fallbackActionsToRun,
+        appendIncomingText,
+        (actionTag, hasText) => {
+          actionCallbacksSeen += 1;
+          runtime.logger?.info(
+            {
+              src: "eliza-api",
+              action: actionTag,
+              hasText,
+            },
+            `[eliza-api] Action callback fired: ${actionTag}`,
+          );
+        },
+      );
+    }
   }
 
   const resultText = extractCompatTextContent(result?.responseContent);
@@ -6117,6 +6340,31 @@ function normalizeTags(value: unknown, required: string[] = []): string[] {
 async function getTodoDataService(
   runtime: AgentRuntime,
 ): Promise<TodoDataServiceLike | null> {
+  const todoDbExplicitlyEnabled = (() => {
+    const raw = process.env.MILADY_ENABLE_TODO_DB;
+    if (!raw) return false;
+    const normalized = raw.trim().toLowerCase();
+    return normalized === "1" || normalized === "true" || normalized === "yes";
+  })();
+  if (!todoDbExplicitlyEnabled) {
+    return null;
+  }
+
+  const runtimeDb =
+    runtime && typeof runtime === "object"
+      ? (runtime as Record<string, unknown>).db
+      : null;
+  const hasTodoDb =
+    runtimeDb &&
+    typeof runtimeDb === "object" &&
+    typeof (runtimeDb as Record<string, unknown>).select === "function" &&
+    typeof (runtimeDb as Record<string, unknown>).insert === "function" &&
+    typeof (runtimeDb as Record<string, unknown>).update === "function" &&
+    typeof (runtimeDb as Record<string, unknown>).delete === "function";
+  if (!hasTodoDb) {
+    return null;
+  }
+
   try {
     const todoModule = (await import("@elizaos/plugin-todo")) as Record<
       string,
@@ -6130,6 +6378,31 @@ async function getTodoDataService(
   } catch {
     return null;
   }
+}
+
+function shouldDisableTodoDataServiceFromError(err: unknown): boolean {
+  if (!(err instanceof Error)) return false;
+  const msg = err.message.toLowerCase();
+  return (
+    msg.includes("failed query") ||
+    msg.includes('from "todos"') ||
+    msg.includes('relation "todos"') ||
+    msg.includes("no such table") ||
+    msg.includes("db.select")
+  );
+}
+
+function markTodoDataServiceDisabled(state: ServerState, err: unknown): void {
+  if (state.todoDataServiceDisabled) return;
+  if (!shouldDisableTodoDataServiceFromError(err)) return;
+  state.todoDataServiceDisabled = true;
+  logger.warn(
+    {
+      src: "eliza-api",
+      error: err instanceof Error ? err.message : String(err),
+    },
+    "[eliza-api] Disabling plugin-todo DB access for this runtime due to query failures",
+  );
 }
 
 function toWorkbenchTodoFromRecord(
@@ -15061,7 +15334,9 @@ async function handleRequest(
       }
 
       try {
-        todoData = await getTodoDataService(state.runtime);
+        todoData = state.todoDataServiceDisabled
+          ? null
+          : await getTodoDataService(state.runtime);
         if (todoData) {
           const dbTodos = await todoData.getTodos({
             agentId: state.runtime.agentId,
@@ -15074,7 +15349,8 @@ async function handleRequest(
             }
           }
         }
-      } catch {
+      } catch (err) {
+        markTodoDataServiceDisabled(state, err);
         // plugin todo unavailable or errored; keep fallback todos
       }
 
@@ -15266,7 +15542,9 @@ async function handleRequest(
       .map((task) => toWorkbenchTodo(task))
       .filter((todo): todo is WorkbenchTodoView => todo !== null)
       .sort((a, b) => a.name.localeCompare(b.name));
-    const todoData = await getTodoDataService(state.runtime);
+    const todoData = state.todoDataServiceDisabled
+      ? null
+      : await getTodoDataService(state.runtime);
     if (todoData) {
       try {
         const dbTodos = await todoData.getTodos({
@@ -15286,7 +15564,8 @@ async function handleRequest(
           }
         }
         todos.sort((a, b) => a.name.localeCompare(b.name));
-      } catch {
+      } catch (err) {
+        markTodoDataServiceDisabled(state, err);
         // fallback to task-backed todos only
       }
     }
@@ -15325,7 +15604,9 @@ async function handleRequest(
         ? body.type.trim()
         : "task";
 
-    const todoData = await getTodoDataService(state.runtime);
+    const todoData = state.todoDataServiceDisabled
+      ? null
+      : await getTodoDataService(state.runtime);
     if (todoData) {
       try {
         const now = Date.now();
@@ -15365,7 +15646,8 @@ async function handleRequest(
           json(res, { todo: mappedDbTodo }, 201);
           return;
         }
-      } catch {
+      } catch (err) {
+        markTodoDataServiceDisabled(state, err);
         // fallback to task-backed todo creation
       }
     }
@@ -15413,7 +15695,9 @@ async function handleRequest(
     const body = await readJsonBody<{ isCompleted?: boolean }>(req, res);
     if (!body) return;
     const isCompleted = body.isCompleted === true;
-    const todoData = await getTodoDataService(state.runtime);
+    const todoData = state.todoDataServiceDisabled
+      ? null
+      : await getTodoDataService(state.runtime);
     if (todoData) {
       try {
         const updated = await todoData.updateTodo(decodedTodoId, {
@@ -15425,7 +15709,8 @@ async function handleRequest(
           return;
         }
         // updateTodo returned false — fall through to task-backed path
-      } catch {
+      } catch (err) {
+        markTodoDataServiceDisabled(state, err);
         // fallback to task-backed path
       }
     }
@@ -15459,7 +15744,9 @@ async function handleRequest(
     }
     const decodedTodoId = decodePathComponent(todoItemMatch[1], res, "todo id");
     if (!decodedTodoId) return;
-    const todoData = await getTodoDataService(state.runtime);
+    const todoData = state.todoDataServiceDisabled
+      ? null
+      : await getTodoDataService(state.runtime);
 
     if (method === "GET" && todoData) {
       try {
@@ -15469,7 +15756,8 @@ async function handleRequest(
           json(res, { todo: mapped });
           return;
         }
-      } catch {
+      } catch (err) {
+        markTodoDataServiceDisabled(state, err);
         // fallback to task-backed path
       }
     }
@@ -15492,7 +15780,8 @@ async function handleRequest(
           json(res, { ok: true });
           return;
         }
-      } catch {
+      } catch (err) {
+        markTodoDataServiceDisabled(state, err);
         // fallback to task-backed path
       }
     }
@@ -15556,7 +15845,8 @@ async function handleRequest(
           json(res, { todo: refreshedMapped });
           return;
         }
-      } catch {
+      } catch (err) {
+        markTodoDataServiceDisabled(state, err);
         // fallback to task-backed path
       }
     }
@@ -16719,6 +17009,7 @@ export async function startApiServer(opts?: {
     pendingRestartReasons: [],
     connectorRouteHandlers: [],
     connectorHealthMonitor: null,
+    todoDataServiceDisabled: false,
   };
 
   // Closure-captured refs for auto-TTS triggering in the event pipeline.
