@@ -5428,11 +5428,6 @@ function ensureWalletKeysInEnvAndConfig(config: ElizaConfig): boolean {
 // Trade permission helpers (exported for use by awareness contributors)
 // ---------------------------------------------------------------------------
 
-export type TradePermissionMode =
-  | "user-sign-only"
-  | "manual-local-key"
-  | "agent-auto";
-
 /**
  * Resolve the active trade permission mode from config.
  * Falls back to "user-sign-only" when not configured.
@@ -5456,52 +5451,24 @@ export function resolveTradePermissionMode(
  * Maximum number of autonomous agent trades allowed per calendar day.
  * Acts as a safety rail when `agent-auto` mode is enabled.
  */
-export const AGENT_AUTO_MAX_DAILY_TRADES = 25;
+// Trade safety utilities (defined in trade-safety.ts for testability)
+import {
+  type TradePermissionMode,
+  assertQuoteFresh,
+  canUseLocalTradeExecution,
+  recordAgentAutoTrade,
+} from "./trade-safety.js";
 
-/** Tracks autonomous trade count for rate-limiting in agent-auto mode. */
-const agentAutoDailyTrades = { count: 0, resetDate: "" };
-
-function getAgentAutoTradeDate(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function recordAgentAutoTrade(): boolean {
-  const today = getAgentAutoTradeDate();
-  if (agentAutoDailyTrades.resetDate !== today) {
-    agentAutoDailyTrades.count = 0;
-    agentAutoDailyTrades.resetDate = today;
-  }
-  if (agentAutoDailyTrades.count >= AGENT_AUTO_MAX_DAILY_TRADES) {
-    logger.warn(
-      `[trade] Agent-auto daily trade limit reached (${AGENT_AUTO_MAX_DAILY_TRADES}). Rejecting autonomous trade.`,
-    );
-    return false;
-  }
-  agentAutoDailyTrades.count += 1;
-  logger.warn(
-    `[trade] Agent-auto autonomous trade ${agentAutoDailyTrades.count}/${AGENT_AUTO_MAX_DAILY_TRADES} for ${today}`,
-  );
-  return true;
-}
-
-/**
- * Returns true if local-key execution is permitted for the given actor.
- * @param mode    The resolved trade permission mode.
- * @param isAgent True when the caller is the agent (autonomous), false for user-initiated flows.
- */
-export function canUseLocalTradeExecution(
-  mode: TradePermissionMode,
-  isAgent: boolean,
-): boolean {
-  if (mode === "agent-auto") {
-    if (isAgent) {
-      return recordAgentAutoTrade();
-    }
-    return true;
-  }
-  if (mode === "manual-local-key") return !isAgent;
-  return false;
-}
+export {
+  AGENT_AUTO_MAX_DAILY_TRADES,
+  QUOTE_MAX_AGE_MS,
+  type TradePermissionMode,
+  agentAutoDailyTrades,
+  assertQuoteFresh,
+  canUseLocalTradeExecution,
+  getAgentAutoTradeDate,
+  recordAgentAutoTrade,
+} from "./trade-safety.js";
 
 // ---------------------------------------------------------------------------
 // Automation & agent permission helpers
@@ -12844,10 +12811,7 @@ async function handleRequest(
       );
 
       // Check quote freshness before executing
-      const QUOTE_MAX_AGE_MS = 60_000; // 60 seconds
-      if (quote.quotedAt && Date.now() - quote.quotedAt > QUOTE_MAX_AGE_MS) {
-        throw new Error("Quote expired — please request a fresh quote");
-      }
+      assertQuoteFresh(quote.quotedAt);
 
       const nonce = await provider.getTransactionCount(
         wallet.address,
