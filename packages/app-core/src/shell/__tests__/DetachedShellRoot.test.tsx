@@ -72,6 +72,7 @@ function appState(overrides: Record<string, unknown> = {}) {
     onboardingLoading: false,
     retryStartup: vi.fn(),
     startupError: null,
+    t: (key: string) => key,
     ...overrides,
   };
 }
@@ -92,7 +93,7 @@ describe("DetachedShellRoot", () => {
     expect(skipLink?.[0].props.className).toContain("sr-only");
   });
 
-  it("renders a main element with role=main and id", async () => {
+  it("renders a main element with id (implicit role)", async () => {
     mockUseApp.mockReturnValue(appState());
     let tree: ReactTestRenderer | undefined;
     await act(async () => {
@@ -104,10 +105,11 @@ describe("DetachedShellRoot", () => {
       (node) => node.type === "main" && node.props.id === "detached-main",
     );
     expect(main?.length).toBe(1);
-    expect(main?.[0].props.role).toBe("main");
+    // No explicit role="main" — <main> carries it implicitly
+    expect(main?.[0].props.role).toBeUndefined();
   });
 
-  it("wraps ConversationsSidebar in nav with role=navigation", async () => {
+  it("wraps ConversationsSidebar in nav with translated aria-label", async () => {
     mockUseApp.mockReturnValue(appState());
     let tree: ReactTestRenderer | undefined;
     await act(async () => {
@@ -116,8 +118,10 @@ describe("DetachedShellRoot", () => {
       );
     });
     const navs = tree?.root.findAll(
-      (node) => node.type === "nav" && node.props.role === "navigation",
+      (node) => node.type === "nav" && node.props["aria-label"],
     );
     expect(navs?.length).toBeGreaterThanOrEqual(1);
+    // aria-label should come from t(), not hardcoded English
+    expect(navs?.[0].props["aria-label"]).toBe("chat.conversations");
   });
 });

@@ -56,9 +56,10 @@ function DetachedSettingsSectionView({
 }
 
 function DetachedChatView(): JSX.Element {
+  const { t } = useApp();
   return (
     <div className="flex flex-1 min-h-0 relative">
-      <nav role="navigation" aria-label="Conversations">
+      <nav aria-label={t("chat.conversations")}>
         <ConversationsSidebar />
       </nav>
       <div className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden pt-3 px-3 xl:px-5">
@@ -156,7 +157,6 @@ export function DetachedShellRoot({
       </a>
       <main
         id="detached-main"
-        role="main"
         className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
       >
         <DetachedShellContent route={route} />
