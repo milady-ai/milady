@@ -24,7 +24,7 @@ Milady ships with native **BNB Smart Chain (BSC)** support — your agent can tr
 
 The built-in `EXECUTE_TRADE` action lets your agent swap tokens on BSC via PancakeSwap. Supports buy/sell with configurable slippage.
 
-To enable BSC trading, add to your `.env` or `~/.eliza/.env`:
+To enable BSC trading, add to your `.env` or `~/.milady/.env`:
 
 ```bash
 EVM_PRIVATE_KEY=0x...                    # wallet private key (hex, 0x-prefixed)
@@ -235,7 +235,7 @@ Recommended server environment:
 export MILADY_API_BIND=0.0.0.0
 export MILADY_API_TOKEN="$(openssl rand -hex 32)"
 export MILADY_ALLOWED_ORIGINS="https://app.milady.ai,https://milady.ai,https://elizacloud.ai,https://www.elizacloud.ai"
-milady start --headless
+milady start
 ```
 
 The access key the user enters in onboarding is the value of `MILADY_API_TOKEN`.
@@ -286,10 +286,10 @@ The implementation and proxy runbook lives in [docs/eliza-cloud-deployment.md](d
 ## Terminal Commands
 
 ```bash
-milady                    # start (default)
-milady start              # same thing
-milady start --headless   # no browser popup
-milady start --verbose    # debug mode for when things break
+milady                    # start (interactive, opens dashboard)
+milady start              # server-only mode (API server, no interactive chat loop)
+milady --verbose          # enable informational runtime logs
+milady --debug            # enable debug-level runtime logs
 ```
 
 ### Setup & Config
@@ -375,15 +375,15 @@ When running, milady shows a live terminal interface:
 | `?` | show help |
 | `↑/↓` | scroll activity |
 
-### Headless mode
+### Server-only mode
 
-Don't want the TUI? Run headless:
+Don't want the interactive TUI? Use the `start` command, which runs in server-only mode (API server, no interactive chat loop):
 
 ```bash
-milady start --headless
+milady start
 ```
 
-Logs go to `stdout/stderr (or configure LOG_FILE)`. Daemonize with your favorite process manager.
+Logs go to `stdout/stderr`. Daemonize with your favorite process manager.
 
 ---
 
@@ -423,7 +423,7 @@ MILADY_GATEWAY_PORT=19000 MILADY_PORT=3000 milady start
 
 ## Config
 
-Lives at `~/.eliza/eliza.json` (override with `ELIZA_CONFIG_PATH` or `ELIZA_STATE_DIR`)
+Lives at `~/.milady/milady.json` (override with `MILADY_CONFIG_PATH` or `MILADY_STATE_DIR`)
 
 ```json5
 {
@@ -437,7 +437,7 @@ Lives at `~/.eliza/eliza.json` (override with `ELIZA_CONFIG_PATH` or `ELIZA_STAT
 }
 ```
 
-Or use `~/.eliza/.env` for secrets.
+Or use `~/.milady/.env` for secrets.
 
 ---
 
@@ -475,7 +475,7 @@ ollama pull gemma3:4b
 
 > **⚠️ Known issue:** The `@elizaos/plugin-ollama` has an SDK version incompatibility with the current AI SDK. Use Ollama's **OpenAI-compatible endpoint** as a workaround:
 
-Edit `~/.eliza/eliza.json`:
+Edit `~/.milady/milady.json`:
 
 ```json5
 {

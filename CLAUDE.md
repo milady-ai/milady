@@ -76,9 +76,9 @@ The try/catch blocks in `apps/app/electrobun/src/native/agent.ts` keep the deskt
 
 ## Config
 
-- **Runtime config**: `~/.eliza/eliza.json` (or `ELIZA_CONFIG_PATH` / `ELIZA_STATE_DIR`)
-- **Env secrets**: `~/.eliza/.env` or project `.env`
-- **Namespace**: The CLI auto-detects "milady" from package.json name
+- **Runtime config**: `~/.milady/milady.json` (override with `MILADY_CONFIG_PATH` or `MILADY_STATE_DIR`; falls back to `ELIZA_CONFIG_PATH` / `ELIZA_STATE_DIR`)
+- **Env secrets**: `~/.milady/.env` or project `.env`
+- **Namespace**: The CLI sets `ELIZA_NAMESPACE=milady` (via `run-node.mjs` and `dev-ui.mjs`), so the state dir is `~/.milady/` and the config file is `milady.json`
 
 ## Code Standards
 
@@ -117,7 +117,7 @@ All `@elizaos/*` packages use the `alpha` dist-tag. When developing locally, `bu
 - **Plugin not found at runtime**: Ensure NODE_PATH is set. Run `bun run repair` to re-run postinstall.
 - **Stale Vite cache after patching deps**: run `MILADY_VITE_FORCE=1 bun run dev` (or delete `apps/app/.vite/`). Dev no longer passes `--force` by default so dependency pre-bundling can cache between runs.
 - **Cold rebuild / stuck artifacts**: `bun run clean` removes root `dist`, UI + Capacitor plugin `dist`, `apps/app/.vite`, Turbo, Foundry test `out/`/`cache`, Playwright output, and `node_modules/.cache` under main workspaces. `bun run clean:deep` also removes Electrobun `build/`/`artifacts/` and generated `preload.js`, plus Electron pack dirs. For a global Bun store wipe (affects all projects): `MILADY_CLEAN_GLOBAL_TOOL_CACHE=1 bun run clean`.
-- **Config file not found**: The actual path is `~/.eliza/eliza.json`, not `~/.milady/milady.json`.
+- **Config file not found**: The actual path is `~/.milady/milady.json` (because `ELIZA_NAMESPACE=milady`). The generic eliza default `~/.eliza/eliza.json` does not apply when running as Milady.
 - **Lock file blocking install**: If postinstall times out with a lock error, delete `.eliza-repo-setup.lock` in the repo root.
 
 ## Setup Environment Variables

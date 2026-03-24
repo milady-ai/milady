@@ -46,7 +46,7 @@ export const STREAMING_PLUGINS: Record<string, string> = {
 
 const PROVIDER_PLUGINS: Record<string, string> = {
   "google-antigravity": "@elizaos/plugin-google-antigravity",
-  "google-gemini": "@elizaos/plugin-google-gemini",
+  "google-genai": "@elizaos/plugin-google-genai",
   "vercel-ai-gateway": "@elizaos/plugin-vercel-ai-gateway",
   openai: "@elizaos/plugin-openai",
   anthropic: "@elizaos/plugin-anthropic",
@@ -71,8 +71,8 @@ export const AUTH_PROVIDER_PLUGINS: Record<string, string> = {
   OPENAI_API_KEY: "@elizaos/plugin-openai",
   AI_GATEWAY_API_KEY: "@elizaos/plugin-vercel-ai-gateway",
   AIGATEWAY_API_KEY: "@elizaos/plugin-vercel-ai-gateway",
-  GOOGLE_API_KEY: "@elizaos/plugin-google-gemini",
-  GOOGLE_GENERATIVE_AI_API_KEY: "@elizaos/plugin-google-gemini",
+  GOOGLE_API_KEY: "@elizaos/plugin-google-genai",
+  GOOGLE_GENERATIVE_AI_API_KEY: "@elizaos/plugin-google-genai",
   GOOGLE_CLOUD_API_KEY: "@elizaos/plugin-google-antigravity",
   GROQ_API_KEY: "@elizaos/plugin-groq",
   XAI_API_KEY: "@elizaos/plugin-xai",
