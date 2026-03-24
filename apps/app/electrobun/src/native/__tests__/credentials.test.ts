@@ -112,7 +112,7 @@ describe("scanProviderCredentials", () => {
       {
         id: "openai",
         source: "codex-auth",
-        apiKey: "sk-openai",
+        apiKey: "****enai",
         authMode: "chatgpt",
         cliInstalled: true,
         status: "unchecked",
@@ -138,7 +138,7 @@ describe("scanProviderCredentials", () => {
       {
         id: "anthropic-subscription",
         source: "claude-credentials",
-        apiKey: "claude-oauth-token",
+        apiKey: "****oken",
         authMode: "oauth",
         cliInstalled: true,
         status: "unchecked",
@@ -174,7 +174,7 @@ describe("scanProviderCredentials", () => {
       {
         id: "openai",
         source: "codex-auth",
-        apiKey: "file-openai",
+        apiKey: "****enai",
         authMode: "api-key",
         cliInstalled: true,
         status: "unchecked",
@@ -182,7 +182,7 @@ describe("scanProviderCredentials", () => {
       {
         id: "anthropic-subscription",
         source: "claude-credentials",
-        apiKey: "file-anthropic",
+        apiKey: "****opic",
         authMode: "oauth",
         cliInstalled: true,
         status: "unchecked",
@@ -190,7 +190,7 @@ describe("scanProviderCredentials", () => {
       {
         id: "anthropic",
         source: "env",
-        apiKey: "env-anthropic",
+        apiKey: "****opic",
         authMode: "api-key",
         cliInstalled: false,
         status: "unchecked",
@@ -218,7 +218,7 @@ describe("scanProviderCredentials", () => {
       {
         id: "anthropic-subscription",
         source: "keychain",
-        apiKey: "keychain-oauth-token",
+        apiKey: "****oken",
         authMode: "oauth",
         cliInstalled: true,
         status: "unchecked",
@@ -226,7 +226,7 @@ describe("scanProviderCredentials", () => {
       {
         id: "openai",
         source: "env",
-        apiKey: "env-openai",
+        apiKey: "****enai",
         authMode: "api-key",
         cliInstalled: false,
         status: "unchecked",
@@ -257,7 +257,7 @@ describe("scanProviderCredentials", () => {
       {
         id: "anthropic-subscription",
         source: "keychain",
-        apiKey: "raw-keychain-token",
+        apiKey: "****oken",
         authMode: "oauth",
         cliInstalled: false,
         status: "unchecked",
@@ -285,7 +285,7 @@ describe("scanProviderCredentials", () => {
       {
         id: "anthropic-subscription",
         source: "keychain",
-        apiKey: "nested-keychain-token",
+        apiKey: "****oken",
         authMode: "oauth",
         cliInstalled: true,
         status: "unchecked",
@@ -322,7 +322,7 @@ describe("scanProviderCredentials", () => {
       {
         id: "openai",
         source: "env",
-        apiKey: "env-openai",
+        apiKey: "****enai",
         authMode: "api-key",
         cliInstalled: false,
         status: "unchecked",
@@ -330,7 +330,7 @@ describe("scanProviderCredentials", () => {
       {
         id: "anthropic",
         source: "env",
-        apiKey: "env-anthropic",
+        apiKey: "****opic",
         authMode: "api-key",
         cliInstalled: false,
         status: "unchecked",
@@ -513,7 +513,7 @@ describe("scanProviderCredentials — env var detection", () => {
     const groq = providers.find((p) => p.id === "groq");
     expect(groq).toBeDefined();
     expect(groq?.source).toBe("env");
-    expect(groq?.apiKey).toBe("gsk-test-groq");
+    expect(groq?.apiKey).toBe("****groq");
     expect(groq?.authMode).toBe("api-key");
   });
 
@@ -523,7 +523,7 @@ describe("scanProviderCredentials — env var detection", () => {
     const google = providers.find((p) => p.id === "google-genai");
     expect(google).toBeDefined();
     expect(google?.source).toBe("env");
-    expect(google?.apiKey).toBe("AIza-test-google");
+    expect(google?.apiKey).toBe("****ogle");
   });
 
   it("detects OPENROUTER_API_KEY as provider 'openrouter'", async () => {
@@ -532,7 +532,7 @@ describe("scanProviderCredentials — env var detection", () => {
     const openrouter = providers.find((p) => p.id === "openrouter");
     expect(openrouter).toBeDefined();
     expect(openrouter?.source).toBe("env");
-    expect(openrouter?.apiKey).toBe("sk-or-test-openrouter");
+    expect(openrouter?.apiKey).toBe("****uter");
   });
 
   it("detects XAI_API_KEY as provider 'xai'", async () => {
@@ -541,7 +541,7 @@ describe("scanProviderCredentials — env var detection", () => {
     const xai = providers.find((p) => p.id === "xai");
     expect(xai).toBeDefined();
     expect(xai?.source).toBe("env");
-    expect(xai?.apiKey).toBe("xai-test-key");
+    expect(xai?.apiKey).toBe("****-key");
   });
 
   it("detects AI_GATEWAY_API_KEY as provider 'vercel-ai-gateway'", async () => {
@@ -550,7 +550,7 @@ describe("scanProviderCredentials — env var detection", () => {
     const gateway = providers.find((p) => p.id === "vercel-ai-gateway");
     expect(gateway).toBeDefined();
     expect(gateway?.source).toBe("env");
-    expect(gateway?.apiKey).toBe("ag-test-key");
+    expect(gateway?.apiKey).toBe("****-key");
   });
 
   it("detects AIGATEWAY_API_KEY as provider 'vercel-ai-gateway' (alias)", async () => {
@@ -559,7 +559,7 @@ describe("scanProviderCredentials — env var detection", () => {
     const gateway = providers.find((p) => p.id === "vercel-ai-gateway");
     expect(gateway).toBeDefined();
     expect(gateway?.source).toBe("env");
-    expect(gateway?.apiKey).toBe("aig-alias-key");
+    expect(gateway?.apiKey).toBe("****-key");
   });
 
   it("deduplicates provider IDs from different env vars (first wins)", async () => {
@@ -568,7 +568,7 @@ describe("scanProviderCredentials — env var detection", () => {
     const providers = await scanProviderCredentials();
     const gateways = providers.filter((p) => p.id === "vercel-ai-gateway");
     expect(gateways).toHaveLength(1);
-    expect(gateways[0].apiKey).toBe("first-gateway-key");
+    expect(gateways[0].apiKey).toBe("****-key");
   });
 
   it("detects multiple env providers simultaneously", async () => {
