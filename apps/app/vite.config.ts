@@ -766,7 +766,7 @@ export default defineConfig({
     },
     proxy: {
       "/api": {
-        target: `http://localhost:${apiPort}`,
+        target: `http://127.0.0.1:${apiPort}`,
         changeOrigin: true,
         configure: (proxy) => {
           proxy.on("error", (_err, _req, res) => {
@@ -778,7 +778,7 @@ export default defineConfig({
         },
       },
       "/ws": {
-        target: `ws://localhost:${apiPort}`,
+        target: `ws://127.0.0.1:${apiPort}`,
         ws: true,
       },
     },
