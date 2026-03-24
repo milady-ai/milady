@@ -101,6 +101,7 @@
     "postinstall": "node scripts/run-repo-setup.mjs",
     "pre-commit:local": "bun scripts/pre-commit-review.mjs",
     "pre-review:local": "bun scripts/pre-review-local.mjs",
+    "review:local": "bun scripts/review-local-agent.mjs",
     "prepack": "scripts/rt.sh run build",
     "prepare": "node -e \"try{require('child_process').execSync('git config core.hooksPath git-hooks',{stdio:'ignore'})}catch{}\"",
     "publish:plugins:next": "cd plugins && bun run publish:next",

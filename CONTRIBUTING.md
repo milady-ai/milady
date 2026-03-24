@@ -91,7 +91,14 @@ Milady uses repo-managed hooks (`git config core.hooksPath git-hooks`) to enforc
 - **pre-commit** runs `bun run pre-commit:local` and blocks commits when:
   - your branch is behind `origin/develop`,
   - behavioral source files are staged without staged tests.
-- **pre-push** runs `bun run pre-review:local` and blocks unsafe pushes.
+- **pre-push** runs `bun run review:local` and blocks unsafe pushes.
+  - This script prints the same 6-line review contract used by the GitHub agent review workflow:
+    - Classification
+    - Scope verdict
+    - Code quality
+    - Security
+    - Tests
+    - Decision
 
 Bypass is available for emergencies only:
 
