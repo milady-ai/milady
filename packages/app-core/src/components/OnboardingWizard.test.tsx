@@ -143,6 +143,38 @@ describe("OnboardingWizard", () => {
     });
   });
 
+  it("pins onboarding to viewport and uses side-by-side overlay layout", async () => {
+    mockUseApp.mockReturnValue({
+      onboardingStep: "hosting",
+      selectedVrmIndex: 1,
+      customVrmUrl: "",
+      uiLanguage: "en",
+      uiTheme: "dark",
+      setState: vi.fn(),
+      t: (key: string) => key,
+      onboardingUiRevealNonce: 0,
+      companionVrmPowerMode: "balanced",
+      companionHalfFramerateMode: "when_saving_power",
+      companionAnimateWhenHidden: false,
+    });
+
+    let tree: ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(<OnboardingWizard />);
+    });
+
+    const root = tree?.root.findByType("div");
+    expect(root?.props.className).toContain("fixed");
+    expect(root?.props.className).toContain("inset-0");
+    expect(root?.props.className).toContain("overflow-hidden");
+
+    const layout = tree?.root.findByProps({
+      "data-testid": "onboarding-overlay-layout",
+    });
+    expect(layout?.props.className).toContain("justify-between");
+    expect(layout?.props.className).toContain("items-center");
+  });
+
   describe("onboarding overlay reveal fallback", () => {
     beforeEach(() => {
       vi.useFakeTimers();

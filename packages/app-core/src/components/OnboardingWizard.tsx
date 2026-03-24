@@ -103,7 +103,7 @@ export function OnboardingWizard() {
   }
 
   return (
-    <div className="onboarding-screen">
+    <div className="onboarding-screen fixed inset-0 overflow-hidden">
       {/* Keep browser E2E runs lightweight and deterministic by skipping VRM boot. */}
       {disableVrm ? (
         <div
@@ -235,10 +235,15 @@ export function OnboardingWizard() {
           </div>
         ) : (
           <div className="absolute inset-0 z-20 pointer-events-none [&>*]:pointer-events-auto">
-            <OnboardingStepNav />
-            <OnboardingPanel step={onboardingStep}>
-              {renderStep()}
-            </OnboardingPanel>
+            <div
+              className="flex h-full w-full items-center justify-between max-md:flex-col max-md:items-stretch max-md:justify-start"
+              data-testid="onboarding-overlay-layout"
+            >
+              <OnboardingStepNav />
+              <OnboardingPanel step={onboardingStep}>
+                {renderStep()}
+              </OnboardingPanel>
+            </div>
           </div>
         )}
       </div>
