@@ -12,7 +12,9 @@ const BIOME_CRASHER_PATHS = new Set([
 ]);
 
 const BIOME_ROOTS = ["src", "scripts", "apps"];
-const BIOME_CHUNK_SIZE = 200;
+// Windows shell invocations hit command length limits quickly. Keep chunks
+// smaller there so `bunx biome check` can run reliably in pre-review hooks.
+const BIOME_CHUNK_SIZE = process.platform === "win32" ? 40 : 200;
 
 function getBiomeFiles() {
   const output = execFileSync(
