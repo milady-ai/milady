@@ -39,6 +39,7 @@ import {
   patchPtyManagerEsmDirnameCompat,
   warnStaleBunCache,
 } from "./lib/patch-bun-exports.mjs";
+import { patchElizaCoreClientChatEvaluate } from "./lib/patch-eliza-core-client-chat-eval.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
@@ -84,6 +85,7 @@ patchPtyManagerEsmDirnameCompat(root);
 patchPtyManagerCursorPositionCompat(root);
 patchCodexFolderApprovalPromptCompat(root);
 patchBrokenElizaCoreRuntimeDists(root);
+patchElizaCoreClientChatEvaluate(root);
 try {
   patchAutonomousMiladyOnboardingPresets(root);
 } catch {

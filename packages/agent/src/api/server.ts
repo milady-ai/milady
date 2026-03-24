@@ -115,6 +115,10 @@ import {
 } from "../services/skill-marketplace.js";
 import { streamManager } from "../services/stream-manager.js";
 import {
+  isFatalTodoDbError,
+  TodoDbCircuitBreaker,
+} from "./todo-db-circuit.js";
+import {
   sanitizeAccountId as sanitizeWhatsAppAccountId,
   WhatsAppPairingSession,
   whatsappAuthExists,
@@ -6422,6 +6426,10 @@ function normalizeTags(value: unknown, required: string[] = []): string[] {
 async function getTodoDataService(
   runtime: AgentRuntime,
 ): Promise<TodoDataServiceLike | null> {
+  const runtimeKey = String(runtime.agentId ?? "unknown");
+  if (todoDbCircuitBreaker.isOpen(runtimeKey)) {
+    return null;
+  }
   try {
     const todoModule = (await import("@elizaos/plugin-todo")) as Record<
       string,
@@ -6435,6 +6443,27 @@ async function getTodoDataService(
   } catch {
     return null;
   }
+}
+
+const todoDbCircuitBreaker = new TodoDbCircuitBreaker();
+
+function recordTodoDbFailure(
+  runtime: AgentRuntime,
+  operation: string,
+  err: unknown,
+): void {
+  if (!isFatalTodoDbError(err)) return;
+  const runtimeKey = String(runtime.agentId ?? "unknown");
+  if (!todoDbCircuitBreaker.open(runtimeKey)) return;
+  runtime.logger?.warn(
+    {
+      src: "eliza-api",
+      operation,
+      err,
+      agentId: runtime.agentId,
+    },
+    "[eliza-api] Disabling plugin-todo DB integration after fatal todo query failure",
+  );
 }
 
 function toWorkbenchTodoFromRecord(
@@ -15423,7 +15452,10 @@ async function handleRequest(
             }
           }
         }
-      } catch {
+      } catch (err) {
+        if (todoData) {
+          recordTodoDbFailure(state.runtime, "overview.getTodos", err);
+        }
         // plugin todo unavailable or errored; keep fallback todos
       }
 
@@ -15635,7 +15667,8 @@ async function handleRequest(
           }
         }
         todos.sort((a, b) => a.name.localeCompare(b.name));
-      } catch {
+      } catch (err) {
+        recordTodoDbFailure(state.runtime, "todos.list", err);
         // fallback to task-backed todos only
       }
     }
@@ -15714,7 +15747,8 @@ async function handleRequest(
           json(res, { todo: mappedDbTodo }, 201);
           return;
         }
-      } catch {
+      } catch (err) {
+        recordTodoDbFailure(state.runtime, "todos.create", err);
         // fallback to task-backed todo creation
       }
     }
@@ -15774,7 +15808,8 @@ async function handleRequest(
           return;
         }
         // updateTodo returned false — fall through to task-backed path
-      } catch {
+      } catch (err) {
+        recordTodoDbFailure(state.runtime, "todos.complete", err);
         // fallback to task-backed path
       }
     }
@@ -15818,7 +15853,8 @@ async function handleRequest(
           json(res, { todo: mapped });
           return;
         }
-      } catch {
+      } catch (err) {
+        recordTodoDbFailure(state.runtime, "todos.get", err);
         // fallback to task-backed path
       }
     }
@@ -15841,7 +15877,8 @@ async function handleRequest(
           json(res, { ok: true });
           return;
         }
-      } catch {
+      } catch (err) {
+        recordTodoDbFailure(state.runtime, "todos.delete", err);
         // fallback to task-backed path
       }
     }
@@ -15905,7 +15942,8 @@ async function handleRequest(
           json(res, { todo: refreshedMapped });
           return;
         }
-      } catch {
+      } catch (err) {
+        recordTodoDbFailure(state.runtime, "todos.update", err);
         // fallback to task-backed path
       }
     }
