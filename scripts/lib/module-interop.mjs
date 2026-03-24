@@ -8,4 +8,3 @@ export function resolveModuleDefault(namespace) {
   }
   return namespace;
 }
-
