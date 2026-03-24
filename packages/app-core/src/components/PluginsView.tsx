@@ -2355,7 +2355,9 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                                   : "border-warn/30 bg-warn/10 text-warn"
                               }`}
                             >
-                              {plugin.loadError ? "Load failed" : "Not installed"}
+                              {plugin.loadError
+                                ? "Load failed"
+                                : "Not installed"}
                             </span>
                           )}
                         </span>

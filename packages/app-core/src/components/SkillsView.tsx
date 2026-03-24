@@ -8,13 +8,16 @@
 
 import {
   Button,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
   Input,
   StatusBadge,
   Switch,
   Textarea,
 } from "@miladyai/ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
 import type {
   SkillInfo,
   SkillMarketplaceResult,
@@ -346,48 +349,38 @@ function InstallModal({
   const { t } = useApp();
   const [tab, setTab] = useState<InstallTab>("search");
 
-  useEffect(() => {
-    const onEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onEsc);
-    return () => window.removeEventListener("keydown", onEsc);
-  }, [onClose]);
-
-  return createPortal(
-    <div className="fixed inset-0 z-[200] flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/80" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-2xl max-h-[80vh] mx-4 flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
-        {/* Header */}
-        <div
-          className="flex items-center justify-between px-5 py-4"
-          style={{ borderBottom: "1px solid var(--border)" }}
-        >
-          <div>
-            <h2
-              style={{
-                fontSize: 13,
-                fontWeight: 800,
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-              }}
-            >
-              Install Skill
-            </h2>
-            <div
-              style={{
-                fontSize: 11,
-                color: "var(--muted)",
-                marginTop: 2,
-              }}
-            >
-              Add skills from the marketplace or a GitHub repository.
-            </div>
+  return (
+    <Dialog
+      open
+      onOpenChange={(open: boolean) => {
+        if (!open) onClose();
+      }}
+    >
+      <DialogContent
+        container={typeof document !== "undefined" ? document.body : undefined}
+        className="w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden rounded-2xl"
+      >
+        <DialogHeader>
+          <DialogTitle
+            style={{
+              fontSize: 13,
+              fontWeight: 800,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+            }}
+          >
+            Install Skill
+          </DialogTitle>
+          <div
+            style={{
+              fontSize: 11,
+              color: "var(--muted)",
+              marginTop: 2,
+            }}
+          >
+            Add skills from the marketplace or a GitHub repository.
           </div>
-          <button onClick={onClose} className="rounded-sm p-1 text-muted hover:text-txt transition-colors" aria-label="Close">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-          </button>
-        </div>
+        </DialogHeader>
 
         {/* Tabs */}
         <div
@@ -565,9 +558,8 @@ function InstallModal({
             </div>
           )}
         </div>
-      </div>
-    </div>,
-    document.body,
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -702,14 +694,6 @@ function EditSkillModal({
     setSaving(false);
   };
 
-  useEffect(() => {
-    const onEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onEsc);
-    return () => window.removeEventListener("keydown", onEsc);
-  }, [onClose]);
-
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if ((e.metaKey || e.ctrlKey) && e.key === "s") {
       e.preventDefault();
@@ -729,19 +713,22 @@ function EditSkillModal({
     }
   };
 
-  return createPortal(
-    <div className="fixed inset-0 z-[200] flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/80" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-4xl h-[85vh] mx-4 flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-2xl">
-        {/* Header */}
-        <div
-          className="flex items-center justify-between px-5 py-3 shrink-0"
-          style={{ borderBottom: "1px solid var(--border)" }}
-        >
+  return (
+    <Dialog
+      open
+      onOpenChange={(open: boolean) => {
+        if (!open) onClose();
+      }}
+    >
+      <DialogContent
+        container={typeof document !== "undefined" ? document.body : undefined}
+        className="w-full max-w-4xl h-[85vh] flex flex-col overflow-hidden rounded-xl"
+      >
+        <DialogHeader className="flex-row items-center justify-between px-5 py-3 shrink-0 border-b border-[var(--border)] space-y-0">
           <div className="flex items-center gap-3 min-w-0">
-            <h2 className="font-semibold text-sm truncate">
+            <DialogTitle className="font-semibold text-sm truncate">
               {skillName}
-            </h2>
+            </DialogTitle>
             <span
               className="text-[10px] font-mono px-1.5 py-0.5"
               style={{
@@ -767,16 +754,8 @@ function EditSkillModal({
               {navigator.platform.includes("Mac") ? "⌘S" : "Ctrl+S"}{" "}
               {t("skillsview.toSave")}
             </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 text-lg text-muted hover:text-txt"
-              onClick={onClose}
-            >
-              ×
-            </Button>
           </div>
-        </div>
+        </DialogHeader>
 
         {/* Editor body */}
         <div className="flex-1 overflow-hidden">
@@ -853,9 +832,8 @@ function EditSkillModal({
             </Button>
           </div>
         </div>
-      </div>
-    </div>,
-    document.body,
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -1109,9 +1087,7 @@ function SkillsModalView() {
           skillsMarketplaceError={skillsMarketplaceError}
           skillsMarketplaceLoading={skillsMarketplaceLoading}
           skillsMarketplaceAction={skillsMarketplaceAction}
-          skillsMarketplaceManualGithubUrl={
-            skillsMarketplaceManualGithubUrl
-          }
+          skillsMarketplaceManualGithubUrl={skillsMarketplaceManualGithubUrl}
           searchSkillsMarketplace={searchSkillsMarketplace}
           installSkillFromMarketplace={installSkillFromMarketplace}
           uninstallMarketplaceSkill={uninstallMarketplaceSkill}

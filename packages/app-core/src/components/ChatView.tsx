@@ -758,7 +758,10 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
             ? {
                 zIndex: 1,
                 top: COMPANION_MESSAGE_LAYER_TOP,
-                bottom: composerHeight > 0 ? `${composerHeight + COMPANION_COMPOSER_GAP_PX}px` : COMPANION_MESSAGE_LAYER_BOTTOM_FALLBACK,
+                bottom:
+                  composerHeight > 0
+                    ? `${composerHeight + COMPANION_COMPOSER_GAP_PX}px`
+                    : COMPANION_MESSAGE_LAYER_BOTTOM_FALLBACK,
                 overscrollBehavior: "contain",
                 touchAction: "pan-y",
                 userSelect: "text",
