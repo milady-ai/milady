@@ -535,8 +535,8 @@ export function HeartbeatsView() {
 
   return (
     <div className="flex h-full w-full overflow-hidden bg-bg">
-      {/* Sidebar */}
-      <aside className="w-72 md:w-80 min-w-[250px] border-r border-border/60 bg-card/30 flex flex-col overflow-y-auto">
+      {/* Sidebar — full-width on mobile when no detail is shown, fixed-width on md+ */}
+      <aside className={`${selectedTriggerId || editorOpen || editingId ? "hidden md:flex" : "flex"} w-full md:w-72 lg:w-80 md:max-w-[320px] shrink-0 border-r border-border/60 bg-card/30 flex-col overflow-y-auto`}>
         <div className="sticky top-0 z-10 pt-2">
           <Button
             variant="ghost"
@@ -667,8 +667,16 @@ export function HeartbeatsView() {
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <main className="flex-1 min-w-0 overflow-y-auto bg-card relative custom-scrollbar">
+      {/* Main Content Area — hidden on mobile when sidebar is showing */}
+      <main className={`${selectedTriggerId || editorOpen || editingId ? "flex" : "hidden md:flex"} flex-1 min-w-0 overflow-y-auto bg-card relative custom-scrollbar flex-col`}>
+        {/* Mobile back button */}
+        <button
+          type="button"
+          className="md:hidden flex items-center gap-2 px-4 py-3 text-base font-medium text-muted hover:text-txt border-b border-border/30"
+          onClick={() => { setSelectedTriggerId(null); setEditorOpen(false); setEditingId(null); }}
+        >
+          ← Back
+        </button>
         {editorOpen || editingId ? (
           <div className="max-w-3xl mx-auto p-6 lg:p-10 pb-20">
             {templateNotice && (

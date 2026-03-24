@@ -2284,29 +2284,6 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                                 </span>
                               )}
                             </span>
-                            <span className="mt-1 block text-sm text-muted">
-                              {plugin.description || "No description available"}
-                            </span>
-                            <span className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-muted">
-                              <span>
-                                {hasParams
-                                  ? `${setCount}/${totalCount} configured`
-                                  : "No configuration needed"}
-                              </span>
-                              {plugin.enabled && !plugin.isActive && (
-                                <span
-                                  className={`rounded-full border px-2 py-0.5 ${
-                                    plugin.loadError
-                                      ? "border-danger/30 bg-danger/10 text-danger"
-                                      : "border-warn/30 bg-warn/10 text-warn"
-                                  }`}
-                                >
-                                  {plugin.loadError
-                                    ? "Load failed"
-                                    : "Not installed"}
-                                </span>
-                              )}
-                            </span>
                           </span>
                         </Button>
 
@@ -2359,6 +2336,29 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                             />
                           </Button>
                         </div>
+                      </div>
+                      <div className="px-4 pb-3 sm:px-5">
+                        <p className="text-sm text-muted">
+                          {plugin.description || "No description available"}
+                        </p>
+                        <span className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] text-muted">
+                          <span>
+                            {hasParams
+                              ? `${setCount}/${totalCount} configured`
+                              : "No configuration needed"}
+                          </span>
+                          {plugin.enabled && !plugin.isActive && (
+                            <span
+                              className={`rounded-full border px-2 py-0.5 ${
+                                plugin.loadError
+                                  ? "border-danger/30 bg-danger/10 text-danger"
+                                  : "border-warn/30 bg-warn/10 text-warn"
+                              }`}
+                            >
+                              {plugin.loadError ? "Load failed" : "Not installed"}
+                            </span>
+                          )}
+                        </span>
                       </div>
 
                       {isExpanded && (

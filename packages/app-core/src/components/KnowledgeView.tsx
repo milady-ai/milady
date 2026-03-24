@@ -376,7 +376,7 @@ function DocumentCard({
       </Button>
       <div className="flex items-center gap-2 ml-4 opacity-0 group-hover:opacity-100 transition-opacity focus-within:opacity-100">
         <ConfirmDeleteControl
-          triggerClassName="h-8 px-3 text-xs font-bold text-danger hover:bg-danger/10 hover:text-danger rounded-lg transition-all"
+          triggerClassName="h-8 px-3 text-xs font-bold !bg-transparent text-danger hover:bg-danger/10 hover:text-danger rounded-lg transition-all"
           confirmClassName="h-8 px-3 text-xs font-bold bg-danger/20 text-danger hover:bg-danger/30 rounded-lg transition-all"
           cancelClassName="h-8 px-3 text-xs font-bold text-muted hover:text-txt rounded-lg transition-all"
           disabled={deleting}

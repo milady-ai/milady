@@ -1092,7 +1092,7 @@ export function MediaSettingsSection() {
                   type="button"
                   variant={active ? "default" : "ghost"}
                   size="sm"
-                  className={`flex-1 min-w-[5.5rem] h-9 rounded-md px-2 py-1.5 text-[11px] font-semibold ${
+                  className={`flex-1 min-w-[5.5rem] h-9 rounded-md px-2 py-1.5 text-[11px] font-semibold !whitespace-normal ${
                     active
                       ? "bg-accent text-accent-foreground shadow-sm"
                       : "text-muted hover:bg-bg-hover hover:text-txt"
@@ -1126,7 +1126,7 @@ export function MediaSettingsSection() {
                     type="button"
                     variant={active ? "default" : "ghost"}
                     size="sm"
-                    className={`flex-1 min-w-[5.5rem] h-9 rounded-md px-2 py-1.5 text-[11px] font-semibold ${
+                    className={`flex-1 min-w-[5.5rem] h-9 rounded-md px-2 py-1.5 text-[11px] font-semibold !whitespace-normal ${
                       active
                         ? "bg-accent text-accent-foreground shadow-sm"
                         : "text-muted hover:bg-bg-hover hover:text-txt"
@@ -1186,7 +1186,7 @@ export function MediaSettingsSection() {
         </header>
 
         {/* Category tabs */}
-        <div className="flex gap-1 rounded-xl border border-border bg-card/50 p-1 shrink-0">
+        <div className="flex flex-wrap gap-1 rounded-xl border border-border bg-card/50 p-1 shrink-0">
           {(
             ["image", "video", "audio", "vision", "voice"] as MediaCategory[]
           ).map((cat) => {
@@ -1197,7 +1197,7 @@ export function MediaSettingsSection() {
                 key={cat}
                 variant={active ? "default" : "ghost"}
                 size="sm"
-                className={`flex-1 h-9 rounded-lg border border-transparent px-3 py-2 text-xs font-semibold ${
+                className={`flex-1 h-9 rounded-lg border border-transparent px-2 sm:px-3 py-2 text-[10px] sm:text-xs font-semibold !whitespace-normal ${
                   active
                     ? "bg-accent text-accent-foreground shadow-sm"
                     : "text-muted hover:bg-bg-hover hover:text-txt"
@@ -1221,8 +1221,8 @@ export function MediaSettingsSection() {
         ) : (
           <>
             {/* Mode toggle (cloud vs own-key) */}
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-semibold text-muted">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <span className="text-xs font-semibold text-muted w-full sm:w-auto">
                 {t("mediasettingssection.APISourceForCategory", {
                   category: t(
                     MEDIA_API_SOURCE_CATEGORY_KEYS[

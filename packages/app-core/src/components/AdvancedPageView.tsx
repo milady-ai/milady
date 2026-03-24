@@ -278,7 +278,7 @@ export function AdvancedPageView({ inModal }: { inModal?: boolean } = {}) {
         </nav>
       ) : (
         <div className="mb-4 shrink-0">
-          <div className="flex gap-1 border-b border-border">
+          <div className="flex gap-1 border-b border-border overflow-x-auto">
             {tabs.map((subTab) => {
               const isActive = currentSubTab === subTab.id;
               return (

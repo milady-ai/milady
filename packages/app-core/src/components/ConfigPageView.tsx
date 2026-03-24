@@ -647,11 +647,11 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
       {/* ═══════════════════════════════════════════════════════════════
           MODE SELECTOR: Eliza Cloud vs Custom RPC
           ═══════════════════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-2 gap-3 mb-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
         <Button
           variant="ghost"
           onClick={() => handleModeChange("cloud")}
-          className={`relative flex flex-col items-start gap-1.5 rounded-xl border-2 p-4 text-left transition-all h-auto ${
+          className={`relative flex flex-col items-start gap-1.5 rounded-xl border-2 p-4 text-left transition-all h-auto !whitespace-normal ${
             rpcMode === "cloud"
               ? "border-accent bg-accent/8 shadow-[0_0_20px_rgba(var(--accent),0.1)]"
               : "border-border/40 bg-card/30 opacity-50 grayscale hover:opacity-70 hover:grayscale-0"
@@ -687,7 +687,7 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
         <Button
           variant="ghost"
           onClick={() => handleModeChange("custom")}
-          className={`relative flex flex-col items-start gap-1.5 rounded-xl border-2 p-4 text-left transition-all h-auto ${
+          className={`relative flex flex-col items-start gap-1.5 rounded-xl border-2 p-4 text-left transition-all h-auto !whitespace-normal ${
             rpcMode === "custom"
               ? "border-accent bg-accent/8 shadow-[0_0_20px_rgba(var(--accent),0.1)]"
               : "border-border/40 bg-card/30 opacity-50 grayscale hover:opacity-70 hover:grayscale-0"
