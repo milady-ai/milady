@@ -26,7 +26,7 @@ import os from "node:os";
 import path from "node:path";
 import process from "node:process";
 import { ethers } from "ethers";
-import JSON5 from "json5";
+import * as JSON5Module from "json5";
 import { CAPACITOR_PLUGIN_NAMES } from "../apps/app/scripts/capacitor-plugin-names.mjs";
 import { capacitorPluginsBuildNeeded } from "./lib/capacitor-plugin-build-needed.mjs";
 import {
@@ -37,6 +37,7 @@ import { buildVisionDepsFailureMessage } from "./lib/dev-ui-vision.mjs";
 import { signalSpawnedProcessTree } from "./lib/kill-process-tree.mjs";
 
 const API_PORT = Number(process.env.MILADY_API_PORT) || 31337;
+const JSON5 = JSON5Module.default ?? JSON5Module;
 
 // --app=<name> selects which app to serve (default: "app" → apps/app)
 const appArgMatch = process.argv.find((a) => a.startsWith("--app="));
@@ -498,7 +499,10 @@ function createOnchainDevConfig({
     config.env && typeof config.env === "object" && !Array.isArray(config.env)
       ? { ...config.env }
       : {};
-  nextEnv.EVM_PRIVATE_KEY = evmPrivateKey;
+  // Only inject the Anvil test key if the user hasn't configured their own wallet.
+  if (!nextEnv.EVM_PRIVATE_KEY) {
+    nextEnv.EVM_PRIVATE_KEY = evmPrivateKey;
+  }
   if (solanaRpcUrl) {
     nextEnv.SOLANA_RPC_URL = solanaRpcUrl;
   }
@@ -800,7 +804,6 @@ async function bootstrapOnchainDev() {
   return {
     env: {
       ELIZA_CONFIG_PATH: configPath,
-      EVM_PRIVATE_KEY: DEFAULT_EVM_DEV_PRIVATE_KEY,
       ELIZA_DEV_CHAIN_ID: String(ANVIL_CHAIN_ID),
       ELIZA_DEV_CHAIN_RPC: ANVIL_RPC_URL,
       ELIZA_DEV_REGISTRY_ADDRESS: registryAddress,
