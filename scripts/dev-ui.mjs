@@ -29,12 +29,12 @@ import process from "node:process";
 import { ethers } from "ethers";
 import * as JSON5Module from "json5";
 import { CAPACITOR_PLUGIN_NAMES } from "../apps/app/scripts/capacitor-plugin-names.mjs";
+import { getBunVersionAdvisory } from "./lib/bun-version-guard.mjs";
 import { capacitorPluginsBuildNeeded } from "./lib/capacitor-plugin-build-needed.mjs";
 import {
   coerceBoolean,
   resolveOnchainPreference,
 } from "./lib/dev-ui-onchain.mjs";
-import { getBunVersionAdvisory } from "./lib/bun-version-guard.mjs";
 import { buildVisionDepsFailureMessage } from "./lib/dev-ui-vision.mjs";
 import { signalSpawnedProcessTree } from "./lib/kill-process-tree.mjs";
 import { resolveModuleDefault } from "./lib/module-interop.mjs";
