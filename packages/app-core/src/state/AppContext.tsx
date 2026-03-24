@@ -5250,14 +5250,18 @@ function AppProviderInner({
           }
         }
 
-        // Wait for the local backend to become reachable
+        // Wait for the local backend to become reachable.
+        // Use exponential backoff to avoid flooding the console with
+        // "access control checks" errors while the server starts.
         const localDeadline = Date.now() + 120_000;
+        let pollMs = 1000;
         while (Date.now() < localDeadline) {
           try {
             await client.getAuthStatus();
             break;
           } catch {
-            await new Promise((r) => setTimeout(r, 500));
+            await new Promise((r) => setTimeout(r, pollMs));
+            pollMs = Math.min(pollMs * 1.5, 5000);
           }
         }
 

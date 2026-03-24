@@ -1,5 +1,7 @@
-// @ts-expect-error - No type definitions available for lookingglass/webxr yet
-import { LookingGlassWebXRPolyfill } from "@lookingglass/webxr";
+// Looking Glass WebXR polyfill — loaded dynamically in setupLookingGlass()
+// to avoid an eager WebSocket connection to ws://localhost:11222/driver on
+// every page load (the module connects on import).
+type LookingGlassWebXRPolyfillType = new (opts: Record<string, unknown>) => unknown;
 import { resolveAppAssetUrl } from "@miladyai/app-core/utils";
 import {
   MToonMaterialLoaderPlugin,
@@ -221,7 +223,7 @@ let sharedDracoLoader: DRACOLoader | null = null;
 let teleportSparkleTexture: THREE.CanvasTexture | null = null;
 /** Module-level singleton: the polyfill overrides navigator.xr globally so
  *  multiple instances cause "attempted to assign baselayer twice" errors. */
-let sharedLkgPolyfill: LookingGlassWebXRPolyfill | null = null;
+let sharedLkgPolyfill: unknown = null;
 const DRACO_DECODER_PATH = resolveAppAssetUrl("vrm-decoders/draco/");
 
 function getRendererPixelRatio(sparkOptimized = false): number {
@@ -1961,20 +1963,30 @@ export class VrmEngine {
    * This runs independently from the main renderer so the app's canvas and
    * camera are never affected by the XR polyfill.
    */
-  private setupLookingGlass(): void {
+  private async setupLookingGlass(): Promise<void> {
     // Remove any stale button / renderer from a previous mount
     document.getElementById("VRButton")?.remove();
     this.lkgRenderer?.dispose();
 
-    // Polyfill singleton (overrides navigator.xr globally once)
+    // Polyfill singleton (overrides navigator.xr globally once).
+    // Dynamic import so the module's WebSocket to localhost:11222 only
+    // opens when Looking Glass is actually enabled.
     if (!sharedLkgPolyfill) {
-      sharedLkgPolyfill = new LookingGlassWebXRPolyfill({
-        inlineView: 1,
-        targetY: 1.0,
-        targetZ: 0,
-        targetDiam: 3,
-        fovy: (40 * Math.PI) / 180,
-      });
+      try {
+        // @ts-expect-error - No type definitions available for lookingglass/webxr yet
+        const mod = await import("@lookingglass/webxr");
+        const Ctor = mod.LookingGlassWebXRPolyfill as LookingGlassWebXRPolyfillType;
+        sharedLkgPolyfill = new Ctor({
+          inlineView: 1,
+          targetY: 1.0,
+          targetZ: 0,
+          targetDiam: 3,
+          fovy: (40 * Math.PI) / 180,
+        });
+      } catch (err) {
+        console.warn("[vrm] Looking Glass WebXR polyfill failed to load:", err);
+        return;
+      }
     }
     this.lkgPolyfill = sharedLkgPolyfill;
 
