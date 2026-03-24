@@ -1,7 +1,7 @@
 ---
 title: "Platform Connectors"
 sidebarTitle: "Connectors"
-description: "Platform bridges for Discord, Telegram, Slack, WhatsApp, Signal, iMessage, BlueBubbles, MS Teams, Google Chat, Twitter, Farcaster, Mattermost, and WeChat."
+description: "Platform bridges for Discord, Telegram, Slack, WhatsApp, Signal, iMessage, BlueBubbles, MS Teams, Google Chat, Twitter, Farcaster, Mattermost, WeChat, Twitch, Feishu, Matrix, Nostr, Lens, Retake, and Blooio."
 ---
 
 Connectors are platform bridges that allow your agent to communicate across messaging platforms and social networks. Each connector handles authentication, message routing, session management, and platform-specific features.
@@ -46,6 +46,13 @@ Connectors are platform bridges that allow your agent to communicate across mess
 | Farcaster | Neynar API key + signer | Casts | Yes (channels) | No |
 | Mattermost | Bot token | Yes | Yes (channels) | No |
 | WeChat | Proxy API key + QR code | Yes | Yes | Yes |
+| Twitch | Access token | Yes (chat) | Yes (channels) | No |
+| Feishu | App ID + secret | Yes | Yes | No |
+| Matrix | Access token | Yes | Yes (rooms) | No |
+| Nostr | Private key (nsec) | Yes | Yes (channels) | No |
+| Lens | API key | Yes | Yes | No |
+| Retake | Access token | Yes | N/A | No |
+| Blooio | API key | Yes (SMS) | N/A | No |
 
 ---
 

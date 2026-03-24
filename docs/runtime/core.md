@@ -149,17 +149,25 @@ for (const [featureName, enabled] of Object.entries(config.features ?? {})) {
 
 ```typescript
 const CHANNEL_PLUGIN_MAP = {
-  discord:     "@elizaos/plugin-discord",
   telegram:    "@elizaos/plugin-telegram",
+  discord:     "@elizaos/plugin-discord",
   slack:       "@elizaos/plugin-slack",
   twitter:     "@elizaos/plugin-twitter",
   whatsapp:    "@elizaos/plugin-whatsapp",
   signal:      "@elizaos/plugin-signal",
-  imessage:    "@elizaos/plugin-imessage",
   bluebubbles: "@elizaos/plugin-bluebubbles",
+  imessage:    "@elizaos/plugin-imessage",
+  farcaster:   "@elizaos/plugin-farcaster",
+  lens:        "@elizaos/plugin-lens",
   msteams:     "@elizaos/plugin-msteams",
   mattermost:  "@elizaos/plugin-mattermost",
   googlechat:  "@elizaos/plugin-google-chat",
+  feishu:      "@elizaos/plugin-feishu",
+  matrix:      "@elizaos/plugin-matrix",
+  nostr:       "@elizaos/plugin-nostr",
+  retake:      "@elizaos/plugin-retake",
+  blooio:      "@elizaos/plugin-blooio",
+  twitch:      "@elizaos/plugin-twitch",
 };
 ```
 
@@ -168,18 +176,32 @@ const CHANNEL_PLUGIN_MAP = {
 ```typescript
 const PROVIDER_PLUGIN_MAP = {
   ANTHROPIC_API_KEY:              "@elizaos/plugin-anthropic",
+  CLAUDE_API_KEY:                 "@elizaos/plugin-anthropic",
   OPENAI_API_KEY:                 "@elizaos/plugin-openai",
-  GOOGLE_API_KEY:                 "@elizaos/plugin-google-genai",
-  GOOGLE_GENERATIVE_AI_API_KEY:   "@elizaos/plugin-google-genai",
-  GROQ_API_KEY:                   "@elizaos/plugin-groq",
-  XAI_API_KEY:                    "@elizaos/plugin-xai",
-  OPENROUTER_API_KEY:             "@elizaos/plugin-openrouter",
   AI_GATEWAY_API_KEY:             "@elizaos/plugin-vercel-ai-gateway",
   AIGATEWAY_API_KEY:              "@elizaos/plugin-vercel-ai-gateway",
-  ZAI_API_KEY:                    "@homunculuslabs/plugin-zai",
+  GOOGLE_API_KEY:                 "@elizaos/plugin-google-genai",
+  GOOGLE_GENERATIVE_AI_API_KEY:   "@elizaos/plugin-google-genai",
+  GOOGLE_CLOUD_API_KEY:           "@elizaos/plugin-google-antigravity",
+  GROQ_API_KEY:                   "@elizaos/plugin-groq",
+  XAI_API_KEY:                    "@elizaos/plugin-xai",
+  GROK_API_KEY:                   "@elizaos/plugin-xai",
+  OPENROUTER_API_KEY:             "@elizaos/plugin-openrouter",
   OLLAMA_BASE_URL:                "@elizaos/plugin-ollama",
+  ZAI_API_KEY:                    "@homunculuslabs/plugin-zai",
+  DEEPSEEK_API_KEY:               "@elizaos/plugin-deepseek",
+  TOGETHER_API_KEY:               "@elizaos/plugin-together",
+  MISTRAL_API_KEY:                "@elizaos/plugin-mistral",
+  COHERE_API_KEY:                 "@elizaos/plugin-cohere",
+  PERPLEXITY_API_KEY:             "@elizaos/plugin-perplexity",
   ELIZAOS_CLOUD_API_KEY:          "@elizaos/plugin-elizacloud",
   ELIZAOS_CLOUD_ENABLED:          "@elizaos/plugin-elizacloud",
+  ELIZA_USE_PI_AI:                "@elizaos/plugin-pi-ai",
+  CUA_API_KEY:                    "@elizaos/plugin-cua",
+  CUA_HOST:                       "@elizaos/plugin-cua",
+  OBSIDIAN_VAULT_PATH:            "@elizaos/plugin-obsidian",
+  REPOPROMPT_CLI_PATH:            "@elizaos/plugin-repoprompt",
+  CLAUDE_CODE_WORKBENCH_ENABLED:  "@elizaos/plugin-claude-code-workbench",
 };
 ```
 
