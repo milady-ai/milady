@@ -58,10 +58,12 @@ function DetachedSettingsSectionView({
 function DetachedChatView(): JSX.Element {
   return (
     <div className="flex flex-1 min-h-0 relative">
-      <ConversationsSidebar />
-      <main className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden pt-3 px-3 xl:px-5">
+      <nav role="navigation" aria-label="Conversations">
+        <ConversationsSidebar />
+      </nav>
+      <div className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden pt-3 px-3 xl:px-5">
         <ChatView />
-      </main>
+      </div>
     </div>
   );
 }
@@ -103,6 +105,14 @@ function DetachedShellContent({ route }: DetachedShellRootProps): JSX.Element {
           <DetachedSettingsSectionView section={target.settingsSection} />
         </section>
       );
+    default: {
+      const _exhaustive: never = target.tab;
+      return (
+        <div className="flex flex-1 items-center justify-center text-sm text-muted">
+          Unknown view: {String(_exhaustive)}
+        </div>
+      );
+    }
   }
 }
 
@@ -138,7 +148,17 @@ export function DetachedShellRoot({
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col font-body text-txt bg-bg">
-      <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      <a
+        href="#detached-main"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-2 focus:bg-bg focus:text-txt"
+      >
+        Skip to content
+      </a>
+      <main
+        id="detached-main"
+        role="main"
+        className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
+      >
         <DetachedShellContent route={route} />
       </main>
     </div>

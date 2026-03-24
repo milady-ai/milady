@@ -28,6 +28,8 @@ export function OnboardingStepNav() {
     <div className="relative z-10 flex flex-col justify-center py-[48px] pl-[40px] pr-0 max-md:items-center max-md:px-4 max-md:pt-4 max-md:pb-2">
       <div className="w-[248px] rounded-[28px] border border-[var(--onboarding-nav-border)] [background:var(--onboarding-nav-scrim)] px-[26px] py-[30px] shadow-[var(--onboarding-nav-shadow)] backdrop-blur-[22px] backdrop-saturate-[1.2] max-md:w-fit max-md:max-w-[calc(100vw-32px)] max-md:rounded-[22px] max-md:px-4 max-md:py-3">
         <div
+          role="list"
+          aria-label={t("onboarding.stepNavigation")}
           style={
             {
               "--tw-after-height": connectorHeight,
@@ -87,9 +89,10 @@ export function OnboardingStepNav() {
                   variant="ghost"
                   type="button"
                   className={rowClass}
+                  aria-label={`${t(step.name)} — ${t("onboarding.stepLabel", { current: i + 1, total: activeSteps.length })} (${t("onboarding.completed")})`}
                   onClick={() => handleOnboardingJumpToStep(step.id)}
                 >
-                  <div className={dotClass} />
+                  <div className={dotClass} aria-hidden="true" />
                   <div className="flex flex-col gap-0.5 max-md:hidden">
                     <span className={nameClass}>{t(step.name)}</span>
                     <span className={subClass}>{t(step.subtitle)}</span>
@@ -102,9 +105,11 @@ export function OnboardingStepNav() {
               <div
                 key={step.id}
                 className={rowClass}
+                role="listitem"
+                aria-label={`${t(step.name)} — ${t("onboarding.stepLabel", { current: i + 1, total: activeSteps.length })}`}
                 {...(isActive ? { "aria-current": "step" as const } : {})}
               >
-                <div className={dotClass} />
+                <div className={dotClass} aria-hidden="true" />
                 <div className="flex flex-col gap-0.5 max-md:hidden">
                   <span className={nameClass}>{t(step.name)}</span>
                   <span className={subClass}>{t(step.subtitle)}</span>

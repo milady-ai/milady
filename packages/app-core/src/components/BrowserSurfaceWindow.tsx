@@ -178,6 +178,7 @@ export function BrowserSurfaceWindow() {
       >
         <div className="flex shrink-0 items-center gap-2 max-[900px]:flex-wrap">
           <Button
+            aria-label={t("aria.browserBack")}
             variant="ghost"
             className={navBtnBase}
             disabled={!canGoBack}
@@ -188,6 +189,7 @@ export function BrowserSurfaceWindow() {
             Back
           </Button>
           <Button
+            aria-label={t("aria.browserForward")}
             variant="ghost"
             className={navBtnBase}
             disabled={!canGoForward}
@@ -198,6 +200,7 @@ export function BrowserSurfaceWindow() {
             Forward
           </Button>
           <Button
+            aria-label={t("aria.browserReload")}
             variant="ghost"
             className={navBtnBase}
             onClick={() => {
@@ -208,6 +211,7 @@ export function BrowserSurfaceWindow() {
             Reload
           </Button>
           <Button
+            aria-label={t("aria.browserHome")}
             variant="default"
             className={navBtnBase}
             onClick={() => {
@@ -269,6 +273,7 @@ export function BrowserSurfaceWindow() {
             ref: (node: HTMLElement | null) => {
               webviewRef.current = node as WebviewTagElement | null;
             },
+            sandbox: "allow-scripts allow-same-origin allow-forms allow-popups",
             src: initialUrl,
           })
         ) : (
