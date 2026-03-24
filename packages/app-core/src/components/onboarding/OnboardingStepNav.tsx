@@ -49,8 +49,7 @@ export function OnboardingStepNav() {
             let dotClass =
               "w-[10px] h-[10px] rounded-full border border-[var(--onboarding-nav-card-border,rgba(201,204,209,0.24))] shrink-0 relative z-10 bg-[var(--onboarding-nav-card-bg,rgba(30,31,35,0.88))] transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]";
             if (isDone) {
-              dotClass +=
-                " !bg-accent !border-accent";
+              dotClass += " !bg-accent !border-accent";
             } else if (isActive) {
               dotClass +=
                 " !w-[12px] !h-[12px] !bg-accent !border-[rgba(255,248,220,0.9)] shadow-[0_0_12px_rgba(240,185,11,0.5)] animate-[onboarding-dot-glow_2s_ease-in-out_infinite]";
