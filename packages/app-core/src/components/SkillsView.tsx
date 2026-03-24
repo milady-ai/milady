@@ -140,7 +140,7 @@ function SkillCard({
           {t("triggersview.Edit")}
         </Button>
         <ConfirmDeleteControl
-          triggerClassName="h-7 px-3 text-[11px] font-bold !bg-transparent text-danger hover:bg-danger/10 hover:text-danger-foreground transition-colors rounded-md"
+          triggerClassName="h-7 px-3 text-[11px] font-bold !bg-transparent text-danger hover:!bg-danger/15 hover:text-danger-foreground transition-colors rounded-md border border-transparent hover:border-danger/30"
           confirmClassName="px-3 py-1 text-[11px] font-bold bg-danger text-danger-foreground hover:bg-danger/90 transition-colors rounded-md shadow-sm"
           cancelClassName="px-3 py-1 text-[11px] font-bold text-muted border border-border/40 hover:text-txt transition-colors rounded-md"
           confirmLabel={t("conversations.deleteYes")}

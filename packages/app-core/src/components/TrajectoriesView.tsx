@@ -295,7 +295,7 @@ export function TrajectoriesView({
             setPage(0);
           }}
         >
-          <SelectTrigger className="h-8 px-3 py-1.5 text-xs bg-card border-border shadow-sm w-36">
+          <SelectTrigger className="h-8 px-3 py-1.5 text-xs bg-card border-border shadow-sm w-40">
             <SelectValue placeholder={t("trajectoriesview.AllStatuses")} />
           </SelectTrigger>
           <SelectContent>
@@ -318,7 +318,7 @@ export function TrajectoriesView({
               setPage(0);
             }}
           >
-            <SelectTrigger className="h-8 px-3 py-1.5 text-xs bg-card border-border shadow-sm w-36">
+            <SelectTrigger className="h-8 px-3 py-1.5 text-xs bg-card border-border shadow-sm w-40">
               <SelectValue placeholder={t("logsview.AllSources")} />
             </SelectTrigger>
             <SelectContent>
