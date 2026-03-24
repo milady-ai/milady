@@ -297,12 +297,7 @@ describe("Trajectory logger chat roundtrip", () => {
     await db.close();
   });
 
-  // TODO: This test is flaky on CI — the trajectory plugin's async persistence
-  // pipeline doesn't guarantee the LLM call data is in the DB by the time the
-  // detail API is polled. The MESSAGE_RECEIVED/MESSAGE_SENT event lifecycle
-  // needs to be wired through the test's mock messageService for the trajectory
-  // step to complete and persist. See: trajectory-plugin-chat-roundtrip.e2e.test.ts
-  it.skip("captures chat prompt and response through the trajectories API", async () => {
+  it("captures chat prompt and response through the trajectories API", async () => {
     if (!server) {
       throw new Error("API server did not start");
     }
