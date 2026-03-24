@@ -291,7 +291,51 @@ export function applyConnectionTransition(
         kind: "patch",
         patch: { onboardingSubscriptionTab: event.tab },
       };
+    default: {
+      const _exhaustive: never = event;
+      console.warn(
+        "[connection-flow] Unhandled connection event:",
+        (_exhaustive as ConnectionEvent).type,
+      );
+      return null;
+    }
   }
+}
+
+/** Providers that do not require an API key to proceed. */
+const NO_KEY_REQUIRED = new Set(["ollama", "pi-ai"]);
+
+/**
+ * Pure predicate: should the CONFIRM button be disabled on the provider-detail screen?
+ * Extracted so tests can cover every provider path without rendering React.
+ */
+export function isProviderConfirmDisabled(opts: {
+  provider: string;
+  apiKey: string;
+  elizaCloudTab: "login" | "apikey";
+  elizaCloudConnected: boolean;
+  subscriptionTab: "token" | "oauth";
+}): boolean {
+  const {
+    provider,
+    apiKey,
+    elizaCloudTab,
+    elizaCloudConnected,
+    subscriptionTab,
+  } = opts;
+  if (!provider) return true;
+  if (provider === "elizacloud") {
+    return (
+      (elizaCloudTab === "login" && !elizaCloudConnected) ||
+      (elizaCloudTab === "apikey" && !apiKey.trim())
+    );
+  }
+  if (provider === "anthropic-subscription") {
+    return subscriptionTab === "token" && !apiKey.trim();
+  }
+  if (NO_KEY_REQUIRED.has(provider)) return false;
+  // All other providers require an API key
+  return !apiKey.trim();
 }
 
 /**

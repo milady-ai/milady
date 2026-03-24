@@ -253,6 +253,7 @@ export function BrowserSurfaceWindow() {
 
       <div className="flex min-w-0 items-center gap-3 px-0.5 text-[0.82rem] text-[color:var(--text-muted,#a1a1aa)]">
         <span
+          aria-live="polite"
           className={`shrink-0 rounded-full border border-[rgba(94,97,102,0.72)] bg-[rgba(30,31,35,0.9)] px-[0.55rem] py-[0.2rem] ${isLoading ? "border-[rgba(232,217,168,0.42)] text-[color:var(--highlight-gold,#f2d27a)]" : ""}`}
         >
           {isLoading ? "Loading" : "Ready"}
