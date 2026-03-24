@@ -452,7 +452,7 @@ function DocumentDetailModal({
     >
       <DialogContent
         container={typeof document !== "undefined" ? document.body : undefined}
-        className="w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden rounded-2xl"
+        className="w-full max-w-4xl max-h-[85vh] p-0 flex flex-col overflow-hidden rounded-2xl"
       >
         <DialogHeader>
           <DialogTitle>

@@ -358,7 +358,7 @@ function InstallModal({
     >
       <DialogContent
         container={typeof document !== "undefined" ? document.body : undefined}
-        className="w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden rounded-2xl"
+        className="w-full max-w-2xl max-h-[80vh] p-0 flex flex-col overflow-hidden rounded-2xl"
       >
         <DialogHeader>
           <DialogTitle
@@ -722,7 +722,7 @@ function EditSkillModal({
     >
       <DialogContent
         container={typeof document !== "undefined" ? document.body : undefined}
-        className="w-full max-w-4xl h-[85vh] flex flex-col overflow-hidden rounded-xl"
+        className="w-full max-w-4xl h-[85vh] p-0 flex flex-col overflow-hidden rounded-xl"
       >
         <DialogHeader className="flex-row items-center justify-between px-5 py-3 shrink-0 border-b border-[var(--border)] space-y-0">
           <div className="flex items-center gap-3 min-w-0">
