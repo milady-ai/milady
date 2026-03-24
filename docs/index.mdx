@@ -121,15 +121,15 @@ Milady is structured as a layered system:
              autonomous state) shell, cron, ...)
                     |
               Connector Layer
-         (Discord, Telegram, Slack, WhatsApp,
-          Twitter, Signal, Farcaster, WeChat, ...)
+         (Discord, Telegram, Slack, WhatsApp, Twitter,
+          Signal, Farcaster, WeChat, Matrix, Nostr, ...)
 ```
 
 - **elizaOS Runtime** -- the core agent framework that handles memory, message processing, action dispatch, and provider abstraction.
 - **Milady Plugin** -- a first-party elizaOS plugin that provides workspace context, session keys, personality presets, autonomous state, and wallet integration.
 - **Gateway** -- a WebSocket + HTTP multiplexed server that bridges the runtime to all connected clients and connectors.
 - **Plugin System** -- standard elizaOS plugins that add capabilities (knowledge, browser, TTS, etc.).
-- **Connector Layer** -- platform-specific adapters for Telegram, Discord, Slack, WhatsApp, Signal, iMessage, BlueBubbles, MS Teams, Google Chat, Twitter, Farcaster, Mattermost, WeChat, and the web chat UI.
+- **Connector Layer** -- platform-specific adapters for Telegram, Discord, Slack, WhatsApp, Signal, iMessage, BlueBubbles, MS Teams, Google Chat, Twitter, Farcaster, Mattermost, WeChat, Matrix, Feishu/Lark, Nostr, and the web chat UI.
 
 All configuration lives in `~/.milady/milady.json`. Secrets can go in `~/.milady/.env`.
 

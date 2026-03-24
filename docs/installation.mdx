@@ -225,8 +225,15 @@ export OLLAMA_BASE_URL="http://localhost:11434"
 
 | Service | Default Port | Environment Variable |
 |---------|-------------|---------------------|
-| Dashboard (Web UI) | `2138` | `MILADY_PORT` |
-| Gateway (API + WebSocket) | `18789` | `MILADY_GATEWAY_PORT` |
+| Dashboard + API | `2138` | `MILADY_PORT` |
+| Gateway (WebSocket) | `18789` | `MILADY_GATEWAY_PORT` |
+
+In development mode (`bun run dev`), the API runs on a separate port:
+
+| Service | Default Port | Environment Variable |
+|---------|-------------|---------------------|
+| API + WebSocket (dev) | `31337` | `MILADY_API_PORT` |
+| Dashboard UI (dev) | `2138` | `MILADY_PORT` |
 
 ```bash
 # Example: custom ports

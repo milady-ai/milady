@@ -15,9 +15,11 @@ milady run     # alias for start
 
 ## Options
 
-`milady start` has no command-specific flags. All behavior is controlled through the configuration file (`~/.milady/milady.json`) and environment variables.
+| Flag | Description |
+|------|-------------|
+| `--connection-key [key]` | Set or auto-generate a connection key for remote access. Pass a value to use a specific key, or pass the flag without a value to auto-generate one. The key is set as `MILADY_API_TOKEN` for the session. When binding to a non-localhost address (e.g., `MILADY_API_BIND=0.0.0.0`), a key is auto-generated if none is configured. |
 
-Global flags that apply to this command:
+Global flags that also apply:
 
 | Flag | Description |
 |------|-------------|
@@ -43,6 +45,12 @@ milady --profile production start
 
 # Start with the dev profile
 milady --dev start
+
+# Start with an auto-generated connection key (for remote access)
+milady start --connection-key
+
+# Start with a specific connection key
+milady start --connection-key my-secret-key
 ```
 
 ## Behavior

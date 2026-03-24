@@ -1,7 +1,7 @@
 ---
 title: "Platform Connectors"
 sidebarTitle: "Connectors"
-description: "Platform bridges for Discord, Telegram, Slack, WhatsApp, Signal, iMessage, BlueBubbles, MS Teams, Google Chat, Twitter, Farcaster, Mattermost, and WeChat."
+description: "Platform bridges for Discord, Telegram, Slack, WhatsApp, Signal, iMessage, BlueBubbles, MS Teams, Google Chat, Twitter, Farcaster, Mattermost, WeChat, Matrix, Feishu, and Nostr."
 ---
 
 Connectors are platform bridges that allow your agent to communicate across messaging platforms and social networks. Each connector handles authentication, message routing, session management, and platform-specific features.
@@ -23,9 +23,12 @@ Connectors are platform bridges that allow your agent to communicate across mess
 13. [Farcaster](#farcaster)
 14. [Mattermost](#mattermost)
 15. [WeChat](#wechat)
-16. [Connector Lifecycle](#connector-lifecycle)
-17. [Multi-Account Support](#multi-account-support)
-18. [Session Management](#session-management)
+16. [Matrix](#matrix)
+17. [Feishu / Lark](#feishu--lark)
+18. [Nostr](#nostr)
+19. [Connector Lifecycle](#connector-lifecycle)
+20. [Multi-Account Support](#multi-account-support)
+21. [Session Management](#session-management)
 
 ---
 
@@ -46,6 +49,9 @@ Connectors are platform bridges that allow your agent to communicate across mess
 | Farcaster | Neynar API key + signer | Casts | Yes (channels) | No |
 | Mattermost | Bot token | Yes | Yes (channels) | No |
 | WeChat | Proxy API key + QR code | Yes | Yes | Yes |
+| Matrix | Access token | Yes | Yes (rooms) | No |
+| Feishu / Lark | App ID + secret | Yes | Yes (group chats) | No |
+| Nostr | Private key (nsec/hex) | Yes (NIP-04) | N/A | No |
 
 ---
 
@@ -577,6 +583,107 @@ operate yourself or explicitly trust for that message flow.
 - Image send/receive (enable with `features.images: true`)
 - QR code login with automatic session persistence
 - Multi-account support via accounts map
+
+---
+
+## Matrix
+
+### Setup Requirements
+
+- Matrix account on any homeserver (e.g., matrix.org or self-hosted)
+- Access token for the bot account
+
+### Key Configuration
+
+```json
+{
+  "env": {
+    "MATRIX_ACCESS_TOKEN": "syt_your_access_token"
+  },
+  "connectors": {
+    "matrix": {
+      "enabled": true
+    }
+  }
+}
+```
+
+**Environment variables:** `MATRIX_ACCESS_TOKEN`, `MATRIX_HOMESERVER`, `MATRIX_USER_ID`, `MATRIX_DEVICE_ID`, `MATRIX_ROOMS`, `MATRIX_AUTO_JOIN`, `MATRIX_ENCRYPTION`, `MATRIX_REQUIRE_MENTION`
+
+### Features
+
+- Room and DM messaging on any spec-compliant homeserver
+- Auto-join on room invitations
+- End-to-end encryption (Olm) support
+- Mention filtering in rooms
+- Federation support across homeservers
+
+---
+
+## Feishu / Lark
+
+### Setup Requirements
+
+- Feishu/Lark Custom App with App ID and App Secret
+- Bot capability enabled on the app
+
+### Key Configuration
+
+```json
+{
+  "env": {
+    "FEISHU_APP_ID": "cli_your_app_id",
+    "FEISHU_APP_SECRET": "your_app_secret"
+  },
+  "connectors": {
+    "feishu": {
+      "enabled": true
+    }
+  }
+}
+```
+
+**Environment variables:** `FEISHU_APP_ID`, `FEISHU_APP_SECRET`, `FEISHU_DOMAIN`, `FEISHU_ALLOWED_CHATS`
+
+### Features
+
+- Direct bot messaging and group chats
+- Chat allowlist for access control
+- China (`feishu.cn`) and global (`larksuite.com`) domain support
+- Event subscription for real-time messages
+
+---
+
+## Nostr
+
+### Setup Requirements
+
+- Nostr private key (nsec or hex format)
+
+### Key Configuration
+
+```json
+{
+  "env": {
+    "NOSTR_PRIVATE_KEY": "nsec1your_private_key"
+  },
+  "connectors": {
+    "nostr": {
+      "enabled": true
+    }
+  }
+}
+```
+
+**Environment variables:** `NOSTR_PRIVATE_KEY`, `NOSTR_RELAYS`, `NOSTR_DM_POLICY`, `NOSTR_ALLOW_FROM`, `NOSTR_ENABLED`
+
+### Features
+
+- Multi-relay connectivity
+- Note publishing (kind 1 events)
+- NIP-04 encrypted direct messages
+- DM access policies (allow, deny, allowlist)
+- Fully decentralized via relay network
 
 ---
 

@@ -68,6 +68,10 @@ bunx miladyai
   Check for and install updates with release channel support (stable, beta, nightly).
 </Card>
 
+<Card title="db" icon="database" href="/cli/db">
+  Manage the local database — reset agent state and conversation history.
+</Card>
+
 <Card title="doctor" icon="stethoscope" href="/cli/doctor">
   Diagnose common issues with your installation and configuration (planned).
 </Card>
@@ -94,6 +98,9 @@ milady update
 
 # Show model provider status
 milady models
+
+# Reset local database
+milady db reset
 ```
 
 ## Environment Variables
