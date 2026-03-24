@@ -23,16 +23,9 @@ import {
 } from "@miladyai/app-core/components";
 import { useApp } from "@miladyai/app-core/state";
 import { confirmDesktopAction } from "@miladyai/app-core/utils";
-import {
-  Button,
-  Checkbox,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  Input,
-} from "@miladyai/ui";
+import { Button, Checkbox, Input } from "@miladyai/ui";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   isKnowledgeImageFile,
   MAX_KNOWLEDGE_IMAGE_PROCESSING_BYTES,
@@ -443,23 +436,39 @@ function DocumentDetailModal({
     };
   }, [documentId]);
 
-  return (
-    <Dialog
-      open
-      onOpenChange={(v) => {
-        if (!v) onClose();
-      }}
-    >
-      <DialogContent className="max-w-4xl max-h-[85vh] p-0 flex flex-col overflow-hidden rounded-2xl">
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleEsc);
+    return () => document.removeEventListener("keydown", handleEsc);
+  }, [onClose]);
+
+  return createPortal(
+    <div className="fixed inset-0 z-[200] flex items-center justify-center">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/80"
+        onClick={onClose}
+      />
+      {/* Modal */}
+      <div className="relative z-10 w-full max-w-4xl max-h-[85vh] mx-4 flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
         {/* Header */}
-        <DialogHeader className="p-5 border-b border-border/30 bg-bg/20">
-          <DialogTitle className="text-lg font-bold text-txt tracking-wide">
+        <div className="flex items-center justify-between p-5 border-b border-border/30">
+          <h2 className="text-lg font-bold text-txt tracking-wide">
             {loading ? "Loading..." : doc?.filename || "Document"}
-          </DialogTitle>
-        </DialogHeader>
+          </h2>
+          <button
+            onClick={onClose}
+            className="rounded-sm p-1 text-muted hover:text-txt transition-colors"
+            aria-label="Close"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+        <div className="flex-1 overflow-y-auto p-6">
           {loading && (
             <div className="text-center py-12 text-muted font-bold tracking-wide animate-pulse">
               <span className="inline-block w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin mr-3 align-middle" />
@@ -567,8 +576,9 @@ function DocumentDetailModal({
             </>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>,
+    document.body,
   );
 }
 
