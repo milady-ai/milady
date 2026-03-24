@@ -9,11 +9,11 @@ import { _resetForTesting } from "./wallet-export-guard";
 
 function mockReq(
   headers: http.IncomingHttpHeaders = {},
-): Pick<http.IncomingMessage, "headers"> {
-  return createMockHeadersRequest(headers) as Pick<
-    http.IncomingMessage,
-    "headers"
-  >;
+): Pick<http.IncomingMessage, "headers" | "socket"> {
+  const base = createMockHeadersRequest(headers) as Record<string, unknown>;
+  // Provide a mock socket so getClientIp() returns a value instead of null
+  base.socket = { remoteAddress: "127.0.0.1" };
+  return base as Pick<http.IncomingMessage, "headers" | "socket">;
 }
 
 /**
