@@ -4,8 +4,50 @@ import {
   createEnvSandbox,
   createMockHeadersRequest,
 } from "./../test-support/test-helpers";
-import { resolveWalletExportRejection } from "./server";
-import { _resetForTesting } from "./wallet-export-guard";
+
+import {
+  createHardenedExportGuard,
+  _resetForTesting,
+} from "./wallet-export-guard";
+
+// Build a minimal upstream mock matching the real resolveWalletExportRejection
+// contract, so we don't pull in @elizaos/core or @miladyai/agent.
+function upstreamMock(
+  req: http.IncomingMessage,
+  body: Record<string, unknown>,
+) {
+  if (!body.confirm) {
+    return { status: 403 as const, reason: "Missing confirm flag" };
+  }
+  const token =
+    process.env.ELIZA_WALLET_EXPORT_TOKEN?.trim() ||
+    process.env.MILADY_WALLET_EXPORT_TOKEN?.trim();
+  if (!token) {
+    return {
+      status: 403 as const,
+      reason:
+        "Wallet export is disabled. Set ELIZA_WALLET_EXPORT_TOKEN to enable secure exports.",
+    };
+  }
+  const headerToken = (
+    req.headers?.["x-eliza-export-token"] as string | undefined
+  )?.trim();
+  const bodyToken = (body.exportToken as string | undefined)?.trim();
+  const provided = headerToken || bodyToken;
+  if (!provided) {
+    return {
+      status: 401 as const,
+      reason:
+        "Missing export token. Provide X-Eliza-Export-Token header or exportToken in request body.",
+    };
+  }
+  if (provided !== token) {
+    return { status: 401 as const, reason: "Invalid export token." };
+  }
+  return null;
+}
+
+const resolveWalletExportRejection = createHardenedExportGuard(upstreamMock);
 
 function mockReq(
   headers: http.IncomingHttpHeaders = {},
