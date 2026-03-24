@@ -146,6 +146,23 @@
   --onboarding-roster-border: rgba(0, 0, 0, 0.08);
 }
 
+/* Force dark panel in onboarding regardless of theme (VRM scene is always dark) */
+.onboarding-screen {
+  --onboarding-panel-bg: rgba(14, 14, 18, 0.72);
+  --onboarding-panel-border: rgba(200, 198, 220, 0.1);
+  --onboarding-panel-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --onboarding-text-strong: rgba(240, 238, 250, 0.95);
+  --onboarding-text-primary: rgba(232, 230, 240, 0.92);
+  --onboarding-text-subtle: rgba(200, 198, 210, 0.72);
+  --onboarding-text-muted: rgba(170, 168, 185, 0.58);
+  --onboarding-text-faint: rgba(140, 138, 155, 0.42);
+  --onboarding-card-bg: rgba(22, 22, 30, 0.55);
+  --onboarding-card-bg-hover: rgba(30, 30, 40, 0.65);
+  --onboarding-card-border: rgba(200, 198, 220, 0.14);
+  --onboarding-card-border-strong: rgba(207, 175, 90, 0.32);
+  --onboarding-divider: rgba(200, 198, 220, 0.12);
+}
+
 .onboarding-step-list::after {
   background: linear-gradient(
     180deg,

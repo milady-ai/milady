@@ -113,6 +113,19 @@
   }
 }
 
+@keyframes onboarding-dot-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(240, 185, 11, 0.5);
+    transform: scale(1);
+  }
+
+  50% {
+    box-shadow: 0 0 16px rgba(240, 185, 11, 0.7);
+    transform: scale(1.15);
+  }
+}
+
 .onboarding-step-name {
   font-size: 15px;
   letter-spacing: 0.08em;

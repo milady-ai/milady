@@ -137,7 +137,7 @@ export function OnboardingWizard() {
           zIndex: 40,
         }}
       >
-        {/* Corner decorations removed to avoid gold tint artifacts on the scene. */}
+        {/* Corner decorations removed — unstyled SVGs caused visible gold tint artifacts */}
 
         {/* Language selector — top right */}
         <div

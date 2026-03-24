@@ -22,7 +22,7 @@ export function OnboardingStepNav() {
   const connectorHeight =
     currentIndex <= 0
       ? "0px"
-      : `calc((100% - 52px) * ${Math.min(currentIndex, connectorCount)} / ${connectorCount})`;
+      : `calc((100% - 34px) * ${Math.min(currentIndex, connectorCount)} / ${connectorCount})`;
 
   return (
     <div className="absolute left-0 top-0 bottom-0 z-10 flex flex-col justify-center py-[48px] pl-[40px] pr-0 max-md:relative max-md:items-center max-md:px-4 max-md:pt-4 max-md:pb-2">
@@ -35,7 +35,7 @@ export function OnboardingStepNav() {
             } as React.CSSProperties
           }
           {...{
-            className: `relative flex flex-col max-md:flex-row max-md:items-center max-md:justify-center max-md:gap-5 before:absolute before:bottom-[26px] before:left-[7px] before:top-[26px] before:w-[1px] before:bg-gradient-to-b before:from-[rgba(255,255,255,0.08)] before:via-[rgba(255,255,255,0.14)] before:to-[rgba(255,255,255,0.06)] before:z-0 after:absolute after:left-[7px] after:top-[26px] after:z-0 after:h-[var(--tw-after-height)] after:w-[1px] after:bg-gradient-to-b after:from-accent/70 after:to-accent/18 after:transition-all after:duration-[800ms] after:ease-[cubic-bezier(0.25,0.46,0.45,0.94)] max-md:before:hidden max-md:after:hidden`,
+            className: `relative flex flex-col max-md:flex-row max-md:items-center max-md:justify-center max-md:gap-5 before:absolute before:bottom-[17px] before:left-[4px] before:top-[17px] before:w-[2px] before:rounded-full before:bg-gradient-to-b before:from-[rgba(255,255,255,0.06)] before:via-[rgba(255,255,255,0.10)] before:to-[rgba(255,255,255,0.06)] before:z-0 after:absolute after:left-[4px] after:top-[17px] after:z-0 after:h-[var(--tw-after-height)] after:w-[2px] after:rounded-full after:bg-gradient-to-b after:from-accent/70 after:to-accent/18 after:transition-all after:duration-[800ms] after:ease-[cubic-bezier(0.25,0.46,0.45,0.94)] max-md:before:hidden max-md:after:hidden`,
           }}
         >
           {activeSteps.map((step, i) => {
@@ -43,17 +43,17 @@ export function OnboardingStepNav() {
             const isActive = i === currentIndex;
             const isClickable = isDone;
 
-            const rowClass = `relative group flex w-full items-center gap-[20px] py-[19px] max-md:w-auto max-md:gap-0 max-md:py-0 ${isClickable ? "m-0 h-auto cursor-pointer justify-start rounded-none border-none bg-transparent px-0 text-left text-inherit hover:bg-transparent focus-visible:outline-2 focus-visible:outline-accent/60 focus-visible:outline-offset-3" : ""}`;
+            const rowClass = `relative group flex w-full items-center gap-[16px] py-[12px] max-md:w-auto max-md:gap-0 max-md:py-0 ${isClickable ? "m-0 h-auto cursor-pointer justify-start rounded-none border-none bg-transparent px-0 text-left text-inherit hover:bg-transparent focus-visible:outline-2 focus-visible:outline-accent/60 focus-visible:outline-offset-3" : ""}`;
 
             // Dot classes
             let dotClass =
-              "w-[14px] h-[14px] border border-[var(--onboarding-nav-card-border,rgba(201,204,209,0.18))] rotate-45 shrink-0 relative z-10 bg-[var(--onboarding-nav-card-bg,rgba(30,31,35,0.88))] transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]";
+              "w-[10px] h-[10px] rounded-full border border-[var(--onboarding-nav-card-border,rgba(201,204,209,0.24))] shrink-0 relative z-10 bg-[var(--onboarding-nav-card-bg,rgba(30,31,35,0.88))] transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]";
             if (isDone) {
               dotClass +=
-                " !bg-[var(--onboarding-accent-bg,rgba(207,175,90,0.22))] !border-[var(--onboarding-accent-border-hover,rgba(242,210,122,0.4))]";
+                " !bg-accent !border-accent";
             } else if (isActive) {
               dotClass +=
-                " !bg-accent !border-[rgba(255,248,220,0.9)] shadow-[0_0_12px_rgba(240,185,11,0.5)] animate-[onboarding-dot-pulse_2s_ease-in-out_infinite]";
+                " !w-[12px] !h-[12px] !bg-accent !border-[rgba(255,248,220,0.9)] shadow-[0_0_12px_rgba(240,185,11,0.5)] animate-[onboarding-dot-glow_2s_ease-in-out_infinite]";
             }
 
             // Name classes
