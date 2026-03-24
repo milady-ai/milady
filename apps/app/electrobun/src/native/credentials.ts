@@ -209,7 +209,7 @@ function scanEnvCredentials(): DetectedProvider[] {
 function maskApiKey(key: string | undefined): string | undefined {
   if (!key) return key;
   if (key.length <= 4) return "****";
-  return "****" + key.slice(-4);
+  return `****${key.slice(-4)}`;
 }
 
 /** Mask API keys in provider results before returning over IPC. */
