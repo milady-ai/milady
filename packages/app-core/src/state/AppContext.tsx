@@ -2018,13 +2018,18 @@ function AppProviderInner({
     try {
       const { character } = await client.getCharacter();
       setCharacterData(character);
+      // Replace any un-substituted {{name}} tokens that may have been persisted
+      // to the server before the fix (onboarding saved raw templates).
+      const savedName = character.name ?? "";
+      const replaceNameToken = (s: string) =>
+        s.replace(/\{\{name\}\}/g, savedName).replace(/\{\{agentName\}\}/g, savedName);
       setCharacterDraft({
-        name: character.name ?? "",
+        name: savedName,
         username: character.username ?? "",
         bio: Array.isArray(character.bio)
-          ? character.bio.join("\n")
-          : (character.bio ?? ""),
-        system: character.system ?? "",
+          ? character.bio.map(replaceNameToken).join("\n")
+          : replaceNameToken(character.bio ?? ""),
+        system: replaceNameToken(character.system ?? ""),
         adjectives: character.adjectives ?? [],
         topics: character.topics ?? [],
         style: {

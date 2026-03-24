@@ -667,8 +667,10 @@ export function CharacterEditor({
       !currentCharacter
     )
       return;
-    // Only apply defaults from the roster entry if this character is completely empty.
-    // Otherwise, loading a custom character and falling back to a roster ID would wipe the custom data.
+    // Only apply defaults from the roster entry if this character is completely empty,
+    // OR if the user has navigated to a different preset character than the one that's
+    // saved (e.g. selected Momo in the roster but Chen is saved — show Momo's data).
+    // Never wipe data for a custom/unnamed character that doesn't match any roster entry.
     const isNamed =
       typeof currentCharacter.name === "string" &&
       currentCharacter.name.trim().length > 0;
@@ -685,9 +687,19 @@ export function CharacterEditor({
       (!hasMeaningfulContent ? characterRoster[0] : null);
     if (!entry) return;
 
+    // Apply preset defaults if: no saved content, OR the active VRM character
+    // differs from what's saved (name mismatch means user switched presets).
+    const savedName =
+      typeof currentCharacter.name === "string"
+        ? currentCharacter.name.trim().toLowerCase()
+        : null;
+    const isMatchingSavedCharacter =
+      savedName !== null && savedName === entry.name.toLowerCase();
+    const applyDefaults = !hasMeaningfulContent || !isMatchingSavedCharacter;
+
     // Suppress dirty-tracking during programmatic auto-select
     suppressDirtyRef.current = true;
-    commitCharacterSelection(entry, !hasMeaningfulContent);
+    commitCharacterSelection(entry, applyDefaults);
     suppressDirtyRef.current = false;
     // Mark this auto-selection as the saved baseline (not a user change)
     setSavedCharacterId(entry.id);
