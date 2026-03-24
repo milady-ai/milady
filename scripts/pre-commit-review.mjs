@@ -69,6 +69,10 @@ export function parseBehindCount(leftRightCountStdout) {
   return Number.isFinite(behind) ? behind : 0;
 }
 
+export function formatBehindWarning(baseRef, behindCount) {
+  return `[pre-commit-review] Branch is behind ${baseRef} by ${behindCount} commit(s). Rebase before push.`;
+}
+
 function getBehindCount(baseRef) {
   const result = runGit([
     "rev-list",
@@ -128,9 +132,7 @@ function main() {
 
   const behindCount = getBehindCount(baseRef);
   if (behindCount > 0) {
-    failures.push(
-      `[pre-commit-review] Branch is behind ${baseRef} by ${behindCount} commit(s). Rebase before committing.`,
-    );
+    warnings.push(formatBehindWarning(baseRef, behindCount));
   }
 
   const overlaps = getUpstreamOverlaps(baseRef, stagedFiles);

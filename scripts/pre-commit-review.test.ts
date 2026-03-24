@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  formatBehindWarning,
   isBehavioralSourceFile,
   isTestFile,
   parseBehindCount,
@@ -19,6 +20,12 @@ describe("pre-commit review helpers", () => {
     expect(parseBehindCount("3\t12")).toBe(3);
     expect(parseBehindCount("0 5")).toBe(0);
     expect(parseBehindCount("nope")).toBe(0);
+  });
+
+  it("formats behind-base warning message", () => {
+    expect(formatBehindWarning("origin/develop", 4)).toContain(
+      "Rebase before push.",
+    );
   });
 
   it("requires tests when behavioral files are staged", () => {
