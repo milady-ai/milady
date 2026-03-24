@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "description": "Live docs for elizaOS, AI SDK, drizzle-orm, ethers, telegraf, zod, and other rapidly-evolving alpha deps"
+    },
+    "deepwiki": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/deepwiki-mcp@latest"],
+      "description": "GitHub repo docs — use for elizaOS/eliza, vercel/ai, oven-sh/bun"
+    }
+  }
+}
