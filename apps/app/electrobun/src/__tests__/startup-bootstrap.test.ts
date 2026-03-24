@@ -59,6 +59,14 @@ describe("Electrobun startup bootstrap", () => {
     expect(source).toContain("[Main] Skipping embedded agent startup");
   });
 
+  it("normalizes persisted desktop page zoom on dom-ready", () => {
+    const source = fs.readFileSync(INDEX_PATH, "utf8");
+
+    expect(source).toContain("function normalizeMainWindowZoom");
+    expect(source).toContain("win.setPageZoom(1);");
+    expect(source).toContain("normalizeMainWindowZoom(win);");
+  });
+
   it("does not load repo or ~/.eliza env files in packaged desktop builds", () => {
     const source = fs.readFileSync(INDEX_PATH, "utf8");
 

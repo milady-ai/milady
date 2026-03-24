@@ -715,6 +715,27 @@ async function createMainWindow(): Promise<BrowserWindow> {
   return win;
 }
 
+/**
+ * Force desktop renderer zoom back to baseline.
+ *
+ * WHY: page zoom can persist across runs (or be changed by accidental
+ * Ctrl/Cmd+wheel). That leaves onboarding looking "zoomed out" with broken
+ * scrolling/layout in desktop while browser `bun run dev` looks correct.
+ */
+function normalizeMainWindowZoom(win: BrowserWindow): void {
+  try {
+    const currentZoom = win.getPageZoom();
+    if (Math.abs(currentZoom - 1) > 0.001) {
+      console.info(
+        `[Main] Resetting persisted page zoom from ${currentZoom.toFixed(3)} to 1.000`,
+      );
+    }
+    win.setPageZoom(1);
+  } catch (error) {
+    console.warn("[Main] Failed to normalize page zoom:", error);
+  }
+}
+
 function attachMainWindow(win: BrowserWindow): BrowserWindow {
   const sendToWebview = wireRpcAndModules(win);
   currentWindow = win;
@@ -722,6 +743,7 @@ function attachMainWindow(win: BrowserWindow): BrowserWindow {
   trackFocusedWindow(win);
 
   win.webview.on("dom-ready", () => {
+    normalizeMainWindowZoom(win);
     injectApiBase(win);
   });
 
