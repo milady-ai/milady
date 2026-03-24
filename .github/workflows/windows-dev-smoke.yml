@@ -1,0 +1,49 @@
+name: Windows Dev Smoke
+
+on:
+  pull_request:
+    branches: [develop]
+    paths:
+      - "scripts/**"
+      - "apps/app/electrobun/**"
+      - "package.json"
+      - "bun.lock"
+  workflow_dispatch:
+
+jobs:
+  dev-smoke:
+    name: Windows smoke (${{ matrix.bun-version }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        bun-version: ["1.3.10", "canary"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ matrix.bun-version }}
+
+      - name: Install dependencies
+        run: bun install --ignore-scripts
+
+      - name: Verify json5 interop
+        run: >
+          bun -e "import * as JSON5Module from 'json5';
+          const JSON5 = JSON5Module.default ?? JSON5Module;
+          if (typeof JSON5.parse !== 'function') throw new Error('JSON5.parse missing');
+          console.log('json5 interop ok');"
+
+      - name: Verify bun-version-guard
+        run: >
+          bun -e "import { getBunVersionAdvisory } from './scripts/lib/bun-version-guard.mjs';
+          const result = getBunVersionAdvisory();
+          console.log('bun-version-guard:', result ?? 'OK (no advisory)');"

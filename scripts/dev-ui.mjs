@@ -28,6 +28,7 @@ import process from "node:process";
 import { ethers } from "ethers";
 import * as JSON5Module from "json5";
 import { CAPACITOR_PLUGIN_NAMES } from "../apps/app/scripts/capacitor-plugin-names.mjs";
+import { getBunVersionAdvisory } from "./lib/bun-version-guard.mjs";
 import { capacitorPluginsBuildNeeded } from "./lib/capacitor-plugin-build-needed.mjs";
 import {
   coerceBoolean,
@@ -87,6 +88,9 @@ function getCliName() {
 
 const cliName = getCliName();
 const logPrefix = `[${cliName}]`;
+
+const bunAdvisory = getBunVersionAdvisory();
+if (bunAdvisory) console.warn(`${logPrefix} ${bunAdvisory}`);
 
 const cwd = process.cwd();
 const uiOnly = process.argv.includes("--ui-only");
