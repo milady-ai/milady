@@ -2,13 +2,14 @@
  * Locks `deriveConnectionScreen`, `resolveConnectionUiSpec`, and `applyConnectionTransition` together.
  * **Why merge + derive in tests:** patches alone do not prove the user lands on the right screen after an event.
  */
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   applyConnectionTransition,
   type ConnectionFlowSnapshot,
   computeShowProviderSelection,
   deriveConnectionScreen,
   getEffectiveRunMode,
+  isProviderConfirmDisabled,
   mergeConnectionSnapshot,
   resolveConnectionUiSpec,
 } from "../connection-flow";
@@ -250,6 +251,186 @@ describe("connection-flow", () => {
       if (r?.kind !== "patch") return;
       const s1 = mergeConnectionSnapshot(s0, r.patch);
       expect(deriveConnectionScreen(s1)).toBe("providerDetail");
+    });
+
+    it("all known event types are handled (no null for valid events)", () => {
+      const validEvents = [
+        { type: "selectLocalHosting" as const },
+        { type: "selectRemoteHosting" as const },
+        { type: "selectElizaCloudHosting" as const },
+        { type: "backElizaCloudPreProvider" as const },
+        { type: "clearProvider" as const },
+        { type: "setElizaCloudTab" as const, tab: "apikey" as const },
+        { type: "setSubscriptionTab" as const, tab: "oauth" as const },
+        {
+          type: "selectProvider" as const,
+          providerId: "openai",
+        },
+      ];
+      for (const event of validEvents) {
+        const r = applyConnectionTransition(baseSnap(), event);
+        expect(r).not.toBeNull();
+      }
+    });
+
+    it("unknown event type returns null via exhaustive default", () => {
+      const s0 = baseSnap();
+      const spy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      // Force an unknown event type to exercise the default branch
+      const r = applyConnectionTransition(s0, {
+        type: "totally_unknown",
+      } as never);
+      expect(r).toBeNull();
+      expect(spy).toHaveBeenCalledWith(
+        "[connection-flow] Unhandled connection event:",
+        "totally_unknown",
+      );
+      spy.mockRestore();
+    });
+  });
+
+  describe("isProviderConfirmDisabled", () => {
+    const defaults = {
+      provider: "",
+      apiKey: "",
+      elizaCloudTab: "login" as const,
+      elizaCloudConnected: false,
+      subscriptionTab: "token" as const,
+    };
+
+    it("disabled when no provider selected", () => {
+      expect(isProviderConfirmDisabled(defaults)).toBe(true);
+    });
+
+    it("elizacloud: disabled when login tab and not connected", () => {
+      expect(
+        isProviderConfirmDisabled({
+          ...defaults,
+          provider: "elizacloud",
+          elizaCloudTab: "login",
+          elizaCloudConnected: false,
+        }),
+      ).toBe(true);
+    });
+
+    it("elizacloud: enabled when login tab and connected", () => {
+      expect(
+        isProviderConfirmDisabled({
+          ...defaults,
+          provider: "elizacloud",
+          elizaCloudTab: "login",
+          elizaCloudConnected: true,
+        }),
+      ).toBe(false);
+    });
+
+    it("elizacloud: disabled when apikey tab and empty key", () => {
+      expect(
+        isProviderConfirmDisabled({
+          ...defaults,
+          provider: "elizacloud",
+          elizaCloudTab: "apikey",
+          apiKey: "  ",
+        }),
+      ).toBe(true);
+    });
+
+    it("elizacloud: enabled when apikey tab and key provided", () => {
+      expect(
+        isProviderConfirmDisabled({
+          ...defaults,
+          provider: "elizacloud",
+          elizaCloudTab: "apikey",
+          apiKey: "ec-test-key",
+        }),
+      ).toBe(false);
+    });
+
+    it("anthropic-subscription: disabled when token tab and empty key", () => {
+      expect(
+        isProviderConfirmDisabled({
+          ...defaults,
+          provider: "anthropic-subscription",
+          subscriptionTab: "token",
+          apiKey: "",
+        }),
+      ).toBe(true);
+    });
+
+    it("anthropic-subscription: enabled when token tab and key provided", () => {
+      expect(
+        isProviderConfirmDisabled({
+          ...defaults,
+          provider: "anthropic-subscription",
+          subscriptionTab: "token",
+          apiKey: "sk-ant-oat01-test",
+        }),
+      ).toBe(false);
+    });
+
+    it("anthropic-subscription: enabled on oauth tab regardless of key", () => {
+      expect(
+        isProviderConfirmDisabled({
+          ...defaults,
+          provider: "anthropic-subscription",
+          subscriptionTab: "oauth",
+          apiKey: "",
+        }),
+      ).toBe(false);
+    });
+
+    it("ollama: enabled without API key", () => {
+      expect(
+        isProviderConfirmDisabled({ ...defaults, provider: "ollama" }),
+      ).toBe(false);
+    });
+
+    it("pi-ai: enabled without API key", () => {
+      expect(
+        isProviderConfirmDisabled({ ...defaults, provider: "pi-ai" }),
+      ).toBe(false);
+    });
+
+    it.each([
+      "openai",
+      "anthropic",
+      "openrouter",
+      "gemini",
+      "grok",
+      "groq",
+      "deepseek",
+      "mistral",
+      "together",
+      "zai",
+    ])("%s: disabled when API key empty", (providerId) => {
+      expect(
+        isProviderConfirmDisabled({
+          ...defaults,
+          provider: providerId,
+          apiKey: "",
+        }),
+      ).toBe(true);
+    });
+
+    it.each([
+      "openai",
+      "anthropic",
+      "openrouter",
+      "gemini",
+      "grok",
+      "groq",
+      "deepseek",
+      "mistral",
+      "together",
+      "zai",
+    ])("%s: enabled when API key provided", (providerId) => {
+      expect(
+        isProviderConfirmDisabled({
+          ...defaults,
+          provider: providerId,
+          apiKey: "sk-test-key-12345",
+        }),
+      ).toBe(false);
     });
   });
 });

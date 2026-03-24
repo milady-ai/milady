@@ -33,7 +33,12 @@ function dispatchMessage(messageName: string, payload: unknown): void {
     const apiBaseUpdate = payload as { base: string; token?: string };
     window.__MILADY_API_BASE__ = apiBaseUpdate.base;
     if (apiBaseUpdate.token) {
-      window.__MILADY_API_TOKEN__ = apiBaseUpdate.token;
+      Object.defineProperty(window, "__MILADY_API_TOKEN__", {
+        value: apiBaseUpdate.token,
+        configurable: true,
+        writable: true,
+        enumerable: false,
+      });
     }
   }
 

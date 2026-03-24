@@ -17,7 +17,10 @@ import type {
 } from "../../../api";
 import { client } from "../../../api";
 import { useBranding } from "../../../config";
-import type { ConnectionEvent } from "../../../onboarding/connection-flow";
+import {
+  type ConnectionEvent,
+  isProviderConfirmDisabled,
+} from "../../../onboarding/connection-flow";
 import { getProviderLogo } from "../../../providers";
 import { useApp } from "../../../state";
 import { openExternalUrl } from "../../../utils";
@@ -242,10 +245,13 @@ export function ConnectionProviderDetailScreen({
     handleOnboardingNext,
   });
 
-  const isConfirmDisabled =
-    onboardingProvider === "elizacloud" &&
-    ((onboardingElizaCloudTab === "login" && !elizaCloudConnected) ||
-      (onboardingElizaCloudTab === "apikey" && !onboardingApiKey.trim()));
+  const isConfirmDisabled = isProviderConfirmDisabled({
+    provider: onboardingProvider,
+    apiKey: onboardingApiKey,
+    elizaCloudTab: onboardingElizaCloudTab,
+    elizaCloudConnected,
+    subscriptionTab: onboardingSubscriptionTab,
+  });
 
   return (
     <>
@@ -354,6 +360,7 @@ export function ConnectionProviderDetailScreen({
                   }
                   return (
                     <p
+                      aria-live="assertive"
                       style={{
                         color: "var(--danger)",
                         fontSize: "0.8125rem",
@@ -526,7 +533,10 @@ export function ConnectionProviderDetailScreen({
                 {t("onboarding.requiresClaudeSub")}
               </p>
               {anthropicError && (
-                <p style={{ fontSize: "0.75rem", color: "var(--danger)" }}>
+                <p
+                  aria-live="assertive"
+                  style={{ fontSize: "0.75rem", color: "var(--danger)" }}
+                >
                   {anthropicError}
                 </p>
               )}
@@ -565,7 +575,10 @@ export function ConnectionProviderDetailScreen({
                 style={{ textAlign: "center" }}
               />
               {anthropicError && (
-                <p style={{ fontSize: "0.75rem", color: "var(--danger)" }}>
+                <p
+                  aria-live="assertive"
+                  style={{ fontSize: "0.75rem", color: "var(--danger)" }}
+                >
                   {anthropicError}
                 </p>
               )}
@@ -734,7 +747,10 @@ export function ConnectionProviderDetailScreen({
                 }}
               />
               {openaiError && (
-                <p style={{ fontSize: "0.75rem", color: "var(--danger)" }}>
+                <p
+                  aria-live="assertive"
+                  style={{ fontSize: "0.75rem", color: "var(--danger)" }}
+                >
                   {openaiError}
                 </p>
               )}
@@ -811,6 +827,7 @@ export function ConnectionProviderDetailScreen({
             />
             {apiKeyFormatWarning && (
               <p
+                aria-live="assertive"
                 style={{
                   fontSize: "0.75rem",
                   color: "var(--danger)",

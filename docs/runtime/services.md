@@ -51,27 +51,34 @@ Core plugins are always loaded and each provides one or more services:
 |---|---|---|
 | `@elizaos/plugin-sql` | Database adapter | PGLite or PostgreSQL persistence; provides `runtime.adapter` |
 | `@elizaos/plugin-local-embedding` | `TEXT_EMBEDDING` handler | Local GGUF embedding model via node-llama-cpp |
-| `@elizaos/plugin-secrets-manager` | Secrets service | Encrypted credential storage and retrieval |
+| `@elizaos/plugin-form` | Form service | Structured form packaging for guided user journeys |
 | `@elizaos/plugin-knowledge` | Knowledge service | RAG knowledge indexing and retrieval |
-| `@elizaos/plugin-rolodex` | Rolodex service | Contact graph, relationship memory, social tracking |
 | `@elizaos/plugin-trajectory-logger` | `trajectory_logger` | Debug and RL training trajectory capture |
 | `@elizaos/plugin-agent-orchestrator` | Orchestrator service | Multi-agent task coordination and spawning |
 | `@elizaos/plugin-cron` | Cron service | Scheduled job execution |
 | `@elizaos/plugin-shell` | Shell service | Shell command execution with security controls |
-| `@elizaos/plugin-plugin-manager` | Plugin manager service | Dynamic plugin install/uninstall at runtime |
 | `@elizaos/plugin-agent-skills` | `AGENT_SKILLS_SERVICE` | Skill catalog loading and execution |
-| `@elizaos/plugin-pdf` | PDF service | PDF document processing |
-| `@elizaos/plugin-form` | Form service | Structured form packaging |
 
 ## Optional Core Services
 
-These services are available but not loaded by default:
+These services are available but not loaded by default — enable via admin panel or config:
 
 | Plugin | Description |
 |---|---|
+| `@elizaos/plugin-pdf` | PDF document processing |
+| `@elizaos/plugin-cua` | CUA computer-use agent (cloud sandbox automation) |
+| `@elizaos/plugin-obsidian` | Obsidian vault CLI integration |
 | `@elizaos/plugin-code` | Code writing and file operations |
-| `@elizaos/plugin-browser` | Browser automation (requires stagehand-server binary) |
-| `@elizaos/plugin-vision` | Visual understanding (requires @tensorflow/tfjs-node) |
+| `@elizaos/plugin-repoprompt` | RepoPrompt CLI integration |
+| `@elizaos/plugin-claude-code-workbench` | Claude Code companion workflows |
+| `@elizaos/plugin-computeruse` | Computer use automation (platform-specific) |
+| `@elizaos/plugin-browser` | Browser automation (requires stagehand-server) |
+| `@elizaos/plugin-vision` | Visual understanding (feature-gated) |
+| `@elizaos/plugin-edge-tts` | Text-to-speech (Microsoft Edge TTS) |
+| `@elizaos/plugin-elevenlabs` | ElevenLabs text-to-speech |
+| `@elizaos/plugin-secrets-manager` | Encrypted credential storage (statically imported, may be re-enabled as core) |
+| `@elizaos/plugin-rolodex` | Contact graph, relationship memory (statically imported, may be re-enabled as core) |
+| `@elizaos/plugin-plugin-manager` | Dynamic plugin install/uninstall at runtime (statically imported, may be re-enabled as core) |
 | `@elizaos/plugin-computeruse` | Computer use automation (requires platform binaries) |
 | `@elizaos/plugin-x402` | x402 HTTP micropayment protocol |
 

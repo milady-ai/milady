@@ -49,10 +49,25 @@ describe("pre-review-local helpers", () => {
         message: "add connector wiring",
       }),
     ).toBe("feature");
+
+    expect(
+      classificationFromInputs({
+        branch: "docs/update-connectors",
+        message: "add Matrix connector docs",
+      }),
+    ).toBe("docs");
+
+    expect(
+      classificationFromInputs({
+        branch: "chore/readme-update",
+        message: "update README.md",
+      }),
+    ).toBe("docs");
   });
 
   it("maps classification to scope verdict", () => {
     expect(scopeVerdictFor("aesthetic")).toBe("out of scope");
+    expect(scopeVerdictFor("docs")).toBe("in scope");
     expect(scopeVerdictFor("feature")).toBe("needs deep review");
     expect(scopeVerdictFor("bugfix")).toBe("in scope");
     expect(scopeVerdictFor("security")).toBe("in scope");

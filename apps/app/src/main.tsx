@@ -335,6 +335,9 @@ function handleDeepLink(url: string): void {
       });
       break;
     }
+    default:
+      console.warn("[Milady] Unknown deep link path:", path);
+      break;
   }
 }
 

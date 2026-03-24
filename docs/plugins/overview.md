@@ -24,11 +24,11 @@ A plugin is a self-contained module that registers one or more of:
 </Card>
 
 <Card title="Model Providers" icon="brain" href="/plugin-registry/llm/openai">
-  LLM integrations for OpenAI, Anthropic, Google Gemini, Groq, Ollama, OpenRouter, DeepSeek, xAI, Mistral, Cohere, Together, Qwen, Minimax, and Pi AI.
+  LLM integrations for OpenAI, Anthropic, Google Gemini, Google Antigravity, Groq, Ollama, OpenRouter, DeepSeek, xAI, Mistral, Cohere, Together, Qwen, Minimax, Pi AI, Perplexity, and Vercel AI Gateway.
 </Card>
 
 <Card title="Platform Connectors" icon="plug" href="/plugin-registry/platform/discord">
-  Bridges to messaging platforms — Discord, Telegram, Twitter, Slack, WhatsApp, Signal, iMessage, BlueBubbles, MS Teams, Google Chat, Mattermost, Farcaster, and WeChat.
+  Bridges to messaging platforms — Discord, Telegram, Twitter, Slack, WhatsApp, Signal, iMessage, BlueBubbles, MS Teams, Google Chat, Mattermost, Farcaster, WeChat, Twitch, Feishu, Matrix, Nostr, Lens, Retake, and Blooio.
 </Card>
 
 <Card title="DeFi & Blockchain" icon="wallet" href="/plugin-registry/defi/evm">
@@ -48,12 +48,10 @@ Plugins are loaded during runtime initialization in this order:
 1. **Milady plugin** — The bridge plugin (`createMiladyPlugin()`) providing workspace context, session keys, emotes, custom actions, and lifecycle actions. Always first in the plugins array.
 2. **Pre-registered plugins** — `@elizaos/plugin-sql` and `@elizaos/plugin-local-embedding` are pre-registered before `runtime.initialize()` to prevent race conditions.
 3. **Core plugins** — Always loaded: `sql`, `local-embedding`, `form`, `knowledge`, `trajectory-logger`, `agent-orchestrator`, `cron`, `shell`, `agent-skills` (see `src/runtime/core-plugins.ts`). Additional plugins like `pdf`, `browser`, `computeruse`, `obsidian`, `vision`, `edge-tts`, and `elevenlabs` are optional and loaded when their feature flags or environment variables are configured.
-4. **Connector plugins** — Loaded when channel config is present in `connectors` (e.g., Discord, Telegram, Slack).
-5. **Provider plugins** — Loaded when the corresponding API key env var is set (e.g., `ANTHROPIC_API_KEY` enables `@elizaos/plugin-anthropic`).
-6. **Feature plugins** — Loaded when feature flags or `plugins.entries` are enabled in `milady.json`.
-7. **User-installed plugins** — Tracked in `plugins.installs` in `milady.json`.
-8. **Custom/drop-in plugins** — Scanned from `~/.milady/plugins/custom/`.
-9. **Ejected plugins** — Local overrides from `~/.milady/plugins/ejected/`.
+4. **Auto-enabled plugins** — Connector, provider, feature, and streaming plugins are auto-enabled based on config and environment variables (see [Architecture](/plugins/architecture) for the full maps).
+5. **Ejected plugins** — Local overrides discovered from `~/.milady/plugins/ejected/`. When an ejected copy exists, it takes priority over the npm-published version.
+6. **User-installed plugins** — Tracked in `plugins.installs` in `milady.json`. Collected before drop-in plugins; any plugin name already present here takes precedence.
+7. **Custom/drop-in plugins** — Scanned from `~/.milady/plugins/custom/` and any extra paths in `plugins.load.paths`. Plugins whose names already exist in `plugins.installs` are skipped (`mergeDropInPlugins` precedence rule).
 
 ```json
 // milady.json plugin configuration

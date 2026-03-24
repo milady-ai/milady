@@ -2004,6 +2004,9 @@ async function handleMiladyCompatRoute(
   // window; these endpoints mirror orchestrator state (stack JSON), proxied screenshot, and log
   // tail — see docs/apps/desktop-local-development.md and dev-stack.ts / dev-console-log.ts.
   if (method === "GET" && url.pathname === "/api/dev/stack") {
+    if (!ensureCompatApiAuthorized(req, res)) {
+      return true;
+    }
     const payload = resolveDevStackFromEnv();
     const localPort = (req.socket as { localPort?: number } | null)?.localPort;
     if (typeof localPort === "number" && localPort > 0) {
@@ -2125,6 +2128,10 @@ async function handleMiladyCompatRoute(
   // Cloud-provisioned containers skip onboarding — the platform handles setup.
   // Return { complete: true } so the frontend goes directly to chat.
   if (method === "GET" && url.pathname === "/api/onboarding/status") {
+    if (!ensureCompatApiAuthorized(req, res)) {
+      return true;
+    }
+
     if (_isCloudProvisioned()) {
       sendJsonResponse(res, 200, { complete: true });
       return true;
@@ -3128,18 +3135,6 @@ async function handleMiladyCompatRoute(
     req.push(replayBody);
     req.push(null);
     return false;
-  }
-
-  if (method === "GET" && url.pathname === "/api/onboarding/status") {
-    if (!ensureCompatApiAuthorized(req, res)) {
-      return true;
-    }
-
-    const config = loadElizaConfig();
-    sendJsonResponse(res, 200, {
-      complete: hasCompatPersistedOnboardingState(config),
-    });
-    return true;
   }
 
   if (method === "GET" && url.pathname === "/api/config") {

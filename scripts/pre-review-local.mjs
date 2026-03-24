@@ -121,11 +121,16 @@ export function classificationFromInputs({ branch, message }) {
     return "bugfix";
   }
 
+  if (/\bdocs?\b|\.mdx?\b|\.md\b|readme/i.test(content)) {
+    return "docs";
+  }
+
   return "feature";
 }
 
 export function scopeVerdictFor(classification) {
   if (classification === "aesthetic") return "out of scope";
+  if (classification === "docs") return "in scope";
   if (classification === "feature") return "needs deep review";
   return "in scope";
 }
@@ -317,10 +322,16 @@ export function runChecks() {
     }
   }
 
+  // Docs-only changes don't need tests
+  const isDocsOnly = changed.files.every(
+    (f) => f.startsWith("docs/") || /\.(mdx?|txt)$/i.test(f),
+  );
+
   if (
-    classification === "bugfix" ||
-    classification === "feature" ||
-    classification === "security"
+    !isDocsOnly &&
+    (classification === "bugfix" ||
+      classification === "feature" ||
+      classification === "security")
   ) {
     const testFiles = changed.files.filter((file) =>
       /\.(?:e2e\.)?test\.(ts|tsx|js|jsx)$/.test(file),

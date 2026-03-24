@@ -357,8 +357,8 @@ where to get the credentials, minimum required fields, and tips for optional fie
 **Get credentials:** https://console.cloud.google.com → APIs → Google Chat API
 **Minimum required:** Service account JSON or `GOOGLE_APPLICATION_CREDENTIALS` path
 **Variables:**
-- `GOOGLE_CHAT_SERVICE_ACCOUNT` — Full service account JSON (paste the entire JSON)
-- `GOOGLE_CHAT_SERVICE_ACCOUNT_FILE` — Path to service account JSON file
+- `GOOGLE_CHAT_SERVICE_ACCOUNT_KEY` — Full service account JSON (paste the entire JSON)
+- `GOOGLE_CHAT_SERVICE_ACCOUNT_FILE` — Alternative: path to service account JSON file
 - `GOOGLE_APPLICATION_CREDENTIALS` — Alternative: path to credentials file
 - `GOOGLE_CHAT_SPACES` — Comma-separated space names (e.g. `spaces/AAAA_space_id`)
 - `GOOGLE_CHAT_AUDIENCE_TYPE` — `PUBLISHED` or `DOMAIN_INSTALL`
@@ -411,7 +411,7 @@ where to get the credentials, minimum required fields, and tips for optional fie
 - `BLOOIO_WEBHOOK_URL` — Your public URL for incoming SMS webhooks
 - `BLOOIO_WEBHOOK_SECRET` — Secret for webhook signature verification
 - `BLOOIO_BASE_URL` — bloo.io API base URL (leave as default)
-- `BLOOIO_FROM_NUMBER` — Phone number to send from
+- `BLOOIO_PHONE_NUMBER` — Phone number to send from
 - `BLOOIO_WEBHOOK_PORT` — Port for webhook listener
 **Tips:** Blooio bridges iMessage/SMS. Requires a Mac running the Blooio app.
 
@@ -454,9 +454,9 @@ where to get the credentials, minimum required fields, and tips for optional fie
 
 ### Mattermost
 **Get credentials:** Your Mattermost instance → System Console → Integrations → Bot Accounts
-**Minimum required:** `MATTERMOST_SERVER_URL` + `MATTERMOST_BOT_TOKEN`
+**Minimum required:** `MATTERMOST_BASE_URL` + `MATTERMOST_BOT_TOKEN`
 **Variables:**
-- `MATTERMOST_SERVER_URL` — e.g. `https://mattermost.yourcompany.com`
+- `MATTERMOST_BASE_URL` — e.g. `https://mattermost.yourcompany.com`
 - `MATTERMOST_BOT_TOKEN` — From System Console → Bot Accounts → Add Bot Account
 - `MATTERMOST_TEAM_ID` — Your team ID (from team URL or API)
 - `MATTERMOST_DM_POLICY` / `MATTERMOST_GROUP_POLICY` — `allow-all` or `allow-from`
@@ -539,9 +539,9 @@ Monitors Gmail via Google Pub/Sub push notifications.
 
 ### Retake.tv
 Live video streaming connector.
-**Minimum required:** `RETAKE_ACCESS_TOKEN`
+**Minimum required:** `RETAKE_AGENT_TOKEN`
 **Variables:**
-- `RETAKE_ACCESS_TOKEN` — From your retake.tv account
+- `RETAKE_AGENT_TOKEN` — From your retake.tv account
 - `RETAKE_API_URL` — API endpoint (default provided)
 - `RETAKE_CAPTURE_URL` — Screen capture endpoint
 

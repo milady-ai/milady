@@ -277,7 +277,12 @@ kbd {
   background-color: hsl(240 4.8% 10%);
 }
 
-/* Focus visible improvements for dark mode */
+/* Focus visible improvements */
+:focus-visible {
+  outline: 2px solid hsl(217 91% 50%);
+  outline-offset: 2px;
+}
+
 [data-theme="dark"] :focus-visible {
   outline: 2px solid hsl(217 91% 60%);
   outline-offset: 2px;

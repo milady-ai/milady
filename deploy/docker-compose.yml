@@ -6,6 +6,8 @@ services:
       TERM: xterm-256color
       MILADY_GATEWAY_TOKEN: ${MILADY_GATEWAY_TOKEN}
       MILADY_ALLOWED_ORIGINS: ${MILADY_ALLOWED_ORIGINS}
+      # Set MILADY_API_TOKEN for non-localhost deployments to require auth on API routes
+      MILADY_API_TOKEN: ${MILADY_API_TOKEN:-}
       CLAUDE_AI_SESSION_KEY: ${CLAUDE_AI_SESSION_KEY}
       CLAUDE_WEB_SESSION_KEY: ${CLAUDE_WEB_SESSION_KEY}
       CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE}
@@ -17,6 +19,12 @@ services:
       - "${MILADY_BRIDGE_PORT:-18790}:18790"
     init: true
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${MILADY_GATEWAY_PORT:-18789}/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     command:
       [
         "node",
@@ -34,6 +42,8 @@ services:
       HOME: /home/node
       TERM: xterm-256color
       MILADY_GATEWAY_TOKEN: ${MILADY_GATEWAY_TOKEN}
+      # Set MILADY_API_TOKEN for non-localhost deployments to require auth on API routes
+      MILADY_API_TOKEN: ${MILADY_API_TOKEN:-}
       BROWSER: echo
       CLAUDE_AI_SESSION_KEY: ${CLAUDE_AI_SESSION_KEY}
       CLAUDE_WEB_SESSION_KEY: ${CLAUDE_WEB_SESSION_KEY}
