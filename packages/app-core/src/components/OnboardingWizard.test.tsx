@@ -173,6 +173,7 @@ describe("OnboardingWizard", () => {
     });
     expect(layout?.props.className).toContain("justify-between");
     expect(layout?.props.className).toContain("items-center");
+    expect(layout?.props.className).toContain("overflow-hidden");
   });
 
   describe("onboarding overlay reveal fallback", () => {

@@ -74,6 +74,33 @@ export function OnboardingWizard() {
     };
   }, [uiTheme]);
 
+  // Keep onboarding pinned to the viewport in desktop/webview contexts.
+  // WHY: some shells can retain page-level scroll state, which makes the
+  // welcome rail/panel appear to drift toward the bottom-left while scrolling.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const html = document.documentElement;
+    const body = document.body;
+    if (!html || !body) return;
+
+    const prevHtmlOverflow = html.style.overflow;
+    const prevHtmlOverscroll = html.style.overscrollBehavior;
+    const prevBodyOverflow = body.style.overflow;
+    const prevBodyOverscroll = body.style.overscrollBehavior;
+
+    html.style.overflow = "hidden";
+    html.style.overscrollBehavior = "none";
+    body.style.overflow = "hidden";
+    body.style.overscrollBehavior = "none";
+
+    return () => {
+      html.style.overflow = prevHtmlOverflow;
+      html.style.overscrollBehavior = prevHtmlOverscroll;
+      body.style.overflow = prevBodyOverflow;
+      body.style.overscrollBehavior = prevBodyOverscroll;
+    };
+  }, []);
+
   // Overlay stays opacity 0 until VrmStage calls onRevealStart. After Reset Milady (or
   // any remount), the engine sometimes never emits reveal — user sees only the avatar.
   useEffect(() => {
@@ -236,7 +263,7 @@ export function OnboardingWizard() {
         ) : (
           <div className="absolute inset-0 z-20 pointer-events-none [&>*]:pointer-events-auto">
             <div
-              className="flex h-full w-full items-center justify-between max-md:flex-col max-md:items-stretch max-md:justify-start"
+              className="flex h-full w-full min-h-0 min-w-0 items-center justify-between overflow-hidden max-md:flex-col max-md:items-stretch max-md:justify-start"
               data-testid="onboarding-overlay-layout"
             >
               <OnboardingStepNav />
