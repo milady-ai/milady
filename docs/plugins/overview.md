@@ -50,8 +50,8 @@ Plugins are loaded during runtime initialization in this order:
 3. **Core plugins** — Always loaded: `sql`, `local-embedding`, `form`, `knowledge`, `trajectory-logger`, `agent-orchestrator`, `cron`, `shell`, `agent-skills` (see `src/runtime/core-plugins.ts`). Additional plugins like `pdf`, `browser`, `computeruse`, `obsidian`, `vision`, `edge-tts`, and `elevenlabs` are optional and loaded when their feature flags or environment variables are configured.
 4. **Auto-enabled plugins** — Connector, provider, feature, and streaming plugins are auto-enabled based on config and environment variables (see [Architecture](/plugins/architecture) for the full maps).
 5. **Ejected plugins** — Local overrides discovered from `~/.milady/plugins/ejected/`. When an ejected copy exists, it takes priority over the npm-published version.
-6. **Custom/drop-in plugins** — Scanned from `~/.milady/plugins/custom/` and any extra paths in `plugins.load.paths`.
-7. **User-installed plugins** — Tracked in `plugins.installs` in `milady.json`.
+6. **User-installed plugins** — Tracked in `plugins.installs` in `milady.json`. Collected before drop-in plugins; any plugin name already present here takes precedence.
+7. **Custom/drop-in plugins** — Scanned from `~/.milady/plugins/custom/` and any extra paths in `plugins.load.paths`. Plugins whose names already exist in `plugins.installs` are skipped (`mergeDropInPlugins` precedence rule).
 
 ```json
 // milady.json plugin configuration
