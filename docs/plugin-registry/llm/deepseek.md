@@ -106,4 +106,4 @@ DeepSeek-V3 costs a fraction of GPT-4o at comparable quality for most tasks.
 - [OpenRouter Plugin](/plugin-registry/llm/openrouter) — Access DeepSeek via OpenRouter
 - [Groq Plugin](/plugin-registry/llm/groq) — Fast inference alternative
 - [Ollama Plugin](/plugin-registry/llm/ollama) — Run DeepSeek locally
-- [Model Providers Guide](/model-providers) — Compare all providers
+- [Model Providers](/runtime/models) — Compare all providers

@@ -115,4 +115,4 @@ See [ai.google.dev/pricing](https://ai.google.dev/pricing) for current rates.
 
 - [OpenAI Plugin](/plugin-registry/llm/openai) — GPT-4o family
 - [Groq Plugin](/plugin-registry/llm/groq) — Fast inference for smaller models
-- [Model Providers Guide](/model-providers) — Compare all providers
+- [Model Providers](/runtime/models) — Compare all providers

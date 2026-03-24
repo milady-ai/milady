@@ -19,16 +19,16 @@ A plugin is a self-contained module that registers one or more of:
 
 <CardGroup cols={2}>
 
-<Card title="Core Plugins" icon="cube" href="/plugin-registry/bootstrap">
-  Essential plugins that ship with every Milady installation — message processing, knowledge, database, and secrets.
+<Card title="Core Plugins" icon="cube" href="/plugin-registry/knowledge">
+  Essential plugins that ship with every Milady installation — knowledge, database, secrets, cron, and shell.
 </Card>
 
 <Card title="Model Providers" icon="brain" href="/plugin-registry/llm/openai">
-  LLM integrations for OpenAI, Anthropic, Google, Groq, Ollama, OpenRouter, and DeepSeek.
+  LLM integrations for OpenAI, Anthropic, Google Gemini, Groq, Ollama, OpenRouter, DeepSeek, xAI, Mistral, Cohere, Together, Qwen, Minimax, and Pi AI.
 </Card>
 
 <Card title="Platform Connectors" icon="plug" href="/plugin-registry/platform/discord">
-  Bridges to messaging platforms — Discord, Telegram, Twitter, Slack, WhatsApp, and Farcaster.
+  Bridges to messaging platforms — Discord, Telegram, Twitter, Slack, WhatsApp, Signal, iMessage, BlueBubbles, MS Teams, Google Chat, Mattermost, Farcaster, and WeChat.
 </Card>
 
 <Card title="DeFi & Blockchain" icon="wallet" href="/plugin-registry/defi/evm">

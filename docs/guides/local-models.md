@@ -115,6 +115,6 @@ const statuses = getLocalModelStatuses("embedding");
 
 ## Related
 
-- [Model Providers](/model-providers)
+- [Model Providers](/runtime/models)
 - [Environment variables](/cli/environment) — `OLLAMA_BASE_URL`, `LOCAL_EMBEDDING_*`
 - [`milady models`](/cli/models) — check configured providers

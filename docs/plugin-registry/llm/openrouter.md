@@ -138,4 +138,4 @@ See [openrouter.ai/docs#limits](https://openrouter.ai/docs#limits) for rate limi
 
 - [OpenAI Plugin](/plugin-registry/llm/openai) — Direct OpenAI integration
 - [Anthropic Plugin](/plugin-registry/llm/anthropic) — Direct Anthropic integration
-- [Model Providers Guide](/model-providers) — Compare all providers
+- [Model Providers](/runtime/models) — Compare all providers

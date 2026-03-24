@@ -20,9 +20,12 @@ Connectors are platform bridges that allow your agent to communicate across mess
 10. [Microsoft Teams](#microsoft-teams)
 11. [Google Chat](#google-chat)
 12. [Twitter](#twitter)
-13. [Connector Lifecycle](#connector-lifecycle)
-14. [Multi-Account Support](#multi-account-support)
-15. [Session Management](#session-management)
+13. [Farcaster](#farcaster)
+14. [Mattermost](#mattermost)
+15. [WeChat](#wechat)
+16. [Connector Lifecycle](#connector-lifecycle)
+17. [Multi-Account Support](#multi-account-support)
+18. [Session Management](#session-management)
 
 ---
 
@@ -40,6 +43,8 @@ Connectors are platform bridges that allow your agent to communicate across mess
 | Microsoft Teams | App ID + password | Yes | Yes (teams/channels) | No |
 | Google Chat | Service account | Yes | Yes (spaces) | Yes |
 | Twitter | API keys + tokens | DMs | N/A | No |
+| Farcaster | Neynar API key + signer | Casts | Yes (channels) | No |
+| Mattermost | Bot token | Yes | Yes (channels) | No |
 | WeChat | Proxy API key + QR code | Yes | Yes | Yes |
 
 ---
@@ -446,6 +451,79 @@ See the [WhatsApp Integration Guide](/guides/whatsapp) for detailed setup instru
 - Action processing toggle
 - Dry run mode for testing
 - Configurable max tweet length (default: 4000)
+
+---
+
+## Farcaster
+
+### Setup Requirements
+
+- Neynar API key (from [neynar.com](https://neynar.com))
+- Farcaster account with a Neynar signer UUID
+- Farcaster ID (FID) of the agent account
+
+### Key Configuration
+
+```json
+{
+  "connectors": {
+    "farcaster": {
+      "enabled": true,
+      "apiKey": "YOUR_NEYNAR_API_KEY",
+      "signerUuid": "YOUR_SIGNER_UUID",
+      "fid": 12345,
+      "channels": ["ai", "agents"],
+      "castIntervalMin": 120,
+      "castIntervalMax": 240
+    }
+  }
+}
+```
+
+### Features
+
+- Autonomous casting (posting) at configurable intervals
+- Reply to @mentions and cast replies
+- Channel monitoring and participation
+- Reactions (likes and recasts)
+- Direct casts (private messages)
+- On-chain identity tied to Ethereum address
+- Cast thread splitting for messages over 320 characters
+
+---
+
+## Mattermost
+
+### Setup Requirements
+
+- Mattermost bot token (from System Console > Integrations > Bot Accounts)
+- Mattermost server URL
+
+### Key Configuration
+
+```json
+{
+  "connectors": {
+    "mattermost": {
+      "enabled": true,
+      "botToken": "YOUR_BOT_TOKEN",
+      "baseUrl": "https://chat.example.com",
+      "chatmode": "all",
+      "requireMention": false
+    }
+  }
+}
+```
+
+**Environment variables:** `MATTERMOST_BOT_TOKEN`, `MATTERMOST_BASE_URL`
+
+### Features
+
+- Channel and DM messaging
+- Chat mode restriction (`dm-only`, `channel-only`, or `all`)
+- Mention filtering (optionally require @mentions)
+- Custom command prefix triggers
+- Self-hosted server support
 
 ---
 

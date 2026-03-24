@@ -102,4 +102,4 @@ See [groq.com/pricing](https://groq.com/pricing) for current rates.
 
 - [Ollama Plugin](/plugin-registry/llm/ollama) — Local model inference (no API key needed)
 - [OpenRouter Plugin](/plugin-registry/llm/openrouter) — Route between Groq and other providers
-- [Model Providers Guide](/model-providers) — Compare all providers
+- [Model Providers](/runtime/models) — Compare all providers

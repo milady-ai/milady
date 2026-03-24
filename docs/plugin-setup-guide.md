@@ -259,6 +259,23 @@ where to get the credentials, minimum required fields, and tips for optional fie
 3. Get your API key from Neynar dashboard
 **Tips:** Neynar is required — it's the indexer that makes Farcaster data accessible via API.
 
+### WeChat
+**Get credentials:** From your WeChat proxy service provider
+**Minimum required:** `WECHAT_API_KEY` + proxy URL in config
+**Variables:**
+- `WECHAT_API_KEY` — Proxy service API key
+**Config-only fields** (set in `connectors.wechat`, not env vars):
+- `proxyUrl` — **Required** — Your WeChat proxy service URL
+- `webhookPort` — Webhook listener port (default: 18790)
+- `deviceType` — Device emulation: `ipad` (default) or `mac`
+- `features.images` — Enable image send/receive (default: false)
+- `features.groups` — Enable group chat support (default: false)
+**Setup steps:**
+1. Get API key from your WeChat proxy service
+2. Configure `connectors.wechat` in milady.json with `apiKey` and `proxyUrl`
+3. Start Milady — scan the QR code displayed in terminal with WeChat
+**Tips:** WeChat uses a third-party proxy service, not an official API. Only use a proxy you trust — it sees all message traffic. Multi-account supported via `accounts` map. Package: `@miladyai/plugin-wechat`.
+
 ### GitHub
 **Get credentials:** https://github.com/settings/tokens → Fine-grained or Classic
 **Minimum required:** `GITHUB_API_TOKEN`

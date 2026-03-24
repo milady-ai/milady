@@ -283,7 +283,7 @@ Use this staged path so you do not get overwhelmed.
 2. **Core configuration**
    - `/configuration`
    - `/config-schema`
-   - `/model-providers`
+   - `/runtime/models`
 3. **Everyday commands and interfaces**
    - `/chat-commands`
    - `/apps/dashboard`

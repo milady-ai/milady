@@ -88,4 +88,4 @@ Use the `/model` slash command in the dashboard to switch models during a sessio
 
 - [milady configure](/cli/configure) -- print provider key guidance to the terminal
 - [Environment Variables](/cli/environment) -- complete environment variable reference
-- [Model Providers](/model-providers) -- detailed provider configuration and model IDs
+- [Model Providers](/runtime/models) -- detailed provider configuration and model IDs

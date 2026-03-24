@@ -1,10 +1,10 @@
 ---
 title: "Anthropic Plugin"
 sidebarTitle: "Anthropic"
-description: "Anthropic Claude model provider for Milady — Claude Opus 4, Sonnet 4.5, Haiku, and the extended thinking models."
+description: "Anthropic Claude model provider for Milady — Claude Opus 4.6, Sonnet 4.6, Haiku 4.5, and the extended thinking models."
 ---
 
-The Anthropic plugin connects Milady agents to Anthropic's Claude API, providing access to the Claude 4 and Claude 3 model families including Opus, Sonnet, and Haiku variants.
+The Anthropic plugin connects Milady agents to Anthropic's Claude API, providing access to the Claude 4.6, 4.5, 4, and 3 model families including Opus, Sonnet, and Haiku variants.
 
 **Package:** `@elizaos/plugin-anthropic`
 
@@ -49,14 +49,22 @@ export ANTHROPIC_API_KEY=sk-ant-...
 
 ## Supported Models
 
+### Claude 4.5/4.6 Family
+
+| Model | Context | Best For |
+|-------|---------|---------|
+| `claude-opus-4-6` | 200k | Most capable, complex reasoning, 1M context available |
+| `claude-sonnet-4-6` | 200k | Latest Sonnet, balanced performance and cost |
+| `claude-haiku-4-5-20251001` | 200k | Fast, lightweight tasks |
+
 ### Claude 4 Family
 
 | Model | Context | Best For |
 |-------|---------|---------|
-| `claude-opus-4-20250514` | 200k | Most capable, complex reasoning |
+| `claude-opus-4-20250514` | 200k | Complex reasoning |
 | `claude-sonnet-4-20250514` | 200k | Balanced performance and cost |
-| `claude-sonnet-4.5` | 200k | Latest Sonnet, improved coding |
-| `claude-3-5-haiku-20241022` | 200k | Fast, lightweight tasks |
+| `claude-sonnet-4.5` | 200k | Improved coding |
+| `claude-3-5-haiku-20241022` | 200k | Fast responses |
 
 ### Claude 3.7 Family
 
@@ -93,7 +101,7 @@ export ANTHROPIC_API_KEY=sk-ant-...
 - Streaming responses
 - Tool use (function calling)
 - Vision (image input on all models)
-- Extended thinking (claude-3-7-sonnet, claude-opus-4-20250514)
+- Extended thinking (claude-3-7-sonnet, claude-opus-4-6)
 - Structured JSON output via tool use
 - 200k token context window on all models
 - Prompt caching for cost reduction on repeated context
@@ -119,4 +127,4 @@ Pricing: [anthropic.com/pricing](https://www.anthropic.com/pricing)
 
 - [OpenAI Plugin](/plugin-registry/llm/openai) — GPT-4o and reasoning models
 - [OpenRouter Plugin](/plugin-registry/llm/openrouter) — Route between providers including Anthropic
-- [Model Providers Guide](/model-providers) — Compare all providers
+- [Model Providers](/runtime/models) — Compare all providers
