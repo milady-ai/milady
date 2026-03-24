@@ -431,7 +431,7 @@ Milady automatically enables plugins based on your configuration. You do not nee
 | `ANTHROPIC_API_KEY` / `CLAUDE_API_KEY` | `@elizaos/plugin-anthropic` |
 | `OPENAI_API_KEY` | `@elizaos/plugin-openai` |
 | `AI_GATEWAY_API_KEY` / `AIGATEWAY_API_KEY` | `@elizaos/plugin-vercel-ai-gateway` |
-| `GOOGLE_API_KEY` / `GOOGLE_GENERATIVE_AI_API_KEY` | `@elizaos/plugin-google-genai` |
+| `GEMINI_API_KEY` / `GOOGLE_API_KEY` / `GOOGLE_GENERATIVE_AI_API_KEY` | `@elizaos/plugin-google-genai` |
 | `GOOGLE_CLOUD_API_KEY` | `@elizaos/plugin-google-antigravity` |
 | `GROQ_API_KEY` | `@elizaos/plugin-groq` |
 | `XAI_API_KEY` / `GROK_API_KEY` | `@elizaos/plugin-xai` |
@@ -469,13 +469,14 @@ Milady automatically enables plugins based on your configuration. You do not nee
 | Feature Flag | Plugin |
 |-------------|--------|
 | `browser` | `@elizaos/plugin-browser` |
+| `cua` | `@elizaos/plugin-cua` |
+| `obsidian` | `@elizaos/plugin-obsidian` |
 | `cron` | `@elizaos/plugin-cron` |
 | `shell` | `@elizaos/plugin-shell` |
 | `imageGen` | `@elizaos/plugin-image-generation` |
 | `tts` | `@elizaos/plugin-tts` |
 | `stt` | `@elizaos/plugin-stt` |
 | `agentSkills` | `@elizaos/plugin-agent-skills` |
-| `directives` | `@elizaos/plugin-directives` |
 | `commands` | `@elizaos/plugin-commands` |
 | `diagnosticsOtel` | `@elizaos/plugin-diagnostics-otel` |
 | `webhooks` | `@elizaos/plugin-webhooks` |
@@ -488,6 +489,8 @@ Milady automatically enables plugins based on your configuration. You do not nee
 | `suno` | `@elizaos/plugin-suno` |
 | `vision` | `@elizaos/plugin-vision` |
 | `computeruse` | `@elizaos/plugin-computeruse` |
+| `repoprompt` | `@elizaos/plugin-repoprompt` |
+| `claudeCodeWorkbench` | `@elizaos/plugin-claude-code-workbench` |
 
 <Info>
 The `vision`, `fal`, and `suno` plugins are also auto-enabled when their respective `media.*` config sections are configured (e.g., `media.vision.provider` is set, or `media.image.provider: "fal"` with `mode: "own-key"`). Webhook plugins auto-enable when `hooks.token` is set. Gmail watch auto-enables when `hooks.gmail.account` is set.

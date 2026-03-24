@@ -1,7 +1,7 @@
 ---
 title: "Platform Connectors"
 sidebarTitle: "Connectors"
-description: "Platform bridges for Discord, Telegram, Slack, WhatsApp, Signal, iMessage, BlueBubbles, MS Teams, Google Chat, Twitter, Farcaster, Mattermost, WeChat, Matrix, Feishu, and Nostr."
+description: "Platform bridges for Discord, Telegram, Slack, WhatsApp, Signal, iMessage, BlueBubbles, MS Teams, Google Chat, Twitter, Farcaster, Mattermost, WeChat, Matrix, Feishu, Nostr, Twitch, Lens, Retake, and Blooio."
 ---
 
 Connectors are platform bridges that allow your agent to communicate across messaging platforms and social networks. Each connector handles authentication, message routing, session management, and platform-specific features.
@@ -26,9 +26,13 @@ Connectors are platform bridges that allow your agent to communicate across mess
 16. [Matrix](#matrix)
 17. [Feishu / Lark](#feishu--lark)
 18. [Nostr](#nostr)
-19. [Connector Lifecycle](#connector-lifecycle)
-20. [Multi-Account Support](#multi-account-support)
-21. [Session Management](#session-management)
+19. [Twitch](#twitch)
+20. [Lens](#lens)
+21. [Retake](#retake)
+22. [Blooio](#blooio)
+23. [Connector Lifecycle](#connector-lifecycle)
+24. [Multi-Account Support](#multi-account-support)
+25. [Session Management](#session-management)
 
 ---
 
@@ -52,6 +56,10 @@ Connectors are platform bridges that allow your agent to communicate across mess
 | Matrix | Access token | Yes | Yes (rooms) | No |
 | Feishu / Lark | App ID + secret | Yes | Yes (group chats) | No |
 | Nostr | Private key (nsec/hex) | Yes (NIP-04) | N/A | No |
+| Twitch | Access token / Client ID | Yes | Yes (channels) | No |
+| Lens | API key | Yes | N/A | No |
+| Retake | Access token | Yes | Yes | No |
+| Blooio | API key | Yes | Yes | No |
 
 ---
 
@@ -687,6 +695,115 @@ operate yourself or explicitly trust for that message flow.
 
 ---
 
+## Twitch
+
+**Plugin:** `@elizaos/plugin-twitch`
+
+```json5
+{
+  connectors: {
+    twitch: {
+      accessToken: "your-twitch-access-token",
+      clientId: "your-twitch-client-id",
+    }
+  }
+}
+```
+
+| Env Variable | Config Path |
+|-------------|-------------|
+| `TWITCH_ACCESS_TOKEN` | `connectors.twitch.accessToken` |
+| `TWITCH_CLIENT_ID` | `connectors.twitch.clientId` |
+
+**Auto-enable triggers:** `accessToken`, `clientId`, or `enabled: true`.
+
+**Features:**
+- Channel chat messaging
+- Whisper / DM support
+- Chat event handling
+
+> Twitch also has a separate **streaming** plugin (`@elizaos/plugin-twitch-streaming`) for live-streaming output — see [Streaming](/skills/streaming) for details.
+
+---
+
+## Lens
+
+**Plugin:** `@elizaos/plugin-lens`
+
+```json5
+{
+  connectors: {
+    lens: {
+      apiKey: "your-lens-api-key",
+    }
+  }
+}
+```
+
+| Env Variable | Config Path |
+|-------------|-------------|
+| `LENS_API_KEY` | `connectors.lens.apiKey` |
+
+**Auto-enable triggers:** `apiKey`, `token`, or `botToken`.
+
+**Features:**
+- Lens Protocol social interactions
+- Post publishing and engagement
+
+---
+
+## Retake
+
+**Plugin:** `@elizaos/plugin-retake`
+
+```json5
+{
+  connectors: {
+    retake: {
+      accessToken: "your-retake-access-token",
+    }
+  }
+}
+```
+
+| Env Variable | Config Path |
+|-------------|-------------|
+| `RETAKE_ACCESS_TOKEN` | `connectors.retake.accessToken` |
+
+**Auto-enable triggers:** `accessToken` or `enabled: true`.
+
+**Features:**
+- Retake platform messaging
+- Also supports streaming output — see [Streaming](/skills/streaming)
+
+---
+
+## Blooio
+
+**Plugin:** `@elizaos/plugin-blooio`
+
+```json5
+{
+  connectors: {
+    blooio: {
+      apiKey: "your-blooio-api-key",
+    }
+  }
+}
+```
+
+| Env Variable | Config Path |
+|-------------|-------------|
+| `BLOOIO_API_KEY` | `connectors.blooio.apiKey` |
+
+**Auto-enable triggers:** `apiKey`, `token`, or `botToken`.
+
+**Features:**
+- Blooio platform integration
+- Message routing and session management
+
+---
+
 ## Connector Lifecycle
 
 The typical connector lifecycle follows this pattern:
@@ -866,6 +983,11 @@ The `dmPolicy` options are:
 
 - Relay connection fails:
   Nostr connectors communicate via relays. Confirm relay URLs are configured and reachable. API key authentication varies by relay.
+
+**Twitch:**
+
+- Authentication fails:
+  Confirm `connectors.twitch.accessToken` or `connectors.twitch.clientId` is set. Alternatively, set `enabled: true` to force-enable. Ensure the access token has the required chat scopes.
 
 **Retake / Blooio:**
 
