@@ -9,6 +9,7 @@ import type { StylePreset } from "@miladyai/shared/contracts/onboarding";
 import { getStylePresets } from "@miladyai/shared/onboarding-presets";
 import { Button, Input, Textarea, ThemedSelect } from "@miladyai/ui";
 import { client } from "../api/client";
+import { shouldApplyPresetDefaults } from "./character-editor-helpers";
 import {
   APP_EMOTE_EVENT,
   dispatchWindowEvent,
@@ -689,13 +690,11 @@ export function CharacterEditor({
 
     // Apply preset defaults if: no saved content, OR the active VRM character
     // differs from what's saved (name mismatch means user switched presets).
-    const savedName =
-      typeof currentCharacter.name === "string"
-        ? currentCharacter.name.trim().toLowerCase()
-        : null;
-    const isMatchingSavedCharacter =
-      savedName !== null && savedName === entry.name.toLowerCase();
-    const applyDefaults = !hasMeaningfulContent || !isMatchingSavedCharacter;
+    const applyDefaults = shouldApplyPresetDefaults(
+      hasMeaningfulContent,
+      currentCharacter.name,
+      entry.name,
+    );
 
     // Suppress dirty-tracking during programmatic auto-select
     suppressDirtyRef.current = true;

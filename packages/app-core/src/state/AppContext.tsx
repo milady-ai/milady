@@ -5,6 +5,7 @@
  */
 
 import { ONBOARDING_PROVIDER_CATALOG } from "@miladyai/shared/contracts/onboarding";
+import { replaceNameTokens } from "../components/character-editor-helpers";
 import {
   getDefaultStylePreset,
   getStylePresets,
@@ -2021,15 +2022,14 @@ function AppProviderInner({
       // Replace any un-substituted {{name}} tokens that may have been persisted
       // to the server before the fix (onboarding saved raw templates).
       const savedName = character.name ?? "";
-      const replaceNameToken = (s: string) =>
-        s.replace(/\{\{name\}\}/g, savedName).replace(/\{\{agentName\}\}/g, savedName);
+      const clean = (s: string) => replaceNameTokens(s, savedName);
       setCharacterDraft({
         name: savedName,
         username: character.username ?? "",
         bio: Array.isArray(character.bio)
-          ? character.bio.map(replaceNameToken).join("\n")
-          : replaceNameToken(character.bio ?? ""),
-        system: replaceNameToken(character.system ?? ""),
+          ? character.bio.map(clean).join("\n")
+          : clean(character.bio ?? ""),
+        system: clean(character.system ?? ""),
         adjectives: character.adjectives ?? [],
         topics: character.topics ?? [],
         style: {
