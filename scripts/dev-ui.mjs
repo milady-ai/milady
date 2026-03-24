@@ -35,9 +35,10 @@ import {
 } from "./lib/dev-ui-onchain.mjs";
 import { buildVisionDepsFailureMessage } from "./lib/dev-ui-vision.mjs";
 import { signalSpawnedProcessTree } from "./lib/kill-process-tree.mjs";
+import { resolveModuleDefault } from "./lib/module-interop.mjs";
 
 const API_PORT = Number(process.env.MILADY_API_PORT) || 31337;
-const JSON5 = JSON5Module.default ?? JSON5Module;
+const JSON5 = resolveModuleDefault(JSON5Module);
 
 // --app=<name> selects which app to serve (default: "app" → apps/app)
 const appArgMatch = process.argv.find((a) => a.startsWith("--app="));
