@@ -64,7 +64,13 @@ if (-not $launcher) {
   exit 1
 }
 
-$appDir = Split-Path -Parent $launcher.FullName
+$launcherParent = Split-Path -Parent $launcher.FullName
+# launcher.exe lives under bin/ in the Electrobun app bundle; the app root is one level up
+$appDir = if ((Split-Path -Leaf $launcherParent) -eq "bin") {
+  Split-Path -Parent $launcherParent
+} else {
+  $launcherParent
+}
 Write-Host "App directory: $appDir"
 
 # Copy app contents to staging

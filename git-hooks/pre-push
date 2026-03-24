@@ -23,4 +23,19 @@ while read local_ref local_sha remote_ref remote_sha; do
   done
 done
 
+# Run pre-review checks (any, @ts-ignore, secrets scan)
+# Skip if MILADY_SKIP_PRE_REVIEW=1 for emergency pushes
+if [ "${MILADY_SKIP_PRE_REVIEW:-0}" != "1" ]; then
+  if command -v bun >/dev/null 2>&1; then
+    echo "Running pre-review checks..."
+    if ! bun run pre-review:local 2>/dev/null; then
+      echo ""
+      echo "🚫  Pre-review checks failed."
+      echo "    Fix the issues above, or set MILADY_SKIP_PRE_REVIEW=1 to bypass."
+      echo ""
+      exit 1
+    fi
+  fi
+fi
+
 exit 0

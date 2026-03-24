@@ -74,6 +74,7 @@ const WINDOWS_PACKAGED_BOOTSTRAP_HELPER_PATH = path.join(
 );
 const INNO_BUILD_SCRIPT_PATH = path.join(ROOT, "packaging/inno/build-inno.ps1");
 const INNO_TEMPLATE_PATH = path.join(ROOT, "packaging/inno/Milady.iss");
+const MSIX_BUILD_SCRIPT_PATH = path.join(ROOT, "packaging/msix/build-msix.ps1");
 const ELECTROBUN_CONFIG_PATH = path.join(
   ROOT,
   "apps/app/electrobun/electrobun.config.ts",
@@ -278,6 +279,10 @@ describe("Electrobun release workflow drift", () => {
       'Join-Path $PWD "apps/app/electrobun/node_modules/electrobun"',
     );
     expect(workflow).not.toContain('bun install -g "rcedit@4.0.1"');
+    // The node here-string must receive $resolvedElectrobunDir, not the
+    // undefined $electrobunDir — see commit fixing this variable mismatch.
+    expect(workflow).toContain("'@ $resolvedElectrobunDir");
+    expect(workflow).not.toMatch(/'@ \$electrobunDir\b/);
   });
 
   it("treats auth-protected health probes as valid smoke-test success on every desktop platform", () => {
@@ -440,6 +445,18 @@ describe("Electrobun release workflow drift", () => {
       'Name: "{autodesktop}\\{#MyAppName}"; Filename: "{app}\\{#MyAppExeName}"; Tasks: desktopicon',
     );
     expect(template).not.toContain('#define MyAppExeName "launcher.exe"');
+  });
+
+  it("normalizes the Windows launcher path back to the app root before packaging with MSIX", () => {
+    const script = fs.readFileSync(MSIX_BUILD_SCRIPT_PATH, "utf8");
+
+    expect(script).toContain(
+      "# launcher.exe lives under bin/ in the Electrobun app bundle; the app root is one level up",
+    );
+    expect(script).toContain(
+      'if ((Split-Path -Leaf $launcherParent) -eq "bin") {',
+    );
+    expect(script).toContain("Split-Path -Parent $launcherParent");
   });
 
   it("bounds hung Inno compiler runs with heartbeat logging and a hard timeout", () => {

@@ -417,7 +417,7 @@ jobs:
             } catch (error) {
               process.stdout.write("");
             }
-          '@ $electrobunDir
+          '@ $resolvedElectrobunDir
 
           if ($null -eq $resolvedRceditPackageJson) {
             $resolvedRceditPackageJson = ""
