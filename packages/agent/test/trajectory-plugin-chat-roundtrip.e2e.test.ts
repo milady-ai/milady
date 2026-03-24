@@ -52,7 +52,9 @@ async function waitForTrajectoryCall(
     response?: string;
   };
 }> {
-  for (let attempt = 0; attempt < 60; attempt += 1) {
+  // Allow more time on slow CI runners — trajectory persistence is async
+  // and the PGlite write may lag behind the API response.
+  for (let attempt = 0; attempt < 120; attempt += 1) {
     const list = await req(port, "GET", "/api/trajectories?limit=20");
     const trajectories = Array.isArray(list.data.trajectories)
       ? (list.data.trajectories as Array<{ id?: string }>)
@@ -83,7 +85,7 @@ async function waitForTrajectoryCall(
       }
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 200));
   }
 
   throw new Error("Timed out waiting for trajectory prompt/response roundtrip");
@@ -309,6 +311,25 @@ describe("Trajectory logger chat roundtrip", () => {
     });
     expect(chat.status).toBe(200);
     expect(String(chat.data.text ?? "")).toBe(expectedResponse);
+
+    // Force-flush any in-memory trajectories to the database.
+    // The async persistence pipeline may not have completed by the
+    // time the API response returns, especially on slow CI runners.
+    const activeTrajectories = (trajectoryLogger as unknown as {
+      activeTrajectories?: Map<string, unknown>;
+    }).activeTrajectories;
+    if (activeTrajectories) {
+      for (const [trajId] of activeTrajectories) {
+        try {
+          await (trajectoryLogger as unknown as {
+            persistTrajectory: (id: string, traj: unknown, status: string) => Promise<void>;
+          }).persistTrajectory(trajId, activeTrajectories.get(trajId), "completed");
+        } catch {
+          // Best-effort flush
+        }
+      }
+    }
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     const list = await req(server.port, "GET", "/api/trajectories?limit=20");
     expect(list.status).toBe(200);

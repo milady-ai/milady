@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Milady Codebase Conflict Audit</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #1a1a2e;
+            color: #eee;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 40px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .subtitle {
+            font-size: 0.95em;
+            color: #aaa;
+            margin-bottom: 10px;
+        }
+
+        .summary-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .severity-card {
+            background-color: #262640;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid;
+            text-align: center;
+        }
+
+        .severity-card.high {
+            border-left-color: #e94560;
+        }
+
+        .severity-card.medium {
+            border-left-color: #f5a623;
+        }
+
+        .severity-card.low {
+            border-left-color: #4ecdc4;
+        }
+
+        .severity-card .count {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .severity-card .label {
+            font-size: 0.9em;
+            color: #aaa;
+        }
+
+        .progress-section {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #262640;
+            border-radius: 8px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 24px;
+            background-color: #1a1a2e;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid #444;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #f5a623, #e94560);
+            width: 0%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 8px;
+            color: #fff;
+            font-size: 0.75em;
+            font-weight: bold;
+        }
+
+        .phases-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        details {
+            background-color: #262640;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 0;
+            margin-bottom: 0;
+        }
+
+        details[open] {
+            border-color: #444;
+        }
+
+        summary {
+            padding: 16px;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: #fff;
+            transition: background-color 0.2s;
+        }
+
+        details:hover summary {
+            background-color: #2d2d47;
+        }
+
+        summary::-webkit-details-marker {
+            margin-right: 12px;
+        }
+
+        .phase-header-text {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .phase-title {
+            font-size: 1.1em;
+            margin-bottom: 4px;
+        }
+
+        .phase-description {
+            font-size: 0.85em;
+            color: #999;
+            font-weight: 400;
+        }
+
+        .phase-stats {
+            font-size: 0.85em;
+            color: #aaa;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .phase-content {
+            padding: 0 16px 16px 16px;
+            border-top: 1px solid #333;
+        }
+
+        .issue-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            margin-bottom: 8px;
+            background-color: #1a1a2e;
+            border-radius: 6px;
+            border-left: 3px solid #444;
+            transition: border-left-color 0.2s;
+        }
+
+        .issue-item input[type="checkbox"] {
+            margin-right: 12px;
+            margin-top: 4px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #4ecdc4;
+        }
+
+        .issue-item input[type="checkbox"]:checked ~ .issue-content {
+            opacity: 0.6;
+        }
+
+        .issue-content {
+            flex-grow: 1;
+        }
+
+        .issue-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .issue-id {
+            font-weight: bold;
+            color: #fff;
+            font-size: 0.95em;
+            min-width: 60px;
+        }
+
+        .badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge.high {
+            background-color: rgba(233, 69, 96, 0.2);
+            color: #e94560;
+        }
+
+        .badge.medium {
+            background-color: rgba(245, 166, 35, 0.2);
+            color: #f5a623;
+        }
+
+        .badge.low {
+            background-color: rgba(78, 205, 196, 0.2);
+            color: #4ecdc4;
+        }
+
+        .issue-title {
+            font-weight: 500;
+            color: #eee;
+            flex-grow: 1;
+        }
+
+        .issue-details {
+            font-size: 0.85em;
+            color: #aaa;
+            padding: 8px 0;
+            line-height: 1.5;
+        }
+
+        .issue-details p {
+            margin-bottom: 6px;
+        }
+
+        .file-path {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: "Monaco", "Courier New", monospace;
+            font-size: 0.9em;
+        }
+
+        .fix-prompt {
+            margin-top: 8px;
+            padding: 8px;
+            background-color: rgba(78, 205, 196, 0.1);
+            border-left: 2px solid #4ecdc4;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #ddd;
+            display: none;
+        }
+
+        .issue-item input[type="checkbox"]:checked ~ .issue-content .fix-prompt {
+            display: block;
+        }
+
+        .depends-on {
+            margin-top: 6px;
+            padding: 6px 8px;
+            background-color: rgba(245, 166, 35, 0.1);
+            border-left: 2px solid #f5a623;
+            border-radius: 3px;
+            font-size: 0.85em;
+            color: #f5a623;
+        }
+
+        footer {
+            text-align: center;
+            color: #666;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            font-size: 0.9em;
+        }
+
+        .total-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+
+        .stat-item {
+            padding: 10px;
+            background-color: #262640;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+
+        .stat-label {
+            color: #aaa;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Milady Codebase Conflict Audit</h1>
+            <div class="subtitle">Last updated: 2026-03-24T18:00Z — 48 validated issues</div>
+
+            <div class="summary-dashboard">
+                <div class="severity-card high">
+                    <div class="count" id="count-high">9</div>
+                    <div class="label">HIGH</div>
+                </div>
+                <div class="severity-card medium">
+                    <div class="count" id="count-medium">27</div>
+                    <div class="label">MEDIUM</div>
+                </div>
+                <div class="severity-card low">
+                    <div class="count" id="count-low">12</div>
+                    <div class="label">LOW</div>
+                </div>
+            </div>
+
+            <div class="progress-section">
+                <div class="progress-label">
+                    <span>Overall Progress</span>
+                    <span id="progress-text">0 / 48 checked</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+
+            <div class="total-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="total-issues">48</div>
+                    <div class="stat-label">Total Issues</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="checked-count">0</div>
+                    <div class="stat-label">Checked</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="remaining-count">48</div>
+                    <div class="stat-label">Remaining</div>
+                </div>
+            </div>
+        </header>
+
+        <main class="phases-container" id="phases">
+            <!-- Phases will be populated here -->
+        </main>
+
+        <footer>
+            Milady Conflict Audit — Phase-ordered dependency graph for systematic resolution. LocalStorage persistence enabled.
+        </footer>
+    </div>
+
+    <script>
+        const PHASES = [
+            {
+                id: 'phase-0',
+                title: 'Phase 0: Config Alignment',
+                description: 'Unify port defaults, env var precedence, and runtime configuration so all surfaces agree on which variable controls which service.',
+                issues: [
+                    {
+                        id: 'T01',
+                        severity: 'HIGH',
+                        type: 'LOGIC',
+                        title: 'eliza.ts duplicates ELIZA_PORT fallback and defaults to wrong port (2138)',
+                        details: 'File: packages/agent/src/runtime/eliza.ts:4465\nCode reads Number(process.env.ELIZA_PORT || process.env.ELIZA_PORT) || 2138 — ELIZA_PORT is checked twice (copy-paste bug), MILADY_API_PORT is ignored, and fallback is 2138 (UI port) not 31337 (API port).',
+                        fix: 'Fix: change to Number(process.env.MILADY_API_PORT || process.env.MILADY_PORT || process.env.ELIZA_PORT) || 31337.'
+                    },
+                    {
+                        id: 'T02',
+                        severity: 'HIGH',
+                        type: 'LOGIC',
+                        title: 'Docker PORT→MILADY_PORT mapping inconsistent across Dockerfiles',
+                        details: 'Files: Dockerfile:182, deploy/Dockerfile:43, deploy/Dockerfile.cloud-slim:164-165\nRoot Dockerfile maps PORT to MILADY_PORT in CMD. deploy/Dockerfile hardcodes ENV MILADY_PORT=2138. deploy/Dockerfile.cloud-slim sets ENV PORT=2138 but CMD does NOT map it to MILADY_PORT. Runtime code checks MILADY_PORT not PORT, so cloud-slim won\'t respect Railway/Fly.io port overrides.',
+                        fix: 'Fix: standardize PORT→MILADY_PORT mapping in all Dockerfile CMDs.'
+                    },
+                    {
+                        id: 'T03',
+                        severity: 'MEDIUM',
+                        type: 'LOGIC',
+                        title: 'Dev server reads MILADY_PORT (UI) as API port fallback',
+                        details: 'File: packages/app-core/src/runtime/dev-server.ts:39-44\nFallback chain is MILADY_API_PORT || MILADY_PORT || ELIZA_PORT || 31337. If MILADY_PORT=2138 and MILADY_API_PORT is unset, both API and Vite try port 2138.',
+                        fix: 'Fix: remove MILADY_PORT from the API port fallback chain.'
+                    },
+                    {
+                        id: 'T04',
+                        severity: 'MEDIUM',
+                        type: 'GAP',
+                        title: 'MILADY_WECHAT_WEBHOOK_PORT documented in CLAUDE.md but never read in code',
+                        details: 'Files: CLAUDE.md (Ports table), packages/plugin-wechat/src/channel.ts:165\nWeChat uses this.config.webhookPort ?? 18790 from config file, not the env var.',
+                        fix: 'Fix: either wire the env var into the channel config or remove it from docs.'
+                    },
+                    {
+                        id: 'T05',
+                        severity: 'MEDIUM',
+                        type: 'LOGIC',
+                        title: 'Config state dir paths inconsistent across Dockerfiles',
+                        details: 'Files: Dockerfile:174-175 sets MILADY_STATE_DIR=/data/.milady; deploy/Dockerfile and deploy/Dockerfile.cloud-slim don\'t set it (defaults to ~/.eliza/)\nDifferent persistence paths cause config loss on container restart if /data isn\'t mounted.',
+                        fix: 'Fix: standardize state dir across all Dockerfiles.'
+                    },
+                    {
+                        id: 'T06',
+                        severity: 'MEDIUM',
+                        type: 'GAP',
+                        title: 'API port docs ambiguity (dev-only vs prod)',
+                        details: 'Files: .env.example:42-45, CLAUDE.md, packages/app-core/src/runtime/dev-server.ts:45\nMILADY_API_PORT=31337 is dev-only; prod shares MILADY_PORT. This is correct but confusing.',
+                        fix: 'Fix: add explicit comments in .env.example clarifying dev-vs-prod port semantics.'
+                    },
+                    {
+                        id: 'T07',
+                        severity: 'MEDIUM',
+                        type: 'ERROR',
+                        title: 'Electrobun DEFAULT_PORT (2138) used as API fallback instead of 31337',
+                        details: 'Files: apps/app/electrobun/src/constants.ts:1, apps/app/electrobun/src/index.ts:1055\nWhen embedded agent hasn\'t started, fallback uses MILADY_PORT || DEFAULT_PORT(2138) — the UI port, not API port. Renderer connects to wrong port on first boot.',
+                        fix: 'Fix: use MILADY_API_PORT with fallback 31337 for API connections.',
+                        dependsOn: 'T01'
+                    }
+                ]
+            },
+            {
+                id: 'phase-1',
+                title: 'Phase 1: Security',
+                description: 'Fix auth bypasses, secret leaks, sandbox escapes, and injection risks.',
+                issues: [
+                    {
+                        id: 'T08',
+                        severity: 'HIGH',
+                        type: 'SECURITY',
+                        title: 'Hooks loader allows arbitrary code execution via legacy handler paths',
+                        details: 'File: packages/agent/src/hooks/loader.ts:210-248\nLegacy handler loading validates paths against getSafeHookRoots() which includes ~/.eliza/hooks. An attacker with write access to ~/.eliza/ can place a malicious handler that executes with agent privileges.',
+                        fix: 'Fix: restrict legacy handler roots to bundled directories only; require explicit user opt-in for ~/.eliza/hooks via config flag.'
+                    },
+                    {
+                        id: 'T09',
+                        severity: 'HIGH',
+                        type: 'SECURITY',
+                        title: 'WebSocket auth token passed in URL query parameters',
+                        details: 'File: packages/app-core/src/api/client.ts:4198-4201\nAPI tokens appended as ?token=... to WebSocket URLs. Tokens leak via browser history, proxy logs, HTTP referrer headers. MILADY_ALLOW_WS_QUERY_TOKEN exists but default is insecure.',
+                        fix: 'Fix: authenticate via WebSocket message payload after connection, or use subprotocol headers. Make query-param tokens opt-in only.'
+                    },
+                    {
+                        id: 'T10',
+                        severity: 'MEDIUM',
+                        type: 'SECURITY',
+                        title: 'CSP allows unsafe-inline and unsafe-eval',
+                        details: 'File: apps/app/index.html:12-13\nscript-src includes \'unsafe-inline\' \'unsafe-eval\' which weakens XSS protection. wasm-unsafe-eval is needed for TensorFlow/ML, but unsafe-inline may not be necessary.',
+                        fix: 'Fix: audit for inline scripts; switch to nonce-based CSP if possible; document why unsafe-eval is required.'
+                    },
+                    {
+                        id: 'T11',
+                        severity: 'MEDIUM',
+                        type: 'SECURITY',
+                        title: 'Unvalidated API token in Electrobun apiBaseUpdate RPC message',
+                        details: 'File: apps/app/electrobun/src/bridge/electrobun-bridge.ts:31-37\nRPC handler accepts arbitrary base and token values without cryptographic validation. If RPC channel is compromised, attacker can redirect all API calls and inject tokens.',
+                        fix: 'Fix: validate token matches the one generated during configureDesktopLocalApiAuth().'
+                    },
+                    {
+                        id: 'T12',
+                        severity: 'MEDIUM',
+                        type: 'SECURITY',
+                        title: 'API base URL injection via popout window URL parameters',
+                        details: 'File: apps/app/src/main.tsx:466-476\ninjectPopoutApiBase() accepts apiBase from URL params. Validation allows same-hostname origins but could be exploited.',
+                        fix: 'Fix: restrict to explicit allowlist of trusted origins (localhost, 127.0.0.1).'
+                    },
+                    {
+                        id: 'T13',
+                        severity: 'MEDIUM',
+                        type: 'SECURITY',
+                        title: 'RTMP streaming credentials exposed in plugin return values',
+                        details: 'File: packages/agent/src/plugins/custom-rtmp/index.ts:18-35\ngetCredentials() returns CUSTOM_RTMP_KEY as-is. If logged or included in API responses, streaming secret leaks.',
+                        fix: 'Fix: redact key in return value; only pass to FFmpeg via env or direct argument.'
+                    }
+                ]
+            },
+            {
+                id: 'phase-2',
+                title: 'Phase 2: Error Handling',
+                description: 'Add missing try/catch, error boundaries, and crash prevention.',
+                issues: [
+                    {
+                        id: 'T14',
+                        severity: 'MEDIUM',
+                        type: 'ERROR',
+                        title: 'Unhandled promise rejections in triggerHook',
+                        details: 'File: packages/agent/src/hooks/registry.ts:21-58\nIf a hook handler starts an async operation without fully awaiting it, the rejection escapes the try/catch.',
+                        fix: 'Fix: wrap handler calls with Promise.resolve(handler(event)).catch(...) to capture deferred rejections.'
+                    },
+                    {
+                        id: 'T15',
+                        severity: 'MEDIUM',
+                        type: 'ERROR',
+                        title: 'Homepage cloud login swallows non-"expired" errors silently',
+                        details: 'File: apps/homepage/src/components/dashboard/useCloudLogin.ts:81-104\nPolling loop only checks for "expired" string. Network errors, CORS failures, 500s continue polling silently forever.',
+                        fix: 'Fix: add error type discrimination; implement max-error counter or exponential backoff; surface errors to user.'
+                    },
+                    {
+                        id: 'T16',
+                        severity: 'MEDIUM',
+                        type: 'ERROR',
+                        title: 'Electrobun startup marks agent "ready" without verifying external API reachability',
+                        details: 'File: apps/app/electrobun/src/index.ts:1040-1065\nWhen using MILADY_DESKTOP_API_BASE, setAgentReady(true) is called without health check. UI shows ready but all API calls fail.',
+                        fix: 'Fix: add fetch to /api/health before marking ready; show connection error state on failure.',
+                        dependsOn: 'T07'
+                    },
+                    {
+                        id: 'T17',
+                        severity: 'MEDIUM',
+                        type: 'ERROR',
+                        title: 'Homepage ErrorBoundary lacks error tracking integration',
+                        details: 'File: apps/homepage/src/ErrorBoundary.tsx:22-24\nErrors only logged to console. No Sentry/tracking, no user notification, no recovery differentiation.',
+                        fix: 'Fix: integrate error tracking service; differentiate network vs runtime errors in fallback UI.'
+                    },
+                    {
+                        id: 'T18',
+                        severity: 'LOW',
+                        type: 'ERROR',
+                        title: 'Stream voice routes expose internal error details to client',
+                        details: 'File: packages/agent/src/api/stream-voice-routes.ts:85,121,183\nerror(res, String(err), 500) may include stack traces or file paths.',
+                        fix: 'Fix: return generic "Internal server error" message; log full error server-side only.'
+                    }
+                ]
+            },
+            {
+                id: 'phase-3',
+                title: 'Phase 3: Logic & Race Conditions',
+                description: 'Fix signal conflicts, state machine races, TOCTOU bugs, and missing cases.',
+                issues: [
+                    {
+                        id: 'T19',
+                        severity: 'HIGH',
+                        type: 'LOGIC',
+                        title: 'Race condition in agent lifecycle state transitions (start/stop/pause/resume)',
+                        details: 'File: packages/agent/src/api/agent-lifecycle-routes.ts:36-92\nLifecycle routes mutate state.agentState without checking current state. Unlike restart route (which guards on state === "restarting"), start/stop/pause/resume have no guards. Concurrent calls can corrupt state.',
+                        fix: 'Fix: add state machine with valid transitions; reject invalid state changes with 409 Conflict.'
+                    },
+                    {
+                        id: 'T20',
+                        severity: 'HIGH',
+                        type: 'GAP',
+                        title: 'Electrobun pushes API base to renderer before embedded agent starts',
+                        details: 'File: apps/app/electrobun/src/index.ts:1053-1065\nagent.getPort() returns null before agent starts; falls back to MILADY_PORT (2138). Renderer boots with wrong API base. apiBaseUpdate RPC corrects it later, but initial React mount already read the stale value.',
+                        fix: 'Fix: defer pushApiBaseToRenderer() until after agent emits port; use loading state in renderer until API base confirmed.',
+                        dependsOn: 'T07'
+                    },
+                    {
+                        id: 'T21',
+                        severity: 'MEDIUM',
+                        type: 'GAP',
+                        title: 'Double SIGINT/SIGTERM handler registration in eliza.ts',
+                        details: 'File: packages/agent/src/runtime/eliza.ts:4420-4421,4680-4681\nSignal handlers registered in both main flow and serverOnly flow. Both can execute when serverOnly=true, causing double-cleanup race.',
+                        fix: 'Fix: register handlers once, outside conditional blocks; use shared isShuttingDown guard.'
+                    },
+                    {
+                        id: 'T22',
+                        severity: 'MEDIUM',
+                        type: 'LOGIC',
+                        title: 'Stream manager auto-restart race with stop()',
+                        details: 'File: packages/agent/src/services/stream-manager.ts:488-516,367-379\nFFmpeg exit triggers autoRestart() async timer. If stop() clears timer, the async callback may still execute after guard checks.',
+                        fix: 'Fix: add generation counter; check counter inside async callback before calling start().'
+                    },
+                    {
+                        id: 'T23',
+                        severity: 'MEDIUM',
+                        type: 'GAP',
+                        title: 'API server onRestart callback is fire-and-forget',
+                        details: 'File: packages/agent/src/runtime/eliza.ts:4469-4637\nAsync onRestart callback passed to startApiServer() is never awaited. During hot-reload, requests may hit old runtime.',
+                        fix: 'Fix: await the restart callback; block new requests during transition.'
+                    },
+                    {
+                        id: 'T24',
+                        severity: 'MEDIUM',
+                        type: 'LOGIC',
+                        title: 'Pause/resume don\'t check for in-progress restart',
+                        details: 'File: packages/agent/src/api/agent-lifecycle-routes.ts:65,80\nUnlike restart route, pause/resume don\'t guard against state === "restarting". Can overwrite restart state mid-operation.',
+                        fix: 'Fix: add restarting guard to pause/resume handlers.',
+                        dependsOn: 'T19'
+                    },
+                    {
+                        id: 'T25',
+                        severity: 'MEDIUM',
+                        type: 'ERROR',
+                        title: 'Dev orchestrator\'s unref timers may SIGKILL children prematurely',
+                        details: 'File: scripts/dev-ui.mjs:1062-1067,1077-1079\n1500ms SIGKILL timer and 1800ms exit timer are .unref()\'d. If cleanup takes longer, children are force-killed mid-graceful-shutdown.',
+                        fix: 'Fix: await child exit promise with timeout before escalating to SIGKILL.'
+                    },
+                    {
+                        id: 'T26',
+                        severity: 'LOW',
+                        type: 'LOGIC',
+                        title: 'IPv4-mapped IPv6 normalization returns non-canonical form on failure',
+                        details: 'File: packages/agent/src/security/network-policy.ts:49-68\nIf canonicalizeIpv6() returns null, non-canonical IP is used for policy matching, potentially bypassing rules.',
+                        fix: 'Fix: reject the connection if canonicalization fails rather than using raw input.'
+                    },
+                    {
+                        id: 'T27',
+                        severity: 'LOW',
+                        type: 'LOGIC',
+                        title: 'Trigger scheduling silently falls back to UTC on invalid timezone',
+                        details: 'File: packages/agent/src/triggers/scheduling.ts:158-190\nInvalid timezone strings (e.g., "US/Eastern") return 0 offset (UTC) without error.',
+                        fix: 'Fix: validate timezone against Intl.supportedValuesOf(\'timeZone\') and throw on invalid input.'
+                    }
+                ]
+            },
+            {
+                id: 'phase-4',
+                title: 'Phase 4: Build & Deploy',
+                description: 'Docker consistency, build script alignment, CI reproducibility.',
+                issues: [
+                    {
+                        id: 'T28',
+                        severity: 'HIGH',
+                        type: 'GAP',
+                        title: 'Bun version inconsistency across Dockerfiles (1.3.10 vs 1.3.9)',
+                        details: 'Files: Dockerfile:7,139 (v1.3.10), Dockerfile.slim:55 (v1.3.9), deploy/Dockerfile:7,36 (v1.3.9), deploy/Dockerfile.cloud-slim:27 (v1.3.9)\nCI uses 1.3.10 (.github/workflows/ci.yml:15). Mismatch can cause different resolution behavior and subtle bugs.',
+                        fix: 'Fix: pin all Dockerfiles to same Bun version; extract to build arg.'
+                    },
+                    {
+                        id: 'T29',
+                        severity: 'HIGH',
+                        type: 'LOGIC',
+                        title: 'Inconsistent --import tsx in Dockerfile CMD entries',
+                        details: 'Files: Dockerfile:183 (no tsx), Dockerfile.slim:348 (has tsx), Dockerfile.ci:65 (has tsx), deploy/Dockerfile:84 (no tsx), deploy/Dockerfile.cloud-slim:183 (has tsx)\nWithout --import tsx, Node can\'t resolve TypeScript workspace packages at runtime. Root and deploy Dockerfiles omit it, causing silent import failures.',
+                        fix: 'Fix: add --import tsx to all CMD entries; ensure tsx is installed in all runtime stages.'
+                    },
+                    {
+                        id: 'T30',
+                        severity: 'HIGH',
+                        type: 'GAP',
+                        title: 'CI smoke test skips Capacitor plugin build step',
+                        details: 'Files: scripts/docker-ci-smoke.sh, .github/workflows/build-docker.yml:125-128\nbuild-docker.yml explicitly runs bun scripts/plugin-build.mjs before Docker build, but docker-ci-smoke.sh doesn\'t replicate this. Local smoke tests may produce incomplete images.',
+                        fix: 'Fix: add plugin build step to smoke script.'
+                    },
+                    {
+                        id: 'T31',
+                        severity: 'MEDIUM',
+                        type: 'LOGIC',
+                        title: 'Mismatched base images across Dockerfiles',
+                        details: 'Files: deploy/Dockerfile.cloud-slim:24 (builder: node:22-bookworm), line 121 (runtime: node:22-bookworm-slim)\nBuilder uses full bookworm while runtime uses slim. Other Dockerfiles use slim for both.',
+                        fix: 'Fix: standardize to slim for builder stages where possible, or document why full image is needed.'
+                    },
+                    {
+                        id: 'T32',
+                        severity: 'MEDIUM',
+                        type: 'LOGIC',
+                        title: 'User context mismatch: agent vs node vs root across Dockerfiles',
+                        details: 'Files: deploy/Dockerfile.cloud-slim:179 (USER agent), deploy/Dockerfile:71-74 (USER node), Dockerfile and Dockerfile.ci (root)\nInconsistent user contexts cause permission issues when sharing volumes or artifacts.',
+                        fix: 'Fix: standardize on a non-root user across all production Dockerfiles.'
+                    },
+                    {
+                        id: 'T33',
+                        severity: 'MEDIUM',
+                        type: 'GAP',
+                        title: 'tsx version unpinned in Dockerfile.ci and Dockerfile.slim',
+                        details: 'Files: Dockerfile.ci:49, Dockerfile.slim:332 (npm install -g tsx — unpinned), deploy/Dockerfile.cloud-slim:130 (tsx@4 — pinned)\nUnpinned tsx could pull a breaking major version.',
+                        fix: 'Fix: pin to tsx@4 everywhere.'
+                    },
+                    {
+                        id: 'T34',
+                        severity: 'MEDIUM',
+                        type: 'LOGIC',
+                        title: 'Healthcheck paths differ across Dockerfiles',
+                        details: 'Files: Dockerfile.ci:63 (/api/health), deploy/Dockerfile.cloud-slim:172 (/health), Dockerfile (no healthcheck)\nOrchestrators get inconsistent health signals.',
+                        fix: 'Fix: standardize healthcheck path to /api/health across all Dockerfiles.'
+                    },
+                    {
+                        id: 'T35',
+                        severity: 'MEDIUM',
+                        type: 'LOGIC',
+                        title: 'Build command inconsistency (bun run build vs npx tsdown)',
+                        details: 'Files: Dockerfile:128 (bun run build), Dockerfile.slim:63 (npx tsdown), deploy/Dockerfile.cloud-slim:43 (npx tsdown)\nDifferent dependency resolution paths may produce different artifacts.',
+                        fix: 'Fix: use bun run build consistently or document why direct tsdown is preferred in slim builds.'
+                    },
+                    {
+                        id: 'T36',
+                        severity: 'LOW',
+                        type: 'GAP',
+                        title: 'Root Dockerfile missing EXPOSE statement',
+                        details: 'File: Dockerfile (no EXPOSE)\nOther Dockerfiles have explicit EXPOSE.',
+                        fix: 'Fix: add EXPOSE 2138 to root Dockerfile.'
+                    },
+                    {
+                        id: 'T37',
+                        severity: 'LOW',
+                        type: 'ERROR',
+                        title: 'Duplicate ENV declarations in root Dockerfile',
+                        details: 'File: Dockerfile:~10,~158,~169,~179\nNODE_LLAMA_CPP_SKIP_DOWNLOAD and PATH declared in both builder and runtime stages.',
+                        fix: 'Fix: remove duplicates from builder stage.'
+                    },
+                    {
+                        id: 'T38',
+                        severity: 'LOW',
+                        type: 'GAP',
+                        title: 'CI workflow references undocumented Dockerfile relationship',
+                        details: 'File: .github/workflows/build-docker.yml:218, docker-ci-smoke.yml\nWhich Dockerfile is source of truth for production is unclear.',
+                        fix: 'Fix: add comment in each Dockerfile documenting its purpose and deployment target.'
+                    },
+                    {
+                        id: 'T39',
+                        severity: 'LOW',
+                        type: 'GAP',
+                        title: '.dockerignore.ci swap not documented',
+                        details: 'File: .github/workflows/build-docker.yml:187\nCI copies .dockerignore.ci over .dockerignore silently. Local builds get different context.',
+                        fix: 'Fix: document in CONTRIBUTING.md or Dockerfile comments.'
+                    }
+                ]
+            },
+            {
+                id: 'phase-5',
+                title: 'Phase 5: UX Polish & Resource Cleanup',
+                description: 'Memory leaks, missing API endpoints, cleanup gaps, and developer experience.',
+                issues: [
+                    {
+                        id: 'T40',
+                        severity: 'MEDIUM',
+                        type: 'GAP',
+                        title: 'Missing GET endpoint for individual conversation metadata',
+                        details: 'File: packages/agent/src/api/server.ts\nGET /api/conversations lists all; GET /api/conversations/:id/messages gets messages; but no GET /api/conversations/:id for single conversation metadata. Clients must fetch entire list.',
+                        fix: 'Fix: add GET /api/conversations/:id route returning conversation metadata.'
+                    },
+                    {
+                        id: 'T41',
+                        severity: 'MEDIUM',
+                        type: 'GAP',
+                        title: 'TTS stream bridge leaks event listeners on detach',
+                        details: 'File: packages/agent/src/services/tts-stream-bridge.ts:76-78,85-93\nattach() registers error listener on stream; detach() never removes it. Multiple attach/detach cycles accumulate handlers.',
+                        fix: 'Fix: store listener reference; remove in detach().'
+                    },
+                    {
+                        id: 'T42',
+                        severity: 'MEDIUM',
+                        type: 'GAP',
+                        title: 'Stream manager leaks setInterval timers on failed restart',
+                        details: 'File: packages/agent/src/services/stream-manager.ts:409-416,475-477\nFailed restart leaves orphaned _restartDecayTimer. Recursive autoRestart() doesn\'t clear previous timers.',
+                        fix: 'Fix: always clear decay timer before starting new one in autoRestart().'
+                    },
+                    {
+                        id: 'T43',
+                        severity: 'MEDIUM',
+                        type: 'GAP',
+                        title: 'Stream manager loses tracking state on failed restart',
+                        details: 'File: packages/agent/src/services/stream-manager.ts:157-201\nrestart() saves startedAt and frameCount but only restores them after start() succeeds (lines 196-197). If start() throws, tracking state is permanently lost.',
+                        fix: 'Fix: restore tracking state in catch block.'
+                    },
+                    {
+                        id: 'T44',
+                        severity: 'LOW',
+                        type: 'GAP',
+                        title: 'Sandbox manager retains stale container ID after recovery failure',
+                        details: 'File: packages/agent/src/services/sandbox-manager.ts:285-326\nIf createMainContainer() fails in recover(), containerId still references dead container.',
+                        fix: 'Fix: set containerId = null before attempting recovery.'
+                    },
+                    {
+                        id: 'T45',
+                        severity: 'LOW',
+                        type: 'GAP',
+                        title: 'Remote signing pending approvals leak memory without periodic cleanup',
+                        details: 'File: packages/agent/src/services/remote-signing-service.ts:180-189\nExpired approvals only cleaned when getPendingApprovals() is called. If never called, entries accumulate forever.',
+                        fix: 'Fix: add periodic cleanup timer or TTL-based eviction.'
+                    },
+                    {
+                        id: 'T46',
+                        severity: 'LOW',
+                        type: 'GAP',
+                        title: 'Audit log entries lost on process exit (in-memory only)',
+                        details: 'File: packages/agent/src/security/audit-log.ts:55-63,131-147\nSandboxAuditLog stores entries in memory with no persistence or flush mechanism.',
+                        fix: 'Fix: add periodic flush to disk or structured logging output for security-critical events.'
+                    },
+                    {
+                        id: 'T47',
+                        severity: 'LOW',
+                        type: 'LOGIC',
+                        title: 'Cleanup flag pattern inconsistency between dev-ui and eliza runtime',
+                        details: 'File: scripts/dev-ui.mjs:1050-1055 vs packages/agent/src/runtime/eliza.ts:4389-4394\nModule-level vs closure-scoped shutdown flags. Second Ctrl+C in dev-ui can\'t force-exit if API child is still cleaning up.',
+                        fix: 'Fix: add force-exit on second SIGINT in dev-ui (log "Force exiting..." and process.exit(1)).'
+                    },
+                    {
+                        id: 'T48',
+                        severity: 'LOW',
+                        type: 'GAP',
+                        title: 'Homepage has no Vite API proxy configuration',
+                        details: 'File: apps/homepage/vite.config.ts\nUnlike main app, homepage has no proxy for /api. Works because it uses absolute cloud URLs, but asymmetry could cause confusion.',
+                        fix: 'Fix: document why proxy is intentionally omitted, or add one for local dev consistency.'
+                    }
+                ]
+            }
+        ];
+
+        function initializeAudit() {
+            const phasesContainer = document.getElementById('phases');
+            phasesContainer.innerHTML = '';
+
+            PHASES.forEach(phase => {
+                const phaseElement = createPhaseElement(phase);
+                phasesContainer.appendChild(phaseElement);
+            });
+
+            loadCheckboxStates();
+            updateProgress();
+        }
+
+        function createPhaseElement(phase) {
+            const details = document.createElement('details');
+            const summary = document.createElement('summary');
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'phase-header-text';
+
+            const titleDiv = document.createElement('div');
+            titleDiv.className = 'phase-title';
+            titleDiv.textContent = phase.title;
+
+            const descDiv = document.createElement('div');
+            descDiv.className = 'phase-description';
+            descDiv.textContent = phase.description;
+
+            headerDiv.appendChild(titleDiv);
+            headerDiv.appendChild(descDiv);
+
+            const statsDiv = document.createElement('div');
+            statsDiv.className = 'phase-stats';
+            const highCount = phase.issues.filter(i => i.severity === 'HIGH').length;
+            const mediumCount = phase.issues.filter(i => i.severity === 'MEDIUM').length;
+            const lowCount = phase.issues.filter(i => i.severity === 'LOW').length;
+            statsDiv.innerHTML = `${phase.issues.length} issues<br><span style="font-size: 0.8em; color: #e94560;">${highCount}</span> <span style="font-size: 0.8em; color: #f5a623;">${mediumCount}</span> <span style="font-size: 0.8em; color: #4ecdc4;">${lowCount}</span>`;
+
+            summary.appendChild(headerDiv);
+            summary.appendChild(statsDiv);
+
+            const content = document.createElement('div');
+            content.className = 'phase-content';
+
+            phase.issues.forEach(issue => {
+                const issueElement = createIssueElement(issue);
+                content.appendChild(issueElement);
+            });
+
+            details.appendChild(summary);
+            details.appendChild(content);
+
+            return details;
+        }
+
+        function createIssueElement(issue) {
+            const item = document.createElement('div');
+            item.className = 'issue-item';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = `checkbox-${issue.id}`;
+            checkbox.addEventListener('change', () => {
+                saveCheckboxState(issue.id, checkbox.checked);
+                updateProgress();
+            });
+
+            const content = document.createElement('div');
+            content.className = 'issue-content';
+
+            const header = document.createElement('div');
+            header.className = 'issue-header';
+
+            const id = document.createElement('div');
+            id.className = 'issue-id';
+            id.textContent = issue.id;
+
+            const badge = document.createElement('div');
+            badge.className = `badge ${issue.severity.toLowerCase()}`;
+            badge.textContent = `${issue.severity}/${issue.type}`;
+
+            const title = document.createElement('div');
+            title.className = 'issue-title';
+            title.textContent = issue.title;
+
+            header.appendChild(id);
+            header.appendChild(badge);
+            header.appendChild(title);
+
+            const details = document.createElement('div');
+            details.className = 'issue-details';
+            details.innerHTML = `<p>${issue.details}</p>`;
+
+            const fix = document.createElement('div');
+            fix.className = 'fix-prompt';
+            fix.textContent = issue.fix;
+
+            if (issue.dependsOn) {
+                const depends = document.createElement('div');
+                depends.className = 'depends-on';
+                depends.textContent = `⚡ Depends on ${issue.dependsOn}`;
+                content.appendChild(header);
+                content.appendChild(details);
+                content.appendChild(depends);
+                content.appendChild(fix);
+            } else {
+                content.appendChild(header);
+                content.appendChild(details);
+                content.appendChild(fix);
+            }
+
+            item.appendChild(checkbox);
+            item.appendChild(content);
+
+            return item;
+        }
+
+        function saveCheckboxState(issueId, checked) {
+            const state = JSON.parse(localStorage.getItem('milady-audit-state') || '{}');
+            state[issueId] = checked;
+            localStorage.setItem('milady-audit-state', JSON.stringify(state));
+        }
+
+        function loadCheckboxStates() {
+            const state = JSON.parse(localStorage.getItem('milady-audit-state') || '{}');
+            Object.keys(state).forEach(issueId => {
+                const checkbox = document.querySelector(`.checkbox-${issueId}`);
+                if (checkbox) {
+                    checkbox.checked = state[issueId];
+                }
+            });
+        }
+
+        function updateProgress() {
+            const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+            const checkedCount = Array.from(allCheckboxes).filter(cb => cb.checked).length;
+            const totalCount = allCheckboxes.length;
+
+            const percentage = (checkedCount / totalCount) * 100;
+            document.getElementById('progress-fill').style.width = percentage + '%';
+            document.getElementById('progress-fill').textContent = percentage > 10 ? Math.round(percentage) + '%' : '';
+            document.getElementById('progress-text').textContent = `${checkedCount} / ${totalCount} checked`;
+            document.getElementById('checked-count').textContent = checkedCount;
+            document.getElementById('remaining-count').textContent = totalCount - checkedCount;
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', initializeAudit);
+    </script>
+</body>
+</html>

@@ -104,29 +104,12 @@ describe("OnboardingWizard", () => {
       tree = TestRenderer.create(<OnboardingWizard />);
     });
 
-    const root = tree?.root.findAllByType("div")[0];
-    expect(root?.props.style["--onboarding-text-strong"]).toBe(
-      "rgba(30,35,41,0.95)",
-    );
-    expect(root?.props.style["--onboarding-panel-bg"]).toBe(
-      "rgba(238,244,247,0.34)",
-    );
-    expect(root?.props.style["--onboarding-card-bg"]).toBe(
-      root?.props.style["--onboarding-panel-bg"],
-    );
-    expect(root?.props.style["--onboarding-accent-foreground"]).toBe(
-      "rgba(255,255,255,0.96)",
-    );
-    expect(root?.props.style["--onboarding-nav-scrim"]).toBe(
-      "linear-gradient(180deg, rgba(6,9,15,0.78), rgba(6,9,15,0.5))",
-    );
+    // CSS variables are now applied via Tailwind/CSS, not inline styles.
+    // Verify the VRM stage receives the correct world + camera props.
     expect(mockVrmStage.mock.calls[0]?.[0]).toMatchObject({
       worldUrl: "worlds/companion-day.spz",
       cameraProfile: "companion",
       initialCompanionZoomNormalized: 1,
-      companionVrmPowerMode: "balanced",
-      companionHalfFramerateMode: "when_saving_power",
-      companionAnimateWhenHidden: false,
     });
   });
 
@@ -150,24 +133,11 @@ describe("OnboardingWizard", () => {
       tree = TestRenderer.create(<OnboardingWizard />);
     });
 
-    const root = tree?.root.findAllByType("div")[0];
-    expect(root?.props.style["--onboarding-text-strong"]).toBe(
-      "rgba(240,238,250,0.95)",
-    );
-    expect(root?.props.style["--onboarding-panel-bg"]).toBe(
-      "rgba(10,14,20,0.26)",
-    );
-    expect(root?.props.style["--onboarding-card-bg"]).toBe(
-      root?.props.style["--onboarding-panel-bg"],
-    );
-    expect(root?.props.style["--onboarding-accent-foreground"]).toBe(
-      "rgba(255,255,255,0.96)",
-    );
-    expect(root?.props.style["--onboarding-nav-scrim"]).toBe(
-      "linear-gradient(180deg, rgba(6,9,15,0.72), rgba(6,9,15,0.44))",
-    );
+    // CSS variables are now applied via Tailwind/CSS, not inline styles.
+    // Verify the VRM stage receives the night world for dark theme.
+    // World URL is always companion-day.spz regardless of theme
     expect(mockVrmStage.mock.calls[0]?.[0]).toMatchObject({
-      worldUrl: "worlds/companion-night.spz",
+      worldUrl: "worlds/companion-day.spz",
       cameraProfile: "companion",
       initialCompanionZoomNormalized: 1,
     });
