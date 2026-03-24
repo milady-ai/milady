@@ -67,6 +67,7 @@
     "build:android": "cd apps/app && bun scripts/build.mjs && capacitor sync android",
     "build:contracts": "cd test/contracts && forge build --skip Harness",
     "build:desktop": "node scripts/desktop-build.mjs build --variant=base --stage-macos-release-app",
+    "desktop:preflight": "node scripts/desktop-build.mjs preflight --variant=base",
     "build:preload": "cd apps/app/electrobun && bun run build:preload",
     "build:home": "cd apps/home && bun run build",
     "build:home:desktop": "node scripts/desktop-build.mjs build --app=home --variant=base --stage-macos-release-app",

@@ -91,6 +91,24 @@ We still keep two Windows-specific guards around that documented flow:
 - **Pre-extract the Electrobun CLI tarball:** `electrobun@1.16.0` still shells out to plain `tar -xzf ...` on Windows. On GitHub runners that can resolve to GNU tar and fail on `C:` paths, so the workflow downloads the official `electrobun-cli-win-x64.tar.gz`, verifies its SHA256 from the GitHub release metadata, and extracts it with `C:\\Windows\\System32\\tar.exe` before the build runs.
 - **Seed `rcedit` when needed:** the CLI still imports `rcedit` dynamically during Windows packaging, so the workflow copies a known-good `rcedit-x64.exe` from the already-installed workspace Bun packages into the Electrobun package before invoking `bun run build`. This avoids relying on a separate global registry fetch during release time.
 
+## Windows preload EACCES recovery
+
+`scripts/desktop-build.mjs` now runs a desktop preflight before preload bundling. It verifies:
+
+- Bun version is a supported stable version.
+- `apps/app/electrobun/node_modules/electrobun/package.json` contains `exports["./view"]`.
+- Bun can resolve/import `electrobun/view` from `apps/app/electrobun`.
+
+If preload build fails with `EACCES` around `electrobun/view`, use this exact repair flow:
+
+1. Stop all Bun/Electrobun/Milady processes.
+2. Delete `apps/app/electrobun/node_modules`.
+3. Delete root `node_modules/.bun`.
+4. From repo root run `bun install --frozen-lockfile`.
+5. Retry `bun run start:desktop`.
+
+You can run the preflight alone with `bun run desktop:preflight`.
+
 ## Desktop WebGPU: browser + native
 
 Milady now carries both WebGPU paths in the desktop app:

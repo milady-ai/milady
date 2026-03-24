@@ -20,6 +20,7 @@ describe("desktop-build.mjs", () => {
       "Ensuring Electrobun workspace dependencies are installed",
     );
     expect(script).toContain('runPackageBinary("vite", ["build"],');
+    expect(script).toContain("runDesktopPreflight();");
     expect(script).toContain('runBun(["run", "build:preload"]');
     expect(script).toContain('runBun(["run", "build:native-effects"]');
     expect(script).toContain('runBun(["run", "build:whisper"]');
@@ -38,9 +39,11 @@ describe("desktop-build.mjs", () => {
       'runPackageBinary("electrobun", commandArgs, options);',
     );
     expect(script).toContain('case "stage":');
+    expect(script).toContain('case "preflight":');
     expect(script).toContain('case "package":');
     expect(script).toContain('case "build":');
     expect(script).toContain('case "run":');
+    expect(script).toContain("[desktop-preflight]");
   });
 
   it("packages through the electrobun workspace build script", () => {

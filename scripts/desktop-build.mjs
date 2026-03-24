@@ -3,6 +3,12 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import {
+  buildWindowsRepairSteps,
+  classifyElectrobunViewFailure,
+  hasElectrobunViewExport,
+  isSupportedBunVersion,
+} from "./lib/desktop-preflight.mjs";
 
 const ROOT = process.cwd();
 // --app=<name> selects which app to build (default: "app" → apps/app)
@@ -156,12 +162,72 @@ function run(commandName, commandArgs, options = {}) {
   }
 }
 
+function runCapture(commandName, commandArgs, options = {}) {
+  const { cwd = ROOT, env = process.env } = options;
+  const invocation = buildInvocation(commandName, commandArgs);
+  const result = spawnSync(invocation.command, invocation.args, {
+    cwd,
+    env,
+    encoding: "utf8",
+    stdio: "pipe",
+  });
+  return {
+    status: result.status ?? 1,
+    stdout: result.stdout ?? "",
+    stderr: result.stderr ?? "",
+    command: invocation.command,
+    args: invocation.args,
+  };
+}
+
 function runBun(commandArgs, options = {}) {
-  const bun = which("bun");
+  const bun = resolveBunBinary();
   if (!bun) {
     fail('Could not find "bun" in PATH.');
   }
   run(bun, commandArgs, options);
+}
+
+function runBunCapture(commandArgs, options = {}) {
+  const bun = resolveBunBinary();
+  if (!bun) {
+    fail('Could not find "bun" in PATH.');
+  }
+  return runCapture(bun, commandArgs, options);
+}
+
+function resolveBunBinary() {
+  if (process.platform === "win32") {
+    const whereResult = spawnSync("where", ["bun"], {
+      encoding: "utf8",
+      stdio: "pipe",
+    });
+    if (whereResult.status === 0 && typeof whereResult.stdout === "string") {
+      const lines = whereResult.stdout
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean);
+      const exePath = lines.find((line) => /\.exe$/i.test(line));
+      if (exePath && fs.existsSync(exePath)) {
+        return exePath;
+      }
+    }
+  }
+  const bun = which("bun");
+  if (!bun) return null;
+  if (process.platform === "win32" && bun.toLowerCase().endsWith(".cmd")) {
+    const bunInstallExe =
+      process.env.BUN_INSTALL &&
+      path.join(process.env.BUN_INSTALL, "bin", "bun.exe");
+    if (bunInstallExe && fs.existsSync(bunInstallExe)) {
+      return bunInstallExe;
+    }
+    const siblingExe = bun.slice(0, -4);
+    if (fs.existsSync(siblingExe) && /\.exe$/i.test(siblingExe)) {
+      return siblingExe;
+    }
+  }
+  return bun;
 }
 
 function runNode(commandArgs, options = {}) {
@@ -201,6 +267,139 @@ function ensureAppDirs() {
       fail(`Expected directory not found: ${dir}`);
     }
   }
+}
+
+function logPreflightDiagnostic(fields) {
+  console.log(`[desktop-preflight] ${JSON.stringify(fields)}`);
+}
+
+function failPreflight(message, fields = {}, detailLines = []) {
+  logPreflightDiagnostic({
+    level: "error",
+    ...fields,
+  });
+  console.error(`[desktop-preflight] ${message}`);
+  for (const line of detailLines) {
+    console.error(line);
+  }
+  fail("Desktop preflight failed. See diagnostics above.");
+}
+
+function runDesktopPreflight() {
+  ensureAppDirs();
+  const moduleName = "electrobun/view";
+  const preflightCwd = ELECTROBUN_DIR;
+
+  const bunVersionResult = runBunCapture(["--version"], { cwd: preflightCwd });
+  const bunVersion = bunVersionResult.stdout.trim();
+  if (bunVersionResult.status !== 0 || !bunVersion) {
+    failPreflight(
+      "Unable to read Bun version.",
+      {
+        step: "bun-version",
+        cwd: preflightCwd,
+        module: moduleName,
+        errorCode: bunVersionResult.status,
+      },
+      [bunVersionResult.stderr.trim()].filter(Boolean),
+    );
+  }
+
+  if (!isSupportedBunVersion(bunVersion)) {
+    failPreflight("Unsupported Bun version for desktop builds.", {
+      step: "bun-version",
+      cwd: preflightCwd,
+      module: moduleName,
+      bunVersion,
+      errorCode: "UNSUPPORTED_BUN_VERSION",
+    });
+  }
+
+  const electrobunPkgPath = path.join(
+    ELECTROBUN_DIR,
+    "node_modules",
+    "electrobun",
+    "package.json",
+  );
+  if (!fs.existsSync(electrobunPkgPath)) {
+    failPreflight(
+      "Electrobun package is missing from workspace node_modules.",
+      {
+        step: "electrobun-manifest",
+        cwd: preflightCwd,
+        module: moduleName,
+        bunVersion,
+        errorCode: "ELECTROBUN_MISSING",
+      },
+    );
+  }
+
+  let electrobunManifest = null;
+  try {
+    electrobunManifest = JSON.parse(fs.readFileSync(electrobunPkgPath, "utf8"));
+  } catch (err) {
+    failPreflight(
+      "Failed to parse electrobun package manifest.",
+      {
+        step: "electrobun-manifest",
+        cwd: preflightCwd,
+        module: moduleName,
+        bunVersion,
+        errorCode: "ELECTROBUN_MANIFEST_PARSE_ERROR",
+      },
+      [String(err)],
+    );
+  }
+
+  if (!hasElectrobunViewExport(electrobunManifest)) {
+    failPreflight("Electrobun package exports are missing ./view.", {
+      step: "electrobun-manifest",
+      cwd: preflightCwd,
+      module: moduleName,
+      bunVersion,
+      errorCode: "ELECTROBUN_VIEW_EXPORT_MISSING",
+    });
+  }
+
+  const importProbe = runBunCapture(
+    [
+      "-e",
+      'try{const resolved=import.meta.resolve("electrobun/view");console.log(resolved);}catch(err){console.error(String(err?.stack||err));process.exit(1);}',
+    ],
+    { cwd: preflightCwd },
+  );
+  if (importProbe.status !== 0) {
+    const stderr = `${importProbe.stderr}\n${importProbe.stdout}`.trim();
+    const classified = classifyElectrobunViewFailure(stderr);
+    const detailLines = [stderr].filter(Boolean);
+    if (
+      classified.code === "EACCES_ELECTROBUN_VIEW" &&
+      process.platform === "win32"
+    ) {
+      detailLines.push("");
+      detailLines.push(...buildWindowsRepairSteps());
+    }
+    failPreflight(
+      "Failed to resolve/import electrobun/view during desktop preflight.",
+      {
+        step: "import-probe",
+        cwd: preflightCwd,
+        module: moduleName,
+        bunVersion,
+        errorCode: classified.code,
+      },
+      detailLines,
+    );
+  }
+
+  logPreflightDiagnostic({
+    level: "info",
+    step: "complete",
+    cwd: preflightCwd,
+    module: moduleName,
+    bunVersion,
+    errorCode: "OK",
+  });
 }
 
 function findLatestMacAppBundle() {
@@ -286,6 +485,8 @@ function stageDesktopBuild() {
     env: { ...process.env, VITE_APP_VARIANT: variant },
     label: `Building renderer bundle (VITE_APP_VARIANT=${variant})`,
   });
+
+  runDesktopPreflight();
 
   runBun(["run", "build:preload"], {
     cwd: ELECTROBUN_DIR,
@@ -374,6 +575,7 @@ function printUsage() {
   console.log(`Usage: node scripts/desktop-build.mjs <command> [options]
 
 Commands:
+  preflight Run desktop preflight checks (Bun + electrobun/view resolution)
   stage    Build runtime/assets/preload inputs for desktop packaging
   package  Run electrobun build against the staged desktop inputs
   build    Run stage + package
@@ -393,6 +595,9 @@ Environment:
 }
 
 switch (command) {
+  case "preflight":
+    runDesktopPreflight();
+    break;
   case "stage":
     stageDesktopBuild();
     break;
