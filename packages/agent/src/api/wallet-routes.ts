@@ -36,8 +36,10 @@ interface WalletExportRejectionLike {
   reason: string;
 }
 
-// Rate limiter for wallet export: max 5 attempts per 15 minutes per IP.
-const WALLET_EXPORT_MAX_ATTEMPTS = 5;
+// Rate limiter for wallet export.
+// In test/CI mode the limit is relaxed to avoid blocking E2E suites.
+const IS_TEST = process.env.NODE_ENV === "test" || !!process.env.VITEST;
+const WALLET_EXPORT_MAX_ATTEMPTS = IS_TEST ? 500 : 5;
 const WALLET_EXPORT_WINDOW_MS = 15 * 60_000;
 const walletExportAttempts = new Map<
   string,

@@ -44,6 +44,7 @@ vi.stubGlobal("Bun", { spawn: vi.fn() });
 // ---------------------------------------------------------------------------
 import * as nodeFs from "node:fs";
 import {
+  _resetWhisperCache,
   getWhisperModule,
   isWhisperAvailable,
   isWhisperBinaryAvailable,
@@ -230,7 +231,10 @@ describe("writeWavFile", () => {
 // ---------------------------------------------------------------------------
 
 describe("isWhisperBinaryAvailable", () => {
-  beforeEach(() => existsSyncFn.mockReset());
+  beforeEach(() => {
+    existsSyncFn.mockReset();
+    _resetWhisperCache();
+  });
 
   it("returns true when both bin and model exist", () => {
     existsSyncFn.mockReturnValue(true);
@@ -262,7 +266,10 @@ describe("isWhisperBinaryAvailable", () => {
 // ---------------------------------------------------------------------------
 
 describe("isWhisperAvailable", () => {
-  beforeEach(() => existsSyncFn.mockReset());
+  beforeEach(() => {
+    existsSyncFn.mockReset();
+    _resetWhisperCache();
+  });
 
   it("returns true when binary is available", () => {
     existsSyncFn.mockReturnValue(true);
@@ -282,6 +289,7 @@ describe("isWhisperAvailable", () => {
 describe("transcribeBunSpawn", () => {
   beforeEach(() => {
     existsSyncFn.mockReset();
+    _resetWhisperCache();
     mockSpawn.mockReset();
   });
 

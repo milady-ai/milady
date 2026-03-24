@@ -65,6 +65,12 @@ export function isWhisperBinaryAvailable(): boolean {
   return whisperBinaryResult;
 }
 
+/** Reset the cached result — only for testing. */
+export function _resetWhisperCache(): void {
+  whisperBinaryChecked = false;
+  whisperBinaryResult = false;
+}
+
 /**
  * Write Float32 PCM samples to a 16-bit PCM RIFF WAV file.
  * whisper.cpp requires 16kHz mono 16-bit PCM WAV input.
