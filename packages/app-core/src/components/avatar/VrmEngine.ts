@@ -2665,9 +2665,7 @@ export class VrmEngine {
         // Teleport animation failed (e.g. WebGPU unavailable) — still notify
         // the app so companion UI (header, chat) becomes visible.
         if (typeof window !== "undefined") {
-          window.dispatchEvent(
-            new CustomEvent("eliza:vrm-teleport-complete"),
-          );
+          window.dispatchEvent(new CustomEvent("eliza:vrm-teleport-complete"));
         }
       }
     }
