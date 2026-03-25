@@ -2431,7 +2431,9 @@ async function handleMiladyCompatRoute(
     if (isStewardConfigured()) {
       try {
         const addresses = getWalletAddresses();
-        const stewardStatus = await getStewardBridgeStatus({ evmAddress: addresses.evmAddress });
+        const stewardStatus = await getStewardBridgeStatus({
+          evmAddress: addresses.evmAddress,
+        });
         sendJsonResponse(res, 200, {
           evmPrivateKey: "[managed-by-steward]",
           evmAddress: addresses.evmAddress ?? stewardStatus.evmAddress ?? "",
