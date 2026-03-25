@@ -18,7 +18,7 @@ AgentRuntime
 └── Local            (from plugins/ directory)
 ```
 
-The source of truth for which plugins are always loaded lives in `src/runtime/core-plugins.ts`:
+The source of truth for which plugins are always loaded lives in `packages/agent/src/runtime/core-plugins.ts` (re-exported by `packages/app-core/src/runtime/core-plugins.ts`):
 
 ```typescript
 export const CORE_PLUGINS: readonly string[] = [
@@ -38,7 +38,7 @@ export const CORE_PLUGINS: readonly string[] = [
 
 ### Optional Core Plugins
 
-A separate list of optional core plugins can be enabled from the admin panel. These are not loaded by default due to packaging or specification constraints. The list lives in `src/runtime/core-plugins.ts`:
+A separate list of optional core plugins can be enabled from the admin panel. These are not loaded by default due to packaging or specification constraints. The list lives in `packages/agent/src/runtime/core-plugins.ts`:
 
 ```typescript
 export const OPTIONAL_CORE_PLUGINS: readonly string[] = [
@@ -117,7 +117,7 @@ interface Plugin {
 
 ## Auto-Enable Mechanism
 
-Plugins are automatically enabled when their required configuration is detected. This logic lives in `src/config/plugin-auto-enable.ts` and runs before runtime initialization.
+Plugins are automatically enabled when their required configuration is detected. This logic lives in `packages/agent/src/config/plugin-auto-enable.ts` (extended by `packages/app-core/src/config/plugin-auto-enable.ts` for Milady-specific connectors like WeChat) and runs before runtime initialization.
 
 ### Trigger Sources
 
@@ -178,8 +178,11 @@ const CONNECTOR_PLUGINS = {
   retake:      "@elizaos/plugin-retake",
   blooio:      "@elizaos/plugin-blooio",
   twitch:      "@elizaos/plugin-twitch",
+  wechat:      "@miladyai/plugin-wechat",  // Milady-specific (added in app-core)
 };
 ```
+
+> **Note:** The upstream `packages/agent` defines all `@elizaos/*` connectors. Milady's `packages/app-core` extends this map with the `wechat` entry pointing to `@miladyai/plugin-wechat`.
 
 **Feature flags** — The `features` section of `milady.json` auto-enables feature plugins. A feature can be enabled with `features.<name>: true` or `features.<name>.enabled: true`:
 

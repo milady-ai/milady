@@ -23,11 +23,13 @@
 
 ## Project Structure
 
-- **Source code:** `src/` — runtime in `src/runtime/`, CLI wiring in `src/cli/`, config in `src/config/`, providers in `src/providers/`, hooks in `src/hooks/`, utils in `src/utils/`, types in `src/types/`
+- **Source code:** `packages/app-core/src/` — runtime in `src/runtime/`, CLI wiring in `src/cli/`, config in `src/config/`, API in `src/api/`, connectors in `src/connectors/`, providers in `src/providers/`, hooks in `src/hooks/`, utils in `src/utils/`, types in `src/types/`
+- **Agent upstream:** `packages/agent/` — elizaOS agent runtime, core plugins, plugin auto-enable maps
 - **Tests:** colocated `*.test.ts` alongside source files
 - **Build output:** `dist/` (via `tsdown`)
-- **Entry points:** `src/entry.ts` (CLI), `src/index.ts` (library), `src/runtime/eliza.ts` (elizaOS runtime)
+- **Entry points:** `packages/app-core/src/entry.ts` (CLI), `packages/app-core/src/index.ts` (library), `packages/app-core/src/runtime/eliza.ts` (elizaOS runtime)
 - **Apps:** `apps/app/` (Capacitor mobile/desktop, includes React UI), `apps/chrome-extension/`
+- **Internal packages:** `packages/ui/`, `packages/shared/`, `packages/vrm-utils/`, `packages/plugin-wechat/`
 - **Deployment:** `deploy/` (Docker configs)
 - **Scripts:** `scripts/` (build, dev, release tooling)
 - **Tests:** `test/` (setup, helpers, mocks, e2e scripts)

@@ -35,18 +35,26 @@ bun run db:check     # database security + readonly tests
 ## Project Layout
 
 ```
-src/
-  entry.ts              CLI bootstrap (env, log level)
-  cli/                  Commander CLI (milady command)
-  runtime/
-    eliza.ts            Agent loader — sets NODE_PATH, loads plugins dynamically
-    dev-server.ts       Dev mode entry point (started by dev-ui.mjs)
-  api/                  Dashboard API (port 31337 in dev, 2138 in prod)
-  plugins/              Milady-specific plugins
-  services/             Business logic
+packages/
+  app-core/             Main application package (source of truth for runtime)
+    src/
+      entry.ts          CLI bootstrap (env, log level)
+      cli/              Commander CLI (milady command)
+      runtime/
+        eliza.ts        Agent loader — sets NODE_PATH, loads plugins dynamically
+        dev-server.ts   Dev mode entry point (started by dev-ui.mjs)
+      api/              Dashboard API (port 31337 in dev, 2138 in prod)
+      config/           Plugin auto-enable, config schemas
+      connectors/       Connector integration code
+      services/         Business logic
+  agent/                Upstream elizaOS agent (core plugins, auto-enable maps)
+  plugin-wechat/        WeChat connector plugin (@miladyai/plugin-wechat)
+  ui/                   Shared UI component library
+  shared/               Shared utilities
+  vrm-utils/            VRM avatar utilities
 apps/
   app/                  Main web + desktop UI (Vite + React)
-  home/                 Home dashboard
+    electrobun/         Electrobun desktop shell
   homepage/             Marketing site
 scripts/
   dev-ui.mjs            Dev orchestrator (API + Vite)
@@ -54,15 +62,13 @@ scripts/
   run-repo-setup.mjs    Postinstall sequencer
   setup-eliza-workspace.mjs   Clone + link ../eliza packages
   patch-deps.mjs        Post-install patches for broken upstream exports
-plugins/                Workspace plugins (plugin-*)
-packages/               Internal packages
 ```
 
 ## Key Architecture Decisions
 
 ### NODE_PATH (do not remove)
 Dynamic plugin imports (`import("@elizaos/plugin-foo")`) need NODE_PATH set to the repo root's `node_modules`. This is set in three places — all three are required:
-1. `src/runtime/eliza.ts` — module-level, before dynamic imports
+1. `packages/agent/src/runtime/eliza.ts` — module-level, before dynamic imports
 2. `scripts/run-node.mjs` — child process env
 3. `apps/app/electrobun/src/native/agent.ts` — Electrobun main process
 
