@@ -82,6 +82,8 @@ export function ShellHeaderControls({
   onNewChat,
 }: ShellHeaderControlsProps) {
   const isMobileViewport = useMediaQuery(SHELL_MODE_MOBILE_MEDIA_QUERY);
+  const shouldSplitCompanionMobileActions =
+    isMobileViewport && Boolean(showCompanionControls);
   const shellOptions: Array<{
     view: ShellView;
     label: string;
@@ -103,14 +105,80 @@ export function ShellHeaderControls({
       Icon: isMobileViewport ? Smartphone : Monitor,
     },
   ];
+  const voiceToggleLabel = chatAgentVoiceMuted
+    ? t("companion.agentVoiceOff")
+    : t("companion.agentVoiceOn");
+  const compactCompanionActionClassName = `${SHELL_ICON_BUTTON_CLASSNAME} pointer-events-auto text-sm leading-none`;
+  const expandedCompanionActionClassName = `${SHELL_EXPANDED_BUTTON_CLASSNAME} justify-center text-sm leading-none sm:!w-auto sm:gap-1.5 sm:px-3.5`;
+
+  const renderVoiceButton = (compact: boolean) => (
+    <Button
+      size="icon"
+      variant="outline"
+      aria-label={voiceToggleLabel}
+      aria-pressed={!chatAgentVoiceMuted}
+      title={voiceToggleLabel}
+      className={
+        compact
+          ? compactCompanionActionClassName
+          : expandedCompanionActionClassName
+      }
+      onClick={onToggleVoiceMute}
+      onPointerDown={(event) => event.stopPropagation()}
+      style={HEADER_BUTTON_STYLE}
+      data-no-camera-drag="true"
+    >
+      {chatAgentVoiceMuted ? (
+        <VolumeX className="pointer-events-none h-4 w-4 shrink-0" />
+      ) : (
+        <Volume2 className="pointer-events-none h-4 w-4 shrink-0" />
+      )}
+      <span className="pointer-events-none hidden sm:inline">
+        {t("companion.voiceToggle")}
+      </span>
+    </Button>
+  );
+
+  const renderNewChatButton = (compact: boolean) => (
+    <Button
+      size="icon"
+      variant="outline"
+      aria-label={t("companion.newChat")}
+      title={t("companion.newChat")}
+      className={
+        compact
+          ? compactCompanionActionClassName
+          : expandedCompanionActionClassName
+      }
+      onClick={onNewChat}
+      onPointerDown={(event) => event.stopPropagation()}
+      style={HEADER_BUTTON_STYLE}
+      data-no-camera-drag="true"
+    >
+      <MessageCirclePlus className="pointer-events-none h-4 w-4 shrink-0" />
+      <span className="pointer-events-none hidden sm:inline">
+        {t("companion.newChatButton")}
+      </span>
+    </Button>
+  );
 
   return (
     <div
-      className={`flex min-w-0 items-center w-full overflow-visible gap-2 ${className ?? ""}`}
+      className={`min-w-0 w-full overflow-visible gap-2 ${
+        shouldSplitCompanionMobileActions
+          ? "grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-2 gap-y-2.5"
+          : "flex items-center"
+      } ${className ?? ""}`}
       data-no-camera-drag="true"
     >
       {/* Left: shell view toggle */}
-      <div className="flex shrink-0 items-center">
+      <div
+        className={
+          shouldSplitCompanionMobileActions
+            ? "col-start-1 row-start-1 flex min-w-0 items-center"
+            : "flex shrink-0 items-center"
+        }
+      >
         <fieldset
           className={SHELL_SEGMENTED_CONTROL_CLASSNAME}
           data-testid="ui-shell-toggle"
@@ -151,55 +219,22 @@ export function ShellHeaderControls({
       </div>
 
       {/* Center: children or companion controls */}
-      <div className="flex-1 min-w-0">
-        {showCompanionControls ? (
+      <div
+        className={
+          shouldSplitCompanionMobileActions
+            ? "hidden"
+            : "flex-1 min-w-0"
+        }
+      >
+        {showCompanionControls && !shouldSplitCompanionMobileActions ? (
           <div
             className="flex items-center justify-center"
             data-testid="companion-header-chat-controls"
             data-no-camera-drag="true"
           >
             <div className="inline-flex items-center gap-2">
-              <Button
-                size="icon"
-                variant="outline"
-                aria-label={
-                  chatAgentVoiceMuted
-                    ? t("companion.agentVoiceOff")
-                    : t("companion.agentVoiceOn")
-                }
-                aria-pressed={!chatAgentVoiceMuted}
-                title={
-                  chatAgentVoiceMuted
-                    ? t("companion.agentVoiceOff")
-                    : t("companion.agentVoiceOn")
-                }
-                className={`${SHELL_EXPANDED_BUTTON_CLASSNAME} text-sm leading-none sm:!w-auto sm:gap-1.5 sm:px-3.5`}
-                onClick={onToggleVoiceMute}
-                style={HEADER_BUTTON_STYLE}
-              >
-                {chatAgentVoiceMuted ? (
-                  <VolumeX className="pointer-events-none h-4 w-4 shrink-0" />
-                ) : (
-                  <Volume2 className="pointer-events-none h-4 w-4 shrink-0" />
-                )}
-                <span className="pointer-events-none hidden sm:inline">
-                  {t("companion.voiceToggle")}
-                </span>
-              </Button>
-              <Button
-                size="icon"
-                variant="outline"
-                aria-label={t("companion.newChat")}
-                title={t("companion.newChat")}
-                className={`${SHELL_EXPANDED_BUTTON_CLASSNAME} text-sm leading-none sm:!w-auto sm:gap-1.5 sm:px-3.5`}
-                onClick={onNewChat}
-                style={HEADER_BUTTON_STYLE}
-              >
-                <MessageCirclePlus className="pointer-events-none h-4 w-4 shrink-0" />
-                <span className="pointer-events-none hidden sm:inline">
-                  {t("companion.newChatButton")}
-                </span>
-              </Button>
+              {renderVoiceButton(false)}
+              {renderNewChatButton(false)}
             </div>
           </div>
         ) : (
@@ -209,7 +244,11 @@ export function ShellHeaderControls({
 
       {/* Right: controls */}
       <div
-        className="flex shrink-0 items-center justify-end gap-2 overflow-visible"
+        className={`flex min-w-0 items-center justify-end gap-2 overflow-visible ${
+          shouldSplitCompanionMobileActions
+            ? "col-start-2 row-start-1 ml-auto shrink-0"
+            : "shrink-0"
+        }`}
         data-testid="shell-header-right-controls"
         data-no-camera-drag="true"
       >
@@ -242,6 +281,26 @@ export function ShellHeaderControls({
         </div>
         {trailingExtras}
       </div>
+
+      {shouldSplitCompanionMobileActions && showCompanionControls ? (
+        <div
+          className="col-span-2 row-start-2 flex items-center justify-between"
+          data-testid="companion-header-mobile-actions"
+        >
+          <div
+            className="flex items-center justify-start"
+            data-testid="companion-header-mobile-voice"
+          >
+            {renderVoiceButton(true)}
+          </div>
+          <div
+            className="flex items-center justify-end"
+            data-testid="companion-header-mobile-new-chat"
+          >
+            {renderNewChatButton(true)}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -507,9 +507,9 @@ export function App() {
         ) : (
           <>
             <ConversationsSidebar />
-            <main className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden pt-3 px-3 xl:px-5">
+            <main className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden">
               <DeferredSetupChecklist
-                className="mb-3"
+                className="mx-3 mb-3 mt-3 xl:mx-5"
                 onOpenTask={handleDeferredTaskOpen}
               />
               <ChatView />

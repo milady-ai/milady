@@ -4,20 +4,16 @@ import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const {
-  clientMock,
-  dispatchWindowEventMock,
-  useAppMock,
-  fetchMock,
-} = vi.hoisted(() => ({
-  clientMock: {
-    getConfig: vi.fn(),
-    updateConfig: vi.fn(),
-  },
-  dispatchWindowEventMock: vi.fn(),
-  useAppMock: vi.fn(),
-  fetchMock: vi.fn(),
-}));
+const { clientMock, dispatchWindowEventMock, useAppMock, fetchMock } =
+  vi.hoisted(() => ({
+    clientMock: {
+      getConfig: vi.fn(),
+      updateConfig: vi.fn(),
+    },
+    dispatchWindowEventMock: vi.fn(),
+    useAppMock: vi.fn(),
+    fetchMock: vi.fn(),
+  }));
 
 class MockAnalyserNode {
   fftSize = 0;
@@ -76,7 +72,8 @@ vi.mock("../../src/state/useApp", () => ({
 }));
 
 vi.mock("../../src/components/CharacterRoster", () => ({
-  CharacterRoster: () => React.createElement("div", { "data-testid": "roster" }),
+  CharacterRoster: () =>
+    React.createElement("div", { "data-testid": "roster" }),
   resolveRosterEntries: () => [
     {
       id: "chen",
@@ -98,9 +95,8 @@ vi.mock("../../src/components/CharacterRoster", () => ({
 }));
 
 vi.mock("../../src/hooks", async () => {
-  const actual = await vi.importActual<typeof import("../../src/hooks")>(
-    "../../src/hooks",
-  );
+  const actual =
+    await vi.importActual<typeof import("../../src/hooks")>("../../src/hooks");
   return {
     ...actual,
     useChatAvatarVoiceBridge: () => {},

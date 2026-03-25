@@ -52,7 +52,7 @@ const SETTINGS_SIDEBAR_RAIL_CLASS =
 const SETTINGS_NAV_BUTTON_BASE_CLASS =
   "group flex h-auto w-full items-start justify-start gap-3 rounded-xl border px-3.5 py-3 text-left transition-all duration-150";
 const SETTINGS_NAV_BUTTON_ACTIVE_CLASS =
-  "border-accent/25 bg-accent/10 text-txt shadow-sm";
+  "border-accent/30 bg-[linear-gradient(180deg,rgba(var(--accent),0.18),rgba(var(--accent),0.08))] text-txt shadow-[0_2px_10px_rgba(3,5,10,0.08)] dark:shadow-[0_0_0_1px_rgba(var(--accent),0.16),0_0_18px_rgba(var(--accent),0.18)]";
 const SETTINGS_NAV_BUTTON_INACTIVE_CLASS =
   "border-transparent text-muted hover:border-border/45 hover:bg-bg/45 hover:text-txt";
 const SETTINGS_SIDEBAR_KICKER_CLASS =
@@ -159,11 +159,10 @@ function SettingsSidebar({
         </div>
 
         <nav
-          className="flex flex-1 flex-col gap-1.5 px-1 py-4"
+          className="mt-4 min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-3"
           aria-label={t("nav.settings")}
         >
           {sections.map((section) => {
-            const Icon = section.icon;
             const isActive = activeSection === section.id;
             return (
               <Button
@@ -179,9 +178,6 @@ function SettingsSidebar({
                     : SETTINGS_NAV_BUTTON_INACTIVE_CLASS
                 }`}
               >
-                <Icon
-                  className={`mt-0.5 h-4 w-4 shrink-0 ${isActive ? "text-accent" : ""}`}
-                />
                 <div className="min-w-0 flex-1 text-left">
                   <div
                     className={`truncate text-sm ${isActive ? "font-semibold" : "font-medium"}`}

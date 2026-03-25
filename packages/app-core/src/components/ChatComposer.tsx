@@ -54,7 +54,7 @@ const COMPOSER_EMPHASIZED_BUTTON_CLASSNAME =
 const COMPOSER_DESTRUCTIVE_BUTTON_CLASSNAME =
   "border border-danger/40 bg-danger/12 text-danger shadow-sm hover:border-danger/65 hover:bg-danger/20 hover:text-danger";
 const COMPOSER_GAME_BUTTON_CLASSNAME =
-  "select-none rounded-full border border-white/10 bg-black/30 text-[color:var(--onboarding-text-primary)] shadow-[0_12px_34px_rgba(0,0,0,0.22)] backdrop-blur-md transition-all duration-300 hover:border-white/20 hover:bg-black/45 hover:text-[color:var(--onboarding-text-strong)] active:scale-95";
+  "select-none rounded-full border border-[color:var(--onboarding-card-border)] bg-[color:var(--onboarding-card-bg)] text-[color:var(--onboarding-text-primary)] shadow-[0_12px_34px_rgba(0,0,0,0.18)] backdrop-blur-md transition-[border-color,background-color,color,transform,box-shadow] duration-300 hover:border-[color:var(--onboarding-card-border-strong)] hover:bg-[color:var(--onboarding-card-bg-hover)] hover:text-[color:var(--onboarding-text-strong)] active:scale-95";
 const COMPOSER_GAME_BUTTON_ACTIVE_CLASSNAME =
   "select-none rounded-full border border-[color:var(--onboarding-accent-border)] bg-[color:var(--onboarding-accent-bg)] text-[color:var(--onboarding-text-strong)] shadow-[0_0_20px_rgba(207,175,90,0.2)] backdrop-blur-md transition-all duration-300 hover:border-[color:var(--onboarding-accent-border-hover)] hover:bg-[color:var(--onboarding-accent-bg-hover)] active:scale-95";
 
@@ -109,6 +109,13 @@ export function ChatComposer({
         : t("chat.send")
       : t("chat.stopSpeaking");
   const actionButtonLabel = isGameModal ? undefined : actionButtonTitle;
+  const actionButtonClassName = isGameModal
+    ? `${COMPOSER_ACTION_BUTTON_CLASSNAME} ${
+        hasDraft
+          ? COMPOSER_GAME_BUTTON_ACTIVE_CLASSNAME
+          : `${COMPOSER_GAME_BUTTON_CLASSNAME} opacity-80`
+      }`
+    : `${COMPOSER_ACTION_BUTTON_CLASSNAME} border border-accent/55 bg-accent/22 text-accent-fg shadow-[0_12px_28px_rgba(0,0,0,0.16)] hover:border-accent/75 hover:bg-accent/32 disabled:border-border/40 disabled:bg-bg-accent disabled:text-muted-strong disabled:shadow-none`;
   const inputPlaceholder = isNarrow ? "Message..." : t("chat.inputPlaceholder");
   const defaultTextareaPlaceholder = isAgentStarting
     ? t("chat.agentStarting")
@@ -190,7 +197,7 @@ export function ChatComposer({
     <div
       className={
         isGameModal
-          ? "relative flex items-end gap-1 transition-all"
+          ? "relative flex w-full items-end gap-2 max-[380px]:gap-1.5 transition-all"
           : "flex items-end gap-1.5 sm:gap-2"
       }
     >
@@ -218,7 +225,7 @@ export function ChatComposer({
           size="icon"
           className={
             isGameModal
-              ? `mr-2 flex items-center justify-center ${COMPOSER_ICON_BUTTON_CLASSNAME} ${
+              ? `flex items-center justify-center ${COMPOSER_ICON_BUTTON_CLASSNAME} ${
                   voice.isListening
                     ? `animate-pulse ${COMPOSER_GAME_BUTTON_ACTIVE_CLASSNAME}`
                     : COMPOSER_GAME_BUTTON_CLASSNAME
@@ -258,7 +265,7 @@ export function ChatComposer({
       <div
         className={
           isGameModal
-            ? "flex min-h-[46px] min-w-0 flex-1 items-center rounded-2xl border border-white/10 bg-[rgba(16,12,11,0.72)] shadow-[0_18px_40px_rgba(0,0,0,0.24)] backdrop-blur-md transition-all"
+            ? "flex min-h-[46px] min-w-0 flex-1 items-center rounded-[26px] border border-[color:var(--onboarding-card-border)] bg-[color:var(--onboarding-card-bg)] shadow-[0_18px_40px_rgba(0,0,0,0.18)] backdrop-blur-md transition-[border-color,background-color,box-shadow] duration-300 focus-within:border-[color:var(--onboarding-card-border-strong)] focus-within:bg-[color:var(--onboarding-card-bg-hover)]"
             : "flex min-h-[46px] min-w-0 flex-1 items-center rounded-xl border border-border/60 bg-card/78 shadow-sm backdrop-blur-md transition-[border-color,background-color,box-shadow] duration-200 hover:border-border-strong focus-within:border-accent/50 focus-within:bg-card/92 focus-within:shadow-md"
         }
       >
@@ -267,7 +274,7 @@ export function ChatComposer({
           data-testid="chat-composer-textarea"
           className={
             isGameModal
-              ? `${COMMON_TEXTAREA_CLASSNAME} max-h-[150px] border-none bg-transparent px-4 py-2 text-[15px] leading-relaxed text-[color:var(--onboarding-text-strong)] placeholder:text-[color:var(--onboarding-text-muted)]`
+              ? `${COMMON_TEXTAREA_CLASSNAME} max-h-[150px] border-none bg-transparent px-4 py-2.5 text-[15px] leading-relaxed text-[color:var(--onboarding-text-strong)] placeholder:text-[color:var(--onboarding-text-muted)] max-[380px]:px-3.5`
               : `${COMMON_TEXTAREA_CLASSNAME} px-3.5 py-2 bg-transparent border-none text-[15px] leading-[1.7] text-txt placeholder:text-muted-strong`
           }
           style={{ fontFamily: "var(--font-chat)" }}
@@ -350,7 +357,7 @@ export function ChatComposer({
           variant="default"
           data-testid="chat-composer-action"
           size="icon"
-          className={`${COMPOSER_ACTION_BUTTON_CLASSNAME} border border-accent/55 bg-accent/22 text-accent-fg shadow-[0_12px_28px_rgba(0,0,0,0.16)] hover:border-accent/75 hover:bg-accent/32 disabled:border-border/40 disabled:bg-bg-accent disabled:text-muted-strong disabled:shadow-none`}
+          className={actionButtonClassName}
           onClick={onSend}
           disabled={isComposerLocked || !hasDraft}
           aria-label={actionButtonLabel}

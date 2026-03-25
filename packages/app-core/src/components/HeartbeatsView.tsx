@@ -66,6 +66,10 @@ const SIDEBAR_SECTION_LABEL_CLASS =
   "text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60";
 const SIDEBAR_CARD_BASE_CLASS =
   "w-full rounded-xl border px-3.5 py-3 text-left transition-[border-color,background-color,color,box-shadow] duration-200";
+const HEARTBEAT_SIDEBAR_CARD_ACTIVE_CLASS =
+  "border-accent/30 bg-[linear-gradient(180deg,rgba(var(--accent),0.18),rgba(var(--accent),0.08))] text-txt shadow-[0_2px_10px_rgba(3,5,10,0.08)] dark:shadow-[0_0_0_1px_rgba(var(--accent),0.16),0_0_18px_rgba(var(--accent),0.18)]";
+const HEARTBEAT_SIDEBAR_CARD_INACTIVE_CLASS =
+  "border-transparent bg-transparent hover:border-border/45 hover:bg-bg/45";
 const HEARTBEATS_SHELL_CLASS =
   "relative flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-lg ring-1 ring-border/20 backdrop-blur-sm";
 const HEARTBEATS_CONTENT_WIDTH_CLASS = "mx-auto w-full max-w-[80rem]";
@@ -585,20 +589,20 @@ export function HeartbeatsView() {
             </Button>
           </div>
 
-          <div className="flex-1 overflow-y-auto pb-4">
+          <div className="flex-1 overflow-y-auto px-3 pb-4 pr-6 pt-4">
             {triggerError && (
-              <div className="mx-3 mb-2 mt-3 rounded-xl border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
+              <div className="mb-2 rounded-xl border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
                 {triggerError}
               </div>
             )}
             {triggersLoading && (
-              <div className="mx-3 mt-3 flex items-center gap-2 rounded-xl border border-border/40 bg-bg/35 px-3 py-3 text-sm text-muted">
+              <div className="flex items-center gap-2 rounded-xl border border-border/40 bg-bg/35 px-3 py-3 text-sm text-muted">
                 <div className="h-4 w-4 rounded-full border-2 border-muted/30 border-t-muted/80 animate-spin" />
                 {t("common.loading")}
               </div>
             )}
             {!triggersLoading && triggers.length === 0 && (
-              <div className="mx-3 mt-3 rounded-2xl border border-dashed border-border/50 bg-bg/25 px-4 py-4">
+              <div className="rounded-2xl border border-dashed border-border/50 bg-bg/25 px-4 py-4">
                 <div className="mb-1 text-sm font-medium text-txt">
                   {t("heartbeatsview.newHeartbeat")}
                 </div>
@@ -624,9 +628,13 @@ export function HeartbeatsView() {
                     openEditEditor(trigger);
                     void loadTriggerRuns(trigger.id);
                   }}
-                  className={`${SIDEBAR_CARD_BASE_CLASS} h-auto ${isActive ? "border-accent/45 bg-accent/10 text-txt shadow-sm" : "border-transparent bg-transparent hover:border-border/45 hover:bg-bg/45"}`}
+                  className={`${SIDEBAR_CARD_BASE_CLASS} h-auto ${
+                    isActive
+                      ? HEARTBEAT_SIDEBAR_CARD_ACTIVE_CLASS
+                      : HEARTBEAT_SIDEBAR_CARD_INACTIVE_CLASS
+                  }`}
                 >
-                  <div className="flex flex-col gap-1.5 min-w-0">
+                  <div className="flex min-w-0 flex-col gap-1.5">
                     <div className="flex items-center justify-between gap-1">
                       <span className="truncate text-sm font-semibold text-txt">
                         {trigger.displayName}
@@ -642,15 +650,10 @@ export function HeartbeatsView() {
                       />
                     </div>
                     <div className="mt-0.5 flex items-center justify-between gap-2 text-[11px] text-muted">
-                      <span className="truncate">
-                        {scheduleLabel(trigger, t)}
-                      </span>
+                      <span className="truncate">{scheduleLabel(trigger, t)}</span>
                       {trigger.lastStatus && (
                         <StatusBadge
-                          label={localizedExecutionStatus(
-                            trigger.lastStatus,
-                            t,
-                          )}
+                          label={localizedExecutionStatus(trigger.lastStatus, t)}
                           tone={toneForLastStatus(trigger.lastStatus)}
                         />
                       )}
@@ -661,7 +664,7 @@ export function HeartbeatsView() {
             })}
 
             {/* Templates */}
-            <div className="mt-3 border-t border-border/30 px-3 pb-2 pt-4">
+            <div className="mt-3 border-t border-border/30 px-1 pb-1 pt-4">
               <div className="mb-2 flex items-center justify-between gap-2">
                 <div className={SIDEBAR_SECTION_LABEL_CLASS}>Templates</div>
                 <span className="text-[10px] text-muted/50">
@@ -671,12 +674,12 @@ export function HeartbeatsView() {
               {[...userTemplates, ...BUILT_IN_TEMPLATES].map((template) => {
                 const isUserTemplate = !template.id.startsWith("__builtin_");
                 return (
-                  <div key={template.id} className="relative group mb-1.5">
+                  <div key={template.id} className="relative mb-1.5 group">
                     <button
                       type="button"
                       className={`${SIDEBAR_CARD_BASE_CLASS} ${
                         isUserTemplate
-                          ? "border-accent/20 bg-accent/5 hover:bg-accent/10 hover:border-accent/30"
+                          ? "border-accent/20 bg-accent/5 hover:border-accent/30 hover:bg-accent/10"
                           : "border-dashed border-border/40 hover:border-border hover:bg-bg-hover"
                       }`}
                       onClick={() => {
@@ -706,7 +709,7 @@ export function HeartbeatsView() {
                     {isUserTemplate && (
                       <button
                         type="button"
-                        className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-muted hover:text-danger text-[10px] px-1.5 py-0.5 rounded bg-bg/80"
+                        className="absolute right-1.5 top-1.5 rounded bg-bg/80 px-1.5 py-0.5 text-[10px] text-muted opacity-0 transition-opacity group-hover:opacity-100 hover:text-danger"
                         onClick={(e) => {
                           e.stopPropagation();
                           deleteUserTemplate(template.id);

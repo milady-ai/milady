@@ -177,4 +177,26 @@ describe("ChatComposer mic controls", () => {
     expect(sendButton.props.className).toContain("bg-accent/22");
     expect(sendButton.props.className).toContain("border-accent/55");
   });
+
+  it("uses the themed companion action styling in game-modal", () => {
+    const { renderer } = renderComposer({
+      variant: "game-modal",
+      chatInput: "Hey",
+    });
+    const sendButton = renderer.root.findByProps({
+      "data-testid": "chat-composer-action",
+    });
+    const textarea = findTextarea(renderer);
+
+    expect(sendButton.props.className).toContain("var(--onboarding-accent-bg)");
+    expect(sendButton.props.className).toContain(
+      "var(--onboarding-accent-border)",
+    );
+    expect(String(textarea.props.className)).toContain(
+      "var(--onboarding-text-strong)",
+    );
+    expect(String(textarea.props.className)).toContain(
+      "var(--onboarding-text-muted)",
+    );
+  });
 });

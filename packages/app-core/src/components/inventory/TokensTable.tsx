@@ -63,7 +63,7 @@ export function TokensTable({
 
   if (walletLoading) {
     return (
-      <div className="text-center py-10 text-muted italic text-xs">
+      <div className="flex min-h-[24rem] items-center justify-center px-6 py-10 text-center text-sm text-muted">
         {t("wallet.loadingBalances")}
       </div>
     );
@@ -71,14 +71,14 @@ export function TokensTable({
 
   if (visibleRows.length === 0) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 px-4 text-center">
+      <div className="flex min-h-[24rem] flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
         <div className="max-w-md space-y-2">
           <div className="text-base font-medium text-txt-strong">
             {walletBalances
               ? t("wallet.noTokensFound")
               : t("wallet.noDataRefresh")}
           </div>
-          <div className="text-xs text-muted">{t("wallet.emptyTokensCta")}</div>
+          <div className="text-sm text-muted">{t("wallet.emptyTokensCta")}</div>
         </div>
         {renderChainErrors()}
       </div>
@@ -86,10 +86,11 @@ export function TokensTable({
   }
 
   return (
-    <>
-      <table className="w-full border-collapse">
+    <div className="flex flex-col">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[42rem] border-collapse">
         <thead>
-          <tr className="border-b border-border">
+          <tr className="border-b border-border/50 bg-bg/24">
             <th className="pl-3 pr-2 py-2 text-left w-12" />
             <th className="px-3 py-2 text-left text-[10px] text-muted font-bold uppercase tracking-wide">
               {t("wallet.table.token")}
@@ -109,7 +110,7 @@ export function TokensTable({
             return (
               <tr
                 key={`${row.chain}-${row.symbol}-${row.contractAddress ?? ""}`}
-                className="border-b border-border last:border-b-0 hover:bg-bg-hover transition-colors"
+                className="border-b border-border/35 last:border-b-0 hover:bg-bg-hover/65 transition-colors"
               >
                 {/* Logo */}
                 <td className="pl-3 pr-2 py-3 align-middle">
@@ -130,7 +131,7 @@ export function TokensTable({
                       </div>
                       <div className="text-[10px] text-muted leading-tight mt-0.5">
                         {row.isNative ? (
-                          <span className="text-[9px] bg-accent/15 text-accent px-1 py-0.5 rounded">
+                          <span className="rounded-full border border-accent/20 bg-accent/10 px-1.5 py-0.5 text-[9px] text-accent">
                             {t("tokenstable.nativeGas")}
                           </span>
                         ) : (
@@ -139,7 +140,7 @@ export function TokensTable({
                               {row.name}
                             </span>
                             {row.isTracked && (
-                              <span className="text-[9px] bg-accent/15 text-accent px-1 py-0.5 rounded">
+                              <span className="rounded-full border border-accent/20 bg-accent/10 px-1.5 py-0.5 text-[9px] text-accent">
                                 {t("wallet.manual")}
                               </span>
                             )}
@@ -148,7 +149,7 @@ export function TokensTable({
                       </div>
                     </div>
                     {inventoryChainFocus === "all" && (
-                      <span className="text-[9px] text-muted font-mono border border-border px-1 py-0.5 rounded shrink-0">
+                      <span className="shrink-0 rounded-full border border-border/50 px-1.5 py-0.5 text-[9px] font-mono text-muted">
                         {row.chain}
                       </span>
                     )}
@@ -171,7 +172,7 @@ export function TokensTable({
                       variant="link"
                       size="sm"
                       data-testid="wallet-token-untrack"
-                      className="text-[10px] text-danger hover:underline cursor-pointer p-0 h-auto"
+                      className="h-auto cursor-pointer p-0 text-[10px] text-danger hover:underline"
                       title={t("wallet.removeManualTitle")}
                       onClick={() => handleUntrackToken(contractAddress)}
                     >
@@ -183,8 +184,9 @@ export function TokensTable({
             );
           })}
         </tbody>
-      </table>
+        </table>
+      </div>
       {renderChainErrors()}
-    </>
+    </div>
   );
 }

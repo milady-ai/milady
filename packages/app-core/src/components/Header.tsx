@@ -2,7 +2,7 @@ import { LanguageDropdown, ThemeToggle } from "@miladyai/app-core/components";
 import { getTabGroups, type TabGroup } from "@miladyai/app-core/navigation";
 import { useApp } from "@miladyai/app-core/state";
 import { Button } from "@miladyai/ui";
-import { Menu } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CloudStatusBadge } from "./CloudStatusBadge";
@@ -33,6 +33,19 @@ interface HeaderProps {
   transparent?: boolean;
   hideCloudCredits?: boolean;
 }
+
+const HEADER_NAV_BUTTON_BASE_CLASSNAME =
+  "relative z-10 min-h-[44px] shrink-0 rounded-xl border border-transparent px-3 py-2.5 text-[12px] transition-all duration-200 md:px-3.5 xl:px-4";
+const HEADER_NAV_BUTTON_ACTIVE_CLASSNAME =
+  "border-accent/30 bg-accent/12 text-txt font-semibold shadow-[0_2px_10px_rgba(3,5,10,0.08)] ring-1 ring-inset ring-accent/18 dark:shadow-[0_0_0_1px_rgba(var(--accent),0.14),0_0_14px_rgba(var(--accent),0.14)]";
+const HEADER_NAV_BUTTON_INACTIVE_CLASSNAME =
+  "text-muted hover:border-border/45 hover:bg-bg-hover/70 hover:text-txt";
+const HEADER_MOBILE_NAV_BUTTON_BASE_CLASSNAME =
+  "flex min-h-[48px] w-full rounded-xl border px-3 py-3 text-[14px] font-medium transition-all duration-200";
+const HEADER_MOBILE_NAV_BUTTON_ACTIVE_CLASSNAME =
+  "border-accent/30 bg-accent/12 text-txt shadow-[0_2px_10px_rgba(3,5,10,0.08)] ring-1 ring-inset ring-accent/18 dark:shadow-[0_0_0_1px_rgba(var(--accent),0.14),0_0_14px_rgba(var(--accent),0.14)]";
+const HEADER_MOBILE_NAV_BUTTON_INACTIVE_CLASSNAME =
+  "border-transparent bg-transparent text-txt hover:border-border/45 hover:bg-bg-hover/70";
 
 export function Header({
   mobileLeft,
@@ -65,20 +78,11 @@ export function Header({
     t,
   } = useApp();
 
-  const [copied, setCopied] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     void loadDropStatus();
   }, [loadDropStatus]);
-
-  // Clear copied state after 2 seconds
-  useEffect(() => {
-    if (copied) {
-      const timer = setTimeout(() => setCopied(null), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [copied]);
 
   // Close mobile menu on escape key
   useEffect(() => {
@@ -103,6 +107,11 @@ export function Header({
   const tabGroups = useMemo(
     () => getTabGroups(streamingEnabled),
     [streamingEnabled],
+  );
+  const activeTabGroup = useMemo(
+    () =>
+      tabGroups.find((group) => group.tabs.includes(tab)) ?? tabGroups[0] ?? null,
+    [tab, tabGroups],
   );
 
   const shellMode =
@@ -285,13 +294,12 @@ export function Header({
               {tabGroups.map((group: TabGroup) => {
                 const primaryTab = group.tabs[0];
                 const isActive = group.tabs.includes(tab);
-                const Icon = group.icon;
                 return (
                   <Button
                     variant={isActive ? "default" : "ghost"}
                     key={group.label}
                     data-testid={`header-nav-button-${primaryTab}`}
-                    className={`relative z-10 min-h-[44px] min-w-[44px] gap-0 xl:gap-1.5 shrink-0 px-3 md:px-3.5 xl:px-4 py-2.5 text-[12px] bg-transparent border border-transparent transition-all duration-300 rounded-full ${
+                    className={`relative z-10 min-h-[44px] shrink-0 px-3 md:px-3.5 xl:px-4 py-2.5 text-[12px] bg-transparent border border-transparent transition-all duration-300 rounded-xl ${
                       isActive
                         ? "text-accent font-bold bg-accent/15 shadow-[0_0_15px_rgba(var(--accent),0.18)] border-accent/40 ring-1 ring-inset ring-accent/20"
                         : "text-muted hover:text-txt hover:bg-bg-hover hover:border-border/50"
@@ -301,14 +309,8 @@ export function Header({
                     style={HEADER_BUTTON_STYLE}
                   >
                     <span
-                      data-testid={`header-nav-icon-${primaryTab}`}
-                      className="pointer-events-none inline-flex md:hidden xl:inline-flex"
-                    >
-                      <Icon className="w-4 h-4" />
-                    </span>
-                    <span
                       data-testid={`header-nav-label-${primaryTab}`}
-                      className="pointer-events-none hidden md:inline"
+                      className="pointer-events-none inline"
                     >
                       {t(NAV_LABEL_I18N_KEY[group.label] ?? group.label)}
                     </span>
@@ -365,12 +367,11 @@ export function Header({
                   {tabGroups.map((group: TabGroup, index) => {
                     const primaryTab = group.tabs[0];
                     const isActive = group.tabs.includes(tab);
-                    const Icon = group.icon;
                     return (
                       <Button
                         variant={isActive ? "default" : "ghost"}
                         key={group.label}
-                        className={`flex min-h-[48px] w-full gap-3 rounded-xl border px-3 py-3.5 text-[14px] font-medium transition-all duration-300 ${
+                        className={`flex min-h-[48px] w-full rounded-xl border px-3 py-3.5 text-[14px] font-medium transition-all duration-300 ${
                           isActive
                             ? "border-accent/40 bg-accent/15 text-accent shadow-[0_0_15px_rgba(var(--accent),0.18)] ring-1 ring-inset ring-accent/20"
                             : "border-transparent bg-transparent text-txt hover:border-border/50 hover:bg-bg-hover"
@@ -384,15 +385,6 @@ export function Header({
                           setMobileMenuOpen(false);
                         }}
                       >
-                        <span
-                          className={`pointer-events-none w-8 h-8 rounded-md flex items-center justify-center shrink-0 ${
-                            isActive ? "bg-accent/20" : "bg-bg-accent"
-                          }`}
-                        >
-                          <Icon
-                            className={`w-4 h-4 ${isActive ? "text-txt" : "text-muted"}`}
-                          />
-                        </span>
                         <div className="pointer-events-none flex-1 text-left">
                           <div className="font-medium">
                             {t(NAV_LABEL_I18N_KEY[group.label] ?? group.label)}

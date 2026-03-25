@@ -13,6 +13,7 @@ vi.mock("@miladyai/app-core/state", () => ({
 
 vi.mock("@miladyai/app-core/hooks", () => ({
   useBugReport: () => ({ isOpen: false, open: vi.fn(), close: vi.fn() }),
+  useMediaQuery: () => false,
 }));
 
 vi.mock("@miladyai/app-core/navigation", () => ({

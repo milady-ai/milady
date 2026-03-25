@@ -2,7 +2,10 @@ import { Button, Tooltip, TooltipContent, TooltipTrigger } from "@miladyai/ui";
 import { PencilLine, X } from "lucide-react";
 import type React from "react";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
-import { getLocalizedConversationTitle } from "./conversation-utils";
+import {
+  formatRelativeTime,
+  getLocalizedConversationTitle,
+} from "./conversation-utils";
 
 const GAME_MODAL_ROW_BASE_CLASSNAME =
   "group relative flex w-full items-start gap-2 rounded-xl border p-2.5 transition-all sm:gap-3";
@@ -14,6 +17,12 @@ const GAME_MODAL_ROW_ACTION_CLASSNAME =
   "h-8 w-8 shrink-0 self-center rounded-lg border border-white/10 bg-black/20 text-[color:var(--onboarding-text-muted)] shadow-sm transition-[border-color,background-color,color,opacity] hover:border-[color:var(--onboarding-accent-border)] hover:bg-[color:var(--onboarding-accent-bg)] hover:text-[color:var(--onboarding-text-strong)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent";
 const DEFAULT_ROW_ACTION_CLASSNAME =
   "h-8 w-8 shrink-0 rounded-lg border border-border/40 bg-card/80 text-muted-strong shadow-sm transition-[border-color,background-color,color,opacity] hover:border-border-strong hover:bg-bg-hover hover:text-txt focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent";
+const DEFAULT_ROW_BASE_CLASSNAME =
+  "group relative flex w-full items-start gap-3 rounded-xl border px-3.5 py-3 transition-all duration-150";
+const DEFAULT_ROW_ACTIVE_CLASSNAME =
+  "border-accent/30 bg-[linear-gradient(180deg,rgba(var(--accent),0.18),rgba(var(--accent),0.08))] text-txt shadow-[0_2px_10px_rgba(3,5,10,0.08)] dark:shadow-[0_0_0_1px_rgba(var(--accent),0.16),0_0_18px_rgba(var(--accent),0.18)]";
+const DEFAULT_ROW_INACTIVE_CLASSNAME =
+  "border-transparent text-muted hover:border-border/45 hover:bg-bg/45 hover:text-txt";
 
 interface ConversationListItemProps {
   conv: { id: string; title: string; updatedAt: string };
@@ -161,6 +170,7 @@ export function ConversationListItem({
     : "opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto";
 
   const displayTitle = getLocalizedConversationTitle(conv.title, t);
+  const updatedLabel = formatRelativeTime(conv.updatedAt, t);
 
   return (
     <div
@@ -168,17 +178,15 @@ export function ConversationListItem({
       data-testid="conv-item"
       data-active={isActive || undefined}
       className={`min-w-0 w-full ${
-        isGameModal
-          ? GAME_MODAL_ROW_BASE_CLASSNAME
-          : "group flex items-center min-w-0 pl-3 pr-2 py-2 gap-1 cursor-pointer transition-colors border-l-[3px]"
+        isGameModal ? GAME_MODAL_ROW_BASE_CLASSNAME : DEFAULT_ROW_BASE_CLASSNAME
       } ${
         isActive
           ? isGameModal
             ? GAME_MODAL_ROW_ACTIVE_CLASSNAME
-            : "bg-bg-hover border-l-accent"
+            : DEFAULT_ROW_ACTIVE_CLASSNAME
           : isGameModal
             ? GAME_MODAL_ROW_INACTIVE_CLASSNAME
-            : "border-l-transparent hover:bg-bg-hover"
+            : DEFAULT_ROW_INACTIVE_CLASSNAME
       }`}
     >
       <Button
@@ -188,7 +196,7 @@ export function ConversationListItem({
         className={
           isGameModal
             ? "flex w-full min-w-0 flex-1 flex-col !items-start !justify-start !text-left cursor-pointer h-auto p-0 rounded-none bg-transparent border-none overflow-hidden"
-            : "flex min-w-0 flex-1 items-center gap-2 overflow-hidden bg-transparent border-0 p-0 m-0 text-left h-auto cursor-pointer rounded-none"
+            : "flex min-w-0 flex-1 items-start gap-3 overflow-hidden bg-transparent border-0 p-0 m-0 text-left h-auto cursor-pointer rounded-none"
         }
         onClick={() => {
           if (suppressClickRef.current) {
@@ -211,16 +219,28 @@ export function ConversationListItem({
             className={
               isGameModal
                 ? "absolute left-3 top-3 z-[1] h-2 w-2 shrink-0 rounded-full bg-accent animate-pulse shadow-[0_0_10px_rgba(var(--accent),0.6)]"
-                : "w-2 h-2 rounded-full bg-accent shrink-0"
+                : "mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-accent shadow-[0_0_8px_rgba(var(--accent),0.35)]"
             }
           />
         )}
 
-        <TruncatingConversationTitle
-          displayTitle={displayTitle}
-          isGameModal={isGameModal}
-          isActive={isActive}
-        />
+        <div className="min-w-0 flex-1">
+          <TruncatingConversationTitle
+            displayTitle={displayTitle}
+            isGameModal={isGameModal}
+            isActive={isActive}
+          />
+          {!isGameModal ? (
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted/75">
+              <span>{updatedLabel}</span>
+              {isUnread ? (
+                <span className="rounded-full border border-accent/25 bg-accent/10 px-2 py-0.5 text-accent-fg">
+                  New
+                </span>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
       </Button>
 
       {confirmDeleteId !== conv.id ? (

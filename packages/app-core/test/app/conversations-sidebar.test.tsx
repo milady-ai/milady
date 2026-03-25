@@ -214,8 +214,8 @@ describe("ConversationsSidebar", () => {
     const sidebar = tree.root.findByProps({
       "data-testid": "conversations-sidebar",
     });
-    expect(String(sidebar.props.className)).toContain("rounded-2xl");
-    expect(String(sidebar.props.className)).toContain("shadow-lg");
+    expect(String(sidebar.props.className)).toContain("rounded-r-[26px]");
+    expect(String(sidebar.props.className)).toContain("rounded-l-none");
     expect(
       tree.root.findAll(
         (node) =>
@@ -224,6 +224,34 @@ describe("ConversationsSidebar", () => {
           node.children.includes("2"),
       ),
     ).toHaveLength(1);
+  });
+
+  it("collapses the desktop rail into a slim history bar", async () => {
+    mockUseApp.mockReturnValue(createContext());
+
+    let tree!: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(ConversationsSidebar));
+    });
+
+    const collapseButton = tree.root.findByProps({
+      "data-testid": "chat-sidebar-collapse-toggle",
+    });
+
+    await act(async () => {
+      collapseButton.props.onClick();
+    });
+
+    const sidebar = tree.root.findByProps({
+      "data-testid": "conversations-sidebar",
+    });
+    expect(sidebar.props["data-collapsed"]).toBe(true);
+    expect(String(sidebar.props.className)).toContain("w-[4.75rem]");
+    expect(
+      tree.root.findByProps({
+        "data-testid": "chat-sidebar-expand-toggle",
+      }),
+    ).toBeTruthy();
   });
 
   it("renders a mobile close control and calls onClose", async () => {

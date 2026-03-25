@@ -6,21 +6,24 @@ import {
   DropdownMenuTrigger,
   TooltipProvider,
 } from "@miladyai/ui";
+import { PanelLeftClose, PanelLeftOpen, SquarePen } from "lucide-react";
 import type React from "react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useApp } from "../state";
 import { ConversationListItem } from "./conversations/ConversationListItem";
 import { ConversationRenameDialog } from "./conversations/ConversationRenameDialog";
 
 const DEFAULT_SIDEBAR_CLASS = "flex flex-col overflow-hidden text-[13px]";
 const DEFAULT_SIDEBAR_DESKTOP_CLASS =
-  "w-[14.75rem] min-w-[14.75rem] rounded-2xl border border-border/60 bg-card/82 shadow-lg ring-1 ring-border/20 backdrop-blur-sm xl:w-[16.75rem] xl:min-w-[16.75rem]";
+  "h-full w-[18.5rem] min-w-[18.5rem] rounded-r-[26px] rounded-l-none border-y-0 border-l-0 border-r border-border/55 bg-card/84 shadow-[0_18px_42px_rgba(3,5,10,0.14)] ring-1 ring-border/12 backdrop-blur-sm xl:w-[20rem] xl:min-w-[20rem]";
+const DEFAULT_SIDEBAR_DESKTOP_COLLAPSED_CLASS =
+  "h-full w-[4.75rem] min-w-[4.75rem] rounded-r-[24px] rounded-l-none border-y-0 border-l-0 border-r border-border/55 bg-card/84 shadow-[0_18px_42px_rgba(3,5,10,0.12)] ring-1 ring-border/12 backdrop-blur-sm";
 const DEFAULT_SIDEBAR_MOBILE_CLASS =
   "h-full w-full min-w-0 border-0 bg-card/96 shadow-none ring-0";
 const GAME_MODAL_SIDEBAR_CLASS =
   "flex h-full flex-col overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(11,12,17,0.9),rgba(8,10,14,0.82))] shadow-[0_20px_60px_rgba(0,0,0,0.28)] backdrop-blur-xl";
 const DEFAULT_HEADER_PANEL_CLASS =
-  "shrink-0 border-b border-border/40 bg-card/75 px-3.5 pb-3 pt-3.5 backdrop-blur-md";
+  "shrink-0 border-b border-border/30 px-3.5 pb-3 pt-3.5";
 const GAME_MODAL_HEADER_PANEL_CLASS =
   "shrink-0 border-b border-white/10 bg-black/10 px-3.5 pb-3 pt-3.5";
 const DEFAULT_MOBILE_HEADER_PANEL_CLASS =
@@ -32,15 +35,15 @@ const COUNT_BADGE_CLASS =
 const UNREAD_BADGE_CLASS =
   "inline-flex min-h-6 items-center rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-[11px] font-medium text-accent shadow-sm";
 const DEFAULT_LIST_REGION_CLASS =
-  "min-h-0 w-full min-w-0 flex-1 overflow-y-auto px-2.5 pb-2.5 pt-2";
+  "min-h-0 w-full min-w-0 flex-1 overflow-y-auto px-2.5 pb-3 pt-3";
 const GAME_MODAL_LIST_REGION_CLASS =
   "custom-scrollbar flex-1 min-h-0 w-full overflow-y-auto p-2.5";
-const DEFAULT_LIST_PANEL_CLASS =
-  "flex min-h-full flex-col gap-1.5 rounded-[22px] border border-border/35 bg-bg/18 p-2 shadow-sm";
+const DEFAULT_LIST_PANEL_CLASS = "flex min-h-full flex-col gap-1.5";
 const GAME_MODAL_LIST_PANEL_CLASS =
   "flex min-h-full flex-col gap-1.5 rounded-[22px] border border-white/10 bg-black/12 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]";
 const EMPTY_STATE_CLASS =
   "rounded-2xl border border-dashed px-4 py-8 text-center text-sm shadow-sm";
+const COLLAPSED_STORAGE_KEY = "milady:chat-sidebar-collapsed";
 
 type ConversationsSidebarVariant = "default" | "game-modal";
 
@@ -77,6 +80,14 @@ export function ConversationsSidebar({
   } | null>(null);
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
   const menuAnchorRef = useRef<HTMLDivElement>(null);
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      return window.localStorage.getItem(COLLAPSED_STORAGE_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
 
   const sortedConversations = [...conversations].sort((a, b) => {
     const aTime = new Date(a.updatedAt).getTime();
@@ -118,12 +129,18 @@ export function ConversationsSidebar({
   };
 
   const isGameModal = variant === "game-modal";
+  const canCollapse = !mobile && !isGameModal;
+  const isCollapsed = canCollapse && collapsed;
   const conversationCount = sortedConversations.length;
   const unreadCount = unreadConversations.size;
   const sidebarClassName = isGameModal
     ? GAME_MODAL_SIDEBAR_CLASS
     : `${DEFAULT_SIDEBAR_CLASS} ${
-        mobile ? DEFAULT_SIDEBAR_MOBILE_CLASS : DEFAULT_SIDEBAR_DESKTOP_CLASS
+        mobile
+          ? DEFAULT_SIDEBAR_MOBILE_CLASS
+          : isCollapsed
+            ? DEFAULT_SIDEBAR_DESKTOP_COLLAPSED_CLASS
+            : DEFAULT_SIDEBAR_DESKTOP_CLASS
       }`;
   const listRegionClassName = isGameModal
     ? GAME_MODAL_LIST_REGION_CLASS
@@ -132,11 +149,21 @@ export function ConversationsSidebar({
     ? GAME_MODAL_LIST_PANEL_CLASS
     : DEFAULT_LIST_PANEL_CLASS;
 
+  useEffect(() => {
+    if (!canCollapse || typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(COLLAPSED_STORAGE_KEY, String(collapsed));
+    } catch {
+      /* ignore persistence failures */
+    }
+  }, [canCollapse, collapsed]);
+
   return (
     <aside
       className={sidebarClassName}
       data-no-window-drag=""
       data-testid="conversations-sidebar"
+      data-collapsed={isCollapsed || undefined}
       data-variant={variant}
       onPointerDown={() => setMenuConversation(null)}
     >
@@ -230,80 +257,131 @@ export function ConversationsSidebar({
               : DEFAULT_HEADER_PANEL_CLASS
           }
         >
-          <div className="mb-3 flex items-end justify-between gap-3">
-            <div className="space-y-1">
-              <div className={SECTION_EYEBROW_CLASS}>
-                {t("conversations.chats")}
+          {isCollapsed ? (
+            <div className="flex flex-col items-center gap-3 py-1">
+              <Button
+                variant="outline"
+                size="icon"
+                data-testid="chat-sidebar-expand-toggle"
+                className="h-11 w-11 rounded-2xl border-border/45 bg-bg/24 text-txt shadow-sm hover:border-border/70 hover:bg-bg/38"
+                aria-label="Expand chats panel"
+                onClick={() => setCollapsed(false)}
+              >
+                <PanelLeftOpen className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-11 w-11 rounded-2xl border-accent/40 bg-accent/10 text-txt shadow-sm hover:border-accent/60 hover:bg-accent/16"
+                aria-label={t("conversations.newChat")}
+                onClick={() => {
+                  handleNewConversation();
+                  onClose?.();
+                }}
+              >
+                <SquarePen className="h-4 w-4" />
+              </Button>
+              <div className="flex flex-col items-center gap-2 pt-1">
+                <div className={COUNT_BADGE_CLASS}>{conversationCount}</div>
+                {unreadCount > 0 ? (
+                  <div className={UNREAD_BADGE_CLASS}>{unreadCount}</div>
+                ) : null}
               </div>
-              <div className="text-xs text-muted">{conversationCount}</div>
             </div>
-            <div className="flex items-center gap-2">
-              <div className={COUNT_BADGE_CLASS}>{conversationCount}</div>
-              {unreadCount > 0 ? (
-                <div className={UNREAD_BADGE_CLASS}>{unreadCount}</div>
-              ) : null}
-            </div>
-          </div>
-          <Button
-            variant="outline"
-            className={
-              isGameModal
-                ? "h-11 w-full rounded-xl border-[color:var(--onboarding-accent-border)] bg-[color:var(--onboarding-accent-bg)] px-3 py-2 text-sm font-medium text-[color:var(--onboarding-text-strong)] shadow-[0_12px_28px_rgba(0,0,0,0.18)] hover:border-[color:var(--onboarding-accent-border-hover)] hover:bg-[color:var(--onboarding-accent-bg-hover)] active:scale-[0.98]"
-                : "min-h-[44px] w-full rounded-xl border-accent/60 bg-accent/10 px-3 py-2.5 text-[12px] font-medium text-txt hover:bg-accent/15 hover:text-accent-fg"
-            }
-            onClick={() => {
-              handleNewConversation();
-              onClose?.();
-            }}
-          >
-            {t("conversations.newChat")}
-          </Button>
+          ) : (
+            <>
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <div className="space-y-1">
+                  <div className={SECTION_EYEBROW_CLASS}>
+                    {t("conversations.chats")}
+                  </div>
+                  <div className="text-xs leading-relaxed text-muted">
+                    Recent threads and unread replies stay here.
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className={COUNT_BADGE_CLASS}>{conversationCount}</div>
+                  {unreadCount > 0 ? (
+                    <div className={UNREAD_BADGE_CLASS}>{unreadCount}</div>
+                  ) : null}
+                  {canCollapse ? (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      data-testid="chat-sidebar-collapse-toggle"
+                      className="h-9 w-9 rounded-xl border border-border/35 bg-bg/22 text-muted shadow-sm hover:border-border/60 hover:bg-bg/35 hover:text-txt"
+                      aria-label={t("conversations.closePanel")}
+                      onClick={() => setCollapsed(true)}
+                    >
+                      <PanelLeftClose className="h-4 w-4" />
+                    </Button>
+                  ) : null}
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                className={
+                  isGameModal
+                    ? "h-11 w-full rounded-xl border-[color:var(--onboarding-accent-border)] bg-[color:var(--onboarding-accent-bg)] px-3 py-2 text-sm font-medium text-[color:var(--onboarding-text-strong)] shadow-[0_12px_28px_rgba(0,0,0,0.18)] hover:border-[color:var(--onboarding-accent-border-hover)] hover:bg-[color:var(--onboarding-accent-bg-hover)] active:scale-[0.98]"
+                    : "min-h-[44px] w-full rounded-xl border-accent/40 bg-accent/10 px-3 py-2.5 text-[12px] font-medium text-txt shadow-sm hover:bg-accent/15 hover:text-accent-fg"
+                }
+                onClick={() => {
+                  handleNewConversation();
+                  onClose?.();
+                }}
+              >
+                {t("conversations.newChat")}
+              </Button>
+            </>
+          )}
         </div>
 
-        <div className={listRegionClassName}>
-          <div className={listPanelClassName}>
-            {sortedConversations.length === 0 ? (
-              <div
-                className={`${EMPTY_STATE_CLASS} ${
-                  isGameModal
-                    ? "border-white/10 bg-black/15 font-medium italic text-[color:var(--onboarding-text-muted)]"
-                    : "border-border/50 bg-bg/35 text-muted"
-                }`}
-              >
-                {t("conversations.none")}
-              </div>
-            ) : (
-              sortedConversations.map((conv) => (
-                <ConversationListItem
-                  key={conv.id}
-                  conv={conv}
-                  isActive={conv.id === activeConversationId}
-                  isUnread={unreadConversations.has(conv.id)}
-                  isGameModal={isGameModal}
-                  confirmDeleteId={confirmDeleteId}
-                  deletingId={deletingId}
-                  t={t}
-                  mobile={mobile}
-                  onSelect={(id) => {
-                    setConfirmDeleteId(null);
-                    setMenuConversation(null);
-                    void handleSelectConversation(id);
-                    onClose?.();
-                  }}
-                  onConfirmDelete={(id) => void handleConfirmDelete(id)}
-                  onCancelDelete={() => setConfirmDeleteId(null)}
-                  onRequestDeleteConfirm={(id) => {
-                    setMenuConversation(null);
-                    setRenameTarget(null);
-                    setConfirmDeleteId(id);
-                  }}
-                  onRequestRename={(c) => openRenameDialog(c)}
-                  onOpenActions={openActionsMenu}
-                />
-              ))
-            )}
+        {!isCollapsed ? (
+          <div className={listRegionClassName}>
+            <div className={listPanelClassName}>
+              {sortedConversations.length === 0 ? (
+                <div
+                  className={`${EMPTY_STATE_CLASS} ${
+                    isGameModal
+                      ? "border-white/10 bg-black/15 font-medium italic text-[color:var(--onboarding-text-muted)]"
+                      : "border-border/50 bg-bg/35 text-muted"
+                  }`}
+                >
+                  {t("conversations.none")}
+                </div>
+              ) : (
+                sortedConversations.map((conv) => (
+                  <ConversationListItem
+                    key={conv.id}
+                    conv={conv}
+                    isActive={conv.id === activeConversationId}
+                    isUnread={unreadConversations.has(conv.id)}
+                    isGameModal={isGameModal}
+                    confirmDeleteId={confirmDeleteId}
+                    deletingId={deletingId}
+                    t={t}
+                    mobile={mobile}
+                    onSelect={(id) => {
+                      setConfirmDeleteId(null);
+                      setMenuConversation(null);
+                      void handleSelectConversation(id);
+                      onClose?.();
+                    }}
+                    onConfirmDelete={(id) => void handleConfirmDelete(id)}
+                    onCancelDelete={() => setConfirmDeleteId(null)}
+                    onRequestDeleteConfirm={(id) => {
+                      setMenuConversation(null);
+                      setRenameTarget(null);
+                      setConfirmDeleteId(id);
+                    }}
+                    onRequestRename={(c) => openRenameDialog(c)}
+                    onOpenActions={openActionsMenu}
+                  />
+                ))
+              )}
+            </div>
           </div>
-        </div>
+        ) : null}
       </TooltipProvider>
     </aside>
   );

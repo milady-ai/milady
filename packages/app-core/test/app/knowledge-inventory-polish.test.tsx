@@ -25,6 +25,31 @@ const {
 }));
 
 vi.mock("@miladyai/ui", () => ({
+  Select: ({
+    children,
+    ...props
+  }: React.PropsWithChildren<Record<string, unknown>>) =>
+    React.createElement("div", props, children),
+  SelectContent: ({
+    children,
+    ...props
+  }: React.PropsWithChildren<Record<string, unknown>>) =>
+    React.createElement("div", props, children),
+  SelectItem: ({
+    children,
+    ...props
+  }: React.PropsWithChildren<Record<string, unknown>>) =>
+    React.createElement("option", props, children),
+  SelectTrigger: ({
+    children,
+    ...props
+  }: React.PropsWithChildren<Record<string, unknown>>) =>
+    React.createElement("div", props, children),
+  SelectValue: ({
+    children,
+    ...props
+  }: React.PropsWithChildren<Record<string, unknown>>) =>
+    React.createElement("div", props, children),
   Button: ({
     children,
     className,
@@ -188,14 +213,15 @@ describe("Knowledge and inventory polish", () => {
       await Promise.resolve();
     });
 
-    const tokenCards = tree.root.findAll(
+    const tokenPanels = tree.root.findAll(
       (node) =>
         typeof node.props.className === "string" &&
-        node.props.className.includes("bg-card/86") &&
-        node.props.className.includes("border-border/45"),
+        node.props.className.includes("rounded-[28px]") &&
+        node.props.className.includes("bg-bg/20") &&
+        node.props.className.includes("ring-1 ring-border/10"),
     );
 
-    expect(tokenCards.length).toBeGreaterThan(0);
+    expect(tokenPanels.length).toBeGreaterThan(0);
   });
 
   it("renders the steward badge with token-driven accent styling", async () => {

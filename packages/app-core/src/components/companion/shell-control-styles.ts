@@ -9,7 +9,7 @@ export const SHELL_SEGMENTED_CONTROL_CLASSNAME =
   "inline-flex items-center gap-0.5 rounded-xl border border-border/60 bg-bg/35 p-0.5 shadow-sm backdrop-blur-md";
 
 export const SHELL_SEGMENT_ACTIVE_CLASSNAME =
-  "border border-accent/40 bg-accent/12 text-accent shadow-sm";
+  "border-[color:color-mix(in_srgb,var(--accent)_34%,var(--border))] bg-[color:color-mix(in_srgb,var(--accent)_16%,var(--card))] text-[color:color-mix(in_srgb,var(--text-strong)_78%,var(--accent)_22%)] shadow-sm";
 
 export const SHELL_SEGMENT_INACTIVE_CLASSNAME =
   "border border-transparent bg-transparent text-muted-strong hover:border-border/60 hover:bg-bg-hover/80 hover:text-txt";

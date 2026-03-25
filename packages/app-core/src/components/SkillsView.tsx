@@ -1027,7 +1027,7 @@ function SkillsFullView() {
                       data-testid={`skill-row-${skill.id}`}
                       className={`flex items-start gap-2 rounded-xl border px-3.5 py-3 text-left transition-all ${
                         selectedSkillId === skill.id
-                          ? "border-accent/30 bg-[linear-gradient(180deg,rgba(var(--accent),0.18),rgba(var(--accent),0.08))] text-txt shadow-[0_2px_10px_rgba(3,5,10,0.08)]"
+                          ? "border-accent/30 bg-[linear-gradient(180deg,rgba(var(--accent),0.18),rgba(var(--accent),0.08))] text-txt shadow-[0_2px_10px_rgba(3,5,10,0.08)] dark:shadow-[0_0_0_1px_rgba(var(--accent),0.16),0_0_18px_rgba(var(--accent),0.18)]"
                           : "border-transparent bg-transparent text-muted hover:border-border/45 hover:bg-bg/45 hover:text-txt"
                       }`}
                     >

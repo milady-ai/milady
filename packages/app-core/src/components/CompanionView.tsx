@@ -154,6 +154,7 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
         creditsCritical={elizaCloudCreditsCritical}
         authRejected={elizaCloudAuthRejected}
         creditsError={elizaCloudCreditsError}
+        compactOnMobile
         t={t}
         onClick={handleCloudStatusClick}
         dataTestId="companion-cloud-status"
