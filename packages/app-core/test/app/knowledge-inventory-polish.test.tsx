@@ -220,8 +220,15 @@ describe("Knowledge and inventory polish", () => {
         node.props.className.includes("bg-bg/20") &&
         node.props.className.includes("ring-1 ring-border/10"),
     );
+    const sidebars = tree.root.findAll(
+      (node) =>
+        typeof node.props.className === "string" &&
+        node.props.className.includes("backdrop-blur-sm") &&
+        node.props.className.includes("border-b border-border/40"),
+    );
 
     expect(tokenPanels.length).toBeGreaterThan(0);
+    expect(sidebars.length).toBeGreaterThan(0);
   });
 
   it("renders the steward badge with token-driven accent styling", async () => {
@@ -269,8 +276,11 @@ describe("Knowledge and inventory polish", () => {
     const stewardBadge = tree.root.findByProps({
       "data-testid": "steward-status-badge",
     });
+    const sidebar = tree.root.findByType("aside");
 
     expect(stewardBadge.props.className).toContain("bg-accent/10");
     expect(stewardBadge.props.className).toContain("text-accent-fg");
+    expect(String(sidebar.props.className)).toContain("border-b border-border/40");
+    expect(String(sidebar.props.className)).toContain("backdrop-blur-sm");
   });
 });

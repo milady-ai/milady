@@ -138,28 +138,27 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
     });
   }, [navigation, setState, setTab, switchShellView]);
 
-  const companionHeaderRightExtras = (
-    <>
-      {inferenceNotice ? (
-        <InferenceCloudAlertButton
-          notice={inferenceNotice}
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={handleInferenceAlertClick}
-        />
-      ) : null}
-      <CloudStatusBadge
-        connected={elizaCloudConnected}
-        credits={elizaCloudCredits}
-        creditsLow={elizaCloudCreditsLow}
-        creditsCritical={elizaCloudCreditsCritical}
-        authRejected={elizaCloudAuthRejected}
-        creditsError={elizaCloudCreditsError}
-        compactOnMobile
-        t={t}
-        onClick={handleCloudStatusClick}
-        dataTestId="companion-cloud-status"
-      />
-    </>
+  const companionHeaderRightExtras = inferenceNotice ? (
+    <InferenceCloudAlertButton
+      notice={inferenceNotice}
+      onPointerDown={(e) => e.stopPropagation()}
+      onClick={handleInferenceAlertClick}
+    />
+  ) : null;
+
+  const companionHeaderRightTrailingExtras = (
+    <CloudStatusBadge
+      connected={elizaCloudConnected}
+      credits={elizaCloudCredits}
+      creditsLow={elizaCloudCreditsLow}
+      creditsCritical={elizaCloudCreditsCritical}
+      authRejected={elizaCloudAuthRejected}
+      creditsError={elizaCloudCreditsError}
+      compactOnMobile
+      t={t}
+      onClick={handleCloudStatusClick}
+      dataTestId="companion-cloud-status"
+    />
   );
 
   return (
@@ -187,6 +186,7 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
           }
           onNewChat={() => void handleNewConversation()}
           rightExtras={companionHeaderRightExtras}
+          rightTrailingExtras={companionHeaderRightTrailingExtras}
         />
       </div>
 

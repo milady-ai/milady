@@ -14,6 +14,8 @@ const CHAT_MODAL_SHELL_BASE_CLASS =
 const CHAT_MODAL_FULL_OVERLAY_SHELL_CLASS = `${CHAT_MODAL_SHELL_BASE_CLASS} overflow-hidden bg-[linear-gradient(180deg,rgba(8,10,16,0.9),rgba(4,6,10,0.86))] backdrop-blur-xl`;
 const CHAT_MODAL_DOCK_SHELL_CLASS =
   "relative flex min-h-0 flex-1 flex-col overflow-visible rounded-[28px] bg-transparent pointer-events-none";
+const CHAT_MODAL_DOCK_COMPOSER_BACKFILL_CLASS =
+  "pointer-events-none absolute inset-x-0 bottom-0 h-[6.5rem] rounded-b-[28px] bg-[linear-gradient(180deg,rgba(18,22,32,0),rgba(12,16,24,0.48)_22%,rgba(10,13,20,0.82)_100%)]";
 const CHAT_MODAL_SIDEBAR_CLASS =
   "flex h-full w-[292px] shrink-0 flex-col border-r border-border/50 bg-[linear-gradient(180deg,rgba(10,13,20,0.82),rgba(7,9,14,0.74))] backdrop-blur-xl xl:w-[320px]";
 const CHAT_MODAL_MOBILE_SIDEBAR_OVERLAY_CLASS =
@@ -56,6 +58,12 @@ export const ChatModalView = memo(function ChatModalView({
       data-chat-game-dock={isCompanionDock || undefined}
     >
       <div className={shellClassName} data-chat-game-shell>
+        {isCompanionDock ? (
+          <div
+            className={CHAT_MODAL_DOCK_COMPOSER_BACKFILL_CLASS}
+            data-chat-game-composer-backfill
+          />
+        ) : null}
         {showMobileSidebarOverlay && (
           <div
             className={

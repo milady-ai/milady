@@ -23,6 +23,16 @@ import type {
 import { useApp } from "../state";
 import { confirmDesktopAction } from "../utils";
 import { formatDateTime, formatDurationMs } from "./format";
+import {
+  APP_PANEL_SHELL_CLASSNAME,
+  APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
+  APP_SIDEBAR_CARD_BASE_CLASSNAME,
+  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
+  APP_SIDEBAR_KICKER_CLASSNAME,
+  APP_SIDEBAR_META_CLASSNAME,
+  APP_SIDEBAR_RAIL_CLASSNAME,
+  APP_SIDEBAR_STICKY_HEADER_CLASSNAME,
+} from "./sidebar-shell-styles";
 
 type TranslateFn = (
   key: string,
@@ -62,16 +72,12 @@ const SELECT_CLASS =
   "h-11 w-full rounded-2xl border border-border/60 bg-bg/70 px-4 py-2 text-sm outline-none transition-[border-color,box-shadow,background-color] focus:border-accent";
 const TEXTAREA_CLASS =
   "min-h-[132px] w-full resize-y rounded-2xl border border-border/60 bg-bg/70 px-4 py-3 text-sm outline-none transition-[border-color,box-shadow,background-color] focus:border-accent";
-const SIDEBAR_SECTION_LABEL_CLASS =
-  "text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60";
-const SIDEBAR_CARD_BASE_CLASS =
-  "w-full rounded-xl border px-3.5 py-3 text-left transition-[border-color,background-color,color,box-shadow] duration-200";
-const HEARTBEAT_SIDEBAR_CARD_ACTIVE_CLASS =
-  "border-accent/30 bg-[linear-gradient(180deg,rgba(var(--accent),0.18),rgba(var(--accent),0.08))] text-txt shadow-[0_2px_10px_rgba(3,5,10,0.08)] dark:shadow-[0_0_0_1px_rgba(var(--accent),0.16),0_0_18px_rgba(var(--accent),0.18)]";
+const SIDEBAR_SECTION_LABEL_CLASS = APP_SIDEBAR_KICKER_CLASSNAME;
+const SIDEBAR_CARD_BASE_CLASS = APP_SIDEBAR_CARD_BASE_CLASSNAME;
+const HEARTBEAT_SIDEBAR_CARD_ACTIVE_CLASS = APP_SIDEBAR_CARD_ACTIVE_CLASSNAME;
 const HEARTBEAT_SIDEBAR_CARD_INACTIVE_CLASS =
-  "border-transparent bg-transparent hover:border-border/45 hover:bg-bg/45";
-const HEARTBEATS_SHELL_CLASS =
-  "relative flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-lg ring-1 ring-border/20 backdrop-blur-sm";
+  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME;
+const HEARTBEATS_SHELL_CLASS = APP_PANEL_SHELL_CLASSNAME;
 const HEARTBEATS_CONTENT_WIDTH_CLASS = "mx-auto w-full max-w-[80rem]";
 const HEARTBEATS_PANEL_CLASS =
   "rounded-[28px] border border-border/35 bg-bg/20 px-5 py-4 shadow-sm sm:px-6 sm:py-5";
@@ -556,13 +562,13 @@ export function HeartbeatsView() {
       <div className={HEARTBEATS_SHELL_CLASS} data-testid="heartbeats-shell">
         {/* Sidebar — full-width on mobile when no detail is shown, fixed-width on md+ */}
         <aside
-          className={`${selectedTriggerId || editorOpen || editingId ? "hidden md:flex" : "flex"} w-full shrink-0 flex-col overflow-y-auto border-r border-border/40 bg-card/45 md:w-[21rem] md:max-w-[352px] lg:w-[23rem] backdrop-blur-sm`}
+          className={`${selectedTriggerId || editorOpen || editingId ? "hidden md:flex" : "flex"} w-full shrink-0 flex-col overflow-y-auto md:w-[21rem] md:max-w-[352px] lg:w-[23rem] ${APP_SIDEBAR_RAIL_CLASSNAME}`}
         >
-          <div className="sticky top-0 z-10 border-b border-border/40 bg-card/80 px-3 pb-3 pt-3 backdrop-blur-md">
+          <div className={APP_SIDEBAR_STICKY_HEADER_CLASSNAME}>
             <div className="mb-3 flex items-end justify-between gap-3 px-1">
               <div className="space-y-1">
                 <div className={SIDEBAR_SECTION_LABEL_CLASS}>Heartbeats</div>
-                <div className="text-xs text-muted">
+                <div className={APP_SIDEBAR_META_CLASSNAME}>
                   {t("heartbeatsview.newHeartbeat")}
                 </div>
               </div>
@@ -589,7 +595,7 @@ export function HeartbeatsView() {
             </Button>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-3 pb-4 pr-6 pt-4">
+          <div className="custom-scrollbar flex-1 overflow-y-auto px-3 pb-4 pr-4 pt-4">
             {triggerError && (
               <div className="mb-2 rounded-xl border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
                 {triggerError}
@@ -650,10 +656,15 @@ export function HeartbeatsView() {
                       />
                     </div>
                     <div className="mt-0.5 flex items-center justify-between gap-2 text-[11px] text-muted">
-                      <span className="truncate">{scheduleLabel(trigger, t)}</span>
+                      <span className="truncate">
+                        {scheduleLabel(trigger, t)}
+                      </span>
                       {trigger.lastStatus && (
                         <StatusBadge
-                          label={localizedExecutionStatus(trigger.lastStatus, t)}
+                          label={localizedExecutionStatus(
+                            trigger.lastStatus,
+                            t,
+                          )}
                           tone={toneForLastStatus(trigger.lastStatus)}
                         />
                       )}

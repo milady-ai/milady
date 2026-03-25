@@ -43,6 +43,7 @@ interface ShellHeaderControlsProps {
   t: ShellHeaderTranslator;
   children?: ReactNode;
   rightExtras?: ReactNode;
+  rightTrailingExtras?: ReactNode;
   trailingExtras?: ReactNode;
   className?: string;
   controlsVariant?: "native" | "companion";
@@ -53,6 +54,7 @@ interface ShellHeaderControlsProps {
   themeToggleWrapperTestId?: string;
   /** Show Voice + New Chat buttons (companion & character editor views). */
   showCompanionControls?: boolean;
+  companionDesktopActionsLayout?: "centered" | "split";
   chatAgentVoiceMuted?: boolean;
   onToggleVoiceMute?: () => void;
   onNewChat?: () => void;
@@ -68,6 +70,7 @@ export function ShellHeaderControls({
   t,
   children,
   rightExtras,
+  rightTrailingExtras,
   trailingExtras,
   className,
   controlsVariant = "native",
@@ -77,6 +80,7 @@ export function ShellHeaderControls({
   themeToggleWrapperClassName,
   themeToggleWrapperTestId,
   showCompanionControls,
+  companionDesktopActionsLayout = "centered",
   chatAgentVoiceMuted = false,
   onToggleVoiceMute,
   onNewChat,
@@ -84,6 +88,10 @@ export function ShellHeaderControls({
   const isMobileViewport = useMediaQuery(SHELL_MODE_MOBILE_MEDIA_QUERY);
   const shouldSplitCompanionMobileActions =
     isMobileViewport && Boolean(showCompanionControls);
+  const shouldSplitCompanionDesktopActions =
+    !isMobileViewport &&
+    Boolean(showCompanionControls) &&
+    companionDesktopActionsLayout === "split";
   const shellOptions: Array<{
     view: ShellView;
     label: string;
@@ -176,7 +184,7 @@ export function ShellHeaderControls({
         className={
           shouldSplitCompanionMobileActions
             ? "col-start-1 row-start-1 flex min-w-0 items-center"
-            : "flex shrink-0 items-center"
+            : "flex shrink-0 items-center gap-2"
         }
       >
         <fieldset
@@ -216,6 +224,15 @@ export function ShellHeaderControls({
             );
           })}
         </fieldset>
+        {shouldSplitCompanionDesktopActions ? (
+          <div
+            className="flex shrink-0 items-center"
+            data-testid="companion-header-desktop-voice"
+            data-no-camera-drag="true"
+          >
+            {renderVoiceButton(false)}
+          </div>
+        ) : null}
       </div>
 
       {/* Center: children or companion controls */}
@@ -227,16 +244,18 @@ export function ShellHeaderControls({
         }
       >
         {showCompanionControls && !shouldSplitCompanionMobileActions ? (
-          <div
-            className="flex items-center justify-center"
-            data-testid="companion-header-chat-controls"
-            data-no-camera-drag="true"
-          >
-            <div className="inline-flex items-center gap-2">
-              {renderVoiceButton(false)}
-              {renderNewChatButton(false)}
+          shouldSplitCompanionDesktopActions ? null : (
+            <div
+              className="flex items-center justify-center"
+              data-testid="companion-header-chat-controls"
+              data-no-camera-drag="true"
+            >
+              <div className="inline-flex items-center gap-2">
+                {renderVoiceButton(false)}
+                {renderNewChatButton(false)}
+              </div>
             </div>
-          </div>
+          )
         ) : (
           children
         )}
@@ -253,6 +272,16 @@ export function ShellHeaderControls({
         data-no-camera-drag="true"
       >
         {rightExtras}
+        {shouldSplitCompanionDesktopActions ? (
+          <div
+            className="flex shrink-0 items-center"
+            data-testid="companion-header-desktop-new-chat"
+            data-no-camera-drag="true"
+          >
+            {renderNewChatButton(false)}
+          </div>
+        ) : null}
+        {rightTrailingExtras}
         <div
           className={`shrink-0 ${languageDropdownClassName ?? ""}`}
           data-testid={languageDropdownWrapperTestId}

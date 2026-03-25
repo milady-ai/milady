@@ -142,14 +142,28 @@ describe("theme persistence", () => {
 
   it("applies the theme to the document root selectors", () => {
     const previousDocument = (globalThis as Record<string, unknown>).document;
+    let attributeWrites = 0;
+    let addCalls = 0;
+    let removeCalls = 0;
     const root = {
       dataset: {},
+      style: {
+        colorScheme: "",
+      },
       classList: {
-        add: (value: string) => classes.add(value),
-        remove: (value: string) => classes.delete(value),
+        add: (value: string) => {
+          addCalls += 1;
+          classes.add(value);
+        },
+        remove: (value: string) => {
+          removeCalls += 1;
+          classes.delete(value);
+        },
         contains: (value: string) => classes.has(value),
       },
+      getAttribute: (name: string) => attributes[name] ?? null,
       setAttribute: (name: string, value: string) => {
+        attributeWrites += 1;
         attributes[name] = value;
       },
     };
@@ -164,10 +178,21 @@ describe("theme persistence", () => {
       applyUiTheme("light");
       expect(attributes["data-theme"]).toBe("light");
       expect(classes.has("dark")).toBe(false);
+      expect(root.style.colorScheme).toBe("light");
 
       applyUiTheme("dark");
       expect(attributes["data-theme"]).toBe("dark");
       expect(classes.has("dark")).toBe(true);
+      expect(root.style.colorScheme).toBe("dark");
+
+      const writesAfterDark = attributeWrites;
+      const addsAfterDark = addCalls;
+      const removesAfterDark = removeCalls;
+
+      applyUiTheme("dark");
+      expect(attributeWrites).toBe(writesAfterDark);
+      expect(addCalls).toBe(addsAfterDark);
+      expect(removeCalls).toBe(removesAfterDark);
     } finally {
       if (previousDocument === undefined) {
         delete (globalThis as Record<string, unknown>).document;

@@ -103,6 +103,18 @@ import type { ConfigUiHint } from "../types";
 import { openExternalUrl, resolveAppAssetUrl } from "../utils";
 import { autoLabel } from "./labels";
 import { SHOWCASE_PLUGIN } from "./plugins/showcase-data";
+import {
+  APP_PANEL_SHELL_CLASSNAME,
+  APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
+  APP_SIDEBAR_CARD_BASE_CLASSNAME,
+  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
+  APP_SIDEBAR_HEADER_CLASSNAME,
+  APP_SIDEBAR_INNER_CLASSNAME,
+  APP_SIDEBAR_KICKER_CLASSNAME,
+  APP_SIDEBAR_META_CLASSNAME,
+  APP_SIDEBAR_RAIL_CLASSNAME,
+  APP_SIDEBAR_SCROLL_REGION_CLASSNAME,
+} from "./sidebar-shell-styles";
 import { WhatsAppQrOverlay } from "./WhatsAppQrOverlay";
 
 /* ── Always-on plugins (hidden from all views) ────────────────────────── */
@@ -2097,8 +2109,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
 
   // ── Game-modal render ─────────────────────────────────────────────
   if (inModal && isSocialMode) {
-    const connectorsShellClassName =
-      "relative flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-lg ring-1 ring-border/20 backdrop-blur-sm";
+    const connectorsShellClassName = APP_PANEL_SHELL_CLASSNAME;
     return (
       <div
         data-testid="plugins-view-social"
@@ -2113,19 +2124,21 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
           {desktopConnectorLayout && (
             <aside
               data-testid="connectors-settings-sidebar"
-              className="flex min-h-0 w-[21rem] max-w-[352px] shrink-0 flex-col overflow-hidden border-r border-border/40 bg-card/45 backdrop-blur-sm"
+              className={`flex min-h-0 w-[21rem] max-w-[352px] shrink-0 flex-col ${APP_SIDEBAR_RAIL_CLASSNAME}`}
             >
-              <div className="flex min-h-0 flex-1 flex-col px-3 pb-4 pt-3">
-                <div className="border-b border-border/30 px-1 pb-3">
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60">
+              <div className={APP_SIDEBAR_INNER_CLASSNAME}>
+                <div className={APP_SIDEBAR_HEADER_CLASSNAME}>
+                  <div className={APP_SIDEBAR_KICKER_CLASSNAME}>
                     {t("nav.social")}
                   </div>
-                  <div className="mt-1 text-xs text-muted">
+                  <div className={APP_SIDEBAR_META_CLASSNAME}>
                     {visiblePlugins.length} available
                   </div>
                 </div>
 
-                <nav className="mt-4 min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-3">
+                <nav
+                  className={`mt-4 space-y-1.5 ${APP_SIDEBAR_SCROLL_REGION_CLASSNAME}`}
+                >
                   {visiblePlugins.map((plugin) => {
                     const isSelected = connectorSelectedId === plugin.id;
                     const isExpanded = connectorExpandedIds.has(plugin.id);
@@ -2137,10 +2150,10 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                     return (
                       <div
                         key={plugin.id}
-                        className={`flex items-start gap-2 rounded-xl border px-3.5 py-3 text-left transition-all ${
+                        className={`${APP_SIDEBAR_CARD_BASE_CLASSNAME} gap-2 ${
                           isSelected
-                            ? "border-accent/30 bg-[linear-gradient(180deg,rgba(var(--accent),0.18),rgba(var(--accent),0.08))] text-txt shadow-[0_2px_10px_rgba(3,5,10,0.08)] dark:shadow-[0_0_0_1px_rgba(var(--accent),0.16),0_0_18px_rgba(var(--accent),0.18)]"
-                            : "border-transparent bg-transparent text-muted hover:border-border/45 hover:bg-bg/45 hover:text-txt"
+                            ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
+                            : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
                         }`}
                       >
                         <Button
@@ -2188,11 +2201,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                           }
                           disabled={toggleDisabled}
                         >
-                          {isToggleBusy
-                            ? "..."
-                            : plugin.enabled
-                              ? "ON"
-                              : "OFF"}
+                          {isToggleBusy ? "..." : plugin.enabled ? "ON" : "OFF"}
                         </Button>
                         <span
                           className={`shrink-0 text-muted transition-transform ${
@@ -2852,16 +2861,17 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
     >
       {showDesktopSubgroupSidebar && (
         <aside
-          className="hidden w-52 shrink-0 self-stretch border-r border-border bg-bg-accent md:sticky md:top-0 md:flex md:h-screen"
+          className={`hidden md:flex md:w-[clamp(17rem,20vw,19rem)] md:min-w-[17rem] md:max-w-[19rem] md:shrink-0 md:self-stretch md:border-r md:border-border/40 ${APP_SIDEBAR_RAIL_CLASSNAME}`}
           data-testid="plugins-subgroup-sidebar"
+          aria-label="Plugin types"
         >
-          <div className="flex flex-1 flex-col overflow-y-auto">
-            <div className="px-4 py-4 border-b border-border">
-              <p className="font-mono text-[10px] font-medium text-txt tracking-[0.12em] uppercase">
-                PLUGIN TYPES
-              </p>
+          <div className={APP_SIDEBAR_INNER_CLASSNAME}>
+            <div className={APP_SIDEBAR_HEADER_CLASSNAME}>
+              <p className={APP_SIDEBAR_KICKER_CLASSNAME}>PLUGIN TYPES</p>
             </div>
-            <nav className="flex flex-col flex-1 py-3 px-2 space-y-0.5">
+            <nav
+              className={`mt-4 flex flex-col space-y-0.5 ${APP_SIDEBAR_SCROLL_REGION_CLASSNAME}`}
+            >
               {subgroupTags.map((tag) =>
                 renderSubgroupFilterButton(tag, { sidebar: true }),
               )}

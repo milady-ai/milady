@@ -273,11 +273,16 @@ describe("ConversationsSidebar", () => {
         node.type === "button" &&
         node.props["aria-label"] === "conversations.closePanel",
     );
+    const sidebar = tree.root.findByProps({
+      "data-testid": "conversations-sidebar",
+    });
 
     await act(async () => {
       closeButton.props.onClick();
     });
 
+    expect(String(sidebar.props.className)).toContain("w-full");
+    expect(closeButton.children).not.toContain("bugreportmodal.Times");
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 });

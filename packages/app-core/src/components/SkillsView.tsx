@@ -22,9 +22,21 @@ import type { SkillInfo, SkillMarketplaceResult } from "../api";
 import { client } from "../api";
 import { useApp } from "../state";
 import { ConfirmDeleteControl } from "./confirm-delete-control";
+import {
+  APP_PANEL_SHELL_CLASSNAME,
+  APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
+  APP_SIDEBAR_CARD_BASE_CLASSNAME,
+  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
+  APP_SIDEBAR_HEADER_CLASSNAME,
+  APP_SIDEBAR_INNER_CLASSNAME,
+  APP_SIDEBAR_KICKER_CLASSNAME,
+  APP_SIDEBAR_META_CLASSNAME,
+  APP_SIDEBAR_RAIL_CLASSNAME,
+  APP_SIDEBAR_SCROLL_REGION_CLASSNAME,
+  APP_SIDEBAR_SEARCH_INPUT_CLASSNAME,
+} from "./sidebar-shell-styles";
 
-const SKILLS_SHELL_CLASS =
-  "settings-shell plugins-game-modal plugins-game-modal--inline relative flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-lg ring-1 ring-border/20 backdrop-blur-sm";
+const SKILLS_SHELL_CLASS = `settings-shell plugins-game-modal plugins-game-modal--inline flex-col lg:flex-row ${APP_PANEL_SHELL_CLASSNAME}`;
 
 /* ── Marketplace Result Card ────────────────────────────────────────── */
 
@@ -921,20 +933,20 @@ function SkillsFullView() {
       <div className={SKILLS_SHELL_CLASS} data-testid="skills-shell">
         <aside
           data-testid="skills-sidebar"
-          className="flex min-h-0 w-[21rem] max-w-[352px] shrink-0 flex-col overflow-hidden border-r border-border/40 bg-card/45 backdrop-blur-sm"
+          className={`flex min-h-0 w-full max-w-none shrink-0 flex-col border-b border-border/40 lg:w-[clamp(18rem,23vw,21rem)] lg:min-w-[18rem] lg:max-w-[22rem] lg:border-b-0 lg:border-r ${APP_SIDEBAR_RAIL_CLASSNAME}`}
         >
-          <div className="flex min-h-0 flex-1 flex-col px-3 pb-4 pt-3">
-            <div className="border-b border-border/30 px-1 pb-3">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60">
+          <div className={APP_SIDEBAR_INNER_CLASSNAME}>
+            <div className={APP_SIDEBAR_HEADER_CLASSNAME}>
+              <div className={APP_SIDEBAR_KICKER_CLASSNAME}>
                 {t("nav.skills", { defaultValue: "Skills" })}
               </div>
-              <div className="mt-1 text-xs text-muted">
+              <div className={APP_SIDEBAR_META_CLASSNAME}>
                 {skills.length}{" "}
                 {t("skillsview.installed", { defaultValue: "installed" })}
               </div>
             </div>
 
-            <div className="mt-4 flex items-center gap-2">
+            <div className="mt-4 flex flex-wrap items-center gap-2">
               <Button
                 variant={skillCreateFormOpen ? "outline" : "default"}
                 size="sm"
@@ -972,7 +984,8 @@ function SkillsFullView() {
                 placeholder={t("skillsview.filterSkills")}
                 value={filterText}
                 onChange={(e) => setFilterText(e.target.value)}
-                className="h-10 rounded-[18px] border-border/50 bg-bg/35 text-sm"
+                aria-label={t("skillsview.filterSkills")}
+                className={`min-w-0 flex-1 ${APP_SIDEBAR_SEARCH_INPUT_CLASSNAME}`}
               />
               <Button
                 variant="ghost"
@@ -1007,7 +1020,9 @@ function SkillsFullView() {
               ))}
             </div>
 
-            <nav className="mt-4 min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-3">
+            <nav
+              className={`mt-4 space-y-1.5 ${APP_SIDEBAR_SCROLL_REGION_CLASSNAME}`}
+            >
               {filteredSkills.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-border/45 bg-bg/20 px-4 py-6 text-center text-sm text-muted">
                   {skills.length === 0
@@ -1025,10 +1040,10 @@ function SkillsFullView() {
                     <div
                       key={skill.id}
                       data-testid={`skill-row-${skill.id}`}
-                      className={`flex items-start gap-2 rounded-xl border px-3.5 py-3 text-left transition-all ${
+                      className={`${APP_SIDEBAR_CARD_BASE_CLASSNAME} items-start gap-2 ${
                         selectedSkillId === skill.id
-                          ? "border-accent/30 bg-[linear-gradient(180deg,rgba(var(--accent),0.18),rgba(var(--accent),0.08))] text-txt shadow-[0_2px_10px_rgba(3,5,10,0.08)] dark:shadow-[0_0_0_1px_rgba(var(--accent),0.16),0_0_18px_rgba(var(--accent),0.18)]"
-                          : "border-transparent bg-transparent text-muted hover:border-border/45 hover:bg-bg/45 hover:text-txt"
+                          ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
+                          : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
                       }`}
                     >
                       <Button

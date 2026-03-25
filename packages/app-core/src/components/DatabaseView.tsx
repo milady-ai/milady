@@ -19,6 +19,10 @@ import {
   type TableRowsResponse,
 } from "../api";
 import { useApp } from "../state";
+import {
+  APP_SIDEBAR_RAIL_CLASSNAME,
+  APP_SIDEBAR_SEARCH_INPUT_CLASSNAME,
+} from "./sidebar-shell-styles";
 
 type DbView = "tables" | "query";
 type SortDir = "asc" | "desc" | null;
@@ -580,7 +584,7 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
         <div className="flex flex-1 min-h-0 gap-4">
           {/* Sidebar */}
           <div
-            className={`flex-shrink-0 border border-border/40 bg-card/60 backdrop-blur-xl rounded-2xl transition-all overflow-hidden flex flex-col shadow-sm ${sidebarCollapsed ? "w-0 opacity-0 border-none m-0" : "w-[220px]"}`}
+            className={`flex-shrink-0 rounded-2xl border transition-all overflow-hidden flex flex-col shadow-sm ${APP_SIDEBAR_RAIL_CLASSNAME} ${sidebarCollapsed ? "w-0 opacity-0 border-none m-0" : "w-[220px]"}`}
           >
             <div className="p-3 flex flex-col h-full gap-3">
               <div className="relative">
@@ -589,7 +593,7 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
                   placeholder={t("databaseview.FilterTables")}
                   value={sidebarSearch}
                   onChange={(e) => setSidebarSearch(e.target.value)}
-                  className="w-full h-9 rounded-xl border-border/50 bg-bg/50 backdrop-blur-sm text-xs focus-visible:ring-accent/50 focus-visible:border-accent pr-8 shadow-inner"
+                  className={`w-full pr-8 text-xs ${APP_SIDEBAR_SEARCH_INPUT_CLASSNAME}`}
                 />
               </div>
               <div className="text-[10px] text-muted uppercase font-bold tracking-widest px-2 bg-bg/50 py-1.5 rounded-lg border border-border/30 inline-flex items-center shadow-inner">
@@ -632,7 +636,7 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
           <Button
             variant="ghost"
             size="icon"
-            className="flex-shrink-0 w-6 h-12 flex items-center justify-center rounded-xl bg-card/40 backdrop-blur-sm border border-border/40 my-auto shadow-sm text-muted hover:text-txt hover:bg-bg-hover hover:border-accent/40 transition-all hover:scale-110"
+            className="my-auto flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl border border-border/40 bg-card/50 shadow-sm text-muted transition-all hover:border-accent/40 hover:bg-bg-hover hover:text-txt"
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
             title={
               sidebarCollapsed

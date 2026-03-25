@@ -569,6 +569,10 @@ describe("PluginsView game modal", () => {
       "data-testid": "plugins-subgroup-sidebar",
     })[0];
     expect(sidebar).toBeDefined();
+    expect(String(sidebar.props.className)).not.toContain("h-screen");
+    expect(String(sidebar.props.className)).toContain("self-stretch");
+    expect(String(sidebar.props.className)).toContain("backdrop-blur-sm");
+    expect(String(sidebar.props.className)).toContain("border-border/40");
     expect(text(sidebar)).toContain("PLUGIN TYPES");
     expect(text(sidebar)).toContain("All");
     expect(text(sidebar)).toContain("AI Providers");

@@ -27,6 +27,18 @@ import { Button, Checkbox, Input } from "@miladyai/ui";
 import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  APP_PANEL_SHELL_CLASSNAME,
+  APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
+  APP_SIDEBAR_CARD_BASE_CLASSNAME,
+  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
+  APP_SIDEBAR_HEADER_CLASSNAME,
+  APP_SIDEBAR_INNER_CLASSNAME,
+  APP_SIDEBAR_KICKER_CLASSNAME,
+  APP_SIDEBAR_META_CLASSNAME,
+  APP_SIDEBAR_PILL_CLASSNAME,
+  APP_SIDEBAR_RAIL_CLASSNAME,
+} from "./sidebar-shell-styles";
+import {
   isKnowledgeImageFile,
   MAX_KNOWLEDGE_IMAGE_PROCESSING_BYTES,
   maybeCompressKnowledgeUploadImage,
@@ -53,24 +65,20 @@ const SUPPORTED_UPLOAD_EXTENSIONS = new Set([
   ".gif",
 ]);
 
-const KNOWLEDGE_SHELL_CLASS =
-  "relative flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-lg ring-1 ring-border/20 backdrop-blur-sm";
+const KNOWLEDGE_SHELL_CLASS = APP_PANEL_SHELL_CLASSNAME;
 const KNOWLEDGE_SIDEBAR_CLASS =
-  "flex w-full shrink-0 flex-col overflow-hidden border-b border-border/40 bg-card/45 backdrop-blur-sm lg:w-[22rem] lg:max-w-[360px] lg:border-b-0 lg:border-r";
-const KNOWLEDGE_KICKER_CLASS =
-  "text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60";
+  `lg:w-[22rem] lg:max-w-[360px] ${APP_SIDEBAR_RAIL_CLASSNAME}`;
+const KNOWLEDGE_KICKER_CLASS = APP_SIDEBAR_KICKER_CLASSNAME;
 const KNOWLEDGE_SECTION_LABEL_CLASS =
   "px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60";
 const KNOWLEDGE_PANEL_CLASS =
   "rounded-[28px] border border-border/35 bg-bg/20 shadow-sm ring-1 ring-border/10";
-const KNOWLEDGE_SIDEBAR_ITEM_BASE_CLASS =
-  "group flex items-start gap-3 rounded-xl border px-3.5 py-3 transition-all duration-150";
-const KNOWLEDGE_SIDEBAR_ITEM_ACTIVE_CLASS =
-  "border-accent/30 bg-[linear-gradient(180deg,rgba(var(--accent),0.18),rgba(var(--accent),0.08))] text-txt shadow-[0_2px_10px_rgba(3,5,10,0.08)] dark:shadow-[0_0_0_1px_rgba(var(--accent),0.16),0_0_18px_rgba(var(--accent),0.18)]";
+const KNOWLEDGE_SIDEBAR_ITEM_BASE_CLASS = APP_SIDEBAR_CARD_BASE_CLASSNAME;
+const KNOWLEDGE_SIDEBAR_ITEM_ACTIVE_CLASS = APP_SIDEBAR_CARD_ACTIVE_CLASSNAME;
 const KNOWLEDGE_SIDEBAR_ITEM_INACTIVE_CLASS =
-  "border-transparent text-muted hover:border-border/45 hover:bg-bg/45 hover:text-txt";
+  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME;
 const KNOWLEDGE_META_PILL_CLASS =
-  "rounded-full border border-border/45 bg-bg/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/75";
+  `${APP_SIDEBAR_PILL_CLASSNAME} text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/75`;
 
 export type KnowledgeUploadFile = File & {
   webkitRelativePath?: string;
@@ -1137,10 +1145,10 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
     >
       <div className={KNOWLEDGE_SHELL_CLASS}>
         <aside className={KNOWLEDGE_SIDEBAR_CLASS}>
-          <div className="flex min-h-0 flex-1 flex-col px-3 pb-4 pt-3">
-            <div className="border-b border-border/30 px-1 pb-3">
+          <div className={APP_SIDEBAR_INNER_CLASSNAME}>
+            <div className={APP_SIDEBAR_HEADER_CLASSNAME}>
               <div className={KNOWLEDGE_KICKER_CLASS}>Knowledge</div>
-              <div className="mt-1 text-xs text-muted">
+              <div className={APP_SIDEBAR_META_CLASSNAME}>
                 {documents.length > 0
                   ? `${documents.length} uploaded document${documents.length === 1 ? "" : "s"} indexed`
                   : "Upload docs and explore indexed fragments"}

@@ -37,6 +37,19 @@ import { MediaSettingsSection } from "./MediaSettingsSection";
 import { PermissionsSection } from "./PermissionsSection";
 import { ProviderSwitcher } from "./ProviderSwitcher";
 import { ReleaseCenterView } from "./ReleaseCenterView";
+import {
+  APP_PANEL_SHELL_CLASSNAME,
+  APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
+  APP_SIDEBAR_CARD_BASE_CLASSNAME,
+  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
+  APP_SIDEBAR_HEADER_CLASSNAME,
+  APP_SIDEBAR_INNER_CLASSNAME,
+  APP_SIDEBAR_KICKER_CLASSNAME,
+  APP_SIDEBAR_META_CLASSNAME,
+  APP_SIDEBAR_RAIL_CLASSNAME,
+  APP_SIDEBAR_SCROLL_REGION_CLASSNAME,
+  APP_SIDEBAR_SEARCH_INPUT_CLASSNAME,
+} from "./sidebar-shell-styles";
 
 interface SettingsSectionDef {
   id: string;
@@ -45,18 +58,8 @@ interface SettingsSectionDef {
   description?: string;
 }
 
-const SETTINGS_SHELL_CLASS =
-  "settings-shell plugins-game-modal plugins-game-modal--inline relative flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-lg ring-1 ring-border/20 backdrop-blur-sm";
-const SETTINGS_SIDEBAR_RAIL_CLASS =
-  "hidden lg:flex lg:w-[21rem] lg:max-w-[352px] lg:shrink-0 lg:flex-col lg:border-r lg:border-border/40 lg:bg-card/45 lg:backdrop-blur-sm";
-const SETTINGS_NAV_BUTTON_BASE_CLASS =
-  "group flex h-auto w-full items-start justify-start gap-3 rounded-xl border px-3.5 py-3 text-left transition-all duration-150";
-const SETTINGS_NAV_BUTTON_ACTIVE_CLASS =
-  "border-accent/30 bg-[linear-gradient(180deg,rgba(var(--accent),0.18),rgba(var(--accent),0.08))] text-txt shadow-[0_2px_10px_rgba(3,5,10,0.08)] dark:shadow-[0_0_0_1px_rgba(var(--accent),0.16),0_0_18px_rgba(var(--accent),0.18)]";
-const SETTINGS_NAV_BUTTON_INACTIVE_CLASS =
-  "border-transparent text-muted hover:border-border/45 hover:bg-bg/45 hover:text-txt";
-const SETTINGS_SIDEBAR_KICKER_CLASS =
-  "text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60";
+const SETTINGS_SHELL_CLASS = `settings-shell plugins-game-modal plugins-game-modal--inline ${APP_PANEL_SHELL_CLASSNAME}`;
+const SETTINGS_SIDEBAR_RAIL_CLASS = `hidden lg:flex lg:w-[clamp(18rem,23vw,21rem)] lg:min-w-[18rem] lg:max-w-[22rem] lg:shrink-0 lg:flex-col lg:border-r lg:border-border/40 ${APP_SIDEBAR_RAIL_CLASSNAME}`;
 const SETTINGS_CONTENT_CLASS =
   "settings-page-content flex-1 min-w-0 overflow-y-auto scroll-smooth bg-bg/10 px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-5 lg:px-7 lg:pb-10 lg:pt-6";
 const SETTINGS_CONTENT_WIDTH_CLASS = "mx-auto w-full max-w-[82rem]";
@@ -136,8 +139,8 @@ function SettingsSidebar({
   sections,
   activeSection,
   onSectionChange,
-  searchQuery: _searchQuery,
-  onSearchChange: _onSearchChange,
+  searchQuery,
+  onSearchChange,
   onClose: _onClose,
 }: {
   sections: SettingsSectionDef[];
@@ -148,22 +151,44 @@ function SettingsSidebar({
   onClose: () => void;
 }) {
   const { t } = useApp();
+  const searchLabel = t("settingsview.SearchSettings", {
+    defaultValue: "Search settings",
+  });
 
   return (
-    <aside className="hidden lg:flex lg:min-h-0 lg:flex-col">
-      <div className="sticky top-0 flex flex-col px-3 pb-4 pt-3">
-        <div className="border-b border-border/30 px-1 pb-3">
-          <div className={SETTINGS_SIDEBAR_KICKER_CLASS}>
+    <aside
+      className="hidden lg:flex lg:min-h-0 lg:flex-col"
+      data-testid="settings-sidebar"
+    >
+      <div className={APP_SIDEBAR_INNER_CLASSNAME}>
+        <div className={APP_SIDEBAR_HEADER_CLASSNAME}>
+          <div className={APP_SIDEBAR_KICKER_CLASSNAME}>
             {t("nav.settings")}
+          </div>
+          <div className={APP_SIDEBAR_META_CLASSNAME}>
+            {sections.length}{" "}
+            {t("settingsview.Sections", { defaultValue: "sections" })}
           </div>
         </div>
 
+        <div className="mt-4">
+          <Input
+            type="search"
+            value={searchQuery}
+            onChange={(event) => onSearchChange(event.target.value)}
+            placeholder={searchLabel}
+            aria-label={searchLabel}
+            className={`w-full ${APP_SIDEBAR_SEARCH_INPUT_CLASSNAME}`}
+          />
+        </div>
+
         <nav
-          className="mt-4 min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-3"
+          className={`mt-4 space-y-1.5 ${APP_SIDEBAR_SCROLL_REGION_CLASSNAME}`}
           aria-label={t("nav.settings")}
         >
           {sections.map((section) => {
             const isActive = activeSection === section.id;
+            const Icon = section.icon;
             return (
               <Button
                 key={section.id}
@@ -172,12 +197,21 @@ function SettingsSidebar({
                 type="button"
                 onClick={() => onSectionChange(section.id)}
                 aria-current={isActive ? "page" : undefined}
-                className={`${SETTINGS_NAV_BUTTON_BASE_CLASS} ${
+                className={`${APP_SIDEBAR_CARD_BASE_CLASSNAME} ${
                   isActive
-                    ? SETTINGS_NAV_BUTTON_ACTIVE_CLASS
-                    : SETTINGS_NAV_BUTTON_INACTIVE_CLASS
+                    ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
+                    : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
                 }`}
               >
+                <span
+                  className={`mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border ${
+                    isActive
+                      ? "border-accent/25 bg-accent/12 text-accent-fg"
+                      : "border-border/40 bg-bg/35 text-muted-strong"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                </span>
                 <div className="min-w-0 flex-1 text-left">
                   <div
                     className={`truncate text-sm ${isActive ? "font-semibold" : "font-medium"}`}

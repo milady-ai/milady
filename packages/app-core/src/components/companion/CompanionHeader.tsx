@@ -19,6 +19,7 @@ export interface CompanionHeaderProps {
   onNewChat?: () => void;
   /** Shown in the shell header right cluster (e.g. inference / cloud alert). */
   rightExtras?: ReactNode;
+  rightTrailingExtras?: ReactNode;
 }
 
 export const CompanionHeader = memo(function CompanionHeader(
@@ -38,6 +39,7 @@ export const CompanionHeader = memo(function CompanionHeader(
     onToggleVoiceMute,
     onNewChat,
     rightExtras,
+    rightTrailingExtras,
   } = props;
   const headerShellStyle = {
     "--companion-header-bg":
@@ -73,10 +75,12 @@ export const CompanionHeader = memo(function CompanionHeader(
             t={t}
             className="px-2.5 py-2 sm:px-4 sm:py-3"
             showCompanionControls={showCompanionControls}
+            companionDesktopActionsLayout="split"
             chatAgentVoiceMuted={chatAgentVoiceMuted}
             onToggleVoiceMute={onToggleVoiceMute}
             onNewChat={onNewChat}
             rightExtras={rightExtras}
+            rightTrailingExtras={rightTrailingExtras}
           >
             {children}
           </ShellHeaderControls>

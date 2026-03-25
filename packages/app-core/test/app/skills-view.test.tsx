@@ -127,13 +127,22 @@ describe("SkillsView", () => {
     expect(
       tree.root.findByProps({ "data-testid": "skills-shell" }),
     ).toBeTruthy();
-    expect(
-      tree.root.findByProps({ "data-testid": "skills-sidebar" }),
-    ).toBeTruthy();
+    const skillsShell = tree.root.findByProps({
+      "data-testid": "skills-shell",
+    });
+    const skillsSidebar = tree.root.findByProps({
+      "data-testid": "skills-sidebar",
+    });
+    expect(skillsSidebar).toBeTruthy();
+    expect(String(skillsShell.props.className)).toContain("flex-col");
+    expect(String(skillsSidebar.props.className)).toContain("w-full");
     expect(
       tree.root.findByProps({ "data-testid": "skills-empty-state" }),
     ).toBeTruthy();
     expect(tree.root.findAllByType("button").length).toBeGreaterThan(0);
+    expect(
+      tree.root.findByProps({ "aria-label": "skillsview.filterSkills" }),
+    ).toBeTruthy();
   });
 
   it("uses a master-detail layout and updates the detail pane when selection changes", async () => {

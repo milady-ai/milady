@@ -186,17 +186,34 @@ export function saveCompanionHalfFramerateMode(
  */
 export function applyUiTheme(theme: UiTheme): void {
   if (typeof document === "undefined") return;
+  const normalizedTheme = normalizeUiTheme(theme);
   const root = document.documentElement;
   if (!root) return;
-  if (typeof root.setAttribute === "function") {
-    root.setAttribute("data-theme", theme);
-  } else if ("dataset" in root && root.dataset) {
-    root.dataset.theme = theme;
-  } else {
-    return;
+  const currentTheme =
+    typeof root.getAttribute === "function"
+      ? root.getAttribute("data-theme")
+      : root.dataset?.theme ?? null;
+  const shouldBeDark = normalizedTheme === "dark";
+  const classMatchesTheme = root.classList
+    ? root.classList.contains("dark") === shouldBeDark
+    : true;
+
+  if (currentTheme !== normalizedTheme) {
+    if (typeof root.setAttribute === "function") {
+      root.setAttribute("data-theme", normalizedTheme);
+    } else if ("dataset" in root && root.dataset) {
+      root.dataset.theme = normalizedTheme;
+    } else {
+      return;
+    }
   }
-  if (!root.classList) return;
-  if (theme === "dark") {
+
+  if (root.style && root.style.colorScheme !== normalizedTheme) {
+    root.style.colorScheme = normalizedTheme;
+  }
+
+  if (!root.classList || classMatchesTheme) return;
+  if (shouldBeDark) {
     root.classList.add("dark");
   } else {
     root.classList.remove("dark");

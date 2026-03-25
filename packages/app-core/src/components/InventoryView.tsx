@@ -23,6 +23,18 @@ import {
   Wallet,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  APP_PANEL_SHELL_CLASSNAME,
+  APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
+  APP_SIDEBAR_CARD_BASE_CLASSNAME,
+  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
+  APP_SIDEBAR_HEADER_CLASSNAME,
+  APP_SIDEBAR_INNER_CLASSNAME,
+  APP_SIDEBAR_KICKER_CLASSNAME,
+  APP_SIDEBAR_META_CLASSNAME,
+  APP_SIDEBAR_PILL_CLASSNAME,
+  APP_SIDEBAR_RAIL_CLASSNAME,
+} from "./sidebar-shell-styles";
 import { TradePanel } from "./BscTradePanel";
 import {
   CHAIN_CONFIGS,
@@ -45,18 +57,13 @@ import { useInventoryData } from "./inventory/useInventoryData";
 
 /* ── Component ─────────────────────────────────────────────────────── */
 
-const WALLET_SHELL_CLASS =
-  "relative flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-lg ring-1 ring-border/20 backdrop-blur-sm";
+const WALLET_SHELL_CLASS = APP_PANEL_SHELL_CLASSNAME;
 const WALLET_SIDEBAR_CLASS =
-  "flex w-full shrink-0 flex-col overflow-hidden border-b border-border/40 bg-card/45 backdrop-blur-sm lg:w-[21rem] lg:max-w-[352px] lg:border-b-0 lg:border-r";
-const WALLET_SIDEBAR_KICKER_CLASS =
-  "text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60";
-const WALLET_SIDEBAR_ITEM_BASE_CLASS =
-  "group flex h-auto w-full items-start justify-start gap-3 rounded-xl border px-3.5 py-3 text-left transition-all duration-150";
-const WALLET_SIDEBAR_ITEM_ACTIVE_CLASS =
-  "border-accent/30 bg-[linear-gradient(180deg,rgba(var(--accent),0.18),rgba(var(--accent),0.08))] text-txt shadow-[0_2px_10px_rgba(3,5,10,0.08)] dark:shadow-[0_0_0_1px_rgba(var(--accent),0.16),0_0_18px_rgba(var(--accent),0.18)]";
-const WALLET_SIDEBAR_ITEM_INACTIVE_CLASS =
-  "border-transparent text-muted hover:border-border/45 hover:bg-bg/45 hover:text-txt";
+  `lg:w-[21rem] lg:max-w-[352px] ${APP_SIDEBAR_RAIL_CLASSNAME}`;
+const WALLET_SIDEBAR_KICKER_CLASS = APP_SIDEBAR_KICKER_CLASSNAME;
+const WALLET_SIDEBAR_ITEM_BASE_CLASS = APP_SIDEBAR_CARD_BASE_CLASSNAME;
+const WALLET_SIDEBAR_ITEM_ACTIVE_CLASS = APP_SIDEBAR_CARD_ACTIVE_CLASSNAME;
+const WALLET_SIDEBAR_ITEM_INACTIVE_CLASS = APP_SIDEBAR_CARD_INACTIVE_CLASSNAME;
 const WALLET_PANEL_CLASS =
   "rounded-[28px] border border-border/35 bg-bg/20 shadow-sm ring-1 ring-border/10";
 
@@ -444,10 +451,10 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
     <div className="flex h-full w-full min-h-0 bg-bg p-0 lg:p-1">
       <div className={WALLET_SHELL_CLASS}>
         <aside className={WALLET_SIDEBAR_CLASS}>
-          <div className="flex min-h-0 flex-1 flex-col px-3 pb-4 pt-3">
-            <div className="border-b border-border/30 px-1 pb-3">
+          <div className={APP_SIDEBAR_INNER_CLASSNAME}>
+            <div className={APP_SIDEBAR_HEADER_CLASSNAME}>
               <div className={WALLET_SIDEBAR_KICKER_CLASS}>Wallet</div>
-              <div className="mt-1 text-xs text-muted">
+              <div className={APP_SIDEBAR_META_CLASSNAME}>
                 {addresses.length > 0
                   ? `${addresses.length} funding route${addresses.length === 1 ? "" : "s"} available`
                   : "Managed wallet overview"}
@@ -470,11 +477,11 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
                   : "$0.00"}
               </div>
               <div className="mt-3 flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/75">
-                <span className="rounded-full border border-border/45 bg-bg/30 px-2.5 py-1">
+                <span className={APP_SIDEBAR_PILL_CLASSNAME}>
                   {inventoryView === "tokens" ? t("wallet.tokens") : t("wallet.nfts")}
                 </span>
                 {inventoryView === "tokens" && (
-                  <span className="rounded-full border border-border/45 bg-bg/30 px-2.5 py-1">
+                  <span className={APP_SIDEBAR_PILL_CLASSNAME}>
                     Sort: {inventorySort}
                   </span>
                 )}

@@ -6,36 +6,38 @@ import {
   DropdownMenuTrigger,
   TooltipProvider,
 } from "@miladyai/ui";
-import { PanelLeftClose, PanelLeftOpen, SquarePen } from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen, SquarePen, X } from "lucide-react";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { useApp } from "../state";
 import { ConversationListItem } from "./conversations/ConversationListItem";
 import { ConversationRenameDialog } from "./conversations/ConversationRenameDialog";
+import {
+  APP_SIDEBAR_META_CLASSNAME,
+  APP_SIDEBAR_PILL_CLASSNAME,
+  APP_SIDEBAR_RAIL_CLASSNAME,
+} from "./sidebar-shell-styles";
 
 const DEFAULT_SIDEBAR_CLASS = "flex flex-col overflow-hidden text-[13px]";
-const DEFAULT_SIDEBAR_DESKTOP_CLASS =
-  "h-full w-[18.5rem] min-w-[18.5rem] rounded-r-[26px] rounded-l-none border-y-0 border-l-0 border-r border-border/55 bg-card/84 shadow-[0_18px_42px_rgba(3,5,10,0.14)] ring-1 ring-border/12 backdrop-blur-sm xl:w-[20rem] xl:min-w-[20rem]";
-const DEFAULT_SIDEBAR_DESKTOP_COLLAPSED_CLASS =
-  "h-full w-[4.75rem] min-w-[4.75rem] rounded-r-[24px] rounded-l-none border-y-0 border-l-0 border-r border-border/55 bg-card/84 shadow-[0_18px_42px_rgba(3,5,10,0.12)] ring-1 ring-border/12 backdrop-blur-sm";
+const DEFAULT_SIDEBAR_DESKTOP_CLASS = `h-full !w-[18.5rem] !min-w-[18.5rem] rounded-r-[26px] rounded-l-none border-y-0 border-l-0 shadow-[14px_0_30px_-22px_rgba(3,5,10,0.28)] ring-1 ring-border/12 xl:!w-[20rem] xl:!min-w-[20rem] ${APP_SIDEBAR_RAIL_CLASSNAME}`;
+const DEFAULT_SIDEBAR_DESKTOP_COLLAPSED_CLASS = `h-full !w-[4.75rem] !min-w-[4.75rem] rounded-r-[24px] rounded-l-none border-y-0 border-l-0 shadow-[12px_0_24px_-20px_rgba(3,5,10,0.24)] ring-1 ring-border/12 ${APP_SIDEBAR_RAIL_CLASSNAME}`;
 const DEFAULT_SIDEBAR_MOBILE_CLASS =
-  "h-full w-full min-w-0 border-0 bg-card/96 shadow-none ring-0";
+  "h-full w-full min-w-0 border-0 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_96%,transparent),color-mix(in_srgb,var(--bg)_92%,transparent))] shadow-none ring-0";
 const GAME_MODAL_SIDEBAR_CLASS =
   "flex h-full flex-col overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(11,12,17,0.9),rgba(8,10,14,0.82))] shadow-[0_20px_60px_rgba(0,0,0,0.28)] backdrop-blur-xl";
 const DEFAULT_HEADER_PANEL_CLASS =
-  "shrink-0 border-b border-border/30 px-3.5 pb-3 pt-3.5";
+  "shrink-0 border-b border-border/30 px-3.5 pb-4 pt-3.5";
 const GAME_MODAL_HEADER_PANEL_CLASS =
   "shrink-0 border-b border-white/10 bg-black/10 px-3.5 pb-3 pt-3.5";
 const DEFAULT_MOBILE_HEADER_PANEL_CLASS =
-  "flex items-center justify-between border-b border-border/40 bg-card/88 px-3.5 py-2.5 backdrop-blur-md";
+  "sticky top-0 z-10 flex items-center justify-between border-b border-border/40 bg-card/88 px-3.5 py-2.5 backdrop-blur-md";
 const SECTION_EYEBROW_CLASS =
-  "text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/70";
-const COUNT_BADGE_CLASS =
-  "inline-flex min-h-6 items-center rounded-full border border-border/45 bg-bg/55 px-2.5 py-1 text-[11px] font-medium text-muted shadow-sm";
+  "text-[11px] font-semibold uppercase tracking-[0.22em] text-muted/68";
+const COUNT_BADGE_CLASS = APP_SIDEBAR_PILL_CLASSNAME;
 const UNREAD_BADGE_CLASS =
   "inline-flex min-h-6 items-center rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-[11px] font-medium text-accent shadow-sm";
 const DEFAULT_LIST_REGION_CLASS =
-  "min-h-0 w-full min-w-0 flex-1 overflow-y-auto px-2.5 pb-3 pt-3";
+  "custom-scrollbar min-h-0 w-full min-w-0 flex-1 overflow-y-auto overscroll-contain px-2.5 pb-3 pt-3 supports-[scrollbar-gutter:stable]:[scrollbar-gutter:stable]";
 const GAME_MODAL_LIST_REGION_CLASS =
   "custom-scrollbar flex-1 min-h-0 w-full overflow-y-auto p-2.5";
 const DEFAULT_LIST_PANEL_CLASS = "flex min-h-full flex-col gap-1.5";
@@ -165,6 +167,7 @@ export function ConversationsSidebar({
       data-testid="conversations-sidebar"
       data-collapsed={isCollapsed || undefined}
       data-variant={variant}
+      aria-label={t("conversations.chats")}
       onPointerDown={() => setMenuConversation(null)}
     >
       <TooltipProvider delayDuration={280} skipDelayDuration={120}>
@@ -236,16 +239,20 @@ export function ConversationsSidebar({
               <div className={SECTION_EYEBROW_CLASS}>
                 {t("conversations.chats")}
               </div>
-              <div className="text-xs text-muted">{conversationCount}</div>
+              <div className={APP_SIDEBAR_META_CLASSNAME}>
+                {conversationCount}
+              </div>
             </div>
             <Button
               variant="outline"
               size="icon"
+              data-testid="conversations-mobile-close"
               className="h-11 w-11 min-h-[44px] min-w-[44px] rounded-xl"
               onClick={onClose}
               aria-label={t("conversations.closePanel")}
+              title={t("conversations.closePanel")}
             >
-              {t("bugreportmodal.Times")}
+              <X className="h-4 w-4" aria-hidden />
             </Button>
           </div>
         )}
@@ -291,12 +298,12 @@ export function ConversationsSidebar({
           ) : (
             <>
               <div className="mb-3 flex items-start justify-between gap-3">
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <div className={SECTION_EYEBROW_CLASS}>
                     {t("conversations.chats")}
                   </div>
-                  <div className="text-xs leading-relaxed text-muted">
-                    Recent threads and unread replies stay here.
+                  <div className="max-w-[19ch] text-[13px] leading-[1.55] text-muted/84">
+                    Recent threads and unread replies.
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

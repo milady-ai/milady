@@ -1408,12 +1408,6 @@ function AppProviderInner({
     saveCompanionHalfFramerateMode(companionHalfFramerateMode);
   }, [companionHalfFramerateMode]);
 
-  // Apply theme on initial mount
-  useEffect(() => {
-    applyUiTheme(uiTheme);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uiTheme]);
-
   // ── Navigation ─────────────────────────────────────────────────────
 
   const setTab = useCallback(

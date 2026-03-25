@@ -83,6 +83,10 @@ describe("ChatModalView", () => {
     expect(String(shell.props.className)).toContain("rounded-[28px]");
     expect(String(shell.props.className)).toContain("bg-transparent");
     expect(String(shell.props.className)).toContain("pointer-events-none");
+    const backfill = testRenderer.root.findByProps({
+      "data-chat-game-composer-backfill": true,
+    });
+    expect(String(backfill.props.className)).toContain("rounded-b-[28px]");
 
     const thread = testRenderer.root.findByProps({
       "data-chat-game-thread": true,

@@ -37,7 +37,9 @@ vi.mock("lucide-react", () => ({
   VolumeX: () => React.createElement("span", null, "mute"),
 }));
 
-function renderControls() {
+function renderControls(
+  props: Partial<React.ComponentProps<typeof ShellHeaderControls>> = {},
+) {
   let tree: ReactTestRenderer | null = null;
   act(() => {
     tree = create(
@@ -56,6 +58,7 @@ function renderControls() {
         rightExtras={React.createElement("div", {
           "data-testid": "right-extra-stub",
         })}
+        {...props}
       />,
     );
   });
@@ -132,5 +135,61 @@ describe("ShellHeaderControls", () => {
     );
     expect(String(rightControls.props.className)).toContain("shrink-0");
     expect(String(rightControls.props.className)).not.toContain("order-2");
+  });
+
+  it("splits companion desktop actions across the header shell", () => {
+    mockUseMediaQuery.mockReturnValue(false);
+
+    const tree = renderControls({
+      companionDesktopActionsLayout: "split",
+      rightTrailingExtras: React.createElement("div", {
+        "data-testid": "right-trailing-extra-stub",
+      }),
+    });
+    const root = tree.root;
+    const leftVoice = root.findByProps({
+      "data-testid": "companion-header-desktop-voice",
+    });
+    const rightNewChat = root.findByProps({
+      "data-testid": "companion-header-desktop-new-chat",
+    });
+    const rightControls = root.findByProps({
+      "data-testid": "shell-header-right-controls",
+    });
+    const buttons = root.findAllByType("button");
+    const voiceButton = buttons.find(
+      (node) => node.props["aria-label"] === "companion.agentVoiceOn",
+    );
+    const newChatButton = buttons.find(
+      (node) => node.props["aria-label"] === "companion.newChat",
+    );
+
+    expect(
+      root.findAllByProps({
+        "data-testid": "companion-header-chat-controls",
+      }),
+    ).toHaveLength(0);
+    expect(String(leftVoice.props.className)).toContain("shrink-0");
+    expect(String(rightNewChat.props.className)).toContain("shrink-0");
+    expect(String(rightControls.props.className)).toContain("justify-end");
+    expect(String(voiceButton?.props.className)).toContain("backdrop-blur-md");
+    expect(String(voiceButton?.props.className)).toContain(
+      "bg-bg/70",
+    );
+    expect(String(newChatButton?.props.className)).toContain(
+      "backdrop-blur-md",
+    );
+    const rightChildrenIds = rightControls.children.map((child) =>
+      typeof child === "object" && child !== null && "props" in child
+        ? (child.props["data-testid"] ?? null)
+        : null,
+    );
+    expect(rightChildrenIds).toEqual([
+      "right-extra-stub",
+      "companion-header-desktop-new-chat",
+      "right-trailing-extra-stub",
+      null,
+      null,
+    ]);
   });
 });

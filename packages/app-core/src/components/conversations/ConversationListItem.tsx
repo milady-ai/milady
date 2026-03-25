@@ -3,6 +3,10 @@ import { PencilLine, X } from "lucide-react";
 import type React from "react";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import {
+  APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
+  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
+} from "../sidebar-shell-styles";
+import {
   formatRelativeTime,
   getLocalizedConversationTitle,
 } from "./conversation-utils";
@@ -18,11 +22,9 @@ const GAME_MODAL_ROW_ACTION_CLASSNAME =
 const DEFAULT_ROW_ACTION_CLASSNAME =
   "h-8 w-8 shrink-0 rounded-lg border border-border/40 bg-card/80 text-muted-strong shadow-sm transition-[border-color,background-color,color,opacity] hover:border-border-strong hover:bg-bg-hover hover:text-txt focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent";
 const DEFAULT_ROW_BASE_CLASSNAME =
-  "group relative flex w-full items-start gap-3 rounded-xl border px-3.5 py-3 transition-all duration-150";
-const DEFAULT_ROW_ACTIVE_CLASSNAME =
-  "border-accent/30 bg-[linear-gradient(180deg,rgba(var(--accent),0.18),rgba(var(--accent),0.08))] text-txt shadow-[0_2px_10px_rgba(3,5,10,0.08)] dark:shadow-[0_0_0_1px_rgba(var(--accent),0.16),0_0_18px_rgba(var(--accent),0.18)]";
-const DEFAULT_ROW_INACTIVE_CLASSNAME =
-  "border-transparent text-muted hover:border-border/45 hover:bg-bg/45 hover:text-txt";
+  "group relative flex w-full items-start gap-3 rounded-xl border px-3.5 py-3 transition-all duration-150 focus-within:ring-2 focus-within:ring-accent/35";
+const DEFAULT_ROW_ACTIVE_CLASSNAME = APP_SIDEBAR_CARD_ACTIVE_CLASSNAME;
+const DEFAULT_ROW_INACTIVE_CLASSNAME = APP_SIDEBAR_CARD_INACTIVE_CLASSNAME;
 
 interface ConversationListItemProps {
   conv: { id: string; title: string; updatedAt: string };
@@ -93,7 +95,11 @@ function TruncatingConversationTitle({
           ? "text-txt text-shadow-glow"
           : "text-white/90 group-hover:text-white"
       }`
-    : "block min-w-0 max-w-full flex-1 font-medium truncate text-left text-txt";
+    : `block min-w-0 max-w-full flex-1 truncate text-left text-[13px] font-semibold leading-[1.2] tracking-[-0.01em] transition-colors ${
+        isActive
+          ? "text-txt"
+          : "text-[color:color-mix(in_srgb,var(--text-strong)_88%,var(--text)_12%)] group-hover:text-txt"
+      }`;
 
   const span = (
     <span
@@ -231,10 +237,10 @@ export function ConversationListItem({
             isActive={isActive}
           />
           {!isGameModal ? (
-            <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted/75">
+            <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px] font-medium leading-none text-muted/78 [font-variant-numeric:tabular-nums]">
               <span>{updatedLabel}</span>
               {isUnread ? (
-                <span className="rounded-full border border-accent/25 bg-accent/10 px-2 py-0.5 text-accent-fg">
+                <span className="rounded-full border border-accent/20 bg-accent/8 px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.02em] text-accent-fg">
                   New
                 </span>
               ) : null}
