@@ -478,7 +478,7 @@ describe("Header", () => {
     ).toHaveLength(1);
   });
 
-  it("renders the glassmorphic pill container in all modes", async () => {
+  it("keeps desktop header chrome transparent so companion glass stays scoped", async () => {
     const mockUseApp = {
       elizaCloudEnabled: false,
       elizaCloudConnected: false,
@@ -514,9 +514,12 @@ describe("Header", () => {
     await act(async () => {
       tree = create(<Header />);
     });
-    const glassShell = tree?.root.findAll(
-      (node) => node.props["data-testid"] === "header-glass-shell",
+    const glassShell = tree?.root.findByProps({
+      "data-testid": "header-glass-shell",
+    });
+    expect(String(glassShell?.props.className)).toContain("bg-transparent");
+    expect(String(glassShell?.props.className)).toContain(
+      "backdrop-blur-none",
     );
-    expect(glassShell?.length).toBe(1);
   });
 });
