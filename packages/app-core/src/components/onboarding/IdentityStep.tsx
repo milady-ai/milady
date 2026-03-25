@@ -22,6 +22,18 @@ import {
   spawnOnboardingRipple,
 } from "./onboarding-step-chrome";
 
+const CLOUD_TTS_VOICE_IDS = new Set([
+  "alloy",
+  "ash",
+  "ballad",
+  "coral",
+  "echo",
+  "nova",
+  "sage",
+  "shimmer",
+  "verse",
+]);
+
 export function IdentityStep() {
   const { onboardingStyle, handleOnboardingNext, setState, t, uiLanguage } =
     useApp();
@@ -43,6 +55,7 @@ export function IdentityStep() {
   const importBusyRef = useRef(false);
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
   const previewObjectUrlRef = useRef<string | null>(null);
+  const previewRequestIdRef = useRef(0);
   const pendingPreviewEntryRef = useRef<CharacterRosterEntry | null>(null);
   const teleportPreviewTimerRef = useRef<number | null>(null);
 
@@ -72,80 +85,78 @@ export function IdentityStep() {
     [stopPreviewAudio],
   );
 
-  const playSelectionPreview = useCallback(async (entry: CharacterRosterEntry) => {
-    const animationPath =
-      entry.greetingAnimation?.trim() || "animations/emotes/greeting.fbx";
-    dispatchAppEmoteEvent({
-      emoteId: "greeting",
-      path: `/${animationPath.replace(/^\/+/, "")}`,
-      duration: 2.5,
-      loop: false,
-      showOverlay: false,
-    });
+  const playSelectionPreview = useCallback(
+    async (entry: CharacterRosterEntry) => {
+      const requestId = ++previewRequestIdRef.current;
+      const isCurrentRequest = () => previewRequestIdRef.current === requestId;
 
-    const catchphrase = entry.catchphrase?.trim();
-    if (!catchphrase || typeof window === "undefined") return;
+      const animationPath =
+        entry.greetingAnimation?.trim() || "animations/emotes/greeting.fbx";
+      dispatchAppEmoteEvent({
+        emoteId: "greeting",
+        path: `/${animationPath.replace(/^\/+/, "")}`,
+        duration: 2.5,
+        loop: false,
+        showOverlay: false,
+      });
 
-    const selectedPreset = entry.voicePresetId
-      ? PREMADE_VOICES.find((voice) => voice.id === entry.voicePresetId)
-      : undefined;
+      const catchphrase = entry.catchphrase?.trim();
+      if (!catchphrase || typeof window === "undefined") return;
 
-    if (selectedPreset?.previewUrl) {
-      const played = await playPreviewFromUrl(selectedPreset.previewUrl);
-      if (played) return;
-    }
+      const selectedPreset = entry.voicePresetId
+        ? PREMADE_VOICES.find((voice) => voice.id === entry.voicePresetId)
+        : undefined;
 
-    if (selectedPreset?.voiceId) {
-      const apiToken = getElizaApiToken()?.trim() ?? "";
-      try {
-        // Prefer cloud-proxied TTS first so Eliza Cloud users get ElevenLabs
-        // without requiring a local ELEVENLABS_API_KEY.
-        let response = await fetch(resolveApiUrl("/api/tts/cloud"), {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "audio/mpeg",
-            ...(apiToken ? { Authorization: `Bearer ${apiToken}` } : {}),
-          },
-          body: JSON.stringify({
-            text: catchphrase,
-            voiceId: selectedPreset.voiceId,
-            modelId: "eleven_flash_v2_5",
-            outputFormat: "mp3_44100_128",
-          }),
-        });
-        if (!response.ok) {
-          response = await fetch(resolveApiUrl("/api/tts/elevenlabs"), {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "audio/mpeg",
-              ...(apiToken ? { Authorization: `Bearer ${apiToken}` } : {}),
-            },
-            body: JSON.stringify({
-              text: catchphrase,
-              voiceId: selectedPreset.voiceId,
-              modelId: "eleven_flash_v2_5",
-              outputFormat: "mp3_44100_128",
-            }),
-          });
-        }
-        if (response.ok) {
-          const blob = await response.blob();
-          const objectUrl = URL.createObjectURL(blob);
-          previewObjectUrlRef.current = objectUrl;
-          const played = await playPreviewFromUrl(objectUrl);
-          if (played) return;
-        }
-      } catch {
-        // Fall through to desktop/browser speech fallback.
+      if (selectedPreset?.previewUrl) {
+        const played = await playPreviewFromUrl(selectedPreset.previewUrl);
+        if (played && isCurrentRequest()) return;
       }
-    }
 
-    // Intentionally do not fall back to generic system/browser TTS voices for
-    // onboarding previews. If preset sample + ElevenLabs are unavailable, stay
-    // silent instead of degrading character identity quality.
-  }, [playPreviewFromUrl]);
+      if (selectedPreset?.voiceId) {
+        const apiToken = getElizaApiToken()?.trim() ?? "";
+        const normalizedVoiceId = selectedPreset.voiceId.trim().toLowerCase();
+        const isCloudVoice = CLOUD_TTS_VOICE_IDS.has(normalizedVoiceId);
+        const endpoints = isCloudVoice
+          ? ["/api/tts/cloud", "/api/tts/elevenlabs"]
+          : ["/api/tts/elevenlabs"];
+
+        for (const endpoint of endpoints) {
+          if (!isCurrentRequest()) return;
+          try {
+            const response = await fetch(resolveApiUrl(endpoint), {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "audio/mpeg",
+                ...(apiToken ? { Authorization: `Bearer ${apiToken}` } : {}),
+              },
+              body: JSON.stringify({
+                text: catchphrase,
+                voiceId: selectedPreset.voiceId,
+                modelId: "eleven_flash_v2_5",
+                outputFormat: "mp3_44100_128",
+              }),
+            });
+            if (!response.ok) continue;
+
+            const blob = await response.blob();
+            if (!isCurrentRequest()) return;
+            const objectUrl = URL.createObjectURL(blob);
+            previewObjectUrlRef.current = objectUrl;
+            const played = await playPreviewFromUrl(objectUrl);
+            if (played && isCurrentRequest()) return;
+          } catch {
+            // Try next endpoint.
+          }
+        }
+      }
+
+      // Intentionally do not fall back to generic system/browser TTS voices for
+      // onboarding previews. If preset sample + ElevenLabs are unavailable, stay
+      // silent instead of degrading character identity quality.
+    },
+    [playPreviewFromUrl],
+  );
 
   const handleSelect = useCallback(
     (entry: CharacterRosterEntry, preview = false) => {
@@ -156,6 +167,13 @@ export function IdentityStep() {
       setState("onboardingName", entry.name);
       setState("selectedVrmIndex", entry.avatarIndex);
       if (preview) {
+        previewRequestIdRef.current += 1;
+        stopPreviewAudio();
+        pendingPreviewEntryRef.current = null;
+        if (teleportPreviewTimerRef.current != null) {
+          window.clearTimeout(teleportPreviewTimerRef.current);
+          teleportPreviewTimerRef.current = null;
+        }
         // Character swaps trigger a teleport dissolve; wait for completion before
         // greeting emote/voice or the emote can be swallowed during transition.
         const avatarChanged = previousAvatarIndex !== entry.avatarIndex;
@@ -167,7 +185,7 @@ export function IdentityStep() {
         }
       }
     },
-    [entries, playSelectionPreview, selectedId, setState],
+    [entries, playSelectionPreview, selectedId, setState, stopPreviewAudio],
   );
 
   // Auto-select the first one if nothing is selected yet
@@ -202,6 +220,7 @@ export function IdentityStep() {
   useEffect(() => {
     return () => {
       pendingPreviewEntryRef.current = null;
+      previewRequestIdRef.current += 1;
       if (teleportPreviewTimerRef.current != null) {
         window.clearTimeout(teleportPreviewTimerRef.current);
         teleportPreviewTimerRef.current = null;
