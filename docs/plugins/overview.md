@@ -96,9 +96,16 @@ milady plugins list
 
 ### Enable/Disable
 
-```bash
-milady plugins enable plugin-name
-milady plugins disable plugin-name
+Plugins are enabled and disabled through the config file (`milady.json`). Use `milady plugins config <name> --edit` to interactively update plugin settings, or edit the `plugins.entries` and `connectors` sections directly:
+
+```json
+{
+  "plugins": {
+    "entries": {
+      "openai": { "enabled": true }
+    }
+  }
+}
 ```
 
 ### Eject (Copy to Local)

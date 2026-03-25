@@ -82,8 +82,9 @@ These variables configure access to AI model providers. Set at least one to enab
 | `OPENAI_API_KEY` | OpenAI (GPT) | GPT-4o, GPT-4, and other OpenAI models |
 | `AI_GATEWAY_API_KEY` | Vercel AI Gateway | Routes requests through the Vercel AI Gateway |
 | `AIGATEWAY_API_KEY` | Vercel AI Gateway | Alias for `AI_GATEWAY_API_KEY` |
-| `GOOGLE_API_KEY` | Google (Gemini) | Gemini model family |
-| `GOOGLE_GENERATIVE_AI_API_KEY` | Google (Gemini) | Alias for `GOOGLE_API_KEY` |
+| `GEMINI_API_KEY` | Google (Gemini) | Gemini model family. This is the variable checked by `milady models`. |
+| `GOOGLE_API_KEY` | Google (Gemini) | Alias for `GEMINI_API_KEY` |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | Google (Gemini) | Alias for `GEMINI_API_KEY` |
 | `GROQ_API_KEY` | Groq | Fast inference via Groq hardware |
 | `XAI_API_KEY` | xAI (Grok) | Grok model family |
 | `GROK_API_KEY` | xAI (Grok) | Alias for `XAI_API_KEY` |

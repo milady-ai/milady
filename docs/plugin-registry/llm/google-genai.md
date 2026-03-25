@@ -16,9 +16,11 @@ milady plugins install google-genai
 
 ## Auto-Enable
 
-The plugin auto-enables when either env var is present:
+The plugin auto-enables when any of these env vars is present:
 
 ```bash
+export GEMINI_API_KEY=AIza...
+# or
 export GOOGLE_API_KEY=AIza...
 # or
 export GOOGLE_GENERATIVE_AI_API_KEY=AIza...
@@ -28,10 +30,11 @@ export GOOGLE_GENERATIVE_AI_API_KEY=AIza...
 
 | Environment Variable | Required | Description |
 |---------------------|----------|-------------|
-| `GOOGLE_API_KEY` | Yes* | Google AI Studio API key |
-| `GOOGLE_GENERATIVE_AI_API_KEY` | Yes* | Alias for `GOOGLE_API_KEY` |
+| `GEMINI_API_KEY` | Yes* | Google AI Studio API key. This is the variable checked by `milady models`. |
+| `GOOGLE_API_KEY` | Yes* | Alias for `GEMINI_API_KEY` |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | Yes* | Alias for `GEMINI_API_KEY` |
 
-*Either form is accepted.
+*Any one of the three forms is accepted.
 
 Get your API key from [aistudio.google.com](https://aistudio.google.com).
 

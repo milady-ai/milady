@@ -55,11 +55,26 @@ Each line shows `configured` if the corresponding environment variable is set an
 | `ANTHROPIC_API_KEY` | Anthropic (Claude) | Claude 3 and 4 model families |
 | `OPENAI_API_KEY` | OpenAI (GPT) | GPT-4o, GPT-4, and other OpenAI models |
 | `AI_GATEWAY_API_KEY` | Vercel AI Gateway | Routes requests through the Vercel AI Gateway |
-| `GEMINI_API_KEY` | Google (Gemini) | Gemini model family. The plugin auto-enable system also accepts `GOOGLE_API_KEY` and `GOOGLE_GENERATIVE_AI_API_KEY`. |
+| `GEMINI_API_KEY` | Google (Gemini) | Gemini model family. Also accepts `GOOGLE_API_KEY` and `GOOGLE_GENERATIVE_AI_API_KEY` as aliases. |
 | `GROQ_API_KEY` | Groq | Fast inference via Groq hardware |
 | `XAI_API_KEY` | xAI (Grok) | Grok model family |
 | `OPENROUTER_API_KEY` | OpenRouter | Unified API for many providers |
 | `OLLAMA_BASE_URL` | Ollama (local) | Local models via Ollama (URL, not a key) |
+
+### Additional Providers (via auto-enable)
+
+The `milady models` command checks the 8 most common providers listed above. Additional providers are available through the plugin auto-enable system and are activated when their API key is set:
+
+| Environment Variable | Provider |
+|---------------------|----------|
+| `DEEPSEEK_API_KEY` | DeepSeek |
+| `TOGETHER_API_KEY` | Together AI |
+| `MISTRAL_API_KEY` | Mistral |
+| `COHERE_API_KEY` | Cohere |
+| `PERPLEXITY_API_KEY` | Perplexity |
+| `ZAI_API_KEY` | Zai |
+
+See [Environment Variables](/cli/environment) for the full list including aliases.
 
 ## Setting Provider Keys
 
