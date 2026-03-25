@@ -548,7 +548,7 @@ export function HeartbeatsView() {
       : form.enabled;
 
   return (
-    <div className="flex h-full w-full min-h-0 bg-bg p-1 sm:p-2 lg:p-3">
+    <div className="flex h-full w-full min-h-0 bg-bg p-0 lg:p-1">
       <div className={HEARTBEATS_SHELL_CLASS} data-testid="heartbeats-shell">
         {/* Sidebar — full-width on mobile when no detail is shown, fixed-width on md+ */}
         <aside

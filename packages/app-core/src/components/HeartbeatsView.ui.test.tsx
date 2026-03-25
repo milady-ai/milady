@@ -110,9 +110,11 @@ describe("HeartbeatsView UI states", () => {
       tree = TestRenderer.create(<HeartbeatsView />);
     });
 
+    const root = tree?.root.findByType("div");
     const aside = tree?.root.findByType("aside");
     const main = tree?.root.findByType("main");
 
+    expect(String(root?.props.className)).toContain("lg:p-1");
     expect(String(aside?.props.className)).toContain("md:w-[21rem]");
     expect(String(main?.props.className)).toContain("lg:p-7");
   });

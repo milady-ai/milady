@@ -12,6 +12,17 @@ import { useApp } from "../state";
 import { ConversationListItem } from "./conversations/ConversationListItem";
 import { ConversationRenameDialog } from "./conversations/ConversationRenameDialog";
 
+const DEFAULT_SIDEBAR_CLASS =
+  "flex flex-col overflow-hidden border-border bg-bg text-[13px]";
+const GAME_MODAL_SIDEBAR_CLASS =
+  "flex h-full flex-col bg-[rgba(12,12,16,0.32)] backdrop-blur-md";
+const DEFAULT_HEADER_PANEL_CLASS = "shrink-0 border-b border-border px-3 py-3";
+const GAME_MODAL_HEADER_PANEL_CLASS = "shrink-0 border-b border-white/10 p-3";
+const SECTION_EYEBROW_CLASS =
+  "text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/70";
+const COUNT_BADGE_CLASS =
+  "inline-flex min-h-6 items-center rounded-full border border-border/50 bg-bg/55 px-2.5 py-1 text-[11px] font-medium text-muted shadow-sm";
+
 type ConversationsSidebarVariant = "default" | "game-modal";
 
 interface ConversationsSidebarProps {
@@ -88,13 +99,15 @@ export function ConversationsSidebar({
   };
 
   const isGameModal = variant === "game-modal";
+  const conversationCount = sortedConversations.length;
+  const unreadCount = unreadConversations.size;
 
   return (
     <aside
       className={
         isGameModal
-          ? "flex h-full flex-col bg-[rgba(12,12,16,0.32)] backdrop-blur-md"
-          : `${mobile ? "h-full w-full min-w-0" : "w-[13rem] min-w-[13rem] xl:w-[15rem] xl:min-w-[15rem] border-r"} flex flex-col overflow-hidden border-border bg-bg text-[13px]`
+          ? GAME_MODAL_SIDEBAR_CLASS
+          : `${mobile ? "h-full w-full min-w-0" : "w-[13rem] min-w-[13rem] border-r xl:w-[15rem] xl:min-w-[15rem]"} ${DEFAULT_SIDEBAR_CLASS}`
       }
       data-no-window-drag=""
       data-testid="conversations-sidebar"
@@ -184,10 +197,21 @@ export function ConversationsSidebar({
         <div
           className={
             isGameModal
-              ? "shrink-0 border-b border-white/10 p-3"
-              : "shrink-0 border-b border-border px-3 py-3"
+              ? GAME_MODAL_HEADER_PANEL_CLASS
+              : DEFAULT_HEADER_PANEL_CLASS
           }
         >
+          <div className="mb-3 flex items-end justify-between gap-3">
+            <div className="space-y-1">
+              <div className={SECTION_EYEBROW_CLASS}>
+                {t("conversations.chats")}
+              </div>
+              <div className="text-xs text-muted">{conversationCount}</div>
+            </div>
+            {unreadCount > 0 ? (
+              <div className={COUNT_BADGE_CLASS}>{unreadCount}</div>
+            ) : null}
+          </div>
           <Button
             variant="outline"
             className={
@@ -215,8 +239,8 @@ export function ConversationsSidebar({
             <div
               className={
                 isGameModal
-                  ? "rounded-xl border border-dashed border-white/10 bg-black/15 px-4 py-8 text-center text-sm font-medium italic text-[color:var(--onboarding-text-muted)]"
-                  : "px-3 py-6 text-center text-muted text-xs"
+                  ? "rounded-2xl border border-dashed border-white/10 bg-black/15 px-4 py-8 text-center text-sm font-medium italic text-[color:var(--onboarding-text-muted)]"
+                  : "rounded-2xl border border-dashed border-border/50 bg-bg/35 px-4 py-8 text-center text-sm text-muted shadow-sm"
               }
             >
               {t("conversations.none")}

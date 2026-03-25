@@ -180,4 +180,22 @@ describe("ConversationsSidebar", () => {
 
     expect(handleNewConversation).toHaveBeenCalledTimes(1);
   });
+
+  it("shows the empty-state guidance when no conversations exist", async () => {
+    mockUseApp.mockReturnValue(
+      createContext({
+        conversations: [],
+        activeConversationId: null,
+      }),
+    );
+
+    let tree!: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(ConversationsSidebar));
+    });
+
+    const content = JSON.stringify(tree.toJSON());
+    expect(content).toContain("conversations.none");
+    expect(content).toContain("conversations.chats");
+  });
 });
