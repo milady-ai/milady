@@ -7,13 +7,19 @@ import {
 } from "../../src/test-support/test-helpers";
 
 let envBackup: string | undefined;
+const originalEnv = { ...process.env };
 
 beforeEach(() => {
+  process.env = { ...originalEnv };
   envBackup = process.env.ELIZA_API_TOKEN;
   process.env.ELIZA_API_TOKEN = "test-token-secret";
+  delete process.env.MILADY_CLOUD_PROVISIONED;
+  delete process.env.ELIZA_CLOUD_PROVISIONED;
+  delete process.env.STEWARD_AGENT_TOKEN;
 });
 
 afterEach(() => {
+  process.env = { ...originalEnv };
   if (envBackup === undefined) delete process.env.ELIZA_API_TOKEN;
   else process.env.ELIZA_API_TOKEN = envBackup;
 });
@@ -75,6 +81,38 @@ describe("auth-routes", () => {
       expect(payload.pairingEnabled).toBe(false);
       expect(payload.expiresAt).toBeNull();
     });
+
+    test("bypasses auth entirely for steward-managed cloud containers", async () => {
+      process.env.MILADY_CLOUD_PROVISIONED = "1";
+      process.env.STEWARD_AGENT_TOKEN = "steward-token";
+      delete process.env.ELIZA_API_TOKEN;
+
+      const ctx = buildCtx("GET", "/api/auth/status");
+      await handleAuthRoutes(ctx);
+      const payload = (ctx.json as ReturnType<typeof vi.fn>).mock.calls[0][1];
+
+      expect(payload).toEqual({
+        required: false,
+        pairingEnabled: false,
+        expiresAt: null,
+      });
+    });
+
+    test("preserves required=true for steward-managed cloud containers with an API token", async () => {
+      process.env.MILADY_CLOUD_PROVISIONED = "1";
+      process.env.STEWARD_AGENT_TOKEN = "steward-token";
+      process.env.ELIZA_API_TOKEN = "test-token-secret";
+
+      const ctx = buildCtx("GET", "/api/auth/status");
+      await handleAuthRoutes(ctx);
+      const payload = (ctx.json as ReturnType<typeof vi.fn>).mock.calls[0][1];
+
+      expect(payload).toEqual({
+        required: true,
+        pairingEnabled: false,
+        expiresAt: null,
+      });
+    });
   });
 
   describe("POST /api/auth/pair", () => {
@@ -99,6 +137,20 @@ describe("auth-routes", () => {
       await handleAuthRoutes(ctx);
       expect(ctx.error).toHaveBeenCalled();
       const args = (ctx.error as ReturnType<typeof vi.fn>).mock.calls[0];
+      expect(args[2]).toBe(403);
+    });
+
+    test("rejects for steward-managed cloud containers", async () => {
+      process.env.MILADY_CLOUD_PROVISIONED = "1";
+      process.env.STEWARD_AGENT_TOKEN = "steward-token";
+
+      const ctx = buildCtx("POST", "/api/auth/pair", {
+        readJsonBody: vi.fn(async () => ({ code: "ABC123" })),
+      });
+      await handleAuthRoutes(ctx);
+      expect(ctx.error).toHaveBeenCalled();
+      const args = (ctx.error as ReturnType<typeof vi.fn>).mock.calls[0];
+      expect(args[1]).toBe("Pairing disabled");
       expect(args[2]).toBe(403);
     });
 

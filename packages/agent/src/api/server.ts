@@ -162,6 +162,7 @@ import { handleBugReportRoutes } from "./bug-report-routes.js";
 import { handleCharacterRoutes } from "./character-routes.js";
 import { handleCloudBillingRoute } from "./cloud-billing-routes.js";
 import { handleCloudCompatRoute } from "./cloud-compat-routes.js";
+import { isCloudProvisionedContainer } from "./cloud-provisioning.js";
 import { type CloudRouteState, handleCloudRoute } from "./cloud-routes.js";
 import { handleCloudStatusRoutes } from "./cloud-status-routes.js";
 import {
@@ -7674,6 +7675,10 @@ async function handleRequest(
   }
   const pathname = url.pathname;
   const isAuthEndpoint = pathname.startsWith("/api/auth/");
+  const isCloudOnboardingStatusEndpoint =
+    method === "GET" &&
+    pathname === "/api/onboarding/status" &&
+    isCloudProvisionedContainer();
   const registryService = state.registryService;
   const dropService = state.dropService;
 
@@ -7816,7 +7821,12 @@ async function handleRequest(
     if (serveStaticUi(req, res, pathname)) return;
   }
 
-  if (method !== "OPTIONS" && !isAuthEndpoint && !isAuthorized(req)) {
+  if (
+    method !== "OPTIONS" &&
+    !isAuthEndpoint &&
+    !isCloudOnboardingStatusEndpoint &&
+    !isAuthorized(req)
+  ) {
     json(res, { error: "Unauthorized" }, 401);
     return;
   }
@@ -8394,6 +8404,11 @@ async function handleRequest(
 
   // ── GET /api/onboarding/status ──────────────────────────────────────────
   if (method === "GET" && pathname === "/api/onboarding/status") {
+    if (isCloudProvisionedContainer()) {
+      json(res, { complete: true });
+      return;
+    }
+
     let config = state.config;
     let complete = configFileExists() && hasPersistedOnboardingState(config);
 

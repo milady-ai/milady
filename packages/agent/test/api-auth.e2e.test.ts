@@ -175,6 +175,120 @@ describe("Non-loopback binding enforces auth without explicit token", () => {
   });
 });
 
+describe("Cloud-provisioned containers bypass local onboarding", () => {
+  let port: number;
+  let close: () => Promise<void>;
+  let envBackup: { restore: () => void };
+
+  beforeAll(async () => {
+    envBackup = saveEnv(
+      "ELIZA_API_TOKEN",
+      "ELIZA_PAIRING_DISABLED",
+      "MILADY_CLOUD_PROVISIONED",
+      "ELIZA_CLOUD_PROVISIONED",
+      "STEWARD_AGENT_TOKEN",
+    );
+    delete process.env.ELIZA_API_TOKEN;
+    process.env.MILADY_CLOUD_PROVISIONED = "1";
+    process.env.STEWARD_AGENT_TOKEN = "steward-token";
+    delete process.env.ELIZA_PAIRING_DISABLED;
+    delete process.env.ELIZA_CLOUD_PROVISIONED;
+
+    const server = await startApiServer({ port: 0 });
+    port = server.port;
+    close = server.close;
+  }, 30_000);
+
+  afterAll(async () => {
+    await close();
+    envBackup.restore();
+  });
+
+  it("allows unauthenticated requests", async () => {
+    const { status, data } = await req(port, "GET", "/api/status");
+    expect(status).toBe(200);
+    expect(typeof data.agentName).toBe("string");
+  });
+
+  it("/api/auth/status reports auth not required", async () => {
+    const { status, data } = await req(port, "GET", "/api/auth/status");
+    expect(status).toBe(200);
+    expect(data).toEqual({
+      required: false,
+      pairingEnabled: false,
+      expiresAt: null,
+    });
+  });
+
+  it("/api/onboarding/status reports complete without auth", async () => {
+    const { status, data } = await req(port, "GET", "/api/onboarding/status");
+    expect(status).toBe(200);
+    expect(data).toEqual({ complete: true });
+  });
+
+  it("/api/auth/pair stays disabled", async () => {
+    const { status, data } = await req(port, "POST", "/api/auth/pair", {
+      code: "ABCD-1234",
+    });
+    expect(status).toBe(403);
+    expect(data.error).toBe("Pairing disabled");
+  });
+});
+
+describe("Cloud-provisioned onboarding survives non-loopback auto-token auth", () => {
+  let port: number;
+  let close: () => Promise<void>;
+  let envBackup: { restore: () => void };
+
+  beforeAll(async () => {
+    envBackup = saveEnv(
+      "ELIZA_API_TOKEN",
+      "ELIZA_PAIRING_DISABLED",
+      "ELIZA_API_BIND",
+      "MILADY_CLOUD_PROVISIONED",
+      "ELIZA_CLOUD_PROVISIONED",
+      "STEWARD_AGENT_TOKEN",
+    );
+    delete process.env.ELIZA_API_TOKEN;
+    process.env.ELIZA_API_BIND = "0.0.0.0";
+    process.env.MILADY_CLOUD_PROVISIONED = "1";
+    process.env.STEWARD_AGENT_TOKEN = "steward-token";
+    delete process.env.ELIZA_PAIRING_DISABLED;
+    delete process.env.ELIZA_CLOUD_PROVISIONED;
+
+    const server = await startApiServer({ port: 0 });
+    port = server.port;
+    close = server.close;
+  }, 30_000);
+
+  afterAll(async () => {
+    await close();
+    envBackup.restore();
+  });
+
+  it("keeps /api/onboarding/status reachable", async () => {
+    const { status, data } = await req(port, "GET", "/api/onboarding/status");
+    expect(status).toBe(200);
+    expect(data).toEqual({ complete: true });
+  });
+
+  it("still protects other endpoints with the generated token", async () => {
+    const { status, data } = await req(port, "GET", "/api/status");
+    expect(status).toBe(401);
+    expect(data.error).toBe("Unauthorized");
+  });
+
+  it("reports auth as required when the bind host generated a token", async () => {
+    const { status, data } = await req(port, "GET", "/api/auth/status");
+    expect(status).toBe(200);
+    expect(data).toEqual({
+      required: true,
+      pairingEnabled: false,
+      expiresAt: null,
+    });
+  });
+});
+
 // ═══════════════════════════════════════════════════════════════════════════
 // 2. TOKEN AUTH GATE
 // ═══════════════════════════════════════════════════════════════════════════
