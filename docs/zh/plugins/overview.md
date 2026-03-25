@@ -1,0 +1,157 @@
+---
+title: 插件概述
+sidebarTitle: 概述
+description: Milady 的插件系统提供模块化能力 — 模型提供者、平台连接器、DeFi 集成和自定义功能。
+---
+
+插件是 Milady 的主要扩展机制。核心运行时之外的每项能力 — 从 LLM 提供者到区块链交互 — 都以插件的形式提供。
+
+<div id="what-is-a-plugin">
+
+## 什么是插件？
+
+</div>
+
+插件是一个独立的模块，可以注册以下一项或多项：
+
+- **Actions** — 代理可以执行的操作（例如，发送推文、交换代币）
+- **Providers** — 注入到代理提示中的上下文（例如，钱包余额、时间）
+- **Evaluators** — 每次响应后运行的后处理逻辑
+- **Services** — 长时间运行的后台进程（例如，定时任务、事件监听器）
+
+<div id="plugin-categories">
+
+## 插件分类
+
+</div>
+
+<CardGroup cols={2}>
+
+<Card title="核心插件" icon="cube" href="/zh/plugin-registry/knowledge">
+  每个 Milady 安装都附带的基础插件 — knowledge、database、form、cron、shell、agent-skills、trajectory-logger 和 agent-orchestrator。
+</Card>
+
+<Card title="模型提供者" icon="brain" href="/zh/plugin-registry/llm/openai">
+  LLM 集成，支持 OpenAI、Anthropic、Google Gemini、Google Antigravity、Groq、Ollama、OpenRouter、DeepSeek、xAI、Mistral、Cohere、Together、Qwen、Minimax、Pi AI、Perplexity、Zai、Vercel AI Gateway 和 Eliza Cloud。
+</Card>
+
+<Card title="平台连接器" icon="plug" href="/zh/plugin-registry/platform/discord">
+  连接 19 个消息平台的桥梁 — Discord、Telegram、Twitter、Slack、WhatsApp、Signal、iMessage、BlueBubbles、Blooio、MS Teams、Google Chat、Mattermost、Farcaster、Twitch、WeChat、Feishu、Matrix、Nostr、Lens 和 Retake。
+</Card>
+
+<Card title="DeFi 与区块链" icon="wallet" href="/zh/plugin-registry/defi/evm">
+  EVM 链和 Solana 的链上交互 — 代币转账、交换和 DeFi 协议。
+</Card>
+
+<Card title="功能插件" icon="wand-magic-sparkles" href="/zh/plugin-registry/browser">
+  扩展能力 — 浏览器控制、图像生成、文本转语音、语音转文本、计算机操控、定时调度、视觉、shell、webhooks、FAL 媒体生成、Suno 音乐等。
+</Card>
+
+</CardGroup>
+
+<div id="how-plugins-load">
+
+## 插件如何加载
+
+</div>
+
+插件在运行时初始化期间按以下顺序加载：
+
+1. **Milady 插件** — 桥接插件（`createMiladyPlugin()`），提供工作区上下文、会话密钥、表情、自定义操作和生命周期操作。始终是插件数组中的第一个。
+2. **预注册插件** — `@elizaos/plugin-sql` 和 `@elizaos/plugin-local-embedding` 在 `runtime.initialize()` 之前预注册，以防止竞态条件。
+3. **核心插件** — 始终加载：`sql`、`local-embedding`、`form`、`knowledge`、`trajectory-logger`、`agent-orchestrator`、`cron`、`shell`、`agent-skills`（见 `src/runtime/core-plugins.ts`）。`pdf`、`browser`、`computeruse`、`obsidian`、`vision`、`edge-tts` 和 `elevenlabs` 等附加插件是可选的，当其功能标志或环境变量配置后才会加载。
+4. **自动启用的插件** — 连接器、提供者、功能和流式插件根据配置和环境变量自动启用（参见[架构](/zh/plugins/architecture)了解完整映射）。
+5. **弹出的插件** — 从 `~/.milady/plugins/ejected/` 发现的本地覆盖。当存在弹出副本时，它优先于 npm 发布的版本。
+6. **用户安装的插件** — 在 `milady.json` 的 `plugins.installs` 中跟踪。在 drop-in 插件之前收集；此处已存在的任何插件名称具有优先权。
+7. **自定义/drop-in 插件** — 从 `~/.milady/plugins/custom/` 和 `plugins.load.paths` 中的任何额外路径扫描。名称已存在于 `plugins.installs` 中的插件将被跳过（`mergeDropInPlugins` 优先规则）。
+
+```json
+// milady.json plugin configuration
+{
+  "plugins": {
+    "allow": ["@elizaos/plugin-openai", "discord"],
+    "entries": {
+      "openai": { "enabled": true }
+    }
+  },
+  "connectors": {
+    "discord": { "token": "..." }
+  }
+}
+```
+
+<div id="plugin-lifecycle">
+
+## 插件生命周期
+
+</div>
+
+```
+Install → Register → Initialize → Active → Shutdown
+```
+
+1. **Install** — 解析插件包（npm 或本地）
+2. **Register** — 将操作、提供者、评估器和服务注册到运行时
+3. **Initialize** — 使用运行时上下文调用 `init()`
+4. **Active** — 插件处理事件并提供能力
+5. **Shutdown** — 在运行时停止时调用 `cleanup()`
+
+<div id="managing-plugins">
+
+## 管理插件
+
+</div>
+
+<div id="install-from-registry">
+
+### 从注册表安装
+
+</div>
+
+```bash
+milady plugins install @elizaos/plugin-openai
+```
+
+<div id="list-installed-plugins">
+
+### 列出已安装的插件
+
+</div>
+
+```bash
+milady plugins list
+```
+
+<div id="enable-disable">
+
+### 启用/禁用
+
+</div>
+
+```bash
+milady plugins enable plugin-name
+milady plugins disable plugin-name
+```
+
+<div id="eject-copy-to-local">
+
+### 弹出（复制到本地）
+
+</div>
+
+```bash
+milady plugins eject plugin-name
+```
+
+参见[插件弹出](/zh/plugins/plugin-eject)了解自定义弹出插件的详细信息。
+
+<div id="related">
+
+## 相关内容
+
+</div>
+
+- [插件架构](/zh/plugins/architecture) — 深入了解插件系统
+- [创建插件](/zh/plugins/create-a-plugin) — 分步教程
+- [插件开发](/zh/plugins/development) — 开发指南和 API
+- [插件注册表](/zh/plugins/registry) — 浏览可用插件
