@@ -1,7 +1,7 @@
 ---
 title: "Platform Connectors"
 sidebarTitle: "Connectors"
-description: "Platform bridges for 30+ messaging platforms including Discord, Telegram, Slack, WhatsApp, Signal, iMessage, BlueBubbles, Blooio, MS Teams, Google Chat, Twitter, Farcaster, Bluesky, Instagram, Twitch, Mattermost, WeChat, Matrix, Feishu, Nostr, LINE, Zalo, Twilio, GitHub, Gmail Watch, Nextcloud Talk, Tlon, Lens, and Retake."
+description: "Platform bridges for 28 messaging platforms — 20 auto-enable (Discord, Telegram, Slack, WhatsApp, Signal, iMessage, BlueBubbles, Blooio, MS Teams, Google Chat, Twitter, Farcaster, Twitch, Mattermost, WeChat, Matrix, Feishu, Nostr, Lens, Retake) and 8 manual-install (Bluesky, Instagram, LINE, Zalo, Twilio, GitHub, Nextcloud Talk, Tlon)."
 ---
 
 Connectors are platform bridges that allow your agent to communicate across messaging platforms and social networks. Each connector handles authentication, message routing, session management, and platform-specific features.
@@ -22,30 +22,33 @@ Connectors are platform bridges that allow your agent to communicate across mess
 12. [Google Chat](#google-chat)
 13. [Twitter](#twitter)
 14. [Farcaster](#farcaster)
-15. [Bluesky](#bluesky)
-16. [Instagram](#instagram)
+15. [Bluesky](#bluesky) *(manual install)*
+16. [Instagram](#instagram) *(manual install)*
 17. [Twitch](#twitch)
 18. [Mattermost](#mattermost)
 19. [WeChat](#wechat)
 20. [Matrix](#matrix)
 21. [Feishu / Lark](#feishu--lark)
 22. [Nostr](#nostr)
-23. [LINE](#line)
-24. [Zalo](#zalo)
-25. [Twilio](#twilio)
-26. [GitHub](#github)
-27. [Gmail Watch](#gmail-watch)
-28. [Nextcloud Talk](#nextcloud-talk)
-29. [Tlon](#tlon)
-30. [Lens](#lens)
-31. [Retake](#retake)
-32. [Connector Lifecycle](#connector-lifecycle)
-33. [Multi-Account Support](#multi-account-support)
-34. [Session Management](#session-management)
+23. [LINE](#line) *(manual install)*
+24. [Zalo](#zalo) *(manual install)*
+25. [Twilio](#twilio) *(manual install)*
+26. [GitHub](#github) *(manual install)*
+27. [Nextcloud Talk](#nextcloud-talk) *(manual install)*
+28. [Tlon](#tlon) *(manual install)*
+29. [Lens](#lens)
+30. [Retake](#retake)
+31. [Connector Lifecycle](#connector-lifecycle)
+32. [Multi-Account Support](#multi-account-support)
+33. [Session Management](#session-management)
 
 ---
 
 ## Supported Platforms
+
+Connectors marked **Auto** are auto-enabled when configured in the `connectors` section of `milady.json`. Connectors marked **Manual** must be installed explicitly via `milady plugins install`.
+
+### Auto-Enable Connectors
 
 | Platform | Auth Method | DM Support | Group Support | Multi-Account |
 |----------|------------|------------|---------------|---------------|
@@ -61,23 +64,31 @@ Connectors are platform bridges that allow your agent to communicate across mess
 | Google Chat | Service account | Yes | Yes (spaces) | Yes |
 | Twitter | API keys + tokens | DMs | N/A | No |
 | Farcaster | Neynar API key + signer | Casts | Yes (channels) | No |
-| Bluesky | Account credentials | Posts | N/A | No |
-| Instagram | Username + password | DMs | N/A | No |
 | Twitch | Client ID + access token | Yes (chat) | Yes (channels) | No |
 | Mattermost | Bot token | Yes | Yes (channels) | No |
 | WeChat | Proxy API key + QR code | Yes | Yes | Yes |
 | Matrix | Access token | Yes | Yes (rooms) | No |
 | Feishu / Lark | App ID + secret | Yes | Yes (group chats) | No |
 | Nostr | Private key (nsec/hex) | Yes (NIP-04) | N/A | No |
+| Lens | API key | Yes | N/A | No |
+| Retake | Access token | Yes | Yes | No |
+
+### Manual-Install Connectors (elizaOS Registry)
+
+These connectors are available in the elizaOS plugin registry but must be installed explicitly (they are not in the auto-enable map):
+
+| Platform | Auth Method | DM Support | Group Support | Multi-Account |
+|----------|------------|------------|---------------|---------------|
+| Bluesky | Account credentials | Posts | N/A | No |
+| Instagram | Username + password | DMs | N/A | No |
 | LINE | Channel access token + secret | Yes | Yes | No |
 | Zalo | Access token | Yes | Yes | No |
 | Twilio | Account SID + auth token | SMS/Voice | N/A | No |
 | GitHub | API token | Issues/PRs | Yes (repos) | No |
-| Gmail Watch | Service account / OAuth | N/A | N/A | No |
 | Nextcloud Talk | Server credentials | Yes | Yes (rooms) | No |
 | Tlon | Ship credentials | Yes | Yes (Urbit chats) | No |
-| Lens | API key | Yes | N/A | No |
-| Retake | Access token | Yes | Yes | No |
+
+> **Note:** Gmail Watch (`@elizaos/plugin-gmail-watch`) is a **feature plugin**, not a connector — it auto-enables via `hooks.gmail.account` in config or the `features.gmailWatch` flag. See [Feature Plugins](/plugins/overview).
 
 ---
 

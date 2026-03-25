@@ -456,6 +456,7 @@ Or use `~/.milady/.env` for secrets.
 | [OpenAI](https://openai.com) | `OPENAI_API_KEY` | gpt-4o, o1, the classics |
 | [OpenRouter](https://openrouter.ai) | `OPENROUTER_API_KEY` | 100+ models one API |
 | [Google Gemini](https://ai.google.dev) | `GOOGLE_API_KEY` | gemini pro, flash, ultra |
+| [Google Antigravity](https://cloud.google.com) | `GOOGLE_CLOUD_API_KEY` | Google Cloud AI |
 | [Ollama](https://ollama.ai) | — | local, free, no API key, full privacy |
 | [Groq](https://groq.com) | `GROQ_API_KEY` | fast af |
 | [xAI](https://x.ai) | `XAI_API_KEY` | grok, based |
@@ -464,7 +465,12 @@ Or use `~/.milady/.env` for secrets.
 | [Together AI](https://together.ai) | `TOGETHER_API_KEY` | open-source model hosting |
 | [Cohere](https://cohere.com) | `COHERE_API_KEY` | command R+ and embed |
 | [Perplexity](https://perplexity.ai) | `PERPLEXITY_API_KEY` | search-augmented gen |
+| [Qwen](https://qwen.ai) | `QWEN_API_KEY` | Alibaba's frontier models |
+| [Minimax](https://minimaxi.com) | `MINIMAX_API_KEY` | Chinese multimodal |
+| [Pi AI](https://pi.ai) | `ELIZA_USE_PI_AI` | conversational AI |
+| [Zai](https://homunculuslabs.com) | `ZAI_API_KEY` | Homunculus Labs |
 | [Vercel AI Gateway](https://sdk.vercel.ai) | `AI_GATEWAY_API_KEY` | unified gateway |
+| [Eliza Cloud](https://elizacloud.ai) | `ELIZAOS_CLOUD_API_KEY` | managed cloud hosting |
 
 See [Model Providers](/docs/model-providers.mdx) for provider details. The `milady models` command checks which providers are configured.
 

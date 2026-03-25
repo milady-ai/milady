@@ -423,6 +423,7 @@ Milady automatically enables plugins based on your configuration. You do not nee
 | `retake` | `@elizaos/plugin-retake` | `connectors.retake.accessToken` or `enabled: true` |
 | `blooio` | `@elizaos/plugin-blooio` | `connectors.blooio.token` |
 | `twitch` | `@elizaos/plugin-twitch` | `connectors.twitch.accessToken` or `clientId` or `enabled: true` |
+| `wechat` | `@miladyai/plugin-wechat` | `connectors.wechat` with valid `WECHAT_API_KEY` |
 
 **Provider plugins** are auto-enabled when the corresponding API key environment variable is set:
 
@@ -449,6 +450,7 @@ Milady automatically enables plugins based on your configuration. You do not nee
 | `OBSIDIAN_VAULT_PATH` | `@elizaos/plugin-obsidian` |
 | `REPOPROMPT_CLI_PATH` | `@elizaos/plugin-repoprompt` |
 | `CLAUDE_CODE_WORKBENCH_ENABLED` | `@elizaos/plugin-claude-code-workbench` |
+| `STEWARD_API_URL` | `@stwd/eliza-plugin` (Steward wallet) |
 
 **Feature plugins** are auto-enabled via the `features` flag map:
 
@@ -495,6 +497,17 @@ Milady automatically enables plugins based on your configuration. You do not nee
 <Info>
 The `vision`, `fal`, and `suno` plugins are also auto-enabled when their respective `media.*` config sections are configured (e.g., `media.vision.provider` is set, or `media.image.provider: "fal"` with `mode: "own-key"`). Webhook plugins auto-enable when `hooks.token` is set. Gmail watch auto-enables when `hooks.gmail.account` is set.
 </Info>
+
+**Streaming plugins** are auto-enabled when a streaming destination is configured under `streaming`:
+
+| Destination | Plugin |
+|-------------|--------|
+| `retake` | `@elizaos/plugin-retake` |
+| `twitch` | `@elizaos/plugin-twitch-streaming` |
+| `youtube` | `@elizaos/plugin-youtube-streaming` |
+| `customRtmp` | `@elizaos/plugin-custom-rtmp` |
+| `pumpfun` | `@elizaos/plugin-pumpfun-streaming` |
+| `x` | `@elizaos/plugin-x-streaming` |
 
 <Tip>
 You can always force-disable any auto-enabled plugin by setting `plugins.entries.<id>.enabled: false`. The denylist takes priority over all auto-enable logic.
