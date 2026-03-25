@@ -67,7 +67,7 @@ const SIDEBAR_SECTION_LABEL_CLASS =
 const SIDEBAR_CARD_BASE_CLASS =
   "w-full rounded-xl border px-3.5 py-3 text-left transition-[border-color,background-color,color,box-shadow] duration-200";
 const HEARTBEATS_SHELL_CLASS =
-  "relative flex min-h-0 flex-1 overflow-hidden rounded-[30px] border border-border/45 bg-card/70 shadow-lg backdrop-blur-sm";
+  "relative flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-lg ring-1 ring-border/20 backdrop-blur-sm";
 const HEARTBEATS_CONTENT_WIDTH_CLASS = "mx-auto w-full max-w-[80rem]";
 const HEARTBEATS_PANEL_CLASS =
   "rounded-[28px] border border-border/35 bg-bg/20 px-5 py-4 shadow-sm sm:px-6 sm:py-5";

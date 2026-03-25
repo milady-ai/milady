@@ -97,8 +97,9 @@ describe("HeartbeatsView UI states", () => {
       "data-testid": "heartbeats-detail-panel",
     });
 
-    expect(String(shell?.props.className)).toContain("rounded-[30px]");
+    expect(String(shell?.props.className)).toContain("rounded-2xl");
     expect(String(shell?.props.className)).toContain("shadow");
+    expect(String(shell?.props.className)).toContain("ring-1");
     expect(detailPanels).toHaveLength(0);
   });
 
