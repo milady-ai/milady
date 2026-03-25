@@ -115,6 +115,8 @@ All `@elizaos/*` packages use the `alpha` dist-tag. When developing locally, `bu
 - **Never stash, switch branches, or create worktrees** unless the user explicitly asks for it.
 - When asked to merge, merge **onto the current branch** (e.g., `git merge <source>` while staying on the current branch).
 - Do not create worktrees unless the user specifically requests one.
+- **Fork-first hard rule:** do implementation/testing on fork validate branches only (`*-validate`), and only promote to PR branches after explicit approval.
+- **Do not push to `origin` by default.** Promotion pushes must be intentional and explicit.
 
 ## Common Pitfalls
 
