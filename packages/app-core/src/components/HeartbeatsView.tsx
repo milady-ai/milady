@@ -68,6 +68,13 @@ const SIDEBAR_CARD_BASE_CLASS =
   "w-full rounded-xl border px-3.5 py-3 text-left transition-[border-color,background-color,color,box-shadow] duration-200";
 const HEARTBEATS_SHELL_CLASS =
   "relative flex min-h-0 flex-1 overflow-hidden rounded-[30px] border border-border/45 bg-card/70 shadow-lg backdrop-blur-sm";
+const HEARTBEATS_CONTENT_WIDTH_CLASS = "mx-auto w-full max-w-[72rem]";
+const HEARTBEATS_PANEL_CLASS =
+  "rounded-[28px] border border-border/35 bg-bg/20 px-5 py-5 shadow-sm sm:px-6 sm:py-6";
+const HEARTBEATS_STAT_CARD_CLASS =
+  "rounded-2xl border border-border/30 bg-bg/20 px-4 py-4 shadow-sm";
+const HEARTBEATS_SECTION_KICKER_CLASS =
+  "text-[11px] font-semibold uppercase tracking-[0.16em] text-muted";
 
 function bestFitUnit(ms: number): { value: number; unit: DurationUnit } {
   for (let i = DURATION_UNITS.length - 1; i >= 0; i -= 1) {
@@ -541,11 +548,11 @@ export function HeartbeatsView() {
       : form.enabled;
 
   return (
-    <div className="flex h-full w-full min-h-0 bg-bg p-3 sm:p-4">
+    <div className="flex h-full w-full min-h-0 bg-bg p-2 sm:p-3 lg:p-4">
       <div className={HEARTBEATS_SHELL_CLASS} data-testid="heartbeats-shell">
         {/* Sidebar — full-width on mobile when no detail is shown, fixed-width on md+ */}
         <aside
-          className={`${selectedTriggerId || editorOpen || editingId ? "hidden md:flex" : "flex"} w-full shrink-0 flex-col overflow-y-auto border-r border-border/40 bg-card/45 md:w-72 md:max-w-[320px] lg:w-80 backdrop-blur-sm`}
+          className={`${selectedTriggerId || editorOpen || editingId ? "hidden md:flex" : "flex"} w-full shrink-0 flex-col overflow-y-auto border-r border-border/40 bg-card/45 md:w-80 md:max-w-[336px] lg:w-[22rem] backdrop-blur-sm`}
         >
           <div className="sticky top-0 z-10 border-b border-border/40 bg-card/80 px-3 pb-3 pt-3 backdrop-blur-md">
             <div className="mb-3 flex items-end justify-between gap-3 px-1">
@@ -717,7 +724,7 @@ export function HeartbeatsView() {
 
         {/* Main Content Area — hidden on mobile when sidebar is showing */}
         <main
-          className={`${selectedTriggerId || editorOpen || editingId ? "flex" : "hidden md:flex"} relative flex-1 min-w-0 flex-col overflow-y-auto bg-bg/10 p-3 sm:p-4 custom-scrollbar`}
+          className={`${selectedTriggerId || editorOpen || editingId ? "flex" : "hidden md:flex"} relative flex-1 min-w-0 flex-col overflow-y-auto bg-bg/10 p-4 sm:p-5 lg:p-6 custom-scrollbar`}
         >
           {/* Mobile back button */}
           <button
@@ -732,15 +739,17 @@ export function HeartbeatsView() {
             ← Back
           </button>
           {editorOpen || editingId ? (
-            <div className="max-w-3xl mx-auto p-6 lg:p-10 pb-20">
+            <div
+              className={`${HEARTBEATS_CONTENT_WIDTH_CLASS} p-4 pb-20 sm:p-6 lg:p-8 xl:p-10`}
+            >
               {templateNotice && (
                 <div className="mb-4 px-4 py-2.5 rounded-lg border border-accent/30 bg-accent/5 text-xs text-accent font-medium animate-[fadeIn_0.2s_ease]">
                   {templateNotice}
                 </div>
               )}
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
-                <div className="space-y-1">
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
+              <div className="mb-8 flex flex-col justify-between gap-5 lg:flex-row lg:items-start">
+                <div className="max-w-3xl space-y-2">
+                  <div className={HEARTBEATS_SECTION_KICKER_CLASS}>
                     {editingId
                       ? t("heartbeatsview.editHeartbeat")
                       : t("heartbeatsview.createHeartbeat")}
@@ -748,9 +757,14 @@ export function HeartbeatsView() {
                   <h2 className="text-2xl font-semibold text-txt">
                     {modalTitle}
                   </h2>
+                  <p className="max-w-2xl text-sm leading-relaxed text-muted">
+                    {editingId
+                      ? t("heartbeatsview.emptyStateDescription")
+                      : t("heartbeatsview.emptyStateDescription")}
+                  </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2 lg:justify-end">
                   {editingId && (
                     <>
                       <Button
@@ -795,7 +809,7 @@ export function HeartbeatsView() {
                   </div>
                 )}
 
-                <div className="grid gap-6 bg-bg/20 p-6 rounded-2xl border border-border/40 shadow-sm">
+                <div className={`${HEARTBEATS_PANEL_CLASS} grid gap-6`}>
                   <div>
                     <span className={FIELD_LABEL_CLASS}>
                       {t("wallet.name")}
@@ -979,8 +993,8 @@ export function HeartbeatsView() {
                   </div>
                 </div>
 
-                {form.displayName.trim() && (
-                  <div className="pt-2">
+                <div className="flex flex-col gap-4 border-t border-border/30 pt-2 sm:flex-row sm:items-center sm:justify-between">
+                  {form.displayName.trim() && (
                     <button
                       type="button"
                       className="text-xs font-medium text-muted transition-colors hover:text-accent underline-offset-2 hover:underline"
@@ -988,51 +1002,51 @@ export function HeartbeatsView() {
                     >
                       Save as template
                     </button>
-                  </div>
-                )}
+                  )}
 
-                <div className="flex items-center gap-3 pt-2">
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="h-10 px-6 text-sm shadow-sm"
-                    disabled={triggersSaving}
-                    onClick={() => void onSubmit()}
-                  >
-                    {triggersSaving
-                      ? t("apikeyconfig.saving")
-                      : editingId
-                        ? t("heartbeatsview.saveChanges")
-                        : t("heartbeatsview.createHeartbeat")}
-                  </Button>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="h-10 px-6 text-sm shadow-sm"
+                      disabled={triggersSaving}
+                      onClick={() => void onSubmit()}
+                    >
+                      {triggersSaving
+                        ? t("apikeyconfig.saving")
+                        : editingId
+                          ? t("heartbeatsview.saveChanges")
+                          : t("heartbeatsview.createHeartbeat")}
+                    </Button>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-10 px-6 text-sm"
-                    onClick={() => {
-                      if (editingId && selectedTriggerId === editingId) {
-                        const trigger = triggers.find(
-                          (t) => t.id === editingId,
-                        );
-                        if (trigger) {
-                          setForm(formFromTrigger(trigger));
-                          setFormError(null);
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-10 px-6 text-sm"
+                      onClick={() => {
+                        if (editingId && selectedTriggerId === editingId) {
+                          const trigger = triggers.find(
+                            (t) => t.id === editingId,
+                          );
+                          if (trigger) {
+                            setForm(formFromTrigger(trigger));
+                            setFormError(null);
+                          }
+                        } else {
+                          closeEditor();
                         }
-                      } else {
-                        closeEditor();
-                      }
-                    }}
-                  >
-                    {editingId ? t("common.cancel") : t("common.cancel")}
-                  </Button>
+                      }}
+                    >
+                      {editingId ? t("common.cancel") : t("common.cancel")}
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Detailed run info and metadata when editing */}
                 {editingId && (
                   <div className="mt-12 pt-10 border-t border-border/40 grid gap-10">
-                    <dl className="grid gap-x-6 gap-y-6 text-sm sm:grid-cols-2 lg:grid-cols-4">
-                      <div>
+                    <dl className="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
+                      <div className={HEARTBEATS_STAT_CARD_CLASS}>
                         <dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
                           {t("heartbeatsview.maxRuns")}
                         </dt>
@@ -1047,7 +1061,7 @@ export function HeartbeatsView() {
                           })()}
                         </dd>
                       </div>
-                      <div>
+                      <div className={HEARTBEATS_STAT_CARD_CLASS}>
                         <dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
                           {t("triggersview.LastRun")}
                         </dt>
@@ -1062,7 +1076,7 @@ export function HeartbeatsView() {
                           })()}
                         </dd>
                       </div>
-                      <div>
+                      <div className={HEARTBEATS_STAT_CARD_CLASS}>
                         <dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
                           {t("heartbeatsview.nextRun")}
                         </dt>
@@ -1079,7 +1093,7 @@ export function HeartbeatsView() {
                       </div>
                     </dl>
 
-                    <div className="space-y-4">
+                    <div className={`${HEARTBEATS_PANEL_CLASS} space-y-4`}>
                       <div className="flex items-center justify-between gap-3 border-b border-border/30 pb-3">
                         <h3 className="text-[12px] font-semibold uppercase tracking-[0.14em] text-muted">
                           {t("triggersview.RunHistory")}
@@ -1192,17 +1206,33 @@ export function HeartbeatsView() {
                 ).length;
                 const totalRuns = runs.length;
                 return (
-                  <div className="max-w-3xl mx-auto p-6 lg:p-10">
-                    <div className="flex items-start justify-between gap-4 mb-6">
-                      <div>
-                        <h2 className="text-2xl font-semibold text-txt">
+                  <div
+                    className={`${HEARTBEATS_CONTENT_WIDTH_CLASS} p-4 sm:p-6 lg:p-8 xl:p-10`}
+                  >
+                    <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="max-w-3xl space-y-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <div className={HEARTBEATS_SECTION_KICKER_CLASS}>
+                            {t("heartbeatsview.heartbeatSingular")}
+                          </div>
+                          <StatusBadge
+                            label={
+                              trigger.enabled
+                                ? t("appsview.Active")
+                                : t("heartbeatsview.statusPaused")
+                            }
+                            tone={trigger.enabled ? "success" : "muted"}
+                            withDot
+                          />
+                        </div>
+                        <h2 className="text-2xl font-semibold text-txt sm:text-[2rem]">
                           {trigger.displayName}
                         </h2>
-                        <p className="text-sm text-muted mt-1">
+                        <p className="text-sm leading-relaxed text-muted sm:text-[15px]">
                           {trigger.instructions}
                         </p>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex shrink-0 flex-wrap items-center gap-2 lg:justify-end">
                         {/* Pause / Resume toggle */}
                         <Button
                           variant="outline"
@@ -1255,8 +1285,8 @@ export function HeartbeatsView() {
                       </div>
                     </div>
 
-                    <dl className="grid gap-x-6 gap-y-4 text-sm sm:grid-cols-3 lg:grid-cols-4 mb-8 border-b border-border/30 pb-6">
-                      <div>
+                    <dl className="mb-8 grid gap-4 text-sm sm:grid-cols-2 xl:grid-cols-4">
+                      <div className={HEARTBEATS_STAT_CARD_CLASS}>
                         <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted">
                           Schedule
                         </dt>
@@ -1264,7 +1294,7 @@ export function HeartbeatsView() {
                           {scheduleLabel(trigger, t)}
                         </dd>
                       </div>
-                      <div>
+                      <div className={HEARTBEATS_STAT_CARD_CLASS}>
                         <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted">
                           {t("triggersview.LastRun")}
                         </dt>
@@ -1274,7 +1304,7 @@ export function HeartbeatsView() {
                           })}
                         </dd>
                       </div>
-                      <div>
+                      <div className={HEARTBEATS_STAT_CARD_CLASS}>
                         <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted">
                           {t("heartbeatsview.nextRun")}
                         </dt>
@@ -1286,7 +1316,7 @@ export function HeartbeatsView() {
                       </div>
                       {/* Success/failure counts */}
                       {hasLoadedRuns && totalRuns > 0 && (
-                        <div>
+                        <div className={HEARTBEATS_STAT_CARD_CLASS}>
                           <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted">
                             Run Stats
                           </dt>
@@ -1305,7 +1335,7 @@ export function HeartbeatsView() {
                       )}
                     </dl>
 
-                    <div className="space-y-4">
+                    <div className={`${HEARTBEATS_PANEL_CLASS} space-y-4`}>
                       <div className="flex items-center justify-between gap-3">
                         <h3 className="text-[12px] font-semibold uppercase tracking-wider text-muted">
                           {t("triggersview.RunHistory")}
@@ -1379,6 +1409,17 @@ export function HeartbeatsView() {
                 <p className="text-sm text-muted max-w-sm leading-relaxed">
                   {t("heartbeatsview.emptyStateDescription")}
                 </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-5 h-10 rounded-xl px-5 text-sm"
+                  onClick={() => {
+                    openCreateEditor();
+                    setSelectedTriggerId(null);
+                  }}
+                >
+                  {t("heartbeatsview.newHeartbeat")}
+                </Button>
               </div>
             )
           )}

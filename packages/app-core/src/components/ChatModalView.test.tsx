@@ -76,6 +76,11 @@ describe("ChatModalView", () => {
       "data-chat-game-sidebar": true,
     });
     expect(String(sidebarShell.props.className)).toContain("md:flex");
+
+    const shell = testRenderer.root.findByProps({
+      "data-chat-game-shell": true,
+    });
+    expect(String(shell.props.className)).toContain("rounded-[28px]");
   });
 
   it("renders a mobile conversations overlay when the companion rail is toggled on a narrow viewport", async () => {
@@ -114,5 +119,10 @@ describe("ChatModalView", () => {
     expect(
       sidebarInstances.some((node) => node.props["data-mobile"] === true),
     ).toBe(true);
+
+    const mobileOverlay = testRenderer.root.findByProps({
+      "data-chat-game-sidebar-overlay": true,
+    });
+    expect(String(mobileOverlay.props.className)).toContain("rounded-[28px]");
   });
 });

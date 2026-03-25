@@ -8,17 +8,17 @@ const CHAT_MODAL_MEDIA_QUERY = `(max-width: ${CHAT_MODAL_NARROW_BREAKPOINT}px)`;
 const CHAT_MODAL_FULL_OVERLAY_CLASS =
   "absolute inset-[max(1rem,6vh)_max(0.75rem,6vw)] z-[100] flex flex-col";
 const CHAT_MODAL_DOCK_WRAPPER_CLASS =
-  "absolute inset-0 z-10 flex flex-col bg-transparent px-3 pb-3 pt-2 sm:px-5 sm:pb-5 sm:pt-3";
+  "absolute inset-0 z-10 flex flex-col bg-transparent px-2 pb-2 pt-2 sm:px-4 sm:pb-4 sm:pt-4";
 const CHAT_MODAL_SHELL_BASE_CLASS =
-  "relative flex min-h-0 flex-1 flex-col rounded-[26px] border border-white/10 shadow-[0_24px_80px_rgba(3,5,10,0.42)]";
-const CHAT_MODAL_FULL_OVERLAY_SHELL_CLASS = `${CHAT_MODAL_SHELL_BASE_CLASS} overflow-hidden bg-black/62 backdrop-blur-xl`;
-const CHAT_MODAL_DOCK_SHELL_CLASS = `${CHAT_MODAL_SHELL_BASE_CLASS} overflow-visible bg-[linear-gradient(180deg,rgba(6,8,14,0.82),rgba(4,6,10,0.7))] backdrop-blur-xl`;
+  "relative flex min-h-0 flex-1 flex-col rounded-[28px] border border-border/60 shadow-[0_28px_90px_rgba(3,5,10,0.45)] ring-1 ring-white/5";
+const CHAT_MODAL_FULL_OVERLAY_SHELL_CLASS = `${CHAT_MODAL_SHELL_BASE_CLASS} overflow-hidden bg-[linear-gradient(180deg,rgba(8,10,16,0.9),rgba(4,6,10,0.86))] backdrop-blur-xl`;
+const CHAT_MODAL_DOCK_SHELL_CLASS = `${CHAT_MODAL_SHELL_BASE_CLASS} overflow-visible bg-[linear-gradient(180deg,rgba(7,10,16,0.88),rgba(4,6,10,0.76))] backdrop-blur-xl`;
 const CHAT_MODAL_SIDEBAR_CLASS =
-  "flex h-full w-[292px] shrink-0 flex-col border-r border-white/10 bg-black/24 backdrop-blur-md xl:w-[320px]";
+  "flex h-full w-[292px] shrink-0 flex-col border-r border-border/50 bg-[linear-gradient(180deg,rgba(10,13,20,0.82),rgba(7,9,14,0.74))] backdrop-blur-xl xl:w-[320px]";
 const CHAT_MODAL_MOBILE_SIDEBAR_OVERLAY_CLASS =
-  "absolute inset-0 z-20 rounded-[26px] bg-black/60 p-3 backdrop-blur-md sm:p-4";
+  "absolute inset-0 z-20 rounded-[28px] bg-[rgba(4,6,10,0.72)] p-3 backdrop-blur-lg sm:p-4";
 const CHAT_MODAL_MOBILE_SIDEBAR_PANEL_CLASS =
-  "h-full max-w-[22rem] overflow-hidden rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(9,12,18,0.9),rgba(6,8,12,0.82))] shadow-[0_24px_60px_rgba(2,4,8,0.5)]";
+  "h-full max-w-[22rem] overflow-hidden rounded-[24px] border border-border/60 bg-[linear-gradient(180deg,rgba(10,13,20,0.92),rgba(6,8,12,0.86))] shadow-[0_24px_70px_rgba(2,4,8,0.52)]";
 
 type ChatModalLayoutVariant = "full-overlay" | "companion-dock";
 
@@ -60,7 +60,10 @@ export const ChatModalView = memo(function ChatModalView({
         data-chat-game-shell
       >
         {showMobileSidebarOverlay && (
-          <div className={CHAT_MODAL_MOBILE_SIDEBAR_OVERLAY_CLASS}>
+          <div
+            className={CHAT_MODAL_MOBILE_SIDEBAR_OVERLAY_CLASS}
+            data-chat-game-sidebar-overlay
+          >
             <div className={CHAT_MODAL_MOBILE_SIDEBAR_PANEL_CLASS}>
               <ConversationsSidebar mobile onClose={onSidebarClose} />
             </div>

@@ -319,6 +319,10 @@ describe("CompanionView", () => {
       "data-testid": "companion-header-chat-controls",
     });
     expect(headerOverlay.length).toBeGreaterThanOrEqual(1);
+    const headerShell = tree?.root.findAllByProps({
+      "data-testid": "companion-header-shell",
+    });
+    expect(headerShell).toHaveLength(1);
   });
 
   it("reveals the companion overlay if teleport completion never arrives", async () => {
@@ -378,6 +382,9 @@ describe("CompanionView", () => {
     const controls = tree?.root.findByProps({
       "data-testid": "companion-header-chat-controls",
     });
+    const headerShell = tree?.root.findByProps({
+      "data-testid": "companion-header-shell",
+    });
     const voiceButton = tree?.root.find(
       (node) =>
         node.type === "button" &&
@@ -389,6 +396,7 @@ describe("CompanionView", () => {
         node.props["aria-label"] === "companion.newChat",
     );
 
+    expect(String(headerShell.props.className)).toContain("max-w-5xl");
     expect(controls).toBeDefined();
     expect(String(controls.props.className)).not.toContain("rounded-full");
     expect(String(controls.props.className)).not.toContain("border");
