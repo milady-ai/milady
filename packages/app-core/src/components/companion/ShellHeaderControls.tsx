@@ -30,7 +30,7 @@ export {
 
 type ShellHeaderTranslator = (key: string) => string;
 
-const SHELL_MODE_MOBILE_BREAKPOINT = 768;
+const SHELL_MODE_MOBILE_BREAKPOINT = 639;
 const SHELL_MODE_MOBILE_MEDIA_QUERY = `(max-width: ${SHELL_MODE_MOBILE_BREAKPOINT}px)`;
 
 interface ShellHeaderControlsProps {

@@ -290,7 +290,7 @@ export function Header({
             <div className="flex sm:hidden">{mobileLeft}</div>
           ) : null}
           {showNavigationMenu ? (
-            <nav className="scrollbar-hide hidden flex-1 items-center justify-start gap-1 overflow-x-auto whitespace-nowrap px-2 sm:flex sm:pl-4">
+            <nav className="scrollbar-hide hidden flex-1 items-center justify-start gap-1.5 overflow-x-auto whitespace-nowrap px-2 sm:flex sm:pl-4">
               {tabGroups.map((group: TabGroup) => {
                 const primaryTab = group.tabs[0];
                 const isActive = group.tabs.includes(tab);
@@ -299,10 +299,10 @@ export function Header({
                     variant={isActive ? "default" : "ghost"}
                     key={group.label}
                     data-testid={`header-nav-button-${primaryTab}`}
-                    className={`relative z-10 min-h-[44px] shrink-0 px-3 md:px-3.5 xl:px-4 py-2.5 text-[12px] bg-transparent border border-transparent transition-all duration-300 rounded-xl ${
+                    className={`${HEADER_NAV_BUTTON_BASE_CLASSNAME} ${
                       isActive
-                        ? "text-accent font-bold bg-accent/15 shadow-[0_0_15px_rgba(var(--accent),0.18)] border-accent/40 ring-1 ring-inset ring-accent/20"
-                        : "text-muted hover:text-txt hover:bg-bg-hover hover:border-border/50"
+                        ? HEADER_NAV_BUTTON_ACTIVE_CLASSNAME
+                        : HEADER_NAV_BUTTON_INACTIVE_CLASSNAME
                     }`}
                     onClick={() => setTab(primaryTab)}
                     title={group.description}
@@ -347,7 +347,12 @@ export function Header({
                   {t("aria.navMenu")}
                 </div>
                 <div className="text-sm font-medium text-txt">
-                  {t("nav.settings")}
+                  {activeTabGroup
+                    ? t(
+                        NAV_LABEL_I18N_KEY[activeTabGroup.label] ??
+                          activeTabGroup.label,
+                      )
+                    : t("aria.navMenu")}
                 </div>
               </div>
               <Button
@@ -358,7 +363,7 @@ export function Header({
                 aria-label={t("aria.closeNavMenu")}
                 style={HEADER_BUTTON_STYLE}
               >
-                {t("bugreportmodal.Times")}
+                <X className="pointer-events-none h-4 w-4" />
               </Button>
             </div>
             <div className="flex flex-1 flex-col px-3 py-3">
@@ -371,10 +376,10 @@ export function Header({
                       <Button
                         variant={isActive ? "default" : "ghost"}
                         key={group.label}
-                        className={`flex min-h-[48px] w-full rounded-xl border px-3 py-3.5 text-[14px] font-medium transition-all duration-300 ${
+                        className={`${HEADER_MOBILE_NAV_BUTTON_BASE_CLASSNAME} ${
                           isActive
-                            ? "border-accent/40 bg-accent/15 text-accent shadow-[0_0_15px_rgba(var(--accent),0.18)] ring-1 ring-inset ring-accent/20"
-                            : "border-transparent bg-transparent text-txt hover:border-border/50 hover:bg-bg-hover"
+                            ? HEADER_MOBILE_NAV_BUTTON_ACTIVE_CLASSNAME
+                            : HEADER_MOBILE_NAV_BUTTON_INACTIVE_CLASSNAME
                         }`}
                         style={{
                           ...HEADER_BUTTON_STYLE,
