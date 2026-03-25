@@ -1,4 +1,5 @@
 import { LanguageDropdown, ThemeToggle } from "@miladyai/app-core/components";
+import { useMediaQuery } from "@miladyai/app-core/hooks";
 import type { UiLanguage } from "@miladyai/app-core/i18n";
 import type { ShellView, UiTheme } from "@miladyai/app-core/state";
 import { Button } from "@miladyai/ui";
@@ -12,7 +13,7 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
-import { type ReactNode, useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import {
   HEADER_BUTTON_STYLE,
   SHELL_EXPANDED_BUTTON_CLASSNAME,
@@ -30,41 +31,7 @@ export {
 type ShellHeaderTranslator = (key: string) => string;
 
 const SHELL_MODE_MOBILE_BREAKPOINT = 768;
-
-function useIsMobileShellViewport(): boolean {
-  const [isMobileViewport, setIsMobileViewport] = useState(() =>
-    typeof window !== "undefined"
-      ? window.innerWidth <= SHELL_MODE_MOBILE_BREAKPOINT
-      : false,
-  );
-
-  useEffect(() => {
-    if (
-      typeof window === "undefined" ||
-      typeof window.matchMedia !== "function"
-    ) {
-      return;
-    }
-
-    const mediaQuery = window.matchMedia(
-      `(max-width: ${SHELL_MODE_MOBILE_BREAKPOINT}px)`,
-    );
-    const syncViewport = () => {
-      setIsMobileViewport(mediaQuery.matches);
-    };
-    syncViewport();
-
-    if (typeof mediaQuery.addEventListener === "function") {
-      mediaQuery.addEventListener("change", syncViewport);
-      return () => mediaQuery.removeEventListener("change", syncViewport);
-    }
-
-    mediaQuery.addListener(syncViewport);
-    return () => mediaQuery.removeListener(syncViewport);
-  }, []);
-
-  return isMobileViewport;
-}
+const SHELL_MODE_MOBILE_MEDIA_QUERY = `(max-width: ${SHELL_MODE_MOBILE_BREAKPOINT}px)`;
 
 interface ShellHeaderControlsProps {
   activeShellView: ShellView;
@@ -114,7 +81,7 @@ export function ShellHeaderControls({
   onToggleVoiceMute,
   onNewChat,
 }: ShellHeaderControlsProps) {
-  const isMobileViewport = useIsMobileShellViewport();
+  const isMobileViewport = useMediaQuery(SHELL_MODE_MOBILE_MEDIA_QUERY);
   const shellOptions: Array<{
     view: ShellView;
     label: string;

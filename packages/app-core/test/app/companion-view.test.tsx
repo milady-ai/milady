@@ -47,7 +47,8 @@ vi.mock("../../src/components/PtyConsoleDrawer", () => ({
 }));
 
 vi.mock("../../src/components/PtyConsoleSidePanel", () => ({
-  PtyConsoleSidePanel: () => React.createElement("div", null, "PtyConsoleSidePanel"),
+  PtyConsoleSidePanel: () =>
+    React.createElement("div", null, "PtyConsoleSidePanel"),
 }));
 
 const mockUploadCustomVrm = vi.fn(async () => {});
@@ -339,7 +340,7 @@ describe("CompanionView", () => {
       ).toHaveLength(0);
 
       await act(async () => {
-        vi.advanceTimersByTime(3500);
+        vi.advanceTimersByTime(1400);
       });
 
       expect(

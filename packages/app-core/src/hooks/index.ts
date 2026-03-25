@@ -6,6 +6,7 @@ export * from "./useContextMenu";
 export * from "./useDocumentVisibility";
 export * from "./useKeyboardShortcuts";
 export * from "./useLifoSync";
+export * from "./useMediaQuery";
 export * from "./useMemoryMonitor";
 export * from "./useRenderGuard";
 export * from "./useRetakeCapture";
