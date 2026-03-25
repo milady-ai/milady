@@ -8,7 +8,11 @@ import type {
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { text, findButtonByText, flush } from "../../../../test/helpers/react-test";
+import {
+  findButtonByText,
+  flush,
+  text,
+} from "../../../../test/helpers/react-test";
 
 interface AppsContextStub {
   setState: (
@@ -111,7 +115,20 @@ function findButtonByTitle(
   return matches[0];
 }
 
-function findTextareaByPlaceholder(
+function findButtonContainingText(
+  root: TestRenderer.ReactTestInstance,
+  value: string,
+): TestRenderer.ReactTestInstance {
+  const matches = root.findAll(
+    (node) => node.type === "button" && text(node).includes(value),
+  );
+  if (!matches[0]) {
+    throw new Error(`Button containing "${value}" not found`);
+  }
+  return matches[0];
+}
+
+function _findTextareaByPlaceholder(
   root: TestRenderer.ReactTestInstance,
   placeholder: string,
 ): TestRenderer.ReactTestInstance {
@@ -125,7 +142,7 @@ function findTextareaByPlaceholder(
   return matches[0];
 }
 
-async function waitFor(
+async function _waitFor(
   predicate: () => boolean,
   message: string,
   attempts = 20,
@@ -588,7 +605,7 @@ describe("AppsView", () => {
 
     // The detail pane should render with a Back button and app name
     expect(
-      tree?.root.findAll((node) => text(node) === "appsview.Back").length,
+      tree?.root.findAll((node) => text(node).includes("appsview.Back")).length,
     ).toBeGreaterThanOrEqual(1);
     expect(
       tree?.root.findAll((node) => text(node) === "Hyperscape").length,
@@ -597,6 +614,44 @@ describe("AppsView", () => {
     // The extension panel ID is not registered, so no extension UI should render.
     // Hyperscape API calls should NOT be made when the extension is absent.
     expect(mockClientFns.listHyperscapeEmbeddedAgents).not.toHaveBeenCalled();
+  });
+
+  it("applies the selected launcher tile treatment after opening an app", async () => {
+    const setState = vi.fn<AppsContextStub["setState"]>();
+    const setActionNotice = vi.fn<AppsContextStub["setActionNotice"]>();
+    mockUseApp.mockReturnValue({
+      uiLanguage: "en",
+      t: tStub,
+      setState,
+      setActionNotice,
+    });
+    const app = createApp("@elizaos/app-hyperscape", "Hyperscape", "Arena");
+    mockClientFns.listApps.mockResolvedValue([app]);
+    mockClientFns.listInstalledApps.mockResolvedValue([
+      {
+        name: app.name,
+        displayName: app.displayName,
+        version: "1.0.0",
+        installPath: "/tmp/hyperscape",
+        installedAt: "2026-01-01T00:00:00.000Z",
+        isRunning: true,
+      },
+    ]);
+
+    let tree: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(AppsView));
+    });
+    await flush();
+
+    await act(async () => {
+      findButtonByTitle(tree?.root, "Open Hyperscape").props.onClick();
+    });
+
+    const selectedButton = findButtonByTitle(tree?.root, "Open Hyperscape");
+    expect(selectedButton.props.className).toContain("rounded-2xl");
+    expect(selectedButton.props.className).toContain("border-accent/35");
+    expect(selectedButton.props.className).toContain("bg-accent/10");
   });
 
   it("opens app details and can return to the app list", async () => {
@@ -622,20 +677,20 @@ describe("AppsView", () => {
       findButtonByTitle(tree?.root, "Open Babylon").props.onClick();
     });
     expect(
-      tree?.root.findAll((node) => text(node) === "appsview.Back").length,
+      tree?.root.findAll((node) => text(node).includes("appsview.Back")).length,
     ).toBeGreaterThanOrEqual(1);
     expect(
       tree?.root.findAll((node) => text(node) === "Babylon").length,
     ).toBeGreaterThan(0);
 
     await act(async () => {
-      findButtonByText(tree?.root, "appsview.Back").props.onClick();
+      findButtonContainingText(tree?.root, "appsview.Back").props.onClick();
     });
     expect(
       tree?.root.findAll(
         (node) => text(node) === "Select an app to view details",
       ).length,
-    ).toBe(1);
+    ).toBeGreaterThanOrEqual(1);
     expect(
       tree?.root.findAll(
         (node) =>

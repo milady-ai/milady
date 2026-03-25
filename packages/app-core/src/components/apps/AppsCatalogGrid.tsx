@@ -40,72 +40,81 @@ export function AppsCatalogGrid({
 
   return (
     <>
-      <div className="mb-4">
+      <div className="mb-4 space-y-3">
         <Input
           type="text"
-          placeholder="Search..."
+          aria-label={t("appsview.Search", { defaultValue: "Search apps" })}
+          placeholder="Search by name or description"
           value={searchQuery}
           onChange={(event) => onSearchQueryChange(event.target.value)}
-          className="text-[12px] rounded-xl bg-surface text-txt placeholder:text-muted/50 focus:border-accent"
+          className="rounded-xl border-border/50 bg-card/86 text-[12px] text-txt placeholder:text-muted focus:border-accent"
         />
-      </div>
-
-      <div className="mb-4 flex gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className="rounded-xl shadow-sm"
-          onClick={onRefresh}
-        >
-          {t("common.refresh")}
-        </Button>
-        <Button
-          variant={showActiveOnly ? "default" : "outline"}
-          size="sm"
-          className="rounded-xl shadow-sm"
-          onClick={onToggleActiveOnly}
-        >
-          {t("appsview.ActiveOnly")}
-        </Button>
+        <p className="text-[11px] leading-5 text-muted-strong">
+          Choose an app tile to inspect launch details, current session state,
+          and available viewer actions.
+        </p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="rounded-full border border-border/30 bg-bg-hover px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-strong">
+            {visibleApps.length} results
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="min-h-10 rounded-xl px-3 shadow-sm"
+              onClick={onRefresh}
+            >
+              {t("common.refresh")}
+            </Button>
+            <Button
+              variant={showActiveOnly ? "default" : "outline"}
+              size="sm"
+              className="min-h-10 rounded-xl px-3 shadow-sm"
+              onClick={onToggleActiveOnly}
+            >
+              {t("appsview.ActiveOnly")}
+            </Button>
+          </div>
+        </div>
       </div>
 
       {hasCurrentGame ? (
         <Button
           variant="ghost"
-          className="w-full mb-4 px-3 py-2.5 rounded-xl border border-ok/30 bg-ok/5 flex items-center gap-2 cursor-pointer hover:bg-ok/10 transition-colors"
+          className="mb-4 flex w-full items-center gap-3 rounded-2xl border border-ok/30 bg-ok/8 px-3 py-3 text-left shadow-sm transition-colors hover:bg-ok/12"
           onClick={onOpenCurrentGame}
         >
-          <span className="w-2 h-2 rounded-full bg-ok animate-pulse" />
-          <span className="text-[11px] font-semibold text-txt flex-1 text-left truncate">
+          <span className="h-2.5 w-2.5 rounded-full bg-ok animate-pulse" />
+          <span className="min-w-0 flex-1 text-left text-[11px] font-semibold text-txt">
             {activeGameDisplayName || "Game running"}
           </span>
-          <span className="text-[10px] text-muted">→</span>
+          <span className="text-[10px] text-muted-strong">Resume</span>
         </Button>
       ) : null}
 
       {error ? (
-        <div className="px-3 py-2 border border-danger/30 rounded-xl text-danger text-[11px] mb-4">
+        <div className="mb-4 rounded-xl border border-danger/30 bg-danger/10 px-3 py-2 text-[11px] text-danger">
           {error}
         </div>
       ) : null}
 
       {loading ? (
-        <div className="text-center py-16 text-muted text-[12px]">
+        <div className="rounded-2xl border border-border/30 bg-card/72 py-16 text-center text-[12px] text-muted">
           Loading...
         </div>
       ) : visibleApps.length === 0 ? (
-        <div className="text-center py-16 text-muted text-[12px]">
-          {searchQuery ? "No apps found" : "No apps available"}
+        <div className="rounded-2xl border border-dashed border-border/35 bg-card/72 px-6 py-16 text-center">
+          <div className="text-[12px] font-medium text-muted-strong">
+            {searchQuery ? "No apps match this search" : "No apps available"}
+          </div>
+          <div className="mt-2 text-[11px] leading-5 text-muted">
+            {searchQuery
+              ? "Try a broader search, or clear the filter to browse everything in the catalog."
+              : "Refresh the catalog or check back after more app packages are installed."}
+          </div>
         </div>
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "14px 4px",
-            justifyItems: "center",
-          }}
-        >
+        <div className="grid grid-cols-3 justify-items-center gap-x-3 gap-y-4 sm:gap-x-4">
           {visibleApps.map((app) => {
             const isActive = activeAppNames.has(app.name);
             const isSelected = selectedAppName === app.name;
@@ -115,18 +124,24 @@ export function AppsCatalogGrid({
               <Button
                 key={app.name}
                 variant="ghost"
-                className={`phone-app-tile group ${isSelected ? "is-selected" : ""}`}
+                className={`phone-app-tile group flex w-full max-w-[5.75rem] flex-col items-center gap-2 rounded-2xl border px-1 py-1.5 text-center transition-all ${
+                  isSelected
+                    ? "is-selected border-accent/35 bg-accent/10 shadow-sm"
+                    : "border-transparent hover:border-border/40 hover:bg-bg-hover/70"
+                }`}
                 title={`Open ${displayName}`}
                 aria-label={`Open ${displayName}`}
                 onClick={() => onSelectApp(app.name)}
               >
-                <div className="phone-app-icon">
+                <div className="phone-app-icon relative flex h-16 w-16 items-center justify-center rounded-[1.35rem] border border-border/35 bg-card/92 shadow-sm transition-transform group-hover:scale-[1.02]">
                   {isActive ? (
-                    <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-ok border-2 border-card z-10" />
+                    <span className="absolute -right-0.5 -top-0.5 z-10 h-2.5 w-2.5 rounded-full border-2 border-card bg-ok" />
                   ) : null}
                   <span className="text-xl">{getAppEmoji(app)}</span>
                 </div>
-                <span className="phone-app-label">{getAppShortName(app)}</span>
+                <span className="phone-app-label min-h-[2.5rem] line-clamp-2 text-[11px] font-medium leading-5 text-txt">
+                  {getAppShortName(app)}
+                </span>
               </Button>
             );
           })}
