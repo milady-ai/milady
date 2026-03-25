@@ -23,6 +23,15 @@ import {
   type WgpuTagElement,
 } from "./release-center/types";
 
+const RELEASE_PANEL_CLASSNAME =
+  "rounded-2xl border border-border/50 bg-card/92 shadow-sm";
+const RELEASE_STATUS_MESSAGE_CLASSNAME =
+  "rounded-xl border px-3 py-2 text-xs shadow-sm";
+const RELEASE_ACTION_BUTTON_CLASSNAME =
+  "min-h-10 rounded-xl px-3 text-xs font-medium";
+const RELEASE_KV_ROW_CLASSNAME =
+  "flex items-start justify-between gap-3 rounded-xl border border-border/40 bg-bg-hover/70 px-3 py-2";
+
 export function ReleaseCenterView() {
   const { appUrl } = useBranding();
   const defaultReleaseNotesUrl = `${appUrl}/releases/`;
@@ -201,9 +210,20 @@ export function ReleaseCenterView() {
 
   if (!desktopRuntime) {
     return (
-      <div className="rounded-2xl border border-border bg-bg-accent px-4 py-4 text-sm text-muted">
-        Release Center is available in the Electrobun desktop runtime.
-      </div>
+      <section className={`${RELEASE_PANEL_CLASSNAME} space-y-3 p-4`}>
+        <div className="space-y-1">
+          <h2 className="text-sm font-semibold text-txt">Release Center</h2>
+          <p className="max-w-2xl text-xs leading-5 text-muted">
+            Update actions and detached release tooling are only available in
+            the Electrobun desktop runtime.
+          </p>
+        </div>
+        <div className="rounded-xl border border-border/40 bg-bg-hover/60 px-3 py-3 text-xs leading-5 text-muted">
+          This web session is read-only for release management. Open Milady in
+          the desktop shell to check for updates, apply downloaded builds, or
+          manage the detached release notes window.
+        </div>
+      </section>
     );
   }
 
@@ -317,9 +337,10 @@ export function ReleaseCenterView() {
   const latestVersion =
     (updateStatus as AppReleaseStatus | null | undefined)?.latestVersion ??
     "Current";
-  const lastChecked = (updateStatus as AppReleaseStatus | null | undefined)
-    ?.lastCheckAt
-    ? new Date((updateStatus as AppReleaseStatus).lastCheckAt!).toLocaleString()
+  const lastCheckAt = (updateStatus as AppReleaseStatus | null | undefined)
+    ?.lastCheckAt;
+  const lastChecked = lastCheckAt
+    ? new Date(lastCheckAt).toLocaleString()
     : "Not yet";
   const updaterStatus = nativeUpdater?.updateReady
     ? "Update ready"
@@ -332,175 +353,213 @@ export function ReleaseCenterView() {
     nativeUpdater != null && !nativeUpdater.canAutoUpdate;
 
   return (
-    <div className="space-y-0">
+    <div className="space-y-4">
       {actionError ? (
-        <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive mb-3">
+        <div
+          role="alert"
+          className={`${RELEASE_STATUS_MESSAGE_CLASSNAME} border-destructive/40 bg-destructive/10 text-destructive`}
+        >
           {actionError}
         </div>
       ) : null}
       {actionMessage ? (
-        <div className="rounded-lg border border-ok/30 bg-ok/10 px-3 py-2 text-xs text-ok mb-3">
+        <div
+          role="status"
+          className={`${RELEASE_STATUS_MESSAGE_CLASSNAME} border-ok/30 bg-ok/10 text-ok`}
+        >
           {actionMessage}
         </div>
       ) : null}
 
       {/* ── Version info rows ─────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-x-8 gap-y-2 py-3 text-xs">
-        <div className="flex justify-between">
+      <div
+        className={`${RELEASE_PANEL_CLASSNAME} grid gap-2 p-4 text-xs sm:grid-cols-2`}
+      >
+        <div className={RELEASE_KV_ROW_CLASSNAME}>
           <span className="text-muted">App</span>
-          <span className="font-semibold text-txt">{appVersion}</span>
+          <span className="break-all text-right font-semibold text-txt">
+            {appVersion}
+          </span>
         </div>
-        <div className="flex justify-between">
+        <div className={RELEASE_KV_ROW_CLASSNAME}>
           <span className="text-muted">Desktop</span>
-          <span className="font-semibold text-txt">{desktopVersion}</span>
+          <span className="break-all text-right font-semibold text-txt">
+            {desktopVersion}
+          </span>
         </div>
-        <div className="flex justify-between">
+        <div className={RELEASE_KV_ROW_CLASSNAME}>
           <span className="text-muted">Channel</span>
-          <span className="font-semibold text-txt">{channel}</span>
+          <span className="break-all text-right font-semibold text-txt">
+            {channel}
+          </span>
         </div>
-        <div className="flex justify-between">
+        <div className={RELEASE_KV_ROW_CLASSNAME}>
           <span className="text-muted">Latest</span>
-          <span className="font-semibold text-txt">{latestVersion}</span>
+          <span className="break-all text-right font-semibold text-txt">
+            {latestVersion}
+          </span>
         </div>
-        <div className="flex justify-between">
+        <div className={RELEASE_KV_ROW_CLASSNAME}>
           <span className="text-muted">Last checked</span>
-          <span className="font-semibold text-txt">{lastChecked}</span>
+          <span className="break-all text-right font-semibold text-txt">
+            {lastChecked}
+          </span>
         </div>
-        <div className="flex justify-between">
+        <div className={RELEASE_KV_ROW_CLASSNAME}>
           <span className="text-muted">Status</span>
-          <span className="font-semibold text-txt">{updaterStatus}</span>
+          <span className="break-all text-right font-semibold text-txt">
+            {updaterStatus}
+          </span>
         </div>
       </div>
 
       {autoUpdateDisabled && nativeUpdater?.autoUpdateDisabledReason ? (
-        <div className="rounded-lg border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning">
+        <div
+          role="status"
+          className={`${RELEASE_STATUS_MESSAGE_CLASSNAME} border-warning/40 bg-warning/10 text-warning`}
+        >
           {nativeUpdater.autoUpdateDisabledReason}
         </div>
       ) : null}
 
-      <hr className="border-border/40" />
-
       {/* ── Actions ───────────────────────────────────────────── */}
-      <div className="flex flex-wrap gap-2 py-3">
-        <Button
-          size="sm"
-          className="h-8 rounded-lg text-xs"
-          disabled={
-            busyAction === "check-updates" ||
-            updateLoading ||
-            autoUpdateDisabled
-          }
-          onClick={() =>
-            void runAction(
-              "check-updates",
-              checkForDesktopUpdate,
-              "Desktop update check started.",
-            )
-          }
-        >
-          Check / Download Update
-        </Button>
-        {nativeUpdater?.updateReady && (
+      <section className={`${RELEASE_PANEL_CLASSNAME} space-y-3 p-4`}>
+        <div className="space-y-1">
+          <h2 className="text-sm font-semibold text-txt">Update Actions</h2>
+          <p className="max-w-2xl text-xs leading-5 text-muted">
+            Refresh the desktop updater state, download available updates, and
+            open the detached release tooling without leaving the app shell.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
           <Button
             size="sm"
-            className="h-8 rounded-lg text-xs"
-            disabled={busyAction === "apply-update" || autoUpdateDisabled}
+            className={RELEASE_ACTION_BUTTON_CLASSNAME}
+            disabled={
+              busyAction === "check-updates" ||
+              updateLoading ||
+              autoUpdateDisabled
+            }
             onClick={() =>
               void runAction(
-                "apply-update",
-                applyDesktopUpdate,
-                "Applying downloaded update.",
+                "check-updates",
+                checkForDesktopUpdate,
+                "Desktop update check started.",
               )
             }
           >
-            Apply Downloaded Update
+            Check / Download Update
           </Button>
-        )}
-        <Button
-          size="sm"
-          variant="outline"
-          className="h-8 rounded-lg text-xs"
-          disabled={busyAction === "refresh" || updateLoading}
-          onClick={() =>
-            void runAction(
-              "refresh",
-              refreshReleaseState,
-              "Release status refreshed.",
-            )
-          }
-        >
-          Refresh
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          className="h-8 rounded-lg text-xs"
-          disabled={busyAction === "detach-release"}
-          onClick={() =>
-            void runAction(
-              "detach-release",
-              detachReleaseCenter,
-              "Detached release center opened.",
-            )
-          }
-        >
-          Open Detached Release Center
-        </Button>
-      </div>
-
-      <hr className="border-border/40" />
+          {nativeUpdater?.updateReady && (
+            <Button
+              size="sm"
+              className={RELEASE_ACTION_BUTTON_CLASSNAME}
+              disabled={busyAction === "apply-update" || autoUpdateDisabled}
+              onClick={() =>
+                void runAction(
+                  "apply-update",
+                  applyDesktopUpdate,
+                  "Applying downloaded update.",
+                )
+              }
+            >
+              Apply Downloaded Update
+            </Button>
+          )}
+          <Button
+            size="sm"
+            variant="outline"
+            className={RELEASE_ACTION_BUTTON_CLASSNAME}
+            disabled={busyAction === "refresh" || updateLoading}
+            onClick={() =>
+              void runAction(
+                "refresh",
+                refreshReleaseState,
+                "Release status refreshed.",
+              )
+            }
+          >
+            Refresh
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className={RELEASE_ACTION_BUTTON_CLASSNAME}
+            disabled={busyAction === "detach-release"}
+            onClick={() =>
+              void runAction(
+                "detach-release",
+                detachReleaseCenter,
+                "Detached release center opened.",
+              )
+            }
+          >
+            Open Detached Release Center
+          </Button>
+        </div>
+      </section>
 
       {/* ── Release Notes ─────────────────────────────────────── */}
-      <div className="py-3">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-xs font-semibold text-txt">Release Notes</span>
+      <section className={`${RELEASE_PANEL_CLASSNAME} space-y-3 p-4`}>
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-txt">
+              Release Notes
+            </span>
+          </div>
+          <p className="max-w-2xl text-xs leading-5 text-muted">
+            Review the release notes source URL, open it in the desktop
+            BrowserView, or reset back to the updater-provided default.
+          </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <Input
             type="text"
-            className="h-8 rounded-lg bg-bg text-xs flex-1"
+            className="min-h-10 flex-1 rounded-xl border-border/50 bg-bg/80 text-xs"
             value={releaseNotesUrl}
             onChange={(e) => {
               setReleaseNotesUrlDirty(true);
               setReleaseNotesUrl(e.target.value);
             }}
           />
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-8 rounded-lg text-xs"
-            disabled={busyAction === "open-release-notes"}
-            onClick={() =>
-              void runAction(
-                "open-release-notes",
-                openReleaseNotesWindow,
-                "Release notes window opened.",
-              )
-            }
-          >
-            Open BrowserView Window
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-8 rounded-lg text-xs text-muted"
-            onClick={() =>
-              void runAction(
-                "reset-release-url",
-                async () => {
-                  setReleaseNotesUrlDirty(false);
-                  setReleaseNotesUrl(
-                    normalizeReleaseNotesUrl(nativeUpdater?.baseUrl),
-                  );
-                },
-                "Release notes URL reset.",
-              )
-            }
-          >
-            Reset URL
-          </Button>
+          <div className="flex flex-wrap gap-2 sm:justify-end">
+            <Button
+              size="sm"
+              variant="outline"
+              className={RELEASE_ACTION_BUTTON_CLASSNAME}
+              disabled={busyAction === "open-release-notes"}
+              onClick={() =>
+                void runAction(
+                  "open-release-notes",
+                  openReleaseNotesWindow,
+                  "Release notes window opened.",
+                )
+              }
+            >
+              Open BrowserView Window
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className={`${RELEASE_ACTION_BUTTON_CLASSNAME} text-muted-strong`}
+              onClick={() =>
+                void runAction(
+                  "reset-release-url",
+                  async () => {
+                    setReleaseNotesUrlDirty(false);
+                    setReleaseNotesUrl(
+                      normalizeReleaseNotesUrl(nativeUpdater?.baseUrl),
+                    );
+                  },
+                  "Release notes URL reset.",
+                )
+              }
+            >
+              Reset URL
+            </Button>
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
