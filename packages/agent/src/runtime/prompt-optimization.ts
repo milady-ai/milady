@@ -32,23 +32,28 @@ const MILADY_ACTION_COMPACTION = (() => {
 })();
 
 /**
- * Skip the security evaluation LLM for direct chat sessions. Default: enabled.
+ * Skip the security evaluation LLM. Default: disabled (security LLM runs).
  *
- * In DM/web UI sessions the user IS the admin — security eval always returns
- * "safe" but burns 2-6 LLM calls per message. This replaces those calls with
- * a lightweight keyword heuristic that flags obvious sensitive terms (api key,
- * password, seed phrase, etc.) and escalates those to the real LLM.
+ * Enable with MILADY_SKIP_SECURITY_EVAL=1 for personal/DM sessions where the
+ * user is the admin and security eval always returns "safe" but burns 2-6 LLM
+ * calls per message. Replaces those calls with a keyword heuristic that flags
+ * obvious sensitive terms (api key, password, seed phrase, etc.).
  *
- * Disable with MILADY_SKIP_SECURITY_EVAL=0 for public channel deployments
- * (Discord, Telegram) where untrusted users can inject prompts.
+ * Leave disabled (default) for public channel deployments (Discord, Telegram)
+ * where untrusted users can inject prompts.
  */
-const MILADY_SKIP_SECURITY_EVAL = (() => {
-  const raw = process.env.MILADY_SKIP_SECURITY_EVAL?.toLowerCase();
-  if (raw === "0" || raw === "false") return false;
-  return true;
-})();
+const MILADY_SKIP_SECURITY_EVAL =
+  process.env.MILADY_SKIP_SECURITY_EVAL === "1" ||
+  process.env.MILADY_SKIP_SECURITY_EVAL?.toLowerCase() === "true";
 
-/** Run the social/relationship extraction LLM every N messages. Default: 3. */
+/**
+ * Run the social/relationship extraction LLM every N messages. Default: 3.
+ *
+ * Skipped messages return empty extraction results (no relationships, no
+ * identities). This is safe because the relationship store accumulates over
+ * time — missing one extraction doesn't corrupt existing data, and the next
+ * extraction (every Nth message) catches up. Saves ~0.3 LLM calls/turn.
+ */
 const MILADY_SOCIAL_EVAL_EVERY_N = Math.max(
   1,
   Number(process.env.MILADY_SOCIAL_EVAL_EVERY_N ?? "3") || 3,

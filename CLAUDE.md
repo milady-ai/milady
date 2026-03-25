@@ -133,3 +133,8 @@ All `@elizaos/*` packages use the `alpha` dist-tag. When developing locally, `bu
 | `MILADY_NO_VISION_DEPS` | Skip vision dep install (camera/fswebcam) | `0` |
 | `SKIP_AVATAR_CLONE` | Skip VRM avatar download during install | `0` |
 | `ELIZA_SKIP_LOCAL_ELIZA` | Use npm packages instead of `../eliza` workspace | `0` |
+| `MILADY_PROMPT_TRACE` | Log prompt compaction stats to console | `0` |
+| `MILADY_ACTION_COMPACTION` | Context-aware action param stripping | `1` (enabled) |
+| `MILADY_SKIP_SECURITY_EVAL` | Replace security LLM with keyword heuristic (for personal DM sessions) | `0` (disabled) |
+| `MILADY_SOCIAL_EVAL_EVERY_N` | Run relationship extraction every N messages | `3` |
+| `MILADY_PROMPT_OPT_MODE` | Prompt optimization mode (`baseline` or `compact`) | `baseline` |

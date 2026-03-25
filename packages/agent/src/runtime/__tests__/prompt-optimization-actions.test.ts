@@ -1,5 +1,6 @@
 /**
- * Tests for context-aware action formatting in prompt-optimization.ts.
+ * Tests for context-aware action formatting in prompt-compaction.ts
+ * and security heuristic helpers in prompt-optimization.ts.
  *
  * Verifies that:
  * - Intent detection correctly classifies messages
