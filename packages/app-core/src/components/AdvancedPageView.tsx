@@ -176,6 +176,9 @@ const SUBTAB_ICONS: Record<string, ReactNode> = {
   ),
 };
 
+const ADVANCED_TAB_BUTTON_BASE_CLASSNAME =
+  "select-none [&_*]:select-none [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] focus:outline-none focus-visible:outline-none min-h-11 rounded-t-lg border-b-2 px-4 py-2 text-xs font-medium transition-colors";
+
 function mapTabToSubTab(tab: Tab): SubTab {
   switch (tab) {
     case "plugins":
@@ -285,10 +288,10 @@ export function AdvancedPageView({ inModal }: { inModal?: boolean } = {}) {
                 <Button
                   variant="ghost"
                   key={subTab.id}
-                  className={`select-none [&_*]:select-none [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] focus:outline-none focus-visible:outline-none px-4 py-2 text-xs font-medium border-b-2 -mb-px transition-colors rounded-none ${
+                  className={`${ADVANCED_TAB_BUTTON_BASE_CLASSNAME} -mb-px rounded-none ${
                     isActive
                       ? "border-accent text-txt"
-                      : "border-transparent text-muted hover:text-txt hover:border-border"
+                      : "border-transparent text-muted-strong hover:border-border hover:text-txt"
                   }`}
                   onClick={() => handleSubTabChange(subTab.id)}
                   title={subTab.description}
@@ -308,14 +311,21 @@ export function AdvancedPageView({ inModal }: { inModal?: boolean } = {}) {
         style={
           inModal
             ? ({
-                "--accent": "var(--section-accent-advanced, #7b8fb5)",
+                "--accent":
+                  "var(--section-accent-advanced, var(--accent, #7b8fb5))",
                 "--surface": "rgba(255, 255, 255, 0.06)",
-                "--s-accent": "#7b8fb5",
-                "--s-text-txt": "#7b8fb5",
-                "--s-accent-glow": "rgba(123, 143, 181, 0.35)",
-                "--s-accent-subtle": "rgba(123, 143, 181, 0.12)",
-                "--s-grid-line": "rgba(123, 143, 181, 0.02)",
-                "--s-glow-edge": "rgba(123, 143, 181, 0.08)",
+                "--s-accent":
+                  "var(--section-accent-advanced, var(--accent, #7b8fb5))",
+                "--s-text-txt":
+                  "var(--section-accent-advanced, var(--accent, #7b8fb5))",
+                "--s-accent-glow":
+                  "color-mix(in srgb, var(--section-accent-advanced, var(--accent, #7b8fb5)) 35%, transparent)",
+                "--s-accent-subtle":
+                  "color-mix(in srgb, var(--section-accent-advanced, var(--accent, #7b8fb5)) 12%, transparent)",
+                "--s-grid-line":
+                  "color-mix(in srgb, var(--section-accent-advanced, var(--accent, #7b8fb5)) 2%, transparent)",
+                "--s-glow-edge":
+                  "color-mix(in srgb, var(--section-accent-advanced, var(--accent, #7b8fb5)) 8%, transparent)",
               } as React.CSSProperties)
             : undefined
         }
