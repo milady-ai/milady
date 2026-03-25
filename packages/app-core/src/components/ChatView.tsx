@@ -51,8 +51,9 @@ const COMPANION_VISIBLE_MESSAGE_LIMIT = 2;
 const COMPANION_HISTORY_HOLD_MS = 30_000;
 const COMPANION_HISTORY_FADE_MS = 5_000;
 const COMPANION_MESSAGE_LAYER_TOP = "calc(-100% + 1.5rem)";
-const COMPANION_MESSAGE_LAYER_BOTTOM_FALLBACK = "4rem";
-const COMPANION_COMPOSER_GAP_PX = 10;
+const COMPANION_MESSAGE_LAYER_BOTTOM_FALLBACK = "5.25rem";
+const COMPANION_COMPOSER_GAP_PX = 18;
+const COMPANION_COMPOSER_SHELL_MIN_HEIGHT_PX = 84;
 const COMPANION_MESSAGE_LAYER_MASK =
   "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.28) 6%, rgba(0,0,0,0.82) 12%, black 17%, black 100%)";
 const COMPANION_ASSISTANT_BUBBLE_CLASSNAME =
@@ -741,7 +742,7 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
       aria-label={t("aria.chatWorkspace")}
       className={`flex flex-col flex-1 min-h-0 relative ${
         isGameModal
-          ? "overflow-visible px-2 sm:px-3 pointer-events-none"
+          ? "overflow-visible pointer-events-none"
           : "bg-bg"
       }${imageDragOver ? " ring-2 ring-accent ring-inset" : ""}`}
       onDragOver={(e) => {
@@ -1007,44 +1008,52 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
         /* ── Game-modal composer ──────────────────────────────────────── */
         <div
           ref={composerRef}
-          className="mt-auto relative pointer-events-auto px-1 pt-2.5 max-[380px]:px-0.5"
+          className="mt-auto pointer-events-auto px-1 max-[380px]:px-0.5"
           data-no-camera-drag="true"
           style={{
             zIndex: 1,
-            paddingBottom: "max(env(safe-area-inset-bottom, 0px), 0px)",
+            paddingBottom:
+              "calc(max(env(safe-area-inset-bottom, 0px), 0px) + 0.25rem)",
           }}
         >
-          <ChatComposer
-            variant="game-modal"
-            textareaRef={textareaRef}
-            chatInput={chatInput}
-            chatPendingImagesCount={chatPendingImages.length}
-            isComposerLocked={isComposerLocked}
-            isAgentStarting={isAgentStarting}
-            chatSending={chatSending}
-            voice={{
-              supported: voice.supported,
-              isListening: voice.isListening,
-              captureMode: voice.captureMode,
-              interimTranscript: voice.interimTranscript,
-              isSpeaking: voice.isSpeaking,
-              toggleListening: voice.toggleListening,
-              startListening: beginVoiceCapture,
-              stopListening: endVoiceCapture,
-            }}
-            agentVoiceEnabled={!agentVoiceMuted}
-            showAgentVoiceToggle={showComposerVoiceToggle}
-            t={t}
-            onAttachImage={() => fileInputRef.current?.click()}
-            onChatInputChange={(value) => setState("chatInput", value)}
-            onKeyDown={handleKeyDown}
-            onSend={() => void handleChatSend()}
-            onStop={handleChatStop}
-            onStopSpeaking={stopSpeaking}
-            onToggleAgentVoice={() =>
-              setState("chatAgentVoiceMuted", !agentVoiceMuted)
-            }
-          />
+          <div
+            className="relative flex min-h-[84px] items-center px-4 py-3 max-[380px]:min-h-[78px] max-[380px]:px-3 max-[380px]:py-2.5 before:pointer-events-none before:absolute before:inset-0 before:rounded-[34px] before:border before:border-white/8 before:bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] before:shadow-[0_20px_52px_rgba(0,0,0,0.17)] before:ring-1 before:ring-inset before:ring-white/6 before:backdrop-blur-[22px] before:content-['']"
+            style={{ minHeight: `${COMPANION_COMPOSER_SHELL_MIN_HEIGHT_PX}px` }}
+          >
+            <div className="relative z-[1] flex w-full items-center">
+              <ChatComposer
+                variant="game-modal"
+                textareaRef={textareaRef}
+                chatInput={chatInput}
+                chatPendingImagesCount={chatPendingImages.length}
+                isComposerLocked={isComposerLocked}
+                isAgentStarting={isAgentStarting}
+                chatSending={chatSending}
+                voice={{
+                  supported: voice.supported,
+                  isListening: voice.isListening,
+                  captureMode: voice.captureMode,
+                  interimTranscript: voice.interimTranscript,
+                  isSpeaking: voice.isSpeaking,
+                  toggleListening: voice.toggleListening,
+                  startListening: beginVoiceCapture,
+                  stopListening: endVoiceCapture,
+                }}
+                agentVoiceEnabled={!agentVoiceMuted}
+                showAgentVoiceToggle={showComposerVoiceToggle}
+                t={t}
+                onAttachImage={() => fileInputRef.current?.click()}
+                onChatInputChange={(value) => setState("chatInput", value)}
+                onKeyDown={handleKeyDown}
+                onSend={() => void handleChatSend()}
+                onStop={handleChatStop}
+                onStopSpeaking={stopSpeaking}
+                onToggleAgentVoice={() =>
+                  setState("chatAgentVoiceMuted", !agentVoiceMuted)
+                }
+              />
+            </div>
+          </div>
         </div>
       ) : (
         /* ── Default composer ─────────────────────────────────────────── */

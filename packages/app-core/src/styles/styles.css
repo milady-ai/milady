@@ -101,6 +101,19 @@
   background: var(--bg);
 }
 
+/*
+ * Theme flips touch a large number of CSS variables. Temporarily disabling
+ * transitions prevents the entire shell from animating every color/border
+ * change when users toggle light/dark rapidly.
+ */
+:root[data-theme-switching],
+:root[data-theme-switching] *,
+:root[data-theme-switching] *::before,
+:root[data-theme-switching] *::after {
+  /* biome-ignore lint/complexity/noImportantStyles: Theme-switch guard must override component-level transition utilities */
+  transition: none !important;
+}
+
 /* ── Typing indicator animation ─────────────────────────────────────── */
 
 @keyframes typing-bounce {

@@ -408,7 +408,7 @@ describe("CompanionView", () => {
     expect(String(desktopNewChat.props.className)).toContain("shrink-0");
     expect(voiceButton).toBeDefined();
     expect(newChatButton).toBeDefined();
-    expect(String(newChatButton.props.className)).toContain("backdrop-blur-md");
+    expect(String(newChatButton.props.className)).toContain("backdrop-blur-xl");
 
     await act(async () => {
       voiceButton?.props.onClick();
@@ -441,6 +441,11 @@ describe("CompanionView", () => {
       "data-testid": "companion-cloud-status",
     });
     expect(connectedBadge.props["data-status"]).toBe("regular-credits");
+    expect(String(connectedBadge.props.className)).toContain("backdrop-blur-xl");
+    expect(String(connectedBadge.props.className)).toContain("font-medium");
+    expect(String(connectedBadge.props.className)).not.toContain("font-mono");
+    expect(connectedBadge.props.style.backgroundColor).toBeUndefined();
+    expect(connectedBadge.props.style.borderColor).toBe("transparent");
     expect(text(connectedBadge)).toContain("$87.5");
 
     mockUseApp.mockReturnValue(createContext());

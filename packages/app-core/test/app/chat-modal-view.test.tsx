@@ -141,13 +141,9 @@ describe("ChatModalView", () => {
     const thread = tree?.root.find(
       (node) => node.props["data-chat-game-thread"] === true,
     );
-    const backfill = tree?.root.find(
-      (node) => node.props["data-chat-game-composer-backfill"] === true,
-    );
     expect(String(shell.props.className)).toContain("rounded-[28px]");
     expect(String(shell.props.className)).toContain("overflow-visible");
     expect(String(thread.props.className)).toContain("overflow-visible");
-    expect(String(backfill.props.className)).toContain("bottom-0");
   });
 
   it("does not boot a new conversation in companion dock when none is active", async () => {

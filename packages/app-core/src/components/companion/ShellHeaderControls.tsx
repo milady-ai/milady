@@ -117,7 +117,7 @@ export function ShellHeaderControls({
     ? t("companion.agentVoiceOff")
     : t("companion.agentVoiceOn");
   const compactCompanionActionClassName = `${SHELL_ICON_BUTTON_CLASSNAME} pointer-events-auto text-sm leading-none`;
-  const expandedCompanionActionClassName = `${SHELL_EXPANDED_BUTTON_CLASSNAME} justify-center text-sm leading-none sm:!w-auto sm:gap-1.5 sm:px-3.5`;
+  const expandedCompanionActionClassName = `${SHELL_EXPANDED_BUTTON_CLASSNAME} justify-center text-sm leading-none sm:!w-auto sm:gap-1.5 sm:!px-3.5`;
 
   const renderVoiceButton = (compact: boolean) => (
     <Button

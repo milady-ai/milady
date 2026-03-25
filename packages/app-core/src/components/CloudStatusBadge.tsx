@@ -1,6 +1,7 @@
 import { Button } from "@miladyai/ui";
 import { CircleDollarSign } from "lucide-react";
 import type { CSSProperties } from "react";
+import { SHELL_EXPANDED_BUTTON_CLASSNAME } from "./companion/shell-control-styles";
 
 const CLOUD_STATUS_BUTTON_STYLE = {
   clipPath: "none",
@@ -38,6 +39,7 @@ export interface CloudStatusBadgeProps {
   authRejected: boolean;
   creditsError?: string | null;
   compactOnMobile?: boolean;
+  appearance?: "default" | "shell";
   t: (key: string) => string;
   onClick: () => void;
   dataTestId?: string;
@@ -122,17 +124,30 @@ export function resolveCloudStatusBadgeState(
 
 function resolveCloudStatusToneStyle(
   kind: CloudHeaderStatusKind,
+  appearance: CloudStatusBadgeProps["appearance"],
 ): CSSProperties {
-  const toneVar =
-    kind === "regular-credits"
-      ? "var(--ok)"
-      : kind === "error"
-        ? "var(--danger)"
-        : "var(--warn)";
+  if (kind === "regular-credits" && appearance === "shell") {
+    return {
+      borderColor: "transparent",
+    };
+  }
+
+  if (kind === "regular-credits") {
+    return {
+      borderColor: "transparent",
+      backgroundColor: "var(--accent)",
+      backgroundImage:
+        "linear-gradient(180deg, color-mix(in srgb, var(--accent) 86%, white 14%), color-mix(in srgb, var(--accent) 94%, black 6%))",
+      color: "var(--accent-foreground)",
+      boxShadow:
+        "inset 0 1px 0 rgba(255,255,255,0.22), 0 12px 28px rgba(3,5,10,0.16)",
+    };
+  }
+
+  const toneVar = kind === "error" ? "var(--danger)" : "var(--warn)";
 
   return {
     borderColor: `color-mix(in srgb, ${toneVar} 34%, var(--border))`,
-    background: `color-mix(in srgb, ${toneVar} 12%, var(--card))`,
     color: `color-mix(in srgb, var(--text-strong) 78%, ${toneVar} 22%)`,
   };
 }
@@ -146,6 +161,7 @@ export function CloudStatusBadge(props: CloudStatusBadgeProps) {
     authRejected,
     creditsError,
     compactOnMobile = false,
+    appearance = "default",
     t,
     onClick,
     dataTestId,
@@ -165,14 +181,18 @@ export function CloudStatusBadge(props: CloudStatusBadgeProps) {
     return null;
   }
 
-  const toneStyle = resolveCloudStatusToneStyle(status.kind);
+  const toneStyle = resolveCloudStatusToneStyle(status.kind, appearance);
 
   return (
     <Button
       variant="outline"
       data-testid={dataTestId}
       data-status={status.kind}
-      className={`h-11 min-h-[44px] shrink-0 gap-1.5 rounded-xl px-2.5 text-[11px] font-mono no-underline shadow-sm transition-all duration-200 hover:border-[color:color-mix(in_srgb,var(--accent)_40%,var(--border))] hover:bg-[color:color-mix(in_srgb,var(--accent)_16%,var(--card))] hover:text-[color:color-mix(in_srgb,var(--text-strong)_84%,var(--accent)_16%)] hover:shadow-sm sm:text-xs ${compactOnMobile ? "max-[380px]:w-11 max-[380px]:justify-center max-[380px]:px-0" : ""}`}
+      className={`${SHELL_EXPANDED_BUTTON_CLASSNAME} shrink-0 gap-1.5 px-3.5 leading-none no-underline ${
+        appearance === "shell"
+          ? "text-sm font-medium"
+          : "text-[11px] font-mono sm:text-xs"
+      } ${compactOnMobile ? "max-[380px]:w-11 max-[380px]:justify-center max-[380px]:px-0" : ""}`}
       aria-label={status.title}
       title={status.title}
       onClick={onClick}

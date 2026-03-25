@@ -172,12 +172,12 @@ describe("ShellHeaderControls", () => {
     expect(String(leftVoice.props.className)).toContain("shrink-0");
     expect(String(rightNewChat.props.className)).toContain("shrink-0");
     expect(String(rightControls.props.className)).toContain("justify-end");
-    expect(String(voiceButton?.props.className)).toContain("backdrop-blur-md");
+    expect(String(voiceButton?.props.className)).toContain("backdrop-blur-xl");
     expect(String(voiceButton?.props.className)).toContain(
-      "bg-bg/70",
+      "ring-white/6",
     );
     expect(String(newChatButton?.props.className)).toContain(
-      "backdrop-blur-md",
+      "backdrop-blur-xl",
     );
     const rightChildrenIds = rightControls.children.map((child) =>
       typeof child === "object" && child !== null && "props" in child

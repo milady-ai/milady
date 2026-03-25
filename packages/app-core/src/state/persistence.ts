@@ -30,12 +30,28 @@ export type { UiTheme } from "./ui-preferences";
 
 const UI_THEME_STORAGE_KEY = "eliza:ui-theme";
 const LEGACY_UI_THEME_STORAGE_KEY = "milady:ui-theme";
+const THEME_SWITCHING_ATTRIBUTE = "data-theme-switching";
+let themeSwitchResetFrameId: number | null = null;
 
 function normalizeUiTheme(value: unknown): UiTheme {
   return value === "light" ? "light" : "dark";
 }
 
 export { normalizeUiTheme };
+
+function suppressThemeTransitions(root: HTMLElement): void {
+  if (typeof window === "undefined") return;
+  root.setAttribute(THEME_SWITCHING_ATTRIBUTE, "");
+  if (themeSwitchResetFrameId != null) {
+    window.cancelAnimationFrame(themeSwitchResetFrameId);
+  }
+  themeSwitchResetFrameId = window.requestAnimationFrame(() => {
+    themeSwitchResetFrameId = window.requestAnimationFrame(() => {
+      root.removeAttribute(THEME_SWITCHING_ATTRIBUTE);
+      themeSwitchResetFrameId = null;
+    });
+  });
+}
 
 export function loadUiTheme(): UiTheme {
   return tryLocalStorage(() => {
@@ -197,6 +213,18 @@ export function applyUiTheme(theme: UiTheme): void {
   const classMatchesTheme = root.classList
     ? root.classList.contains("dark") === shouldBeDark
     : true;
+  const colorSchemeMatches =
+    !root.style || root.style.colorScheme === normalizedTheme;
+
+  if (
+    currentTheme === normalizedTheme &&
+    classMatchesTheme &&
+    colorSchemeMatches
+  ) {
+    return;
+  }
+
+  suppressThemeTransitions(root);
 
   if (currentTheme !== normalizedTheme) {
     if (typeof root.setAttribute === "function") {

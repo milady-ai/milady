@@ -54,9 +54,9 @@ const COMPOSER_EMPHASIZED_BUTTON_CLASSNAME =
 const COMPOSER_DESTRUCTIVE_BUTTON_CLASSNAME =
   "border border-danger/40 bg-danger/12 text-danger shadow-sm hover:border-danger/65 hover:bg-danger/20 hover:text-danger";
 const COMPOSER_GAME_BUTTON_CLASSNAME =
-  "select-none rounded-full border border-[color:var(--onboarding-card-border)] bg-[color:var(--onboarding-card-bg)] text-[color:var(--onboarding-text-primary)] shadow-[0_12px_34px_rgba(0,0,0,0.18)] backdrop-blur-md transition-[border-color,background-color,color,transform,box-shadow] duration-300 hover:border-[color:var(--onboarding-card-border-strong)] hover:bg-[color:var(--onboarding-card-bg-hover)] hover:text-[color:var(--onboarding-text-strong)] active:scale-95";
+  "select-none rounded-full border border-[color:var(--onboarding-card-border)] bg-[image:linear-gradient(180deg,color-mix(in_srgb,var(--onboarding-card-bg)_72%,rgba(255,255,255,0.12)),color-mix(in_srgb,var(--onboarding-card-bg)_92%,rgba(0,0,0,0.04)))] text-[color:var(--onboarding-text-primary)] shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_14px_34px_rgba(0,0,0,0.16)] ring-1 ring-inset ring-white/8 backdrop-blur-xl transition-[border-color,background-color,color,transform,box-shadow] duration-300 hover:border-[color:var(--onboarding-card-border-strong)] hover:bg-[image:linear-gradient(180deg,color-mix(in_srgb,var(--onboarding-card-bg-hover)_76%,rgba(255,255,255,0.14)),color-mix(in_srgb,var(--onboarding-card-bg-hover)_94%,rgba(0,0,0,0.05)))] hover:text-[color:var(--onboarding-text-strong)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_18px_40px_rgba(0,0,0,0.18)] active:scale-95";
 const COMPOSER_GAME_BUTTON_ACTIVE_CLASSNAME =
-  "select-none rounded-full border border-[color:var(--onboarding-accent-border)] bg-[color:var(--onboarding-accent-bg)] text-[color:var(--onboarding-text-strong)] shadow-[0_0_20px_rgba(207,175,90,0.2)] backdrop-blur-md transition-all duration-300 hover:border-[color:var(--onboarding-accent-border-hover)] hover:bg-[color:var(--onboarding-accent-bg-hover)] active:scale-95";
+  "select-none rounded-full border border-[color:var(--onboarding-accent-border)] bg-[image:linear-gradient(180deg,color-mix(in_srgb,var(--onboarding-accent-bg)_78%,rgba(255,255,255,0.12)),color-mix(in_srgb,var(--onboarding-accent-bg)_96%,rgba(0,0,0,0.02)))] text-[color:var(--onboarding-text-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_0_20px_rgba(207,175,90,0.18),0_14px_30px_rgba(0,0,0,0.16)] ring-1 ring-inset ring-white/10 backdrop-blur-xl transition-all duration-300 hover:border-[color:var(--onboarding-accent-border-hover)] hover:bg-[image:linear-gradient(180deg,color-mix(in_srgb,var(--onboarding-accent-bg-hover)_82%,rgba(255,255,255,0.14)),color-mix(in_srgb,var(--onboarding-accent-bg-hover)_98%,rgba(0,0,0,0.02)))] active:scale-95";
 
 export function ChatComposer({
   variant,
@@ -265,7 +265,7 @@ export function ChatComposer({
       <div
         className={
           isGameModal
-            ? "flex min-h-[46px] min-w-0 flex-1 items-center rounded-[26px] border border-[color:var(--onboarding-card-border)] bg-[color:var(--onboarding-card-bg)] shadow-[0_18px_40px_rgba(0,0,0,0.18)] backdrop-blur-md transition-[border-color,background-color,box-shadow] duration-300 focus-within:border-[color:var(--onboarding-card-border-strong)] focus-within:bg-[color:var(--onboarding-card-bg-hover)]"
+            ? "relative flex min-h-[46px] min-w-0 flex-1 items-center overflow-hidden rounded-[26px] border border-[color:var(--onboarding-card-border)] bg-[image:linear-gradient(180deg,color-mix(in_srgb,var(--onboarding-card-bg)_72%,rgba(255,255,255,0.14)),color-mix(in_srgb,var(--onboarding-card-bg)_94%,rgba(0,0,0,0.04)))] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_20px_44px_rgba(0,0,0,0.16)] ring-1 ring-inset ring-white/8 backdrop-blur-2xl transition-[border-color,background-color,box-shadow] duration-300 before:pointer-events-none before:absolute before:inset-x-4 before:top-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.42),transparent)] focus-within:border-[color:var(--onboarding-card-border-strong)] focus-within:bg-[image:linear-gradient(180deg,color-mix(in_srgb,var(--onboarding-card-bg-hover)_78%,rgba(255,255,255,0.16)),color-mix(in_srgb,var(--onboarding-card-bg-hover)_96%,rgba(0,0,0,0.04)))] focus-within:shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_24px_52px_rgba(0,0,0,0.18)]"
             : "flex min-h-[46px] min-w-0 flex-1 items-center rounded-xl border border-border/60 bg-card/78 shadow-sm backdrop-blur-md transition-[border-color,background-color,box-shadow] duration-200 hover:border-border-strong focus-within:border-accent/50 focus-within:bg-card/92 focus-within:shadow-md"
         }
       >
@@ -274,7 +274,7 @@ export function ChatComposer({
           data-testid="chat-composer-textarea"
           className={
             isGameModal
-              ? `${COMMON_TEXTAREA_CLASSNAME} max-h-[150px] border-none bg-transparent px-4 py-2.5 text-[15px] leading-relaxed text-[color:var(--onboarding-text-strong)] placeholder:text-[color:var(--onboarding-text-muted)] max-[380px]:px-3.5`
+              ? `${COMMON_TEXTAREA_CLASSNAME} relative z-[1] max-h-[150px] border-none bg-transparent px-4 py-2.5 text-[15px] leading-relaxed text-[color:var(--onboarding-text-strong)] placeholder:text-[color:color-mix(in_srgb,var(--onboarding-text-muted)_88%,white_12%)] max-[380px]:px-3.5`
               : `${COMMON_TEXTAREA_CLASSNAME} px-3.5 py-2 bg-transparent border-none text-[15px] leading-[1.7] text-txt placeholder:text-muted-strong`
           }
           style={{ fontFamily: "var(--font-chat)" }}

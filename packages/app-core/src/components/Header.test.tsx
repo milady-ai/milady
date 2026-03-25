@@ -383,6 +383,8 @@ describe("Header", () => {
       "data-testid": "header-cloud-status",
     });
     expect(cloudStatus.props["data-status"]).toBe("regular-credits");
+    expect(String(cloudStatus.props.className)).toContain("font-mono");
+    expect(cloudStatus.props.style.backgroundColor).toBe("var(--accent)");
     expect(
       cloudStatus.findAll(
         (node) =>

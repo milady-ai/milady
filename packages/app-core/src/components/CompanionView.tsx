@@ -15,7 +15,7 @@ import { resolveCompanionInferenceNotice } from "./companion/resolve-companion-i
 import { PtyConsoleSidePanel } from "./PtyConsoleSidePanel";
 
 const COMPANION_UI_REVEAL_FALLBACK_MS = 1400;
-const COMPANION_DOCK_HEIGHT = "min(48vh, 28rem)";
+const COMPANION_DOCK_HEIGHT = "min(42vh, 24rem)";
 const COMPANION_DOCK_ACTIVITY_OFFSET = `calc(${COMPANION_DOCK_HEIGHT} + 1rem)`;
 
 /**
@@ -155,6 +155,7 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
       authRejected={elizaCloudAuthRejected}
       creditsError={elizaCloudCreditsError}
       compactOnMobile
+      appearance="shell"
       t={t}
       onClick={handleCloudStatusClick}
       dataTestId="companion-cloud-status"
@@ -191,10 +192,10 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
       </div>
 
       {avatarReady && (
-        <div className="pointer-events-auto absolute inset-x-0 bottom-0 z-20 flex justify-center px-2 pb-2 sm:px-4 sm:pb-4">
+        <div className="pointer-events-auto absolute inset-x-0 bottom-0 z-20 flex justify-center px-1.5 pb-3 sm:px-4 sm:pb-5">
           <div
             className="relative w-full max-w-5xl min-w-0"
-            style={{ height: COMPANION_DOCK_HEIGHT, minHeight: "19rem" }}
+            style={{ height: COMPANION_DOCK_HEIGHT, minHeight: "17rem" }}
           >
             <ChatModalView variant="companion-dock" />
           </div>
