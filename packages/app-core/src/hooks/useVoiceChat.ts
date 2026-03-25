@@ -467,10 +467,13 @@ function resolveEffectiveVoiceConfig(
 ): VoiceConfig | null {
   const cloudConnected = options?.cloudConnected === true;
   const base = cloneVoiceConfig(config) ?? {};
-  const provider =
+  const inferredProvider =
     base.provider ??
     (base.elevenlabs ? "elevenlabs" : base.edge ? "edge" : undefined) ??
     (cloudConnected ? "elevenlabs" : undefined);
+  // Prefer cloud ElevenLabs whenever cloud is connected, even if a stale
+  // saved config still says "edge" from an earlier fallback session.
+  const provider = cloudConnected ? "elevenlabs" : inferredProvider;
 
   if (!provider) return null;
   if (provider !== "elevenlabs") {
@@ -1428,13 +1431,14 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
                 break;
               }
               console.warn(
-                "[useVoiceChat] ElevenLabs TTS failed, falling back to browser:",
+                "[useVoiceChat] ElevenLabs TTS failed; browser fallback suppressed:",
                 error instanceof Error
                   ? `${error.name}: ${error.message}`
                   : error,
               );
-              usingAudioAnalysisRef.current = false;
-              setUsingAudioAnalysis(false);
+              // Keep voice identity consistent: if ElevenLabs is selected and
+              // fails, do not swap to browser/system voices.
+              continue;
             }
           } else {
             usingAudioAnalysisRef.current = false;

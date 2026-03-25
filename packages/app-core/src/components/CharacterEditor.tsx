@@ -320,6 +320,10 @@ export function CharacterEditor({
     Record<string, string> | string | undefined
   >;
   const [voiceConfig, setVoiceConfig] = useState<VoiceConfig>({});
+  const hasSavedElevenLabsVoice = Boolean(
+    (voiceConfig.elevenlabs as Record<string, string> | undefined)?.voiceId,
+  );
+  const shouldPreferElevenLabs = useElevenLabs || hasSavedElevenLabsVoice;
 
   const handleChatAvatarSpeakingChange = useCallback(
     (isSpeaking: boolean) => {
@@ -543,8 +547,10 @@ export function CharacterEditor({
       setVoiceSaveError(null);
       if (!entry.voicePresetId) return;
       // When cloud provides ElevenLabs, use the ElevenLabs preset voice.
+      // Also keep ElevenLabs if a saved ElevenLabs voice already exists, so
+      // transient cloud-status flickers don't silently downgrade to Edge.
       // Otherwise fall back to matching edge backup voice by gender.
-      if (useElevenLabs) {
+      if (shouldPreferElevenLabs) {
         const voicePreset = PREMADE_VOICES.find(
           (p) => p.id === entry.voicePresetId,
         );
@@ -566,7 +572,7 @@ export function CharacterEditor({
         }
       }
     },
-    [handleSelectPreset, useElevenLabs],
+    [handleSelectPreset, shouldPreferElevenLabs],
   );
 
   /* ── Character defaults ─────────────────────────────────────────── */
@@ -831,7 +837,7 @@ export function CharacterEditor({
       const defaultVoiceMode =
         typeof voiceConfig.mode === "string"
           ? voiceConfig.mode
-          : useElevenLabs && !hasElevenLabsApiKey
+          : shouldPreferElevenLabs && !hasElevenLabsApiKey
             ? "cloud"
             : "own-key";
       const normalized: Record<string, string> = {
@@ -852,7 +858,7 @@ export function CharacterEditor({
     }
     await client.updateConfig({ messages: { tts: normalizedVoiceConfig } });
     dispatchWindowEvent(VOICE_CONFIG_UPDATED_EVENT, normalizedVoiceConfig);
-  }, [voiceConfig, useElevenLabs]);
+  }, [shouldPreferElevenLabs, voiceConfig, useElevenLabs]);
 
   /* ── Save all ───────────────────────────────────────────────────── */
   const handleSaveAll = useCallback(async () => {

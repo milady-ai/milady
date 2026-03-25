@@ -276,11 +276,17 @@ export function persistCompatOnboardingDefaults(
   }
 
   const elevenLabsApiKey = process.env.ELEVENLABS_API_KEY?.trim();
+  const cloudApiKey =
+    trimToUndefined(process.env.ELIZAOS_CLOUD_API_KEY) ??
+    trimToUndefined(
+      typeof config.cloud?.apiKey === "string" ? config.cloud.apiKey : undefined,
+    );
+  const canUseCloudManagedVoice = Boolean(cloudApiKey);
   const voicePresetId = stylePreset?.voicePresetId?.trim();
   const voiceId = voicePresetId
     ? ELEVENLABS_VOICE_ID_BY_PRESET.get(voicePresetId)
     : undefined;
-  if (elevenLabsApiKey && voiceId) {
+  if ((elevenLabsApiKey || canUseCloudManagedVoice) && voiceId) {
     if (!config.messages || typeof config.messages !== "object") {
       (config as Record<string, unknown>).messages = {};
     }
@@ -297,6 +303,7 @@ export function persistCompatOnboardingDefaults(
     messages.tts = {
       ...existingTts,
       provider: "elevenlabs",
+      mode: elevenLabsApiKey ? existingTts.mode : "cloud",
       elevenlabs: {
         ...existingElevenlabs,
         voiceId,

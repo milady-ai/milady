@@ -128,7 +128,7 @@ export function Header({
         : "desktop";
   const useMinimalHeaderChrome = transparent || activeShellView !== "desktop";
   const showNavigationMenu = activeShellView === "desktop";
-  const showCloudStatus = activeShellView === "desktop" && !hideCloudCredits;
+  const showCloudStatus = !hideCloudCredits;
 
   const handleShellViewChange = (
     view: "companion" | "character" | "desktop",

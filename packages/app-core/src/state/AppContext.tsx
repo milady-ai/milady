@@ -2146,14 +2146,9 @@ function AppProviderInner({
       return lastElizaCloudPollConnectedRef.current;
     }
     if (!cloudStatus) {
-      setElizaCloudConnected(false);
-      setElizaCloudCredits(null);
-      setElizaCloudCreditsLow(false);
-      setElizaCloudCreditsCritical(false);
-      setElizaCloudAuthRejected(false);
-      setElizaCloudCreditsError(null);
-      lastElizaCloudPollConnectedRef.current = false;
-      return false;
+      // Keep last-known cloud state on transient poll failures.
+      // This prevents brief startup/network blips from looking like a disconnect.
+      return lastElizaCloudPollConnectedRef.current;
     }
     // Trust `connected` from the server snapshot (it already folds in API key + CLOUD_AUTH).
     const isConnected = Boolean(cloudStatus.connected);
@@ -2210,10 +2205,9 @@ function AppProviderInner({
       setElizaCloudCreditsError(null);
     }
     lastElizaCloudPollConnectedRef.current = isConnected;
-    // Self-manage the recurring poll interval: start when connected, stop when not.
-    // This covers login during onboarding (interval wasn't started at mount) and
-    // disconnect (interval should stop to avoid useless API calls).
-    if (isConnected && !elizaCloudPollInterval.current) {
+    // Keep polling even when disconnected so recovered sessions are detected
+    // automatically without requiring user interaction.
+    if (!elizaCloudPollInterval.current) {
       elizaCloudPollInterval.current = window.setInterval(() => {
         if (
           typeof document !== "undefined" &&
@@ -2223,9 +2217,6 @@ function AppProviderInner({
         }
         void pollCloudCredits();
       }, 60_000);
-    } else if (!isConnected && elizaCloudPollInterval.current) {
-      clearInterval(elizaCloudPollInterval.current);
-      elizaCloudPollInterval.current = null;
     }
     return isConnected;
   }, []);
