@@ -724,7 +724,7 @@ export function HeartbeatsView() {
 
         {/* Main Content Area — hidden on mobile when sidebar is showing */}
         <main
-          className={`${selectedTriggerId || editorOpen || editingId ? "flex" : "hidden md:flex"} relative flex-1 min-w-0 flex-col overflow-y-auto bg-bg/10 p-4 sm:p-6 lg:p-7 custom-scrollbar`}
+          className={`${selectedTriggerId || editorOpen || editingId ? "flex" : "hidden md:flex"} relative flex-1 min-w-0 flex-col overflow-y-auto bg-bg/10 px-4 pb-4 pt-2 sm:px-6 sm:pb-6 sm:pt-3 lg:px-7 lg:pb-7 lg:pt-4 custom-scrollbar`}
         >
           {/* Mobile back button */}
           <button
@@ -740,14 +740,14 @@ export function HeartbeatsView() {
           </button>
           {editorOpen || editingId ? (
             <div
-              className={`${HEARTBEATS_CONTENT_WIDTH_CLASS} px-4 pb-16 pt-0 sm:px-5 sm:pb-16 sm:pt-1 lg:px-7 lg:pb-16 lg:pt-1 xl:px-8`}
+              className={`${HEARTBEATS_CONTENT_WIDTH_CLASS} px-4 pb-8 pt-0 sm:px-5 sm:pb-8 sm:pt-1 lg:px-7 lg:pb-8 lg:pt-1 xl:px-8`}
             >
               {templateNotice && (
                 <div className="mb-4 px-4 py-2.5 rounded-lg border border-accent/30 bg-accent/5 text-xs text-accent font-medium animate-[fadeIn_0.2s_ease]">
                   {templateNotice}
                 </div>
               )}
-              <div className="mb-4 flex flex-col justify-between gap-2 lg:flex-row lg:items-start">
+              <div className="mb-3 flex flex-col justify-between gap-2 lg:flex-row lg:items-start">
                 <div className="max-w-3xl space-y-1">
                   <div className={HEARTBEATS_SECTION_KICKER_CLASS}>
                     {editingId

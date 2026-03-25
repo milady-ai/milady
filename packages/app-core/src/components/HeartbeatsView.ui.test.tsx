@@ -117,6 +117,8 @@ describe("HeartbeatsView UI states", () => {
     expect(String(root?.props.className)).toContain("p-0");
     expect(String(root?.props.className)).toContain("lg:p-1");
     expect(String(aside?.props.className)).toContain("md:w-[21rem]");
-    expect(String(main?.props.className)).toContain("lg:p-7");
+    expect(String(main?.props.className)).toContain("lg:pt-4");
+    expect(String(main?.props.className)).toContain("lg:pb-7");
+    expect(String(main?.props.className)).toContain("lg:px-7");
   });
 });
