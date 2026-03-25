@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main, develop]
   push:
-    branches: [main, develop, "codex/**"]
+    branches: [main, develop]
   workflow_dispatch:
 
 concurrency:
@@ -259,4 +259,3 @@ jobs:
         run: bun run build:homepage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-

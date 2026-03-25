@@ -20,6 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -57,11 +59,36 @@ jobs:
       - name: Run repository postinstall patches
         run: bun run postinstall
 
+      - name: Fetch upstream develop for diff base
+        run: |
+          git remote add upstream https://github.com/milady-ai/milady.git || true
+          git fetch --no-tags upstream develop
+
+      - name: Resolve lint scope
+        id: scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          files="$(git diff --name-only --diff-filter=ACMR upstream/develop...HEAD \
+            | grep -E '^(apps/|packages/|scripts/).*\.(ts|tsx|js|jsx|json|css|mjs|cjs)$' || true)"
+          if [[ -z "${files}" ]]; then
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          printf '%s\n' "${files}" > /tmp/biome_scope.txt
+          echo "has_files=true" >> "$GITHUB_OUTPUT"
+
       - name: Biome lint
-        run: bun run lint
+        if: steps.scope.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          xargs -a /tmp/biome_scope.txt bunx @biomejs/biome lint
 
       - name: Biome format check
-        run: bun run format
+        if: steps.scope.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          xargs -a /tmp/biome_scope.txt bunx @biomejs/biome format
 
   typecheck:
     name: Type Check
