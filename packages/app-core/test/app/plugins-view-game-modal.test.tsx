@@ -271,6 +271,12 @@ describe("PluginsView game modal", () => {
       (node) => node.props?.["data-testid"] === "connectors-shell",
     )[0];
     expect(String(shell?.props.className)).toContain("rounded-2xl");
+    const selectedConnector = tree?.root.findAll(
+      (node) => node.props?.["aria-current"] === "page",
+    )[0];
+    expect(String(selectedConnector?.parent?.props.className)).toContain(
+      "border-accent/30",
+    );
     expect(
       tree?.root.findAll((node) => hasClass(node, "plugins-game-modal")).length,
     ).toBe(0);

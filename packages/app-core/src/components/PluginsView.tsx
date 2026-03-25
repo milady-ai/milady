@@ -2098,7 +2098,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
   // ── Game-modal render ─────────────────────────────────────────────
   if (inModal && isSocialMode) {
     const connectorsShellClassName =
-      "relative flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-lg ring-1 ring-border/20 backdrop-blur-sm";
+      "relative flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-border/60 bg-card/75 shadow-[0_20px_60px_rgba(3,5,10,0.28)] ring-1 ring-border/20 backdrop-blur-sm";
     return (
       <div
         data-testid="plugins-view-social"
@@ -2113,9 +2113,9 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
           {desktopConnectorLayout && (
             <aside
               data-testid="connectors-settings-sidebar"
-              className="flex w-[21rem] max-w-[352px] shrink-0 flex-col border-r border-border/40 bg-card/45 backdrop-blur-sm"
+              className="flex min-h-0 w-[21rem] max-w-[352px] shrink-0 flex-col overflow-hidden border-r border-border/40 bg-card/45 backdrop-blur-sm"
             >
-              <div className="sticky top-0 flex min-h-full flex-1 flex-col px-3 pb-4 pt-3">
+              <div className="flex min-h-0 flex-1 flex-col px-3 pb-4 pt-3">
                 <div className="border-b border-border/30 px-1 pb-3">
                   <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60">
                     {t("nav.social")}
@@ -2125,88 +2125,98 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                   </div>
                 </div>
 
-                <nav className="flex-1 space-y-1.5 overflow-y-auto px-1 py-4">
-                  {visiblePlugins.map((plugin) => {
-                    const isSelected = connectorSelectedId === plugin.id;
-                    const isExpanded = connectorExpandedIds.has(plugin.id);
-                    const isToggleBusy = togglingPlugins.has(plugin.id);
-                    const toggleDisabled =
-                      isToggleBusy ||
-                      (hasPluginToggleInFlight && !isToggleBusy);
+                <div className="mt-4 flex min-h-0 flex-1 flex-col rounded-[26px] border border-border/30 bg-bg/16 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_18px_38px_rgba(3,5,10,0.16)]">
+                  <nav className="min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-1">
+                    {visiblePlugins.map((plugin) => {
+                      const isSelected = connectorSelectedId === plugin.id;
+                      const isExpanded = connectorExpandedIds.has(plugin.id);
+                      const isToggleBusy = togglingPlugins.has(plugin.id);
+                      const toggleDisabled =
+                        isToggleBusy ||
+                        (hasPluginToggleInFlight && !isToggleBusy);
 
-                    return (
-                      <div
-                        key={plugin.id}
-                        className={`flex items-start gap-2 rounded-xl border px-3.5 py-3 text-left transition-all ${
-                          isSelected
-                            ? "border-accent/25 bg-accent/10 text-txt shadow-sm"
-                            : "border-transparent bg-transparent text-muted hover:border-border/45 hover:bg-bg/45 hover:text-txt"
-                        }`}
-                      >
-                        <Button
-                          variant="ghost"
-                          className="flex h-auto min-w-0 flex-1 items-start gap-3 rounded-none p-0 text-left"
-                          onClick={() => handleConnectorSelect(plugin.id)}
-                          aria-current={isSelected ? "page" : undefined}
+                      return (
+                        <div
+                          key={plugin.id}
+                          className={`flex items-start gap-2 rounded-xl border px-3.5 py-3 text-left transition-all ${
+                            isSelected
+                              ? "border-accent/30 bg-[linear-gradient(180deg,rgba(var(--accent),0.18),rgba(var(--accent),0.08))] text-txt shadow-[0_14px_28px_rgba(3,5,10,0.16)]"
+                              : "border-transparent bg-transparent text-muted hover:border-border/45 hover:bg-bg/45 hover:text-txt"
+                          }`}
                         >
+                          <Button
+                            variant="ghost"
+                            className="flex h-auto min-w-0 flex-1 items-start gap-3 rounded-none p-0 text-left"
+                            onClick={() => handleConnectorSelect(plugin.id)}
+                            aria-current={isSelected ? "page" : undefined}
+                          >
+                            <span
+                              className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border p-2 ${
+                                isSelected
+                                  ? "border-accent/30 bg-accent/18 text-txt-strong"
+                                  : "border-border/50 bg-bg-accent/80 text-muted"
+                              }`}
+                            >
+                              {renderResolvedIcon(plugin, {
+                                className:
+                                  "h-4 w-4 shrink-0 rounded-sm object-contain",
+                                emojiClassName: "text-sm",
+                              })}
+                            </span>
+                            <span className="min-w-0 flex-1 text-left">
+                              <span className="block whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold leading-snug">
+                                {plugin.name}
+                              </span>
+                              <span className="mt-1 block whitespace-normal break-words [overflow-wrap:anywhere] text-[11px] leading-relaxed text-muted/85">
+                                {plugin.description ||
+                                  "No description available"}
+                              </span>
+                            </span>
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className={`shrink-0 rounded-full border px-2.5 py-1 h-auto text-[10px] font-bold tracking-[0.16em] transition-colors ${
+                              plugin.enabled
+                                ? "border-accent bg-accent text-accent-fg"
+                                : "border-border bg-transparent text-muted hover:border-accent/40 hover:text-txt"
+                            } ${
+                              toggleDisabled
+                                ? "cursor-not-allowed opacity-60"
+                                : "cursor-pointer"
+                            }`}
+                            onClick={() =>
+                              void handleTogglePlugin(
+                                plugin.id,
+                                !plugin.enabled,
+                              )
+                            }
+                            disabled={toggleDisabled}
+                          >
+                            {isToggleBusy
+                              ? "..."
+                              : plugin.enabled
+                                ? "ON"
+                                : "OFF"}
+                          </Button>
                           <span
-                            className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border p-2 ${
-                              isSelected
-                                ? "border-accent/30 bg-accent/18 text-txt-strong"
-                                : "border-border/50 bg-bg-accent/80 text-muted"
+                            className={`shrink-0 text-muted transition-transform ${
+                              isExpanded ? "rotate-90" : ""
                             }`}
                           >
-                            {renderResolvedIcon(plugin, {
-                              className:
-                                "h-4 w-4 shrink-0 rounded-sm object-contain",
-                              emojiClassName: "text-sm",
-                            })}
+                            <ChevronRight className="h-4 w-4" />
                           </span>
-                          <span className="min-w-0 flex-1 text-left">
-                            <span className="block truncate text-sm font-semibold leading-none">
-                              {plugin.name}
-                            </span>
-                            <span className="mt-1 block text-[11px] leading-relaxed text-muted/85">
-                              {plugin.description || "No description available"}
-                            </span>
-                          </span>
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className={`shrink-0 rounded-full border px-2.5 py-1 h-auto text-[10px] font-bold tracking-[0.16em] transition-colors ${
-                            plugin.enabled
-                              ? "border-accent bg-accent text-accent-fg"
-                              : "border-border bg-transparent text-muted hover:border-accent/40 hover:text-txt"
-                          } ${
-                            toggleDisabled
-                              ? "cursor-not-allowed opacity-60"
-                              : "cursor-pointer"
-                          }`}
-                          onClick={() =>
-                            void handleTogglePlugin(plugin.id, !plugin.enabled)
-                          }
-                          disabled={toggleDisabled}
-                        >
-                          {isToggleBusy ? "..." : plugin.enabled ? "ON" : "OFF"}
-                        </Button>
-                        <span
-                          className={`shrink-0 text-muted transition-transform ${
-                            isExpanded ? "rotate-90" : ""
-                          }`}
-                        >
-                          <ChevronRight className="h-4 w-4" />
-                        </span>
-                      </div>
-                    );
-                  })}
-                </nav>
+                        </div>
+                      );
+                    })}
+                  </nav>
+                </div>
               </div>
             </aside>
           )}
 
           <div className="min-w-0 flex-1 overflow-y-auto bg-bg/10">
-            <div className="mx-auto max-w-[82rem] px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
+            <div className="mx-auto max-w-[76rem] px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
               {hasPluginToggleInFlight && (
                 <div className="mb-4 rounded-2xl border border-accent bg-accent-subtle px-4 py-3 text-[11px] text-txt">
                   {t("pluginsview.ApplyingPluginChan")}
@@ -2262,9 +2272,9 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                           connectorSectionRefs.current[plugin.id] = element;
                         }}
                         data-testid={`connector-section-${plugin.id}`}
-                        className={`overflow-hidden rounded-[1.4rem] border bg-card/90 shadow-sm transition-all ${
+                        className={`overflow-hidden rounded-[1.6rem] border bg-card/92 shadow-[0_18px_44px_rgba(3,5,10,0.16)] ring-1 ring-border/10 transition-all ${
                           isSelected
-                            ? "border-accent/35 shadow-[0_18px_40px_rgba(var(--accent),0.08)]"
+                            ? "border-border/45 shadow-[0_18px_40px_rgba(3,5,10,0.16)]"
                             : "border-border/50"
                         }`}
                       >
@@ -2292,7 +2302,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                             </span>
                             <span className="min-w-0 flex-1">
                               <span className="flex min-w-0 flex-wrap items-center gap-2">
-                                <span className="truncate text-sm font-semibold text-txt">
+                                <span className="whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold leading-snug text-txt">
                                   {plugin.name}
                                 </span>
                                 <span
@@ -2345,7 +2355,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                               size="sm"
                               className={`flex items-center gap-1 rounded-full border px-3 py-1.5 h-auto text-[11px] font-semibold transition-colors ${
                                 isExpanded
-                                  ? "border-accent/40 bg-accent/10 text-txt"
+                                  ? "border-border/50 bg-bg/25 text-txt"
                                   : "border-border/50 text-muted hover:border-accent/40 hover:text-txt"
                               }`}
                               onClick={() =>
@@ -2390,7 +2400,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                         </div>
 
                         {isExpanded && (
-                          <div className="border-t border-border/40 bg-card/55 px-4 py-4 sm:px-5">
+                          <div className="border-t border-border/40 bg-bg/18 px-4 py-4 sm:px-5">
                             {plugin.validationErrors &&
                               plugin.validationErrors.length > 0 && (
                                 <div className="mb-4 rounded-2xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
@@ -2473,7 +2483,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                               )}
 
                             {hasParams ? (
-                              <div className="space-y-4">
+                              <div className="space-y-4 rounded-[24px] border border-border/25 bg-bg/10 p-4 sm:p-5">
                                 {plugin.id === "telegram" ? (
                                   <TelegramPluginConfig
                                     plugin={plugin}
@@ -2492,7 +2502,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                                 )}
                               </div>
                             ) : (
-                              <div className="rounded-2xl border border-border/40 bg-card/40 px-4 py-3 text-sm text-muted">
+                              <div className="rounded-2xl border border-border/40 bg-card/30 px-4 py-3 text-sm text-muted">
                                 No configuration needed.
                               </div>
                             )}
