@@ -1,8 +1,146 @@
 import { useApp } from "@miladyai/app-core/state";
 import { Button, Input } from "@miladyai/ui";
 import { useState } from "react";
+import {
+  OnboardingStepHeader,
+  onboardingBodyTextShadowStyle,
+  onboardingFooterClass,
+  onboardingPrimaryActionClass,
+  onboardingPrimaryActionTextShadowStyle,
+  onboardingSecondaryActionClass,
+  onboardingSecondaryActionTextShadowStyle,
+  spawnOnboardingRipple,
+} from "./onboarding-step-chrome";
 
 type RpcMode = "" | "cloud" | "byok";
+
+const rpcModeCardBaseClass =
+  "flex min-h-[76px] w-full items-center justify-center rounded-2xl border px-4 py-3 text-center backdrop-blur-[18px] backdrop-saturate-[1.2] transition-all duration-300";
+
+const rpcModeTitleClass =
+  "text-sm font-semibold leading-tight text-[var(--onboarding-text-primary)]";
+
+const rpcModeDescriptionClass =
+  "mt-1 text-xs leading-[1.45] text-[var(--onboarding-text-subtle)]";
+
+const rpcCalloutClass =
+  "mx-auto mt-4 flex w-full max-w-[25rem] items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm leading-relaxed shadow-[0_18px_50px_rgba(3,5,10,0.2)] backdrop-blur-sm";
+
+const rpcFieldStackClass = "mx-auto w-full max-w-[27rem] space-y-4 text-left";
+
+const rpcFieldLabelClass =
+  "mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--onboarding-text-muted)]";
+
+const rpcFieldHintClass =
+  "mb-2 text-xs leading-relaxed text-[var(--onboarding-text-subtle)]";
+
+const rpcInputClass =
+  "w-full rounded-xl border border-[var(--onboarding-card-border)] bg-[var(--onboarding-card-bg)] px-4 py-3 text-left text-sm tracking-[0.01em] text-[var(--onboarding-text-primary)] outline-none transition-[border-color,box-shadow,background-color] duration-300 placeholder:text-[var(--onboarding-text-faint)] focus:border-[var(--onboarding-field-focus-border)] focus:shadow-[var(--onboarding-field-focus-shadow)]";
+
+function RpcModeCard({
+  title,
+  description,
+  tone = "default",
+  onClick,
+}: {
+  title: string;
+  description: string;
+  tone?: "default" | "recommended";
+  onClick: () => void;
+}) {
+  return (
+    <Button
+      type="button"
+      variant={tone === "recommended" ? "default" : "outline"}
+      className={`${rpcModeCardBaseClass} ${
+        tone === "recommended"
+          ? "border-[var(--onboarding-recommended-border)] bg-[var(--onboarding-recommended-bg)] hover:border-[var(--onboarding-recommended-border-strong)] hover:bg-[var(--onboarding-recommended-bg-hover)]"
+          : "border-[var(--onboarding-card-border)] bg-[var(--onboarding-card-bg)] hover:border-[var(--onboarding-card-border-strong)] hover:bg-[var(--onboarding-card-bg-hover)]"
+      }`}
+      onClick={onClick}
+    >
+      <div className="min-w-0">
+        <div
+          className={rpcModeTitleClass}
+          style={onboardingBodyTextShadowStyle}
+        >
+          {title}
+        </div>
+        <div
+          className={rpcModeDescriptionClass}
+          style={onboardingBodyTextShadowStyle}
+        >
+          {description}
+        </div>
+      </div>
+    </Button>
+  );
+}
+
+function RpcKeyField({
+  id,
+  label,
+  hint,
+  placeholder,
+  value,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  hint?: string;
+  placeholder: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className={rpcFieldLabelClass}>
+        {label}
+      </label>
+      {hint ? <p className={rpcFieldHintClass}>{hint}</p> : null}
+      <Input
+        id={id}
+        type="password"
+        className={rpcInputClass}
+        placeholder={placeholder}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      />
+    </div>
+  );
+}
+
+function CloudLoginErrorMessage({ error }: { error: string }) {
+  const urlMatch = error.match(/^Open this link to log in: (.+)$/);
+  if (urlMatch) {
+    return (
+      <p
+        className="mt-3 text-sm text-[var(--onboarding-text-strong)]"
+        style={onboardingBodyTextShadowStyle}
+      >
+        Open this link to log in:{" "}
+        <a
+          href={urlMatch[1]}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline underline-offset-2"
+        >
+          Click here
+        </a>
+      </p>
+    );
+  }
+
+  return (
+    <div
+      className={`${rpcCalloutClass} border-[color:color-mix(in_srgb,var(--danger)_42%,transparent)] bg-[color:color-mix(in_srgb,var(--danger)_12%,transparent)] text-[var(--danger)]`}
+      role="alert"
+      style={onboardingBodyTextShadowStyle}
+    >
+      {error}
+    </div>
+  );
+}
 
 export function RpcStep() {
   const {
@@ -33,98 +171,48 @@ export function RpcStep() {
     setState("onboardingRpcKeys", { ...rpcKeys, [key]: value });
   };
 
-  const handleSkip = () => {
-    // Clear any partial RPC config and advance
-    void handleOnboardingNext();
+  const applyCloudSelections = () => {
+    setState("onboardingRpcSelections", {
+      evm: "eliza-cloud",
+      bsc: "eliza-cloud",
+      solana: "eliza-cloud",
+    });
   };
 
-  // ── No mode chosen yet — show two option cards ──────────────────────
   if (!mode) {
     return (
       <>
-        <div
-          className="text-xs tracking-[0.3em] uppercase text-[var(--onboarding-text-muted)] font-semibold text-center mb-0"
-          style={{ textShadow: "0 2px 10px rgba(3,5,10,0.55)" }}
-        >
-          {t("onboarding.rpcTitle")}
-        </div>
-        <div className="flex items-center gap-[12px] my-[16px] before:content-[''] before:flex-1 before:h-[1px] before:bg-gradient-to-r before:from-transparent before:via-[var(--onboarding-divider)] before:to-transparent after:content-[''] after:flex-1 after:h-[1px] after:bg-gradient-to-r after:from-transparent after:via-[var(--onboarding-divider)] after:to-transparent">
-          <div className="w-1.5 h-1.5 bg-[rgba(240,185,11,0.4)] rotate-45 shrink-0" />
-        </div>
-        <div
-          className="text-xl font-light leading-[1.4] text-[var(--onboarding-text-strong)] text-center mb-[18px]"
-          style={{ textShadow: "0 2px 10px rgba(3,5,10,0.55)" }}
-        >
-          {t("onboarding.rpcQuestion")}
-        </div>
-        <p className="mx-auto mt-1.5 mb-3 max-w-[32ch] text-center text-[12px] leading-[1.35] text-[var(--onboarding-text-muted)]">
-          {t("onboarding.rpcDesc")}
-        </p>
+        <OnboardingStepHeader
+          eyebrow={t("onboarding.rpcTitle")}
+          title={t("onboarding.rpcQuestion")}
+          description={t("onboarding.rpcDesc")}
+          descriptionClassName="mx-auto mt-1 max-w-[34ch] text-balance text-[13px] leading-6"
+        />
 
-        <div className="mx-auto flex w-full max-w-[24rem] flex-col gap-2.5">
-          {/* Eliza Cloud option */}
-          <Button
-            type="button"
-            className="flex min-h-[48px] items-center justify-center gap-[10px] rounded-[10px] border border-[var(--onboarding-recommended-border)] bg-[var(--onboarding-recommended-bg)] px-[12px] py-[9px] text-left backdrop-blur-[18px] backdrop-saturate-[1.2] transition-all duration-300 hover:bg-[var(--onboarding-recommended-bg-hover)] hover:border-[var(--onboarding-recommended-border-strong)]"
+        <div className="mx-auto flex w-full max-w-[25rem] flex-col gap-3">
+          <RpcModeCard
+            title={t("onboarding.rpcElizaCloud")}
+            description={t("onboarding.rpcElizaCloudDesc")}
+            tone="recommended"
             onClick={() => {
               if (elizaCloudConnected) {
-                // Already connected — just mark cloud and advance
-                setState("onboardingRpcSelections", {
-                  evm: "eliza-cloud",
-                  bsc: "eliza-cloud",
-                  solana: "eliza-cloud",
-                });
-                setMode("cloud");
-              } else {
-                setMode("cloud");
+                applyCloudSelections();
               }
+              setMode("cloud");
             }}
-          >
-            <div className="min-w-0 text-center">
-              <div
-                className="text-[11px] font-medium leading-[1.2] text-[var(--onboarding-text-primary)]"
-                style={{ textShadow: "0 1px 8px rgba(3,5,10,0.6)" }}
-              >
-                {t("onboarding.rpcElizaCloud")}
-              </div>
-              <div
-                className="mt-0.5 line-clamp-1 text-[9px] leading-[1.2] text-[var(--onboarding-text-subtle)]"
-                style={{ textShadow: "0 1px 8px rgba(3,5,10,0.5)" }}
-              >
-                {t("onboarding.rpcElizaCloudDesc")}
-              </div>
-            </div>
-          </Button>
-
-          {/* BYOK option */}
-          <Button
-            variant="outline"
-            type="button"
-            className="flex min-h-[48px] items-center justify-center gap-[10px] rounded-[10px] border border-[var(--onboarding-card-border)] bg-[var(--onboarding-card-bg)] px-[12px] py-[9px] text-left backdrop-blur-[18px] backdrop-saturate-[1.2] transition-all duration-300 hover:bg-[var(--onboarding-card-bg-hover)] hover:border-[var(--onboarding-card-border-strong)]"
+          />
+          <RpcModeCard
+            title={t("onboarding.rpcBringKeys")}
+            description="Alchemy, QuickNode, Helius"
             onClick={() => setMode("byok")}
-          >
-            <div className="min-w-0 text-center">
-              <div
-                className="text-[11px] font-medium leading-[1.2] text-[var(--onboarding-text-primary)]"
-                style={{ textShadow: "0 1px 8px rgba(3,5,10,0.6)" }}
-              >
-                {t("onboarding.rpcBringKeys")}
-              </div>
-              <div
-                className="mt-0.5 line-clamp-1 text-[9px] leading-[1.2] text-[var(--onboarding-text-subtle)]"
-                style={{ textShadow: "0 1px 8px rgba(3,5,10,0.5)" }}
-              >
-                Alchemy, QuickNode, Helius
-              </div>
-            </div>
-          </Button>
+          />
         </div>
 
-        <div className="flex justify-between items-center gap-6 mt-[18px] pt-3.5 border-t border-[var(--onboarding-footer-border)]">
+        <div className={onboardingFooterClass}>
           <Button
             variant="ghost"
-            className="text-[10px] text-[var(--onboarding-text-muted)] tracking-[0.15em] uppercase cursor-pointer no-underline bg-none border-none font-inherit transition-colors duration-300 p-0 hover:text-[var(--onboarding-text-strong)]"
-            style={{ textShadow: "0 1px 8px rgba(3,5,10,0.45)" }}
+            className={onboardingSecondaryActionClass}
+            style={onboardingSecondaryActionTextShadowStyle}
             onClick={handleOnboardingBack}
             type="button"
           >
@@ -132,9 +220,9 @@ export function RpcStep() {
           </Button>
           <Button
             variant="ghost"
-            className="text-[10px] text-[var(--onboarding-text-muted)] tracking-[0.15em] uppercase cursor-pointer no-underline bg-none border-none font-inherit transition-colors duration-300 p-0 hover:text-[var(--onboarding-text-strong)]"
-            style={{ textShadow: "0 1px 8px rgba(3,5,10,0.45)" }}
-            onClick={handleSkip}
+            className={onboardingSecondaryActionClass}
+            style={onboardingSecondaryActionTextShadowStyle}
+            onClick={() => void handleOnboardingNext()}
             type="button"
           >
             {t("onboarding.rpcSkip")}
@@ -144,35 +232,22 @@ export function RpcStep() {
     );
   }
 
-  // ── Eliza Cloud mode ───────────────────────────────────────────────
   if (mode === "cloud") {
     return (
       <>
-        <div
-          className="text-xs tracking-[0.3em] uppercase text-[var(--onboarding-text-muted)] font-semibold text-center mb-0"
-          style={{ textShadow: "0 2px 10px rgba(3,5,10,0.55)" }}
-        >
-          {t("onboarding.rpcTitle")}
-        </div>
-        <div className="flex items-center gap-[12px] my-[16px] before:content-[''] before:flex-1 before:h-[1px] before:bg-gradient-to-r before:from-transparent before:via-[var(--onboarding-divider)] before:to-transparent after:content-[''] after:flex-1 after:h-[1px] after:bg-gradient-to-r after:from-transparent after:via-[var(--onboarding-divider)] after:to-transparent">
-          <div className="w-1.5 h-1.5 bg-[rgba(240,185,11,0.4)] rotate-45 shrink-0" />
-        </div>
+        <OnboardingStepHeader
+          eyebrow={t("onboarding.rpcTitle")}
+          title={t("onboarding.rpcElizaCloud")}
+          description={t("onboarding.rpcElizaCloudDesc")}
+          descriptionClassName="mx-auto mt-1 max-w-[34ch] text-balance"
+        />
 
-        <div style={{ width: "100%", textAlign: "center" }}>
+        <div className="mx-auto w-full max-w-[25rem] text-center">
           {elizaCloudConnected ? (
             <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                padding: "0.625rem 1rem",
-                border: "1px solid var(--ok-muted)",
-                background: "var(--ok-subtle)",
-                color: "var(--ok)",
-                fontSize: "0.875rem",
-                borderRadius: "0.5rem",
-                justifyContent: "center",
-              }}
+              className={`${rpcCalloutClass} border-[var(--ok-muted)] bg-[var(--ok-subtle)] text-[var(--ok)]`}
+              role="status"
+              style={onboardingBodyTextShadowStyle}
             >
               <svg
                 width="16"
@@ -193,20 +268,14 @@ export function RpcStep() {
             <>
               <Button
                 type="button"
-                className="group relative inline-flex items-center justify-center gap-[8px] px-[32px] py-[12px] min-h-[44px] bg-[var(--onboarding-accent-bg)] border border-[var(--onboarding-accent-border)] rounded-[6px] text-[var(--onboarding-accent-foreground)] text-[11px] font-semibold tracking-[0.18em] uppercase cursor-pointer transition-all duration-300 font-inherit overflow-hidden hover:bg-[var(--onboarding-accent-bg-hover)] hover:border-[var(--onboarding-accent-border-hover)] disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{ textShadow: "0 1px 6px rgba(3,5,10,0.55)" }}
-                onClick={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const circle = document.createElement("span");
-                  const diameter = Math.max(rect.width, rect.height);
-                  circle.style.width = circle.style.height = `${diameter}px`;
-                  circle.style.left = `${e.clientX - rect.left - diameter / 2}px`;
-                  circle.style.top = `${e.clientY - rect.top - diameter / 2}px`;
-                  circle.className =
-                    "absolute rounded-full bg-[var(--onboarding-ripple)] transform scale-0 animate-[onboarding-ripple-expand_0.6s_ease-out_forwards] pointer-events-none";
-                  e.currentTarget.appendChild(circle);
-                  setTimeout(() => circle.remove(), 600);
-                  handleCloudLogin();
+                className={`${onboardingPrimaryActionClass} w-full`}
+                style={onboardingPrimaryActionTextShadowStyle}
+                onClick={(event) => {
+                  spawnOnboardingRipple(event.currentTarget, {
+                    x: event.clientX,
+                    y: event.clientY,
+                  });
+                  void handleCloudLogin();
                 }}
                 disabled={elizaCloudLoginBusy || elizaCloudReady}
               >
@@ -216,73 +285,34 @@ export function RpcStep() {
                     ? t("onboarding.connected")
                     : t("onboarding.connectAccount")}
               </Button>
-              {elizaCloudLoginError &&
-                (() => {
-                  const urlMatch = elizaCloudLoginError.match(
-                    /^Open this link to log in: (.+)$/,
-                  );
-                  if (urlMatch) {
-                    return (
-                      <p
-                        style={{
-                          fontSize: "0.8125rem",
-                          marginTop: "0.5rem",
-                          color: "var(--text)",
-                        }}
-                      >
-                        Open this link to log in:{" "}
-                        <a
-                          href={urlMatch[1]}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{
-                            color: "var(--text)",
-                            textDecoration: "underline",
-                          }}
-                        >
-                          Click here
-                        </a>
-                      </p>
-                    );
-                  }
-                  return (
-                    <p
-                      style={{
-                        color: "var(--danger)",
-                        fontSize: "0.8125rem",
-                        marginTop: "0.5rem",
-                      }}
-                    >
-                      {elizaCloudLoginError}
-                    </p>
-                  );
-                })()}
-              <p className="text-sm text-[var(--onboarding-text-muted)] text-center leading-relaxed mt-3">
+              {elizaCloudLoginError ? (
+                <CloudLoginErrorMessage error={elizaCloudLoginError} />
+              ) : null}
+              <p
+                className="mt-3 text-sm leading-relaxed text-[var(--onboarding-text-muted)]"
+                style={onboardingBodyTextShadowStyle}
+              >
                 {t("onboarding.freeCredits")}
               </p>
             </>
           )}
         </div>
 
-        <div className="flex justify-between items-center gap-6 mt-[18px] pt-3.5 border-t border-[var(--onboarding-footer-border)]">
+        <div className={onboardingFooterClass}>
           <Button
             variant="ghost"
-            className="text-[10px] text-[var(--onboarding-text-muted)] tracking-[0.15em] uppercase cursor-pointer no-underline bg-none border-none font-inherit transition-colors duration-300 p-0 hover:text-[var(--onboarding-text-strong)]"
-            style={{ textShadow: "0 1px 8px rgba(3,5,10,0.45)" }}
+            className={onboardingSecondaryActionClass}
+            style={onboardingSecondaryActionTextShadowStyle}
             onClick={() => setMode("")}
             type="button"
           >
-            {t("settings.change")}
+            {t("onboarding.back")}
           </Button>
           <Button
-            className="group relative inline-flex items-center justify-center gap-[8px] px-[32px] py-[12px] min-h-[44px] bg-[var(--onboarding-accent-bg)] border border-[var(--onboarding-accent-border)] rounded-[6px] text-[var(--onboarding-accent-foreground)] text-[11px] font-semibold tracking-[0.18em] uppercase cursor-pointer transition-all duration-300 font-inherit overflow-hidden hover:bg-[var(--onboarding-accent-bg-hover)] hover:border-[var(--onboarding-accent-border-hover)] disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ textShadow: "0 1px 6px rgba(3,5,10,0.55)" }}
+            className={onboardingPrimaryActionClass}
+            style={onboardingPrimaryActionTextShadowStyle}
             onClick={() => {
-              setState("onboardingRpcSelections", {
-                evm: "eliza-cloud",
-                bsc: "eliza-cloud",
-                solana: "eliza-cloud",
-              });
+              applyCloudSelections();
               void handleOnboardingNext();
             }}
             disabled={!elizaCloudReady}
@@ -295,152 +325,61 @@ export function RpcStep() {
     );
   }
 
-  // ── BYOK mode ───────────────────────────────────────────────────────
   return (
     <>
-      <div
-        className="text-xs tracking-[0.3em] uppercase text-[var(--onboarding-text-muted)] font-semibold text-center mb-0"
-        style={{ textShadow: "0 2px 10px rgba(3,5,10,0.55)" }}
-      >
-        {t("onboarding.rpcTitle")}
+      <OnboardingStepHeader
+        eyebrow={t("onboarding.rpcTitle")}
+        title={t("onboarding.rpcBringKeys")}
+        description="Connect your preferred RPC providers for chains where you want direct control."
+        descriptionClassName="mx-auto mt-1 max-w-[35ch] text-balance"
+      />
+
+      <div className={rpcFieldStackClass}>
+        <RpcKeyField
+          id="rpc-alchemy"
+          label={t("onboarding.rpcAlchemyKey")}
+          hint="Covers Ethereum, Base, Arbitrum, Optimism, Polygon, and BSC."
+          placeholder="Enter Alchemy API key"
+          value={rpcKeys.ALCHEMY_API_KEY ?? ""}
+          onChange={(value) => setRpcKey("ALCHEMY_API_KEY", value)}
+        />
+        <RpcKeyField
+          id="rpc-helius"
+          label={t("onboarding.rpcHeliusKey")}
+          hint="Solana mainnet RPC and token data."
+          placeholder="Enter Helius API key"
+          value={rpcKeys.HELIUS_API_KEY ?? ""}
+          onChange={(value) => setRpcKey("HELIUS_API_KEY", value)}
+        />
+        <RpcKeyField
+          id="rpc-birdeye"
+          label={t("onboarding.rpcBirdeyeKey")}
+          hint="Optional Solana market data for richer token coverage."
+          placeholder="Enter Birdeye API key (optional)"
+          value={rpcKeys.BIRDEYE_API_KEY ?? ""}
+          onChange={(value) => setRpcKey("BIRDEYE_API_KEY", value)}
+        />
+      </div>
+
+      <div className={onboardingFooterClass}>
         <Button
           variant="ghost"
-          type="button"
-          className="text-[10px] text-[var(--onboarding-text-muted)] tracking-[0.15em] uppercase cursor-pointer no-underline bg-none border-none font-inherit transition-colors duration-300 p-0 hover:text-[var(--onboarding-text-strong)]"
-          style={{
-            textShadow: "0 1px 8px rgba(3,5,10,0.45)",
-            marginLeft: "0.5rem",
-            fontSize: "0.75rem",
-          }}
-          onClick={() => setMode("")}
-        >
-          {t("settings.change")}
-        </Button>
-      </div>
-      <div className="flex items-center gap-[12px] my-[16px] before:content-[''] before:flex-1 before:h-[1px] before:bg-gradient-to-r before:from-transparent before:via-[var(--onboarding-divider)] before:to-transparent after:content-[''] after:flex-1 after:h-[1px] after:bg-gradient-to-r after:from-transparent after:via-[var(--onboarding-divider)] after:to-transparent">
-        <div className="w-1.5 h-1.5 bg-[rgba(240,185,11,0.4)] rotate-45 shrink-0" />
-      </div>
-
-      <div
-        style={{
-          width: "100%",
-          textAlign: "left",
-          display: "flex",
-          flexDirection: "column",
-          gap: "1rem",
-        }}
-      >
-        {/* Alchemy — all EVM chains */}
-        <div>
-          <label
-            htmlFor="rpc-alchemy"
-            style={{
-              display: "block",
-              fontSize: "0.8125rem",
-              fontWeight: 600,
-              marginBottom: "0.375rem",
-              color: "var(--text)",
-            }}
-          >
-            {t("onboarding.rpcAlchemyKey")}
-          </label>
-          <p
-            className="text-sm text-[var(--onboarding-text-muted)] text-center leading-relaxed mt-3"
-            style={{ marginBottom: "0.375rem", textAlign: "left" }}
-          >
-            Covers Ethereum, Base, Arbitrum, Optimism, Polygon, BSC
-          </p>
-          <Input
-            id="rpc-alchemy"
-            type="password"
-            className="w-full px-[20px] py-[16px] bg-[var(--onboarding-card-bg)] border border-[var(--onboarding-card-border)] rounded-[6px] text-[var(--onboarding-text-primary)] font-inherit outline-none tracking-[0.03em] text-center transition-all duration-300 focus:border-[var(--onboarding-field-focus-border)] focus:shadow-[var(--onboarding-field-focus-shadow)] placeholder:text-[var(--onboarding-text-faint)]"
-            placeholder="Enter Alchemy API key"
-            value={rpcKeys.ALCHEMY_API_KEY ?? ""}
-            onChange={(e) => setRpcKey("ALCHEMY_API_KEY", e.target.value)}
-          />
-        </div>
-
-        {/* Helius — Solana specific */}
-        <div>
-          <label
-            htmlFor="rpc-helius"
-            style={{
-              display: "block",
-              fontSize: "0.8125rem",
-              fontWeight: 600,
-              marginBottom: "0.375rem",
-              color: "var(--text)",
-            }}
-          >
-            {t("onboarding.rpcHeliusKey")}
-          </label>
-          <p
-            className="text-sm text-[var(--onboarding-text-muted)] text-center leading-relaxed mt-3"
-            style={{ marginBottom: "0.375rem", textAlign: "left" }}
-          >
-            Solana mainnet RPC &amp; token data
-          </p>
-          <Input
-            id="rpc-helius"
-            type="password"
-            className="w-full px-[20px] py-[16px] bg-[var(--onboarding-card-bg)] border border-[var(--onboarding-card-border)] rounded-[6px] text-[var(--onboarding-text-primary)] font-inherit outline-none tracking-[0.03em] text-center transition-all duration-300 focus:border-[var(--onboarding-field-focus-border)] focus:shadow-[var(--onboarding-field-focus-shadow)] placeholder:text-[var(--onboarding-text-faint)]"
-            placeholder="Enter Helius API key"
-            value={rpcKeys.HELIUS_API_KEY ?? ""}
-            onChange={(e) => setRpcKey("HELIUS_API_KEY", e.target.value)}
-          />
-        </div>
-
-        {/* Birdeye — Solana token data (optional) */}
-        <div>
-          <label
-            htmlFor="rpc-birdeye"
-            style={{
-              display: "block",
-              fontSize: "0.8125rem",
-              fontWeight: 600,
-              marginBottom: "0.375rem",
-              color: "var(--text)",
-            }}
-          >
-            {t("onboarding.rpcBirdeyeKey")}
-          </label>
-          <Input
-            id="rpc-birdeye"
-            type="password"
-            className="w-full px-[20px] py-[16px] bg-[var(--onboarding-card-bg)] border border-[var(--onboarding-card-border)] rounded-[6px] text-[var(--onboarding-text-primary)] font-inherit outline-none tracking-[0.03em] text-center transition-all duration-300 focus:border-[var(--onboarding-field-focus-border)] focus:shadow-[var(--onboarding-field-focus-shadow)] placeholder:text-[var(--onboarding-text-faint)]"
-            placeholder="Enter Birdeye API key (optional)"
-            value={rpcKeys.BIRDEYE_API_KEY ?? ""}
-            onChange={(e) => setRpcKey("BIRDEYE_API_KEY", e.target.value)}
-          />
-        </div>
-      </div>
-
-      <div className="flex justify-between items-center gap-6 mt-[18px] pt-3.5 border-t border-[var(--onboarding-footer-border)]">
-        <Button
-          variant="ghost"
-          className="text-[10px] text-[var(--onboarding-text-muted)] tracking-[0.15em] uppercase cursor-pointer no-underline bg-none border-none font-inherit transition-colors duration-300 p-0 hover:text-[var(--onboarding-text-strong)]"
-          style={{ textShadow: "0 1px 8px rgba(3,5,10,0.45)" }}
+          className={onboardingSecondaryActionClass}
+          style={onboardingSecondaryActionTextShadowStyle}
           onClick={() => setMode("")}
           type="button"
         >
           {t("onboarding.back")}
         </Button>
         <Button
-          className="group relative inline-flex items-center justify-center gap-[8px] px-[32px] py-[12px] min-h-[44px] bg-[var(--onboarding-accent-bg)] border border-[var(--onboarding-accent-border)] rounded-[6px] text-[var(--onboarding-accent-foreground)] text-[11px] font-semibold tracking-[0.18em] uppercase cursor-pointer transition-all duration-300 font-inherit overflow-hidden hover:bg-[var(--onboarding-accent-bg-hover)] hover:border-[var(--onboarding-accent-border-hover)] disabled:opacity-40 disabled:cursor-not-allowed"
-          style={{ textShadow: "0 1px 6px rgba(3,5,10,0.55)" }}
-          onClick={(e) => {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const circle = document.createElement("span");
-            const diameter = Math.max(rect.width, rect.height);
-            circle.style.width = circle.style.height = `${diameter}px`;
-            circle.style.left = `${e.clientX - rect.left - diameter / 2}px`;
-            circle.style.top = `${e.clientY - rect.top - diameter / 2}px`;
-            circle.className =
-              "absolute rounded-full bg-[var(--onboarding-ripple)] transform scale-0 animate-[onboarding-ripple-expand_0.6s_ease-out_forwards] pointer-events-none";
-            e.currentTarget.appendChild(circle);
-            setTimeout(() => circle.remove(), 600);
+          className={onboardingPrimaryActionClass}
+          style={onboardingPrimaryActionTextShadowStyle}
+          onClick={(event) => {
+            spawnOnboardingRipple(event.currentTarget, {
+              x: event.clientX,
+              y: event.clientY,
+            });
 
-            // Build RPC selections based on what keys were entered
             const selections: Record<string, string> = {};
             if (rpcKeys.ALCHEMY_API_KEY) {
               selections.evm = "alchemy";
