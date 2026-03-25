@@ -20,7 +20,10 @@ import {
   useState,
 } from "react";
 import type { VoiceConfig, VoiceMode } from "../api/client";
-import { getElectrobunRendererRpc } from "../bridge/electrobun-rpc";
+import {
+  getElectrobunRendererRpc,
+  invokeDesktopBridgeRequest,
+} from "../bridge/electrobun-rpc";
 import {
   getTalkModePlugin,
   type TalkModeErrorEvent,
@@ -320,9 +323,12 @@ function shelterUrls(input: string): {
  */
 function isRealSentenceEnd(value: string, matchIndex: number): boolean {
   // Decimal: digit immediately before the period → not a sentence end.
-  if (matchIndex > 0 && /\d/.test(value[matchIndex - 1]!)) {
+  const prevChar = matchIndex > 0 ? value.charAt(matchIndex - 1) : "";
+  if (/\d/.test(prevChar)) {
     // Check if a digit also follows the period (e.g. "3.14")
-    if (matchIndex + 1 < value.length && /\d/.test(value[matchIndex + 1]!)) {
+    const nextChar =
+      matchIndex + 1 < value.length ? value.charAt(matchIndex + 1) : "";
+    if (/\d/.test(nextChar)) {
       return false;
     }
   }
@@ -461,10 +467,23 @@ function resolveEffectiveVoiceConfig(
 ): VoiceConfig | null {
   const cloudConnected = options?.cloudConnected === true;
   const base = cloneVoiceConfig(config) ?? {};
-  const provider =
+  const hasSavedElevenLabsVoice = Boolean(
+    (base.elevenlabs as Record<string, string> | undefined)?.voiceId,
+  );
+  const inferredProvider =
     base.provider ??
     (base.elevenlabs ? "elevenlabs" : base.edge ? "edge" : undefined) ??
     (cloudConnected ? "elevenlabs" : undefined);
+  // When cloud is connected and no explicit provider was saved, default to
+  // elevenlabs. Also prefer elevenlabs if a saved voice exists (prevents
+  // silent downgrade when cloud status flickers). But respect an explicit
+  // non-elevenlabs choice — the user intentionally selected edge/other.
+  const provider =
+    !base.provider && cloudConnected
+      ? "elevenlabs"
+      : hasSavedElevenLabsVoice && cloudConnected
+        ? "elevenlabs"
+        : inferredProvider;
 
   if (!provider) return null;
   if (provider !== "elevenlabs") {
@@ -1290,6 +1309,15 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
         activeTaskFinishRef.current = finish;
 
         if (!synth) {
+          if (getElectrobunRendererRpc()) {
+            void invokeDesktopBridgeRequest<void>({
+              rpcMethod: "talkmodeSpeak",
+              ipcChannel: "talkmode:speak",
+              params: { text: text.trim() },
+            }).catch((err: unknown) => {
+              console.warn("[useVoiceChat] Desktop speech bridge failed:", err);
+            });
+          }
           emitPlaybackStart({
             text,
             segment: task.segment,
@@ -1413,13 +1441,14 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
                 break;
               }
               console.warn(
-                "[useVoiceChat] ElevenLabs TTS failed, falling back to browser:",
+                "[useVoiceChat] ElevenLabs TTS failed; browser fallback suppressed:",
                 error instanceof Error
                   ? `${error.name}: ${error.message}`
                   : error,
               );
-              usingAudioAnalysisRef.current = false;
-              setUsingAudioAnalysis(false);
+              // Keep voice identity consistent: if ElevenLabs is selected and
+              // fails, do not swap to browser/system voices.
+              continue;
             }
           } else {
             usingAudioAnalysisRef.current = false;

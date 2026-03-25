@@ -223,8 +223,24 @@ describe("extractAndPersistOnboardingApiKey", () => {
 });
 
 describe("persistCompatOnboardingDefaults", () => {
+  let envSnapshot: Record<string, string | undefined>;
+
   beforeEach(() => {
+    envSnapshot = {
+      ELEVENLABS_API_KEY: process.env.ELEVENLABS_API_KEY,
+      ELIZAOS_CLOUD_API_KEY: process.env.ELIZAOS_CLOUD_API_KEY,
+    };
     mockSaveElizaConfig.mockClear();
+  });
+
+  afterEach(() => {
+    for (const [key, value] of Object.entries(envSnapshot)) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
   });
 
   it("persists the compat admin entity id and agent metadata into agents.list", () => {
@@ -328,6 +344,32 @@ describe("persistCompatOnboardingDefaults", () => {
 
     expect(result).toBeNull();
     expect(mockSaveElizaConfig).not.toHaveBeenCalled();
+  });
+
+  it("persists preset ElevenLabs voice for cloud-managed onboarding without direct elevenlabs key", () => {
+    // Guard fork-first QA flow: cloud-managed onboarding must still persist
+    // a deterministic preset voice so desktop catchphrase playback stays stable.
+    delete process.env.ELEVENLABS_API_KEY;
+    delete process.env.ELIZAOS_CLOUD_API_KEY;
+
+    const config = {
+      cloud: { apiKey: "eliza_cloud_test_key", enabled: true },
+      agents: { defaults: {} },
+    } as Record<string, unknown>;
+    mockLoadElizaConfig.mockReturnValue(config);
+
+    persistCompatOnboardingDefaults({
+      name: "Chen",
+      uiLanguage: "en",
+    });
+
+    expect(mockSaveElizaConfig).toHaveBeenCalledTimes(1);
+    const saved = mockSaveElizaConfig.mock.calls[0][0];
+    expect(saved.messages?.tts?.provider).toBe("elevenlabs");
+    expect(saved.messages?.tts?.mode).toBe("cloud");
+    expect(saved.messages?.tts?.elevenlabs?.voiceId).toEqual(
+      expect.any(String),
+    );
   });
 });
 

@@ -5,7 +5,6 @@
  */
 
 import { ONBOARDING_PROVIDER_CATALOG } from "@miladyai/shared/contracts/onboarding";
-import { replaceNameTokens } from "../components/character-editor-helpers";
 import {
   getDefaultStylePreset,
   getStylePresets,
@@ -32,7 +31,6 @@ import {
   type BscTradeTxStatusResponse,
   type BscTransferExecuteRequest,
   type BscTransferExecuteResponse,
-  type StewardStatusResponse,
   type CatalogSkill,
   type CharacterData,
   type CodingAgentSession,
@@ -101,6 +99,7 @@ import {
   normalizeSlashCommandName,
 } from "../chat";
 import { mapServerTasksToSessions } from "../coding";
+import { replaceNameTokens } from "../components/character-editor-helpers";
 import { getBootConfig, setBootConfig } from "../config/boot-config";
 import { BrandingContext, DEFAULT_BRANDING } from "../config/branding";
 import { type AppEmoteEventDetail, dispatchAppEmoteEvent } from "../events";
@@ -142,9 +141,9 @@ import {
   asApiLikeError,
   type CompanionHalfFramerateMode,
   type CompanionVrmPowerMode,
+  clearAvatarIndex,
   clearPersistedConnectionMode,
   clearPersistedOnboardingStep,
-  clearAvatarIndex,
   deriveOnboardingResumeConnection,
   deriveOnboardingResumeFields,
   formatSearchBullet,
@@ -722,7 +721,7 @@ function AppProviderInner({
     for (const turn of queued) {
       turn.resolve();
     }
-  }, [chatSendQueueRef]);
+  }, []);
   const interruptActiveChatPipeline = useCallback(() => {
     resolveQueuedChatSends();
     chatAbortRef.current?.abort();
@@ -731,7 +730,6 @@ function AppProviderInner({
     setChatFirstTokenReceived(false);
   }, [
     chatAbortRef,
-    chatSendQueueRef,
     resolveQueuedChatSends,
     setChatFirstTokenReceived,
     setChatSending,
@@ -2148,14 +2146,9 @@ function AppProviderInner({
       return lastElizaCloudPollConnectedRef.current;
     }
     if (!cloudStatus) {
-      setElizaCloudConnected(false);
-      setElizaCloudCredits(null);
-      setElizaCloudCreditsLow(false);
-      setElizaCloudCreditsCritical(false);
-      setElizaCloudAuthRejected(false);
-      setElizaCloudCreditsError(null);
-      lastElizaCloudPollConnectedRef.current = false;
-      return false;
+      // Keep last-known cloud state on transient poll failures.
+      // This prevents brief startup/network blips from looking like a disconnect.
+      return lastElizaCloudPollConnectedRef.current;
     }
     // Trust `connected` from the server snapshot (it already folds in API key + CLOUD_AUTH).
     const isConnected = Boolean(cloudStatus.connected);
@@ -2212,10 +2205,9 @@ function AppProviderInner({
       setElizaCloudCreditsError(null);
     }
     lastElizaCloudPollConnectedRef.current = isConnected;
-    // Self-manage the recurring poll interval: start when connected, stop when not.
-    // This covers login during onboarding (interval wasn't started at mount) and
-    // disconnect (interval should stop to avoid useless API calls).
-    if (isConnected && !elizaCloudPollInterval.current) {
+    // Keep polling even when disconnected so recovered sessions are detected
+    // automatically without requiring user interaction.
+    if (!elizaCloudPollInterval.current) {
       elizaCloudPollInterval.current = window.setInterval(() => {
         if (
           typeof document !== "undefined" &&
@@ -2225,9 +2217,6 @@ function AppProviderInner({
         }
         void pollCloudCredits();
       }, 60_000);
-    } else if (!isConnected && elizaCloudPollInterval.current) {
-      clearInterval(elizaCloudPollInterval.current);
-      elizaCloudPollInterval.current = null;
     }
     return isConnected;
   }, []);
@@ -2837,8 +2826,6 @@ function AppProviderInner({
       onboardingCompletionCommittedRef,
       onboardingResumeConnectionRef,
       setSelectedVrmIndex,
-      setCustomVrmUrl,
-      setCustomBackgroundUrl,
     ],
   );
 
@@ -3716,7 +3703,6 @@ function AppProviderInner({
     }
   }, [
     chatSendBusyRef,
-    chatSendQueueRef,
     runQueuedChatSend,
     setChatFirstTokenReceived,
     setChatSending,
@@ -3749,7 +3735,7 @@ function AppProviderInner({
         void flushQueuedChatSends();
       });
     },
-    [chatSendQueueRef, flushQueuedChatSends, setChatSending],
+    [flushQueuedChatSends, setChatSending],
   );
 
   const handleChatSend = useCallback(
@@ -5425,6 +5411,7 @@ function AppProviderInner({
     setOnboardingStyle,
     setPostOnboardingChecklistDismissed,
     setSelectedVrmIndex,
+    loadCharacter,
   ]);
 
   // ── Onboarding motion (flow graph: packages/app-core/src/onboarding/flow.ts) ──
@@ -6100,16 +6087,12 @@ function AppProviderInner({
         return;
       }
 
+      // Keep users on provider choice first: detection should inform and
+      // annotate options, not auto-route into a specific provider detail view.
+      // We only nudge run mode so the provider grid is available.
       setOnboardingRunMode(prefill.runMode);
-      setOnboardingProvider(prefill.providerId);
-      setOnboardingApiKey(prefill.apiKey);
     },
-    [
-      setOnboardingApiKey,
-      setOnboardingDetectedProviders,
-      setOnboardingProvider,
-      setOnboardingRunMode,
-    ],
+    [setOnboardingDetectedProviders, setOnboardingRunMode],
   );
 
   // ── Generic state setter ───────────────────────────────────────────
@@ -6442,7 +6425,9 @@ function AppProviderInner({
           ? await inspectExistingElizaInstall().catch(() => null)
           : null;
       const shouldPreferLocalBootstrap =
-        forceLocalBootstrap || Boolean(desktopExistingInstall?.detected);
+        forceLocalBootstrap ||
+        isElectrobunRuntime() ||
+        Boolean(desktopExistingInstall?.detected);
       const probedConnection = persistedConnection
         ? null
         : await detectExistingOnboardingConnection({
@@ -7174,17 +7159,25 @@ function AppProviderInner({
         logStartupWarning("failed to load wallet addresses", err);
       }
 
-      // Restore avatar selection from config (server-persisted under "ui")
+      // Restore avatar selection from stream settings (same source used when saving).
+      // This prevents detached/settings windows from snapping back to stale
+      // config.ui.avatarIndex values and overwriting local avatar preference.
       let resolvedIndex = loadAvatarIndex();
       try {
-        const cfg = await client.getConfig();
-        const ui = cfg.ui as Record<string, unknown> | undefined;
-        if (ui?.avatarIndex != null) {
-          resolvedIndex = normalizeAvatarIndex(Number(ui.avatarIndex));
+        const stream = await client.getStreamSettings();
+        const serverAvatarIndex = stream.settings?.avatarIndex;
+        if (
+          typeof serverAvatarIndex === "number" &&
+          Number.isFinite(serverAvatarIndex)
+        ) {
+          resolvedIndex = normalizeAvatarIndex(serverAvatarIndex);
           setSelectedVrmIndex(resolvedIndex);
         }
       } catch (err) {
-        logStartupWarning("failed to load config for avatar selection", err);
+        logStartupWarning(
+          "failed to load stream settings for avatar selection",
+          err,
+        );
       }
       // If custom avatar selected, verify the file still exists on the server
       if (resolvedIndex === 0) {
