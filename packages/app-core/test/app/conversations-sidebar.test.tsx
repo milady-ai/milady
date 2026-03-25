@@ -198,4 +198,58 @@ describe("ConversationsSidebar", () => {
     expect(content).toContain("conversations.none");
     expect(content).toContain("conversations.chats");
   });
+
+  it("uses the rounded desktop shell treatment and shows unread count badges", async () => {
+    mockUseApp.mockReturnValue(
+      createContext({
+        unreadConversations: new Set(["conv-1", "conv-2"]),
+      }),
+    );
+
+    let tree!: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(ConversationsSidebar));
+    });
+
+    const sidebar = tree.root.findByProps({
+      "data-testid": "conversations-sidebar",
+    });
+    expect(String(sidebar.props.className)).toContain("rounded-2xl");
+    expect(String(sidebar.props.className)).toContain("shadow-lg");
+    expect(
+      tree.root.findAll(
+        (node) =>
+          typeof node.props.className === "string" &&
+          node.props.className.includes("bg-accent/10") &&
+          node.children.includes("2"),
+      ),
+    ).toHaveLength(1);
+  });
+
+  it("renders a mobile close control and calls onClose", async () => {
+    const onClose = vi.fn();
+    mockUseApp.mockReturnValue(createContext());
+
+    let tree!: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(
+        React.createElement(ConversationsSidebar, {
+          mobile: true,
+          onClose,
+        }),
+      );
+    });
+
+    const closeButton = tree.root.find(
+      (node) =>
+        node.type === "button" &&
+        node.props["aria-label"] === "conversations.closePanel",
+    );
+
+    await act(async () => {
+      closeButton.props.onClick();
+    });
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
 });
