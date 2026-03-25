@@ -18,6 +18,11 @@ const REASON_LABELS: Record<StartupErrorState["reason"], string> = {
   "asset-missing": "Asset Missing",
 };
 
+const SCREEN_SHELL_CLASS =
+  "relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-bg px-4 py-6 font-body text-txt sm:px-6";
+const SCREEN_CARD_CLASS =
+  "relative z-10 w-full max-w-[720px] overflow-hidden border border-border/60 bg-card/95 shadow-[0_30px_120px_rgba(0,0,0,0.36)] backdrop-blur-xl";
+
 interface StartupFailureViewProps {
   error: StartupErrorState;
   onRetry: () => void;
@@ -33,10 +38,14 @@ export function StartupFailureView({
   const reasonLabel = REASON_LABELS[error.reason];
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-bg px-4 py-6 font-body text-txt sm:px-6">
-      <Card className="w-full max-w-[680px] overflow-hidden">
-        <CardHeader className="border-b border-border/60 pb-5">
-          <div className="flex flex-col gap-3">
+    <div className={SCREEN_SHELL_CLASS}>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(220,38,38,0.1),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.02),transparent_42%)]"
+      />
+      <Card className={SCREEN_CARD_CLASS}>
+        <CardHeader className="border-b border-border/60 bg-danger/5 pb-6 pt-6">
+          <div className="flex flex-col gap-4">
             <StatusBadge
               label={reasonLabel}
               tone="danger"
@@ -52,7 +61,7 @@ export function StartupFailureView({
               </p>
             </div>
             {isBackendUnreachable ? (
-              <p className="max-w-[56ch] text-sm leading-relaxed text-muted">
+              <p className="max-w-[56ch] rounded-xl border border-border/50 bg-bg/35 px-4 py-3 text-sm leading-relaxed text-muted">
                 {t("startupfailureview.ThisOriginDoesNot")}
               </p>
             ) : null}
@@ -61,7 +70,7 @@ export function StartupFailureView({
 
         <CardContent className="flex flex-col gap-5 pt-6">
           {error.detail ? (
-            <section className="space-y-2">
+            <section className="space-y-2 rounded-2xl border border-border/50 bg-bg/35 p-4 shadow-sm">
               <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">
                 Details
               </div>
@@ -75,7 +84,7 @@ export function StartupFailureView({
             </CardDescription>
           )}
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex flex-col gap-3 border-t border-border/40 pt-4 sm:flex-row sm:items-center">
             <Button
               variant="default"
               size="lg"
