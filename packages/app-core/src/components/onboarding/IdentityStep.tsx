@@ -1,4 +1,7 @@
+import { dispatchAppEmoteEvent } from "@miladyai/app-core/events";
 import { useApp } from "@miladyai/app-core/state";
+import { PREMADE_VOICES } from "../../voice/types";
+import { getElizaApiToken, resolveApiUrl } from "../../utils";
 import { getStylePresets } from "@miladyai/shared/onboarding-presets";
 import { Button, Input } from "@miladyai/ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -38,22 +41,174 @@ export function IdentityStep() {
   const [importError, setImportError] = useState<string | null>(null);
   const [importSuccess, setImportSuccess] = useState<string | null>(null);
   const importBusyRef = useRef(false);
+  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
+  const previewObjectUrlRef = useRef<string | null>(null);
+  const pendingPreviewEntryRef = useRef<CharacterRosterEntry | null>(null);
+  const teleportPreviewTimerRef = useRef<number | null>(null);
+
+  const stopPreviewAudio = useCallback(() => {
+    if (previewAudioRef.current) {
+      previewAudioRef.current.pause();
+      previewAudioRef.current = null;
+    }
+    if (previewObjectUrlRef.current) {
+      URL.revokeObjectURL(previewObjectUrlRef.current);
+      previewObjectUrlRef.current = null;
+    }
+  }, []);
+
+  const playPreviewFromUrl = useCallback(
+    async (url: string) => {
+      stopPreviewAudio();
+      const audio = new Audio(url);
+      previewAudioRef.current = audio;
+      try {
+        await audio.play();
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    [stopPreviewAudio],
+  );
+
+  const playSelectionPreview = useCallback(async (entry: CharacterRosterEntry) => {
+    const animationPath =
+      entry.greetingAnimation?.trim() || "animations/emotes/greeting.fbx";
+    dispatchAppEmoteEvent({
+      emoteId: "greeting",
+      path: `/${animationPath.replace(/^\/+/, "")}`,
+      duration: 2.5,
+      loop: false,
+      showOverlay: false,
+    });
+
+    const catchphrase = entry.catchphrase?.trim();
+    if (!catchphrase || typeof window === "undefined") return;
+
+    const selectedPreset = entry.voicePresetId
+      ? PREMADE_VOICES.find((voice) => voice.id === entry.voicePresetId)
+      : undefined;
+
+    if (selectedPreset?.previewUrl) {
+      const played = await playPreviewFromUrl(selectedPreset.previewUrl);
+      if (played) return;
+    }
+
+    if (selectedPreset?.voiceId) {
+      const apiToken = getElizaApiToken()?.trim() ?? "";
+      try {
+        // Prefer cloud-proxied TTS first so Eliza Cloud users get ElevenLabs
+        // without requiring a local ELEVENLABS_API_KEY.
+        let response = await fetch(resolveApiUrl("/api/tts/cloud"), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "audio/mpeg",
+            ...(apiToken ? { Authorization: `Bearer ${apiToken}` } : {}),
+          },
+          body: JSON.stringify({
+            text: catchphrase,
+            voiceId: selectedPreset.voiceId,
+            modelId: "eleven_flash_v2_5",
+            outputFormat: "mp3_44100_128",
+          }),
+        });
+        if (!response.ok) {
+          response = await fetch(resolveApiUrl("/api/tts/elevenlabs"), {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "audio/mpeg",
+              ...(apiToken ? { Authorization: `Bearer ${apiToken}` } : {}),
+            },
+            body: JSON.stringify({
+              text: catchphrase,
+              voiceId: selectedPreset.voiceId,
+              modelId: "eleven_flash_v2_5",
+              outputFormat: "mp3_44100_128",
+            }),
+          });
+        }
+        if (response.ok) {
+          const blob = await response.blob();
+          const objectUrl = URL.createObjectURL(blob);
+          previewObjectUrlRef.current = objectUrl;
+          const played = await playPreviewFromUrl(objectUrl);
+          if (played) return;
+        }
+      } catch {
+        // Fall through to desktop/browser speech fallback.
+      }
+    }
+
+    // Intentionally do not fall back to generic system/browser TTS voices for
+    // onboarding previews. If preset sample + ElevenLabs are unavailable, stay
+    // silent instead of degrading character identity quality.
+  }, [playPreviewFromUrl]);
 
   const handleSelect = useCallback(
-    (entry: CharacterRosterEntry) => {
+    (entry: CharacterRosterEntry, preview = false) => {
+      const previousAvatarIndex = selectedId
+        ? entries.find((candidate) => candidate.id === selectedId)?.avatarIndex
+        : undefined;
       setState("onboardingStyle", entry.id);
       setState("onboardingName", entry.name);
       setState("selectedVrmIndex", entry.avatarIndex);
+      if (preview) {
+        // Character swaps trigger a teleport dissolve; wait for completion before
+        // greeting emote/voice or the emote can be swallowed during transition.
+        const avatarChanged = previousAvatarIndex !== entry.avatarIndex;
+        if (avatarChanged) {
+          pendingPreviewEntryRef.current = entry;
+        } else {
+          pendingPreviewEntryRef.current = null;
+          void playSelectionPreview(entry);
+        }
+      }
     },
-    [setState],
+    [entries, playSelectionPreview, selectedId, setState],
   );
 
   // Auto-select the first one if nothing is selected yet
   useEffect(() => {
     if (!onboardingStyle && firstEntry) {
-      handleSelect(firstEntry);
+      handleSelect(firstEntry, false);
     }
   }, [onboardingStyle, handleSelect, firstEntry]);
+
+  useEffect(() => {
+    const onTeleportComplete = () => {
+      const pending = pendingPreviewEntryRef.current;
+      if (!pending) return;
+      pendingPreviewEntryRef.current = null;
+      if (teleportPreviewTimerRef.current != null) {
+        window.clearTimeout(teleportPreviewTimerRef.current);
+      }
+      teleportPreviewTimerRef.current = window.setTimeout(() => {
+        teleportPreviewTimerRef.current = null;
+        void playSelectionPreview(pending);
+      }, 450);
+    };
+    window.addEventListener("eliza:vrm-teleport-complete", onTeleportComplete);
+    return () => {
+      window.removeEventListener(
+        "eliza:vrm-teleport-complete",
+        onTeleportComplete,
+      );
+    };
+  }, [playSelectionPreview]);
+
+  useEffect(() => {
+    return () => {
+      pendingPreviewEntryRef.current = null;
+      if (teleportPreviewTimerRef.current != null) {
+        window.clearTimeout(teleportPreviewTimerRef.current);
+        teleportPreviewTimerRef.current = null;
+      }
+      stopPreviewAudio();
+    };
+  }, [stopPreviewAudio]);
 
   const handleImportAgent = useCallback(async () => {
     if (importBusyRef.current || importBusy) return;
@@ -223,7 +378,7 @@ export function IdentityStep() {
         <CharacterRoster
           entries={entries}
           selectedId={selectedId}
-          onSelect={handleSelect}
+          onSelect={(entry) => handleSelect(entry, true)}
           variant="onboarding"
           testIdPrefix="onboarding"
         />

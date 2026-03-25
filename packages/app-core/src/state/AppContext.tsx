@@ -6100,14 +6100,13 @@ function AppProviderInner({
         return;
       }
 
+      // Keep users on provider choice first: detection should inform and
+      // annotate options, not auto-route into a specific provider detail view.
+      // We only nudge run mode so the provider grid is available.
       setOnboardingRunMode(prefill.runMode);
-      setOnboardingProvider(prefill.providerId);
-      setOnboardingApiKey(prefill.apiKey);
     },
     [
-      setOnboardingApiKey,
       setOnboardingDetectedProviders,
-      setOnboardingProvider,
       setOnboardingRunMode,
     ],
   );
@@ -6442,7 +6441,9 @@ function AppProviderInner({
           ? await inspectExistingElizaInstall().catch(() => null)
           : null;
       const shouldPreferLocalBootstrap =
-        forceLocalBootstrap || Boolean(desktopExistingInstall?.detected);
+        forceLocalBootstrap ||
+        isElectrobunRuntime() ||
+        Boolean(desktopExistingInstall?.detected);
       const probedConnection = persistedConnection
         ? null
         : await detectExistingOnboardingConnection({
@@ -7174,17 +7175,25 @@ function AppProviderInner({
         logStartupWarning("failed to load wallet addresses", err);
       }
 
-      // Restore avatar selection from config (server-persisted under "ui")
+      // Restore avatar selection from stream settings (same source used when saving).
+      // This prevents detached/settings windows from snapping back to stale
+      // config.ui.avatarIndex values and overwriting local avatar preference.
       let resolvedIndex = loadAvatarIndex();
       try {
-        const cfg = await client.getConfig();
-        const ui = cfg.ui as Record<string, unknown> | undefined;
-        if (ui?.avatarIndex != null) {
-          resolvedIndex = normalizeAvatarIndex(Number(ui.avatarIndex));
+        const stream = await client.getStreamSettings();
+        const serverAvatarIndex = stream.settings?.avatarIndex;
+        if (
+          typeof serverAvatarIndex === "number" &&
+          Number.isFinite(serverAvatarIndex)
+        ) {
+          resolvedIndex = normalizeAvatarIndex(serverAvatarIndex);
           setSelectedVrmIndex(resolvedIndex);
         }
       } catch (err) {
-        logStartupWarning("failed to load config for avatar selection", err);
+        logStartupWarning(
+          "failed to load stream settings for avatar selection",
+          err,
+        );
       }
       // If custom avatar selected, verify the file still exists on the server
       if (resolvedIndex === 0) {

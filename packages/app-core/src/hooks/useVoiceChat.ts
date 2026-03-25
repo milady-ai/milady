@@ -20,7 +20,10 @@ import {
   useState,
 } from "react";
 import type { VoiceConfig, VoiceMode } from "../api/client";
-import { getElectrobunRendererRpc } from "../bridge/electrobun-rpc";
+import {
+  getElectrobunRendererRpc,
+  invokeDesktopBridgeRequest,
+} from "../bridge/electrobun-rpc";
 import {
   getTalkModePlugin,
   type TalkModeErrorEvent,
@@ -1290,6 +1293,15 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
         activeTaskFinishRef.current = finish;
 
         if (!synth) {
+          if (getElectrobunRendererRpc()) {
+            void invokeDesktopBridgeRequest<void>({
+              rpcMethod: "talkmodeSpeak",
+              ipcChannel: "talkmode:speak",
+              params: { text: text.trim() },
+            }).catch((err: unknown) => {
+              console.warn("[useVoiceChat] Desktop speech bridge failed:", err);
+            });
+          }
           emitPlaybackStart({
             text,
             segment: task.segment,
