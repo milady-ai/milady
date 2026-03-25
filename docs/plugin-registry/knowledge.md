@@ -41,7 +41,7 @@ Navigate to **Agent → Knowledge** and upload documents through the file picker
 ### Via the REST API
 
 ```bash
-curl -X POST http://localhost:3000/api/knowledge \
+curl -X POST http://localhost:2138/api/knowledge \
   -H "Authorization: Bearer $MILADY_API_KEY" \
   -F "file=@document.pdf" \
   -F "agentId=your-agent-id"

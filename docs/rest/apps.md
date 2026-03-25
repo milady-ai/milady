@@ -79,7 +79,7 @@ Launch an app. If the app's plugin is not installed, it is installed first. Retu
 {
   "name": "@elizaos/app-browser",
   "displayName": "Browser",
-  "viewerUrl": "http://localhost:3000/apps/browser",
+  "viewerUrl": "http://localhost:2138/apps/browser",
   "running": true
 }
 ```

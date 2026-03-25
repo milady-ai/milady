@@ -86,9 +86,9 @@ where to get the credentials, minimum required fields, and tips for optional fie
 ### Ollama (Local Models)
 **Get credentials:** No API key needed — install Ollama locally
 **Setup:** https://ollama.ai — run `ollama pull llama3.2` to download a model
-**Minimum required:** `OLLAMA_API_ENDPOINT` = `http://localhost:11434/api`
+**Minimum required:** `OLLAMA_BASE_URL` = `http://localhost:11434`
 **Variables:**
-- `OLLAMA_API_ENDPOINT` — Default: `http://localhost:11434/api`
+- `OLLAMA_BASE_URL` — Default: `http://localhost:11434`
 - `OLLAMA_SMALL_MODEL` — e.g. `llama3.2:3b`
 - `OLLAMA_MEDIUM_MODEL` — e.g. `llama3.2`
 - `OLLAMA_LARGE_MODEL` — e.g. `llama3.3:70b`
