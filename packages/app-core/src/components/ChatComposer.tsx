@@ -47,6 +47,16 @@ const COMPOSER_CONTROL_HEIGHT_CLASSNAME = "h-[46px]";
 const COMPOSER_ICON_BUTTON_CLASSNAME = `${COMPOSER_CONTROL_HEIGHT_CLASSNAME} w-[46px] shrink-0`;
 const COMPOSER_ACTION_BUTTON_CLASSNAME = `ml-1 flex items-center justify-center rounded-full transition-all duration-300 select-none active:scale-95 ${COMPOSER_ICON_BUTTON_CLASSNAME}`;
 const COMMON_TEXTAREA_CLASSNAME = `w-full min-w-0 min-h-0 ${COMPOSER_CONTROL_HEIGHT_CLASSNAME} resize-none overflow-y-hidden max-h-[200px] outline-none ring-0 shadow-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 font-[var(--font-chat)] disabled:opacity-50`;
+const COMPOSER_SURFACE_BUTTON_CLASSNAME =
+  "select-none border border-border/60 bg-bg/72 text-muted-strong shadow-sm backdrop-blur-md transition-[border-color,background-color,color,transform,box-shadow] duration-200 hover:border-accent/60 hover:bg-bg-hover/90 hover:text-txt hover:shadow-md active:scale-95 disabled:hover:border-border/60 disabled:hover:bg-bg/72 disabled:hover:text-muted-strong";
+const COMPOSER_EMPHASIZED_BUTTON_CLASSNAME =
+  "border border-accent/45 bg-accent/16 text-accent shadow-[0_0_18px_rgba(var(--accent),0.18)] ring-1 ring-inset ring-accent/18 hover:border-accent/70 hover:bg-accent/24 hover:text-accent";
+const COMPOSER_DESTRUCTIVE_BUTTON_CLASSNAME =
+  "border border-danger/40 bg-danger/12 text-danger shadow-sm hover:border-danger/65 hover:bg-danger/20 hover:text-danger";
+const COMPOSER_GAME_BUTTON_CLASSNAME =
+  "select-none rounded-full border border-white/10 bg-black/30 text-[color:var(--onboarding-text-primary)] shadow-[0_12px_34px_rgba(0,0,0,0.22)] backdrop-blur-md transition-all duration-300 hover:border-white/20 hover:bg-black/45 hover:text-[color:var(--onboarding-text-strong)] active:scale-95";
+const COMPOSER_GAME_BUTTON_ACTIVE_CLASSNAME =
+  "select-none rounded-full border border-[color:var(--onboarding-accent-border)] bg-[color:var(--onboarding-accent-bg)] text-[color:var(--onboarding-text-strong)] shadow-[0_0_20px_rgba(207,175,90,0.2)] backdrop-blur-md transition-all duration-300 hover:border-[color:var(--onboarding-accent-border-hover)] hover:bg-[color:var(--onboarding-accent-bg-hover)] active:scale-95";
 
 export function ChatComposer({
   variant,
@@ -83,9 +93,9 @@ export function ChatComposer({
   const isGameModal = variant === "game-modal";
   const showVoiceButton = isGameModal || voice.supported;
   const defaultMicButtonClassName = voice.isListening
-    ? "select-none text-white shadow-[0_0_15px_rgba(var(--accent),0.4)] hover:text-white bg-accent border border-accent transition-all duration-300 active:scale-95"
-    : "select-none border border-border/50 bg-bg/50 backdrop-blur-md text-txt shadow-sm transition-all duration-300 hover:border-accent hover:text-txt hover:shadow-[0_0_15px_rgba(var(--accent),0.5)] active:scale-95";
-  const micIconClassName = isGameModal ? "w-5 h-5 text-[#fff1f2]" : "w-4 h-4";
+    ? `${COMPOSER_SURFACE_BUTTON_CLASSNAME} ${COMPOSER_EMPHASIZED_BUTTON_CLASSNAME}`
+    : COMPOSER_SURFACE_BUTTON_CLASSNAME;
+  const micIconClassName = isGameModal ? "w-5 h-5" : "w-4 h-4";
   const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pushToTalkActiveRef = useRef(false);
   const suppressClickRef = useRef(false);
@@ -188,10 +198,10 @@ export function ChatComposer({
         <Button
           variant={chatPendingImagesCount > 0 ? "secondary" : "ghost"}
           size="icon"
-          className={`${COMPOSER_ICON_BUTTON_CLASSNAME} select-none transition-all duration-300 active:scale-95 ${
+          className={`${COMPOSER_ICON_BUTTON_CLASSNAME} ${
             chatPendingImagesCount > 0
-              ? "bg-accent/15 sm:hover:bg-accent/25 border-accent/40 text-accent hover:text-accent shadow-[0_0_15px_rgba(var(--accent),0.18)] ring-1 ring-inset ring-accent/20"
-              : "border border-border/50 bg-bg/50 backdrop-blur-md text-txt shadow-sm hover:border-accent hover:text-txt hover:shadow-[0_0_15px_rgba(var(--accent),0.5)]"
+              ? `${COMPOSER_SURFACE_BUTTON_CLASSNAME} ${COMPOSER_EMPHASIZED_BUTTON_CLASSNAME} ring-1 ring-inset ring-accent/25`
+              : COMPOSER_SURFACE_BUTTON_CLASSNAME
           }`}
           onClick={onAttachImage}
           aria-label={t("aria.attachImage")}
@@ -208,10 +218,10 @@ export function ChatComposer({
           size="icon"
           className={
             isGameModal
-              ? `mr-2 select-none flex items-center justify-center rounded-full transition-all active:scale-95 ${COMPOSER_ICON_BUTTON_CLASSNAME} ${
+              ? `mr-2 flex items-center justify-center ${COMPOSER_ICON_BUTTON_CLASSNAME} ${
                   voice.isListening
-                    ? "animate-pulse border text-[#fff1f2] shadow-[0_0_30px_rgba(255,107,112,0.5)]"
-                    : "bg-transparent text-[#fff1f2] shadow-[0_0_6px_rgba(255,107,112,0.25)] hover:bg-[#ff6b70]/10"
+                    ? `animate-pulse ${COMPOSER_GAME_BUTTON_ACTIVE_CLASSNAME}`
+                    : COMPOSER_GAME_BUTTON_CLASSNAME
                 } ${isComposerLocked ? "opacity-50" : ""}`
               : `${COMPOSER_ICON_BUTTON_CLASSNAME} ${defaultMicButtonClassName}`
           }
@@ -248,8 +258,8 @@ export function ChatComposer({
       <div
         className={
           isGameModal
-            ? "flex min-h-[46px] flex-1 items-center rounded-2xl bg-black/40 transition-all min-w-0"
-            : "flex min-h-[46px] flex-1 items-center rounded-md border min-w-0 border-border/40 bg-card/60 backdrop-blur-md"
+            ? "flex min-h-[46px] min-w-0 flex-1 items-center rounded-2xl border border-white/10 bg-[rgba(16,12,11,0.72)] shadow-[0_18px_40px_rgba(0,0,0,0.24)] backdrop-blur-md transition-all"
+            : "flex min-h-[46px] min-w-0 flex-1 items-center rounded-xl border border-border/60 bg-card/78 shadow-sm backdrop-blur-md transition-[border-color,background-color,box-shadow] duration-200 hover:border-border-strong focus-within:border-accent/50 focus-within:bg-card/92 focus-within:shadow-md"
         }
       >
         <Textarea
@@ -257,8 +267,8 @@ export function ChatComposer({
           data-testid="chat-composer-textarea"
           className={
             isGameModal
-              ? `${COMMON_TEXTAREA_CLASSNAME} px-4 py-2 bg-transparent border-none text-[15px] leading-relaxed text-white placeholder:text-white/30 max-h-[150px]`
-              : `${COMMON_TEXTAREA_CLASSNAME} px-3 py-2 bg-transparent border-none text-[15px] leading-[1.7] text-txt placeholder:text-muted`
+              ? `${COMMON_TEXTAREA_CLASSNAME} max-h-[150px] border-none bg-transparent px-4 py-2 text-[15px] leading-relaxed text-[color:var(--onboarding-text-strong)] placeholder:text-[color:var(--onboarding-text-muted)]`
+              : `${COMMON_TEXTAREA_CLASSNAME} px-3.5 py-2 bg-transparent border-none text-[15px] leading-[1.7] text-txt placeholder:text-muted-strong`
           }
           style={{ fontFamily: "var(--font-chat)" }}
           rows={1}
@@ -287,8 +297,12 @@ export function ChatComposer({
           size="icon"
           className={
             isGameModal
-              ? `${COMPOSER_ICON_BUTTON_CLASSNAME} select-none rounded-full bg-black/35 text-white/75 transition-all duration-300 hover:bg-black/55 hover:text-white active:scale-95`
-              : `${COMPOSER_ICON_BUTTON_CLASSNAME} select-none border border-border/50 bg-bg/50 backdrop-blur-md text-txt shadow-sm transition-all duration-300 hover:border-accent hover:text-txt hover:shadow-[0_0_15px_rgba(var(--accent),0.5)] active:scale-95`
+              ? `${COMPOSER_ICON_BUTTON_CLASSNAME} ${
+                  agentVoiceEnabled
+                    ? COMPOSER_GAME_BUTTON_ACTIVE_CLASSNAME
+                    : COMPOSER_GAME_BUTTON_CLASSNAME
+                }`
+              : `${COMPOSER_ICON_BUTTON_CLASSNAME} ${agentVoiceEnabled ? `${COMPOSER_SURFACE_BUTTON_CLASSNAME} ${COMPOSER_EMPHASIZED_BUTTON_CLASSNAME}` : COMPOSER_SURFACE_BUTTON_CLASSNAME}`
           }
           onClick={onToggleAgentVoice}
           aria-label={
@@ -311,7 +325,7 @@ export function ChatComposer({
         <Button
           variant="destructive"
           data-testid="chat-composer-action"
-          className={`${COMPOSER_ACTION_BUTTON_CLASSNAME} bg-danger/20 text-danger hover:bg-danger/30`}
+          className={`${COMPOSER_ACTION_BUTTON_CLASSNAME} ${COMPOSER_DESTRUCTIVE_BUTTON_CLASSNAME}`}
           onClick={onStop}
           size="icon"
           title={actionButtonLabel}
@@ -323,7 +337,7 @@ export function ChatComposer({
         <Button
           variant="destructive"
           data-testid="chat-composer-action"
-          className={`${COMPOSER_ACTION_BUTTON_CLASSNAME} bg-danger/20 text-danger hover:bg-danger/30`}
+          className={`${COMPOSER_ACTION_BUTTON_CLASSNAME} ${COMPOSER_DESTRUCTIVE_BUTTON_CLASSNAME}`}
           onClick={onStopSpeaking}
           size="icon"
           title={actionButtonLabel}
@@ -336,7 +350,7 @@ export function ChatComposer({
           variant="default"
           data-testid="chat-composer-action"
           size="icon"
-          className={`${COMPOSER_ACTION_BUTTON_CLASSNAME} bg-accent text-accent-fg hover:shadow-[0_0_15px_rgba(240,178,50,0.4)] disabled:opacity-40`}
+          className={`${COMPOSER_ACTION_BUTTON_CLASSNAME} border border-accent/55 bg-accent/22 text-accent-fg shadow-[0_12px_28px_rgba(0,0,0,0.16)] hover:border-accent/75 hover:bg-accent/32 disabled:border-border/40 disabled:bg-bg-accent disabled:text-muted-strong disabled:shadow-none`}
           onClick={onSend}
           disabled={isComposerLocked || !hasDraft}
           aria-label={actionButtonLabel}

@@ -1350,14 +1350,18 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
           size="sm"
           className={`h-7 px-3 text-[11px] font-bold tracking-wide rounded-lg transition-all ${
             isActive
-              ? "shadow-[0_0_10px_rgba(var(--accent),0.2)] border-accent"
+              ? "border-accent/55 bg-accent/16 text-accent-fg shadow-sm"
               : "bg-card/40 backdrop-blur-sm border-border/40 text-muted hover:text-txt shadow-sm hover:border-accent/30"
           }`}
           onClick={() => setSubgroupFilter(tag.id)}
         >
           {tag.label}
           <span
-            className={`ml-1.5 px-1.5 py-0.5 rounded border text-[9px] font-mono leading-none ${isActive ? "bg-black/20 border-black/10" : "bg-black/10 border-white/5"}`}
+            className={`ml-1.5 rounded border px-1.5 py-0.5 text-[9px] font-mono leading-none ${
+              isActive
+                ? "border-accent/30 bg-accent/12 text-accent-fg"
+                : "border-border/50 bg-bg-accent/80 text-muted-strong"
+            }`}
           >
             {tag.count}
           </span>
@@ -1802,7 +1806,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
             {p.tags?.slice(0, 4).map((tag) => (
               <span
                 key={`${p.id}:${tag}`}
-                className="text-[10px] px-1.5 py-px border border-border/50 bg-black/10 text-muted lowercase tracking-wide whitespace-nowrap"
+                className="whitespace-nowrap border border-border/50 bg-bg-accent/80 px-1.5 py-px text-[10px] lowercase tracking-wide text-muted-strong"
               >
                 {tag}
               </span>
@@ -1831,7 +1835,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
         )}
 
         {/* Bottom bar: config status + settings button */}
-        <div className="flex items-center gap-3 px-4 py-3 border-t border-border/40 mt-auto bg-black/5">
+        <div className="mt-auto flex items-center gap-3 border-t border-border/40 bg-card/55 px-4 py-3">
           {hasParams && !isShowcase ? (
             <>
               <span
@@ -1883,7 +1887,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
               className={`h-7 px-2.5 text-[11px] font-bold transition-all flex items-center gap-1.5 ${
                 isOpen
                   ? "text-txt bg-accent/10 hover:bg-accent/20"
-                  : "text-muted hover:text-txt hover:bg-white/5"
+                  : "text-muted hover:bg-bg-hover hover:text-txt"
               }`}
               onClick={(e) => {
                 e.stopPropagation();
@@ -2364,7 +2368,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                       </div>
 
                       {isExpanded && (
-                        <div className="border-t border-border/40 bg-black/5 px-4 py-4 sm:px-5">
+                        <div className="border-t border-border/40 bg-card/55 px-4 py-4 sm:px-5">
                           {plugin.validationErrors &&
                             plugin.validationErrors.length > 0 && (
                               <div className="mb-4 rounded-2xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
@@ -2919,7 +2923,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
             >
               <DialogContent className="max-w-2xl max-h-[85vh] p-0 flex flex-col overflow-hidden rounded-2xl">
                 {/* Dialog header */}
-                <DialogHeader className="flex items-center gap-3 px-5 py-4 border-b border-border/30 bg-black/10 shrink-0 flex-row">
+                <DialogHeader className="flex flex-row items-center gap-3 border-b border-border/30 bg-card/80 px-5 py-4 shrink-0">
                   <DialogTitle className="font-bold text-base flex items-center gap-2 flex-1 min-w-0 tracking-wide text-txt">
                     {(() => {
                       const icon = resolveIcon(p);
@@ -2946,7 +2950,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                     })()}
                     {p.name}
                   </DialogTitle>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full border border-border/40 bg-black/20 text-muted lowercase tracking-widest font-bold">
+                  <span className="rounded-full border border-border/40 bg-bg-accent/80 px-2 py-0.5 text-[10px] font-bold lowercase tracking-widest text-muted-strong">
                     {categoryLabel}
                   </span>
                   {p.version && (
@@ -2962,7 +2966,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                 </DialogHeader>
 
                 {/* Dialog body — scrollable */}
-                <div className="overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                <div className="scrollbar-thin scrollbar-thumb-border/70 scrollbar-track-transparent overflow-y-auto flex-1">
                   {/* Plugin details */}
                   <div className="px-5 pt-4 pb-1 flex items-center gap-3 flex-wrap text-xs text-muted">
                     {p.description && (
@@ -2975,7 +2979,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                         {p.tags?.map((tag) => (
                           <span
                             key={`${p.id}:${tag}:settings`}
-                            className="text-[10px] px-1.5 py-px border border-border/40 bg-black/10 text-muted lowercase tracking-wide whitespace-nowrap"
+                            className="whitespace-nowrap border border-border/40 bg-bg-accent/80 px-1.5 py-px text-[10px] lowercase tracking-wide text-muted-strong"
                           >
                             {tag}
                           </span>
@@ -3030,7 +3034,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
 
                 {/* Dialog footer — actions (hidden for showcase) */}
                 {!isShowcase && (
-                  <div className="flex justify-end gap-3 px-5 py-4 border-t border-border/30 shrink-0 bg-black/10">
+                  <div className="flex justify-end gap-3 border-t border-border/30 bg-card/80 px-5 py-4 shrink-0">
                     {p.enabled && !p.isActive && p.npmName && !p.loadError && (
                       <Button
                         variant="default"
@@ -3141,7 +3145,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
 
           <Input
             type="text"
-            className="w-full h-10 px-3 border border-border/40 bg-black/20 text-txt text-[13px] font-mono transition-all duration-150 focus-visible:ring-accent rounded-xl shadow-inner placeholder:text-muted/50"
+            className="h-10 w-full rounded-xl border border-border/50 bg-card/85 px-3 text-[13px] font-mono text-txt shadow-inner transition-all duration-150 placeholder:text-muted/60 focus-visible:ring-accent"
             placeholder={t("pluginsview.PathToPluginOrP")}
             value={addDirPath}
             onChange={(e) => setAddDirPath(e.target.value)}

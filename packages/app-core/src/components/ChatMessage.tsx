@@ -190,6 +190,13 @@ export const ChatMessage = memo(function ChatMessage({
   }, [showActions, supportsHover]);
 
   const actionsVisible = showActions;
+  const bubbleClassName = isUser
+    ? "rounded-br-md border border-accent/35 bg-accent/16 text-txt shadow-sm"
+    : "rounded-bl-md border border-border/70 bg-card/96 text-txt shadow-sm";
+  const actionRailClassName =
+    "top-1 rounded-xl border border-border/60 bg-card/96 p-1 shadow-sm backdrop-blur-sm";
+  const actionButtonClassName =
+    "h-8 w-8 rounded-lg border border-border/45 bg-card/92 text-muted-strong shadow-sm transition-[background-color,color,border-color,box-shadow] hover:border-border-strong hover:bg-bg-hover hover:text-txt";
 
   return (
     <article
@@ -208,11 +215,7 @@ export const ChatMessage = memo(function ChatMessage({
       >
         {/* Message Content */}
         <div
-          className={`relative group px-4 py-2.5 text-[15px] leading-[1.7] whitespace-pre-wrap break-words rounded-2xl ${
-            isUser
-              ? "bg-accent text-accent-fg rounded-br-md"
-              : "bg-bg-accent border border-border text-txt rounded-bl-md"
-          }`}
+          className={`relative group rounded-2xl px-4 py-2.5 text-[15px] leading-[1.7] whitespace-pre-wrap break-words ${bubbleClassName}`}
           style={{ fontFamily: "var(--font-chat)" }}
         >
           {isEditing ? (
@@ -222,7 +225,7 @@ export const ChatMessage = memo(function ChatMessage({
                 value={draftText}
                 onChange={(event) => setDraftText(event.target.value)}
                 onKeyDown={handleEditKeyDown}
-                className="w-full min-h-[110px] rounded-xl border border-white/20 bg-black/10 px-3 py-2 text-[15px] leading-[1.7] text-inherit outline-none focus:border-white/40"
+                className="min-h-[110px] w-full rounded-xl border border-border-strong/70 bg-bg/80 px-3 py-2 text-[15px] leading-[1.7] text-txt outline-none shadow-inner focus-visible:border-accent/55 focus-visible:ring-2 focus-visible:ring-accent/20"
                 style={{ fontFamily: "var(--font-chat)" }}
                 aria-label={t("aria.editMessage")}
                 disabled={savingEdit}
@@ -233,7 +236,7 @@ export const ChatMessage = memo(function ChatMessage({
                   size="sm"
                   onClick={handleCancelEditing}
                   disabled={savingEdit}
-                  className="h-8 px-3 text-xs text-inherit/80 hover:bg-black/10"
+                  className="h-8 rounded-lg border border-border/45 px-3 text-xs text-muted-strong hover:border-border-strong hover:bg-bg-hover hover:text-txt"
                 >
                   {t("common.cancel")}
                 </Button>
@@ -246,7 +249,7 @@ export const ChatMessage = memo(function ChatMessage({
                     !draftText.trim() ||
                     draftText.trim() === message.text.trim()
                   }
-                  className="h-8 px-3 text-xs border-white/25 bg-black/10 hover:bg-black/15"
+                  className="h-8 rounded-lg border-accent/35 bg-accent/12 px-3 text-xs text-accent-fg hover:border-accent/55 hover:bg-accent/18 disabled:border-border/50 disabled:bg-bg-accent disabled:text-muted-strong"
                 >
                   {savingEdit ? "Saving..." : "Save and resend"}
                 </Button>
@@ -258,8 +261,8 @@ export const ChatMessage = memo(function ChatMessage({
 
           {/* Stream interruption indicator */}
           {!isUser && message.interrupted && (
-            <div className="mt-2 pt-2 border-t border-danger/30">
-              <span className="text-xs text-danger">
+            <div className="mt-2 border-t border-danger/30 pt-2">
+              <span className="inline-flex rounded-full border border-danger/30 bg-danger/10 px-2 py-0.5 text-xs font-medium text-danger">
                 {t("chatmessage.ResponseInterrupte")}
               </span>
             </div>
@@ -268,9 +271,9 @@ export const ChatMessage = memo(function ChatMessage({
           {/* Message Actions */}
           {!isEditing && (
             <div
-              className={`absolute ${isUser ? "left-0 -translate-x-full" : "right-0 translate-x-full"} top-0 flex items-center gap-1 p-1 transition-opacity duration-200 ${
+              className={`absolute ${isUser ? "left-0 -translate-x-full" : "right-0 translate-x-full"} top-0 flex items-center gap-1 transition-opacity duration-200 ${
                 actionsVisible ? "opacity-100" : "pointer-events-none opacity-0"
-              }`}
+              } ${actionRailClassName}`}
             >
               <Button
                 variant="ghost"
@@ -279,7 +282,7 @@ export const ChatMessage = memo(function ChatMessage({
                   event?.stopPropagation?.();
                   handleCopy();
                 }}
-                className="w-7 h-7 rounded-md text-muted hover:text-txt hover:bg-bg-hover transition-colors"
+                className={actionButtonClassName}
                 title={copied ? "Copied!" : "Copy message"}
                 aria-label={copied ? "Copied to clipboard" : "Copy message"}
               >
@@ -298,7 +301,7 @@ export const ChatMessage = memo(function ChatMessage({
                     event?.stopPropagation?.();
                     onSpeak?.(message.id, message.text);
                   }}
-                  className="w-7 h-7 rounded-md text-muted hover:text-txt hover:bg-bg-hover transition-colors"
+                  className={actionButtonClassName}
                   title={t("aria.playMessage")}
                   aria-label={t("aria.playMessage")}
                 >
@@ -314,7 +317,7 @@ export const ChatMessage = memo(function ChatMessage({
                     event?.stopPropagation?.();
                     handleStartEditing();
                   }}
-                  className="w-7 h-7 rounded-md text-muted hover:text-txt hover:bg-bg-hover transition-colors"
+                  className={actionButtonClassName}
                   title={t("aria.editMessage")}
                   aria-label={t("aria.editMessage")}
                 >
@@ -330,7 +333,7 @@ export const ChatMessage = memo(function ChatMessage({
                     event?.stopPropagation?.();
                     onDelete(message.id);
                   }}
-                  className="w-7 h-7 rounded-md text-muted hover:text-danger hover:bg-danger/10 transition-colors"
+                  className={`${actionButtonClassName} hover:border-danger/45 hover:bg-danger/10 hover:text-danger`}
                   title={t("chatmessage.DeleteMessage")}
                   aria-label={t("aria.deleteMessage")}
                 >
