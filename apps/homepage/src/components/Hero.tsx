@@ -82,7 +82,7 @@ export function HeroBackground() {
   };
 
   return (
-    <section className="absolute inset-x-0 top-0 bottom-[45%] sm:bottom-0 flex flex-col items-center justify-start sm:justify-center px-4 sm:px-6 md:px-12 pt-24 sm:pt-12 pointer-events-none overflow-hidden">
+    <section className="absolute inset-x-0 top-0 bottom-[30%] sm:bottom-0 flex flex-col items-center justify-start sm:justify-center px-4 sm:px-6 md:px-12 pt-24 sm:pt-12 pointer-events-none overflow-visible sm:overflow-hidden">
       {/* Corner accents — sharp, terminal-like */}
       <div className="hidden sm:block absolute top-12 left-12 w-6 h-6 border-t border-l border-brand/30" />
       <div className="hidden sm:block absolute top-12 right-12 w-6 h-6 border-t border-r border-brand/30" />
@@ -97,10 +97,10 @@ export function HeroBackground() {
       >
         <motion.h1
           variants={itemVariants}
-          className="text-[28vw] sm:text-[11vw] lg:text-[13vw] font-black leading-[0.76] tracking-tighter uppercase text-white/95 flex flex-col items-center pointer-events-none select-none mt-16 sm:mt-12 max-w-[10ch] sm:max-w-none"
+          className="text-[13vw] sm:text-[11vw] lg:text-[13vw] font-black leading-[0.76] tracking-tighter uppercase text-white/95 flex flex-col items-center pointer-events-none select-none mt-16 sm:mt-12 max-w-none"
         >
           <span>MILADY</span>
-          <span className="text-brand drop-shadow-lg text-[28vw] sm:text-[9vw] lg:text-[11vw] break-words hyphens-none text-center w-full">
+          <span className="text-brand drop-shadow-lg text-[11vw] sm:text-[9vw] lg:text-[11vw] break-words hyphens-none text-center w-full">
             <TypewriterLoop />
           </span>
         </motion.h1>

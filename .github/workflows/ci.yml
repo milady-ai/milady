@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main, develop]
   push:
-    branches: [main, develop]
+    branches: [main, develop, "codex/**"]
   workflow_dispatch:
 
 concurrency:
@@ -17,7 +17,7 @@ env:
 jobs:
   pre-review:
     name: Pre-Review
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ${{ github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -62,12 +62,19 @@ jobs:
           SKIP_AVATAR_CLONE: "1"
           MILADY_NO_VISION_DEPS: "1"
 
+      - name: Fetch upstream develop for pre-review base
+        run: |
+          git remote add upstream https://github.com/milady-ai/milady.git || true
+          git fetch --no-tags upstream develop
+
       - name: Run local pre-review gate
         run: bun run pre-review:local
+        env:
+          MILADY_PRE_REVIEW_BASE: upstream/develop
 
   lint:
     name: Lint & Format
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ${{ github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -115,7 +122,7 @@ jobs:
 
   typecheck:
     name: Type Check
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ${{ github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -160,7 +167,7 @@ jobs:
 
   test:
     name: Unit Tests
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ${{ github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -205,7 +212,7 @@ jobs:
 
   build:
     name: Build
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ${{ github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -252,3 +259,4 @@ jobs:
         run: bun run build:homepage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

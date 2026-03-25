@@ -19,7 +19,7 @@ Milady is available on every platform you work on. Each app connects to the same
 </Card>
 
 <Card title="Chrome Extension" icon="chrome" href="/apps/chrome-extension">
-  Browser relay extension that lets your agent control and observe browser tabs.
+  Browser relay extension that lets your agent control and observe browser tabs. (Not yet included in main repo — see docs for status.)
 </Card>
 
 <Card title="Dashboard" icon="browser" href="/apps/dashboard">

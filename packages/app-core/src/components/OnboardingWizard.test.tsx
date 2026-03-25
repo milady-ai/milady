@@ -270,4 +270,38 @@ describe("OnboardingWizard", () => {
       });
     });
   });
+
+  it("locks document/body scroll while mounted and restores on unmount", async () => {
+    mockUseApp.mockReturnValue({
+      onboardingStep: "welcome",
+      selectedVrmIndex: 1,
+      customVrmUrl: "",
+      uiLanguage: "en",
+      uiTheme: "dark",
+      setState: vi.fn(),
+      t: (key: string) => key,
+      onboardingUiRevealNonce: 0,
+      companionVrmPowerMode: "balanced",
+      companionHalfFramerateMode: "when_saving_power",
+      companionAnimateWhenHidden: false,
+    });
+
+    const prevDocOverflow = document.documentElement.style.overflow;
+    const prevBodyOverflow = document.body.style.overflow;
+
+    let tree: ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(<OnboardingWizard />);
+    });
+
+    expect(document.documentElement.style.overflow).toBe("hidden");
+    expect(document.body.style.overflow).toBe("hidden");
+
+    await act(async () => {
+      tree?.unmount();
+    });
+
+    expect(document.documentElement.style.overflow).toBe(prevDocOverflow);
+    expect(document.body.style.overflow).toBe(prevBodyOverflow);
+  });
 });

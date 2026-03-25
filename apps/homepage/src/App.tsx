@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { HeroBackground } from "./components/Hero";
 import { releaseData } from "./generated/release-data";
 
@@ -109,7 +109,20 @@ function ChevronDown() {
 
 function DownloadDropdown() {
   const [open, setOpen] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const downloads = releaseData.release.downloads;
+
+  const cancelClose = () => {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  };
+
+  const scheduleClose = () => {
+    cancelClose();
+    closeTimer.current = setTimeout(() => setOpen(false), 150);
+  };
 
   const platformIcon = (id: string) => {
     const cls = "w-5 h-5 text-text-muted";
@@ -122,48 +135,54 @@ function DownloadDropdown() {
   return (
     <fieldset
       className="relative border-0 p-0 m-0"
-      onMouseLeave={() => setOpen(false)}
+      onMouseLeave={scheduleClose}
+      onMouseEnter={cancelClose}
     >
       <button
         type="button"
         className="flex items-center gap-2 px-6 py-3 border border-text-subtle/30 text-text-muted font-mono text-[11px] tracking-[0.15em] uppercase hover:border-text-muted/50 hover:text-text-light transition-all"
-        onClick={() => setOpen(!open)}
-        onMouseEnter={() => setOpen(true)}
+        onClick={() => setOpen((v) => !v)}
+        onMouseEnter={() => {
+          cancelClose();
+          setOpen(true);
+        }}
       >
         <DownloadIcon />
         Download
         <ChevronDown />
       </button>
       {open && (
-        <div className="absolute bottom-full left-0 mb-2 w-72 border border-text-subtle/20 bg-dark/95 backdrop-blur-md z-[100]">
-          {downloads.map((d) => (
+        <div className="absolute bottom-full left-0 pb-2 w-72 z-[100]">
+          <div className="border border-text-subtle/20 bg-dark/95 backdrop-blur-md">
+            {downloads.map((d) => (
+              <a
+                key={d.id}
+                href={d.url}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors border-b border-text-subtle/10 last:border-b-0"
+              >
+                {platformIcon(d.id)}
+                <span className="flex-1 font-mono text-[11px] tracking-wider uppercase text-text-light">
+                  {d.label}
+                </span>
+                <span className="font-mono text-[10px] text-text-subtle">
+                  {d.sizeLabel}
+                </span>
+              </a>
+            ))}
             <a
-              key={d.id}
-              href={d.url}
+              href={releaseData.release.url}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors border-b border-text-subtle/10 last:border-b-0"
+              className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors border-t border-text-subtle/20"
             >
-              {platformIcon(d.id)}
-              <span className="flex-1 font-mono text-[11px] tracking-wider uppercase text-text-light">
-                {d.label}
-              </span>
-              <span className="font-mono text-[10px] text-text-subtle">
-                {d.sizeLabel}
+              <GithubIcon />
+              <span className="font-mono text-[11px] tracking-wider uppercase text-text-muted">
+                All Releases
               </span>
             </a>
-          ))}
-          <a
-            href={releaseData.release.url}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors border-t border-text-subtle/20"
-          >
-            <GithubIcon />
-            <span className="font-mono text-[11px] tracking-wider uppercase text-text-muted">
-              All Releases
-            </span>
-          </a>
+          </div>
         </div>
       )}
     </fieldset>

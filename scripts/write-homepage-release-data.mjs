@@ -77,13 +77,18 @@ function noteForAsset(name) {
   return "Release asset";
 }
 
+function sortReleasesByRecency(releases) {
+  return [...releases]
+    .filter((release) => !release.draft)
+    .sort((a, b) => {
+      const aTime = Date.parse(a.published_at ?? a.created_at ?? 0);
+      const bTime = Date.parse(b.published_at ?? b.created_at ?? 0);
+      return bTime - aTime;
+    });
+}
+
 function pickRelease(releases) {
-  const published = releases.filter((release) => !release.draft);
-  published.sort((a, b) => {
-    const aTime = Date.parse(a.published_at ?? a.created_at ?? 0);
-    const bTime = Date.parse(b.published_at ?? b.created_at ?? 0);
-    return bTime - aTime;
-  });
+  const published = sortReleasesByRecency(releases);
   // Pick the most recent release that has downloadable assets
   return (
     published.find((r) => Array.isArray(r.assets) && r.assets.length > 0) ??
@@ -113,7 +118,18 @@ function serializeDownload(id, label, asset) {
   };
 }
 
-function buildRelease(release) {
+function pickAssetFromReleases(releases, matchers) {
+  for (const release of releases) {
+    const assets = Array.isArray(release.assets) ? release.assets : [];
+    const asset = pickAsset(assets, matchers);
+    if (asset) {
+      return asset;
+    }
+  }
+  return null;
+}
+
+function buildRelease(release, allReleases = []) {
   if (!release) {
     return {
       tagName: "unavailable",
@@ -126,39 +142,46 @@ function buildRelease(release) {
   }
 
   const assets = Array.isArray(release.assets) ? release.assets : [];
+  const releasesByRecency = sortReleasesByRecency(allReleases);
+  const prioritizedReleases = [
+    release,
+    ...releasesByRecency.filter((candidate) => candidate !== release),
+  ].filter(Boolean);
+
   const downloads = [
     {
       id: "macos-arm64",
       label: "macOS (Apple Silicon)",
-      asset: pickAsset(assets, [
+      asset: pickAssetFromReleases(prioritizedReleases, [
         (asset) =>
           /macos-arm64/i.test(asset.name) && /\.dmg$/i.test(asset.name),
+        (asset) => /arm64/i.test(asset.name) && /\.dmg$/i.test(asset.name),
       ]),
     },
     {
       id: "macos-x64",
       label: "macOS (Intel)",
-      asset: pickAsset(assets, [
+      asset: pickAssetFromReleases(prioritizedReleases, [
         (asset) => /macos-x64/i.test(asset.name) && /\.dmg$/i.test(asset.name),
+        (asset) =>
+          /mac/i.test(asset.name) &&
+          !/arm64/i.test(asset.name) &&
+          /\.dmg$/i.test(asset.name),
       ]),
     },
     {
       id: "windows-x64",
       label: "Windows",
-      asset: pickAsset(assets, [
+      asset: pickAssetFromReleases(prioritizedReleases, [
         (asset) => /setup/i.test(asset.name) && /\.exe$/i.test(asset.name),
         (asset) => /win/i.test(asset.name) && /\.exe$/i.test(asset.name),
         (asset) => /win/i.test(asset.name) && /\.msix$/i.test(asset.name),
-        (asset) =>
-          /win/i.test(asset.name) &&
-          /setup/i.test(asset.name) &&
-          /\.zip$/i.test(asset.name),
       ]),
     },
     {
       id: "linux-x64",
       label: "Linux",
-      asset: pickAsset(assets, [
+      asset: pickAssetFromReleases(prioritizedReleases, [
         (asset) => /linux/i.test(asset.name) && /\.appimage$/i.test(asset.name),
         (asset) => /linux/i.test(asset.name) && /\.tar\.gz$/i.test(asset.name),
       ]),
@@ -166,7 +189,7 @@ function buildRelease(release) {
     {
       id: "linux-deb",
       label: "Ubuntu / Debian",
-      asset: pickAsset(assets, [
+      asset: pickAssetFromReleases(prioritizedReleases, [
         (asset) => /linux/i.test(asset.name) && /\.deb$/i.test(asset.name),
         (asset) => /\.deb$/i.test(asset.name),
       ]),
@@ -195,11 +218,11 @@ function buildRelease(release) {
   };
 }
 
-function buildPayload(release) {
+function buildPayload(release, allReleases = []) {
   return {
     generatedAt: new Date().toISOString(),
     scripts,
-    release: buildRelease(release),
+    release: buildRelease(release, allReleases),
   };
 }
 
@@ -242,7 +265,7 @@ async function main() {
   try {
     const releases = await fetchReleases();
     const release = pickRelease(releases);
-    await writePayload(buildPayload(release));
+    await writePayload(buildPayload(release, releases));
     const tag = release?.tag_name ?? "no published release";
     console.log(`homepage release data: ${tag}`);
   } catch (error) {

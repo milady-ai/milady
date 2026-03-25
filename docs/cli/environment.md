@@ -53,7 +53,7 @@ These variables affect the update checker and plugin registry client.
 |----------|-------------|---------|
 | `MILADY_UPDATE_CHANNEL` | Override the active release channel (`stable`, `beta`, or `nightly`). Takes precedence over the `update.channel` value in `milady.json`. Invalid values are ignored and fall back to the config value. | (from config) |
 | `MILADY_SKILLS_CATALOG` | Override the path to the skills catalog JSON file. | (auto-resolved from package root) |
-| `MILADY_DISABLE_LAZY_SUBCOMMANDS` | When set to `1` (or any truthy value), all subcommands (`plugins`, `models`) are eagerly registered at startup instead of on first invocation. Useful for shell completion scripts. | (unset) |
+| `ELIZA_DISABLE_LAZY_SUBCOMMANDS` | When set to `1` (or any truthy value), all subcommands (`plugins`, `models`) are eagerly registered at startup instead of on first invocation. Useful for shell completion scripts. | (unset) |
 
 ---
 
@@ -63,7 +63,7 @@ These variables affect the CLI output and banner behavior.
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `MILADY_HIDE_BANNER` | When set to `1`, suppresses the Milady ASCII banner that normally prints before each command. The banner is also suppressed for the `update` and `completion` commands regardless of this variable. | (unset) |
+| `ELIZA_HIDE_BANNER` | When set to `1`, suppresses the Milady ASCII banner that normally prints before each command. The banner is also suppressed for the `update` and `completion` commands regardless of this variable. | (unset) |
 | `FORCE_COLOR` | Force colored terminal output even when stdout is not a TTY. Set to any non-empty, non-`0` string to enable. | (unset) |
 | `NO_COLOR` | Disable all ANSI colors when set (any value). Standard convention; takes effect before `FORCE_COLOR`. | (unset) |
 | `LOG_LEVEL` | Set the logging verbosity level. Accepted values: `debug`, `info`, `warn`, `error`. | `info` |

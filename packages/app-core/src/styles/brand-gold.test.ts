@@ -9,8 +9,11 @@ describe("brand-gold onboarding styles", () => {
     );
 
     expect(css).toContain(".onboarding-screen {");
+    expect(css).toContain("position: fixed;");
+    expect(css).toContain("inset: 0;");
     expect(css).toContain("height: 100dvh;");
     expect(css).toContain("overflow: hidden;");
+    expect(css).toContain("overscroll-behavior: none;");
   });
 
   it("forces dark onboarding panel variables inside the onboarding screen", () => {

@@ -63,6 +63,30 @@ describe("canUseLocalTradeExecution", () => {
     expect(canUseLocalTradeExecution("agent-auto", true)).toBe(false);
   });
 
+  it("reports agent-auto capability without consuming quota", () => {
+    agentAutoDailyTrades.count = 3;
+    agentAutoDailyTrades.resetDate = new Date().toISOString().slice(0, 10);
+
+    expect(
+      canUseLocalTradeExecution("agent-auto", true, undefined, {
+        consumeAgentQuota: false,
+      }),
+    ).toBe(true);
+    expect(agentAutoDailyTrades.count).toBe(3);
+  });
+
+  it("reports capability false at the limit without mutating quota", () => {
+    agentAutoDailyTrades.count = AGENT_AUTO_MAX_DAILY_TRADES;
+    agentAutoDailyTrades.resetDate = new Date().toISOString().slice(0, 10);
+
+    expect(
+      canUseLocalTradeExecution("agent-auto", true, undefined, {
+        consumeAgentQuota: false,
+      }),
+    ).toBe(false);
+    expect(agentAutoDailyTrades.count).toBe(AGENT_AUTO_MAX_DAILY_TRADES);
+  });
+
   it("allows user trades in manual-local-key mode", () => {
     expect(canUseLocalTradeExecution("manual-local-key", false)).toBe(true);
   });

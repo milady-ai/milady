@@ -78,6 +78,28 @@ export function OnboardingWizard() {
     };
   }, [uiTheme]);
 
+  useEffect(() => {
+    const docEl = document.documentElement;
+    const body = document.body;
+    const prevDocOverflow = docEl.style.overflow;
+    const prevDocOverscroll = docEl.style.overscrollBehavior;
+    const prevBodyOverflow = body.style.overflow;
+    const prevBodyOverscroll = body.style.overscrollBehavior;
+
+    // Lock page-level scroll while onboarding is active; panel handles its own scroll.
+    docEl.style.overflow = "hidden";
+    docEl.style.overscrollBehavior = "none";
+    body.style.overflow = "hidden";
+    body.style.overscrollBehavior = "none";
+
+    return () => {
+      docEl.style.overflow = prevDocOverflow;
+      docEl.style.overscrollBehavior = prevDocOverscroll;
+      body.style.overflow = prevBodyOverflow;
+      body.style.overscrollBehavior = prevBodyOverscroll;
+    };
+  }, []);
+
   // Overlay stays opacity 0 until VrmStage calls onRevealStart. After Reset Milady (or
   // any remount), the engine sometimes never emits reveal — user sees only the avatar.
   useEffect(() => {

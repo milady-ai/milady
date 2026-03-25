@@ -1,6 +1,11 @@
 import { useCallback, useState } from "react";
 import { useAgents } from "../../lib/AgentProvider";
 import { openWebUI } from "../../lib/open-web-ui";
+import {
+  MIN_DEPOSIT_DISPLAY,
+  PRICE_IDLE_PER_HR,
+  PRICE_RUNNING_PER_HR,
+} from "../../lib/pricing-constants";
 import { useAuth } from "../../lib/useAuth";
 import { AgentCard } from "./AgentCard";
 import { AgentDetail } from "./AgentDetail";
@@ -322,13 +327,49 @@ function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
         <h3 className="font-mono text-sm text-text-light mb-2">
           NO AGENTS FOUND
         </h3>
-        <p className="font-mono text-xs text-text-muted max-w-sm mx-auto leading-relaxed mb-6">
+        <p className="font-mono text-xs text-text-muted max-w-sm mx-auto leading-relaxed mb-4">
           Start Milady locally to see your agents here.
           <br />
-          {authed
-            ? "Or create a cloud agent for hosted infrastructure."
-            : "Sign in to Eliza Cloud for hosted options."}
+          {authed ? (
+            "Or create a cloud agent for hosted infrastructure."
+          ) : (
+            <>
+              Start Milady locally to see your agents here.
+              <br />
+              Sign in to Eliza Cloud for hosted options.
+            </>
+          )}
         </p>
+
+        {/* Pricing preview */}
+        <div className="max-w-xs mx-auto mb-6">
+          <div className="grid grid-cols-3 gap-px bg-border-subtle text-center">
+            <div className="bg-dark-secondary/50 px-3 py-2.5">
+              <p className="font-mono text-[9px] tracking-wider text-text-subtle mb-1">
+                RUNNING
+              </p>
+              <p className="font-mono text-xs font-semibold text-brand tabular-nums">
+                {PRICE_RUNNING_PER_HR}/hr
+              </p>
+            </div>
+            <div className="bg-dark-secondary/50 px-3 py-2.5">
+              <p className="font-mono text-[9px] tracking-wider text-text-subtle mb-1">
+                IDLE
+              </p>
+              <p className="font-mono text-xs font-semibold text-text-light tabular-nums">
+                {PRICE_IDLE_PER_HR}/hr
+              </p>
+            </div>
+            <div className="bg-dark-secondary/50 px-3 py-2.5">
+              <p className="font-mono text-[9px] tracking-wider text-text-subtle mb-1">
+                MIN. DEPOSIT
+              </p>
+              <p className="font-mono text-xs font-semibold text-text-light tabular-nums">
+                {MIN_DEPOSIT_DISPLAY}
+              </p>
+            </div>
+          </div>
+        </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <a

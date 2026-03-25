@@ -20,6 +20,19 @@ function callHandler(params: Record<string, unknown>) {
   } as HandlerOptions);
 }
 
+async function callHandlerWithCallback(
+  params: Record<string, unknown>,
+  callback?: (payload: Record<string, unknown>) => void,
+) {
+  return transferTokenAction.handler(
+    {} as never,
+    {} as never,
+    undefined,
+    { parameters: params } as HandlerOptions,
+    callback as never,
+  );
+}
+
 // ── Test suite ───────────────────────────────────────────────────────────────
 
 describe("TRANSFER_TOKEN action", () => {
@@ -103,12 +116,20 @@ describe("TRANSFER_TOKEN action", () => {
   // ── Parameter validation: toAddress ────────────────────────────────────
 
   it("returns error when toAddress is missing", async () => {
+    const callback = vi.fn();
     const result = await callHandler({
       amount: "1.5",
       assetSymbol: "BNB",
     });
     expect((result as { success: boolean }).success).toBe(false);
     expect((result as { text: string }).text).toContain("address");
+    await callHandlerWithCallback(
+      { amount: "1.5", assetSymbol: "BNB" },
+      callback,
+    );
+    expect(callback).toHaveBeenCalledWith(
+      expect.objectContaining({ action: "TRANSFER_TOKEN_FAILED" }),
+    );
   });
 
   it("returns error when toAddress is malformed", async () => {
@@ -315,6 +336,40 @@ describe("TRANSFER_TOKEN action", () => {
     expect(body.tokenAddress).toBeUndefined();
   });
 
+  it("fires TRANSFER_TOKEN_SUCCESS callback on executed transfer", async () => {
+    const mockFetch = globalThis.fetch as ReturnType<typeof vi.fn>;
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        ok: true,
+        mode: "local-key",
+        executed: true,
+        requiresUserSignature: false,
+        toAddress: VALID_ADDRESS,
+        amount: "1",
+        assetSymbol: "BNB",
+        execution: {
+          hash: "0xabc",
+          explorerUrl: "https://bscscan.com/tx/0xabc",
+          status: "success",
+          blockNumber: 1,
+        },
+      }),
+    });
+    const callback = vi.fn();
+    await callHandlerWithCallback(
+      {
+        toAddress: VALID_ADDRESS,
+        amount: "1",
+        assetSymbol: "BNB",
+      },
+      callback,
+    );
+    expect(callback).toHaveBeenCalledWith(
+      expect.objectContaining({ action: "TRANSFER_TOKEN_SUCCESS" }),
+    );
+  });
+
   it("calls API and returns success for user-sign mode", async () => {
     const mockFetch = globalThis.fetch as ReturnType<typeof vi.fn>;
     mockFetch.mockResolvedValueOnce({
@@ -505,6 +560,27 @@ describe("TRANSFER_TOKEN action", () => {
     expect((result as { success: boolean }).success).toBe(false);
     expect((result as { text: string }).text).toContain(
       "Transfer not permitted",
+    );
+  });
+
+  it("fires TRANSFER_TOKEN_FAILED callback on API error", async () => {
+    const mockFetch = globalThis.fetch as ReturnType<typeof vi.fn>;
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      json: async () => ({ error: "boom" }),
+    });
+    const callback = vi.fn();
+    await callHandlerWithCallback(
+      {
+        toAddress: VALID_ADDRESS,
+        amount: "1.5",
+        assetSymbol: "BNB",
+      },
+      callback,
+    );
+    expect(callback).toHaveBeenCalledWith(
+      expect.objectContaining({ action: "TRANSFER_TOKEN_FAILED" }),
     );
   });
 

@@ -4,6 +4,10 @@ sidebarTitle: Chrome Extension
 description: Use the Milady Browser Relay Chrome extension to let your agent control browser tabs via the Chrome DevTools Protocol.
 ---
 
+<Warning>
+The Chrome extension source code is not currently included in the main Milady repository (`apps/chrome-extension/` does not exist). This documentation describes the planned or separately-distributed Browser Relay extension. If you need browser control, consider the `@elizaos/plugin-browser` plugin which provides browser automation via Stagehand.
+</Warning>
+
 The **Milady Browser Relay** is a Chrome extension that bridges your browser tabs to the Milady agent runtime using the Chrome DevTools Protocol (CDP). This allows your agent to inspect, navigate, and interact with web pages in real time.
 
 ## What It Does

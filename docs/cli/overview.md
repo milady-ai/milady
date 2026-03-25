@@ -73,7 +73,7 @@ bunx miladyai
 </Card>
 
 <Card title="doctor" icon="stethoscope" href="/cli/doctor">
-  Diagnose common issues with your installation and configuration (planned).
+  Check environment health and diagnose common issues.
 </Card>
 
 </CardGroup>
@@ -84,7 +84,7 @@ bunx miladyai
 # Start the agent
 milady
 
-# Start agent in headless server mode
+# Start agent in headless server mode (alias: milady run)
 milady start
 
 # Run setup
@@ -101,6 +101,9 @@ milady models
 
 # Reset local database
 milady db reset
+
+# Run health checks
+milady doctor
 ```
 
 ## Environment Variables

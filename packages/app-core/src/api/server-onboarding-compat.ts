@@ -371,19 +371,21 @@ export function deriveCompatOnboardingReplayBody(
  *
  * Security: The bypass ONLY activates when BOTH conditions are met:
  * 1. MILADY_CLOUD_PROVISIONED=1 (or ELIZA_CLOUD_PROVISIONED=1)
- * 2. MILADY_API_TOKEN (or ELIZA_API_TOKEN) is configured
+ * 2. A platform-managed token is configured (`STEWARD_AGENT_TOKEN`, with
+ *    compat-token fallback for older environments)
  *
  * This ensures that only platform-managed containers with proper auth can skip
- * onboarding. A container with just CLOUD_PROVISIONED=1 but no token would be
- * unauthenticated and must go through normal onboarding.
+ * onboarding. A container with just CLOUD_PROVISIONED=1 but no platform token
+ * would be unauthenticated and must go through normal onboarding.
  */
 export function isCloudProvisioned(): boolean {
   const hasCloudFlag =
     process.env.MILADY_CLOUD_PROVISIONED === "1" ||
     process.env.ELIZA_CLOUD_PROVISIONED === "1";
 
-  // Security guard: only bypass when the platform has also set an API token
-  const hasApiToken = Boolean(getCompatApiToken());
+  const hasPlatformToken = Boolean(
+    process.env.STEWARD_AGENT_TOKEN?.trim() || getCompatApiToken(),
+  );
 
-  return hasCloudFlag && hasApiToken;
+  return hasCloudFlag && hasPlatformToken;
 }

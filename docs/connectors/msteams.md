@@ -20,10 +20,28 @@ The Microsoft Teams connector is an external elizaOS plugin that bridges your ag
 
 ## Minimal Configuration
 
-In your character file:
+The connector auto-enables only when `botToken`, `token`, or `apiKey` is present. The `appId`/`appPassword`/`tenantId` fields alone do NOT trigger auto-enable — you must also include one of the trigger fields or add the plugin to `plugins.allow`.
 
 ```json
 {
+  "connectors": {
+    "msteams": {
+      "botToken": "YOUR_BOT_TOKEN",
+      "appId": "YOUR_APP_ID",
+      "appPassword": "YOUR_APP_PASSWORD",
+      "tenantId": "YOUR_TENANT_ID"
+    }
+  }
+}
+```
+
+If you don't have a `botToken`, add the plugin explicitly:
+
+```json
+{
+  "plugins": {
+    "allow": ["@elizaos/plugin-msteams"]
+  },
   "connectors": {
     "msteams": {
       "appId": "YOUR_APP_ID",

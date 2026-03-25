@@ -58,7 +58,7 @@ milady start --connection-key my-secret-key
 When you run `milady start`:
 
 1. The CLI calls `startEliza({ serverOnly: true })` from the elizaOS runtime.
-2. The API server starts on port `2138` by default (override with `MILADY_PORT`).
+2. The API server starts on port `2138` by default (override with `MILADY_PORT` or `ELIZA_PORT`).
 3. The agent loop begins processing messages from connected clients and messaging platforms.
 4. No interactive interface is launched -- the process runs headlessly.
 
@@ -68,7 +68,7 @@ The `run` command is a direct alias that calls the exact same `startEliza({ serv
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `MILADY_PORT` | API server port | `2138` |
+| `MILADY_PORT` | API server port (also accepts `ELIZA_PORT` as fallback) | `2138` |
 | `MILADY_STATE_DIR` | State directory override | `~/.milady/` |
 | `MILADY_CONFIG_PATH` | Config file path override | `~/.milady/milady.json` |
 

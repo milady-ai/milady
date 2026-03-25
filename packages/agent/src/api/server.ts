@@ -3132,6 +3132,153 @@ function writeSseJson(
   writeSseData(res, JSON.stringify(payload), event);
 }
 
+type FallbackParsedAction = {
+  name: string;
+  parameters: Record<string, string>;
+};
+
+function inferBalanceChainFromText(
+  input: string,
+): "all" | "solana" | "bsc" | "base" | "ethereum" {
+  const normalized = input.toLowerCase();
+  if (/\bsol(?:ana)?\b/.test(normalized)) return "solana";
+  if (/\b(bsc|bnb|binance)\b/.test(normalized)) return "bsc";
+  if (/\bbase\b/.test(normalized)) return "base";
+  if (/\b(eth|ethereum)\b/.test(normalized)) return "ethereum";
+  return "all";
+}
+
+function shouldForceCheckBalanceFallback(
+  parsedActions: FallbackParsedAction[],
+  userText: string,
+  responseText: string,
+): boolean {
+  const nonReplyActions = parsedActions.filter(
+    (a) => a.name !== "REPLY" && a.name !== "NONE" && a.name !== "IGNORE",
+  );
+  if (nonReplyActions.length > 0) return false;
+
+  const combined = `${userText}\n${responseText}`.toLowerCase();
+  const balanceIntent =
+    /\b(balance|wallet|holdings|portfolio|funds|how much)\b/.test(combined) ||
+    /\b(check(ing)?|look(ing)? up|fetch(ing)?)\b/.test(combined);
+  return balanceIntent;
+}
+
+function parseFallbackActionBlocks(value: unknown): FallbackParsedAction[] {
+  const rawValues: string[] = [];
+  if (typeof value === "string") {
+    rawValues.push(value);
+  } else if (Array.isArray(value)) {
+    for (const entry of value) {
+      if (typeof entry === "string" && entry.trim().length > 0) {
+        rawValues.push(entry);
+      }
+    }
+  }
+
+  const parsed: FallbackParsedAction[] = [];
+  for (const raw of rawValues) {
+    const xmlActionMatches = Array.from(
+      raw.matchAll(/<action\b[^>]*>([\s\S]*?)<\/action>/gi),
+    );
+    if (xmlActionMatches.length === 0) {
+      const normalized = raw.trim().toUpperCase();
+      if (/^[A-Z0-9_]+$/.test(normalized)) {
+        parsed.push({ name: normalized, parameters: {} });
+      }
+      continue;
+    }
+
+    for (const [, block = ""] of xmlActionMatches) {
+      const nameMatch = block.match(/<name>\s*([A-Za-z0-9_]+)\s*<\/name>/i);
+      if (!nameMatch) continue;
+      const params: Record<string, string> = {};
+      const paramsMatch = block.match(/<params>([\s\S]*?)<\/params>/i);
+      if (paramsMatch?.[1]) {
+        const paramPairs = paramsMatch[1].matchAll(
+          /<([A-Za-z_][A-Za-z0-9_-]*)>\s*([^<]+?)\s*<\/\1>/g,
+        );
+        for (const [, key, val] of paramPairs) {
+          params[key] = val.trim();
+        }
+      }
+      parsed.push({
+        name: nameMatch[1].trim().toUpperCase(),
+        parameters: params,
+      });
+    }
+  }
+
+  return parsed;
+}
+
+async function executeFallbackParsedActions(
+  runtime: AgentRuntime,
+  message: ReturnType<typeof createMessageMemory>,
+  parsedActions: FallbackParsedAction[],
+  appendIncomingText: (incoming: string) => void,
+  onActionCallback: (actionTag: string, hasText: boolean) => void,
+): Promise<void> {
+  const runtimeActions = Array.isArray((runtime as { actions?: unknown[] }).actions)
+    ? ((runtime as { actions: unknown[] }).actions as Array<{
+        name?: string;
+        similes?: string[];
+        validate?: (...args: unknown[]) => unknown;
+        handler?: (...args: unknown[]) => unknown;
+      }>)
+    : [];
+
+  const lookup = new Map<string, (typeof runtimeActions)[number]>();
+  for (const action of runtimeActions) {
+    if (typeof action.name === "string") lookup.set(action.name.toUpperCase(), action);
+    if (!Array.isArray(action.similes)) continue;
+    for (const alias of action.similes) {
+      if (typeof alias === "string") lookup.set(alias.toUpperCase(), action);
+    }
+  }
+
+  for (const parsed of parsedActions) {
+    if (parsed.name === "REPLY" || parsed.name === "NONE" || parsed.name === "IGNORE") {
+      continue;
+    }
+    const action = lookup.get(parsed.name);
+    if (!action || typeof action.handler !== "function") continue;
+
+    if (typeof action.validate === "function") {
+      const valid = await Promise.resolve(action.validate(runtime, message, undefined));
+      if (!valid) continue;
+    }
+
+    await Promise.resolve(
+      action.handler(
+        runtime,
+        message,
+        undefined,
+        { parameters: parsed.parameters },
+        async (content: unknown) => {
+          const contentRecord =
+            content && typeof content === "object"
+              ? (content as Record<string, unknown>)
+              : {};
+          const actionTag =
+            typeof contentRecord.action === "string"
+              ? contentRecord.action
+              : parsed.name;
+          const chunk =
+            contentRecord && typeof contentRecord === "object"
+              ? extractCompatTextContent(contentRecord as Content)
+              : "";
+          onActionCallback(actionTag, Boolean(chunk));
+          if (chunk) appendIncomingText(chunk);
+          return [];
+        },
+        [],
+      ),
+    );
+  }
+}
+
 const CHAT_KNOWLEDGE_MIN_SIMILARITY = 0.2;
 const CHAT_KNOWLEDGE_MAX_SNIPPETS = 3;
 const CHAT_KNOWLEDGE_MAX_CHARS = 900;
@@ -3351,6 +3498,7 @@ async function generateChatResponse(
         ReturnType<NonNullable<AgentRuntime["messageService"]>["handleMessage"]>
       >
     | undefined;
+  let actionCallbacksSeen = 0;
   let _handlerError: unknown = null;
   try {
     const generationMessage = await maybeAugmentChatMessageWithKnowledge(
@@ -3368,6 +3516,7 @@ async function generateChatResponse(
         // Trace action callback invocations so we can verify handlers execute.
         const actionTag = (content as Record<string, unknown>)?.action;
         if (actionTag) {
+          actionCallbacksSeen += 1;
           runtime.logger?.info(
             {
               src: "eliza-api",
@@ -3452,6 +3601,57 @@ async function generateChatResponse(
       },
       "[eliza-api] Chat response metadata",
     );
+
+    const rawActionsPayload = rc?.actions ?? resultRecord.actions;
+    const parsedFallbackActions = parseFallbackActionBlocks(rawActionsPayload);
+    const userText = String(extractCompatTextContent(message.content) ?? "");
+    const modelText = String(extractCompatTextContent(result.responseContent) ?? "");
+    const fallbackActionsToRun = [...parsedFallbackActions];
+
+    if (
+      shouldForceCheckBalanceFallback(fallbackActionsToRun, userText, modelText) &&
+      !fallbackActionsToRun.some((a) => a.name === "CHECK_BALANCE")
+    ) {
+      fallbackActionsToRun.push({
+        name: "CHECK_BALANCE",
+        parameters: { chain: inferBalanceChainFromText(userText) },
+      });
+      runtime.logger?.warn(
+        {
+          src: "eliza-api",
+          inferredChain: inferBalanceChainFromText(userText),
+        },
+        "[eliza-api] Injecting CHECK_BALANCE fallback for REPLY-only malformed action payload",
+      );
+    }
+
+    if (actionCallbacksSeen === 0 && fallbackActionsToRun.length > 0) {
+      runtime.logger?.warn(
+        {
+          src: "eliza-api",
+          parsedActions: fallbackActionsToRun.map((a) => a.name),
+        },
+        "[eliza-api] Recovering from unexecuted action payload",
+      );
+
+      await executeFallbackParsedActions(
+        runtime,
+        message,
+        fallbackActionsToRun,
+        appendIncomingText,
+        (actionTag, hasText) => {
+          actionCallbacksSeen += 1;
+          runtime.logger?.info(
+            {
+              src: "eliza-api",
+              action: actionTag,
+              hasText,
+            },
+            `[eliza-api] Action callback fired: ${actionTag}`,
+          );
+        },
+      );
+    }
   }
 
   const resultText = extractCompatTextContent(result?.responseContent);
@@ -3464,13 +3664,14 @@ async function generateChatResponse(
       emitChunk(resultText);
     }
   } else if (
+    actionCallbacksSeen === 0 &&
     resultText &&
     resultText !== responseText &&
     resultText.startsWith(responseText)
   ) {
     // Keep streaming monotonic when final text extends emitted chunks.
     emitChunk(resultText.slice(responseText.length));
-  } else if (resultText && resultText !== responseText) {
+  } else if (actionCallbacksSeen === 0 && resultText && resultText !== responseText) {
     // Canonical final response may differ from streamed chunks (normalization).
     if (opts?.onSnapshot) {
       emitSnapshot(resultText);
@@ -12414,7 +12615,9 @@ async function handleRequest(
     json(res, {
       tradePermissionMode: mode,
       canUserLocalExecute: canUseLocalTradeExecution(mode, false),
-      canAgentAutoTrade: canUseLocalTradeExecution(mode, true),
+      canAgentAutoTrade: canUseLocalTradeExecution(mode, true, undefined, {
+        consumeAgentQuota: false,
+      }),
     });
     return;
   }
@@ -12457,7 +12660,14 @@ async function handleRequest(
       ok: true,
       tradePermissionMode: newMode,
       canUserLocalExecute: canUseLocalTradeExecution(newMode, false),
-      canAgentAutoTrade: canUseLocalTradeExecution(newMode, true),
+      canAgentAutoTrade: canUseLocalTradeExecution(
+        newMode,
+        true,
+        undefined,
+        {
+          consumeAgentQuota: false,
+        },
+      ),
     });
     return;
   }
@@ -12497,6 +12707,10 @@ async function handleRequest(
     const canAgentAutoTrade = canUseLocalTradeExecution(
       tradePermissionMode,
       true,
+      undefined,
+      {
+        consumeAgentQuota: false,
+      },
     );
     const canTrade = Boolean(evmAddress) && bscRpcReady;
     const automationMode: "connectors-only" | "full" =

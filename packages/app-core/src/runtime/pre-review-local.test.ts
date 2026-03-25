@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import {
   classificationFromInputs,
   decisionFromFindings,
+  getBaseRef,
   resolveRunnableTestFiles,
   runChecks,
   scanDiffTextForBlockedPatterns,
@@ -218,6 +219,38 @@ index 1234567..89abcde 100644
     }
   });
 
+  it("uses explicit pre-review base ref from env when valid", () => {
+    const originalCwd = process.cwd();
+    const originalBase = process.env.MILADY_PRE_REVIEW_BASE;
+    const repoDir = mkdtempSync(path.join(tmpdir(), "eliza-prereview-base-"));
+
+    try {
+      execSync("git init -b main", { cwd: repoDir, stdio: "pipe" });
+      execSync('git config user.email "test@example.com"', {
+        cwd: repoDir,
+        stdio: "pipe",
+      });
+      execSync('git config user.name "Test User"', {
+        cwd: repoDir,
+        stdio: "pipe",
+      });
+      writeFileSync(path.join(repoDir, "README.md"), "seed\n");
+      execSync("git add README.md", { cwd: repoDir, stdio: "pipe" });
+      execSync('git commit -m "seed"', { cwd: repoDir, stdio: "pipe" });
+
+      process.chdir(repoDir);
+      process.env.MILADY_PRE_REVIEW_BASE = "main";
+      expect(getBaseRef()).toBe("main");
+    } finally {
+      process.chdir(originalCwd);
+      if (originalBase === undefined) {
+        delete process.env.MILADY_PRE_REVIEW_BASE;
+      } else {
+        process.env.MILADY_PRE_REVIEW_BASE = originalBase;
+      }
+    }
+  });
+
   it("filters deleted test files out of targeted test runs", () => {
     const repoDir = mkdtempSync(path.join(tmpdir(), "eliza-prereview-files-"));
     const kept = path.join(repoDir, "kept.test.ts");
@@ -232,14 +265,19 @@ index 1234567..89abcde 100644
   });
 
   it("routes only root e2e tests to the e2e config runner", () => {
-    expect(
-      splitRunnableTestFiles([
-        "packages/app-core/src/components/SettingsView.test.tsx",
-        "packages/app-core/test/app/settings-sections.e2e.test.ts",
-        "test/health-endpoint.e2e.test.ts",
-        "apps/homepage/src/routes/home.test.tsx",
-      ]),
-    ).toEqual({
+    const actual = splitRunnableTestFiles([
+      "packages/app-core/src/components/SettingsView.test.tsx",
+      "packages/app-core/test/app/settings-sections.e2e.test.ts",
+      "test/health-endpoint.e2e.test.ts",
+      "apps/homepage/src/routes/home.test.tsx",
+    ]);
+
+    expect({
+      ...actual,
+      homepageTests: actual.homepageTests.map((file) =>
+        file.replaceAll("\\", "/"),
+      ),
+    }).toEqual({
       repoTests: ["packages/app-core/src/components/SettingsView.test.tsx"],
       repoE2eTests: ["test/health-endpoint.e2e.test.ts"],
       homepageTests: ["src/routes/home.test.tsx"],

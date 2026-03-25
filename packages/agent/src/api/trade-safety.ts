@@ -47,6 +47,10 @@ export type TradePermissionMode =
   | "manual-local-key"
   | "disabled";
 
+type LocalTradeExecutionOptions = {
+  consumeAgentQuota?: boolean;
+};
+
 /**
  * Returns true if local-key execution is permitted for the given actor.
  */
@@ -54,9 +58,17 @@ export function canUseLocalTradeExecution(
   mode: TradePermissionMode,
   isAgent: boolean,
   log?: (msg: string) => void,
+  options: LocalTradeExecutionOptions = {},
 ): boolean {
   if (mode === "agent-auto") {
     if (isAgent) {
+      if (options.consumeAgentQuota === false) {
+        const today = getAgentAutoTradeDate();
+        if (agentAutoDailyTrades.resetDate !== today) {
+          return true;
+        }
+        return agentAutoDailyTrades.count < AGENT_AUTO_MAX_DAILY_TRADES;
+      }
       return recordAgentAutoTrade(log);
     }
     return true;

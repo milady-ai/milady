@@ -17,6 +17,10 @@ milady setup [options]
 | Flag | Type | Default | Description |
 |------|------|---------|-------------|
 | `--workspace <dir>` | string | (from config or `~/.milady/workspace/`) | Custom agent workspace directory to create or verify |
+| `--provider <name>` | string | (none) | Model provider name for non-interactive setup |
+| `--key <value>` | string | (none) | API key value passed directly via command line |
+| `--key-stdin` | boolean | false | Read the API key or URL from stdin |
+| `--no-wizard` | boolean | false | Skip the model provider wizard |
 
 Global flags:
 
@@ -44,7 +48,32 @@ milady --profile staging setup
 
 # Setup with an absolute path
 milady setup --workspace /srv/milady/workspace
+
+# Non-interactive setup with a specific provider
+milady setup --provider anthropic --key "sk-ant-..."
+
+# Read API key from stdin (useful in CI)
+echo "sk-ant-..." | milady setup --provider anthropic --key-stdin
+
+# Skip the provider wizard entirely
+milady setup --no-wizard
 ```
+
+## Provider Wizard
+
+When run interactively (TTY attached) and no model provider API key is configured, `milady setup` launches a provider wizard that lets you choose from:
+
+- Anthropic (Claude)
+- OpenAI (GPT)
+- Google (Gemini)
+- Groq
+- xAI (Grok)
+- OpenRouter
+- Mistral
+- Ollama (local, no key)
+- Skip for now
+
+The wizard prompts for your API key and saves it to the config file. Use `--no-wizard` to skip this step, or `--provider` and `--key` for non-interactive setup.
 
 ## Behavior
 

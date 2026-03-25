@@ -16,9 +16,11 @@ The Feishu connector is an external elizaOS plugin that integrates your agent wi
 |-------|-------|
 | Package | `@elizaos/plugin-feishu` |
 | Config key | `connectors.feishu` |
-| Auto-enable trigger | `FEISHU_APP_ID` and `FEISHU_APP_SECRET` are set |
+| Auto-enable trigger | `token`, `botToken`, or `apiKey` in the connector config |
 
 ## Minimal Configuration
+
+The connector auto-enables when one of the generic trigger fields (`token`, `botToken`, or `apiKey`) is present in the connector config. Environment variables alone do not trigger auto-enable.
 
 ```json
 {
@@ -28,7 +30,7 @@ The Feishu connector is an external elizaOS plugin that integrates your agent wi
   },
   "connectors": {
     "feishu": {
-      "enabled": true
+      "apiKey": "your_app_secret"
     }
   }
 }

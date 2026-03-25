@@ -17,10 +17,12 @@ Your Milady database is stored at:
 ~/.milady/workspace/.eliza/.elizadb
 ```
 
-You can override this location by setting the `MILADY_STATE_DIR` environment variable:
+The actual path is resolved from the `ELIZA_STATE_DIR` environment variable (defaults to `~/.eliza/` when the namespace is not set). When running as Milady, the `ELIZA_NAMESPACE=milady` setting redirects this to `~/.milady/`.
+
+You can override this location by setting the `ELIZA_STATE_DIR` environment variable:
 
 ```bash
-export MILADY_STATE_DIR=/custom/path/to/state
+export ELIZA_STATE_DIR=/custom/path/to/state
 milady db reset
 ```
 

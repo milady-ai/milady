@@ -53,7 +53,7 @@ The `ConversationsSidebar` and `AutonomousPanel` components both accept a `mobil
 
 ## Tabs
 
-The navigation is organized into primary tabs and an Advanced group. Tabs are defined in `apps/app/src/navigation.ts` with the following structure:
+The navigation is organized into primary tabs and an Advanced group:
 
 | Tab Group | Tabs | URL Path |
 |-----------|------|----------|

@@ -341,8 +341,10 @@ function ensurePairingCode(): string | null {
   if (!pairingCode || now > pairingExpiresAt) {
     pairingCode = generatePairingCode();
     pairingExpiresAt = now + PAIRING_TTL_MS;
+    // Pairing still requires an operator to read the server logs and enter the
+    // full code, so masking it here breaks auth bootstrap.
     console.warn(
-      `[milady-api] Pairing code: ${pairingCode.slice(0, 4)}**** (valid for 10 minutes)`,
+      `[milady-api] Pairing code: ${pairingCode} (valid for 10 minutes)`,
     );
   }
 
@@ -3526,10 +3528,19 @@ export async function startApiServer(
       void (async () => {
         try {
           await ensureRuntimeSqlCompatibility(runtime);
+        } catch (err) {
+          logger.error(
+            `[milady][runtime] SQL compatibility init failed: ${
+              err instanceof Error ? err.message : String(err)
+            }`,
+          );
+        }
+
+        try {
           await (await lazyEnsureTTS())(runtime);
         } catch (err) {
           logger.warn(
-            `[milady][runtime] Deferred compat init failed: ${
+            `[milady][runtime] TTS init failed (non-critical): ${
               err instanceof Error ? err.message : String(err)
             }`,
           );

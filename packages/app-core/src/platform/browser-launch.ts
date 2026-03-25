@@ -77,46 +77,60 @@ async function exchangeCloudLaunchSession(
   cloudBaseUrl: string,
   sessionId: string,
 ): Promise<{ apiBase: string; token: string }> {
-  const response = await fetch(
-    `${cloudBaseUrl}/api/v1/eliza/launch-sessions/${encodeURIComponent(sessionId)}`,
-    {
+  const sessionPath = encodeURIComponent(sessionId);
+  const launchSessionUrls = [
+    `${cloudBaseUrl}/api/v1/milady/launch-sessions/${sessionPath}`,
+    `${cloudBaseUrl}/api/v1/eliza/launch-sessions/${sessionPath}`,
+  ];
+
+  let lastError: Error | null = null;
+
+  for (const url of launchSessionUrls) {
+    const response = await fetch(url, {
       method: "GET",
       headers: { Accept: "application/json" },
       redirect: "manual",
-    },
-  );
+    });
 
-  if (!response.ok) {
-    const payload = (await response.json().catch(() => ({}))) as {
+    if (!response.ok) {
+      const payload = (await response.json().catch(() => ({}))) as {
+        error?: string;
+      };
+      lastError = new Error(
+        payload.error ||
+          `Launch session exchange failed (HTTP ${response.status})`,
+      );
+
+      if (response.status === 404) {
+        continue;
+      }
+      throw lastError;
+    }
+
+    const payload = (await response.json()) as {
+      success?: boolean;
+      data?: {
+        connection?: { apiBase?: string; token?: string };
+      };
       error?: string;
     };
-    throw new Error(
-      payload.error ||
-        `Launch session exchange failed (HTTP ${response.status})`,
-    );
-  }
 
-  const payload = (await response.json()) as {
-    success?: boolean;
-    data?: {
-      connection?: { apiBase?: string; token?: string };
+    if (!payload.success || !payload.data?.connection?.apiBase) {
+      throw new Error(payload.error || "Launch session payload is invalid");
+    }
+
+    const token = payload.data.connection.token?.trim();
+    if (!token) {
+      throw new Error("Launch session did not include an access token");
+    }
+
+    return {
+      apiBase: normalizeLaunchApiBase(payload.data.connection.apiBase),
+      token,
     };
-    error?: string;
-  };
-
-  if (!payload.success || !payload.data?.connection?.apiBase) {
-    throw new Error(payload.error || "Launch session payload is invalid");
   }
 
-  const token = payload.data.connection.token?.trim();
-  if (!token) {
-    throw new Error("Launch session did not include an access token");
-  }
-
-  return {
-    apiBase: normalizeLaunchApiBase(payload.data.connection.apiBase),
-    token,
-  };
+  throw lastError ?? new Error("Launch session exchange failed");
 }
 
 export async function applyLaunchConnectionFromUrl(): Promise<boolean> {

@@ -16,11 +16,11 @@ The Matrix connector is an external elizaOS plugin that bridges your agent to an
 |-------|-------|
 | Package | `@elizaos/plugin-matrix` |
 | Config key | `connectors.matrix` |
-| Auto-enable trigger | `MATRIX_ACCESS_TOKEN` environment variable is set |
+| Auto-enable trigger | `token`, `botToken`, or `apiKey` in the connector config |
 
 ## Minimal Configuration
 
-Set the required environment variable and add a connector entry:
+The connector auto-enables when one of the generic trigger fields (`token`, `botToken`, or `apiKey`) is present in the connector config. Set the access token in both places:
 
 ```json
 {
@@ -29,7 +29,7 @@ Set the required environment variable and add a connector entry:
   },
   "connectors": {
     "matrix": {
-      "enabled": true
+      "token": "syt_your_access_token"
     }
   }
 }
