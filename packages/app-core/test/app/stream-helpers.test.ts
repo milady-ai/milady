@@ -1,6 +1,9 @@
 // @vitest-environment jsdom
 
-import { toggleAlwaysOnTop } from "../../src/components/stream/helpers";
+import {
+  STREAM_SOURCE_LABELS,
+  toggleAlwaysOnTop,
+} from "../../src/components/stream/helpers";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 type TestWindow = Window & {
@@ -42,5 +45,13 @@ describe("toggleAlwaysOnTop", () => {
     expect(request).toHaveBeenCalledWith({
       flag: true,
     });
+  });
+});
+
+describe("STREAM_SOURCE_LABELS", () => {
+  it("exposes labels for every supported stream source type", () => {
+    expect(STREAM_SOURCE_LABELS["stream-tab"]).toBe("Stream Tab");
+    expect(STREAM_SOURCE_LABELS.game).toBe("Game");
+    expect(STREAM_SOURCE_LABELS["custom-url"]).toBe("Custom URL");
   });
 });

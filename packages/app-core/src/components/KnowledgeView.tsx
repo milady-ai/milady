@@ -441,7 +441,8 @@ function DocumentViewer({ documentId }: { documentId: string | null }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!documentId) {
+    const id = documentId ?? "";
+    if (!id) {
       setDoc(null);
       setFragments([]);
       setLoading(false);
@@ -456,8 +457,8 @@ function DocumentViewer({ documentId }: { documentId: string | null }) {
       setError(null);
 
       const [docRes, fragRes] = await Promise.all([
-        client.getKnowledgeDocument(documentId),
-        client.getKnowledgeFragments(documentId),
+        client.getKnowledgeDocument(id),
+        client.getKnowledgeFragments(id),
       ]);
 
       if (cancelled) return;

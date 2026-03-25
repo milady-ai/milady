@@ -34,6 +34,7 @@ import {
   FULL_SIZE,
   IS_POPOUT,
   PIP_SIZE,
+  STREAM_SOURCE_LABELS,
   type StreamSourceType,
   TERMINAL_ACTIVE_WINDOW_MS,
 } from "./stream/helpers";
