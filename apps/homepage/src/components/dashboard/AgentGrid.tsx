@@ -320,14 +320,18 @@ function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
         </div>
 
         <h3 className="font-mono text-sm text-text-light mb-2">
-          NO AGENTS FOUND
+          {authed ? "CLOUD AGENTS COMING SOON" : "NO AGENTS FOUND"}
         </h3>
         <p className="font-mono text-xs text-text-muted max-w-sm mx-auto leading-relaxed mb-6">
-          Start Milady locally to see your agents here.
-          <br />
           {authed
-            ? "Or create a cloud agent for hosted infrastructure."
-            : "Sign in to Eliza Cloud for hosted options."}
+            ? "Cloud agent hosting is rolling out. Stay tuned."
+            : (
+                <>
+                  Start Milady locally to see your agents here.
+                  <br />
+                  Sign in to Eliza Cloud for hosted options.
+                </>
+              )}
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">

@@ -141,7 +141,9 @@ export function CreateAgentForm({
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setStep("error");
-      if (msg.includes("401") || msg.includes("403")) {
+      if (err instanceof Error && err.name === "CloudAgentsNotAvailableError") {
+        setError("Cloud agent hosting is coming soon. Stay tuned!");
+      } else if (msg.includes("401") || msg.includes("403")) {
         setError("Authentication failed. Please sign in again.");
       } else {
         setError(msg);

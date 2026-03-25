@@ -96,6 +96,13 @@ function unwrapListResponse<T>(
   return [];
 }
 
+export class CloudAgentsNotAvailableError extends Error {
+  constructor() {
+    super("Cloud agent hosting is not available on this server yet.");
+    this.name = "CloudAgentsNotAvailableError";
+  }
+}
+
 export class CloudClient {
   private apiKey: string;
 
@@ -135,6 +142,12 @@ export class CloudClient {
       // AND the response indicates an actual auth failure
       if (clearAuthOnFailure && isCloudAuthFailure(res.status, errorMessage)) {
         clearToken();
+      }
+      // 404 on milady agent endpoints means the cloud instance hasn't deployed
+      // the agent hosting feature yet — throw a specific error so callers can
+      // show a "coming soon" message instead of a generic failure.
+      if (res.status === 404 && path.startsWith("/api/v1/milady/")) {
+        throw new CloudAgentsNotAvailableError();
       }
       throw new Error(
         errorMessage

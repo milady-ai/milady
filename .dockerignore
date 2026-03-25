@@ -1,53 +1,34 @@
-# ── Docker Build Context Exclusions ──
-# Reduces context sent to daemon from ~4GB to ~200MB
+# CI-specific dockerignore for Dockerfile.ci
+# Unlike .dockerignore, this allows dist/ and apps/app/dist/ in the build context
+# because they are pre-built by GitHub Actions before the docker build step.
 
-# Git history (700MB+)
 .git
 .github
-
-# IDE
+.claude
+.devin
 .vscode
 .idea
-
-# Local dependency trees / caches
-node_modules/
-**/node_modules/
-.bun/
-
-# Previous build artifacts
-dist/
-
-# Test files
-**/*.test.ts
-**/*.test.tsx
-**/*.spec.ts
-**/vitest*
-coverage/
-
-# Dev tooling
-.storybook
-**/*.stories.*
-.husky
-git-hooks
-
-# Documentation
-docs/
-
-# Large assets not needed for headless agent
-**/*.vrm
-**/*.glb
-**/*.gltf
-**/*.fbx
-
-# Desktop builds
-apps/app/electrobun/build
+.env
+.env.local
+.env.*.local
+node_modules/.cache
 apps/app/android
-apps/app/ios
-
-# Homepage static site
-apps/homepage/out
-apps/homepage/.next
-
-# Ignored caches
-.ruff_cache/
-cache/voice/
+apps/app/electrobun
+apps/homepage
+apps/home
+apps/landing
+apps/chrome-extension
+apps/ui
+docs/
+coverage/
+dev.log
+install.sh
+install.ps1
+packaging/
+artifacts/
+deploy/
+Dockerfile
+Dockerfile.alpha89
+Dockerfile.fixed
+Dockerfile.slim
+!Dockerfile.ci
