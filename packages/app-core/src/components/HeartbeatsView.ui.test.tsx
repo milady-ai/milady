@@ -81,4 +81,25 @@ describe("HeartbeatsView UI states", () => {
     const snapshot = JSON.stringify(tree?.toJSON());
     expect(snapshot).toContain("Loading");
   });
+
+  it("renders the rounded shell and lifted detail surface", async () => {
+    mockUseApp.mockReturnValue(makeAppState());
+
+    let tree: TestRenderer.ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(<HeartbeatsView />);
+    });
+
+    const shell = tree?.root.findByProps({
+      "data-testid": "heartbeats-shell",
+    });
+    const detailPanel = tree?.root.findByProps({
+      "data-testid": "heartbeats-detail-panel",
+    });
+
+    expect(String(shell?.props.className)).toContain("rounded-[30px]");
+    expect(String(shell?.props.className)).toContain("shadow-[");
+    expect(String(detailPanel?.props.className)).toContain("rounded-[24px]");
+    expect(String(detailPanel?.props.className)).toContain("shadow-[");
+  });
 });
