@@ -62,8 +62,6 @@ const MILADY_SKIP_SECURITY_EVAL_OVERRIDE: boolean | null = (() => {
   return null; // dynamic (default)
 })();
 
-/** Sources where the user is trusted (admin/DM) — skip security eval. */
-const TRUSTED_SOURCES = new Set(["client_chat", "direct", "dm", "web"]);
 
 /**
  * Run the social/relationship extraction LLM every N messages. Default: 3.
@@ -87,27 +85,16 @@ function extractSecurityMessage(prompt: string): string {
   return match?.[1] ?? "";
 }
 
-/** Extract the message source/channel from the security eval prompt context. */
-function extractSourceFromPrompt(prompt: string): string | null {
-  // The security eval prompt includes context like "Source: client_chat" or
-  // the prompt itself may reference the channel. Check common patterns.
-  const sourceMatch = prompt.match(
-    /\bsource[:\s]+["']?(\w+)["']?/i,
-  );
-  return sourceMatch?.[1]?.toLowerCase() ?? null;
-}
-
-/** Determine whether security eval should be skipped for this prompt. */
-export function shouldSkipSecurityEval(prompt: string): boolean {
-  // Explicit override from env var takes precedence
-  if (MILADY_SKIP_SECURITY_EVAL_OVERRIDE !== null) {
-    return MILADY_SKIP_SECURITY_EVAL_OVERRIDE;
-  }
-  // Dynamic: skip for trusted sources (DM/web UI), run for public channels
-  const source = extractSourceFromPrompt(prompt);
-  if (source && TRUSTED_SOURCES.has(source)) return true;
-  // If we can't determine the source, run the full eval (safe default)
-  return false;
+/** Determine whether security eval should be skipped.
+ *
+ * Uses only the env var — no prompt content parsing (which would be a
+ * prompt injection vector since user messages are embedded in the prompt).
+ *
+ * For automatic per-channel behavior, configure MILADY_SKIP_SECURITY_EVAL
+ * per deployment: =1 for personal/DM instances, leave unset for public.
+ */
+export function shouldSkipSecurityEval(): boolean {
+  return MILADY_SKIP_SECURITY_EVAL_OVERRIDE === true;
 }
 
 export function isHighRiskMessage(text: string): boolean {
@@ -230,7 +217,7 @@ export function installPromptOptimizations(runtime: AgentRuntime): void {
     if (
       isTextLarge &&
       originalPrompt.startsWith("You are a security evaluation system.") &&
-      shouldSkipSecurityEval(originalPrompt)
+      shouldSkipSecurityEval()
     ) {
       const analyzedMessage = extractSecurityMessage(originalPrompt);
       const cacheKey = analyzedMessage.slice(0, 1000);

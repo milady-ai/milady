@@ -91,12 +91,15 @@ export function compactInstalledSkills(prompt: string): string {
 // Intent detection
 // ---------------------------------------------------------------------------
 
+// Coding intent uses specific terms. Generic words like "fix", "build", "run"
+// are excluded to avoid false positives ("fix the typo", "build me a haiku").
 const CODING_INTENT_RE =
-  /\b(code|coding|repo|repository|pull request|pr\b|branch|test(s)?\b|compile|build|debug|fix|start_coding_task|spawn_coding_agent|send_to_coding_agent)\b|https?:\/\/(?:github\.com|gitlab\.com|bitbucket\.org)\//i;
+  /\b(code|coding|codebase|repo|repository|pull request|pr\b|branch|merge|commit|deploy|refactor|start_coding_task|spawn_coding_agent|send_to_coding_agent)\b|https?:\/\/(?:github\.com|gitlab\.com|bitbucket\.org)\//i;
 const PLUGIN_UI_INTENT_RE =
   /\b(plugin|plugins|configure|configuration|setup|install|enable|disable|api key|credential|secret|dashboard|form|ui|interface|\[config:)\b/i;
+// Terminal intent requires specific CLI/tool terms, not generic verbs.
 const TERMINAL_INTENT_RE =
-  /\b(shell|command|execute|run|npm|bun|git\b|bash|terminal|script|pip)\b/i;
+  /\b(shell|command line|execute command|npm|bun|yarn|git\b|bash|terminal|script|pip|apt-get|brew)\b/i;
 const EMOTE_INTENT_RE =
   /\b(emote|wave|dance|bow|clap|laugh|angry|sad|think|sit|play_emote)\b/i;
 const ISSUE_INTENT_RE =

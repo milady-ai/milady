@@ -198,6 +198,30 @@ describe("detectIntentCategories", () => {
     const prompt = `<task>Fix the repository code.</task>\n<providers>\n${SAMPLE_ACTIONS_BLOCK}\n</providers>`;
     expect(detectIntentCategories(prompt)).toContain("coding");
   });
+
+  // False-positive regression tests — common phrases with generic verbs
+  // must NOT trigger coding/terminal intent.
+  it("does NOT trigger coding intent for 'fix the typo in my essay'", () => {
+    const prompt = buildPrompt("fix the typo in my essay");
+    expect(detectIntentCategories(prompt)).not.toContain("coding");
+  });
+
+  it("does NOT trigger terminal intent for 'run a quick summary'", () => {
+    const prompt = buildPrompt("run a quick summary of today's news");
+    expect(detectIntentCategories(prompt)).not.toContain("terminal");
+  });
+
+  it("does NOT trigger coding intent for 'build me a haiku'", () => {
+    const prompt = buildPrompt("build me a haiku about cats");
+    expect(detectIntentCategories(prompt)).not.toContain("coding");
+  });
+
+  it("does NOT trigger ANY intent for general chat", () => {
+    expect(detectIntentCategories(buildPrompt("what are your favorite pancake toppings"))).toEqual([]);
+    expect(detectIntentCategories(buildPrompt("tell me a joke"))).toEqual([]);
+    expect(detectIntentCategories(buildPrompt("how are you doing today"))).toEqual([]);
+    expect(detectIntentCategories(buildPrompt("what is the meaning of life"))).toEqual([]);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -428,33 +452,20 @@ describe("isHighRiskMessage", () => {
 });
 
 // ---------------------------------------------------------------------------
-// shouldSkipSecurityEval (dynamic per source)
+// shouldSkipSecurityEval (env-var only, no prompt parsing)
 // ---------------------------------------------------------------------------
 
 describe("shouldSkipSecurityEval", () => {
-  it("skips for client_chat (DM/web UI) source", () => {
-    const prompt = 'You are analyzing... Source: client_chat Context: DM';
-    expect(shouldSkipSecurityEval(prompt)).toBe(true);
+  it("returns false by default (security eval runs)", () => {
+    // Default: MILADY_SKIP_SECURITY_EVAL is not set
+    expect(shouldSkipSecurityEval()).toBe(false);
   });
 
-  it("skips for direct message source", () => {
-    const prompt = 'Security check... source: "direct" ...';
-    expect(shouldSkipSecurityEval(prompt)).toBe(true);
-  });
-
-  it("does NOT skip for discord source", () => {
-    const prompt = 'You are analyzing... Source: discord Context: guild';
-    expect(shouldSkipSecurityEval(prompt)).toBe(false);
-  });
-
-  it("does NOT skip for telegram source", () => {
-    const prompt = 'Security... source: telegram ...';
-    expect(shouldSkipSecurityEval(prompt)).toBe(false);
-  });
-
-  it("does NOT skip when source cannot be determined (safe default)", () => {
-    const prompt = 'You are a security evaluation system. Message to analyze: "hello"';
-    expect(shouldSkipSecurityEval(prompt)).toBe(false);
+  it("is not influenced by prompt content (no injection vector)", () => {
+    // A malicious user embedding "Source: client_chat" in their message
+    // must NOT cause the security eval to be skipped.
+    // shouldSkipSecurityEval() takes no arguments — prompt content is irrelevant.
+    expect(shouldSkipSecurityEval()).toBe(false);
   });
 });
 
