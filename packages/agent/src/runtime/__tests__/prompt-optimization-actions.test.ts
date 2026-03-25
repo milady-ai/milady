@@ -406,7 +406,10 @@ describe("compactActionsForIntent", () => {
 // isHighRiskMessage (security heuristic)
 // ---------------------------------------------------------------------------
 
-import { isHighRiskMessage } from "../prompt-optimization";
+import {
+  isHighRiskMessage,
+  shouldSkipSecurityEval,
+} from "../prompt-optimization";
 
 describe("isHighRiskMessage", () => {
   it("flags messages containing sensitive keywords", () => {
@@ -421,5 +424,36 @@ describe("isHighRiskMessage", () => {
     expect(isHighRiskMessage("what is the weather")).toBe(false);
     expect(isHighRiskMessage("tell me about pancakes")).toBe(false);
     expect(isHighRiskMessage("fix the bug in the repo")).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// shouldSkipSecurityEval (dynamic per source)
+// ---------------------------------------------------------------------------
+
+describe("shouldSkipSecurityEval", () => {
+  it("skips for client_chat (DM/web UI) source", () => {
+    const prompt = 'You are analyzing... Source: client_chat Context: DM';
+    expect(shouldSkipSecurityEval(prompt)).toBe(true);
+  });
+
+  it("skips for direct message source", () => {
+    const prompt = 'Security check... source: "direct" ...';
+    expect(shouldSkipSecurityEval(prompt)).toBe(true);
+  });
+
+  it("does NOT skip for discord source", () => {
+    const prompt = 'You are analyzing... Source: discord Context: guild';
+    expect(shouldSkipSecurityEval(prompt)).toBe(false);
+  });
+
+  it("does NOT skip for telegram source", () => {
+    const prompt = 'Security... source: telegram ...';
+    expect(shouldSkipSecurityEval(prompt)).toBe(false);
+  });
+
+  it("does NOT skip when source cannot be determined (safe default)", () => {
+    const prompt = 'You are a security evaluation system. Message to analyze: "hello"';
+    expect(shouldSkipSecurityEval(prompt)).toBe(false);
   });
 });

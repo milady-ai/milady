@@ -32,19 +32,22 @@ const MILADY_ACTION_COMPACTION = (() => {
 })();
 
 /**
- * Skip the security evaluation LLM. Default: disabled (security LLM runs).
+ * Force security eval behavior. By default, security eval is dynamic:
+ * - `client_chat` (web UI / desktop DM) → skip (user is admin)
+ * - Public channels (discord, telegram, etc.) → full LLM eval
  *
- * Enable with MILADY_SKIP_SECURITY_EVAL=1 for personal/DM sessions where the
- * user is the admin and security eval always returns "safe" but burns 2-6 LLM
- * calls per message. Replaces those calls with a keyword heuristic that flags
- * obvious sensitive terms (api key, password, seed phrase, etc.).
- *
- * Leave disabled (default) for public channel deployments (Discord, Telegram)
- * where untrusted users can inject prompts.
+ * Override with MILADY_SKIP_SECURITY_EVAL=1 to always skip, or =0 to
+ * always run the full LLM eval regardless of channel.
  */
-const MILADY_SKIP_SECURITY_EVAL =
-  process.env.MILADY_SKIP_SECURITY_EVAL === "1" ||
-  process.env.MILADY_SKIP_SECURITY_EVAL?.toLowerCase() === "true";
+const MILADY_SKIP_SECURITY_EVAL_OVERRIDE: boolean | null = (() => {
+  const raw = process.env.MILADY_SKIP_SECURITY_EVAL?.toLowerCase();
+  if (raw === "1" || raw === "true") return true;
+  if (raw === "0" || raw === "false") return false;
+  return null; // dynamic (default)
+})();
+
+/** Sources where the user is trusted (admin/DM) — skip security eval. */
+const TRUSTED_SOURCES = new Set(["client_chat", "direct", "dm", "web"]);
 
 /**
  * Run the social/relationship extraction LLM every N messages. Default: 3.
@@ -66,6 +69,29 @@ const MILADY_SOCIAL_EVAL_EVERY_N = Math.max(
 function extractSecurityMessage(prompt: string): string {
   const match = prompt.match(/Message to analyze:\s*"([\s\S]*?)"\s*Context:/i);
   return match?.[1] ?? "";
+}
+
+/** Extract the message source/channel from the security eval prompt context. */
+function extractSourceFromPrompt(prompt: string): string | null {
+  // The security eval prompt includes context like "Source: client_chat" or
+  // the prompt itself may reference the channel. Check common patterns.
+  const sourceMatch = prompt.match(
+    /\bsource[:\s]+["']?(\w+)["']?/i,
+  );
+  return sourceMatch?.[1]?.toLowerCase() ?? null;
+}
+
+/** Determine whether security eval should be skipped for this prompt. */
+export function shouldSkipSecurityEval(prompt: string): boolean {
+  // Explicit override from env var takes precedence
+  if (MILADY_SKIP_SECURITY_EVAL_OVERRIDE !== null) {
+    return MILADY_SKIP_SECURITY_EVAL_OVERRIDE;
+  }
+  // Dynamic: skip for trusted sources (DM/web UI), run for public channels
+  const source = extractSourceFromPrompt(prompt);
+  if (source && TRUSTED_SOURCES.has(source)) return true;
+  // If we can't determine the source, run the full eval (safe default)
+  return false;
 }
 
 export function isHighRiskMessage(text: string): boolean {
@@ -155,14 +181,14 @@ export function installPromptOptimizations(runtime: AgentRuntime): void {
 
     const originalPrompt = String(promptRecord[promptKey] ?? "");
 
-    // --- Security eval bypass (DM/admin sessions) ---
-    // Replaces the 2-6 LLM security calls per message with a keyword
-    // heuristic. High-risk messages (containing sensitive terms) still
-    // get flagged. Saves ~2 LLM calls per chat turn.
+    // --- Security eval bypass (dynamic per source) ---
+    // DM/web UI sessions skip the security LLM (user is admin).
+    // Public channels (Discord, Telegram) run the full eval.
+    // High-risk messages always get flagged by keyword heuristic.
     if (
-      MILADY_SKIP_SECURITY_EVAL &&
       isTextLarge &&
-      originalPrompt.startsWith("You are a security evaluation system.")
+      originalPrompt.startsWith("You are a security evaluation system.") &&
+      shouldSkipSecurityEval(originalPrompt)
     ) {
       const analyzedMessage = extractSecurityMessage(originalPrompt);
       const cacheKey = analyzedMessage.slice(0, 1000);
