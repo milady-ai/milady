@@ -17,4 +17,3 @@ export function resolvePreviewTtsEndpoints(voiceId: string): string[] {
     ? ["/api/tts/cloud", "/api/tts/elevenlabs"]
     : ["/api/tts/elevenlabs"];
 }
-

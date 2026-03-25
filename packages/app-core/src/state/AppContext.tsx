@@ -6105,10 +6105,7 @@ function AppProviderInner({
       // We only nudge run mode so the provider grid is available.
       setOnboardingRunMode(prefill.runMode);
     },
-    [
-      setOnboardingDetectedProviders,
-      setOnboardingRunMode,
-    ],
+    [setOnboardingDetectedProviders, setOnboardingRunMode],
   );
 
   // ── Generic state setter ───────────────────────────────────────────
