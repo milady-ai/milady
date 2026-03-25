@@ -204,16 +204,17 @@ export function CustomActionsView() {
   );
 
   return (
-    <div data-testid="custom-actions-view" className={CUSTOM_ACTIONS_SHELL_CLASS}>
+    <div
+      data-testid="custom-actions-view"
+      className={CUSTOM_ACTIONS_SHELL_CLASS}
+    >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="space-y-2">
           <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted/70">
             Custom Actions
           </div>
           <div className="space-y-1">
-            <h1 className="text-2xl font-semibold text-txt">
-              Action Registry
-            </h1>
+            <h1 className="text-2xl font-semibold text-txt">Action Registry</h1>
             <p className="max-w-2xl text-sm leading-relaxed text-muted">
               Create reusable action definitions, keep handlers organized, and
               quickly toggle or revise automation building blocks without

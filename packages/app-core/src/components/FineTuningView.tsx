@@ -530,9 +530,7 @@ export function FineTuningView() {
       <section className={FINE_TUNING_SECTION_CLASS}>
         <div className={FINE_TUNING_SECTION_HEADER_CLASS}>
           <div className="space-y-2">
-            <div className={FINE_TUNING_SECTION_KICKER_CLASS}>
-              Fine Tuning
-            </div>
+            <div className={FINE_TUNING_SECTION_KICKER_CLASS}>Fine Tuning</div>
             <h2 className="text-xl font-semibold text-txt">
               {t("finetuningview.FineTuning")}
             </h2>
@@ -639,7 +637,9 @@ export function FineTuningView() {
           </Button>
         </div>
         {!trajectoryList.available ? (
-          <div className={`${FINE_TUNING_PANEL_CLASS} px-4 py-4 text-sm text-muted`}>
+          <div
+            className={`${FINE_TUNING_PANEL_CLASS} px-4 py-4 text-sm text-muted`}
+          >
             {summarizeAvailability(trajectoryList.reason)}
           </div>
         ) : (
@@ -733,7 +733,9 @@ export function FineTuningView() {
       <section className={FINE_TUNING_SECTION_CLASS}>
         <div className={FINE_TUNING_SECTION_HEADER_CLASS}>
           <div className="space-y-1">
-            <div className={FINE_TUNING_SECTION_KICKER_CLASS}>Dataset Build</div>
+            <div className={FINE_TUNING_SECTION_KICKER_CLASS}>
+              Dataset Build
+            </div>
             <h3 className="text-lg font-semibold text-txt">
               {t("finetuningview.Datasets1")}
             </h3>
@@ -774,7 +776,9 @@ export function FineTuningView() {
             {t("finetuningview.RefreshDatasets")}
           </Button>
         </div>
-        <div className={`${FINE_TUNING_PANEL_CLASS} max-h-60 overflow-auto p-3`}>
+        <div
+          className={`${FINE_TUNING_PANEL_CLASS} max-h-60 overflow-auto p-3`}
+        >
           {datasets.length === 0 ? (
             <div className="text-sm text-muted">
               {t("finetuningview.NoDatasetsYet")}
@@ -793,10 +797,13 @@ export function FineTuningView() {
                     onChange={() => setSelectedDatasetId(dataset.id)}
                   />
                   <div className="min-w-0 flex-1">
-                    <div className="font-mono text-sm text-txt">{dataset.id}</div>
+                    <div className="font-mono text-sm text-txt">
+                      {dataset.id}
+                    </div>
                     <div className="mt-1 text-xs text-muted">
                       {dataset.sampleCount} {t("finetuningview.samples")}{" "}
-                      {dataset.trajectoryCount} {t("finetuningview.trajectories")}
+                      {dataset.trajectoryCount}{" "}
+                      {t("finetuningview.trajectories")}
                     </div>
                   </div>
                 </label>
@@ -949,7 +956,9 @@ export function FineTuningView() {
                   <div className="mt-1 text-xs text-muted">
                     {job.status} · {formatProgress(job.progress)} · {job.phase}
                   </div>
-                  <div className="text-xs text-muted">{formatDate(job.createdAt)}</div>
+                  <div className="text-xs text-muted">
+                    {formatDate(job.createdAt)}
+                  </div>
                 </div>
               ))
             )}
@@ -968,8 +977,8 @@ export function FineTuningView() {
                   <span className="font-semibold">
                     {t("finetuningview.Status1")}
                   </span>{" "}
-                  {selectedJob.status} · {formatProgress(selectedJob.progress)} ·{" "}
-                  {selectedJob.phase}
+                  {selectedJob.status} · {formatProgress(selectedJob.progress)}{" "}
+                  · {selectedJob.phase}
                 </div>
                 <div className="text-sm">
                   <span className="font-semibold">

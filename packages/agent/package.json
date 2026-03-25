@@ -128,7 +128,7 @@
     "@elizaos/plugin-groq": "^1.0.4",
     "@elizaos/plugin-knowledge": "alpha",
     "@elizaos/plugin-local-embedding": "alpha",
-    "@elizaos/plugin-ollama": "alpha",
+    "@elizaos/plugin-ollama": "2.0.0-alpha.70",
     "@elizaos/plugin-openai": "alpha",
     "@elizaos/plugin-pdf": "alpha",
     "@elizaos/plugin-personality": "alpha",

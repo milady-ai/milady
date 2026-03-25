@@ -99,14 +99,18 @@ describe("ShellHeaderControls", () => {
     );
 
     expect(String(headerRoot.props.className)).toContain("grid");
-    expect(String(shellToggle.parent?.props.className)).toContain("row-start-1");
+    expect(String(shellToggle.parent?.props.className)).toContain(
+      "row-start-1",
+    );
     expect(String(rightControls.props.className)).toContain("row-start-1");
     expect(String(mobileActions.props.className)).toContain("row-start-2");
     expect(String(mobileActions.props.className)).toContain("justify-between");
     expect(String(mobileVoice.props.className)).toContain("justify-start");
     expect(String(mobileNewChat.props.className)).toContain("justify-end");
     expect(String(voiceButton?.props.className)).toContain("rounded-xl");
-    expect(String(voiceButton?.props.className)).toContain("pointer-events-auto");
+    expect(String(voiceButton?.props.className)).toContain(
+      "pointer-events-auto",
+    );
     expect(String(newChatButton?.props.className)).toContain("rounded-xl");
     expect(String(newChatButton?.props.className)).toContain(
       "pointer-events-auto",
@@ -173,9 +177,7 @@ describe("ShellHeaderControls", () => {
     expect(String(rightNewChat.props.className)).toContain("shrink-0");
     expect(String(rightControls.props.className)).toContain("justify-end");
     expect(String(voiceButton?.props.className)).toContain("backdrop-blur-xl");
-    expect(String(voiceButton?.props.className)).toContain(
-      "ring-white/6",
-    );
+    expect(String(voiceButton?.props.className)).toContain("ring-white/6");
     expect(String(newChatButton?.props.className)).toContain(
       "backdrop-blur-xl",
     );

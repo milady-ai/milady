@@ -58,9 +58,7 @@ export const ChatModalView = memo(function ChatModalView({
       <div className={shellClassName} data-chat-game-shell>
         {showMobileSidebarOverlay && (
           <div
-            className={
-              `${CHAT_MODAL_MOBILE_SIDEBAR_OVERLAY_CLASS} pointer-events-auto`
-            }
+            className={`${CHAT_MODAL_MOBILE_SIDEBAR_OVERLAY_CLASS} pointer-events-auto`}
             data-chat-game-sidebar-overlay
           >
             <div className={CHAT_MODAL_MOBILE_SIDEBAR_PANEL_CLASS}>

@@ -58,8 +58,7 @@ import { useInventoryData } from "./inventory/useInventoryData";
 /* ── Component ─────────────────────────────────────────────────────── */
 
 const WALLET_SHELL_CLASS = APP_PANEL_SHELL_CLASSNAME;
-const WALLET_SIDEBAR_CLASS =
-  `lg:w-[21rem] lg:max-w-[352px] ${APP_SIDEBAR_RAIL_CLASSNAME}`;
+const WALLET_SIDEBAR_CLASS = `lg:w-[21rem] lg:max-w-[352px] ${APP_SIDEBAR_RAIL_CLASSNAME}`;
 const WALLET_SIDEBAR_KICKER_CLASS = APP_SIDEBAR_KICKER_CLASSNAME;
 const WALLET_SIDEBAR_ITEM_BASE_CLASS = APP_SIDEBAR_CARD_BASE_CLASSNAME;
 const WALLET_SIDEBAR_ITEM_ACTIVE_CLASS = APP_SIDEBAR_CARD_ACTIVE_CLASSNAME;
@@ -478,7 +477,9 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
               </div>
               <div className="mt-3 flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/75">
                 <span className={APP_SIDEBAR_PILL_CLASSNAME}>
-                  {inventoryView === "tokens" ? t("wallet.tokens") : t("wallet.nfts")}
+                  {inventoryView === "tokens"
+                    ? t("wallet.tokens")
+                    : t("wallet.nfts")}
                 </span>
                 {inventoryView === "tokens" && (
                   <span className={APP_SIDEBAR_PILL_CLASSNAME}>
@@ -677,9 +678,15 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="value">{t("wallet.value")}</SelectItem>
-                        <SelectItem value="chain">{t("wallet.chain")}</SelectItem>
-                        <SelectItem value="symbol">{t("wallet.name")}</SelectItem>
+                        <SelectItem value="value">
+                          {t("wallet.value")}
+                        </SelectItem>
+                        <SelectItem value="chain">
+                          {t("wallet.chain")}
+                        </SelectItem>
+                        <SelectItem value="symbol">
+                          {t("wallet.name")}
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   )}
@@ -758,7 +765,9 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
               )}
             </div>
 
-            <div className={`mt-4 min-h-[58vh] ${WALLET_PANEL_CLASS} overflow-hidden`}>
+            <div
+              className={`mt-4 min-h-[58vh] ${WALLET_PANEL_CLASS} overflow-hidden`}
+            >
               {inventoryView === "tokens" ? (
                 <TokensTable
                   t={t}

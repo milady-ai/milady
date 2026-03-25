@@ -66,8 +66,7 @@ const SUPPORTED_UPLOAD_EXTENSIONS = new Set([
 ]);
 
 const KNOWLEDGE_SHELL_CLASS = APP_PANEL_SHELL_CLASSNAME;
-const KNOWLEDGE_SIDEBAR_CLASS =
-  `lg:w-[22rem] lg:max-w-[360px] ${APP_SIDEBAR_RAIL_CLASSNAME}`;
+const KNOWLEDGE_SIDEBAR_CLASS = `lg:w-[22rem] lg:max-w-[360px] ${APP_SIDEBAR_RAIL_CLASSNAME}`;
 const KNOWLEDGE_KICKER_CLASS = APP_SIDEBAR_KICKER_CLASSNAME;
 const KNOWLEDGE_SECTION_LABEL_CLASS =
   "px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60";
@@ -77,8 +76,7 @@ const KNOWLEDGE_SIDEBAR_ITEM_BASE_CLASS = APP_SIDEBAR_CARD_BASE_CLASSNAME;
 const KNOWLEDGE_SIDEBAR_ITEM_ACTIVE_CLASS = APP_SIDEBAR_CARD_ACTIVE_CLASSNAME;
 const KNOWLEDGE_SIDEBAR_ITEM_INACTIVE_CLASS =
   APP_SIDEBAR_CARD_INACTIVE_CLASSNAME;
-const KNOWLEDGE_META_PILL_CLASS =
-  `${APP_SIDEBAR_PILL_CLASSNAME} text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/75`;
+const KNOWLEDGE_META_PILL_CLASS = `${APP_SIDEBAR_PILL_CLASSNAME} text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/75`;
 
 export type KnowledgeUploadFile = File & {
   webkitRelativePath?: string;

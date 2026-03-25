@@ -110,7 +110,9 @@ export function Header({
   );
   const activeTabGroup = useMemo(
     () =>
-      tabGroups.find((group) => group.tabs.includes(tab)) ?? tabGroups[0] ?? null,
+      tabGroups.find((group) => group.tabs.includes(tab)) ??
+      tabGroups[0] ??
+      null,
     [tab, tabGroups],
   );
 

@@ -238,9 +238,7 @@ export function ShellHeaderControls({
       {/* Center: children or companion controls */}
       <div
         className={
-          shouldSplitCompanionMobileActions
-            ? "hidden"
-            : "flex-1 min-w-0"
+          shouldSplitCompanionMobileActions ? "hidden" : "flex-1 min-w-0"
         }
       >
         {showCompanionControls && !shouldSplitCompanionMobileActions ? (
