@@ -136,36 +136,36 @@ function DownloadDropdown() {
       </button>
       {open && (
         <div className="absolute bottom-full left-0 pb-2 w-72 z-[100]">
-        <div className="border border-text-subtle/20 bg-dark/95 backdrop-blur-md">
-          {downloads.map((d) => (
+          <div className="border border-text-subtle/20 bg-dark/95 backdrop-blur-md">
+            {downloads.map((d) => (
+              <a
+                key={d.id}
+                href={d.url}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors border-b border-text-subtle/10 last:border-b-0"
+              >
+                {platformIcon(d.id)}
+                <span className="flex-1 font-mono text-[11px] tracking-wider uppercase text-text-light">
+                  {d.label}
+                </span>
+                <span className="font-mono text-[10px] text-text-subtle">
+                  {d.sizeLabel}
+                </span>
+              </a>
+            ))}
             <a
-              key={d.id}
-              href={d.url}
+              href={releaseData.release.url}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors border-b border-text-subtle/10 last:border-b-0"
+              className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors border-t border-text-subtle/20"
             >
-              {platformIcon(d.id)}
-              <span className="flex-1 font-mono text-[11px] tracking-wider uppercase text-text-light">
-                {d.label}
-              </span>
-              <span className="font-mono text-[10px] text-text-subtle">
-                {d.sizeLabel}
+              <GithubIcon />
+              <span className="font-mono text-[11px] tracking-wider uppercase text-text-muted">
+                All Releases
               </span>
             </a>
-          ))}
-          <a
-            href={releaseData.release.url}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors border-t border-text-subtle/20"
-          >
-            <GithubIcon />
-            <span className="font-mono text-[11px] tracking-wider uppercase text-text-muted">
-              All Releases
-            </span>
-          </a>
-        </div>
+          </div>
         </div>
       )}
     </fieldset>

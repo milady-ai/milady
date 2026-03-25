@@ -521,6 +521,14 @@ export function CreateAgentForm({
           )}
         </div>
 
+        {/* Pricing note */}
+        <div className="mb-5 px-3 py-2.5 border-l-2 border-brand/30 bg-brand/5">
+          <p className="font-mono text-[10px] text-text-muted leading-relaxed">
+            <span className="text-brand">HOSTING</span> $0.01/hr running ·
+            $0.0025/hr idle · min. balance $5.00
+          </p>
+        </div>
+
         {/* Error message */}
         {error && (
           <div className="mb-5 font-mono text-sm text-red-400">

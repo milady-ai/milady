@@ -133,6 +133,93 @@ export function CreditsPanel() {
         </p>
       </div>
 
+      {/* Pricing breakdown */}
+      <div className="border border-border bg-surface">
+        <div className="px-4 py-2 bg-dark-secondary border-b border-border flex items-center justify-between">
+          <span className="font-mono text-[10px] tracking-wider text-text-subtle">
+            PRICING
+          </span>
+          <span className="font-mono text-[10px] tracking-wider text-text-subtle">
+            $ milady pricing --show
+          </span>
+        </div>
+        <div className="p-4 space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="font-mono text-[9px] tracking-wider text-text-subtle mb-1.5">
+                RUNNING AGENT
+              </p>
+              <p className="font-mono text-lg font-semibold text-brand tabular-nums">
+                $0.01
+                <span className="text-xs font-normal text-text-muted">/hr</span>
+              </p>
+              <p className="font-mono text-[10px] text-text-subtle mt-0.5">
+                ≈ $7.20/month
+              </p>
+            </div>
+            <div>
+              <p className="font-mono text-[9px] tracking-wider text-text-subtle mb-1.5">
+                IDLE AGENT
+              </p>
+              <p className="font-mono text-lg font-semibold text-text-light tabular-nums">
+                $0.0025
+                <span className="text-xs font-normal text-text-muted">/hr</span>
+              </p>
+              <p className="font-mono text-[10px] text-text-subtle mt-0.5">
+                ≈ $1.80/month
+              </p>
+            </div>
+          </div>
+
+          <div className="border-t border-border-subtle" />
+
+          <div>
+            <p className="font-mono text-[9px] tracking-wider text-text-subtle mb-3">
+              CREDIT PACKS
+            </p>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="border border-border-subtle bg-dark p-3">
+                <p className="font-mono text-[9px] tracking-wider text-text-subtle mb-1">
+                  SMALL
+                </p>
+                <p className="font-mono text-sm font-semibold text-text-light tabular-nums">
+                  $5
+                </p>
+                <p className="font-mono text-[10px] text-text-subtle mt-0.5">
+                  500 credits
+                </p>
+              </div>
+              <div className="border border-brand/20 bg-brand/5 p-3">
+                <p className="font-mono text-[9px] tracking-wider text-text-subtle mb-1">
+                  MEDIUM
+                </p>
+                <p className="font-mono text-sm font-semibold text-text-light tabular-nums">
+                  $13
+                </p>
+                <p className="font-mono text-[10px] text-brand mt-0.5">
+                  $15 value <span className="text-emerald-400">+15%</span>
+                </p>
+              </div>
+              <div className="border border-brand/20 bg-brand/5 p-3">
+                <p className="font-mono text-[9px] tracking-wider text-text-subtle mb-1">
+                  LARGE
+                </p>
+                <p className="font-mono text-sm font-semibold text-text-light tabular-nums">
+                  $40
+                </p>
+                <p className="font-mono text-[10px] text-brand mt-0.5">
+                  $50 value <span className="text-emerald-400">+25%</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <p className="font-mono text-[10px] text-text-subtle pt-1">
+            Minimum deposit: $5.00
+          </p>
+        </div>
+      </div>
+
       {/* Stats grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-border">
         <DataCell
