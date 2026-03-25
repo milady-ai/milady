@@ -568,37 +568,5 @@ if (threeVrmNodeTargets.length === 0) {
   );
 }
 
-/**
- * Patch @elizaos/core parseKeyValueXml action parsing.
- *
- * The upstream parseKeyValueXml helper comma-splits <actions> content, which
- * breaks when the value contains structured <action> XML tags (e.g.
- * `<actions><action name="foo">...</action></actions>`). We patch the
- * comma-split branch to keep the raw string when it contains XML action tags.
- */
-function patchElizaCoreActionParsing() {
-  const needle = `result[key] = value ? value.split(",").map((s) => s.trim()) : [];`;
-  const replacement = `result[key] = (key === "actions" && value && (value.includes("<action>") || value.includes("<action "))) ? [...value.matchAll(/<action[^>]*>[\\s\\S]*?<name>([\\s\\S]*?)<\\/name>[\\s\\S]*?<\\/action>/g)].map(m => m[1].trim()).filter(Boolean) : (value ? value.split(",").map((s) => s.trim()) : []);`;
-
-  let patched = 0;
-  for (const target of elizaCoreBundleTargets) {
-    let src = readFileSync(target, "utf8");
-    if (!src.includes(needle)) continue;
-    src = src.replaceAll(needle, replacement);
-    writeFileSync(target, src, "utf8");
-    patched++;
-    console.log(
-      `[patch-deps] Applied @elizaos/core action-parsing patch: ${target}`,
-    );
-  }
-  if (patched > 0) {
-    console.log(
-      `[patch-deps] @elizaos/core: applied action-parsing patch to ${patched} file(s).`,
-    );
-  } else if (elizaCoreBundleTargets.length > 0) {
-    console.log(
-      "[patch-deps] @elizaos/core action-parsing: needle not found (already patched or API changed).",
-    );
-  }
-}
-patchElizaCoreActionParsing();
+// Action parsing patch removed — fix shipped in @elizaos/core@2.0.0-alpha.106
+// (PR #6661: parseKeyValueXml preserves raw XML string for <actions> content).

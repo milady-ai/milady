@@ -4362,6 +4362,18 @@ export async function startEliza(
     await waitForTrajectoryLoggerService(runtime, "runtime.initialize()");
     ensureTrajectoryLoggerEnabled(runtime, "runtime.initialize()");
 
+    // 8a. Install prompt optimization / capture layer (wraps runtime.useModel)
+    try {
+      const { installPromptOptimizations } = await import(
+        "./prompt-optimization.js"
+      );
+      installPromptOptimizations(runtime);
+    } catch (err) {
+      logger.warn(
+        `[eliza] Failed to install prompt optimizations: ${err instanceof Error ? err.message : err}`,
+      );
+    }
+
     // 8b. Ensure AutonomyService is available for trigger dispatch.
     // registers this service) from loading, so we start it explicitly.
     if (!runtime.getService("AUTONOMY")) {
