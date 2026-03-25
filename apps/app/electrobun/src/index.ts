@@ -775,24 +775,39 @@ function attachMainWindow(win: BrowserWindow): BrowserWindow {
 }
 
 async function ensureBackgroundWindow(): Promise<void> {
-  if (isQuitting || currentWindow || backgroundWindowPromise) {
+  if (isQuitting || currentWindow) {
     return;
   }
 
-  backgroundWindowPromise = (async () => {
-    const replacementWindow = attachMainWindow(await createMainWindow());
+  // Don't recreate the window — just keep the process alive in the
+  // background (exitOnLastWindowClosed is false in electrobun.config.ts).
+  // The dock icon click fires the "reopen" event which restores the window.
+  console.log("[Main] Window closed — agent continues in background");
+  showBackgroundRunNoticeOnce();
+}
+
+/** Restore or recreate the main window (called on dock icon click). */
+async function restoreWindow(): Promise<void> {
+  if (currentWindow) {
     try {
-      replacementWindow.minimize();
-      console.log("[Main] Recreated minimized background window");
-      showBackgroundRunNoticeOnce();
-    } catch (err) {
-      console.warn("[Main] Failed to minimize background window:", err);
+      currentWindow.unminimize();
+      currentWindow.focus();
+    } catch {
+      // unminimize/focus may not be available
     }
-    injectApiBase(replacementWindow);
+    return;
+  }
+  if (backgroundWindowPromise) {
+    await backgroundWindowPromise;
+    return;
+  }
+  backgroundWindowPromise = (async () => {
+    const win = attachMainWindow(await createMainWindow());
+    injectApiBase(win);
+    console.log("[Main] Restored window from dock click");
   })().finally(() => {
     backgroundWindowPromise = null;
   });
-
   await backgroundWindowPromise;
 }
 
@@ -815,7 +830,10 @@ async function createSettingsWindow(tabHint?: string): Promise<void> {
   await surfaceWindowManager.openSettingsWindow(tabHint);
 }
 
-function showMainSurface(surface: string): void {
+async function showMainSurface(surface: string): Promise<void> {
+  if (!currentWindow) {
+    await restoreWindow();
+  }
   void getDesktopManager().showWindow();
   sendToActiveRenderer("desktopTrayMenuClick", {
     itemId: `show-main:${surface}`,
@@ -1191,8 +1209,13 @@ async function setupUpdater(): Promise<void> {
 
     Electrobun.events.on(
       "application-menu-clicked",
-      (e: { data?: { action?: string } }) => {
+      async (e: { data?: { action?: string } }) => {
         const action = e?.data?.action;
+
+        // If the main window is gone and the action targets it, restore first.
+        if (!currentWindow && action && !action.startsWith("focus-window:")) {
+          await restoreWindow();
+        }
         if (action === "check-for-updates") {
           triggerManualUpdateCheck();
         } else if (action === "export-config") {
@@ -1272,6 +1295,12 @@ async function setupUpdater(): Promise<void> {
 function setupDeepLinks(): void {
   Electrobun.events.on("open-url", (url: string) => {
     sendToActiveRenderer("shareTargetReceived", { url });
+  });
+}
+
+function setupDockReopen(): void {
+  Electrobun.events.on("reopen", () => {
+    void restoreWindow();
   });
 }
 
@@ -1526,6 +1555,7 @@ async function main(): Promise<void> {
   }
 
   setupDeepLinks();
+  setupDockReopen();
 
   const desktop = getDesktopManager();
   try {

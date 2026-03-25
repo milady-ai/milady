@@ -70,14 +70,20 @@ describe("Electrobun startup bootstrap", () => {
     expect(source).toContain("MILADY_DESKTOP_API_BASE");
   });
 
-  it("shows a one-time background notice after recreating the minimized window", () => {
+  it("shows a one-time background notice when window closes to background", () => {
     const indexSource = fs.readFileSync(INDEX_PATH, "utf8");
     const noticeSource = fs.readFileSync(BACKGROUND_NOTICE_PATH, "utf8");
-    const minimizeIndex = indexSource.indexOf("replacementWindow.minimize();");
-    const noticeIndex = indexSource.indexOf("showBackgroundRunNoticeOnce();");
 
-    expect(minimizeIndex).toBeGreaterThan(-1);
-    expect(noticeIndex).toBeGreaterThan(minimizeIndex);
+    // ensureBackgroundWindow should call showBackgroundRunNoticeOnce
+    // without creating a new window (no replacementWindow.minimize)
+    const bgFnStart = indexSource.indexOf(
+      "async function ensureBackgroundWindow",
+    );
+    expect(bgFnStart).toBeGreaterThan(-1);
+    const bgFnBody = indexSource.slice(bgFnStart, bgFnStart + 500);
+    expect(bgFnBody).toContain("showBackgroundRunNoticeOnce");
+    expect(bgFnBody).not.toContain("createMainWindow");
+
     expect(noticeSource).toContain(
       'export const BACKGROUND_NOTICE_TITLE = "Milady Is Still Running";',
     );
