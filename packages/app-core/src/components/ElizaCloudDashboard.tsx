@@ -43,6 +43,10 @@ const ELIZA_CLOUD_INSTANCES_URL = "https://www.elizacloud.ai/dashboard/eliza";
 /** Marketing / docs site — “Learn more” when not connected (in-app browser on desktop). */
 const ELIZA_CLOUD_WEB_URL = "https://elizacloud.ai";
 const BILLING_PRESET_AMOUNTS = [10, 25, 100];
+const CLOUD_PANEL_CLASSNAME =
+  "rounded-2xl border border-border/60 bg-card/88 p-4 shadow-sm";
+const CLOUD_INSET_PANEL_CLASSNAME =
+  "rounded-xl border border-border/50 bg-bg/30 p-4";
 
 const STATUS_BADGE: Record<string, { i18nKey: string; className: string }> = {
   running: {
@@ -86,6 +90,7 @@ function CloudAgentCard({
   launching,
   onLaunch,
   onSelect,
+  selected = false,
 }: {
   agent: CloudCompatAgent;
   onDelete: (id: string) => void;
@@ -93,12 +98,17 @@ function CloudAgentCard({
   launching: boolean;
   onLaunch: (id: string) => void;
   onSelect?: (id: string) => void;
+  selected?: boolean;
 }) {
   const { t } = useApp();
   return (
     // biome-ignore lint/a11y/useSemanticElements: cannot use button due to nested buttons
     <div
-      className="rounded-2xl border border-border/50 bg-bg/30 p-5 flex flex-col justify-between gap-4 hover:border-accent/30 transition-all duration-200 cursor-pointer"
+      className={`flex cursor-pointer flex-col justify-between gap-4 rounded-2xl border p-5 transition-all duration-200 ${
+        selected
+          ? "border-accent/45 bg-accent/8 shadow-[0_0_0_1px_rgba(var(--accent),0.12),0_14px_30px_rgba(0,0,0,0.12)]"
+          : "border-border/60 bg-card/88 shadow-sm hover:border-accent/30"
+      }`}
       onClick={() => onSelect?.(agent.agent_id)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -109,36 +119,36 @@ function CloudAgentCard({
       role="button"
       tabIndex={0}
     >
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-2">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
           <Server className="w-4 h-4 text-txt shrink-0" />
-          <span className="font-bold text-sm text-txt-strong truncate max-w-[140px]">
+          <span className="max-w-[16rem] truncate text-sm font-bold text-txt-strong">
             {agent.agent_name || t("elizaclouddashboard.unnamedAgent")}
           </span>
         </div>
         <AgentStatusBadge status={agent.status} />
       </div>
 
-      <div className="text-[11px] text-muted space-y-1">
-        <div className="flex justify-between">
+      <div className="space-y-1 text-[11px] text-muted">
+        <div className="flex items-center justify-between gap-3">
           <span>{t("elizaclouddashboard.node")}</span>
-          <span className="font-mono text-txt-strong/70">
+          <span className="truncate font-mono text-txt-strong/70">
             {agent.node_id?.slice(0, 8) ?? "—"}
           </span>
         </div>
-        <div className="flex justify-between">
+        <div className="flex items-center justify-between gap-3">
           <span>{t("elizaclouddashboard.created")}</span>
-          <span className="text-txt-strong/70">
+          <span className="text-right text-txt-strong/70">
             {new Date(agent.created_at).toLocaleDateString()}
           </span>
         </div>
       </div>
 
-      <div className="flex gap-2 mt-1">
+      <div className="mt-1 flex flex-col gap-2 sm:flex-row">
         <Button
           variant="outline"
           size="sm"
-          className="flex-1 rounded-xl h-8 text-xs border-border/40"
+          className="h-9 flex-1 rounded-xl border-border/40 text-xs"
           onClick={(event) => {
             event.stopPropagation();
             onLaunch(agent.agent_id);
@@ -156,7 +166,7 @@ function CloudAgentCard({
         <Button
           variant="outline"
           size="sm"
-          className="px-0 rounded-xl h-8 text-xs border-danger/30 text-danger hover:bg-danger/10"
+          className="h-9 rounded-xl border-danger/30 px-0 text-xs text-danger hover:bg-danger/10 sm:w-10"
           onClick={(event) => {
             event.stopPropagation();
             onDelete(agent.agent_id);
@@ -983,8 +993,8 @@ export function CloudDashboard() {
           {t("notice.elizaCloudAuthRejected")}
         </div>
       ) : null}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
           <h2 className="text-lg font-bold text-txt-strong tracking-tight">
             {t("elizaclouddashboard.CloudDashboard")}
           </h2>
@@ -994,13 +1004,15 @@ export function CloudDashboard() {
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="inline-flex items-center gap-0.5 rounded-lg border border-border/50 bg-bg/50 p-0.5">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="inline-flex flex-wrap items-center gap-0.5 rounded-lg border border-border/50 bg-bg/50 p-0.5">
             <Button
               variant={activeView === "billing" ? "default" : "ghost"}
               size="sm"
               className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium ${
-                activeView !== "billing" ? "text-muted hover:text-txt" : ""
+                activeView !== "billing"
+                  ? "text-muted-strong hover:text-txt"
+                  : ""
               }`}
               onClick={() => setState("cloudDashboardView", "billing")}
             >
@@ -1011,7 +1023,9 @@ export function CloudDashboard() {
               variant={activeView === "agents" ? "default" : "ghost"}
               size="sm"
               className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium ${
-                activeView !== "agents" ? "text-muted hover:text-txt" : ""
+                activeView !== "agents"
+                  ? "text-muted-strong hover:text-txt"
+                  : ""
               }`}
               onClick={() => setState("cloudDashboardView", "agents")}
             >
@@ -1047,10 +1061,10 @@ export function CloudDashboard() {
       </div>
 
       {activeView === "billing" ? (
-        <div className="max-w-3xl mx-auto space-y-0">
+        <div className="mx-auto max-w-3xl space-y-0">
           {/* ── Balance bar ───────────────────────────────────────── */}
-          <div className="flex items-center justify-between py-4">
-            <div className="flex items-baseline gap-3">
+          <div className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap items-baseline gap-3">
               <span
                 className={`text-3xl font-bold tracking-tight ${creditStatusColor}`}
               >
@@ -1069,7 +1083,7 @@ export function CloudDashboard() {
               )}
             </div>
             <span
-              className={`rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
+              className={`w-fit rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
                 summaryCritical
                   ? "border-danger/30 bg-danger/10 text-danger"
                   : summaryLow
@@ -1091,7 +1105,7 @@ export function CloudDashboard() {
 
           {/* ── Top Up ────────────────────────────────────────────── */}
           <div className="py-5">
-            <div className="flex items-center justify-between mb-4">
+            <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <h3 className="text-sm font-semibold text-txt-strong">
                 {t("elizaclouddashboard.TopUpCredits")}
               </h3>
@@ -1108,9 +1122,9 @@ export function CloudDashboard() {
               ) : null}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4 md:grid-cols-2">
               {/* Card payment */}
-              <div className="rounded-xl border border-border/50 bg-bg/30 p-4">
+              <div className={CLOUD_INSET_PANEL_CLASSNAME}>
                 <div className="flex items-center gap-2 mb-3">
                   <CreditCard className="h-4 w-4 text-muted" />
                   <span className="text-xs font-semibold">
@@ -1127,7 +1141,7 @@ export function CloudDashboard() {
                       size="sm"
                       className={`rounded-lg px-2.5 py-1 text-xs font-medium ${
                         billingAmount !== String(amount)
-                          ? "border-border/50 bg-bg/30 text-txt hover:border-accent/40"
+                          ? "border-border/50 bg-bg/40 text-txt hover:border-accent/40"
                           : ""
                       }`}
                       onClick={() => setBillingAmount(String(amount))}
@@ -1163,7 +1177,7 @@ export function CloudDashboard() {
               </div>
 
               {/* Crypto payment */}
-              <div className="rounded-xl border border-border/50 bg-bg/30 p-4">
+              <div className={CLOUD_INSET_PANEL_CLASSNAME}>
                 <div className="flex items-center gap-2 mb-3">
                   <Wallet className="h-4 w-4 text-muted" />
                   <span className="text-xs font-semibold">
@@ -1193,7 +1207,7 @@ export function CloudDashboard() {
                         {readString(cryptoQuote.payToAddress)}
                       </code>
                     )}
-                    <div className="flex gap-2">
+                    <div className="flex flex-col gap-2 sm:flex-row">
                       {readString(cryptoQuote.paymentLinkUrl) && (
                         <Button
                           variant="outline"
@@ -1258,7 +1272,7 @@ export function CloudDashboard() {
 
           {/* ── Auto Top-Up ───────────────────────────────────────── */}
           <div className="py-5">
-            <div className="flex items-center justify-between mb-3">
+            <div className="mb-3 flex items-center justify-between gap-3">
               <div>
                 <h3 className="text-sm font-semibold text-txt-strong">
                   {t("elizaclouddashboard.AutoTopUp")}
@@ -1277,7 +1291,7 @@ export function CloudDashboard() {
                 aria-label={t("elizaclouddashboard.ToggleAutoTopUp")}
               />
             </div>
-            <div className="flex items-end gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
               <div className="flex-1 space-y-1">
                 <label
                   htmlFor="cloud-auto-topup-threshold"
@@ -1326,7 +1340,7 @@ export function CloudDashboard() {
               </div>
               <Button
                 variant="outline"
-                className="rounded-lg h-9 px-4"
+                className="h-9 rounded-lg px-4 sm:self-end"
                 disabled={
                   billingSettingsBusy || billingLoading || !autoTopUpForm.dirty
                 }
@@ -1343,15 +1357,15 @@ export function CloudDashboard() {
           <hr className="border-border/40" />
 
           {/* ── Account ───────────────────────────────────────────── */}
-          <div className="py-5 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4 min-w-0">
+          <div className="flex flex-col gap-3 py-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4 text-ok shrink-0" />
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-ok/10 text-ok font-bold uppercase tracking-wider border border-ok/20">
                   {t("elizaclouddashboard.Secure")}
                 </span>
               </div>
-              <code className="text-[11px] text-muted break-all font-mono truncate">
+              <code className="break-all font-mono text-[11px] text-muted">
                 {elizaCloudUserId || t("elizaclouddashboard.NotAvailable")}
               </code>
             </div>
@@ -1367,7 +1381,7 @@ export function CloudDashboard() {
           </div>
         </div>
       ) : (
-        <div className="max-w-3xl mx-auto space-y-0">
+        <div className="mx-auto max-w-3xl space-y-0">
           {/* ── Cloud not ready ────────────────────────────── */}
           {cloudNotReady && (
             <div className="flex flex-col items-center justify-center py-12 animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -1393,13 +1407,13 @@ export function CloudDashboard() {
           )}
 
           {/* ── Account bar ───────────────────────────────────── */}
-          <div className="flex items-center justify-between py-3 text-xs">
-            <div className="flex items-center gap-3">
-              <code className="text-muted font-mono truncate max-w-[200px]">
+          <div className="flex flex-col gap-3 py-3 text-xs sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3">
+              <code className="max-w-full break-all font-mono text-muted sm:max-w-[200px] sm:truncate">
                 {elizaCloudUserId || t("elizaclouddashboard.NotAvailable")}
               </code>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <span className={`font-semibold ${creditStatusColor}`}>
                 {cloudBalanceNumber !== null ? (
                   `$${cloudBalanceNumber.toFixed(2)}`
@@ -1441,11 +1455,14 @@ export function CloudDashboard() {
                       launching={launchingAgentId === agent.agent_id}
                       onLaunch={handleLaunchAgent}
                       onSelect={(id) => setSelectedAgentId(id)}
+                      selected={selectedAgentId === agent.agent_id}
                     />
                   ))}
 
                   {showDeployForm ? (
-                    <div className="flex items-center gap-2 py-2">
+                    <div
+                      className={`${CLOUD_PANEL_CLASSNAME} flex flex-col gap-2 py-2 sm:flex-row sm:items-center`}
+                    >
                       <Input
                         placeholder={t("elizaclouddashboard.AgentName")}
                         value={deployAgentName}
@@ -1455,11 +1472,11 @@ export function CloudDashboard() {
                           if (e.key === "Escape") setShowDeployForm(false);
                         }}
                         disabled={deploying}
-                        className="h-8 rounded-lg bg-bg text-xs flex-1"
+                        className="h-9 flex-1 rounded-lg bg-bg text-xs"
                       />
                       <Button
                         size="sm"
-                        className="h-8 rounded-lg text-xs"
+                        className="h-9 rounded-lg text-xs"
                         onClick={handleDeployAgent}
                         disabled={deploying || !deployAgentName.trim()}
                       >
@@ -1472,7 +1489,7 @@ export function CloudDashboard() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 rounded-lg text-xs text-muted"
+                        className="h-9 rounded-lg text-xs text-muted-strong"
                         onClick={() => setShowDeployForm(false)}
                         disabled={deploying}
                       >
@@ -1482,7 +1499,7 @@ export function CloudDashboard() {
                   ) : (
                     <Button
                       variant="ghost"
-                      className="flex items-center gap-2 w-full py-3 text-xs text-muted hover:text-txt h-auto justify-start"
+                      className={`${CLOUD_PANEL_CLASSNAME} h-auto w-full justify-start gap-2 py-3 text-xs text-muted-strong hover:text-txt`}
                       onClick={() => setShowDeployForm(true)}
                     >
                       <Plus className="w-4 h-4" />
@@ -1603,7 +1620,7 @@ function AgentDetailSidebar({
     <div className="space-y-4 animate-in slide-in-from-right-8 duration-300">
       <SectionCard
         title={t("elizaclouddashboard.agentDetails")}
-        className="border-accent/40 bg-accent/5 backdrop-blur-xl rounded-3xl shadow-sm relative overflow-hidden"
+        className="relative overflow-hidden rounded-3xl border-accent/30 bg-card/92 shadow-sm backdrop-blur-xl"
       >
         <Button
           variant="ghost"
@@ -1615,14 +1632,14 @@ function AgentDetailSidebar({
         </Button>
 
         <div className="mt-4 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-3 rounded-xl bg-bg/40 border border-border/40">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-xl border border-border/40 bg-bg/40 p-3">
               <span className="text-[10px] text-muted uppercase font-bold tracking-wider mb-1 block">
                 Status
               </span>
               <AgentStatusBadge status={statusDetail?.status || agent.status} />
             </div>
-            <div className="p-3 rounded-xl bg-bg/40 border border-border/40">
+            <div className="rounded-xl border border-border/40 bg-bg/40 p-3">
               <span className="text-[10px] text-muted uppercase font-bold tracking-wider mb-1 block">
                 DB Status
               </span>
@@ -1630,7 +1647,7 @@ function AgentDetailSidebar({
                 {statusDetail?.databaseStatus || agent.database_status || "—"}
               </span>
             </div>
-            <div className="p-3 rounded-xl bg-bg/40 border border-border/40 col-span-2">
+            <div className="rounded-xl border border-border/40 bg-bg/40 p-3 sm:col-span-2">
               <span className="text-[10px] text-muted uppercase font-bold tracking-wider mb-1 block">
                 Heartbeat
               </span>
@@ -1644,12 +1661,12 @@ function AgentDetailSidebar({
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-bg/80 border border-border/40">
+          <div className="rounded-xl border border-border/40 bg-bg/80 p-3">
             <span className="text-[10px] text-muted uppercase font-bold tracking-wider mb-2 flex items-center gap-2">
               <Terminal className="w-3 h-3" /> Live Logs
             </span>
-            <div className="h-64 overflow-y-auto custom-scrollbar bg-black/50 rounded-lg p-3 border border-border/20">
-              <pre className="text-[10px] font-mono text-txt-strong/80 whitespace-pre-wrap break-all">
+            <div className="custom-scrollbar h-64 overflow-y-auto rounded-lg border border-border/30 bg-bg/65 p-3">
+              <pre className="text-[10px] font-mono text-txt-strong/85 whitespace-pre-wrap break-all">
                 {logs || "No logs available. Deploying..."}
                 <div ref={logsEndRef} />
               </pre>

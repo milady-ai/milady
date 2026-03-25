@@ -20,10 +20,29 @@ The Google Chat connector is an external elizaOS plugin that bridges your agent 
 
 ## Minimal Configuration
 
-In your character file:
+The connector auto-enables only when `botToken`, `token`, or `apiKey` is present. The `serviceAccountFile`/`audience` fields alone do NOT trigger auto-enable — you must also include one of the trigger fields or add the plugin to `plugins.allow`.
 
 ```json
 {
+  "connectors": {
+    "googlechat": {
+      "apiKey": "placeholder",
+      "serviceAccountFile": "./service-account.json",
+      "audienceType": "project-number",
+      "audience": "123456789",
+      "webhookPath": "/google-chat"
+    }
+  }
+}
+```
+
+If you don't want to set a trigger field, add the plugin explicitly:
+
+```json
+{
+  "plugins": {
+    "allow": ["@elizaos/plugin-google-chat"]
+  },
   "connectors": {
     "googlechat": {
       "serviceAccountFile": "./service-account.json",

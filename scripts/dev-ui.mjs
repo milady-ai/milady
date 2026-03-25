@@ -255,17 +255,49 @@ if (!hasBun && !which("npx")) {
 
 // coerceBoolean — imported from ./lib/dev-ui-onchain.mjs
 
+function resolveMiladyStateDir() {
+  const brandedStateDir = process.env.MILADY_STATE_DIR?.trim();
+  if (brandedStateDir) {
+    return path.resolve(brandedStateDir);
+  }
+
+  const upstreamStateDir = process.env.ELIZA_STATE_DIR?.trim();
+  if (upstreamStateDir) {
+    return path.resolve(upstreamStateDir);
+  }
+
+  const brandedDefault = path.join(os.homedir(), ".milady");
+  if (existsSync(brandedDefault)) {
+    return brandedDefault;
+  }
+
+  return path.join(os.homedir(), ".eliza");
+}
+
 function resolveMiladyConfigPath() {
-  const explicitConfigPath = process.env.ELIZA_CONFIG_PATH?.trim();
+  const explicitConfigPath =
+    process.env.MILADY_CONFIG_PATH?.trim() ||
+    process.env.ELIZA_CONFIG_PATH?.trim();
   if (explicitConfigPath) {
     return path.resolve(explicitConfigPath);
   }
 
-  const explicitStateDir = process.env.ELIZA_STATE_DIR?.trim();
-  if (explicitStateDir) {
-    return path.join(path.resolve(explicitStateDir), "eliza.json");
+  const brandedStateDir = process.env.MILADY_STATE_DIR?.trim();
+  if (brandedStateDir) {
+    return path.join(path.resolve(brandedStateDir), "milady.json");
   }
 
+  const upstreamStateDir = process.env.ELIZA_STATE_DIR?.trim();
+  if (upstreamStateDir) {
+    return path.join(path.resolve(upstreamStateDir), "eliza.json");
+  }
+
+  const brandedDefault = path.join(os.homedir(), ".milady", "milady.json");
+  if (existsSync(brandedDefault)) {
+    return brandedDefault;
+  }
+
+  // Keep the legacy Eliza path as a fallback for older local dev setups.
   return path.join(os.homedir(), ".eliza", "eliza.json");
 }
 
@@ -364,8 +396,7 @@ function resolveStealthImportFlags() {
   // Auto-detect subscription credentials: if the user has logged in via
   // a subscription provider, enable the corresponding stealth interceptor
   // automatically (unless explicitly disabled above).
-  const stateDir =
-    process.env.ELIZA_STATE_DIR?.trim() || path.join(os.homedir(), ".eliza");
+  const stateDir = resolveMiladyStateDir();
   if (openaiFlag === null) {
     const codexAuthPath = path.join(stateDir, "auth", "openai-codex.json");
     if (existsSync(codexAuthPath)) {

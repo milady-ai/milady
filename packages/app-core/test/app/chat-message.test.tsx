@@ -115,6 +115,13 @@ describe("ChatMessage actions", () => {
     expect(
       tree.root.findByProps({ "aria-label": "aria.playMessage" }),
     ).toBeDefined();
+    expect(
+      tree.root.findAll(
+        (node) =>
+          typeof node.props.className === "string" &&
+          node.props.className.includes("bg-card/96"),
+      ).length,
+    ).toBeGreaterThan(0);
   });
 
   it("plays assistant messages from the message action button", async () => {
@@ -139,7 +146,9 @@ describe("ChatMessage actions", () => {
       );
     });
 
-    const playButton = tree.root.findByProps({ "aria-label": "aria.playMessage" });
+    const playButton = tree.root.findByProps({
+      "aria-label": "aria.playMessage",
+    });
     await act(async () => {
       playButton.props.onClick();
     });
@@ -169,12 +178,16 @@ describe("ChatMessage actions", () => {
       );
     });
 
-    const editButton = tree.root.findByProps({ "aria-label": "aria.editMessage" });
+    const editButton = tree.root.findByProps({
+      "aria-label": "aria.editMessage",
+    });
     await act(async () => {
       editButton.props.onClick();
     });
 
-    const textarea = tree.root.findByProps({ "aria-label": "aria.editMessage" });
+    const textarea = tree.root.findByProps({
+      "aria-label": "aria.editMessage",
+    });
     await act(async () => {
       textarea.props.onChange({ target: { value: "edited text" } });
     });
@@ -218,5 +231,67 @@ describe("ChatMessage actions", () => {
     expect(
       tree.root.findAllByProps({ "aria-label": "Retry message" }),
     ).toHaveLength(0);
+  });
+
+  it("uses the emphasized user bubble treatment for editable user messages", async () => {
+    mockUseApp.mockReturnValue({
+      copyToClipboard: vi.fn(),
+      t: (key: string) => key,
+    });
+
+    let tree!: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(
+        React.createElement(ChatMessage, {
+          message: {
+            id: "user-1",
+            role: "user",
+            text: "hello there",
+            timestamp: 1,
+          },
+          onEdit: vi.fn(async () => true),
+        }),
+      );
+    });
+
+    expect(
+      tree.root.findAll(
+        (node) =>
+          typeof node.props.className === "string" &&
+          node.props.className.includes("bg-accent/16") &&
+          node.props.className.includes("border-accent/35"),
+      ).length,
+    ).toBeGreaterThan(0);
+  });
+
+  it("renders the action rail inside a card-toned shell", async () => {
+    mockUseApp.mockReturnValue({
+      copyToClipboard: vi.fn(),
+      t: (key: string) => key,
+    });
+
+    let tree!: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(
+        React.createElement(ChatMessage, {
+          message: {
+            id: "assistant-1",
+            role: "assistant",
+            text: "hello there",
+            timestamp: 1,
+          },
+          onSpeak: vi.fn(),
+        }),
+      );
+    });
+
+    expect(
+      tree.root.findAll(
+        (node) =>
+          typeof node.props.className === "string" &&
+          node.props.className.includes("bg-card/96") &&
+          node.props.className.includes("backdrop-blur-sm"),
+      ).length,
+    ).toBeGreaterThan(0);
   });
 });

@@ -2282,12 +2282,15 @@ export class MiladyClient {
     if (!res.ok && !options?.allowNonOk) {
       const body = (await res
         .json()
-        .catch(() => ({ error: res.statusText }))) as Record<string, string>;
+        .catch(() => ({ error: res.statusText }))) as Record<
+        string,
+        string
+      > | null;
       throw new ApiError({
         kind: "http",
         path,
         status: res.status,
-        message: body.error ?? `HTTP ${res.status}`,
+        message: body?.error ?? `HTTP ${res.status}`,
       });
     }
     return res;
@@ -3068,8 +3071,11 @@ export class MiladyClient {
     if (!res.ok) {
       const body = (await res
         .json()
-        .catch(() => ({ error: res.statusText }))) as Record<string, string>;
-      const err = new Error(body.error ?? `HTTP ${res.status}`);
+        .catch(() => ({ error: res.statusText }))) as Record<
+        string,
+        string
+      > | null;
+      const err = new Error(body?.error ?? `HTTP ${res.status}`);
       (err as Error & { status?: number }).status = res.status;
       throw err;
     }

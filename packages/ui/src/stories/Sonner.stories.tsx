@@ -1,7 +1,32 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { ThemeProvider } from "next-themes";
+import { type ReactNode, useEffect } from "react";
 import { toast } from "sonner";
 import { Toaster } from "../components/ui/sonner";
+
+function DarkThemeStoryWrapper({ children }: { children: ReactNode }) {
+  useEffect(() => {
+    const root = document.documentElement;
+    const previousTheme = root.getAttribute("data-theme");
+    const previousDark = root.classList.contains("dark");
+
+    root.setAttribute("data-theme", "dark");
+    root.classList.add("dark");
+
+    return () => {
+      if (previousTheme) {
+        root.setAttribute("data-theme", previousTheme);
+      } else {
+        root.removeAttribute("data-theme");
+      }
+
+      if (!previousDark) {
+        root.classList.remove("dark");
+      }
+    };
+  }, []);
+
+  return <>{children}</>;
+}
 
 const meta = {
   title: "UI/Sonner",
@@ -9,9 +34,9 @@ const meta = {
   tags: ["autodocs"],
   decorators: [
     (Story) => (
-      <ThemeProvider attribute="class" defaultTheme="dark">
+      <DarkThemeStoryWrapper>
         <Story />
-      </ThemeProvider>
+      </DarkThemeStoryWrapper>
     ),
   ],
 } satisfies Meta<typeof Toaster>;

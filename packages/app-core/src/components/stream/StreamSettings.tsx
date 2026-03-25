@@ -40,6 +40,16 @@ interface StreamSettingsProps {
   onClose: () => void;
 }
 
+const SECTION_HINT_CLASSNAME = "max-w-2xl text-[12px] leading-5 text-muted";
+const FIELD_INPUT_CLASSNAME =
+  "h-9 rounded-xl border border-border/50 bg-bg-hover/75 px-3 text-xs leading-5 text-txt shadow-sm focus-visible:ring-2 focus-visible:ring-accent/35";
+const SURFACE_CARD_CLASSNAME =
+  "rounded-2xl border border-border/55 bg-card/92 shadow-sm";
+const OPTION_CARD_CLASSNAME =
+  "w-full h-auto justify-start gap-3 rounded-2xl border border-border/55 bg-card/88 px-4 py-3 text-left shadow-sm transition-[border-color,background-color,box-shadow] focus-visible:ring-2 focus-visible:ring-accent/35";
+const ACTIVE_OPTION_CARD_CLASSNAME =
+  "border-accent/45 bg-accent/12 shadow-md shadow-accent/5";
+
 // ---------------------------------------------------------------------------
 // Config field renderer
 // ---------------------------------------------------------------------------
@@ -88,7 +98,7 @@ function ConfigField({
               typeof value === "number" ? value : (field.default as number)
             }
             onChange={(e) => onChange(fieldKey, Number(e.target.value))}
-            className="h-8 bg-bg-muted border-border text-xs rounded px-2"
+            className={FIELD_INPUT_CLASSNAME}
           />
         </label>
       );
@@ -106,7 +116,7 @@ function ConfigField({
           >
             <SelectTrigger
               id={`config-${fieldKey}`}
-              className="bg-bg-muted border border-border text-txt text-[12px] rounded px-2 py-1 cursor-pointer h-auto"
+              className={`${FIELD_INPUT_CLASSNAME} h-9 cursor-pointer`}
             >
               <SelectValue />
             </SelectTrigger>
@@ -154,7 +164,7 @@ function ConfigField({
               typeof value === "string" ? value : String(field.default ?? "")
             }
             onChange={(e) => onChange(fieldKey, e.target.value)}
-            className="h-8 bg-bg-muted border-border text-xs rounded px-2"
+            className={FIELD_INPUT_CLASSNAME}
           />
         </label>
       );
@@ -180,8 +190,8 @@ function WidgetRow({
   const hasConfig = def && Object.keys(def.configSchema).length > 0;
 
   return (
-    <div className="border border-border rounded-lg overflow-hidden">
-      <div className="flex items-center gap-2 px-3 py-2 bg-[rgba(255,255,255,0.03)]">
+    <div className={`${SURFACE_CARD_CLASSNAME} overflow-hidden`}>
+      <div className="flex items-center gap-2 border-b border-border/40 bg-bg-hover/55 px-3 py-2.5">
         {/* Toggle */}
         <Switch
           checked={instance.enabled}
@@ -194,11 +204,11 @@ function WidgetRow({
         />
 
         <div className="flex-1 min-w-0">
-          <div className="text-[12px] font-medium text-txt truncate">
+          <div className="text-[12px] font-medium text-txt break-words">
             {def?.name ?? instance.type}
           </div>
           {def?.description && (
-            <div className="text-[10px] text-muted truncate">
+            <div className="mt-0.5 text-[10px] leading-4 text-muted break-words">
               {def.description}
             </div>
           )}
@@ -209,7 +219,7 @@ function WidgetRow({
             variant="ghost"
             size="sm"
             onClick={() => setExpanded((x) => !x)}
-            className="text-muted hover:text-txt text-[10px] h-6 px-1.5 py-0 bg-bg-muted"
+            className="h-9 rounded-xl border border-border/45 bg-card/92 px-2.5 text-[10px] font-medium text-muted-strong hover:border-border-strong hover:bg-bg-hover hover:text-txt"
           >
             {expanded
               ? t("streamsettings.ConfigExpanded")
@@ -219,7 +229,7 @@ function WidgetRow({
       </div>
 
       {expanded && hasConfig && def && (
-        <div className="px-3 py-2 border-t border-border flex flex-col gap-2">
+        <div className="flex flex-col gap-2 border-t border-border/40 bg-bg/35 px-3 py-3">
           {Object.entries(def.configSchema).map(([key, field]) => (
             <ConfigField
               key={key}
@@ -267,10 +277,10 @@ export function StreamSettings({
       variant={section === id ? "default" : "ghost"}
       size="sm"
       onClick={() => setSection(id)}
-      className={`px-3 py-1.5 text-[12px] font-medium rounded-lg transition-colors h-auto ${
+      className={`min-h-10 rounded-xl border px-3.5 py-2 text-[12px] font-medium transition-[border-color,background-color,color,box-shadow] ${
         section === id
-          ? "bg-accent/20 text-txt hover:bg-accent/30"
-          : "text-muted hover:text-txt hover:bg-bg-muted"
+          ? "border-accent/45 bg-accent/12 text-txt-strong shadow-sm"
+          : "border-border/45 bg-card/82 text-muted-strong hover:border-border-strong hover:bg-bg-hover hover:text-txt"
       }`}
     >
       {label}
@@ -278,16 +288,13 @@ export function StreamSettings({
   );
 
   return (
-    <div
-      className="absolute inset-0 z-50 flex items-end justify-center"
-      style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
-    >
+    <div className="absolute inset-0 z-50 flex items-end justify-center bg-bg/80 p-3 backdrop-blur-md sm:items-center sm:p-5">
       <div
-        className="w-full max-w-xl rounded-t-2xl border border-border overflow-hidden flex flex-col"
-        style={{ background: "rgba(14,18,28,0.97)", maxHeight: "80vh" }}
+        className="flex w-full max-w-2xl flex-col overflow-hidden rounded-3xl border border-border/60 bg-card/98 shadow-2xl"
+        style={{ maxHeight: "min(88vh, 44rem)" }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0">
+        <div className="flex flex-shrink-0 items-center justify-between border-b border-border/50 px-4 py-3">
           <span className="text-[13px] font-semibold text-txt">
             {t("streamsettings.StreamSettings")}
           </span>
@@ -295,30 +302,32 @@ export function StreamSettings({
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="text-muted hover:text-txt transition-colors text-lg leading-none p-1 h-auto"
+            className="h-9 w-9 rounded-xl border border-border/40 bg-card/85 p-0 text-lg leading-none text-muted-strong hover:border-border-strong hover:bg-bg-hover hover:text-txt"
           >
             ×
           </Button>
         </div>
 
         {/* Nav */}
-        <div className="flex gap-1 px-4 py-2 border-b border-border flex-shrink-0">
+        <div className="flex flex-shrink-0 flex-wrap gap-2 border-b border-border/50 px-4 py-3">
           {navBtn("channel", t("streamsettings.NavChannel"))}
           {navBtn("overlays", t("streamsettings.NavOverlays"))}
           {navBtn("source", t("trajectoriesview.Source"))}
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto flex-1 px-4 py-4">
+        <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-5">
           {/* ── Channel / destination ─────────────────────────────── */}
           {section === "channel" && (
             <div className="flex flex-col gap-3">
-              <p className="text-[12px] text-muted">
+              <p className={SECTION_HINT_CLASSNAME}>
                 {t("streamsettings.SelectWhereToBroa")}
               </p>
 
               {destinations.length === 0 ? (
-                <div className="text-[12px] text-muted border border-border rounded-lg p-4 text-center">
+                <div
+                  className={`${SURFACE_CARD_CLASSNAME} p-5 text-center text-[12px] leading-5 text-muted`}
+                >
                   {t("streamsettings.NoStreamingDestina")}
                   <br />
 
@@ -339,10 +348,10 @@ export function StreamSettings({
                             : undefined
                         }
                         onClick={() => onDestinationChange(d.id)}
-                        className={`w-full flex items-center justify-start gap-3 px-4 py-3 h-auto rounded-lg border transition-colors disabled:opacity-50 text-left ${
+                        className={`${OPTION_CARD_CLASSNAME} disabled:opacity-50 ${
                           active
-                            ? "border-accent/60 bg-accent/10"
-                            : "border-border bg-white/[0.03] hover:border-accent/30 hover:bg-white/[0.05]"
+                            ? ACTIVE_OPTION_CARD_CLASSNAME
+                            : "hover:border-border-strong hover:bg-bg-hover"
                         }`}
                       >
                         <span
@@ -352,9 +361,7 @@ export function StreamSettings({
                               : "bg-muted/30"
                           }`}
                         />
-                        <span
-                          className={`text-[13px] font-medium ${active ? "text-txt" : "text-txt"}`}
-                        >
+                        <span className="min-w-0 break-words text-[13px] font-medium text-txt">
                           {d.name}
                         </span>
                         {active && (
@@ -369,7 +376,7 @@ export function StreamSettings({
               )}
 
               {streamLive && (
-                <p className="text-[11px] text-[#f59e0b] border border-[#f59e0b]/30 rounded px-3 py-1.5 bg-[#f59e0b]/5">
+                <p className="rounded-xl border border-warn/30 bg-warn/10 px-3 py-2 text-[11px] leading-5 text-warn">
                   {t("streamsettings.StreamIsLiveSt")}
                 </p>
               )}
@@ -380,21 +387,23 @@ export function StreamSettings({
           {section === "overlays" && (
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <p className="text-[12px] text-muted">
+                <p className={SECTION_HINT_CLASSNAME}>
                   {t("streamsettings.ToggleAndConfigure")}
                 </p>
                 <Button
                   variant="link"
                   size="sm"
                   onClick={resetLayout}
-                  className="text-[11px] text-muted hover:text-danger transition-colors p-0 h-auto"
+                  className="h-auto p-0 text-[11px] text-muted hover:text-danger"
                 >
                   {t("streamsettings.ResetDefaults")}
                 </Button>
               </div>
 
               {layout.widgets.length === 0 ? (
-                <div className="text-[12px] text-muted border border-border rounded-lg p-4 text-center">
+                <div
+                  className={`${SURFACE_CARD_CLASSNAME} p-5 text-center text-[12px] leading-5 text-muted`}
+                >
                   {t("streamsettings.NoWidgetsAvailable")}
                 </div>
               ) : (
@@ -415,7 +424,7 @@ export function StreamSettings({
           {/* ── Stream source ──────────────────────────────────────── */}
           {section === "source" && (
             <div className="flex flex-col gap-3">
-              <p className="text-[12px] text-muted">
+              <p className={SECTION_HINT_CLASSNAME}>
                 {t("streamsettings.ChooseWhatContent")}
               </p>
 
@@ -438,10 +447,10 @@ export function StreamSettings({
                             );
                           }
                         }}
-                        className={`w-full h-auto flex items-center justify-start gap-3 px-4 py-3 rounded-lg border transition-colors text-left ${
+                        className={`${OPTION_CARD_CLASSNAME} ${
                           active && st !== "custom-url"
-                            ? "border-accent/60 bg-accent/10"
-                            : "border-border bg-white/[0.03] hover:border-accent/30 hover:bg-white/[0.05]"
+                            ? ACTIVE_OPTION_CARD_CLASSNAME
+                            : "hover:border-border-strong hover:bg-bg-hover"
                         }`}
                       >
                         <span
@@ -451,13 +460,11 @@ export function StreamSettings({
                               : "bg-muted/30"
                           }`}
                         />
-                        <div>
-                          <div
-                            className={`text-[13px] font-medium ${active && st !== "custom-url" ? "text-txt" : "text-txt"}`}
-                          >
+                        <div className="min-w-0">
+                          <div className="text-[13px] font-medium text-txt">
                             {STREAM_SOURCE_LABELS[st]}
                           </div>
-                          <div className="text-[10px] text-muted mt-1.5">
+                          <div className="mt-1.5 break-words text-[10px] leading-4 text-muted">
                             {st === "stream-tab" &&
                               t("streamsettings.CaptureStreamBrowserTab")}
                             {st === "game" &&
@@ -472,17 +479,20 @@ export function StreamSettings({
 
                       {st === "custom-url" && (
                         <div
-                          className={`mt-1 flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-colors ${
+                          className={`mt-1 flex items-center gap-2 rounded-2xl border px-3 py-2 transition-colors ${
                             active
-                              ? "border-accent/60 bg-accent/10"
-                              : "border-border bg-white/[0.03]"
+                              ? "border-accent/45 bg-accent/10"
+                              : "border-border/55 bg-card/88"
                           }`}
                         >
                           <Input
                             placeholder={t("streamsettings.httpsYourUrlCom")}
                             value={customUrlInput}
                             onChange={(e) => setCustomUrlInput(e.target.value)}
-                            className="flex-1 bg-transparent border-none p-0 h-auto text-xs focus-visible:ring-0 shadow-none placeholder:text-muted/40"
+                            aria-invalid={
+                              trimmedCustomUrl ? !customUrlValid : undefined
+                            }
+                            className="h-9 flex-1 border-none bg-transparent p-0 text-xs shadow-none focus-visible:ring-0 placeholder:text-muted/40"
                             onKeyDown={(e) => {
                               if (e.key === "Enter" && customUrlValid) {
                                 onSourceChange("custom-url", trimmedCustomUrl);
@@ -498,7 +508,7 @@ export function StreamSettings({
                                 onSourceChange("custom-url", trimmedCustomUrl);
                               }
                             }}
-                            className="px-2 py-1 h-auto bg-accent/20 text-txt text-[11px] font-semibold hover:bg-accent/30 transition-colors"
+                            className="h-9 rounded-xl border border-accent/35 bg-accent/12 px-2.5 text-[11px] font-semibold text-accent-fg hover:border-accent/55 hover:bg-accent/18"
                           >
                             {t("streamsettings.Use")}
                           </Button>

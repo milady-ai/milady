@@ -38,6 +38,7 @@ import {
   patchProperLockfileSignalExitCompat,
   patchPtyManagerCursorPositionCompat,
   patchPtyManagerEsmDirnameCompat,
+  pruneNestedElizaPluginCoreCopies,
   repairElizaCoreRuntimeDist,
   warnStaleBunCache,
 } from "./patch-bun-exports.mjs";
@@ -538,6 +539,93 @@ describe("patch-bun-exports", () => {
           "utf8",
         ),
       ).toBe("// node");
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it("pruneNestedElizaPluginCoreCopies removes stale plugin-local core installs", () => {
+    const tmp = mkdtempSync(join(tmpdir(), "patch-bun-exports-test-"));
+    try {
+      const rootCoreDir = join(tmp, "node_modules", "@elizaos", "core");
+      const pluginDir = join(tmp, "node_modules", "@elizaos", "plugin-ollama");
+      const nestedCoreDir = join(pluginDir, "node_modules", "@elizaos", "core");
+
+      mkdirSync(rootCoreDir, { recursive: true });
+      mkdirSync(nestedCoreDir, { recursive: true });
+      writeFileSync(
+        join(rootCoreDir, "package.json"),
+        JSON.stringify({ name: "@elizaos/core", version: "2.0.0-alpha.98" }),
+        "utf8",
+      );
+      writeFileSync(
+        join(pluginDir, "package.json"),
+        JSON.stringify({
+          name: "@elizaos/plugin-ollama",
+          version: "2.0.0-alpha.70",
+        }),
+        "utf8",
+      );
+      writeFileSync(
+        join(nestedCoreDir, "package.json"),
+        JSON.stringify({ name: "@elizaos/core", version: "2.0.0-alpha.86" }),
+        "utf8",
+      );
+
+      const logs: string[] = [];
+      const patched = pruneNestedElizaPluginCoreCopies(tmp, (msg) =>
+        logs.push(msg),
+      );
+
+      expect(patched).toBe(true);
+      expect(existsSync(nestedCoreDir)).toBe(false);
+      expect(existsSync(rootCoreDir)).toBe(true);
+      expect(logs.some((line) => line.includes("@elizaos/plugin-ollama"))).toBe(
+        true,
+      );
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it("pruneNestedElizaPluginCoreCopies scans Bun cache plugin installs", () => {
+    const tmp = mkdtempSync(join(tmpdir(), "patch-bun-exports-test-"));
+    try {
+      const rootCoreDir = join(tmp, "node_modules", "@elizaos", "core");
+      const pluginDir = join(
+        tmp,
+        "node_modules",
+        ".bun",
+        "@elizaos+plugin-openrouter@2.0.0-alpha.10",
+        "node_modules",
+        "@elizaos",
+        "plugin-openrouter",
+      );
+      const nestedCoreDir = join(pluginDir, "node_modules", "@elizaos", "core");
+
+      mkdirSync(rootCoreDir, { recursive: true });
+      mkdirSync(nestedCoreDir, { recursive: true });
+      writeFileSync(
+        join(rootCoreDir, "package.json"),
+        JSON.stringify({ name: "@elizaos/core", version: "2.0.0-alpha.98" }),
+        "utf8",
+      );
+      writeFileSync(
+        join(pluginDir, "package.json"),
+        JSON.stringify({
+          name: "@elizaos/plugin-openrouter",
+          version: "2.0.0-alpha.10",
+        }),
+        "utf8",
+      );
+      writeFileSync(
+        join(nestedCoreDir, "package.json"),
+        JSON.stringify({ name: "@elizaos/core", version: "2.0.0-alpha.86" }),
+        "utf8",
+      );
+
+      expect(pruneNestedElizaPluginCoreCopies(tmp)).toBe(true);
+      expect(existsSync(nestedCoreDir)).toBe(false);
     } finally {
       rmSync(tmp, { recursive: true, force: true });
     }

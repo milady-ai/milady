@@ -17,6 +17,19 @@ function callHandler(params: Record<string, unknown> = {}) {
   } as HandlerOptions);
 }
 
+async function callHandlerWithCallback(
+  params: Record<string, unknown> = {},
+  callback?: (payload: Record<string, unknown>) => void,
+) {
+  return checkBalanceAction.handler(
+    {} as never,
+    {} as never,
+    undefined,
+    { parameters: params } as HandlerOptions,
+    callback as never,
+  );
+}
+
 /** Full multi-chain mock response matching WalletBalancesResponse. */
 function makeFullResponse() {
   return {
@@ -186,6 +199,26 @@ describe("CHECK_BALANCE action", () => {
     expect(text).toContain("SOL: 10.0");
     expect(text).toContain("$1,200.00");
     expect(text).toContain("BONK: 1000000");
+  });
+
+  it("fires CHECK_BALANCE_RESPONSE callback on success", async () => {
+    const mockFetch = globalThis.fetch as ReturnType<typeof vi.fn>;
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => makeFullResponse(),
+    });
+    const callback = vi.fn();
+
+    const result = await callHandlerWithCallback({}, callback);
+    const text = String((result as { text?: string }).text ?? "");
+
+    expect(callback).toHaveBeenCalledTimes(1);
+    expect(callback).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "CHECK_BALANCE_RESPONSE",
+        text,
+      }),
+    );
   });
 
   // ── Chain filtering ──────────────────────────────────────────────────────
@@ -506,6 +539,23 @@ describe("CHECK_BALANCE action", () => {
     expect(text).toContain("HTTP 500");
   });
 
+  it("fires CHECK_BALANCE_FAILED callback on HTTP failure", async () => {
+    const mockFetch = globalThis.fetch as ReturnType<typeof vi.fn>;
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 503,
+    });
+    const callback = vi.fn();
+
+    await callHandlerWithCallback({}, callback);
+    expect(callback).toHaveBeenCalledTimes(1);
+    expect(callback).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "CHECK_BALANCE_FAILED",
+      }),
+    );
+  });
+
   it("handles API 403 error", async () => {
     const mockFetch = globalThis.fetch as ReturnType<typeof vi.fn>;
     mockFetch.mockResolvedValueOnce({
@@ -531,6 +581,20 @@ describe("CHECK_BALANCE action", () => {
 
     expect(success).toBe(false);
     expect(text).toContain("ECONNREFUSED");
+  });
+
+  it("fires CHECK_BALANCE_FAILED callback on exception", async () => {
+    const mockFetch = globalThis.fetch as ReturnType<typeof vi.fn>;
+    mockFetch.mockRejectedValueOnce(new Error("boom"));
+    const callback = vi.fn();
+
+    await callHandlerWithCallback({}, callback);
+    expect(callback).toHaveBeenCalledTimes(1);
+    expect(callback).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "CHECK_BALANCE_FAILED",
+      }),
+    );
   });
 
   it("handles timeout errors", async () => {

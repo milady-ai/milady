@@ -169,7 +169,8 @@ function createUseAppMock(
   overrides: Record<string, unknown> = {},
 ) {
   return {
-    t: (k: string) => k,
+    t: (k: string, options?: { defaultValue?: string }) =>
+      options?.defaultValue ?? k,
     ...state,
     exportBusy: false,
     exportPassword: "",
@@ -260,6 +261,34 @@ describe("SettingsView Sections", () => {
   });
 
   describe("Danger Zone Section", () => {
+    it("renders a searchable settings sidebar and filters sections", async () => {
+      let tree: TestRenderer.ReactTestRenderer | null = null;
+
+      await act(async () => {
+        tree = TestRenderer.create(React.createElement(SettingsView));
+      });
+
+      const sidebar = tree?.root.findByProps({
+        "data-testid": "settings-sidebar",
+      });
+      const searchInput = tree?.root
+        .findAllByType("input")
+        .find((node) =>
+          String(node.props["aria-label"] ?? "").includes("Search settings"),
+        );
+
+      expect(sidebar).toBeDefined();
+      expect(searchInput).toBeDefined();
+
+      await act(async () => {
+        searchInput?.props.onChange({ target: { value: "media" } });
+      });
+
+      const renderedTree = JSON.stringify(tree?.toJSON());
+      expect(renderedTree).toContain("settings.sections.media.label");
+      expect(renderedTree).not.toContain("settings.sections.permissions.label");
+    });
+
     it("renders danger zone with reset button", async () => {
       let tree: TestRenderer.ReactTestRenderer | null = null;
 
@@ -296,7 +325,6 @@ describe("SettingsView Sections", () => {
       }
     });
   });
-
 });
 
 // ---------------------------------------------------------------------------

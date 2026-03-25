@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 
-import { ChatComposer } from "../../src/components/ChatComposer";
 import React, { createRef } from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { ChatComposer } from "../../src/components/ChatComposer";
 
 function createVoiceState(
   overrides?: Partial<React.ComponentProps<typeof ChatComposer>["voice"]>,
@@ -129,6 +129,15 @@ describe("ChatComposer mic controls", () => {
     expect(speakerButton).toBeUndefined();
   });
 
+  it("uses emphasized surface styling when agent voice output is enabled", () => {
+    const { speakerButton } = renderComposer({
+      agentVoiceEnabled: true,
+    });
+
+    expect(speakerButton?.props.className).toContain("bg-accent/16");
+    expect(speakerButton?.props.className).toContain("text-accent");
+  });
+
   it("shows Listening... in an empty default chat input while listening", () => {
     const { renderer } = renderComposer({
       chatInput: "",
@@ -140,5 +149,54 @@ describe("ChatComposer mic controls", () => {
     const textarea = findTextarea(renderer);
 
     expect(textarea.props.placeholder).toBe("chat.listening");
+  });
+
+  it("uses muted disabled send styling until there is a draft", () => {
+    const { renderer } = renderComposer({
+      chatInput: "",
+      chatPendingImagesCount: 0,
+    });
+    const sendButton = renderer.root.findByProps({
+      "data-testid": "chat-composer-action",
+    });
+
+    expect(sendButton.props.disabled).toBe(true);
+    expect(sendButton.props.className).toContain("disabled:bg-bg-accent");
+    expect(sendButton.props.className).toContain("disabled:text-muted-strong");
+  });
+
+  it("uses the accent-tinted primary action styling when a draft is ready", () => {
+    const { renderer } = renderComposer({
+      chatInput: "Ship it",
+    });
+    const sendButton = renderer.root.findByProps({
+      "data-testid": "chat-composer-action",
+    });
+
+    expect(sendButton.props.disabled).toBe(false);
+    expect(sendButton.props.className).toContain("bg-accent/22");
+    expect(sendButton.props.className).toContain("border-accent/55");
+  });
+
+  it("uses the themed companion action styling in game-modal", () => {
+    const { renderer } = renderComposer({
+      variant: "game-modal",
+      chatInput: "Hey",
+    });
+    const sendButton = renderer.root.findByProps({
+      "data-testid": "chat-composer-action",
+    });
+    const textarea = findTextarea(renderer);
+
+    expect(sendButton.props.className).toContain("var(--onboarding-accent-bg)");
+    expect(sendButton.props.className).toContain(
+      "var(--onboarding-accent-border)",
+    );
+    expect(String(textarea.props.className)).toContain(
+      "var(--onboarding-text-strong)",
+    );
+    expect(String(textarea.props.className)).toContain(
+      "var(--onboarding-text-muted)",
+    );
   });
 });

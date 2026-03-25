@@ -51,10 +51,17 @@ const COMPANION_VISIBLE_MESSAGE_LIMIT = 2;
 const COMPANION_HISTORY_HOLD_MS = 30_000;
 const COMPANION_HISTORY_FADE_MS = 5_000;
 const COMPANION_MESSAGE_LAYER_TOP = "calc(-100% + 1.5rem)";
-const COMPANION_MESSAGE_LAYER_BOTTOM_FALLBACK = "4rem";
-const COMPANION_COMPOSER_GAP_PX = 10;
+const COMPANION_MESSAGE_LAYER_BOTTOM_FALLBACK = "5.25rem";
+const COMPANION_COMPOSER_GAP_PX = 18;
+const COMPANION_COMPOSER_SHELL_MIN_HEIGHT_PX = 84;
 const COMPANION_MESSAGE_LAYER_MASK =
   "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.28) 6%, rgba(0,0,0,0.82) 12%, black 17%, black 100%)";
+const COMPANION_ASSISTANT_BUBBLE_CLASSNAME =
+  "border border-[color:var(--onboarding-card-border)] bg-[color:var(--onboarding-card-bg)] text-[color:var(--onboarding-text-strong)] shadow-[0_14px_34px_rgba(0,0,0,0.16)] backdrop-blur-md";
+const COMPANION_USER_BUBBLE_CLASSNAME =
+  "border border-[color:var(--onboarding-accent-border)] bg-[color:var(--onboarding-accent-bg)] text-[color:var(--onboarding-text-strong)] shadow-[0_14px_34px_rgba(0,0,0,0.14)]";
+const COMPANION_TYPING_BUBBLE_CLASSNAME =
+  "border border-[color:var(--onboarding-card-border)] bg-[color:var(--onboarding-card-bg)] shadow-[0_12px_30px_rgba(0,0,0,0.14)] backdrop-blur-md";
 
 type ChatViewVariant = "default" | "game-modal";
 
@@ -733,7 +740,11 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
   return (
     <section
       aria-label={t("aria.chatWorkspace")}
-      className={`flex flex-col flex-1 min-h-0 relative${isGameModal ? " overflow-visible px-2 sm:px-3 pointer-events-none" : ""}${imageDragOver ? " ring-2 ring-accent ring-inset" : ""}`}
+      className={`flex flex-col flex-1 min-h-0 relative ${
+        isGameModal
+          ? "overflow-visible pointer-events-none"
+          : "bg-bg"
+      }${imageDragOver ? " ring-2 ring-accent ring-inset" : ""}`}
       onDragOver={(e) => {
         e.preventDefault();
         setImageDragOver(true);
@@ -751,7 +762,7 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
         className={
           isGameModal
             ? "chat-native-scrollbar absolute inset-x-0 overflow-x-hidden overflow-y-auto pointer-events-auto"
-            : "chat-native-scrollbar relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto py-2"
+            : "chat-native-scrollbar relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto px-3 py-3 sm:px-4 sm:py-4 xl:px-5"
         }
         style={
           isGameModal
@@ -793,10 +804,10 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
                   style={{ opacity: gameModalCarryoverOpacity }}
                 >
                   <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-3 text-[15px] leading-relaxed ${
+                    className={`max-w-[min(85%,24rem)] rounded-2xl px-4 py-3 text-[15px] leading-relaxed ${
                       isUser
-                        ? "bg-accent/85 text-white rounded-br-sm"
-                        : "border border-white/10 bg-black/45 text-white/95 rounded-bl-sm backdrop-blur-md"
+                        ? `${COMPANION_USER_BUBBLE_CLASSNAME} rounded-br-sm`
+                        : `${COMPANION_ASSISTANT_BUBBLE_CLASSNAME} rounded-bl-sm`
                     }`}
                   >
                     <div
@@ -818,10 +829,10 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
                   className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-3 text-[15px] leading-relaxed ${
+                    className={`max-w-[min(85%,24rem)] rounded-2xl px-4 py-3 text-[15px] leading-relaxed ${
                       isUser
-                        ? "bg-accent/85 text-white rounded-br-sm"
-                        : "border border-white/10 bg-black/45 text-white/95 rounded-bl-sm backdrop-blur-md"
+                        ? `${COMPANION_USER_BUBBLE_CLASSNAME} rounded-br-sm`
+                        : `${COMPANION_ASSISTANT_BUBBLE_CLASSNAME} rounded-bl-sm`
                     }`}
                   >
                     <div
@@ -836,17 +847,19 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
             })}
             {chatSending && !chatFirstTokenReceived && (
               <div className="flex w-full justify-start">
-                <div className="max-w-[85%] rounded-2xl rounded-bl-sm px-4 py-3 bg-black/30 flex items-center gap-1">
+                <div
+                  className={`max-w-[min(85%,24rem)] rounded-2xl rounded-bl-sm px-4 py-3 flex items-center gap-1 ${COMPANION_TYPING_BUBBLE_CLASSNAME}`}
+                >
                   <span
-                    className="w-1.5 h-1.5 rounded-full bg-white/50 animate-bounce"
+                    className="w-1.5 h-1.5 rounded-full bg-[color:var(--onboarding-text-muted)] animate-bounce"
                     style={{ animationDelay: "0ms" }}
                   />
                   <span
-                    className="w-1.5 h-1.5 rounded-full bg-white/50 animate-bounce"
+                    className="w-1.5 h-1.5 rounded-full bg-[color:var(--onboarding-text-muted)] animate-bounce"
                     style={{ animationDelay: "150ms" }}
                   />
                   <span
-                    className="w-1.5 h-1.5 rounded-full bg-white/50 animate-bounce"
+                    className="w-1.5 h-1.5 rounded-full bg-[color:var(--onboarding-text-muted)] animate-bounce"
                     style={{ animationDelay: "300ms" }}
                   />
                 </div>
@@ -854,7 +867,7 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
             )}
           </div>
         ) : (
-          <div className="w-full pl-2 sm:pl-3 pr-3 sm:pr-4 space-y-1">
+          <div className="w-full space-y-1.5">
             {visibleMsgs.map((msg, i) => {
               const prev = i > 0 ? visibleMsgs[i - 1] : null;
               const isGrouped = prev?.role === msg.role;
@@ -995,46 +1008,57 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
         /* ── Game-modal composer ──────────────────────────────────────── */
         <div
           ref={composerRef}
-          className="mt-auto pt-2.5 relative pointer-events-auto"
+          className="mt-auto pointer-events-auto px-1 max-[380px]:px-0.5"
           data-no-camera-drag="true"
-          style={{ zIndex: 1 }}
+          style={{
+            zIndex: 1,
+            paddingBottom:
+              "calc(max(env(safe-area-inset-bottom, 0px), 0px) + 0.25rem)",
+          }}
         >
-          <ChatComposer
-            variant="game-modal"
-            textareaRef={textareaRef}
-            chatInput={chatInput}
-            chatPendingImagesCount={chatPendingImages.length}
-            isComposerLocked={isComposerLocked}
-            isAgentStarting={isAgentStarting}
-            chatSending={chatSending}
-            voice={{
-              supported: voice.supported,
-              isListening: voice.isListening,
-              captureMode: voice.captureMode,
-              interimTranscript: voice.interimTranscript,
-              isSpeaking: voice.isSpeaking,
-              toggleListening: voice.toggleListening,
-              startListening: beginVoiceCapture,
-              stopListening: endVoiceCapture,
-            }}
-            agentVoiceEnabled={!agentVoiceMuted}
-            showAgentVoiceToggle={showComposerVoiceToggle}
-            t={t}
-            onAttachImage={() => fileInputRef.current?.click()}
-            onChatInputChange={(value) => setState("chatInput", value)}
-            onKeyDown={handleKeyDown}
-            onSend={() => void handleChatSend()}
-            onStop={handleChatStop}
-            onStopSpeaking={stopSpeaking}
-            onToggleAgentVoice={() =>
-              setState("chatAgentVoiceMuted", !agentVoiceMuted)
-            }
-          />
+          <div
+            className="relative flex min-h-[84px] items-center px-4 py-3 max-[380px]:min-h-[78px] max-[380px]:px-3 max-[380px]:py-2.5 before:pointer-events-none before:absolute before:inset-0 before:rounded-[34px] before:border before:border-white/8 before:bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] before:shadow-[0_20px_52px_rgba(0,0,0,0.17)] before:ring-1 before:ring-inset before:ring-white/6 before:backdrop-blur-[22px] before:content-['']"
+            style={{ minHeight: `${COMPANION_COMPOSER_SHELL_MIN_HEIGHT_PX}px` }}
+          >
+            <div className="relative z-[1] flex w-full items-center">
+              <ChatComposer
+                variant="game-modal"
+                textareaRef={textareaRef}
+                chatInput={chatInput}
+                chatPendingImagesCount={chatPendingImages.length}
+                isComposerLocked={isComposerLocked}
+                isAgentStarting={isAgentStarting}
+                chatSending={chatSending}
+                voice={{
+                  supported: voice.supported,
+                  isListening: voice.isListening,
+                  captureMode: voice.captureMode,
+                  interimTranscript: voice.interimTranscript,
+                  isSpeaking: voice.isSpeaking,
+                  toggleListening: voice.toggleListening,
+                  startListening: beginVoiceCapture,
+                  stopListening: endVoiceCapture,
+                }}
+                agentVoiceEnabled={!agentVoiceMuted}
+                showAgentVoiceToggle={showComposerVoiceToggle}
+                t={t}
+                onAttachImage={() => fileInputRef.current?.click()}
+                onChatInputChange={(value) => setState("chatInput", value)}
+                onKeyDown={handleKeyDown}
+                onSend={() => void handleChatSend()}
+                onStop={handleChatStop}
+                onStopSpeaking={stopSpeaking}
+                onToggleAgentVoice={() =>
+                  setState("chatAgentVoiceMuted", !agentVoiceMuted)
+                }
+              />
+            </div>
+          </div>
         </div>
       ) : (
         /* ── Default composer ─────────────────────────────────────────── */
         <div
-          className="border-t border-border pt-3 pb-3 sm:pb-4 px-2 sm:px-3 relative"
+          className="relative border-t border-border/40 bg-card/55 px-3 pb-3 pt-3 backdrop-blur-sm sm:px-4 sm:pb-4 xl:px-5"
           style={{ zIndex: 1 }}
         >
           <ChatComposer

@@ -39,13 +39,13 @@ The pairing flow allows remote UIs (like the dashboard) to obtain the API token 
 ### How It Works
 
 1. The server generates a pairing code on first request to `GET /api/auth/status`
-2. The code is displayed in the server logs: `[milady-api] Pairing code: XXXX-XXXX (valid for 10 minutes)`
+2. The code is displayed in the server logs: `[milady-api] Pairing code: XXXX**** (valid for 10 minutes)` (first 4 chars shown, rest masked)
 3. The user enters the code in the UI, which submits it to `POST /api/auth/pair`
 4. On success, the token is returned and the pairing code is cleared
 
 ### Pairing Code Format
 
-Codes follow the `XXXX-XXXX` pattern (4 characters, dash, 4 characters). The alphabet excludes visually ambiguous characters:
+Codes follow the `XXXX-XXXX-XXXX` pattern (three groups of 4 characters separated by dashes, 12 characters total). The alphabet excludes visually ambiguous characters:
 
 ```
 ABCDEFGHJKLMNPQRSTUVWXYZ23456789

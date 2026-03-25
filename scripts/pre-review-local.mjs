@@ -81,7 +81,22 @@ function runCommandArgs(command, args, options = {}) {
 }
 
 export function getBaseRef() {
+  const explicitBase =
+    process.env.MILADY_PRE_REVIEW_BASE ?? process.env.PRE_REVIEW_BASE_REF;
+  if (explicitBase) {
+    const explicitResult = runCommandArgs("git", [
+      "rev-parse",
+      "--verify",
+      explicitBase,
+    ]);
+    if (explicitResult.ok) return explicitBase;
+  }
+
   const candidates = [
+    "refs/remotes/upstream/develop",
+    "upstream/develop",
+    "refs/remotes/upstream/main",
+    "upstream/main",
     "refs/heads/origin/develop",
     "origin/develop",
     "develop",

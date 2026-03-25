@@ -101,6 +101,19 @@
   background: var(--bg);
 }
 
+/*
+ * Theme flips touch a large number of CSS variables. Temporarily disabling
+ * transitions prevents the entire shell from animating every color/border
+ * change when users toggle light/dark rapidly.
+ */
+:root[data-theme-switching],
+:root[data-theme-switching] *,
+:root[data-theme-switching] *::before,
+:root[data-theme-switching] *::after {
+  /* biome-ignore lint/complexity/noImportantStyles: Theme-switch guard must override component-level transition utilities */
+  transition: none !important;
+}
+
 /* ── Typing indicator animation ─────────────────────────────────────── */
 
 @keyframes typing-bounce {
@@ -208,38 +221,56 @@
   display: none;
 }
 
-.chat-native-scrollbar {
+.custom-scrollbar,
+.chat-native-scrollbar,
+* {
   scrollbar-width: thin;
-  scrollbar-color: rgba(240, 178, 50, 0.55) transparent;
+  scrollbar-color: var(--scrollbar-thumb-mid) var(--scrollbar-track);
 }
 
-.chat-native-scrollbar::-webkit-scrollbar {
+.custom-scrollbar::-webkit-scrollbar,
+.chat-native-scrollbar::-webkit-scrollbar,
+*::-webkit-scrollbar {
   width: 10px;
+  height: 10px;
 }
 
-.chat-native-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+.custom-scrollbar::-webkit-scrollbar-track,
+.chat-native-scrollbar::-webkit-scrollbar-track,
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
 }
 
-.chat-native-scrollbar::-webkit-scrollbar-thumb {
+.custom-scrollbar::-webkit-scrollbar-thumb,
+.chat-native-scrollbar::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-thumb {
   background: linear-gradient(
     180deg,
-    rgba(255, 225, 150, 0.9) 0%,
-    rgba(240, 178, 50, 0.72) 55%,
-    rgba(201, 128, 24, 0.78) 100%
+    var(--scrollbar-thumb-start) 0%,
+    var(--scrollbar-thumb-mid) 55%,
+    var(--scrollbar-thumb-end) 100%
   );
   border-radius: 9999px;
-  border: 2px solid transparent;
+  border: 2px solid var(--scrollbar-track);
   background-clip: padding-box;
+  box-shadow: inset 0 0 0 1px var(--scrollbar-thumb-edge);
 }
 
-.chat-native-scrollbar::-webkit-scrollbar-thumb:hover {
+.custom-scrollbar::-webkit-scrollbar-thumb:hover,
+.chat-native-scrollbar::-webkit-scrollbar-thumb:hover,
+*::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(
     180deg,
-    rgba(255, 232, 170, 0.95) 0%,
-    rgba(240, 178, 50, 0.82) 55%,
-    rgba(201, 128, 24, 0.88) 100%
+    var(--scrollbar-thumb-hover-start) 0%,
+    var(--scrollbar-thumb-hover-mid) 55%,
+    var(--scrollbar-thumb-hover-end) 100%
   );
+}
+
+.custom-scrollbar::-webkit-scrollbar-corner,
+.chat-native-scrollbar::-webkit-scrollbar-corner,
+*::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 /* Keyboard shortcuts styling */
@@ -279,13 +310,13 @@ kbd {
 
 /* Focus visible improvements */
 :focus-visible {
-  outline: 2px solid hsl(217 91% 50%);
+  outline: 2px solid var(--ring);
   outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--focus);
 }
 
 [data-theme="dark"] :focus-visible {
-  outline: 2px solid hsl(217 91% 60%);
-  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--focus);
 }
 
 /* Reduced motion - !important is intentional for accessibility override */

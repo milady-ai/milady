@@ -16,15 +16,25 @@ import type { LogEntry } from "../api";
 import { useApp } from "../state";
 import { formatTime } from "./format";
 
-/** Per-tag badge colour map. */
-const TAG_COLORS: Record<string, { bg: string; fg: string }> = {
-  agent: { bg: "rgba(99, 102, 241, 0.15)", fg: "rgb(99, 102, 241)" },
-  server: { bg: "rgba(34, 197, 94, 0.15)", fg: "rgb(34, 197, 94)" },
-  system: { bg: "rgba(156, 163, 175, 0.15)", fg: "rgb(156, 163, 175)" },
-  cloud: { bg: "rgba(59, 130, 246, 0.15)", fg: "rgb(59, 130, 246)" },
-  plugins: { bg: "rgba(168, 85, 247, 0.15)", fg: "rgb(168, 85, 247)" },
-  autonomy: { bg: "rgba(245, 158, 11, 0.15)", fg: "rgb(245, 158, 11)" },
-  websocket: { bg: "rgba(20, 184, 166, 0.15)", fg: "rgb(20, 184, 166)" },
+const TAG_TONE_CLASSNAMES: Record<string, string> = {
+  agent: "border-accent/25 bg-accent/10 text-accent-fg",
+  server: "border-ok/25 bg-ok/10 text-ok",
+  system: "border-border/40 bg-bg-hover text-muted-strong",
+  cloud: "border-accent/20 bg-accent/8 text-accent",
+  plugins: "border-accent/25 bg-accent/10 text-accent-fg",
+  autonomy: "border-warning/30 bg-warning/10 text-warning",
+  websocket: "border-ok/20 bg-ok/8 text-ok",
+};
+
+const LOGS_PANEL_CLASSNAME =
+  "rounded-2xl border border-border/50 bg-card/92 shadow-sm";
+const LOGS_CONTROL_CLASSNAME =
+  "h-10 rounded-xl border-border/50 bg-bg/80 text-sm text-txt";
+const LOGS_LEVEL_CLASSNAMES: Record<string, string> = {
+  error: "text-danger",
+  warn: "text-warning",
+  info: "text-muted-strong",
+  debug: "text-muted",
 };
 
 export function LogsView() {
@@ -77,162 +87,197 @@ export function LogsView() {
     });
   }, [logs, normalizedSearch]);
 
+  const activeFilterCount = [
+    logTagFilter !== "",
+    logLevelFilter !== "",
+    logSourceFilter !== "",
+    normalizedSearch !== "",
+  ].filter(Boolean).length;
+
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col gap-3" data-testid="logs-view">
       {/* Filters row — filters left, refresh right */}
-      <div className="flex flex-wrap gap-1.5 mb-2.5 items-center">
-        <Input
-          type="text"
-          className="text-xs py-1.5 bg-card text-txt min-w-56 h-auto"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder={t("logsview.SearchLogs")}
-          aria-label={t("aria.searchLogs")}
-        />
+      <section className={`${LOGS_PANEL_CLASSNAME} space-y-3 p-3 sm:p-4`}>
+        <div className="space-y-1">
+          <div className="text-sm font-semibold text-txt">Filter logs</div>
+          <p className="max-w-3xl text-xs leading-5 text-muted">
+            Narrow the runtime stream by text, severity, source, or tag so the
+            current incident stands out without losing the surrounding context.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Input
+            type="text"
+            className={`min-w-[15rem] flex-1 ${LOGS_CONTROL_CLASSNAME}`}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t("logsview.SearchLogs")}
+            aria-label={t("aria.searchLogs")}
+          />
 
-        <Select
-          value={logLevelFilter === "" ? "all" : logLevelFilter}
-          onValueChange={(val) => {
-            setState("logLevelFilter", val === "all" ? "" : val);
-            void loadLogs();
-          }}
-        >
-          <SelectTrigger className="h-8 px-3 py-1.5 text-xs bg-card border-border shadow-sm w-36">
-            <SelectValue placeholder={t("logsview.AllLevels")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("logsview.AllLevels")}</SelectItem>
-            <SelectItem value="debug">{t("logsview.Debug")}</SelectItem>
-            <SelectItem value="info">{t("logsview.Info")}</SelectItem>
-            <SelectItem value="warn">{t("logsview.Warn")}</SelectItem>
-            <SelectItem value="error">{t("logsview.Error")}</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <Select
-          value={logSourceFilter === "" ? "all" : logSourceFilter}
-          onValueChange={(val) => {
-            setState("logSourceFilter", val === "all" ? "" : val);
-            void loadLogs();
-          }}
-        >
-          <SelectTrigger className="h-8 px-3 py-1.5 text-xs bg-card border-border shadow-sm w-36">
-            <SelectValue placeholder={t("logsview.AllSources")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("logsview.AllSources")}</SelectItem>
-            {logSources.map((s) => (
-              <SelectItem key={s} value={s}>
-                {s}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {logTags.length > 0 && (
           <Select
-            value={logTagFilter === "" ? "all" : logTagFilter}
+            value={logLevelFilter === "" ? "all" : logLevelFilter}
             onValueChange={(val) => {
-              setState("logTagFilter", val === "all" ? "" : val);
+              setState("logLevelFilter", val === "all" ? "" : val);
               void loadLogs();
             }}
           >
-            <SelectTrigger className="h-8 px-3 py-1.5 text-xs bg-card border-border shadow-sm w-36">
-              <SelectValue placeholder={t("logsview.AllTags")} />
+            <SelectTrigger className={`w-40 ${LOGS_CONTROL_CLASSNAME}`}>
+              <SelectValue placeholder={t("logsview.AllLevels")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t("logsview.AllTags")}</SelectItem>
-              {logTags.map((tag) => (
-                <SelectItem key={tag} value={tag}>
-                  {tag}
+              <SelectItem value="all">{t("logsview.AllLevels")}</SelectItem>
+              <SelectItem value="debug">{t("logsview.Debug")}</SelectItem>
+              <SelectItem value="info">{t("logsview.Info")}</SelectItem>
+              <SelectItem value="warn">{t("logsview.Warn")}</SelectItem>
+              <SelectItem value="error">{t("logsview.Error")}</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={logSourceFilter === "" ? "all" : logSourceFilter}
+            onValueChange={(val) => {
+              setState("logSourceFilter", val === "all" ? "" : val);
+              void loadLogs();
+            }}
+          >
+            <SelectTrigger className={`w-40 ${LOGS_CONTROL_CLASSNAME}`}>
+              <SelectValue placeholder={t("logsview.AllSources")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("logsview.AllSources")}</SelectItem>
+              {logSources.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {s}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-        )}
 
-        {hasActiveFilters && (
+          {logTags.length > 0 && (
+            <Select
+              value={logTagFilter === "" ? "all" : logTagFilter}
+              onValueChange={(val) => {
+                setState("logTagFilter", val === "all" ? "" : val);
+                void loadLogs();
+              }}
+            >
+              <SelectTrigger className={`w-40 ${LOGS_CONTROL_CLASSNAME}`}>
+                <SelectValue placeholder={t("logsview.AllTags")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t("logsview.AllTags")}</SelectItem>
+                {logTags.map((tag) => (
+                  <SelectItem key={tag} value={tag}>
+                    {tag}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
+          {hasActiveFilters && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="min-h-10 rounded-xl px-3 text-xs font-medium"
+              onClick={handleClearFilters}
+            >
+              {t("logsview.ClearFilters")}
+            </Button>
+          )}
+
           <Button
             variant="outline"
             size="sm"
-            className="h-auto min-h-[2rem] whitespace-normal break-words text-left text-xs bg-card text-txt hover:text-txt shadow-sm px-3 py-1.5"
-            onClick={handleClearFilters}
+            className="ml-auto min-h-10 rounded-xl px-3 text-xs font-medium"
+            onClick={() => void loadLogs()}
           >
-            {t("logsview.ClearFilters")}
+            {t("common.refresh")}
           </Button>
-        )}
-
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-auto min-h-[2rem] whitespace-normal break-words text-left text-xs bg-card text-txt hover:text-txt shadow-sm ml-auto px-3 py-1.5"
-          onClick={() => void loadLogs()}
-        >
-          {t("common.refresh")}
-        </Button>
-      </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <div className="rounded-full border border-border/40 bg-bg-hover/60 px-2.5 py-1 text-muted tabular-nums">
+            Showing {filteredLogs.length}{" "}
+            {filteredLogs.length === 1 ? "entry" : "entries"}
+          </div>
+          <div className="rounded-full border border-border/35 bg-bg/80 px-2.5 py-1 text-muted tabular-nums">
+            {activeFilterCount}{" "}
+            {activeFilterCount === 1 ? "active filter" : "active filters"}
+          </div>
+        </div>
+      </section>
 
       {/* Log entries — full remaining height */}
-      <div className="font-mono text-xs flex-1 min-h-0 overflow-y-auto border border-border p-2 bg-card">
+      <div
+        className={`${LOGS_PANEL_CLASSNAME} flex-1 min-h-0 overflow-y-auto p-2 font-mono text-sm`}
+      >
         {filteredLogs.length === 0 ? (
-          <div className="text-center py-8 text-muted">
+          <div
+            role="status"
+            className="m-1 rounded-xl border border-border/35 bg-bg-hover/60 px-6 py-10 text-center text-sm text-muted"
+          >
             {t("logsview.NoLogEntries")}
             {hasActiveFilters ? " matching filters" : " yet"}.
           </div>
         ) : (
-          filteredLogs.map((entry: LogEntry) => (
-            <div
-              key={`${entry.timestamp}-${entry.source}-${entry.level}-${entry.message}`}
-              className="font-mono text-xs px-2 py-1 border-b border-border flex gap-2 items-baseline"
-              data-testid="log-entry"
-            >
-              {/* Timestamp */}
-              <span className="text-muted whitespace-nowrap">
-                {formatTime(entry.timestamp, { fallback: "—" })}
-              </span>
-
-              {/* Level */}
-              <span
-                className={`font-semibold w-[44px] uppercase text-[11px] ${
-                  entry.level === "error"
-                    ? "text-danger"
-                    : entry.level === "warn"
-                      ? "text-warn"
-                      : "text-muted"
-                }`}
-              >
-                {entry.level}
-              </span>
-
-              {/* Source */}
-              <span className="text-muted w-16 overflow-hidden text-ellipsis whitespace-nowrap text-[11px]">
-                [{entry.source}]
-              </span>
-
-              {/* Tag badges */}
-              <span className="inline-flex gap-0.5 shrink-0">
-                {(entry.tags ?? []).map((t: string) => {
-                  const c = TAG_COLORS[t];
-                  return (
-                    <span
-                      key={t}
-                      className="inline-block text-[10px] px-1.5 py-px rounded-lg mr-0.5"
-                      style={{
-                        background: c ? c.bg : "var(--bg-muted)",
-                        color: c ? c.fg : "var(--muted)",
-                        fontFamily: "var(--font-body, sans-serif)",
-                      }}
-                    >
-                      {t}
-                    </span>
-                  );
-                })}
-              </span>
-
-              {/* Message */}
-              <span className="flex-1 break-all">{entry.message}</span>
+          <div className="overflow-hidden rounded-xl border border-border/35 bg-bg-hover/30">
+            <div className="hidden grid-cols-[5.75rem_3.5rem_5rem_14rem_minmax(0,1fr)] gap-3 border-b border-border/40 px-3 py-2 text-[11px] font-medium uppercase tracking-[0.08em] text-muted md:grid">
+              <span>Time</span>
+              <span>Level</span>
+              <span>Source</span>
+              <span>Tags</span>
+              <span>Message</span>
             </div>
-          ))
+            {filteredLogs.map((entry: LogEntry) => (
+              <div
+                key={`${entry.timestamp}-${entry.source}-${entry.level}-${entry.message}`}
+                className="flex items-start gap-3 border-b border-border/40 px-3 py-3 text-[13px] last:border-b-0"
+                data-testid="log-entry"
+              >
+                {/* Timestamp */}
+                <span className="w-[5.75rem] shrink-0 whitespace-nowrap text-[11px] text-muted tabular-nums">
+                  {formatTime(entry.timestamp, { fallback: "—" })}
+                </span>
+
+                {/* Level */}
+                <span
+                  className={`w-14 shrink-0 font-semibold uppercase tracking-[0.08em] text-[11px] ${
+                    LOGS_LEVEL_CLASSNAMES[entry.level] ?? "text-muted"
+                  }`}
+                >
+                  {entry.level}
+                </span>
+
+                {/* Source */}
+                <span className="w-20 shrink-0 truncate text-[11px] text-muted">
+                  [{entry.source}]
+                </span>
+
+                {/* Tag badges */}
+                <span className="inline-flex max-w-[14rem] shrink-0 flex-wrap gap-1">
+                  {(entry.tags ?? []).map((t: string) => {
+                    return (
+                      <span
+                        key={t}
+                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${TAG_TONE_CLASSNAMES[t] ?? "border-border/35 bg-bg-hover text-muted-strong"}`}
+                        style={{
+                          fontFamily: "var(--font-body, sans-serif)",
+                        }}
+                      >
+                        {t}
+                      </span>
+                    );
+                  })}
+                </span>
+
+                {/* Message */}
+                <span className="min-w-0 flex-1 break-words leading-6 text-txt">
+                  {entry.message}
+                </span>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>

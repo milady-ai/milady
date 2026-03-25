@@ -23,16 +23,21 @@ import {
 } from "@miladyai/app-core/components";
 import { useApp } from "@miladyai/app-core/state";
 import { confirmDesktopAction } from "@miladyai/app-core/utils";
+import { Button, Checkbox, Input } from "@miladyai/ui";
+import { RefreshCw } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  Button,
-  Checkbox,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  Input,
-} from "@miladyai/ui";
-import { useCallback, useEffect, useRef, useState } from "react";
+  APP_PANEL_SHELL_CLASSNAME,
+  APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
+  APP_SIDEBAR_CARD_BASE_CLASSNAME,
+  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
+  APP_SIDEBAR_HEADER_CLASSNAME,
+  APP_SIDEBAR_INNER_CLASSNAME,
+  APP_SIDEBAR_KICKER_CLASSNAME,
+  APP_SIDEBAR_META_CLASSNAME,
+  APP_SIDEBAR_PILL_CLASSNAME,
+  APP_SIDEBAR_RAIL_CLASSNAME,
+} from "./sidebar-shell-styles";
 import {
   isKnowledgeImageFile,
   MAX_KNOWLEDGE_IMAGE_PROCESSING_BYTES,
@@ -59,6 +64,21 @@ const SUPPORTED_UPLOAD_EXTENSIONS = new Set([
   ".webp",
   ".gif",
 ]);
+
+const KNOWLEDGE_SHELL_CLASS = APP_PANEL_SHELL_CLASSNAME;
+const KNOWLEDGE_SIDEBAR_CLASS =
+  `lg:w-[22rem] lg:max-w-[360px] ${APP_SIDEBAR_RAIL_CLASSNAME}`;
+const KNOWLEDGE_KICKER_CLASS = APP_SIDEBAR_KICKER_CLASSNAME;
+const KNOWLEDGE_SECTION_LABEL_CLASS =
+  "px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60";
+const KNOWLEDGE_PANEL_CLASS =
+  "rounded-[28px] border border-border/35 bg-bg/20 shadow-sm ring-1 ring-border/10";
+const KNOWLEDGE_SIDEBAR_ITEM_BASE_CLASS = APP_SIDEBAR_CARD_BASE_CLASSNAME;
+const KNOWLEDGE_SIDEBAR_ITEM_ACTIVE_CLASS = APP_SIDEBAR_CARD_ACTIVE_CLASSNAME;
+const KNOWLEDGE_SIDEBAR_ITEM_INACTIVE_CLASS =
+  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME;
+const KNOWLEDGE_META_PILL_CLASS =
+  `${APP_SIDEBAR_PILL_CLASSNAME} text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/75`;
 
 export type KnowledgeUploadFile = File & {
   webkitRelativePath?: string;
@@ -97,6 +117,22 @@ function isSupportedKnowledgeFile(file: Pick<File, "name">): boolean {
     if (lowerName.endsWith(extension)) return true;
   }
   return false;
+}
+
+function getKnowledgeTypeLabel(contentType?: string): string {
+  return contentType?.split("/").pop()?.toUpperCase() || "DOC";
+}
+
+function getKnowledgeSourceLabel(source?: string): string {
+  if (source === "youtube") return "YouTube";
+  if (source === "url") return "From URL";
+  return "Upload";
+}
+
+function getKnowledgeDocumentSummary(doc: KnowledgeDocument): string {
+  const fragmentLabel =
+    doc.fragmentCount === 1 ? "1 fragment" : `${doc.fragmentCount} fragments`;
+  return `${getKnowledgeSourceLabel(doc.source)} • ${fragmentLabel} • ${formatByteSize(doc.fileSize)}`;
 }
 
 /* ── Upload Zone ────────────────────────────────────────────────────── */
@@ -159,7 +195,7 @@ function UploadZone({
 
   return (
     <fieldset
-      className="w-full min-w-[min(22rem,100%)] flex-[1_1_26rem] sm:w-auto sm:flex-none"
+      className="w-full"
       onDragOver={(e) => {
         e.preventDefault();
         setDragOver(true);
@@ -176,11 +212,23 @@ function UploadZone({
         accept=".txt,.md,.mdx,.pdf,.docx,.json,.csv,.xml,.html,.png,.jpg,.jpeg,.webp,.gif"
         onChange={handleFileSelect}
       />
-      <div className="flex flex-wrap items-center justify-end gap-x-2 gap-y-1">
+      <div className="flex items-start justify-between gap-3 px-1">
+        <div className="min-w-0">
+          <div className={KNOWLEDGE_SECTION_LABEL_CLASS}>Add Content</div>
+          <div className="mt-1 text-[11px] leading-relaxed text-muted">
+            Import files or paste a source URL.
+          </div>
+        </div>
+        <div className={KNOWLEDGE_META_PILL_CLASS}>
+          {SUPPORTED_UPLOAD_EXTENSIONS.size} formats
+        </div>
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-2">
         <Button
           variant="default"
           size="sm"
-          className="h-10 px-4 text-[11px] font-semibold"
+          className="h-10 px-4 text-[11px] font-semibold text-txt shadow-sm"
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
         >
@@ -189,29 +237,27 @@ function UploadZone({
         <Button
           variant="outline"
           size="sm"
-          className="h-10 px-4 text-[11px] font-semibold hover:text-txt"
+          className="h-10 px-4 text-[11px] font-semibold text-txt shadow-sm hover:text-txt"
           onClick={() => setShowUrlInput(!showUrlInput)}
           disabled={uploading}
         >
           {t("knowledgeview.AddFromURL")}
         </Button>
-        {/* biome-ignore lint/a11y/noLabelWithoutControl: form control is associated programmatically */}
-        <label className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-md border border-border/30 bg-bg/40 px-3 text-[11px] text-muted/80 transition-colors hover:text-muted">
-          <Checkbox
-            checked={includeImageDescriptions}
-            onCheckedChange={(checked) =>
-              setIncludeImageDescriptions(!!checked)
-            }
-            disabled={uploading}
-          />
-          {t("knowledgeview.IncludeAIImageDes")}
-        </label>
       </div>
+      {/* biome-ignore lint/a11y/noLabelWithoutControl: form control is associated programmatically */}
+      <label className="mt-2 inline-flex min-h-11 w-full cursor-pointer items-center gap-2 rounded-xl border border-border/35 bg-bg/18 px-3 text-[11px] leading-relaxed text-muted-strong transition-colors hover:border-border/55 hover:bg-bg/28 hover:text-txt">
+        <Checkbox
+          checked={includeImageDescriptions}
+          onCheckedChange={(checked) => setIncludeImageDescriptions(!!checked)}
+          disabled={uploading}
+        />
+        <span className="min-w-0">{t("knowledgeview.IncludeAIImageDes")}</span>
+      </label>
       <div
-        className={`mt-2 rounded-xl border px-3 py-2.5 transition-colors sm:min-w-[24rem] ${
+        className={`mt-3 rounded-2xl border px-3 py-3 transition-colors ${
           dragOver
-            ? "border-accent/50 bg-accent/5"
-            : "border border-dashed border-border/30 bg-card/10"
+            ? "border-accent/50 bg-accent/8 shadow-sm"
+            : "border-dashed border-border/35 bg-card/62"
         } ${uploading ? "opacity-60" : ""}`}
       >
         {(dragOver || uploading) && (
@@ -225,8 +271,13 @@ function UploadZone({
         )}
 
         {!dragOver && !uploading && !showUrlInput && (
-          <div className="text-[11px] text-muted/60 text-center py-0.5">
-            Drop files here to upload
+          <div className="space-y-1 py-1 text-center">
+            <div className="text-[11px] font-medium text-muted-strong">
+              Drop files here to upload
+            </div>
+            <div className="text-[10px] text-muted">
+              Docs, PDFs, JSON, CSV, and supported images.
+            </div>
           </div>
         )}
 
@@ -245,7 +296,7 @@ function UploadZone({
                 onChange={(e) => setUrlInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleUrlSubmit()}
                 disabled={uploading}
-                className="h-10 flex-1 bg-bg/60 border-border/50 text-xs shadow-none"
+                className="h-10 flex-1 border-border/55 bg-bg/72 text-xs shadow-none"
               />
               <Button
                 variant="default"
@@ -264,128 +315,113 @@ function UploadZone({
   );
 }
 
-/* ── Search Results ─────────────────────────────────────────────────── */
+/* ── Search Result Item ─────────────────────────────────────────────── */
 
-function SearchResults({
-  results,
-  onClear,
+function SearchResultListItem({
+  result,
+  active,
+  onSelect,
 }: {
-  results: KnowledgeSearchResult[];
-  onClear: () => void;
+  result: KnowledgeSearchResult;
+  active: boolean;
+  onSelect: (documentId: string) => void;
 }) {
   const { t } = useApp();
+
   return (
-    <div className="mb-8 animate-in fade-in slide-in-from-top-4 duration-300">
-      <div className="flex items-center justify-between mb-4 border-b border-border/40 pb-3">
-        <h3 className="text-sm font-bold text-txt tracking-wide">
-          {t("knowledgeview.SearchResults")}
-          <span className="ml-2 text-[11px] text-muted font-mono bg-bg/20 px-2 py-0.5 rounded-full border border-border/20">
-            {results.length}
-          </span>
-        </h3>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onClear}
-          className="h-7 text-[11px] font-bold text-muted hover:text-danger hover:bg-danger/10"
-        >
-          {t("knowledgeview.Clear")}
-        </Button>
-      </div>
-      <div className="space-y-3">
-        {results.map((result) => (
-          <div
-            key={result.id}
-            className="p-4 border border-border/40 bg-card/40 backdrop-blur-md rounded-xl shadow-sm hover:shadow-md transition-all hover:border-accent/40"
-          >
-            <div className="flex items-start justify-between gap-3 mb-3">
-              <span className="text-[13px] font-bold text-txt truncate">
-                {result.documentTitle || "Unknown Document"}
-              </span>
-              <span className="shrink-0 text-[10px] font-bold tracking-wider px-2 py-1 bg-accent/20 text-txt rounded-md border border-accent/20">
-                {(result.similarity * 100).toFixed(0)}%{" "}
-                {t("knowledgeview.Match")}
-              </span>
-            </div>
-            <p className="text-sm text-txt/80 line-clamp-3 leading-relaxed">
-              {result.text}
-            </p>
-          </div>
-        ))}
-        {results.length === 0 && (
-          <div className="text-center py-10 text-muted bg-bg/10 rounded-xl border border-border/20">
-            {t("knowledgeview.NoResultsFound")}
-          </div>
-        )}
-      </div>
-    </div>
+    <Button
+      variant="ghost"
+      size="sm"
+      type="button"
+      onClick={() => onSelect(result.documentId || result.id)}
+      aria-current={active ? "page" : undefined}
+      className={`${KNOWLEDGE_SIDEBAR_ITEM_BASE_CLASS} h-auto w-full ${
+        active
+          ? KNOWLEDGE_SIDEBAR_ITEM_ACTIVE_CLASS
+          : KNOWLEDGE_SIDEBAR_ITEM_INACTIVE_CLASS
+      }`}
+    >
+      <span
+        className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border text-[10px] font-semibold ${
+          active
+            ? "border-accent/30 bg-accent/18 text-txt-strong"
+            : "border-border/50 bg-bg-accent/80 text-muted"
+        }`}
+      >
+        {(result.similarity * 100).toFixed(0)}%
+      </span>
+      <span className="min-w-0 flex-1 text-left">
+        <span className="block truncate text-sm font-semibold text-txt">
+          {result.documentTitle || "Unknown Document"}
+        </span>
+        <span className="mt-1 block line-clamp-2 text-[11px] leading-relaxed text-muted/85">
+          {result.text}
+        </span>
+        <span className="mt-2 block text-[10px] font-semibold uppercase tracking-[0.12em] text-accent-fg/85">
+          {(result.similarity * 100).toFixed(0)}% {t("knowledgeview.Match")}
+        </span>
+      </span>
+    </Button>
   );
 }
 
 /* ── Document Card ──────────────────────────────────────────────────── */
 
-function DocumentCard({
+function DocumentListItem({
   doc,
+  active,
   onSelect,
   onDelete,
   deleting,
 }: {
   doc: KnowledgeDocument;
+  active: boolean;
   onSelect: (id: string) => void;
   onDelete: (id: string) => void;
   deleting: boolean;
 }) {
-  const { t } = useApp();
   return (
-    <div className="flex items-center justify-between p-4 border border-border/40 bg-card/40 backdrop-blur-md rounded-xl shadow-sm hover:shadow-[0_0_15px_rgba(var(--accent),0.1)] hover:border-accent/50 transition-all group">
+    <div
+      className={`${KNOWLEDGE_SIDEBAR_ITEM_BASE_CLASS} ${
+        active
+          ? KNOWLEDGE_SIDEBAR_ITEM_ACTIVE_CLASS
+          : KNOWLEDGE_SIDEBAR_ITEM_INACTIVE_CLASS
+      }`}
+    >
+      <span
+        className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border text-[11px] font-semibold ${
+          active
+            ? "border-accent/30 bg-accent/18 text-txt-strong"
+            : "border-border/50 bg-bg-accent/80 text-muted"
+        }`}
+      >
+        {getKnowledgeTypeLabel(doc.contentType).slice(0, 3)}
+      </span>
       <Button
         variant="ghost"
-        className="flex-1 min-w-0 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm h-auto p-0"
+        className="h-auto min-w-0 flex-1 rounded-sm p-0 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         onClick={() => onSelect(doc.id)}
         aria-label={`Open ${doc.filename}`}
+        aria-current={active ? "page" : undefined}
       >
-        <div className="font-bold text-sm text-txt truncate mb-2 group-hover:text-txt transition-colors">
+        <div className="truncate text-sm font-semibold text-txt transition-colors">
           {doc.filename}
         </div>
-        <div className="flex items-center gap-3 text-xs text-muted/80 font-medium">
-          <span className="uppercase tracking-widest text-[10px]">
-            {doc.contentType?.split("/").pop()}
+        <div className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-muted/85">
+          {getKnowledgeDocumentSummary(doc)}
+        </div>
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted/70">
+          <span className="rounded-full border border-border/45 bg-bg/30 px-2 py-0.5">
+            {getKnowledgeSourceLabel(doc.source)}
           </span>
-          <span className="w-1 h-1 rounded-full bg-border/50" />
-          <span>{formatByteSize(doc.fileSize)}</span>
-          {doc.fragmentCount != null && (
-            <>
-              <span className="w-1 h-1 rounded-full bg-border/50" />
-              <span className="text-xs text-muted">
-                {doc.fragmentCount} fragments
-              </span>
-            </>
-          )}
-          <span className="w-1 h-1 rounded-full bg-border/50" />
           <span>{formatShortDate(doc.createdAt, { fallback: "—" })}</span>
-          {doc.source === "youtube" && (
-            <>
-              <span className="w-1 h-1 rounded-full bg-border/50" />
-              <span className="px-2 py-0.5 bg-danger/10 text-danger border border-danger/20 rounded-md text-[10px] font-bold tracking-wider">
-                {t("knowledgeview.YouTube")}
-              </span>
-            </>
-          )}
-          {doc.source === "url" && (
-            <>
-              <span className="w-1 h-1 rounded-full bg-border/50" />
-              <span className="px-2 py-0.5 bg-accent/10 text-txt border border-accent/20 rounded-md text-[10px] font-bold tracking-wider">
-                {t("knowledgeview.URL")}
-              </span>
-            </>
-          )}
         </div>
       </Button>
-      <div className="flex items-center gap-2 ml-4 opacity-0 group-hover:opacity-100 transition-opacity focus-within:opacity-100">
+      <div className="flex shrink-0 items-center pl-1 opacity-70 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
         <ConfirmDeleteControl
-          triggerClassName="h-8 px-3 text-xs font-bold !bg-transparent text-danger hover:!bg-danger/15 hover:text-danger rounded-lg transition-all border border-transparent hover:border-danger/30"
-          confirmClassName="h-8 px-3 text-xs font-bold bg-danger/20 text-danger hover:bg-danger/30 rounded-lg transition-all"
-          cancelClassName="h-8 px-3 text-xs font-bold text-muted hover:text-txt rounded-lg transition-all"
+          triggerClassName="h-8 rounded-lg border border-transparent px-3 text-xs font-bold !bg-transparent text-danger transition-all hover:!bg-danger/12 hover:border-danger/25 hover:text-danger"
+          confirmClassName="h-8 rounded-lg border border-danger/25 bg-danger/14 px-3 text-xs font-bold text-danger transition-all hover:bg-danger/20"
+          cancelClassName="h-8 rounded-lg border border-border/35 px-3 text-xs font-bold text-muted-strong transition-all hover:border-border-strong hover:text-txt"
           disabled={deleting}
           busyLabel="..."
           onConfirm={() => onDelete(doc.id)}
@@ -395,15 +431,9 @@ function DocumentCard({
   );
 }
 
-/* ── Document Detail Modal ──────────────────────────────────────────── */
+/* ── Document Viewer ────────────────────────────────────────────────── */
 
-function DocumentDetailModal({
-  documentId,
-  onClose,
-}: {
-  documentId: string;
-  onClose: () => void;
-}) {
+function DocumentViewer({ documentId }: { documentId: string | null }) {
   const { t } = useApp();
   const [doc, setDoc] = useState<KnowledgeDocument | null>(null);
   const [fragments, setFragments] = useState<KnowledgeFragment[]>([]);
@@ -411,6 +441,15 @@ function DocumentDetailModal({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const id = documentId ?? "";
+    if (!id) {
+      setDoc(null);
+      setFragments([]);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
     let cancelled = false;
 
     async function load() {
@@ -418,8 +457,8 @@ function DocumentDetailModal({
       setError(null);
 
       const [docRes, fragRes] = await Promise.all([
-        client.getKnowledgeDocument(documentId),
-        client.getKnowledgeFragments(documentId),
+        client.getKnowledgeDocument(id),
+        client.getKnowledgeFragments(id),
       ]);
 
       if (cancelled) return;
@@ -443,85 +482,133 @@ function DocumentDetailModal({
     };
   }, [documentId]);
 
+  const previewText = doc?.content?.text?.trim();
+
   return (
-    <Dialog
-      open
-      onOpenChange={(open: boolean) => {
-        if (!open) onClose();
-      }}
+    <section
+      className={`${KNOWLEDGE_PANEL_CLASS} min-h-[62vh] overflow-hidden`}
     >
-      <DialogContent
-        container={typeof document !== "undefined" ? document.body : undefined}
-        className="w-full max-w-4xl max-h-[85vh] p-0 flex flex-col overflow-hidden rounded-2xl"
-      >
-        <DialogHeader>
-          <DialogTitle>
-            {loading ? "Loading..." : doc?.filename || "Document"}
-          </DialogTitle>
-        </DialogHeader>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {loading && (
-            <div className="text-center py-12 text-muted font-bold tracking-wide animate-pulse">
-              <span className="inline-block w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin mr-3 align-middle" />
-              {t("databaseview.Loading")}
+      <div className="border-b border-border/30 px-5 py-5 sm:px-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0 flex-1">
+            <div className={KNOWLEDGE_KICKER_CLASS}>Viewer</div>
+            <h2 className="mt-1 text-2xl font-semibold text-txt-strong">
+              {loading
+                ? "Loading..."
+                : doc?.filename || "Select a document to inspect"}
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+              {doc
+                ? "Review metadata, preview the source, and scan the indexed fragments without leaving the page."
+                : "Pick a document from the sidebar to review its metadata, preview text, and indexed fragments."}
+            </p>
+          </div>
+          {doc && (
+            <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+              <span className="rounded-full border border-border/45 bg-bg/25 px-3 py-1.5 text-[11px] font-semibold text-muted">
+                {getKnowledgeTypeLabel(doc.contentType)}
+              </span>
+              <span className="rounded-full border border-accent/25 bg-accent/8 px-3 py-1.5 text-[11px] font-semibold text-accent-fg">
+                {getKnowledgeSourceLabel(doc.source)}
+              </span>
             </div>
           )}
+        </div>
+      </div>
 
-          {error && (
-            <div className="text-center py-10 bg-danger/10 border border-danger/20 rounded-xl text-danger font-medium mx-auto max-w-lg">
-              {error}
+      <div className="space-y-4 px-5 py-5 sm:px-6">
+        {loading && (
+          <div className="py-12 text-center font-bold tracking-wide text-muted animate-pulse">
+            <span className="mr-3 inline-block h-4 w-4 animate-spin rounded-full border-2 border-accent border-t-transparent align-middle" />
+            {t("databaseview.Loading")}
+          </div>
+        )}
+
+        {error && (
+          <div className="mx-auto max-w-lg rounded-xl border border-danger/25 bg-danger/10 py-10 text-center font-medium text-danger">
+            {error}
+          </div>
+        )}
+
+        {!loading && !error && !doc && (
+          <div className="rounded-2xl border border-dashed border-border/35 bg-card/72 px-6 py-16 text-center shadow-inner">
+            <div className="text-base font-semibold text-txt">
+              No document selected
             </div>
-          )}
+            <div className="mt-2 text-sm text-muted">
+              Upload a file or choose an item from the sidebar to start viewing
+              fragments and metadata.
+            </div>
+          </div>
+        )}
 
-          {!loading && !error && doc && (
-            <>
-              {/* Document info */}
-              <div className="mb-8 p-5 bg-bg/30 border border-border/20 shadow-inner rounded-xl">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+        {!loading && !error && doc && (
+          <>
+            <div className="grid gap-3 lg:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.9fr)]">
+              <div className="rounded-2xl border border-border/35 bg-card/82 p-5 shadow-sm">
+                <div className="mb-3 flex items-center justify-between gap-3 border-b border-border/25 pb-3">
+                  <div className="text-sm font-semibold text-txt">Preview</div>
+                  <span className="rounded-full border border-border/35 bg-bg/25 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/70">
+                    {formatByteSize(doc.fileSize)}
+                  </span>
+                </div>
+                {previewText ? (
+                  <pre className="max-h-[18rem] overflow-auto whitespace-pre-wrap break-words text-[13px] leading-relaxed text-txt/88">
+                    {previewText.slice(0, 3000)}
+                  </pre>
+                ) : (
+                  <div className="rounded-xl border border-dashed border-border/35 bg-bg/16 px-4 py-10 text-center text-sm text-muted">
+                    Full text preview is not available for this document type,
+                    but indexed fragments are shown below.
+                  </div>
+                )}
+              </div>
+
+              <div className="rounded-2xl border border-border/35 bg-card/82 p-5 shadow-sm">
+                <div className="text-sm font-semibold text-txt">Details</div>
+                <div className="mt-4 grid gap-3 text-xs">
                   <div className="flex flex-col gap-1.5">
-                    <span className="text-[10px] font-bold tracking-widest uppercase text-muted/70">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted/70">
                       {t("knowledgeview.Type")}
-                    </span>{" "}
-                    <span className="text-txt font-medium bg-bg/30 px-2 py-1 rounded inline-block w-fit">
+                    </span>
+                    <span className="inline-block w-fit rounded-md border border-border/25 bg-bg-hover px-2 py-1 font-medium text-txt">
                       {doc.contentType}
                     </span>
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <span className="text-[10px] font-bold tracking-widest uppercase text-muted/70">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted/70">
                       {t("knowledgeview.Source")}
-                    </span>{" "}
-                    <span className="text-txt font-medium bg-bg/30 px-2 py-1 rounded inline-block w-fit">
+                    </span>
+                    <span className="inline-block w-fit rounded-md border border-border/25 bg-bg-hover px-2 py-1 font-medium text-txt">
                       {doc.source}
                     </span>
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <span className="text-[10px] font-bold tracking-widest uppercase text-muted/70">
-                      Size
-                    </span>{" "}
-                    <span className="text-txt font-medium bg-bg/30 px-2 py-1 rounded inline-block w-fit">
-                      {formatByteSize(doc.fileSize)}
-                    </span>
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-[10px] font-bold tracking-widest uppercase text-muted/70">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted/70">
                       Uploaded
-                    </span>{" "}
-                    <span className="text-txt font-medium bg-bg/30 px-2 py-1 rounded inline-block w-fit">
+                    </span>
+                    <span className="inline-block w-fit rounded-md border border-border/25 bg-bg-hover px-2 py-1 font-medium text-txt">
                       {formatShortDate(doc.createdAt, { fallback: "—" })}
                     </span>
                   </div>
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted/70">
+                      Fragments
+                    </span>
+                    <span className="inline-block w-fit rounded-md border border-border/25 bg-bg-hover px-2 py-1 font-medium text-txt">
+                      {fragments.length}
+                    </span>
+                  </div>
                   {doc.url && (
-                    <div className="col-span-full mt-2 pt-4 border-t border-border/20 flex flex-col gap-1.5">
-                      <span className="text-[10px] font-bold tracking-widest uppercase text-muted/70">
+                    <div className="mt-1 flex flex-col gap-1.5 border-t border-border/20 pt-4">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-muted/70">
                         {t("appsview.URL")}
-                      </span>{" "}
+                      </span>
                       <a
                         href={doc.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-txt hover:text-txt/80 font-medium underline decoration-accent/30 underline-offset-4 transition-colors break-all"
+                        className="break-all text-sm font-medium text-txt underline decoration-accent/30 underline-offset-4 transition-colors hover:text-txt/80"
                       >
                         {doc.url}
                       </a>
@@ -529,12 +616,13 @@ function DocumentDetailModal({
                   )}
                 </div>
               </div>
+            </div>
 
-              {/* Fragments */}
-              <div className="flex items-center justify-between mb-4 border-b border-border/30 pb-2">
+            <div className="rounded-2xl border border-border/35 bg-card/82 p-5 shadow-sm">
+              <div className="mb-4 flex items-center justify-between border-b border-border/30 pb-3">
                 <h3 className="text-sm font-bold tracking-wide text-txt">
                   {t("knowledgeview.Fragments1")}
-                  <span className="ml-2 px-2 py-0.5 rounded-full bg-white/10 text-xs text-muted font-mono">
+                  <span className="ml-2 rounded-full border border-border/30 bg-bg-hover px-2 py-0.5 font-mono text-xs text-muted-strong">
                     {fragments.length}
                   </span>
                 </h3>
@@ -543,34 +631,34 @@ function DocumentDetailModal({
                 {fragments.map((fragment, index) => (
                   <div
                     key={fragment.id}
-                    className="p-4 bg-card/60 border border-border/20 shadow-sm rounded-xl hover:border-accent/30 transition-colors"
+                    className="rounded-xl border border-border/30 bg-card/86 p-4 shadow-sm transition-colors hover:border-accent/30"
                   >
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-[11px] font-bold tracking-widest uppercase text-muted">
+                    <div className="mb-3 flex items-center justify-between">
+                      <span className="text-[11px] font-bold uppercase tracking-widest text-muted">
                         {t("knowledgeview.Fragment")} {index + 1}
                       </span>
                       {fragment.position !== undefined && (
-                        <span className="text-[10px] text-muted/80 font-mono bg-bg/30 px-2 py-0.5 rounded-md border border-border/20">
+                        <span className="rounded-md border border-border/25 bg-bg-hover px-2 py-0.5 font-mono text-[10px] text-muted-strong">
                           {t("knowledgeview.Position")} {fragment.position}
                         </span>
                       )}
                     </div>
-                    <p className="text-[13px] text-txt/90 whitespace-pre-wrap leading-relaxed">
+                    <p className="whitespace-pre-wrap text-[13px] leading-relaxed text-txt/90">
                       {fragment.text}
                     </p>
                   </div>
                 ))}
                 {fragments.length === 0 && (
-                  <div className="text-center py-12 text-muted bg-bg/20 rounded-xl border border-dashed border-border/30">
+                  <div className="rounded-xl border border-dashed border-border/35 bg-card/72 py-12 text-center text-muted">
                     {t("knowledgeview.NoFragmentsFound")}
                   </div>
                 )}
               </div>
-            </>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+            </div>
+          </>
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -1024,141 +1112,275 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
     [handleSearch, searchQuery],
   );
 
+  const totalFragments = useMemo(
+    () => documents.reduce((sum, d) => sum + (d.fragmentCount || 0), 0),
+    [documents],
+  );
+  const selectedDoc = documents.find((doc) => doc.id === selectedDocId) || null;
+  const isShowingSearchResults = searchResults !== null;
+  const visibleSearchResults = searchResults ?? [];
+
+  useEffect(() => {
+    if (documents.length === 0) {
+      if (selectedDocId !== null) {
+        setSelectedDocId(null);
+      }
+      return;
+    }
+
+    const hasSelectedDocument = documents.some(
+      (doc) => doc.id === selectedDocId,
+    );
+    if (!hasSelectedDocument) {
+      setSelectedDocId(documents[0]?.id ?? null);
+    }
+  }, [documents, selectedDocId]);
+
   return (
-    <div className={inModal ? "h-full w-full overflow-y-auto pb-8" : "w-full"}>
-      {isServiceLoading && (
-        <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded border border-[var(--border)] bg-[var(--card)] text-sm text-[var(--muted)]">
-          <span className="w-4 h-4 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
-
-          {t("knowledgeview.KnowledgeServiceIs")}
-        </div>
-      )}
-
-      {loadError && !isServiceLoading && (
-        <div className="flex items-center justify-between mb-4 px-3 py-2 rounded border border-[var(--danger)] bg-[var(--danger)]/10 text-sm text-[var(--danger)]">
-          <span>{loadError}</span>
-          <Button
-            variant="outline"
-            size="sm"
-            className="ml-3 px-2 py-1 text-xs border-[var(--danger)] text-[var(--danger)] hover:bg-[var(--danger)]/20"
-            onClick={() => loadData()}
-          >
-            {t("common.retry")}
-          </Button>
-        </div>
-      )}
-
-      <div className="flex items-center gap-4 mb-4 px-4 py-2.5 bg-card/60 backdrop-blur-xl border border-border/40 rounded-2xl">
-        <span className="w-2 h-2 rounded-full bg-ok" />
-        <span className="text-xs font-medium text-txt">
-          {documents.length} documents
-        </span>
-        <span className="text-xs text-muted">•</span>
-        <span className="text-xs text-muted">
-          {documents.reduce((sum, d) => sum + (d.fragmentCount || 0), 0)}{" "}
-          fragments
-        </span>
-      </div>
-
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-2">
-        <form
-          className="w-full max-w-[500px] flex-[1_1_500px]"
-          onSubmit={handleSearchSubmit}
-        >
-          <div className="flex items-stretch gap-2">
-            <Input
-              type="text"
-              placeholder={t("knowledge.ui.searchPlaceholder")}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              disabled={searching}
-              className="h-10 bg-bg border-border text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-accent"
-            />
-            <Button
-              type="submit"
-              variant="default"
-              size="sm"
-              className="h-10 px-4 shadow-sm"
-              disabled={!searchQuery.trim() || searching}
-            >
-              {searching
-                ? t("knowledge.ui.searching")
-                : t("knowledge.ui.search")}
-            </Button>
-          </div>
-        </form>
-
-        <UploadZone
-          onFilesUpload={handleFilesUpload}
-          onUrlUpload={handleUrlUpload}
-          uploading={uploading}
-          uploadStatus={uploadStatus}
-        />
-      </div>
-
-      {searchResults !== null && (
-        <SearchResults
-          results={searchResults}
-          onClear={() => setSearchResults(null)}
-        />
-      )}
-
-      <div className="flex flex-col">
-        <div className="flex items-center justify-between mb-4 border-b border-border/40 pb-3">
-          <h2 className="text-sm font-bold tracking-wide text-txt">
-            {t("knowledgeview.Documents")}
-            <span className="ml-2 px-2 py-0.5 rounded-full bg-bg/20 text-xs text-muted font-mono">
-              {documents.length}
-            </span>
-          </h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 text-[11px] font-bold border border-transparent shadow-inner hover:bg-accent/10 hover:border-accent/30 hover:text-txt transition-all"
-            onClick={() => void loadData()}
-            disabled={loading}
-          >
-            {loading ? "Loading..." : "Refresh"}
-          </Button>
-        </div>
-
-        {loading && documents.length === 0 && (
-          <div className="text-center py-12 text-muted font-bold tracking-wide animate-pulse">
-            {t("knowledgeview.LoadingDocuments")}
-          </div>
-        )}
-
-        {!loading && documents.length === 0 && (
-          <div className="text-center py-16 border-2 border-dashed border-border/40 rounded-2xl bg-card/20 backdrop-blur-sm shadow-inner">
-            <div className="text-muted/80 font-bold mb-2 tracking-wide text-[15px]">
-              {t("knowledgeview.NoDocumentsYet")}
+    <div
+      className={
+        inModal
+          ? "flex h-full w-full min-h-0 bg-bg"
+          : "flex h-full w-full min-h-0 bg-bg p-0 lg:p-1"
+      }
+    >
+      <div className={KNOWLEDGE_SHELL_CLASS}>
+        <aside className={KNOWLEDGE_SIDEBAR_CLASS}>
+          <div className={APP_SIDEBAR_INNER_CLASSNAME}>
+            <div className={APP_SIDEBAR_HEADER_CLASSNAME}>
+              <div className={KNOWLEDGE_KICKER_CLASS}>Knowledge</div>
+              <div className={APP_SIDEBAR_META_CLASSNAME}>
+                {documents.length > 0
+                  ? `${documents.length} uploaded document${documents.length === 1 ? "" : "s"} indexed`
+                  : "Upload docs and explore indexed fragments"}
+              </div>
             </div>
-            <div className="text-xs text-muted/60 font-medium">
-              {t("knowledgeview.UploadFilesOrImpo")}
+
+            <div className="mt-4 flex flex-wrap gap-2 px-1">
+              <span className={KNOWLEDGE_META_PILL_CLASS}>
+                {documents.length} {documents.length === 1 ? "doc" : "docs"}
+              </span>
+              <span className={KNOWLEDGE_META_PILL_CLASS}>
+                {totalFragments} fragments
+              </span>
+              {selectedDoc && (
+                <span className="rounded-full border border-accent/25 bg-accent/8 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-accent-fg">
+                  {getKnowledgeTypeLabel(selectedDoc.contentType)}
+                </span>
+              )}
+            </div>
+
+            <div className="mt-4 border-b border-border/25 pb-4">
+              <UploadZone
+                onFilesUpload={handleFilesUpload}
+                onUrlUpload={handleUrlUpload}
+                uploading={uploading}
+                uploadStatus={uploadStatus}
+              />
+            </div>
+
+            <div className="mt-4 border-b border-border/25 pb-4">
+              <div className="px-1">
+                <div className={KNOWLEDGE_SECTION_LABEL_CLASS}>Search</div>
+                <div className="mt-1 text-[11px] leading-relaxed text-muted">
+                  Jump to a known document by searching fragment text.
+                </div>
+              </div>
+              <form
+                className="mt-3 w-full max-w-[500px] flex-[1_1_500px]"
+                onSubmit={handleSearchSubmit}
+              >
+                <div className="flex items-stretch gap-2">
+                  <Input
+                    type="text"
+                    placeholder={t("knowledge.ui.searchPlaceholder")}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    disabled={searching}
+                    className="h-10 border-border/55 bg-bg/82 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-accent"
+                  />
+                  <Button
+                    type="submit"
+                    variant="default"
+                    size="sm"
+                    className="h-10 px-4 text-txt shadow-sm"
+                    disabled={!searchQuery.trim() || searching}
+                  >
+                    {searching
+                      ? t("knowledge.ui.searching")
+                      : t("knowledge.ui.search")}
+                  </Button>
+                </div>
+              </form>
+              <div className="mt-3 flex flex-wrap items-center gap-2 px-1">
+                <span
+                  className={
+                    isShowingSearchResults
+                      ? "rounded-full border border-accent/25 bg-accent/8 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-accent-fg"
+                      : KNOWLEDGE_META_PILL_CLASS
+                  }
+                >
+                  {isShowingSearchResults
+                    ? `${visibleSearchResults.length} result${visibleSearchResults.length === 1 ? "" : "s"}`
+                    : "Search idle"}
+                </span>
+                {isShowingSearchResults && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 rounded-lg border border-border/35 px-3 text-[11px] font-semibold text-muted hover:border-border/60 hover:bg-bg/35 hover:text-txt"
+                    onClick={() => setSearchResults(null)}
+                  >
+                    Clear
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 flex min-h-0 flex-1 flex-col">
+              <div className="flex items-center justify-between gap-2 px-1">
+                <div>
+                  <div className={KNOWLEDGE_SECTION_LABEL_CLASS}>
+                    {isShowingSearchResults
+                      ? t("knowledgeview.SearchResults")
+                      : t("knowledgeview.Documents")}
+                  </div>
+                  <div className="mt-1 text-[11px] text-muted">
+                    {isShowingSearchResults
+                      ? "Search hits replace the document list until you clear them."
+                      : "Uploaded docs live here for quick review."}
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-9 rounded-xl px-3 text-[11px] font-semibold shadow-sm"
+                  onClick={() => void loadData()}
+                  disabled={loading}
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  {loading ? "Loading..." : "Refresh"}
+                </Button>
+              </div>
+
+              <div className="mt-3 min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-3">
+                {loading &&
+                  !isShowingSearchResults &&
+                  documents.length === 0 && (
+                    <div className="rounded-2xl border border-border/35 bg-card/72 px-4 py-10 text-center text-sm font-medium text-muted">
+                      {t("knowledgeview.LoadingDocuments")}
+                    </div>
+                  )}
+
+                {!loading &&
+                  !isShowingSearchResults &&
+                  documents.length === 0 && (
+                    <div className="rounded-2xl border border-dashed border-border/35 bg-card/72 px-4 py-10 text-center shadow-inner">
+                      <div className="text-sm font-semibold text-txt">
+                        {t("knowledgeview.NoDocumentsYet")}
+                      </div>
+                      <div className="mt-2 text-[11px] leading-relaxed text-muted">
+                        {t("knowledgeview.UploadFilesOrImpo")}
+                      </div>
+                    </div>
+                  )}
+
+                {isShowingSearchResults &&
+                  visibleSearchResults.length === 0 && (
+                    <div className="rounded-2xl border border-dashed border-border/35 bg-card/72 px-4 py-10 text-center shadow-inner">
+                      <div className="text-sm font-semibold text-txt">
+                        {t("knowledgeview.NoResultsFound")}
+                      </div>
+                      <div className="mt-2 text-[11px] leading-relaxed text-muted">
+                        Try a filename, topic, or phrase from the document body.
+                      </div>
+                    </div>
+                  )}
+
+                {isShowingSearchResults
+                  ? visibleSearchResults.map((result) => (
+                      <SearchResultListItem
+                        key={result.id}
+                        result={result}
+                        active={
+                          selectedDocId === (result.documentId || result.id)
+                        }
+                        onSelect={setSelectedDocId}
+                      />
+                    ))
+                  : documents.map((doc) => (
+                      <DocumentListItem
+                        key={doc.id}
+                        doc={doc}
+                        active={selectedDocId === doc.id}
+                        onSelect={setSelectedDocId}
+                        onDelete={handleDelete}
+                        deleting={deleting === doc.id}
+                      />
+                    ))}
+              </div>
             </div>
           </div>
-        )}
+        </aside>
 
-        <div className="space-y-2">
-          {documents.map((doc) => (
-            <DocumentCard
-              key={doc.id}
-              doc={doc}
-              onSelect={setSelectedDocId}
-              onDelete={handleDelete}
-              deleting={deleting === doc.id}
-            />
-          ))}
+        <div className="min-w-0 flex-1 overflow-y-auto bg-bg/10">
+          <div className="mx-auto max-w-[78rem] px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
+            {isServiceLoading && (
+              <div className="mb-4 flex items-center gap-2 rounded-2xl border border-border/40 bg-card/86 px-4 py-3 text-sm text-muted-strong shadow-sm">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--accent)] border-t-transparent" />
+                {t("knowledgeview.KnowledgeServiceIs")}
+              </div>
+            )}
+
+            {loadError && !isServiceLoading && (
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-danger/25 bg-danger/10 px-4 py-3 text-sm text-danger shadow-sm">
+                <span>{loadError}</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-danger/30 px-3 text-xs text-danger hover:bg-danger/16"
+                  onClick={() => loadData()}
+                >
+                  {t("common.retry")}
+                </Button>
+              </div>
+            )}
+
+            <section className={`${KNOWLEDGE_PANEL_CLASS} px-5 py-5 sm:px-6`}>
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div className="min-w-0 flex-1">
+                  <div className={KNOWLEDGE_KICKER_CLASS}>Knowledge</div>
+                  <h1 className="mt-1 text-2xl font-semibold text-txt-strong">
+                    {selectedDoc?.filename || "Knowledge workspace"}
+                  </h1>
+                  <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+                    {selectedDoc
+                      ? `${getKnowledgeDocumentSummary(selectedDoc)}. Open search results, inspect fragments, and keep uploads close at hand in the sidebar.`
+                      : "Keep uploads, search, and document review in one workspace so the knowledge base is easier to manage and inspect."}
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+                  <span className="rounded-full border border-border/45 bg-bg/25 px-3 py-1.5 text-[11px] font-semibold text-muted">
+                    {documents.length} docs
+                  </span>
+                  <span className="rounded-full border border-border/45 bg-bg/25 px-3 py-1.5 text-[11px] font-semibold text-muted">
+                    {totalFragments} fragments
+                  </span>
+                  {searchResults !== null && (
+                    <span className="rounded-full border border-accent/25 bg-accent/8 px-3 py-1.5 text-[11px] font-semibold text-accent-fg">
+                      {searchResults.length} results
+                    </span>
+                  )}
+                </div>
+              </div>
+            </section>
+
+            <div className="mt-4">
+              <DocumentViewer documentId={selectedDocId} />
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* Document Detail Modal */}
-      {selectedDocId && (
-        <DocumentDetailModal
-          documentId={selectedDocId}
-          onClose={() => setSelectedDocId(null)}
-        />
-      )}
     </div>
   );
 }

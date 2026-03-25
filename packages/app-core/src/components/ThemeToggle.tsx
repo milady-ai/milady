@@ -10,6 +10,7 @@ import { Button } from "@miladyai/ui";
 import { Moon, Sun } from "lucide-react";
 import { useCallback } from "react";
 import type { UiTheme } from "../state/persistence";
+import { SHELL_ICON_BUTTON_CLASSNAME } from "./companion/shell-control-styles";
 
 /** Minimal translator function type. */
 export type ThemeTranslatorFn = (key: string) => string;
@@ -44,7 +45,7 @@ export function ThemeToggle({
       aria-label={_t ? _t("aria.toggleTheme") : "Toggle theme"}
       onClick={handleToggle}
       onPointerDown={(event) => event.stopPropagation()}
-      className={`w-11 h-11 min-w-[44px] min-h-[44px] border-border/50 bg-bg/50 backdrop-blur-md text-sm leading-none hover:border-accent hover:text-txt font-medium hover:-translate-y-0.5 transition-all duration-300 hover:shadow-[0_0_15px_rgba(var(--accent),0.5)] active:scale-95 rounded-xl text-txt shadow-sm ${className ?? ""}`}
+      className={`${SHELL_ICON_BUTTON_CLASSNAME} text-sm leading-none ${className ?? ""}`}
       data-testid="theme-toggle"
       data-no-camera-drag="true"
     >

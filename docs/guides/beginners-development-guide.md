@@ -65,17 +65,16 @@ bun run milady --version
 
 ## 4) Repo map (mental model)
 
-Core areas:
+Core areas (all under `packages/app-core/`):
 
-- `src/runtime/` — runtime startup, plugin orchestration, lifecycle
-- `src/cli/` — CLI parsing, command registration, process behavior
-- `src/config/` — config types, loading, resolution
-- `src/actions/` — action handlers
-- `src/providers/` — context/data providers
-- `src/hooks/` — lifecycle extension hooks
-- `src/types/` — shared type contracts
+- `packages/app-core/src/runtime/` — runtime startup, plugin orchestration, lifecycle
+- `packages/app-core/src/cli/` — CLI parsing, command registration, process behavior
+- `packages/app-core/src/config/` — config types, loading, resolution
+- `packages/app-core/src/api/` — dashboard API server and routes
+- `packages/app-core/src/services/` — business logic (plugin installer, updater, etc.)
+- `packages/app-core/src/connectors/` — connector integration code
+- `packages/agent/` — upstream elizaOS agent (core plugins, auto-enable maps)
 - `apps/app/` — desktop/mobile UI app
-- `apps/chrome-extension/` — browser extension integration
 - `scripts/` — build/dev/release tooling
 - `test/` + colocated tests — verification
 
@@ -85,15 +84,15 @@ Core areas:
 
 Important files to understand first:
 
-1. `src/entry.ts` (CLI process bootstrap)
-2. `src/cli/run-main.ts` (dotenv + Commander + error handling)
-3. `src/cli/program/*` (command registration)
-4. `src/runtime/eliza.ts` (runtime boot sequence + plugin resolution)
-5. `src/index.ts` (package exports)
+1. `packages/app-core/src/entry.ts` (CLI process bootstrap)
+2. `packages/app-core/src/cli/run-main.ts` (dotenv + Commander + error handling)
+3. `packages/app-core/src/cli/program/*` (command registration)
+4. `packages/app-core/src/runtime/eliza.ts` (runtime boot sequence + plugin resolution)
+5. `packages/app-core/src/index.ts` (package exports)
 
 ### Suggested reading order (first 60–90 min)
 
-1. Read `src/entry.ts` top-to-bottom
+1. Read `packages/app-core/src/entry.ts` top-to-bottom
 2. Trace into `run-main.ts`
 3. Open one command registration file (`register.start.ts`, etc.)
 4. Read runtime lifecycle doc and compare to `eliza.ts`
@@ -216,7 +215,7 @@ If you cannot run both paths fully, explain what you validated and why.
 
 - **Huge PRs** → split into smaller, reviewable units
 - **No tests for logic changes** → add regression coverage
-- **Overusing new dependencies** → avoid unless required by `src/`
+- **Overusing new dependencies** → avoid unless required by source code
 - **Ignoring platform/runtime assumptions** → test Node/Bun paths
 - **Editing generated artifacts** → edit source, regenerate output
 

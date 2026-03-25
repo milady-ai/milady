@@ -200,9 +200,12 @@ export const DESKTOP_WORKSPACE_CLICK_AUDIT: readonly DesktopClickAuditItem[] = [
   ),
 ] as const;
 
+const DESKTOP_ACTION_BUTTON_CLASSNAME =
+  "min-h-9 justify-start whitespace-normal text-left sm:min-h-10";
+
 function renderPathList(paths: string[]) {
   if (paths.length === 0) {
-    return <span className="text-muted">No path selected yet.</span>;
+    return <span className="text-muted-strong">No path selected yet.</span>;
   }
 
   return (
@@ -323,11 +326,12 @@ export function DesktopWorkspaceSection() {
   }
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-center gap-2">
+    <div className="space-y-6">
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
         <Button
           variant="outline"
           size="sm"
+          className={DESKTOP_ACTION_BUTTON_CLASSNAME}
           onClick={() => void refreshSnapshot()}
           disabled={loading}
         >
@@ -339,6 +343,7 @@ export function DesktopWorkspaceSection() {
         <Button
           variant="default"
           size="sm"
+          className={DESKTOP_ACTION_BUTTON_CLASSNAME}
           onClick={() =>
             void runAction(
               "desktop-open-settings-window",
@@ -361,12 +366,13 @@ export function DesktopWorkspaceSection() {
               ? "border-danger/40 bg-danger/10 text-danger"
               : "border-ok/40 bg-ok/10 text-ok"
           }`}
+          role={actionError ? "alert" : "status"}
         >
           {actionError ?? actionMessage}
         </div>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 xl:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">Diagnostics</CardTitle>
@@ -376,7 +382,7 @@ export function DesktopWorkspaceSection() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <pre className="overflow-x-auto rounded-xl border border-border bg-bg px-3 py-3 text-[11px] leading-5 text-txt">
+            <pre className="overflow-x-auto break-all rounded-xl border border-border bg-bg px-3 py-3 text-[11px] leading-5 text-txt">
               {diagnosticsText}
             </pre>
           </CardContent>
@@ -397,7 +403,7 @@ export function DesktopWorkspaceSection() {
                   key={surface.id}
                   variant="outline"
                   size="sm"
-                  className="justify-start whitespace-normal text-left"
+                  className={DESKTOP_ACTION_BUTTON_CLASSNAME}
                   onClick={() =>
                     void runAction(
                       `desktop-surface-${surface.id}`,
@@ -416,7 +422,7 @@ export function DesktopWorkspaceSection() {
         </Card>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 xl:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">Window Controls</CardTitle>
@@ -425,10 +431,11 @@ export function DesktopWorkspaceSection() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid gap-2 sm:grid-cols-2">
               <Button
                 variant="outline"
                 size="sm"
+                className={DESKTOP_ACTION_BUTTON_CLASSNAME}
                 onClick={() =>
                   void runAction("desktop-show-window", async () => {
                     await invokeDesktopBridgeRequest<void>({
@@ -444,6 +451,7 @@ export function DesktopWorkspaceSection() {
               <Button
                 variant="outline"
                 size="sm"
+                className={DESKTOP_ACTION_BUTTON_CLASSNAME}
                 onClick={() =>
                   void runAction("desktop-hide-window", async () => {
                     await invokeDesktopBridgeRequest<void>({
@@ -459,6 +467,7 @@ export function DesktopWorkspaceSection() {
               <Button
                 variant="outline"
                 size="sm"
+                className={DESKTOP_ACTION_BUTTON_CLASSNAME}
                 onClick={() =>
                   void runAction("desktop-focus-window", async () => {
                     await invokeDesktopBridgeRequest<void>({
@@ -474,6 +483,7 @@ export function DesktopWorkspaceSection() {
               <Button
                 variant="outline"
                 size="sm"
+                className={DESKTOP_ACTION_BUTTON_CLASSNAME}
                 onClick={() =>
                   void runAction("desktop-minimize-window", async () => {
                     const method = snapshot?.window.minimized
@@ -497,6 +507,7 @@ export function DesktopWorkspaceSection() {
               <Button
                 variant="outline"
                 size="sm"
+                className={`sm:col-span-2 ${DESKTOP_ACTION_BUTTON_CLASSNAME}`}
                 onClick={() =>
                   void runAction("desktop-maximize-toggle", async () => {
                     const method = snapshot?.window.maximized
@@ -530,10 +541,11 @@ export function DesktopWorkspaceSection() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid gap-2 sm:grid-cols-2">
               <Button
                 variant="outline"
                 size="sm"
+                className={DESKTOP_ACTION_BUTTON_CLASSNAME}
                 onClick={() =>
                   void runAction(
                     "desktop-notify",
@@ -559,6 +571,7 @@ export function DesktopWorkspaceSection() {
               <Button
                 variant="outline"
                 size="sm"
+                className={DESKTOP_ACTION_BUTTON_CLASSNAME}
                 onClick={() =>
                   void runAction(
                     "desktop-restart-agent",
@@ -573,6 +586,7 @@ export function DesktopWorkspaceSection() {
               <Button
                 variant="outline"
                 size="sm"
+                className={DESKTOP_ACTION_BUTTON_CLASSNAME}
                 onClick={() =>
                   void runAction(
                     "desktop-relaunch-app",
@@ -588,6 +602,7 @@ export function DesktopWorkspaceSection() {
               <Button
                 variant="outline"
                 size="sm"
+                className={DESKTOP_ACTION_BUTTON_CLASSNAME}
                 onClick={() =>
                   void runAction("desktop-toggle-auto-launch", async () => {
                     await invokeDesktopBridgeRequest<void>({
@@ -610,6 +625,7 @@ export function DesktopWorkspaceSection() {
               <Button
                 variant="outline"
                 size="sm"
+                className={`sm:col-span-2 ${DESKTOP_ACTION_BUTTON_CLASSNAME}`}
                 onClick={() =>
                   void runAction("desktop-toggle-hidden-launch", async () => {
                     await invokeDesktopBridgeRequest<void>({
@@ -635,7 +651,7 @@ export function DesktopWorkspaceSection() {
         </Card>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 xl:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">Native File Dialogs</CardTitle>
@@ -645,10 +661,11 @@ export function DesktopWorkspaceSection() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex flex-wrap gap-2">
+            <div className="grid gap-2 sm:grid-cols-2">
               <Button
                 variant="outline"
                 size="sm"
+                className={DESKTOP_ACTION_BUTTON_CLASSNAME}
                 onClick={() =>
                   void runAction(
                     "desktop-open-file-dialog",
@@ -679,6 +696,7 @@ export function DesktopWorkspaceSection() {
               <Button
                 variant="outline"
                 size="sm"
+                className={DESKTOP_ACTION_BUTTON_CLASSNAME}
                 onClick={() =>
                   void runAction(
                     "desktop-open-folder-dialog",
@@ -708,6 +726,7 @@ export function DesktopWorkspaceSection() {
               <Button
                 variant="outline"
                 size="sm"
+                className={`sm:col-span-2 ${DESKTOP_ACTION_BUTTON_CLASSNAME}`}
                 onClick={() =>
                   void runAction(
                     "desktop-save-dialog",
@@ -767,10 +786,11 @@ export function DesktopWorkspaceSection() {
               className="min-h-24 w-full rounded-xl border border-border bg-bg px-3 py-2 text-sm text-txt outline-none"
               placeholder="Clipboard draft"
             />
-            <div className="flex flex-wrap gap-2">
+            <div className="grid gap-2 sm:grid-cols-2">
               <Button
                 variant="outline"
                 size="sm"
+                className={DESKTOP_ACTION_BUTTON_CLASSNAME}
                 onClick={() =>
                   void runAction("desktop-clipboard-read", async () => {
                     const result = await invokeDesktopBridgeRequest<{
@@ -789,6 +809,7 @@ export function DesktopWorkspaceSection() {
               <Button
                 variant="outline"
                 size="sm"
+                className={DESKTOP_ACTION_BUTTON_CLASSNAME}
                 onClick={() =>
                   void runAction("desktop-clipboard-copy", async () => {
                     await copyTextToClipboard(clipboardDraft);
@@ -801,6 +822,7 @@ export function DesktopWorkspaceSection() {
               <Button
                 variant="outline"
                 size="sm"
+                className={DESKTOP_ACTION_BUTTON_CLASSNAME}
                 onClick={() =>
                   void runAction("desktop-clipboard-clear", async () => {
                     await invokeDesktopBridgeRequest<void>({
@@ -819,6 +841,7 @@ export function DesktopWorkspaceSection() {
                   <Button
                     variant="outline"
                     size="sm"
+                    className={DESKTOP_ACTION_BUTTON_CLASSNAME}
                     onClick={() =>
                       void runAction(
                         "desktop-open-path",
@@ -840,6 +863,7 @@ export function DesktopWorkspaceSection() {
                   <Button
                     variant="outline"
                     size="sm"
+                    className={DESKTOP_ACTION_BUTTON_CLASSNAME}
                     onClick={() =>
                       void runAction(
                         "desktop-reveal-path",

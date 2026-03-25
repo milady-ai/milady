@@ -43,7 +43,7 @@ The SQL plugin manages the following tables:
 Memories are stored with:
 
 - `content` — The memory text and metadata
-- `embedding` — Vector embedding (768 dimensions by default)
+- `embedding` — Vector embedding (384 dimensions by default — Milady caps `EMBEDDING_DIMENSION` to 384)
 - `type` — `message`, `knowledge`, `reflection`, `fact`, etc.
 - `roomId` — The room this memory belongs to
 - `entityId` — The entity (user/agent) associated with the memory

@@ -13,7 +13,12 @@
  * @module actions/transfer-token
  */
 
-import type { Action, HandlerOptions, IAgentRuntime } from "@elizaos/core";
+import type {
+  Action,
+  HandlerCallback,
+  HandlerOptions,
+  IAgentRuntime,
+} from "@elizaos/core";
 import {
   buildAuthHeaders,
   WALLET_ACTION_API_PORT,
@@ -42,7 +47,13 @@ export const transferTokenAction: Action = {
     );
   },
 
-  handler: async (_runtime, _message, _state, options) => {
+  handler: async (
+    _runtime,
+    _message,
+    _state,
+    options,
+    callback?: HandlerCallback,
+  ) => {
     try {
       const params = (options as HandlerOptions | undefined)?.parameters;
 
@@ -53,8 +64,11 @@ export const transferTokenAction: Action = {
           : undefined;
 
       if (!toAddress || !EVM_ADDRESS_RE.test(toAddress)) {
+        const text =
+          "I need a valid recipient address (0x-prefixed, 40 hex chars).";
+        if (callback) callback({ text, action: "TRANSFER_TOKEN_FAILED" });
         return {
-          text: "I need a valid recipient address (0x-prefixed, 40 hex chars).",
+          text,
           success: false,
         };
       }
@@ -72,8 +86,10 @@ export const transferTokenAction: Action = {
         Number.isNaN(Number(amountRaw)) ||
         Number(amountRaw) <= 0
       ) {
+        const text = "I need a positive numeric amount for the transfer.";
+        if (callback) callback({ text, action: "TRANSFER_TOKEN_FAILED" });
         return {
-          text: "I need a positive numeric amount for the transfer.",
+          text,
           success: false,
         };
       }
@@ -85,14 +101,19 @@ export const transferTokenAction: Action = {
           : undefined;
 
       if (!assetSymbol) {
+        const text =
+          "I need an asset symbol (e.g. BNB, USDT, USDC) for the transfer.";
+        if (callback) callback({ text, action: "TRANSFER_TOKEN_FAILED" });
         return {
-          text: "I need an asset symbol (e.g. BNB, USDT, USDC) for the transfer.",
+          text,
           success: false,
         };
       }
 
       if (!/^[A-Za-z0-9]{1,20}$/.test(assetSymbol)) {
-        return { text: "Invalid asset symbol format.", success: false };
+        const text = "Invalid asset symbol format.";
+        if (callback) callback({ text, action: "TRANSFER_TOKEN_FAILED" });
+        return { text, success: false };
       }
 
       // ── Optional tokenAddress ──────────────────────────────────────────
@@ -103,7 +124,9 @@ export const transferTokenAction: Action = {
           : undefined;
 
       if (tokenAddress && !EVM_ADDRESS_RE.test(tokenAddress)) {
-        return { text: "Invalid token address format.", success: false };
+        const text = "Invalid token address format.";
+        if (callback) callback({ text, action: "TRANSFER_TOKEN_FAILED" });
+        return { text, success: false };
       }
 
       // ── POST to transfer execution API ─────────────────────────────────
@@ -137,8 +160,10 @@ export const transferTokenAction: Action = {
           string,
           string
         >;
+        const text = `Transfer failed: ${errBody.error ?? `HTTP ${response.status}`}`;
+        if (callback) callback({ text, action: "TRANSFER_TOKEN_FAILED" });
         return {
-          text: `Transfer failed: ${errBody.error ?? `HTTP ${response.status}`}`,
+          text,
           success: false,
         };
       }
@@ -162,19 +187,23 @@ export const transferTokenAction: Action = {
       };
 
       if (!result.ok) {
+        const text = `Transfer failed: ${result.error ?? "unknown error"}`;
+        if (callback) callback({ text, action: "TRANSFER_TOKEN_FAILED" });
         return {
-          text: `Transfer failed: ${result.error ?? "unknown error"}`,
+          text,
           success: false,
         };
       }
 
       // ── Build human-readable response ──────────────────────────────────
       if (result.executed && result.execution) {
+        const text =
+          `Transfer executed successfully! Sent ${amountRaw} ${assetSymbol} to ${toAddress} via ${result.mode} mode.\n` +
+          `TX: ${result.execution.explorerUrl}\n` +
+          `Status: ${result.execution.status}`;
+        if (callback) callback({ text, action: "TRANSFER_TOKEN_SUCCESS" });
         return {
-          text:
-            `Transfer executed successfully! Sent ${amountRaw} ${assetSymbol} to ${toAddress} via ${result.mode} mode.\n` +
-            `TX: ${result.execution.explorerUrl}\n` +
-            `Status: ${result.execution.status}`,
+          text,
           success: true,
           data: {
             toAddress,
@@ -189,10 +218,12 @@ export const transferTokenAction: Action = {
       }
 
       // user-sign mode — transfer was prepared but not executed on-chain
+      const text =
+        `Transfer prepared in ${result.mode} mode. ` +
+        `A user signature is required to send ${amountRaw} ${assetSymbol} to ${toAddress}.`;
+      if (callback) callback({ text, action: "TRANSFER_TOKEN_SUCCESS" });
       return {
-        text:
-          `Transfer prepared in ${result.mode} mode. ` +
-          `A user signature is required to send ${amountRaw} ${assetSymbol} to ${toAddress}.`,
+        text,
         success: true,
         data: {
           toAddress,
@@ -205,8 +236,10 @@ export const transferTokenAction: Action = {
         },
       };
     } catch (err) {
+      const text = `Transfer failed: ${err instanceof Error ? err.message : String(err)}`;
+      if (callback) callback({ text, action: "TRANSFER_TOKEN_FAILED" });
       return {
-        text: `Transfer failed: ${err instanceof Error ? err.message : String(err)}`,
+        text,
         success: false,
       };
     }

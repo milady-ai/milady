@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getToken } from "../../lib/auth";
 import { CloudClient, type JobStatus } from "../../lib/cloud-api";
+import {
+  MIN_DEPOSIT_DISPLAY,
+  PRICE_IDLE_PER_HR,
+  PRICE_RUNNING_PER_HR,
+} from "../../lib/pricing-constants";
 import { useCloudLogin } from "./useCloudLogin";
 
 interface CreateAgentFormProps {
@@ -141,7 +146,9 @@ export function CreateAgentForm({
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setStep("error");
-      if (msg.includes("401") || msg.includes("403")) {
+      if (err instanceof Error && err.name === "CloudAgentsNotAvailableError") {
+        setError("Cloud agent hosting is coming soon. Stay tuned!");
+      } else if (msg.includes("401") || msg.includes("403")) {
         setError("Authentication failed. Please sign in again.");
       } else {
         setError(msg);
@@ -524,8 +531,8 @@ export function CreateAgentForm({
         {/* Pricing note */}
         <div className="mb-5 px-3 py-2.5 border-l-2 border-brand/30 bg-brand/5">
           <p className="font-mono text-[10px] text-text-muted leading-relaxed">
-            <span className="text-brand">HOSTING</span> $0.01/hr running ·
-            $0.0025/hr idle · min. balance $5.00
+            <span className="text-brand">HOSTING</span>{" "}
+            {`${PRICE_RUNNING_PER_HR}/hr running · ${PRICE_IDLE_PER_HR}/hr idle · min. balance ${MIN_DEPOSIT_DISPLAY}`}
           </p>
         </div>
 

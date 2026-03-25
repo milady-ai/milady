@@ -3,6 +3,10 @@ const SCRIPT_START = Date.now();
 
 import { getLogPrefix } from "../utils/log-prefix";
 import { getErrorMessage } from "./embedding-manager-support.js";
+import {
+  formatUncaughtError,
+  shouldIgnoreUnhandledRejection,
+} from "./error-handlers.js";
 
 console.log(`${getLogPrefix()} Script starting...`);
 
@@ -291,6 +295,7 @@ async function shutdown(): Promise<void> {
     }
     currentRuntime = null;
   }
+  clearTimeout(forceExitTimer);
   process.exit(0);
 }
 
@@ -367,6 +372,29 @@ async function main() {
     `${getLogPrefix()} Startup init complete in ${Date.now() - startupStart}ms, agent bootstrapping...`,
   );
 }
+
+// ── Global error handlers (match CLI behavior from run-main.ts) ──
+process.on("unhandledRejection", (reason) => {
+  if (shouldIgnoreUnhandledRejection(reason)) {
+    console.warn(
+      `${getLogPrefix()} Provider credits appear exhausted; request failed without output. Top up credits and retry.`,
+    );
+    return;
+  }
+  // In dev mode (bun --watch), log but do NOT exit — let the watcher restart.
+  console.error(
+    `${getLogPrefix()} Unhandled rejection:`,
+    formatUncaughtError(reason),
+  );
+});
+
+process.on("uncaughtException", (error) => {
+  console.error(
+    `${getLogPrefix()} Uncaught exception:`,
+    formatUncaughtError(error),
+  );
+  process.exit(1);
+});
 
 main().catch((err: unknown) => {
   const error = err instanceof Error ? err : new Error(String(err));

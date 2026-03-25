@@ -37,6 +37,7 @@ import {
   patchProperLockfileSignalExitCompat,
   patchPtyManagerCursorPositionCompat,
   patchPtyManagerEsmDirnameCompat,
+  pruneNestedElizaPluginCoreCopies,
   warnStaleBunCache,
 } from "./lib/patch-bun-exports.mjs";
 import { patchElizaCoreClientChatEvaluate } from "./lib/patch-eliza-core-client-chat-eval.mjs";
@@ -85,6 +86,7 @@ patchPtyManagerEsmDirnameCompat(root);
 patchPtyManagerCursorPositionCompat(root);
 patchCodexFolderApprovalPromptCompat(root);
 patchBrokenElizaCoreRuntimeDists(root);
+pruneNestedElizaPluginCoreCopies(root);
 patchElizaCoreClientChatEvaluate(root);
 try {
   patchAutonomousMiladyOnboardingPresets(root);

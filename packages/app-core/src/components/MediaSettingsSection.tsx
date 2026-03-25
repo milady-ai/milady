@@ -217,6 +217,13 @@ const CATEGORY_LABELS: Record<MediaCategory, string> = {
   voice: "settings.sections.voice.label",
 };
 
+const MEDIA_SEGMENT_BUTTON_CLASSNAME =
+  "flex-1 basis-[calc(50%-0.125rem)] sm:basis-0 min-h-[44px] rounded-lg border px-2 py-1.5 text-[11px] font-semibold !whitespace-normal";
+const MEDIA_SEGMENT_BUTTON_ACTIVE_CLASSNAME =
+  "border-accent/45 bg-accent/16 text-accent-fg shadow-sm";
+const MEDIA_SEGMENT_BUTTON_INACTIVE_CLASSNAME =
+  "border-border/40 text-muted-strong hover:border-border-strong hover:bg-bg-hover hover:text-txt";
+
 /** Short noun for “{category} API source” (not the longer tab titles). */
 const MEDIA_API_SOURCE_CATEGORY_KEYS = {
   image: "mediasettingssection.MediaApiSourceCategory.image",
@@ -1092,10 +1099,10 @@ export function MediaSettingsSection() {
                   type="button"
                   variant={active ? "default" : "ghost"}
                   size="sm"
-                  className={`flex-1 min-w-[5.5rem] h-9 rounded-md px-2 py-1.5 text-[11px] font-semibold !whitespace-normal ${
+                  className={`${MEDIA_SEGMENT_BUTTON_CLASSNAME} ${
                     active
-                      ? "bg-accent text-accent-foreground shadow-sm"
-                      : "text-muted hover:bg-bg-hover hover:text-txt"
+                      ? MEDIA_SEGMENT_BUTTON_ACTIVE_CLASSNAME
+                      : MEDIA_SEGMENT_BUTTON_INACTIVE_CLASSNAME
                   }`}
                   onClick={() => setCompanionVrmPowerMode(mode)}
                   aria-pressed={active}
@@ -1126,10 +1133,10 @@ export function MediaSettingsSection() {
                     type="button"
                     variant={active ? "default" : "ghost"}
                     size="sm"
-                    className={`flex-1 min-w-[5.5rem] h-9 rounded-md px-2 py-1.5 text-[11px] font-semibold !whitespace-normal ${
+                    className={`${MEDIA_SEGMENT_BUTTON_CLASSNAME} ${
                       active
-                        ? "bg-accent text-accent-foreground shadow-sm"
-                        : "text-muted hover:bg-bg-hover hover:text-txt"
+                        ? MEDIA_SEGMENT_BUTTON_ACTIVE_CLASSNAME
+                        : MEDIA_SEGMENT_BUTTON_INACTIVE_CLASSNAME
                     }`}
                     onClick={() => setCompanionHalfFramerateMode(mode)}
                     aria-pressed={active}
@@ -1164,7 +1171,7 @@ export function MediaSettingsSection() {
 
       {/* biome-ignore lint/a11y/useSemanticElements: existing pattern */}
       <div
-        className="rounded-xl border border-border border-l-[3px] border-l-accent bg-card/70 px-3 py-3 flex flex-col gap-4 shadow-[0_12px_40px_rgba(0,0,0,0.12)]"
+        className="flex flex-col gap-4 rounded-xl border border-border/70 border-l-[3px] border-l-accent bg-card/85 px-3 py-3 shadow-sm"
         data-testid="settings-media-generate-group"
         role="region"
         aria-label={t("mediasettingssection.GenerateGroupRegionLabel", {
@@ -1197,10 +1204,10 @@ export function MediaSettingsSection() {
                 key={cat}
                 variant={active ? "default" : "ghost"}
                 size="sm"
-                className={`flex-1 h-9 rounded-lg border border-transparent px-2 sm:px-3 py-2 text-[10px] sm:text-xs font-semibold !whitespace-normal ${
+                className={`flex-1 basis-[calc(50%-0.125rem)] sm:basis-0 min-h-[44px] rounded-lg border px-2 py-2 text-[10px] sm:text-xs font-semibold !whitespace-normal ${
                   active
-                    ? "bg-accent text-accent-foreground shadow-sm"
-                    : "text-muted hover:bg-bg-hover hover:text-txt"
+                    ? MEDIA_SEGMENT_BUTTON_ACTIVE_CLASSNAME
+                    : MEDIA_SEGMENT_BUTTON_INACTIVE_CLASSNAME
                 }`}
                 onClick={() => setActiveTab(cat)}
               >

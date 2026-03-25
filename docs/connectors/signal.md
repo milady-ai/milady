@@ -16,7 +16,7 @@ The Signal connector is an external elizaOS plugin that bridges your agent to Si
 |-------|-------|
 | Package | `@elizaos/plugin-signal` |
 | Config key | `connectors.signal` |
-| Auto-enable trigger | `account` with `httpUrl`, OR `cliPath`, OR `accounts` with configured entries |
+| Auto-enable trigger | `token`/`botToken`/`apiKey`, OR any of `authDir`/`account`/`httpUrl`/`httpHost`/`httpPort`/`cliPath`, OR `accounts` with configured entries |
 
 ## Minimal Configuration
 

@@ -64,7 +64,7 @@ export function ConfirmModal({
       ? { background: "#ef4444", color: "#fff" }
       : tone === "warn"
         ? { background: "#f59e0b", color: "#fff" }
-        : { background: "#f0b232", color: "#000" };
+        : { background: "var(--accent)", color: "var(--accent-foreground)" };
 
   return (
     <Dialog
@@ -179,7 +179,10 @@ export function PromptModal({
             variant="default"
             onClick={handleConfirm}
             className="px-4 py-2 text-sm font-medium"
-            style={{ background: "#f0b232", color: "#000" }}
+            style={{
+              background: "var(--accent)",
+              color: "var(--accent-foreground)",
+            }}
           >
             {confirmLabel}
           </Button>

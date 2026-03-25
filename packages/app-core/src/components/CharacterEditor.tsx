@@ -9,7 +9,6 @@ import type { StylePreset } from "@miladyai/shared/contracts/onboarding";
 import { getStylePresets } from "@miladyai/shared/onboarding-presets";
 import { Button, Input, Textarea, ThemedSelect } from "@miladyai/ui";
 import { client } from "../api/client";
-import { shouldApplyPresetDefaults } from "./character-editor-helpers";
 import {
   APP_EMOTE_EVENT,
   dispatchWindowEvent,
@@ -29,6 +28,7 @@ import {
   type CharacterRosterEntry,
   resolveRosterEntries,
 } from "./CharacterRoster";
+import { shouldApplyPresetDefaults } from "./character-editor-helpers";
 
 /* Inline SVG icon helpers – avoids adding lucide-react as a dependency. */
 const svgBase = {
@@ -1171,7 +1171,7 @@ export function CharacterEditor({
               {/* ── LEFT PANEL (Character identity) ───────────────────────── */}
               <div
                 ref={leftPanelRef}
-                className={`flex flex-col flex-1 gap-3 min-h-0 overflow-y-auto pr-1 [scrollbar-gutter:stable] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-sm${activePage !== "identity" ? " hidden" : ""}`}
+                className={`custom-scrollbar flex flex-col flex-1 gap-3 min-h-0 overflow-y-auto pr-1 [scrollbar-gutter:stable]${activePage !== "identity" ? " hidden" : ""}`}
               >
                 {/* Name + Voice (50/50 split) */}
                 <section className="flex flex-col gap-2 p-3 border border-border rounded-xl bg-card">
@@ -1348,7 +1348,7 @@ export function CharacterEditor({
               {/* ── RIGHT PANEL ───────────────────────────────────────────── */}
               <div
                 ref={rightPanelRef}
-                className={`flex flex-col flex-1 gap-3 min-h-0 overflow-y-auto pr-1 [scrollbar-gutter:stable] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-sm${activePage === "identity" ? " hidden" : ""}`}
+                className={`custom-scrollbar flex flex-col flex-1 gap-3 min-h-0 overflow-y-auto pr-1 [scrollbar-gutter:stable]${activePage === "identity" ? " hidden" : ""}`}
               >
                 {/* Style Rules */}
                 <section

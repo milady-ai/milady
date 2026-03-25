@@ -34,6 +34,7 @@ import {
   FULL_SIZE,
   IS_POPOUT,
   PIP_SIZE,
+  STREAM_SOURCE_LABELS,
   type StreamSourceType,
   TERMINAL_ACTIVE_WINDOW_MS,
 } from "./stream/helpers";
@@ -343,6 +344,11 @@ export function StreamView({ inModal }: { inModal?: boolean } = {}) {
         .reverse(),
     [autonomousEvents],
   );
+  const showIdleStandbyState =
+    streamAvailable &&
+    mode === "idle" &&
+    feedEvents.length === 0 &&
+    conversationMessages.length === 0;
 
   // Extract latest viewer stats from events
   const viewerCount = useMemo(() => {
@@ -407,10 +413,10 @@ export function StreamView({ inModal }: { inModal?: boolean } = {}) {
       {/* Stream voice config — TTS toggle and status */}
       {!isPip && streamAvailable && (
         <div
-          className={`flex items-center px-4 py-1 border-b ${
+          className={`flex items-center border-b px-3 py-2 lg:px-4 ${
             inModal
-              ? "border-[var(--border)] bg-[rgba(255,255,255,0.03)]"
-              : "border-border bg-bg"
+              ? "border-border/60 bg-card/88 shadow-sm backdrop-blur-xl"
+              : "border-border/50 bg-card/72"
           }`}
         >
           <StreamVoiceConfig streamLive={streamLive} />
@@ -422,7 +428,7 @@ export function StreamView({ inModal }: { inModal?: boolean } = {}) {
         <div className="flex-1 min-w-0 relative">
           {!streamAvailable ? (
             <div className="h-full flex items-center justify-center p-6">
-              <div className="max-w-md rounded-2xl border border-border bg-bg-muted/50 p-6 text-center shadow-lg">
+              <div className="max-w-lg rounded-3xl border border-border/60 bg-card/94 p-6 text-center shadow-xl backdrop-blur-xl">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-muted">
                   {t("streamview.StreamingUnavailabl")}
                 </p>
@@ -431,7 +437,9 @@ export function StreamView({ inModal }: { inModal?: boolean } = {}) {
                 </h2>
                 <p className="mt-3 text-sm leading-6 text-muted">
                   {t("streamview.MiladyCouldNotRea")}{" "}
-                  <code>{t("streamview.streamingBase")}</code>{" "}
+                  <code className="rounded-md border border-border/45 bg-bg-hover px-1.5 py-0.5 text-xs text-txt-strong">
+                    {t("streamview.streamingBase")}
+                  </code>{" "}
                   {t("streamview.pluginThenReload")}
                 </p>
                 <p className="mt-4 text-xs text-muted">
@@ -457,7 +465,36 @@ export function StreamView({ inModal }: { inModal?: boolean } = {}) {
               messages={conversationMessages}
             />
           ) : (
-            <IdleContent events={autonomousEvents.slice(-20)} />
+            <>
+              <IdleContent events={autonomousEvents.slice(-20)} />
+              {showIdleStandbyState && (
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-6">
+                  <div className="max-w-xl rounded-3xl border border-border/60 bg-card/94 px-6 py-7 text-center shadow-xl backdrop-blur-xl">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted">
+                      Stream Standby
+                    </p>
+                    <h2 className="mt-2 text-[clamp(1.5rem,2vw,2rem)] font-semibold tracking-[-0.03em] text-txt">
+                      Milady is ready for the next signal.
+                    </h2>
+                    <p className="mt-3 text-sm leading-6 text-muted">
+                      Viewer chat, agent actions, terminal output, and overlay
+                      moments will surface here as soon as activity starts.
+                    </p>
+                    <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-[11px] text-muted-strong">
+                      <span className="inline-flex min-h-8 items-center rounded-full border border-border/45 bg-bg-hover/75 px-3 py-1.5">
+                        Source: {STREAM_SOURCE_LABELS[streamSource.type]}
+                      </span>
+                      <span className="inline-flex min-h-8 items-center rounded-full border border-border/45 bg-bg-hover/75 px-3 py-1.5">
+                        Destination: {activeDestination?.name ?? "Not selected"}
+                      </span>
+                      <span className="inline-flex min-h-8 items-center rounded-full border border-accent/25 bg-accent/10 px-3 py-1.5 text-accent-fg">
+                        Voice controls are ready above
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           {/* Stream overlay widgets */}
@@ -488,7 +525,7 @@ export function StreamView({ inModal }: { inModal?: boolean } = {}) {
         </div>
 
         {/* Activity sidebar */}
-        <div className="w-[260px] min-w-[260px] xl:w-[300px] xl:min-w-[300px]">
+        <div className="hidden border-l border-border/50 bg-card/35 md:block md:w-[240px] md:min-w-[240px] lg:w-[260px] lg:min-w-[260px] xl:w-[300px] xl:min-w-[300px]">
           <ActivityFeed events={feedEvents} />
         </div>
       </div>

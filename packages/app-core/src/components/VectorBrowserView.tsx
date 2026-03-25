@@ -80,6 +80,13 @@ const VECTOR_GRAPH_2D_PALETTE = [
   "#84cc16",
 ];
 
+const VECTOR_VIEW_TOGGLE_BASE_CLASSNAME =
+  "h-auto min-h-[1.75rem] rounded-lg border px-4 py-1 text-left text-xs font-medium whitespace-normal break-words transition-all duration-300";
+const VECTOR_VIEW_TOGGLE_ACTIVE_CLASSNAME =
+  "border-accent/45 bg-accent/16 text-accent-fg shadow-sm";
+const VECTOR_VIEW_TOGGLE_INACTIVE_CLASSNAME =
+  "border-transparent text-muted-strong hover:border-border/50 hover:bg-bg-hover hover:text-txt";
+
 /** Try to parse a JSON content field, returning the text content or the raw string. */
 function parseContent(val: unknown): string {
   if (typeof val !== "string") return String(val ?? "");
@@ -342,12 +349,17 @@ function VectorGraph({
 
     // Background
     const style = getComputedStyle(document.documentElement);
-    const bgColor = style.getPropertyValue("--bg").trim() || "#111";
-    const borderColor = style.getPropertyValue("--border").trim() || "#333";
+    const bgColor = style.getPropertyValue("--bg").trim() || "#111111";
+    const cardColor = style.getPropertyValue("--card").trim() || bgColor;
+    const borderColor = style.getPropertyValue("--border").trim() || "#333333";
     const accentColor = style.getPropertyValue("--accent").trim() || "#6cf";
-    const mutedColor = style.getPropertyValue("--muted").trim() || "#888";
+    const mutedColor = style.getPropertyValue("--muted").trim() || "#888888";
+    const textColor =
+      style.getPropertyValue("--text").trim() ||
+      style.getPropertyValue("--txt").trim() ||
+      "#f5f5f5";
 
-    ctx.fillStyle = bgColor;
+    ctx.fillStyle = cardColor;
     ctx.fillRect(0, 0, W, H);
 
     // Grid lines
@@ -403,7 +415,7 @@ function VectorGraph({
       ctx.globalAlpha = 1;
 
       if (isHovered) {
-        ctx.strokeStyle = "#fff";
+        ctx.strokeStyle = textColor;
         ctx.lineWidth = 1.5;
         ctx.stroke();
       }
@@ -436,9 +448,12 @@ function VectorGraph({
       if (tx + tw > W) tx = sx - tw - 10;
       if (ty < 0) ty = sy + 10;
 
-      ctx.fillStyle = "rgba(0,0,0,0.85)";
+      ctx.fillStyle = cardColor;
       ctx.fillRect(tx, ty, tw, th);
-      ctx.fillStyle = "#fff";
+      ctx.strokeStyle = borderColor;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(tx, ty, tw, th);
+      ctx.fillStyle = textColor;
       ctx.textAlign = "left";
       ctx.fillText(label, tx + 6, ty + 15);
     }
@@ -1067,7 +1082,7 @@ function MemoryDetailModal({
   const { t } = useApp();
   return (
     <div
-      className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-8"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-bg/80 p-4 backdrop-blur-sm sm:p-8"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -1080,7 +1095,7 @@ function MemoryDetailModal({
       role="dialog"
       aria-modal="true"
     >
-      <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-2xl backdrop-blur-xl max-w-[700px] w-full max-h-[90vh] overflow-auto">
+      <div className="max-h-[90vh] w-full max-w-[700px] overflow-auto rounded-2xl border border-border/50 bg-card/96 shadow-xl backdrop-blur-xl">
         {/* Header */}
         <div className="flex items-center justify-between p-3 border-b border-[var(--border)]">
           <div className="text-xs font-medium text-[var(--txt)]">
@@ -1425,7 +1440,7 @@ export function VectorBrowserView({ leftNav }: { leftNav?: ReactNode }) {
   return (
     <div className="flex flex-col h-full gap-4">
       {/* Unified Toolbar */}
-      <div className="flex items-center gap-3 p-3 bg-card/60 backdrop-blur-xl border border-border/40 rounded-2xl shadow-sm flex-wrap">
+      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border/40 bg-card/60 p-3 shadow-sm backdrop-blur-xl">
         {leftNav}
 
         <div className="flex-1" />
@@ -1434,14 +1449,14 @@ export function VectorBrowserView({ leftNav }: { leftNav?: ReactNode }) {
         {!isConnectionError && (
           <div className="flex flex-wrap items-center gap-3">
             {viewMode === "list" && (
-              <div className="flex gap-1">
+              <div className="flex w-full gap-1 sm:w-auto">
                 <Input
                   type="text"
                   placeholder={t("vectorbrowserview.SearchContent")}
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                  className="w-[220px] bg-card text-xs"
+                  className="w-full bg-card text-xs sm:w-[220px]"
                 />
                 <Button variant="default" size="sm" onClick={handleSearch}>
                   {t("vectorbrowserview.Search")}
@@ -1459,7 +1474,7 @@ export function VectorBrowserView({ leftNav }: { leftNav?: ReactNode }) {
                   setSearchInput("");
                 }}
               >
-                <SelectTrigger className="px-3 py-1.5 text-xs border border-border bg-card rounded-lg text-txt h-auto w-auto">
+                <SelectTrigger className="h-auto min-w-[11rem] rounded-lg border border-border bg-card px-3 py-1.5 text-xs text-txt sm:w-auto">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1477,14 +1492,14 @@ export function VectorBrowserView({ leftNav }: { leftNav?: ReactNode }) {
             )}
 
             {/* View mode toggle */}
-            <div className="flex gap-1 p-1 bg-bg/50 backdrop-blur-md border border-border/40 rounded-xl shadow-inner ml-auto">
+            <div className="ml-0 flex w-full gap-1 rounded-xl border border-border/40 bg-bg/50 p-1 shadow-inner backdrop-blur-md sm:ml-auto sm:w-auto">
               <Button
                 variant={viewMode === "list" ? "default" : "ghost"}
                 size="sm"
-                className={`h-auto min-h-[1.75rem] px-4 py-1 whitespace-normal break-words text-left text-xs font-medium rounded-lg transition-all duration-300 ${
+                className={`${VECTOR_VIEW_TOGGLE_BASE_CLASSNAME} ${
                   viewMode === "list"
-                    ? "bg-accent text-accent-fg shadow-[0_0_15px_rgba(var(--accent),0.4)] border border-accent/50 scale-105"
-                    : "text-muted hover:text-txt hover:bg-bg-hover hover:border-border/50"
+                    ? VECTOR_VIEW_TOGGLE_ACTIVE_CLASSNAME
+                    : VECTOR_VIEW_TOGGLE_INACTIVE_CLASSNAME
                 }`}
                 onClick={() => setViewMode("list")}
               >
@@ -1493,10 +1508,10 @@ export function VectorBrowserView({ leftNav }: { leftNav?: ReactNode }) {
               <Button
                 variant={viewMode === "graph" ? "default" : "ghost"}
                 size="sm"
-                className={`h-auto min-h-[1.75rem] px-4 py-1 whitespace-normal break-words text-left text-xs font-medium rounded-lg transition-all duration-300 ${
+                className={`${VECTOR_VIEW_TOGGLE_BASE_CLASSNAME} ${
                   viewMode === "graph"
-                    ? "bg-accent text-accent-fg shadow-[0_0_15px_rgba(var(--accent),0.4)] border border-accent/50 scale-105"
-                    : "text-muted hover:text-txt hover:bg-bg-hover hover:border-border/50"
+                    ? VECTOR_VIEW_TOGGLE_ACTIVE_CLASSNAME
+                    : VECTOR_VIEW_TOGGLE_INACTIVE_CLASSNAME
                 }`}
                 onClick={() => setViewMode("graph")}
               >
@@ -1505,10 +1520,10 @@ export function VectorBrowserView({ leftNav }: { leftNav?: ReactNode }) {
               <Button
                 variant={viewMode === "3d" ? "default" : "ghost"}
                 size="sm"
-                className={`h-auto min-h-[1.75rem] px-4 py-1 whitespace-normal break-words text-left text-xs font-medium rounded-lg transition-all duration-300 ${
+                className={`${VECTOR_VIEW_TOGGLE_BASE_CLASSNAME} ${
                   viewMode === "3d"
-                    ? "bg-accent text-accent-fg shadow-[0_0_15px_rgba(var(--accent),0.4)] border border-accent/50 scale-105"
-                    : "text-muted hover:text-txt hover:bg-bg-hover hover:border-border/50"
+                    ? VECTOR_VIEW_TOGGLE_ACTIVE_CLASSNAME
+                    : VECTOR_VIEW_TOGGLE_INACTIVE_CLASSNAME
                 }`}
                 onClick={() => setViewMode("3d")}
               >
@@ -1530,7 +1545,7 @@ export function VectorBrowserView({ leftNav }: { leftNav?: ReactNode }) {
       <div className="flex-1 min-h-0 overflow-auto pr-2 custom-scrollbar">
         {/* Stats bar */}
         {stats && !isConnectionError && (
-          <div className="flex items-center gap-4 mb-4 px-4 py-2.5 bg-card/60 backdrop-blur-xl border border-border/40 rounded-2xl">
+          <div className="mb-4 flex flex-wrap items-center gap-3 rounded-2xl border border-border/40 bg-card/60 px-4 py-2.5 backdrop-blur-xl">
             <span className="w-2 h-2 rounded-full bg-ok" />
             <span className="text-xs font-medium text-txt">
               {Number(stats.total).toLocaleString()}{" "}
@@ -1561,10 +1576,10 @@ export function VectorBrowserView({ leftNav }: { leftNav?: ReactNode }) {
         {error &&
           (error.includes("agent is running") ? (
             <div className="text-center py-16">
-              <div className="text-[var(--muted)] text-sm mb-2">
+              <div className="mb-2 text-sm text-[var(--muted)]">
                 {t("databaseview.DatabaseNotAvailab")}
               </div>
-              <div className="text-[var(--muted)] text-xs mb-4">
+              <div className="mb-4 text-xs text-[var(--muted)]">
                 {t("vectorbrowserview.StartTheAgentToB")}
               </div>
               <Button
@@ -1579,7 +1594,7 @@ export function VectorBrowserView({ leftNav }: { leftNav?: ReactNode }) {
               </Button>
             </div>
           ) : (
-            <div className="p-2.5 border border-[var(--danger)] text-[var(--danger)] text-xs mb-3">
+            <div className="mb-3 rounded-xl border border-danger/35 bg-danger/10 px-3 py-2.5 text-xs text-danger">
               {error}
             </div>
           ))}
@@ -1638,7 +1653,7 @@ export function VectorBrowserView({ leftNav }: { leftNav?: ReactNode }) {
                 <Button
                   key={mem.id || `${mem.content.slice(0, 30)}-${mem.createdAt}`}
                   variant="outline"
-                  className="justify-start items-start text-left h-auto p-3 hover:border-accent w-full flex flex-col"
+                  className="flex h-auto w-full flex-col items-start justify-start rounded-xl border-border/50 bg-card/92 p-3 text-left shadow-sm hover:border-accent/45 hover:bg-bg-hover"
                   onClick={() => setSelectedMemory(mem)}
                 >
                   {/* Content preview */}
@@ -1651,7 +1666,7 @@ export function VectorBrowserView({ leftNav }: { leftNav?: ReactNode }) {
                   {/* Metadata row */}
                   <div className="flex flex-wrap items-center gap-3 text-[10px] text-[var(--muted)]">
                     {mem.type && mem.type !== "undefined" && (
-                      <span className="px-1.5 py-0.5 bg-[var(--accent)]/10 text-[var(--accent)]">
+                      <span className="rounded-md border border-accent/20 bg-accent/10 px-1.5 py-0.5 text-accent-fg">
                         {mem.type}
                       </span>
                     )}
@@ -1670,7 +1685,7 @@ export function VectorBrowserView({ leftNav }: { leftNav?: ReactNode }) {
                       <span>{mem.createdAt}</span>
                     )}
                     {mem.unique && (
-                      <span className="px-1.5 py-0.5 bg-green-500/20 text-green-400 font-bold">
+                      <span className="rounded-md border border-ok/20 bg-ok/10 px-1.5 py-0.5 font-bold text-ok">
                         {t("vectorbrowserview.unique")}
                       </span>
                     )}

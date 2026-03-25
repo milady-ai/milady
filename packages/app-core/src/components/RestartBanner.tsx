@@ -62,7 +62,10 @@ export function RestartBanner() {
           onClick={handleRestart}
           disabled={restarting}
           className="rounded px-3 py-1 text-[12px] font-semibold border-transparent"
-          style={{ background: "#f0b232", color: "#000" }}
+          style={{
+            background: "var(--accent)",
+            color: "var(--accent-foreground)",
+          }}
         >
           {restarting ? "Restarting..." : "Restart Now"}
         </Button>

@@ -32,7 +32,7 @@ NODE_PATH must be set in exactly 3 files. Verify all 3 exist and point to repo r
 3. `apps/app/electrobun/src/native/agent.ts` (~line 841-879)
 
 ### 5. Plugin auto-enable config
-- Check `src/config/plugin-auto-enable.ts` — should the new plugin be auto-enabled?
+- Check `packages/app-core/src/config/plugin-auto-enable.ts` — should the new plugin be auto-enabled?
 - Check `CHANNEL_PLUGIN_MAP` in `packages/agent/src/runtime/eliza.ts` if it's a connector plugin
 
 ### 6. Test coverage

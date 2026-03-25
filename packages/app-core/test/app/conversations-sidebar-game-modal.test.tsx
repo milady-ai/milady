@@ -56,32 +56,20 @@ vi.mock("@miladyai/ui", async () => {
             children,
           )
         : null,
-    DialogContent: ({
-      children,
-      ...props
-    }: React.ComponentProps<"div">) =>
+    DialogContent: ({ children, ...props }: React.ComponentProps<"div">) =>
       React.createElement("div", props, children),
     DialogHeader: ({ children }: { children?: React.ReactNode }) =>
       React.createElement("div", null, children),
-    DialogTitle: ({
-      children,
-      ...props
-    }: React.ComponentProps<"h2">) =>
+    DialogTitle: ({ children, ...props }: React.ComponentProps<"h2">) =>
       React.createElement("h2", props, children),
     DialogFooter: ({ children }: { children?: React.ReactNode }) =>
       React.createElement("div", null, children),
-    DialogDescription: ({
-      children,
-      ...props
-    }: React.ComponentProps<"p">) =>
+    DialogDescription: ({ children, ...props }: React.ComponentProps<"p">) =>
       React.createElement("p", props, children),
     Input: React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
       (props, ref) => React.createElement("input", { ...props, ref }),
     ),
-    Label: ({
-      children,
-      ...props
-    }: React.ComponentProps<"label">) =>
+    Label: ({ children, ...props }: React.ComponentProps<"label">) =>
       React.createElement("label", props, children),
     TooltipProvider: ({ children }: { children?: React.ReactNode }) =>
       React.createElement(React.Fragment, null, children),
@@ -91,7 +79,10 @@ vi.mock("@miladyai/ui", async () => {
       children,
       asChild,
       ...props
-    }: { children?: React.ReactNode; asChild?: boolean } & Record<string, unknown>) =>
+    }: { children?: React.ReactNode; asChild?: boolean } & Record<
+      string,
+      unknown
+    >) =>
       asChild
         ? (children as React.ReactElement)
         : React.createElement("span", props, children),
@@ -111,19 +102,6 @@ vi.mock("@miladyai/ui", async () => {
       ...props
     }: React.ComponentProps<"button">) =>
       React.createElement("button", { ...props, onClick }, children),
-    TooltipProvider: ({ children }: { children?: React.ReactNode }) =>
-      React.createElement(React.Fragment, null, children),
-    Tooltip: ({ children }: { children?: React.ReactNode }) =>
-      React.createElement(React.Fragment, null, children),
-    TooltipTrigger: ({
-      children,
-      asChild,
-      ...props
-    }: { children?: React.ReactNode; asChild?: boolean } & Record<string, unknown>) =>
-      asChild
-        ? (children as React.ReactElement)
-        : React.createElement("span", props, children),
-    TooltipContent: () => null,
   };
 });
 
@@ -420,5 +398,20 @@ describe("ConversationsSidebar game-modal variant", () => {
       "conv-2",
       "LLM suggested title",
     );
+  });
+
+  it("shows the unread count badge in game-modal when conversations are unread", async () => {
+    mockUseApp.mockReturnValue(createContext());
+
+    let tree: TestRenderer.ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(
+        React.createElement(ConversationsSidebar, { variant: "game-modal" }),
+      );
+    });
+
+    const content = textOf(tree?.root);
+    expect(content).toContain("conversations.chats");
+    expect(content).toContain("1");
   });
 });

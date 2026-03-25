@@ -19,6 +19,10 @@ import {
   type TableRowsResponse,
 } from "../api";
 import { useApp } from "../state";
+import {
+  APP_SIDEBAR_RAIL_CLASSNAME,
+  APP_SIDEBAR_SEARCH_INPUT_CLASSNAME,
+} from "./sidebar-shell-styles";
 
 type DbView = "tables" | "query";
 type SortDir = "asc" | "desc" | null;
@@ -72,16 +76,16 @@ function typeBadgeColor(type: string): string {
     t.includes("real") ||
     t.includes("double")
   )
-    return "text-amber-400 bg-amber-400/10";
-  if (t.includes("bool")) return "text-purple-400 bg-purple-400/10";
-  if (t.includes("json")) return "text-orange-400 bg-orange-400/10";
-  if (t.includes("uuid")) return "text-cyan-400 bg-cyan-400/10";
+    return "text-accent-fg bg-accent/12";
+  if (t.includes("bool")) return "text-ok bg-ok/10";
+  if (t.includes("json")) return "text-warn bg-warn/10";
+  if (t.includes("uuid")) return "text-accent bg-accent/10";
   if (t.includes("timestamp") || t.includes("date"))
-    return "text-pink-400 bg-pink-400/10";
+    return "text-danger bg-danger/10";
   if (t.includes("text") || t.includes("char"))
-    return "text-green-400 bg-green-400/10";
-  if (t.includes("vector")) return "text-blue-400 bg-blue-400/10";
-  return "text-[var(--muted)] bg-[var(--muted)]/10";
+    return "text-muted-strong bg-bg-hover";
+  if (t.includes("vector")) return "text-accent bg-accent/12";
+  return "text-muted-strong bg-bg-hover";
 }
 
 // ── Cell inspect popover ──────────────────────────────────────────────
@@ -185,7 +189,7 @@ function ResultsGrid({
                     {meta?.isPrimaryKey && (
                       <Badge
                         variant="outline"
-                        className="text-[9px] px-1.5 py-0 border-none font-bold text-yellow-400 bg-yellow-400/10 shadow-[0_0_8px_rgba(250,204,21,0.2)]"
+                        className="border-none bg-accent/16 px-1.5 py-0 text-[9px] font-bold text-accent-fg shadow-sm"
                       >
                         PK
                       </Badge>
@@ -494,7 +498,7 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
           {dbStatus ? (
             <>
               <span
-                className={`w-2 h-2 rounded-full shadow-[0_0_8px_currentColor] ${dbStatus.connected ? "text-green-400 bg-green-400" : "text-red-400 bg-red-400"}`}
+                className={`h-2 w-2 rounded-full shadow-[0_0_8px_currentColor] ${dbStatus.connected ? "bg-ok text-ok" : "bg-danger text-danger"}`}
               />
               <span className="tracking-wide">{dbStatus.provider}</span>
               <span className="opacity-40">·</span>
@@ -516,8 +520,8 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
             size="sm"
             className={`h-auto min-h-[1.75rem] px-4 py-1 whitespace-normal break-words text-left text-xs font-medium rounded-lg transition-all duration-300 ${
               view === "tables"
-                ? "bg-accent text-accent-fg shadow-[0_0_15px_rgba(var(--accent),0.4)] border border-accent/50 scale-105"
-                : "text-muted hover:text-txt hover:bg-bg-hover hover:border-border/50"
+                ? "border border-accent/45 bg-accent/16 text-accent-fg shadow-sm"
+                : "text-muted-strong hover:border-border/50 hover:bg-bg-hover hover:text-txt"
             }`}
             onClick={() => setView("tables")}
           >
@@ -528,8 +532,8 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
             size="sm"
             className={`h-auto min-h-[1.75rem] px-4 py-1 whitespace-normal break-words text-left text-xs font-medium rounded-lg transition-all duration-300 ${
               view === "query"
-                ? "bg-accent text-accent-fg shadow-[0_0_15px_rgba(var(--accent),0.4)] border border-accent/50 scale-105"
-                : "text-muted hover:text-txt hover:bg-bg-hover hover:border-border/50"
+                ? "border border-accent/45 bg-accent/16 text-accent-fg shadow-sm"
+                : "text-muted-strong hover:border-border/50 hover:bg-bg-hover hover:text-txt"
             }`}
             onClick={() => setView("query")}
           >
@@ -580,7 +584,7 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
         <div className="flex flex-1 min-h-0 gap-4">
           {/* Sidebar */}
           <div
-            className={`flex-shrink-0 border border-border/40 bg-card/60 backdrop-blur-xl rounded-2xl transition-all overflow-hidden flex flex-col shadow-sm ${sidebarCollapsed ? "w-0 opacity-0 border-none m-0" : "w-[220px]"}`}
+            className={`flex-shrink-0 rounded-2xl border transition-all overflow-hidden flex flex-col shadow-sm ${APP_SIDEBAR_RAIL_CLASSNAME} ${sidebarCollapsed ? "w-0 opacity-0 border-none m-0" : "w-[220px]"}`}
           >
             <div className="p-3 flex flex-col h-full gap-3">
               <div className="relative">
@@ -589,7 +593,7 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
                   placeholder={t("databaseview.FilterTables")}
                   value={sidebarSearch}
                   onChange={(e) => setSidebarSearch(e.target.value)}
-                  className="w-full h-9 rounded-xl border-border/50 bg-bg/50 backdrop-blur-sm text-xs focus-visible:ring-accent/50 focus-visible:border-accent pr-8 shadow-inner"
+                  className={`w-full pr-8 text-xs ${APP_SIDEBAR_SEARCH_INPUT_CLASSNAME}`}
                 />
               </div>
               <div className="text-[10px] text-muted uppercase font-bold tracking-widest px-2 bg-bg/50 py-1.5 rounded-lg border border-border/30 inline-flex items-center shadow-inner">
@@ -632,7 +636,7 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
           <Button
             variant="ghost"
             size="icon"
-            className="flex-shrink-0 w-6 h-12 flex items-center justify-center rounded-xl bg-card/40 backdrop-blur-sm border border-border/40 my-auto shadow-sm text-muted hover:text-txt hover:bg-bg-hover hover:border-accent/40 transition-all hover:scale-110"
+            className="my-auto flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl border border-border/40 bg-card/50 shadow-sm text-muted transition-all hover:border-accent/40 hover:bg-bg-hover hover:text-txt"
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
             title={
               sidebarCollapsed

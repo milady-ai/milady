@@ -62,7 +62,7 @@ function DetachedChatView(): JSX.Element {
       <nav aria-label={t("chat.conversations")}>
         <ConversationsSidebar />
       </nav>
-      <div className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden pt-3 px-3 xl:px-5">
+      <div className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden">
         <ChatView />
       </div>
     </div>

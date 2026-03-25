@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { HeroBackground } from "./components/Hero";
 import { releaseData } from "./generated/release-data";
 
@@ -109,7 +109,20 @@ function ChevronDown() {
 
 function DownloadDropdown() {
   const [open, setOpen] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const downloads = releaseData.release.downloads;
+
+  const cancelClose = () => {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  };
+
+  const scheduleClose = () => {
+    cancelClose();
+    closeTimer.current = setTimeout(() => setOpen(false), 150);
+  };
 
   const platformIcon = (id: string) => {
     const cls = "w-5 h-5 text-text-muted";
@@ -122,13 +135,17 @@ function DownloadDropdown() {
   return (
     <fieldset
       className="relative border-0 p-0 m-0"
-      onMouseLeave={() => setOpen(false)}
+      onMouseLeave={scheduleClose}
+      onMouseEnter={cancelClose}
     >
       <button
         type="button"
         className="flex items-center gap-2 px-6 py-3 border border-text-subtle/30 text-text-muted font-mono text-[11px] tracking-[0.15em] uppercase hover:border-text-muted/50 hover:text-text-light transition-all"
-        onClick={() => setOpen(!open)}
-        onMouseEnter={() => setOpen(true)}
+        onClick={() => setOpen((v) => !v)}
+        onMouseEnter={() => {
+          cancelClose();
+          setOpen(true);
+        }}
       >
         <DownloadIcon />
         Download

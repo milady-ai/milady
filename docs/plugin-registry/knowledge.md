@@ -95,7 +95,7 @@ Place documents in the knowledge directory specified in `milady.json`:
 
 ## Embedding Model
 
-By default, knowledge embeddings use the local embedding model provided by `@elizaos/plugin-local-embedding` (Nomic Embed Text v1.5, 768 dimensions). This runs entirely on-device — no API key required.
+By default, knowledge embeddings use the local embedding model provided by `@elizaos/plugin-local-embedding` (Nomic Embed Text v1.5). Milady caps the embedding dimension to **384** (set via `EMBEDDING_DIMENSION` at boot). This runs entirely on-device — no API key required.
 
 To use a different embedding model, configure it in `milady.json`:
 
@@ -103,7 +103,7 @@ To use a different embedding model, configure it in `milady.json`:
 {
   "embedding": {
     "model": "nomic-embed-text-v1.5.Q5_K_M.gguf",
-    "dimensions": 768
+    "dimensions": 384
   }
 }
 ```

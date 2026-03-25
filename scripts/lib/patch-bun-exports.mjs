@@ -148,6 +148,109 @@ export function patchBrokenElizaCoreRuntimeDists(root, log = console.log) {
   return patched;
 }
 
+function findElizaPluginPackageJsonPaths(root) {
+  const candidates = [];
+  const rootScopeDir = resolve(root, "node_modules", "@elizaos");
+
+  if (existsSync(rootScopeDir)) {
+    for (const entry of readdirSync(rootScopeDir)) {
+      if (!entry.startsWith("plugin-")) continue;
+      const pkgPath = resolve(rootScopeDir, entry, "package.json");
+      if (existsSync(pkgPath)) candidates.push(pkgPath);
+    }
+  }
+
+  const bunCache = resolve(root, "node_modules/.bun");
+  if (existsSync(bunCache)) {
+    for (const entry of readdirSync(bunCache)) {
+      const scopeDir = resolve(bunCache, entry, "node_modules", "@elizaos");
+      if (!existsSync(scopeDir)) continue;
+      for (const scopedEntry of readdirSync(scopeDir)) {
+        if (!scopedEntry.startsWith("plugin-")) continue;
+        const pkgPath = resolve(scopeDir, scopedEntry, "package.json");
+        if (existsSync(pkgPath)) candidates.push(pkgPath);
+      }
+    }
+  }
+
+  return dedupeRealPaths(candidates);
+}
+
+/**
+ * Bun can keep a private @elizaos/core inside individual plugin package dirs.
+ * When that happens, ESM resolves the plugin's own nested core first instead of
+ * the root install, which can re-introduce version skew even when the root core
+ * is pinned and healthy. Remove those nested copies so plugins resolve the
+ * canonical top-level core.
+ */
+export function pruneNestedElizaPluginCoreCopies(root, log = console.log) {
+  const rootCorePkgPath = resolve(
+    root,
+    "node_modules",
+    "@elizaos",
+    "core",
+    "package.json",
+  );
+  const preferredCorePkgPath = existsSync(rootCorePkgPath)
+    ? rootCorePkgPath
+    : findPackageJsonPaths(root, "@elizaos/core")[0];
+
+  if (!preferredCorePkgPath) {
+    log(
+      "[patch-deps] Skipping nested @elizaos/core pruning: no root core install was found.",
+    );
+    return false;
+  }
+
+  let preferredCoreDir = dirname(preferredCorePkgPath);
+  try {
+    preferredCoreDir = realpathSync(preferredCoreDir);
+  } catch {
+    // Keep the unresolved dir when realpath fails.
+  }
+
+  let patched = false;
+  for (const pluginPkgPath of findElizaPluginPackageJsonPaths(root)) {
+    const pluginDir = dirname(pluginPkgPath);
+    const nestedCoreDir = resolve(
+      pluginDir,
+      "node_modules",
+      "@elizaos",
+      "core",
+    );
+    if (!existsSync(nestedCoreDir)) continue;
+
+    let resolvedNestedCoreDir = nestedCoreDir;
+    try {
+      resolvedNestedCoreDir = realpathSync(nestedCoreDir);
+    } catch {
+      // Keep the unresolved dir when realpath fails.
+    }
+
+    if (resolvedNestedCoreDir === preferredCoreDir) {
+      continue;
+    }
+
+    let pluginName = pluginDir;
+    try {
+      const pkg = JSON.parse(readFileSync(pluginPkgPath, "utf8"));
+      if (typeof pkg.name === "string" && pkg.name.trim()) {
+        pluginName = pkg.name.trim();
+      }
+    } catch {
+      // Fall back to the directory path when package.json cannot be read.
+    }
+
+    rmSync(nestedCoreDir, { recursive: true, force: true });
+    patched = true;
+    log(
+      `[patch-deps] Removed nested @elizaos/core from ${pluginName}; plugin imports now resolve the root core.`,
+    );
+  }
+
+  return patched;
+}
+
 /** @see patchElizaCoreStreamingTtsHandlerGuard */
 const ELIZA_CORE_STREAMING_TTS_PATCH_MARKER =
   "getModel(ModelType.TEXT_TO_SPEECH) ? await runtime2.useModel(ModelType.TEXT_TO_SPEECH, params)";

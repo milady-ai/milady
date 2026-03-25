@@ -1,87 +1,116 @@
 ---
 title: "milady doctor"
 sidebarTitle: "doctor"
-description: "Run diagnostics to verify your Milady installation (planned)."
+description: "Run diagnostics to verify your Milady installation health."
 ---
 
-<Warning>
-The `doctor` command is **not yet implemented**. This page describes the planned behavior for an upcoming release. Running `milady doctor` will currently produce an "unknown command" error.
-</Warning>
+The `doctor` command runs a suite of diagnostic checks to verify that your Milady installation is healthy and properly configured. It inspects the runtime environment, configuration, storage, and network, then prints a structured report with pass/fail indicators and suggested fixes.
 
-The `doctor` command will run a suite of diagnostic checks to verify that your Milady installation is healthy and properly configured. It will inspect the runtime environment, configuration, API key availability, plugin state, and network connectivity, then print a structured report with pass/fail indicators and suggested fixes.
-
-## Planned Usage
+## Usage
 
 ```bash
-milady doctor
+milady doctor [options]
 ```
 
-## Planned Diagnostic Checks
+## Options
 
-### Runtime
+| Flag | Description |
+|------|-------------|
+| `--no-ports` | Skip port availability checks |
+| `--fix` | Automatically fix issues where possible |
+| `--json` | Output results as JSON (CI-friendly) |
+
+## Example Output
+
+```
+  Eliza Health Check
+
+  System
+  ✓ Runtime              Node.js v22.12.0
+  ✓ node_modules         /path/to/milady/node_modules
+  ✓ Build artifacts      /path/to/milady/dist
+  ⚠ Eliza workspace      Not found at ../eliza (optional)
+
+  Configuration
+  ✓ Config file          /home/user/.milady/milady.json
+  ✓ Model API key        ANTHROPIC_API_KEY set (Anthropic (Claude))
+  ✓ Host binding         Loopback only (default)
+
+  Storage
+  ✓ State directory      /home/user/.milady
+  ✓ Database             /home/user/.milady/workspace/.eliza/.elizadb
+  ✓ Disk space           45.2 GB free
+
+  Network
+  ✓ Port 31337           Available
+  ✓ Port 2138            Available
+
+  Everything looks good. Ready to run milady start.
+```
+
+## Diagnostic Checks
+
+### System
 
 | Check | Pass Condition |
 |-------|---------------|
-| Node.js / Bun version | Runtime meets minimum version requirement |
-| CLI version | Installed version matches the latest on the active channel |
-| Config file readable | `~/.milady/milady.json` exists and is valid JSON |
-| State directory writable | `~/.milady/` can be written to |
+| Runtime | Node.js >= 22 or Bun >= 1.0 |
+| node_modules | `node_modules` directory exists in the project root |
+| Build artifacts | `dist/entry.js` exists (warn if running from source) |
+| Eliza workspace | Optional `../eliza` checkout for local @elizaos development |
 
 ### Configuration
 
 | Check | Pass Condition |
 |-------|---------------|
-| Config file valid | File parses without errors and matches the expected schema |
-| Workspace directory | Workspace directory exists and contains bootstrap files |
-| Config path resolution | `MILADY_STATE_DIR` and `MILADY_CONFIG_PATH` resolve to accessible paths |
+| Config file | `milady.json` exists and is valid JSON |
+| Model API key | At least one model provider API key is set |
+| Host binding | Non-loopback binds have an explicit API token |
 
-### API Keys
-
-| Check | Pass Condition |
-|-------|---------------|
-| At least one model provider configured | One or more model provider environment variables is set |
-| Anthropic API key | `ANTHROPIC_API_KEY` is set (checked if present) |
-| OpenAI API key | `OPENAI_API_KEY` is set (checked if present) |
-| Other provider keys | Any other provider keys detected |
-
-### Connectivity
+### Storage
 
 | Check | Pass Condition |
 |-------|---------------|
-| API server reachable | Port `2138` (or `MILADY_PORT`) responds to a TCP probe |
-| npm registry reachable | The plugin registry endpoint is accessible |
+| State directory | State directory exists and is writable |
+| Database | PGLite database directory exists |
+| Disk space | At least 1 GB free on the state volume |
 
-### Plugins
+### Network
 
 | Check | Pass Condition |
 |-------|---------------|
-| Custom plugins valid | All plugins in `~/.milady/plugins/custom/` pass the plugin validation test |
-| Plugin registry cache | Registry cache file is present and not stale |
-| Installed plugins | All registry-installed plugins are present on disk |
+| Port 31337 | API port is available |
+| Port 2138 | UI port is available |
 
-## Workarounds Until `doctor` Exists
+Port checks can be skipped with `--no-ports`.
 
-You can manually verify your installation using existing commands:
+## Auto-Fix
+
+The `--fix` flag attempts to automatically remediate fixable issues:
 
 ```bash
-# Check model providers
-milady models
-
-# Validate custom plugins
-milady plugins test
-
-# Inspect config file location and values
-milady config path
-milady config show
-
-# Verify workspace setup
-milady setup
+milady doctor --fix
 ```
+
+Auto-fixable checks include:
+- **Missing config file** -- runs `milady setup`
+- **No model API key** -- runs `milady setup` to launch the provider wizard
+
+Only safe sub-commands are auto-run. Manual fixes (e.g., file permissions) are shown but not executed automatically.
+
+## JSON Output
+
+For CI pipelines, use `--json` for machine-readable output:
+
+```bash
+milady doctor --json
+```
+
+Returns a JSON object with `summary` (pass/warn/fail/skip counts) and `checks` (detailed results array). Exits with code 1 if any checks fail.
 
 ## Related
 
 - [milady setup](/cli/setup) -- initialize the workspace
 - [milady config](/cli/config) -- inspect configuration values
 - [milady models](/cli/models) -- verify model provider key configuration
-- [milady plugins test](/cli/plugins) -- validate custom drop-in plugins
 - [Environment Variables](/cli/environment) -- all environment variables that affect diagnostics

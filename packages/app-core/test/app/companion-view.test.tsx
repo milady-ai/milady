@@ -47,7 +47,8 @@ vi.mock("../../src/components/PtyConsoleDrawer", () => ({
 }));
 
 vi.mock("../../src/components/PtyConsoleSidePanel", () => ({
-  PtyConsoleSidePanel: () => React.createElement("div", null, "PtyConsoleSidePanel"),
+  PtyConsoleSidePanel: () =>
+    React.createElement("div", null, "PtyConsoleSidePanel"),
 }));
 
 const mockUploadCustomVrm = vi.fn(async () => {});
@@ -314,10 +315,18 @@ describe("CompanionView", () => {
     // ChatModalView is gated behind avatarReady (VRM teleport), so it won't
     // render until the avatar finishes loading. Verify the header overlay is
     // present instead (rendered with opacity 0 while waiting).
-    const headerOverlay = tree?.root.findAllByProps({
-      "data-testid": "companion-header-chat-controls",
+    const desktopVoice = tree?.root.findAllByProps({
+      "data-testid": "companion-header-desktop-voice",
     });
-    expect(headerOverlay.length).toBeGreaterThanOrEqual(1);
+    const desktopNewChat = tree?.root.findAllByProps({
+      "data-testid": "companion-header-desktop-new-chat",
+    });
+    expect(desktopVoice.length).toBeGreaterThanOrEqual(1);
+    expect(desktopNewChat.length).toBeGreaterThanOrEqual(1);
+    const headerShell = tree?.root.findAllByProps({
+      "data-testid": "companion-header-shell",
+    });
+    expect(headerShell).toHaveLength(1);
   });
 
   it("reveals the companion overlay if teleport completion never arrives", async () => {
@@ -339,7 +348,7 @@ describe("CompanionView", () => {
       ).toHaveLength(0);
 
       await act(async () => {
-        vi.advanceTimersByTime(3500);
+        vi.advanceTimersByTime(1400);
       });
 
       expect(
@@ -357,7 +366,7 @@ describe("CompanionView", () => {
     }
   });
 
-  it("renders centered companion header chat controls", async () => {
+  it("renders split companion header actions around the shell chrome", async () => {
     const setState = vi.fn();
     const handleStartDraftConversation = vi.fn(async () => {});
     const handleNewConversation = vi.fn(async () => {});
@@ -374,8 +383,14 @@ describe("CompanionView", () => {
       tree = TestRenderer.create(React.createElement(CompanionView));
     });
 
-    const controls = tree?.root.findByProps({
-      "data-testid": "companion-header-chat-controls",
+    const desktopVoice = tree?.root.findByProps({
+      "data-testid": "companion-header-desktop-voice",
+    });
+    const desktopNewChat = tree?.root.findByProps({
+      "data-testid": "companion-header-desktop-new-chat",
+    });
+    const headerShell = tree?.root.findByProps({
+      "data-testid": "companion-header-shell",
     });
     const voiceButton = tree?.root.find(
       (node) =>
@@ -388,12 +403,12 @@ describe("CompanionView", () => {
         node.props["aria-label"] === "companion.newChat",
     );
 
-    expect(controls).toBeDefined();
-    expect(String(controls.props.className)).not.toContain("rounded-full");
-    expect(String(controls.props.className)).not.toContain("border");
+    expect(String(headerShell.props.className)).toContain("max-w-5xl");
+    expect(String(desktopVoice.props.className)).toContain("shrink-0");
+    expect(String(desktopNewChat.props.className)).toContain("shrink-0");
     expect(voiceButton).toBeDefined();
     expect(newChatButton).toBeDefined();
-    expect(String(newChatButton.props.className)).toContain("text-txt");
+    expect(String(newChatButton.props.className)).toContain("backdrop-blur-xl");
 
     await act(async () => {
       voiceButton?.props.onClick();
@@ -426,6 +441,11 @@ describe("CompanionView", () => {
       "data-testid": "companion-cloud-status",
     });
     expect(connectedBadge.props["data-status"]).toBe("regular-credits");
+    expect(String(connectedBadge.props.className)).toContain("backdrop-blur-xl");
+    expect(String(connectedBadge.props.className)).toContain("font-medium");
+    expect(String(connectedBadge.props.className)).not.toContain("font-mono");
+    expect(connectedBadge.props.style.backgroundColor).toBeUndefined();
+    expect(connectedBadge.props.style.borderColor).toBe("transparent");
     expect(text(connectedBadge)).toContain("$87.5");
 
     mockUseApp.mockReturnValue(createContext());

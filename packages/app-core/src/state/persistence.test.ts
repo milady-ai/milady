@@ -8,17 +8,20 @@ import { describe, expect, it } from "vitest";
 // Import the load/save helpers that call normalizeOnboardingStep internally so
 // we can verify the contract without re-exporting the private function.
 import {
+  applyUiTheme,
   clearPersistedOnboardingStep,
   loadCompanionAnimateWhenHidden,
   loadCompanionHalfFramerateMode,
   loadCompanionVrmPowerMode,
   loadPersistedOnboardingStep,
+  loadUiTheme,
   normalizeCompanionHalfFramerateMode,
   normalizeCompanionVrmPowerMode,
   saveCompanionAnimateWhenHidden,
   saveCompanionHalfFramerateMode,
   saveCompanionVrmPowerMode,
   saveOnboardingStep,
+  saveUiTheme,
 } from "./persistence";
 
 // We need a localStorage-like environment. Vitest (jsdom not configured here)
@@ -117,6 +120,86 @@ describe("normalizeOnboardingStep (via load/save helpers)", () => {
       clearPersistedOnboardingStep();
       expect(loadPersistedOnboardingStep()).toBeNull();
     });
+  });
+});
+
+describe("theme persistence", () => {
+  it("prefers the current theme key and mirrors saves to the legacy key", () => {
+    withLocalStorageStub(() => {
+      saveUiTheme("light");
+      expect(localStorage.getItem("eliza:ui-theme")).toBe("light");
+      expect(localStorage.getItem("milady:ui-theme")).toBe("light");
+      expect(loadUiTheme()).toBe("light");
+    });
+  });
+
+  it("falls back to the legacy Milady theme key when needed", () => {
+    withLocalStorageStub(() => {
+      localStorage.setItem("milady:ui-theme", "light");
+      expect(loadUiTheme()).toBe("light");
+    });
+  });
+
+  it("applies the theme to the document root selectors", () => {
+    const previousDocument = (globalThis as Record<string, unknown>).document;
+    let attributeWrites = 0;
+    let addCalls = 0;
+    let removeCalls = 0;
+    const root = {
+      dataset: {},
+      style: {
+        colorScheme: "",
+      },
+      classList: {
+        add: (value: string) => {
+          addCalls += 1;
+          classes.add(value);
+        },
+        remove: (value: string) => {
+          removeCalls += 1;
+          classes.delete(value);
+        },
+        contains: (value: string) => classes.has(value),
+      },
+      getAttribute: (name: string) => attributes[name] ?? null,
+      setAttribute: (name: string, value: string) => {
+        attributeWrites += 1;
+        attributes[name] = value;
+      },
+    };
+    const classes = new Set<string>();
+    const attributes: Record<string, string> = {};
+
+    (globalThis as Record<string, unknown>).document = {
+      documentElement: root,
+    };
+
+    try {
+      applyUiTheme("light");
+      expect(attributes["data-theme"]).toBe("light");
+      expect(classes.has("dark")).toBe(false);
+      expect(root.style.colorScheme).toBe("light");
+
+      applyUiTheme("dark");
+      expect(attributes["data-theme"]).toBe("dark");
+      expect(classes.has("dark")).toBe(true);
+      expect(root.style.colorScheme).toBe("dark");
+
+      const writesAfterDark = attributeWrites;
+      const addsAfterDark = addCalls;
+      const removesAfterDark = removeCalls;
+
+      applyUiTheme("dark");
+      expect(attributeWrites).toBe(writesAfterDark);
+      expect(addCalls).toBe(addsAfterDark);
+      expect(removeCalls).toBe(removesAfterDark);
+    } finally {
+      if (previousDocument === undefined) {
+        delete (globalThis as Record<string, unknown>).document;
+      } else {
+        (globalThis as Record<string, unknown>).document = previousDocument;
+      }
+    }
   });
 });
 

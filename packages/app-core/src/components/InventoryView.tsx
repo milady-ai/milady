@@ -7,12 +7,39 @@
 
 import type { StewardStatusResponse } from "@miladyai/app-core/api";
 import { useApp } from "@miladyai/app-core/state";
-import { Button } from "@miladyai/ui";
-import { useCallback, useEffect, useState } from "react";
+import {
+  Button,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@miladyai/ui";
+import {
+  Coins,
+  Copy,
+  Image as ImageIcon,
+  RefreshCw,
+  Wallet,
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  APP_PANEL_SHELL_CLASSNAME,
+  APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
+  APP_SIDEBAR_CARD_BASE_CLASSNAME,
+  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
+  APP_SIDEBAR_HEADER_CLASSNAME,
+  APP_SIDEBAR_INNER_CLASSNAME,
+  APP_SIDEBAR_KICKER_CLASSNAME,
+  APP_SIDEBAR_META_CLASSNAME,
+  APP_SIDEBAR_PILL_CLASSNAME,
+  APP_SIDEBAR_RAIL_CLASSNAME,
+} from "./sidebar-shell-styles";
 import { TradePanel } from "./BscTradePanel";
 import {
   CHAIN_CONFIGS,
   type ChainKey,
+  PRIMARY_CHAIN_KEYS,
   chainKeyToWalletRpcChain,
   resolveChainKey,
 } from "./chainConfig";
@@ -24,12 +51,40 @@ import {
   saveTrackedTokens,
   type TrackedToken,
 } from "./inventory";
-import { InventoryToolbar } from "./inventory/InventoryToolbar";
 import { NftGrid } from "./inventory/NftGrid";
 import { TokensTable } from "./inventory/TokensTable";
 import { useInventoryData } from "./inventory/useInventoryData";
 
 /* ── Component ─────────────────────────────────────────────────────── */
+
+const WALLET_SHELL_CLASS = APP_PANEL_SHELL_CLASSNAME;
+const WALLET_SIDEBAR_CLASS =
+  `lg:w-[21rem] lg:max-w-[352px] ${APP_SIDEBAR_RAIL_CLASSNAME}`;
+const WALLET_SIDEBAR_KICKER_CLASS = APP_SIDEBAR_KICKER_CLASSNAME;
+const WALLET_SIDEBAR_ITEM_BASE_CLASS = APP_SIDEBAR_CARD_BASE_CLASSNAME;
+const WALLET_SIDEBAR_ITEM_ACTIVE_CLASS = APP_SIDEBAR_CARD_ACTIVE_CLASSNAME;
+const WALLET_SIDEBAR_ITEM_INACTIVE_CLASS = APP_SIDEBAR_CARD_INACTIVE_CLASSNAME;
+const WALLET_PANEL_CLASS =
+  "rounded-[28px] border border-border/35 bg-bg/20 shadow-sm ring-1 ring-border/10";
+
+function countVisibleAssetsForFocus(
+  focus: string,
+  rows:
+    | Array<{
+        chain: string;
+        balanceRaw: number;
+        valueUsd: number;
+        isTracked?: boolean;
+      }>
+    | undefined,
+): number {
+  return (rows ?? []).filter((row) => {
+    const hasBalance = row.isTracked || row.balanceRaw > 0 || row.valueUsd > 0;
+    if (!hasBalance) return false;
+    if (focus === "all") return true;
+    return resolveChainKey(row.chain) === focus;
+  }).length;
+}
 
 export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
   const {
@@ -106,6 +161,7 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
   // ── Derived data (hook) ───────────────────────────────────────────
   const {
     chainFocus,
+    tokenRows,
     allNfts,
     focusedChainError,
     focusedChainName,
@@ -184,12 +240,81 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
     solAddr ? { label: "Solana", address: solAddr } : null,
   ].filter((item): item is { label: string; address: string } => Boolean(item));
 
+  const chainItemMeta = useMemo(() => {
+    const totalAssetCount = countVisibleAssetsForFocus("all", tokenRows);
+    const items = [
+      {
+        key: "all",
+        label: "All Assets",
+        description:
+          totalAssetCount > 0
+            ? `${totalAssetCount} assets across connected wallets`
+            : "Browse every connected chain from one place",
+      },
+    ];
+
+    for (const key of PRIMARY_CHAIN_KEYS) {
+      const config = CHAIN_CONFIGS[key];
+      const assetCount = countVisibleAssetsForFocus(key, tokenRows);
+      const chainReady =
+        key === "ethereum"
+          ? ethereumReady
+          : key === "base"
+            ? baseReady
+            : key === "bsc"
+              ? bscReady
+              : key === "avax"
+                ? avaxReady
+                : key === "solana"
+                  ? solanaReady
+                  : false;
+      const hasAddress = key === "solana" ? Boolean(solAddr) : Boolean(evmAddr);
+
+      items.push({
+        key,
+        label: config.name,
+        description: !hasAddress
+          ? "No wallet address yet"
+          : chainReady
+            ? assetCount > 0
+              ? `${assetCount} visible assets`
+              : "Connected and ready"
+            : "Needs RPC setup",
+      });
+    }
+
+    return items;
+  }, [
+    avaxReady,
+    baseReady,
+    bscReady,
+    ethereumReady,
+    evmAddr,
+    solAddr,
+    solanaReady,
+    tokenRows,
+  ]);
+
   const focusedChainLabel =
     focusedChainName ??
     (chainFocus !== "all"
       ? (CHAIN_CONFIGS[chainFocus as keyof typeof CHAIN_CONFIGS]?.name ??
         chainFocus)
       : null);
+  const walletPageTitle =
+    chainFocus === "all"
+      ? inventoryView === "tokens"
+        ? "Wallet Overview"
+        : "NFT Gallery"
+      : `${focusedChainLabel ?? "Chain"} ${inventoryView === "tokens" ? "Assets" : "NFTs"}`;
+  const walletPageDescription =
+    chainFocus === "all"
+      ? inventoryView === "tokens"
+        ? "Track balances, managed addresses, and trading readiness in one place."
+        : "Review collectibles across every connected wallet."
+      : inventoryView === "tokens"
+        ? `Balances and watchlist activity for ${focusedChainLabel ?? "the selected chain"}.`
+        : `Collectibles discovered on ${focusedChainLabel ?? "the selected chain"}.`;
   const inlineError =
     chainFocus !== "all" && focusedChainError
       ? {
@@ -283,9 +408,11 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
   // ── Standalone states (no two-panel layout) ─────────────────────
   if (walletLoading && !walletBalances) {
     return (
-      <div className={inModal ? "p-6 h-full overflow-y-auto" : ""}>
-        <div className="text-center py-10 text-muted italic mt-6">
-          {t("wallet.loadingBalances")}
+      <div className="flex h-full w-full min-h-0 bg-bg p-0 lg:p-1">
+        <div className={`${WALLET_SHELL_CLASS} items-center justify-center`}>
+          <div className="rounded-[28px] border border-border/35 bg-bg/20 px-6 py-10 text-center text-sm text-muted shadow-sm ring-1 ring-border/10">
+            {t("wallet.loadingBalances")}
+          </div>
         </div>
       </div>
     );
@@ -293,28 +420,27 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
 
   if (!evmAddr && !solAddr) {
     return (
-      <div className={inModal ? "p-6 h-full overflow-y-auto" : ""}>
-        <div
-          className={`mt-4 border px-4 py-6 text-center ${
-            inModal
-              ? "border-[var(--border)] bg-[rgba(255,255,255,0.04)] backdrop-blur-sm rounded-xl"
-              : "border-border bg-card"
-          }`}
-        >
-          <div className="text-sm font-bold mb-1">
-            {t("wallet.noOnchainWallet")}
+      <div className="flex h-full w-full min-h-0 bg-bg p-0 lg:p-1">
+        <div className={`${WALLET_SHELL_CLASS} items-center justify-center`}>
+          <div className="mx-4 w-full max-w-xl rounded-[28px] border border-border/35 bg-bg/20 px-6 py-8 text-center shadow-sm ring-1 ring-border/10">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-accent/25 bg-accent/10 text-accent">
+              <Wallet className="h-6 w-6" />
+            </div>
+            <div className="text-base font-semibold text-txt-strong">
+              {t("wallet.noOnchainWallet")}
+            </div>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted">
+              {t("wallet.noOnchainWalletHint")}
+            </p>
+            <Button
+              variant="default"
+              size="sm"
+              className="mt-5 rounded-full px-5"
+              onClick={() => setTab("settings")}
+            >
+              {t("nav.settings")}
+            </Button>
           </div>
-          <p className="text-xs text-muted mb-3">
-            {t("wallet.noOnchainWalletHint")}
-          </p>
-          <Button
-            variant="default"
-            size="sm"
-            className="font-mono"
-            onClick={() => setTab("settings")}
-          >
-            {t("nav.settings")}
-          </Button>
         </div>
       </div>
     );
@@ -322,112 +448,338 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
 
   // ── Wallet layout ───────────────────────────────────────────────
   return (
-    <div
-      className={`flex min-h-full w-full flex-col ${inModal ? "p-6 h-full overflow-y-auto" : ""}`}
-    >
-      <InventoryToolbar
-        t={t}
-        totalUsd={totalUsd}
-        inventoryView={inventoryView}
-        inventorySort={inventorySort}
-        chainFocus={chainFocus}
-        walletBalances={walletBalances}
-        walletNfts={walletNfts}
-        addresses={addresses}
-        onCopyAddress={handleCopyAddress}
-        setState={setState}
-        onChainChange={(chain) => setState("inventoryChainFocus", chain)}
-        loadBalances={loadBalances}
-        loadNfts={loadNfts}
-      />
-
-      {stewardStatus?.connected && (
-        <div
-          className="mt-2 flex items-center gap-1.5 text-[11px] text-purple-400"
-          data-testid="steward-status-badge"
-        >
-          <span>🔐</span>
-          <span>Steward vault connected</span>
-          {stewardStatus.evmAddress && (
-            <span className="text-muted font-mono ml-1">
-              {stewardStatus.evmAddress.slice(0, 6)}…
-              {stewardStatus.evmAddress.slice(-4)}
-            </span>
-          )}
-        </div>
-      )}
-
-      <div className="mt-3 flex flex-col gap-2">
-        {walletError && (
-          <div className="border-l-2 border-danger/70 pl-3 py-1 text-xs text-danger">
-            {walletError}
-          </div>
-        )}
-
-        {inlineError?.message && (
-          <div className="flex items-center gap-2 border-l-2 border-danger/70 pl-3 py-1 text-[11px] text-danger">
-            <span>{inlineError.message}</span>
-            <Button
-              variant="link"
-              size="sm"
-              className="text-[11px] font-medium text-danger h-auto p-0"
-              onClick={() => void loadBalances()}
-              title={inlineError.retryTitle ?? t("common.retry")}
-            >
-              {t("common.retry")}
-            </Button>
-          </div>
-        )}
-
-        {headerWarning && (
-          <div className="border-l-2 border-accent/70 pl-3 py-1 text-[11px]">
-            <div className="font-semibold text-txt-strong">
-              {headerWarning.title}
+    <div className="flex h-full w-full min-h-0 bg-bg p-0 lg:p-1">
+      <div className={WALLET_SHELL_CLASS}>
+        <aside className={WALLET_SIDEBAR_CLASS}>
+          <div className={APP_SIDEBAR_INNER_CLASSNAME}>
+            <div className={APP_SIDEBAR_HEADER_CLASSNAME}>
+              <div className={WALLET_SIDEBAR_KICKER_CLASS}>Wallet</div>
+              <div className={APP_SIDEBAR_META_CLASSNAME}>
+                {addresses.length > 0
+                  ? `${addresses.length} funding route${addresses.length === 1 ? "" : "s"} available`
+                  : "Managed wallet overview"}
+              </div>
             </div>
-            <div className="mt-1 text-muted">{headerWarning.body}</div>
-            <Button
-              variant="link"
-              size="sm"
-              className="mt-1 text-[11px] font-medium text-accent h-auto p-0"
-              onClick={goToRpcSettings}
-            >
-              {headerWarning.actionLabel}
-            </Button>
+
+            <div className="mt-4 rounded-[24px] border border-border/30 bg-bg/18 p-4 shadow-sm ring-1 ring-border/10">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60">
+                Portfolio
+              </div>
+              <div
+                className="mt-2 text-[2rem] font-semibold leading-none text-txt-strong"
+                data-testid="wallet-balance-value"
+              >
+                {totalUsd > 0
+                  ? `$${totalUsd.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}`
+                  : "$0.00"}
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/75">
+                <span className={APP_SIDEBAR_PILL_CLASSNAME}>
+                  {inventoryView === "tokens" ? t("wallet.tokens") : t("wallet.nfts")}
+                </span>
+                {inventoryView === "tokens" && (
+                  <span className={APP_SIDEBAR_PILL_CLASSNAME}>
+                    Sort: {inventorySort}
+                  </span>
+                )}
+                {chainFocus !== "all" && (
+                  <span className="rounded-full border border-accent/25 bg-accent/8 px-2.5 py-1 text-accent">
+                    {focusedChainLabel ?? chainFocus}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-2">
+              <div className={WALLET_SIDEBAR_KICKER_CLASS}>View</div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  data-testid="wallet-view-tokens"
+                  className={`h-10 rounded-xl border text-xs font-semibold ${
+                    inventoryView === "tokens"
+                      ? WALLET_SIDEBAR_ITEM_ACTIVE_CLASS
+                      : "border-border/45 bg-bg/20 text-muted hover:border-border/70 hover:bg-bg/35 hover:text-txt"
+                  }`}
+                  onClick={() => {
+                    setState("inventoryView", "tokens");
+                    if (!walletBalances) void loadBalances();
+                  }}
+                >
+                  <Coins className="h-4 w-4" />
+                  {t("wallet.tokens")}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  data-testid="wallet-view-nfts"
+                  className={`h-10 rounded-xl border text-xs font-semibold ${
+                    inventoryView === "nfts"
+                      ? WALLET_SIDEBAR_ITEM_ACTIVE_CLASS
+                      : "border-border/45 bg-bg/20 text-muted hover:border-border/70 hover:bg-bg/35 hover:text-txt"
+                  }`}
+                  onClick={() => {
+                    setState("inventoryView", "nfts");
+                    if (!walletNfts) void loadNfts();
+                  }}
+                >
+                  <ImageIcon className="h-4 w-4" />
+                  {t("wallet.nfts")}
+                </Button>
+              </div>
+            </div>
+
+            <div className="mt-4 flex min-h-0 flex-1 flex-col">
+              <div className={WALLET_SIDEBAR_KICKER_CLASS}>Chains</div>
+              <nav className="mt-3 min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-3">
+                {chainItemMeta.map((item) => {
+                  const isActive = chainFocus === item.key;
+                  return (
+                    <Button
+                      key={item.key}
+                      variant="ghost"
+                      size="sm"
+                      type="button"
+                      onClick={() => setState("inventoryChainFocus", item.key)}
+                      aria-current={isActive ? "page" : undefined}
+                      className={`${WALLET_SIDEBAR_ITEM_BASE_CLASS} ${
+                        isActive
+                          ? WALLET_SIDEBAR_ITEM_ACTIVE_CLASS
+                          : WALLET_SIDEBAR_ITEM_INACTIVE_CLASS
+                      }`}
+                    >
+                      <span
+                        className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border text-sm font-bold ${
+                          isActive
+                            ? "border-accent/30 bg-accent/18 text-txt-strong"
+                            : "border-border/50 bg-bg-accent/80 text-muted"
+                        }`}
+                      >
+                        {item.key === "all"
+                          ? "A"
+                          : CHAIN_CONFIGS[item.key as ChainKey].nativeSymbol
+                              .slice(0, 1)
+                              .toUpperCase()}
+                      </span>
+                      <span className="min-w-0 flex-1 text-left">
+                        <span className="block text-sm font-semibold leading-snug">
+                          {item.key === "all" ? t("wallet.all") : item.label}
+                        </span>
+                        <span className="mt-1 block line-clamp-2 text-[11px] leading-relaxed text-muted/85">
+                          {item.description}
+                        </span>
+                      </span>
+                    </Button>
+                  );
+                })}
+              </nav>
+            </div>
+
+            <div className="mt-4 space-y-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-10 w-full justify-start rounded-xl px-4 text-xs font-semibold shadow-sm"
+                onClick={() =>
+                  inventoryView === "tokens" ? loadBalances() : loadNfts()
+                }
+              >
+                <RefreshCw className="h-4 w-4" />
+                {t("common.refresh")}
+              </Button>
+              {addresses.map((item) => (
+                <Button
+                  key={`${item.label}-${item.address}`}
+                  variant="outline"
+                  size="sm"
+                  data-testid={`wallet-copy-${item.label.toLowerCase()}-address`}
+                  className="h-10 w-full justify-start rounded-xl px-4 text-xs font-semibold shadow-sm"
+                  onClick={() => void handleCopyAddress(item.address)}
+                >
+                  <Copy className="h-4 w-4" />
+                  {item.label === "EVM"
+                    ? t("wallet.copyEvmAddress")
+                    : t("wallet.copySolanaAddress")}
+                </Button>
+              ))}
+              {addresses.length > 0 && (
+                <div
+                  className="px-1 pt-1 text-[11px] leading-relaxed text-muted"
+                  data-testid="wallet-address-copy-row"
+                >
+                  {t("wallet.receiveHint")}
+                </div>
+              )}
+            </div>
           </div>
-        )}
+        </aside>
 
-        {chainFocus === "bsc" && evmAddr && (
-          <TradePanel
-            tradeReady={tradeReady}
-            bnbBalance={bnbBalance}
-            onAddToken={handleAddToken}
-            getBscTradePreflight={getBscTradePreflight}
-            getBscTradeQuote={getBscTradeQuote}
-            executeBscTrade={executeBscTrade}
-            getBscTradeTxStatus={getBscTradeTxStatus}
-          />
-        )}
-      </div>
+        <div className="min-w-0 flex-1 overflow-y-auto bg-bg/10">
+          <div className="mx-auto max-w-[76rem] px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
+            <section className={`${WALLET_PANEL_CLASS} px-5 py-5 sm:px-6`}>
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div className="min-w-0 flex-1">
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
+                    Wallet
+                  </div>
+                  <h1 className="mt-1 text-2xl font-semibold text-txt-strong">
+                    {walletPageTitle}
+                  </h1>
+                  <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+                    {walletPageDescription}
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+                  <Select
+                    value={chainFocus}
+                    onValueChange={(value) =>
+                      setState("inventoryChainFocus", value)
+                    }
+                  >
+                    <SelectTrigger
+                      data-testid="wallet-chain-select"
+                      aria-label={t("wallet.chain")}
+                      className="h-10 min-w-32 rounded-xl border border-border/60 bg-card/88 px-3 text-sm text-txt shadow-sm"
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">{t("wallet.all")}</SelectItem>
+                      {PRIMARY_CHAIN_KEYS.map((key) => (
+                        <SelectItem key={key} value={key}>
+                          {CHAIN_CONFIGS[key].name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {inventoryView === "tokens" && (
+                    <Select
+                      value={inventorySort}
+                      onValueChange={(nextSort) => {
+                        if (
+                          nextSort === "value" ||
+                          nextSort === "chain" ||
+                          nextSort === "symbol"
+                        ) {
+                          setState("inventorySort", nextSort);
+                        }
+                      }}
+                    >
+                      <SelectTrigger
+                        data-testid="wallet-sort-select"
+                        aria-label={t("wallet.sort")}
+                        className="h-10 min-w-36 rounded-xl border border-border/60 bg-card/88 px-3 text-sm text-txt shadow-sm"
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="value">{t("wallet.value")}</SelectItem>
+                        <SelectItem value="chain">{t("wallet.chain")}</SelectItem>
+                        <SelectItem value="symbol">{t("wallet.name")}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                  <span className="rounded-full border border-border/45 bg-bg/25 px-3 py-1.5 text-[11px] font-semibold text-muted">
+                    {chainFocus === "all" ? t("wallet.all") : focusedChainLabel}
+                  </span>
+                </div>
+              </div>
+            </section>
 
-      <div className="mt-4 flex min-h-[58vh] flex-1 flex-col">
-        {inventoryView === "tokens" ? (
-          <TokensTable
-            t={t}
-            walletLoading={walletLoading}
-            walletBalances={walletBalances}
-            visibleRows={visibleRows}
-            visibleChainErrors={visibleChainErrors}
-            inventoryChainFocus={inventoryChainFocus ?? "all"}
-            handleUntrackToken={handleUntrackToken}
-          />
-        ) : (
-          <NftGrid
-            t={t}
-            walletNftsLoading={walletNftsLoading}
-            walletNfts={walletNfts}
-            allNfts={allNfts}
-          />
-        )}
+            <div className="mt-4 grid gap-3">
+              {stewardStatus?.connected && (
+                <div
+                  className="inline-flex items-center gap-1.5 rounded-2xl border border-accent/25 bg-accent/10 px-3 py-2 text-[11px] text-accent-fg shadow-sm"
+                  data-testid="steward-status-badge"
+                >
+                  <span>🔐</span>
+                  <span>Steward vault connected</span>
+                  {stewardStatus.evmAddress && (
+                    <span className="ml-1 font-mono text-muted">
+                      {stewardStatus.evmAddress.slice(0, 6)}…
+                      {stewardStatus.evmAddress.slice(-4)}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {walletError && (
+                <div className="rounded-2xl border border-danger/25 bg-danger/8 px-4 py-3 text-sm text-danger shadow-sm">
+                  {walletError}
+                </div>
+              )}
+
+              {inlineError?.message && (
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-danger/25 bg-danger/8 px-4 py-3 text-sm text-danger shadow-sm">
+                  <span>{inlineError.message}</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 rounded-full border-danger/35 px-3 text-[11px] text-danger shadow-none hover:bg-danger/10"
+                    onClick={() => void loadBalances()}
+                    title={inlineError.retryTitle ?? t("common.retry")}
+                  >
+                    {t("common.retry")}
+                  </Button>
+                </div>
+              )}
+
+              {headerWarning && (
+                <div className="rounded-2xl border border-accent/25 bg-accent/8 px-4 py-3 text-sm shadow-sm">
+                  <div className="font-semibold text-txt-strong">
+                    {headerWarning.title}
+                  </div>
+                  <div className="mt-1 text-muted">{headerWarning.body}</div>
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="mt-2 h-auto p-0 text-[11px] font-medium text-accent"
+                    onClick={goToRpcSettings}
+                  >
+                    {headerWarning.actionLabel}
+                  </Button>
+                </div>
+              )}
+
+              {chainFocus === "bsc" && evmAddr && (
+                <TradePanel
+                  tradeReady={tradeReady}
+                  bnbBalance={bnbBalance}
+                  onAddToken={handleAddToken}
+                  getBscTradePreflight={getBscTradePreflight}
+                  getBscTradeQuote={getBscTradeQuote}
+                  executeBscTrade={executeBscTrade}
+                  getBscTradeTxStatus={getBscTradeTxStatus}
+                />
+              )}
+            </div>
+
+            <div className={`mt-4 min-h-[58vh] ${WALLET_PANEL_CLASS} overflow-hidden`}>
+              {inventoryView === "tokens" ? (
+                <TokensTable
+                  t={t}
+                  walletLoading={walletLoading}
+                  walletBalances={walletBalances}
+                  visibleRows={visibleRows}
+                  visibleChainErrors={visibleChainErrors}
+                  inventoryChainFocus={inventoryChainFocus ?? "all"}
+                  handleUntrackToken={handleUntrackToken}
+                />
+              ) : (
+                <NftGrid
+                  t={t}
+                  walletNftsLoading={walletNftsLoading}
+                  walletNfts={walletNfts}
+                  allNfts={allNfts}
+                />
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -109,21 +109,28 @@ milady
 First run walks you through onboarding:
 
 ```
-┌  milady
+┌  WELCOME TO MILADY!
 │
-◇  What should I call your agent?
-│  mila
-│
-◇  Pick a vibe
-│  ● Helpful & friendly
-│  ○ Tsundere
-│  ○ Unhinged
+◇  ♡♡milady♡♡: Hey there, I'm.... err, what was my name again?
+│  ● Sakuya
+│  ○ Reimu
+│  ○ Koishi
+│  ○ Marisa
 │  ○ Custom...
 │
+◇  Sakuya: Now... how do I like to talk again?
+│  ● uwu~       (soft & sweet)
+│  ○ hell yeah   (bold & fearless)
+│  ○ lol k       (terminally online)
+│  ○ Noted.      (composed & precise)
+│  ○ hehe~       (playful trickster)
+│  ○ ...         (quiet intensity)
+│  ○ lmao kms    (unhinged & dark)
+│
 ◇  Connect a brain
-│  ● Anthropic (Claude) ← recommended, actually smart
+│  ● Anthropic (Claude)
 │  ○ OpenAI (GPT)
-│  ○ Ollama (local, free, full schizo mode)
+│  ○ Ollama (local, no key)
 │  ○ Skip for now
 │
 ◇  API key?
@@ -342,7 +349,7 @@ When running, milady shows a live terminal interface:
 
 ```
 ╭─────────────────────────────────────────────────────────────╮
-│  milady v0.1.0                              ▲ running      │
+│  milady v2.0.0                              ▲ running      │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
 │  Agent: mila                                                │
@@ -459,7 +466,7 @@ Or use `~/.milady/.env` for secrets.
 | [Perplexity](https://perplexity.ai) | `PERPLEXITY_API_KEY` | search-augmented gen |
 | [Vercel AI Gateway](https://sdk.vercel.ai) | `AI_GATEWAY_API_KEY` | unified gateway |
 
-See [Model Providers](/docs/model-providers.mdx) for the full list of 19 supported providers.
+See [Model Providers](/docs/model-providers.mdx) for provider details. The `milady models` command checks which providers are configured.
 
 ### Using Ollama (local models)
 
@@ -551,7 +558,7 @@ bun run doctor       # diagnose environment issues
 bun run repair       # re-run postinstall hooks
 ```
 
-See **[DEVELOPMENT.md](./DEVELOPMENT.md)** for the full development guide including troubleshooting, architecture overview, and config reference.
+See **[Architecture](docs/architecture.mdx)** for the full development guide including architecture overview and config reference. See **[CONTRIBUTING.md](./CONTRIBUTING.md)** for contribution guidelines.
 
 ### Documentation (with WHYs)
 

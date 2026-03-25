@@ -24,6 +24,8 @@ const FORCE_VRM =
   typeof window !== "undefined" &&
   new URLSearchParams(window.location.search).get("test_force_vrm") === "1";
 
+const ONBOARDING_UI_REVEAL_FALLBACK_MS = 1200;
+
 const DISABLE_ONBOARDING_VRM =
   !FORCE_VRM &&
   (String(import.meta.env.VITE_E2E_DISABLE_VRM ?? "").toLowerCase() ===
@@ -45,10 +47,12 @@ export function OnboardingWizard() {
     t,
     onboardingUiRevealNonce,
   } = useApp();
+  const revealWelcomeUiImmediately =
+    disableVrm || onboardingStep === "welcome" || onboardingUiRevealNonce > 0;
   // After Reset Agent from chat/companion, nonce bumps: show welcome UI immediately instead
   // of waiting for VrmStage reveal (often missing when remounting after an active session).
   const [revealStarted, setRevealStarted] = useState(
-    () => disableVrm || onboardingUiRevealNonce > 0,
+    () => revealWelcomeUiImmediately,
   );
 
   const setUiLanguage = (lang: UiLanguage) =>
@@ -74,15 +78,40 @@ export function OnboardingWizard() {
     };
   }, [uiTheme]);
 
+  useEffect(() => {
+    const docEl = document.documentElement;
+    const body = document.body;
+    const prevDocOverflow = docEl.style.overflow;
+    const prevDocOverscroll = docEl.style.overscrollBehavior;
+    const prevBodyOverflow = body.style.overflow;
+    const prevBodyOverscroll = body.style.overscrollBehavior;
+
+    // Lock page-level scroll while onboarding is active; panel handles its own scroll.
+    docEl.style.overflow = "hidden";
+    docEl.style.overscrollBehavior = "none";
+    body.style.overflow = "hidden";
+    body.style.overscrollBehavior = "none";
+
+    return () => {
+      docEl.style.overflow = prevDocOverflow;
+      docEl.style.overscrollBehavior = prevDocOverscroll;
+      body.style.overflow = prevBodyOverflow;
+      body.style.overscrollBehavior = prevBodyOverscroll;
+    };
+  }, []);
+
   // Overlay stays opacity 0 until VrmStage calls onRevealStart. After Reset Milady (or
   // any remount), the engine sometimes never emits reveal — user sees only the avatar.
   useEffect(() => {
-    if (disableVrm) return;
+    if (revealWelcomeUiImmediately) {
+      setRevealStarted(true);
+      return;
+    }
     const id = window.setTimeout(() => {
       setRevealStarted((prev) => (prev ? prev : true));
-    }, 3500);
+    }, ONBOARDING_UI_REVEAL_FALLBACK_MS);
     return () => window.clearTimeout(id);
-  }, [disableVrm]);
+  }, [revealWelcomeUiImmediately]);
 
   function renderStep() {
     switch (onboardingStep) {
@@ -133,7 +162,7 @@ export function OnboardingWizard() {
           inset: 0,
           pointerEvents: "none",
           opacity: revealStarted ? 1 : 0,
-          transition: "opacity 1.2s ease-in-out",
+          transition: "opacity 0.7s ease-in-out",
           zIndex: 40,
         }}
       >

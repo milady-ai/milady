@@ -66,7 +66,19 @@ describe("PairingView", () => {
     });
     if (!tree) throw new Error("failed to render PairingView");
 
-    expect(tree.root.findAllByType("a")).toHaveLength(0);
+    const bodyText = tree.root
+      .findAllByType("p")
+      .map((p) => p.children.join(""));
+
+    const docsLinks = tree.root.findAll(
+      (node) =>
+        node.type === "a" &&
+        typeof node.props.href === "string" &&
+        node.props.href.includes("docs/api-reference.mdx"),
+    );
+
+    expect(bodyText.join(" ")).not.toContain("pairingview.PairingIsNotEnabl");
+    expect(docsLinks).toHaveLength(1);
     expect(tree.root.findAllByType("li")).toHaveLength(0);
   });
 });

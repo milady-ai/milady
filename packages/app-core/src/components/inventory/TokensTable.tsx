@@ -63,7 +63,7 @@ export function TokensTable({
 
   if (walletLoading) {
     return (
-      <div className="text-center py-10 text-muted italic text-xs">
+      <div className="flex min-h-[24rem] items-center justify-center px-6 py-10 text-center text-sm text-muted">
         {t("wallet.loadingBalances")}
       </div>
     );
@@ -71,14 +71,14 @@ export function TokensTable({
 
   if (visibleRows.length === 0) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 px-4 text-center">
+      <div className="flex min-h-[24rem] flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
         <div className="max-w-md space-y-2">
           <div className="text-base font-medium text-txt-strong">
             {walletBalances
               ? t("wallet.noTokensFound")
               : t("wallet.noDataRefresh")}
           </div>
-          <div className="text-xs text-muted">{t("wallet.emptyTokensCta")}</div>
+          <div className="text-sm text-muted">{t("wallet.emptyTokensCta")}</div>
         </div>
         {renderChainErrors()}
       </div>
@@ -86,105 +86,107 @@ export function TokensTable({
   }
 
   return (
-    <>
-      <table className="w-full border-collapse">
-        <thead>
-          <tr className="border-b border-border">
-            <th className="pl-3 pr-2 py-2 text-left w-12" />
-            <th className="px-3 py-2 text-left text-[10px] text-muted font-bold uppercase tracking-wide">
-              {t("wallet.table.token")}
-            </th>
-            <th className="px-3 py-2 text-right text-[10px] text-muted font-bold uppercase tracking-wide">
-              {t("wallet.table.balance")}
-            </th>
-            <th className="px-3 py-2 text-right text-[10px] text-muted font-bold uppercase tracking-wide">
-              {t("wallet.value")}
-            </th>
-            <th className="pl-3 pr-3 py-2 text-right w-24" />
-          </tr>
-        </thead>
-        <tbody>
-          {visibleRows.map((row) => {
-            const contractAddress = row.contractAddress;
-            return (
-              <tr
-                key={`${row.chain}-${row.symbol}-${row.contractAddress ?? ""}`}
-                className="border-b border-border last:border-b-0 hover:bg-bg-hover transition-colors"
-              >
-                {/* Logo */}
-                <td className="pl-3 pr-2 py-3 align-middle">
-                  <TokenLogo
-                    symbol={row.symbol}
-                    chain={row.chain}
-                    contractAddress={contractAddress}
-                    preferredLogoUrl={row.logoUrl}
-                    size={32}
-                  />
-                </td>
-                {/* Symbol + name */}
-                <td className="px-3 py-3 align-middle">
-                  <div className="flex items-center gap-2">
-                    <div>
-                      <div className="text-sm font-bold font-mono leading-tight">
-                        {row.symbol}
-                      </div>
-                      <div className="text-[10px] text-muted leading-tight mt-0.5">
-                        {row.isNative ? (
-                          <span className="text-[9px] bg-accent/15 text-accent px-1 py-0.5 rounded">
-                            {t("tokenstable.nativeGas")}
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1">
-                            <span className="truncate max-w-[160px] inline-block">
-                              {row.name}
+    <div className="flex flex-col">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[42rem] border-collapse">
+          <thead>
+            <tr className="border-b border-border/50 bg-bg/24">
+              <th className="pl-3 pr-2 py-2 text-left w-12" />
+              <th className="px-3 py-2 text-left text-[10px] text-muted font-bold uppercase tracking-wide">
+                {t("wallet.table.token")}
+              </th>
+              <th className="px-3 py-2 text-right text-[10px] text-muted font-bold uppercase tracking-wide">
+                {t("wallet.table.balance")}
+              </th>
+              <th className="px-3 py-2 text-right text-[10px] text-muted font-bold uppercase tracking-wide">
+                {t("wallet.value")}
+              </th>
+              <th className="pl-3 pr-3 py-2 text-right w-24" />
+            </tr>
+          </thead>
+          <tbody>
+            {visibleRows.map((row) => {
+              const contractAddress = row.contractAddress;
+              return (
+                <tr
+                  key={`${row.chain}-${row.symbol}-${row.contractAddress ?? ""}`}
+                  className="border-b border-border/35 last:border-b-0 hover:bg-bg-hover/65 transition-colors"
+                >
+                  {/* Logo */}
+                  <td className="pl-3 pr-2 py-3 align-middle">
+                    <TokenLogo
+                      symbol={row.symbol}
+                      chain={row.chain}
+                      contractAddress={contractAddress}
+                      preferredLogoUrl={row.logoUrl}
+                      size={32}
+                    />
+                  </td>
+                  {/* Symbol + name */}
+                  <td className="px-3 py-3 align-middle">
+                    <div className="flex items-center gap-2">
+                      <div>
+                        <div className="text-sm font-bold font-mono leading-tight">
+                          {row.symbol}
+                        </div>
+                        <div className="text-[10px] text-muted leading-tight mt-0.5">
+                          {row.isNative ? (
+                            <span className="rounded-full border border-accent/20 bg-accent/10 px-1.5 py-0.5 text-[9px] text-accent">
+                              {t("tokenstable.nativeGas")}
                             </span>
-                            {row.isTracked && (
-                              <span className="text-[9px] bg-accent/15 text-accent px-1 py-0.5 rounded">
-                                {t("wallet.manual")}
+                          ) : (
+                            <span className="inline-flex items-center gap-1">
+                              <span className="truncate max-w-[160px] inline-block">
+                                {row.name}
                               </span>
-                            )}
-                          </span>
-                        )}
+                              {row.isTracked && (
+                                <span className="rounded-full border border-accent/20 bg-accent/10 px-1.5 py-0.5 text-[9px] text-accent">
+                                  {t("wallet.manual")}
+                                </span>
+                              )}
+                            </span>
+                          )}
+                        </div>
                       </div>
+                      {inventoryChainFocus === "all" && (
+                        <span className="shrink-0 rounded-full border border-border/50 px-1.5 py-0.5 text-[9px] font-mono text-muted">
+                          {row.chain}
+                        </span>
+                      )}
                     </div>
-                    {inventoryChainFocus === "all" && (
-                      <span className="text-[9px] text-muted font-mono border border-border px-1 py-0.5 rounded shrink-0">
-                        {row.chain}
-                      </span>
+                  </td>
+                  {/* Balance */}
+                  <td className="px-3 py-3 align-middle font-mono text-sm text-right whitespace-nowrap">
+                    {formatBalance(row.balance)}
+                  </td>
+                  {/* Value */}
+                  <td className="px-3 py-3 align-middle font-mono text-sm text-right text-muted whitespace-nowrap">
+                    {row.valueUsd > 0
+                      ? `$${row.valueUsd.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                      : "\u2014"}
+                  </td>
+                  {/* Actions */}
+                  <td className="pl-2 pr-3 py-3 align-middle whitespace-nowrap text-right">
+                    {row.isTracked && contractAddress && (
+                      <Button
+                        variant="link"
+                        size="sm"
+                        data-testid="wallet-token-untrack"
+                        className="h-auto cursor-pointer p-0 text-[10px] text-danger hover:underline"
+                        title={t("wallet.removeManualTitle")}
+                        onClick={() => handleUntrackToken(contractAddress)}
+                      >
+                        {t("wallet.remove")}
+                      </Button>
                     )}
-                  </div>
-                </td>
-                {/* Balance */}
-                <td className="px-3 py-3 align-middle font-mono text-sm text-right whitespace-nowrap">
-                  {formatBalance(row.balance)}
-                </td>
-                {/* Value */}
-                <td className="px-3 py-3 align-middle font-mono text-sm text-right text-muted whitespace-nowrap">
-                  {row.valueUsd > 0
-                    ? `$${row.valueUsd.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                    : "\u2014"}
-                </td>
-                {/* Actions */}
-                <td className="pl-2 pr-3 py-3 align-middle whitespace-nowrap text-right">
-                  {row.isTracked && contractAddress && (
-                    <Button
-                      variant="link"
-                      size="sm"
-                      data-testid="wallet-token-untrack"
-                      className="text-[10px] text-danger hover:underline cursor-pointer p-0 h-auto"
-                      title={t("wallet.removeManualTitle")}
-                      onClick={() => handleUntrackToken(contractAddress)}
-                    >
-                      {t("wallet.remove")}
-                    </Button>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
       {renderChainErrors()}
-    </>
+    </div>
   );
 }

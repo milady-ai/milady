@@ -20,6 +20,7 @@
 .onboarding-step-list {
   display: flex;
   flex-direction: column;
+  min-width: 0;
   position: relative;
 }
 
@@ -36,8 +37,8 @@
   height: 0;
   background: linear-gradient(
     180deg,
-    rgba(240, 185, 11, 0.4),
-    rgba(240, 185, 11, 0.12)
+    rgba(252, 213, 53, 0.34),
+    rgba(252, 213, 53, 0.12)
   );
   transition: height 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   z-index: 0;
@@ -89,26 +90,26 @@
 }
 
 .onboarding-step-item--done .onboarding-step-dot {
-  background: rgba(240, 185, 11, 0.35);
-  border-color: rgba(240, 185, 11, 0.5);
+  background: rgba(252, 213, 53, 0.24);
+  border-color: rgba(252, 213, 53, 0.38);
 }
 
 .onboarding-step-item--active .onboarding-step-dot {
-  background: #f0b90b;
+  background: var(--accent);
   border-color: var(--text);
-  box-shadow: 0 0 12px rgba(240, 185, 11, 0.5);
+  box-shadow: 0 0 12px rgba(252, 213, 53, 0.24);
   animation: onboarding-dot-pulse 2s ease-in-out infinite;
 }
 
 @keyframes onboarding-dot-pulse {
   0%,
   100% {
-    box-shadow: 0 0 12px rgba(240, 185, 11, 0.5);
+    box-shadow: 0 0 12px rgba(252, 213, 53, 0.24);
     transform: rotate(45deg) scale(1);
   }
 
   50% {
-    box-shadow: 0 0 20px rgba(240, 185, 11, 0.7);
+    box-shadow: 0 0 18px rgba(252, 213, 53, 0.34);
     transform: rotate(45deg) scale(1.15);
   }
 }
@@ -116,14 +117,14 @@
 .onboarding-step-name {
   font-size: 15px;
   letter-spacing: 0.08em;
-  color: rgba(240, 238, 250, 0.58);
+  color: rgba(240, 238, 250, 0.7);
   font-weight: 500;
-  text-shadow: 0 2px 10px rgba(3, 5, 10, 0.65);
+  text-shadow: 0 1px 6px rgba(3, 5, 10, 0.42);
   transition: all 0.5s;
 }
 
 .onboarding-step-item--done .onboarding-step-name {
-  color: rgba(240, 238, 250, 0.72);
+  color: rgba(240, 238, 250, 0.82);
 }
 
 .onboarding-step-item--active .onboarding-step-name {
@@ -133,14 +134,14 @@
 
 .onboarding-step-sub {
   font-size: 13px;
-  color: rgba(240, 238, 250, 0.38);
+  color: rgba(240, 238, 250, 0.5);
   letter-spacing: 0.05em;
-  text-shadow: 0 2px 10px rgba(3, 5, 10, 0.55);
+  text-shadow: 0 1px 6px rgba(3, 5, 10, 0.3);
   transition: all 0.5s;
 }
 
 .onboarding-step-item--active .onboarding-step-sub {
-  color: rgba(240, 185, 11, 0.8);
+  color: rgba(252, 213, 53, 0.82);
 }
 
 button.onboarding-step-item.onboarding-step-item--clickable {
@@ -155,7 +156,7 @@ button.onboarding-step-item.onboarding-step-item--clickable {
   color: inherit;
 }
 button.onboarding-step-item.onboarding-step-item--clickable:focus-visible {
-  outline: 2px solid rgba(240, 185, 11, 0.55);
+  outline: 2px solid rgba(252, 213, 53, 0.5);
   outline-offset: 3px;
 }
 button.onboarding-step-item.onboarding-step-item--clickable:hover
@@ -165,17 +166,19 @@ button.onboarding-step-item.onboarding-step-item--clickable:hover
 
 /* === Panel — scrollbar pseudo-elements, child stagger, permission overrides === */
 .onboarding-panel {
-  background: rgba(10, 14, 20, 0.16);
-  backdrop-filter: blur(40px) saturate(1.4);
-  -webkit-backdrop-filter: blur(40px) saturate(1.4);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background:
+    linear-gradient(180deg, rgba(12, 15, 22, 0.22), rgba(12, 15, 22, 0.1)),
+    rgba(10, 14, 20, 0.22);
+  backdrop-filter: blur(36px) saturate(1.24);
+  -webkit-backdrop-filter: blur(36px) saturate(1.24);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 10px;
   padding: 36px 32px;
   display: flex;
   flex-direction: column;
   gap: 0;
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.25),
+    0 12px 36px rgba(0, 0, 0, 0.28),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
   animation: onboarding-panel-enter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)
     both;
@@ -185,16 +188,24 @@ button.onboarding-step-item.onboarding-step-item--clickable:hover
 }
 
 .onboarding-panel::-webkit-scrollbar {
-  width: 4px;
+  width: 8px;
 }
 
 .onboarding-panel::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--scrollbar-track);
 }
 
 .onboarding-panel::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
+  background: linear-gradient(
+    180deg,
+    var(--scrollbar-thumb-start) 0%,
+    var(--scrollbar-thumb-mid) 55%,
+    var(--scrollbar-thumb-end) 100%
+  );
+  border-radius: 9999px;
+  border: 2px solid var(--scrollbar-track);
+  background-clip: padding-box;
+  box-shadow: inset 0 0 0 1px var(--scrollbar-thumb-edge);
 }
 
 @keyframes onboarding-panel-enter {
@@ -407,18 +418,18 @@ button.onboarding-step-item.onboarding-step-item--clickable:hover
 }
 
 .onboarding-provider-card--selected {
-  background: rgba(240, 185, 11, 0.12);
-  border-color: rgba(240, 185, 11, 0.34);
+  background: rgba(252, 213, 53, 0.12);
+  border-color: rgba(252, 213, 53, 0.3);
 }
 
 .onboarding-provider-card--recommended {
-  border-color: rgba(240, 185, 11, 0.24);
-  background: rgba(240, 185, 11, 0.1);
+  border-color: rgba(252, 213, 53, 0.22);
+  background: rgba(252, 213, 53, 0.1);
 }
 
 .onboarding-provider-card--recommended:hover {
-  border-color: rgba(240, 185, 11, 0.4);
-  background: rgba(240, 185, 11, 0.14);
+  border-color: rgba(252, 213, 53, 0.34);
+  background: rgba(252, 213, 53, 0.14);
 }
 
 .onboarding-provider-card--detected {
@@ -441,9 +452,9 @@ button.onboarding-step-item.onboarding-step-item--clickable:hover
   --card: rgba(10, 14, 20, 0.28);
   --border: rgba(255, 255, 255, 0.14);
   --muted: rgba(240, 238, 250, 0.66);
-  --ok: rgba(240, 185, 11, 0.92);
-  --accent: rgba(240, 185, 11, 0.94);
-  --accent-foreground: rgba(240, 238, 250, 0.94);
+  --ok: rgba(252, 213, 53, 0.92);
+  --accent: rgba(252, 213, 53, 0.94);
+  --accent-foreground: rgba(11, 14, 17, 0.96);
   --danger: rgb(248, 113, 113);
   color: rgba(240, 238, 250, 0.92);
 }
@@ -459,11 +470,11 @@ button.onboarding-step-item.onboarding-step-item--clickable:hover
 }
 
 .onboarding-panel [class*="border-\\[var\\(--ok\\)\\]"] {
-  border-color: rgba(240, 185, 11, 0.3);
+  border-color: rgba(252, 213, 53, 0.28);
 }
 
 .onboarding-panel [class*="bg-\\[var\\(--ok\\)\\]"] {
-  background-color: rgba(240, 185, 11, 0.06);
+  background-color: rgba(252, 213, 53, 0.08);
 }
 
 .onboarding-panel [class*="bg-\\[var\\(--card\\)\\]"] {
@@ -479,15 +490,15 @@ button.onboarding-step-item.onboarding-step-item--clickable:hover
 
 .onboarding-panel.onboarding-panel
   .flex.items-center.gap-4.p-4.border:has(.text-\[var\(--ok\)\]) {
-  background: rgba(240, 185, 11, 0.12);
-  border-color: rgba(240, 185, 11, 0.32);
+  background: rgba(252, 213, 53, 0.12);
+  border-color: rgba(252, 213, 53, 0.28);
 }
 
 /* Style buttons within permissions to match game theme */
 .onboarding-panel.onboarding-panel button[class*="bg-accent"] {
-  background: rgba(240, 185, 11, 0.1);
-  border: 1px solid rgba(240, 185, 11, 0.35);
-  color: rgba(240, 238, 250, 0.94);
+  background: rgba(252, 213, 53, 0.14);
+  border: 1px solid rgba(252, 213, 53, 0.32);
+  color: rgba(11, 14, 17, 0.96);
   border-radius: 6px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -495,7 +506,7 @@ button.onboarding-step-item.onboarding-step-item--clickable:hover
 }
 
 .onboarding-panel.onboarding-panel button[class*="bg-accent"]:hover {
-  background: rgba(240, 185, 11, 0.18);
+  background: rgba(252, 213, 53, 0.22);
 }
 
 /* Outline/skip buttons */
@@ -535,7 +546,8 @@ button.onboarding-step-item.onboarding-step-item--clickable:hover
 @media (max-width: 768px) {
   .onboarding-step-list {
     flex-direction: row;
-    gap: 16px;
+    gap: 8px;
+    min-width: max-content;
   }
 
   .onboarding-step-list::before {

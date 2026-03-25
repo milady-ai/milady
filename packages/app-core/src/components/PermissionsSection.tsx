@@ -142,6 +142,11 @@ const PERMISSION_BADGE_LABELS: Record<
 };
 
 const SETTINGS_REFRESH_DELAYS_MS = [1500, 4000] as const;
+const SETTINGS_PANEL_CLASSNAME =
+  "rounded-2xl border border-border/60 bg-card/92 shadow-sm";
+const SETTINGS_PANEL_HEADER_CLASSNAME =
+  "flex flex-col gap-3 border-b border-border/50 px-4 py-4 sm:flex-row sm:items-start sm:justify-between";
+const SETTINGS_PANEL_ACTIONS_CLASSNAME = "flex flex-wrap gap-2";
 
 function translateWithFallback(
   t: (key: string) => string,
@@ -404,37 +409,51 @@ function PermissionRow({
   const badge = getPermissionBadge(def.id, status, platform);
 
   return (
-    <div className="flex items-center gap-3 py-2.5 px-3 border-b border-[var(--border)] last:border-b-0">
-      <PermissionIcon icon={def.icon} />
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="font-semibold text-[13px]">{def.name}</span>
+    <div className="flex flex-col gap-3 border-b border-border/50 px-4 py-3 last:border-b-0 sm:flex-row sm:items-center">
+      <div className="flex min-w-0 flex-1 items-start gap-3">
+        <PermissionIcon icon={def.icon} />
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-semibold text-[13px] text-txt">
+              {def.name}
+            </span>
+            {isShell && (
+              <span className="rounded-full border border-border/50 bg-bg-hover px-2 py-0.5 text-[10px] font-medium text-muted-strong">
+                Local runtime
+              </span>
+            )}
+          </div>
           <StatusBadge
             label={badge.label}
             tone={badge.tone}
             withDot
             className="rounded-full font-semibold"
           />
-        </div>
-        <div className="text-[11px] text-[var(--muted)] mt-0.5 truncate">
-          {def.description}
+          <div className="mt-1 text-[11px] leading-5 text-muted">
+            {def.description}
+          </div>
         </div>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
         {isShell && onToggleShell && status !== "not-applicable" && (
-          <Switch
-            checked={shellEnabled}
-            onCheckedChange={onToggleShell}
-            title={
-              shellEnabled ? "Disable shell access" : "Enable shell access"
-            }
-          />
+          <div className="flex min-h-10 items-center gap-2 rounded-xl border border-border/50 bg-bg-hover px-3">
+            <span className="text-[11px] font-medium text-muted-strong">
+              {shellEnabled ? "Enabled" : "Disabled"}
+            </span>
+            <Switch
+              checked={shellEnabled}
+              onCheckedChange={onToggleShell}
+              title={
+                shellEnabled ? "Disable shell access" : "Enable shell access"
+              }
+            />
+          </div>
         )}
         {!isShell && action && (
           <Button
             variant="default"
             size="sm"
-            className="h-auto text-[11px] py-1 px-2.5"
+            className="min-h-10 rounded-xl px-3 text-[11px] font-semibold"
             onClick={action.type === "request" ? onRequest : onOpenSettings}
             aria-label={`${action.ariaLabelPrefix} ${def.name}`}
           >
@@ -465,37 +484,53 @@ function CapabilityToggle({
 
   return (
     <div
-      className={`flex items-center gap-3 p-3 border border-[var(--border)] ${
-        enabled ? "bg-[var(--accent)]/10" : "bg-[var(--card)]"
+      className={`flex flex-col gap-3 rounded-2xl border px-4 py-3 shadow-sm transition-colors sm:flex-row sm:items-center ${
+        enabled
+          ? "border-accent/30 bg-accent/10"
+          : "border-border/60 bg-card/92"
       }`}
     >
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="font-semibold text-[13px]">{cap.label}</span>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-semibold text-[13px] text-txt">
+            {cap.label}
+          </span>
+          {!available && (
+            <span className="rounded-full border border-border/50 bg-bg-hover px-2 py-0.5 text-[10px] font-medium text-muted-strong">
+              Plugin unavailable
+            </span>
+          )}
           {!permissionsGranted && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--warning)]/20 text-[var(--warning)]">
+            <span className="rounded-full border border-warn/30 bg-warn/10 px-2 py-0.5 text-[10px] font-medium text-warn">
               {t("permissionssection.MissingPermissions")}
             </span>
           )}
         </div>
-        <div className="text-[11px] text-[var(--muted)] mt-0.5">
+        <div className="mt-1 text-[11px] leading-5 text-muted">
           {cap.description}
         </div>
       </div>
-      <Switch
-        checked={enabled}
-        onCheckedChange={onToggle}
-        disabled={!canEnable}
-        title={
-          !available
-            ? "Plugin not available"
-            : !permissionsGranted
-              ? "Grant required permissions first"
-              : enabled
-                ? "Disable"
-                : "Enable"
-        }
-      />
+      <div className="flex w-full justify-end sm:w-auto">
+        <div className="flex min-h-10 items-center gap-2 rounded-xl border border-border/50 bg-bg-hover px-3">
+          <span className="text-[11px] font-medium text-muted-strong">
+            {enabled ? "Enabled" : "Disabled"}
+          </span>
+          <Switch
+            checked={enabled}
+            onCheckedChange={onToggle}
+            disabled={!canEnable}
+            title={
+              !available
+                ? "Plugin not available"
+                : !permissionsGranted
+                  ? "Grant required permissions first"
+                  : enabled
+                    ? "Disable"
+                    : "Enable"
+            }
+          />
+        </div>
+      </div>
     </div>
   );
 }
@@ -841,7 +876,7 @@ function DesktopPermissionsView() {
 
   if (loading) {
     return (
-      <div className="text-center py-6 text-[var(--muted)] text-xs">
+      <div className="rounded-2xl border border-border/60 bg-card/92 px-4 py-6 text-center text-xs text-muted shadow-sm">
         {translateWithFallback(
           t,
           "permissionssection.LoadingPermissions",
@@ -853,7 +888,7 @@ function DesktopPermissionsView() {
 
   if (!permissions) {
     return (
-      <div className="text-center py-6 text-[var(--muted)] text-xs">
+      <div className="rounded-2xl border border-border/60 bg-card/92 px-4 py-6 text-center text-xs text-muted shadow-sm">
         {translateWithFallback(
           t,
           "permissionssection.UnableToLoadPermi",
@@ -867,71 +902,80 @@ function DesktopPermissionsView() {
     <div className="space-y-6">
       {/* System Permissions */}
       <div>
-        <div className="flex justify-between items-center mb-3">
-          <div className="font-bold text-sm">
-            {translateWithFallback(
-              t,
-              "permissionssection.SystemPermissions",
-              "System Permissions",
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="default"
-              size="sm"
-              className="h-auto text-[11px] py-1 px-2.5"
-              onClick={async () => {
-                for (const def of applicablePermissions) {
-                  if (def.id === "shell") continue;
-                  const state = permissions[def.id];
-                  if (state?.status === "granted") continue;
-                  if (state?.canRequest) {
-                    await handleRequest(def.id);
-                  } else {
-                    await handleOpenSettings(def.id);
+        <div className={SETTINGS_PANEL_CLASSNAME}>
+          <div className={SETTINGS_PANEL_HEADER_CLASSNAME}>
+            <div className="space-y-1">
+              <div className="font-bold text-sm text-txt">
+                {translateWithFallback(
+                  t,
+                  "permissionssection.SystemPermissions",
+                  "System Permissions",
+                )}
+              </div>
+              <div className="max-w-2xl text-[11px] leading-5 text-muted">
+                {platform === "darwin"
+                  ? "Review the native permissions Milady needs for desktop control, voice input, and visual analysis. macOS changes may require opening System Settings."
+                  : "Grant the runtime access it needs for voice input, camera capture, shell tasks, and desktop automation features."}
+              </div>
+            </div>
+            <div className={SETTINGS_PANEL_ACTIONS_CLASSNAME}>
+              <Button
+                variant="default"
+                size="sm"
+                className="min-h-10 rounded-xl px-3 text-[11px] font-semibold"
+                onClick={async () => {
+                  for (const def of applicablePermissions) {
+                    if (def.id === "shell") continue;
+                    const state = permissions[def.id];
+                    if (state?.status === "granted") continue;
+                    if (state?.canRequest) {
+                      await handleRequest(def.id);
+                    } else {
+                      await handleOpenSettings(def.id);
+                    }
                   }
-                }
-              }}
-            >
-              {translateWithFallback(
-                t,
-                "permissionssection.AllowAll",
-                "Allow All",
-              )}
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              className="h-auto text-[11px] py-1 px-2.5"
-              onClick={handleRefresh}
-              disabled={refreshing}
-            >
-              {refreshing ? "Refreshing..." : "Refresh"}
-            </Button>
+                }}
+              >
+                {translateWithFallback(
+                  t,
+                  "permissionssection.AllowAll",
+                  "Allow All",
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="min-h-10 rounded-xl px-3 text-[11px] font-semibold"
+                onClick={handleRefresh}
+                disabled={refreshing}
+              >
+                {refreshing ? "Refreshing..." : "Refresh"}
+              </Button>
+            </div>
+          </div>
+          <div className="divide-y divide-border/50">
+            {applicablePermissions.map((def) => {
+              const state = permissions[def.id];
+              return (
+                <PermissionRow
+                  key={def.id}
+                  def={def}
+                  status={state?.status ?? "not-determined"}
+                  platform={platform}
+                  canRequest={state?.canRequest ?? false}
+                  onRequest={() => handleRequest(def.id)}
+                  onOpenSettings={() => handleOpenSettings(def.id)}
+                  isShell={def.id === "shell"}
+                  shellEnabled={shellEnabled}
+                  onToggleShell={
+                    def.id === "shell" ? handleToggleShell : undefined
+                  }
+                />
+              );
+            })}
           </div>
         </div>
-        <div className="border border-[var(--border)] bg-[var(--card)]">
-          {applicablePermissions.map((def) => {
-            const state = permissions[def.id];
-            return (
-              <PermissionRow
-                key={def.id}
-                def={def}
-                status={state?.status ?? "not-determined"}
-                platform={platform}
-                canRequest={state?.canRequest ?? false}
-                onRequest={() => handleRequest(def.id)}
-                onOpenSettings={() => handleOpenSettings(def.id)}
-                isShell={def.id === "shell"}
-                shellEnabled={shellEnabled}
-                onToggleShell={
-                  def.id === "shell" ? handleToggleShell : undefined
-                }
-              />
-            );
-          })}
-        </div>
-        <div className="text-[11px] text-[var(--muted)] mt-2">
+        <div className="mt-2 text-[11px] leading-5 text-muted">
           {platform === "darwin" ? (
             <>
               macOS requires Accessibility permission for computer control. Open
@@ -948,29 +992,37 @@ function DesktopPermissionsView() {
 
       {/* Capability Toggles */}
       <div>
-        <div className="font-bold text-sm mb-3">
-          {t("appsview.Capabilities")}
+        <div className={SETTINGS_PANEL_CLASSNAME}>
+          <div className="border-b border-border/50 px-4 py-4">
+            <div className="font-bold text-sm text-txt">
+              {t("appsview.Capabilities")}
+            </div>
+            <div className="mt-1 text-[11px] leading-5 text-muted">
+              Turn higher-level capabilities on only after the required runtime
+              permissions are available.
+            </div>
+          </div>
+          <div className="space-y-2 px-4 py-4">
+            {CAPABILITIES.map((cap) => {
+              const plugin = plugins.find((p) => p.id === cap.id) ?? null;
+              const permissionsGranted = arePermissionsGranted(
+                cap.requiredPermissions,
+              );
+              return (
+                <CapabilityToggle
+                  key={cap.id}
+                  cap={cap}
+                  plugin={plugin}
+                  permissionsGranted={permissionsGranted}
+                  onToggle={(enabled) => {
+                    if (plugin) void handlePluginToggle(cap.id, enabled);
+                  }}
+                />
+              );
+            })}
+          </div>
         </div>
-        <div className="space-y-2">
-          {CAPABILITIES.map((cap) => {
-            const plugin = plugins.find((p) => p.id === cap.id) ?? null;
-            const permissionsGranted = arePermissionsGranted(
-              cap.requiredPermissions,
-            );
-            return (
-              <CapabilityToggle
-                key={cap.id}
-                cap={cap}
-                plugin={plugin}
-                permissionsGranted={permissionsGranted}
-                onToggle={(enabled) => {
-                  if (plugin) void handlePluginToggle(cap.id, enabled);
-                }}
-              />
-            );
-          })}
-        </div>
-        <div className="text-[11px] text-[var(--muted)] mt-2">
+        <div className="mt-2 text-[11px] leading-5 text-muted">
           {translateWithFallback(
             t,
             "permissionssection.CapabilitiesRequire",
@@ -1140,7 +1192,7 @@ function DesktopOnboardingPermissions({
   });
 
   return (
-    <div>
+    <div className="space-y-5">
       <div className="text-center mb-6">
         <div className="text-xl font-bold mb-2">
           {translateWithFallback(
@@ -1174,26 +1226,32 @@ function DesktopOnboardingPermissions({
             <div
               key={def.id}
               data-permission-id={def.id}
-              className={`flex items-center gap-4 p-4 border ${
+              className={`flex flex-col gap-3 rounded-2xl border p-4 shadow-sm sm:flex-row sm:items-center ${
                 isGranted
-                  ? "border-[var(--ok)] bg-[var(--ok)]/10"
-                  : "border-[var(--border)] bg-[var(--card)]"
+                  ? "border-ok/35 bg-ok/10"
+                  : "border-border/60 bg-card/92"
               }`}
             >
-              <PermissionIcon icon={def.icon} />
-              <div className="flex-1">
-                <div className="font-semibold text-sm">{def.name}</div>
-                <div className="text-[11px] text-[var(--muted)]">
-                  {def.description}
+              <div className="flex min-w-0 flex-1 items-start gap-4">
+                <PermissionIcon icon={def.icon} />
+                <div className="min-w-0 flex-1">
+                  <div className="font-semibold text-sm text-txt">
+                    {def.name}
+                  </div>
+                  <div className="text-[11px] leading-5 text-muted">
+                    {def.description}
+                  </div>
                 </div>
               </div>
               {isGranted ? (
-                <Check className="w-4 h-4 text-[var(--ok)]" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-ok/30 bg-ok/10">
+                  <Check className="h-4 w-4 text-ok" />
+                </div>
               ) : action ? (
                 <Button
                   variant="default"
                   size="sm"
-                  className="h-auto text-xs py-1.5 px-3"
+                  className="min-h-10 rounded-xl px-3 text-xs font-semibold sm:self-center"
                   onClick={() =>
                     action.type === "request"
                       ? handleRequest(def.id)
@@ -1214,7 +1272,7 @@ function DesktopOnboardingPermissions({
           <Button
             variant="default"
             size="sm"
-            className="h-auto text-xs py-2 px-6 w-full max-w-xs bg-accent border-accent text-accent-foreground"
+            className="min-h-11 w-full max-w-sm rounded-xl px-6 text-xs font-semibold"
             onClick={async () => {
               for (const def of essentialPermissions) {
                 const state = permissions[def.id];
@@ -1236,13 +1294,12 @@ function DesktopOnboardingPermissions({
         </div>
       )}
 
-      <div className="flex justify-between items-center gap-6 mt-[18px] pt-3.5 border-t border-white/[0.08]">
+      <div className="mt-[18px] flex flex-col gap-4 border-t border-border/50 pt-3.5 sm:flex-row sm:items-center sm:justify-between">
         {onBack ? (
           <Button
             variant="ghost"
             size="sm"
-            className="text-[10px] text-[rgba(240,238,250,0.62)] tracking-[0.15em] uppercase cursor-pointer no-underline bg-none border-none font-inherit transition-colors duration-300 p-0 hover:text-[rgba(240,238,250,0.9)]"
-            style={{ textShadow: "0 1px 8px rgba(3,5,10,0.45)" }}
+            className="justify-start p-0 text-[10px] uppercase tracking-[0.15em] text-muted-strong hover:text-txt"
             onClick={() => onBack()}
             type="button"
           >
@@ -1256,7 +1313,7 @@ function DesktopOnboardingPermissions({
           variant="default"
           size="sm"
           data-testid="permissions-onboarding-continue"
-          className="h-auto min-w-[8.5rem] bg-accent border-accent px-4 py-2 text-[11px] leading-tight text-accent-foreground"
+          className="min-h-11 min-w-[8.5rem] rounded-xl px-4 py-2 text-[11px] font-semibold leading-tight"
           onClick={() => onContinue()}
         >
           {translateWithFallback(t, "onboarding.savedMyKeys", "Continue")}

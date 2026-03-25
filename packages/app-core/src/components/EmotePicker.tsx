@@ -474,8 +474,13 @@ export function EmotePicker() {
           className="shrink-0 rounded px-2 py-1 text-xs font-medium h-auto"
           style={{
             background:
-              activeCategory === null ? "#f0b232" : "rgba(255,255,255,0.06)",
-            color: activeCategory === null ? "#000" : "rgba(255,255,255,0.6)",
+              activeCategory === null
+                ? "var(--accent)"
+                : "rgba(255,255,255,0.06)",
+            color:
+              activeCategory === null
+                ? "var(--accent-foreground)"
+                : "rgba(255,255,255,0.6)",
           }}
         >
           {t("wallet.all")}
@@ -489,8 +494,13 @@ export function EmotePicker() {
             className="shrink-0 rounded px-2 py-1 text-xs font-medium h-auto"
             style={{
               background:
-                activeCategory === cat ? "#f0b232" : "rgba(255,255,255,0.06)",
-              color: activeCategory === cat ? "#000" : "rgba(255,255,255,0.6)",
+                activeCategory === cat
+                  ? "var(--accent)"
+                  : "rgba(255,255,255,0.06)",
+              color:
+                activeCategory === cat
+                  ? "var(--accent-foreground)"
+                  : "rgba(255,255,255,0.6)",
             }}
           >
             <span className="mr-1">{CATEGORY_ICONS[cat]}</span>
@@ -513,7 +523,9 @@ export function EmotePicker() {
               className="flex aspect-square items-center justify-center rounded text-2xl h-auto w-auto"
               style={{
                 background:
-                  playing === emote.id ? "#f0b232" : "rgba(255,255,255,0.06)",
+                  playing === emote.id
+                    ? "var(--accent)"
+                    : "rgba(255,255,255,0.06)",
               }}
             >
               {emote.icon}

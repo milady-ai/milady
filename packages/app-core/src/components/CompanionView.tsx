@@ -4,7 +4,6 @@ import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { AgentActivityBox } from "./AgentActivityBox";
 import { ChatModalView } from "./ChatModalView";
 import { CloudStatusBadge } from "./CloudStatusBadge";
-import { PtyConsoleSidePanel } from "./PtyConsoleSidePanel";
 import { CompanionHeader } from "./companion/CompanionHeader";
 import {
   CompanionSceneHost,
@@ -13,8 +12,11 @@ import {
 } from "./companion/CompanionSceneHost";
 import { InferenceCloudAlertButton } from "./companion/InferenceCloudAlertButton";
 import { resolveCompanionInferenceNotice } from "./companion/resolve-companion-inference-notice";
+import { PtyConsoleSidePanel } from "./PtyConsoleSidePanel";
 
-const COMPANION_UI_REVEAL_FALLBACK_MS = 3500;
+const COMPANION_UI_REVEAL_FALLBACK_MS = 1400;
+const COMPANION_DOCK_HEIGHT = "min(42vh, 24rem)";
+const COMPANION_DOCK_ACTIVITY_OFFSET = `calc(${COMPANION_DOCK_HEIGHT} + 1rem)`;
 
 /**
  * Inner overlay that subscribes to useApp() for frequently-changing data
@@ -136,27 +138,28 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
     });
   }, [navigation, setState, setTab, switchShellView]);
 
-  const companionHeaderRightExtras = (
-    <>
-      {inferenceNotice ? (
-        <InferenceCloudAlertButton
-          notice={inferenceNotice}
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={handleInferenceAlertClick}
-        />
-      ) : null}
-      <CloudStatusBadge
-        connected={elizaCloudConnected}
-        credits={elizaCloudCredits}
-        creditsLow={elizaCloudCreditsLow}
-        creditsCritical={elizaCloudCreditsCritical}
-        authRejected={elizaCloudAuthRejected}
-        creditsError={elizaCloudCreditsError}
-        t={t}
-        onClick={handleCloudStatusClick}
-        dataTestId="companion-cloud-status"
-      />
-    </>
+  const companionHeaderRightExtras = inferenceNotice ? (
+    <InferenceCloudAlertButton
+      notice={inferenceNotice}
+      onPointerDown={(e) => e.stopPropagation()}
+      onClick={handleInferenceAlertClick}
+    />
+  ) : null;
+
+  const companionHeaderRightTrailingExtras = (
+    <CloudStatusBadge
+      connected={elizaCloudConnected}
+      credits={elizaCloudCredits}
+      creditsLow={elizaCloudCreditsLow}
+      creditsCritical={elizaCloudCreditsCritical}
+      authRejected={elizaCloudAuthRejected}
+      creditsError={elizaCloudCreditsError}
+      compactOnMobile
+      appearance="shell"
+      t={t}
+      onClick={handleCloudStatusClick}
+      dataTestId="companion-cloud-status"
+    />
   );
 
   return (
@@ -164,7 +167,7 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
       <div
         style={{
           opacity: avatarReady ? 1 : 0,
-          transition: "opacity 0.5s ease-in",
+          transition: "opacity 0.35s ease-out",
           // Explicit auto so header hit-testing is not ambiguous under a `pointer-events-none` ancestor.
           pointerEvents: avatarReady ? "auto" : "none",
         }}
@@ -184,18 +187,27 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
           }
           onNewChat={() => void handleNewConversation()}
           rightExtras={companionHeaderRightExtras}
+          rightTrailingExtras={companionHeaderRightTrailingExtras}
         />
       </div>
 
       {avatarReady && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[45%] z-20 pointer-events-auto">
-          <ChatModalView variant="companion-dock" />
+        <div className="pointer-events-auto absolute inset-x-0 bottom-0 z-20 flex justify-center px-1.5 pb-3 sm:px-4 sm:pb-5">
+          <div
+            className="relative w-full max-w-5xl min-w-0"
+            style={{ height: COMPANION_DOCK_HEIGHT, minHeight: "17rem" }}
+          >
+            <ChatModalView variant="companion-dock" />
+          </div>
         </div>
       )}
 
       {/* Floating agent-status pill (bottom-right, above chat dock) */}
       {ptySessions.length > 0 && (
-        <div className="absolute bottom-[48%] right-4 z-30 pointer-events-auto">
+        <div
+          className="absolute right-3 z-30 pointer-events-auto sm:right-5"
+          style={{ bottom: COMPANION_DOCK_ACTIVITY_OFFSET }}
+        >
           <AgentActivityBox
             sessions={ptySessions}
             onSessionClick={(id) =>

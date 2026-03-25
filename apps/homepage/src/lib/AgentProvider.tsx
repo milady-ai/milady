@@ -222,10 +222,16 @@ export function AgentProvider({ children }: { children: ReactNode }) {
           });
         }
       } catch (err) {
-        // Cloud API failed — capture error and continue with sandbox discovery
+        // Cloud API failed — if 404, the milady agents endpoint isn't deployed
+        // on this cloud instance yet. Silently continue instead of showing an error.
         const errMsg =
           err instanceof Error ? err.message : "Cloud API request failed";
-        fetchError = `Cloud API: ${errMsg}`;
+        const isNotAvailable =
+          errMsg.includes("404") ||
+          (err instanceof Error && err.name === "CloudAgentsNotAvailableError");
+        if (!isNotAvailable) {
+          fetchError = `Cloud API: ${errMsg}`;
+        }
       }
     } else {
       cloudClientRef.current = null;

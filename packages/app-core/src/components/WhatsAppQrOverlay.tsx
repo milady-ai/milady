@@ -93,7 +93,7 @@ export function WhatsAppQrOverlay({
           variant="outline"
           size="sm"
           className="text-[11px]"
-          style={{ borderColor: "#f0b232", color: "#f0b232" }}
+          style={{ borderColor: "var(--accent)", color: "var(--accent)" }}
           onClick={() => {
             firedRef.current = false;
             void startPairing();
@@ -128,7 +128,7 @@ export function WhatsAppQrOverlay({
           variant="outline"
           size="sm"
           className="text-[11px]"
-          style={{ borderColor: "#f0b232", color: "#f0b232" }}
+          style={{ borderColor: "var(--accent)", color: "var(--accent)" }}
           onClick={() => {
             firedRef.current = false;
             void startPairing();
@@ -209,7 +209,7 @@ export function WhatsAppQrOverlay({
           <div className="mt-3 flex items-center gap-2">
             <span
               className="inline-block w-1.5 h-1.5 rounded-full animate-pulse"
-              style={{ background: "#f0b232" }}
+              style={{ background: "var(--accent)" }}
             />
             <span className="text-[10px]" style={{ color: "var(--muted)" }}>
               {t("whatsappqroverlay.QRRefreshesAutomat")}

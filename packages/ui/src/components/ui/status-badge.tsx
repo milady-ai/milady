@@ -5,19 +5,19 @@ export type StatusTone = "success" | "warning" | "danger" | "muted";
 
 const STATUS_TONE_STYLES: Record<StatusTone, { badge: string; dot: string }> = {
   success: {
-    badge: "text-ok border-ok/30 bg-ok/10",
+    badge: "border-ok/35 bg-ok/12 text-ok",
     dot: "bg-ok",
   },
   warning: {
-    badge: "text-warn border-warn/30 bg-warn/10",
+    badge: "border-warn/40 bg-warn/14 text-warn",
     dot: "bg-warn",
   },
   danger: {
-    badge: "text-destructive border-destructive/30 bg-destructive/10",
+    badge: "border-destructive/35 bg-destructive/12 text-destructive",
     dot: "bg-destructive",
   },
   muted: {
-    badge: "text-muted border-border bg-bg",
+    badge: "border-border bg-bg-accent text-muted-strong",
     dot: "bg-muted",
   },
 };

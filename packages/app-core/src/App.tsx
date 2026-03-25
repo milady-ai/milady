@@ -54,6 +54,8 @@ import { APPS_ENABLED, COMPANION_ENABLED } from "./navigation";
 import { useApp } from "./state";
 
 const CHAT_MOBILE_BREAKPOINT_PX = 1024;
+const CHAT_DESKTOP_COMPOSER_UNDERLAY_CLASS =
+  "pointer-events-none absolute inset-x-0 bottom-0 h-[5.75rem] border-t border-border/40 bg-card/55 backdrop-blur-sm";
 
 function formatStartupElapsed(sec: number): string {
   if (sec <= 0) return "";
@@ -485,6 +487,12 @@ export function App() {
     <div className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg">
       <Header mobileLeft={mobileChatControls} />
       <div className="flex flex-1 min-h-0 relative">
+        {!isChatMobileLayout ? (
+          <div
+            className={CHAT_DESKTOP_COMPOSER_UNDERLAY_CLASS}
+            data-chat-shell-composer-underlay
+          />
+        ) : null}
         {isChatMobileLayout ? (
           <>
             <main className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden pt-2 px-2">
@@ -507,9 +515,9 @@ export function App() {
         ) : (
           <>
             <ConversationsSidebar />
-            <main className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden pt-3 px-3 xl:px-5">
+            <main className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden">
               <DeferredSetupChecklist
-                className="mb-3"
+                className="mx-3 mb-3 mt-3 xl:mx-5"
                 onOpenTask={handleDeferredTaskOpen}
               />
               <ChatView />

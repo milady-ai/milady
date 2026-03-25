@@ -510,6 +510,9 @@ describe("KnowledgeView UI", () => {
       await Promise.resolve();
     });
 
+    expect(client.getKnowledgeDocument).toHaveBeenCalledWith("doc-1");
+    expect(client.getKnowledgeFragments).toHaveBeenCalledWith("doc-1");
+
     const allText = JSON.stringify(tree?.toJSON());
     expect(allText).toContain("knowledgeview.Fragments1");
     expect(allText).toContain("fragment body");

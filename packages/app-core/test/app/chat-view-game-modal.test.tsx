@@ -713,4 +713,60 @@ describe("ChatView game-modal variant", () => {
     expect(messages.props.style.touchAction).toBe("pan-y");
     expect(composer).toBeTruthy();
   });
+
+  it("uses theme-token surfaces for companion bubbles and composer spacing", async () => {
+    mockUseApp.mockReturnValue(
+      createContext({
+        chatSending: true,
+        chatFirstTokenReceived: false,
+        conversationMessages: [
+          {
+            id: "assistant-1",
+            role: "assistant",
+            text: "Acknowledged",
+            timestamp: Date.now(),
+          },
+          {
+            id: "user-1",
+            role: "user",
+            text: "Okay",
+            timestamp: Date.now() + 1,
+          },
+        ],
+      }),
+    );
+
+    let tree: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(
+        React.createElement(ChatView, { variant: "game-modal" }),
+      );
+    });
+
+    const rows = tree.root.findAllByProps({
+      "data-testid": "companion-message-row",
+    });
+    const assistantBubble = rows[0]?.findAllByType("div").at(-2);
+    const userBubble = rows[1]?.findAllByType("div").at(-2);
+    const composer = tree.root.findByProps({
+      "data-no-camera-drag": "true",
+    });
+
+    expect(String(assistantBubble?.props.className)).toContain(
+      "var(--onboarding-card-bg)",
+    );
+    expect(String(assistantBubble?.props.className)).toContain(
+      "var(--onboarding-card-border)",
+    );
+    expect(String(userBubble?.props.className)).toContain(
+      "var(--onboarding-accent-bg)",
+    );
+    expect(String(userBubble?.props.className)).toContain(
+      "var(--onboarding-accent-border)",
+    );
+    expect(String(composer.props.className)).toContain("px-1");
+    expect(String(composer.props.style.paddingBottom)).toContain(
+      "safe-area-inset-bottom",
+    );
+  });
 });

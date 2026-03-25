@@ -13,6 +13,7 @@ vi.mock("@miladyai/app-core/state", () => ({
 
 vi.mock("@miladyai/app-core/hooks", () => ({
   useBugReport: () => ({ isOpen: false, open: vi.fn(), close: vi.fn() }),
+  useMediaQuery: () => false,
 }));
 
 vi.mock("@miladyai/app-core/navigation", () => ({
@@ -382,6 +383,8 @@ describe("Header", () => {
       "data-testid": "header-cloud-status",
     });
     expect(cloudStatus.props["data-status"]).toBe("regular-credits");
+    expect(String(cloudStatus.props.className)).toContain("font-mono");
+    expect(cloudStatus.props.style.backgroundColor).toBe("var(--accent)");
     expect(
       cloudStatus.findAll(
         (node) =>

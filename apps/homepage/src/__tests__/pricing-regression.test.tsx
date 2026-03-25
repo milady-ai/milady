@@ -1,4 +1,10 @@
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AgentGrid } from "../components/dashboard/AgentGrid";
 import { CreateAgentForm } from "../components/dashboard/CreateAgentForm";
@@ -114,17 +120,32 @@ describe("homepage pricing regression coverage", () => {
 
     render(<CreditsPanel />);
 
+    // Wait for the overview tab to load
     await waitFor(() => {
       expect(screen.getByText("PRICING")).toBeTruthy();
     });
 
+    // Overview tab: pricing rates section
     expect(screen.getByText("RUNNING AGENT")).toBeTruthy();
     expect(screen.getByText("IDLE AGENT")).toBeTruthy();
-    expect(screen.getByText("CREDIT PACKS")).toBeTruthy();
-    expect(screen.getByText(/Minimum deposit: \$5\.00/)).toBeTruthy();
-    expect(screen.getByText("SMALL")).toBeTruthy();
-    expect(screen.getByText("MEDIUM")).toBeTruthy();
-    expect(screen.getByText("LARGE")).toBeTruthy();
+
+    // Switch to PURCHASE tab to check credit pack content
+    fireEvent.click(screen.getByText("PURCHASE"));
+
+    await waitFor(() => {
+      expect(screen.getByText("CREDIT PACKS")).toBeTruthy();
+    });
+
+    // Pack names in current implementation
+    expect(screen.getByText("STARTER")).toBeTruthy();
+    expect(screen.getByText("STANDARD")).toBeTruthy();
+    expect(screen.getByText("PRO")).toBeTruthy();
+
+    // Min deposit footer uses API value ($5.00) when available
+    // Use selector:'p' to scope to the leaf paragraph element in the purchase footer
+    expect(
+      screen.getByText(/Minimum deposit:/, { selector: "p" }),
+    ).toBeTruthy();
   });
 
   it("shows the pricing note in the authenticated create form", () => {
@@ -148,5 +169,95 @@ describe("homepage pricing regression coverage", () => {
     expect(screen.getByText("$0.0025/hr")).toBeTruthy();
     expect(screen.getByText("$5.00")).toBeTruthy();
     expect(screen.getByText("+ CREATE CLOUD AGENT")).toBeTruthy();
+  });
+
+  it("shows the API-provided minimumTopUp in the credits panel pricing section", async () => {
+    useAgentsMock.mockReturnValue({ agents: [] });
+    useAuthMock.mockReturnValue({
+      isAuthenticated: true,
+      token: "tok",
+      signOut: vi.fn(),
+    });
+    vi.spyOn(CloudClient.prototype, "getCreditsBalance").mockResolvedValue({
+      balance: 100,
+      currency: "credits",
+    });
+    vi.spyOn(CloudClient.prototype, "getCurrentSession").mockResolvedValue(
+      null,
+    );
+    vi.spyOn(CloudClient.prototype, "getBillingSettings").mockResolvedValue(
+      null,
+    );
+    vi.spyOn(CloudClient.prototype, "getCreditsSummary").mockResolvedValue({
+      organization: null,
+      agentsSummary: null,
+      pricing: { creditsPerDollar: 100, minimumTopUp: 10 },
+    });
+
+    render(<CreditsPanel />);
+
+    // Wait for data to load then switch to purchase tab
+    await waitFor(() => {
+      expect(screen.getByText("PURCHASE")).toBeTruthy();
+    });
+    fireEvent.click(screen.getByText("PURCHASE"));
+
+    await waitFor(() => {
+      // API returned minimumTopUp: 10 → should render $10.00, not the fallback $5.00
+      const minDepositEl = screen.getByText(/Minimum deposit:/, {
+        selector: "p",
+      });
+      expect(minDepositEl.textContent).toContain("$10.00");
+    });
+  });
+
+  it("falls back to the static minimum deposit when pricing.minimumTopUp is absent", async () => {
+    useAgentsMock.mockReturnValue({ agents: [] });
+    useAuthMock.mockReturnValue({
+      isAuthenticated: true,
+      token: "tok",
+      signOut: vi.fn(),
+    });
+    vi.spyOn(CloudClient.prototype, "getCreditsBalance").mockResolvedValue({
+      balance: 100,
+      currency: "credits",
+    });
+    vi.spyOn(CloudClient.prototype, "getCurrentSession").mockResolvedValue(
+      null,
+    );
+    vi.spyOn(CloudClient.prototype, "getBillingSettings").mockResolvedValue(
+      null,
+    );
+    vi.spyOn(CloudClient.prototype, "getCreditsSummary").mockResolvedValue({
+      organization: null,
+      agentsSummary: null,
+      pricing: { creditsPerDollar: 100 },
+    });
+
+    render(<CreditsPanel />);
+
+    // Wait for data to load then switch to purchase tab
+    await waitFor(() => {
+      expect(screen.getByText("PURCHASE")).toBeTruthy();
+    });
+    fireEvent.click(screen.getByText("PURCHASE"));
+
+    await waitFor(() => {
+      // No minimumTopUp in API response → falls back to hardcoded $5.00
+      const minDepositEl = screen.getByText(/Minimum deposit:/, {
+        selector: "p",
+      });
+      expect(minDepositEl.textContent).toContain("$5.00");
+    });
+  });
+
+  it("renders running and idle rate labels from shared constants in the create form", () => {
+    render(<CreateAgentForm onCreated={vi.fn()} onCancel={vi.fn()} />);
+
+    // Verify the pricing note renders the correct rates from pricing-constants
+    const pricingNote = screen.getByText(/\$0\.01\/hr running/);
+    expect(pricingNote).toBeTruthy();
+    expect(pricingNote.textContent).toContain("$0.0025/hr idle");
+    expect(pricingNote.textContent).toContain("min. balance $5.00");
   });
 });

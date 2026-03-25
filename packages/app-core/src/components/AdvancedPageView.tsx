@@ -22,7 +22,7 @@ import {
 import type { Tab } from "@miladyai/app-core/navigation";
 import { useApp } from "@miladyai/app-core/state";
 import { Button } from "@miladyai/ui";
-import React, { type ReactNode, useState } from "react";
+import React, { useState } from "react";
 import { DesktopWorkspaceSection } from "./DesktopWorkspaceSection";
 import { FineTuningView } from "./FineTuningView";
 import { LifoSandboxView } from "./LifoSandboxView";
@@ -87,94 +87,17 @@ const MODAL_SUB_TABS = SUB_TABS.filter(
   (t) => t.id !== "plugins" && t.id !== "skills",
 );
 
-const SUBTAB_ICONS: Record<string, ReactNode> = {
-  trajectories: (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="6" cy="19" r="3" />
-      <path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15" />
-      <circle cx="18" cy="5" r="3" />
-    </svg>
-  ),
-  runtime: (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <polyline points="4 17 10 11 4 5" />
-      <line x1="12" y1="19" x2="20" y2="19" />
-    </svg>
-  ),
-  database: (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <ellipse cx="12" cy="5" rx="9" ry="3" />
-      <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
-      <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
-    </svg>
-  ),
-  desktop: (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-      <line x1="8" y1="21" x2="16" y2="21" />
-      <line x1="12" y1="17" x2="12" y2="21" />
-    </svg>
-  ),
-  logs: (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
-      <line x1="16" y1="13" x2="8" y2="13" />
-      <line x1="16" y1="17" x2="8" y2="17" />
-      <polyline points="10 9 9 9 8 9" />
-    </svg>
-  ),
-};
+const ADVANCED_TAB_BUTTON_RESET_CLASSNAME =
+  "select-none [&_*]:select-none [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] focus:outline-none focus-visible:outline-none";
+const ADVANCED_SHELL_NAV_SURFACE_CLASSNAME =
+  "mb-3 shrink-0 border-b border-border/40 pb-3";
+const ADVANCED_SHELL_NAV_SCROLL_CLASSNAME =
+  "flex gap-1.5 overflow-x-auto overflow-y-hidden pr-2";
+const ADVANCED_TAB_BUTTON_BASE_CLASSNAME = `${ADVANCED_TAB_BUTTON_RESET_CLASSNAME} group inline-flex shrink-0 rounded-xl border text-left transition-all duration-150`;
+const ADVANCED_TAB_BUTTON_ACTIVE_CLASSNAME =
+  "border-accent/25 bg-accent/10 text-txt shadow-[0_1px_4px_rgba(3,5,10,0.06)] dark:shadow-[0_0_0_1px_rgba(var(--accent),0.12),0_0_12px_rgba(var(--accent),0.12)]";
+const ADVANCED_TAB_BUTTON_INACTIVE_CLASSNAME =
+  "border-transparent bg-transparent text-muted hover:border-border/40 hover:bg-bg/30 hover:text-txt";
 
 function mapTabToSubTab(tab: Tab): SubTab {
   switch (tab) {
@@ -213,6 +136,44 @@ export function AdvancedPageView({ inModal }: { inModal?: boolean } = {}) {
   const handleSubTabChange = (subTab: SubTab) => {
     setSelectedTrajectoryId(null);
     setTab(subTab as Tab);
+  };
+
+  const renderSubTabButton = (
+    subTab: { id: SubTab; label: string; description: string },
+    options?: { compact?: boolean },
+  ) => {
+    const isActive = currentSubTab === subTab.id;
+    const compact = options?.compact ?? false;
+
+    return (
+      <Button
+        variant="ghost"
+        key={subTab.id}
+        aria-current={isActive ? "page" : undefined}
+        className={`${ADVANCED_TAB_BUTTON_BASE_CLASSNAME} ${
+          compact
+            ? "items-center px-3 py-2.5"
+            : "min-h-9 items-center whitespace-nowrap px-2.5 py-1.5"
+        } ${
+          isActive
+            ? ADVANCED_TAB_BUTTON_ACTIVE_CLASSNAME
+            : ADVANCED_TAB_BUTTON_INACTIVE_CLASSNAME
+        }`}
+        onClick={() => handleSubTabChange(subTab.id)}
+        title={subTab.description}
+        data-testid={`advanced-subtab-${subTab.id}`}
+      >
+        <div className="text-left">
+          <div
+            className={`text-[13px] ${
+              isActive ? "font-semibold text-txt" : "font-medium"
+            }`}
+          >
+            {subTab.label}
+          </div>
+        </div>
+      </Button>
+    );
   };
 
   const renderContent = () => {
@@ -263,40 +224,16 @@ export function AdvancedPageView({ inModal }: { inModal?: boolean } = {}) {
     >
       {inModal ? (
         <nav className="settings-icon-sidebar">
-          {tabs.map((subTab) => (
-            <Button
-              key={subTab.id}
-              variant="ghost"
-              className={`select-none [&_*]:select-none [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] focus:outline-none focus-visible:outline-none settings-icon-btn ${currentSubTab === subTab.id ? "is-active" : ""}`}
-              onClick={() => handleSubTabChange(subTab.id)}
-              title={subTab.description}
-            >
-              {SUBTAB_ICONS[subTab.id]}
-              <span className="settings-icon-label">{subTab.label}</span>
-            </Button>
-          ))}
+          {tabs.map((subTab) => renderSubTabButton(subTab, { compact: true }))}
         </nav>
       ) : (
-        <div className="mb-4 shrink-0">
-          <div className="flex gap-1 border-b border-border overflow-x-auto overflow-y-hidden">
-            {tabs.map((subTab) => {
-              const isActive = currentSubTab === subTab.id;
-              return (
-                <Button
-                  variant="ghost"
-                  key={subTab.id}
-                  className={`select-none [&_*]:select-none [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] focus:outline-none focus-visible:outline-none px-4 py-2 text-xs font-medium border-b-2 -mb-px transition-colors rounded-none ${
-                    isActive
-                      ? "border-accent text-txt"
-                      : "border-transparent text-muted hover:text-txt hover:border-border"
-                  }`}
-                  onClick={() => handleSubTabChange(subTab.id)}
-                  title={subTab.description}
-                >
-                  {subTab.label}
-                </Button>
-              );
-            })}
+        <div className={ADVANCED_SHELL_NAV_SURFACE_CLASSNAME}>
+          <div
+            className={ADVANCED_SHELL_NAV_SCROLL_CLASSNAME}
+            aria-label="Advanced navigation"
+            data-testid="advanced-subtab-nav"
+          >
+            {tabs.map((subTab) => renderSubTabButton(subTab))}
           </div>
         </div>
       )}
@@ -308,14 +245,21 @@ export function AdvancedPageView({ inModal }: { inModal?: boolean } = {}) {
         style={
           inModal
             ? ({
-                "--accent": "var(--section-accent-advanced, #7b8fb5)",
+                "--accent":
+                  "var(--section-accent-advanced, var(--accent, #7b8fb5))",
                 "--surface": "rgba(255, 255, 255, 0.06)",
-                "--s-accent": "#7b8fb5",
-                "--s-text-txt": "#7b8fb5",
-                "--s-accent-glow": "rgba(123, 143, 181, 0.35)",
-                "--s-accent-subtle": "rgba(123, 143, 181, 0.12)",
-                "--s-grid-line": "rgba(123, 143, 181, 0.02)",
-                "--s-glow-edge": "rgba(123, 143, 181, 0.08)",
+                "--s-accent":
+                  "var(--section-accent-advanced, var(--accent, #7b8fb5))",
+                "--s-text-txt":
+                  "var(--section-accent-advanced, var(--accent, #7b8fb5))",
+                "--s-accent-glow":
+                  "color-mix(in srgb, var(--section-accent-advanced, var(--accent, #7b8fb5)) 35%, transparent)",
+                "--s-accent-subtle":
+                  "color-mix(in srgb, var(--section-accent-advanced, var(--accent, #7b8fb5)) 12%, transparent)",
+                "--s-grid-line":
+                  "color-mix(in srgb, var(--section-accent-advanced, var(--accent, #7b8fb5)) 2%, transparent)",
+                "--s-glow-edge":
+                  "color-mix(in srgb, var(--section-accent-advanced, var(--accent, #7b8fb5)) 8%, transparent)",
               } as React.CSSProperties)
             : undefined
         }

@@ -96,6 +96,13 @@ function unwrapListResponse<T>(
   return [];
 }
 
+export class CloudAgentsNotAvailableError extends Error {
+  constructor() {
+    super("Cloud agent hosting is not available on this server yet.");
+    this.name = "CloudAgentsNotAvailableError";
+  }
+}
+
 export class CloudClient {
   private apiKey: string;
 
@@ -136,6 +143,12 @@ export class CloudClient {
       if (clearAuthOnFailure && isCloudAuthFailure(res.status, errorMessage)) {
         clearToken();
       }
+      // 404 on milady agent endpoints means the cloud instance hasn't deployed
+      // the agent hosting feature yet — throw a specific error so callers can
+      // show a "coming soon" message instead of a generic failure.
+      if (res.status === 404 && path.startsWith("/api/v1/milady/")) {
+        throw new CloudAgentsNotAvailableError();
+      }
       throw new Error(
         errorMessage
           ? `Cloud API ${res.status}: ${path}: ${errorMessage}`
@@ -157,10 +170,17 @@ export class CloudClient {
       true, // clearAuthOnFailure: this is the primary auth check
     );
     const raw = unwrapListResponse<CloudAgentDetail>(data, "agents");
-    // Backend returns agentName; normalize to name for the rest of the app
+    // Backend returns agentName; normalize to name for the rest of the app.
+    // The backend does not return an uptime field — derive it client-side from
+    // createdAt so the AgentCard can show a meaningful value instead of "—".
     return raw.map((a) => ({
       ...a,
       name: a.agentName || a.name || a.id,
+      uptime:
+        a.uptime ??
+        (a.createdAt
+          ? Math.floor((Date.now() - new Date(a.createdAt).getTime()) / 1000)
+          : undefined),
     }));
   }
 

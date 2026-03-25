@@ -1,6 +1,11 @@
 import { useCallback, useState } from "react";
 import { useAgents } from "../../lib/AgentProvider";
 import { openWebUI } from "../../lib/open-web-ui";
+import {
+  MIN_DEPOSIT_DISPLAY,
+  PRICE_IDLE_PER_HR,
+  PRICE_RUNNING_PER_HR,
+} from "../../lib/pricing-constants";
 import { useAuth } from "../../lib/useAuth";
 import { AgentCard } from "./AgentCard";
 import { AgentDetail } from "./AgentDetail";
@@ -325,9 +330,15 @@ function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
         <p className="font-mono text-xs text-text-muted max-w-sm mx-auto leading-relaxed mb-4">
           Start Milady locally to see your agents here.
           <br />
-          {authed
-            ? "Or create a cloud agent for hosted infrastructure."
-            : "Sign in to Eliza Cloud for hosted options."}
+          {authed ? (
+            "Or create a cloud agent for hosted infrastructure."
+          ) : (
+            <>
+              Start Milady locally to see your agents here.
+              <br />
+              Sign in to Eliza Cloud for hosted options.
+            </>
+          )}
         </p>
 
         {/* Pricing preview */}
@@ -338,7 +349,7 @@ function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
                 RUNNING
               </p>
               <p className="font-mono text-xs font-semibold text-brand tabular-nums">
-                $0.01/hr
+                {PRICE_RUNNING_PER_HR}/hr
               </p>
             </div>
             <div className="bg-dark-secondary/50 px-3 py-2.5">
@@ -346,7 +357,7 @@ function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
                 IDLE
               </p>
               <p className="font-mono text-xs font-semibold text-text-light tabular-nums">
-                $0.0025/hr
+                {PRICE_IDLE_PER_HR}/hr
               </p>
             </div>
             <div className="bg-dark-secondary/50 px-3 py-2.5">
@@ -354,7 +365,7 @@ function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
                 MIN. DEPOSIT
               </p>
               <p className="font-mono text-xs font-semibold text-text-light tabular-nums">
-                $5.00
+                {MIN_DEPOSIT_DISPLAY}
               </p>
             </div>
           </div>

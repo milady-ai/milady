@@ -153,9 +153,14 @@ export class ElizaEmbeddingManager {
       const drainPromise = new Promise<void>((resolve) => {
         this.drainResolve = resolve;
       });
-      const timeout = new Promise<void>((resolve) => setTimeout(resolve, 5000));
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const timeout = new Promise<void>((resolve) => {
+        timer = setTimeout(resolve, 5000);
+      });
       await Promise.race([drainPromise, timeout]);
+      if (timer !== undefined) clearTimeout(timer);
     }
+    this.drainResolve = null;
     await this.releaseResources();
   }
 

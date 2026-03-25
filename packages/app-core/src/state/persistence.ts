@@ -29,6 +29,9 @@ function tryLocalStorage<T>(fn: () => T, fallback: T): T {
 export type { UiTheme } from "./ui-preferences";
 
 const UI_THEME_STORAGE_KEY = "eliza:ui-theme";
+const LEGACY_UI_THEME_STORAGE_KEY = "milady:ui-theme";
+const THEME_SWITCHING_ATTRIBUTE = "data-theme-switching";
+let themeSwitchResetFrameId: number | null = null;
 
 function normalizeUiTheme(value: unknown): UiTheme {
   return value === "light" ? "light" : "dark";
@@ -36,16 +39,33 @@ function normalizeUiTheme(value: unknown): UiTheme {
 
 export { normalizeUiTheme };
 
+function suppressThemeTransitions(root: HTMLElement): void {
+  if (typeof window === "undefined") return;
+  root.setAttribute(THEME_SWITCHING_ATTRIBUTE, "");
+  if (themeSwitchResetFrameId != null) {
+    window.cancelAnimationFrame(themeSwitchResetFrameId);
+  }
+  themeSwitchResetFrameId = window.requestAnimationFrame(() => {
+    themeSwitchResetFrameId = window.requestAnimationFrame(() => {
+      root.removeAttribute(THEME_SWITCHING_ATTRIBUTE);
+      themeSwitchResetFrameId = null;
+    });
+  });
+}
+
 export function loadUiTheme(): UiTheme {
-  return tryLocalStorage(
-    () => normalizeUiTheme(localStorage.getItem(UI_THEME_STORAGE_KEY)),
-    "dark",
-  );
+  return tryLocalStorage(() => {
+    const current = localStorage.getItem(UI_THEME_STORAGE_KEY);
+    if (current != null) return normalizeUiTheme(current);
+    return normalizeUiTheme(localStorage.getItem(LEGACY_UI_THEME_STORAGE_KEY));
+  }, "dark");
 }
 
 export function saveUiTheme(theme: UiTheme): void {
   tryLocalStorage(() => {
-    localStorage.setItem(UI_THEME_STORAGE_KEY, normalizeUiTheme(theme));
+    const normalized = normalizeUiTheme(theme);
+    localStorage.setItem(UI_THEME_STORAGE_KEY, normalized);
+    localStorage.setItem(LEGACY_UI_THEME_STORAGE_KEY, normalized);
   }, undefined);
 }
 
@@ -182,17 +202,46 @@ export function saveCompanionHalfFramerateMode(
  */
 export function applyUiTheme(theme: UiTheme): void {
   if (typeof document === "undefined") return;
+  const normalizedTheme = normalizeUiTheme(theme);
   const root = document.documentElement;
   if (!root) return;
-  if (typeof root.setAttribute === "function") {
-    root.setAttribute("data-theme", theme);
-  } else if ("dataset" in root && root.dataset) {
-    root.dataset.theme = theme;
-  } else {
+  const currentTheme =
+    typeof root.getAttribute === "function"
+      ? root.getAttribute("data-theme")
+      : (root.dataset?.theme ?? null);
+  const shouldBeDark = normalizedTheme === "dark";
+  const classMatchesTheme = root.classList
+    ? root.classList.contains("dark") === shouldBeDark
+    : true;
+  const colorSchemeMatches =
+    !root.style || root.style.colorScheme === normalizedTheme;
+
+  if (
+    currentTheme === normalizedTheme &&
+    classMatchesTheme &&
+    colorSchemeMatches
+  ) {
     return;
   }
-  if (!root.classList) return;
-  if (theme === "dark") {
+
+  suppressThemeTransitions(root);
+
+  if (currentTheme !== normalizedTheme) {
+    if (typeof root.setAttribute === "function") {
+      root.setAttribute("data-theme", normalizedTheme);
+    } else if ("dataset" in root && root.dataset) {
+      root.dataset.theme = normalizedTheme;
+    } else {
+      return;
+    }
+  }
+
+  if (root.style && root.style.colorScheme !== normalizedTheme) {
+    root.style.colorScheme = normalizedTheme;
+  }
+
+  if (!root.classList || classMatchesTheme) return;
+  if (shouldBeDark) {
     root.classList.add("dark");
   } else {
     root.classList.remove("dark");

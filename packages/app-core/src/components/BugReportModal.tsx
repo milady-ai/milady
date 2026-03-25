@@ -279,7 +279,7 @@ export function BugReportModal() {
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm hover:underline break-all"
-              style={{ color: "#f0b232" }}
+              style={{ color: "var(--accent)" }}
             >
               {resultUrl}
             </a>
