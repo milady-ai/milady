@@ -16,7 +16,7 @@ import {
   buildFullParamActionSet,
   compactActionsForIntent,
   detectIntentCategories,
-} from "../prompt-optimization";
+} from "../prompt-compaction";
 
 // ---------------------------------------------------------------------------
 // Test fixtures
