@@ -5,7 +5,6 @@
  */
 
 import { ONBOARDING_PROVIDER_CATALOG } from "@miladyai/shared/contracts/onboarding";
-import { replaceNameTokens } from "../components/character-editor-helpers";
 import {
   getDefaultStylePreset,
   getStylePresets,
@@ -32,7 +31,6 @@ import {
   type BscTradeTxStatusResponse,
   type BscTransferExecuteRequest,
   type BscTransferExecuteResponse,
-  type StewardStatusResponse,
   type CatalogSkill,
   type CharacterData,
   type CodingAgentSession,
@@ -101,6 +99,7 @@ import {
   normalizeSlashCommandName,
 } from "../chat";
 import { mapServerTasksToSessions } from "../coding";
+import { replaceNameTokens } from "../components/character-editor-helpers";
 import { getBootConfig, setBootConfig } from "../config/boot-config";
 import { BrandingContext, DEFAULT_BRANDING } from "../config/branding";
 import { type AppEmoteEventDetail, dispatchAppEmoteEvent } from "../events";
@@ -142,9 +141,9 @@ import {
   asApiLikeError,
   type CompanionHalfFramerateMode,
   type CompanionVrmPowerMode,
+  clearAvatarIndex,
   clearPersistedConnectionMode,
   clearPersistedOnboardingStep,
-  clearAvatarIndex,
   deriveOnboardingResumeConnection,
   deriveOnboardingResumeFields,
   formatSearchBullet,
@@ -722,7 +721,7 @@ function AppProviderInner({
     for (const turn of queued) {
       turn.resolve();
     }
-  }, [chatSendQueueRef]);
+  }, []);
   const interruptActiveChatPipeline = useCallback(() => {
     resolveQueuedChatSends();
     chatAbortRef.current?.abort();
@@ -731,7 +730,6 @@ function AppProviderInner({
     setChatFirstTokenReceived(false);
   }, [
     chatAbortRef,
-    chatSendQueueRef,
     resolveQueuedChatSends,
     setChatFirstTokenReceived,
     setChatSending,
@@ -2837,8 +2835,6 @@ function AppProviderInner({
       onboardingCompletionCommittedRef,
       onboardingResumeConnectionRef,
       setSelectedVrmIndex,
-      setCustomVrmUrl,
-      setCustomBackgroundUrl,
     ],
   );
 
@@ -3716,7 +3712,6 @@ function AppProviderInner({
     }
   }, [
     chatSendBusyRef,
-    chatSendQueueRef,
     runQueuedChatSend,
     setChatFirstTokenReceived,
     setChatSending,
@@ -3749,7 +3744,7 @@ function AppProviderInner({
         void flushQueuedChatSends();
       });
     },
-    [chatSendQueueRef, flushQueuedChatSends, setChatSending],
+    [flushQueuedChatSends, setChatSending],
   );
 
   const handleChatSend = useCallback(
@@ -5425,6 +5420,7 @@ function AppProviderInner({
     setOnboardingStyle,
     setPostOnboardingChecklistDismissed,
     setSelectedVrmIndex,
+    loadCharacter,
   ]);
 
   // ── Onboarding motion (flow graph: packages/app-core/src/onboarding/flow.ts) ──

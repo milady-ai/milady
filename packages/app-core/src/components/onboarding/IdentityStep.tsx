@@ -1,10 +1,10 @@
 import { dispatchAppEmoteEvent } from "@miladyai/app-core/events";
 import { useApp } from "@miladyai/app-core/state";
-import { PREMADE_VOICES } from "../../voice/types";
-import { getElizaApiToken, resolveApiUrl } from "../../utils";
 import { getStylePresets } from "@miladyai/shared/onboarding-presets";
 import { Button, Input } from "@miladyai/ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getElizaApiToken, resolveApiUrl } from "../../utils";
+import { PREMADE_VOICES } from "../../voice/types";
 import {
   CharacterRoster,
   type CharacterRosterEntry,
@@ -20,6 +20,7 @@ export function IdentityStep() {
     () => resolveRosterEntries(getStylePresets(uiLanguage)),
     [uiLanguage],
   );
+  const firstEntry = entries[0];
   const selectedId = onboardingStyle || entries[0]?.id || "";
 
   /* ── Import / restore state ─────────────────────────────────────── */
@@ -163,11 +164,10 @@ export function IdentityStep() {
 
   // Auto-select the first one if nothing is selected yet
   useEffect(() => {
-    const firstEntry = entries[0];
     if (!onboardingStyle && firstEntry) {
       handleSelect(firstEntry, false);
     }
-  }, [onboardingStyle, handleSelect]);
+  }, [onboardingStyle, handleSelect, firstEntry]);
 
   useEffect(() => {
     const onTeleportComplete = () => {

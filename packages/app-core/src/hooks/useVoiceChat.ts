@@ -323,9 +323,12 @@ function shelterUrls(input: string): {
  */
 function isRealSentenceEnd(value: string, matchIndex: number): boolean {
   // Decimal: digit immediately before the period → not a sentence end.
-  if (matchIndex > 0 && /\d/.test(value[matchIndex - 1]!)) {
+  const prevChar = matchIndex > 0 ? value.charAt(matchIndex - 1) : "";
+  if (/\d/.test(prevChar)) {
     // Check if a digit also follows the period (e.g. "3.14")
-    if (matchIndex + 1 < value.length && /\d/.test(value[matchIndex + 1]!)) {
+    const nextChar =
+      matchIndex + 1 < value.length ? value.charAt(matchIndex + 1) : "";
+    if (/\d/.test(nextChar)) {
       return false;
     }
   }
