@@ -20,6 +20,8 @@ describe("brand-gold onboarding styles", () => {
     );
 
     expect(css).toContain("--onboarding-panel-bg: rgba(5, 5, 6, 0.88);");
-    expect(css).toContain("--onboarding-text-primary: rgba(234, 236, 239, 0.92);");
+    expect(css).toContain(
+      "--onboarding-text-primary: rgba(234, 236, 239, 0.92);",
+    );
   });
 });
