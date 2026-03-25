@@ -18,217 +18,13 @@ import {
   Textarea,
 } from "@miladyai/ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type {
-  SkillInfo,
-  SkillMarketplaceResult,
-  SkillScanReportSummary,
-} from "../api";
+import type { SkillInfo, SkillMarketplaceResult } from "../api";
 import { client } from "../api";
-import { useTimeout } from "../hooks";
 import { useApp } from "../state";
 import { ConfirmDeleteControl } from "./confirm-delete-control";
 
-/* ── Skill Card ─────────────────────────────────────────────────────── */
-
-function SkillCard({
-  skill,
-  skillToggleAction,
-  skillReviewId,
-  skillReviewReport,
-  skillReviewLoading,
-  onToggle,
-  onEdit,
-  onDelete,
-  onReview,
-  onAcknowledge,
-  onDismissReview,
-}: {
-  skill: SkillInfo;
-  skillToggleAction: string;
-  skillReviewId: string;
-  skillReviewReport: ReturnType<typeof useApp>["skillReviewReport"];
-  skillReviewLoading: boolean;
-  onToggle: (id: string, enabled: boolean) => void;
-  onEdit: (skill: SkillInfo) => void;
-  onDelete: (id: string, name: string) => void;
-  onReview: (id: string) => void;
-  onAcknowledge: (id: string) => void;
-  onDismissReview: () => void;
-}) {
-  const { t } = useApp();
-  const isQuarantined =
-    skill.scanStatus === "warning" || skill.scanStatus === "critical";
-  const isBlocked = skill.scanStatus === "blocked";
-  const isReviewing = skillReviewId === skill.id;
-
-  return (
-    <div
-      className={`flex flex-col border bg-[var(--card)] transition-colors ${
-        isQuarantined || isBlocked
-          ? "border-danger/35"
-          : "border-[var(--border)] hover:border-[var(--accent)]/50"
-      }`}
-      data-skill-id={skill.id}
-    >
-      {/* Main content area */}
-      <div className="p-4">
-        {/* Top row: badge + toggle */}
-        <div className="flex items-center justify-between mb-2.5">
-          <StatusBadge
-            label={
-              skill.scanStatus === "blocked" || skill.scanStatus === "critical"
-                ? t("skillsview.statusBlocked")
-                : skill.scanStatus === "warning"
-                  ? t("skillsview.statusWarning")
-                  : skill.enabled
-                    ? t("skillsview.statusActive")
-                    : t("skillsview.statusInactive")
-            }
-            tone={
-              skill.scanStatus === "blocked" ||
-              skill.scanStatus === "critical" ||
-              skill.scanStatus === "warning"
-                ? skill.scanStatus === "warning"
-                  ? "warning"
-                  : "danger"
-                : skill.enabled
-                  ? "success"
-                  : "muted"
-            }
-            withDot
-          />
-          {!isBlocked && !isQuarantined && (
-            <Switch
-              checked={skill.enabled}
-              disabled={skillToggleAction === skill.id}
-              onCheckedChange={(val) => onToggle(skill.id, val)}
-            />
-          )}
-          {isQuarantined && !isReviewing && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-6 border-warn/35 bg-warn/12 px-2 text-[10px] font-bold text-warn transition-colors hover:border-warn/55 hover:bg-warn/18 hover:text-warn"
-              onClick={() => onReview(skill.id)}
-            >
-              {t("skillsview.ReviewFindings")}
-            </Button>
-          )}
-        </div>
-
-        {/* Name + description */}
-        <div
-          className="font-semibold text-sm text-[var(--txt)] mb-1 truncate"
-          title={skill.name}
-        >
-          {skill.name}
-        </div>
-        <div className="text-[11px] text-[var(--muted)] line-clamp-2 min-h-[2em]">
-          {skill.description || t("skillsview.noDescription")}
-        </div>
-      </div>
-
-      {/* Footer actions */}
-      <div className="flex items-center gap-2 px-4 py-3 border-t border-border/40 bg-black/5 mt-auto">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 px-3 text-[11px] font-bold text-muted hover:text-txt transition-colors"
-          onClick={() => onEdit(skill)}
-        >
-          {t("triggersview.Edit")}
-        </Button>
-        <ConfirmDeleteControl
-          triggerClassName="h-7 px-3 text-[11px] font-bold !bg-transparent text-danger hover:!bg-danger/15 hover:text-danger-foreground transition-colors rounded-md border border-transparent hover:border-danger/30"
-          confirmClassName="px-3 py-1 text-[11px] font-bold bg-danger text-danger-foreground hover:bg-danger/90 transition-colors rounded-md shadow-sm"
-          cancelClassName="px-3 py-1 text-[11px] font-bold text-muted border border-border/40 hover:text-txt transition-colors rounded-md"
-          confirmLabel={t("conversations.deleteYes")}
-          cancelLabel={t("conversations.deleteNo")}
-          onConfirm={() => onDelete(skill.id, skill.name)}
-        />
-        <span className="flex-1" />
-        <span
-          className="text-[10px] text-[var(--muted)] font-mono truncate max-w-[120px]"
-          title={skill.id}
-        >
-          {skill.id.length > 16 ? `${skill.id.slice(0, 16)}...` : skill.id}
-        </span>
-      </div>
-
-      {/* Inline review panel */}
-      {isReviewing && skillReviewReport ? (
-        <div className="border-t border-[var(--border)] p-4 bg-[var(--bg)]">
-          <div className="flex items-center gap-3 mb-3">
-            <span className="text-xs font-semibold text-[var(--txt)]">
-              {t("skillsview.ScanReport")}
-            </span>
-            <span className="text-[11px] font-mono text-danger">
-              {skillReviewReport.summary.critical} {t("skillsview.critical")}
-            </span>
-            <span className="text-[11px] font-mono text-warn">
-              {skillReviewReport.summary.warn} {t("skillsview.warnings")}
-            </span>
-          </div>
-          {skillReviewReport.findings.length > 0 && (
-            <div className="max-h-40 overflow-y-auto mb-3 border border-[var(--border)] bg-[var(--card)]">
-              {skillReviewReport.findings.map(
-                (
-                  f: SkillScanReportSummary["findings"][number],
-                  idx: number,
-                ) => (
-                  <div
-                    key={`${f.file}:${f.line}:${f.message}`}
-                    className={`flex items-start gap-2 px-3 py-1.5 text-[11px] font-mono ${
-                      idx > 0 ? "border-t border-[var(--border)]" : ""
-                    }`}
-                  >
-                    <span
-                      className={`shrink-0 px-1.5 py-px font-bold text-[10px] uppercase ${
-                        f.severity === "critical"
-                          ? "bg-danger/12 text-danger"
-                          : "bg-warn/12 text-warn"
-                      }`}
-                    >
-                      {f.severity}
-                    </span>
-                    <span className="text-[var(--txt)] flex-1 min-w-0">
-                      {f.message}
-                    </span>
-                    <span className="text-[var(--muted)] shrink-0">
-                      {f.file}:{f.line}
-                    </span>
-                  </div>
-                ),
-              )}
-            </div>
-          )}
-          <div className="flex gap-2.5 mt-2">
-            <Button
-              variant="default"
-              size="sm"
-              className="h-7 px-3 text-[11px] font-bold tracking-wide shadow-sm"
-              onClick={() => onAcknowledge(skill.id)}
-            >
-              {t("skillsview.AcknowledgeAmpEn")}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 px-3 text-[11px] font-bold text-muted hover:text-txt transition-colors"
-              onClick={onDismissReview}
-            >
-              {t("skillsview.Dismiss")}
-            </Button>
-          </div>
-        </div>
-      ) : isReviewing && skillReviewLoading ? (
-        <div className="border-t border-[var(--border)] p-4 text-xs text-[var(--muted)] italic">
-          {t("skillsview.LoadingScanReport")}
-        </div>
-      ) : null}
-    </div>
-  );
-}
+const SKILLS_SHELL_CLASS =
+  "settings-shell plugins-game-modal plugins-game-modal--inline relative flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-lg ring-1 ring-border/20 backdrop-blur-sm";
 
 /* ── Marketplace Result Card ────────────────────────────────────────── */
 
@@ -1025,8 +821,6 @@ function SkillsModalView() {
 /* ── Full-Page Skills View ─────────────────────────────────────────── */
 
 function SkillsFullView() {
-  const { setTimeout: _setTimeout } = useTimeout();
-
   const {
     skills,
     skillCreateFormOpen,
@@ -1060,59 +854,50 @@ function SkillsFullView() {
 
   const [installModalOpen, setInstallModalOpen] = useState(false);
   const [filterText, setFilterText] = useState("");
+  const [filterTab, setFilterTab] = useState<"all" | "on" | "off">("all");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editingSkill, setEditingSkill] = useState<SkillInfo | null>(null);
 
   useEffect(() => {
     void loadSkills();
   }, [loadSkills]);
 
-  // Group into: needs attention, active, inactive — with text filter
-  const {
-    attention,
-    active,
-    inactive,
-    activeCount: _activeCount,
-    totalCount: _totalCount,
-  } = useMemo(() => {
-    const attention: SkillInfo[] = [];
-    const active: SkillInfo[] = [];
-    const inactive: SkillInfo[] = [];
-    let activeCount = 0;
-
+  const filteredSkills = useMemo(() => {
     const query = filterText.toLowerCase();
 
-    for (const skill of skills) {
+    return skills.filter((skill) => {
+      if (filterTab === "on" && !skill.enabled) return false;
+      if (filterTab === "off" && skill.enabled) return false;
       if (
         query &&
         !skill.name.toLowerCase().includes(query) &&
         !skill.description?.toLowerCase().includes(query)
       ) {
-        continue;
+        return false;
       }
+      return true;
+    });
+  }, [skills, filterText, filterTab]);
 
-      if (skill.enabled) activeCount++;
+  const selectedSkillId =
+    selectedId && filteredSkills.some((skill) => skill.id === selectedId)
+      ? selectedId
+      : (filteredSkills[0]?.id ?? null);
+  const selectedSkill = selectedSkillId
+    ? (skills.find((skill) => skill.id === selectedSkillId) ?? null)
+    : null;
 
-      if (
-        skill.scanStatus === "warning" ||
-        skill.scanStatus === "critical" ||
-        skill.scanStatus === "blocked"
-      ) {
-        attention.push(skill);
-      } else if (skill.enabled) {
-        active.push(skill);
-      } else {
-        inactive.push(skill);
-      }
-    }
-
-    return {
-      attention,
-      active,
-      inactive,
-      activeCount,
-      totalCount: skills.length,
-    };
-  }, [skills, filterText]);
+  const filterTabs: { key: typeof filterTab; label: string }[] = [
+    { key: "all", label: `ALL (${skills.length})` },
+    {
+      key: "on",
+      label: `ON (${skills.filter((skill) => skill.enabled).length})`,
+    },
+    {
+      key: "off",
+      label: `OFF (${skills.filter((skill) => !skill.enabled).length})`,
+    },
+  ];
 
   const handleDismissReview = () => {
     setState("skillReviewId", "");
@@ -1125,149 +910,453 @@ function SkillsFullView() {
     setState("skillCreateDescription", "");
   };
 
-  const allVisible = [...attention, ...active, ...inactive];
-
-  /** Render a group of skill cards in a grid with a section header. */
-  const renderGroup = (
-    label: string,
-    items: SkillInfo[],
-    toneClassName = "text-muted",
-  ) => {
-    if (items.length === 0) return null;
-    return (
-      <div className="mb-6">
-        <div
-          className={`mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider ${toneClassName}`}
-        >
-          {label}
-          <span className="text-[10px] font-mono opacity-60">
-            ({items.length})
-          </span>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {items.map((skill) => (
-            <SkillCard
-              key={skill.id}
-              skill={skill}
-              skillToggleAction={skillToggleAction}
-              skillReviewId={skillReviewId}
-              skillReviewReport={skillReviewReport}
-              skillReviewLoading={skillReviewLoading}
-              onToggle={handleSkillToggle}
-              onEdit={setEditingSkill}
-              onDelete={handleDeleteSkill}
-              onReview={handleReviewSkill}
-              onAcknowledge={handleAcknowledgeSkill}
-              onDismissReview={handleDismissReview}
-            />
-          ))}
-        </div>
-      </div>
-    );
-  };
+  const selectedSkillReviewOpen = skillReviewId === selectedSkill?.id;
+  const selectedNeedsAttention =
+    selectedSkill?.scanStatus === "warning" ||
+    selectedSkill?.scanStatus === "critical" ||
+    selectedSkill?.scanStatus === "blocked";
 
   return (
-    <div>
-      {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-3 mb-6 p-3 border border-border/40 bg-card/60 backdrop-blur-md rounded-2xl shadow-sm">
-        <Input
-          type="text"
-          placeholder={t("skillsview.filterSkills")}
-          value={filterText}
-          onChange={(e) => setFilterText(e.target.value)}
-          className="w-[240px] h-9 bg-bg/50 border-border/50 focus-visible:ring-accent rounded-xl text-xs"
-        />
+    <div className="flex h-full w-full min-h-0 bg-bg p-0 lg:p-1">
+      <div className={SKILLS_SHELL_CLASS} data-testid="skills-shell">
+        <aside
+          data-testid="skills-sidebar"
+          className="flex min-h-0 w-[21rem] max-w-[352px] shrink-0 flex-col overflow-hidden border-r border-border/40 bg-card/45 backdrop-blur-sm"
+        >
+          <div className="flex min-h-0 flex-1 flex-col px-3 pb-4 pt-3">
+            <div className="border-b border-border/30 px-1 pb-3">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60">
+                {t("nav.skills", { defaultValue: "Skills" })}
+              </div>
+              <div className="mt-1 text-xs text-muted">
+                {skills.length}{" "}
+                {t("skillsview.installed", { defaultValue: "installed" })}
+              </div>
+            </div>
 
-        <span className="flex-1" />
+            <div className="mt-4 flex items-center gap-2">
+              <Button
+                variant={skillCreateFormOpen ? "outline" : "default"}
+                size="sm"
+                type="button"
+                className={`h-9 flex-1 rounded-full px-4 text-[11px] font-bold tracking-[0.12em] ${
+                  skillCreateFormOpen
+                    ? "border-border/50 bg-bg/25 text-txt"
+                    : ""
+                }`}
+                onClick={() => {
+                  setState("skillCreateFormOpen", !skillCreateFormOpen);
+                  if (skillCreateFormOpen) {
+                    handleCancelCreate();
+                  }
+                }}
+              >
+                {skillCreateFormOpen
+                  ? t("common.cancel")
+                  : `+ ${t("skillsview.NewSkill", { defaultValue: "New Skill" })}`}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                className="h-9 rounded-full px-4 text-[11px] font-bold tracking-[0.12em]"
+                onClick={() => setInstallModalOpen(true)}
+              >
+                {t("skillsview.Install", { defaultValue: "Install" })}
+              </Button>
+            </div>
 
-        <Button
-          variant={skillCreateFormOpen ? "ghost" : "default"}
-          size="sm"
-          className={
-            skillCreateFormOpen
-              ? "h-9 px-4 font-bold text-muted hover:text-txt"
-              : "h-9 px-4 font-bold tracking-wide shadow-sm"
-          }
-          onClick={() => setState("skillCreateFormOpen", !skillCreateFormOpen)}
+            <div className="mt-3 flex items-center gap-2">
+              <Input
+                type="text"
+                placeholder={t("skillsview.filterSkills")}
+                value={filterText}
+                onChange={(e) => setFilterText(e.target.value)}
+                className="h-10 rounded-[18px] border-border/50 bg-bg/35 text-sm"
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                type="button"
+                className="h-10 rounded-full px-3 text-[10px] font-bold tracking-[0.14em] text-muted hover:text-txt"
+                onClick={() => void refreshSkills()}
+                title={t("skillsview.RefreshSkillsList", {
+                  defaultValue: "Refresh Skills List",
+                })}
+              >
+                {t("common.refresh")}
+              </Button>
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-2">
+              {filterTabs.map((tab) => (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  key={tab.key}
+                  type="button"
+                  className={`h-8 rounded-full border px-3 text-[10px] font-bold tracking-[0.14em] ${
+                    filterTab === tab.key
+                      ? "border-accent/30 bg-accent/10 text-txt"
+                      : "border-border/45 text-muted hover:border-border/70 hover:bg-bg/35 hover:text-txt"
+                  }`}
+                  onClick={() => setFilterTab(tab.key)}
+                >
+                  {tab.label}
+                </Button>
+              ))}
+            </div>
+
+            <div className="mt-4 flex min-h-0 flex-1 flex-col rounded-[26px] border border-border/30 bg-bg/16 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_18px_38px_rgba(3,5,10,0.16)]">
+              <nav className="min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-1">
+                {filteredSkills.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-border/45 bg-bg/20 px-4 py-6 text-center text-sm text-muted">
+                    {skills.length === 0
+                      ? "No Skills Installed"
+                      : `No skills match "${filterText}"`}
+                  </div>
+                ) : (
+                  filteredSkills.map((skill) => {
+                    const needsAttention =
+                      skill.scanStatus === "warning" ||
+                      skill.scanStatus === "critical" ||
+                      skill.scanStatus === "blocked";
+
+                    return (
+                      <div
+                        key={skill.id}
+                        data-testid={`skill-row-${skill.id}`}
+                        className={`flex items-start gap-2 rounded-xl border px-3.5 py-3 text-left transition-all ${
+                          selectedSkillId === skill.id
+                            ? "border-accent/30 bg-[linear-gradient(180deg,rgba(var(--accent),0.18),rgba(var(--accent),0.08))] text-txt shadow-[0_14px_28px_rgba(3,5,10,0.16)]"
+                            : "border-transparent bg-transparent text-muted hover:border-border/45 hover:bg-bg/45 hover:text-txt"
+                        }`}
+                      >
+                        <Button
+                          variant="ghost"
+                          className="flex h-auto min-w-0 flex-1 items-start gap-3 rounded-none p-0 text-left"
+                          onClick={() => {
+                            setSelectedId(skill.id);
+                            setState("skillCreateFormOpen", false);
+                          }}
+                          aria-current={
+                            selectedSkillId === skill.id ? "page" : undefined
+                          }
+                        >
+                          <span
+                            className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border p-2 text-sm font-bold ${
+                              selectedSkillId === skill.id
+                                ? "border-accent/30 bg-accent/18 text-txt-strong"
+                                : "border-border/50 bg-bg-accent/80 text-muted"
+                            }`}
+                          >
+                            {skill.name.charAt(0).toUpperCase()}
+                          </span>
+                          <span className="min-w-0 flex-1 text-left">
+                            <span className="block whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold leading-snug">
+                              {skill.name}
+                            </span>
+                            <span className="mt-1 block whitespace-normal break-words [overflow-wrap:anywhere] text-[11px] leading-relaxed text-muted/85">
+                              {skill.description ||
+                                t("skillsview.noDescription")}
+                            </span>
+                          </span>
+                        </Button>
+                        <div className="flex shrink-0 flex-col items-end gap-2">
+                          <span
+                            className={`rounded-full border px-2.5 py-1 text-[10px] font-bold tracking-[0.16em] ${
+                              skill.enabled
+                                ? "border-accent bg-accent text-accent-fg"
+                                : "border-border bg-transparent text-muted"
+                            }`}
+                          >
+                            {skill.enabled ? "ON" : "OFF"}
+                          </span>
+                          {needsAttention && (
+                            <span className="rounded-full border border-warn/30 bg-warn/12 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-warn">
+                              {skill.scanStatus === "blocked"
+                                ? t("skillsview.statusBlocked")
+                                : t("skillsview.statusWarning")}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </nav>
+            </div>
+          </div>
+        </aside>
+
+        <div
+          data-testid="skills-detail"
+          className="min-w-0 flex-1 overflow-y-auto bg-bg/10"
         >
-          {skillCreateFormOpen
-            ? t("common.cancel")
-            : `+ ${t("skillsview.NewSkill", { defaultValue: "New Skill" })}`}
-        </Button>
-        <Button
-          variant="default"
-          size="sm"
-          className="h-9 px-4 font-bold tracking-wide shadow-sm"
-          onClick={() => setInstallModalOpen(true)}
-        >
-          {t("skillsview.BrowseMarketplace", {
-            defaultValue: "Browse Marketplace",
-          })}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-9 px-4 font-bold text-muted hover:text-txt"
-          onClick={() => refreshSkills()}
-          title={t("skillsview.RefreshSkillsList", {
-            defaultValue: "Refresh Skills List",
-          })}
-        >
-          {t("common.refresh")}
-        </Button>
+          <div className="mx-auto max-w-[76rem] px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
+            {skills.length === 0 && !skillCreateFormOpen ? (
+              <div className="rounded-[1.6rem] border border-border/45 bg-card/92 px-6 py-12 text-center shadow-[0_18px_44px_rgba(3,5,10,0.16)] ring-1 ring-border/10">
+                <div
+                  data-testid="skills-empty-state"
+                  className="text-sm font-semibold text-txt"
+                >
+                  No Skills Installed
+                </div>
+                <div className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted">
+                  Install skills from the marketplace or create your own.
+                </div>
+                <div className="mt-5 flex justify-center gap-3">
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="h-10 rounded-full px-5 font-bold tracking-[0.12em]"
+                    onClick={() => setInstallModalOpen(true)}
+                  >
+                    Browse Marketplace
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-10 rounded-full px-5 font-bold tracking-[0.12em]"
+                    onClick={() => setState("skillCreateFormOpen", true)}
+                  >
+                    Create Skill
+                  </Button>
+                </div>
+              </div>
+            ) : filteredSkills.length === 0 && !skillCreateFormOpen ? (
+              <div
+                data-testid="skills-filter-empty"
+                className="rounded-[1.6rem] border border-dashed border-border/45 bg-bg/18 px-6 py-12 text-center text-sm text-muted"
+              >
+                No skills match filtering "{filterText}"
+              </div>
+            ) : skillCreateFormOpen ? (
+              <section className="overflow-hidden rounded-[1.6rem] border border-border/45 bg-card/92 shadow-[0_18px_44px_rgba(3,5,10,0.16)] ring-1 ring-border/10">
+                <div className="border-b border-border/35 px-5 py-4">
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60">
+                    Skill Builder
+                  </div>
+                  <div className="mt-1 text-sm font-semibold text-txt">
+                    {t("skillsview.CreateNewSkill")}
+                  </div>
+                </div>
+                <div className="bg-bg/18 px-4 py-4 sm:px-5">
+                  <CreateSkillForm
+                    skillCreateName={skillCreateName}
+                    skillCreateDescription={skillCreateDescription}
+                    skillCreating={skillCreating}
+                    setState={setState}
+                    onCancel={handleCancelCreate}
+                    onCreate={handleCreateSkill}
+                  />
+                </div>
+              </section>
+            ) : selectedSkill ? (
+              <section
+                data-skill-id={selectedSkill.id}
+                className="overflow-hidden rounded-[1.6rem] border border-border/45 bg-card/92 shadow-[0_18px_44px_rgba(3,5,10,0.16)] ring-1 ring-border/10"
+              >
+                <div className="flex items-start gap-3 px-4 py-4 sm:px-5">
+                  <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-accent/30 bg-accent/18 p-2.5 text-base font-bold text-txt-strong">
+                    {selectedSkill.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex min-w-0 flex-wrap items-center gap-2">
+                      <div
+                        data-testid="skills-detail-name"
+                        className="whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold leading-snug text-txt"
+                      >
+                        {selectedSkill.name}
+                      </div>
+                      <StatusBadge
+                        label={
+                          selectedSkill.scanStatus === "blocked" ||
+                          selectedSkill.scanStatus === "critical"
+                            ? t("skillsview.statusBlocked")
+                            : selectedSkill.scanStatus === "warning"
+                              ? t("skillsview.statusWarning")
+                              : selectedSkill.enabled
+                                ? t("skillsview.statusActive")
+                                : t("skillsview.statusInactive")
+                        }
+                        tone={
+                          selectedSkill.scanStatus === "warning"
+                            ? "warning"
+                            : selectedSkill.scanStatus === "blocked" ||
+                                selectedSkill.scanStatus === "critical"
+                              ? "danger"
+                              : selectedSkill.enabled
+                                ? "success"
+                                : "muted"
+                        }
+                        withDot
+                      />
+                      <span className="text-[11px] font-mono text-muted/80">
+                        {selectedSkill.id}
+                      </span>
+                    </div>
+                    <div className="mt-3 max-w-3xl text-sm leading-relaxed text-muted">
+                      {selectedSkill.description || "No description provided."}
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    {selectedNeedsAttention && !selectedSkillReviewOpen && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-auto rounded-full border-warn/35 bg-warn/12 px-3 py-1.5 text-[10px] font-bold tracking-[0.14em] text-warn"
+                        onClick={() => handleReviewSkill(selectedSkill.id)}
+                      >
+                        {t("skillsview.ReviewFindings")}
+                      </Button>
+                    )}
+                    {selectedNeedsAttention && selectedSkillReviewOpen && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-auto rounded-full border-border/50 px-3 py-1.5 text-[11px] font-semibold text-muted hover:text-txt"
+                        onClick={handleDismissReview}
+                      >
+                        {t("skillsview.Dismiss")}
+                      </Button>
+                    )}
+                    <Switch
+                      checked={selectedSkill.enabled}
+                      disabled={skillToggleAction === selectedSkill.id}
+                      onCheckedChange={(next) =>
+                        handleSkillToggle(selectedSkill.id, next)
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="border-t border-border/40 bg-bg/18 px-4 py-4 sm:px-5">
+                  <div className="mb-4 flex flex-wrap items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-9 rounded-full px-4 text-[11px] font-bold tracking-[0.12em]"
+                      onClick={() => setEditingSkill(selectedSkill)}
+                    >
+                      {t("skillsview.EditSource", {
+                        defaultValue: "Edit Source",
+                      })}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-9 rounded-full px-4 text-[11px] font-bold tracking-[0.12em] text-muted hover:text-txt"
+                      onClick={() => void refreshSkills()}
+                    >
+                      {t("common.refresh")}
+                    </Button>
+                    <ConfirmDeleteControl
+                      triggerClassName="h-9 rounded-full px-4 text-[11px] font-bold tracking-[0.12em] !bg-transparent text-danger hover:!bg-danger/15 hover:text-danger-foreground transition-colors border border-danger/30"
+                      confirmClassName="px-3 py-1 text-[11px] font-bold bg-danger text-danger-foreground hover:bg-danger/90 transition-colors rounded-md shadow-sm"
+                      cancelClassName="px-3 py-1 text-[11px] font-bold text-muted border border-border/40 hover:text-txt transition-colors rounded-md"
+                      confirmLabel={t("conversations.deleteYes")}
+                      cancelLabel={t("conversations.deleteNo")}
+                      onConfirm={() =>
+                        handleDeleteSkill(selectedSkill.id, selectedSkill.name)
+                      }
+                    />
+                  </div>
+
+                  {selectedSkillReviewOpen && skillReviewReport ? (
+                    <div className="rounded-[24px] border border-border/25 bg-bg/10 p-4 sm:p-5">
+                      <div className="mb-3 flex flex-wrap items-center gap-3">
+                        <span className="text-xs font-semibold text-txt">
+                          {t("skillsview.ScanReport")}
+                        </span>
+                        <span className="text-[11px] font-mono text-danger">
+                          {skillReviewReport.summary.critical}{" "}
+                          {t("skillsview.critical")}
+                        </span>
+                        <span className="text-[11px] font-mono text-warn">
+                          {skillReviewReport.summary.warn}{" "}
+                          {t("skillsview.warnings")}
+                        </span>
+                      </div>
+                      {skillReviewReport.findings.length > 0 && (
+                        <div className="custom-scrollbar max-h-64 overflow-y-auto rounded-2xl border border-border/35 bg-card/30">
+                          {skillReviewReport.findings.map((finding, idx) => (
+                            <div
+                              key={`${finding.file}:${finding.line}:${finding.message}`}
+                              className={`flex items-start gap-2 px-3 py-2 text-[11px] ${
+                                idx > 0 ? "border-t border-border/30" : ""
+                              }`}
+                            >
+                              <span
+                                className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] ${
+                                  finding.severity === "critical"
+                                    ? "bg-danger/12 text-danger"
+                                    : "bg-warn/12 text-warn"
+                                }`}
+                              >
+                                {finding.severity}
+                              </span>
+                              <span className="min-w-0 flex-1 text-txt">
+                                {finding.message}
+                              </span>
+                              <span className="shrink-0 font-mono text-muted">
+                                {finding.file}:{finding.line}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="mt-4 flex gap-2">
+                        <Button
+                          variant="default"
+                          size="sm"
+                          className="h-9 rounded-full px-4 text-[11px] font-bold tracking-[0.12em]"
+                          onClick={() =>
+                            handleAcknowledgeSkill(selectedSkill.id)
+                          }
+                        >
+                          {t("skillsview.AcknowledgeAmpEn")}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-9 rounded-full px-4 text-[11px] font-bold tracking-[0.12em] text-muted hover:text-txt"
+                          onClick={handleDismissReview}
+                        >
+                          {t("skillsview.Dismiss")}
+                        </Button>
+                      </div>
+                    </div>
+                  ) : selectedSkillReviewOpen && skillReviewLoading ? (
+                    <div className="rounded-2xl border border-border/35 bg-bg/10 px-4 py-3 text-sm text-muted">
+                      {t("skillsview.LoadingScanReport")}
+                    </div>
+                  ) : (
+                    <div className="rounded-[24px] border border-border/25 bg-bg/10 p-4 sm:p-5">
+                      <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60">
+                        {t("skillsview.EditSource", {
+                          defaultValue: "Edit Source",
+                        })}
+                      </div>
+                      <div className="mt-2 text-sm leading-relaxed text-muted">
+                        Open the skill source editor to inspect or modify
+                        `SKILL.md`, or review findings here when a skill needs
+                        attention.
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </section>
+            ) : (
+              <div className="rounded-[1.6rem] border border-dashed border-border/45 bg-bg/18 px-6 py-12 text-center text-sm text-muted">
+                {t("skillsview.SelectATalentToConf", {
+                  defaultValue: "Select a talent to configure",
+                })}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-
-      {/* Create form */}
-      {skillCreateFormOpen && (
-        <CreateSkillForm
-          skillCreateName={skillCreateName}
-          skillCreateDescription={skillCreateDescription}
-          skillCreating={skillCreating}
-          setState={setState}
-          onCancel={handleCancelCreate}
-          onCreate={handleCreateSkill}
-        />
-      )}
-
-      {/* Skill grid — grouped by status */}
-      {skills.length === 0 ? (
-        <div className="text-center py-16">
-          <div className="text-[var(--muted)] text-sm mb-2">
-            No Skills Installed
-          </div>
-          <div className="text-[var(--muted)] text-[11px] mb-4">
-            Install skills from the marketplace or create your own.
-          </div>
-          <div className="flex justify-center gap-3">
-            <Button
-              variant="default"
-              size="sm"
-              className="h-10 px-6 font-bold tracking-wide shadow-sm"
-              onClick={() => setInstallModalOpen(true)}
-            >
-              Browse Marketplace
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-10 px-6 font-bold text-muted hover:text-txt"
-              onClick={() => setState("skillCreateFormOpen", true)}
-            >
-              Create Skill
-            </Button>
-          </div>
-        </div>
-      ) : allVisible.length === 0 ? (
-        <div className="text-center py-12 text-[var(--muted)] text-xs">
-          No skills match filtering "{filterText}"
-        </div>
-      ) : (
-        <div>
-          {renderGroup("Needs Attention", attention, "text-warn")}
-          {renderGroup("Active", active, "text-ok")}
-          {renderGroup("Inactive", inactive)}
-        </div>
-      )}
 
       {/* Edit modal */}
       {editingSkill && (

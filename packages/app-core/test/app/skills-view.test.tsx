@@ -124,17 +124,16 @@ describe("SkillsView", () => {
       tree = TestRenderer.create(React.createElement(SkillsView));
     });
 
-    expect(tree.root.findAllByType("button").length).toBeGreaterThan(0);
     expect(
-      tree.root.findAll(
-        (node) =>
-          node.type === "div" &&
-          node.children.some((child) => child === "No Skills Installed"),
-      ).length,
-    ).toBeGreaterThan(0);
+      tree.root.findByProps({ "data-testid": "skills-shell" }),
+    ).toBeTruthy();
+    expect(
+      tree.root.findByProps({ "data-testid": "skills-empty-state" }),
+    ).toBeTruthy();
+    expect(tree.root.findAllByType("button").length).toBeGreaterThan(0);
   });
 
-  it("uses token-driven tone classes for grouped status headers", async () => {
+  it("uses a master-detail layout and updates the detail pane when selection changes", async () => {
     mockUseApp.mockReturnValue(
       createAppState({
         skills: [
@@ -161,20 +160,37 @@ describe("SkillsView", () => {
       tree = TestRenderer.create(React.createElement(SkillsView));
     });
 
-    const headers = tree.root.findAll(
-      (node) =>
-        node.type === "div" &&
-        typeof node.props.className === "string" &&
-        node.children.some((child) => child === "Needs Attention"),
-    );
-    expect(headers[0]?.props.className).toContain("text-warn");
+    expect(
+      tree.root.findByProps({ "data-testid": "skills-sidebar" }),
+    ).toBeTruthy();
+    expect(
+      tree.root.findByProps({ "data-testid": "skills-detail" }),
+    ).toBeTruthy();
+    expect(
+      tree.root.findByProps({ "data-testid": "skills-detail-name" }).children,
+    ).toContain("Warn Skill");
+    expect(
+      tree.root
+        .findByProps({ "data-testid": "skill-row-warn-skill" })
+        .findByProps({
+          "aria-current": "page",
+        }),
+    ).toBeTruthy();
+    expect(
+      tree.root
+        .findAllByType("button")
+        .some((node) => node.children.includes("skillsview.ReviewFindings")),
+    ).toBe(true);
 
-    const activeHeaders = tree.root.findAll(
-      (node) =>
-        node.type === "div" &&
-        typeof node.props.className === "string" &&
-        node.children.some((child) => child === "Active"),
-    );
-    expect(activeHeaders[0]?.props.className).toContain("text-ok");
+    await act(async () => {
+      tree.root
+        .findByProps({ "data-testid": "skill-row-active-skill" })
+        .findByProps({ type: "button" })
+        .props.onClick();
+    });
+
+    expect(
+      tree.root.findByProps({ "data-testid": "skills-detail-name" }).children,
+    ).toContain("Active Skill");
   });
 });
