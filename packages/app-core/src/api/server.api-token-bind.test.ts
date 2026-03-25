@@ -9,9 +9,11 @@ describe("ensureApiTokenForBindHost", () => {
     "ELIZA_API_TOKEN",
     "ELIZA_API_BIND",
     "ELIZA_ALLOWED_ORIGINS",
+    "ELIZA_DISABLE_AUTO_API_TOKEN",
     "MILADY_API_TOKEN",
     "MILADY_API_BIND",
     "MILADY_ALLOWED_ORIGINS",
+    "MILADY_DISABLE_AUTO_API_TOKEN",
   ];
   const savedEnv = new Map<string, string | undefined>();
 
@@ -43,6 +45,26 @@ describe("ensureApiTokenForBindHost", () => {
     process.env.ELIZA_API_TOKEN = "existing-token";
     ensureApiTokenForBindHost("0.0.0.0");
     expect(process.env.ELIZA_API_TOKEN).toBe("existing-token");
+  });
+
+  it("preserves a brand-aliased token", () => {
+    process.env.MILADY_API_TOKEN = "brand-token";
+    ensureApiTokenForBindHost("0.0.0.0");
+    expect(process.env.MILADY_API_TOKEN).toBe("brand-token");
+  });
+
+  it.each([
+    ["MILADY_DISABLE_AUTO_API_TOKEN", "1"],
+    ["ELIZA_DISABLE_AUTO_API_TOKEN", "1"],
+  ])("skips token generation when %s=%s", (envKey, envValue) => {
+    delete process.env.ELIZA_API_TOKEN;
+    delete process.env.MILADY_API_TOKEN;
+    process.env[envKey] = envValue;
+
+    ensureApiTokenForBindHost("0.0.0.0");
+
+    expect(process.env.MILADY_API_TOKEN).toBeUndefined();
+    expect(process.env.ELIZA_API_TOKEN).toBeUndefined();
   });
 
   it("generates a token for non-loopback binds without logging raw token", () => {

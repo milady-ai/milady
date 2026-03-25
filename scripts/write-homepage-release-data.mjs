@@ -168,6 +168,7 @@ function buildRelease(release) {
       label: "Ubuntu / Debian",
       asset: pickAsset(assets, [
         (asset) => /linux/i.test(asset.name) && /\.deb$/i.test(asset.name),
+        (asset) => /\.deb$/i.test(asset.name),
       ]),
     },
   ]

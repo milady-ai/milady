@@ -82,6 +82,34 @@ describe("isNetworkBind", () => {
   });
 });
 
+describe("shouldDisableAutoConnectionKey", () => {
+  beforeEach(() => {
+    delete process.env.MILADY_DISABLE_AUTO_API_TOKEN;
+    delete process.env.ELIZA_DISABLE_AUTO_API_TOKEN;
+  });
+
+  function shouldDisableAutoConnectionKey(): boolean {
+    return (
+      process.env.MILADY_DISABLE_AUTO_API_TOKEN === "1" ||
+      process.env.ELIZA_DISABLE_AUTO_API_TOKEN === "1"
+    );
+  }
+
+  it("returns true when MILADY_DISABLE_AUTO_API_TOKEN=1", () => {
+    process.env.MILADY_DISABLE_AUTO_API_TOKEN = "1";
+    expect(shouldDisableAutoConnectionKey()).toBe(true);
+  });
+
+  it("returns true when ELIZA_DISABLE_AUTO_API_TOKEN=1", () => {
+    process.env.ELIZA_DISABLE_AUTO_API_TOKEN = "1";
+    expect(shouldDisableAutoConnectionKey()).toBe(true);
+  });
+
+  it("returns false when neither disable flag is set", () => {
+    expect(shouldDisableAutoConnectionKey()).toBe(false);
+  });
+});
+
 describe("connection key is NOT auto-generated for localhost", () => {
   beforeEach(() => {
     delete process.env.MILADY_API_TOKEN;

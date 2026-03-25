@@ -5767,11 +5767,7 @@ let pairingExpiresAt = 0;
 const pairingAttempts = new Map<string, { count: number; resetAt: number }>();
 
 function pairingEnabled(): boolean {
-  return (
-    Boolean(
-      (process.env.ELIZA_API_TOKEN ?? process.env.ELIZA_API_TOKEN)?.trim(),
-    ) && process.env.ELIZA_PAIRING_DISABLED !== "1"
-  );
+  return Boolean(getConfiguredApiToken()) && process.env.ELIZA_PAIRING_DISABLED !== "1";
 }
 
 function normalizePairingCode(code: string): string {
@@ -5897,6 +5893,12 @@ function tokenMatches(expected: string, provided: string): boolean {
   return crypto.timingSafeEqual(a, b);
 }
 
+function getConfiguredApiToken(): string | undefined {
+  return (
+    process.env.ELIZA_API_TOKEN?.trim() || process.env.MILADY_API_TOKEN?.trim()
+  );
+}
+
 function isLoopbackBindHost(host: string): boolean {
   let normalized = host.trim().toLowerCase();
 
@@ -5946,29 +5948,25 @@ export function ensureApiTokenForBindHost(host: string): void {
     return;
   }
 
-  const token = (
-    process.env.ELIZA_API_TOKEN ?? process.env.ELIZA_API_TOKEN
-  )?.trim();
+  const token = getConfiguredApiToken();
   if (token) return;
   if (isLoopbackBindHost(host)) return;
 
   const generated = crypto.randomBytes(32).toString("hex");
-  process.env.ELIZA_API_TOKEN = generated;
+  process.env.MILADY_API_TOKEN = generated;
   process.env.ELIZA_API_TOKEN = generated;
 
   logger.warn(
-    `[eliza-api] ELIZA_API_BIND/ELIZA_API_BIND=${host} is non-loopback and ELIZA_API_TOKEN/ELIZA_API_TOKEN is unset.`,
+    `[eliza-api] MILADY_API_BIND/ELIZA_API_BIND=${host} is non-loopback and MILADY_API_TOKEN/ELIZA_API_TOKEN is unset.`,
   );
   const tokenFingerprint = `${generated.slice(0, 4)}...${generated.slice(-4)}`;
   logger.warn(
-    `[eliza-api] Generated temporary API token (${tokenFingerprint}) for this process. Set ELIZA_API_TOKEN explicitly to override.`,
+    `[eliza-api] Generated temporary API token (${tokenFingerprint}) for this process. Set MILADY_API_TOKEN or ELIZA_API_TOKEN explicitly to override.`,
   );
 }
 
 export function isAuthorized(req: http.IncomingMessage): boolean {
-  const expected = (
-    process.env.ELIZA_API_TOKEN ?? process.env.ELIZA_API_TOKEN
-  )?.trim();
+  const expected = getConfiguredApiToken();
   if (!expected) return true;
   const provided = extractAuthToken(req);
   if (!provided) return false;
@@ -6079,9 +6077,7 @@ export function resolveTerminalRunRejection(
   body: TerminalRunRequestBody,
 ): TerminalRunRejection | null {
   const expected = process.env.ELIZA_TERMINAL_RUN_TOKEN?.trim();
-  const apiTokenEnabled = Boolean(
-    (process.env.ELIZA_API_TOKEN ?? process.env.ELIZA_API_TOKEN)?.trim(),
-  );
+  const apiTokenEnabled = Boolean(getConfiguredApiToken());
 
   // Compatibility mode: local loopback sessions without API token keep
   // existing behavior unless an explicit terminal token is configured.
@@ -6138,9 +6134,7 @@ function isWebSocketAuthorized(
   request: http.IncomingMessage,
   url: URL,
 ): boolean {
-  const expected = (
-    process.env.ELIZA_API_TOKEN ?? process.env.ELIZA_API_TOKEN
-  )?.trim();
+  const expected = getConfiguredApiToken();
   if (!expected) return true;
 
   const headerToken = extractAuthToken(request);

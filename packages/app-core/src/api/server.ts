@@ -143,6 +143,19 @@ function syncElizaEnvToMilady(): void {
   const aliases = getBootConfig().envAliases;
   if (aliases) syncElizaEnvToBrand(aliases);
 }
+
+function resolveWalletExecutionMode(
+  canSign: boolean,
+  canExecuteLocally: boolean,
+  hasStewardSigner: boolean,
+): "local-key" | "steward" | "user-sign" {
+  if (!canSign || !canExecuteLocally) {
+    return "user-sign";
+  }
+
+  return hasStewardSigner ? "steward" : "local-key";
+}
+
 // Lazy-imported to avoid circular dependency with runtime/eliza.ts
 const lazyEnsureTTS = () =>
   import("../runtime/eliza.js").then((m) => m.ensureMiladyTextToSpeechHandler);
@@ -2606,7 +2619,11 @@ async function handleMiladyCompatRoute(
         sendJsonResponse(res, 200, {
           ok: true,
           side: quote.side,
-          mode: canSign && canExecuteLocally ? (hasStewardSigner ? "steward" : "local-key") : "user-sign",
+          mode: resolveWalletExecutionMode(
+            canSign,
+            canExecuteLocally,
+            hasStewardSigner,
+          ),
           quote,
           executed: false,
           requiresUserSignature: true,
@@ -2886,7 +2903,11 @@ async function handleMiladyCompatRoute(
     if (!canSign || !canExecuteLocally || body.confirm !== true) {
       sendJsonResponse(res, 200, {
         ok: true,
-        mode: canSign && canExecuteLocally ? (hasStewardSigner ? "steward" : "local-key") : "user-sign",
+        mode: resolveWalletExecutionMode(
+          canSign,
+          canExecuteLocally,
+          hasStewardSigner,
+        ),
         executed: false,
         requiresUserSignature: true,
         toAddress,

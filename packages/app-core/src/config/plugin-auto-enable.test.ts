@@ -431,6 +431,15 @@ describe("applyPluginAutoEnable — env vars", () => {
     const cuaEntries = allow.filter((p) => p === "cua");
     expect(cuaEntries).toHaveLength(1);
   });
+
+  it("auto-enables steward plugin when STEWARD_API_URL is set", () => {
+    const params = makeParams({
+      env: { STEWARD_API_URL: "https://steward.example" },
+    });
+    const { config } = applyPluginAutoEnable(params);
+
+    expect(config.plugins?.allow).toContain("@stwd/eliza-plugin");
+  });
 });
 
 // ============================================================================
