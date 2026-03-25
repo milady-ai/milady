@@ -8,6 +8,10 @@ The Twilio plugin connects Milady agents to Twilio, enabling SMS messaging and v
 
 **Package:** `@elizaos/plugin-twilio`
 
+<Note>
+This plugin is **not auto-enabled**. You must install it manually using the command below.
+</Note>
+
 ## Installation
 
 ```bash

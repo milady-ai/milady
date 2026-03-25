@@ -1,7 +1,7 @@
 ---
 title: "Platform Connectors"
 sidebarTitle: "Connectors"
-description: "Platform bridges for 30+ messaging platforms including Discord, Telegram, Slack, WhatsApp, Signal, iMessage, BlueBubbles, Blooio, MS Teams, Google Chat, Twitter, Farcaster, Bluesky, Instagram, Twitch, Mattermost, WeChat, Matrix, Feishu, Nostr, LINE, Zalo, Twilio, GitHub, Gmail Watch, Nextcloud Talk, Tlon, Lens, and Retake."
+description: "Platform bridges for 29 messaging platforms including Discord, Telegram, Slack, WhatsApp, Signal, iMessage, BlueBubbles, Blooio, MS Teams, Google Chat, Twitter, Farcaster, Bluesky, Instagram, Twitch, Mattermost, WeChat, Matrix, Feishu, Nostr, LINE, Zalo, Twilio, GitHub, Gmail Watch, Nextcloud Talk, Tlon, Lens, and Retake."
 ---
 
 Connectors are platform bridges that allow your agent to communicate across messaging platforms and social networks. Each connector handles authentication, message routing, session management, and platform-specific features.
@@ -78,6 +78,12 @@ Connectors are platform bridges that allow your agent to communicate across mess
 | Tlon | Ship credentials | Yes | Yes (Urbit chats) | No |
 | Lens | API key | Yes | N/A | No |
 | Retake | Access token | Yes | Yes | No |
+
+### Auto-Enabled vs Registry-Only
+
+**Auto-enabled connectors** (20 total) activate automatically when their credentials are configured: Discord, Telegram, Slack, Twitter, WhatsApp, Signal, BlueBubbles, iMessage, Farcaster, Lens, MS Teams, Google Chat, Mattermost, Feishu, Matrix, Nostr, Retake, Blooio, Twitch, and WeChat.
+
+**Registry-only connectors** require manual installation via `milady plugins install <name>` before they can be used: Bluesky, Instagram, LINE, Zalo, Twilio, GitHub, Nextcloud Talk, and Tlon. Gmail Watch is enabled via a feature flag (`features.gmailWatch`) rather than the connectors section.
 
 ---
 

@@ -8,6 +8,10 @@ The Tlon plugin connects Milady agents to Tlon (Urbit), enabling message handlin
 
 **Package:** `@elizaos/plugin-tlon`
 
+<Note>
+This plugin is **not auto-enabled**. You must install it manually using the command below.
+</Note>
+
 ## Installation
 
 ```bash

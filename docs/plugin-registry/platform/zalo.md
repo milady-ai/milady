@@ -8,6 +8,10 @@ The Zalo plugin connects Milady agents to Zalo, enabling message handling throug
 
 **Package:** `@elizaos/plugin-zalo`
 
+<Note>
+This plugin is **not auto-enabled**. You must install it manually using the command below.
+</Note>
+
 ## Installation
 
 ```bash

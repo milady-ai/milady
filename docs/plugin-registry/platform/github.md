@@ -8,6 +8,10 @@ The GitHub plugin connects Milady agents to GitHub, enabling interactions with r
 
 **Package:** `@elizaos/plugin-github`
 
+<Note>
+This plugin is **not auto-enabled**. You must install it manually using the command below.
+</Note>
+
 ## Installation
 
 ```bash

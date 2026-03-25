@@ -8,7 +8,7 @@ Connect your agent to LINE for bot messaging and customer conversations.
 
 ## Overview
 
-The LINE connector is an elizaOS plugin that bridges your agent to LINE Messaging API. It supports rich message types, group chat, and webhook-based event handling. This connector is available from the plugin registry.
+The LINE connector is an elizaOS plugin that bridges your agent to LINE Messaging API. It supports rich message types, group chat, and webhook-based event handling. This connector is available from the elizaOS plugin registry and requires manual installation (it is **not** auto-enabled).
 
 ## Package Info
 

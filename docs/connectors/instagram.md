@@ -8,7 +8,7 @@ Connect your agent to Instagram for media posting, comment monitoring, and DM ha
 
 ## Overview
 
-The Instagram connector is an elizaOS plugin that bridges your agent to Instagram. It supports media posting with caption generation, comment response, and direct message handling. This connector is available from the plugin registry.
+The Instagram connector is an elizaOS plugin that bridges your agent to Instagram. It supports media posting with caption generation, comment response, and direct message handling. This connector is available from the elizaOS plugin registry and requires manual installation (it is **not** auto-enabled).
 
 ## Package Info
 

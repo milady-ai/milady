@@ -8,6 +8,10 @@ The LINE plugin connects Milady agents to LINE as a bot, enabling message handli
 
 **Package:** `@elizaos/plugin-line`
 
+<Note>
+This plugin is **not auto-enabled**. You must install it manually using the command below.
+</Note>
+
 ## Installation
 
 ```bash
