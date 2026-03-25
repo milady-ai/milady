@@ -279,7 +279,9 @@ export function persistCompatOnboardingDefaults(
   const cloudApiKey =
     trimToUndefined(process.env.ELIZAOS_CLOUD_API_KEY) ??
     trimToUndefined(
-      typeof config.cloud?.apiKey === "string" ? config.cloud.apiKey : undefined,
+      typeof config.cloud?.apiKey === "string"
+        ? config.cloud.apiKey
+        : undefined,
     );
   const canUseCloudManagedVoice = Boolean(cloudApiKey);
   const voicePresetId = stylePreset?.voicePresetId?.trim();

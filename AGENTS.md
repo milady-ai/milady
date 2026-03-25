@@ -74,6 +74,14 @@
 - Group related changes; avoid bundling unrelated refactors
 - PRs should summarize scope, note testing performed, and mention any user-facing changes
 
+## Fork-First Promotion Flow (Hard Rule)
+
+- Default working flow is **fork-first on a validate branch**.
+- Active implementation branches must end with `-validate` (example: `codex/some-fix-validate`).
+- Do not push directly to `origin` during validation.
+- Only promote to non-validate / PR branches after validation is green.
+- One-time promotion pushes must be explicit and intentional (hook override: `MILADY_ALLOW_NON_VALIDATE_PUSH=1`).
+
 ## Security & Configuration
 
 - Never commit real secrets, phone numbers, or live configuration values

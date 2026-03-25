@@ -347,6 +347,8 @@ describe("persistCompatOnboardingDefaults", () => {
   });
 
   it("persists preset ElevenLabs voice for cloud-managed onboarding without direct elevenlabs key", () => {
+    // Guard fork-first QA flow: cloud-managed onboarding must still persist
+    // a deterministic preset voice so desktop catchphrase playback stays stable.
     delete process.env.ELEVENLABS_API_KEY;
     delete process.env.ELIZAOS_CLOUD_API_KEY;
 

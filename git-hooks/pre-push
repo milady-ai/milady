@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 #
-# Pre-push hook: Prevents direct pushes to the main branch.
-# All changes to main must go through a pull request.
+# Pre-push hook:
+# - Prevent direct pushes to protected branches
+# - Enforce fork-first validation flow (validate branch only) unless explicitly overridden
 #
 
 PROTECTED_BRANCHES=("main")
+VALIDATE_BRANCH_SUFFIX="-validate"
 
 current_branch=$(git symbolic-ref HEAD 2>/dev/null | sed 's|refs/heads/||')
+remote_name="$1"
 
 # Read the push info from stdin
 while read local_ref local_sha remote_ref remote_sha; do
@@ -22,6 +25,28 @@ while read local_ref local_sha remote_ref remote_sha; do
     fi
   done
 done
+
+# Fork-first guard: default to fork validate branches only.
+# Override once with MILADY_ALLOW_NON_VALIDATE_PUSH=1 when explicitly promoting.
+if [ "${MILADY_ALLOW_NON_VALIDATE_PUSH:-0}" != "1" ]; then
+  if [ "${remote_name}" = "origin" ]; then
+    echo ""
+    echo "🚫  Pushes to origin are blocked by default."
+    echo "    Use fork validate branch flow first."
+    echo "    If you intentionally need this once, set MILADY_ALLOW_NON_VALIDATE_PUSH=1."
+    echo ""
+    exit 1
+  fi
+
+  if [ "${remote_name}" = "fork" ] && [[ "${current_branch}" != *"${VALIDATE_BRANCH_SUFFIX}" ]]; then
+    echo ""
+    echo "🚫  Current branch '${current_branch}' is not a validate branch."
+    echo "    Required flow: push only branches ending with '${VALIDATE_BRANCH_SUFFIX}' to fork."
+    echo "    If this is an intentional promotion push, set MILADY_ALLOW_NON_VALIDATE_PUSH=1."
+    echo ""
+    exit 1
+  fi
+fi
 
 # Run pre-review checks (any, ts-directive suppressions, secrets scan)
 # Skip if MILADY_SKIP_PRE_REVIEW=1 for emergency pushes
