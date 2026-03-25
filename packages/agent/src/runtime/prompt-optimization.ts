@@ -5,6 +5,8 @@
  * prompt metrics.  All behaviour is controlled via MILADY_* env vars.
  */
 
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
 import type { AgentRuntime } from "@elizaos/core";
 
 import {
@@ -27,6 +29,16 @@ const MILADY_PROMPT_OPT_MODE = (
 const MILADY_PROMPT_TRACE =
   process.env.MILADY_PROMPT_TRACE === "1" ||
   process.env.MILADY_PROMPT_TRACE?.toLowerCase() === "true";
+
+/**
+ * Dump raw prompts to .tmp/prompt-captures/ for analysis. Dev-only.
+ * WARNING: captures contain full conversation content including user messages.
+ */
+const MILADY_CAPTURE_PROMPTS =
+  process.env.MILADY_CAPTURE_PROMPTS === "1" ||
+  process.env.MILADY_CAPTURE_PROMPTS?.toLowerCase() === "true";
+
+let promptCaptureSeq = 0;
 
 /** When false, context-aware action compaction is skipped entirely. Default: enabled. */
 const MILADY_ACTION_COMPACTION = (() => {
@@ -198,6 +210,18 @@ export function installPromptOptimizations(runtime: AgentRuntime): void {
     }
 
     const originalPrompt = String(promptRecord[promptKey] ?? "");
+
+    // --- Prompt capture (dev debugging) ---
+    if (MILADY_CAPTURE_PROMPTS) {
+      const captureDir = path.resolve(".tmp", "prompt-captures");
+      const seq = String(++promptCaptureSeq).padStart(4, "0");
+      const filename = `${seq}-${modelType}.txt`;
+      await mkdir(captureDir, { recursive: true }).catch(() => {});
+      await writeFile(
+        path.join(captureDir, filename),
+        `--- model: ${modelType} | key: ${promptKey} | chars: ${originalPrompt.length} ---\n\n${originalPrompt}`,
+      ).catch(() => {});
+    }
 
     // --- Security eval bypass (dynamic per source) ---
     // DM/web UI sessions skip the security LLM (user is admin).
