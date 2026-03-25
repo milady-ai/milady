@@ -10,7 +10,7 @@ function normalizeCloudHost(hostname: string): string {
 
 function resolveDefaultCloudBase(): string {
   if (typeof window === "undefined") {
-    return "https://elizacloud.ai";
+    return "https://www.elizacloud.ai";
   }
 
   const hostname = normalizeCloudHost(window.location.hostname);
@@ -22,7 +22,8 @@ function resolveDefaultCloudBase(): string {
     return `${window.location.protocol}//${window.location.host}`;
   }
 
-  return "https://elizacloud.ai";
+  // Use www to avoid bare-domain redirect dropping POST bodies
+  return "https://www.elizacloud.ai";
 }
 
 const DEFAULT_CLOUD_BASE = resolveDefaultCloudBase();

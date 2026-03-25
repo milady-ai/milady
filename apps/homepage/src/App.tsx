@@ -135,7 +135,8 @@ function DownloadDropdown() {
         <ChevronDown />
       </button>
       {open && (
-        <div className="absolute bottom-full left-0 mb-2 w-72 border border-text-subtle/20 bg-dark/95 backdrop-blur-md z-[100]">
+        <div className="absolute bottom-full left-0 pb-2 w-72 z-[100]">
+        <div className="border border-text-subtle/20 bg-dark/95 backdrop-blur-md">
           {downloads.map((d) => (
             <a
               key={d.id}
@@ -164,6 +165,7 @@ function DownloadDropdown() {
               All Releases
             </span>
           </a>
+        </div>
         </div>
       )}
     </fieldset>
