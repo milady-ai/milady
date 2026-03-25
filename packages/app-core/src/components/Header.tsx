@@ -3,7 +3,7 @@ import { getTabGroups, type TabGroup } from "@miladyai/app-core/navigation";
 import { useApp } from "@miladyai/app-core/state";
 import { Button } from "@miladyai/ui";
 import { Menu, X } from "lucide-react";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CloudStatusBadge } from "./CloudStatusBadge";
 import { InferenceCloudAlertButton } from "./companion/InferenceCloudAlertButton";
@@ -129,6 +129,26 @@ export function Header({
   const useMinimalHeaderChrome = transparent || activeShellView !== "desktop";
   const showNavigationMenu = activeShellView === "desktop";
   const showCloudStatus = !hideCloudCredits;
+  const useCharacterShellChrome = activeShellView === "character";
+  const showCompanionControls = activeShellView !== "desktop";
+  const characterHeaderShellStyle = useMemo(
+    () =>
+      ({
+        "--companion-header-bg":
+          uiTheme === "light"
+            ? "linear-gradient(180deg, rgba(255,255,255,0.34), rgba(255,255,255,0.1)), linear-gradient(180deg, rgba(255,253,246,0.62), rgba(248,241,215,0.34))"
+            : "linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)), linear-gradient(180deg, rgba(8, 11, 18, 0.52), rgba(5, 7, 12, 0.3))",
+        "--companion-header-border":
+          uiTheme === "light"
+            ? "rgba(201, 186, 143, 0.44)"
+            : "rgba(255, 255, 255, 0.12)",
+        "--companion-header-shadow":
+          uiTheme === "light"
+            ? "inset 0 1px 0 rgba(255,255,255,0.56), inset 0 -1px 0 rgba(171,151,92,0.1), 0 24px 42px rgba(123, 101, 26, 0.14)"
+            : "inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -1px 0 rgba(255,255,255,0.04), 0 24px 50px rgba(2, 4, 8, 0.28)",
+      }) as CSSProperties,
+    [uiTheme],
+  );
 
   const handleShellViewChange = (
     view: "companion" | "character" | "desktop",
@@ -221,107 +241,216 @@ export function Header({
         }`}
         style={{ WebkitUserSelect: "none", userSelect: "none" }}
       >
-        <ShellHeaderControls
-          activeShellView={activeShellView}
-          onShellViewChange={handleShellViewChange}
-          uiLanguage={uiLanguage}
-          setUiLanguage={setUiLanguage}
-          uiTheme={uiTheme}
-          setUiTheme={setUiTheme}
-          t={t}
-          languageDropdownClassName={
-            showNavigationMenu ? "hidden sm:inline-flex" : undefined
-          }
-          languageDropdownWrapperTestId={
-            showNavigationMenu ? "header-language-dropdown-desktop" : undefined
-          }
-          themeToggleWrapperClassName={
-            showNavigationMenu ? "hidden sm:flex" : undefined
-          }
-          themeToggleWrapperTestId={
-            showNavigationMenu ? "header-theme-toggle-desktop" : undefined
-          }
-          rightExtras={
-            <>
-              {chatInferenceNotice ? (
-                <InferenceCloudAlertButton
-                  notice={chatInferenceNotice}
-                  onClick={handleChatInferenceAlertClick}
-                />
-              ) : null}
-              {showCloudStatus ? (
-                <CloudStatusBadge
-                  connected={elizaCloudConnected}
-                  credits={elizaCloudCredits}
-                  creditsLow={elizaCloudCreditsLow}
-                  creditsCritical={elizaCloudCreditsCritical}
-                  authRejected={elizaCloudAuthRejected}
-                  creditsError={elizaCloudCreditsError}
-                  t={t}
-                  onClick={openCloudBilling}
-                  dataTestId="header-cloud-status"
-                />
-              ) : null}
-            </>
-          }
-          showCompanionControls={
-            activeShellView === "companion" || activeShellView === "character"
-          }
-          chatAgentVoiceMuted={chatAgentVoiceMuted}
-          onToggleVoiceMute={() =>
-            setState("chatAgentVoiceMuted", !chatAgentVoiceMuted)
-          }
-          onNewChat={() => void handleNewConversation()}
-          trailingExtras={
-            showNavigationMenu ? (
-              <Button
-                size="icon"
-                variant="outline"
-                className={`sm:hidden ${HEADER_ICON_BUTTON_CLASSNAME}`}
-                onClick={() => setMobileMenuOpen(true)}
-                aria-label={t("aria.openNavMenu")}
-                aria-expanded={mobileMenuOpen}
-                style={HEADER_BUTTON_STYLE}
-              >
-                <Menu className="pointer-events-none w-5 h-5" />
-              </Button>
-            ) : null
-          }
-        >
-          {mobileLeft ? (
-            <div className="flex sm:hidden">{mobileLeft}</div>
-          ) : null}
-          {showNavigationMenu ? (
-            <nav className="scrollbar-hide hidden flex-1 items-center justify-start gap-1.5 overflow-x-auto whitespace-nowrap px-2 sm:flex sm:pl-4">
-              {tabGroups.map((group: TabGroup) => {
-                const primaryTab = group.tabs[0];
-                const isActive = group.tabs.includes(tab);
-                return (
-                  <Button
-                    variant={isActive ? "default" : "ghost"}
-                    key={group.label}
-                    data-testid={`header-nav-button-${primaryTab}`}
-                    className={`${HEADER_NAV_BUTTON_BASE_CLASSNAME} ${
-                      isActive
-                        ? HEADER_NAV_BUTTON_ACTIVE_CLASSNAME
-                        : HEADER_NAV_BUTTON_INACTIVE_CLASSNAME
-                    }`}
-                    onClick={() => setTab(primaryTab)}
-                    title={group.description}
-                    style={HEADER_BUTTON_STYLE}
-                  >
-                    <span
-                      data-testid={`header-nav-label-${primaryTab}`}
-                      className="pointer-events-none inline"
+        {useCharacterShellChrome ? (
+          <div className="px-1.5 pt-1.5 max-[768px]:px-2 max-[768px]:pt-2 sm:px-4 sm:pt-4">
+            <div
+              className="pointer-events-auto relative mx-auto w-full max-w-5xl rounded-[20px] border border-[color:var(--companion-header-border)] bg-[image:var(--companion-header-bg)] shadow-[var(--companion-header-shadow)] ring-1 ring-inset ring-white/10 before:pointer-events-none before:absolute before:inset-x-[6%] before:top-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.55),transparent)] backdrop-blur-2xl max-[768px]:rounded-none max-[768px]:border-transparent max-[768px]:bg-none max-[768px]:shadow-none max-[768px]:ring-0 max-[768px]:before:hidden max-[768px]:backdrop-blur-none sm:rounded-[22px]"
+              data-testid="character-header-shell"
+              style={characterHeaderShellStyle}
+            >
+              <ShellHeaderControls
+                activeShellView={activeShellView}
+                onShellViewChange={handleShellViewChange}
+                uiLanguage={uiLanguage}
+                setUiLanguage={setUiLanguage}
+                uiTheme={uiTheme}
+                setUiTheme={setUiTheme}
+                t={t}
+                className="px-2.5 py-2 sm:px-4 sm:py-3"
+                languageDropdownClassName={
+                  showNavigationMenu ? "hidden sm:inline-flex" : undefined
+                }
+                languageDropdownWrapperTestId={
+                  showNavigationMenu
+                    ? "header-language-dropdown-desktop"
+                    : undefined
+                }
+                themeToggleWrapperClassName={
+                  showNavigationMenu ? "hidden sm:flex" : undefined
+                }
+                themeToggleWrapperTestId={
+                  showNavigationMenu ? "header-theme-toggle-desktop" : undefined
+                }
+                rightExtras={
+                  <>
+                    {chatInferenceNotice ? (
+                      <InferenceCloudAlertButton
+                        notice={chatInferenceNotice}
+                        onClick={handleChatInferenceAlertClick}
+                      />
+                    ) : null}
+                    {showCloudStatus ? (
+                      <CloudStatusBadge
+                        connected={elizaCloudConnected}
+                        credits={elizaCloudCredits}
+                        creditsLow={elizaCloudCreditsLow}
+                        creditsCritical={elizaCloudCreditsCritical}
+                        authRejected={elizaCloudAuthRejected}
+                        creditsError={elizaCloudCreditsError}
+                        t={t}
+                        onClick={openCloudBilling}
+                        dataTestId="header-cloud-status"
+                      />
+                    ) : null}
+                  </>
+                }
+                showCompanionControls={showCompanionControls}
+                chatAgentVoiceMuted={chatAgentVoiceMuted}
+                onToggleVoiceMute={() =>
+                  setState("chatAgentVoiceMuted", !chatAgentVoiceMuted)
+                }
+                onNewChat={() => void handleNewConversation()}
+                trailingExtras={
+                  showNavigationMenu ? (
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className={`sm:hidden ${HEADER_ICON_BUTTON_CLASSNAME}`}
+                      onClick={() => setMobileMenuOpen(true)}
+                      aria-label={t("aria.openNavMenu")}
+                      aria-expanded={mobileMenuOpen}
+                      style={HEADER_BUTTON_STYLE}
                     >
-                      {t(NAV_LABEL_I18N_KEY[group.label] ?? group.label)}
-                    </span>
-                  </Button>
-                );
-              })}
-            </nav>
-          ) : null}
-        </ShellHeaderControls>
+                      <Menu className="pointer-events-none w-5 h-5" />
+                    </Button>
+                  ) : null
+                }
+              >
+                {mobileLeft ? (
+                  <div className="flex sm:hidden">{mobileLeft}</div>
+                ) : null}
+                {showNavigationMenu ? (
+                  <nav className="scrollbar-hide hidden flex-1 items-center justify-start gap-1.5 overflow-x-auto whitespace-nowrap px-2 sm:flex sm:pl-4">
+                    {tabGroups.map((group: TabGroup) => {
+                      const primaryTab = group.tabs[0];
+                      const isActive = group.tabs.includes(tab);
+                      return (
+                        <Button
+                          variant={isActive ? "default" : "ghost"}
+                          key={group.label}
+                          data-testid={`header-nav-button-${primaryTab}`}
+                          className={`${HEADER_NAV_BUTTON_BASE_CLASSNAME} ${
+                            isActive
+                              ? HEADER_NAV_BUTTON_ACTIVE_CLASSNAME
+                              : HEADER_NAV_BUTTON_INACTIVE_CLASSNAME
+                          }`}
+                          onClick={() => setTab(primaryTab)}
+                          title={group.description}
+                          style={HEADER_BUTTON_STYLE}
+                        >
+                          <span
+                            data-testid={`header-nav-label-${primaryTab}`}
+                            className="pointer-events-none inline"
+                          >
+                            {t(NAV_LABEL_I18N_KEY[group.label] ?? group.label)}
+                          </span>
+                        </Button>
+                      );
+                    })}
+                  </nav>
+                ) : null}
+              </ShellHeaderControls>
+            </div>
+          </div>
+        ) : (
+          <ShellHeaderControls
+            activeShellView={activeShellView}
+            onShellViewChange={handleShellViewChange}
+            uiLanguage={uiLanguage}
+            setUiLanguage={setUiLanguage}
+            uiTheme={uiTheme}
+            setUiTheme={setUiTheme}
+            t={t}
+            languageDropdownClassName={
+              showNavigationMenu ? "hidden sm:inline-flex" : undefined
+            }
+            languageDropdownWrapperTestId={
+              showNavigationMenu ? "header-language-dropdown-desktop" : undefined
+            }
+            themeToggleWrapperClassName={
+              showNavigationMenu ? "hidden sm:flex" : undefined
+            }
+            themeToggleWrapperTestId={
+              showNavigationMenu ? "header-theme-toggle-desktop" : undefined
+            }
+            rightExtras={
+              <>
+                {chatInferenceNotice ? (
+                  <InferenceCloudAlertButton
+                    notice={chatInferenceNotice}
+                    onClick={handleChatInferenceAlertClick}
+                  />
+                ) : null}
+                {showCloudStatus ? (
+                  <CloudStatusBadge
+                    connected={elizaCloudConnected}
+                    credits={elizaCloudCredits}
+                    creditsLow={elizaCloudCreditsLow}
+                    creditsCritical={elizaCloudCreditsCritical}
+                    authRejected={elizaCloudAuthRejected}
+                    creditsError={elizaCloudCreditsError}
+                    t={t}
+                    onClick={openCloudBilling}
+                    dataTestId="header-cloud-status"
+                  />
+                ) : null}
+              </>
+            }
+            showCompanionControls={showCompanionControls}
+            chatAgentVoiceMuted={chatAgentVoiceMuted}
+            onToggleVoiceMute={() =>
+              setState("chatAgentVoiceMuted", !chatAgentVoiceMuted)
+            }
+            onNewChat={() => void handleNewConversation()}
+            trailingExtras={
+              showNavigationMenu ? (
+                <Button
+                  size="icon"
+                  variant="outline"
+                  className={`sm:hidden ${HEADER_ICON_BUTTON_CLASSNAME}`}
+                  onClick={() => setMobileMenuOpen(true)}
+                  aria-label={t("aria.openNavMenu")}
+                  aria-expanded={mobileMenuOpen}
+                  style={HEADER_BUTTON_STYLE}
+                >
+                  <Menu className="pointer-events-none w-5 h-5" />
+                </Button>
+              ) : null
+            }
+          >
+            {mobileLeft ? <div className="flex sm:hidden">{mobileLeft}</div> : null}
+            {showNavigationMenu ? (
+              <nav className="scrollbar-hide hidden flex-1 items-center justify-start gap-1.5 overflow-x-auto whitespace-nowrap px-2 sm:flex sm:pl-4">
+                {tabGroups.map((group: TabGroup) => {
+                  const primaryTab = group.tabs[0];
+                  const isActive = group.tabs.includes(tab);
+                  return (
+                    <Button
+                      variant={isActive ? "default" : "ghost"}
+                      key={group.label}
+                      data-testid={`header-nav-button-${primaryTab}`}
+                      className={`${HEADER_NAV_BUTTON_BASE_CLASSNAME} ${
+                        isActive
+                          ? HEADER_NAV_BUTTON_ACTIVE_CLASSNAME
+                          : HEADER_NAV_BUTTON_INACTIVE_CLASSNAME
+                      }`}
+                      onClick={() => setTab(primaryTab)}
+                      title={group.description}
+                      style={HEADER_BUTTON_STYLE}
+                    >
+                      <span
+                        data-testid={`header-nav-label-${primaryTab}`}
+                        className="pointer-events-none inline"
+                      >
+                        {t(NAV_LABEL_I18N_KEY[group.label] ?? group.label)}
+                      </span>
+                    </Button>
+                  );
+                })}
+              </nav>
+            ) : null}
+          </ShellHeaderControls>
+        )}
       </header>
 
       {/* Mobile Menu Overlay */}

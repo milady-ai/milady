@@ -122,7 +122,7 @@ describe("Header", () => {
     expect(mockUseApp.setState).toHaveBeenCalledWith("chatMode", "power");
   });
 
-  it("uses minimal chrome for the character view and hides cloud pricing", async () => {
+  it("uses character shell chrome on the character view", async () => {
     const mockUseApp = {
       t: (k: string) => k,
       agentStatus: { state: "running", agentName: "Eliza" },
@@ -178,8 +178,13 @@ describe("Header", () => {
     expect(
       (testRenderer as ReactTestRenderer).root.findAllByProps({
         "data-testid": "header-cloud-status",
+      }).length,
+    ).toBeGreaterThan(0);
+    expect(
+      (testRenderer as ReactTestRenderer).root.findAllByProps({
+        "data-testid": "character-header-shell",
       }),
-    ).toHaveLength(0);
+    ).toHaveLength(1);
   });
 
   it("uses minimal chrome in companion mode", async () => {
