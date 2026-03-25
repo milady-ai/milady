@@ -45,6 +45,25 @@ interface SettingsSectionDef {
   description?: string;
 }
 
+const SETTINGS_SHELL_CLASS =
+  "settings-shell plugins-game-modal plugins-game-modal--inline relative flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-lg ring-1 ring-border/20 backdrop-blur-sm";
+const SETTINGS_SIDEBAR_RAIL_CLASS =
+  "hidden lg:flex lg:w-[21rem] lg:max-w-[352px] lg:shrink-0 lg:flex-col lg:border-r lg:border-border/40 lg:bg-card/45 lg:backdrop-blur-sm";
+const SETTINGS_NAV_BUTTON_BASE_CLASS =
+  "group flex h-auto w-full items-start justify-start gap-3 rounded-xl border px-3.5 py-3 text-left transition-all duration-150";
+const SETTINGS_NAV_BUTTON_ACTIVE_CLASS =
+  "border-accent/25 bg-accent/10 text-txt shadow-sm";
+const SETTINGS_NAV_BUTTON_INACTIVE_CLASS =
+  "border-transparent text-muted hover:border-border/45 hover:bg-bg/45 hover:text-txt";
+const SETTINGS_SIDEBAR_KICKER_CLASS =
+  "text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60";
+const SETTINGS_CONTENT_CLASS =
+  "settings-page-content flex-1 min-w-0 overflow-y-auto scroll-smooth bg-bg/10 px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-5 lg:px-7 lg:pb-10 lg:pt-6";
+const SETTINGS_CONTENT_WIDTH_CLASS = "mx-auto w-full max-w-[82rem]";
+const SETTINGS_SECTION_STACK_CLASS = "space-y-6 pb-14 sm:space-y-8 sm:pb-16";
+const SETTINGS_SECTION_CARD_CLASS =
+  "overflow-hidden rounded-[28px] border-border/35 bg-bg/20 shadow-sm ring-1 ring-border/10";
+
 const SETTINGS_SECTIONS: SettingsSectionDef[] = [
   {
     id: "cloud",
@@ -131,38 +150,53 @@ function SettingsSidebar({
   const { t } = useApp();
 
   return (
-    <aside className="hidden lg:sticky lg:top-0 lg:flex lg:flex-col lg:h-screen lg:overflow-y-auto">
-      <div className="px-3 py-3 border-b border-border">
-        {/* Navigation */}
-        <nav className="py-4 px-3">
-          <div className="space-y-1.5">
-            {sections.map((section) => {
-              const Icon = section.icon;
-              const isActive = activeSection === section.id;
-              return (
-                <Button
-                  key={section.id}
-                  variant="ghost"
-                  size="sm"
-                  type="button"
-                  onClick={() => onSectionChange(section.id)}
-                  aria-current={isActive ? "page" : undefined}
-                  className={`group w-full flex items-center gap-3 text-left px-3 py-2.5 rounded-lg transition-all duration-150
-                    text-sm h-auto
-                    ${
-                      isActive
-                        ? "text-txt font-semibold bg-surface"
-                        : "text-muted hover:text-txt hover:bg-surface/50"
-                    }`}
-                >
-                  <Icon
-                    className={`w-4 h-4 shrink-0 ${isActive ? "text-accent" : ""}`}
-                  />
-                  <span className="truncate">{t(section.label)}</span>
-                </Button>
-              );
-            })}
+    <aside className="hidden lg:flex lg:min-h-0 lg:flex-col">
+      <div className="sticky top-0 flex flex-col px-3 pb-4 pt-3">
+        <div className="border-b border-border/30 px-1 pb-3">
+          <div className={SETTINGS_SIDEBAR_KICKER_CLASS}>
+            {t("nav.settings")}
           </div>
+        </div>
+
+        <nav
+          className="flex flex-1 flex-col gap-1.5 px-1 py-4"
+          aria-label={t("nav.settings")}
+        >
+          {sections.map((section) => {
+            const Icon = section.icon;
+            const isActive = activeSection === section.id;
+            return (
+              <Button
+                key={section.id}
+                variant="ghost"
+                size="sm"
+                type="button"
+                onClick={() => onSectionChange(section.id)}
+                aria-current={isActive ? "page" : undefined}
+                className={`${SETTINGS_NAV_BUTTON_BASE_CLASS} ${
+                  isActive
+                    ? SETTINGS_NAV_BUTTON_ACTIVE_CLASS
+                    : SETTINGS_NAV_BUTTON_INACTIVE_CLASS
+                }`}
+              >
+                <Icon
+                  className={`mt-0.5 h-4 w-4 shrink-0 ${isActive ? "text-accent" : ""}`}
+                />
+                <div className="min-w-0 flex-1 text-left">
+                  <div
+                    className={`truncate text-sm ${isActive ? "font-semibold" : "font-medium"}`}
+                  >
+                    {t(section.label)}
+                  </div>
+                  {section.description ? (
+                    <div className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-muted/85">
+                      {t(section.description)}
+                    </div>
+                  ) : null}
+                </div>
+              </Button>
+            );
+          })}
         </nav>
       </div>
     </aside>
@@ -499,6 +533,7 @@ export function SettingsView({
   const [activeSection, setActiveSection] = useState(initialSection ?? "cloud");
   const [searchQuery, setSearchQuery] = useState("");
   const shellRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLElement | null>(null);
 
   const visibleSections = useMemo(
@@ -518,7 +553,12 @@ export function SettingsView({
   }, [loadPlugins]);
 
   useEffect(() => {
+    const content = contentRef.current;
     const shell = shellRef.current;
+    if (content) {
+      scrollContainerRef.current = content;
+      return;
+    }
     if (!shell) return;
 
     scrollContainerRef.current = inModal
@@ -605,7 +645,7 @@ export function SettingsView({
       {visibleSectionIds.has("cloud") && (
         <section
           id="cloud"
-          className="bg-bg rounded-2xl border border-border/50 overflow-hidden relative"
+          className={`${SETTINGS_SECTION_CARD_CLASS} relative`}
         >
           <CloudDashboard />
         </section>
@@ -616,7 +656,7 @@ export function SettingsView({
           id="ai-model"
           title={t("settings.sections.aimodel.label")}
           description={t("settings.sections.aimodel.desc")}
-          className="p-4 sm:p-5 lg:p-6"
+          className={SETTINGS_SECTION_CARD_CLASS}
         >
           <ProviderSwitcher />
         </SectionCard>
@@ -627,7 +667,7 @@ export function SettingsView({
           id="coding-agents"
           title={t("settings.sections.codingagents.label")}
           description={t("settings.codingAgentsDescription")}
-          className="p-4 sm:p-5 lg:p-6"
+          className={SETTINGS_SECTION_CARD_CLASS}
         >
           <CodingAgentSettingsSection />
         </SectionCard>
@@ -638,7 +678,7 @@ export function SettingsView({
           id="wallet-rpc"
           title={t("settings.sections.walletrpc.label")}
           description={t("settings.walletRpcDescription")}
-          className="p-4 sm:p-5 lg:p-6"
+          className={SETTINGS_SECTION_CARD_CLASS}
         >
           <ConfigPageView embedded />
         </SectionCard>
@@ -649,7 +689,7 @@ export function SettingsView({
           id="media"
           title={t("settings.sections.media.label")}
           description={t("settings.sections.media.desc")}
-          className="p-4 sm:p-5 lg:p-6"
+          className={SETTINGS_SECTION_CARD_CLASS}
         >
           <MediaSettingsSection />
         </SectionCard>
@@ -660,7 +700,7 @@ export function SettingsView({
           id="permissions"
           title={t("settings.sections.permissions.label")}
           description={t("settings.sections.permissions.desc")}
-          className="p-4 sm:p-5 lg:p-6"
+          className={SETTINGS_SECTION_CARD_CLASS}
         >
           <PermissionsSection />
         </SectionCard>
@@ -671,7 +711,7 @@ export function SettingsView({
           id="updates"
           title={t("settings.sections.updates.label")}
           description={t("settings.sections.updates.desc")}
-          className="p-4 sm:p-5 lg:p-6"
+          className={SETTINGS_SECTION_CARD_CLASS}
         >
           <UpdatesSection />
         </SectionCard>
@@ -682,7 +722,7 @@ export function SettingsView({
           id="advanced"
           title={t("nav.advanced")}
           description={t("settings.sections.advanced.desc")}
-          className="p-4 sm:p-5 lg:p-6"
+          className={SETTINGS_SECTION_CARD_CLASS}
         >
           <AdvancedSection />
         </SectionCard>
@@ -693,7 +733,7 @@ export function SettingsView({
           id="settings-empty"
           title={t("settingsview.NoMatchingSettings")}
           description={t("settings.noMatchingSettingsDescription")}
-          className="p-4 sm:p-5 lg:p-6"
+          className={SETTINGS_SECTION_CARD_CLASS}
         >
           <Button
             variant="outline"
@@ -708,23 +748,30 @@ export function SettingsView({
   );
 
   return (
-    <div
-      ref={shellRef}
-      className="settings-shell plugins-game-modal plugins-game-modal--inline !h-auto grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-4 items-stretch"
-    >
-      <div className="hidden lg:block rounded-xl border border-border bg-card shadow-sm">
-        <SettingsSidebar
-          sections={visibleSections}
-          activeSection={activeSection}
-          onSectionChange={handleSectionChange}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          onClose={handleClose}
-        />
-      </div>
+    <div className="flex h-full w-full min-h-0 bg-bg p-0 lg:p-1">
+      <div
+        ref={shellRef}
+        className={SETTINGS_SHELL_CLASS}
+        data-testid="settings-shell"
+      >
+        <div className={SETTINGS_SIDEBAR_RAIL_CLASS}>
+          <SettingsSidebar
+            sections={visibleSections}
+            activeSection={activeSection}
+            onSectionChange={handleSectionChange}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onClose={handleClose}
+          />
+        </div>
 
-      <div className="settings-page-content flex-1 min-w-0 scroll-smooth px-4 py-4">
-        <div className="space-y-6 pb-20 sm:space-y-8">{sectionsContent}</div>
+        <div ref={contentRef} className={SETTINGS_CONTENT_CLASS}>
+          <div className={SETTINGS_CONTENT_WIDTH_CLASS}>
+            <div className={SETTINGS_SECTION_STACK_CLASS}>
+              {sectionsContent}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
