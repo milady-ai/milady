@@ -2097,166 +2097,60 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
 
   // ── Game-modal render ─────────────────────────────────────────────
   if (inModal && isSocialMode) {
+    const connectorsShellClassName =
+      "relative flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-lg ring-1 ring-border/20 backdrop-blur-sm";
     return (
       <div
         data-testid="plugins-view-social"
-        className={`flex min-h-full min-w-0 w-full flex-col bg-bg ${
-          desktopConnectorLayout ? "md:flex-row" : ""
-        }`}
+        className="flex h-full w-full min-h-0 bg-bg p-0 lg:p-1"
       >
-        {desktopConnectorLayout && (
-          <aside
-            data-testid="connectors-settings-sidebar"
-            className="flex w-[22rem] shrink-0 border-r border-border/50 bg-bg/35 backdrop-blur-xl"
-          >
-            <div className="flex min-h-full flex-1 flex-col sticky top-0 max-h-screen">
-              <nav className="flex-1 space-y-2 overflow-y-auto px-4 py-4">
-                {visiblePlugins.map((plugin) => {
-                  const isSelected = connectorSelectedId === plugin.id;
-                  const isExpanded = connectorExpandedIds.has(plugin.id);
-                  const isToggleBusy = togglingPlugins.has(plugin.id);
-                  const toggleDisabled =
-                    isToggleBusy || (hasPluginToggleInFlight && !isToggleBusy);
+        <div
+          data-testid="connectors-shell"
+          className={`${connectorsShellClassName} ${
+            desktopConnectorLayout ? "md:flex-row" : "flex-col"
+          }`}
+        >
+          {desktopConnectorLayout && (
+            <aside
+              data-testid="connectors-settings-sidebar"
+              className="flex w-[21rem] max-w-[352px] shrink-0 flex-col border-r border-border/40 bg-card/45 backdrop-blur-sm"
+            >
+              <div className="sticky top-0 flex min-h-full flex-1 flex-col px-3 pb-4 pt-3">
+                <div className="border-b border-border/30 px-1 pb-3">
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60">
+                    {t("nav.social")}
+                  </div>
+                  <div className="mt-1 text-xs text-muted">
+                    {visiblePlugins.length} available
+                  </div>
+                </div>
 
-                  return (
-                    <div
-                      key={plugin.id}
-                      className={`flex items-center gap-2 rounded-2xl border px-3 py-2 transition-all ${
-                        isSelected
-                          ? "border-accent/40 bg-accent/10 text-txt shadow-[0_10px_30px_rgba(var(--accent),0.08)]"
-                          : "border-transparent bg-transparent text-muted hover:border-border/60 hover:bg-card/55 hover:text-txt"
-                      }`}
-                    >
-                      <Button
-                        variant="ghost"
-                        className="flex min-w-0 flex-1 items-center gap-3 text-left h-auto p-0 rounded-none"
-                        onClick={() => handleConnectorSelect(plugin.id)}
-                        aria-current={isSelected ? "page" : undefined}
-                      >
-                        <span
-                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border p-1.5 ${
-                            isSelected
-                              ? "border-accent/30 bg-accent/18 text-txt-strong"
-                              : "border-border/50 bg-bg-accent/80 text-muted"
-                          }`}
-                        >
-                          {renderResolvedIcon(plugin, {
-                            className:
-                              "h-4 w-4 shrink-0 rounded-sm object-contain",
-                            emojiClassName: "text-sm",
-                          })}
-                        </span>
-                        <span className="min-w-0 flex-1 truncate text-sm font-semibold leading-none">
-                          {plugin.name}
-                        </span>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className={`shrink-0 rounded-full border px-2.5 py-1 h-auto text-[10px] font-bold tracking-[0.16em] transition-colors ${
-                          plugin.enabled
-                            ? "border-accent bg-accent text-accent-fg"
-                            : "border-border bg-transparent text-muted hover:border-accent/40 hover:text-txt"
-                        } ${
-                          toggleDisabled
-                            ? "cursor-not-allowed opacity-60"
-                            : "cursor-pointer"
-                        }`}
-                        onClick={() =>
-                          void handleTogglePlugin(plugin.id, !plugin.enabled)
-                        }
-                        disabled={toggleDisabled}
-                      >
-                        {isToggleBusy ? "..." : plugin.enabled ? "ON" : "OFF"}
-                      </Button>
-                      <span
-                        className={`shrink-0 text-muted transition-transform ${
-                          isExpanded ? "rotate-90" : ""
+                <nav className="flex-1 space-y-1.5 overflow-y-auto px-1 py-4">
+                  {visiblePlugins.map((plugin) => {
+                    const isSelected = connectorSelectedId === plugin.id;
+                    const isExpanded = connectorExpandedIds.has(plugin.id);
+                    const isToggleBusy = togglingPlugins.has(plugin.id);
+                    const toggleDisabled =
+                      isToggleBusy ||
+                      (hasPluginToggleInFlight && !isToggleBusy);
+
+                    return (
+                      <div
+                        key={plugin.id}
+                        className={`flex items-start gap-2 rounded-xl border px-3.5 py-3 text-left transition-all ${
+                          isSelected
+                            ? "border-accent/25 bg-accent/10 text-txt shadow-sm"
+                            : "border-transparent bg-transparent text-muted hover:border-border/45 hover:bg-bg/45 hover:text-txt"
                         }`}
                       >
-                        <ChevronRight className="h-4 w-4" />
-                      </span>
-                    </div>
-                  );
-                })}
-              </nav>
-            </div>
-          </aside>
-        )}
-
-        <div className="min-w-0 flex-1">
-          <div className="mx-auto max-w-5xl px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
-            {hasPluginToggleInFlight && (
-              <div className="mb-4 rounded-2xl border border-accent bg-accent-subtle px-4 py-3 text-[11px] text-txt">
-                {t("pluginsview.ApplyingPluginChan")}
-              </div>
-            )}
-
-            {visiblePlugins.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-border px-5 py-10 text-center text-muted">
-                No connectors available.
-              </div>
-            ) : (
-              <div
-                data-testid="connectors-settings-content"
-                className="space-y-4"
-              >
-                {(desktopConnectorLayout
-                  ? visiblePlugins.filter((p) => p.id === connectorSelectedId)
-                  : visiblePlugins
-                ).map((plugin) => {
-                  const hasParams =
-                    (plugin.parameters?.length ?? 0) > 0 &&
-                    plugin.id !== "__ui-showcase__";
-                  const isExpanded = connectorExpandedIds.has(plugin.id);
-                  const isSelected = connectorSelectedId === plugin.id;
-                  const requiredParams = hasParams
-                    ? plugin.parameters.filter((param) => param.required)
-                    : [];
-                  const requiredSetCount = requiredParams.filter(
-                    (param) => param.isSet,
-                  ).length;
-                  const setCount = hasParams
-                    ? plugin.parameters.filter((param) => param.isSet).length
-                    : 0;
-                  const totalCount = hasParams ? plugin.parameters.length : 0;
-                  const allParamsSet =
-                    !hasParams ||
-                    (requiredParams.length > 0
-                      ? requiredSetCount === requiredParams.length
-                      : setCount === totalCount);
-                  const isToggleBusy = togglingPlugins.has(plugin.id);
-                  const toggleDisabled =
-                    isToggleBusy || (hasPluginToggleInFlight && !isToggleBusy);
-                  const isSaving = pluginSaving.has(plugin.id);
-                  const saveSuccess = pluginSaveSuccess.has(plugin.id);
-                  const testResult = testResults.get(plugin.id);
-                  const pluginLinks = getPluginResourceLinks(plugin);
-
-                  return (
-                    <section
-                      key={plugin.id}
-                      ref={(element) => {
-                        connectorSectionRefs.current[plugin.id] = element;
-                      }}
-                      data-testid={`connector-section-${plugin.id}`}
-                      className={`overflow-hidden rounded-[1.4rem] border bg-card/90 shadow-sm transition-all ${
-                        isSelected
-                          ? "border-accent/35 shadow-[0_18px_40px_rgba(var(--accent),0.08)]"
-                          : "border-border/50"
-                      }`}
-                    >
-                      <div className="flex items-start gap-3 px-4 py-4 sm:px-5">
                         <Button
                           variant="ghost"
-                          data-testid={`connector-header-${plugin.id}`}
-                          className="flex min-w-0 flex-1 items-start gap-3 text-left h-auto p-0 rounded-none"
-                          onClick={() =>
-                            handleConnectorSectionToggle(plugin.id)
-                          }
+                          className="flex h-auto min-w-0 flex-1 items-start gap-3 rounded-none p-0 text-left"
+                          onClick={() => handleConnectorSelect(plugin.id)}
+                          aria-current={isSelected ? "page" : undefined}
                         >
                           <span
-                            className={`mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border p-2.5 ${
+                            className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border p-2 ${
                               isSelected
                                 ? "border-accent/30 bg-accent/18 text-txt-strong"
                                 : "border-border/50 bg-bg-accent/80 text-muted"
@@ -2265,287 +2159,420 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                             {renderResolvedIcon(plugin, {
                               className:
                                 "h-4 w-4 shrink-0 rounded-sm object-contain",
-                              emojiClassName: "text-base",
+                              emojiClassName: "text-sm",
                             })}
                           </span>
-                          <span className="min-w-0 flex-1">
-                            <span className="flex min-w-0 flex-wrap items-center gap-2">
-                              <span className="truncate text-sm font-semibold text-txt">
-                                {plugin.name}
-                              </span>
-                              <span
-                                className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] ${
-                                  allParamsSet
-                                    ? "border-ok/30 bg-ok/10 text-ok"
-                                    : "border-warn/30 bg-warn/10 text-warn"
-                                }`}
-                              >
-                                {allParamsSet ? "Ready" : "Needs setup"}
-                              </span>
-                              {plugin.version && (
-                                <span className="text-[11px] font-mono text-muted/80">
-                                  v{plugin.version}
-                                </span>
-                              )}
+                          <span className="min-w-0 flex-1 text-left">
+                            <span className="block truncate text-sm font-semibold leading-none">
+                              {plugin.name}
+                            </span>
+                            <span className="mt-1 block text-[11px] leading-relaxed text-muted/85">
+                              {plugin.description || "No description available"}
                             </span>
                           </span>
                         </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={`shrink-0 rounded-full border px-2.5 py-1 h-auto text-[10px] font-bold tracking-[0.16em] transition-colors ${
+                            plugin.enabled
+                              ? "border-accent bg-accent text-accent-fg"
+                              : "border-border bg-transparent text-muted hover:border-accent/40 hover:text-txt"
+                          } ${
+                            toggleDisabled
+                              ? "cursor-not-allowed opacity-60"
+                              : "cursor-pointer"
+                          }`}
+                          onClick={() =>
+                            void handleTogglePlugin(plugin.id, !plugin.enabled)
+                          }
+                          disabled={toggleDisabled}
+                        >
+                          {isToggleBusy ? "..." : plugin.enabled ? "ON" : "OFF"}
+                        </Button>
+                        <span
+                          className={`shrink-0 text-muted transition-transform ${
+                            isExpanded ? "rotate-90" : ""
+                          }`}
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </span>
+                      </div>
+                    );
+                  })}
+                </nav>
+              </div>
+            </aside>
+          )}
 
-                        <div className="flex shrink-0 items-center gap-2">
+          <div className="min-w-0 flex-1 overflow-y-auto bg-bg/10">
+            <div className="mx-auto max-w-[82rem] px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
+              {hasPluginToggleInFlight && (
+                <div className="mb-4 rounded-2xl border border-accent bg-accent-subtle px-4 py-3 text-[11px] text-txt">
+                  {t("pluginsview.ApplyingPluginChan")}
+                </div>
+              )}
+
+              {visiblePlugins.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-border/50 bg-bg/20 px-5 py-10 text-center text-muted shadow-sm">
+                  No connectors available.
+                </div>
+              ) : (
+                <div
+                  data-testid="connectors-settings-content"
+                  className="space-y-4"
+                >
+                  {(desktopConnectorLayout
+                    ? visiblePlugins.filter((p) => p.id === connectorSelectedId)
+                    : visiblePlugins
+                  ).map((plugin) => {
+                    const hasParams =
+                      (plugin.parameters?.length ?? 0) > 0 &&
+                      plugin.id !== "__ui-showcase__";
+                    const isExpanded = connectorExpandedIds.has(plugin.id);
+                    const isSelected = connectorSelectedId === plugin.id;
+                    const requiredParams = hasParams
+                      ? plugin.parameters.filter((param) => param.required)
+                      : [];
+                    const requiredSetCount = requiredParams.filter(
+                      (param) => param.isSet,
+                    ).length;
+                    const setCount = hasParams
+                      ? plugin.parameters.filter((param) => param.isSet).length
+                      : 0;
+                    const totalCount = hasParams ? plugin.parameters.length : 0;
+                    const allParamsSet =
+                      !hasParams ||
+                      (requiredParams.length > 0
+                        ? requiredSetCount === requiredParams.length
+                        : setCount === totalCount);
+                    const isToggleBusy = togglingPlugins.has(plugin.id);
+                    const toggleDisabled =
+                      isToggleBusy ||
+                      (hasPluginToggleInFlight && !isToggleBusy);
+                    const isSaving = pluginSaving.has(plugin.id);
+                    const saveSuccess = pluginSaveSuccess.has(plugin.id);
+                    const testResult = testResults.get(plugin.id);
+                    const pluginLinks = getPluginResourceLinks(plugin);
+
+                    return (
+                      <section
+                        key={plugin.id}
+                        ref={(element) => {
+                          connectorSectionRefs.current[plugin.id] = element;
+                        }}
+                        data-testid={`connector-section-${plugin.id}`}
+                        className={`overflow-hidden rounded-[1.4rem] border bg-card/90 shadow-sm transition-all ${
+                          isSelected
+                            ? "border-accent/35 shadow-[0_18px_40px_rgba(var(--accent),0.08)]"
+                            : "border-border/50"
+                        }`}
+                      >
+                        <div className="flex items-start gap-3 px-4 py-4 sm:px-5">
                           <Button
-                            variant="outline"
-                            size="sm"
-                            className={`rounded-full border px-3 py-1.5 h-auto text-[10px] font-bold tracking-[0.16em] transition-colors ${
-                              plugin.enabled
-                                ? "border-accent bg-accent text-accent-fg"
-                                : "border-border bg-transparent text-muted hover:border-accent/40 hover:text-txt"
-                            } ${
-                              toggleDisabled
-                                ? "cursor-not-allowed opacity-60"
-                                : "cursor-pointer"
-                            }`}
-                            onClick={() =>
-                              void handleTogglePlugin(
-                                plugin.id,
-                                !plugin.enabled,
-                              )
-                            }
-                            disabled={toggleDisabled}
-                          >
-                            {isToggleBusy
-                              ? "..."
-                              : plugin.enabled
-                                ? "ON"
-                                : "OFF"}
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className={`flex items-center gap-1 rounded-full border px-3 py-1.5 h-auto text-[11px] font-semibold transition-colors ${
-                              isExpanded
-                                ? "border-accent/40 bg-accent/10 text-txt"
-                                : "border-border/50 text-muted hover:border-accent/40 hover:text-txt"
-                            }`}
+                            variant="ghost"
+                            data-testid={`connector-header-${plugin.id}`}
+                            className="flex min-w-0 flex-1 items-start gap-3 text-left h-auto p-0 rounded-none"
                             onClick={() =>
                               handleConnectorSectionToggle(plugin.id)
                             }
-                            aria-expanded={isExpanded}
-                            aria-label={`${isExpanded ? "Collapse" : "Expand"} ${plugin.name}`}
                           >
-                            <span>{isExpanded ? "Collapse" : "Expand"}</span>
-                            <ChevronRight
-                              className={`h-4 w-4 transition-transform ${
-                                isExpanded ? "rotate-90" : ""
-                              }`}
-                            />
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="px-4 pb-3 sm:px-5">
-                        <p className="text-sm text-muted">
-                          {plugin.description || "No description available"}
-                        </p>
-                        <span className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] text-muted">
-                          <span>
-                            {hasParams
-                              ? `${setCount}/${totalCount} configured`
-                              : "No configuration needed"}
-                          </span>
-                          {plugin.enabled && !plugin.isActive && (
                             <span
-                              className={`rounded-full border px-2 py-0.5 ${
-                                plugin.loadError
-                                  ? "border-danger/30 bg-danger/10 text-danger"
-                                  : "border-warn/30 bg-warn/10 text-warn"
+                              className={`mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border p-2.5 ${
+                                isSelected
+                                  ? "border-accent/30 bg-accent/18 text-txt-strong"
+                                  : "border-border/50 bg-bg-accent/80 text-muted"
                               }`}
                             >
-                              {plugin.loadError
-                                ? "Load failed"
-                                : "Not installed"}
+                              {renderResolvedIcon(plugin, {
+                                className:
+                                  "h-4 w-4 shrink-0 rounded-sm object-contain",
+                                emojiClassName: "text-base",
+                              })}
                             </span>
-                          )}
-                        </span>
-                      </div>
-
-                      {isExpanded && (
-                        <div className="border-t border-border/40 bg-card/55 px-4 py-4 sm:px-5">
-                          {plugin.validationErrors &&
-                            plugin.validationErrors.length > 0 && (
-                              <div className="mb-4 rounded-2xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-                                {plugin.validationErrors.map((error) => (
-                                  <div
-                                    key={`${plugin.id}:${error.field}:${error.message}`}
-                                  >
-                                    {error.field}: {error.message}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-
-                          {plugin.validationWarnings &&
-                            plugin.validationWarnings.length > 0 && (
-                              <div className="mb-4 rounded-2xl border border-warn/30 bg-warn/10 px-4 py-3 text-sm text-warn">
-                                {plugin.validationWarnings.map((warning) => (
-                                  <div
-                                    key={`${plugin.id}:${warning.field}:${warning.message}`}
-                                  >
-                                    {warning.message}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-
-                          {pluginLinks.length > 0 && (
-                            <div className="mb-4 flex flex-wrap gap-2">
-                              {pluginLinks.map((link) => (
-                                <Button
-                                  key={`${plugin.id}:${link.key}`}
-                                  variant="outline"
-                                  size="sm"
-                                  className="h-8 rounded-xl border-border/40 bg-card/40 px-3 text-[11px] font-semibold text-muted transition-all hover:border-accent hover:bg-accent/5 hover:text-txt"
-                                  onClick={() => {
-                                    void handleOpenPluginExternalUrl(link.url);
-                                  }}
-                                  title={`${link.label}: ${link.url}`}
+                            <span className="min-w-0 flex-1">
+                              <span className="flex min-w-0 flex-wrap items-center gap-2">
+                                <span className="truncate text-sm font-semibold text-txt">
+                                  {plugin.name}
+                                </span>
+                                <span
+                                  className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] ${
+                                    allParamsSet
+                                      ? "border-ok/30 bg-ok/10 text-ok"
+                                      : "border-warn/30 bg-warn/10 text-warn"
+                                  }`}
                                 >
-                                  {link.label}
-                                </Button>
-                              ))}
-                            </div>
-                          )}
+                                  {allParamsSet ? "Ready" : "Needs setup"}
+                                </span>
+                                {plugin.version && (
+                                  <span className="text-[11px] font-mono text-muted/80">
+                                    v{plugin.version}
+                                  </span>
+                                )}
+                              </span>
+                            </span>
+                          </Button>
 
-                          {plugin.enabled &&
-                            !plugin.isActive &&
-                            plugin.npmName &&
-                            !plugin.loadError && (
-                              <div className="mb-4 rounded-2xl border border-warn/30 bg-warn/10 px-4 py-3 text-sm text-txt">
-                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                  <div>
-                                    Install this connector to activate it in the
-                                    runtime.
-                                  </div>
-                                  <Button
-                                    variant="default"
-                                    size="sm"
-                                    className="h-8 rounded-xl px-4 text-[11px] font-bold"
-                                    disabled={installingPlugins.has(plugin.id)}
-                                    onClick={() =>
-                                      handleInstallPlugin(
-                                        plugin.id,
-                                        plugin.npmName ?? "",
-                                      )
-                                    }
-                                  >
-                                    {installingPlugins.has(plugin.id)
-                                      ? installProgress.get(
-                                          plugin.npmName ?? "",
-                                        )?.message || "Installing..."
-                                      : "Install Plugin"}
-                                  </Button>
-                                </div>
-                              </div>
-                            )}
-
-                          {hasParams ? (
-                            <div className="space-y-4">
-                              {plugin.id === "telegram" ? (
-                                <TelegramPluginConfig
-                                  plugin={plugin}
-                                  pluginConfigs={pluginConfigs}
-                                  onParamChange={handleParamChange}
-                                />
-                              ) : (
-                                <PluginConfigForm
-                                  plugin={plugin}
-                                  pluginConfigs={pluginConfigs}
-                                  onParamChange={handleParamChange}
-                                />
-                              )}
-                              {plugin.id === "whatsapp" && (
-                                <WhatsAppQrOverlay accountId="default" />
-                              )}
-                            </div>
-                          ) : (
-                            <div className="rounded-2xl border border-border/40 bg-card/40 px-4 py-3 text-sm text-muted">
-                              No configuration needed.
-                            </div>
-                          )}
-
-                          <div className="mt-4 flex flex-wrap items-center gap-2">
-                            {plugin.isActive && (
-                              <Button
-                                variant={
-                                  testResult?.success
-                                    ? "default"
-                                    : testResult?.error
-                                      ? "destructive"
-                                      : "outline"
-                                }
-                                size="sm"
-                                className={`h-8 rounded-xl px-4 text-[11px] font-bold transition-all ${
-                                  testResult?.loading
-                                    ? "cursor-wait opacity-70"
-                                    : testResult?.success
-                                      ? "border-ok bg-ok text-ok-fg hover:bg-ok/90"
-                                      : testResult?.error
-                                        ? "border-danger bg-danger text-danger-fg hover:bg-danger/90"
-                                        : "border-border/40 bg-card/40 hover:border-accent/40"
+                          <div className="flex shrink-0 items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className={`rounded-full border px-3 py-1.5 h-auto text-[10px] font-bold tracking-[0.16em] transition-colors ${
+                                plugin.enabled
+                                  ? "border-accent bg-accent text-accent-fg"
+                                  : "border-border bg-transparent text-muted hover:border-accent/40 hover:text-txt"
+                              } ${
+                                toggleDisabled
+                                  ? "cursor-not-allowed opacity-60"
+                                  : "cursor-pointer"
+                              }`}
+                              onClick={() =>
+                                void handleTogglePlugin(
+                                  plugin.id,
+                                  !plugin.enabled,
+                                )
+                              }
+                              disabled={toggleDisabled}
+                            >
+                              {isToggleBusy
+                                ? "..."
+                                : plugin.enabled
+                                  ? "ON"
+                                  : "OFF"}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className={`flex items-center gap-1 rounded-full border px-3 py-1.5 h-auto text-[11px] font-semibold transition-colors ${
+                                isExpanded
+                                  ? "border-accent/40 bg-accent/10 text-txt"
+                                  : "border-border/50 text-muted hover:border-accent/40 hover:text-txt"
+                              }`}
+                              onClick={() =>
+                                handleConnectorSectionToggle(plugin.id)
+                              }
+                              aria-expanded={isExpanded}
+                              aria-label={`${isExpanded ? "Collapse" : "Expand"} ${plugin.name}`}
+                            >
+                              <span>{isExpanded ? "Collapse" : "Expand"}</span>
+                              <ChevronRight
+                                className={`h-4 w-4 transition-transform ${
+                                  isExpanded ? "rotate-90" : ""
                                 }`}
-                                disabled={testResult?.loading}
-                                onClick={() =>
-                                  void handleTestConnection(plugin.id)
-                                }
+                              />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="px-4 pb-3 sm:px-5">
+                          <p className="text-sm text-muted">
+                            {plugin.description || "No description available"}
+                          </p>
+                          <span className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] text-muted">
+                            <span>
+                              {hasParams
+                                ? `${setCount}/${totalCount} configured`
+                                : "No configuration needed"}
+                            </span>
+                            {plugin.enabled && !plugin.isActive && (
+                              <span
+                                className={`rounded-full border px-2 py-0.5 ${
+                                  plugin.loadError
+                                    ? "border-danger/30 bg-danger/10 text-danger"
+                                    : "border-warn/30 bg-warn/10 text-warn"
+                                }`}
                               >
-                                {testResult?.loading
-                                  ? "Testing..."
-                                  : testResult?.success
-                                    ? `OK (${testResult.durationMs}ms)`
-                                    : testResult?.error
-                                      ? `Failed: ${testResult.error}`
-                                      : "Test Connection"}
-                              </Button>
+                                {plugin.loadError
+                                  ? "Load failed"
+                                  : "Not installed"}
+                              </span>
                             )}
-                            {hasParams && (
-                              <>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-8 rounded-xl px-4 text-[11px] font-semibold text-muted hover:text-txt"
-                                  onClick={() => handleConfigReset(plugin.id)}
-                                >
-                                  Reset
-                                </Button>
+                          </span>
+                        </div>
+
+                        {isExpanded && (
+                          <div className="border-t border-border/40 bg-card/55 px-4 py-4 sm:px-5">
+                            {plugin.validationErrors &&
+                              plugin.validationErrors.length > 0 && (
+                                <div className="mb-4 rounded-2xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
+                                  {plugin.validationErrors.map((error) => (
+                                    <div
+                                      key={`${plugin.id}:${error.field}:${error.message}`}
+                                    >
+                                      {error.field}: {error.message}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                            {plugin.validationWarnings &&
+                              plugin.validationWarnings.length > 0 && (
+                                <div className="mb-4 rounded-2xl border border-warn/30 bg-warn/10 px-4 py-3 text-sm text-warn">
+                                  {plugin.validationWarnings.map((warning) => (
+                                    <div
+                                      key={`${plugin.id}:${warning.field}:${warning.message}`}
+                                    >
+                                      {warning.message}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                            {pluginLinks.length > 0 && (
+                              <div className="mb-4 flex flex-wrap gap-2">
+                                {pluginLinks.map((link) => (
+                                  <Button
+                                    key={`${plugin.id}:${link.key}`}
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 rounded-xl border-border/40 bg-card/40 px-3 text-[11px] font-semibold text-muted transition-all hover:border-accent hover:bg-accent/5 hover:text-txt"
+                                    onClick={() => {
+                                      void handleOpenPluginExternalUrl(
+                                        link.url,
+                                      );
+                                    }}
+                                    title={`${link.label}: ${link.url}`}
+                                  >
+                                    {link.label}
+                                  </Button>
+                                ))}
+                              </div>
+                            )}
+
+                            {plugin.enabled &&
+                              !plugin.isActive &&
+                              plugin.npmName &&
+                              !plugin.loadError && (
+                                <div className="mb-4 rounded-2xl border border-warn/30 bg-warn/10 px-4 py-3 text-sm text-txt">
+                                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <div>
+                                      Install this connector to activate it in
+                                      the runtime.
+                                    </div>
+                                    <Button
+                                      variant="default"
+                                      size="sm"
+                                      className="h-8 rounded-xl px-4 text-[11px] font-bold"
+                                      disabled={installingPlugins.has(
+                                        plugin.id,
+                                      )}
+                                      onClick={() =>
+                                        handleInstallPlugin(
+                                          plugin.id,
+                                          plugin.npmName ?? "",
+                                        )
+                                      }
+                                    >
+                                      {installingPlugins.has(plugin.id)
+                                        ? installProgress.get(
+                                            plugin.npmName ?? "",
+                                          )?.message || "Installing..."
+                                        : "Install Plugin"}
+                                    </Button>
+                                  </div>
+                                </div>
+                              )}
+
+                            {hasParams ? (
+                              <div className="space-y-4">
+                                {plugin.id === "telegram" ? (
+                                  <TelegramPluginConfig
+                                    plugin={plugin}
+                                    pluginConfigs={pluginConfigs}
+                                    onParamChange={handleParamChange}
+                                  />
+                                ) : (
+                                  <PluginConfigForm
+                                    plugin={plugin}
+                                    pluginConfigs={pluginConfigs}
+                                    onParamChange={handleParamChange}
+                                  />
+                                )}
+                                {plugin.id === "whatsapp" && (
+                                  <WhatsAppQrOverlay accountId="default" />
+                                )}
+                              </div>
+                            ) : (
+                              <div className="rounded-2xl border border-border/40 bg-card/40 px-4 py-3 text-sm text-muted">
+                                No configuration needed.
+                              </div>
+                            )}
+
+                            <div className="mt-4 flex flex-wrap items-center gap-2">
+                              {plugin.isActive && (
                                 <Button
                                   variant={
-                                    saveSuccess ? "default" : "secondary"
+                                    testResult?.success
+                                      ? "default"
+                                      : testResult?.error
+                                        ? "destructive"
+                                        : "outline"
                                   }
                                   size="sm"
                                   className={`h-8 rounded-xl px-4 text-[11px] font-bold transition-all ${
-                                    saveSuccess
-                                      ? "bg-ok text-ok-fg hover:bg-ok/90"
-                                      : "bg-accent text-accent-fg hover:bg-accent/90"
+                                    testResult?.loading
+                                      ? "cursor-wait opacity-70"
+                                      : testResult?.success
+                                        ? "border-ok bg-ok text-ok-fg hover:bg-ok/90"
+                                        : testResult?.error
+                                          ? "border-danger bg-danger text-danger-fg hover:bg-danger/90"
+                                          : "border-border/40 bg-card/40 hover:border-accent/40"
                                   }`}
+                                  disabled={testResult?.loading}
                                   onClick={() =>
-                                    void handleConfigSave(plugin.id)
+                                    void handleTestConnection(plugin.id)
                                   }
-                                  disabled={isSaving}
                                 >
-                                  {isSaving
-                                    ? "Saving..."
-                                    : saveSuccess
-                                      ? "Saved"
-                                      : "Save Settings"}
+                                  {testResult?.loading
+                                    ? "Testing..."
+                                    : testResult?.success
+                                      ? `OK (${testResult.durationMs}ms)`
+                                      : testResult?.error
+                                        ? `Failed: ${testResult.error}`
+                                        : "Test Connection"}
                                 </Button>
-                              </>
-                            )}
+                              )}
+                              {hasParams && (
+                                <>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 rounded-xl px-4 text-[11px] font-semibold text-muted hover:text-txt"
+                                    onClick={() => handleConfigReset(plugin.id)}
+                                  >
+                                    Reset
+                                  </Button>
+                                  <Button
+                                    variant={
+                                      saveSuccess ? "default" : "secondary"
+                                    }
+                                    size="sm"
+                                    className={`h-8 rounded-xl px-4 text-[11px] font-bold transition-all ${
+                                      saveSuccess
+                                        ? "bg-ok text-ok-fg hover:bg-ok/90"
+                                        : "bg-accent text-accent-fg hover:bg-accent/90"
+                                    }`}
+                                    onClick={() =>
+                                      void handleConfigSave(plugin.id)
+                                    }
+                                    disabled={isSaving}
+                                  >
+                                    {isSaving
+                                      ? "Saving..."
+                                      : saveSuccess
+                                        ? "Saved"
+                                        : "Save Settings"}
+                                  </Button>
+                                </>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </section>
-                  );
-                })}
-              </div>
-            )}
+                        )}
+                      </section>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

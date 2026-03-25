@@ -267,6 +267,10 @@ describe("PluginsView game modal", () => {
         (node) => node.props?.["data-testid"] === "connectors-settings-sidebar",
       ).length,
     ).toBe(1);
+    const shell = tree?.root.findAll(
+      (node) => node.props?.["data-testid"] === "connectors-shell",
+    )[0];
+    expect(String(shell?.props.className)).toContain("rounded-2xl");
     expect(
       tree?.root.findAll((node) => hasClass(node, "plugins-game-modal")).length,
     ).toBe(0);
