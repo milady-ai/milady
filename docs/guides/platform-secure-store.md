@@ -10,7 +10,7 @@ This document defines how Milady should store **high-value secrets** (especially
 
 ## Goals
 
-1. **At rest:** Private keys and comparable secrets are **not** persisted in plaintext `milady.json` / `eliza.json` when the user opts in (or by default on supported desktops).
+1. **At rest:** Private keys and comparable secrets are **not** persisted in plaintext `milady.json` when the user opts in (or by default on supported desktops).
 2. **Namespaced:** Secrets are **scoped per Milady agent instance** (state directory / agent identity), so two profiles on one machine do not collide.
 3. **Multi-agent safe:** **Swarm / PTY / subprocess** agents do **not** receive raw key material in environment variables; they use **host-mediated signing** (existing [RemoteSigningService](./wallet.md#remote-signing-service) direction).
 4. **Cross-platform:** One **abstract API** with **platform backends** and explicit **fallback** behavior.
@@ -40,18 +40,18 @@ TypeScript contract: `packages/app-core/src/security/platform-secure-store.ts`.
 
 **Problem:** A generic keychain item named `Milady/EVM_PRIVATE_KEY` would be shared by every profile and unsafe.
 
-**Rule:** Every stored item is keyed by a **`vaultId`**: a **stable, opaque string** derived from the **canonical agent state root** (e.g. resolved `ELIZA_STATE_DIR` / config home for this Milady process).
+**Rule:** Every stored item is keyed by a **`vaultId`**: a **stable, opaque string** derived from the **canonical agent state root** (e.g. resolved `MILADY_STATE_DIR` / config home for this Milady process).
 
 **Requirements:**
 
 - **Stable** across restarts for the same profile.
-- **Distinct** for different `ELIZA_STATE_DIR` values.
+- **Distinct** for different `MILADY_STATE_DIR` values.
 - **Not reversible** to a full filesystem path in the stored label (use a short hash prefix in service/account fields; optional human label `"Milady wallet"` for prompts only).
 
 **Suggested derivation (normative for implementers):**
 
 ```
-canonicalPath = realpath(normalize(ELIZA_STATE_DIR or equivalent))
+canonicalPath = realpath(normalize(MILADY_STATE_DIR or equivalent))
 vaultId = "mldy1-" + base64url(sha256(utf8(canonicalPath)))[0:16]
 ```
 
@@ -107,7 +107,7 @@ When loading wallet keys into the signing layer:
 ## Migration and backup
 
 - **Backup:** OS store is **not** in `export agent` zip by default. Offer explicit **“Export wallet secrets”** (already sensitive) or document **manual keychain backup** (platform-specific).
-- **Restore:** Re-import keys or restore keychain backup; align `vaultId` with **same** `ELIZA_STATE_DIR` or document re-keying.
+- **Restore:** Re-import keys or restore keychain backup; align `vaultId` with **same** `MILADY_STATE_DIR` or document re-keying.
 - **Reset agent:** Delete platform entries for this `vaultId` when user confirms full wipe (same as clearing config `env` today).
 
 ## Phased implementation (suggested)

@@ -106,7 +106,7 @@ Milady passes provider keys to coding-agent sessions when present:
 
 - `ANTHROPIC_API_KEY`
 - `OPENAI_API_KEY`
-- `GOOGLE_GENERATIVE_AI_API_KEY` (aliases: `GOOGLE_API_KEY`, `GEMINI_API_KEY`)
+- `GOOGLE_GENERATIVE_AI_API_KEY` (alias: `GOOGLE_API_KEY`)
 
 Behavior when keys are missing depends on the agent CLI:
 
