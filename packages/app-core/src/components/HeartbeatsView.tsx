@@ -54,13 +54,18 @@ const DURATION_UNITS = [
 
 type DurationUnit = (typeof DURATION_UNITS)[number]["unit"];
 
-const FIELD_LABEL_CLASS = "mb-1.5 block text-xs font-medium text-muted";
+const FIELD_LABEL_CLASS =
+  "mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted/80";
 const INPUT_CLASS =
-  "h-10 w-full rounded-xl border-border/60 bg-bg/70 px-3 py-2 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-accent";
+  "h-11 w-full rounded-2xl border border-border/60 bg-bg/70 px-4 py-2 text-sm shadow-sm transition-[border-color,box-shadow,background-color] focus-visible:ring-1 focus-visible:ring-accent";
 const SELECT_CLASS =
-  "h-10 w-full rounded-xl border border-border/60 bg-bg/70 px-3 py-2 text-sm outline-none focus:border-accent";
+  "h-11 w-full rounded-2xl border border-border/60 bg-bg/70 px-4 py-2 text-sm outline-none transition-[border-color,box-shadow,background-color] focus:border-accent";
 const TEXTAREA_CLASS =
-  "min-h-[120px] w-full resize-y rounded-xl border border-border/60 bg-bg/70 px-3 py-2 text-sm outline-none focus:border-accent";
+  "min-h-[132px] w-full resize-y rounded-2xl border border-border/60 bg-bg/70 px-4 py-3 text-sm outline-none transition-[border-color,box-shadow,background-color] focus:border-accent";
+const SIDEBAR_SECTION_LABEL_CLASS =
+  "text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60";
+const SIDEBAR_CARD_BASE_CLASS =
+  "w-full rounded-xl border px-3.5 py-3 text-left transition-[border-color,background-color,color,box-shadow] duration-200";
 
 function bestFitUnit(ms: number): { value: number; unit: DurationUnit } {
   for (let i = DURATION_UNITS.length - 1; i >= 0; i -= 1) {
@@ -537,13 +542,27 @@ export function HeartbeatsView() {
     <div className="flex h-full w-full overflow-hidden bg-bg">
       {/* Sidebar — full-width on mobile when no detail is shown, fixed-width on md+ */}
       <aside
-        className={`${selectedTriggerId || editorOpen || editingId ? "hidden md:flex" : "flex"} w-full md:w-72 lg:w-80 md:max-w-[320px] shrink-0 border-r border-border/60 bg-card/30 flex-col overflow-y-auto`}
+        className={`${selectedTriggerId || editorOpen || editingId ? "hidden md:flex" : "flex"} w-full shrink-0 flex-col overflow-y-auto border-r border-border/50 bg-card/45 md:w-72 md:max-w-[320px] lg:w-80 backdrop-blur-sm`}
       >
-        <div className="sticky top-0 z-10 pt-2">
+        <div className="sticky top-0 z-10 border-b border-border/40 bg-card/80 px-3 pb-3 pt-3 backdrop-blur-md">
+          <div className="mb-3 flex items-end justify-between gap-3 px-1">
+            <div className="space-y-1">
+              <div className={SIDEBAR_SECTION_LABEL_CLASS}>Heartbeats</div>
+              <div className="text-xs text-muted">
+                {t("heartbeatsview.newHeartbeat")}
+              </div>
+            </div>
+            <StatusBadge
+              label={
+                triggersLoading ? t("common.loading") : String(triggers.length)
+              }
+              tone={triggersLoading ? "warning" : "muted"}
+            />
+          </div>
           <Button
             variant="ghost"
             size="sm"
-            className="w-full h-10 px-3 justify-start text-sm hover:bg-accent/5 font-medium border-l-2 border-transparent"
+            className="h-11 w-full justify-start rounded-xl border border-accent/20 bg-accent/5 px-4 text-sm font-medium text-txt shadow-sm hover:border-accent/35 hover:bg-accent/10"
             onClick={() => {
               openCreateEditor();
               setSelectedTriggerId(null);
@@ -556,8 +575,24 @@ export function HeartbeatsView() {
 
         <div className="flex-1 overflow-y-auto pb-4">
           {triggerError && (
-            <div className="mx-3 mt-3 mb-1 rounded-xl border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
+            <div className="mx-3 mb-2 mt-3 rounded-xl border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
               {triggerError}
+            </div>
+          )}
+          {triggersLoading && (
+            <div className="mx-3 mt-3 flex items-center gap-2 rounded-xl border border-border/40 bg-bg/35 px-3 py-3 text-sm text-muted">
+              <div className="h-4 w-4 rounded-full border-2 border-muted/30 border-t-muted/80 animate-spin" />
+              {t("common.loading")}
+            </div>
+          )}
+          {!triggersLoading && triggers.length === 0 && (
+            <div className="mx-3 mt-3 rounded-2xl border border-dashed border-border/50 bg-bg/25 px-4 py-4">
+              <div className="mb-1 text-sm font-medium text-txt">
+                {t("heartbeatsview.newHeartbeat")}
+              </div>
+              <p className="text-xs leading-relaxed text-muted">
+                {t("heartbeatsview.emptyStateDescription")}
+              </p>
             </div>
           )}
           {triggers.map((trigger) => {
@@ -577,11 +612,11 @@ export function HeartbeatsView() {
                   openEditEditor(trigger);
                   void loadTriggerRuns(trigger.id);
                 }}
-                className={`w-full text-left px-3 py-2.5 h-auto border-l-2 rounded-none ${isActive ? "border-accent text-accent bg-transparent" : "border-transparent bg-transparent hover:bg-accent/5"}`}
+                className={`${SIDEBAR_CARD_BASE_CLASS} h-auto ${isActive ? "border-accent/45 bg-accent/10 text-txt shadow-sm" : "border-transparent bg-transparent hover:border-border/45 hover:bg-bg/45"}`}
               >
                 <div className="flex flex-col gap-1.5 min-w-0">
                   <div className="flex items-center justify-between gap-1">
-                    <span className="font-semibold text-sm text-txt truncate">
+                    <span className="truncate text-sm font-semibold text-txt">
                       {trigger.displayName}
                     </span>
                     <StatusBadge
@@ -594,7 +629,7 @@ export function HeartbeatsView() {
                       withDot
                     />
                   </div>
-                  <div className="text-[11px] text-muted flex items-center justify-between gap-2 mt-0.5">
+                  <div className="mt-0.5 flex items-center justify-between gap-2 text-[11px] text-muted">
                     <span className="truncate">
                       {scheduleLabel(trigger, t)}
                     </span>
@@ -611,9 +646,12 @@ export function HeartbeatsView() {
           })}
 
           {/* Templates */}
-          <div className="px-3 pt-4 pb-2 border-t border-border/30 mt-2">
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted/60 mb-2">
-              Templates
+          <div className="mt-3 border-t border-border/30 px-3 pb-2 pt-4">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <div className={SIDEBAR_SECTION_LABEL_CLASS}>Templates</div>
+              <span className="text-[10px] text-muted/50">
+                {userTemplates.length + BUILT_IN_TEMPLATES.length}
+              </span>
             </div>
             {[...userTemplates, ...BUILT_IN_TEMPLATES].map((template) => {
               const isUserTemplate = !template.id.startsWith("__builtin_");
@@ -621,10 +659,10 @@ export function HeartbeatsView() {
                 <div key={template.id} className="relative group mb-1.5">
                   <button
                     type="button"
-                    className={`w-full text-left px-3 py-2 rounded-lg border transition-colors ${
+                    className={`${SIDEBAR_CARD_BASE_CLASS} ${
                       isUserTemplate
                         ? "border-accent/20 bg-accent/5 hover:bg-accent/10 hover:border-accent/30"
-                        : "border-dashed border-border/40 hover:bg-bg-hover hover:border-border"
+                        : "border-dashed border-border/40 hover:border-border hover:bg-bg-hover"
                     }`}
                     onClick={() => {
                       setForm({
@@ -646,7 +684,7 @@ export function HeartbeatsView() {
                     <div className="text-xs font-medium text-txt">
                       {template.name}
                     </div>
-                    <div className="text-[10px] text-muted/60 mt-0.5">
+                    <div className="mt-0.5 text-[10px] text-muted/60">
                       Every {template.interval} {template.unit}
                     </div>
                   </button>
@@ -676,7 +714,7 @@ export function HeartbeatsView() {
         {/* Mobile back button */}
         <button
           type="button"
-          className="md:hidden flex items-center gap-2 px-4 py-3 text-base font-medium text-muted hover:text-txt border-b border-border/30"
+          className="flex items-center gap-2 border-b border-border/30 px-4 py-3 text-base font-medium text-muted hover:text-txt md:hidden"
           onClick={() => {
             setSelectedTriggerId(null);
             setEditorOpen(false);
@@ -935,10 +973,10 @@ export function HeartbeatsView() {
                 <div className="pt-2">
                   <button
                     type="button"
-                    className="text-xs text-muted hover:text-accent transition-colors underline underline-offset-2"
+                    className="text-xs font-medium text-muted transition-colors hover:text-accent underline-offset-2 hover:underline"
                     onClick={saveFormAsTemplate}
                   >
-                    💾 Save as template
+                    Save as template
                   </button>
                 </div>
               )}
