@@ -65,7 +65,7 @@ function SkillCard({
     <div
       className={`flex flex-col border bg-[var(--card)] transition-colors ${
         isQuarantined || isBlocked
-          ? "border-[#e74c3c]/40"
+          ? "border-danger/35"
           : "border-[var(--border)] hover:border-[var(--accent)]/50"
       }`}
       data-skill-id={skill.id}
@@ -108,7 +108,7 @@ function SkillCard({
             <Button
               variant="outline"
               size="sm"
-              className="h-6 px-2 text-[10px] font-bold bg-[#f39c12]/15 text-[#f39c12] border-[#f39c12]/30 hover:bg-[#f39c12]/25 hover:text-[#f39c12] transition-colors"
+              className="h-6 border-warn/35 bg-warn/12 px-2 text-[10px] font-bold text-warn transition-colors hover:border-warn/55 hover:bg-warn/18 hover:text-warn"
               onClick={() => onReview(skill.id)}
             >
               {t("skillsview.ReviewFindings")}
@@ -162,10 +162,10 @@ function SkillCard({
             <span className="text-xs font-semibold text-[var(--txt)]">
               {t("skillsview.ScanReport")}
             </span>
-            <span className="text-[11px] text-[#e74c3c] font-mono">
+            <span className="text-[11px] font-mono text-danger">
               {skillReviewReport.summary.critical} {t("skillsview.critical")}
             </span>
-            <span className="text-[11px] text-[#f39c12] font-mono">
+            <span className="text-[11px] font-mono text-warn">
               {skillReviewReport.summary.warn} {t("skillsview.warnings")}
             </span>
           </div>
@@ -185,8 +185,8 @@ function SkillCard({
                     <span
                       className={`shrink-0 px-1.5 py-px font-bold text-[10px] uppercase ${
                         f.severity === "critical"
-                          ? "bg-[#e74c3c]/15 text-[#e74c3c]"
-                          : "bg-[#f39c12]/15 text-[#f39c12]"
+                          ? "bg-danger/12 text-danger"
+                          : "bg-warn/12 text-warn"
                       }`}
                     >
                       {f.severity}
@@ -358,35 +358,19 @@ function InstallModal({
     >
       <DialogContent
         container={typeof document !== "undefined" ? document.body : undefined}
-        className="w-full max-w-2xl max-h-[80vh] p-0 flex flex-col overflow-hidden rounded-2xl"
+        className="flex max-h-[80vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-border/60 bg-card/98 p-0 shadow-2xl"
       >
         <DialogHeader>
-          <DialogTitle
-            style={{
-              fontSize: 13,
-              fontWeight: 800,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-            }}
-          >
+          <DialogTitle className="text-[13px] font-extrabold uppercase tracking-[0.14em]">
             Install Skill
           </DialogTitle>
-          <div
-            style={{
-              fontSize: 11,
-              color: "var(--muted)",
-              marginTop: 2,
-            }}
-          >
+          <div className="mt-0.5 text-[11px] text-muted">
             Add skills from the marketplace or a GitHub repository.
           </div>
         </DialogHeader>
 
         {/* Tabs */}
-        <div
-          className="flex"
-          style={{ borderBottom: "1px solid var(--border)" }}
-        >
+        <div className="flex border-b border-border/60 bg-bg-accent/35">
           {(
             [
               { id: "search" as const, label: "MARKETPLACE" },
@@ -398,21 +382,11 @@ function InstallModal({
               size="sm"
               type="button"
               key={t.id}
-              style={{
-                flex: 1,
-                padding: "10px 16px",
-                fontSize: 11,
-                fontWeight: 700,
-                letterSpacing: "0.1em",
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                borderBottom:
-                  tab === t.id ? "2px solid #f0b232" : "2px solid transparent",
-                color: tab === t.id ? "#f0b232" : "var(--muted)",
-                transition: "color 0.2s, border-color 0.2s",
-                borderRadius: 0,
-              }}
+              className={`flex-1 rounded-none border-b-2 px-4 py-2.5 text-[11px] font-bold tracking-[0.1em] transition-colors ${
+                tab === t.id
+                  ? "border-accent text-accent"
+                  : "border-transparent text-muted-strong hover:text-txt"
+              }`}
               onClick={() => setTab(t.id)}
             >
               {t.label}
@@ -452,24 +426,14 @@ function InstallModal({
               </div>
 
               {skillsMarketplaceError && (
-                <div
-                  className="p-2.5 text-xs mb-3"
-                  style={{ border: "1px solid #e74c3c", color: "#e74c3c" }}
-                >
+                <div className="mb-3 rounded-lg border border-danger/35 bg-danger/10 p-2.5 text-xs text-danger">
                   {skillsMarketplaceError}
                 </div>
               )}
 
               {skillsMarketplaceResults.length === 0 ? (
                 <div className="text-center py-12">
-                  <div
-                    style={{
-                      color: "var(--muted)",
-                      fontSize: 12,
-                      letterSpacing: "0.1em",
-                      textTransform: "uppercase",
-                    }}
-                  >
+                  <div className="text-[12px] uppercase tracking-[0.1em] text-muted">
                     Search above to discover skills.
                   </div>
                 </div>
@@ -496,23 +460,10 @@ function InstallModal({
 
           {tab === "url" && (
             <div>
-              <div
-                style={{
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: "var(--text)",
-                  marginBottom: 4,
-                }}
-              >
+              <div className="mb-1 text-[12px] font-semibold text-txt">
                 GitHub Repository URL
               </div>
-              <div
-                style={{
-                  fontSize: 11,
-                  color: "var(--muted)",
-                  marginBottom: 12,
-                }}
-              >
+              <div className="mb-3 text-[11px] text-muted">
                 Paste a full GitHub repository URL to install a skill directly.
               </div>
               <div className="flex gap-2 items-center">
@@ -548,10 +499,7 @@ function InstallModal({
               </div>
 
               {skillsMarketplaceError && (
-                <div
-                  className="p-2.5 text-xs mt-3"
-                  style={{ border: "1px solid #e74c3c", color: "#e74c3c" }}
-                >
+                <div className="mt-3 rounded-lg border border-danger/35 bg-danger/10 p-2.5 text-xs text-danger">
                   {skillsMarketplaceError}
                 </div>
               )}
@@ -591,8 +539,7 @@ function CreateSkillForm({
       <div className="p-4 flex flex-col gap-3">
         <div>
           <span className="block text-[11px] text-[var(--muted)] mb-1 font-medium">
-            {t("skillsview.SkillName")}{" "}
-            <span className="text-[#e74c3c]">*</span>
+            {t("skillsview.SkillName")} <span className="text-danger">*</span>
           </span>
           <Input
             className="w-full bg-bg/50 border-border/50 focus-visible:ring-accent"
@@ -722,35 +669,24 @@ function EditSkillModal({
     >
       <DialogContent
         container={typeof document !== "undefined" ? document.body : undefined}
-        className="w-full max-w-4xl h-[85vh] p-0 flex flex-col overflow-hidden rounded-xl"
+        className="flex h-[85vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-border/60 bg-card/98 p-0 shadow-2xl"
       >
         <DialogHeader className="flex-row items-center justify-between px-5 py-3 shrink-0 border-b border-[var(--border)] space-y-0">
           <div className="flex items-center gap-3 min-w-0">
             <DialogTitle className="font-semibold text-sm truncate">
               {skillName}
             </DialogTitle>
-            <span
-              className="text-[10px] font-mono px-1.5 py-0.5"
-              style={{
-                color: "var(--muted)",
-                background: "var(--bg-hover)",
-                border: "1px solid var(--border)",
-                borderRadius: 4,
-              }}
-            >
+            <span className="rounded-md border border-border bg-bg-hover px-1.5 py-0.5 text-[10px] font-mono text-muted">
               {t("skillsview.SKILLMd")}
             </span>
             {hasChanges && (
-              <span
-                className="text-[10px] font-medium"
-                style={{ color: "#f0b232" }}
-              >
+              <span className="text-[10px] font-medium text-warn">
                 {t("skillsview.unsaved")}
               </span>
             )}
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px]" style={{ color: "var(--muted)" }}>
+            <span className="text-[10px] text-muted">
               {navigator.platform.includes("Mac") ? "⌘S" : "Ctrl+S"}{" "}
               {t("skillsview.toSave")}
             </span>
@@ -760,17 +696,12 @@ function EditSkillModal({
         {/* Editor body */}
         <div className="flex-1 overflow-hidden">
           {loading ? (
-            <div
-              className="flex items-center justify-center h-full text-sm"
-              style={{ color: "var(--muted)" }}
-            >
+            <div className="flex h-full items-center justify-center text-sm text-muted">
               {t("skillsview.LoadingSkillSource")}
             </div>
           ) : error && !content ? (
             <div className="flex flex-col items-center justify-center h-full gap-3">
-              <div className="text-sm font-medium" style={{ color: "#ef4444" }}>
-                {error}
-              </div>
+              <div className="text-sm font-medium text-danger">{error}</div>
               <Button
                 variant="outline"
                 size="sm"
@@ -782,11 +713,7 @@ function EditSkillModal({
             </div>
           ) : (
             <Textarea
-              className="w-full h-full resize-none border-0 text-[13px] leading-relaxed font-mono p-5 focus:outline-none"
-              style={{
-                background: "var(--bg-hover)",
-                color: "var(--text)",
-              }}
+              className="h-full w-full resize-none border-0 bg-bg-hover p-5 font-mono text-[13px] leading-relaxed text-txt focus:outline-none focus-visible:ring-0"
               value={content}
               onChange={(e) => setContent(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -796,16 +723,11 @@ function EditSkillModal({
         </div>
 
         {/* Footer */}
-        <div
-          className="flex items-center justify-between px-5 py-3 shrink-0"
-          style={{ borderTop: "1px solid var(--border)" }}
-        >
-          <div className="text-[11px]" style={{ color: "var(--muted)" }}>
+        <div className="flex shrink-0 items-center justify-between border-t border-border px-5 py-3">
+          <div className="text-[11px] text-muted">
             {content ? `${content.split("\n").length} lines` : ""}
             {error && content ? (
-              <span className="ml-3" style={{ color: "#ef4444" }}>
-                {error}
-              </span>
+              <span className="ml-3 text-danger">{error}</span>
             ) : null}
           </div>
           <div className="flex items-center gap-2">
@@ -820,11 +742,11 @@ function EditSkillModal({
             <Button
               variant="default"
               size="sm"
-              className="text-xs font-medium"
-              style={{
-                background: saveSuccess ? "#22c55e" : "#f0b232",
-                color: saveSuccess ? "#fff" : "#000",
-              }}
+              className={`text-xs font-medium ${
+                saveSuccess
+                  ? "border-ok/40 bg-ok text-white hover:bg-ok/90"
+                  : ""
+              }`}
               onClick={() => handleSave()}
               disabled={saving || !hasChanges}
             >
@@ -1206,13 +1128,16 @@ function SkillsFullView() {
   const allVisible = [...attention, ...active, ...inactive];
 
   /** Render a group of skill cards in a grid with a section header. */
-  const renderGroup = (label: string, items: SkillInfo[], accent?: string) => {
+  const renderGroup = (
+    label: string,
+    items: SkillInfo[],
+    toneClassName = "text-muted",
+  ) => {
     if (items.length === 0) return null;
     return (
       <div className="mb-6">
         <div
-          className="text-xs uppercase tracking-wider font-semibold mb-2 flex items-center gap-2"
-          style={accent ? { color: accent } : { color: "var(--muted)" }}
+          className={`mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider ${toneClassName}`}
         >
           {label}
           <span className="text-[10px] font-mono opacity-60">
@@ -1338,8 +1263,8 @@ function SkillsFullView() {
         </div>
       ) : (
         <div>
-          {renderGroup("Needs Attention", attention, "#f39c12")}
-          {renderGroup("Active", active, "var(--ok, #16a34a)")}
+          {renderGroup("Needs Attention", attention, "text-warn")}
+          {renderGroup("Active", active, "text-ok")}
           {renderGroup("Inactive", inactive)}
         </div>
       )}
