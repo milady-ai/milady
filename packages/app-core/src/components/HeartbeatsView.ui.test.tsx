@@ -82,7 +82,7 @@ describe("HeartbeatsView UI states", () => {
     expect(snapshot).toContain("Loading");
   });
 
-  it("renders the rounded shell and lifted detail surface", async () => {
+  it("renders the rounded shared shell without a nested detail panel wrapper", async () => {
     mockUseApp.mockReturnValue(makeAppState());
 
     let tree: TestRenderer.ReactTestRenderer | undefined;
@@ -93,13 +93,12 @@ describe("HeartbeatsView UI states", () => {
     const shell = tree?.root.findByProps({
       "data-testid": "heartbeats-shell",
     });
-    const detailPanel = tree?.root.findByProps({
+    const detailPanels = tree?.root.findAllByProps({
       "data-testid": "heartbeats-detail-panel",
     });
 
     expect(String(shell?.props.className)).toContain("rounded-[30px]");
-    expect(String(shell?.props.className)).toContain("shadow-[");
-    expect(String(detailPanel?.props.className)).toContain("rounded-[24px]");
-    expect(String(detailPanel?.props.className)).toContain("shadow-[");
+    expect(String(shell?.props.className)).toContain("shadow");
+    expect(detailPanels).toHaveLength(0);
   });
 });
