@@ -70,6 +70,10 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
     useState<StewardStatusResponse | null>(null);
 
   useEffect(() => {
+    if (typeof getStewardStatus !== "function") {
+      return;
+    }
+
     let cancelled = false;
     getStewardStatus()
       .then((s) => {

@@ -8,7 +8,6 @@
  * or falling back to --packages=external if resolution fails entirely.
  */
 import { execFileSync } from "node:child_process";
-import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 
@@ -45,7 +44,7 @@ const args = [
 if (process.platform === "win32") {
   try {
     const req = createRequire(path.join(ELECTROBUN_DIR, "package.json"));
-    const viewEntry = req.resolve("electrobun/view");
+    req.resolve("electrobun/view");
     // If resolution succeeds, we're fine — bun build should work.
     // But add the electrobun dir to NODE_PATH as a fallback.
     if (!process.env.NODE_PATH) {
@@ -66,7 +65,7 @@ try {
     stdio: "inherit",
     env: process.env,
   });
-} catch (err) {
+} catch {
   // If the first attempt failed on Windows, retry with --packages=external
   if (process.platform === "win32" && !args.includes("--packages=external")) {
     console.warn(

@@ -3,6 +3,8 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
+import type { SecureStoreSecretKind } from "./platform-secure-store";
+
 /** Fixed Keychain / Secret Service “service” identifier (see docs/guides/platform-secure-store.md). */
 export const MILADY_AGENT_VAULT_SERVICE = "ai.milady.agent.vault";
 
@@ -34,7 +36,7 @@ export function deriveAgentVaultId(
 
 export function keychainAccountForSecretKind(
   vaultId: string,
-  kind: "wallet.evm_private_key" | "wallet.solana_private_key",
+  kind: SecureStoreSecretKind,
 ): string {
   return `${vaultId}:${kind}`;
 }

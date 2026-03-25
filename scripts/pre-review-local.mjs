@@ -135,7 +135,10 @@ export function scopeVerdictFor(classification) {
   return "in scope";
 }
 
-export function decisionFromFindings({ classification, issues }) {
+export function decisionFromFindings({
+  classification: _classification,
+  issues,
+}) {
   return issues.length > 0 ? "REQUEST CHANGES" : "APPROVE";
 }
 
