@@ -343,7 +343,7 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
 
       {stewardStatus?.connected && (
         <div
-          className="mt-2 flex items-center gap-1.5 text-[11px] text-purple-400"
+          className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-accent/25 bg-accent/10 px-2.5 py-1 text-[11px] text-accent-fg"
           data-testid="steward-status-badge"
         >
           <span>🔐</span>
