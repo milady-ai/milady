@@ -128,6 +128,9 @@ describe("SkillsView", () => {
       tree.root.findByProps({ "data-testid": "skills-shell" }),
     ).toBeTruthy();
     expect(
+      tree.root.findByProps({ "data-testid": "skills-sidebar" }),
+    ).toBeTruthy();
+    expect(
       tree.root.findByProps({ "data-testid": "skills-empty-state" }),
     ).toBeTruthy();
     expect(tree.root.findAllByType("button").length).toBeGreaterThan(0);

@@ -1007,85 +1007,82 @@ function SkillsFullView() {
               ))}
             </div>
 
-            <div className="mt-4 flex min-h-0 flex-1 flex-col rounded-[26px] border border-border/30 bg-bg/16 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_18px_38px_rgba(3,5,10,0.16)]">
-              <nav className="min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-1">
-                {filteredSkills.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-border/45 bg-bg/20 px-4 py-6 text-center text-sm text-muted">
-                    {skills.length === 0
-                      ? "No Skills Installed"
-                      : `No skills match "${filterText}"`}
-                  </div>
-                ) : (
-                  filteredSkills.map((skill) => {
-                    const needsAttention =
-                      skill.scanStatus === "warning" ||
-                      skill.scanStatus === "critical" ||
-                      skill.scanStatus === "blocked";
+            <nav className="mt-4 min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-3">
+              {filteredSkills.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-border/45 bg-bg/20 px-4 py-6 text-center text-sm text-muted">
+                  {skills.length === 0
+                    ? "No Skills Installed"
+                    : `No skills match "${filterText}"`}
+                </div>
+              ) : (
+                filteredSkills.map((skill) => {
+                  const needsAttention =
+                    skill.scanStatus === "warning" ||
+                    skill.scanStatus === "critical" ||
+                    skill.scanStatus === "blocked";
 
-                    return (
-                      <div
-                        key={skill.id}
-                        data-testid={`skill-row-${skill.id}`}
-                        className={`flex items-start gap-2 rounded-xl border px-3.5 py-3 text-left transition-all ${
-                          selectedSkillId === skill.id
-                            ? "border-accent/30 bg-[linear-gradient(180deg,rgba(var(--accent),0.18),rgba(var(--accent),0.08))] text-txt shadow-[0_14px_28px_rgba(3,5,10,0.16)]"
-                            : "border-transparent bg-transparent text-muted hover:border-border/45 hover:bg-bg/45 hover:text-txt"
-                        }`}
+                  return (
+                    <div
+                      key={skill.id}
+                      data-testid={`skill-row-${skill.id}`}
+                      className={`flex items-start gap-2 rounded-xl border px-3.5 py-3 text-left transition-all ${
+                        selectedSkillId === skill.id
+                          ? "border-accent/30 bg-[linear-gradient(180deg,rgba(var(--accent),0.18),rgba(var(--accent),0.08))] text-txt shadow-[0_2px_10px_rgba(3,5,10,0.08)]"
+                          : "border-transparent bg-transparent text-muted hover:border-border/45 hover:bg-bg/45 hover:text-txt"
+                      }`}
+                    >
+                      <Button
+                        variant="ghost"
+                        className="flex h-auto min-w-0 flex-1 items-start gap-3 rounded-none p-0 text-left"
+                        onClick={() => {
+                          setSelectedId(skill.id);
+                          setState("skillCreateFormOpen", false);
+                        }}
+                        aria-current={
+                          selectedSkillId === skill.id ? "page" : undefined
+                        }
                       >
-                        <Button
-                          variant="ghost"
-                          className="flex h-auto min-w-0 flex-1 items-start gap-3 rounded-none p-0 text-left"
-                          onClick={() => {
-                            setSelectedId(skill.id);
-                            setState("skillCreateFormOpen", false);
-                          }}
-                          aria-current={
-                            selectedSkillId === skill.id ? "page" : undefined
-                          }
+                        <span
+                          className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border p-2 text-sm font-bold ${
+                            selectedSkillId === skill.id
+                              ? "border-accent/30 bg-accent/18 text-txt-strong"
+                              : "border-border/50 bg-bg-accent/80 text-muted"
+                          }`}
                         >
-                          <span
-                            className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border p-2 text-sm font-bold ${
-                              selectedSkillId === skill.id
-                                ? "border-accent/30 bg-accent/18 text-txt-strong"
-                                : "border-border/50 bg-bg-accent/80 text-muted"
-                            }`}
-                          >
-                            {skill.name.charAt(0).toUpperCase()}
+                          {skill.name.charAt(0).toUpperCase()}
+                        </span>
+                        <span className="min-w-0 flex-1 text-left">
+                          <span className="block whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold leading-snug">
+                            {skill.name}
                           </span>
-                          <span className="min-w-0 flex-1 text-left">
-                            <span className="block whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold leading-snug">
-                              {skill.name}
-                            </span>
-                            <span className="mt-1 block whitespace-normal break-words [overflow-wrap:anywhere] text-[11px] leading-relaxed text-muted/85">
-                              {skill.description ||
-                                t("skillsview.noDescription")}
-                            </span>
+                          <span className="mt-1 block whitespace-normal break-words [overflow-wrap:anywhere] line-clamp-2 text-[11px] leading-relaxed text-muted/85">
+                            {skill.description || t("skillsview.noDescription")}
                           </span>
-                        </Button>
-                        <div className="flex shrink-0 flex-col items-end gap-2">
-                          <span
-                            className={`rounded-full border px-2.5 py-1 text-[10px] font-bold tracking-[0.16em] ${
-                              skill.enabled
-                                ? "border-accent bg-accent text-accent-fg"
-                                : "border-border bg-transparent text-muted"
-                            }`}
-                          >
-                            {skill.enabled ? "ON" : "OFF"}
+                        </span>
+                      </Button>
+                      <div className="flex shrink-0 flex-col items-end gap-2">
+                        <span
+                          className={`rounded-full border px-2.5 py-1 text-[10px] font-bold tracking-[0.16em] ${
+                            skill.enabled
+                              ? "border-accent bg-accent text-accent-fg"
+                              : "border-border bg-transparent text-muted"
+                          }`}
+                        >
+                          {skill.enabled ? "ON" : "OFF"}
+                        </span>
+                        {needsAttention && (
+                          <span className="rounded-full border border-warn/30 bg-warn/12 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-warn">
+                            {skill.scanStatus === "blocked"
+                              ? t("skillsview.statusBlocked")
+                              : t("skillsview.statusWarning")}
                           </span>
-                          {needsAttention && (
-                            <span className="rounded-full border border-warn/30 bg-warn/12 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-warn">
-                              {skill.scanStatus === "blocked"
-                                ? t("skillsview.statusBlocked")
-                                : t("skillsview.statusWarning")}
-                            </span>
-                          )}
-                        </div>
+                        )}
                       </div>
-                    );
-                  })
-                )}
-              </nav>
-            </div>
+                    </div>
+                  );
+                })
+              )}
+            </nav>
           </div>
         </aside>
 
