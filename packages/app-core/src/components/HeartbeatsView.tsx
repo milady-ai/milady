@@ -68,7 +68,7 @@ const SIDEBAR_CARD_BASE_CLASS =
   "w-full rounded-xl border px-3.5 py-3 text-left transition-[border-color,background-color,color,box-shadow] duration-200";
 const HEARTBEATS_SHELL_CLASS =
   "relative flex min-h-0 flex-1 overflow-hidden rounded-[30px] border border-border/45 bg-card/70 shadow-lg backdrop-blur-sm";
-const HEARTBEATS_CONTENT_WIDTH_CLASS = "mx-auto w-full max-w-[72rem]";
+const HEARTBEATS_CONTENT_WIDTH_CLASS = "mx-auto w-full max-w-[80rem]";
 const HEARTBEATS_PANEL_CLASS =
   "rounded-[28px] border border-border/35 bg-bg/20 px-5 py-5 shadow-sm sm:px-6 sm:py-6";
 const HEARTBEATS_STAT_CARD_CLASS =
@@ -548,11 +548,11 @@ export function HeartbeatsView() {
       : form.enabled;
 
   return (
-    <div className="flex h-full w-full min-h-0 bg-bg p-2 sm:p-3 lg:p-4">
+    <div className="flex h-full w-full min-h-0 bg-bg p-1 sm:p-2 lg:p-3">
       <div className={HEARTBEATS_SHELL_CLASS} data-testid="heartbeats-shell">
         {/* Sidebar — full-width on mobile when no detail is shown, fixed-width on md+ */}
         <aside
-          className={`${selectedTriggerId || editorOpen || editingId ? "hidden md:flex" : "flex"} w-full shrink-0 flex-col overflow-y-auto border-r border-border/40 bg-card/45 md:w-80 md:max-w-[336px] lg:w-[22rem] backdrop-blur-sm`}
+          className={`${selectedTriggerId || editorOpen || editingId ? "hidden md:flex" : "flex"} w-full shrink-0 flex-col overflow-y-auto border-r border-border/40 bg-card/45 md:w-[21rem] md:max-w-[352px] lg:w-[23rem] backdrop-blur-sm`}
         >
           <div className="sticky top-0 z-10 border-b border-border/40 bg-card/80 px-3 pb-3 pt-3 backdrop-blur-md">
             <div className="mb-3 flex items-end justify-between gap-3 px-1">
@@ -724,7 +724,7 @@ export function HeartbeatsView() {
 
         {/* Main Content Area — hidden on mobile when sidebar is showing */}
         <main
-          className={`${selectedTriggerId || editorOpen || editingId ? "flex" : "hidden md:flex"} relative flex-1 min-w-0 flex-col overflow-y-auto bg-bg/10 p-4 sm:p-5 lg:p-6 custom-scrollbar`}
+          className={`${selectedTriggerId || editorOpen || editingId ? "flex" : "hidden md:flex"} relative flex-1 min-w-0 flex-col overflow-y-auto bg-bg/10 p-4 sm:p-6 lg:p-7 custom-scrollbar`}
         >
           {/* Mobile back button */}
           <button

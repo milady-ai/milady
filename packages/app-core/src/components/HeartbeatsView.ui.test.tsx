@@ -113,7 +113,7 @@ describe("HeartbeatsView UI states", () => {
     const aside = tree?.root.findByType("aside");
     const main = tree?.root.findByType("main");
 
-    expect(String(aside?.props.className)).toContain("md:w-80");
-    expect(String(main?.props.className)).toContain("lg:p-6");
+    expect(String(aside?.props.className)).toContain("md:w-[21rem]");
+    expect(String(main?.props.className)).toContain("lg:p-7");
   });
 });
