@@ -97,7 +97,8 @@ async function exchangeCloudLaunchSession(
         error?: string;
       };
       lastError = new Error(
-        payload.error || `Launch session exchange failed (HTTP ${response.status})`,
+        payload.error ||
+          `Launch session exchange failed (HTTP ${response.status})`,
       );
 
       if (response.status === 404) {
