@@ -70,7 +70,7 @@ const HEARTBEATS_SHELL_CLASS =
   "relative flex min-h-0 flex-1 overflow-hidden rounded-[30px] border border-border/45 bg-card/70 shadow-lg backdrop-blur-sm";
 const HEARTBEATS_CONTENT_WIDTH_CLASS = "mx-auto w-full max-w-[80rem]";
 const HEARTBEATS_PANEL_CLASS =
-  "rounded-[28px] border border-border/35 bg-bg/20 px-5 py-5 shadow-sm sm:px-6 sm:py-6";
+  "rounded-[28px] border border-border/35 bg-bg/20 px-5 py-4 shadow-sm sm:px-6 sm:py-5";
 const HEARTBEATS_STAT_CARD_CLASS =
   "rounded-2xl border border-border/30 bg-bg/20 px-4 py-4 shadow-sm";
 const HEARTBEATS_SECTION_KICKER_CLASS =
@@ -740,15 +740,15 @@ export function HeartbeatsView() {
           </button>
           {editorOpen || editingId ? (
             <div
-              className={`${HEARTBEATS_CONTENT_WIDTH_CLASS} p-4 pb-20 sm:p-6 lg:p-8 xl:p-10`}
+              className={`${HEARTBEATS_CONTENT_WIDTH_CLASS} px-4 pb-16 pt-0 sm:px-5 sm:pb-16 sm:pt-1 lg:px-7 lg:pb-16 lg:pt-1 xl:px-8`}
             >
               {templateNotice && (
                 <div className="mb-4 px-4 py-2.5 rounded-lg border border-accent/30 bg-accent/5 text-xs text-accent font-medium animate-[fadeIn_0.2s_ease]">
                   {templateNotice}
                 </div>
               )}
-              <div className="mb-8 flex flex-col justify-between gap-5 lg:flex-row lg:items-start">
-                <div className="max-w-3xl space-y-2">
+              <div className="mb-4 flex flex-col justify-between gap-2 lg:flex-row lg:items-start">
+                <div className="max-w-3xl space-y-1">
                   <div className={HEARTBEATS_SECTION_KICKER_CLASS}>
                     {editingId
                       ? t("heartbeatsview.editHeartbeat")
@@ -802,14 +802,17 @@ export function HeartbeatsView() {
                 </div>
               </div>
 
-              <div className="space-y-8">
+              <div className="space-y-6">
                 {formError && (
                   <div className="rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger shadow-sm">
                     {formError}
                   </div>
                 )}
 
-                <div className={`${HEARTBEATS_PANEL_CLASS} grid gap-6`}>
+                <div
+                  className={`${HEARTBEATS_PANEL_CLASS} grid gap-5`}
+                  data-testid="heartbeats-editor-panel"
+                >
                   <div>
                     <span className={FIELD_LABEL_CLASS}>
                       {t("wallet.name")}
@@ -993,7 +996,7 @@ export function HeartbeatsView() {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-4 border-t border-border/30 pt-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   {form.displayName.trim() && (
                     <button
                       type="button"
@@ -1004,7 +1007,7 @@ export function HeartbeatsView() {
                     </button>
                   )}
 
-                  <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-2.5">
                     <Button
                       variant="default"
                       size="sm"
@@ -1044,7 +1047,7 @@ export function HeartbeatsView() {
 
                 {/* Detailed run info and metadata when editing */}
                 {editingId && (
-                  <div className="mt-12 pt-10 border-t border-border/40 grid gap-10">
+                  <div className="mt-10 grid gap-8 border-t border-border/40 pt-8">
                     <dl className="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
                       <div className={HEARTBEATS_STAT_CARD_CLASS}>
                         <dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
