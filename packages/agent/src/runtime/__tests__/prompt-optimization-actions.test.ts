@@ -457,3 +457,41 @@ describe("shouldSkipSecurityEval", () => {
     expect(shouldSkipSecurityEval(prompt)).toBe(false);
   });
 });
+
+// ---------------------------------------------------------------------------
+// validateIntentActionMap
+// ---------------------------------------------------------------------------
+
+import { validateIntentActionMap } from "../prompt-compaction";
+
+describe("validateIntentActionMap", () => {
+  it("logs no warnings when all mapped actions are registered", () => {
+    const warnings: string[] = [];
+    const logger = { warn: (msg: string) => warnings.push(msg) };
+    validateIntentActionMap(
+      [
+        "START_CODING_TASK",
+        "SPAWN_CODING_AGENT",
+        "PROVISION_WORKSPACE",
+        "FINALIZE_WORKSPACE",
+        "LIST_CODING_AGENTS",
+        "SEND_TO_CODING_AGENT",
+        "RUN_IN_TERMINAL",
+        "RESTART_AGENT",
+        "MANAGE_ISSUES",
+        "PLAY_EMOTE",
+      ],
+      logger,
+    );
+    expect(warnings).toHaveLength(0);
+  });
+
+  it("logs warnings for stale action names not in the registry", () => {
+    const warnings: string[] = [];
+    const logger = { warn: (msg: string) => warnings.push(msg) };
+    // Only register a few — the rest should warn
+    validateIntentActionMap(["START_CODING_TASK", "PLAY_EMOTE"], logger);
+    expect(warnings.length).toBeGreaterThan(0);
+    expect(warnings.some((w) => w.includes("SPAWN_CODING_AGENT"))).toBe(true);
+  });
+});

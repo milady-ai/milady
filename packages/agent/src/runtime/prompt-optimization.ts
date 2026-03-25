@@ -7,7 +7,11 @@
 
 import type { AgentRuntime } from "@elizaos/core";
 
-import { compactActionsForIntent, compactModelPrompt } from "./prompt-compaction";
+import {
+  compactActionsForIntent,
+  compactModelPrompt,
+  validateIntentActionMap,
+} from "./prompt-compaction";
 
 // Re-export compaction functions for backwards compatibility
 export { detectIntentCategories, buildFullParamActionSet, compactActionsForIntent } from "./prompt-compaction";
@@ -147,6 +151,20 @@ export function installPromptOptimizations(runtime: AgentRuntime): void {
   const rt = runtime as RuntimeWithOptState;
   if (rt.__miladyPromptOptInstalled) return;
   rt.__miladyPromptOptInstalled = true;
+
+  // Warn when security eval is force-skipped via env var
+  if (MILADY_SKIP_SECURITY_EVAL_OVERRIDE === true) {
+    runtime.logger?.warn(
+      "[milady] MILADY_SKIP_SECURITY_EVAL=1 — LLM security evaluation is disabled for ALL channels. " +
+        "Only a keyword heuristic is active. Set =0 or remove the var for public channel deployments.",
+    );
+  }
+
+  // Validate intent-action map against registered actions
+  const actionNames = runtime.actions?.map((a) => a.name) ?? [];
+  if (actionNames.length > 0) {
+    validateIntentActionMap(actionNames, runtime.logger);
+  }
 
   const originalUseModel = runtime.useModel.bind(runtime);
 

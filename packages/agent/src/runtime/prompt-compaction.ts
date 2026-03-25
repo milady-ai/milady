@@ -105,7 +105,14 @@ const ISSUE_INTENT_RE =
 /** Actions that are always included at full detail. */
 export const UNIVERSAL_ACTIONS = new Set(["REPLY", "NONE", "IGNORE"]);
 
-/** Map intent categories → action names that get full params when detected. */
+/**
+ * Map intent categories → action names that get full params when detected.
+ *
+ * These names must match the registered action names in the runtime. If an
+ * action is renamed or removed upstream, the compaction gracefully degrades
+ * — the action simply won't appear in the prompt at all, so the stale name
+ * in this map is harmless (it just won't match anything).
+ */
 export const INTENT_ACTION_MAP: Record<string, Set<string>> = {
   coding: new Set([
     "START_CODING_TASK",
@@ -140,6 +147,27 @@ export function hasIntent(prompt: string, keywords: RegExp): boolean {
   }
 
   return false;
+}
+
+/**
+ * Validate INTENT_ACTION_MAP against the runtime's registered actions.
+ * Logs warnings for any mapped action names that don't exist in the runtime.
+ * Call once at startup after plugins are loaded.
+ */
+export function validateIntentActionMap(
+  registeredActions: string[],
+  logger?: { warn: (msg: string) => void },
+): void {
+  const registered = new Set(registeredActions.map((a) => a.toUpperCase()));
+  for (const [category, actions] of Object.entries(INTENT_ACTION_MAP)) {
+    for (const action of actions) {
+      if (!registered.has(action)) {
+        logger?.warn(
+          `[milady] INTENT_ACTION_MAP["${category}"] references "${action}" which is not a registered action — may be renamed or removed upstream`,
+        );
+      }
+    }
+  }
 }
 
 /**
