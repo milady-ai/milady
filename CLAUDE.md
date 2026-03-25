@@ -136,6 +136,6 @@ All `@elizaos/*` packages use the `alpha` dist-tag. When developing locally, `bu
 | `MILADY_PROMPT_TRACE` | Log prompt compaction stats to console | `0` |
 | `MILADY_CAPTURE_PROMPTS` | Dump raw prompts to `.tmp/prompt-captures/` (dev-only, contains user messages) | `0` |
 | `MILADY_ACTION_COMPACTION` | Context-aware action param stripping | `1` (enabled) |
-| `MILADY_SKIP_SECURITY_EVAL` | Override security eval: `1`=always skip, `0`=always run. Default: dynamic (skip for DM/web, run for Discord/Telegram) | dynamic |
+| `MILADY_SKIP_SECURITY_EVAL` | Skip LLM security eval, use keyword heuristic instead (for personal/DM deployments) | `0` (disabled) |
 | `MILADY_SOCIAL_EVAL_EVERY_N` | Run relationship extraction every N messages | `3` |
 | `MILADY_PROMPT_OPT_MODE` | Prompt optimization mode (`baseline` or `compact`) | `baseline` |

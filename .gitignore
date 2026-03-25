@@ -5,6 +5,7 @@ dist
 storybook-static
 coverage
 tmp/
+.tmp/
 apps/app/electron/build/
 apps/app/electrobun/build/
 .bun

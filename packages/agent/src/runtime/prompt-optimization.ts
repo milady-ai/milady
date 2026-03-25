@@ -48,19 +48,16 @@ const MILADY_ACTION_COMPACTION = (() => {
 })();
 
 /**
- * Force security eval behavior. By default, security eval is dynamic:
- * - `client_chat` (web UI / desktop DM) → skip (user is admin)
- * - Public channels (discord, telegram, etc.) → full LLM eval
+ * Skip the LLM security evaluator. Default: disabled (full LLM eval runs).
  *
- * Override with MILADY_SKIP_SECURITY_EVAL=1 to always skip, or =0 to
- * always run the full LLM eval regardless of channel.
+ * Set MILADY_SKIP_SECURITY_EVAL=1 for personal/DM deployments where the
+ * user is trusted. This replaces 2-6 LLM security calls per message with
+ * a keyword heuristic. Leave unset or =0 for public channel deployments
+ * (Discord, Telegram) where untrusted users can inject prompts.
  */
-const MILADY_SKIP_SECURITY_EVAL_OVERRIDE: boolean | null = (() => {
-  const raw = process.env.MILADY_SKIP_SECURITY_EVAL?.toLowerCase();
-  if (raw === "1" || raw === "true") return true;
-  if (raw === "0" || raw === "false") return false;
-  return null; // dynamic (default)
-})();
+const MILADY_SKIP_SECURITY_EVAL =
+  process.env.MILADY_SKIP_SECURITY_EVAL === "1" ||
+  process.env.MILADY_SKIP_SECURITY_EVAL?.toLowerCase() === "true";
 
 
 /**
@@ -85,16 +82,9 @@ function extractSecurityMessage(prompt: string): string {
   return match?.[1] ?? "";
 }
 
-/** Determine whether security eval should be skipped.
- *
- * Uses only the env var — no prompt content parsing (which would be a
- * prompt injection vector since user messages are embedded in the prompt).
- *
- * For automatic per-channel behavior, configure MILADY_SKIP_SECURITY_EVAL
- * per deployment: =1 for personal/DM instances, leave unset for public.
- */
+/** Whether the security LLM evaluator should be skipped (env-var only). */
 export function shouldSkipSecurityEval(): boolean {
-  return MILADY_SKIP_SECURITY_EVAL_OVERRIDE === true;
+  return MILADY_SKIP_SECURITY_EVAL;
 }
 
 export function isHighRiskMessage(text: string): boolean {
@@ -121,6 +111,12 @@ function buildSecurityHeuristicResult(message: string): string {
 // Social eval helpers
 // ---------------------------------------------------------------------------
 
+/**
+ * Empty stub matching the schema expected by @elizaos/core's social
+ * extraction consumer (see relationship-extraction evaluator). Empty
+ * arrays are safe — the store accumulates over time, so skipped
+ * extractions don't corrupt existing data.
+ */
 function buildEmptySocialExtractionResult(): Record<string, unknown> {
   return {
     platformIdentities: [],
@@ -151,8 +147,8 @@ export function installPromptOptimizations(runtime: AgentRuntime): void {
   if (rt.__miladyPromptOptInstalled) return;
   rt.__miladyPromptOptInstalled = true;
 
-  // Warn when security eval is force-skipped via env var
-  if (MILADY_SKIP_SECURITY_EVAL_OVERRIDE === true) {
+  // Warn when security eval is skipped via env var
+  if (MILADY_SKIP_SECURITY_EVAL) {
     runtime.logger?.warn(
       "[milady] MILADY_SKIP_SECURITY_EVAL=1 — LLM security evaluation is disabled for ALL channels. " +
         "Only a keyword heuristic is active. Set =0 or remove the var for public channel deployments.",

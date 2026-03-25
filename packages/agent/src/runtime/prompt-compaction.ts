@@ -102,8 +102,10 @@ const TERMINAL_INTENT_RE =
   /\b(shell|command line|execute command|npm|bun|yarn|git\b|bash|terminal|script|pip|apt-get|brew)\b/i;
 const EMOTE_INTENT_RE =
   /\b(emote|wave|dance|bow|clap|laugh|angry|sad|think|sit|play_emote)\b/i;
+// "close" and "label" removed — too generic ("close the file", "label this").
+// Kept specific collocations like "close issue", "github issue".
 const ISSUE_INTENT_RE =
-  /\b(issue|bug|ticket|label|close|reopen|github issue|create issue)\b/i;
+  /\b(issue|bug report|ticket|close issue|reopen issue|github issue|create issue|file a bug)\b/i;
 
 /** Actions that are always included at full detail. */
 export const UNIVERSAL_ACTIONS = new Set(["REPLY", "NONE", "IGNORE"]);
