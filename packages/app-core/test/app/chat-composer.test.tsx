@@ -164,4 +164,17 @@ describe("ChatComposer mic controls", () => {
     expect(sendButton.props.className).toContain("disabled:bg-bg-accent");
     expect(sendButton.props.className).toContain("disabled:text-muted-strong");
   });
+
+  it("uses the accent-tinted primary action styling when a draft is ready", () => {
+    const { renderer } = renderComposer({
+      chatInput: "Ship it",
+    });
+    const sendButton = renderer.root.findByProps({
+      "data-testid": "chat-composer-action",
+    });
+
+    expect(sendButton.props.disabled).toBe(false);
+    expect(sendButton.props.className).toContain("bg-accent/22");
+    expect(sendButton.props.className).toContain("border-accent/55");
+  });
 });
