@@ -73,7 +73,7 @@ bunx miladyai
 </Card>
 
 <Card title="doctor" icon="stethoscope" href="/cli/doctor">
-  Diagnose common issues with your installation and configuration (planned).
+  Diagnose common issues with your installation and configuration.
 </Card>
 
 </CardGroup>

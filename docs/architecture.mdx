@@ -569,17 +569,22 @@ The monorepo uses Bun workspaces:
 
 ```
 milady/
-  src/              # Core runtime, CLI, API, services
+  packages/
+    app-core/       # Main application package (runtime, CLI, API, services)
+    agent/          # Upstream elizaOS agent (core plugins, auto-enable maps)
+    plugin-wechat/  # WeChat connector plugin (@miladyai/plugin-wechat)
+    ui/             # Shared UI component library
+    shared/         # Shared utilities
+    types/          # Shared TypeScript types
+    vrm-utils/      # VRM avatar utilities
   apps/
     app/            # React SPA frontend (Vite)
       electrobun/   # Electrobun desktop wrapper
-      plugins/      # App-specific plugins
-  plugins/
-    plugin-*/       # Workspace plugins (development)
-  deploy/
-    cloud-agent-template/  # Cloud deployment template
+    homepage/       # Marketing site
+  deploy/           # Docker and cloud deployment
   docs/             # Mintlify documentation
   scripts/          # Build, dev, and utility scripts
+  skills/           # Skills system
   test/             # E2E and integration tests
 ```
 

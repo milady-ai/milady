@@ -41,6 +41,9 @@ These variables control the API server and network behavior.
 | `MILADY_ALLOWED_ORIGINS` | Comma-separated list of additional CORS origins allowed by the API server. | (unset) |
 | `MILADY_ALLOW_NULL_ORIGIN` | When set to `1`, allows the `null` origin in CORS (useful for file:// or desktop clients). | (unset) |
 | `MILADY_WALLET_EXPORT_TOKEN` | Auth token for the wallet export API endpoint. When unset, wallet exports are disabled. | (unset) |
+| `MILADY_API_PORT` | API server port in dev mode (`bun run dev`). The dev orchestrator uses this for the backend API, separate from the UI port. | `31337` |
+| `MILADY_HOME_PORT` | Home dashboard port in dev mode. | `2142` |
+| `MILADY_WECHAT_WEBHOOK_PORT` | WeChat webhook listener port. | `18790` |
 | `API_PORT` / `SERVER_PORT` | Alternative port overrides used by some runtime actions. Prefer `MILADY_PORT`. | (unset) |
 
 ---
@@ -84,6 +87,7 @@ These variables configure access to AI model providers. Set at least one to enab
 | `AIGATEWAY_API_KEY` | Vercel AI Gateway | Alias for `AI_GATEWAY_API_KEY` |
 | `GOOGLE_API_KEY` | Google (Gemini) | Gemini model family |
 | `GOOGLE_GENERATIVE_AI_API_KEY` | Google (Gemini) | Alias for `GOOGLE_API_KEY` |
+| `GOOGLE_CLOUD_API_KEY` | Google Antigravity (Vertex AI) | Google Cloud / Vertex AI models |
 | `GROQ_API_KEY` | Groq | Fast inference via Groq hardware |
 | `XAI_API_KEY` | xAI (Grok) | Grok model family |
 | `GROK_API_KEY` | xAI (Grok) | Alias for `XAI_API_KEY` |
@@ -95,12 +99,27 @@ These variables configure access to AI model providers. Set at least one to enab
 | `PERPLEXITY_API_KEY` | Perplexity | Perplexity model family |
 | `ZAI_API_KEY` | Zai | Zai model provider |
 | `Z_AI_API_KEY` | Zai | Alias -- automatically copied to `ZAI_API_KEY` at startup if `ZAI_API_KEY` is unset |
+| `ELIZA_USE_PI_AI` | Pi AI | Set to enable Inflection Pi conversational models |
 | `OLLAMA_BASE_URL` | Ollama (local) | Base URL for a local Ollama server (not an API key) |
 | `ELIZAOS_CLOUD_API_KEY` | elizaOS Cloud | Cloud-hosted model inference via elizaOS |
 | `ELIZAOS_CLOUD_ENABLED` | elizaOS Cloud | Set to `1` to enable elizaOS Cloud (requires API key) |
 | `ELIZAOS_CLOUD_BASE_URL` | elizaOS Cloud | Override the elizaOS Cloud endpoint URL. Set automatically from config when cloud is enabled. |
 
 Use `milady models` to check which providers are currently configured.
+
+---
+
+## Feature Plugin Variables
+
+These variables auto-enable feature plugins when set, without requiring explicit configuration in `milady.json`.
+
+| Variable | Plugin | Description |
+|----------|--------|-------------|
+| `CUA_API_KEY` | `@elizaos/plugin-cua` | Computer Use Agent API key |
+| `CUA_HOST` | `@elizaos/plugin-cua` | Computer Use Agent host URL |
+| `OBSIDIAN_VAULT_PATH` | `@elizaos/plugin-obsidian` | Path to Obsidian vault directory |
+| `REPOPROMPT_CLI_PATH` | `@elizaos/plugin-repoprompt` | Path to RepoPrompt CLI binary |
+| `CLAUDE_CODE_WORKBENCH_ENABLED` | `@elizaos/plugin-claude-code-workbench` | Set to `1` to enable Claude Code workbench workflows |
 
 ---
 

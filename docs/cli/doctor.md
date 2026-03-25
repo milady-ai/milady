@@ -1,82 +1,124 @@
 ---
 title: "milady doctor"
 sidebarTitle: "doctor"
-description: "Run diagnostics to verify your Milady installation (planned)."
+description: "Run diagnostics to verify your Milady installation and configuration."
 ---
 
-<Warning>
-The `doctor` command is **not yet implemented**. This page describes the planned behavior for an upcoming release. Running `milady doctor` will currently produce an "unknown command" error.
-</Warning>
+The `doctor` command runs a suite of diagnostic checks to verify that your Milady installation is healthy and properly configured. It inspects the runtime environment, configuration, API key availability, storage, and network connectivity, then prints a structured report with pass/fail indicators and suggested fixes.
 
-The `doctor` command will run a suite of diagnostic checks to verify that your Milady installation is healthy and properly configured. It will inspect the runtime environment, configuration, API key availability, plugin state, and network connectivity, then print a structured report with pass/fail indicators and suggested fixes.
-
-## Planned Usage
+## Usage
 
 ```bash
-milady doctor
+milady doctor [options]
 ```
 
-## Planned Diagnostic Checks
+## Options
 
-### Runtime
+| Flag | Description |
+|------|-------------|
+| `--fix` | Automatically fix issues where possible (runs safe `milady` sub-commands) |
+| `--no-ports` | Skip port availability checks |
+| `--json` | Output results as JSON (CI-friendly) |
+
+## Examples
+
+```bash
+# Run all diagnostics
+milady doctor
+
+# Auto-fix what can be fixed
+milady doctor --fix
+
+# CI-friendly JSON output
+milady doctor --json
+
+# Skip network port checks
+milady doctor --no-ports
+```
+
+## Diagnostic Checks
+
+Checks are organized into four categories:
+
+### System
 
 | Check | Pass Condition |
 |-------|---------------|
-| Node.js / Bun version | Runtime meets minimum version requirement |
-| CLI version | Installed version matches the latest on the active channel |
-| Config file readable | `~/.milady/milady.json` exists and is valid JSON |
-| State directory writable | `~/.milady/` can be written to |
+| Runtime | Node.js >= 22 or Bun >= 1.0 detected |
+| CLI version | Installed version is current on the active channel |
 
 ### Configuration
 
 | Check | Pass Condition |
 |-------|---------------|
-| Config file valid | File parses without errors and matches the expected schema |
-| Workspace directory | Workspace directory exists and contains bootstrap files |
-| Config path resolution | `MILADY_STATE_DIR` and `MILADY_CONFIG_PATH` resolve to accessible paths |
+| Config file | `~/.milady/milady.json` exists and is valid JSON |
+| Workspace directory | Workspace directory exists and is writable |
+| Model provider | At least one model provider API key is configured |
 
-### API Keys
+The model provider check scans for all recognized API keys:
+
+| Key | Alias | Provider |
+|-----|-------|----------|
+| `ANTHROPIC_API_KEY` | `CLAUDE_API_KEY` | Anthropic (Claude) |
+| `OPENAI_API_KEY` | — | OpenAI |
+| `GOOGLE_API_KEY` | `GOOGLE_GENERATIVE_AI_API_KEY` | Google (Gemini) |
+| `GROQ_API_KEY` | — | Groq |
+| `XAI_API_KEY` | `GROK_API_KEY` | xAI (Grok) |
+| `OPENROUTER_API_KEY` | — | OpenRouter |
+| `DEEPSEEK_API_KEY` | — | DeepSeek |
+| `TOGETHER_API_KEY` | — | Together AI |
+| `MISTRAL_API_KEY` | — | Mistral |
+| `COHERE_API_KEY` | — | Cohere |
+| `PERPLEXITY_API_KEY` | — | Perplexity |
+| `ZAI_API_KEY` | `Z_AI_API_KEY` | Zai |
+| `AI_GATEWAY_API_KEY` | `AIGATEWAY_API_KEY` | Vercel AI Gateway |
+| `ELIZAOS_CLOUD_API_KEY` | — | elizaOS Cloud |
+| `OLLAMA_BASE_URL` | — | Ollama (local) |
+
+### Storage
 
 | Check | Pass Condition |
 |-------|---------------|
-| At least one model provider configured | One or more model provider environment variables is set |
-| Anthropic API key | `ANTHROPIC_API_KEY` is set (checked if present) |
-| OpenAI API key | `OPENAI_API_KEY` is set (checked if present) |
-| Other provider keys | Any other provider keys detected |
+| State directory writable | `~/.milady/` can be written to |
+| Disk space | Sufficient free space on the state directory volume |
 
-### Connectivity
+### Network
 
 | Check | Pass Condition |
 |-------|---------------|
-| API server reachable | Port `2138` (or `MILADY_PORT`) responds to a TCP probe |
-| npm registry reachable | The plugin registry endpoint is accessible |
+| API port | Port 2138 (or `MILADY_PORT`) is available for binding |
+| Gateway port | Port 18789 (or `MILADY_GATEWAY_PORT`) is available for binding |
 
-### Plugins
+Network port checks can be skipped with `--no-ports`.
 
-| Check | Pass Condition |
-|-------|---------------|
-| Custom plugins valid | All plugins in `~/.milady/plugins/custom/` pass the plugin validation test |
-| Plugin registry cache | Registry cache file is present and not stale |
-| Installed plugins | All registry-installed plugins are present on disk |
+## Auto-Fix (`--fix`)
 
-## Workarounds Until `doctor` Exists
+When `--fix` is passed, the doctor attempts to auto-remediate issues that have an `autoFixable` flag. Only safe `milady` sub-commands are executed automatically (e.g., `milady setup`). Manual fix suggestions (like `chmod` commands) are displayed but not executed.
 
-You can manually verify your installation using existing commands:
+## JSON Output
 
-```bash
-# Check model providers
-milady models
+The `--json` flag outputs a machine-readable report for CI pipelines:
 
-# Validate custom plugins
-milady plugins test
-
-# Inspect config file location and values
-milady config path
-milady config show
-
-# Verify workspace setup
-milady setup
+```json
+{
+  "summary": {
+    "pass": 6,
+    "warn": 1,
+    "fail": 0,
+    "skip": 0
+  },
+  "checks": [
+    {
+      "label": "Runtime",
+      "status": "pass",
+      "category": "system",
+      "detail": "Node.js v22.x.x"
+    }
+  ]
+}
 ```
+
+The process exits with code 1 if any check fails.
 
 ## Related
 
