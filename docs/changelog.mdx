@@ -3,6 +3,57 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-03-25" description="Coding agent terminals, onboarding identity step, security hardening" tags={["Feature", "Update", "Fix"]}>
+## Coding agent terminal drawer
+
+Coding agent sessions now have an inline terminal right in the chat view. Click any active agent in the status bar to open a tabbed xterm.js drawer showing live terminal output, with keyboard input forwarding and buffered history. In companion mode, the terminal opens as a side panel instead. See the [coding swarms guide](/guides/coding-swarms) for details.
+
+## Onboarding identity step
+
+The [onboarding wizard](/guides/beginners-user-guide) now includes an identity step where you choose your agent's avatar and persona before launch. Browse available characters, preview their VRM model, and start with the right personality from the first conversation.
+
+## Homepage redesign
+
+The homepage has been simplified to a minimal single-page layout with a centered hero, platform-specific download dropdown showing file sizes, and a Try Cloud call-to-action — replacing the previous multi-section design.
+
+## Security and reliability hardening
+
+A broad audit addressed 54 issues across the stack. Highlights that affect your experience:
+
+- **Wallet safety** — Trades now verify approval receipt status before broadcasting, quotes expire after 60 seconds, and slippage is capped at 10%. A daily trade limit (25/day) is enforced by default.
+- **Stronger pairing codes** — Dashboard pairing codes now use 60-bit entropy (up from 40-bit) for better security.
+- **Browser sandbox** — The in-app browser surface now runs with a restrictive sandbox policy, limiting what embedded content can do.
+- **Credential masking** — API keys and wallet keys are masked in API responses, showing only the last four characters.
+
+## Updates
+
+- **Companion scene performance** — The 3D VRM scene no longer re-renders on every keystroke in the chat input. Typing is noticeably smoother when the companion view is active.
+- **Modals and mobile layout** — Knowledge detail, skills install, and skills edit modals now open reliably instead of rendering blank. Several views are now usable on mobile-width screens with proper overflow handling and responsive grids.
+- **Onboarding credential guard** — The Connect button in onboarding is now disabled until you've entered the required credentials for your chosen provider, preventing empty submissions.
+- **Accessibility improvements** — Focus indicators are now visible in light mode, the detached shell has proper ARIA landmarks and a skip-to-content link, and onboarding step dots include screen reader labels.
+- **Bun version advisory** — Milady now warns at startup if you're running a Bun canary build or a version outside the tested 1.3.x range, so you know upfront if compatibility issues are likely.
+- **Cloud API clarity** — When Eliza Cloud features aren't available yet, the dashboard now shows a friendly "coming soon" message instead of a raw 404 error.
+
+## Bug fixes
+
+- Fixed the VRM avatar being invisible due to a shader compilation error in the teleport effect — avatars now render correctly on all platforms
+- Fixed the Looking Glass WebSocket connecting eagerly on every page load even when no display is configured — the connection now only opens when explicitly enabled
+- Fixed startup flooding the console with auth polling errors by switching to exponential backoff
+- Fixed the character editor showing the wrong name, bio, and system prompt when selecting a different avatar preset
+- Fixed `{{name}}` tokens appearing literally in character bios instead of being replaced with the agent's actual name
+- Fixed PostgreSQL foreign key migrations failing on re-run — migrations are now idempotent
+- Fixed the "Clear All" button on the trajectories page silently doing nothing
+- Fixed trajectory schema migrations dropping and recreating the table instead of adding missing columns
+- Fixed the VRM camera zoom hijacking scroll on the character editor — customization panels are now scrollable
+- Fixed WeChat voice, video, and file messages being incorrectly treated as images
+- Fixed the Windows desktop app failing to package correctly due to a variable mismatch in the release workflow
+- Fixed the MSIX installer missing resources outside the `bin/` directory
+- Fixed the desktop app crashing on Windows when Electrobun view modules couldn't be resolved — the app now shows actionable recovery steps
+- Fixed a WeChat response body leak under sustained rate limiting that could accumulate open connections
+- Fixed the streaming service not resetting its state after a failed FFmpeg start, which could leave it in an inconsistent state
+
+</Update>
+
 <Update label="2026-03-24" description="Heartbeat templates, Steward bridge, dashboard performance" tags={["Feature", "Update", "Fix"]}>
 ## Heartbeat templates and detail view
 
