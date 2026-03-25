@@ -279,13 +279,13 @@ kbd {
 
 /* Focus visible improvements */
 :focus-visible {
-  outline: 2px solid hsl(217 91% 50%);
+  outline: 2px solid var(--ring);
   outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--focus);
 }
 
 [data-theme="dark"] :focus-visible {
-  outline: 2px solid hsl(217 91% 60%);
-  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--focus);
 }
 
 /* Reduced motion - !important is intentional for accessibility override */

@@ -19,6 +19,7 @@ import {
 import { Check, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import type { UiLanguage } from "../i18n/messages";
+import { SHELL_EXPANDED_BUTTON_CLASSNAME } from "./companion/shell-control-styles";
 
 /** Minimal translator function type. Receive key, return string. */
 export type TranslatorFn = (key: string) => string;
@@ -59,7 +60,7 @@ export function LanguageDropdown({
   const [open, setOpen] = useState(false);
 
   const current = LANGUAGES.find((l) => l.id === uiLanguage) ?? LANGUAGES[0];
-  const triggerClass = `inline-flex min-h-[44px] min-w-[44px] items-center gap-1.5 h-11 px-3 border border-border/50 bg-bg/50 backdrop-blur-md text-xs font-medium cursor-pointer transition-all duration-300 text-txt hover:border-accent hover:text-txt rounded-md shadow-sm ${open ? "border-accent text-txt bg-accent/5" : ""} ${triggerClassName ?? ""}`;
+  const triggerClass = `${SHELL_EXPANDED_BUTTON_CLASSNAME} gap-1.5 text-xs font-medium ${open ? "border-accent/80 bg-accent/12 text-txt shadow-md" : ""} ${triggerClassName ?? ""}`;
 
   return (
     <div
@@ -89,7 +90,7 @@ export function LanguageDropdown({
           align="end"
           side={menuPlacement === "top-end" ? "top" : "bottom"}
           sideOffset={4}
-          className="w-36 rounded-lg border border-border/50 bg-bg/50 shadow-xl overflow-hidden py-1 backdrop-blur-md"
+          className="w-40 overflow-hidden rounded-xl border border-border/60 bg-card/95 py-1 shadow-xl backdrop-blur-xl"
           style={
             variant === "companion"
               ? {
@@ -105,7 +106,7 @@ export function LanguageDropdown({
           {LANGUAGES.map((lang) => (
             <DropdownMenuItem
               key={lang.id}
-              className={`flex items-center justify-between px-3 py-2 text-sm transition-colors cursor-pointer ${lang.id === uiLanguage ? "text-txt bg-accent/5 font-medium" : "text-txt"}`}
+              className={`flex min-h-[40px] items-center justify-between px-3 py-2 text-sm transition-colors cursor-pointer ${lang.id === uiLanguage ? "bg-accent/10 text-txt font-medium" : "text-txt"}`}
               onPointerDown={(event) => event.stopPropagation()}
               onSelect={() => {
                 setUiLanguage(lang.id);

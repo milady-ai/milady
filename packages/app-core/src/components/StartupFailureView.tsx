@@ -1,4 +1,11 @@
-import { Button } from "@miladyai/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  StatusBadge,
+} from "@miladyai/ui";
 import { useBranding } from "../config/branding";
 import type { StartupErrorState } from "../state";
 import { useApp } from "../state";
@@ -23,35 +30,75 @@ export function StartupFailureView({
   const { t } = useApp();
   const branding = useBranding();
   const isBackendUnreachable = error.reason === "backend-unreachable";
+  const reasonLabel = REASON_LABELS[error.reason];
 
   return (
-    <div className="max-w-[680px] mx-auto mt-15 p-6 border border-border bg-card rounded-[10px]">
-      <h1 className="text-lg font-semibold mb-2 text-danger">
-        {t("startupfailureview.StartupFailed")} {REASON_LABELS[error.reason]}
-      </h1>
-      <p className="text-txt-strong mb-3 leading-relaxed">{error.message}</p>
-      {isBackendUnreachable && (
-        <p className="text-muted mb-3 leading-relaxed">
-          {t("startupfailureview.ThisOriginDoesNot")}
-        </p>
-      )}
-      {error.detail && (
-        <pre className="mb-4 p-3 border border-border rounded bg-bg-muted text-xs text-muted whitespace-pre-wrap break-words">
-          {error.detail}
-        </pre>
-      )}
-      <div className="flex items-center gap-2">
-        <Button variant="default" size="sm" onClick={onRetry}>
-          {t("startupfailureview.RetryStartup")}
-        </Button>
-        {isBackendUnreachable && (
-          <Button variant="outline" size="sm" asChild>
-            <a href={branding.appUrl} target="_blank" rel="noreferrer">
-              {t("startupfailureview.OpenApp")}
-            </a>
-          </Button>
-        )}
-      </div>
+    <div className="flex min-h-screen w-full items-center justify-center bg-bg px-4 py-6 font-body text-txt sm:px-6">
+      <Card className="w-full max-w-[680px] overflow-hidden">
+        <CardHeader className="border-b border-border/60 pb-5">
+          <div className="flex flex-col gap-3">
+            <StatusBadge
+              label={reasonLabel}
+              tone="danger"
+              withDot
+              className="self-start"
+            />
+            <div className="space-y-2">
+              <h1 className="text-xl font-semibold leading-tight text-danger">
+                {t("startupfailureview.StartupFailed")} {reasonLabel}
+              </h1>
+              <p className="max-w-[56ch] text-sm leading-relaxed text-txt-strong">
+                {error.message}
+              </p>
+            </div>
+            {isBackendUnreachable ? (
+              <p className="max-w-[56ch] text-sm leading-relaxed text-muted">
+                {t("startupfailureview.ThisOriginDoesNot")}
+              </p>
+            ) : null}
+          </div>
+        </CardHeader>
+
+        <CardContent className="flex flex-col gap-5 pt-6">
+          {error.detail ? (
+            <section className="space-y-2">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">
+                Details
+              </div>
+              <pre className="max-h-60 overflow-auto rounded-xl border border-border bg-bg-muted p-3 text-xs leading-relaxed text-muted whitespace-pre-wrap break-words">
+                {error.detail}
+              </pre>
+            </section>
+          ) : (
+            <CardDescription className="max-w-[56ch] leading-relaxed">
+              {reasonLabel}
+            </CardDescription>
+          )}
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Button
+              variant="default"
+              size="lg"
+              onClick={onRetry}
+              className="w-full sm:w-auto sm:min-w-[11rem]"
+            >
+              {t("startupfailureview.RetryStartup")}
+            </Button>
+            {isBackendUnreachable ? (
+              <Button
+                variant="outline"
+                size="lg"
+                asChild
+                className="w-full sm:w-auto sm:min-w-[10rem]"
+              >
+                <a href={branding.appUrl} target="_blank" rel="noreferrer">
+                  {t("startupfailureview.OpenApp")}
+                </a>
+              </Button>
+            ) : null}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

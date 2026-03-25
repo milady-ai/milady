@@ -51,6 +51,7 @@ import {
   DetachedShellRoot,
 } from "@miladyai/app-core/shell";
 import { AppProvider } from "@miladyai/app-core/state";
+import { applyUiTheme, loadUiTheme } from "@miladyai/app-core/state";
 import { Agent } from "@miladyai/capacitor-agent";
 import { Desktop } from "@miladyai/capacitor-desktop";
 import { StrictMode } from "react";
@@ -480,15 +481,7 @@ function injectDetachedShellApiBase(): void {
 }
 
 function applyStoredDetachedShellTheme(): void {
-  try {
-    const stored = localStorage.getItem("milady:ui-theme");
-    const theme = stored === "light" ? "light" : "dark";
-    document.documentElement.classList.toggle("dark", theme === "dark");
-    document.documentElement.setAttribute("data-theme", theme);
-  } catch {
-    document.documentElement.classList.add("dark");
-    document.documentElement.setAttribute("data-theme", "dark");
-  }
+  applyUiTheme(loadUiTheme());
 }
 
 async function main(): Promise<void> {

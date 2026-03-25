@@ -19,7 +19,7 @@ describe("brand-gold onboarding styles", () => {
       "utf8",
     );
 
-    expect(css).toContain("--onboarding-panel-bg: rgba(14, 14, 18, 0.72);");
+    expect(css).toContain("--onboarding-panel-bg: rgba(12, 14, 20, 0.8);");
     expect(css).toContain(
       "--onboarding-text-primary: rgba(232, 230, 240, 0.92);",
     );

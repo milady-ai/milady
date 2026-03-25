@@ -203,10 +203,10 @@ export function Header({
   return (
     <>
       <header
-        className={`py-2 px-3 sm:py-3 sm:px-4 z-20 sticky top-0 w-full transition-all select-none ${
+        className={`sticky top-0 z-20 w-full px-3 py-2.5 select-none transition-all sm:px-4 sm:py-3 ${
           useMinimalHeaderChrome
             ? "border-b border-transparent bg-transparent backdrop-blur-0 shadow-none"
-            : "border-b border-border/50 bg-bg/80 backdrop-blur-xl"
+            : "border-b border-border/50 bg-bg/82 backdrop-blur-xl"
         }`}
         style={{ WebkitUserSelect: "none", userSelect: "none" }}
       >
@@ -281,7 +281,7 @@ export function Header({
             <div className="flex sm:hidden">{mobileLeft}</div>
           ) : null}
           {showNavigationMenu ? (
-            <nav className="hidden sm:flex flex-1 items-center justify-start gap-1 overflow-x-auto whitespace-nowrap px-2 sm:pl-4 scrollbar-hide">
+            <nav className="scrollbar-hide hidden flex-1 items-center justify-start gap-1 overflow-x-auto whitespace-nowrap px-2 sm:flex sm:pl-4">
               {tabGroups.map((group: TabGroup) => {
                 const primaryTab = group.tabs[0];
                 const isActive = group.tabs.includes(tab);
@@ -331,16 +331,36 @@ export function Header({
           {/* Backdrop */}
           <Button
             variant="ghost"
-            className="absolute inset-0 bg-black/30 backdrop-blur-sm w-full h-full border-0"
+            className="absolute inset-0 h-full w-full border-0 bg-black/40 backdrop-blur-sm"
             onClick={() => setMobileMenuOpen(false)}
             aria-label={t("aria.closeNavMenu")}
             style={HEADER_BUTTON_STYLE}
           />
 
           {/* Menu Panel */}
-          <div className="absolute right-0 top-0 bottom-0 w-[280px] max-w-[85vw] bg-bg border-l border-border shadow-2xl animate-in slide-in-from-right duration-200 flex flex-col">
-            <div className="flex flex-1 flex-col py-3 px-3">
-              <div className="flex-1 overflow-y-auto">
+          <div className="absolute bottom-0 right-0 top-0 flex w-[min(22rem,88vw)] flex-col border-l border-border/60 bg-bg/92 shadow-2xl backdrop-blur-xl animate-in slide-in-from-right duration-200">
+            <div className="flex items-center justify-between border-b border-border/50 px-4 py-3">
+              <div className="min-w-0">
+                <div className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">
+                  {t("aria.navMenu")}
+                </div>
+                <div className="text-sm font-medium text-txt">
+                  {t("nav.settings")}
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                className={`shrink-0 ${HEADER_ICON_BUTTON_CLASSNAME}`}
+                onClick={() => setMobileMenuOpen(false)}
+                aria-label={t("aria.closeNavMenu")}
+                style={HEADER_BUTTON_STYLE}
+              >
+                {t("bugreportmodal.Times")}
+              </Button>
+            </div>
+            <div className="flex flex-1 flex-col px-3 py-3">
+              <div className="flex-1 overflow-y-auto pr-1">
                 <div className="flex flex-col gap-1">
                   {tabGroups.map((group: TabGroup, index) => {
                     const primaryTab = group.tabs[0];
@@ -350,7 +370,7 @@ export function Header({
                       <Button
                         variant={isActive ? "default" : "ghost"}
                         key={group.label}
-                        className={`w-full flex gap-3 px-3 py-3.5 border rounded-xl text-[14px] font-medium transition-all duration-300 min-h-[48px] ${
+                        className={`flex min-h-[48px] w-full gap-3 rounded-xl border px-3 py-3.5 text-[14px] font-medium transition-all duration-300 ${
                           isActive
                             ? "border-accent/40 bg-accent/15 text-accent shadow-[0_0_15px_rgba(var(--accent),0.18)] ring-1 ring-inset ring-accent/20"
                             : "border-transparent bg-transparent text-txt hover:border-border/50 hover:bg-bg-hover"

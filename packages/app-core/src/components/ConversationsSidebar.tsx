@@ -93,8 +93,8 @@ export function ConversationsSidebar({
     <aside
       className={
         isGameModal
-          ? "flex flex-col h-full bg-black/20 backdrop-blur-md"
-          : `${mobile ? "w-full min-w-0 h-full" : "w-48 min-w-48 xl:w-60 xl:min-w-60 border-r"} border-border bg-bg flex flex-col overflow-y-auto text-[13px]`
+          ? "flex h-full flex-col bg-[rgba(12,12,16,0.32)] backdrop-blur-md"
+          : `${mobile ? "h-full w-full min-w-0" : "w-[13rem] min-w-[13rem] xl:w-[15rem] xl:min-w-[15rem] border-r"} flex flex-col overflow-hidden border-border bg-bg text-[13px]`
       }
       data-no-window-drag=""
       data-testid="conversations-sidebar"
@@ -165,14 +165,14 @@ export function ConversationsSidebar({
         </DropdownMenu>
 
         {!isGameModal && mobile && (
-          <div className="px-3 py-2 border-b border-border flex items-center justify-between">
+          <div className="flex items-center justify-between border-b border-border px-3 py-2.5">
             <div className="text-xs uppercase tracking-wide text-muted">
               {t("conversations.chats")}
             </div>
             <Button
               variant="outline"
               size="icon"
-              className="w-7 h-7"
+              className="h-11 w-11 min-h-[44px] min-w-[44px] rounded-xl"
               onClick={onClose}
               aria-label={t("conversations.closePanel")}
             >
@@ -184,16 +184,16 @@ export function ConversationsSidebar({
         <div
           className={
             isGameModal
-              ? "p-3 border-b border-white/10 shrink-0"
-              : "p-3 border-b border-border"
+              ? "shrink-0 border-b border-white/10 p-3"
+              : "shrink-0 border-b border-border px-3 py-3"
           }
         >
           <Button
             variant="outline"
             className={
               isGameModal
-                ? "w-full py-2 px-3 rounded-lg border-accent/60 bg-accent/10 text-txt font-medium text-sm hover:bg-accent/20 hover:border-accent hover:shadow-[0_0_15px_rgba(240,178,50,0.15)] active:scale-[0.98]"
-                : "w-full px-3 py-1.5 border-accent text-txt text-[12px] font-medium hover:bg-accent hover:text-accent-fg"
+                ? "h-11 w-full rounded-xl border-[color:var(--onboarding-accent-border)] bg-[color:var(--onboarding-accent-bg)] px-3 py-2 text-sm font-medium text-[color:var(--onboarding-text-strong)] shadow-[0_12px_28px_rgba(0,0,0,0.18)] hover:border-[color:var(--onboarding-accent-border-hover)] hover:bg-[color:var(--onboarding-accent-bg-hover)] active:scale-[0.98]"
+                : "min-h-[44px] w-full rounded-xl border-accent/60 bg-accent/10 px-3 py-2.5 text-[12px] font-medium text-txt hover:bg-accent/15 hover:text-accent-fg"
             }
             onClick={() => {
               handleNewConversation();
@@ -207,15 +207,15 @@ export function ConversationsSidebar({
         <div
           className={
             isGameModal
-              ? "flex-1 overflow-y-auto p-2 space-y-1 min-h-0 custom-scrollbar w-full"
-              : "flex-1 overflow-y-auto py-1 w-full min-w-0"
+              ? "custom-scrollbar flex-1 min-h-0 w-full space-y-1 overflow-y-auto p-2"
+              : "min-h-0 w-full min-w-0 flex-1 overflow-y-auto px-2 py-2"
           }
         >
           {sortedConversations.length === 0 ? (
             <div
               className={
                 isGameModal
-                  ? "py-8 text-center text-white/40 text-sm font-medium italic"
+                  ? "rounded-xl border border-dashed border-white/10 bg-black/15 px-4 py-8 text-center text-sm font-medium italic text-[color:var(--onboarding-text-muted)]"
                   : "px-3 py-6 text-center text-muted text-xs"
               }
             >

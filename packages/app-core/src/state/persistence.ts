@@ -29,6 +29,7 @@ function tryLocalStorage<T>(fn: () => T, fallback: T): T {
 export type { UiTheme } from "./ui-preferences";
 
 const UI_THEME_STORAGE_KEY = "eliza:ui-theme";
+const LEGACY_UI_THEME_STORAGE_KEY = "milady:ui-theme";
 
 function normalizeUiTheme(value: unknown): UiTheme {
   return value === "light" ? "light" : "dark";
@@ -37,15 +38,18 @@ function normalizeUiTheme(value: unknown): UiTheme {
 export { normalizeUiTheme };
 
 export function loadUiTheme(): UiTheme {
-  return tryLocalStorage(
-    () => normalizeUiTheme(localStorage.getItem(UI_THEME_STORAGE_KEY)),
-    "dark",
-  );
+  return tryLocalStorage(() => {
+    const current = localStorage.getItem(UI_THEME_STORAGE_KEY);
+    if (current != null) return normalizeUiTheme(current);
+    return normalizeUiTheme(localStorage.getItem(LEGACY_UI_THEME_STORAGE_KEY));
+  }, "dark");
 }
 
 export function saveUiTheme(theme: UiTheme): void {
   tryLocalStorage(() => {
-    localStorage.setItem(UI_THEME_STORAGE_KEY, normalizeUiTheme(theme));
+    const normalized = normalizeUiTheme(theme);
+    localStorage.setItem(UI_THEME_STORAGE_KEY, normalized);
+    localStorage.setItem(LEGACY_UI_THEME_STORAGE_KEY, normalized);
   }, undefined);
 }
 

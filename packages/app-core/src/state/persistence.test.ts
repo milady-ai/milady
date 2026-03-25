@@ -8,17 +8,20 @@ import { describe, expect, it } from "vitest";
 // Import the load/save helpers that call normalizeOnboardingStep internally so
 // we can verify the contract without re-exporting the private function.
 import {
+  applyUiTheme,
   clearPersistedOnboardingStep,
   loadCompanionAnimateWhenHidden,
   loadCompanionHalfFramerateMode,
   loadCompanionVrmPowerMode,
   loadPersistedOnboardingStep,
+  loadUiTheme,
   normalizeCompanionHalfFramerateMode,
   normalizeCompanionVrmPowerMode,
   saveCompanionAnimateWhenHidden,
   saveCompanionHalfFramerateMode,
   saveCompanionVrmPowerMode,
   saveOnboardingStep,
+  saveUiTheme,
 } from "./persistence";
 
 // We need a localStorage-like environment. Vitest (jsdom not configured here)
@@ -117,6 +120,61 @@ describe("normalizeOnboardingStep (via load/save helpers)", () => {
       clearPersistedOnboardingStep();
       expect(loadPersistedOnboardingStep()).toBeNull();
     });
+  });
+});
+
+describe("theme persistence", () => {
+  it("prefers the current theme key and mirrors saves to the legacy key", () => {
+    withLocalStorageStub(() => {
+      saveUiTheme("light");
+      expect(localStorage.getItem("eliza:ui-theme")).toBe("light");
+      expect(localStorage.getItem("milady:ui-theme")).toBe("light");
+      expect(loadUiTheme()).toBe("light");
+    });
+  });
+
+  it("falls back to the legacy Milady theme key when needed", () => {
+    withLocalStorageStub(() => {
+      localStorage.setItem("milady:ui-theme", "light");
+      expect(loadUiTheme()).toBe("light");
+    });
+  });
+
+  it("applies the theme to the document root selectors", () => {
+    const previousDocument = (globalThis as Record<string, unknown>).document;
+    const root = {
+      dataset: {},
+      classList: {
+        add: (value: string) => classes.add(value),
+        remove: (value: string) => classes.delete(value),
+        contains: (value: string) => classes.has(value),
+      },
+      setAttribute: (name: string, value: string) => {
+        attributes[name] = value;
+      },
+    };
+    const classes = new Set<string>();
+    const attributes: Record<string, string> = {};
+
+    (globalThis as Record<string, unknown>).document = {
+      documentElement: root,
+    };
+
+    try {
+      applyUiTheme("light");
+      expect(attributes["data-theme"]).toBe("light");
+      expect(classes.has("dark")).toBe(false);
+
+      applyUiTheme("dark");
+      expect(attributes["data-theme"]).toBe("dark");
+      expect(classes.has("dark")).toBe(true);
+    } finally {
+      if (previousDocument === undefined) {
+        delete (globalThis as Record<string, unknown>).document;
+      } else {
+        (globalThis as Record<string, unknown>).document = previousDocument;
+      }
+    }
   });
 });
 

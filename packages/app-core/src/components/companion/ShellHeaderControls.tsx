@@ -13,14 +13,19 @@ import {
   VolumeX,
 } from "lucide-react";
 import { type ReactNode, useEffect, useState } from "react";
+import {
+  HEADER_BUTTON_STYLE,
+  SHELL_EXPANDED_BUTTON_CLASSNAME,
+  SHELL_ICON_BUTTON_CLASSNAME,
+  SHELL_SEGMENT_ACTIVE_CLASSNAME,
+  SHELL_SEGMENT_INACTIVE_CLASSNAME,
+  SHELL_SEGMENTED_CONTROL_CLASSNAME,
+} from "./shell-control-styles";
 
-export const HEADER_ICON_BUTTON_CLASSNAME =
-  "inline-flex items-center justify-center w-11 h-11 min-w-[44px] min-h-[44px] border border-border/50 bg-bg/50 backdrop-blur-md cursor-pointer text-sm leading-none hover:border-accent hover:text-txt font-medium hover:-translate-y-0.5 transition-all duration-300 hover:shadow-[0_0_15px_rgba(var(--accent),0.5)] active:scale-95 rounded-xl text-txt shadow-sm";
-export const HEADER_BUTTON_STYLE = {
-  clipPath: "none",
-  WebkitClipPath: "none",
-  touchAction: "manipulation",
-} as const;
+export {
+  HEADER_BUTTON_STYLE,
+  SHELL_ICON_BUTTON_CLASSNAME as HEADER_ICON_BUTTON_CLASSNAME,
+};
 
 type ShellHeaderTranslator = (key: string) => string;
 
@@ -140,7 +145,7 @@ export function ShellHeaderControls({
       {/* Left: shell view toggle */}
       <div className="flex shrink-0 items-center">
         <fieldset
-          className="inline-flex items-center gap-0.5 rounded-xl border border-border/60 bg-transparent p-0.5 shadow-sm dark:border-border dark:bg-transparent"
+          className={SHELL_SEGMENTED_CONTROL_CLASSNAME}
           data-testid="ui-shell-toggle"
           data-no-camera-drag="true"
           aria-label="Switch shell view"
@@ -162,8 +167,8 @@ export function ShellHeaderControls({
                 onPointerDown={(event) => event.stopPropagation()}
                 className={`h-11 min-h-[44px] min-w-[44px] px-3 transition-all duration-200 ${edgeClass} ${
                   selected
-                    ? "border border-[#d8a108]/30 bg-bg/55 text-[#8a6500] shadow-sm dark:border-accent/25 dark:bg-bg/85 dark:text-[#f0b232]"
-                    : "border border-transparent bg-transparent text-muted-strong hover:border-border/70 hover:bg-bg/85 hover:text-txt dark:text-muted dark:hover:border-border/60 dark:hover:bg-bg-hover/80 dark:hover:text-txt"
+                    ? SHELL_SEGMENT_ACTIVE_CLASSNAME
+                    : SHELL_SEGMENT_INACTIVE_CLASSNAME
                 }`}
                 style={HEADER_BUTTON_STYLE}
                 aria-label={label}
@@ -201,7 +206,7 @@ export function ShellHeaderControls({
                     ? t("companion.agentVoiceOff")
                     : t("companion.agentVoiceOn")
                 }
-                className="w-11 h-11 min-w-[44px] min-h-[44px] border-border/50 bg-bg/50 backdrop-blur-md text-sm leading-none hover:border-accent hover:text-txt font-medium hover:-translate-y-0.5 transition-all duration-300 hover:shadow-[0_0_15px_rgba(var(--accent),0.5)] active:scale-95 rounded-xl text-txt shadow-sm sm:!w-auto sm:gap-1.5 sm:px-3.5"
+                className={`${SHELL_EXPANDED_BUTTON_CLASSNAME} text-sm leading-none sm:!w-auto sm:gap-1.5 sm:px-3.5`}
                 onClick={onToggleVoiceMute}
                 style={HEADER_BUTTON_STYLE}
               >
@@ -219,7 +224,7 @@ export function ShellHeaderControls({
                 variant="outline"
                 aria-label={t("companion.newChat")}
                 title={t("companion.newChat")}
-                className="w-11 h-11 min-w-[44px] min-h-[44px] border-border/50 bg-bg/50 backdrop-blur-md text-sm leading-none hover:border-accent hover:text-txt font-medium hover:-translate-y-0.5 transition-all duration-300 hover:shadow-[0_0_15px_rgba(var(--accent),0.5)] active:scale-95 rounded-xl text-txt shadow-sm sm:!w-auto sm:gap-1.5 sm:px-3.5"
+                className={`${SHELL_EXPANDED_BUTTON_CLASSNAME} text-sm leading-none sm:!w-auto sm:gap-1.5 sm:px-3.5`}
                 onClick={onNewChat}
                 style={HEADER_BUTTON_STYLE}
               >

@@ -20,6 +20,7 @@
 .onboarding-step-list {
   display: flex;
   flex-direction: column;
+  min-width: 0;
   position: relative;
 }
 
@@ -116,14 +117,14 @@
 .onboarding-step-name {
   font-size: 15px;
   letter-spacing: 0.08em;
-  color: rgba(240, 238, 250, 0.58);
+  color: rgba(240, 238, 250, 0.7);
   font-weight: 500;
-  text-shadow: 0 2px 10px rgba(3, 5, 10, 0.65);
+  text-shadow: 0 1px 6px rgba(3, 5, 10, 0.42);
   transition: all 0.5s;
 }
 
 .onboarding-step-item--done .onboarding-step-name {
-  color: rgba(240, 238, 250, 0.72);
+  color: rgba(240, 238, 250, 0.82);
 }
 
 .onboarding-step-item--active .onboarding-step-name {
@@ -133,9 +134,9 @@
 
 .onboarding-step-sub {
   font-size: 13px;
-  color: rgba(240, 238, 250, 0.38);
+  color: rgba(240, 238, 250, 0.5);
   letter-spacing: 0.05em;
-  text-shadow: 0 2px 10px rgba(3, 5, 10, 0.55);
+  text-shadow: 0 1px 6px rgba(3, 5, 10, 0.3);
   transition: all 0.5s;
 }
 
@@ -165,17 +166,19 @@ button.onboarding-step-item.onboarding-step-item--clickable:hover
 
 /* === Panel — scrollbar pseudo-elements, child stagger, permission overrides === */
 .onboarding-panel {
-  background: rgba(10, 14, 20, 0.16);
-  backdrop-filter: blur(40px) saturate(1.4);
-  -webkit-backdrop-filter: blur(40px) saturate(1.4);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background:
+    linear-gradient(180deg, rgba(12, 15, 22, 0.22), rgba(12, 15, 22, 0.1)),
+    rgba(10, 14, 20, 0.22);
+  backdrop-filter: blur(36px) saturate(1.24);
+  -webkit-backdrop-filter: blur(36px) saturate(1.24);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 10px;
   padding: 36px 32px;
   display: flex;
   flex-direction: column;
   gap: 0;
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.25),
+    0 12px 36px rgba(0, 0, 0, 0.28),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
   animation: onboarding-panel-enter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)
     both;
@@ -193,7 +196,7 @@ button.onboarding-step-item.onboarding-step-item--clickable:hover
 }
 
 .onboarding-panel::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(240, 185, 11, 0.18);
   border-radius: 2px;
 }
 
@@ -535,7 +538,8 @@ button.onboarding-step-item.onboarding-step-item--clickable:hover
 @media (max-width: 768px) {
   .onboarding-step-list {
     flex-direction: row;
-    gap: 16px;
+    gap: 8px;
+    min-width: max-content;
   }
 
   .onboarding-step-list::before {

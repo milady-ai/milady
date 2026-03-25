@@ -72,16 +72,16 @@ function typeBadgeColor(type: string): string {
     t.includes("real") ||
     t.includes("double")
   )
-    return "text-amber-400 bg-amber-400/10";
-  if (t.includes("bool")) return "text-purple-400 bg-purple-400/10";
-  if (t.includes("json")) return "text-orange-400 bg-orange-400/10";
-  if (t.includes("uuid")) return "text-cyan-400 bg-cyan-400/10";
+    return "text-accent-fg bg-accent/12";
+  if (t.includes("bool")) return "text-ok bg-ok/10";
+  if (t.includes("json")) return "text-warn bg-warn/10";
+  if (t.includes("uuid")) return "text-accent bg-accent/10";
   if (t.includes("timestamp") || t.includes("date"))
-    return "text-pink-400 bg-pink-400/10";
+    return "text-danger bg-danger/10";
   if (t.includes("text") || t.includes("char"))
-    return "text-green-400 bg-green-400/10";
-  if (t.includes("vector")) return "text-blue-400 bg-blue-400/10";
-  return "text-[var(--muted)] bg-[var(--muted)]/10";
+    return "text-muted-strong bg-bg-hover";
+  if (t.includes("vector")) return "text-accent bg-accent/12";
+  return "text-muted-strong bg-bg-hover";
 }
 
 // ── Cell inspect popover ──────────────────────────────────────────────
@@ -185,7 +185,7 @@ function ResultsGrid({
                     {meta?.isPrimaryKey && (
                       <Badge
                         variant="outline"
-                        className="text-[9px] px-1.5 py-0 border-none font-bold text-yellow-400 bg-yellow-400/10 shadow-[0_0_8px_rgba(250,204,21,0.2)]"
+                        className="border-none bg-accent/16 px-1.5 py-0 text-[9px] font-bold text-accent-fg shadow-sm"
                       >
                         PK
                       </Badge>
@@ -494,7 +494,7 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
           {dbStatus ? (
             <>
               <span
-                className={`w-2 h-2 rounded-full shadow-[0_0_8px_currentColor] ${dbStatus.connected ? "text-green-400 bg-green-400" : "text-red-400 bg-red-400"}`}
+                className={`h-2 w-2 rounded-full shadow-[0_0_8px_currentColor] ${dbStatus.connected ? "bg-ok text-ok" : "bg-danger text-danger"}`}
               />
               <span className="tracking-wide">{dbStatus.provider}</span>
               <span className="opacity-40">·</span>
@@ -516,8 +516,8 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
             size="sm"
             className={`h-auto min-h-[1.75rem] px-4 py-1 whitespace-normal break-words text-left text-xs font-medium rounded-lg transition-all duration-300 ${
               view === "tables"
-                ? "bg-accent text-accent-fg shadow-[0_0_15px_rgba(var(--accent),0.4)] border border-accent/50 scale-105"
-                : "text-muted hover:text-txt hover:bg-bg-hover hover:border-border/50"
+                ? "border border-accent/45 bg-accent/16 text-accent-fg shadow-sm"
+                : "text-muted-strong hover:border-border/50 hover:bg-bg-hover hover:text-txt"
             }`}
             onClick={() => setView("tables")}
           >
@@ -528,8 +528,8 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
             size="sm"
             className={`h-auto min-h-[1.75rem] px-4 py-1 whitespace-normal break-words text-left text-xs font-medium rounded-lg transition-all duration-300 ${
               view === "query"
-                ? "bg-accent text-accent-fg shadow-[0_0_15px_rgba(var(--accent),0.4)] border border-accent/50 scale-105"
-                : "text-muted hover:text-txt hover:bg-bg-hover hover:border-border/50"
+                ? "border border-accent/45 bg-accent/16 text-accent-fg shadow-sm"
+                : "text-muted-strong hover:border-border/50 hover:bg-bg-hover hover:text-txt"
             }`}
             onClick={() => setView("query")}
           >

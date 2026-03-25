@@ -63,16 +63,16 @@
    */
   --onboarding-text-strong: rgba(240, 238, 250, 0.95);
   --onboarding-text-primary: rgba(232, 230, 240, 0.92);
-  --onboarding-text-subtle: rgba(200, 198, 210, 0.72);
-  --onboarding-text-muted: rgba(170, 168, 185, 0.58);
-  --onboarding-text-faint: rgba(140, 138, 155, 0.42);
-  --onboarding-card-bg: rgba(22, 22, 30, 0.55);
-  --onboarding-card-bg-hover: rgba(30, 30, 40, 0.65);
+  --onboarding-text-subtle: rgba(210, 208, 220, 0.78);
+  --onboarding-text-muted: rgba(186, 184, 198, 0.7);
+  --onboarding-text-faint: rgba(160, 158, 176, 0.56);
+  --onboarding-card-bg: rgba(20, 21, 30, 0.68);
+  --onboarding-card-bg-hover: rgba(28, 30, 40, 0.78);
   --onboarding-card-border: rgba(200, 198, 220, 0.14);
   --onboarding-card-border-strong: rgba(207, 175, 90, 0.32);
-  --onboarding-panel-bg: rgba(14, 14, 18, 0.72);
-  --onboarding-panel-border: rgba(200, 198, 220, 0.1);
-  --onboarding-panel-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --onboarding-panel-bg: rgba(12, 14, 20, 0.8);
+  --onboarding-panel-border: rgba(214, 210, 230, 0.14);
+  --onboarding-panel-shadow: 0 16px 44px rgba(0, 0, 0, 0.42);
   --onboarding-divider: rgba(200, 198, 220, 0.12);
 }
 
@@ -84,13 +84,13 @@
   /* Text hierarchy */
   --onboarding-text-strong: rgba(240, 238, 250, 0.95);
   --onboarding-text-primary: rgba(232, 230, 240, 0.92);
-  --onboarding-text-subtle: rgba(200, 198, 210, 0.72);
-  --onboarding-text-muted: rgba(170, 168, 185, 0.58);
-  --onboarding-text-faint: rgba(140, 138, 155, 0.42);
+  --onboarding-text-subtle: rgba(210, 208, 220, 0.78);
+  --onboarding-text-muted: rgba(186, 184, 198, 0.7);
+  --onboarding-text-faint: rgba(160, 158, 176, 0.56);
 
   /* Cards (Remote, Cloud buttons) */
-  --onboarding-card-bg: rgba(22, 22, 30, 0.55);
-  --onboarding-card-bg-hover: rgba(30, 30, 40, 0.65);
+  --onboarding-card-bg: rgba(20, 21, 30, 0.68);
+  --onboarding-card-bg-hover: rgba(28, 30, 40, 0.78);
   --onboarding-card-border: rgba(200, 198, 220, 0.14);
   --onboarding-card-border-strong: rgba(207, 175, 90, 0.32);
 
@@ -108,9 +108,9 @@
   --onboarding-accent-foreground: var(--highlight-gold);
 
   /* Panel (main onboarding container) */
-  --onboarding-panel-bg: rgba(14, 14, 18, 0.72);
-  --onboarding-panel-border: rgba(200, 198, 220, 0.1);
-  --onboarding-panel-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --onboarding-panel-bg: rgba(12, 14, 20, 0.8);
+  --onboarding-panel-border: rgba(214, 210, 230, 0.14);
+  --onboarding-panel-shadow: 0 16px 44px rgba(0, 0, 0, 0.42);
 
   /* Misc */
   --onboarding-divider: rgba(200, 198, 220, 0.12);
@@ -127,18 +127,18 @@
 :root:not(.dark) {
   --onboarding-text-strong: rgba(30, 35, 41, 0.95);
   --onboarding-text-primary: rgba(40, 44, 52, 0.9);
-  --onboarding-text-subtle: rgba(60, 64, 72, 0.72);
-  --onboarding-text-muted: rgba(80, 84, 96, 0.58);
-  --onboarding-text-faint: rgba(100, 104, 116, 0.42);
-  --onboarding-card-bg: rgba(255, 255, 255, 0.6);
-  --onboarding-card-bg-hover: rgba(255, 255, 255, 0.78);
+  --onboarding-text-subtle: rgba(52, 58, 67, 0.76);
+  --onboarding-text-muted: rgba(70, 76, 88, 0.72);
+  --onboarding-text-faint: rgba(86, 92, 106, 0.58);
+  --onboarding-card-bg: rgba(255, 255, 255, 0.72);
+  --onboarding-card-bg-hover: rgba(255, 255, 255, 0.84);
   --onboarding-card-border: rgba(0, 0, 0, 0.1);
   --onboarding-card-border-strong: rgba(166, 124, 46, 0.4);
   --onboarding-recommended-bg: rgba(207, 175, 90, 0.1);
   --onboarding-recommended-bg-hover: rgba(207, 175, 90, 0.18);
   --onboarding-recommended-border: rgba(166, 124, 46, 0.3);
   --onboarding-recommended-border-strong: rgba(166, 124, 46, 0.5);
-  --onboarding-panel-bg: rgba(255, 255, 255, 0.82);
+  --onboarding-panel-bg: rgba(255, 255, 255, 0.9);
   --onboarding-panel-border: rgba(0, 0, 0, 0.08);
   --onboarding-panel-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   --onboarding-divider: rgba(0, 0, 0, 0.08);
