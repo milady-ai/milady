@@ -197,10 +197,40 @@ describe("OnboardingWizard", () => {
       const overlay = tree?.root.findByProps({
         "data-testid": "onboarding-ui-overlay",
       });
+      expect(overlay?.props.style.opacity).toBe(1);
+
+      await act(async () => {
+        tree?.unmount();
+      });
+    });
+
+    it("reveals non-welcome onboarding steps after a shorter fallback delay", async () => {
+      mockUseApp.mockReturnValue({
+        onboardingStep: "hosting",
+        selectedVrmIndex: 1,
+        customVrmUrl: "",
+        uiLanguage: "en",
+        uiTheme: "dark",
+        setState: vi.fn(),
+        t: (key: string) => key,
+        onboardingUiRevealNonce: 0,
+        companionVrmPowerMode: "balanced",
+        companionHalfFramerateMode: "when_saving_power",
+        companionAnimateWhenHidden: false,
+      });
+
+      let tree: ReactTestRenderer | undefined;
+      await act(async () => {
+        tree = TestRenderer.create(<OnboardingWizard />);
+      });
+
+      const overlay = tree?.root.findByProps({
+        "data-testid": "onboarding-ui-overlay",
+      });
       expect(overlay?.props.style.opacity).toBe(0);
 
       await act(async () => {
-        vi.advanceTimersByTime(3500);
+        vi.advanceTimersByTime(1200);
       });
 
       expect(overlay?.props.style.opacity).toBe(1);

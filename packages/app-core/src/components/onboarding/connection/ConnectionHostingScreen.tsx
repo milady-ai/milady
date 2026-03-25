@@ -2,6 +2,12 @@ import { Button } from "@miladyai/ui";
 import { appNameInterpolationVars, useBranding } from "../../../config";
 import type { ConnectionEvent } from "../../../onboarding/connection-flow";
 import { useApp } from "../../../state";
+import {
+  OnboardingStepHeader,
+  onboardingFooterClass,
+  onboardingSecondaryActionClass,
+  onboardingSecondaryActionTextShadowStyle,
+} from "../onboarding-step-chrome";
 
 export function ConnectionHostingScreen({
   showHostingLocalCard,
@@ -15,21 +21,13 @@ export function ConnectionHostingScreen({
 
   return (
     <>
-      <div
-        className="text-xs tracking-[0.3em] uppercase text-[var(--onboarding-text-muted)] font-semibold text-center mb-0"
-        style={{ textShadow: "0 2px 10px rgba(3,5,10,0.55)" }}
-      >
-        {t("onboarding.hostingTitle")}
-      </div>
-      <div className="flex items-center gap-[12px] my-[16px] before:content-[''] before:flex-1 before:h-[1px] before:bg-gradient-to-r before:from-transparent before:via-[var(--onboarding-divider)] before:to-transparent after:content-[''] after:flex-1 after:h-[1px] after:bg-gradient-to-r after:from-transparent after:via-[var(--onboarding-divider)] after:to-transparent">
-        <div className="w-1.5 h-1.5 bg-[rgba(240,185,11,0.4)] rotate-45 shrink-0" />
-      </div>
-      <div
-        className="text-xl font-light leading-[1.4] text-[var(--onboarding-text-strong)] text-center mb-[18px]"
-        style={{ textShadow: "0 2px 10px rgba(3,5,10,0.55)" }}
-      >
-        {t("onboarding.hostingQuestion", appNameInterpolationVars(branding))}
-      </div>
+      <OnboardingStepHeader
+        eyebrow={t("onboarding.hostingTitle")}
+        title={t(
+          "onboarding.hostingQuestion",
+          appNameInterpolationVars(branding),
+        )}
+      />
       <div className="flex flex-col gap-1.5 mb-4">
         {showHostingLocalCard && (
           <Button
@@ -102,11 +100,11 @@ export function ConnectionHostingScreen({
           </div>
         </Button>
       </div>
-      <div className="flex justify-between items-center gap-6 mt-[18px] pt-3.5 border-t border-[var(--onboarding-footer-border)]">
+      <div className={onboardingFooterClass}>
         <Button
           variant="ghost"
-          className="text-[10px] text-[var(--onboarding-text-muted)] tracking-[0.15em] uppercase cursor-pointer no-underline bg-none border-none font-inherit transition-colors duration-300 p-0 hover:text-[var(--onboarding-text-strong)]"
-          style={{ textShadow: "0 1px 8px rgba(3,5,10,0.45)" }}
+          className={onboardingSecondaryActionClass}
+          style={onboardingSecondaryActionTextShadowStyle}
           onClick={handleOnboardingBack}
           type="button"
         >

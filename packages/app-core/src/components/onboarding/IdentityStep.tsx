@@ -7,6 +7,17 @@ import {
   type CharacterRosterEntry,
   resolveRosterEntries,
 } from "../CharacterRoster";
+import {
+  OnboardingStepHeader,
+  onboardingBodyTextShadowStyle,
+  onboardingFooterClass,
+  onboardingLinkActionClass,
+  onboardingPrimaryActionClass,
+  onboardingPrimaryActionTextShadowStyle,
+  onboardingSecondaryActionClass,
+  onboardingSecondaryActionTextShadowStyle,
+  spawnOnboardingRipple,
+} from "./onboarding-step-chrome";
 
 export function IdentityStep() {
   const { onboardingStyle, handleOnboardingNext, setState, t, uiLanguage } =
@@ -16,6 +27,7 @@ export function IdentityStep() {
     () => resolveRosterEntries(getStylePresets(uiLanguage)),
     [uiLanguage],
   );
+  const firstEntry = entries[0];
   const selectedId = onboardingStyle || entries[0]?.id || "";
 
   /* ── Import / restore state ─────────────────────────────────────── */
@@ -38,11 +50,10 @@ export function IdentityStep() {
 
   // Auto-select the first one if nothing is selected yet
   useEffect(() => {
-    const firstEntry = entries[0];
     if (!onboardingStyle && firstEntry) {
       handleSelect(firstEntry);
     }
-  }, [onboardingStyle, handleSelect]);
+  }, [onboardingStyle, handleSelect, firstEntry]);
 
   const handleImportAgent = useCallback(async () => {
     if (importBusyRef.current || importBusy) return;
@@ -91,22 +102,11 @@ export function IdentityStep() {
   if (showImport) {
     return (
       <div className="flex flex-col items-center gap-3 w-full max-w-[400px]">
-        <div
-          className="text-xs tracking-[0.3em] uppercase text-[var(--onboarding-text-muted)] font-semibold text-center mb-0"
-          style={{ textShadow: "0 2px 10px rgba(3,5,10,0.55)" }}
-        >
-          {t("settings.importAgent")}
-        </div>
-        <div className="flex items-center gap-[12px] my-[16px] before:content-[''] before:flex-1 before:h-[1px] before:bg-gradient-to-r before:from-transparent before:via-[var(--onboarding-divider)] before:to-transparent after:content-[''] after:flex-1 after:h-[1px] after:bg-gradient-to-r after:from-transparent after:via-[var(--onboarding-divider)] after:to-transparent">
-          <div className="w-1.5 h-1.5 bg-[rgba(240,185,11,0.4)] rotate-45 shrink-0" />
-        </div>
-
-        <p
-          className="text-sm text-[var(--onboarding-text-muted)] text-center leading-relaxed mt-3 mb-1"
-          style={{ textShadow: "0 2px 10px rgba(3,5,10,0.45)" }}
-        >
-          {t("onboarding.importDesc")}
-        </p>
+        <OnboardingStepHeader
+          eyebrow={t("settings.importAgent")}
+          description={t("onboarding.importDesc")}
+          descriptionClassName="mt-1 mb-1"
+        />
 
         <input
           type="file"
@@ -132,7 +132,7 @@ export function IdentityStep() {
         {importError && (
           <p
             className="text-sm text-[var(--danger)] text-center leading-relaxed mt-3 !mb-0"
-            style={{ textShadow: "0 2px 10px rgba(3,5,10,0.45)" }}
+            style={onboardingBodyTextShadowStyle}
           >
             {importError}
           </p>
@@ -140,17 +140,17 @@ export function IdentityStep() {
         {importSuccess && (
           <p
             className="text-sm text-[var(--ok)] text-center leading-relaxed mt-3 !mb-0"
-            style={{ textShadow: "0 2px 10px rgba(3,5,10,0.45)" }}
+            style={onboardingBodyTextShadowStyle}
           >
             {importSuccess}
           </p>
         )}
 
-        <div className="flex gap-3 mt-2">
+        <div className={`${onboardingFooterClass} mt-2 w-full border-t-0 pt-0`}>
           <Button
             variant="ghost"
-            className="text-[10px] text-[var(--onboarding-text-muted)] tracking-[0.15em] uppercase cursor-pointer no-underline bg-none border-none font-inherit transition-colors duration-300 p-0 hover:text-[var(--onboarding-text-strong)]"
-            style={{ textShadow: "0 1px 8px rgba(3,5,10,0.45)" }}
+            className={onboardingSecondaryActionClass}
+            style={onboardingSecondaryActionTextShadowStyle}
             onClick={() => {
               setShowImport(false);
               setImportError(null);
@@ -163,20 +163,14 @@ export function IdentityStep() {
             {t("common.cancel")}
           </Button>
           <Button
-            className="group relative inline-flex items-center justify-center gap-[8px] px-[32px] py-[12px] min-h-[44px] bg-[var(--onboarding-accent-bg)] border border-[var(--onboarding-accent-border)] rounded-[6px] text-[var(--onboarding-accent-foreground)] text-[11px] font-semibold tracking-[0.18em] uppercase cursor-pointer transition-all duration-300 font-inherit overflow-hidden hover:bg-[var(--onboarding-accent-bg-hover)] hover:border-[var(--onboarding-accent-border-hover)] disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ textShadow: "0 1px 6px rgba(3,5,10,0.55)" }}
+            className={onboardingPrimaryActionClass}
+            style={onboardingPrimaryActionTextShadowStyle}
             disabled={importBusy || !importFile}
             onClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const circle = document.createElement("span");
-              const diameter = Math.max(rect.width, rect.height);
-              circle.style.width = circle.style.height = `${diameter}px`;
-              circle.style.left = `${e.clientX - rect.left - diameter / 2}px`;
-              circle.style.top = `${e.clientY - rect.top - diameter / 2}px`;
-              circle.className =
-                "absolute rounded-full bg-[var(--onboarding-ripple)] transform scale-0 animate-[onboarding-ripple-expand_0.6s_ease-out_forwards] pointer-events-none";
-              e.currentTarget.appendChild(circle);
-              setTimeout(() => circle.remove(), 600);
+              spawnOnboardingRipple(e.currentTarget, {
+                x: e.clientX,
+                y: e.clientY,
+              });
               void handleImportAgent();
             }}
             type="button"
@@ -198,9 +192,15 @@ export function IdentityStep() {
     >
       {/* Selected character info — floats above the roster */}
       <div
-        className="text-center"
+        className="w-full text-center"
         style={{ animation: "onboarding-content-fade-in 0.5s ease 0.1s both" }}
       >
+        <div
+          className="mb-2 text-xs font-semibold uppercase tracking-[0.3em] text-[var(--onboarding-text-muted)]"
+          style={onboardingBodyTextShadowStyle}
+        >
+          {t("onboarding.stepSub.identity")}
+        </div>
         <div
           className="text-[28px] font-bold tracking-[0.12em] uppercase text-[var(--onboarding-text-strong)] transition-all duration-300 max-md:text-xl"
           style={{
@@ -234,21 +234,13 @@ export function IdentityStep() {
         style={{ animation: "onboarding-content-fade-in 0.5s ease 0.3s both" }}
       >
         <Button
-          className="group relative inline-flex items-center justify-center gap-[8px] px-[32px] py-[12px] min-h-[44px] bg-[var(--onboarding-accent-bg)] border border-[var(--onboarding-accent-border)] rounded-[6px] text-[var(--onboarding-accent-foreground)] text-[11px] font-semibold tracking-[0.18em] uppercase cursor-pointer transition-all duration-300 font-inherit overflow-hidden hover:bg-[var(--onboarding-accent-bg-hover)] hover:border-[var(--onboarding-accent-border-hover)] disabled:opacity-40 disabled:cursor-not-allowed"
-          style={{ textShadow: "0 1px 6px rgba(3,5,10,0.55)" }}
+          className={onboardingPrimaryActionClass}
+          style={onboardingPrimaryActionTextShadowStyle}
           onClick={(e) => {
-            if (e?.currentTarget) {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const circle = document.createElement("span");
-              const diameter = Math.max(rect.width, rect.height);
-              circle.style.width = circle.style.height = `${diameter}px`;
-              circle.style.left = `${e.clientX - rect.left - diameter / 2}px`;
-              circle.style.top = `${e.clientY - rect.top - diameter / 2}px`;
-              circle.className =
-                "absolute rounded-full bg-[var(--onboarding-ripple)] transform scale-0 animate-[onboarding-ripple-expand_0.6s_ease-out_forwards] pointer-events-none";
-              e.currentTarget.appendChild(circle);
-              setTimeout(() => circle.remove(), 600);
-            }
+            spawnOnboardingRipple(e.currentTarget, {
+              x: e.clientX,
+              y: e.clientY,
+            });
             handleOnboardingNext();
           }}
           type="button"
@@ -259,7 +251,7 @@ export function IdentityStep() {
           variant="link"
           type="button"
           onClick={() => setShowImport(true)}
-          className="bg-transparent border-none text-[var(--onboarding-text-faint)] text-[11px] cursor-pointer underline font-inherit p-1 px-2 transition-colors duration-300 hover:text-[var(--onboarding-link)]"
+          className={onboardingLinkActionClass}
         >
           {t("onboarding.restoreFromBackup")}
         </Button>

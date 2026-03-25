@@ -8,6 +8,13 @@ import type {
 import { CONNECTION_RECOMMENDED_PROVIDER_IDS } from "../../../onboarding/connection-flow";
 import { getProviderLogo } from "../../../providers";
 import { useApp } from "../../../state";
+import {
+  OnboardingStepHeader,
+  onboardingBodyTextShadowStyle,
+  onboardingFooterClass,
+  onboardingSecondaryActionClass,
+  onboardingSecondaryActionTextShadowStyle,
+} from "../onboarding-step-chrome";
 
 const recommendedIds = new Set<string>(CONNECTION_RECOMMENDED_PROVIDER_IDS);
 
@@ -39,29 +46,21 @@ export function ConnectionProviderGridScreen({
 
   return (
     <>
-      <div
-        className="text-xs tracking-[0.3em] uppercase text-[var(--onboarding-text-muted)] font-semibold text-center mb-0"
-        style={{ textShadow: "0 2px 10px rgba(3,5,10,0.55)" }}
-      >
-        {t("onboarding.neuralLinkTitle")}
-      </div>
-      <div className="flex items-center gap-[12px] my-[16px] before:content-[''] before:flex-1 before:h-[1px] before:bg-gradient-to-r before:from-transparent before:via-[var(--onboarding-divider)] before:to-transparent after:content-[''] after:flex-1 after:h-[1px] after:bg-gradient-to-r after:from-transparent after:via-[var(--onboarding-divider)] after:to-transparent">
-        <div className="w-1.5 h-1.5 bg-[rgba(240,185,11,0.4)] rotate-45 shrink-0" />
-      </div>
+      <OnboardingStepHeader
+        eyebrow={t("onboarding.neuralLinkTitle")}
+        title={t("onboarding.chooseProvider")}
+      />
       {onboardingRemoteConnected && (
-        <p className="mx-auto mt-1.5 mb-3 max-w-[32ch] text-center text-[12px] leading-[1.35] text-[var(--onboarding-text-muted)]">
+        <p
+          className="mx-auto mb-3 mt-1.5 max-w-[32ch] text-center text-[12px] leading-[1.35] text-[var(--onboarding-text-muted)]"
+          style={onboardingBodyTextShadowStyle}
+        >
           {t(
             "onboarding.remoteConnectedDesc",
             appNameInterpolationVars(branding),
           )}
         </p>
       )}
-      <div
-        className="text-xl font-light leading-[1.4] text-[var(--onboarding-text-strong)] text-center mb-[18px]"
-        style={{ textShadow: "0 2px 10px rgba(3,5,10,0.55)" }}
-      >
-        {t("onboarding.chooseProvider")}
-      </div>
       <div className="mb-4 grid grid-cols-1 gap-1.5 min-[440px]:grid-cols-2">
         {sortedProviders.map((p: ProviderOption) => {
           const display = getProviderDisplay(p);
@@ -116,11 +115,11 @@ export function ConnectionProviderGridScreen({
           );
         })}
       </div>
-      <div className="flex justify-between items-center gap-6 mt-[18px] pt-3.5 pb-1 border-t border-[var(--onboarding-footer-border)]">
+      <div className={`${onboardingFooterClass} pb-1`}>
         <Button
           variant="ghost"
-          className="text-[10px] text-[var(--onboarding-text-muted)] tracking-[0.15em] uppercase cursor-pointer bg-transparent border-none font-inherit transition-colors duration-300 p-0 hover:text-[var(--onboarding-text-strong)]"
-          style={{ textShadow: "0 1px 8px rgba(3,5,10,0.45)" }}
+          className={onboardingSecondaryActionClass}
+          style={onboardingSecondaryActionTextShadowStyle}
           onClick={() => {
             if (onboardingRemoteConnected) {
               onTransitionEffect("useLocalBackend");
