@@ -113,7 +113,7 @@ function serializeDownload(id, label, asset) {
   };
 }
 
-function buildRelease(release) {
+function buildRelease(release, allReleases = []) {
   if (!release) {
     return {
       tagName: "unavailable",
@@ -126,11 +126,26 @@ function buildRelease(release) {
   }
 
   const assets = Array.isArray(release.assets) ? release.assets : [];
+
+  // Collect assets from older releases as fallback for missing platforms
+  const allAssets = [...assets];
+  for (const older of allReleases) {
+    if (older === release || !Array.isArray(older.assets)) continue;
+    for (const asset of older.assets) {
+      // Only add if we don't already have a match for this asset pattern
+      if (!allAssets.some((a) => a.name === asset.name)) {
+        allAssets.push(asset);
+      }
+    }
+  }
   const downloads = [
     {
       id: "macos-arm64",
       label: "macOS (Apple Silicon)",
       asset: pickAsset(assets, [
+        (asset) =>
+          /macos-arm64/i.test(asset.name) && /\.dmg$/i.test(asset.name),
+      ]) ?? pickAsset(allAssets, [
         (asset) =>
           /macos-arm64/i.test(asset.name) && /\.dmg$/i.test(asset.name),
       ]),
@@ -140,6 +155,8 @@ function buildRelease(release) {
       label: "macOS (Intel)",
       asset: pickAsset(assets, [
         (asset) => /macos-x64/i.test(asset.name) && /\.dmg$/i.test(asset.name),
+      ]) ?? pickAsset(allAssets, [
+        (asset) => /macos-x64/i.test(asset.name) && /\.dmg$/i.test(asset.name),
       ]),
     },
     {
@@ -148,17 +165,19 @@ function buildRelease(release) {
       asset: pickAsset(assets, [
         (asset) => /setup/i.test(asset.name) && /\.exe$/i.test(asset.name),
         (asset) => /win/i.test(asset.name) && /\.exe$/i.test(asset.name),
+      ]) ?? pickAsset(allAssets, [
+        (asset) => /setup/i.test(asset.name) && /\.exe$/i.test(asset.name),
+        (asset) => /win/i.test(asset.name) && /\.exe$/i.test(asset.name),
         (asset) => /win/i.test(asset.name) && /\.msix$/i.test(asset.name),
-        (asset) =>
-          /win/i.test(asset.name) &&
-          /setup/i.test(asset.name) &&
-          /\.zip$/i.test(asset.name),
       ]),
     },
     {
       id: "linux-x64",
       label: "Linux",
       asset: pickAsset(assets, [
+        (asset) => /linux/i.test(asset.name) && /\.appimage$/i.test(asset.name),
+        (asset) => /linux/i.test(asset.name) && /\.tar\.gz$/i.test(asset.name),
+      ]) ?? pickAsset(allAssets, [
         (asset) => /linux/i.test(asset.name) && /\.appimage$/i.test(asset.name),
         (asset) => /linux/i.test(asset.name) && /\.tar\.gz$/i.test(asset.name),
       ]),
@@ -195,11 +214,11 @@ function buildRelease(release) {
   };
 }
 
-function buildPayload(release) {
+function buildPayload(release, allReleases = []) {
   return {
     generatedAt: new Date().toISOString(),
     scripts,
-    release: buildRelease(release),
+    release: buildRelease(release, allReleases),
   };
 }
 
@@ -242,7 +261,7 @@ async function main() {
   try {
     const releases = await fetchReleases();
     const release = pickRelease(releases);
-    await writePayload(buildPayload(release));
+    await writePayload(buildPayload(release, releases));
     const tag = release?.tag_name ?? "no published release";
     console.log(`homepage release data: ${tag}`);
   } catch (error) {
