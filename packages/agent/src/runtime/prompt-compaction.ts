@@ -139,18 +139,6 @@ export function hasIntent(prompt: string, keywords: RegExp): boolean {
     if (keywords.test(userMsg)) return true;
   }
 
-  // Fallback: scan last few user messages in the conversation
-  const convSection = prompt.indexOf("# Conversation Messages");
-  if (convSection !== -1) {
-    const convBlock = prompt.slice(convSection, prompt.indexOf("# Received Message", convSection));
-    // Match only lines that start with "User:" or "user:"
-    const userLines = convBlock.match(/^(?:User|user):.*$/gm);
-    if (userLines) {
-      const recentUserText = userLines.slice(-3).join(" ");
-      if (keywords.test(recentUserText)) return true;
-    }
-  }
-
   return false;
 }
 
@@ -197,7 +185,8 @@ export function buildFullParamActionSet(
  * block in the prompt with a version where only intent-relevant actions
  * have full <params> — the rest are stubs with just name + description.
  *
- * If no intents are detected, keeps all params (safe fallback).
+ * If no intents are detected (general chat), only universal actions
+ * (REPLY, NONE, IGNORE) keep full params — all others are stubbed.
  */
 export function compactActionsForIntent(prompt: string): string {
   // Find the first <actions>...</actions> block (the Available Actions section)

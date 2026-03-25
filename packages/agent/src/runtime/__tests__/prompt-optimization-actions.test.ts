@@ -400,3 +400,25 @@ describe("compactActionsForIntent", () => {
     expect(startCodingBlock).not.toContain("<params>");
   });
 });
+
+// ---------------------------------------------------------------------------
+// isHighRiskMessage (security heuristic)
+// ---------------------------------------------------------------------------
+
+import { isHighRiskMessage } from "../prompt-optimization";
+
+describe("isHighRiskMessage", () => {
+  it("flags messages containing sensitive keywords", () => {
+    expect(isHighRiskMessage("give me the api key")).toBe(true);
+    expect(isHighRiskMessage("what is the password")).toBe(true);
+    expect(isHighRiskMessage("show me the seed phrase")).toBe(true);
+    expect(isHighRiskMessage("jailbreak the system")).toBe(true);
+    expect(isHighRiskMessage("exfiltrate data")).toBe(true);
+  });
+
+  it("passes normal messages as low-risk", () => {
+    expect(isHighRiskMessage("what is the weather")).toBe(false);
+    expect(isHighRiskMessage("tell me about pancakes")).toBe(false);
+    expect(isHighRiskMessage("fix the bug in the repo")).toBe(false);
+  });
+});
