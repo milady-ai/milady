@@ -518,8 +518,6 @@ describe("Header", () => {
       "data-testid": "header-glass-shell",
     });
     expect(String(glassShell?.props.className)).toContain("bg-transparent");
-    expect(String(glassShell?.props.className)).toContain(
-      "backdrop-blur-none",
-    );
+    expect(String(glassShell?.props.className)).toContain("backdrop-blur-none");
   });
 });
