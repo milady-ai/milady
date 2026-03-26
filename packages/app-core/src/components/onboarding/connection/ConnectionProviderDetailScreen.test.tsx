@@ -135,11 +135,19 @@ describe("ConnectionProviderDetailScreen", () => {
         onboardingOpenRouterModel: "mixtral",
         onboardingOptions: {
           providers: [
-            { id: "openrouter", name: "OpenRouter", description: "Many models" },
+            {
+              id: "openrouter",
+              name: "OpenRouter",
+              description: "Many models",
+            },
           ],
           openrouterModels: [
             { id: "mixtral", name: "Mixtral", description: "Fast model" },
-            { id: "sonnet", name: "Claude Sonnet", description: "Balanced model" },
+            {
+              id: "sonnet",
+              name: "Claude Sonnet",
+              description: "Balanced model",
+            },
           ],
           piAiModels: [],
           piAiDefaultModel: "",
@@ -149,7 +157,9 @@ describe("ConnectionProviderDetailScreen", () => {
 
     render(<ConnectionProviderDetailScreen dispatch={vi.fn()} />);
 
-    expect(screen.getByRole("radiogroup", { name: "Select model" })).toBeTruthy();
+    expect(
+      screen.getByRole("radiogroup", { name: "Select model" }),
+    ).toBeTruthy();
     const selectedModel = screen.getByRole("radio", { name: /Mixtral/i });
     expect(selectedModel).toBeTruthy();
     expect(selectedModel.getAttribute("aria-checked")).toBe("true");

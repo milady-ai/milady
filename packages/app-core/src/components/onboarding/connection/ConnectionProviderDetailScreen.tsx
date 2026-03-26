@@ -305,7 +305,10 @@ export function ConnectionProviderDetailScreen({
   });
 
   useEffect(() => {
-    if (onboardingProvider === "elizacloud" && onboardingElizaCloudTab === "apikey") {
+    if (
+      onboardingProvider === "elizacloud" &&
+      onboardingElizaCloudTab === "apikey"
+    ) {
       elizaCloudApiKeyRef.current?.focus();
     }
   }, [onboardingElizaCloudTab, onboardingProvider]);
@@ -318,11 +321,7 @@ export function ConnectionProviderDetailScreen({
     ) {
       elizaCloudStatusRef.current?.focus();
     }
-  }, [
-    elizaCloudConnected,
-    onboardingElizaCloudTab,
-    onboardingProvider,
-  ]);
+  }, [elizaCloudConnected, onboardingElizaCloudTab, onboardingProvider]);
 
   useEffect(() => {
     if (
@@ -427,7 +426,10 @@ export function ConnectionProviderDetailScreen({
           {onboardingElizaCloudTab === "login" ? (
             <div className={onboardingCenteredStackClassName}>
               {elizaCloudConnected ? (
-                <OnboardingStatusBanner ref={elizaCloudStatusRef} tone="success">
+                <OnboardingStatusBanner
+                  ref={elizaCloudStatusRef}
+                  tone="success"
+                >
                   <ConnectedIcon title={t("onboarding.connected")} />
                   {t("onboarding.connected")}
                 </OnboardingStatusBanner>
@@ -880,50 +882,50 @@ export function ConnectionProviderDetailScreen({
       )}
 
       {onboardingProvider === "openrouter" &&
-        onboardingApiKey.trim() &&
-        onboardingOptions?.openrouterModels ? (
-          <div className={`${onboardingDetailStackClassName} mt-4`}>
-            <div
-              id="openrouter-models-label"
-              className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--onboarding-text-muted)]"
-            >
-              {t("onboarding.selectModel")}
-            </div>
-            <div
-              role="radiogroup"
-              aria-labelledby="openrouter-models-label"
-              className="flex flex-col gap-2"
-            >
-              {onboardingOptions.openrouterModels.map(
-                (model: OpenRouterModelOption) => (
-                  <Button
-                    type="button"
-                    role="radio"
-                    aria-checked={onboardingOpenRouterModel === model.id}
-                    key={model.id}
-                    className={getOnboardingChoiceCardClassName({
-                      selected: onboardingOpenRouterModel === model.id,
-                    })}
-                    onClick={() => handleOpenRouterModelSelect(model.id)}
-                  >
-                    <div className="min-w-0">
-                      <div className={onboardingChoiceCardTitleClassName}>
-                        {model.name}
-                      </div>
-                      {model.description ? (
-                        <div
-                          className={`${onboardingSubtleTextClassName} mt-1 line-clamp-2`}
-                        >
-                          {model.description}
-                        </div>
-                      ) : null}
-                    </div>
-                  </Button>
-                ),
-              )}
-            </div>
+      onboardingApiKey.trim() &&
+      onboardingOptions?.openrouterModels ? (
+        <div className={`${onboardingDetailStackClassName} mt-4`}>
+          <div
+            id="openrouter-models-label"
+            className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--onboarding-text-muted)]"
+          >
+            {t("onboarding.selectModel")}
           </div>
-        ) : null}
+          <div
+            role="radiogroup"
+            aria-labelledby="openrouter-models-label"
+            className="flex flex-col gap-2"
+          >
+            {onboardingOptions.openrouterModels.map(
+              (model: OpenRouterModelOption) => (
+                <Button
+                  type="button"
+                  role="radio"
+                  aria-checked={onboardingOpenRouterModel === model.id}
+                  key={model.id}
+                  className={getOnboardingChoiceCardClassName({
+                    selected: onboardingOpenRouterModel === model.id,
+                  })}
+                  onClick={() => handleOpenRouterModelSelect(model.id)}
+                >
+                  <div className="min-w-0">
+                    <div className={onboardingChoiceCardTitleClassName}>
+                      {model.name}
+                    </div>
+                    {model.description ? (
+                      <div
+                        className={`${onboardingSubtleTextClassName} mt-1 line-clamp-2`}
+                      >
+                        {model.description}
+                      </div>
+                    ) : null}
+                  </div>
+                </Button>
+              ),
+            )}
+          </div>
+        </div>
+      ) : null}
 
       <div className={onboardingFooterClass}>
         <Button

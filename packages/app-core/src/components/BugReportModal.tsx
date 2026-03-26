@@ -237,7 +237,9 @@ export function BugReportModal() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 px-5 py-6 text-center">
-            <p className="text-sm text-txt">{t("bugreportmodal.YourBugReportHas")}</p>
+            <p className="text-sm text-txt">
+              {t("bugreportmodal.YourBugReportHas")}
+            </p>
             <a
               href={resultUrl}
               target="_blank"
@@ -281,7 +283,10 @@ export function BugReportModal() {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex max-h-[min(88vh,52rem)] flex-col" aria-busy={submitting}>
+        <div
+          className="flex max-h-[min(88vh,52rem)] flex-col"
+          aria-busy={submitting}
+        >
           <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
             {errorMsg && (
               <Banner variant="error" className="rounded-xl text-xs">
@@ -322,7 +327,9 @@ export function BugReportModal() {
                 className={modalTextareaClassName}
                 placeholder={t("bugreportmodal.stepsPlaceholder")}
                 value={form.stepsToReproduce}
-                onChange={(e) => updateField("stepsToReproduce", e.target.value)}
+                onChange={(e) =>
+                  updateField("stepsToReproduce", e.target.value)
+                }
                 rows={4}
               />
               <FieldDescription className={subtleMonoDescriptionClassName}>
@@ -339,7 +346,9 @@ export function BugReportModal() {
                 className={`${modalTextareaClassName} min-h-[72px]`}
                 placeholder={t("bugreportmodal.DescribeTheExpecte")}
                 value={form.expectedBehavior}
-                onChange={(e) => updateField("expectedBehavior", e.target.value)}
+                onChange={(e) =>
+                  updateField("expectedBehavior", e.target.value)
+                }
                 rows={3}
               />
             </Field>
@@ -416,7 +425,9 @@ export function BugReportModal() {
             <Field>
               <div className="flex items-center justify-between gap-3">
                 <div className="space-y-1">
-                  <FieldLabel className="mb-0">{t("bugreportmodal.Logs")}</FieldLabel>
+                  <FieldLabel className="mb-0">
+                    {t("bugreportmodal.Logs")}
+                  </FieldLabel>
                   <FieldDescription className={subtleMonoDescriptionClassName}>
                     Paste only the relevant errors, traces, or console output.
                   </FieldDescription>

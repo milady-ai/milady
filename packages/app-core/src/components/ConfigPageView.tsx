@@ -10,7 +10,14 @@ import {
   WALLET_RPC_PROVIDER_OPTIONS,
   type WalletRpcSelections,
 } from "@miladyai/shared/contracts/wallet";
-import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, Switch } from "@miladyai/ui";
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Switch,
+} from "@miladyai/ui";
 import { useCallback, useEffect, useState } from "react";
 import { client } from "../api";
 import {

@@ -28,8 +28,7 @@ export const ADMIN_SEGMENTED_TABLIST_CLASSNAME =
 export const ADMIN_SEGMENTED_TAB_CLASSNAME =
   "flex-1 rounded-none border-b-2 px-4 py-2.5 text-[11px] font-bold tracking-[0.1em] transition-[border-color,color,background-color]";
 
-export const ADMIN_SEGMENTED_TAB_ACTIVE_CLASSNAME =
-  "border-accent text-accent";
+export const ADMIN_SEGMENTED_TAB_ACTIVE_CLASSNAME = "border-accent text-accent";
 
 export const ADMIN_SEGMENTED_TAB_INACTIVE_CLASSNAME =
   "border-transparent text-muted-strong hover:text-txt";

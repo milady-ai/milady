@@ -1127,7 +1127,9 @@ export function CharacterEditor({
                     aria-controls={`character-editor-panel-${page}`}
                     tabIndex={activePage === page ? 0 : -1}
                     className={CHARACTER_EDITOR_TAB_CLASSNAME}
-                    style={activePage === page ? accentGradientStyle : undefined}
+                    style={
+                      activePage === page ? accentGradientStyle : undefined
+                    }
                     onClick={() => {
                       setActivePage(page);
                       if (page === "style" || page === "examples")
@@ -1153,7 +1155,9 @@ export function CharacterEditor({
                             : event.key === "ArrowRight"
                               ? (currentIndex + 1) %
                                 CHARACTER_EDITOR_PAGES.length
-                              : (currentIndex - 1 + CHARACTER_EDITOR_PAGES.length) %
+                              : (currentIndex -
+                                  1 +
+                                  CHARACTER_EDITOR_PAGES.length) %
                                 CHARACTER_EDITOR_PAGES.length;
                       const nextPage = CHARACTER_EDITOR_PAGES[nextIndex];
                       setActivePage(nextPage);
@@ -1462,7 +1466,9 @@ export function CharacterEditor({
                               items.map((item, index) => (
                                 <div
                                   key={`${key}:${item}`}
-                                  className={CHARACTER_EDITOR_INLINE_RULE_CLASSNAME}
+                                  className={
+                                    CHARACTER_EDITOR_INLINE_RULE_CLASSNAME
+                                  }
                                 >
                                   <span className="mt-0.5 shrink-0 text-[10px] font-bold text-accent">
                                     {index + 1}
@@ -1486,22 +1492,30 @@ export function CharacterEditor({
                                     onBlur={() =>
                                       handleCommitStyleEntry(key, index)
                                     }
-                                    aria-label={`${t(`charactereditor.StyleRules.${key}`, {
-                                      defaultValue: "Style rule",
-                                    })} ${index + 1}`}
+                                    aria-label={`${t(
+                                      `charactereditor.StyleRules.${key}`,
+                                      {
+                                        defaultValue: "Style rule",
+                                      },
+                                    )} ${index + 1}`}
                                     className="min-w-0 flex-1 resize-none border-none bg-transparent p-0 font-mono text-xs leading-normal text-txt [field-sizing:content] min-h-[1.5em] focus-visible:outline-none focus-visible:shadow-none"
                                   />
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    className={CHARACTER_EDITOR_ICON_GHOST_CLASSNAME}
+                                    className={
+                                      CHARACTER_EDITOR_ICON_GHOST_CLASSNAME
+                                    }
                                     onClick={() =>
                                       handleRemoveStyleEntry(key, index)
                                     }
                                     title={t("common.remove")}
-                                    aria-label={`${t("common.remove")} ${t(`charactereditor.StyleRules.${key}`, {
-                                      defaultValue: "style rule",
-                                    })} ${index + 1}`}
+                                    aria-label={`${t("common.remove")} ${t(
+                                      `charactereditor.StyleRules.${key}`,
+                                      {
+                                        defaultValue: "style rule",
+                                      },
+                                    )} ${index + 1}`}
                                   >
                                     <svg
                                       width="10"
@@ -1552,7 +1566,9 @@ export function CharacterEditor({
                             <Button
                               variant="ghost"
                               size="sm"
-                              className={CHARACTER_EDITOR_SMALL_GOLD_ACTION_CLASSNAME}
+                              className={
+                                CHARACTER_EDITOR_SMALL_GOLD_ACTION_CLASSNAME
+                              }
                               onClick={() => handleAddStyleEntry(key)}
                               disabled={!pendingStyleEntries[key].trim()}
                             >
@@ -1659,7 +1675,9 @@ export function CharacterEditor({
                                   updated[ci] = convoClone;
                                   handleFieldEdit("messageExamples", updated);
                                 }}
-                                className={CHARACTER_EDITOR_INLINE_FIELD_CLASSNAME}
+                                className={
+                                  CHARACTER_EDITOR_INLINE_FIELD_CLASSNAME
+                                }
                               />
                             </div>
                           ))}

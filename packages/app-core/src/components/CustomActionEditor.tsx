@@ -829,7 +829,9 @@ export function CustomActionEditor({
 
           {/* Name */}
           <div className="flex flex-col gap-1">
-            <span className={editorFieldLabelClassName}>{t("wallet.name")}</span>
+            <span className={editorFieldLabelClassName}>
+              {t("wallet.name")}
+            </span>
             <Input
               type="text"
               value={name}

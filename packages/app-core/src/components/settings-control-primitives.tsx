@@ -1,9 +1,4 @@
-import {
-  Field,
-  FieldDescription,
-  FieldLabel,
-  cn,
-} from "@miladyai/ui";
+import { Field, FieldDescription, FieldLabel, cn } from "@miladyai/ui";
 import * as React from "react";
 
 export const SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME =

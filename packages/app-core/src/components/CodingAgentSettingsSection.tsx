@@ -383,7 +383,9 @@ export function CodingAgentSettingsSection() {
               setPref("PARALLAX_DEFAULT_AGENT_TYPE", value)
             }
           >
-            <SelectTrigger className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}>
+            <SelectTrigger
+              className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -493,7 +495,9 @@ export function CodingAgentSettingsSection() {
             value={aiderProvider}
             onValueChange={(value) => setPref("PARALLAX_AIDER_PROVIDER", value)}
           >
-            <SelectTrigger className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}>
+            <SelectTrigger
+              className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -522,7 +526,9 @@ export function CodingAgentSettingsSection() {
               setPref(`${prefix}_MODEL_POWERFUL`, value)
             }
           >
-            <SelectTrigger className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}>
+            <SelectTrigger
+              className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
+            >
               <SelectValue
                 placeholder={t("codingagentsettingssection.Default")}
               />
@@ -547,7 +553,9 @@ export function CodingAgentSettingsSection() {
             value={fastValue}
             onValueChange={(value) => setPref(`${prefix}_MODEL_FAST`, value)}
           >
-            <SelectTrigger className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}>
+            <SelectTrigger
+              className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
+            >
               <SelectValue
                 placeholder={t("codingagentsettingssection.Default")}
               />

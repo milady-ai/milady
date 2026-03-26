@@ -111,7 +111,9 @@ export function ConnectionProviderGridScreen({
                   </span>
                 )}
                 {isRecommended && !detectedLabel && (
-                  <span className={onboardingChoiceCardRecommendedLabelClassName}>
+                  <span
+                    className={onboardingChoiceCardRecommendedLabelClassName}
+                  >
                     {t("onboarding.recommended") ?? "Recommended"}
                   </span>
                 )}

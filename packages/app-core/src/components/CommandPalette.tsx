@@ -234,12 +234,7 @@ export function CommandPalette() {
         }
       }
     },
-    [
-      closeCommandPalette,
-      commandActiveIndex,
-      filteredCommands,
-      setState,
-    ],
+    [closeCommandPalette, commandActiveIndex, filteredCommands, setState],
   );
 
   return (
