@@ -4,6 +4,6 @@
 
 import { PluginsView } from "./PluginsView";
 
-export function PluginsPageView() {
-  return <PluginsView mode="all-social" inModal />;
+export function PluginsPageView({ inModal }: { inModal?: boolean } = {}) {
+  return <PluginsView mode="all-social" inModal={inModal ?? false} />;
 }

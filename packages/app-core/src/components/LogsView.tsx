@@ -14,7 +14,14 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import type { LogEntry } from "../api";
 import { useApp } from "../state";
+import {
+  DESKTOP_CONTROL_SURFACE_CLASSNAME,
+  DESKTOP_INSET_PANEL_CLASSNAME,
+  DESKTOP_SURFACE_PANEL_CLASSNAME,
+  DesktopEmptyStatePanel,
+} from "./desktop-surface-primitives";
 import { formatTime } from "./format";
+import { SETTINGS_FILTER_CONTROL_CLASSNAME } from "./settings-control-primitives";
 
 const TAG_TONE_CLASSNAMES: Record<string, string> = {
   agent: "border-accent/25 bg-accent/10 text-accent-fg",
@@ -26,10 +33,7 @@ const TAG_TONE_CLASSNAMES: Record<string, string> = {
   websocket: "border-ok/20 bg-ok/8 text-ok",
 };
 
-const LOGS_PANEL_CLASSNAME =
-  "rounded-2xl border border-border/50 bg-card/92 shadow-sm";
-const LOGS_CONTROL_CLASSNAME =
-  "h-10 rounded-xl border-border/50 bg-bg/80 text-sm text-txt";
+const LOGS_PANEL_CLASSNAME = DESKTOP_SURFACE_PANEL_CLASSNAME;
 const LOGS_LEVEL_CLASSNAMES: Record<string, string> = {
   error: "text-danger",
   warn: "text-warning",
@@ -108,7 +112,7 @@ export function LogsView() {
         <div className="flex flex-wrap items-center gap-2">
           <Input
             type="text"
-            className={`min-w-[15rem] flex-1 ${LOGS_CONTROL_CLASSNAME}`}
+            className={`min-w-[15rem] flex-1 ${SETTINGS_FILTER_CONTROL_CLASSNAME}`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t("logsview.SearchLogs")}
@@ -122,7 +126,9 @@ export function LogsView() {
               void loadLogs();
             }}
           >
-            <SelectTrigger className={`w-40 ${LOGS_CONTROL_CLASSNAME}`}>
+            <SelectTrigger
+              className={`w-40 ${SETTINGS_FILTER_CONTROL_CLASSNAME}`}
+            >
               <SelectValue placeholder={t("logsview.AllLevels")} />
             </SelectTrigger>
             <SelectContent>
@@ -141,7 +147,9 @@ export function LogsView() {
               void loadLogs();
             }}
           >
-            <SelectTrigger className={`w-40 ${LOGS_CONTROL_CLASSNAME}`}>
+            <SelectTrigger
+              className={`w-40 ${SETTINGS_FILTER_CONTROL_CLASSNAME}`}
+            >
               <SelectValue placeholder={t("logsview.AllSources")} />
             </SelectTrigger>
             <SelectContent>
@@ -162,7 +170,9 @@ export function LogsView() {
                 void loadLogs();
               }}
             >
-              <SelectTrigger className={`w-40 ${LOGS_CONTROL_CLASSNAME}`}>
+              <SelectTrigger
+                className={`w-40 ${SETTINGS_FILTER_CONTROL_CLASSNAME}`}
+              >
                 <SelectValue placeholder={t("logsview.AllTags")} />
               </SelectTrigger>
               <SelectContent>
@@ -180,7 +190,7 @@ export function LogsView() {
             <Button
               variant="outline"
               size="sm"
-              className="min-h-10 rounded-xl px-3 text-xs font-medium"
+              className={`min-h-10 rounded-[18px] px-3 text-xs font-medium ${DESKTOP_CONTROL_SURFACE_CLASSNAME}`}
               onClick={handleClearFilters}
             >
               {t("logsview.ClearFilters")}
@@ -190,7 +200,7 @@ export function LogsView() {
           <Button
             variant="outline"
             size="sm"
-            className="ml-auto min-h-10 rounded-xl px-3 text-xs font-medium"
+            className={`ml-auto min-h-10 rounded-[18px] px-3 text-xs font-medium ${DESKTOP_CONTROL_SURFACE_CLASSNAME}`}
             onClick={() => void loadLogs()}
           >
             {t("common.refresh")}
@@ -213,15 +223,20 @@ export function LogsView() {
         className={`${LOGS_PANEL_CLASSNAME} flex-1 min-h-0 overflow-y-auto p-2 font-mono text-sm`}
       >
         {filteredLogs.length === 0 ? (
-          <div
+          <DesktopEmptyStatePanel
             role="status"
-            className="m-1 rounded-xl border border-border/35 bg-bg-hover/60 px-6 py-10 text-center text-sm text-muted"
-          >
-            {t("logsview.NoLogEntries")}
-            {hasActiveFilters ? " matching filters" : " yet"}.
-          </div>
+            className="m-1 min-h-[16rem] rounded-xl border-border/35 bg-bg-hover/60 px-6 py-10"
+            description={
+              hasActiveFilters
+                ? "Try broadening the current log filters to bring entries back into view."
+                : "New runtime and service events will appear here as the system emits them."
+            }
+            title={`${t("logsview.NoLogEntries")}${hasActiveFilters ? " matching filters" : " yet"}.`}
+          />
         ) : (
-          <div className="overflow-hidden rounded-xl border border-border/35 bg-bg-hover/30">
+          <div
+            className={`${DESKTOP_INSET_PANEL_CLASSNAME} overflow-hidden rounded-[18px]`}
+          >
             <div className="hidden grid-cols-[5.75rem_3.5rem_5rem_14rem_minmax(0,1fr)] gap-3 border-b border-border/40 px-3 py-2 text-[11px] font-medium uppercase tracking-[0.08em] text-muted md:grid">
               <span>Time</span>
               <span>Level</span>

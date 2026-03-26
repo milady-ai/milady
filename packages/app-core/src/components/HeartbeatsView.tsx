@@ -12,7 +12,7 @@ import {
   Textarea,
 } from "@miladyai/ui";
 import { Clock3, Plus } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type {
   CreateTriggerRequest,
   TriggerSummary,
@@ -22,6 +22,12 @@ import type {
 } from "../api/client";
 import { useApp } from "../state";
 import { confirmDesktopAction } from "../utils";
+import {
+  DESKTOP_PADDED_SURFACE_PANEL_CLASSNAME,
+  DESKTOP_RAIL_SUMMARY_CARD_CLASSNAME,
+  DesktopEmptyStatePanel,
+  DesktopPageFrame,
+} from "./desktop-surface-primitives";
 import { formatDateTime, formatDurationMs } from "./format";
 import {
   APP_PANEL_SHELL_CLASSNAME,
@@ -79,10 +85,8 @@ const HEARTBEAT_SIDEBAR_CARD_INACTIVE_CLASS =
   APP_SIDEBAR_CARD_INACTIVE_CLASSNAME;
 const HEARTBEATS_SHELL_CLASS = APP_PANEL_SHELL_CLASSNAME;
 const HEARTBEATS_CONTENT_WIDTH_CLASS = "mx-auto w-full max-w-[80rem]";
-const HEARTBEATS_PANEL_CLASS =
-  "rounded-[28px] border border-border/35 bg-bg/20 px-5 py-4 shadow-sm sm:px-6 sm:py-5";
-const HEARTBEATS_STAT_CARD_CLASS =
-  "rounded-2xl border border-border/30 bg-bg/20 px-4 py-4 shadow-sm";
+const HEARTBEATS_PANEL_CLASS = DESKTOP_PADDED_SURFACE_PANEL_CLASSNAME;
+const HEARTBEATS_STAT_CARD_CLASS = `${DESKTOP_RAIL_SUMMARY_CARD_CLASSNAME} px-4 py-4`;
 const HEARTBEATS_SECTION_KICKER_CLASS =
   "text-[11px] font-semibold uppercase tracking-[0.16em] text-muted";
 
@@ -327,15 +331,6 @@ function toneForLastStatus(
   return "muted";
 }
 
-function _wakeModeLabel(
-  wakeMode: TriggerWakeMode,
-  t: (key: string) => string,
-): string {
-  return wakeMode === "inject_now"
-    ? t("triggersview.InjectAmpWakeIm")
-    : t("triggersview.QueueForNextCycle");
-}
-
 function localizedExecutionStatus(status: string, t: TranslateFn): string {
   switch (status) {
     case "success":
@@ -353,12 +348,6 @@ function localizedExecutionStatus(status: string, t: TranslateFn): string {
     default:
       return status;
   }
-}
-
-function _runCountLabel(count: number, t: TranslateFn): string {
-  return count === 1
-    ? t("heartbeatsview.runCountSingle", { count })
-    : t("heartbeatsview.runCountPlural", { count });
 }
 
 export function HeartbeatsView() {
@@ -415,11 +404,6 @@ export function HeartbeatsView() {
     });
   }, []);
 
-  const _selectedRuns = useMemo(() => {
-    if (!selectedTriggerId) return [];
-    return triggerRunsById[selectedTriggerId] ?? [];
-  }, [selectedTriggerId, triggerRunsById]);
-
   useEffect(() => {
     void loadTriggerHealth();
     void loadTriggers();
@@ -474,14 +458,6 @@ export function HeartbeatsView() {
     key: K,
     value: TriggerFormState[K],
   ) => setForm((previous) => ({ ...previous, [key]: value }));
-
-  const _toggleExpandedTrigger = (triggerId: string) => {
-    const nextTriggerId = selectedTriggerId === triggerId ? null : triggerId;
-    setSelectedTriggerId(nextTriggerId);
-    if (nextTriggerId) {
-      void loadTriggerRuns(nextTriggerId);
-    }
-  };
 
   const onSubmit = async () => {
     const error = validateForm(form, t);
@@ -558,7 +534,7 @@ export function HeartbeatsView() {
       : form.enabled;
 
   return (
-    <div className="flex h-full w-full min-h-0 bg-bg p-0 lg:p-1">
+    <DesktopPageFrame>
       <div className={HEARTBEATS_SHELL_CLASS} data-testid="heartbeats-shell">
         {/* Sidebar — full-width on mobile when no detail is shown, fixed-width on md+ */}
         <aside
@@ -608,14 +584,11 @@ export function HeartbeatsView() {
               </div>
             )}
             {!triggersLoading && triggers.length === 0 && (
-              <div className="rounded-2xl border border-dashed border-border/50 bg-bg/25 px-4 py-4">
-                <div className="mb-1 text-sm font-medium text-txt">
-                  {t("heartbeatsview.newHeartbeat")}
-                </div>
-                <p className="text-xs leading-relaxed text-muted">
-                  {t("heartbeatsview.emptyStateDescription")}
-                </p>
-              </div>
+              <DesktopEmptyStatePanel
+                className="min-h-[11rem] px-4 py-6"
+                description={t("heartbeatsview.emptyStateDescription")}
+                title="No heartbeats yet"
+              />
             )}
             {triggers.map((trigger) => {
               const isActive = selectedTriggerId === trigger.id;
@@ -1417,31 +1390,30 @@ export function HeartbeatsView() {
                 );
               })()) || (
               <div className="flex h-full flex-col items-center justify-center p-8 text-center bg-bg/5">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-card border border-border/30 shadow-sm mb-6 rotate-3">
-                  <Clock3 className="h-7 w-7 text-muted/80" />
-                </div>
-                <h2 className="text-xl font-medium text-txt mb-2">
-                  {t("heartbeatsview.selectAHeartbeat")}
-                </h2>
-                <p className="text-sm text-muted max-w-sm leading-relaxed">
-                  {t("heartbeatsview.emptyStateDescription")}
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-5 h-10 rounded-xl px-5 text-sm"
-                  onClick={() => {
-                    openCreateEditor();
-                    setSelectedTriggerId(null);
-                  }}
-                >
-                  {t("heartbeatsview.newHeartbeat")}
-                </Button>
+                <DesktopEmptyStatePanel
+                  className="h-full min-h-[22rem]"
+                  description={t("heartbeatsview.emptyStateDescription")}
+                  icon={<Clock3 className="h-7 w-7" />}
+                  title={t("heartbeatsview.selectAHeartbeat")}
+                  action={
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-10 rounded-xl px-5 text-sm"
+                      onClick={() => {
+                        openCreateEditor();
+                        setSelectedTriggerId(null);
+                      }}
+                    >
+                      {t("heartbeatsview.newHeartbeat")}
+                    </Button>
+                  }
+                />
               </div>
             )
           )}
         </main>
       </div>
-    </div>
+    </DesktopPageFrame>
   );
 }

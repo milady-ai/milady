@@ -1,10 +1,6 @@
 /**
- * RuntimeView — deep runtime state inspector for advanced debugging.
- *
- * Shows:
- * - Full runtime snapshot
- * - Split sections: actions/providers/plugins/services/evaluators
- * - Explicit load order metadata
+ * RuntimeView — structured runtime inspector with a left rail navigator and
+ * a focused summary/detail pane.
  */
 
 import { Button, Input } from "@miladyai/ui";
@@ -16,9 +12,45 @@ import {
   type RuntimeServiceOrderItem,
 } from "../api";
 import { useApp } from "../state";
+import {
+  DESKTOP_CONTROL_SURFACE_ACCENT_CLASSNAME,
+  DESKTOP_CONTROL_SURFACE_CLASSNAME,
+  DESKTOP_CONTROL_SURFACE_COMPACT_CLASSNAME,
+  DESKTOP_INPUT_SHELL_CLASSNAME,
+  DESKTOP_INSET_EMPTY_PANEL_CLASSNAME,
+  DESKTOP_INSET_PANEL_CLASSNAME,
+  DESKTOP_PADDED_SURFACE_PANEL_CLASSNAME,
+  DESKTOP_PAGE_CONTENT_CLASSNAME,
+  DESKTOP_RAIL_SUMMARY_CARD_COMPACT_CLASSNAME,
+  DESKTOP_SECTION_SHELL_CLASSNAME,
+  DESKTOP_SURFACE_PANEL_CLASSNAME,
+  DesktopEmptyStatePanel,
+  DesktopPageFrame,
+  DesktopRailSummaryCard,
+} from "./desktop-surface-primitives";
 import { formatDateTime } from "./format";
+import {
+  APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME,
+  APP_DESKTOP_SPLIT_SHELL_CLASSNAME,
+  APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
+  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
+  APP_SIDEBAR_COMPACT_CARD_CLASSNAME,
+  APP_SIDEBAR_COMPACT_ICON_ACTIVE_CLASSNAME,
+  APP_SIDEBAR_COMPACT_ICON_INACTIVE_CLASSNAME,
+  APP_SIDEBAR_COMPACT_META_CLASSNAME,
+  APP_SIDEBAR_COMPACT_PILL_CLASSNAME,
+  APP_SIDEBAR_COMPACT_TITLE_CLASSNAME,
+  APP_SIDEBAR_HEADER_CLASSNAME,
+  APP_SIDEBAR_INNER_CLASSNAME,
+  APP_SIDEBAR_KICKER_CLASSNAME,
+  APP_SIDEBAR_META_CLASSNAME,
+  APP_SIDEBAR_PILL_CLASSNAME,
+  APP_SIDEBAR_SCROLL_REGION_CLASSNAME,
+  APP_SIDEBAR_SECTION_HEADING_CLASSNAME,
+} from "./sidebar-shell-styles";
 
 type RuntimeSectionKey =
+  | "summary"
   | "runtime"
   | "actions"
   | "providers"
@@ -26,25 +58,66 @@ type RuntimeSectionKey =
   | "services"
   | "evaluators";
 
+type RuntimeTreeSectionKey = Exclude<RuntimeSectionKey, "summary">;
+
+const RUNTIME_SHELL_CLASSNAME = APP_DESKTOP_SPLIT_SHELL_CLASSNAME;
+const RUNTIME_PANE_CLASSNAME = `${DESKTOP_PAGE_CONTENT_CLASSNAME} min-h-0`;
+const RUNTIME_TOOLBAR_BUTTON_CLASSNAME = `${DESKTOP_CONTROL_SURFACE_COMPACT_CLASSNAME} ${DESKTOP_CONTROL_SURFACE_CLASSNAME}`;
+const RUNTIME_TOOLBAR_BUTTON_ACCENT_CLASSNAME = `${DESKTOP_CONTROL_SURFACE_COMPACT_CLASSNAME} ${DESKTOP_CONTROL_SURFACE_ACCENT_CLASSNAME}`;
+const RUNTIME_INPUT_CLASSNAME = `${DESKTOP_INPUT_SHELL_CLASSNAME} h-9 rounded-[16px] px-3 text-sm text-txt`;
+const RUNTIME_SECTION_BUTTON_CLASSNAME = APP_SIDEBAR_COMPACT_CARD_CLASSNAME;
+
 const SECTION_TAB_KEYS: Array<{
   key: RuntimeSectionKey;
   i18nKey: string;
+  description: string;
 }> = [
-  { key: "runtime", i18nKey: "runtimeview.tabRuntime" },
-  { key: "actions", i18nKey: "runtimeview.tabActions" },
-  { key: "providers", i18nKey: "runtimeview.tabProviders" },
-  { key: "plugins", i18nKey: "runtimeview.tabPlugins" },
-  { key: "services", i18nKey: "runtimeview.tabServices" },
-  { key: "evaluators", i18nKey: "runtimeview.tabEvaluators" },
+  {
+    key: "summary",
+    i18nKey: "runtimeview.Summary",
+    description: "Health, counts, and current load order.",
+  },
+  {
+    key: "runtime",
+    i18nKey: "runtimeview.tabRuntime",
+    description: "Full serialized runtime object.",
+  },
+  {
+    key: "actions",
+    i18nKey: "runtimeview.tabActions",
+    description: "Registered actions and order.",
+  },
+  {
+    key: "providers",
+    i18nKey: "runtimeview.tabProviders",
+    description: "Loaded providers and precedence.",
+  },
+  {
+    key: "plugins",
+    i18nKey: "runtimeview.tabPlugins",
+    description: "Plugin registration and order.",
+  },
+  {
+    key: "services",
+    i18nKey: "runtimeview.tabServices",
+    description: "Grouped service implementations.",
+  },
+  {
+    key: "evaluators",
+    i18nKey: "runtimeview.tabEvaluators",
+    description: "Evaluator registration and order.",
+  },
 ];
 
 const SECTION_DESCRIPTIONS: Record<RuntimeSectionKey, string> = {
+  summary:
+    "Start here to confirm runtime availability, check the active model, and scan the current registration totals before opening a specific section.",
   runtime:
     "Inspect the full serialized runtime object and expand into the raw state tree.",
   actions:
     "Review registered actions and their load order in the active runtime.",
   providers:
-    "Check loaded providers, execution precedence, and which contexts are available.",
+    "Check loaded providers, execution precedence, and what contexts are available.",
   plugins:
     "Verify plugin registration order and confirm what the runtime has loaded.",
   services: "Inspect grouped services and their instantiated implementations.",
@@ -52,23 +125,15 @@ const SECTION_DESCRIPTIONS: Record<RuntimeSectionKey, string> = {
     "Review evaluator registration and ordering for agent decision loops.",
 };
 
-const RUNTIME_PANEL_CLASSNAME =
-  "rounded-2xl border border-border/50 bg-card/92 shadow-sm";
-const RUNTIME_SUBPANEL_CLASSNAME =
-  "rounded-xl border border-border/40 bg-bg-hover/60";
-const RUNTIME_TOOLBAR_BUTTON_CLASSNAME =
-  "min-h-10 rounded-xl px-3 text-xs font-medium";
-const RUNTIME_TAB_BUTTON_CLASSNAME =
-  "min-h-10 rounded-xl border px-3 text-xs font-medium transition-colors";
-
 function nodeSummary(value: unknown): string {
   if (value === null) return "null";
   if (typeof value === "string") {
     const compact = value.length > 100 ? `${value.slice(0, 100)}...` : value;
     return JSON.stringify(compact);
   }
-  if (typeof value === "number" || typeof value === "boolean")
+  if (typeof value === "number" || typeof value === "boolean") {
     return String(value);
+  }
   if (Array.isArray(value)) return `Array(${value.length})`;
   if (typeof value === "object") {
     const record = value as Record<string, unknown>;
@@ -109,10 +174,10 @@ function nodeEntries(
   path: string,
 ): Array<{ key: string; value: unknown; path: string }> {
   if (Array.isArray(value)) {
-    return value.map((entry, i) => ({
-      key: `[${i}]`,
+    return value.map((entry, index) => ({
+      key: `[${index}]`,
       value: entry,
-      path: `${path}[${i}]`,
+      path: `${path}[${index}]`,
     }));
   }
   if (!value || typeof value !== "object") return [];
@@ -174,7 +239,7 @@ function TreeNode(props: {
         <span className="min-w-0 break-all text-txt">{nodeSummary(value)}</span>
       </div>
 
-      {canExpand && open && (
+      {canExpand && open ? (
         <div>
           {entries.map((entry) => (
             <TreeNode
@@ -188,7 +253,7 @@ function TreeNode(props: {
             />
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -196,91 +261,81 @@ function TreeNode(props: {
 function OrderCard(props: { title: string; entries: RuntimeOrderItem[] }) {
   const { t } = useApp();
   const { title, entries } = props;
+
   return (
-    <div className={`${RUNTIME_PANEL_CLASSNAME} min-h-[188px] p-4`}>
+    <section className={`${DESKTOP_SECTION_SHELL_CLASSNAME} p-5`}>
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="text-sm font-semibold text-txt">{title}</div>
-        <div className="rounded-full border border-border/50 bg-bg-hover/70 px-2.5 py-1 text-[11px] font-medium text-muted">
-          {entries.length}
-        </div>
+        <div className={APP_SIDEBAR_PILL_CLASSNAME}>{entries.length}</div>
       </div>
-      <div className="max-h-[220px] rounded-xl border border-border/35 bg-bg-hover/40 p-3 text-[12px] font-mono leading-6 tabular-nums">
+      <div
+        className={`${DESKTOP_INSET_PANEL_CLASSNAME} max-h-[18rem] overflow-auto px-4 py-3 text-[12px] font-mono leading-6 tabular-nums`}
+      >
         {entries.length === 0 ? (
-          <div
-            role="status"
-            className="rounded-lg border border-border/35 bg-bg/70 px-3 py-3 text-muted"
-          >
-            {t("runtimeview.none")}
-          </div>
+          <div className="text-muted">{t("runtimeview.none")}</div>
         ) : (
-          <div className="max-h-[192px] overflow-auto pr-1">
-            {entries.map((entry) => (
-              <div
-                key={`${title}-${entry.index}`}
-                className="min-w-0 break-words text-txt"
-              >
-                {orderItemLabel(entry)}
-              </div>
-            ))}
-          </div>
+          entries.map((entry) => (
+            <div
+              key={`${title}-${entry.index}`}
+              className="min-w-0 break-words text-txt"
+            >
+              {orderItemLabel(entry)}
+            </div>
+          ))
         )}
       </div>
-    </div>
+    </section>
   );
 }
 
 function ServicesOrderCard(props: { entries: RuntimeServiceOrderItem[] }) {
   const { t } = useApp();
   const { entries } = props;
+
   return (
-    <div className={`${RUNTIME_PANEL_CLASSNAME} min-h-[188px] p-4`}>
+    <section className={`${DESKTOP_SECTION_SHELL_CLASSNAME} p-5`}>
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="text-sm font-semibold text-txt">
           {t("runtimeview.Services")}
         </div>
-        <div className="rounded-full border border-border/50 bg-bg-hover/70 px-2.5 py-1 text-[11px] font-medium text-muted">
+        <div className={APP_SIDEBAR_PILL_CLASSNAME}>
           {entries.length} {t("runtimeview.types")}
         </div>
       </div>
-      <div className="max-h-[220px] rounded-xl border border-border/35 bg-bg-hover/40 p-3 text-[12px] font-mono leading-6 tabular-nums">
+      <div
+        className={`${DESKTOP_INSET_PANEL_CLASSNAME} max-h-[18rem] space-y-3 overflow-auto px-4 py-3 text-[12px] font-mono leading-6 tabular-nums`}
+      >
         {entries.length === 0 ? (
-          <div
-            role="status"
-            className="rounded-lg border border-border/35 bg-bg/70 px-3 py-3 text-muted"
-          >
-            {t("runtimeview.none")}
-          </div>
+          <div className="text-muted">{t("runtimeview.none")}</div>
         ) : (
-          <div className="max-h-[192px] space-y-3 overflow-auto pr-1">
-            {entries.map((serviceGroup) => (
-              <div
-                key={`${serviceGroup.serviceType}-${serviceGroup.index}`}
-                className={`${RUNTIME_SUBPANEL_CLASSNAME} p-3`}
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="min-w-0 break-words text-txt">
-                    [{serviceGroup.index}] {serviceGroup.serviceType}
-                  </div>
-                  <div className="rounded-full border border-border/40 bg-bg/80 px-2 py-0.5 text-[11px] text-muted">
-                    {serviceGroup.count}
-                  </div>
+          entries.map((serviceGroup) => (
+            <div
+              key={`${serviceGroup.serviceType}-${serviceGroup.index}`}
+              className={`${DESKTOP_INSET_PANEL_CLASSNAME} px-3 py-3`}
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="min-w-0 break-words text-txt">
+                  [{serviceGroup.index}] {serviceGroup.serviceType}
                 </div>
-                <div className="mt-2 space-y-1 pl-3 text-muted">
-                  {serviceGroup.instances.map((instance) => (
-                    <div
-                      key={`${serviceGroup.serviceType}-${instance.index}`}
-                      className="min-w-0 break-words"
-                    >
-                      {orderItemLabel(instance)}
-                    </div>
-                  ))}
+                <div className={APP_SIDEBAR_PILL_CLASSNAME}>
+                  {serviceGroup.count}
                 </div>
               </div>
-            ))}
-          </div>
+              <div className="mt-2 space-y-1 pl-3 text-muted">
+                {serviceGroup.instances.map((instance) => (
+                  <div
+                    key={`${serviceGroup.serviceType}-${instance.index}`}
+                    className="min-w-0 break-words"
+                  >
+                    {orderItemLabel(instance)}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))
         )}
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -323,17 +378,17 @@ function RuntimeSummaryCard(props: {
   ];
 
   return (
-    <div className={`${RUNTIME_PANEL_CLASSNAME} p-4`}>
+    <section className={`${DESKTOP_SECTION_SHELL_CLASSNAME} p-5`}>
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="text-sm font-semibold text-txt">
           {t("runtimeview.Summary")}
         </div>
         <div
-          className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${
+          className={
             snapshot.runtimeAvailable
-              ? "border-ok/30 bg-ok/10 text-ok"
-              : "border-warning/30 bg-warning/10 text-warning"
-          }`}
+              ? "rounded-full border border-ok/30 bg-ok/10 px-2.5 py-1 text-[11px] font-medium text-ok"
+              : "rounded-full border border-warning/30 bg-warning/10 px-2.5 py-1 text-[11px] font-medium text-warning"
+          }
         >
           {snapshot.runtimeAvailable
             ? t("runtimeview.available")
@@ -344,7 +399,7 @@ function RuntimeSummaryCard(props: {
         {summaryRows.map((row) => (
           <div
             key={row.label}
-            className="flex items-start justify-between gap-3 rounded-xl border border-border/35 bg-bg-hover/50 px-3 py-2"
+            className={`${DESKTOP_INSET_PANEL_CLASSNAME} flex items-start justify-between gap-3 px-3 py-2`}
           >
             <span className="text-muted">{row.label}</span>
             <span className="min-w-0 break-all text-right font-semibold text-txt">
@@ -353,7 +408,7 @@ function RuntimeSummaryCard(props: {
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -363,15 +418,18 @@ export function RuntimeView() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeSection, setActiveSection] =
-    useState<RuntimeSectionKey>("runtime");
+    useState<RuntimeSectionKey>("summary");
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
-
   const [depth, setDepth] = useState(10);
   const [maxArrayLength, setMaxArrayLength] = useState(1000);
   const [maxObjectEntries, setMaxObjectEntries] = useState(1000);
 
-  const sectionData = snapshot?.sections[activeSection] ?? null;
-  const rootPath = `$${activeSection}`;
+  const sectionData =
+    activeSection === "summary"
+      ? (snapshot?.sections.runtime ?? null)
+      : (snapshot?.sections[activeSection as RuntimeTreeSectionKey] ?? null);
+  const rootPath =
+    activeSection === "summary" ? "$runtime" : `$${activeSection}`;
 
   const loadSnapshot = useCallback(async () => {
     setLoading(true);
@@ -401,229 +459,436 @@ export function RuntimeView() {
   }, [rootPath, sectionData]);
 
   const handleTogglePath = useCallback((path: string) => {
-    setExpandedPaths((prev) => {
-      const next = new Set(prev);
+    setExpandedPaths((previous) => {
+      const next = new Set(previous);
       if (next.has(path)) next.delete(path);
       else next.add(path);
       return next;
     });
   }, []);
 
+  const runtimeAvailable = snapshot?.runtimeAvailable ?? false;
+  const sectionMeta: Record<RuntimeSectionKey, string> = {
+    summary: snapshot
+      ? `${snapshot.meta.pluginCount + snapshot.meta.providerCount + snapshot.meta.evaluatorCount} signals`
+      : "overview",
+    runtime: snapshot
+      ? `${Object.keys(snapshot.sections.runtime ?? {}).length} roots`
+      : "raw tree",
+    actions: snapshot ? "registered handlers" : "actions",
+    providers: snapshot ? "loaded contexts" : "providers",
+    plugins: snapshot ? "active modules" : "plugins",
+    services: snapshot ? "instantiated services" : "services",
+    evaluators: snapshot ? "decision hooks" : "evaluators",
+  };
+
+  const getSectionCount = (sectionKey: RuntimeSectionKey) => {
+    if (!snapshot) return null;
+    switch (sectionKey) {
+      case "summary":
+        return null;
+      case "runtime":
+        return snapshot.runtimeAvailable ? "live" : "offline";
+      case "actions":
+        return String(snapshot.order.actions.length);
+      case "providers":
+        return String(snapshot.order.providers.length);
+      case "plugins":
+        return String(snapshot.order.plugins.length);
+      case "services":
+        return String(snapshot.order.services.length);
+      case "evaluators":
+        return String(snapshot.order.evaluators.length);
+    }
+  };
+
   return (
-    <div data-testid="runtime-view" className="flex flex-col gap-4 h-full">
-      <section
-        className={`${RUNTIME_PANEL_CLASSNAME} flex flex-col gap-4 p-4 sm:p-5`}
-      >
-        <div className="flex flex-col gap-1">
-          <div className="text-sm font-semibold text-txt">
-            Runtime snapshot controls
-          </div>
-          <p className="max-w-3xl text-xs leading-5 text-muted">
-            Tune how much runtime data to pull into the inspector, refresh the
-            snapshot, and quickly collapse or re-expand the first layer when you
-            need to scan the tree.
-          </p>
-        </div>
-        <div className="grid gap-3 lg:grid-cols-[repeat(3,minmax(0,11rem))_auto_auto_auto_1fr]">
-          {/* biome-ignore lint/a11y/noLabelWithoutControl: form control is associated programmatically */}
-          <label className="flex min-w-0 flex-col gap-1.5 text-xs text-muted">
-            <span>{t("runtimeview.depth")}</span>
-            <Input
-              type="number"
-              min={1}
-              max={24}
-              value={depth}
-              onChange={(e) =>
-                setDepth(Math.max(1, Math.min(24, Number(e.target.value) || 1)))
-              }
-              className="h-10 w-full rounded-xl border-border/50 bg-bg/80 px-3 text-sm text-txt"
-            />
-          </label>
-          {/* biome-ignore lint/a11y/noLabelWithoutControl: form control is associated programmatically */}
-          <label className="flex min-w-0 flex-col gap-1.5 text-xs text-muted">
-            <span>{t("runtimeview.arrayCap")}</span>
-            <Input
-              type="number"
-              min={1}
-              max={5000}
-              value={maxArrayLength}
-              onChange={(e) =>
-                setMaxArrayLength(
-                  Math.max(1, Math.min(5000, Number(e.target.value) || 1)),
-                )
-              }
-              className="h-10 w-full rounded-xl border-border/50 bg-bg/80 px-3 text-sm text-txt"
-            />
-          </label>
-          {/* biome-ignore lint/a11y/noLabelWithoutControl: form control is associated programmatically */}
-          <label className="flex min-w-0 flex-col gap-1.5 text-xs text-muted">
-            <span>{t("runtimeview.objectCap")}</span>
-            <Input
-              type="number"
-              min={1}
-              max={5000}
-              value={maxObjectEntries}
-              onChange={(e) =>
-                setMaxObjectEntries(
-                  Math.max(1, Math.min(5000, Number(e.target.value) || 1)),
-                )
-              }
-              className="h-10 w-full rounded-xl border-border/50 bg-bg/80 px-3 text-sm text-txt"
-            />
-          </label>
-          <Button
-            variant="outline"
-            size="sm"
-            type="button"
-            onClick={() => void loadSnapshot()}
-            disabled={loading}
-            className={RUNTIME_TOOLBAR_BUTTON_CLASSNAME}
-          >
-            {loading ? t("runtimeview.Refreshing") : t("common.refresh")}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            type="button"
-            onClick={() => setExpandedPaths(new Set([rootPath]))}
-            className={RUNTIME_TOOLBAR_BUTTON_CLASSNAME}
-          >
-            {t("runtimeview.Collapse")}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            type="button"
-            onClick={() =>
-              setExpandedPaths(buildInitialExpanded(rootPath, sectionData))
-            }
-            className={RUNTIME_TOOLBAR_BUTTON_CLASSNAME}
-          >
-            {t("runtimeview.ExpandTop")}
-          </Button>
-          <div className="flex items-center lg:justify-end">
-            <div className="rounded-xl border border-border/40 bg-bg-hover/60 px-3 py-2 text-xs text-muted tabular-nums">
-              {snapshot
-                ? `${t("runtimeview.lastUpdated")} ${formatDateTime(
-                    snapshot.generatedAt,
-                    {
-                      fallback: "n/a",
-                    },
-                  )}`
-                : t("runtimeview.noSnapshotLoaded")}
+    <DesktopPageFrame>
+      <div data-testid="runtime-view" className={RUNTIME_SHELL_CLASSNAME}>
+        <aside className={APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME}>
+          <div className={APP_SIDEBAR_INNER_CLASSNAME}>
+            <div className={APP_SIDEBAR_HEADER_CLASSNAME}>
+              <div className={APP_SIDEBAR_KICKER_CLASSNAME}>
+                {t("runtimeview.runtime", { defaultValue: "Runtime" })}
+              </div>
+              <div className={APP_SIDEBAR_META_CLASSNAME}>
+                {snapshot
+                  ? runtimeAvailable
+                    ? t("runtimeview.available")
+                    : t("runtimeview.offline")
+                  : t("runtimeview.loadingSnapshot")}
+              </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {snapshot && (
-        <section className="space-y-3">
-          <div className="flex flex-col gap-1">
-            <div className="text-sm font-semibold text-txt">
-              Runtime load order overview
-            </div>
-            <p className="max-w-3xl text-xs leading-5 text-muted">
-              Scan the high-level registration counts before drilling into the
-              raw object tree below.
-            </p>
-          </div>
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            <OrderCard
-              title={t("runtimeview.Plugins")}
-              entries={snapshot.order.plugins}
-            />
-            <OrderCard
-              title={t("runtimeview.Actions")}
-              entries={snapshot.order.actions}
-            />
-            <OrderCard
-              title={t("runtimeview.Providers")}
-              entries={snapshot.order.providers}
-            />
-            <OrderCard
-              title={t("runtimeview.Evaluators")}
-              entries={snapshot.order.evaluators}
-            />
-            <ServicesOrderCard entries={snapshot.order.services} />
-            <RuntimeSummaryCard snapshot={snapshot} t={t} />
-          </div>
-        </section>
-      )}
-
-      <div className="flex flex-wrap gap-2">
-        {SECTION_TAB_KEYS.map((tab) => {
-          const active = tab.key === activeSection;
-          return (
-            <Button
-              key={tab.key}
-              variant="ghost"
-              size="sm"
-              type="button"
-              onClick={() => setActiveSection(tab.key)}
-              className={`${RUNTIME_TAB_BUTTON_CLASSNAME} ${
-                active
-                  ? "border-accent/60 bg-accent/10 text-txt shadow-sm"
-                  : "border-border/40 bg-bg-hover/50 text-muted-strong hover:border-border hover:bg-bg-hover hover:text-txt"
-              }`}
+            <DesktopRailSummaryCard
+              className={`mt-3 ${DESKTOP_RAIL_SUMMARY_CARD_COMPACT_CLASSNAME}`}
             >
-              {t(tab.i18nKey)}
-            </Button>
-          );
-        })}
-      </div>
-
-      <div
-        className={`${RUNTIME_PANEL_CLASSNAME} flex-1 min-h-[320px] overflow-auto p-3`}
-      >
-        {!error && snapshot?.runtimeAvailable ? (
-          <div className="mb-3 flex flex-col gap-1 rounded-xl border border-border/35 bg-bg-hover/40 px-4 py-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="text-sm font-semibold capitalize text-txt">
-                {activeSection}
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-[12px] font-semibold text-txt">
+                    {snapshot?.meta.agentName ??
+                      t("runtimeview.loadingSnapshot", {
+                        defaultValue: "Loading snapshot",
+                      })}
+                  </div>
+                  <div className="mt-0.5 text-[10px] text-muted">
+                    {snapshot
+                      ? formatDateTime(snapshot.generatedAt, {
+                          fallback: "n/a",
+                        })
+                      : t("runtimeview.noSnapshotLoaded")}
+                  </div>
+                </div>
+                <span className={APP_SIDEBAR_PILL_CLASSNAME}>
+                  {runtimeAvailable
+                    ? t("runtimeview.available")
+                    : t("runtimeview.offline")}
+                </span>
               </div>
-              <div className="rounded-full border border-border/35 bg-bg/80 px-2.5 py-1 text-[11px] font-medium text-muted">
-                {rootPath}
+
+              <div className="mt-2.5 grid grid-cols-2 gap-1.5">
+                <div className={APP_SIDEBAR_COMPACT_PILL_CLASSNAME}>
+                  {snapshot?.meta.model ?? "n/a"}
+                </div>
+                <div className={APP_SIDEBAR_COMPACT_PILL_CLASSNAME}>
+                  {snapshot?.meta.agentState ?? "unknown"}
+                </div>
+                <div className={APP_SIDEBAR_COMPACT_PILL_CLASSNAME}>
+                  {`${snapshot?.meta.pluginCount ?? 0} plugins`}
+                </div>
+                <div className={APP_SIDEBAR_COMPACT_PILL_CLASSNAME}>
+                  {`${snapshot?.meta.serviceCount ?? 0} services`}
+                </div>
+              </div>
+            </DesktopRailSummaryCard>
+
+            <div className={`mt-3 ${APP_SIDEBAR_SECTION_HEADING_CLASSNAME}`}>
+              Inspector controls
+            </div>
+            <DesktopRailSummaryCard
+              className={`mt-2 space-y-2 ${DESKTOP_RAIL_SUMMARY_CARD_COMPACT_CLASSNAME}`}
+            >
+              {/* biome-ignore lint/a11y/noLabelWithoutControl: programmatic control association is preserved */}
+              <label className="flex flex-col gap-1 text-[11px] text-muted">
+                <span>{t("runtimeview.depth")}</span>
+                <Input
+                  type="number"
+                  min={1}
+                  max={24}
+                  value={depth}
+                  onChange={(event) =>
+                    setDepth(
+                      Math.max(
+                        1,
+                        Math.min(24, Number(event.target.value) || 1),
+                      ),
+                    )
+                  }
+                  className={RUNTIME_INPUT_CLASSNAME}
+                />
+              </label>
+
+              {/* biome-ignore lint/a11y/noLabelWithoutControl: programmatic control association is preserved */}
+              <label className="flex flex-col gap-1 text-[11px] text-muted">
+                <span>{t("runtimeview.arrayCap")}</span>
+                <Input
+                  type="number"
+                  min={1}
+                  max={5000}
+                  value={maxArrayLength}
+                  onChange={(event) =>
+                    setMaxArrayLength(
+                      Math.max(
+                        1,
+                        Math.min(5000, Number(event.target.value) || 1),
+                      ),
+                    )
+                  }
+                  className={RUNTIME_INPUT_CLASSNAME}
+                />
+              </label>
+
+              {/* biome-ignore lint/a11y/noLabelWithoutControl: programmatic control association is preserved */}
+              <label className="flex flex-col gap-1 text-[11px] text-muted">
+                <span>{t("runtimeview.objectCap")}</span>
+                <Input
+                  type="number"
+                  min={1}
+                  max={5000}
+                  value={maxObjectEntries}
+                  onChange={(event) =>
+                    setMaxObjectEntries(
+                      Math.max(
+                        1,
+                        Math.min(5000, Number(event.target.value) || 1),
+                      ),
+                    )
+                  }
+                  className={RUNTIME_INPUT_CLASSNAME}
+                />
+              </label>
+
+              <div className="grid grid-cols-2 gap-1.5 pt-0.5">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  onClick={() => void loadSnapshot()}
+                  disabled={loading}
+                  className={
+                    loading
+                      ? RUNTIME_TOOLBAR_BUTTON_ACCENT_CLASSNAME
+                      : RUNTIME_TOOLBAR_BUTTON_CLASSNAME
+                  }
+                >
+                  {loading ? t("runtimeview.Refreshing") : t("common.refresh")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  onClick={() =>
+                    setExpandedPaths(
+                      buildInitialExpanded(rootPath, sectionData),
+                    )
+                  }
+                  className={RUNTIME_TOOLBAR_BUTTON_CLASSNAME}
+                  disabled={activeSection === "summary"}
+                >
+                  {t("runtimeview.ExpandTop")}
+                </Button>
+              </div>
+            </DesktopRailSummaryCard>
+
+            <div className={`mt-3 ${APP_SIDEBAR_SECTION_HEADING_CLASSNAME}`}>
+              Sections
+            </div>
+            <div className={`mt-2 ${APP_SIDEBAR_SCROLL_REGION_CLASSNAME}`}>
+              <div className="space-y-1.5">
+                {SECTION_TAB_KEYS.map((section) => {
+                  const active = section.key === activeSection;
+                  return (
+                    <Button
+                      key={section.key}
+                      variant="ghost"
+                      type="button"
+                      onClick={() => setActiveSection(section.key)}
+                      className={`${RUNTIME_SECTION_BUTTON_CLASSNAME} ${
+                        active
+                          ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
+                          : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
+                      }`}
+                      aria-current={active ? "page" : undefined}
+                    >
+                      <span
+                        className={
+                          active
+                            ? APP_SIDEBAR_COMPACT_ICON_ACTIVE_CLASSNAME
+                            : APP_SIDEBAR_COMPACT_ICON_INACTIVE_CLASSNAME
+                        }
+                      >
+                        {section.key === "summary"
+                          ? "Σ"
+                          : t(section.i18nKey).charAt(0).toUpperCase()}
+                      </span>
+                      <span className="min-w-0 flex-1 text-left">
+                        <span className={APP_SIDEBAR_COMPACT_TITLE_CLASSNAME}>
+                          {t(section.i18nKey)}
+                        </span>
+                        <span className={APP_SIDEBAR_COMPACT_META_CLASSNAME}>
+                          {sectionMeta[section.key]}
+                        </span>
+                      </span>
+                      {getSectionCount(section.key) ? (
+                        <span className={APP_SIDEBAR_COMPACT_PILL_CLASSNAME}>
+                          {getSectionCount(section.key)}
+                        </span>
+                      ) : null}
+                    </Button>
+                  );
+                })}
               </div>
             </div>
-            <p className="max-w-3xl text-xs leading-5 text-muted">
-              {SECTION_DESCRIPTIONS[activeSection]}
-            </p>
           </div>
-        ) : null}
-        {error ? (
-          <div
-            role="alert"
-            className="m-1 rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger"
-          >
-            {error}
+        </aside>
+
+        <div className={RUNTIME_PANE_CLASSNAME}>
+          <div className="flex min-h-0 flex-1 flex-col gap-4 p-3 lg:p-4">
+            {error ? (
+              <div className="rounded-[18px] border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
+                {error}
+              </div>
+            ) : null}
+
+            {!snapshot ? (
+              <DesktopEmptyStatePanel
+                className="min-h-[24rem]"
+                description="Refresh the inspector after the desktop runtime boots to pull the current object tree and registration data."
+                title={
+                  loading
+                    ? t("runtimeview.loadingSnapshot")
+                    : t("runtimeview.noSnapshotAvailable")
+                }
+              />
+            ) : !snapshot.runtimeAvailable ? (
+              <DesktopEmptyStatePanel
+                className="min-h-[24rem] border-warning/25 bg-warning/10 text-warning"
+                description="The runtime inspector becomes available after the desktop agent finishes loading its core services."
+                title={t("runtimeview.AgentRuntimeIsNot")}
+              />
+            ) : activeSection === "summary" ? (
+              <>
+                <section className={DESKTOP_PADDED_SURFACE_PANEL_CLASSNAME}>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted/70">
+                    Runtime
+                  </div>
+                  <div className="mt-2 text-[2rem] font-semibold leading-tight text-txt">
+                    Runtime Summary
+                  </div>
+                  <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
+                    Confirm that the agent runtime is healthy, review its active
+                    model and state, then use the left rail to open one section
+                    at a time when you need raw detail.
+                  </p>
+                </section>
+
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  <OrderCard
+                    title={t("runtimeview.Plugins")}
+                    entries={snapshot.order.plugins}
+                  />
+                  <OrderCard
+                    title={t("runtimeview.Actions")}
+                    entries={snapshot.order.actions}
+                  />
+                  <OrderCard
+                    title={t("runtimeview.Providers")}
+                    entries={snapshot.order.providers}
+                  />
+                  <OrderCard
+                    title={t("runtimeview.Evaluators")}
+                    entries={snapshot.order.evaluators}
+                  />
+                  <ServicesOrderCard entries={snapshot.order.services} />
+                  <RuntimeSummaryCard snapshot={snapshot} t={t} />
+                </div>
+              </>
+            ) : (
+              <>
+                <section className={DESKTOP_PADDED_SURFACE_PANEL_CLASSNAME}>
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted/70">
+                        Runtime Section
+                      </div>
+                      <div className="mt-2 text-[2rem] font-semibold leading-tight text-txt">
+                        {t(
+                          SECTION_TAB_KEYS.find(
+                            (section) => section.key === activeSection,
+                          )?.i18nKey ?? "runtimeview.runtime",
+                        )}
+                      </div>
+                      <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
+                        {SECTION_DESCRIPTIONS[activeSection]}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        type="button"
+                        onClick={() => setExpandedPaths(new Set([rootPath]))}
+                        className={RUNTIME_TOOLBAR_BUTTON_CLASSNAME}
+                      >
+                        {t("runtimeview.Collapse")}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        type="button"
+                        onClick={() =>
+                          setExpandedPaths(
+                            buildInitialExpanded(rootPath, sectionData),
+                          )
+                        }
+                        className={RUNTIME_TOOLBAR_BUTTON_CLASSNAME}
+                      >
+                        {t("runtimeview.ExpandTop")}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    <div
+                      className={`${DESKTOP_INSET_PANEL_CLASSNAME} px-4 py-4`}
+                    >
+                      <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
+                        Path
+                      </div>
+                      <div className="mt-2 font-mono text-sm text-txt">
+                        {rootPath}
+                      </div>
+                    </div>
+                    <div
+                      className={`${DESKTOP_INSET_PANEL_CLASSNAME} px-4 py-4`}
+                    >
+                      <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
+                        Last Updated
+                      </div>
+                      <div className="mt-2 text-sm font-semibold text-txt">
+                        {formatDateTime(snapshot.generatedAt, {
+                          fallback: "n/a",
+                        })}
+                      </div>
+                    </div>
+                    <div
+                      className={`${DESKTOP_INSET_PANEL_CLASSNAME} px-4 py-4`}
+                    >
+                      <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
+                        Depth
+                      </div>
+                      <div className="mt-2 text-sm font-semibold text-txt">
+                        {depth}
+                      </div>
+                    </div>
+                    <div
+                      className={`${DESKTOP_INSET_PANEL_CLASSNAME} px-4 py-4`}
+                    >
+                      <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
+                        Object Cap
+                      </div>
+                      <div className="mt-2 text-sm font-semibold text-txt">
+                        {maxObjectEntries}
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section
+                  className={`${DESKTOP_SURFACE_PANEL_CLASSNAME} min-h-[24rem] flex-1 overflow-auto p-4`}
+                >
+                  {sectionData == null ? (
+                    <DesktopEmptyStatePanel
+                      className={`min-h-[18rem] ${DESKTOP_INSET_EMPTY_PANEL_CLASSNAME}`}
+                      description="No data was returned for this section in the current snapshot."
+                      title="Section unavailable"
+                    />
+                  ) : (
+                    <TreeNode
+                      label={activeSection}
+                      value={sectionData}
+                      path={rootPath}
+                      depth={0}
+                      expanded={expandedPaths}
+                      onToggle={handleTogglePath}
+                    />
+                  )}
+                </section>
+              </>
+            )}
           </div>
-        ) : !snapshot ? (
-          <div
-            role="status"
-            className="m-1 rounded-xl border border-border/35 bg-bg-hover/60 px-6 py-10 text-center text-sm text-muted"
-          >
-            {loading
-              ? t("runtimeview.loadingSnapshot")
-              : t("runtimeview.noSnapshotAvailable")}
-          </div>
-        ) : !snapshot.runtimeAvailable ? (
-          <div
-            role="status"
-            className="m-1 rounded-xl border border-warning/25 bg-warning/10 px-6 py-10 text-center text-sm text-warning"
-          >
-            {t("runtimeview.AgentRuntimeIsNot")}
-          </div>
-        ) : (
-          <TreeNode
-            label={activeSection}
-            value={sectionData}
-            path={rootPath}
-            depth={0}
-            expanded={expandedPaths}
-            onToggle={handleTogglePath}
-          />
-        )}
+        </div>
       </div>
-    </div>
+    </DesktopPageFrame>
   );
 }

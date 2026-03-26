@@ -20,9 +20,40 @@ import {
 } from "../api";
 import { useApp } from "../state";
 import {
+  DESKTOP_CONTROL_SURFACE_CLASSNAME,
+  DESKTOP_INSET_EMPTY_PANEL_CLASSNAME,
+  DESKTOP_INSET_PANEL_CLASSNAME,
+  DESKTOP_PAGE_CONTENT_CLASSNAME,
+  DESKTOP_SEGMENTED_GROUP_CLASSNAME,
+  DESKTOP_SEGMENTED_ITEM_ACTIVE_CLASSNAME,
+  DESKTOP_SEGMENTED_ITEM_BASE_CLASSNAME,
+  DESKTOP_SEGMENTED_ITEM_INACTIVE_CLASSNAME,
+  DESKTOP_SURFACE_PANEL_CLASSNAME,
+  DesktopEmptyStatePanel,
+  DesktopRailSummaryCard,
+} from "./desktop-surface-primitives";
+import {
+  APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME,
+  APP_DESKTOP_SPLIT_SHELL_CLASSNAME,
+  APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
+  APP_SIDEBAR_CARD_BASE_CLASSNAME,
+  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
+  APP_SIDEBAR_HEADER_CLASSNAME,
+  APP_SIDEBAR_INNER_CLASSNAME,
+  APP_SIDEBAR_KICKER_CLASSNAME,
+  APP_SIDEBAR_META_CLASSNAME,
+  APP_SIDEBAR_PILL_CLASSNAME,
   APP_SIDEBAR_RAIL_CLASSNAME,
+  APP_SIDEBAR_SCROLL_REGION_CLASSNAME,
   APP_SIDEBAR_SEARCH_INPUT_CLASSNAME,
 } from "./sidebar-shell-styles";
+
+const DATABASE_SHELL_CLASS = APP_DESKTOP_SPLIT_SHELL_CLASSNAME;
+const DATABASE_SIDEBAR_CLASS = APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME;
+const DATABASE_INFO_PANEL_CLASS = `${DESKTOP_INSET_PANEL_CLASSNAME} rounded-[18px] px-3 py-3 text-[11px] text-muted`;
+const DATABASE_EMPTY_HINT_CLASS = `${DESKTOP_INSET_EMPTY_PANEL_CLASSNAME} rounded-[18px] px-3 py-4 text-center text-xs text-muted`;
+const DATABASE_HISTORY_BUTTON_CLASS = `h-auto w-full justify-start rounded-[18px] px-3 py-2 text-left text-[11px] font-mono ${DESKTOP_CONTROL_SURFACE_CLASSNAME}`;
+const DATABASE_REFRESH_BUTTON_CLASS = `h-10 w-full justify-start rounded-[18px] px-4 text-xs font-semibold ${DESKTOP_CONTROL_SURFACE_CLASSNAME}`;
 
 type DbView = "tables" | "query";
 type SortDir = "asc" | "desc" | null;
@@ -110,7 +141,7 @@ function CellPopover({
   return (
     <div
       ref={ref}
-      className="fixed z-50 bg-card/60 backdrop-blur-md border border-border/40 shadow-[0_8px_30px_rgba(var(--accent),0.15)] rounded-xl p-4 max-w-[500px] max-h-[300px] overflow-auto"
+      className="fixed z-50 bg-card/60 backdrop-blur-md border border-border/40 shadow-[0_8px_30px_rgba(var(--accent-rgb),0.15)] rounded-xl p-4 max-w-[500px] max-h-[300px] overflow-auto"
       style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
     >
       <div className="flex items-center justify-between mb-3 border-b border-border/40 pb-2">
@@ -120,7 +151,7 @@ function CellPopover({
         <Button
           variant="ghost"
           size="icon"
-          className="w-6 h-6 rounded-full hover:bg-bg-hover hover:text-txt hover:shadow-[0_0_10px_rgba(var(--accent),0.2)] transition-all"
+          className="w-6 h-6 rounded-full transition-[background-color,color,box-shadow] hover:bg-bg-hover hover:text-txt hover:shadow-[0_0_10px_rgba(var(--accent-rgb),0.2)]"
           onClick={onClose}
         >
           ×
@@ -287,7 +318,7 @@ function PaginationBar({
         <Button
           variant="outline"
           size="sm"
-          className="h-auto min-h-[1.75rem] py-1 whitespace-normal break-words text-left text-[11px] rounded-lg border-border/50 hover:border-accent hover:text-txt hover:shadow-[0_0_10px_rgba(var(--accent),0.2)] transition-all bg-bg/50 backdrop-blur-sm"
+          className="h-auto min-h-[1.75rem] whitespace-normal break-words rounded-lg border-border/50 bg-bg/50 py-1 text-left text-[11px] backdrop-blur-sm transition-[border-color,color,box-shadow] hover:border-accent hover:text-txt hover:shadow-[0_0_10px_rgba(var(--accent-rgb),0.2)]"
           disabled={!hasPrev}
           onClick={onPrev}
         >
@@ -296,7 +327,7 @@ function PaginationBar({
         <Button
           variant="outline"
           size="sm"
-          className="h-auto min-h-[1.75rem] py-1 whitespace-normal break-words text-left text-[11px] rounded-lg border-border/50 hover:border-accent hover:text-txt hover:shadow-[0_0_10px_rgba(var(--accent),0.2)] transition-all bg-bg/50 backdrop-blur-sm"
+          className="h-auto min-h-[1.75rem] whitespace-normal break-words rounded-lg border-border/50 bg-bg/50 py-1 text-left text-[11px] backdrop-blur-sm transition-[border-color,color,box-shadow] hover:border-accent hover:text-txt hover:shadow-[0_0_10px_rgba(var(--accent-rgb),0.2)]"
           disabled={!hasNext}
           onClick={onNext}
         >
@@ -311,6 +342,7 @@ function PaginationBar({
 
 export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
   const { t } = useApp();
+  const showExternalSidebar = Boolean(leftNav);
   const [dbStatus, setDbStatus] = useState<DatabaseStatus | null>(null);
   const [tables, setTables] = useState<TableInfo[]>([]);
   const [selectedTable, setSelectedTable] = useState("");
@@ -489,72 +521,472 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
     [tables, sidebarSearch],
   );
 
-  return (
-    <div className="flex flex-col h-full gap-4">
-      {/* Top bar */}
-      <div className="flex items-center gap-3 p-3 bg-card/60 backdrop-blur-xl border border-border/40 rounded-2xl shadow-sm flex-wrap">
-        {leftNav}
-        <div className="flex items-center gap-2 text-xs text-muted font-medium bg-bg/50 px-3 py-1.5 rounded-lg border border-border/30">
-          {dbStatus ? (
-            <>
-              <span
-                className={`h-2 w-2 rounded-full shadow-[0_0_8px_currentColor] ${dbStatus.connected ? "bg-ok text-ok" : "bg-danger text-danger"}`}
-              />
-              <span className="tracking-wide">{dbStatus.provider}</span>
-              <span className="opacity-40">·</span>
-              <span>
-                {dbStatus.tableCount} {t("databaseview.tables")}
-              </span>
-            </>
+  const viewToggle = (
+    <div
+      className={DESKTOP_SEGMENTED_GROUP_CLASSNAME}
+      role="tablist"
+      aria-label="Database editor modes"
+    >
+      <Button
+        variant="ghost"
+        size="sm"
+        role="tab"
+        aria-selected={view === "tables"}
+        className={`${DESKTOP_SEGMENTED_ITEM_BASE_CLASSNAME} h-10 flex-1 ${
+          view === "tables"
+            ? DESKTOP_SEGMENTED_ITEM_ACTIVE_CLASSNAME
+            : DESKTOP_SEGMENTED_ITEM_INACTIVE_CLASSNAME
+        }`}
+        onClick={() => setView("tables")}
+      >
+        {t("databaseview.TableEditor")}
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        role="tab"
+        aria-selected={view === "query"}
+        className={`${DESKTOP_SEGMENTED_ITEM_BASE_CLASSNAME} h-10 flex-1 ${
+          view === "query"
+            ? DESKTOP_SEGMENTED_ITEM_ACTIVE_CLASSNAME
+            : DESKTOP_SEGMENTED_ITEM_INACTIVE_CLASSNAME
+        }`}
+        onClick={() => setView("query")}
+      >
+        {t("databaseview.SQLEditor")}
+      </Button>
+    </div>
+  );
+
+  const sidebarSummary = (
+    <DesktopRailSummaryCard className="mt-4">
+      <div className="flex items-center gap-2 text-sm font-medium text-txt">
+        <span
+          className={`h-2.5 w-2.5 rounded-full ${
+            dbStatus?.connected
+              ? "bg-ok shadow-[0_0_8px_rgba(34,197,94,0.5)]"
+              : "bg-danger"
+          }`}
+        />
+        <span>{dbStatus?.provider ?? t("onboarding.connecting")}</span>
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/75">
+        <span className={APP_SIDEBAR_PILL_CLASSNAME}>
+          {tables.length} {t("databaseview.tables")}
+        </span>
+        <span className={APP_SIDEBAR_PILL_CLASSNAME}>
+          {view === "tables"
+            ? t("databaseview.TableEditor")
+            : t("databaseview.SQLEditor")}
+        </span>
+        {selectedTable ? (
+          <span className="rounded-full border border-accent/25 bg-accent/8 px-2.5 py-1 text-accent">
+            {selectedTable}
+          </span>
+        ) : null}
+      </div>
+    </DesktopRailSummaryCard>
+  );
+
+  if (showExternalSidebar) {
+    return (
+      <div className={DATABASE_SHELL_CLASS}>
+        <aside className={DATABASE_SIDEBAR_CLASS}>
+          <div className={APP_SIDEBAR_INNER_CLASSNAME}>
+            <div className={`${APP_SIDEBAR_HEADER_CLASSNAME} border-b-0 pb-0`}>
+              <div className={APP_SIDEBAR_KICKER_CLASSNAME}>Database</div>
+              <div className={APP_SIDEBAR_META_CLASSNAME}>
+                Inspect schemas, rows, media, vectors, and SQL in one workspace.
+              </div>
+            </div>
+
+            <div className="space-y-3 pt-4">
+              {leftNav}
+              {viewToggle}
+              {sidebarSummary}
+              <Button
+                variant="outline"
+                size="sm"
+                className={DATABASE_REFRESH_BUTTON_CLASS}
+                onClick={async () => {
+                  const status = await loadStatus();
+                  if (status?.connected) {
+                    await loadTables();
+                  }
+                }}
+              >
+                {t("common.refresh")}
+              </Button>
+            </div>
+
+            <div className="mt-4 h-px bg-border/30" />
+
+            {view === "tables" ? (
+              <>
+                <div className="space-y-3 pt-4">
+                  <Input
+                    type="text"
+                    placeholder={t("databaseview.FilterTables")}
+                    value={sidebarSearch}
+                    onChange={(e) => setSidebarSearch(e.target.value)}
+                    className={APP_SIDEBAR_SEARCH_INPUT_CLASSNAME}
+                  />
+                  <div className="text-[10px] text-muted uppercase font-bold tracking-widest px-2 bg-bg/50 py-1.5 rounded-lg border border-border/30 inline-flex items-center shadow-inner">
+                    {t("databaseview.Tables")} ({filteredTables.length})
+                  </div>
+                </div>
+
+                <div
+                  className={`mt-3 space-y-1.5 ${APP_SIDEBAR_SCROLL_REGION_CLASSNAME}`}
+                >
+                  {loading && tables.length === 0 ? (
+                    <div className={DATABASE_EMPTY_HINT_CLASS}>
+                      {t("databaseview.Loading")}
+                    </div>
+                  ) : (
+                    filteredTables.map((table) => (
+                      <Button
+                        variant="ghost"
+                        key={table.name}
+                        onClick={() => handleSelectTable(table.name)}
+                        className={`${APP_SIDEBAR_CARD_BASE_CLASSNAME} gap-2 ${
+                          selectedTable === table.name
+                            ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
+                            : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
+                        }`}
+                      >
+                        <span
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border text-sm font-bold ${
+                            selectedTable === table.name
+                              ? "border-accent/30 bg-accent/18 text-txt-strong"
+                              : "border-border/50 bg-bg-accent/80 text-muted"
+                          }`}
+                        >
+                          {table.name.slice(0, 1).toUpperCase()}
+                        </span>
+                        <span className="min-w-0 flex-1 text-left">
+                          <span className="block truncate text-sm font-semibold leading-snug">
+                            {table.name}
+                          </span>
+                          <span className="mt-1 block text-[11px] leading-relaxed text-muted/85">
+                            {(table.rowCount ?? 0).toLocaleString()} rows
+                          </span>
+                        </span>
+                      </Button>
+                    ))
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="space-y-3 pt-4">
+                  <div className={DATABASE_INFO_PANEL_CLASS}>
+                    Write ad-hoc queries and inspect results without leaving the
+                    database workspace.
+                  </div>
+                </div>
+
+                {queryHistory.length > 0 ? (
+                  <div
+                    className={`mt-3 space-y-1.5 ${APP_SIDEBAR_SCROLL_REGION_CLASSNAME}`}
+                  >
+                    <div className="text-[10px] text-muted uppercase tracking-[0.16em]">
+                      {t("databaseview.RecentQueries")}
+                    </div>
+                    {queryHistory.slice(0, 8).map((q) => (
+                      <Button
+                        variant="ghost"
+                        key={q}
+                        className={DATABASE_HISTORY_BUTTON_CLASS}
+                        onClick={() => setQueryText(q)}
+                      >
+                        <span className="truncate">{q}</span>
+                      </Button>
+                    ))}
+                  </div>
+                ) : null}
+              </>
+            )}
+          </div>
+        </aside>
+
+        <div
+          className={`${DESKTOP_PAGE_CONTENT_CLASSNAME} flex flex-col bg-transparent`}
+        >
+          {errorMessage ? (
+            <div className="m-5 rounded-xl border border-danger/35 bg-danger/10 px-4 py-3 text-sm text-danger">
+              {errorMessage}
+            </div>
+          ) : null}
+
+          {dbStatus && !dbStatus.connected ? (
+            <div className="flex min-h-0 flex-1 flex-col overflow-auto p-6">
+              <section
+                className={`${DESKTOP_SURFACE_PANEL_CLASSNAME} px-5 py-5 sm:px-6`}
+              >
+                <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
+                  Database
+                </div>
+                <h1 className="mt-1 text-2xl font-semibold text-txt-strong">
+                  Table Browser
+                </h1>
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+                  Review schemas, inspect rows, and switch into SQL when the
+                  database becomes available.
+                </p>
+              </section>
+
+              <div
+                className={`${DESKTOP_SURFACE_PANEL_CLASSNAME} mt-4 flex min-h-[18rem] flex-1 items-center justify-center p-6`}
+              >
+                <DesktopEmptyStatePanel
+                  className="w-full min-h-[14rem]"
+                  title={t("databaseview.DatabaseNotAvailab")}
+                  description={t("databaseview.TheDatabaseViewer")}
+                />
+              </div>
+            </div>
+          ) : view === "tables" ? (
+            <div className="flex min-h-0 flex-1 flex-col overflow-auto p-6">
+              {!selectedTable ? (
+                <>
+                  <section
+                    className={`${DESKTOP_SURFACE_PANEL_CLASSNAME} px-5 py-5 sm:px-6`}
+                  >
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
+                      Database
+                    </div>
+                    <h1 className="mt-1 text-2xl font-semibold text-txt-strong">
+                      Table Browser
+                    </h1>
+                    <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+                      Choose a table from the sidebar to inspect columns, sort
+                      rows, and review the data structure.
+                    </p>
+                  </section>
+
+                  <div
+                    className={`${DESKTOP_SURFACE_PANEL_CLASSNAME} mt-4 flex min-h-[18rem] flex-1 items-center justify-center p-6`}
+                  >
+                    <DesktopEmptyStatePanel
+                      className="w-full min-h-[14rem]"
+                      title={t("databaseview.SelectATable")}
+                      description={t("databaseview.ChooseATableFrom")}
+                    />
+                  </div>
+                </>
+              ) : loading && !tableData ? (
+                <div
+                  className={`${DESKTOP_SURFACE_PANEL_CLASSNAME} flex flex-1 items-center justify-center px-6 py-10 text-sm font-medium italic text-muted`}
+                >
+                  {t("databaseview.Loading")}
+                </div>
+              ) : tableData ? (
+                <>
+                  <section
+                    className={`${DESKTOP_SURFACE_PANEL_CLASSNAME} px-5 py-5 sm:px-6`}
+                  >
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
+                          Database
+                        </div>
+                        <h1 className="mt-1 text-2xl font-semibold text-txt-strong">
+                          {selectedTable}
+                        </h1>
+                        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+                          Inspect rows, sort columns, and review table structure
+                          in one place.
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {columnMeta.size > 0 && (
+                          <span className={APP_SIDEBAR_PILL_CLASSNAME}>
+                            {columnMeta.size} {t("databaseview.columns")}
+                          </span>
+                        )}
+                        <span className={APP_SIDEBAR_PILL_CLASSNAME}>
+                          {tableData.total.toLocaleString()} rows
+                        </span>
+                      </div>
+                    </div>
+                  </section>
+
+                  <div
+                    className={`${DESKTOP_SURFACE_PANEL_CLASSNAME} mt-4 flex flex-1 min-h-0 flex-col overflow-hidden p-3`}
+                  >
+                    <div className="flex-1 min-h-0">
+                      {tableData.rows.length === 0 ? (
+                        <DesktopEmptyStatePanel
+                          className="min-h-[14rem]"
+                          title={t("databaseview.TableIsEmpty")}
+                          description="This table is connected and available, but it does not have any rows yet."
+                        />
+                      ) : (
+                        <ResultsGrid
+                          columns={tableData.columns}
+                          rows={tableData.rows}
+                          columnMeta={columnMeta}
+                          sortCol={sortCol}
+                          sortDir={sortDir}
+                          onSort={handleSort}
+                          onCellClick={(v) => setCellInspect(v)}
+                        />
+                      )}
+                    </div>
+
+                    <PaginationBar
+                      total={tableData.total}
+                      offset={rowOffset}
+                      limit={ROW_LIMIT}
+                      onPrev={handlePrev}
+                      onNext={handleNext}
+                    />
+                  </div>
+                </>
+              ) : null}
+            </div>
           ) : (
-            <span>{t("onboarding.connecting")}</span>
+            <div className="flex min-h-0 flex-1 flex-col overflow-auto p-6">
+              <section
+                className={`${DESKTOP_SURFACE_PANEL_CLASSNAME} px-5 py-5 sm:px-6`}
+              >
+                <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
+                  Database
+                </div>
+                <h1 className="mt-1 text-2xl font-semibold text-txt-strong">
+                  SQL Workspace
+                </h1>
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+                  Run ad-hoc queries, inspect results, and reuse recent SQL from
+                  the sidebar.
+                </p>
+              </section>
+
+              <div
+                className={`${DESKTOP_SURFACE_PANEL_CLASSNAME} mt-4 flex flex-col p-4`}
+              >
+                <div className="relative group">
+                  <div className="absolute -inset-[1px] bg-gradient-to-r from-accent/0 via-accent/30 to-accent/0 rounded-2xl opacity-0 group-focus-within:opacity-100 blur transition-opacity duration-500" />
+                  <Textarea
+                    value={queryText}
+                    onChange={(e) => setQueryText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                        e.preventDefault();
+                        runQuery();
+                      }
+                    }}
+                    placeholder={t("databaseview.SELECTFROMMemori")}
+                    rows={6}
+                    className="w-full relative bg-bg/80 backdrop-blur-md border-border/50 text-txt text-sm font-mono resize-y leading-relaxed rounded-xl focus-visible:ring-accent focus-visible:border-accent custom-scrollbar shadow-inner"
+                    spellCheck={false}
+                  />
+                </div>
+                <div className="flex items-center gap-3 mt-3">
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="h-auto min-h-[2.25rem] whitespace-normal break-words rounded-xl bg-accent px-6 py-1.5 text-left text-xs font-bold text-accent-fg shadow-[0_0_15px_rgba(var(--accent-rgb),0.4)] transition-[opacity,transform,box-shadow] hover:scale-[1.02] hover:opacity-90 disabled:opacity-40"
+                    disabled={queryLoading || !queryText.trim()}
+                    onClick={runQuery}
+                  >
+                    {queryLoading
+                      ? t("common.running", { defaultValue: "Running..." })
+                      : t("databaseview.runQuery", {
+                          defaultValue: "Run Query",
+                        })}
+                  </Button>
+                  <kbd className="text-[10px] text-muted font-mono bg-bg/50 px-2 py-1 rounded-md border border-border/30 shadow-inner tracking-wider">
+                    {navigator.platform.includes("Mac") ? "⌘" : "Ctrl"}{" "}
+                    {t("onboarding.enter")}
+                  </kbd>
+                  {queryResult && (
+                    <div className="text-xs text-muted ml-auto bg-bg/50 px-3 py-1.5 rounded-lg border border-border/30 font-medium shadow-inner tracking-wide">
+                      <span className="text-txt">{queryResult.rowCount}</span>{" "}
+                      {t("databaseview.row")}
+                      {queryResult.rowCount !== 1 ? "s" : ""} ·{" "}
+                      <span className="text-txt">
+                        {queryResult.durationMs}ms
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {queryResult && queryResult.rows.length > 0 ? (
+                <div
+                  className={`${DESKTOP_SURFACE_PANEL_CLASSNAME} mt-4 flex flex-1 min-h-0 flex-col overflow-hidden p-3`}
+                >
+                  <ResultsGrid
+                    columns={queryResult.columns}
+                    rows={queryResult.rows}
+                    onCellClick={(v) => setCellInspect(v)}
+                  />
+                </div>
+              ) : null}
+
+              {queryResult && queryResult.rows.length === 0 ? (
+                <DesktopEmptyStatePanel
+                  className="mt-4 min-h-[12rem]"
+                  title={t("databaseview.QueryReturnedNoRo")}
+                  description="The query completed successfully but did not return any rows."
+                />
+              ) : null}
+            </div>
           )}
         </div>
 
-        <div className="flex-1" />
+        {cellInspect !== null && (
+          <CellPopover
+            value={cellInspect}
+            onClose={() => setCellInspect(null)}
+          />
+        )}
+      </div>
+    );
+  }
 
-        {/* View toggle */}
-        <div className="flex p-1 bg-bg/50 backdrop-blur-md border border-border/40 rounded-xl shadow-inner gap-1">
+  return (
+    <div className="flex flex-col h-full gap-4">
+      {!showExternalSidebar && (
+        <div className="flex items-center gap-3 p-3 bg-card/60 backdrop-blur-xl border border-border/40 rounded-2xl shadow-sm flex-wrap">
+          <div className="flex items-center gap-2 text-xs text-muted font-medium bg-bg/50 px-3 py-1.5 rounded-lg border border-border/30">
+            {dbStatus ? (
+              <>
+                <span
+                  className={`h-2 w-2 rounded-full shadow-[0_0_8px_currentColor] ${dbStatus.connected ? "bg-ok text-ok" : "bg-danger text-danger"}`}
+                />
+                <span className="tracking-wide">{dbStatus.provider}</span>
+                <span className="opacity-40">·</span>
+                <span>
+                  {dbStatus.tableCount} {t("databaseview.tables")}
+                </span>
+              </>
+            ) : (
+              <span>{t("onboarding.connecting")}</span>
+            )}
+          </div>
+
+          <div className="flex-1" />
+
+          {!showExternalSidebar && viewToggle}
+
           <Button
-            variant={view === "tables" ? "default" : "ghost"}
+            variant="outline"
             size="sm"
-            className={`h-auto min-h-[1.75rem] px-4 py-1 whitespace-normal break-words text-left text-xs font-medium rounded-lg transition-all duration-300 ${
-              view === "tables"
-                ? "border border-accent/45 bg-accent/16 text-accent-fg shadow-sm"
-                : "text-muted-strong hover:border-border/50 hover:bg-bg-hover hover:text-txt"
-            }`}
-            onClick={() => setView("tables")}
+            className="h-auto min-h-[2.25rem] whitespace-normal break-words rounded-xl border-border/50 bg-bg/50 px-4 py-1.5 text-xs font-medium backdrop-blur-md shadow-sm transition-[border-color,color,transform,box-shadow] duration-300 hover:border-accent hover:text-txt hover:shadow-[0_0_15px_rgba(var(--accent-rgb),0.3)]"
+            onClick={async () => {
+              const status = await loadStatus();
+              if (status?.connected) {
+                await loadTables();
+              }
+            }}
           >
-            {t("databaseview.TableEditor")}
-          </Button>
-          <Button
-            variant={view === "query" ? "default" : "ghost"}
-            size="sm"
-            className={`h-auto min-h-[1.75rem] px-4 py-1 whitespace-normal break-words text-left text-xs font-medium rounded-lg transition-all duration-300 ${
-              view === "query"
-                ? "border border-accent/45 bg-accent/16 text-accent-fg shadow-sm"
-                : "text-muted-strong hover:border-border/50 hover:bg-bg-hover hover:text-txt"
-            }`}
-            onClick={() => setView("query")}
-          >
-            {t("databaseview.SQLEditor")}
+            {t("common.refresh")}
           </Button>
         </div>
-
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-auto min-h-[2.25rem] whitespace-normal break-words px-4 py-1.5 text-xs font-medium rounded-xl border-border/50 hover:border-accent hover:text-txt transition-all duration-300 bg-bg/50 backdrop-blur-md shadow-sm hover:shadow-[0_0_15px_rgba(var(--accent),0.3)]"
-          onClick={async () => {
-            const status = await loadStatus();
-            if (status?.connected) {
-              await loadTables();
-            }
-          }}
-        >
-          {t("common.refresh")}
-        </Button>
-      </div>
+      )}
 
       {dbStatus && !dbStatus.connected && (
         <div className="p-4 border border-border/40 bg-card/60 backdrop-blur-md rounded-2xl text-muted text-sm shadow-sm">
@@ -582,236 +1014,391 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
       {view === "tables" ? (
         /* ── Table Editor ──────────────────────────────────────── */
         <div className="flex flex-1 min-h-0 gap-4">
-          {/* Sidebar */}
-          <div
-            className={`flex-shrink-0 rounded-2xl border transition-all overflow-hidden flex flex-col shadow-sm ${APP_SIDEBAR_RAIL_CLASSNAME} ${sidebarCollapsed ? "w-0 opacity-0 border-none m-0" : "w-[220px]"}`}
-          >
-            <div className="p-3 flex flex-col h-full gap-3">
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder={t("databaseview.FilterTables")}
-                  value={sidebarSearch}
-                  onChange={(e) => setSidebarSearch(e.target.value)}
-                  className={`w-full pr-8 text-xs ${APP_SIDEBAR_SEARCH_INPUT_CLASSNAME}`}
-                />
-              </div>
-              <div className="text-[10px] text-muted uppercase font-bold tracking-widest px-2 bg-bg/50 py-1.5 rounded-lg border border-border/30 inline-flex items-center shadow-inner">
-                {t("databaseview.Tables")} ({filteredTables.length})
-              </div>
-              {loading && tables.length === 0 ? (
-                <div className="text-xs text-muted px-2 py-4 italic text-center opacity-70">
-                  {t("databaseview.Loading")}
-                </div>
-              ) : (
-                <div className="flex flex-col gap-1 flex-1 overflow-auto pr-1 custom-scrollbar">
-                  {filteredTables.map((t) => (
-                    <Button
-                      variant={selectedTable === t.name ? "secondary" : "ghost"}
-                      key={t.name}
-                      onClick={() => handleSelectTable(t.name)}
-                      className={`justify-start h-8 px-3 text-xs w-full transition-all duration-300 rounded-xl ${
-                        selectedTable === t.name
-                          ? "bg-accent/20 text-txt font-semibold border border-accent/30 shadow-[0_0_10px_rgba(var(--accent),0.1)] translate-x-1"
-                          : "text-muted hover:text-txt hover:bg-bg-hover hover:translate-x-0.5"
-                      }`}
-                    >
-                      <span className="truncate flex-1 text-left">
-                        {t.name}
-                      </span>
-                      <Badge
+          {(showExternalSidebar || !sidebarCollapsed) && (
+            <aside
+              className={`overflow-hidden rounded-2xl border shadow-sm ${APP_SIDEBAR_RAIL_CLASSNAME} ${
+                showExternalSidebar
+                  ? "w-[21rem] max-w-[352px] shrink-0"
+                  : "w-[220px] flex-shrink-0"
+              }`}
+            >
+              <div
+                className={
+                  showExternalSidebar
+                    ? APP_SIDEBAR_INNER_CLASSNAME
+                    : "p-3 flex flex-col h-full gap-3"
+                }
+              >
+                {showExternalSidebar && (
+                  <>
+                    <div className={APP_SIDEBAR_HEADER_CLASSNAME}>
+                      <div className={APP_SIDEBAR_KICKER_CLASSNAME}>
+                        Database
+                      </div>
+                      <div className={APP_SIDEBAR_META_CLASSNAME}>
+                        Inspect schemas, rows, and queries in one workspace.
+                      </div>
+                    </div>
+                    {sidebarSummary}
+                    <div className="space-y-3 pt-4">
+                      {viewToggle}
+                      {leftNav}
+                      <Button
                         variant="outline"
-                        className="text-[9px] px-1.5 py-0 h-4 border-border/30 bg-bg/50 text-muted-foreground ml-2 tabular-nums"
+                        size="sm"
+                        className="h-10 w-full justify-start rounded-xl px-4 text-xs font-semibold shadow-sm"
+                        onClick={async () => {
+                          const status = await loadStatus();
+                          if (status?.connected) {
+                            await loadTables();
+                          }
+                        }}
                       >
-                        {t.rowCount}
-                      </Badge>
-                    </Button>
-                  ))}
+                        {t("common.refresh")}
+                      </Button>
+                    </div>
+                    <div className="h-px bg-border/30" />
+                  </>
+                )}
+
+                <div className="relative">
+                  <Input
+                    type="text"
+                    placeholder={t("databaseview.FilterTables")}
+                    value={sidebarSearch}
+                    onChange={(e) => setSidebarSearch(e.target.value)}
+                    className={`w-full pr-8 text-xs ${APP_SIDEBAR_SEARCH_INPUT_CLASSNAME}`}
+                  />
                 </div>
-              )}
-            </div>
-          </div>
+                <div className="text-[10px] text-muted uppercase font-bold tracking-widest px-2 bg-bg/50 py-1.5 rounded-lg border border-border/30 inline-flex items-center shadow-inner">
+                  {t("databaseview.Tables")} ({filteredTables.length})
+                </div>
+                {loading && tables.length === 0 ? (
+                  <div className="text-xs text-muted px-2 py-4 italic text-center opacity-70">
+                    {t("databaseview.Loading")}
+                  </div>
+                ) : (
+                  <div
+                    className={`flex flex-col gap-1 flex-1 overflow-auto pr-1 custom-scrollbar ${
+                      showExternalSidebar
+                        ? APP_SIDEBAR_SCROLL_REGION_CLASSNAME
+                        : ""
+                    }`}
+                  >
+                    {filteredTables.map((t) => (
+                      <Button
+                        variant="ghost"
+                        key={t.name}
+                        onClick={() => handleSelectTable(t.name)}
+                        className={`${APP_SIDEBAR_CARD_BASE_CLASSNAME} gap-2 ${
+                          selectedTable === t.name
+                            ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
+                            : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
+                        }`}
+                      >
+                        <span
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border text-sm font-bold ${
+                            selectedTable === t.name
+                              ? "border-accent/30 bg-accent/18 text-txt-strong"
+                              : "border-border/50 bg-bg-accent/80 text-muted"
+                          }`}
+                        >
+                          {t.name.slice(0, 1).toUpperCase()}
+                        </span>
+                        <span className="min-w-0 flex-1 text-left">
+                          <span className="block truncate text-sm font-semibold leading-snug">
+                            {t.name}
+                          </span>
+                          <span className="mt-1 block text-[11px] leading-relaxed text-muted/85">
+                            {(t.rowCount ?? 0).toLocaleString()} rows
+                          </span>
+                        </span>
+                      </Button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </aside>
+          )}
 
           {/* Toggle sidebar */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="my-auto flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl border border-border/40 bg-card/50 shadow-sm text-muted transition-all hover:border-accent/40 hover:bg-bg-hover hover:text-txt"
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            title={
-              sidebarCollapsed
-                ? t("databaseview.showSidebar", {
-                    defaultValue: "Show sidebar",
-                  })
-                : t("databaseview.hideSidebar", {
-                    defaultValue: "Hide sidebar",
-                  })
-            }
-          >
-            {sidebarCollapsed ? (
-              <ChevronRight className="w-3.5 h-3.5" />
-            ) : (
-              <ChevronLeft className="w-3.5 h-3.5" />
-            )}
-          </Button>
+          {!showExternalSidebar && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="my-auto flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl border border-border/40 bg-card/50 shadow-sm text-muted transition-all hover:border-accent/40 hover:bg-bg-hover hover:text-txt"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              title={
+                sidebarCollapsed
+                  ? t("databaseview.showSidebar", {
+                      defaultValue: "Show sidebar",
+                    })
+                  : t("databaseview.hideSidebar", {
+                      defaultValue: "Hide sidebar",
+                    })
+              }
+            >
+              {sidebarCollapsed ? (
+                <ChevronRight className="w-3.5 h-3.5" />
+              ) : (
+                <ChevronLeft className="w-3.5 h-3.5" />
+              )}
+            </Button>
+          )}
 
           {/* Main grid area */}
-          <div className="flex-1 min-w-0 flex flex-col bg-card/40 backdrop-blur-xl border border-border/40 rounded-2xl shadow-sm overflow-hidden p-2">
+          <div className="flex-1 min-w-0 flex flex-col bg-bg/10">
             {!selectedTable ? (
-              <div className="flex-1 flex items-center justify-center">
-                <div className="text-center p-8 border border-border/30 bg-bg/50 rounded-3xl shadow-inner backdrop-blur-md">
-                  <div className="text-muted text-base font-medium mb-2 tracking-wide">
-                    {t("databaseview.SelectATable")}
-                  </div>
-                  <div className="text-muted text-xs opacity-60 tracking-wider uppercase">
-                    {t("databaseview.ChooseATableFrom")}
-                  </div>
-                </div>
-              </div>
+              <DesktopEmptyStatePanel
+                className="min-h-[18rem]"
+                title={t("databaseview.SelectATable")}
+                description={t("databaseview.ChooseATableFrom")}
+              />
             ) : loading && !tableData ? (
-              <div className="flex-1 flex items-center justify-center font-medium text-muted text-sm italic tracking-widest animate-pulse">
+              <div
+                className={`${DESKTOP_SURFACE_PANEL_CLASSNAME} flex flex-1 items-center justify-center px-6 py-10 text-sm font-medium italic text-muted`}
+              >
                 {t("databaseview.Loading")}
               </div>
             ) : tableData ? (
               <>
-                {/* Table header bar */}
-                <div className="flex items-center gap-3 px-3 py-2 text-xs mb-2 bg-bg/40 rounded-xl border border-border/30">
-                  <span className="text-txt font-semibold tracking-wide">
-                    {selectedTable}
-                  </span>
-                  {columnMeta.size > 0 && (
-                    <Badge
-                      variant="outline"
-                      className="text-[10px] text-muted border-border/30 bg-bg/50 font-medium"
-                    >
-                      {columnMeta.size} {t("databaseview.columns")}
-                    </Badge>
-                  )}
-                </div>
-
-                {/* Data grid */}
-                <div className="flex-1 min-h-0">
-                  {tableData.rows.length === 0 ? (
-                    <div className="flex items-center justify-center h-full border border-border/40 bg-card/40 rounded-t-2xl">
-                      <div className="text-muted text-sm p-6 bg-bg/50 rounded-2xl border border-border/30 shadow-inner backdrop-blur-md font-medium tracking-wide">
-                        {t("databaseview.TableIsEmpty")}
+                <section
+                  className={`${DESKTOP_SURFACE_PANEL_CLASSNAME} px-5 py-5 sm:px-6`}
+                >
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
+                        Database
                       </div>
+                      <h1 className="mt-1 text-2xl font-semibold text-txt-strong">
+                        {selectedTable}
+                      </h1>
+                      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+                        Inspect rows, sort columns, and review table structure
+                        in one place.
+                      </p>
                     </div>
-                  ) : (
-                    <ResultsGrid
-                      columns={tableData.columns}
-                      rows={tableData.rows}
-                      columnMeta={columnMeta}
-                      sortCol={sortCol}
-                      sortDir={sortDir}
-                      onSort={handleSort}
-                      onCellClick={(v) => setCellInspect(v)}
-                    />
-                  )}
-                </div>
+                    {columnMeta.size > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        <span className={APP_SIDEBAR_PILL_CLASSNAME}>
+                          {columnMeta.size} {t("databaseview.columns")}
+                        </span>
+                        <span className={APP_SIDEBAR_PILL_CLASSNAME}>
+                          {tableData.total.toLocaleString()} rows
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </section>
 
-                {/* Pagination */}
-                <PaginationBar
-                  total={tableData.total}
-                  offset={rowOffset}
-                  limit={ROW_LIMIT}
-                  onPrev={handlePrev}
-                  onNext={handleNext}
-                />
+                <div
+                  className={`${DESKTOP_SURFACE_PANEL_CLASSNAME} mt-4 flex flex-1 min-h-0 flex-col overflow-hidden p-3`}
+                >
+                  <div className="flex-1 min-h-0">
+                    {tableData.rows.length === 0 ? (
+                      <DesktopEmptyStatePanel
+                        className="min-h-[14rem]"
+                        title={t("databaseview.TableIsEmpty")}
+                        description="This table is connected and available, but it does not have any rows yet."
+                      />
+                    ) : (
+                      <ResultsGrid
+                        columns={tableData.columns}
+                        rows={tableData.rows}
+                        columnMeta={columnMeta}
+                        sortCol={sortCol}
+                        sortDir={sortDir}
+                        onSort={handleSort}
+                        onCellClick={(v) => setCellInspect(v)}
+                      />
+                    )}
+                  </div>
+
+                  <PaginationBar
+                    total={tableData.total}
+                    offset={rowOffset}
+                    limit={ROW_LIMIT}
+                    onPrev={handlePrev}
+                    onNext={handleNext}
+                  />
+                </div>
               </>
             ) : null}
           </div>
         </div>
       ) : (
         /* ── SQL Editor ────────────────────────────────────────── */
-        <div className="flex flex-col flex-1 min-h-0 gap-4">
-          {/* Editor area */}
-          <div className="flex flex-col bg-card/60 backdrop-blur-xl border border-border/40 rounded-2xl p-4 shadow-sm">
-            <div className="relative group">
-              <div className="absolute -inset-[1px] bg-gradient-to-r from-accent/0 via-accent/30 to-accent/0 rounded-2xl opacity-0 group-focus-within:opacity-100 blur transition-opacity duration-500" />
-              <Textarea
-                value={queryText}
-                onChange={(e) => setQueryText(e.target.value)}
-                onKeyDown={(e) => {
-                  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-                    e.preventDefault();
-                    runQuery();
-                  }
-                }}
-                placeholder={t("databaseview.SELECTFROMMemori")}
-                rows={6}
-                className="w-full relative bg-bg/80 backdrop-blur-md border-border/50 text-txt text-sm font-mono resize-y leading-relaxed rounded-xl focus-visible:ring-accent focus-visible:border-accent custom-scrollbar shadow-inner"
-                spellCheck={false}
-              />
+        <div className="flex flex-1 min-h-0 gap-4">
+          {showExternalSidebar && (
+            <aside
+              className={`w-[21rem] max-w-[352px] shrink-0 overflow-hidden rounded-[24px] border border-border/34 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_20px_30px_-28px_rgba(15,23,42,0.18)] ${APP_SIDEBAR_RAIL_CLASSNAME}`}
+            >
+              <div className={APP_SIDEBAR_INNER_CLASSNAME}>
+                <div className={APP_SIDEBAR_HEADER_CLASSNAME}>
+                  <div className={APP_SIDEBAR_KICKER_CLASSNAME}>Database</div>
+                  <div className={APP_SIDEBAR_META_CLASSNAME}>
+                    Write and run ad-hoc SQL against your connected database.
+                  </div>
+                </div>
+                {sidebarSummary}
+                <div className="space-y-3 pt-4">
+                  {viewToggle}
+                  {leftNav}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={DATABASE_REFRESH_BUTTON_CLASS}
+                    onClick={async () => {
+                      const status = await loadStatus();
+                      if (status?.connected) {
+                        await loadTables();
+                      }
+                    }}
+                  >
+                    {t("common.refresh")}
+                  </Button>
+                </div>
+                <div className="h-px bg-border/30" />
+                <div className={DATABASE_INFO_PANEL_CLASS}>
+                  Write ad-hoc queries and inspect results without leaving the
+                  database workspace.
+                </div>
+                {queryHistory.length > 0 ? (
+                  <div
+                    className={`space-y-1.5 ${APP_SIDEBAR_SCROLL_REGION_CLASSNAME}`}
+                  >
+                    <div className="text-[10px] text-muted uppercase tracking-[0.16em]">
+                      {t("databaseview.RecentQueries")}
+                    </div>
+                    {queryHistory.slice(0, 8).map((q) => (
+                      <Button
+                        variant="ghost"
+                        key={q}
+                        className={DATABASE_HISTORY_BUTTON_CLASS}
+                        onClick={() => setQueryText(q)}
+                      >
+                        <span className="truncate">{q}</span>
+                      </Button>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            </aside>
+          )}
+
+          <div
+            className={`${DESKTOP_PAGE_CONTENT_CLASSNAME} flex min-h-0 flex-col gap-4 bg-transparent`}
+          >
+            <section
+              className={`${DESKTOP_SURFACE_PANEL_CLASSNAME} px-5 py-5 sm:px-6`}
+            >
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div className="min-w-0 flex-1">
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
+                    Database
+                  </div>
+                  <h1 className="mt-1 text-2xl font-semibold text-txt-strong">
+                    SQL Workspace
+                  </h1>
+                  <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+                    Run ad-hoc queries, inspect results, and reuse recent SQL
+                    from the sidebar.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <div
+              className={`${DESKTOP_SURFACE_PANEL_CLASSNAME} flex flex-col p-4`}
+            >
+              <div className="relative group">
+                <div className="absolute -inset-[1px] bg-gradient-to-r from-accent/0 via-accent/30 to-accent/0 rounded-2xl opacity-0 group-focus-within:opacity-100 blur transition-opacity duration-500" />
+                <Textarea
+                  value={queryText}
+                  onChange={(e) => setQueryText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                      e.preventDefault();
+                      runQuery();
+                    }
+                  }}
+                  placeholder={t("databaseview.SELECTFROMMemori")}
+                  rows={6}
+                  className="w-full relative bg-bg/80 backdrop-blur-md border-border/50 text-txt text-sm font-mono resize-y leading-relaxed rounded-xl focus-visible:ring-accent focus-visible:border-accent custom-scrollbar shadow-inner"
+                  spellCheck={false}
+                />
+              </div>
+              <div className="flex items-center gap-3 mt-3">
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="h-auto min-h-[2.25rem] whitespace-normal break-words rounded-xl bg-accent px-6 py-1.5 text-left text-xs font-bold text-accent-fg shadow-[0_0_15px_rgba(var(--accent-rgb),0.4)] transition-[opacity,transform,box-shadow] hover:scale-[1.02] hover:opacity-90 disabled:opacity-40"
+                  disabled={queryLoading || !queryText.trim()}
+                  onClick={runQuery}
+                >
+                  {queryLoading
+                    ? t("common.running", { defaultValue: "Running..." })
+                    : t("databaseview.runQuery", { defaultValue: "Run Query" })}
+                </Button>
+                <kbd className="text-[10px] text-muted font-mono bg-bg/50 px-2 py-1 rounded-md border border-border/30 shadow-inner tracking-wider">
+                  {navigator.platform.includes("Mac") ? "⌘" : "Ctrl"}{" "}
+                  {t("onboarding.enter")}
+                </kbd>
+                {queryResult && (
+                  <div className="text-xs text-muted ml-auto bg-bg/50 px-3 py-1.5 rounded-lg border border-border/30 font-medium shadow-inner tracking-wide">
+                    <span className="text-txt">{queryResult.rowCount}</span>{" "}
+                    {t("databaseview.row")}
+                    {queryResult.rowCount !== 1 ? "s" : ""} ·{" "}
+                    <span className="text-txt">{queryResult.durationMs}ms</span>
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-3 mt-3">
-              <Button
-                variant="default"
-                size="sm"
-                className="px-6 h-auto min-h-[2.25rem] whitespace-normal break-words text-left py-1.5 text-xs font-bold rounded-xl bg-accent text-accent-fg hover:opacity-90 disabled:opacity-40 shadow-[0_0_15px_rgba(var(--accent),0.4)] transition-all hover:scale-[1.02]"
-                disabled={queryLoading || !queryText.trim()}
-                onClick={runQuery}
-              >
-                {queryLoading
-                  ? t("common.running", { defaultValue: "Running..." })
-                  : t("databaseview.runQuery", { defaultValue: "Run Query" })}
-              </Button>
-              <kbd className="text-[10px] text-muted font-mono bg-bg/50 px-2 py-1 rounded-md border border-border/30 shadow-inner tracking-wider">
-                {navigator.platform.includes("Mac") ? "⌘" : "Ctrl"}{" "}
-                {t("onboarding.enter")}
-              </kbd>
-              {queryResult && (
-                <div className="text-xs text-muted ml-auto bg-bg/50 px-3 py-1.5 rounded-lg border border-border/30 font-medium shadow-inner tracking-wide">
-                  <span className="text-txt">{queryResult.rowCount}</span>{" "}
-                  {t("databaseview.row")}
-                  {queryResult.rowCount !== 1 ? "s" : ""} ·{" "}
-                  <span className="text-txt">{queryResult.durationMs}ms</span>
+
+            {/* Query history dropdown */}
+            {queryHistory.length > 0 &&
+              !queryResult &&
+              !showExternalSidebar && (
+                <div className="border border-border/40 bg-card/40 backdrop-blur-xl rounded-2xl shadow-sm overflow-hidden">
+                  <div className="px-4 py-2.5 text-[10px] text-muted uppercase font-bold tracking-widest bg-bg/60 border-b border-border/40 shadow-inner">
+                    {t("databaseview.RecentQueries")}
+                  </div>
+                  <div className="flex flex-col">
+                    {queryHistory.slice(0, 5).map((q) => (
+                      <Button
+                        variant="ghost"
+                        key={q}
+                        className="w-full px-4 py-3 h-auto justify-start text-[11px] font-mono text-txt text-left rounded-none border-b border-border/20 hover:bg-accent/10 hover:text-txt transition-colors truncate"
+                        onClick={() => setQueryText(q)}
+                      >
+                        <span className="truncate opacity-80 group-hover:opacity-100">
+                          {q}
+                        </span>
+                      </Button>
+                    ))}
+                  </div>
                 </div>
               )}
-            </div>
+
+            {/* Results */}
+            {queryResult && queryResult.rows.length > 0 && (
+              <div className="flex-1 min-h-0">
+                <ResultsGrid
+                  columns={queryResult.columns}
+                  rows={queryResult.rows}
+                  onCellClick={(v) => setCellInspect(v)}
+                />
+              </div>
+            )}
+
+            {queryResult && queryResult.rows.length === 0 && (
+              <div className="flex items-center justify-center p-8 border border-border/40 bg-card/60 backdrop-blur-xl rounded-2xl shadow-sm text-muted text-sm tracking-wide font-medium">
+                <div className="px-6 py-4 bg-bg/50 shadow-inner rounded-xl border border-border/30">
+                  {t("databaseview.QueryReturnedNoRo")}
+                </div>
+              </div>
+            )}
           </div>
-
-          {/* Query history dropdown */}
-          {queryHistory.length > 0 && !queryResult && (
-            <div className="border border-border/40 bg-card/40 backdrop-blur-xl rounded-2xl shadow-sm overflow-hidden">
-              <div className="px-4 py-2.5 text-[10px] text-muted uppercase font-bold tracking-widest bg-bg/60 border-b border-border/40 shadow-inner">
-                {t("databaseview.RecentQueries")}
-              </div>
-              <div className="flex flex-col">
-                {queryHistory.slice(0, 5).map((q) => (
-                  <Button
-                    variant="ghost"
-                    key={q}
-                    className="w-full px-4 py-3 h-auto justify-start text-[11px] font-mono text-txt text-left rounded-none border-b border-border/20 hover:bg-accent/10 hover:text-txt transition-colors truncate"
-                    onClick={() => setQueryText(q)}
-                  >
-                    <span className="truncate opacity-80 group-hover:opacity-100">
-                      {q}
-                    </span>
-                  </Button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Results */}
-          {queryResult && queryResult.rows.length > 0 && (
-            <div className="flex-1 min-h-0">
-              <ResultsGrid
-                columns={queryResult.columns}
-                rows={queryResult.rows}
-                onCellClick={(v) => setCellInspect(v)}
-              />
-            </div>
-          )}
-
-          {queryResult && queryResult.rows.length === 0 && (
-            <div className="flex items-center justify-center p-8 border border-border/40 bg-card/60 backdrop-blur-xl rounded-2xl shadow-sm text-muted text-sm tracking-wide font-medium">
-              <div className="px-6 py-4 bg-bg/50 shadow-inner rounded-xl border border-border/30">
-                {t("databaseview.QueryReturnedNoRo")}
-              </div>
-            </div>
-          )}
         </div>
       )}
 

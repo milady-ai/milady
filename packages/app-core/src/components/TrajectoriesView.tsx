@@ -1,8 +1,10 @@
 /**
- * TrajectoriesView — view and analyze LLM call trajectories.
+ * TrajectoriesView — desktop trajectory workspace with a sidebar rail and
+ * detail viewer.
  *
- * Shows all captured LLM interactions with token counts, latency, and context.
- * Supports filtering, search, export, and clearing trajectories.
+ * The left rail owns filters, actions, and the trajectory list. The right
+ * pane shows an overview by default and drills into one trajectory when
+ * selected.
  */
 
 import {
@@ -29,6 +31,41 @@ import {
 } from "@miladyai/ui";
 import { useCallback, useEffect, useState } from "react";
 import {
+  DESKTOP_CONTROL_SURFACE_ACCENT_CLASSNAME,
+  DESKTOP_CONTROL_SURFACE_CLASSNAME,
+  DESKTOP_CONTROL_SURFACE_COMPACT_CLASSNAME,
+  DESKTOP_INSET_EMPTY_PANEL_CLASSNAME,
+  DESKTOP_INSET_PANEL_CLASSNAME,
+  DESKTOP_PADDED_SURFACE_PANEL_CLASSNAME,
+  DESKTOP_PAGE_CONTENT_CLASSNAME,
+  DESKTOP_RAIL_SUMMARY_CARD_COMPACT_CLASSNAME,
+  DESKTOP_SECTION_SHELL_CLASSNAME,
+  DesktopEmptyStatePanel,
+  DesktopPageFrame,
+  DesktopRailSummaryCard,
+} from "./desktop-surface-primitives";
+import {
+  APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME,
+  APP_DESKTOP_SPLIT_SHELL_CLASSNAME,
+  APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
+  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
+  APP_SIDEBAR_COMPACT_CARD_CLASSNAME,
+  APP_SIDEBAR_COMPACT_ICON_ACTIVE_CLASSNAME,
+  APP_SIDEBAR_COMPACT_ICON_INACTIVE_CLASSNAME,
+  APP_SIDEBAR_COMPACT_META_CLASSNAME,
+  APP_SIDEBAR_COMPACT_PILL_CLASSNAME,
+  APP_SIDEBAR_COMPACT_TITLE_CLASSNAME,
+  APP_SIDEBAR_HEADER_CLASSNAME,
+  APP_SIDEBAR_INNER_CLASSNAME,
+  APP_SIDEBAR_KICKER_CLASSNAME,
+  APP_SIDEBAR_META_CLASSNAME,
+  APP_SIDEBAR_PILL_CLASSNAME,
+  APP_SIDEBAR_SCROLL_REGION_CLASSNAME,
+  APP_SIDEBAR_SEARCH_INPUT_CLASSNAME,
+  APP_SIDEBAR_SECTION_HEADING_CLASSNAME,
+} from "./sidebar-shell-styles";
+import { TrajectoryDetailView } from "./TrajectoryDetailView";
+import {
   formatTrajectoryDuration,
   formatTrajectoryTimestamp,
   formatTrajectoryTokenCount,
@@ -51,11 +88,51 @@ const SOURCE_COLORS: Record<string, { bg: string; fg: string }> = {
   orchestrator: { bg: "rgba(168, 85, 247, 0.15)", fg: "rgb(168, 85, 247)" },
 };
 
+const TRAJECTORIES_SHELL_CLASSNAME = APP_DESKTOP_SPLIT_SHELL_CLASSNAME;
+const TRAJECTORIES_PANE_CLASSNAME = `${DESKTOP_PAGE_CONTENT_CLASSNAME} min-h-0`;
+const TRAJECTORY_LIST_ITEM_CLASSNAME = APP_SIDEBAR_COMPACT_CARD_CLASSNAME;
+const TRAJECTORY_ACTION_BUTTON_CLASSNAME = `${DESKTOP_CONTROL_SURFACE_COMPACT_CLASSNAME} ${DESKTOP_CONTROL_SURFACE_CLASSNAME}`;
+const TRAJECTORY_ACTION_ACCENT_BUTTON_CLASSNAME = `${DESKTOP_CONTROL_SURFACE_COMPACT_CLASSNAME} ${DESKTOP_CONTROL_SURFACE_ACCENT_CLASSNAME}`;
+const TRAJECTORY_ALERT_CLASSNAME =
+  "rounded-[18px] border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger";
+
+function renderInlineBadge(label: string, colors?: { bg: string; fg: string }) {
+  return (
+    <span
+      className="inline-flex items-center rounded-full border border-transparent px-2 py-0.5 text-[10px] font-semibold tracking-[0.12em]"
+      style={
+        colors
+          ? {
+              background: colors.bg,
+              color: colors.fg,
+            }
+          : undefined
+      }
+    >
+      {label}
+    </span>
+  );
+}
+
+function renderInlineMeta(label: string, colors?: { fg: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 text-[10px] font-medium text-muted/85">
+      <span
+        className="h-1.5 w-1.5 rounded-full"
+        style={colors ? { backgroundColor: colors.fg } : undefined}
+      />
+      <span>{label}</span>
+    </span>
+  );
+}
+
 interface TrajectoriesViewProps {
-  onSelectTrajectory?: (id: string) => void;
+  selectedTrajectoryId?: string | null;
+  onSelectTrajectory?: (id: string | null) => void;
 }
 
 export function TrajectoriesView({
+  selectedTrajectoryId = null,
   onSelectTrajectory,
 }: TrajectoriesViewProps) {
   const { t } = useApp();
@@ -65,14 +142,12 @@ export function TrajectoriesView({
   const [config, setConfig] = useState<TrajectoryConfig | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Filters
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("");
   const [sourceFilter, setSourceFilter] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
   const pageSize = 50;
 
-  // Actions
   const [exporting, setExporting] = useState(false);
   const [clearing, setClearing] = useState(false);
   const [updatingLogging, setUpdatingLogging] = useState(false);
@@ -100,10 +175,11 @@ export function TrajectoriesView({
         setLoading(false);
         return;
       } catch (err) {
-        // Auto-retry on 503 (trajectory logger service still starting)
         const status = (err as { status?: number }).status;
         if (status === 503 && attempt < 3) {
-          await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+          await new Promise((resolve) =>
+            setTimeout(resolve, 1000 * (attempt + 1)),
+          );
           continue;
         }
         setError(
@@ -115,7 +191,7 @@ export function TrajectoriesView({
         return;
       }
     }
-  }, [page, statusFilter, sourceFilter, searchQuery, t]);
+  }, [page, searchQuery, sourceFilter, statusFilter, t]);
 
   useEffect(() => {
     void loadTrajectories();
@@ -148,10 +224,10 @@ export function TrajectoriesView({
     try {
       const blob = await client.exportTrajectories({ format, includePrompts });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `trajectories-${new Date().toISOString().split("T")[0]}.${format}`;
-      a.click();
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `trajectories-${new Date().toISOString().split("T")[0]}.${format}`;
+      anchor.click();
       URL.revokeObjectURL(url);
     } catch (err) {
       setError(
@@ -173,12 +249,12 @@ export function TrajectoriesView({
       cancelLabel: t("common.cancel"),
       type: "warning",
     });
-    if (!confirmed) {
-      return;
-    }
+    if (!confirmed) return;
+
     setClearing(true);
     try {
       await client.clearAllTrajectories();
+      onSelectTrajectory?.(null);
       void loadTrajectories();
     } catch (err) {
       setError(
@@ -203,339 +279,554 @@ export function TrajectoriesView({
   const trajectories = result?.trajectories ?? [];
   const total = result?.total ?? 0;
   const totalPages = Math.ceil(total / pageSize);
-
   const sources = stats?.bySource ? Object.keys(stats.bySource) : [];
+  const visibleCount = trajectories.length;
+  const isOverviewSelected = selectedTrajectoryId == null;
+  const loggingEnabled = config?.enabled ?? false;
 
   return (
-    <div className="flex flex-col h-full gap-3" data-testid="trajectories-view">
-      {/* Stats summary */}
-      {stats && (
-        <div className="flex flex-wrap items-center gap-4 px-4 py-2.5 bg-card/60 backdrop-blur-xl border border-border/40 rounded-2xl text-xs">
-          <div className="flex items-center gap-1.5">
-            <span className="text-muted">{t("trajectoriesview.Total")}</span>
-            <span className="font-semibold">
-              {stats.totalTrajectories.toLocaleString()}
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-muted">{t("trajectoriesview.LLMCalls")}</span>
-            <span className="font-semibold">
-              {stats.totalLlmCalls.toLocaleString()}
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-muted">{t("trajectoriesview.Tokens")}</span>
-            <span className="font-semibold text-txt">
-              {formatTrajectoryTokenCount(
-                stats.totalPromptTokens + stats.totalCompletionTokens,
-                { emptyLabel: "0" },
+    <DesktopPageFrame>
+      <div
+        className={TRAJECTORIES_SHELL_CLASSNAME}
+        data-testid="trajectories-view"
+      >
+        <aside className={APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME}>
+          <div className={APP_SIDEBAR_INNER_CLASSNAME}>
+            <div className={APP_SIDEBAR_HEADER_CLASSNAME}>
+              <div className={APP_SIDEBAR_KICKER_CLASSNAME}>
+                {t("advanced.trajectories", { defaultValue: "Trajectories" })}
+              </div>
+              <div className={APP_SIDEBAR_META_CLASSNAME}>
+                {loading && !stats
+                  ? t("common.loading", { defaultValue: "Loading..." })
+                  : `${visibleCount.toLocaleString()} visible`}
+              </div>
+            </div>
+
+            <DesktopRailSummaryCard
+              className={`mt-3 ${DESKTOP_RAIL_SUMMARY_CARD_COMPACT_CLASSNAME}`}
+            >
+              <div className="flex items-start justify-between gap-2.5">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`h-2.5 w-2.5 rounded-full ${
+                        loggingEnabled
+                          ? "bg-ok shadow-[0_0_12px_rgba(34,197,94,0.32)]"
+                          : "bg-warning"
+                      }`}
+                    />
+                    <span className="text-[12px] font-semibold text-txt">
+                      {loggingEnabled
+                        ? t("trajectoriesview.LoggingEnabled", {
+                            defaultValue: "Logging enabled",
+                          })
+                        : t("trajectoriesview.LoggingDisabled", {
+                            defaultValue: "Logging disabled",
+                          })}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-[10px] leading-5 text-muted">
+                    Browse recent runs and open one in the viewer.
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  onClick={handleToggleLogging}
+                  disabled={!config || updatingLogging}
+                  className={
+                    loggingEnabled
+                      ? TRAJECTORY_ACTION_ACCENT_BUTTON_CLASSNAME
+                      : TRAJECTORY_ACTION_BUTTON_CLASSNAME
+                  }
+                >
+                  {updatingLogging
+                    ? t("common.loading", { defaultValue: "Loading..." })
+                    : loggingEnabled
+                      ? t("common.on")
+                      : t("common.off")}
+                </Button>
+              </div>
+
+              <div className="mt-2.5 grid grid-cols-2 gap-1.5">
+                <div className={APP_SIDEBAR_COMPACT_PILL_CLASSNAME}>
+                  {`${stats?.totalTrajectories.toLocaleString() ?? "0"} total`}
+                </div>
+                <div className={APP_SIDEBAR_COMPACT_PILL_CLASSNAME}>
+                  {`${stats?.totalLlmCalls.toLocaleString() ?? "0"} calls`}
+                </div>
+                <div className={APP_SIDEBAR_COMPACT_PILL_CLASSNAME}>
+                  {formatTrajectoryTokenCount(
+                    (stats?.totalPromptTokens ?? 0) +
+                      (stats?.totalCompletionTokens ?? 0),
+                    { emptyLabel: "0" },
+                  )}{" "}
+                  tokens
+                </div>
+                <div className={APP_SIDEBAR_COMPACT_PILL_CLASSNAME}>
+                  {formatTrajectoryDuration(stats?.averageDurationMs ?? 0)} avg
+                </div>
+              </div>
+            </DesktopRailSummaryCard>
+
+            <div className="mt-3 space-y-1.5">
+              <Input
+                type="search"
+                placeholder={t("trajectoriesview.Search")}
+                className={APP_SIDEBAR_SEARCH_INPUT_CLASSNAME}
+                value={searchQuery}
+                onChange={(event) => {
+                  setSearchQuery(event.target.value);
+                  setPage(0);
+                }}
+              />
+
+              <div
+                className={
+                  sources.length > 0
+                    ? "grid grid-cols-2 gap-1.5"
+                    : "grid gap-1.5"
+                }
+              >
+                <Select
+                  value={statusFilter === "" ? "all" : statusFilter}
+                  onValueChange={(value) => {
+                    setStatusFilter(
+                      value === "all" ? "" : (value as StatusFilter),
+                    );
+                    setPage(0);
+                  }}
+                >
+                  <SelectTrigger className={APP_SIDEBAR_SEARCH_INPUT_CLASSNAME}>
+                    <SelectValue
+                      placeholder={t("trajectoriesview.AllStatuses")}
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">
+                      {t("trajectoriesview.AllStatuses")}
+                    </SelectItem>
+                    <SelectItem value="active">
+                      {t("appsview.Active")}
+                    </SelectItem>
+                    <SelectItem value="completed">
+                      {t("trajectoriesview.Completed")}
+                    </SelectItem>
+                    <SelectItem value="error">{t("logsview.Error")}</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {sources.length > 0 ? (
+                  <Select
+                    value={sourceFilter === "" ? "all" : sourceFilter}
+                    onValueChange={(value) => {
+                      setSourceFilter(value === "all" ? "" : value);
+                      setPage(0);
+                    }}
+                  >
+                    <SelectTrigger
+                      className={APP_SIDEBAR_SEARCH_INPUT_CLASSNAME}
+                    >
+                      <SelectValue placeholder={t("logsview.AllSources")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">
+                        {t("logsview.AllSources")}
+                      </SelectItem>
+                      {sources.map((source) => (
+                        <SelectItem key={source} value={source}>
+                          {source}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="mt-3 grid grid-cols-2 gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                className={TRAJECTORY_ACTION_BUTTON_CLASSNAME}
+                onClick={() => void loadTrajectories()}
+                disabled={loading}
+              >
+                {loading
+                  ? t("common.loading", { defaultValue: "Loading..." })
+                  : t("common.refresh")}
+              </Button>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={TRAJECTORY_ACTION_BUTTON_CLASSNAME}
+                    disabled={exporting || trajectories.length === 0}
+                  >
+                    {exporting ? t("common.exporting") : t("common.export")}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => handleExport("json", true)}>
+                    {t("trajectoriesview.JSONWithPrompts")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleExport("json", false)}>
+                    {t("trajectoriesview.JSONRedacted")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleExport("csv", false)}>
+                    {t("trajectoriesview.CSVSummaryOnly")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleExport("zip", true)}>
+                    {t("trajectoriesview.ZIPFolders")}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {hasActiveFilters ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  className={TRAJECTORY_ACTION_BUTTON_CLASSNAME}
+                  onClick={handleClearFilters}
+                >
+                  {t("logsview.ClearFilters")}
+                </Button>
+              ) : (
+                <div />
               )}
-            </span>
-            <span className="text-muted text-[10px]">
-              (
-              {formatTrajectoryTokenCount(stats.totalPromptTokens, {
-                emptyLabel: "0",
-              })}
-              ↑{" "}
-              {formatTrajectoryTokenCount(stats.totalCompletionTokens, {
-                emptyLabel: "0",
-              })}
-              ↓)
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-muted">
-              {t("trajectoriesview.AvgDuration")}
-            </span>
-            <span className="font-semibold">
-              {formatTrajectoryDuration(stats.averageDurationMs)}
-            </span>
-          </div>
-          <div className="ml-auto flex items-center gap-2">
-            <div className="flex items-center gap-1.5">
-              <span className="text-muted">
-                {t("trajectoriesview.Logging")}
-              </span>
+
               <Button
                 variant="outline"
                 size="sm"
-                className={`h-6 px-2 py-0.5 text-[11px] shadow-sm ${
-                  config?.enabled
-                    ? "bg-success/20 border-success text-success hover:bg-success/30"
-                    : "bg-warn/20 border-warn text-warn hover:bg-warn/30"
-                }`}
-                onClick={handleToggleLogging}
-                disabled={!config || updatingLogging}
-                aria-pressed={config?.enabled ?? false}
+                type="button"
+                className={`${DESKTOP_CONTROL_SURFACE_COMPACT_CLASSNAME} rounded-full border-danger/32 text-danger hover:border-danger/46 hover:bg-danger/10`}
+                onClick={handleClearAll}
+                disabled={clearing || stats?.totalTrajectories === 0}
               >
-                {config?.enabled ? t("common.on") : t("common.off")}
+                {clearing ? t("common.clearing") : t("common.clearAll")}
               </Button>
             </div>
-          </div>
-        </div>
-      )}
 
-      {/* Filters row */}
-      <div className="flex flex-wrap gap-1.5 items-center">
-        <Input
-          type="text"
-          placeholder={t("trajectoriesview.Search")}
-          className="h-8 px-3 py-1.5 text-xs bg-card border-border w-48 shadow-sm"
-          value={searchQuery}
-          onChange={(e) => {
-            setSearchQuery(e.target.value);
-            setPage(0);
-          }}
-        />
-
-        <Select
-          value={statusFilter === "" ? "all" : statusFilter}
-          onValueChange={(val) => {
-            setStatusFilter(val === "all" ? "" : (val as StatusFilter));
-            setPage(0);
-          }}
-        >
-          <SelectTrigger className="h-8 px-3 py-1.5 text-xs bg-card border-border shadow-sm w-40">
-            <SelectValue placeholder={t("trajectoriesview.AllStatuses")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">
-              {t("trajectoriesview.AllStatuses")}
-            </SelectItem>
-            <SelectItem value="active">{t("appsview.Active")}</SelectItem>
-            <SelectItem value="completed">
-              {t("trajectoriesview.Completed")}
-            </SelectItem>
-            <SelectItem value="error">{t("logsview.Error")}</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {sources.length > 0 && (
-          <Select
-            value={sourceFilter === "" ? "all" : sourceFilter}
-            onValueChange={(val) => {
-              setSourceFilter(val === "all" ? "" : val);
-              setPage(0);
-            }}
-          >
-            <SelectTrigger className="h-8 px-3 py-1.5 text-xs bg-card border-border shadow-sm w-40">
-              <SelectValue placeholder={t("logsview.AllSources")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t("logsview.AllSources")}</SelectItem>
-              {sources.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {s}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-
-        {hasActiveFilters && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-auto min-h-[2rem] whitespace-normal break-words px-3 py-1.5 text-xs bg-card text-txt hover:text-txt shadow-sm text-left"
-            onClick={handleClearFilters}
-          >
-            {t("logsview.ClearFilters")}
-          </Button>
-        )}
-
-        <div className="ml-auto flex gap-1.5">
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-auto min-h-[2rem] whitespace-normal break-words px-3 py-1.5 text-xs bg-card text-txt hover:text-txt shadow-sm text-left"
-            onClick={() => void loadTrajectories()}
-            disabled={loading}
-          >
-            {loading
-              ? t("common.loading", { defaultValue: "Loading..." })
-              : t("common.refresh", { defaultValue: "Refresh" })}
-          </Button>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-auto min-h-[2rem] whitespace-normal break-words px-3 py-1.5 text-xs bg-card text-txt hover:text-txt shadow-sm text-left"
-                disabled={exporting || trajectories.length === 0}
-              >
-                {exporting ? t("common.exporting") : t("common.export")}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => handleExport("json", true)}>
-                {t("trajectoriesview.JSONWithPrompts")}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleExport("json", false)}>
-                {t("trajectoriesview.JSONRedacted")}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleExport("csv", false)}>
-                {t("trajectoriesview.CSVSummaryOnly")}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleExport("zip", true)}>
-                {t("trajectoriesview.ZIPFolders")}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-auto min-h-[2rem] whitespace-normal break-words px-3 py-1.5 text-xs bg-card text-danger border-danger/50 hover:bg-danger/10 hover:border-danger shadow-sm text-left"
-            onClick={handleClearAll}
-            disabled={clearing || stats?.totalTrajectories === 0}
-          >
-            {clearing ? t("common.clearing") : t("common.clearAll")}
-          </Button>
-        </div>
-      </div>
-
-      {/* Error display */}
-      {error && (
-        <div className="text-xs text-danger border border-danger/30 bg-danger/10 px-3 py-2 rounded-xl">
-          {error}
-        </div>
-      )}
-
-      {/* Trajectories list */}
-      <div className="flex-1 min-h-0 overflow-y-auto border border-border bg-card">
-        {loading && trajectories.length === 0 ? (
-          <div className="border border-border/30 bg-card/20 rounded-xl p-8 text-center text-muted text-xs m-4">
-            {t("trajectoriesview.LoadingTrajectories")}
-          </div>
-        ) : trajectories.length === 0 ? (
-          <div className="border border-border/30 bg-card/20 rounded-xl p-8 text-center m-4">
-            <div className="text-muted text-xs">
-              {hasActiveFilters
-                ? t("trajectoriesview.NoTrajectoriesMatchingFilters")
-                : t("trajectoriesview.NoTrajectoriesYet")}
+            <div className={`mt-3 ${APP_SIDEBAR_SECTION_HEADING_CLASSNAME}`}>
+              Entries
             </div>
-            {!config?.enabled && (
-              <div className="mt-2 text-warn text-[11px]">
-                {t("trajectoriesview.LoggingHelp")}
+
+            <div className={`mt-2 ${APP_SIDEBAR_SCROLL_REGION_CLASSNAME}`}>
+              <div className="space-y-1.5">
+                <Button
+                  variant="ghost"
+                  type="button"
+                  onClick={() => onSelectTrajectory?.(null)}
+                  className={`${TRAJECTORY_LIST_ITEM_CLASSNAME} ${
+                    isOverviewSelected
+                      ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
+                      : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
+                  }`}
+                  aria-current={isOverviewSelected ? "page" : undefined}
+                >
+                  <span
+                    className={
+                      isOverviewSelected
+                        ? APP_SIDEBAR_COMPACT_ICON_ACTIVE_CLASSNAME
+                        : APP_SIDEBAR_COMPACT_ICON_INACTIVE_CLASSNAME
+                    }
+                  >
+                    Σ
+                  </span>
+                  <span className="min-w-0 flex-1 text-left">
+                    <span className={APP_SIDEBAR_COMPACT_TITLE_CLASSNAME}>
+                      Overview
+                    </span>
+                    <span className={APP_SIDEBAR_COMPACT_META_CLASSNAME}>
+                      Health, totals, and logging state.
+                    </span>
+                  </span>
+                </Button>
+
+                {loading && trajectories.length === 0 ? (
+                  <div
+                    className={`${DESKTOP_INSET_EMPTY_PANEL_CLASSNAME} px-4 py-6 text-center text-sm text-muted`}
+                  >
+                    {t("trajectoriesview.LoadingTrajectories")}
+                  </div>
+                ) : trajectories.length === 0 ? (
+                  <div
+                    className={`${DESKTOP_INSET_EMPTY_PANEL_CLASSNAME} px-4 py-6 text-center text-sm text-muted`}
+                  >
+                    {hasActiveFilters
+                      ? t("trajectoriesview.NoTrajectoriesMatchingFilters")
+                      : t("trajectoriesview.NoTrajectoriesYet")}
+                  </div>
+                ) : (
+                  trajectories.map((trajectory: TrajectoryRecord) => {
+                    const selected = selectedTrajectoryId === trajectory.id;
+                    const statusColor =
+                      STATUS_COLORS[trajectory.status] ??
+                      STATUS_COLORS.completed;
+                    const sourceColor =
+                      SOURCE_COLORS[trajectory.source] ?? SOURCE_COLORS.api;
+
+                    return (
+                      <Button
+                        key={trajectory.id}
+                        variant="ghost"
+                        type="button"
+                        onClick={() => onSelectTrajectory?.(trajectory.id)}
+                        className={`${TRAJECTORY_LIST_ITEM_CLASSNAME} ${
+                          selected
+                            ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
+                            : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
+                        }`}
+                        aria-current={selected ? "page" : undefined}
+                      >
+                        <span
+                          className={
+                            selected
+                              ? APP_SIDEBAR_COMPACT_ICON_ACTIVE_CLASSNAME
+                              : APP_SIDEBAR_COMPACT_ICON_INACTIVE_CLASSNAME
+                          }
+                        >
+                          {trajectory.llmCallCount}
+                        </span>
+                        <span className="min-w-0 flex-1 text-left">
+                          <span className="flex flex-wrap items-center gap-1.5">
+                            <span
+                              className={APP_SIDEBAR_COMPACT_TITLE_CLASSNAME}
+                            >
+                              {formatTrajectoryTimestamp(
+                                trajectory.createdAt,
+                                "smart",
+                              )}
+                            </span>
+                          </span>
+                          <span className={APP_SIDEBAR_COMPACT_META_CLASSNAME}>
+                            <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                              {renderInlineMeta(trajectory.source, sourceColor)}
+                              {renderInlineMeta(trajectory.status, statusColor)}
+                              <span>
+                                {formatTrajectoryTokenCount(
+                                  trajectory.totalPromptTokens +
+                                    trajectory.totalCompletionTokens,
+                                  { emptyLabel: "0" },
+                                )}{" "}
+                                tokens
+                              </span>
+                              <span>
+                                {formatTrajectoryDuration(
+                                  trajectory.durationMs,
+                                )}
+                              </span>
+                            </span>
+                          </span>
+                        </span>
+                      </Button>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {totalPages > 1 && (
+              <div className="mt-3 flex items-center justify-between gap-2 border-t border-border/20 pt-3 text-xs text-muted">
+                <span className="min-w-0">
+                  {t("trajectoriesview.ShowingRange", {
+                    start: page * pageSize + 1,
+                    end: Math.min((page + 1) * pageSize, total),
+                    total,
+                  })}
+                </span>
+                <div className="flex gap-1.5">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    type="button"
+                    className="h-8 rounded-full px-3 text-[11px]"
+                    onClick={() =>
+                      setPage((current) => Math.max(0, current - 1))
+                    }
+                    disabled={page === 0}
+                  >
+                    {t("databaseview.Prev")}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    type="button"
+                    className="h-8 rounded-full px-3 text-[11px]"
+                    onClick={() => setPage((current) => current + 1)}
+                    disabled={page >= totalPages - 1}
+                  >
+                    {t("onboarding.next")}
+                  </Button>
+                </div>
               </div>
             )}
           </div>
-        ) : (
-          <table className="w-full text-xs">
-            <thead className="bg-muted/10 sticky top-0">
-              <tr>
-                <th className="text-left px-2 py-1.5 font-medium">
-                  {t("trajectoriesview.Time")}
-                </th>
-                <th className="text-left px-2 py-1.5 font-medium">
-                  {t("trajectoriesview.Source")}
-                </th>
-                <th className="text-left px-2 py-1.5 font-medium">
-                  {t("finetuningview.Status")}
-                </th>
-                <th className="text-right px-2 py-1.5 font-medium">
-                  {t("trajectoriesview.Calls")}
-                </th>
-                <th className="text-right px-2 py-1.5 font-medium">
-                  {t("wallet.tokens")}
-                </th>
-                <th className="text-right px-2 py-1.5 font-medium">
-                  {t("trajectoriesview.Duration")}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {trajectories.map((traj: TrajectoryRecord) => {
-                const statusColor =
-                  STATUS_COLORS[traj.status] ?? STATUS_COLORS.completed;
-                const sourceColor =
-                  SOURCE_COLORS[traj.source] ?? SOURCE_COLORS.api;
-                return (
-                  <tr
-                    key={traj.id}
-                    className="border-t border-border hover:bg-muted/5 cursor-pointer"
-                    onClick={() => onSelectTrajectory?.(traj.id)}
-                  >
-                    <td className="px-2 py-1.5 text-muted whitespace-nowrap">
-                      {formatTrajectoryTimestamp(traj.createdAt, "smart")}
-                    </td>
-                    <td className="px-2 py-1.5">
-                      <span
-                        className="inline-block text-[10px] px-1.5 py-px rounded"
-                        style={{
-                          background: sourceColor.bg,
-                          color: sourceColor.fg,
-                        }}
-                      >
-                        {traj.source}
-                      </span>
-                    </td>
-                    <td className="px-2 py-1.5">
-                      <span
-                        className="inline-block text-[10px] px-1.5 py-px rounded"
-                        style={{
-                          background: statusColor.bg,
-                          color: statusColor.fg,
-                        }}
-                      >
-                        {traj.status}
-                      </span>
-                    </td>
-                    <td className="px-2 py-1.5 text-right font-mono">
-                      {traj.llmCallCount}
-                    </td>
-                    <td className="px-2 py-1.5 text-right font-mono">
-                      <span className="text-txt">
-                        {formatTrajectoryTokenCount(
-                          traj.totalPromptTokens + traj.totalCompletionTokens,
-                          { emptyLabel: "0" },
-                        )}
-                      </span>
-                    </td>
-                    <td className="px-2 py-1.5 text-right text-muted font-mono">
-                      {formatTrajectoryDuration(traj.durationMs)}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        )}
-      </div>
+        </aside>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-muted">
-            {t("trajectoriesview.ShowingRange", {
-              start: page * pageSize + 1,
-              end: Math.min((page + 1) * pageSize, total),
-              total,
-            })}
-          </span>
-          <div className="flex gap-1">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-auto min-h-[1.75rem] px-2 py-1 text-xs bg-card disabled:opacity-50 shadow-sm"
-              onClick={() => setPage((p) => Math.max(0, p - 1))}
-              disabled={page === 0}
-            >
-              {t("databaseview.Prev")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-auto min-h-[1.75rem] px-2 py-1 text-xs bg-card disabled:opacity-50 shadow-sm"
-              onClick={() => setPage((p) => p + 1)}
-              disabled={page >= totalPages - 1}
-            >
-              {t("onboarding.next")}
-            </Button>
+        <div className={TRAJECTORIES_PANE_CLASSNAME}>
+          <div className="flex min-h-0 flex-1 flex-col gap-4 p-3 lg:p-4">
+            {error ? (
+              <div className={TRAJECTORY_ALERT_CLASSNAME}>{error}</div>
+            ) : null}
+
+            {isOverviewSelected ? (
+              <>
+                <section className={DESKTOP_PADDED_SURFACE_PANEL_CLASSNAME}>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted/70">
+                    Trajectories
+                  </div>
+                  <div className="mt-2 text-[2rem] font-semibold leading-tight text-txt">
+                    Trajectory Overview
+                  </div>
+                  <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
+                    Capture, inspect, and export model runs from one workspace.
+                    Use the left rail to filter history, then open a run to see
+                    prompt, response, and token detail without leaving the page.
+                  </p>
+                </section>
+
+                <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+                  <section
+                    className={`${DESKTOP_SECTION_SHELL_CLASSNAME} p-5 sm:p-6`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted/70">
+                          Health
+                        </div>
+                        <div className="mt-2 text-lg font-semibold text-txt">
+                          Capture Status
+                        </div>
+                      </div>
+                      <span className={APP_SIDEBAR_PILL_CLASSNAME}>
+                        {loggingEnabled ? "Ready" : "Disabled"}
+                      </span>
+                    </div>
+
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                      <div
+                        className={`${DESKTOP_INSET_PANEL_CLASSNAME} px-4 py-4`}
+                      >
+                        <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
+                          Total Runs
+                        </div>
+                        <div className="mt-2 text-2xl font-semibold text-txt">
+                          {stats?.totalTrajectories.toLocaleString() ?? "0"}
+                        </div>
+                      </div>
+                      <div
+                        className={`${DESKTOP_INSET_PANEL_CLASSNAME} px-4 py-4`}
+                      >
+                        <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
+                          LLM Calls
+                        </div>
+                        <div className="mt-2 text-2xl font-semibold text-txt">
+                          {stats?.totalLlmCalls.toLocaleString() ?? "0"}
+                        </div>
+                      </div>
+                      <div
+                        className={`${DESKTOP_INSET_PANEL_CLASSNAME} px-4 py-4`}
+                      >
+                        <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
+                          Tokens
+                        </div>
+                        <div className="mt-2 text-xl font-semibold text-txt">
+                          {formatTrajectoryTokenCount(
+                            (stats?.totalPromptTokens ?? 0) +
+                              (stats?.totalCompletionTokens ?? 0),
+                            { emptyLabel: "0" },
+                          )}
+                        </div>
+                      </div>
+                      <div
+                        className={`${DESKTOP_INSET_PANEL_CLASSNAME} px-4 py-4`}
+                      >
+                        <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
+                          Average Duration
+                        </div>
+                        <div className="mt-2 text-xl font-semibold text-txt">
+                          {formatTrajectoryDuration(
+                            stats?.averageDurationMs ?? 0,
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section
+                    className={`${DESKTOP_SECTION_SHELL_CLASSNAME} p-5 sm:p-6`}
+                  >
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted/70">
+                      Next Step
+                    </div>
+                    <div className="mt-2 text-lg font-semibold text-txt">
+                      Choose a trajectory
+                    </div>
+                    <p className="mt-3 text-sm leading-6 text-muted">
+                      Select any item in the left rail to inspect system prompt,
+                      input, output, latency, token cost, and orchestrator
+                      context on the right.
+                    </p>
+
+                    {trajectories.length === 0 ? (
+                      <DesktopEmptyStatePanel
+                        className="mt-5 min-h-[16rem]"
+                        description={
+                          hasActiveFilters
+                            ? t(
+                                "trajectoriesview.NoTrajectoriesMatchingFilters",
+                              )
+                            : t("trajectoriesview.NoTrajectoriesYet")
+                        }
+                        title="No trajectory selected"
+                      />
+                    ) : (
+                      <div
+                        className={`${DESKTOP_INSET_PANEL_CLASSNAME} mt-5 px-4 py-4`}
+                      >
+                        <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
+                          Latest visible run
+                        </div>
+                        <div className="mt-2 text-base font-semibold text-txt">
+                          {formatTrajectoryTimestamp(
+                            trajectories[0]?.createdAt ?? Date.now(),
+                            "detailed",
+                          )}
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {trajectories[0]
+                            ? renderInlineBadge(
+                                trajectories[0].source,
+                                SOURCE_COLORS[trajectories[0].source] ??
+                                  SOURCE_COLORS.api,
+                              )
+                            : null}
+                          {trajectories[0]
+                            ? renderInlineBadge(
+                                trajectories[0].status,
+                                STATUS_COLORS[trajectories[0].status] ??
+                                  STATUS_COLORS.completed,
+                              )
+                            : null}
+                        </div>
+                      </div>
+                    )}
+                  </section>
+                </div>
+              </>
+            ) : (
+              <TrajectoryDetailView trajectoryId={selectedTrajectoryId} />
+            )}
           </div>
         </div>
-      )}
-    </div>
+      </div>
+    </DesktopPageFrame>
   );
 }

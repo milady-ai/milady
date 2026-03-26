@@ -22,12 +22,19 @@ import {
 import type { Tab } from "@miladyai/app-core/navigation";
 import { useApp } from "@miladyai/app-core/state";
 import { Button } from "@miladyai/ui";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { DesktopWorkspaceSection } from "./DesktopWorkspaceSection";
+import {
+  DESKTOP_PAGE_CONTENT_CLASSNAME,
+  DESKTOP_SEGMENTED_GROUP_CLASSNAME,
+  DESKTOP_SEGMENTED_ITEM_ACTIVE_CLASSNAME,
+  DESKTOP_SEGMENTED_ITEM_BASE_CLASSNAME,
+  DESKTOP_SEGMENTED_ITEM_INACTIVE_CLASSNAME,
+} from "./desktop-surface-primitives";
 import { FineTuningView } from "./FineTuningView";
 import { LifoSandboxView } from "./LifoSandboxView";
 import { TrajectoriesView } from "./TrajectoriesView";
-import { TrajectoryDetailView } from "./TrajectoryDetailView";
 
 type SubTab =
   // | "actions"
@@ -89,15 +96,14 @@ const MODAL_SUB_TABS = SUB_TABS.filter(
 
 const ADVANCED_TAB_BUTTON_RESET_CLASSNAME =
   "select-none [&_*]:select-none [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] focus:outline-none focus-visible:outline-none";
-const ADVANCED_SHELL_NAV_SURFACE_CLASSNAME =
-  "mb-3 shrink-0 border-b border-border/40 pb-3";
+const ADVANCED_SHELL_NAV_SURFACE_CLASSNAME = "mb-3 shrink-0";
 const ADVANCED_SHELL_NAV_SCROLL_CLASSNAME =
   "flex gap-1.5 overflow-x-auto overflow-y-hidden pr-2";
-const ADVANCED_TAB_BUTTON_BASE_CLASSNAME = `${ADVANCED_TAB_BUTTON_RESET_CLASSNAME} group inline-flex shrink-0 rounded-xl border text-left transition-all duration-150`;
+const ADVANCED_TAB_BUTTON_BASE_CLASSNAME = `${ADVANCED_TAB_BUTTON_RESET_CLASSNAME} ${DESKTOP_SEGMENTED_ITEM_BASE_CLASSNAME} group shrink-0 text-left transition-all duration-150`;
 const ADVANCED_TAB_BUTTON_ACTIVE_CLASSNAME =
-  "border-accent/25 bg-accent/10 text-txt shadow-[0_1px_4px_rgba(3,5,10,0.06)] dark:shadow-[0_0_0_1px_rgba(var(--accent),0.12),0_0_12px_rgba(var(--accent),0.12)]";
+  DESKTOP_SEGMENTED_ITEM_ACTIVE_CLASSNAME;
 const ADVANCED_TAB_BUTTON_INACTIVE_CLASSNAME =
-  "border-transparent bg-transparent text-muted hover:border-border/40 hover:bg-bg/30 hover:text-txt";
+  DESKTOP_SEGMENTED_ITEM_INACTIVE_CLASSNAME;
 
 function mapTabToSubTab(tab: Tab): SubTab {
   switch (tab) {
@@ -187,17 +193,9 @@ export function AdvancedPageView({ inModal }: { inModal?: boolean } = {}) {
       case "fine-tuning":
         return <FineTuningView />;
       case "trajectories":
-        if (selectedTrajectoryId) {
-          return (
-            <TrajectoryDetailView
-              trajectoryId={selectedTrajectoryId}
-              onBack={() => setSelectedTrajectoryId(null)}
-            />
-          );
-        }
         return (
           <TrajectoriesView
-            key={selectedTrajectoryId === null ? "list" : "hidden"}
+            selectedTrajectoryId={selectedTrajectoryId}
             onSelectTrajectory={setSelectedTrajectoryId}
           />
         );
@@ -228,19 +226,19 @@ export function AdvancedPageView({ inModal }: { inModal?: boolean } = {}) {
         </nav>
       ) : (
         <div className={ADVANCED_SHELL_NAV_SURFACE_CLASSNAME}>
-          <div
-            className={ADVANCED_SHELL_NAV_SCROLL_CLASSNAME}
+          <nav
+            className={`${DESKTOP_SEGMENTED_GROUP_CLASSNAME} ${ADVANCED_SHELL_NAV_SCROLL_CLASSNAME}`}
             aria-label="Advanced navigation"
             data-testid="advanced-subtab-nav"
           >
             {tabs.map((subTab) => renderSubTabButton(subTab))}
-          </div>
+          </nav>
         </div>
       )}
 
       <div
         className={
-          inModal ? "settings-content-area" : "flex-1 min-h-0 overflow-y-auto"
+          inModal ? "settings-content-area" : DESKTOP_PAGE_CONTENT_CLASSNAME
         }
         style={
           inModal
