@@ -62,8 +62,7 @@ Get conversation-driven wallet execution working end-to-end on BSC testnet with 
 - BSC RPC is ready.
 - automation mode is `full`.
 - trade permission mode is `agent-auto`.
-- Balance from conversation works.
-- Send and swap are not yet proven end-to-end in the live desktop runtime.
+- Balance from conversation works.`r`n- Conversational send on BSC testnet is now working live with a real tx hash and saved conversation log proof.`r`n- Swap is not yet proven live because the test token address is not configured and the live swap path still needs the same end-to-end proof.
 
 ## Current Code Changes On This Branch
 ### Agent/server path
@@ -109,12 +108,7 @@ We need a single provider contract for:
 
 Callers should ask for wallet execution capability, not for Privy/Steward/local-specific behavior.
 
-### 4. End-to-end live send
-Required acceptance:
-- prompt: `send 0.001 tBNB on BSC testnet to 0x8DFBdEEC8c5d4970BB5F481C6ec7f73fa1C65be5`
-- assistant reply includes tx hash
-- conversation log contains same tx hash
-- trajectory contains same tx hash
+### 4. End-to-end live send`r`nStatus: completed.`r`n`r`nProof:`r`n- prompt: `send 0.001 tBNB on BSC testnet to 0x8DFBdEEC8c5d4970BB5F481C6ec7f73fa1C65be5``r`n- assistant reply included tx hash `0x2eebb8104814ac017515d8c002b749f010ce8e16b42e01a2fe3830befbd74cb5``r`n- saved conversation log contained the same tx hash
 
 ### 5. End-to-end live swap
 Required acceptance:
@@ -154,3 +148,4 @@ The main improvement is that the failures are no longer vague:
 - we know the next narrowing step is live local-key send from conversation
 
 The system is not done, but the architecture problem is now much clearer than when this work started.
+

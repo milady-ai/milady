@@ -20,7 +20,7 @@ import type {
 } from "@miladyai/shared/contracts";
 import {
   buildAuthHeaders,
-  WALLET_ACTION_API_PORT,
+  getWalletActionApiPort,
 } from "./wallet-action-shared.js";
 
 /** Timeout for the balance API call. */
@@ -179,7 +179,7 @@ export const checkBalanceAction: Action = {
 
       // ── Fetch balances from API ──────────────────────────────────────
       const response = await fetch(
-        `http://127.0.0.1:${WALLET_ACTION_API_PORT}/api/wallet/balances`,
+        `http://127.0.0.1:${getWalletActionApiPort()}/api/wallet/balances`,
         {
           headers: {
             ...buildAuthHeaders(),

@@ -1955,6 +1955,27 @@ async function _sendLocalWalletTransaction(
   }
 }
 
+function resolveBscExecutionNetwork(): {
+  chainId: number;
+  explorerBaseUrl: string;
+} {
+  if (process.env.MILADY_WALLET_NETWORK?.trim().toLowerCase() === "testnet") {
+    const parsedChainId = Number.parseInt(
+      process.env.BSC_TESTNET_CHAIN_ID?.trim() ?? "97",
+      10,
+    );
+    return {
+      chainId: Number.isNaN(parsedChainId) ? 97 : parsedChainId,
+      explorerBaseUrl: "https://testnet.bscscan.com",
+    };
+  }
+
+  return {
+    chainId: 56,
+    explorerBaseUrl: "https://bscscan.com",
+  };
+}
+
 /**
  * Load config from disk and backfill cloud.apiKey from sealed secrets
  * if it's missing. This handles the case where the API key was persisted
@@ -2581,6 +2602,7 @@ async function handleMiladyCompatRoute(
     const hasStewardSigner = isStewardConfigured();
     const canSign = hasLocalKey || hasStewardSigner;
     const rpcReadiness = resolveWalletRpcReadiness(config);
+    const bscExecutionNetwork = resolveBscExecutionNetwork();
 
     try {
       const quote = await buildBscTradeQuote({
@@ -2807,7 +2829,7 @@ async function handleMiladyCompatRoute(
           blockNumber: null,
           gasUsed: null,
           effectiveGasPriceWei: null,
-          explorerUrl: `https://bscscan.com/tx/${finalHash}`,
+          explorerUrl: `${bscExecutionNetwork.explorerBaseUrl}/tx/${finalHash}`,
         });
       } catch (ledgerErr) {
         logger.warn(
@@ -2830,7 +2852,7 @@ async function handleMiladyCompatRoute(
           nonce: finalNonce,
           gasLimit: finalGasLimit,
           valueWei: unsignedTx.valueWei,
-          explorerUrl: `https://bscscan.com/tx/${finalHash}`,
+          explorerUrl: `${bscExecutionNetwork.explorerBaseUrl}/tx/${finalHash}`,
           blockNumber: null,
           status: "pending",
           approvalHash,
@@ -2897,6 +2919,7 @@ async function handleMiladyCompatRoute(
     const canSign = hasLocalKey || hasStewardSigner;
     const addresses = getWalletAddresses();
     const rpcReadiness = resolveWalletRpcReadiness(config);
+    const bscExecutionNetwork = resolveBscExecutionNetwork();
 
     let toAddress: string;
     try {
@@ -2932,7 +2955,7 @@ async function handleMiladyCompatRoute(
     }
 
     const unsignedTx = {
-      chainId: 56,
+      chainId: bscExecutionNetwork.chainId,
       from: addresses.evmAddress ?? null,
       to:
         isBnb || typeof body.tokenAddress !== "string"
@@ -2947,7 +2970,7 @@ async function handleMiladyCompatRoute(
             ethers.parseUnits(amount, decimals),
           ]),
       valueWei: isBnb ? ethers.parseEther(amount).toString() : "0",
-      explorerUrl: "https://bscscan.com",
+      explorerUrl: bscExecutionNetwork.explorerBaseUrl,
       assetSymbol,
       amount,
       tokenAddress:
@@ -3057,7 +3080,7 @@ async function handleMiladyCompatRoute(
           nonce: finalNonce,
           gasLimit: finalGasLimit,
           valueWei: unsignedTx.valueWei,
-          explorerUrl: `https://bscscan.com/tx/${finalHash}`,
+          explorerUrl: `${bscExecutionNetwork.explorerBaseUrl}/tx/${finalHash}`,
           blockNumber: null,
           status: "pending",
         },
