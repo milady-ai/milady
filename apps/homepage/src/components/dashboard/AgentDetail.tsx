@@ -38,7 +38,7 @@ function formatDate(dateStr?: string): string {
 
 const STATE_COLORS: Record<string, { text: string; bg: string }> = {
   running: { text: "text-emerald-400", bg: "bg-emerald-500" },
-  paused: { text: "text-amber-400", bg: "bg-amber-500" },
+  paused: { text: "text-brand", bg: "bg-brand" },
   stopped: { text: "text-red-400", bg: "bg-red-500" },
   provisioning: { text: "text-brand", bg: "bg-brand" },
   unknown: { text: "text-text-muted", bg: "bg-text-muted" },
@@ -161,13 +161,13 @@ export function AgentDetail({
       </div>
 
       {/* Tab navigation - terminal style */}
-      <div className="flex items-center border-b border-border bg-dark/50">
+      <div className="flex items-center overflow-x-auto border-b border-border bg-dark/50">
         {TABS.map((t) => (
           <button
             type="button"
             key={t}
             onClick={() => setTab(t)}
-            className={`relative px-5 py-3 font-mono text-xs tracking-wide transition-all duration-150
+            className={`relative shrink-0 px-5 py-3 font-mono text-xs tracking-wide transition-colors duration-150
               ${
                 tab === t
                   ? "text-brand bg-surface"
@@ -389,7 +389,7 @@ function CloudActionButton({
   const isLoading = loading === action;
   const colors = {
     success: "text-emerald-400 hover:bg-emerald-500/10 border-emerald-500/20",
-    warn: "text-amber-400 hover:bg-amber-500/10 border-amber-500/20",
+    warn: "text-brand hover:bg-brand/10 border-brand/20",
     danger: "text-red-400 hover:bg-red-500/10 border-red-500/20",
     default:
       "text-text-muted hover:text-text-light hover:bg-surface-elevated border-border",

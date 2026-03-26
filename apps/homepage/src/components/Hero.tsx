@@ -55,7 +55,7 @@ function TypewriterLoop() {
   return (
     <>
       {display}
-      <span className="inline-block w-[0.06em] h-[0.8em] bg-brand ml-[0.04em] align-middle animate-[cursor-blink_1s_step-end_infinite]" />
+      <span className="ml-[0.04em] inline-block h-[0.8em] w-[0.06em] animate-[cursor-blink_1s_step-end_infinite] align-middle bg-brand" />
     </>
   );
 }
@@ -100,7 +100,7 @@ export function HeroBackground() {
           className="text-[13vw] sm:text-[11vw] lg:text-[13vw] font-black leading-[0.76] tracking-tighter uppercase text-white/95 flex flex-col items-center pointer-events-none select-none mt-16 sm:mt-12 max-w-none"
         >
           <span>MILADY</span>
-          <span className="text-brand drop-shadow-lg text-[11vw] sm:text-[9vw] lg:text-[11vw] break-words hyphens-none text-center w-full">
+          <span className="w-full break-words hyphens-none text-center text-[11vw] text-brand drop-shadow-[0_10px_28px_rgba(240,185,11,0.18)] sm:text-[9vw] lg:text-[11vw]">
             <TypewriterLoop />
           </span>
         </motion.h1>

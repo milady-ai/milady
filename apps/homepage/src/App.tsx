@@ -160,7 +160,7 @@ function DownloadDropdown() {
                 href={d.url}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors border-b border-text-subtle/10 last:border-b-0"
+                className="flex items-center gap-3 border-b border-text-subtle/10 px-4 py-3 transition-colors hover:bg-brand/5 last:border-b-0"
               >
                 {platformIcon(d.id)}
                 <span className="flex-1 font-mono text-[11px] tracking-wider uppercase text-text-light">
@@ -175,10 +175,10 @@ function DownloadDropdown() {
               href={releaseData.release.url}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors border-t border-text-subtle/20"
+              className="flex items-center gap-3 border-t border-text-subtle/20 px-4 py-3 text-text-muted transition-colors hover:bg-brand/5 hover:text-brand"
             >
               <GithubIcon />
-              <span className="font-mono text-[11px] tracking-wider uppercase text-text-muted">
+              <span className="font-mono text-[11px] tracking-wider uppercase">
                 All Releases
               </span>
             </a>

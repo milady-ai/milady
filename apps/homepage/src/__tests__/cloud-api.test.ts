@@ -556,8 +556,10 @@ describe("CloudClient", () => {
       status: 200,
       json: () => Promise.resolve({ result: { state: "running" } }),
     });
-    const result = await cc.bridge("agent-1", "status.get");
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const result = (await cc.bridge("agent-1", "status.get")) as {
+      result: { state: string };
+    };
+    const body = JSON.parse(String(mockFetch.mock.calls[0][1].body));
     expect(body.method).toBe("status.get");
     expect(body.jsonrpc).toBe("2.0");
     expect(body.id).toBeDefined();

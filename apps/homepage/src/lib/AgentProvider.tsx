@@ -143,7 +143,7 @@ export function AgentProvider({ children }: { children: ReactNode }) {
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>("all");
   const cloudClientRef = useRef<CloudClient | null>(null);
   const cloudTokenRef = useRef<string | null>(null);
-  const intervalRef = useRef<ReturnType<typeof setInterval>>();
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   // Request sequencing: incremented on each fetchAll() call to prevent stale responses
   const fetchSequenceRef = useRef(0);
   // Track whether initial load has completed
@@ -363,7 +363,6 @@ export function AgentProvider({ children }: { children: ReactNode }) {
       url: LOCAL_AGENT_BASE,
       type: "local",
     });
-    const _localAgentIndex = results.length;
     // We'll add local agent placeholder only if probe succeeds (handled in parallel probes)
 
     // 4. Manually-added remote agents (via ConnectionModal)
@@ -558,15 +557,20 @@ export function AgentProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    fetchAll();
+    void fetchAll();
     intervalRef.current = setInterval(fetchAll, 30000);
-    return () => clearInterval(intervalRef.current);
+    return () => {
+      if (intervalRef.current !== null) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
   }, [fetchAll]);
 
   // Listen for auth changes (sign-in/sign-out) and refresh immediately
   useEffect(() => {
     const handleAuthChange = () => {
-      fetchAll();
+      void fetchAll();
     };
 
     // Subscribe to custom auth changed event (same-tab)
@@ -576,7 +580,7 @@ export function AgentProvider({ children }: { children: ReactNode }) {
     const handleStorage = (event: StorageEvent) => {
       const tokenKey = getCloudTokenStorageKey();
       if (event.key === tokenKey || event.key === null) {
-        fetchAll();
+        void fetchAll();
       }
     };
     window.addEventListener("storage", handleStorage);
@@ -590,7 +594,7 @@ export function AgentProvider({ children }: { children: ReactNode }) {
   const addRemoteUrl = useCallback(
     (name: string, url: string, token?: string) => {
       addConnection({ name, url, type: "remote", authToken: token });
-      fetchAll();
+      void fetchAll();
     },
     [fetchAll],
   );
@@ -599,7 +603,7 @@ export function AgentProvider({ children }: { children: ReactNode }) {
     (id: string) => {
       const connId = id.replace("remote-", "");
       removeConnection(connId);
-      fetchAll();
+      void fetchAll();
     },
     [fetchAll],
   );

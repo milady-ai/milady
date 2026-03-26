@@ -85,7 +85,7 @@ export function SourceBar() {
           onClick={() => setShowAddRemote(true)}
           className="px-3 py-1.5 font-mono text-[10px] tracking-wider
             text-text-subtle hover:text-text-light hover:bg-surface
-            transition-all duration-150"
+            transition-colors duration-150"
         >
           + CONNECT
         </button>
@@ -95,7 +95,7 @@ export function SourceBar() {
           onClick={handleRefresh}
           disabled={isRefreshing}
           className={`flex items-center gap-1.5 px-3 py-1.5 
-            font-mono text-[10px] tracking-wider transition-all duration-150
+            font-mono text-[10px] tracking-wider transition-colors duration-150
             ${
               isRefreshing
                 ? "text-text-subtle cursor-not-allowed"
@@ -188,7 +188,7 @@ function FilterTab({
 }) {
   const statusColor = {
     active: "bg-emerald-400",
-    warn: "bg-amber-400",
+    warn: "bg-brand",
     idle: "bg-text-muted/30",
   };
 
@@ -197,7 +197,7 @@ function FilterTab({
       type="button"
       onClick={onClick}
       className={`flex items-center gap-2 px-3 py-2 font-mono text-[10px] tracking-wider
-        transition-all duration-150
+        transition-colors duration-150
         ${
           active
             ? "bg-surface text-text-light"

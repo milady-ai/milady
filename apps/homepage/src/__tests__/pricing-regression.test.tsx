@@ -155,7 +155,7 @@ describe("homepage pricing regression coverage", () => {
     expect(screen.getByText(/\$0\.01\/hr running/)).toBeTruthy();
     expect(screen.getByText(/\$0\.0025\/hr idle/)).toBeTruthy();
     expect(screen.getByText(/min\. balance \$5\.00/)).toBeTruthy();
-    expect(screen.getByText("DEPLOY")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Deploy" })).toBeTruthy();
   });
 
   it("shows the pricing preview in the empty agents state", () => {
@@ -182,12 +182,8 @@ describe("homepage pricing regression coverage", () => {
       balance: 100,
       currency: "credits",
     });
-    vi.spyOn(CloudClient.prototype, "getCurrentSession").mockResolvedValue(
-      null,
-    );
-    vi.spyOn(CloudClient.prototype, "getBillingSettings").mockResolvedValue(
-      null,
-    );
+    vi.spyOn(CloudClient.prototype, "getCurrentSession").mockResolvedValue({});
+    vi.spyOn(CloudClient.prototype, "getBillingSettings").mockResolvedValue({});
     vi.spyOn(CloudClient.prototype, "getCreditsSummary").mockResolvedValue({
       organization: null,
       agentsSummary: null,
@@ -222,12 +218,8 @@ describe("homepage pricing regression coverage", () => {
       balance: 100,
       currency: "credits",
     });
-    vi.spyOn(CloudClient.prototype, "getCurrentSession").mockResolvedValue(
-      null,
-    );
-    vi.spyOn(CloudClient.prototype, "getBillingSettings").mockResolvedValue(
-      null,
-    );
+    vi.spyOn(CloudClient.prototype, "getCurrentSession").mockResolvedValue({});
+    vi.spyOn(CloudClient.prototype, "getBillingSettings").mockResolvedValue({});
     vi.spyOn(CloudClient.prototype, "getCreditsSummary").mockResolvedValue({
       organization: null,
       agentsSummary: null,

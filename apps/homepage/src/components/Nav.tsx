@@ -8,8 +8,11 @@ export function Nav() {
   const isOnDashboard = location.pathname === "/dashboard";
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-dark/95 backdrop-blur-md border-b border-border">
-      <div className="flex items-center justify-between px-4 sm:px-5 md:px-8 h-[56px]">
+    <nav
+      className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-dark/95 backdrop-blur-md"
+      style={{ paddingTop: "var(--safe-area-top, 0px)" }}
+    >
+      <div className="flex h-[56px] items-center justify-between px-4 sm:px-5 md:px-8">
         {/* Brand mark — square logo container */}
         <Link
           to="/dashboard"
@@ -67,7 +70,7 @@ export function Nav() {
             onClick={() => setMobileOpen((open) => !open)}
             aria-expanded={mobileOpen}
             aria-label="Toggle navigation menu"
-            className="inline-flex items-center justify-center w-10 h-10 border border-border text-text-light 
+            className="inline-flex h-11 w-11 items-center justify-center border border-border text-text-light 
               hover:bg-surface transition-colors"
           >
             <svg

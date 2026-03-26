@@ -92,9 +92,9 @@ describe("Regression: connections store", () => {
   });
 
   it("preserves other connections when removing one", () => {
-    const _c1 = addConnection({ name: "A", url: "http://a", type: "remote" });
+    addConnection({ name: "A", url: "http://a", type: "remote" });
     const c2 = addConnection({ name: "B", url: "http://b", type: "remote" });
-    const _c3 = addConnection({ name: "C", url: "http://c", type: "remote" });
+    addConnection({ name: "C", url: "http://c", type: "remote" });
     removeConnection(c2.id);
     const remaining = getConnections();
     expect(remaining).toHaveLength(2);

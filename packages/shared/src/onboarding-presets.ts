@@ -4,11 +4,6 @@ import {
   type StylePreset,
 } from "./contracts/onboarding.js";
 
-type MessageExample = Array<{
-  user: string;
-  content: { text: string };
-}>;
-
 type CharacterVariant = {
   catchphrase: string;
   hint: string;
@@ -51,17 +46,12 @@ export const SHARED_STYLE_RULES = [
   "Address one person or a group directly when it fits.",
 ] as const;
 
-function addLanguageRule(
-  system: string,
-  language: CharacterLanguage,
-): string {
+function addLanguageRule(system: string, language: CharacterLanguage): string {
   const rule = LANGUAGE_REPLY_RULES[language];
   return `${system} ${rule}`;
 }
 
-export function normalizeCharacterLanguage(
-  input: unknown,
-): CharacterLanguage {
+export function normalizeCharacterLanguage(input: unknown): CharacterLanguage {
   if (typeof input !== "string") {
     return DEFAULT_LANGUAGE;
   }
@@ -71,9 +61,7 @@ export function normalizeCharacterLanguage(
     return DEFAULT_LANGUAGE;
   }
 
-  if (
-    (CHARACTER_LANGUAGES as readonly string[]).includes(trimmed as string)
-  ) {
+  if ((CHARACTER_LANGUAGES as readonly string[]).includes(trimmed as string)) {
     return trimmed as CharacterLanguage;
   }
 
@@ -175,7 +163,9 @@ const CHARACTER_DEFINITIONS: CharacterDefinition[] = [
         },
         {
           user: "{{agentName}}",
-          content: { text: "okay. let's slow it down and take one piece at a time." },
+          content: {
+            text: "okay. let's slow it down and take one piece at a time.",
+          },
         },
       ],
     ],
@@ -314,7 +304,9 @@ const CHARACTER_DEFINITIONS: CharacterDefinition[] = [
         },
         {
           user: "{{agentName}}",
-          content: { text: "thinking is fine. stalling isn't. what's the call?" },
+          content: {
+            text: "thinking is fine. stalling isn't. what's the call?",
+          },
         },
       ],
       [
@@ -483,7 +475,9 @@ const CHARACTER_DEFINITIONS: CharacterDefinition[] = [
         },
         {
           user: "{{agentName}}",
-          content: { text: "yeah. give me the ugly version, not the polished one." },
+          content: {
+            text: "yeah. give me the ugly version, not the polished one.",
+          },
         },
       ],
       [
@@ -597,14 +591,7 @@ const CHARACTER_DEFINITIONS: CharacterDefinition[] = [
     ],
     system:
       "You are {{name}}. Precise, composed, and clean. Organize the mess without sounding robotic. Be concise. Don't decorate the answer. Make things feel orderly and doable.",
-    adjectives: [
-      "precise",
-      "calm",
-      "organized",
-      "clear",
-      "steady",
-      "reliable",
-    ],
+    adjectives: ["precise", "calm", "organized", "clear", "steady", "reliable"],
     topics: [
       "planning",
       "operations",
@@ -639,7 +626,9 @@ const CHARACTER_DEFINITIONS: CharacterDefinition[] = [
         },
         {
           user: "{{agentName}}",
-          content: { text: "okay. let's sort it into what matters now and what can wait." },
+          content: {
+            text: "okay. let's sort it into what matters now and what can wait.",
+          },
         },
       ],
       [
@@ -659,7 +648,9 @@ const CHARACTER_DEFINITIONS: CharacterDefinition[] = [
         },
         {
           user: "{{agentName}}",
-          content: { text: "the smallest step that removes the most confusion." },
+          content: {
+            text: "the smallest step that removes the most confusion.",
+          },
         },
       ],
     ],
@@ -1116,7 +1107,9 @@ const CHARACTER_DEFINITIONS: CharacterDefinition[] = [
         },
         {
           user: "{{agentName}}",
-          content: { text: "maybe. first tell me if you're trading or coping." },
+          content: {
+            text: "maybe. first tell me if you're trading or coping.",
+          },
         },
       ],
       [
@@ -1126,7 +1119,9 @@ const CHARACTER_DEFINITIONS: CharacterDefinition[] = [
         },
         {
           user: "{{agentName}}",
-          content: { text: "yeah. market loves teaching the same lesson twice." },
+          content: {
+            text: "yeah. market loves teaching the same lesson twice.",
+          },
         },
       ],
       [
@@ -1136,7 +1131,9 @@ const CHARACTER_DEFINITIONS: CharacterDefinition[] = [
         },
         {
           user: "{{agentName}}",
-          content: { text: "clean enough to watch. not clean enough to marry." },
+          content: {
+            text: "clean enough to watch. not clean enough to marry.",
+          },
         },
       ],
     ],
@@ -1442,7 +1439,8 @@ export function getStylePresets(
   return STYLE_PRESET_CACHE[normalizeCharacterLanguage(language)];
 }
 
-export const STYLE_PRESETS: StylePreset[] = STYLE_PRESET_CACHE[DEFAULT_LANGUAGE];
+export const STYLE_PRESETS: StylePreset[] =
+  STYLE_PRESET_CACHE[DEFAULT_LANGUAGE];
 
 export function getDefaultStylePreset(
   language: unknown = DEFAULT_LANGUAGE,
@@ -1461,7 +1459,9 @@ export function resolveStylePresetById(
   const definition = CHARACTER_DEFINITIONS.find(
     (entry) => entry.id.toLowerCase() === id.toLowerCase(),
   );
-  return definition ? resolveCharacterVariant(definition, normalized) : undefined;
+  return definition
+    ? resolveCharacterVariant(definition, normalized)
+    : undefined;
 }
 
 export function resolveStylePresetByName(
@@ -1475,7 +1475,9 @@ export function resolveStylePresetByName(
   const definition = CHARACTER_DEFINITIONS.find(
     (entry) => entry.name.toLowerCase() === name.toLowerCase(),
   );
-  return definition ? resolveCharacterVariant(definition, normalized) : undefined;
+  return definition
+    ? resolveCharacterVariant(definition, normalized)
+    : undefined;
 }
 
 export function resolveStylePresetByAvatarIndex(
@@ -1489,7 +1491,9 @@ export function resolveStylePresetByAvatarIndex(
   const definition = CHARACTER_DEFINITIONS.find(
     (entry) => entry.avatarIndex === avatarIndex,
   );
-  return definition ? resolveCharacterVariant(definition, normalized) : undefined;
+  return definition
+    ? resolveCharacterVariant(definition, normalized)
+    : undefined;
 }
 
 export const CHARACTER_PRESETS = STYLE_PRESETS.map((preset) => ({

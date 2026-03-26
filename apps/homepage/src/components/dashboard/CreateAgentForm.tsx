@@ -1,3 +1,12 @@
+import {
+  Button,
+  cn,
+  Field,
+  FieldDescription,
+  FieldLabel,
+  FieldMessage,
+  Input,
+} from "@miladyai/ui";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getToken } from "../../lib/auth";
 import { CloudClient, type JobStatus } from "../../lib/cloud-api";
@@ -28,6 +37,15 @@ interface EnvVarRow {
   value: string;
 }
 
+const terminalPrimaryButtonClassName =
+  "h-11 rounded-xl border-brand/70 bg-brand text-dark font-mono text-xs font-semibold uppercase tracking-[0.18em] shadow-[0_16px_40px_rgba(240,185,11,0.16)] hover:border-brand hover:bg-brand-hover";
+
+const terminalSecondaryButtonClassName =
+  "h-11 rounded-xl border-border bg-dark/55 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-light hover:border-brand/30 hover:bg-dark-secondary";
+
+const terminalInputClassName =
+  "h-11 rounded-xl border-border bg-dark/80 px-4 font-mono text-sm text-text-light placeholder:text-text-muted/65 focus-visible:ring-brand/35";
+
 export function CreateAgentForm({
   onAuthenticated,
   onCreated,
@@ -41,7 +59,10 @@ export function CreateAgentForm({
   const [jobStatus, setJobStatus] = useState<JobStatus | null>(null);
   const [_createdAgentId, setCreatedAgentId] = useState<string | null>(null);
   const [createdName, setCreatedName] = useState("");
-  const pollRef = useRef<ReturnType<typeof setTimeout>>();
+  const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const progressHeadingRef = useRef<HTMLSpanElement>(null);
+  const errorHeadingRef = useRef<HTMLSpanElement>(null);
+  const previousStepRef = useRef<CreateStep>("form");
   const {
     error: loginError,
     isAuthenticated: authenticated,
@@ -53,9 +74,21 @@ export function CreateAgentForm({
   // Clean up polling on unmount
   useEffect(() => {
     return () => {
-      if (pollRef.current) clearTimeout(pollRef.current);
+      if (pollRef.current !== null) {
+        clearTimeout(pollRef.current);
+      }
     };
   }, []);
+
+  useEffect(() => {
+    if (previousStepRef.current === step) return;
+    if (step === "creating" || step === "provisioning" || step === "done") {
+      progressHeadingRef.current?.focus();
+    } else if (step === "error") {
+      errorHeadingRef.current?.focus();
+    }
+    previousStepRef.current = step;
+  }, [step]);
 
   const pollJob = useCallback(
     async (cc: CloudClient, jobId: string, attempt = 0) => {
@@ -165,6 +198,7 @@ export function CreateAgentForm({
     updated[i] = { ...updated[i], [field]: val };
     setEnvVars(updated);
   };
+  const canSubmit = Boolean(name.trim());
 
   // Build deploy steps for terminal output
   const getDeploySteps = (): DeployStep[] => {
@@ -215,21 +249,35 @@ export function CreateAgentForm({
               className={`w-2.5 h-2.5 rounded-full ${step === "done" ? "bg-emerald-500" : "bg-brand animate-[status-pulse_2s_ease-in-out_infinite]"}`}
             />
           </div>
-          <span className="font-mono text-xs text-text-muted">
+          <span
+            ref={progressHeadingRef}
+            tabIndex={-1}
+            className="font-mono text-xs text-text-muted focus:outline-none"
+          >
             {step === "done" ? "deploy complete" : "deploying..."}
           </span>
         </div>
 
         {/* Deploy log output */}
         <div className="p-5 font-mono text-sm">
+          <p
+            className="sr-only"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {step === "done"
+              ? `${createdName || name} is live.`
+              : `Deploying ${createdName || name}.`}
+          </p>
           <div className="text-text-muted mb-4">
             <span className="text-brand">$</span> milady deploy --name{" "}
             {createdName || name}
           </div>
 
-          <div className="space-y-2.5">
+          <ol className="space-y-2.5" aria-label="Deployment progress">
             {deploySteps.map((s) => (
-              <div key={s.id} className="flex items-center gap-3">
+              <li key={s.id} className="flex items-center gap-3">
                 {s.status === "done" && (
                   <span className="text-emerald-400 w-4 text-center">✓</span>
                 )}
@@ -256,9 +304,9 @@ export function CreateAgentForm({
                   {s.label}
                   {s.status === "active" && "..."}
                 </span>
-              </div>
+              </li>
             ))}
-          </div>
+          </ol>
 
           {/* Done state — brief flash */}
           {step === "done" && (
@@ -282,7 +330,11 @@ export function CreateAgentForm({
         {/* Terminal header bar */}
         <div className="flex items-center gap-3 px-4 py-2.5 bg-dark-secondary border-b border-border">
           <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
-          <span className="font-mono text-xs text-text-muted">
+          <span
+            ref={errorHeadingRef}
+            tabIndex={-1}
+            className="font-mono text-xs text-text-muted focus:outline-none"
+          >
             deploy failed
           </span>
         </div>
@@ -294,29 +346,35 @@ export function CreateAgentForm({
             {createdName || name}
           </div>
 
-          <div className="text-red-400 mb-6">
+          <div
+            className="text-red-400 mb-6"
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+          >
             <span className="text-red-500">ERROR:</span> {error}
           </div>
 
           <div className="flex items-center gap-3">
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => {
                 setStep("form");
                 setError(null);
               }}
-              className="px-4 py-2.5 bg-surface-elevated border border-border font-mono text-xs text-text-light
-                hover:border-brand/50 transition-colors"
+              className={terminalSecondaryButtonClassName}
             >
-              RETRY
-            </button>
-            <button
+              Retry
+            </Button>
+            <Button
               type="button"
+              variant="ghost"
               onClick={onCancel}
-              className="px-4 py-2.5 font-mono text-xs text-text-muted hover:text-text-light transition-colors"
+              className="h-11 rounded-xl px-4 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-muted hover:bg-transparent hover:text-text-light"
             >
-              CANCEL
-            </button>
+              Cancel
+            </Button>
           </div>
         </div>
       </div>
@@ -343,24 +401,33 @@ export function CreateAgentForm({
           </div>
 
           {/* Auth required message */}
-          <div className="border-l-2 border-brand/40 pl-4 mb-6">
+          <Field className="mb-6 border-l-2 border-brand/40 pl-4">
             <p className="font-mono text-xs text-text-subtle tracking-wide mb-1">
               AUTHENTICATION REQUIRED
             </p>
-            <p className="text-sm text-text-muted">
+            <FieldDescription className="text-sm text-text-muted">
               Sign in to Eliza Cloud to deploy agents.
-            </p>
+            </FieldDescription>
             {loginError && (
-              <p className="font-mono text-xs text-red-400 mt-2">
+              <FieldMessage
+                tone="danger"
+                className="font-mono text-xs"
+                role="alert"
+                aria-live="assertive"
+              >
                 {loginError}
-              </p>
+              </FieldMessage>
             )}
-          </div>
+          </Field>
 
           {/* Actions */}
           <div className="flex items-center gap-3">
             {loginState === "polling" ? (
-              <div className="flex items-center gap-3 font-mono text-sm">
+              <div
+                className="flex items-center gap-3 font-mono text-sm"
+                role="status"
+                aria-live="polite"
+              >
                 <span className="text-brand animate-pulse">◌</span>
                 <span className="text-text-muted">
                   Waiting for browser auth...
@@ -378,21 +445,21 @@ export function CreateAgentForm({
               </div>
             ) : (
               <>
-                <button
+                <Button
                   type="button"
                   onClick={signIn}
-                  className="px-5 py-2.5 bg-brand text-dark font-mono text-xs font-semibold tracking-wide
-                    hover:bg-brand-hover active:scale-[0.98] transition-all duration-150"
+                  className={terminalPrimaryButtonClassName}
                 >
-                  SIGN IN
-                </button>
-                <button
+                  Sign In
+                </Button>
+                <Button
                   type="button"
+                  variant="ghost"
                   onClick={onCancel}
-                  className="px-4 py-2.5 font-mono text-xs text-text-muted hover:text-text-light transition-colors"
+                  className="h-11 rounded-xl px-4 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-muted hover:bg-transparent hover:text-text-light"
                 >
-                  CANCEL
-                </button>
+                  Cancel
+                </Button>
               </>
             )}
           </div>
@@ -415,7 +482,13 @@ export function CreateAgentForm({
         </span>
       </div>
 
-      <div className="p-5">
+      <form
+        className="p-5"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void handleCreate();
+        }}
+      >
         {/* Command preview */}
         <div className="font-mono text-sm text-text-muted mb-5">
           <span className="text-brand">$</span> milady deploy --name{" "}
@@ -425,52 +498,69 @@ export function CreateAgentForm({
         </div>
 
         {/* Agent name input */}
-        <div className="mb-5">
-          <label
+        <Field className="mb-5">
+          <FieldLabel
             htmlFor="agent-name-input"
-            className="block font-mono text-[10px] font-medium tracking-wider text-text-subtle mb-2"
+            className="font-mono text-[10px] font-medium uppercase tracking-[0.22em] text-text-subtle"
           >
-            NAME
-          </label>
-          <input
+            Agent Name
+          </FieldLabel>
+          <Input
             id="agent-name-input"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            onKeyDown={(e) =>
-              e.key === "Enter" && !showEnvVars && name.trim() && handleCreate()
-            }
             placeholder="agent-name"
-            className="w-full px-4 py-3 bg-dark border border-border font-mono text-sm
-              text-text-light placeholder:text-text-subtle
-              focus:border-brand/50 focus:outline-none
-              transition-colors"
+            autoFocus
+            className={terminalInputClassName}
           />
-        </div>
+          <FieldDescription className="font-mono text-[11px] text-text-subtle">
+            Lowercase letters, numbers, and hyphens work best for cloud agent
+            names.
+          </FieldDescription>
+        </Field>
 
         {/* Environment Variables — config editor style */}
-        <div className="mb-5">
-          <button
-            type="button"
-            onClick={() => setShowEnvVars(!showEnvVars)}
-            className="flex items-center gap-2 font-mono text-[10px] tracking-wider text-text-subtle 
-              hover:text-text-muted transition-colors"
-          >
-            <span
-              className={`transition-transform ${showEnvVars ? "rotate-90" : ""}`}
+        <Field className="mb-5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="space-y-1">
+              <FieldLabel className="font-mono text-[10px] font-medium uppercase tracking-[0.22em] text-text-subtle">
+                Environment
+              </FieldLabel>
+              <FieldDescription className="font-mono text-[11px] text-text-subtle">
+                Optional secrets and runtime config for your agent.
+              </FieldDescription>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setShowEnvVars(!showEnvVars)}
+              aria-expanded={showEnvVars}
+              aria-controls="homepage-agent-env-vars"
             >
-              ▸
-            </span>
-            ENV
-            {envVars.length > 0 && (
-              <span className="px-1.5 py-0.5 bg-brand/10 text-brand text-[9px]">
-                {envVars.length}
+              <span
+                className={cn(
+                  "text-sm transition-transform duration-200",
+                  showEnvVars && "rotate-90",
+                )}
+                aria-hidden="true"
+              >
+                ▸
               </span>
-            )}
-          </button>
+              {showEnvVars ? "Hide env" : "Edit env"}
+              {envVars.length > 0 && (
+                <span className="rounded-full border border-brand/30 bg-brand/10 px-2 py-0.5 text-[10px] text-brand">
+                  {envVars.length}
+                </span>
+              )}
+            </Button>
+          </div>
 
           {showEnvVars && (
-            <div className="mt-3 border border-border-subtle bg-dark">
+            <div
+              id="homepage-agent-env-vars"
+              className="mt-3 rounded-2xl border border-border-subtle bg-dark/95"
+            >
               {/* Config file header */}
               <div className="px-3 py-2 border-b border-border-subtle bg-dark-secondary">
                 <span className="font-mono text-[10px] text-text-subtle">
@@ -487,49 +577,64 @@ export function CreateAgentForm({
                 {envVars.map((ev, i) => (
                   <div
                     key={ev.id}
-                    className="flex items-center gap-1 font-mono text-sm"
+                    className="grid gap-2 md:grid-cols-[minmax(0,12rem)_auto_minmax(0,1fr)_auto]"
                   >
-                    <input
+                    <Input
                       type="text"
                       value={ev.key}
                       onChange={(e) => updateEnvVar(i, "key", e.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") event.preventDefault();
+                      }}
+                      aria-label={`Environment variable ${i + 1} key`}
                       placeholder="KEY"
-                      className="w-32 px-2 py-1.5 bg-transparent text-brand placeholder:text-text-subtle/50
-                        focus:outline-none uppercase"
+                      className="h-10 rounded-xl border-border/60 bg-transparent px-3 font-mono text-sm uppercase text-brand placeholder:text-text-subtle/50 focus-visible:ring-brand/25"
                     />
-                    <span className="text-text-subtle">=</span>
-                    <input
+                    <div className="hidden items-center justify-center text-text-subtle md:flex">
+                      =
+                    </div>
+                    <Input
                       type="text"
                       value={ev.value}
                       onChange={(e) => updateEnvVar(i, "value", e.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") event.preventDefault();
+                      }}
+                      aria-label={`Environment variable ${i + 1} value`}
                       placeholder="value"
-                      className="flex-1 px-2 py-1.5 bg-transparent text-text-light placeholder:text-text-subtle/50
-                        focus:outline-none"
+                      className="h-10 rounded-xl border-border/60 bg-transparent px-3 font-mono text-sm text-text-light placeholder:text-text-subtle/50 focus-visible:ring-brand/25"
                     />
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="icon"
                       onClick={() => removeEnvVar(i)}
-                      className="px-2 py-1 text-text-subtle hover:text-red-400 transition-colors"
-                      title="Remove"
+                      aria-label={`Remove environment variable ${i + 1}`}
+                      className="h-10 w-10 rounded-xl border border-transparent text-text-subtle hover:border-red-400/20 hover:bg-red-500/10 hover:text-red-400"
                     >
                       ×
-                    </button>
+                    </Button>
                   </div>
                 ))}
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={addEnvVar}
-                  className="flex items-center gap-1 font-mono text-xs text-text-subtle hover:text-brand transition-colors pt-1"
+                  className="w-fit rounded-lg border border-transparent px-2 text-text-subtle hover:border-brand/20 hover:bg-brand/5 hover:text-brand"
                 >
                   <span>+</span> add
-                </button>
+                </Button>
               </div>
             </div>
           )}
-        </div>
+        </Field>
 
         {/* Pricing note */}
-        <div className="mb-5 px-3 py-2.5 border-l-2 border-brand/30 bg-brand/5">
+        <div
+          className="mb-5 rounded-xl border border-brand/15 bg-brand/5 px-3 py-2.5"
+          id="homepage-hosting-note"
+        >
           <p className="font-mono text-[10px] text-text-muted leading-relaxed">
             <span className="text-brand">HOSTING</span>{" "}
             {`${PRICE_RUNNING_PER_HR}/hr running · ${PRICE_IDLE_PER_HR}/hr idle · min. balance ${MIN_DEPOSIT_DISPLAY}`}
@@ -538,21 +643,26 @@ export function CreateAgentForm({
 
         {/* Error message */}
         {error && (
-          <div className="mb-5 font-mono text-sm text-red-400">
+          <FieldMessage
+            className="mb-5 font-mono text-sm"
+            tone="danger"
+            role="alert"
+            aria-live="assertive"
+          >
             <span className="text-red-500">ERROR:</span> {error}
-          </div>
+          </FieldMessage>
         )}
 
         {/* Actions */}
         <div className="flex items-center gap-3 pt-2">
-          <button
-            type="button"
-            onClick={handleCreate}
-            disabled={!name.trim()}
-            className="px-6 py-3 bg-brand text-dark font-mono text-xs font-semibold tracking-wide
-              hover:bg-brand-hover active:scale-[0.98] transition-all duration-150
-              disabled:opacity-30 disabled:cursor-not-allowed
-              flex items-center gap-2"
+          <Button
+            type="submit"
+            disabled={!canSubmit}
+            aria-describedby="homepage-hosting-note"
+            className={cn(
+              terminalPrimaryButtonClassName,
+              "px-6 disabled:border-brand/15 disabled:bg-brand/35 disabled:text-dark/70",
+            )}
           >
             <svg
               aria-hidden="true"
@@ -568,17 +678,18 @@ export function CreateAgentForm({
                 d="M13 10V3L4 14h7v7l9-11h-7z"
               />
             </svg>
-            DEPLOY
-          </button>
-          <button
+            Deploy
+          </Button>
+          <Button
             type="button"
+            variant="ghost"
             onClick={onCancel}
-            className="px-4 py-3 font-mono text-xs text-text-muted hover:text-text-light transition-colors"
+            className="h-11 rounded-xl px-4 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-muted hover:bg-transparent hover:text-text-light"
           >
-            CANCEL
-          </button>
+            Cancel
+          </Button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

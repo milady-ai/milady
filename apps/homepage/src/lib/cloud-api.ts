@@ -42,6 +42,18 @@ export interface JobStatus {
   error?: string;
 }
 
+export interface BridgeResponse<T = Record<string, unknown>> {
+  result?: T;
+  error?: unknown;
+  [key: string]: unknown;
+}
+
+export interface BridgeStatus {
+  state: string;
+  uptime?: number;
+  memories?: number;
+}
+
 /**
  * Check if a response indicates an authentication failure.
  *
@@ -264,11 +276,11 @@ export class CloudClient {
   }
 
   // Bridge (JSON-RPC to sandbox)
-  async bridge(
+  async bridge<T = Record<string, unknown>>(
     agentId: string,
     method: string,
     params?: object,
-  ): Promise<Record<string, unknown>> {
+  ): Promise<BridgeResponse<T>> {
     return this.request(`/api/v1/milady/agents/${agentId}/bridge`, {
       method: "POST",
       body: JSON.stringify({
@@ -280,11 +292,16 @@ export class CloudClient {
     });
   }
 
-  async getAgentBridgeStatus(
-    agentId: string,
-  ): Promise<{ state: string; uptime?: number; memories?: number }> {
-    const res = await this.bridge(agentId, "status.get");
-    return res.result ?? res;
+  async getAgentBridgeStatus(agentId: string): Promise<BridgeStatus> {
+    const res = await this.bridge<BridgeStatus>(agentId, "status.get");
+    const payload = res.result ?? res;
+    const state = typeof payload.state === "string" ? payload.state : "unknown";
+    return {
+      state,
+      uptime: typeof payload.uptime === "number" ? payload.uptime : undefined,
+      memories:
+        typeof payload.memories === "number" ? payload.memories : undefined,
+    };
   }
 
   // Credits & billing
@@ -437,12 +454,10 @@ function makeUnauthenticatedAgentStatus(): AgentStatus {
 
 export class CloudApiClient {
   private baseUrl: string;
-  private type: ConnectionType;
   private authToken?: string;
 
   constructor(connection: ConnectionInfo) {
     this.baseUrl = connection.url.replace(/\/$/, "");
-    this.type = connection.type;
     this.authToken = connection.authToken;
   }
 

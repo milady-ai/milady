@@ -26,14 +26,17 @@ export function useCloudLogin(options: UseCloudLoginOptions = {}) {
   );
   const [error, setError] = useState<string | null>(null);
   const [manualLoginUrl, setManualLoginUrl] = useState<string | null>(null);
-  const pollRef = useRef<ReturnType<typeof setInterval>>();
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     const syncAuthState = () => {
       const authenticated = isAuthenticated();
       setState(authenticated ? "authenticated" : "unauthenticated");
       if (authenticated) {
-        if (pollRef.current) clearInterval(pollRef.current);
+        if (pollRef.current !== null) {
+          clearInterval(pollRef.current);
+          pollRef.current = null;
+        }
         setError(null);
         setManualLoginUrl(null);
       }
@@ -49,14 +52,19 @@ export function useCloudLogin(options: UseCloudLoginOptions = {}) {
     window.addEventListener("storage", handleStorage);
 
     return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
+      if (pollRef.current !== null) {
+        clearInterval(pollRef.current);
+      }
       window.removeEventListener(CLOUD_AUTH_CHANGED_EVENT, syncAuthState);
       window.removeEventListener("storage", handleStorage);
     };
   }, []);
 
   const signIn = useCallback(async () => {
-    if (pollRef.current) clearInterval(pollRef.current);
+    if (pollRef.current !== null) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
 
     setState("polling");
     setError(null);
@@ -81,7 +89,10 @@ export function useCloudLogin(options: UseCloudLoginOptions = {}) {
       pollRef.current = setInterval(async () => {
         try {
           if (Date.now() > deadline) {
-            clearInterval(pollRef.current);
+            if (pollRef.current !== null) {
+              clearInterval(pollRef.current);
+              pollRef.current = null;
+            }
             setState("error");
             setError("Login timed out. Please try again.");
             return;
@@ -89,14 +100,20 @@ export function useCloudLogin(options: UseCloudLoginOptions = {}) {
 
           const result = await cloudLoginPoll(sessionId);
           if (result.status === "authenticated" && result.apiKey) {
-            clearInterval(pollRef.current);
+            if (pollRef.current !== null) {
+              clearInterval(pollRef.current);
+              pollRef.current = null;
+            }
             setToken(result.apiKey);
             setState("authenticated");
             onAuthenticated?.();
           }
         } catch (err) {
           if (String(err).includes("expired")) {
-            clearInterval(pollRef.current);
+            if (pollRef.current !== null) {
+              clearInterval(pollRef.current);
+              pollRef.current = null;
+            }
             setState("error");
             setError("Session expired. Please try again.");
           }

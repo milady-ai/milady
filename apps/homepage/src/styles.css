@@ -12,17 +12,17 @@
   --color-dark-secondary: #0e0e11;
   --color-light: #f4f4f6;
 
-  /* Brand gold - confident, luxurious */
+  /* Shared Binance-inspired yellow accent */
   --color-brand: #f0b90b;
-  --color-brand-hover: #ffc61a;
-  --color-brand-muted: #c99a09;
-  --color-accent: #fcd535;
+  --color-brand-hover: #f3ba2f;
+  --color-brand-muted: #d8a000;
+  --color-accent: #f0b90b;
 
   /* Text hierarchy */
   --color-text-light: #e8e8ec;
   --color-text-dark: #08080a;
-  --color-text-muted: #6b6b78;
-  --color-text-subtle: #4a4a55;
+  --color-text-muted: #9494a2;
+  --color-text-subtle: #7a7a89;
 
   /* Surfaces - layered depth */
   --color-surface: #131316;
@@ -33,7 +33,7 @@
 
   /* Status colors - refined */
   --color-status-running: #22c55e;
-  --color-status-paused: #eab308;
+  --color-status-paused: #f0b90b;
   --color-status-stopped: #ef4444;
   --color-status-provisioning: #f0b90b;
 }
@@ -49,6 +49,12 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgb(240 185 11 / 18%);
 }
 
 /* ── Keyframes ────────────────────────────────────────────────────── */
@@ -162,12 +168,16 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #222;
+  background: color-mix(in srgb, var(--color-surface-elevated) 88%, black 12%);
   border-left: 1px solid var(--color-dark);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #333;
+  background: color-mix(
+    in srgb,
+    var(--color-brand) 24%,
+    var(--color-surface-hover) 76%
+  );
 }
 
 /* ── Download Icons (complex hover/responsive states) ──────────────── */
@@ -208,12 +218,21 @@ body {
   justify-content: center;
   width: 44px;
   height: 44px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.85);
+  border: 1px solid
+    color-mix(in srgb, var(--color-brand) 22%, var(--color-border) 78%);
+  background: color-mix(
+    in srgb,
+    var(--color-dark-secondary) 86%,
+    rgba(255, 255, 255, 0.08)
+  );
+  color: var(--color-text-light);
   text-decoration: none;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease,
+    transform 0.25s ease;
   position: relative;
   overflow: hidden;
 }
@@ -268,9 +287,17 @@ body {
     width: 100%;
     min-width: 0;
     padding: 10px 8px;
-    background: rgba(255, 255, 255, 0.12);
-    color: #fff;
-    border-color: rgba(255, 255, 255, 0.35);
+    background: color-mix(
+      in srgb,
+      var(--color-brand) 12%,
+      var(--color-surface) 88%
+    );
+    color: var(--color-text-light);
+    border-color: color-mix(
+      in srgb,
+      var(--color-brand) 36%,
+      var(--color-border) 64%
+    );
   }
 
   .download-icons .download:hover i {
@@ -296,9 +323,9 @@ body {
   width: auto;
   min-width: 44px;
   padding: 6px 10px;
-  background: #fff;
-  color: #000;
-  border-color: #fff;
+  background: var(--color-brand);
+  color: var(--color-text-dark);
+  border-color: var(--color-brand);
 }
 
 @media (min-width: 640px) {
@@ -343,4 +370,18 @@ body {
 .download-icons .download.is-disabled:hover .df,
 .download-icons .download.is-disabled:hover .dfn {
   color: var(--color-brand);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+  }
 }

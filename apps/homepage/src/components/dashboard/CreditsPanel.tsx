@@ -220,7 +220,7 @@ export function CreditsPanel() {
             isCriticalBalance
               ? "bg-red-500/5 border-r border-red-500/20"
               : isLowBalance
-                ? "bg-amber-500/5 border-r border-amber-500/20"
+                ? "bg-brand/5 border-r border-brand/20"
                 : "bg-brand/5 border-r border-brand/20"
           }`}
         >
@@ -234,7 +234,7 @@ export function CreditsPanel() {
               </span>
             )}
             {isLowBalance && !isCriticalBalance && (
-              <span className="font-mono text-[9px] tracking-wider px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              <span className="font-mono text-[9px] tracking-wider px-2 py-0.5 bg-brand/10 text-brand border border-brand/20">
                 LOW
               </span>
             )}
@@ -244,7 +244,7 @@ export function CreditsPanel() {
               isCriticalBalance
                 ? "text-red-400"
                 : isLowBalance
-                  ? "text-amber-400"
+                  ? "text-brand"
                   : "text-brand"
             }`}
           >
@@ -268,7 +268,7 @@ export function CreditsPanel() {
                   daysRemaining < 1
                     ? "text-red-400"
                     : daysRemaining < 7
-                      ? "text-amber-400"
+                      ? "text-brand"
                       : "text-emerald-400"
                 }`}
               >
@@ -343,14 +343,14 @@ export function CreditsPanel() {
           className={`flex items-center gap-3 px-4 py-3 border ${
             isCriticalBalance
               ? "border-red-500/30 bg-red-500/5"
-              : "border-amber-500/30 bg-amber-500/5"
+              : "border-brand/30 bg-brand/5"
           }`}
         >
           <span
-            className={`w-2 h-2 rounded-full ${isCriticalBalance ? "bg-red-500 animate-pulse" : "bg-amber-500"}`}
+            className={`w-2 h-2 rounded-full ${isCriticalBalance ? "bg-red-500 animate-pulse" : "bg-brand"}`}
           />
           <p
-            className={`font-mono text-xs ${isCriticalBalance ? "text-red-400" : "text-amber-400"}`}
+            className={`font-mono text-xs ${isCriticalBalance ? "text-red-400" : "text-brand"}`}
           >
             {isCriticalBalance
               ? "Balance critically low — agents may be suspended soon. Top up now."
@@ -462,7 +462,7 @@ export function CreditsPanel() {
                 </div>
                 <div className="border border-border-subtle bg-dark p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="w-2 h-2 rounded-full bg-amber-500" />
+                    <span className="w-2 h-2 rounded-full bg-brand" />
                     <p className="font-mono text-[9px] tracking-wider text-text-subtle">
                       IDLE AGENT
                     </p>

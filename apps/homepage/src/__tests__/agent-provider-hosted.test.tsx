@@ -72,7 +72,7 @@ describe("AgentProvider hosted fallback", () => {
       return Promise.reject(new Error("offline"));
     });
 
-    let result: ReturnType<typeof render>;
+    let result!: ReturnType<typeof render>;
     await act(async () => {
       result = render(
         <AgentProvider>

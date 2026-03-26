@@ -452,9 +452,10 @@ describe("AgentCard regression", () => {
     render(
       <AgentCard {...baseProps} onSelect={onSelect} agent={makeAgent()} />,
     );
-    // Card is now an <article> element, not a button
-    const article = screen.getByRole("article");
-    fireEvent.click(article);
+    const cardButton = screen.getByRole("button", {
+      name: /open details for testagent/i,
+    });
+    fireEvent.click(cardButton);
     expect(onSelect).toHaveBeenCalled();
   });
 
@@ -514,8 +515,7 @@ describe("CreateAgentForm", () => {
 
     render(<CreateAgentForm onCreated={vi.fn()} onCancel={vi.fn()} />);
 
-    // New design uses uppercase "SIGN IN"
-    expect(screen.getByText("SIGN IN")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Sign In" })).toBeTruthy();
     expect(screen.queryByLabelText("Agent Name")).toBeNull();
   });
 
@@ -537,8 +537,7 @@ describe("CreateAgentForm", () => {
     render(<CreateAgentForm onCreated={vi.fn()} onCancel={vi.fn()} />);
 
     await act(async () => {
-      // New design uses uppercase "SIGN IN"
-      fireEvent.click(screen.getByText("SIGN IN"));
+      fireEvent.click(screen.getByRole("button", { name: "Sign In" }));
       await Promise.resolve();
     });
 

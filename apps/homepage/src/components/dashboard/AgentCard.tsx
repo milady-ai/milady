@@ -5,6 +5,7 @@ import { formatUptime } from "../../lib/format";
 interface AgentCardProps {
   agent: AgentStatus;
   source: AgentSource;
+  detailsId?: string;
   sourceUrl?: string;
   webUiUrl?: string;
   nodeId?: string;
@@ -24,6 +25,7 @@ interface AgentCardProps {
   onSelect: () => void;
   onOpenUI?: () => void;
   selected: boolean;
+  busy?: boolean;
 }
 
 const STATE_CONFIG: Record<
@@ -38,10 +40,10 @@ const STATE_CONFIG: Record<
     label: "LIVE",
   },
   paused: {
-    color: "text-amber-400",
-    bg: "bg-amber-500",
-    bgLight: "bg-amber-500/10",
-    border: "border-amber-500/20",
+    color: "text-brand",
+    bg: "bg-brand",
+    bgLight: "bg-brand/10",
+    border: "border-brand/20",
     label: "PAUSED",
   },
   stopped: {
@@ -143,6 +145,7 @@ function StopIcon() {
 export function AgentCard({
   agent,
   source,
+  detailsId,
   sourceUrl,
   webUiUrl,
   nodeId,
@@ -157,6 +160,7 @@ export function AgentCard({
   onSelect,
   onOpenUI,
   selected,
+  busy = false,
 }: AgentCardProps) {
   const stateConfig = STATE_CONFIG[agent.state] ?? STATE_CONFIG.unknown;
   const canOpenUI = agent.state === "running" || source === "cloud";
@@ -167,14 +171,7 @@ export function AgentCard({
 
   return (
     <article
-      onClick={onSelect}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          onSelect();
-        }
-      }}
-      className={`group relative cursor-pointer transition-all duration-200
+      className={`group relative transition-[box-shadow,border-color,transform] duration-200
         ${
           selected ? "ring-1 ring-brand/50" : "hover:ring-1 hover:ring-border"
         }`}
@@ -189,107 +186,118 @@ export function AgentCard({
       <div
         className={`bg-surface border border-border ${selected ? "border-brand/30" : ""}`}
       >
-        {/* Header row */}
-        <div className="flex items-start gap-4 p-4 pb-0">
-          {/* Agent avatar - prominent */}
-          <div
-            className={`w-12 h-12 flex items-center justify-center flex-shrink-0
+        <button
+          type="button"
+          aria-expanded={selected}
+          aria-controls={detailsId}
+          aria-label={`Open details for ${agent.agentName}`}
+          onClick={onSelect}
+          className="block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-dark"
+        >
+          {/* Header row */}
+          <div className="flex items-start gap-4 p-4 pb-0">
+            {/* Agent avatar - prominent */}
+            <div
+              className={`w-12 h-12 flex items-center justify-center flex-shrink-0
               ${stateConfig.bgLight} ${stateConfig.border} border`}
-          >
-            <span
-              className={`font-mono text-sm font-semibold ${stateConfig.color}`}
             >
-              {initials}
-            </span>
-          </div>
-
-          {/* Agent identity */}
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <h3 className="text-[15px] font-medium text-text-light truncate leading-tight">
-                {agent.agentName}
-              </h3>
-              <span className="text-text-subtle text-xs" title={source}>
-                {SOURCE_ICON[source]}
+              <span
+                className={`font-mono text-sm font-semibold ${stateConfig.color}`}
+              >
+                {initials}
               </span>
             </div>
-            {agent.model && (
-              <p className="text-xs text-text-muted mt-0.5 font-mono truncate">
-                {agent.model}
-              </p>
-            )}
-          </div>
 
-          {/* Status badge - prominent */}
-          <div
-            className={`flex items-center gap-2 px-3 py-1.5 flex-shrink-0
-              ${stateConfig.bgLight} ${stateConfig.border} border`}
-          >
-            <span
-              className={`w-2 h-2 rounded-full ${stateConfig.bg}
-                ${isLive || isProvisioning ? "animate-[status-pulse_2s_ease-in-out_infinite]" : ""}`}
-            />
-            <span
-              className={`font-mono text-[11px] font-medium tracking-wide ${stateConfig.color}`}
-            >
-              {stateConfig.label}
-            </span>
-          </div>
-        </div>
-
-        {/* Stats grid - only show cells with real data */}
-        {(() => {
-          const stats: { label: string; value: string; accent?: boolean }[] = [
-            { label: "UPTIME", value: formatUptime(agent.uptime) },
-            {
-              label: "MEMORY",
-              value:
-                agent.memories !== undefined
-                  ? String(agent.memories)
-                  : "\u2014",
-            },
-          ];
-          const hb = formatRelativeTime(lastHeartbeat);
-          if (hb) {
-            stats.push({ label: "HEARTBEAT", value: hb });
-          }
-          if (billing?.costPerHour !== undefined) {
-            stats.push({
-              label: "COST",
-              value: `$${billing.costPerHour.toFixed(2)}`,
-              accent: true,
-            });
-          }
-          const cols =
-            stats.length <= 2
-              ? "grid-cols-2"
-              : stats.length === 3
-                ? "grid-cols-3"
-                : "grid-cols-4";
-          return (
-            <div className={`grid ${cols} gap-px mt-4 bg-border-subtle`}>
-              {stats.map((s) => (
-                <StatCell
-                  key={s.label}
-                  label={s.label}
-                  value={s.value}
-                  accent={s.accent}
-                />
-              ))}
+            {/* Agent identity */}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h3 className="text-[15px] font-medium text-text-light truncate leading-tight">
+                  {agent.agentName}
+                </h3>
+                <span className="text-text-subtle text-xs" title={source}>
+                  {SOURCE_ICON[source]}
+                </span>
+              </div>
+              {agent.model && (
+                <p className="text-xs text-text-muted mt-0.5 font-mono truncate">
+                  {agent.model}
+                </p>
+              )}
             </div>
-          );
-        })()}
+
+            {/* Status badge - prominent */}
+            <div
+              className={`flex items-center gap-2 px-3 py-1.5 flex-shrink-0
+              ${stateConfig.bgLight} ${stateConfig.border} border`}
+            >
+              <span
+                className={`w-2 h-2 rounded-full ${stateConfig.bg}
+                ${isLive || isProvisioning ? "animate-[status-pulse_2s_ease-in-out_infinite]" : ""}`}
+              />
+              <span
+                className={`font-mono text-[11px] font-medium tracking-wide ${stateConfig.color}`}
+              >
+                {stateConfig.label}
+              </span>
+            </div>
+          </div>
+
+          {/* Stats grid - only show cells with real data */}
+          {(() => {
+            const stats: { label: string; value: string; accent?: boolean }[] =
+              [
+                { label: "UPTIME", value: formatUptime(agent.uptime) },
+                {
+                  label: "MEMORY",
+                  value:
+                    agent.memories !== undefined
+                      ? String(agent.memories)
+                      : "\u2014",
+                },
+              ];
+            const hb = formatRelativeTime(lastHeartbeat);
+            if (hb) {
+              stats.push({ label: "HEARTBEAT", value: hb });
+            }
+            if (billing?.costPerHour !== undefined) {
+              stats.push({
+                label: "COST",
+                value: `$${billing.costPerHour.toFixed(2)}`,
+                accent: true,
+              });
+            }
+            const cols =
+              stats.length <= 2
+                ? "grid-cols-2"
+                : stats.length === 3
+                  ? "grid-cols-3"
+                  : "grid-cols-4";
+            return (
+              <div className={`grid ${cols} gap-px mt-4 bg-border-subtle`}>
+                {stats.map((s) => (
+                  <StatCell
+                    key={s.label}
+                    label={s.label}
+                    value={s.value}
+                    accent={s.accent}
+                  />
+                ))}
+              </div>
+            );
+          })()}
+        </button>
 
         {/* Actions row */}
-        <div className="flex items-center justify-between gap-2 p-3 bg-dark-secondary/50">
+        <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-dark-secondary/50">
           {/* Control actions */}
-          <div className="flex items-center gap-1">
+          <div className="flex flex-wrap items-center gap-1">
             {agent.state === "stopped" && (
               <ActionBtn
                 onClick={stopProp(onPlay)}
                 variant="success"
                 icon={<PlayIcon />}
                 label="Start"
+                disabled={busy}
               />
             )}
             {agent.state === "paused" && (
@@ -298,6 +306,7 @@ export function AgentCard({
                 variant="success"
                 icon={<PlayIcon />}
                 label="Resume"
+                disabled={busy}
               />
             )}
             {agent.state === "running" && (
@@ -306,6 +315,7 @@ export function AgentCard({
                 variant="warn"
                 icon={<PauseIcon />}
                 label="Pause"
+                disabled={busy}
               />
             )}
             {agent.state !== "stopped" &&
@@ -316,11 +326,12 @@ export function AgentCard({
                   variant="danger"
                   icon={<StopIcon />}
                   label="Stop"
+                  disabled={busy}
                 />
               )}
-            {agent.state === "provisioning" && (
+            {(agent.state === "provisioning" || busy) && (
               <span className="text-[11px] font-mono text-brand animate-pulse px-2">
-                Starting\u2026
+                {busy ? "Working\u2026" : "Starting\u2026"}
               </span>
             )}
           </div>
@@ -336,9 +347,12 @@ export function AgentCard({
                   window.open(uiUrl, "_blank", "noopener,noreferrer");
                 }
               })}
+              aria-label={`Open ${agent.agentName} UI`}
+              disabled={busy}
               className="flex items-center gap-1.5 px-3 py-1.5
-                bg-brand text-dark font-mono text-[11px] font-semibold tracking-wide
-                hover:bg-brand-hover transition-colors"
+                min-h-[40px] rounded-md bg-brand text-dark font-mono text-[11px] font-semibold tracking-wide
+                transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-dark
+                hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
             >
               OPEN UI
               <svg
@@ -405,15 +419,17 @@ function ActionBtn({
   variant,
   icon,
   label,
+  disabled = false,
 }: {
   onClick: (e: React.MouseEvent) => void;
   variant: "success" | "warn" | "danger";
   icon: React.ReactNode;
   label: string;
+  disabled?: boolean;
 }) {
   const colors = {
     success: "text-emerald-400 hover:bg-emerald-500/10 border-emerald-500/20",
-    warn: "text-amber-400 hover:bg-amber-500/10 border-amber-500/20",
+    warn: "text-brand hover:bg-brand/10 border-brand/20",
     danger: "text-red-400 hover:bg-red-500/10 border-red-500/20",
   };
 
@@ -421,9 +437,12 @@ function ActionBtn({
     <button
       type="button"
       onClick={onClick}
+      aria-label={label}
       title={label}
+      disabled={disabled}
       className={`flex items-center gap-1.5 px-2.5 py-1.5
-        font-mono text-[11px] font-medium border transition-all duration-150
+        min-h-[40px] rounded-md font-mono text-[11px] font-medium border transition-colors duration-150
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-dark disabled:cursor-not-allowed disabled:opacity-50
         ${colors[variant]}`}
     >
       <span className="inline-flex items-center justify-center">{icon}</span>

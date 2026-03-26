@@ -259,7 +259,7 @@ export function DownloadIcons() {
 
   return (
     <div className="flex flex-col items-center gap-6">
-      {/* Platform download icons — white bg hover style */}
+      {/* Platform download icons */}
       <ul className="download-icons">
         {platformDefs.map((p) => {
           const url = getUrl(p.assetId);
@@ -287,13 +287,13 @@ export function DownloadIcons() {
       {/* Install commands — terminal style */}
       <div className="w-full max-w-xl">
         {/* Terminal window */}
-        <div className="bg-[#0a0a0c] border border-brand/20 overflow-hidden">
+        <div className="overflow-hidden border border-brand/18 bg-dark shadow-[0_18px_44px_rgba(240,185,11,0.08)]">
           {/* Terminal chrome with tabs */}
-          <div className="flex items-center bg-[#111114] border-b border-brand/10">
+          <div className="flex items-center border-b border-brand/10 bg-dark-secondary">
             {/* Window controls */}
             <div className="flex items-center gap-1.5 px-3 py-2.5 border-r border-brand/10">
               <span className="w-2 h-2 rounded-full bg-red-500/70" />
-              <span className="w-2 h-2 rounded-full bg-yellow-500/70" />
+              <span className="w-2 h-2 rounded-full bg-brand/78" />
               <span className="w-2 h-2 rounded-full bg-green-500/70" />
             </div>
 
@@ -304,11 +304,11 @@ export function DownloadIcons() {
                   key={method.id}
                   type="button"
                   onClick={() => setActiveMethod(method.id)}
-                  className={`px-4 py-2.5 font-mono text-[10px] tracking-wider uppercase transition-all duration-150 border-r border-brand/10
+                  className={`border-r border-brand/10 px-4 py-2.5 font-mono text-[10px] tracking-wider uppercase transition-colors duration-150
                     ${
                       activeMethod === method.id
-                        ? "text-brand bg-[#0a0a0c]"
-                        : "text-text-subtle hover:text-text-light hover:bg-[#0d0d10]"
+                        ? "bg-dark text-brand"
+                        : "text-text-subtle hover:bg-surface hover:text-text-light"
                     }`}
                 >
                   {method.label}
@@ -318,7 +318,7 @@ export function DownloadIcons() {
           </div>
 
           {/* Command area */}
-          <div className="relative px-4 py-4 bg-[#08080a]">
+          <div className="relative bg-dark px-4 py-4">
             <code className="block font-mono text-[10px] sm:text-[11px] text-brand select-all cursor-text break-all sm:break-normal pr-10">
               <span className="text-text-subtle mr-2">
                 {getPrefix(activeMethod)}
@@ -330,7 +330,7 @@ export function DownloadIcons() {
             <button
               type="button"
               onClick={copyToClipboard}
-              className={`absolute right-3 top-1/2 -translate-y-1/2 p-1.5 transition-all duration-150 border border-transparent
+              className={`absolute right-3 top-1/2 -translate-y-1/2 border border-transparent p-1.5 transition-colors duration-150
                 ${
                   copied
                     ? "text-green-400"

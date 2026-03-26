@@ -21,11 +21,13 @@ export function Sidebar({ active, onChange }: SidebarProps) {
   const { isAuthenticated: authed, token, signOut } = useAuth();
   const { agents } = useAgents();
   const hasAgents = agents.length > 0;
-  const visibleSections = SECTIONS.filter(
-    (s) =>
-      (!s.requiresAuth || authed) &&
-      (!("requiresAgents" in s && s.requiresAgents) || hasAgents),
-  );
+  const visibleSections = SECTIONS.filter((section) => {
+    const requiresAuth =
+      "requiresAuth" in section ? section.requiresAuth : false;
+    const requiresAgents =
+      "requiresAgents" in section ? section.requiresAgents : false;
+    return (!requiresAuth || authed) && (!requiresAgents || hasAgents);
+  });
   const [credits, setCredits] = useState<CreditBalance | null>(null);
 
   useEffect(() => {

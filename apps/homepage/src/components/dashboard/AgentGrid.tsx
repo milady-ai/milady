@@ -1,4 +1,5 @@
-import { useCallback, useState } from "react";
+import { Button } from "@miladyai/ui";
+import { useCallback, useEffect, useState } from "react";
 import { useAgents } from "../../lib/AgentProvider";
 import { openWebUI } from "../../lib/open-web-ui";
 import {
@@ -23,11 +24,31 @@ export function AgentGrid() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [actionBusyId, setActionBusyId] = useState<string | null>(null);
+  const [actionNotice, setActionNotice] = useState<{
+    tone: "info" | "success" | "error";
+    text: string;
+    busy?: boolean;
+  } | null>(null);
 
   const handleAction = useCallback(
     async (agentId: string, action: "play" | "resume" | "pause" | "stop") => {
       const agent = agents.find((a) => a.id === agentId);
       if (!agent) return;
+      const verb =
+        action === "play"
+          ? "Starting"
+          : action === "resume"
+            ? "Resuming"
+            : action === "pause"
+              ? "Pausing"
+              : "Stopping";
+      setActionBusyId(agentId);
+      setActionNotice({
+        tone: "info",
+        text: `${verb} ${agent.name}...`,
+        busy: true,
+      });
       try {
         if (
           agent.source === "cloud" &&
@@ -46,12 +67,28 @@ export function AgentGrid() {
           else if (action === "stop") await agent.client.stopAgent();
         }
         await refresh();
+        setActionNotice({
+          tone: "success",
+          text: `${agent.name} ${action === "pause" ? "paused" : action === "stop" ? "stopped" : "updated"} successfully.`,
+        });
       } catch (err) {
         console.error(`Failed to ${action} agent:`, err);
+        setActionNotice({
+          tone: "error",
+          text: `${agent.name}: ${err instanceof Error ? err.message : `Failed to ${action} agent.`}`,
+        });
+      } finally {
+        setActionBusyId((current) => (current === agentId ? null : current));
       }
     },
     [agents, refresh],
   );
+
+  useEffect(() => {
+    if (!actionNotice || actionNotice.busy) return;
+    const timer = window.setTimeout(() => setActionNotice(null), 3200);
+    return () => window.clearTimeout(timer);
+  }, [actionNotice]);
 
   const getWebUIUrl = useCallback((agent: (typeof agents)[0]) => {
     if (agent.webUiUrl) return agent.webUiUrl;
@@ -96,15 +133,13 @@ export function AgentGrid() {
           </p>
         </div>
         {!showCreate && (
-          <button
+          <Button
             type="button"
             onClick={() => setShowCreate(true)}
-            className="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2.5 
-              bg-brand text-dark font-mono text-xs font-semibold tracking-wide
-              hover:bg-brand-hover active:scale-[0.98] transition-all duration-150"
+            className="h-11 w-full rounded-xl border-brand/70 bg-brand text-dark font-mono text-xs font-semibold uppercase tracking-[0.18em] shadow-[0_16px_40px_rgba(240,185,11,0.16)] hover:border-brand hover:bg-brand-hover sm:w-auto"
           >
-            + NEW AGENT
-          </button>
+            + New Agent
+          </Button>
         )}
       </div>
 
@@ -113,6 +148,8 @@ export function AgentGrid() {
         <div
           className="flex items-center justify-between gap-4 px-4 py-3 
           border border-red-500/30 bg-red-500/5 animate-[fade-up_0.4s_ease-out_both]"
+          role="alert"
+          aria-live="assertive"
         >
           <div className="flex items-center gap-3">
             <span className="w-2 h-2 rounded-full bg-red-500" />
@@ -122,6 +159,7 @@ export function AgentGrid() {
             type="button"
             onClick={clearError}
             className="text-red-400/60 hover:text-red-400 transition-colors p-1"
+            aria-label="Dismiss error"
           >
             <svg
               aria-hidden="true"
@@ -138,6 +176,59 @@ export function AgentGrid() {
               />
             </svg>
           </button>
+        </div>
+      )}
+
+      {actionNotice && (
+        <div
+          className={`flex items-start justify-between gap-4 px-4 py-3 border animate-[fade-up_0.4s_ease-out_both] ${
+            actionNotice.tone === "error"
+              ? "border-red-500/30 bg-red-500/5 text-red-300"
+              : actionNotice.tone === "success"
+                ? "border-emerald-500/30 bg-emerald-500/5 text-emerald-300"
+                : "border-brand/30 bg-brand/8 text-text-light"
+          }`}
+          role={actionNotice.tone === "error" ? "alert" : "status"}
+          aria-live={actionNotice.tone === "error" ? "assertive" : "polite"}
+          aria-busy={actionNotice.busy ? true : undefined}
+        >
+          <div className="flex items-center gap-3">
+            <span
+              className={`mt-1 h-2 w-2 shrink-0 rounded-full ${
+                actionNotice.tone === "error"
+                  ? "bg-red-400"
+                  : actionNotice.tone === "success"
+                    ? "bg-emerald-400"
+                    : "bg-brand"
+              }`}
+            />
+            <span className="font-mono text-xs leading-relaxed">
+              {actionNotice.text}
+            </span>
+          </div>
+          {!actionNotice.busy ? (
+            <button
+              type="button"
+              onClick={() => setActionNotice(null)}
+              className="rounded-md p-1 text-current/70 transition-colors hover:text-current"
+              aria-label="Dismiss action notice"
+            >
+              <svg
+                aria-hidden="true"
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          ) : null}
         </div>
       )}
 
@@ -197,7 +288,7 @@ export function AgentGrid() {
                 agent={{
                   agentName: agent.name,
                   state: agent.status,
-                  model: agent.model,
+                  model: agent.model ?? "—",
                   uptime: agent.uptime,
                   memories: agent.memories,
                 }}
@@ -221,7 +312,9 @@ export function AgentGrid() {
                   if (!url) return;
                   openWebUI(url, agent.source, agent.cloudAgentId);
                 }}
+                detailsId={`homepage-agent-detail-${agent.id}`}
                 selected={selectedId === agent.id}
+                busy={actionBusyId === agent.id}
               />
             </div>
           ))}
@@ -230,12 +323,16 @@ export function AgentGrid() {
 
       {/* Detail panel */}
       {selected && (
-        <div className="animate-[fade-up_0.4s_ease-out_both]">
+        <section
+          id={`homepage-agent-detail-${selected.id}`}
+          className="animate-[fade-up_0.4s_ease-out_both]"
+          aria-label={`${selected.name} details`}
+        >
           <AgentDetail
             agent={{
               agentName: selected.name,
               state: selected.status,
-              model: selected.model,
+              model: selected.model ?? "—",
               uptime: selected.uptime,
               memories: selected.memories,
             }}
@@ -243,7 +340,7 @@ export function AgentGrid() {
             connectionId={selected.id}
             webUIUrl={getWebUIUrl(selected)}
           />
-        </div>
+        </section>
       )}
     </div>
   );

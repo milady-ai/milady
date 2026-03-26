@@ -56,7 +56,7 @@ describe("AgentProvider", () => {
 
   it("shows no agents when not authenticated", async () => {
     mockFetch.mockRejectedValue(new Error("connection refused"));
-    let result: ReturnType<typeof render>;
+    let result!: ReturnType<typeof render>;
     await act(async () => {
       result = render(
         <AgentProvider>
@@ -99,7 +99,7 @@ describe("AgentProvider", () => {
       return Promise.reject(new Error("connection refused"));
     });
 
-    let result: ReturnType<typeof render>;
+    let result!: ReturnType<typeof render>;
     await act(async () => {
       result = render(
         <AgentProvider>
@@ -121,7 +121,7 @@ describe("AgentProvider", () => {
     setToken("test-key");
     mockFetch.mockRejectedValue(new Error("network error"));
 
-    let result: ReturnType<typeof render>;
+    let result!: ReturnType<typeof render>;
     await act(async () => {
       result = render(
         <AgentProvider>
@@ -160,7 +160,7 @@ describe("AgentProvider", () => {
       return Promise.reject(new Error("offline"));
     });
 
-    let result: ReturnType<typeof render>;
+    let result!: ReturnType<typeof render>;
     await act(async () => {
       result = render(
         <AgentProvider>
@@ -212,7 +212,7 @@ describe("AgentProvider", () => {
       return Promise.reject(new Error("offline"));
     });
 
-    let result: ReturnType<typeof render>;
+    let result!: ReturnType<typeof render>;
     await act(async () => {
       result = render(
         <AgentProvider>
@@ -238,7 +238,7 @@ describe("AgentProvider", () => {
 
   it("discovers cloud agents when token is set mid-session (after login)", async () => {
     mockFetch.mockRejectedValue(new Error("connection refused"));
-    let result: ReturnType<typeof render>;
+    let result!: ReturnType<typeof render>;
     await act(async () => {
       result = render(
         <AgentProvider>
@@ -299,7 +299,7 @@ describe("AgentProvider", () => {
       return Promise.reject(new Error("offline"));
     });
 
-    let result: ReturnType<typeof render>;
+    let result!: ReturnType<typeof render>;
     await act(async () => {
       result = render(
         <AgentProvider>
@@ -338,7 +338,7 @@ describe("AgentProvider", () => {
       return Promise.reject(new Error("offline"));
     });
 
-    let result: ReturnType<typeof render>;
+    let result!: ReturnType<typeof render>;
     await act(async () => {
       result = render(
         <AgentProvider>
@@ -366,7 +366,7 @@ describe("AgentProvider", () => {
       );
     });
 
-    let result: ReturnType<typeof render>;
+    let result!: ReturnType<typeof render>;
     await act(async () => {
       result = render(
         <AgentProvider>
@@ -461,7 +461,7 @@ describe("AgentProvider", () => {
       return Promise.reject(new Error("offline"));
     });
 
-    let result: ReturnType<typeof render>;
+    let result!: ReturnType<typeof render>;
     await act(async () => {
       result = render(
         <AgentProvider>
@@ -504,7 +504,7 @@ describe("AgentProvider", () => {
   it("refreshes agents immediately on auth change event", async () => {
     mockFetch.mockRejectedValue(new Error("connection refused"));
 
-    let result: ReturnType<typeof render>;
+    let result!: ReturnType<typeof render>;
     await act(async () => {
       result = render(
         <AgentProvider>
@@ -575,7 +575,7 @@ describe("AgentProvider", () => {
       return Promise.reject(new Error("offline"));
     });
 
-    let result: ReturnType<typeof render>;
+    let result!: ReturnType<typeof render>;
     await act(async () => {
       result = render(
         <AgentProvider>
@@ -616,7 +616,7 @@ describe("AgentProvider", () => {
       return Promise.reject(new Error("offline"));
     });
 
-    let result: ReturnType<typeof render>;
+    let result!: ReturnType<typeof render>;
     await act(async () => {
       result = render(
         <AgentProvider>
@@ -676,7 +676,7 @@ describe("AgentProvider", () => {
     setToken("test-key");
     mockFetch.mockRejectedValue(new Error("Network timeout"));
 
-    let result: ReturnType<typeof render>;
+    let result!: ReturnType<typeof render>;
     await act(async () => {
       result = render(
         <AgentProvider>
@@ -696,7 +696,7 @@ describe("AgentProvider", () => {
     setToken("test-key");
     mockFetch.mockRejectedValue(new Error("Network timeout"));
 
-    let result: ReturnType<typeof render>;
+    let result!: ReturnType<typeof render>;
     await act(async () => {
       result = render(
         <AgentProvider>
@@ -720,7 +720,7 @@ describe("AgentProvider", () => {
     setToken("test-key");
     mockFetch.mockRejectedValue(new Error("Network timeout"));
 
-    let result: ReturnType<typeof render>;
+    let result!: ReturnType<typeof render>;
     await act(async () => {
       result = render(
         <AgentProvider>
