@@ -343,7 +343,8 @@ describe("AgentManager", () => {
       expect(writeFileSync).toHaveBeenCalled();
       expect(copyFileSync).toHaveBeenCalledTimes(2);
       const reportJsonWrite = writeFileSync.mock.calls.find(
-        (call) => typeof call[0] === "string" && call[0].endsWith("report.json"),
+        (call) =>
+          typeof call[0] === "string" && call[0].endsWith("report.json"),
       );
       expect(reportJsonWrite).toBeDefined();
       const parsed = JSON.parse(String(reportJsonWrite?.[1]));
