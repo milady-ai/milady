@@ -1,5 +1,4 @@
 import type http from "node:http";
-import { logger } from "@elizaos/core";
 import { normalizeCloudSiteUrl } from "../cloud/base-url";
 import { validateCloudBaseUrl } from "../cloud/validate-url";
 import { sendJson, sendJsonError } from "./http-helpers";

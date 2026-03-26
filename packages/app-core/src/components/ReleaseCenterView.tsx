@@ -44,7 +44,7 @@ export function ReleaseCenterView() {
   const [nativeUpdater, setNativeUpdater] =
     useState<DesktopUpdaterSnapshot | null>(null);
   const [_buildInfo, setBuildInfo] = useState<DesktopBuildInfo | null>(null);
-  const [dockVisible, setDockVisible] = useState<boolean>(true);
+  const [_dockVisible, _setDockVisible] = useState<boolean>(true);
   const [_sessionSnapshots, setSessionSnapshots] = useState<
     Record<string, DesktopSessionSnapshot | undefined>
   >({});
@@ -98,7 +98,7 @@ export function ReleaseCenterView() {
 
     setNativeUpdater(updater);
     setBuildInfo(build);
-    setDockVisible(dock?.visible ?? true);
+    _setDockVisible(dock?.visible ?? true);
     setWebGpuStatus(gpuStatus);
     setSessionSnapshots(
       Object.fromEntries(
@@ -253,15 +253,6 @@ export function ReleaseCenterView() {
     });
   };
 
-  const _toggleDockIcon = async () => {
-    const next = await invokeDesktopBridgeRequest<{ visible: boolean }>({
-      rpcMethod: "desktopSetDockIconVisibility",
-      ipcChannel: "desktop:setDockIconVisibility",
-      params: { visible: !dockVisible },
-    });
-    setDockVisible(next?.visible ?? dockVisible);
-  };
-
   const openReleaseNotesWindow = async () => {
     const info =
       await invokeDesktopBridgeRequest<DesktopReleaseNotesWindowInfo>({
@@ -285,48 +276,6 @@ export function ReleaseCenterView() {
         [RELEASE_NOTES_PARTITION]: refreshedSession,
       }));
     }
-  };
-
-  const _clearSession = async (partition: string) => {
-    const snapshot = await invokeDesktopBridgeRequest<DesktopSessionSnapshot>({
-      rpcMethod: "desktopClearSessionData",
-      ipcChannel: "desktop:clearSessionData",
-      params: {
-        partition,
-        storageTypes: "all",
-        clearCookies: true,
-      },
-    });
-    if (snapshot) {
-      setSessionSnapshots((current) => ({
-        ...current,
-        [partition]: snapshot,
-      }));
-    }
-  };
-
-  const _clearCookiesOnly = async (partition: string) => {
-    const snapshot = await invokeDesktopBridgeRequest<DesktopSessionSnapshot>({
-      rpcMethod: "desktopClearSessionData",
-      ipcChannel: "desktop:clearSessionData",
-      params: {
-        partition,
-        storageTypes: ["cookies"],
-        clearCookies: true,
-      },
-    });
-    if (snapshot) {
-      setSessionSnapshots((current) => ({
-        ...current,
-        [partition]: snapshot,
-      }));
-    }
-  };
-
-  const _runWgpuAction = (action: () => void, stateMessage: string) => {
-    setActionError(null);
-    setActionMessage(stateMessage);
-    action();
   };
 
   const appVersion =

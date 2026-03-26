@@ -11,9 +11,8 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { IAgentRuntime } from "@elizaos/core";
 import { logger } from "@elizaos/core";
-import { deriveEvmAddress, deriveSolanaAddress } from "../api/wallet";
+import type { IAgentRuntime } from "@elizaos/core";
 import type {
   AppLaunchResult,
   AppStopResult,
@@ -268,47 +267,6 @@ function buildViewerConfig(
     };
   }
   return null;
-}
-
-/**
- * Get wallet addresses from agent runtime settings (character secrets).
- * Falls back to process.env if runtime is not available.
- */
-function _getWalletAddressesFromRuntime(
-  runtime: IAgentRuntime | null | undefined,
-): { evmAddress: string | null; solanaAddress: string | null } {
-  const PLACEHOLDER_RE =
-    /^\[?\s*(REDACTED|PLACEHOLDER|TODO|CHANGEME|EMPTY)\s*]?$/i;
-  let evmAddress: string | null = null;
-  let solanaAddress: string | null = null;
-
-  // Try runtime settings first (character secrets), fall back to process.env
-  const evmKey =
-    (runtime?.getSetting?.("EVM_PRIVATE_KEY") as string | undefined)?.trim() ||
-    process.env.EVM_PRIVATE_KEY?.trim();
-
-  if (evmKey && !PLACEHOLDER_RE.test(evmKey)) {
-    try {
-      evmAddress = deriveEvmAddress(evmKey);
-    } catch (e) {
-      logger.warn(`[app-manager] Bad EVM key: ${e}`);
-    }
-  }
-
-  const solKey =
-    (
-      runtime?.getSetting?.("SOLANA_PRIVATE_KEY") as string | undefined
-    )?.trim() || process.env.SOLANA_PRIVATE_KEY?.trim();
-
-  if (solKey && !PLACEHOLDER_RE.test(solKey)) {
-    try {
-      solanaAddress = deriveSolanaAddress(solKey);
-    } catch (e) {
-      logger.warn(`[app-manager] Bad SOL key: ${e}`);
-    }
-  }
-
-  return { evmAddress, solanaAddress };
 }
 
 export class AppManager {

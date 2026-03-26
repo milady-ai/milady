@@ -4,6 +4,7 @@
 type LookingGlassWebXRPolyfillType = new (
   opts: Record<string, unknown>,
 ) => unknown;
+
 import { resolveAppAssetUrl } from "@miladyai/app-core/utils";
 import {
   MToonMaterialLoaderPlugin,
@@ -42,8 +43,6 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 type TslNode = any;
 type TslMathFn = (...args: TslNode[]) => TslNode;
 type TslMathLib = Record<string, TslMathFn | undefined>;
-
-const _RENDERER_FALLBACK_POLL_INTERVAL = 1000;
 
 import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
@@ -618,7 +617,6 @@ export class VrmEngine {
 
   private outgoingVrm: VRM | null = null;
   private outgoingMixer: THREE.AnimationMixer | null = null;
-  private outgoingIdleAction: THREE.AnimationAction | null = null;
   private cameraAnimation: CameraAnimationConfig = {
     ...DEFAULT_CAMERA_ANIMATION,
   };
@@ -691,9 +689,6 @@ export class VrmEngine {
   private lkgVrButton: HTMLElement | null = null;
   private lkgRenderer: THREE.WebGLRenderer | null = null;
   private lkgKeyListener: ((e: KeyboardEvent) => void) | null = null;
-  // biome-ignore lint/suspicious/noExplicitAny: LookingGlassWebXRPolyfill has no type definitions.
-  private lkgPolyfill: any = null;
-
   private clearEmoteTimeout(): void {
     if (this.emoteTimeout !== null) {
       clearTimeout(this.emoteTimeout);
@@ -1991,8 +1986,6 @@ export class VrmEngine {
         return;
       }
     }
-    this.lkgPolyfill = sharedLkgPolyfill;
-
     // Separate hidden canvas + renderer — the polyfill will resize/take over
     // this canvas, NOT the main app canvas.
     const lkgCanvas = document.createElement("canvas");
@@ -2095,7 +2088,6 @@ export class VrmEngine {
       );
       this.lkgRenderer = null;
     }
-    this.lkgPolyfill = null;
   }
 
   setPaused(paused: boolean): void {
@@ -2560,8 +2552,6 @@ export class VrmEngine {
       }
       this.outgoingVrm = this.vrm;
       this.outgoingMixer = this.mixer;
-      this.outgoingIdleAction = this.idleAction;
-
       this.vrm = null;
       this.vrmReady = false;
       this.vrmName = null;
@@ -3140,7 +3130,6 @@ ${isOutgoing ? "if (teleportNoise >= teleportRatio) discard;" : "if (teleportNoi
             VRMUtils.deepDispose(this.outgoingVrm.scene);
             this.outgoingVrm = null;
             this.outgoingMixer = null;
-            this.outgoingIdleAction = null;
           }
           this.cleanupTeleportDissolve();
           this.cleanupTeleportSparkles();

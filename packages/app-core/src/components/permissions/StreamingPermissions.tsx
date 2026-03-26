@@ -1,6 +1,6 @@
 import { Button, StatusBadge } from "@miladyai/ui";
 import { Check, Cloud } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useApp } from "../../state";
 import { PermissionIcon } from "./PermissionIcon";
 
@@ -191,16 +191,6 @@ function getBadgeLabel(state: MediaPermissionState): string {
   if (state === "granted") return "Granted";
   if (state === "denied") return "Denied";
   return "Not Set";
-}
-
-function _useAllPermissionsGranted(
-  permStates: Record<string, MediaPermissionState>,
-): boolean {
-  // biome-ignore lint/correctness/useHookAtTopLevel: false positive, hook is at module level
-  return useMemo(
-    () => MEDIA_PERMISSIONS.every((def) => permStates[def.id] === "granted"),
-    [permStates],
-  );
 }
 
 interface StreamingPermissionsSettingsViewProps {

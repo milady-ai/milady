@@ -1,5 +1,4 @@
 import { cn } from "@miladyai/ui";
-import * as React from "react";
 
 export const CONFIG_FIELD_LABEL_CLASSNAME = "text-xs font-semibold";
 export const CONFIG_FIELD_ERROR_TEXT_CLASSNAME =

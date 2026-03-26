@@ -1,5 +1,5 @@
 import type { AgentRuntime } from "@elizaos/core";
-import { logger, ModelType } from "@elizaos/core";
+import { ModelType } from "@elizaos/core";
 import type { RouteRequestContext } from "./route-helpers";
 
 interface CharacterGenerateContext {

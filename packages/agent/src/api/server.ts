@@ -640,155 +640,6 @@ interface StreamEventEnvelope {
 }
 
 // ---------------------------------------------------------------------------
-// Response block extraction — parse agent text for structured UI blocks
-// ---------------------------------------------------------------------------
-
-/** Content block types returned in the /api/chat and /api/conversations/:id/messages responses. */
-type ResponseBlock =
-  | { type: "text"; text: string }
-  | { type: "ui-spec"; spec: Record<string, unknown>; raw: string }
-  | {
-      type: "config-form";
-      pluginId: string;
-      pluginName?: string;
-      schema: Record<string, unknown>;
-      hints?: Record<string, unknown>;
-      values?: Record<string, unknown>;
-    };
-
-/** Regex matching fenced JSON code blocks: ```json ... ``` or ``` ... ``` */
-const FENCED_JSON_RE_SERVER = /```(?:json)?\s*\n([\s\S]*?)```/g;
-
-/** CONFIG marker pattern: [CONFIG:pluginId] */
-const CONFIG_MARKER_RE = /\[CONFIG:([^\]]+)\]/g;
-
-function tryParseJsonServer(raw: string): unknown {
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
-}
-
-function isUiSpecObject(
-  obj: unknown,
-): obj is { root: string; elements: Record<string, unknown> } {
-  if (obj === null || typeof obj !== "object" || Array.isArray(obj))
-    return false;
-  const c = obj as Record<string, unknown>;
-  return (
-    typeof c.root === "string" &&
-    c.elements !== null &&
-    typeof c.elements === "object" &&
-    !Array.isArray(c.elements)
-  );
-}
-
-/**
- * Scan agent response text for:
- * 1. Fenced UiSpec JSON blocks → extract as { type: "ui-spec", spec, raw }
- * 2. [CONFIG:pluginId] markers → generate { type: "config-form", ... } from plugin list
- * 3. Remaining text → { type: "text", text }
- *
- * Returns { cleanText, blocks } where cleanText has UI blocks/markers removed.
- */
-function _extractResponseBlocks(
-  responseText: string,
-  plugins: PluginEntry[],
-): { cleanText: string; blocks: ResponseBlock[] } {
-  const blocks: ResponseBlock[] = [];
-  let text = responseText;
-
-  // Pass 1: extract fenced UiSpec JSON blocks
-  FENCED_JSON_RE_SERVER.lastIndex = 0;
-  const uiSpecRanges: Array<{
-    start: number;
-    end: number;
-    block: ResponseBlock;
-  }> = [];
-  let match: RegExpExecArray | null = FENCED_JSON_RE_SERVER.exec(text);
-
-  while (match !== null) {
-    const jsonContent = match[1].trim();
-    const parsed = tryParseJsonServer(jsonContent);
-    if (parsed !== null && isUiSpecObject(parsed)) {
-      uiSpecRanges.push({
-        start: match.index,
-        end: match.index + match[0].length,
-        block: {
-          type: "ui-spec",
-          spec: parsed as Record<string, unknown>,
-          raw: jsonContent,
-        },
-      });
-    }
-    match = FENCED_JSON_RE_SERVER.exec(text);
-  }
-
-  // Remove UiSpec blocks from text (reverse order to preserve indices)
-  if (uiSpecRanges.length > 0) {
-    for (let i = uiSpecRanges.length - 1; i >= 0; i--) {
-      const r = uiSpecRanges[i];
-      blocks.unshift(r.block);
-      text = text.slice(0, r.start) + text.slice(r.end);
-    }
-  }
-
-  // Pass 2: extract [CONFIG:pluginId] markers
-  CONFIG_MARKER_RE.lastIndex = 0;
-  const configMarkers: Array<{ start: number; end: number; pluginId: string }> =
-    [];
-  match = CONFIG_MARKER_RE.exec(text);
-  while (match !== null) {
-    configMarkers.push({
-      start: match.index,
-      end: match.index + match[0].length,
-      pluginId: match[1].trim(),
-    });
-    match = CONFIG_MARKER_RE.exec(text);
-  }
-
-  if (configMarkers.length > 0) {
-    for (let i = configMarkers.length - 1; i >= 0; i--) {
-      const m = configMarkers[i];
-      const plugin = plugins.find((p) => p.id === m.pluginId);
-      if (plugin) {
-        const schema: Record<string, unknown> = {};
-        const values: Record<string, unknown> = {};
-        for (const param of plugin.parameters) {
-          schema[param.key] = {
-            type: param.type,
-            description: param.description,
-            required: param.required,
-          };
-          if (param.currentValue !== null)
-            values[param.key] = param.currentValue;
-        }
-        blocks.push({
-          type: "config-form",
-          pluginId: m.pluginId,
-          pluginName: plugin.name,
-          schema,
-          hints: plugin.configUiHints ?? {},
-          values,
-        });
-      }
-      text = text.slice(0, m.start) + text.slice(m.end);
-    }
-  }
-
-  // Build clean text (trim whitespace from block removal)
-  const cleanText = text.replace(/\n{3,}/g, "\n\n").trim();
-
-  // If there's remaining text content, prepend it as a text block
-  if (cleanText) {
-    blocks.unshift({ type: "text", text: cleanText });
-  }
-
-  return { cleanText, blocks };
-}
-
-// ---------------------------------------------------------------------------
 // Package root resolution (for reading bundled plugins.json)
 // ---------------------------------------------------------------------------
 
@@ -900,91 +751,6 @@ function buildParamDefs(
       options: Array.isArray(def.options)
         ? (def.options as string[])
         : undefined,
-      currentValue: isSet
-        ? sensitive
-          ? maskValue(envValue ?? "")
-          : (envValue ?? "")
-        : null,
-      isSet,
-    };
-  });
-}
-
-/**
- * Infer parameter definitions from bare config key names when explicit
- * pluginParameters metadata is not provided.  Uses naming conventions to
- * determine type, sensitivity, requirement level, and a human-readable
- * description.
- */
-function _inferParamDefs(configKeys: string[]): PluginParamDef[] {
-  return configKeys.map((key) => {
-    const upper = key.toUpperCase();
-
-    // Detect sensitive keys
-    const sensitive =
-      upper.includes("_API_KEY") ||
-      upper.includes("_SECRET") ||
-      upper.includes("_TOKEN") ||
-      upper.includes("_PASSWORD") ||
-      upper.includes("_PRIVATE_KEY") ||
-      upper.includes("_SIGNING_") ||
-      upper.includes("ENCRYPTION_");
-
-    // Detect booleans
-    const isBoolean =
-      upper.includes("ENABLED") ||
-      upper.includes("_ENABLE_") ||
-      upper.startsWith("ENABLE_") ||
-      upper.includes("DRY_RUN") ||
-      upper.includes("_DEBUG") ||
-      upper.includes("_VERBOSE") ||
-      upper.includes("AUTO_") ||
-      upper.includes("FORCE_") ||
-      upper.includes("DISABLE_") ||
-      upper.includes("SHOULD_") ||
-      upper.endsWith("_SSL");
-
-    // Detect numbers
-    const isNumber =
-      upper.endsWith("_PORT") ||
-      upper.endsWith("_INTERVAL") ||
-      upper.endsWith("_TIMEOUT") ||
-      upper.endsWith("_MS") ||
-      upper.endsWith("_MINUTES") ||
-      upper.endsWith("_SECONDS") ||
-      upper.endsWith("_LIMIT") ||
-      upper.endsWith("_MAX") ||
-      upper.endsWith("_MIN") ||
-      upper.includes("_MAX_") ||
-      upper.includes("_MIN_") ||
-      upper.endsWith("_COUNT") ||
-      upper.endsWith("_SIZE") ||
-      upper.endsWith("_STEPS");
-
-    const type = isBoolean ? "boolean" : isNumber ? "number" : "string";
-
-    // Primary keys are required (API keys, tokens, bot tokens, account IDs)
-    const required =
-      sensitive &&
-      (upper.endsWith("_API_KEY") ||
-        upper.endsWith("_BOT_TOKEN") ||
-        upper.endsWith("_TOKEN") ||
-        upper.endsWith("_PRIVATE_KEY"));
-
-    // Generate a human-readable description from the key name
-    const description = inferDescription(key);
-
-    const envValue = process.env[key];
-    const isSet = Boolean(envValue?.trim());
-
-    return {
-      key,
-      type,
-      description,
-      required,
-      sensitive,
-      default: undefined,
-      options: undefined,
       currentValue: isSet
         ? sensitive
           ? maskValue(envValue ?? "")
@@ -3499,7 +3265,6 @@ async function generateChatResponse(
       >
     | undefined;
   let actionCallbacksSeen = 0;
-  let _handlerError: unknown = null;
   try {
     const generationMessage = await maybeAugmentChatMessageWithKnowledge(
       runtime,
@@ -3583,7 +3348,6 @@ async function generateChatResponse(
       );
     }
   } catch (err) {
-    _handlerError = err;
     throw err;
   }
 
@@ -5662,7 +5426,6 @@ import {
   type TradePermissionMode,
   assertQuoteFresh,
   canUseLocalTradeExecution,
-  recordAgentAutoTrade,
 } from "./trade-safety.js";
 
 export {

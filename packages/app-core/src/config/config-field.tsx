@@ -932,7 +932,10 @@ function JsonFieldInner({ fp: props }: { fp: FieldRenderProps }) {
   return (
     <div>
       <textarea
-        className={textareaCls(Boolean(jsonError || props.errors?.length), "min-h-[100px]")}
+        className={textareaCls(
+          Boolean(jsonError || props.errors?.length),
+          "min-h-[100px]",
+        )}
         defaultValue={initial}
         placeholder={
           props.hint.placeholder ||
@@ -1561,7 +1564,10 @@ function MarkdownFieldInner(props: FieldRenderProps) {
         </div>
       ) : (
         <textarea
-          className={textareaCls(!!props.errors?.length, "min-h-[100px] h-auto")}
+          className={textareaCls(
+            !!props.errors?.length,
+            "min-h-[100px] h-auto",
+          )}
           defaultValue={value}
           placeholder={props.hint.placeholder ?? "Markdown content..."}
           data-config-key={props.key}
@@ -1857,8 +1863,6 @@ export function ConfigField({
 }) {
   const { t } = useApp();
   const label = renderProps.hint.label ?? renderProps.key;
-  const envKey = renderProps.key;
-  const _labelDiffersFromKey = label !== envKey;
   const errors = renderProps.errors ?? [];
   const hasError = errors.length > 0;
   const isRequiredEmpty = renderProps.required && !renderProps.isSet;

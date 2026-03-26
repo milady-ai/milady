@@ -1,5 +1,4 @@
 import type { AgentRuntime, Service } from "@elizaos/core";
-import { logger } from "@elizaos/core";
 import { resolveCloudApiBaseUrl as resolveCanonicalCloudApiBaseUrl } from "../cloud/base-url";
 import { validateCloudBaseUrl } from "../cloud/validate-url";
 import type { RouteHelpers, RouteRequestMeta } from "./route-helpers";
