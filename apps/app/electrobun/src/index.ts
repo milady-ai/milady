@@ -34,6 +34,7 @@ import {
   configureDesktopLocalApiAuth,
   getAgentManager,
   getDiagnosticLogPath,
+  getStartupDiagnosticLogTail,
   getStartupDiagnosticsSnapshot,
   getStartupStatusPath,
 } from "./native/agent";
@@ -1672,13 +1673,19 @@ function buildStartupCrashDiscordReport(options: {
   error: string | null;
 }): string {
   const diagnostics = getStartupDiagnosticsSnapshot();
+  const startupLogTail = getStartupDiagnosticLogTail(8_000).trim();
+  const appVersion = process.env.npm_package_version?.trim() || "unknown";
+  const appRuntime = `electrobun/${Bun.version}`;
   const reportLines = [
     "Milady startup crash report",
     "",
+    "Share this report in Discord and ping @iono.",
+    "",
     `Source: ${options.source}`,
     `Timestamp: ${new Date().toISOString()}`,
+    `App Version: ${appVersion}`,
+    `Runtime: ${appRuntime}`,
     `Platform: ${process.platform} ${process.arch}`,
-    `Bun: ${Bun.version}`,
     `State: ${diagnostics.state}`,
     `Phase: ${diagnostics.phase}`,
     `Last Error: ${options.error ?? diagnostics.lastError ?? "unknown"}`,
@@ -1686,8 +1693,14 @@ function buildStartupCrashDiscordReport(options: {
     `Log Path: ${diagnostics.logPath}`,
     `Status Path: ${diagnostics.statusPath}`,
     "",
-    "Please send this in Discord and ping @iono.",
+    startupLogTail ? "Startup Log Tail:" : "Startup Log Tail: unavailable",
   ];
+
+  if (startupLogTail) {
+    reportLines.push("```");
+    reportLines.push(startupLogTail);
+    reportLines.push("```");
+  }
   return `${reportLines.join("\n")}\n`;
 }
 
@@ -1696,11 +1709,24 @@ function persistStartupCrashReport(options: {
   error: string | null;
 }): { report: string; reportPath: string } {
   const report = buildStartupCrashDiscordReport(options);
-  const reportPath = resolveStartupCrashReportPath();
+  const primaryReportPath = resolveStartupCrashReportPath();
+  const fallbackReportPath = path.join(os.tmpdir(), STARTUP_CRASH_REPORT_FILE);
+  let reportPath = primaryReportPath;
   try {
-    fs.writeFileSync(reportPath, report, "utf8");
+    fs.mkdirSync(path.dirname(primaryReportPath), { recursive: true });
+    fs.writeFileSync(primaryReportPath, report, "utf8");
   } catch (err) {
     console.warn("[Main] Failed to write startup crash report:", err);
+    try {
+      fs.mkdirSync(path.dirname(fallbackReportPath), { recursive: true });
+      fs.writeFileSync(fallbackReportPath, report, "utf8");
+      reportPath = fallbackReportPath;
+    } catch (fallbackErr) {
+      console.warn(
+        "[Main] Failed to write fallback startup crash report:",
+        fallbackErr,
+      );
+    }
   }
   return { report, reportPath };
 }

@@ -317,6 +317,21 @@ describe("AgentManager", () => {
     it("creates a local bug report bundle and copies diagnostics files", async () => {
       const writeFileSync = await getWriteFileSyncMock();
       const copyFileSync = await getCopyFileSyncMock();
+      const readFileSync = await getReadFileSyncMock();
+      readFileSync.mockImplementation((filePath: string) => {
+        if (String(filePath).endsWith("startup-status.json")) {
+          return JSON.stringify({
+            state: "error",
+            phase: "startup",
+            updatedAt: "2026-03-26T00:00:00.000Z",
+            logPath: "/tmp/milady-startup.log",
+            statusPath: "/tmp/startup-status.json",
+            platform: "win32",
+            arch: "x64",
+          });
+        }
+        return "Authorization: Bearer test-secret\nsafe line";
+      });
 
       const bundle = createBugReportBundle({
         reportMarkdown: "# Report",
@@ -327,6 +342,16 @@ describe("AgentManager", () => {
       expect(bundle.directory).toContain("canary-");
       expect(writeFileSync).toHaveBeenCalled();
       expect(copyFileSync).toHaveBeenCalledTimes(2);
+      const reportJsonWrite = writeFileSync.mock.calls.find(
+        (call) => typeof call[0] === "string" && call[0].endsWith("report.json"),
+      );
+      expect(reportJsonWrite).toBeDefined();
+      const parsed = JSON.parse(String(reportJsonWrite?.[1]));
+      expect(parsed.startupDiagnostics).toMatchObject({
+        state: "error",
+        phase: "startup",
+      });
+      expect(parsed.startupLogTail).toContain("[REDACTED]");
     });
 
     it("returns a default startup diagnostics snapshot when the status file is missing", async () => {

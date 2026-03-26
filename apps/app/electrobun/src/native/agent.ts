@@ -472,12 +472,23 @@ export function createBugReportBundle(options: {
   const statusPath = getStartupStatusPath();
   const startupLogTarget = path.join(directory, "milady-startup.log");
   const startupStatusTarget = path.join(directory, "startup-status.json");
+  const startupDiagnostics = getStartupDiagnosticsSnapshot();
+  const includeLogTail =
+    typeof options.reportJson.attachLogs === "boolean"
+      ? options.reportJson.attachLogs
+      : true;
+  const startupLogTail = includeLogTail ? getStartupDiagnosticLogTail() : "";
+  const normalizedReportJson = {
+    ...options.reportJson,
+    startupDiagnostics,
+    startupLogTail,
+  };
 
   fs.mkdirSync(directory, { recursive: true });
   fs.writeFileSync(reportMarkdownPath, options.reportMarkdown, "utf8");
   fs.writeFileSync(
     reportJsonPath,
-    `${JSON.stringify(options.reportJson, null, 2)}\n`,
+    `${JSON.stringify(normalizedReportJson, null, 2)}\n`,
     "utf8",
   );
 

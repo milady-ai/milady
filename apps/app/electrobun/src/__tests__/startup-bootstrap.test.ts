@@ -63,7 +63,10 @@ describe("Electrobun startup bootstrap", () => {
     const source = fs.readFileSync(INDEX_PATH, "utf8");
 
     expect(source).toContain("maybePromptStartupCrashReport");
-    expect(source).toContain("Please send this in Discord and ping @iono.");
+    expect(source).toContain("Share this report in Discord and ping @iono.");
+    expect(source).toContain("App Version:");
+    expect(source).toContain("Runtime:");
+    expect(source).toContain("Startup Log Tail:");
     expect(source).toContain("Copy Report");
     expect(source).toContain("startup-crash-report-latest.md");
   });
