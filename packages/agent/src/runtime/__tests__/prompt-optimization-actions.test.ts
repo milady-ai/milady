@@ -452,3 +452,62 @@ describe("compactActionsForIntent", () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// installPromptOptimizations (useModel interception)
+// ---------------------------------------------------------------------------
+
+import { installPromptOptimizations } from "../prompt-optimization";
+
+describe("installPromptOptimizations", () => {
+  function createMockRuntime() {
+    const calls: Array<{ modelType: string; prompt: string }> = [];
+    const runtime = {
+      actions: [{ name: "REPLY" }, { name: "START_CODING_TASK" }],
+      logger: { info: () => {}, warn: () => {} },
+      useModel: async (modelType: string, payload: Record<string, unknown>) => {
+        calls.push({
+          modelType,
+          prompt: String(payload?.prompt ?? ""),
+        });
+        return "mock response";
+      },
+      __miladyPromptOptInstalled: false,
+    };
+    return { runtime: runtime as unknown as import("@elizaos/core").AgentRuntime, calls };
+  }
+
+  it("is idempotent — double install does not double-wrap", () => {
+    const { runtime } = createMockRuntime();
+    installPromptOptimizations(runtime);
+    const firstWrapper = runtime.useModel;
+    installPromptOptimizations(runtime);
+    expect(runtime.useModel).toBe(firstWrapper);
+  });
+
+  it("passes through non-TEXT_LARGE calls unchanged", async () => {
+    const { runtime, calls } = createMockRuntime();
+    installPromptOptimizations(runtime);
+    await runtime.useModel("TEXT_SMALL" as any, { prompt: "hello" } as any);
+    expect(calls).toHaveLength(1);
+    expect(calls[0].modelType).toBe("TEXT_SMALL");
+    expect(calls[0].prompt).toBe("hello");
+  });
+
+  it("applies action compaction to TEXT_LARGE calls", async () => {
+    const { runtime, calls } = createMockRuntime();
+    installPromptOptimizations(runtime);
+    const prompt = `<actions>
+  <action><name>REPLY</name><description>Reply.</description></action>
+  <action><name>START_CODING_TASK</name><description>Code.</description><params><param><name>repo</name></param></params></action>
+</actions>
+# Received Message
+user: tell me a joke`;
+    await runtime.useModel("TEXT_LARGE" as any, { prompt } as any);
+    expect(calls).toHaveLength(1);
+    // START_CODING_TASK params should be stripped (no coding intent in "tell me a joke")
+    expect(calls[0].prompt).not.toContain("<param>");
+    // But action names preserved
+    expect(calls[0].prompt).toContain("<name>START_CODING_TASK</name>");
+    expect(calls[0].prompt).toContain("<name>REPLY</name>");
+  });
+});

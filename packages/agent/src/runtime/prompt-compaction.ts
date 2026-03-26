@@ -95,17 +95,17 @@ export function compactInstalledSkills(prompt: string): string {
 // are excluded to avoid false positives ("fix the typo", "build me a haiku").
 // Includes translations for supported locales: ko, zh-CN, es, pt, vi, tl.
 const CODING_INTENT_RE =
-  /\b(code|coding|codebase|repo|repository|pull request|pr\b|branch|merge|commit|deploy|refactor|start_coding_task|spawn_coding_agent|send_to_coding_agent)\b|https?:\/\/(?:github\.com|gitlab\.com|bitbucket\.org)\/|코드|코딩|레포|저장소|브랜치|커밋|배포|리팩토링|풀\s?리퀘스트|代码|仓库|分支|提交|部署|合并|拉取请求|código|repositorio|repositório|rama|rama|confirmación|implementar|mã|kho|nhánh|triển khai/i;
+  /\b(code|coding|codebase|repo|repository|pull request|pr\b|branch|merge|commit|deploy|refactor|start_coding_task|spawn_coding_agent|send_to_coding_agent)\b|https?:\/\/(?:github\.com|gitlab\.com|bitbucket\.org)\/|코드|코딩|레포|저장소|브랜치|커밋|배포|리팩토링|풀\s?리퀘스트|代码|仓库|分支|提交|部署|合并|拉取请求|\b(código|repositorio|repositório|confirmación|implementar)\b|mã|kho|nhánh|triển khai/i;
 const PLUGIN_UI_INTENT_RE =
-  /\b(plugin|plugins|configure|configuration|setup|install|enable|disable|api key|credential|secret|dashboard|form|ui|interface|\[config:)\b|플러그인|설정|설치|插件|配置|安装|complemento|configurar|instalar|plugin|configuração/i;
+  /\b(plugin|plugins|configure|configuration|setup|install|enable|disable|api key|credential|secret|dashboard|form|ui|interface|\[config:)\b|플러그인|설정|설치|插件|配置|安装|\b(complemento|configurar|instalar|configuração)\b/i;
 // Terminal intent requires specific CLI/tool terms, not generic verbs.
 const TERMINAL_INTENT_RE =
-  /\b(shell|command line|execute command|npm|bun|yarn|git\b|bash|terminal|script|pip|apt-get|brew)\b|터미널|명령어|스크립트|终端|命令行|脚本|terminal|línea de comandos|linha de comando/i;
+  /\b(shell|command line|execute command|npm|bun|yarn|git\b|bash|terminal|script|pip|apt-get|brew)\b|터미널|명령어|스크립트|终端|命令行|脚本|\b(terminal|línea de comandos|linha de comando)\b/i;
 const EMOTE_INTENT_RE =
-  /\b(emote|wave|dance|bow|clap|laugh|angry|sad|think|sit|play_emote)\b|이모트|춤|인사|笑|跳舞|鞠躬|emote|bailar/i;
+  /\b(emote|wave|dance|bow|clap|laugh|angry|sad|think|sit|play_emote)\b|이모트|춤|인사|笑|跳舞|鞠躬|\b(bailar)\b/i;
 // "close" and "label" removed — too generic ("close the file", "label this").
 const ISSUE_INTENT_RE =
-  /\b(issue|bug report|ticket|close issue|reopen issue|github issue|create issue|file a bug)\b|이슈|버그|티켓|问题|错误|工单|problema|error|billete/i;
+  /\b(issue|bug report|ticket|close issue|reopen issue|github issue|create issue|file a bug)\b|이슈|버그|티켓|问题|错误|工单|\b(problema|error|billete)\b/i;
 
 /** Actions that are always included at full detail. */
 export const UNIVERSAL_ACTIONS = new Set(["REPLY", "NONE", "IGNORE"]);
