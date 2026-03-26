@@ -111,6 +111,22 @@ export async function handleAgentLifecycleRoutes(
       return true;
     }
 
+    // Set the property AND call the service method so the batcher
+    // section is actually registered/unregistered.
+    const autonomySvc =
+      runtime.getService?.("AUTONOMY") ?? runtime.getService?.("autonomy");
+    const svcAny = autonomySvc as unknown as
+      | { enableAutonomy(): Promise<void>; disableAutonomy(): Promise<void> }
+      | undefined;
+    if (svcAny && typeof svcAny.enableAutonomy === "function") {
+      if (body.enabled) {
+        await svcAny.enableAutonomy();
+      } else {
+        await svcAny.disableAutonomy();
+      }
+    }
+    // Always sync the property — enableAutonomy()/disableAutonomy() set it
+    // internally, but if the service path wasn't taken, set it directly.
     runtime.enableAutonomy = body.enabled;
     json(res, { enabled: runtime.enableAutonomy === true });
     return true;

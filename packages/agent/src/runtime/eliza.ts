@@ -4375,6 +4375,29 @@ export async function startEliza(
       }
     }
 
+    // Enable the autonomy loop so trigger/heartbeat instructions are
+    // actually processed. Without this, memories created by
+    // dispatchInstruction() sit in the DB and are never acted on.
+    {
+      const autonomySvc = (runtime.getService("AUTONOMY") ??
+        runtime.getService("autonomy")) as unknown as
+        | { enableAutonomy(): Promise<void> }
+        | null
+        | undefined;
+      if (autonomySvc && typeof autonomySvc.enableAutonomy === "function") {
+        try {
+          await autonomySvc.enableAutonomy();
+          logger.info(
+            "[eliza] AutonomyService enabled — trigger instructions will be processed",
+          );
+        } catch (err) {
+          logger.warn(
+            `[eliza] Failed to enable autonomy loop: ${formatError(err)}`,
+          );
+        }
+      }
+    }
+
     // Do not block runtime startup on skills warm-up.
     void warmAgentSkillsService();
   };
@@ -4662,6 +4685,24 @@ export async function startEliza(
               logger.warn(
                 `[eliza] AutonomyService failed to start after hot-reload: ${formatError(err)}`,
               );
+            }
+          }
+
+          // Enable the autonomy loop after hot-reload (same as initial boot)
+          {
+            const svc = (newRuntime.getService("AUTONOMY") ??
+              newRuntime.getService("autonomy")) as unknown as
+              | { enableAutonomy(): Promise<void> }
+              | null
+              | undefined;
+            if (svc && typeof svc.enableAutonomy === "function") {
+              try {
+                await svc.enableAutonomy();
+              } catch (err) {
+                logger.warn(
+                  `[eliza] Failed to enable autonomy after hot-reload: ${formatError(err)}`,
+                );
+              }
             }
           }
 

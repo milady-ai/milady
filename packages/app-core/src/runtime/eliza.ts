@@ -454,6 +454,27 @@ async function repairRuntimeAfterBoot(
     }
   }
 
+  // Enable the autonomy loop so trigger/heartbeat instructions are processed.
+  {
+    const autonomySvc = (runtime.getService("AUTONOMY") ??
+      runtime.getService("autonomy")) as unknown as
+      | { enableAutonomy(): Promise<void> }
+      | null
+      | undefined;
+    if (autonomySvc && typeof autonomySvc.enableAutonomy === "function") {
+      try {
+        await autonomySvc.enableAutonomy();
+        logger.info(
+          "[milady] AutonomyService enabled — trigger instructions will be processed",
+        );
+      } catch (err) {
+        logger.warn(
+          `[milady] Failed to enable autonomy loop: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
+    }
+  }
+
   // Ensure Telegram bot is polling. The upstream plugin's bot.launch() is
   // not awaited and silently fails on bun/Windows. We create a standalone
   // Telegraf instance with proper lifecycle management.
