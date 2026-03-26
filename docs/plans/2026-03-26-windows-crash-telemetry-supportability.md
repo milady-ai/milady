@@ -7,7 +7,7 @@ Turn low-signal “it crashes immediately” reports into actionable diagnostics
 ## Branch / PR
 
 - Branch: `codex/win-reporting`
-- PR: `to open` (changes implemented locally)
+- PR: `#1358` (https://github.com/milady-ai/milady/pull/1358)
 
 ## Scope
 
@@ -35,9 +35,9 @@ Turn low-signal “it crashes immediately” reports into actionable diagnostics
 
 ## Remaining
 
-- [ ] Commit local changes.
-- [ ] Push branch.
-- [ ] Open PR with focused scope statement.
+- [x] Commit local changes.
+- [x] Push branch.
+- [x] Open PR with focused scope statement.
 - [ ] Run full CI and address any non-target regressions.
 
 ## Acceptance

@@ -22,7 +22,7 @@ This is the top-level tracker for the parallel projects discussed.
 ## Current Snapshot
 
 - `S1` in progress (`PR #1343`)
-- `S2` implemented locally in `codex/win-reporting` (commit/push pending)
+- `S2` in progress on `PR #1358` (branch pushed, CI/review pending)
 - `S3` not started (discovery complete, execution not started)
 - `S4` issue opened (`#1359`), fix not started
 - `S5` discovery complete, execution not started
