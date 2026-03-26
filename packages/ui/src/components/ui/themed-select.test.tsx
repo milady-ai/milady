@@ -26,7 +26,7 @@ describe("ThemedSelect", () => {
   it("opens menu on click", async () => {
     const user = userEvent.setup();
     render(<ThemedSelect value={null} groups={groups} onChange={vi.fn()} />);
-    await user.click(screen.getByText("select..."));
+    await user.click(screen.getByRole("combobox"));
     expect(screen.getByText("Fruits")).toBeInTheDocument();
     expect(screen.getByText("Veggies")).toBeInTheDocument();
   });
@@ -34,7 +34,7 @@ describe("ThemedSelect", () => {
   it("shows groups and items", async () => {
     const user = userEvent.setup();
     render(<ThemedSelect value={null} groups={groups} onChange={vi.fn()} />);
-    await user.click(screen.getByText("select..."));
+    await user.click(screen.getByRole("combobox"));
     expect(screen.getByText("Apple")).toBeInTheDocument();
     expect(screen.getByText("Banana")).toBeInTheDocument();
     expect(screen.getByText("Carrot")).toBeInTheDocument();
@@ -44,17 +44,28 @@ describe("ThemedSelect", () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
     render(<ThemedSelect value={null} groups={groups} onChange={onChange} />);
-    await user.click(screen.getByText("select..."));
-    await user.click(screen.getByText("Apple"));
+    await user.click(screen.getByRole("combobox"));
+    await user.click(screen.getByRole("option", { name: "Apple" }));
     expect(onChange).toHaveBeenCalledWith("apple");
   });
 
   it("closes on Escape", async () => {
     const user = userEvent.setup();
     render(<ThemedSelect value={null} groups={groups} onChange={vi.fn()} />);
-    await user.click(screen.getByText("select..."));
+    await user.click(screen.getByRole("combobox"));
     expect(screen.getByText("Fruits")).toBeInTheDocument();
     await user.keyboard("{Escape}");
     expect(screen.queryByText("Fruits")).not.toBeInTheDocument();
+  });
+
+  it("supports arrow-key navigation and selection", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<ThemedSelect value={null} groups={groups} onChange={onChange} />);
+
+    await user.click(screen.getByRole("combobox"));
+    await user.keyboard("{ArrowDown}{Enter}");
+
+    expect(onChange).toHaveBeenCalledWith("banana");
   });
 });

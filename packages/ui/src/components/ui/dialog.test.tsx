@@ -77,4 +77,17 @@ describe("Dialog", () => {
     );
     expect(screen.getByText("Close")).toBeInTheDocument();
   });
+
+  it("can hide the default close button", () => {
+    render(
+      <Dialog open>
+        <DialogContent showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>Title</DialogTitle>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>,
+    );
+    expect(screen.queryByText("Close")).toBeNull();
+  });
 });

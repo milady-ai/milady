@@ -36,9 +36,13 @@ export const CustomFallback: Story = {
   render: () => (
     <ErrorBoundary
       fallback={(error, reset) => (
-        <div className="p-6 border border-yellow-500 bg-yellow-50 rounded-md text-center">
-          <p className="font-semibold text-yellow-800 mb-2">Custom Error UI</p>
-          <p className="text-sm text-yellow-700 mb-4">{error.message}</p>
+        <div className="rounded-md border border-[color:var(--accent)]/45 bg-[color:rgba(var(--accent-rgb,240,185,11),0.08)] p-6 text-center">
+          <p className="mb-2 font-semibold text-[color:var(--text-strong,var(--text,#111827))]">
+            Custom Error UI
+          </p>
+          <p className="mb-4 text-sm text-[color:var(--muted-strong,var(--muted,#4b5563))]">
+            {error.message}
+          </p>
           <button
             type="button"
             className="px-3 py-1 text-sm border rounded-md"

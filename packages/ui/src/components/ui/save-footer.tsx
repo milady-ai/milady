@@ -46,6 +46,7 @@ export const SaveFooter = React.forwardRef<HTMLDivElement, SaveFooterProps>(
         {saveSuccess && <span className="text-xs text-ok">{savedLabel}</span>}
         <Button
           size="sm"
+          className="text-txt-strong hover:text-txt-strong"
           disabled={saving}
           onClick={onSave}
         >

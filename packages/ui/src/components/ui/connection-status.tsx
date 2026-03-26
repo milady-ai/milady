@@ -5,22 +5,38 @@ export type ConnectionState = "connected" | "disconnected" | "error";
 
 const STATE_STYLES: Record<
   ConnectionState,
-  { dot: string; text: string; label: string }
+  {
+    dot: string;
+    text: string;
+    label: string;
+    surface: string;
+    liveRole: "status" | "alert";
+    liveMode: "polite" | "assertive";
+  }
 > = {
   connected: {
     dot: "bg-ok",
     text: "text-txt",
     label: "Connected",
+    surface: "border-ok/25 bg-ok-subtle/70",
+    liveRole: "status",
+    liveMode: "polite",
   },
   disconnected: {
     dot: "bg-muted",
-    text: "text-muted",
+    text: "text-muted-strong",
     label: "Disconnected",
+    surface: "border-border/70 bg-bg-accent",
+    liveRole: "status",
+    liveMode: "polite",
   },
   error: {
     dot: "bg-destructive",
     text: "text-destructive",
     label: "Error",
+    surface: "border-destructive/35 bg-destructive-subtle",
+    liveRole: "alert",
+    liveMode: "assertive",
   },
 };
 
@@ -40,26 +56,44 @@ export interface ConnectionStatusProps
 export const ConnectionStatus = React.forwardRef<
   HTMLDivElement,
   ConnectionStatusProps
->(({ state, label, connectedLabel, disconnectedLabel, errorLabel, className, ...props }, ref) => {
-  const styles = STATE_STYLES[state];
-  const overrideLabels: Record<ConnectionState, string | undefined> = {
-    connected: connectedLabel,
-    disconnected: disconnectedLabel,
-    error: errorLabel,
-  };
-  return (
-    <div
-      ref={ref}
-      className={cn(
-        "inline-flex items-center gap-2 rounded-md border border-border bg-bg-accent px-3 py-1.5 text-xs",
-        styles.text,
-        className,
-      )}
-      {...props}
-    >
-      <span className={cn("h-2 w-2 rounded-full", styles.dot)} />
-      {label ?? overrideLabels[state] ?? styles.label}
-    </div>
-  );
-});
+>(
+  (
+    {
+      state,
+      label,
+      connectedLabel,
+      disconnectedLabel,
+      errorLabel,
+      className,
+      role,
+      "aria-live": ariaLive,
+      ...props
+    },
+    ref,
+  ) => {
+    const styles = STATE_STYLES[state];
+    const overrideLabels: Record<ConnectionState, string | undefined> = {
+      connected: connectedLabel,
+      disconnected: disconnectedLabel,
+      error: errorLabel,
+    };
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          "inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-xs",
+          styles.surface,
+          styles.text,
+          className,
+        )}
+        role={role ?? styles.liveRole}
+        aria-live={ariaLive ?? styles.liveMode}
+        {...props}
+      >
+        <span className={cn("h-2 w-2 rounded-full", styles.dot)} />
+        {label ?? overrideLabels[state] ?? styles.label}
+      </div>
+    );
+  },
+);
 ConnectionStatus.displayName = "ConnectionStatus";

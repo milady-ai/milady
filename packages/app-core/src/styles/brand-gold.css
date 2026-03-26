@@ -8,11 +8,11 @@
   --rich-black: #0a0a0c;
   --charcoal: #121214;
 
-  --deep-gold: #f0b90b;
-  --classic-gold: #fcd535;
-  --highlight-gold: #ffe06f;
-  --champagne-gold: #eaecef;
-  --burnished-gold: #f6ca45;
+  --deep-gold: #d8a000;
+  --classic-gold: #f0b90b;
+  --highlight-gold: #f3ba2f;
+  --champagne-gold: #f5f7fa;
+  --burnished-gold: #e9b52c;
 
   --dark-silver: #313136;
   --steel: #8a8a94;
@@ -20,24 +20,25 @@
   --chrome-highlight: #f5f5f5;
   --gunmetal: #232329;
 
-  --gold-glow: rgba(252, 213, 53, 0.16);
+  --gold-glow: rgba(240, 185, 11, 0.16);
   --soft-white-glow: rgba(255, 255, 255, 0.08);
   --inner-shadow: rgba(0, 0, 0, 0.6);
 
   --accent: var(--classic-gold);
+  --accent-rgb: 240, 185, 11;
   --accent-hover: var(--highlight-gold);
   --accent-muted: var(--deep-gold);
-  --accent-subtle: rgba(252, 213, 53, 0.12);
+  --accent-subtle: rgba(240, 185, 11, 0.12);
   --accent-foreground: var(--jet-black);
   --primary: var(--classic-gold);
   --primary-foreground: var(--jet-black);
   --ring: var(--highlight-gold);
   --border-hover: var(--classic-gold);
   --warn: var(--classic-gold);
-  --warn-muted: rgba(252, 213, 53, 0.7);
-  --warn-subtle: rgba(252, 213, 53, 0.14);
-  --focus: rgba(252, 213, 53, 0.18);
-  --focus-ring: 0 0 0 2px rgba(252, 213, 53, 0.34);
+  --warn-muted: rgba(240, 185, 11, 0.7);
+  --warn-subtle: rgba(240, 185, 11, 0.14);
+  --focus: rgba(240, 185, 11, 0.18);
+  --focus-ring: 0 0 0 2px rgba(240, 185, 11, 0.34);
   --link-color: var(--classic-gold);
   --link-hover-color: var(--highlight-gold);
 }
@@ -71,7 +72,7 @@
   --onboarding-card-bg: rgba(10, 10, 12, 0.8);
   --onboarding-card-bg-hover: rgba(18, 18, 21, 0.88);
   --onboarding-card-border: rgba(49, 49, 56, 0.32);
-  --onboarding-card-border-strong: rgba(252, 213, 53, 0.34);
+  --onboarding-card-border-strong: rgba(240, 185, 11, 0.34);
   --onboarding-panel-bg: rgba(5, 5, 6, 0.88);
   --onboarding-panel-border: rgba(49, 49, 56, 0.28);
   --onboarding-panel-shadow: 0 16px 44px rgba(0, 0, 0, 0.42);
@@ -94,19 +95,19 @@
   --onboarding-card-bg: rgba(10, 10, 12, 0.8);
   --onboarding-card-bg-hover: rgba(18, 18, 21, 0.88);
   --onboarding-card-border: rgba(49, 49, 56, 0.32);
-  --onboarding-card-border-strong: rgba(252, 213, 53, 0.34);
+  --onboarding-card-border-strong: rgba(240, 185, 11, 0.34);
 
   /* Recommended card (Local button) */
-  --onboarding-recommended-bg: rgba(252, 213, 53, 0.12);
-  --onboarding-recommended-bg-hover: rgba(252, 213, 53, 0.18);
-  --onboarding-recommended-border: rgba(252, 213, 53, 0.28);
-  --onboarding-recommended-border-strong: rgba(252, 213, 53, 0.44);
+  --onboarding-recommended-bg: rgba(240, 185, 11, 0.12);
+  --onboarding-recommended-bg-hover: rgba(240, 185, 11, 0.18);
+  --onboarding-recommended-border: rgba(240, 185, 11, 0.28);
+  --onboarding-recommended-border-strong: rgba(240, 185, 11, 0.44);
 
   /* Accent (badges, active indicators) */
-  --onboarding-accent-bg: rgba(252, 213, 53, 0.16);
-  --onboarding-accent-bg-hover: rgba(252, 213, 53, 0.24);
-  --onboarding-accent-border: rgba(252, 213, 53, 0.24);
-  --onboarding-accent-border-hover: rgba(252, 213, 53, 0.46);
+  --onboarding-accent-bg: rgba(240, 185, 11, 0.16);
+  --onboarding-accent-bg-hover: rgba(240, 185, 11, 0.24);
+  --onboarding-accent-border: rgba(240, 185, 11, 0.24);
+  --onboarding-accent-border-hover: rgba(240, 185, 11, 0.46);
   --onboarding-accent-foreground: var(--highlight-gold);
 
   /* Panel (main onboarding container) */
@@ -118,11 +119,11 @@
   --onboarding-divider: rgba(49, 49, 56, 0.22);
   --onboarding-footer-border: rgba(49, 49, 56, 0.16);
   --onboarding-link: var(--classic-gold);
-  --onboarding-ripple: rgba(252, 213, 53, 0.08);
+  --onboarding-ripple: rgba(240, 185, 11, 0.08);
   --onboarding-roster-bg: rgba(8, 10, 13, 0.76);
   --onboarding-roster-border: rgba(49, 49, 56, 0.18);
-  --onboarding-field-focus-border: rgba(252, 213, 53, 0.42);
-  --onboarding-field-focus-shadow: 0 0 0 3px rgba(252, 213, 53, 0.12);
+  --onboarding-field-focus-border: rgba(240, 185, 11, 0.42);
+  --onboarding-field-focus-shadow: 0 0 0 3px rgba(240, 185, 11, 0.12);
 }
 
 /* Light-mode overrides */
@@ -132,15 +133,15 @@
   --onboarding-text-subtle: rgba(52, 58, 67, 0.76);
   --onboarding-text-muted: rgba(70, 76, 88, 0.72);
   --onboarding-text-faint: rgba(86, 92, 106, 0.58);
-  --onboarding-card-bg: rgba(255, 255, 255, 0.72);
-  --onboarding-card-bg-hover: rgba(255, 255, 255, 0.84);
+  --onboarding-card-bg: rgba(252, 253, 253, 0.76);
+  --onboarding-card-bg-hover: rgba(252, 253, 253, 0.88);
   --onboarding-card-border: rgba(0, 0, 0, 0.1);
   --onboarding-card-border-strong: rgba(240, 185, 11, 0.28);
-  --onboarding-recommended-bg: rgba(252, 213, 53, 0.1);
-  --onboarding-recommended-bg-hover: rgba(252, 213, 53, 0.16);
+  --onboarding-recommended-bg: rgba(240, 185, 11, 0.1);
+  --onboarding-recommended-bg-hover: rgba(240, 185, 11, 0.16);
   --onboarding-recommended-border: rgba(240, 185, 11, 0.24);
-  --onboarding-recommended-border-strong: rgba(252, 213, 53, 0.38);
-  --onboarding-panel-bg: rgba(255, 255, 255, 0.9);
+  --onboarding-recommended-border-strong: rgba(240, 185, 11, 0.38);
+  --onboarding-panel-bg: rgba(247, 248, 250, 0.92);
   --onboarding-panel-border: rgba(0, 0, 0, 0.08);
   --onboarding-panel-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   --onboarding-divider: rgba(0, 0, 0, 0.08);
@@ -152,27 +153,22 @@
   background: linear-gradient(
     180deg,
     rgba(240, 185, 11, 0.54) 0%,
-    rgba(252, 213, 53, 0.48) 58%,
-    rgba(252, 213, 53, 0.2) 100%
+    rgba(255, 210, 77, 0.46) 58%,
+    rgba(255, 210, 77, 0.18) 100%
   );
 }
 
 .onboarding-step-item--done .onboarding-step-dot {
-  background: rgba(252, 213, 53, 0.18);
-  border-color: rgba(252, 213, 53, 0.34);
+  background: rgba(240, 185, 11, 0.18);
+  border-color: rgba(240, 185, 11, 0.34);
 }
 
 .onboarding-step-item--active .onboarding-step-dot {
-  background: linear-gradient(
-    135deg,
-    var(--burnished-gold) 0%,
-    var(--classic-gold) 56%,
-    var(--highlight-gold) 100%
-  );
-  border-color: var(--champagne-gold);
+  background: var(--classic-gold);
+  border-color: rgba(245, 247, 250, 0.86);
   box-shadow:
     0 0 12px var(--gold-glow),
-    0 0 22px rgba(252, 213, 53, 0.12);
+    0 0 22px rgba(240, 185, 11, 0.12);
 }
 
 @keyframes onboarding-dot-pulse {
@@ -180,19 +176,19 @@
   100% {
     box-shadow:
       0 0 12px var(--gold-glow),
-      0 0 22px rgba(252, 213, 53, 0.12);
+      0 0 22px rgba(240, 185, 11, 0.12);
     transform: rotate(45deg) scale(1);
   }
   50% {
     box-shadow:
-      0 0 16px rgba(252, 213, 53, 0.24),
-      0 0 28px rgba(252, 213, 53, 0.14);
+      0 0 16px rgba(240, 185, 11, 0.24),
+      0 0 28px rgba(240, 185, 11, 0.14);
     transform: rotate(45deg) scale(1.15);
   }
 }
 
 .onboarding-step-item--active .onboarding-step-sub {
-  color: var(--champagne-gold);
+  color: var(--highlight-gold);
 }
 
 [data-theme="dark"],
@@ -250,15 +246,15 @@
     rgba(18, 18, 21, 0.96) 0%,
     rgba(10, 10, 12, 0.94) 100%
   );
-  border-color: rgba(252, 213, 53, 0.36);
+  border-color: rgba(240, 185, 11, 0.36);
   box-shadow:
-    0 0 0 1px rgba(252, 213, 53, 0.14),
+    0 0 0 1px rgba(240, 185, 11, 0.14),
     0 16px 28px rgba(0, 0, 0, 0.34),
-    0 0 18px rgba(252, 213, 53, 0.08);
+    0 0 18px rgba(240, 185, 11, 0.08);
 }
 
 [data-testid="companion-header-chat-controls"] > button[aria-pressed="true"] {
-  border-color: rgba(252, 213, 53, 0.32);
+  border-color: rgba(240, 185, 11, 0.32);
 }
 
 .settings-icon-sidebar {
@@ -282,21 +278,21 @@
   --s-text: var(--chrome-highlight);
   --s-text-secondary: #eaecef;
   --s-text-muted: #848e9c;
-  --s-text-txt: var(--champagne-gold);
+  --s-text-txt: var(--chrome-highlight);
   --s-border-subtle: rgba(49, 49, 56, 0.28);
   --s-border: rgba(49, 49, 56, 0.42);
   --s-border-medium: rgba(138, 138, 148, 0.34);
   --s-border-strong: rgba(177, 183, 191, 0.2);
   --s-accent: var(--classic-gold);
-  --s-accent-glow: rgba(252, 213, 53, 0.16);
-  --s-accent-subtle: rgba(252, 213, 53, 0.1);
-  --s-grid-line: rgba(252, 213, 53, 0.018);
-  --s-glow-edge: rgba(252, 213, 53, 0.08);
+  --s-accent-glow: rgba(240, 185, 11, 0.16);
+  --s-accent-subtle: rgba(240, 185, 11, 0.1);
+  --s-grid-line: rgba(240, 185, 11, 0.018);
+  --s-glow-edge: rgba(240, 185, 11, 0.08);
 
   background:
     radial-gradient(
       circle at top right,
-      rgba(252, 213, 53, 0.06),
+      rgba(240, 185, 11, 0.06),
       transparent 26%
     ),
     linear-gradient(180deg, rgba(10, 10, 12, 0.98), rgba(5, 5, 6, 1));
@@ -309,10 +305,10 @@
   background: linear-gradient(
     180deg,
     transparent 8%,
-    rgba(252, 213, 53, 0.16) 48%,
+    rgba(240, 185, 11, 0.16) 48%,
     transparent 92%
   );
-  box-shadow: 0 0 18px rgba(252, 213, 53, 0.08);
+  box-shadow: 0 0 18px rgba(240, 185, 11, 0.08);
 }
 
 .settings-content-area::before {
@@ -404,17 +400,17 @@
 }
 
 .plugins-game-card.is-selected {
-  border-color: rgba(252, 213, 53, 0.42);
+  border-color: rgba(240, 185, 11, 0.42);
   border-left-color: var(--highlight-gold);
   background: linear-gradient(
     180deg,
-    rgba(252, 213, 53, 0.12) 0%,
+    rgba(240, 185, 11, 0.12) 0%,
     rgba(18, 18, 21, 0.94) 100%
   );
   box-shadow:
-    0 0 0 1px rgba(252, 213, 53, 0.12),
+    0 0 0 1px rgba(240, 185, 11, 0.12),
     0 18px 38px rgba(0, 0, 0, 0.28),
-    0 0 18px rgba(252, 213, 53, 0.08);
+    0 0 18px rgba(240, 185, 11, 0.08);
 }
 
 .plugins-game-card-icon-shell,
@@ -447,8 +443,8 @@
 }
 
 .plugins-game-badge.is-on {
-  border-color: rgba(252, 213, 53, 0.28);
-  background: rgba(252, 213, 53, 0.12);
+  border-color: rgba(240, 185, 11, 0.28);
+  background: rgba(240, 185, 11, 0.12);
   color: var(--highlight-gold);
 }
 
