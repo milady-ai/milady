@@ -4,9 +4,14 @@
 #   - Push of release tags matching v* (auto-detects next steward-N)
 #   - Manual dispatch with optional steward number override
 #
-# The steward image is built from the standard deploy/Dockerfile.
-# @stwd/sdk is already a production dependency in package.json, so no
-# Dockerfile modifications are required.
+# The steward image is built from deploy/Dockerfile.cloud-slim (headless,
+# optimised for provisioning workers). @stwd/sdk is already a production
+# dependency in package.json — no Dockerfile modifications required.
+# Dockerfile.cloud-slim is preferred over deploy/Dockerfile because the
+# repo's .dockerignore excludes several paths (apps/homepage, deploy/, etc.)
+# that deploy/Dockerfile tries to COPY individually, which would break the
+# build. Dockerfile.cloud-slim uses COPY . . which respects .dockerignore
+# cleanly and produces a slim headless runtime image.
 #
 # Published tags (example for steward-9):
 #   ghcr.io/milady-ai/agent:v2.0.0-steward-9
@@ -122,20 +127,6 @@ jobs:
           echo "steward_tag=$STEWARD_TAG" >> $GITHUB_OUTPUT
           echo "Steward tag: $STEWARD_TAG"
 
-      # ── Fix .dockerignore ─────────────────────────────────────────────────
-      # The repo .dockerignore excludes deploy/ globally, but deploy/Dockerfile
-      # COPYs deploy/cloud-agent-template/package.json. Add the exception here
-      # so Docker can resolve it during build.
-      - name: Patch .dockerignore for deploy/cloud-agent-template
-        run: |
-          if grep -q '^deploy/$' .dockerignore; then
-            sed -i 's|^deploy/$|deploy/\n!deploy/cloud-agent-template/package.json|' .dockerignore
-            echo "Patched .dockerignore: added !deploy/cloud-agent-template/package.json exception"
-          else
-            echo ".dockerignore does not have deploy/ exclusion, no patch needed"
-          fi
-          grep -A1 'deploy/' .dockerignore || true
-
       # ── Docker build ───────────────────────────────────────────────────────
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -151,7 +142,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./deploy/Dockerfile
+          file: ./deploy/Dockerfile.cloud-slim
           platforms: linux/amd64
           push: ${{ github.event_name == 'push' || inputs.push == true }}
           tags: |
