@@ -1,15 +1,14 @@
 # build-steward-image.yml — Build and publish the Steward-enabled agent image
 #
 # Triggers:
-#   - Push of release tags matching v* (auto-detects next steward-N)
+#   - Push of stable release tags (vX.Y.Z, excludes alpha/beta/rc pre-releases)
 #   - Manual dispatch with optional steward number override
 #
-# The steward image is built from the root Dockerfile (self-contained, full
-# monorepo build). @stwd/sdk is already a production dependency in
-# package.json — no Dockerfile modifications required.
-# NOTE: deploy/Dockerfile and deploy/Dockerfile.cloud-slim are outdated and
-# reference paths excluded by .dockerignore (apps/homepage, deploy/, src/).
-# The root Dockerfile does COPY . . and is compatible with .dockerignore.
+# Build strategy:
+#   The .dockerignore excludes workspace dirs (apps/homepage, apps/app/electrobun)
+#   which breaks `bun install` inside Docker. We therefore pre-build on the
+#   runner (bun install + bun run build), swap in .dockerignore.ci (which keeps
+#   node_modules/ in the build context), and build with Dockerfile.ci.
 #
 # Published tags (example for steward-9):
 #   ghcr.io/milady-ai/agent:v2.0.0-steward-9
@@ -17,8 +16,8 @@
 #
 # Required secrets:
 #   GHCR_TOKEN        — PAT with packages:write (or use GITHUB_TOKEN on milady-ai org)
-#   VPS_SSH_KEY       — SSH private key for root@89.167.63.246
-#   VPS_HOST          — VPS hostname/IP (default: 89.167.63.246)
+#   VPS_SSH_KEY       — SSH private key for the deploy target
+#   VPS_HOST          — VPS hostname/IP (required, no default)
 #   VPS_ENV_FILE      — Path to .env.local on VPS (default: /opt/eliza-cloud/.env.local)
 #   VPS_SERVICE_NAME  — systemd service to restart (default: milady-provisioning-worker)
 
@@ -27,7 +26,8 @@ name: Build Steward Image
 on:
   push:
     tags:
-      - 'v*'
+      # Only stable releases — excludes alpha/beta/rc pre-release tags
+      - 'v[0-9]+.[0-9]+.[0-9]+'
   workflow_dispatch:
     inputs:
       steward_n:
@@ -125,6 +125,30 @@ jobs:
           echo "steward_tag=$STEWARD_TAG" >> $GITHUB_OUTPUT
           echo "Steward tag: $STEWARD_TAG"
 
+      # ── Pre-build on runner ─────────────────────────────────────────────────
+      # .dockerignore excludes workspace dirs that bun needs for install.
+      # Build artifacts on the runner first, then use Dockerfile.ci which
+      # copies pre-built node_modules + dist into the image.
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.10"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile --ignore-scripts
+
+      - name: Run patch scripts
+        run: |
+          node ./scripts/link-browser-server.mjs || true
+          node ./scripts/patch-deps.mjs || true
+
+      - name: Build
+        run: bun run build
+
+      # Swap to CI-specific dockerignore that keeps node_modules in context
+      - name: Prepare Docker context
+        run: cp .dockerignore.ci .dockerignore
+
       # ── Docker build ───────────────────────────────────────────────────────
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -140,7 +164,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile
+          file: ./Dockerfile.ci
           platforms: linux/amd64
           push: ${{ github.event_name == 'push' || inputs.push == true }}
           tags: |
@@ -154,8 +178,8 @@ jobs:
             org.opencontainers.image.source=https://github.com/milady-ai/milady
             milady.steward.n=${{ steps.steward.outputs.steward_n }}
           build-args: |
-            BUILD_VERSION=${{ steps.version.outputs.version }}
-            BUILD_SHA=${{ steps.version.outputs.git_sha }}
+            VERSION=${{ steps.version.outputs.version }}
+            VERSION_CLEAN=${{ steps.version.outputs.version_clean }}
           cache-from: type=gha,scope=steward
           cache-to: type=gha,mode=max,scope=steward
 
@@ -184,10 +208,18 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.deploy == true) ||
       (github.event_name == 'push' && github.repository == 'milady-ai/milady')
     steps:
+      - name: Validate deploy secrets
+        run: |
+          if [[ -z "${{ secrets.VPS_HOST }}" ]]; then
+            echo "::error::VPS_HOST secret is not set. Deploy cannot proceed."
+            exit 1
+          fi
+
       - name: Update VPS env and restart service
-        uses: appleboy/ssh-action@v1
+        # Pinned to v1 commit SHA for supply-chain safety
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2  # v1
         with:
-          host: ${{ secrets.VPS_HOST || '89.167.63.246' }}
+          host: ${{ secrets.VPS_HOST }}
           username: root
           key: ${{ secrets.VPS_SSH_KEY }}
           timeout: 60s
