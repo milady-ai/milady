@@ -117,7 +117,9 @@ export function BrowserSurfaceWindow() {
       setWebviewInitError(null);
     } catch (err) {
       setWebviewInitError(
-        err instanceof Error ? err.message : "Failed to initialize browser view",
+        err instanceof Error
+          ? err.message
+          : "Failed to initialize browser view",
       );
     }
   });
