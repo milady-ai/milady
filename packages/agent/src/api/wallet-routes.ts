@@ -292,18 +292,20 @@ export async function handleWalletRoutes(
     const envKey = chain === "evm" ? "EVM_PRIVATE_KEY" : "SOLANA_PRIVATE_KEY";
     (config.env as Record<string, string>)[envKey] = process.env[envKey] ?? "";
 
+    let configSaveWarning: string | undefined;
     try {
       saveConfig(config);
     } catch (err) {
-      logger.warn(
-        `[api] Config save failed: ${String(err)}`,
-      );
+      const msg = `Config save failed: ${String(err)}`;
+      logger.warn(`[api] ${msg}`);
+      configSaveWarning = msg;
     }
 
     json(res, {
       ok: true,
       chain,
       address: result.address,
+      ...(configSaveWarning ? { warnings: [configSaveWarning] } : {}),
     });
     return true;
   }
@@ -348,15 +350,20 @@ export async function handleWalletRoutes(
       logger.info(`[eliza-api] Generated Solana wallet: ${result.address}`);
     }
 
+    let configSaveWarning: string | undefined;
     try {
       saveConfig(config);
     } catch (err) {
-      logger.warn(
-        `[api] Config save failed: ${String(err)}`,
-      );
+      const msg = `Config save failed: ${String(err)}`;
+      logger.warn(`[api] ${msg}`);
+      configSaveWarning = msg;
     }
 
-    json(res, { ok: true, wallets: generated });
+    json(res, {
+      ok: true,
+      wallets: generated,
+      ...(configSaveWarning ? { warnings: [configSaveWarning] } : {}),
+    });
     return true;
   }
 
@@ -422,15 +429,19 @@ export async function handleWalletRoutes(
 
     ensureWalletKeysInEnvAndConfig(config);
 
+    let configSaveWarning: string | undefined;
     try {
       saveConfig(config);
     } catch (err) {
-      logger.warn(
-        `[api] Config save failed: ${String(err)}`,
-      );
+      const msg = `Config save failed: ${String(err)}`;
+      logger.warn(`[api] ${msg}`);
+      configSaveWarning = msg;
     }
 
-    json(res, { ok: true });
+    json(res, {
+      ok: true,
+      ...(configSaveWarning ? { warnings: [configSaveWarning] } : {}),
+    });
     ctx.scheduleRuntimeRestart?.("Wallet configuration updated");
     return true;
   }

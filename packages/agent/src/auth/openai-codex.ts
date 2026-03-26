@@ -9,6 +9,7 @@ import {
   refreshOpenAICodexToken as _refreshOpenAICodexToken,
   loginOpenAICodex,
 } from "@mariozechner/pi-ai";
+import { logger } from "@elizaos/core";
 import type { OAuthCredentials } from "./types";
 
 export interface CodexFlow {
@@ -70,7 +71,9 @@ export function startCodexLogin(): Promise<CodexFlow> {
         originator: "eliza",
       });
       // Prevent unhandled rejections even if no one awaits this promise.
-      void credentials.catch(() => {});
+      void credentials.catch((err) => {
+        logger.warn(`[auth] OpenAI Codex credential flow failed: ${err}`);
+      });
     } catch (err) {
       rejectFlow(err);
       return;

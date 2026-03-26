@@ -321,8 +321,18 @@ export async function handleCloudRoute(
       cloud.enabled = true;
       cloud.apiKey = data.apiKey;
       (state.config as Record<string, unknown>).cloud = cloud;
-      state.saveConfig?.(state.config);
-      logger.info("[cloud-login] API key saved to config file");
+      try {
+        if (state.saveConfig) {
+          state.saveConfig(state.config);
+        } else {
+          logger.warn("[cloud-login] saveConfig not available — config not persisted");
+        }
+        logger.info("[cloud-login] API key saved to config file");
+      } catch (saveErr) {
+        logger.error(`[cloud-login] Failed to save config: ${String(saveErr)}`);
+        sendJson(res, { status: "error", error: "Authenticated but failed to save config" }, 500);
+        return true;
+      }
 
       process.env.ELIZAOS_CLOUD_API_KEY = data.apiKey;
       process.env.ELIZAOS_CLOUD_ENABLED = "true";
@@ -388,11 +398,18 @@ export async function handleCloudRoute(
       return true;
     }
 
-    const agent = await client.createAgent({
-      agentName: body.agentName,
-      agentConfig: body.agentConfig,
-      environmentVars: body.environmentVars,
-    });
+    let agent: unknown;
+    try {
+      agent = await client.createAgent({
+        agentName: body.agentName,
+        agentConfig: body.agentConfig,
+        environmentVars: body.environmentVars,
+      });
+    } catch (err) {
+      logger.error(`[cloud] createAgent failed: ${String(err)}`);
+      sendJson(res, { ok: false, error: `Cloud createAgent failed: ${String(err)}` }, 502);
+      return true;
+    }
     sendJson(res, { ok: true, agent }, 201);
     return true;
   }
@@ -407,7 +424,14 @@ export async function handleCloudRoute(
       sendJsonError(res, "Invalid agent ID or cloud not connected", 400);
       return true;
     }
-    const proxy = await state.cloudManager.connect(agentId);
+    let proxy: { agentName?: string };
+    try {
+      proxy = await state.cloudManager.connect(agentId);
+    } catch (err) {
+      logger.error(`[cloud] provision/connect failed: ${String(err)}`);
+      sendJson(res, { ok: false, error: `Cloud provision failed: ${String(err)}` }, 502);
+      return true;
+    }
     sendJson(res, {
       ok: true,
       agentId,
@@ -432,10 +456,16 @@ export async function handleCloudRoute(
       sendJsonError(res, "Not connected to Eliza Cloud", 401);
       return true;
     }
-    if (state.cloudManager.getActiveAgentId() === agentId) {
-      await state.cloudManager.disconnect();
+    try {
+      if (state.cloudManager.getActiveAgentId() === agentId) {
+        await state.cloudManager.disconnect();
+      }
+      await client.deleteAgent(agentId);
+    } catch (err) {
+      logger.error(`[cloud] shutdown/deleteAgent failed: ${String(err)}`);
+      sendJson(res, { ok: false, error: `Cloud shutdown failed: ${String(err)}` }, 502);
+      return true;
     }
-    await client.deleteAgent(agentId);
     sendJson(res, { ok: true, agentId, status: "stopped" });
     return true;
   }
@@ -450,10 +480,17 @@ export async function handleCloudRoute(
       sendJsonError(res, "Invalid agent ID or cloud not connected", 400);
       return true;
     }
-    if (state.cloudManager.getActiveAgentId()) {
-      await state.cloudManager.disconnect();
+    let proxy: { agentName?: string };
+    try {
+      if (state.cloudManager.getActiveAgentId()) {
+        await state.cloudManager.disconnect();
+      }
+      proxy = await state.cloudManager.connect(agentId);
+    } catch (err) {
+      logger.error(`[cloud] connect failed: ${String(err)}`);
+      sendJson(res, { ok: false, error: `Cloud connect failed: ${String(err)}` }, 502);
+      return true;
     }
-    const proxy = await state.cloudManager.connect(agentId);
     sendJson(res, {
       ok: true,
       agentId,
@@ -474,7 +511,17 @@ export async function handleCloudRoute(
     delete cloud.apiKey;
     (state.config as Record<string, unknown>).cloud = cloud;
 
-    state.saveConfig?.(state.config);
+    try {
+      if (state.saveConfig) {
+        state.saveConfig(state.config);
+      } else {
+        logger.warn("[cloud-disconnect] saveConfig not available — config not persisted");
+      }
+    } catch (saveErr) {
+      logger.error(`[cloud-disconnect] Failed to save config: ${String(saveErr)}`);
+      sendJson(res, { ok: false, error: "Disconnected but failed to save config" }, 500);
+      return true;
+    }
 
     delete process.env.ELIZAOS_CLOUD_API_KEY;
     delete process.env.ELIZAOS_CLOUD_ENABLED;

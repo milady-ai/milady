@@ -866,22 +866,28 @@ export async function handleKnowledgeRoutes(
         (document.metadata as Record<string, unknown>)
           ?.includeImageDescriptions === true;
       if (includeDescriptions && runtime) {
-        const { ModelType } = await import("@elizaos/core");
-        const dataUri = `data:${contentType};base64,${content}`;
-        const description = await runtime.useModel(
-          ModelType.IMAGE_DESCRIPTION,
-          {
-            imageUrl: dataUri,
-            prompt: `Describe this image in detail for a knowledge base. Focus on text content, data, charts, and key visual elements. Image filename: ${document.filename}`,
-          },
-        );
-        const descText =
-          typeof description === "string"
-            ? description
-            : (description as { description?: string }).description ||
-              "Image uploaded";
-        content = `[Image: ${document.filename}]\n\n${descText}`;
-        contentType = "text/plain";
+        try {
+          const { ModelType } = await import("@elizaos/core");
+          const dataUri = `data:${contentType};base64,${content}`;
+          const description = await runtime.useModel(
+            ModelType.IMAGE_DESCRIPTION,
+            {
+              imageUrl: dataUri,
+              prompt: `Describe this image in detail for a knowledge base. Focus on text content, data, charts, and key visual elements. Image filename: ${document.filename}`,
+            },
+          );
+          const descText =
+            typeof description === "string"
+              ? description
+              : (description as { description?: string }).description ||
+                "Image uploaded";
+          content = `[Image: ${document.filename}]\n\n${descText}`;
+          contentType = "text/plain";
+        } catch (modelErr) {
+          warnings.push(`Image description failed: ${String(modelErr)}`);
+          content = `[Image: ${document.filename}] — Image description unavailable (model error).`;
+          contentType = "text/plain";
+        }
       } else {
         // No vision requested — store as a reference entry
         content = `[Image: ${document.filename}] — Image uploaded without text extraction.`;
@@ -933,7 +939,13 @@ export async function handleKnowledgeRoutes(
       return true;
     }
 
-    const result = await addKnowledgeDocument(knowledgeService, body);
+    let result: { documentId: string; fragmentCount: number; warnings?: string[] };
+    try {
+      result = await addKnowledgeDocument(knowledgeService, body);
+    } catch (err) {
+      error(res, `Failed to add knowledge document: ${String(err)}`, 500);
+      return true;
+    }
 
     json(res, {
       ok: true,
@@ -1052,8 +1064,15 @@ export async function handleKnowledgeRoutes(
     const urlToFetch = body.url.trim();
 
     // Fetch and process the URL content
-    const { content, contentType, filename } =
-      await fetchUrlContent(urlToFetch);
+    let fetchedContent: { content: string; contentType: string; filename: string };
+    try {
+      fetchedContent = await fetchUrlContent(urlToFetch);
+    } catch (fetchErr) {
+      error(res, `Failed to fetch URL content: ${String(fetchErr)}`, 400);
+      return true;
+    }
+
+    const { content, contentType, filename } = fetchedContent;
 
     const result = await knowledgeService.addKnowledge({
       agentId,
