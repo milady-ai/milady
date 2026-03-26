@@ -8,7 +8,7 @@ Milady is a modular AI agent framework. Here's what people are building with it.
 
 ## Social Media Agents
 
-Deploy agents across Twitter/X, Discord, Telegram, Slack, Farcaster, and 8+ other platforms that engage with communities, post content, and respond to mentions — all driven by a configurable character personality. A single character file controls posting cadence, tone, and auto-reply behavior across every connected platform.
+Deploy agents across Twitter/X, Discord, Telegram, Slack, Farcaster, and 20+ other platforms (WhatsApp, Signal, iMessage, Matrix, Nostr, MS Teams, and more) that engage with communities, post content, and respond to mentions — all driven by a configurable character personality. A single character file controls posting cadence, tone, and auto-reply behavior across every connected platform.
 
 ```json
 {

@@ -128,7 +128,8 @@ milady dashboard          # open dashboard in browser
 milady configure          # configuration guidance
 milady config get <key>   # read config value
 milady models             # show model provider status
-milady plugins list       # list installed plugins
+milady plugins list       # browse available plugins from the registry
+milady plugins installed  # list plugins you've installed
 ```
 
 Tip: Use `milady <command> --help` any time you feel stuck.
@@ -215,9 +216,11 @@ Start with a minimal strategy:
 Useful commands:
 
 ```bash
-milady plugins list
-milady plugins install <name>
-milady plugins uninstall <name>
+milady plugins list              # browse registry
+milady plugins installed         # see what you've installed
+milady plugins search <query>    # search for plugins by keyword
+milady plugins install <name>    # install a plugin
+milady plugins uninstall <name>  # remove a plugin
 ```
 
 ---

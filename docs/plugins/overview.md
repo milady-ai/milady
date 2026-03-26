@@ -20,7 +20,7 @@ A plugin is a self-contained module that registers one or more of:
 <CardGroup cols={2}>
 
 <Card title="Core Plugins" icon="cube" href="/plugin-registry/knowledge">
-  Essential plugins that ship with every Milady installation — knowledge, database, form, cron, shell, agent-skills, trajectory-logger, and agent-orchestrator.
+  Essential plugins that ship with every Milady installation — sql (database adapter), local-embedding, form, knowledge, trajectory-logger, agent-orchestrator, cron, shell, and agent-skills.
 </Card>
 
 <Card title="Model Providers" icon="brain" href="/plugin-registry/llm/openai">
@@ -28,7 +28,7 @@ A plugin is a self-contained module that registers one or more of:
 </Card>
 
 <Card title="Platform Connectors" icon="plug" href="/plugin-registry/platform/discord">
-  Bridges to 18+ messaging platforms via auto-enable (Discord, Telegram, Twitter, Slack, WhatsApp, Signal, iMessage, BlueBubbles, Blooio, MS Teams, Google Chat, Mattermost, Farcaster, Twitch, WeChat, Feishu, Matrix, Nostr). Additional connectors (Bluesky, Instagram, Lens, LINE, Zalo, Twilio, GitHub, Gmail Watch, Nextcloud Talk, Tlon, Retake) are available in the elizaOS registry.
+  Bridges to 20 messaging platforms via auto-enable (Discord, Telegram, Twitter, Slack, WhatsApp, Signal, iMessage, BlueBubbles, Blooio, MS Teams, Google Chat, Mattermost, Farcaster, Lens, Twitch, Retake, WeChat, Feishu, Matrix, Nostr). Additional connectors (Bluesky, Instagram, LINE, Zalo, Twilio, GitHub, Gmail Watch, Nextcloud Talk, Tlon) are available in the elizaOS registry.
 </Card>
 
 <Card title="DeFi & Blockchain" icon="wallet" href="/plugin-registry/defi/evm">
@@ -47,7 +47,7 @@ Plugins are loaded during runtime initialization in this order:
 
 1. **Milady plugin** — The bridge plugin (`createMiladyPlugin()`) providing workspace context, session keys, emotes, custom actions, and lifecycle actions. Always first in the plugins array.
 2. **Pre-registered plugins** — `@elizaos/plugin-sql` and `@elizaos/plugin-local-embedding` are pre-registered before `runtime.initialize()` to prevent race conditions.
-3. **Core plugins** — Always loaded: `sql`, `local-embedding`, `form`, `knowledge`, `trajectory-logger`, `agent-orchestrator`, `cron`, `shell`, `agent-skills` (see `packages/agent/src/runtime/core-plugins.ts`). Additional plugins like `pdf`, `browser`, `computeruse`, `obsidian`, `code`, `repoprompt`, `claude-code-workbench`, `vision`, `cli`, `edge-tts`, and `elevenlabs` are optional and loaded when their feature flags or environment variables are configured.
+3. **Core plugins** — Always loaded: `sql`, `local-embedding`, `form`, `knowledge`, `trajectory-logger`, `agent-orchestrator`, `cron`, `shell`, `agent-skills` (see `packages/agent/src/runtime/core-plugins.ts`). Additional plugins like `pdf`, `cua`, `obsidian`, `code`, `repoprompt`, `claude-code-workbench`, `computeruse`, `browser`, `vision`, `cli`, `discord`, `telegram`, `twitch`, `edge-tts`, and `elevenlabs` are optional and loaded when their feature flags or environment variables are configured.
 4. **Auto-enabled plugins** — Connector, provider, feature, and streaming plugins are auto-enabled based on config and environment variables (see [Architecture](/plugins/architecture) for the full maps).
 5. **Ejected plugins** — Local overrides discovered from `~/.milady/plugins/ejected/`. When an ejected copy exists, it takes priority over the npm-published version.
 6. **User-installed plugins** — Tracked in `plugins.installs` in `milady.json`. Collected before drop-in plugins; any plugin name already present here takes precedence.
@@ -88,10 +88,17 @@ Install → Register → Initialize → Active → Shutdown
 milady plugins install @elizaos/plugin-openai
 ```
 
+### Browse Registry
+
+```bash
+milady plugins list             # browse all available plugins
+milady plugins search <query>   # search by keyword
+```
+
 ### List Installed Plugins
 
 ```bash
-milady plugins list
+milady plugins installed
 ```
 
 ### Enable/Disable

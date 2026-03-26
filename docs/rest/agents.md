@@ -10,7 +10,7 @@ All agent endpoints require the agent runtime to be initialized. The API server 
 
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/api/agent/start` | Start the agent and enable autonomy |
+| POST | `/api/agent/start` | Start the agent (enters paused state) |
 | POST | `/api/agent/stop` | Stop the agent and disable autonomy |
 | POST | `/api/agent/pause` | Pause the agent (keep uptime, disable autonomy) |
 | POST | `/api/agent/resume` | Resume a paused agent and re-enable autonomy |
@@ -25,7 +25,7 @@ All agent endpoints require the agent runtime to be initialized. The API server 
 
 ### POST /api/agent/start
 
-Start the agent and enable autonomous operation. Sets the agent state to `running`, records the start timestamp, and enables the autonomy task so the first tick fires immediately.
+Start the agent. Sets the agent state to `paused`, records the start timestamp, and detects the active model provider. Use `POST /api/agent/resume` to transition to `running` state with autonomy enabled.
 
 **Response**
 
@@ -33,7 +33,7 @@ Start the agent and enable autonomous operation. Sets the agent state to `runnin
 {
   "ok": true,
   "status": {
-    "state": "running",
+    "state": "paused",
     "agentName": "Milady",
     "model": "@elizaos/plugin-anthropic",
     "uptime": 0,
