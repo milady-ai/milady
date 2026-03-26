@@ -22,6 +22,14 @@ import {
 } from "vitest";
 import { req } from "../../../../test/helpers/http";
 
+import { createInlineUiMock } from "./mockInlineUi";
+
+vi.mock("@miladyai/ui", async () => {
+  const actual =
+    await vi.importActual<typeof import("@miladyai/ui")>("@miladyai/ui");
+  return createInlineUiMock(actual);
+});
+
 vi.mock("@miladyai/app-core/components", async () => {
   const actual = await vi.importActual<
     typeof import("@miladyai/app-core/components")

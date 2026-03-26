@@ -23,6 +23,62 @@ vi.mock("@miladyai/app-core/state", async () => {
   };
 });
 
+vi.mock("@miladyai/ui", async () => {
+  const actual = await vi.importActual<typeof import("@miladyai/ui")>(
+    "@miladyai/ui",
+  );
+  const React = await vi.importActual<typeof import("react")>("react");
+
+  return {
+    ...actual,
+    DrawerSheet: ({
+      open,
+      children,
+    }: {
+      open?: boolean;
+      children?: React.ReactNode;
+    }) => (open ? React.createElement(React.Fragment, null, children) : null),
+    DrawerSheetContent: ({
+      children,
+      ...props
+    }: React.HTMLAttributes<HTMLDivElement>) =>
+      React.createElement("div", props, children),
+    DrawerSheetHeader: ({
+      children,
+      ...props
+    }: React.HTMLAttributes<HTMLDivElement>) =>
+      React.createElement("div", props, children),
+    DrawerSheetTitle: ({
+      children,
+      ...props
+    }: React.HTMLAttributes<HTMLDivElement>) =>
+      React.createElement("div", props, children),
+  };
+});
+
+vi.mock("@miladyai/ui", async () => {
+  const React = await vi.importActual<typeof import("react")>("react");
+  const actual =
+    await vi.importActual<typeof import("@miladyai/ui")>("@miladyai/ui");
+
+  return {
+    ...actual,
+    DrawerSheet: ({
+      children,
+      open,
+    }: {
+      children?: React.ReactNode;
+      open?: boolean;
+    }) => (open ? React.createElement(React.Fragment, null, children) : null),
+    DrawerSheetContent: ({ children, ...props }: React.ComponentProps<"div">) =>
+      React.createElement("div", props, children),
+    DrawerSheetHeader: ({ children, ...props }: React.ComponentProps<"div">) =>
+      React.createElement("div", props, children),
+    DrawerSheetTitle: ({ children, ...props }: React.ComponentProps<"h2">) =>
+      React.createElement("h2", props, children),
+  };
+});
+
 vi.mock("@miladyai/app-core/components", async () => {
   const actual = await vi.importActual<
     typeof import("@miladyai/app-core/components")

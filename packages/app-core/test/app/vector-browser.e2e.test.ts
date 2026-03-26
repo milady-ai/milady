@@ -367,8 +367,8 @@ vi.mock("@miladyai/app-core/api", () => ({
   },
 }));
 
-import { flush } from "../../../../test/helpers/react-test";
 import { client } from "@miladyai/app-core/api";
+import { flush } from "../../../../test/helpers/react-test";
 import { VectorBrowserView } from "../../src/components/VectorBrowserView";
 
 // ── Component Tests ────────────────────────────────────────────────────
@@ -521,7 +521,7 @@ describe("VectorBrowserView Component", () => {
     const noMemoriesText = root.findAll(
       (node) =>
         typeof node.children[0] === "string" &&
-        node.children[0].includes("vectorbrowserview.NoMemoriesFound"),
+        node.children[0].includes("vectorbrowserview.NoMemoryRecordsDetected"),
     );
     expect(noMemoriesText.length).toBeGreaterThan(0);
   });

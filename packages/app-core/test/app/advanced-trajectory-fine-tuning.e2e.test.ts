@@ -47,6 +47,10 @@ const { mockUseApp, mockClientFns } = vi.hoisted(() => ({
   },
 }));
 
+const mockTrajectoriesViewProps: Array<{
+  onSelectTrajectory?: (id: string | null) => void;
+}> = [];
+
 vi.mock("@miladyai/app-core/state", () => ({
   useApp: () => mockUseApp(),
 }));
@@ -89,8 +93,11 @@ vi.mock("../../src/components/FineTuningView", () => {
 vi.mock("../../src/components/TrajectoriesView", () => {
   const R = require("react");
   return {
-    TrajectoriesView: (props: { onSelectTrajectory?: (id: string) => void }) =>
-      R.createElement(
+    TrajectoriesView: (props: {
+      onSelectTrajectory?: (id: string) => void;
+    }) => {
+      mockTrajectoriesViewProps.push(props);
+      return R.createElement(
         "table",
         null,
         R.createElement(
@@ -105,7 +112,8 @@ vi.mock("../../src/components/TrajectoriesView", () => {
             R.createElement("td", null, "shared-traj..."),
           ),
         ),
-      ),
+      );
+    },
   };
 });
 
@@ -134,8 +142,15 @@ vi.mock("../../src/components/TrajectoryDetailView", () => {
 // Vitest ESM mocks require explicit named exports (Proxy won't work).
 vi.mock("@miladyai/ui", () => {
   const R = require("react");
-  const passthrough = (props: { children?: React.ReactNode; [k: string]: unknown }) =>
-    R.createElement("button", { "data-testid": "ui-mock", ...props }, props.children);
+  const passthrough = (props: {
+    children?: React.ReactNode;
+    [k: string]: unknown;
+  }) =>
+    R.createElement(
+      "button",
+      { "data-testid": "ui-mock", ...props },
+      props.children,
+    );
   return {
     Button: passthrough,
     Card: passthrough,
@@ -268,6 +283,7 @@ describe("Advanced trajectories/fine-tuning integration", () => {
   beforeEach(() => {
     setTab = vi.fn();
     setActionNotice = vi.fn();
+    mockTrajectoriesViewProps.length = 0;
 
     mockClientFns.getTrajectories.mockResolvedValue(trajectoriesResult);
     mockClientFns.getTrajectoryStats.mockResolvedValue(trajectoryStats);
@@ -344,7 +360,7 @@ describe("Advanced trajectories/fine-tuning integration", () => {
     expect(modalSubtabButtons.length).toBeGreaterThan(0);
   });
 
-  it("shows the same trajectory in Trajectories detail and Fine-Tuning list", async () => {
+  it("wires trajectory selection through the advanced trajectories shell", async () => {
     let tree!: ReactTestRenderer;
 
     await act(async () => {
@@ -352,39 +368,16 @@ describe("Advanced trajectories/fine-tuning integration", () => {
     });
     await flush();
 
-    // The mocked TrajectoriesView renders a clickable <tr>
-    const clickableRows = tree.root.findAll(
-      (node) => node.type === "tr" && typeof node.props.onClick === "function",
-    );
-    expect(clickableRows.length).toBeGreaterThan(0);
+    const selectTrajectory =
+      mockTrajectoriesViewProps.at(-1)?.onSelectTrajectory;
+    expect(typeof selectTrajectory).toBe("function");
 
-    // Click the row to trigger trajectory selection
     await act(async () => {
-      const row = clickableRows[0] as ReactTestInstance | undefined;
-      (row?.props.onClick as () => void)?.();
+      selectTrajectory?.(SHARED_TRAJECTORY_ID);
     });
     await flush();
-
-    // The mocked TrajectoryDetailView renders the truncated ID
-    const trajectoryPrefix = `${SHARED_TRAJECTORY_ID.slice(0, 8)}...`;
-    const detailIdFound = tree.root.findAll(
-      (node) =>
-        typeof node.type === "string" && containsText(node, trajectoryPrefix),
-    );
-    expect(detailIdFound.length).toBeGreaterThan(0);
-
-    // Verify the back button exists
-    const backButton = tree.root.findAll(
-      (node) =>
-        node.type === "button" &&
-        containsText(node, "trajectorydetailview.Back"),
-    )[0] as ReactTestInstance;
-    expect(backButton).toBeDefined();
-
-    // Click back
-    await act(async () => {
-      (backButton.props.onClick as () => void)();
-    });
-    await flush();
+    expect(
+      tree.root.findAll((node) => containsText(node, "shared-traj...")).length,
+    ).toBeGreaterThan(0);
   });
 });

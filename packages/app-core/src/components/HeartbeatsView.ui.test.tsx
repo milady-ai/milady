@@ -12,6 +12,7 @@ vi.mock("../state", () => ({
 }));
 
 import { HeartbeatsView } from "./HeartbeatsView";
+import { APP_PANEL_SHELL_CLASSNAME } from "./sidebar-shell-styles";
 
 function t(key: string): string {
   const translations: Record<string, string> = {
@@ -97,7 +98,8 @@ describe("HeartbeatsView UI states", () => {
       "data-testid": "heartbeats-detail-panel",
     });
 
-    expect(String(shell?.props.className)).toContain("rounded-2xl");
+    expect(String(shell?.props.className)).toBe(APP_PANEL_SHELL_CLASSNAME);
+    expect(String(shell?.props.className)).toContain("backdrop-blur-md");
     expect(String(shell?.props.className)).toContain("shadow");
     expect(String(shell?.props.className)).toContain("ring-1");
     expect(detailPanels).toHaveLength(0);

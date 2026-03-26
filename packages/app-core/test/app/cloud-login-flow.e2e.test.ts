@@ -17,6 +17,8 @@ import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { createInlineUiMock } from "./mockInlineUi";
+
 // ---------------------------------------------------------------------------
 // Part 2: UI Tests for Cloud Login
 // ---------------------------------------------------------------------------
@@ -29,6 +31,12 @@ vi.mock("@miladyai/app-core/state", () => ({
   useApp: () => mockUseApp(),
   THEMES: [{ id: "eliza", label: "Eliza" }],
 }));
+
+vi.mock("@miladyai/ui", async () => {
+  const actual =
+    await vi.importActual<typeof import("@miladyai/ui")>("@miladyai/ui");
+  return createInlineUiMock(actual);
+});
 
 vi.mock("@miladyai/app-core/components", async () => {
   const actual = await vi.importActual<
