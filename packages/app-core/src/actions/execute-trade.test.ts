@@ -265,7 +265,7 @@ describe("EXECUTE_TRADE action", () => {
     expect(body.confirm).toBe(true);
   });
 
-  it("calls API and returns success for user-sign mode", async () => {
+  it("returns failure for user-sign mode because no on-chain execution occurred", async () => {
     const mockFetch = globalThis.fetch as ReturnType<typeof vi.fn>;
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -286,8 +286,9 @@ describe("EXECUTE_TRADE action", () => {
       amount: "0.5",
     });
 
-    expect((result as { success: boolean }).success).toBe(true);
+    expect((result as { success: boolean }).success).toBe(false);
     expect((result as { text: string }).text).toContain("user-sign");
+    expect((result as { text: string }).text).toContain("not executed");
     expect((result as { text: string }).text).toContain(
       "signature is required",
     );

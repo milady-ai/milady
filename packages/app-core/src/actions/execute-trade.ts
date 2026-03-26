@@ -221,18 +221,19 @@ export const executeTradeAction: Action = {
         };
       }
 
-      // user-sign mode — trade was quoted but not executed on-chain
+      // For agent automation, reporting "success" without an on-chain execution
+      // leads to false-positive heartbeat status.
       return {
-        text:
-          `Trade prepared in ${result.mode} mode. ` +
-          `A user signature is required to complete the ${side}.`,
-        success: true,
+        text: result.requiresUserSignature
+          ? `Trade was prepared in ${result.mode} mode but not executed. User signature is required to complete the ${side}.`
+          : `Trade was prepared in ${result.mode} mode but not executed on-chain.`,
+        success: false,
         data: {
           side,
           tokenAddress,
           amount: amountRaw,
           mode: result.mode,
-          requiresUserSignature: true,
+          requiresUserSignature: result.requiresUserSignature,
           executed: false,
           unsignedTx: result.unsignedTx,
         },

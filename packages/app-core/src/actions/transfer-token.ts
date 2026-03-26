@@ -217,20 +217,21 @@ export const transferTokenAction: Action = {
         };
       }
 
-      // user-sign mode — transfer was prepared but not executed on-chain
-      const text =
-        `Transfer prepared in ${result.mode} mode. ` +
-        `A user signature is required to send ${amountRaw} ${assetSymbol} to ${toAddress}.`;
-      if (callback) callback({ text, action: "TRANSFER_TOKEN_SUCCESS" });
+      // For agent automation, reporting "success" without an on-chain execution
+      // leads to false-positive heartbeat status.
+      const text = result.requiresUserSignature
+        ? `Transfer was prepared in ${result.mode} mode but not executed. User signature is required to send ${amountRaw} ${assetSymbol} to ${toAddress}.`
+        : `Transfer was prepared in ${result.mode} mode but not executed on-chain.`;
+      if (callback) callback({ text, action: "TRANSFER_TOKEN_FAILED" });
       return {
         text,
-        success: true,
+        success: false,
         data: {
           toAddress,
           amount: amountRaw,
           assetSymbol,
           mode: result.mode,
-          requiresUserSignature: true,
+          requiresUserSignature: result.requiresUserSignature,
           executed: false,
           unsignedTx: result.unsignedTx,
         },
