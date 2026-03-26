@@ -476,6 +476,68 @@ describe("ChatView game-modal variant", () => {
     expect(micButton.props.disabled).toBe(true);
   });
 
+  it("keeps composer unlocked for zh-CN after turn lifecycle ends even with stale starting status", async () => {
+    const lifecycleScenarios: Array<{
+      label: string;
+      messages: ChatMessage[];
+    }> = [
+      {
+        label: "completion",
+        messages: [
+          { id: "user-1", role: "user", text: "你好", timestamp: 1 },
+          { id: "assistant-1", role: "assistant", text: "你好呀", timestamp: 2 },
+        ],
+      },
+      {
+        label: "error",
+        messages: [
+          { id: "user-2", role: "user", text: "再试一次", timestamp: 3 },
+        ],
+      },
+      {
+        label: "cancel",
+        messages: [
+          { id: "user-3", role: "user", text: "先停一下", timestamp: 4 },
+          {
+            id: "assistant-3",
+            role: "assistant",
+            text: "好的，已停止",
+            timestamp: 5,
+          },
+        ],
+      },
+    ];
+
+    for (const scenario of lifecycleScenarios) {
+      mockUseApp.mockReturnValue(
+        createContext({
+          uiLanguage: "zh-CN",
+          agentStatus: { agentName: "Milady", state: "starting" },
+          chatSending: false,
+          chatFirstTokenReceived: false,
+          conversationMessages: scenario.messages,
+        }),
+      );
+
+      let tree: TestRenderer.ReactTestRenderer;
+      await act(async () => {
+        tree = TestRenderer.create(
+          React.createElement(ChatView, { variant: "game-modal" }),
+        );
+      });
+
+      const textarea = tree.root.findByType("textarea");
+      expect(textarea.props.disabled).toBe(
+        false,
+        `expected unlocked composer for ${scenario.label}`,
+      );
+
+      await act(async () => {
+        tree.unmount();
+      });
+    }
+  });
+
   it("renders the game-modal composer unfocused with level control sizing", async () => {
     const focus = vi.fn();
 
