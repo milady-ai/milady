@@ -130,6 +130,7 @@ export const INTENT_ACTION_MAP: Record<string, Set<string>> = {
   terminal: new Set(["RUN_IN_TERMINAL", "RESTART_AGENT"]),
   issues: new Set(["MANAGE_ISSUES"]),
   emote: new Set(["PLAY_EMOTE"]),
+  plugin_ui: new Set(["RESTART_AGENT"]),
 };
 
 export function hasIntent(prompt: string, keywords: RegExp): boolean {
