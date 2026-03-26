@@ -10,8 +10,6 @@
  * - No-intent fallback keeps all actions intact
  * - The agent can still use compacted actions correctly
  *
- * Security heuristic tests (isHighRiskMessage, shouldSkipSecurityEval,
- * validateIntentActionMap) are in prompt-security-heuristic.test.ts.
  */
 
 import { describe, expect, it } from "vitest";
