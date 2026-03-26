@@ -1,3 +1,4 @@
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   BACKGROUND_NOTICE_MARKER_FILE,
@@ -8,22 +9,30 @@ import {
 } from "../background-notice";
 
 describe("background notice", () => {
+  const join = (...parts: string[]) => path.join(...parts);
+
   it("resolves the marker path under the userData directory", () => {
-    expect(resolveBackgroundNoticeMarkerPath("/tmp/milady")).toBe(
-      `/tmp/milady/${BACKGROUND_NOTICE_MARKER_FILE}`,
+    expect(resolveBackgroundNoticeMarkerPath(join("/tmp", "milady"))).toBe(
+      join("/tmp", "milady", BACKGROUND_NOTICE_MARKER_FILE),
     );
   });
 
   it("reports whether the background notice marker already exists", () => {
-    const seenPaths = new Set([`/tmp/milady/${BACKGROUND_NOTICE_MARKER_FILE}`]);
+    const seenPaths = new Set([
+      join("/tmp", "milady", BACKGROUND_NOTICE_MARKER_FILE),
+    ]);
     const fileSystem = {
       existsSync: (filePath: string) => seenPaths.has(filePath),
       mkdirSync: () => {},
       writeFileSync: () => {},
     };
 
-    expect(hasSeenBackgroundNotice(fileSystem, "/tmp/milady")).toBe(true);
-    expect(hasSeenBackgroundNotice(fileSystem, "/tmp/other")).toBe(false);
+    expect(hasSeenBackgroundNotice(fileSystem, join("/tmp", "milady"))).toBe(
+      true,
+    );
+    expect(hasSeenBackgroundNotice(fileSystem, join("/tmp", "other"))).toBe(
+      false,
+    );
   });
 
   it("writes the marker file when the background notice is shown", () => {
@@ -52,18 +61,23 @@ describe("background notice", () => {
       },
     };
 
-    const markerPath = markBackgroundNoticeSeen(fileSystem, "/tmp/milady");
+    const markerPath = markBackgroundNoticeSeen(
+      fileSystem,
+      join("/tmp", "milady"),
+    );
 
-    expect(markerPath).toBe(`/tmp/milady/${BACKGROUND_NOTICE_MARKER_FILE}`);
+    expect(markerPath).toBe(
+      join("/tmp", "milady", BACKGROUND_NOTICE_MARKER_FILE),
+    );
     expect(mkdirCalls).toEqual([
       {
-        dirPath: "/tmp/milady",
+        dirPath: join("/tmp", "milady"),
         recursive: true,
       },
     ]);
     expect(writeCalls).toEqual([
       {
-        filePath: `/tmp/milady/${BACKGROUND_NOTICE_MARKER_FILE}`,
+        filePath: join("/tmp", "milady", BACKGROUND_NOTICE_MARKER_FILE),
         data: '{"seen":true}\n',
         encoding: "utf8",
       },
@@ -84,7 +98,7 @@ describe("background notice", () => {
     expect(
       showBackgroundNoticeOnce({
         fileSystem,
-        userDataDir: "/tmp/milady",
+        userDataDir: join("/tmp", "milady"),
         showNotification: (options) => {
           notifications.push(options);
         },
@@ -93,7 +107,7 @@ describe("background notice", () => {
     expect(
       showBackgroundNoticeOnce({
         fileSystem,
-        userDataDir: "/tmp/milady",
+        userDataDir: join("/tmp", "milady"),
         showNotification: (options) => {
           notifications.push(options);
         },

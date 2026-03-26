@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { fileURLToPath } from "node:url";
 
 /**
  * Validates that FFmpeg auto-restart properly resets _running state
@@ -9,14 +10,17 @@ describe("stream-manager autoRestart error recovery", () => {
   it("resets _running in the catch block of autoRestart", async () => {
     const fs = await import("node:fs");
     const path = await import("node:path");
-    const testDir = path.dirname(new URL(import.meta.url).pathname);
+    const testDir = path.dirname(fileURLToPath(import.meta.url));
     const source = fs.readFileSync(
       path.resolve(testDir, "stream-manager.ts"),
       "utf-8",
     );
 
     // Find the autoRestart catch block
-    const catchIdx = source.indexOf("} catch (err) {", source.indexOf("autoRestart"));
+    const catchIdx = source.indexOf(
+      "} catch (err) {",
+      source.indexOf("autoRestart"),
+    );
     expect(catchIdx).toBeGreaterThan(-1);
 
     // Verify _running = false appears within 100 chars after the catch

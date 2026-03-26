@@ -1753,15 +1753,16 @@ X-GNOME-Autostart-enabled=true
       };
     }
 
+    const pathApi = process.platform === "darwin" ? path.posix : path;
     const supportedRoots = [
       "/Applications",
-      path.join(Utils.paths.home, "Applications"),
-    ].map((root) => path.resolve(root));
-    const normalizedBundlePath = path.resolve(appBundlePath);
+      pathApi.join(Utils.paths.home, "Applications"),
+    ].map((root) => pathApi.resolve(root));
+    const normalizedBundlePath = pathApi.resolve(appBundlePath);
     const inApplications = supportedRoots.some((root) => {
-      const normalizedRoot = root.endsWith(path.sep)
+      const normalizedRoot = root.endsWith(pathApi.sep)
         ? root
-        : `${root}${path.sep}`;
+        : `${root}${pathApi.sep}`;
       return (
         normalizedBundlePath === root ||
         normalizedBundlePath.startsWith(normalizedRoot)
@@ -1779,19 +1780,20 @@ X-GNOME-Autostart-enabled=true
     return {
       appBundlePath: normalizedBundlePath,
       canAutoUpdate: false,
-      autoUpdateDisabledReason: `Move ${path.basename(
+      autoUpdateDisabledReason: `Move ${pathApi.basename(
         normalizedBundlePath,
       )} to /Applications to enable in-place desktop updates.`,
     };
   }
 
   private resolveMacAppBundlePath(execPath: string): string | null {
-    let current = path.resolve(execPath);
+    const pathApi = path.posix;
+    let current = pathApi.resolve(execPath);
     while (true) {
       if (current.endsWith(".app")) {
         return current;
       }
-      const parent = path.dirname(current);
+      const parent = pathApi.dirname(current);
       if (parent === current) {
         return null;
       }
