@@ -1,4 +1,4 @@
-# Stream S5 - Docs + Onboarding Support Expansion (Chinese-first)
+﻿# Stream S5 - Docs + Onboarding Support Expansion (Chinese-first)
 
 ## Goal
 
@@ -12,30 +12,30 @@ Reduce user confusion and support load by shipping practical tutorials, in-app g
 ## Scope
 
 - Chinese tutorial/documentation coverage.
-- In-app “how to use” guidance and support/reporting entry points.
+- In-app "how to use" guidance and support/reporting entry points.
 - Clarify cloud vs BYOK provider behavior and restart requirements.
 
 ## Plan
 
 1. Docs Baseline
-- [ ] Inventory current EN guides and map missing zh equivalents.
-- [ ] Create prioritized doc set: install, onboarding, providers, cloud, wallet basics, troubleshooting.
+- [x] Inventory current EN guides and map missing zh equivalents.
+- [x] Create prioritized doc set: install, onboarding, providers, cloud, wallet basics, troubleshooting.
 
 2. Onboarding Guidance
-- [ ] Add concise guided hints in onboarding for first-run decisions.
-- [ ] Add explicit messaging for restart-required settings paths.
+- [x] Add concise guided hints in onboarding for first-run decisions.
+- [x] Add explicit messaging for restart-required settings paths.
 
 3. Support UX
-- [ ] Add prominent in-app bug-report entry in key failure surfaces.
-- [ ] Provide copy-ready support template (what to send, where to send).
+- [x] Add prominent in-app bug-report entry in key failure surfaces.
+- [x] Provide copy-ready support template (what to send, where to send).
 
 4. Cloud/Provider Clarity
-- [ ] Clarify inference routing when cloud is connected but local provider selected.
-- [ ] Clarify credit consumption expectations and service toggles.
+- [x] Clarify inference routing when cloud is connected but local provider selected.
+- [x] Clarify credit consumption expectations and service toggles.
 
 5. QA/Review
 - [ ] Native Chinese review pass for wording and intent.
-- [ ] Verify all links/actions in docs and UI help flow.
+- [x] Verify all links/actions in docs and UI help flow.
 
 ## Acceptance
 

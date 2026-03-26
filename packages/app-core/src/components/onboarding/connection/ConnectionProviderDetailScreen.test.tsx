@@ -127,6 +127,25 @@ describe("ConnectionProviderDetailScreen", () => {
     );
   });
 
+  it("shows report-issue action for non-link cloud login errors", () => {
+    mockUseBranding.mockImplementation(() => ({
+      bugReportUrl: "https://example.invalid",
+    }));
+    mockUseApp.mockReturnValue(
+      createState({
+        onboardingProvider: "elizacloud",
+        elizaCloudLoginError: "Login failed unexpectedly",
+      }),
+    );
+
+    render(<ConnectionProviderDetailScreen dispatch={vi.fn()} />);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "onboarding.reportIssue" }),
+    );
+    expect(mockOpenExternalUrl).toHaveBeenCalledWith("https://example.invalid");
+  });
+
   it("exposes openrouter model choices as a radiogroup", () => {
     mockUseApp.mockReturnValue(
       createState({

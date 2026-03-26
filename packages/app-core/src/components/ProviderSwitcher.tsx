@@ -21,6 +21,7 @@ import {
   defaultRegistry,
   type JsonSchemaObject,
 } from "../config";
+import { useBranding } from "../config/branding";
 import { useTimeout } from "../hooks";
 import {
   getOnboardingProviderOption,
@@ -33,6 +34,7 @@ import {
 } from "../providers";
 import { useApp } from "../state";
 import type { ConfigUiHint } from "../types";
+import { openExternalUrl } from "../utils";
 import { ApiKeyConfig } from "./ApiKeyConfig";
 import { SubscriptionStatus } from "./SubscriptionStatus";
 
@@ -105,6 +107,7 @@ function getSubscriptionProviderLabel(
 export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
   const { setTimeout } = useTimeout();
   const app = useApp();
+  const branding = useBranding();
   const t = app.t;
   const elizaCloudEnabled =
     props.elizaCloudEnabled ?? Boolean(app.elizaCloudEnabled);
@@ -651,6 +654,9 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
         <p className="text-[11px] text-[var(--muted)] mt-1.5">
           {t("providerswitcher.chooseYourPreferredProvider")}
         </p>
+        <p className="text-[11px] text-[var(--muted)] mt-1">
+          {t("providerswitcher.cloudInferenceToggleHint")}
+        </p>
       </div>
 
       {/* Cloud settings */}
@@ -809,6 +815,9 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
                   </span>
                 )}
               </div>
+              <p className="mt-2 text-[11px] text-[var(--muted)]">
+                {t("providerswitcher.restartRequiredHint")}
+              </p>
             </div>
           ) : (
             <div>
@@ -822,6 +831,17 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
                     <div className="text-xs text-[var(--danger)] mb-2">
                       {elizaCloudLoginError}
                     </div>
+                  )}
+                  {elizaCloudLoginError && (
+                    <Button
+                      variant="link"
+                      size="sm"
+                      type="button"
+                      className="!mt-0 !px-0 text-[11px]"
+                      onClick={() => openExternalUrl(branding.bugReportUrl)}
+                    >
+                      {t("providerswitcher.reportIssueWithTemplate")}
+                    </Button>
                   )}
                   <Button
                     variant="default"

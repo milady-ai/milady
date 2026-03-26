@@ -1,10 +1,13 @@
 import { useApp } from "@miladyai/app-core/state";
 import { Button, Spinner } from "@miladyai/ui";
 import { useEffect, useRef } from "react";
+import { useBranding } from "../../config";
+import { openExternalUrl } from "../../utils";
 import {
   OnboardingStepHeader,
   onboardingBodyTextShadowStyle,
   onboardingFooterClass,
+  onboardingLinkActionClass,
   onboardingPrimaryActionClass,
   onboardingPrimaryActionTextShadowStyle,
   onboardingSecondaryActionClass,
@@ -22,6 +25,7 @@ const busyCardClass = `${statusCardClass} border-[var(--onboarding-card-border)]
 const errorCardClass = `${statusCardClass} border-[color:color-mix(in_srgb,var(--danger)_42%,transparent)] bg-[color:color-mix(in_srgb,var(--danger)_12%,transparent)] text-[var(--danger)]`;
 
 export function CloudLoginStep() {
+  const branding = useBranding();
   const {
     onboardingStep,
     elizaCloudConnected,
@@ -52,6 +56,12 @@ export function CloudLoginStep() {
         description={t("onboarding.cloudLoginDesc")}
         descriptionClassName="mx-auto mt-1 max-w-[34ch] text-balance"
       />
+      <p
+        className="mx-auto mt-3 max-w-[40ch] text-center text-xs leading-relaxed text-[var(--onboarding-text-muted)]"
+        style={onboardingBodyTextShadowStyle}
+      >
+        {t("onboarding.cloudProviderBehaviorHint")}
+      </p>
 
       {elizaCloudConnected ? (
         <div
@@ -74,13 +84,23 @@ export function CloudLoginStep() {
       ) : (
         <>
           {elizaCloudLoginError ? (
-            <div
-              className={errorCardClass}
-              role="alert"
-              style={onboardingBodyTextShadowStyle}
-            >
-              {elizaCloudLoginError}
-            </div>
+            <>
+              <div
+                className={errorCardClass}
+                role="alert"
+                style={onboardingBodyTextShadowStyle}
+              >
+                {elizaCloudLoginError}
+              </div>
+              <Button
+                variant="ghost"
+                type="button"
+                className={`${onboardingLinkActionClass} mx-auto mt-2`}
+                onClick={() => openExternalUrl(branding.bugReportUrl)}
+              >
+                {t("onboarding.reportIssue")}
+              </Button>
+            </>
           ) : null}
           <Button
             className={`${onboardingPrimaryActionClass} mx-auto mt-4 flex w-full max-w-[25rem]`}
@@ -98,6 +118,12 @@ export function CloudLoginStep() {
               ? t("onboarding.cloudLoginRetry")
               : t("onboarding.cloudLoginBtn")}
           </Button>
+          <p
+            className="mx-auto mt-3 max-w-[40ch] text-center text-xs leading-relaxed text-[var(--onboarding-text-subtle)]"
+            style={onboardingBodyTextShadowStyle}
+          >
+            {t("onboarding.restartAfterProviderChangeHint")}
+          </p>
         </>
       )}
 
