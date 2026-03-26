@@ -59,6 +59,15 @@ describe("Electrobun startup bootstrap", () => {
     expect(source).toContain("[Main] Skipping embedded agent startup");
   });
 
+  it("prompts with startup crash report recovery instructions", () => {
+    const source = fs.readFileSync(INDEX_PATH, "utf8");
+
+    expect(source).toContain("maybePromptStartupCrashReport");
+    expect(source).toContain("Please send this in Discord and ping @iono.");
+    expect(source).toContain("Copy Report");
+    expect(source).toContain("startup-crash-report-latest.md");
+  });
+
   it("does not load repo or ~/.eliza env files in packaged desktop builds", () => {
     const source = fs.readFileSync(INDEX_PATH, "utf8");
 
