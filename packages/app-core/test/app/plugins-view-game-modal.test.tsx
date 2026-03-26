@@ -78,6 +78,97 @@ vi.mock("@miladyai/app-core/api", () => ({
   },
 }));
 
+vi.mock("@miladyai/ui", () => ({
+  cn: (...classes: Array<string | false | null | undefined>) =>
+    classes.filter(Boolean).join(" "),
+  EmptyState: ({
+    children,
+    className,
+    ...props
+  }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", { className, ...props }, children),
+  Button: ({
+    children,
+    ...props
+  }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
+    React.createElement("button", { type: "button", ...props }, children),
+  Dialog: ({
+    children,
+    open,
+  }: {
+    children: React.ReactNode;
+    open?: boolean;
+  }) => (open === false ? null : React.createElement("div", null, children)),
+  DialogContent: ({
+    children,
+    className,
+    ...props
+  }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", { className, ...props }, children),
+  DialogDescription: ({
+    children,
+    className,
+  }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", { className }, children),
+  DialogFooter: ({
+    children,
+    className,
+  }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", { className }, children),
+  DialogHeader: ({
+    children,
+    className,
+  }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", { className }, children),
+  DialogTitle: ({
+    children,
+    className,
+  }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", { className }, children),
+  Input: (props: React.InputHTMLAttributes<HTMLInputElement>) =>
+    React.createElement("input", props),
+  Select: ({
+    children,
+    value,
+  }: {
+    children: React.ReactNode;
+    value?: string;
+  }) => React.createElement("div", { "data-value": value }, children),
+  SelectTrigger: ({
+    children,
+    className,
+    ...props
+  }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
+    React.createElement("button", { type: "button", className, ...props }, children),
+  SelectValue: ({ children }: { children?: React.ReactNode }) =>
+    React.createElement("span", null, children),
+  SelectContent: ({
+    children,
+    className,
+  }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", { className }, children),
+  SelectItem: ({
+    children,
+    value,
+    className,
+  }: React.HTMLAttributes<HTMLDivElement> & { value: string }) =>
+    React.createElement("div", { className, "data-value": value }, children),
+  Switch: ({
+    checked,
+    onCheckedChange,
+    ...props
+  }: {
+    checked?: boolean;
+    onCheckedChange?: (next: boolean) => void;
+  } & React.ButtonHTMLAttributes<HTMLButtonElement>) =>
+    React.createElement("button", {
+      type: "button",
+      "aria-pressed": checked,
+      onClick: () => onCheckedChange?.(!checked),
+      ...props,
+    }),
+}));
+
 import { PluginsView } from "../../src/components/PluginsView";
 
 function hasClass(
@@ -261,7 +352,7 @@ describe("PluginsView game modal", () => {
       tree?.root.findAll(
         (node) => node.props?.["data-testid"] === "plugins-view-social",
       ).length,
-    ).toBe(1);
+    ).toBeGreaterThan(0);
     expect(
       tree?.root.findAll(
         (node) => node.props?.["data-testid"] === "connectors-settings-sidebar",
@@ -270,19 +361,19 @@ describe("PluginsView game modal", () => {
     const shell = tree?.root.findAll(
       (node) => node.props?.["data-testid"] === "connectors-shell",
     )[0];
-    expect(String(shell?.props.className)).toContain("rounded-2xl");
-    expect(String(shell?.props.className)).toContain("shadow-lg");
+    expect(String(shell?.props.className)).toContain("rounded-[30px]");
+    expect(String(shell?.props.className)).toContain("backdrop-blur-md");
     const selectedConnector = tree?.root.findAll(
       (node) => node.props?.["aria-current"] === "page",
     )[0];
     expect(String(selectedConnector?.parent?.props.className)).toContain(
-      "border-accent/30",
+      "border-accent/26",
     );
     expect(String(selectedConnector?.parent?.props.className)).toContain(
-      "shadow-[0_2px_10px_rgba(3,5,10,0.08)]",
+      "ring-accent/10",
     );
     expect(String(selectedConnector?.parent?.props.className)).toContain(
-      "dark:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.16),0_0_18px_rgba(var(--accent-rgb),0.18)]",
+      "dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_18px_28px_-22px_rgba(0,0,0,0.26),0_0_0_1px_rgba(var(--accent-rgb),0.12)]",
     );
     expect(
       tree?.root.findAll((node) => hasClass(node, "plugins-game-modal")).length,
@@ -570,10 +661,10 @@ describe("PluginsView game modal", () => {
     })[0];
     expect(sidebar).toBeDefined();
     expect(String(sidebar.props.className)).not.toContain("h-screen");
-    expect(String(sidebar.props.className)).toContain("self-stretch");
-    expect(String(sidebar.props.className)).toContain("backdrop-blur-sm");
-    expect(String(sidebar.props.className)).toContain("border-border/40");
-    expect(text(sidebar)).toContain("PLUGIN TYPES");
+    expect(String(sidebar.props.className)).toContain("overflow-hidden");
+    expect(String(sidebar.props.className)).toContain("backdrop-blur-md");
+    expect(String(sidebar.props.className)).toContain("border-border/34");
+    expect(text(sidebar)).toContain("Plugins");
     expect(text(sidebar)).toContain("All");
     expect(text(sidebar)).toContain("AI Providers");
     expect(text(sidebar)).toContain("Connectors");

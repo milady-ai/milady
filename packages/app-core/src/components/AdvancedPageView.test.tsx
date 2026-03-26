@@ -24,6 +24,8 @@ vi.mock("@miladyai/app-core/components", () => {
 });
 
 vi.mock("@miladyai/ui", () => ({
+  cn: (...classes: Array<string | false | null | undefined>) =>
+    classes.filter(Boolean).join(" "),
   Button: React.forwardRef(
     (props: Record<string, unknown>, ref: React.Ref<HTMLButtonElement>) =>
       React.createElement("button", { type: "button", ...props, ref }),
@@ -71,7 +73,8 @@ describe("AdvancedPageView", () => {
     });
 
     expect(nav).toBeDefined();
-    expect(String(activeButton.props.className)).toContain("bg-accent/10");
+    expect(String(activeButton.props.className)).toContain("border-accent/26");
+    expect(String(activeButton.props.className)).toContain("text-txt-strong");
     expect(String(activeButton.props.className)).toContain("px-2.5");
     expect(activeButton.props["aria-current"]).toBe("page");
   });

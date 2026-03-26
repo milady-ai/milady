@@ -11,6 +11,8 @@ const { mockUseApp, mockLoadSkills, mockRefreshSkills } = vi.hoisted(() => ({
 }));
 
 vi.mock("@miladyai/ui", () => ({
+  cn: (...classes: Array<string | false | null | undefined>) =>
+    classes.filter(Boolean).join(" "),
   Button: ({
     children,
     ...props
