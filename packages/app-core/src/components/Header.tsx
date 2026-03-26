@@ -129,10 +129,11 @@ export function Header({
       : tab === "character" || tab === "character-select"
         ? "character"
         : "desktop";
-  const useMinimalHeaderChrome = transparent || activeShellView !== "desktop";
-  const showNavigationMenu = activeShellView === "desktop";
-  const showCloudStatus = activeShellView === "desktop" && !hideCloudCredits;
-  const headerShellClassName = showNavigationMenu
+  const isDesktopShell = activeShellView === "desktop";
+  const useMinimalHeaderChrome = transparent || !isDesktopShell;
+  const showNavigationMenu = isDesktopShell;
+  const showCloudStatus = isDesktopShell && !hideCloudCredits;
+  const headerShellClassName = isDesktopShell
     ? "border-transparent bg-transparent shadow-none ring-0 backdrop-blur-none"
     : "max-w-5xl border-[rgba(255,255,255,0.12)] bg-[image:linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02)),linear-gradient(180deg,rgba(8,11,18,0.52),rgba(5,7,12,0.3))] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),inset_0_-1px_0_rgba(255,255,255,0.04),0_24px_50px_rgba(2,4,8,0.28)] ring-1 ring-inset ring-white/10 backdrop-blur-2xl";
 

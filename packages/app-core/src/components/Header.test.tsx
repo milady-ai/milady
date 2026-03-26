@@ -237,6 +237,58 @@ describe("Header", () => {
     ).toHaveLength(0);
   });
 
+  it("keeps desktop shell transparent when the header is explicitly transparent", async () => {
+    const mockUseApp = {
+      t: (k: string) => k,
+      agentStatus: { state: "running", agentName: "Eliza" },
+      elizaCloudEnabled: false,
+      elizaCloudConnected: false,
+      elizaCloudCredits: null,
+      elizaCloudCreditsCritical: false,
+      elizaCloudCreditsLow: false,
+      elizaCloudAuthRejected: false,
+      elizaCloudCreditsError: null,
+      elizaCloudTopUpUrl: "",
+      lifecycleBusy: false,
+      lifecycleAction: null,
+      handleRestart: vi.fn(),
+      handleStart: vi.fn(),
+      loadDropStatus: vi.fn().mockResolvedValue(undefined),
+      tab: "chat",
+      setTab: vi.fn(),
+      setState: vi.fn(),
+      plugins: [],
+      uiLanguage: "en",
+      setUiLanguage: vi.fn(),
+      uiTheme: "dark",
+      setUiTheme: vi.fn(),
+      uiShellMode: "native",
+      switchShellView: vi.fn(),
+    };
+
+    // @ts-expect-error - test uses a narrowed subset of the full app context type.
+    vi.spyOn(AppContext, "useApp").mockReturnValue(mockUseApp);
+
+    let testRenderer: ReactTestRenderer | null = null;
+    await act(async () => {
+      testRenderer = create(<Header transparent />);
+    });
+    if (!testRenderer) {
+      throw new Error("Failed to render Header");
+    }
+
+    const glassShell = (testRenderer as ReactTestRenderer).root.findByProps({
+      "data-testid": "header-glass-shell",
+    });
+    expect(String(glassShell.props.className)).toContain("bg-transparent");
+    expect(String(glassShell.props.className)).toContain("backdrop-blur-none");
+    expect(
+      (testRenderer as ReactTestRenderer).root.findAll(
+        (node) => node.props["data-testid"] === "header-nav-button-chat",
+      ),
+    ).not.toHaveLength(0);
+  });
+
   it("shows nothing when cloud is disconnected", async () => {
     const mockUseApp = {
       t: (k: string) => k,
