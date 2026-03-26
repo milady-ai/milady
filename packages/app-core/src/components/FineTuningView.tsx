@@ -29,6 +29,10 @@ import {
   parsePositiveFloat,
   parsePositiveInteger,
 } from "../utils/number-parsing";
+import {
+  SETTINGS_FILTER_CONTROL_CLASSNAME,
+  SETTINGS_TEXTAREA_CLASSNAME,
+} from "./settings-control-primitives";
 
 const TRAINING_EVENT_KINDS = new Set<TrainingStreamEvent["kind"]>([
   "job_started",
@@ -101,12 +105,9 @@ const FINE_TUNING_PANEL_CLASS =
   "rounded-2xl border border-border/45 bg-bg/20 shadow-sm";
 const FINE_TUNING_PANEL_HEADER_CLASS =
   "border-b border-border/35 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted/70";
-const FINE_TUNING_INPUT_CLASS =
-  "h-10 rounded-xl border-border/60 bg-bg/55 px-3 text-sm shadow-sm";
-const FINE_TUNING_SELECT_TRIGGER_CLASS =
-  "h-10 rounded-xl border-border/60 bg-bg/55 px-3 text-sm shadow-sm";
-const FINE_TUNING_TEXTAREA_CLASS =
-  "w-full rounded-xl border border-border/60 bg-bg/55 px-3 py-2 text-[11px] font-mono shadow-sm";
+const FINE_TUNING_INPUT_CLASS = SETTINGS_FILTER_CONTROL_CLASSNAME;
+const FINE_TUNING_SELECT_TRIGGER_CLASS = SETTINGS_FILTER_CONTROL_CLASSNAME;
+const FINE_TUNING_TEXTAREA_CLASS = SETTINGS_TEXTAREA_CLASSNAME;
 const FINE_TUNING_ACTION_CLASS =
   "h-10 rounded-xl px-3 text-xs shadow-sm hover:border-accent disabled:opacity-50";
 const FINE_TUNING_STATUS_CARD_CLASS =

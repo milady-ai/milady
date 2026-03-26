@@ -6,7 +6,14 @@
  * available secrets from plugins and pick which ones to manage here.
  */
 
-import { Button, Input } from "@miladyai/ui";
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Input,
+} from "@miladyai/ui";
 import { ChevronDown } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { SecretInfo } from "../api";
@@ -381,25 +388,20 @@ function SecretPicker({
   }, [available]);
 
   return (
-    <div
-      className="fixed inset-0 z-[9999] flex items-start justify-center bg-black/50 px-4 pt-10 backdrop-blur-sm sm:pt-20"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
       }}
-      onKeyDown={(e) => {
-        if (e.key === "Escape") {
-          e.preventDefault();
-          onClose();
-        }
-      }}
-      role="dialog"
-      aria-modal="true"
     >
-      <div className="flex max-h-[min(80vh,36rem)] w-full max-w-[min(35rem,100%)] flex-col overflow-hidden rounded-2xl border border-border/60 bg-card/96 shadow-2xl">
-        <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
-          <span className="text-[14px] font-semibold text-txt">
+      <DialogContent
+        showCloseButton={false}
+        className="w-[min(100%-2rem,35rem)] max-h-[min(80vh,36rem)] overflow-hidden rounded-2xl border border-border/60 bg-card/96 p-0 shadow-2xl"
+      >
+        <DialogHeader className="flex flex-row items-center justify-between border-b border-border/60 px-4 py-3">
+          <DialogTitle className="text-[14px] font-semibold text-txt">
             {t("secretsview.AddSecretsToVault")}
-          </span>
+          </DialogTitle>
           <Button
             variant="ghost"
             size="icon"
@@ -409,13 +411,15 @@ function SecretPicker({
           >
             x
           </Button>
-        </div>
+        </DialogHeader>
         <Input
           type="text"
           className="h-12 w-full rounded-none border-0 border-b border-border/60 bg-transparent px-4 py-2.5 text-[13px] text-txt shadow-none focus-visible:ring-0 font-body"
           placeholder={t("secretsview.SearchByKeyDescr")}
+          aria-label={t("secretsview.SearchByKeyDescr")}
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
+          autoFocus
         />
         <div className="flex-1 overflow-y-auto p-3">
           {available.length === 0 ? (
@@ -474,8 +478,8 @@ function SecretPicker({
             ))
           )}
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 

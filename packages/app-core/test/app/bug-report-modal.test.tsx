@@ -12,11 +12,53 @@ vi.mock("@miladyai/ui", () => {
   }: React.PropsWithChildren<Record<string, unknown>>) =>
     React.createElement("div", props, children);
   return {
+    Banner: ({
+      children,
+      ...props
+    }: React.HTMLAttributes<HTMLDivElement>) =>
+      React.createElement("div", { role: "alert", ...props }, children),
     Button: ({
       children,
       ...props
     }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
       React.createElement("button", { type: "button", ...props }, children),
+    Dialog: ({
+      children,
+    }: React.PropsWithChildren<Record<string, unknown>>) =>
+      React.createElement(React.Fragment, null, children),
+    DialogContent: ({
+      children,
+      ...props
+    }: React.PropsWithChildren<Record<string, unknown>>) =>
+      React.createElement("div", { role: "dialog", ...props }, children),
+    DialogDescription: ({
+      children,
+      ...props
+    }: React.PropsWithChildren<Record<string, unknown>>) =>
+      React.createElement("span", props, children),
+    DialogFooter: passthrough,
+    DialogHeader: passthrough,
+    DialogTitle: ({
+      children,
+      ...props
+    }: React.PropsWithChildren<Record<string, unknown>>) =>
+      React.createElement("span", props, children),
+    Field: passthrough,
+    FieldDescription: ({
+      children,
+      ...props
+    }: React.PropsWithChildren<Record<string, unknown>>) =>
+      React.createElement("div", props, children),
+    FieldLabel: ({
+      children,
+      ...props
+    }: React.LabelHTMLAttributes<HTMLLabelElement>) =>
+      React.createElement("label", props, children),
+    FieldMessage: ({
+      children,
+      ...props
+    }: React.HTMLAttributes<HTMLParagraphElement>) =>
+      React.createElement("div", props, children),
     Input: (props: React.InputHTMLAttributes<HTMLInputElement>) =>
       React.createElement("input", props),
     Textarea: (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) =>
@@ -64,7 +106,10 @@ vi.mock("@miladyai/app-core/state", () => ({
 }));
 
 vi.mock("@miladyai/app-core/config/branding", () => ({
-  useBranding: () => ({ appName: "Milady" }),
+  useBranding: () => ({
+    appName: "Milady",
+    bugReportUrl: "https://github.com/elizaos/eliza/issues/new",
+  }),
 }));
 
 vi.mock("@miladyai/app-core/utils", () => ({
@@ -218,7 +263,12 @@ describe("BugReportModal", () => {
     });
 
     const errorDivs = tree?.root.findAll(
-      (node) => node.type === "div" && node.props.style?.color === "#ef4444",
+      (node) =>
+        node.children.some(
+          (c) =>
+            typeof c === "string" &&
+            c.includes("bugreportmodal.descriptionRequired"),
+        ),
     );
     expect(errorDivs?.length).toBeGreaterThan(0);
   });
@@ -313,8 +363,6 @@ describe("BugReportModal", () => {
 
     const errorDivs = tree?.root.findAll(
       (node) =>
-        node.type === "div" &&
-        node.props.style?.color === "#ef4444" &&
         node.children.some(
           (c) => typeof c === "string" && c.includes("Network error"),
         ),
@@ -380,10 +428,8 @@ describe("BugReportModal", () => {
 
     const before = getTextareas(tree?.root).length;
 
-    const logsToggle = getButtons(tree?.root).find((b) =>
-      b.children.some(
-        (c) => typeof c === "string" && c.trim() === "bugreportmodal.Logs",
-      ),
+    const logsToggle = getButtons(tree?.root).find(
+      (b) => b.props["aria-controls"] === "bug-report-logs-panel",
     );
     act(() => {
       logsToggle?.props.onClick();

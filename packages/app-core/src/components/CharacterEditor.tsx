@@ -75,28 +75,49 @@ import {
   useState,
 } from "react";
 
-/* ── Shared gold gradient styles ─────────────────────────────────── */
-const goldGradientStyle = {
+/* ── Shared accent styles ────────────────────────────────────────── */
+const accentGradientStyle = {
   background:
-    "linear-gradient(135deg, var(--burnished-gold) 0%, var(--classic-gold) 58%, var(--highlight-gold) 100%)",
-  color: "#1a1a1a",
-  borderColor: "rgba(232, 217, 168, 0.55)",
-  boxShadow: "0 0 18px var(--gold-glow), inset 0 1px 0 var(--soft-white-glow)",
+    "linear-gradient(180deg, color-mix(in srgb, var(--accent) 92%, white 8%) 0%, var(--accent) 100%)",
+  color: "var(--accent-foreground, #1a1f26)",
+  borderColor: "rgba(var(--accent-rgb, 240, 185, 11), 0.5)",
+  boxShadow:
+    "0 0 14px rgba(var(--accent-rgb, 240, 185, 11), 0.16), inset 0 1px 0 var(--soft-white-glow)",
 } as const;
 
 const idleSaveBtnStyle = {
   background:
-    "linear-gradient(135deg, rgba(122,90,31,0.25) 0%, rgba(207,175,90,0.2) 58%, rgba(242,210,122,0.15) 100%)",
-  color: "rgba(232, 217, 168, 0.5)",
-  borderColor: "rgba(207, 175, 90, 0.2)",
+    "linear-gradient(180deg, rgba(var(--accent-rgb,240,185,11),0.16) 0%, rgba(var(--accent-rgb,240,185,11),0.1) 100%)",
+  color: "rgba(var(--accent-rgb, 240, 185, 11), 0.78)",
+  borderColor: "rgba(var(--accent-rgb, 240, 185, 11), 0.22)",
   boxShadow: "none",
 } as const;
 
 const pageTabsBoxShadow =
   "0 10px 26px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.05)";
+
+const CHARACTER_EDITOR_TABLIST_CLASSNAME =
+  "flex shrink-0 items-center gap-1 rounded-lg border border-border bg-elevated p-1";
+const CHARACTER_EDITOR_TAB_CLASSNAME =
+  "flex-initial cursor-pointer rounded-md border border-transparent bg-transparent px-[0.6rem] py-1.5 text-center text-[10px] font-bold uppercase tracking-[0.1em] text-txt transition-[background,border-color,color,box-shadow] duration-150 hover:border-border hover:bg-bg-hover hover:text-txt-strong";
+const CHARACTER_EDITOR_SECTION_CLASSNAME =
+  "flex flex-col gap-2 rounded-xl border border-border bg-card p-3";
+const CHARACTER_EDITOR_TEXTAREA_CLASSNAME =
+  "flex-1 min-h-12 resize-none overflow-y-auto rounded-lg border-border bg-white/[0.04] px-3 py-2 font-mono text-xs leading-relaxed text-txt";
+const CHARACTER_EDITOR_INLINE_RULE_CLASSNAME =
+  "group flex items-start gap-2 rounded-md border border-border bg-white/[0.02] px-2.5 py-1.5";
+const CHARACTER_EDITOR_INLINE_FIELD_CLASSNAME =
+  "h-7 flex-1 rounded-md border border-border bg-white/[0.03] px-2 font-mono text-[11px] text-txt outline-none focus:border-accent";
+const CHARACTER_EDITOR_SMALL_GOLD_ACTION_CLASSNAME =
+  "h-6 px-2 text-[10px] font-bold text-accent";
+const CHARACTER_EDITOR_ICON_GHOST_CLASSNAME =
+  "mt-0.5 h-auto w-auto shrink-0 p-0 text-muted opacity-0 transition-[opacity,color,box-shadow] duration-150 hover:text-red-500 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-danger/40";
+const CHARACTER_EDITOR_FOOTER_ACTION_CLASSNAME =
+  "h-9 rounded-xl px-6 text-[13px] font-bold tracking-[0.05em] transition-[background-color,border-color,color,box-shadow,transform] duration-200 disabled:opacity-50";
 /* ── Constants ─────────────────────────────────────────────────────── */
 
 const DEFAULT_ELEVEN_FAST_MODEL = "eleven_flash_v2_5";
+const CHARACTER_EDITOR_PAGES = ["identity", "style", "examples"] as const;
 const STYLE_SECTION_KEYS = ["all"] as const;
 const STYLE_SECTION_PLACEHOLDERS: Record<string, string> = {
   all: "Add a style rule",
@@ -1089,19 +1110,61 @@ export function CharacterEditor({
           >
             <div className="flex items-center justify-between gap-3 shrink-0">
               <div
-                className="flex gap-1 p-1 rounded-lg bg-elevated border border-border items-center shrink-0"
+                className={CHARACTER_EDITOR_TABLIST_CLASSNAME}
                 style={{ boxShadow: pageTabsBoxShadow }}
+                role="tablist"
+                aria-label={t("charactereditor.TabbedEditorGroupLabel", {
+                  defaultValue: "Character editor sections",
+                })}
               >
-                {(["identity", "style", "examples"] as const).map((page) => (
+                {CHARACTER_EDITOR_PAGES.map((page) => (
                   <button
                     key={page}
                     type="button"
-                    className="flex-initial px-[0.6rem] py-1.5 rounded-md border border-transparent bg-transparent text-txt text-[10px] font-bold uppercase tracking-[0.1em] cursor-pointer transition-[background,border-color,color,box-shadow] duration-150 text-center hover:text-txt-strong hover:bg-bg-hover hover:border-border"
-                    style={activePage === page ? goldGradientStyle : undefined}
+                    id={`character-editor-tab-${page}`}
+                    role="tab"
+                    aria-selected={activePage === page}
+                    aria-controls={`character-editor-panel-${page}`}
+                    tabIndex={activePage === page ? 0 : -1}
+                    className={CHARACTER_EDITOR_TAB_CLASSNAME}
+                    style={activePage === page ? accentGradientStyle : undefined}
                     onClick={() => {
                       setActivePage(page);
                       if (page === "style" || page === "examples")
                         setRightTab(page);
+                    }}
+                    onKeyDown={(event) => {
+                      if (
+                        event.key !== "ArrowRight" &&
+                        event.key !== "ArrowLeft" &&
+                        event.key !== "Home" &&
+                        event.key !== "End"
+                      ) {
+                        return;
+                      }
+                      event.preventDefault();
+                      const currentIndex =
+                        CHARACTER_EDITOR_PAGES.indexOf(activePage);
+                      const nextIndex =
+                        event.key === "Home"
+                          ? 0
+                          : event.key === "End"
+                            ? CHARACTER_EDITOR_PAGES.length - 1
+                            : event.key === "ArrowRight"
+                              ? (currentIndex + 1) %
+                                CHARACTER_EDITOR_PAGES.length
+                              : (currentIndex - 1 + CHARACTER_EDITOR_PAGES.length) %
+                                CHARACTER_EDITOR_PAGES.length;
+                      const nextPage = CHARACTER_EDITOR_PAGES[nextIndex];
+                      setActivePage(nextPage);
+                      if (nextPage === "style" || nextPage === "examples") {
+                        setRightTab(nextPage);
+                      }
+                      requestAnimationFrame(() => {
+                        globalThis.document
+                          ?.getElementById(`character-editor-tab-${nextPage}`)
+                          ?.focus();
+                      });
                     }}
                   >
                     {page === "identity"
@@ -1123,7 +1186,7 @@ export function CharacterEditor({
                 variant="outline"
                 size="sm"
                 className="h-9 rounded-xl px-2.5 text-[11px] font-semibold disabled:opacity-40"
-                style={goldGradientStyle}
+                style={accentGradientStyle}
                 onClick={handleResetToDefaults}
                 disabled={!activeCharacterRosterEntry}
                 title={t("charactereditor.ResetToDefaults", {
@@ -1167,18 +1230,26 @@ export function CharacterEditor({
               </p>
             </div>
 
-            <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+            <div
+              id={`character-editor-panel-${activePage}`}
+              role="tabpanel"
+              aria-labelledby={`character-editor-tab-${activePage}`}
+              className="flex flex-col flex-1 min-h-0 overflow-hidden"
+            >
               {/* ── LEFT PANEL (Character identity) ───────────────────────── */}
               <div
                 ref={leftPanelRef}
                 className={`custom-scrollbar flex flex-col flex-1 gap-3 min-h-0 overflow-y-auto pr-1 [scrollbar-gutter:stable]${activePage !== "identity" ? " hidden" : ""}`}
               >
                 {/* Name + Voice (50/50 split) */}
-                <section className="flex flex-col gap-2 p-3 border border-border rounded-xl bg-card">
+                <section className={CHARACTER_EDITOR_SECTION_CLASSNAME}>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="flex flex-col gap-2 min-w-0">
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">
+                        <span
+                          id="character-editor-name-label"
+                          className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted"
+                        >
                           {t("charactereditor.Name", { defaultValue: "Name" })}
                         </span>
                       </div>
@@ -1188,6 +1259,7 @@ export function CharacterEditor({
                         placeholder={t("charactereditor.AgentNamePlaceholder", {
                           defaultValue: "Agent name",
                         })}
+                        aria-labelledby="character-editor-name-label"
                         onChange={(
                           e: ChangeEvent<
                             HTMLInputElement | HTMLTextAreaElement
@@ -1198,7 +1270,10 @@ export function CharacterEditor({
                     </div>
                     <div className="flex flex-col gap-2 min-w-0">
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">
+                        <span
+                          id="character-editor-voice-label"
+                          className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted"
+                        >
                           {t("charactereditor.Voice", {
                             defaultValue: "Voice",
                           })}
@@ -1222,6 +1297,7 @@ export function CharacterEditor({
                           placeholder={t("charactereditor.SelectAVoice", {
                             defaultValue: "Select a voice",
                           })}
+                          ariaLabelledBy="character-editor-voice-label"
                           menuPlacement="bottom"
                           className="flex-1 min-w-0"
                           triggerClassName="h-8 rounded-md border-border/50 bg-bg/65 px-3 py-0 text-[11px] shadow-inner backdrop-blur-sm"
@@ -1274,7 +1350,9 @@ export function CharacterEditor({
                 </section>
 
                 {/* Bio / About Me */}
-                <section className="flex flex-col gap-2 p-3 border border-border rounded-xl bg-card flex-1 min-h-0">
+                <section
+                  className={`${CHARACTER_EDITOR_SECTION_CLASSNAME} flex-1 min-h-0`}
+                >
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">
                       {t("charactereditor.AboutMe", {
@@ -1284,7 +1362,7 @@ export function CharacterEditor({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-6 px-2 text-[10px] font-bold text-[color:var(--champagne-gold)]"
+                      className={CHARACTER_EDITOR_SMALL_GOLD_ACTION_CLASSNAME}
                       onClick={() => void handleGenerate("bio")}
                       disabled={generating === "bio"}
                     >
@@ -1306,12 +1384,14 @@ export function CharacterEditor({
                     onChange={(
                       e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
                     ) => handleFieldEdit("bio", e.target.value)}
-                    className="rounded-lg border-border bg-white/[0.04] font-mono text-xs leading-relaxed text-txt px-3 py-2 resize-none flex-1 min-h-12 overflow-y-auto"
+                    className={CHARACTER_EDITOR_TEXTAREA_CLASSNAME}
                   />
                 </section>
 
                 {/* System Prompt / Directions */}
-                <section className="flex flex-col gap-2 p-3 border border-border rounded-xl bg-card flex-1 min-h-0">
+                <section
+                  className={`${CHARACTER_EDITOR_SECTION_CLASSNAME} flex-1 min-h-0`}
+                >
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">
                       {t("charactereditor.SystemPrompt", {
@@ -1321,7 +1401,7 @@ export function CharacterEditor({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-6 px-2 text-[10px] font-bold text-[color:var(--champagne-gold)]"
+                      className={CHARACTER_EDITOR_SMALL_GOLD_ACTION_CLASSNAME}
                       onClick={() => void handleGenerate("system")}
                       disabled={generating === "system"}
                     >
@@ -1340,7 +1420,7 @@ export function CharacterEditor({
                     onChange={(
                       e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
                     ) => handleFieldEdit("system", e.target.value)}
-                    className="rounded-lg border-border bg-white/[0.04] font-mono text-xs leading-relaxed text-txt px-3 py-2 resize-none flex-1 min-h-12 overflow-y-auto"
+                    className={CHARACTER_EDITOR_TEXTAREA_CLASSNAME}
                   />
                 </section>
               </div>
@@ -1352,14 +1432,14 @@ export function CharacterEditor({
               >
                 {/* Style Rules */}
                 <section
-                  className="flex flex-col gap-2 p-3 border border-border rounded-xl bg-card flex-1 min-h-0"
+                  className={`${CHARACTER_EDITOR_SECTION_CLASSNAME} flex-1 min-h-0`}
                   style={{ display: rightTab === "style" ? undefined : "none" }}
                 >
                   <div className="flex items-center justify-between">
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-6 px-2 text-[10px] font-bold text-[color:var(--champagne-gold)]"
+                      className={CHARACTER_EDITOR_SMALL_GOLD_ACTION_CLASSNAME}
                       onClick={() => void handleGenerate("style", "replace")}
                       disabled={generating === "style"}
                     >
@@ -1382,7 +1462,7 @@ export function CharacterEditor({
                               items.map((item, index) => (
                                 <div
                                   key={`${key}:${item}`}
-                                  className="group flex items-start gap-2 px-2.5 py-1.5 rounded-md border border-border bg-white/[0.02]"
+                                  className={CHARACTER_EDITOR_INLINE_RULE_CLASSNAME}
                                 >
                                   <span className="mt-0.5 shrink-0 text-[10px] font-bold text-accent">
                                     {index + 1}
@@ -1406,16 +1486,22 @@ export function CharacterEditor({
                                     onBlur={() =>
                                       handleCommitStyleEntry(key, index)
                                     }
+                                    aria-label={`${t(`charactereditor.StyleRules.${key}`, {
+                                      defaultValue: "Style rule",
+                                    })} ${index + 1}`}
                                     className="min-w-0 flex-1 resize-none border-none bg-transparent p-0 font-mono text-xs leading-normal text-txt [field-sizing:content] min-h-[1.5em] focus-visible:outline-none focus-visible:shadow-none"
                                   />
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="mt-0.5 shrink-0 text-muted opacity-0 transition-opacity duration-150 p-0 h-auto w-auto hover:text-red-500 group-hover:opacity-100"
+                                    className={CHARACTER_EDITOR_ICON_GHOST_CLASSNAME}
                                     onClick={() =>
                                       handleRemoveStyleEntry(key, index)
                                     }
                                     title={t("common.remove")}
+                                    aria-label={`${t("common.remove")} ${t(`charactereditor.StyleRules.${key}`, {
+                                      defaultValue: "style rule",
+                                    })} ${index + 1}`}
                                   >
                                     <svg
                                       width="10"
@@ -1461,12 +1547,12 @@ export function CharacterEditor({
                                   handleAddStyleEntry(key);
                                 }
                               }}
-                              className="h-7 text-xs flex-1 min-w-0 rounded-lg border-border bg-white/[0.04] text-[13px] text-txt"
+                              className={`min-w-0 text-xs ${CHARACTER_EDITOR_INLINE_FIELD_CLASSNAME}`}
                             />
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-6 px-2 text-[10px] font-bold text-[color:var(--champagne-gold)]"
+                              className={CHARACTER_EDITOR_SMALL_GOLD_ACTION_CLASSNAME}
                               onClick={() => handleAddStyleEntry(key)}
                               disabled={!pendingStyleEntries[key].trim()}
                             >
@@ -1481,7 +1567,7 @@ export function CharacterEditor({
 
                 {/* Chat Examples */}
                 <section
-                  className="flex flex-col gap-2 p-3 border border-border rounded-xl bg-card flex-1 min-h-0"
+                  className={`${CHARACTER_EDITOR_SECTION_CLASSNAME} flex-1 min-h-0`}
                   style={{
                     display: rightTab === "examples" ? undefined : "none",
                   }}
@@ -1495,7 +1581,7 @@ export function CharacterEditor({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-6 px-2 text-[10px] font-bold text-[color:var(--champagne-gold)]"
+                      className={CHARACTER_EDITOR_SMALL_GOLD_ACTION_CLASSNAME}
                       onClick={() =>
                         void handleGenerate("chatExamples", "replace")
                       }
@@ -1573,7 +1659,7 @@ export function CharacterEditor({
                                   updated[ci] = convoClone;
                                   handleFieldEdit("messageExamples", updated);
                                 }}
-                                className="h-7 flex-1 rounded-md border border-border bg-white/[0.03] px-2 font-mono text-[11px] text-txt outline-none focus:border-accent"
+                                className={CHARACTER_EDITOR_INLINE_FIELD_CLASSNAME}
                               />
                             </div>
                           ))}
@@ -1592,7 +1678,7 @@ export function CharacterEditor({
 
                 {/* Post Examples */}
                 <section
-                  className="flex flex-col gap-2 p-3 border border-border rounded-xl bg-card flex-1 min-h-0"
+                  className={`${CHARACTER_EDITOR_SECTION_CLASSNAME} flex-1 min-h-0`}
                   style={{
                     display: rightTab === "examples" ? undefined : "none",
                   }}
@@ -1606,7 +1692,7 @@ export function CharacterEditor({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-6 px-2 text-[10px] font-bold text-[color:var(--champagne-gold)]"
+                      className={CHARACTER_EDITOR_SMALL_GOLD_ACTION_CLASSNAME}
                       onClick={() =>
                         void handleGenerate("postExamples", "replace")
                       }
@@ -1631,12 +1717,12 @@ export function CharacterEditor({
                             updated[pi] = e.target.value;
                             handleFieldEdit("postExamples", updated);
                           }}
-                          className="h-7 flex-1 rounded-md border border-border bg-white/[0.03] px-2 font-mono text-[11px] text-txt outline-none focus:border-accent"
+                          className={CHARACTER_EDITOR_INLINE_FIELD_CLASSNAME}
                         />
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="mt-0.5 shrink-0 text-muted opacity-0 transition-opacity duration-150 p-0 h-auto w-auto hover:text-red-500 group-hover:opacity-100"
+                          className={CHARACTER_EDITOR_ICON_GHOST_CLASSNAME}
                           onClick={() => {
                             const updated = [...(d.postExamples ?? [])];
                             updated.splice(pi, 1);
@@ -1731,7 +1817,7 @@ export function CharacterEditor({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="h-9 rounded-xl px-6 text-[13px] font-bold tracking-[0.05em] transition-all duration-200 disabled:opacity-50"
+                  className={CHARACTER_EDITOR_FOOTER_ACTION_CLASSNAME}
                   style={idleSaveBtnStyle}
                   onClick={() =>
                     document.getElementById("ce-vrm-upload")?.click()
@@ -1751,8 +1837,8 @@ export function CharacterEditor({
           {/* Save Character — centered; transparent when nothing to save */}
           <Button
             size="sm"
-            className="h-9 rounded-xl px-6 text-[13px] font-bold tracking-[0.05em] transition-all duration-200 disabled:opacity-50"
-            style={hasPendingChanges ? goldGradientStyle : idleSaveBtnStyle}
+            className={CHARACTER_EDITOR_FOOTER_ACTION_CLASSNAME}
+            style={hasPendingChanges ? accentGradientStyle : idleSaveBtnStyle}
             disabled={characterSaving || voiceSaving || !hasPendingChanges}
             onClick={() => void handleSaveAll()}
           >
@@ -1767,8 +1853,8 @@ export function CharacterEditor({
               type="button"
               variant="default"
               size="sm"
-              className="h-9 rounded-xl px-6 text-[13px] font-bold tracking-[0.05em] transition-all duration-200 disabled:opacity-50"
-              style={goldGradientStyle}
+              className={CHARACTER_EDITOR_FOOTER_ACTION_CLASSNAME}
+              style={accentGradientStyle}
               onClick={() => {
                 if (customizing) {
                   setCustomizing(false);

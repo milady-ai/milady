@@ -1,5 +1,19 @@
-import { Button, Dialog, DialogContent, Input } from "@miladyai/ui";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  Input,
+} from "@miladyai/ui";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from "react";
 import { isElectrobunRuntime } from "../bridge";
 import {
   buildCommands as buildCommandPaletteCommands,
@@ -40,6 +54,7 @@ export function CommandPalette() {
   );
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const listboxId = "command-palette-results";
 
   const agentState = agentStatus?.state ?? "stopped";
   const currentGameViewerUrl =
@@ -135,11 +150,50 @@ export function CommandPalette() {
     }
   }, [commandPaletteOpen]);
 
-  // Keyboard handling
   useEffect(() => {
-    if (!commandPaletteOpen) return;
+    if (filteredCommands.length === 0) {
+      if (commandActiveIndex !== 0) {
+        setState("commandActiveIndex", 0);
+      }
+      return;
+    }
 
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const maxIndex = filteredCommands.length - 1;
+    if (commandActiveIndex < 0 || commandActiveIndex > maxIndex) {
+      setState(
+        "commandActiveIndex",
+        Math.min(Math.max(commandActiveIndex, 0), maxIndex),
+      );
+    }
+  }, [commandActiveIndex, filteredCommands.length, setState]);
+
+  // Reset active index when query changes
+  useEffect(() => {
+    if (commandQuery !== "") {
+      setState("commandActiveIndex", 0);
+    }
+  }, [commandQuery, setState]);
+
+  const commandPaletteTitle = t("commandpalette.Title", {
+    defaultValue: "Command palette",
+  });
+  const commandPaletteDescription = t("commandpalette.Description", {
+    defaultValue: "Search commands and jump straight to actions.",
+  });
+  const commandSearchLabel = t("commandpalette.SearchLabel", {
+    defaultValue: "Search commands",
+  });
+  const commandResultsLabel = t("commandpalette.ResultsLabel", {
+    defaultValue: "Command results",
+  });
+  const activeCommand =
+    filteredCommands.length > 0 ? filteredCommands[commandActiveIndex] : null;
+  const activeOptionId = activeCommand
+    ? `command-palette-option-${activeCommand.id}`
+    : undefined;
+
+  const handlePaletteKeyDown = useCallback(
+    (e: ReactKeyboardEvent<HTMLDivElement>) => {
       if (e.key === "Escape") {
         e.preventDefault();
         closeCommandPalette();
@@ -178,43 +232,15 @@ export function CommandPalette() {
           cmd.action();
           closeCommandPalette();
         }
-        return;
       }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [
-    commandPaletteOpen,
-    commandActiveIndex,
-    filteredCommands,
-    setState,
-    closeCommandPalette,
-  ]);
-
-  useEffect(() => {
-    if (filteredCommands.length === 0) {
-      if (commandActiveIndex !== 0) {
-        setState("commandActiveIndex", 0);
-      }
-      return;
-    }
-
-    const maxIndex = filteredCommands.length - 1;
-    if (commandActiveIndex < 0 || commandActiveIndex > maxIndex) {
-      setState(
-        "commandActiveIndex",
-        Math.min(Math.max(commandActiveIndex, 0), maxIndex),
-      );
-    }
-  }, [commandActiveIndex, filteredCommands.length, setState]);
-
-  // Reset active index when query changes
-  useEffect(() => {
-    if (commandQuery !== "") {
-      setState("commandActiveIndex", 0);
-    }
-  }, [commandQuery, setState]);
+    },
+    [
+      closeCommandPalette,
+      commandActiveIndex,
+      filteredCommands,
+      setState,
+    ],
+  );
 
   return (
     <Dialog
@@ -223,9 +249,17 @@ export function CommandPalette() {
         if (!v) closeCommandPalette();
       }}
     >
-      <DialogContent className="w-[520px] max-w-[520px] max-h-[420px] p-0 flex flex-col rounded-xl top-[30%] translate-y-0">
+      <DialogContent
+        className="flex max-h-[420px] w-[520px] max-w-[520px] flex-col rounded-xl p-0 top-[30%] translate-y-0"
+        onKeyDown={handlePaletteKeyDown}
+      >
+        <DialogHeader className="sr-only">
+          <DialogTitle>{commandPaletteTitle}</DialogTitle>
+          <DialogDescription>{commandPaletteDescription}</DialogDescription>
+        </DialogHeader>
         <Input
           ref={inputRef}
+          id="command-palette-search"
           type="text"
           className="w-full px-4 py-3.5 bg-transparent text-[15px] outline-none font-body"
           style={{
@@ -233,12 +267,25 @@ export function CommandPalette() {
             color: "var(--text)",
           }}
           placeholder={t("commandpalette.TypeToSearchComma")}
+          aria-label={commandSearchLabel}
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded={commandPaletteOpen}
+          aria-controls={listboxId}
+          aria-activedescendant={activeOptionId}
           value={commandQuery}
           onChange={(e) => setState("commandQuery", e.target.value)}
         />
-        <div className="flex-1 overflow-y-auto py-1">
+        <div
+          id={listboxId}
+          role="listbox"
+          aria-label={commandResultsLabel}
+          className="flex-1 overflow-y-auto py-1"
+        >
           {filteredCommands.length === 0 ? (
             <div
+              role="status"
+              aria-live="polite"
               className="py-5 text-center text-[13px]"
               style={{ color: "var(--muted)" }}
             >
@@ -249,6 +296,9 @@ export function CommandPalette() {
               <Button
                 variant="ghost"
                 key={cmd.id}
+                id={`command-palette-option-${cmd.id}`}
+                role="option"
+                aria-selected={idx === commandActiveIndex}
                 className="w-full px-4 py-2.5 cursor-pointer flex justify-between items-center text-left text-sm font-body border-0 rounded-none h-auto"
                 style={{
                   background:

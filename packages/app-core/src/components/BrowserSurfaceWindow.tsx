@@ -20,20 +20,20 @@ import {
 
 /* ── Shared style constants ─────────────────────────────────────────── */
 
-const goldGradientStyle = {
-  borderColor: "rgba(232, 217, 168, 0.5)",
+const yellowAccentStyle = {
+  borderColor: "rgba(var(--accent-rgb, 240, 185, 11), 0.42)",
   background:
-    "linear-gradient(135deg, var(--burnished-gold, #7a5a1f) 0%, var(--classic-gold, #cfaf5a) 58%, var(--highlight-gold, #f2d27a) 100%)",
-  color: "#1a1a1a",
+    "linear-gradient(180deg, color-mix(in srgb, var(--accent) 92%, white 8%) 0%, var(--accent) 100%)",
+  color: "var(--accent-foreground, #1a1f26)",
   boxShadow:
-    "0 0 16px rgba(242, 210, 122, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.08)",
+    "0 0 14px rgba(var(--accent-rgb, 240, 185, 11), 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.08)",
 } as const;
 
 const navBtnBase =
   "h-10 px-[0.95rem] rounded-[0.8rem] border border-[rgba(94,97,102,0.72)] bg-[rgba(30,31,35,0.95)] text-[color:var(--chrome-highlight,#f5f7fa)] text-[0.9rem] font-semibold cursor-pointer transition-[background,border-color,color,box-shadow] duration-150 hover:enabled:bg-[rgba(42,45,49,0.98)] hover:enabled:border-[rgba(201,204,209,0.35)] disabled:opacity-[0.42] disabled:cursor-not-allowed";
 
 const toolbarStyle = {
-  border: "1px solid rgba(122, 90, 31, 0.45)",
+  border: "1px solid rgba(var(--accent-rgb, 240, 185, 11), 0.28)",
   background:
     "linear-gradient(180deg, rgba(30, 31, 35, 0.96), rgba(18, 18, 20, 0.92))",
   boxShadow:
@@ -48,7 +48,7 @@ const viewportStyle = {
 
 const containerStyle = {
   background:
-    "radial-gradient(circle at top, rgba(242, 210, 122, 0.08), transparent 28%), linear-gradient(180deg, rgba(18, 18, 20, 0.98), rgba(11, 11, 12, 1))",
+    "radial-gradient(circle at top, rgba(var(--accent-rgb, 240, 185, 11), 0.08), transparent 28%), linear-gradient(180deg, rgba(18, 18, 20, 0.98), rgba(11, 11, 12, 1))",
 } as const;
 
 function readBrowserShellSeedUrl(): string | null {
@@ -217,7 +217,7 @@ export function BrowserSurfaceWindow() {
             onClick={() => {
               navigateTo(DEFAULT_BROWSER_HOME);
             }}
-            style={goldGradientStyle}
+            style={yellowAccentStyle}
           >
             Home
           </Button>
@@ -231,7 +231,7 @@ export function BrowserSurfaceWindow() {
             aria-label={t("aria.browserAddress")}
             autoCapitalize="none"
             autoCorrect="off"
-            className="h-10 w-full min-w-0 rounded-[0.8rem] border border-[rgba(94,97,102,0.72)] bg-[rgba(11,11,12,0.95)] px-[0.9rem] text-[0.95rem] text-[color:var(--chrome-highlight,#f5f7fa)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] outline-none focus:border-[rgba(232,217,168,0.48)] focus:shadow-[0_0_0_1px_rgba(232,217,168,0.36),0_0_16px_rgba(242,210,122,0.12)]"
+            className="h-10 w-full min-w-0 rounded-[0.8rem] border border-[rgba(94,97,102,0.72)] bg-[rgba(11,11,12,0.95)] px-[0.9rem] text-[0.95rem] text-[color:var(--chrome-highlight,#f5f7fa)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] outline-none focus:border-[rgba(var(--accent-rgb,240,185,11),0.48)] focus:shadow-[0_0_0_1px_rgba(var(--accent-rgb,240,185,11),0.36),0_0_16px_rgba(var(--accent-rgb,240,185,11),0.12)]"
             onChange={(event) => {
               setAddressValue(event.target.value);
             }}
@@ -243,7 +243,7 @@ export function BrowserSurfaceWindow() {
           <Button
             variant="default"
             className={navBtnBase}
-            style={goldGradientStyle}
+            style={yellowAccentStyle}
             type="submit"
           >
             Go
@@ -254,7 +254,7 @@ export function BrowserSurfaceWindow() {
       <div className="flex min-w-0 items-center gap-3 px-0.5 text-[0.82rem] text-[color:var(--text-muted,#a1a1aa)]">
         <span
           aria-live="polite"
-          className={`shrink-0 rounded-full border border-[rgba(94,97,102,0.72)] bg-[rgba(30,31,35,0.9)] px-[0.55rem] py-[0.2rem] ${isLoading ? "border-[rgba(232,217,168,0.42)] text-[color:var(--highlight-gold,#f2d27a)]" : ""}`}
+          className={`shrink-0 rounded-full border border-[rgba(94,97,102,0.72)] bg-[rgba(30,31,35,0.9)] px-[0.55rem] py-[0.2rem] ${isLoading ? "border-[rgba(var(--accent-rgb,240,185,11),0.42)] text-[color:var(--accent-hover,var(--accent))]" : ""}`}
         >
           {isLoading ? "Loading" : "Ready"}
         </span>

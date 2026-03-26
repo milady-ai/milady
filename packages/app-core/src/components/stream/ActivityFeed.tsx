@@ -56,7 +56,7 @@ export function ActivityFeed({ events }: { events: StreamEventEnvelope[] }) {
                   isNewViewer
                     ? "border-emerald-500/30 bg-emerald-500/5"
                     : isThought
-                      ? "border-yellow-500/30 bg-yellow-500/5"
+                      ? "border-[color:rgba(var(--accent-rgb,240,185,11),0.3)] bg-[color:rgba(var(--accent-rgb,240,185,11),0.06)]"
                       : isAction
                         ? "border-blue-500/30 bg-blue-500/5"
                         : isAssistant
@@ -72,7 +72,7 @@ export function ActivityFeed({ events }: { events: StreamEventEnvelope[] }) {
                       isNewViewer
                         ? "text-emerald-400"
                         : isThought
-                          ? "text-yellow-400"
+                          ? "text-[color:var(--accent-hover,var(--accent))]"
                           : isAction
                             ? "text-blue-400"
                             : isAssistant
@@ -98,7 +98,9 @@ export function ActivityFeed({ events }: { events: StreamEventEnvelope[] }) {
                 </div>
                 <div
                   className={`text-[12px] mt-0.5 break-words line-clamp-3 ${
-                    isThought ? "text-yellow-200/70 italic" : "text-txt"
+                    isThought
+                      ? "text-[color:rgba(245,247,250,0.78)] italic"
+                      : "text-txt"
                   }`}
                 >
                   {getEventText(event)}

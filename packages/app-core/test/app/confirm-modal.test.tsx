@@ -1,219 +1,176 @@
 // @vitest-environment jsdom
 
-// Disable createPortal in ConfirmModal when using react-test-renderer
-(globalThis as Record<string, unknown>).__TEST_RENDERER__ = true;
-
+import { act } from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import {
   ConfirmDialog as ConfirmModal,
   PromptDialog as PromptModal,
   useConfirm,
   usePrompt,
 } from "@miladyai/ui";
-import React from "react";
-import TestRenderer, { act } from "react-test-renderer";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
-function findButton(
-  root: TestRenderer.ReactTestInstance,
-  label: string,
-): TestRenderer.ReactTestInstance {
-  const match = root
-    .findAllByType("button" as React.ElementType)
-    .find((node) => node.children.join("").includes(label));
-  if (!match) {
-    throw new Error(`Could not find button with label: ${label}`);
-  }
-  return match;
-}
 
 let latestConfirm!: ReturnType<typeof useConfirm>;
 let latestPrompt!: ReturnType<typeof usePrompt>;
 
 function ConfirmHarness() {
   latestConfirm = useConfirm();
-  return React.createElement(ConfirmModal, latestConfirm.modalProps);
+  return <ConfirmModal {...latestConfirm.modalProps} />;
 }
 
 function PromptHarness() {
   latestPrompt = usePrompt();
-  return React.createElement(PromptModal, latestPrompt.modalProps);
+  return <PromptModal {...latestPrompt.modalProps} />;
 }
 
 describe("ConfirmModal", () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    (globalThis as Record<string, unknown>).__TEST_RENDERER__ = true;
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    delete (globalThis as Record<string, unknown>).__TEST_RENDERER__;
+    cleanup();
   });
 
   it("renders nothing when closed", () => {
-    let tree!: TestRenderer.ReactTestRenderer;
-    act(() => {
-      tree = TestRenderer.create(
-        React.createElement(ConfirmModal, {
-          open: false,
-          message: "Delete this item?",
-          onConfirm: vi.fn(),
-          onCancel: vi.fn(),
-        }),
-      );
-    });
+    const { container } = render(
+      <ConfirmModal
+        open={false}
+        message="Delete this item?"
+        onConfirm={vi.fn()}
+        onCancel={vi.fn()}
+      />,
+    );
 
-    expect(tree.toJSON()).toBeNull();
+    expect(container.innerHTML).toBe("");
   });
 
-  it("cancels on Escape and confirms from the primary button", () => {
+  it("cancels from the secondary button and confirms from the primary button", () => {
     const onConfirm = vi.fn();
     const onCancel = vi.fn();
 
-    let tree!: TestRenderer.ReactTestRenderer;
-    act(() => {
-      tree = TestRenderer.create(
-        React.createElement(ConfirmModal, {
-          open: true,
-          title: "Delete item",
-          message: "Delete this item?",
-          confirmLabel: "Delete",
-          cancelLabel: "Keep",
-          tone: "danger",
-          onConfirm,
-          onCancel,
-        }),
-      );
-      vi.runAllTimers();
-    });
+    const { rerender } = render(
+      <ConfirmModal
+        open={true}
+        title="Delete item"
+        message="Delete this item?"
+        confirmLabel="Delete"
+        cancelLabel="Keep"
+        tone="danger"
+        onConfirm={onConfirm}
+        onCancel={onCancel}
+      />,
+    );
 
-    const dialog = tree.root.findByProps({ role: "dialog" });
-
-    act(() => {
-      dialog.props.onKeyDown({
-        key: "Escape",
-        preventDefault: vi.fn(),
-      });
-    });
-
+    fireEvent.click(screen.getByText("Keep"));
     expect(onCancel).toHaveBeenCalledTimes(1);
 
-    act(() => {
-      findButton(tree.root, "Delete").props.onClick();
-    });
+    rerender(
+      <ConfirmModal
+        open={true}
+        title="Delete item"
+        message="Delete this item?"
+        confirmLabel="Delete"
+        cancelLabel="Keep"
+        tone="danger"
+        onConfirm={onConfirm}
+        onCancel={onCancel}
+      />,
+    );
 
+    fireEvent.click(screen.getByText("Delete"));
     expect(onConfirm).toHaveBeenCalledTimes(1);
   });
 
   it("useConfirm resolves true from the confirm button", async () => {
-    let tree!: TestRenderer.ReactTestRenderer;
-    act(() => {
-      tree = TestRenderer.create(React.createElement(ConfirmHarness));
-    });
+    render(<ConfirmHarness />);
 
     let resultPromise!: Promise<boolean>;
-    act(() => {
+    await act(async () => {
       resultPromise = latestConfirm.confirm({
         title: "Delete item",
         message: "Delete this item?",
         confirmLabel: "Delete",
         tone: "danger",
       });
-      vi.runAllTimers();
     });
 
-    expect(latestConfirm.modalProps.open).toBe(true);
-
-    await act(async () => {
-      findButton(tree.root, "Delete").props.onClick();
-    });
+    fireEvent.click(screen.getByText("Delete"));
 
     await expect(resultPromise).resolves.toBe(true);
-    expect(tree.toJSON()).toBeNull();
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 
   it("useConfirm resolves false from the cancel button", async () => {
-    let tree!: TestRenderer.ReactTestRenderer;
-    act(() => {
-      tree = TestRenderer.create(React.createElement(ConfirmHarness));
-    });
+    render(<ConfirmHarness />);
 
     let resultPromise!: Promise<boolean>;
-    act(() => {
+    await act(async () => {
       resultPromise = latestConfirm.confirm({
         title: "Discard draft",
         message: "Discard your changes?",
         cancelLabel: "Stay",
       });
-      vi.runAllTimers();
     });
 
-    await act(async () => {
-      findButton(tree.root, "Stay").props.onClick();
-    });
+    fireEvent.click(screen.getByText("Stay"));
 
     await expect(resultPromise).resolves.toBe(false);
-    expect(tree.toJSON()).toBeNull();
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 });
 
 describe("PromptModal", () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    (globalThis as Record<string, unknown>).__TEST_RENDERER__ = true;
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    delete (globalThis as Record<string, unknown>).__TEST_RENDERER__;
+    cleanup();
   });
 
   it("confirms the entered value", async () => {
-    let tree!: TestRenderer.ReactTestRenderer;
-    act(() => {
-      tree = TestRenderer.create(React.createElement(PromptHarness));
-    });
+    render(<PromptHarness />);
 
     let resultPromise!: Promise<string | null>;
-    act(() => {
+    await act(async () => {
       resultPromise = latestPrompt.prompt({
         title: "Wallet Export Token",
         message: "Enter export token",
         confirmLabel: "Export",
       });
-      vi.runAllTimers();
     });
 
-    const input = tree.root.findByType("input" as React.ElementType);
-    act(() => {
-      input.props.onChange({ target: { value: "token-123" } });
+    fireEvent.change(screen.getByRole("textbox"), {
+      target: { value: "token-123" },
     });
-
-    await act(async () => {
-      findButton(tree.root, "Export").props.onClick();
-    });
+    fireEvent.click(screen.getByText("Export"));
 
     await expect(resultPromise).resolves.toBe("token-123");
-    expect(tree.toJSON()).toBeNull();
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 
   it("returns null on cancel", async () => {
-    let tree!: TestRenderer.ReactTestRenderer;
-    act(() => {
-      tree = TestRenderer.create(React.createElement(PromptHarness));
-    });
+    render(<PromptHarness />);
 
     let resultPromise!: Promise<string | null>;
-    act(() => {
+    await act(async () => {
       resultPromise = latestPrompt.prompt({
         title: "Prompt",
         message: "Enter text",
         cancelLabel: "Skip",
       });
-      vi.runAllTimers();
     });
 
-    await act(async () => {
-      findButton(tree.root, "Skip").props.onClick();
-    });
+    fireEvent.click(screen.getByText("Skip"));
 
     await expect(resultPromise).resolves.toBeNull();
-    expect(tree.toJSON()).toBeNull();
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 });

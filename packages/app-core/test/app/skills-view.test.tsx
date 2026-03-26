@@ -39,6 +39,13 @@ vi.mock("@miladyai/ui", () => ({
     children: React.ReactNode;
     className?: string;
   }) => React.createElement("div", { className }, children),
+  DialogDescription: ({
+    children,
+    className,
+  }: {
+    children: React.ReactNode;
+    className?: string;
+  }) => React.createElement("div", { className }, children),
   Input: (props: React.InputHTMLAttributes<HTMLInputElement>) =>
     React.createElement("input", props),
   StatusBadge: ({ label }: { label: string }) =>

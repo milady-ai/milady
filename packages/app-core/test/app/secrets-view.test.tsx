@@ -1,7 +1,9 @@
+// @vitest-environment jsdom
+
+import { act } from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { SecretsView } from "@miladyai/app-core/components";
-import React from "react";
-import TestRenderer, { act } from "react-test-renderer";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { mockGetSecrets, mockUpdateSecrets } = vi.hoisted(() => ({
   mockGetSecrets: vi.fn(),
@@ -23,6 +25,10 @@ describe("SecretsView picker keyboard behavior", () => {
     if (storage && typeof storage.clear === "function") {
       storage.clear();
     }
+  });
+
+  afterEach(() => {
+    cleanup();
   });
 
   it("keeps picker open on Enter/Space and closes on Escape", async () => {
@@ -47,46 +53,28 @@ describe("SecretsView picker keyboard behavior", () => {
       ],
     });
 
-    let tree!: TestRenderer.ReactTestRenderer;
-    await act(async () => {
-      tree = TestRenderer.create(React.createElement(SecretsView));
+    render(<SecretsView />);
+
+    const addSecretButton = await screen.findByRole("button", {
+      name: "secretsview.AddSecret",
     });
 
     await act(async () => {
-      await Promise.resolve();
+      fireEvent.click(addSecretButton);
     });
 
-    const addSecretButton = tree.root.find(
-      (node) =>
-        node.type === "button" &&
-        node.props.children === "secretsview.AddSecret",
-    );
+    const dialog = await screen.findByRole("dialog");
 
-    await act(async () => {
-      addSecretButton.props.onClick();
+    fireEvent.keyDown(dialog, { key: "Enter" });
+    expect(screen.getByRole("dialog")).toBeTruthy();
+
+    fireEvent.keyDown(dialog, { key: " " });
+    expect(screen.getByRole("dialog")).toBeTruthy();
+
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).toBeNull();
     });
-
-    expect(tree.root.findAllByProps({ role: "dialog" }).length).toBe(1);
-
-    const dialog = tree.root.findByProps({ role: "dialog" });
-    const preventDefault = vi.fn();
-
-    await act(async () => {
-      dialog.props.onKeyDown({ key: "Enter", preventDefault });
-    });
-    expect(preventDefault).not.toHaveBeenCalled();
-    expect(tree.root.findAllByProps({ role: "dialog" }).length).toBe(1);
-
-    await act(async () => {
-      dialog.props.onKeyDown({ key: " ", preventDefault });
-    });
-    expect(preventDefault).not.toHaveBeenCalled();
-    expect(tree.root.findAllByProps({ role: "dialog" }).length).toBe(1);
-
-    await act(async () => {
-      dialog.props.onKeyDown({ key: "Escape", preventDefault });
-    });
-    expect(preventDefault).toHaveBeenCalledTimes(1);
-    expect(tree.root.findAllByProps({ role: "dialog" }).length).toBe(0);
   });
 });

@@ -3,7 +3,7 @@ import { isElectrobunRuntime } from "../bridge";
 import { useApp } from "../state";
 
 /**
- * Banner shown during WebSocket reconnection attempts (amber) and
+ * Banner shown during WebSocket reconnection attempts (yellow) and
  * after all attempts are exhausted (red). Offers Retry when failed.
  */
 export function ConnectionFailedBanner() {
@@ -21,12 +21,14 @@ export function ConnectionFailedBanner() {
   if (backendConnection.state === "reconnecting") {
     return (
       <div
-        className="fixed left-0 right-0 z-[9999] flex items-center gap-3 bg-amber-500 px-4 py-2 text-[13px] font-medium text-white shadow-lg"
+        role="status"
+        aria-live="polite"
+        className="fixed left-0 right-0 z-[9999] flex items-center gap-3 bg-warn px-4 py-2 text-[13px] font-medium text-[color:var(--accent-foreground)] shadow-lg"
         style={{ top: bannerTop }}
       >
         <Spinner
           size={16}
-          className="shrink-0 text-white"
+          className="shrink-0 text-[color:var(--accent-foreground)]"
           aria-label={t("aria.reconnecting")}
         />
         <span className="truncate">
@@ -44,6 +46,8 @@ export function ConnectionFailedBanner() {
   ) {
     return (
       <div
+        role="alert"
+        aria-live="assertive"
         className="fixed left-0 right-0 z-[9999] flex items-center justify-between gap-3 bg-danger px-4 py-2 text-[13px] font-medium text-white shadow-lg"
         style={{ top: bannerTop }}
       >

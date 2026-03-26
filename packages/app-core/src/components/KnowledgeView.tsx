@@ -27,6 +27,20 @@ import { Button, Checkbox, Input } from "@miladyai/ui";
 import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  DESKTOP_INSET_EMPTY_PANEL_CLASSNAME,
+  DESKTOP_INSET_PANEL_CLASSNAME,
+  DESKTOP_PAGE_CONTENT_CLASSNAME,
+  DESKTOP_SURFACE_PANEL_CLASSNAME,
+  DesktopEmptyStatePanel,
+  DesktopInsetEmptyStatePanel,
+  DesktopPageFrame,
+} from "./desktop-surface-primitives";
+import {
+  isKnowledgeImageFile,
+  MAX_KNOWLEDGE_IMAGE_PROCESSING_BYTES,
+  maybeCompressKnowledgeUploadImage,
+} from "./knowledge-upload-image";
+import {
   APP_PANEL_SHELL_CLASSNAME,
   APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
   APP_SIDEBAR_CARD_BASE_CLASSNAME,
@@ -38,11 +52,6 @@ import {
   APP_SIDEBAR_PILL_CLASSNAME,
   APP_SIDEBAR_RAIL_CLASSNAME,
 } from "./sidebar-shell-styles";
-import {
-  isKnowledgeImageFile,
-  MAX_KNOWLEDGE_IMAGE_PROCESSING_BYTES,
-  maybeCompressKnowledgeUploadImage,
-} from "./knowledge-upload-image";
 
 const MAX_UPLOAD_REQUEST_BYTES = 32 * 1_048_576; // Must match server knowledge route limit
 const BULK_UPLOAD_TARGET_BYTES = 24 * 1_048_576;
@@ -70,13 +79,13 @@ const KNOWLEDGE_SIDEBAR_CLASS = `lg:w-[22rem] lg:max-w-[360px] ${APP_SIDEBAR_RAI
 const KNOWLEDGE_KICKER_CLASS = APP_SIDEBAR_KICKER_CLASSNAME;
 const KNOWLEDGE_SECTION_LABEL_CLASS =
   "px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60";
-const KNOWLEDGE_PANEL_CLASS =
-  "rounded-[28px] border border-border/35 bg-bg/20 shadow-sm ring-1 ring-border/10";
+const KNOWLEDGE_PANEL_CLASS = DESKTOP_SURFACE_PANEL_CLASSNAME;
+const KNOWLEDGE_INSET_PANEL_CLASS = DESKTOP_INSET_PANEL_CLASSNAME;
 const KNOWLEDGE_SIDEBAR_ITEM_BASE_CLASS = APP_SIDEBAR_CARD_BASE_CLASSNAME;
 const KNOWLEDGE_SIDEBAR_ITEM_ACTIVE_CLASS = APP_SIDEBAR_CARD_ACTIVE_CLASSNAME;
 const KNOWLEDGE_SIDEBAR_ITEM_INACTIVE_CLASS =
   APP_SIDEBAR_CARD_INACTIVE_CLASSNAME;
-const KNOWLEDGE_META_PILL_CLASS = `${APP_SIDEBAR_PILL_CLASSNAME} text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/75`;
+const KNOWLEDGE_META_PILL_CLASS = `${APP_SIDEBAR_PILL_CLASSNAME} text-[10px] font-semibold uppercase tracking-[0.14em] text-txt-strong`;
 
 export type KnowledgeUploadFile = File & {
   webkitRelativePath?: string;
@@ -226,7 +235,7 @@ function UploadZone({
         <Button
           variant="default"
           size="sm"
-          className="h-10 px-4 text-[11px] font-semibold text-txt shadow-sm"
+          className="h-10 px-4 text-[11px] font-semibold text-txt-strong shadow-sm hover:text-txt-strong"
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
         >
@@ -506,7 +515,7 @@ function DocumentViewer({ documentId }: { documentId: string | null }) {
               <span className="rounded-full border border-border/45 bg-bg/25 px-3 py-1.5 text-[11px] font-semibold text-muted">
                 {getKnowledgeTypeLabel(doc.contentType)}
               </span>
-              <span className="rounded-full border border-accent/25 bg-accent/8 px-3 py-1.5 text-[11px] font-semibold text-accent-fg">
+              <span className="rounded-full border border-accent/25 bg-accent/8 px-3 py-1.5 text-[11px] font-semibold text-txt-strong">
                 {getKnowledgeSourceLabel(doc.source)}
               </span>
             </div>
@@ -523,27 +532,23 @@ function DocumentViewer({ documentId }: { documentId: string | null }) {
         )}
 
         {error && (
-          <div className="mx-auto max-w-lg rounded-xl border border-danger/25 bg-danger/10 py-10 text-center font-medium text-danger">
+          <div className="mx-auto max-w-lg rounded-[18px] border border-danger/25 bg-danger/10 py-10 text-center font-medium text-danger">
             {error}
           </div>
         )}
 
         {!loading && !error && !doc && (
-          <div className="rounded-2xl border border-dashed border-border/35 bg-card/72 px-6 py-16 text-center shadow-inner">
-            <div className="text-base font-semibold text-txt">
-              No document selected
-            </div>
-            <div className="mt-2 text-sm text-muted">
-              Upload a file or choose an item from the sidebar to start viewing
-              fragments and metadata.
-            </div>
-          </div>
+          <DesktopInsetEmptyStatePanel
+            className="px-6 py-16"
+            description="Upload a file or choose an item from the sidebar to start viewing fragments and metadata."
+            title="No document selected"
+          />
         )}
 
         {!loading && !error && doc && (
           <>
             <div className="grid gap-3 lg:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.9fr)]">
-              <div className="rounded-2xl border border-border/35 bg-card/82 p-5 shadow-sm">
+              <div className={`${KNOWLEDGE_INSET_PANEL_CLASS} p-5`}>
                 <div className="mb-3 flex items-center justify-between gap-3 border-b border-border/25 pb-3">
                   <div className="text-sm font-semibold text-txt">Preview</div>
                   <span className="rounded-full border border-border/35 bg-bg/25 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/70">
@@ -555,14 +560,15 @@ function DocumentViewer({ documentId }: { documentId: string | null }) {
                     {previewText.slice(0, 3000)}
                   </pre>
                 ) : (
-                  <div className="rounded-xl border border-dashed border-border/35 bg-bg/16 px-4 py-10 text-center text-sm text-muted">
-                    Full text preview is not available for this document type,
-                    but indexed fragments are shown below.
-                  </div>
+                  <DesktopInsetEmptyStatePanel
+                    className="min-h-[10rem] px-4 py-10 text-sm"
+                    description="Indexed fragments are still available below for this document type."
+                    title="Full text preview is not available"
+                  />
                 )}
               </div>
 
-              <div className="rounded-2xl border border-border/35 bg-card/82 p-5 shadow-sm">
+              <div className={`${KNOWLEDGE_INSET_PANEL_CLASS} p-5`}>
                 <div className="text-sm font-semibold text-txt">Details</div>
                 <div className="mt-4 grid gap-3 text-xs">
                   <div className="flex flex-col gap-1.5">
@@ -616,7 +622,7 @@ function DocumentViewer({ documentId }: { documentId: string | null }) {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-border/35 bg-card/82 p-5 shadow-sm">
+            <div className={`${KNOWLEDGE_INSET_PANEL_CLASS} p-5`}>
               <div className="mb-4 flex items-center justify-between border-b border-border/30 pb-3">
                 <h3 className="text-sm font-bold tracking-wide text-txt">
                   {t("knowledgeview.Fragments1")}
@@ -647,9 +653,10 @@ function DocumentViewer({ documentId }: { documentId: string | null }) {
                   </div>
                 ))}
                 {fragments.length === 0 && (
-                  <div className="rounded-xl border border-dashed border-border/35 bg-card/72 py-12 text-center text-muted">
-                    {t("knowledgeview.NoFragmentsFound")}
-                  </div>
+                  <DesktopInsetEmptyStatePanel
+                    className="min-h-[10rem] py-12"
+                    title={t("knowledgeview.NoFragmentsFound")}
+                  />
                 )}
               </div>
             </div>
@@ -1135,13 +1142,7 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
   }, [documents, selectedDocId]);
 
   return (
-    <div
-      className={
-        inModal
-          ? "flex h-full w-full min-h-0 bg-bg"
-          : "flex h-full w-full min-h-0 bg-bg p-0 lg:p-1"
-      }
-    >
+    <DesktopPageFrame className={inModal ? "p-0 lg:p-0" : undefined}>
       <div className={KNOWLEDGE_SHELL_CLASS}>
         <aside className={KNOWLEDGE_SIDEBAR_CLASS}>
           <div className={APP_SIDEBAR_INNER_CLASSNAME}>
@@ -1162,7 +1163,7 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
                 {totalFragments} fragments
               </span>
               {selectedDoc && (
-                <span className="rounded-full border border-accent/25 bg-accent/8 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-accent-fg">
+                <span className="rounded-full border border-accent/25 bg-accent/8 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-txt-strong">
                   {getKnowledgeTypeLabel(selectedDoc.contentType)}
                 </span>
               )}
@@ -1214,7 +1215,7 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
                 <span
                   className={
                     isShowingSearchResults
-                      ? "rounded-full border border-accent/25 bg-accent/8 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-accent-fg"
+                      ? "rounded-full border border-accent/25 bg-accent/8 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-txt-strong"
                       : KNOWLEDGE_META_PILL_CLASS
                   }
                 >
@@ -1265,7 +1266,9 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
                 {loading &&
                   !isShowingSearchResults &&
                   documents.length === 0 && (
-                    <div className="rounded-2xl border border-border/35 bg-card/72 px-4 py-10 text-center text-sm font-medium text-muted">
+                    <div
+                      className={`${DESKTOP_INSET_EMPTY_PANEL_CLASSNAME} px-4 py-10 text-center text-sm font-medium text-muted`}
+                    >
                       {t("knowledgeview.LoadingDocuments")}
                     </div>
                   )}
@@ -1273,26 +1276,20 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
                 {!loading &&
                   !isShowingSearchResults &&
                   documents.length === 0 && (
-                    <div className="rounded-2xl border border-dashed border-border/35 bg-card/72 px-4 py-10 text-center shadow-inner">
-                      <div className="text-sm font-semibold text-txt">
-                        {t("knowledgeview.NoDocumentsYet")}
-                      </div>
-                      <div className="mt-2 text-[11px] leading-relaxed text-muted">
-                        {t("knowledgeview.UploadFilesOrImpo")}
-                      </div>
-                    </div>
+                    <DesktopEmptyStatePanel
+                      className="min-h-[12rem] px-4 py-8"
+                      description={t("knowledgeview.UploadFilesOrImpo")}
+                      title={t("knowledgeview.NoDocumentsYet")}
+                    />
                   )}
 
                 {isShowingSearchResults &&
                   visibleSearchResults.length === 0 && (
-                    <div className="rounded-2xl border border-dashed border-border/35 bg-card/72 px-4 py-10 text-center shadow-inner">
-                      <div className="text-sm font-semibold text-txt">
-                        {t("knowledgeview.NoResultsFound")}
-                      </div>
-                      <div className="mt-2 text-[11px] leading-relaxed text-muted">
-                        Try a filename, topic, or phrase from the document body.
-                      </div>
-                    </div>
+                    <DesktopEmptyStatePanel
+                      className="min-h-[12rem] px-4 py-8"
+                      description="Try a filename, topic, or phrase from the document body."
+                      title={t("knowledgeview.NoResultsFound")}
+                    />
                   )}
 
                 {isShowingSearchResults
@@ -1321,10 +1318,12 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
           </div>
         </aside>
 
-        <div className="min-w-0 flex-1 overflow-y-auto bg-bg/10">
+        <div className={DESKTOP_PAGE_CONTENT_CLASSNAME}>
           <div className="mx-auto max-w-[78rem] px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
             {isServiceLoading && (
-              <div className="mb-4 flex items-center gap-2 rounded-2xl border border-border/40 bg-card/86 px-4 py-3 text-sm text-muted-strong shadow-sm">
+              <div
+                className={`${KNOWLEDGE_INSET_PANEL_CLASS} mb-4 flex items-center gap-2 px-4 py-3 text-sm text-muted-strong`}
+              >
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--accent)] border-t-transparent" />
                 {t("knowledgeview.KnowledgeServiceIs")}
               </div>
@@ -1365,7 +1364,7 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
                     {totalFragments} fragments
                   </span>
                   {searchResults !== null && (
-                    <span className="rounded-full border border-accent/25 bg-accent/8 px-3 py-1.5 text-[11px] font-semibold text-accent-fg">
+                    <span className="rounded-full border border-accent/25 bg-accent/8 px-3 py-1.5 text-[11px] font-semibold text-txt-strong">
                       {searchResults.length} results
                     </span>
                   )}
@@ -1379,6 +1378,6 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
           </div>
         </div>
       </div>
-    </div>
+    </DesktopPageFrame>
   );
 }

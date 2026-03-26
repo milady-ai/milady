@@ -1,4 +1,4 @@
-import { Button } from "@miladyai/ui";
+import { Button, ConnectionStatus } from "@miladyai/ui";
 import { useApp } from "../state";
 
 export type CloudSourceMode = "cloud" | "own-key";
@@ -59,26 +59,25 @@ export function CloudConnectionStatus({
   const { t } = useApp();
   const resolvedConnectedText = connectedText ?? "Connected to Eliza Cloud";
   return (
-    <div className="flex items-center justify-between py-2.5 px-3 border border-[var(--border)] bg-[var(--bg-muted)]">
-      {connected ? (
-        <>
-          <span className="text-xs text-[var(--text)]">
-            {resolvedConnectedText}
-          </span>
-          <span className="rounded-full border border-green-600 bg-green-600/10 px-1.5 py-0.5 text-[10px] text-[var(--text)]">
-            {t("appsview.Active")}
-          </span>
-        </>
-      ) : (
-        <>
-          <span className="text-xs text-[var(--muted)]">
-            {disconnectedText}
-          </span>
-          <span className="rounded-full border border-[var(--warn)] bg-[var(--warn-subtle)] px-1.5 py-0.5 text-[10px] text-[var(--text)]">
-            {t("cloudsourcecontrols.Offline")}
-          </span>
-        </>
-      )}
+    <div
+      className="flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-bg-muted/90 px-3 py-2.5"
+      role="status"
+      aria-live="polite"
+    >
+      <ConnectionStatus
+        state={connected ? "connected" : "disconnected"}
+        label={connected ? resolvedConnectedText : disconnectedText}
+        className="border-0 bg-transparent px-0 py-0 shadow-none"
+      />
+      <span
+        className={`rounded-full border px-1.5 py-0.5 text-[10px] font-medium ${
+          connected
+            ? "border-ok/30 bg-ok-subtle text-txt"
+            : "border-warn/35 bg-warn-subtle text-txt"
+        }`}
+      >
+        {connected ? t("appsview.Active") : t("cloudsourcecontrols.Offline")}
+      </span>
     </div>
   );
 }

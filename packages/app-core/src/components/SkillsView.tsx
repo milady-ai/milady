@@ -10,6 +10,7 @@ import {
   Button,
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   Input,
@@ -21,9 +22,28 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { SkillInfo, SkillMarketplaceResult } from "../api";
 import { client } from "../api";
 import { useApp } from "../state";
+import {
+  ADMIN_DIALOG_CODE_EDITOR_CLASSNAME,
+  ADMIN_DIALOG_CONTENT_CLASSNAME,
+  ADMIN_DIALOG_HEADER_CLASSNAME,
+  ADMIN_DIALOG_INPUT_CLASSNAME,
+  ADMIN_DIALOG_MONO_META_CLASSNAME,
+  ADMIN_SEGMENTED_TAB_ACTIVE_CLASSNAME,
+  ADMIN_SEGMENTED_TAB_CLASSNAME,
+  ADMIN_SEGMENTED_TAB_INACTIVE_CLASSNAME,
+  ADMIN_SEGMENTED_TABLIST_CLASSNAME,
+} from "./admin-surface-primitives";
 import { ConfirmDeleteControl } from "./confirm-delete-control";
 import {
-  APP_PANEL_SHELL_CLASSNAME,
+  DESKTOP_INSET_PANEL_CLASSNAME,
+  DESKTOP_PAGE_CONTENT_CLASSNAME,
+  DESKTOP_SECTION_SHELL_CLASSNAME,
+  DesktopEmptyStatePanel,
+  DesktopPageFrame,
+} from "./desktop-surface-primitives";
+import {
+  APP_DESKTOP_INLINE_SPLIT_SHELL_CLASSNAME,
+  APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME,
   APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
   APP_SIDEBAR_CARD_BASE_CLASSNAME,
   APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
@@ -31,12 +51,11 @@ import {
   APP_SIDEBAR_INNER_CLASSNAME,
   APP_SIDEBAR_KICKER_CLASSNAME,
   APP_SIDEBAR_META_CLASSNAME,
-  APP_SIDEBAR_RAIL_CLASSNAME,
   APP_SIDEBAR_SCROLL_REGION_CLASSNAME,
   APP_SIDEBAR_SEARCH_INPUT_CLASSNAME,
 } from "./sidebar-shell-styles";
 
-const SKILLS_SHELL_CLASS = `settings-shell plugins-game-modal plugins-game-modal--inline flex-col lg:flex-row ${APP_PANEL_SHELL_CLASSNAME}`;
+const SKILLS_SHELL_CLASS = APP_DESKTOP_INLINE_SPLIT_SHELL_CLASSNAME;
 
 /* ── Marketplace Result Card ────────────────────────────────────────── */
 
@@ -156,6 +175,10 @@ function InstallModal({
 }) {
   const { t } = useApp();
   const [tab, setTab] = useState<InstallTab>("search");
+  const installTabs = [
+    { id: "search" as const, label: "MARKETPLACE" },
+    { id: "url" as const, label: "GITHUB URL" },
+  ] as const;
 
   return (
     <Dialog
@@ -166,34 +189,37 @@ function InstallModal({
     >
       <DialogContent
         container={typeof document !== "undefined" ? document.body : undefined}
-        className="flex max-h-[80vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-border/60 bg-card/98 p-0 shadow-2xl"
+        className={`${ADMIN_DIALOG_CONTENT_CLASSNAME} max-h-[80vh] max-w-2xl`}
       >
-        <DialogHeader>
+        <DialogHeader className={ADMIN_DIALOG_HEADER_CLASSNAME}>
           <DialogTitle className="text-[13px] font-extrabold uppercase tracking-[0.14em]">
             Install Skill
           </DialogTitle>
-          <div className="mt-0.5 text-[11px] text-muted">
+          <DialogDescription className="mt-0.5 text-[11px] text-muted">
             Add skills from the marketplace or a GitHub repository.
-          </div>
+          </DialogDescription>
         </DialogHeader>
 
         {/* Tabs */}
-        <div className="flex border-b border-border/60 bg-bg-accent/35">
-          {(
-            [
-              { id: "search" as const, label: "MARKETPLACE" },
-              { id: "url" as const, label: "GITHUB URL" },
-            ] as const
-          ).map((t) => (
+        <div
+          className={ADMIN_SEGMENTED_TABLIST_CLASSNAME}
+          role="tablist"
+          aria-label="Install skill source"
+        >
+          {installTabs.map((t) => (
             <Button
               variant="ghost"
               size="sm"
               type="button"
               key={t.id}
-              className={`flex-1 rounded-none border-b-2 px-4 py-2.5 text-[11px] font-bold tracking-[0.1em] transition-colors ${
+              role="tab"
+              id={`skills-install-tab-${t.id}`}
+              aria-selected={tab === t.id}
+              aria-controls={`skills-install-panel-${t.id}`}
+              className={`${ADMIN_SEGMENTED_TAB_CLASSNAME} ${
                 tab === t.id
-                  ? "border-accent text-accent"
-                  : "border-transparent text-muted-strong hover:text-txt"
+                  ? ADMIN_SEGMENTED_TAB_ACTIVE_CLASSNAME
+                  : ADMIN_SEGMENTED_TAB_INACTIVE_CLASSNAME
               }`}
               onClick={() => setTab(t.id)}
             >
@@ -205,13 +231,20 @@ function InstallModal({
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {tab === "search" && (
-            <>
+            <div
+              id="skills-install-panel-search"
+              role="tabpanel"
+              aria-labelledby="skills-install-tab-search"
+            >
               <div className="flex gap-2 items-center mb-4">
                 <Input
                   type="text"
-                  className="plugins-game-search-input"
+                  className={ADMIN_DIALOG_INPUT_CLASSNAME}
                   style={{ flex: 1, minWidth: 200 }}
                   placeholder={t("skillsview.searchByKeyword")}
+                  aria-label={t("skillsview.searchByKeyword", {
+                    defaultValue: "Search skills marketplace",
+                  })}
                   value={skillsMarketplaceQuery}
                   onChange={(e) =>
                     setState("skillsMarketplaceQuery", e.target.value)
@@ -234,7 +267,10 @@ function InstallModal({
               </div>
 
               {skillsMarketplaceError && (
-                <div className="mb-3 rounded-lg border border-danger/35 bg-danger/10 p-2.5 text-xs text-danger">
+                <div
+                  role="alert"
+                  className="mb-3 rounded-lg border border-danger/35 bg-danger/10 p-2.5 text-xs text-danger"
+                >
                   {skillsMarketplaceError}
                 </div>
               )}
@@ -263,11 +299,15 @@ function InstallModal({
                   ))}
                 </div>
               )}
-            </>
+            </div>
           )}
 
           {tab === "url" && (
-            <div>
+            <div
+              id="skills-install-panel-url"
+              role="tabpanel"
+              aria-labelledby="skills-install-tab-url"
+            >
               <div className="mb-1 text-[12px] font-semibold text-txt">
                 GitHub Repository URL
               </div>
@@ -277,9 +317,10 @@ function InstallModal({
               <div className="flex gap-2 items-center">
                 <Input
                   type="text"
-                  className="plugins-game-search-input"
+                  className={ADMIN_DIALOG_INPUT_CLASSNAME}
                   style={{ flex: 1 }}
                   placeholder="https://github.com/org/repo"
+                  aria-label="GitHub repository URL"
                   value={skillsMarketplaceManualGithubUrl}
                   onChange={(e) =>
                     setState("skillsMarketplaceManualGithubUrl", e.target.value)
@@ -307,7 +348,10 @@ function InstallModal({
               </div>
 
               {skillsMarketplaceError && (
-                <div className="mt-3 rounded-lg border border-danger/35 bg-danger/10 p-2.5 text-xs text-danger">
+                <div
+                  role="alert"
+                  className="mt-3 rounded-lg border border-danger/35 bg-danger/10 p-2.5 text-xs text-danger"
+                >
                   {skillsMarketplaceError}
                 </div>
               )}
@@ -454,18 +498,6 @@ function EditSkillModal({
       e.preventDefault();
       if (hasChanges && !saving) void handleSave();
     }
-    // Allow tab to insert spaces
-    if (e.key === "Tab") {
-      e.preventDefault();
-      const target = e.target as HTMLTextAreaElement;
-      const start = target.selectionStart;
-      const end = target.selectionEnd;
-      const val = target.value;
-      setContent(`${val.substring(0, start)}  ${val.substring(end)}`);
-      requestAnimationFrame(() => {
-        target.selectionStart = target.selectionEnd = start + 2;
-      });
-    }
   };
 
   return (
@@ -477,16 +509,23 @@ function EditSkillModal({
     >
       <DialogContent
         container={typeof document !== "undefined" ? document.body : undefined}
-        className="flex h-[85vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-border/60 bg-card/98 p-0 shadow-2xl"
+        className={`${ADMIN_DIALOG_CONTENT_CLASSNAME} h-[85vh] max-w-4xl`}
       >
-        <DialogHeader className="flex-row items-center justify-between px-5 py-3 shrink-0 border-b border-[var(--border)] space-y-0">
+        <DialogHeader
+          className={`${ADMIN_DIALOG_HEADER_CLASSNAME} flex-row items-center justify-between py-3 space-y-0`}
+        >
           <div className="flex items-center gap-3 min-w-0">
             <DialogTitle className="font-semibold text-sm truncate">
               {skillName}
             </DialogTitle>
-            <span className="rounded-md border border-border bg-bg-hover px-1.5 py-0.5 text-[10px] font-mono text-muted">
+            <span
+              className={`rounded-md border border-border bg-bg-hover px-1.5 py-0.5 ${ADMIN_DIALOG_MONO_META_CLASSNAME}`}
+            >
               {t("skillsview.SKILLMd")}
             </span>
+            <DialogDescription className="sr-only">
+              Edit the Markdown source for this skill and save your changes.
+            </DialogDescription>
             {hasChanges && (
               <span className="text-[10px] font-medium text-warn">
                 {t("skillsview.unsaved")}
@@ -521,7 +560,7 @@ function EditSkillModal({
             </div>
           ) : (
             <Textarea
-              className="h-full w-full resize-none border-0 bg-bg-hover p-5 font-mono text-[13px] leading-relaxed text-txt focus:outline-none focus-visible:ring-0"
+              className={ADMIN_DIALOG_CODE_EDITOR_CLASSNAME}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -659,6 +698,9 @@ function SkillsModalView() {
               placeholder={t("skillsview.SearchSkills", {
                 defaultValue: "Search skills...",
               })}
+              aria-label={t("skillsview.SearchSkills", {
+                defaultValue: "Search skills",
+              })}
               value={filterText}
               onChange={(e) => setFilterText(e.target.value)}
               className="plugins-game-search-input"
@@ -693,7 +735,13 @@ function SkillsModalView() {
         </div>
 
         {/* Skill list */}
-        <div className="plugins-game-list-scroll">
+        <div
+          className="plugins-game-list-scroll"
+          role="listbox"
+          aria-label={t("skillsview.Talents", {
+            defaultValue: "Installed skills",
+          })}
+        >
           {filtered.length === 0 ? (
             <div className="plugins-game-list-empty">
               {t("skillsview.NoSkillsFound", {
@@ -706,6 +754,8 @@ function SkillsModalView() {
                 variant="ghost"
                 key={skill.id}
                 type="button"
+                role="option"
+                aria-selected={effectiveSelectedId === skill.id}
                 className={`plugins-game-card${effectiveSelectedId === skill.id ? " is-selected" : ""}${!skill.enabled ? " is-disabled" : ""} h-auto`}
                 onClick={() => setSelectedId(skill.id)}
               >
@@ -929,11 +979,11 @@ function SkillsFullView() {
     selectedSkill?.scanStatus === "blocked";
 
   return (
-    <div className="flex h-full w-full min-h-0 bg-bg p-0 lg:p-1">
+    <DesktopPageFrame>
       <div className={SKILLS_SHELL_CLASS} data-testid="skills-shell">
         <aside
           data-testid="skills-sidebar"
-          className={`flex min-h-0 w-full max-w-none shrink-0 flex-col border-b border-border/40 lg:w-[clamp(18rem,23vw,21rem)] lg:min-w-[18rem] lg:max-w-[22rem] lg:border-b-0 lg:border-r ${APP_SIDEBAR_RAIL_CLASSNAME}`}
+          className={APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME}
         >
           <div className={APP_SIDEBAR_INNER_CLASSNAME}>
             <div className={APP_SIDEBAR_HEADER_CLASSNAME}>
@@ -954,7 +1004,7 @@ function SkillsFullView() {
                 className={`h-9 flex-1 rounded-full px-4 text-[11px] font-bold tracking-[0.12em] ${
                   skillCreateFormOpen
                     ? "border-border/50 bg-bg/25 text-txt"
-                    : ""
+                    : "text-txt-strong"
                 }`}
                 onClick={() => {
                   setState("skillCreateFormOpen", !skillCreateFormOpen);
@@ -1020,8 +1070,11 @@ function SkillsFullView() {
               ))}
             </div>
 
-            <nav
+            <section
               className={`mt-4 space-y-1.5 ${APP_SIDEBAR_SCROLL_REGION_CLASSNAME}`}
+              aria-label={t("skillsview.filterSkills", {
+                defaultValue: "Skills list",
+              })}
             >
               {filteredSkills.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-border/45 bg-bg/20 px-4 py-6 text-center text-sm text-muted">
@@ -1048,6 +1101,8 @@ function SkillsFullView() {
                     >
                       <Button
                         variant="ghost"
+                        role="option"
+                        aria-selected={selectedSkillId === skill.id}
                         className="flex h-auto min-w-0 flex-1 items-start gap-3 rounded-none p-0 text-left"
                         onClick={() => {
                           setSelectedId(skill.id);
@@ -1097,17 +1152,19 @@ function SkillsFullView() {
                   );
                 })
               )}
-            </nav>
+            </section>
           </div>
         </aside>
 
         <div
           data-testid="skills-detail"
-          className="min-w-0 flex-1 overflow-y-auto bg-bg/10"
+          className={DESKTOP_PAGE_CONTENT_CLASSNAME}
         >
           <div className="mx-auto max-w-[76rem] px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
             {skills.length === 0 && !skillCreateFormOpen ? (
-              <div className="rounded-[1.6rem] border border-border/45 bg-card/92 px-6 py-12 text-center shadow-[0_18px_44px_rgba(3,5,10,0.16)] ring-1 ring-border/10">
+              <div
+                className={`${DESKTOP_SECTION_SHELL_CLASSNAME} px-6 py-12 text-center`}
+              >
                 <div
                   data-testid="skills-empty-state"
                   className="text-sm font-semibold text-txt"
@@ -1137,14 +1194,14 @@ function SkillsFullView() {
                 </div>
               </div>
             ) : filteredSkills.length === 0 && !skillCreateFormOpen ? (
-              <div
+              <DesktopEmptyStatePanel
                 data-testid="skills-filter-empty"
-                className="rounded-[1.6rem] border border-dashed border-border/45 bg-bg/18 px-6 py-12 text-center text-sm text-muted"
-              >
-                No skills match filtering "{filterText}"
-              </div>
+                className="px-6 py-12 text-center text-sm text-muted"
+                title="No matching skills"
+                description={`No skills match filtering "${filterText}"`}
+              />
             ) : skillCreateFormOpen ? (
-              <section className="overflow-hidden rounded-[1.6rem] border border-border/45 bg-card/92 shadow-[0_18px_44px_rgba(3,5,10,0.16)] ring-1 ring-border/10">
+              <section className={DESKTOP_SECTION_SHELL_CLASSNAME}>
                 <div className="border-b border-border/35 px-5 py-4">
                   <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60">
                     Skill Builder
@@ -1167,7 +1224,7 @@ function SkillsFullView() {
             ) : selectedSkill ? (
               <section
                 data-skill-id={selectedSkill.id}
-                className="overflow-hidden rounded-[1.6rem] border border-border/45 bg-card/92 shadow-[0_18px_44px_rgba(3,5,10,0.16)] ring-1 ring-border/10"
+                className={DESKTOP_SECTION_SHELL_CLASSNAME}
               >
                 <div className="flex items-start gap-3 px-4 py-4 sm:px-5">
                   <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-accent/30 bg-accent/18 p-2.5 text-base font-bold text-txt-strong">
@@ -1276,7 +1333,9 @@ function SkillsFullView() {
                   </div>
 
                   {selectedSkillReviewOpen && skillReviewReport ? (
-                    <div className="rounded-[24px] border border-border/25 bg-bg/10 p-4 sm:p-5">
+                    <div
+                      className={`${DESKTOP_INSET_PANEL_CLASSNAME} p-4 sm:p-5`}
+                    >
                       <div className="mb-3 flex flex-wrap items-center gap-3">
                         <span className="text-xs font-semibold text-txt">
                           {t("skillsview.ScanReport")}
@@ -1344,7 +1403,9 @@ function SkillsFullView() {
                       {t("skillsview.LoadingScanReport")}
                     </div>
                   ) : (
-                    <div className="rounded-[24px] border border-border/25 bg-bg/10 p-4 sm:p-5">
+                    <div
+                      className={`${DESKTOP_INSET_PANEL_CLASSNAME} p-4 sm:p-5`}
+                    >
                       <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60">
                         {t("skillsview.EditSource", {
                           defaultValue: "Edit Source",
@@ -1360,11 +1421,12 @@ function SkillsFullView() {
                 </div>
               </section>
             ) : (
-              <div className="rounded-[1.6rem] border border-dashed border-border/45 bg-bg/18 px-6 py-12 text-center text-sm text-muted">
-                {t("skillsview.SelectATalentToConf", {
+              <DesktopEmptyStatePanel
+                className="px-6 py-12 text-center text-sm text-muted"
+                title={t("skillsview.SelectATalentToConf", {
                   defaultValue: "Select a talent to configure",
                 })}
-              </div>
+              />
             )}
           </div>
         </div>
@@ -1398,6 +1460,6 @@ function SkillsFullView() {
           onClose={() => setInstallModalOpen(false)}
         />
       )}
-    </div>
+    </DesktopPageFrame>
   );
 }

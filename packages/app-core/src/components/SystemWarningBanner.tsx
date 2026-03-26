@@ -5,7 +5,7 @@ import { useApp } from "../state";
 const AUTO_DISMISS_MS = 20_000;
 
 /**
- * Renders amber warning banners for system-level warnings
+ * Renders yellow warning banners for system-level warnings
  * broadcast via WebSocket `system-warning` events.
  */
 export function SystemWarningBanner() {
@@ -54,7 +54,9 @@ export function SystemWarningBanner() {
       {systemWarnings.map((message, index) => (
         <div
           key={message}
-          className="fixed left-0 right-0 z-[9998] flex items-center justify-between gap-3 bg-amber-500 px-4 py-2 text-[13px] font-medium text-white shadow-lg"
+          role="alert"
+          aria-live="assertive"
+          className="fixed left-0 right-0 z-[9998] flex items-center justify-between gap-3 bg-warn px-4 py-2 text-[13px] font-medium text-[color:var(--accent-foreground)] shadow-lg"
           style={{ top: `${baseTop + index * 36}px` }}
         >
           <span className="truncate">{message}</span>
@@ -62,7 +64,7 @@ export function SystemWarningBanner() {
             variant="ghost"
             size="sm"
             onClick={() => dismissSystemWarning(message)}
-            className="rounded px-2 py-0.5 text-[12px] text-amber-100 hover:bg-amber-600 shrink-0"
+            className="shrink-0 rounded px-2 py-0.5 text-[12px] text-[color:var(--accent-foreground)]/80 hover:bg-black/10"
           >
             x
           </Button>

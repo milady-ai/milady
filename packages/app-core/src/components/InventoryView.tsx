@@ -23,6 +23,31 @@ import {
   Wallet,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { TradePanel } from "./BscTradePanel";
+import {
+  CHAIN_CONFIGS,
+  type ChainKey,
+  chainKeyToWalletRpcChain,
+  PRIMARY_CHAIN_KEYS,
+  resolveChainKey,
+} from "./chainConfig";
+import {
+  DESKTOP_PAGE_CONTENT_CLASSNAME,
+  DESKTOP_RAIL_SUMMARY_CARD_CLASSNAME,
+  DESKTOP_SURFACE_PANEL_CLASSNAME,
+  DesktopPageFrame,
+} from "./desktop-surface-primitives";
+import {
+  BSC_GAS_READY_THRESHOLD,
+  loadTrackedBscTokens,
+  loadTrackedTokens,
+  removeTrackedBscToken,
+  saveTrackedTokens,
+  type TrackedToken,
+} from "./inventory";
+import { NftGrid } from "./inventory/NftGrid";
+import { TokensTable } from "./inventory/TokensTable";
+import { useInventoryData } from "./inventory/useInventoryData";
 import {
   APP_PANEL_SHELL_CLASSNAME,
   APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
@@ -35,25 +60,6 @@ import {
   APP_SIDEBAR_PILL_CLASSNAME,
   APP_SIDEBAR_RAIL_CLASSNAME,
 } from "./sidebar-shell-styles";
-import { TradePanel } from "./BscTradePanel";
-import {
-  CHAIN_CONFIGS,
-  type ChainKey,
-  PRIMARY_CHAIN_KEYS,
-  chainKeyToWalletRpcChain,
-  resolveChainKey,
-} from "./chainConfig";
-import {
-  BSC_GAS_READY_THRESHOLD,
-  loadTrackedBscTokens,
-  loadTrackedTokens,
-  removeTrackedBscToken,
-  saveTrackedTokens,
-  type TrackedToken,
-} from "./inventory";
-import { NftGrid } from "./inventory/NftGrid";
-import { TokensTable } from "./inventory/TokensTable";
-import { useInventoryData } from "./inventory/useInventoryData";
 
 /* ── Component ─────────────────────────────────────────────────────── */
 
@@ -63,8 +69,7 @@ const WALLET_SIDEBAR_KICKER_CLASS = APP_SIDEBAR_KICKER_CLASSNAME;
 const WALLET_SIDEBAR_ITEM_BASE_CLASS = APP_SIDEBAR_CARD_BASE_CLASSNAME;
 const WALLET_SIDEBAR_ITEM_ACTIVE_CLASS = APP_SIDEBAR_CARD_ACTIVE_CLASSNAME;
 const WALLET_SIDEBAR_ITEM_INACTIVE_CLASS = APP_SIDEBAR_CARD_INACTIVE_CLASSNAME;
-const WALLET_PANEL_CLASS =
-  "rounded-[28px] border border-border/35 bg-bg/20 shadow-sm ring-1 ring-border/10";
+const WALLET_PANEL_CLASS = DESKTOP_SURFACE_PANEL_CLASSNAME;
 
 function countVisibleAssetsForFocus(
   focus: string,
@@ -85,7 +90,7 @@ function countVisibleAssetsForFocus(
   }).length;
 }
 
-export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
+export function InventoryView() {
   const {
     walletConfig,
     walletAddresses,
@@ -407,21 +412,25 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
   // ── Standalone states (no two-panel layout) ─────────────────────
   if (walletLoading && !walletBalances) {
     return (
-      <div className="flex h-full w-full min-h-0 bg-bg p-0 lg:p-1">
+      <DesktopPageFrame>
         <div className={`${WALLET_SHELL_CLASS} items-center justify-center`}>
-          <div className="rounded-[28px] border border-border/35 bg-bg/20 px-6 py-10 text-center text-sm text-muted shadow-sm ring-1 ring-border/10">
+          <div
+            className={`${WALLET_PANEL_CLASS} px-6 py-10 text-center text-sm text-muted`}
+          >
             {t("wallet.loadingBalances")}
           </div>
         </div>
-      </div>
+      </DesktopPageFrame>
     );
   }
 
   if (!evmAddr && !solAddr) {
     return (
-      <div className="flex h-full w-full min-h-0 bg-bg p-0 lg:p-1">
+      <DesktopPageFrame>
         <div className={`${WALLET_SHELL_CLASS} items-center justify-center`}>
-          <div className="mx-4 w-full max-w-xl rounded-[28px] border border-border/35 bg-bg/20 px-6 py-8 text-center shadow-sm ring-1 ring-border/10">
+          <div
+            className={`mx-4 w-full max-w-xl ${WALLET_PANEL_CLASS} px-6 py-8 text-center`}
+          >
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-accent/25 bg-accent/10 text-accent">
               <Wallet className="h-6 w-6" />
             </div>
@@ -441,13 +450,13 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
             </Button>
           </div>
         </div>
-      </div>
+      </DesktopPageFrame>
     );
   }
 
   // ── Wallet layout ───────────────────────────────────────────────
   return (
-    <div className="flex h-full w-full min-h-0 bg-bg p-0 lg:p-1">
+    <DesktopPageFrame>
       <div className={WALLET_SHELL_CLASS}>
         <aside className={WALLET_SIDEBAR_CLASS}>
           <div className={APP_SIDEBAR_INNER_CLASSNAME}>
@@ -460,7 +469,7 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
               </div>
             </div>
 
-            <div className="mt-4 rounded-[24px] border border-border/30 bg-bg/18 p-4 shadow-sm ring-1 ring-border/10">
+            <div className={`mt-4 ${DESKTOP_RAIL_SUMMARY_CARD_CLASSNAME}`}>
               <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60">
                 Portfolio
               </div>
@@ -619,7 +628,7 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
           </div>
         </aside>
 
-        <div className="min-w-0 flex-1 overflow-y-auto bg-bg/10">
+        <div className={DESKTOP_PAGE_CONTENT_CLASSNAME}>
           <div className="mx-auto max-w-[76rem] px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
             <section className={`${WALLET_PANEL_CLASS} px-5 py-5 sm:px-6`}>
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -790,6 +799,6 @@ export function InventoryView({ inModal }: { inModal?: boolean } = {}) {
           </div>
         </div>
       </div>
-    </div>
+    </DesktopPageFrame>
   );
 }

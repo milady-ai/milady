@@ -319,7 +319,9 @@ export function TradePanel({
             {p.name && <span className="font-mono">{p.name}: </span>}
             <span
               className={
-                p.status === "rejected" ? "text-red-400" : "text-yellow-400"
+                p.status === "rejected"
+                  ? "text-red-400"
+                  : "text-[color:var(--warn,var(--accent))]"
               }
             >
               {p.status}
@@ -357,7 +359,7 @@ export function TradePanel({
           </div>
           {status === "pending" && (
             <div className="flex items-center gap-2">
-              <span className="text-yellow-500">
+              <span className="text-[color:var(--warn,var(--accent))]">
                 {t("bsctradepanel.Pending")}
               </span>
               <Button
@@ -395,7 +397,7 @@ export function TradePanel({
       if (isPending) {
         return (
           <div className="border border-border p-2 text-xs space-y-1">
-            <div className="flex items-center gap-1 text-yellow-500">
+            <div className="flex items-center gap-1 text-[color:var(--warn,var(--accent))]">
               <span>🔐</span>
               <span>Waiting for Steward policy approval…</span>
             </div>
@@ -426,7 +428,7 @@ export function TradePanel({
     if (latestExecution.requiresUserSignature) {
       return (
         <div className="border border-border p-2 text-xs space-y-1">
-          <div className="text-yellow-500">
+          <div className="text-[color:var(--warn,var(--accent))]">
             {t("bsctradepanel.RequiresWalletSign")}
           </div>
           {latestExecution.unsignedApprovalTx && (
@@ -470,7 +472,13 @@ export function TradePanel({
     <>
       {/* Status bar */}
       <div className="flex items-center gap-2 text-xs">
-        <span className={tradeReady ? "text-green-500" : "text-yellow-500"}>
+        <span
+          className={
+            tradeReady
+              ? "text-green-500"
+              : "text-[color:var(--warn,var(--accent))]"
+          }
+        >
           {tradeReady ? "Trade Ready" : "Trade Not Ready"}
         </span>
         <span className="text-muted">
@@ -597,7 +605,7 @@ export function TradePanel({
             </div>
             {pendingTrade ? (
               <div className="mt-1 flex items-center gap-2">
-                <span className="text-yellow-500 font-bold">
+                <span className="font-bold text-[color:var(--warn,var(--accent))]">
                   {t("onboarding.confirm")} {pendingTrade.side}{" "}
                   {t("bsctradepanel.trade")}
                 </span>

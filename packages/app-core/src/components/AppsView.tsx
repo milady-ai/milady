@@ -14,21 +14,19 @@ import {
   DEFAULT_VIEWER_SANDBOX,
   shouldShowAppInAppsView,
 } from "./apps/helpers";
+import {
+  DESKTOP_INSET_PANEL_CLASSNAME,
+  DesktopEmptyStatePanel,
+} from "./desktop-surface-primitives";
 
 export { shouldShowAppInAppsView } from "./apps/helpers";
 
 function AppsEmptyState() {
   return (
-    <div className="flex h-full min-h-[18rem] flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-border/40 bg-card/72 px-6 py-12 text-center">
-      <span className="mb-4 text-4xl opacity-40">📱</span>
-      <span className="text-[13px] font-medium text-muted">
-        Select an app to view details
-      </span>
-      <span className="mt-2 max-w-[16rem] text-[11px] leading-5 text-muted-strong">
-        Browse the catalog, inspect launch details, and resume active sessions
-        from one place.
-      </span>
-    </div>
+    <DesktopEmptyStatePanel
+      description="Browse the catalog, inspect launch details, and resume active sessions from one place."
+      title="Select an app to view details"
+    />
   );
 }
 
@@ -250,7 +248,9 @@ export function AppsView() {
             />
           </div>
 
-          <div className="order-1 rounded-[1.5rem] border border-border/40 bg-bg/45 p-4 shadow-inner lg:order-2">
+          <div
+            className={`order-1 p-4 lg:order-2 ${DESKTOP_INSET_PANEL_CLASSNAME}`}
+          >
             {selectedApp ? (
               <AppDetailPane
                 app={selectedApp}

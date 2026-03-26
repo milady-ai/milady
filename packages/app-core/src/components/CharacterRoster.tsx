@@ -111,8 +111,9 @@ export function CharacterRoster({
                 ...(isSelected
                   ? {
                       background:
-                        "linear-gradient(135deg, var(--burnished-gold) 0%, var(--classic-gold) 58%, var(--highlight-gold) 100%)",
-                      boxShadow: "0 0 20px var(--gold-glow)",
+                        "linear-gradient(180deg, color-mix(in srgb, var(--accent) 90%, white 10%) 0%, var(--accent) 100%)",
+                      boxShadow:
+                        "0 0 16px rgba(var(--accent-rgb, 240, 185, 11), 0.16)",
                     }
                   : {}),
               }}
@@ -123,7 +124,7 @@ export function CharacterRoster({
               >
                 {isSelected && (
                   <div
-                    className="pointer-events-none absolute -inset-3 bg-yellow-300/15 blur-xl"
+                    className="pointer-events-none absolute -inset-3 bg-[rgba(var(--accent-rgb,240,185,11),0.15)] blur-xl"
                     style={{ clipPath: SLANT_CLIP }}
                   />
                 )}
