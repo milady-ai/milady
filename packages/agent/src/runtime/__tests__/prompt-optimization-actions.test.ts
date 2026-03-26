@@ -471,7 +471,6 @@ describe("installPromptOptimizations", () => {
         });
         return "mock response";
       },
-      __miladyPromptOptInstalled: false,
     };
     return { runtime: runtime as unknown as import("@elizaos/core").AgentRuntime, calls };
   }
@@ -509,5 +508,59 @@ user: tell me a joke`;
     // But action names preserved
     expect(calls[0].prompt).toContain("<name>START_CODING_TASK</name>");
     expect(calls[0].prompt).toContain("<name>REPLY</name>");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// compactModelPrompt (compact mode orchestration)
+// ---------------------------------------------------------------------------
+
+import { compactModelPrompt } from "../prompt-compaction";
+
+describe("compactModelPrompt", () => {
+  it("composes helpers correctly in compact mode", () => {
+    const prompt = `initial code: a1ad90f7-5206-4c20-a281-fdb569ca3121
+# Conversation Messages
+user: hello
+
+# Received Message
+user: hello`;
+
+    const result = compactModelPrompt(prompt);
+    // Initial code marker should be compacted
+    expect(result).toContain("<initial_code>");
+    expect(result).not.toContain("a1ad90f7-5206-4c20-a281-fdb569ca3121");
+  });
+
+  it("skips coding-only compactors when coding intent is absent", () => {
+    const prompt = `
+## Project Context (Workspace)
+### AGENTS.md
+Some agent info here
+# Conversation Messages
+user: what are pancakes made of
+
+# Received Message
+user: what are pancakes made of`;
+
+    const result = compactModelPrompt(prompt);
+    // Workspace context should be stripped for non-coding
+    expect(result).toContain("[workspace file contents omitted");
+  });
+
+  it("keeps workspace context when coding intent is present", () => {
+    const prompt = `
+## Project Context (Workspace)
+### AGENTS.md
+Some agent info here
+# Conversation Messages
+user: fix the repository code
+
+# Received Message
+user: fix the repository code`;
+
+    const result = compactModelPrompt(prompt);
+    // Workspace context should be preserved for coding
+    expect(result).toContain("Some agent info here");
   });
 });

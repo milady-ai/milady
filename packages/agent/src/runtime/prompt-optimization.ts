@@ -50,22 +50,16 @@ const MILADY_ACTION_COMPACTION = (() => {
 	return true;
 })();
 
-// ---------------------------------------------------------------------------
-// Runtime state (per-runtime, attached to the runtime instance)
-// ---------------------------------------------------------------------------
-
-interface RuntimeWithOptState extends AgentRuntime {
-	__miladyPromptOptInstalled?: boolean;
-}
+// Track which runtimes have been wrapped to prevent double-installation.
+const installedRuntimes = new WeakSet<AgentRuntime>();
 
 // ---------------------------------------------------------------------------
 // Public API — install the useModel wrapper on a runtime
 // ---------------------------------------------------------------------------
 
 export function installPromptOptimizations(runtime: AgentRuntime): void {
-	const rt = runtime as RuntimeWithOptState;
-	if (rt.__miladyPromptOptInstalled) return;
-	rt.__miladyPromptOptInstalled = true;
+	if (installedRuntimes.has(runtime)) return;
+	installedRuntimes.add(runtime);
 
 	// Validate intent-action map against registered actions
 	const actionNames = runtime.actions?.map((a) => a.name) ?? [];

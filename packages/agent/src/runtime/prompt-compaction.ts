@@ -285,8 +285,8 @@ export function compactModelPrompt(prompt: string): string {
   if (!hasCodingIntent) {
     next = compactCodingActionExamples(next);
   }
-  // Context-aware action compaction (replaces old compactActionDocs)
-  next = compactActionsForIntent(next);
+  // Action compaction is handled by installPromptOptimizations before
+  // compactModelPrompt is called — no need to run it again here.
   next = compactLoadedPluginLists(next);
   next = compactEmoteCatalog(next);
   if (!hasCodingIntent) {
