@@ -106,6 +106,10 @@ const EMOTE_INTENT_RE =
 // "close" and "label" removed — too generic ("close the file", "label this").
 const ISSUE_INTENT_RE =
   /\b(issue|bug report|ticket|close issue|reopen issue|github issue|create issue|file a bug)\b|이슈|버그|티켓|问题|错误|工单|\b(problema|error|billete)\b/i;
+// Wallet / on-chain intent should keep full action schemas to avoid "I will send"
+// style larping when trade/transfer actions require detailed params.
+const WALLET_INTENT_RE =
+  /\b(wallet|onchain|on-chain|transaction|tx\b|transfer|swap|trade|send\b|gas|token|bnb|eth|sol|basechain|erc20|balance)\b|钱包|交易|转账|代币|余额|지갑|거래|전송|잔액|\b(cartera|transacci[oó]n|intercambio|saldo)\b/i;
 
 /** Actions that are always included at full detail. */
 export const UNIVERSAL_ACTIONS = new Set(["REPLY", "NONE", "IGNORE"]);
@@ -131,6 +135,7 @@ export const INTENT_ACTION_MAP: Record<string, Set<string>> = {
   issues: new Set(["MANAGE_ISSUES"]),
   emote: new Set(["PLAY_EMOTE"]),
   plugin_ui: new Set(["RESTART_AGENT"]),
+  wallet: new Set(),
 };
 
 export function hasIntent(prompt: string, keywords: RegExp): boolean {
@@ -188,6 +193,7 @@ export function detectIntentCategories(prompt: string): string[] {
   if (hasIntent(prompt, ISSUE_INTENT_RE)) categories.push("issues");
   if (hasIntent(prompt, EMOTE_INTENT_RE)) categories.push("emote");
   if (hasIntent(prompt, PLUGIN_UI_INTENT_RE)) categories.push("plugin_ui");
+  if (hasIntent(prompt, WALLET_INTENT_RE)) categories.push("wallet");
   return categories;
 }
 
@@ -223,6 +229,12 @@ export function buildFullParamActionSet(
  * (REPLY, NONE, IGNORE) keep full params — all others are stubbed.
  */
 export function compactActionsForIntent(prompt: string): string {
+  // Wallet / on-chain tasks need full action param schemas for reliable tool
+  // invocation across providers and languages. Skip action compaction here.
+  if (hasIntent(prompt, WALLET_INTENT_RE)) {
+    return prompt;
+  }
+
   // NOTE: Intent detection is English-keyword-based. Non-English messages may
   // not trigger any intent, causing all non-universal action params to be
   // stripped. This is a graceful degradation — action names and descriptions
