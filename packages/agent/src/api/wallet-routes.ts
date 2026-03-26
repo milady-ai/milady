@@ -23,6 +23,7 @@ import {
 import {
   applyWalletRpcConfigUpdate,
   getStoredWalletRpcSelections,
+  resolveWalletNetworkMode,
   resolveWalletRpcReadiness,
 } from "./wallet-rpc";
 
@@ -97,6 +98,10 @@ function resolveWalletConfigUpdateRequest(
     typeof record.selections === "object" &&
     !Array.isArray(record.selections)
   ) {
+    const walletNetwork =
+      record.walletNetwork === "testnet" || record.walletNetwork === "mainnet"
+        ? record.walletNetwork
+        : undefined;
     const credentials =
       record.credentials &&
       typeof record.credentials === "object" &&
@@ -112,6 +117,7 @@ function resolveWalletConfigUpdateRequest(
       selections: normalizeWalletRpcSelections(
         record.selections as Partial<Record<keyof WalletRpcSelections, string>>,
       ),
+      walletNetwork,
       credentials: credentials as WalletConfigUpdateRequest["credentials"],
     };
   }
@@ -129,6 +135,10 @@ function resolveWalletConfigUpdateRequest(
 
   return {
     selections: currentSelections,
+    walletNetwork:
+      record.walletNetwork === "testnet" || record.walletNetwork === "mainnet"
+        ? record.walletNetwork
+        : undefined,
     credentials: compatCredentials as WalletConfigUpdateRequest["credentials"],
   };
 }
@@ -377,6 +387,7 @@ export async function handleWalletRoutes(
     const quickNodeSet = Boolean(process.env.QUICKNODE_BSC_RPC_URL?.trim());
     const configStatus: WalletConfigStatus = {
       selectedRpcProviders: rpcReadiness.selectedRpcProviders,
+      walletNetwork: resolveWalletNetworkMode(config),
       legacyCustomChains: rpcReadiness.legacyCustomChains,
       alchemyKeySet,
       infuraKeySet: Boolean(process.env.INFURA_API_KEY?.trim()),

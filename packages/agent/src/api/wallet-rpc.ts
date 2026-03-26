@@ -34,6 +34,7 @@ export const DEFAULT_PUBLIC_SOLANA_TESTNET_RPC_URLS = [
 type WalletCapableConfig = Pick<ElizaConfig, "cloud" | "env"> & {
   wallet?: {
     rpcProviders?: Partial<Record<keyof WalletRpcSelections, string>>;
+    network?: "mainnet" | "testnet";
   };
 };
 
@@ -58,6 +59,7 @@ export interface WalletRpcResolutionOptions {
 }
 
 export interface WalletRpcReadiness {
+  walletNetwork: "mainnet" | "testnet";
   cloudManagedAccess: boolean;
   managedBscRpcReady: boolean;
   evmBalanceReady: boolean;
@@ -126,10 +128,16 @@ function normalizeSecret(value: string | null | undefined): string | null {
   return trimmed.length > 0 ? trimmed : null;
 }
 
-function resolveWalletNetwork(
-  value?: string | null,
+export function resolveWalletNetworkMode(
+  config?: WalletCapableConfig | null,
+  fallback?: string | null,
 ): "mainnet" | "testnet" {
-  const normalized = (value ?? process.env.MILADY_WALLET_NETWORK ?? "")
+  const normalized = (
+    fallback ??
+    config?.wallet?.network ??
+    process.env.MILADY_WALLET_NETWORK ??
+    ""
+  )
     .trim()
     .toLowerCase();
   if (normalized === "testnet") return "testnet";
@@ -396,7 +404,10 @@ export function getInventoryProviderOptions(): InventoryProviderOption[] {
 export function resolveBscRpcUrls(
   options: WalletRpcResolutionOptions = {},
 ): string[] {
-  const network = resolveWalletNetwork(options.walletNetwork);
+  const network = resolveWalletNetworkMode(
+    undefined,
+    options.walletNetwork,
+  );
   const cloudRpcUrl =
     network === "mainnet" ? buildCloudEvmRpcUrl("bsc", options) : null;
   const publicDefaults =
@@ -445,7 +456,10 @@ export function resolveAvalancheRpcUrls(
 export function resolveSolanaRpcUrls(
   options: WalletRpcResolutionOptions = {},
 ): string[] {
-  const network = resolveWalletNetwork(options.walletNetwork);
+  const network = resolveWalletNetworkMode(
+    undefined,
+    options.walletNetwork,
+  );
   const cloudRpcUrl =
     network === "mainnet" ? buildCloudSolanaRpcUrl(options) : null;
   const publicDefaults =
@@ -478,7 +492,18 @@ export function applyWalletRpcConfigUpdate(
   config.wallet = {
     ...config.wallet,
     rpcProviders: normalizedSelections,
+    network:
+      update.walletNetwork === "testnet"
+        ? "testnet"
+        : update.walletNetwork === "mainnet"
+          ? "mainnet"
+          : config.wallet?.network,
   };
+
+  if (update.walletNetwork === "testnet" || update.walletNetwork === "mainnet") {
+    env.MILADY_WALLET_NETWORK = update.walletNetwork;
+    process.env.MILADY_WALLET_NETWORK = update.walletNetwork;
+  }
 
   for (const key of WALLET_RPC_CONFIG_KEYS) {
     const value = update.credentials?.[key];
@@ -511,6 +536,7 @@ export function applyWalletRpcConfigUpdate(
 export function resolveWalletRpcReadiness(
   config?: WalletCapableConfig | null,
 ): WalletRpcReadiness {
+  const walletNetwork = resolveWalletNetworkMode(config);
   const cloudApiKey = resolveCloudApiKey(config);
   const cloudBaseUrl = resolveCloudApiBaseUrl(config?.cloud?.baseUrl);
   const cloudManagedAccess = Boolean(cloudApiKey);
@@ -518,7 +544,7 @@ export function resolveWalletRpcReadiness(
     cloudManagedAccess,
     cloudApiKey,
     cloudBaseUrl,
-    walletNetwork: resolveWalletNetwork(),
+    walletNetwork,
   } satisfies WalletRpcResolutionOptions;
   const bscRpcUrls = resolveBscRpcUrls(cloudOptions);
   const ethereumRpcUrls = resolveEthereumRpcUrls(cloudOptions);
@@ -531,6 +557,7 @@ export function resolveWalletRpcReadiness(
   const legacyCustomChains = buildLegacyCustomChains(selectedRpcProviders);
 
   return {
+    walletNetwork,
     cloudManagedAccess,
     managedBscRpcReady: bscRpcUrls.length > 0,
     evmBalanceReady: Boolean(

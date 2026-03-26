@@ -24,6 +24,7 @@ const ENV_KEYS = [
   "EVM_PRIVATE_KEY",
   "SOLANA_PRIVATE_KEY",
   "SOLANA_RPC_URL",
+  "MILADY_WALLET_NETWORK",
 ] as const;
 
 const ORIGINAL_ENV = Object.fromEntries(
@@ -275,6 +276,7 @@ describe("wallet routes", () => {
     expect(result.handled).toBe(true);
     expect(result.payload).toEqual(
       expect.objectContaining({
+        walletNetwork: "mainnet",
         selectedRpcProviders: {
           evm: "eliza-cloud",
           bsc: "eliza-cloud",
@@ -381,6 +383,7 @@ describe("wallet routes", () => {
           bsc: "alchemy",
           solana: "helius-birdeye",
         },
+        walletNetwork: "testnet",
         credentials: {
           ALCHEMY_API_KEY: "a-key",
           HELIUS_API_KEY: "h-key",
@@ -403,6 +406,8 @@ describe("wallet routes", () => {
       bsc: "alchemy",
       solana: "helius-birdeye",
     });
+    expect(result.config.wallet?.network).toBe("testnet");
+    expect(process.env.MILADY_WALLET_NETWORK).toBe("testnet");
     expect(result.ensureWalletKeysInEnvAndConfig).not.toHaveBeenCalled();
     expect(result.saveConfig).toHaveBeenCalledWith(result.config);
     expect(result.payload).toEqual({ ok: true });

@@ -186,11 +186,15 @@ export type WalletRpcCredentialKey =
 
 export interface WalletConfigUpdateRequest {
   selections: WalletRpcSelections;
+  walletNetwork?: WalletNetworkMode;
   credentials?: Partial<Record<WalletRpcCredentialKey, string>>;
 }
 
+export type WalletNetworkMode = "mainnet" | "testnet";
+
 export interface WalletConfigStatus {
   selectedRpcProviders: WalletRpcSelections;
+  walletNetwork?: WalletNetworkMode;
   legacyCustomChains: WalletRpcChain[];
   alchemyKeySet: boolean;
   infuraKeySet: boolean;

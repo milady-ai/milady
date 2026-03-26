@@ -23,6 +23,7 @@ const ENV_KEYS = [
   "ELIZAOS_CLOUD_BASE_URL",
   "EVM_PRIVATE_KEY",
   "SOLANA_PRIVATE_KEY",
+  "MILADY_WALLET_NETWORK",
 ] as const;
 
 const ORIGINAL_ENV = Object.fromEntries(
@@ -148,6 +149,7 @@ describe("wallet RPC helpers", () => {
         bsc: "eliza-cloud",
         solana: "helius-birdeye",
       },
+      walletNetwork: "testnet",
       credentials: {
         INFURA_API_KEY: "next-infura",
         HELIUS_API_KEY: "next-helius",
@@ -160,6 +162,8 @@ describe("wallet RPC helpers", () => {
       bsc: "eliza-cloud",
       solana: "helius-birdeye",
     });
+    expect(config.wallet?.network).toBe("testnet");
+    expect(process.env.MILADY_WALLET_NETWORK).toBe("testnet");
     expect(process.env.ALCHEMY_API_KEY).toBeUndefined();
     expect(process.env.NODEREAL_BSC_RPC_URL).toBeUndefined();
     expect(process.env.BSC_RPC_URL).toBeUndefined();

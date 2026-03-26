@@ -123,8 +123,10 @@ export function buildWalletRpcUpdateRequest(args: {
   selectedProviders:
     | WalletRpcSelections
     | Partial<Record<WalletRpcChain, string | null | undefined>>;
+  selectedNetwork?: "mainnet" | "testnet";
 }): WalletConfigUpdateRequest {
-  const { walletConfig, rpcFieldValues, selectedProviders } = args;
+  const { walletConfig, rpcFieldValues, selectedProviders, selectedNetwork } =
+    args;
   const credentials: Partial<Record<WalletRpcCredentialKey, string>> = {};
   const normalizedSelections = normalizeWalletRpcSelections(selectedProviders);
   const selectedKeys = collectSelectedCredentialKeys(normalizedSelections);
@@ -171,6 +173,9 @@ export function buildWalletRpcUpdateRequest(args: {
 
   return {
     selections: normalizedSelections,
+    walletNetwork:
+      selectedNetwork ??
+      (walletConfig?.walletNetwork === "testnet" ? "testnet" : "mainnet"),
     credentials,
   };
 }

@@ -57,6 +57,7 @@ function walletConfigRequest(args: {
     bsc?: string;
     solana?: string;
   };
+  walletNetwork?: "mainnet" | "testnet";
   credentials?: Record<string, string>;
   extra?: Record<string, unknown>;
 }): Record<string, unknown> {
@@ -67,6 +68,7 @@ function walletConfigRequest(args: {
       solana: "eliza-cloud",
       ...args.selections,
     },
+    walletNetwork: args.walletNetwork ?? "mainnet",
     credentials: args.credentials ?? {},
     ...args.extra,
   };
@@ -89,6 +91,7 @@ describe("Wallet API E2E", () => {
     "ALCHEMY_API_KEY",
     "HELIUS_API_KEY",
     "BIRDEYE_API_KEY",
+    "MILADY_WALLET_NETWORK",
   ];
 
   beforeAll(async () => {
@@ -152,6 +155,7 @@ describe("Wallet API E2E", () => {
     it("returns config status with key indicators", async () => {
       const { status, data } = await req(port, "GET", "/api/wallet/config");
       expect(status).toBe(200);
+      expect(data.walletNetwork).toBe("mainnet");
       expect(typeof data.alchemyKeySet).toBe("boolean");
       expect(typeof data.heliusKeySet).toBe("boolean");
       expect(typeof data.birdeyeKeySet).toBe("boolean");
@@ -216,6 +220,7 @@ describe("Wallet API E2E", () => {
         "PUT",
         "/api/wallet/config",
         walletConfigRequest({
+          walletNetwork: "testnet",
           selections: {
             evm: "alchemy",
             solana: "helius-birdeye",
@@ -234,6 +239,7 @@ describe("Wallet API E2E", () => {
       expect(process.env.ALCHEMY_API_KEY).toBe("test-alchemy-key");
       expect(process.env.HELIUS_API_KEY).toBe("test-helius-key");
       expect(process.env.BIRDEYE_API_KEY).toBe("test-birdeye-key");
+      expect(process.env.MILADY_WALLET_NETWORK).toBe("testnet");
     });
 
     it("reflects saved keys in GET /api/wallet/config", async () => {
