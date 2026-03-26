@@ -363,6 +363,8 @@
   "elizaclouddashboard.NoAgentWalletDetected": "Nenhuma carteira do agente detectada ainda. Gere ou importe uma em Configurações antes de usar recargas com cripto.",
   "elizaclouddashboard.NoSetupNeeded": "Nenhuma configuração necessária",
   "elizaclouddashboard.NotAvailable": "Não disponível",
+  "elizaclouddashboard.AccountIdApiKeyOnly": "Somente chave de API — conecte-se pelo navegador para exibir seu ID de usuário na nuvem.",
+  "elizaclouddashboard.AccountIdSessionNoUserId": "Sem ID de usuário — a nuvem segue funcionando.",
   "elizaclouddashboard.OpenBrowserBilling": "Abrir faturamento no navegador",
   "elizaclouddashboard.PayWithCard": "Pagar com cartão",
   "elizaclouddashboard.PayWithCrypto": "Pagar com cripto",

@@ -363,6 +363,8 @@
   "elizaclouddashboard.NoAgentWalletDetected": "Wala pang natukoy na agent wallet. Gumawa o mag-import ng isa sa Settings bago gamitin ang crypto top-ups.",
   "elizaclouddashboard.NoSetupNeeded": "Hindi kailangan ng setup",
   "elizaclouddashboard.NotAvailable": "Hindi available",
+  "elizaclouddashboard.AccountIdApiKeyOnly": "API key lang — kumonekta gamit ang browser sign-in para makita ang cloud user ID.",
+  "elizaclouddashboard.AccountIdSessionNoUserId": "Walang user ID — gumagana pa rin ang cloud.",
   "elizaclouddashboard.OpenBrowserBilling": "Buksan ang browser billing",
   "elizaclouddashboard.PayWithCard": "Magbayad gamit ang Card",
   "elizaclouddashboard.PayWithCrypto": "Magbayad gamit ang Crypto",

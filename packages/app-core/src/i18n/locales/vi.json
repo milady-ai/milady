@@ -363,6 +363,8 @@
   "elizaclouddashboard.NoAgentWalletDetected": "Chưa có ví agent. Tạo hoặc import trong Cài đặt trước khi nạp crypto.",
   "elizaclouddashboard.NoSetupNeeded": "Không cần cài đặt",
   "elizaclouddashboard.NotAvailable": "Không khả dụng",
+  "elizaclouddashboard.AccountIdApiKeyOnly": "Chỉ dùng API key — đăng nhập qua trình duyệt để hiển thị ID người dùng trên cloud.",
+  "elizaclouddashboard.AccountIdSessionNoUserId": "Không hiển thị ID người dùng — cloud vẫn hoạt động.",
   "elizaclouddashboard.OpenBrowserBilling": "Mở thanh toán trên trình duyệt",
   "elizaclouddashboard.PayWithCard": "Trả bằng thẻ",
   "elizaclouddashboard.PayWithCrypto": "Trả bằng crypto",

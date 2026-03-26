@@ -32,6 +32,7 @@ import {
   type CloudCompatAgent,
   client,
 } from "../api";
+import { isCloudStatusReasonApiKeyOnly } from "../api/cloud-connection";
 import { useIntervalWhenDocumentVisible } from "../hooks/useDocumentVisibility";
 import { useApp } from "../state";
 import { openDesktopInAppBrowser, openExternalUrl } from "../utils";
@@ -186,6 +187,23 @@ function CloudAgentCard({
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+function resolveCloudAccountIdDisplay(
+  userId: string | null,
+  statusReason: string | null,
+  t: (key: string) => string,
+): { mono: boolean; text: string } {
+  if (userId) {
+    return { mono: true, text: userId };
+  }
+  if (isCloudStatusReasonApiKeyOnly(statusReason)) {
+    return { mono: false, text: t("elizaclouddashboard.AccountIdApiKeyOnly") };
+  }
+  return {
+    mono: false,
+    text: t("elizaclouddashboard.AccountIdSessionNoUserId"),
+  };
 }
 
 function unwrapBillingData<T extends Record<string, unknown>>(value: T): T {
@@ -348,6 +366,7 @@ export function CloudDashboard() {
     elizaCloudAuthRejected,
     elizaCloudTopUpUrl,
     elizaCloudUserId,
+    elizaCloudStatusReason,
     cloudDashboardView,
     elizaCloudLoginBusy,
     handleCloudLogin,
@@ -927,6 +946,11 @@ export function CloudDashboard() {
       : summaryLow
         ? t("elizaclouddashboard.CreditsLow")
         : t("elizaclouddashboard.CreditsHealthy");
+  const cloudAccountIdDisplay = resolveCloudAccountIdDisplay(
+    elizaCloudUserId,
+    elizaCloudStatusReason,
+    t,
+  );
   const hasAgentWallet = Boolean(
     walletAddresses?.evmAddress || walletAddresses?.solanaAddress,
   );
@@ -1365,9 +1389,15 @@ export function CloudDashboard() {
                   {t("elizaclouddashboard.Secure")}
                 </span>
               </div>
-              <code className="break-all font-mono text-[11px] text-muted">
-                {elizaCloudUserId || t("elizaclouddashboard.NotAvailable")}
-              </code>
+              {cloudAccountIdDisplay.mono ? (
+                <code className="break-all font-mono text-[11px] text-muted">
+                  {cloudAccountIdDisplay.text}
+                </code>
+              ) : (
+                <span className="break-words text-[11px] text-muted leading-snug">
+                  {cloudAccountIdDisplay.text}
+                </span>
+              )}
             </div>
             <Button
               variant="ghost"
@@ -1409,9 +1439,15 @@ export function CloudDashboard() {
           {/* ── Account bar ───────────────────────────────────── */}
           <div className="flex flex-col gap-3 py-3 text-xs sm:flex-row sm:items-center sm:justify-between">
             <div className="flex min-w-0 items-center gap-3">
-              <code className="max-w-full break-all font-mono text-muted sm:max-w-[200px] sm:truncate">
-                {elizaCloudUserId || t("elizaclouddashboard.NotAvailable")}
-              </code>
+              {cloudAccountIdDisplay.mono ? (
+                <code className="max-w-full break-all font-mono text-muted sm:max-w-[200px] sm:truncate">
+                  {cloudAccountIdDisplay.text}
+                </code>
+              ) : (
+                <span className="max-w-full break-words text-muted text-[11px] leading-snug sm:max-w-[min(100%,280px)]">
+                  {cloudAccountIdDisplay.text}
+                </span>
+              )}
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <span className={`font-semibold ${creditStatusColor}`}>

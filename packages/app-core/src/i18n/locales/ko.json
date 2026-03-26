@@ -363,6 +363,8 @@
   "elizaclouddashboard.NoAgentWalletDetected": "아직 에이전트 지갑이 감지되지 않았습니다. 암호화폐 충전을 사용하기 전에 설정에서 지갑을 생성하거나 가져오세요.",
   "elizaclouddashboard.NoSetupNeeded": "설정 필요 없음",
   "elizaclouddashboard.NotAvailable": "사용 불가",
+  "elizaclouddashboard.AccountIdApiKeyOnly": "API 키만 사용 중 — 브라우저 로그인으로 연결하면 클라우드 사용자 ID가 표시됩니다.",
+  "elizaclouddashboard.AccountIdSessionNoUserId": "사용자 ID 없음 — 클라우드는 정상 동작.",
   "elizaclouddashboard.OpenBrowserBilling": "브라우저 결제 열기",
   "elizaclouddashboard.PayWithCard": "카드로 결제",
   "elizaclouddashboard.PayWithCrypto": "암호화폐로 결제",

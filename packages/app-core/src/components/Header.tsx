@@ -236,7 +236,7 @@ export function Header({
         <div
           className={`px-1.5 sm:px-4 ${useMinimalHeaderChrome ? "" : "pb-1.5 sm:pb-3"}`}
           style={{
-            paddingTop: `calc(var(--safe-area-top, 0px) + ${
+            paddingTop: `calc(var(--safe-area-top, 0px) + var(--milady-macos-frame-top-inset, 0px) + ${
               isDesktopShell ? "0.875rem" : "0.375rem"
             })`,
             paddingLeft: `calc(var(--safe-area-left, 0px) + ${

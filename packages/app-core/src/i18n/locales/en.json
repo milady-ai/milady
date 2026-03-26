@@ -855,6 +855,8 @@
   "subscriptionstatus.ChatGPTSubscriptionTitle": "ChatGPT Subscription",
   "subscriptionstatus.Completing": "Completing...",
   "elizaclouddashboard.NotAvailable": "Not available",
+  "elizaclouddashboard.AccountIdApiKeyOnly": "API key only — connect via browser sign-in to show your cloud user ID.",
+  "elizaclouddashboard.AccountIdSessionNoUserId": "No user ID shown — cloud still works.",
   "elizaclouddashboard.ElizaCloudNotConnectedSettings": "Eliza Cloud not connected - configure in Settings -> AI Model",
   "elizaclouddashboard.NoSetupNeeded": "No setup needed",
   "codingagentsettingssection.NoSupportedCLIs": "No supported coding agent CLIs detected. Install at least one of: Claude, Gemini, Codex, or Aider.",

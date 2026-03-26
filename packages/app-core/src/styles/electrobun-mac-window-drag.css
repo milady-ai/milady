@@ -11,6 +11,14 @@
  * html.milady-electrobun-frameless is toggled from apps/app/src/main.tsx
  * (main macOS Electrobun shell only; detached shells skip it).
  */
+html.milady-electrobun-frameless {
+  /**
+   * Extra top inset so the first interactive row (shell toggle, header) sits below
+   * the traffic lights — hiddenInset draws them over the web view with no title bar.
+   */
+  --milady-macos-frame-top-inset: 26px;
+}
+
 html.milady-electrobun-frameless body {
   -webkit-app-region: drag;
 }

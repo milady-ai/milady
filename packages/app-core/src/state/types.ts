@@ -427,6 +427,8 @@ export interface AppState {
   elizaCloudCreditsError: string | null;
   elizaCloudTopUpUrl: string;
   elizaCloudUserId: string | null;
+  /** Last `reason` from GET /api/cloud/status (e.g. API-key-only vs OAuth). */
+  elizaCloudStatusReason: string | null;
   cloudDashboardView: "billing" | "agents";
   elizaCloudLoginBusy: boolean;
   elizaCloudLoginError: string | null;

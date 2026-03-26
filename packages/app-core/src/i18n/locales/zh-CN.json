@@ -363,6 +363,8 @@
   "elizaclouddashboard.NoAgentWalletDetected": "尚未检测到代理钱包。使用加密货币充值前，请先在设置中生成或导入钱包。",
   "elizaclouddashboard.NoSetupNeeded": "无需设置",
   "elizaclouddashboard.NotAvailable": "不可用",
+  "elizaclouddashboard.AccountIdApiKeyOnly": "仅 API 密钥 — 通过浏览器登录后可显示云端用户 ID。",
+  "elizaclouddashboard.AccountIdSessionNoUserId": "未显示用户 ID — 云端仍可用。",
   "elizaclouddashboard.OpenBrowserBilling": "在浏览器中打开计费",
   "elizaclouddashboard.PayWithCard": "银行卡支付",
   "elizaclouddashboard.PayWithCrypto": "加密货币支付",
