@@ -2644,20 +2644,108 @@ async function handleMiladyCompatRoute(
       });
 
       let approvalHash: string | undefined;
-      if (requiresApproval && unsignedApprovalTx) {
-        const approvalResult = await signTransactionWithOptionalSteward({
-          evmAddress: walletAddress,
-          tx: {
+      let finalHash = "";
+      let finalNonce: number | null = null;
+      let finalGasLimit = "0";
+      let finalMode: "local-key" | "steward" = hasLocalKey
+        ? "local-key"
+        : "steward";
+
+      if (hasLocalKey && canExecuteLocally) {
+        if (!rpcUrl) {
+          sendJsonErrorResponse(
+            res,
+            503,
+            "BSC RPC not configured for local execution",
+          );
+          return true;
+        }
+
+        if (requiresApproval && unsignedApprovalTx) {
+          const approvalResult = await _sendLocalWalletTransaction(rpcUrl, {
             to: unsignedApprovalTx.to,
             data: unsignedApprovalTx.data,
-            value: unsignedApprovalTx.valueWei,
+            value: BigInt(unsignedApprovalTx.valueWei),
             chainId: unsignedApprovalTx.chainId,
+          });
+          approvalHash = approvalResult.hash;
+          const provider = new ethers.JsonRpcProvider(rpcUrl);
+          try {
+            await provider.waitForTransaction(approvalHash, 1);
+          } finally {
+            provider.destroy();
+          }
+        }
+
+        const localExecution = await _sendLocalWalletTransaction(rpcUrl, {
+          to: unsignedTx.to,
+          data: unsignedTx.data,
+          value: BigInt(unsignedTx.valueWei),
+          chainId: unsignedTx.chainId,
+        });
+        finalHash = localExecution.hash;
+        finalNonce = localExecution.nonce;
+        finalGasLimit = localExecution.gasLimit;
+      } else {
+        finalMode = "steward";
+        if (requiresApproval && unsignedApprovalTx) {
+          const approvalResult = await signTransactionWithOptionalSteward({
+            evmAddress: walletAddress,
+            tx: {
+              to: unsignedApprovalTx.to,
+              data: unsignedApprovalTx.data,
+              value: unsignedApprovalTx.valueWei,
+              chainId: unsignedApprovalTx.chainId,
+            },
+          });
+
+          if (
+            approvalResult.mode === "steward" &&
+            approvalResult.pendingApproval
+          ) {
+            sendJsonResponse(res, 200, {
+              ok: true,
+              side: quote.side,
+              mode: "steward",
+              quote,
+              executed: false,
+              requiresUserSignature: false,
+              unsignedTx,
+              unsignedApprovalTx,
+              requiresApproval,
+              approval: {
+                status: "pending_approval",
+                policyResults: approvalResult.policyResults,
+              },
+            });
+            return true;
+          }
+
+          approvalHash = "txHash" in approvalResult ? approvalResult.txHash : "";
+
+          if (approvalResult.mode === "steward" && rpcUrl) {
+            const provider = new ethers.JsonRpcProvider(rpcUrl);
+            try {
+              await provider.waitForTransaction(approvalHash, 1);
+            } finally {
+              provider.destroy();
+            }
+          }
+        }
+
+        const executionResult = await signTransactionWithOptionalSteward({
+          evmAddress: walletAddress,
+          tx: {
+            to: unsignedTx.to,
+            data: unsignedTx.data,
+            value: unsignedTx.valueWei,
+            chainId: unsignedTx.chainId,
           },
         });
 
         if (
-          approvalResult.mode === "steward" &&
-          approvalResult.pendingApproval
+          executionResult.mode === "steward" &&
+          executionResult.pendingApproval
         ) {
           sendJsonResponse(res, 200, {
             ok: true,
@@ -2669,64 +2757,17 @@ async function handleMiladyCompatRoute(
             unsignedTx,
             unsignedApprovalTx,
             requiresApproval,
-            approval: {
+            approvalHash,
+            execution: {
               status: "pending_approval",
-              policyResults: approvalResult.policyResults,
+              policyResults: executionResult.policyResults,
             },
           });
           return true;
         }
 
-        approvalHash = "txHash" in approvalResult ? approvalResult.txHash : "";
-
-        if (approvalResult.mode === "steward" && rpcUrl) {
-          const provider = new ethers.JsonRpcProvider(rpcUrl);
-          try {
-            await provider.waitForTransaction(approvalHash, 1);
-          } finally {
-            provider.destroy();
-          }
-        }
+        finalHash = "txHash" in executionResult ? executionResult.txHash : "";
       }
-
-      const executionResult = await signTransactionWithOptionalSteward({
-        evmAddress: walletAddress,
-        tx: {
-          to: unsignedTx.to,
-          data: unsignedTx.data,
-          value: unsignedTx.valueWei,
-          chainId: unsignedTx.chainId,
-        },
-      });
-
-      if (
-        executionResult.mode === "steward" &&
-        executionResult.pendingApproval
-      ) {
-        sendJsonResponse(res, 200, {
-          ok: true,
-          side: quote.side,
-          mode: "steward",
-          quote,
-          executed: false,
-          requiresUserSignature: false,
-          unsignedTx,
-          unsignedApprovalTx,
-          requiresApproval,
-          approvalHash,
-          execution: {
-            status: "pending_approval",
-            policyResults: executionResult.policyResults,
-          },
-        });
-        return true;
-      }
-
-      const finalHash =
-        "txHash" in executionResult ? executionResult.txHash : "";
-      const finalNonce = null;
-      const finalGasLimit = "0";
-      const finalMode = executionResult.mode;
 
       try {
         const tradeSource =
@@ -2929,46 +2970,72 @@ async function handleMiladyCompatRoute(
     });
 
     try {
-      const executionResult = await signTransactionWithOptionalSteward({
-        evmAddress: addresses.evmAddress,
-        tx: {
+      let finalHash = "";
+      let finalNonce: number | null = null;
+      let finalGasLimit = "0";
+      let finalMode: "local-key" | "steward" = hasLocalKey
+        ? "local-key"
+        : "steward";
+
+      if (hasLocalKey && canExecuteLocally) {
+        if (!_rpcUrl) {
+          sendJsonErrorResponse(
+            res,
+            503,
+            "BSC RPC not configured for local execution",
+          );
+          return true;
+        }
+
+        const localExecution = await _sendLocalWalletTransaction(_rpcUrl, {
           to: unsignedTx.to,
           data: unsignedTx.data,
-          value: unsignedTx.valueWei,
+          value: BigInt(unsignedTx.valueWei),
           chainId: unsignedTx.chainId,
-        },
-      });
-
-      if (
-        executionResult.mode === "steward" &&
-        executionResult.pendingApproval
-      ) {
-        sendJsonResponse(res, 200, {
-          ok: true,
-          mode: "steward",
-          executed: false,
-          requiresUserSignature: false,
-          toAddress,
-          amount,
-          assetSymbol,
-          tokenAddress: unsignedTx.tokenAddress,
-          unsignedTx,
-          execution: {
-            status: "pending_approval",
-            policyResults: executionResult.policyResults,
+        });
+        finalHash = localExecution.hash;
+        finalNonce = localExecution.nonce;
+        finalGasLimit = localExecution.gasLimit;
+      } else {
+        finalMode = "steward";
+        const executionResult = await signTransactionWithOptionalSteward({
+          evmAddress: addresses.evmAddress,
+          tx: {
+            to: unsignedTx.to,
+            data: unsignedTx.data,
+            value: unsignedTx.valueWei,
+            chainId: unsignedTx.chainId,
           },
         });
-        return true;
-      }
 
-      const finalHash =
-        "txHash" in executionResult ? executionResult.txHash : "";
-      const finalNonce = null;
-      const finalGasLimit = "0";
+        if (
+          executionResult.mode === "steward" &&
+          executionResult.pendingApproval
+        ) {
+          sendJsonResponse(res, 200, {
+            ok: true,
+            mode: "steward",
+            executed: false,
+            requiresUserSignature: false,
+            toAddress,
+            amount,
+            assetSymbol,
+            tokenAddress: unsignedTx.tokenAddress,
+            unsignedTx,
+            execution: {
+              status: "pending_approval",
+              policyResults: executionResult.policyResults,
+            },
+          });
+          return true;
+        }
+
+        finalHash = "txHash" in executionResult ? executionResult.txHash : "";
+      }
 
       sendJsonResponse(res, 200, {
         ok: true,
-        mode: executionResult.mode,
+        mode: finalMode,
         executed: true,
         requiresUserSignature: false,
         toAddress,

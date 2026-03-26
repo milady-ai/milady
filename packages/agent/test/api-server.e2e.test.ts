@@ -23,6 +23,7 @@ import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import type { AgentRuntime, Content, Task, UUID } from "@elizaos/core";
+import { Wallet } from "ethers";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { WebSocket } from "ws";
 import { startApiServer } from "../src/api/server";
@@ -2885,6 +2886,568 @@ describe("API Server E2E (no runtime)", () => {
 
   });
 
+  describe("wallet mode guidance fallback", () => {
+    it("GET /api/wallet/config exposes wallet capability readiness fields", async () => {
+      const prevKey = process.env.EVM_PRIVATE_KEY;
+      process.env.EVM_PRIVATE_KEY =
+        "0x59c6995e998f97a5a0044976f4b8c0fcbf2d34f95f0f70f7f6f6e3d54d3f5f31";
+      const runtime = createRuntimeForChatSseTests();
+      const server = await startApiServer({ port: 0, runtime });
+      try {
+        const { status, data } = await req(server.port, "GET", "/api/wallet/config");
+        expect(status).toBe(200);
+        expect(data.walletSource).toBe("local");
+        expect(data.automationMode).toBe("full");
+        expect(typeof data.pluginEvmLoaded).toBe("boolean");
+        expect(typeof data.executionReady).toBe("boolean");
+        expect(data.executionBlockedReason === null || typeof data.executionBlockedReason === "string").toBe(true);
+      } finally {
+        await server.close();
+        if (prevKey === undefined) delete process.env.EVM_PRIVATE_KEY;
+        else process.env.EVM_PRIVATE_KEY = prevKey;
+      }
+    });
+
+    it("POST /api/chat includes the active EVM address when wallet key is configured", async () => {
+      const prevKey = process.env.EVM_PRIVATE_KEY;
+      const testKey =
+        "0x59c6995e998f97a5a0044976f4b8c0fcbf2d34f95f0f70f7f6f6e3d54d3f5f31";
+      process.env.EVM_PRIVATE_KEY = testKey;
+      const expectedAddress = new Wallet(testKey).address;
+
+      const handleMessage = vi.fn<
+        Parameters<
+          NonNullable<AgentRuntime["messageService"]>["handleMessage"]
+        >,
+        ReturnType<NonNullable<AgentRuntime["messageService"]>["handleMessage"]>
+      >(async () => ({
+        responseContent: { text: "i don't have a wallet - wrong fallback" },
+      }));
+      const runtime = createRuntimeForChatSseTests({ handleMessage });
+      const server = await startApiServer({ port: 0, runtime });
+      try {
+        const { status, data } = await req(server.port, "POST", "/api/chat", {
+          text: "what is your wallet address?",
+          mode: "power",
+        });
+        expect(status).toBe(200);
+        expect(String(data.text)).toContain(`EVM: ${expectedAddress}`);
+        expect(String(data.text)).toContain("Automation mode:");
+        expect(handleMessage).not.toHaveBeenCalled();
+      } finally {
+        await server.close();
+        if (prevKey === undefined) {
+          delete process.env.EVM_PRIVATE_KEY;
+        } else {
+          process.env.EVM_PRIVATE_KEY = prevKey;
+        }
+      }
+    });
+
+    it("POST /api/chat returns deterministic wallet status for wallet address prompts", async () => {
+      const handleMessage = vi.fn<
+        Parameters<
+          NonNullable<AgentRuntime["messageService"]>["handleMessage"]
+        >,
+        ReturnType<NonNullable<AgentRuntime["messageService"]>["handleMessage"]>
+      >(async () => ({
+        responseContent: { text: "i don't have a wallet - wrong fallback" },
+      }));
+      const runtime = createRuntimeForChatSseTests({ handleMessage });
+      const server = await startApiServer({ port: 0, runtime });
+      try {
+        const { status, data } = await req(server.port, "POST", "/api/chat", {
+          text: "what is your wallet address?",
+          mode: "power",
+        });
+        expect(status).toBe(200);
+        expect(String(data.text)).toContain("Detected wallets:");
+        expect(String(data.text)).toContain("Automation mode:");
+        expect(handleMessage).not.toHaveBeenCalled();
+      } finally {
+        await server.close();
+      }
+    });
+
+    it("POST /api/chat does not intercept wallet balance prompts in full mode", async () => {
+      const handleMessage = vi.fn<
+        Parameters<
+          NonNullable<AgentRuntime["messageService"]>["handleMessage"]
+        >,
+        ReturnType<NonNullable<AgentRuntime["messageService"]>["handleMessage"]>
+      >(async (_runtime, _message, onResponse) => {
+        await onResponse({
+          text: "Balance from plugin path",
+          action: "CHECK_BALANCE",
+        } as Content);
+        return {
+          responseContent: { text: "Balance from plugin path" },
+        };
+      });
+      const runtime = createRuntimeForChatSseTests({ handleMessage });
+      const server = await startApiServer({ port: 0, runtime });
+      try {
+        const { status, data } = await req(server.port, "POST", "/api/chat", {
+          text: "what is your wallet balance?",
+          mode: "power",
+        });
+        expect(status).toBe(200);
+        expect(String(data.text)).toContain("Balance from plugin path");
+        expect(handleMessage).toHaveBeenCalledTimes(1);
+        const handledMessage = handleMessage.mock.calls[0]?.[1] as
+          | { content?: { text?: string } }
+          | undefined;
+        expect(String(handledMessage?.content?.text ?? "")).toContain(
+          "Server-verified wallet context:",
+        );
+        expect(String(handledMessage?.content?.text ?? "")).toContain(
+          "User message: what is your wallet balance?",
+        );
+      } finally {
+        await server.close();
+      }
+    });
+
+    it("POST /api/chat trims wallet progress filler when CHECK_BALANCE returns a real result", async () => {
+      const handleMessage = vi.fn<
+        Parameters<
+          NonNullable<AgentRuntime["messageService"]>["handleMessage"]
+        >,
+        ReturnType<NonNullable<AgentRuntime["messageService"]>["handleMessage"]>
+      >(async (_runtime, _message, onResponse) => {
+        await onResponse({ text: "checking your evm balance now..." } as Content);
+        await onResponse({
+          text: "Wallet Balances:\n\nBSC (0x51a5...a4Ee):\n  BNB: 0.1 ($63.03)",
+          action: "CHECK_BALANCE_RESPONSE",
+        } as Content);
+        return {
+          responseContent: {
+            text: "checking your evm balance now...Wallet Balances:\n\nBSC (0x51a5...a4Ee):\n  BNB: 0.1 ($63.03)",
+          },
+        };
+      });
+      const runtime = createRuntimeForChatSseTests({ handleMessage });
+      const server = await startApiServer({ port: 0, runtime });
+      try {
+        const { status, data } = await req(server.port, "POST", "/api/chat", {
+          text: "what is your wallet balance?",
+          mode: "power",
+        });
+        expect(status).toBe(200);
+        expect(String(data.text)).toContain("Wallet Balances:");
+        expect(String(data.text)).not.toContain("checking your evm balance now");
+      } finally {
+        await server.close();
+      }
+    });
+
+    it("POST /api/chat turns wallet progress filler into an explicit execution failure when no action runs", async () => {
+      const handleMessage = vi.fn<
+        Parameters<
+          NonNullable<AgentRuntime["messageService"]>["handleMessage"]
+        >,
+        ReturnType<NonNullable<AgentRuntime["messageService"]>["handleMessage"]>
+      >(async () => ({
+        responseContent: { text: "let me check that for you" },
+      }));
+      const runtime = createRuntimeForChatSseTests({ handleMessage });
+      const server = await startApiServer({ port: 0, runtime });
+      try {
+        const { status, data } = await req(server.port, "POST", "/api/chat", {
+          text: "what is your wallet balance?",
+          mode: "power",
+        });
+        expect(status).toBe(200);
+        expect(String(data.text)).toContain(
+          "no wallet action actually ran",
+        );
+        expect(String(data.text)).toContain("plugin-evm:");
+        expect(String(data.text)).not.toContain("let me check that for you");
+      } finally {
+        await server.close();
+      }
+    });
+
+    it("POST /api/chat executes CHECK_BALANCE fallback when the model emits prose with no action payload", async () => {
+      const handleMessage = vi.fn<
+        Parameters<
+          NonNullable<AgentRuntime["messageService"]>["handleMessage"]
+        >,
+        ReturnType<NonNullable<AgentRuntime["messageService"]>["handleMessage"]>
+      >(async () => ({
+        responseContent: { text: "let me check that for you" },
+      }));
+      const runtime = createRuntimeForChatSseTests({ handleMessage });
+      (runtime as unknown as { actions: unknown[] }).actions = [
+        {
+          name: "CHECK_BALANCE",
+          validate: async () => true,
+          handler: async (
+            _runtime: unknown,
+            _message: unknown,
+            _state: unknown,
+            _options: unknown,
+            callback?: (content: Content) => void,
+          ) => {
+            callback?.({
+              text: "Wallet Balances:\n\nBSC (0x51a5...a4Ee):\n  BNB: 0.1000 ($0.00)",
+              action: "CHECK_BALANCE_RESPONSE",
+            } as Content);
+            return {
+              text: "Wallet Balances:\n\nBSC (0x51a5...a4Ee):\n  BNB: 0.1000 ($0.00)",
+              success: true,
+            };
+          },
+        },
+      ];
+      const server = await startApiServer({ port: 0, runtime });
+      try {
+        const { status, data } = await req(server.port, "POST", "/api/chat", {
+          text: "what is your wallet balance?",
+          mode: "power",
+        });
+        expect(status).toBe(200);
+        expect(String(data.text)).toContain("Wallet Balances:");
+        expect(String(data.text)).toContain("BNB: 0.1000");
+        expect(String(data.text)).not.toContain(
+          "no wallet action actually ran",
+        );
+      } finally {
+        await server.close();
+      }
+    });
+
+    it("POST /api/chat executes TRANSFER_TOKEN fallback from a prose-only send prompt and returns the tx hash", async () => {
+      const previousKey = process.env.EVM_PRIVATE_KEY;
+      const previousRpc = process.env.BSC_TESTNET_RPC_URL;
+      process.env.EVM_PRIVATE_KEY =
+        "0x59c6995e998f97a5a0044976f4b8c0fcbf2d34f95f0f70f7f6f6e3d54d3f5f31";
+      process.env.BSC_TESTNET_RPC_URL = "https://example-rpc.invalid";
+      const handleMessage = vi.fn<
+        Parameters<
+          NonNullable<AgentRuntime["messageService"]>["handleMessage"]
+        >,
+        ReturnType<NonNullable<AgentRuntime["messageService"]>["handleMessage"]>
+      >(async () => ({
+        responseContent: { text: "I can handle that send for you." },
+      }));
+      const runtime = createRuntimeForChatSseTests({ handleMessage });
+      (runtime as unknown as { plugins: Array<{ name: string }> }).plugins = [
+        { name: "@elizaos/plugin-evm" },
+      ];
+      (runtime as unknown as { actions: unknown[] }).actions = [
+        {
+          name: "TRANSFER_TOKEN",
+          validate: async () => true,
+          handler: async (
+            _runtime: unknown,
+            _message: unknown,
+            _state: unknown,
+            options: { parameters?: Record<string, string> },
+            callback?: (content: Content) => void,
+          ) => {
+            expect(options.parameters?.toAddress).toBe(
+              "0x8DFBdEEC8c5d4970BB5F481C6ec7f73fa1C65be5",
+            );
+            expect(options.parameters?.amount).toBe("0.001");
+            expect(options.parameters?.assetSymbol).toBe("BNB");
+            callback?.({
+              text:
+                "Action: TRANSFER_TOKEN\nChain: BSC testnet\nAmount: 0.001 BNB\nRecipient: 0x8DFBdEEC8c5d4970BB5F481C6ec7f73fa1C65be5\nExecution mode: agent-auto\nExecuted: true\nTx hash: 0xsendhash\nExplorer: https://testnet.bscscan.com/tx/0xsendhash\nStatus: success",
+              action: "TRANSFER_TOKEN_SUCCESS",
+            } as Content);
+            return {
+              text:
+                "Action: TRANSFER_TOKEN\nChain: BSC testnet\nAmount: 0.001 BNB\nRecipient: 0x8DFBdEEC8c5d4970BB5F481C6ec7f73fa1C65be5\nExecution mode: agent-auto\nExecuted: true\nTx hash: 0xsendhash\nExplorer: https://testnet.bscscan.com/tx/0xsendhash\nStatus: success",
+              success: true,
+            };
+          },
+        },
+      ];
+      const server = await startApiServer({ port: 0, runtime });
+      try {
+        const { status, data } = await req(server.port, "POST", "/api/chat", {
+          text: "send 0.001 tBNB on BSC testnet to 0x8DFBdEEC8c5d4970BB5F481C6ec7f73fa1C65be5",
+          mode: "power",
+        });
+        expect(status).toBe(200);
+        expect(String(data.text)).toContain("Action: TRANSFER_TOKEN");
+        expect(String(data.text)).toContain("Tx hash: 0xsendhash");
+        expect(String(data.text)).not.toContain("no wallet action actually ran");
+      } finally {
+        await server.close();
+        if (previousKey === undefined) delete process.env.EVM_PRIVATE_KEY;
+        else process.env.EVM_PRIVATE_KEY = previousKey;
+        if (previousRpc === undefined) delete process.env.BSC_TESTNET_RPC_URL;
+        else process.env.BSC_TESTNET_RPC_URL = previousRpc;
+      }
+    });
+
+    it("POST /api/chat executes EXECUTE_TRADE fallback from a prose-only swap prompt and returns the tx hash", async () => {
+      const previousKey = process.env.EVM_PRIVATE_KEY;
+      const previousRpc = process.env.BSC_TESTNET_RPC_URL;
+      const previousToken = process.env.WALLET_DRILL_TOKEN_ADDRESS;
+      process.env.EVM_PRIVATE_KEY =
+        "0x59c6995e998f97a5a0044976f4b8c0fcbf2d34f95f0f70f7f6f6e3d54d3f5f31";
+      process.env.BSC_TESTNET_RPC_URL = "https://example-rpc.invalid";
+      process.env.WALLET_DRILL_TOKEN_ADDRESS =
+        "0x1111111111111111111111111111111111111111";
+      const handleMessage = vi.fn<
+        Parameters<
+          NonNullable<AgentRuntime["messageService"]>["handleMessage"]
+        >,
+        ReturnType<NonNullable<AgentRuntime["messageService"]>["handleMessage"]>
+      >(async () => ({
+        responseContent: { text: "I can make that swap." },
+      }));
+      const runtime = createRuntimeForChatSseTests({ handleMessage });
+      (runtime as unknown as { plugins: Array<{ name: string }> }).plugins = [
+        { name: "@elizaos/plugin-evm" },
+      ];
+      (runtime as unknown as { actions: unknown[] }).actions = [
+        {
+          name: "EXECUTE_TRADE",
+          validate: async () => true,
+          handler: async (
+            _runtime: unknown,
+            _message: unknown,
+            _state: unknown,
+            options: { parameters?: Record<string, string> },
+            callback?: (content: Content) => void,
+          ) => {
+            expect(options.parameters?.side).toBe("buy");
+            expect(options.parameters?.amount).toBe("0.001");
+            expect(options.parameters?.tokenAddress).toBe(
+              "0x1111111111111111111111111111111111111111",
+            );
+            expect(options.parameters?.routeProvider).toBe("pancakeswap-v2");
+            callback?.({
+              text:
+                "Action: EXECUTE_TRADE\nChain: BSC testnet\nSide: buy\nAmount: 0.001 BNB\nToken: 0x1111111111111111111111111111111111111111\nRoute provider: pancakeswap-v2\nExecution mode: agent-auto\nExecuted: true\nTx hash: 0xswaphash\nExplorer: https://testnet.bscscan.com/tx/0xswaphash\nStatus: success",
+              action: "EXECUTE_TRADE_SUCCESS",
+            } as Content);
+            return {
+              text:
+                "Action: EXECUTE_TRADE\nChain: BSC testnet\nSide: buy\nAmount: 0.001 BNB\nToken: 0x1111111111111111111111111111111111111111\nRoute provider: pancakeswap-v2\nExecution mode: agent-auto\nExecuted: true\nTx hash: 0xswaphash\nExplorer: https://testnet.bscscan.com/tx/0xswaphash\nStatus: success",
+              success: true,
+            };
+          },
+        },
+      ];
+      const server = await startApiServer({ port: 0, runtime });
+      try {
+        const { status, data } = await req(server.port, "POST", "/api/chat", {
+          text: "swap 0.001 tBNB to the configured token on BSC testnet using pancakeswap-v2",
+          mode: "power",
+        });
+        expect(status).toBe(200);
+        expect(String(data.text)).toContain("Action: EXECUTE_TRADE");
+        expect(String(data.text)).toContain("Route provider: pancakeswap-v2");
+        expect(String(data.text)).toContain("Tx hash: 0xswaphash");
+      } finally {
+        await server.close();
+        if (previousKey === undefined) {
+          delete process.env.EVM_PRIVATE_KEY;
+        } else {
+          process.env.EVM_PRIVATE_KEY = previousKey;
+        }
+        if (previousRpc === undefined) {
+          delete process.env.BSC_TESTNET_RPC_URL;
+        } else {
+          process.env.BSC_TESTNET_RPC_URL = previousRpc;
+        }
+        if (previousToken === undefined) {
+          delete process.env.WALLET_DRILL_TOKEN_ADDRESS;
+        } else {
+          process.env.WALLET_DRILL_TOKEN_ADDRESS = previousToken;
+        }
+      }
+    });
+
+    it("POST /api/chat returns an explicit swap parameter failure when no token address is available", async () => {
+      const previousKey = process.env.EVM_PRIVATE_KEY;
+      const previousRpc = process.env.BSC_TESTNET_RPC_URL;
+      const previousToken = process.env.WALLET_DRILL_TOKEN_ADDRESS;
+      process.env.EVM_PRIVATE_KEY =
+        "0x59c6995e998f97a5a0044976f4b8c0fcbf2d34f95f0f70f7f6f6e3d54d3f5f31";
+      process.env.BSC_TESTNET_RPC_URL = "https://example-rpc.invalid";
+      delete process.env.WALLET_DRILL_TOKEN_ADDRESS;
+      const handleMessage = vi.fn<
+        Parameters<
+          NonNullable<AgentRuntime["messageService"]>["handleMessage"]
+        >,
+        ReturnType<NonNullable<AgentRuntime["messageService"]>["handleMessage"]>
+      >(async () => ({
+        responseContent: { text: "I can make that swap." },
+      }));
+      const runtime = createRuntimeForChatSseTests({ handleMessage });
+      (runtime as unknown as { plugins: Array<{ name: string }> }).plugins = [
+        { name: "@elizaos/plugin-evm" },
+      ];
+      const server = await startApiServer({ port: 0, runtime });
+      try {
+        const { status, data } = await req(server.port, "POST", "/api/chat", {
+          text: "swap 0.001 tBNB on BSC testnet using pancakeswap-v2",
+          mode: "power",
+        });
+        expect(status).toBe(200);
+        expect(String(data.text)).toContain("Action: EXECUTE_TRADE");
+        expect(String(data.text)).toContain("Executed: false");
+        expect(String(data.text)).toContain("I need a target token address");
+      } finally {
+        await server.close();
+        if (previousKey === undefined) {
+          delete process.env.EVM_PRIVATE_KEY;
+        } else {
+          process.env.EVM_PRIVATE_KEY = previousKey;
+        }
+        if (previousRpc === undefined) {
+          delete process.env.BSC_TESTNET_RPC_URL;
+        } else {
+          process.env.BSC_TESTNET_RPC_URL = previousRpc;
+        }
+        if (previousToken === undefined) {
+          delete process.env.WALLET_DRILL_TOKEN_ADDRESS;
+        } else {
+          process.env.WALLET_DRILL_TOKEN_ADDRESS = previousToken;
+        }
+      }
+    });
+
+    it("POST /api/conversations/:id/messages/stream emits deterministic wallet status for address prompts", async () => {
+      const prevKey = process.env.EVM_PRIVATE_KEY;
+      const testKey =
+        "0x8b3a350cf5c34c9194ca3b0f2f4f1a4f7f6c8c8d8b6f4a7c5d2e9f4a1b2c3d4e";
+      process.env.EVM_PRIVATE_KEY = testKey;
+      const expectedAddress = new Wallet(testKey).address;
+
+      const handleMessage = vi.fn<
+        Parameters<
+          NonNullable<AgentRuntime["messageService"]>["handleMessage"]
+        >,
+        ReturnType<NonNullable<AgentRuntime["messageService"]>["handleMessage"]>
+      >(async () => ({
+        responseContent: { text: "wrong streamed fallback" },
+      }));
+      const runtime = createRuntimeForChatSseTests({ handleMessage });
+      const server = await startApiServer({ port: 0, runtime });
+      try {
+        const created = await req(server.port, "POST", "/api/conversations", {
+          title: "Wallet stream status",
+        });
+        expect(created.status).toBe(200);
+        const conversationId = String(
+          (created.data as { conversation?: { id?: string } }).conversation
+            ?.id ?? "",
+        );
+        expect(conversationId.length).toBeGreaterThan(0);
+
+        const { status, events } = await reqSse(
+          server.port,
+          `/api/conversations/${conversationId}/messages/stream`,
+          {
+            text: "what is your wallet address?",
+            mode: "power",
+          },
+        );
+        expect(status).toBe(200);
+        const doneEvent = events.find((event) => event.type === "done");
+        expect(String(doneEvent?.fullText ?? "")).toContain(
+          `EVM: ${expectedAddress}`,
+        );
+        expect(handleMessage).not.toHaveBeenCalled();
+      } finally {
+        await server.close();
+        if (prevKey === undefined) {
+          delete process.env.EVM_PRIVATE_KEY;
+        } else {
+          process.env.EVM_PRIVATE_KEY = prevKey;
+        }
+      }
+    });
+
+    it("POST /api/chat returns connectors-only guidance for wallet intent without invoking runtime", async () => {
+      const handleMessage = vi.fn<
+        Parameters<
+          NonNullable<AgentRuntime["messageService"]>["handleMessage"]
+        >,
+        ReturnType<NonNullable<AgentRuntime["messageService"]>["handleMessage"]>
+      >(async () => ({
+        responseContent: { text: "unexpected-runtime-response" },
+      }));
+      const runtime = createRuntimeForChatSseTests({ handleMessage });
+      const server = await startApiServer({ port: 0, runtime });
+      try {
+        const mode = await req(
+          server.port,
+          "PUT",
+          "/api/permissions/automation-mode",
+          { mode: "connectors-only" },
+        );
+        expect(mode.status).toBe(200);
+
+        const { status, data } = await req(server.port, "POST", "/api/chat", {
+          text: "swap 0.001 bnb on bsc testnet",
+          mode: "power",
+        });
+        expect(status).toBe(200);
+        expect(String(data.text)).toContain("connectors-only mode");
+        expect(String(data.text)).toContain("/api/permissions/automation-mode");
+        expect(handleMessage).not.toHaveBeenCalled();
+      } finally {
+        await server.close();
+      }
+    });
+
+    it("POST /api/conversations/:id/messages returns connectors-only guidance for wallet intent", async () => {
+      const handleMessage = vi.fn<
+        Parameters<
+          NonNullable<AgentRuntime["messageService"]>["handleMessage"]
+        >,
+        ReturnType<NonNullable<AgentRuntime["messageService"]>["handleMessage"]>
+      >(async () => ({
+        responseContent: { text: "unexpected-runtime-response" },
+      }));
+      const runtime = createRuntimeForChatSseTests({ handleMessage });
+      const server = await startApiServer({ port: 0, runtime });
+      try {
+        const mode = await req(
+          server.port,
+          "PUT",
+          "/api/permissions/automation-mode",
+          { mode: "connectors-only" },
+        );
+        expect(mode.status).toBe(200);
+
+        const created = await req(server.port, "POST", "/api/conversations", {
+          title: "Wallet mode guidance",
+        });
+        expect(created.status).toBe(200);
+        const conversationId = String(
+          (created.data as { conversation?: { id?: string } }).conversation
+            ?.id ?? "",
+        );
+        expect(conversationId.length).toBeGreaterThan(0);
+
+        const { status, data } = await req(
+          server.port,
+          "POST",
+          `/api/conversations/${conversationId}/messages`,
+          {
+            text: "can you swap on bsc for me?",
+            mode: "power",
+          },
+        );
+        expect(status).toBe(200);
+        expect(String(data.text)).toContain("connectors-only mode");
+        expect(String(data.text)).toContain("/api/permissions/automation-mode");
+        expect(handleMessage).not.toHaveBeenCalled();
+      } finally {
+        await server.close();
+      }
+    });
+  });
+
   describe("provider issue fallback", () => {
     it("POST /api/chat replaces '(no response)' with the provider issue message", async () => {
       const runtime = createRuntimeForCreditNoResponseTests();
@@ -3270,6 +3833,20 @@ describe("API Server E2E (no runtime)", () => {
       const { status, data } = await req(port, "GET", "/api/plugins");
       expect(status).toBe(200);
       expect(Array.isArray(data.plugins)).toBe(true);
+    });
+
+    it("includes plugin-evm as a visible diagnostic plugin entry", async () => {
+      const { data } = await req(port, "GET", "/api/plugins");
+      const plugins = data.plugins as Array<Record<string, unknown>>;
+      const evm = plugins.find(
+        (plugin) =>
+          plugin.id === "evm" ||
+          plugin.npmName === "@elizaos/plugin-evm",
+      );
+      expect(evm).toBeDefined();
+      expect(evm?.managementMode).toBe("core-optional");
+      expect(Array.isArray(evm?.prerequisites)).toBe(true);
+      expect(typeof evm?.capabilityStatus).toBe("string");
     });
 
     it("plugins have correct shape", async () => {
