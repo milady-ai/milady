@@ -1,7 +1,14 @@
 import { LanguageDropdown, ThemeToggle } from "@miladyai/app-core/components";
 import { getTabGroups, type TabGroup } from "@miladyai/app-core/navigation";
 import { useApp } from "@miladyai/app-core/state";
-import { Button } from "@miladyai/ui";
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@miladyai/ui";
 import { Menu, X } from "lucide-react";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -37,13 +44,13 @@ interface HeaderProps {
 const HEADER_NAV_BUTTON_BASE_CLASSNAME =
   "relative z-10 min-h-[44px] shrink-0 rounded-xl border border-transparent px-3 py-2.5 text-[12px] transition-all duration-200 md:px-3.5 xl:px-4";
 const HEADER_NAV_BUTTON_ACTIVE_CLASSNAME =
-  "border-accent/30 bg-accent/12 text-txt font-semibold shadow-[0_2px_10px_rgba(3,5,10,0.08)] ring-1 ring-inset ring-accent/18 dark:shadow-[0_0_0_1px_rgba(var(--accent),0.14),0_0_14px_rgba(var(--accent),0.14)]";
+  "border-accent/30 bg-accent/12 text-txt font-semibold shadow-[0_2px_10px_rgba(3,5,10,0.08)] ring-1 ring-inset ring-accent/18 dark:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.14),0_0_14px_rgba(var(--accent-rgb),0.14)]";
 const HEADER_NAV_BUTTON_INACTIVE_CLASSNAME =
   "text-muted hover:border-border/45 hover:bg-bg-hover/70 hover:text-txt";
 const HEADER_MOBILE_NAV_BUTTON_BASE_CLASSNAME =
   "flex min-h-[48px] w-full rounded-xl border px-3 py-3 text-[14px] font-medium transition-all duration-200";
 const HEADER_MOBILE_NAV_BUTTON_ACTIVE_CLASSNAME =
-  "border-accent/30 bg-accent/12 text-txt shadow-[0_2px_10px_rgba(3,5,10,0.08)] ring-1 ring-inset ring-accent/18 dark:shadow-[0_0_0_1px_rgba(var(--accent),0.14),0_0_14px_rgba(var(--accent),0.14)]";
+  "border-accent/30 bg-accent/12 text-txt shadow-[0_2px_10px_rgba(3,5,10,0.08)] ring-1 ring-inset ring-accent/18 dark:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.14),0_0_14px_rgba(var(--accent-rgb),0.14)]";
 const HEADER_MOBILE_NAV_BUTTON_INACTIVE_CLASSNAME =
   "border-transparent bg-transparent text-txt hover:border-border/45 hover:bg-bg-hover/70";
 
@@ -133,9 +140,10 @@ export function Header({
   const useMinimalHeaderChrome = transparent || !isDesktopShell;
   const showNavigationMenu = isDesktopShell;
   const showCloudStatus = isDesktopShell && !hideCloudCredits;
+  const headerFrameClassName = isDesktopShell ? "" : "max-w-5xl";
   const headerShellClassName = isDesktopShell
     ? "border-transparent bg-transparent shadow-none ring-0 backdrop-blur-none"
-    : "max-w-5xl border-[rgba(255,255,255,0.12)] bg-[image:linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02)),linear-gradient(180deg,rgba(8,11,18,0.52),rgba(5,7,12,0.3))] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),inset_0_-1px_0_rgba(255,255,255,0.04),0_24px_50px_rgba(2,4,8,0.28)] ring-1 ring-inset ring-white/10 backdrop-blur-2xl";
+    : "border-[rgba(255,255,255,0.12)] bg-[image:linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02)),linear-gradient(180deg,rgba(8,11,18,0.52),rgba(5,7,12,0.3))] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),inset_0_-1px_0_rgba(255,255,255,0.04),0_24px_50px_rgba(2,4,8,0.28)] ring-1 ring-inset ring-white/10 backdrop-blur-2xl";
 
   const handleShellViewChange = (
     view: "companion" | "character" | "desktop",
@@ -226,10 +234,21 @@ export function Header({
         data-no-camera-drag="true"
       >
         <div
-          className={`px-1.5 pt-1.5 sm:px-4 sm:pt-3 ${useMinimalHeaderChrome ? "" : "pb-1.5 sm:pb-3"}`}
+          className={`px-1.5 sm:px-4 ${useMinimalHeaderChrome ? "" : "pb-1.5 sm:pb-3"}`}
+          style={{
+            paddingTop: `calc(var(--safe-area-top, 0px) + ${
+              isDesktopShell ? "0.875rem" : "0.375rem"
+            })`,
+            paddingLeft: `calc(var(--safe-area-left, 0px) + ${
+              isDesktopShell ? "clamp(0.65rem, 1.3vw, 1.2rem)" : "0.375rem"
+            })`,
+            paddingRight: `calc(var(--safe-area-right, 0px) + ${
+              isDesktopShell ? "clamp(0.65rem, 1.3vw, 1.2rem)" : "0.375rem"
+            })`,
+          }}
         >
           <div
-            className={`pointer-events-auto relative mx-auto w-full rounded-[20px] border bg-clip-padding transition-all sm:rounded-[22px] ${headerShellClassName}`}
+            className={`pointer-events-auto relative mx-auto w-full rounded-[20px] border bg-clip-padding transition-all sm:rounded-[22px] ${headerFrameClassName} ${headerShellClassName}`}
             data-testid="header-glass-shell"
           >
             <ShellHeaderControls
@@ -357,50 +376,43 @@ export function Header({
         </div>
       </header>
 
-      {/* Mobile Menu Overlay */}
-      {showNavigationMenu && mobileMenuOpen && (
-        <div
-          className="fixed inset-0 z-[140] sm:hidden"
-          role="dialog"
-          aria-modal="true"
-          aria-label={t("aria.navMenu")}
-        >
-          {/* Backdrop */}
-          <Button
-            variant="ghost"
-            className="absolute inset-0 h-full w-full border-0 bg-black/40 backdrop-blur-sm"
-            onClick={() => setMobileMenuOpen(false)}
-            aria-label={t("aria.closeNavMenu")}
-            style={HEADER_BUTTON_STYLE}
-          />
-
-          {/* Menu Panel */}
-          <div className="absolute bottom-0 right-0 top-0 flex w-[min(22rem,88vw)] flex-col border-l border-border/60 bg-bg/92 shadow-2xl backdrop-blur-xl animate-in slide-in-from-right duration-200">
-            <div className="flex items-center justify-between border-b border-border/50 px-4 py-3">
-              <div className="min-w-0">
-                <div className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">
-                  {t("aria.navMenu")}
+      {showNavigationMenu ? (
+        <Dialog open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+          <DialogContent
+            showCloseButton={false}
+            className="fixed right-0 top-0 left-auto flex h-[100dvh] w-[min(22rem,88vw)] max-w-none translate-x-0 translate-y-0 flex-col gap-0 rounded-none border-l border-border/60 bg-bg/92 p-0 shadow-2xl backdrop-blur-xl data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:hidden"
+          >
+            <DialogHeader className="border-b border-border/50 px-4 py-3 text-left">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">
+                    {t("aria.navMenu")}
+                  </div>
+                  <DialogTitle className="truncate text-sm font-medium text-txt">
+                    {activeTabGroup
+                      ? t(
+                          NAV_LABEL_I18N_KEY[activeTabGroup.label] ??
+                            activeTabGroup.label,
+                        )
+                      : t("aria.navMenu")}
+                  </DialogTitle>
+                  <DialogDescription className="sr-only">
+                    Switch between Milady sections from the mobile navigation
+                    drawer.
+                  </DialogDescription>
                 </div>
-                <div className="text-sm font-medium text-txt">
-                  {activeTabGroup
-                    ? t(
-                        NAV_LABEL_I18N_KEY[activeTabGroup.label] ??
-                          activeTabGroup.label,
-                      )
-                    : t("aria.navMenu")}
-                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className={`shrink-0 ${HEADER_ICON_BUTTON_CLASSNAME}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                  aria-label={t("aria.closeNavMenu")}
+                  style={HEADER_BUTTON_STYLE}
+                >
+                  <X className="pointer-events-none h-4 w-4" />
+                </Button>
               </div>
-              <Button
-                variant="outline"
-                size="icon"
-                className={`shrink-0 ${HEADER_ICON_BUTTON_CLASSNAME}`}
-                onClick={() => setMobileMenuOpen(false)}
-                aria-label={t("aria.closeNavMenu")}
-                style={HEADER_BUTTON_STYLE}
-              >
-                <X className="pointer-events-none h-4 w-4" />
-              </Button>
-            </div>
+            </DialogHeader>
             <div className="flex flex-1 flex-col px-3 py-3">
               <div className="flex-1 overflow-y-auto pr-1">
                 <div className="flex flex-col gap-1">
@@ -447,9 +459,9 @@ export function Header({
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          </DialogContent>
+        </Dialog>
+      ) : null}
     </>
   );
 }

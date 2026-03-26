@@ -1,5 +1,7 @@
+import { Button } from "@miladyai/ui";
 import { useRenderGuard } from "@miladyai/app-core/hooks";
 import { useApp } from "@miladyai/app-core/state";
+import { PanelLeftOpen } from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { AgentActivityBox } from "./AgentActivityBox";
 import { ChatModalView } from "./ChatModalView";
@@ -35,6 +37,7 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
     chatAgentVoiceMuted,
     chatLastUsage,
     conversationMessages,
+    conversations,
     elizaCloudAuthRejected,
     elizaCloudConnected,
     elizaCloudCredits,
@@ -45,6 +48,7 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
     handleNewConversation,
     navigation,
     ptySessions,
+    activeConversationId,
     setState,
     setTab,
     switchShellView,
@@ -54,6 +58,7 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
   const [ptySidePanelSessionId, setPtySidePanelSessionId] = useState<
     string | null
   >(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   // Gate chat + header behind avatar load — don't show chat or play
   // greeting speech until the VRM finishes its teleport-in animation.
@@ -118,6 +123,24 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
       t,
     ],
   );
+  const activeConversation = useMemo(
+    () =>
+      conversations.find(
+        (conversation) => conversation.id === activeConversationId,
+      ) ?? null,
+    [activeConversationId, conversations],
+  );
+  const activeConversationTitle = useMemo(() => {
+    if (!activeConversation?.title) return t("conversations.newChat");
+    if (
+      activeConversation.title === "New Chat" ||
+      activeConversation.title === "companion.newChat" ||
+      activeConversation.title === "conversations.newChatTitle"
+    ) {
+      return t("conversations.newChat");
+    }
+    return activeConversation.title;
+  }, [activeConversation?.title, t]);
 
   const handleInferenceAlertClick = useCallback(() => {
     if (!inferenceNotice) return;
@@ -138,13 +161,28 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
     });
   }, [navigation, setState, setTab, switchShellView]);
 
-  const companionHeaderRightExtras = inferenceNotice ? (
-    <InferenceCloudAlertButton
-      notice={inferenceNotice}
-      onPointerDown={(e) => e.stopPropagation()}
-      onClick={handleInferenceAlertClick}
-    />
-  ) : null;
+  const companionHeaderRightExtras = (
+    <>
+      <Button
+        variant="outline"
+        onClick={() => setHistoryOpen(true)}
+        onPointerDown={(event) => event.stopPropagation()}
+        className="h-11 min-h-[44px] min-w-[44px] max-w-[min(14rem,44vw)] justify-start gap-2 rounded-xl px-3 text-left"
+        aria-label={`${t("conversations.chats")}: ${activeConversationTitle}`}
+        title={activeConversationTitle}
+      >
+        <PanelLeftOpen className="h-4 w-4 shrink-0" aria-hidden />
+        <span className="truncate text-sm">{activeConversationTitle}</span>
+      </Button>
+      {inferenceNotice ? (
+        <InferenceCloudAlertButton
+          notice={inferenceNotice}
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={handleInferenceAlertClick}
+        />
+      ) : null}
+    </>
+  );
 
   const companionHeaderRightTrailingExtras = (
     <CloudStatusBadge
@@ -192,12 +230,21 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
       </div>
 
       {avatarReady && (
-        <div className="pointer-events-auto absolute inset-x-0 bottom-0 z-20 flex justify-center px-1.5 pb-3 sm:px-4 sm:pb-5">
+        <div
+          className="pointer-events-auto absolute inset-x-0 bottom-0 z-20 flex justify-center px-1.5 sm:px-4"
+          style={{
+            paddingBottom: "calc(var(--safe-area-bottom, 0px) + 0.75rem)",
+          }}
+        >
           <div
             className="relative w-full max-w-5xl min-w-0"
             style={{ height: COMPANION_DOCK_HEIGHT, minHeight: "17rem" }}
           >
-            <ChatModalView variant="companion-dock" />
+            <ChatModalView
+              variant="companion-dock"
+              showSidebar={historyOpen}
+              onSidebarClose={() => setHistoryOpen(false)}
+            />
           </div>
         </div>
       )}

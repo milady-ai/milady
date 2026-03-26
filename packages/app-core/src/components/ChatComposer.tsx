@@ -8,6 +8,12 @@ import {
   useRef,
   useState,
 } from "react";
+import {
+  DESKTOP_CONTROL_SURFACE_ACCENT_CLASSNAME,
+  DESKTOP_CONTROL_SURFACE_CLASSNAME,
+  DESKTOP_CONTROL_SURFACE_DESTRUCTIVE_CLASSNAME,
+  DESKTOP_INPUT_SHELL_CLASSNAME,
+} from "./desktop-surface-primitives";
 
 type ChatComposerVariant = "default" | "game-modal";
 
@@ -47,12 +53,11 @@ const COMPOSER_CONTROL_HEIGHT_CLASSNAME = "h-[46px]";
 const COMPOSER_ICON_BUTTON_CLASSNAME = `${COMPOSER_CONTROL_HEIGHT_CLASSNAME} w-[46px] shrink-0`;
 const COMPOSER_ACTION_BUTTON_CLASSNAME = `ml-1 flex items-center justify-center rounded-full transition-all duration-300 select-none active:scale-95 ${COMPOSER_ICON_BUTTON_CLASSNAME}`;
 const COMMON_TEXTAREA_CLASSNAME = `w-full min-w-0 min-h-0 ${COMPOSER_CONTROL_HEIGHT_CLASSNAME} resize-none overflow-y-hidden max-h-[200px] outline-none ring-0 shadow-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 font-[var(--font-chat)] disabled:opacity-50`;
-const COMPOSER_SURFACE_BUTTON_CLASSNAME =
-  "select-none border border-border/60 bg-bg/72 text-muted-strong shadow-sm backdrop-blur-md transition-[border-color,background-color,color,transform,box-shadow] duration-200 hover:border-accent/60 hover:bg-bg-hover/90 hover:text-txt hover:shadow-md active:scale-95 disabled:hover:border-border/60 disabled:hover:bg-bg/72 disabled:hover:text-muted-strong";
+const COMPOSER_SURFACE_BUTTON_CLASSNAME = DESKTOP_CONTROL_SURFACE_CLASSNAME;
 const COMPOSER_EMPHASIZED_BUTTON_CLASSNAME =
-  "border border-accent/45 bg-accent/16 text-accent shadow-[0_0_18px_rgba(var(--accent),0.18)] ring-1 ring-inset ring-accent/18 hover:border-accent/70 hover:bg-accent/24 hover:text-accent";
+  DESKTOP_CONTROL_SURFACE_ACCENT_CLASSNAME;
 const COMPOSER_DESTRUCTIVE_BUTTON_CLASSNAME =
-  "border border-danger/40 bg-danger/12 text-danger shadow-sm hover:border-danger/65 hover:bg-danger/20 hover:text-danger";
+  DESKTOP_CONTROL_SURFACE_DESTRUCTIVE_CLASSNAME;
 const COMPOSER_GAME_BUTTON_CLASSNAME =
   "select-none rounded-full border border-[color:var(--onboarding-card-border)] bg-[image:linear-gradient(180deg,color-mix(in_srgb,var(--onboarding-card-bg)_72%,rgba(255,255,255,0.12)),color-mix(in_srgb,var(--onboarding-card-bg)_92%,rgba(0,0,0,0.04)))] text-[color:var(--onboarding-text-primary)] shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_14px_34px_rgba(0,0,0,0.16)] ring-1 ring-inset ring-white/8 backdrop-blur-xl transition-[border-color,background-color,color,transform,box-shadow] duration-300 hover:border-[color:var(--onboarding-card-border-strong)] hover:bg-[image:linear-gradient(180deg,color-mix(in_srgb,var(--onboarding-card-bg-hover)_76%,rgba(255,255,255,0.14)),color-mix(in_srgb,var(--onboarding-card-bg-hover)_94%,rgba(0,0,0,0.05)))] hover:text-[color:var(--onboarding-text-strong)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_18px_40px_rgba(0,0,0,0.18)] active:scale-95";
 const COMPOSER_GAME_BUTTON_ACTIVE_CLASSNAME =
@@ -115,7 +120,7 @@ export function ChatComposer({
           ? COMPOSER_GAME_BUTTON_ACTIVE_CLASSNAME
           : `${COMPOSER_GAME_BUTTON_CLASSNAME} opacity-80`
       }`
-    : `${COMPOSER_ACTION_BUTTON_CLASSNAME} border border-accent/55 bg-accent/22 text-accent-fg shadow-[0_12px_28px_rgba(0,0,0,0.16)] hover:border-accent/75 hover:bg-accent/32 disabled:border-border/40 disabled:bg-bg-accent disabled:text-muted-strong disabled:shadow-none`;
+    : `${COMPOSER_ACTION_BUTTON_CLASSNAME} ${DESKTOP_CONTROL_SURFACE_ACCENT_CLASSNAME} disabled:ring-0`;
   const inputPlaceholder = isNarrow ? "Message..." : t("chat.inputPlaceholder");
   const defaultTextareaPlaceholder = isAgentStarting
     ? t("chat.agentStarting")
@@ -266,7 +271,7 @@ export function ChatComposer({
         className={
           isGameModal
             ? "relative flex min-h-[46px] min-w-0 flex-1 items-center overflow-hidden rounded-[26px] border border-[color:var(--onboarding-card-border)] bg-[image:linear-gradient(180deg,color-mix(in_srgb,var(--onboarding-card-bg)_72%,rgba(255,255,255,0.14)),color-mix(in_srgb,var(--onboarding-card-bg)_94%,rgba(0,0,0,0.04)))] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_20px_44px_rgba(0,0,0,0.16)] ring-1 ring-inset ring-white/8 backdrop-blur-2xl transition-[border-color,background-color,box-shadow] duration-300 before:pointer-events-none before:absolute before:inset-x-4 before:top-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.42),transparent)] focus-within:border-[color:var(--onboarding-card-border-strong)] focus-within:bg-[image:linear-gradient(180deg,color-mix(in_srgb,var(--onboarding-card-bg-hover)_78%,rgba(255,255,255,0.16)),color-mix(in_srgb,var(--onboarding-card-bg-hover)_96%,rgba(0,0,0,0.04)))] focus-within:shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_24px_52px_rgba(0,0,0,0.18)]"
-            : "flex min-h-[46px] min-w-0 flex-1 items-center rounded-xl border border-border/60 bg-card/78 shadow-sm backdrop-blur-md transition-[border-color,background-color,box-shadow] duration-200 hover:border-border-strong focus-within:border-accent/50 focus-within:bg-card/92 focus-within:shadow-md"
+            : `flex min-h-[46px] min-w-0 flex-1 items-center rounded-[16px] ${DESKTOP_INPUT_SHELL_CLASSNAME}`
         }
       >
         <Textarea
@@ -275,7 +280,7 @@ export function ChatComposer({
           className={
             isGameModal
               ? `${COMMON_TEXTAREA_CLASSNAME} relative z-[1] max-h-[150px] border-none bg-transparent px-4 py-2.5 text-[15px] leading-relaxed text-[color:var(--onboarding-text-strong)] placeholder:text-[color:color-mix(in_srgb,var(--onboarding-text-muted)_88%,white_12%)] max-[380px]:px-3.5`
-              : `${COMMON_TEXTAREA_CLASSNAME} px-3.5 py-2 bg-transparent border-none text-[15px] leading-[1.7] text-txt placeholder:text-muted-strong`
+              : `${COMMON_TEXTAREA_CLASSNAME} px-3.5 py-2 bg-transparent border-none text-[15px] leading-[1.7] text-txt-strong placeholder:text-muted`
           }
           style={{ fontFamily: "var(--font-chat)" }}
           rows={1}

@@ -24,7 +24,7 @@ import {
   type VoicePlaybackStartEvent,
 } from "@miladyai/app-core/hooks";
 import { getVrmPreviewUrl, useApp } from "@miladyai/app-core/state";
-import { Button } from "@miladyai/ui";
+import { Button, ChatEmptyState } from "@miladyai/ui";
 import {
   type ChangeEvent,
   type DragEvent,
@@ -720,6 +720,27 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
     [addImageFiles],
   );
 
+  const handlePrimeCompanionDraft = useCallback(
+    (draft: string) => {
+      setState("chatInput", draft);
+      if (typeof window !== "undefined") {
+        window.requestAnimationFrame(() => textareaRef.current?.focus());
+      } else {
+        textareaRef.current?.focus();
+      }
+    },
+    [setState],
+  );
+
+  const companionStarterPrompts = useMemo(
+    () => [
+      `Hey ${agentName}, what can you help me with?`,
+      "Give me a quick status update.",
+      "Help me decide what to do next.",
+    ],
+    [agentName],
+  );
+
   const handleFileInputChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       if (e.target.files) {
@@ -741,7 +762,7 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
     <section
       aria-label={t("aria.chatWorkspace")}
       className={`flex flex-col flex-1 min-h-0 relative ${
-        isGameModal ? "overflow-visible pointer-events-none" : "bg-bg"
+        isGameModal ? "overflow-visible pointer-events-none" : "bg-transparent"
       }${imageDragOver ? " ring-2 ring-accent ring-inset" : ""}`}
       onDragOver={(e) => {
         e.preventDefault();
@@ -785,7 +806,38 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
       >
         {visibleMsgs.length === 0 && !chatSending ? (
           isGameModal ? (
-            <div className="flex min-h-full items-end px-1 py-4" />
+            <div className="flex min-h-full items-end px-1 py-4">
+              <div className="w-full rounded-[32px] border border-[color:var(--onboarding-card-border)] bg-[color:var(--onboarding-panel-bg)]/94 p-2 shadow-[0_20px_60px_rgba(0,0,0,0.18)] backdrop-blur-xl">
+                <ChatEmptyState
+                  agentName={agentName}
+                  className="items-start px-5 py-6 text-left sm:px-6 sm:py-7"
+                  suggestions={companionStarterPrompts}
+                  onSuggestionClick={handlePrimeCompanionDraft}
+                  action={
+                    <Button
+                      className="min-h-10 rounded-xl px-4 text-xs font-semibold"
+                      onClick={() =>
+                        handlePrimeCompanionDraft(
+                          `Hey ${agentName}, can you help me get started?`,
+                        )
+                      }
+                      size="sm"
+                      type="button"
+                      variant="default"
+                    >
+                      Draft Welcome Prompt
+                    </Button>
+                  }
+                  hint="Chat begins in the dock below."
+                  labels={{
+                    startConversation: "Start in the Dock",
+                    sendMessageTo: "Queue up a prompt for",
+                    toBeginChatting:
+                      "and send it from the dock composer below.",
+                  }}
+                />
+              </div>
+            </div>
           ) : chatAwaitingGreeting ? (
             <TypingIndicator agentName={agentName} />
           ) : null
@@ -1056,8 +1108,11 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
       ) : (
         /* ── Default composer ─────────────────────────────────────────── */
         <div
-          className="relative border-t border-border/40 bg-card/55 px-3 pb-3 pt-3 backdrop-blur-sm sm:px-4 sm:pb-4 xl:px-5"
-          style={{ zIndex: 1 }}
+          className="relative border-t border-border/20 bg-transparent px-3 pb-3 pt-3 sm:px-4 sm:pb-4 xl:px-5"
+          style={{
+            zIndex: 1,
+            paddingBottom: "calc(var(--safe-area-bottom, 0px) + 0.75rem)",
+          }}
         >
           <ChatComposer
             variant="default"

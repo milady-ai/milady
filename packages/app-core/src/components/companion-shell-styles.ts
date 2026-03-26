@@ -13,23 +13,23 @@ export const COMPANION_OVERLAY_TABS = new Set<Tab>(["companion"]);
 /* ── Per-tab accent / color config ─────────────────────────────────── */
 
 export const ACCENT_COLORS: Record<string, string> = {
-  skills: "#fcd535",
+  skills: "#f0b90b",
   apps: "#10b981",
-  plugins: "#fcd535",
-  connectors: "#fcd535",
+  plugins: "#f0b90b",
+  connectors: "#f0b90b",
   knowledge: "#a78bfa",
-  wallets: "#fcd535",
+  wallets: "#f0b90b",
   stream: "#ef4444",
   lifo: "#8b5cf6",
 };
 
 export const TOP_BAR_COLORS: Record<string, string> = {
-  skills: "#fcd535",
-  wallets: "rgba(252, 213, 53, 0.7)",
+  skills: "#f0b90b",
+  wallets: "rgba(240, 185, 11, 0.7)",
   lifo: "rgba(139, 92, 246, 0.7)",
   stream: "rgba(239, 68, 68, 0.7)",
-  plugins: "#fcd535",
-  connectors: "#fcd535",
+  plugins: "#f0b90b",
+  connectors: "#f0b90b",
   apps: "rgba(16, 185, 129, 0.7)",
   knowledge: "rgba(167, 139, 250, 0.7)",
 };
@@ -160,33 +160,33 @@ export function cardBoxShadow(f: TabFlags, _shadowFx: string) {
 /* ── Accent color helpers ──────────────────────────────────────────── */
 
 export function accentVar(f: TabFlags) {
-  if (f.isPluginsLike) return "#fcd535";
+  if (f.isPluginsLike) return "#f0b90b";
   if (f.isApps) return "#10b981";
   if (f.isKnowledge) return "#a78bfa";
-  if (f.isWallets) return "#fcd535";
+  if (f.isWallets) return "#f0b90b";
   if (f.isLifo) return "#8b5cf6";
   if (f.isStream) return "#ef4444";
-  return "#fcd535";
+  return "#f0b90b";
 }
 
 export function accentSubtleVar(f: TabFlags) {
-  if (f.isPluginsLike) return "rgba(252, 213, 53, 0.12)";
+  if (f.isPluginsLike) return "rgba(240, 185, 11, 0.12)";
   if (f.isApps) return "rgba(16, 185, 129, 0.12)";
   if (f.isKnowledge) return "rgba(167, 139, 250, 0.12)";
-  if (f.isWallets) return "rgba(252, 213, 53, 0.12)";
+  if (f.isWallets) return "rgba(240, 185, 11, 0.12)";
   if (f.isLifo) return "rgba(139, 92, 246, 0.12)";
   if (f.isStream) return "rgba(239, 68, 68, 0.12)";
-  return "rgba(252, 213, 53, 0.12)";
+  return "rgba(240, 185, 11, 0.12)";
 }
 
 export function accentRgbVar(f: TabFlags) {
-  if (f.isPluginsLike) return "252, 213, 53";
+  if (f.isPluginsLike) return "240, 185, 11";
   if (f.isApps) return "16, 185, 129";
   if (f.isKnowledge) return "167, 139, 250";
-  if (f.isWallets) return "252, 213, 53";
+  if (f.isWallets) return "240, 185, 11";
   if (f.isLifo) return "139, 92, 246";
   if (f.isStream) return "239, 68, 68";
-  return "252, 213, 53";
+  return "240, 185, 11";
 }
 
 export function accentForegroundVar(f: TabFlags) {

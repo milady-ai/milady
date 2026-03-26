@@ -16,6 +16,13 @@ import {
   useRef,
   useState,
 } from "react";
+import {
+  DESKTOP_CHAT_BUBBLE_ASSISTANT_CLASSNAME,
+  DESKTOP_CHAT_BUBBLE_USER_CLASSNAME,
+  DESKTOP_CONTROL_SURFACE_ACCENT_CLASSNAME,
+  DESKTOP_CONTROL_SURFACE_CLASSNAME,
+  DESKTOP_FLOATING_ACTION_RAIL_CLASSNAME,
+} from "./desktop-surface-primitives";
 import { MessageContent } from "./MessageContent";
 
 interface ChatMessageProps {
@@ -191,12 +198,10 @@ export const ChatMessage = memo(function ChatMessage({
 
   const actionsVisible = showActions;
   const bubbleClassName = isUser
-    ? "rounded-br-md border border-accent/35 bg-accent/16 text-txt shadow-sm"
-    : "rounded-bl-md border border-border/70 bg-card/96 text-txt shadow-sm";
-  const actionRailClassName =
-    "top-1 rounded-xl border border-border/60 bg-card/96 p-1 shadow-sm backdrop-blur-sm";
-  const actionButtonClassName =
-    "h-8 w-8 rounded-lg border border-border/45 bg-card/92 text-muted-strong shadow-sm transition-[background-color,color,border-color,box-shadow] hover:border-border-strong hover:bg-bg-hover hover:text-txt";
+    ? `rounded-[18px] rounded-br-[6px] ${DESKTOP_CHAT_BUBBLE_USER_CLASSNAME}`
+    : `rounded-[18px] rounded-bl-[6px] ${DESKTOP_CHAT_BUBBLE_ASSISTANT_CLASSNAME}`;
+  const actionRailClassName = `top-1 rounded-[12px] p-1 ${DESKTOP_FLOATING_ACTION_RAIL_CLASSNAME}`;
+  const actionButtonClassName = `h-8 w-8 rounded-[11px] ${DESKTOP_CONTROL_SURFACE_CLASSNAME}`;
 
   return (
     <article
@@ -215,7 +220,7 @@ export const ChatMessage = memo(function ChatMessage({
       >
         {/* Message Content */}
         <div
-          className={`relative group rounded-2xl px-4 py-2.5 text-[15px] leading-[1.7] whitespace-pre-wrap break-words ${bubbleClassName}`}
+          className={`relative group px-4 py-3 text-[15px] leading-[1.7] whitespace-pre-wrap break-words ${bubbleClassName}`}
           style={{ fontFamily: "var(--font-chat)" }}
         >
           {isEditing ? (
@@ -225,7 +230,7 @@ export const ChatMessage = memo(function ChatMessage({
                 value={draftText}
                 onChange={(event) => setDraftText(event.target.value)}
                 onKeyDown={handleEditKeyDown}
-                className="min-h-[110px] w-full rounded-xl border border-border-strong/70 bg-bg/80 px-3 py-2 text-[15px] leading-[1.7] text-txt outline-none shadow-inner focus-visible:border-accent/55 focus-visible:ring-2 focus-visible:ring-accent/20"
+                className="min-h-[110px] w-full rounded-[14px] border border-border/28 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_86%,transparent),color-mix(in_srgb,var(--bg)_95%,transparent))] px-3 py-2.5 text-[15px] leading-[1.7] text-txt outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_14px_20px_-20px_rgba(15,23,42,0.1)] focus-visible:border-accent/28 focus-visible:ring-2 focus-visible:ring-accent/12"
                 style={{ fontFamily: "var(--font-chat)" }}
                 aria-label={t("aria.editMessage")}
                 disabled={savingEdit}
@@ -236,7 +241,7 @@ export const ChatMessage = memo(function ChatMessage({
                   size="sm"
                   onClick={handleCancelEditing}
                   disabled={savingEdit}
-                  className="h-8 rounded-lg border border-border/45 px-3 text-xs text-muted-strong hover:border-border-strong hover:bg-bg-hover hover:text-txt"
+                  className={`h-8 rounded-[11px] px-3 text-xs ${DESKTOP_CONTROL_SURFACE_CLASSNAME}`}
                 >
                   {t("common.cancel")}
                 </Button>
@@ -249,7 +254,7 @@ export const ChatMessage = memo(function ChatMessage({
                     !draftText.trim() ||
                     draftText.trim() === message.text.trim()
                   }
-                  className="h-8 rounded-lg border-accent/35 bg-accent/12 px-3 text-xs text-accent-fg hover:border-accent/55 hover:bg-accent/18 disabled:border-border/50 disabled:bg-bg-accent disabled:text-muted-strong"
+                  className={`h-8 rounded-[11px] px-3 text-xs ${DESKTOP_CONTROL_SURFACE_ACCENT_CLASSNAME} disabled:border-border/20 disabled:bg-bg-accent disabled:text-muted-strong`}
                 >
                   {savingEdit ? "Saving..." : "Save and resend"}
                 </Button>
@@ -379,7 +384,7 @@ export const TypingIndicator = memo(function TypingIndicator({
         <div className="text-[12px] font-semibold text-txt mb-1">
           {agentName}
         </div>
-        <div className="px-4 py-3 bg-bg-accent border border-border rounded-2xl rounded-bl-md">
+        <div className="rounded-[20px] rounded-bl-[8px] border border-border/32 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_90%,transparent),color-mix(in_srgb,var(--bg)_96%,transparent))] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_16px_24px_-22px_rgba(15,23,42,0.1)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_18px_26px_-24px_rgba(0,0,0,0.2)]">
           <div className="flex gap-1">
             <span
               className="w-2 h-2 rounded-full bg-muted-strong animate-[typing-bounce_1.2s_ease-in-out_infinite]"

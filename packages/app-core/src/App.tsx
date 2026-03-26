@@ -4,7 +4,13 @@
 
 import { Keyboard } from "@capacitor/keyboard";
 import { isIOS, isNative } from "@miladyai/app-core/platform";
-import { Button } from "@miladyai/ui";
+import {
+  Button,
+  DrawerSheet,
+  DrawerSheetContent,
+  DrawerSheetHeader,
+  DrawerSheetTitle,
+} from "@miladyai/ui";
 import {
   type ReactNode,
   useCallback,
@@ -54,9 +60,9 @@ import type { Tab } from "./navigation";
 import { APPS_ENABLED, COMPANION_ENABLED } from "./navigation";
 import { useApp } from "./state";
 
-const CHAT_MOBILE_BREAKPOINT_PX = 1024;
+const CHAT_MOBILE_BREAKPOINT_PX = 820;
 const CHAT_DESKTOP_COMPOSER_UNDERLAY_CLASS =
-  "pointer-events-none absolute inset-x-0 bottom-0 h-[5.75rem] border-t border-border/40 bg-card/55 backdrop-blur-sm";
+  "pointer-events-none absolute inset-x-0 bottom-0 h-[5.75rem]";
 
 function formatStartupElapsed(sec: number): string {
   if (sec <= 0) return "";
@@ -516,12 +522,26 @@ export function App() {
             </main>
 
             {mobileConversationsOpen && (
-              <div className="fixed inset-0 z-[120] bg-bg">
-                <ConversationsSidebar
-                  mobile
-                  onClose={() => setMobileConversationsOpen(false)}
-                />
-              </div>
+              <DrawerSheet
+                open={mobileConversationsOpen}
+                onOpenChange={setMobileConversationsOpen}
+              >
+                <DrawerSheetContent
+                  aria-describedby={undefined}
+                  className="h-[min(calc(100dvh-1rem-var(--safe-area-top,0px)-var(--safe-area-bottom,0px)),46rem)] p-0"
+                  showCloseButton={false}
+                >
+                  <DrawerSheetHeader className="sr-only">
+                    <DrawerSheetTitle>
+                      {t("conversations.chats")}
+                    </DrawerSheetTitle>
+                  </DrawerSheetHeader>
+                  <ConversationsSidebar
+                    mobile
+                    onClose={() => setMobileConversationsOpen(false)}
+                  />
+                </DrawerSheetContent>
+              </DrawerSheet>
             )}
           </>
         ) : (

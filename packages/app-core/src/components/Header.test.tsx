@@ -45,6 +45,25 @@ vi.mock("@miladyai/ui", () => ({
     ...props
   }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
     React.createElement("button", { type: "button", ...props }, children),
+  Dialog: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
+  DialogContent: ({
+    children,
+    ...props
+  }: React.HTMLAttributes<HTMLDivElement> & { showCloseButton?: boolean }) =>
+    React.createElement("div", props, children),
+  DialogHeader: ({
+    children,
+    ...props
+  }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", props, children),
+  DialogTitle: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", props, children),
+  DialogDescription: ({
+    children,
+    ...props
+  }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", props, children),
 }));
 
 vi.mock("lucide-react", () => ({

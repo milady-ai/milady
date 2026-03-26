@@ -93,13 +93,13 @@ describe("derived style helpers", () => {
 
   it("uses the default accent for generic advanced overlays", () => {
     const flags = tabFlags("actions");
-    expect(accentVar(flags)).toBe("#fcd535");
-    expect(accentSubtleVar(flags)).toBe("rgba(252, 213, 53, 0.12)");
+    expect(accentVar(flags)).toBe("#f0b90b");
+    expect(accentSubtleVar(flags)).toBe("rgba(240, 185, 11, 0.12)");
   });
 
   it("keeps special-case accents for stream and wallets", () => {
     expect(accentVar(tabFlags("stream"))).toBe("#ef4444");
-    expect(accentVar(tabFlags("wallets"))).toBe("#fcd535");
+    expect(accentVar(tabFlags("wallets"))).toBe("#f0b90b");
   });
 
   it("keeps card surfaces non-transparent in base chat shell", () => {
@@ -136,7 +136,7 @@ describe("App.tsx advanced-tab parity", () => {
 describe("accent palettes", () => {
   it("keeps stable accent constants", () => {
     expect(ACCENT_COLORS.stream).toBe("#ef4444");
-    expect(ACCENT_COLORS.skills).toBe("#fcd535");
+    expect(ACCENT_COLORS.skills).toBe("#f0b90b");
     expect(TOP_BAR_COLORS.stream).toContain("239, 68, 68");
   });
 });

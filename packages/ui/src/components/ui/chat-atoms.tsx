@@ -1,3 +1,6 @@
+import type * as React from "react";
+
+import { cn } from "../../lib/utils";
 import { Button } from "./button";
 
 export function TypingIndicator({
@@ -46,6 +49,9 @@ export interface ChatEmptyStateProps {
   /** Starter suggestions shown as quick-reply chips. */
   suggestions?: string[];
   onSuggestionClick?: (suggestion: string) => void;
+  action?: React.ReactNode;
+  hint?: React.ReactNode;
+  className?: string;
   /** i18n labels — all have sensible English defaults. */
   labels?: {
     startConversation?: string;
@@ -59,10 +65,18 @@ export function ChatEmptyState({
   agentName,
   suggestions = ["Hello!", "How are you?", "Tell me a joke", "Help me with..."],
   onSuggestionClick,
+  action,
+  hint,
+  className,
   labels = {},
 }: ChatEmptyStateProps) {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
+    <div
+      className={cn(
+        "flex flex-1 flex-col items-center justify-center p-6 text-center",
+        className,
+      )}
+    >
       <div className="w-16 h-16 rounded-2xl bg-accent-subtle flex items-center justify-center mb-4">
         <svg
           width="32"
@@ -87,6 +101,7 @@ export function ChatEmptyState({
         {labels.sendMessageTo ?? "Send a message to"} {agentName}{" "}
         {labels.toBeginChatting ?? "to begin chatting."}
       </p>
+      {action ? <div className="mb-4 flex justify-center">{action}</div> : null}
       <div className="flex flex-wrap justify-center gap-2">
         {suggestions.map((suggestion) => (
           <Button
@@ -100,6 +115,11 @@ export function ChatEmptyState({
           </Button>
         ))}
       </div>
+      {hint ? (
+        <div className="mt-4 max-w-sm text-[11px] uppercase tracking-[0.16em] text-muted/74">
+          {hint}
+        </div>
+      ) : null}
     </div>
   );
 }

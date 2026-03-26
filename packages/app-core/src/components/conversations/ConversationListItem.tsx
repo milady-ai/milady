@@ -3,8 +3,14 @@ import { PencilLine, X } from "lucide-react";
 import type React from "react";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import {
+  DESKTOP_CONTROL_SURFACE_CLASSNAME,
+  DESKTOP_CONTROL_SURFACE_DESTRUCTIVE_CLASSNAME,
+} from "../desktop-surface-primitives";
+import {
   APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
+  APP_SIDEBAR_CARD_BASE_CLASSNAME,
   APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
+  APP_SIDEBAR_PILL_CLASSNAME,
 } from "../sidebar-shell-styles";
 import {
   formatRelativeTime,
@@ -19,10 +25,8 @@ const GAME_MODAL_ROW_INACTIVE_CLASSNAME =
   "border-transparent bg-transparent hover:border-white/10 hover:bg-white/5";
 const GAME_MODAL_ROW_ACTION_CLASSNAME =
   "h-8 w-8 shrink-0 self-center rounded-lg border border-white/10 bg-black/20 text-[color:var(--onboarding-text-muted)] shadow-sm transition-[border-color,background-color,color,opacity] hover:border-[color:var(--onboarding-accent-border)] hover:bg-[color:var(--onboarding-accent-bg)] hover:text-[color:var(--onboarding-text-strong)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent";
-const DEFAULT_ROW_ACTION_CLASSNAME =
-  "h-8 w-8 shrink-0 rounded-lg border border-border/40 bg-card/80 text-muted-strong shadow-sm transition-[border-color,background-color,color,opacity] hover:border-border-strong hover:bg-bg-hover hover:text-txt focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent";
-const DEFAULT_ROW_BASE_CLASSNAME =
-  "group relative flex w-full items-start gap-3 rounded-xl border px-3.5 py-3 transition-all duration-150 focus-within:ring-2 focus-within:ring-accent/35";
+const DEFAULT_ROW_ACTION_CLASSNAME = `h-8 w-8 shrink-0 rounded-[11px] ${DESKTOP_CONTROL_SURFACE_CLASSNAME} focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent`;
+const DEFAULT_ROW_BASE_CLASSNAME = `${APP_SIDEBAR_CARD_BASE_CLASSNAME} relative px-3.5 py-3.5 focus-within:ring-2 focus-within:ring-accent/35`;
 const DEFAULT_ROW_ACTIVE_CLASSNAME = APP_SIDEBAR_CARD_ACTIVE_CLASSNAME;
 const DEFAULT_ROW_INACTIVE_CLASSNAME = APP_SIDEBAR_CARD_INACTIVE_CLASSNAME;
 
@@ -224,8 +228,8 @@ export function ConversationListItem({
           <span
             className={
               isGameModal
-                ? "absolute left-3 top-3 z-[1] h-2 w-2 shrink-0 rounded-full bg-accent animate-pulse shadow-[0_0_10px_rgba(var(--accent),0.6)]"
-                : "mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-accent shadow-[0_0_8px_rgba(var(--accent),0.35)]"
+                ? "absolute left-3 top-3 z-[1] h-2 w-2 shrink-0 rounded-full bg-accent animate-pulse shadow-[0_0_10px_rgba(var(--accent-rgb),0.6)]"
+                : "mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-accent shadow-[0_0_8px_rgba(var(--accent-rgb),0.35)]"
             }
           />
         )}
@@ -237,10 +241,12 @@ export function ConversationListItem({
             isActive={isActive}
           />
           {!isGameModal ? (
-            <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px] font-medium leading-none text-muted/78 [font-variant-numeric:tabular-nums]">
+            <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px] font-medium leading-none text-muted/72 [font-variant-numeric:tabular-nums]">
               <span>{updatedLabel}</span>
               {isUnread ? (
-                <span className="rounded-full border border-accent/20 bg-accent/8 px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.02em] text-accent-fg">
+                <span
+                  className={`${APP_SIDEBAR_PILL_CLASSNAME} px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.02em] text-txt-strong`}
+                >
                   New
                 </span>
               ) : null}
@@ -279,7 +285,7 @@ export function ConversationListItem({
           className={
             isGameModal
               ? `${GAME_MODAL_ROW_ACTION_CLASSNAME} ${rowActionVisibility} hover:text-danger`
-              : `${DEFAULT_ROW_ACTION_CLASSNAME} ${rowActionVisibility} hover:text-danger`
+              : `${DEFAULT_ROW_ACTION_CLASSNAME} ${DESKTOP_CONTROL_SURFACE_DESTRUCTIVE_CLASSNAME} ${rowActionVisibility} hover:text-danger`
           }
           onClick={(e) => {
             e.preventDefault();
@@ -292,7 +298,7 @@ export function ConversationListItem({
       ) : null}
 
       {confirmDeleteId === conv.id ? (
-        <div className="flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-danger/25 bg-danger/8 px-2 py-1 shadow-sm">
+        <div className="flex flex-shrink-0 items-center gap-1.5 rounded-[12px] border border-danger/22 bg-[linear-gradient(180deg,rgba(239,68,68,0.1),rgba(239,68,68,0.04))] px-2 py-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_10px_16px_-16px_rgba(127,29,29,0.18)]">
           <span className="text-[10px] font-medium text-danger">
             {t("conversations.deleteConfirm")}
           </span>
