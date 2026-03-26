@@ -1303,5 +1303,12 @@
   "whatsappqroverlay.Tap": "轻敲",
   "whatsappqroverlay.TryAgain": "再试一次",
   "whatsappqroverlay.UsesAnUnofficialW": "使用非官方 WhatsApp API。使用专用电话号码。",
-  "whatsappqroverlay.andSelect": "并选择"
+  "whatsappqroverlay.andSelect": "并选择",
+  "bugreportmodal.attachLogs": "??????",
+  "bugreportmodal.attachSystemInfo": "??????",
+  "bugreportmodal.copyDiagnostics": "??????",
+  "bugreportmodal.copiedDiagnostics": "????????",
+  "bugreportmodal.openLogsFolder": "???????",
+  "bugreportmodal.saveBundle": "?????",
+  "bugreportmodal.savingBundle": "???????..."
 }

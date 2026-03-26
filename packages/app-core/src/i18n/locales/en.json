@@ -1308,5 +1308,12 @@
   "lifecycle.restartInProgress": "restarting",
   "lifecycle.resetInProgress": "resetting",
   "aria.close": "Close",
-  "aria.closeDialog": "Close dialog"
+  "aria.closeDialog": "Close dialog",
+  "bugreportmodal.attachLogs": "Attach startup logs",
+  "bugreportmodal.attachSystemInfo": "Attach system info",
+  "bugreportmodal.copyDiagnostics": "Copy Diagnostics",
+  "bugreportmodal.copiedDiagnostics": "Diagnostics Copied!",
+  "bugreportmodal.openLogsFolder": "Open Logs Folder",
+  "bugreportmodal.saveBundle": "Save Report Bundle",
+  "bugreportmodal.savingBundle": "Saving Bundle..."
 }

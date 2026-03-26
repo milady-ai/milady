@@ -1303,5 +1303,12 @@
   "whatsappqroverlay.Tap": "I-tap ang",
   "whatsappqroverlay.TryAgain": "Subukan Muli",
   "whatsappqroverlay.UsesAnUnofficialW": "Gumagamit ng unofficial WhatsApp API. Gumamit ng dedicated phone number.",
-  "whatsappqroverlay.andSelect": "at piliin ang"
+  "whatsappqroverlay.andSelect": "at piliin ang",
+  "bugreportmodal.attachLogs": "Attach startup logs",
+  "bugreportmodal.attachSystemInfo": "Attach system info",
+  "bugreportmodal.copyDiagnostics": "Copy Diagnostics",
+  "bugreportmodal.copiedDiagnostics": "Diagnostics Copied!",
+  "bugreportmodal.openLogsFolder": "Open Logs Folder",
+  "bugreportmodal.saveBundle": "Save Report Bundle",
+  "bugreportmodal.savingBundle": "Saving Bundle..."
 }

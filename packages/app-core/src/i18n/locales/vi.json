@@ -1303,5 +1303,12 @@
   "whatsappqroverlay.Tap": "Chạm",
   "whatsappqroverlay.TryAgain": "Thử lại",
   "whatsappqroverlay.UsesAnUnofficialW": "Dùng API WhatsApp không chính thức. Hãy dùng số riêng.",
-  "whatsappqroverlay.andSelect": "và chọn"
+  "whatsappqroverlay.andSelect": "và chọn",
+  "bugreportmodal.attachLogs": "Attach startup logs",
+  "bugreportmodal.attachSystemInfo": "Attach system info",
+  "bugreportmodal.copyDiagnostics": "Copy Diagnostics",
+  "bugreportmodal.copiedDiagnostics": "Diagnostics Copied!",
+  "bugreportmodal.openLogsFolder": "Open Logs Folder",
+  "bugreportmodal.saveBundle": "Save Report Bundle",
+  "bugreportmodal.savingBundle": "Saving Bundle..."
 }
