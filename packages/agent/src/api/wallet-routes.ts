@@ -159,6 +159,8 @@ export interface WalletRouteDependencies {
   validatePrivateKey: typeof validatePrivateKey;
   importWallet: typeof importWallet;
   generateWalletForChain: typeof generateWalletForChain;
+  getAutomationMode?: (config: ElizaConfig) => "full" | "connectors-only";
+  getPluginEvmLoaded?: () => boolean;
 }
 
 export const DEFAULT_WALLET_ROUTE_DEPENDENCIES: WalletRouteDependencies = {

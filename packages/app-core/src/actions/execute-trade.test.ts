@@ -233,7 +233,9 @@ describe("EXECUTE_TRADE action", () => {
     });
 
     expect((result as { success: boolean }).success).toBe(true);
-    expect((result as { text: string }).text).toContain("Action: EXECUTE_TRADE");
+    expect((result as { text: string }).text).toContain(
+      "Action: EXECUTE_TRADE",
+    );
     expect((result as { text: string }).text).toContain("Executed: true");
     expect((result as { text: string }).text).toContain("Tx hash: 0xabc123");
     expect((result as { data: Record<string, unknown> }).data).toMatchObject({
@@ -596,4 +598,3 @@ describe("EXECUTE_TRADE action", () => {
     expect(body.side).toBe("buy");
   });
 });
-

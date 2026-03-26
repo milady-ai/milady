@@ -3612,7 +3612,11 @@ async function generateChatResponse(
     if (directWalletExecutionFallback?.errorText) {
       forcedWalletExecutionText = true;
       responseText = directWalletExecutionFallback.errorText;
-      result = { responseContent: { text: directWalletExecutionFallback.errorText } };
+      result = {
+        responseContent: { text: directWalletExecutionFallback.errorText },
+        didRespond: true,
+        responseMessages: [],
+      };
     } else if (directWalletExecutionFallback?.action) {
       runtime.logger?.info(
         {
@@ -3639,7 +3643,11 @@ async function generateChatResponse(
           );
         },
       );
-      result = { responseContent: { text: responseText } };
+      result = {
+        responseContent: { text: responseText },
+        didRespond: true,
+        responseMessages: [],
+      };
     } else {
       const walletAugmentedMessage =
         maybeAugmentChatMessageWithWalletContext(runtime, message);
@@ -7079,6 +7087,9 @@ export function resolveWebSocketUpgradeRejection(
   }
 
   const handshakeToken = extractWebSocketHandshakeToken(req, wsUrl);
+  if (!handshakeToken) {
+    return { status: 401, reason: "Unauthorized" };
+  }
   if (handshakeToken && !tokenMatches(expected, handshakeToken)) {
     return { status: 401, reason: "Unauthorized" };
   }

@@ -2743,7 +2743,8 @@ async function handleMiladyCompatRoute(
             return true;
           }
 
-          approvalHash = "txHash" in approvalResult ? approvalResult.txHash : "";
+          approvalHash =
+            "txHash" in approvalResult ? approvalResult.txHash : "";
 
           if (approvalResult.mode === "steward" && rpcUrl) {
             const provider = new ethers.JsonRpcProvider(rpcUrl);

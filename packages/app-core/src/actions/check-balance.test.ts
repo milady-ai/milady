@@ -642,4 +642,3 @@ describe("CHECK_BALANCE action", () => {
     expect(data.solana).toBeDefined();
   });
 });
-

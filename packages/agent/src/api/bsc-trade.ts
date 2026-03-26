@@ -141,6 +141,12 @@ export function resolvePrimaryBscRpcUrl(
   return primary;
 }
 
+export function resolveBscApprovalSpender(
+  quote: Pick<BscTradeQuoteResponse, "routerAddress">,
+): string {
+  return ethers.getAddress(quote.routerAddress);
+}
+
 function hostLabel(url: string): string {
   try {
     return new URL(url).host;

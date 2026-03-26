@@ -257,6 +257,7 @@ export interface BscTradeQuoteRequest {
   tokenAddress: string;
   amount: string;
   slippageBps?: number;
+  routeProvider?: "auto" | "pancakeswap-v2" | "0x";
 }
 
 export interface BscTradeQuoteLeg {
