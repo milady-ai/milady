@@ -7859,6 +7859,12 @@ async function handleRequest(
       // model calls — user's own keys handle models.
       delete process.env.ELIZAOS_CLOUD_SMALL_MODEL;
       delete process.env.ELIZAOS_CLOUD_LARGE_MODEL;
+      // Clear ElizaCloud proxy base URLs so coding agents use direct
+      // provider APIs with the user's own keys.
+      delete process.env.ANTHROPIC_BASE_URL;
+      delete process.env.OPENAI_BASE_URL;
+      delete envCfg.ANTHROPIC_BASE_URL;
+      delete envCfg.OPENAI_BASE_URL;
     };
 
     // Helper: enable cloud inference (switching TO cloud)
@@ -7980,6 +7986,33 @@ async function handleRequest(
         if (config.cloud.apiKey) {
           process.env.ELIZAOS_CLOUD_API_KEY = config.cloud.apiKey;
           process.env.ELIZAOS_CLOUD_ENABLED = "true";
+
+          // Configure coding agent CLIs to proxy through ElizaCloud.
+          // ElizaCloud provides Anthropic-compatible (/api/v1/messages) and
+          // OpenAI-compatible (/api/v1/chat/completions) proxy endpoints
+          // that bill to the user's cloud credits.
+          const cloudBaseUrl =
+            (config.cloud as Record<string, unknown>).baseUrl ??
+            process.env.ELIZAOS_CLOUD_BASE_URL ??
+            "https://www.elizacloud.ai";
+          const cloudApiKey = config.cloud.apiKey;
+
+          // Claude Code: Anthropic-compatible proxy
+          process.env.ANTHROPIC_API_KEY = cloudApiKey;
+          process.env.ANTHROPIC_BASE_URL = `${cloudBaseUrl}/api/v1`;
+          envCfg.ANTHROPIC_API_KEY = cloudApiKey;
+          envCfg.ANTHROPIC_BASE_URL = `${cloudBaseUrl}/api/v1`;
+
+          // Codex: OpenAI-compatible proxy
+          process.env.OPENAI_API_KEY = cloudApiKey;
+          process.env.OPENAI_BASE_URL = `${cloudBaseUrl}/api/v1`;
+          envCfg.OPENAI_API_KEY = cloudApiKey;
+          envCfg.OPENAI_BASE_URL = `${cloudBaseUrl}/api/v1`;
+
+          // Gemini CLI and Aider use direct Google/provider APIs — no
+          // ElizaCloud proxy exists for those. Their keys were already
+          // cleared by clearOtherApiKeys() above, so they'll show as
+          // unavailable in the coding agent settings.
         }
       } else if (normalizedProvider === "pi-ai") {
         // Switching TO pi-ai credentials mode
