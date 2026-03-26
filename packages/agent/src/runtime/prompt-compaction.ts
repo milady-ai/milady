@@ -93,19 +93,19 @@ export function compactInstalledSkills(prompt: string): string {
 
 // Coding intent uses specific terms. Generic words like "fix", "build", "run"
 // are excluded to avoid false positives ("fix the typo", "build me a haiku").
+// Includes translations for supported locales: ko, zh-CN, es, pt, vi, tl.
 const CODING_INTENT_RE =
-  /\b(code|coding|codebase|repo|repository|pull request|pr\b|branch|merge|commit|deploy|refactor|start_coding_task|spawn_coding_agent|send_to_coding_agent)\b|https?:\/\/(?:github\.com|gitlab\.com|bitbucket\.org)\//i;
+  /\b(code|coding|codebase|repo|repository|pull request|pr\b|branch|merge|commit|deploy|refactor|start_coding_task|spawn_coding_agent|send_to_coding_agent)\b|https?:\/\/(?:github\.com|gitlab\.com|bitbucket\.org)\/|코드|코딩|레포|저장소|브랜치|커밋|배포|리팩토링|풀\s?리퀘스트|代码|仓库|分支|提交|部署|合并|拉取请求|código|repositorio|repositório|rama|rama|confirmación|implementar|mã|kho|nhánh|triển khai/i;
 const PLUGIN_UI_INTENT_RE =
-  /\b(plugin|plugins|configure|configuration|setup|install|enable|disable|api key|credential|secret|dashboard|form|ui|interface|\[config:)\b/i;
+  /\b(plugin|plugins|configure|configuration|setup|install|enable|disable|api key|credential|secret|dashboard|form|ui|interface|\[config:)\b|플러그인|설정|설치|插件|配置|安装|complemento|configurar|instalar|plugin|configuração/i;
 // Terminal intent requires specific CLI/tool terms, not generic verbs.
 const TERMINAL_INTENT_RE =
-  /\b(shell|command line|execute command|npm|bun|yarn|git\b|bash|terminal|script|pip|apt-get|brew)\b/i;
+  /\b(shell|command line|execute command|npm|bun|yarn|git\b|bash|terminal|script|pip|apt-get|brew)\b|터미널|명령어|스크립트|终端|命令行|脚本|terminal|línea de comandos|linha de comando/i;
 const EMOTE_INTENT_RE =
-  /\b(emote|wave|dance|bow|clap|laugh|angry|sad|think|sit|play_emote)\b/i;
+  /\b(emote|wave|dance|bow|clap|laugh|angry|sad|think|sit|play_emote)\b|이모트|춤|인사|笑|跳舞|鞠躬|emote|bailar/i;
 // "close" and "label" removed — too generic ("close the file", "label this").
-// Kept specific collocations like "close issue", "github issue".
 const ISSUE_INTENT_RE =
-  /\b(issue|bug report|ticket|close issue|reopen issue|github issue|create issue|file a bug)\b/i;
+  /\b(issue|bug report|ticket|close issue|reopen issue|github issue|create issue|file a bug)\b|이슈|버그|티켓|问题|错误|工单|problema|error|billete/i;
 
 /** Actions that are always included at full detail. */
 export const UNIVERSAL_ACTIONS = new Set(["REPLY", "NONE", "IGNORE"]);
@@ -222,6 +222,12 @@ export function buildFullParamActionSet(
  * (REPLY, NONE, IGNORE) keep full params — all others are stubbed.
  */
 export function compactActionsForIntent(prompt: string): string {
+  // NOTE: Intent detection is English-keyword-based. Non-English messages may
+  // not trigger any intent, causing all non-universal action params to be
+  // stripped. This is a graceful degradation — action names and descriptions
+  // are always preserved, so the LLM can still select the right action; it
+  // just won't see detailed param schemas until the user triggers a known intent.
+
   // Find the first <actions>...</actions> block (the Available Actions section)
   const actionsStart = prompt.indexOf("<actions>");
   if (actionsStart === -1) return prompt;

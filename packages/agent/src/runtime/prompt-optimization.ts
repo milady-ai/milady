@@ -54,6 +54,11 @@ const MILADY_ACTION_COMPACTION = (() => {
  * user is trusted. This replaces 2-6 LLM security calls per message with
  * a keyword heuristic. Leave unset or =0 for public channel deployments
  * (Discord, Telegram) where untrusted users can inject prompts.
+ *
+ * WARNING: This MUST NOT be set in multi-user deployments (Discord servers,
+ * public Telegram groups, shared web dashboards). Untrusted users can craft
+ * messages that bypass the keyword heuristic but would be caught by the
+ * full LLM security evaluator.
  */
 const MILADY_SKIP_SECURITY_EVAL =
   process.env.MILADY_SKIP_SECURITY_EVAL === "1" ||
@@ -150,7 +155,7 @@ export function installPromptOptimizations(runtime: AgentRuntime): void {
   // Warn when security eval is skipped via env var
   if (MILADY_SKIP_SECURITY_EVAL) {
     runtime.logger?.warn(
-      "[milady] MILADY_SKIP_SECURITY_EVAL=1 — LLM security evaluation is disabled for ALL channels. " +
+      "[SECURITY] MILADY_SKIP_SECURITY_EVAL=1 — LLM security evaluation is disabled for ALL channels. " +
         "Only a keyword heuristic is active. Set =0 or remove the var for public channel deployments.",
     );
   }
@@ -212,6 +217,8 @@ export function installPromptOptimizations(runtime: AgentRuntime): void {
     // High-risk messages always get flagged by keyword heuristic.
     if (
       isTextLarge &&
+      // Upstream @elizaos/core prompt prefix for the security evaluator.
+      // Update this string if core changes the security eval prompt format.
       originalPrompt.startsWith("You are a security evaluation system.") &&
       shouldSkipSecurityEval()
     ) {
@@ -239,6 +246,8 @@ export function installPromptOptimizations(runtime: AgentRuntime): void {
     // Run relationship extraction every N messages instead of every message.
     if (
       isObjectSmall &&
+      // Upstream @elizaos/core prompt prefix for the social/relationship extraction evaluator.
+      // Update this string if core changes the social eval prompt format.
       originalPrompt.startsWith(
         "You are analyzing a conversation to extract social and identity information.",
       )

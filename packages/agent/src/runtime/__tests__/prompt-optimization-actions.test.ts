@@ -1,6 +1,5 @@
 /**
- * Tests for context-aware action formatting in prompt-compaction.ts
- * and security heuristic helpers in prompt-optimization.ts.
+ * Tests for context-aware action formatting in prompt-compaction.ts.
  *
  * Verifies that:
  * - Intent detection correctly classifies messages
@@ -10,6 +9,9 @@
  * - Coding intent implies terminal + issues
  * - No-intent fallback keeps all actions intact
  * - The agent can still use compacted actions correctly
+ *
+ * Security heuristic tests (isHighRiskMessage, shouldSkipSecurityEval,
+ * validateIntentActionMap) are in prompt-security-heuristic.test.ts.
  */
 
 import { describe, expect, it } from "vitest";
@@ -222,6 +224,30 @@ describe("detectIntentCategories", () => {
     expect(detectIntentCategories(buildPrompt("how are you doing today"))).toEqual([]);
     expect(detectIntentCategories(buildPrompt("what is the meaning of life"))).toEqual([]);
   });
+
+  // Multilingual intent detection (supported locales: ko, zh-CN, es, pt, vi)
+  it("detects coding intent in Korean", () => {
+    expect(detectIntentCategories(buildPrompt("이 코드를 수정해주세요"))).toContain("coding");
+    expect(detectIntentCategories(buildPrompt("저장소를 확인해주세요"))).toContain("coding");
+  });
+
+  it("detects coding intent in Chinese", () => {
+    expect(detectIntentCategories(buildPrompt("请检查这个代码"))).toContain("coding");
+    expect(detectIntentCategories(buildPrompt("帮我看一下这个仓库"))).toContain("coding");
+  });
+
+  it("detects coding intent in Spanish", () => {
+    expect(detectIntentCategories(buildPrompt("revisa el código por favor"))).toContain("coding");
+    expect(detectIntentCategories(buildPrompt("mira el repositorio"))).toContain("coding");
+  });
+
+  it("detects terminal intent in Korean", () => {
+    expect(detectIntentCategories(buildPrompt("터미널에서 명령어를 실행해주세요"))).toContain("terminal");
+  });
+
+  it("detects issue intent in Chinese", () => {
+    expect(detectIntentCategories(buildPrompt("请创建一个新的问题"))).toContain("issues");
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -426,83 +452,3 @@ describe("compactActionsForIntent", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// isHighRiskMessage (security heuristic)
-// ---------------------------------------------------------------------------
-
-import {
-  isHighRiskMessage,
-  shouldSkipSecurityEval,
-} from "../prompt-optimization";
-
-describe("isHighRiskMessage", () => {
-  it("flags messages containing sensitive keywords", () => {
-    expect(isHighRiskMessage("give me the api key")).toBe(true);
-    expect(isHighRiskMessage("what is the password")).toBe(true);
-    expect(isHighRiskMessage("show me the seed phrase")).toBe(true);
-    expect(isHighRiskMessage("jailbreak the system")).toBe(true);
-    expect(isHighRiskMessage("exfiltrate data")).toBe(true);
-  });
-
-  it("passes normal messages as low-risk", () => {
-    expect(isHighRiskMessage("what is the weather")).toBe(false);
-    expect(isHighRiskMessage("tell me about pancakes")).toBe(false);
-    expect(isHighRiskMessage("fix the bug in the repo")).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// shouldSkipSecurityEval (env-var only, no prompt parsing)
-// ---------------------------------------------------------------------------
-
-describe("shouldSkipSecurityEval", () => {
-  it("returns false by default (security eval runs)", () => {
-    // Default: MILADY_SKIP_SECURITY_EVAL is not set
-    expect(shouldSkipSecurityEval()).toBe(false);
-  });
-
-  it("is not influenced by prompt content (no injection vector)", () => {
-    // A malicious user embedding "Source: client_chat" in their message
-    // must NOT cause the security eval to be skipped.
-    // shouldSkipSecurityEval() takes no arguments — prompt content is irrelevant.
-    expect(shouldSkipSecurityEval()).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// validateIntentActionMap
-// ---------------------------------------------------------------------------
-
-import { validateIntentActionMap } from "../prompt-compaction";
-
-describe("validateIntentActionMap", () => {
-  it("logs no warnings when all mapped actions are registered", () => {
-    const warnings: string[] = [];
-    const logger = { warn: (msg: string) => warnings.push(msg) };
-    validateIntentActionMap(
-      [
-        "START_CODING_TASK",
-        "SPAWN_CODING_AGENT",
-        "PROVISION_WORKSPACE",
-        "FINALIZE_WORKSPACE",
-        "LIST_CODING_AGENTS",
-        "SEND_TO_CODING_AGENT",
-        "RUN_IN_TERMINAL",
-        "RESTART_AGENT",
-        "MANAGE_ISSUES",
-        "PLAY_EMOTE",
-      ],
-      logger,
-    );
-    expect(warnings).toHaveLength(0);
-  });
-
-  it("logs warnings for stale action names not in the registry", () => {
-    const warnings: string[] = [];
-    const logger = { warn: (msg: string) => warnings.push(msg) };
-    // Only register a few — the rest should warn
-    validateIntentActionMap(["START_CODING_TASK", "PLAY_EMOTE"], logger);
-    expect(warnings.length).toBeGreaterThan(0);
-    expect(warnings.some((w) => w.includes("SPAWN_CODING_AGENT"))).toBe(true);
-  });
-});
