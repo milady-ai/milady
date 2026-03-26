@@ -21,7 +21,7 @@ import type {
 } from "@elizaos/core";
 import {
   buildAuthHeaders,
-  WALLET_ACTION_API_PORT,
+  getWalletActionApiPort,
 } from "./wallet-action-shared.js";
 
 /** Timeout for the transfer API call (includes on-chain confirmation). */
@@ -238,7 +238,7 @@ export const transferTokenAction: Action = {
       }
 
       const response = await fetch(
-        `http://127.0.0.1:${WALLET_ACTION_API_PORT}/api/wallet/transfer/execute`,
+        `http://127.0.0.1:${getWalletActionApiPort()}/api/wallet/transfer/execute`,
         {
           method: "POST",
           headers: {

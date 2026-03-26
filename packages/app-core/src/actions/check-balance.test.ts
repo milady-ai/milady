@@ -160,7 +160,7 @@ describe("CHECK_BALANCE action", () => {
 
     expect(mockFetch).toHaveBeenCalledOnce();
     const [url] = mockFetch.mock.calls[0] as [string, RequestInit];
-    expect(url).toBe("http://127.0.0.1:2138/api/wallet/balances");
+    expect(url).toBe("http://127.0.0.1:31337/api/wallet/balances");
   });
 
   // ── Multi-chain response formatting ──────────────────────────────────────
@@ -642,3 +642,4 @@ describe("CHECK_BALANCE action", () => {
     expect(data.solana).toBeDefined();
   });
 });
+

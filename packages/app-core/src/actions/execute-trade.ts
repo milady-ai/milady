@@ -22,7 +22,7 @@ import type {
 import { logger } from "@elizaos/core";
 import {
   buildAuthHeaders,
-  WALLET_ACTION_API_PORT,
+  getWalletActionApiPort,
 } from "./wallet-action-shared.js";
 
 /** Timeout for the trade API call (includes on-chain confirmation). */
@@ -197,7 +197,7 @@ export const executeTradeAction: Action = {
       );
 
       const response = await fetch(
-        `http://127.0.0.1:${WALLET_ACTION_API_PORT}/api/wallet/trade/execute`,
+        `http://127.0.0.1:${getWalletActionApiPort()}/api/wallet/trade/execute`,
         {
           method: "POST",
           headers: {
@@ -400,3 +400,4 @@ export const executeTradeAction: Action = {
     },
   ],
 };
+
