@@ -7,7 +7,12 @@ import { findOwnPackageRoot } from "./server";
 const tempDirs: string[] = [];
 
 function makeTempDir(prefix: string): string {
-  const dir = mkdtempSync(path.join(os.tmpdir(), prefix));
+  const preferredBase = path.join(
+    process.env.LOCALAPPDATA ?? os.tmpdir(),
+    "milady-package-root-tests",
+  );
+  mkdirSync(preferredBase, { recursive: true });
+  const dir = mkdtempSync(path.join(preferredBase, prefix));
   tempDirs.push(dir);
   return dir;
 }
