@@ -8,8 +8,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@miladyai/ui";
-import type { ChangeEvent, ReactNode } from "react";
-import { useState } from "react";
+import type { ChangeEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import type {
   OpenRouterModelOption,
   PiAiModelOption,
@@ -25,6 +25,18 @@ import { getProviderLogo } from "../../../providers";
 import { useApp } from "../../../state";
 import { openExternalUrl } from "../../../utils";
 import { OnboardingTabs } from "../OnboardingTabs";
+import {
+  getOnboardingChoiceCardClassName,
+  OnboardingField,
+  OnboardingStatusBanner,
+  onboardingCenteredStackClassName,
+  onboardingChoiceCardTitleClassName,
+  onboardingDetailStackClassName,
+  onboardingHelperTextClassName,
+  onboardingInfoPanelClassName,
+  onboardingInputClassName,
+  onboardingSubtleTextClassName,
+} from "../onboarding-form-primitives";
 import {
   OnboardingStepHeader,
   onboardingBodyTextShadowStyle,
@@ -75,48 +87,21 @@ const providerOverrides: Record<
   "pi-ai": { name: "Pi Credentials", description: "Local auth" },
 };
 
-const detailStackClass = "flex w-full flex-col gap-4 text-left";
-const centeredDetailStackClass =
-  "flex w-full flex-col items-center gap-3 text-center";
-const statusBannerBaseClass =
-  "flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm";
-const fieldLabelClass =
-  "mb-2 block text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--onboarding-text-muted)]";
-const fieldInputClass =
-  "h-12 w-full rounded-xl border border-[var(--onboarding-card-border)] bg-[var(--onboarding-card-bg)] px-4 text-left text-[var(--onboarding-text-primary)] outline-none transition-all duration-300 focus:border-[var(--onboarding-field-focus-border)] focus:shadow-[var(--onboarding-field-focus-shadow)] placeholder:text-[var(--onboarding-text-faint)]";
-const helperTextClass =
-  "text-sm leading-relaxed text-[var(--onboarding-text-muted)]";
-const subtleTextClass =
-  "text-xs leading-relaxed text-[var(--onboarding-text-subtle)]";
-const infoPanelClass =
-  "rounded-2xl border border-[var(--onboarding-card-border)] bg-[var(--onboarding-card-bg)]/90 px-4 py-4 backdrop-blur-[18px] backdrop-saturate-[1.15]";
-const modelButtonClass =
-  "flex min-h-[56px] w-full items-start justify-between gap-3 rounded-xl border border-[var(--onboarding-card-border)] bg-[var(--onboarding-card-bg)] px-4 py-3 text-left transition-all duration-300 hover:border-[var(--onboarding-card-border-strong)] hover:bg-[var(--onboarding-card-bg-hover)]";
-
-function StatusBanner({
-  tone,
-  children,
-  live = "polite",
-}: {
-  tone: "success" | "neutral" | "error";
-  children: ReactNode;
-  live?: "polite" | "assertive";
-}) {
-  const toneClass =
-    tone === "success"
-      ? "border-[var(--ok-muted)] bg-[var(--ok-subtle)] text-[var(--ok)]"
-      : tone === "error"
-        ? "border-[color:color-mix(in_srgb,var(--danger)_38%,transparent)] bg-[color:color-mix(in_srgb,var(--danger)_12%,transparent)] text-[var(--danger)]"
-        : "border-[var(--onboarding-card-border)] bg-[var(--onboarding-card-bg)] text-[var(--onboarding-text-muted)]";
-
+function ConnectedIcon({ title }: { title: string }) {
   return (
-    <div
-      aria-live={live}
-      role={tone === "error" ? "alert" : "status"}
-      className={`${statusBannerBaseClass} ${toneClass}`}
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     >
-      {children}
-    </div>
+      <title>{title}</title>
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
   );
 }
 
@@ -155,6 +140,16 @@ export function ConnectionProviderDetailScreen({
   const [anthropicError, setAnthropicError] = useState("");
 
   const [apiKeyFormatWarning, setApiKeyFormatWarning] = useState("");
+
+  const elizaCloudApiKeyRef = useRef<HTMLInputElement>(null);
+  const elizaCloudStatusRef = useRef<HTMLDivElement>(null);
+  const anthropicTokenRef = useRef<HTMLInputElement>(null);
+  const anthropicCodeRef = useRef<HTMLInputElement>(null);
+  const anthropicStatusRef = useRef<HTMLDivElement>(null);
+  const openaiCallbackRef = useRef<HTMLInputElement>(null);
+  const openaiStatusRef = useRef<HTMLDivElement>(null);
+  const genericApiKeyRef = useRef<HTMLInputElement>(null);
+  const piAiCustomModelRef = useRef<HTMLInputElement>(null);
 
   const catalogProviders: ProviderOption[] = (
     onboardingOptions?.providers as ProviderOption[] | undefined
@@ -309,6 +304,92 @@ export function ConnectionProviderDetailScreen({
     subscriptionTab: onboardingSubscriptionTab,
   });
 
+  useEffect(() => {
+    if (onboardingProvider === "elizacloud" && onboardingElizaCloudTab === "apikey") {
+      elizaCloudApiKeyRef.current?.focus();
+    }
+  }, [onboardingElizaCloudTab, onboardingProvider]);
+
+  useEffect(() => {
+    if (
+      onboardingProvider === "elizacloud" &&
+      onboardingElizaCloudTab === "login" &&
+      elizaCloudConnected
+    ) {
+      elizaCloudStatusRef.current?.focus();
+    }
+  }, [
+    elizaCloudConnected,
+    onboardingElizaCloudTab,
+    onboardingProvider,
+  ]);
+
+  useEffect(() => {
+    if (
+      onboardingProvider === "anthropic-subscription" &&
+      onboardingSubscriptionTab === "token"
+    ) {
+      anthropicTokenRef.current?.focus();
+    }
+  }, [onboardingProvider, onboardingSubscriptionTab]);
+
+  useEffect(() => {
+    if (
+      onboardingProvider === "anthropic-subscription" &&
+      onboardingSubscriptionTab === "oauth" &&
+      anthropicOAuthStarted &&
+      !anthropicConnected
+    ) {
+      anthropicCodeRef.current?.focus();
+    }
+  }, [
+    anthropicConnected,
+    anthropicOAuthStarted,
+    onboardingProvider,
+    onboardingSubscriptionTab,
+  ]);
+
+  useEffect(() => {
+    if (anthropicConnected) {
+      anthropicStatusRef.current?.focus();
+    }
+  }, [anthropicConnected]);
+
+  useEffect(() => {
+    if (
+      onboardingProvider === "openai-subscription" &&
+      openaiOAuthStarted &&
+      !openaiConnected
+    ) {
+      openaiCallbackRef.current?.focus();
+    }
+  }, [onboardingProvider, openaiConnected, openaiOAuthStarted]);
+
+  useEffect(() => {
+    if (openaiConnected) {
+      openaiStatusRef.current?.focus();
+    }
+  }, [openaiConnected]);
+
+  useEffect(() => {
+    if (
+      onboardingProvider &&
+      onboardingProvider !== "anthropic-subscription" &&
+      onboardingProvider !== "openai-subscription" &&
+      onboardingProvider !== "elizacloud" &&
+      onboardingProvider !== "ollama" &&
+      onboardingProvider !== "pi-ai"
+    ) {
+      genericApiKeyRef.current?.focus();
+    }
+  }, [onboardingProvider]);
+
+  useEffect(() => {
+    if (onboardingProvider === "pi-ai" && piAiSelectValue === "__custom__") {
+      piAiCustomModelRef.current?.focus();
+    }
+  }, [onboardingProvider, piAiSelectValue]);
+
   return (
     <>
       {selectedProvider ? (
@@ -320,7 +401,7 @@ export function ConnectionProviderDetailScreen({
                 false,
                 getCustomLogo(selectedProvider.id),
               )}
-              alt={selectedDisplay.name}
+              alt=""
               className="h-8 w-8 rounded-md object-contain"
             />
           </div>
@@ -333,7 +414,7 @@ export function ConnectionProviderDetailScreen({
       />
 
       {onboardingProvider === "elizacloud" && (
-        <div className={detailStackClass}>
+        <div className={onboardingDetailStackClassName}>
           <OnboardingTabs
             tabs={[
               { id: "login" as const, label: t("onboarding.login") },
@@ -344,24 +425,12 @@ export function ConnectionProviderDetailScreen({
           />
 
           {onboardingElizaCloudTab === "login" ? (
-            <div className={centeredDetailStackClass}>
+            <div className={onboardingCenteredStackClassName}>
               {elizaCloudConnected ? (
-                <StatusBanner tone="success">
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <title>{t("onboarding.connected")}</title>
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
+                <OnboardingStatusBanner ref={elizaCloudStatusRef} tone="success">
+                  <ConnectedIcon title={t("onboarding.connected")} />
                   {t("onboarding.connected")}
-                </StatusBanner>
+                </OnboardingStatusBanner>
               ) : (
                 <Button
                   type="button"
@@ -388,62 +457,75 @@ export function ConnectionProviderDetailScreen({
                   );
                   if (urlMatch) {
                     return (
-                      <Button
-                        variant="ghost"
-                        type="button"
-                        className={onboardingLinkActionClass}
-                        onClick={() => openExternalUrl(urlMatch[1])}
+                      <OnboardingStatusBanner
+                        tone="neutral"
+                        action={
+                          <Button
+                            variant="ghost"
+                            type="button"
+                            className={onboardingLinkActionClass}
+                            onClick={() => openExternalUrl(urlMatch[1])}
+                          >
+                            Open login page in browser
+                          </Button>
+                        }
                       >
-                        Open login page in browser
-                      </Button>
+                        Open the login page in your browser to continue.
+                      </OnboardingStatusBanner>
                     );
                   }
                   return (
-                    <StatusBanner tone="error" live="assertive">
+                    <OnboardingStatusBanner tone="error" live="assertive">
                       {elizaCloudLoginError}
-                    </StatusBanner>
+                    </OnboardingStatusBanner>
                   );
                 })()}
-              <p className={`${helperTextClass} text-center`}>
+              <p className={`${onboardingHelperTextClassName} text-center`}>
                 {t("onboarding.freeCredits")}
               </p>
             </div>
           ) : (
-            <div className={detailStackClass}>
-              <div className={infoPanelClass}>
-                <label
-                  htmlFor="elizacloud-apikey-detail"
-                  className={fieldLabelClass}
+            <div className={onboardingDetailStackClassName}>
+              <div className={onboardingInfoPanelClassName}>
+                <OnboardingField
+                  controlId="elizacloud-apikey-detail"
+                  label={t("onboarding.apiKey")}
+                  description={
+                    <>
+                      {t("onboarding.useExistingKey")}{" "}
+                      <a
+                        href="https://elizacloud.ai/dashboard/settings"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[var(--onboarding-link)] underline underline-offset-2 transition-colors duration-200 hover:text-[var(--onboarding-text-strong)]"
+                      >
+                        {t("onboarding.getOneHere")}
+                      </a>
+                    </>
+                  }
                 >
-                  {t("onboarding.apiKey")}
-                </label>
-                <Input
-                  id="elizacloud-apikey-detail"
-                  type="password"
-                  className={fieldInputClass}
-                  placeholder="ec-..."
-                  value={onboardingApiKey}
-                  onChange={handleApiKeyChange}
-                />
+                  {({ describedBy, invalid }) => (
+                    <Input
+                      id="elizacloud-apikey-detail"
+                      ref={elizaCloudApiKeyRef}
+                      type="password"
+                      aria-describedby={describedBy}
+                      aria-invalid={invalid}
+                      className={onboardingInputClassName}
+                      placeholder="ec-..."
+                      value={onboardingApiKey}
+                      onChange={handleApiKeyChange}
+                    />
+                  )}
+                </OnboardingField>
               </div>
-              <p className={helperTextClass}>
-                {t("onboarding.useExistingKey")}{" "}
-                <a
-                  href="https://elizacloud.ai/dashboard/settings"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[var(--onboarding-link)] underline underline-offset-2"
-                >
-                  {t("onboarding.getOneHere")}
-                </a>
-              </p>
             </div>
           )}
         </div>
       )}
 
       {onboardingProvider === "anthropic-subscription" && (
-        <div className={detailStackClass}>
+        <div className={onboardingDetailStackClassName}>
           <OnboardingTabs
             tabs={[
               { id: "token" as const, label: t("onboarding.setupToken") },
@@ -454,45 +536,42 @@ export function ConnectionProviderDetailScreen({
           />
 
           {onboardingSubscriptionTab === "token" ? (
-            <div className={infoPanelClass}>
-              <div className={fieldLabelClass}>
-                {t("onboarding.enterSetupToken")}
-              </div>
-              <Input
-                type="password"
-                className={fieldInputClass}
-                value={onboardingApiKey}
-                onChange={handleApiKeyChange}
-                placeholder="sk-ant-oat01-..."
-              />
-              <p className={`${helperTextClass} mt-3 whitespace-pre-line`}>
-                {t("onboarding.setupTokenInstructions")}
-              </p>
+            <div className={onboardingInfoPanelClassName}>
+              <OnboardingField
+                controlId="anthropic-setup-token"
+                label={t("onboarding.enterSetupToken")}
+                description={t("onboarding.setupTokenInstructions")}
+                descriptionClassName="whitespace-pre-line"
+                message={apiKeyFormatWarning}
+                messageTone="danger"
+              >
+                {({ describedBy, invalid }) => (
+                  <Input
+                    id="anthropic-setup-token"
+                    ref={anthropicTokenRef}
+                    type="password"
+                    aria-describedby={describedBy}
+                    aria-invalid={invalid}
+                    className={onboardingInputClassName}
+                    value={onboardingApiKey}
+                    onChange={handleApiKeyChange}
+                    placeholder="sk-ant-oat01-..."
+                  />
+                )}
+              </OnboardingField>
             </div>
           ) : anthropicConnected ? (
-            <div className={centeredDetailStackClass}>
-              <StatusBanner tone="success">
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <title>{t("onboarding.connected")}</title>
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+            <div className={onboardingCenteredStackClassName}>
+              <OnboardingStatusBanner ref={anthropicStatusRef} tone="success">
+                <ConnectedIcon title={t("onboarding.connected")} />
                 {t("onboarding.connectedToClaude")}
-              </StatusBanner>
-              <p className={`${helperTextClass} text-center`}>
+              </OnboardingStatusBanner>
+              <p className={`${onboardingHelperTextClassName} text-center`}>
                 {t("onboarding.claudeSubscriptionReady")}
               </p>
             </div>
           ) : !anthropicOAuthStarted ? (
-            <div className={centeredDetailStackClass}>
+            <div className={onboardingCenteredStackClassName}>
               <Button
                 type="button"
                 className={`${onboardingPrimaryActionClass} w-full`}
@@ -507,39 +586,40 @@ export function ConnectionProviderDetailScreen({
               >
                 {t("onboarding.loginWithAnthropic")}
               </Button>
-              <p className={`${helperTextClass} text-center`}>
+              <p className={`${onboardingHelperTextClassName} text-center`}>
                 {t("onboarding.requiresClaudeSub")}
               </p>
-              {anthropicError && (
-                <StatusBanner tone="error" live="assertive">
+              {anthropicError ? (
+                <OnboardingStatusBanner tone="error" live="assertive">
                   {anthropicError}
-                </StatusBanner>
-              )}
+                </OnboardingStatusBanner>
+              ) : null}
             </div>
           ) : (
-            <div className={detailStackClass}>
-              <p className={`${helperTextClass} text-center`}>
-                {t("onboarding.authCodeInstructions")
-                  .split("\n")
-                  .map((line, i) => (
-                    <span key={line + String(i)}>
-                      {line}
-                      {i === 0 && <br />}
-                    </span>
-                  ))}
-              </p>
-              <Input
-                type="text"
-                className={`${fieldInputClass} text-center`}
-                placeholder={t("onboarding.pasteAuthCode")}
-                value={anthropicCode}
-                onChange={(e) => setAnthropicCode(e.target.value)}
-              />
-              {anthropicError && (
-                <StatusBanner tone="error" live="assertive">
-                  {anthropicError}
-                </StatusBanner>
-              )}
+            <div className={onboardingDetailStackClassName}>
+              <OnboardingField
+                align="center"
+                controlId="anthropic-auth-code"
+                label={t("onboarding.pasteAuthCode")}
+                description={t("onboarding.authCodeInstructions")}
+                descriptionClassName="whitespace-pre-line"
+                message={anthropicError}
+                messageTone="danger"
+              >
+                {({ describedBy, invalid }) => (
+                  <Input
+                    id="anthropic-auth-code"
+                    ref={anthropicCodeRef}
+                    type="text"
+                    aria-describedby={describedBy}
+                    aria-invalid={invalid}
+                    className={`${onboardingInputClassName} text-center`}
+                    placeholder={t("onboarding.pasteAuthCode")}
+                    value={anthropicCode}
+                    onChange={(e) => setAnthropicCode(e.target.value)}
+                  />
+                )}
+              </OnboardingField>
               <Button
                 type="button"
                 className={`${onboardingPrimaryActionClass} self-center`}
@@ -561,31 +641,19 @@ export function ConnectionProviderDetailScreen({
       )}
 
       {onboardingProvider === "openai-subscription" && (
-        <div className={detailStackClass}>
+        <div className={onboardingDetailStackClassName}>
           {openaiConnected ? (
-            <div className={centeredDetailStackClass}>
-              <StatusBanner tone="success">
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <title>{t("onboarding.connected")}</title>
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+            <div className={onboardingCenteredStackClassName}>
+              <OnboardingStatusBanner ref={openaiStatusRef} tone="success">
+                <ConnectedIcon title={t("onboarding.connected")} />
                 {t("onboarding.connectedToChatGPT")}
-              </StatusBanner>
-              <p className={`${helperTextClass} text-center`}>
+              </OnboardingStatusBanner>
+              <p className={`${onboardingHelperTextClassName} text-center`}>
                 {t("onboarding.chatgptSubscriptionReady")}
               </p>
             </div>
           ) : !openaiOAuthStarted ? (
-            <div className={centeredDetailStackClass}>
+            <div className={onboardingCenteredStackClassName}>
               <Button
                 type="button"
                 className={`${onboardingPrimaryActionClass} w-full`}
@@ -600,17 +668,17 @@ export function ConnectionProviderDetailScreen({
               >
                 {t("onboarding.loginWithOpenAI")}
               </Button>
-              <p className={`${helperTextClass} text-center`}>
+              <p className={`${onboardingHelperTextClassName} text-center`}>
                 {t("onboarding.requiresChatGPTSub")}
               </p>
             </div>
           ) : (
-            <div className={detailStackClass}>
-              <div className={infoPanelClass}>
+            <div className={onboardingDetailStackClassName}>
+              <div className={onboardingInfoPanelClassName}>
                 <p className="mb-1 text-sm font-semibold text-[var(--onboarding-text-primary)]">
                   {t("onboarding.almostThere")}
                 </p>
-                <p className={helperTextClass}>
+                <p className={onboardingHelperTextClassName}>
                   {t("onboarding.redirectInstructions")}{" "}
                   <code className="rounded bg-[var(--bg-hover)] px-1 py-0.5 text-xs">
                     localhost:1455
@@ -618,21 +686,30 @@ export function ConnectionProviderDetailScreen({
                   {t("onboarding.copyEntireUrl")}
                 </p>
               </div>
-              <Input
-                type="text"
-                className={fieldInputClass}
-                placeholder="http://localhost:1455/..."
-                value={openaiCallbackUrl}
-                onChange={(e) => {
-                  setOpenaiCallbackUrl(e.target.value);
-                  setOpenaiError("");
-                }}
-              />
-              {openaiError && (
-                <StatusBanner tone="error" live="assertive">
-                  {openaiError}
-                </StatusBanner>
-              )}
+              <OnboardingField
+                controlId="openai-callback-url"
+                label="Redirect URL"
+                description={t("onboarding.copyEntireUrl")}
+                message={openaiError}
+                messageTone="danger"
+              >
+                {({ describedBy, invalid }) => (
+                  <Input
+                    id="openai-callback-url"
+                    ref={openaiCallbackRef}
+                    type="text"
+                    aria-describedby={describedBy}
+                    aria-invalid={invalid}
+                    className={onboardingInputClassName}
+                    placeholder="http://localhost:1455/..."
+                    value={openaiCallbackUrl}
+                    onChange={(e) => {
+                      setOpenaiCallbackUrl(e.target.value);
+                      setOpenaiError("");
+                    }}
+                  />
+                )}
+              </OnboardingField>
               <div className="flex flex-wrap items-center justify-center gap-3">
                 <Button
                   type="button"
@@ -657,6 +734,7 @@ export function ConnectionProviderDetailScreen({
                   onClick={() => {
                     setOpenaiOAuthStarted(false);
                     setOpenaiCallbackUrl("");
+                    setOpenaiError("");
                   }}
                 >
                   {t("onboarding.startOver")}
@@ -673,29 +751,33 @@ export function ConnectionProviderDetailScreen({
         onboardingProvider !== "elizacloud" &&
         onboardingProvider !== "ollama" &&
         onboardingProvider !== "pi-ai" && (
-          <div className={infoPanelClass}>
-            <div className={fieldLabelClass}>{t("onboarding.apiKey")}</div>
-            <Input
-              type="password"
-              className={fieldInputClass}
-              value={onboardingApiKey}
-              onChange={handleApiKeyChange}
-              placeholder={t("onboarding.enterApiKey")}
-            />
-            {apiKeyFormatWarning && (
-              <p
-                aria-live="assertive"
-                className="mt-3 text-xs text-[var(--danger)]"
-              >
-                {apiKeyFormatWarning}
-              </p>
-            )}
+          <div className={onboardingInfoPanelClassName}>
+            <OnboardingField
+              controlId="provider-api-key"
+              label={t("onboarding.apiKey")}
+              message={apiKeyFormatWarning}
+              messageTone="danger"
+            >
+              {({ describedBy, invalid }) => (
+                <Input
+                  id="provider-api-key"
+                  ref={genericApiKeyRef}
+                  type="password"
+                  aria-describedby={describedBy}
+                  aria-invalid={invalid}
+                  className={onboardingInputClassName}
+                  value={onboardingApiKey}
+                  onChange={handleApiKeyChange}
+                  placeholder={t("onboarding.enterApiKey")}
+                />
+              )}
+            </OnboardingField>
           </div>
         )}
 
       {onboardingProvider === "ollama" && (
         <p
-          className={`${helperTextClass} text-center`}
+          className={`${onboardingHelperTextClassName} text-center`}
           style={onboardingBodyTextShadowStyle}
         >
           {t("onboarding.ollamaNoConfig")}
@@ -703,49 +785,88 @@ export function ConnectionProviderDetailScreen({
       )}
 
       {onboardingProvider === "pi-ai" && (
-        <div className={detailStackClass}>
-          <div className={fieldLabelClass}>
-            {t("onboarding.primaryModelOptional")}
-          </div>
+        <div className={onboardingDetailStackClassName}>
           {piAiModels.length > 0 ? (
-            <>
-              <Select
-                value={piAiSelectValue}
-                onValueChange={(next) => {
-                  if (next === "__custom__") {
-                    if (piAiSelectValue !== "__custom__") {
-                      setState("onboardingPrimaryModel", "");
-                    }
-                    return;
-                  }
-                  setState(
-                    "onboardingPrimaryModel",
-                    next === "__default__" ? "" : next,
-                  );
-                }}
-              >
-                <SelectTrigger className={`${fieldInputClass} text-center`}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__default__">
-                    {t("onboarding.useDefaultModel")}
-                    {piAiDefaultModel ? ` (${piAiDefaultModel})` : ""}
-                  </SelectItem>
-                  {piAiModels.map((model: PiAiModelOption) => (
-                    <SelectItem key={model.id} value={model.id}>
-                      {model.name} ({model.provider})
-                    </SelectItem>
-                  ))}
-                  <SelectItem value="__custom__">
-                    {t("onboarding.customModel")}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              {piAiSelectValue === "__custom__" && (
+            <OnboardingField
+              controlId="pi-ai-model-select"
+              label={t("onboarding.primaryModelOptional")}
+              description={`${t("onboarding.piCredentialsHint")}${t(
+                "onboarding.piDropdownHint",
+              )}`}
+            >
+              {({ describedBy, invalid }) => (
+                <>
+                  <Select
+                    value={piAiSelectValue}
+                    onValueChange={(next) => {
+                      if (next === "__custom__") {
+                        if (piAiSelectValue !== "__custom__") {
+                          setState("onboardingPrimaryModel", "");
+                        }
+                        return;
+                      }
+                      setState(
+                        "onboardingPrimaryModel",
+                        next === "__default__" ? "" : next,
+                      );
+                    }}
+                  >
+                    <SelectTrigger
+                      id="pi-ai-model-select"
+                      aria-describedby={describedBy}
+                      aria-invalid={invalid}
+                      className={`${onboardingInputClassName} text-center`}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__default__">
+                        {t("onboarding.useDefaultModel")}
+                        {piAiDefaultModel ? ` (${piAiDefaultModel})` : ""}
+                      </SelectItem>
+                      {piAiModels.map((model: PiAiModelOption) => (
+                        <SelectItem key={model.id} value={model.id}>
+                          {model.name} ({model.provider})
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="__custom__">
+                        {t("onboarding.customModel")}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {piAiSelectValue === "__custom__" ? (
+                    <Input
+                      id="pi-ai-custom-model"
+                      ref={piAiCustomModelRef}
+                      type="text"
+                      aria-describedby={describedBy}
+                      className={`${onboardingInputClassName} mt-2`}
+                      value={onboardingPrimaryModel}
+                      onChange={(e) =>
+                        setState("onboardingPrimaryModel", e.target.value)
+                      }
+                      placeholder="provider/model (e.g. anthropic/claude-3.5-sonnet)"
+                    />
+                  ) : null}
+                </>
+              )}
+            </OnboardingField>
+          ) : (
+            <OnboardingField
+              controlId="pi-ai-model"
+              label={t("onboarding.primaryModelOptional")}
+              description={`${t("onboarding.piCredentialsHint")}${t(
+                "onboarding.piManualHint",
+              )}`}
+            >
+              {({ describedBy, invalid }) => (
                 <Input
+                  id="pi-ai-model"
+                  ref={piAiCustomModelRef}
                   type="text"
-                  className={`${fieldInputClass} mt-2`}
+                  aria-describedby={describedBy}
+                  aria-invalid={invalid}
+                  className={onboardingInputClassName}
                   value={onboardingPrimaryModel}
                   onChange={(e) =>
                     setState("onboardingPrimaryModel", e.target.value)
@@ -753,57 +874,56 @@ export function ConnectionProviderDetailScreen({
                   placeholder="provider/model (e.g. anthropic/claude-3.5-sonnet)"
                 />
               )}
-            </>
-          ) : (
-            <Input
-              type="text"
-              className={fieldInputClass}
-              value={onboardingPrimaryModel}
-              onChange={(e) =>
-                setState("onboardingPrimaryModel", e.target.value)
-              }
-              placeholder="provider/model (e.g. anthropic/claude-3.5-sonnet)"
-            />
+            </OnboardingField>
           )}
-          <p className={helperTextClass}>
-            {t("onboarding.piCredentialsHint")}
-            {piAiModels.length > 0
-              ? t("onboarding.piDropdownHint")
-              : t("onboarding.piManualHint")}
-          </p>
         </div>
       )}
 
       {onboardingProvider === "openrouter" &&
         onboardingApiKey.trim() &&
-        onboardingOptions?.openrouterModels && (
-          <div className={`${detailStackClass} mt-4`}>
-            <div className={fieldLabelClass}>{t("onboarding.selectModel")}</div>
-            <div className="flex flex-col gap-2">
-              {onboardingOptions?.openrouterModels?.map(
+        onboardingOptions?.openrouterModels ? (
+          <div className={`${onboardingDetailStackClassName} mt-4`}>
+            <div
+              id="openrouter-models-label"
+              className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--onboarding-text-muted)]"
+            >
+              {t("onboarding.selectModel")}
+            </div>
+            <div
+              role="radiogroup"
+              aria-labelledby="openrouter-models-label"
+              className="flex flex-col gap-2"
+            >
+              {onboardingOptions.openrouterModels.map(
                 (model: OpenRouterModelOption) => (
                   <Button
                     type="button"
+                    role="radio"
+                    aria-checked={onboardingOpenRouterModel === model.id}
                     key={model.id}
-                    className={`${modelButtonClass}${onboardingOpenRouterModel === model.id ? " border-[rgba(240,185,11,0.32)] bg-[rgba(240,185,11,0.12)]" : ""}`}
+                    className={getOnboardingChoiceCardClassName({
+                      selected: onboardingOpenRouterModel === model.id,
+                    })}
                     onClick={() => handleOpenRouterModelSelect(model.id)}
                   >
-                    <div>
-                      <div className="text-xs leading-[1.3] text-[var(--onboarding-text-primary)]">
+                    <div className="min-w-0">
+                      <div className={onboardingChoiceCardTitleClassName}>
                         {model.name}
                       </div>
-                      {model.description && (
-                        <div className={`${subtleTextClass} mt-1 line-clamp-2`}>
+                      {model.description ? (
+                        <div
+                          className={`${onboardingSubtleTextClassName} mt-1 line-clamp-2`}
+                        >
                           {model.description}
                         </div>
-                      )}
+                      ) : null}
                     </div>
                   </Button>
                 ),
               )}
             </div>
           </div>
-        )}
+        ) : null}
 
       <div className={onboardingFooterClass}>
         <Button

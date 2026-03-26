@@ -26,7 +26,11 @@ import { startMockApiServer } from "../electrobun-packaged/mock-api";
 // Types
 // ---------------------------------------------------------------------------
 
-type ViewportId = "mobile-portrait" | "desktop-landscape" | "ipad-portrait";
+type ViewportId =
+  | "mobile-portrait"
+  | "mobile-landscape"
+  | "desktop-landscape"
+  | "ipad-portrait";
 
 interface ViewportSpec {
   id: ViewportId;
@@ -101,6 +105,14 @@ const viewports: ViewportSpec[] = [
     hasTouch: true,
   },
   {
+    id: "mobile-landscape",
+    label: "Mobile Landscape",
+    width: 844,
+    height: 390,
+    isMobile: true,
+    hasTouch: true,
+  },
+  {
     id: "desktop-landscape",
     label: "Desktop Landscape",
     width: 1440,
@@ -118,6 +130,40 @@ const viewports: ViewportSpec[] = [
   },
 ];
 
+const ONBOARDING_PERMISSION_FLOW =
+  process.env.MILADY_DESIGN_REVIEW_PERMISSIONS_PATH === "grant"
+    ? "grant"
+    : "skip";
+
+async function waitForVisibleTextFallback(
+  page: Page,
+  labels: readonly string[],
+): Promise<void> {
+  for (const label of labels) {
+    const locator = page.getByText(label, { exact: true }).first();
+    if (await locator.isVisible().catch(() => false)) {
+      await locator.waitFor({ state: "visible", timeout: READY_TIMEOUT_MS });
+      return;
+    }
+  }
+  throw new Error(`Could not find any of: ${labels.join(", ")}`);
+}
+
+async function clickVisibleTextFallback(
+  page: Page,
+  labels: readonly string[],
+): Promise<void> {
+  for (const label of labels) {
+    const locator = page.getByText(label, { exact: true }).first();
+    if (!(await locator.isVisible().catch(() => false))) {
+      continue;
+    }
+    await locator.click();
+    return;
+  }
+  throw new Error(`Could not find any of: ${labels.join(", ")}`);
+}
+
 // ---------------------------------------------------------------------------
 // Onboarding step definitions
 // ---------------------------------------------------------------------------
@@ -132,8 +178,8 @@ const steps: StepSpec[] = [
     id: "02-identity",
     label: "Identity — Choose Agent",
     setup: async (page) => {
-      // Click "Create New Agent" to advance from wakeUp → identity
-      await page.getByText("Create New Agent").click();
+      // The welcome CTA has shifted to "Get Started"; keep the old copy as a fallback.
+      await clickVisibleTextFallback(page, ["Get Started", "Create New Agent"]);
       await page.waitForTimeout(600);
     },
   },
@@ -177,8 +223,8 @@ const steps: StepSpec[] = [
     id: "07-senses",
     label: "Senses — Permissions",
     setup: async (page) => {
-      // Click "Skip for now" on RPC step to advance
-      await page.getByText("Skip for now").click();
+      // Keep the current RPC skip copy and preserve the older capitalization fallback.
+      await clickVisibleTextFallback(page, ["Skip for now", "Skip for Now"]);
       await page.waitForTimeout(600);
     },
   },
@@ -186,8 +232,17 @@ const steps: StepSpec[] = [
     id: "08-activate",
     label: "Activate — Ready",
     setup: async (page) => {
-      // Click "Skip for Now" on permissions step to advance
-      await page.getByText("Skip for Now").click();
+      // Default to the stable skip path. Grant-path captures can be enabled via
+      // MILADY_DESIGN_REVIEW_PERMISSIONS_PATH=grant when needed.
+      if (ONBOARDING_PERMISSION_FLOW === "grant") {
+        await clickVisibleTextFallback(page, [
+          "Grant",
+          "Allow All Permissions",
+          "Allow All",
+        ]);
+      } else {
+        await clickVisibleTextFallback(page, ["Skip for Now", "Skip for now"]);
+      }
       await page.waitForTimeout(600);
     },
   },
@@ -260,6 +315,9 @@ async function createPage(
       try {
         window.localStorage.clear();
         window.sessionStorage.clear();
+        window.localStorage.setItem("eliza:ui-language", "en");
+        window.localStorage.setItem("eliza:ui-theme", "dark");
+        window.localStorage.setItem("eliza:ui-shell-mode", "native");
         window.localStorage.setItem("milady:ui-language", "en");
         window.localStorage.setItem("milady:ui-theme", "dark");
         window.localStorage.setItem("milady:ui-shell-mode", "native");
@@ -500,13 +558,14 @@ async function captureOnboardingFlow(
 
     // Wait for loading screen to disappear and welcome screen to appear.
     // The AvatarLoader renders as a fixed overlay while onboardingLoading=true.
-    // Wait for the "Create New Agent" button to be visible and clickable,
-    // which means the loading overlay has been removed.
+    // Wait for the current welcome CTA to be visible and clickable, which
+    // means the loading overlay has been removed.
     await waitForSettled(page);
     try {
-      await page
-        .getByText("Create New Agent")
-        .waitFor({ state: "visible", timeout: READY_TIMEOUT_MS });
+      await waitForVisibleTextFallback(page, [
+        "Get Started",
+        "Create New Agent",
+      ]);
     } catch {
       // If Welcome text not found, take diagnostic screenshot
       await mkdir(diagnosticsRoot, { recursive: true });

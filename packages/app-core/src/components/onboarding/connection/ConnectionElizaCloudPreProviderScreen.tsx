@@ -5,8 +5,15 @@ import { useApp } from "../../../state";
 import { openExternalUrl } from "../../../utils";
 import { OnboardingTabs } from "../OnboardingTabs";
 import {
+  OnboardingField,
+  OnboardingStatusBanner,
+  onboardingCenteredStackClassName,
+  onboardingDetailStackClassName,
+  onboardingHelperTextClassName,
+  onboardingInputClassName,
+} from "../onboarding-form-primitives";
+import {
   OnboardingStepHeader,
-  onboardingBodyTextShadowStyle,
   onboardingFooterClass,
   onboardingPrimaryActionClass,
   onboardingPrimaryActionTextShadowStyle,
@@ -56,7 +63,7 @@ export function ConnectionElizaCloudPreProviderScreen({
     <>
       <OnboardingStepHeader eyebrow="Eliza Cloud" />
 
-      <div style={{ width: "100%", textAlign: "left" }}>
+      <div className="w-full text-left">
         <OnboardingTabs
           tabs={[
             { id: "login" as const, label: t("onboarding.login") },
@@ -67,22 +74,9 @@ export function ConnectionElizaCloudPreProviderScreen({
         />
 
         {onboardingElizaCloudTab === "login" ? (
-          <div className="flex flex-col items-center gap-3 text-center">
+          <div className={onboardingCenteredStackClassName}>
             {elizaCloudConnected ? (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  padding: "0.625rem 1rem",
-                  border: "1px solid var(--ok-muted)",
-                  background: "var(--ok-subtle)",
-                  color: "var(--ok)",
-                  fontSize: "0.875rem",
-                  borderRadius: "0.5rem",
-                  justifyContent: "center",
-                }}
-              >
+              <OnboardingStatusBanner tone="success">
                 <svg
                   width="16"
                   height="16"
@@ -97,7 +91,7 @@ export function ConnectionElizaCloudPreProviderScreen({
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
                 {t("onboarding.connected")}
-              </div>
+              </OnboardingStatusBanner>
             ) : (
               <Button
                 type="button"
@@ -124,64 +118,66 @@ export function ConnectionElizaCloudPreProviderScreen({
                 );
                 if (urlMatch) {
                   return (
-                    <button
-                      type="button"
-                      className="text-sm text-[var(--onboarding-link)] underline mt-2 cursor-pointer bg-transparent border-none font-inherit hover:text-[var(--onboarding-text-strong)] transition-colors duration-200"
-                      onClick={() => openExternalUrl(urlMatch[1])}
+                    <OnboardingStatusBanner
+                      tone="neutral"
+                      action={
+                        <Button
+                          variant="ghost"
+                          type="button"
+                          className="rounded-md px-2 py-1 text-[11px] text-[var(--onboarding-text-faint)] transition-colors duration-300 hover:text-[var(--onboarding-link)]"
+                          onClick={() => openExternalUrl(urlMatch[1])}
+                        >
+                          Open login page in browser
+                        </Button>
+                      }
                     >
-                      Open login page in browser
-                    </button>
+                      Open the login page in your browser to continue.
+                    </OnboardingStatusBanner>
                   );
                 }
                 return (
-                  <p
-                    style={{
-                      color: "var(--danger)",
-                      fontSize: "0.8125rem",
-                      marginTop: "0.5rem",
-                      ...onboardingBodyTextShadowStyle,
-                    }}
-                  >
+                  <OnboardingStatusBanner tone="error" live="assertive">
                     {elizaCloudLoginError}
-                  </p>
+                  </OnboardingStatusBanner>
                 );
               })()}
-            <p className="text-sm text-[var(--onboarding-text-muted)] text-center leading-relaxed mt-3">
+            <p className={`${onboardingHelperTextClassName} text-center`}>
               {t("onboarding.freeCredits")}
             </p>
           </div>
         ) : (
-          <div>
-            <label
-              htmlFor="elizacloud-apikey-pre"
-              style={{
-                display: "block",
-                fontSize: "0.875rem",
-                marginBottom: "0.375rem",
-                color: "var(--muted)",
-              }}
+          <div className={onboardingDetailStackClassName}>
+            <OnboardingField
+              align="center"
+              controlId="elizacloud-apikey-pre"
+              label={t("onboarding.apiKey")}
+              description={
+                <>
+                  {t("onboarding.useExistingKey")}{" "}
+                  <a
+                    href="https://elizacloud.ai/dashboard/settings"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[var(--onboarding-link)] underline underline-offset-2 transition-colors duration-200 hover:text-[var(--onboarding-text-strong)]"
+                  >
+                    {t("onboarding.getOneHere")}
+                  </a>
+                </>
+              }
             >
-              {t("onboarding.apiKey")}
-            </label>
-            <Input
-              id="elizacloud-apikey-pre"
-              type="password"
-              className="w-full px-[20px] py-[16px] bg-[var(--onboarding-card-bg)] border border-[var(--onboarding-card-border)] rounded-[6px] text-[var(--onboarding-text-primary)] font-inherit outline-none tracking-[0.03em] text-center transition-all duration-300 focus:border-[var(--onboarding-field-focus-border)] focus:shadow-[var(--onboarding-field-focus-shadow)] placeholder:text-[var(--onboarding-text-faint)]"
-              placeholder="ck-..."
-              value={onboardingApiKey}
-              onChange={handleApiKeyChange}
-            />
-            <p className="text-sm text-[var(--onboarding-text-muted)] text-center leading-relaxed mt-3">
-              {t("onboarding.useExistingKey")}{" "}
-              <a
-                href="https://elizacloud.ai/dashboard/settings"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "var(--text)" }}
-              >
-                {t("onboarding.getOneHere")}
-              </a>
-            </p>
+              {({ describedBy, invalid }) => (
+                <Input
+                  id="elizacloud-apikey-pre"
+                  type="password"
+                  aria-describedby={describedBy}
+                  aria-invalid={invalid}
+                  className={`${onboardingInputClassName} text-center`}
+                  placeholder="ck-..."
+                  value={onboardingApiKey}
+                  onChange={handleApiKeyChange}
+                />
+              )}
+            </OnboardingField>
           </div>
         )}
       </div>

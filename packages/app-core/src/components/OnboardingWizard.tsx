@@ -172,8 +172,8 @@ export function OnboardingWizard() {
         <div
           style={{
             position: "absolute",
-            top: "1rem",
-            right: "1rem",
+            top: "calc(var(--safe-area-top, 0px) + 1rem)",
+            right: "calc(var(--safe-area-right, 0px) + 1rem)",
             zIndex: 50,
             display: "flex",
             gap: "0.5rem",

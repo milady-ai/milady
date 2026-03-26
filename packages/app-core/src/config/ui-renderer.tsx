@@ -29,6 +29,12 @@ import React, {
 import { useApp } from "../state";
 import { confirmDesktopAction, resolveAppAssetUrl } from "../utils";
 import { getByPath, setByPath } from "./config-catalog";
+import {
+  CONFIG_FIELD_LABEL_CLASSNAME,
+  ConfigFieldErrors,
+  getConfigInputClassName,
+  getConfigTextareaClassName,
+} from "./config-control-primitives";
 import type {
   AuthState,
   CondExpr,
@@ -352,11 +358,6 @@ const JUSTIFY: Record<string, string> = {
   around: "justify-around",
 };
 
-// ── Tailwind class constants ────────────────────────────────────────
-
-const INPUT_CLS =
-  "w-full px-2 py-[5px] border border-[var(--border)] bg-[var(--card)] text-xs font-[var(--mono)] transition-colors focus:border-[var(--accent)] focus:outline-none box-border h-[30px]";
-
 // ══════════════════════════════════════════════════════════════════════
 // COMPONENT REGISTRY
 // ══════════════════════════════════════════════════════════════════════
@@ -471,10 +472,15 @@ const InputComponent: ComponentFn = (props, _children, ctx, el) => {
   return (
     <div className="flex flex-col gap-1">
       {props.label ? (
-        <span className="text-xs font-semibold">{String(props.label)}</span>
+        <span className={CONFIG_FIELD_LABEL_CLASSNAME}>
+          {String(props.label)}
+        </span>
       ) : null}
       <input
-        className={`${INPUT_CLS}${errors?.length ? " border-[var(--destructive)]" : ""}`}
+        className={getConfigInputClassName({
+          density: "compact",
+          hasError: !!errors?.length,
+        })}
         type={String(props.type ?? "text")}
         name={String(props.name ?? "")}
         placeholder={String(props.placeholder ?? "")}
@@ -482,15 +488,7 @@ const InputComponent: ComponentFn = (props, _children, ctx, el) => {
         onChange={(e) => handleChange(e.target.value)}
         onBlur={handleBlur}
       />
-      {errors?.length ? (
-        <div className="flex flex-col gap-0.5">
-          {errors.map((err) => (
-            <span key={err} className="text-[10px] text-[var(--destructive)]">
-              {err}
-            </span>
-          ))}
-        </div>
-      ) : null}
+      <ConfigFieldErrors errors={errors} />
     </div>
   );
 };
@@ -516,10 +514,15 @@ const TextareaComponent: ComponentFn = (props, _children, ctx, el) => {
   return (
     <div className="flex flex-col gap-1">
       {props.label ? (
-        <span className="text-xs font-semibold">{String(props.label)}</span>
+        <span className={CONFIG_FIELD_LABEL_CLASSNAME}>
+          {String(props.label)}
+        </span>
       ) : null}
       <textarea
-        className={`w-full px-2 py-[5px] border border-[var(--border)] bg-[var(--card)] text-xs font-[var(--mono)] transition-colors focus:border-[var(--accent)] focus:outline-none box-border min-h-[64px] resize-y${errors?.length ? " border-[var(--destructive)]" : ""}`}
+        className={getConfigTextareaClassName({
+          density: "compact",
+          hasError: !!errors?.length,
+        })}
         name={String(props.name ?? "")}
         placeholder={String(props.placeholder ?? "")}
         rows={Number(props.rows ?? 3)}
@@ -527,15 +530,7 @@ const TextareaComponent: ComponentFn = (props, _children, ctx, el) => {
         onChange={(e) => handleChange(e.target.value)}
         onBlur={handleBlur}
       />
-      {errors?.length ? (
-        <div className="flex flex-col gap-0.5">
-          {errors.map((err) => (
-            <span key={err} className="text-[10px] text-[var(--destructive)]">
-              {err}
-            </span>
-          ))}
-        </div>
-      ) : null}
+      <ConfigFieldErrors errors={errors} />
     </div>
   );
 };
@@ -563,7 +558,9 @@ const SelectComponent: ComponentFn = (props, _children, ctx, el) => {
   return (
     <div className="flex flex-col gap-1">
       {props.label ? (
-        <span className="text-xs font-semibold">{String(props.label)}</span>
+        <span className={CONFIG_FIELD_LABEL_CLASSNAME}>
+          {String(props.label)}
+        </span>
       ) : null}
       <Select
         value={String(value ?? "") || "__none__"}
@@ -573,7 +570,10 @@ const SelectComponent: ComponentFn = (props, _children, ctx, el) => {
         }}
       >
         <SelectTrigger
-          className={`${INPUT_CLS}${errors?.length ? " border-[var(--destructive)]" : ""}`}
+          className={getConfigInputClassName({
+            density: "compact",
+            hasError: !!errors?.length,
+          })}
         >
           <SelectValue
             placeholder={
@@ -596,15 +596,7 @@ const SelectComponent: ComponentFn = (props, _children, ctx, el) => {
             ))}
         </SelectContent>
       </Select>
-      {errors?.length ? (
-        <div className="flex flex-col gap-0.5">
-          {errors.map((err) => (
-            <span key={err} className="text-[10px] text-[var(--destructive)]">
-              {err}
-            </span>
-          ))}
-        </div>
-      ) : null}
+      <ConfigFieldErrors errors={errors} />
     </div>
   );
 };

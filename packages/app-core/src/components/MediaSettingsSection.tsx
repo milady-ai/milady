@@ -44,6 +44,12 @@ import {
   CloudConnectionStatus,
   CloudSourceModeToggle,
 } from "./CloudSourceControls";
+import {
+  SETTINGS_COMPACT_INPUT_CLASSNAME,
+  SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME,
+  SETTINGS_SEGMENTED_GROUP_CLASSNAME,
+  SETTINGS_SOFT_SELECT_TRIGGER_CLASSNAME,
+} from "./settings-control-primitives";
 import { VoiceConfigView } from "./VoiceConfigView";
 
 type MediaCategory = "image" | "video" | "audio" | "vision" | "voice";
@@ -220,7 +226,7 @@ const CATEGORY_LABELS: Record<MediaCategory, string> = {
 const MEDIA_SEGMENT_BUTTON_CLASSNAME =
   "flex-1 basis-[calc(50%-0.125rem)] sm:basis-0 min-h-[44px] rounded-lg border px-2 py-1.5 text-[11px] font-semibold !whitespace-normal";
 const MEDIA_SEGMENT_BUTTON_ACTIVE_CLASSNAME =
-  "border-accent/45 bg-accent/16 text-accent-fg shadow-sm";
+  "border-accent/45 bg-accent/16 text-txt-strong shadow-sm";
 const MEDIA_SEGMENT_BUTTON_INACTIVE_CLASSNAME =
   "border-border/40 text-muted-strong hover:border-border-strong hover:bg-bg-hover hover:text-txt";
 
@@ -535,7 +541,7 @@ export function DesktopMediaControlPanel() {
             value={selectedCameraId}
             onValueChange={(value) => setSelectedCameraId(value)}
           >
-            <SelectTrigger className="w-full rounded-lg border border-border bg-bg px-2.5 py-1.5 text-xs">
+            <SelectTrigger className={SETTINGS_SOFT_SELECT_TRIGGER_CLASSNAME}>
               <SelectValue placeholder="No camera devices" />
             </SelectTrigger>
             <SelectContent>
@@ -728,7 +734,7 @@ export function DesktopMediaControlPanel() {
             value={selectedSourceId}
             onValueChange={(value) => setSelectedSourceId(value)}
           >
-            <SelectTrigger className="w-full rounded-lg border border-border bg-bg px-2.5 py-1.5 text-xs">
+            <SelectTrigger className={SETTINGS_SOFT_SELECT_TRIGGER_CLASSNAME}>
               <SelectValue placeholder="No screen sources" />
             </SelectTrigger>
             <SelectContent>
@@ -1090,7 +1096,7 @@ export function MediaSettingsSection() {
               {t("settings.companionVrmPower.desc")}
             </div>
           </div>
-          <div className="flex flex-wrap gap-1 rounded-lg border border-border bg-card/50 p-1">
+          <div className={SETTINGS_SEGMENTED_GROUP_CLASSNAME}>
             {COMPANION_VRM_POWER_OPTIONS.map((mode) => {
               const active = companionVrmPowerMode === mode;
               return (
@@ -1124,7 +1130,7 @@ export function MediaSettingsSection() {
                 {t("settings.companionHalfFramerate.desc")}
               </div>
             </div>
-            <div className="flex flex-wrap gap-1 rounded-lg border border-border bg-card/50 p-1">
+            <div className={SETTINGS_SEGMENTED_GROUP_CLASSNAME}>
               {COMPANION_HALF_FRAMERATE_OPTIONS.map((mode) => {
                 const active = companionHalfFramerateMode === mode;
                 return (
@@ -1193,7 +1199,7 @@ export function MediaSettingsSection() {
         </header>
 
         {/* Category tabs */}
-        <div className="flex flex-wrap gap-1 rounded-xl border border-border bg-card/50 p-1 shrink-0">
+        <div className={SETTINGS_SEGMENTED_GROUP_CLASSNAME}>
           {(
             ["image", "video", "audio", "vision", "voice"] as MediaCategory[]
           ).map((cat) => {
@@ -1335,7 +1341,7 @@ export function MediaSettingsSection() {
                     </span>
                     <Input
                       type="password"
-                      className="h-9 px-3 py-2 bg-card border-border text-xs rounded-lg shadow-sm focus-visible:ring-1 focus-visible:ring-accent"
+                      className={SETTINGS_COMPACT_INPUT_CLASSNAME}
                       placeholder={
                         getNestedValue(
                           mediaConfig as Record<string, unknown>,
@@ -1371,7 +1377,9 @@ export function MediaSettingsSection() {
                         updateNestedValue("image.fal.model", value)
                       }
                     >
-                      <SelectTrigger className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg">
+                      <SelectTrigger
+                        className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -1446,7 +1454,9 @@ export function MediaSettingsSection() {
                           updateNestedValue("image.openai.model", value)
                         }
                       >
-                        <SelectTrigger className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg">
+                        <SelectTrigger
+                          className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
+                        >
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -1474,7 +1484,9 @@ export function MediaSettingsSection() {
                           updateNestedValue("image.openai.quality", value)
                         }
                       >
-                        <SelectTrigger className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg">
+                        <SelectTrigger
+                          className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
+                        >
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -1506,7 +1518,9 @@ export function MediaSettingsSection() {
                         updateNestedValue("video.fal.model", value)
                       }
                     >
-                      <SelectTrigger className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg">
+                      <SelectTrigger
+                        className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -1614,7 +1628,9 @@ export function MediaSettingsSection() {
                         updateNestedValue("audio.suno.model", value)
                       }
                     >
-                      <SelectTrigger className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg">
+                      <SelectTrigger
+                        className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -1640,7 +1656,7 @@ export function MediaSettingsSection() {
                       min={0.5}
                       max={22}
                       step={0.5}
-                      className="h-9 px-3 py-2 bg-card border-border text-xs rounded-lg shadow-sm focus-visible:ring-1 focus-visible:ring-accent w-24"
+                      className={`${SETTINGS_COMPACT_INPUT_CLASSNAME} w-24`}
                       value={
                         (getNestedValue(
                           mediaConfig as Record<string, unknown>,
@@ -1674,7 +1690,9 @@ export function MediaSettingsSection() {
                         updateNestedValue("vision.openai.model", value)
                       }
                     >
-                      <SelectTrigger className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg">
+                      <SelectTrigger
+                        className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -1708,7 +1726,9 @@ export function MediaSettingsSection() {
                         updateNestedValue("vision.google.model", value)
                       }
                     >
-                      <SelectTrigger className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg">
+                      <SelectTrigger
+                        className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -1742,7 +1762,9 @@ export function MediaSettingsSection() {
                         updateNestedValue("vision.anthropic.model", value)
                       }
                     >
-                      <SelectTrigger className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none rounded-lg">
+                      <SelectTrigger
+                        className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>

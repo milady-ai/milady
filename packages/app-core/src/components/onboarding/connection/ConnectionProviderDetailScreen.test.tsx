@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
-import TestRenderer, { act } from "react-test-renderer";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
   mockUseApp,
@@ -40,13 +40,16 @@ import { ConnectionProviderDetailScreen } from "./ConnectionProviderDetailScreen
 function t(key: string): string {
   const translations: Record<string, string> = {
     "onboarding.apiKey": "API Key",
+    "onboarding.enterApiKey": "Enter API key",
     "onboarding.back": "Back",
     "onboarding.confirm": "Confirm",
     "onboarding.login": "Login",
     "onboarding.useExistingKey": "Use an existing key.",
     "onboarding.getOneHere": "Get one here",
     "onboarding.freeCredits": "Free credits included.",
+    "onboarding.selectModel": "Select model",
   };
+
   return translations[key] ?? key;
 }
 
@@ -82,16 +85,6 @@ function createState(overrides: Record<string, unknown> = {}) {
   };
 }
 
-function textOf(node: TestRenderer.ReactTestInstance): string {
-  return node.children
-    .map((child) =>
-      typeof child === "string"
-        ? child
-        : textOf(child as TestRenderer.ReactTestInstance),
-    )
-    .join("");
-}
-
 describe("ConnectionProviderDetailScreen", () => {
   beforeEach(() => {
     mockUseApp.mockReset();
@@ -100,24 +93,21 @@ describe("ConnectionProviderDetailScreen", () => {
     mockGetProviderLogo.mockClear();
   });
 
-  it("renders provider header copy and confirmation affordances", async () => {
-    mockUseApp.mockReturnValue(createState());
-
-    let tree: TestRenderer.ReactTestRenderer | undefined;
-    await act(async () => {
-      tree = TestRenderer.create(
-        <ConnectionProviderDetailScreen dispatch={vi.fn()} />,
-      );
-    });
-
-    const snapshot = JSON.stringify(tree?.toJSON());
-    expect(snapshot).toContain("OpenAI");
-    expect(snapshot).toContain("GPT API key");
-    expect(snapshot).toContain("API Key");
-    expect(snapshot).toContain("Confirm");
+  afterEach(() => {
+    cleanup();
   });
 
-  it("renders an actionable browser-login recovery control for Eliza Cloud", async () => {
+  it("renders labeled API key entry and confirmation affordances", () => {
+    mockUseApp.mockReturnValue(createState());
+
+    render(<ConnectionProviderDetailScreen dispatch={vi.fn()} />);
+
+    expect(screen.getByText("OpenAI")).toBeTruthy();
+    expect(screen.getByLabelText("API Key")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Confirm" })).toBeTruthy();
+  });
+
+  it("renders an actionable browser-login recovery control for Eliza Cloud", () => {
     mockUseApp.mockReturnValue(
       createState({
         onboardingProvider: "elizacloud",
@@ -126,25 +116,42 @@ describe("ConnectionProviderDetailScreen", () => {
       }),
     );
 
-    let tree: TestRenderer.ReactTestRenderer | undefined;
-    await act(async () => {
-      tree = TestRenderer.create(
-        <ConnectionProviderDetailScreen dispatch={vi.fn()} />,
-      );
-    });
+    render(<ConnectionProviderDetailScreen dispatch={vi.fn()} />);
 
-    const linkButton = tree?.root
-      .findAll((node) => typeof node.props?.onClick === "function")
-      .find((node) => textOf(node).includes("Open login page in browser"));
-
-    expect(linkButton).toBeDefined();
-
-    await act(async () => {
-      linkButton?.props.onClick();
-    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Open login page in browser" }),
+    );
 
     expect(mockOpenExternalUrl).toHaveBeenCalledWith(
       "https://example.com/login",
     );
+  });
+
+  it("exposes openrouter model choices as a radiogroup", () => {
+    mockUseApp.mockReturnValue(
+      createState({
+        onboardingProvider: "openrouter",
+        onboardingApiKey: "sk-test-12345678901234567890",
+        onboardingOpenRouterModel: "mixtral",
+        onboardingOptions: {
+          providers: [
+            { id: "openrouter", name: "OpenRouter", description: "Many models" },
+          ],
+          openrouterModels: [
+            { id: "mixtral", name: "Mixtral", description: "Fast model" },
+            { id: "sonnet", name: "Claude Sonnet", description: "Balanced model" },
+          ],
+          piAiModels: [],
+          piAiDefaultModel: "",
+        },
+      }),
+    );
+
+    render(<ConnectionProviderDetailScreen dispatch={vi.fn()} />);
+
+    expect(screen.getByRole("radiogroup", { name: "Select model" })).toBeTruthy();
+    const selectedModel = screen.getByRole("radio", { name: /Mixtral/i });
+    expect(selectedModel).toBeTruthy();
+    expect(selectedModel.getAttribute("aria-checked")).toBe("true");
   });
 });

@@ -12,33 +12,31 @@ import {
   Input,
   Label,
   SectionCard,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Spinner,
 } from "@miladyai/ui";
-import {
-  AlertTriangle,
-  Bot,
-  Cloud,
-  Download,
-  Image,
-  RefreshCw,
-  Shield,
-  Sliders,
-  Terminal,
-  Upload,
-  Wallet,
-} from "lucide-react";
-import type React from "react";
+import { AlertTriangle, Download, Upload } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useApp } from "../state";
 import { CodingAgentSettingsSection } from "./CodingAgentSettingsSection";
 import { ConfigPageView } from "./ConfigPageView";
+import {
+  DESKTOP_SURFACE_PANEL_CLASSNAME,
+  DesktopPageFrame,
+} from "./desktop-surface-primitives";
 import { CloudDashboard } from "./ElizaCloudDashboard";
 import { MediaSettingsSection } from "./MediaSettingsSection";
 import { PermissionsSection } from "./PermissionsSection";
 import { ProviderSwitcher } from "./ProviderSwitcher";
 import { ReleaseCenterView } from "./ReleaseCenterView";
+import { SETTINGS_TOOLBAR_SELECT_TRIGGER_CLASSNAME } from "./settings-control-primitives";
 import {
-  APP_PANEL_SHELL_CLASSNAME,
+  APP_DESKTOP_INLINE_SPLIT_SHELL_CLASSNAME,
+  APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME,
   APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
   APP_SIDEBAR_CARD_BASE_CLASSNAME,
   APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
@@ -46,7 +44,6 @@ import {
   APP_SIDEBAR_INNER_CLASSNAME,
   APP_SIDEBAR_KICKER_CLASSNAME,
   APP_SIDEBAR_META_CLASSNAME,
-  APP_SIDEBAR_RAIL_CLASSNAME,
   APP_SIDEBAR_SCROLL_REGION_CLASSNAME,
   APP_SIDEBAR_SEARCH_INPUT_CLASSNAME,
 } from "./sidebar-shell-styles";
@@ -54,67 +51,112 @@ import {
 interface SettingsSectionDef {
   id: string;
   label: string;
-  icon: React.ElementType;
   description?: string;
+  keywords?: string[];
 }
 
-const SETTINGS_SHELL_CLASS = `settings-shell plugins-game-modal plugins-game-modal--inline ${APP_PANEL_SHELL_CLASSNAME}`;
-const SETTINGS_SIDEBAR_RAIL_CLASS = `hidden lg:flex lg:w-[clamp(18rem,23vw,21rem)] lg:min-w-[18rem] lg:max-w-[22rem] lg:shrink-0 lg:flex-col lg:border-r lg:border-border/40 ${APP_SIDEBAR_RAIL_CLASSNAME}`;
+const SETTINGS_SHELL_CLASS = APP_DESKTOP_INLINE_SPLIT_SHELL_CLASSNAME;
+const SETTINGS_SIDEBAR_RAIL_CLASS = `hidden lg:flex ${APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME}`;
 const SETTINGS_CONTENT_CLASS =
   "settings-page-content flex-1 min-w-0 overflow-y-auto scroll-smooth bg-bg/10 px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-5 lg:px-7 lg:pb-10 lg:pt-6";
 const SETTINGS_CONTENT_WIDTH_CLASS = "mx-auto w-full max-w-[82rem]";
 const SETTINGS_SECTION_STACK_CLASS = "space-y-6 pb-14 sm:space-y-8 sm:pb-16";
-const SETTINGS_SECTION_CARD_CLASS =
-  "overflow-hidden rounded-[28px] border-border/35 bg-bg/20 shadow-sm ring-1 ring-border/10";
+const SETTINGS_SECTION_CARD_CLASS = `overflow-hidden ${DESKTOP_SURFACE_PANEL_CLASSNAME}`;
 
 const SETTINGS_SECTIONS: SettingsSectionDef[] = [
   {
     id: "cloud",
     label: "providerswitcher.elizaCloud",
-    icon: Cloud,
     description: "settings.sections.cloud.desc",
+    keywords: ["cloud", "billing", "credits", "auth", "subscription"],
   },
   {
     id: "ai-model",
     label: "settings.sections.aimodel.label",
-    icon: Bot,
     description: "settings.sections.aimodel.desc",
+    keywords: [
+      "model",
+      "provider",
+      "openai",
+      "anthropic",
+      "grok",
+      "gemini",
+      "api key",
+      "inference",
+      "llm",
+    ],
   },
   {
     id: "coding-agents",
     label: "settings.sections.codingagents.label",
-    icon: Terminal,
     description: "settings.sections.codingagents.desc",
+    keywords: ["codex", "agent", "reasoning", "parallel", "approval"],
   },
   {
     id: "wallet-rpc",
     label: "settings.sections.walletrpc.label",
-    icon: Wallet,
     description: "settings.sections.walletrpc.desc",
+    keywords: [
+      "wallet",
+      "rpc",
+      "chain",
+      "solana",
+      "ethereum",
+      "base",
+      "private key",
+      "address",
+      "network",
+    ],
   },
   {
     id: "media",
     label: "settings.sections.media.label",
-    icon: Image,
     description: "settings.sections.media.desc",
+    keywords: [
+      "audio",
+      "voice",
+      "video",
+      "camera",
+      "microphone",
+      "speech",
+      "tts",
+      "avatar",
+    ],
   },
   {
     id: "permissions",
     label: "settings.sections.permissions.label",
-    icon: Shield,
     description: "settings.sections.permissions.desc",
+    keywords: [
+      "permissions",
+      "desktop",
+      "filesystem",
+      "security",
+      "microphone permission",
+      "camera permission",
+      "file access",
+    ],
   },
   {
     id: "updates",
     label: "settings.sections.updates.label",
-    icon: RefreshCw,
     description: "settings.sections.updates.desc",
+    keywords: ["updates", "release", "version", "download"],
   },
   {
     id: "advanced",
     label: "nav.advanced",
-    icon: Sliders,
     description: "settings.sections.advanced.desc",
+    keywords: [
+      "advanced",
+      "export",
+      "import",
+      "reset",
+      "debug",
+      "backup",
+      "restore",
+      "danger zone",
+    ],
   },
 ];
 
@@ -129,7 +171,72 @@ function matchesSettingsSection(
     t(section.label).toLowerCase().includes(normalized) ||
     (section.description
       ? t(section.description).toLowerCase().includes(normalized)
-      : false)
+      : false) ||
+    (section.keywords ?? []).some((keyword) =>
+      keyword.toLowerCase().includes(normalized),
+    )
+  );
+}
+
+function SettingsMobileToolbar({
+  sections,
+  activeSection,
+  onSectionChange,
+  searchQuery,
+  onSearchChange,
+}: {
+  sections: SettingsSectionDef[];
+  activeSection: string;
+  onSectionChange: (id: string) => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+}) {
+  const { t } = useApp();
+  const active = sections.find((section) => section.id === activeSection);
+  const searchLabel = t("settingsview.SearchSettings", {
+    defaultValue: "Search settings",
+  });
+
+  return (
+    <div
+      className="sticky z-20 mb-4 space-y-3 rounded-[calc(var(--radius-xl)+2px)] border border-border/50 bg-card/88 p-3 shadow-lg backdrop-blur-xl lg:hidden"
+      style={{ top: "calc(var(--safe-area-top, 0px) + 0.5rem)" }}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className={APP_SIDEBAR_KICKER_CLASSNAME}>
+            {t("nav.settings")}
+          </div>
+          <div className="truncate text-sm font-medium text-txt">
+            {active ? t(active.label) : t("nav.settings")}
+          </div>
+        </div>
+        <div className="min-w-[10rem] flex-1 max-w-[14rem]">
+          <Select value={activeSection} onValueChange={onSectionChange}>
+            <SelectTrigger
+              className={SETTINGS_TOOLBAR_SELECT_TRIGGER_CLASSNAME}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {sections.map((section) => (
+                <SelectItem key={section.id} value={section.id}>
+                  {t(section.label)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <Input
+        type="search"
+        value={searchQuery}
+        onChange={(event) => onSearchChange(event.target.value)}
+        placeholder={searchLabel}
+        aria-label={searchLabel}
+        className={`h-11 ${APP_SIDEBAR_SEARCH_INPUT_CLASSNAME}`}
+      />
+    </div>
   );
 }
 
@@ -188,7 +295,6 @@ function SettingsSidebar({
         >
           {sections.map((section) => {
             const isActive = activeSection === section.id;
-            const Icon = section.icon;
             return (
               <Button
                 key={section.id}
@@ -203,15 +309,6 @@ function SettingsSidebar({
                     : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
                 }`}
               >
-                <span
-                  className={`mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border ${
-                    isActive
-                      ? "border-accent/25 bg-accent/12 text-accent-fg"
-                      : "border-border/40 bg-bg/35 text-muted-strong"
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                </span>
                 <div className="min-w-0 flex-1 text-left">
                   <div
                     className={`truncate text-sm ${isActive ? "font-semibold" : "font-medium"}`}
@@ -309,7 +406,7 @@ function AdvancedSection() {
             variant="outline"
             type="button"
             onClick={openExportModal}
-            className="min-h-[5.5rem] p-5 rounded-[calc(var(--radius-xl)+2px)] flex items-center gap-4 border border-border/50 bg-card/60 text-left backdrop-blur-md transition-all group hover:-translate-y-0.5 hover:border-accent hover:shadow-[0_4px_20px_rgba(var(--accent),0.1)] h-auto"
+            className="min-h-[5.5rem] h-auto rounded-[calc(var(--radius-xl)+2px)] border border-border/50 bg-card/60 p-5 text-left backdrop-blur-md transition-[transform,border-color,background-color,box-shadow] group hover:-translate-y-0.5 hover:border-accent hover:shadow-[0_4px_20px_rgba(var(--accent-rgb),0.1)]"
             aria-haspopup="dialog"
           >
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-border/50 bg-bg-accent p-3 shadow-sm transition-all group-hover:border-accent group-hover:bg-accent">
@@ -329,7 +426,7 @@ function AdvancedSection() {
             variant="outline"
             type="button"
             onClick={openImportModal}
-            className="min-h-[5.5rem] p-5 rounded-[calc(var(--radius-xl)+2px)] flex items-center gap-4 border border-border/50 bg-card/60 text-left backdrop-blur-md transition-all group hover:-translate-y-0.5 hover:border-accent hover:shadow-[0_4px_20px_rgba(var(--accent),0.1)] h-auto"
+            className="min-h-[5.5rem] h-auto rounded-[calc(var(--radius-xl)+2px)] border border-border/50 bg-card/60 p-5 text-left backdrop-blur-md transition-[transform,border-color,background-color,box-shadow] group hover:-translate-y-0.5 hover:border-accent hover:shadow-[0_4px_20px_rgba(var(--accent-rgb),0.1)]"
             aria-haspopup="dialog"
           >
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-border/50 bg-bg-accent p-3 shadow-sm transition-all group-hover:border-accent group-hover:bg-accent">
@@ -418,12 +515,20 @@ function AdvancedSection() {
             </div>
 
             {exportError && (
-              <div className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">
+              <div
+                className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger"
+                role="alert"
+                aria-live="assertive"
+              >
                 {exportError}
               </div>
             )}
             {exportSuccess && (
-              <div className="rounded-lg border border-ok/30 bg-ok/10 px-3 py-2 text-sm text-ok">
+              <div
+                className="rounded-lg border border-ok/30 bg-ok/10 px-3 py-2 text-sm text-ok"
+                role="status"
+                aria-live="polite"
+              >
                 {exportSuccess}
               </div>
             )}
@@ -511,12 +616,20 @@ function AdvancedSection() {
             </div>
 
             {importError && (
-              <div className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">
+              <div
+                className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger"
+                role="alert"
+                aria-live="assertive"
+              >
                 {importError}
               </div>
             )}
             {importSuccess && (
-              <div className="rounded-lg border border-ok/30 bg-ok/10 px-3 py-2 text-sm text-ok">
+              <div
+                className="rounded-lg border border-ok/30 bg-ok/10 px-3 py-2 text-sm text-ok"
+                role="status"
+                aria-live="polite"
+              >
                 {importSuccess}
               </div>
             )}
@@ -778,7 +891,7 @@ export function SettingsView({
   );
 
   return (
-    <div className="flex h-full w-full min-h-0 bg-bg p-0 lg:p-1">
+    <DesktopPageFrame>
       <div
         ref={shellRef}
         className={SETTINGS_SHELL_CLASS}
@@ -797,12 +910,19 @@ export function SettingsView({
 
         <div ref={contentRef} className={SETTINGS_CONTENT_CLASS}>
           <div className={SETTINGS_CONTENT_WIDTH_CLASS}>
+            <SettingsMobileToolbar
+              sections={visibleSections}
+              activeSection={activeSection}
+              onSectionChange={handleSectionChange}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+            />
             <div className={SETTINGS_SECTION_STACK_CLASS}>
               {sectionsContent}
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </DesktopPageFrame>
   );
 }

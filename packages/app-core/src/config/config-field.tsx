@@ -25,6 +25,10 @@ import { useApp } from "../state";
 import type { DynamicValue } from "../types";
 import type { FieldRenderer, FieldRenderProps } from "./config-catalog";
 import { resolveDynamic } from "./config-catalog";
+import {
+  getConfigInputClassName,
+  getConfigTextareaClassName,
+} from "./config-control-primitives";
 
 // ── Action binding helper ──────────────────────────────────────────────
 
@@ -51,16 +55,12 @@ function fireAction(props: FieldRenderProps, eventName: string): void {
   void props.onAction(binding.action, resolvedParams);
 }
 
-// ── Shared Tailwind class constants ─────────────────────────────────────
-
-const INPUT_CLS =
-  "w-full px-3 py-2 border border-[var(--border)] bg-[var(--card)] text-[13px] font-[var(--mono)] transition-all focus:border-[var(--accent)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] box-border h-[36px] rounded-sm placeholder:text-[var(--muted)] placeholder:opacity-60";
-
-const INPUT_ERROR_CLS =
-  "w-full px-3 py-2 border border-[var(--destructive)] bg-[color-mix(in_srgb,var(--destructive)_3%,var(--card))] text-[13px] font-[var(--mono)] transition-all focus:border-[var(--accent)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] box-border h-[36px] rounded-sm placeholder:text-[var(--muted)] placeholder:opacity-60";
-
 function inputCls(hasError: boolean): string {
-  return hasError ? INPUT_ERROR_CLS : INPUT_CLS;
+  return getConfigInputClassName({ hasError });
+}
+
+function textareaCls(hasError: boolean, className?: string): string {
+  return getConfigTextareaClassName({ hasError, className });
 }
 
 // ── 1. Text ─────────────────────────────────────────────────────────────
@@ -398,7 +398,7 @@ export function RenderSelectField(props: FieldRenderProps) {
       }}
     >
       <SelectTrigger
-        className={INPUT_CLS}
+        className={inputCls(!!props.errors?.length)}
         data-config-key={props.key}
         data-field-type="select"
       >
@@ -609,7 +609,7 @@ function TextareaFieldInner({ fp: props }: { fp: FieldRenderProps }) {
   return (
     <textarea
       ref={textareaRef}
-      className="w-full px-3 py-2 border border-[var(--border)] bg-[var(--card)] text-[13px] font-[var(--mono)] transition-all focus:border-[var(--accent)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] box-border min-h-[72px] max-h-[400px] rounded-sm placeholder:text-[var(--muted)] placeholder:opacity-60"
+      className={textareaCls(!!props.errors?.length)}
       style={{ fieldSizing: "content" } as React.CSSProperties}
       defaultValue={value}
       placeholder={placeholder}
@@ -932,11 +932,7 @@ function JsonFieldInner({ fp: props }: { fp: FieldRenderProps }) {
   return (
     <div>
       <textarea
-        className={`w-full px-2.5 py-[7px] border ${
-          jsonError || props.errors?.length
-            ? "border-[var(--destructive)]"
-            : "border-[var(--border)]"
-        } bg-[var(--card)] text-[13px] font-mono transition-all focus:border-[var(--accent)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] box-border min-h-[100px] resize-y rounded-sm`}
+        className={textareaCls(Boolean(jsonError || props.errors?.length), "min-h-[100px]")}
         defaultValue={initial}
         placeholder={
           props.hint.placeholder ||
@@ -972,11 +968,7 @@ export function renderCodeField(props: FieldRenderProps) {
 
   return (
     <textarea
-      className={`w-full px-2.5 py-[7px] border ${
-        props.errors?.length
-          ? "border-[var(--destructive)]"
-          : "border-[var(--border)]"
-      } bg-[var(--card)] text-[13px] font-mono transition-all focus:border-[var(--accent)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] box-border min-h-[100px] resize-y rounded-sm`}
+      className={textareaCls(!!props.errors?.length, "min-h-[100px]")}
       defaultValue={value}
       placeholder={placeholder}
       rows={6}
@@ -1569,7 +1561,7 @@ function MarkdownFieldInner(props: FieldRenderProps) {
         </div>
       ) : (
         <textarea
-          className={`${inputCls(!!props.errors?.length)} min-h-[100px] h-auto resize-y font-[var(--mono)]`}
+          className={textareaCls(!!props.errors?.length, "min-h-[100px] h-auto")}
           defaultValue={value}
           placeholder={props.hint.placeholder ?? "Markdown content..."}
           data-config-key={props.key}
@@ -1684,7 +1676,7 @@ export const renderGroupField: FieldRenderer = (props) => {
         {props.hint.label ?? props.key}
       </legend>
       <textarea
-        className={`${inputCls(!!props.errors?.length)} min-h-[60px] h-auto resize-y`}
+        className={textareaCls(!!props.errors?.length, "min-h-[60px] h-auto")}
         defaultValue={value}
         placeholder={props.hint.placeholder ?? "Group configuration..."}
         disabled={props.readonly}

@@ -37,8 +37,6 @@ import { useApp } from "../state";
 import { openDesktopInAppBrowser, openExternalUrl } from "../utils";
 import { StripeEmbeddedCheckout } from "./StripeEmbeddedCheckout";
 
-const _ELIZA_CLOUD_LOGIN_URL =
-  "https://www.elizacloud.ai/login?returnTo=%2Fdashboard%2Feliza";
 const ELIZA_CLOUD_INSTANCES_URL = "https://www.elizacloud.ai/dashboard/eliza";
 /** Marketing / docs site — “Learn more” when not connected (in-app browser on desktop). */
 const ELIZA_CLOUD_WEB_URL = "https://elizacloud.ai";
@@ -47,6 +45,8 @@ const CLOUD_PANEL_CLASSNAME =
   "rounded-2xl border border-border/60 bg-card/88 p-4 shadow-sm";
 const CLOUD_INSET_PANEL_CLASSNAME =
   "rounded-xl border border-border/50 bg-bg/30 p-4";
+const CLOUD_ACCENT_CONTROL_TEXT_CLASSNAME =
+  "text-txt-strong hover:text-txt-strong";
 
 const STATUS_BADGE: Record<string, { i18nKey: string; className: string }> = {
   running: {
@@ -106,7 +106,7 @@ function CloudAgentCard({
     <div
       className={`flex cursor-pointer flex-col justify-between gap-4 rounded-2xl border p-5 transition-all duration-200 ${
         selected
-          ? "border-accent/45 bg-accent/8 shadow-[0_0_0_1px_rgba(var(--accent),0.12),0_14px_30px_rgba(0,0,0,0.12)]"
+          ? "border-accent/45 bg-accent/8 shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.12),0_14px_30px_rgba(0,0,0,0.12)]"
           : "border-border/60 bg-card/88 shadow-sm hover:border-accent/30"
       }`}
       onClick={() => onSelect?.(agent.agent_id)}
@@ -1012,7 +1012,7 @@ export function CloudDashboard() {
               className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium ${
                 activeView !== "billing"
                   ? "text-muted-strong hover:text-txt"
-                  : ""
+                  : CLOUD_ACCENT_CONTROL_TEXT_CLASSNAME
               }`}
               onClick={() => setState("cloudDashboardView", "billing")}
             >
@@ -1025,7 +1025,7 @@ export function CloudDashboard() {
               className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium ${
                 activeView !== "agents"
                   ? "text-muted-strong hover:text-txt"
-                  : ""
+                  : CLOUD_ACCENT_CONTROL_TEXT_CLASSNAME
               }`}
               onClick={() => setState("cloudDashboardView", "agents")}
             >
@@ -1142,7 +1142,7 @@ export function CloudDashboard() {
                       className={`rounded-lg px-2.5 py-1 text-xs font-medium ${
                         billingAmount !== String(amount)
                           ? "border-border/50 bg-bg/40 text-txt hover:border-accent/40"
-                          : ""
+                          : CLOUD_ACCENT_CONTROL_TEXT_CLASSNAME
                       }`}
                       onClick={() => setBillingAmount(String(amount))}
                     >
@@ -1163,7 +1163,7 @@ export function CloudDashboard() {
                   />
                   <Button
                     variant="default"
-                    className="rounded-lg font-semibold h-9 px-4"
+                    className={`rounded-lg font-semibold h-9 px-4 ${CLOUD_ACCENT_CONTROL_TEXT_CLASSNAME}`}
                     disabled={checkoutBusy || billingLoading}
                     onClick={() => void handleStartCheckout()}
                   >
@@ -1226,7 +1226,7 @@ export function CloudDashboard() {
                       <Button
                         variant="default"
                         size="sm"
-                        className="rounded-lg text-xs h-8 flex-1"
+                        className={`rounded-lg text-xs h-8 flex-1 ${CLOUD_ACCENT_CONTROL_TEXT_CLASSNAME}`}
                         disabled={
                           cryptoPayBusy ||
                           !hasAgentWallet ||

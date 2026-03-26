@@ -704,9 +704,10 @@ function useDesktopPermissionsState() {
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await replaceSnapshot(true);
+      return await replaceSnapshot(true);
     } catch (err) {
       console.error("Failed to refresh permissions:", err);
+      return null;
     } finally {
       setRefreshing(false);
     }
@@ -1047,11 +1048,10 @@ export function PermissionsSection() {
 }
 
 /**
- * Onboarding **senses** step: system / streaming permissions with a single **Continue**.
- *
- * **WHY one button:** “Skip” vs “Continue” duplicated intent and confused users; grant
- * state stays visible on each row. **`onContinue()`** always advances the wizard; the
- * legacy `allowPermissionBypass` flag is only for tests / programmatic use, not these UIs.
+ * Onboarding **senses** step: system / streaming permissions with explicit grant
+ * and skip actions. Per-permission status stays visible on each row, while the footer
+ * makes the outcome of skipping clear. **`onContinue()`** still advances the wizard;
+ * `allowPermissionBypass` is used for the explicit skip path.
  */
 /** Onboarding section for mobile — streaming permissions to cloud sandbox. */
 function MobileOnboardingPermissions({
@@ -1144,11 +1144,73 @@ function DesktopOnboardingPermissions({
   onBack?: () => void;
 }) {
   const { t } = useApp();
-  const { handleOpenSettings, handleRequest, loading, permissions } =
-    useDesktopPermissionsState();
+  const {
+    handleOpenSettings,
+    handleRequest,
+    handleRefresh,
+    loading,
+    permissions,
+  } = useDesktopPermissionsState();
+  const [grantingPermissions, setGrantingPermissions] = useState(false);
 
   /** Check if all critical permissions are granted (or not applicable). */
   const allGranted = hasRequiredOnboardingPermissions(permissions);
+  const essentialPermissions = SYSTEM_PERMISSIONS.filter((def) => {
+    const state = permissions?.[def.id];
+    return state?.status !== "not-applicable" && def.id !== "shell";
+  });
+  const footerStatusMessage = allGranted
+    ? translateWithFallback(
+        t,
+        "permissionssection.PermissionReadyNote",
+        "All required permissions are ready. Continue when you're ready.",
+      )
+    : translateWithFallback(
+        t,
+        "permissionssection.PermissionSkipNote",
+        "Skipping keeps desktop features locked until you grant the missing permissions in Settings.",
+      );
+
+  const handleGrantPermissions = useCallback(async () => {
+    if (grantingPermissions) {
+      return;
+    }
+
+    setGrantingPermissions(true);
+    try {
+      for (const def of essentialPermissions) {
+        const state = permissions?.[def.id];
+        if (state?.status === "granted") continue;
+        if (state?.status === "not-determined" && state.canRequest) {
+          await handleRequest(def.id);
+          continue;
+        }
+        await handleOpenSettings(def.id);
+      }
+
+      const refreshed = await handleRefresh();
+      if (
+        refreshed &&
+        hasRequiredOnboardingPermissions(refreshed.permissions)
+      ) {
+        onContinue();
+      }
+    } finally {
+      setGrantingPermissions(false);
+    }
+  }, [
+    grantingPermissions,
+    essentialPermissions,
+    handleOpenSettings,
+    handleRefresh,
+    handleRequest,
+    onContinue,
+    permissions,
+  ]);
+
+  const handleSkipForNow = useCallback(() => {
+    onContinue({ allowPermissionBypass: true });
+  }, [onContinue]);
 
   if (loading) {
     return (
@@ -1185,11 +1247,6 @@ function DesktopOnboardingPermissions({
       </div>
     );
   }
-
-  const essentialPermissions = SYSTEM_PERMISSIONS.filter((def) => {
-    const state = permissions[def.id];
-    return state?.status !== "not-applicable" && def.id !== "shell";
-  });
 
   return (
     <div className="space-y-5">
@@ -1251,7 +1308,7 @@ function DesktopOnboardingPermissions({
                 <Button
                   variant="default"
                   size="sm"
-                  className="min-h-10 rounded-xl px-3 text-xs font-semibold sm:self-center"
+                  className="min-h-10 rounded-xl px-3 text-xs font-semibold text-txt-strong hover:text-txt-strong sm:self-center"
                   onClick={() =>
                     action.type === "request"
                       ? handleRequest(def.id)
@@ -1267,57 +1324,71 @@ function DesktopOnboardingPermissions({
         })}
       </div>
 
-      {!allGranted && (
-        <div className="flex justify-center mb-4">
-          <Button
-            variant="default"
-            size="sm"
-            className="min-h-11 w-full max-w-sm rounded-xl px-6 text-xs font-semibold"
-            onClick={async () => {
-              for (const def of essentialPermissions) {
-                const state = permissions[def.id];
-                if (state?.status === "granted") continue;
-                if (state?.status === "not-determined" && state.canRequest) {
-                  await handleRequest(def.id);
-                  continue;
-                }
-                await handleOpenSettings(def.id);
-              }
-            }}
-          >
-            {translateWithFallback(
-              t,
-              "permissionssection.AllowAllPermission",
-              "Allow All Permissions",
-            )}
-          </Button>
+      <div className="mt-[18px] border-t border-border/50 pt-3.5">
+        <div className="mb-4 space-y-1 text-[11px] leading-5 text-muted">
+          <p>{footerStatusMessage}</p>
+          {!allGranted ? (
+            <p>
+              {translateWithFallback(
+                t,
+                "permissionssection.PermissionGrantNote",
+                "Granting now will request what can be approved immediately and open Settings for anything that must be enabled there.",
+              )}
+            </p>
+          ) : null}
         </div>
-      )}
-
-      <div className="mt-[18px] flex flex-col gap-4 border-t border-border/50 pt-3.5 sm:flex-row sm:items-center sm:justify-between">
-        {onBack ? (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="justify-start p-0 text-[10px] uppercase tracking-[0.15em] text-muted-strong hover:text-txt"
-            onClick={() => onBack()}
-            type="button"
-          >
-            {translateWithFallback(t, "onboarding.back", "Back")}
-          </Button>
-        ) : (
-          <span />
-        )}
-        <Button
-          type="button"
-          variant="default"
-          size="sm"
-          data-testid="permissions-onboarding-continue"
-          className="min-h-11 min-w-[8.5rem] rounded-xl px-4 py-2 text-[11px] font-semibold leading-tight"
-          onClick={() => onContinue()}
-        >
-          {translateWithFallback(t, "onboarding.savedMyKeys", "Continue")}
-        </Button>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          {onBack ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="justify-start p-0 text-[10px] uppercase tracking-[0.15em] text-muted-strong hover:text-txt"
+              onClick={() => onBack()}
+              type="button"
+            >
+              {translateWithFallback(t, "onboarding.back", "Back")}
+            </Button>
+          ) : (
+            <span />
+          )}
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+            {!allGranted ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="min-h-11 rounded-xl px-4 py-2 text-[11px] font-semibold"
+                disabled={grantingPermissions}
+                onClick={handleSkipForNow}
+              >
+                {translateWithFallback(t, "onboarding.rpcSkip", "Skip for now")}
+              </Button>
+            ) : null}
+            <Button
+              type="button"
+              variant="default"
+              size="sm"
+              data-testid="permissions-onboarding-continue"
+              className="min-h-11 min-w-[8.5rem] rounded-xl px-4 py-2 text-[11px] font-semibold leading-tight text-txt-strong hover:text-txt-strong"
+              disabled={grantingPermissions}
+              onClick={allGranted ? () => onContinue() : handleGrantPermissions}
+            >
+              {allGranted
+                ? translateWithFallback(t, "onboarding.savedMyKeys", "Continue")
+                : grantingPermissions
+                  ? translateWithFallback(
+                      t,
+                      "permissionssection.GrantingPermissions",
+                      "Granting...",
+                    )
+                  : translateWithFallback(
+                      t,
+                      "permissionssection.GrantPermissions",
+                      "Grant Permissions",
+                    )}
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );

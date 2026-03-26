@@ -10,7 +10,7 @@ import {
   WALLET_RPC_PROVIDER_OPTIONS,
   type WalletRpcSelections,
 } from "@miladyai/shared/contracts/wallet";
-import { Button, Switch } from "@miladyai/ui";
+import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, Switch } from "@miladyai/ui";
 import { useCallback, useEffect, useState } from "react";
 import { client } from "../api";
 import {
@@ -653,7 +653,7 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
           onClick={() => handleModeChange("cloud")}
           className={`relative flex flex-col items-start gap-1.5 rounded-xl border-2 p-4 text-left transition-all h-auto !whitespace-normal ${
             rpcMode === "cloud"
-              ? "border-accent bg-accent/8 shadow-[0_0_20px_rgba(var(--accent),0.1)]"
+              ? "border-accent bg-accent/8 shadow-[0_0_20px_rgba(var(--accent-rgb),0.1)]"
               : "border-border/40 bg-card/30 opacity-50 grayscale hover:opacity-70 hover:grayscale-0"
           }`}
         >
@@ -689,7 +689,7 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
           onClick={() => handleModeChange("custom")}
           className={`relative flex flex-col items-start gap-1.5 rounded-xl border-2 p-4 text-left transition-all h-auto !whitespace-normal ${
             rpcMode === "custom"
-              ? "border-accent bg-accent/8 shadow-[0_0_20px_rgba(var(--accent),0.1)]"
+              ? "border-accent bg-accent/8 shadow-[0_0_20px_rgba(var(--accent-rgb),0.1)]"
               : "border-border/40 bg-card/30 opacity-50 grayscale hover:opacity-70 hover:grayscale-0"
           }`}
         >
@@ -955,23 +955,13 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
       )}
 
       {/* ── Secrets modal ── */}
-      {secretsOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-bg/80"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setSecretsOpen(false);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Escape" || e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              setSecretsOpen(false);
-            }
-          }}
-          role="dialog"
-          aria-modal="true"
+      <Dialog open={secretsOpen} onOpenChange={setSecretsOpen}>
+        <DialogContent
+          showCloseButton={false}
+          className="w-[min(100%-2rem,42rem)] max-h-[min(88vh,48rem)] overflow-hidden rounded-2xl border border-border/70 bg-card/96 p-0 shadow-2xl"
         >
-          <div className="w-full max-w-2xl max-h-[80vh] border border-border bg-card p-5 shadow-lg flex flex-col rounded-xl">
-            <div className="flex items-center justify-between mb-4 flex-shrink-0">
+          <div className="flex max-h-[min(88vh,48rem)] flex-col">
+            <DialogHeader className="flex flex-row items-center justify-between border-b border-border/70 px-5 py-4">
               <div className="flex items-center gap-2">
                 <svg
                   width="15"
@@ -988,25 +978,26 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                   <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                 </svg>
-                <span className="font-bold text-sm">
+                <DialogTitle className="text-sm font-bold">
                   {t("configpageview.SecretsVault1")}
-                </span>
+                </DialogTitle>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
                 className="text-muted hover:text-txt text-lg leading-none"
                 onClick={() => setSecretsOpen(false)}
+                aria-label={t("common.close")}
               >
                 {t("bugreportmodal.Times")}
               </Button>
-            </div>
-            <div className="flex-1 min-h-0 overflow-y-auto">
+            </DialogHeader>
+            <div className="flex-1 min-h-0 overflow-y-auto p-5">
               <SecretsView />
             </div>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -90,7 +90,7 @@ export function FlaminaGuideCard({
 
   return (
     <section
-      className={`rounded-2xl border border-accent/25 bg-card/70 px-4 py-4 text-left shadow-[0_10px_30px_rgba(var(--accent),0.08)] backdrop-blur-sm ${className}`.trim()}
+      className={`rounded-2xl border border-accent/25 bg-card/70 px-4 py-4 text-left shadow-[0_10px_30px_rgba(var(--accent-rgb),0.08)] backdrop-blur-sm ${className}`.trim()}
     >
       <div className="mb-2 flex items-center gap-2">
         <span className="rounded-full border border-accent/30 bg-accent/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-txt">

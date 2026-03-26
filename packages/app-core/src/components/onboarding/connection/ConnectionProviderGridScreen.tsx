@@ -9,6 +9,13 @@ import { CONNECTION_RECOMMENDED_PROVIDER_IDS } from "../../../onboarding/connect
 import { getProviderLogo } from "../../../providers";
 import { useApp } from "../../../state";
 import {
+  getOnboardingChoiceCardClassName,
+  onboardingChoiceCardDescriptionClassName,
+  onboardingChoiceCardDetectedBadgeClassName,
+  onboardingChoiceCardRecommendedLabelClassName,
+  onboardingChoiceCardTitleClassName,
+} from "../onboarding-form-primitives";
+import {
   OnboardingStepHeader,
   onboardingBodyTextShadowStyle,
   onboardingFooterClass,
@@ -70,7 +77,10 @@ export function ConnectionProviderGridScreen({
             <Button
               type="button"
               key={p.id}
-              className={`h-auto w-full min-w-0 justify-start overflow-hidden whitespace-normal rounded-[10px] border px-[10px] py-[8px] text-left transition-all duration-300 backdrop-blur-[18px] backdrop-saturate-[1.2] ${isRecommended ? "min-[440px]:col-span-2 border-[var(--onboarding-recommended-border)] bg-[var(--onboarding-recommended-bg)] hover:bg-[var(--onboarding-recommended-bg-hover)] hover:border-[var(--onboarding-recommended-border-strong)]" : "border-[var(--onboarding-card-border)] bg-[var(--onboarding-card-bg)] hover:bg-[var(--onboarding-card-bg-hover)] hover:border-[var(--onboarding-card-border-strong)]"}${detectedLabel ? " border-[rgba(34,197,94,0.4)] bg-[rgba(34,197,94,0.1)] hover:bg-[rgba(34,197,94,0.15)] hover:border-[rgba(34,197,94,0.5)]" : ""}`}
+              className={`${getOnboardingChoiceCardClassName({
+                detected: Boolean(detectedLabel),
+                recommended: isRecommended,
+              })} h-auto min-w-0 justify-start overflow-hidden whitespace-normal px-[10px] py-[8px] ${isRecommended ? "min-[440px]:col-span-2" : ""}`}
               onClick={() =>
                 dispatch({ type: "selectProvider", providerId: p.id })
               }
@@ -78,35 +88,30 @@ export function ConnectionProviderGridScreen({
               <div className="flex min-h-[46px] w-full items-center gap-2">
                 <img
                   src={getProviderLogo(p.id, true, getCustomLogo(p.id))}
-                  alt={display.name}
+                  alt=""
                   className="h-[22px] w-[22px] shrink-0 rounded-md object-contain"
                 />
                 <div className="min-w-0 flex-1">
                   <div
-                    className="truncate text-[11px] font-medium leading-[1.2] text-[var(--onboarding-text-primary)]"
-                    style={{ textShadow: "0 1px 8px rgba(3,5,10,0.6)" }}
+                    className={`${onboardingChoiceCardTitleClassName} truncate`}
                   >
                     {display.name}
                   </div>
                   {display.description && (
                     <div
-                      className="mt-0.5 truncate text-[9px] leading-[1.2] text-[var(--onboarding-text-subtle)]"
-                      style={{ textShadow: "0 1px 8px rgba(3,5,10,0.5)" }}
+                      className={`${onboardingChoiceCardDescriptionClassName} truncate`}
                     >
                       {display.description}
                     </div>
                   )}
                 </div>
                 {detectedLabel && (
-                  <span
-                    className="ml-auto shrink-0 whitespace-nowrap rounded-full bg-[rgba(34,197,94,0.2)] px-1 py-0.5 text-[8px] font-semibold uppercase tracking-[0.08em] text-[rgba(34,197,94,0.94)]"
-                    style={{ textShadow: "0 1px 6px rgba(3,5,10,0.45)" }}
-                  >
+                  <span className={onboardingChoiceCardDetectedBadgeClassName}>
                     {detectedLabel}
                   </span>
                 )}
                 {isRecommended && !detectedLabel && (
-                  <span className="ml-auto shrink-0 whitespace-nowrap text-[8px] font-medium uppercase tracking-[0.12em] text-accent">
+                  <span className={onboardingChoiceCardRecommendedLabelClassName}>
                     {t("onboarding.recommended") ?? "Recommended"}
                   </span>
                 )}
