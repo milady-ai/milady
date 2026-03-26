@@ -233,7 +233,16 @@ import {
   verifyTweet,
 } from "./twitter-verify.js";
 import { TxService } from "./tx-service.js";
-import { generateWalletKeys, getWalletAddresses } from "./wallet.js";
+import {
+  fetchEvmBalances,
+  fetchSolanaBalances,
+  fetchSolanaNativeBalanceViaRpc,
+  generateWalletForChain,
+  generateWalletKeys,
+  getWalletAddresses,
+  importWallet,
+  validatePrivateKey,
+} from "./wallet.js";
 import { handleWalletRoutes } from "./wallet-routes.js";
 import { resolveWalletRpcReadiness } from "./wallet-rpc.js";
 import {
@@ -606,6 +615,16 @@ interface PluginEntry {
   homepage?: string;
   repository?: string;
   setupGuideUrl?: string;
+  autoEnabled?: boolean;
+  managementMode?: "standard" | "core-optional";
+  capabilityStatus?:
+    | "loaded"
+    | "auto-enabled"
+    | "blocked"
+    | "missing-prerequisites"
+    | "disabled";
+  capabilityReason?: string | null;
+  prerequisites?: Array<{ label: string; met: boolean }>;
 }
 
 interface SkillEntry {
@@ -639,6 +658,155 @@ interface StreamEventEnvelope {
   agentId?: string;
   roomId?: UUID;
   payload: object;
+}
+
+// ---------------------------------------------------------------------------
+// Response block extraction — parse agent text for structured UI blocks
+// ---------------------------------------------------------------------------
+
+/** Content block types returned in the /api/chat and /api/conversations/:id/messages responses. */
+type ResponseBlock =
+  | { type: "text"; text: string }
+  | { type: "ui-spec"; spec: Record<string, unknown>; raw: string }
+  | {
+      type: "config-form";
+      pluginId: string;
+      pluginName?: string;
+      schema: Record<string, unknown>;
+      hints?: Record<string, unknown>;
+      values?: Record<string, unknown>;
+    };
+
+/** Regex matching fenced JSON code blocks: ```json ... ``` or ``` ... ``` */
+const FENCED_JSON_RE_SERVER = /```(?:json)?\s*\n([\s\S]*?)```/g;
+
+/** CONFIG marker pattern: [CONFIG:pluginId] */
+const CONFIG_MARKER_RE = /\[CONFIG:([^\]]+)\]/g;
+
+function tryParseJsonServer(raw: string): unknown {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function isUiSpecObject(
+  obj: unknown,
+): obj is { root: string; elements: Record<string, unknown> } {
+  if (obj === null || typeof obj !== "object" || Array.isArray(obj))
+    return false;
+  const c = obj as Record<string, unknown>;
+  return (
+    typeof c.root === "string" &&
+    c.elements !== null &&
+    typeof c.elements === "object" &&
+    !Array.isArray(c.elements)
+  );
+}
+
+/**
+ * Scan agent response text for:
+ * 1. Fenced UiSpec JSON blocks → extract as { type: "ui-spec", spec, raw }
+ * 2. [CONFIG:pluginId] markers → generate { type: "config-form", ... } from plugin list
+ * 3. Remaining text → { type: "text", text }
+ *
+ * Returns { cleanText, blocks } where cleanText has UI blocks/markers removed.
+ */
+function _extractResponseBlocks(
+  responseText: string,
+  plugins: PluginEntry[],
+): { cleanText: string; blocks: ResponseBlock[] } {
+  const blocks: ResponseBlock[] = [];
+  let text = responseText;
+
+  // Pass 1: extract fenced UiSpec JSON blocks
+  FENCED_JSON_RE_SERVER.lastIndex = 0;
+  const uiSpecRanges: Array<{
+    start: number;
+    end: number;
+    block: ResponseBlock;
+  }> = [];
+  let match: RegExpExecArray | null = FENCED_JSON_RE_SERVER.exec(text);
+
+  while (match !== null) {
+    const jsonContent = match[1].trim();
+    const parsed = tryParseJsonServer(jsonContent);
+    if (parsed !== null && isUiSpecObject(parsed)) {
+      uiSpecRanges.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        block: {
+          type: "ui-spec",
+          spec: parsed as Record<string, unknown>,
+          raw: jsonContent,
+        },
+      });
+    }
+    match = FENCED_JSON_RE_SERVER.exec(text);
+  }
+
+  // Remove UiSpec blocks from text (reverse order to preserve indices)
+  if (uiSpecRanges.length > 0) {
+    for (let i = uiSpecRanges.length - 1; i >= 0; i--) {
+      const r = uiSpecRanges[i];
+      blocks.unshift(r.block);
+      text = text.slice(0, r.start) + text.slice(r.end);
+    }
+  }
+
+  // Pass 2: extract [CONFIG:pluginId] markers
+  CONFIG_MARKER_RE.lastIndex = 0;
+  const configMarkers: Array<{ start: number; end: number; pluginId: string }> =
+    [];
+  match = CONFIG_MARKER_RE.exec(text);
+  while (match !== null) {
+    configMarkers.push({
+      start: match.index,
+      end: match.index + match[0].length,
+      pluginId: match[1].trim(),
+    });
+    match = CONFIG_MARKER_RE.exec(text);
+  }
+
+  if (configMarkers.length > 0) {
+    for (let i = configMarkers.length - 1; i >= 0; i--) {
+      const m = configMarkers[i];
+      const plugin = plugins.find((p) => p.id === m.pluginId);
+      if (plugin) {
+        const schema: Record<string, unknown> = {};
+        const values: Record<string, unknown> = {};
+        for (const param of plugin.parameters) {
+          schema[param.key] = {
+            type: param.type,
+            description: param.description,
+            required: param.required,
+          };
+          if (param.currentValue !== null)
+            values[param.key] = param.currentValue;
+        }
+        blocks.push({
+          type: "config-form",
+          pluginId: m.pluginId,
+          pluginName: plugin.name,
+          schema,
+          hints: plugin.configUiHints ?? {},
+          values,
+        });
+      }
+      text = text.slice(0, m.start) + text.slice(m.end);
+    }
+  }
+
+  // Build clean text (trim whitespace from block removal)
+  const cleanText = text.replace(/\n{3,}/g, "\n\n").trim();
+
+  // If there's remaining text content, prepend it as a text block
+  if (cleanText) {
+    blocks.unshift({ type: "text", text: cleanText });
+  }
+
+  return { cleanText, blocks };
 }
 
 // ---------------------------------------------------------------------------
@@ -763,6 +931,91 @@ function buildParamDefs(
   });
 }
 
+/**
+ * Infer parameter definitions from bare config key names when explicit
+ * pluginParameters metadata is not provided.  Uses naming conventions to
+ * determine type, sensitivity, requirement level, and a human-readable
+ * description.
+ */
+function _inferParamDefs(configKeys: string[]): PluginParamDef[] {
+  return configKeys.map((key) => {
+    const upper = key.toUpperCase();
+
+    // Detect sensitive keys
+    const sensitive =
+      upper.includes("_API_KEY") ||
+      upper.includes("_SECRET") ||
+      upper.includes("_TOKEN") ||
+      upper.includes("_PASSWORD") ||
+      upper.includes("_PRIVATE_KEY") ||
+      upper.includes("_SIGNING_") ||
+      upper.includes("ENCRYPTION_");
+
+    // Detect booleans
+    const isBoolean =
+      upper.includes("ENABLED") ||
+      upper.includes("_ENABLE_") ||
+      upper.startsWith("ENABLE_") ||
+      upper.includes("DRY_RUN") ||
+      upper.includes("_DEBUG") ||
+      upper.includes("_VERBOSE") ||
+      upper.includes("AUTO_") ||
+      upper.includes("FORCE_") ||
+      upper.includes("DISABLE_") ||
+      upper.includes("SHOULD_") ||
+      upper.endsWith("_SSL");
+
+    // Detect numbers
+    const isNumber =
+      upper.endsWith("_PORT") ||
+      upper.endsWith("_INTERVAL") ||
+      upper.endsWith("_TIMEOUT") ||
+      upper.endsWith("_MS") ||
+      upper.endsWith("_MINUTES") ||
+      upper.endsWith("_SECONDS") ||
+      upper.endsWith("_LIMIT") ||
+      upper.endsWith("_MAX") ||
+      upper.endsWith("_MIN") ||
+      upper.includes("_MAX_") ||
+      upper.includes("_MIN_") ||
+      upper.endsWith("_COUNT") ||
+      upper.endsWith("_SIZE") ||
+      upper.endsWith("_STEPS");
+
+    const type = isBoolean ? "boolean" : isNumber ? "number" : "string";
+
+    // Primary keys are required (API keys, tokens, bot tokens, account IDs)
+    const required =
+      sensitive &&
+      (upper.endsWith("_API_KEY") ||
+        upper.endsWith("_BOT_TOKEN") ||
+        upper.endsWith("_TOKEN") ||
+        upper.endsWith("_PRIVATE_KEY"));
+
+    // Generate a human-readable description from the key name
+    const description = inferDescription(key);
+
+    const envValue = process.env[key];
+    const isSet = Boolean(envValue?.trim());
+
+    return {
+      key,
+      type,
+      description,
+      required,
+      sensitive,
+      default: undefined,
+      options: undefined,
+      currentValue: isSet
+        ? sensitive
+          ? maskValue(envValue ?? "")
+          : (envValue ?? "")
+        : null,
+      isSet,
+    };
+  });
+}
+
 /** Derive a human-readable description from an environment variable key. */
 function inferDescription(key: string): string {
   const upper = key.toUpperCase();
@@ -861,6 +1114,7 @@ const BLOCKED_ENV_KEYS = new Set([
   "ELIZA_API_TOKEN",
   "ELIZA_API_TOKEN",
   "ELIZA_WALLET_EXPORT_TOKEN",
+  "MILADY_WALLET_EXPORT_TOKEN",
   "ELIZA_TERMINAL_RUN_TOKEN",
   "HYPERSCAPE_AUTH_TOKEN",
   // Wallet private keys — writable via API would enable key theft / replacement
@@ -2933,6 +3187,13 @@ function shouldForceCheckBalanceFallback(
   return balanceIntent;
 }
 
+function isBalanceIntent(input: string): boolean {
+  const normalized = input.toLowerCase();
+  return /\b(balance|wallet|holdings|portfolio|funds|how much)\b/.test(
+    normalized,
+  );
+}
+
 function parseFallbackActionBlocks(value: unknown): FallbackParsedAction[] {
   const rawValues: string[] = [];
   if (typeof value === "string") {
@@ -3018,7 +3279,8 @@ async function executeFallbackParsedActions(
       if (!valid) continue;
     }
 
-    await Promise.resolve(
+    let callbackSeen = false;
+    const actionResult = await Promise.resolve(
       action.handler(
         runtime,
         message,
@@ -3037,6 +3299,7 @@ async function executeFallbackParsedActions(
             contentRecord && typeof contentRecord === "object"
               ? extractCompatTextContent(contentRecord as Content)
               : "";
+          callbackSeen = true;
           onActionCallback(actionTag, Boolean(chunk));
           if (chunk) appendIncomingText(chunk);
           return [];
@@ -3044,6 +3307,16 @@ async function executeFallbackParsedActions(
         [],
       ),
     );
+    if (!callbackSeen) {
+      const fallbackText =
+        actionResult && typeof actionResult === "object"
+          ? extractCompatTextContent(actionResult as Content)
+          : "";
+      if (fallbackText) {
+        onActionCallback(parsed.name, true);
+        appendIncomingText(fallbackText);
+      }
+    }
   }
 }
 
@@ -3127,6 +3400,67 @@ function buildChatKnowledgePrompt(
   ].join("\n");
 }
 
+const WALLET_CONTEXT_INTENT_RE =
+  /\b(wallet|address|balance|swap|trade|transfer|send|token|bnb|eth|sol|onchain|on-chain)\b/i;
+
+function buildWalletContextPrompt(
+  runtime: AgentRuntime,
+  userPrompt: string,
+): string {
+  const addrs = getWalletAddresses();
+  const walletNetwork =
+    process.env.MILADY_WALLET_NETWORK?.trim().toLowerCase() === "testnet"
+      ? "testnet"
+      : "mainnet";
+  const localSignerAvailable = Boolean(process.env.EVM_PRIVATE_KEY?.trim());
+  const pluginEvmLoaded = isPluginLoadedByName(runtime, EVM_PLUGIN_PACKAGE);
+  const rpcReady = Boolean(
+    process.env.BSC_RPC_URL?.trim() ||
+      process.env.BSC_TESTNET_RPC_URL?.trim() ||
+      process.env.NODEREAL_BSC_RPC_URL?.trim() ||
+      process.env.QUICKNODE_BSC_RPC_URL?.trim(),
+  );
+  const executionReady =
+    Boolean(addrs.evmAddress) && rpcReady && pluginEvmLoaded;
+  const executionBlockedReason = !addrs.evmAddress
+    ? "No EVM wallet is active yet."
+    : !rpcReady
+      ? "BSC RPC is not configured."
+      : !pluginEvmLoaded
+        ? "plugin-evm is not loaded."
+        : "none";
+  return [
+    "Server-verified wallet context:",
+    `- walletNetwork: ${walletNetwork}`,
+    `- evmAddress: ${addrs.evmAddress ?? "not generated"}`,
+    `- solanaAddress: ${addrs.solanaAddress ?? "not generated"}`,
+    `- localSignerAvailable: ${localSignerAvailable ? "true" : "false"}`,
+    `- rpcReady: ${rpcReady ? "true" : "false"}`,
+    `- pluginEvmLoaded: ${pluginEvmLoaded ? "true" : "false"}`,
+    `- executionReady: ${executionReady ? "true" : "false"}`,
+    `- executionBlockedReason: ${executionBlockedReason}`,
+    "Use this context as source of truth for wallet questions and on-chain actions.",
+    "",
+    `User message: ${userPrompt}`,
+  ].join("\n");
+}
+
+function maybeAugmentChatMessageWithWalletContext(
+  runtime: AgentRuntime,
+  message: ReturnType<typeof createMessageMemory>,
+): ReturnType<typeof createMessageMemory> {
+  const userPrompt = extractCompatTextContent(message.content)?.trim();
+  if (!userPrompt) return message;
+  if (!WALLET_CONTEXT_INTENT_RE.test(userPrompt)) return message;
+  return {
+    ...message,
+    content: {
+      ...message.content,
+      text: buildWalletContextPrompt(runtime, userPrompt),
+    },
+  };
+}
+
 async function maybeAugmentChatMessageWithKnowledge(
   runtime: AgentRuntime,
   message: ReturnType<typeof createMessageMemory>,
@@ -3200,8 +3534,10 @@ async function generateChatResponse(
   agentName: string,
   opts?: ChatGenerateOptions,
 ): Promise<ChatGenerationResult> {
+  const originalUserText = String(extractCompatTextContent(message.content) ?? "");
   type StreamSource = "unset" | "callback" | "onStreamChunk";
   let responseText = "";
+  let forcedWalletExecutionText = false;
   let activeStreamSource: StreamSource = "unset";
   const messageSource =
     typeof message.content.source === "string" &&
@@ -3269,52 +3605,92 @@ async function generateChatResponse(
       >
     | undefined;
   let actionCallbacksSeen = 0;
+  let _handlerError: unknown = null;
+  const directWalletExecutionFallback =
+    WALLET_EXECUTION_INTENT_RE.test(originalUserText)
+      ? inferWalletExecutionFallback(originalUserText)
+      : null;
   try {
-    const generationMessage = await maybeAugmentChatMessageWithKnowledge(
-      runtime,
-      message,
-    );
-    result = await runtime.messageService?.handleMessage(
-      runtime,
-      generationMessage,
-      async (content: Content) => {
-        if (opts?.isAborted?.()) {
-          throw new Error("client_disconnected");
-        }
-
-        // Trace action callback invocations so we can verify handlers execute.
-        const actionTag = (content as Record<string, unknown>)?.action;
-        if (actionTag) {
+    if (directWalletExecutionFallback?.errorText) {
+      forcedWalletExecutionText = true;
+      responseText = directWalletExecutionFallback.errorText;
+      result = { responseContent: { text: directWalletExecutionFallback.errorText } };
+    } else if (directWalletExecutionFallback?.action) {
+      runtime.logger?.info(
+        {
+          src: "eliza-api",
+          action: directWalletExecutionFallback.action.name,
+          parameters: directWalletExecutionFallback.action.parameters,
+        },
+        "[eliza-api] Direct wallet execution dispatch from prompt intent",
+      );
+      await executeFallbackParsedActions(
+        runtime,
+        message,
+        [directWalletExecutionFallback.action],
+        appendIncomingText,
+        (actionTag, hasText) => {
           actionCallbacksSeen += 1;
           runtime.logger?.info(
             {
               src: "eliza-api",
               action: actionTag,
-              hasText: Boolean(extractCompatTextContent(content)),
+              hasText,
             },
             `[eliza-api] Action callback fired: ${actionTag}`,
           );
-        }
+        },
+      );
+      result = { responseContent: { text: responseText } };
+    } else {
+      const walletAugmentedMessage =
+        maybeAugmentChatMessageWithWalletContext(runtime, message);
+      const generationMessage = await maybeAugmentChatMessageWithKnowledge(
+        runtime,
+        walletAugmentedMessage,
+      );
+      result = await runtime.messageService?.handleMessage(
+        runtime,
+        generationMessage,
+        async (content: Content) => {
+          if (opts?.isAborted?.()) {
+            throw new Error("client_disconnected");
+          }
 
-        const chunk = extractCompatTextContent(content);
-        if (!chunk) return [];
-        if (!claimStreamSource("callback")) return [];
-        appendIncomingText(chunk);
-        return [];
-      },
-      {
-        onStreamChunk: opts?.onChunk
-          ? async (chunk: string) => {
-              if (opts?.isAborted?.()) {
-                throw new Error("client_disconnected");
+          // Trace action callback invocations so we can verify handlers execute.
+          const actionTag = (content as Record<string, unknown>)?.action;
+          if (actionTag) {
+            actionCallbacksSeen += 1;
+            runtime.logger?.info(
+              {
+                src: "eliza-api",
+                action: actionTag,
+                hasText: Boolean(extractCompatTextContent(content)),
+              },
+              `[eliza-api] Action callback fired: ${actionTag}`,
+            );
+          }
+
+          const chunk = extractCompatTextContent(content);
+          if (!chunk) return [];
+          if (!claimStreamSource("callback")) return [];
+          appendIncomingText(chunk);
+          return [];
+        },
+        {
+          onStreamChunk: opts?.onChunk
+            ? async (chunk: string) => {
+                if (opts?.isAborted?.()) {
+                  throw new Error("client_disconnected");
+                }
+                if (!chunk) return;
+                if (!claimStreamSource("onStreamChunk")) return;
+                appendIncomingText(chunk);
               }
-              if (!chunk) return;
-              if (!claimStreamSource("onStreamChunk")) return;
-              appendIncomingText(chunk);
-            }
-          : undefined,
-      },
-    );
+            : undefined,
+        },
+      );
+    }
 
     // Ensure MESSAGE_SENT hooks run for API chat flows. Some runtimes emit this
     // internally, but API wrappers can bypass those hooks.
@@ -3352,6 +3728,7 @@ async function generateChatResponse(
       );
     }
   } catch (err) {
+    _handlerError = err;
     throw err;
   }
 
@@ -3375,6 +3752,7 @@ async function generateChatResponse(
     const userText = String(extractCompatTextContent(message.content) ?? "");
     const modelText = String(extractCompatTextContent(result.responseContent) ?? "");
     const fallbackActionsToRun = [...parsedFallbackActions];
+    const inferredBalanceChain = inferBalanceChainFromText(userText);
 
     if (
       shouldForceCheckBalanceFallback(fallbackActionsToRun, userText, modelText) &&
@@ -3382,15 +3760,69 @@ async function generateChatResponse(
     ) {
       fallbackActionsToRun.push({
         name: "CHECK_BALANCE",
-        parameters: { chain: inferBalanceChainFromText(userText) },
+        parameters: { chain: inferredBalanceChain },
       });
       runtime.logger?.warn(
         {
           src: "eliza-api",
-          inferredChain: inferBalanceChainFromText(userText),
+          inferredChain: inferredBalanceChain,
         },
         "[eliza-api] Injecting CHECK_BALANCE fallback for REPLY-only malformed action payload",
       );
+    }
+
+    if (
+      actionCallbacksSeen === 0 &&
+      fallbackActionsToRun.length === 0 &&
+      isBalanceIntent(userText)
+    ) {
+      fallbackActionsToRun.push({
+        name: "CHECK_BALANCE",
+        parameters: { chain: inferredBalanceChain },
+      });
+      runtime.logger?.warn(
+        {
+          src: "eliza-api",
+          inferredChain: inferredBalanceChain,
+        },
+        "[eliza-api] Injecting CHECK_BALANCE fallback for balance intent without any action payload",
+      );
+    }
+
+    if (
+      actionCallbacksSeen === 0 &&
+      WALLET_EXECUTION_INTENT_RE.test(userText)
+    ) {
+      const inferredWalletFallback = inferWalletExecutionFallback(userText);
+      if (inferredWalletFallback?.action) {
+        const existingIndex = fallbackActionsToRun.findIndex(
+          (action) => action.name === inferredWalletFallback.action.name,
+        );
+        if (
+          existingIndex === -1 ||
+          !hasUsableWalletFallbackParams(fallbackActionsToRun[existingIndex]!)
+        ) {
+          if (existingIndex >= 0) {
+            fallbackActionsToRun.splice(existingIndex, 1);
+          }
+          fallbackActionsToRun.push(inferredWalletFallback.action);
+          runtime.logger?.warn(
+            {
+              src: "eliza-api",
+              action: inferredWalletFallback.action.name,
+              parameters: inferredWalletFallback.action.parameters,
+            },
+            "[eliza-api] Injecting wallet execution fallback from prompt intent",
+          );
+        }
+      } else if (inferredWalletFallback?.errorText) {
+        forcedWalletExecutionText = true;
+        if (opts?.onSnapshot) {
+          emitSnapshot(inferredWalletFallback.errorText);
+        } else {
+          responseText = inferredWalletFallback.errorText;
+        }
+      }
     }
 
     if (actionCallbacksSeen === 0 && fallbackActionsToRun.length > 0) {
@@ -3439,7 +3871,12 @@ async function generateChatResponse(
   ) {
     // Keep streaming monotonic when final text extends emitted chunks.
     emitChunk(resultText.slice(responseText.length));
-  } else if (actionCallbacksSeen === 0 && resultText && resultText !== responseText) {
+  } else if (
+    actionCallbacksSeen === 0 &&
+    resultText &&
+    resultText !== responseText &&
+    !forcedWalletExecutionText
+  ) {
     // Canonical final response may differ from streamed chunks (normalization).
     if (opts?.onSnapshot) {
       emitSnapshot(resultText);
@@ -3448,10 +3885,31 @@ async function generateChatResponse(
     }
   }
 
+  if (actionCallbacksSeen === 0 && isWalletActionRequiredIntent(originalUserText)) {
+    const normalizedVisibleText = stripAssistantStageDirections(
+      (responseText || resultText || "").trim(),
+    );
+    if (
+      normalizedVisibleText.length === 0 ||
+      WALLET_PROGRESS_ONLY_RE.test(normalizedVisibleText)
+    ) {
+      const failureText = buildWalletActionNotExecutedReply(
+        runtime,
+        originalUserText.trim(),
+      );
+      if (opts?.onSnapshot) {
+        emitSnapshot(failureText);
+      } else {
+        responseText = failureText;
+      }
+    }
+  }
+
   const noResponseFallback = opts?.resolveNoResponseText?.();
-  const finalText = isClientVisibleNoResponse(responseText)
+  const normalizedResponseText = trimWalletProgressPrefix(responseText);
+  const finalText = isClientVisibleNoResponse(normalizedResponseText)
     ? (noResponseFallback ?? (responseText || "(no response)"))
-    : responseText;
+    : normalizedResponseText;
 
   // Estimate token usage from text lengths (~4 chars per token)
   const promptText = extractCompatTextContent(message.content) ?? "";
@@ -5430,6 +5888,7 @@ import {
   type TradePermissionMode,
   assertQuoteFresh,
   canUseLocalTradeExecution,
+  recordAgentAutoTrade,
 } from "./trade-safety.js";
 
 export {
@@ -5454,6 +5913,7 @@ const AGENT_AUTOMATION_MODES = new Set<AgentAutomationMode>([
   "connectors-only",
   "full",
 ]);
+const EVM_PLUGIN_PACKAGE = "@elizaos/plugin-evm";
 
 function parseAgentAutomationMode(value: unknown): AgentAutomationMode | null {
   if (typeof value !== "string") return null;
@@ -5510,6 +5970,465 @@ function persistAgentAutomationMode(
     enabled: true,
     mode,
   };
+}
+
+function isPluginLoadedByName(
+  runtime: AgentRuntime | null,
+  pluginName: string,
+): boolean {
+  if (!runtime || !Array.isArray(runtime.plugins)) return false;
+  const shortId = pluginName.replace("@elizaos/plugin-", "");
+  const packageSuffix = `plugin-${shortId}`;
+  return runtime.plugins.some((plugin) => {
+    const name = typeof plugin?.name === "string" ? plugin.name : "";
+    return (
+      name === pluginName ||
+      name === shortId ||
+      name === packageSuffix ||
+      name.endsWith(`/${packageSuffix}`) ||
+      name.includes(shortId)
+    );
+  });
+}
+
+function resolveWalletCapabilityStatus(
+  state: Pick<ServerState, "config" | "runtime">,
+) {
+  const addrs = getWalletAddresses();
+  const rpcReadiness = resolveWalletRpcReadiness(state.config);
+  const automationMode = resolveAgentAutomationModeFromConfig(state.config);
+  const localSignerAvailable = Boolean(process.env.EVM_PRIVATE_KEY?.trim());
+  const hasWallet = Boolean(addrs.evmAddress || addrs.solanaAddress);
+  const hasEvm = Boolean(addrs.evmAddress);
+  const pluginEvmLoaded = isPluginLoadedByName(
+    state.runtime,
+    EVM_PLUGIN_PACKAGE,
+  );
+  const pluginEvmRequired = hasEvm || localSignerAvailable;
+  const rpcReady = Boolean(rpcReadiness.managedBscRpcReady);
+  const walletSource = localSignerAvailable
+    ? "local"
+    : hasWallet
+      ? "managed"
+      : "none";
+
+  let executionBlockedReason: string | null = null;
+  if (!hasEvm) {
+    executionBlockedReason = "No EVM wallet is active yet.";
+  } else if (!rpcReady) {
+    executionBlockedReason = "BSC RPC is not configured.";
+  } else if (!pluginEvmLoaded) {
+    executionBlockedReason =
+      "plugin-evm is not loaded, so EVM wallet execution is unavailable.";
+  } else if (automationMode !== "full") {
+    executionBlockedReason =
+      "Agent automation is in connectors-only mode, so wallet execution is blocked in chat.";
+  }
+
+  return {
+    walletSource,
+    walletNetwork: rpcReadiness.walletNetwork,
+    evmAddress: addrs.evmAddress ?? null,
+    solanaAddress: addrs.solanaAddress ?? null,
+    hasWallet,
+    hasEvm,
+    localSignerAvailable,
+    rpcReady,
+    automationMode,
+    pluginEvmLoaded,
+    pluginEvmRequired,
+    executionReady:
+      hasEvm && rpcReady && pluginEvmLoaded && automationMode === "full",
+    executionBlockedReason,
+  };
+}
+
+function buildPluginEvmDiagnosticEntry(
+  state: Pick<ServerState, "config" | "runtime">,
+): PluginEntry {
+  const capability = resolveWalletCapabilityStatus(state);
+  const enabled =
+    capability.pluginEvmLoaded ||
+    capability.pluginEvmRequired ||
+    (state.config.plugins?.allow ?? []).some((entry) => {
+      return entry === EVM_PLUGIN_PACKAGE || entry === "evm";
+    });
+
+  const capabilityStatus = capability.pluginEvmLoaded
+    ? capability.pluginEvmRequired
+      ? "loaded"
+      : "auto-enabled"
+    : enabled
+      ? capability.evmAddress || capability.localSignerAvailable
+        ? "blocked"
+        : "missing-prerequisites"
+      : "disabled";
+
+  return {
+    id: "evm",
+    name: "Plugin EVM",
+    description:
+      "EVM wallet runtime for balance, transfer, and trade actions. Required for wallet execution in chat.",
+    tags: ["wallet", "evm", "bsc", "onchain"],
+    enabled,
+    configured: capability.pluginEvmRequired,
+    envKey: "EVM_PRIVATE_KEY",
+    category: "feature",
+    source: "bundled",
+    configKeys: [
+      "EVM_PRIVATE_KEY",
+      "BSC_RPC_URL",
+      "BSC_TESTNET_RPC_URL",
+      "MILADY_WALLET_NETWORK",
+    ],
+    parameters: [],
+    validationErrors: [],
+    validationWarnings: [],
+    npmName: EVM_PLUGIN_PACKAGE,
+    isActive: capability.pluginEvmLoaded,
+    autoEnabled: capability.pluginEvmRequired && !capability.pluginEvmLoaded,
+    managementMode: "core-optional",
+    capabilityStatus,
+    capabilityReason: capability.executionReady
+      ? "Wallet execution is ready."
+      : capability.executionBlockedReason,
+    prerequisites: [
+      { label: "wallet present", met: Boolean(capability.evmAddress) },
+      { label: "rpc ready", met: capability.rpcReady },
+      { label: "plugin loaded", met: capability.pluginEvmLoaded },
+    ],
+  };
+}
+
+const WALLET_CHAT_INTENT_RE =
+  /\b(wallet|privy|onchain|on-chain|address|balance|swap|trade|transfer|send|token|bnb|eth|sol)\b/i;
+
+const WALLET_EXECUTION_INTENT_RE =
+  /\b(swap|trade|transfer|send|buy|sell|execute|approve)\b/i;
+
+const WALLET_IDENTITY_INTENT_RE =
+  /\b(wallet\s*address|address)\b/i;
+
+const WALLET_ACTION_REQUIRED_INTENT_RE =
+  /\b(balance|portfolio|holdings|funds|swap|trade|transfer|send|buy|sell|execute|approve)\b/i;
+
+const WALLET_PROGRESS_ONLY_RE =
+  /\b(let me|i(?:'| wi)ll|checking|fetching|looking up|pulling|one moment|just a second|hold on)\b[\s\S]{0,80}\b(check|look|fetch|pull|get|verify|see|review)\b/i;
+
+const WALLET_PROGRESS_PREFIX_RE =
+  /^\s*(?:let me|i(?:'ll| will)|checking|fetching|looking up|pulling|one moment|just a second|hold on)[\s\S]{0,120}?(?:now|\.{3}|…)?\s*/i;
+
+function isWalletActionRequiredIntent(prompt: string): boolean {
+  return (
+    WALLET_CHAT_INTENT_RE.test(prompt) &&
+    !WALLET_IDENTITY_INTENT_RE.test(prompt) &&
+    WALLET_ACTION_REQUIRED_INTENT_RE.test(prompt)
+  );
+}
+
+const EVM_ADDRESS_CAPTURE_RE = /\b0x[a-fA-F0-9]{40}\b/g;
+const DECIMAL_AMOUNT_CAPTURE_RE = /\b(\d+(?:\.\d+)?)\b/;
+const SEND_NATIVE_ASSET_RE =
+  /\b(?:t?bnb|bnb|eth|usdt|usdc|busd|dai|weth|wbtc)\b/i;
+const SWAP_ROUTE_PROVIDER_RE = /\b(pancakeswap-v2|0x|auto)\b/i;
+
+type WalletIntentFallback =
+  | { action: FallbackParsedAction; errorText?: undefined }
+  | { action?: undefined; errorText: string };
+
+function normalizeWalletAssetSymbol(asset: string): string {
+  const normalized = asset.trim().toUpperCase();
+  if (normalized === "TBNB") return "BNB";
+  return normalized;
+}
+
+function resolveWalletDrillTokenAddress(): string | null {
+  const raw = process.env.WALLET_DRILL_TOKEN_ADDRESS?.trim();
+  return raw && /^0x[a-fA-F0-9]{40}$/.test(raw) ? raw : null;
+}
+
+function buildWalletParameterFailureReply(
+  actionName: "TRANSFER_TOKEN" | "EXECUTE_TRADE",
+  reason: string,
+): string {
+  const walletNetwork =
+    process.env.MILADY_WALLET_NETWORK?.trim().toLowerCase() === "testnet"
+      ? "BSC testnet"
+      : "BSC";
+  return [
+    `Action: ${actionName}`,
+    `Chain: ${walletNetwork}`,
+    "Executed: false",
+    `Reason: ${reason}`,
+  ].join("\n");
+}
+
+function inferTransferFallbackAction(prompt: string): WalletIntentFallback | null {
+  if (!/\b(send|transfer|pay)\b/i.test(prompt)) return null;
+
+  const recipient = prompt.match(EVM_ADDRESS_CAPTURE_RE)?.[0];
+  if (!recipient) {
+    return {
+      errorText: buildWalletParameterFailureReply(
+        "TRANSFER_TOKEN",
+        "I need a recipient EVM address to send funds.",
+      ),
+    };
+  }
+
+  const amount = prompt.match(DECIMAL_AMOUNT_CAPTURE_RE)?.[1];
+  if (!amount) {
+    return {
+      errorText: buildWalletParameterFailureReply(
+        "TRANSFER_TOKEN",
+        "I need a positive transfer amount.",
+      ),
+    };
+  }
+
+  const assetMatch = prompt.match(SEND_NATIVE_ASSET_RE)?.[0];
+  if (!assetMatch) {
+    return {
+      errorText: buildWalletParameterFailureReply(
+        "TRANSFER_TOKEN",
+        "I need an asset symbol such as BNB, USDT, or USDC.",
+      ),
+    };
+  }
+
+  return {
+    action: {
+      name: "TRANSFER_TOKEN",
+      parameters: {
+        toAddress: recipient,
+        amount,
+        assetSymbol: normalizeWalletAssetSymbol(assetMatch),
+      },
+    },
+  };
+}
+
+function inferTradeSide(prompt: string): "buy" | "sell" | null {
+  if (/\bsell\b/i.test(prompt)) return "sell";
+  if (/\b(buy|swap|trade)\b/i.test(prompt)) return "buy";
+  return null;
+}
+
+function inferTradeFallbackAction(prompt: string): WalletIntentFallback | null {
+  if (!/\b(swap|trade|buy|sell)\b/i.test(prompt)) return null;
+
+  const side = inferTradeSide(prompt);
+  if (!side) {
+    return {
+      errorText: buildWalletParameterFailureReply(
+        "EXECUTE_TRADE",
+        'I need a trade side ("buy" or "sell").',
+      ),
+    };
+  }
+
+  const amount = prompt.match(DECIMAL_AMOUNT_CAPTURE_RE)?.[1];
+  if (!amount) {
+    return {
+      errorText: buildWalletParameterFailureReply(
+        "EXECUTE_TRADE",
+        "I need a positive trade amount.",
+      ),
+    };
+  }
+
+  const addresses = prompt.match(EVM_ADDRESS_CAPTURE_RE) ?? [];
+  const tokenAddress = addresses[0] ?? resolveWalletDrillTokenAddress();
+  if (!tokenAddress) {
+    return {
+      errorText: buildWalletParameterFailureReply(
+        "EXECUTE_TRADE",
+        "I need a target token address. Set WALLET_DRILL_TOKEN_ADDRESS or include the token contract address in the prompt.",
+      ),
+    };
+  }
+
+  const routeProvider =
+    prompt.match(SWAP_ROUTE_PROVIDER_RE)?.[1]?.toLowerCase() ??
+    "pancakeswap-v2";
+
+  return {
+    action: {
+      name: "EXECUTE_TRADE",
+      parameters: {
+        side,
+        amount,
+        tokenAddress,
+        routeProvider,
+      },
+    },
+  };
+}
+
+function inferWalletExecutionFallback(prompt: string): WalletIntentFallback | null {
+  return inferTransferFallbackAction(prompt) ?? inferTradeFallbackAction(prompt);
+}
+
+function hasUsableWalletFallbackParams(action: FallbackParsedAction): boolean {
+  if (action.name === "TRANSFER_TOKEN") {
+    return (
+      typeof action.parameters.toAddress === "string" &&
+      /^0x[a-fA-F0-9]{40}$/.test(action.parameters.toAddress) &&
+      typeof action.parameters.amount === "string" &&
+      action.parameters.amount.trim().length > 0 &&
+      typeof action.parameters.assetSymbol === "string" &&
+      action.parameters.assetSymbol.trim().length > 0
+    );
+  }
+
+  if (action.name === "EXECUTE_TRADE") {
+    return (
+      (action.parameters.side === "buy" || action.parameters.side === "sell") &&
+      typeof action.parameters.amount === "string" &&
+      action.parameters.amount.trim().length > 0 &&
+      typeof action.parameters.tokenAddress === "string" &&
+      /^0x[a-fA-F0-9]{40}$/.test(action.parameters.tokenAddress)
+    );
+  }
+
+  return true;
+}
+
+function buildWalletActionNotExecutedReply(
+  runtime: AgentRuntime,
+  userPrompt: string,
+): string {
+  const addrs = getWalletAddresses();
+  const walletNetwork =
+    process.env.MILADY_WALLET_NETWORK?.trim().toLowerCase() === "testnet"
+      ? "testnet"
+      : "mainnet";
+  const pluginEvmLoaded = isPluginLoadedByName(runtime, EVM_PLUGIN_PACKAGE);
+  const rpcReady = Boolean(
+    process.env.BSC_RPC_URL?.trim() ||
+      process.env.BSC_TESTNET_RPC_URL?.trim() ||
+      process.env.NODEREAL_BSC_RPC_URL?.trim() ||
+      process.env.QUICKNODE_BSC_RPC_URL?.trim(),
+  );
+  const executionBlockedReason = !addrs.evmAddress
+    ? "No EVM wallet is active yet."
+    : !rpcReady
+      ? "BSC RPC is not configured."
+      : !pluginEvmLoaded
+        ? "plugin-evm is not loaded, so EVM wallet execution is unavailable."
+        : "A wallet action was not executed for this turn.";
+
+  return [
+    `I could not complete "${userPrompt}" because no wallet action actually ran.`,
+    `Wallet network: ${walletNetwork}.`,
+    `Detected wallets:`,
+    `- EVM: ${addrs.evmAddress ?? "not generated"}`,
+    `- Solana: ${addrs.solanaAddress ?? "not generated"}`,
+    `plugin-evm: ${pluginEvmLoaded ? "loaded" : "not loaded"}.`,
+    `RPC ready: ${rpcReady ? "yes" : "no"}.`,
+    `Blocked reason: ${executionBlockedReason}`,
+  ].join("\n");
+}
+
+function trimWalletProgressPrefix(text: string): string {
+  const balanceIdx = text.indexOf("Wallet Balances:");
+  if (balanceIdx > 0) {
+    return text.slice(balanceIdx).trimStart();
+  }
+
+  const markers = [
+    "Action: TRANSFER_TOKEN",
+    "Action: EXECUTE_TRADE",
+    "Transfer",
+    "Swap",
+    "Trade",
+    "Tx hash:",
+    "Transaction hash:",
+  ];
+  for (const marker of markers) {
+    const idx = text.indexOf(marker);
+    if (idx <= 0) continue;
+    const prefix = text.slice(0, idx);
+    if (WALLET_PROGRESS_PREFIX_RE.test(prefix)) {
+      return text.slice(idx).trimStart();
+    }
+  }
+  return text;
+}
+
+function resolveWalletModeGuidanceReply(
+  state: ServerState,
+  prompt: string,
+): string | null {
+  if (!WALLET_CHAT_INTENT_RE.test(prompt)) {
+    return null;
+  }
+
+  const capability = resolveWalletCapabilityStatus(state);
+  const {
+    automationMode,
+    evmAddress,
+    solanaAddress,
+    walletNetwork,
+    pluginEvmLoaded,
+    executionReady,
+    executionBlockedReason,
+  } = capability;
+  const walletSummary = `Detected wallets:
+- EVM: ${evmAddress ?? "not generated"}
+- Solana: ${solanaAddress ?? "not generated"}`;
+
+  if (automationMode === "connectors-only") {
+    if (!WALLET_EXECUTION_INTENT_RE.test(prompt)) {
+      return null;
+    }
+    return [
+      "I am in connectors-only mode, so wallet actions are disabled in chat right now.",
+      "Turn on full mode with one of these:",
+      '1) Settings -> Permissions -> Agent Automation Mode -> "Full".',
+      '2) API: PUT /api/permissions/automation-mode with {"mode":"full"}.',
+      "Then retry your wallet request.",
+      `Wallet network: ${walletNetwork}.`,
+      walletSummary,
+    ].join("\n");
+  }
+
+  if (
+    !evmAddress &&
+    !solanaAddress &&
+    WALLET_EXECUTION_INTENT_RE.test(prompt)
+  ) {
+    const privyConfigured = isPrivyWalletProvisioningEnabled();
+    return [
+      "No wallet is active yet.",
+      "Open Wallet page and choose one setup path:",
+      `- Managed (Privy): ${privyConfigured ? "available" : "blocked until PRIVY_APP_ID and PRIVY_APP_SECRET are set on the backend"}.`,
+      "- Local: Generate or Import wallet in the Wallet wizard.",
+      walletSummary,
+    ].join("\n");
+  }
+
+  if (WALLET_IDENTITY_INTENT_RE.test(prompt)) {
+    return [
+      `Wallet network: ${walletNetwork}.`,
+      walletSummary,
+      `plugin-evm: ${pluginEvmLoaded ? "loaded" : "not loaded"}.`,
+      `Execution readiness: ${executionReady ? "ready for wallet actions" : (executionBlockedReason ?? "blocked")}.`,
+      `Automation mode: ${automationMode}.`,
+    ].join("\n");
+  }
+
+  if (WALLET_EXECUTION_INTENT_RE.test(prompt) && !executionReady) {
+    return [
+      `Wallet execution is currently blocked: ${executionBlockedReason ?? "unknown reason"}`,
+      `Wallet network: ${walletNetwork}.`,
+      walletSummary,
+      `plugin-evm: ${pluginEvmLoaded ? "loaded" : "not loaded"}.`,
+      `Automation mode: ${automationMode}.`,
+    ].join("\n");
+  }
+
+  return null;
 }
 
 // ---------------------------------------------------------------------------
@@ -5623,7 +6542,7 @@ export function isAllowedHost(req: http.IncomingMessage): boolean {
 
   const bindHost = (
     process.env.ELIZA_API_BIND ??
-    process.env.ELIZA_API_BIND ??
+    process.env.MILADY_API_BIND ??
     ""
   )
     .trim()
@@ -5664,7 +6583,7 @@ export function resolveCorsOrigin(origin?: string): string | null {
   // require an explicit token, so this only relaxes the browser origin check.
   const bindHost = (
     process.env.ELIZA_API_BIND ??
-    process.env.ELIZA_API_BIND ??
+    process.env.MILADY_API_BIND ??
     ""
   )
     .trim()
@@ -5999,12 +6918,14 @@ export function resolveWalletExportRejection(
     };
   }
 
-  const expected = process.env.ELIZA_WALLET_EXPORT_TOKEN?.trim();
+  const expected =
+    process.env.ELIZA_WALLET_EXPORT_TOKEN?.trim() ||
+    process.env.MILADY_WALLET_EXPORT_TOKEN?.trim();
   if (!expected) {
     return {
       status: 403,
       reason:
-        "Wallet export is disabled. Set ELIZA_WALLET_EXPORT_TOKEN to enable secure exports.",
+        "Wallet export is disabled. Set ELIZA_WALLET_EXPORT_TOKEN (or MILADY_WALLET_EXPORT_TOKEN) to enable secure exports.",
     };
   }
 
@@ -6098,6 +7019,23 @@ function extractWsQueryToken(url: URL): string | null {
   return token?.trim() || null;
 }
 
+function hasWsQueryToken(url: URL): boolean {
+  return (
+    url.searchParams.has("token") ||
+    url.searchParams.has("apiKey") ||
+    url.searchParams.has("api_key")
+  );
+}
+
+function extractWebSocketHandshakeToken(
+  request: http.IncomingMessage,
+  url: URL,
+): string | null {
+  const headerToken = extractAuthToken(request);
+  if (headerToken) return headerToken;
+  return extractWsQueryToken(url);
+}
+
 function isWebSocketAuthorized(
   request: http.IncomingMessage,
   url: URL,
@@ -6105,12 +7043,9 @@ function isWebSocketAuthorized(
   const expected = getConfiguredApiToken();
   if (!expected) return true;
 
-  const headerToken = extractAuthToken(request);
-  if (headerToken) return tokenMatches(expected, headerToken);
-
-  const queryToken = extractWsQueryToken(url);
-  if (!queryToken) return false;
-  return tokenMatches(expected, queryToken);
+  const handshakeToken = extractWebSocketHandshakeToken(request, url);
+  if (!handshakeToken) return false;
+  return tokenMatches(expected, handshakeToken);
 }
 
 export interface WebSocketUpgradeRejection {
@@ -6133,7 +7068,20 @@ export function resolveWebSocketUpgradeRejection(
     return { status: 403, reason: "Origin not allowed" };
   }
 
-  if (!isWebSocketAuthorized(req, wsUrl)) {
+  const expected = getConfiguredApiToken();
+  if (!expected) {
+    return null;
+  }
+
+  if (
+    process.env.ELIZA_ALLOW_WS_QUERY_TOKEN !== "1" &&
+    hasWsQueryToken(wsUrl)
+  ) {
+    return { status: 401, reason: "Unauthorized" };
+  }
+
+  const handshakeToken = extractWebSocketHandshakeToken(req, wsUrl);
+  if (handshakeToken && !tokenMatches(expected, handshakeToken)) {
     return { status: 401, reason: "Unauthorized" };
   }
 
@@ -9192,6 +10140,27 @@ async function handleRequest(
     const bundledIds = new Set(state.plugins.map((p) => p.id));
     const installedEntries = discoverInstalledPlugins(freshConfig, bundledIds);
     const allPlugins: PluginEntry[] = [...state.plugins, ...installedEntries];
+    const evmDiagnostic = buildPluginEvmDiagnosticEntry({
+      config: state.config,
+      runtime: state.runtime,
+    });
+    const existingEvmPlugin = allPlugins.find(
+      (plugin) => plugin.id === "evm" || plugin.npmName === EVM_PLUGIN_PACKAGE,
+    );
+    if (existingEvmPlugin) {
+      existingEvmPlugin.autoEnabled = evmDiagnostic.autoEnabled;
+      existingEvmPlugin.managementMode = "core-optional";
+      existingEvmPlugin.capabilityStatus = evmDiagnostic.capabilityStatus;
+      existingEvmPlugin.capabilityReason = evmDiagnostic.capabilityReason;
+      existingEvmPlugin.prerequisites = evmDiagnostic.prerequisites;
+      existingEvmPlugin.setupGuideUrl =
+        existingEvmPlugin.setupGuideUrl ?? evmDiagnostic.setupGuideUrl;
+      existingEvmPlugin.tags = Array.from(
+        new Set([...(existingEvmPlugin.tags ?? []), ...evmDiagnostic.tags]),
+      );
+    } else {
+      allPlugins.push(evmDiagnostic);
+    }
 
     // Resolve enabled state from config and loaded state from runtime.
     // "enabled" = user wants it active (config). "isActive" = actually loaded.
@@ -9238,6 +10207,15 @@ async function handleRequest(
           plugin.loadError =
             "Plugin installed but failed to load — the package may be missing compiled files.";
         }
+      }
+      if (plugin.id === "evm" || plugin.npmName === EVM_PLUGIN_PACKAGE) {
+        plugin.enabled = evmDiagnostic.enabled;
+        plugin.isActive = evmDiagnostic.isActive;
+        plugin.autoEnabled = evmDiagnostic.autoEnabled;
+        plugin.managementMode = "core-optional";
+        plugin.capabilityStatus = evmDiagnostic.capabilityStatus;
+        plugin.capabilityReason = evmDiagnostic.capabilityReason;
+        plugin.prerequisites = evmDiagnostic.prerequisites;
       }
     }
 
@@ -11237,6 +12215,18 @@ async function handleRequest(
       ensureWalletKeysInEnvAndConfig,
       resolveWalletExportRejection,
       scheduleRuntimeRestart,
+      deps: {
+        getWalletAddresses,
+        fetchEvmBalances,
+        fetchSolanaBalances,
+        fetchSolanaNativeBalanceViaRpc,
+        validatePrivateKey,
+        importWallet,
+        generateWalletForChain,
+        getAutomationMode: resolveAgentAutomationModeFromConfig,
+        getPluginEvmLoaded: () =>
+          isPluginLoadedByName(state.runtime, EVM_PLUGIN_PACKAGE),
+      },
       readJsonBody,
       json,
       error,
@@ -12213,6 +13203,7 @@ async function handleRequest(
       delete envPatch.ELIZA_API_TOKEN;
       delete envPatch.ELIZA_API_TOKEN;
       delete envPatch.ELIZA_WALLET_EXPORT_TOKEN;
+      delete envPatch.MILADY_WALLET_EXPORT_TOKEN;
       delete envPatch.ELIZA_TERMINAL_RUN_TOKEN;
       delete envPatch.HYPERSCAPE_AUTH_TOKEN;
       delete envPatch.EVM_PRIVATE_KEY;
@@ -12227,6 +13218,7 @@ async function handleRequest(
         delete vars.ELIZA_API_TOKEN;
         delete vars.ELIZA_API_TOKEN;
         delete vars.ELIZA_WALLET_EXPORT_TOKEN;
+        delete vars.MILADY_WALLET_EXPORT_TOKEN;
         delete vars.ELIZA_TERMINAL_RUN_TOKEN;
         delete vars.HYPERSCAPE_AUTH_TOKEN;
         delete vars.EVM_PRIVATE_KEY;
@@ -12498,9 +13490,9 @@ async function handleRequest(
   // used by action handlers (can-i, etc.) to evaluate permissions.
   if (method === "GET" && pathname === "/api/agent/self-status") {
     const addrs = getWalletAddresses();
-    const evmAddress = addrs.evmAddress ?? null;
+    const capability = resolveWalletCapabilityStatus(state);
+    const evmAddress = capability.evmAddress;
     const tradePermissionMode = resolveTradePermissionMode(state.config);
-    const localSigner = Boolean(process.env.EVM_PRIVATE_KEY?.trim());
     const walletRpcReadiness = resolveWalletRpcReadiness(state.config);
     const bscRpcReady = walletRpcReadiness.managedBscRpcReady;
     const canLocalTrade = canUseLocalTradeExecution(tradePermissionMode, false);
@@ -12513,11 +13505,7 @@ async function handleRequest(
       },
     );
     const canTrade = Boolean(evmAddress) && bscRpcReady;
-    const automationMode: "connectors-only" | "full" =
-      (state.config.features as Record<string, unknown> | undefined)
-        ?.automationMode === "full"
-        ? "full"
-        : "connectors-only";
+    const automationMode = capability.automationMode;
 
     // Include registry snapshot summary if available
     let registrySummary: string | null = null;
@@ -12594,8 +13582,9 @@ async function handleRequest(
       tradePermissionMode,
       shellEnabled: state.shellEnabled !== false,
       wallet: {
-        hasWallet: Boolean(evmAddress || addrs.solanaAddress),
-        hasEvm: Boolean(evmAddress),
+        walletSource: capability.walletSource,
+        hasWallet: capability.hasWallet,
+        hasEvm: capability.hasEvm,
         hasSolana: Boolean(addrs.solanaAddress),
         evmAddress,
         evmAddressShort:
@@ -12607,8 +13596,13 @@ async function handleRequest(
           addrs.solanaAddress && addrs.solanaAddress.length >= 12
             ? `${addrs.solanaAddress.slice(0, 4)}...${addrs.solanaAddress.slice(-4)}`
             : (addrs.solanaAddress ?? null),
-        localSignerAvailable: localSigner,
+        localSignerAvailable: capability.localSignerAvailable,
         managedBscRpcReady: bscRpcReady,
+        rpcReady: capability.rpcReady,
+        pluginEvmLoaded: capability.pluginEvmLoaded,
+        pluginEvmRequired: capability.pluginEvmRequired,
+        executionReady: capability.executionReady,
+        executionBlockedReason: capability.executionBlockedReason,
       },
       plugins: {
         totalActive: pluginNames.length,
@@ -12618,8 +13612,10 @@ async function handleRequest(
       },
       capabilities: {
         canTrade,
-        canLocalTrade: canTrade && localSigner && canLocalTrade,
-        canAutoTrade: canTrade && localSigner && canAgentAutoTrade,
+        canLocalTrade:
+          canTrade && capability.localSignerAvailable && canLocalTrade,
+        canAutoTrade:
+          canTrade && capability.localSignerAvailable && canAgentAutoTrade,
         canUseBrowser: hasBrowserPlugin,
         canUseComputer: hasComputerPlugin,
         canRunTerminal: state.shellEnabled !== false,
@@ -14455,6 +15451,42 @@ async function handleRequest(
       return;
     }
 
+    const walletModeGuidance = resolveWalletModeGuidanceReply(state, prompt);
+    if (walletModeGuidance) {
+      initSse(res);
+      let aborted = false;
+      req.on("close", () => {
+        aborted = true;
+      });
+      if (!aborted) {
+        writeChatTokenSse(res, walletModeGuidance, walletModeGuidance);
+        try {
+          await persistAssistantConversationMemory(
+            runtime,
+            conv.roomId,
+            walletModeGuidance,
+            channelType,
+            turnStartedAt,
+          );
+          conv.updatedAt = new Date().toISOString();
+        } catch (persistErr) {
+          writeSse(res, {
+            type: "error",
+            message: getErrorMessage(persistErr),
+          });
+          res.end();
+          return;
+        }
+        writeSseJson(res, {
+          type: "done",
+          fullText: walletModeGuidance,
+          agentName: state.agentName,
+        });
+      }
+      res.end();
+      return;
+    }
+
     // ── Local runtime path (existing code below) ───────────────────────
 
     initSse(res);
@@ -14596,6 +15628,27 @@ async function handleRequest(
       await persistConversationMemory(runtime, messageToStore);
     } catch (err) {
       error(res, `Failed to store user message: ${getErrorMessage(err)}`, 500);
+      return;
+    }
+
+    const walletModeGuidance = resolveWalletModeGuidanceReply(state, prompt);
+    if (walletModeGuidance) {
+      try {
+        await persistAssistantConversationMemory(
+          runtime,
+          conv.roomId,
+          walletModeGuidance,
+          channelType,
+          turnStartedAt,
+        );
+        conv.updatedAt = new Date().toISOString();
+        json(res, {
+          text: walletModeGuidance,
+          agentName: state.agentName,
+        });
+      } catch (persistErr) {
+        error(res, getErrorMessage(persistErr), 500);
+      }
       return;
     }
 
@@ -14838,6 +15891,19 @@ async function handleRequest(
     let streamedText = "";
 
     try {
+      const walletModeGuidance = resolveWalletModeGuidanceReply(state, prompt);
+      if (walletModeGuidance) {
+        if (!aborted) {
+          writeChatTokenSse(res, walletModeGuidance, walletModeGuidance);
+          writeSseJson(res, {
+            type: "done",
+            fullText: walletModeGuidance,
+            agentName: state.agentName,
+          });
+        }
+        return;
+      }
+
       const runtime = state.runtime;
       const agentName = runtime.character.name ?? "Eliza";
       await ensureLegacyChatConnection(runtime, agentName);
@@ -14942,6 +16008,15 @@ async function handleRequest(
     }
 
     try {
+      const walletModeGuidance = resolveWalletModeGuidanceReply(state, prompt);
+      if (walletModeGuidance) {
+        json(res, {
+          text: walletModeGuidance,
+          agentName: state.agentName,
+        });
+        return;
+      }
+
       const runtime = state.runtime;
       const agentName = runtime.character.name ?? "Eliza";
       await ensureLegacyChatConnection(runtime, agentName);
@@ -16818,7 +17893,7 @@ export async function startApiServer(opts?: {
   const host =
     (
       process.env.ELIZA_API_BIND ??
-      process.env.ELIZA_API_BIND ??
+      process.env.MILADY_API_BIND ??
       "127.0.0.1"
     ).trim() || "127.0.0.1";
   ensureApiTokenForBindHost(host);
@@ -17660,8 +18735,9 @@ export async function startApiServer(opts?: {
 
   // Handle WebSocket connections
   wss.on("connection", (ws: WebSocket, request: http.IncomingMessage) => {
+    let wsUrl: URL;
     try {
-      const wsUrl = new URL(
+      wsUrl = new URL(
         request.url ?? "/",
         `http://${request.headers.host ?? "localhost"}`,
       );
@@ -17669,41 +18745,66 @@ export async function startApiServer(opts?: {
       if (clientId) wsClientIds.set(ws, clientId);
     } catch {
       // Ignore malformed WS URL metadata; auth/path were already validated.
+      wsUrl = new URL("ws://localhost/ws");
     }
 
-    wsClients.add(ws);
-    addLog("info", "WebSocket client connected", "websocket", [
-      "server",
-      "websocket",
-    ]);
+    let isAuthenticated = isWebSocketAuthorized(request, wsUrl);
 
-    // Send initial status and latest stream events.
-    try {
-      ws.send(
-        JSON.stringify({
-          type: "status",
-          state: state.agentState,
-          agentName: state.agentName,
-          model: state.model,
-          startedAt: state.startedAt,
-          startup: state.startup,
-          pendingRestart: state.pendingRestartReasons.length > 0,
-          pendingRestartReasons: state.pendingRestartReasons,
-        }),
-      );
-      const replay = state.eventBuffer.slice(-120);
-      for (const event of replay) {
-        ws.send(JSON.stringify(event));
+    const activateAuthenticatedConnection = () => {
+      wsClients.add(ws);
+      addLog("info", "WebSocket client connected", "websocket", [
+        "server",
+        "websocket",
+      ]);
+
+      try {
+        ws.send(
+          JSON.stringify({
+            type: "status",
+            state: state.agentState,
+            agentName: state.agentName,
+            model: state.model,
+            startedAt: state.startedAt,
+            startup: state.startup,
+            pendingRestart: state.pendingRestartReasons.length > 0,
+            pendingRestartReasons: state.pendingRestartReasons,
+          }),
+        );
+        const replay = state.eventBuffer.slice(-120);
+        for (const event of replay) {
+          ws.send(JSON.stringify(event));
+        }
+      } catch (err) {
+        logger.error(
+          `[eliza-api] WebSocket send error: ${err instanceof Error ? err.message : err}`,
+        );
       }
-    } catch (err) {
-      logger.error(
-        `[eliza-api] WebSocket send error: ${err instanceof Error ? err.message : err}`,
-      );
+    };
+
+    if (isAuthenticated) {
+      activateAuthenticatedConnection();
     }
 
     ws.on("message", (data) => {
       try {
         const msg = JSON.parse(data.toString());
+        if (!isAuthenticated) {
+          const expected = getConfiguredApiToken();
+          if (
+            expected &&
+            msg.type === "auth" &&
+            typeof msg.token === "string" &&
+            tokenMatches(expected, msg.token.trim())
+          ) {
+            isAuthenticated = true;
+            ws.send(JSON.stringify({ type: "auth-ok" }));
+            activateAuthenticatedConnection();
+          } else {
+            logger.warn("[eliza-api] WebSocket message rejected before auth");
+            ws.close(1008, "Unauthorized");
+          }
+          return;
+        }
         if (msg.type === "ping") {
           ws.send(JSON.stringify({ type: "pong" }));
         } else if (msg.type === "active-conversation") {

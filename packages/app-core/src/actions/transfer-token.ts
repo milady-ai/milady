@@ -29,6 +29,95 @@ const TRANSFER_TIMEOUT_MS = 60_000;
 
 /** Matches a 0x-prefixed 40-hex-char EVM address. */
 const EVM_ADDRESS_RE = /^0x[0-9a-fA-F]{40}$/;
+const EVM_ADDRESS_CAPTURE_RE = /\b0x[a-fA-F0-9]{40}\b/g;
+const DECIMAL_AMOUNT_CAPTURE_RE = /\b(\d+(?:\.\d+)?)\b/;
+const ASSET_SYMBOL_CAPTURE_RE =
+  /\b(?:t?bnb|bnb|eth|usdt|usdc|busd|dai|weth|wbtc)\b/i;
+
+function extractMessageText(message: unknown): string {
+  if (
+    !message ||
+    typeof message !== "object" ||
+    !("content" in message) ||
+    !message.content ||
+    typeof message.content !== "object" ||
+    !("text" in message.content) ||
+    typeof message.content.text !== "string"
+  ) {
+    return "";
+  }
+  return message.content.text.trim();
+}
+
+function inferTransferParamsFromMessage(message: unknown): {
+  toAddress?: string;
+  amount?: string;
+  assetSymbol?: string;
+} {
+  const text = extractMessageText(message);
+  const addressMatches = text.match(EVM_ADDRESS_CAPTURE_RE) ?? [];
+  const toAddress = addressMatches[addressMatches.length - 1];
+  const amount = text.match(DECIMAL_AMOUNT_CAPTURE_RE)?.[1];
+  const assetSymbol = text.match(ASSET_SYMBOL_CAPTURE_RE)?.[0];
+  return {
+    toAddress,
+    amount,
+    assetSymbol:
+      typeof assetSymbol === "string"
+        ? assetSymbol.trim().toUpperCase() === "TBNB"
+          ? "BNB"
+          : assetSymbol.trim().toUpperCase()
+        : undefined,
+  };
+}
+
+function walletNetworkLabel(): string {
+  return process.env.MILADY_WALLET_NETWORK?.trim().toLowerCase() === "testnet"
+    ? "BSC testnet"
+    : "BSC";
+}
+
+function buildTransferSuccessText(args: {
+  amount: string;
+  assetSymbol: string;
+  toAddress: string;
+  mode: string;
+  txHash: string;
+  explorerUrl: string;
+  status: string;
+}): string {
+  return [
+    "Action: TRANSFER_TOKEN",
+    `Chain: ${walletNetworkLabel()}`,
+    `Amount: ${args.amount} ${args.assetSymbol}`,
+    `Recipient: ${args.toAddress}`,
+    `Execution mode: ${args.mode}`,
+    "Executed: true",
+    `Tx hash: ${args.txHash}`,
+    `Explorer: ${args.explorerUrl}`,
+    `Status: ${args.status}`,
+  ].join("\n");
+}
+
+function buildTransferFailureText(args: {
+  amount: string;
+  assetSymbol: string;
+  toAddress: string;
+  mode: string;
+  requiresUserSignature: boolean;
+  reason: string;
+}): string {
+  return [
+    "Action: TRANSFER_TOKEN",
+    `Chain: ${walletNetworkLabel()}`,
+    `Amount: ${args.amount} ${args.assetSymbol}`,
+    `Recipient: ${args.toAddress}`,
+    `Execution mode: ${args.mode}`,
+    "Executed: false",
+    `Requires user signature: ${args.requiresUserSignature ? "true" : "false"}`,
+    `Reason: ${args.reason}`,
+  ].join("\n");
+}
 
 export const transferTokenAction: Action = {
   name: "TRANSFER_TOKEN",
@@ -56,12 +145,15 @@ export const transferTokenAction: Action = {
   ) => {
     try {
       const params = (options as HandlerOptions | undefined)?.parameters;
+      const inferredParams = inferTransferParamsFromMessage(_message);
 
       // ── Validate toAddress ─────────────────────────────────────────────
       const toAddress =
         typeof params?.toAddress === "string"
-          ? params.toAddress.trim()
-          : undefined;
+          ? EVM_ADDRESS_RE.test(params.toAddress.trim())
+            ? params.toAddress.trim()
+            : inferredParams.toAddress
+          : inferredParams.toAddress;
 
       if (!toAddress || !EVM_ADDRESS_RE.test(toAddress)) {
         const text =
@@ -76,10 +168,12 @@ export const transferTokenAction: Action = {
       // ── Validate amount ────────────────────────────────────────────────
       const amountRaw =
         typeof params?.amount === "string"
-          ? params.amount.trim()
+          ? Number(params.amount.trim()) > 0
+            ? params.amount.trim()
+            : inferredParams.amount
           : typeof params?.amount === "number"
             ? String(params.amount)
-            : undefined;
+            : inferredParams.amount;
 
       if (
         !amountRaw ||
@@ -97,8 +191,10 @@ export const transferTokenAction: Action = {
       // ── Validate assetSymbol ───────────────────────────────────────────
       const assetSymbol =
         typeof params?.assetSymbol === "string"
-          ? params.assetSymbol.trim()
-          : undefined;
+          ? params.assetSymbol.trim().length > 0
+            ? params.assetSymbol.trim()
+            : inferredParams.assetSymbol
+          : inferredParams.assetSymbol;
 
       if (!assetSymbol) {
         const text =
@@ -197,11 +293,26 @@ export const transferTokenAction: Action = {
 
       // ── Build human-readable response ──────────────────────────────────
       if (result.executed && result.execution) {
-        const text =
-          `Transfer executed successfully! Sent ${amountRaw} ${assetSymbol} to ${toAddress} via ${result.mode} mode.\n` +
-          `TX: ${result.execution.explorerUrl}\n` +
-          `Status: ${result.execution.status}`;
-        if (callback) callback({ text, action: "TRANSFER_TOKEN_SUCCESS" });
+        const text = buildTransferSuccessText({
+          amount: amountRaw,
+          assetSymbol,
+          toAddress,
+          mode: result.mode,
+          txHash: result.execution.hash,
+          explorerUrl: result.execution.explorerUrl,
+          status: result.execution.status,
+        });
+        if (callback) {
+          callback({
+            text,
+            action: "TRANSFER_TOKEN_SUCCESS",
+            txHash: result.execution.hash,
+            explorerUrl: result.execution.explorerUrl,
+            executionMode: result.mode,
+            executed: true,
+            recipient: toAddress,
+          });
+        }
         return {
           text,
           success: true,
@@ -219,10 +330,26 @@ export const transferTokenAction: Action = {
 
       // For agent automation, reporting "success" without an on-chain execution
       // leads to false-positive heartbeat status.
-      const text = result.requiresUserSignature
-        ? `Transfer was prepared in ${result.mode} mode but not executed. User signature is required to send ${amountRaw} ${assetSymbol} to ${toAddress}.`
-        : `Transfer was prepared in ${result.mode} mode but not executed on-chain.`;
-      if (callback) callback({ text, action: "TRANSFER_TOKEN_FAILED" });
+      const text = buildTransferFailureText({
+        amount: amountRaw,
+        assetSymbol,
+        toAddress,
+        mode: result.mode,
+        requiresUserSignature: result.requiresUserSignature,
+        reason: result.requiresUserSignature
+          ? "User signature is required before the transfer can be broadcast."
+          : "Transfer was prepared but not executed on-chain.",
+      });
+      if (callback) {
+        callback({
+          text,
+          action: "TRANSFER_TOKEN_FAILED",
+          executionMode: result.mode,
+          executed: false,
+          recipient: toAddress,
+          requiresUserSignature: result.requiresUserSignature,
+        });
+      }
       return {
         text,
         success: false,

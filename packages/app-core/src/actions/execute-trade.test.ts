@@ -52,13 +52,14 @@ describe("EXECUTE_TRADE action", () => {
 
   it("has parameter definitions", () => {
     expect(executeTradeAction.parameters).toBeDefined();
-    expect(executeTradeAction.parameters?.length).toBe(4);
+    expect(executeTradeAction.parameters?.length).toBe(5);
 
     const names = executeTradeAction.parameters?.map((p) => p.name);
     expect(names).toContain("side");
     expect(names).toContain("tokenAddress");
     expect(names).toContain("amount");
     expect(names).toContain("slippageBps");
+    expect(names).toContain("routeProvider");
 
     // side, tokenAddress, amount are required; slippageBps is optional
     const slippage = executeTradeAction.parameters?.find(
@@ -232,10 +233,9 @@ describe("EXECUTE_TRADE action", () => {
     });
 
     expect((result as { success: boolean }).success).toBe(true);
-    expect((result as { text: string }).text).toContain(
-      "executed successfully",
-    );
-    expect((result as { text: string }).text).toContain("0xabc123");
+    expect((result as { text: string }).text).toContain("Action: EXECUTE_TRADE");
+    expect((result as { text: string }).text).toContain("Executed: true");
+    expect((result as { text: string }).text).toContain("Tx hash: 0xabc123");
     expect((result as { data: Record<string, unknown> }).data).toMatchObject({
       side: "buy",
       tokenAddress: VALID_TOKEN,
@@ -262,6 +262,7 @@ describe("EXECUTE_TRADE action", () => {
     expect(body.tokenAddress).toBe(VALID_TOKEN);
     expect(body.amount).toBe("0.5");
     expect(body.slippageBps).toBe(300);
+    expect(body.routeProvider).toBe("pancakeswap-v2");
     expect(body.confirm).toBe(true);
   });
 
@@ -288,7 +289,7 @@ describe("EXECUTE_TRADE action", () => {
 
     expect((result as { success: boolean }).success).toBe(false);
     expect((result as { text: string }).text).toContain("user-sign");
-    expect((result as { text: string }).text).toContain("not executed");
+    expect((result as { text: string }).text).toContain("Executed: false");
     expect((result as { text: string }).text).toContain(
       "signature is required",
     );
