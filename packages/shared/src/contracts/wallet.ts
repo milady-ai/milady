@@ -217,6 +217,13 @@ export interface WalletConfigStatus {
   evmChains: string[];
   evmAddress: string | null;
   solanaAddress: string | null;
+  walletSource?: "local" | "managed" | "none";
+  walletNetwork?: "mainnet" | "testnet";
+  automationMode?: "full" | "connectors-only";
+  pluginEvmLoaded?: boolean;
+  pluginEvmRequired?: boolean;
+  executionReady?: boolean;
+  executionBlockedReason?: string | null;
 }
 
 export type TradePermissionMode =

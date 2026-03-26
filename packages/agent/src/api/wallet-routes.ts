@@ -143,6 +143,24 @@ function resolveWalletConfigUpdateRequest(
   };
 }
 
+function resolveWalletAutomationMode(
+  config: ElizaConfig,
+): "full" | "connectors-only" {
+  const features =
+    config.features && typeof config.features === "object"
+      ? (config.features as Record<string, unknown>)
+      : null;
+  const agentAutomation =
+    features?.agentAutomation &&
+    typeof features.agentAutomation === "object" &&
+    !Array.isArray(features.agentAutomation)
+      ? (features.agentAutomation as Record<string, unknown>)
+      : null;
+  return agentAutomation?.mode === "connectors-only"
+    ? "connectors-only"
+    : "full";
+}
+
 export interface WalletRouteDependencies {
   getWalletAddresses: typeof getWalletAddresses;
   fetchEvmBalances: typeof fetchEvmBalances;
@@ -381,6 +399,27 @@ export async function handleWalletRoutes(
   if (method === "GET" && pathname === "/api/wallet/config") {
     const addresses = deps.getWalletAddresses();
     const rpcReadiness = resolveWalletRpcReadiness(config);
+    const automationMode = resolveWalletAutomationMode(config);
+    const localSignerAvailable = Boolean(process.env.EVM_PRIVATE_KEY?.trim());
+    const pluginEvmLoaded = localSignerAvailable || Boolean(addresses.evmAddress);
+    const pluginEvmRequired = localSignerAvailable || Boolean(addresses.evmAddress);
+    const walletSource = localSignerAvailable
+      ? "local"
+      : addresses.evmAddress || addresses.solanaAddress
+        ? "managed"
+        : "none";
+    let executionBlockedReason: string | null = null;
+    if (!addresses.evmAddress) {
+      executionBlockedReason = "No EVM wallet is active yet.";
+    } else if (!rpcReadiness.managedBscRpcReady) {
+      executionBlockedReason = "BSC RPC is not configured.";
+    } else if (!pluginEvmLoaded) {
+      executionBlockedReason =
+        "plugin-evm is not loaded, so EVM wallet execution is unavailable.";
+    } else if (automationMode !== "full") {
+      executionBlockedReason =
+        "Agent automation is in connectors-only mode, so wallet execution is blocked in chat.";
+    }
     const alchemyKeySet = Boolean(process.env.ALCHEMY_API_KEY?.trim());
     const ankrKeySet = Boolean(process.env.ANKR_API_KEY?.trim());
     const nodeRealSet = Boolean(process.env.NODEREAL_BSC_RPC_URL?.trim());
@@ -417,6 +456,17 @@ export async function handleWalletRoutes(
       ],
       evmAddress: addresses.evmAddress,
       solanaAddress: addresses.solanaAddress,
+      walletSource,
+      walletNetwork: rpcReadiness.walletNetwork,
+      automationMode,
+      pluginEvmLoaded,
+      pluginEvmRequired,
+      executionReady:
+        Boolean(addresses.evmAddress) &&
+        rpcReadiness.managedBscRpcReady &&
+        pluginEvmLoaded &&
+        automationMode === "full",
+      executionBlockedReason,
     };
     json(res, configStatus);
     return true;

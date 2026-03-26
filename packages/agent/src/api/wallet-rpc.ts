@@ -64,6 +64,7 @@ export interface WalletRpcReadiness {
   managedBscRpcReady: boolean;
   evmBalanceReady: boolean;
   solanaBalanceReady: boolean;
+  walletNetwork: "mainnet" | "testnet";
   selectedRpcProviders: WalletRpcSelections;
   legacyCustomChains: WalletRpcChain[];
   bscRpcUrls: string[];
@@ -121,6 +122,13 @@ const WALLET_RPC_CONFIG_KEYS = [
   "BSC_RPC_URL",
   "SOLANA_RPC_URL",
 ] as const satisfies readonly WalletRpcCredentialKey[];
+
+function resolveWalletNetwork(): "mainnet" | "testnet" {
+  const explicit = process.env.MILADY_WALLET_NETWORK?.trim().toLowerCase();
+  if (explicit === "testnet") return "testnet";
+  if (explicit === "mainnet") return "mainnet";
+  return process.env.BSC_TESTNET_RPC_URL?.trim() ? "testnet" : "mainnet";
+}
 
 function normalizeSecret(value: string | null | undefined): string | null {
   if (typeof value !== "string") return null;
@@ -572,6 +580,7 @@ export function resolveWalletRpcReadiness(
     solanaBalanceReady: Boolean(
       process.env.HELIUS_API_KEY?.trim() || solanaRpcUrls.length > 0,
     ),
+    walletNetwork,
     selectedRpcProviders,
     legacyCustomChains,
     bscRpcUrls,

@@ -2898,6 +2898,7 @@ describe("API Server E2E (no runtime)", () => {
         expect(status).toBe(200);
         expect(data.walletSource).toBe("local");
         expect(data.automationMode).toBe("full");
+        expect(data.walletNetwork).toBe("mainnet");
         expect(typeof data.pluginEvmLoaded).toBe("boolean");
         expect(typeof data.executionReady).toBe("boolean");
         expect(data.executionBlockedReason === null || typeof data.executionBlockedReason === "string").toBe(true);
