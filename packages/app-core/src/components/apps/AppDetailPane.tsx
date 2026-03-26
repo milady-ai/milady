@@ -48,11 +48,11 @@ function MetadataRow({
   value: React.ReactNode;
 }) {
   return (
-    <div className="grid gap-1 rounded-2xl border border-border/35 bg-card/72 px-3 py-2.5 sm:grid-cols-[7rem_minmax(0,1fr)] sm:items-start sm:gap-3">
+    <div className="flex flex-col gap-0.5 rounded-2xl border border-border/35 bg-card/72 px-3 py-2.5">
       <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted">
         {label}
       </span>
-      <span className="min-w-0 text-[12px] leading-5 text-txt">{value}</span>
+      <span className="min-w-0 text-[13px] leading-5 text-txt break-words">{value}</span>
     </div>
   );
 }

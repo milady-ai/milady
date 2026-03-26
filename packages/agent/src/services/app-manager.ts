@@ -27,6 +27,8 @@ import type {
   RegistrySearchResult,
 } from "./plugin-manager-types";
 import { getPluginInfo, getRegistryPlugins } from "./registry-client";
+import { LOCAL_APP_OVERRIDES, resolveAppOverride } from "./registry-client-app-meta.js";
+import type { RegistryAppMeta } from "./registry-client-types.js";
 
 const LOCAL_PLUGINS_DIR = "plugins";
 
@@ -289,6 +291,19 @@ export class AppManager {
     } catch {
       // local discovery is best-effort
     }
+    // Inject apps from LOCAL_APP_OVERRIDES that aren't in the elizaOS registry
+    for (const [name, override] of Object.entries(LOCAL_APP_OVERRIDES)) {
+      if (!registry.has(name) && override.category) {
+        registry.set(name, {
+          name,
+          displayName: override.displayName ?? name,
+          description: "",
+          kind: "app",
+          npm: { package: name, v0Version: null, v1Version: null, v2Version: null },
+          supports: { v0: false, v1: false, v2: true },
+        } as RegistryPluginInfo);
+      }
+    }
     // Include app packages: those with "/app-" in the name OR kind === "app"
     const apps = Array.from(registry.values()).filter((plugin) => {
       if (plugin.kind === "app") return true;
@@ -298,11 +313,11 @@ export class AppManager {
     });
     // Flatten appMeta into top-level fields for the frontend
     return apps.map((p) => {
-      const meta = p.appMeta;
+      const meta = resolveAppOverride(p.name, p.appMeta as RegistryAppMeta | undefined);
       if (!meta) return p;
       return {
         ...p,
-        displayName: meta.displayName,
+        displayName: meta.displayName ?? p.displayName,
         launchType: meta.launchType,
         launchUrl: meta.launchUrl,
         icon: meta.icon,
@@ -370,6 +385,15 @@ export class AppManager {
       }
     } catch {
       // local lookup is best-effort
+    }
+    // Apply local app overrides (viewer URL, launch type, etc.)
+    if (appInfo) {
+      const resolved = resolveAppOverride(name, undefined);
+      if (resolved) {
+        if (resolved.viewer) appInfo.viewer = resolved.viewer;
+        if (resolved.launchUrl) appInfo.launchUrl = resolved.launchUrl;
+        if (resolved.launchType) appInfo.launchType = resolved.launchType as "local" | "connect";
+      }
     }
     if (!appInfo) {
       throw new Error(`App "${name}" not found in the registry.`);

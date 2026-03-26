@@ -17,7 +17,7 @@ import {
 import { DEFAULT_BRANDING } from "../config/branding";
 
 /** Apps are only enabled in dev mode; production builds hide this feature. */
-export const APPS_ENABLED = false; // import.meta.env.DEV;
+export const APPS_ENABLED = true;
 
 /** Stream routes stay addressable; the nav hides the tab unless streaming is enabled. */
 export const STREAM_ENABLED = true;

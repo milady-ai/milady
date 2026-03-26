@@ -34,6 +34,16 @@ interface LocalAppOverride {
 }
 
 const LOCAL_APP_OVERRIDES: Readonly<Record<string, LocalAppOverride>> = {
+  "@iqlabs-official/plugin-clawbal": {
+    displayName: "Clawbal",
+    category: "social",
+    launchType: "connect",
+    launchUrl: "https://ai.iqlabs.dev",
+    viewer: {
+      url: "https://ai.iqlabs.dev",
+      sandbox: "allow-scripts allow-same-origin allow-popups allow-forms",
+    },
+  },
   "@elizaos/app-babylon": {
     launchType: "url",
     launchUrl: "http://localhost:3000",

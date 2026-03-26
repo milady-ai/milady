@@ -18,7 +18,7 @@ export const CORE_PLUGINS: readonly string[] = [
   "@elizaos/plugin-agent-skills", // skill execution and marketplace runtime
   // "@elizaos/plugin-secrets-manager", // secrets management — load early, other plugins depend on it
   // "@elizaos/plugin-rolodex", // contact graph and relationship/social memory
-  // "@elizaos/plugin-plugin-manager", // dynamic plugin management
+  "@elizaos/plugin-plugin-manager", // dynamic plugin management
   // "@elizaos/plugin-trust", // trust scoring and policy signals
   // "@elizaos/plugin-todo", // todo/task management
   // "@elizaos/plugin-personality", // personality coherence

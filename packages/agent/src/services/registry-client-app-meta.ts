@@ -33,12 +33,39 @@ interface LocalAppOverride {
   viewer?: RegistryAppViewerMeta;
 }
 
-const LOCAL_APP_OVERRIDES: Readonly<Record<string, LocalAppOverride>> = {
+export const LOCAL_APP_OVERRIDES: Readonly<Record<string, LocalAppOverride>> = {
+  "@iqlabs-official/plugin-clawbal": {
+    displayName: "Clawbal",
+    category: "social",
+    launchType: "connect",
+    launchUrl: "https://ai.iqlabs.dev",
+    viewer: {
+      url: "https://ai.iqlabs.dev",
+      sandbox: "allow-scripts allow-same-origin allow-popups allow-forms",
+    },
+  },
   "@elizaos/app-babylon": {
     launchType: "url",
     launchUrl: "http://localhost:3000",
     viewer: {
       url: "http://localhost:3000",
+      sandbox: "allow-scripts allow-same-origin allow-popups allow-forms",
+    },
+  },
+  "@elizaos/app-hyperscape": {
+    launchType: "connect",
+    launchUrl: "http://localhost:3333",
+    uiExtension: {
+      detailPanelId: "hyperscape-embedded-agents",
+    },
+    viewer: {
+      url: "http://localhost:3333",
+      embedParams: {
+        embedded: "true",
+        mode: "spectator",
+        quality: "medium",
+      },
+      postMessageAuth: true,
       sandbox: "allow-scripts allow-same-origin allow-popups allow-forms",
     },
   },
