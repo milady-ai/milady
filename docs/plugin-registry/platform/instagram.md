@@ -41,6 +41,16 @@ export INSTAGRAM_USERNAME=YOUR_USERNAME
 export INSTAGRAM_PASSWORD=YOUR_PASSWORD
 ```
 
+## Auto-Enable
+
+Instagram does **not** auto-enable based on configuration. You must explicitly install and allow the plugin:
+
+```bash
+milady plugins install instagram
+```
+
+Then add `"instagram"` to your `plugins.allow` list in `milady.json`.
+
 ## Configuration
 
 | Field | Required | Description |

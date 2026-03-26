@@ -32,7 +32,7 @@ description: Milady 的插件系统提供模块化能力 — 模型提供者、�
 </Card>
 
 <Card title="模型提供者" icon="brain" href="/zh/plugin-registry/llm/openai">
-  LLM 集成，支持 OpenAI、Anthropic、Google Gemini、Google Antigravity、Groq、Ollama、OpenRouter、DeepSeek、xAI、Mistral、Cohere、Together、Qwen、Minimax、Pi AI、Perplexity、Zai、Vercel AI Gateway 和 Eliza Cloud。
+  LLM 集成，支持 OpenAI、Anthropic、Google Gemini、Google Vertex AI、Groq、Ollama、OpenRouter、DeepSeek、xAI、Mistral、Cohere、Together、Qwen、Minimax、Pi AI、Perplexity、Zai、Vercel AI Gateway 和 Eliza Cloud。
 </Card>
 
 <Card title="平台连接器" icon="plug" href="/zh/plugin-registry/platform/discord">

@@ -46,6 +46,16 @@ export ZALO_APP_ID=YOUR_APP_ID
 export ZALO_APP_SECRET=YOUR_APP_SECRET
 ```
 
+## Auto-Enable
+
+Zalo does **not** auto-enable based on configuration. You must explicitly install and allow the plugin:
+
+```bash
+milady plugins install zalo
+```
+
+Then add `"zalo"` to your `plugins.allow` list in `milady.json`.
+
 ## Configuration
 
 | Field | Required | Description |

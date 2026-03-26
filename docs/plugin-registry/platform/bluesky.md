@@ -44,6 +44,16 @@ export BLUESKY_PASSWORD=YOUR_PASSWORD
 export BLUESKY_HANDLE=YOUR_HANDLE
 ```
 
+## Auto-Enable
+
+Bluesky does **not** auto-enable based on configuration. You must explicitly install and allow the plugin:
+
+```bash
+milady plugins install bluesky
+```
+
+Then add `"bluesky"` to your `plugins.allow` list in `milady.json`.
+
 ## Configuration
 
 | Field | Required | Description |

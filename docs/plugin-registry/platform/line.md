@@ -44,6 +44,16 @@ export LINE_CHANNEL_ACCESS_TOKEN=YOUR_CHANNEL_ACCESS_TOKEN
 export LINE_CHANNEL_SECRET=YOUR_CHANNEL_SECRET
 ```
 
+## Auto-Enable
+
+LINE does **not** auto-enable based on configuration. You must explicitly install and allow the plugin:
+
+```bash
+milady plugins install line
+```
+
+Then add `"line"` to your `plugins.allow` list in `milady.json`.
+
 ## Configuration
 
 | Field | Required | Description |

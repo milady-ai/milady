@@ -49,7 +49,7 @@ milady plugins install discord
 Or via environment variable:
 
 ```bash
-export DISCORD_BOT_TOKEN=YOUR_BOT_TOKEN
+export DISCORD_API_TOKEN=YOUR_BOT_TOKEN
 ```
 
 ## Configuration
@@ -121,7 +121,7 @@ The plugin auto-enables when the `connectors.discord` block contains a `botToken
 The bot token can also be set via:
 
 ```bash
-export DISCORD_BOT_TOKEN=YOUR_BOT_TOKEN
+export DISCORD_API_TOKEN=YOUR_BOT_TOKEN
 ```
 
 ## Related
