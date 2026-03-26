@@ -403,9 +403,7 @@ describe("wallet routes", () => {
       bsc: "alchemy",
       solana: "helius-birdeye",
     });
-    expect(result.ensureWalletKeysInEnvAndConfig).toHaveBeenCalledWith(
-      result.config,
-    );
+    expect(result.ensureWalletKeysInEnvAndConfig).not.toHaveBeenCalled();
     expect(result.saveConfig).toHaveBeenCalledWith(result.config);
     expect(result.payload).toEqual({ ok: true });
   });

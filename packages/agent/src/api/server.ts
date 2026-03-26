@@ -17068,9 +17068,17 @@ export async function startApiServer(opts?: {
     }
   }
 
-  // Self-heal older configs where wallet keys were never provisioned
-  // (e.g. RPC/cloud configured outside onboarding).
-  if (ensureWalletKeysInEnvAndConfig(config)) {
+  // Optional auto-provision mode for legacy environments. Disabled by default
+  // so startup does not silently create new wallets when keys are missing.
+  const walletAutoProvisionRaw = process.env.MILADY_WALLET_AUTO_PROVISION
+    ?.trim()
+    .toLowerCase();
+  const walletAutoProvisionEnabled =
+    walletAutoProvisionRaw === "1" ||
+    walletAutoProvisionRaw === "true" ||
+    walletAutoProvisionRaw === "on" ||
+    walletAutoProvisionRaw === "yes";
+  if (walletAutoProvisionEnabled && ensureWalletKeysInEnvAndConfig(config)) {
     try {
       saveElizaConfig(config);
     } catch (err) {

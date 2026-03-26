@@ -427,8 +427,6 @@ export async function handleWalletRoutes(
 
     applyWalletRpcConfigUpdate(config, updateRequest);
 
-    ensureWalletKeysInEnvAndConfig(config);
-
     let configSaveWarning: string | undefined;
     try {
       saveConfig(config);
