@@ -12,6 +12,9 @@ export const DEFAULT_CLOUD_API_BASE_URL = "https://elizacloud.ai/api/v1";
 export const DEFAULT_PUBLIC_BSC_RPC_URLS = [
   "https://bsc-dataseed1.binance.org/",
 ] as const;
+export const DEFAULT_PUBLIC_BSC_TESTNET_RPC_URLS = [
+  "https://data-seed-prebsc-1-s1.binance.org:8545/",
+] as const;
 export const DEFAULT_PUBLIC_ETHEREUM_RPC_URLS = [
   "https://ethereum.publicnode.com/",
 ] as const;
@@ -23,6 +26,9 @@ export const DEFAULT_PUBLIC_AVALANCHE_RPC_URLS = [
 ] as const;
 export const DEFAULT_PUBLIC_SOLANA_RPC_URLS = [
   "https://api.mainnet-beta.solana.com",
+] as const;
+export const DEFAULT_PUBLIC_SOLANA_TESTNET_RPC_URLS = [
+  "https://api.devnet.solana.com",
 ] as const;
 
 type WalletCapableConfig = Pick<ElizaConfig, "cloud" | "env"> & {
@@ -48,6 +54,7 @@ export interface WalletRpcResolutionOptions {
   cloudManagedAccess?: boolean | null;
   cloudApiKey?: string | null;
   cloudBaseUrl?: string | null;
+  walletNetwork?: "mainnet" | "testnet" | null;
 }
 
 export interface WalletRpcReadiness {
@@ -117,6 +124,16 @@ function normalizeSecret(value: string | null | undefined): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
+}
+
+function resolveWalletNetwork(
+  value?: string | null,
+): "mainnet" | "testnet" {
+  const normalized = (value ?? process.env.MILADY_WALLET_NETWORK ?? "")
+    .trim()
+    .toLowerCase();
+  if (normalized === "testnet") return "testnet";
+  return "mainnet";
 }
 
 function uniqueRpcUrls(
@@ -379,14 +396,22 @@ export function getInventoryProviderOptions(): InventoryProviderOption[] {
 export function resolveBscRpcUrls(
   options: WalletRpcResolutionOptions = {},
 ): string[] {
+  const network = resolveWalletNetwork(options.walletNetwork);
+  const cloudRpcUrl =
+    network === "mainnet" ? buildCloudEvmRpcUrl("bsc", options) : null;
+  const publicDefaults =
+    network === "testnet"
+      ? DEFAULT_PUBLIC_BSC_TESTNET_RPC_URLS
+      : DEFAULT_PUBLIC_BSC_RPC_URLS;
   return uniqueRpcUrls(
     [
+      process.env.BSC_TESTNET_RPC_URL,
       process.env.NODEREAL_BSC_RPC_URL,
       process.env.QUICKNODE_BSC_RPC_URL,
       process.env.BSC_RPC_URL,
-      buildCloudEvmRpcUrl("bsc", options),
+      cloudRpcUrl,
     ],
-    options.cloudManagedAccess ? DEFAULT_PUBLIC_BSC_RPC_URLS : [],
+    options.cloudManagedAccess ? publicDefaults : [],
   );
 }
 
@@ -420,9 +445,16 @@ export function resolveAvalancheRpcUrls(
 export function resolveSolanaRpcUrls(
   options: WalletRpcResolutionOptions = {},
 ): string[] {
+  const network = resolveWalletNetwork(options.walletNetwork);
+  const cloudRpcUrl =
+    network === "mainnet" ? buildCloudSolanaRpcUrl(options) : null;
+  const publicDefaults =
+    network === "testnet"
+      ? DEFAULT_PUBLIC_SOLANA_TESTNET_RPC_URLS
+      : DEFAULT_PUBLIC_SOLANA_RPC_URLS;
   return uniqueRpcUrls(
-    [process.env.SOLANA_RPC_URL, buildCloudSolanaRpcUrl(options)],
-    options.cloudManagedAccess ? DEFAULT_PUBLIC_SOLANA_RPC_URLS : [],
+    [process.env.SOLANA_TESTNET_RPC_URL, process.env.SOLANA_RPC_URL, cloudRpcUrl],
+    options.cloudManagedAccess ? publicDefaults : [],
   );
 }
 
@@ -486,6 +518,7 @@ export function resolveWalletRpcReadiness(
     cloudManagedAccess,
     cloudApiKey,
     cloudBaseUrl,
+    walletNetwork: resolveWalletNetwork(),
   } satisfies WalletRpcResolutionOptions;
   const bscRpcUrls = resolveBscRpcUrls(cloudOptions);
   const ethereumRpcUrls = resolveEthereumRpcUrls(cloudOptions);
