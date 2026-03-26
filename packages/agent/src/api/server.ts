@@ -3256,8 +3256,10 @@ async function generateChatResponse(
     );
   }
 
-  // Fallback when MESSAGE_RECEIVED hooks are unavailable: start a trajectory
-  // directly so /api/chat still produces rows for the Trajectories view.
+  // Trajectory creation is handled by @elizaos/plugin-trajectory-logger's
+  // MESSAGE_RECEIVED event handler (fired above). It creates a step ID and
+  // sets message.metadata.trajectoryStepId, which core's handleMessage picks
+  // up via runWithTrajectoryContext to capture live LLM calls.
 
   let result:
     | Awaited<

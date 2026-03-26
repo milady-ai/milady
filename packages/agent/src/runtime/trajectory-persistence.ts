@@ -2466,10 +2466,11 @@ export class DatabaseTrajectoryLogger extends Service {
   /**
    * Start a new step within an existing trajectory.
    */
-  startStep(_trajectoryId: string): string {
-    const stepId = `step-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    // For database logger, steps are independent - we just return the new stepId
-    return stepId;
+  startStep(trajectoryId: string): string {
+    // Return the trajectory ID so LLM calls logged with this step ID attach
+    // to the same trajectory row that startTrajectory created. Generating a
+    // separate step-xxx ID would create a disconnected trajectory row.
+    return trajectoryId;
   }
 
   /**
