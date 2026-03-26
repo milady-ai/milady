@@ -2209,7 +2209,11 @@ function reconcilePglitePidFile(dataDir: string): PglitePidFileStatus {
  * The pid file is stale if the recorded process is no longer running.
  */
 export function cleanStalePglitePid(dataDir: string): void {
-  void reconcilePglitePidFile(dataDir);
+  try {
+    reconcilePglitePidFile(dataDir);
+  } catch (err) {
+    logger.warn(`[eliza] PGlite PID reconciliation failed: ${err}`);
+  }
 }
 
 function collectErrorMessages(err: unknown): string[] {
@@ -4411,7 +4415,9 @@ export async function startEliza(
     }
 
     // Do not block runtime startup on skills warm-up.
-    void warmAgentSkillsService();
+    void warmAgentSkillsService().catch((err) => {
+      logger.warn(`[eliza] Skills warm-up failed: ${formatError(err)}`);
+    });
   };
 
   try {
@@ -4517,7 +4523,9 @@ export async function startEliza(
 
   // ── Headless mode — return runtime for API server wiring ──────────────
   if (opts?.headless) {
-    void loadHooksSystem();
+    void loadHooksSystem().catch((err) => {
+      logger.warn(`[eliza] Hooks system load failed: ${formatError(err)}`);
+    });
     logger.info(
       "[eliza] Runtime initialised in headless mode (autonomy enabled)",
     );

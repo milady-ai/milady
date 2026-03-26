@@ -121,8 +121,11 @@ async function persistCloudLoginStatus(args: {
     await runtime.updateAgent(runtime.agentId, {
       secrets: { ...nextSecrets },
     });
-  } catch {
+  } catch (err) {
     // Non-fatal: config/sealed secret persistence is enough for login continuity.
+    logger.warn(
+      `[cloud-routes] Failed to persist cloud secrets to agent DB: ${String(err)}`,
+    );
   }
 }
 

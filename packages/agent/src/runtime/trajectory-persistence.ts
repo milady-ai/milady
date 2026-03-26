@@ -4,7 +4,12 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { createGzip } from "node:zlib";
-import { type IAgentRuntime, ModelType, Service } from "@elizaos/core";
+import {
+  type IAgentRuntime,
+  ModelType,
+  Service,
+  logger as coreLogger,
+} from "@elizaos/core";
 
 type TrajectoryStatus = "active" | "completed" | "error" | "timeout";
 
@@ -429,7 +434,9 @@ export function pushChatExchange(
 
   // Flush on threshold
   if (buffer.length >= OBSERVATION_BUFFER_THRESHOLD) {
-    flushObservationBuffer(runtime).catch(() => {});
+    flushObservationBuffer(runtime).catch((err) => {
+      coreLogger.warn(`[trajectory] Observation buffer flush failed: ${err}`);
+    });
     return;
   }
 
@@ -439,7 +446,9 @@ export function pushChatExchange(
   observationFlushTimers.set(
     key,
     setTimeout(() => {
-      flushObservationBuffer(runtime).catch(() => {});
+      flushObservationBuffer(runtime).catch((err) => {
+        coreLogger.warn(`[trajectory] Observation buffer flush failed: ${err}`);
+      });
     }, OBSERVATION_FLUSH_INTERVAL_MS),
   );
 }
@@ -1975,7 +1984,9 @@ export async function installDatabaseTrajectoryLogger(
 
   patchedLoggers.add(loggerObject);
 
-  void ensureTrajectoriesTable(runtime);
+  void ensureTrajectoriesTable(runtime).catch((err) => {
+    coreLogger.warn(`[trajectory] Trajectories table init failed: ${err}`);
+  });
 }
 
 async function writeStartedTrajectoryStep({

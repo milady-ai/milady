@@ -1,4 +1,5 @@
 import type http from "node:http";
+import { logger } from "@elizaos/core";
 
 /**
  * Common request body size guard used across API/benchmark endpoints.
@@ -173,8 +174,9 @@ export function writeJsonResponseSafe(
   body: unknown,
   status = 200,
 ): void {
-  void writeJsonResponse(res, body, status).catch(() => {
-    /* ignore response write errors */
+  void writeJsonResponse(res, body, status).catch((err) => {
+    /* response already committed, log for diagnostics */
+    logger.warn(`[http] JSON response write failed: ${err}`);
   });
 }
 
@@ -201,8 +203,9 @@ export function writeJsonErrorSafe(
   message: string,
   status = 400,
 ): void {
-  void writeJsonError(res, message, status).catch(() => {
-    /* ignore response write errors */
+  void writeJsonError(res, message, status).catch((err) => {
+    /* response already committed, log for diagnostics */
+    logger.warn(`[http] JSON error response write failed: ${err}`);
   });
 }
 

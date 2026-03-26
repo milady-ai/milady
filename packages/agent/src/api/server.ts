@@ -17474,7 +17474,9 @@ export async function startApiServer(opts?: {
   );
 
   // Warm per-provider model caches in background (non-blocking)
-  void getOrFetchAllProviders().catch(() => {});
+  void getOrFetchAllProviders().catch((err) => {
+    logger.warn("[api] Provider cache warm-up failed:", err);
+  });
 
   // ── Intercept loggers so ALL agent/plugin/service logs appear in the UI ──
   // We patch both the global `logger` singleton from @elizaos/core (used by
@@ -18438,8 +18440,12 @@ export async function startApiServer(opts?: {
 
   // Restore conversations from DB at initial boot (if runtime was passed in)
   if (opts?.runtime) {
-    void beginConversationRestore(opts.runtime);
-    void overlayDbCharacter(opts.runtime, state);
+    void beginConversationRestore(opts.runtime).catch((err) => {
+      logger.warn("[api] Conversation restore failed:", err);
+    });
+    void overlayDbCharacter(opts.runtime, state).catch((err) => {
+      logger.warn("[api] Character overlay restore failed:", err);
+    });
   }
 
   /** Hot-swap the runtime reference (used after an in-process restart). */
@@ -18463,10 +18469,14 @@ export async function startApiServer(opts?: {
     ]);
 
     // Restore conversations from DB so they survive restarts
-    void beginConversationRestore(rt);
+    void beginConversationRestore(rt).catch((err) => {
+      logger.warn("[api] Conversation restore failed on restart:", err);
+    });
 
     // Overlay DB-persisted character data (from Character Editor saves)
-    void overlayDbCharacter(rt, state);
+    void overlayDbCharacter(rt, state).catch((err) => {
+      logger.warn("[api] Character overlay restore failed on restart:", err);
+    });
 
     // Broadcast status update immediately after restart
     broadcastStatus();
