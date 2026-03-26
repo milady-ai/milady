@@ -122,6 +122,20 @@ jobs:
           echo "steward_tag=$STEWARD_TAG" >> $GITHUB_OUTPUT
           echo "Steward tag: $STEWARD_TAG"
 
+      # ── Fix .dockerignore ─────────────────────────────────────────────────
+      # The repo .dockerignore excludes deploy/ globally, but deploy/Dockerfile
+      # COPYs deploy/cloud-agent-template/package.json. Add the exception here
+      # so Docker can resolve it during build.
+      - name: Patch .dockerignore for deploy/cloud-agent-template
+        run: |
+          if grep -q '^deploy/$' .dockerignore; then
+            sed -i 's|^deploy/$|deploy/\n!deploy/cloud-agent-template/package.json|' .dockerignore
+            echo "Patched .dockerignore: added !deploy/cloud-agent-template/package.json exception"
+          else
+            echo ".dockerignore does not have deploy/ exclusion, no patch needed"
+          fi
+          grep -A1 'deploy/' .dockerignore || true
+
       # ── Docker build ───────────────────────────────────────────────────────
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
