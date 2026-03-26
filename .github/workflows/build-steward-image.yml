@@ -4,14 +4,12 @@
 #   - Push of release tags matching v* (auto-detects next steward-N)
 #   - Manual dispatch with optional steward number override
 #
-# The steward image is built from deploy/Dockerfile.cloud-slim (headless,
-# optimised for provisioning workers). @stwd/sdk is already a production
-# dependency in package.json — no Dockerfile modifications required.
-# Dockerfile.cloud-slim is preferred over deploy/Dockerfile because the
-# repo's .dockerignore excludes several paths (apps/homepage, deploy/, etc.)
-# that deploy/Dockerfile tries to COPY individually, which would break the
-# build. Dockerfile.cloud-slim uses COPY . . which respects .dockerignore
-# cleanly and produces a slim headless runtime image.
+# The steward image is built from the root Dockerfile (self-contained, full
+# monorepo build). @stwd/sdk is already a production dependency in
+# package.json — no Dockerfile modifications required.
+# NOTE: deploy/Dockerfile and deploy/Dockerfile.cloud-slim are outdated and
+# reference paths excluded by .dockerignore (apps/homepage, deploy/, src/).
+# The root Dockerfile does COPY . . and is compatible with .dockerignore.
 #
 # Published tags (example for steward-9):
 #   ghcr.io/milady-ai/agent:v2.0.0-steward-9
@@ -142,7 +140,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./deploy/Dockerfile.cloud-slim
+          file: ./Dockerfile
           platforms: linux/amd64
           push: ${{ github.event_name == 'push' || inputs.push == true }}
           tags: |
