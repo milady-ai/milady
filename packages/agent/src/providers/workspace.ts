@@ -214,7 +214,9 @@ export type WorkspaceInitFile = {
 export function isDefaultBoilerplate(name: string, content: string): boolean {
   const template = WORKSPACE_TEMPLATES[name];
   if (!template) return false;
-  return content.trim() === template.trim();
+  // Case-insensitive comparison — template casing may drift from on-disk files
+  // (e.g. "ElizaOS" vs "elizaOS") written by an older version.
+  return content.trim().toLowerCase() === template.trim().toLowerCase();
 }
 
 type ElizaCoreWorkspaceHelpers = {

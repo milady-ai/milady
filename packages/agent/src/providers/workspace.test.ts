@@ -91,4 +91,26 @@ configuration is required.
 `;
     expect(isDefaultBoilerplate("TOOLS.md", content)).toBe(true);
   });
+
+  it("matches despite casing drift (elizaOS vs ElizaOS)", () => {
+    const content = `# Agents
+
+You are an autonomous AI agent powered by elizaOS.
+
+## Capabilities
+
+- Respond to user messages conversationally
+- Execute actions and use available tools
+- Access and manage knowledge from your workspace
+- Maintain context across conversations
+
+## Guidelines
+
+- Be helpful, concise, and accurate
+- Ask for clarification when instructions are ambiguous
+- Use tools when they would help accomplish the user's goal
+- Respect the user's preferences and communication style
+`;
+    expect(isDefaultBoilerplate("AGENTS.md", content)).toBe(true);
+  });
 });
