@@ -241,6 +241,7 @@ import {
   recordWalletTradeLedgerEntry,
   updateWalletTradeLedgerEntryStatus,
 } from "./wallet-trading-profile.js";
+import { handleWalletTradeExecuteRoute } from "./wallet-trade-routes.js";
 import {
   applyWhatsAppQrOverride,
   handleWhatsAppRoute,
@@ -12770,251 +12771,37 @@ async function handleRequest(
   }
 
   // ── POST /api/wallet/trade/execute ─────────────────────────────────────
-  // Execute or prepare a BSC trade. In "user-sign-only" mode, returns an
-  // unsigned transaction for the user to sign. In local-key modes, executes
-  // using the server-side EVM private key.
-  if (method === "POST" && pathname === "/api/wallet/trade/execute") {
-    const body = await readJsonBody<{
-      side?: string;
-      tokenAddress?: string;
-      amount?: string;
-      slippageBps?: number;
-      routeProvider?: "auto" | "pancakeswap-v2" | "0x";
-      deadlineSeconds?: number;
-      confirm?: boolean;
-      source?: "agent" | "manual";
-    }>(req, res);
-    if (!body) return;
-
-    if (!body.side || !body.tokenAddress || !body.amount) {
-      error(res, "side, tokenAddress, and amount are required", 400);
-      return;
-    }
-
-    const tradePermissionMode = resolveTradePermissionMode(state.config);
-    const isAgentRequest = isAgentAutomationRequest(req);
-    const hasLocalKey = Boolean(process.env.EVM_PRIVATE_KEY?.trim());
-    const canExecuteLocally = canUseLocalTradeExecution(
-      tradePermissionMode,
-      isAgentRequest,
-    );
-    const addrs = getWalletAddresses();
-    const walletRpcReadiness = resolveWalletRpcReadiness(state.config);
-
-    try {
-      const quote = await buildBscTradeQuote({
-        walletAddress: addrs.evmAddress ?? null,
-        rpcUrls: walletRpcReadiness.bscRpcUrls,
-        cloudManagedAccess: walletRpcReadiness.cloudManagedAccess,
-        request: {
-          side: body.side as "buy" | "sell",
-          tokenAddress: body.tokenAddress,
-          amount: body.amount,
-          slippageBps: body.slippageBps,
-          routeProvider: body.routeProvider,
-        },
-      });
-
-      const walletAddress = addrs.evmAddress ?? null;
-
-      // Build the unsigned trade transaction
-      const unsignedTx =
-        quote.side === "buy"
-          ? buildBscBuyUnsignedTx(quote, walletAddress, body.deadlineSeconds)
-          : buildBscSellUnsignedTx(quote, walletAddress, body.deadlineSeconds);
-
-      // Build approval tx for sell (if needed)
-      let unsignedApprovalTx:
-        | import("../contracts/wallet.js").BscUnsignedApprovalTx
-        | undefined;
-      let requiresApproval = false;
-      if (quote.side === "sell" && walletAddress) {
-        unsignedApprovalTx = buildBscApproveUnsignedTx(
-          quote.tokenAddress,
-          walletAddress,
-          resolveBscApprovalSpender(quote),
-          quote.quoteIn.amountWei,
-        );
-        requiresApproval = true;
-      }
-
-      // If local execution is not permitted or no private key, return unsigned tx
-      if (!hasLocalKey || !canExecuteLocally || body.confirm !== true) {
-        json(res, {
-          ok: true,
-          side: quote.side,
-          mode: hasLocalKey && canExecuteLocally ? "local-key" : "user-sign",
-          quote,
-          executed: false,
-          requiresUserSignature: true,
-          unsignedTx,
-          unsignedApprovalTx,
-          requiresApproval,
-        });
-        return;
-      }
-
-      // Execute locally with EVM private key
-      const rpcUrl = resolvePrimaryBscRpcUrl({
-        rpcUrls: walletRpcReadiness.bscRpcUrls,
-        cloudManagedAccess: walletRpcReadiness.cloudManagedAccess,
-      });
-
-      if (!rpcUrl) {
-        error(res, "BSC RPC not configured for local execution.", 503);
-        return;
-      }
-
-      const evmKey = process.env.EVM_PRIVATE_KEY ?? "";
-      const provider = new ethers.JsonRpcProvider(rpcUrl);
-      const wallet = new ethers.Wallet(
-        evmKey.startsWith("0x") ? evmKey : `0x${evmKey}`,
-        provider,
-      );
-
-      // Check quote freshness before executing
-      assertQuoteFresh(quote.quotedAt);
-
-      const nonce = await provider.getTransactionCount(
-        wallet.address,
-        "pending",
-      );
-
-      // Execute approval first if needed
-      let approvalHash: string | undefined;
-      if (requiresApproval && unsignedApprovalTx) {
-        const approvalTxReq: ethers.TransactionRequest = {
-          to: unsignedApprovalTx.to,
-          data: unsignedApprovalTx.data,
-          value: BigInt(unsignedApprovalTx.valueWei),
-          chainId: unsignedApprovalTx.chainId,
-          nonce,
-        };
-        const approvalResponse = await wallet.sendTransaction(approvalTxReq);
-        approvalHash = approvalResponse.hash;
-        // Wait for approval to be mined before submitting trade
-        const approvalReceipt = await approvalResponse.wait(1);
-        if (!approvalReceipt || approvalReceipt.status === 0) {
-          throw new Error("Token approval transaction reverted on-chain");
-        }
-      }
-
-      // Fetch fresh nonce for the trade tx (avoids stale nonce after approval)
-      const tradeNonce = requiresApproval
-        ? await provider.getTransactionCount(wallet.address, "pending")
-        : nonce;
-
-      const tradeTxReq: ethers.TransactionRequest = {
-        to: unsignedTx.to,
-        data: unsignedTx.data,
-        value: BigInt(unsignedTx.valueWei),
-        chainId: unsignedTx.chainId,
-        nonce: tradeNonce,
-      };
-
-      const tradeTxResponse = await wallet.sendTransaction(tradeTxReq);
-
-      const executionResult = {
-        hash: tradeTxResponse.hash,
-        nonce: tradeNonce,
-        gasLimit: tradeTxResponse.gasLimit?.toString() ?? "0",
-        valueWei: unsignedTx.valueWei,
-        explorerUrl: `https://bscscan.com/tx/${tradeTxResponse.hash}`,
-        blockNumber: null as number | null,
-        status: "submitted" as "submitted" | "success",
-        approvalHash,
-      };
-
-      // Record in ledger
-      const source = body.source ?? "manual";
-      try {
-        recordWalletTradeLedgerEntry({
-          hash: tradeTxResponse.hash,
-          source,
-          side: quote.side,
-          tokenAddress: quote.tokenAddress,
-          slippageBps: quote.slippageBps,
-          route: quote.route,
-          quoteIn: {
-            symbol: quote.quoteIn.symbol,
-            amount: quote.quoteIn.amount,
-            amountWei: quote.quoteIn.amountWei,
-          },
-          quoteOut: {
-            symbol: quote.quoteOut.symbol,
-            amount: quote.quoteOut.amount,
-            amountWei: quote.quoteOut.amountWei,
-          },
-          status: "pending",
-          confirmations: 0,
-          nonce: tradeNonce,
-          blockNumber: null,
-          gasUsed: null,
-          effectiveGasPriceWei: null,
-          explorerUrl: executionResult.explorerUrl,
-        });
-      } catch (ledgerErr) {
-        logger.warn(
-          `[api] Failed to record trade ledger entry (attempt 1): ${ledgerErr instanceof Error ? ledgerErr.message : ledgerErr}`,
-        );
-        // Retry once — ledger writes are important for audit trail.
-        try {
-          recordWalletTradeLedgerEntry({
-            hash: tradeTxResponse.hash,
-            source,
-            side: quote.side,
-            tokenAddress: quote.tokenAddress,
-            slippageBps: quote.slippageBps,
-            route: quote.route,
-            quoteIn: {
-              symbol: quote.quoteIn.symbol,
-              amount: quote.quoteIn.amount,
-              amountWei: quote.quoteIn.amountWei,
-            },
-            quoteOut: {
-              symbol: quote.quoteOut.symbol,
-              amount: quote.quoteOut.amount,
-              amountWei: quote.quoteOut.amountWei,
-            },
-            status: "pending",
-            confirmations: 0,
-            nonce: tradeNonce,
-            blockNumber: null,
-            gasUsed: null,
-            effectiveGasPriceWei: null,
-            explorerUrl: executionResult.explorerUrl,
-          });
-        } catch (retryErr) {
-          logger.error(
-            `[api] Ledger entry retry also failed: ${retryErr instanceof Error ? retryErr.message : retryErr}`,
-          );
-        }
-      }
-
-      provider.destroy();
-
-      json(res, {
-        ok: true,
-        side: quote.side,
-        mode: "local-key",
-        quote,
-        executed: true,
-        requiresUserSignature: false,
-        unsignedTx,
-        unsignedApprovalTx,
-        requiresApproval,
-        execution: executionResult,
-      });
-    } catch (err) {
-      logger.error(
-        `[api] BSC trade execute failed: ${err instanceof Error ? err.message : err}`,
-      );
-      error(
-        res,
-        `Trade execution failed: ${err instanceof Error ? err.message : "unknown error"}`,
-        500,
-      );
-    }
+  if (
+    await handleWalletTradeExecuteRoute({
+      req,
+      res,
+      method,
+      pathname,
+      readJsonBody,
+      json,
+      error,
+      state: { config: state.config },
+      deps: {
+        getWalletAddresses,
+        resolveWalletRpcReadiness,
+        resolveTradePermissionMode,
+        isAgentAutomationRequest,
+        canUseLocalTradeExecution,
+        buildBscTradeQuote,
+        buildBscBuyUnsignedTx,
+        buildBscSellUnsignedTx,
+        buildBscApproveUnsignedTx,
+        resolveBscApprovalSpender,
+        resolvePrimaryBscRpcUrl,
+        assertQuoteFresh,
+        recordWalletTradeLedgerEntry,
+        createProvider: (rpcUrl) => new ethers.JsonRpcProvider(rpcUrl),
+        createWallet: (privateKey, provider) =>
+          new ethers.Wallet(privateKey, provider as ethers.Provider),
+        logger,
+      },
+    })
+  ) {
     return;
   }
 
