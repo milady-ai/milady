@@ -221,6 +221,8 @@ export type TradePermissionMode =
   | "agent-auto";
 
 export type BscTradeSide = "buy" | "sell";
+export type BscTradeRouteProvider = "pancakeswap-v2" | "0x";
+export type BscTradeRoutePreference = BscTradeRouteProvider | "auto";
 
 export interface BscTradePreflightRequest {
   tokenAddress?: string;
@@ -250,6 +252,7 @@ export interface BscTradeQuoteRequest {
   tokenAddress: string;
   amount: string;
   slippageBps?: number;
+  routeProvider?: BscTradeRoutePreference;
 }
 
 export interface BscTradeQuoteLeg {
@@ -261,6 +264,10 @@ export interface BscTradeQuoteLeg {
 export interface BscTradeQuoteResponse {
   ok: boolean;
   side: BscTradeSide;
+  routeProvider: BscTradeRouteProvider;
+  routeProviderRequested: BscTradeRoutePreference;
+  routeProviderFallbackUsed: boolean;
+  routeProviderNotes?: string[];
   routerAddress: string;
   wrappedNativeAddress: string;
   tokenAddress: string;
@@ -271,6 +278,10 @@ export interface BscTradeQuoteResponse {
   minReceive: BscTradeQuoteLeg;
   price: string;
   preflight: BscTradePreflightResponse;
+  swapTargetAddress?: string;
+  swapCallData?: string;
+  swapValueWei?: string;
+  allowanceTarget?: string;
   quotedAt?: number;
 }
 

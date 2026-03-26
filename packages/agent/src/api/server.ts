@@ -156,6 +156,7 @@ import {
   buildBscSellUnsignedTx,
   buildBscTradePreflight,
   buildBscTradeQuote,
+  resolveBscApprovalSpender,
   resolvePrimaryBscRpcUrl,
 } from "./bsc-trade.js";
 import { handleBugReportRoutes } from "./bug-report-routes.js";
@@ -12730,6 +12731,7 @@ async function handleRequest(
       tokenAddress?: string;
       amount?: string;
       slippageBps?: number;
+      routeProvider?: "auto" | "pancakeswap-v2" | "0x";
     }>(req, res);
     if (!body) return;
 
@@ -12750,6 +12752,7 @@ async function handleRequest(
           tokenAddress: body.tokenAddress,
           amount: body.amount,
           slippageBps: body.slippageBps,
+          routeProvider: body.routeProvider,
         },
       });
       json(res, result);
@@ -12776,6 +12779,7 @@ async function handleRequest(
       tokenAddress?: string;
       amount?: string;
       slippageBps?: number;
+      routeProvider?: "auto" | "pancakeswap-v2" | "0x";
       deadlineSeconds?: number;
       confirm?: boolean;
       source?: "agent" | "manual";
@@ -12807,6 +12811,7 @@ async function handleRequest(
           tokenAddress: body.tokenAddress,
           amount: body.amount,
           slippageBps: body.slippageBps,
+          routeProvider: body.routeProvider,
         },
       });
 
@@ -12827,7 +12832,7 @@ async function handleRequest(
         unsignedApprovalTx = buildBscApproveUnsignedTx(
           quote.tokenAddress,
           walletAddress,
-          quote.routerAddress,
+          resolveBscApprovalSpender(quote),
           quote.quoteIn.amountWei,
         );
         requiresApproval = true;

@@ -9,6 +9,8 @@
 import { logger } from "@elizaos/core";
 import { ethers } from "ethers";
 import type {
+  BscTradeRoutePreference,
+  BscTradeRouteProvider,
   BscTradePreflightResponse,
   BscTradeQuoteRequest,
   BscTradeQuoteResponse,
@@ -27,6 +29,8 @@ const MIN_GAS_BNB = "0.005";
 const DEFAULT_SLIPPAGE_BPS = 300;
 const MAX_SLIPPAGE_BPS = 1_000;
 const SLIPPAGE_WARNING_THRESHOLD_BPS = 300;
+const ZEROX_API_BASE_URL = "https://bsc.api.0x.org";
+const ZEROX_QUOTE_TIMEOUT_MS = 8_000;
 
 export const PANCAKE_SWAP_V2_ROUTER = ethers.getAddress(
   "0x10ED43C718714eb63d5aA57B78B54704E256024E",
@@ -78,6 +82,15 @@ interface JsonRpcResponse<T> {
     code?: number;
     message?: string;
   };
+}
+
+interface ZeroXQuoteResponse {
+  to?: string;
+  data?: string;
+  value?: string;
+  allowanceTarget?: string;
+  buyAmount?: string;
+  sellAmount?: string;
 }
 
 function normalizeRpcUrl(url: string | null | undefined): string | null {
@@ -201,6 +214,27 @@ function parsePositiveDecimal(value: string): number {
     throw new Error("Amount must be a positive number.");
   }
   return amount;
+}
+
+function resolveRouteProviderPreference(
+  value: string | null | undefined,
+): BscTradeRoutePreference {
+  if (value === "pancakeswap-v2" || value === "0x" || value === "auto") {
+    return value;
+  }
+  return "auto";
+}
+
+function resolveRouteProviderOrder(
+  requested: BscTradeRoutePreference,
+): BscTradeRouteProvider[] {
+  if (requested === "0x") {
+    return ["0x", "pancakeswap-v2"];
+  }
+  if (requested === "pancakeswap-v2") {
+    return ["pancakeswap-v2"];
+  }
+  return ["0x", "pancakeswap-v2"];
 }
 
 function formatPrice(amountIn: string, amountOut: string): string {
@@ -333,6 +367,79 @@ async function readTokenBalanceWei(
     throw new Error("Token balance response is invalid.");
   }
   return balance;
+}
+
+async function fetchZeroXQuote(input: {
+  side: BscTradeSide;
+  walletAddress: string;
+  tokenAddress: string;
+  wrappedNativeAddress: string;
+  amountInWei: bigint;
+  slippageBps: number;
+}): Promise<ZeroXQuoteResponse> {
+  const apiBase = normalizeRpcUrl(process.env.ZEROX_BSC_API_BASE_URL)
+    ? (normalizeRpcUrl(process.env.ZEROX_BSC_API_BASE_URL) as string)
+    : ZEROX_API_BASE_URL;
+  const sellToken =
+    input.side === "buy" ? input.wrappedNativeAddress : input.tokenAddress;
+  const buyToken =
+    input.side === "buy" ? input.tokenAddress : input.wrappedNativeAddress;
+  const quoteUrl = new URL("/swap/v1/quote", apiBase);
+  quoteUrl.searchParams.set("sellToken", sellToken);
+  quoteUrl.searchParams.set("buyToken", buyToken);
+  quoteUrl.searchParams.set("sellAmount", input.amountInWei.toString());
+  quoteUrl.searchParams.set(
+    "slippagePercentage",
+    (input.slippageBps / 10_000).toString(),
+  );
+  quoteUrl.searchParams.set("takerAddress", input.walletAddress);
+  const apiKey = process.env.ZEROX_API_KEY?.trim();
+  const response = await fetch(quoteUrl.toString(), {
+    method: "GET",
+    headers: apiKey ? { "0x-api-key": apiKey } : undefined,
+    signal: AbortSignal.timeout(ZEROX_QUOTE_TIMEOUT_MS),
+  });
+  const raw = await response.text();
+  if (!response.ok) {
+    throw new Error(`0x HTTP ${response.status}: ${raw.slice(0, 180)}`);
+  }
+  let parsed: ZeroXQuoteResponse;
+  try {
+    parsed = JSON.parse(raw) as ZeroXQuoteResponse;
+  } catch {
+    throw new Error(`0x quote returned invalid JSON: ${raw.slice(0, 180)}`);
+  }
+
+  const to = normalizeAddress(parsed.to);
+  const data =
+    typeof parsed.data === "string" && parsed.data.startsWith("0x")
+      ? parsed.data
+      : null;
+  const buyAmount =
+    typeof parsed.buyAmount === "string" && /^\d+$/.test(parsed.buyAmount)
+      ? BigInt(parsed.buyAmount)
+      : null;
+  const sellAmount =
+    typeof parsed.sellAmount === "string" && /^\d+$/.test(parsed.sellAmount)
+      ? BigInt(parsed.sellAmount)
+      : null;
+  const value =
+    typeof parsed.value === "string" && /^\d+$/.test(parsed.value)
+      ? parsed.value
+      : "0";
+
+  if (!to || !data || !buyAmount || !sellAmount) {
+    throw new Error("0x quote missing required transaction fields.");
+  }
+
+  return {
+    to,
+    data,
+    value,
+    allowanceTarget: normalizeAddress(parsed.allowanceTarget ?? null) ?? undefined,
+    buyAmount: buyAmount.toString(),
+    sellAmount: sellAmount.toString(),
+  };
 }
 
 export async function buildBscTradePreflight(
@@ -486,11 +593,17 @@ export async function buildBscTradeQuote(
   parsePositiveDecimal(amountInput);
 
   const slippageBps = clampSlippageBps(input.request.slippageBps);
+  const routeProviderRequested = resolveRouteProviderPreference(
+    input.request.routeProvider,
+  );
   const preflight = await buildBscTradePreflight({
     walletAddress: input.walletAddress,
     tokenAddress,
+    rpcUrls: input.rpcUrls,
     nodeRealBscRpcUrl: input.nodeRealBscRpcUrl,
     quickNodeBscRpcUrl: input.quickNodeBscRpcUrl,
+    bscRpcUrl: input.bscRpcUrl,
+    cloudManagedAccess: input.cloudManagedAccess,
   });
   if (!preflight.ok) {
     throw new Error(preflight.reasons[0] ?? "Trade preflight failed.");
@@ -534,35 +647,103 @@ export async function buildBscTradeQuote(
     }
   }
 
-  const route =
-    side === "buy"
-      ? [wrappedNativeAddress, tokenAddress]
-      : [tokenAddress, wrappedNativeAddress];
-  const quoteCall = ROUTER_IFACE.encodeFunctionData("getAmountsOut", [
-    amountInWei,
-    route,
-  ]);
-  const quoteResponse = await ethCall(
-    rpcUrls,
-    PANCAKE_SWAP_V2_ROUTER,
-    quoteCall,
-  );
-  const decoded = ROUTER_IFACE.decodeFunctionResult(
-    "getAmountsOut",
-    quoteResponse.result,
-  );
-  const amountsOut = decoded[0];
-  if (!Array.isArray(amountsOut) || amountsOut.length < 2) {
-    throw new Error("Router returned an invalid quote.");
+  let routeProvider: BscTradeRouteProvider = "pancakeswap-v2";
+  let routeProviderFallbackUsed = false;
+  const routeProviderNotes: string[] = [];
+  let amountOutWei: bigint | null = null;
+  let route: string[] = [];
+  let swapTargetAddress: string | undefined;
+  let swapCallData: string | undefined;
+  let swapValueWei: string | undefined;
+  let allowanceTarget: string | undefined;
+
+  const providerErrors: string[] = [];
+  for (const provider of resolveRouteProviderOrder(routeProviderRequested)) {
+    try {
+      if (provider === "0x") {
+        if (!preflight.walletAddress) {
+          throw new Error("wallet address is required for 0x route");
+        }
+        const zeroX = await fetchZeroXQuote({
+          side,
+          walletAddress: preflight.walletAddress,
+          tokenAddress,
+          wrappedNativeAddress,
+          amountInWei,
+          slippageBps,
+        });
+        const buyAmount = BigInt(zeroX.buyAmount ?? "0");
+        if (buyAmount <= 0n) {
+          throw new Error("0x quote returned zero output amount");
+        }
+        amountOutWei = buyAmount;
+        routeProvider = "0x";
+        route =
+          side === "buy"
+            ? [wrappedNativeAddress, tokenAddress]
+            : [tokenAddress, wrappedNativeAddress];
+        swapTargetAddress = zeroX.to;
+        swapCallData = zeroX.data;
+        swapValueWei = zeroX.value ?? "0";
+        allowanceTarget = zeroX.allowanceTarget;
+        break;
+      }
+
+      const candidateRoute =
+        side === "buy"
+          ? [wrappedNativeAddress, tokenAddress]
+          : [tokenAddress, wrappedNativeAddress];
+      const quoteCall = ROUTER_IFACE.encodeFunctionData("getAmountsOut", [
+        amountInWei,
+        candidateRoute,
+      ]);
+      const quoteResponse = await ethCall(
+        rpcUrls,
+        PANCAKE_SWAP_V2_ROUTER,
+        quoteCall,
+      );
+      const decoded = ROUTER_IFACE.decodeFunctionResult(
+        "getAmountsOut",
+        quoteResponse.result,
+      );
+      const amountsOut = decoded[0];
+      if (!Array.isArray(amountsOut) || amountsOut.length < 2) {
+        throw new Error("router returned an invalid quote");
+      }
+      const finalAmount = amountsOut[amountsOut.length - 1];
+      if (typeof finalAmount !== "bigint" || finalAmount <= 0n) {
+        throw new Error("router quote output is invalid");
+      }
+
+      amountOutWei = finalAmount;
+      routeProvider = "pancakeswap-v2";
+      route = candidateRoute;
+      break;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      providerErrors.push(`${provider}: ${message}`);
+    }
   }
 
-  const amountOutWei = amountsOut[amountsOut.length - 1];
-  if (typeof amountOutWei !== "bigint") {
-    throw new Error("Router quote output type is invalid.");
+  if (!amountOutWei) {
+    throw new Error(
+      `Trade quote failed across providers (${providerErrors.join(" | ")})`,
+    );
   }
+
+  if (routeProviderRequested !== routeProvider) {
+    routeProviderFallbackUsed = true;
+    routeProviderNotes.push(
+      `Requested ${routeProviderRequested}, used ${routeProvider}.`,
+    );
+  }
+  if (providerErrors.length > 0) {
+    routeProviderNotes.push(...providerErrors);
+  }
+
   let minReceiveWei = (amountOutWei * BigInt(10_000 - slippageBps)) / 10_000n;
   if (minReceiveWei === 0n && amountOutWei > 0n) {
-    minReceiveWei = 1n; // Prevent zero-slippage execution for small amounts
+    minReceiveWei = 1n;
   }
   const outDecimals = side === "buy" ? tokenDecimals : 18;
   const inSymbol = side === "buy" ? "BNB" : tokenSymbol;
@@ -577,7 +758,12 @@ export async function buildBscTradeQuote(
   return {
     ok: true,
     side,
-    routerAddress: PANCAKE_SWAP_V2_ROUTER,
+    routeProvider,
+    routeProviderRequested,
+    routeProviderFallbackUsed,
+    routeProviderNotes: routeProviderNotes.length > 0 ? routeProviderNotes : undefined,
+    routerAddress:
+      routeProvider === "0x" ? (swapTargetAddress ?? PANCAKE_SWAP_V2_ROUTER) : PANCAKE_SWAP_V2_ROUTER,
     wrappedNativeAddress,
     tokenAddress,
     slippageBps,
@@ -599,6 +785,10 @@ export async function buildBscTradeQuote(
     },
     price: formatPrice(amountInFormatted, amountOutFormatted),
     preflight,
+    swapTargetAddress,
+    swapCallData,
+    swapValueWei,
+    allowanceTarget,
     quotedAt: Date.now(),
   };
 }
@@ -608,6 +798,9 @@ export async function buildBscTradeQuote(
  * Prevents a compromised or tampered quote from directing funds to an arbitrary address.
  */
 function assertRouterAddress(quote: BscTradeQuoteResponse): void {
+  if (quote.routeProvider === "0x") {
+    return;
+  }
   if (quote.routerAddress !== PANCAKE_SWAP_V2_ROUTER) {
     throw new Error(
       `Unexpected router address in quote: ${quote.routerAddress}. Expected PancakeSwap V2 router ${PANCAKE_SWAP_V2_ROUTER}.`,
@@ -627,6 +820,20 @@ export function buildBscBuyUnsignedTx(
   const normalizedRecipient = normalizeAddress(recipientAddress);
   if (!normalizedRecipient) {
     throw new Error("Recipient wallet address is required.");
+  }
+  if (quote.routeProvider === "0x") {
+    if (!quote.swapTargetAddress || !quote.swapCallData) {
+      throw new Error("0x quote is missing swap transaction payload.");
+    }
+    return {
+      chainId: BSC_CHAIN_ID,
+      from: normalizedRecipient,
+      to: quote.swapTargetAddress,
+      data: quote.swapCallData,
+      valueWei: quote.swapValueWei ?? quote.quoteIn.amountWei,
+      deadline: Math.floor(Date.now() / 1000) + clampDeadlineSeconds(deadlineSeconds),
+      explorerUrl: "https://bscscan.com",
+    };
   }
   const now = Math.floor(Date.now() / 1000);
   const deadline = now + clampDeadlineSeconds(deadlineSeconds);
@@ -663,6 +870,20 @@ export function buildBscSellUnsignedTx(
   const normalizedRecipient = normalizeAddress(recipientAddress);
   if (!normalizedRecipient) {
     throw new Error("Recipient wallet address is required.");
+  }
+  if (quote.routeProvider === "0x") {
+    if (!quote.swapTargetAddress || !quote.swapCallData) {
+      throw new Error("0x quote is missing swap transaction payload.");
+    }
+    return {
+      chainId: BSC_CHAIN_ID,
+      from: normalizedRecipient,
+      to: quote.swapTargetAddress,
+      data: quote.swapCallData,
+      valueWei: quote.swapValueWei ?? "0",
+      deadline: Math.floor(Date.now() / 1000) + clampDeadlineSeconds(deadlineSeconds),
+      explorerUrl: "https://bscscan.com",
+    };
   }
   const now = Math.floor(Date.now() / 1000);
   const deadline = now + clampDeadlineSeconds(deadlineSeconds);
@@ -732,4 +953,13 @@ export function buildBscApproveUnsignedTx(
     spender: normalizedSpender,
     amountWei: amount.toString(),
   };
+}
+
+export function resolveBscApprovalSpender(
+  quote: Pick<BscTradeQuoteResponse, "routeProvider" | "allowanceTarget" | "routerAddress">,
+): string {
+  if (quote.routeProvider === "0x" && quote.allowanceTarget) {
+    return quote.allowanceTarget;
+  }
+  return quote.routerAddress;
 }
