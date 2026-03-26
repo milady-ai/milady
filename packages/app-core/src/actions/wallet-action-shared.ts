@@ -5,9 +5,16 @@
  * @module actions/wallet-action-shared
  */
 
-/** API port for loopback wallet API calls. Shared across all wallet actions. */
-export const WALLET_ACTION_API_PORT =
-  process.env.MILADY_API_PORT || process.env.MILADY_PORT || "2138";
+/** Resolve the loopback API port for wallet action calls at runtime. */
+export function getWalletActionApiPort(): string {
+  return (
+    process.env.MILADY_API_PORT ||
+    process.env.MILADY_PORT ||
+    process.env.ELIZA_PORT ||
+    process.env.API_PORT ||
+    "31337"
+  );
+}
 
 /**
  * Build Authorization headers for loopback API calls.
