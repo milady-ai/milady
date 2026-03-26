@@ -55,6 +55,7 @@ export interface WalletRpcReadiness {
   managedBscRpcReady: boolean;
   evmBalanceReady: boolean;
   solanaBalanceReady: boolean;
+  walletNetwork: "mainnet" | "testnet";
   selectedRpcProviders: WalletRpcSelections;
   legacyCustomChains: WalletRpcChain[];
   bscRpcUrls: string[];
@@ -112,6 +113,13 @@ const WALLET_RPC_CONFIG_KEYS = [
   "BSC_RPC_URL",
   "SOLANA_RPC_URL",
 ] as const satisfies readonly WalletRpcCredentialKey[];
+
+function resolveWalletNetwork(): "mainnet" | "testnet" {
+  const explicit = process.env.MILADY_WALLET_NETWORK?.trim().toLowerCase();
+  if (explicit === "testnet") return "testnet";
+  if (explicit === "mainnet") return "mainnet";
+  return process.env.BSC_TESTNET_RPC_URL?.trim() ? "testnet" : "mainnet";
+}
 
 function normalizeSecret(value: string | null | undefined): string | null {
   if (typeof value !== "string") return null;
@@ -379,10 +387,12 @@ export function getInventoryProviderOptions(): InventoryProviderOption[] {
 export function resolveBscRpcUrls(
   options: WalletRpcResolutionOptions = {},
 ): string[] {
+  const walletNetwork = resolveWalletNetwork();
   return uniqueRpcUrls(
     [
       process.env.NODEREAL_BSC_RPC_URL,
       process.env.QUICKNODE_BSC_RPC_URL,
+      walletNetwork === "testnet" ? process.env.BSC_TESTNET_RPC_URL : null,
       process.env.BSC_RPC_URL,
       buildCloudEvmRpcUrl("bsc", options),
     ],
@@ -479,6 +489,7 @@ export function applyWalletRpcConfigUpdate(
 export function resolveWalletRpcReadiness(
   config?: WalletCapableConfig | null,
 ): WalletRpcReadiness {
+  const walletNetwork = resolveWalletNetwork();
   const cloudApiKey = resolveCloudApiKey(config);
   const cloudBaseUrl = resolveCloudApiBaseUrl(config?.cloud?.baseUrl);
   const cloudManagedAccess = Boolean(cloudApiKey);
@@ -512,6 +523,7 @@ export function resolveWalletRpcReadiness(
     solanaBalanceReady: Boolean(
       process.env.HELIUS_API_KEY?.trim() || solanaRpcUrls.length > 0,
     ),
+    walletNetwork,
     selectedRpcProviders,
     legacyCustomChains,
     bscRpcUrls,
