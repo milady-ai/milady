@@ -58,6 +58,8 @@ export * from "./CustomActionEditor";
 export * from "./CustomActionsPanel";
 export * from "./CustomActionsView";
 export * from "./chainConfig";
+export { ChainIcon } from "./inventory/ChainIcon";
+export type { ChainIconProps, ChainIconSize } from "./inventory/ChainIcon";
 export * from "./companion-shell-styles";
 export * from "./confirm-delete-control";
 export * from "./conversations/ConversationListItem";
