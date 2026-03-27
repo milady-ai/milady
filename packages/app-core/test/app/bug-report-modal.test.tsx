@@ -180,7 +180,7 @@ let closeFn: ReturnType<typeof vi.fn>;
 
 function setupMock(isOpen: boolean) {
   closeFn = vi.fn();
-  mockUseBugReport.mockReturnValue({ isOpen, close: closeFn });
+  mockUseBugReport.mockReturnValue({ isOpen, draft: null, close: closeFn });
 }
 
 function getButtons(root: TestRenderer.ReactTestInstance) {
@@ -299,6 +299,28 @@ describe("BugReportModal", () => {
       await new Promise((r) => globalThis.setTimeout(r, 60));
     });
     expect(mockClient.checkBugReportInfo).toHaveBeenCalledOnce();
+  });
+
+  it("prefills the form from bug report draft data", async () => {
+    closeFn = vi.fn();
+    mockUseBugReport.mockReturnValue({
+      isOpen: true,
+      draft: {
+        description: "Startup failed on Windows",
+        actualBehavior: "App never got past startup",
+        logs: "Reason: backend-unreachable",
+      },
+      close: closeFn,
+    });
+    let tree: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(BugReportModal));
+      await new Promise((r) => globalThis.setTimeout(r, 60));
+    });
+
+    const textareas = getTextareas(tree!.root);
+    expect(textareas[0].props.value).toBe("Startup failed on Windows");
+    expect(textareas[3].props.value).toBe("App never got past startup");
   });
 
   // --- validation ---

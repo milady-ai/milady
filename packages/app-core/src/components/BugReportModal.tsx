@@ -74,7 +74,7 @@ export function BugReportModal() {
   const { copyToClipboard, t } = useApp();
   const desktopRuntime = isElectrobunRuntime();
   const branding = useBranding();
-  const { isOpen, close } = useBugReport();
+  const { isOpen, draft, close } = useBugReport();
   const [form, setForm] = useState<BugReportForm>(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
@@ -113,20 +113,22 @@ export function BugReportModal() {
       .checkBugReportInfo()
       .then((info) => {
         if (cancelled) return;
-        if (info.nodeVersion)
-          setForm((f) => ({ ...f, nodeVersion: info.nodeVersion ?? "" }));
-        if (info.platform)
-          setForm((f) => ({
-            ...f,
-            environment:
-              info.platform === "darwin"
-                ? "macOS"
-                : info.platform === "win32"
-                  ? "Windows"
-                  : info.platform === "linux"
-                    ? "Linux"
-                    : "Other",
-          }));
+        setForm((f) => ({
+          ...f,
+          ...(info.nodeVersion ? { nodeVersion: info.nodeVersion ?? "" } : {}),
+          ...(info.platform
+            ? {
+                environment:
+                  info.platform === "darwin"
+                    ? "macOS"
+                    : info.platform === "win32"
+                      ? "Windows"
+                      : info.platform === "linux"
+                        ? "Linux"
+                        : "Other",
+              }
+            : {}),
+        }));
       })
       .catch((err: unknown) => {
         console.warn("[BugReportModal] Failed to fetch bug report info:", err);
@@ -161,6 +163,14 @@ export function BugReportModal() {
       cancelled = true;
     };
   }, [desktopRuntime, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || !draft) return;
+    setForm((f) => ({
+      ...f,
+      ...draft,
+    }));
+  }, [draft, isOpen]);
 
   useEffect(() => {
     if (!resultUrl) return;

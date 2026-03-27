@@ -3,9 +3,10 @@
 import TestRenderer, { act } from "react-test-renderer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockUseApp, mockUseBranding } = vi.hoisted(() => ({
+const { mockUseApp, mockUseBranding, openBugReportMock } = vi.hoisted(() => ({
   mockUseApp: vi.fn(),
   mockUseBranding: vi.fn(),
+  openBugReportMock: vi.fn(),
 }));
 
 vi.mock("../state", () => ({
@@ -14,6 +15,10 @@ vi.mock("../state", () => ({
 
 vi.mock("../config/branding", () => ({
   useBranding: () => mockUseBranding(),
+}));
+
+vi.mock("../hooks", () => ({
+  useBugReport: () => ({ open: openBugReportMock }),
 }));
 
 import { StartupFailureView } from "./StartupFailureView";
@@ -32,9 +37,11 @@ describe("StartupFailureView", () => {
               "This origin does not host the agent backend.",
             "startupfailureview.RetryStartup": "Retry Startup",
             "startupfailureview.OpenApp": "Open App",
+            "bugreportmodal.ReportABug": "Report Bug",
           }) as Record<string, string>
         )[key] ?? key,
     });
+    openBugReportMock.mockReset();
   });
 
   it("renders retry controls and details for startup failures", async () => {
@@ -59,6 +66,44 @@ describe("StartupFailureView", () => {
     expect(snapshot).toContain("The agent process exited unexpectedly.");
     expect(snapshot).toContain("stack trace");
     expect(snapshot).toContain("Retry Startup");
+    expect(snapshot).toContain("Report Bug");
+  });
+
+  it("opens bug report with startup diagnostics", async () => {
+    const onRetry = vi.fn();
+
+    let tree: TestRenderer.ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(
+        <StartupFailureView
+          error={{
+            reason: "backend-unreachable",
+            phase: "starting-backend",
+            message: "Failed to reach backend",
+            detail: "HTTP 404",
+            status: 404,
+            path: "/api/onboarding/status",
+          }}
+          onRetry={onRetry}
+        />,
+      );
+    });
+
+    const buttons = tree?.root.findAllByType("button") ?? [];
+    const reportButton = buttons.find((button) =>
+      button.children.join("").includes("Report Bug"),
+    );
+    await act(async () => {
+      reportButton?.props.onClick();
+    });
+
+    expect(openBugReportMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        description: "Backend Unreachable: Failed to reach backend",
+        actualBehavior: "Failed to reach backend",
+        logs: expect.stringContaining("Path: /api/onboarding/status"),
+      }),
+    );
   });
 
   it("shows the open-app action when the backend is unreachable", async () => {

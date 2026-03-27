@@ -7,6 +7,7 @@ import {
   StatusBadge,
 } from "@miladyai/ui";
 import { useBranding } from "../config/branding";
+import { useBugReport } from "../hooks";
 import type { StartupErrorState } from "../state";
 import { useApp } from "../state";
 
@@ -34,8 +35,18 @@ export function StartupFailureView({
 }: StartupFailureViewProps) {
   const { t } = useApp();
   const branding = useBranding();
+  const { open: openBugReport } = useBugReport();
   const isBackendUnreachable = error.reason === "backend-unreachable";
   const reasonLabel = REASON_LABELS[error.reason];
+  const startupDetail = [
+    `Reason: ${error.reason}`,
+    `Phase: ${error.phase}`,
+    typeof error.status === "number" ? `Status: ${error.status}` : null,
+    error.path ? `Path: ${error.path}` : null,
+    error.detail ? `Detail: ${error.detail}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   return (
     <div className={SCREEN_SHELL_CLASS}>
@@ -92,6 +103,24 @@ export function StartupFailureView({
               className="w-full sm:w-auto sm:min-w-[11rem]"
             >
               {t("startupfailureview.RetryStartup")}
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() =>
+                openBugReport({
+                  description: `${reasonLabel}: ${error.message}`.slice(0, 80),
+                  stepsToReproduce:
+                    "1. Launch the desktop app.\n2. Wait for startup to fail.\n3. Observe the startup failure screen.",
+                  expectedBehavior:
+                    "The app should finish startup and show the main shell.",
+                  actualBehavior: error.message,
+                  logs: startupDetail,
+                })
+              }
+              className="w-full sm:w-auto sm:min-w-[10rem]"
+            >
+              {t("bugreportmodal.ReportABug")}
             </Button>
             {isBackendUnreachable ? (
               <Button
