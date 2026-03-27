@@ -227,11 +227,12 @@ describe("IdentityStep", () => {
 
   it("shows a friendly status error when import returns a non-JSON 5xx body", async () => {
     mockUseApp.mockReturnValue(baseContext({ onboardingStep: "identity" }));
-    const fetchMock = vi.fn(async () =>
-      new Response("<html>bad gateway</html>", {
-        status: 502,
-        headers: { "Content-Type": "text/html" },
-      }),
+    const fetchMock = vi.fn(
+      async () =>
+        new Response("<html>bad gateway</html>", {
+          status: 502,
+          headers: { "Content-Type": "text/html" },
+        }),
     );
     vi.stubGlobal("fetch", fetchMock);
 
@@ -253,7 +254,9 @@ describe("IdentityStep", () => {
       const inputs = (tree?.root as TestRenderer.ReactTestInstance).findAll(
         (node) => node.type === "input",
       );
-      const fileInput = inputs.find((node) => node.props.accept === ".eliza-agent");
+      const fileInput = inputs.find(
+        (node) => node.props.accept === ".eliza-agent",
+      );
       const passwordInput = inputs.find(
         (node) =>
           node.props.placeholder === "onboarding.decryptionPasswordPlaceholder",
@@ -301,13 +304,15 @@ describe("IdentityStep", () => {
       },
       expectedToken: "boot-token",
     },
-  ])(
-    "sends Authorization header from %s during onboarding import",
-    async ({ setup, expectedToken }) => {
-      mockUseApp.mockReturnValue(baseContext({ onboardingStep: "identity" }));
-      setup();
+  ])("sends Authorization header from %s during onboarding import", async ({
+    setup,
+    expectedToken,
+  }) => {
+    mockUseApp.mockReturnValue(baseContext({ onboardingStep: "identity" }));
+    setup();
 
-      const fetchMock = vi.fn(async () =>
+    const fetchMock = vi.fn(
+      async () =>
         new Response(
           JSON.stringify({
             success: true,
@@ -319,75 +324,86 @@ describe("IdentityStep", () => {
             headers: { "Content-Type": "application/json" },
           },
         ),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    let tree: TestRenderer.ReactTestRenderer | undefined;
+    try {
+      await act(async () => {
+        tree = TestRenderer.create(React.createElement(IdentityStep));
+      });
+
+      const restoreBtn = findButtons(
+        tree?.root as TestRenderer.ReactTestInstance,
+      ).find(
+        (button) => collectText(button) === "onboarding.restoreFromBackup",
       );
-      vi.stubGlobal("fetch", fetchMock);
+      expect(restoreBtn).toBeDefined();
 
-      let tree: TestRenderer.ReactTestRenderer | undefined;
-      try {
-        await act(async () => {
-          tree = TestRenderer.create(React.createElement(IdentityStep));
-        });
+      await act(async () => {
+        restoreBtn?.props.onClick();
+      });
 
-        const restoreBtn = findButtons(
-          tree?.root as TestRenderer.ReactTestInstance,
-        ).find((button) => collectText(button) === "onboarding.restoreFromBackup");
-        expect(restoreBtn).toBeDefined();
+      const inputs = (tree?.root as TestRenderer.ReactTestInstance).findAll(
+        (node) => node.type === "input",
+      );
+      const fileInput = inputs.find(
+        (node) => node.props.accept === ".eliza-agent",
+      );
+      const passwordInput = inputs.find(
+        (node) =>
+          node.props.placeholder === "onboarding.decryptionPasswordPlaceholder",
+      );
+      expect(fileInput).toBeDefined();
+      expect(passwordInput).toBeDefined();
 
-        await act(async () => {
-          restoreBtn?.props.onClick();
-        });
+      const mockFile = {
+        arrayBuffer: async () => new Uint8Array([1, 2, 3]).buffer,
+      } as File;
 
-        const inputs = (tree?.root as TestRenderer.ReactTestInstance).findAll(
-          (node) => node.type === "input",
-        );
-        const fileInput = inputs.find((node) => node.props.accept === ".eliza-agent");
-        const passwordInput = inputs.find(
-          (node) =>
-            node.props.placeholder === "onboarding.decryptionPasswordPlaceholder",
-        );
-        expect(fileInput).toBeDefined();
-        expect(passwordInput).toBeDefined();
+      await act(async () => {
+        fileInput?.props.onChange({ target: { files: [mockFile] } });
+        passwordInput?.props.onChange({ target: { value: "pass1234" } });
+      });
 
-        const mockFile = {
-          arrayBuffer: async () => new Uint8Array([1, 2, 3]).buffer,
-        } as File;
+      const importBtn = findButtons(
+        tree?.root as TestRenderer.ReactTestInstance,
+      ).find((button) => collectText(button) === "onboarding.restore");
+      expect(importBtn).toBeDefined();
 
-        await act(async () => {
-          fileInput?.props.onChange({ target: { files: [mockFile] } });
-          passwordInput?.props.onChange({ target: { value: "pass1234" } });
-        });
+      await act(async () => {
+        await importBtn?.props.onClick(makeButtonClickEvent());
+      });
 
-        const importBtn = findButtons(
-          tree?.root as TestRenderer.ReactTestInstance,
-        ).find((button) => collectText(button) === "onboarding.restore");
-        expect(importBtn).toBeDefined();
-
-        await act(async () => {
-          await importBtn?.props.onClick(makeButtonClickEvent());
-        });
-
-        expect(fetchMock).toHaveBeenCalledWith(
-          "/api/agent/import",
-          expect.objectContaining({
-            headers: expect.objectContaining({
-              Authorization: `Bearer ${expectedToken}`,
-              "Content-Type": "application/octet-stream",
-            }),
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/agent/import",
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: `Bearer ${expectedToken}`,
+            "Content-Type": "application/octet-stream",
           }),
-        );
-      } finally {
-        vi.unstubAllGlobals();
-      }
-    },
-  );
+        }),
+      );
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
 
   it("surfaces a bounded timeout error when onboarding import hangs", async () => {
     vi.useFakeTimers();
     mockUseApp.mockReturnValue(baseContext({ onboardingStep: "identity" }));
     const fetchMock = vi.fn(
-      () =>
-        new Promise<Response>(() => {
-          // Intentionally never resolves.
+      (_input: RequestInfo | URL, init?: RequestInit) =>
+        new Promise<Response>((_, reject) => {
+          init?.signal?.addEventListener(
+            "abort",
+            () => {
+              reject(
+                new DOMException("The operation was aborted.", "AbortError"),
+              );
+            },
+            { once: true },
+          );
         }),
     );
     vi.stubGlobal("fetch", fetchMock);
@@ -400,7 +416,9 @@ describe("IdentityStep", () => {
 
       const restoreBtn = findButtons(
         tree?.root as TestRenderer.ReactTestInstance,
-      ).find((button) => collectText(button) === "onboarding.restoreFromBackup");
+      ).find(
+        (button) => collectText(button) === "onboarding.restoreFromBackup",
+      );
       expect(restoreBtn).toBeDefined();
 
       await act(async () => {
@@ -410,7 +428,9 @@ describe("IdentityStep", () => {
       const inputs = (tree?.root as TestRenderer.ReactTestInstance).findAll(
         (node) => node.type === "input",
       );
-      const fileInput = inputs.find((node) => node.props.accept === ".eliza-agent");
+      const fileInput = inputs.find(
+        (node) => node.props.accept === ".eliza-agent",
+      );
       const passwordInput = inputs.find(
         (node) =>
           node.props.placeholder === "onboarding.decryptionPasswordPlaceholder",
@@ -437,11 +457,12 @@ describe("IdentityStep", () => {
       });
 
       await act(async () => {
-        await vi.advanceTimersByTimeAsync(10_001);
+        await vi.advanceTimersByTimeAsync(60_001);
+        await Promise.resolve();
       });
 
       const text = collectText(tree?.root as TestRenderer.ReactTestInstance);
-      expect(text).toContain("Request timed out after 10000ms");
+      expect(text).toContain("Request timed out after 60000ms");
     } finally {
       vi.useRealTimers();
       vi.unstubAllGlobals();

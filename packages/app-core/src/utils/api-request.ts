@@ -36,39 +36,42 @@ export async function fetchWithTimeout(
   init?: RequestInit,
   timeoutMs = DEFAULT_FETCH_TIMEOUT_MS,
 ): Promise<Response> {
+  const controller = new AbortController();
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
-  let abortListener: (() => void) | undefined;
-  const fetchPromise = fetch(input, init);
-  const pending: Promise<Response>[] = [fetchPromise];
-
-  pending.push(
-    new Promise<Response>((_, reject) => {
-      timeoutId = setTimeout(() => {
-        reject(new Error(`Request timed out after ${timeoutMs}ms`));
-      }, timeoutMs);
-    }),
-  );
+  let upstreamAbortListener: (() => void) | undefined;
+  let timedOut = false;
+  let aborted = false;
 
   if (init?.signal) {
     if (init.signal.aborted) {
       throw new Error("Request aborted");
     }
-
-    pending.push(
-      new Promise<Response>((_, reject) => {
-        abortListener = () => {
-          reject(new Error("Request aborted"));
-        };
-        init.signal?.addEventListener("abort", abortListener, {
-          once: true,
-        });
-      }),
-    );
+    upstreamAbortListener = () => {
+      aborted = true;
+      controller.abort();
+    };
+    init.signal.addEventListener("abort", upstreamAbortListener, {
+      once: true,
+    });
   }
 
+  timeoutId = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, timeoutMs);
+
   try {
-    return await Promise.race(pending);
+    return await fetch(input, {
+      ...init,
+      signal: controller.signal,
+    });
   } catch (error) {
+    if (timedOut) {
+      throw new Error(`Request timed out after ${timeoutMs}ms`);
+    }
+    if (aborted) {
+      throw new Error("Request aborted");
+    }
     if (error instanceof Error) {
       throw error;
     }
@@ -77,8 +80,8 @@ export async function fetchWithTimeout(
     if (timeoutId !== undefined) {
       clearTimeout(timeoutId);
     }
-    if (init?.signal && abortListener) {
-      init.signal.removeEventListener("abort", abortListener);
+    if (init?.signal && upstreamAbortListener) {
+      init.signal.removeEventListener("abort", upstreamAbortListener);
     }
   }
 }

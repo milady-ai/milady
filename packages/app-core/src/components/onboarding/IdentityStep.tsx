@@ -1,20 +1,21 @@
 import { dispatchAppEmoteEvent } from "@miladyai/app-core/events";
 import { useApp } from "@miladyai/app-core/state";
-import { PREMADE_VOICES } from "../../voice/types";
-import { resolveApiUrl } from "../../utils/asset-url";
+import { getStylePresets } from "@miladyai/shared/onboarding-presets";
+import { Button, Input } from "@miladyai/ui";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   fetchWithTimeout,
   resolveCompatApiToken,
 } from "../../utils/api-request";
+import { resolveApiUrl } from "../../utils/asset-url";
 import { getElizaApiToken } from "../../utils/eliza-globals";
-import { getStylePresets } from "@miladyai/shared/onboarding-presets";
-import { Button, Input } from "@miladyai/ui";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { PREMADE_VOICES } from "../../voice/types";
 import {
   CharacterRoster,
   type CharacterRosterEntry,
   resolveRosterEntries,
 } from "../CharacterRoster";
+import { resolvePreviewTtsEndpoints } from "./identity-preview-tts";
 import {
   OnboardingStepHeader,
   onboardingBodyTextShadowStyle,
@@ -26,7 +27,8 @@ import {
   onboardingSecondaryActionTextShadowStyle,
   spawnOnboardingRipple,
 } from "./onboarding-step-chrome";
-import { resolvePreviewTtsEndpoints } from "./identity-preview-tts";
+
+const IMPORT_AGENT_FETCH_TIMEOUT_MS = 60_000;
 
 export function IdentityStep() {
   const { onboardingStyle, handleOnboardingNext, setState, t, uiLanguage } =
@@ -258,6 +260,7 @@ export function IdentityStep() {
           },
           body: envelope,
         },
+        IMPORT_AGENT_FETCH_TIMEOUT_MS,
       );
 
       const responseText = await response.text();
