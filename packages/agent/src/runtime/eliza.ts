@@ -1970,24 +1970,29 @@ export function applyCloudConfigToEnv(config: ElizaConfig): void {
     logger.info(
       `[eliza] Cloud config: enabled=${cloud.enabled}, hasApiKey=${Boolean(cloud.apiKey)}, baseUrl=${cloud.baseUrl ?? "(default)"}`,
     );
+    // Only propagate the API key when cloud is enabled AND it is a real
+    // credential — never set the literal "[REDACTED]" placeholder (which can
+    // leak into the config via UI round-trips through the redacted GET → PUT
+    // cycle). WHY: when enabled is false (BYOK / disconnected), leaving the key
+    // in process.env still auto-loads @elizaos/plugin-elizacloud and steals
+    // TEXT_LARGE even if the JSON says cloud is off.
+    const isRealApiKey =
+      cloud.apiKey && cloud.apiKey.trim().toUpperCase() !== "[REDACTED]";
+    if (isRealApiKey) {
+      process.env.ELIZAOS_CLOUD_API_KEY = cloud.apiKey;
+    } else {
+      delete process.env.ELIZAOS_CLOUD_API_KEY;
+    }
+    if (cloud.baseUrl) {
+      process.env.ELIZAOS_CLOUD_BASE_URL = cloud.baseUrl;
+    } else {
+      delete process.env.ELIZAOS_CLOUD_BASE_URL;
+    }
   } else {
     delete process.env.ELIZAOS_CLOUD_ENABLED;
     delete process.env.ELIZAOS_CLOUD_SMALL_MODEL;
     delete process.env.ELIZAOS_CLOUD_LARGE_MODEL;
-  }
-  // Only propagate the API key when it is a real credential — never set
-  // the literal "[REDACTED]" placeholder (which can leak into the config via
-  // UI round-trips through the redacted GET → PUT cycle).
-  const isRealApiKey =
-    cloud.apiKey && cloud.apiKey.trim().toUpperCase() !== "[REDACTED]";
-  if (isRealApiKey) {
-    process.env.ELIZAOS_CLOUD_API_KEY = cloud.apiKey;
-  } else {
     delete process.env.ELIZAOS_CLOUD_API_KEY;
-  }
-  if (cloud.baseUrl) {
-    process.env.ELIZAOS_CLOUD_BASE_URL = cloud.baseUrl;
-  } else {
     delete process.env.ELIZAOS_CLOUD_BASE_URL;
   }
 

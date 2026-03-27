@@ -1985,6 +1985,16 @@ function resolveBscExecutionNetwork(): {
  */
 function resolveCloudConfig(runtime?: unknown): ElizaConfig {
   const config = loadElizaConfig();
+  const cloudRec =
+    config.cloud && typeof config.cloud === "object"
+      ? (config.cloud as Record<string, unknown>)
+      : undefined;
+  if (cloudRec?.enabled === false) {
+    // Respect explicit disconnect / BYOK: never backfill cloud.apiKey from env
+    // or agent secrets into the file with enabled=true. WHY: that undoes
+    // Settings → disconnect + OpenRouter and breaks the next cold start.
+    return config;
+  }
   if (!config.cloud?.apiKey) {
     // Try multiple sources: sealed secrets → process.env → runtime character secrets
     const backfillKey =

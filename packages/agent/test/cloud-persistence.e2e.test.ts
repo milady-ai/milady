@@ -84,12 +84,13 @@ describe("applyCloudConfigToEnv — cloud credential persistence", () => {
     expect(process.env.ELIZAOS_CLOUD_ENABLED).toBeUndefined();
   });
 
-  it("keeps cloud disabled when enabled flag is explicitly false", () => {
+  it("does not put cloud API key in env when enabled is explicitly false", () => {
     const config = {
       cloud: { enabled: false, apiKey: "ck-test" },
     } as ElizaConfig;
     applyCloudConfigToEnv(config);
-    expect(process.env.ELIZAOS_CLOUD_API_KEY).toBe("ck-test");
+    expect(process.env.ELIZAOS_CLOUD_API_KEY).toBeUndefined();
+    expect(process.env.ELIZAOS_CLOUD_BASE_URL).toBeUndefined();
     expect(process.env.ELIZAOS_CLOUD_ENABLED).toBeUndefined();
   });
 });

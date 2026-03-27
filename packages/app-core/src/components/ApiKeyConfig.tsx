@@ -182,7 +182,7 @@ export function ApiKeyConfig({
       />
 
       <div className="flex justify-between items-center mt-3">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-h-8">
           <Button
             variant="outline"
             size="sm"
@@ -193,13 +193,18 @@ export function ApiKeyConfig({
               ? t("apikeyconfig.fetching")
               : t("apikeyconfig.fetchModels")}
           </Button>
-          {modelsFetchResult && (
-            <span
-              className={`text-[11px] ${modelsFetchResult.tone === "error" ? "text-[var(--danger)]" : "text-[var(--ok)]"}`}
-            >
-              {modelsFetchResult.message}
-            </span>
-          )}
+          <span
+            className={`text-[11px] min-h-4 flex items-center max-w-[min(100%,16rem)] ${
+              modelsFetchResult
+                ? modelsFetchResult.tone === "error"
+                  ? "text-[var(--danger)]"
+                  : "text-[var(--ok)]"
+                : "text-transparent select-none"
+            }`}
+            aria-live="polite"
+          >
+            {modelsFetchResult?.message ?? "\u00a0"}
+          </span>
         </div>
         <Button
           variant="default"

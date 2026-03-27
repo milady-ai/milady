@@ -13152,6 +13152,24 @@ async function handleRequest(
 
     safeMerge(state.config as Record<string, unknown>, filtered);
 
+    // Deep-merge leaves stale `cloud.apiKey` when the client only sends
+    // `cloud: { enabled: false, … }` (e.g. switching to OpenRouter). Strip it
+    // so disk + hot-reload match "disconnected" and env backfill cannot revive
+    // Eliza Cloud on the next boot.
+    if (
+      filtered.cloud &&
+      typeof filtered.cloud === "object" &&
+      !Array.isArray(filtered.cloud) &&
+      (filtered.cloud as Record<string, unknown>).enabled === false
+    ) {
+      const mergedCloud = (state.config as Record<string, unknown>).cloud as
+        | Record<string, unknown>
+        | undefined;
+      if (mergedCloud && typeof mergedCloud === "object") {
+        delete mergedCloud.apiKey;
+      }
+    }
+
     // If the client updated env vars, synchronise them into process.env so
     // subsequent hot-restarts see the latest values (loadElizaConfig()
     // only fills missing env vars and does not override existing ones).

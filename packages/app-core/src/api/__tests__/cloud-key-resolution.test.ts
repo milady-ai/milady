@@ -41,9 +41,15 @@ import { normalizeEnvValue } from "../../utils/env";
  * updated to match — the E2E fallback test below will catch any drift.
  */
 function resolveCloudApiKey(
-  config: { cloud?: { apiKey?: string } },
+  config: { cloud?: { apiKey?: string; enabled?: boolean } },
   runtime?: { character?: { secrets?: Record<string, unknown> } } | null,
 ): string | undefined {
+  if (config.cloud && typeof config.cloud === "object") {
+    if (config.cloud.enabled === false) {
+      return undefined;
+    }
+  }
+
   // 1. Config file (disk)
   const configApiKey = normalizeEnvValue(config.cloud?.apiKey);
   if (configApiKey) return configApiKey;
@@ -143,6 +149,17 @@ describe("cloud API key resolution fallback chain", () => {
 
     it("returns undefined when no source provides a key", () => {
       const result = resolveCloudApiKey(makeConfig(), null);
+
+      expect(result).toBeUndefined();
+    });
+
+    it("returns undefined when cloud.enabled is false even if env has a key", () => {
+      process.env.ELIZAOS_CLOUD_API_KEY = "env-key";
+
+      const result = resolveCloudApiKey(
+        { cloud: { enabled: false } },
+        makeRuntime("runtime-key"),
+      );
 
       expect(result).toBeUndefined();
     });

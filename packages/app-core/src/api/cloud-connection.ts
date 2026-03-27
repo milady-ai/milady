@@ -159,6 +159,19 @@ export function resolveCloudApiKey(
   config: Pick<ElizaConfig, "cloud"> | Record<string, unknown>,
   runtime?: { character?: { secrets?: Record<string, unknown> } } | null,
 ): string | undefined {
+  const cloudRecord = (config as { cloud?: { enabled?: unknown } }).cloud;
+  if (
+    cloudRecord &&
+    typeof cloudRecord === "object" &&
+    cloudRecord.enabled === false
+  ) {
+    // User disconnected cloud or chose BYOK — do not resurrect a key from env,
+    // sealed store, or agent DB. WHY: ~/.milady/.env may still hold
+    // ELIZAOS_CLOUD_API_KEY; without this guard the runtime looks "connected"
+    // and billing routes can rewrite enabled=true back onto disk.
+    return undefined;
+  }
+
   // 1. Config file (disk)
   const configApiKey = normalizeSecret(
     (config as { cloud?: { apiKey?: string } }).cloud?.apiKey,
