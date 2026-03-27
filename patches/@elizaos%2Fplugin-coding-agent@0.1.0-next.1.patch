@@ -1,6 +1,53 @@
-diff --git a/Users/shawwalters/eliza-workspace/milady/node_modules/@elizaos/plugin-coding-agent/.bun-tag-382009ea4b173d55 b/.bun-tag-382009ea4b173d55
+diff --git a/node_modules/@elizaos/plugin-coding-agent/.bun-tag-183878086aa825fb b/.bun-tag-183878086aa825fb
 new file mode 100644
 index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/dist/index.js b/dist/index.js
+index 9e43bfe2e952af9a4d7566cc5ee8174874dfa89c..8cf075274e949ebea9a056cd3657dca48c8fbf7d 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -3377,11 +3377,11 @@ var spawnAgentAction = {
+           unsubscribe();
+         }
+       });
+-      if (coordinator && task) {
++      if (coordinator) {
+         coordinator.registerTask(session.id, {
+           agentType,
+           label: `agent-${session.id.slice(-8)}`,
+-          originalTask: task,
++          originalTask: task || "",
+           workdir
+         });
+       }
+@@ -3834,11 +3834,11 @@ Docs: ${preflight.docsUrl}`
+     const isScratchWorkspace = !repo;
+     const scratchDir = isScratchWorkspace ? workdir : null;
+     registerSessionEvents(ptyService, runtime, session.id, label, scratchDir, callback, !!coordinator);
+-    if (coordinator && task) {
++    if (coordinator) {
+       coordinator.registerTask(session.id, {
+         agentType,
+         label,
+-        originalTask: task,
++        originalTask: task || "",
+         workdir
+       });
+     }
+@@ -5200,12 +5200,12 @@ async function handleAgentRoutes(req, res, pathname, ctx) {
+           }
+         }
+       });
+-      if (coordinator && task) {
++      if (coordinator) {
+         const label = metadata?.label;
+         coordinator.registerTask(session.id, {
+           agentType: agentStr,
+           label: label || `agent-${session.id.slice(-8)}`,
+-          originalTask: task,
++          originalTask: task || "",
+           workdir: session.workdir
+         });
+       }
 diff --git a/package.json b/package.json
 index 5822b64f2690da5dbbd4a1bd95e207f49d3f718e..a7f6b645c8e2f78e63d905c2a047104fed212cba 100644
 --- a/package.json
