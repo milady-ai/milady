@@ -60,12 +60,14 @@ interface ConversationsSidebarProps {
   mobile?: boolean;
   onClose?: () => void;
   variant?: ConversationsSidebarVariant;
+  showNewChatButton?: boolean;
 }
 
 export function ConversationsSidebar({
   mobile = false,
   onClose,
   variant = "default",
+  showNewChatButton = true,
 }: ConversationsSidebarProps) {
   const {
     conversations,
@@ -334,20 +336,22 @@ export function ConversationsSidebar({
                   ) : null}
                 </div>
               </div>
-              <Button
-                variant="outline"
-                className={
-                  isGameModal
-                    ? "h-11 w-full rounded-xl border-[color:var(--onboarding-accent-border)] bg-[color:var(--onboarding-accent-bg)] px-3 py-2 text-sm font-medium text-[color:var(--onboarding-text-strong)] shadow-[0_12px_28px_rgba(0,0,0,0.18)] hover:border-[color:var(--onboarding-accent-border-hover)] hover:bg-[color:var(--onboarding-accent-bg-hover)] active:scale-[0.98]"
-                    : `min-h-[44px] w-full rounded-[14px] px-3 py-2.5 text-[12px] font-medium ${DESKTOP_CONTROL_SURFACE_ACCENT_CLASSNAME}`
-                }
-                onClick={() => {
-                  handleNewConversation();
-                  onClose?.();
-                }}
-              >
-                {t("conversations.newChat")}
-              </Button>
+              {showNewChatButton ? (
+                <Button
+                  variant="outline"
+                  className={
+                    isGameModal
+                      ? "h-11 w-full rounded-xl border-[color:var(--onboarding-accent-border)] bg-[color:var(--onboarding-accent-bg)] px-3 py-2 text-sm font-medium text-[color:var(--onboarding-text-strong)] shadow-[0_12px_28px_rgba(0,0,0,0.18)] hover:border-[color:var(--onboarding-accent-border-hover)] hover:bg-[color:var(--onboarding-accent-bg-hover)] active:scale-[0.98]"
+                      : `min-h-[44px] w-full rounded-[14px] px-3 py-2.5 text-[12px] font-medium ${DESKTOP_CONTROL_SURFACE_ACCENT_CLASSNAME}`
+                  }
+                  onClick={() => {
+                    handleNewConversation();
+                    onClose?.();
+                  }}
+                >
+                  {t("conversations.newChat")}
+                </Button>
+              ) : null}
             </>
           )}
         </div>

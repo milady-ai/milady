@@ -74,14 +74,17 @@ vi.mock("./ConversationsSidebar.js", () => ({
   ConversationsSidebar: ({
     mobile,
     variant,
+    showNewChatButton,
   }: {
     mobile?: boolean;
     variant?: string;
+    showNewChatButton?: boolean;
   }) =>
     React.createElement("div", {
       "data-testid": "conversations-sidebar",
       "data-mobile": mobile ?? false,
       "data-variant": variant ?? "default",
+      "data-show-new-chat-button": showNewChatButton ?? true,
     }),
 }));
 
@@ -140,6 +143,12 @@ describe("ChatModalView", () => {
       "data-chat-game-thread": true,
     });
     expect(String(thread.props.className)).toContain("pointer-events-auto");
+
+    const sidebar = testRenderer.root.findByProps({
+      "data-testid": "conversations-sidebar",
+      "data-variant": "game-modal",
+    });
+    expect(sidebar.props["data-show-new-chat-button"]).toBe(false);
   });
 
   it("renders a mobile conversations overlay when the companion rail is toggled on a narrow viewport", async () => {
@@ -177,6 +186,13 @@ describe("ChatModalView", () => {
 
     expect(
       sidebarInstances.some((node) => node.props["data-mobile"] === true),
+    ).toBe(true);
+    expect(
+      sidebarInstances.some(
+        (node) =>
+          node.props["data-mobile"] === true &&
+          node.props["data-show-new-chat-button"] === false,
+      ),
     ).toBe(true);
 
     const mobileOverlay = testRenderer.root.findByProps({

@@ -76,7 +76,11 @@ export const ChatModalView = memo(function ChatModalView({
               <DrawerSheetHeader className="sr-only">
                 <DrawerSheetTitle>Chats</DrawerSheetTitle>
               </DrawerSheetHeader>
-              <ConversationsSidebar mobile onClose={onSidebarClose} />
+              <ConversationsSidebar
+                mobile
+                onClose={onSidebarClose}
+                showNewChatButton={!isCompanionDock}
+              />
             </DrawerSheetContent>
           </DrawerSheet>
         )}
@@ -91,7 +95,10 @@ export const ChatModalView = memo(function ChatModalView({
             } ${isCompanionDock ? "pointer-events-auto" : ""}`}
             data-chat-game-sidebar
           >
-            <ConversationsSidebar variant="game-modal" />
+            <ConversationsSidebar
+              variant="game-modal"
+              showNewChatButton={!isCompanionDock}
+            />
           </aside>
           <section
             className={`flex-1 flex flex-col min-w-0 bg-transparent relative ${

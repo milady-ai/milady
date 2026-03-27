@@ -414,4 +414,25 @@ describe("ConversationsSidebar game-modal variant", () => {
     expect(content).toContain("conversations.chats");
     expect(content).toContain("1");
   });
+
+  it("can hide the duplicate new-chat button in game-modal variant", async () => {
+    mockUseApp.mockReturnValue(createContext());
+
+    let tree: TestRenderer.ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(
+        React.createElement(ConversationsSidebar, {
+          variant: "game-modal",
+          showNewChatButton: false,
+        }),
+      );
+    });
+
+    const newChatButtons = tree?.root.findAll(
+      (node) =>
+        node.type === "button" &&
+        textOf(node).trim() === "conversations.newChat",
+    );
+    expect(newChatButtons?.length ?? 0).toBe(0);
+  });
 });
