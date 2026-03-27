@@ -1,7 +1,7 @@
 ---
 title: "Platform Connectors"
 sidebarTitle: "Connectors"
-description: "Platform bridges for 29 messaging platforms — 20 auto-enabled from config (Discord, Telegram, Slack, WhatsApp, Signal, iMessage, BlueBubbles, Blooio, MS Teams, Google Chat, Twitter, Farcaster, Twitch, Mattermost, WeChat, Matrix, Feishu, Nostr, Lens, Retake) plus 9 installable from the registry (Bluesky, Instagram, LINE, Zalo, Twilio, GitHub, Gmail Watch, Nextcloud Talk, Tlon)."
+description: "Platform bridges for 29 messaging platforms — 19 auto-enabled from config (Discord, Telegram, Slack, WhatsApp, Signal, iMessage, BlueBubbles, Blooio, MS Teams, Google Chat, Twitter, Farcaster, Twitch, Mattermost, Matrix, Feishu, Nostr, Lens, Retake) plus 10 installable from the registry (Bluesky, Instagram, LINE, Zalo, Twilio, GitHub, Gmail Watch, Nextcloud Talk, Tlon, WeChat)."
 ---
 
 Connectors are platform bridges that allow your agent to communicate across messaging platforms and social networks. Each connector handles authentication, message routing, session management, and platform-specific features.
@@ -65,7 +65,7 @@ Connectors marked **Auto** load automatically when their config is present in `m
 | Farcaster | Neynar API key + signer | Casts | Yes (channels) | No | Auto |
 | Twitch | Client ID + access token | Yes (chat) | Yes (channels) | No | Auto |
 | Mattermost | Bot token | Yes | Yes (channels) | No | Auto |
-| WeChat | Proxy API key + QR code | Yes | Yes | Yes | Auto |
+| WeChat | Proxy API key + QR code | Yes | Yes | Yes | Registry |
 | Matrix | Access token | Yes | Yes (rooms) | No | Auto |
 | Feishu / Lark | App ID + secret | Yes | Yes (group chats) | No | Auto |
 | Nostr | Private key (nsec/hex) | Yes (NIP-04) | N/A | No | Auto |
@@ -333,12 +333,15 @@ See the [WhatsApp Integration Guide](/guides/whatsapp) for detailed setup instru
   "connectors": {
     "imessage": {
       "enabled": true,
+      "cliPath": "/usr/local/bin/imessage-exporter",
       "service": "auto",
       "dmPolicy": "pairing"
     }
   }
 }
 ```
+
+> **Auto-enable note:** The connector auto-enables when `cliPath` is set. Without it, the plugin will not load.
 
 ### Features
 
@@ -430,6 +433,7 @@ Connects to iMessage and SMS messaging via the Blooio service with signed webhoo
   "connectors": {
     "msteams": {
       "enabled": true,
+      "botToken": "APP_PASSWORD",
       "appId": "APP_ID",
       "appPassword": "APP_PASSWORD",
       "tenantId": "TENANT_ID",
@@ -438,6 +442,8 @@ Connects to iMessage and SMS messaging via the Blooio service with signed webhoo
   }
 }
 ```
+
+> **Auto-enable note:** The connector auto-enables when `botToken`, `token`, or `apiKey` is present in the config. Set `botToken` to the app password to trigger auto-enable.
 
 ### Features
 
@@ -464,6 +470,7 @@ Connects to iMessage and SMS messaging via the Blooio service with signed webhoo
   "connectors": {
     "googlechat": {
       "enabled": true,
+      "apiKey": "placeholder",
       "serviceAccountFile": "./service-account.json",
       "audienceType": "project-number",
       "audience": "123456789",
@@ -472,6 +479,8 @@ Connects to iMessage and SMS messaging via the Blooio service with signed webhoo
   }
 }
 ```
+
+> **Auto-enable note:** Google Chat uses service-account auth, not a traditional API key. Include `"apiKey": "placeholder"` to trigger auto-enable — the actual authentication uses the service account file.
 
 ### Features
 
@@ -760,11 +769,14 @@ operate yourself or explicitly trust for that message flow.
   },
   "connectors": {
     "matrix": {
-      "enabled": true
+      "enabled": true,
+      "token": "syt_your_access_token"
     }
   }
 }
 ```
+
+> **Auto-enable note:** The connector auto-enables when `token`, `botToken`, or `apiKey` is present in the connector config. Setting `"enabled": true` alone is not sufficient — include the `token` field.
 
 **Environment variables:** `MATRIX_ACCESS_TOKEN`, `MATRIX_HOMESERVER`, `MATRIX_USER_ID`, `MATRIX_DEVICE_ID`, `MATRIX_ROOMS`, `MATRIX_AUTO_JOIN`, `MATRIX_ENCRYPTION`, `MATRIX_REQUIRE_MENTION`
 
@@ -795,11 +807,14 @@ operate yourself or explicitly trust for that message flow.
   },
   "connectors": {
     "feishu": {
-      "enabled": true
+      "enabled": true,
+      "apiKey": "your_app_secret"
     }
   }
 }
 ```
+
+> **Auto-enable note:** The connector auto-enables when `apiKey`, `token`, or `botToken` is present in the connector config. Set `apiKey` to the app secret to trigger auto-enable.
 
 **Environment variables:** `FEISHU_APP_ID`, `FEISHU_APP_SECRET`, `FEISHU_DOMAIN`, `FEISHU_ALLOWED_CHATS`
 
@@ -827,11 +842,14 @@ operate yourself or explicitly trust for that message flow.
   },
   "connectors": {
     "nostr": {
-      "enabled": true
+      "enabled": true,
+      "token": "placeholder"
     }
   }
 }
 ```
+
+> **Auto-enable note:** Nostr uses key-based auth, not a traditional token. Include `"token": "placeholder"` in the connector config to trigger auto-enable — the actual authentication uses the `NOSTR_PRIVATE_KEY` environment variable.
 
 **Environment variables:** `NOSTR_PRIVATE_KEY`, `NOSTR_RELAYS`, `NOSTR_DM_POLICY`, `NOSTR_ALLOW_FROM`, `NOSTR_ENABLED`
 

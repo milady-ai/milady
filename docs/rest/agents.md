@@ -19,6 +19,8 @@ All agent endpoints require the agent runtime to be initialized. The API server 
 | POST | `/api/agent/export` | Export agent as a password-encrypted `.eliza-agent` binary file |
 | GET | `/api/agent/export/estimate` | Estimate export file size before downloading |
 | POST | `/api/agent/import` | Import agent from a password-encrypted `.eliza-agent` file |
+| GET | `/api/agent/autonomy` | Check whether autonomy is enabled |
+| POST | `/api/agent/autonomy` | Enable or disable autonomy |
 | GET | `/api/agent/self-status` | Structured self-status summary with capabilities, wallet, plugins, and awareness |
 
 ---
@@ -99,6 +101,41 @@ Resume a paused agent and re-enable autonomy. The first tick fires immediately.
     "uptime": 34200000,
     "startedAt": 1718000000000
   }
+}
+```
+
+---
+
+### GET /api/agent/autonomy
+
+Check whether autonomous operation is currently enabled.
+
+**Response**
+
+```json
+{
+  "enabled": true
+}
+```
+
+---
+
+### POST /api/agent/autonomy
+
+Enable or disable autonomous operation.
+
+**Request Body**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `enabled` | boolean | Yes | Whether to enable autonomy |
+
+**Response**
+
+```json
+{
+  "ok": true,
+  "enabled": true
 }
 ```
 

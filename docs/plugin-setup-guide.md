@@ -28,9 +28,9 @@ where to get the credentials, minimum required fields, and tips for optional fie
 
 ### Anthropic
 **Get credentials:** https://console.anthropic.com/settings/keys
-**Minimum required:** `ANTHROPIC_API_KEY` (starts with `sk-ant-`)
+**Minimum required:** `ANTHROPIC_API_KEY` (starts with `sk-ant-`) or `CLAUDE_API_KEY`
 **Variables:**
-- `ANTHROPIC_API_KEY` — Your secret key from console.anthropic.com
+- `ANTHROPIC_API_KEY` / `CLAUDE_API_KEY` — Your secret key from console.anthropic.com (either works for auto-enable)
 - `ANTHROPIC_SMALL_MODEL` — e.g. `claude-haiku-4-5-20251001`
 - `ANTHROPIC_LARGE_MODEL` — e.g. `claude-sonnet-4-6`
 - `ANTHROPIC_BROWSER_BASE_URL` — (Advanced) Proxy URL for browser-side requests
@@ -38,9 +38,9 @@ where to get the credentials, minimum required fields, and tips for optional fie
 
 ### Google Gemini
 **Get credentials:** https://aistudio.google.com/app/apikey
-**Minimum required:** `GOOGLE_GENERATIVE_AI_API_KEY`
+**Minimum required:** `GOOGLE_GENERATIVE_AI_API_KEY` or `GOOGLE_API_KEY`
 **Variables:**
-- `GOOGLE_GENERATIVE_AI_API_KEY` — From AI Studio or Google Cloud
+- `GOOGLE_GENERATIVE_AI_API_KEY` / `GOOGLE_API_KEY` — From AI Studio or Google Cloud (either works for auto-enable)
 - `GOOGLE_SMALL_MODEL` — e.g. `gemini-2.0-flash`
 - `GOOGLE_LARGE_MODEL` — e.g. `gemini-2.0-pro`
 - `GOOGLE_EMBEDDING_MODEL` — e.g. `text-embedding-004`
@@ -72,9 +72,9 @@ where to get the credentials, minimum required fields, and tips for optional fie
 
 ### xAI (Grok)
 **Get credentials:** https://console.x.ai/
-**Minimum required:** `XAI_API_KEY`
+**Minimum required:** `XAI_API_KEY` or `GROK_API_KEY`
 **Variables:**
-- `XAI_API_KEY` — From console.x.ai
+- `XAI_API_KEY` / `GROK_API_KEY` — From console.x.ai (either works for auto-enable)
 - `XAI_MODEL` — e.g. `grok-2-1212` (overrides small/large)
 - `XAI_SMALL_MODEL` / `XAI_LARGE_MODEL` — Specific model slots
 - `XAI_EMBEDDING_MODEL` — e.g. `v1`
@@ -86,9 +86,10 @@ where to get the credentials, minimum required fields, and tips for optional fie
 ### Ollama (Local Models)
 **Get credentials:** No API key needed — install Ollama locally
 **Setup:** https://ollama.ai — run `ollama pull llama3.2` to download a model
-**Minimum required:** `OLLAMA_API_ENDPOINT` = `http://localhost:11434/api`
+**Minimum required:** `OLLAMA_BASE_URL` = `http://localhost:11434` (auto-enable trigger) or `OLLAMA_API_ENDPOINT` = `http://localhost:11434/api`
 **Variables:**
-- `OLLAMA_API_ENDPOINT` — Default: `http://localhost:11434/api`
+- `OLLAMA_BASE_URL` — Auto-enable trigger. Default: `http://localhost:11434`
+- `OLLAMA_API_ENDPOINT` — Plugin endpoint. Default: `http://localhost:11434/api`
 - `OLLAMA_SMALL_MODEL` — e.g. `llama3.2:3b`
 - `OLLAMA_MEDIUM_MODEL` — e.g. `llama3.2`
 - `OLLAMA_LARGE_MODEL` — e.g. `llama3.3:70b`

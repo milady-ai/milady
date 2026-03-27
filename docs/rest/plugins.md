@@ -516,11 +516,37 @@ Get the agent's registry connection status.
 
 **Response**
 
+When the registry service is configured:
+
 ```json
 {
   "registered": true,
-  "agentId": "uuid",
-  "registryUrl": "https://registry.elizaos.com"
+  "configured": true,
+  "tokenId": 1,
+  "agentName": "Milady",
+  "agentEndpoint": "https://...",
+  "capabilitiesHash": "...",
+  "isActive": true,
+  "tokenURI": "https://...",
+  "walletAddress": "0x...",
+  "totalAgents": 42
+}
+```
+
+When the registry service is not configured:
+
+```json
+{
+  "registered": false,
+  "configured": false,
+  "tokenId": 0,
+  "agentName": "",
+  "agentEndpoint": "",
+  "capabilitiesHash": "",
+  "isActive": false,
+  "tokenURI": "",
+  "walletAddress": "",
+  "totalAgents": 0
 }
 ```
 
@@ -530,25 +556,29 @@ Get the agent's registry connection status.
 
 Register the agent with the elizaOS registry.
 
+**Request Body**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | No | Agent name override |
+| `endpoint` | string | No | Public endpoint URL |
+| `tokenURI` | string | No | Token URI for the registration |
+
 **Response**
 
-```json
-{
-  "ok": true
-}
-```
+Returns the registration result from the registry service (schema depends on registry implementation).
 
 ---
 
 ### POST /api/registry/update-uri
 
-Update the agent's public URI in the registry.
+Update the agent's token URI in the registry.
 
 **Request Body**
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `uri` | string | Yes | New public URI |
+| `tokenURI` | string | Yes | New token URI |
 
 **Response**
 
@@ -564,11 +594,20 @@ Update the agent's public URI in the registry.
 
 Sync the agent's state with the registry (heartbeat, status update).
 
+**Request Body**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | No | Agent name override |
+| `endpoint` | string | No | Public endpoint URL |
+| `tokenURI` | string | No | Token URI |
+
 **Response**
 
 ```json
 {
-  "ok": true
+  "ok": true,
+  "txHash": "0x..."
 }
 ```
 
@@ -576,14 +615,16 @@ Sync the agent's state with the registry (heartbeat, status update).
 
 ### GET /api/registry/config
 
-Get the current registry configuration.
+Get the current registry configuration. Returns the contents of `config.registry` along with chain metadata.
 
 **Response**
 
 ```json
 {
-  "registryUrl": "https://registry.elizaos.com",
-  "autoRegister": true,
-  "syncInterval": 300000
+  "chainId": 1,
+  "explorerUrl": "https://etherscan.io",
+  "...": "additional fields from config.registry"
 }
 ```
+
+The exact response shape depends on what is configured in `milady.json` under the `registry` key.
