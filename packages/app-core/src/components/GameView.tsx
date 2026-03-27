@@ -476,7 +476,7 @@ export function GameView() {
   handleChatSendRef.current = handleChatSend;
   const spokenAssistantIdRef = useRef<string | null>(null);
 
-  const voiceSilenceTimerRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  const voiceSilenceTimerRef = useRef<number | null>(null);
   const voiceStopRef = useRef<((opts?: { submit?: boolean }) => Promise<void>) | null>(null);
   const voiceStartRef = useRef<((mode?: "compose" | "push-to-talk") => Promise<void>) | null>(null);
 
