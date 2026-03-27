@@ -244,21 +244,15 @@ export function ShellHeaderControls({
           aria-label="Switch shell view"
         >
           <legend className="sr-only">Switch shell view</legend>
-          {shellOptions.map(({ view, label, Icon }, index) => {
+          {shellOptions.map(({ view, label, Icon }) => {
             const selected = activeShellView === view;
-            const edgeClass =
-              index === 0
-                ? "rounded-l-xl rounded-r-none"
-                : index === shellOptions.length - 1
-                  ? "rounded-l-none rounded-r-xl"
-                  : "rounded-none";
             return (
               <Button
                 key={view}
                 size="icon"
                 onClick={() => onShellViewChange(view)}
                 onPointerDown={(event) => event.stopPropagation()}
-                className={`h-11 min-h-[44px] min-w-[44px] px-3 transition-all duration-200 ${edgeClass} ${
+                className={`h-11 min-h-[44px] min-w-[44px] rounded-[10px] px-3 transition-all duration-200 ${
                   selected
                     ? SHELL_SEGMENT_ACTIVE_CLASSNAME
                     : SHELL_SEGMENT_INACTIVE_CLASSNAME
