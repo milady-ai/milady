@@ -11,23 +11,25 @@
 #   node_modules/ in the build context), and build with Dockerfile.ci.
 #
 # Published tags (example for steward-9):
-#   ghcr.io/milady-ai/agent:v2.0.0-steward-9
-#   ghcr.io/milady-ai/agent:steward-latest
+#   ghcr.io/milady-ai/milady/agent:v2.0.0-steward-9
+#   ghcr.io/milady-ai/milady/agent:steward-latest
 #
 # Required secrets:
 #   GHCR_TOKEN        — PAT with packages:write (or use GITHUB_TOKEN on milady-ai org)
 #   VPS_SSH_KEY       — SSH private key for the deploy target
-#   VPS_HOST          — VPS hostname/IP (required, no default)
-#   VPS_ENV_FILE      — Path to .env.local on VPS (default: /opt/eliza-cloud/.env.local)
-#   VPS_SERVICE_NAME  — systemd service to restart (default: milady-provisioning-worker)
+#   VPS_HOST          — VPS hostname/IP (required)
+#   VPS_USER          — SSH username on VPS (default: deploy; avoid root)
+#   VPS_ENV_FILE      — Path to .env file on VPS (required, no default)
+#   VPS_SERVICE_NAME  — systemd service to restart (required, no default)
 
 name: Build Steward Image
 
 on:
   push:
     tags:
-      # Only stable releases — excludes alpha/beta/rc pre-release tags
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+      # Glob matches any v-prefixed semver; the "Validate stable tag" step
+      # below rejects pre-release suffixes (alpha/beta/rc).
+      - 'v[0-9]*.[0-9]*.[0-9]*'
   workflow_dispatch:
     inputs:
       steward_n:
@@ -51,7 +53,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: milady-ai/agent
+  IMAGE_NAME: milady-ai/milady/agent
 
 permissions:
   contents: read
@@ -71,6 +73,17 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      # ── Validate tag is a stable release (no pre-release suffix) ────────────
+      - name: Validate stable tag
+        if: github.event_name == 'push'
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Tag '$TAG' is not a stable semver release (expected vX.Y.Z). Skipping."
+            exit 1
+          fi
+          echo "Stable release tag validated: $TAG"
 
       # ── Determine release version ──────────────────────────────────────────
       - name: Determine version
@@ -210,8 +223,13 @@ jobs:
     steps:
       - name: Validate deploy secrets
         run: |
-          if [[ -z "${{ secrets.VPS_HOST }}" ]]; then
-            echo "::error::VPS_HOST secret is not set. Deploy cannot proceed."
+          MISSING=()
+          [[ -z "${{ secrets.VPS_HOST }}" ]] && MISSING+=("VPS_HOST")
+          [[ -z "${{ secrets.VPS_SSH_KEY }}" ]] && MISSING+=("VPS_SSH_KEY")
+          [[ -z "${{ secrets.VPS_ENV_FILE }}" ]] && MISSING+=("VPS_ENV_FILE")
+          [[ -z "${{ secrets.VPS_SERVICE_NAME }}" ]] && MISSING+=("VPS_SERVICE_NAME")
+          if [[ ${#MISSING[@]} -gt 0 ]]; then
+            echo "::error::Missing required secrets: ${MISSING[*]}. Deploy cannot proceed."
             exit 1
           fi
 
@@ -220,20 +238,25 @@ jobs:
         uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2  # v1
         with:
           host: ${{ secrets.VPS_HOST }}
-          username: root
+          username: ${{ secrets.VPS_USER || 'deploy' }}
           key: ${{ secrets.VPS_SSH_KEY }}
           timeout: 60s
           script: |
-            ENV_FILE="${{ secrets.VPS_ENV_FILE || '/opt/eliza-cloud/.env.local' }}"
-            SERVICE="${{ secrets.VPS_SERVICE_NAME || 'milady-provisioning-worker' }}"
+            set -euo pipefail
+
+            ENV_FILE="${{ secrets.VPS_ENV_FILE }}"
+            SERVICE="${{ secrets.VPS_SERVICE_NAME }}"
             NEW_TAG="${{ needs.build.outputs.steward_tag }}"
 
+            : "${ENV_FILE:?VPS_ENV_FILE secret is required}"
+            : "${SERVICE:?VPS_SERVICE_NAME secret is required}"
+
             echo "Updating steward image tag in $ENV_FILE to $NEW_TAG..."
-            # Replace any existing steward-N tag reference with the new one
-            sed -i "s|steward-[0-9]*|${NEW_TAG##*:}|g" "$ENV_FILE"
+            # Only replace steward-N in lines containing IMAGE_TAG or STEWARD
+            sed -i '/IMAGE_TAG\|STEWARD/s|steward-[0-9][0-9]*|'"${NEW_TAG##*:}"'|g' "$ENV_FILE"
 
             echo "Restarting $SERVICE..."
-            systemctl restart "$SERVICE"
+            sudo systemctl restart "$SERVICE"
 
             echo "Done. Current steward tag in env:"
             grep -i steward "$ENV_FILE" | sed 's/=.*/=<redacted>/' || echo "(no steward entries)"
