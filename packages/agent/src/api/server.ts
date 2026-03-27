@@ -6394,6 +6394,15 @@ export function resolveCorsOrigin(origin?: string): string | null {
   const trimmed = origin.trim();
   if (!trimmed) return null;
 
+  // Cloud-provisioned containers default to allowing all origins so the
+  // browser web UI can reach the agent API without extra config.
+  if (
+    process.env.MILADY_CLOUD_PROVISIONED === "1" ||
+    process.env.ELIZA_CLOUD_PROVISIONED === "1"
+  ) {
+    return trimmed;
+  }
+
   // When bound to a wildcard address, allow any origin. Non-loopback binds still
   // require an explicit token, so this only relaxes the browser origin check.
   const bindHost = (
@@ -6406,7 +6415,7 @@ export function resolveCorsOrigin(origin?: string): string | null {
   if (WILDCARD_BIND_RE.test(stripPort(bindHost))) return trimmed;
 
   // Explicit allowlist via env (comma-separated)
-  const extra = process.env.ELIZA_ALLOWED_ORIGINS;
+  const extra = process.env.ELIZA_ALLOWED_ORIGINS ?? process.env.CORS_ORIGINS;
   if (extra) {
     const allow = extra
       .split(",")
