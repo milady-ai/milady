@@ -3,34 +3,28 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
-<Update label="2026-03-27" description="Prompt optimization, desktop background mode, heartbeat execution fix" tags={["Feature", "Update", "Fix"]}>
-## Smart prompt optimization
+<Update label="2026-03-26" description="Dashboard pricing, background mode, desktop UI polish" tags={["Feature", "Update", "Fix"]}>
+## Dashboard pricing info
 
-Milady now automatically reduces prompt sizes by around 36% for general chat. The system detects what you're asking about — coding, emotes, terminal work — and only includes full action details for relevant actions, replacing the rest with compact stubs. This means faster responses and lower token costs with no configuration needed. Coding tasks keep full context. Set `PARALLAX_PROMPT_TRACE=1` to see compaction stats in the server log.
+The cloud [dashboard](/guides/cloud) now shows pricing information before you create an agent. Hosting rates, credit pack options with volume discounts, and minimum deposit requirements are visible on the credits page, the create-agent form, and the empty-agents landing view — so you know what to expect before committing.
 
-## Homepage pricing
+## Desktop background mode
 
-The [homepage](/guides/cloud) now shows hosting and credit pricing before you create an agent — running rate, idle rate, credit packs, and minimum deposit — so you know what to expect upfront.
+Closing the desktop window no longer briefly flashes a replacement window. The agent keeps running in the background and a system notification confirms it. Click the dock icon or any menu/tray action to restore the window instantly.
 
 ## Updates
 
-- **Desktop background mode** — Closing the desktop window no longer flashes a replacement window. The agent keeps running in the background, and clicking the dock icon or any tray/menu action restores the window cleanly.
-- **Coding agents on Eliza Cloud** — [Coding agents](/guides/coding-swarms) (Claude Code, Codex) now route through Eliza Cloud proxy endpoints when cloud inference is active. Previously, switching to cloud mode wiped their API keys.
-- **Desktop shell consistency** — Layouts across chat, settings, skills, apps, heartbeats, stream, knowledge, and other views have been normalized to use a shared surface system, improving readability and reducing visual inconsistencies.
-- **Workspace boilerplate excluded from prompts** — Default workspace template files (like `AGENTS.md`) are no longer injected into prompts due to a case-sensitivity mismatch. Only files you've actually customized are included.
+- **Desktop shell consistency** — A broad layout and theme pass brings chat, skills, apps, heartbeats, stream, knowledge, onboarding, companion, and settings surfaces onto a shared chrome system. Spacing, hierarchy, and readability are improved across the board, and the companion composer uses a proper structural container instead of layered visual nudges.
+- **Wallet action feedback** — Wallet actions like balance checks and token transfers now reliably report success or failure in the [trajectory view](/advanced/trajectories), making it easier to trace what happened during a transaction.
+- **Cloud container access** — Cloud-provisioned containers no longer auto-generate an API token that locks out the web UI. Managed deployments are accessible immediately without browser auth until the pairing flow is configured.
 
 ## Bug fixes
 
-- Fixed heartbeats and triggers silently not executing — the autonomy loop was never enabled after startup, so scheduled tasks sat in the database unprocessed
-- Fixed 19 operations across cloud, wallet, knowledge, and runtime that reported success but silently failed — errors are now surfaced properly
-- Fixed homepage sign-in failing because the cloud base URL redirect stripped the POST body
-- Fixed homepage hero text clipping on mobile screens and the download dropdown closing when moving the cursor to the list
-- Fixed wallet `CHECK_BALANCE` and `TRANSFER_TOKEN` actions not reporting success or failure back to the chat
-- Fixed the desktop companion header's glass blur effect bleeding into the standard desktop header
-- Fixed the Windows app icon only containing 16px and 32px sizes — taskbar, Start Menu, and desktop shortcuts now display crisp icons at all standard sizes
-- Fixed Eliza Cloud showing a generic error when the session is missing an account — it now explains whether an API key or login session is needed
-- Fixed onboarding voice preview collapsing all ElevenLabs voice IDs to a single default, and a race condition when rapidly switching character previews
-- Fixed unhandled runtime errors and a timeout leak in the embedding manager that could cause issues during cleanup
+- Fixed cloud sign-in failing on the hosted homepage — a bare-domain redirect was dropping the POST body during authentication
+- Fixed homepage hero text clipping on mobile screens and the download dropdown closing when moving the cursor from the button to the list
+- Fixed onboarding character preview playing a single default voice instead of the voice associated with each character preset
+- Fixed onboarding voice preview failing entirely when switching characters rapidly
+- Fixed stale timers during embedding cleanup that could cause errors on shutdown
 
 </Update>
 

@@ -1,0 +1,262 @@
+# build-steward-image.yml — Build and publish the Steward-enabled agent image
+#
+# Triggers:
+#   - Push of stable release tags (vX.Y.Z, excludes alpha/beta/rc pre-releases)
+#   - Manual dispatch with optional steward number override
+#
+# Build strategy:
+#   The .dockerignore excludes workspace dirs (apps/homepage, apps/app/electrobun)
+#   which breaks `bun install` inside Docker. We therefore pre-build on the
+#   runner (bun install + bun run build), swap in .dockerignore.ci (which keeps
+#   node_modules/ in the build context), and build with Dockerfile.ci.
+#
+# Published tags (example for steward-9):
+#   ghcr.io/milady-ai/milady/agent:v2.0.0-steward-9
+#   ghcr.io/milady-ai/milady/agent:steward-latest
+#
+# Required secrets:
+#   GHCR_TOKEN        — PAT with packages:write (or use GITHUB_TOKEN on milady-ai org)
+#   VPS_SSH_KEY       — SSH private key for the deploy target
+#   VPS_HOST          — VPS hostname/IP (required)
+#   VPS_USER          — SSH username on VPS (default: deploy; avoid root)
+#   VPS_ENV_FILE      — Path to .env file on VPS (required, no default)
+#   VPS_SERVICE_NAME  — systemd service to restart (required, no default)
+
+name: Build Steward Image
+
+on:
+  push:
+    tags:
+      # Glob matches any v-prefixed semver; the "Validate stable tag" step
+      # below rejects pre-release suffixes (alpha/beta/rc).
+      - 'v[0-9]*.[0-9]*.[0-9]*'
+  workflow_dispatch:
+    inputs:
+      steward_n:
+        description: 'Steward image number (e.g. 9). Leave empty to auto-detect from GHCR.'
+        required: false
+        type: string
+      version:
+        description: 'Git tag/ref to build (e.g. v2.0.0-alpha.125). Defaults to latest tag.'
+        required: false
+        type: string
+      push:
+        description: 'Push image to GHCR'
+        required: false
+        type: boolean
+        default: true
+      deploy:
+        description: 'SSH to VPS and update .env.local + restart service'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: milady-ai/milady/agent
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    outputs:
+      steward_tag: ${{ steps.steward.outputs.steward_tag }}
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ── Validate tag is a stable release (no pre-release suffix) ────────────
+      - name: Validate stable tag
+        if: github.event_name == 'push'
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Tag '$TAG' is not a stable semver release (expected vX.Y.Z). Skipping."
+            exit 1
+          fi
+          echo "Stable release tag validated: $TAG"
+
+      # ── Determine release version ──────────────────────────────────────────
+      - name: Determine version
+        id: version
+        run: |
+          if [[ -n "${{ inputs.version }}" ]]; then
+            VERSION="${{ inputs.version }}"
+          elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
+          else
+            VERSION="$(git tag --sort=-creatordate | grep -E '^v[0-9]' | head -1)"
+          fi
+          VERSION_CLEAN="${VERSION#v}"
+          GIT_SHA="$(git rev-parse --short HEAD)"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "version_clean=$VERSION_CLEAN" >> $GITHUB_OUTPUT
+          echo "git_sha=$GIT_SHA" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION  SHA: $GIT_SHA"
+
+      # ── Auto-detect next steward-N ─────────────────────────────────────────
+      - name: Determine steward number
+        id: steward
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [[ -n "${{ inputs.steward_n }}" ]]; then
+            N="${{ inputs.steward_n }}"
+            echo "Using manually specified steward number: $N"
+          else
+            echo "Auto-detecting next steward number from GHCR..."
+            # List GHCR tags via the GitHub Packages API
+            TAGS=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+              "https://api.github.com/orgs/milady-ai/packages/container/agent/versions?per_page=100" \
+              | python3 -c "
+          import sys, json, re
+          versions = json.load(sys.stdin)
+          ns = []
+          for v in versions:
+              for tag in v.get('metadata', {}).get('container', {}).get('tags', []):
+                  m = re.search(r'steward-(\d+)', tag)
+                  if m:
+                      ns.append(int(m.group(1)))
+          print(max(ns) if ns else 0)
+          " 2>/dev/null || echo "0")
+            CURRENT="${TAGS:-0}"
+            N=$((CURRENT + 1))
+            echo "Current max steward number: $CURRENT → next: $N"
+          fi
+
+          STEWARD_TAG="v${{ steps.version.outputs.version_clean }}-steward-${N}"
+          echo "steward_n=$N" >> $GITHUB_OUTPUT
+          echo "steward_tag=$STEWARD_TAG" >> $GITHUB_OUTPUT
+          echo "Steward tag: $STEWARD_TAG"
+
+      # ── Pre-build on runner ─────────────────────────────────────────────────
+      # .dockerignore excludes workspace dirs that bun needs for install.
+      # Build artifacts on the runner first, then use Dockerfile.ci which
+      # copies pre-built node_modules + dist into the image.
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.10"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile --ignore-scripts
+
+      - name: Run patch scripts
+        run: |
+          node ./scripts/link-browser-server.mjs || true
+          node ./scripts/patch-deps.mjs || true
+
+      - name: Build
+        run: bun run build
+
+      # Swap to CI-specific dockerignore that keeps node_modules in context
+      - name: Prepare Docker context
+        run: cp .dockerignore.ci .dockerignore
+
+      # ── Docker build ───────────────────────────────────────────────────────
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push steward image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.ci
+          platforms: linux/amd64
+          push: ${{ github.event_name == 'push' || inputs.push == true }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.steward.outputs.steward_tag }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:steward-latest
+          labels: |
+            org.opencontainers.image.title=Milady Agent (Steward)
+            org.opencontainers.image.description=Milady agent with @stwd/sdk steward integration
+            org.opencontainers.image.version=${{ steps.version.outputs.version }}
+            org.opencontainers.image.revision=${{ steps.version.outputs.git_sha }}
+            org.opencontainers.image.source=https://github.com/milady-ai/milady
+            milady.steward.n=${{ steps.steward.outputs.steward_n }}
+          build-args: |
+            VERSION=${{ steps.version.outputs.version }}
+            VERSION_CLEAN=${{ steps.version.outputs.version_clean }}
+          cache-from: type=gha,scope=steward
+          cache-to: type=gha,mode=max,scope=steward
+
+      - name: Build summary
+        run: |
+          echo "## 🔐 Steward Image Built" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | \`${{ steps.version.outputs.version }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Steward tag | \`${{ steps.steward.outputs.steward_tag }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| SHA | \`${{ steps.version.outputs.git_sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Pull" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.steward.outputs.steward_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+  # ── Deploy to VPS ─────────────────────────────────────────────────────────
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Only run on manual trigger with deploy=true, or on tag pushes to main repo
+    if: |
+      (github.event_name == 'workflow_dispatch' && inputs.deploy == true) ||
+      (github.event_name == 'push' && github.repository == 'milady-ai/milady')
+    steps:
+      - name: Validate deploy secrets
+        run: |
+          MISSING=()
+          [[ -z "${{ secrets.VPS_HOST }}" ]] && MISSING+=("VPS_HOST")
+          [[ -z "${{ secrets.VPS_SSH_KEY }}" ]] && MISSING+=("VPS_SSH_KEY")
+          [[ -z "${{ secrets.VPS_ENV_FILE }}" ]] && MISSING+=("VPS_ENV_FILE")
+          [[ -z "${{ secrets.VPS_SERVICE_NAME }}" ]] && MISSING+=("VPS_SERVICE_NAME")
+          if [[ ${#MISSING[@]} -gt 0 ]]; then
+            echo "::error::Missing required secrets: ${MISSING[*]}. Deploy cannot proceed."
+            exit 1
+          fi
+
+      - name: Update VPS env and restart service
+        # Pinned to v1 commit SHA for supply-chain safety
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2  # v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER || 'deploy' }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          timeout: 60s
+          script: |
+            set -euo pipefail
+
+            ENV_FILE="${{ secrets.VPS_ENV_FILE }}"
+            SERVICE="${{ secrets.VPS_SERVICE_NAME }}"
+            NEW_TAG="${{ needs.build.outputs.steward_tag }}"
+
+            : "${ENV_FILE:?VPS_ENV_FILE secret is required}"
+            : "${SERVICE:?VPS_SERVICE_NAME secret is required}"
+
+            echo "Updating steward image tag in $ENV_FILE to $NEW_TAG..."
+            # Only replace steward-N in lines containing IMAGE_TAG or STEWARD
+            sed -i '/IMAGE_TAG\|STEWARD/s|steward-[0-9][0-9]*|'"${NEW_TAG##*:}"'|g' "$ENV_FILE"
+
+            echo "Restarting $SERVICE..."
+            sudo systemctl restart "$SERVICE"
+
+            echo "Done. Current steward tag in env:"
+            grep -i steward "$ENV_FILE" | sed 's/=.*/=<redacted>/' || echo "(no steward entries)"
