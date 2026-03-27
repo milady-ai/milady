@@ -31,7 +31,7 @@ milady plugins install retake
 Or use environment variables:
 
 ```bash
-export RETAKE_ACCESS_TOKEN=your-retake-access-token
+export RETAKE_AGENT_TOKEN=your-retake-access-token
 ```
 
 ## Auto-Enable
