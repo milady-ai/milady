@@ -387,12 +387,9 @@ describe("Token auth gate (ELIZA_API_TOKEN set)", () => {
     expect(status).toBe(200);
   });
 
-  it("rejects WebSocket upgrade without token", async () => {
+  it("allows WebSocket upgrade without token so clients can auth on the first message", async () => {
     const result = await connectWs(`ws://127.0.0.1:${port}/ws`);
-    expect(result.kind).toBe("rejected");
-    if (result.kind === "rejected") {
-      expect(result.status).toBe(401);
-    }
+    expect(result.kind).toBe("open");
   });
 
   it("rejects WebSocket query-token auth by default", async () => {

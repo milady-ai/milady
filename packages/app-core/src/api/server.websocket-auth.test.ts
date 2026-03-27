@@ -52,13 +52,13 @@ describe("resolveWebSocketUpgradeRejection", () => {
     expect(rejection).toEqual({ status: 403, reason: "Origin not allowed" });
   });
 
-  it("rejects unauthenticated upgrades when API token is enabled", () => {
+  it("allows tokenless upgrades so clients can authenticate on the first message", () => {
     process.env.ELIZA_API_TOKEN = "test-token";
     const rejection = resolveWebSocketUpgradeRejection(
       mockReq() as http.IncomingMessage,
       new URL("ws://localhost/ws"),
     );
-    expect(rejection).toEqual({ status: 401, reason: "Unauthorized" });
+    expect(rejection).toBeNull();
   });
 
   it("accepts valid bearer token", () => {
@@ -175,13 +175,13 @@ describe("resolveWebSocketUpgradeRejection", () => {
     expect(rejection).toBeNull();
   });
 
-  it("rejects whitespace-only bearer token", () => {
+  it("treats whitespace-only bearer tokens as missing and falls back to deferred auth", () => {
     process.env.ELIZA_API_TOKEN = "test-token";
     const rejection = resolveWebSocketUpgradeRejection(
       mockReq({ authorization: "Bearer   " }) as http.IncomingMessage,
       new URL("ws://localhost/ws"),
     );
-    expect(rejection).toEqual({ status: 401, reason: "Unauthorized" });
+    expect(rejection).toBeNull();
   });
 
   it("accepts query token via apiKey param when enabled", () => {
