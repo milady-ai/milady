@@ -18,14 +18,12 @@ describe("Electrobun test workflow drift", () => {
     const workflow = fs.readFileSync(WORKFLOW_PATH, "utf8");
 
     expect(workflow).toContain(
-      "name: Install dependencies\n        run: bun install",
+      "name: Setup workspace dependencies\n        uses: ./.github/actions/setup-bun-workspace",
     );
+    expect(workflow).toContain("install-command: bun install");
+    expect(workflow).toContain('run-postinstall: "false"');
     expect(workflow).not.toContain(
-      "name: Install dependencies\n        run: bun install\n        env:\n          npm_config_python: $" +
-        "{{ env.pythonLocation }}/bin/python3\n\n      - name: Run repository postinstall patches",
-    );
-    expect(workflow).not.toContain(
-      "name: Install dependencies\n        run: bun install\n\n      - name: Run repository postinstall patches",
+      'install-command: bun install\n          run-postinstall: "true"',
     );
   });
 
@@ -33,7 +31,7 @@ describe("Electrobun test workflow drift", () => {
     const workflow = fs.readFileSync(WORKFLOW_PATH, "utf8");
 
     expect(workflow).toContain(
-      'name: Run repository postinstall patches\n        run: bun run postinstall\n        env:\n          SKIP_AVATAR_CLONE: "1"\n          MILADY_NO_VISION_DEPS: "1"',
+      'skip-avatar-clone: "true"\n          no-vision-deps: "true"',
     );
   });
 
