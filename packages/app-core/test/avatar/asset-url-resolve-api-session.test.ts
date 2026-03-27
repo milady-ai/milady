@@ -29,4 +29,14 @@ describe("resolveApiUrl (sessionStorage, jsdom)", () => {
       "http://127.0.0.1:40000/api/status",
     );
   });
+
+  it("prefers __MILADY_API_BASE__ over boot when session is unset (desktop TTS)", () => {
+    const w = window as Window & { __MILADY_API_BASE__?: string };
+    w.__MILADY_API_BASE__ = "http://127.0.0.1:31337";
+    setBootConfig({ branding: {}, apiBase: "http://127.0.0.1:2138" });
+    expect(resolveApiUrl("/api/tts/cloud")).toBe(
+      "http://127.0.0.1:31337/api/tts/cloud",
+    );
+    delete w.__MILADY_API_BASE__;
+  });
 });

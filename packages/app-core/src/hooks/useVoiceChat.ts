@@ -507,11 +507,16 @@ function resolveEffectiveVoiceConfig(
     (base.elevenlabs ? "elevenlabs" : base.edge ? "edge" : undefined) ??
     (cloudConnected ? "elevenlabs" : undefined);
 
-  // Saved characters often have `provider: "edge"` or `openai`, which skips
-  // the ElevenLabs fetch path (`useElevenLabs` is false). When Eliza Cloud is
-  // available for voice, prefer cloud-backed synthesis instead of browser
-  // (Web Speech / Edge-named voices).
-  if (cloudConnected && (provider === "edge" || provider === "openai")) {
+  // Saved characters often use browser/local TTS (`edge`, `simple-voice`, or
+  // legacy `openai`), which skips the ElevenLabs fetch path. When Eliza Cloud
+  // is available for voice, prefer cloud-backed synthesis instead of Web Speech
+  // (often labeled Microsoft / Edge in the OS).
+  if (
+    cloudConnected &&
+    (provider === "edge" ||
+      provider === "openai" ||
+      provider === "simple-voice")
+  ) {
     provider = "elevenlabs";
   }
 

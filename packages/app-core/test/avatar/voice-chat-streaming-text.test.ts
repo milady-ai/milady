@@ -93,6 +93,22 @@ describe("useVoiceChat streaming text helpers", () => {
     expect(resolveVoiceProxyEndpoint("own-key")).toBe("/api/tts/elevenlabs");
   });
 
+  it("upgrades simple-voice to ElevenLabs when Cloud voice is available", () => {
+    expect(
+      resolveEffectiveVoiceConfig(
+        { provider: "simple-voice" },
+        { cloudConnected: true },
+      ),
+    ).toMatchObject({
+      provider: "elevenlabs",
+      mode: "cloud",
+      elevenlabs: {
+        voiceId: "EXAVITQu4vr4xnSDxMaL",
+        modelId: "eleven_flash_v2_5",
+      },
+    });
+  });
+
   it("upgrades saved edge provider to ElevenLabs when Cloud voice is available", () => {
     expect(
       resolveEffectiveVoiceConfig(

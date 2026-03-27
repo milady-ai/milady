@@ -115,10 +115,11 @@ function readSessionStorageApiBase(): string | undefined {
  * the renderer. In desktop shells the page origin is electrobun:// or
  * file://, so bare /api/... paths resolve to the SPA instead of the backend.
  *
- * Uses the same base resolution order as {@link MiladyClient}'s constructor
- * (`sessionStorage` → boot `apiBase` → `window.__MILADY_API_BASE__`). Without
- * this, TTS fetches from `useVoiceChat` could stay root-relative while REST
- * calls used the stored session base → silent failure → Web Speech fallback.
+ * Resolution order: `sessionStorage` (user/session override) → shell-injected
+ * `__MILADY_API_BASE__` → boot `apiBase`. Injected is preferred over boot so
+ * Electrobun/desktop dev is not stuck on a stale UI-only boot URL (e.g. Vite
+ * :2138) after `setBootConfig` omitted `apiBase` or set it wrong — otherwise
+ * `/api/tts/cloud` hits the wrong host and TTS falls back to Web Speech.
  */
 export function resolveApiUrl(apiPath: string): string {
   const stored = readSessionStorageApiBase();
@@ -127,7 +128,7 @@ export function resolveApiUrl(apiPath: string): string {
   const injectedRaw = getElizaApiBase()?.trim();
   const injected =
     injectedRaw && injectedRaw.length > 0 ? injectedRaw : undefined;
-  const base = stored ?? boot ?? injected;
+  const base = stored ?? injected ?? boot;
   if (!base) return apiPath;
   const normalized = base.replace(/\/+$/, "");
   const suffix = apiPath.startsWith("/") ? apiPath : `/${apiPath}`;
