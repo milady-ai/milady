@@ -206,7 +206,7 @@ describe("ChatView game-modal variant", () => {
     expect(text).not.toContain("five");
   });
 
-  it("shows the companion empty-state prompts when chat is empty", async () => {
+  it("keeps the companion empty state idle when chat is empty", async () => {
     mockUseApp.mockReturnValue(createContext({ conversationMessages: [] }));
 
     let tree: TestRenderer.ReactTestRenderer;
@@ -217,9 +217,13 @@ describe("ChatView game-modal variant", () => {
     });
 
     const text = textOf(tree?.root).toLowerCase();
-    expect(text).toContain("hey milady");
-    expect(text).toContain("give me a quick status update");
-    expect(text).toContain("help me decide what to do next");
+    expect(text).not.toContain("hey milady");
+    expect(text).not.toContain("draft welcome prompt");
+    expect(text).not.toContain(
+      "send me a message in the dock below to get started",
+    );
+    expect(text).not.toContain("give me a quick status update");
+    expect(text).not.toContain("help me decide what to do next");
   });
 
   it("queues assistant speech in companion mode while a response is streaming", async () => {
@@ -558,7 +562,12 @@ describe("ChatView game-modal variant", () => {
         label: "completion",
         messages: [
           { id: "user-1", role: "user", text: "你好", timestamp: 1 },
-          { id: "assistant-1", role: "assistant", text: "你好呀", timestamp: 2 },
+          {
+            id: "assistant-1",
+            role: "assistant",
+            text: "你好呀",
+            timestamp: 2,
+          },
         ],
       },
       {

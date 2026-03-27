@@ -82,6 +82,7 @@ export {
   filterConfigEnvForResponse,
 } from "./server-config-filter";
 export {
+  __resetCloudBaseUrlCache,
   ensureCloudTtsApiKeyAlias,
   resolveCloudTtsBaseUrl,
   resolveElevenLabsApiKeyForCloudMode,

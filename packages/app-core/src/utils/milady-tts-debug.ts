@@ -32,7 +32,8 @@ function miladyTtsDebugEnabled(): boolean {
   try {
     // Use static `import.meta.env.*` so Vite `define` can replace MILADY_TTS_DEBUG at build time.
     if (truthy(String(import.meta.env.MILADY_TTS_DEBUG ?? ""))) return true;
-    if (truthy(String(import.meta.env.VITE_MILADY_TTS_DEBUG ?? ""))) return true;
+    if (truthy(String(import.meta.env.VITE_MILADY_TTS_DEBUG ?? "")))
+      return true;
   } catch {
     /* no import.meta */
   }

@@ -187,7 +187,14 @@ export function IdentityStep({
         }
       }
     },
-    [entries, gateVoicePreviewOnTeleport, playSelectionPreview, selectedId, setState, stopPreviewAudio],
+    [
+      entries,
+      gateVoicePreviewOnTeleport,
+      playSelectionPreview,
+      selectedId,
+      setState,
+      stopPreviewAudio,
+    ],
   );
 
   // Auto-select the first one if nothing is selected yet
@@ -209,7 +216,10 @@ export function IdentityStep({
     };
     window.addEventListener(VRM_TELEPORT_COMPLETE_EVENT, onTeleportComplete);
     return () => {
-      window.removeEventListener(VRM_TELEPORT_COMPLETE_EVENT, onTeleportComplete);
+      window.removeEventListener(
+        VRM_TELEPORT_COMPLETE_EVENT,
+        onTeleportComplete,
+      );
     };
   }, [playSelectionPreview]);
 

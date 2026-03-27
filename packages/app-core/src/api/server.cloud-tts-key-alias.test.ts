@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as appConfig from "../config/config";
 import {
+  __resetCloudBaseUrlCache,
   ensureCloudTtsApiKeyAlias,
   resolveCloudTtsBaseUrl,
   resolveElevenLabsApiKeyForCloudMode,
@@ -9,6 +10,7 @@ import {
 describe("cloud-backed ElevenLabs API key alias", () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    __resetCloudBaseUrlCache();
   });
 
   it("returns direct ElevenLabs key when present", () => {

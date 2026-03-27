@@ -147,9 +147,7 @@ export function OnboardingWizard() {
       case "permissions":
         return <PermissionsStep />;
       case "identity":
-        return (
-          <IdentityStep gateVoicePreviewOnTeleport={!disableVrm} />
-        );
+        return <IdentityStep gateVoicePreviewOnTeleport={!disableVrm} />;
       case "launch":
         return <ActivateStep />;
       default:

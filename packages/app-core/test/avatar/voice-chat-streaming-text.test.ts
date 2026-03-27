@@ -106,7 +106,7 @@ describe("useVoiceChat streaming text helpers", () => {
       ),
     ).toMatchObject({
       provider: "elevenlabs",
-      mode: "cloud",
+      mode: "own-key",
       elevenlabs: {
         voiceId: "EXAVITQu4vr4xnSDxMaL",
         modelId: "eleven_flash_v2_5",
@@ -125,7 +125,7 @@ describe("useVoiceChat streaming text helpers", () => {
       ),
     ).toEqual({
       provider: "elevenlabs",
-      mode: "cloud",
+      mode: "own-key",
       edge: { voice: "en-US-AriaNeural" },
       elevenlabs: {
         voiceId: "EXAVITQu4vr4xnSDxMaL",
@@ -163,7 +163,7 @@ describe("useVoiceChat streaming text helpers", () => {
       ),
     ).toMatchObject({
       provider: "elevenlabs",
-      mode: "cloud",
+      mode: "own-key",
       openai: { voice: "nova", model: "tts-1" },
       elevenlabs: {
         voiceId: "EXAVITQu4vr4xnSDxMaL",

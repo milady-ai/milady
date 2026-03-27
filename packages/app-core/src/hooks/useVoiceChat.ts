@@ -489,24 +489,68 @@ function queueableSpeechPrefix(text: string, isFinal: boolean): string {
 }
 
 function cloneVoiceConfig(
-  config: VoiceConfig | null | undefined,
-): VoiceConfig | null {
+  config:
+    | (VoiceConfig & {
+        provider?: VoiceConfig["provider"] | "openai";
+        openai?: {
+          apiKey?: string;
+          voice?: string;
+          model?: string;
+        };
+      })
+    | null
+    | undefined,
+):
+  | (VoiceConfig & {
+      provider?: VoiceConfig["provider"] | "openai";
+      openai?: {
+        apiKey?: string;
+        voice?: string;
+        model?: string;
+      };
+    })
+  | null {
   if (!config) return null;
   return {
     ...config,
     elevenlabs: config.elevenlabs ? { ...config.elevenlabs } : undefined,
     edge: config.edge ? { ...config.edge } : undefined,
+    openai: config.openai ? { ...config.openai } : undefined,
   };
 }
 
 function resolveEffectiveVoiceConfig(
-  config: VoiceConfig | null | undefined,
+  config:
+    | (VoiceConfig & {
+        provider?: VoiceConfig["provider"] | "openai";
+        openai?: {
+          apiKey?: string;
+          voice?: string;
+          model?: string;
+        };
+      })
+    | null
+    | undefined,
   options?: { cloudConnected?: boolean },
-): VoiceConfig | null {
+):
+  | (VoiceConfig & {
+      provider?: VoiceConfig["provider"] | "openai";
+      openai?: {
+        apiKey?: string;
+        voice?: string;
+        model?: string;
+      };
+    })
+  | null {
   const cloudConnected = options?.cloudConnected === true;
   const base = cloneVoiceConfig(config) ?? {};
-  let provider =
-    base.provider ??
+  const rawProvider = base.provider as
+    | VoiceConfig["provider"]
+    | "openai"
+    | undefined;
+  const hasLegacyOpenAiProvider = rawProvider === "openai";
+  let provider: VoiceConfig["provider"] | undefined =
+    (hasLegacyOpenAiProvider ? undefined : rawProvider) ??
     (base.elevenlabs ? "elevenlabs" : base.edge ? "edge" : undefined) ??
     (cloudConnected ? "elevenlabs" : undefined);
 
@@ -517,9 +561,12 @@ function resolveEffectiveVoiceConfig(
   if (
     cloudConnected &&
     (provider === "edge" ||
-      provider === "openai" ||
+      hasLegacyOpenAiProvider ||
       provider === "simple-voice")
   ) {
+    miladyTtsDebug("voiceConfig:upgrade_provider_for_cloud", {
+      fromProvider: hasLegacyOpenAiProvider ? "openai" : provider,
+    });
     provider = "elevenlabs";
   }
 
@@ -1685,8 +1732,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
             ...(task.debugUtteranceContext
               ? {
                   messageId: task.debugUtteranceContext.messageId,
-                  hearingFull:
-                    task.debugUtteranceContext.fullAssistTextPreview,
+                  hearingFull: task.debugUtteranceContext.fullAssistTextPreview,
                 }
               : {}),
           });
@@ -1732,7 +1778,9 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
             usingAudioAnalysisRef.current = false;
             setUsingAudioAnalysis(false);
             miladyTtsDebug("processQueue:browser-tts-direct", {
-              reason: elConfig ? "provider_not_elevenlabs" : "missing_elevenlabs_config",
+              reason: elConfig
+                ? "provider_not_elevenlabs"
+                : "missing_elevenlabs_config",
               provider: config?.provider ?? null,
               nextPath:
                 "speakBrowser — OS Web Speech (often msedge/Microsoft) or Electrobun talkmode",

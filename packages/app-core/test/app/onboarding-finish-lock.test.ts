@@ -467,7 +467,7 @@ describe("onboarding finish locking", () => {
     });
   });
 
-  it("requires permissions check before finishing unless user explicitly skips", async () => {
+  it("requires an explicit permissions bypass before finishing", async () => {
     mockClient.getPermissions.mockResolvedValue({
       accessibility: { id: "accessibility", ...permissionState("granted") },
       "screen-recording": {
@@ -510,19 +510,14 @@ describe("onboarding finish locking", () => {
     await act(async () => {
       await api?.handleOnboardingNext();
     });
-    expect(requireApi().getOnboardingStep()).toBe("identity");
+    expect(requireApi().getOnboardingStep()).toBe("launch");
     expect(mockClient.submitOnboarding).not.toHaveBeenCalled();
 
     await act(async () => {
       await api?.handleOnboardingNext({ allowPermissionBypass: true });
     });
-    expect(requireApi().getOnboardingStep()).toBe("launch");
-    expect(mockClient.submitOnboarding).not.toHaveBeenCalled();
-
-    await act(async () => {
-      await api?.handleOnboardingNext();
-    });
     expect(mockClient.submitOnboarding).toHaveBeenCalledTimes(1);
+    expect(requireApi().snapshot().onboardingComplete).toBe(true);
 
     await act(async () => {
       tree?.unmount();
@@ -539,7 +534,9 @@ describe("onboarding finish locking", () => {
     };
     mockClient.listConversations.mockImplementation(async () => ({
       conversations:
-        mockClient.createConversation.mock.calls.length > 0 ? [createdMeta] : [],
+        mockClient.createConversation.mock.calls.length > 0
+          ? [createdMeta]
+          : [],
     }));
 
     let api: ProbeApi | null = null;

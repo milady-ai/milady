@@ -129,6 +129,7 @@ import {
   resolveApiUrl,
   yieldMiladyHttpAfterNativeMessageBox,
 } from "../utils";
+import { isMiladyTtsDebugEnabled } from "../utils/milady-tts-debug";
 import {
   computeAgentDeadlineExtensions,
   getAgentReadyTimeoutMs,
@@ -493,12 +494,9 @@ function buildLocalizedCharacterPayload(
   };
 }
 
-/** In production, set `localStorage.setItem("milady:debug:greeting", "1")` to enable. */
+/** Enable with `MILADY_TTS_DEBUG=1` or `localStorage.setItem("milady:debug:greeting", "1")`. */
 function miladyGreetingDebugEnabled(): boolean {
-  const viteDev = Boolean(
-    (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV,
-  );
-  if (viteDev) return true;
+  if (isMiladyTtsDebugEnabled()) return true;
   try {
     return (
       typeof localStorage !== "undefined" &&
@@ -536,9 +534,7 @@ function publishElizaCloudVoiceSnapshot(
     enabled: snapshot.enabled,
     hasPersistedApiKey: snapshot.hasPersistedApiKey,
     cloudVoiceProxyAvailable:
-      snapshot.hasPersistedApiKey ||
-      snapshot.enabled ||
-      snapshot.apiConnected,
+      snapshot.hasPersistedApiKey || snapshot.enabled || snapshot.apiConnected,
   });
 }
 
@@ -2309,7 +2305,9 @@ function AppProviderInner({
       },
     ): Promise<boolean> => {
       if (greetingInFlightConversationRef.current === convId) {
-        traceMiladyGreeting("fetchGreeting:skip_duplicate_in_flight", { convId });
+        traceMiladyGreeting("fetchGreeting:skip_duplicate_in_flight", {
+          convId,
+        });
         return false;
       }
       greetingInFlightConversationRef.current = convId;
@@ -5241,9 +5239,12 @@ function AppProviderInner({
           /* ignore */
         }
 
-        await bootstrapConversationAfterAgentReady("onboarding:cloud_fast_track", {
-          showOverlay: true,
-        });
+        await bootstrapConversationAfterAgentReady(
+          "onboarding:cloud_fast_track",
+          {
+            showOverlay: true,
+          },
+        );
 
         clearPersistedOnboardingStep();
         onboardingResumeConnectionRef.current = null;

@@ -47,10 +47,9 @@ export function readMiladyTtsDebugClientHeaders(
   };
 }
 
-function ttsClientDbgFields(hdr: ReturnType<typeof readMiladyTtsDebugClientHeaders>): Record<
-  string,
-  string
-> {
+function ttsClientDbgFields(
+  hdr: ReturnType<typeof readMiladyTtsDebugClientHeaders>,
+): Record<string, string> {
   const o: Record<string, string> = {};
   if (hdr.messageId) o.messageId = hdr.messageId;
   if (hdr.clipSegment) o.clipSegment = hdr.clipSegment;
@@ -165,6 +164,11 @@ function resolveCloudApiKey(
 let cachedCloudBaseUrlFromConfig: string | null | undefined;
 let hasResolvedCloudBaseUrlFromConfig = false;
 
+export function __resetCloudBaseUrlCache(): void {
+  cachedCloudBaseUrlFromConfig = undefined;
+  hasResolvedCloudBaseUrlFromConfig = false;
+}
+
 function resolveCloudBaseUrlFromConfig(): string | null {
   if (hasResolvedCloudBaseUrlFromConfig) {
     return cachedCloudBaseUrlFromConfig ?? null;
@@ -255,7 +259,9 @@ function forwardCloudTtsUpstreamError(
   }
   res.statusCode = status;
   res.setHeader("content-type", "application/json; charset=utf-8");
-  res.end(JSON.stringify({ error: trimmed || "Eliza Cloud TTS request failed" }));
+  res.end(
+    JSON.stringify({ error: trimmed || "Eliza Cloud TTS request failed" }),
+  );
 }
 
 /**
@@ -333,9 +339,9 @@ export function resolveCloudTtsBaseUrl(
   env: NodeJS.ProcessEnv = process.env,
 ): string {
   const fromEnv = env.ELIZAOS_CLOUD_BASE_URL?.trim() ?? "";
-  const fromConfig = fromEnv.length > 0 ? null : resolveCloudBaseUrlFromConfig();
-  const configured =
-    fromEnv.length > 0 ? fromEnv : (fromConfig?.trim() ?? "");
+  const fromConfig =
+    fromEnv.length > 0 ? null : resolveCloudBaseUrlFromConfig();
+  const configured = fromEnv.length > 0 ? fromEnv : (fromConfig?.trim() ?? "");
   const fallback = "https://www.elizacloud.ai/api/v1";
   const base = configured.length > 0 ? configured : fallback;
 
@@ -365,6 +371,8 @@ export function resolveCloudTtsCandidateUrls(
       const u = new URL(trimmed);
       const path = u.pathname.replace(/\/+$/, "");
       if (path.endsWith("/api/v1")) {
+        // Preserve the ElevenLabs-shaped compat route; `/audio/speech` would
+        // require OpenAI-style model/voice ids and is intentionally not used.
         candidates.add(`${u.origin}/api/elevenlabs/tts`);
       }
     } catch {
@@ -436,7 +444,9 @@ export async function handleCloudTtsPreviewRoute(
     return true;
   }
 
-  const cloudModel = resolveCloudProxyTtsModel(pickBodyString(body, "modelId", "model_id"));
+  const cloudModel = resolveCloudProxyTtsModel(
+    pickBodyString(body, "modelId", "model_id"),
+  );
   const cloudVoice = resolveElizaCloudTtsVoiceId(
     pickBodyString(body, "voiceId", "voice_id"),
   );

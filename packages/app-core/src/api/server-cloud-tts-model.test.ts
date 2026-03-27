@@ -60,7 +60,10 @@ describe("resolveCloudProxyTtsModel", () => {
 describe("resolveElizaCloudTtsVoiceId", () => {
   it("passes through ElevenLabs voice ids", () => {
     expect(
-      resolveElizaCloudTtsVoiceId("EXAVITQu4vr4xnSDxMaL", {} as NodeJS.ProcessEnv),
+      resolveElizaCloudTtsVoiceId(
+        "EXAVITQu4vr4xnSDxMaL",
+        {} as NodeJS.ProcessEnv,
+      ),
     ).toBe("EXAVITQu4vr4xnSDxMaL");
   });
 
