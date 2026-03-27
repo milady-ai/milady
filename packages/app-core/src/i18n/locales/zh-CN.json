@@ -1310,11 +1310,11 @@
   "whatsappqroverlay.TryAgain": "再试一次",
   "whatsappqroverlay.UsesAnUnofficialW": "使用非官方 WhatsApp API。使用专用电话号码。",
   "whatsappqroverlay.andSelect": "并选择",
-  "bugreportmodal.attachLogs": "??????",
-  "bugreportmodal.attachSystemInfo": "??????",
-  "bugreportmodal.copyDiagnostics": "??????",
-  "bugreportmodal.copiedDiagnostics": "????????",
-  "bugreportmodal.openLogsFolder": "???????",
-  "bugreportmodal.saveBundle": "?????",
-  "bugreportmodal.savingBundle": "???????..."
+  "bugreportmodal.attachLogs": "附加启动日志",
+  "bugreportmodal.attachSystemInfo": "附加系统信息",
+  "bugreportmodal.copyDiagnostics": "复制诊断信息",
+  "bugreportmodal.copiedDiagnostics": "诊断信息已复制！",
+  "bugreportmodal.openLogsFolder": "打开日志文件夹",
+  "bugreportmodal.saveBundle": "保存报告包",
+  "bugreportmodal.savingBundle": "正在保存报告包..."
 }

@@ -453,6 +453,21 @@ export function getStartupDiagnosticLogTail(maxChars = 16_000): string {
   return readFileTail(getDiagnosticLogPath(), maxChars);
 }
 
+function sanitizeBugReportPrefix(prefix: string | undefined): string {
+  const trimmed = prefix?.trim();
+  if (!trimmed) return "bug-report";
+
+  const sanitized = trimmed
+    .replace(/[\\/]+/g, "-")
+    .replace(/\.\.+/g, "-")
+    .replace(/[^a-zA-Z0-9._-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^[._-]+|[._-]+$/g, "")
+    .slice(0, 64);
+
+  return sanitized || "bug-report";
+}
+
 export function createBugReportBundle(options: {
   reportMarkdown: string;
   reportJson: Record<string, unknown>;
@@ -460,7 +475,7 @@ export function createBugReportBundle(options: {
 }): BugReportBundleResult {
   const configDir = resolveConfigDir();
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const prefix = options.prefix?.trim() || "bug-report";
+  const prefix = sanitizeBugReportPrefix(options.prefix);
   const directory = path.join(
     configDir,
     "bug-reports",
