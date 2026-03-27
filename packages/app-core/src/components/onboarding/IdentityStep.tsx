@@ -1,7 +1,12 @@
 import { dispatchAppEmoteEvent } from "@miladyai/app-core/events";
 import { useApp } from "@miladyai/app-core/state";
 import { PREMADE_VOICES } from "../../voice/types";
-import { getElizaApiToken, resolveApiUrl } from "../../utils";
+import { resolveApiUrl } from "../../utils/asset-url";
+import {
+  fetchWithTimeout,
+  resolveCompatApiToken,
+} from "../../utils/api-request";
+import { getElizaApiToken } from "../../utils/eliza-globals";
 import { getStylePresets } from "@miladyai/shared/onboarding-presets";
 import { Button, Input } from "@miladyai/ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -242,8 +247,8 @@ export function IdentityStep() {
       envelope.set(passwordBytes, 4);
       envelope.set(new Uint8Array(fileBuffer), 4 + passwordBytes.length);
 
-      const apiToken = getElizaApiToken()?.trim() ?? "";
-      const response = await fetch(resolveApiUrl("/api/agent/import"), {
+      const apiToken = resolveCompatApiToken();
+      const response = await fetchWithTimeout(resolveApiUrl("/api/agent/import"), {
         method: "POST",
         headers: {
           "Content-Type": "application/octet-stream",
@@ -252,14 +257,27 @@ export function IdentityStep() {
         body: envelope,
       });
 
-      const result = (await response.json()) as {
+      const responseText = await response.text();
+      let result = {} as {
         error?: string;
         success?: boolean;
         agentId?: string;
         agentName?: string;
         counts?: Record<string, number>;
       };
-      if (!result.success) {
+
+      if (responseText) {
+        try {
+          result = JSON.parse(responseText) as typeof result;
+        } catch {
+          if (!response.ok) {
+            throw new Error(`Import failed (${response.status})`);
+          }
+          throw new Error("Import failed (invalid server response)");
+        }
+      }
+
+      if (!response.ok || !result.success) {
         throw new Error(result.error ?? `Import failed (${response.status})`);
       }
       const counts = result.counts ?? {};

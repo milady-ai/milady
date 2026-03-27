@@ -8,20 +8,29 @@ const { mockUseApp } = vi.hoisted(() => ({
   mockUseApp: vi.fn(),
 }));
 
-vi.mock("@miladyai/app-core/state", () => ({
+vi.mock("../state", () => ({
   useApp: () => mockUseApp(),
 }));
 
-vi.mock("@miladyai/app-core/components", () => {
-  const R = require("react");
-  return {
-    DatabasePageView: () => R.createElement("div", null, "database-view"),
-    LogsPageView: () => R.createElement("div", null, "logs-view"),
-    PluginsPageView: () => R.createElement("div", null, "plugins-view"),
-    RuntimeView: () => R.createElement("div", null, "runtime-view"),
-    SkillsView: () => R.createElement("div", null, "skills-view"),
-  };
-});
+vi.mock("./DatabasePageView", () => ({
+  DatabasePageView: () => React.createElement("div", null, "database-view"),
+}));
+
+vi.mock("./LogsPageView", () => ({
+  LogsPageView: () => React.createElement("div", null, "logs-view"),
+}));
+
+vi.mock("./PluginsPageView", () => ({
+  PluginsPageView: () => React.createElement("div", null, "plugins-view"),
+}));
+
+vi.mock("./RuntimeView", () => ({
+  RuntimeView: () => React.createElement("div", null, "runtime-view"),
+}));
+
+vi.mock("./SkillsView", () => ({
+  SkillsView: () => React.createElement("div", null, "skills-view"),
+}));
 
 vi.mock("@miladyai/ui", () => ({
   cn: (...classes: Array<string | false | null | undefined>) =>
