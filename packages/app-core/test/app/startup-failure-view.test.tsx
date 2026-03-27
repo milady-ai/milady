@@ -2,6 +2,11 @@ import { StartupFailureView } from "@miladyai/app-core/components";
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { describe, expect, it, vi } from "vitest";
+import { textOf } from "../../../../test/helpers/react-test";
+
+const { openBugReportMock } = vi.hoisted(() => ({
+  openBugReportMock: vi.fn(),
+}));
 
 vi.mock("@miladyai/app-core/state", () => ({
   CUSTOM_ONBOARDING_STEPS: [],
@@ -15,6 +20,10 @@ vi.mock("@miladyai/app-core/state", () => ({
       return k;
     },
   }),
+}));
+
+vi.mock("@miladyai/app-core/hooks", () => ({
+  useBugReport: () => ({ open: openBugReportMock }),
 }));
 
 describe("StartupFailureView", () => {
@@ -51,7 +60,7 @@ describe("StartupFailureView", () => {
     expect(openAppLink.props.href).toBe("https://app.elizaos.ai");
     expect(openAppLink.children.join("")).toContain("Open App");
 
-    const retryButton = tree.root.findByType("button");
+    const retryButton = tree.root.findAllByType("button")[0];
     await act(async () => {
       retryButton.props.onClick();
     });
