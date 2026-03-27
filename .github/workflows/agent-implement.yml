@@ -157,7 +157,6 @@ jobs:
       pull-requests: write
       issues: write
       actions: read
-      id-token: write
     steps:
       - name: Mark issue as in-progress
         uses: actions/github-script@v7
