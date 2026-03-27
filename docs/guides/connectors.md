@@ -1,7 +1,7 @@
 ---
 title: "Platform Connectors"
 sidebarTitle: "Connectors"
-description: "Platform bridges for 30+ messaging platforms including Discord, Telegram, Slack, WhatsApp, Signal, iMessage, BlueBubbles, Blooio, MS Teams, Google Chat, Twitter, Farcaster, Bluesky, Instagram, Twitch, Mattermost, WeChat, Matrix, Feishu, Nostr, LINE, Zalo, Twilio, GitHub, Gmail Watch, Nextcloud Talk, Tlon, Lens, and Retake."
+description: "Platform bridges for 29 messaging platforms — 20 auto-enabled from config (Discord, Telegram, Slack, WhatsApp, Signal, iMessage, BlueBubbles, Blooio, MS Teams, Google Chat, Twitter, Farcaster, Twitch, Mattermost, WeChat, Matrix, Feishu, Nostr, Lens, Retake) plus 9 installable from the registry (Bluesky, Instagram, LINE, Zalo, Twilio, GitHub, Gmail Watch, Nextcloud Talk, Tlon)."
 ---
 
 Connectors are platform bridges that allow your agent to communicate across messaging platforms and social networks. Each connector handles authentication, message routing, session management, and platform-specific features.
@@ -47,37 +47,39 @@ Connectors are platform bridges that allow your agent to communicate across mess
 
 ## Supported Platforms
 
-| Platform | Auth Method | DM Support | Group Support | Multi-Account |
-|----------|------------|------------|---------------|---------------|
-| Discord | Bot token | Yes | Yes (guilds/channels) | Yes |
-| Telegram | Bot token | Yes | Yes (groups/topics) | Yes |
-| Slack | Bot + App tokens | Yes | Yes (channels/threads) | Yes |
-| WhatsApp | QR code (Baileys) or Cloud API | Yes | Yes | Yes |
-| Signal | signal-cli HTTP API | Yes | Yes | Yes |
-| iMessage | Native CLI (macOS) | Yes | Yes | Yes |
-| BlueBubbles | Server URL + password | Yes | Yes | Yes |
-| Blooio | API key + webhook | Yes | Yes | No |
-| Microsoft Teams | App ID + password | Yes | Yes (teams/channels) | No |
-| Google Chat | Service account | Yes | Yes (spaces) | Yes |
-| Twitter | API keys + tokens | DMs | N/A | No |
-| Farcaster | Neynar API key + signer | Casts | Yes (channels) | No |
-| Bluesky | Account credentials | Posts | N/A | No |
-| Instagram | Username + password | DMs | N/A | No |
-| Twitch | Client ID + access token | Yes (chat) | Yes (channels) | No |
-| Mattermost | Bot token | Yes | Yes (channels) | No |
-| WeChat | Proxy API key + QR code | Yes | Yes | Yes |
-| Matrix | Access token | Yes | Yes (rooms) | No |
-| Feishu / Lark | App ID + secret | Yes | Yes (group chats) | No |
-| Nostr | Private key (nsec/hex) | Yes (NIP-04) | N/A | No |
-| LINE | Channel access token + secret | Yes | Yes | No |
-| Zalo | Access token | Yes | Yes | No |
-| Twilio | Account SID + auth token | SMS/Voice | N/A | No |
-| GitHub | API token | Issues/PRs | Yes (repos) | No |
-| Gmail Watch | Service account / OAuth | N/A | N/A | No |
-| Nextcloud Talk | Server credentials | Yes | Yes (rooms) | No |
-| Tlon | Ship credentials | Yes | Yes (Urbit chats) | No |
-| Lens | API key | Yes | N/A | No |
-| Retake | Access token | Yes | Yes | No |
+Connectors marked **Auto** load automatically when their config is present in `milady.json`. Connectors marked **Registry** must be installed first with `milady plugins install <package>`.
+
+| Platform | Auth Method | DM Support | Group Support | Multi-Account | Availability |
+|----------|------------|------------|---------------|---------------|-------------|
+| Discord | Bot token | Yes | Yes (guilds/channels) | Yes | Auto |
+| Telegram | Bot token | Yes | Yes (groups/topics) | Yes | Auto |
+| Slack | Bot + App tokens | Yes | Yes (channels/threads) | Yes | Auto |
+| WhatsApp | QR code (Baileys) or Cloud API | Yes | Yes | Yes | Auto |
+| Signal | signal-cli HTTP API | Yes | Yes | Yes | Auto |
+| iMessage | Native CLI (macOS) | Yes | Yes | Yes | Auto |
+| BlueBubbles | Server URL + password | Yes | Yes | Yes | Auto |
+| Blooio | API key + webhook | Yes | Yes | No | Auto |
+| Microsoft Teams | App ID + password | Yes | Yes (teams/channels) | No | Auto |
+| Google Chat | Service account | Yes | Yes (spaces) | Yes | Auto |
+| Twitter | API keys + tokens | DMs | N/A | No | Auto |
+| Farcaster | Neynar API key + signer | Casts | Yes (channels) | No | Auto |
+| Twitch | Client ID + access token | Yes (chat) | Yes (channels) | No | Auto |
+| Mattermost | Bot token | Yes | Yes (channels) | No | Auto |
+| WeChat | Proxy API key + QR code | Yes | Yes | Yes | Auto |
+| Matrix | Access token | Yes | Yes (rooms) | No | Auto |
+| Feishu / Lark | App ID + secret | Yes | Yes (group chats) | No | Auto |
+| Nostr | Private key (nsec/hex) | Yes (NIP-04) | N/A | No | Auto |
+| Lens | API key | Yes | N/A | No | Auto |
+| Retake | Access token | Yes | Yes | No | Auto |
+| Bluesky | Account credentials | Posts | N/A | No | Registry |
+| Instagram | Username + password | DMs | N/A | No | Registry |
+| LINE | Channel access token + secret | Yes | Yes | No | Registry |
+| Zalo | Access token | Yes | Yes | No | Registry |
+| Twilio | Account SID + auth token | SMS/Voice | N/A | No | Registry |
+| GitHub | API token | Issues/PRs | Yes (repos) | No | Registry |
+| Gmail Watch | Service account / OAuth | N/A | N/A | No | Registry |
+| Nextcloud Talk | Server credentials | Yes | Yes (rooms) | No | Registry |
+| Tlon | Ship credentials | Yes | Yes (Urbit chats) | No | Registry |
 
 ---
 
