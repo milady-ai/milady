@@ -936,7 +936,7 @@ export function GameView() {
                 </button>
               )}
               <button className="w-full px-3 py-2 text-left text-xs text-txt hover:bg-bg-hover transition-colors" onClick={() => { setState("chatAgentVoiceMuted", !chatAgentVoiceMuted); setShowHeaderMenu(false); }}>
-                {chatAgentVoiceMuted ? "Unmute Voice" : "Mute Voice"}
+                {chatAgentVoiceMuted ? t("game.unmuteVoice") : t("game.muteVoice")}
               </button>
               <button className="w-full px-3 py-2 text-left text-xs text-txt hover:bg-bg-hover transition-colors" onClick={() => { setState("gameOverlayEnabled", !gameOverlayEnabled); setShowHeaderMenu(false); }}>
                 {gameOverlayEnabled ? t("game.unpinOverlay") : t("game.keepOnTop")}

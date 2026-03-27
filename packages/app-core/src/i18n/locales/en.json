@@ -1173,6 +1173,8 @@
   "game.stopping": "Stopping...",
   "game.openInNativeWindow": "Open in native window",
   "game.launching": "Launching...",
+  "game.muteVoice": "Mute Voice",
+  "game.unmuteVoice": "Unmute Voice",
   "lifomonitorpanel.LifoComputerUseSu": "Computer Use Surfaces",
   "lifomonitorpanel.WatchOnlyDesktopM": "Watch-only desktop mirror. Agent controls the browser sandbox.",
   "lifomonitorpanel.SandboxLiveNoVNCS": "Sandbox live noVNC session",
