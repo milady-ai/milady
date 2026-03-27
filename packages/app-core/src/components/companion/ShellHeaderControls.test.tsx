@@ -231,4 +231,54 @@ describe("ShellHeaderControls", () => {
     );
     expect(newChatButtons.length).toBe(0);
   });
+
+  it("uses a shared segmented inset and uniform inner rounding for all shell buttons", () => {
+    mockUseMediaQuery.mockReturnValue(false);
+
+    const tree = renderControls({ activeShellView: "desktop" });
+    const root = tree.root;
+    const fieldset = root.findByProps({ "data-testid": "ui-shell-toggle" });
+    const companionButton = root.findByProps({
+      "data-testid": "ui-shell-toggle-companion",
+    });
+    const characterButton = root.findByProps({
+      "data-testid": "ui-shell-toggle-character",
+    });
+    const desktopButton = root.findByProps({
+      "data-testid": "ui-shell-toggle-desktop",
+    });
+
+    expect(String(fieldset.props.className)).toContain("rounded-[14px]");
+    expect(String(fieldset.props.className)).toContain("p-1");
+    for (const button of [companionButton, characterButton, desktopButton]) {
+      expect(String(button.props.className)).toContain("rounded-[10px]");
+      expect(String(button.props.className)).not.toContain("rounded-l");
+      expect(String(button.props.className)).not.toContain("rounded-r");
+    }
+  });
+
+  it("gives inactive shell segments a visible baseline fill", () => {
+    mockUseMediaQuery.mockReturnValue(false);
+
+    const tree = renderControls({ activeShellView: "character" });
+    const root = tree.root;
+    const companionButton = root.findByProps({
+      "data-testid": "ui-shell-toggle-companion",
+    });
+    const characterButton = root.findByProps({
+      "data-testid": "ui-shell-toggle-character",
+    });
+    const desktopButton = root.findByProps({
+      "data-testid": "ui-shell-toggle-desktop",
+    });
+
+    expect(String(companionButton.props.className)).toContain("bg-white/[0.03]");
+    expect(String(desktopButton.props.className)).toContain("bg-white/[0.03]");
+    expect(String(characterButton.props.className)).toContain(
+      "border-[color:color-mix",
+    );
+    expect(characterButton.props["aria-pressed"]).toBe(true);
+    expect(companionButton.props["aria-pressed"]).toBe(false);
+    expect(desktopButton.props["aria-pressed"]).toBe(false);
+  });
 });
