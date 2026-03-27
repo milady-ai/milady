@@ -1655,8 +1655,8 @@ export async function installDatabaseTrajectoryLogger(
     return stepId;
   };
 
-  loggerAny.startStep = (_trajectoryId: string): string => {
-    return `step-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  loggerAny.startStep = (trajectoryId: string): string => {
+    return trajectoryId;
   };
 
   loggerAny.endTrajectory = async (
@@ -2466,10 +2466,10 @@ export class DatabaseTrajectoryLogger extends Service {
   /**
    * Start a new step within an existing trajectory.
    */
-  startStep(_trajectoryId: string): string {
-    const stepId = `step-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    // For database logger, steps are independent - we just return the new stepId
-    return stepId;
+  startStep(trajectoryId: string): string {
+    // Return the trajectory ID so LLM calls logged with this step ID attach
+    // to the same trajectory row that startTrajectory created.
+    return trajectoryId;
   }
 
   /**
