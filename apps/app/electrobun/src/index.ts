@@ -30,7 +30,14 @@ import {
   pickReachableMenuResetApiBase,
   runMainMenuResetAfterApiBaseResolved,
 } from "./menu-reset-from-main";
-import { configureDesktopLocalApiAuth, getAgentManager } from "./native/agent";
+import {
+  configureDesktopLocalApiAuth,
+  getAgentManager,
+  getDiagnosticLogPath,
+  getStartupDiagnosticLogTail,
+  getStartupDiagnosticsSnapshot,
+  getStartupStatusPath,
+} from "./native/agent";
 import { getDesktopManager } from "./native/desktop";
 import { disposeNativeModules, initializeNativeModules } from "./native/index";
 import {
@@ -67,6 +74,8 @@ type HeartbeatMenuHealthResponse = {
 
 const HEARTBEAT_MENU_REFRESH_MS = 30_000;
 const CONFIG_EXPORT_FILE_NAME = "milady-config.json";
+const STARTUP_CRASH_REPORT_FILE = "startup-crash-report-latest.md";
+const STARTUP_CRASH_PROMPT_MARKER_FILE = "startup-crash-last-prompted.txt";
 // Browser surface ships enabled by default. Set
 // MILADY_ENABLE_BROWSER_SURFACE=0 to force-disable it for local debugging or
 // release triage.
@@ -1430,6 +1439,8 @@ async function main(): Promise<void> {
   console.log(
     `[Env] desktopRuntimeMode=${runtimeResolution.mode} externalApi=${runtimeResolution.externalApi.base ?? "none"}`,
   );
+
+  await maybePromptStartupCrashReport();
   // On Windows (CEF renderer), clear stale CEF profile data when the app
   // version changes.  A leftover Partitions/default profile from a previous
   // install causes "Cannot create profile at path" errors that cascade into
@@ -1643,19 +1654,183 @@ async function main(): Promise<void> {
   setupShutdown(cleanupFns);
 }
 
+function resolveStartupCrashReportPath(): string {
+  return path.join(
+    path.dirname(getDiagnosticLogPath()),
+    STARTUP_CRASH_REPORT_FILE,
+  );
+}
+
+function resolveStartupCrashPromptMarkerPath(): string {
+  return path.join(
+    path.dirname(getDiagnosticLogPath()),
+    STARTUP_CRASH_PROMPT_MARKER_FILE,
+  );
+}
+
+function buildStartupCrashDiscordReport(options: {
+  source: "startup-recovery" | "fatal-startup";
+  error: string | null;
+}): string {
+  const diagnostics = getStartupDiagnosticsSnapshot();
+  const startupLogTail = getStartupDiagnosticLogTail(8_000).trim();
+  const appVersion = process.env.npm_package_version?.trim() || "unknown";
+  const appRuntime = `electrobun/${Bun.version}`;
+  const reportLines = [
+    "Milady startup crash report",
+    "",
+    "Share this report in Discord and ping @iono.",
+    "",
+    `Source: ${options.source}`,
+    `Timestamp: ${new Date().toISOString()}`,
+    `App Version: ${appVersion}`,
+    `Runtime: ${appRuntime}`,
+    `Platform: ${process.platform} ${process.arch}`,
+    `State: ${diagnostics.state}`,
+    `Phase: ${diagnostics.phase}`,
+    `Last Error: ${options.error ?? diagnostics.lastError ?? "unknown"}`,
+    `Updated At: ${diagnostics.updatedAt}`,
+    `Log Path: ${diagnostics.logPath}`,
+    `Status Path: ${diagnostics.statusPath}`,
+    "",
+    startupLogTail ? "Startup Log Tail:" : "Startup Log Tail: unavailable",
+  ];
+
+  if (startupLogTail) {
+    reportLines.push("```");
+    reportLines.push(startupLogTail);
+    reportLines.push("```");
+  }
+  return `${reportLines.join("\n")}\n`;
+}
+
+function persistStartupCrashReport(options: {
+  source: "startup-recovery" | "fatal-startup";
+  error: string | null;
+}): { report: string; reportPath: string } {
+  const report = buildStartupCrashDiscordReport(options);
+  const primaryReportPath = resolveStartupCrashReportPath();
+  const fallbackReportPath = path.join(os.tmpdir(), STARTUP_CRASH_REPORT_FILE);
+  let reportPath = primaryReportPath;
+  try {
+    fs.mkdirSync(path.dirname(primaryReportPath), { recursive: true });
+    fs.writeFileSync(primaryReportPath, report, "utf8");
+  } catch (err) {
+    console.warn("[Main] Failed to write startup crash report:", err);
+    try {
+      fs.mkdirSync(path.dirname(fallbackReportPath), { recursive: true });
+      fs.writeFileSync(fallbackReportPath, report, "utf8");
+      reportPath = fallbackReportPath;
+    } catch (fallbackErr) {
+      console.warn(
+        "[Main] Failed to write fallback startup crash report:",
+        fallbackErr,
+      );
+    }
+  }
+  return { report, reportPath };
+}
+
+function wasStartupCrashAlreadyPrompted(updatedAt: string): boolean {
+  try {
+    const markerPath = resolveStartupCrashPromptMarkerPath();
+    return fs.readFileSync(markerPath, "utf8").trim() === updatedAt;
+  } catch {
+    return false;
+  }
+}
+
+function markStartupCrashPrompted(updatedAt: string): void {
+  try {
+    fs.writeFileSync(resolveStartupCrashPromptMarkerPath(), updatedAt, "utf8");
+  } catch {}
+}
+
+async function maybePromptStartupCrashReport(): Promise<void> {
+  const diagnostics = getStartupDiagnosticsSnapshot();
+  const looksLikeStartupFailure =
+    diagnostics.state === "error" &&
+    diagnostics.phase !== "ready" &&
+    diagnostics.phase !== "stopped";
+  if (!looksLikeStartupFailure) {
+    return;
+  }
+  if (wasStartupCrashAlreadyPrompted(diagnostics.updatedAt)) {
+    return;
+  }
+
+  const { report, reportPath } = persistStartupCrashReport({
+    source: "startup-recovery",
+    error: diagnostics.lastError,
+  });
+  markStartupCrashPrompted(diagnostics.updatedAt);
+
+  const dialog = await Utils.showMessageBox({
+    type: "warning",
+    title: "Milady recovered after a startup failure",
+    message:
+      "The previous launch failed. A crash report is ready to share with support.",
+    detail:
+      "Choose Copy Report, paste into Discord, and ping @iono. You can also open logs.",
+    buttons: ["Copy Report", "Open Logs Folder", "Continue"],
+    defaultId: 0,
+    cancelId: 2,
+  });
+  const response =
+    dialog && typeof dialog === "object" && "response" in dialog
+      ? (dialog as { response: number }).response
+      : typeof dialog === "number"
+        ? dialog
+        : 2;
+
+  if (response === 0) {
+    try {
+      Utils.clipboardWriteText(report);
+      Utils.showNotification({
+        title: "Crash report copied",
+        body: "Paste in Discord and ping @iono.",
+      });
+    } catch (err) {
+      console.warn("[Main] Failed to copy startup crash report:", err);
+    }
+  } else if (response === 1) {
+    try {
+      Utils.openPath(path.dirname(reportPath));
+    } catch (err) {
+      console.warn("[Main] Failed to open startup logs folder:", err);
+    }
+  }
+}
+
 main().catch((err) => {
   const msg = `[Main] Fatal error during startup: ${err?.stack ?? err}`;
   console.error(msg);
+  persistStartupCrashReport({
+    source: "fatal-startup",
+    error: msg,
+  });
   // Write to startup log so it's visible even without a console
   try {
-    const logDir =
-      process.platform === "win32"
-        ? path.join(process.env.APPDATA ?? "", "Milady")
-        : path.join(os.homedir(), ".config", "Milady");
-    fs.mkdirSync(logDir, { recursive: true });
-    fs.appendFileSync(
-      path.join(logDir, "milady-startup.log"),
-      `[${new Date().toISOString()}] ${msg}\n`,
+    const logPath = getDiagnosticLogPath();
+    fs.mkdirSync(path.dirname(logPath), { recursive: true });
+    fs.appendFileSync(logPath, `[${new Date().toISOString()}] ${msg}\n`);
+    fs.writeFileSync(
+      getStartupStatusPath(),
+      `${JSON.stringify(
+        {
+          state: "error",
+          phase: "fatal_startup",
+          updatedAt: new Date().toISOString(),
+          lastError: msg,
+          platform: process.platform,
+          arch: process.arch,
+          logPath,
+          statusPath: getStartupStatusPath(),
+        },
+        null,
+        2,
+      )}\n`,
+      "utf8",
     );
   } catch {}
   process.exit(1);

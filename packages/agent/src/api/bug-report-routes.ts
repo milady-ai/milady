@@ -1,9 +1,36 @@
 import os from "node:os";
 import type { RouteRequestContext } from "./route-helpers";
 
-export const BUG_REPORT_REPO = "elizaos/eliza";
-const GITHUB_ISSUES_URL = `https://api.github.com/repos/${BUG_REPORT_REPO}/issues`;
-const GITHUB_NEW_ISSUE_URL = `https://github.com/${BUG_REPORT_REPO}/issues/new?template=bug_report.yml`;
+export const DEFAULT_BUG_REPORT_REPO = "milady-ai/milady";
+export const BUG_REPORT_REPO_ENV_KEY = "MILADY_BUG_REPORT_REPO";
+const BUG_REPORT_REPO_FALLBACK_ENV_KEY = "BUG_REPORT_REPO";
+
+function sanitizeRepoName(value: string | undefined): string | null {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+  if (!/^[\w.-]+\/[\w.-]+$/.test(trimmed)) return null;
+  return trimmed;
+}
+
+export function resolveBugReportRepo(
+  env: NodeJS.ProcessEnv = process.env,
+): string {
+  return (
+    sanitizeRepoName(env[BUG_REPORT_REPO_ENV_KEY]) ??
+    sanitizeRepoName(env[BUG_REPORT_REPO_FALLBACK_ENV_KEY]) ??
+    DEFAULT_BUG_REPORT_REPO
+  );
+}
+
+export const BUG_REPORT_REPO = resolveBugReportRepo();
+
+function getGithubIssuesUrl(repo: string): string {
+  return `https://api.github.com/repos/${repo}/issues`;
+}
+
+function getGithubNewIssueUrl(repo: string): string {
+  return `https://github.com/${repo}/issues/new?template=bug_report.yml`;
+}
 
 const BUG_REPORT_WINDOW_MS = 10 * 60 * 1000;
 const BUG_REPORT_MAX_SUBMISSIONS = 5;
@@ -87,6 +114,9 @@ export async function handleBugReportRoutes(
   ctx: RouteRequestContext,
 ): Promise<boolean> {
   const { req, res, method, pathname, json, error, readJsonBody } = ctx;
+  const bugReportRepo = resolveBugReportRepo();
+  const githubIssuesUrl = getGithubIssuesUrl(bugReportRepo);
+  const githubNewIssueUrl = getGithubNewIssueUrl(bugReportRepo);
 
   if (method === "GET" && pathname === "/api/bug-report/info") {
     json(res, {
@@ -112,7 +142,7 @@ export async function handleBugReportRoutes(
 
     const githubToken = process.env.GITHUB_TOKEN;
     if (!githubToken) {
-      json(res, { fallback: GITHUB_NEW_ISSUE_URL });
+      json(res, { fallback: githubNewIssueUrl });
       return true;
     }
 
@@ -122,7 +152,7 @@ export async function handleBugReportRoutes(
         " ",
       );
       const issueBody = formatIssueBody(body);
-      const issueRes = await fetch(GITHUB_ISSUES_URL, {
+      const issueRes = await fetch(githubIssuesUrl, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${githubToken}`,
@@ -145,7 +175,7 @@ export async function handleBugReportRoutes(
       const url = issueData.html_url;
       if (
         typeof url !== "string" ||
-        !url.startsWith(`https://github.com/${BUG_REPORT_REPO}/issues/`)
+        !url.startsWith(`https://github.com/${bugReportRepo}/issues/`)
       ) {
         error(res, "Unexpected response from GitHub API", 502);
         return true;

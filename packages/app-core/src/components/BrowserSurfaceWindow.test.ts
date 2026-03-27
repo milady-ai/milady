@@ -29,6 +29,12 @@ class FakeElectrobunWebview extends HTMLElement {
   }
 }
 
+class GetterOnlySandboxWebview extends FakeElectrobunWebview {
+  get sandbox(): string {
+    return this.getAttribute("sandbox") ?? "";
+  }
+}
+
 describe("BrowserSurfaceWindow", () => {
   let host: HTMLDivElement;
   let root: Root;
@@ -117,6 +123,48 @@ describe("BrowserSurfaceWindow", () => {
       expect(FakeElectrobunWebview.latest?.loadURL).toHaveBeenCalledWith(
         "https://example.com/",
       );
+      expect(FakeElectrobunWebview.latest?.getAttribute("sandbox")).toBe(
+        "allow-scripts allow-same-origin allow-forms allow-popups",
+      );
+    } finally {
+      getSpy.mockRestore();
+      createSpy.mockRestore();
+    }
+  });
+
+  it("does not throw when sandbox is getter-only on the custom element", async () => {
+    customElements.define(elementName, GetterOnlySandboxWebview);
+    const originalGet = window.customElements.get.bind(window.customElements);
+    const getSpy = vi
+      .spyOn(window.customElements, "get")
+      .mockImplementation((name: string) =>
+        name === "electrobun-webview"
+          ? GetterOnlySandboxWebview
+          : originalGet(name),
+      );
+    const originalCreateElement = document.createElement.bind(document);
+    const createSpy = vi
+      .spyOn(document, "createElement")
+      .mockImplementation(((
+        tagName: string,
+        options?: ElementCreationOptions,
+      ) =>
+        originalCreateElement(
+          tagName === "electrobun-webview" ? elementName : tagName,
+          options,
+        )) as typeof document.createElement);
+
+    try {
+      await act(async () => {
+        root.render(React.createElement(BrowserSurfaceWindow));
+      });
+
+      expect(host.textContent).not.toContain(
+        "Browser surface failed to initialize.",
+      );
+      expect(
+        GetterOnlySandboxWebview.latest?.getAttribute("sandbox"),
+      ).toContain("allow-scripts");
     } finally {
       getSpy.mockRestore();
       createSpy.mockRestore();

@@ -71,6 +71,7 @@ export function BrowserSurfaceWindow() {
   const [canGoBack, setCanGoBack] = useState(false);
   const [canGoForward, setCanGoForward] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [webviewInitError, setWebviewInitError] = useState<string | null>(null);
 
   const syncNavigationState = useEffectEvent(async () => {
     const webview = webviewRef.current;
@@ -101,6 +102,26 @@ export function BrowserSurfaceWindow() {
     applyNavigationUrl(nextUrl);
     setIsLoading(true);
     webview?.loadURL(nextUrl);
+  });
+
+  const attachWebviewRef = useEffectEvent((node: HTMLElement | null) => {
+    webviewRef.current = node as WebviewTagElement | null;
+    if (!node) return;
+    try {
+      // Set sandbox as an attribute to avoid assigning into potential
+      // getter-only custom element properties in certain runtime builds.
+      node.setAttribute(
+        "sandbox",
+        "allow-scripts allow-same-origin allow-forms allow-popups",
+      );
+      setWebviewInitError(null);
+    } catch (err) {
+      setWebviewInitError(
+        err instanceof Error
+          ? err.message
+          : "Failed to initialize browser view",
+      );
+    }
   });
 
   useEffect(() => {
@@ -267,16 +288,17 @@ export function BrowserSurfaceWindow() {
         className="flex min-h-0 flex-1 overflow-hidden rounded-[1.1rem] bg-white"
         style={viewportStyle}
       >
-        {webviewTagAvailable ? (
+        {webviewTagAvailable && !webviewInitError ? (
           createElement("electrobun-webview", {
             className: "h-full min-h-0 w-full bg-white",
             partition: "milady-browser",
-            ref: (node: HTMLElement | null) => {
-              webviewRef.current = node as WebviewTagElement | null;
-            },
-            sandbox: "allow-scripts allow-same-origin allow-forms allow-popups",
+            ref: attachWebviewRef,
             src: initialUrl,
           })
+        ) : webviewTagAvailable && webviewInitError ? (
+          <div className="flex flex-1 items-center justify-center bg-black/5 px-6 text-center text-sm text-muted">
+            Browser surface failed to initialize. {webviewInitError}
+          </div>
         ) : (
           <div className="flex flex-1 items-center justify-center bg-black/5 px-6 text-center text-sm text-muted">
             Browser surface is only available in the Electrobun desktop runtime.
