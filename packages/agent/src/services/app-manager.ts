@@ -297,7 +297,7 @@ export class AppManager {
         registry.set(name, {
           name,
           displayName: override.displayName ?? name,
-          description: "",
+          description: override.description ?? "",
           kind: "app",
           npm: { package: name, v0Version: null, v1Version: null, v2Version: null },
           supports: { v0: false, v1: false, v2: true },

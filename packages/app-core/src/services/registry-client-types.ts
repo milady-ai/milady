@@ -11,6 +11,7 @@ export interface AppUiExtensionConfig {
 
 export interface RegistryAppMeta {
   displayName: string;
+  description?: string;
   category: string;
   launchType: string;
   launchUrl: string | null;

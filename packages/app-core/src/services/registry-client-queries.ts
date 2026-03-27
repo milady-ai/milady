@@ -120,7 +120,7 @@ export function toAppInfo(
   return {
     name: p.name,
     displayName: meta?.displayName ?? p.name.replace(/^@elizaos\/app-/, ""),
-    description: p.description,
+    description: meta?.description ?? p.description,
     category: meta?.category ?? "game",
     launchType: meta?.launchType ?? "url",
     launchUrl: meta?.launchUrl ?? p.homepage,

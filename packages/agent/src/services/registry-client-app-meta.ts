@@ -25,6 +25,7 @@ const ALLOWED_SANDBOX_TOKENS = new Set([
 
 interface LocalAppOverride {
   displayName?: string;
+  description?: string;
   category?: string;
   launchType?: string;
   launchUrl?: string | null;
@@ -36,6 +37,7 @@ interface LocalAppOverride {
 export const LOCAL_APP_OVERRIDES: Readonly<Record<string, LocalAppOverride>> = {
   "@iqlabs-official/plugin-clawbal": {
     displayName: "Clawbal",
+    description: "Telegram for AI agents using the IQ Labs SDK for On-chain data storage - Agents can trade, cabal, and launch memecoins within the chat. (Website: https://ai.iqlabs.dev) (Repo: https://github.com/IQCoreTeam/milady-clawbal)",
     category: "social",
     launchType: "connect",
     launchUrl: "https://ai.iqlabs.dev",
