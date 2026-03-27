@@ -33,7 +33,6 @@ import {
 import { resolveApiUrl } from "../utils";
 import { getElizaApiToken } from "../utils/eliza-globals";
 import { mergeStreamingText } from "../utils/streaming-text";
-import { hasConfiguredApiKey } from "../voice";
 
 // ── Speech Recognition types ──────────────────────────────────────────
 
@@ -180,11 +179,14 @@ const globalAudioCache = new Map<string, Uint8Array>();
 
 function resolveVoiceMode(
   mode: VoiceMode | undefined,
-  cloudConnected: boolean,
-  apiKey?: string | null,
+  _cloudConnected: boolean,
+  _apiKey?: string | null,
 ): VoiceMode {
   if (mode) return mode;
-  if (cloudConnected && !hasConfiguredApiKey(apiKey)) return "cloud";
+  // Always use the ElevenLabs proxy path ("own-key") — the server aliases the
+  // cloud API key to ELEVENLABS_API_KEY at startup so upstream Eliza can use
+  // it.  The "cloud" path converts ElevenLabs voice IDs to OpenAI-style names
+  // (nova, alloy, etc.) which produces wrong audio (default sample clips).
   return "own-key";
 }
 

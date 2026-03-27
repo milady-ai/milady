@@ -182,6 +182,7 @@ import {
 // ---------------------------------------------------------------------------
 
 import {
+  ensureCloudTtsApiKeyAlias,
   handleCloudTtsPreviewRoute as _handleCloudTtsPreviewRoute,
   mirrorCompatHeaders,
 } from "./server-cloud-tts";
@@ -3387,6 +3388,9 @@ export function patchHttpCreateServerForMiladyCompat(
     const wrappedListener: http.RequestListener = async (req, res) => {
       syncMiladyEnvToEliza();
       syncElizaEnvToMilady();
+      // Re-check cloud TTS key alias on each request so sign-in mid-session
+      // is picked up without a restart.
+      ensureCloudTtsApiKeyAlias();
       mirrorCompatHeaders(req);
       if (state) {
         patchCompatStatusResponse(req, res, state);
@@ -3498,6 +3502,10 @@ export async function startApiServer(
 ): Promise<Awaited<ReturnType<typeof upstreamStartApiServer>>> {
   syncMiladyEnvToEliza();
   syncElizaEnvToMilady();
+  // Ensure cloud-backed ElevenLabs key is available as ELEVENLABS_API_KEY so
+  // the upstream Eliza TTS handler can use it (the `/api/tts/elevenlabs` route
+  // passes through to upstream which checks this env var).
+  ensureCloudTtsApiKeyAlias();
   await hydrateWalletKeysFromNodePlatformSecureStore();
   const compatState: CompatRuntimeState = {
     current: (args[0]?.runtime as AgentRuntime | null) ?? null,
