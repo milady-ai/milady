@@ -31,39 +31,13 @@ jobs:
         with:
           node-version: 22
 
-      - name: Setup Python (for node-gyp when native prebuilds missing)
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install setuptools for distutils (Python 3.12+)
-        run: pip install setuptools
-
-      - name: Install native dependencies
-        run: sudo apt-get update && sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev libpixman-1-dev librsvg2-dev
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup workspace dependencies
+        uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-
-      - name: Cache Bun install
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-          restore-keys: bun-${{ runner.os }}-
-
-      - name: Install dependencies
-        run: bun install --ignore-scripts
-        env:
-          npm_config_python: ${{ env.pythonLocation }}/bin/python3
-
-      - name: Run repository postinstall patches
-        run: bun run postinstall
-        env:
-          SKIP_AVATAR_CLONE: "1"
-          MILADY_NO_VISION_DEPS: "1"
+          install-command: bun install --ignore-scripts
+          skip-avatar-clone: "true"
+          no-vision-deps: "true"
 
       - name: Run unit tests with coverage
         run: bun run test:coverage
@@ -88,39 +62,13 @@ jobs:
         with:
           node-version: 22
 
-      - name: Setup Python (for node-gyp when native prebuilds missing)
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install setuptools for distutils (Python 3.12+)
-        run: pip install setuptools
-
-      - name: Install canvas native dependencies
-        run: sudo apt-get update && sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev libpixman-1-dev librsvg2-dev
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup workspace dependencies
+        uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-
-      - name: Cache Bun install
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-          restore-keys: bun-${{ runner.os }}-
-
-      - name: Install dependencies
-        run: bun install --ignore-scripts
-        env:
-          npm_config_python: ${{ env.pythonLocation }}/bin/python3
-
-      - name: Run repository postinstall patches
-        run: bun run postinstall
-        env:
-          SKIP_AVATAR_CLONE: "1"
-          MILADY_NO_VISION_DEPS: "1"
+          install-command: bun install --ignore-scripts
+          skip-avatar-clone: "true"
+          no-vision-deps: "true"
 
       - name: Run database security and query-guard tests
         run: bun run db:check
@@ -138,33 +86,12 @@ jobs:
         with:
           node-version: 22
 
-      - name: Setup Python (for node-gyp when native prebuilds missing)
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install setuptools for distutils (Python 3.12+)
-        run: pip install setuptools
-
-      - name: Install canvas native dependencies
-        run: sudo apt-get update && sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev libpixman-1-dev librsvg2-dev
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup workspace dependencies
+        uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-
-      - name: Cache Bun install
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-          restore-keys: bun-${{ runner.os }}-
-
-      - name: Install dependencies
-        run: bun install
-        env:
-          npm_config_python: ${{ env.pythonLocation }}/bin/python3
+          install-command: bun install
+          run-postinstall: "false"
 
       - name: Build
         run: bun run build
@@ -183,42 +110,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install canvas native dependencies
-        run: sudo apt-get update && sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev libpixman-1-dev librsvg2-dev
-
       # WHY useblacksmith: colocated cache avoids nodejs.org download timeouts on Blacksmith runners.
       - name: Setup Node.js
         uses: useblacksmith/setup-node@v5
         with:
           node-version: 22
 
-      - name: Setup Python (for node-gyp)
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install setuptools for distutils (Python 3.12+)
-        run: pip install setuptools
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup workspace dependencies
+        uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-
-      - name: Cache Bun install
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-          restore-keys: bun-${{ runner.os }}-
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile --ignore-scripts
-        env:
-          npm_config_python: ${{ env.pythonLocation }}/bin/python3
-
-      - name: Run repository postinstall patches
-        run: bun run postinstall
+          install-command: bun install --frozen-lockfile --ignore-scripts
 
       - name: Run app startup/onboarding tests
         run: >
@@ -254,36 +156,17 @@ jobs:
         if: steps.cloud.outputs.enabled == 'true'
         uses: actions/checkout@v4
 
-      - name: Install canvas native dependencies
+      - name: Setup workspace dependencies
         if: steps.cloud.outputs.enabled == 'true'
-        run: sudo apt-get update && sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev libpixman-1-dev librsvg2-dev
-
-      - name: Setup Bun
-        if: steps.cloud.outputs.enabled == 'true'
-        uses: oven-sh/setup-bun@v2
+        uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-
-      - name: Cache Bun install
-        if: steps.cloud.outputs.enabled == 'true'
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-          restore-keys: bun-${{ runner.os }}-
-
-      - name: Install dependencies
-        if: steps.cloud.outputs.enabled == 'true'
-        run: |
-          for i in 1 2 3 4 5; do
-            bun install --frozen-lockfile --ignore-scripts && break
-            echo "Attempt $i failed, retrying in $((i * 15))s..."
-            sleep $((i * 15))
-          done
-
-      - name: Run repository postinstall patches
-        if: steps.cloud.outputs.enabled == 'true'
-        run: bun run postinstall
+          install-command: |
+            for i in 1 2 3 4 5; do
+              bun install --frozen-lockfile --ignore-scripts && break
+              echo "Attempt $i failed, retrying in $((i * 15))s..."
+              sleep $((i * 15))
+            done
 
       - name: Run cloud live test
         if: steps.cloud.outputs.enabled == 'true'
@@ -303,26 +186,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install canvas native dependencies
-        run: sudo apt-get update && sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev libpixman-1-dev librsvg2-dev
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup workspace dependencies
+        uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-
-      - name: Cache Bun install
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-          restore-keys: bun-${{ runner.os }}-
-
-      - name: Install dependencies
-        run: bun install --ignore-scripts
-
-      - name: Run repository postinstall patches
-        run: bun run postinstall
+          install-command: bun install --ignore-scripts
 
       - name: Build
         run: bun run build

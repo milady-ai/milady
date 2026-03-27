@@ -1,0 +1,75 @@
+name: "Setup Bun Workspace"
+description: "Install Bun workspace dependencies and optional postinstall patches for CI jobs."
+
+inputs:
+  bun-version:
+    description: "Bun version to install"
+    required: false
+    default: "1.3.10"
+  python-version:
+    description: "Python version for node-gyp fallbacks"
+    required: false
+    default: "3.12"
+  install-command:
+    description: "Dependency install command"
+    required: false
+    default: "bun install --ignore-scripts"
+  install-native-deps:
+    description: "Whether to install native apt dependencies"
+    required: false
+    default: "true"
+  run-postinstall:
+    description: "Whether to run the repo postinstall step explicitly"
+    required: false
+    default: "true"
+  skip-avatar-clone:
+    description: "Set SKIP_AVATAR_CLONE=1 for postinstall"
+    required: false
+    default: "false"
+  no-vision-deps:
+    description: "Set MILADY_NO_VISION_DEPS=1 for postinstall"
+    required: false
+    default: "false"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install setuptools for distutils (Python 3.12+)
+      shell: bash
+      run: pip install setuptools
+
+    - name: Install native dependencies
+      if: ${{ inputs.install-native-deps == 'true' }}
+      shell: bash
+      run: sudo apt-get update && sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev libpixman-1-dev librsvg2-dev
+
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v2
+      with:
+        bun-version: ${{ inputs.bun-version }}
+
+    - name: Cache Bun install
+      uses: actions/cache@v4
+      with:
+        path: ~/.bun/install/cache
+        key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+        restore-keys: bun-${{ runner.os }}-
+
+    - name: Install dependencies
+      shell: bash
+      run: ${{ inputs.install-command }}
+      env:
+        npm_config_python: ${{ env.pythonLocation }}/bin/python3
+
+    - name: Run repository postinstall patches
+      if: ${{ inputs.run-postinstall == 'true' }}
+      shell: bash
+      run: bun run postinstall
+      env:
+        SKIP_AVATAR_CLONE: ${{ inputs.skip-avatar-clone == 'true' && '1' || '' }}
+        MILADY_NO_VISION_DEPS: ${{ inputs.no-vision-deps == 'true' && '1' || '' }}

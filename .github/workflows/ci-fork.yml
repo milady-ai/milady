@@ -3,8 +3,6 @@ name: CI (Fork)
 on:
   pull_request:
     branches: [main, develop]
-  push:
-    branches: [main, develop, "codex/**"]
   workflow_dispatch:
 
 concurrency:
@@ -17,6 +15,7 @@ env:
 jobs:
   lint:
     name: Lint & Format
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == true)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,36 +25,11 @@ jobs:
         with:
           node-version: 22
 
-      - name: Setup Python (for node-gyp when native prebuilds missing)
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install setuptools for distutils (Python 3.12+)
-        run: pip install setuptools
-
-      - name: Install native dependencies
-        run: sudo apt-get update && sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev libpixman-1-dev librsvg2-dev
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup workspace dependencies
+        uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-
-      - name: Cache Bun install
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-          restore-keys: bun-${{ runner.os }}-
-
-      - name: Install dependencies
-        run: bun install --ignore-scripts
-        env:
-          npm_config_python: ${{ env.pythonLocation }}/bin/python3
-
-      - name: Run repository postinstall patches
-        run: bun run postinstall
+          install-command: bun install --ignore-scripts
 
       - name: Biome lint
         run: bun run lint
@@ -65,6 +39,7 @@ jobs:
 
   typecheck:
     name: Type Check
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == true)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -74,42 +49,18 @@ jobs:
         with:
           node-version: 22
 
-      - name: Setup Python (for node-gyp when native prebuilds missing)
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install setuptools for distutils (Python 3.12+)
-        run: pip install setuptools
-
-      - name: Install native dependencies
-        run: sudo apt-get update && sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev libpixman-1-dev librsvg2-dev
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup workspace dependencies
+        uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-
-      - name: Cache Bun install
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-          restore-keys: bun-${{ runner.os }}-
-
-      - name: Install dependencies
-        run: bun install --ignore-scripts
-        env:
-          npm_config_python: ${{ env.pythonLocation }}/bin/python3
-
-      - name: Run repository postinstall patches
-        run: bun run postinstall
+          install-command: bun install --ignore-scripts
 
       - name: Run type checker
         run: bun run typecheck
 
   test:
     name: Targeted Tests
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == true)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -119,42 +70,18 @@ jobs:
         with:
           node-version: 22
 
-      - name: Setup Python (for node-gyp when native prebuilds missing)
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install setuptools for distutils (Python 3.12+)
-        run: pip install setuptools
-
-      - name: Install native dependencies
-        run: sudo apt-get update && sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev libpixman-1-dev librsvg2-dev
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup workspace dependencies
+        uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-
-      - name: Cache Bun install
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-          restore-keys: bun-${{ runner.os }}-
-
-      - name: Install dependencies
-        run: bun install --ignore-scripts
-        env:
-          npm_config_python: ${{ env.pythonLocation }}/bin/python3
-
-      - name: Run repository postinstall patches
-        run: bun run postinstall
+          install-command: bun install --ignore-scripts
 
       - name: Run onboarding voice regression tests
         run: bunx vitest run packages/app-core/src/components/onboarding/identity-preview-tts.test.ts
 
   build:
     name: Build
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == true)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -164,36 +91,11 @@ jobs:
         with:
           node-version: 22
 
-      - name: Setup Python (for node-gyp when native prebuilds missing)
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install setuptools for distutils (Python 3.12+)
-        run: pip install setuptools
-
-      - name: Install native dependencies
-        run: sudo apt-get update && sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev libpixman-1-dev librsvg2-dev
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup workspace dependencies
+        uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-
-      - name: Cache Bun install
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-          restore-keys: bun-${{ runner.os }}-
-
-      - name: Install dependencies
-        run: bun install --ignore-scripts
-        env:
-          npm_config_python: ${{ env.pythonLocation }}/bin/python3
-
-      - name: Run repository postinstall patches
-        run: bun run postinstall
+          install-command: bun install --ignore-scripts
 
       - name: Build project
         run: bun run build
