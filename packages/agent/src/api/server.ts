@@ -2999,7 +2999,25 @@ function isBalanceIntent(input: string): boolean {
   );
 }
 
-function parseFallbackActionBlocks(value: unknown): FallbackParsedAction[] {
+/**
+ * Extract key-value params from the inside of an XML block.
+ * Matches `<key>value</key>` pairs, skipping nested XML.
+ */
+function extractXmlParams(block: string): Record<string, string> {
+  const params: Record<string, string> = {};
+  const pairs = block.matchAll(
+    /<([A-Za-z_][A-Za-z0-9_-]*)>\s*([^<]+?)\s*<\/\1>/g,
+  );
+  for (const [, key, val] of pairs) {
+    params[key] = val.trim();
+  }
+  return params;
+}
+
+function parseFallbackActionBlocks(
+  value: unknown,
+  responseText?: string,
+): FallbackParsedAction[] {
   const rawValues: string[] = [];
   if (typeof value === "string") {
     rawValues.push(value);
@@ -3019,7 +3037,20 @@ function parseFallbackActionBlocks(value: unknown): FallbackParsedAction[] {
     if (xmlActionMatches.length === 0) {
       const normalized = raw.trim().toUpperCase();
       if (/^[A-Z0-9_]+$/.test(normalized)) {
-        parsed.push({ name: normalized, parameters: {} });
+        // Plain action name — try to extract params from the response
+        // text where the LLM writes `<ACTION_NAME>..params..</ACTION_NAME>`
+        let params: Record<string, string> = {};
+        if (responseText) {
+          const actionBlockRe = new RegExp(
+            `<${normalized}>([\\s\\S]*?)<\\/${normalized}>`,
+            "i",
+          );
+          const actionBlock = responseText.match(actionBlockRe);
+          if (actionBlock?.[1]) {
+            params = extractXmlParams(actionBlock[1]);
+          }
+        }
+        parsed.push({ name: normalized, parameters: params });
       }
       continue;
     }
@@ -3030,12 +3061,7 @@ function parseFallbackActionBlocks(value: unknown): FallbackParsedAction[] {
       const params: Record<string, string> = {};
       const paramsMatch = block.match(/<params>([\s\S]*?)<\/params>/i);
       if (paramsMatch?.[1]) {
-        const paramPairs = paramsMatch[1].matchAll(
-          /<([A-Za-z_][A-Za-z0-9_-]*)>\s*([^<]+?)\s*<\/\1>/g,
-        );
-        for (const [, key, val] of paramPairs) {
-          params[key] = val.trim();
-        }
+        Object.assign(params, extractXmlParams(paramsMatch[1]));
       }
       parsed.push({
         name: nameMatch[1].trim().toUpperCase(),
@@ -3581,11 +3607,14 @@ async function generateChatResponse(
     );
 
     const rawActionsPayload = rc?.actions ?? resultRecord.actions;
-    const parsedFallbackActions = parseFallbackActionBlocks(rawActionsPayload);
-    const userText = String(extractCompatTextContent(message.content) ?? "");
     const modelText = String(
       extractCompatTextContent(result.responseContent) ?? "",
     );
+    const parsedFallbackActions = parseFallbackActionBlocks(
+      rawActionsPayload,
+      modelText,
+    );
+    const userText = String(extractCompatTextContent(message.content) ?? "");
     const fallbackActionsToRun = [...parsedFallbackActions];
     const inferredBalanceChain = inferBalanceChainFromText(userText);
 
@@ -3664,7 +3693,17 @@ async function generateChatResponse(
       }
     }
 
-    if (actionCallbacksSeen === 0 && fallbackActionsToRun.length > 0) {
+    // Only run fallback execution when the core did NOT dispatch actions itself.
+    // When mode === "actions", processActions already invoked the handlers —
+    // their callbacks may still be pending (async work like cloning repos,
+    // spawning PTY sessions) so actionCallbacksSeen can be 0 even though
+    // the handlers ARE running. Re-executing them would double-spawn agents.
+    const coreHandledActions = resultRecord.mode === "actions";
+    if (
+      actionCallbacksSeen === 0 &&
+      !coreHandledActions &&
+      fallbackActionsToRun.length > 0
+    ) {
       runtime.logger?.warn(
         {
           src: "eliza-api",
@@ -18546,12 +18585,8 @@ export async function startApiServer(opts?: {
                 return;
               }
               const diskCfg = loadElizaConfig();
-              const lang =
-                state.config.ui?.language ?? diskCfg.ui?.language;
-              const preset = resolveStylePresetByAvatarIndex(
-                avatarIndex,
-                lang,
-              );
+              const lang = state.config.ui?.language ?? diskCfg.ui?.language;
+              const preset = resolveStylePresetByAvatarIndex(avatarIndex, lang);
               const nextUi: ElizaConfig["ui"] = {
                 ...(state.config.ui ?? {}),
                 avatarIndex,

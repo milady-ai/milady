@@ -143,8 +143,8 @@
     "@clack/prompts": "^1.1.0",
     "@electric-sql/pglite": "^0.3.16",
     "@elizaos/app-hyperscape": "1.0.0",
-    "@elizaos/core": "2.0.0-alpha.108",
-    "@elizaos/plugin-agent-orchestrator": "0.3.18",
+    "@elizaos/core": "2.0.0-alpha.109",
+    "@elizaos/plugin-agent-orchestrator": "0.3.19",
     "@elizaos/plugin-agent-skills": "^2.0.0-alpha.70",
     "@elizaos/plugin-anthropic": "^2.0.0-alpha.9",
     "@elizaos/plugin-cron": "^2.0.0-alpha.7",
@@ -231,7 +231,7 @@
     "@vitest/utils": "4.1.0"
   },
   "overrides": {
-    "@elizaos/core": "2.0.0-alpha.108",
+    "@elizaos/core": "2.0.0-alpha.109",
     "drizzle-orm": "0.45.1",
     "ai": "6.0.30",
     "@stwd/sdk": "^0.3.0",

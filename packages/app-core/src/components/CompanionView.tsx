@@ -3,7 +3,6 @@ import { useApp } from "@miladyai/app-core/state";
 import { Button } from "@miladyai/ui";
 import { PanelLeftOpen } from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { AgentActivityBox } from "./AgentActivityBox";
 import { ChatModalView } from "./ChatModalView";
 import { CloudStatusBadge } from "./CloudStatusBadge";
 import { CompanionHeader } from "./companion/CompanionHeader";
@@ -18,7 +17,6 @@ import { PtyConsoleSidePanel } from "./PtyConsoleSidePanel";
 
 const COMPANION_UI_REVEAL_FALLBACK_MS = 1400;
 const COMPANION_DOCK_HEIGHT = "min(42vh, 24rem)";
-const COMPANION_DOCK_ACTIVITY_OFFSET = `calc(${COMPANION_DOCK_HEIGHT} + 1rem)`;
 
 /**
  * Inner overlay that subscribes to useApp() for frequently-changing data
@@ -225,23 +223,11 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
               variant="companion-dock"
               showSidebar={historyOpen}
               onSidebarClose={() => setHistoryOpen(false)}
+              onPtySessionClick={(id) =>
+                setPtySidePanelSessionId((prev) => (prev === id ? null : id))
+              }
             />
           </div>
-        </div>
-      )}
-
-      {/* Floating agent-status pill (bottom-right, above chat dock) */}
-      {ptySessions.length > 0 && (
-        <div
-          className="absolute right-3 z-30 pointer-events-auto sm:right-5"
-          style={{ bottom: COMPANION_DOCK_ACTIVITY_OFFSET }}
-        >
-          <AgentActivityBox
-            sessions={ptySessions}
-            onSessionClick={(id) =>
-              setPtySidePanelSessionId((prev) => (prev === id ? null : id))
-            }
-          />
         </div>
       )}
 
