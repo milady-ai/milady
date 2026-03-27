@@ -67,12 +67,9 @@ describe("CI workflow audit regressions", () => {
     );
   });
 
-  it("composite actions exist", () => {
+  it("setup-bun-workspace composite action exists (supersedes setup-native-deps)", () => {
     expect(
-      fs.existsSync(path.join(ACTIONS_DIR, "setup-native-deps/action.yml")),
-    ).toBe(true);
-    expect(
-      fs.existsSync(path.join(ACTIONS_DIR, "bun-install-retry/action.yml")),
+      fs.existsSync(path.join(ACTIONS_DIR, "setup-bun-workspace/action.yml")),
     ).toBe(true);
   });
 

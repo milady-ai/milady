@@ -346,11 +346,12 @@ jobs:
 
       - name: Upload to App Store Connect
         run: |
-          xcrun notarytool submit "$PKG_PATH" \
-            --apple-id "$APPLE_ID" \
-            --team-id "$APPLE_TEAM_ID" \
-            --password "$APPLE_APP_SPECIFIC_PASSWORD" \
-            --wait
+          xcrun altool --upload-app \
+            --file "$PKG_PATH" \
+            --type macos \
+            --apiKey "${{ secrets.APP_STORE_API_KEY_ID }}" \
+            --apiIssuer "${{ secrets.APP_STORE_API_ISSUER_ID }}" \
+            --show-progress
 
       - name: Upload pkg artifact
         uses: actions/upload-artifact@v4
