@@ -219,10 +219,6 @@ export function AppsView() {
   return (
     <div className="device-layout mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-4 lg:px-6">
       <div className="phone-frame overflow-hidden rounded-[2rem] border border-border/40 bg-card/86 shadow-[0_20px_60px_rgba(0,0,0,0.16)] backdrop-blur-xl">
-        <div className="phone-status-bar flex items-center justify-between border-b border-border/40 px-5 py-3 text-[12px] text-muted-strong">
-          <span className="font-semibold">9:41</span>
-          <span className="opacity-50">📶 🔋</span>
-        </div>
 
         <div className="phone-content grid gap-5 p-4 lg:grid-cols-[minmax(0,1fr)_minmax(19rem,23rem)] lg:p-5">
           <div
@@ -275,10 +271,6 @@ export function AppsView() {
       </div>
 
       <div className="pad-frame overflow-hidden rounded-[2rem] border border-border/40 bg-card/86 shadow-[0_20px_60px_rgba(0,0,0,0.16)] backdrop-blur-xl">
-        <div className="phone-status-bar flex items-center justify-between border-b border-border/40 px-5 py-3 text-[12px] text-muted-strong">
-          <span className="font-semibold">9:41</span>
-          <span className="opacity-50">📶 🔋</span>
-        </div>
 
         <div className="phone-content p-5">
           {selectedApp ? (
