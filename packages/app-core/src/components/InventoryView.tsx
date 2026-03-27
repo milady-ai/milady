@@ -543,9 +543,9 @@ export function InventoryView() {
               </div>
             </div>
 
-            <div className="mt-4 flex min-h-0 flex-1 flex-col">
+            <div className="mt-4">
               <div className={WALLET_SIDEBAR_KICKER_CLASS}>Chains</div>
-              <nav className="mt-3 min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-3">
+              <nav className="mt-3 space-y-1.5">
                 {chainItemMeta.map((item) => {
                   const isActive = chainFocus === item.key;
                   return (
@@ -633,75 +633,52 @@ export function InventoryView() {
             <section className={`${WALLET_PANEL_CLASS} px-5 py-5 sm:px-6`}>
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0 flex-1">
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
-                    Wallet
-                  </div>
-                  <h1 className="mt-1 text-2xl font-semibold text-txt-strong">
+                  <h1 className="text-lg font-semibold text-txt-strong">
                     {walletPageTitle}
                   </h1>
-                  <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+                  <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">
                     {walletPageDescription}
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-                  <Select
-                    value={chainFocus}
-                    onValueChange={(value) =>
-                      setState("inventoryChainFocus", value)
-                    }
-                  >
-                    <SelectTrigger
-                      data-testid="wallet-chain-select"
-                      aria-label={t("wallet.chain")}
-                      className="h-10 min-w-32 rounded-xl border border-border/60 bg-card/88 px-3 text-sm text-txt shadow-sm"
-                    >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">{t("wallet.all")}</SelectItem>
-                      {PRIMARY_CHAIN_KEYS.map((key) => (
-                        <SelectItem key={key} value={key}>
-                          {CHAIN_CONFIGS[key].name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                   {inventoryView === "tokens" && (
-                    <Select
-                      value={inventorySort}
-                      onValueChange={(nextSort) => {
-                        if (
-                          nextSort === "value" ||
-                          nextSort === "chain" ||
-                          nextSort === "symbol"
-                        ) {
-                          setState("inventorySort", nextSort);
-                        }
-                      }}
-                    >
-                      <SelectTrigger
-                        data-testid="wallet-sort-select"
-                        aria-label={t("wallet.sort")}
-                        className="h-10 min-w-36 rounded-xl border border-border/60 bg-card/88 px-3 text-sm text-txt shadow-sm"
+                    <div className="min-w-36">
+                      <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
+                        {t("wallet.sort")}
+                      </div>
+                      <Select
+                        value={inventorySort}
+                        onValueChange={(nextSort) => {
+                          if (
+                            nextSort === "value" ||
+                            nextSort === "chain" ||
+                            nextSort === "symbol"
+                          ) {
+                            setState("inventorySort", nextSort);
+                          }
+                        }}
                       >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="value">
-                          {t("wallet.value")}
-                        </SelectItem>
-                        <SelectItem value="chain">
-                          {t("wallet.chain")}
-                        </SelectItem>
-                        <SelectItem value="symbol">
-                          {t("wallet.name")}
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
+                        <SelectTrigger
+                          data-testid="wallet-sort-select"
+                          aria-label={t("wallet.sort")}
+                          className="h-10 min-w-36 rounded-xl border border-border/60 bg-card/88 px-3 text-sm text-txt shadow-sm"
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="value">
+                            {t("wallet.value")}
+                          </SelectItem>
+                          <SelectItem value="chain">
+                            {t("wallet.chain")}
+                          </SelectItem>
+                          <SelectItem value="symbol">
+                            {t("wallet.name")}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   )}
-                  <span className="rounded-full border border-border/45 bg-bg/25 px-3 py-1.5 text-[11px] font-semibold text-muted">
-                    {chainFocus === "all" ? t("wallet.all") : focusedChainLabel}
-                  </span>
                 </div>
               </div>
             </section>

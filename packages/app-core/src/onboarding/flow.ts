@@ -8,7 +8,7 @@
  *   and forces side effects (cloud login, finish, provider fill) to stay in
  *   AppContext where they already close over the right state.
  *
- * Consolidated 6-step flow: welcome → hosting → providers → permissions → identity → launch
+ * Consolidated 6-step flow: welcome → identity → hosting → providers → permissions → launch
  *
  * See: docs/guides/onboarding-ui-flow.md
  * Tests: tests/flow.test.ts

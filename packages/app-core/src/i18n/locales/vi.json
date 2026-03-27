@@ -363,6 +363,8 @@
   "elizaclouddashboard.NoAgentWalletDetected": "Chưa có ví agent. Tạo hoặc import trong Cài đặt trước khi nạp crypto.",
   "elizaclouddashboard.NoSetupNeeded": "Không cần cài đặt",
   "elizaclouddashboard.NotAvailable": "Không khả dụng",
+  "elizaclouddashboard.AccountIdApiKeyOnly": "Chỉ dùng API key — đăng nhập qua trình duyệt để hiển thị ID người dùng trên cloud.",
+  "elizaclouddashboard.AccountIdSessionNoUserId": "Không hiển thị ID người dùng — cloud vẫn hoạt động.",
   "elizaclouddashboard.OpenBrowserBilling": "Mở thanh toán trên trình duyệt",
   "elizaclouddashboard.PayWithCard": "Trả bằng thẻ",
   "elizaclouddashboard.PayWithCrypto": "Trả bằng crypto",
@@ -1301,5 +1303,12 @@
   "whatsappqroverlay.Tap": "Chạm",
   "whatsappqroverlay.TryAgain": "Thử lại",
   "whatsappqroverlay.UsesAnUnofficialW": "Dùng API WhatsApp không chính thức. Hãy dùng số riêng.",
-  "whatsappqroverlay.andSelect": "và chọn"
+  "whatsappqroverlay.andSelect": "và chọn",
+  "bugreportmodal.attachLogs": "Attach startup logs",
+  "bugreportmodal.attachSystemInfo": "Attach system info",
+  "bugreportmodal.copyDiagnostics": "Copy Diagnostics",
+  "bugreportmodal.copiedDiagnostics": "Diagnostics Copied!",
+  "bugreportmodal.openLogsFolder": "Open Logs Folder",
+  "bugreportmodal.saveBundle": "Save Report Bundle",
+  "bugreportmodal.savingBundle": "Saving Bundle..."
 }

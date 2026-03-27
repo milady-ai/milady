@@ -6,7 +6,7 @@ description: "Your personal AI assistant that runs on YOUR machine. Local-first,
 
 **Milady** is a local-first AI assistant built on [elizaOS](https://github.com/elizaOS). It runs entirely on your machine -- not in a datacenter, not in the cloud. It manages your sessions, tools, and agent personality through a Gateway control plane, connects to Telegram, Discord, and other platforms, and ships with a web dashboard for real-time interaction.
 
-It supports 17 model providers out of the box (including fully local inference via Ollama), has a growing plugin ecosystem powered by elizaOS, a skills marketplace via [ClawHub](https://clawhub.ai), and runs on every major platform: desktop, mobile, web, CLI, and Chrome extension.
+It supports 19 model providers out of the box (including fully local inference via Ollama), has a growing plugin ecosystem powered by elizaOS, a skills marketplace via [ClawHub](https://clawhub.ai), and runs on every major platform: desktop, mobile, web, CLI, and Chrome extension.
 
 <CardGroup cols={2}>
   <Card title="Installation" icon="download" href="/installation">
@@ -37,27 +37,29 @@ Milady runs on your hardware. Your conversations, memory, and wallet keys stay i
 
 ### Multi-Model, Multi-Provider
 
-Connect to any of 17 supported AI providers -- or run fully offline with Ollama:
+Connect to any of 19 supported AI providers -- or run fully offline with Ollama:
 
 | Provider | What You Get |
 |----------|-------------|
 | **Anthropic** | Claude (recommended) |
 | **OpenAI** | GPT-4o, o1, and friends |
 | **OpenRouter** | 100+ models through one API |
-| **Google Gemini** | Gemini Pro and Ultra |
+| **Google Gemini** | Gemini Pro, Flash, and Ultra |
+| **Google Antigravity** | Google Cloud / Vertex AI models |
 | **xAI** | Grok |
-| **Groq** | Ultra-fast inference |
-| **DeepSeek** | Reasoning models |
-| **Mistral** | Open-weight European models |
+| **Groq** | Ultra-fast inference (LPU) |
+| **DeepSeek** | Reasoning and code models |
+| **Mistral** | Mistral and Mixtral models |
 | **Together AI** | Open-source model hosting |
-| **Cohere** | Command R and embeddings |
+| **Cohere** | Command R+ and embeddings |
 | **Perplexity** | Search-augmented generation |
-| **zAI** | Custom inference endpoints |
-| **Hyperbolic** | Decentralized GPU inference |
-| **Fireworks AI** | Fast open-model hosting |
-| **Cerebras** | Ultra-low-latency inference |
+| **Qwen** | Alibaba's Qwen models |
+| **MiniMax** | MiniMax language models |
+| **Pi AI** | Inflection Pi conversational models |
+| **zAI** | Homunculus Labs custom endpoints |
 | **Vercel AI Gateway** | Unified gateway access |
 | **Ollama** | Fully local, free, no API key |
+| **elizaOS Cloud** | Managed cloud inference (via `ELIZAOS_CLOUD_API_KEY`) |
 
 Switch providers mid-conversation with `/model <id>`. No lock-in.
 
@@ -129,7 +131,7 @@ Milady is structured as a layered system:
 - **Milady Plugin** -- a first-party elizaOS plugin that provides workspace context, session keys, personality presets, autonomous state, and wallet integration.
 - **Gateway** -- a WebSocket + HTTP multiplexed server that bridges the runtime to all connected clients and connectors.
 - **Plugin System** -- standard elizaOS plugins that add capabilities (knowledge, browser, TTS, etc.).
-- **Connector Layer** -- platform-specific adapters for Telegram, Discord, Slack, WhatsApp, Signal, iMessage, BlueBubbles, MS Teams, Google Chat, Twitter, Farcaster, Mattermost, WeChat, Matrix, Feishu/Lark, Nostr, and the web chat UI.
+- **Connector Layer** -- platform-specific adapters for Telegram, Discord, Slack, WhatsApp, Signal, iMessage, BlueBubbles, Blooio, MS Teams, Google Chat, Twitter, Farcaster, Twitch, Mattermost, WeChat, Matrix, Feishu/Lark, Nostr, Lens, Retake, and the web chat UI.
 
 All configuration lives in `~/.milady/milady.json`. Secrets can go in `~/.milady/.env`.
 

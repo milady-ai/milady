@@ -49,7 +49,7 @@ export function CloudOnboarding() {
             <>
               <Button
                 variant="default"
-                className="w-full py-3 px-4 rounded-lg bg-accent text-white font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+                className="w-full py-3 px-4 rounded-lg bg-accent text-accent-fg font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
                 onClick={handleCloudLogin}
                 disabled={elizaCloudLoginBusy}
               >

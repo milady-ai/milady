@@ -269,6 +269,11 @@ export function registerRpcHandlers(
     ) => desktop.setDockIconVisibility(params),
     desktopGetPath: async (params: Parameters<typeof desktop.getPath>[0]) =>
       desktop.getPath(params),
+    desktopGetStartupDiagnostics: async () => desktop.getStartupDiagnostics(),
+    desktopOpenLogsFolder: async () => desktop.openLogsFolder(),
+    desktopCreateBugReportBundle: async (
+      params: Parameters<typeof desktop.createBugReportBundle>[0],
+    ) => desktop.createBugReportBundle(params),
     desktopBeep: async () => desktop.beep(),
     desktopShowSelectionContextMenu: async (
       params: Parameters<typeof desktop.showSelectionContextMenu>[0],

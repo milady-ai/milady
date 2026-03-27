@@ -7,6 +7,10 @@
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  DEFAULT_BOOT_CONFIG,
+  setBootConfig,
+} from "../../src/config/boot-config";
 
 // ── Hoisted mock ──────────────────────────────────────────────────────
 const { mockUseApp, mockIsNativeFn } = vi.hoisted(() => ({
@@ -49,6 +53,16 @@ vi.mock("@miladyai/app-core/platform", () => ({
   isAndroid: false,
   platform: "web",
 }));
+
+vi.mock("../../src/components/onboarding/onboarding-step-chrome", async () => {
+  const actual = await vi.importActual<
+    typeof import("../../src/components/onboarding/onboarding-step-chrome")
+  >("../../src/components/onboarding/onboarding-step-chrome");
+  return {
+    ...actual,
+    spawnOnboardingRipple: vi.fn(),
+  };
+});
 
 import { ActivateStep } from "../../src/components/onboarding/ActivateStep";
 import { ConnectionStep } from "../../src/components/onboarding/ConnectionStep";
@@ -125,12 +139,26 @@ function findButtons(
   return root.findAllByType("button");
 }
 
+function makeButtonClickEvent() {
+  return {
+    currentTarget: null,
+    clientX: 0,
+    clientY: 0,
+  };
+}
+
 // ===================================================================
 //  IdentityStep
 // ===================================================================
 
 describe("IdentityStep", () => {
-  beforeEach(() => mockUseApp.mockReset());
+  beforeEach(() => {
+    mockUseApp.mockReset();
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+    sessionStorage.clear();
+    setBootConfig(DEFAULT_BOOT_CONFIG);
+  });
 
   it("renders character select roster with preset characters", async () => {
     mockUseApp.mockReturnValue(baseContext({ onboardingStep: "identity" }));
@@ -195,6 +223,229 @@ describe("IdentityStep", () => {
     expect(text).toContain("settings.importAgent");
     expect(text).toContain("common.cancel");
     expect(text).toContain("onboarding.restore");
+  });
+
+  it("shows a friendly status error when import returns a non-JSON 5xx body", async () => {
+    mockUseApp.mockReturnValue(baseContext({ onboardingStep: "identity" }));
+    const fetchMock = vi.fn(async () =>
+      new Response("<html>bad gateway</html>", {
+        status: 502,
+        headers: { "Content-Type": "text/html" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    let tree: TestRenderer.ReactTestRenderer | undefined;
+    try {
+      await act(async () => {
+        tree = TestRenderer.create(React.createElement(IdentityStep));
+      });
+
+      const restoreBtn = findButtons(
+        tree?.root as TestRenderer.ReactTestInstance,
+      ).find((b) => collectText(b) === "onboarding.restoreFromBackup");
+      expect(restoreBtn).toBeDefined();
+
+      await act(async () => {
+        restoreBtn?.props.onClick();
+      });
+
+      const inputs = (tree?.root as TestRenderer.ReactTestInstance).findAll(
+        (node) => node.type === "input",
+      );
+      const fileInput = inputs.find((node) => node.props.accept === ".eliza-agent");
+      const passwordInput = inputs.find(
+        (node) =>
+          node.props.placeholder === "onboarding.decryptionPasswordPlaceholder",
+      );
+      expect(fileInput).toBeDefined();
+      expect(passwordInput).toBeDefined();
+
+      const mockFile = {
+        arrayBuffer: async () => new Uint8Array([1, 2, 3]).buffer,
+      } as File;
+
+      await act(async () => {
+        fileInput?.props.onChange({ target: { files: [mockFile] } });
+        passwordInput?.props.onChange({ target: { value: "pass1234" } });
+      });
+
+      const importBtn = findButtons(
+        tree?.root as TestRenderer.ReactTestInstance,
+      ).find((b) => collectText(b) === "onboarding.restore");
+      expect(importBtn).toBeDefined();
+
+      await act(async () => {
+        await importBtn?.props.onClick(makeButtonClickEvent());
+      });
+
+      const text = collectText(tree?.root as TestRenderer.ReactTestInstance);
+      expect(text).toContain("Import failed (502)");
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it.each([
+    {
+      name: "session storage token",
+      setup: () => {
+        sessionStorage.setItem("milady_api_token", "session-token");
+      },
+      expectedToken: "session-token",
+    },
+    {
+      name: "boot config token",
+      setup: () => {
+        setBootConfig({ ...DEFAULT_BOOT_CONFIG, apiToken: "boot-token" });
+      },
+      expectedToken: "boot-token",
+    },
+  ])(
+    "sends Authorization header from %s during onboarding import",
+    async ({ setup, expectedToken }) => {
+      mockUseApp.mockReturnValue(baseContext({ onboardingStep: "identity" }));
+      setup();
+
+      const fetchMock = vi.fn(async () =>
+        new Response(
+          JSON.stringify({
+            success: true,
+            agentName: "Chen",
+            counts: { memories: 3 },
+          }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          },
+        ),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      let tree: TestRenderer.ReactTestRenderer | undefined;
+      try {
+        await act(async () => {
+          tree = TestRenderer.create(React.createElement(IdentityStep));
+        });
+
+        const restoreBtn = findButtons(
+          tree?.root as TestRenderer.ReactTestInstance,
+        ).find((button) => collectText(button) === "onboarding.restoreFromBackup");
+        expect(restoreBtn).toBeDefined();
+
+        await act(async () => {
+          restoreBtn?.props.onClick();
+        });
+
+        const inputs = (tree?.root as TestRenderer.ReactTestInstance).findAll(
+          (node) => node.type === "input",
+        );
+        const fileInput = inputs.find((node) => node.props.accept === ".eliza-agent");
+        const passwordInput = inputs.find(
+          (node) =>
+            node.props.placeholder === "onboarding.decryptionPasswordPlaceholder",
+        );
+        expect(fileInput).toBeDefined();
+        expect(passwordInput).toBeDefined();
+
+        const mockFile = {
+          arrayBuffer: async () => new Uint8Array([1, 2, 3]).buffer,
+        } as File;
+
+        await act(async () => {
+          fileInput?.props.onChange({ target: { files: [mockFile] } });
+          passwordInput?.props.onChange({ target: { value: "pass1234" } });
+        });
+
+        const importBtn = findButtons(
+          tree?.root as TestRenderer.ReactTestInstance,
+        ).find((button) => collectText(button) === "onboarding.restore");
+        expect(importBtn).toBeDefined();
+
+        await act(async () => {
+          await importBtn?.props.onClick(makeButtonClickEvent());
+        });
+
+        expect(fetchMock).toHaveBeenCalledWith(
+          "/api/agent/import",
+          expect.objectContaining({
+            headers: expect.objectContaining({
+              Authorization: `Bearer ${expectedToken}`,
+              "Content-Type": "application/octet-stream",
+            }),
+          }),
+        );
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    },
+  );
+
+  it("surfaces a bounded timeout error when onboarding import hangs", async () => {
+    vi.useFakeTimers();
+    mockUseApp.mockReturnValue(baseContext({ onboardingStep: "identity" }));
+    const fetchMock = vi.fn(
+      () =>
+        new Promise<Response>(() => {
+          // Intentionally never resolves.
+        }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    let tree: TestRenderer.ReactTestRenderer | undefined;
+    try {
+      await act(async () => {
+        tree = TestRenderer.create(React.createElement(IdentityStep));
+      });
+
+      const restoreBtn = findButtons(
+        tree?.root as TestRenderer.ReactTestInstance,
+      ).find((button) => collectText(button) === "onboarding.restoreFromBackup");
+      expect(restoreBtn).toBeDefined();
+
+      await act(async () => {
+        restoreBtn?.props.onClick();
+      });
+
+      const inputs = (tree?.root as TestRenderer.ReactTestInstance).findAll(
+        (node) => node.type === "input",
+      );
+      const fileInput = inputs.find((node) => node.props.accept === ".eliza-agent");
+      const passwordInput = inputs.find(
+        (node) =>
+          node.props.placeholder === "onboarding.decryptionPasswordPlaceholder",
+      );
+      expect(fileInput).toBeDefined();
+      expect(passwordInput).toBeDefined();
+
+      const mockFile = {
+        arrayBuffer: async () => new Uint8Array([1, 2, 3]).buffer,
+      } as File;
+
+      await act(async () => {
+        fileInput?.props.onChange({ target: { files: [mockFile] } });
+        passwordInput?.props.onChange({ target: { value: "pass1234" } });
+      });
+
+      const importBtn = findButtons(
+        tree?.root as TestRenderer.ReactTestInstance,
+      ).find((button) => collectText(button) === "onboarding.restore");
+      expect(importBtn).toBeDefined();
+
+      await act(async () => {
+        void importBtn?.props.onClick(makeButtonClickEvent());
+      });
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(10_001);
+      });
+
+      const text = collectText(tree?.root as TestRenderer.ReactTestInstance);
+      expect(text).toContain("Request timed out after 10000ms");
+    } finally {
+      vi.useRealTimers();
+      vi.unstubAllGlobals();
+    }
   });
 });
 

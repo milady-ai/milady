@@ -126,6 +126,7 @@ import { autoLabel } from "./labels";
 import { SHOWCASE_PLUGIN } from "./plugins/showcase-data";
 import { SETTINGS_FILTER_CONTROL_CLASSNAME } from "./settings-control-primitives";
 import {
+  APP_SIDEBAR_COMPACT_PILL_CLASSNAME,
   APP_DESKTOP_INLINE_SPLIT_SHELL_CLASSNAME,
   APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME,
   APP_DESKTOP_SPLIT_SHELL_CLASSNAME,
@@ -2157,6 +2158,8 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
       mode === "social"
         ? t("nav.social", { defaultValue: "Connectors" })
         : label;
+    const showSidebarKicker = mode !== "social" || inModal;
+    const showSidebarAvailabilityPill = mode === "social" && !inModal;
     const shellEmptyTitle =
       mode === "social" ? "No connectors available" : "No plugins available";
     const shellEmptyDescription =
@@ -2184,16 +2187,31 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
               className={`flex min-h-0 w-[21rem] max-w-[352px] shrink-0 flex-col ${APP_SIDEBAR_RAIL_CLASSNAME}`}
             >
               <div className={APP_SIDEBAR_INNER_CLASSNAME}>
-                <div className={APP_SIDEBAR_HEADER_CLASSNAME}>
-                  <div className={APP_SIDEBAR_KICKER_CLASSNAME}>
-                    {shellTitle}
+                {showSidebarKicker ? (
+                  <div className={APP_SIDEBAR_HEADER_CLASSNAME}>
+                    <div className={APP_SIDEBAR_KICKER_CLASSNAME}>
+                      {shellTitle}
+                    </div>
+                    <div className={APP_SIDEBAR_META_CLASSNAME}>
+                      {visiblePlugins.length} available
+                    </div>
                   </div>
-                  <div className={APP_SIDEBAR_META_CLASSNAME}>
-                    {visiblePlugins.length} available
+                ) : showSidebarAvailabilityPill ? (
+                  <div className="mb-3 flex items-center justify-end px-1">
+                    <div
+                      data-testid="connectors-available-pill"
+                      className={`${APP_SIDEBAR_COMPACT_PILL_CLASSNAME} text-[10px] font-semibold uppercase tracking-[0.14em] text-txt-strong`}
+                    >
+                      {visiblePlugins.length} available
+                    </div>
                   </div>
-                </div>
+                ) : null}
 
-                <div className="mt-4 grid grid-cols-[minmax(0,1fr)_8.75rem] items-center gap-2">
+                <div
+                  className={`grid grid-cols-[minmax(0,1fr)_8.75rem] items-center gap-2 ${
+                    showSidebarKicker ? "mt-4" : ""
+                  }`}
+                >
                   <Input
                     type="search"
                     value={pluginSearch}

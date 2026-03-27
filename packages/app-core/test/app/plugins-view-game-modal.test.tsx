@@ -358,6 +358,15 @@ describe("PluginsView game modal", () => {
         (node) => node.props?.["data-testid"] === "connectors-settings-sidebar",
       ).length,
     ).toBe(1);
+    const sidebar = tree?.root.findAll(
+      (node) => node.props?.["data-testid"] === "connectors-settings-sidebar",
+    )[0];
+    expect(
+      tree?.root.findAll(
+        (node) => node.props?.["data-testid"] === "connectors-available-pill",
+      ).length,
+    ).toBe(0);
+    expect(text(sidebar).startsWith("nav.social2 available")).toBe(true);
     const shell = tree?.root.findAll(
       (node) => node.props?.["data-testid"] === "connectors-shell",
     )[0];
@@ -627,6 +636,16 @@ describe("PluginsView game modal", () => {
     expect(text(tree?.root)).toContain("GitHub");
     expect(text(tree?.root)).toContain("Iq");
     expect(text(tree?.root)).not.toContain("Retake.tv");
+    const sidebar = tree?.root.findAll(
+      (node) => node.props?.["data-testid"] === "connectors-settings-sidebar",
+    )[0];
+    expect(sidebar).toBeDefined();
+    const availabilityPill = tree?.root.findAll(
+      (node) => node.props?.["data-testid"] === "connectors-available-pill",
+    )[0];
+    expect(availabilityPill).toBeDefined();
+    expect(text(availabilityPill)).toBe("4 available");
+    expect(text(sidebar).startsWith("4 available")).toBe(true);
 
     const addButtons = tree?.root.findAll(
       (node) =>

@@ -22,17 +22,26 @@ const ORIGINAL_PLATFORM = process.platform;
 vi.mock("node:fs", () => {
   const existsSyncFn = vi.fn(() => true);
   const rmSyncFn = vi.fn();
+  const readFileSyncFn = vi.fn(() => "");
+  const writeFileSyncFn = vi.fn();
+  const copyFileSyncFn = vi.fn();
   return {
     default: {
       existsSync: existsSyncFn,
       mkdirSync: vi.fn(),
       appendFileSync: vi.fn(),
+      readFileSync: readFileSyncFn,
+      writeFileSync: writeFileSyncFn,
+      copyFileSync: copyFileSyncFn,
       readdirSync: vi.fn(() => ["entry.js"]),
       rmSync: rmSyncFn,
     },
     existsSync: existsSyncFn,
     mkdirSync: vi.fn(),
     appendFileSync: vi.fn(),
+    readFileSync: readFileSyncFn,
+    writeFileSync: writeFileSyncFn,
+    copyFileSync: copyFileSyncFn,
     readdirSync: vi.fn(() => ["entry.js"]),
     rmSync: rmSyncFn,
   };
@@ -141,13 +150,33 @@ async function getExistsSyncMock(): Promise<Mock> {
   return fs.default.existsSync as Mock;
 }
 
+async function getReadFileSyncMock(): Promise<Mock> {
+  const fs = await import("node:fs");
+  return fs.default.readFileSync as Mock;
+}
+
+async function getWriteFileSyncMock(): Promise<Mock> {
+  const fs = await import("node:fs");
+  return fs.default.writeFileSync as Mock;
+}
+
+async function getCopyFileSyncMock(): Promise<Mock> {
+  const fs = await import("node:fs");
+  return fs.default.copyFileSync as Mock;
+}
+
 // ---------------------------------------------------------------------------
 // Import AFTER mocks
 // ---------------------------------------------------------------------------
 import {
   AgentManager,
+  createBugReportBundle,
+  getDiagnosticLogPath,
   getHealthPollTimeoutMs,
   getMiladyDistFallbackCandidates,
+  getStartupDiagnosticLogTail,
+  getStartupDiagnosticsSnapshot,
+  getStartupStatusPath,
 } from "../native/agent";
 
 describe("AgentManager", () => {
@@ -264,6 +293,89 @@ describe("AgentManager", () => {
 
     it("getPort returns null initially", () => {
       expect(manager.getPort()).toBeNull();
+    });
+  });
+
+  describe("diagnostics helpers", () => {
+    it("resolves the startup status file beside the startup log", () => {
+      expect(getDiagnosticLogPath()).toContain("milady-startup.log");
+      expect(getStartupStatusPath()).toContain("startup-status.json");
+    });
+
+    it("redacts secrets from the startup log tail", async () => {
+      const readFileSync = await getReadFileSyncMock();
+      readFileSync.mockReturnValue(
+        "Authorization: Bearer super-secret-token\napiKey=abc123\nlast line",
+      );
+
+      const tail = getStartupDiagnosticLogTail();
+      expect(tail).toContain("[REDACTED]");
+      expect(tail).toContain("last line");
+      expect(tail).not.toContain("super-secret-token");
+    });
+
+    it("creates a local bug report bundle and copies diagnostics files", async () => {
+      const writeFileSync = await getWriteFileSyncMock();
+      const copyFileSync = await getCopyFileSyncMock();
+      const readFileSync = await getReadFileSyncMock();
+      readFileSync.mockImplementation((filePath: string) => {
+        if (String(filePath).endsWith("startup-status.json")) {
+          return JSON.stringify({
+            state: "error",
+            phase: "startup",
+            updatedAt: "2026-03-26T00:00:00.000Z",
+            logPath: "/tmp/milady-startup.log",
+            statusPath: "/tmp/startup-status.json",
+            platform: "win32",
+            arch: "x64",
+          });
+        }
+        return "Authorization: Bearer test-secret\nsafe line";
+      });
+
+      const bundle = createBugReportBundle({
+        reportMarkdown: "# Report",
+        reportJson: { ok: true },
+        prefix: "canary",
+      });
+
+      expect(bundle.directory).toContain("canary-");
+      expect(writeFileSync).toHaveBeenCalled();
+      expect(copyFileSync).toHaveBeenCalledTimes(2);
+      const reportJsonWrite = writeFileSync.mock.calls.find(
+        (call) =>
+          typeof call[0] === "string" && call[0].endsWith("report.json"),
+      );
+      expect(reportJsonWrite).toBeDefined();
+      const parsed = JSON.parse(String(reportJsonWrite?.[1]));
+      expect(parsed.startupDiagnostics).toMatchObject({
+        state: "error",
+        phase: "startup",
+      });
+      expect(parsed.startupLogTail).toContain("[REDACTED]");
+    });
+
+    it("sanitizes bundle prefixes to prevent path traversal", () => {
+      const bundle = createBugReportBundle({
+        reportMarkdown: "# Report",
+        reportJson: { ok: true },
+        prefix: "../../escape\\..\\report bundle",
+      });
+
+      expect(bundle.directory).toContain("/bug-reports/escape-report-bundle-");
+      expect(bundle.directory).not.toContain("../");
+      expect(bundle.directory).not.toContain("..\\");
+    });
+
+    it("returns a default startup diagnostics snapshot when the status file is missing", async () => {
+      const readFileSync = await getReadFileSyncMock();
+      readFileSync.mockImplementation(() => {
+        throw new Error("missing");
+      });
+
+      const snapshot = getStartupDiagnosticsSnapshot();
+      expect(snapshot.state).toBe("not_started");
+      expect(snapshot.statusPath).toContain("startup-status.json");
     });
   });
 

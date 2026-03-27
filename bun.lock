@@ -13,7 +13,7 @@
         "@clack/prompts": "^1.1.0",
         "@electric-sql/pglite": "^0.3.16",
         "@elizaos/app-hyperscape": "1.0.0",
-        "@elizaos/core": "2.0.0-alpha.106",
+        "@elizaos/core": "2.0.0-alpha.108",
         "@elizaos/plugin-agent-orchestrator": "0.3.18",
         "@elizaos/plugin-agent-skills": "^2.0.0-alpha.70",
         "@elizaos/plugin-anthropic": "^2.0.0-alpha.9",
@@ -560,7 +560,7 @@
     "@elizaos/plugin-sql@2.0.0-alpha.17": "patches/@elizaos%2Fplugin-sql@2.0.0-alpha.17.patch",
   },
   "overrides": {
-    "@elizaos/core": "2.0.0-alpha.106",
+    "@elizaos/core": "2.0.0-alpha.108",
     "@stwd/sdk": "^0.3.0",
     "ai": "6.0.30",
     "drizzle-orm": "0.45.1",
@@ -786,7 +786,7 @@
 
     "@elizaos/app-hyperscape": ["@elizaos/app-hyperscape@1.0.0", "", { "dependencies": { "@elizaos/core": "^2.0.0-alpha.2" } }, "sha512-OMBrGrNGUCEczY+BLrqv69jQfZcNSDTlkc28CCz2etAfZPYU4dyFsH2hPkMx9bhOx6MBHyDReL+J3qMrz+b4tw=="],
 
-    "@elizaos/core": ["@elizaos/core@2.0.0-alpha.106", "", { "dependencies": { "@anthropic-ai/sdk": "^0.32.1", "@bufbuild/protobuf": "^2.11.0", "@langchain/core": "^1.1.12", "@langchain/textsplitters": "^1.0.1", "adze": "^2.2.5", "crypto-browserify": "^3.12.0", "dedent": "^1.7.1", "dotenv": "^17.2.3", "drizzle-orm": "^0.45.1", "fast-redact": "^3.5.0", "file-type": "^21.3.0", "glob": "^13.0.0", "handlebars": "^4.7.8", "json5": "^2.2.3", "markdown-it": "^14.1.0", "pdfjs-dist": "^5.4.530", "undici": "^7.0.0", "unique-names-generator": "^4.7.1", "uuid": "^13.0.0", "yaml": "^2.7.0", "zod": "^4.3.6" } }, "sha512-08n9VTBhk8+dyq1eYD9LHjtsrjoSOUO0cEV0Mq0RXbvuSdTT6hnLB84bo0B6wG6igxCdlH0kJ3gzaYBUY0M4XQ=="],
+    "@elizaos/core": ["@elizaos/core@2.0.0-alpha.108", "", { "dependencies": { "@anthropic-ai/sdk": "^0.32.1", "@bufbuild/protobuf": "^2.11.0", "@langchain/core": "^1.1.12", "@langchain/textsplitters": "^1.0.1", "adze": "^2.2.5", "crypto-browserify": "^3.12.0", "dedent": "^1.7.1", "dotenv": "^17.2.3", "drizzle-orm": "^0.45.1", "fast-redact": "^3.5.0", "file-type": "^21.3.0", "glob": "^13.0.0", "handlebars": "^4.7.8", "json5": "^2.2.3", "markdown-it": "^14.1.0", "pdfjs-dist": "^5.4.530", "undici": "^7.0.0", "unique-names-generator": "^4.7.1", "uuid": "^13.0.0", "yaml": "^2.7.0", "zod": "^4.3.6" } }, "sha512-QhWFAcLG2RsHjg/+hzCfi0RqnPRAhq8BmPvolpAfPgRPMEqeNfZexyVJguH0FgHWbtnhvAmnkpXst9TgcD6y0A=="],
 
     "@elizaos/plugin-agent-orchestrator": ["@elizaos/plugin-agent-orchestrator@0.3.18", "", { "dependencies": { "coding-agent-adapters": "0.12.0", "pty-console": "0.3.1" }, "peerDependencies": { "@elizaos/core": ">=2.0.0-alpha.0", "git-workspace-service": "0.4.4", "pty-manager": "1.10.0" } }, "sha512-xaHxTpjgAhdwuW4Ez7nJMt+ql0uecNUJKUkDp3AiZnMiH14PlrG8PIk7dIewW+xn4uhXWGk6jrgmx1YnJLYmCw=="],
 

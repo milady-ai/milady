@@ -63,6 +63,11 @@ import type {
 } from "../rpc-schema";
 import type { SendToWebview } from "../types.js";
 import {
+  createBugReportBundle,
+  getStartupDiagnosticLogTail,
+  getStartupDiagnosticsSnapshot,
+} from "./agent";
+import {
   isAppActive,
   isKeyWindow,
   makeKeyAndOrderFront,
@@ -1164,6 +1169,59 @@ X-GNOME-Autostart-enabled=true
       `[DesktopManager] Unknown path name "${options.name}", falling back to userData`,
     );
     return { path: Utils.paths.userData };
+  }
+
+  async getStartupDiagnostics(): Promise<{
+    state: "not_started" | "starting" | "running" | "stopped" | "error";
+    phase: string;
+    updatedAt: string;
+    lastError: string | null;
+    agentName: string | null;
+    port: number | null;
+    startedAt: number | null;
+    platform: string;
+    arch: string;
+    configDir: string;
+    logPath: string;
+    statusPath: string;
+    logTail: string;
+    appVersion?: string;
+    appRuntime?: string;
+    packaged?: boolean;
+    locale?: string;
+  }> {
+    const snapshot = getStartupDiagnosticsSnapshot();
+    const version = await this.getVersion();
+    const packaged = await this.isPackaged();
+    const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+    return {
+      ...snapshot,
+      logTail: getStartupDiagnosticLogTail(),
+      appVersion: version.version,
+      appRuntime: version.runtime,
+      packaged: packaged.packaged,
+      locale,
+    };
+  }
+
+  async openLogsFolder(): Promise<void> {
+    const diagnostics = getStartupDiagnosticsSnapshot();
+    const folderPath = path.dirname(diagnostics.logPath);
+    Utils.openPath(folderPath);
+  }
+
+  async createBugReportBundle(options: {
+    reportMarkdown: string;
+    reportJson: Record<string, unknown>;
+    prefix?: string;
+  }): Promise<{
+    directory: string;
+    reportMarkdownPath: string;
+    reportJsonPath: string;
+    startupLogPath: string | null;
+    startupStatusPath: string | null;
+  }> {
+    return createBugReportBundle(options);
   }
 
   async checkForUpdates(): Promise<DesktopUpdaterSnapshot> {

@@ -477,13 +477,26 @@ export function ConnectionProviderDetailScreen({
                     );
                   }
                   return (
-                    <OnboardingStatusBanner tone="error" live="assertive">
-                      {elizaCloudLoginError}
-                    </OnboardingStatusBanner>
+                    <div className={onboardingCenteredStackClassName}>
+                      <OnboardingStatusBanner tone="error" live="assertive">
+                        {elizaCloudLoginError}
+                      </OnboardingStatusBanner>
+                      <Button
+                        variant="ghost"
+                        type="button"
+                        className={onboardingLinkActionClass}
+                        onClick={() => openExternalUrl(branding.bugReportUrl)}
+                      >
+                        {t("onboarding.reportIssue")}
+                      </Button>
+                    </div>
                   );
                 })()}
               <p className={`${onboardingHelperTextClassName} text-center`}>
                 {t("onboarding.freeCredits")}
+              </p>
+              <p className={`${onboardingSubtleTextClassName} text-center`}>
+                {t("onboarding.cloudProviderBehaviorHint")}
               </p>
             </div>
           ) : (
@@ -953,6 +966,9 @@ export function ConnectionProviderDetailScreen({
           {t("onboarding.confirm")}
         </Button>
       </div>
+      <p className={`${onboardingSubtleTextClassName} mt-3 text-center`}>
+        {t("onboarding.restartAfterProviderChangeHint")}
+      </p>
     </>
   );
 }

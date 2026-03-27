@@ -358,6 +358,34 @@ export interface ExistingElizaInstallInfo {
   source: "config-path-env" | "state-dir-env" | "default-state-dir";
 }
 
+export interface DesktopStartupDiagnostics {
+  state: "not_started" | "starting" | "running" | "stopped" | "error";
+  phase: string;
+  updatedAt: string;
+  lastError: string | null;
+  agentName: string | null;
+  port: number | null;
+  startedAt: number | null;
+  platform: string;
+  arch: string;
+  configDir: string;
+  logPath: string;
+  statusPath: string;
+  logTail: string;
+  appVersion?: string;
+  appRuntime?: string;
+  packaged?: boolean;
+  locale?: string;
+}
+
+export interface DesktopBugReportBundleInfo {
+  directory: string;
+  reportMarkdownPath: string;
+  reportJsonPath: string;
+  startupLogPath: string | null;
+  startupStatusPath: string | null;
+}
+
 // ============================================================================
 // RPC Schema
 // ============================================================================
@@ -514,6 +542,19 @@ export type MiladyRPCSchema = {
       desktopGetPath: {
         params: { name: string };
         response: { path: string };
+      };
+      desktopGetStartupDiagnostics: {
+        params: undefined;
+        response: DesktopStartupDiagnostics;
+      };
+      desktopOpenLogsFolder: { params: undefined; response: undefined };
+      desktopCreateBugReportBundle: {
+        params: {
+          reportMarkdown: string;
+          reportJson: Record<string, unknown>;
+          prefix?: string;
+        };
+        response: DesktopBugReportBundleInfo;
       };
       desktopBeep: { params: undefined; response: undefined };
       desktopShowSelectionContextMenu: {
@@ -1196,6 +1237,9 @@ export const CHANNEL_TO_RPC_METHOD: Record<string, string> = {
   "desktop:getDockIconVisibility": "desktopGetDockIconVisibility",
   "desktop:setDockIconVisibility": "desktopSetDockIconVisibility",
   "desktop:getPath": "desktopGetPath",
+  "desktop:getStartupDiagnostics": "desktopGetStartupDiagnostics",
+  "desktop:openLogsFolder": "desktopOpenLogsFolder",
+  "desktop:createBugReportBundle": "desktopCreateBugReportBundle",
   "desktop:beep": "desktopBeep",
   "desktop:showSelectionContextMenu": "desktopShowSelectionContextMenu",
   "desktop:getSessionSnapshot": "desktopGetSessionSnapshot",

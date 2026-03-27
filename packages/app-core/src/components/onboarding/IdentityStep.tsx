@@ -6,7 +6,12 @@ import {
 } from "@miladyai/app-core/events";
 import { useApp } from "@miladyai/app-core/state";
 import { PREMADE_VOICES } from "../../voice/types";
-import { getElizaApiToken, resolveApiUrl } from "../../utils";
+import { resolveApiUrl } from "../../utils/asset-url";
+import {
+  fetchWithTimeout,
+  resolveCompatApiToken,
+} from "../../utils/api-request";
+import { getElizaApiToken } from "../../utils/eliza-globals";
 import { getStylePresets } from "@miladyai/shared/onboarding-presets";
 import { Button, Input } from "@miladyai/ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -231,11 +236,53 @@ export function IdentityStep({
       setImportBusy(true);
       setImportError(null);
       setImportSuccess(null);
-      // Dynamic import to avoid hard dependency on client when server is absent
-      const { client } = await import("@miladyai/app-core/api");
       const fileBuffer = await importFile.arrayBuffer();
-      const result = await client.importAgent(importPassword, fileBuffer);
-      const counts = result.counts;
+      const passwordBytes = new TextEncoder().encode(importPassword);
+      const envelope = new Uint8Array(
+        4 + passwordBytes.length + fileBuffer.byteLength,
+      );
+      const view = new DataView(envelope.buffer);
+      view.setUint32(0, passwordBytes.length, false);
+      envelope.set(passwordBytes, 4);
+      envelope.set(new Uint8Array(fileBuffer), 4 + passwordBytes.length);
+
+      const apiToken = resolveCompatApiToken();
+      const response = await fetchWithTimeout(
+        resolveApiUrl("/api/agent/import"),
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/octet-stream",
+            ...(apiToken ? { Authorization: `Bearer ${apiToken}` } : {}),
+          },
+          body: envelope,
+        },
+      );
+
+      const responseText = await response.text();
+      let result = {} as {
+        error?: string;
+        success?: boolean;
+        agentId?: string;
+        agentName?: string;
+        counts?: Record<string, number>;
+      };
+
+      if (responseText) {
+        try {
+          result = JSON.parse(responseText) as typeof result;
+        } catch {
+          if (!response.ok) {
+            throw new Error(`Import failed (${response.status})`);
+          }
+          throw new Error("Import failed (invalid server response)");
+        }
+      }
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error ?? `Import failed (${response.status})`);
+      }
+      const counts = result.counts ?? {};
       const summary = [
         counts.memories ? `${counts.memories} memories` : null,
         counts.entities ? `${counts.entities} entities` : null,
@@ -375,7 +422,7 @@ export function IdentityStep({
 
       {/* ── Roster bar ── */}
       <div
-        className="flex flex-nowrap items-end justify-center gap-0 w-full max-w-[900px] px-2 max-md:px-1 max-md:max-w-full border-t border-[var(--onboarding-roster-border)] bg-[var(--onboarding-roster-bg)] p-4 pb-8 backdrop-blur-md"
+        className="flex flex-nowrap items-end justify-center gap-0 w-full max-w-[900px] px-2 max-md:px-1 max-md:max-w-full rounded-[18px] border border-[var(--onboarding-panel-border)] bg-[linear-gradient(180deg,rgba(9,12,18,0.18),rgba(9,12,18,0.08)),var(--onboarding-panel-bg)] p-4 pb-8 backdrop-blur-[36px] backdrop-saturate-[1.24] shadow-[var(--onboarding-panel-shadow)]"
         style={{
           animation:
             "ob-roster-slide-up 0.5s cubic-bezier(0.25,0.46,0.45,0.94) 0.15s both",

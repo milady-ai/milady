@@ -10,6 +10,7 @@ import {
   DrawerSheetContent,
   DrawerSheetHeader,
   DrawerSheetTitle,
+  ErrorBoundary,
 } from "@miladyai/ui";
 import {
   type ReactNode,
@@ -23,6 +24,7 @@ import {
   AdvancedPageView,
   AppsPageView,
   AvatarLoader,
+  BugReportModal,
   CharacterEditor,
   ChatView,
   CompanionShell,
@@ -32,7 +34,6 @@ import {
   ConversationsSidebar,
   CustomActionEditor,
   CustomActionsPanel,
-  ErrorBoundary,
   GameViewOverlay,
   Header,
   HeartbeatsView,
@@ -47,7 +48,7 @@ import {
   StartupFailureView,
   StreamView,
   SystemWarningBanner,
-} from "./components";
+} from "./app-shell-components";
 import { CompanionHeader } from "./components/companion/CompanionHeader";
 import { DeferredSetupChecklist } from "./components/FlaminaGuide";
 import {
@@ -484,7 +485,12 @@ export function App() {
 
   // After loader hooks (stable hook order); do not return startupError before useState above.
   if (startupError) {
-    return <StartupFailureView error={startupError} onRetry={retryStartup} />;
+    return (
+      <BugReportProvider value={bugReport}>
+        <StartupFailureView error={startupError} onRetry={retryStartup} />
+        <BugReportModal />
+      </BugReportProvider>
+    );
   }
 
   if (authRequired && !blockOnboardingForShell) return <PairingView />;
@@ -581,9 +587,6 @@ export function App() {
         onToggleVoiceMute={() =>
           setState("chatAgentVoiceMuted", !chatAgentVoiceMuted)
         }
-        onSave={handleSaveCharacter}
-        isSaving={characterSaving}
-        saveSuccess={Boolean(characterSaveSuccess)}
       />
       <main className="flex flex-1 min-h-0 min-w-0 overflow-hidden px-3 xl:px-5 pb-4 pt-2 xl:pb-6">
         <ViewRouter characterSceneVisible />

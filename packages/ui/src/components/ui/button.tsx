@@ -10,7 +10,9 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "border border-accent/45 bg-accent/18 text-accent-fg shadow-sm hover:border-accent/70 hover:bg-accent/28",
+          // Solid accent surfaces use text-accent-fg; translucent accent buttons
+          // switch to text-accent in dark mode to preserve contrast.
+          "border border-accent/45 bg-accent/18 text-accent-fg dark:text-accent shadow-sm hover:border-accent/70 hover:bg-accent/28",
         destructive:
           "border border-destructive/45 bg-destructive/92 text-destructive-fg shadow-sm hover:border-destructive/75 hover:bg-destructive",
         outline:

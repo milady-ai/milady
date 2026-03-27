@@ -55,7 +55,7 @@ The `dashboard` command follows this resolution order:
 
 2. **Check specified port** -- probes `127.0.0.1:<port>` with an 800ms timeout. If listening, opens `http://localhost:<port>`.
 
-3. **Check dev port** -- if the specified port is not responding, checks port `2138` (the default dev server port). If listening, opens `http://localhost:2138`.
+3. **Check default port fallback** -- if a custom `--port` was specified and is not responding, falls back to check port `2138` (the default). If listening, opens `http://localhost:2138`.
 
 4. **Start Vite dev server** -- if neither port is responding, attempts to start the Vite dev server from the `apps/app/` directory inside the Milady package root. Once the server reports "Local:" in its output (or after 10 seconds), opens `http://localhost:2138`.
 

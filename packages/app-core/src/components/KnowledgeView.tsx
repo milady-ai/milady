@@ -48,7 +48,6 @@ import {
   APP_SIDEBAR_HEADER_CLASSNAME,
   APP_SIDEBAR_INNER_CLASSNAME,
   APP_SIDEBAR_KICKER_CLASSNAME,
-  APP_SIDEBAR_META_CLASSNAME,
   APP_SIDEBAR_PILL_CLASSNAME,
   APP_SIDEBAR_RAIL_CLASSNAME,
 } from "./sidebar-shell-styles";
@@ -556,8 +555,8 @@ function DocumentViewer({ documentId }: { documentId: string | null }) {
                   </span>
                 </div>
                 {previewText ? (
-                  <pre className="max-h-[18rem] overflow-auto whitespace-pre-wrap break-words text-[13px] leading-relaxed text-txt/88">
-                    {previewText.slice(0, 3000)}
+                  <pre className="max-h-[12rem] overflow-auto whitespace-pre-wrap break-words text-[13px] leading-relaxed text-txt/88 custom-scrollbar">
+                    {previewText.slice(0, 1200)}
                   </pre>
                 ) : (
                   <DesktopInsetEmptyStatePanel
@@ -647,7 +646,7 @@ function DocumentViewer({ documentId }: { documentId: string | null }) {
                         </span>
                       )}
                     </div>
-                    <p className="whitespace-pre-wrap text-[13px] leading-relaxed text-txt/90">
+                    <p className="whitespace-pre-wrap text-[13px] leading-relaxed text-txt/90 line-clamp-6">
                       {fragment.text}
                     </p>
                   </div>
@@ -1148,11 +1147,6 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
           <div className={APP_SIDEBAR_INNER_CLASSNAME}>
             <div className={APP_SIDEBAR_HEADER_CLASSNAME}>
               <div className={KNOWLEDGE_KICKER_CLASS}>Knowledge</div>
-              <div className={APP_SIDEBAR_META_CLASSNAME}>
-                {documents.length > 0
-                  ? `${documents.length} uploaded document${documents.length === 1 ? "" : "s"} indexed`
-                  : "Upload docs and explore indexed fragments"}
-              </div>
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2 px-1">
@@ -1181,9 +1175,6 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
             <div className="mt-4 border-b border-border/25 pb-4">
               <div className="px-1">
                 <div className={KNOWLEDGE_SECTION_LABEL_CLASS}>Search</div>
-                <div className="mt-1 text-[11px] leading-relaxed text-muted">
-                  Jump to a known document by searching fragment text.
-                </div>
               </div>
               <form
                 className="mt-3 w-full max-w-[500px] flex-[1_1_500px]"
@@ -1243,11 +1234,6 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
                     {isShowingSearchResults
                       ? t("knowledgeview.SearchResults")
                       : t("knowledgeview.Documents")}
-                  </div>
-                  <div className="mt-1 text-[11px] text-muted">
-                    {isShowingSearchResults
-                      ? "Search hits replace the document list until you clear them."
-                      : "Uploaded docs live here for quick review."}
                   </div>
                 </div>
                 <Button
@@ -1343,34 +1329,18 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
               </div>
             )}
 
-            <section className={`${KNOWLEDGE_PANEL_CLASS} px-5 py-5 sm:px-6`}>
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div className="min-w-0 flex-1">
-                  <div className={KNOWLEDGE_KICKER_CLASS}>Knowledge</div>
-                  <h1 className="mt-1 text-2xl font-semibold text-txt-strong">
-                    {selectedDoc?.filename || "Knowledge workspace"}
-                  </h1>
-                  <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-                    {selectedDoc
-                      ? `${getKnowledgeDocumentSummary(selectedDoc)}. Open search results, inspect fragments, and keep uploads close at hand in the sidebar.`
-                      : "Keep uploads, search, and document review in one workspace so the knowledge base is easier to manage and inspect."}
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-                  <span className="rounded-full border border-border/45 bg-bg/25 px-3 py-1.5 text-[11px] font-semibold text-muted">
-                    {documents.length} docs
+            {selectedDoc && (
+              <section className={`${KNOWLEDGE_PANEL_CLASS} px-5 py-4 sm:px-6`}>
+                <div className="flex items-center justify-between gap-4">
+                  <h2 className="min-w-0 truncate text-lg font-semibold text-txt-strong">
+                    {selectedDoc.filename}
+                  </h2>
+                  <span className="shrink-0 text-[11px] font-semibold text-muted">
+                    {getKnowledgeDocumentSummary(selectedDoc)}
                   </span>
-                  <span className="rounded-full border border-border/45 bg-bg/25 px-3 py-1.5 text-[11px] font-semibold text-muted">
-                    {totalFragments} fragments
-                  </span>
-                  {searchResults !== null && (
-                    <span className="rounded-full border border-accent/25 bg-accent/8 px-3 py-1.5 text-[11px] font-semibold text-txt-strong">
-                      {searchResults.length} results
-                    </span>
-                  )}
                 </div>
-              </div>
-            </section>
+              </section>
+            )}
 
             <div className="mt-4">
               <DocumentViewer documentId={selectedDocId} />

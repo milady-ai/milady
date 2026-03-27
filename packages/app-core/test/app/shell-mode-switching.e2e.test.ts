@@ -144,6 +144,68 @@ vi.mock("@miladyai/app-core/components", async () => {
   };
 });
 
+vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
+  AdvancedPageView: () =>
+    React.createElement("section", null, "AdvancedPageView Ready"),
+  AppsPageView: () => React.createElement("section", null, "AppsPageView Ready"),
+  AvatarLoader: () => React.createElement("div", null, "AvatarLoader"),
+  BugReportModal: () => React.createElement("div", null, "BugReportModal"),
+  CharacterEditor: () => React.createElement("section", null, "CharacterView Ready"),
+  ChatView: () => React.createElement("section", null, "ChatView Ready"),
+  CompanionShell: ({ tab }: { tab: string }) =>
+    React.createElement("main", null, `CompanionShell Ready: ${tab}`),
+  CompanionView: () =>
+    React.createElement("section", null, "CompanionView Ready"),
+  ConnectionFailedBanner: () =>
+    React.createElement("div", null, "ConnectionFailedBanner"),
+  ConnectorsPageView: () =>
+    React.createElement("section", null, "ConnectorsPageView Ready"),
+  ConversationsSidebar: () =>
+    React.createElement("aside", null, "ConversationsSidebar"),
+  CustomActionEditor: () =>
+    React.createElement("aside", null, "CustomActionEditor"),
+  CustomActionsPanel: () =>
+    React.createElement("aside", null, "CustomActionsPanel"),
+  GameViewOverlay: () => React.createElement("div", null, "GameViewOverlay"),
+  Header: () => React.createElement("header", null, "Header"),
+  HeartbeatsView: () =>
+    React.createElement("section", null, "HeartbeatsView Ready"),
+  InventoryView: () =>
+    React.createElement("section", null, "InventoryView Ready"),
+  KnowledgeView: () =>
+    React.createElement("section", null, "KnowledgeView Ready"),
+  OnboardingWizard: () => React.createElement("div", null, "OnboardingWizard"),
+  PairingView: () => React.createElement("div", null, "PairingView"),
+  SaveCommandModal: () => React.createElement("div", null, "SaveCommandModal"),
+  SettingsView: () => React.createElement("section", null, "SettingsView Ready"),
+  SharedCompanionScene: ({
+    active,
+    interactive,
+    children,
+  }: {
+    active: boolean;
+    interactive?: boolean;
+    children: React.ReactNode;
+  }) => {
+    const { useEffect } = React;
+    useEffect(() => {
+      sceneHostState.mounts += 1;
+      return () => {
+        sceneHostState.unmounts += 1;
+      };
+    }, []);
+    sceneHostState.activeHistory.push(active);
+    sceneHostState.interactiveHistory.push(Boolean(interactive));
+    return React.createElement(React.Fragment, null, children);
+  },
+  ShellOverlays: () => null,
+  StartupFailureView: ({ error }: { error: { message: string } }) =>
+    React.createElement("div", null, error.message),
+  StreamView: () => React.createElement("section", null, "StreamView Ready"),
+  SystemWarningBanner: () =>
+    React.createElement("div", null, "SystemWarningBanner"),
+}));
+
 vi.mock("@miladyai/app-core/src/components/Header", () => ({
   Header: () => React.createElement("header", null, "Header"),
 }));

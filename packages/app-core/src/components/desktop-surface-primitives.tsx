@@ -15,7 +15,7 @@ export const DESKTOP_TEXT_DEPTH_MUTED_CLASSNAME =
 export const DESKTOP_SURFACE_PANEL_CLASSNAME =
   "rounded-[28px] border border-border/34 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_82%,transparent),color-mix(in_srgb,var(--bg)_96%,transparent))] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_22px_34px_-26px_rgba(15,23,42,0.14)] ring-1 ring-border/8 backdrop-blur-md dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_24px_36px_-26px_rgba(0,0,0,0.32)]";
 
-export const DESKTOP_SECTION_SHELL_CLASSNAME = `overflow-hidden ${DESKTOP_SURFACE_PANEL_CLASSNAME}`;
+export const DESKTOP_SECTION_SHELL_CLASSNAME = `overflow-visible ${DESKTOP_SURFACE_PANEL_CLASSNAME}`;
 
 export const DESKTOP_PADDED_SURFACE_PANEL_CLASSNAME = `${DESKTOP_SURFACE_PANEL_CLASSNAME} px-5 py-4 sm:px-6 sm:py-5`;
 

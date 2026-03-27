@@ -93,6 +93,7 @@ describe("GET /api/bug-report/info", () => {
       expect.objectContaining({
         nodeVersion: expect.stringMatching(/^v\d+/),
         platform: expect.any(String),
+        submissionMode: expect.any(String),
       }),
     );
   });
@@ -172,6 +173,9 @@ describe("POST /api/bug-report", () => {
   describe("without GITHUB_TOKEN", () => {
     beforeEach(() => {
       delete process.env.GITHUB_TOKEN;
+      delete process.env.MILADY_BUG_REPORT_API_URL;
+      delete process.env.ELIZA_CLOUD_BUG_REPORT_URL;
+      delete process.env.BUG_REPORT_API_URL;
     });
 
     it("returns fallback URL", async () => {
@@ -183,7 +187,21 @@ describe("POST /api/bug-report", () => {
       const handled = await handleBugReportRoutes(ctx);
       expect(handled).toBe(true);
       expect(ctx.json).toHaveBeenCalledWith(ctx.res, {
-        fallback: expect.stringContaining("github.com/elizaos/eliza"),
+        fallback: expect.stringContaining("github.com/milady-ai/milady"),
+      });
+    });
+
+    it("ignores undocumented BUG_REPORT_API_URL fallback", async () => {
+      process.env.BUG_REPORT_API_URL = "https://unexpected.example/reports";
+      const ctx = makeCtx({
+        method: "POST",
+        pathname: "/api/bug-report",
+        readJsonBody: vi.fn().mockResolvedValue(validBody),
+      });
+      const handled = await handleBugReportRoutes(ctx);
+      expect(handled).toBe(true);
+      expect(ctx.json).toHaveBeenCalledWith(ctx.res, {
+        fallback: expect.stringContaining("github.com/milady-ai/milady"),
       });
     });
   });
@@ -202,7 +220,7 @@ describe("POST /api/bug-report", () => {
         ok: true,
         json: () =>
           Promise.resolve({
-            html_url: "https://github.com/elizaos/eliza/issues/42",
+            html_url: "https://github.com/milady-ai/milady/issues/42",
           }),
       });
       vi.stubGlobal("fetch", mockFetch);
@@ -217,14 +235,14 @@ describe("POST /api/bug-report", () => {
 
       expect(mockFetch).toHaveBeenCalledOnce();
       const [url, opts] = mockFetch.mock.calls[0];
-      expect(url).toContain("api.github.com/repos/elizaos/eliza/issues");
+      expect(url).toContain("api.github.com/repos/milady-ai/milady/issues");
       expect(opts.method).toBe("POST");
       const body = JSON.parse(opts.body);
       expect(body.title).toContain("[Bug]");
       expect(body.labels).toEqual(["bug", "triage", "user-reported"]);
 
       expect(ctx.json).toHaveBeenCalledWith(ctx.res, {
-        url: "https://github.com/elizaos/eliza/issues/42",
+        url: "https://github.com/milady-ai/milady/issues/42",
       });
     });
 
@@ -257,7 +275,7 @@ describe("POST /api/bug-report", () => {
           ok: true,
           json: () =>
             Promise.resolve({
-              html_url: "https://github.com/elizaos/eliza/issues/99",
+              html_url: "https://github.com/milady-ai/milady/issues/99",
             }),
         }),
       );
@@ -321,6 +339,77 @@ describe("POST /api/bug-report", () => {
         ctx.res,
         "Failed to create GitHub issue",
         500,
+      );
+    });
+  });
+
+  describe("with remote intake configured", () => {
+    beforeEach(() => {
+      delete process.env.GITHUB_TOKEN;
+      process.env.MILADY_BUG_REPORT_API_URL =
+        "https://cloud.elizaos.ai/api/v1/reports/bug";
+      process.env.MILADY_BUG_REPORT_API_TOKEN = "secret";
+    });
+
+    afterEach(() => {
+      delete process.env.MILADY_BUG_REPORT_API_URL;
+      delete process.env.MILADY_BUG_REPORT_API_TOKEN;
+      vi.restoreAllMocks();
+    });
+
+    it("submits to the configured remote endpoint first", async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        headers: { get: () => "application/json" },
+        json: () => Promise.resolve({ accepted: true, id: "rpt_123" }),
+      });
+      vi.stubGlobal("fetch", mockFetch);
+
+      const ctx = makeCtx({
+        method: "POST",
+        pathname: "/api/bug-report",
+        readJsonBody: vi.fn().mockResolvedValue({
+          ...validBody,
+          category: "startup-failure",
+        }),
+      });
+      await handleBugReportRoutes(ctx);
+
+      expect(mockFetch).toHaveBeenCalledOnce();
+      const [url, init] = mockFetch.mock.calls[0];
+      expect(url).toBe("https://cloud.elizaos.ai/api/v1/reports/bug");
+      expect(init.headers.Authorization).toBe("Bearer secret");
+      expect(ctx.json).toHaveBeenCalledWith(
+        ctx.res,
+        expect.objectContaining({
+          accepted: true,
+          id: "rpt_123",
+          destination: "remote",
+        }),
+      );
+    });
+
+    it("returns 502 when the remote intake fails", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue({
+          ok: false,
+          status: 503,
+          headers: { get: () => "application/json" },
+        }),
+      );
+
+      const ctx = makeCtx({
+        method: "POST",
+        pathname: "/api/bug-report",
+        readJsonBody: vi.fn().mockResolvedValue(validBody),
+      });
+      await handleBugReportRoutes(ctx);
+
+      expect(ctx.error).toHaveBeenCalledWith(
+        ctx.res,
+        "Failed to submit bug report",
+        502,
       );
     });
   });

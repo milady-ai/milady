@@ -199,6 +199,11 @@ describe("Header", () => {
         "data-testid": "header-cloud-status",
       }),
     ).toHaveLength(0);
+    expect(
+      (testRenderer as ReactTestRenderer).root.findAll(
+        (node) => node.props["aria-label"] === "charactereditor.Save",
+      ),
+    ).toHaveLength(0);
   });
 
   it("uses minimal chrome in companion mode", async () => {

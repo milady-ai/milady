@@ -42,7 +42,7 @@ vi.mock("./hooks", () => ({
   useStreamPopoutNavigation: useStreamPopoutNavigationMock,
 }));
 
-vi.mock("./components", () => {
+vi.mock("./app-shell-components", () => {
   const stub =
     (name: string) =>
     ({ children }: { children?: React.ReactNode }) =>
@@ -54,6 +54,7 @@ vi.mock("./components", () => {
     AdvancedPageView: stub("AdvancedPageView"),
     AppsPageView: stub("AppsPageView"),
     AvatarLoader: stub("AvatarLoader"),
+    BugReportModal: stub("BugReportModal"),
     CharacterEditor: stub("CharacterEditor"),
     ChatView: stub("ChatView"),
     CompanionShell: stub("CompanionShell"),
@@ -63,7 +64,6 @@ vi.mock("./components", () => {
     ConversationsSidebar: stub("ConversationsSidebar"),
     CustomActionEditor: stub("CustomActionEditor"),
     CustomActionsPanel: stub("CustomActionsPanel"),
-    ErrorBoundary: passthrough,
     GameViewOverlay: stub("GameViewOverlay"),
     Header: stub("Header"),
     HeartbeatsView: stub("HeartbeatsView"),

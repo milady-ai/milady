@@ -71,7 +71,7 @@ describe("voice cloud default (e2e)", () => {
     vi.unstubAllGlobals();
   });
 
-  it("uses cloud TTS when cloud is available and the stored ElevenLabs key is only a masked placeholder", async () => {
+  it("uses the ElevenLabs server proxy when cloud is available and the stored key is only a masked placeholder", async () => {
     const { result } = renderHook(() =>
       useVoiceChat({
         cloudConnected: true,
@@ -95,7 +95,7 @@ describe("voice cloud default (e2e)", () => {
     });
 
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(url).toBe("/api/tts/cloud");
+    expect(url).toBe("/api/tts/elevenlabs");
     expect(init.method).toBe("POST");
     expect(JSON.parse(String(init.body))).toMatchObject({
       text: "Hello from the cloud voice path.",

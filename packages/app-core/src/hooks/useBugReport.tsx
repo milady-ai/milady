@@ -6,16 +6,32 @@ import {
   useState,
 } from "react";
 
+export interface BugReportDraft {
+  description?: string;
+  stepsToReproduce?: string;
+  expectedBehavior?: string;
+  actualBehavior?: string;
+  environment?: string;
+  nodeVersion?: string;
+  modelProvider?: string;
+  logs?: string;
+}
+
 interface BugReportContextValue {
   isOpen: boolean;
-  open: () => void;
+  draft: BugReportDraft | null;
+  open: (draft?: BugReportDraft) => void;
   close: () => void;
 }
 
 const BugReportContext = createContext<BugReportContextValue | null>(null);
 
+export function useOptionalBugReport(): BugReportContextValue | null {
+  return useContext(BugReportContext);
+}
+
 export function useBugReport(): BugReportContextValue {
-  const ctx = useContext(BugReportContext);
+  const ctx = useOptionalBugReport();
   if (!ctx)
     throw new Error("useBugReport must be used within BugReportProvider");
   return ctx;
@@ -23,9 +39,16 @@ export function useBugReport(): BugReportContextValue {
 
 export function useBugReportState(): BugReportContextValue {
   const [isOpen, setIsOpen] = useState(false);
-  const open = useCallback(() => setIsOpen(true), []);
-  const close = useCallback(() => setIsOpen(false), []);
-  return { isOpen, open, close };
+  const [draft, setDraft] = useState<BugReportDraft | null>(null);
+  const open = useCallback((nextDraft?: BugReportDraft) => {
+    setDraft(nextDraft ?? null);
+    setIsOpen(true);
+  }, []);
+  const close = useCallback(() => {
+    setIsOpen(false);
+    setDraft(null);
+  }, []);
+  return { isOpen, draft, open, close };
 }
 
 export function BugReportProvider({

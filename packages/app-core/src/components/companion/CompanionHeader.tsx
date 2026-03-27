@@ -55,7 +55,8 @@ export const CompanionHeader = memo(function CompanionHeader(
       <div
         className="px-1.5 max-[768px]:px-2 sm:px-4"
         style={{
-          paddingTop: "calc(var(--safe-area-top, 0px) + 0.375rem)",
+          paddingTop:
+            "calc(var(--safe-area-top, 0px) + var(--milady-macos-frame-top-inset, 0px) + 0.375rem)",
           paddingLeft: "calc(var(--safe-area-left, 0px) + 0.375rem)",
           paddingRight: "calc(var(--safe-area-right, 0px) + 0.375rem)",
         }}

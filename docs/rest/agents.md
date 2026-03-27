@@ -10,7 +10,7 @@ All agent endpoints require the agent runtime to be initialized. The API server 
 
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/api/agent/start` | Start the agent and enable autonomy |
+| POST | `/api/agent/start` | Start the agent |
 | POST | `/api/agent/stop` | Stop the agent and disable autonomy |
 | POST | `/api/agent/pause` | Pause the agent (keep uptime, disable autonomy) |
 | POST | `/api/agent/resume` | Resume a paused agent and re-enable autonomy |
@@ -19,13 +19,15 @@ All agent endpoints require the agent runtime to be initialized. The API server 
 | POST | `/api/agent/export` | Export agent as a password-encrypted `.eliza-agent` binary file |
 | GET | `/api/agent/export/estimate` | Estimate export file size before downloading |
 | POST | `/api/agent/import` | Import agent from a password-encrypted `.eliza-agent` file |
+| GET | `/api/agent/autonomy` | Check whether autonomy is enabled |
+| POST | `/api/agent/autonomy` | Enable or disable autonomy |
 | GET | `/api/agent/self-status` | Structured self-status summary with capabilities, wallet, plugins, and awareness |
 
 ---
 
 ### POST /api/agent/start
 
-Start the agent and enable autonomous operation. Sets the agent state to `running`, records the start timestamp, and enables the autonomy task so the first tick fires immediately.
+Start the agent. Sets the agent state to `paused`, records the start timestamp, and detects the active model provider. Use `POST /api/agent/autonomy` to enable autonomous operation separately.
 
 **Response**
 
@@ -33,7 +35,7 @@ Start the agent and enable autonomous operation. Sets the agent state to `runnin
 {
   "ok": true,
   "status": {
-    "state": "running",
+    "state": "paused",
     "agentName": "Milady",
     "model": "@elizaos/plugin-anthropic",
     "uptime": 0,
@@ -99,6 +101,41 @@ Resume a paused agent and re-enable autonomy. The first tick fires immediately.
     "uptime": 34200000,
     "startedAt": 1718000000000
   }
+}
+```
+
+---
+
+### GET /api/agent/autonomy
+
+Check whether autonomous operation is currently enabled.
+
+**Response**
+
+```json
+{
+  "enabled": true
+}
+```
+
+---
+
+### POST /api/agent/autonomy
+
+Enable or disable autonomous operation.
+
+**Request Body**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `enabled` | boolean | Yes | Whether to enable autonomy |
+
+**Response**
+
+```json
+{
+  "ok": true,
+  "enabled": true
 }
 ```
 

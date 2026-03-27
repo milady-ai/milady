@@ -95,6 +95,13 @@ const TRADE_STATUS_SET = new Set<BscTradeTxStatus>([
   "not_found",
 ]);
 
+const ALLOWED_STATUS_TRANSITIONS: Record<BscTradeTxStatus, Set<BscTradeTxStatus>> = {
+  pending: new Set(["pending", "success", "reverted", "not_found"]),
+  not_found: new Set(["pending", "success", "reverted", "not_found"]),
+  success: new Set(["success"]),
+  reverted: new Set(["reverted"]),
+};
+
 const TRADE_SIDE_SET = new Set<BscTradeSide>(["buy", "sell"]);
 
 function nowIso(): string {
@@ -127,6 +134,13 @@ function normalizeStatus(value: unknown): BscTradeTxStatus {
   const normalized = value.trim().toLowerCase() as BscTradeTxStatus;
   if (!TRADE_STATUS_SET.has(normalized)) return "pending";
   return normalized;
+}
+
+function canTransitionTradeStatus(
+  current: BscTradeTxStatus,
+  next: BscTradeTxStatus,
+): boolean {
+  return ALLOWED_STATUS_TRANSITIONS[current].has(next);
 }
 
 function normalizeSide(value: unknown): BscTradeSide {
@@ -402,9 +416,13 @@ export function updateWalletTradeLedgerEntryStatus(
   if (index < 0) return null;
 
   const current = store.entries[index];
+  const nextStatus = normalizeStatus(patch.status);
+  if (!canTransitionTradeStatus(current.status, nextStatus)) {
+    return current;
+  }
   const updated: WalletTradeLedgerEntry = {
     ...current,
-    status: normalizeStatus(patch.status),
+    status: nextStatus,
     confirmations: Math.max(0, Math.floor(toFiniteNumber(patch.confirmations))),
     nonce:
       patch.nonce === null ? null : Math.floor(toFiniteNumber(patch.nonce)),

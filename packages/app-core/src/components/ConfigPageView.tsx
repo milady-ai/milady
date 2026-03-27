@@ -509,12 +509,18 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
   const [selectedSolanaRpc, setSelectedSolanaRpc] = useState<
     WalletRpcSelections["solana"]
   >(initialRpc.solana);
+  const [selectedWalletNetwork, setSelectedWalletNetwork] = useState<
+    "mainnet" | "testnet"
+  >(walletConfig?.walletNetwork === "testnet" ? "testnet" : "mainnet");
 
   useEffect(() => {
     const selections = resolveInitialWalletRpcSelections(walletConfig);
     setSelectedEvmRpc(selections.evm);
     setSelectedBscRpc(selections.bsc);
     setSelectedSolanaRpc(selections.solana);
+    setSelectedWalletNetwork(
+      walletConfig?.walletNetwork === "testnet" ? "testnet" : "mainnet",
+    );
   }, [walletConfig]);
 
   /* When switching to cloud mode, set all providers to eliza-cloud */
@@ -536,6 +542,7 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
         bsc: selectedBscRpc,
         solana: selectedSolanaRpc,
       },
+      selectedNetwork: selectedWalletNetwork,
     });
     void handleWalletApiKeySave(config);
   }, [
@@ -543,6 +550,7 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
     rpcFieldValues,
     selectedBscRpc,
     selectedEvmRpc,
+    selectedWalletNetwork,
     selectedSolanaRpc,
     walletConfig,
   ]);
@@ -686,7 +694,7 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
           </span>
           {rpcMode === "cloud" && (
             <span className="absolute top-3 right-3 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-fg">
-              ✓
+              {"\u2713"}
             </span>
           )}
         </Button>
@@ -731,6 +739,33 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
       {/* ═══════════════════════════════════════════════════════════════
           CLOUD MODE
           ═══════════════════════════════════════════════════════════════ */}
+      <div className="mb-5 rounded-lg border border-border p-3">
+        <div className="text-xs font-bold mb-1">Wallet Network</div>
+        <div className="text-[11px] text-muted mb-2">
+          Choose Mainnet for live funds or Testnet for practice.
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          <Button
+            variant={
+              selectedWalletNetwork === "mainnet" ? "default" : "outline"
+            }
+            className="min-h-[40px] px-3 text-xs font-semibold"
+            onClick={() => setSelectedWalletNetwork("mainnet")}
+          >
+            Mainnet
+          </Button>
+          <Button
+            variant={
+              selectedWalletNetwork === "testnet" ? "default" : "outline"
+            }
+            className="min-h-[40px] px-3 text-xs font-semibold"
+            onClick={() => setSelectedWalletNetwork("testnet")}
+          >
+            Testnet
+          </Button>
+        </div>
+      </div>
+
       {rpcMode === "cloud" && (
         <div>
           {elizaCloudConnected ? (

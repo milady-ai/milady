@@ -940,6 +940,9 @@ function AppProviderInner({
   const [elizaCloudTopUpUrl, setElizaCloudTopUpUrl] =
     useState("/cloud/billing");
   const [elizaCloudUserId, setElizaCloudUserId] = useState<string | null>(null);
+  const [elizaCloudStatusReason, setElizaCloudStatusReason] = useState<
+    string | null
+  >(null);
   const [cloudDashboardView, setCloudDashboardView] = useState<
     "billing" | "agents"
   >("billing");
@@ -2192,6 +2195,7 @@ function AppProviderInner({
       setElizaCloudCreditsCritical(false);
       setElizaCloudAuthRejected(false);
       setElizaCloudCreditsError(null);
+      setElizaCloudStatusReason(null);
       lastElizaCloudPollConnectedRef.current = false;
       return false;
     }
@@ -2219,6 +2223,13 @@ function AppProviderInner({
       hasPersistedApiKey,
     });
     setElizaCloudUserId(cloudStatus.userId ?? null);
+    setElizaCloudStatusReason(
+      isConnected &&
+        typeof cloudStatus.reason === "string" &&
+        cloudStatus.reason.trim()
+        ? cloudStatus.reason.trim()
+        : null,
+    );
     if (cloudStatus.topUpUrl) setElizaCloudTopUpUrl(cloudStatus.topUpUrl);
     if (isConnected) {
       const credits = await client.getCloudCredits().catch(() => null);
@@ -2260,6 +2271,7 @@ function AppProviderInner({
       setElizaCloudCreditsCritical(false);
       setElizaCloudAuthRejected(false);
       setElizaCloudCreditsError(null);
+      setElizaCloudStatusReason(null);
     }
     lastElizaCloudPollConnectedRef.current = isConnected;
     // Self-manage the recurring poll interval: start when connected, stop when not.
@@ -2838,6 +2850,7 @@ function AppProviderInner({
           setElizaCloudCreditsError(null);
           setElizaCloudTopUpUrl("/cloud/billing");
           setElizaCloudUserId(null);
+          setElizaCloudStatusReason(null);
           setElizaCloudLoginError(null);
         },
         markOnboardingReset: () => {
@@ -5616,7 +5629,7 @@ function AppProviderInner({
       if (onboardingStep === "permissions") {
         if (options?.allowPermissionBypass) {
           if (options.skipTask) addDeferredOnboardingTask(options.skipTask);
-          // Don't finish yet — advance to identity step for avatar selection
+          // Don't finish yet — advance to the next step
         }
       }
 
@@ -6083,6 +6096,7 @@ function AppProviderInner({
       setElizaCloudAuthRejected(false);
       setElizaCloudCreditsError(null);
       setElizaCloudUserId(null);
+      setElizaCloudStatusReason(null);
       lastElizaCloudPollConnectedRef.current = false;
       elizaCloudPreferDisconnectedUntilLoginRef.current = true;
       setActionNotice("Disconnected from Eliza Cloud.", "success");
@@ -7717,6 +7731,7 @@ function AppProviderInner({
     elizaCloudCreditsError,
     elizaCloudTopUpUrl,
     elizaCloudUserId,
+    elizaCloudStatusReason,
     cloudDashboardView,
     elizaCloudLoginBusy,
     elizaCloudLoginError,
