@@ -376,7 +376,7 @@ export function IdentityStep() {
 
       {/* ── Roster bar ── */}
       <div
-        className="flex flex-nowrap items-end justify-center gap-0 w-full max-w-[900px] px-2 max-md:px-1 max-md:max-w-full border-t border-[var(--onboarding-roster-border)] bg-[var(--onboarding-roster-bg)] p-4 pb-8 backdrop-blur-md"
+        className="flex flex-nowrap items-end justify-center gap-0 w-full max-w-[900px] px-2 max-md:px-1 max-md:max-w-full rounded-[18px] border border-[var(--onboarding-panel-border)] bg-[linear-gradient(180deg,rgba(9,12,18,0.18),rgba(9,12,18,0.08)),var(--onboarding-panel-bg)] p-4 pb-8 backdrop-blur-[36px] backdrop-saturate-[1.24] shadow-[var(--onboarding-panel-shadow)]"
         style={{
           animation:
             "ob-roster-slide-up 0.5s cubic-bezier(0.25,0.46,0.45,0.94) 0.15s both",

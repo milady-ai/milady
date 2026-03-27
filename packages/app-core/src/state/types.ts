@@ -103,12 +103,17 @@ export interface OnboardingStepMeta {
   subtitle: string;
 }
 
-/** Unified 5-step onboarding flow. */
+/** Unified 6-step onboarding flow — identity (character select) is first. */
 export const ONBOARDING_STEPS: OnboardingStepMeta[] = [
   {
     id: "welcome",
     name: "onboarding.stepName.welcome",
     subtitle: "onboarding.stepSub.welcome",
+  },
+  {
+    id: "identity",
+    name: "onboarding.stepName.identity",
+    subtitle: "onboarding.stepSub.identity",
   },
   {
     id: "hosting",
@@ -124,11 +129,6 @@ export const ONBOARDING_STEPS: OnboardingStepMeta[] = [
     id: "permissions",
     name: "onboarding.stepName.permissions",
     subtitle: "onboarding.stepSub.permissions",
-  },
-  {
-    id: "identity",
-    name: "onboarding.stepName.identity",
-    subtitle: "onboarding.stepSub.identity",
   },
   {
     id: "launch",
