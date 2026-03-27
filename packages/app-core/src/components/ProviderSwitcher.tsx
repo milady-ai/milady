@@ -745,10 +745,20 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
                     small: {
                       label: t("providerswitcher.smallModelLabel"),
                       width: "half",
+                      options: modelOptions.small.map((m) => ({
+                        value: m.id,
+                        label: m.name,
+                        description: `${m.provider} — ${m.description}`,
+                      })),
                     },
                     large: {
                       label: t("providerswitcher.largeModelLabel"),
                       width: "half",
+                      options: modelOptions.large.map((m) => ({
+                        value: m.id,
+                        label: m.name,
+                        description: `${m.provider} — ${m.description}`,
+                      })),
                     },
                   };
                   const modelValues: Record<string, unknown> = {};
