@@ -11,9 +11,10 @@
 import { Button } from "@miladyai/ui";
 import { Check, Copy, Mic, MoreVertical, Send } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { client, type ConversationMessage, type LogEntry } from "../api";
+import { client, type ConversationMessage, type LogEntry, type VoiceConfig } from "../api";
 import { invokeDesktopBridgeRequest, isElectrobunRuntime } from "../bridge";
 import { useBranding } from "../config/branding";
+import { VOICE_CONFIG_UPDATED_EVENT } from "../events";
 import {
   useDocumentVisibility,
   useIntervalWhenDocumentVisible,
@@ -406,12 +407,16 @@ export function GameView() {
     handleSelectConversation,
     handleNewConversation,
     agentStatus,
+    chatAgentVoiceMuted,
     copyToClipboard,
+    elizaCloudConnected,
+    elizaCloudEnabled,
     plugins,
     logs,
     loadLogs,
     setState,
     setActionNotice,
+    uiLanguage,
     t,
   } = useApp();
   const agentName = agentStatus?.agentName || "Agent";
@@ -441,17 +446,45 @@ export function GameView() {
 
   const setChatInput = useCallback((v: string) => setState("chatInput", v), [setState]);
 
-  // Voice input — speech-to-text using the same hook as ChatView
+  // Voice config — load TTS settings from server (same source as ChatView)
+  const [voiceConfig, setVoiceConfig] = useState<VoiceConfig | null>(null);
+  const loadVoiceConfig = useCallback(async () => {
+    try {
+      const cfg = await client.getConfig();
+      const messages = cfg.messages as Record<string, Record<string, string>> | undefined;
+      const tts = messages?.tts as VoiceConfig | undefined;
+      setVoiceConfig(tts ?? null);
+    } catch { /* browser TTS fallback */ }
+  }, []);
+
+  useEffect(() => { void loadVoiceConfig(); }, [loadVoiceConfig]);
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<VoiceConfig | undefined>).detail;
+      if (detail && typeof detail === "object") { setVoiceConfig(detail); return; }
+      void loadVoiceConfig();
+    };
+    window.addEventListener(VOICE_CONFIG_UPDATED_EVENT, handler);
+    return () => window.removeEventListener(VOICE_CONFIG_UPDATED_EVENT, handler);
+  }, [loadVoiceConfig]);
+
+  // Voice I/O — speech-to-text + text-to-speech using the same hook as ChatView
   const [voiceAlwaysOn, setVoiceAlwaysOn] = useState(false);
   const voiceAlwaysOnRef = useRef(false);
   const handleChatSendRef = useRef(handleChatSend);
   handleChatSendRef.current = handleChatSend;
+  const spokenAssistantIdRef = useRef<string | null>(null);
 
   const voiceSilenceTimerRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
   const voiceStopRef = useRef<((opts?: { submit?: boolean }) => Promise<void>) | null>(null);
   const voiceStartRef = useRef<((mode?: "compose" | "push-to-talk") => Promise<void>) | null>(null);
 
   const voice = useVoiceChat({
+    cloudConnected: elizaCloudConnected || elizaCloudEnabled,
+    interruptOnSpeech: true,
+    lang: uiLanguage === "zh-CN" ? "zh-CN" : "en-US",
+    voiceConfig,
     onTranscript: useCallback((text: string) => {
       setState("chatInput", text);
     }, [setState]),
@@ -481,6 +514,26 @@ export function GameView() {
   // Keep ref in sync
   useEffect(() => { voiceAlwaysOnRef.current = voiceAlwaysOn; }, [voiceAlwaysOn]);
 
+  // Auto-speak new assistant messages (TTS) — mirrors ChatView behavior
+  useEffect(() => {
+    if (chatAgentVoiceMuted || voice.isListening) return;
+    const latest = [...conversationMessages].reverse()
+      .find((m) => m.role === "assistant" && m.text.trim());
+    if (!latest) return;
+    if (spokenAssistantIdRef.current === latest.id) return;
+    voice.queueAssistantSpeech(latest.id, latest.text, !chatSending);
+    spokenAssistantIdRef.current = null;
+  }, [chatAgentVoiceMuted, chatSending, conversationMessages, voice.queueAssistantSpeech, voice.isListening]);
+
+  // Suppress auto-speak for messages that arrive while user is talking
+  const beginVoiceCapture = useCallback((mode: "compose" | "push-to-talk" = "compose") => {
+    if (voice.isListening) return;
+    const latest = [...conversationMessages].reverse()
+      .find((m) => m.role === "assistant" && m.text.trim());
+    spokenAssistantIdRef.current = latest?.id ?? null;
+    void voice.startListening(mode);
+  }, [conversationMessages, voice.isListening, voice.startListening]);
+
   // Create fresh chat on mount — module-level guard prevents strict mode duplicates
   useEffect(() => {
     const now = Date.now();
@@ -503,10 +556,17 @@ export function GameView() {
       return;
     }
     setWhisperMsgCount(conversationMessages.length);
-    setWhisperVisible(true);
-    const timer = window.setTimeout(() => setWhisperVisible(false), 15000);
-    return () => window.clearTimeout(timer);
-  }, [conversationMessages.length]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!chatExpanded) {
+      setWhisperVisible(true);
+      const timer = window.setTimeout(() => setWhisperVisible(false), 15000);
+      return () => window.clearTimeout(timer);
+    }
+  }, [conversationMessages.length, chatExpanded]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Hide whisper bubbles immediately when chat is expanded
+  useEffect(() => {
+    if (chatExpanded) setWhisperVisible(false);
+  }, [chatExpanded]);
 
   // Close header menu on Escape
   useEffect(() => {
@@ -875,6 +935,9 @@ export function GameView() {
                   {retakeCapture ? t("game.stopCapture") : t("game.retakeCapture")}
                 </button>
               )}
+              <button className="w-full px-3 py-2 text-left text-xs text-txt hover:bg-bg-hover transition-colors" onClick={() => { setState("chatAgentVoiceMuted", !chatAgentVoiceMuted); setShowHeaderMenu(false); }}>
+                {chatAgentVoiceMuted ? "Unmute Voice" : "Mute Voice"}
+              </button>
               <button className="w-full px-3 py-2 text-left text-xs text-txt hover:bg-bg-hover transition-colors" onClick={() => { setState("gameOverlayEnabled", !gameOverlayEnabled); setShowHeaderMenu(false); }}>
                 {gameOverlayEnabled ? t("game.unpinOverlay") : t("game.keepOnTop")}
               </button>
@@ -1001,10 +1064,10 @@ export function GameView() {
                     } else if (voice.isListening) {
                       void voice.stopListening();
                     } else {
-                      void voice.startListening("compose");
+                      beginVoiceCapture("compose");
                     }
                   }}
-                  onPointerDown={(e) => { if (!voice.isListening && !voiceAlwaysOn && e.button === 0) { e.preventDefault(); void voice.startListening("push-to-talk"); } }}
+                  onPointerDown={(e) => { if (!voice.isListening && !voiceAlwaysOn && e.button === 0) { e.preventDefault(); beginVoiceCapture("push-to-talk"); } }}
                   onPointerUp={() => {
                     if (voice.captureMode === "push-to-talk") {
                       void voice.stopListening({ submit: true }).then(() => {
@@ -1028,7 +1091,7 @@ export function GameView() {
                   onClick={() => {
                     const next = !voiceAlwaysOn;
                     setVoiceAlwaysOn(next);
-                    if (next && !voice.isListening) void voice.startListening("compose");
+                    if (next && !voice.isListening) beginVoiceCapture("compose");
                     if (!next && voice.isListening) void voice.stopListening();
                   }}
                   className={`text-[9px] font-bold px-1 rounded transition-colors ${voiceAlwaysOn ? "text-red-400 bg-red-400/20" : "text-white/30 hover:text-white/60"}`}
