@@ -5,6 +5,10 @@ on:
     branches: [main, develop]
   workflow_dispatch:
 
+concurrency:
+  group: windows-desktop-preload-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   preload-smoke:
     name: desktop preload preflight (windows)

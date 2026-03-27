@@ -174,50 +174,14 @@ jobs:
           echo "Pack summary: $SIZE_LINE"
 
   # ── Publish to npm ──────────────────────────────────────────────────────
-  # Reuses build artifacts from build-and-test to avoid redundant rebuilds.
   publish-npm:
-    name: Publish to npm (nightly)
     needs: [check-commits, build-and-test]
     if: needs.check-commits.outputs.has_new_commits == 'true'
-    runs-on: blacksmith-4vcpu-ubuntu-2404
-    timeout-minutes: 15
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: main
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          check-latest: false
-          registry-url: "https://registry.npmjs.org"
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: "1.3.10"
-
-      - name: Cache Bun install
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-          restore-keys: bun-${{ runner.os }}-
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: nightly-dist
-
-      - name: Install dependencies (for npm publish file resolution)
-        run: bun install --frozen-lockfile --ignore-scripts
-
-      - name: Publish with nightly dist-tag
-        run: npm publish --tag nightly --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    uses: ./.github/workflows/reusable-npm-publish.yml
+    with:
+      version: ${{ needs.build-and-test.outputs.nightly_version }}
+      dist_tag: nightly
+    secrets: inherit
 
   # ── Create GitHub pre-release ──────────────────────────────────────────
   create-release:

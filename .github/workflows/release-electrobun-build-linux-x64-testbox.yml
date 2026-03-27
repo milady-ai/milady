@@ -8,6 +8,10 @@ on:
         description: "Testbox session ID"
         required: true
 
+concurrency:
+  group: release-electrobun-linux-x64-testbox-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   CI: "true"
   BUN_VERSION: "1.3.10"

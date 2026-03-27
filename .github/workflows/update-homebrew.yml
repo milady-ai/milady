@@ -19,6 +19,10 @@ on:
         required: true
         type: string
 
+concurrency:
+  group: update-homebrew-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   update-tap:
     name: Trigger Homebrew tap update

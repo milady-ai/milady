@@ -7,6 +7,10 @@ on:
         description: "Testbox session ID"
         required: true
 
+concurrency:
+  group: android-release-build-aab-testbox-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   JAVA_VERSION: "21"
   NODE_VERSION: "22"

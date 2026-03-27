@@ -10,6 +10,10 @@ on:
       - "bun.lock"
   workflow_dispatch:
 
+concurrency:
+  group: windows-dev-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   dev-smoke:
     name: Windows smoke (${{ matrix.bun-version }})
