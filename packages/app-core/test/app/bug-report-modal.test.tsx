@@ -345,6 +345,27 @@ describe("BugReportModal", () => {
     expect(link?.props.href).toBe(issueUrl);
   });
 
+  it("shows success state when remote intake accepts without returning a URL", async () => {
+    mockClient.submitBugReport.mockResolvedValue({ accepted: true });
+    setupMock(true);
+    let tree: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(BugReportModal));
+      await new Promise(r => globalThis.setTimeout(r, 60));
+    });
+
+    await fillRequired(tree?.root);
+
+    const submitBtn = findButton(tree?.root, "bugreportmodal.submit");
+    await act(async () => {
+      submitBtn?.props.onClick();
+    });
+
+    const snapshot = JSON.stringify(tree?.toJSON());
+    expect(snapshot).toContain("bugreportmodal.BugReportSubmitted");
+    expect(snapshot).toContain("Your report was received.");
+  });
+
   it("shows error message on submit failure", async () => {
     mockClient.submitBugReport.mockRejectedValue(new Error("Network error"));
     setupMock(true);
