@@ -4380,7 +4380,12 @@ export async function startEliza(
 
     // 8b. Ensure AutonomyService is available for trigger dispatch.
     // registers this service) from loading, so we start it explicitly.
-    if (!runtime.getService("AUTONOMY")) {
+    // Respect ENABLE_AUTONOMY env var — cloud-provisioned containers may
+    // disable this to prevent runaway autonomous actions.
+    const autonomyEnabled =
+      (process.env.ENABLE_AUTONOMY ?? "true").toLowerCase() !== "false";
+
+    if (autonomyEnabled && !runtime.getService("AUTONOMY")) {
       try {
         await AutonomyService.start(runtime);
         logger.info("[eliza] AutonomyService started for trigger dispatch");
@@ -4389,12 +4394,16 @@ export async function startEliza(
           `[eliza] AutonomyService failed to start: ${formatError(err)}`,
         );
       }
+    } else if (!autonomyEnabled) {
+      logger.info(
+        "[eliza] AutonomyService skipped — ENABLE_AUTONOMY=false",
+      );
     }
 
     // Enable the autonomy loop so trigger/heartbeat instructions are
     // actually processed. Without this, memories created by
     // dispatchInstruction() sit in the DB and are never acted on.
-    {
+    if (autonomyEnabled) {
       const autonomySvc = (runtime.getService("AUTONOMY") ??
         runtime.getService("autonomy")) as unknown as
         | { enableAutonomy(): Promise<void> }
@@ -4697,8 +4706,11 @@ export async function startEliza(
             "hot-reload runtime.initialize()",
           );
 
-          // Ensure AutonomyService survives hot-reload
-          if (!newRuntime.getService("AUTONOMY")) {
+          // Ensure AutonomyService survives hot-reload (respects ENABLE_AUTONOMY)
+          const hotReloadAutonomyEnabled =
+            (process.env.ENABLE_AUTONOMY ?? "true").toLowerCase() !== "false";
+
+          if (hotReloadAutonomyEnabled && !newRuntime.getService("AUTONOMY")) {
             try {
               await AutonomyService.start(newRuntime);
             } catch (err) {
@@ -4709,7 +4721,7 @@ export async function startEliza(
           }
 
           // Enable the autonomy loop after hot-reload (same as initial boot)
-          {
+          if (hotReloadAutonomyEnabled) {
             const svc = (newRuntime.getService("AUTONOMY") ??
               newRuntime.getService("autonomy")) as unknown as
               | { enableAutonomy(): Promise<void> }

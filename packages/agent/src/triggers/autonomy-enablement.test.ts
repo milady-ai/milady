@@ -5,7 +5,8 @@ import { describe, expect, it, vi } from "vitest";
 /**
  * Contract tests for autonomy enablement.
  * Test 1: mirrors the API route logic to catch handler regressions.
- * Test 2: verifies all three code paths call enableAutonomy().
+ * Test 2: verifies all three runtime code paths enable autonomy, while the
+ * agent runtime still respects ENABLE_AUTONOMY guards.
  */
 describe("autonomy enablement for triggers", () => {
   it("API toggle calls service methods and syncs the property", async () => {
@@ -38,27 +39,33 @@ describe("autonomy enablement for triggers", () => {
     expect(runtime.enableAutonomy).toBe(false);
   });
 
-  it("all three runtime paths call enableAutonomy after AutonomyService.start", () => {
+  it("all three runtime paths enable autonomy after startup guards", () => {
+    const expectEnableBlock = (source: string, anchor: string): string => {
+      const start = source.indexOf(anchor);
+      expect(start).toBeGreaterThan(-1);
+      const after = source.slice(start, start + 1_600);
+      expect(after).toContain("enableAutonomy()");
+      return after;
+    };
+
     // Agent runtime (initial boot)
     const agentEliza = readFileSync(
       path.resolve(import.meta.dirname, "..", "runtime", "eliza.ts"),
       "utf-8",
     );
-    const bootStart = agentEliza.indexOf("AutonomyService.start(runtime)");
-    expect(bootStart).toBeGreaterThan(-1);
-    const afterBoot = agentEliza.slice(bootStart, bootStart + 800);
-    expect(afterBoot).toContain(".enableAutonomy()");
+    expect(agentEliza).toContain('process.env.ENABLE_AUTONOMY ?? "true"');
+    const afterBoot = expectEnableBlock(
+      agentEliza,
+      "AutonomyService.start(runtime)",
+    );
+    expect(afterBoot).toContain("ENABLE_AUTONOMY=false");
 
     // Agent runtime (hot-reload)
-    const hotReloadStart = agentEliza.indexOf(
+    const afterHotReload = expectEnableBlock(
+      agentEliza,
       "AutonomyService.start(newRuntime)",
     );
-    expect(hotReloadStart).toBeGreaterThan(-1);
-    const afterHotReload = agentEliza.slice(
-      hotReloadStart,
-      hotReloadStart + 800,
-    );
-    expect(afterHotReload).toContain(".enableAutonomy()");
+    expect(afterHotReload).toContain("hotReloadAutonomyEnabled");
 
     // Desktop runtime (app-core)
     const desktopEliza = readFileSync(
@@ -74,9 +81,6 @@ describe("autonomy enablement for triggers", () => {
       ),
       "utf-8",
     );
-    const desktopStart = desktopEliza.indexOf("AutonomyService.start(runtime)");
-    expect(desktopStart).toBeGreaterThan(-1);
-    const afterDesktop = desktopEliza.slice(desktopStart, desktopStart + 800);
-    expect(afterDesktop).toContain(".enableAutonomy()");
+    expectEnableBlock(desktopEliza, "AutonomyService.start(runtime)");
   });
 });
