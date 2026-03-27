@@ -3003,7 +3003,7 @@ function isBalanceIntent(input: string): boolean {
  * Extract key-value params from the inside of an XML block.
  * Matches `<key>value</key>` pairs, skipping nested XML.
  */
-function extractXmlParams(block: string): Record<string, string> {
+export function extractXmlParams(block: string): Record<string, string> {
   const params: Record<string, string> = {};
   const pairs = block.matchAll(
     /<([A-Za-z_][A-Za-z0-9_-]*)>\s*([^<]+?)\s*<\/\1>/g,
@@ -3014,7 +3014,7 @@ function extractXmlParams(block: string): Record<string, string> {
   return params;
 }
 
-function parseFallbackActionBlocks(
+export function parseFallbackActionBlocks(
   value: unknown,
   responseText?: string,
 ): FallbackParsedAction[] {
