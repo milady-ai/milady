@@ -64,7 +64,6 @@ export interface WalletRpcReadiness {
   managedBscRpcReady: boolean;
   evmBalanceReady: boolean;
   solanaBalanceReady: boolean;
-  walletNetwork: "mainnet" | "testnet";
   selectedRpcProviders: WalletRpcSelections;
   legacyCustomChains: WalletRpcChain[];
   bscRpcUrls: string[];
@@ -580,7 +579,6 @@ export function resolveWalletRpcReadiness(
     solanaBalanceReady: Boolean(
       process.env.HELIUS_API_KEY?.trim() || solanaRpcUrls.length > 0,
     ),
-    walletNetwork,
     selectedRpcProviders,
     legacyCustomChains,
     bscRpcUrls,

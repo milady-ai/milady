@@ -3614,7 +3614,11 @@ async function generateChatResponse(
     if (directWalletExecutionFallback?.errorText) {
       forcedWalletExecutionText = true;
       responseText = directWalletExecutionFallback.errorText;
-      result = { responseContent: { text: directWalletExecutionFallback.errorText } };
+      result = {
+        didRespond: true,
+        responseContent: { text: directWalletExecutionFallback.errorText },
+        responseMessages: [],
+      };
     } else if (directWalletExecutionFallback?.action) {
       runtime.logger?.info(
         {
@@ -3641,7 +3645,11 @@ async function generateChatResponse(
           );
         },
       );
-      result = { responseContent: { text: responseText } };
+      result = {
+        didRespond: true,
+        responseContent: { text: responseText },
+        responseMessages: [],
+      };
     } else {
       const walletAugmentedMessage =
         maybeAugmentChatMessageWithWalletContext(runtime, message);
@@ -12223,9 +12231,6 @@ async function handleRequest(
         validatePrivateKey,
         importWallet,
         generateWalletForChain,
-        getAutomationMode: resolveAgentAutomationModeFromConfig,
-        getPluginEvmLoaded: () =>
-          isPluginLoadedByName(state.runtime, EVM_PLUGIN_PACKAGE),
       },
       readJsonBody,
       json,

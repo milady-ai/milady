@@ -218,7 +218,6 @@ export interface WalletConfigStatus {
   evmAddress: string | null;
   solanaAddress: string | null;
   walletSource?: "local" | "managed" | "none";
-  walletNetwork?: "mainnet" | "testnet";
   automationMode?: "full" | "connectors-only";
   pluginEvmLoaded?: boolean;
   pluginEvmRequired?: boolean;

@@ -26,7 +26,7 @@ type WalletForExecution = {
   ) => Promise<{
     hash: string;
     gasLimit?: bigint;
-    wait: (confirmations?: number) => Promise<{ status?: number } | null>;
+    wait: (confirmations?: number) => Promise<{ status?: number | null } | null>;
   }>;
 };
 
