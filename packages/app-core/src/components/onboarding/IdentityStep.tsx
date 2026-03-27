@@ -179,7 +179,7 @@ export function IdentityStep({
         // `VRM_TELEPORT_COMPLETE_EVENT`. When onboarding skips VRM, OnboardingWizard listens
         // for `ONBOARDING_VOICE_PREVIEW_AWAIT_TELEPORT_EVENT` and echoes teleport-complete.
         const avatarChanged = previousAvatarIndex !== entry.avatarIndex;
-        if (avatarChanged) {
+        if (avatarChanged && gateVoicePreviewOnTeleport) {
           pendingPreviewEntryRef.current = entry;
           dispatchWindowEvent(ONBOARDING_VOICE_PREVIEW_AWAIT_TELEPORT_EVENT);
         } else {
@@ -187,7 +187,7 @@ export function IdentityStep({
         }
       }
     },
-    [entries, playSelectionPreview, selectedId, setState, stopPreviewAudio],
+    [entries, gateVoicePreviewOnTeleport, playSelectionPreview, selectedId, setState, stopPreviewAudio],
   );
 
   // Auto-select the first one if nothing is selected yet
