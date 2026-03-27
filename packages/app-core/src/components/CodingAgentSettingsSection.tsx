@@ -447,7 +447,7 @@ export function CodingAgentSettingsSection() {
               size="sm"
               className={`flex-1 h-9 rounded-lg border border-transparent px-3 py-2 text-xs font-semibold ${
                 active
-                  ? "bg-accent text-accent-foreground shadow-sm"
+                  ? "bg-accent text-accent-fg shadow-sm"
                   : "text-muted hover:bg-bg-hover hover:text-txt"
               }`}
               onClick={() => setActiveTab(agent)}
