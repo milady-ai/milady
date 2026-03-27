@@ -1,18 +1,62 @@
 /**
- * Cloud TTS helpers — ElevenLabs / Eliza Cloud voice synthesis.
+ * Cloud TTS helpers — proxy to Eliza Cloud (`elizacloud.ai`).
  *
- * These functions resolve API keys, base URLs, and handle the cloud TTS
- * preview route.  They are extracted from `server.ts` for maintainability
- * but re-exported from there so existing imports remain valid.
+ * Upstream routes (see eliza-cloud-v2): `POST /api/v1/voice/tts` and legacy
+ * `POST /api/elevenlabs/tts`. Both accept `{ text, voiceId?, modelId? }` with
+ * **ElevenLabs** voice and model ids; the cloud runs ElevenLabs server-side.
  */
 import type http from "node:http";
 import { sanitizeSpeechText } from "@miladyai/agent";
 import { loadElizaConfig } from "../config/config";
+import {
+  miladyTtsDebug,
+  miladyTtsDebugTextPreview,
+} from "../utils/milady-tts-debug";
 import { getCloudSecret } from "./cloud-secrets";
 
 // ---------------------------------------------------------------------------
 // Internal helpers (not exported)
 // ---------------------------------------------------------------------------
+
+/** Milady browser → API correlation (never forwarded to Eliza Cloud). */
+export function readMiladyTtsDebugClientHeaders(
+  req: Pick<http.IncomingMessage, "headers">,
+): {
+  messageId?: string;
+  clipSegment?: string;
+  hearingFull?: string;
+} {
+  const pick = (name: string): string | undefined => {
+    const raw = req.headers[name];
+    if (raw == null) return undefined;
+    const v = Array.isArray(raw) ? raw[0] : raw;
+    return typeof v === "string" && v.trim() ? v.trim() : undefined;
+  };
+  const decode = (enc: string | undefined): string | undefined => {
+    if (!enc) return undefined;
+    try {
+      return decodeURIComponent(enc);
+    } catch {
+      return enc;
+    }
+  };
+  return {
+    messageId: decode(pick("x-milady-tts-message-id")),
+    clipSegment: decode(pick("x-milady-tts-clip-segment")),
+    hearingFull: decode(pick("x-milady-tts-full-preview")),
+  };
+}
+
+function ttsClientDbgFields(hdr: ReturnType<typeof readMiladyTtsDebugClientHeaders>): Record<
+  string,
+  string
+> {
+  const o: Record<string, string> = {};
+  if (hdr.messageId) o.messageId = hdr.messageId;
+  if (hdr.clipSegment) o.clipSegment = hdr.clipSegment;
+  if (hdr.hearingFull) o.hearingFull = hdr.hearingFull;
+  return o;
+}
 
 function normalizeSecretEnvValue(value: string | undefined): string | null {
   const trimmed = value?.trim();
@@ -29,7 +73,8 @@ function normalizeSecretEnvValue(value: string | undefined): string | null {
   return trimmed;
 }
 
-const SUPPORTED_CLOUD_TTS_VOICES = new Set([
+/** OpenAI-style names — not valid ElevenLabs `voiceId`; map to default voice. */
+const OPENAI_STYLE_VOICE_ALIASES = new Set([
   "alloy",
   "ash",
   "ballad",
@@ -41,22 +86,48 @@ const SUPPORTED_CLOUD_TTS_VOICES = new Set([
   "verse",
 ]);
 
-function resolveCloudVoiceName(
-  requestedVoice: unknown,
+/** Eliza Cloud default premade voice (matches eliza-cloud-v2 ElevenLabs service). */
+const DEFAULT_ELIZA_CLOUD_TTS_VOICE_ID = "EXAVITQu4vr4xnSDxMaL";
+const DEFAULT_ELIZA_CLOUD_TTS_MODEL_ID = "eleven_flash_v2_5";
+
+/** Matches `MAX_TEXT_LENGTH` in eliza-cloud-v2 `app/api/v1/voice/tts/route.ts`. */
+export const ELIZA_CLOUD_TTS_MAX_TEXT_CHARS = 5000;
+
+/** Edge / Azure neural ids (e.g. `en-US-AriaNeural`) are not ElevenLabs `voiceId`s. */
+function isLikelyEdgeOrAzureNeuralVoiceId(raw: string): boolean {
+  const t = raw.trim();
+  return /^[a-z]{2}-[A-Z]{2}-/i.test(t) && /Neural$/i.test(t);
+}
+
+function normalizeElizaCloudVoiceId(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return DEFAULT_ELIZA_CLOUD_TTS_VOICE_ID;
+  const lower = trimmed.toLowerCase();
+  if (OPENAI_STYLE_VOICE_ALIASES.has(lower)) {
+    return DEFAULT_ELIZA_CLOUD_TTS_VOICE_ID;
+  }
+  if (isLikelyEdgeOrAzureNeuralVoiceId(trimmed)) {
+    return DEFAULT_ELIZA_CLOUD_TTS_VOICE_ID;
+  }
+  return trimmed;
+}
+
+/**
+ * Resolve `voiceId` for Eliza Cloud TTS (ElevenLabs ids). OpenAI-style names
+ * in the request are replaced with the default premade voice.
+ */
+export function resolveElizaCloudTtsVoiceId(
+  bodyVoiceId: unknown,
   env: NodeJS.ProcessEnv = process.env,
 ): string {
-  const requested =
-    typeof requestedVoice === "string"
-      ? requestedVoice.trim().toLowerCase()
-      : "";
-  if (requested && SUPPORTED_CLOUD_TTS_VOICES.has(requested)) {
-    return requested;
+  if (typeof bodyVoiceId === "string" && bodyVoiceId.trim()) {
+    return normalizeElizaCloudVoiceId(bodyVoiceId);
   }
-  const configured = env.ELIZAOS_CLOUD_TTS_VOICE?.trim().toLowerCase();
-  if (configured && SUPPORTED_CLOUD_TTS_VOICES.has(configured)) {
-    return configured;
+  const envVoice = env.ELIZAOS_CLOUD_TTS_VOICE?.trim() ?? "";
+  if (envVoice) {
+    return normalizeElizaCloudVoiceId(envVoice);
   }
-  return "nova";
+  return DEFAULT_ELIZA_CLOUD_TTS_VOICE_ID;
 }
 
 function resolveCloudApiKey(
@@ -91,6 +162,31 @@ function resolveCloudApiKey(
   return null;
 }
 
+function resolveCloudBaseUrlFromConfig(): string | null {
+  try {
+    const config = loadElizaConfig();
+    const raw =
+      typeof config.cloud?.baseUrl === "string"
+        ? config.cloud.baseUrl.trim()
+        : "";
+    return raw.length > 0 ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
+function pickBodyString(
+  body: Record<string, unknown>,
+  camel: string,
+  snake: string,
+): unknown {
+  const a = body[camel];
+  if (typeof a === "string" && a.trim()) return a;
+  const b = body[snake];
+  if (typeof b === "string" && b.trim()) return b;
+  return undefined;
+}
+
 async function readRawRequestBody(req: http.IncomingMessage): Promise<Buffer> {
   const chunks: Buffer[] = [];
   for await (const chunk of req) {
@@ -116,6 +212,74 @@ function sendJsonErrorResponse(
   message: string,
 ): void {
   sendJsonResponse(res, status, { error: message });
+}
+
+/**
+ * After a non-OK upstream response, only try the next URL for likely-transient /
+ * wrong-route issues. Avoid retrying 401/402/429 etc. so we do not double-charge TTS.
+ */
+export function shouldRetryCloudTtsUpstream(status: number): boolean {
+  return status === 404 || status === 502 || status === 503;
+}
+
+function forwardCloudTtsUpstreamError(
+  res: http.ServerResponse,
+  status: number,
+  bodyText: string,
+): void {
+  if (res.headersSent) return;
+  const trimmed = bodyText.trim();
+  if (
+    (trimmed.startsWith("{") && trimmed.endsWith("}")) ||
+    (trimmed.startsWith("[") && trimmed.endsWith("]"))
+  ) {
+    try {
+      const parsed: unknown = JSON.parse(trimmed);
+      sendJsonResponse(res, status, parsed);
+      return;
+    } catch {
+      /* fall through */
+    }
+  }
+  res.statusCode = status;
+  res.setHeader("content-type", "application/json; charset=utf-8");
+  res.end(JSON.stringify({ error: trimmed || "Eliza Cloud TTS request failed" }));
+}
+
+/**
+ * Coerce stored/configured values to an ElevenLabs model id Eliza Cloud accepts.
+ * Maps OpenAI TTS ids and common copy-paste mistakes; passes through real `eleven_*` ids.
+ */
+export function normalizeElizaCloudTtsModelId(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return DEFAULT_ELIZA_CLOUD_TTS_MODEL_ID;
+  const lower = trimmed.toLowerCase();
+  if (OPENAI_STYLE_VOICE_ALIASES.has(lower)) {
+    return DEFAULT_ELIZA_CLOUD_TTS_MODEL_ID;
+  }
+  if (/^gpt-/i.test(trimmed)) {
+    return DEFAULT_ELIZA_CLOUD_TTS_MODEL_ID;
+  }
+  if (/^tts-1/i.test(trimmed)) {
+    return DEFAULT_ELIZA_CLOUD_TTS_MODEL_ID;
+  }
+  if (/mini-tts/i.test(trimmed)) {
+    return DEFAULT_ELIZA_CLOUD_TTS_MODEL_ID;
+  }
+  return trimmed;
+}
+
+/** Eliza Cloud TTS `modelId` (ElevenLabs), from body or env or default. */
+export function resolveCloudProxyTtsModel(
+  bodyModel: unknown,
+  env: NodeJS.ProcessEnv = process.env,
+): string {
+  const envModel = env.ELIZAOS_CLOUD_TTS_MODEL?.trim() ?? "";
+  const raw =
+    typeof bodyModel === "string" && bodyModel.trim() ? bodyModel.trim() : "";
+  const chosen = raw || envModel;
+  if (!chosen) return DEFAULT_ELIZA_CLOUD_TTS_MODEL_ID;
+  return normalizeElizaCloudTtsModelId(chosen);
 }
 
 // ---------------------------------------------------------------------------
@@ -156,14 +320,12 @@ export function ensureCloudTtsApiKeyAlias(
 export function resolveCloudTtsBaseUrl(
   env: NodeJS.ProcessEnv = process.env,
 ): string {
-  const configured = env.ELIZAOS_CLOUD_BASE_URL?.trim();
+  const fromEnv = env.ELIZAOS_CLOUD_BASE_URL?.trim() ?? "";
+  const fromConfig = fromEnv.length > 0 ? null : resolveCloudBaseUrlFromConfig();
+  const configured =
+    fromEnv.length > 0 ? fromEnv : (fromConfig?.trim() ?? "");
   const fallback = "https://www.elizacloud.ai/api/v1";
-  if (!configured || configured.length === 0) {
-    console.warn(
-      "[cloud-tts] ELIZAOS_CLOUD_BASE_URL not set; falling back to default cloud TTS endpoint",
-    );
-  }
-  const base = configured && configured.length > 0 ? configured : fallback;
+  const base = configured.length > 0 ? configured : fallback;
 
   try {
     const parsed = new URL(base);
@@ -183,21 +345,30 @@ export function resolveCloudTtsCandidateUrls(
 ): string[] {
   const base = resolveCloudTtsBaseUrl(env).replace(/\/+$/, "");
   const candidates = new Set<string>();
-  const addBase = (baseUrl: string): void => {
+
+  const addEndpointsForApiV1Base = (baseUrl: string): void => {
     const trimmed = baseUrl.replace(/\/+$/, "");
     candidates.add(`${trimmed}/voice/tts`);
-    candidates.add(`${trimmed}/audio/speech`);
+    try {
+      const u = new URL(trimmed);
+      const path = u.pathname.replace(/\/+$/, "");
+      if (path.endsWith("/api/v1")) {
+        candidates.add(`${u.origin}/api/elevenlabs/tts`);
+      }
+    } catch {
+      /* ignore */
+    }
   };
 
-  addBase(base);
+  addEndpointsForApiV1Base(base);
   try {
     const parsed = new URL(base);
     if (parsed.hostname.startsWith("www.")) {
       parsed.hostname = parsed.hostname.slice(4);
-      addBase(parsed.toString());
+      addEndpointsForApiV1Base(parsed.toString().replace(/\/$/, ""));
     } else {
       parsed.hostname = `www.${parsed.hostname}`;
-      addBase(parsed.toString());
+      addEndpointsForApiV1Base(parsed.toString().replace(/\/$/, ""));
     }
   } catch {
     // no-op
@@ -210,8 +381,15 @@ export async function handleCloudTtsPreviewRoute(
   req: http.IncomingMessage,
   res: http.ServerResponse,
 ): Promise<boolean> {
+  const clientTtsDbg = readMiladyTtsDebugClientHeaders(req);
+  const dbgExtra = ttsClientDbgFields(clientTtsDbg);
+
   const cloudApiKey = resolveCloudApiKey();
   if (!cloudApiKey) {
+    miladyTtsDebug("server:cloud-tts:reject", {
+      reason: "no_api_key",
+      ...dbgExtra,
+    });
     sendJsonErrorResponse(
       res,
       401,
@@ -237,19 +415,37 @@ export async function handleCloudTtsPreviewRoute(
     return true;
   }
 
-  const cloudModel =
-    (typeof body.modelId === "string" && body.modelId.trim()) ||
-    process.env.ELIZAOS_CLOUD_TTS_MODEL?.trim() ||
-    "gpt-5-mini-tts";
-  const cloudVoice = resolveCloudVoiceName(body.voiceId);
-  const cloudInstructions = process.env.ELIZAOS_CLOUD_TTS_INSTRUCTIONS?.trim();
+  if (text.length > ELIZA_CLOUD_TTS_MAX_TEXT_CHARS) {
+    sendJsonErrorResponse(
+      res,
+      400,
+      `Text too long. Maximum length is ${ELIZA_CLOUD_TTS_MAX_TEXT_CHARS} characters`,
+    );
+    return true;
+  }
+
+  const cloudModel = resolveCloudProxyTtsModel(pickBodyString(body, "modelId", "model_id"));
+  const cloudVoice = resolveElizaCloudTtsVoiceId(
+    pickBodyString(body, "voiceId", "voice_id"),
+  );
   const cloudUrls = resolveCloudTtsCandidateUrls();
+
+  const ttsPreview = miladyTtsDebugTextPreview(text);
+  miladyTtsDebug("server:cloud-tts:proxy", {
+    textChars: text.length,
+    preview: ttsPreview,
+    modelId: cloudModel,
+    voiceId: cloudVoice,
+    urlCandidates: cloudUrls.length,
+    ...dbgExtra,
+  });
 
   try {
     let lastStatus = 0;
     let lastDetails = "unknown error";
     let cloudResponse: Response | null = null;
-    for (const cloudUrl of cloudUrls) {
+    for (let i = 0; i < cloudUrls.length; i++) {
+      const cloudUrl = cloudUrls[i]!;
       const attempt = await fetch(cloudUrl, {
         method: "POST",
         headers: {
@@ -260,25 +456,53 @@ export async function handleCloudTtsPreviewRoute(
         },
         body: JSON.stringify({
           text,
-          input: text,
-          model: cloudModel,
-          modelId: cloudModel,
-          voice: cloudVoice,
           voiceId: cloudVoice,
-          format: "mp3",
-          ...(cloudInstructions ? { instructions: cloudInstructions } : {}),
+          modelId: cloudModel,
         }),
       });
 
       if (attempt.ok) {
         cloudResponse = attempt;
+        miladyTtsDebug("server:cloud-tts:upstream-ok", {
+          urlIndex: i,
+          status: attempt.status,
+          preview: ttsPreview,
+          ...dbgExtra,
+        });
         break;
       }
 
       lastStatus = attempt.status;
       lastDetails = await attempt.text().catch(() => "unknown error");
+      miladyTtsDebug("server:cloud-tts:upstream-retry", {
+        urlIndex: i,
+        status: attempt.status,
+        preview: ttsPreview,
+        ...dbgExtra,
+      });
+
+      const hasMoreCandidates = i < cloudUrls.length - 1;
+      if (!hasMoreCandidates || !shouldRetryCloudTtsUpstream(attempt.status)) {
+        break;
+      }
     }
     if (!cloudResponse) {
+      miladyTtsDebug("server:cloud-tts:reject", {
+        reason: "upstream_failed",
+        lastStatus,
+        preview: ttsPreview,
+        ...dbgExtra,
+      });
+      if (
+        lastStatus === 400 ||
+        lastStatus === 401 ||
+        lastStatus === 402 ||
+        lastStatus === 403 ||
+        lastStatus === 429
+      ) {
+        forwardCloudTtsUpstreamError(res, lastStatus, lastDetails);
+        return true;
+      }
       sendJsonErrorResponse(
         res,
         502,
@@ -288,6 +512,11 @@ export async function handleCloudTtsPreviewRoute(
     }
 
     const audioBuffer = Buffer.from(await cloudResponse.arrayBuffer());
+    miladyTtsDebug("server:cloud-tts:success", {
+      bytes: audioBuffer.length,
+      preview: ttsPreview,
+      ...dbgExtra,
+    });
     res.statusCode = 200;
     res.setHeader("Content-Type", "audio/mpeg");
     res.setHeader("Cache-Control", "no-store");

@@ -134,6 +134,7 @@ All `@elizaos/*` packages use the `alpha` dist-tag. When developing locally, `bu
 | `SKIP_AVATAR_CLONE` | Skip VRM avatar download during install | `0` |
 | `ELIZA_SKIP_LOCAL_ELIZA` | Use npm packages instead of `../eliza` workspace | `0` |
 | `MILADY_PROMPT_TRACE` | Log prompt compaction stats to console | `0` |
+| `MILADY_TTS_DEBUG` | Log TTS pipeline traces (`[milady][tts]`): queue/proxy plus **playback** (`play:web-audio:*`, `play:browser:*`, `play:talkmode:*`) with a short `preview` of spoken text. UI picks this up via Vite `define` in dev/build; for client-only, `VITE_MILADY_TTS_DEBUG` also works | `0` |
 | `MILADY_CAPTURE_PROMPTS` | Dump raw prompts to `.tmp/prompt-captures/` (dev-only, contains user messages) | `0` |
 | `MILADY_ACTION_COMPACTION` | Context-aware action param stripping | `1` (enabled) |
 | `MILADY_PROMPT_OPT_MODE` | Prompt optimization mode (`baseline` or `compact`) | `baseline` |

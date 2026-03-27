@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import * as appConfig from "../config/config";
 import {
   ensureCloudTtsApiKeyAlias,
   resolveCloudTtsBaseUrl,
@@ -6,6 +7,10 @@ import {
 } from "./server";
 
 describe("cloud-backed ElevenLabs API key alias", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("returns direct ElevenLabs key when present", () => {
     const env = {
       ELEVENLABS_API_KEY: "direct-key",
@@ -63,6 +68,16 @@ describe("cloud-backed ElevenLabs API key alias", () => {
 
     expect(resolveCloudTtsBaseUrl(env)).toBe(
       "https://www.elizacloud.ai/api/v1",
+    );
+  });
+
+  it("uses milady.json cloud.baseUrl when ELIZAOS_CLOUD_BASE_URL is unset", () => {
+    vi.spyOn(appConfig, "loadElizaConfig").mockReturnValue({
+      cloud: { baseUrl: "https://staging.elizacloud.example" },
+    } as appConfig.ElizaConfig);
+
+    expect(resolveCloudTtsBaseUrl({} as NodeJS.ProcessEnv)).toBe(
+      "https://staging.elizacloud.example/api/v1",
     );
   });
 });

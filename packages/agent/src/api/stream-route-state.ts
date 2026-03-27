@@ -45,4 +45,10 @@ export interface StreamRouteState {
       tts?: Record<string, unknown>;
     };
   };
+  /**
+   * When the client saves stream visual settings, mirror `avatarIndex` into
+   * Eliza `config.ui` (and live server state). Greeting + identity read
+   * `config.ui`, while avatar taps only hit `/api/stream/settings` today.
+   */
+  mirrorStreamAvatarToElizaConfig?: (avatarIndex: number) => void;
 }

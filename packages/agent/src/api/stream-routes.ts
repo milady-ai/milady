@@ -902,6 +902,20 @@ export async function handleStreamRoute(
       const existing = readStreamSettings();
       const merged = { ...existing, ...result.settings };
       writeStreamSettings(merged);
+      if (
+        typeof merged.avatarIndex === "number" &&
+        Number.isFinite(merged.avatarIndex)
+      ) {
+        try {
+          state.mirrorStreamAvatarToElizaConfig?.(merged.avatarIndex);
+        } catch (err) {
+          logger.warn(
+            `[stream] mirrorStreamAvatarToElizaConfig failed (stream settings still saved): ${
+              err instanceof Error ? err.message : String(err)
+            }`,
+          );
+        }
+      }
       json(res, { ok: true, settings: merged });
     } catch (err) {
       error(res, String(err), 500);

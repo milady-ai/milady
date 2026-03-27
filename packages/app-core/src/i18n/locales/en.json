@@ -1289,6 +1289,8 @@
   "voiceconfigview.testPhrase": "Hello from Milady desktop talk mode.",
   "chat.releaseToSend": "Release to send...",
   "chat.clickToDictate": "Click to dictate. Hold to talk and send.",
+  "chat.micTitleIdleEnhanced": "Voice input — assistant replies use neural TTS (ElevenLabs). Change under Settings → Voice.",
+  "chat.micTitleIdleStandard": "Voice input — assistant uses device speech. Neural TTS and billing: Settings → Voice.",
   "lifecycle.startProgress": "Starting agent...",
   "lifecycle.startSuccess": "Agent started.",
   "lifecycle.stopProgress": "Stopping agent...",

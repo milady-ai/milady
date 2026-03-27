@@ -1809,16 +1809,16 @@
         },
         "ELIZAOS_CLOUD_TTS_MODEL": {
           "type": "string",
-          "description": "Identifier of the model used for text-to-speech generation.",
+          "description": "ElevenLabs TTS model id for Eliza Cloud proxy (`/api/v1/voice/tts`). OpenAI-style ids (`gpt-*-tts`, `tts-1`, OpenAI voice names mistaken for a model) are coerced to `eleven_flash_v2_5`.",
           "required": false,
-          "default": "gpt-5-mini-tts",
+          "default": "eleven_flash_v2_5",
           "sensitive": false
         },
         "ELIZAOS_CLOUD_TTS_VOICE": {
           "type": "string",
-          "description": "Voice profile to use for text-to-speech output.",
+          "description": "ElevenLabs voice id when the client omits `voiceId`. OpenAI-style names (`nova`, etc.) and Edge/Azure neural ids (`en-US-AriaNeural`, etc.) are mapped to the default premade voice.",
           "required": false,
-          "default": "nova",
+          "default": "EXAVITQu4vr4xnSDxMaL",
           "sensitive": false
         },
         "ELIZAOS_CLOUD_TTS_INSTRUCTIONS": {

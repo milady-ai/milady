@@ -48,6 +48,11 @@ import { beforeEach } from "vitest";
 describe("resolveApiUrl", () => {
   beforeEach(() => {
     setBootConfig({ branding: {} });
+    try {
+      window.sessionStorage.removeItem("milady_api_base");
+    } catch {
+      /* no window */
+    }
   });
 
   it("returns the path unchanged when apiBase is not set", () => {

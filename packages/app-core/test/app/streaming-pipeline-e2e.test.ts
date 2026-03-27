@@ -301,116 +301,104 @@ describe("streaming pipeline: exact phrase round-trip", () => {
 
 // ── Voice queue simulation ──────────────────────────────────────────
 
-const { splitFirstSentence, remainderAfter, queueableSpeechPrefix } =
-  __voiceChatInternals;
+const {
+  remainderAfter,
+  ASSISTANT_TTS_FIRST_FLUSH_CHARS,
+  ASSISTANT_TTS_MIN_CHUNK_CHARS,
+} = __voiceChatInternals;
 
 /**
- * Simulates the full `queueAssistantSpeech` algorithm, tracking what
- * speech chunks would actually be enqueued at each streaming step.
- * This catches chunk duplication, ordering, and garbling issues.
+ * Simulates `queueAssistantSpeech` batching (min chars + final flush).
+ * No real timer — after the loop, flushes any tail debounce would have sent.
  */
 function simulateVoiceQueue(
   cumulativeTexts: string[],
   isFinalFlags?: boolean[],
 ) {
   const state = {
-    lastObservedText: "",
-    firstSentenceSpoken: false,
-    firstSentenceText: "",
-    queuedRemainderText: "",
+    queuedSpeakablePrefix: "",
+    latestSpeakable: "",
     finalQueued: false,
   };
 
   const enqueuedChunks: { text: string; append: boolean; step: number }[] = [];
+
+  const tryFlush = (speakable: string, isFinal: boolean, step: number) => {
+    if (
+      speakable === state.queuedSpeakablePrefix &&
+      (!isFinal || state.finalQueued)
+    ) {
+      return;
+    }
+    if (speakable === state.queuedSpeakablePrefix && isFinal) {
+      state.finalQueued = true;
+      return;
+    }
+    const unsent = remainderAfter(speakable, state.queuedSpeakablePrefix);
+    if (!unsent) {
+      if (isFinal) state.finalQueued = true;
+      return;
+    }
+    const isFirstClip = state.queuedSpeakablePrefix.length === 0;
+    const flushNow =
+      isFinal ||
+      (isFirstClip && unsent.length >= ASSISTANT_TTS_FIRST_FLUSH_CHARS) ||
+      (!isFirstClip && unsent.length >= ASSISTANT_TTS_MIN_CHUNK_CHARS);
+    if (!flushNow) return;
+    enqueuedChunks.push({
+      text: unsent,
+      append: !isFirstClip,
+      step,
+    });
+    state.queuedSpeakablePrefix = speakable;
+    if (isFinal) state.finalQueued = true;
+  };
 
   for (let i = 0; i < cumulativeTexts.length; i++) {
     const rawText = cumulativeTexts[i];
     const isFinal = isFinalFlags ? isFinalFlags[i] : i === cumulativeTexts.length - 1;
     const speakable = toSpeakableText(rawText);
     if (!speakable) continue;
+    state.latestSpeakable = speakable;
+    tryFlush(speakable, isFinal, i);
+  }
 
-    if (
-      speakable === state.lastObservedText &&
-      (!isFinal || state.finalQueued)
-    ) {
-      continue;
+  let lastSpeakable = "";
+  for (const raw of cumulativeTexts) {
+    const s = toSpeakableText(raw);
+    if (s) lastSpeakable = s;
+  }
+  if (lastSpeakable && state.queuedSpeakablePrefix !== lastSpeakable) {
+    const unsent = remainderAfter(lastSpeakable, state.queuedSpeakablePrefix);
+    if (unsent) {
+      const isFirstClip = state.queuedSpeakablePrefix.length === 0;
+      enqueuedChunks.push({
+        text: unsent,
+        append: !isFirstClip,
+        step: cumulativeTexts.length,
+      });
+      state.queuedSpeakablePrefix = lastSpeakable;
     }
-    state.lastObservedText = speakable;
-
-    if (!state.firstSentenceSpoken) {
-      const split = splitFirstSentence(speakable);
-      if (!split.complete && !isFinal) continue;
-
-      if (split.complete) {
-        state.firstSentenceSpoken = true;
-        state.firstSentenceText = split.firstSentence;
-        enqueuedChunks.push({
-          text: split.firstSentence,
-          append: false,
-          step: i,
-        });
-
-        const queueableRemainder = queueableSpeechPrefix(
-          split.remainder,
-          isFinal,
-        );
-        if (queueableRemainder) {
-          enqueuedChunks.push({
-            text: queueableRemainder,
-            append: true,
-            step: i,
-          });
-          state.queuedRemainderText = queueableRemainder;
-        }
-        if (isFinal) state.finalQueued = true;
-        continue;
-      }
-
-      // No sentence boundary and isFinal — queue everything
-      enqueuedChunks.push({ text: speakable, append: false, step: i });
-      state.finalQueued = true;
-      continue;
-    }
-
-    // First sentence already spoken — compute remainder delta
-    const remainder = remainderAfter(speakable, state.firstSentenceText);
-    const queueableRemainder = queueableSpeechPrefix(remainder, isFinal);
-    const newRemainderDelta = remainderAfter(
-      queueableRemainder,
-      state.queuedRemainderText,
-    );
-    if (newRemainderDelta) {
-      enqueuedChunks.push({ text: newRemainderDelta, append: true, step: i });
-      state.queuedRemainderText = queueableRemainder;
-    }
-    if (isFinal && !state.finalQueued) state.finalQueued = true;
   }
 
   return enqueuedChunks;
 }
 
 describe("streaming pipeline: voice queue chunk ordering", () => {
-  it("queues first sentence then remainder without duplication", () => {
+  it("batches streaming tokens into fewer TTS clips (min length + final)", () => {
     const chunks = simulateVoiceQueue([
       "Hello",
       "Hello world.",
       "Hello world. How are you?",
     ]);
 
-    // First chunk: "Hello world." (first sentence)
+    expect(chunks).toHaveLength(1);
     expect(chunks[0]).toEqual(
-      expect.objectContaining({ text: "Hello world.", append: false }),
+      expect.objectContaining({
+        text: "Hello world. How are you?",
+        append: false,
+      }),
     );
-    // Second chunk: "How are you?" (remainder)
-    expect(chunks[1]).toEqual(
-      expect.objectContaining({ text: "How are you?", append: true }),
-    );
-    // No more chunks — no duplication
-    expect(chunks).toHaveLength(2);
-
-    // The concatenation of all chunks should equal the full spoken text
-    const spokenText = chunks.map((c) => c.text).join(" ");
-    expect(spokenText).toBe("Hello world. How are you?");
   });
 
   it("does not re-queue text that was already spoken", () => {
@@ -420,12 +408,11 @@ describe("streaming pipeline: voice queue chunk ordering", () => {
       "First sentence. Second sentence. Third sentence.",
     ]);
 
-    expect(chunks).toHaveLength(3);
-    expect(chunks[0].text).toBe("First sentence.");
-    expect(chunks[1].text).toBe("Second sentence.");
-    expect(chunks[2].text).toBe("Third sentence.");
-
-    // No duplication — each sentence appears exactly once
+    expect(chunks.length).toBeGreaterThanOrEqual(2);
+    const spokenText = chunks.map((c) => c.text).join(" ");
+    expect(spokenText).toBe(
+      "First sentence. Second sentence. Third sentence.",
+    );
     const allText = chunks.map((c) => c.text);
     const unique = [...new Set(allText)];
     expect(unique).toHaveLength(allText.length);
@@ -442,11 +429,9 @@ describe("streaming pipeline: voice queue chunk ordering", () => {
       [false, false, true],
     );
 
-    expect(chunks[0].text).toBe("Hello world.");
-    // "The answer is" should be flushed on the final call
-    expect(chunks.some((c) => c.text === "The answer is")).toBe(true);
-    // No duplication
-    expect(chunks.filter((c) => c.text === "Hello world.")).toHaveLength(1);
+    expect(chunks).toHaveLength(1);
+    expect(chunks[0]!.text).toBe("Hello world. The answer is");
+    expect(chunks[0]!.append).toBe(false);
   });
 
   it("never enqueues XML content in voice chunks", () => {
@@ -481,9 +466,10 @@ describe("streaming pipeline: voice queue chunk ordering", () => {
       expect(chunk.text).not.toContain("<");
     }
 
-    expect(chunks[0].text).toBe("Good morning.");
-    expect(chunks[1].text).toBe("How can I help you today?");
-    expect(chunks).toHaveLength(2);
+    expect(chunks).toHaveLength(1);
+    expect(chunks[0]!.text).toBe(
+      "Good morning. How can I help you today?",
+    );
   });
 
   it("handles <actions> appearing mid-stream after spoken text", () => {
@@ -540,9 +526,9 @@ describe("streaming pipeline: voice queue chunk ordering", () => {
       [false, false, false, true],
     );
 
-    // "Hello world." should only appear once
-    const helloChunks = chunks.filter((c) => c.text === "Hello world.");
-    expect(helloChunks).toHaveLength(1);
+    expect(chunks).toHaveLength(1);
+    const combined = chunks.map((c) => c.text).join(" ");
+    expect(combined.match(/Hello world\./g)?.length ?? 0).toBe(1);
   });
 
   it("handles text that changes due to XML stripping between steps", () => {
@@ -557,11 +543,7 @@ describe("streaming pipeline: voice queue chunk ordering", () => {
       [false, false, false, true],
     );
 
-    // "Hello world." queued once, "The answer." queued once
-    expect(chunks[0].text).toBe("Hello world.");
-    const answerChunk = chunks.find((c) => c.text.includes("answer"));
-    expect(answerChunk).toBeDefined();
-    expect(answerChunk!.text).toBe("The answer.");
-    expect(chunks).toHaveLength(2);
+    expect(chunks).toHaveLength(1);
+    expect(chunks[0]!.text).toBe("Hello world. The answer.");
   });
 });

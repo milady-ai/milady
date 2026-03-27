@@ -26,10 +26,27 @@ export const CONNECT_EVENT = "eliza:connect" as const;
 export const VOICE_CONFIG_UPDATED_EVENT = "eliza:voice-config-updated" as const;
 export const CHAT_AVATAR_VOICE_EVENT = "eliza:chat-avatar-voice" as const;
 export const APP_EMOTE_EVENT = "eliza:app-emote" as const;
+/** After `/api/cloud/status` — chat voice reloads config so cloud-backed TTS mode matches the server snapshot. */
+export const ELIZA_CLOUD_STATUS_UPDATED_EVENT =
+  "eliza:cloud-status-updated" as const;
+
+export interface ElizaCloudStatusUpdatedDetail {
+  /** Same as cloud status `connected` (auth or API key on server). */
+  connected: boolean;
+  /** Config `cloud.enabled` (and related flags) from the server snapshot. */
+  enabled: boolean;
+  /** Server reports a persisted Eliza Cloud API key. */
+  hasPersistedApiKey: boolean;
+  /** Prefer for `useVoiceChat` `cloudConnected`: key, enabled, or connected. */
+  cloudVoiceProxyAvailable: boolean;
+}
 
 // ── Avatar / VRM ─────────────────────────────────────────────────────────
 export const VRM_TELEPORT_COMPLETE_EVENT =
   "eliza:vrm-teleport-complete" as const;
+/** IdentityStep dispatches this after queuing a post-teleport voice preview; OnboardingWizard echoes {@link VRM_TELEPORT_COMPLETE_EVENT} when VRM is off. */
+export const ONBOARDING_VOICE_PREVIEW_AWAIT_TELEPORT_EVENT =
+  "eliza:onboarding-voice-preview-await-teleport" as const;
 
 // ── Sidebar sync ─────────────────────────────────────────────────────────
 export const SELF_STATUS_SYNC_EVENT = "eliza:self-status-refresh" as const;
@@ -63,7 +80,9 @@ export type ElizaWindowEventName =
   | typeof VOICE_CONFIG_UPDATED_EVENT
   | typeof CHAT_AVATAR_VOICE_EVENT
   | typeof APP_EMOTE_EVENT
+  | typeof ELIZA_CLOUD_STATUS_UPDATED_EVENT
   | typeof VRM_TELEPORT_COMPLETE_EVENT
+  | typeof ONBOARDING_VOICE_PREVIEW_AWAIT_TELEPORT_EVENT
   | typeof SELF_STATUS_SYNC_EVENT;
 
 export type ElizaEventName = ElizaDocumentEventName | ElizaWindowEventName;
@@ -90,6 +109,12 @@ export function dispatchWindowEvent(
 /** Dispatch a normalized app-wide emote event on `window`. */
 export function dispatchAppEmoteEvent(detail: AppEmoteEventDetail): void {
   dispatchWindowEvent(APP_EMOTE_EVENT, detail);
+}
+
+export function dispatchElizaCloudStatusUpdated(
+  detail: ElizaCloudStatusUpdatedDetail,
+): void {
+  dispatchWindowEvent(ELIZA_CLOUD_STATUS_UPDATED_EVENT, detail);
 }
 
 // ── Generic app aliases (preferred) ──────────────────────────────────────

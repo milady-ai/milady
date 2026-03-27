@@ -435,6 +435,10 @@ export default defineConfig({
   publicDir: path.resolve(here, "public"),
   define: {
     global: "globalThis",
+    // Mirror MILADY_TTS_DEBUG into the client bundle so one env enables UI + server TTS logs in dev.
+    "import.meta.env.MILADY_TTS_DEBUG": JSON.stringify(
+      process.env.MILADY_TTS_DEBUG ?? "",
+    ),
   },
   plugins: [
     nativeModuleStubPlugin(),

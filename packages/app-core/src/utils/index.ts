@@ -6,5 +6,6 @@ export * from "./desktop-dialogs";
 export * from "./desktop-workspace";
 export * from "./eliza-cloud-model-route";
 export * from "./eliza-globals";
+export * from "./milady-tts-debug";
 export * from "./number-parsing";
 export * from "./openExternalUrl";

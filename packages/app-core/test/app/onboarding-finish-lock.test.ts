@@ -529,7 +529,19 @@ describe("onboarding finish locking", () => {
     });
   });
 
-  it("does not create an empty conversation after onboarding completes", async () => {
+  it("creates a default conversation when the server has none after onboarding completes", async () => {
+    const createdMeta = {
+      id: "conv-created",
+      title: "New Chat",
+      roomId: "room-created",
+      createdAt: "2026-02-01T00:00:00.000Z",
+      updatedAt: "2026-02-01T00:00:00.000Z",
+    };
+    mockClient.listConversations.mockImplementation(async () => ({
+      conversations:
+        mockClient.createConversation.mock.calls.length > 0 ? [createdMeta] : [],
+    }));
+
     let api: ProbeApi | null = null;
     let tree: TestRenderer.ReactTestRenderer;
     await act(async () => {
@@ -567,10 +579,15 @@ describe("onboarding finish locking", () => {
     const snapshot = requireApi().snapshot();
     expect(snapshot.onboardingComplete).toBe(true);
     expect(snapshot.tab).toBe("character-select");
-    expect(snapshot.activeConversationId).toBeNull();
-    expect(snapshot.conversationMessages).toEqual([]);
     expect(mockClient.restartAgent).toHaveBeenCalled();
-    expect(mockClient.createConversation).not.toHaveBeenCalled();
+    expect(mockClient.createConversation).toHaveBeenCalledWith(undefined, {
+      bootstrapGreeting: true,
+      lang: "en",
+    });
+
+    await vi.waitFor(() => {
+      expect(requireApi().snapshot().activeConversationId).toBe("conv-created");
+    });
 
     await act(async () => {
       tree?.unmount();

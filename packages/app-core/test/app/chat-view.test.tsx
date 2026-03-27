@@ -39,6 +39,8 @@ interface ChatViewContextStub {
   chatMode: "simple" | "power";
   chatAgentVoiceMuted: boolean;
   elizaCloudConnected: boolean;
+  elizaCloudEnabled: boolean;
+  elizaCloudHasPersistedKey: boolean;
   t: (k: string) => string;
   handleStart: () => Promise<void>;
 
@@ -120,6 +122,8 @@ function createContext(
     chatMode: "simple",
     chatAgentVoiceMuted: false,
     elizaCloudConnected: false,
+    elizaCloudEnabled: false,
+    elizaCloudHasPersistedKey: false,
     handleStart: vi.fn(async () => {}),
 
     handleRestart: vi.fn(async () => {}),
@@ -164,6 +168,8 @@ describe("ChatView", () => {
       speak: vi.fn(),
       queueAssistantSpeech,
       stopSpeaking: vi.fn(),
+      voiceUnlockedGeneration: 0,
+      assistantTtsQuality: "standard",
     });
     mockClient.getConfig.mockResolvedValue({});
     mockIsDesktopPlatform.mockReturnValue(false);

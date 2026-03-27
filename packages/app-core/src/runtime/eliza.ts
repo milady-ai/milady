@@ -248,15 +248,39 @@ export async function ensureMiladyTextToSpeechHandler(
     return;
   }
 
+  type EdgeTtsPluginModule = {
+    default?: { models?: Record<string, TtsModelHandler> };
+  };
+
+  const readHandler = (
+    plugin: EdgeTtsPluginModule["default"],
+  ): TtsModelHandler | undefined => {
+    const h = plugin?.models?.[ModelType.TEXT_TO_SPEECH];
+    return typeof h === "function" ? h : undefined;
+  };
+
   try {
-    const mod = (await import("@elizaos/plugin-edge-tts")) as {
-      default?: { models?: Record<string, TtsModelHandler> };
-    };
-    const plugin = mod.default;
-    const handler = plugin?.models?.[ModelType.TEXT_TO_SPEECH];
-    if (typeof handler !== "function") {
+    // The package root export can resolve to the **browser stub** (`models: {}`)
+    // under Bun / some bundlers. The `/node` subpath always loads `node-edge-tts`.
+    let plugin: EdgeTtsPluginModule["default"] | undefined;
+    try {
+      const nodeMod = (await import(
+        "@elizaos/plugin-edge-tts/node"
+      )) as EdgeTtsPluginModule;
+      plugin = nodeMod.default;
+    } catch {
+      plugin = undefined;
+    }
+    let handler = readHandler(plugin);
+    if (!handler) {
+      const rootMod = (await import(
+        "@elizaos/plugin-edge-tts"
+      )) as EdgeTtsPluginModule;
+      handler = readHandler(rootMod.default);
+    }
+    if (!handler) {
       logger.warn(
-        "[milady] @elizaos/plugin-edge-tts: no TEXT_TO_SPEECH handler on default export",
+        "[milady] @elizaos/plugin-edge-tts: no TEXT_TO_SPEECH handler (browser stub or incompatible build — use @elizaos/plugin-edge-tts/node)",
       );
       return;
     }

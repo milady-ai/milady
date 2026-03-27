@@ -34,6 +34,7 @@ interface ChatViewContextStub {
   chatAgentVoiceMuted: boolean;
   elizaCloudEnabled: boolean;
   elizaCloudConnected: boolean;
+  elizaCloudHasPersistedKey: boolean;
   selectedVrmIndex: number;
   uiLanguage: "en" | "zh-CN";
   t: (k: string) => string;
@@ -135,6 +136,8 @@ describe("ChatView game-modal variant", () => {
       speak: vi.fn(),
       queueAssistantSpeech: vi.fn(),
       stopSpeaking: vi.fn(),
+      voiceUnlockedGeneration: 0,
+      assistantTtsQuality: "standard",
     });
     mockClient.getConfig.mockResolvedValue({});
   });
@@ -235,6 +238,8 @@ describe("ChatView game-modal variant", () => {
       speak: vi.fn(),
       queueAssistantSpeech,
       stopSpeaking: vi.fn(),
+      voiceUnlockedGeneration: 0,
+      assistantTtsQuality: "standard",
     });
     mockUseApp.mockReturnValue(
       createContext({
@@ -255,6 +260,51 @@ describe("ChatView game-modal variant", () => {
       "assistant-1",
       "hello",
       false,
+    );
+  });
+
+  it("queues companion auto-speak once under StrictMode (no duplicate greeting TTS)", async () => {
+    const queueAssistantSpeech = vi.fn();
+    mockUseVoiceChat.mockReturnValue({
+      supported: true,
+      isListening: false,
+      captureMode: "idle",
+      interimTranscript: "",
+      toggleListening: vi.fn(),
+      startListening: vi.fn(),
+      stopListening: vi.fn(),
+      mouthOpen: 0,
+      isSpeaking: false,
+      usingAudioAnalysis: false,
+      speak: vi.fn(),
+      queueAssistantSpeech,
+      stopSpeaking: vi.fn(),
+      voiceUnlockedGeneration: 0,
+      assistantTtsQuality: "standard",
+    });
+    mockUseApp.mockReturnValue(
+      createContext({
+        conversationMessages: [
+          { id: "assistant-1", role: "assistant", text: "hello", timestamp: 1 },
+        ],
+      }),
+    );
+
+    await act(async () => {
+      TestRenderer.create(
+        React.createElement(
+          React.StrictMode,
+          null,
+          React.createElement(ChatView, { variant: "game-modal" }),
+        ),
+      );
+    });
+
+    expect(queueAssistantSpeech).toHaveBeenCalledTimes(1);
+    expect(queueAssistantSpeech).toHaveBeenCalledWith(
+      "assistant-1",
+      "hello",
+      true,
     );
   });
 
@@ -416,6 +466,29 @@ describe("ChatView game-modal variant", () => {
       createContext({
         elizaCloudEnabled: true,
         elizaCloudConnected: false,
+      }),
+    );
+
+    await act(async () => {
+      TestRenderer.create(
+        React.createElement(ChatView, { variant: "game-modal" }),
+      );
+    });
+
+    expect(mockUseVoiceChat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cloudConnected: true,
+        interruptOnSpeech: true,
+      }),
+    );
+  });
+
+  it("treats persisted Eliza Cloud API key as voice cloud access without oauth", async () => {
+    mockUseApp.mockReturnValue(
+      createContext({
+        elizaCloudEnabled: false,
+        elizaCloudConnected: false,
+        elizaCloudHasPersistedKey: true,
       }),
     );
 

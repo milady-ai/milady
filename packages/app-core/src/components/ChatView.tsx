@@ -14,7 +14,11 @@ import {
   type VoiceConfig,
 } from "@miladyai/app-core/api";
 import { isRoutineCodingAgentMessage } from "@miladyai/app-core/chat";
-import { VOICE_CONFIG_UPDATED_EVENT } from "@miladyai/app-core/events";
+import {
+  ELIZA_CLOUD_STATUS_UPDATED_EVENT,
+  type ElizaCloudStatusUpdatedDetail,
+  VOICE_CONFIG_UPDATED_EVENT,
+} from "@miladyai/app-core/events";
 import {
   useChatAvatarVoiceBridge,
   useDocumentVisibility,
@@ -24,13 +28,15 @@ import {
   type VoicePlaybackStartEvent,
 } from "@miladyai/app-core/hooks";
 import { getVrmPreviewUrl, useApp } from "@miladyai/app-core/state";
-import { Button, ChatEmptyState } from "@miladyai/ui";
+import { miladyTtsDebug } from "@miladyai/app-core/utils";
+import { Button } from "@miladyai/ui";
 import {
   type ChangeEvent,
   type DragEvent,
   type KeyboardEvent,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -81,12 +87,24 @@ function findLatestAssistantMessage(messages: ConversationMessage[]) {
     .find((message) => message.role === "assistant" && message.text.trim());
 }
 
+/**
+ * Chat assistant TTS pipeline — order matters for cloud-backed voice:
+ * 1. Server exposes Eliza Cloud via `GET /api/cloud/status` (`hasApiKey`, `enabled`, `connected`).
+ * 2. `AppContext.pollCloudCredits` persists React state and dispatches {@link ELIZA_CLOUD_STATUS_UPDATED_EVENT}.
+ * 3. This hook stores `detail.cloudVoiceProxyAvailable` in a ref for same-turn
+ *    `true` before React state commits; `cloudConnected` is `context || ref===true`
+ *    so an early `false` snapshot cannot block TTS after auth loads. Then reloads
+ *    `messages.tts` from `getConfig`.
+ * 4. `useVoiceChat` resolves cloud vs own-key mode and speaks via `/api/tts/cloud` when the browser has no xi-api-key.
+ */
 function useChatVoiceController(options: {
   agentVoiceMuted: boolean;
   chatFirstTokenReceived: boolean;
   chatInput: string;
   chatSending: boolean;
-  cloudVoiceAvailable: boolean;
+  elizaCloudConnected: boolean;
+  elizaCloudEnabled: boolean;
+  elizaCloudHasPersistedKey: boolean;
   conversationMessages: ConversationMessage[];
   handleChatEdit: (messageId: string, text: string) => Promise<boolean>;
   handleChatSend: (channelType?: ConversationChannelType) => Promise<void>;
@@ -101,7 +119,9 @@ function useChatVoiceController(options: {
     chatFirstTokenReceived,
     chatInput,
     chatSending,
-    cloudVoiceAvailable,
+    elizaCloudConnected,
+    elizaCloudEnabled,
+    elizaCloudHasPersistedKey,
     conversationMessages,
     handleChatEdit,
     handleChatSend,
@@ -110,7 +130,12 @@ function useChatVoiceController(options: {
     setState,
     uiLanguage,
   } = options;
+  /** After the first `eliza:cloud-status-updated`, mirrors server `cloudVoiceProxyAvailable` (avoids one-frame lag vs context). */
+  const cloudVoiceSnapshotRef = useRef<boolean | null>(null);
+  const [, cloudVoiceSnapshotTick] = useState(0);
   const [voiceConfig, setVoiceConfig] = useState<VoiceConfig | null>(null);
+  /** Bumps after each `getConfig` (or inline VOICE_CONFIG event) settles — game-modal auto-speak waits for this so TTS does not run with a stale/null voice profile and get stuck deduped. */
+  const [voiceBootstrapTick, setVoiceBootstrapTick] = useState(0);
   const [voiceLatency, setVoiceLatency] = useState<{
     firstSegmentCached: boolean | null;
     speechEndToFirstTokenMs: number | null;
@@ -124,6 +149,13 @@ function useChatVoiceController(options: {
     voiceStartedAtMs?: number;
   } | null>(null);
   const suppressedAssistantSpeechIdRef = useRef<string | null>(null);
+  /** Skips duplicate companion auto-speak when only `voiceBootstrapTick` bumps (config/cloud reload) for the same assistant text. */
+  const companionBootstrapAutoSpeakRef = useRef<{
+    tick: number;
+    messageId: string;
+    text: string;
+    unlockGen: number;
+  } | null>(null);
   const voiceDraftBaseInputRef = useRef("");
   const prevIsGameModalRef = useRef(isGameModal);
   const gameModalJustActivatedRef = useRef(false);
@@ -138,6 +170,9 @@ function useChatVoiceController(options: {
       setVoiceConfig(tts ?? null);
     } catch {
       /* ignore — will use browser TTS fallback */
+      setVoiceConfig(null);
+    } finally {
+      setVoiceBootstrapTick((t) => t + 1);
     }
   }, []);
 
@@ -154,6 +189,7 @@ function useChatVoiceController(options: {
       const detail = (event as CustomEvent<VoiceConfig | undefined>).detail;
       if (detail && typeof detail === "object") {
         setVoiceConfig(detail);
+        setVoiceBootstrapTick((t) => t + 1);
         return;
       }
       void loadVoiceConfig();
@@ -162,6 +198,35 @@ function useChatVoiceController(options: {
     window.addEventListener(VOICE_CONFIG_UPDATED_EVENT, handler);
     return () =>
       window.removeEventListener(VOICE_CONFIG_UPDATED_EVENT, handler);
+  }, [loadVoiceConfig]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const onCloudStatus = (event: Event) => {
+      const detail = (event as CustomEvent<ElizaCloudStatusUpdatedDetail>)
+        .detail;
+      if (detail && typeof detail === "object") {
+        miladyTtsDebug("chat:cloud-status-event", {
+          cloudVoiceProxyAvailable: detail.cloudVoiceProxyAvailable,
+          connected: detail.connected,
+          enabled: detail.enabled,
+          hasPersistedApiKey: detail.hasPersistedApiKey,
+        });
+      }
+      if (detail && typeof detail.cloudVoiceProxyAvailable === "boolean") {
+        cloudVoiceSnapshotRef.current = detail.cloudVoiceProxyAvailable;
+      }
+      cloudVoiceSnapshotTick((n) => n + 1);
+      void loadVoiceConfig();
+    };
+    window.addEventListener(ELIZA_CLOUD_STATUS_UPDATED_EVENT, onCloudStatus);
+    return () =>
+      window.removeEventListener(
+        ELIZA_CLOUD_STATUS_UPDATED_EVENT,
+        onCloudStatus,
+      );
   }, [loadVoiceConfig]);
 
   const composeVoiceDraft = useCallback((transcript: string) => {
@@ -200,6 +265,11 @@ function useChatVoiceController(options: {
 
   const handleVoicePlaybackStart = useCallback(
     (event: VoicePlaybackStartEvent) => {
+      miladyTtsDebug("chat:playback-start", {
+        provider: event.provider,
+        segment: event.segment,
+        cached: event.cached,
+      });
       const pending = pendingVoiceTurnRef.current;
       if (!pending) return;
       if (event.startedAtMs > pending.expiresAtMs) {
@@ -223,6 +293,39 @@ function useChatVoiceController(options: {
     [],
   );
 
+  const cloudVoiceAvailable = useMemo(() => {
+    const fromContext =
+      elizaCloudConnected || elizaCloudEnabled || elizaCloudHasPersistedKey;
+    const snap = cloudVoiceSnapshotRef.current;
+    // Ref snapshot can be `false` from an early status poll before the key is
+    // loaded, then never updated if no further event fires — that stuck
+    // `cloudConnected` false in useVoiceChat and kept browser TTS. Prefer
+    // context; only use the ref to force `true` when the event arrives before
+    // React state commits (same-turn lag).
+    return fromContext || snap === true;
+  }, [
+    elizaCloudConnected,
+    elizaCloudEnabled,
+    elizaCloudHasPersistedKey,
+    cloudVoiceSnapshotTick,
+  ]);
+
+  useEffect(() => {
+    miladyTtsDebug("chat:cloud-voice-available", {
+      cloudVoiceAvailable,
+      elizaCloudConnected,
+      elizaCloudEnabled,
+      elizaCloudHasPersistedKey,
+      snapshotRef: cloudVoiceSnapshotRef.current,
+    });
+  }, [
+    cloudVoiceAvailable,
+    cloudVoiceSnapshotTick,
+    elizaCloudConnected,
+    elizaCloudEnabled,
+    elizaCloudHasPersistedKey,
+  ]);
+
   const voice = useVoiceChat({
     cloudConnected: cloudVoiceAvailable,
     interruptOnSpeech: isGameModal,
@@ -238,7 +341,21 @@ function useChatVoiceController(options: {
     startListening,
     stopListening,
     stopSpeaking,
+    voiceUnlockedGeneration,
   } = voice;
+
+  // After the user gesture unlocks audio, clear progressive TTS dedupe state so
+  // auto-speak can queue the greeting again (ElevenLabs was likely skipped once).
+  const prevVoiceUnlockGenRef = useRef<number | null>(null);
+  useLayoutEffect(() => {
+    if (prevVoiceUnlockGenRef.current === null) {
+      prevVoiceUnlockGenRef.current = voiceUnlockedGeneration;
+      return;
+    }
+    if (prevVoiceUnlockGenRef.current === voiceUnlockedGeneration) return;
+    prevVoiceUnlockGenRef.current = voiceUnlockedGeneration;
+    stopSpeaking();
+  }, [voiceUnlockedGeneration, stopSpeaking]);
 
   const beginVoiceCapture = useCallback(
     (mode: Exclude<VoiceCaptureMode, "idle"> = "compose") => {
@@ -302,7 +419,14 @@ function useChatVoiceController(options: {
   }, [isGameModal]);
 
   useEffect(() => {
+    if (!isGameModal) {
+      companionBootstrapAutoSpeakRef.current = null;
+    }
+  }, [isGameModal]);
+
+  useEffect(() => {
     if (!isGameModal || agentVoiceMuted || voice.isListening) return;
+    if (voiceBootstrapTick === 0) return;
     // Skip the stale replay when the view just became active (mode switch).
     if (gameModalJustActivatedRef.current) {
       gameModalJustActivatedRef.current = false;
@@ -312,12 +436,41 @@ function useChatVoiceController(options: {
     if (!latestAssistant) return;
     if (suppressedAssistantSpeechIdRef.current === latestAssistant.id) return;
 
-    queueAssistantSpeech(
-      latestAssistant.id,
-      latestAssistant.text,
-      !chatSending,
-    );
+    const tick = voiceBootstrapTick;
+    const messageId = latestAssistant.id;
+    const text = latestAssistant.text;
+    const ug = voiceUnlockedGeneration;
+    const prev = companionBootstrapAutoSpeakRef.current;
+    if (
+      prev &&
+      prev.messageId === messageId &&
+      prev.text === text &&
+      prev.unlockGen === ug
+    ) {
+      if (tick > prev.tick) {
+        // Voice config / cloud status bumped the tick only — do not re-queue the same line.
+        companionBootstrapAutoSpeakRef.current = {
+          tick,
+          messageId,
+          text,
+          unlockGen: ug,
+        };
+        return;
+      }
+      if (tick === prev.tick) {
+        // Same deps re-run (e.g. React Strict Mode dev double effect) — already queued.
+        return;
+      }
+    }
+
+    queueAssistantSpeech(messageId, text, !chatSending);
     suppressedAssistantSpeechIdRef.current = null;
+    companionBootstrapAutoSpeakRef.current = {
+      tick,
+      messageId,
+      text,
+      unlockGen: ug,
+    };
   }, [
     agentVoiceMuted,
     chatSending,
@@ -325,6 +478,8 @@ function useChatVoiceController(options: {
     isGameModal,
     queueAssistantSpeech,
     voice.isListening,
+    voiceBootstrapTick,
+    voiceUnlockedGeneration,
   ]);
 
   useEffect(() => {
@@ -502,6 +657,7 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
     handleChatEdit,
     elizaCloudEnabled,
     elizaCloudConnected,
+    elizaCloudHasPersistedKey,
     setState,
     droppedFiles,
     shareIngestNotice,
@@ -528,7 +684,6 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
   const isAgentStarting =
     agentStatus?.state === "starting" || agentStatus?.state === "restarting";
   const isComposerLocked = isAgentStarting;
-  const cloudVoiceAvailable = elizaCloudConnected || elizaCloudEnabled;
   const {
     beginVoiceCapture,
     endVoiceCapture,
@@ -542,7 +697,9 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
     chatFirstTokenReceived,
     chatInput,
     chatSending,
-    cloudVoiceAvailable,
+    elizaCloudConnected,
+    elizaCloudEnabled,
+    elizaCloudHasPersistedKey,
     conversationMessages,
     handleChatEdit,
     handleChatSend,
@@ -552,11 +709,11 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
     uiLanguage,
   });
   // Stop any in-flight voice playback when the user switches conversations.
-  // This prevents old audio from bleeding into the new conversation.
-  // Safe to call here: the new conversation's greeting speech won't be queued
-  // until after this effect runs (effects fire after state updates settle).
+  // useLayoutEffect (not useEffect): must run *before* useChatVoiceController's
+  // passive auto-speak effect. Otherwise we queue the new thread's greeting
+  // first, then stopSpeaking() clears that queue — no TTS after new chat/reset.
   const prevConversationIdRef = useRef(activeConversationId);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (prevConversationIdRef.current === activeConversationId) return;
     prevConversationIdRef.current = activeConversationId;
     stopSpeaking();
@@ -720,27 +877,6 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
     [addImageFiles],
   );
 
-  const handlePrimeCompanionDraft = useCallback(
-    (draft: string) => {
-      setState("chatInput", draft);
-      if (typeof window !== "undefined") {
-        window.requestAnimationFrame(() => textareaRef.current?.focus());
-      } else {
-        textareaRef.current?.focus();
-      }
-    },
-    [setState],
-  );
-
-  const companionStarterPrompts = useMemo(
-    () => [
-      `Hey ${agentName}, what can you help me with?`,
-      "Give me a quick status update.",
-      "Help me decide what to do next.",
-    ],
-    [agentName],
-  );
-
   const handleFileInputChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       if (e.target.files) {
@@ -805,41 +941,20 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
         }
       >
         {visibleMsgs.length === 0 && !chatSending ? (
-          isGameModal ? (
-            <div className="flex min-h-full items-end px-1 py-4">
-              <div className="w-full rounded-[32px] border border-[color:var(--onboarding-card-border)] bg-[color:var(--onboarding-panel-bg)]/94 p-2 shadow-[0_20px_60px_rgba(0,0,0,0.18)] backdrop-blur-xl">
-                <ChatEmptyState
+          chatAwaitingGreeting ? (
+            isGameModal ? (
+              <div className="flex min-h-full items-end px-1 py-4">
+                <TypingIndicator
                   agentName={agentName}
-                  className="items-start px-5 py-6 text-left sm:px-6 sm:py-7"
-                  suggestions={companionStarterPrompts}
-                  onSuggestionClick={handlePrimeCompanionDraft}
-                  action={
-                    <Button
-                      className="min-h-10 rounded-xl px-4 text-xs font-semibold"
-                      onClick={() =>
-                        handlePrimeCompanionDraft(
-                          `Hey ${agentName}, can you help me get started?`,
-                        )
-                      }
-                      size="sm"
-                      type="button"
-                      variant="default"
-                    >
-                      Draft Welcome Prompt
-                    </Button>
-                  }
-                  hint="Chat begins in the dock below."
-                  labels={{
-                    startConversation: "Start in the Dock",
-                    sendMessageTo: "Queue up a prompt for",
-                    toBeginChatting:
-                      "and send it from the dock composer below.",
-                  }}
+                  agentAvatarSrc={agentAvatarSrc}
                 />
               </div>
-            </div>
-          ) : chatAwaitingGreeting ? (
-            <TypingIndicator agentName={agentName} />
+            ) : (
+              <TypingIndicator
+                agentName={agentName}
+                agentAvatarSrc={agentAvatarSrc}
+              />
+            )
           ) : null
         ) : isGameModal ? (
           <div className="flex min-h-full w-full flex-col justify-end gap-4 px-1 py-4">
@@ -1085,6 +1200,7 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
                   captureMode: voice.captureMode,
                   interimTranscript: voice.interimTranscript,
                   isSpeaking: voice.isSpeaking,
+                  assistantTtsQuality: voice.assistantTtsQuality,
                   toggleListening: voice.toggleListening,
                   startListening: beginVoiceCapture,
                   stopListening: endVoiceCapture,
@@ -1128,6 +1244,7 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
               captureMode: voice.captureMode,
               interimTranscript: voice.interimTranscript,
               isSpeaking: voice.isSpeaking,
+              assistantTtsQuality: voice.assistantTtsQuality,
               toggleListening: voice.toggleListening,
               startListening: beginVoiceCapture,
               stopListening: endVoiceCapture,

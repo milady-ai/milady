@@ -2231,6 +2231,35 @@ describe("API Server E2E (no runtime)", () => {
       }
     });
 
+    it("prefers avatar index over a stale preset id for intro greetings", async () => {
+      const runtime = createRuntimeForChatSseTests();
+      const streamServer = await startApiServer({ port: 0, runtime });
+      try {
+        const saveConfig = await req(streamServer.port, "PUT", "/api/config", {
+          ui: { presetId: "chen", avatarIndex: 2 },
+        });
+        expect(saveConfig.status).toBe(200);
+
+        const create = await req(
+          streamServer.port,
+          "POST",
+          "/api/conversations",
+          {
+            title: "Avatar wins greeting test",
+            includeGreeting: true,
+            lang: "en",
+          },
+        );
+        expect(create.status).toBe(200);
+        expect(create.data.greeting).toMatchObject({
+          text: "what are we shipping?",
+          generated: true,
+        });
+      } finally {
+        await streamServer.close();
+      }
+    });
+
     it("POST /api/conversations/:id/greeting is idempotent after the intro is stored", async () => {
       const runtime = createRuntimeForChatSseTests();
       const streamServer = await startApiServer({ port: 0, runtime });

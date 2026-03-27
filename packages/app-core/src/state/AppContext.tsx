@@ -102,7 +102,11 @@ import { mapServerTasksToSessions } from "../coding";
 import { replaceNameTokens } from "../components/character-editor-helpers";
 import { getBootConfig, setBootConfig } from "../config/boot-config";
 import { BrandingContext, DEFAULT_BRANDING } from "../config/branding";
-import { type AppEmoteEventDetail, dispatchAppEmoteEvent } from "../events";
+import {
+  type AppEmoteEventDetail,
+  dispatchAppEmoteEvent,
+  dispatchElizaCloudStatusUpdated,
+} from "../events";
 import type { UiLanguage } from "../i18n";
 import {
   COMPANION_ENABLED,
@@ -489,6 +493,55 @@ function buildLocalizedCharacterPayload(
   };
 }
 
+/** In production, set `localStorage.setItem("milady:debug:greeting", "1")` to enable. */
+function miladyGreetingDebugEnabled(): boolean {
+  const viteDev = Boolean(
+    (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV,
+  );
+  if (viteDev) return true;
+  try {
+    return (
+      typeof localStorage !== "undefined" &&
+      localStorage.getItem("milady:debug:greeting") === "1"
+    );
+  } catch {
+    return false;
+  }
+}
+
+function traceMiladyGreeting(
+  phase: string,
+  detail?: Record<string, unknown>,
+): void {
+  if (!miladyGreetingDebugEnabled()) return;
+  if (detail && Object.keys(detail).length > 0) {
+    console.info(`[milady][greeting] ${phase}`, detail);
+  } else {
+    console.info(`[milady][greeting] ${phase}`);
+  }
+}
+
+/** Publish server cloud snapshot for chat TTS (`useVoiceChat` + `loadVoiceConfig`). */
+function publishElizaCloudVoiceSnapshot(
+  setHasPersistedKey: (value: boolean) => void,
+  snapshot: {
+    apiConnected: boolean;
+    enabled: boolean;
+    hasPersistedApiKey: boolean;
+  },
+): void {
+  setHasPersistedKey(snapshot.hasPersistedApiKey);
+  dispatchElizaCloudStatusUpdated({
+    connected: snapshot.apiConnected,
+    enabled: snapshot.enabled,
+    hasPersistedApiKey: snapshot.hasPersistedApiKey,
+    cloudVoiceProxyAvailable:
+      snapshot.hasPersistedApiKey ||
+      snapshot.enabled ||
+      snapshot.apiConnected,
+  });
+}
+
 // ── Provider ───────────────────────────────────────────────────────────
 
 export function AppProvider({
@@ -872,6 +925,8 @@ function AppProviderInner({
   // --- Eliza Cloud ---
   const [elizaCloudEnabled, setElizaCloudEnabled] = useState(false);
   const [elizaCloudConnected, setElizaCloudConnected] = useState(false);
+  const [elizaCloudHasPersistedKey, setElizaCloudHasPersistedKey] =
+    useState(false);
   const [elizaCloudCredits, setElizaCloudCredits] = useState<number | null>(
     null,
   );
@@ -2127,6 +2182,11 @@ function AppProviderInner({
     }
     if (!cloudStatus) {
       setElizaCloudConnected(false);
+      publishElizaCloudVoiceSnapshot(setElizaCloudHasPersistedKey, {
+        apiConnected: false,
+        enabled: false,
+        hasPersistedApiKey: false,
+      });
       setElizaCloudCredits(null);
       setElizaCloudCreditsLow(false);
       setElizaCloudCreditsCritical(false);
@@ -2135,17 +2195,29 @@ function AppProviderInner({
       lastElizaCloudPollConnectedRef.current = false;
       return false;
     }
+    const enabled = Boolean(cloudStatus.enabled ?? false);
+    const hasPersistedApiKey = Boolean(cloudStatus.hasApiKey);
     // Trust `connected` from the server snapshot (it already folds in API key + CLOUD_AUTH).
     const isConnected = Boolean(cloudStatus.connected);
     if (isConnected && elizaCloudPreferDisconnectedUntilLoginRef.current) {
+      publishElizaCloudVoiceSnapshot(setElizaCloudHasPersistedKey, {
+        apiConnected: isConnected,
+        enabled,
+        hasPersistedApiKey,
+      });
       lastElizaCloudPollConnectedRef.current = false;
       return false;
     }
     if (!isConnected) {
       elizaCloudPreferDisconnectedUntilLoginRef.current = false;
     }
-    setElizaCloudEnabled(Boolean(cloudStatus.enabled ?? false));
+    setElizaCloudEnabled(enabled);
     setElizaCloudConnected(isConnected);
+    publishElizaCloudVoiceSnapshot(setElizaCloudHasPersistedKey, {
+      apiConnected: isConnected,
+      enabled,
+      hasPersistedApiKey,
+    });
     setElizaCloudUserId(cloudStatus.userId ?? null);
     if (cloudStatus.topUpUrl) setElizaCloudTopUpUrl(cloudStatus.topUpUrl);
     if (isConnected) {
@@ -2225,18 +2297,26 @@ function AppProviderInner({
       },
     ): Promise<boolean> => {
       if (greetingInFlightConversationRef.current === convId) {
+        traceMiladyGreeting("fetchGreeting:skip_duplicate_in_flight", { convId });
         return false;
       }
       greetingInFlightConversationRef.current = convId;
       setChatAwaitingGreeting(true);
+      traceMiladyGreeting("fetchGreeting:request", { convId });
       try {
         const data = await client.requestGreeting(convId, uiLanguage);
         if (data.text) {
-          greetingFiredRef.current = true;
-          if (data.persisted === true) {
-            scheduleGreetingWaveForCompanion(options?.showOverlay === true);
-          }
-          if (activeConversationIdRef.current === convId) {
+          const stillActive = activeConversationIdRef.current === convId;
+          traceMiladyGreeting("fetchGreeting:response", {
+            convId,
+            stillActive,
+            textLength: data.text.length,
+            persisted: data.persisted === true,
+          });
+          if (stillActive) {
+            if (data.persisted === true) {
+              scheduleGreetingWaveForCompanion(options?.showOverlay === true);
+            }
             setConversationMessages((prev: ConversationMessage[]) => {
               if (
                 prev.some(
@@ -2259,11 +2339,17 @@ function AppProviderInner({
                 },
               ];
             });
+            greetingFiredRef.current = true;
           }
-          return true;
+          return stillActive;
         }
+        traceMiladyGreeting("fetchGreeting:empty_or_whitespace", { convId });
         greetingFiredRef.current = false;
-      } catch {
+      } catch (err) {
+        traceMiladyGreeting("fetchGreeting:request_failed", {
+          convId,
+          error: err instanceof Error ? err.message : String(err),
+        });
         greetingFiredRef.current = false;
         /* greeting failed silently — user can still chat */
       } finally {
@@ -2277,7 +2363,7 @@ function AppProviderInner({
     [
       scheduleGreetingWaveForCompanion,
       uiLanguage,
-      activeConversationIdRef.current,
+      activeConversationIdRef,
       greetingFiredRef,
       greetingInFlightConversationRef,
       setConversationMessages,
@@ -2292,10 +2378,18 @@ function AppProviderInner({
       },
     ): Promise<void> => {
       if (!convId || greetingFiredRef.current) {
+        traceMiladyGreeting("requestGreetingWhenRunning:skip", {
+          convId: convId ?? null,
+          greetingFired: greetingFiredRef.current,
+        });
         return;
       }
       try {
         const status = await client.getStatus();
+        traceMiladyGreeting("requestGreetingWhenRunning:status", {
+          convId,
+          state: status.state,
+        });
         if (status.state === "running" && !greetingFiredRef.current) {
           await fetchGreeting(convId, options);
         }
@@ -2306,7 +2400,7 @@ function AppProviderInner({
         );
       }
     },
-    [fetchGreeting, greetingFiredRef.current],
+    [fetchGreeting],
   );
 
   const waitForOnboardingGreetingBootstrap = useCallback(async () => {
@@ -2350,6 +2444,7 @@ function AppProviderInner({
 
     try {
       const { conversations: c } = await client.listConversations();
+      traceMiladyGreeting("hydrate:listConversations", { count: c.length });
       if (!isCurrentHydration()) {
         return null;
       }
@@ -2398,6 +2493,7 @@ function AppProviderInner({
       if (!isCurrentHydration()) {
         return null;
       }
+      traceMiladyGreeting("hydrate:no_conversations_on_server");
       greetingFiredRef.current = false;
       conversationMessagesRef.current = [];
       setConversationMessages([]);
@@ -2730,6 +2826,11 @@ function AppProviderInner({
           elizaCloudPreferDisconnectedUntilLoginRef.current = false;
           setElizaCloudEnabled(false);
           setElizaCloudConnected(false);
+          publishElizaCloudVoiceSnapshot(setElizaCloudHasPersistedKey, {
+            apiConnected: false,
+            enabled: false,
+            hasPersistedApiKey: false,
+          });
           setElizaCloudCredits(null);
           setElizaCloudCreditsLow(false);
           setElizaCloudCreditsCritical(false);
@@ -3127,6 +3228,63 @@ function AppProviderInner({
       setCompanionMessageCutoffTs,
       setConversationMessages,
       setConversations,
+    ],
+  );
+
+  /**
+   * After agent is up: load conversations; if the server has none, create a
+   * default thread (same as sidebar "new chat") so greeting/bootstrap can run.
+   */
+  const bootstrapConversationAfterAgentReady = useCallback(
+    async (
+      context: string,
+      options?: { showOverlay?: boolean; skipAgentRunningWait?: boolean },
+    ) => {
+      const showOverlay = options?.showOverlay ?? true;
+      traceMiladyGreeting(`${context}:begin`, {
+        skipAgentRunningWait: options?.skipAgentRunningWait === true,
+      });
+      if (options?.skipAgentRunningWait !== true) {
+        await waitForOnboardingGreetingBootstrap();
+      }
+      const greetConvId = await hydrateInitialConversationState();
+      traceMiladyGreeting(`${context}:hydrate`, {
+        greetConvId,
+        activeConversationId: activeConversationIdRef.current,
+        messageCount: conversationMessagesRef.current.length,
+        greetingFired: greetingFiredRef.current,
+      });
+
+      if (!greetConvId && !activeConversationIdRef.current) {
+        traceMiladyGreeting(`${context}:create_default_conversation`);
+        await handleNewConversation();
+        traceMiladyGreeting(`${context}:after_create`, {
+          activeConversationId: activeConversationIdRef.current,
+          messageCount: conversationMessagesRef.current.length,
+          greetingFired: greetingFiredRef.current,
+        });
+        return;
+      }
+
+      if (greetConvId) {
+        traceMiladyGreeting(`${context}:request_greeting`, { greetConvId });
+        await requestGreetingWhenRunning(greetConvId, { showOverlay });
+        traceMiladyGreeting(`${context}:after_request_greeting`, {
+          messageCount: conversationMessagesRef.current.length,
+          greetingFired: greetingFiredRef.current,
+        });
+      } else {
+        traceMiladyGreeting(`${context}:skip_request_greeting`, {
+          activeConversationId: activeConversationIdRef.current,
+          messageCount: conversationMessagesRef.current.length,
+        });
+      }
+    },
+    [
+      handleNewConversation,
+      hydrateInitialConversationState,
+      requestGreetingWhenRunning,
+      waitForOnboardingGreetingBootstrap,
     ],
   );
 
@@ -5070,7 +5228,14 @@ function AppProviderInner({
           /* ignore */
         }
 
+        await bootstrapConversationAfterAgentReady("onboarding:cloud_fast_track", {
+          showOverlay: true,
+        });
+
         clearPersistedOnboardingStep();
+        onboardingResumeConnectionRef.current = null;
+        onboardingCompletionCommittedRef.current = true;
+        initialTabSetRef.current = true;
         setOnboardingComplete(true);
         setTab("companion");
         return;
@@ -5287,11 +5452,9 @@ function AppProviderInner({
       } catch {
         /* ignore */
       }
-      await waitForOnboardingGreetingBootstrap();
-      const greetConvId = await hydrateInitialConversationState();
-      if (greetConvId) {
-        void requestGreetingWhenRunning(greetConvId, { showOverlay: true });
-      }
+      await bootstrapConversationAfterAgentReady("onboarding:full_finish", {
+        showOverlay: true,
+      });
       clearPersistedOnboardingStep();
       onboardingResumeConnectionRef.current = null;
       onboardingCompletionCommittedRef.current = true;
@@ -5368,10 +5531,8 @@ function AppProviderInner({
     onboardingRpcSelections,
     onboardingRpcKeys,
     walletConfig,
-    hydrateInitialConversationState,
+    bootstrapConversationAfterAgentReady,
     setTab,
-    requestGreetingWhenRunning,
-    waitForOnboardingGreetingBootstrap,
     elizaCloudConnected,
     onboardingCompletionCommittedRef,
     onboardingFinishBusyRef,
@@ -5911,6 +6072,11 @@ function AppProviderInner({
 
       setElizaCloudEnabled(false);
       setElizaCloudConnected(false);
+      publishElizaCloudVoiceSnapshot(setElizaCloudHasPersistedKey, {
+        apiConnected: false,
+        enabled: false,
+        hasPersistedApiKey: false,
+      });
       setElizaCloudCredits(null);
       setElizaCloudCreditsLow(false);
       setElizaCloudCreditsCritical(false);
@@ -7341,8 +7507,44 @@ function AppProviderInner({
     conversationMessages.length,
     chatSending,
     fetchGreeting,
-    greetingFiredRef.current,
-    greetingInFlightConversationRef.current,
+  ]);
+
+  // Empty thread + running agent: ensure a first assistant message is requested
+  // (covers races where startup/transition greeting paths miss the active conv id).
+  useEffect(() => {
+    if (
+      !activeConversationId ||
+      conversationMessages.length > 0 ||
+      agentStatus?.state !== "running" ||
+      chatSending
+    ) {
+      return;
+    }
+    if (greetingFiredRef.current) return;
+    if (greetingInFlightConversationRef.current === activeConversationId) {
+      return;
+    }
+
+    const timerId = window.setTimeout(() => {
+      if (activeConversationIdRef.current !== activeConversationId) return;
+      if (conversationMessagesRef.current.length > 0) return;
+      if (greetingFiredRef.current) return;
+      if (greetingInFlightConversationRef.current === activeConversationId) {
+        return;
+      }
+      traceMiladyGreeting("effect:empty_thread_auto_greet", {
+        activeConversationId,
+      });
+      void fetchGreeting(activeConversationId);
+    }, 0);
+
+    return () => window.clearTimeout(timerId);
+  }, [
+    activeConversationId,
+    agentStatus?.state,
+    chatSending,
+    conversationMessages.length,
+    fetchGreeting,
   ]);
 
   // ── Context value ──────────────────────────────────────────────────
@@ -7507,6 +7709,7 @@ function AppProviderInner({
     customBackgroundUrl,
     elizaCloudEnabled,
     elizaCloudConnected,
+    elizaCloudHasPersistedKey,
     elizaCloudCredits,
     elizaCloudCreditsLow,
     elizaCloudCreditsCritical,

@@ -96,14 +96,40 @@ export function resolveAppAssetUrl(
   return new URL(normalized, baseHref).toString();
 }
 
+/** Keep in sync with `MiladyClient` SESSION_STORAGE_API_BASE_KEY. */
+const MILADY_API_BASE_SESSION_KEY = "milady_api_base";
+
+function readSessionStorageApiBase(): string | undefined {
+  try {
+    if (typeof window === "undefined") return undefined;
+    const raw = window.sessionStorage.getItem(MILADY_API_BASE_SESSION_KEY);
+    const trimmed = raw?.trim();
+    return trimmed && trimmed.length > 0 ? trimmed : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 /**
  * Resolve an API path (e.g. "/api/avatar/vrm") to a full URL reachable from
  * the renderer. In desktop shells the page origin is electrobun:// or
  * file://, so bare /api/... paths resolve to the SPA instead of the backend.
- * This helper reads the API base from the boot config.
+ *
+ * Uses the same base resolution order as {@link MiladyClient}'s constructor
+ * (`sessionStorage` → boot `apiBase` → `window.__MILADY_API_BASE__`). Without
+ * this, TTS fetches from `useVoiceChat` could stay root-relative while REST
+ * calls used the stored session base → silent failure → Web Speech fallback.
  */
 export function resolveApiUrl(apiPath: string): string {
-  const base = getBootConfig().apiBase ?? getElizaApiBase();
-  if (base) return `${base}${apiPath}`;
-  return apiPath;
+  const stored = readSessionStorageApiBase();
+  const bootRaw = getBootConfig().apiBase?.trim();
+  const boot = bootRaw && bootRaw.length > 0 ? bootRaw : undefined;
+  const injectedRaw = getElizaApiBase()?.trim();
+  const injected =
+    injectedRaw && injectedRaw.length > 0 ? injectedRaw : undefined;
+  const base = stored ?? boot ?? injected;
+  if (!base) return apiPath;
+  const normalized = base.replace(/\/+$/, "");
+  const suffix = apiPath.startsWith("/") ? apiPath : `/${apiPath}`;
+  return `${normalized}${suffix}`;
 }

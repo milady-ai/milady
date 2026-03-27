@@ -8,6 +8,11 @@ import {
   useApp,
 } from "@miladyai/app-core/state";
 import { resolveAppAssetUrl } from "@miladyai/app-core/utils";
+import {
+  dispatchWindowEvent,
+  ONBOARDING_VOICE_PREVIEW_AWAIT_TELEPORT_EVENT,
+  VRM_TELEPORT_COMPLETE_EVENT,
+} from "@miladyai/app-core/events";
 import { useEffect, useState } from "react";
 import { useBranding } from "../config/branding";
 import { COMPANION_ENABLED } from "../navigation";
@@ -113,6 +118,25 @@ export function OnboardingWizard() {
     return () => window.clearTimeout(id);
   }, [revealWelcomeUiImmediately]);
 
+  // No VrmStage: engine never emits teleport-complete; bridge roster preview to the same event.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!disableVrm || onboardingStep !== "identity") return;
+    const bridge = () => {
+      dispatchWindowEvent(VRM_TELEPORT_COMPLETE_EVENT);
+    };
+    window.addEventListener(
+      ONBOARDING_VOICE_PREVIEW_AWAIT_TELEPORT_EVENT,
+      bridge,
+    );
+    return () => {
+      window.removeEventListener(
+        ONBOARDING_VOICE_PREVIEW_AWAIT_TELEPORT_EVENT,
+        bridge,
+      );
+    };
+  }, [disableVrm, onboardingStep]);
+
   function renderStep() {
     switch (onboardingStep) {
       case "welcome":
@@ -123,7 +147,9 @@ export function OnboardingWizard() {
       case "permissions":
         return <PermissionsStep />;
       case "identity":
-        return <IdentityStep />;
+        return (
+          <IdentityStep gateVoicePreviewOnTeleport={!disableVrm} />
+        );
       case "launch":
         return <ActivateStep />;
       default:

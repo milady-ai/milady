@@ -31,6 +31,14 @@ describe("useVoiceChat streaming text helpers", () => {
     ).toBe("second sentence done.");
   });
 
+  it("splitFirstSentence can yield remainder identical to first sentence (e.g. Hi! Hi!)", () => {
+    const s = splitFirstSentence("Hi! Hi!");
+    expect(s.complete).toBe(true);
+    expect(s.firstSentence).toBe("Hi!");
+    expect(s.remainder).toBe("Hi!");
+    expect(queueableSpeechPrefix(s.remainder, true)).toBe("Hi!");
+  });
+
   it("flushes all remaining text on the final chunk", () => {
     expect(
       queueableSpeechPrefix(
@@ -85,7 +93,7 @@ describe("useVoiceChat streaming text helpers", () => {
     expect(resolveVoiceProxyEndpoint("own-key")).toBe("/api/tts/elevenlabs");
   });
 
-  it("keeps explicit non-ElevenLabs providers intact", () => {
+  it("upgrades saved edge provider to ElevenLabs when Cloud voice is available", () => {
     expect(
       resolveEffectiveVoiceConfig(
         {
@@ -95,8 +103,51 @@ describe("useVoiceChat streaming text helpers", () => {
         { cloudConnected: true },
       ),
     ).toEqual({
+      provider: "elevenlabs",
+      mode: "cloud",
+      edge: { voice: "en-US-AriaNeural" },
+      elevenlabs: {
+        voiceId: "EXAVITQu4vr4xnSDxMaL",
+        modelId: "eleven_flash_v2_5",
+        stability: 0.5,
+        similarityBoost: 0.75,
+        speed: 1,
+      },
+    });
+  });
+
+  it("keeps explicit edge provider when Cloud voice is not available", () => {
+    expect(
+      resolveEffectiveVoiceConfig(
+        {
+          provider: "edge",
+          edge: { voice: "en-US-AriaNeural" },
+        },
+        { cloudConnected: false },
+      ),
+    ).toEqual({
       provider: "edge",
       edge: { voice: "en-US-AriaNeural" },
+    });
+  });
+
+  it("upgrades saved openai provider to ElevenLabs when Cloud voice is available", () => {
+    expect(
+      resolveEffectiveVoiceConfig(
+        {
+          provider: "openai",
+          openai: { voice: "nova", model: "tts-1" },
+        },
+        { cloudConnected: true },
+      ),
+    ).toMatchObject({
+      provider: "elevenlabs",
+      mode: "cloud",
+      openai: { voice: "nova", model: "tts-1" },
+      elevenlabs: {
+        voiceId: "EXAVITQu4vr4xnSDxMaL",
+        modelId: "eleven_flash_v2_5",
+      },
     });
   });
 

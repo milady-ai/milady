@@ -1,4 +1,9 @@
-import { dispatchAppEmoteEvent } from "@miladyai/app-core/events";
+import {
+  dispatchAppEmoteEvent,
+  dispatchWindowEvent,
+  ONBOARDING_VOICE_PREVIEW_AWAIT_TELEPORT_EVENT,
+  VRM_TELEPORT_COMPLETE_EVENT,
+} from "@miladyai/app-core/events";
 import { useApp } from "@miladyai/app-core/state";
 import { PREMADE_VOICES } from "../../voice/types";
 import { getElizaApiToken, resolveApiUrl } from "../../utils";
@@ -23,7 +28,18 @@ import {
 } from "./onboarding-step-chrome";
 import { resolvePreviewTtsEndpoints } from "./identity-preview-tts";
 
-export function IdentityStep() {
+export interface IdentityStepProps {
+  /**
+   * When the onboarding VRM stage is off (`disableVrm`), `eliza:vrm-teleport-complete`
+   * never fires — play the voice preview immediately on character swap instead of
+   * waiting on an event that will not arrive.
+   */
+  gateVoicePreviewOnTeleport?: boolean;
+}
+
+export function IdentityStep({
+  gateVoicePreviewOnTeleport = true,
+}: IdentityStepProps) {
   const { onboardingStyle, handleOnboardingNext, setState, t, uiLanguage } =
     useApp();
 
@@ -46,7 +62,6 @@ export function IdentityStep() {
   const previewObjectUrlRef = useRef<string | null>(null);
   const previewRequestIdRef = useRef(0);
   const pendingPreviewEntryRef = useRef<CharacterRosterEntry | null>(null);
-  const teleportPreviewTimerRef = useRef<number | null>(null);
 
   const stopPreviewAudio = useCallback(() => {
     if (previewAudioRef.current) {
@@ -155,17 +170,14 @@ export function IdentityStep() {
         previewRequestIdRef.current += 1;
         stopPreviewAudio();
         pendingPreviewEntryRef.current = null;
-        if (teleportPreviewTimerRef.current != null) {
-          window.clearTimeout(teleportPreviewTimerRef.current);
-          teleportPreviewTimerRef.current = null;
-        }
-        // Character swaps trigger a teleport dissolve; wait for completion before
-        // greeting emote/voice or the emote can be swallowed during transition.
+        // Avatar swaps use a teleport dissolve when VrmStage is mounted; defer preview until
+        // `VRM_TELEPORT_COMPLETE_EVENT`. When onboarding skips VRM, OnboardingWizard listens
+        // for `ONBOARDING_VOICE_PREVIEW_AWAIT_TELEPORT_EVENT` and echoes teleport-complete.
         const avatarChanged = previousAvatarIndex !== entry.avatarIndex;
         if (avatarChanged) {
           pendingPreviewEntryRef.current = entry;
+          dispatchWindowEvent(ONBOARDING_VOICE_PREVIEW_AWAIT_TELEPORT_EVENT);
         } else {
-          pendingPreviewEntryRef.current = null;
           void playSelectionPreview(entry);
         }
       }
@@ -188,20 +200,11 @@ export function IdentityStep() {
       const pending = pendingPreviewEntryRef.current;
       if (!pending) return;
       pendingPreviewEntryRef.current = null;
-      if (teleportPreviewTimerRef.current != null) {
-        window.clearTimeout(teleportPreviewTimerRef.current);
-      }
-      teleportPreviewTimerRef.current = window.setTimeout(() => {
-        teleportPreviewTimerRef.current = null;
-        void playSelectionPreview(pending);
-      }, 450);
+      void playSelectionPreview(pending);
     };
-    window.addEventListener("eliza:vrm-teleport-complete", onTeleportComplete);
+    window.addEventListener(VRM_TELEPORT_COMPLETE_EVENT, onTeleportComplete);
     return () => {
-      window.removeEventListener(
-        "eliza:vrm-teleport-complete",
-        onTeleportComplete,
-      );
+      window.removeEventListener(VRM_TELEPORT_COMPLETE_EVENT, onTeleportComplete);
     };
   }, [playSelectionPreview]);
 
@@ -209,10 +212,6 @@ export function IdentityStep() {
     return () => {
       pendingPreviewEntryRef.current = null;
       previewRequestIdRef.current += 1;
-      if (teleportPreviewTimerRef.current != null) {
-        window.clearTimeout(teleportPreviewTimerRef.current);
-        teleportPreviewTimerRef.current = null;
-      }
       stopPreviewAudio();
     };
   }, [stopPreviewAudio]);

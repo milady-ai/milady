@@ -309,8 +309,8 @@ The endpoint resolves the cloud API key from (in order): `ELIZAOS_CLOUD_API_KEY`
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `text` | string | Yes | Text to synthesize |
-| `voiceId` | string | No | Cloud voice name. Supported values: `alloy`, `ash`, `ballad`, `coral`, `echo`, `nova`, `sage`, `shimmer`, `verse`. Defaults to `nova`. |
-| `modelId` | string | No | TTS model ID (default: `gpt-5-mini-tts`). Can also be set via `ELIZAOS_CLOUD_TTS_MODEL`. |
+| `voiceId` | string | No | ElevenLabs voice id (e.g. premade `EXAVITQu4vr4xnSDxMaL`). OpenAI-style names (`nova`, `alloy`, …) and Edge/Azure neural ids (`en-US-AriaNeural`, …) are mapped to the default premade voice. Same behavior for snake_case `voice_id`. Override default via `ELIZAOS_CLOUD_TTS_VOICE`. |
+| `modelId` | string | No | ElevenLabs model id (default: `eleven_flash_v2_5`). OpenAI TTS ids (`gpt-*-tts`, `tts-1`, …) and OpenAI voice names sent by mistake are coerced to `eleven_flash_v2_5`. Same for snake_case `model_id` and `ELIZAOS_CLOUD_TTS_MODEL`. |
 
 **Response**
 
@@ -320,9 +320,11 @@ Binary audio stream with `Content-Type: audio/mpeg`.
 
 | Status | Condition |
 |--------|-----------|
-| 400 | Missing text or invalid JSON request body |
-| 401 | Eliza Cloud is not connected (no API key available) |
-| 502 | Eliza Cloud TTS request failed |
+| 400 | Missing text, invalid JSON, or text over 5000 characters (Eliza Cloud limit) |
+| 401 | Eliza Cloud is not connected (no API key available), or upstream rejected the cloud API key |
+| 402 | Upstream: insufficient Eliza Cloud credits for TTS (JSON body may include `required`) |
+| 429 | Upstream rate limit |
+| 502 | Eliza Cloud TTS request failed after retries (e.g. gateway errors) |
 
 ---
 

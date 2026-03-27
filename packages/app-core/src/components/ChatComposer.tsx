@@ -23,6 +23,8 @@ interface ChatComposerVoiceState {
   captureMode: "idle" | "compose" | "push-to-talk";
   interimTranscript: string;
   isSpeaking: boolean;
+  /** Assistant reply path: neural (ElevenLabs) vs device/browser TTS */
+  assistantTtsQuality?: "enhanced" | "standard";
   toggleListening: () => void;
   startListening: (mode?: "compose" | "push-to-talk") => void | Promise<void>;
   stopListening: (options?: { submit?: boolean }) => void | Promise<void>;
@@ -259,7 +261,9 @@ export function ChatComposer({
                 ? voice.captureMode === "push-to-talk"
                   ? t("chat.releaseToSend")
                   : t("chat.stopListening")
-                : t("chat.clickToDictate")
+                : voice.assistantTtsQuality === "enhanced"
+                  ? t("chat.micTitleIdleEnhanced")
+                  : t("chat.micTitleIdleStandard")
           }
           disabled={isComposerLocked}
         >
