@@ -3731,6 +3731,12 @@ function AppProviderInner({
           );
         }
 
+        // Action callbacks can persist additional assistant turns that are not
+        // mirrored by the optimistic streaming placeholder in local state.
+        if (activeConversationIdRef.current === convId) {
+          await loadConversationMessages(convId);
+        }
+
         const userMessageCount = conversationMessagesRef.current.filter(
           (message) =>
             message.role === "user" && !message.id.startsWith("temp-"),
@@ -4054,6 +4060,12 @@ function AppProviderInner({
                   : message,
               ),
             );
+          }
+
+          // Keep the visible thread authoritative when the server stores
+          // additional action-generated messages during a successful send.
+          if (activeConversationIdRef.current === convId) {
+            await loadConversationMessages(convId);
           }
 
           void loadConversations();

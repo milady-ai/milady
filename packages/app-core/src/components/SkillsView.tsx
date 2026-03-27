@@ -19,6 +19,15 @@ import {
   Textarea,
 } from "@miladyai/ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
+
+const BINANCE_SKILL_IDS = new Set([
+  "binance-crypto-market-rank",
+  "binance-meme-rush",
+  "binance-query-address-info",
+  "binance-query-token-audit",
+  "binance-query-token-info",
+  "binance-trading-signal",
+]);
 import type { SkillInfo, SkillMarketplaceResult } from "../api";
 import { client } from "../api";
 import { useApp } from "../state";
@@ -639,7 +648,7 @@ function SkillsModalView() {
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filterText, setFilterText] = useState("");
-  const [filterTab, setFilterTab] = useState<"all" | "on" | "off">("all");
+  const [filterTab, setFilterTab] = useState<"all" | "on" | "off" | "binance">("all");
   const [editingSkill, setEditingSkill] = useState<SkillInfo | null>(null);
   const [installModalOpen, setInstallModalOpen] = useState(false);
 
@@ -652,6 +661,7 @@ function SkillsModalView() {
     return skills.filter((s) => {
       if (filterTab === "on" && !s.enabled) return false;
       if (filterTab === "off" && s.enabled) return false;
+      if (filterTab === "binance" && !BINANCE_SKILL_IDS.has(s.id)) return false;
       if (
         searchLower &&
         !s.name.toLowerCase().includes(searchLower) &&
@@ -670,10 +680,12 @@ function SkillsModalView() {
     ? (skills.find((s) => s.id === effectiveSelectedId) ?? null)
     : null;
 
+  const binanceCount = skills.filter((s) => BINANCE_SKILL_IDS.has(s.id)).length;
   const tabs: { key: typeof filterTab; label: string }[] = [
     { key: "all", label: `ALL (${skills.length})` },
     { key: "on", label: `ON (${skills.filter((s) => s.enabled).length})` },
     { key: "off", label: `OFF (${skills.filter((s) => !s.enabled).length})` },
+    { key: "binance", label: `BINANCE (${binanceCount})` },
   ];
 
   return (
@@ -916,7 +928,7 @@ function SkillsFullView() {
 
   const [installModalOpen, setInstallModalOpen] = useState(false);
   const [filterText, setFilterText] = useState("");
-  const [filterTab, setFilterTab] = useState<"all" | "on" | "off">("all");
+  const [filterTab, setFilterTab] = useState<"all" | "on" | "off" | "binance">("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editingSkill, setEditingSkill] = useState<SkillInfo | null>(null);
 
@@ -930,6 +942,7 @@ function SkillsFullView() {
     return skills.filter((skill) => {
       if (filterTab === "on" && !skill.enabled) return false;
       if (filterTab === "off" && skill.enabled) return false;
+      if (filterTab === "binance" && !BINANCE_SKILL_IDS.has(skill.id)) return false;
       if (
         query &&
         !skill.name.toLowerCase().includes(query) &&
@@ -949,6 +962,7 @@ function SkillsFullView() {
     ? (skills.find((skill) => skill.id === selectedSkillId) ?? null)
     : null;
 
+  const binanceSkillCount = skills.filter((skill) => BINANCE_SKILL_IDS.has(skill.id)).length;
   const filterTabs: { key: typeof filterTab; label: string }[] = [
     { key: "all", label: `ALL (${skills.length})` },
     {
@@ -959,6 +973,7 @@ function SkillsFullView() {
       key: "off",
       label: `OFF (${skills.filter((skill) => !skill.enabled).length})`,
     },
+    { key: "binance", label: `BINANCE (${binanceSkillCount})` },
   ];
 
   const handleDismissReview = () => {

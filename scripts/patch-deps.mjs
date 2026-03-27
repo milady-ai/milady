@@ -570,3 +570,67 @@ if (threeVrmNodeTargets.length === 0) {
 
 // Action parsing patch removed — fix shipped in @elizaos/core@2.0.0-alpha.106
 // (PR #6661: parseKeyValueXml preserves raw XML string for <actions> content).
+
+/**
+ * Patch @elizaos/plugin-agent-skills GET_SKILL_GUIDANCE local skill fallback.
+ *
+ * When the remote marketplace search fails (e.g. 429 rate limit) and returns
+ * no results, the upstream code short-circuits on `!bestRemote` and says
+ * "couldn't find skill" — ignoring a strong local match entirely.
+ *
+ * We flip the condition so that a strong local match (score >= 8) always wins,
+ * regardless of whether the remote search succeeded.
+ *
+ * Remove once upstream fixes the local-first fallback logic.
+ */
+function patchAgentSkillsLocalFallback() {
+  const relPath = "dist/index.js";
+  const searchDirs = [
+    resolve(root, "node_modules/@elizaos/plugin-agent-skills"),
+  ];
+  const bunCacheDir = resolve(root, "node_modules/.bun");
+  if (existsSync(bunCacheDir)) {
+    try {
+      for (const entry of readdirSync(bunCacheDir)) {
+        if (entry.startsWith("@elizaos+plugin-agent-skills@")) {
+          searchDirs.push(
+            resolve(
+              bunCacheDir,
+              entry,
+              "node_modules/@elizaos/plugin-agent-skills",
+            ),
+          );
+        }
+      }
+    } catch {}
+  }
+
+  const needle =
+    "if (!bestRemote || bestRemote.score < 0.25 && !localIsStrong) {";
+  const replacement =
+    "if (!localIsStrong && (!bestRemote || bestRemote.score < 0.25)) {";
+
+  let patched = 0;
+  for (const dir of searchDirs) {
+    const target = resolve(dir, relPath);
+    if (!existsSync(target)) continue;
+    let src = readFileSync(target, "utf8");
+    if (!src.includes(needle)) continue;
+    src = src.replaceAll(needle, replacement);
+    writeFileSync(target, src, "utf8");
+    patched++;
+    console.log(
+      `[patch-deps] Applied plugin-agent-skills local fallback fix: ${target}`,
+    );
+  }
+  if (patched > 0) {
+    console.log(
+      `[patch-deps] plugin-agent-skills: fixed ${patched} local fallback check(s).`,
+    );
+  } else {
+    console.log(
+      "[patch-deps] plugin-agent-skills local fallback: already patched or pattern not found.",
+    );
+  }
+}
+patchAgentSkillsLocalFallback();
