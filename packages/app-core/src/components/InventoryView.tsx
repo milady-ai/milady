@@ -51,6 +51,8 @@ import { useInventoryData } from "./inventory/useInventoryData";
 import {
   APP_PANEL_SHELL_CLASSNAME,
   APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
+  APP_SIDEBAR_CARD_BASE_CLASSNAME,
+  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
   APP_SIDEBAR_HEADER_CLASSNAME,
   APP_SIDEBAR_INNER_CLASSNAME,
   APP_SIDEBAR_KICKER_CLASSNAME,
@@ -64,7 +66,9 @@ import {
 const WALLET_SHELL_CLASS = APP_PANEL_SHELL_CLASSNAME;
 const WALLET_SIDEBAR_CLASS = `lg:w-[21rem] lg:max-w-[352px] ${APP_SIDEBAR_RAIL_CLASSNAME}`;
 const WALLET_SIDEBAR_KICKER_CLASS = APP_SIDEBAR_KICKER_CLASSNAME;
+const WALLET_SIDEBAR_ITEM_BASE_CLASS = APP_SIDEBAR_CARD_BASE_CLASSNAME;
 const WALLET_SIDEBAR_ITEM_ACTIVE_CLASS = APP_SIDEBAR_CARD_ACTIVE_CLASSNAME;
+const WALLET_SIDEBAR_ITEM_INACTIVE_CLASS = APP_SIDEBAR_CARD_INACTIVE_CLASSNAME;
 const WALLET_PANEL_CLASS = DESKTOP_SURFACE_PANEL_CLASSNAME;
 
 function countVisibleAssetsForFocus(
@@ -307,6 +311,14 @@ export function InventoryView() {
         ? "Wallet Overview"
         : "NFT Gallery"
       : `${focusedChainLabel ?? "Chain"} ${inventoryView === "tokens" ? "Assets" : "NFTs"}`;
+  const walletPageDescription =
+    chainFocus === "all"
+      ? inventoryView === "tokens"
+        ? "Track balances, managed addresses, and trading readiness in one place."
+        : "Review collectibles across every connected wallet."
+      : inventoryView === "tokens"
+        ? `Balances and watchlist activity for ${focusedChainLabel ?? "the selected chain"}.`
+        : `Collectibles discovered on ${focusedChainLabel ?? "the selected chain"}.`;
   const inlineError =
     chainFocus !== "all" && focusedChainError
       ? {
@@ -533,7 +545,7 @@ export function InventoryView() {
 
             <div className="mt-4">
               <div className={WALLET_SIDEBAR_KICKER_CLASS}>Chains</div>
-              <nav className="mt-3 space-y-1">
+              <nav className="mt-3 space-y-1.5">
                 {chainItemMeta.map((item) => {
                   const isActive = chainFocus === item.key;
                   return (
@@ -544,17 +556,17 @@ export function InventoryView() {
                       type="button"
                       onClick={() => setState("inventoryChainFocus", item.key)}
                       aria-current={isActive ? "page" : undefined}
-                      className={`w-full justify-start gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold ${
+                      className={`${WALLET_SIDEBAR_ITEM_BASE_CLASS} ${
                         isActive
-                          ? "border border-accent/30 bg-accent/12 text-txt-strong"
-                          : "text-muted hover:bg-bg/35 hover:text-txt"
+                          ? WALLET_SIDEBAR_ITEM_ACTIVE_CLASS
+                          : WALLET_SIDEBAR_ITEM_INACTIVE_CLASS
                       }`}
                     >
                       <span
-                        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[10px] font-bold ${
+                        className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border text-sm font-bold ${
                           isActive
-                            ? "bg-accent/18 text-txt-strong"
-                            : "bg-bg-accent/80 text-muted"
+                            ? "border-accent/30 bg-accent/18 text-txt-strong"
+                            : "border-border/50 bg-bg-accent/80 text-muted"
                         }`}
                       >
                         {item.key === "all"
@@ -563,7 +575,14 @@ export function InventoryView() {
                               .slice(0, 1)
                               .toUpperCase()}
                       </span>
-                      {item.key === "all" ? t("wallet.all") : item.label}
+                      <span className="min-w-0 flex-1 text-left">
+                        <span className="block text-sm font-semibold leading-snug">
+                          {item.key === "all" ? t("wallet.all") : item.label}
+                        </span>
+                        <span className="mt-1 block line-clamp-2 text-[11px] leading-relaxed text-muted/85">
+                          {item.description}
+                        </span>
+                      </span>
                     </Button>
                   );
                 })}
@@ -617,40 +636,48 @@ export function InventoryView() {
                   <h1 className="text-lg font-semibold text-txt-strong">
                     {walletPageTitle}
                   </h1>
+                  <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">
+                    {walletPageDescription}
+                  </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 lg:justify-end">
                   {inventoryView === "tokens" && (
-                    <Select
-                      value={inventorySort}
-                      onValueChange={(nextSort) => {
-                        if (
-                          nextSort === "value" ||
-                          nextSort === "chain" ||
-                          nextSort === "symbol"
-                        ) {
-                          setState("inventorySort", nextSort);
-                        }
-                      }}
-                    >
-                      <SelectTrigger
-                        data-testid="wallet-sort-select"
-                        aria-label={t("wallet.sort")}
-                        className="h-10 min-w-36 rounded-xl border border-border/60 bg-card/88 px-3 text-sm text-txt shadow-sm"
+                    <div className="min-w-36">
+                      <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
+                        {t("wallet.sort")}
+                      </div>
+                      <Select
+                        value={inventorySort}
+                        onValueChange={(nextSort) => {
+                          if (
+                            nextSort === "value" ||
+                            nextSort === "chain" ||
+                            nextSort === "symbol"
+                          ) {
+                            setState("inventorySort", nextSort);
+                          }
+                        }}
                       >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="value">
-                          {t("wallet.value")}
-                        </SelectItem>
-                        <SelectItem value="chain">
-                          {t("wallet.chain")}
-                        </SelectItem>
-                        <SelectItem value="symbol">
-                          {t("wallet.name")}
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
+                        <SelectTrigger
+                          data-testid="wallet-sort-select"
+                          aria-label={t("wallet.sort")}
+                          className="h-10 min-w-36 rounded-xl border border-border/60 bg-card/88 px-3 text-sm text-txt shadow-sm"
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="value">
+                            {t("wallet.value")}
+                          </SelectItem>
+                          <SelectItem value="chain">
+                            {t("wallet.chain")}
+                          </SelectItem>
+                          <SelectItem value="symbol">
+                            {t("wallet.name")}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   )}
                 </div>
               </div>

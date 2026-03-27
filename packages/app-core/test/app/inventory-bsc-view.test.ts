@@ -18,6 +18,8 @@ vi.mock("@miladyai/ui", () => {
   }: React.PropsWithChildren<Record<string, unknown>>) =>
     React.createElement("div", props, children);
   return {
+    cn: (...classes: Array<string | false | null | undefined>) =>
+      classes.filter(Boolean).join(" "),
     Button: ({
       children,
       ...props
@@ -407,15 +409,16 @@ describe("InventoryView unified wallets", () => {
       tree = TestRenderer.create(React.createElement(InventoryView));
     });
 
-    const chainSelect = tree?.root.findAll(
+    const bscButton = tree?.root.findAll(
       (node) =>
-        typeof node.props.onValueChange === "function" &&
-        node.props.value === "all"
+        node.type === "button" &&
+        typeof node.props.onClick === "function" &&
+        text(node).includes("BSC")
     )[0];
-    expect(chainSelect).toBeDefined();
+    expect(bscButton).toBeDefined();
 
     await act(async () => {
-      chainSelect.props.onValueChange("bsc");
+      bscButton.props.onClick();
     });
     expect(ctx.setState).toHaveBeenCalledWith("inventoryChainFocus", "bsc");
 
