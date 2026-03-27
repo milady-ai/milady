@@ -361,7 +361,9 @@ patchTrajectoryLoggerJsonArrayDecode();
  */
 function patchLocalEmbeddingLinuxGpuProbe() {
   const relPaths = ["dist/index.js"];
-  const searchDirs = [resolve(root, "node_modules/@elizaos/plugin-local-embedding")];
+  const searchDirs = [
+    resolve(root, "node_modules/@elizaos/plugin-local-embedding"),
+  ];
   const bunCacheDir = resolve(root, "node_modules/.bun");
   if (existsSync(bunCacheDir)) {
     try {
