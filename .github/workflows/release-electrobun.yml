@@ -482,6 +482,31 @@ jobs:
 
           Write-Host "Using rcedit from $resolvedRceditDir"
 
+          # The Electrobun native CLI binary self-extracts to a temp directory
+          # (e.g. D:\a\electrobun\electrobun\package\) and resolves rcedit
+          # relative to *that* extraction path — not the npm package dir.
+          # Seed rcedit there too so icon embedding succeeds at build time.
+          $electrobunCacheDir = Join-Path $resolvedElectrobunDir ".cache"
+          $electrobunExe = Join-Path $electrobunCacheDir "electrobun.exe"
+          if (Test-Path $electrobunExe) {
+            # Run the CLI with --print-extract-dir to find where it unpacks
+            # (not available in all versions), otherwise probe the known
+            # extraction base path pattern used by electrobun on Windows CI.
+            $extractionBases = @(
+              "D:\a\electrobun\electrobun\package",
+              "$env:TEMP\electrobun\package"
+            )
+            foreach ($extractBase in $extractionBases) {
+              $extractRceditDir = Join-Path $extractBase "node_modules\rcedit"
+              $extractRceditExe = Join-Path $extractRceditDir "bin\rcedit-x64.exe"
+              if (-not (Test-Path $extractRceditExe)) {
+                Write-Host "Pre-seeding rcedit at extraction path: $extractRceditDir"
+                New-Item -ItemType Directory -Force -Path (Join-Path $extractBase "node_modules") | Out-Null
+                Copy-Item -Recurse -Force $resolvedRceditDir $extractRceditDir
+              }
+            }
+          }
+
       # electrobun.cjs downloads its native binary then calls:
       #   execSync(`tar -xzf "${tarballPath}"`, { cwd: cacheDir })
       # GNU tar (found first in PATH on Windows) treats the C: drive letter as

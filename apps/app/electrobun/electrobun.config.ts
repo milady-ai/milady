@@ -65,6 +65,10 @@ export default {
       // package.json is needed so findOwnPackageRoot() can match on the
       // "milady" package name. dist/package.json only has {"type":"module"}.
       "../../../package.json": "milady-dist/package.json",
+      // Tray icon loaded at runtime via path.join(import.meta.dir, "../assets/appIcon.png").
+      // import.meta.dir resolves to app/bun/ in the packaged bundle, so the
+      // destination "assets/appIcon.png" places it at app/assets/appIcon.png.
+      "assets/appIcon.png": "assets/appIcon.png",
       // Optional native blur (run build:native-effects locally). Omit when missing to avoid noisy copy errors in dev.
       ...(process.platform === "darwin" &&
       fs.existsSync(libMacWindowEffectsDylib)
