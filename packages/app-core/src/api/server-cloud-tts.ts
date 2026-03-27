@@ -162,15 +162,27 @@ function resolveCloudApiKey(
   return null;
 }
 
+let cachedCloudBaseUrlFromConfig: string | null | undefined;
+let hasResolvedCloudBaseUrlFromConfig = false;
+
 function resolveCloudBaseUrlFromConfig(): string | null {
+  if (hasResolvedCloudBaseUrlFromConfig) {
+    return cachedCloudBaseUrlFromConfig ?? null;
+  }
+
   try {
     const config = loadElizaConfig();
     const raw =
       typeof config.cloud?.baseUrl === "string"
         ? config.cloud.baseUrl.trim()
         : "";
-    return raw.length > 0 ? raw : null;
+    cachedCloudBaseUrlFromConfig = raw.length > 0 ? raw : null;
+    hasResolvedCloudBaseUrlFromConfig = true;
+    return cachedCloudBaseUrlFromConfig;
   } catch {
+    // On failure, remember that we attempted resolution to avoid repeated I/O.
+    cachedCloudBaseUrlFromConfig = null;
+    hasResolvedCloudBaseUrlFromConfig = true;
     return null;
   }
 }
