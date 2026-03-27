@@ -200,9 +200,15 @@ jobs:
           bun-version: ${{ env.BUN_VERSION }}
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: bun install --frozen-lockfile --ignore-scripts
         env:
           NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org'
+
+      - name: Run repository postinstall patches
+        run: bun run postinstall
+        env:
+          SKIP_AVATAR_CLONE: "1"
+          MILADY_NO_VISION_DEPS: "1"
 
       - name: Run Claude to implement
         id: claude
