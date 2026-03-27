@@ -587,9 +587,6 @@ export function App() {
         onToggleVoiceMute={() =>
           setState("chatAgentVoiceMuted", !chatAgentVoiceMuted)
         }
-        onSave={handleSaveCharacter}
-        isSaving={characterSaving}
-        saveSuccess={Boolean(characterSaveSuccess)}
       />
       <main className="flex flex-1 min-h-0 min-w-0 overflow-hidden px-3 xl:px-5 pb-4 pt-2 xl:pb-6">
         <ViewRouter characterSceneVisible />

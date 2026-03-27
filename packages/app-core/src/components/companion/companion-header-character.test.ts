@@ -18,7 +18,7 @@ describe("character editor header", () => {
     const after = source.slice(charBlock, charBlock + 800);
     expect(after).toContain("CompanionHeader");
     expect(after).toContain('activeShellView="character"');
-    expect(after).toContain("onSave");
+    expect(after).not.toContain("onSave");
   });
 
   it("CompanionHeader accepts onSave/isSaving/saveSuccess props", () => {

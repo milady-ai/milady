@@ -309,19 +309,6 @@ export function Header({
                   ? undefined
                   : () => void handleNewConversation()
               }
-              onSave={
-                activeShellView === "character"
-                  ? handleSaveCharacter
-                  : undefined
-              }
-              isSaving={
-                activeShellView === "character" ? characterSaving : false
-              }
-              saveSuccess={
-                activeShellView === "character"
-                  ? Boolean(characterSaveSuccess)
-                  : false
-              }
               trailingExtras={
                 showNavigationMenu ? (
                   <Button
