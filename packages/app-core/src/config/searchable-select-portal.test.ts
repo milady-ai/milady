@@ -33,13 +33,22 @@ describe("SearchableSelectInner portal rendering", () => {
   });
 
   it("does NOT use position:absolute (would be clipped by overflow:hidden)", () => {
-    // The dropdown style should use fixed, not absolute
-    const dropdownStyleBlock = configFieldSource.match(
-      /setDropdownStyle\(\{[\s\S]*?\}\)/,
+    // The computeDropdownStyle function should return fixed, not absolute
+    const styleBlock = configFieldSource.match(
+      /computeDropdownStyle[\s\S]*?position:\s*"fixed"/,
     );
-    expect(dropdownStyleBlock).toBeTruthy();
-    expect(dropdownStyleBlock?.[0]).not.toContain('"absolute"');
-    expect(dropdownStyleBlock?.[0]).toContain('"fixed"');
+    expect(styleBlock).toBeTruthy();
+    expect(configFieldSource).not.toMatch(
+      /computeDropdownStyle[\s\S]*?position:\s*"absolute"/,
+    );
+  });
+
+  it("computes position synchronously on click (no flicker)", () => {
+    // Position must be computed in onClick, not in useEffect, to avoid
+    // the portal rendering with empty style for one frame
+    expect(configFieldSource).toContain(
+      "setDropdownStyle(computeDropdownStyle())",
+    );
   });
 });
 

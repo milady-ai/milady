@@ -469,18 +469,19 @@ function SearchableSelectInner({
     [props],
   );
 
-  // Position the portal dropdown below the trigger button
-  useEffect(() => {
-    if (!open || !triggerRef.current) return;
+  // Compute portal position synchronously from the trigger rect.
+  // Called in the click handler so the style is set before the portal renders.
+  const computeDropdownStyle = useCallback(() => {
+    if (!triggerRef.current) return {};
     const rect = triggerRef.current.getBoundingClientRect();
-    setDropdownStyle({
-      position: "fixed",
+    return {
+      position: "fixed" as const,
       top: rect.bottom + 4,
       left: rect.left,
       width: rect.width,
       zIndex: 9999,
-    });
-  }, [open]);
+    };
+  }, []);
 
   // Close on click outside
   useEffect(() => {
@@ -520,6 +521,7 @@ function SearchableSelectInner({
         className={`${inputCls(!!props.errors?.length)} text-left flex items-center justify-between gap-2 cursor-pointer`}
         disabled={props.readonly}
         onClick={() => {
+          if (!open) setDropdownStyle(computeDropdownStyle());
           setOpen(!open);
           setFilter("");
         }}
