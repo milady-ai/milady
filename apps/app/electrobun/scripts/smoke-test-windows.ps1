@@ -84,6 +84,118 @@ function Stop-MiladyProcesses() {
     Stop-Process -Force
 }
 
+function Get-TarCommand() {
+  if (Test-Path "C:\\Windows\\System32\\tar.exe") {
+    return "C:\\Windows\\System32\\tar.exe"
+  }
+  return "tar"
+}
+
+function Assert-PackagedAssetVariants(
+  [string]$Description,
+  [int]$MinSizeBytes,
+  [string[]]$Candidates
+) {
+  foreach ($candidate in $Candidates) {
+    if (-not (Test-Path $candidate)) {
+      continue
+    }
+    $length = (Get-Item $candidate).Length
+    if ($length -ge $MinSizeBytes) {
+      return
+    }
+  }
+
+  throw "Missing packaged $Description. Checked: $($Candidates -join ', ')"
+}
+
+function Assert-PackagedArchiveAssetVariants(
+  [string]$ArchivePath,
+  [string]$Description,
+  [int]$MinSizeBytes,
+  [string[]]$Suffixes
+) {
+  $tarCommand = Get-TarCommand
+  $archiveList = & $tarCommand -tf $ArchivePath 2>$null
+
+  foreach ($suffix in $Suffixes) {
+    $normalizedSuffix = $suffix.Replace("\", "/")
+    $member = $archiveList |
+      Where-Object { ($_ -replace "\\", "/") -like "*$normalizedSuffix" } |
+      Select-Object -First 1
+
+    if (-not $member) {
+      continue
+    }
+
+    $extractDir = Join-Path $env:RUNNER_TEMP ("milady-archive-asset-check-" + [Guid]::NewGuid().ToString("N"))
+    New-Item -ItemType Directory -Force -Path $extractDir | Out-Null
+    try {
+      & $tarCommand -xf $ArchivePath -C $extractDir $member 2>$null | Out-Null
+      $memberPath = Join-Path $extractDir ($member -replace "/", "\")
+      if (-not (Test-Path $memberPath)) {
+        continue
+      }
+      $length = (Get-Item $memberPath).Length
+      if ($length -ge $MinSizeBytes) {
+        return
+      }
+    } finally {
+      Remove-Item $extractDir -Recurse -Force -ErrorAction SilentlyContinue
+    }
+  }
+
+  throw "Missing packaged $Description in runtime archive. Checked suffixes: $($Suffixes -join ', ')"
+}
+
+function Verify-PackagedRendererAssets([string]$LauncherPath) {
+  $launcherDir = Split-Path -Parent $LauncherPath
+  $appRoot = Split-Path -Parent $launcherDir
+  $rendererDir = Join-Path $appRoot "resources\\app\\renderer"
+
+  if (Test-Path $rendererDir) {
+    Assert-PackagedAssetVariants -Description "renderer entrypoint" -MinSizeBytes 256 -Candidates @(
+      (Join-Path $rendererDir "index.html")
+    )
+    Assert-PackagedAssetVariants -Description "default avatar VRM" -MinSizeBytes 1024 -Candidates @(
+      (Join-Path $rendererDir "vrms\\milady-1.vrm.gz"),
+      (Join-Path $rendererDir "vrms\\milady-1.vrm")
+    )
+    Assert-PackagedAssetVariants -Description "default avatar preview" -MinSizeBytes 1024 -Candidates @(
+      (Join-Path $rendererDir "vrms\\previews\\milady-1.png")
+    )
+    Assert-PackagedAssetVariants -Description "default avatar background" -MinSizeBytes 1024 -Candidates @(
+      (Join-Path $rendererDir "vrms\\backgrounds\\milady-1.png")
+    )
+    Write-Host "Packaged renderer asset check PASSED (direct app bundle)."
+    return
+  }
+
+  $resourcesDir = Join-Path $appRoot "resources"
+  $runtimeArchive = Get-ChildItem -Path $resourcesDir -File -Filter "*.tar.zst" -ErrorAction SilentlyContinue |
+    Sort-Object LastWriteTime -Descending |
+    Select-Object -First 1
+
+  if (-not $runtimeArchive) {
+    throw "Packaged renderer directory missing and no runtime archive found under $resourcesDir"
+  }
+
+  Assert-PackagedArchiveAssetVariants -ArchivePath $runtimeArchive.FullName -Description "renderer entrypoint" -MinSizeBytes 256 -Suffixes @(
+    "renderer/index.html"
+  )
+  Assert-PackagedArchiveAssetVariants -ArchivePath $runtimeArchive.FullName -Description "default avatar VRM" -MinSizeBytes 1024 -Suffixes @(
+    "renderer/vrms/milady-1.vrm.gz",
+    "renderer/vrms/milady-1.vrm"
+  )
+  Assert-PackagedArchiveAssetVariants -ArchivePath $runtimeArchive.FullName -Description "default avatar preview" -MinSizeBytes 1024 -Suffixes @(
+    "renderer/vrms/previews/milady-1.png"
+  )
+  Assert-PackagedArchiveAssetVariants -ArchivePath $runtimeArchive.FullName -Description "default avatar background" -MinSizeBytes 1024 -Suffixes @(
+    "renderer/vrms/backgrounds/milady-1.png"
+  )
+  Write-Host "Packaged renderer asset check PASSED (runtime archive)."
+}
+
 function Get-ObservedBackendPorts([int]$DefaultPort) {
   $ports = [System.Collections.Generic.List[int]]::new()
   $ports.Add($DefaultPort)
@@ -241,6 +353,7 @@ if (-not $launcher) {
 
 $launcher = Write-ReusableLauncherPath -Launcher $launcher -TemporaryRoot $tempExtractDir
 Write-Host "Using $launcherSource launcher: $($launcher.FullName)"
+Verify-PackagedRendererAssets -LauncherPath $launcher.FullName
 $launcherDir = Split-Path -Parent $launcher.FullName
 $launcherProcess = Start-Process -FilePath $launcher.FullName -WorkingDirectory $launcherDir -PassThru
 $launcherStarted = $true

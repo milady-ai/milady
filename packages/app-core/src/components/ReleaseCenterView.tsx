@@ -69,8 +69,8 @@ export function ReleaseCenterView() {
       return;
     }
 
-    const [updater, build, dock, gpuStatus, ...sessionResults] =
-      await Promise.all([
+    const [updaterResult, buildResult, dockResult, gpuStatusResult, ...sessionResults] =
+      await Promise.allSettled([
         invokeDesktopBridgeRequest<DesktopUpdaterSnapshot>({
           rpcMethod: "desktopGetUpdaterState",
           ipcChannel: "desktop:getUpdaterState",
@@ -96,6 +96,13 @@ export function ReleaseCenterView() {
         ),
       ]);
 
+    const updater =
+      updaterResult.status === "fulfilled" ? updaterResult.value : null;
+    const build = buildResult.status === "fulfilled" ? buildResult.value : null;
+    const dock = dockResult.status === "fulfilled" ? dockResult.value : null;
+    const gpuStatus =
+      gpuStatusResult.status === "fulfilled" ? gpuStatusResult.value : null;
+
     setNativeUpdater(updater);
     setBuildInfo(build);
     _setDockVisible(dock?.visible ?? true);
@@ -104,7 +111,9 @@ export function ReleaseCenterView() {
       Object.fromEntries(
         SESSION_PARTITIONS.map((entry, index) => [
           entry.partition,
-          sessionResults[index] ?? undefined,
+          sessionResults[index]?.status === "fulfilled"
+            ? (sessionResults[index].value ?? undefined)
+            : undefined,
         ]),
       ),
     );
@@ -113,6 +122,18 @@ export function ReleaseCenterView() {
         ? current
         : normalizeReleaseNotesUrl(updater?.baseUrl ?? current),
     );
+
+    if (
+      updaterResult.status === "rejected" ||
+      buildResult.status === "rejected" ||
+      dockResult.status === "rejected" ||
+      gpuStatusResult.status === "rejected" ||
+      sessionResults.some((result) => result.status === "rejected")
+    ) {
+      console.warn(
+        "[ReleaseCenter] One or more desktop runtime requests failed during refresh.",
+      );
+    }
   }, [desktopRuntime, releaseNotesUrlDirty]);
 
   useEffect(() => {

@@ -166,4 +166,58 @@ describe("ReleaseCenterView", () => {
       }),
     );
   });
+
+  it("stays interactive when one desktop bridge request rejects", async () => {
+    invokeDesktopBridgeRequestMock.mockImplementation(
+      async ({ rpcMethod }: { rpcMethod: string }) => {
+        if (rpcMethod === "desktopGetBuildInfo") {
+          throw new Error("desktop build info unavailable");
+        }
+        if (rpcMethod === "desktopGetUpdaterState") {
+          return {
+            currentVersion: "1.0.0",
+            updateAvailable: false,
+            updateReady: false,
+            latestVersion: null,
+            baseUrl: "https://milady.ai/releases/",
+            lastStatus: null,
+          };
+        }
+        if (rpcMethod === "desktopGetDockIconVisibility") {
+          return { visible: true };
+        }
+        if (rpcMethod === "desktopGetWebGpuBrowserStatus") {
+          return {
+            available: false,
+            reason: "Renderer WebGPU unavailable in test.",
+            renderer: "native",
+            chromeBetaPath: null,
+            downloadUrl: null,
+          };
+        }
+        if (rpcMethod === "desktopGetSessionSnapshot") {
+          return {
+            partition: "persist:default",
+            persistent: true,
+            cookieCount: 0,
+            cookies: [],
+          };
+        }
+        return null;
+      },
+    );
+
+    let renderer: TestRenderer.ReactTestRenderer | undefined;
+    await act(async () => {
+      renderer = TestRenderer.create(React.createElement(ReleaseCenterView));
+    });
+
+    if (!renderer) {
+      throw new Error("ReleaseCenterView did not render");
+    }
+
+    const root = renderer.root;
+    expect(() => findButtonByText(root, "Refresh")).not.toThrow();
+    expect(() => findButtonByText(root, "Open Detached Release Center")).not.toThrow();
+  });
 });
