@@ -497,6 +497,8 @@ Edit `~/.milady/milady.json`:
 
 This routes through the OpenAI plugin instead of the broken Ollama plugin. Works with any Ollama model — just make sure `ollama serve` is running.
 
+> **OpenRouter (`@elizaos/plugin-openrouter`):** Milady pins the dependency to **`2.0.0-alpha.10`**. **Why:** npm **`2.0.0-alpha.12`** published **truncated** JavaScript bundles: the files export `openrouterPlugin` / default but never define them (the main plugin chunk is missing), so Bun fails when loading the plugin. A caret range would allow that broken version again. See [Plugin resolution — pinned OpenRouter](docs/plugin-resolution-and-node-path.md#pinned-elizaosplugin-openrouter) and [OpenRouter plugin doc](docs/plugin-registry/llm/openrouter.md#milady-pinned-version-and-upstream-bundle-bug).
+
 **Recommended models for local use:**
 
 | Model | Size | Vibe |
@@ -562,7 +564,7 @@ See **[Architecture](docs/architecture.mdx)** for the full development guide inc
 
 ### Documentation (with WHYs)
 
-- **[Plugin resolution and NODE_PATH](docs/plugin-resolution-and-node-path.md)** — Why we set `NODE_PATH` in three places so dynamic plugin imports resolve when building from source (CLI, desktop dev, Electrobun).
+- **[Plugin resolution and NODE_PATH](docs/plugin-resolution-and-node-path.md)** — Why we set `NODE_PATH` in three places so dynamic plugin imports resolve when building from source (CLI, desktop dev, Electrobun). Includes **pinned `@elizaos/plugin-openrouter`** and **why** `alpha.12` must not be resolved until upstream fixes the published bundle.
 - **[Build and release](docs/build-and-release.md)** — Why the release pipeline uses strict shell, retries, setup-node v3/Blacksmith, Bun cache, timeouts; why size-report pipelines handle SIGPIPE; why Windows plugin build uses `npx -p typescript tsc`.
 - **[Desktop local development](docs/apps/desktop-local-development.md)** — Why `dev:desktop` / `dev:desktop:watch` orchestrate Vite, API, and Electrobun; HMR vs `vite build --watch`; Ctrl-C, Quit, and `detached` children; **IDE/agent observability** (`/api/dev/stack`, aggregated console, screenshot proxy, WHY loopback and opt-out).
 - **[Desktop main-process reset](docs/apps/desktop-main-process-reset.md)** — Why **Reset Milady…** runs HTTP in the Electrobun main process after native confirm, how the renderer syncs UI state, reachable API probing (`res.ok`), and where tests live.

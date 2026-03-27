@@ -95,6 +95,23 @@ try {
 }
 patchAutonomousTypeError(root);
 
+// ---------------------------------------------------------------------------
+// @elizaos/plugin-openrouter — version is pinned in root package.json to
+// 2.0.0-alpha.10 (exact, no caret).
+//
+// WHY: npm @elizaos/plugin-openrouter@2.0.0-alpha.12 shipped truncated
+// dist/node/index.node.js and dist/browser/index.browser.js: only the config
+// helper chunk is present, but the module still exports openrouterPlugin /
+// default aliases for symbols that are never defined. Bun then fails loading
+// the plugin ("not declared in this file"). alpha.10 publishes a full bundle.
+// We do not patch the broken tarball here because the implementation chunk is
+// missing entirely (unlike plugin-pdf's wrong export identifier).
+//
+// Before bumping: verify the new tarball's dist entry defines the plugin, or
+// run: bun build node_modules/@elizaos/plugin-openrouter/dist/node/index.node.js --target=bun
+// Docs: docs/plugin-resolution-and-node-path.md (Pinned: @elizaos/plugin-openrouter)
+// ---------------------------------------------------------------------------
+
 /**
  * Patch @elizaos/plugin-pdf broken ESM bundle.
  *

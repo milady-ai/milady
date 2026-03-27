@@ -3,6 +3,17 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-03-27" description="OpenRouter plugin dependency pin (upstream bad publish)" tags={["Fix", "Docs"]}>
+## Pin `@elizaos/plugin-openrouter` to `2.0.0-alpha.10`
+
+**Why:** npm **`2.0.0-alpha.12`** shipped **truncated** plugin bundles: `dist/node/index.node.js` (and the browser ESM build) contain only config helpers but still **export** `openrouterPlugin` / default — symbols that are **never defined** in the file. Bun then fails while loading the plugin (*not declared in this file*). **`2.0.0-alpha.10`** has a complete bundle.
+
+**Why a hard pin in `package.json`:** A caret range (`^2.0.0-alpha.10`) allowed the resolver to pick **`alpha.12`**, breaking fresh installs and lockfile updates. The fix is version selection, not a small dist patch (the plugin body is missing entirely).
+
+**Docs:** [Plugin resolution — pinned OpenRouter](/plugin-resolution-and-node-path#pinned-elizaosplugin-openrouter), [OpenRouter registry page](/plugin-registry/llm/openrouter#milady-pinned-version-and-upstream-bundle-bug), root `README.md` (upstream note), and `docs/ROADMAP.md` (done item).
+
+</Update>
+
 <Update label="2026-03-26" description="Dashboard pricing, background mode, desktop UI polish" tags={["Feature", "Update", "Fix"]}>
 ## Dashboard pricing info
 

@@ -8,6 +8,22 @@ The OpenRouter plugin connects Milady agents to OpenRouter's unified inference g
 
 **Package:** `@elizaos/plugin-openrouter`
 
+## Milady: pinned version and upstream bundle bug
+
+In the Milady monorepo, **`@elizaos/plugin-openrouter` is pinned to `2.0.0-alpha.10`** (exact version in root `package.json`, reflected in `bun.lock`).
+
+**Why pin**
+
+- **`2.0.0-alpha.12` on npm is a bad publish:** the Node and browser ESM bundles are **truncated**. They include only rolled-up config helpers; the **main plugin object is missing**, yet the file still **exports** `openrouterPlugin` and a default alias. **Why runtime fails:** Bun (and any strict tooling) tries to load that file and errors because those bindings are **never declared** in the module.
+- **Why not `^2.0.0-alpha.10`:** Semver ranges can float to **`alpha.12`**, which breaks `bun install` / lockfile refresh for everyone using OpenRouter.
+- **Why we do not patch this in `patch-deps.mjs`:** Unlike a wrong export *name* in an otherwise complete file, this tarball omits the **entire implementation chunk**. A postinstall string replace cannot invent the plugin; the safe fix is **use a good version**.
+
+**When to remove the pin**
+
+After upstream publishes a fixed version, verify `dist/node/index.node.js` contains the full plugin (hundreds of lines, not ~80) and that `bun build …/index.node.js --target=bun` succeeds, then bump and relax the range if desired.
+
+**Reference:** [Plugin resolution — pinned OpenRouter](/plugin-resolution-and-node-path#pinned-elizaosplugin-openrouter).
+
 ## Installation
 
 ```bash
