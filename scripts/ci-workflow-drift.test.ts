@@ -37,24 +37,34 @@ describe("CI workflow drift", () => {
 
     expect(workflow).not.toContain("push:");
     expect(countOccurrences(workflow, forkGate)).toBe(4);
-    expect(countOccurrences(workflow, "uses: ./.github/actions/setup-bun-workspace")).toBe(4);
+    expect(
+      countOccurrences(workflow, "uses: ./.github/actions/setup-bun-workspace"),
+    ).toBe(4);
   });
 
   it("routes core CI jobs through the shared setup action", () => {
     const workflow = read(CI_WORKFLOW_PATH);
 
-    expect(countOccurrences(workflow, "uses: ./.github/actions/setup-bun-workspace")).toBe(5);
+    expect(
+      countOccurrences(workflow, "uses: ./.github/actions/setup-bun-workspace"),
+    ).toBe(5);
     expect(workflow).toContain('skip-avatar-clone: "true"');
     expect(workflow).toContain('no-vision-deps: "true"');
-    expect(workflow).not.toContain("Run repository postinstall patches\n        run: bun run postinstall");
+    expect(workflow).not.toContain(
+      "Run repository postinstall patches\n        run: bun run postinstall",
+    );
   });
 
   it("uses the shared setup action in test jobs without reintroducing double postinstall", () => {
     const workflow = read(TEST_WORKFLOW_PATH);
 
-    expect(countOccurrences(workflow, "uses: ./.github/actions/setup-bun-workspace")).toBe(6);
+    expect(
+      countOccurrences(workflow, "uses: ./.github/actions/setup-bun-workspace"),
+    ).toBe(6);
     expect(workflow).toContain('run-postinstall: "false"');
     expect(workflow).toContain("install-command: bun install");
-    expect(workflow).toContain('install-command: bun install --frozen-lockfile --ignore-scripts');
+    expect(workflow).toContain(
+      "install-command: bun install --frozen-lockfile --ignore-scripts",
+    );
   });
 });
