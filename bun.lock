@@ -28,7 +28,7 @@
         "@elizaos/plugin-local-embedding": "^2.0.0-alpha.11",
         "@elizaos/plugin-ollama": "^2.0.0-alpha.70",
         "@elizaos/plugin-openai": "2.0.0-alpha.13",
-        "@elizaos/plugin-openrouter": "^2.0.0-alpha.10",
+        "@elizaos/plugin-openrouter": "2.0.0-alpha.10",
         "@elizaos/plugin-pdf": "^2.0.0-alpha.16",
         "@elizaos/plugin-personality": "^2.0.0-alpha.8",
         "@elizaos/plugin-plugin-manager": "^2.0.0-alpha.7",
@@ -822,7 +822,7 @@
 
     "@elizaos/plugin-openai": ["@elizaos/plugin-openai@2.0.0-alpha.13", "", { "dependencies": { "@ai-sdk/openai": "^3.0.9", "@elizaos/core": "alpha", "ai": "^6.0.30", "js-tiktoken": "^1.0.21", "undici": "^7.16.0" }, "peerDependencies": { "zod": "^4.3.6" } }, "sha512-ho6vxXwoU5kdbT8Rl5Y1iZ9yTXqkUcWgXdb2Wpr2/1tIaVP16yG9IrFrd0OAaF4crUX6wWJWQByfnGgxi8/GqA=="],
 
-    "@elizaos/plugin-openrouter": ["@elizaos/plugin-openrouter@2.0.0-alpha.12", "", { "dependencies": { "@ai-sdk/openai": "^3.0.9", "@ai-sdk/ui-utils": "^1.2.8", "@openrouter/ai-sdk-provider": "^1.2.0", "ai": "^6.0.30", "undici": "^7.16.0" }, "peerDependencies": { "@elizaos/core": ">=2.0.0-alpha.98 <3.0.0" } }, "sha512-hxJIlvNuQAMa4TAaN9swE9jqlNBvy4gDMXM35JmbX95wpCOrZ2NYdwwnymoPVeYmZTNtB/rizf53phPpYj/5gw=="],
+    "@elizaos/plugin-openrouter": ["@elizaos/plugin-openrouter@2.0.0-alpha.10", "", { "dependencies": { "@ai-sdk/openai": "^3.0.9", "@ai-sdk/ui-utils": "^1.2.8", "@elizaos/core": "alpha", "@openrouter/ai-sdk-provider": "^1.2.0", "ai": "^6.0.30", "undici": "^7.16.0" } }, "sha512-K75JkVn50Tj21Jl6ODvakDIn9aa9/tKYctR/XGzFCH9yKgBJqewmR7fBCO7/wuFAPQtI36Nj7fE99FFQM0WZHQ=="],
 
     "@elizaos/plugin-pdf": ["@elizaos/plugin-pdf@2.0.0-alpha.16", "", { "dependencies": { "@elizaos/core": "alpha", "unpdf": "^1.4.0" } }, "sha512-zoYWXNl+yQTuCoYCp8tKZ0KctZ0z6sm+yXweqxhchwtqG/iQ1ykBZgzDhqiO2q/nPh5nOf4SatZ3nbyGh3hR2w=="],
 
@@ -2852,7 +2852,7 @@
 
     "levn": ["levn@0.4.1", "", { "dependencies": { "prelude-ls": "^1.2.1", "type-check": "~0.4.0" } }, "sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ=="],
 
-    "libsignal": ["@whiskeysockets/libsignal-node@github:whiskeysockets/libsignal-node#1c30d7d", { "dependencies": { "curve25519-js": "^0.0.4", "protobufjs": "6.8.8" } }, "WhiskeySockets-libsignal-node-1c30d7d", "sha512-5q4/OuDQaMYx3RpDqMqS3WYyqjrsSMpU8ipQZtpYnm5l6DwNoLV9oIYMDK0NILKW+tyk3tVCIA11BMYQ+A1+GA=="],
+    "libsignal": ["@whiskeysockets/libsignal-node@github:whiskeysockets/libsignal-node#1c30d7d", { "dependencies": { "curve25519-js": "^0.0.4", "protobufjs": "6.8.8" } }, "WhiskeySockets-libsignal-node-1c30d7d"],
 
     "lie": ["lie@3.3.0", "", { "dependencies": { "immediate": "~3.0.5" } }, "sha512-UaiMJzeWRlEujzAuw5LokY1L5ecNQYZKfmyZ9L7wDHb/p5etKaxXhohBcrw0EYby+G/NA52vRSN4N39dxHAIwQ=="],
 

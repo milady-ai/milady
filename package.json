@@ -158,7 +158,7 @@
     "@elizaos/plugin-local-embedding": "^2.0.0-alpha.11",
     "@elizaos/plugin-ollama": "^2.0.0-alpha.70",
     "@elizaos/plugin-openai": "2.0.0-alpha.13",
-    "@elizaos/plugin-openrouter": "^2.0.0-alpha.10",
+    "@elizaos/plugin-openrouter": "2.0.0-alpha.10",
     "@elizaos/plugin-pdf": "^2.0.0-alpha.16",
     "@elizaos/plugin-personality": "^2.0.0-alpha.8",
     "@elizaos/plugin-plugin-manager": "^2.0.0-alpha.7",
