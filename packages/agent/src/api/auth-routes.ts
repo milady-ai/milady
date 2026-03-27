@@ -39,16 +39,18 @@ export async function handleAuthRoutes(
   if (!pathname.startsWith("/api/auth/")) return false;
 
   if (method === "GET" && pathname === "/api/auth/status") {
-    const required = Boolean(getConfiguredApiToken());
-
     if (isCloudProvisionedContainer()) {
+      // Steward-managed cloud containers enforce API auth upstream, but the
+      // local pairing flow is intentionally unavailable there. Reporting
+      // required=true would strand app-core clients in PairingView.
       json(res, {
-        required,
+        required: false,
         pairingEnabled: false,
         expiresAt: null,
       });
       return true;
     }
+    const required = Boolean(getConfiguredApiToken());
     const enabled = pairingEnabled();
     if (enabled) ensurePairingCode();
     json(res, {

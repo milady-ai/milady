@@ -127,6 +127,11 @@ describe("Auth bypass (no ELIZA_API_TOKEN)", () => {
     expect(status).toBe(400);
     expect(data.error).toContain("not enabled");
   });
+
+  it("allows unauthenticated WebSocket upgrades when no token is set", async () => {
+    const result = await connectWs(`ws://127.0.0.1:${port}/ws`);
+    expect(result.kind).toBe("open");
+  });
 });
 
 describe("Non-loopback binding enforces auth without explicit token", () => {
@@ -186,6 +191,7 @@ describe("Cloud-provisioned containers bypass local onboarding", () => {
   let port: number;
   let close: () => Promise<void>;
   let envBackup: { restore: () => void };
+  let generatedToken = "";
 
   beforeAll(async () => {
     envBackup = saveEnv(
@@ -195,17 +201,20 @@ describe("Cloud-provisioned containers bypass local onboarding", () => {
       "MILADY_CLOUD_PROVISIONED",
       "ELIZA_CLOUD_PROVISIONED",
       "STEWARD_AGENT_TOKEN",
+      "NODE_ENV",
     );
     delete process.env.ELIZA_API_TOKEN;
     delete process.env.MILADY_API_TOKEN;
     process.env.MILADY_CLOUD_PROVISIONED = "1";
     process.env.STEWARD_AGENT_TOKEN = "steward-token";
+    process.env.NODE_ENV = "production";
     delete process.env.ELIZA_PAIRING_DISABLED;
     delete process.env.ELIZA_CLOUD_PROVISIONED;
 
     const server = await startApiServer({ port: 0 });
     port = server.port;
     close = server.close;
+    generatedToken = process.env.ELIZA_API_TOKEN ?? "";
   }, 30_000);
 
   afterAll(async () => {
@@ -213,13 +222,30 @@ describe("Cloud-provisioned containers bypass local onboarding", () => {
     envBackup.restore();
   });
 
-  it("allows unauthenticated requests", async () => {
-    const { status, data } = await req(port, "GET", "/api/status");
-    expect(status).toBe(200);
-    expect(typeof data.agentName).toBe("string");
+  it("generates an inbound API token even on loopback binds", async () => {
+    expect(generatedToken).toMatch(/^[a-f0-9]{64}$/);
   });
 
-  it("/api/auth/status reports auth not required", async () => {
+  it("rejects unauthenticated API requests", async () => {
+    const { status, data } = await req(port, "GET", "/api/status");
+    expect(status).toBe(401);
+    expect(data.error).toBe("Unauthorized");
+  });
+
+  it("rejects unauthenticated WebSocket upgrades", async () => {
+    const result = await connectWs(`ws://127.0.0.1:${port}/ws`);
+    expect(result.kind).toBe("rejected");
+    if (result.kind === "rejected") {
+      expect(result.status).toBe(401);
+    }
+  });
+
+  it("does not auth-block document requests before the app shell", async () => {
+    const { status } = await req(port, "GET", "/");
+    expect(status).not.toBe(401);
+  });
+
+  it("/api/auth/status does not advertise local pairing auth", async () => {
     const { status, data } = await req(port, "GET", "/api/auth/status");
     expect(status).toBe(200);
     expect(data).toEqual({
@@ -241,6 +267,21 @@ describe("Cloud-provisioned containers bypass local onboarding", () => {
     });
     expect(status).toBe(403);
     expect(data.error).toBe("Pairing disabled");
+  });
+
+  it("accepts the generated token for normal API access", async () => {
+    const { status, data } = await req(port, "GET", "/api/status", undefined, {
+      headers: { Authorization: `Bearer ${generatedToken}` },
+    });
+    expect(status).toBe(200);
+    expect(typeof data.agentName).toBe("string");
+  });
+
+  it("accepts WebSocket upgrades with the generated token", async () => {
+    const result = await connectWs(`ws://127.0.0.1:${port}/ws`, {
+      Authorization: `Bearer ${generatedToken}`,
+    });
+    expect(result.kind).toBe("open");
   });
 });
 
@@ -289,11 +330,11 @@ describe("Cloud-provisioned onboarding survives non-loopback auto-token auth", (
     expect(data.error).toBe("Unauthorized");
   });
 
-  it("reports auth as required when the bind host generated a token", async () => {
+  it("does not advertise local pairing auth when the bind host generated a token", async () => {
     const { status, data } = await req(port, "GET", "/api/auth/status");
     expect(status).toBe(200);
     expect(data).toEqual({
-      required: true,
+      required: false,
       pairingEnabled: false,
       expiresAt: null,
     });

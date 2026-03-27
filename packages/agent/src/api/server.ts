@@ -2554,9 +2554,7 @@ function serveStaticUi(
   if (!root) return false;
 
   // Keep API and WebSocket namespaces exclusively owned by server handlers.
-  if (pathname === "/api" || pathname.startsWith("/api/")) return false;
-  if (pathname === "/v1" || pathname.startsWith("/v1/")) return false;
-  if (pathname === "/ws") return false;
+  if (isAuthProtectedRoute(pathname)) return false;
 
   let decodedPath: string;
   try {
@@ -2629,6 +2627,17 @@ function serveStaticUi(
     html,
   );
   return true;
+}
+
+function isAuthProtectedRoute(pathname: string): boolean {
+  return (
+    pathname === "/api" ||
+    pathname.startsWith("/api/") ||
+    pathname === "/v1" ||
+    pathname.startsWith("/v1/") ||
+    pathname === "/ws" ||
+    pathname.startsWith("/ws/")
+  );
 }
 
 interface ChatGenerationResult {
@@ -6761,15 +6770,22 @@ export function ensureApiTokenForBindHost(host: string): void {
 
   const token = getConfiguredApiToken();
   if (token) return;
-  if (isLoopbackBindHost(host)) return;
+  const cloudProvisioned = isCloudProvisionedContainer();
+  if (!cloudProvisioned && isLoopbackBindHost(host)) return;
 
   const generated = crypto.randomBytes(32).toString("hex");
   process.env.MILADY_API_TOKEN = generated;
   process.env.ELIZA_API_TOKEN = generated;
 
-  logger.warn(
-    `[eliza-api] MILADY_API_BIND/ELIZA_API_BIND=${host} is non-loopback and MILADY_API_TOKEN/ELIZA_API_TOKEN is unset.`,
-  );
+  if (cloudProvisioned) {
+    logger.warn(
+      "[eliza-api] Steward-managed cloud container started without MILADY_API_TOKEN/ELIZA_API_TOKEN; generated a temporary inbound API token for this process.",
+    );
+  } else {
+    logger.warn(
+      `[eliza-api] MILADY_API_BIND/ELIZA_API_BIND=${host} is non-loopback and MILADY_API_TOKEN/ELIZA_API_TOKEN is unset.`,
+    );
+  }
   const tokenFingerprint = `${generated.slice(0, 4)}...${generated.slice(-4)}`;
   logger.warn(
     `[eliza-api] Generated temporary API token (${tokenFingerprint}) for this process. Set MILADY_API_TOKEN or ELIZA_API_TOKEN explicitly to override.`,
@@ -6778,7 +6794,7 @@ export function ensureApiTokenForBindHost(host: string): void {
 
 export function isAuthorized(req: http.IncomingMessage): boolean {
   const expected = getConfiguredApiToken();
-  if (!expected) return true;
+  if (!expected) return !isCloudProvisionedContainer();
   const provided = extractAuthToken(req);
   if (!provided) return false;
   return tokenMatches(expected, provided);
@@ -6965,7 +6981,7 @@ function isWebSocketAuthorized(
   url: URL,
 ): boolean {
   const expected = getConfiguredApiToken();
-  if (!expected) return true;
+  if (!expected) return !isCloudProvisionedContainer();
 
   const handshakeToken = extractWebSocketHandshakeToken(request, url);
   if (!handshakeToken) return false;
@@ -6994,7 +7010,9 @@ export function resolveWebSocketUpgradeRejection(
 
   const expected = getConfiguredApiToken();
   if (!expected) {
-    return null;
+    return isCloudProvisionedContainer()
+      ? { status: 401, reason: "Unauthorized" }
+      : null;
   }
 
   if (
@@ -7006,6 +7024,12 @@ export function resolveWebSocketUpgradeRejection(
 
   const handshakeToken = extractWebSocketHandshakeToken(req, wsUrl);
   if (handshakeToken && !tokenMatches(expected, handshakeToken)) {
+    return { status: 401, reason: "Unauthorized" };
+  }
+
+  // Cloud containers must authenticate at the handshake level because there is
+  // no trusted upstream proxy handling auth for the WebSocket path.
+  if (!handshakeToken && isCloudProvisionedContainer()) {
     return { status: 401, reason: "Unauthorized" };
   }
 
@@ -8513,6 +8537,7 @@ async function handleRequest(
     method === "GET" &&
     pathname === "/api/onboarding/status" &&
     isCloudProvisionedContainer();
+  const isAuthProtectedPath = isAuthProtectedRoute(pathname);
   const registryService = state.registryService;
   const dropService = state.dropService;
 
@@ -8648,15 +8673,28 @@ async function handleRequest(
     return;
   }
 
-  // Serve dashboard static assets before the auth gate.  serveStaticUi
-  // already refuses /api/, /v1/, and /ws paths, so API endpoints remain
-  // fully protected by the token check below.
+  // Serve dashboard static assets before the auth gates. serveStaticUi already
+  // refuses /api/, /v1/, and /ws paths, so API endpoints remain protected
+  // while steward-managed containers can still reach the built-in dashboard.
   if (method === "GET" || method === "HEAD") {
     if (serveStaticUi(req, res, pathname)) return;
   }
 
   if (
+    isCloudProvisionedContainer() &&
     method !== "OPTIONS" &&
+    isAuthProtectedPath &&
+    !isAuthEndpoint &&
+    !isCloudOnboardingStatusEndpoint &&
+    !isAuthorized(req)
+  ) {
+    json(res, { error: "Unauthorized" }, 401);
+    return;
+  }
+
+  if (
+    method !== "OPTIONS" &&
+    isAuthProtectedPath &&
     !isAuthEndpoint &&
     !isCloudOnboardingStatusEndpoint &&
     !isAuthorized(req)
