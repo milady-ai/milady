@@ -23,8 +23,7 @@ import {
 } from "@miladyai/app-core/components";
 import { useApp } from "@miladyai/app-core/state";
 import { confirmDesktopAction } from "@miladyai/app-core/utils";
-import { Button, Checkbox, Input } from "@miladyai/ui";
-import { RefreshCw } from "lucide-react";
+import { Button, Input } from "@miladyai/ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   DESKTOP_INSET_EMPTY_PANEL_CLASSNAME,
@@ -218,13 +217,8 @@ function UploadZone({
         accept=".txt,.md,.mdx,.pdf,.docx,.json,.csv,.xml,.html,.png,.jpg,.jpeg,.webp,.gif"
         onChange={handleFileSelect}
       />
-      <div className="flex items-start justify-between gap-3 px-1">
-        <div className="min-w-0">
-          <div className={KNOWLEDGE_SECTION_LABEL_CLASS}>Add Content</div>
-          <div className="mt-1 text-[11px] leading-relaxed text-muted">
-            Import files or paste a source URL.
-          </div>
-        </div>
+      <div className="flex items-center justify-between gap-3 px-1">
+        <div className={KNOWLEDGE_SECTION_LABEL_CLASS}>add</div>
         <div className={KNOWLEDGE_META_PILL_CLASS}>
           {SUPPORTED_UPLOAD_EXTENSIONS.size} formats
         </div>
@@ -238,7 +232,7 @@ function UploadZone({
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
         >
-          {t("knowledgeview.ChooseFiles")}
+          upload files
         </Button>
         <Button
           variant="outline"
@@ -247,23 +241,14 @@ function UploadZone({
           onClick={() => setShowUrlInput(!showUrlInput)}
           disabled={uploading}
         >
-          {t("knowledgeview.AddFromURL")}
+          add url
         </Button>
       </div>
-      {/* biome-ignore lint/a11y/noLabelWithoutControl: form control is associated programmatically */}
-      <label className="mt-2 inline-flex min-h-11 w-full cursor-pointer items-center gap-2 rounded-xl border border-border/35 bg-bg/18 px-3 text-[11px] leading-relaxed text-muted-strong transition-colors hover:border-border/55 hover:bg-bg/28 hover:text-txt">
-        <Checkbox
-          checked={includeImageDescriptions}
-          onCheckedChange={(checked) => setIncludeImageDescriptions(!!checked)}
-          disabled={uploading}
-        />
-        <span className="min-w-0">{t("knowledgeview.IncludeAIImageDes")}</span>
-      </label>
       <div
-        className={`mt-3 rounded-2xl border px-3 py-3 transition-colors ${
+        className={`mt-3 min-h-[12rem] rounded-2xl border-2 px-3 py-3 transition-colors flex items-center justify-center ${
           dragOver
             ? "border-accent/50 bg-accent/8 shadow-sm"
-            : "border-dashed border-border/35 bg-card/62"
+            : "border-dashed border-border/55 bg-card/62"
         } ${uploading ? "opacity-60" : ""}`}
       >
         {(dragOver || uploading) && (
@@ -277,12 +262,9 @@ function UploadZone({
         )}
 
         {!dragOver && !uploading && !showUrlInput && (
-          <div className="space-y-1 py-1 text-center">
+          <div className="py-1 text-center">
             <div className="text-[11px] font-medium text-muted-strong">
-              Drop files here to upload
-            </div>
-            <div className="text-[10px] text-muted">
-              Docs, PDFs, JSON, CSV, and supported images.
+              drop files or choose files
             </div>
           </div>
         )}
@@ -497,17 +479,11 @@ function DocumentViewer({ documentId }: { documentId: string | null }) {
       <div className="border-b border-border/30 px-5 py-5 sm:px-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0 flex-1">
-            <div className={KNOWLEDGE_KICKER_CLASS}>Viewer</div>
-            <h2 className="mt-1 text-2xl font-semibold text-txt-strong">
+            <h2 className="text-2xl font-semibold text-txt-strong">
               {loading
-                ? "Loading..."
-                : doc?.filename || "Select a document to inspect"}
+                ? "..."
+                : doc?.filename || ""}
             </h2>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-              {doc
-                ? "Review metadata, preview the source, and scan the indexed fragments without leaving the page."
-                : "Pick a document from the sidebar to review its metadata, preview text, and indexed fragments."}
-            </p>
           </div>
           {doc && (
             <div className="flex flex-wrap items-center gap-2 lg:justify-end">
@@ -539,8 +515,8 @@ function DocumentViewer({ documentId }: { documentId: string | null }) {
         {!loading && !error && !doc && (
           <DesktopInsetEmptyStatePanel
             className="px-6 py-16"
-            description="Upload a file or choose an item from the sidebar to start viewing fragments and metadata."
-            title="No document selected"
+            description="upload or select"
+            title="no document"
           />
         )}
 
@@ -1146,21 +1122,18 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
         <aside className={KNOWLEDGE_SIDEBAR_CLASS}>
           <div className={APP_SIDEBAR_INNER_CLASSNAME}>
             <div className={APP_SIDEBAR_HEADER_CLASSNAME}>
-              <div className={KNOWLEDGE_KICKER_CLASS}>Knowledge</div>
+              <div className={KNOWLEDGE_KICKER_CLASS}>knowledge</div>
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-2 px-1">
-              <span className={KNOWLEDGE_META_PILL_CLASS}>
-                {documents.length} {documents.length === 1 ? "doc" : "docs"}
-              </span>
-              <span className={KNOWLEDGE_META_PILL_CLASS}>
-                {totalFragments} fragments
-              </span>
-              {selectedDoc && (
-                <span className="rounded-full border border-accent/25 bg-accent/8 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-txt-strong">
-                  {getKnowledgeTypeLabel(selectedDoc.contentType)}
-                </span>
-              )}
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <div className={`${DESKTOP_INSET_PANEL_CLASSNAME} flex flex-col items-center justify-center px-3 py-3`}>
+                <span className="text-2xl font-bold text-txt-strong">{documents.length}</span>
+                <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">docs</span>
+              </div>
+              <div className={`${DESKTOP_INSET_PANEL_CLASSNAME} flex flex-col items-center justify-center px-3 py-3`}>
+                <span className="text-2xl font-bold text-txt-strong">{totalFragments}</span>
+                <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">fragments</span>
+              </div>
             </div>
 
             <div className="mt-4 border-b border-border/25 pb-4">
@@ -1172,18 +1145,15 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
               />
             </div>
 
-            <div className="mt-4 border-b border-border/25 pb-4">
-              <div className="px-1">
-                <div className={KNOWLEDGE_SECTION_LABEL_CLASS}>Search</div>
-              </div>
+            <div className="mt-4">
               <form
-                className="mt-3 w-full max-w-[500px] flex-[1_1_500px]"
+                className="w-full"
                 onSubmit={handleSearchSubmit}
               >
                 <div className="flex items-stretch gap-2">
                   <Input
                     type="text"
-                    placeholder={t("knowledge.ui.searchPlaceholder")}
+                    placeholder="search docs"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     disabled={searching}
@@ -1196,59 +1166,32 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
                     className="h-10 px-4 text-txt shadow-sm"
                     disabled={!searchQuery.trim() || searching}
                   >
-                    {searching
-                      ? t("knowledge.ui.searching")
-                      : t("knowledge.ui.search")}
+                    {searching ? "..." : "go"}
                   </Button>
                 </div>
               </form>
-              <div className="mt-3 flex flex-wrap items-center gap-2 px-1">
-                <span
-                  className={
-                    isShowingSearchResults
-                      ? "rounded-full border border-accent/25 bg-accent/8 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-txt-strong"
-                      : KNOWLEDGE_META_PILL_CLASS
-                  }
-                >
-                  {isShowingSearchResults
-                    ? `${visibleSearchResults.length} result${visibleSearchResults.length === 1 ? "" : "s"}`
-                    : "Search idle"}
-                </span>
-                {isShowingSearchResults && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 rounded-lg border border-border/35 px-3 text-[11px] font-semibold text-muted hover:border-border/60 hover:bg-bg/35 hover:text-txt"
-                    onClick={() => setSearchResults(null)}
-                  >
-                    Clear
-                  </Button>
-                )}
-              </div>
             </div>
 
             <div className="mt-4 flex min-h-0 flex-1 flex-col">
-              <div className="flex items-center justify-between gap-2 px-1">
-                <div>
-                  <div className={KNOWLEDGE_SECTION_LABEL_CLASS}>
-                    {isShowingSearchResults
-                      ? t("knowledgeview.SearchResults")
-                      : t("knowledgeview.Documents")}
-                  </div>
+              {isShowingSearchResults && (
+                <div className="mb-2 flex items-center justify-between px-1">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
+                    search results
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-[10px] text-muted hover:text-txt"
+                    onClick={() => {
+                      setSearchResults(null);
+                      setSearchQuery("");
+                    }}
+                  >
+                    clear
+                  </Button>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-9 rounded-xl px-3 text-[11px] font-semibold shadow-sm"
-                  onClick={() => void loadData()}
-                  disabled={loading}
-                >
-                  <RefreshCw className="h-4 w-4" />
-                  {loading ? "Loading..." : "Refresh"}
-                </Button>
-              </div>
-
-              <div className="mt-3 min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-3">
+              )}
+              <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-3">
                 {loading &&
                   !isShowingSearchResults &&
                   documents.length === 0 && (
@@ -1264,8 +1207,7 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
                   documents.length === 0 && (
                     <DesktopEmptyStatePanel
                       className="min-h-[12rem] px-4 py-8"
-                      description={t("knowledgeview.UploadFilesOrImpo")}
-                      title={t("knowledgeview.NoDocumentsYet")}
+                      title="no documents yet"
                     />
                   )}
 
@@ -1273,8 +1215,7 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
                   visibleSearchResults.length === 0 && (
                     <DesktopEmptyStatePanel
                       className="min-h-[12rem] px-4 py-8"
-                      description="Try a filename, topic, or phrase from the document body."
-                      title={t("knowledgeview.NoResultsFound")}
+                      title="no results"
                     />
                   )}
 
@@ -1329,18 +1270,24 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
               </div>
             )}
 
-            {selectedDoc && (
-              <section className={`${KNOWLEDGE_PANEL_CLASS} px-5 py-4 sm:px-6`}>
-                <div className="flex items-center justify-between gap-4">
-                  <h2 className="min-w-0 truncate text-lg font-semibold text-txt-strong">
-                    {selectedDoc.filename}
-                  </h2>
-                  <span className="shrink-0 text-[11px] font-semibold text-muted">
-                    {getKnowledgeDocumentSummary(selectedDoc)}
+            <section className={`${KNOWLEDGE_PANEL_CLASS} px-5 py-5 sm:px-6`}>
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div className="min-w-0 flex-1">
+                  <div className={KNOWLEDGE_KICKER_CLASS}>KNOWLEDGE</div>
+                  <h1 className="mt-1 text-2xl font-semibold text-txt-strong">
+                    {selectedDoc?.filename || "workspace"}
+                  </h1>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+                  <span className={KNOWLEDGE_META_PILL_CLASS}>
+                    {documents.length} docs
+                  </span>
+                  <span className={KNOWLEDGE_META_PILL_CLASS}>
+                    {totalFragments} fragments
                   </span>
                 </div>
-              </section>
-            )}
+              </div>
+            </section>
 
             <div className="mt-4">
               <DocumentViewer documentId={selectedDocId} />
