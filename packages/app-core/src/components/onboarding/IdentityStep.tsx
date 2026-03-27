@@ -232,11 +232,37 @@ export function IdentityStep() {
       setImportBusy(true);
       setImportError(null);
       setImportSuccess(null);
-      // Dynamic import to avoid hard dependency on client when server is absent
-      const { client } = await import("@miladyai/app-core/api");
       const fileBuffer = await importFile.arrayBuffer();
-      const result = await client.importAgent(importPassword, fileBuffer);
-      const counts = result.counts;
+      const passwordBytes = new TextEncoder().encode(importPassword);
+      const envelope = new Uint8Array(
+        4 + passwordBytes.length + fileBuffer.byteLength,
+      );
+      const view = new DataView(envelope.buffer);
+      view.setUint32(0, passwordBytes.length, false);
+      envelope.set(passwordBytes, 4);
+      envelope.set(new Uint8Array(fileBuffer), 4 + passwordBytes.length);
+
+      const apiToken = getElizaApiToken()?.trim() ?? "";
+      const response = await fetch(resolveApiUrl("/api/agent/import"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/octet-stream",
+          ...(apiToken ? { Authorization: `Bearer ${apiToken}` } : {}),
+        },
+        body: envelope,
+      });
+
+      const result = (await response.json()) as {
+        error?: string;
+        success?: boolean;
+        agentId?: string;
+        agentName?: string;
+        counts?: Record<string, number>;
+      };
+      if (!result.success) {
+        throw new Error(result.error ?? `Import failed (${response.status})`);
+      }
+      const counts = result.counts ?? {};
       const summary = [
         counts.memories ? `${counts.memories} memories` : null,
         counts.entities ? `${counts.entities} entities` : null,

@@ -12,18 +12,12 @@
  *   - Logs: Runtime log viewer
  */
 
-import {
-  DatabasePageView,
-  LogsPageView,
-  PluginsPageView,
-  RuntimeView,
-  SkillsView,
-} from "@miladyai/app-core/components";
-import type { Tab } from "@miladyai/app-core/navigation";
-import { useApp } from "@miladyai/app-core/state";
 import { Button } from "@miladyai/ui";
 import type React from "react";
 import { useState } from "react";
+import type { Tab } from "../navigation";
+import { useApp } from "../state";
+import { DatabasePageView } from "./DatabasePageView";
 import { DesktopWorkspaceSection } from "./DesktopWorkspaceSection";
 import {
   DESKTOP_PAGE_CONTENT_CLASSNAME,
@@ -34,6 +28,10 @@ import {
 } from "./desktop-surface-primitives";
 import { FineTuningView } from "./FineTuningView";
 import { LifoSandboxView } from "./LifoSandboxView";
+import { LogsPageView } from "./LogsPageView";
+import { PluginsPageView } from "./PluginsPageView";
+import { RuntimeView } from "./RuntimeView";
+import { SkillsView } from "./SkillsView";
 import { TrajectoriesView } from "./TrajectoriesView";
 
 type SubTab =

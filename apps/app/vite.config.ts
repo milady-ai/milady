@@ -22,6 +22,46 @@ const enableAppSourceMaps = process.env.MILADY_APP_SOURCEMAP === "1";
 /** Set by scripts/dev-platform.mjs for `vite build --watch` (Electrobun desktop). */
 const desktopFastDist = process.env.MILADY_DESKTOP_VITE_FAST_DIST === "1";
 
+function pathIncludesAny(id: string, markers: string[]): boolean {
+  return markers.some((marker) => id.includes(marker));
+}
+
+function resolveManualChunk(id: string): string | undefined {
+  const normalizedId = id.split(path.sep).join("/");
+
+  if (normalizedId.includes("/node_modules/")) {
+    if (
+      pathIncludesAny(normalizedId, [
+        "/@react-spring/",
+        "/react-dom/",
+        "/react-is/",
+        "/scheduler/",
+        "/react/",
+      ])
+    ) {
+      return "vendor-react";
+    }
+
+    if (normalizedId.includes("/@pixiv/three-vrm/")) {
+      return "vendor-vrm";
+    }
+
+    if (normalizedId.includes("/@sparkjsdev/spark/")) {
+      return "vendor-spark";
+    }
+
+    if (normalizedId.includes("/three/examples/")) {
+      return "vendor-three-extras";
+    }
+
+    if (pathIncludesAny(normalizedId, ["/three/build/", "/three/src/"])) {
+      return "vendor-three";
+    }
+  }
+
+  return undefined;
+}
+
 /**
  * Dev-only middleware that handles CORS for the desktop custom-scheme origin
  * (electrobun://-). Vite's proxy doesn't reliably forward CORS headers
@@ -673,6 +713,8 @@ export default defineConfig({
     emptyOutDir: !desktopFastDist,
     sourcemap: desktopFastDist ? false : enableAppSourceMaps,
     target: "es2022",
+    // Keep warnings focused on regressions after splitting the heavy 3D vendor surface.
+    chunkSizeWarningLimit: 2300,
     minify: desktopFastDist ? false : undefined,
     cssMinify: desktopFastDist ? false : undefined,
     reportCompressedSize: !desktopFastDist,
@@ -741,9 +783,7 @@ export default defineConfig({
         screenshotter: path.resolve(here, "public_src/screenshotter.html"),
       },
       output: {
-        manualChunks: {
-          "vendor-3d": ["three", "@pixiv/three-vrm", "@sparkjsdev/spark"],
-        },
+        manualChunks: resolveManualChunk,
       },
     },
     commonjsOptions: {

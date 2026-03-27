@@ -10,6 +10,7 @@ import {
   DrawerSheetContent,
   DrawerSheetHeader,
   DrawerSheetTitle,
+  ErrorBoundary,
 } from "@miladyai/ui";
 import {
   type ReactNode,
@@ -23,6 +24,7 @@ import {
   AdvancedPageView,
   AppsPageView,
   AvatarLoader,
+  BugReportModal,
   CharacterEditor,
   ChatView,
   CompanionShell,
@@ -32,13 +34,11 @@ import {
   ConversationsSidebar,
   CustomActionEditor,
   CustomActionsPanel,
-  ErrorBoundary,
   GameViewOverlay,
   Header,
   HeartbeatsView,
   InventoryView,
   KnowledgeView,
-  BugReportModal,
   OnboardingWizard,
   PairingView,
   SaveCommandModal,
@@ -48,7 +48,7 @@ import {
   StartupFailureView,
   StreamView,
   SystemWarningBanner,
-} from "./components";
+} from "./app-shell-components";
 import { CompanionHeader } from "./components/companion/CompanionHeader";
 import { DeferredSetupChecklist } from "./components/FlaminaGuide";
 import {
