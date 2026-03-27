@@ -545,6 +545,7 @@ function SearchableSelectInner({
             {/* Search input */}
             <div className="p-1.5 border-b border-[var(--border)]">
               <input
+                // biome-ignore lint/a11y/noAutofocus: dropdown search needs immediate focus
                 autoFocus
                 className="w-full px-2 py-1.5 border border-[var(--border)] bg-[var(--bg)] text-[12px] font-[var(--mono)] focus:border-[var(--accent)] focus:outline-none rounded-sm"
                 type="text"
