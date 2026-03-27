@@ -3,6 +3,31 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-03-26" description="Dashboard pricing, background mode, desktop UI polish" tags={["Feature", "Update", "Fix"]}>
+## Dashboard pricing info
+
+The cloud [dashboard](/guides/cloud) now shows pricing information before you create an agent. Hosting rates, credit pack options with volume discounts, and minimum deposit requirements are visible on the credits page, the create-agent form, and the empty-agents landing view — so you know what to expect before committing.
+
+## Desktop background mode
+
+Closing the desktop window no longer briefly flashes a replacement window. The agent keeps running in the background and a system notification confirms it. Click the dock icon or any menu/tray action to restore the window instantly.
+
+## Updates
+
+- **Desktop shell consistency** — A broad layout and theme pass brings chat, skills, apps, heartbeats, stream, knowledge, onboarding, companion, and settings surfaces onto a shared chrome system. Spacing, hierarchy, and readability are improved across the board, and the companion composer uses a proper structural container instead of layered visual nudges.
+- **Wallet action feedback** — Wallet actions like balance checks and token transfers now reliably report success or failure in the [trajectory view](/advanced/trajectories), making it easier to trace what happened during a transaction.
+- **Cloud container access** — Cloud-provisioned containers no longer auto-generate an API token that locks out the web UI. Managed deployments are accessible immediately without browser auth until the pairing flow is configured.
+
+## Bug fixes
+
+- Fixed cloud sign-in failing on the hosted homepage — a bare-domain redirect was dropping the POST body during authentication
+- Fixed homepage hero text clipping on mobile screens and the download dropdown closing when moving the cursor from the button to the list
+- Fixed onboarding character preview playing a single default voice instead of the voice associated with each character preset
+- Fixed onboarding voice preview failing entirely when switching characters rapidly
+- Fixed stale timers during embedding cleanup that could cause errors on shutdown
+
+</Update>
+
 <Update label="2026-03-25" description="Coding agent terminals, onboarding identity step, security hardening" tags={["Feature", "Update", "Fix"]}>
 ## Coding agent terminal drawer
 
