@@ -680,6 +680,26 @@ function webSpeechVoiceDebugFields(
   };
 }
 
+function normalizeSpeechLocale(input: string | undefined): string {
+  const trimmed = input?.trim();
+  return trimmed || "en-US";
+}
+
+function localePrefix(locale: string): string {
+  return locale.toLowerCase().split("-")[0] || "en";
+}
+
+function matchesVoiceLocale(
+  voice: SpeechSynthesisVoice,
+  targetLocale: string,
+): boolean {
+  const target = targetLocale.toLowerCase();
+  const voiceLang = voice.lang.toLowerCase();
+  if (voiceLang === target) return true;
+  const base = localePrefix(targetLocale);
+  return voiceLang.startsWith(`${base}-`) || voiceLang === base;
+}
+
 // ── Hook ──────────────────────────────────────────────────────────────
 
 export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
@@ -1509,6 +1529,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
     (text: string, task: SpeakTask, generation: number) => {
       const config = voiceConfigRef.current;
       const synth = synthRef.current;
+      const requestedLocale = normalizeSpeechLocale(options.lang);
       const words = text.trim().split(/\s+/).length;
       const estimatedMs = Math.max(1200, (words / 3) * 1000);
       const useTalkModeTts = !synth && Boolean(getElectrobunRendererRpc());
@@ -1590,6 +1611,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
         }
 
         const utterance = new SpeechSynthesisUtterance(text.trim());
+        utterance.lang = requestedLocale;
         utteranceRef.current = utterance;
 
         let selectedVoice: SpeechSynthesisVoice | undefined;
@@ -1607,7 +1629,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
                 edgeVoiceName.toLowerCase().includes("guy") ||
                 edgeVoiceName.toLowerCase().includes("male");
               selectedVoice = voices.find((v) => {
-                if (!v.lang.startsWith("en")) return false;
+                if (!matchesVoiceLocale(v, requestedLocale)) return false;
                 const nameLower = v.name.toLowerCase();
                 if (isMale) {
                   return (
@@ -1630,6 +1652,22 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
           }
 
           if (!selectedVoice) {
+            if (localePrefix(requestedLocale) === "en") {
+              selectedVoice =
+                voices.find(
+                  (v) =>
+                    matchesVoiceLocale(v, requestedLocale) &&
+                    !v.name.toLowerCase().includes("alex") &&
+                    !v.name.toLowerCase().includes("david"),
+                ) || voices.find((v) => matchesVoiceLocale(v, requestedLocale));
+            } else {
+              selectedVoice = voices.find((v) =>
+                matchesVoiceLocale(v, requestedLocale),
+              );
+            }
+          }
+
+          if (!selectedVoice) {
             selectedVoice =
               voices.find(
                 (v) =>
@@ -1641,6 +1679,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
 
           if (selectedVoice) {
             utterance.voice = selectedVoice;
+            utterance.lang = selectedVoice.lang || requestedLocale;
           }
         }
 
@@ -1652,6 +1691,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
           append: task.append,
           textChars: text.trim().length,
           preview: miladyTtsDebugTextPreview(text),
+          requestedLocale,
           engine: "speechSynthesis",
           ...webSpeechVoiceDebugFields(selectedVoice),
         });
@@ -1665,6 +1705,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
             append: task.append,
             textChars: text.trim().length,
             preview: miladyTtsDebugTextPreview(text),
+            requestedLocale,
             engine: "speechSynthesis-utterance-onstart",
             ...webSpeechVoiceDebugFields(selectedVoice),
           });
@@ -1694,6 +1735,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
             segment: task.segment,
             synthesisError: errEv.error ?? "unknown",
             preview: miladyTtsDebugTextPreview(text),
+            requestedLocale,
             ...webSpeechVoiceDebugFields(selectedVoice),
           });
           endBrowserUtterance();
@@ -1703,7 +1745,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
         speechTimeoutRef.current = setTimeout(finish, estimatedMs + 5000);
       });
     },
-    [clearSpeechTimers],
+    [clearSpeechTimers, options.lang],
   );
 
   const processQueue = useCallback(() => {

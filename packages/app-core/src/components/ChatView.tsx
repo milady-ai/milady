@@ -51,6 +51,25 @@ function nowMs(): number {
   return typeof performance !== "undefined" ? performance.now() : Date.now();
 }
 
+function mapUiLanguageToSpeechLocale(uiLanguage: string): string {
+  switch (uiLanguage) {
+    case "zh-CN":
+      return "zh-CN";
+    case "ko":
+      return "ko-KR";
+    case "es":
+      return "es-ES";
+    case "pt":
+      return "pt-BR";
+    case "vi":
+      return "vi-VN";
+    case "tl":
+      return "fil-PH";
+    default:
+      return "en-US";
+  }
+}
+
 const CHAT_INPUT_MIN_HEIGHT_PX = 46;
 const CHAT_INPUT_MAX_HEIGHT_PX = 200;
 const COMPANION_VISIBLE_MESSAGE_LIMIT = 2;
@@ -329,7 +348,7 @@ function useChatVoiceController(options: {
   const voice = useVoiceChat({
     cloudConnected: cloudVoiceAvailable,
     interruptOnSpeech: isGameModal,
-    lang: uiLanguage === "zh-CN" ? "zh-CN" : "en-US",
+    lang: mapUiLanguageToSpeechLocale(uiLanguage),
     onPlaybackStart: handleVoicePlaybackStart,
     onTranscript: handleVoiceTranscript,
     onTranscriptPreview: handleVoiceTranscriptPreview,
