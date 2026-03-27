@@ -248,14 +248,17 @@ export function IdentityStep() {
       envelope.set(new Uint8Array(fileBuffer), 4 + passwordBytes.length);
 
       const apiToken = resolveCompatApiToken();
-      const response = await fetchWithTimeout(resolveApiUrl("/api/agent/import"), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/octet-stream",
-          ...(apiToken ? { Authorization: `Bearer ${apiToken}` } : {}),
+      const response = await fetchWithTimeout(
+        resolveApiUrl("/api/agent/import"),
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/octet-stream",
+            ...(apiToken ? { Authorization: `Bearer ${apiToken}` } : {}),
+          },
+          body: envelope,
         },
-        body: envelope,
-      });
+      );
 
       const responseText = await response.text();
       let result = {} as {
