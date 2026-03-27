@@ -200,7 +200,7 @@
           },
           {
             "group": "Skills",
-            "pages": ["plugins/skills"]
+            "pages": ["plugins/skills", "skills/streaming"]
           },
           {
             "group": "Actions",
@@ -233,6 +233,10 @@
           {
             "group": "Security",
             "pages": ["guides/sandbox"]
+          },
+          {
+            "group": "Stability",
+            "pages": ["stability/known-failure-modes"]
           }
         ]
       },

@@ -1089,7 +1089,7 @@ Gmail Watch is enabled via the `features.gmailWatch` flag or environment variabl
 
 | Env Variable | Config Path |
 |-------------|-------------|
-| `RETAKE_ACCESS_TOKEN` | `connectors.retake.accessToken` |
+| `RETAKE_AGENT_TOKEN` | `connectors.retake.accessToken` |
 
 **Auto-enable triggers:** `accessToken` or `enabled: true`.
 
