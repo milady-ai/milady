@@ -9,6 +9,7 @@ const {
   resolveVoiceMode,
   resolveVoiceProxyEndpoint,
   toSpeakableText,
+  webSpeechVoiceDebugFields,
 } = __voiceChatInternals;
 
 describe("useVoiceChat streaming text helpers", () => {
@@ -254,6 +255,95 @@ describe("useVoiceChat streaming text helpers", () => {
     const exactPhrase = "The quick brown fox jumps over the lazy dog.";
     const wrapped = `<response><thought>user wants a test</thought><text>${exactPhrase}</text></response>`;
     expect(toSpeakableText(wrapped)).toBe(exactPhrase);
+  });
+});
+
+describe("webSpeechVoiceDebugFields (MILADY_TTS_DEBUG engine guess)", () => {
+  it("classifies Microsoft / Edge style Web Speech voices", () => {
+    const v = {
+      name: "Microsoft Zira - English (United States)",
+      voiceURI: "Microsoft Zira - English (United States)",
+      lang: "en-US",
+      default: false,
+    } as SpeechSynthesisVoice;
+    expect(webSpeechVoiceDebugFields(v).engineGuess).toBe(
+      "microsoft-edge-family",
+    );
+  });
+
+  it("detects msedge in voiceURI", () => {
+    const v = {
+      name: "Custom",
+      voiceURI: "urn:msedge-tts:en-US",
+      lang: "en-US",
+      default: false,
+    } as SpeechSynthesisVoice;
+    expect(webSpeechVoiceDebugFields(v).engineGuess).toBe(
+      "microsoft-edge-family",
+    );
+  });
+
+  it("detects edge-tts in name or URI", () => {
+    const v = {
+      name: "edge-tts neural",
+      voiceURI: "local",
+      lang: "en-US",
+      default: false,
+    } as SpeechSynthesisVoice;
+    expect(webSpeechVoiceDebugFields(v).engineGuess).toBe(
+      "microsoft-edge-family",
+    );
+  });
+
+  it("classifies Apple WebKit voices", () => {
+    const v = {
+      name: "Samantha",
+      voiceURI: "com.apple.speech.synthesis.voice.samantha",
+      lang: "en-US",
+      default: true,
+    } as SpeechSynthesisVoice;
+    const f = webSpeechVoiceDebugFields(v);
+    expect(f.engineGuess).toBe("apple-webkit");
+    expect(f.voiceDefault).toBe(true);
+  });
+
+  it("classifies Google voices", () => {
+    const v = {
+      name: "Google US English",
+      voiceURI: "Google US English",
+      lang: "en-US",
+      default: false,
+    } as SpeechSynthesisVoice;
+    expect(webSpeechVoiceDebugFields(v).engineGuess).toBe("google");
+  });
+
+  it("returns unknown for generic local voices", () => {
+    const v = {
+      name: "Local Voice",
+      voiceURI: "file:///voices/local",
+      lang: "en",
+      default: false,
+    } as SpeechSynthesisVoice;
+    expect(webSpeechVoiceDebugFields(v).engineGuess).toBe("unknown");
+  });
+
+  it("includes voiceLocalService when present on the voice object", () => {
+    const v = {
+      name: "Test",
+      voiceURI: "x",
+      lang: "en",
+      default: false,
+      localService: true,
+    } as SpeechSynthesisVoice;
+    expect(webSpeechVoiceDebugFields(v).voiceLocalService).toBe(true);
+  });
+
+  it("describes missing voice for TTS debug", () => {
+    expect(webSpeechVoiceDebugFields(undefined)).toEqual({
+      voiceName: "(engine default)",
+      voiceURI: "(none)",
+      engineGuess: "unknown",
+    });
   });
 });
 

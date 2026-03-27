@@ -4,7 +4,8 @@
  * user-visible spoken text — disable in shared logs / production.
  *
  * Playback phases (browser console): `play:web-audio:start|end` (ElevenLabs /
- * cloud MP3), `play:browser:speechSynthesis:start|end`, `play:talkmode:dispatch`,
+ * cloud MP3), `speakBrowser:enter`, `play:browser:web-speech:enqueued`,
+ * `play:browser:speechSynthesis:start|end|error`, `play:talkmode:dispatch|speak-failed`,
  * `play:browser:no-synth`. Server logs: `server:cloud-tts:*` (includes optional
  * `messageId`, `clipSegment`, `hearingFull` when the client sends
  * `x-milady-tts-*` headers on `/api/tts/cloud`), ChatView: `chat:*`.

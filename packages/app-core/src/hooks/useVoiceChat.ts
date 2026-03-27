@@ -575,6 +575,7 @@ export const __voiceChatInternals = {
   resolveVoiceMode,
   resolveVoiceProxyEndpoint,
   toSpeakableText,
+  webSpeechVoiceDebugFields,
   ASSISTANT_TTS_FIRST_FLUSH_CHARS,
   ASSISTANT_TTS_MIN_CHUNK_CHARS,
 };
@@ -589,6 +590,44 @@ function shouldPreferNativeTalkMode(): boolean {
   if (typeof window === "undefined") return false;
   if (getElectrobunRendererRpc()) return true;
   return Capacitor.isNativePlatform();
+}
+
+/** MILADY_TTS_DEBUG fields for OS/browser SpeechSynthesis (often Microsoft Edge on Windows). */
+function webSpeechVoiceDebugFields(
+  voice: SpeechSynthesisVoice | undefined,
+): Record<string, string | boolean | undefined> {
+  if (!voice) {
+    return {
+      voiceName: "(engine default)",
+      voiceURI: "(none)",
+      engineGuess: "unknown",
+    };
+  }
+  const blob = `${voice.voiceURI} ${voice.name}`.toLowerCase();
+  let engineGuess = "unknown";
+  if (
+    blob.includes("microsoft") ||
+    blob.includes("msedge") ||
+    blob.includes("edge-tts")
+  ) {
+    engineGuess = "microsoft-edge-family";
+  } else if (blob.includes("com.apple")) {
+    engineGuess = "apple-webkit";
+  } else if (blob.includes("google")) {
+    engineGuess = "google";
+  }
+  const extended = voice as SpeechSynthesisVoice & { localService?: boolean };
+  return {
+    voiceName: voice.name,
+    voiceURI: voice.voiceURI,
+    voiceLang: voice.lang,
+    voiceDefault: voice.default,
+    voiceLocalService:
+      typeof extended.localService === "boolean"
+        ? extended.localService
+        : undefined,
+    engineGuess,
+  };
 }
 
 // ── Hook ──────────────────────────────────────────────────────────────
@@ -1423,6 +1462,23 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
       const synth = synthRef.current;
       const words = text.trim().split(/\s+/).length;
       const estimatedMs = Math.max(1200, (words / 3) * 1000);
+      const useTalkModeTts = !synth && Boolean(getElectrobunRendererRpc());
+
+      miladyTtsDebug("speakBrowser:enter", {
+        path: synth
+          ? "speechSynthesis"
+          : useTalkModeTts
+            ? "talkmode-bridge"
+            : "no-synth-timer-only",
+        segment: task.segment,
+        append: task.append,
+        textChars: text.trim().length,
+        preview: miladyTtsDebugTextPreview(text),
+        voiceConfigProvider: config?.provider ?? null,
+        ...(config?.provider === "edge" && config.edge?.voice
+          ? { edgeVoiceSetting: config.edge.voice }
+          : {}),
+      });
 
       return new Promise<void>((resolve) => {
         let finished = false;
@@ -1446,12 +1502,22 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
               append: task.append,
               textChars: text.trim().length,
               preview: miladyTtsDebugTextPreview(text),
+              engine: "native-talkmode-bridge",
+              note: "No window.speechSynthesis — routing TTS to main-process talkmodeSpeak",
             });
             void invokeDesktopBridgeRequest<void>({
               rpcMethod: "talkmodeSpeak",
               ipcChannel: "talkmode:speak",
               params: { text: text.trim() },
             }).catch((err: unknown) => {
+              miladyTtsDebug("play:talkmode:speak-failed", {
+                segment: task.segment,
+                preview: miladyTtsDebugTextPreview(text),
+                err:
+                  err instanceof Error
+                    ? `${err.name}: ${err.message.slice(0, 200)}`
+                    : String(err).slice(0, 200),
+              });
               console.warn("[useVoiceChat] Desktop speech bridge failed:", err);
             });
           } else {
@@ -1459,6 +1525,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
               segment: task.segment,
               textChars: text.trim().length,
               preview: miladyTtsDebugTextPreview(text),
+              engine: "none",
               note: "No SpeechSynthesis — playback may be silent until Talk Mode or synth is available",
             });
           }
@@ -1531,6 +1598,15 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
         utterance.rate = 1.0;
         utterance.pitch = 1.0;
 
+        miladyTtsDebug("play:browser:web-speech:enqueued", {
+          segment: task.segment,
+          append: task.append,
+          textChars: text.trim().length,
+          preview: miladyTtsDebugTextPreview(text),
+          engine: "speechSynthesis",
+          ...webSpeechVoiceDebugFields(selectedVoice),
+        });
+
         const browserPlayStartMsRef = { value: 0 };
         utterance.onstart = () => {
           if (generation !== generationRef.current) return;
@@ -1540,8 +1616,8 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
             append: task.append,
             textChars: text.trim().length,
             preview: miladyTtsDebugTextPreview(text),
-            voice: selectedVoice?.name ?? "(default)",
-            lang: selectedVoice?.lang ?? utterance.lang,
+            engine: "speechSynthesis-utterance-onstart",
+            ...webSpeechVoiceDebugFields(selectedVoice),
           });
           emitPlaybackStart({
             text,
@@ -1563,7 +1639,16 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
           finish();
         };
         utterance.onend = endBrowserUtterance;
-        utterance.onerror = endBrowserUtterance;
+        utterance.onerror = (ev) => {
+          const errEv = ev as SpeechSynthesisErrorEvent;
+          miladyTtsDebug("play:browser:speechSynthesis:error", {
+            segment: task.segment,
+            synthesisError: errEv.error ?? "unknown",
+            preview: miladyTtsDebugTextPreview(text),
+            ...webSpeechVoiceDebugFields(selectedVoice),
+          });
+          endBrowserUtterance();
+        };
         synth.speak(utterance);
 
         speechTimeoutRef.current = setTimeout(finish, estimatedMs + 5000);
@@ -1635,6 +1720,8 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
                     : String(error).slice(0, 200),
                 ttsTarget: describeTtsCloudFetchTargetForDebug(),
                 hadBearer: Boolean(getElizaApiToken()?.trim()),
+                nextPath:
+                  "speakBrowser (Web Speech / Microsoft Edge voice or talkmode bridge)",
               });
               usingAudioAnalysisRef.current = false;
               setUsingAudioAnalysis(false);
@@ -1645,6 +1732,8 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
             miladyTtsDebug("processQueue:browser-tts-direct", {
               reason: elConfig ? "provider_not_elevenlabs" : "missing_elevenlabs_config",
               provider: config?.provider ?? null,
+              nextPath:
+                "speakBrowser — OS Web Speech (often msedge/Microsoft) or Electrobun talkmode",
             });
           }
 
