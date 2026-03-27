@@ -5357,6 +5357,7 @@ export class MiladyClient {
   async checkBugReportInfo(): Promise<{
     nodeVersion?: string;
     platform?: string;
+    submissionMode?: "remote" | "github" | "fallback";
   }> {
     return this.fetch("/api/bug-report/info");
   }
@@ -5370,7 +5371,24 @@ export class MiladyClient {
     nodeVersion?: string;
     modelProvider?: string;
     logs?: string;
-  }): Promise<{ url?: string; fallback?: string }> {
+    category?: "general" | "startup-failure";
+    appVersion?: string;
+    releaseChannel?: string;
+    startup?: {
+      reason?: string;
+      phase?: string;
+      message?: string;
+      detail?: string;
+      status?: number;
+      path?: string;
+    };
+  }): Promise<{
+    accepted?: boolean;
+    id?: string;
+    url?: string;
+    fallback?: string;
+    destination?: "remote" | "github" | "fallback";
+  }> {
     return this.fetch("/api/bug-report", {
       method: "POST",
       body: JSON.stringify(report),

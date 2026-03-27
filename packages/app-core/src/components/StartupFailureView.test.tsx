@@ -9,6 +9,16 @@ const { mockUseApp, mockUseBranding, openBugReportMock } = vi.hoisted(() => ({
   openBugReportMock: vi.fn(),
 }));
 
+vi.mock("../api", () => ({
+  client: {
+    checkBugReportInfo: vi.fn().mockResolvedValue({
+      nodeVersion: "v22.0.0",
+      platform: "win32",
+    }),
+    submitBugReport: vi.fn().mockResolvedValue({ accepted: true }),
+  },
+}));
+
 vi.mock("../state", () => ({
   useApp: () => mockUseApp(),
 }));
@@ -53,6 +63,7 @@ describe("StartupFailureView", () => {
         <StartupFailureView
           error={{
             reason: "agent-error",
+            phase: "initializing-agent",
             message: "The agent process exited unexpectedly.",
             detail: "stack trace",
           }}
@@ -113,6 +124,7 @@ describe("StartupFailureView", () => {
         <StartupFailureView
           error={{
             reason: "backend-unreachable",
+            phase: "starting-backend",
             message: "Failed to reach the app backend.",
             detail: null,
           }}
