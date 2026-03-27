@@ -1163,6 +1163,55 @@ jobs:
             Write-Host "Compressed: ${originalMB}MB -> ${compressedMB}MB"
           }
 
+      - name: Prepare public canary Windows installer artifact
+        if: matrix.platform.os == 'windows' && needs.prepare.outputs.env == 'canary'
+        shell: pwsh
+        run: |
+          $artifactsDir = Join-Path $PWD "apps/app/electrobun/artifacts"
+          $publicCanaryDir = Join-Path $artifactsDir "public-canary-installer"
+          Remove-Item $publicCanaryDir -Recurse -Force -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Force -Path $publicCanaryDir | Out-Null
+
+          $canonicalInstallerZips = Get-ChildItem -Path $artifactsDir -File -Filter "Milady-Setup-*.exe.zip" -ErrorAction SilentlyContinue |
+            Sort-Object LastWriteTime -Descending
+          if (-not $canonicalInstallerZips) {
+            Write-Error "No canonical Windows installer zip found for canary artifact publishing."
+            exit 1
+          }
+          if ($canonicalInstallerZips.Count -gt 1) {
+            Write-Error "Multiple canonical Windows installer zips found for canary artifact publishing."
+            $canonicalInstallerZips | ForEach-Object { Write-Host "  - $($_.FullName)" }
+            exit 1
+          }
+
+          $canonicalInstallerZip = $canonicalInstallerZips | Select-Object -First 1
+          Expand-Archive -Path $canonicalInstallerZip.FullName -DestinationPath $publicCanaryDir -Force
+
+          $publicInstallers = Get-ChildItem -Path $publicCanaryDir -File -Filter "Milady-Setup-*.exe" -ErrorAction SilentlyContinue |
+            Sort-Object LastWriteTime -Descending
+          if (-not $publicInstallers) {
+            Write-Error "Failed to expand a public Windows installer from $($canonicalInstallerZip.FullName)"
+            exit 1
+          }
+          if ($publicInstallers.Count -gt 1) {
+            Write-Error "Expanded canary installer artifact contains multiple public installers."
+            $publicInstallers | ForEach-Object { Write-Host "  - $($_.FullName)" }
+            exit 1
+          }
+
+          $publicInstaller = $publicInstallers | Select-Object -First 1
+          Write-Host "Prepared public canary installer artifact: $($publicInstaller.FullName)"
+
+      - name: Upload public canary installer artifact
+        if: matrix.platform.os == 'windows' && needs.prepare.outputs.env == 'canary'
+        uses: actions/upload-artifact@v4
+        with:
+          name: electrobun-${{ matrix.platform.artifact-name }}-public-installer
+          path: apps/app/electrobun/artifacts/public-canary-installer/Milady-Setup-*.exe
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:

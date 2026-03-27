@@ -720,6 +720,34 @@ describe("Electrobun release workflow drift", () => {
     );
   });
 
+  it("publishes a plain Windows installer artifact for canary builds", () => {
+    const workflow = fs.readFileSync(WORKFLOW_PATH, "utf8");
+
+    expect(workflow).toContain(
+      "name: Prepare public canary Windows installer artifact",
+    );
+    expect(workflow).toContain(
+      "if: matrix.platform.os == 'windows' && needs.prepare.outputs.env == 'canary'",
+    );
+    expect(workflow).toContain(
+      '$canonicalInstallerZips = Get-ChildItem -Path $artifactsDir -File -Filter "Milady-Setup-*.exe.zip"',
+    );
+    expect(workflow).toContain(
+      "Expand-Archive -Path $canonicalInstallerZip.FullName -DestinationPath $publicCanaryDir -Force",
+    );
+    expect(workflow).toContain(
+      '$publicInstallers = Get-ChildItem -Path $publicCanaryDir -File -Filter "Milady-Setup-*.exe"',
+    );
+    expect(workflow).toContain("name: Upload public canary installer artifact");
+    expect(workflow).toContain(
+      "name: electrobun-$" +
+        "{{ matrix.platform.artifact-name }}-public-installer",
+    );
+    expect(workflow).toContain(
+      "path: apps/app/electrobun/artifacts/public-canary-installer/Milady-Setup-*.exe",
+    );
+  });
+
   it("seeds the Windows embedding model cache before packaged smoke", () => {
     const workflow = fs.readFileSync(WORKFLOW_PATH, "utf8");
 
