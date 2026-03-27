@@ -28,7 +28,7 @@ const autonomousElizaPathCandidates = [
   "packages/agent/src/runtime/eliza.ts",
 ] as const;
 const requiredWorkflowSnippets = [
-  'BUN_VERSION: "1.3.10"',
+  'BUN_VERSION: "1.3.9"',
   "workflow_call:",
   "name: Validate Release Inputs",
   "bun-version: $" + "{{ env.BUN_VERSION }}",
@@ -155,7 +155,7 @@ const requiredElectrobunPrWorkflowSnippets = [
   "workflow_dispatch:",
   "permissions:",
   "contents: read",
-  'BUN_VERSION: "1.3.10"',
+  'BUN_VERSION: "1.3.9"',
   "name: Release Workflow Contract",
   "bun install --frozen-lockfile --ignore-scripts",
   "bun run postinstall",

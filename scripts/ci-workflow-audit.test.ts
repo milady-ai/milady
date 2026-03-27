@@ -15,7 +15,7 @@ function readWorkflow(name: string): string {
 }
 
 describe("CI workflow audit regressions", () => {
-  it("electrobun workflows use BUN_VERSION 1.3.10", () => {
+  it("electrobun workflows pin BUN_VERSION 1.3.9 (Windows frozen-lockfile workaround)", () => {
     const files = [
       "release-electrobun.yml",
       "release-electrobun-build-linux-x64-testbox.yml",
@@ -26,7 +26,7 @@ describe("CI workflow audit regressions", () => {
       const content = readWorkflow(f);
       const match = content.match(/BUN_VERSION:\s*"([^"]+)"/);
       expect(match, `${f} should declare BUN_VERSION`).toBeTruthy();
-      expect(match![1]).toBe("1.3.10");
+      expect(match![1]).toBe("1.3.9");
     }
   });
 

@@ -212,7 +212,7 @@ jobs:
 
       - name: Run Claude to implement
         id: claude
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@094bd24d575e7b30ac1576024817bf1a97c81262 # v1
         env:
           NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org'
           ISSUE_NUMBER: ${{ github.event.issue.number }}

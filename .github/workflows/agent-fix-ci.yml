@@ -225,7 +225,7 @@ jobs:
             });
 
       - name: Run Claude to fix CI
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@094bd24d575e7b30ac1576024817bf1a97c81262 # v1
         env:
           NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org'
           PR_NUMBER: ${{ needs.should-fix.outputs.pr_number }}
