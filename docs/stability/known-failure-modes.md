@@ -1,3 +1,7 @@
+---
+title: Known Failure Modes
+---
+
 # Known Failure Modes
 
 This document catalogs known failure modes across the Milady system, organized by subsystem. Each entry describes the observable symptoms, underlying root cause, any current mitigation in place, and the remaining gap or risk.
