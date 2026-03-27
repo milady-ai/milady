@@ -46,7 +46,23 @@ runs:
     - name: Install native dependencies
       if: ${{ inputs.install-native-deps == 'true' }}
       shell: bash
-      run: sudo apt-get update && sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev libpixman-1-dev librsvg2-dev
+      run: |
+        # Blacksmith runners can intermittently fail reaching Ubuntu mirrors over IPv6.
+        # Force IPv4 and retry apt commands to make CI setup resilient.
+        APT_ARGS=(-o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30)
+        for attempt in 1 2 3; do
+          if sudo apt-get "${APT_ARGS[@]}" update && \
+             sudo apt-get "${APT_ARGS[@]}" install -y --fix-missing \
+               build-essential libcairo2-dev libpango1.0-dev libjpeg-dev \
+               libgif-dev libpixman-1-dev librsvg2-dev; then
+            break
+          fi
+          if [ "$attempt" -eq 3 ]; then
+            echo "apt install failed after ${attempt} attempts"
+            exit 1
+          fi
+          sleep $((attempt * 10))
+        done
 
     - name: Setup Bun
       uses: oven-sh/setup-bun@v2
