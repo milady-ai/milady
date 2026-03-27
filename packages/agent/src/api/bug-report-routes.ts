@@ -77,10 +77,38 @@ interface BugReportBody {
   nodeVersion?: string;
   modelProvider?: string;
   logs?: string;
+  category?: "general" | "startup-failure";
+  appVersion?: string;
+  releaseChannel?: string;
+  startup?: {
+    reason?: string;
+    phase?: string;
+    message?: string;
+    detail?: string;
+    status?: number;
+    path?: string;
+  };
 }
 
 export function sanitize(input: string, maxLen = 10_000): string {
   return input.replace(/<[^>]*>/g, "").slice(0, maxLen);
+}
+
+function redactSecrets(input: string, maxLen = 10_000): string {
+  const sanitized = sanitize(input, maxLen);
+  return sanitized
+    .replace(
+      /\b(0x[a-fA-F0-9]{64}|[A-Za-z0-9+/]{80,}={0,2})\b/g,
+      "[redacted-secret]",
+    )
+    .replace(
+      /\b(sk-[A-Za-z0-9_-]{10,}|ghp_[A-Za-z0-9]{20,}|xox[baprs]-[A-Za-z0-9-]{10,})\b/g,
+      "[redacted-token]",
+    )
+    .replace(
+      /\b(mnemonic|private[_ -]?key|seed phrase)\b\s*[:=]\s*.+/gi,
+      "$1: [redacted]",
+    );
 }
 
 function formatIssueBody(body: BugReportBody): string {
@@ -105,9 +133,125 @@ function formatIssueBody(body: BugReportBody): string {
     sections.push(`### Model Provider\n\n${sanitize(body.modelProvider, 200)}`);
   }
   if (body.logs) {
-    sections.push(`### Logs\n\n\`\`\`\n${sanitize(body.logs, 50_000)}\n\`\`\``);
+    sections.push(
+      `### Logs\n\n\`\`\`\n${redactSecrets(body.logs, 50_000)}\n\`\`\``,
+    );
+  }
+  if (body.startup) {
+    sections.push(
+      `### Startup Context\n\n\`\`\`json\n${JSON.stringify(
+        {
+          reason: body.startup.reason,
+          phase: body.startup.phase,
+          status: body.startup.status,
+          path: body.startup.path,
+        },
+        null,
+        2,
+      )}\n\`\`\``,
+    );
   }
   return sections.join("\n\n");
+}
+
+function getBugReportMode(): "remote" | "github" | "fallback" {
+  if (getRemoteBugReportUrl()) return "remote";
+  if (process.env.GITHUB_TOKEN) return "github";
+  return "fallback";
+}
+
+function getRemoteBugReportUrl(): string | undefined {
+  return (
+    process.env.MILADY_BUG_REPORT_API_URL ??
+    process.env.ELIZA_CLOUD_BUG_REPORT_URL
+  );
+}
+
+function getRemoteBugReportToken(): string | undefined {
+  return (
+    process.env.MILADY_BUG_REPORT_API_TOKEN ??
+    process.env.ELIZA_CLOUD_BUG_REPORT_TOKEN
+  );
+}
+
+async function submitToRemoteBugIntake(body: BugReportBody) {
+  const remoteBugReportUrl = getRemoteBugReportUrl();
+  if (!remoteBugReportUrl) return null;
+  const payload = {
+    source: "milady-desktop",
+    submittedAt: new Date().toISOString(),
+    category: body.category ?? "general",
+    description: sanitize(body.description, 500),
+    stepsToReproduce: sanitize(body.stepsToReproduce, 10_000),
+    expectedBehavior: body.expectedBehavior
+      ? sanitize(body.expectedBehavior, 10_000)
+      : undefined,
+    actualBehavior: body.actualBehavior
+      ? sanitize(body.actualBehavior, 10_000)
+      : undefined,
+    environment: body.environment ? sanitize(body.environment, 200) : undefined,
+    nodeVersion: body.nodeVersion ? sanitize(body.nodeVersion, 200) : undefined,
+    modelProvider: body.modelProvider
+      ? sanitize(body.modelProvider, 200)
+      : undefined,
+    appVersion: body.appVersion ? sanitize(body.appVersion, 200) : undefined,
+    releaseChannel: body.releaseChannel
+      ? sanitize(body.releaseChannel, 200)
+      : undefined,
+    logs: body.logs ? redactSecrets(body.logs, 50_000) : undefined,
+    startup: body.startup
+      ? {
+          reason: body.startup.reason
+            ? sanitize(body.startup.reason, 120)
+            : undefined,
+          phase: body.startup.phase
+            ? sanitize(body.startup.phase, 120)
+            : undefined,
+          message: body.startup.message
+            ? redactSecrets(body.startup.message, 1_000)
+            : undefined,
+          detail: body.startup.detail
+            ? redactSecrets(body.startup.detail, 10_000)
+            : undefined,
+          status: body.startup.status,
+          path: body.startup.path
+            ? sanitize(body.startup.path, 500)
+            : undefined,
+        }
+      : undefined,
+  };
+
+  const response = await fetch(remoteBugReportUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(getRemoteBugReportToken()
+        ? { Authorization: `Bearer ${getRemoteBugReportToken()}` }
+        : {}),
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Remote intake error (${response.status})`);
+  }
+
+  const contentType = response.headers.get("content-type") ?? "";
+  if (contentType.includes("application/json")) {
+    const data = (await response.json()) as {
+      id?: string;
+      url?: string;
+      accepted?: boolean;
+    };
+    return {
+      accepted: data.accepted ?? true,
+      id: data.id,
+      url: data.url,
+      destination: "remote" as const,
+    };
+  }
+
+  return { accepted: true, destination: "remote" as const };
 }
 
 export async function handleBugReportRoutes(
@@ -122,6 +266,7 @@ export async function handleBugReportRoutes(
     json(res, {
       nodeVersion: process.version,
       platform: os.platform(),
+      submissionMode: getBugReportMode(),
     });
     return true;
   }
@@ -137,6 +282,20 @@ export async function handleBugReportRoutes(
 
     if (!body.description?.trim() || !body.stepsToReproduce?.trim()) {
       error(res, "description and stepsToReproduce are required", 400);
+      return true;
+    }
+
+    if (getRemoteBugReportUrl()) {
+      try {
+        const result = await submitToRemoteBugIntake(body);
+        if (!result) {
+          error(res, "Failed to submit bug report", 502);
+          return true;
+        }
+        json(res, result);
+      } catch {
+        error(res, "Failed to submit bug report", 502);
+      }
       return true;
     }
 

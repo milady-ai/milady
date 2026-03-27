@@ -70,14 +70,25 @@ const modalTextareaClassName =
 
 const subtleMonoDescriptionClassName = "font-mono text-[11px] text-muted";
 
+function normalizeHttpsResultUrl(url?: string): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" ? parsed.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
 export function BugReportModal() {
   const { copyToClipboard, t } = useApp();
   const desktopRuntime = isElectrobunRuntime();
   const branding = useBranding();
-  const { isOpen, close } = useBugReport();
+  const { isOpen, draft, close } = useBugReport();
   const [form, setForm] = useState<BugReportForm>(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
+  const [acceptedWithoutUrl, setAcceptedWithoutUrl] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showLogs, setShowLogs] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -99,6 +110,7 @@ export function BugReportModal() {
     setForm(EMPTY_FORM);
     setSubmitting(false);
     setResultUrl(null);
+    setAcceptedWithoutUrl(false);
     setErrorMsg(null);
     setShowLogs(false);
     setCopied(false);
@@ -113,20 +125,22 @@ export function BugReportModal() {
       .checkBugReportInfo()
       .then((info) => {
         if (cancelled) return;
-        if (info.nodeVersion)
-          setForm((f) => ({ ...f, nodeVersion: info.nodeVersion ?? "" }));
-        if (info.platform)
-          setForm((f) => ({
-            ...f,
-            environment:
-              info.platform === "darwin"
-                ? "macOS"
-                : info.platform === "win32"
-                  ? "Windows"
-                  : info.platform === "linux"
-                    ? "Linux"
-                    : "Other",
-          }));
+        setForm((f) => ({
+          ...f,
+          ...(info.nodeVersion ? { nodeVersion: info.nodeVersion ?? "" } : {}),
+          ...(info.platform
+            ? {
+                environment:
+                  info.platform === "darwin"
+                    ? "macOS"
+                    : info.platform === "win32"
+                      ? "Windows"
+                      : info.platform === "linux"
+                        ? "Linux"
+                        : "Other",
+              }
+            : {}),
+        }));
       })
       .catch((err: unknown) => {
         console.warn("[BugReportModal] Failed to fetch bug report info:", err);
@@ -161,6 +175,14 @@ export function BugReportModal() {
       cancelled = true;
     };
   }, [desktopRuntime, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || !draft) return;
+    setForm((f) => ({
+      ...f,
+      ...draft,
+    }));
+  }, [draft, isOpen]);
 
   useEffect(() => {
     if (!resultUrl) return;
@@ -256,8 +278,11 @@ export function BugReportModal() {
         modelProvider: form.modelProvider,
         logs: buildCombinedLogs(),
       });
-      if (result.url) {
-        setResultUrl(result.url);
+      const safeResultUrl = normalizeHttpsResultUrl(result.url);
+      if (safeResultUrl) {
+        setResultUrl(safeResultUrl);
+      } else if (result.accepted) {
+        setAcceptedWithoutUrl(true);
       } else if (result.fallback) {
         // No GITHUB_TOKEN on server — copy report and open GitHub manually
         let ok = false;
@@ -336,7 +361,7 @@ export function BugReportModal() {
     form.description.trim() && form.stepsToReproduce.trim() && !submitting;
 
   // Success state
-  if (resultUrl) {
+  if (resultUrl || acceptedWithoutUrl) {
     return (
       <Dialog
         open={isOpen}
@@ -359,16 +384,24 @@ export function BugReportModal() {
           </DialogHeader>
           <div className="space-y-3 px-5 py-6 text-center">
             <p className="text-sm text-txt">
-              {t("bugreportmodal.YourBugReportHas")}
+              {acceptedWithoutUrl
+                ? "Your report was received."
+                : t("bugreportmodal.YourBugReportHas")}
             </p>
-            <a
-              href={resultUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="break-all text-sm font-medium text-accent underline-offset-4 hover:underline"
-            >
-              {resultUrl}
-            </a>
+            {resultUrl ? (
+              <a
+                href={resultUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="break-all text-sm font-medium text-accent underline-offset-4 hover:underline"
+              >
+                {resultUrl}
+              </a>
+            ) : (
+              <p className="text-xs text-muted">
+                Diagnostics were shared successfully.
+              </p>
+            )}
           </div>
           <DialogFooter className="border-t border-border/70 px-5 py-4 sm:justify-end">
             <Button variant="outline" size="sm" onClick={close}>
