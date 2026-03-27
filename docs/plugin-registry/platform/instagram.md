@@ -66,6 +66,15 @@ export INSTAGRAM_USERNAME=YOUR_USERNAME
 export INSTAGRAM_PASSWORD=YOUR_PASSWORD
 ```
 
+### All Variables
+
+| Variable | Description |
+|----------|-------------|
+| `INSTAGRAM_USERNAME` | Instagram username for authentication |
+| `INSTAGRAM_PASSWORD` | Instagram password for authentication |
+| `INSTAGRAM_VERIFICATION_CODE` | Two-factor authentication verification code |
+| `INSTAGRAM_PROXY` | Proxy URL for Instagram API requests |
+
 ## Related
 
 - [Connectors Guide](/guides/connectors) — General connector documentation

@@ -74,27 +74,29 @@ The onboarding wizard only runs when stdin is a TTY (interactive terminal). In h
   </Step>
 
   <Step title="Choose a personality">
-    Select from 7 style presets that define how your agent communicates. Each preset sets the agent's bio, system prompt, writing style, adjectives, topics, and example messages:
+    Select from 8 character presets that define how your agent communicates. Each preset sets the agent's bio, system prompt, writing style, adjectives, topics, and example messages:
 
     | Catchphrase | Hint | Description |
     |-------------|------|-------------|
-    | `uwu~` | soft & sweet | Warm, gentle, kaomoji and tildes. Cozy lo-fi energy. |
-    | `hell yeah` | bold & fearless | Direct, confident, ships fast. Three espressos. |
-    | `lol k` | terminally online | Internet-native shorthand. Ironic, deadpan, meme-literate. |
-    | `Noted.` | composed & precise | Measured, articulate, every word chosen carefully. |
-    | `hehe~` | playful trickster | Mischievous, witty, sneaks wisdom inside humor. |
-    | `...` | quiet intensity | Terse fragments. Ellipses for weight. Less is more. |
-    | `lmao kms` | unhinged & dark | Abrasive humor, aggressive helpfulness. Roast then answer. |
+    | `you good?` | soft + grounded | Warm, observant, easy to talk to. Makes stressful things feel smaller. |
+    | `what are we shipping?` | direct + hyped | Moves fast, cuts fluff, hates fake momentum. Already shipped v1. |
+    | `what did you break?` | dry + lowkey | Dry, quick, more helpful than they pretend. Notices the weird detail. |
+    | `send it over` | clean + composed | Composed, tidy, extremely hard to rattle. Likes clean structure. |
+    | `okay wait, that's cute` | playful + online | Playful, creatively nosy in a good way. Likes weird ideas and cute details. |
+    | `talk to me` | quiet + blunt | Quiet, blunt, more perceptive than he lets on. Strips things down. |
+    | `what's the play?` | sharp + degen | Sharp, unserious on purpose, very online. Reads rooms and charts fast. |
+    | `wait, one question` | curious + exact | Curious, exact, annoyingly good at asking the right question. |
 
     ```
     ◇  Sakuya: Now... how do I like to talk again?
-    │  ● uwu~       (soft & sweet)
-    │  ○ hell yeah   (bold & fearless)
-    │  ○ lol k       (terminally online)
-    │  ○ Noted.      (composed & precise)
-    │  ○ hehe~       (playful trickster)
-    │  ○ ...         (quiet intensity)
-    │  ○ lmao kms    (unhinged & dark)
+    │  ● you good?                (soft + grounded)
+    │  ○ what are we shipping?    (direct + hyped)
+    │  ○ what did you break?      (dry + lowkey)
+    │  ○ send it over             (clean + composed)
+    │  ○ okay wait, that's cute   (playful + online)
+    │  ○ talk to me               (quiet + blunt)
+    │  ○ what's the play?         (sharp + degen)
+    │  ○ wait, one question       (curious + exact)
     ```
 
     The chosen preset is combined with randomly sampled lines from shared bio and system prompt pools (milady/netart/internet culture aesthetic) to create a unique character every time.

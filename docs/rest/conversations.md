@@ -18,6 +18,7 @@ The conversations API manages the agent's web-chat interface. Each conversation 
 | POST | `/api/conversations/:id/greeting` | Generate a greeting message |
 | PATCH | `/api/conversations/:id` | Update conversation metadata |
 | DELETE | `/api/conversations/:id` | Delete a conversation |
+| POST | `/api/conversations/:id/messages/truncate` | Truncate message history |
 | POST | `/api/chat/stream` | Legacy streaming chat (single room) |
 | POST | `/api/chat` | Legacy synchronous chat (single room) |
 
@@ -232,6 +233,26 @@ Delete a conversation. Messages remain in the runtime memory but the conversatio
   "ok": true
 }
 ```
+
+---
+
+### POST /api/conversations/:id/messages/truncate
+
+Truncate the message history for a conversation. Removes messages from the runtime memory while keeping the conversation metadata intact.
+
+**Response**
+
+```json
+{
+  "ok": true
+}
+```
+
+**Errors**
+
+| Status | Condition |
+|--------|-----------|
+| 404 | Conversation not found |
 
 ---
 

@@ -69,6 +69,18 @@ export LINE_CHANNEL_ACCESS_TOKEN=YOUR_CHANNEL_ACCESS_TOKEN
 export LINE_CHANNEL_SECRET=YOUR_CHANNEL_SECRET
 ```
 
+### All Variables
+
+| Variable | Description |
+|----------|-------------|
+| `LINE_CHANNEL_ACCESS_TOKEN` | Channel access token from LINE Developer Console |
+| `LINE_CHANNEL_SECRET` | Channel secret for webhook verification |
+| `LINE_WEBHOOK_PATH` | Custom webhook path for receiving LINE events |
+| `LINE_DM_POLICY` | DM policy (e.g., `allow`, `deny`, `allowlist`) |
+| `LINE_GROUP_POLICY` | Group message policy (e.g., `allow`, `deny`) |
+| `LINE_ALLOW_FROM` | Comma-separated list of allowed user IDs |
+| `LINE_ENABLED` | Set to `true` to enable the LINE connector |
+
 ## Related
 
 - [Connectors Guide](/guides/connectors) — General connector documentation
