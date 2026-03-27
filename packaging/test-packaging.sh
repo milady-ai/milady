@@ -217,7 +217,8 @@ fi
 check "Has release trigger" grep -q "release:" "$WORKFLOW"
 check "Has workflow_dispatch" grep -q "workflow_dispatch:" "$WORKFLOW"
 check "Has PyPI job" grep -q "publish-pypi:" "$WORKFLOW"
-check "Has Homebrew job" grep -q "update-homebrew:" "$WORKFLOW"
+# Homebrew is handled by the standalone update-homebrew.yml workflow
+check "Has Homebrew job" test -f ".github/workflows/update-homebrew.yml"
 check "Has Snap job" grep -q "publish-snap:" "$WORKFLOW"
 check "Has Debian job" grep -q "build-deb:" "$WORKFLOW"
 check "Has Flatpak job" grep -q "build-flatpak:" "$WORKFLOW"
