@@ -52,14 +52,14 @@ describe("useVoiceChat streaming text helpers", () => {
     expect(queued.length).toBeLessThan(longText.length);
   });
 
-  it("defaults to ElevenLabs cloud config when Cloud auth is present", () => {
+  it("defaults to ElevenLabs own-key proxy config when Cloud auth is present", () => {
     expect(
       resolveEffectiveVoiceConfig(null, {
         cloudConnected: true,
       }),
     ).toEqual({
       provider: "elevenlabs",
-      mode: "cloud",
+      mode: "own-key",
       elevenlabs: {
         voiceId: "EXAVITQu4vr4xnSDxMaL",
         modelId: "eleven_flash_v2_5",

@@ -33,6 +33,7 @@ import {
 import { resolveApiUrl } from "../utils";
 import { getElizaApiToken } from "../utils/eliza-globals";
 import { mergeStreamingText } from "../utils/streaming-text";
+import { hasConfiguredApiKey } from "../voice";
 
 // ── Speech Recognition types ──────────────────────────────────────────
 
@@ -1156,8 +1157,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
 
         const trimmedApiKey =
           typeof elConfig.apiKey === "string" ? elConfig.apiKey.trim() : "";
-        const hasDirectKey =
-          trimmedApiKey.length > 0 && !isRedactedSecret(trimmedApiKey);
+        const hasDirectKey = hasConfiguredApiKey(trimmedApiKey);
 
         let res: Response;
         if (hasDirectKey) {
