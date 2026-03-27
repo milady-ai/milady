@@ -333,6 +333,7 @@ describe("bsc-trade quote", () => {
 
     expect(quote.ok).toBe(true);
     expect(quote.side).toBe("buy");
+    expect(quote.routeProvider).toBe("pancakeswap-v2");
     expect(quote.quoteIn.symbol).toBe("BNB");
     expect(quote.quoteOut.symbol).toBe("USDT");
     expect(quote.quoteIn.amount).toBe("0.1");
@@ -454,11 +455,122 @@ describe("bsc-trade quote", () => {
 
     expect(quote.ok).toBe(true);
     expect(quote.side).toBe("sell");
+    expect(quote.routeProvider).toBe("pancakeswap-v2");
     expect(quote.quoteIn.symbol).toBe("USDT");
     expect(quote.quoteOut.symbol).toBe("BNB");
     expect(quote.quoteIn.amount).toBe("1.0");
     expect(quote.route[0]).toBe(ethers.getAddress(TOKEN));
     expect(quote.route[1]).toBe(BSC_WBNB_FALLBACK);
+  });
+
+  it("falls back to pancakeswap when 0x quote fails in auto mode", async () => {
+    const fetchMock = vi.fn(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input);
+        if (url.includes("bsc.api.0x.org")) {
+          return new Response("upstream unavailable", { status: 503 });
+        }
+
+        const { method, params } = decodeMethod(init);
+        if (method === "eth_chainId") {
+          return new Response(
+            JSON.stringify({ jsonrpc: "2.0", id: 1, result: "0x38" }),
+          );
+        }
+        if (method === "eth_getBalance") {
+          return new Response(
+            JSON.stringify({
+              jsonrpc: "2.0",
+              id: 1,
+              result: `0x${ethers.parseEther("1").toString(16)}`,
+            }),
+          );
+        }
+        if (method === "eth_getCode") {
+          return new Response(
+            JSON.stringify({
+              jsonrpc: "2.0",
+              id: 1,
+              result: "0x60006000",
+            }),
+          );
+        }
+        if (method !== "eth_call") {
+          throw new Error(`Unexpected RPC method: ${method}`);
+        }
+
+        const callObj = params[0] as { to?: string; data?: string };
+        const data = callObj?.data ?? "";
+        const to = ethers.getAddress(callObj?.to ?? ethers.ZeroAddress);
+        if (to !== PANCAKE_SWAP_V2_ROUTER) {
+          if (data.startsWith(ERC20_IFACE.getFunction("decimals")?.selector)) {
+            return new Response(
+              JSON.stringify({
+                jsonrpc: "2.0",
+                id: 1,
+                result: ERC20_IFACE.encodeFunctionResult("decimals", [18]),
+              }),
+            );
+          }
+          if (data.startsWith(ERC20_IFACE.getFunction("symbol")?.selector)) {
+            return new Response(
+              JSON.stringify({
+                jsonrpc: "2.0",
+                id: 1,
+                result: ERC20_IFACE.encodeFunctionResult("symbol", ["USDT"]),
+              }),
+            );
+          }
+          throw new Error(`Unexpected token call: ${data.slice(0, 10)}`);
+        }
+
+        if (data.startsWith(ROUTER_IFACE.getFunction("WETH")?.selector)) {
+          return new Response(
+            JSON.stringify({
+              jsonrpc: "2.0",
+              id: 1,
+              result: ROUTER_IFACE.encodeFunctionResult("WETH", [
+                BSC_WBNB_FALLBACK,
+              ]),
+            }),
+          );
+        }
+
+        if (
+          data.startsWith(ROUTER_IFACE.getFunction("getAmountsOut")?.selector)
+        ) {
+          return new Response(
+            JSON.stringify({
+              jsonrpc: "2.0",
+              id: 1,
+              result: ROUTER_IFACE.encodeFunctionResult("getAmountsOut", [
+                [ethers.parseEther("0.1"), ethers.parseUnits("30", 18)],
+              ]),
+            }),
+          );
+        }
+
+        throw new Error(`Unexpected router call: ${data.slice(0, 10)}`);
+      },
+    );
+    globalThis.fetch = fetchMock as typeof fetch;
+
+    const quote = await buildBscTradeQuote({
+      walletAddress: WALLET,
+      nodeRealBscRpcUrl: NODE_REAL,
+      quickNodeBscRpcUrl: QUICK_NODE,
+      request: {
+        side: "buy",
+        tokenAddress: TOKEN,
+        amount: "0.1",
+        slippageBps: 300,
+        routeProvider: "auto",
+      },
+    });
+
+    expect(quote.routeProvider).toBe("pancakeswap-v2");
+    expect(quote.routeProviderFallbackUsed).toBe(true);
+    expect(quote.routeProviderNotes?.join(" ")).toContain("0x");
   });
 });
 
@@ -466,6 +578,9 @@ describe("bsc-trade execute payload", () => {
   const baseBuyQuote = {
     ok: true as const,
     side: "buy" as const,
+    routeProvider: "pancakeswap-v2" as const,
+    routeProviderRequested: "auto" as const,
+    routeProviderFallbackUsed: false,
     routerAddress: PANCAKE_SWAP_V2_ROUTER,
     wrappedNativeAddress: BSC_WBNB_FALLBACK,
     tokenAddress: ethers.getAddress(TOKEN),

@@ -1,5 +1,5 @@
 /**
- * EXECUTE_TRADE action — executes a BSC token trade (buy or sell).
+ * EXECUTE_TRADE action - executes a BSC token trade (buy or sell).
  *
  * When triggered the action:
  *   1. Validates parameters (side, tokenAddress format, amount > 0)
@@ -8,16 +8,21 @@
  *      if executed, or unsigned TX info if user-sign mode
  *
  * All business logic (permissions, safety caps, signing) is handled
- * server-side — this action is a thin wrapper.
+ * server-side - this action is a thin wrapper.
  *
  * @module actions/execute-trade
  */
 
-import type { Action, HandlerOptions, IAgentRuntime } from "@elizaos/core";
+import type {
+  Action,
+  HandlerCallback,
+  HandlerOptions,
+  IAgentRuntime,
+} from "@elizaos/core";
 import { logger } from "@elizaos/core";
 import {
   buildAuthHeaders,
-  WALLET_ACTION_API_PORT,
+  getWalletActionApiPort,
 } from "./wallet-action-shared.js";
 
 /** Timeout for the trade API call (includes on-chain confirmation). */
@@ -39,6 +44,60 @@ function isValidParam(val: unknown): val is string {
   );
 }
 
+function walletNetworkLabel(): string {
+  return process.env.MILADY_WALLET_NETWORK?.trim().toLowerCase() === "testnet"
+    ? "BSC testnet"
+    : "BSC";
+}
+
+function buildTradeSuccessText(args: {
+  side: string;
+  amount: string;
+  tokenAddress: string;
+  routeProvider: string;
+  mode: string;
+  txHash: string;
+  explorerUrl: string;
+  status: string;
+}): string {
+  return [
+    "Action: EXECUTE_TRADE",
+    `Chain: ${walletNetworkLabel()}`,
+    `Side: ${args.side}`,
+    `Amount: ${args.amount} BNB`,
+    `Token: ${args.tokenAddress}`,
+    `Route provider: ${args.routeProvider}`,
+    `Execution mode: ${args.mode}`,
+    "Executed: true",
+    `Tx hash: ${args.txHash}`,
+    `Explorer: ${args.explorerUrl}`,
+    `Status: ${args.status}`,
+  ].join("\n");
+}
+
+function buildTradeFailureText(args: {
+  side: string;
+  amount: string;
+  tokenAddress: string;
+  routeProvider: string;
+  mode: string;
+  requiresUserSignature: boolean;
+  reason: string;
+}): string {
+  return [
+    "Action: EXECUTE_TRADE",
+    `Chain: ${walletNetworkLabel()}`,
+    `Side: ${args.side}`,
+    `Amount: ${args.amount} BNB`,
+    `Token: ${args.tokenAddress}`,
+    `Route provider: ${args.routeProvider}`,
+    `Execution mode: ${args.mode}`,
+    "Executed: false",
+    `Requires user signature: ${args.requiresUserSignature ? "true" : "false"}`,
+    `Reason: ${args.reason}`,
+  ].join("\n");
+}
+
 export const executeTradeAction: Action = {
   name: "EXECUTE_TRADE",
 
@@ -53,11 +112,17 @@ export const executeTradeAction: Action = {
     const hasWallet =
       runtime.getSetting("EVM_PRIVATE_KEY") ||
       runtime.getSetting("PRIVY_APP_ID") ||
-      runtime.getSetting("STEWARD_API_URL"); // Steward provides the wallet
+      runtime.getSetting("STEWARD_API_URL");
     return Boolean(hasWallet);
   },
 
-  handler: async (_runtime, _message, _state, options) => {
+  handler: async (
+    _runtime,
+    _message,
+    _state,
+    options,
+    callback?: HandlerCallback,
+  ) => {
     try {
       const params = (options as HandlerOptions | undefined)?.parameters;
       logger.debug(
@@ -65,7 +130,6 @@ export const executeTradeAction: Action = {
         JSON.stringify(params ?? {}),
       );
 
-      // ── Resolve side ─────────────────────────────────────────────────
       const rawSide = isValidParam(params?.side as string)
         ? (params?.side as string)
         : undefined;
@@ -73,13 +137,11 @@ export const executeTradeAction: Action = {
         typeof rawSide === "string" ? rawSide.trim().toLowerCase() : undefined;
 
       if (side !== "buy" && side !== "sell") {
-        return {
-          text: 'I need a valid trade side ("buy" or "sell").',
-          success: false,
-        };
+        const text = 'I need a valid trade side ("buy" or "sell").';
+        callback?.({ text, action: "EXECUTE_TRADE_FAILED" });
+        return { text, success: false };
       }
 
-      // ── Resolve tokenAddress ─────────────────────────────────────────
       const rawAddr = isValidParam(params?.tokenAddress as string)
         ? (params?.tokenAddress as string)
         : undefined;
@@ -87,13 +149,12 @@ export const executeTradeAction: Action = {
         typeof rawAddr === "string" ? rawAddr.trim() : undefined;
 
       if (!tokenAddress || !BSC_ADDRESS_RE.test(tokenAddress)) {
-        return {
-          text: "I need a valid BSC token contract address (0x-prefixed, 40 hex chars).",
-          success: false,
-        };
+        const text =
+          "I need a valid BSC token contract address (0x-prefixed, 40 hex chars).";
+        callback?.({ text, action: "EXECUTE_TRADE_FAILED" });
+        return { text, success: false };
       }
 
-      // ── Resolve amount ───────────────────────────────────────────────
       const rawAmt = isValidParam(params?.amount as string)
         ? (params?.amount as string)
         : typeof params?.amount === "number" && params.amount > 0
@@ -106,13 +167,11 @@ export const executeTradeAction: Action = {
         Number.isNaN(Number(amountRaw)) ||
         Number(amountRaw) <= 0
       ) {
-        return {
-          text: "I need a positive numeric amount for the trade.",
-          success: false,
-        };
+        const text = "I need a positive numeric amount for the trade.";
+        callback?.({ text, action: "EXECUTE_TRADE_FAILED" });
+        return { text, success: false };
       }
 
-      // ── Resolve slippageBps ──────────────────────────────────────────
       const slippageBps =
         typeof params?.slippageBps === "number"
           ? params.slippageBps
@@ -122,19 +181,23 @@ export const executeTradeAction: Action = {
             : 300;
 
       if (Number.isNaN(slippageBps) || slippageBps < 0) {
-        return {
-          text: "slippageBps must be a non-negative number.",
-          success: false,
-        };
+        const text = "slippageBps must be a non-negative number.";
+        callback?.({ text, action: "EXECUTE_TRADE_FAILED" });
+        return { text, success: false };
       }
 
+      const routeProvider =
+        typeof params?.routeProvider === "string" &&
+        params.routeProvider.trim().length > 0
+          ? params.routeProvider.trim()
+          : "pancakeswap-v2";
+
       logger.debug(
-        `[EXECUTE_TRADE] resolved: side=${side} token=${tokenAddress} amount=${amountRaw} slippage=${slippageBps}`,
+        `[EXECUTE_TRADE] resolved: side=${side} token=${tokenAddress} amount=${amountRaw} slippage=${slippageBps} routeProvider=${routeProvider}`,
       );
 
-      // ── POST to trade execution API ──────────────────────────────────
       const response = await fetch(
-        `http://127.0.0.1:${WALLET_ACTION_API_PORT}/api/wallet/trade/execute`,
+        `http://127.0.0.1:${getWalletActionApiPort()}/api/wallet/trade/execute`,
         {
           method: "POST",
           headers: {
@@ -147,6 +210,7 @@ export const executeTradeAction: Action = {
             tokenAddress,
             amount: amountRaw,
             slippageBps,
+            routeProvider,
             confirm: true,
           }),
           signal: AbortSignal.timeout(TRADE_TIMEOUT_MS),
@@ -158,10 +222,17 @@ export const executeTradeAction: Action = {
           string,
           string
         >;
-        return {
-          text: `Trade failed: ${body.error ?? `HTTP ${response.status}`}`,
-          success: false,
-        };
+        const text = buildTradeFailureText({
+          side,
+          amount: amountRaw,
+          tokenAddress,
+          routeProvider,
+          mode: "unknown",
+          requiresUserSignature: false,
+          reason: body.error ?? `HTTP ${response.status}`,
+        });
+        callback?.({ text, action: "EXECUTE_TRADE_FAILED" });
+        return { text, success: false };
       }
 
       const result = (await response.json()) as {
@@ -194,26 +265,56 @@ export const executeTradeAction: Action = {
         }),
       );
 
+      const resolvedRouteProvider =
+        typeof result.quote?.routeProvider === "string"
+          ? result.quote.routeProvider
+          : routeProvider;
+
       if (!result.ok) {
-        return {
-          text: `Trade failed: ${result.error ?? "unknown error"}`,
-          success: false,
-        };
+        const text = buildTradeFailureText({
+          side,
+          amount: amountRaw,
+          tokenAddress,
+          routeProvider: resolvedRouteProvider,
+          mode: result.mode,
+          requiresUserSignature: result.requiresUserSignature,
+          reason: result.error ?? "unknown error",
+        });
+        callback?.({ text, action: "EXECUTE_TRADE_FAILED" });
+        return { text, success: false };
       }
 
-      // ── Build human-readable response ────────────────────────────────
       if (result.executed && result.execution) {
+        const text = buildTradeSuccessText({
+          side,
+          amount: amountRaw,
+          tokenAddress,
+          routeProvider: resolvedRouteProvider,
+          mode: result.mode,
+          txHash: result.execution.hash,
+          explorerUrl: result.execution.explorerUrl,
+          status: result.execution.status,
+        });
+        callback?.({
+          text,
+          action: "EXECUTE_TRADE_SUCCESS",
+          txHash: result.execution.hash,
+          explorerUrl: result.execution.explorerUrl,
+          executionMode: result.mode,
+          routeProvider: resolvedRouteProvider,
+          executed: true,
+          tokenAddress,
+          side,
+        });
         return {
-          text:
-            `Trade executed successfully! ${side.toUpperCase()} via ${result.mode} mode.\n` +
-            `TX: ${result.execution.explorerUrl}\n` +
-            `Status: ${result.execution.status}`,
+          text,
           success: true,
           data: {
             side,
             tokenAddress,
             amount: amountRaw,
             mode: result.mode,
+            routeProvider: resolvedRouteProvider,
             txHash: result.execution.hash,
             explorerUrl: result.execution.explorerUrl,
             executed: true,
@@ -221,27 +322,45 @@ export const executeTradeAction: Action = {
         };
       }
 
-      // user-sign mode — trade was quoted but not executed on-chain
+      const text = buildTradeFailureText({
+        side,
+        amount: amountRaw,
+        tokenAddress,
+        routeProvider: resolvedRouteProvider,
+        mode: result.mode,
+        requiresUserSignature: result.requiresUserSignature,
+        reason: result.requiresUserSignature
+          ? `User signature is required to complete the ${side}.`
+          : "Trade was prepared but not executed on-chain.",
+      });
+      callback?.({
+        text,
+        action: "EXECUTE_TRADE_FAILED",
+        executionMode: result.mode,
+        routeProvider: resolvedRouteProvider,
+        executed: false,
+        tokenAddress,
+        side,
+        requiresUserSignature: result.requiresUserSignature,
+      });
       return {
-        text:
-          `Trade prepared in ${result.mode} mode. ` +
-          `A user signature is required to complete the ${side}.`,
-        success: true,
+        text,
+        success: false,
         data: {
           side,
           tokenAddress,
           amount: amountRaw,
           mode: result.mode,
-          requiresUserSignature: true,
+          routeProvider: resolvedRouteProvider,
+          requiresUserSignature: result.requiresUserSignature,
           executed: false,
           unsignedTx: result.unsignedTx,
         },
       };
     } catch (err) {
-      return {
-        text: `Trade failed: ${err instanceof Error ? err.message : String(err)}`,
-        success: false,
-      };
+      const text = `Trade failed: ${err instanceof Error ? err.message : String(err)}`;
+      callback?.({ text, action: "EXECUTE_TRADE_FAILED" });
+      return { text, success: false };
     }
   },
 
@@ -271,6 +390,13 @@ export const executeTradeAction: Action = {
       description: "Slippage tolerance in basis points (default 300 = 3%)",
       required: false,
       schema: { type: "number" as const },
+    },
+    {
+      name: "routeProvider",
+      description:
+        'Route provider preference for the swap: "pancakeswap-v2" or "0x". Defaults to "pancakeswap-v2".',
+      required: false,
+      schema: { type: "string" as const },
     },
   ],
 };

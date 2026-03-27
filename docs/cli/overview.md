@@ -28,6 +28,7 @@ bunx miladyai
 | `--dev` | Shorthand for `--profile dev` (also sets the gateway port to `19001`) |
 | `--verbose` | Enable informational runtime logs |
 | `--debug` | Enable debug-level runtime logs |
+| `--connection-key [key]` | Set or auto-generate a connection key for remote access |
 | `--no-color` | Disable ANSI colors |
 
 ## Commands
@@ -35,7 +36,7 @@ bunx miladyai
 <CardGroup cols={2}>
 
 <Card title="start" icon="play" href="/cli/start">
-  Start the elizaOS agent runtime in headless server-only mode.
+  Start the elizaOS agent runtime.
 </Card>
 
 
@@ -52,6 +53,10 @@ bunx miladyai
   Read and inspect configuration values with get, path, and show subcommands.
 </Card>
 
+<Card title="run" icon="play" href="/cli/start">
+  Alias for `start` — start the agent runtime.
+</Card>
+
 <Card title="dashboard" icon="gauge" href="/cli/dashboard">
   Open the Control UI in your default web browser.
 </Card>
@@ -61,7 +66,7 @@ bunx miladyai
 </Card>
 
 <Card title="plugins" icon="plug" href="/cli/plugins">
-  Browse, search, install, and manage elizaOS plugins from the registry.
+  Browse, search, install, and manage elizaOS plugins. Subcommands: `install`, `list`, `uninstall`, `search`, `info`, `installed`, `refresh`, `test`, `add-path`, `paths`, `config`, `open`.
 </Card>
 
 <Card title="update" icon="arrow-up" href="/cli/update">
@@ -92,6 +97,12 @@ milady setup
 
 # Install a plugin
 milady plugins install twitter
+
+# List installed plugins
+milady plugins installed
+
+# Search the plugin registry
+milady plugins search twitter
 
 # Check for updates
 milady update

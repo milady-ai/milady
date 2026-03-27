@@ -246,6 +246,15 @@ describe("detectIntentCategories", () => {
   it("detects issue intent in Chinese", () => {
     expect(detectIntentCategories(buildPrompt("请创建一个新的问题"))).toContain("issues");
   });
+
+  it("detects wallet intent for transaction requests", () => {
+    expect(
+      detectIntentCategories(buildPrompt("Send 0.01 BNB to 0x1234 on-chain")),
+    ).toContain("wallet");
+    expect(detectIntentCategories(buildPrompt("请帮我转账这笔交易"))).toContain(
+      "wallet",
+    );
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -399,6 +408,13 @@ describe("compactActionsForIntent", () => {
   it("returns prompt unchanged when no actions block found", () => {
     const prompt = "Just a plain prompt with no actions.";
     expect(compactActionsForIntent(prompt)).toBe(prompt);
+  });
+
+  it("skips action compaction for wallet/on-chain intent", () => {
+    const prompt = buildPrompt("Send 0.01 BNB transaction to this wallet");
+    const result = compactActionsForIntent(prompt);
+    expect(result).toBe(prompt);
+    expect(result).toContain("<params>");
   });
 
   it("strips non-universal action params for general chat (no intent)", () => {

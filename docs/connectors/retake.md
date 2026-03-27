@@ -34,12 +34,12 @@ The Retake connector is an external elizaOS plugin that bridges your agent to th
 
 | Variable | Description |
 |----------|-------------|
-| `RETAKE_ACCESS_TOKEN` | Retake platform access token |
+| `RETAKE_AGENT_TOKEN` | Retake platform access token |
 
 ## Setup Steps
 
 1. Obtain an access token from the Retake platform
-2. Add it to `connectors.retake` in your config or set the `RETAKE_ACCESS_TOKEN` environment variable
+2. Add it to `connectors.retake` in your config or set the `RETAKE_AGENT_TOKEN` environment variable
 3. Start your agent — the Retake connector will auto-enable
 
 ## Streaming

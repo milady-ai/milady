@@ -88,7 +88,7 @@ When the agent is running as a cloud-provisioned container (e.g., on Eliza Cloud
 1. `MILADY_CLOUD_PROVISIONED=1` (or `ELIZA_CLOUD_PROVISIONED=1`) is set
 2. `MILADY_API_TOKEN` (or `ELIZA_API_TOKEN`) is configured
 
-When cloud provisioned, `GET /api/auth/status` returns `{ "required": false, "pairingEnabled": false, "expiresAt": null }` — the frontend skips the pairing screen entirely.
+When cloud provisioned, `GET /api/auth/status` returns `{ "required": true, "pairingEnabled": false, "expiresAt": null }` — the API token is still required for requests, but the pairing flow is disabled since the token is already provisioned.
 
 A container with only the cloud flag but no API token falls through to the normal pairing flow.
 

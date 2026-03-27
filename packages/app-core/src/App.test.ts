@@ -54,6 +54,7 @@ vi.mock("./components", () => {
     AdvancedPageView: stub("AdvancedPageView"),
     AppsPageView: stub("AppsPageView"),
     AvatarLoader: stub("AvatarLoader"),
+    BugReportModal: stub("BugReportModal"),
     CharacterEditor: stub("CharacterEditor"),
     ChatView: stub("ChatView"),
     CompanionShell: stub("CompanionShell"),

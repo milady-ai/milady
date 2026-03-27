@@ -1,3 +1,7 @@
+---
+title: Streaming Integration
+---
+
 # Streaming Integration — Agent Skill Reference
 
 Milady agents can autonomously control live streaming: go live, switch channels, manage stream overlays, speak via TTS, and switch what content is being captured — all through built-in actions.

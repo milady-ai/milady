@@ -262,7 +262,7 @@ describe("CharacterEditor voice cloud fallback (e2e)", () => {
     vi.unstubAllGlobals();
   });
 
-  it("speaks the character greeting through cloud TTS when only a masked ElevenLabs key is present", async () => {
+  it("speaks the character greeting through the ElevenLabs server proxy when only a masked key is present", async () => {
     await act(async () => {
       tree = TestRenderer.create(React.createElement(CharacterEditor));
     });
@@ -277,7 +277,7 @@ describe("CharacterEditor voice cloud fallback (e2e)", () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(url).toBe("/api/tts/cloud");
+    expect(url).toBe("/api/tts/elevenlabs");
     expect(JSON.parse(String(init.body))).toMatchObject({
       text: "Hello from Chen.",
       voiceId: "voice-123",

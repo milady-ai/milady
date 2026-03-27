@@ -180,11 +180,14 @@ const globalAudioCache = new Map<string, Uint8Array>();
 
 function resolveVoiceMode(
   mode: VoiceMode | undefined,
-  cloudConnected: boolean,
-  apiKey?: string | null,
+  _cloudConnected: boolean,
+  _apiKey?: string | null,
 ): VoiceMode {
   if (mode) return mode;
-  if (cloudConnected && !hasConfiguredApiKey(apiKey)) return "cloud";
+  // Always use the ElevenLabs proxy path ("own-key") — the server aliases the
+  // cloud API key to ELEVENLABS_API_KEY at startup so upstream Eliza can use
+  // it.  The "cloud" path converts ElevenLabs voice IDs to OpenAI-style names
+  // (nova, alloy, etc.) which produces wrong audio (default sample clips).
   return "own-key";
 }
 
@@ -1154,8 +1157,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
 
         const trimmedApiKey =
           typeof elConfig.apiKey === "string" ? elConfig.apiKey.trim() : "";
-        const hasDirectKey =
-          trimmedApiKey.length > 0 && !isRedactedSecret(trimmedApiKey);
+        const hasDirectKey = hasConfiguredApiKey(trimmedApiKey);
 
         let res: Response;
         if (hasDirectKey) {

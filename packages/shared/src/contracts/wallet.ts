@@ -186,11 +186,15 @@ export type WalletRpcCredentialKey =
 
 export interface WalletConfigUpdateRequest {
   selections: WalletRpcSelections;
+  walletNetwork?: WalletNetworkMode;
   credentials?: Partial<Record<WalletRpcCredentialKey, string>>;
 }
 
+export type WalletNetworkMode = "mainnet" | "testnet";
+
 export interface WalletConfigStatus {
   selectedRpcProviders: WalletRpcSelections;
+  walletNetwork?: WalletNetworkMode;
   legacyCustomChains: WalletRpcChain[];
   alchemyKeySet: boolean;
   infuraKeySet: boolean;
@@ -213,6 +217,12 @@ export interface WalletConfigStatus {
   evmChains: string[];
   evmAddress: string | null;
   solanaAddress: string | null;
+  walletSource?: "local" | "managed" | "none";
+  automationMode?: "full" | "connectors-only";
+  pluginEvmLoaded?: boolean;
+  pluginEvmRequired?: boolean;
+  executionReady?: boolean;
+  executionBlockedReason?: string | null;
 }
 
 export type TradePermissionMode =
@@ -221,6 +231,8 @@ export type TradePermissionMode =
   | "agent-auto";
 
 export type BscTradeSide = "buy" | "sell";
+export type BscTradeRouteProvider = "pancakeswap-v2" | "0x";
+export type BscTradeRoutePreference = BscTradeRouteProvider | "auto";
 
 export interface BscTradePreflightRequest {
   tokenAddress?: string;
@@ -250,6 +262,7 @@ export interface BscTradeQuoteRequest {
   tokenAddress: string;
   amount: string;
   slippageBps?: number;
+  routeProvider?: BscTradeRoutePreference;
 }
 
 export interface BscTradeQuoteLeg {
@@ -261,6 +274,10 @@ export interface BscTradeQuoteLeg {
 export interface BscTradeQuoteResponse {
   ok: boolean;
   side: BscTradeSide;
+  routeProvider: BscTradeRouteProvider;
+  routeProviderRequested: BscTradeRoutePreference;
+  routeProviderFallbackUsed: boolean;
+  routeProviderNotes?: string[];
   routerAddress: string;
   wrappedNativeAddress: string;
   tokenAddress: string;
@@ -271,6 +288,10 @@ export interface BscTradeQuoteResponse {
   minReceive: BscTradeQuoteLeg;
   price: string;
   preflight: BscTradePreflightResponse;
+  swapTargetAddress?: string;
+  swapCallData?: string;
+  swapValueWei?: string;
+  allowanceTarget?: string;
   quotedAt?: number;
 }
 

@@ -527,7 +527,14 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
   // ── Derived composer state ──────────────────────────────────────
   const isAgentStarting =
     agentStatus?.state === "starting" || agentStatus?.state === "restarting";
-  const isComposerLocked = isAgentStarting;
+  const hasCompletedLifecycleActivity =
+    !chatSending &&
+    conversationMessages.some(
+      (message) =>
+        message.role === "user" ||
+        (message.role === "assistant" && message.text.trim().length > 0),
+    );
+  const isComposerLocked = isAgentStarting && !hasCompletedLifecycleActivity;
   const cloudVoiceAvailable = elizaCloudConnected || elizaCloudEnabled;
   const {
     beginVoiceCapture,

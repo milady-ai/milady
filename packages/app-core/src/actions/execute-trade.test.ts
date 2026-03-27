@@ -52,13 +52,14 @@ describe("EXECUTE_TRADE action", () => {
 
   it("has parameter definitions", () => {
     expect(executeTradeAction.parameters).toBeDefined();
-    expect(executeTradeAction.parameters?.length).toBe(4);
+    expect(executeTradeAction.parameters?.length).toBe(5);
 
     const names = executeTradeAction.parameters?.map((p) => p.name);
     expect(names).toContain("side");
     expect(names).toContain("tokenAddress");
     expect(names).toContain("amount");
     expect(names).toContain("slippageBps");
+    expect(names).toContain("routeProvider");
 
     // side, tokenAddress, amount are required; slippageBps is optional
     const slippage = executeTradeAction.parameters?.find(
@@ -233,9 +234,10 @@ describe("EXECUTE_TRADE action", () => {
 
     expect((result as { success: boolean }).success).toBe(true);
     expect((result as { text: string }).text).toContain(
-      "executed successfully",
+      "Action: EXECUTE_TRADE",
     );
-    expect((result as { text: string }).text).toContain("0xabc123");
+    expect((result as { text: string }).text).toContain("Executed: true");
+    expect((result as { text: string }).text).toContain("Tx hash: 0xabc123");
     expect((result as { data: Record<string, unknown> }).data).toMatchObject({
       side: "buy",
       tokenAddress: VALID_TOKEN,
@@ -248,7 +250,7 @@ describe("EXECUTE_TRADE action", () => {
     // Verify fetch was called with correct args
     expect(mockFetch).toHaveBeenCalledOnce();
     const [url, opts] = mockFetch.mock.calls[0] as [string, RequestInit];
-    expect(url).toBe("http://127.0.0.1:2138/api/wallet/trade/execute");
+    expect(url).toBe("http://127.0.0.1:31337/api/wallet/trade/execute");
     expect(opts.method).toBe("POST");
     expect(
       (opts.headers as Record<string, string>)["X-Eliza-Agent-Action"],
@@ -262,10 +264,11 @@ describe("EXECUTE_TRADE action", () => {
     expect(body.tokenAddress).toBe(VALID_TOKEN);
     expect(body.amount).toBe("0.5");
     expect(body.slippageBps).toBe(300);
+    expect(body.routeProvider).toBe("pancakeswap-v2");
     expect(body.confirm).toBe(true);
   });
 
-  it("calls API and returns success for user-sign mode", async () => {
+  it("returns failure for user-sign mode because no on-chain execution occurred", async () => {
     const mockFetch = globalThis.fetch as ReturnType<typeof vi.fn>;
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -286,8 +289,9 @@ describe("EXECUTE_TRADE action", () => {
       amount: "0.5",
     });
 
-    expect((result as { success: boolean }).success).toBe(true);
+    expect((result as { success: boolean }).success).toBe(false);
     expect((result as { text: string }).text).toContain("user-sign");
+    expect((result as { text: string }).text).toContain("Executed: false");
     expect((result as { text: string }).text).toContain(
       "signature is required",
     );

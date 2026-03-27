@@ -38,6 +38,7 @@ import {
   HeartbeatsView,
   InventoryView,
   KnowledgeView,
+  BugReportModal,
   OnboardingWizard,
   PairingView,
   SaveCommandModal,
@@ -484,7 +485,12 @@ export function App() {
 
   // After loader hooks (stable hook order); do not return startupError before useState above.
   if (startupError) {
-    return <StartupFailureView error={startupError} onRetry={retryStartup} />;
+    return (
+      <BugReportProvider value={bugReport}>
+        <StartupFailureView error={startupError} onRetry={retryStartup} />
+        <BugReportModal />
+      </BugReportProvider>
+    );
   }
 
   if (authRequired && !blockOnboardingForShell) return <PairingView />;

@@ -14,10 +14,10 @@ describe("onboarding flow", () => {
     it("returns unified 6-step order", () => {
       expect(getStepOrder()).toEqual([
         "welcome",
+        "identity",
         "hosting",
         "providers",
         "permissions",
-        "identity",
         "launch",
       ]);
     });
@@ -25,11 +25,11 @@ describe("onboarding flow", () => {
 
   describe("resolveOnboardingNextStep", () => {
     it("advances through all steps", () => {
-      expect(resolveOnboardingNextStep("welcome")).toBe("hosting");
+      expect(resolveOnboardingNextStep("welcome")).toBe("identity");
+      expect(resolveOnboardingNextStep("identity")).toBe("hosting");
       expect(resolveOnboardingNextStep("hosting")).toBe("providers");
       expect(resolveOnboardingNextStep("providers")).toBe("permissions");
-      expect(resolveOnboardingNextStep("permissions")).toBe("identity");
-      expect(resolveOnboardingNextStep("identity")).toBe("launch");
+      expect(resolveOnboardingNextStep("permissions")).toBe("launch");
       expect(resolveOnboardingNextStep("launch")).toBe(null);
     });
   });
@@ -37,11 +37,11 @@ describe("onboarding flow", () => {
   describe("resolveOnboardingPreviousStep", () => {
     it("steps back through all steps", () => {
       expect(resolveOnboardingPreviousStep("welcome")).toBe(null);
-      expect(resolveOnboardingPreviousStep("hosting")).toBe("welcome");
+      expect(resolveOnboardingPreviousStep("identity")).toBe("welcome");
+      expect(resolveOnboardingPreviousStep("hosting")).toBe("identity");
       expect(resolveOnboardingPreviousStep("providers")).toBe("hosting");
       expect(resolveOnboardingPreviousStep("permissions")).toBe("providers");
-      expect(resolveOnboardingPreviousStep("identity")).toBe("permissions");
-      expect(resolveOnboardingPreviousStep("launch")).toBe("identity");
+      expect(resolveOnboardingPreviousStep("launch")).toBe("permissions");
     });
   });
 
@@ -71,10 +71,10 @@ describe("onboarding flow", () => {
       const metas = getOnboardingNavMetas("providers", false);
       expect(metas.map((m) => m.id)).toEqual([
         "welcome",
+        "identity",
         "hosting",
         "providers",
         "permissions",
-        "identity",
         "launch",
       ]);
     });
@@ -82,10 +82,10 @@ describe("onboarding flow", () => {
       const metas = getOnboardingNavMetas("welcome", true);
       expect(metas.map((m) => m.id)).toEqual([
         "welcome",
+        "identity",
         "hosting",
         "providers",
         "permissions",
-        "identity",
         "launch",
       ]);
     });

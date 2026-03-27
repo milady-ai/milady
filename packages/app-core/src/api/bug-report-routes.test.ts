@@ -8,6 +8,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   BUG_REPORT_REPO,
+  resolveBugReportRepo,
   rateLimitBugReport,
   resetBugReportRateLimit,
   sanitize,
@@ -121,8 +122,24 @@ describe("bug-report-routes", () => {
 
   // ── BUG_REPORT_REPO constant ───────────────────────────────────────
   describe("BUG_REPORT_REPO", () => {
-    it("points to a GitHub repo for bug reports (milady or eliza)", () => {
-      expect(["milady-ai/milady", "elizaos/eliza"]).toContain(BUG_REPORT_REPO);
+    it("defaults to the Milady GitHub repo for bug reports", () => {
+      expect(BUG_REPORT_REPO).toBe("milady-ai/milady");
+    });
+
+    it("allows overriding the target repo via MILADY_BUG_REPORT_REPO", () => {
+      expect(
+        resolveBugReportRepo({
+          MILADY_BUG_REPORT_REPO: "custom-org/custom-repo",
+        } as NodeJS.ProcessEnv),
+      ).toBe("custom-org/custom-repo");
+    });
+
+    it("ignores invalid repo override values", () => {
+      expect(
+        resolveBugReportRepo({
+          MILADY_BUG_REPORT_REPO: "not-a-repo",
+        } as NodeJS.ProcessEnv),
+      ).toBe("milady-ai/milady");
     });
   });
 });

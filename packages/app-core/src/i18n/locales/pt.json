@@ -1303,5 +1303,12 @@
   "whatsappqroverlay.Tap": "Tocar",
   "whatsappqroverlay.TryAgain": "Tente novamente",
   "whatsappqroverlay.UsesAnUnofficialW": "Usa uma API não oficial do WhatsApp. Use um número de telefone dedicado.",
-  "whatsappqroverlay.andSelect": "e selecione"
+  "whatsappqroverlay.andSelect": "e selecione",
+  "bugreportmodal.attachLogs": "Attach startup logs",
+  "bugreportmodal.attachSystemInfo": "Attach system info",
+  "bugreportmodal.copyDiagnostics": "Copy Diagnostics",
+  "bugreportmodal.copiedDiagnostics": "Diagnostics Copied!",
+  "bugreportmodal.openLogsFolder": "Open Logs Folder",
+  "bugreportmodal.saveBundle": "Save Report Bundle",
+  "bugreportmodal.savingBundle": "Saving Bundle..."
 }

@@ -52,14 +52,14 @@ describe("useVoiceChat streaming text helpers", () => {
     expect(queued.length).toBeLessThan(longText.length);
   });
 
-  it("defaults to ElevenLabs cloud config when Cloud auth is present", () => {
+  it("defaults to ElevenLabs own-key proxy config when Cloud auth is present", () => {
     expect(
       resolveEffectiveVoiceConfig(null, {
         cloudConnected: true,
       }),
     ).toEqual({
       provider: "elevenlabs",
-      mode: "cloud",
+      mode: "own-key",
       elevenlabs: {
         voiceId: "EXAVITQu4vr4xnSDxMaL",
         modelId: "eleven_flash_v2_5",
@@ -70,14 +70,18 @@ describe("useVoiceChat streaming text helpers", () => {
     });
   });
 
-  it("defaults the saved voice mode to cloud when Cloud auth is present", () => {
-    expect(resolveVoiceMode(undefined, true)).toBe("cloud");
-    expect(resolveVoiceMode(undefined, true, "")).toBe("cloud");
+  it("always defaults to own-key so ElevenLabs voices route through the server proxy", () => {
+    // Cloud-connected but no explicit mode — server aliases cloud key to
+    // ELEVENLABS_API_KEY so the upstream proxy handles it.
+    expect(resolveVoiceMode(undefined, true)).toBe("own-key");
+    expect(resolveVoiceMode(undefined, true, "")).toBe("own-key");
     expect(resolveVoiceMode(undefined, true, "sk-test")).toBe("own-key");
-    expect(resolveVoiceMode(undefined, true, "[REDACTED]")).toBe("cloud");
-    expect(resolveVoiceMode(undefined, true, "sk-t...1234")).toBe("cloud");
+    expect(resolveVoiceMode(undefined, true, "[REDACTED]")).toBe("own-key");
+    expect(resolveVoiceMode(undefined, true, "sk-t...1234")).toBe("own-key");
     expect(resolveVoiceMode(undefined, false)).toBe("own-key");
+    // Explicit mode is always respected.
     expect(resolveVoiceMode("own-key", true, "")).toBe("own-key");
+    expect(resolveVoiceMode("cloud", true, "")).toBe("cloud");
   });
 
   it("uses the cloud TTS proxy when ElevenLabs is in cloud mode", () => {

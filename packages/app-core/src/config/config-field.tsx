@@ -20,7 +20,8 @@ import {
   Switch,
 } from "@miladyai/ui";
 import { ChevronDown, X } from "lucide-react";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useApp } from "../state";
 import type { DynamicValue } from "../types";
 import type { FieldRenderer, FieldRenderProps } from "./config-catalog";
@@ -445,8 +446,9 @@ function SearchableSelectInner({
   );
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState("");
-  const containerRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
 
   const filtered = filter
     ? options.filter(
@@ -467,31 +469,59 @@ function SearchableSelectInner({
     [props],
   );
 
+  // Compute portal position synchronously from the trigger rect.
+  // Called in the click handler so the style is set before the portal renders.
+  const computeDropdownStyle = useCallback(() => {
+    if (!triggerRef.current) return {};
+    const rect = triggerRef.current.getBoundingClientRect();
+    return {
+      position: "fixed" as const,
+      top: rect.bottom + 4,
+      left: rect.left,
+      width: rect.width,
+      zIndex: 9999,
+    };
+  }, []);
+
   // Close on click outside
-  React.useEffect(() => {
+  useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
+      const target = e.target as Node;
       if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
-        setOpen(false);
-        setFilter("");
-      }
+        triggerRef.current?.contains(target) ||
+        dropdownRef.current?.contains(target)
+      )
+        return;
+      setOpen(false);
+      setFilter("");
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
+  // Close on scroll of any ancestor (position shifts)
+  useEffect(() => {
+    if (!open) return;
+    const handler = () => {
+      setOpen(false);
+      setFilter("");
+    };
+    window.addEventListener("scroll", handler, true);
+    return () => window.removeEventListener("scroll", handler, true);
+  }, [open]);
+
   return (
-    <div className="relative" ref={containerRef}>
+    <div>
       {/* Trigger button that looks like a select */}
       <Button
+        ref={triggerRef}
         type="button"
         variant="outline"
         className={`${inputCls(!!props.errors?.length)} text-left flex items-center justify-between gap-2 cursor-pointer`}
         disabled={props.readonly}
         onClick={() => {
+          if (!open) setDropdownStyle(computeDropdownStyle());
           setOpen(!open);
           setFilter("");
         }}
@@ -506,80 +536,87 @@ function SearchableSelectInner({
         </span>
       </Button>
 
-      {/* Dropdown panel */}
-      {open && (
-        <div className="absolute z-50 left-0 right-0 mt-1 border border-[var(--border)] bg-[var(--card)] shadow-lg max-h-[280px] flex flex-col rounded-sm">
-          {/* Search input */}
-          <div className="p-1.5 border-b border-[var(--border)]">
-            <input
-              ref={inputRef}
-              className="w-full px-2 py-1.5 border border-[var(--border)] bg-[var(--bg)] text-[12px] font-[var(--mono)] focus:border-[var(--accent)] focus:outline-none rounded-sm"
-              type="text"
-              value={filter}
-              placeholder={`Search ${options.length} models...`}
-              onChange={(e) => setFilter(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Escape") {
-                  setOpen(false);
-                  setFilter("");
-                } else if (e.key === "Enter" && filtered.length === 1) {
-                  select(filtered[0]);
-                }
-              }}
-            />
-          </div>
-          {/* Options list */}
-          <div className="overflow-y-auto flex-1">
-            {!props.required && (
-              <Button
-                type="button"
-                variant="ghost"
-                className="w-full text-left px-3 py-1.5 text-[12px] text-[var(--muted)] hover:bg-[var(--bg-hover)] transition-colors italic rounded-none justify-start h-auto"
-                onClick={() => {
-                  props.onChange("");
-                  setInputVal("");
-                  setOpen(false);
-                  setFilter("");
-                  fireAction(props, "change");
+      {/* Dropdown panel — rendered as portal to escape overflow:hidden ancestors */}
+      {open &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            style={dropdownStyle}
+            className="border border-[var(--border)] bg-[var(--card)] shadow-lg rounded-sm"
+          >
+            {/* Search input */}
+            <div className="p-1.5 border-b border-[var(--border)]">
+              <input
+                // biome-ignore lint/a11y/noAutofocus: dropdown search needs immediate focus
+                autoFocus
+                className="w-full px-2 py-1.5 border border-[var(--border)] bg-[var(--bg)] text-[12px] font-[var(--mono)] focus:border-[var(--accent)] focus:outline-none rounded-sm"
+                type="text"
+                value={filter}
+                placeholder={`Search ${options.length} options...`}
+                onChange={(e) => setFilter(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") {
+                    setOpen(false);
+                    setFilter("");
+                  } else if (e.key === "Enter" && filtered.length === 1) {
+                    select(filtered[0]);
+                  }
                 }}
-              >
-                {t("config-field.None", { defaultValue: "None" })}
-              </Button>
-            )}
-            {filtered.length === 0 && (
-              <div className="px-3 py-3 text-[12px] text-[var(--muted)] text-center">
-                {t("config-field.NoMatches", {
-                  defaultValue: "No matches",
-                })}
-              </div>
-            )}
-            {filtered.map((opt) => (
-              <Button
-                key={opt.value}
-                type="button"
-                variant="ghost"
-                className={`w-full text-left px-3 py-1.5 text-[12px] hover:bg-[var(--bg-hover)] transition-colors rounded-none justify-start h-auto ${
-                  opt.value === effectiveValue
-                    ? "bg-[color-mix(in_srgb,var(--accent)_10%,var(--card))] text-[var(--accent)] font-medium"
-                    : ""
-                }`}
-                onClick={() => select(opt)}
-              >
-                {opt.label}
-                {opt.description && (
-                  <span className="text-[var(--muted)] ml-1.5 text-[11px]">
-                    {opt.description}
-                  </span>
-                )}
-              </Button>
-            ))}
-          </div>
-          <div className="px-3 py-1 border-t border-[var(--border)] text-[10px] text-[var(--muted)]">
-            {filtered.length} of {options.length}{" "}
-            {t("config-field.models", { defaultValue: "models" })}
-          </div>
-        </div>
-      )}
+              />
+            </div>
+            {/* Options list */}
+            <div className="overflow-y-auto max-h-[220px]">
+              {!props.required && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="w-full text-left px-3 py-1.5 text-[12px] text-[var(--muted)] hover:bg-[var(--bg-hover)] transition-colors italic rounded-none justify-start h-auto"
+                  onClick={() => {
+                    props.onChange("");
+                    setInputVal("");
+                    setOpen(false);
+                    setFilter("");
+                    fireAction(props, "change");
+                  }}
+                >
+                  {t("config-field.None", { defaultValue: "None" })}
+                </Button>
+              )}
+              {filtered.length === 0 && (
+                <div className="px-3 py-3 text-[12px] text-[var(--muted)] text-center">
+                  {t("config-field.NoMatches", {
+                    defaultValue: "No matches",
+                  })}
+                </div>
+              )}
+              {filtered.map((opt) => (
+                <Button
+                  key={opt.value}
+                  type="button"
+                  variant="ghost"
+                  className={`w-full text-left px-3 py-1.5 text-[12px] hover:bg-[var(--bg-hover)] transition-colors rounded-none justify-start h-auto ${
+                    opt.value === effectiveValue
+                      ? "bg-[color-mix(in_srgb,var(--accent)_10%,var(--card))] text-[var(--accent)] font-medium"
+                      : ""
+                  }`}
+                  onClick={() => select(opt)}
+                >
+                  {opt.label}
+                  {opt.description && (
+                    <span className="text-[var(--muted)] ml-1.5 text-[11px]">
+                      {opt.description}
+                    </span>
+                  )}
+                </Button>
+              ))}
+            </div>
+            <div className="px-3 py-1 border-t border-[var(--border)] text-[10px] text-[var(--muted)]">
+              {filtered.length} of {options.length}{" "}
+              {t("config-field.options", { defaultValue: "options" })}
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

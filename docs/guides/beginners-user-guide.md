@@ -128,7 +128,8 @@ milady dashboard          # open dashboard in browser
 milady configure          # configuration guidance
 milady config get <key>   # read config value
 milady models             # show model provider status
-milady plugins list       # list installed plugins
+milady plugins installed   # list installed plugins
+milady plugins list       # browse registry plugins
 ```
 
 Tip: Use `milady <command> --help` any time you feel stuck.

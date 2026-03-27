@@ -12,19 +12,14 @@ vi.mock("@miladyai/ui", () => {
   }: React.PropsWithChildren<Record<string, unknown>>) =>
     React.createElement("div", props, children);
   return {
-    Banner: ({
-      children,
-      ...props
-    }: React.HTMLAttributes<HTMLDivElement>) =>
+    Banner: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) =>
       React.createElement("div", { role: "alert", ...props }, children),
     Button: ({
       children,
       ...props
     }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
       React.createElement("button", { type: "button", ...props }, children),
-    Dialog: ({
-      children,
-    }: React.PropsWithChildren<Record<string, unknown>>) =>
+    Dialog: ({ children }: React.PropsWithChildren<Record<string, unknown>>) =>
       React.createElement(React.Fragment, null, children),
     DialogContent: ({
       children,
@@ -77,17 +72,52 @@ vi.mock("@miladyai/ui", () => {
 
 // --- hoisted mocks ----------------------------------------------------------
 
-const { mockUseBugReport, mockClient } = vi.hoisted(() => ({
+const {
+  mockUseBugReport,
+  mockClient,
+  mockCopyToClipboard,
+  isElectrobunRuntimeMock,
+  mockDesktopDiagnostics,
+  loadDesktopBugReportDiagnosticsMock,
+  openDesktopLogsFolderMock,
+  createDesktopBugReportBundleMock,
+} = vi.hoisted(() => ({
   mockUseBugReport: vi.fn(),
   mockClient: {
     getCodingAgentStatus: vi.fn(async () => null),
     checkBugReportInfo: vi.fn().mockResolvedValue({}),
     submitBugReport: vi.fn().mockResolvedValue({}),
   },
+  mockCopyToClipboard: vi.fn(),
+  isElectrobunRuntimeMock: vi.fn(() => false),
+  mockDesktopDiagnostics: {
+    state: "error",
+    phase: "startup_failed",
+    updatedAt: "2026-03-26T00:00:00.000Z",
+    lastError: "Boom",
+    agentName: null,
+    port: null,
+    startedAt: null,
+    platform: "win32",
+    arch: "x64",
+    configDir: "C:/Users/test/AppData/Roaming/Milady",
+    logPath: "C:/Users/test/AppData/Roaming/Milady/milady-startup.log",
+    statusPath: "C:/Users/test/AppData/Roaming/Milady/startup-status.json",
+    logTail: "startup line 1\\nstartup line 2",
+    appVersion: "2.0.0-alpha.125",
+    appRuntime: "electrobun/1.3.10",
+    packaged: true,
+    locale: "zh-CN",
+  },
+  loadDesktopBugReportDiagnosticsMock: vi.fn(),
+  openDesktopLogsFolderMock: vi.fn(),
+  createDesktopBugReportBundleMock: vi.fn(),
 }));
 
-const mockSetTimeout = (fn: () => void, ms: number) => globalThis.setTimeout(fn, ms);
-const mockClearTimeout = (id: ReturnType<typeof globalThis.setTimeout>) => globalThis.clearTimeout(id);
+const mockSetTimeout = (fn: () => void, ms: number) =>
+  globalThis.setTimeout(fn, ms);
+const mockClearTimeout = (id: ReturnType<typeof globalThis.setTimeout>) =>
+  globalThis.clearTimeout(id);
 
 vi.mock("@miladyai/app-core/hooks", () => ({
   useBugReport: () => mockUseBugReport(),
@@ -102,7 +132,10 @@ vi.mock("@miladyai/app-core/api", () => ({
 }));
 
 vi.mock("@miladyai/app-core/state", () => ({
-  useApp: () => ({ t: (key: string) => key, copyToClipboard: vi.fn() }),
+  useApp: () => ({
+    t: (key: string) => key,
+    copyToClipboard: mockCopyToClipboard,
+  }),
 }));
 
 vi.mock("@miladyai/app-core/config/branding", () => ({
@@ -116,6 +149,24 @@ vi.mock("@miladyai/app-core/utils", () => ({
   openExternalUrl: vi.fn(),
 }));
 
+vi.mock("../../src/bridge", () => ({
+  isElectrobunRuntime: () => isElectrobunRuntimeMock(),
+}));
+
+vi.mock("../../src/utils/desktop-bug-report", () => ({
+  loadDesktopBugReportDiagnostics: (...args: unknown[]) =>
+    loadDesktopBugReportDiagnosticsMock(...args),
+  openDesktopLogsFolder: (...args: unknown[]) =>
+    openDesktopLogsFolderMock(...args),
+  createDesktopBugReportBundle: (...args: unknown[]) =>
+    createDesktopBugReportBundleMock(...args),
+  formatDesktopBugReportDiagnostics: (diagnostics: {
+    phase: string;
+    lastError: string | null;
+  }) =>
+    `Startup Phase: ${diagnostics.phase}\nLast Error: ${diagnostics.lastError ?? "none"}`,
+}));
+
 import { BugReportModal } from "../../src/components/BugReportModal";
 
 // --- helpers ----------------------------------------------------------------
@@ -124,7 +175,7 @@ let closeFn: ReturnType<typeof vi.fn>;
 
 function setupMock(isOpen: boolean) {
   closeFn = vi.fn();
-  mockUseBugReport.mockReturnValue({ isOpen, close: closeFn });
+  mockUseBugReport.mockReturnValue({ isOpen, draft: null, close: closeFn });
 }
 
 function getButtons(root: TestRenderer.ReactTestInstance) {
@@ -164,10 +215,19 @@ describe("BugReportModal", () => {
     mockUseBugReport.mockReset();
     mockClient.checkBugReportInfo.mockReset().mockResolvedValue({});
     mockClient.submitBugReport.mockReset().mockResolvedValue({});
+    mockCopyToClipboard.mockReset().mockResolvedValue(undefined);
+    isElectrobunRuntimeMock.mockReset().mockReturnValue(false);
+    loadDesktopBugReportDiagnosticsMock
+      .mockReset()
+      .mockResolvedValue(mockDesktopDiagnostics);
+    openDesktopLogsFolderMock.mockReset().mockResolvedValue(undefined);
+    createDesktopBugReportBundleMock.mockReset().mockResolvedValue({
+      directory:
+        "C:/Users/test/AppData/Roaming/Milady/bug-reports/milady-report-1",
+    });
   });
 
-  afterEach(() => {
-  });
+  afterEach(() => {});
 
   // --- rendering ---
 
@@ -185,7 +245,7 @@ describe("BugReportModal", () => {
     let tree: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(BugReportModal));
-      await new Promise(r => globalThis.setTimeout(r, 60));
+      await new Promise((r) => globalThis.setTimeout(r, 60));
     });
     expect(getText(tree?.root)).toContain("bugreportmodal.ReportABug");
   });
@@ -195,7 +255,7 @@ describe("BugReportModal", () => {
     let tree: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(BugReportModal));
-      await new Promise(r => globalThis.setTimeout(r, 60));
+      await new Promise((r) => globalThis.setTimeout(r, 60));
     });
     const labels = tree?.root.findAllByType("label" as React.ElementType);
     const requiredLabels = labels?.filter((l) =>
@@ -212,7 +272,7 @@ describe("BugReportModal", () => {
     let tree: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(BugReportModal));
-      await new Promise(r => globalThis.setTimeout(r, 60));
+      await new Promise((r) => globalThis.setTimeout(r, 60));
     });
     // Description, Steps to Reproduce, Expected Behavior, Actual Behavior
     expect(getTextareas(tree?.root).length).toBeGreaterThanOrEqual(4);
@@ -231,9 +291,31 @@ describe("BugReportModal", () => {
     setupMock(true);
     await act(async () => {
       TestRenderer.create(React.createElement(BugReportModal));
-      await new Promise(r => globalThis.setTimeout(r, 60));
+      await new Promise((r) => globalThis.setTimeout(r, 60));
     });
     expect(mockClient.checkBugReportInfo).toHaveBeenCalledOnce();
+  });
+
+  it("prefills the form from bug report draft data", async () => {
+    closeFn = vi.fn();
+    mockUseBugReport.mockReturnValue({
+      isOpen: true,
+      draft: {
+        description: "Startup failed on Windows",
+        actualBehavior: "App never got past startup",
+        logs: "Reason: backend-unreachable",
+      },
+      close: closeFn,
+    });
+    let tree: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(BugReportModal));
+      await new Promise((r) => globalThis.setTimeout(r, 60));
+    });
+
+    const textareas = getTextareas(tree?.root);
+    expect(textareas[0].props.value).toBe("Startup failed on Windows");
+    expect(textareas[3].props.value).toBe("App never got past startup");
   });
 
   // --- validation ---
@@ -243,7 +325,7 @@ describe("BugReportModal", () => {
     let tree: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(BugReportModal));
-      await new Promise(r => globalThis.setTimeout(r, 60));
+      await new Promise((r) => globalThis.setTimeout(r, 60));
     });
     const submitBtn = findButton(tree?.root, "bugreportmodal.submit");
     expect(submitBtn?.props.disabled).toBe(true);
@@ -254,7 +336,7 @@ describe("BugReportModal", () => {
     let tree: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(BugReportModal));
-      await new Promise(r => globalThis.setTimeout(r, 60));
+      await new Promise((r) => globalThis.setTimeout(r, 60));
     });
 
     const submitBtn = findButton(tree?.root, "bugreportmodal.submit");
@@ -262,13 +344,12 @@ describe("BugReportModal", () => {
       submitBtn?.props.onClick();
     });
 
-    const errorDivs = tree?.root.findAll(
-      (node) =>
-        node.children.some(
-          (c) =>
-            typeof c === "string" &&
-            c.includes("bugreportmodal.descriptionRequired"),
-        ),
+    const errorDivs = tree?.root.findAll((node) =>
+      node.children.some(
+        (c) =>
+          typeof c === "string" &&
+          c.includes("bugreportmodal.descriptionRequired"),
+      ),
     );
     expect(errorDivs?.length).toBeGreaterThan(0);
   });
@@ -283,7 +364,7 @@ describe("BugReportModal", () => {
     let tree: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(BugReportModal));
-      await new Promise(r => globalThis.setTimeout(r, 60));
+      await new Promise((r) => globalThis.setTimeout(r, 60));
     });
 
     await fillRequired(tree?.root);
@@ -309,7 +390,7 @@ describe("BugReportModal", () => {
     let tree: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(BugReportModal));
-      await new Promise(r => globalThis.setTimeout(r, 60));
+      await new Promise((r) => globalThis.setTimeout(r, 60));
     });
 
     await fillRequired(tree?.root);
@@ -330,7 +411,7 @@ describe("BugReportModal", () => {
     let tree: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(BugReportModal));
-      await new Promise(r => globalThis.setTimeout(r, 60));
+      await new Promise((r) => globalThis.setTimeout(r, 60));
     });
 
     await fillRequired(tree?.root);
@@ -345,13 +426,13 @@ describe("BugReportModal", () => {
     expect(link?.props.href).toBe(issueUrl);
   });
 
-  it("shows error message on submit failure", async () => {
-    mockClient.submitBugReport.mockRejectedValue(new Error("Network error"));
+  it("shows success state when remote intake accepts without returning a URL", async () => {
+    mockClient.submitBugReport.mockResolvedValue({ accepted: true });
     setupMock(true);
     let tree: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(BugReportModal));
-      await new Promise(r => globalThis.setTimeout(r, 60));
+      await new Promise((r) => globalThis.setTimeout(r, 60));
     });
 
     await fillRequired(tree?.root);
@@ -361,11 +442,56 @@ describe("BugReportModal", () => {
       submitBtn?.props.onClick();
     });
 
-    const errorDivs = tree?.root.findAll(
-      (node) =>
-        node.children.some(
-          (c) => typeof c === "string" && c.includes("Network error"),
-        ),
+    const snapshot = JSON.stringify(tree?.toJSON());
+    expect(snapshot).toContain("bugreportmodal.BugReportSubmitted");
+    expect(snapshot).toContain("Your report was received.");
+  });
+
+  it("ignores non-https URLs returned by remote intake", async () => {
+    mockClient.submitBugReport.mockResolvedValue({
+      accepted: true,
+      url: "data:text/html,phish",
+    });
+    setupMock(true);
+    let tree: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(BugReportModal));
+      await new Promise((r) => globalThis.setTimeout(r, 60));
+    });
+
+    await fillRequired(tree?.root);
+
+    const submitBtn = findButton(tree?.root, "bugreportmodal.submit");
+    await act(async () => {
+      submitBtn?.props.onClick();
+    });
+
+    const snapshot = JSON.stringify(tree?.toJSON());
+    expect(snapshot).toContain("bugreportmodal.BugReportSubmitted");
+    expect(snapshot).toContain("Your report was received.");
+    expect(snapshot).not.toContain("data:text/html,phish");
+  });
+
+  it("shows error message on submit failure", async () => {
+    mockClient.submitBugReport.mockRejectedValue(new Error("Network error"));
+    setupMock(true);
+    let tree: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(BugReportModal));
+      await new Promise((r) => globalThis.setTimeout(r, 60));
+    });
+
+    await fillRequired(tree?.root);
+
+    const submitBtn = findButton(tree?.root, "bugreportmodal.submit");
+    await act(async () => {
+      submitBtn?.props.onClick();
+    });
+
+    const errorDivs = tree?.root.findAll((node) =>
+      node.children.some(
+        (c) => typeof c === "string" && c.includes("Network error"),
+      ),
     );
     expect(errorDivs?.length).toBe(1);
   });
@@ -380,7 +506,7 @@ describe("BugReportModal", () => {
     let tree: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(BugReportModal));
-      await new Promise(r => globalThis.setTimeout(r, 60));
+      await new Promise((r) => globalThis.setTimeout(r, 60));
     });
 
     await fillRequired(tree?.root);
@@ -398,6 +524,78 @@ describe("BugReportModal", () => {
     expect(getTextareas(tree?.root).length).toBeGreaterThan(0);
   });
 
+  it("loads desktop diagnostics in the Electrobun runtime", async () => {
+    isElectrobunRuntimeMock.mockReturnValue(true);
+    setupMock(true);
+
+    await act(async () => {
+      TestRenderer.create(React.createElement(BugReportModal));
+      await new Promise((r) => globalThis.setTimeout(r, 60));
+    });
+
+    expect(loadDesktopBugReportDiagnosticsMock).toHaveBeenCalledOnce();
+  });
+
+  it("opens the desktop logs folder", async () => {
+    isElectrobunRuntimeMock.mockReturnValue(true);
+    setupMock(true);
+    let tree: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(BugReportModal));
+      await new Promise((r) => globalThis.setTimeout(r, 60));
+    });
+
+    const logsButton = findButton(tree?.root, "bugreportmodal.openLogsFolder");
+    await act(async () => {
+      await logsButton?.props.onClick();
+    });
+
+    expect(openDesktopLogsFolderMock).toHaveBeenCalledOnce();
+  });
+
+  it("copies desktop diagnostics", async () => {
+    isElectrobunRuntimeMock.mockReturnValue(true);
+    setupMock(true);
+    let tree: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(BugReportModal));
+      await new Promise((r) => globalThis.setTimeout(r, 60));
+    });
+
+    const copyButton = findButton(tree?.root, "bugreportmodal.copyDiagnostics");
+    await act(async () => {
+      await copyButton?.props.onClick();
+    });
+
+    expect(mockCopyToClipboard).toHaveBeenCalledWith(
+      expect.stringContaining("Startup Phase: startup_failed"),
+    );
+  });
+
+  it("creates a local report bundle", async () => {
+    isElectrobunRuntimeMock.mockReturnValue(true);
+    setupMock(true);
+    let tree: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(BugReportModal));
+      await new Promise((r) => globalThis.setTimeout(r, 60));
+    });
+
+    await fillRequired(tree?.root);
+
+    const saveButton = findButton(tree?.root, "bugreportmodal.saveBundle");
+    await act(async () => {
+      await saveButton?.props.onClick();
+    });
+
+    expect(createDesktopBugReportBundleMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prefix: "milady-report",
+        reportMarkdown: expect.any(String),
+      }),
+    );
+  });
+
   // --- close behavior ---
 
   it("calls close on Cancel button click", async () => {
@@ -405,7 +603,7 @@ describe("BugReportModal", () => {
     let tree: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(BugReportModal));
-      await new Promise(r => globalThis.setTimeout(r, 60));
+      await new Promise((r) => globalThis.setTimeout(r, 60));
     });
 
     const cancelBtn = findButton(tree?.root, "common.cancel");
@@ -423,7 +621,7 @@ describe("BugReportModal", () => {
     let tree: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(BugReportModal));
-      await new Promise(r => globalThis.setTimeout(r, 60));
+      await new Promise((r) => globalThis.setTimeout(r, 60));
     });
 
     const before = getTextareas(tree?.root).length;

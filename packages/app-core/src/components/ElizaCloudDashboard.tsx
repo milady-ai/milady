@@ -32,7 +32,6 @@ import {
   type CloudCompatAgent,
   client,
 } from "../api";
-import { isCloudStatusReasonApiKeyOnly } from "../api/cloud-connection";
 import { useIntervalWhenDocumentVisible } from "../hooks/useDocumentVisibility";
 import { useApp } from "../state";
 import { openDesktopInAppBrowser, openExternalUrl } from "../utils";
@@ -48,6 +47,10 @@ const CLOUD_INSET_PANEL_CLASSNAME =
   "rounded-xl border border-border/50 bg-bg/30 p-4";
 const CLOUD_ACCENT_CONTROL_TEXT_CLASSNAME =
   "text-txt-strong hover:text-txt-strong";
+const CLOUD_STATUS_API_KEY_ONLY_REASONS: ReadonlySet<string> = new Set([
+  "api_key_present_not_authenticated",
+  "api_key_present_runtime_not_started",
+]);
 
 const STATUS_BADGE: Record<string, { i18nKey: string; className: string }> = {
   running: {
@@ -187,6 +190,14 @@ function CloudAgentCard({
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+function isCloudStatusReasonApiKeyOnly(
+  reason: string | null | undefined,
+): boolean {
+  return (
+    typeof reason === "string" && CLOUD_STATUS_API_KEY_ONLY_REASONS.has(reason)
+  );
 }
 
 function resolveCloudAccountIdDisplay(

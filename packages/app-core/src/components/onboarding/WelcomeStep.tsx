@@ -26,18 +26,18 @@ export function WelcomeStep() {
   } = useApp();
 
   const handleGetStarted = () => {
-    // Default to Chen (blue-haired anime character) — character selection
-    // happens after onboarding completes.
+    // Default to Chen (blue-haired anime character) — user picks their
+    // character in the identity step (now the very next screen).
     setState("onboardingStyle", "chen");
     setState("onboardingName", "Chen");
     setState("selectedVrmIndex", 1);
     // WHY goToOnboardingStep: syncs Flamina guide in advanced mode; persisted
     // step still goes through the same setter as the rest of onboarding.
-    goToOnboardingStep("hosting");
+    goToOnboardingStep("identity");
   };
 
   const handleUseExistingSetup = () => {
-    setState("onboardingStep", "hosting");
+    setState("onboardingStep", "identity");
   };
 
   return (

@@ -1303,5 +1303,12 @@
   "whatsappqroverlay.Tap": "탭",
   "whatsappqroverlay.TryAgain": "다시 시도",
   "whatsappqroverlay.UsesAnUnofficialW": "비공식 WhatsApp API를 사용합니다. 전용 전화번호를 사용하세요.",
-  "whatsappqroverlay.andSelect": "그리고 선택"
+  "whatsappqroverlay.andSelect": "그리고 선택",
+  "bugreportmodal.attachLogs": "Attach startup logs",
+  "bugreportmodal.attachSystemInfo": "Attach system info",
+  "bugreportmodal.copyDiagnostics": "Copy Diagnostics",
+  "bugreportmodal.copiedDiagnostics": "Diagnostics Copied!",
+  "bugreportmodal.openLogsFolder": "Open Logs Folder",
+  "bugreportmodal.saveBundle": "Save Report Bundle",
+  "bugreportmodal.savingBundle": "Saving Bundle..."
 }

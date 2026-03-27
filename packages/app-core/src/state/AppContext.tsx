@@ -5468,7 +5468,7 @@ function AppProviderInner({
       if (onboardingStep === "permissions") {
         if (options?.allowPermissionBypass) {
           if (options.skipTask) addDeferredOnboardingTask(options.skipTask);
-          // Don't finish yet — advance to identity step for avatar selection
+          // Don't finish yet — advance to the next step
         }
       }
 
