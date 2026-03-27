@@ -480,9 +480,7 @@ function DocumentViewer({ documentId }: { documentId: string | null }) {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0 flex-1">
             <h2 className="text-2xl font-semibold text-txt-strong">
-              {loading
-                ? "..."
-                : doc?.filename || ""}
+              {loading ? "..." : doc?.filename || ""}
             </h2>
           </div>
           {doc && (
@@ -1126,13 +1124,25 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-2">
-              <div className={`${DESKTOP_INSET_PANEL_CLASSNAME} flex flex-col items-center justify-center px-3 py-3`}>
-                <span className="text-2xl font-bold text-txt-strong">{documents.length}</span>
-                <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">docs</span>
+              <div
+                className={`${DESKTOP_INSET_PANEL_CLASSNAME} flex flex-col items-center justify-center px-3 py-3`}
+              >
+                <span className="text-2xl font-bold text-txt-strong">
+                  {documents.length}
+                </span>
+                <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
+                  docs
+                </span>
               </div>
-              <div className={`${DESKTOP_INSET_PANEL_CLASSNAME} flex flex-col items-center justify-center px-3 py-3`}>
-                <span className="text-2xl font-bold text-txt-strong">{totalFragments}</span>
-                <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">fragments</span>
+              <div
+                className={`${DESKTOP_INSET_PANEL_CLASSNAME} flex flex-col items-center justify-center px-3 py-3`}
+              >
+                <span className="text-2xl font-bold text-txt-strong">
+                  {totalFragments}
+                </span>
+                <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
+                  fragments
+                </span>
               </div>
             </div>
 
@@ -1146,10 +1156,7 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
             </div>
 
             <div className="mt-4">
-              <form
-                className="w-full"
-                onSubmit={handleSearchSubmit}
-              >
+              <form className="w-full" onSubmit={handleSearchSubmit}>
                 <div className="flex items-stretch gap-2">
                   <Input
                     type="text"

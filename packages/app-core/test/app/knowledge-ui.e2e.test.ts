@@ -363,7 +363,10 @@ vi.mock("@miladyai/ui", async (importOriginal) => {
     }: {
       open?: boolean;
       children: React.ReactNode;
-    }) => (open ? React.createElement("div", { "data-testid": "dialog" }, children) : null),
+    }) =>
+      open
+        ? React.createElement("div", { "data-testid": "dialog" }, children)
+        : null,
     DialogContent: ({ children }: { children: React.ReactNode }) =>
       React.createElement("div", { "data-testid": "dialog-content" }, children),
     DialogHeader: ({ children }: { children: React.ReactNode }) =>
@@ -460,7 +463,8 @@ describe("KnowledgeView UI", () => {
     });
 
     const allText = JSON.stringify(tree?.toJSON());
-    expect(allText).toContain("Documents");
+    expect(allText).toContain("docs");
+    expect(allText).toContain("fragments");
   });
 
   it("loads fragment details when opening a document", async () => {
@@ -557,13 +561,13 @@ describe("KnowledgeView UI", () => {
         .findAllByType("button")
         .find((node) => node.props.children === label);
 
-    const chooseFilesButton = findButton("knowledgeview.ChooseFiles");
-    const chooseFolderButton = findButton("knowledgeview.ChooseFolder");
-    const searchButton = findButton("knowledge.ui.search");
+    const chooseFilesButton = findButton("upload files");
+    const addUrlButton = findButton("add url");
+    const searchButton = findButton("go");
     const searchForm = tree?.root.findAllByType("form")[0];
 
-    expect(chooseFolderButton).toBeUndefined();
-    expect(searchForm?.props.className).toContain("max-w-[500px]");
+    expect(addUrlButton?.props.className).toContain("h-10");
+    expect(searchForm?.props.className).toContain("w-full");
     expect(chooseFilesButton?.props.className).toContain("h-10");
     expect(chooseFilesButton?.props.className).toContain("text-txt");
     expect(searchButton?.props.className).toContain("h-10");
