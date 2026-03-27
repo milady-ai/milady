@@ -159,3 +159,5 @@ cache/voice/
 
 # Dev workflow artifacts
 milady-*.html
+# prr state file (auto-generated)
+.pr-resolver-state.json
