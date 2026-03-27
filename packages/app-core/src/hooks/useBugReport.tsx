@@ -26,8 +26,12 @@ interface BugReportContextValue {
 
 const BugReportContext = createContext<BugReportContextValue | null>(null);
 
+export function useOptionalBugReport(): BugReportContextValue | null {
+  return useContext(BugReportContext);
+}
+
 export function useBugReport(): BugReportContextValue {
-  const ctx = useContext(BugReportContext);
+  const ctx = useOptionalBugReport();
   if (!ctx)
     throw new Error("useBugReport must be used within BugReportProvider");
   return ctx;

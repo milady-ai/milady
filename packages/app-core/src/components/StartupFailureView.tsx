@@ -10,7 +10,7 @@ import {
 import { useState } from "react";
 import { client } from "../api";
 import { useBranding } from "../config/branding";
-import { useBugReport } from "../hooks";
+import { type BugReportDraft, useOptionalBugReport } from "../hooks";
 import type { StartupErrorState } from "../state";
 import { useApp } from "../state";
 
@@ -32,20 +32,11 @@ interface StartupFailureViewProps {
   onRetry: () => void;
 }
 
-export function StartupFailureView({
-  error,
-  onRetry,
-}: StartupFailureViewProps) {
-  const { t } = useApp();
-  const branding = useBranding();
-  const { open: openBugReport } = useBugReport();
-  const [reportState, setReportState] = useState<
-    "idle" | "submitting" | "success" | "error"
-  >("idle");
-  const [reportMessage, setReportMessage] = useState<string | null>(null);
-  const isBackendUnreachable = error.reason === "backend-unreachable";
-  const reasonLabel = REASON_LABELS[error.reason];
-  const startupDetail = [
+function buildStartupBugReportDraft(
+  reasonLabel: string,
+  error: StartupErrorState,
+): BugReportDraft {
+  const logs = [
     `Reason: ${error.reason}`,
     `Phase: ${error.phase}`,
     typeof error.status === "number" ? `Status: ${error.status}` : null,
@@ -54,6 +45,41 @@ export function StartupFailureView({
   ]
     .filter(Boolean)
     .join("\n");
+
+  return {
+    description: `${reasonLabel}: ${error.message}`.slice(0, 80),
+    stepsToReproduce:
+      "1. Launch the desktop app.\n2. Wait for startup to fail.\n3. Observe the startup failure screen.",
+    expectedBehavior: "The app should finish startup and show the main shell.",
+    actualBehavior: error.message,
+    logs,
+  };
+}
+
+function normalizeReportUrl(url?: string): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" ? parsed.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
+export function StartupFailureView({
+  error,
+  onRetry,
+}: StartupFailureViewProps) {
+  const { t } = useApp();
+  const branding = useBranding();
+  const bugReport = useOptionalBugReport();
+  const [reportState, setReportState] = useState<
+    "idle" | "submitting" | "success" | "error"
+  >("idle");
+  const [reportMessage, setReportMessage] = useState<string | null>(null);
+  const isBackendUnreachable = error.reason === "backend-unreachable";
+  const reasonLabel = REASON_LABELS[error.reason];
+  const startupDraft = buildStartupBugReportDraft(reasonLabel, error);
 
   async function handleShareReport() {
     setReportState("submitting");
@@ -93,12 +119,28 @@ export function StartupFailureView({
           path: error.path,
         },
       });
-      setReportState("success");
-      setReportMessage(
-        result.url
-          ? `Report shared: ${result.url}`
-          : "Diagnostic report shared successfully.",
-      );
+      const safeResultUrl = normalizeReportUrl(result.url);
+      if (safeResultUrl) {
+        setReportState("success");
+        setReportMessage(`Report shared: ${safeResultUrl}`);
+        return;
+      }
+      if (result.accepted) {
+        setReportState("success");
+        setReportMessage("Diagnostic report shared successfully.");
+        return;
+      }
+      if (result.fallback) {
+        setReportState("error");
+        setReportMessage(
+          bugReport
+            ? "Automatic sharing is unavailable. Use Report Bug to review and submit it manually."
+            : "Automatic sharing is unavailable on this screen.",
+        );
+        return;
+      }
+      setReportState("error");
+      setReportMessage("Failed to share diagnostic report.");
     } catch (submitError) {
       setReportState("error");
       setReportMessage(
@@ -173,24 +215,16 @@ export function StartupFailureView({
             >
               {t("startupfailureview.RetryStartup")}
             </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() =>
-                openBugReport({
-                  description: `${reasonLabel}: ${error.message}`.slice(0, 80),
-                  stepsToReproduce:
-                    "1. Launch the desktop app.\n2. Wait for startup to fail.\n3. Observe the startup failure screen.",
-                  expectedBehavior:
-                    "The app should finish startup and show the main shell.",
-                  actualBehavior: error.message,
-                  logs: startupDetail,
-                })
-              }
-              className="w-full sm:w-auto sm:min-w-[10rem]"
-            >
-              {t("bugreportmodal.ReportABug")}
-            </Button>
+            {bugReport ? (
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => bugReport.open(startupDraft)}
+                className="w-full sm:w-auto sm:min-w-[10rem]"
+              >
+                {t("bugreportmodal.ReportABug")}
+              </Button>
+            ) : null}
             <Button
               variant="outline"
               size="lg"

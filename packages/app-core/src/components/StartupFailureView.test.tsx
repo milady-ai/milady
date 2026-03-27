@@ -3,10 +3,16 @@
 import TestRenderer, { act } from "react-test-renderer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockUseApp, mockUseBranding, openBugReportMock } = vi.hoisted(() => ({
+const {
+  mockUseApp,
+  mockUseBranding,
+  openBugReportMock,
+  optionalBugReportMock,
+} = vi.hoisted(() => ({
   mockUseApp: vi.fn(),
   mockUseBranding: vi.fn(),
   openBugReportMock: vi.fn(),
+  optionalBugReportMock: vi.fn(),
 }));
 
 vi.mock("../api", () => ({
@@ -28,7 +34,7 @@ vi.mock("../config/branding", () => ({
 }));
 
 vi.mock("../hooks", () => ({
-  useBugReport: () => ({ open: openBugReportMock }),
+  useOptionalBugReport: () => optionalBugReportMock(),
 }));
 
 import { StartupFailureView } from "./StartupFailureView";
@@ -52,6 +58,7 @@ describe("StartupFailureView", () => {
         )[key] ?? key,
     });
     openBugReportMock.mockReset();
+    optionalBugReportMock.mockReturnValue({ open: openBugReportMock });
   });
 
   it("renders retry controls and details for startup failures", async () => {
@@ -78,6 +85,27 @@ describe("StartupFailureView", () => {
     expect(snapshot).toContain("stack trace");
     expect(snapshot).toContain("Retry Startup");
     expect(snapshot).toContain("Report Bug");
+  });
+
+  it("does not render the report button when no bug report provider is present", async () => {
+    optionalBugReportMock.mockReturnValue(null);
+
+    let tree: TestRenderer.ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(
+        <StartupFailureView
+          error={{
+            reason: "agent-error",
+            phase: "initializing-agent",
+            message: "The agent process exited unexpectedly.",
+          }}
+          onRetry={vi.fn()}
+        />,
+      );
+    });
+
+    const snapshot = JSON.stringify(tree?.toJSON());
+    expect(snapshot).not.toContain("Report Bug");
   });
 
   it("opens bug report with startup diagnostics", async () => {

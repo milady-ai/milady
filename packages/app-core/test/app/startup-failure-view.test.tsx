@@ -1,11 +1,11 @@
 import { StartupFailureView } from "@miladyai/app-core/components";
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
-import { describe, expect, it, vi } from "vitest";
-import { textOf } from "../../../../test/helpers/react-test";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { openBugReportMock } = vi.hoisted(() => ({
+const { openBugReportMock, optionalBugReportMock } = vi.hoisted(() => ({
   openBugReportMock: vi.fn(),
+  optionalBugReportMock: vi.fn(),
 }));
 
 const { mockClient } = vi.hoisted(() => ({
@@ -37,10 +37,14 @@ vi.mock("@miladyai/app-core/state", () => ({
 }));
 
 vi.mock("@miladyai/app-core/hooks", () => ({
-  useBugReport: () => ({ open: openBugReportMock }),
+  useOptionalBugReport: () => optionalBugReportMock(),
 }));
 
 describe("StartupFailureView", () => {
+  beforeEach(() => {
+    optionalBugReportMock.mockReturnValue({ open: openBugReportMock });
+  });
+
   it("renders backend-unreachable hint and open-app CTA, then triggers retry", async () => {
     const onRetry = vi.fn();
     let tree: TestRenderer.ReactTestRenderer | null = null;
@@ -168,7 +172,9 @@ describe("StartupFailureView", () => {
 
   it("submits a one-click diagnostic report", async () => {
     mockClient.checkBugReportInfo.mockClear();
-    mockClient.submitBugReport.mockClear().mockResolvedValue({ accepted: true });
+    mockClient.submitBugReport
+      .mockClear()
+      .mockResolvedValue({ accepted: true });
 
     let tree: TestRenderer.ReactTestRenderer | null = null;
     await act(async () => {
@@ -212,5 +218,73 @@ describe("StartupFailureView", () => {
     );
     const snapshot = JSON.stringify(tree.toJSON());
     expect(snapshot).toContain("Diagnostic report shared successfully.");
+  });
+
+  it("does not render the local report action without bug report context", async () => {
+    optionalBugReportMock.mockReturnValue(null);
+
+    let tree: TestRenderer.ReactTestRenderer | null = null;
+    await act(async () => {
+      tree = TestRenderer.create(
+        React.createElement(StartupFailureView, {
+          error: {
+            reason: "agent-error",
+            phase: "initializing-agent",
+            message: "Agent boot failed",
+          },
+          onRetry: vi.fn(),
+        }),
+      );
+    });
+
+    if (!tree) throw new Error("failed to render StartupFailureView");
+    const reportButton = tree.root
+      .findAllByType("button")
+      .find((button) =>
+        button.children.join("").includes("bugreportmodal.ReportABug"),
+      );
+    expect(reportButton).toBeUndefined();
+  });
+
+  it("does not claim success when the share flow falls back to manual submission", async () => {
+    mockClient.checkBugReportInfo.mockClear();
+    mockClient.submitBugReport.mockClear().mockResolvedValue({
+      fallback: "https://github.com/milady-ai/milady/issues/new",
+    });
+
+    let tree: TestRenderer.ReactTestRenderer | null = null;
+    await act(async () => {
+      tree = TestRenderer.create(
+        React.createElement(StartupFailureView, {
+          error: {
+            reason: "agent-error",
+            phase: "initializing-agent",
+            message: "Agent boot failed",
+            detail: "stack trace",
+            path: "/api/status",
+          },
+          onRetry: vi.fn(),
+        }),
+      );
+    });
+
+    if (!tree) throw new Error("failed to render StartupFailureView");
+
+    const shareButton = tree.root
+      .findAllByType("button")
+      .find((button) =>
+        button.children.join("").includes("Share diagnostic report"),
+      );
+    if (!shareButton) throw new Error("missing share button");
+
+    await act(async () => {
+      await shareButton.props.onClick();
+    });
+
+    const snapshot = JSON.stringify(tree.toJSON());
+    expect(snapshot).toContain(
+      "Use Report Bug to review and submit it manually.",
+    );
+    expect(snapshot).not.toContain("Diagnostic report shared successfully.");
   });
 });

@@ -174,9 +174,25 @@ describe("POST /api/bug-report", () => {
     beforeEach(() => {
       delete process.env.GITHUB_TOKEN;
       delete process.env.MILADY_BUG_REPORT_API_URL;
+      delete process.env.ELIZA_CLOUD_BUG_REPORT_URL;
+      delete process.env.BUG_REPORT_API_URL;
     });
 
     it("returns fallback URL", async () => {
+      const ctx = makeCtx({
+        method: "POST",
+        pathname: "/api/bug-report",
+        readJsonBody: vi.fn().mockResolvedValue(validBody),
+      });
+      const handled = await handleBugReportRoutes(ctx);
+      expect(handled).toBe(true);
+      expect(ctx.json).toHaveBeenCalledWith(ctx.res, {
+        fallback: expect.stringContaining("github.com/milady-ai/milady"),
+      });
+    });
+
+    it("ignores undocumented BUG_REPORT_API_URL fallback", async () => {
+      process.env.BUG_REPORT_API_URL = "https://unexpected.example/reports";
       const ctx = makeCtx({
         method: "POST",
         pathname: "/api/bug-report",

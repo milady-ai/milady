@@ -12,19 +12,14 @@ vi.mock("@miladyai/ui", () => {
   }: React.PropsWithChildren<Record<string, unknown>>) =>
     React.createElement("div", props, children);
   return {
-    Banner: ({
-      children,
-      ...props
-    }: React.HTMLAttributes<HTMLDivElement>) =>
+    Banner: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) =>
       React.createElement("div", { role: "alert", ...props }, children),
     Button: ({
       children,
       ...props
     }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
       React.createElement("button", { type: "button", ...props }, children),
-    Dialog: ({
-      children,
-    }: React.PropsWithChildren<Record<string, unknown>>) =>
+    Dialog: ({ children }: React.PropsWithChildren<Record<string, unknown>>) =>
       React.createElement(React.Fragment, null, children),
     DialogContent: ({
       children,
@@ -318,7 +313,7 @@ describe("BugReportModal", () => {
       await new Promise((r) => globalThis.setTimeout(r, 60));
     });
 
-    const textareas = getTextareas(tree!.root);
+    const textareas = getTextareas(tree?.root);
     expect(textareas[0].props.value).toBe("Startup failed on Windows");
     expect(textareas[3].props.value).toBe("App never got past startup");
   });
@@ -349,13 +344,12 @@ describe("BugReportModal", () => {
       submitBtn?.props.onClick();
     });
 
-    const errorDivs = tree?.root.findAll(
-      (node) =>
-        node.children.some(
-          (c) =>
-            typeof c === "string" &&
-            c.includes("bugreportmodal.descriptionRequired"),
-        ),
+    const errorDivs = tree?.root.findAll((node) =>
+      node.children.some(
+        (c) =>
+          typeof c === "string" &&
+          c.includes("bugreportmodal.descriptionRequired"),
+      ),
     );
     expect(errorDivs?.length).toBeGreaterThan(0);
   });
@@ -438,7 +432,7 @@ describe("BugReportModal", () => {
     let tree: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(BugReportModal));
-      await new Promise(r => globalThis.setTimeout(r, 60));
+      await new Promise((r) => globalThis.setTimeout(r, 60));
     });
 
     await fillRequired(tree?.root);
@@ -451,6 +445,31 @@ describe("BugReportModal", () => {
     const snapshot = JSON.stringify(tree?.toJSON());
     expect(snapshot).toContain("bugreportmodal.BugReportSubmitted");
     expect(snapshot).toContain("Your report was received.");
+  });
+
+  it("ignores non-https URLs returned by remote intake", async () => {
+    mockClient.submitBugReport.mockResolvedValue({
+      accepted: true,
+      url: "data:text/html,phish",
+    });
+    setupMock(true);
+    let tree: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(BugReportModal));
+      await new Promise((r) => globalThis.setTimeout(r, 60));
+    });
+
+    await fillRequired(tree?.root);
+
+    const submitBtn = findButton(tree?.root, "bugreportmodal.submit");
+    await act(async () => {
+      submitBtn?.props.onClick();
+    });
+
+    const snapshot = JSON.stringify(tree?.toJSON());
+    expect(snapshot).toContain("bugreportmodal.BugReportSubmitted");
+    expect(snapshot).toContain("Your report was received.");
+    expect(snapshot).not.toContain("data:text/html,phish");
   });
 
   it("shows error message on submit failure", async () => {
@@ -469,11 +488,10 @@ describe("BugReportModal", () => {
       submitBtn?.props.onClick();
     });
 
-    const errorDivs = tree?.root.findAll(
-      (node) =>
-        node.children.some(
-          (c) => typeof c === "string" && c.includes("Network error"),
-        ),
+    const errorDivs = tree?.root.findAll((node) =>
+      node.children.some(
+        (c) => typeof c === "string" && c.includes("Network error"),
+      ),
     );
     expect(errorDivs?.length).toBe(1);
   });

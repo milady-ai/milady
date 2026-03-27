@@ -105,7 +105,10 @@ function redactSecrets(input: string, maxLen = 10_000): string {
       /\b(sk-[A-Za-z0-9_-]{10,}|ghp_[A-Za-z0-9]{20,}|xox[baprs]-[A-Za-z0-9-]{10,})\b/g,
       "[redacted-token]",
     )
-    .replace(/\b(mnemonic|private[_ -]?key|seed phrase)\b\s*[:=]\s*.+/gi, "$1: [redacted]");
+    .replace(
+      /\b(mnemonic|private[_ -]?key|seed phrase)\b\s*[:=]\s*.+/gi,
+      "$1: [redacted]",
+    );
 }
 
 function formatIssueBody(body: BugReportBody): string {
@@ -130,7 +133,9 @@ function formatIssueBody(body: BugReportBody): string {
     sections.push(`### Model Provider\n\n${sanitize(body.modelProvider, 200)}`);
   }
   if (body.logs) {
-    sections.push(`### Logs\n\n\`\`\`\n${redactSecrets(body.logs, 50_000)}\n\`\`\``);
+    sections.push(
+      `### Logs\n\n\`\`\`\n${redactSecrets(body.logs, 50_000)}\n\`\`\``,
+    );
   }
   if (body.startup) {
     sections.push(
@@ -158,16 +163,14 @@ function getBugReportMode(): "remote" | "github" | "fallback" {
 function getRemoteBugReportUrl(): string | undefined {
   return (
     process.env.MILADY_BUG_REPORT_API_URL ??
-    process.env.ELIZA_CLOUD_BUG_REPORT_URL ??
-    process.env.BUG_REPORT_API_URL
+    process.env.ELIZA_CLOUD_BUG_REPORT_URL
   );
 }
 
 function getRemoteBugReportToken(): string | undefined {
   return (
     process.env.MILADY_BUG_REPORT_API_TOKEN ??
-    process.env.ELIZA_CLOUD_BUG_REPORT_TOKEN ??
-    process.env.BUG_REPORT_API_TOKEN
+    process.env.ELIZA_CLOUD_BUG_REPORT_TOKEN
   );
 }
 
@@ -201,7 +204,9 @@ async function submitToRemoteBugIntake(body: BugReportBody) {
           reason: body.startup.reason
             ? sanitize(body.startup.reason, 120)
             : undefined,
-          phase: body.startup.phase ? sanitize(body.startup.phase, 120) : undefined,
+          phase: body.startup.phase
+            ? sanitize(body.startup.phase, 120)
+            : undefined,
           message: body.startup.message
             ? redactSecrets(body.startup.message, 1_000)
             : undefined,
@@ -209,7 +214,9 @@ async function submitToRemoteBugIntake(body: BugReportBody) {
             ? redactSecrets(body.startup.detail, 10_000)
             : undefined,
           status: body.startup.status,
-          path: body.startup.path ? sanitize(body.startup.path, 500) : undefined,
+          path: body.startup.path
+            ? sanitize(body.startup.path, 500)
+            : undefined,
         }
       : undefined,
   };

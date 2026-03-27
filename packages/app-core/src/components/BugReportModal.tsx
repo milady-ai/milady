@@ -70,6 +70,16 @@ const modalTextareaClassName =
 
 const subtleMonoDescriptionClassName = "font-mono text-[11px] text-muted";
 
+function normalizeHttpsResultUrl(url?: string): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" ? parsed.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
 export function BugReportModal() {
   const { copyToClipboard, t } = useApp();
   const desktopRuntime = isElectrobunRuntime();
@@ -268,8 +278,9 @@ export function BugReportModal() {
         modelProvider: form.modelProvider,
         logs: buildCombinedLogs(),
       });
-      if (result.url) {
-        setResultUrl(result.url);
+      const safeResultUrl = normalizeHttpsResultUrl(result.url);
+      if (safeResultUrl) {
+        setResultUrl(safeResultUrl);
       } else if (result.accepted) {
         setAcceptedWithoutUrl(true);
       } else if (result.fallback) {
