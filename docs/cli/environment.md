@@ -38,9 +38,12 @@ These variables control the API server and network behavior.
 | `MILADY_API_TOKEN` | Static API token for authenticating requests to the agent API server. When set, all API requests must include this token. Auto-generated if unset and bind is non-loopback. | (unset) |
 | `MILADY_ALLOW_WS_QUERY_TOKEN` | When set to `1`, allows the API token to be passed as a WebSocket query parameter (less secure; useful for some clients). | (unset) |
 | `MILADY_PAIRING_DISABLED` | When set to `1`, disables the pairing endpoint on the API server (requires `MILADY_API_TOKEN` to be set). | (unset) |
+| `MILADY_API_PORT` | API server port in dev mode (used by `bun run dev`). In production (`milady start`), the API shares `MILADY_PORT`. | `31337` |
 | `MILADY_ALLOWED_ORIGINS` | Comma-separated list of additional CORS origins allowed by the API server. | (unset) |
 | `MILADY_ALLOW_NULL_ORIGIN` | When set to `1`, allows the `null` origin in CORS (useful for file:// or desktop clients). | (unset) |
 | `MILADY_WALLET_EXPORT_TOKEN` | Auth token for the wallet export API endpoint. When unset, wallet exports are disabled. | (unset) |
+| `MILADY_HOME_PORT` | Home dashboard port. | `2142` |
+| `MILADY_WECHAT_WEBHOOK_PORT` | WeChat webhook receiver port. | `18790` |
 | `API_PORT` / `SERVER_PORT` | Alternative port overrides used by some runtime actions. Prefer `MILADY_PORT`. | (unset) |
 
 ---
@@ -96,9 +99,11 @@ These variables configure access to AI model providers. Set at least one to enab
 | `ZAI_API_KEY` | Zai | Zai model provider |
 | `Z_AI_API_KEY` | Zai | Alias -- automatically copied to `ZAI_API_KEY` at startup if `ZAI_API_KEY` is unset |
 | `OLLAMA_BASE_URL` | Ollama (local) | Base URL for a local Ollama server (not an API key) |
+| `GOOGLE_CLOUD_API_KEY` | Google Antigravity | Google Cloud API for Antigravity model provider |
 | `ELIZAOS_CLOUD_API_KEY` | elizaOS Cloud | Cloud-hosted model inference via elizaOS |
 | `ELIZAOS_CLOUD_ENABLED` | elizaOS Cloud | Set to `1` to enable elizaOS Cloud (requires API key) |
 | `ELIZAOS_CLOUD_BASE_URL` | elizaOS Cloud | Override the elizaOS Cloud endpoint URL. Set automatically from config when cloud is enabled. |
+| `ELIZA_USE_PI_AI` | Pi AI | Set to `1` to enable the Pi AI model provider |
 
 Use `milady models` to check which providers are currently configured.
 
@@ -172,6 +177,21 @@ These variables control elizaOS runtime initialization behavior.
 | `MILADY_DISABLE_WORKSPACE_PLUGIN_OVERRIDES` | When set to `1`, disables loading plugin overrides from workspace directories. | (unset) |
 | `MILADY_BUNDLED_VERSION` | Override the bundled version string returned by the version resolver. Used in special packaging scenarios. | (unset) |
 | `MILADY_DISABLE_EDGE_TTS` | When set to `1`, `true`, or `yes`, Milady does **not** auto-load `@elizaos/plugin-edge-tts` when `@elizaos/plugin-agent-orchestrator` is enabled (orchestrator-driven flows use `TEXT_TO_SPEECH`). Without this, the bundled `node-edge-tts` client **contacts Microsoft’s Edge TTS cloud service** even though no API key is required—there is still an outbound network call to Microsoft. To opt out while keeping other plugins: set this variable, or set `plugins.entries["edge-tts"].enabled` to `false` in `milady.json`. Alias: `ELIZA_DISABLE_EDGE_TTS`. | (unset — Edge TTS is auto-loaded with the agent orchestrator) |
+
+---
+
+## Feature Plugin Activation
+
+These environment variables auto-enable their associated plugins when set. They are checked by the plugin auto-enable layer during runtime startup.
+
+| Variable | Plugin | Description |
+|----------|--------|-------------|
+| `CUA_API_KEY` | `@elizaos/plugin-cua` | CUA cloud sandbox automation API key |
+| `CUA_HOST` | `@elizaos/plugin-cua` | CUA host URL (alternative trigger to API key) |
+| `OBSIDIAN_VAULT_PATH` | `@elizaos/plugin-obsidian` | Path to Obsidian vault — auto-enables Obsidian plugin |
+| `REPOPROMPT_CLI_PATH` | `@elizaos/plugin-repoprompt` | Path to RepoPrompt CLI — auto-enables RepoPrompt plugin |
+| `CLAUDE_CODE_WORKBENCH_ENABLED` | `@elizaos/plugin-claude-code-workbench` | Set to `1` to enable Claude Code Workbench workflows |
+| `STEWARD_API_URL` | `@stwd/eliza-plugin` | Steward wallet plugin API URL (Milady-specific) |
 
 ---
 
