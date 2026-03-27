@@ -117,6 +117,95 @@ where to get the credentials, minimum required fields, and tips for optional fie
 - `AI_GATEWAY_TIMEOUT_MS` — Request timeout, default 30000ms
 **Tips:** Routes model calls through Vercel's AI gateway for caching, rate limiting, and observability. Useful if you're already on Vercel.
 
+### DeepSeek
+**Get credentials:** https://platform.deepseek.com/api_keys
+**Minimum required:** `DEEPSEEK_API_KEY`
+**Variables:**
+- `DEEPSEEK_API_KEY` — Your API key from platform.deepseek.com
+- `DEEPSEEK_SMALL_MODEL` — e.g. `deepseek-chat`
+- `DEEPSEEK_LARGE_MODEL` — e.g. `deepseek-reasoner`
+**Tips:** DeepSeek offers competitive pricing and strong reasoning models. The `deepseek-reasoner` model supports chain-of-thought reasoning.
+
+### Together AI
+**Get credentials:** https://api.together.xyz/settings/api-keys
+**Minimum required:** `TOGETHER_API_KEY`
+**Variables:**
+- `TOGETHER_API_KEY` — From api.together.xyz
+- `TOGETHER_SMALL_MODEL` — e.g. `meta-llama/Llama-3.2-3B-Instruct-Turbo`
+- `TOGETHER_LARGE_MODEL` — e.g. `meta-llama/Llama-3.3-70B-Instruct-Turbo`
+- `TOGETHER_EMBEDDING_MODEL` — e.g. `togethercomputer/m2-bert-80M-8k-retrieval`
+- `TOGETHER_IMAGE_MODEL` — e.g. `black-forest-labs/FLUX.1-schnell`
+**Tips:** Together AI hosts a wide range of open-source models. Great for accessing Llama, Mixtral, and other open models via API.
+
+### Mistral
+**Get credentials:** https://console.mistral.ai/api-keys
+**Minimum required:** `MISTRAL_API_KEY`
+**Variables:**
+- `MISTRAL_API_KEY` — From console.mistral.ai
+- `MISTRAL_SMALL_MODEL` — e.g. `mistral-small-latest`
+- `MISTRAL_LARGE_MODEL` — e.g. `mistral-large-latest`
+- `MISTRAL_EMBEDDING_MODEL` — e.g. `mistral-embed`
+**Tips:** Mistral models are fast and cost-effective. Good for European data residency requirements.
+
+### Cohere
+**Get credentials:** https://dashboard.cohere.com/api-keys
+**Minimum required:** `COHERE_API_KEY`
+**Variables:**
+- `COHERE_API_KEY` — From dashboard.cohere.com
+- `COHERE_SMALL_MODEL` — e.g. `command-r`
+- `COHERE_LARGE_MODEL` — e.g. `command-r-plus`
+- `COHERE_EMBEDDING_MODEL` — e.g. `embed-english-v3.0`
+**Tips:** Cohere excels at RAG (retrieval-augmented generation) and multilingual tasks. Their embedding models are production-grade.
+
+### Perplexity
+**Get credentials:** https://www.perplexity.ai/settings/api
+**Minimum required:** `PERPLEXITY_API_KEY`
+**Variables:**
+- `PERPLEXITY_API_KEY` — From perplexity.ai settings
+- `PERPLEXITY_SMALL_MODEL` — e.g. `llama-3.1-sonar-small-128k-online`
+- `PERPLEXITY_LARGE_MODEL` — e.g. `llama-3.1-sonar-large-128k-online`
+**Tips:** Perplexity models have built-in web search — ideal for tasks requiring up-to-date information.
+
+### Google Antigravity
+**Get credentials:** Google Cloud API key with Antigravity access
+**Minimum required:** `GOOGLE_CLOUD_API_KEY`
+**Variables:**
+- `GOOGLE_CLOUD_API_KEY` — Google Cloud API key
+**Tips:** Google Antigravity is a specialized Google model provider. Requires separate Google Cloud credentials from Google Gemini.
+
+### Qwen
+**Minimum required:** Configure via provider plugins config in `milady.json`
+**Variables:**
+- Set model IDs via the `providers.qwen` config block in `milady.json`
+**Tips:** Qwen models from Alibaba Cloud. Configure through the providers section of your config.
+
+### Minimax
+**Minimum required:** Configure via provider plugins config in `milady.json`
+**Variables:**
+- Set model IDs via the `providers.minimax` config block in `milady.json`
+**Tips:** Minimax provides Chinese and multilingual AI models.
+
+### Pi AI
+**Minimum required:** `ELIZA_USE_PI_AI=true`
+**Variables:**
+- `ELIZA_USE_PI_AI` — Set to `true` to enable Pi AI as a model provider
+**Tips:** Pi AI provides conversational models optimized for friendly, helpful dialogue.
+
+### Zai
+**Get credentials:** From Homunculus Labs
+**Minimum required:** `ZAI_API_KEY`
+**Variables:**
+- `ZAI_API_KEY` — Your Zai API key from Homunculus Labs
+**Tips:** Zai is a model provider from Homunculus Labs. Plugin package: `@homunculuslabs/plugin-zai`.
+
+### Eliza Cloud
+**Get credentials:** From the elizaOS Cloud service
+**Minimum required:** `ELIZAOS_CLOUD_API_KEY` or `ELIZAOS_CLOUD_ENABLED=true`
+**Variables:**
+- `ELIZAOS_CLOUD_API_KEY` — Your Eliza Cloud API key
+- `ELIZAOS_CLOUD_ENABLED` — Set to `true` to enable cloud features
+**Tips:** Eliza Cloud provides hosted infrastructure for running elizaOS agents with managed scaling and monitoring.
+
 ---
 
 ## Connectors
