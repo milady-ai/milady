@@ -193,7 +193,6 @@ function waitForWsMessage(
   });
 }
 
-
 type TestAgentEvent = {
   runId: string;
   seq: number;
@@ -897,15 +896,24 @@ describe("API Server E2E (no runtime)", () => {
       agentAutoDailyTrades.resetDate = new Date().toISOString().slice(0, 10);
 
       try {
-        const putResponse = await req(port, "PUT", "/api/permissions/trade-mode", {
-          mode: "agent-auto",
-        });
+        const putResponse = await req(
+          port,
+          "PUT",
+          "/api/permissions/trade-mode",
+          {
+            mode: "agent-auto",
+          },
+        );
         expect(putResponse.status).toBe(200);
         expect(putResponse.data.canAgentAutoTrade).toBe(true);
         expect(agentAutoDailyTrades.count).toBe(0);
 
         for (let i = 0; i < 3; i += 1) {
-          const getResponse = await req(port, "GET", "/api/permissions/trade-mode");
+          const getResponse = await req(
+            port,
+            "GET",
+            "/api/permissions/trade-mode",
+          );
           expect(getResponse.status).toBe(200);
           expect(getResponse.data.canAgentAutoTrade).toBe(true);
         }
@@ -1299,10 +1307,15 @@ describe("API Server E2E (no runtime)", () => {
 
       const streamServer = await startApiServer({ port: 0, runtime });
       try {
-        const { status, data } = await req(streamServer.port, "POST", "/api/chat", {
-          text: "how much SOL do you have?",
-          mode: "simple",
-        });
+        const { status, data } = await req(
+          streamServer.port,
+          "POST",
+          "/api/chat",
+          {
+            text: "how much SOL do you have?",
+            mode: "simple",
+          },
+        );
 
         expect(status).toBe(200);
         expect(String(data.text ?? "")).toContain("Wallet Balances:");
@@ -1326,10 +1339,15 @@ describe("API Server E2E (no runtime)", () => {
 
       const streamServer = await startApiServer({ port: 0, runtime });
       try {
-        const { status, data } = await req(streamServer.port, "POST", "/api/chat", {
-          text: "are you there?",
-          mode: "simple",
-        });
+        const { status, data } = await req(
+          streamServer.port,
+          "POST",
+          "/api/chat",
+          {
+            text: "are you there?",
+            mode: "simple",
+          },
+        );
 
         expect(status).toBe(200);
         expect(String(data.text ?? "")).toBe("I am here.");
@@ -1809,7 +1827,9 @@ describe("API Server E2E (no runtime)", () => {
         getService: () => null,
         getRoomsByWorld: async () => restoreGate.promise,
         getMemories: async (query: { count?: number }) =>
-          query.count === 1 ? ([{ createdAt: restoredAt }] as Array<{ createdAt: number }>) : [],
+          query.count === 1
+            ? ([{ createdAt: restoredAt }] as Array<{ createdAt: number }>)
+            : [],
         getCache: async () => null,
         setCache: async () => {},
       } as unknown as AgentRuntime;
@@ -1860,7 +1880,9 @@ describe("API Server E2E (no runtime)", () => {
         getService: () => null,
         getRoomsByWorld: async () => restoreGate.promise,
         getMemories: async (query: { count?: number }) =>
-          query.count === 1 ? ([{ createdAt: restoredAt }] as Array<{ createdAt: number }>) : [],
+          query.count === 1
+            ? ([{ createdAt: restoredAt }] as Array<{ createdAt: number }>)
+            : [],
         getCache: async () => null,
         setCache: async () => {},
       } as unknown as AgentRuntime;
@@ -2194,9 +2216,9 @@ describe("API Server E2E (no runtime)", () => {
           `/api/conversations/${conversationId}`,
         );
         expect(remove.status).toBe(200);
-        expect(
-          deletedMemoryBatches.some((batch) => batch.length > 0),
-        ).toBe(true);
+        expect(deletedMemoryBatches.some((batch) => batch.length > 0)).toBe(
+          true,
+        );
         expect(deletedRooms).toContain(conversationRoomId);
       } finally {
         await streamServer.close();
@@ -2883,7 +2905,6 @@ describe("API Server E2E (no runtime)", () => {
         await streamServer.close();
       }
     });
-
   });
 
   describe("wallet mode guidance fallback", () => {
@@ -2894,14 +2915,21 @@ describe("API Server E2E (no runtime)", () => {
       const runtime = createRuntimeForChatSseTests();
       const server = await startApiServer({ port: 0, runtime });
       try {
-        const { status, data } = await req(server.port, "GET", "/api/wallet/config");
+        const { status, data } = await req(
+          server.port,
+          "GET",
+          "/api/wallet/config",
+        );
         expect(status).toBe(200);
         expect(data.walletSource).toBe("local");
         expect(data.automationMode).toBe("full");
         expect(data.walletNetwork).toBe("mainnet");
         expect(typeof data.pluginEvmLoaded).toBe("boolean");
         expect(typeof data.executionReady).toBe("boolean");
-        expect(data.executionBlockedReason === null || typeof data.executionBlockedReason === "string").toBe(true);
+        expect(
+          data.executionBlockedReason === null ||
+            typeof data.executionBlockedReason === "string",
+        ).toBe(true);
       } finally {
         await server.close();
         if (prevKey === undefined) delete process.env.EVM_PRIVATE_KEY;
@@ -2999,10 +3027,13 @@ describe("API Server E2E (no runtime)", () => {
           | { content?: { text?: string } }
           | undefined;
         expect(String(handledMessage?.content?.text ?? "")).toContain(
-          "Server-verified wallet context:",
+          "Original wallet request (JSON-encoded untrusted user input):",
         );
         expect(String(handledMessage?.content?.text ?? "")).toContain(
-          "User message: what is your wallet balance?",
+          '"what is your wallet balance?"',
+        );
+        expect(String(handledMessage?.content?.text ?? "")).toContain(
+          "Server-verified wallet context:",
         );
       } finally {
         await server.close();
@@ -3016,7 +3047,9 @@ describe("API Server E2E (no runtime)", () => {
         >,
         ReturnType<NonNullable<AgentRuntime["messageService"]>["handleMessage"]>
       >(async (_runtime, _message, onResponse) => {
-        await onResponse({ text: "checking your evm balance now..." } as Content);
+        await onResponse({
+          text: "checking your evm balance now...",
+        } as Content);
         await onResponse({
           text: "Wallet Balances:\n\nBSC (0x51a5...a4Ee):\n  BNB: 0.1 ($63.03)",
           action: "CHECK_BALANCE_RESPONSE",
@@ -3036,7 +3069,9 @@ describe("API Server E2E (no runtime)", () => {
         });
         expect(status).toBe(200);
         expect(String(data.text)).toContain("Wallet Balances:");
-        expect(String(data.text)).not.toContain("checking your evm balance now");
+        expect(String(data.text)).not.toContain(
+          "checking your evm balance now",
+        );
       } finally {
         await server.close();
       }
@@ -3059,9 +3094,7 @@ describe("API Server E2E (no runtime)", () => {
           mode: "power",
         });
         expect(status).toBe(200);
-        expect(String(data.text)).toContain(
-          "no wallet action actually ran",
-        );
+        expect(String(data.text)).toContain("no wallet action actually ran");
         expect(String(data.text)).toContain("plugin-evm:");
         expect(String(data.text)).not.toContain("let me check that for you");
       } finally {
@@ -3153,13 +3186,11 @@ describe("API Server E2E (no runtime)", () => {
             expect(options.parameters?.amount).toBe("0.001");
             expect(options.parameters?.assetSymbol).toBe("BNB");
             callback?.({
-              text:
-                "Action: TRANSFER_TOKEN\nChain: BSC testnet\nAmount: 0.001 BNB\nRecipient: 0x8DFBdEEC8c5d4970BB5F481C6ec7f73fa1C65be5\nExecution mode: agent-auto\nExecuted: true\nTx hash: 0xsendhash\nExplorer: https://testnet.bscscan.com/tx/0xsendhash\nStatus: success",
+              text: "Action: TRANSFER_TOKEN\nChain: BSC testnet\nAmount: 0.001 BNB\nRecipient: 0x8DFBdEEC8c5d4970BB5F481C6ec7f73fa1C65be5\nExecution mode: agent-auto\nExecuted: true\nTx hash: 0xsendhash\nExplorer: https://testnet.bscscan.com/tx/0xsendhash\nStatus: success",
               action: "TRANSFER_TOKEN_SUCCESS",
             } as Content);
             return {
-              text:
-                "Action: TRANSFER_TOKEN\nChain: BSC testnet\nAmount: 0.001 BNB\nRecipient: 0x8DFBdEEC8c5d4970BB5F481C6ec7f73fa1C65be5\nExecution mode: agent-auto\nExecuted: true\nTx hash: 0xsendhash\nExplorer: https://testnet.bscscan.com/tx/0xsendhash\nStatus: success",
+              text: "Action: TRANSFER_TOKEN\nChain: BSC testnet\nAmount: 0.001 BNB\nRecipient: 0x8DFBdEEC8c5d4970BB5F481C6ec7f73fa1C65be5\nExecution mode: agent-auto\nExecuted: true\nTx hash: 0xsendhash\nExplorer: https://testnet.bscscan.com/tx/0xsendhash\nStatus: success",
               success: true,
             };
           },
@@ -3174,7 +3205,9 @@ describe("API Server E2E (no runtime)", () => {
         expect(status).toBe(200);
         expect(String(data.text)).toContain("Action: TRANSFER_TOKEN");
         expect(String(data.text)).toContain("Tx hash: 0xsendhash");
-        expect(String(data.text)).not.toContain("no wallet action actually ran");
+        expect(String(data.text)).not.toContain(
+          "no wallet action actually ran",
+        );
       } finally {
         await server.close();
         if (previousKey === undefined) delete process.env.EVM_PRIVATE_KEY;
@@ -3223,13 +3256,11 @@ describe("API Server E2E (no runtime)", () => {
             );
             expect(options.parameters?.routeProvider).toBe("pancakeswap-v2");
             callback?.({
-              text:
-                "Action: EXECUTE_TRADE\nChain: BSC testnet\nSide: buy\nAmount: 0.001 BNB\nToken: 0x1111111111111111111111111111111111111111\nRoute provider: pancakeswap-v2\nExecution mode: agent-auto\nExecuted: true\nTx hash: 0xswaphash\nExplorer: https://testnet.bscscan.com/tx/0xswaphash\nStatus: success",
+              text: "Action: EXECUTE_TRADE\nChain: BSC testnet\nSide: buy\nAmount: 0.001 BNB\nToken: 0x1111111111111111111111111111111111111111\nRoute provider: pancakeswap-v2\nExecution mode: agent-auto\nExecuted: true\nTx hash: 0xswaphash\nExplorer: https://testnet.bscscan.com/tx/0xswaphash\nStatus: success",
               action: "EXECUTE_TRADE_SUCCESS",
             } as Content);
             return {
-              text:
-                "Action: EXECUTE_TRADE\nChain: BSC testnet\nSide: buy\nAmount: 0.001 BNB\nToken: 0x1111111111111111111111111111111111111111\nRoute provider: pancakeswap-v2\nExecution mode: agent-auto\nExecuted: true\nTx hash: 0xswaphash\nExplorer: https://testnet.bscscan.com/tx/0xswaphash\nStatus: success",
+              text: "Action: EXECUTE_TRADE\nChain: BSC testnet\nSide: buy\nAmount: 0.001 BNB\nToken: 0x1111111111111111111111111111111111111111\nRoute provider: pancakeswap-v2\nExecution mode: agent-auto\nExecuted: true\nTx hash: 0xswaphash\nExplorer: https://testnet.bscscan.com/tx/0xswaphash\nStatus: success",
               success: true,
             };
           },
@@ -3560,9 +3591,14 @@ describe("API Server E2E (no runtime)", () => {
       });
       const streamServer = await startApiServer({ port: 0, runtime });
       try {
-        const create = await req(streamServer.port, "POST", "/api/conversations", {
-          title: "Provider issue conversation",
-        });
+        const create = await req(
+          streamServer.port,
+          "POST",
+          "/api/conversations",
+          {
+            title: "Provider issue conversation",
+          },
+        );
         expect(create.status).toBe(200);
         const conversation = create.data.conversation as { id?: string };
         const conversationId = conversation.id ?? "";
@@ -3592,9 +3628,14 @@ describe("API Server E2E (no runtime)", () => {
       });
       const streamServer = await startApiServer({ port: 0, runtime });
       try {
-        const create = await req(streamServer.port, "POST", "/api/conversations", {
-          title: "Provider issue stream conversation",
-        });
+        const create = await req(
+          streamServer.port,
+          "POST",
+          "/api/conversations",
+          {
+            title: "Provider issue stream conversation",
+          },
+        );
         expect(create.status).toBe(200);
         const conversation = create.data.conversation as { id?: string };
         const conversationId = conversation.id ?? "";
@@ -3775,15 +3816,10 @@ describe("API Server E2E (no runtime)", () => {
     });
 
     it("returns 503 for dataset build when service is unavailable", async () => {
-      const response = await req(
-        port,
-        "POST",
-        "/api/training/datasets/build",
-        {
-          limit: 5,
-          minLlmCallsPerTrajectory: 1,
-        },
-      );
+      const response = await req(port, "POST", "/api/training/datasets/build", {
+        limit: 5,
+        minLlmCallsPerTrajectory: 1,
+      });
       expect(response.status).toBe(503);
     });
 
@@ -3841,8 +3877,7 @@ describe("API Server E2E (no runtime)", () => {
       const plugins = data.plugins as Array<Record<string, unknown>>;
       const evm = plugins.find(
         (plugin) =>
-          plugin.id === "evm" ||
-          plugin.npmName === "@elizaos/plugin-evm",
+          plugin.id === "evm" || plugin.npmName === "@elizaos/plugin-evm",
       );
       expect(evm).toBeDefined();
       expect(evm?.managementMode).toBe("core-optional");

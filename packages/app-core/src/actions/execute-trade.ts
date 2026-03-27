@@ -1,5 +1,5 @@
 /**
- * EXECUTE_TRADE action — executes a BSC token trade (buy or sell).
+ * EXECUTE_TRADE action - executes a BSC token trade (buy or sell).
  *
  * When triggered the action:
  *   1. Validates parameters (side, tokenAddress format, amount > 0)
@@ -8,7 +8,7 @@
  *      if executed, or unsigned TX info if user-sign mode
  *
  * All business logic (permissions, safety caps, signing) is handled
- * server-side — this action is a thin wrapper.
+ * server-side - this action is a thin wrapper.
  *
  * @module actions/execute-trade
  */
@@ -400,4 +400,3 @@ export const executeTradeAction: Action = {
     },
   ],
 };
-

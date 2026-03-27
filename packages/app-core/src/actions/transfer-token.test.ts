@@ -301,7 +301,9 @@ describe("TRANSFER_TOKEN action", () => {
     });
 
     expect((result as { success: boolean }).success).toBe(true);
-    expect((result as { text: string }).text).toContain("Action: TRANSFER_TOKEN");
+    expect((result as { text: string }).text).toContain(
+      "Action: TRANSFER_TOKEN",
+    );
     expect((result as { text: string }).text).toContain("Executed: true");
     expect((result as { text: string }).text).toContain("1.5");
     expect((result as { text: string }).text).toContain("BNB");
@@ -676,4 +678,3 @@ describe("TRANSFER_TOKEN action", () => {
     expect((result as { success: boolean }).success).toBe(false);
   });
 });
-

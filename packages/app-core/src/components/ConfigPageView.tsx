@@ -746,14 +746,18 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
         </div>
         <div className="flex flex-wrap gap-1.5">
           <Button
-            variant={selectedWalletNetwork === "mainnet" ? "default" : "outline"}
+            variant={
+              selectedWalletNetwork === "mainnet" ? "default" : "outline"
+            }
             className="min-h-[40px] px-3 text-xs font-semibold"
             onClick={() => setSelectedWalletNetwork("mainnet")}
           >
             Mainnet
           </Button>
           <Button
-            variant={selectedWalletNetwork === "testnet" ? "default" : "outline"}
+            variant={
+              selectedWalletNetwork === "testnet" ? "default" : "outline"
+            }
             className="min-h-[40px] px-3 text-xs font-semibold"
             onClick={() => setSelectedWalletNetwork("testnet")}
           >

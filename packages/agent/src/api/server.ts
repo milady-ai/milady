@@ -114,10 +114,7 @@ import {
   uninstallMarketplaceSkill,
 } from "../services/skill-marketplace.js";
 import { streamManager } from "../services/stream-manager.js";
-import {
-  isFatalTodoDbError,
-  TodoDbCircuitBreaker,
-} from "./todo-db-circuit.js";
+import { isFatalTodoDbError, TodoDbCircuitBreaker } from "./todo-db-circuit.js";
 import {
   sanitizeAccountId as sanitizeWhatsAppAccountId,
   WhatsAppPairingSession,
@@ -174,9 +171,7 @@ import {
 } from "./compat-utils.js";
 import { ConnectorHealthMonitor } from "./connector-health.js";
 import { wireCoordinatorBridgesWhenReady } from "./coordinator-wiring.js";
-import {
-  isInsufficientCreditsMessage,
-} from "./credit-detection.js";
+import { isInsufficientCreditsMessage } from "./credit-detection.js";
 import { handleDatabaseRoute } from "./database.js";
 import { handleDiagnosticsRoutes } from "./diagnostics-routes.js";
 import { DropService } from "./drop-service.js";
@@ -644,7 +639,10 @@ interface LogEntry {
   tags: string[];
 }
 
-export type StreamEventType = "agent_event" | "heartbeat_event" | "training_event";
+export type StreamEventType =
+  | "agent_event"
+  | "heartbeat_event"
+  | "training_event";
 
 interface StreamEventEnvelope {
   type: StreamEventType;
@@ -658,155 +656,6 @@ interface StreamEventEnvelope {
   agentId?: string;
   roomId?: UUID;
   payload: object;
-}
-
-// ---------------------------------------------------------------------------
-// Response block extraction — parse agent text for structured UI blocks
-// ---------------------------------------------------------------------------
-
-/** Content block types returned in the /api/chat and /api/conversations/:id/messages responses. */
-type ResponseBlock =
-  | { type: "text"; text: string }
-  | { type: "ui-spec"; spec: Record<string, unknown>; raw: string }
-  | {
-      type: "config-form";
-      pluginId: string;
-      pluginName?: string;
-      schema: Record<string, unknown>;
-      hints?: Record<string, unknown>;
-      values?: Record<string, unknown>;
-    };
-
-/** Regex matching fenced JSON code blocks: ```json ... ``` or ``` ... ``` */
-const FENCED_JSON_RE_SERVER = /```(?:json)?\s*\n([\s\S]*?)```/g;
-
-/** CONFIG marker pattern: [CONFIG:pluginId] */
-const CONFIG_MARKER_RE = /\[CONFIG:([^\]]+)\]/g;
-
-function tryParseJsonServer(raw: string): unknown {
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
-}
-
-function isUiSpecObject(
-  obj: unknown,
-): obj is { root: string; elements: Record<string, unknown> } {
-  if (obj === null || typeof obj !== "object" || Array.isArray(obj))
-    return false;
-  const c = obj as Record<string, unknown>;
-  return (
-    typeof c.root === "string" &&
-    c.elements !== null &&
-    typeof c.elements === "object" &&
-    !Array.isArray(c.elements)
-  );
-}
-
-/**
- * Scan agent response text for:
- * 1. Fenced UiSpec JSON blocks → extract as { type: "ui-spec", spec, raw }
- * 2. [CONFIG:pluginId] markers → generate { type: "config-form", ... } from plugin list
- * 3. Remaining text → { type: "text", text }
- *
- * Returns { cleanText, blocks } where cleanText has UI blocks/markers removed.
- */
-function _extractResponseBlocks(
-  responseText: string,
-  plugins: PluginEntry[],
-): { cleanText: string; blocks: ResponseBlock[] } {
-  const blocks: ResponseBlock[] = [];
-  let text = responseText;
-
-  // Pass 1: extract fenced UiSpec JSON blocks
-  FENCED_JSON_RE_SERVER.lastIndex = 0;
-  const uiSpecRanges: Array<{
-    start: number;
-    end: number;
-    block: ResponseBlock;
-  }> = [];
-  let match: RegExpExecArray | null = FENCED_JSON_RE_SERVER.exec(text);
-
-  while (match !== null) {
-    const jsonContent = match[1].trim();
-    const parsed = tryParseJsonServer(jsonContent);
-    if (parsed !== null && isUiSpecObject(parsed)) {
-      uiSpecRanges.push({
-        start: match.index,
-        end: match.index + match[0].length,
-        block: {
-          type: "ui-spec",
-          spec: parsed as Record<string, unknown>,
-          raw: jsonContent,
-        },
-      });
-    }
-    match = FENCED_JSON_RE_SERVER.exec(text);
-  }
-
-  // Remove UiSpec blocks from text (reverse order to preserve indices)
-  if (uiSpecRanges.length > 0) {
-    for (let i = uiSpecRanges.length - 1; i >= 0; i--) {
-      const r = uiSpecRanges[i];
-      blocks.unshift(r.block);
-      text = text.slice(0, r.start) + text.slice(r.end);
-    }
-  }
-
-  // Pass 2: extract [CONFIG:pluginId] markers
-  CONFIG_MARKER_RE.lastIndex = 0;
-  const configMarkers: Array<{ start: number; end: number; pluginId: string }> =
-    [];
-  match = CONFIG_MARKER_RE.exec(text);
-  while (match !== null) {
-    configMarkers.push({
-      start: match.index,
-      end: match.index + match[0].length,
-      pluginId: match[1].trim(),
-    });
-    match = CONFIG_MARKER_RE.exec(text);
-  }
-
-  if (configMarkers.length > 0) {
-    for (let i = configMarkers.length - 1; i >= 0; i--) {
-      const m = configMarkers[i];
-      const plugin = plugins.find((p) => p.id === m.pluginId);
-      if (plugin) {
-        const schema: Record<string, unknown> = {};
-        const values: Record<string, unknown> = {};
-        for (const param of plugin.parameters) {
-          schema[param.key] = {
-            type: param.type,
-            description: param.description,
-            required: param.required,
-          };
-          if (param.currentValue !== null)
-            values[param.key] = param.currentValue;
-        }
-        blocks.push({
-          type: "config-form",
-          pluginId: m.pluginId,
-          pluginName: plugin.name,
-          schema,
-          hints: plugin.configUiHints ?? {},
-          values,
-        });
-      }
-      text = text.slice(0, m.start) + text.slice(m.end);
-    }
-  }
-
-  // Build clean text (trim whitespace from block removal)
-  const cleanText = text.replace(/\n{3,}/g, "\n\n").trim();
-
-  // If there's remaining text content, prepend it as a text block
-  if (cleanText) {
-    blocks.unshift({ type: "text", text: cleanText });
-  }
-
-  return { cleanText, blocks };
 }
 
 // ---------------------------------------------------------------------------
@@ -921,91 +770,6 @@ function buildParamDefs(
       options: Array.isArray(def.options)
         ? (def.options as string[])
         : undefined,
-      currentValue: isSet
-        ? sensitive
-          ? maskValue(envValue ?? "")
-          : (envValue ?? "")
-        : null,
-      isSet,
-    };
-  });
-}
-
-/**
- * Infer parameter definitions from bare config key names when explicit
- * pluginParameters metadata is not provided.  Uses naming conventions to
- * determine type, sensitivity, requirement level, and a human-readable
- * description.
- */
-function _inferParamDefs(configKeys: string[]): PluginParamDef[] {
-  return configKeys.map((key) => {
-    const upper = key.toUpperCase();
-
-    // Detect sensitive keys
-    const sensitive =
-      upper.includes("_API_KEY") ||
-      upper.includes("_SECRET") ||
-      upper.includes("_TOKEN") ||
-      upper.includes("_PASSWORD") ||
-      upper.includes("_PRIVATE_KEY") ||
-      upper.includes("_SIGNING_") ||
-      upper.includes("ENCRYPTION_");
-
-    // Detect booleans
-    const isBoolean =
-      upper.includes("ENABLED") ||
-      upper.includes("_ENABLE_") ||
-      upper.startsWith("ENABLE_") ||
-      upper.includes("DRY_RUN") ||
-      upper.includes("_DEBUG") ||
-      upper.includes("_VERBOSE") ||
-      upper.includes("AUTO_") ||
-      upper.includes("FORCE_") ||
-      upper.includes("DISABLE_") ||
-      upper.includes("SHOULD_") ||
-      upper.endsWith("_SSL");
-
-    // Detect numbers
-    const isNumber =
-      upper.endsWith("_PORT") ||
-      upper.endsWith("_INTERVAL") ||
-      upper.endsWith("_TIMEOUT") ||
-      upper.endsWith("_MS") ||
-      upper.endsWith("_MINUTES") ||
-      upper.endsWith("_SECONDS") ||
-      upper.endsWith("_LIMIT") ||
-      upper.endsWith("_MAX") ||
-      upper.endsWith("_MIN") ||
-      upper.includes("_MAX_") ||
-      upper.includes("_MIN_") ||
-      upper.endsWith("_COUNT") ||
-      upper.endsWith("_SIZE") ||
-      upper.endsWith("_STEPS");
-
-    const type = isBoolean ? "boolean" : isNumber ? "number" : "string";
-
-    // Primary keys are required (API keys, tokens, bot tokens, account IDs)
-    const required =
-      sensitive &&
-      (upper.endsWith("_API_KEY") ||
-        upper.endsWith("_BOT_TOKEN") ||
-        upper.endsWith("_TOKEN") ||
-        upper.endsWith("_PRIVATE_KEY"));
-
-    // Generate a human-readable description from the key name
-    const description = inferDescription(key);
-
-    const envValue = process.env[key];
-    const isSet = Boolean(envValue?.trim());
-
-    return {
-      key,
-      type,
-      description,
-      required,
-      sensitive,
-      default: undefined,
-      options: undefined,
       currentValue: isSet
         ? sensitive
           ? maskValue(envValue ?? "")
@@ -3249,7 +3013,9 @@ async function executeFallbackParsedActions(
   appendIncomingText: (incoming: string) => void,
   onActionCallback: (actionTag: string, hasText: boolean) => void,
 ): Promise<void> {
-  const runtimeActions = Array.isArray((runtime as { actions?: unknown[] }).actions)
+  const runtimeActions = Array.isArray(
+    (runtime as { actions?: unknown[] }).actions,
+  )
     ? ((runtime as { actions: unknown[] }).actions as Array<{
         name?: string;
         similes?: string[];
@@ -3260,7 +3026,8 @@ async function executeFallbackParsedActions(
 
   const lookup = new Map<string, (typeof runtimeActions)[number]>();
   for (const action of runtimeActions) {
-    if (typeof action.name === "string") lookup.set(action.name.toUpperCase(), action);
+    if (typeof action.name === "string")
+      lookup.set(action.name.toUpperCase(), action);
     if (!Array.isArray(action.similes)) continue;
     for (const alias of action.similes) {
       if (typeof alias === "string") lookup.set(alias.toUpperCase(), action);
@@ -3268,14 +3035,20 @@ async function executeFallbackParsedActions(
   }
 
   for (const parsed of parsedActions) {
-    if (parsed.name === "REPLY" || parsed.name === "NONE" || parsed.name === "IGNORE") {
+    if (
+      parsed.name === "REPLY" ||
+      parsed.name === "NONE" ||
+      parsed.name === "IGNORE"
+    ) {
       continue;
     }
     const action = lookup.get(parsed.name);
     if (!action || typeof action.handler !== "function") continue;
 
     if (typeof action.validate === "function") {
-      const valid = await Promise.resolve(action.validate(runtime, message, undefined));
+      const valid = await Promise.resolve(
+        action.validate(runtime, message, undefined),
+      );
       if (!valid) continue;
     }
 
@@ -3429,7 +3202,11 @@ function buildWalletContextPrompt(
       : !pluginEvmLoaded
         ? "plugin-evm is not loaded."
         : "none";
+  const encodedUserPrompt = JSON.stringify(userPrompt);
   return [
+    "Original wallet request (JSON-encoded untrusted user input):",
+    encodedUserPrompt,
+    "",
     "Server-verified wallet context:",
     `- walletNetwork: ${walletNetwork}`,
     `- evmAddress: ${addrs.evmAddress ?? "not generated"}`,
@@ -3440,8 +3217,6 @@ function buildWalletContextPrompt(
     `- executionReady: ${executionReady ? "true" : "false"}`,
     `- executionBlockedReason: ${executionBlockedReason}`,
     "Use this context as source of truth for wallet questions and on-chain actions.",
-    "",
-    `User message: ${userPrompt}`,
   ].join("\n");
 }
 
@@ -3534,7 +3309,9 @@ async function generateChatResponse(
   agentName: string,
   opts?: ChatGenerateOptions,
 ): Promise<ChatGenerationResult> {
-  const originalUserText = String(extractCompatTextContent(message.content) ?? "");
+  const originalUserText = String(
+    extractCompatTextContent(message.content) ?? "",
+  );
   type StreamSource = "unset" | "callback" | "onStreamChunk";
   let responseText = "";
   let forcedWalletExecutionText = false;
@@ -3606,10 +3383,11 @@ async function generateChatResponse(
     | undefined;
   let actionCallbacksSeen = 0;
   let _handlerError: unknown = null;
-  const directWalletExecutionFallback =
-    WALLET_EXECUTION_INTENT_RE.test(originalUserText)
-      ? inferWalletExecutionFallback(originalUserText)
-      : null;
+  const directWalletExecutionFallback = WALLET_EXECUTION_INTENT_RE.test(
+    originalUserText,
+  )
+    ? inferWalletExecutionFallback(originalUserText)
+    : null;
   try {
     if (directWalletExecutionFallback?.errorText) {
       forcedWalletExecutionText = true;
@@ -3651,8 +3429,10 @@ async function generateChatResponse(
         responseMessages: [],
       };
     } else {
-      const walletAugmentedMessage =
-        maybeAugmentChatMessageWithWalletContext(runtime, message);
+      const walletAugmentedMessage = maybeAugmentChatMessageWithWalletContext(
+        runtime,
+        message,
+      );
       const generationMessage = await maybeAugmentChatMessageWithKnowledge(
         runtime,
         walletAugmentedMessage,
@@ -3758,12 +3538,18 @@ async function generateChatResponse(
     const rawActionsPayload = rc?.actions ?? resultRecord.actions;
     const parsedFallbackActions = parseFallbackActionBlocks(rawActionsPayload);
     const userText = String(extractCompatTextContent(message.content) ?? "");
-    const modelText = String(extractCompatTextContent(result.responseContent) ?? "");
+    const modelText = String(
+      extractCompatTextContent(result.responseContent) ?? "",
+    );
     const fallbackActionsToRun = [...parsedFallbackActions];
     const inferredBalanceChain = inferBalanceChainFromText(userText);
 
     if (
-      shouldForceCheckBalanceFallback(fallbackActionsToRun, userText, modelText) &&
+      shouldForceCheckBalanceFallback(
+        fallbackActionsToRun,
+        userText,
+        modelText,
+      ) &&
       !fallbackActionsToRun.some((a) => a.name === "CHECK_BALANCE")
     ) {
       fallbackActionsToRun.push({
@@ -3893,7 +3679,10 @@ async function generateChatResponse(
     }
   }
 
-  if (actionCallbacksSeen === 0 && isWalletActionRequiredIntent(originalUserText)) {
+  if (
+    actionCallbacksSeen === 0 &&
+    isWalletActionRequiredIntent(originalUserText)
+  ) {
     const normalizedVisibleText = stripAssistantStageDirections(
       (responseText || resultText || "").trim(),
     );
@@ -4895,7 +4684,9 @@ function readUiLanguageHeader(
   if (Array.isArray(header)) {
     return header.find((value) => value.trim())?.trim();
   }
-  return typeof header === "string" && header.trim() ? header.trim() : undefined;
+  return typeof header === "string" && header.trim()
+    ? header.trim()
+    : undefined;
 }
 
 function resolveConfiguredCharacterLanguage(
@@ -4922,7 +4713,10 @@ function resolveOnboardingStylePreset(
     if (byId) return byId;
   }
 
-  if (typeof body.avatarIndex === "number" && Number.isFinite(body.avatarIndex)) {
+  if (
+    typeof body.avatarIndex === "number" &&
+    Number.isFinite(body.avatarIndex)
+  ) {
     const byAvatar = presets.find(
       (preset) => preset.avatarIndex === Number(body.avatarIndex),
     );
@@ -6114,8 +5908,7 @@ const WALLET_CHAT_INTENT_RE =
 const WALLET_EXECUTION_INTENT_RE =
   /\b(swap|trade|transfer|send|buy|sell|execute|approve)\b/i;
 
-const WALLET_IDENTITY_INTENT_RE =
-  /\b(wallet\s*address|address)\b/i;
+const WALLET_IDENTITY_INTENT_RE = /\b(wallet\s*address|address)\b/i;
 
 const WALLET_ACTION_REQUIRED_INTENT_RE =
   /\b(balance|portfolio|holdings|funds|swap|trade|transfer|send|buy|sell|execute|approve)\b/i;
@@ -6151,6 +5944,9 @@ function normalizeWalletAssetSymbol(asset: string): string {
 }
 
 function resolveWalletDrillTokenAddress(): string | null {
+  if (process.env.NODE_ENV === "production" && !process.env.VITEST) {
+    return null;
+  }
   const raw = process.env.WALLET_DRILL_TOKEN_ADDRESS?.trim();
   return raw && /^0x[a-fA-F0-9]{40}$/.test(raw) ? raw : null;
 }
@@ -6171,7 +5967,9 @@ function buildWalletParameterFailureReply(
   ].join("\n");
 }
 
-function inferTransferFallbackAction(prompt: string): WalletIntentFallback | null {
+function inferTransferFallbackAction(
+  prompt: string,
+): WalletIntentFallback | null {
   if (!/\b(send|transfer|pay)\b/i.test(prompt)) return null;
 
   const recipient = prompt.match(EVM_ADDRESS_CAPTURE_RE)?.[0];
@@ -6246,12 +6044,17 @@ function inferTradeFallbackAction(prompt: string): WalletIntentFallback | null {
   }
 
   const addresses = prompt.match(EVM_ADDRESS_CAPTURE_RE) ?? [];
-  const tokenAddress = addresses[0] ?? resolveWalletDrillTokenAddress();
+  const drillTokenAddress = resolveWalletDrillTokenAddress();
+  const tokenAddress = addresses[0] ?? drillTokenAddress;
   if (!tokenAddress) {
     return {
       errorText: buildWalletParameterFailureReply(
         "EXECUTE_TRADE",
-        "I need a target token address. Set WALLET_DRILL_TOKEN_ADDRESS or include the token contract address in the prompt.",
+        drillTokenAddress === null &&
+          process.env.NODE_ENV === "production" &&
+          !process.env.VITEST
+          ? "I need a target token contract address in the prompt."
+          : "I need a target token address. Set WALLET_DRILL_TOKEN_ADDRESS or include the token contract address in the prompt.",
       ),
     };
   }
@@ -6273,8 +6076,12 @@ function inferTradeFallbackAction(prompt: string): WalletIntentFallback | null {
   };
 }
 
-function inferWalletExecutionFallback(prompt: string): WalletIntentFallback | null {
-  return inferTransferFallbackAction(prompt) ?? inferTradeFallbackAction(prompt);
+function inferWalletExecutionFallback(
+  prompt: string,
+): WalletIntentFallback | null {
+  return (
+    inferTransferFallbackAction(prompt) ?? inferTradeFallbackAction(prompt)
+  );
 }
 
 function hasUsableWalletFallbackParams(action: FallbackParsedAction): boolean {
@@ -6662,7 +6469,10 @@ let pairingExpiresAt = 0;
 const pairingAttempts = new Map<string, { count: number; resetAt: number }>();
 
 function pairingEnabled(): boolean {
-  return Boolean(getConfiguredApiToken()) && process.env.ELIZA_PAIRING_DISABLED !== "1";
+  return (
+    Boolean(getConfiguredApiToken()) &&
+    process.env.ELIZA_PAIRING_DISABLED !== "1"
+  );
 }
 
 function normalizePairingCode(code: string): string {
@@ -7089,7 +6899,7 @@ export function resolveWebSocketUpgradeRejection(
   }
 
   const handshakeToken = extractWebSocketHandshakeToken(req, wsUrl);
-  if (handshakeToken && !tokenMatches(expected, handshakeToken)) {
+  if (!handshakeToken || !tokenMatches(expected, handshakeToken)) {
     return { status: 401, reason: "Unauthorized" };
   }
 
@@ -9451,7 +9261,9 @@ async function handleRequest(
 
     json(res, {
       names: pickRandomNames(5),
-      styles: getStylePresets(resolveConfiguredCharacterLanguage(state.config, req)),
+      styles: getStylePresets(
+        resolveConfiguredCharacterLanguage(state.config, req),
+      ),
       providers: getProviderOptions(),
       cloudProviders: getCloudProviderOptions(),
       models: getModelOptions(),
@@ -9559,7 +9371,10 @@ async function handleRequest(
       ...(config.ui.assistant ?? {}),
       name: agent.name,
     };
-    if (typeof body.avatarIndex === "number" && Number.isFinite(body.avatarIndex)) {
+    if (
+      typeof body.avatarIndex === "number" &&
+      Number.isFinite(body.avatarIndex)
+    ) {
       config.ui.avatarIndex = Number(body.avatarIndex);
     }
     config.ui.language = configuredLanguage;
@@ -9860,9 +9675,10 @@ async function handleRequest(
         ) as NonNullable<typeof runtimeCharacter.style>;
       }
       if (normalizedMessageExamples) {
-        runtimeCharacter.messageExamples = normalizedMessageExamples as NonNullable<
-          typeof runtimeCharacter.messageExamples
-        >;
+        runtimeCharacter.messageExamples =
+          normalizedMessageExamples as NonNullable<
+            typeof runtimeCharacter.messageExamples
+          >;
       }
       if (Array.isArray(agent.postExamples)) {
         runtimeCharacter.postExamples = [...agent.postExamples];
@@ -9872,9 +9688,8 @@ async function handleRequest(
         await state.runtime.updateAgent(state.runtime.agentId, {
           name: runtimeCharacter.name,
           metadata: {
-            ...(
-              runtimeCharacter as { metadata?: Record<string, unknown> }
-            ).metadata,
+            ...(runtimeCharacter as { metadata?: Record<string, unknown> })
+              .metadata,
             character: {
               name: runtimeCharacter.name,
               bio: runtimeCharacter.bio,
@@ -12667,7 +12482,11 @@ async function handleRequest(
     }
     // Also remove from legacy channels key
     const stateConfigRecord = state.config as Record<string, unknown>;
-    if (stateConfigRecord.channels && typeof stateConfigRecord.channels === "object" && Object.hasOwn(stateConfigRecord.channels, name)) {
+    if (
+      stateConfigRecord.channels &&
+      typeof stateConfigRecord.channels === "object" &&
+      Object.hasOwn(stateConfigRecord.channels, name)
+    ) {
       delete (stateConfigRecord.channels as Record<string, unknown>)[name];
     }
 
@@ -13457,14 +13276,9 @@ async function handleRequest(
       ok: true,
       tradePermissionMode: newMode,
       canUserLocalExecute: canUseLocalTradeExecution(newMode, false),
-      canAgentAutoTrade: canUseLocalTradeExecution(
-        newMode,
-        true,
-        undefined,
-        {
-          consumeAgentQuota: false,
-        },
-      ),
+      canAgentAutoTrade: canUseLocalTradeExecution(newMode, true, undefined, {
+        consumeAgentQuota: false,
+      }),
     });
     return;
   }
@@ -17937,9 +17751,8 @@ export async function startApiServer(opts?: {
 
   // Optional auto-provision mode for legacy environments. Disabled by default
   // so startup does not silently create new wallets when keys are missing.
-  const walletAutoProvisionRaw = process.env.MILADY_WALLET_AUTO_PROVISION
-    ?.trim()
-    .toLowerCase();
+  const walletAutoProvisionRaw =
+    process.env.MILADY_WALLET_AUTO_PROVISION?.trim().toLowerCase();
   const walletAutoProvisionEnabled =
     walletAutoProvisionRaw === "1" ||
     walletAutoProvisionRaw === "true" ||
@@ -19160,7 +18973,8 @@ export async function startApiServer(opts?: {
     bindRuntimeStreams(rt);
     // AppManager doesn't need a runtime reference
     state.agentState = "running";
-    state.agentName = rt.character.name ?? resolveDefaultAgentName(state.config);
+    state.agentName =
+      rt.character.name ?? resolveDefaultAgentName(state.config);
     state.model = detectRuntimeModel(rt, state.config);
     state.startedAt = Date.now();
     state.startup = {
