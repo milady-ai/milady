@@ -196,6 +196,101 @@ function patchPluginSqlUUID() {
 patchPluginSqlUUID();
 
 /**
+ * Patch @elizaos/plugin-sql participant insertion for Postgres dialect drift.
+ *
+ * Some deployments produce an invalid ON CONFLICT target for participants and
+ * fail with:
+ *   "there is no unique or exclusion constraint matching ON CONFLICT specification"
+ *
+ * We replace addParticipant/addParticipantsRoom to perform an explicit
+ * existence check followed by plain insert, avoiding ON CONFLICT entirely.
+ * Remove once upstream fixes the generated participant insert query.
+ */
+function patchPluginSqlParticipantInsertConflict() {
+  const relPaths = [
+    "dist/node/index.node.js",
+    "dist/cjs/index.node.cjs",
+    "dist/browser/index.browser.js",
+  ];
+  const searchDirs = [resolve(root, "node_modules/@elizaos/plugin-sql")];
+  const bunCacheDir = resolve(root, "node_modules/.bun");
+  if (existsSync(bunCacheDir)) {
+    try {
+      for (const entry of readdirSync(bunCacheDir)) {
+        if (entry.startsWith("@elizaos+plugin-sql@")) {
+          searchDirs.push(
+            resolve(bunCacheDir, entry, "node_modules/@elizaos/plugin-sql"),
+          );
+        }
+      }
+    } catch {}
+  }
+
+  const oldAddParticipant = `await this.db.insert(participantTable).values({
+          entityId,
+          roomId,
+          agentId: this.agentId
+        }).onConflictDoNothing();
+        return true;`;
+  const newAddParticipant = `const existing = await this.db.select({ id: participantTable.id }).from(participantTable).where(and(eq2(participantTable.entityId, entityId), eq2(participantTable.roomId, roomId), eq2(participantTable.agentId, this.agentId))).limit(1);
+        if (existing.length === 0) {
+          await this.db.insert(participantTable).values({
+            entityId,
+            roomId,
+            agentId: this.agentId
+          });
+        }
+        return true;`;
+
+  const oldAddParticipantsRoom = `const values = entityIds.map((id) => ({
+          entityId: id,
+          roomId,
+          agentId: this.agentId
+        }));
+        await this.db.insert(participantTable).values(values).onConflictDoNothing().execute();
+        return true;`;
+  const newAddParticipantsRoom = `for (const id of entityIds) {
+          const existing = await this.db.select({ id: participantTable.id }).from(participantTable).where(and(eq2(participantTable.entityId, id), eq2(participantTable.roomId, roomId), eq2(participantTable.agentId, this.agentId))).limit(1);
+          if (existing.length === 0) {
+            await this.db.insert(participantTable).values({
+              entityId: id,
+              roomId,
+              agentId: this.agentId
+            });
+          }
+        }
+        return true;`;
+
+  let patched = 0;
+  for (const dir of searchDirs) {
+    for (const relPath of relPaths) {
+      const target = resolve(dir, relPath);
+      if (!existsSync(target)) continue;
+      let src = readFileSync(target, "utf8");
+      const before = src;
+
+      src = src.replace(oldAddParticipant, newAddParticipant);
+      src = src.replace(oldAddParticipantsRoom, newAddParticipantsRoom);
+
+      if (src !== before) {
+        writeFileSync(target, src, "utf8");
+        patched++;
+        console.log(
+          `[patch-deps] Applied plugin-sql participant ON CONFLICT workaround: ${target}`,
+        );
+      }
+    }
+  }
+
+  if (patched > 0) {
+    console.log(
+      `[patch-deps] plugin-sql: patched ${patched} participant insertion path(s).`,
+    );
+  }
+}
+patchPluginSqlParticipantInsertConflict();
+
+/**
  * Patch @elizaos/plugin-trajectory-logger JSONB array decoding.
  *
  * PGlite/Postgres can return JSONB arrays as native JS arrays. The published
@@ -254,6 +349,69 @@ function patchTrajectoryLoggerJsonArrayDecode() {
   }
 }
 patchTrajectoryLoggerJsonArrayDecode();
+
+/**
+ * Patch @elizaos/plugin-local-embedding Linux GPU probe noise in slim images.
+ *
+ * Debian slim containers often do not include lspci. Upstream logs this as an
+ * error during startup, even though GPU probing is optional. Downgrade that
+ * path to debug/warn and keep returning null.
+ *
+ * Remove once upstream handles missing lspci gracefully.
+ */
+function patchLocalEmbeddingLinuxGpuProbe() {
+  const relPaths = ["dist/index.js"];
+  const searchDirs = [resolve(root, "node_modules/@elizaos/plugin-local-embedding")];
+  const bunCacheDir = resolve(root, "node_modules/.bun");
+  if (existsSync(bunCacheDir)) {
+    try {
+      for (const entry of readdirSync(bunCacheDir)) {
+        if (entry.startsWith("@elizaos+plugin-local-embedding@")) {
+          searchDirs.push(
+            resolve(
+              bunCacheDir,
+              entry,
+              "node_modules/@elizaos/plugin-local-embedding",
+            ),
+          );
+        }
+      }
+    } catch {}
+  }
+
+  const oldSnippet = `logger3.error("Linux GPU detection failed", { error });
+        return null;`;
+  const newSnippet = `const message = error instanceof Error ? error.message : String(error);
+        if (message.includes("lspci") && message.includes("not found")) {
+          logger3.debug("Linux GPU detection skipped: lspci not installed");
+        } else {
+          logger3.warn("Linux GPU detection failed", { error: message });
+        }
+        return null;`;
+
+  let patched = 0;
+  for (const dir of searchDirs) {
+    for (const relPath of relPaths) {
+      const target = resolve(dir, relPath);
+      if (!existsSync(target)) continue;
+      let src = readFileSync(target, "utf8");
+      if (!src.includes(oldSnippet)) continue;
+      src = src.replace(oldSnippet, newSnippet);
+      writeFileSync(target, src, "utf8");
+      patched++;
+      console.log(
+        `[patch-deps] Applied local-embedding Linux GPU probe log patch: ${target}`,
+      );
+    }
+  }
+
+  if (patched > 0) {
+    console.log(
+      `[patch-deps] plugin-local-embedding: patched ${patched} Linux GPU probe path(s).`,
+    );
+  }
+}
+patchLocalEmbeddingLinuxGpuProbe();
 
 /**
  * Patch @miladyai/agent ensureBrowserServerLink() file extension.
