@@ -6743,11 +6743,10 @@ function AppProviderInner({
       );
 
       if (!restoredConnection) {
-        const startupWithoutConnection = resolveStartupWithoutRestoredConnection(
-          {
+        const startupWithoutConnection =
+          resolveStartupWithoutRestoredConnection({
             hadPersistedOnboardingCompletion,
-          },
-        );
+          });
         if (startupWithoutConnection.kind === "startup-error") {
           setOnboardingComplete(true);
           setStartupError(startupWithoutConnection.error);
