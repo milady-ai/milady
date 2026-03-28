@@ -1290,6 +1290,8 @@
   "wallet.setup.configureRpc": "RPC 구성",
   "wallet.setup.rpcNotConfigured": "BSC RPC가 구성되지 않았습니다.",
   "wallet.sort": "정렬",
+  "wallet.sortAscending": "오름차순",
+  "wallet.sortDescending": "내림차순",
   "wallet.table.balance": "잔액",
   "wallet.table.token": "토큰",
   "wallet.tokenRemovedManual": "관심 목록에서 토큰이 제거되었습니다.",

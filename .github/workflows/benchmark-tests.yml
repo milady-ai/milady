@@ -17,6 +17,9 @@ on:
       - ".github/workflows/benchmark-tests.yml"
   workflow_dispatch:
 
+env:
+  NODE_NO_WARNINGS: "1"
+
 jobs:
   benchmark:
     runs-on: blacksmith-4vcpu-ubuntu-2404

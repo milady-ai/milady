@@ -1290,6 +1290,8 @@
   "wallet.setup.configureRpc": "Cấu hình RPC",
   "wallet.setup.rpcNotConfigured": "Chưa cấu hình BSC RPC.",
   "wallet.sort": "Sắp xếp",
+  "wallet.sortAscending": "Tăng dần",
+  "wallet.sortDescending": "Giảm dần",
   "wallet.table.balance": "Số dư",
   "wallet.table.token": "Token",
   "wallet.tokenRemovedManual": "Đã xoá token khỏi watchlist.",

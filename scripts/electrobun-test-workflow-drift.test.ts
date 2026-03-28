@@ -62,6 +62,7 @@ describe("Electrobun test workflow drift", () => {
     expect(workflow).toContain("permissions:");
     expect(workflow).toContain("contents: read");
     expect(workflow).toContain('BUN_VERSION: "1.3.9"');
+    expect(workflow).toContain('NODE_NO_WARNINGS: "1"');
     expect(workflow).toContain("name: Release Workflow Contract");
     expect(workflow).toContain(
       "bun install --frozen-lockfile --ignore-scripts",

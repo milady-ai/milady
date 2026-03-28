@@ -55,6 +55,12 @@ describe("CI workflow drift", () => {
     );
   });
 
+  it("suppresses expected Vitest node warning noise in CI test lanes", () => {
+    expect(read(CI_WORKFLOW_PATH)).toContain('NODE_NO_WARNINGS: "1"');
+    expect(read(CI_FORK_WORKFLOW_PATH)).toContain('NODE_NO_WARNINGS: "1"');
+    expect(read(TEST_WORKFLOW_PATH)).toContain('NODE_NO_WARNINGS: "1"');
+  });
+
   it("uses the shared setup action in test jobs without reintroducing double postinstall", () => {
     const workflow = read(TEST_WORKFLOW_PATH);
 

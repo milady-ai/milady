@@ -10,6 +10,7 @@ import {
   Button,
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   Input,
@@ -397,9 +398,14 @@ function SecretPicker({
         className="w-[min(100%-2rem,35rem)] max-h-[min(80vh,36rem)] overflow-hidden rounded-2xl border border-border/60 bg-card/96 p-0 shadow-2xl"
       >
         <DialogHeader className="flex flex-row items-center justify-between border-b border-border/60 px-4 py-3">
-          <DialogTitle className="text-[14px] font-semibold text-txt">
-            {t("secretsview.AddSecretsToVault")}
-          </DialogTitle>
+          <div className="min-w-0">
+            <DialogTitle className="text-[14px] font-semibold text-txt">
+              {t("secretsview.AddSecretsToVault")}
+            </DialogTitle>
+            <DialogDescription className="sr-only">
+              {t("secretsview.SearchByKeyDescr")}
+            </DialogDescription>
+          </div>
           <Button
             variant="ghost"
             size="icon"

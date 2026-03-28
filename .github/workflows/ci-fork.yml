@@ -78,6 +78,8 @@ jobs:
 
       - name: Run onboarding voice regression tests
         run: bunx vitest run packages/app-core/src/components/onboarding/identity-preview-tts.test.ts
+        env:
+          NODE_NO_WARNINGS: "1"
 
   build:
     name: Build

@@ -21,6 +21,7 @@ const {
 
 vi.mock("@miladyai/app-core/state", () => ({
   useApp: () => mockUseApp(),
+  useTranslation: () => ({ t: (key: string) => key }),
 }));
 
 vi.mock("../../src/components/ChatView", () => ({

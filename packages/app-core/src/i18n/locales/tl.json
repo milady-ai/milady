@@ -1290,6 +1290,8 @@
   "wallet.setup.configureRpc": "I-configure ang RPC",
   "wallet.setup.rpcNotConfigured": "Hindi naka-configure ang BSC RPC.",
   "wallet.sort": "Ayusin",
+  "wallet.sortAscending": "Pataas",
+  "wallet.sortDescending": "Pababa",
   "wallet.table.balance": "Balanse",
   "wallet.table.token": "Token",
   "wallet.tokenRemovedManual": "Naalis ang token sa watchlist.",

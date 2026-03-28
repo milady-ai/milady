@@ -108,6 +108,8 @@ jobs:
 
       - name: Run unit tests
         run: bunx vitest run --config vitest.unit.config.ts
+        env:
+          NODE_NO_WARNINGS: "1"
 
   build:
     name: Build

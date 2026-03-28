@@ -1290,6 +1290,8 @@
   "wallet.setup.configureRpc": "Configurar RPC",
   "wallet.setup.rpcNotConfigured": "O RPC do BSC não está configurado.",
   "wallet.sort": "Organizar",
+  "wallet.sortAscending": "Crescente",
+  "wallet.sortDescending": "Decrescente",
   "wallet.table.balance": "Equilíbrio",
   "wallet.table.token": "Token",
   "wallet.tokenRemovedManual": "Token removido da lista de observação.",

@@ -1283,6 +1283,8 @@
   "wallet.setup.configureRpc": "配置RPC",
   "wallet.setup.rpcNotConfigured": "BSC RPC 未配置。",
   "wallet.sort": "排序",
+  "wallet.sortAscending": "升序",
+  "wallet.sortDescending": "降序",
   "wallet.table.balance": "余额",
   "wallet.table.token": "代币",
   "wallet.tokenRemovedManual": "代币已从观察列表移除。",

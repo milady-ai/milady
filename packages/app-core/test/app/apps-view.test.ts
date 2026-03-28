@@ -211,7 +211,65 @@ describe("AppsView", () => {
     mockClientFns.listInstalledApps.mockResolvedValue([]);
   });
 
-  const tStub = (k: string) => k;
+  const tStub = (
+    key: string,
+    vars?: Record<string, string | number | boolean | null | undefined>,
+  ) => {
+    const name = typeof vars?.name === "string" ? vars.name : "App";
+    const message =
+      typeof vars?.message === "string" ? vars.message : "unknown error";
+    const count = typeof vars?.count === "number" ? vars.count : 0;
+
+    switch (key) {
+      case "appsview.IframeAuthMissing":
+        return `${name} requires iframe auth, but no auth payload was returned.`;
+      case "appsview.OpenedInNewTab":
+        return `${name} opened in a new tab.`;
+      case "appsview.PopupBlockedOpen":
+        return `Popup blocked while opening ${name}. Allow popups and try again.`;
+      case "appsview.LaunchFailed":
+        return `Failed to launch ${name}: ${message}`;
+      case "appsview.Open":
+        return `Open ${name}`;
+      case "appsview.Search":
+      case "appsview.SearchPlaceholder":
+        return "Search apps";
+      case "appsview.HelperText":
+        return "Browse installed and available apps.";
+      case "appsview.Results":
+        return `${count} results`;
+      case "appsview.NoAppsMatchSearch":
+        return "No apps match your search.";
+      case "appsview.NoAppsAvailable":
+        return "No apps available.";
+      case "appsview.EmptySearchHint":
+        return "Try a different search.";
+      case "appsview.EmptyCatalogHint":
+        return "Refresh the catalog.";
+      case "appsview.GameRunning":
+        return "Game running";
+      case "appsview.Resume":
+        return "Resume";
+      case "appsview.LoadError":
+        return `Failed to load apps: ${message}`;
+      case "appsview.NetworkError":
+        return "Network error";
+      case "appsview.CurrentGameOpened":
+        return "Current game opened in a new tab.";
+      case "appsview.PopupBlocked":
+        return "Popup blocked. Allow popups and try again.";
+      case "appsview.LaunchedNoViewer":
+        return `${name} launched without a viewer URL.`;
+      case "appsview.EmptyStateTitle":
+        return "Select an app to view details";
+      case "appsview.EmptyStateDescription":
+        return "Choose an app from the catalog.";
+      case "common.error":
+        return "Error";
+      default:
+        return key;
+    }
+  };
 
   afterEach(() => {
     vi.unstubAllGlobals();

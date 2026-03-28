@@ -219,8 +219,9 @@ describe("ConversationsSidebar", () => {
     expect(
       tree.root.findAll(
         (node) =>
-          typeof node.props.className === "string" &&
-          node.children.includes("2"),
+          node.type === "span" &&
+          Array.isArray(node.children) &&
+          node.children.includes("New"),
       ),
     ).toHaveLength(1);
   });

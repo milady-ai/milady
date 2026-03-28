@@ -28,6 +28,8 @@ vi.mock("@miladyai/app-core/navigation", () => ({
 }));
 
 vi.mock("@miladyai/app-core/components", () => ({
+  LANGUAGE_DROPDOWN_TRIGGER_CLASSNAME:
+    "!h-11 !min-h-[44px] !min-w-[44px] !rounded-xl !px-3.5 sm:!px-3.5 leading-none",
   LanguageDropdown: () => React.createElement("div", null, "LanguageDropdown"),
   ThemeToggle: () => React.createElement("div", null, "ThemeToggle"),
 }));
@@ -111,6 +113,8 @@ describe("header status", () => {
       elizaCloudCredits: null,
       elizaCloudCreditsCritical: false,
       elizaCloudCreditsLow: false,
+      elizaCloudAuthRejected: false,
+      elizaCloudCreditsError: null,
       elizaCloudTopUpUrl: "",
       walletAddresses: null,
       lifecycleBusy: false,
@@ -128,11 +132,19 @@ describe("header status", () => {
       registryStatus: null,
       plugins: [],
       uiShellMode: "native",
+      switchShellView: vi.fn(),
       setUiShellMode: vi.fn(),
       uiLanguage: "en",
       setUiLanguage: vi.fn(),
       uiTheme: "dark",
       setUiTheme: vi.fn(),
+      chatAgentVoiceMuted: false,
+      handleNewConversation: vi.fn(async () => {}),
+      handleSaveCharacter: vi.fn(async () => {}),
+      characterSaving: false,
+      characterSaveSuccess: false,
+      conversationMessages: [],
+      chatLastUsage: null,
     };
     mockUseApp.mockReturnValue(baseAppState);
   });

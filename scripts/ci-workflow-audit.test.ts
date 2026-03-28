@@ -73,6 +73,13 @@ describe("CI workflow audit regressions", () => {
     expect(content).toMatch(/npm publish --tag nightly/);
   });
 
+  it("nightly and benchmark workflows suppress expected Vitest node warning noise", () => {
+    expect(readWorkflow("nightly.yml")).toContain('NODE_NO_WARNINGS: "1"');
+    expect(readWorkflow("benchmark-tests.yml")).toContain(
+      'NODE_NO_WARNINGS: "1"',
+    );
+  });
+
   it("setup-bun-workspace composite action exists (supersedes setup-native-deps)", () => {
     expect(
       fs.existsSync(path.join(ACTIONS_DIR, "setup-bun-workspace/action.yml")),

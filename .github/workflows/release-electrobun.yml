@@ -102,6 +102,8 @@ jobs:
     name: Validate Release Inputs
     needs: prepare
     runs-on: blacksmith-4vcpu-ubuntu-2404
+    env:
+      NODE_NO_WARNINGS: "1"
     defaults:
       run:
         shell: bash -euo pipefail {0}

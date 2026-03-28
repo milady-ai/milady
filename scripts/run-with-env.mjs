@@ -15,6 +15,10 @@ const envAssignments = args.slice(0, separatorIndex);
 const commandWithArgs = args.slice(separatorIndex + 1);
 const [command, ...commandArgs] = commandWithArgs;
 
+function shouldSuppressNodeWarnings(commandName, args) {
+  return [commandName, ...args].some((part) => /\bvitest\b/.test(part));
+}
+
 const env = { ...process.env };
 for (const assignment of envAssignments) {
   const eqIndex = assignment.indexOf("=");
@@ -25,6 +29,13 @@ for (const assignment of envAssignments) {
   const key = assignment.slice(0, eqIndex);
   const value = assignment.slice(eqIndex + 1);
   env[key] = value;
+}
+
+if (
+  env.NODE_NO_WARNINGS == null &&
+  shouldSuppressNodeWarnings(command, commandArgs)
+) {
+  env.NODE_NO_WARNINGS = "1";
 }
 
 const result = spawnSync(command, commandArgs, {

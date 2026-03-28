@@ -8,6 +8,10 @@ function run(command, args) {
   const result = spawnSync(command, args, {
     cwd: ROOT,
     stdio: "inherit",
+    env: {
+      ...process.env,
+      NODE_NO_WARNINGS: process.env.NODE_NO_WARNINGS ?? "1",
+    },
     shell: process.platform === "win32",
   });
 

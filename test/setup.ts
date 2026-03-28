@@ -106,8 +106,68 @@ if (typeof globalThis.window !== "undefined") {
   const win = globalThis.window as unknown as Record<string, unknown>;
   ensureStorage(win, "localStorage", sharedLocalStorage);
   ensureStorage(win, "sessionStorage", sharedSessionStorage);
-  if (!win.confirm) {
-    win.confirm = vi.fn().mockReturnValue(true);
+  // jsdom ships noisy "Not implemented" confirm/alert stubs. Replace them
+  // eagerly so tests can override them without polluting stderr. Default to
+  // "cancel" to preserve the old falsey fallback behavior in app flows.
+  win.confirm = vi.fn().mockReturnValue(false);
+  win.alert = vi.fn();
+
+  // Programmatic download/external-link clicks should exercise handlers in
+  // tests without asking jsdom to perform a full navigation.
+  const anchorPrototype = globalThis.HTMLAnchorElement?.prototype as
+    | ({
+        click?: () => void;
+      } & Record<string, unknown>)
+    | undefined;
+  const originalAnchorClick = anchorPrototype?.click;
+  if (anchorPrototype && typeof originalAnchorClick === "function") {
+    Object.defineProperty(anchorPrototype, "click", {
+      configurable: true,
+      writable: true,
+      value: function patchedAnchorClick(this: HTMLAnchorElement) {
+        const href = this.getAttribute("href") ?? "";
+        const target = this.getAttribute("target") ?? "";
+        const shouldSuppressNavigation =
+          this.hasAttribute("download") ||
+          target === "_blank" ||
+          /^(?:https?:|blob:|data:)/i.test(href);
+
+        if (shouldSuppressNavigation) {
+          this.dispatchEvent(
+            new window.MouseEvent("click", {
+              bubbles: true,
+              cancelable: true,
+              composed: true,
+            }),
+          );
+          return;
+        }
+
+        return originalAnchorClick.call(this);
+      },
+    });
+  }
+
+  const virtualConsole = (
+    globalThis.window as typeof globalThis.window & {
+      _virtualConsole?: {
+        emit?: (eventName: string, ...args: unknown[]) => unknown;
+      };
+    }
+  )._virtualConsole;
+  const originalEmit = virtualConsole?.emit;
+  if (virtualConsole && typeof originalEmit === "function") {
+    virtualConsole.emit = function patchedEmit(eventName, ...args) {
+      const [firstArg] = args;
+      if (
+        eventName === "jsdomError" &&
+        firstArg instanceof Error &&
+        firstArg.message === "Not implemented: navigation to another Document"
+      ) {
+        return;
+      }
+      return originalEmit.call(this, eventName, ...args);
+    };
   }
 }
 

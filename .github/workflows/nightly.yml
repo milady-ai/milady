@@ -21,6 +21,7 @@ concurrency:
 
 env:
   CI: "true"
+  NODE_NO_WARNINGS: "1"
   NODE_OPTIONS: "--max-old-space-size=4096"
 
 permissions:

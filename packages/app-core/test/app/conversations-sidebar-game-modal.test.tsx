@@ -411,7 +411,16 @@ describe("ConversationsSidebar game-modal variant", () => {
     });
 
     const content = textOf(tree?.root);
-    expect(content).toContain("conversations.chats");
-    expect(content).toContain("1");
+    expect(content).toContain("Newest room");
+    expect(content).toContain("First room");
+    expect(
+      tree?.root.findAll(
+        (node) =>
+          node.type === "span" &&
+          typeof node.props.className === "string" &&
+          node.props.className.includes("bg-accent") &&
+          node.props.className.includes("animate-pulse"),
+      ),
+    ).toHaveLength(1);
   });
 });

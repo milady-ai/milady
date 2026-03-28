@@ -180,13 +180,9 @@ export default defineConfig({
     testTimeout: 120_000,
     hookTimeout: 120_000,
     globalSetup: ["test/e2e-global-setup.ts"],
+    isolate: false,
+    fileParallelism: false,
     pool: "forks",
-    poolOptions: {
-      forks: {
-        singleFork: true,
-        isolate: false,
-      },
-    },
     maxWorkers: 1,
     sequence: {
       concurrent: false,
