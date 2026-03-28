@@ -3595,7 +3595,12 @@ export class MiladyClient {
     status?: string;
     limit?: number;
     offset?: number;
-  }): Promise<{ records: StewardHistoryResponse; total: number; offset: number; limit: number }> {
+  }): Promise<{
+    records: StewardHistoryResponse;
+    total: number;
+    offset: number;
+    limit: number;
+  }> {
     const params = new URLSearchParams();
     if (opts?.status) params.set("status", opts.status);
     if (opts?.limit) params.set("limit", String(opts.limit));
@@ -3615,14 +3620,19 @@ export class MiladyClient {
     });
   }
 
-  async rejectStewardTx(txId: string, reason?: string): Promise<StewardApprovalActionResponse> {
+  async rejectStewardTx(
+    txId: string,
+    reason?: string,
+  ): Promise<StewardApprovalActionResponse> {
     return this.fetch("/api/wallet/steward-deny-tx", {
       method: "POST",
       body: JSON.stringify({ txId, reason }),
     });
   }
 
-  async signViaSteward(request: StewardSignRequest): Promise<StewardSignResponse> {
+  async signViaSteward(
+    request: StewardSignRequest,
+  ): Promise<StewardSignResponse> {
     return this.fetch("/api/wallet/steward-sign", {
       method: "POST",
       body: JSON.stringify(request),

@@ -740,10 +740,18 @@ export interface AppActions {
     status?: string;
     limit?: number;
     offset?: number;
-  }) => Promise<{ records: StewardHistoryResponse; total: number; offset: number; limit: number }>;
+  }) => Promise<{
+    records: StewardHistoryResponse;
+    total: number;
+    offset: number;
+    limit: number;
+  }>;
   getStewardPending: () => Promise<StewardPendingResponse>;
   approveStewardTx: (txId: string) => Promise<StewardApprovalActionResponse>;
-  rejectStewardTx: (txId: string, reason?: string) => Promise<StewardApprovalActionResponse>;
+  rejectStewardTx: (
+    txId: string,
+    reason?: string,
+  ) => Promise<StewardApprovalActionResponse>;
   loadWalletTradingProfile: (
     window?: WalletTradingProfileWindow,
     source?: WalletTradingProfileSourceFilter,

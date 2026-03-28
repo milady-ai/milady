@@ -1,7 +1,14 @@
 /**
  * @vitest-environment jsdom
  */
-import { cleanup, fireEvent, render, screen, act, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  act,
+  waitFor,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the client module before importing the component
@@ -29,22 +36,39 @@ vi.mock("lucide-react", () => ({
 // Mock @miladyai/ui components as simple HTML elements
 vi.mock("@miladyai/ui", () => ({
   Button: ({ children, onClick, disabled, ...props }: any) => (
-    <button onClick={onClick} disabled={disabled} {...props}>{children}</button>
+    <button onClick={onClick} disabled={disabled} {...props}>
+      {children}
+    </button>
   ),
-  ConfirmDialog: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  ConfirmDialog: ({ children, ...props }: any) => (
+    <div {...props}>{children}</div>
+  ),
   Input: ({ value, onChange, ...props }: any) => (
     <input value={value} onChange={onChange} {...props} />
   ),
   Label: ({ children, ...props }: any) => <label {...props}>{children}</label>,
   SectionCard: ({ children, title, ...props }: any) => (
-    <div {...props}><h3>{title}</h3>{children}</div>
+    <div {...props}>
+      <h3>{title}</h3>
+      {children}
+    </div>
   ),
   Slider: ({ value, onValueChange, ...props }: any) => (
-    <input type="range" value={value?.[0]} onChange={(e) => onValueChange?.([Number(e.target.value)])} {...props} />
+    <input
+      type="range"
+      value={value?.[0]}
+      onChange={(e) => onValueChange?.([Number(e.target.value)])}
+      {...props}
+    />
   ),
   Spinner: () => <div data-testid="spinner" />,
   Switch: ({ checked, onCheckedChange, ...props }: any) => (
-    <input type="checkbox" checked={checked} onChange={() => onCheckedChange?.(!checked)} {...props} />
+    <input
+      type="checkbox"
+      checked={checked}
+      onChange={() => onCheckedChange?.(!checked)}
+      {...props}
+    />
   ),
 }));
 
@@ -94,9 +118,9 @@ describe("PolicyControlsView", () => {
       // Should indicate steward isn't connected/configured
       expect(
         text.toLowerCase().includes("not connected") ||
-        text.toLowerCase().includes("not configured") ||
-        text.toLowerCase().includes("connect") ||
-        text.toLowerCase().includes("steward"),
+          text.toLowerCase().includes("not configured") ||
+          text.toLowerCase().includes("connect") ||
+          text.toLowerCase().includes("steward"),
       ).toBe(true);
     });
   });
@@ -136,8 +160,8 @@ describe("PolicyControlsView", () => {
       // Should display spending limit policy
       expect(
         text.toLowerCase().includes("spending") ||
-        text.toLowerCase().includes("limit") ||
-        text.toLowerCase().includes("0.1"),
+          text.toLowerCase().includes("limit") ||
+          text.toLowerCase().includes("0.1"),
       ).toBe(true);
     });
   });
@@ -151,7 +175,9 @@ describe("PolicyControlsView", () => {
       connected: true,
       agentId: "test-agent",
     });
-    (client.getStewardPolicies as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+    (client.getStewardPolicies as ReturnType<typeof vi.fn>).mockResolvedValue(
+      [],
+    );
 
     const mod = await import("../PolicyControlsView");
     render(<mod.PolicyControlsView />);
@@ -161,8 +187,8 @@ describe("PolicyControlsView", () => {
       // Should show some indication of no policies or ability to add
       expect(
         text.toLowerCase().includes("no polic") ||
-        text.toLowerCase().includes("add") ||
-        text.toLowerCase().includes("create"),
+          text.toLowerCase().includes("add") ||
+          text.toLowerCase().includes("create"),
       ).toBe(true);
     });
   });
@@ -199,7 +225,7 @@ describe("PolicyControlsView", () => {
       const text = document.body.textContent ?? "";
       expect(
         text.toLowerCase().includes("spending") ||
-        text.toLowerCase().includes("limit"),
+          text.toLowerCase().includes("limit"),
       ).toBe(true);
     });
 
@@ -210,8 +236,7 @@ describe("PolicyControlsView", () => {
 
       // Look for save button
       const saveButton = Array.from(document.querySelectorAll("button")).find(
-        (btn) =>
-          (btn.textContent ?? "").toLowerCase().includes("save"),
+        (btn) => (btn.textContent ?? "").toLowerCase().includes("save"),
       );
       if (saveButton) {
         fireEvent.click(saveButton);
@@ -244,8 +269,8 @@ describe("PolicyControlsView", () => {
       // Should show an error message
       expect(
         text.toLowerCase().includes("error") ||
-        text.toLowerCase().includes("failed") ||
-        text.toLowerCase().includes("retry"),
+          text.toLowerCase().includes("failed") ||
+          text.toLowerCase().includes("retry"),
       ).toBe(true);
     });
   });

@@ -2100,7 +2100,8 @@ function AppProviderInner({
   );
 
   const rejectStewardTx = useCallback(
-    async (txId: string, reason?: string) => client.rejectStewardTx(txId, reason),
+    async (txId: string, reason?: string) =>
+      client.rejectStewardTx(txId, reason),
     [],
   );
 

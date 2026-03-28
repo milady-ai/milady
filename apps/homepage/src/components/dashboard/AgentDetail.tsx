@@ -12,7 +12,16 @@ import { PolicyControls } from "./PolicyControls";
 import { TransactionHistory } from "./TransactionHistory";
 import { WalletsPanel } from "./WalletsPanel";
 
-const TABS = ["Overview", "Wallets", "Policies", "Transactions", "Approvals", "Metrics", "Logs", "Snapshots"] as const;
+const TABS = [
+  "Overview",
+  "Wallets",
+  "Policies",
+  "Transactions",
+  "Approvals",
+  "Metrics",
+  "Logs",
+  "Snapshots",
+] as const;
 type Tab = (typeof TABS)[number];
 
 interface AgentDetailProps {

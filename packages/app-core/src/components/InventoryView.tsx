@@ -264,14 +264,12 @@ export function InventoryView() {
   const tradeReady =
     singleChainFocus === "bsc" ? bnbBalance >= BSC_GAS_READY_THRESHOLD : true;
   // When steward is connected, use steward addresses for copy buttons
-  const stewardEvmAddr =
-    stewardStatus?.connected
-      ? stewardStatus.walletAddresses?.evm ?? stewardStatus.evmAddress ?? null
-      : null;
-  const stewardSolAddr =
-    stewardStatus?.connected
-      ? stewardStatus.walletAddresses?.solana ?? null
-      : null;
+  const stewardEvmAddr = stewardStatus?.connected
+    ? (stewardStatus.walletAddresses?.evm ?? stewardStatus.evmAddress ?? null)
+    : null;
+  const stewardSolAddr = stewardStatus?.connected
+    ? (stewardStatus.walletAddresses?.solana ?? null)
+    : null;
   const displayEvmAddr = stewardEvmAddr ?? evmAddr;
   const displaySolAddr = stewardSolAddr ?? solAddr;
   const addresses = [
@@ -443,7 +441,9 @@ export function InventoryView() {
     );
   }
 
-  const stewardHasAddresses = stewardStatus?.connected && (stewardStatus.walletAddresses?.evm || stewardStatus.evmAddress);
+  const stewardHasAddresses =
+    stewardStatus?.connected &&
+    (stewardStatus.walletAddresses?.evm || stewardStatus.evmAddress);
   if (!evmAddr && !solAddr && !stewardHasAddresses) {
     return (
       <DesktopPageFrame>

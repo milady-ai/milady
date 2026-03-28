@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { CloudApiClient, StewardTxRecord, StewardTxStatus } from "../../lib/cloud-api";
+import type {
+  CloudApiClient,
+  StewardTxRecord,
+  StewardTxStatus,
+} from "../../lib/cloud-api";
 
 const STATUS_FILTERS: Array<{ value: string; label: string }> = [
   { value: "", label: "ALL" },
@@ -90,12 +94,34 @@ function CopyButton({ text }: { text: string }) {
       className="ml-1 text-text-subtle hover:text-text-light transition-colors"
     >
       {copied ? (
-        <svg aria-hidden="true" className="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+        <svg
+          aria-hidden="true"
+          className="w-3 h-3 text-emerald-400"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M5 13l4 4L19 7"
+          />
         </svg>
       ) : (
-        <svg aria-hidden="true" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        <svg
+          aria-hidden="true"
+          className="w-3 h-3"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+          />
         </svg>
       )}
     </button>
@@ -138,9 +164,12 @@ export function TransactionHistory({ client }: TransactionHistoryProps) {
         setOffset(newOffset);
       } catch (err) {
         if (!mountedRef.current) return;
-        const msg = err instanceof Error ? err.message : "Failed to load transactions";
+        const msg =
+          err instanceof Error ? err.message : "Failed to load transactions";
         if (msg.includes("503") || msg.includes("not configured")) {
-          setError("Steward is not configured for this agent. Transaction history requires a connected Steward instance.");
+          setError(
+            "Steward is not configured for this agent. Transaction history requires a connected Steward instance.",
+          );
         } else {
           setError(msg);
         }
@@ -234,11 +263,24 @@ export function TransactionHistory({ client }: TransactionHistoryProps) {
         {!loading && !error && records.length === 0 && (
           <div className="p-8 text-center">
             <div className="w-10 h-10 mx-auto mb-3 bg-surface-elevated border border-border flex items-center justify-center">
-              <svg aria-hidden="true" className="w-5 h-5 text-text-subtle" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+              <svg
+                aria-hidden="true"
+                className="w-5 h-5 text-text-subtle"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+                />
               </svg>
             </div>
-            <p className="font-mono text-sm text-text-light mb-1">NO TRANSACTIONS</p>
+            <p className="font-mono text-sm text-text-light mb-1">
+              NO TRANSACTIONS
+            </p>
             <p className="font-mono text-xs text-text-muted">
               {statusFilter
                 ? `No transactions with status "${statusFilter}"`
@@ -283,7 +325,9 @@ export function TransactionHistory({ client }: TransactionHistoryProps) {
                       <CopyButton text={toAddr} />
                     </span>
                   ) : (
-                    <span className="font-mono text-[11px] text-text-muted">—</span>
+                    <span className="font-mono text-[11px] text-text-muted">
+                      —
+                    </span>
                   )}
                 </div>
 
@@ -341,7 +385,9 @@ export function TransactionHistory({ client }: TransactionHistoryProps) {
                       </svg>
                     </a>
                   ) : (
-                    <span className="font-mono text-[11px] text-text-muted">—</span>
+                    <span className="font-mono text-[11px] text-text-muted">
+                      —
+                    </span>
                   )}
                 </div>
               </div>

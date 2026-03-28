@@ -478,7 +478,9 @@ export async function getStewardTokenBalances(
  * Build auth headers for direct steward API calls.
  * Used for endpoints not yet exposed in the SDK (pending, approve, deny).
  */
-export function buildStewardHeaders(env: NodeJS.ProcessEnv = process.env): Headers {
+export function buildStewardHeaders(
+  env: NodeJS.ProcessEnv = process.env,
+): Headers {
   const headers = new Headers();
   headers.set("Content-Type", "application/json");
   headers.set("Accept", "application/json");
@@ -1047,7 +1049,6 @@ async function doEnsureStewardAgent(
     } catch {
       console.warn("[steward] Token generation failed (non-fatal)");
     }
-
 
     const result: EnsureStewardAgentResult = {
       agentId,

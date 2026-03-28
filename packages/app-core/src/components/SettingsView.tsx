@@ -20,7 +20,14 @@ import {
   SelectValue,
   Spinner,
 } from "@miladyai/ui";
-import { AlertTriangle, ChevronDown, Copy, Download, Shield, Upload } from "lucide-react";
+import {
+  AlertTriangle,
+  ChevronDown,
+  Copy,
+  Download,
+  Shield,
+  Upload,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { client } from "../api";
 import { useApp } from "../state";

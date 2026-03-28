@@ -39,9 +39,7 @@ describe("live E2E script contract", () => {
     expect(liveScript).toContain(
       "bunx vitest run --config vitest.live-e2e.config.ts",
     );
-    expect(liveScript).toContain(
-      "packages/agent/test/wallet-live.e2e.test.ts",
-    );
+    expect(liveScript).toContain("packages/agent/test/wallet-live.e2e.test.ts");
     expect(liveScript).toContain(
       "packages/agent/test/api-auth-live.e2e.test.ts",
     );
