@@ -408,6 +408,24 @@ type KnowledgeState = {
   }>;
 };
 
+function translate(
+  key: string,
+  vars?: {
+    defaultValue?: string;
+    [key: string]: unknown;
+  },
+): string {
+  if (typeof vars?.defaultValue === "string") {
+    let value = vars.defaultValue;
+    for (const [token, raw] of Object.entries(vars)) {
+      if (token === "defaultValue") continue;
+      value = value.replace(`{{${token}}}`, String(raw));
+    }
+    return value;
+  }
+  return key;
+}
+
 function createKnowledgeUIState(): KnowledgeState {
   return {
     knowledgeStats: { documentCount: 5, fragmentCount: 42 },
@@ -438,36 +456,31 @@ function createKnowledgeUIState(): KnowledgeState {
 
 describe("KnowledgeView UI", () => {
   let state: KnowledgeState;
+  let appActions: {
+    loadKnowledgeStats: ReturnType<typeof vi.fn>;
+    loadKnowledgeDocuments: ReturnType<typeof vi.fn>;
+    uploadKnowledgeDocument: ReturnType<typeof vi.fn>;
+    searchKnowledge: ReturnType<typeof vi.fn>;
+    deleteKnowledgeDocument: ReturnType<typeof vi.fn>;
+    setActionNotice: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     state = createKnowledgeUIState();
-
-    mockUseApp.mockReset();
-    mockUseApp.mockImplementation(() => ({
-      t: (
-        k: string,
-        vars?: {
-          defaultValue?: string;
-          [key: string]: unknown;
-        },
-      ) => {
-        if (typeof vars?.defaultValue === "string") {
-          let value = vars.defaultValue;
-          for (const [key, raw] of Object.entries(vars)) {
-            if (key === "defaultValue") continue;
-            value = value.replace(`{{${key}}}`, String(raw));
-          }
-          return value;
-        }
-        return k;
-      },
-      ...state,
+    appActions = {
       loadKnowledgeStats: vi.fn(),
       loadKnowledgeDocuments: vi.fn(),
       uploadKnowledgeDocument: vi.fn(),
       searchKnowledge: vi.fn(),
       deleteKnowledgeDocument: vi.fn(),
       setActionNotice: vi.fn(),
+    };
+
+    mockUseApp.mockReset();
+    mockUseApp.mockImplementation(() => ({
+      t: translate,
+      ...state,
+      ...appActions,
     }));
   });
 

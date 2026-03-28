@@ -191,6 +191,8 @@ export default defineConfig({
     fileParallelism: false,
     pool: "forks",
     maxWorkers: 1,
+    // Startup E2E also runs serial jsdom suites in a single fork.
+    execArgv: ["--max-old-space-size=4096"],
     sequence: {
       concurrent: false,
       shuffle: false,

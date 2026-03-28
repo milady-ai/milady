@@ -187,6 +187,9 @@ export default defineConfig({
     fileParallelism: false,
     pool: "forks",
     maxWorkers: 1,
+    // Match the unit test worker heap to avoid late jsdom OOM crashes during
+    // serial E2E runs, where one fork accumulates dozens of suites.
+    execArgv: ["--max-old-space-size=4096"],
     sequence: {
       concurrent: false,
       shuffle: false,

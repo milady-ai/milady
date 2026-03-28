@@ -7,6 +7,9 @@
 
 import { vi } from "vitest";
 
+const CANVAS_PATCH_MARK = Symbol.for("milady.test.canvasMocksInstalled");
+const CONSOLE_PATCH_MARK = Symbol.for("milady.test.consoleErrorPatched");
+
 /**
  * Create an in-memory Storage mock backed by a Map.
  * Wraps methods in vi.fn() so tests can assert on storage calls.
@@ -80,9 +83,10 @@ export function createCanvas2DContext(): CanvasRenderingContext2D {
     createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
     createRadialGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
     createPattern: vi.fn(() => null),
-    canvas: typeof document !== "undefined"
-      ? document.createElement("canvas")
-      : ({} as HTMLCanvasElement),
+    canvas:
+      typeof document !== "undefined"
+        ? document.createElement("canvas")
+        : ({} as HTMLCanvasElement),
     lineWidth: 1,
     globalAlpha: 1,
     fillStyle: "#000",
@@ -95,8 +99,13 @@ export function createCanvas2DContext(): CanvasRenderingContext2D {
  */
 export function installCanvasMocks(): void {
   if (typeof globalThis.HTMLCanvasElement === "undefined") return;
+  const prototype = globalThis.HTMLCanvasElement
+    .prototype as HTMLCanvasElement["prototype"] & {
+    [CANVAS_PATCH_MARK]?: boolean;
+  };
+  if (prototype[CANVAS_PATCH_MARK]) return;
 
-  Object.defineProperty(globalThis.HTMLCanvasElement.prototype, "getContext", {
+  Object.defineProperty(prototype, "getContext", {
     value: vi.fn((contextType: string) =>
       contextType === "2d" ? createCanvas2DContext() : null,
     ),
@@ -104,19 +113,27 @@ export function installCanvasMocks(): void {
     configurable: true,
   });
 
-  Object.defineProperty(globalThis.HTMLCanvasElement.prototype, "toDataURL", {
+  Object.defineProperty(prototype, "toDataURL", {
     value: vi.fn(() => "data:image/png;base64,dGVzdA=="),
     writable: true,
     configurable: true,
   });
+
+  prototype[CANVAS_PATCH_MARK] = true;
 }
 
 /**
  * Suppress known noisy console.error messages from React test tooling.
  */
 export function suppressReactTestConsoleErrors(): void {
+  const currentConsoleError = console.error as typeof console.error & {
+    [CONSOLE_PATCH_MARK]?: boolean;
+  };
+  if (currentConsoleError[CONSOLE_PATCH_MARK]) {
+    return;
+  }
   const originalConsoleError = console.error.bind(console);
-  console.error = (...args: unknown[]) => {
+  const patchedConsoleError = ((...args: unknown[]) => {
     const first = args[0];
     if (
       typeof first === "string" &&
@@ -128,5 +145,9 @@ export function suppressReactTestConsoleErrors(): void {
       return;
     }
     originalConsoleError(...args);
+  }) as typeof console.error & {
+    [CONSOLE_PATCH_MARK]?: boolean;
   };
+  patchedConsoleError[CONSOLE_PATCH_MARK] = true;
+  console.error = patchedConsoleError;
 }

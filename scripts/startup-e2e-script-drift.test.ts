@@ -41,6 +41,7 @@ describe("startup E2E script contract", () => {
     expect(config).toContain('pool: "forks"');
     expect(config).not.toContain("poolOptions:");
     expect(config).toContain("maxWorkers: 1");
+    expect(config).toContain('execArgv: ["--max-old-space-size=4096"]');
   });
 
   it("uses Vitest 4 top-level worker options in the shared E2E config", () => {
@@ -50,5 +51,6 @@ describe("startup E2E script contract", () => {
     expect(config).toContain("fileParallelism: false");
     expect(config).not.toContain("poolOptions:");
     expect(config).toContain("maxWorkers: 1");
+    expect(config).toContain('execArgv: ["--max-old-space-size=4096"]');
   });
 });

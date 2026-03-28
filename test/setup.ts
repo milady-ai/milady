@@ -7,6 +7,17 @@ import {
   suppressReactTestConsoleErrors,
 } from "./helpers/browser-mocks";
 
+const REACT_RESOLVE_PATCH_MARK = Symbol.for("milady.test.reactResolvePatched");
+const ANCHOR_CLICK_PATCH_MARK = Symbol.for("milady.test.anchorClickPatched");
+const JSDOM_EMIT_PATCH_MARK = Symbol.for("milady.test.jsdomEmitPatched");
+
+type ResolveFilename = (
+  request: string,
+  parent: unknown,
+  isMain: boolean,
+  options: unknown,
+) => string;
+
 // ── React deduplication ──────────────────────────────────────────────
 // bun hoists react-test-renderer's peer react into a separate .bun/ path,
 // creating two React instances that break hooks.  Intercept Node's CJS
@@ -18,10 +29,15 @@ try {
     _require.resolve("react/package.json"),
   );
 
-  const origResolve = (Module as unknown as { _resolveFilename: Function })
-    ._resolveFilename;
-  (Module as unknown as { _resolveFilename: Function })._resolveFilename =
-    function patchedResolve(
+  const moduleInternals = Module as unknown as {
+    _resolveFilename: ResolveFilename & {
+      [REACT_RESOLVE_PATCH_MARK]?: boolean;
+    };
+  };
+  if (!moduleInternals._resolveFilename[REACT_RESOLVE_PATCH_MARK]) {
+    const origResolve = moduleInternals._resolveFilename;
+    const patchedResolve = function patchedResolve(
+      this: unknown,
       request: string,
       parent: unknown,
       isMain: boolean,
@@ -52,7 +68,10 @@ try {
         }
       }
       return resolved;
-    };
+    } as typeof moduleInternals._resolveFilename;
+    patchedResolve[REACT_RESOLVE_PATCH_MARK] = true;
+    moduleInternals._resolveFilename = patchedResolve;
+  }
 } catch {
   // React not available — skip deduplication patch (e.g. CI without react)
 }
@@ -117,10 +136,15 @@ if (typeof globalThis.window !== "undefined") {
   const anchorPrototype = globalThis.HTMLAnchorElement?.prototype as
     | ({
         click?: () => void;
+        [ANCHOR_CLICK_PATCH_MARK]?: boolean;
       } & Record<string, unknown>)
     | undefined;
   const originalAnchorClick = anchorPrototype?.click;
-  if (anchorPrototype && typeof originalAnchorClick === "function") {
+  if (
+    anchorPrototype &&
+    typeof originalAnchorClick === "function" &&
+    !anchorPrototype[ANCHOR_CLICK_PATCH_MARK]
+  ) {
     Object.defineProperty(anchorPrototype, "click", {
       configurable: true,
       writable: true,
@@ -146,18 +170,25 @@ if (typeof globalThis.window !== "undefined") {
         return originalAnchorClick.call(this);
       },
     });
+    anchorPrototype[ANCHOR_CLICK_PATCH_MARK] = true;
   }
 
   const virtualConsole = (
     globalThis.window as typeof globalThis.window & {
       _virtualConsole?: {
-        emit?: (eventName: string, ...args: unknown[]) => unknown;
+        emit?: ((eventName: string, ...args: unknown[]) => unknown) & {
+          [JSDOM_EMIT_PATCH_MARK]?: boolean;
+        };
       };
     }
   )._virtualConsole;
   const originalEmit = virtualConsole?.emit;
-  if (virtualConsole && typeof originalEmit === "function") {
-    virtualConsole.emit = function patchedEmit(eventName, ...args) {
+  if (
+    virtualConsole &&
+    typeof originalEmit === "function" &&
+    !originalEmit[JSDOM_EMIT_PATCH_MARK]
+  ) {
+    const patchedEmit = function patchedEmit(eventName, ...args) {
       const [firstArg] = args;
       if (
         eventName === "jsdomError" &&
@@ -167,7 +198,9 @@ if (typeof globalThis.window !== "undefined") {
         return;
       }
       return originalEmit.call(this, eventName, ...args);
-    };
+    } as typeof originalEmit;
+    patchedEmit[JSDOM_EMIT_PATCH_MARK] = true;
+    virtualConsole.emit = patchedEmit;
   }
 }
 
