@@ -1,10 +1,10 @@
 ---
 title: Apps Overview
 sidebarTitle: Overview
-description: Milady ships as a cross-platform suite for desktop, mobile, and web dashboard workflows in release v2.0.0-alpha.125.
+description: Milady ships as a cross-platform suite for desktop, mobile, and web dashboard workflows.
 ---
 
-Milady is available across the primary shipped platforms in release `v2.0.0-alpha.125`. Each app connects to the same agent runtime, giving you a consistent experience whether you're at your desk or on your phone.
+Milady is available across the primary shipped platforms. Each app connects to the same agent runtime, giving you a consistent experience whether you're at your desk or on your phone.
 
 ## Available Apps
 

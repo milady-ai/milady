@@ -96,15 +96,27 @@ milady plugins list
 
 ### Enable/Disable
 
-```bash
-milady plugins enable plugin-name
-milady plugins disable plugin-name
+Toggle plugins via the config file or `milady plugins config`:
+
+```json
+// milady.json
+{
+  "plugins": {
+    "entries": {
+      "plugin-name": { "enabled": false }
+    }
+  }
+}
 ```
+
+Or use the Dashboard Settings UI to toggle plugins on/off.
 
 ### Eject (Copy to Local)
 
+Eject a plugin to a local editable copy via the REST API or Dashboard:
+
 ```bash
-milady plugins eject plugin-name
+curl -X POST http://localhost:2138/api/plugins/plugin-name/eject
 ```
 
 See [Plugin Eject](/plugins/plugin-eject) for details on customizing ejected plugins.

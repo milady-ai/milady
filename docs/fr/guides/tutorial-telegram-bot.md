@@ -11,7 +11,7 @@ description: "Apprenez à créer et configurer un bot Telegram avec Milady en qu
 Démarrez avec l'intégration du bot Telegram de Milady. Ce tutoriel vous guide à travers la création de votre premier bot, sa configuration et ses tests de bout en bout.
 
 <Info>
-  Ce tutoriel suppose que vous avez installé Milady. Si ce n'est pas encore fait, consultez le [Guide d'installation](../getting-started/installation.md).
+  Ce tutoriel suppose que vous avez installé Milady. Si ce n'est pas encore fait, consultez le [Guide d'installation](/installation).
 </Info>
 
 <div id="prerequisites">

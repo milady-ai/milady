@@ -17,7 +17,7 @@ The eject system lets you clone an upstream plugin's source code locally, modify
 7. [The .upstream.json Format](#the-upstreamjson-format)
 8. [Syncing with Upstream](#syncing-with-upstream)
 9. [Contributing Back](#contributing-back)
-10. [CLI Commands](#cli-commands)
+10. [Usage](#usage)
 11. [Troubleshooting](#troubleshooting)
 
 ---
@@ -322,9 +322,9 @@ gh pr create --repo elizaos-plugins/plugin-telegram --base 1.x
 
 ---
 
-## CLI Commands
+## Usage
 
-### List Ejected Plugins
+### REST API
 
 ```
 GET /api/plugins/ejected
@@ -332,7 +332,7 @@ GET /api/plugins/ejected
 
 Returns all ejected plugins with their `.upstream.json` metadata.
 
-### Via Agent Chat
+### Agent Chat Commands
 
 - `"eject the telegram plugin"` -- triggers `EJECT_PLUGIN`
 - `"sync the ejected telegram plugin"` -- triggers `SYNC_PLUGIN`

@@ -15,7 +15,7 @@ The Milady mobile app brings the full dashboard experience to iOS and Android de
 
 **App ID:** `com.miladyai.milady`
 **Package name:** `@miladyai/app`
-**Current version:** `2.0.0-alpha.87`
+**Current version:** See root `package.json` for the latest version.
 
 ## Prerequisites
 

@@ -50,18 +50,15 @@ If your token is ever exposed, regenerate it immediately by clicking **Regenerat
 </Step>
 
 <Step title="Configure milady.json">
-1. Open your Milady installation directory and locate or create `milady.json` in the root folder
-2. Add the Discord plugin configuration:
+1. Open `~/.milady/milady.json` (create it if it doesn't exist)
+2. Add the Discord connector configuration:
 
 ```json5
 {
   // ... existing config ...
-  "plugins": {
+  "connectors": {
     "discord": {
-      "enabled": true,
-      "token": "YOUR_BOT_TOKEN_HERE",
-      "intents": ["GUILDS", "GUILD_MESSAGES", "DIRECT_MESSAGES", "MESSAGE_CONTENT"],
-      "prefix": "!"
+      "botToken": "YOUR_BOT_TOKEN_HERE"
     }
   }
 }
@@ -71,21 +68,20 @@ If your token is ever exposed, regenerate it immediately by clicking **Regenerat
 4. Save the file
 
 <Info>
-The `intents` field tells Discord which events your bot should receive. `MESSAGE_CONTENT` is required to read message text.
+The Discord connector auto-enables when it detects a `botToken` in your connector config. No additional plugin installation is needed.
 </Info>
 
 </Step>
 
-<Step title="Enable the Discord Plugin">
-1. Open your terminal and navigate to your Milady installation directory
+<Step title="Verify the Discord Plugin">
+1. Open your terminal
 2. Run the following command to verify the plugin is recognized:
 
 ```bash
-bun run milady --plugins
+milady plugins installed
 ```
 
-3. Confirm that `discord` appears in the list of available plugins
-4. Check `milady.json` to ensure `"enabled": true` is set for the Discord plugin
+3. Start or restart Milady — the Discord connector loads automatically when `botToken` is configured
 
 </Step>
 

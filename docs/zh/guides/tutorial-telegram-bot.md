@@ -11,7 +11,7 @@ description: "了解如何在几分钟内使用 Milady 创建和配置 Telegram 
 开始使用 Milady 的 Telegram 机器人集成。本教程将引导你完成创建第一个机器人、配置以及端到端测试的全过程。
 
 <Info>
-  本教程假设你已经安装了 Milady。如果还没有，请查看[安装指南](../getting-started/installation.md)。
+  本教程假设你已经安装了 Milady。如果还没有，请查看[安装指南](/installation)。
 </Info>
 
 <div id="prerequisites">
