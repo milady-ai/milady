@@ -1,6 +1,7 @@
 import { asRecord, readString } from "./config-readers";
 import { deriveOnboardingResumeConnection } from "./onboarding-resume";
 import type { PersistedConnectionMode } from "./persistence";
+import type { StartupErrorState } from "./types";
 
 export interface ExistingOnboardingProbeClient {
   apiAvailable: boolean;
@@ -17,6 +18,10 @@ export interface DetectedProviderCandidate {
   id: string;
   apiKey?: string;
 }
+
+export type StartupWithoutConnectionResolution =
+  | { kind: "onboarding" }
+  | { kind: "startup-error"; error: StartupErrorState };
 
 const LOCAL_CONNECTION: PersistedConnectionMode = { runMode: "local" };
 
@@ -95,6 +100,26 @@ export async function detectExistingOnboardingConnection(args: {
   }
 
   return result === timeoutToken ? null : result;
+}
+
+export function resolveStartupWithoutRestoredConnection(args: {
+  hadPersistedOnboardingCompletion: boolean;
+}): StartupWithoutConnectionResolution {
+  if (!args.hadPersistedOnboardingCompletion) {
+    return { kind: "onboarding" };
+  }
+
+  return {
+    kind: "startup-error",
+    error: {
+      reason: "backend-unreachable",
+      phase: "starting-backend",
+      message:
+        "No reusable backend connection was found for this previously onboarded app.",
+      detail:
+        "Local onboarding state is preserved so setup does not restart unexpectedly. Retry after the backend is reachable again.",
+    },
+  };
 }
 
 export function deriveDetectedProviderPrefill(
