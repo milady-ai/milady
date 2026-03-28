@@ -960,9 +960,14 @@ function killPort(port) {
 function waitForPort(port, { timeout = 120_000, interval = 500 } = {}) {
   return new Promise((resolve, reject) => {
     const deadline = Date.now() + timeout;
+    let activeSocket = null;
 
     function attempt() {
       if (Date.now() > deadline) {
+        if (activeSocket) {
+          activeSocket.destroy();
+          activeSocket = null;
+        }
         reject(
           new Error(
             `Timed out waiting for port ${port} after ${timeout / 1000}s`,
@@ -970,13 +975,15 @@ function waitForPort(port, { timeout = 120_000, interval = 500 } = {}) {
         );
         return;
       }
-      const socket = createConnection({ port, host: "127.0.0.1" });
-      socket.once("connect", () => {
-        socket.destroy();
+      activeSocket = createConnection({ port, host: "127.0.0.1" });
+      activeSocket.once("connect", () => {
+        activeSocket.destroy();
+        activeSocket = null;
         resolve();
       });
-      socket.once("error", () => {
-        socket.destroy();
+      activeSocket.once("error", () => {
+        activeSocket.destroy();
+        activeSocket = null;
         setTimeout(attempt, interval);
       });
     }
@@ -1201,6 +1208,13 @@ function startVite() {
     stdio: ["inherit", "pipe", "pipe"],
   });
 
+  viteProcess.on("error", (err) => {
+    console.error(
+      `  ${green(logPrefix)} Failed to start vite: ${err.message}`,
+    );
+    cleanup(1);
+  });
+
   viteProcess.stdout.on("data", (data) => {
     const text = data.toString();
     if (text.includes("ready")) {
@@ -1342,6 +1356,13 @@ if (uiOnly) {
       LOG_LEVEL: devLogLevel,
     },
     stdio: ["inherit", "pipe", "pipe"],
+  });
+
+  apiProcess.on("error", (err) => {
+    console.error(
+      `  ${green(logPrefix)} Failed to start API server: ${err.message}`,
+    );
+    cleanup(1);
   });
 
   if (quietApiLogs) {
