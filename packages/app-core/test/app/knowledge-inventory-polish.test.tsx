@@ -189,6 +189,36 @@ vi.mock("../../src/components/inventory/useInventoryData", () => ({
 import { InventoryView } from "../../src/components/InventoryView";
 import { KnowledgeView } from "../../src/components/KnowledgeView";
 
+function translate(key: string, options?: Record<string, unknown>): string {
+  const template =
+    typeof options?.defaultValue === "string" ? options.defaultValue : key;
+  return template.replace(/\{\{(\w+)\}\}/g, (_, token: string) =>
+    String(options?.[token] ?? `{{${token}}}`),
+  );
+}
+
+function flattenText(value: React.ReactNode): string {
+  if (typeof value === "string" || typeof value === "number") {
+    return String(value);
+  }
+  if (Array.isArray(value)) {
+    return value.map(flattenText).join("");
+  }
+  if (React.isValidElement(value)) {
+    return flattenText(value.props.children);
+  }
+  return "";
+}
+
+function findKnowledgeDocumentButtons(tree: TestRenderer.ReactTestRenderer) {
+  return tree.root.findAll(
+    (node) =>
+      node.type === "button" &&
+      typeof node.props["aria-label"] === "string" &&
+      node.props["aria-label"].startsWith("Open "),
+  );
+}
+
 describe("Knowledge and inventory polish", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -251,6 +281,84 @@ describe("Knowledge and inventory polish", () => {
     expect(sidebars.length).toBeGreaterThan(0);
   });
 
+  it("filters documents locally before semantic search and clears back to the full list", async () => {
+    mockListKnowledgeDocuments.mockResolvedValue({
+      documents: [
+        {
+          id: "doc-1",
+          filename: "README.md",
+          contentType: "text/markdown",
+          fileSize: 1024,
+          createdAt: Date.now(),
+          fragmentCount: 4,
+          source: "upload",
+        },
+        {
+          id: "doc-2",
+          filename: "roadmap.txt",
+          contentType: "text/plain",
+          fileSize: 2048,
+          createdAt: Date.now(),
+          fragmentCount: 2,
+          source: "upload",
+        },
+      ],
+    });
+    mockUseApp.mockReturnValue({
+      t: translate,
+      setActionNotice: vi.fn(),
+    });
+
+    let tree!: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(KnowledgeView));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(findKnowledgeDocumentButtons(tree)).toHaveLength(2);
+
+    const searchInput = tree.root.find(
+      (node) => node.type === "input" && node.props.type === "text",
+    );
+
+    await act(async () => {
+      searchInput.props.onChange({
+        target: { value: "road" },
+      });
+    });
+
+    const filteredButtons = findKnowledgeDocumentButtons(tree);
+    expect(filteredButtons).toHaveLength(1);
+    expect(flattenText(filteredButtons[0].props.children)).toContain(
+      "roadmap.txt",
+    );
+    expect(mockSearchKnowledge).not.toHaveBeenCalled();
+
+    await act(async () => {
+      searchInput.props.onChange({
+        target: { value: "zzz" },
+      });
+    });
+
+    expect(findKnowledgeDocumentButtons(tree)).toHaveLength(0);
+    expect(JSON.stringify(tree.toJSON())).toContain("No matching documents");
+
+    const clearButton = tree.root.find(
+      (node) => node.type === "button" && node.props["aria-label"] === "Clear",
+    );
+
+    await act(async () => {
+      clearButton.props.onClick();
+    });
+
+    const resetButtons = findKnowledgeDocumentButtons(tree);
+    expect(resetButtons).toHaveLength(2);
+    expect(JSON.stringify(tree.toJSON())).not.toContain(
+      "No matching documents",
+    );
+  });
+
   it("renders the steward badge with token-driven accent styling", async () => {
     mockUseApp.mockReturnValue({
       walletConfig: {
@@ -307,7 +415,9 @@ describe("Knowledge and inventory polish", () => {
 
     expect(stewardBadge.props.className).toContain("bg-accent/10");
     expect(stewardBadge.props.className).toContain("text-accent-fg");
-    expect(String(sidebar.props.className)).toContain("border-b border-border/34");
+    expect(String(sidebar.props.className)).toContain(
+      "border-b border-border/34",
+    );
     expect(String(sidebar.props.className)).toContain("backdrop-blur-md");
   });
 });
