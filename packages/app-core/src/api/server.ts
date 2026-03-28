@@ -2220,7 +2220,6 @@ async function handleMiladyCompatRoute(
     } catch (err) {
       sendJsonResponse(res, 502, {
         error: "screenshot proxy error",
-        message: err instanceof Error ? err.message : String(err),
       });
       return true;
     }
