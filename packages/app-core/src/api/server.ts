@@ -331,6 +331,20 @@ let pairingCode: string | null = null;
 let pairingExpiresAt = 0;
 const pairingAttempts = new Map<string, { count: number; resetAt: number }>();
 
+// Periodic sweep to prevent unbounded memory growth (mirrors wallet-export-guard.ts pattern)
+const PAIRING_SWEEP_INTERVAL_MS = 5 * 60 * 1000;
+const pairingSweepTimer = setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of pairingAttempts) {
+    if (now > entry.resetAt) {
+      pairingAttempts.delete(key);
+    }
+  }
+}, PAIRING_SWEEP_INTERVAL_MS);
+if (typeof pairingSweepTimer === "object" && "unref" in pairingSweepTimer) {
+  pairingSweepTimer.unref();
+}
+
 // tokenMatches — now imported from ./auth
 
 function pairingEnabled(): boolean {
