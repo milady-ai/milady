@@ -22,9 +22,7 @@ import {
   formatShortDate,
 } from "@miladyai/app-core/components";
 import { useApp } from "@miladyai/app-core/state";
-import { confirmDesktopAction } from "@miladyai/app-core/utils";
-import { Button, Checkbox, Input } from "@miladyai/ui";
-import { RefreshCw } from "lucide-react";
+import { Button, Input } from "@miladyai/ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   DESKTOP_INSET_EMPTY_PANEL_CLASSNAME,
@@ -36,61 +34,25 @@ import {
   DesktopPageFrame,
 } from "./desktop-surface-primitives";
 import {
-  isKnowledgeImageFile,
-  MAX_KNOWLEDGE_IMAGE_PROCESSING_BYTES,
-  maybeCompressKnowledgeUploadImage,
-} from "./knowledge-upload-image";
-import {
   APP_PANEL_SHELL_CLASSNAME,
   APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
   APP_SIDEBAR_CARD_BASE_CLASSNAME,
   APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
   APP_SIDEBAR_INNER_CLASSNAME,
-  APP_SIDEBAR_KICKER_CLASSNAME,
-  APP_SIDEBAR_PILL_CLASSNAME,
   APP_SIDEBAR_RAIL_CLASSNAME,
 } from "./sidebar-shell-styles";
 
-const MAX_UPLOAD_REQUEST_BYTES = 32 * 1_048_576; // Must match server knowledge route limit
-const BULK_UPLOAD_TARGET_BYTES = 24 * 1_048_576;
-const MAX_BULK_REQUEST_DOCUMENTS = 100;
-const LARGE_FILE_WARNING_BYTES = 8 * 1_048_576;
-const SUPPORTED_UPLOAD_EXTENSIONS = new Set([
-  ".txt",
-  ".md",
-  ".mdx",
-  ".pdf",
-  ".docx",
-  ".json",
-  ".csv",
-  ".xml",
-  ".html",
-  ".png",
-  ".jpg",
-  ".jpeg",
-  ".webp",
-  ".gif",
-]);
-
 const KNOWLEDGE_SHELL_CLASS = APP_PANEL_SHELL_CLASSNAME;
 const KNOWLEDGE_SIDEBAR_CLASS = `lg:w-[22rem] lg:max-w-[360px] ${APP_SIDEBAR_RAIL_CLASSNAME}`;
-const KNOWLEDGE_KICKER_CLASS = APP_SIDEBAR_KICKER_CLASSNAME;
-const KNOWLEDGE_SECTION_LABEL_CLASS =
-  "px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60";
 const KNOWLEDGE_PANEL_CLASS = DESKTOP_SURFACE_PANEL_CLASSNAME;
 const KNOWLEDGE_INSET_PANEL_CLASS = DESKTOP_INSET_PANEL_CLASSNAME;
 const KNOWLEDGE_SIDEBAR_ITEM_BASE_CLASS = APP_SIDEBAR_CARD_BASE_CLASSNAME;
 const KNOWLEDGE_SIDEBAR_ITEM_ACTIVE_CLASS = APP_SIDEBAR_CARD_ACTIVE_CLASSNAME;
 const KNOWLEDGE_SIDEBAR_ITEM_INACTIVE_CLASS =
   APP_SIDEBAR_CARD_INACTIVE_CLASSNAME;
-const KNOWLEDGE_META_PILL_CLASS = `${APP_SIDEBAR_PILL_CLASSNAME} text-[10px] font-semibold uppercase tracking-[0.14em] text-txt-strong`;
 
 export type KnowledgeUploadFile = File & {
   webkitRelativePath?: string;
-};
-
-type KnowledgeUploadOptions = {
-  includeImageDescriptions: boolean;
 };
 
 export function getKnowledgeUploadFilename(file: KnowledgeUploadFile): string {
@@ -116,14 +78,6 @@ export function shouldReadKnowledgeFileAsText(
   );
 }
 
-function isSupportedKnowledgeFile(file: Pick<File, "name">): boolean {
-  const lowerName = file.name.toLowerCase();
-  for (const extension of SUPPORTED_UPLOAD_EXTENSIONS) {
-    if (lowerName.endsWith(extension)) return true;
-  }
-  return false;
-}
-
 function getKnowledgeTypeLabel(contentType?: string): string {
   return contentType?.split("/").pop()?.toUpperCase() || "DOC";
 }
@@ -139,212 +93,6 @@ function getKnowledgeSourceLabel(
     return t("knowledgeview.FromUrl", { defaultValue: "From URL" });
   }
   return t("knowledgeview.Upload", { defaultValue: "Upload" });
-}
-
-function getKnowledgeDocumentSummary(
-  doc: KnowledgeDocument,
-  t: (key: string, options?: Record<string, unknown>) => string,
-): string {
-  const fragmentLabel =
-    doc.fragmentCount === 1
-      ? t("knowledgeview.FragmentCountOne", {
-          defaultValue: "1 fragment",
-        })
-      : t("knowledgeview.FragmentCountMany", {
-          defaultValue: "{{count}} fragments",
-          count: doc.fragmentCount,
-        });
-  return `${getKnowledgeSourceLabel(doc.source, t)} • ${fragmentLabel} • ${formatByteSize(doc.fileSize)}`;
-}
-
-/* ── Upload Zone ────────────────────────────────────────────────────── */
-
-function UploadZone({
-  onFilesUpload,
-  onUrlUpload,
-  uploading,
-  uploadStatus,
-}: {
-  onFilesUpload: (
-    files: KnowledgeUploadFile[],
-    options: KnowledgeUploadOptions,
-  ) => void;
-  onUrlUpload: (url: string, options: KnowledgeUploadOptions) => void;
-  uploading: boolean;
-  uploadStatus: { current: number; total: number; filename: string } | null;
-}) {
-  const { t } = useApp();
-  const [dragOver, setDragOver] = useState(false);
-  const [urlInput, setUrlInput] = useState("");
-  const [showUrlInput, setShowUrlInput] = useState(false);
-  const [includeImageDescriptions, setIncludeImageDescriptions] =
-    useState(true);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      setDragOver(false);
-      const files = Array.from(e.dataTransfer.files) as KnowledgeUploadFile[];
-      if (files.length > 0 && !uploading) {
-        onFilesUpload(files, { includeImageDescriptions });
-      }
-    },
-    [includeImageDescriptions, onFilesUpload, uploading],
-  );
-
-  const handleFileSelect = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = e.target.files;
-      if (files && files.length > 0 && !uploading) {
-        onFilesUpload(Array.from(files) as KnowledgeUploadFile[], {
-          includeImageDescriptions,
-        });
-      }
-      e.target.value = "";
-    },
-    [includeImageDescriptions, onFilesUpload, uploading],
-  );
-
-  const handleUrlSubmit = useCallback(() => {
-    const url = urlInput.trim();
-    if (url && !uploading) {
-      onUrlUpload(url, { includeImageDescriptions });
-      setUrlInput("");
-      setShowUrlInput(false);
-    }
-  }, [includeImageDescriptions, urlInput, uploading, onUrlUpload]);
-
-  return (
-    <fieldset
-      className="w-full"
-      onDragOver={(e) => {
-        e.preventDefault();
-        setDragOver(true);
-      }}
-      onDragLeave={() => setDragOver(false)}
-      onDrop={handleDrop}
-      aria-label={t("aria.knowledgeUpload")}
-    >
-      <input
-        ref={fileInputRef}
-        type="file"
-        className="hidden"
-        multiple
-        accept=".txt,.md,.mdx,.pdf,.docx,.json,.csv,.xml,.html,.png,.jpg,.jpeg,.webp,.gif"
-        onChange={handleFileSelect}
-      />
-      <div className="flex items-start justify-between gap-3 px-1">
-        <div className={KNOWLEDGE_META_PILL_CLASS}>
-          {t("knowledgeview.FormatsCount", {
-            defaultValue: "{{count}} formats",
-            count: SUPPORTED_UPLOAD_EXTENSIONS.size,
-          })}
-        </div>
-      </div>
-
-      <div className="mt-3 grid grid-cols-2 gap-2">
-        <Button
-          variant="default"
-          size="sm"
-          className="h-10 px-4 text-[11px] font-semibold text-txt-strong shadow-sm hover:text-txt-strong"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
-        >
-          {t("knowledgeview.ChooseFiles")}
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-10 px-4 text-[11px] font-semibold text-txt shadow-sm hover:text-txt"
-          onClick={() => setShowUrlInput(!showUrlInput)}
-          disabled={uploading}
-        >
-          {t("knowledgeview.AddFromURL")}
-        </Button>
-      </div>
-      {/* biome-ignore lint/a11y/noLabelWithoutControl: form control is associated programmatically */}
-      <label className="mt-2 inline-flex min-h-11 w-full cursor-pointer items-center gap-2 rounded-xl border border-border/35 bg-bg/18 px-3 text-[11px] leading-relaxed text-muted-strong transition-colors hover:border-border/55 hover:bg-bg/28 hover:text-txt">
-        <Checkbox
-          checked={includeImageDescriptions}
-          onCheckedChange={(checked) => setIncludeImageDescriptions(!!checked)}
-          disabled={uploading}
-        />
-        <span className="min-w-0">{t("knowledgeview.IncludeAIImageDes")}</span>
-      </label>
-      <div
-        className={`mt-3 rounded-2xl border px-3 py-3 transition-colors ${
-          dragOver
-            ? "border-accent/50 bg-accent/8 shadow-sm"
-            : "border-dashed border-border/35 bg-card/62"
-        } ${uploading ? "opacity-60" : ""}`}
-      >
-        {(dragOver || uploading) && (
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted/80">
-            <span className="font-medium text-txt/80">
-              {uploadStatus
-                ? t("knowledgeview.UploadingProgress", {
-                    defaultValue: "Uploading {{current}}/{{total}}{{filename}}",
-                    current: uploadStatus.current,
-                    total: uploadStatus.total,
-                    filename: uploadStatus.filename
-                      ? `: ${uploadStatus.filename}`
-                      : "",
-                  })
-                : t("knowledgeview.DropFilesOrFoldersToUpload", {
-                    defaultValue: "Drop files or folders to upload",
-                  })}
-            </span>
-          </div>
-        )}
-
-        {!dragOver && !uploading && !showUrlInput && (
-          <div className="space-y-1 py-1 text-center">
-            <div className="text-[11px] font-medium text-muted-strong">
-              {t("knowledgeview.DropFilesHereToUpload", {
-                defaultValue: "Drop files here to upload",
-              })}
-            </div>
-            <div className="text-[10px] text-muted">
-              {t("knowledgeview.UploadSupportedTypes", {
-                defaultValue: "Docs, PDFs, JSON, CSV, and supported images.",
-              })}
-            </div>
-          </div>
-        )}
-
-        {showUrlInput && (
-          <div
-            className={`${dragOver || uploading ? "mt-2" : ""} animate-in fade-in slide-in-from-top-2 duration-300`}
-          >
-            <div className="mb-2 text-[11px] font-medium leading-relaxed text-muted">
-              {t("knowledgeview.PasteAURLToImpor")}
-            </div>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <Input
-                type="url"
-                placeholder={t("knowledgeview.httpsExampleCom")}
-                value={urlInput}
-                onChange={(e) => setUrlInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleUrlSubmit()}
-                disabled={uploading}
-                className="h-10 flex-1 border-border/55 bg-bg/72 text-xs shadow-none"
-              />
-              <Button
-                variant="default"
-                size="sm"
-                className="h-10 px-4 text-[11px] font-semibold"
-                onClick={handleUrlSubmit}
-                disabled={!urlInput.trim() || uploading}
-              >
-                {t("settings.import")}
-              </Button>
-            </div>
-          </div>
-        )}
-      </div>
-    </fieldset>
-  );
 }
 
 /* ── Search Result Item ─────────────────────────────────────────────── */
@@ -417,32 +165,25 @@ function DocumentListItem({
 }) {
   const { t } = useApp();
   return (
-    <div
+    <button
+      type="button"
       className={`${KNOWLEDGE_SIDEBAR_ITEM_BASE_CLASS} relative cursor-pointer ${
         active
           ? KNOWLEDGE_SIDEBAR_ITEM_ACTIVE_CLASS
           : KNOWLEDGE_SIDEBAR_ITEM_INACTIVE_CLASS
       }`}
       onClick={() => onSelect(doc.id)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onSelect(doc.id);
-        }
-      }}
       aria-label={t("knowledgeview.OpenDocument", {
         defaultValue: "Open {{filename}}",
         filename: doc.filename,
       })}
       aria-current={active ? "page" : undefined}
     >
-      <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-semibold leading-snug text-txt">
+      <span className="min-w-0 flex-1 text-left">
+        <span className="block truncate text-sm font-semibold leading-snug text-txt">
           {doc.filename}
-        </div>
-        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+        </span>
+        <span className="mt-1.5 flex flex-wrap items-center gap-1.5">
           <span
             className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[9px] font-bold uppercase leading-none tracking-wider ${
               active
@@ -458,9 +199,10 @@ function DocumentListItem({
           <span className="text-[10px] text-muted/50 opacity-0 transition-opacity group-hover:opacity-100">
             {formatShortDate(doc.createdAt, { fallback: "—" })}
           </span>
-        </div>
-      </div>
-      <div
+        </span>
+      </span>
+      {/* biome-ignore lint/a11y/useKeyWithClickEvents lint/a11y/noStaticElementInteractions: stopPropagation wrapper for nested interactive */}
+      <span
         className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100"
         onClick={(e) => e.stopPropagation()}
       >
@@ -472,8 +214,8 @@ function DocumentListItem({
           busyLabel="..."
           onConfirm={() => onDelete(doc.id)}
         />
-      </div>
-    </div>
+      </span>
+    </button>
   );
 }
 
@@ -530,7 +272,7 @@ function DocumentViewer({ documentId }: { documentId: string | null }) {
     return () => {
       cancelled = true;
     };
-  }, [documentId]);
+  }, [documentId, t]);
 
   const previewText = doc?.content?.text?.trim();
 
@@ -723,12 +465,6 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
     KnowledgeSearchResult[] | null
   >(null);
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState<{
-    current: number;
-    total: number;
-    filename: string;
-  } | null>(null);
   const [searching, setSearching] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
@@ -762,7 +498,7 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     loadData().catch((err) => {
@@ -792,387 +528,7 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
       loadData();
     }, delayMs);
     return () => clearTimeout(timer);
-  }, [isServiceLoading, loadData]);
-
-  const readKnowledgeFile = useCallback(async (file: KnowledgeUploadFile) => {
-    const reader = new FileReader();
-    return new Promise<string>((resolve, reject) => {
-      reader.onload = () => {
-        const result = reader.result;
-        if (typeof result === "string") {
-          resolve(result);
-          return;
-        }
-
-        if (result instanceof ArrayBuffer) {
-          const bytes = new Uint8Array(result);
-          let binary = "";
-          for (let i = 0; i < bytes.byteLength; i++) {
-            binary += String.fromCharCode(bytes[i]);
-          }
-          resolve(btoa(binary));
-          return;
-        }
-
-        reject(
-          new Error(
-            t("knowledgeview.FailedToReadFile", {
-              defaultValue: "Failed to read file",
-            }),
-          ),
-        );
-      };
-
-      reader.onerror = () => reject(reader.error);
-
-      if (shouldReadKnowledgeFileAsText(file)) {
-        reader.readAsText(file);
-      } else {
-        reader.readAsArrayBuffer(file);
-      }
-    });
-  }, []);
-
-  const buildKnowledgeUploadRequest = useCallback(
-    async (file: KnowledgeUploadFile, options: KnowledgeUploadOptions) => {
-      const optimizedImage = await maybeCompressKnowledgeUploadImage(file);
-      const uploadFile = optimizedImage.file as KnowledgeUploadFile;
-      if (
-        isKnowledgeImageFile(uploadFile) &&
-        uploadFile.size > MAX_KNOWLEDGE_IMAGE_PROCESSING_BYTES
-      ) {
-        throw new Error(
-          t("knowledgeview.ImageCouldNotBeCompressed", {
-            defaultValue:
-              "Image could not be compressed below {{limit}} for processing.",
-            limit: formatByteSize(MAX_KNOWLEDGE_IMAGE_PROCESSING_BYTES),
-          }),
-        );
-      }
-
-      const uploadFilename = getKnowledgeUploadFilename(uploadFile);
-      const content = await readKnowledgeFile(uploadFile);
-
-      const request = {
-        content,
-        filename: uploadFilename,
-        contentType: uploadFile.type || "application/octet-stream",
-        metadata: {
-          includeImageDescriptions: options.includeImageDescriptions,
-          relativePath: uploadFile.webkitRelativePath || undefined,
-        },
-      };
-      const requestBytes = new TextEncoder().encode(
-        JSON.stringify(request),
-      ).length;
-      if (requestBytes > MAX_UPLOAD_REQUEST_BYTES) {
-        throw new Error(
-          t("knowledgeview.UploadPayloadExceedsLimit", {
-            defaultValue:
-              "Upload payload is {{size}}, which exceeds the current limit ({{limit}}).",
-            size: formatByteSize(requestBytes),
-            limit: formatByteSize(MAX_UPLOAD_REQUEST_BYTES),
-          }),
-        );
-      }
-
-      return {
-        filename: uploadFilename,
-        request,
-        requestBytes,
-      };
-    },
-    [readKnowledgeFile],
-  );
-
-  const handleFilesUpload = useCallback(
-    async (files: KnowledgeUploadFile[], options: KnowledgeUploadOptions) => {
-      const unsupportedFiles = files.filter(
-        (file) => !isSupportedKnowledgeFile(file),
-      );
-      const uploadQueue = files.filter(
-        (file) => file.size > 0 && isSupportedKnowledgeFile(file),
-      );
-      if (uploadQueue.length === 0) {
-        setActionNotice(
-          unsupportedFiles.length > 0
-            ? t("knowledgeview.NoSupportedNonEmptyFiles", {
-                defaultValue: "No supported non-empty files were selected.",
-              })
-            : t("knowledgeview.NoNonEmptyFiles", {
-                defaultValue: "No non-empty files were selected.",
-              }),
-          "info",
-          3000,
-        );
-        return;
-      }
-
-      const largeFiles = uploadQueue.filter(
-        (file) => file.size >= LARGE_FILE_WARNING_BYTES,
-      );
-      if (largeFiles.length > 0) {
-        const shouldContinue =
-          typeof window === "undefined"
-            ? true
-            : await confirmDesktopAction({
-                title: t("knowledgeview.UploadLargeFiles", {
-                  defaultValue: "Upload Large Files",
-                }),
-                message: t("knowledgeview.LargeFilesDetected", {
-                  defaultValue: "{{count}} large file(s) detected.",
-                  count: largeFiles.length,
-                }),
-                detail: t("knowledgeview.UploadLargeFilesDetail", {
-                  defaultValue:
-                    "Uploading can take longer and may increase embedding or vision costs.",
-                }),
-                confirmLabel: t("onboarding.savedMyKeys", {
-                  defaultValue: "Continue",
-                }),
-                cancelLabel: t("common.cancel", {
-                  defaultValue: "Cancel",
-                }),
-                type: "warning",
-              });
-        if (!shouldContinue) return;
-      }
-
-      const failures: string[] = [];
-      const warnings: string[] = [];
-      let successful = 0;
-
-      const normalizeUploadError = (err: unknown): string => {
-        const message =
-          err instanceof Error
-            ? err.message
-            : t("knowledgeview.UnknownUploadError", {
-                defaultValue: "Unknown upload error",
-              });
-        const status = (err as Error & { status?: number })?.status;
-        return status === 413 || /maximum size|payload is/i.test(message)
-          ? t("knowledgeview.UploadTooLarge", {
-              defaultValue: "Upload too large. Try splitting this file.",
-            })
-          : message;
-      };
-
-      setUploading(true);
-      setUploadStatus({
-        current: 0,
-        total: uploadQueue.length,
-        filename: t("knowledgeview.Preparing", {
-          defaultValue: "Preparing...",
-        }),
-      });
-
-      try {
-        type PreparedUpload = {
-          filename: string;
-          request: {
-            content: string;
-            filename: string;
-            contentType: string;
-            metadata: {
-              includeImageDescriptions: boolean;
-              relativePath: string | undefined;
-            };
-          };
-          requestBytes: number;
-        };
-
-        let currentBatch: PreparedUpload[] = [];
-        let currentBatchBytes = 0;
-
-        const flushBatch = async () => {
-          if (currentBatch.length === 0) return;
-
-          const batchToUpload = currentBatch;
-          currentBatch = [];
-          currentBatchBytes = 0;
-
-          const batchLabel =
-            batchToUpload[0]?.filename ||
-            t("knowledgeview.Batch", { defaultValue: "batch" });
-          setUploadStatus({
-            current: successful + failures.length,
-            total: uploadQueue.length,
-            filename: t("knowledgeview.UploadingBatchStartingWith", {
-              defaultValue: "Uploading batch starting with {{label}}",
-              label: batchLabel,
-            }),
-          });
-
-          try {
-            const result = await client.uploadKnowledgeDocumentsBulk({
-              documents: batchToUpload.map((item) => item.request),
-            });
-
-            for (const item of result.results) {
-              const batchItem = batchToUpload[item.index];
-              const filename =
-                item.filename ||
-                batchItem?.filename ||
-                t("knowledgeview.Document", {
-                  defaultValue: "document",
-                });
-              if (item.ok) {
-                successful += 1;
-                if (item.warnings?.[0]) {
-                  warnings.push(`${filename}: ${item.warnings[0]}`);
-                }
-              } else {
-                failures.push(
-                  `${filename}: ${
-                    item.error ||
-                    t("knowledgeview.UploadFailed", {
-                      defaultValue: "Upload failed",
-                    })
-                  }`,
-                );
-              }
-            }
-          } catch (err) {
-            const message = normalizeUploadError(err);
-            for (const batchItem of batchToUpload) {
-              failures.push(`${batchItem.filename}: ${message}`);
-            }
-          }
-        };
-
-        for (const [index, file] of uploadQueue.entries()) {
-          const uploadFilename = getKnowledgeUploadFilename(file);
-          setUploadStatus({
-            current: index + 1,
-            total: uploadQueue.length,
-            filename: t("knowledgeview.PreparingFile", {
-              defaultValue: "Preparing: {{filename}}",
-              filename: uploadFilename,
-            }),
-          });
-
-          try {
-            const prepared = await buildKnowledgeUploadRequest(file, options);
-            if (
-              currentBatch.length > 0 &&
-              (currentBatchBytes + prepared.requestBytes >
-                BULK_UPLOAD_TARGET_BYTES ||
-                currentBatch.length >= MAX_BULK_REQUEST_DOCUMENTS)
-            ) {
-              await flushBatch();
-            }
-            currentBatch.push(prepared);
-            currentBatchBytes += prepared.requestBytes;
-          } catch (err) {
-            failures.push(`${uploadFilename}: ${normalizeUploadError(err)}`);
-          }
-        }
-
-        await flushBatch();
-
-        let refreshFailed = false;
-        try {
-          await loadData();
-        } catch (err) {
-          refreshFailed = true;
-          console.error("[KnowledgeView] Failed to refresh after upload:", err);
-        }
-
-        const skippedSummary =
-          unsupportedFiles.length > 0
-            ? ` Skipped ${unsupportedFiles.length} unsupported file(s).`
-            : "";
-        const refreshSummary = refreshFailed
-          ? " Uploaded, but failed to refresh document list."
-          : "";
-
-        if (
-          uploadQueue.length === 1 &&
-          successful === 1 &&
-          failures.length === 0
-        ) {
-          const onlyFile = getKnowledgeUploadFilename(uploadQueue[0]);
-          const baseMessage = `Uploaded "${onlyFile}"`;
-          if (warnings.length > 0) {
-            setActionNotice(`${baseMessage}. ${warnings[0]}`, "info", 6000);
-          } else if (refreshFailed) {
-            setActionNotice(
-              `${baseMessage}. Uploaded, but failed to refresh document list.`,
-              "info",
-              6000,
-            );
-          } else {
-            setActionNotice(baseMessage, "success", 3000);
-          }
-          return;
-        }
-
-        if (failures.length === 0) {
-          setActionNotice(
-            `Uploaded ${successful}/${uploadQueue.length} files.${warnings.length > 0 ? ` ${warnings[0]}` : ""}${skippedSummary}${refreshSummary}`,
-            warnings.length > 0 || refreshFailed || unsupportedFiles.length > 0
-              ? "info"
-              : "success",
-            7000,
-          );
-          return;
-        }
-
-        setActionNotice(
-          `Uploaded ${successful}/${uploadQueue.length} files. ${failures.length} failed.${failures.length > 0 ? ` ${failures[0]}` : ""}${skippedSummary}${refreshSummary}`,
-          successful > 0 ? "info" : "error",
-          7000,
-        );
-      } finally {
-        setUploading(false);
-        setUploadStatus(null);
-      }
-    },
-    [buildKnowledgeUploadRequest, loadData, setActionNotice],
-  );
-
-  const handleUrlUpload = useCallback(
-    async (url: string, options: KnowledgeUploadOptions) => {
-      setUploading(true);
-      try {
-        const result = await client.uploadKnowledgeFromUrl(url, {
-          includeImageDescriptions: options.includeImageDescriptions,
-        });
-
-        const baseMessage = result.isYouTubeTranscript
-          ? `Imported YouTube transcript (${result.fragmentCount} fragments)`
-          : `Imported "${result.filename}" (${result.fragmentCount} fragments)`;
-        if (result.warnings && result.warnings.length > 0) {
-          setActionNotice(
-            `${baseMessage}. ${result.warnings[0]}`,
-            "info",
-            6000,
-          );
-        } else {
-          setActionNotice(baseMessage, "success", 3000);
-        }
-        loadData();
-      } catch (err) {
-        const message =
-          err instanceof Error
-            ? err.message
-            : t("knowledgeview.UnknownImportError", {
-                defaultValue: "Unknown import error",
-              });
-        setActionNotice(
-          t("knowledgeview.FailedToImportFromUrl", {
-            defaultValue: "Failed to import from URL: {{message}}",
-            message,
-          }),
-          "error",
-          5000,
-        );
-      } finally {
-        setUploading(false);
-      }
-    },
-    [loadData, setActionNotice],
-  );
+  }, [isServiceLoading, loadData, t]);
 
   const handleSearch = useCallback(
     async (query: string) => {
@@ -1203,7 +559,7 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
         setSearching(false);
       }
     },
-    [setActionNotice],
+    [setActionNotice, t],
   );
 
   const handleDelete = useCallback(
@@ -1251,7 +607,7 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
         setDeleting(null);
       }
     },
-    [loadData, setActionNotice],
+    [loadData, setActionNotice, t],
   );
 
   const handleSearchSubmit = useCallback(
@@ -1264,13 +620,19 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
     [handleSearch, searchQuery],
   );
 
-  const totalFragments = useMemo(
-    () => documents.reduce((sum, d) => sum + (d.fragmentCount || 0), 0),
-    [documents],
-  );
-  const selectedDoc = documents.find((doc) => doc.id === selectedDocId) || null;
   const isShowingSearchResults = searchResults !== null;
   const visibleSearchResults = searchResults ?? [];
+
+  // Local filename filter — filters document list as user types (before submitting semantic search)
+  const filteredDocuments = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q || isShowingSearchResults) return documents;
+    return documents.filter(
+      (doc) =>
+        doc.filename.toLowerCase().includes(q) ||
+        doc.contentType?.toLowerCase().includes(q),
+    );
+  }, [documents, searchQuery, isShowingSearchResults]);
 
   useEffect(() => {
     if (documents.length === 0) {
@@ -1299,14 +661,47 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
                 onSubmit={handleSearchSubmit}
               >
                 <div className="flex items-stretch gap-2">
-                  <Input
-                    type="text"
-                    placeholder={t("knowledge.ui.searchPlaceholder")}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    disabled={searching}
-                    className="h-10 border-border/55 bg-bg/82 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-accent"
-                  />
+                  <div className="relative flex-1">
+                    <Input
+                      type="text"
+                      placeholder={t("knowledge.ui.searchPlaceholder")}
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        // Clear semantic results when user edits the query — fall back to local filter
+                        if (isShowingSearchResults) setSearchResults(null);
+                      }}
+                      disabled={searching}
+                      className="h-10 border-border/55 bg-bg/82 pr-8 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-accent"
+                    />
+                    {searchQuery && (
+                      <button
+                        type="button"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-0.5 text-muted/60 transition-colors hover:text-txt"
+                        onClick={() => {
+                          setSearchQuery("");
+                          setSearchResults(null);
+                        }}
+                        aria-label={t("common.clear", {
+                          defaultValue: "Clear",
+                        })}
+                      >
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 14 14"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          aria-hidden="true"
+                        >
+                          <title>Clear</title>
+                          <path d="M3.5 3.5l7 7M10.5 3.5l-7 7" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
                   <Button
                     type="submit"
                     variant="default"
@@ -1326,9 +721,14 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
                     variant="ghost"
                     size="sm"
                     className="h-8 rounded-lg border border-border/35 px-3 text-[11px] font-semibold text-muted hover:border-border/60 hover:bg-bg/35 hover:text-txt"
-                    onClick={() => setSearchResults(null)}
+                    onClick={() => {
+                      setSearchResults(null);
+                      setSearchQuery("");
+                    }}
                   >
-                    {t("common.clear", { defaultValue: "Clear" })}
+                    {t("knowledgeview.ClearSearch", {
+                      defaultValue: "Clear search",
+                    })}
                   </Button>
                 )}
               </div>
@@ -1350,6 +750,22 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
                     className="min-h-[12rem] px-4 py-8"
                     description={t("knowledgeview.UploadFilesOrImpo")}
                     title={t("knowledgeview.NoDocumentsYet")}
+                  />
+                )}
+
+              {!loading &&
+                !isShowingSearchResults &&
+                documents.length > 0 &&
+                filteredDocuments.length === 0 && (
+                  <DesktopEmptyStatePanel
+                    className="min-h-[12rem] px-4 py-8"
+                    description={t("knowledgeview.SearchTips", {
+                      defaultValue:
+                        "Try a filename, topic, or phrase from the document body.",
+                    })}
+                    title={t("knowledgeview.NoMatchingDocuments", {
+                      defaultValue: "No matching documents",
+                    })}
                   />
                 )}
 
@@ -1375,7 +791,7 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
                       onSelect={setSelectedDocId}
                     />
                   ))
-                : documents.map((doc) => (
+                : filteredDocuments.map((doc) => (
                     <DocumentListItem
                       key={doc.id}
                       doc={doc}
