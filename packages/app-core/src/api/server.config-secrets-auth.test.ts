@@ -8,8 +8,9 @@
  * auth on mutation routes.
  */
 
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { req } from "../../../../test/helpers/http";
+import { _resetAuthRateLimiter } from "./auth";
 import { startApiServer } from "./server";
 
 // Prevent mcp-marketplace import side effects
@@ -46,6 +47,10 @@ describe("sensitive endpoint auth gates (MW-04)", () => {
     port = server.port;
     close = server.close;
   }, 30_000);
+
+  beforeEach(() => {
+    _resetAuthRateLimiter();
+  });
 
   afterAll(async () => {
     await close();

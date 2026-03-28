@@ -29,12 +29,19 @@ export function getCompatApiToken(): string | null {
   return resolveApiToken(process.env);
 }
 
-/** Timing-safe token comparison (constant-time for equal-length inputs). */
+/** Timing-safe token comparison (constant-time regardless of input length). */
 export function tokenMatches(expected: string, provided: string): boolean {
   const a = Buffer.from(expected, "utf8");
   const b = Buffer.from(provided, "utf8");
-  if (a.length !== b.length) return false;
-  return crypto.timingSafeEqual(a, b);
+  // Pad the shorter buffer so timingSafeEqual always runs on equal-length inputs,
+  // preventing length leakage through early return.
+  const maxLen = Math.max(a.length, b.length);
+  const aPadded = Buffer.alloc(maxLen);
+  const bPadded = Buffer.alloc(maxLen);
+  a.copy(aPadded);
+  b.copy(bPadded);
+  // Both length match AND content match required
+  return a.length === b.length && crypto.timingSafeEqual(aPadded, bPadded);
 }
 
 /**
@@ -64,21 +71,70 @@ export function getProvidedApiToken(
   return headerToken?.trim() || null;
 }
 
+// ── Auth attempt rate limiter ─────────────────────────────────────────────────
+const AUTH_RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+const AUTH_RATE_LIMIT_MAX = 20; // max failed attempts per window per IP
+const authAttempts = new Map<string, { count: number; resetAt: number }>();
+
+/** Clear all auth rate limit state. Exported for test use only. */
+export function _resetAuthRateLimiter(): void {
+  authAttempts.clear();
+}
+
+const authSweepTimer = setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of authAttempts) {
+    if (now > entry.resetAt) authAttempts.delete(key);
+  }
+}, 5 * 60 * 1000);
+if (typeof authSweepTimer === "object" && "unref" in authSweepTimer) {
+  authSweepTimer.unref();
+}
+
+function isAuthRateLimited(ip: string | null): boolean {
+  const key = ip ?? "unknown";
+  const now = Date.now();
+  const entry = authAttempts.get(key);
+  if (!entry || now > entry.resetAt) return false;
+  return entry.count >= AUTH_RATE_LIMIT_MAX;
+}
+
+function recordFailedAuth(ip: string | null): void {
+  const key = ip ?? "unknown";
+  const now = Date.now();
+  const entry = authAttempts.get(key);
+  if (!entry || now > entry.resetAt) {
+    authAttempts.set(key, {
+      count: 1,
+      resetAt: now + AUTH_RATE_LIMIT_WINDOW_MS,
+    });
+  } else {
+    entry.count += 1;
+  }
+}
+
 /**
  * Gate a request behind the configured API token.
  * Returns `true` if the request is authorised (or no token is configured).
  * Sends a 401 and returns `false` otherwise.
  */
 export function ensureCompatApiAuthorized(
-  req: Pick<http.IncomingMessage, "headers">,
+  req: Pick<http.IncomingMessage, "headers" | "socket">,
   res: http.ServerResponse,
 ): boolean {
   const expectedToken = getCompatApiToken();
   if (!expectedToken) return true;
 
+  const ip = req.socket?.remoteAddress ?? null;
+  if (isAuthRateLimited(ip)) {
+    sendJsonError(res, 429, "Too many authentication attempts");
+    return false;
+  }
+
   const providedToken = getProvidedApiToken(req);
   if (providedToken && tokenMatches(expectedToken, providedToken)) return true;
 
+  recordFailedAuth(ip);
   sendJsonError(res, 401, "Unauthorized");
   return false;
 }
@@ -90,15 +146,21 @@ export function isDevEnvironment(): boolean {
 }
 
 /**
- * Gate a sensitive route. In dev mode without a configured token the
- * request is allowed through; in all other cases an API token is required.
+ * Gate a sensitive route. In dev mode the request is allowed through ONLY
+ * when `MILADY_DEV_AUTH_BYPASS=1` is explicitly set and no token is configured.
+ * In all other cases an API token is required.
  */
 export function ensureCompatSensitiveRouteAuthorized(
   req: Pick<http.IncomingMessage, "headers">,
   res: http.ServerResponse,
 ): boolean {
   if (!getCompatApiToken()) {
-    if (isDevEnvironment()) return true;
+    if (
+      isDevEnvironment() &&
+      process.env.MILADY_DEV_AUTH_BYPASS?.trim() === "1"
+    ) {
+      return true;
+    }
     sendJsonError(
       res,
       403,
