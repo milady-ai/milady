@@ -325,6 +325,11 @@ describe("Cloud-provisioned containers bypass local onboarding", () => {
     });
     expect(result.kind).toBe("open");
   });
+
+  it("allows unauthenticated GET /api/health for readiness probes", async () => {
+    const { status } = await req(port, "GET", "/api/health");
+    expect(status).not.toBe(401);
+  });
 });
 
 describe("Cloud-provisioned onboarding survives non-loopback auto-token auth", () => {

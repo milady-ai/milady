@@ -64,9 +64,9 @@ export function getOnboardingChoiceCardClassName({
       ? `${onboardingRecommendedSurfaceClassName} ${onboardingRecommendedSurfaceHoverClassName}`
       : `${onboardingCardSurfaceClassName} ${onboardingCardSurfaceHoverClassName}`,
     selected &&
-    "border-[rgba(240,185,11,0.32)] bg-[rgba(240,185,11,0.12)] shadow-[0_0_0_1px_rgba(240,185,11,0.18)]",
+      "border-[rgba(240,185,11,0.32)] bg-[rgba(240,185,11,0.12)] shadow-[0_0_0_1px_rgba(240,185,11,0.18)]",
     detected &&
-    "border-[rgba(34,197,94,0.4)] bg-[rgba(34,197,94,0.1)] hover:border-[rgba(34,197,94,0.5)] hover:bg-[rgba(34,197,94,0.15)]",
+      "border-[rgba(34,197,94,0.4)] bg-[rgba(34,197,94,0.1)] hover:border-[rgba(34,197,94,0.5)] hover:bg-[rgba(34,197,94,0.15)]",
   );
 }
 
