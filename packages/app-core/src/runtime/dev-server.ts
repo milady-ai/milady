@@ -299,8 +299,8 @@ async function shutdown(): Promise<void> {
   process.exit(0);
 }
 
-process.on("SIGINT", () => void shutdown());
-process.on("SIGTERM", () => void shutdown());
+process.once("SIGINT", () => void shutdown());
+process.once("SIGTERM", () => void shutdown());
 
 async function main() {
   const startupStart = Date.now();
