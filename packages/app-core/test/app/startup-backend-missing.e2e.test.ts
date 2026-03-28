@@ -9,6 +9,7 @@ const { mockClient } = vi.hoisted(() => ({
     hasToken: vi.fn(() => false),
     getCodingAgentStatus: vi.fn(async () => null),
     setToken: vi.fn(),
+    getConfig: vi.fn(async () => ({})),
     getAuthStatus: vi.fn(async () => ({
       required: false,
       pairingEnabled: false,
@@ -67,6 +68,7 @@ describe("startup failure: backend missing", () => {
     );
     mockClient.hasToken.mockReturnValue(false);
     mockClient.disconnectWs.mockImplementation(() => {});
+    mockClient.getConfig.mockResolvedValue({});
     mockClient.getAuthStatus.mockResolvedValue({
       required: false,
       pairingEnabled: false,

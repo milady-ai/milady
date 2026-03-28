@@ -1588,13 +1588,7 @@ function AppProviderInner({
       );
       setTab(nextTab);
     },
-    [
-      lastNativeTab,
-      ownerName,
-      ownerNameHydrated,
-      showOwnerNamePrompt,
-      setTab,
-    ],
+    [lastNativeTab, ownerName, ownerNameHydrated, showOwnerNamePrompt, setTab],
   );
 
   const navigationHubRef = useRef(new NavigationEventHub());

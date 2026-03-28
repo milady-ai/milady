@@ -30,9 +30,7 @@ describe("OwnerNamePrompt", () => {
     const input = screen.getByRole("textbox");
     const submit = screen.getByRole("button", { name: /that's me/i });
 
-    expect(input.getAttribute("maxlength")).toBe(
-      String(OWNER_NAME_MAX_LENGTH),
-    );
+    expect(input.getAttribute("maxlength")).toBe(String(OWNER_NAME_MAX_LENGTH));
     expect((submit as HTMLButtonElement).disabled).toBe(true);
 
     fireEvent.change(input, { target: { value: "   " } });

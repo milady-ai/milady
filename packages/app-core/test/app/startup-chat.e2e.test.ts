@@ -25,9 +25,8 @@ vi.mock("@miladyai/app-core/state", async () => {
 });
 
 vi.mock("../../src/state", async () => {
-  const actual = await vi.importActual<typeof import("../../src/state")>(
-    "../../src/state",
-  );
+  const actual =
+    await vi.importActual<typeof import("../../src/state")>("../../src/state");
   return {
     ...actual,
     useApp: () => mockUseApp(),
@@ -38,9 +37,8 @@ vi.mock("../../src/state", async () => {
 });
 
 vi.mock("@miladyai/ui", async () => {
-  const actual = await vi.importActual<typeof import("@miladyai/ui")>(
-    "@miladyai/ui",
-  );
+  const actual =
+    await vi.importActual<typeof import("@miladyai/ui")>("@miladyai/ui");
   const React = await vi.importActual<typeof import("react")>("react");
 
   return {
@@ -117,6 +115,7 @@ vi.mock("@miladyai/app-core/components", async () => {
     KnowledgeView: () => React.createElement("div", null, "KnowledgeView"),
     OnboardingWizard: () =>
       React.createElement("div", null, "OnboardingWizard"),
+    OwnerNamePrompt: () => React.createElement("div", null, "OwnerNamePrompt"),
     PairingView: () => React.createElement("div", null, "PairingView"),
     SharedCompanionScene: ({
       children,
@@ -186,8 +185,7 @@ vi.mock("@miladyai/app-core/src/components/CompanionView", () => ({
 }));
 
 vi.mock("../../src/app-shell-components", () => ({
-  AdvancedPageView: () =>
-    React.createElement("div", null, "AdvancedPageView"),
+  AdvancedPageView: () => React.createElement("div", null, "AdvancedPageView"),
   AppsPageView: () => React.createElement("div", null, "AppsPageView"),
   AvatarLoader: () => React.createElement("div", null, "AvatarLoader"),
   BugReportModal: () => React.createElement("div", null, "BugReportModal"),
@@ -212,11 +210,10 @@ vi.mock("../../src/app-shell-components", () => ({
   HeartbeatsView: () => React.createElement("div", null, "HeartbeatsView"),
   InventoryView: () => React.createElement("div", null, "InventoryView"),
   KnowledgeView: () => React.createElement("div", null, "KnowledgeView"),
-  OnboardingWizard: () =>
-    React.createElement("div", null, "OnboardingWizard"),
+  OnboardingWizard: () => React.createElement("div", null, "OnboardingWizard"),
+  OwnerNamePrompt: () => React.createElement("div", null, "OwnerNamePrompt"),
   PairingView: () => React.createElement("div", null, "PairingView"),
-  SaveCommandModal: () =>
-    React.createElement("div", null, "SaveCommandModal"),
+  SaveCommandModal: () => React.createElement("div", null, "SaveCommandModal"),
   SettingsView: () => React.createElement("div", null, "SettingsView"),
   SharedCompanionScene: ({
     children,

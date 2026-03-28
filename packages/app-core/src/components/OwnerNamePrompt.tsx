@@ -9,10 +9,7 @@
 
 import { Button, Input } from "@miladyai/ui";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  normalizeOwnerName,
-  OWNER_NAME_MAX_LENGTH,
-} from "../utils/owner-name";
+import { normalizeOwnerName, OWNER_NAME_MAX_LENGTH } from "../utils/owner-name";
 
 const PROMPT_TEXT = "Sorry, I didn't get your name! What should I call you?";
 
