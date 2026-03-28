@@ -457,17 +457,6 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
           );
         }) ?? null;
 
-      // Persist plugin toggles before switchProvider (may restart) so reload
-      // does not briefly see stale enabled plugins.
-      if (target && !target.enabled) {
-        await handlePluginToggle(target.id, true);
-      }
-      for (const p of enabledAiProviders) {
-        if (!target || p.id !== target.id) {
-          await handlePluginToggle(p.id, false);
-        }
-      }
-
       try {
         // Disable cloud inference but keep cloud connected for RPC/services
         await client.updateConfig({
@@ -480,6 +469,17 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
         await client.switchProvider(getStoredSubscriptionProvider(providerId));
         setCloudHandlesInference(false);
         setPiAiEnabled(false);
+
+        // Persist plugin toggles after successful switch to avoid inconsistent
+        // UI state if switchProvider fails.
+        if (target && !target.enabled) {
+          await handlePluginToggle(target.id, true);
+        }
+        for (const p of enabledAiProviders) {
+          if (!target || p.id !== target.id) {
+            await handlePluginToggle(p.id, false);
+          }
+        }
       } catch (err) {
         console.warn("[eliza] Provider switch failed", err);
       }
