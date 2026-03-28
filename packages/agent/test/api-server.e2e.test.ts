@@ -3520,6 +3520,9 @@ describe("API Server E2E (no runtime)", () => {
   });
 
   describe("provider issue fallback", () => {
+    const CLOUD_CREDITS_DEPLETED_REPLY =
+      "Eliza Cloud credits are depleted. Top up the cloud balance and try again.";
+
     it("POST /api/chat replaces '(no response)' with the provider issue message", async () => {
       const runtime = createRuntimeForCreditNoResponseTests();
       const streamServer = await startApiServer({ port: 0, runtime });
@@ -3534,7 +3537,7 @@ describe("API Server E2E (no runtime)", () => {
           },
         );
         expect(status).toBe(200);
-        expect(String(data.text)).toBe("Sorry, I'm having a provider issue");
+        expect(String(data.text)).toBe(CLOUD_CREDITS_DEPLETED_REPLY);
         expect(String(data.text)).not.toBe("(no response)");
       } finally {
         await streamServer.close();
@@ -3554,7 +3557,7 @@ describe("API Server E2E (no runtime)", () => {
         const doneEvent = events.find((event) => event.type === "done");
         expect(doneEvent).toBeDefined();
         expect(String(doneEvent?.fullText ?? "")).toBe(
-          "Sorry, I'm having a provider issue",
+          CLOUD_CREDITS_DEPLETED_REPLY,
         );
       } finally {
         await streamServer.close();
@@ -3595,7 +3598,7 @@ describe("API Server E2E (no runtime)", () => {
           },
         );
         expect(status).toBe(200);
-        expect(String(data.text)).toBe("Sorry, I'm having a provider issue");
+        expect(String(data.text)).toBe(CLOUD_CREDITS_DEPLETED_REPLY);
       } finally {
         await streamServer.close();
       }
@@ -3615,7 +3618,7 @@ describe("API Server E2E (no runtime)", () => {
           },
         );
         expect(status).toBe(200);
-        expect(String(data.text)).toBe("Sorry, I'm having a provider issue");
+        expect(String(data.text)).toBe(CLOUD_CREDITS_DEPLETED_REPLY);
         expect(String(data.text)).not.toBe("(no response)");
       } finally {
         await streamServer.close();

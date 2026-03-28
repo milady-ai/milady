@@ -44,7 +44,13 @@ function t(key: string): string {
     "onboarding.back": "Back",
     "onboarding.connected": "Connected",
     "onboarding.confirm": "Confirm",
+    "onboarding.connectAccount": "Connect account",
+    "onboarding.connecting": "Connecting",
     "onboarding.login": "Login",
+    "onboarding.openLoginPageInBrowser": "Open login page in browser",
+    "onboarding.openLoginPageInBrowserDesc":
+      "Open the login page in your browser to continue.",
+    "onboarding.reportIssue": "Report issue",
     "onboarding.useExistingKey": "Use an existing key.",
     "onboarding.getOneHere": "Get one here",
     "onboarding.freeCredits": "Free credits included.",
@@ -152,9 +158,7 @@ describe("ConnectionProviderDetailScreen", () => {
       <ConnectionProviderDetailScreen dispatch={vi.fn()} />,
     );
 
-    const reportIssueButton = getByRole("button", {
-      name: (content) => content.includes("onboarding.reportIssue"),
-    });
+    const reportIssueButton = getByRole("button", { name: "Report issue" });
 
     expect(reportIssueButton).toBeDefined();
 

@@ -37,6 +37,7 @@ vi.mock("@miladyai/ui", async () => {
 
 vi.mock("@miladyai/app-core/state", () => ({
   useApp: vi.fn(),
+  useTranslation: vi.fn(() => ({ t: (key: string) => key })),
 }));
 
 vi.mock("@miladyai/ui", async () => {

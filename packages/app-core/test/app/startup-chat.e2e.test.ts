@@ -324,8 +324,10 @@ describe("app startup routing (e2e)", () => {
 
     const root = tree?.root;
     const buttons = root.findAllByType("button");
-    const chatDrawerButton = buttons.find((node) =>
-      buttonText(node).includes("Chats"),
+    const chatDrawerButton = buttons.find(
+      (node) =>
+        node.props["aria-label"] === "aria.openChatsPanel" ||
+        buttonText(node).includes("conversations.chats"),
     );
     expect(chatDrawerButton).toBeDefined();
 

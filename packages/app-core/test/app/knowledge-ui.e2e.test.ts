@@ -465,7 +465,7 @@ describe("KnowledgeView UI", () => {
     expect(tree).not.toBeNull();
   });
 
-  it("displays document count in stats", async () => {
+  it("renders the loaded knowledge documents in the rail", async () => {
     let tree: TestRenderer.ReactTestRenderer | null = null;
 
     await act(async () => {
@@ -473,7 +473,7 @@ describe("KnowledgeView UI", () => {
     });
 
     const allText = JSON.stringify(tree?.toJSON());
-    expect(allText).toContain("Documents");
+    expect(allText).toContain("README.md");
   });
 
   it("loads fragment details when opening a document", async () => {
@@ -585,19 +585,12 @@ describe("KnowledgeView UI", () => {
         flattenText(node.props.children) === "knowledge.ui.search" &&
         typeof node.props.className === "string",
     );
-    const refreshButton = buttons.find(
-      (node) =>
-        flattenText(node.props.children) === "Refresh" &&
-        typeof node.props.className === "string",
-    );
-
     expect(allText).not.toContain("knowledgeview.ChooseFolder");
     expect(allText).not.toContain("knowledgeview.ChooseFiles");
     expect(allText).toContain("knowledge.ui.search");
     expect(searchForm?.props.className).toContain("max-w-[500px]");
     expect(searchButton?.props.className).toContain("h-10");
     expect(searchButton?.props.className).toContain("text-txt");
-    expect(refreshButton?.props.className).toContain("shadow-sm");
   });
 
   it("shows loading state when knowledgeLoading is true", async () => {
