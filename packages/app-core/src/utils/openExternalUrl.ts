@@ -23,13 +23,17 @@ export async function openExternalUrl(url: string): Promise<void> {
     return;
   }
 
-  // Non-desktop (web browser) fallback
+  // Non-desktop (web browser) fallback — never throw on popup block.
+  // OAuth flows call this after async gaps which lose user-gesture context,
+  // so popup blocking is expected. Callers handle the fallback (e.g. showing
+  // the URL for manual copy-paste) and continue polling.
   if (typeof window === "undefined" || typeof window.open !== "function") {
-    throw new Error("Popup blocked. Allow popups and try again.");
+    console.warn("[openExternalUrl] window.open unavailable — URL:", url);
+    return;
   }
 
   const popup = window.open(url, "_blank", "noopener,noreferrer");
   if (!popup) {
-    throw new Error("Popup blocked. Allow popups and try again.");
+    console.warn("[openExternalUrl] popup blocked — URL:", url);
   }
 }

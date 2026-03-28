@@ -292,6 +292,8 @@ export function ConnectionProviderDetailScreen({
       const { authUrl } = await client.startAnthropicLogin();
       if (authUrl) {
         await openExternalUrl(authUrl);
+        // Always transition to the code-paste screen — even if the popup was
+        // blocked the URL is logged to console and the user can open it manually.
         setAnthropicOAuthStarted(true);
         return;
       }
