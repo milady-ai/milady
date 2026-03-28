@@ -152,6 +152,11 @@ const runNode = () => {
     stdio: "inherit",
   });
 
+  nodeProcess.on("error", (err) => {
+    logRunner(`Failed to spawn ${execPath}: ${err.message}`);
+    process.exit(1);
+  });
+
   nodeProcess.on("exit", (exitCode, exitSignal) => {
     if (exitSignal) {
       process.exit(1);
@@ -193,6 +198,10 @@ const runNode = () => {
           cwd,
           env,
           stdio: "inherit",
+        });
+        build.on("error", (err) => {
+          logRunner(`Failed to spawn ${buildCmd}: ${err.message}`);
+          process.exit(1);
         });
         build.on("exit", (code, signal) => {
           if (signal || (code !== 0 && code !== null)) {
@@ -238,6 +247,11 @@ if (!shouldBuild()) {
     cwd,
     env,
     stdio: "inherit",
+  });
+
+  build.on("error", (err) => {
+    logRunner(`Failed to spawn ${buildCmd}: ${err.message}`);
+    process.exit(1);
   });
 
   build.on("exit", (code, signal) => {
