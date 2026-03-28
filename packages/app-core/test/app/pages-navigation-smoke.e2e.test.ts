@@ -46,9 +46,8 @@ vi.mock("@miladyai/app-core/state", async () => {
 });
 
 vi.mock("../../src/state", async () => {
-  const actual = await vi.importActual<typeof import("../../src/state")>(
-    "../../src/state",
-  );
+  const actual =
+    await vi.importActual<typeof import("../../src/state")>("../../src/state");
   return {
     ...actual,
     useApp: () => mockUseApp(),
@@ -167,11 +166,10 @@ vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
     React.createElement("section", null, "InventoryView Ready"),
   KnowledgeView: () =>
     React.createElement("section", null, "KnowledgeView Ready"),
-  OnboardingWizard: () =>
-    React.createElement("div", null, "OnboardingWizard"),
+  OnboardingWizard: () => React.createElement("div", null, "OnboardingWizard"),
+  OwnerNamePrompt: () => React.createElement("div", null, "OwnerNamePrompt"),
   PairingView: () => React.createElement("div", null, "PairingView"),
-  SaveCommandModal: () =>
-    React.createElement("div", null, "SaveCommandModal"),
+  SaveCommandModal: () => React.createElement("div", null, "SaveCommandModal"),
   SettingsView: () =>
     React.createElement("section", null, "SettingsView Ready"),
   SharedCompanionScene: ({ children }: { children: React.ReactNode }) =>
@@ -216,11 +214,10 @@ vi.mock("../../src/app-shell-components", () => ({
     React.createElement("section", null, "InventoryView Ready"),
   KnowledgeView: () =>
     React.createElement("section", null, "KnowledgeView Ready"),
-  OnboardingWizard: () =>
-    React.createElement("div", null, "OnboardingWizard"),
+  OnboardingWizard: () => React.createElement("div", null, "OnboardingWizard"),
+  OwnerNamePrompt: () => React.createElement("div", null, "OwnerNamePrompt"),
   PairingView: () => React.createElement("div", null, "PairingView"),
-  SaveCommandModal: () =>
-    React.createElement("div", null, "SaveCommandModal"),
+  SaveCommandModal: () => React.createElement("div", null, "SaveCommandModal"),
   SettingsView: () =>
     React.createElement("section", null, "SettingsView Ready"),
   SharedCompanionScene: ({ children }: { children: React.ReactNode }) =>
@@ -383,9 +380,8 @@ vi.mock("@miladyai/app-core/hooks", async () => {
 });
 
 vi.mock("../../src/hooks", async () => {
-  const actual = await vi.importActual<typeof import("../../src/hooks")>(
-    "../../src/hooks",
-  );
+  const actual =
+    await vi.importActual<typeof import("../../src/hooks")>("../../src/hooks");
   return {
     ...actual,
     useContextMenu: () => ({
