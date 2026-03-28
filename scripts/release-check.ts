@@ -626,7 +626,7 @@ function assertMacArtifactStagerLooksCorrect() {
     `--options runtime "\${entitlement_args[@]}" "$STAGED_APP_PATH"`,
     'codesign --verify --deep --strict --verbose=2 "$STAGED_APP_PATH"',
     "hdiutil create \\",
-    'notarytool submit \\',
+    "notarytool submit \\",
     'stapler staple "$TEMP_DMG_PATH"',
     'mv "$TEMP_DMG_PATH" "$FINAL_DMG_PATH"',
   ];
