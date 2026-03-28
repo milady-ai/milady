@@ -3033,8 +3033,12 @@ export class MiladyClient {
   ): Promise<{ ok: boolean; updated: string[] }> {
     logSettingsClient("PUT /api/secrets → start", {
       baseUrl: this.getBaseUrl(),
-      secretKeys: Object.keys(secrets).sort(),
-      secrets,
+      secretMeta: Object.keys(secrets)
+        .sort()
+        .map((key) => ({
+          key,
+          hasValue: Boolean(secrets[key]),
+        })),
     });
     const out = (await this.fetch("/api/secrets", {
       method: "PUT",
