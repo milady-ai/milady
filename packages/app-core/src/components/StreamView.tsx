@@ -1,14 +1,8 @@
 /**
- * StreamView — Dynamic agent activity screen for live streaming.
+ * StreamView — Basic streaming control surface.
  *
- * Shows what the agent is actively doing as the primary content:
- * - Terminal output when running commands
- * - Game iframe when playing a game
- * - Chat exchanges when conversing
- * - Activity dashboard when idle
- *
- * VRM avatar floats as a small picture-in-picture overlay (bottom-left).
- * Activity feed runs along the right sidebar. Chat ticker at the bottom.
+ * Provides go-live/offline toggle and stream health status polling.
+ * The actual FFmpeg pipeline runs on the backend via stream-routes.
  */
 
 import { client, isApiError } from "@miladyai/app-core/api";
@@ -16,77 +10,25 @@ import { isElectrobunRuntime } from "@miladyai/app-core/bridge";
 import { getBootConfig } from "@miladyai/app-core/config";
 import { useDocumentVisibility } from "@miladyai/app-core/hooks";
 import { useApp } from "@miladyai/app-core/state";
-import {
-  type CSSProperties,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { ActivityFeed } from "./stream/ActivityFeed";
-import { AvatarPip } from "./stream/AvatarPip";
-import { ChatContent } from "./stream/ChatContent";
-import { ChatTicker } from "./stream/ChatTicker";
-import {
-  type AgentMode,
-  CHAT_ACTIVE_WINDOW_MS,
-  FULL_SIZE,
-  IS_POPOUT,
-  PIP_SIZE,
-  STREAM_SOURCE_LABELS,
-  type StreamSourceType,
-  TERMINAL_ACTIVE_WINDOW_MS,
-} from "./stream/helpers";
-import { IdleContent } from "./stream/IdleContent";
-import { OverlayLayer } from "./stream/overlays/OverlayLayer";
-import { useOverlayLayout } from "./stream/overlays/useOverlayLayout";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { IS_POPOUT } from "./stream/helpers";
 import { StatusBar } from "./stream/StatusBar";
-import { StreamSettings } from "./stream/StreamSettings";
-import { StreamTerminal } from "./stream/StreamTerminal";
-import { StreamVoiceConfig } from "./stream/StreamVoiceConfig";
-
-// ---------------------------------------------------------------------------
-// StreamView
-// ---------------------------------------------------------------------------
 
 export function StreamView({ inModal }: { inModal?: boolean } = {}) {
-  const {
-    agentStatus,
-    autonomousEvents,
-    conversationMessages,
-    activeGameViewerUrl,
-    activeGameSandbox,
-    chatAvatarSpeaking: _chatAvatarSpeaking,
-    t,
-  } = useApp();
-
+  const { agentStatus, t } = useApp();
   const { branding } = getBootConfig();
   const agentName = agentStatus?.agentName ?? branding.appName ?? "Eliza";
   const isElectrobun = isElectrobunRuntime();
+
   const [streamLive, setStreamLive] = useState(false);
   const [streamLoading, setStreamLoading] = useState(false);
   const loadingRef = useRef(false);
   const docVisible = useDocumentVisibility();
-
   const [streamAvailable, setStreamAvailable] = useState(true);
-  const [volume, setVolume] = useState(100);
-  const [muted, setMuted] = useState(false);
-  const [destinations, setDestinations] = useState<
-    Array<{ id: string; name: string }>
-  >([]);
-  const [activeDestination, setActiveDestination] = useState<{
-    id: string;
-    name: string;
-  } | null>(null);
   const [uptime, setUptime] = useState(0);
   const [frameCount, setFrameCount] = useState(0);
-  const [audioSource, setAudioSource] = useState("");
-  const [streamSource, setStreamSource] = useState<{
-    type: StreamSourceType;
-    url?: string;
-  }>({ type: "stream-tab" });
 
+  // Poll stream status
   useEffect(() => {
     let mounted = true;
     const poll = async () => {
@@ -95,20 +37,14 @@ export function StreamView({ inModal }: { inModal?: boolean } = {}) {
         const status = await client.streamStatus();
         if (mounted && !loadingRef.current) {
           setStreamLive(status.running && status.ffmpegAlive);
-          setVolume(status.volume);
-          setMuted(status.muted);
           setUptime(status.uptime);
           setFrameCount(status.frameCount);
-          setAudioSource(status.audioSource);
-          if (status.destination) setActiveDestination(status.destination);
         }
       } catch (err: unknown) {
-        // 404 means stream routes are not configured — stop polling
         if (isApiError(err) && err.status === 404) {
           setStreamAvailable(false);
           return;
         }
-        // Other errors — API not yet available, leave as offline
       }
     };
     if (!streamAvailable || !docVisible) return;
@@ -119,36 +55,6 @@ export function StreamView({ inModal }: { inModal?: boolean } = {}) {
       clearInterval(id);
     };
   }, [streamAvailable, docVisible]);
-  useEffect(() => {
-    if (!streamLive) return;
-    let cancelled = false;
-    if (activeGameViewerUrl.trim() && streamSource.type !== "game") {
-      client
-        .setStreamSource("game", activeGameViewerUrl)
-        .then((result) => {
-          if (!cancelled && result.ok) {
-            setStreamSource({ type: "game", url: activeGameViewerUrl });
-          }
-        })
-        .catch((err) => {
-          console.warn("[stream] Failed to set game source:", err);
-        });
-    } else if (!activeGameViewerUrl.trim() && streamSource.type === "game") {
-      client
-        .setStreamSource("stream-tab")
-        .then((result) => {
-          if (!cancelled && result.ok) {
-            setStreamSource({ type: "stream-tab" });
-          }
-        })
-        .catch((err) => {
-          console.warn("[stream] Failed to reset stream source:", err);
-        });
-    }
-    return () => {
-      cancelled = true;
-    };
-  }, [activeGameViewerUrl, streamLive, streamSource.type]);
 
   const toggleStream = useCallback(async () => {
     if (loadingRef.current) return;
@@ -162,9 +68,6 @@ export function StreamView({ inModal }: { inModal?: boolean } = {}) {
         const result = await client.streamGoLive();
         setStreamLive(result.live);
 
-        // Browser popout is only meaningful on the web. Electrobun now captures
-        // the native app window directly, so a renderer popup no longer changes
-        // the capture target and should not be opened on desktop.
         if (result.live && !IS_POPOUT && !isElectrobun) {
           const apiBase = getBootConfig().apiBase;
           const base = window.location.origin || "";
@@ -196,321 +99,71 @@ export function StreamView({ inModal }: { inModal?: boolean } = {}) {
       setStreamLoading(false);
     }
   }, [isElectrobun, streamLive]);
-  useEffect(() => {
-    if (!streamAvailable) return;
-    client
-      .getStreamingDestinations()
-      .then((res) => {
-        if (res.ok) setDestinations(res.destinations);
-      })
-      .catch((err) => {
-        console.warn("[stream] Failed to fetch destinations:", err);
-      });
-  }, [streamAvailable]);
-  const handleVolumeChange = useCallback((vol: number) => {
-    setVolume(vol);
-    client.setStreamVolume(vol).catch((err) => {
-      console.warn("[stream] Failed to set volume:", err);
-    });
-  }, []);
-
-  const handleToggleMute = useCallback(() => {
-    const next = !muted;
-    setMuted(next);
-    (next ? client.muteStream() : client.unmuteStream()).catch((err) => {
-      console.warn("[stream] Failed to toggle mute:", err);
-    });
-  }, [muted]);
-
-  const handleDestinationChange = useCallback((id: string) => {
-    client
-      .setActiveDestination(id)
-      .then((res) => {
-        if (res.ok && res.destination) setActiveDestination(res.destination);
-      })
-      .catch((err) => {
-        console.warn("[stream] Failed to set destination:", err);
-      });
-  }, []);
-
-  const handleSourceChange = useCallback(
-    async (sourceType: StreamSourceType, customUrl?: string) => {
-      try {
-        const result = await client.setStreamSource(sourceType, customUrl);
-        if (result.ok) {
-          setStreamSource(
-            result.source as { type: StreamSourceType; url?: string },
-          );
-        }
-      } catch (err) {
-        console.warn("[stream] Failed to change source:", err);
-      }
-    },
-    [],
-  );
-  const [showSettings, setShowSettings] = useState(false);
-  const [isPip, setIsPip] = useState(false);
-
-  const togglePip = useCallback(() => {
-    if (!IS_POPOUT) return;
-    const next = !isPip;
-    if (next) {
-      // Enter PIP: small window positioned at bottom-right
-      window.resizeTo(PIP_SIZE.width, PIP_SIZE.height);
-      const sw = window.screen.availWidth;
-      const sh = window.screen.availHeight;
-      window.moveTo(sw - PIP_SIZE.width - 20, sh - PIP_SIZE.height - 20);
-    } else {
-      // Exit PIP: restore full size, centered
-      window.resizeTo(FULL_SIZE.width, FULL_SIZE.height);
-      const sw = window.screen.availWidth;
-      const sh = window.screen.availHeight;
-      window.moveTo(
-        Math.round((sw - FULL_SIZE.width) / 2),
-        Math.round((sh - FULL_SIZE.height) / 2),
-      );
-    }
-    setIsPip(next);
-  }, [isPip]);
-
-  // Track whether terminal is active (received output recently)
-  const [terminalActive, setTerminalActive] = useState(false);
-  const terminalTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    const unbind = client.onWsEvent(
-      "terminal-output",
-      (data: Record<string, unknown>) => {
-        const event = data.event as string;
-        if (event === "start" || event === "stdout" || event === "stderr") {
-          setTerminalActive(true);
-          if (terminalTimeoutRef.current) {
-            clearTimeout(terminalTimeoutRef.current);
-          }
-          terminalTimeoutRef.current = setTimeout(() => {
-            setTerminalActive(false);
-          }, TERMINAL_ACTIVE_WINDOW_MS);
-        }
-      },
-    );
-    return () => {
-      unbind();
-      if (terminalTimeoutRef.current) clearTimeout(terminalTimeoutRef.current);
-    };
-  }, []);
-
-  // Detect current mode (priority order)
-  const mode: AgentMode = useMemo(() => {
-    if (activeGameViewerUrl.trim()) return "gaming";
-    if (terminalActive) return "terminal";
-
-    const now = Date.now();
-    const recentChat = autonomousEvents.find(
-      (e) => e.stream === "assistant" && now - e.ts < CHAT_ACTIVE_WINDOW_MS,
-    );
-    if (recentChat) return "chatting";
-
-    return "idle";
-  }, [activeGameViewerUrl, terminalActive, autonomousEvents]);
-
-  const overlayLayout = useOverlayLayout(activeDestination?.id);
-  const { layout } = overlayLayout;
-
-  const feedEvents = useMemo(
-    () =>
-      autonomousEvents
-        .filter((e) => e.stream !== "viewer_stats")
-        .slice(-80)
-        .reverse(),
-    [autonomousEvents],
-  );
-  const showIdleStandbyState =
-    streamAvailable &&
-    mode === "idle" &&
-    feedEvents.length === 0 &&
-    conversationMessages.length === 0;
-
-  // Extract latest viewer stats from events
-  const viewerCount = useMemo(() => {
-    for (let i = autonomousEvents.length - 1; i >= 0; i--) {
-      const evt = autonomousEvents[i];
-      if (evt.stream === "viewer_stats") {
-        const p = evt.payload as Record<string, unknown>;
-        if (typeof p.apiViewerCount === "number") return p.apiViewerCount;
-        if (typeof p.uniqueChatters === "number") return p.uniqueChatters;
-      }
-    }
-    return null;
-  }, [autonomousEvents]);
-
-  // In PIP mode, render the full 1280×720 layout and CSS-transform-scale it
-  // down to fit the PIP window. This keeps the stream capture identical to
-  // the normal view — capturePage() captures the full layout at native pixels.
-  const pipScale = isPip ? PIP_SIZE.width / FULL_SIZE.width : 1;
-  const pipStyle: CSSProperties | undefined = isPip
-    ? {
-        width: FULL_SIZE.width,
-        height: FULL_SIZE.height,
-        transform: `scale(${pipScale})`,
-        transformOrigin: "top left",
-      }
-    : undefined;
 
   return (
     <div
       data-stream-view
       className={`flex flex-col text-txt font-body ${
         inModal ? "bg-transparent" : "bg-bg"
-      } ${isPip ? "" : "h-full w-full"}`}
-      style={pipStyle}
+      } h-full w-full`}
     >
       <StatusBar
         agentName={agentName}
-        mode={mode}
-        viewerCount={viewerCount}
-        isPip={isPip}
-        onTogglePip={togglePip}
         streamAvailable={streamAvailable}
         streamLive={streamLive}
         streamLoading={streamLoading}
         onToggleStream={toggleStream}
-        volume={volume}
-        muted={muted}
-        onVolumeChange={handleVolumeChange}
-        onToggleMute={handleToggleMute}
-        destinations={destinations}
-        activeDestination={activeDestination}
-        onDestinationChange={handleDestinationChange}
         uptime={uptime}
         frameCount={frameCount}
-        audioSource={audioSource}
-        streamSource={streamSource}
-        activeGameViewerUrl={activeGameViewerUrl}
-        onSourceChange={handleSourceChange}
-        onOpenSettings={() => setShowSettings(true)}
       />
 
-      {/* Stream voice config — TTS toggle and status */}
-      {!isPip && streamAvailable && (
-        <div
-          className={`flex items-center border-b px-3 py-2 lg:px-4 ${
-            inModal
-              ? "border-border/60 bg-card/88 shadow-sm backdrop-blur-xl"
-              : "border-border/50 bg-card/72"
-          }`}
-        >
-          <StreamVoiceConfig streamLive={streamLive} />
-        </div>
-      )}
-
-      <div className="flex flex-1 min-h-0">
-        {/* Main content area — shows what the agent is doing */}
-        <div className="flex-1 min-w-0 relative">
-          {!streamAvailable ? (
-            <div className="h-full flex items-center justify-center p-6">
-              <div className="max-w-lg rounded-3xl border border-border/60 bg-card/94 p-6 text-center shadow-xl backdrop-blur-xl">
-                <p className="text-[11px] uppercase tracking-[0.24em] text-muted">
-                  {t("streamview.StreamingUnavailabl")}
-                </p>
-                <h2 className="mt-2 text-xl font-semibold text-txt">
-                  {t("streamview.EnableTheStreaming")}
-                </h2>
-                <p className="mt-3 text-sm leading-6 text-muted">
-                  {t("streamview.MiladyCouldNotRea")}{" "}
-                  <code className="rounded-md border border-border/45 bg-bg-hover px-1.5 py-0.5 text-xs text-txt-strong">
-                    {t("streamview.streamingBase")}
-                  </code>{" "}
-                  {t("streamview.pluginThenReload")}
-                </p>
-                <p className="mt-4 text-xs text-muted">
-                  {t("streamview.IfThePluginIsAlr")}
-                </p>
-              </div>
-            </div>
-          ) : mode === "gaming" ? (
-            <iframe
-              src={activeGameViewerUrl}
-              title={t("streamview.Game")}
-              className="w-full h-full border-0"
-              sandbox={
-                activeGameSandbox ||
-                "allow-scripts allow-same-origin allow-popups"
-              }
+      <div className="flex flex-1 min-h-0 items-center justify-center">
+        {!streamAvailable ? (
+          <div className="max-w-lg rounded-3xl border border-border/60 bg-card/94 p-6 text-center shadow-xl backdrop-blur-xl">
+            <p className="text-[11px] uppercase tracking-[0.24em] text-muted">
+              {t("streamview.StreamingUnavailabl")}
+            </p>
+            <h2 className="mt-2 text-xl font-semibold text-txt">
+              {t("streamview.EnableTheStreaming")}
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-muted">
+              {t("streamview.MiladyCouldNotRea")}{" "}
+              <code className="rounded-md border border-border/45 bg-bg-hover px-1.5 py-0.5 text-xs text-txt-strong">
+                {t("streamview.streamingBase")}
+              </code>{" "}
+              {t("streamview.pluginThenReload")}
+            </p>
+            <p className="mt-4 text-xs text-muted">
+              {t("streamview.IfThePluginIsAlr")}
+            </p>
+          </div>
+        ) : (
+          <div className="max-w-md rounded-3xl border border-border/60 bg-card/94 p-6 text-center shadow-xl backdrop-blur-xl">
+            <div
+              className={`mx-auto mb-4 h-3 w-3 rounded-full ${
+                streamLive
+                  ? "bg-danger ring-4 ring-danger/20 animate-pulse"
+                  : "bg-muted"
+              }`}
             />
-          ) : mode === "terminal" ? (
-            <StreamTerminal />
-          ) : mode === "chatting" ? (
-            <ChatContent
-              events={autonomousEvents.slice(-20)}
-              messages={conversationMessages}
-            />
-          ) : (
-            <>
-              <IdleContent events={autonomousEvents.slice(-20)} />
-              {showIdleStandbyState && (
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-6">
-                  <div className="max-w-xl rounded-3xl border border-border/60 bg-card/94 px-6 py-7 text-center shadow-xl backdrop-blur-xl">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted">
-                      Stream Standby
-                    </p>
-                    <h2 className="mt-2 text-[clamp(1.5rem,2vw,2rem)] font-semibold tracking-[-0.03em] text-txt">
-                      Milady is ready for the next signal.
-                    </h2>
-                    <p className="mt-3 text-sm leading-6 text-muted">
-                      Viewer chat, agent actions, terminal output, and overlay
-                      moments will surface here as soon as activity starts.
-                    </p>
-                    <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-[11px] text-muted-strong">
-                      <span className="inline-flex min-h-8 items-center rounded-full border border-border/45 bg-bg-hover/75 px-3 py-1.5">
-                        Source: {STREAM_SOURCE_LABELS[streamSource.type]}
-                      </span>
-                      <span className="inline-flex min-h-8 items-center rounded-full border border-border/45 bg-bg-hover/75 px-3 py-1.5">
-                        Destination: {activeDestination?.name ?? "Not selected"}
-                      </span>
-                      <span className="inline-flex min-h-8 items-center rounded-full border border-accent/25 bg-accent/10 px-3 py-1.5 text-accent-fg">
-                        Voice controls are ready above
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-
-          {/* Stream overlay widgets */}
-          <OverlayLayer
-            layout={layout}
-            events={autonomousEvents}
-            agentMode={mode}
-            agentName={agentName}
-          />
-
-          {/* VRM avatar — picture-in-picture overlay */}
-          <AvatarPip />
-
-          {/* Stream settings panel */}
-          {showSettings && streamAvailable && (
-            <StreamSettings
-              destinations={destinations}
-              activeDestination={activeDestination}
-              onDestinationChange={handleDestinationChange}
-              streamLive={streamLive}
-              streamSource={streamSource}
-              activeGameViewerUrl={activeGameViewerUrl}
-              onSourceChange={handleSourceChange}
-              overlayLayout={overlayLayout}
-              onClose={() => setShowSettings(false)}
-            />
-          )}
-        </div>
-
-        {/* Activity sidebar */}
-        <div className="hidden border-l border-border/50 bg-card/35 md:block md:w-[240px] md:min-w-[240px] lg:w-[260px] lg:min-w-[260px] xl:w-[300px] xl:min-w-[300px]">
-          <ActivityFeed events={feedEvents} />
-        </div>
+            <h2 className="text-lg font-semibold text-txt">
+              {streamLive ? "Stream is Live" : "Stream Ready"}
+            </h2>
+            <p className="mt-2 text-sm text-muted">
+              {streamLive
+                ? `Uptime: ${formatUptime(uptime)} · ${frameCount.toLocaleString()} frames`
+                : "Press Go Live to start streaming."}
+            </p>
+          </div>
+        )}
       </div>
-
-      <ChatTicker events={autonomousEvents} />
     </div>
   );
+}
+
+function formatUptime(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }

@@ -18,7 +18,6 @@ export const CONNECTOR_IDS = [
   "feishu",
   "matrix",
   "nostr",
-  "retake",
   "blooio",
   "twitch",
 ] as const;
@@ -439,11 +438,6 @@ const FIELD_LABELS: Record<string, string> = {
   "connectors.imessage": "iMessage",
   "connectors.bluebubbles": "BlueBubbles",
   "connectors.msteams": "MS Teams",
-  "connectors.retake": "Retake",
-  "connectors.retake.enabled": "Retake Enabled",
-  "connectors.retake.accessToken": "Retake Agent Token",
-  "connectors.retake.apiUrl": "Retake API URL",
-  "connectors.retake.captureUrl": "Retake Capture URL",
   "connectors.telegram.botToken": "Telegram Bot Token",
   "connectors.telegram.dmPolicy": "Telegram DM Policy",
   "connectors.telegram.streamMode": "Telegram Draft Stream Mode",
@@ -872,12 +866,6 @@ const FIELD_HELP: Record<string, string> = {
     "Allow iMessage to write config in response to channel events/commands (default: true).",
   "connectors.msteams.configWrites":
     "Allow Microsoft Teams to write config in response to channel events/commands (default: true).",
-  "connectors.retake.accessToken":
-    "Bearer token for retake.tv agent API (equivalent to RETAKE_AGENT_TOKEN env var).",
-  "connectors.retake.apiUrl":
-    "Retake.tv API base URL (default: https://retake.tv/api/v1).",
-  "connectors.retake.captureUrl":
-    "URL of the page to capture for streaming (default: local agent UI).",
   "connectors.discord.commands.native":
     'Override native commands for Discord (bool or "auto").',
   "connectors.discord.commands.nativeSkills":
@@ -966,8 +954,6 @@ const FIELD_PLACEHOLDERS: Record<string, string> = {
   "gateway.controlUi.root": "dist/control-ui",
   "gateway.controlUi.allowedOrigins": "https://control.example.com",
   "connectors.mattermost.baseUrl": "https://chat.example.com",
-  "connectors.retake.apiUrl": "https://retake.tv/api/v1",
-  "connectors.retake.captureUrl": "http://127.0.0.1:2138",
   "agents.list[].identity.avatar": "avatars/eliza.png",
 };
 

@@ -99,7 +99,7 @@ export default {
         // Hardware device access
         "com.apple.security.device.camera": true,
         "com.apple.security.device.microphone": true,
-        // Screen recording (screencapture, retake/computer-use)
+        // Screen recording (screencapture)
         "com.apple.security.device.screen-recording": true,
       },
     },

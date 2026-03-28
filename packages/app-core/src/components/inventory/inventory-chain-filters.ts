@@ -21,7 +21,6 @@ type InventoryChainFilterState =
   | Partial<InventoryChainFilters>
   | null
   | undefined;
-
 function isPrimaryInventoryChainKey(
   k: ChainKey,
 ): k is PrimaryInventoryChainKey {

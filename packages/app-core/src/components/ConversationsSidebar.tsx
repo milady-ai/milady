@@ -369,7 +369,7 @@ export function ConversationsSidebar({
               </div>
             </div>
             {canCollapse ? (
-              <div className="shrink-0 border-t border-border/25 bg-[linear-gradient(0deg,color-mix(in_srgb,var(--card)_34%,transparent),transparent)] px-3.5 pb-3.5 pt-2 shadow-[inset_0_-1px_0_rgba(255,255,255,0.03)] flex justify-end">
+              <div className="relative z-10 shrink-0 border-t border-border/25 bg-[linear-gradient(0deg,color-mix(in_srgb,var(--card)_34%,transparent),transparent)] px-3.5 pb-3.5 pt-2 shadow-[inset_0_-1px_0_rgba(255,255,255,0.03)] flex justify-end">
                 <Button
                   variant="ghost"
                   size="icon"

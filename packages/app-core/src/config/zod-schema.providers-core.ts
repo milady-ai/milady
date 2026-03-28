@@ -802,17 +802,6 @@ export const BlueBubblesConfigSchema = BlueBubblesAccountSchemaBase.extend({
   });
 });
 
-// ── Retake.tv streaming connector ──────────────────────────────────────────
-
-export const RetakeConfigSchema = z
-  .object({
-    enabled: z.boolean().optional(),
-    accessToken: z.string().optional(),
-    apiUrl: z.string().url().optional(),
-    captureUrl: z.string().optional(),
-  })
-  .strict();
-
 // ── Twitch chat connector schema ──────────────────────────────────────────
 
 export const TwitchConnectorConfigSchema = z

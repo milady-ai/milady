@@ -15,13 +15,11 @@ const BASELINE_PROVIDER_PLUGINS = [
 const DESKTOP_RUNTIME_ONLY_PLUGINS = new Set<string>([
   "@elizaos/plugin-browser",
   "@elizaos/plugin-computeruse",
-  "@elizaos/plugin-retake",
 ]);
 
 const LOCAL_RUNTIME_ONLY_PLUGINS = new Set<string>([
   "@elizaos/plugin-browser",
   "@elizaos/plugin-computeruse",
-  "@elizaos/plugin-retake",
 ]);
 
 export type RegistryPluginInstallSurface = "runtime" | "app";

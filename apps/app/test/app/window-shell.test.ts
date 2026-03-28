@@ -1,6 +1,5 @@
 import {
   parseWindowShellRoute,
-  resolveDetachedShellPathname,
   resolveDetachedShellTarget,
   shouldInstallMainWindowOnboardingPatches,
   syncDetachedShellLocation,
@@ -16,19 +15,6 @@ describe("window shell routing", () => {
     expect(parseWindowShellRoute("?shell=surface&tab=plugins")).toEqual({
       mode: "surface",
       tab: "plugins",
-    });
-    expect(parseWindowShellRoute("?shell=surface&tab=browser")).toEqual({
-      mode: "surface",
-      tab: "browser",
-    });
-    expect(
-      parseWindowShellRoute(
-        "?shell=surface&tab=browser&browse=https%3A%2F%2Felizacloud.ai",
-      ),
-    ).toEqual({
-      mode: "surface",
-      tab: "browser",
-      browse: "https://elizacloud.ai",
     });
     expect(parseWindowShellRoute("?shell=surface&tab=connectors")).toEqual({
       mode: "surface",
@@ -76,18 +62,6 @@ describe("window shell routing", () => {
     ).toEqual({
       tab: "triggers",
     });
-    expect(
-      resolveDetachedShellTarget(
-        parseWindowShellRoute("?shell=surface&tab=browser"),
-      ),
-    ).toEqual({
-      tab: "browser",
-    });
-    expect(
-      resolveDetachedShellPathname(
-        parseWindowShellRoute("?shell=surface&tab=browser"),
-      ),
-    ).toBe("/browser");
   });
 
   it("rewrites detached shell URLs onto real app paths before app-core boots", () => {
@@ -109,22 +83,6 @@ describe("window shell routing", () => {
       null,
       "",
       "http://127.0.0.1:5174/plugins?shell=surface&tab=plugins&apiBase=http://127.0.0.1:31337",
-    );
-
-    expect(
-      syncDetachedShellLocation(
-        parseWindowShellRoute("?shell=surface&tab=browser"),
-        {
-          history,
-          href: "http://127.0.0.1:5174/?shell=surface&tab=browser",
-        },
-      ),
-    ).toBe(true);
-
-    expect(history.replaceState).toHaveBeenLastCalledWith(
-      null,
-      "",
-      "http://127.0.0.1:5174/browser?shell=surface&tab=browser",
     );
   });
 });

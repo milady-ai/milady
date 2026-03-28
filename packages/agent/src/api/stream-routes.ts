@@ -1,24 +1,17 @@
 /**
  * Generic streaming infrastructure routes.
  *
- * Extracted from retake-routes.ts so any streaming destination (Retake.tv,
- * custom RTMP, etc.) can reuse the same pipeline: capture mode detection,
- * Xvfb management, browser capture, FFmpeg, frame routing, volume/mute.
+ * Shared pipeline for all streaming destinations (custom RTMP, Twitch,
+ * YouTube, etc.): capture mode detection, Xvfb management, browser capture,
+ * FFmpeg, frame routing, volume/mute.
  *
- * Platform-specific credential fetching lives in destination adapters
- * (e.g. retake-routes.ts exports `createRetakeDestination`).
+ * Platform-specific credential fetching lives in destination adapters.
  */
 
 import fs from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { logger } from "@elizaos/core";
 import type { StreamConfig } from "../services/stream-manager";
-import {
-  getTtsProviderStatus,
-  resolveTtsConfig,
-  ttsStreamBridge,
-} from "../services/tts-stream-bridge";
-import { sanitizeSpeechText } from "../utils/spoken-text";
 import {
   readRequestBody,
   readRequestBodyBuffer,
@@ -27,19 +20,12 @@ import {
 } from "./http-helpers";
 import {
   getHeadlessCaptureConfig,
-  parseDestinationQuery,
-  readOverlayLayout,
   readStreamSettings,
   seedOverlayDefaults,
   validateStreamSettings,
-  writeOverlayLayout,
   writeStreamSettings,
 } from "./stream-persistence";
 import type { StreamRouteState } from "./stream-route-state";
-import {
-  handleStreamVoiceRoute as handleAutonomousStreamVoiceRoute,
-  onAgentMessage as onAutonomousAgentMessage,
-} from "./stream-voice-routes";
 import type { StreamingDestination } from "./streaming-types";
 
 export type { StreamRouteState } from "./stream-route-state";
@@ -124,55 +110,6 @@ function formatErrorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
-function resolveRouteTtsConfig(
-  config: unknown,
-): Record<string, unknown> | null {
-  return resolveTtsConfig(config as never) as unknown as Record<
-    string,
-    unknown
-  > | null;
-}
-
-function getRouteTtsProviderStatus(config: unknown): {
-  resolvedProvider: string | null;
-  configuredProvider: string | null;
-  hasApiKey: boolean;
-} {
-  return getTtsProviderStatus(config as never);
-}
-
-const ttsBridgeAdapter = {
-  isSpeaking(): boolean {
-    return ttsStreamBridge.isSpeaking();
-  },
-  isAttached(): boolean {
-    return ttsStreamBridge.isAttached();
-  },
-  async speak(text: string, config: Record<string, unknown>): Promise<boolean> {
-    return ttsStreamBridge.speak(text, config as never);
-  },
-};
-
-function readRouteStreamSettings(): {
-  voice?: {
-    enabled?: boolean;
-    autoSpeak?: boolean;
-    provider?: string;
-  };
-} {
-  return readStreamSettings();
-}
-
-function writeRouteStreamSettings(settings: {
-  voice?: {
-    enabled?: boolean;
-    autoSpeak?: boolean;
-    provider?: string;
-  };
-}): void {
-  writeStreamSettings(settings as never);
-}
-
 // ---------------------------------------------------------------------------
 // Capture mode detection
 // ---------------------------------------------------------------------------
@@ -181,7 +118,7 @@ function writeRouteStreamSettings(settings: {
  * Detect the best capture mode for the current environment.
  *
  * Priority:
- * 1. STREAM_MODE / RETAKE_STREAM_MODE env var (explicit override)
+ * 1. STREAM_MODE env var (explicit override)
  * 2. Desktop screen capture bridge -> "pipe" (POST /api/stream/frame -> FFmpeg stdin)
  * 3. Linux with DISPLAY or Xvfb -> "x11grab" (Hyperscape approach)
  * 4. macOS -> "avfoundation" (native screen capture)
@@ -189,7 +126,7 @@ function writeRouteStreamSettings(settings: {
  */
 /** @internal Exported for testing. */
 export function detectCaptureMode(): StreamConfig["inputMode"] {
-  const explicit = process.env.STREAM_MODE ?? process.env.RETAKE_STREAM_MODE;
+  const explicit = process.env.STREAM_MODE;
   if (explicit === "ui" || explicit === "pipe") return "pipe";
   if (explicit === "x11grab") return "x11grab";
   if (explicit === "avfoundation" || explicit === "screen")
@@ -308,23 +245,9 @@ async function startStreamPipeline(
 
   const mode = detectCaptureMode();
 
-  // Check if stream voice (TTS) is enabled in settings
-  const streamSettings = readStreamSettings();
-  const voiceEnabled = streamSettings.voice?.enabled === true;
-  const ttsConfig = state.config?.messages?.tts;
-  const resolvedTts = voiceEnabled ? resolveTtsConfig(ttsConfig) : null;
-
-  const audioSource = resolvedTts
-    ? "tts"
-    : (process.env.STREAM_AUDIO_SOURCE ??
-      process.env.RETAKE_AUDIO_SOURCE ??
-      "silent");
-  const audioDevice =
-    process.env.STREAM_AUDIO_DEVICE ?? process.env.RETAKE_AUDIO_DEVICE;
-  const volume = parseInt(
-    process.env.STREAM_VOLUME ?? process.env.RETAKE_VOLUME ?? "80",
-    10,
-  );
+  const audioSource = process.env.STREAM_AUDIO_SOURCE ?? "silent";
+  const audioDevice = process.env.STREAM_AUDIO_DEVICE;
+  const volume = parseInt(process.env.STREAM_VOLUME ?? "80", 10);
   const resolution = "1280x720";
 
   const baseConfig: StreamConfig = {
@@ -383,7 +306,7 @@ async function startStreamPipeline(
     case "x11grab": {
       // Linux Xvfb mode (Hyperscape approach): capture virtual display.
       const display =
-        process.env.STREAM_DISPLAY ?? process.env.RETAKE_DISPLAY ?? ":99";
+        process.env.STREAM_DISPLAY ?? ":99";
       logger.info(`[stream] Capture mode: x11grab (display ${display})`);
 
       // Ensure Xvfb is running
@@ -393,7 +316,6 @@ async function startStreamPipeline(
       const captureUrl =
         state.captureUrl ??
         process.env.STREAM_CAPTURE_URL ??
-        process.env.RETAKE_CAPTURE_URL ??
         `http://127.0.0.1:${state.port ?? 2138}`;
 
       try {
@@ -425,9 +347,7 @@ async function startStreamPipeline(
     case "avfoundation": {
       // macOS native screen capture.
       const videoDevice =
-        process.env.STREAM_VIDEO_DEVICE ??
-        process.env.RETAKE_VIDEO_DEVICE ??
-        "3";
+        process.env.STREAM_VIDEO_DEVICE ?? "3";
       logger.info(
         `[stream] Capture mode: avfoundation (device ${videoDevice})`,
       );
@@ -445,7 +365,6 @@ async function startStreamPipeline(
       const captureUrl =
         state.captureUrl ??
         process.env.STREAM_CAPTURE_URL ??
-        process.env.RETAKE_CAPTURE_URL ??
         `http://127.0.0.1:${state.port ?? 2138}`;
 
       logger.info(
@@ -839,43 +758,6 @@ export async function handleStreamRoute(
     return true;
   }
 
-  // ── GET /api/stream/overlay-layout -- read overlay config ─────────────
-  // Supports ?destination=<id> for per-destination layouts.
-  if (method === "GET" && pathname === "/api/stream/overlay-layout") {
-    try {
-      const destId = parseDestinationQuery(req.url);
-      const layout = readOverlayLayout(destId, getActiveDestination(state));
-      json(res, { ok: true, layout, destinationId: destId ?? null });
-    } catch (err) {
-      error(res, String(err), 500);
-    }
-    return true;
-  }
-
-  // ── POST /api/stream/overlay-layout -- save overlay config ────────────
-  // Supports ?destination=<id> for per-destination layouts.
-  if (method === "POST" && pathname === "/api/stream/overlay-layout") {
-    try {
-      const destId = parseDestinationQuery(req.url);
-      const body = await readRequestBody(req);
-      const parsed = typeof body === "string" ? JSON.parse(body) : body;
-      const layout = parsed?.layout;
-      if (!layout || layout.version !== 1 || !Array.isArray(layout.widgets)) {
-        error(
-          res,
-          "Invalid layout: must have { version: 1, widgets: [...] }",
-          400,
-        );
-        return true;
-      }
-      writeOverlayLayout(layout, destId);
-      json(res, { ok: true, layout, destinationId: destId ?? null });
-    } catch (err) {
-      error(res, String(err), 500);
-    }
-    return true;
-  }
-
   // ── GET /api/stream/settings -- read stream visual settings ───────────
   if (method === "GET" && pathname === "/api/stream/settings") {
     try {
@@ -1003,34 +885,5 @@ export async function handleStreamRoute(
     return true;
   }
 
-  // ── Voice routes (GET/POST /api/stream/voice*) — delegated ──────────
-  if (pathname.startsWith("/api/stream/voice")) {
-    return handleAutonomousStreamVoiceRoute({
-      req,
-      res,
-      pathname,
-      method,
-      state,
-      getTtsProviderStatus: getRouteTtsProviderStatus,
-      resolveTtsConfig: resolveRouteTtsConfig,
-      ttsStreamBridge: ttsBridgeAdapter,
-      sanitizeSpeechText,
-      readStreamSettings: readRouteStreamSettings,
-      writeStreamSettings: writeRouteStreamSettings,
-    });
-  }
-
   return false;
-}
-
-export async function onAgentMessage(
-  text: string,
-  state: StreamRouteState,
-): Promise<void> {
-  return onAutonomousAgentMessage(text, state, {
-    sanitizeSpeechText,
-    readStreamSettings: readRouteStreamSettings,
-    resolveTtsConfig: resolveRouteTtsConfig,
-    ttsStreamBridge: ttsBridgeAdapter,
-  });
 }

@@ -592,6 +592,7 @@ describe("KnowledgeView UI", () => {
     );
 
     expect(allText).not.toContain("knowledgeview.ChooseFolder");
+    expect(allText).not.toContain("knowledgeview.ChooseFiles");
     expect(allText).toContain("knowledge.ui.search");
     expect(searchForm?.props.className).toContain("max-w-[500px]");
     expect(searchButton?.props.className).toContain("h-10");

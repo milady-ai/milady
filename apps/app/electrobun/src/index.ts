@@ -27,7 +27,6 @@ import {
   parseSettingsWindowAction,
 } from "./application-menu";
 import { showBackgroundNoticeOnce } from "./background-notice";
-import { isBrowserSurfaceEnabled } from "./browser-surface-flag";
 import { readNavigationEventUrl } from "./cloud-auth-window";
 import {
   buildMainMenuResetApiCandidates,
@@ -81,12 +80,6 @@ const HEARTBEAT_MENU_REFRESH_MS = 30_000;
 const CONFIG_EXPORT_FILE_NAME = "milady-config.json";
 const STARTUP_CRASH_REPORT_FILE = "startup-crash-report-latest.md";
 const STARTUP_CRASH_PROMPT_MARKER_FILE = "startup-crash-last-prompted.txt";
-// Browser surface ships enabled by default. Set
-// MILADY_ENABLE_BROWSER_SURFACE=0 to force-disable it for local debugging or
-// release triage.
-const BROWSER_SURFACE_ENABLED = isBrowserSurfaceEnabled(
-  process.env as Record<string, string | undefined>,
-);
 let heartbeatMenuSnapshot: HeartbeatMenuSnapshot =
   EMPTY_HEARTBEAT_MENU_SNAPSHOT;
 let heartbeatMenuRefreshTimer: ReturnType<typeof setInterval> | null = null;
@@ -110,7 +103,6 @@ function setupApplicationMenu(): void {
   const isMac = process.platform === "darwin";
   const menu = buildApplicationMenu({
     isMac,
-    browserEnabled: BROWSER_SURFACE_ENABLED,
     heartbeatSnapshot: heartbeatMenuSnapshot,
     detachedWindows: surfaceWindowManager?.listWindows() ?? [],
     agentReady: isAgentReady(),
@@ -1440,20 +1432,6 @@ function initializeBundledWebGPU(): void {
  * On Linux/Windows with CEF, upstream Electrobun flag support is still needed.
  */
 function checkWebGpuBrowserSupport(): void {
-  if (!BROWSER_SURFACE_ENABLED) {
-    console.warn("[WebGPU Browser] Browser surface disabled in this build.");
-    setTimeout(() => {
-      sendToActiveRenderer("webgpu:browserStatus", {
-        available: false,
-        reason: "Browser surface disabled in this build.",
-        renderer: "unknown",
-        chromeBetaPath: null,
-        downloadUrl: null,
-      });
-    }, 2000);
-    return;
-  }
-
   const status = checkWebGpuSupport();
   if (status.available) {
     console.log(`[WebGPU Browser] ${status.reason}`);

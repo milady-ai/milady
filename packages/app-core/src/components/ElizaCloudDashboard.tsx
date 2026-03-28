@@ -34,7 +34,7 @@ import {
 } from "../api";
 import { useIntervalWhenDocumentVisible } from "../hooks/useDocumentVisibility";
 import { useApp } from "../state";
-import { openDesktopInAppBrowser, openExternalUrl } from "../utils";
+import { openExternalUrl } from "../utils";
 import { StripeEmbeddedCheckout } from "./StripeEmbeddedCheckout";
 
 const ELIZA_CLOUD_INSTANCES_URL = "https://www.elizacloud.ai/dashboard/eliza";
@@ -873,10 +873,7 @@ export function CloudDashboard() {
   }, []);
 
   const handleLearnMoreElizaCloud = useCallback(async () => {
-    const opened = await openDesktopInAppBrowser(ELIZA_CLOUD_WEB_URL);
-    if (!opened) {
-      await openExternalUrl(ELIZA_CLOUD_WEB_URL);
-    }
+    await openExternalUrl(ELIZA_CLOUD_WEB_URL);
   }, []);
 
   useEffect(() => {
