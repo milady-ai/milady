@@ -697,7 +697,7 @@ export function VoiceConfigView() {
   const isConfigured = (() => {
     if (!providerInfo?.needsKey) return true;
     if (currentMode === "cloud") return cloudVoiceAvailable;
-    return Boolean(voiceConfig.elevenlabs?.apiKey);
+    return hasConfiguredApiKey(voiceConfig.elevenlabs?.apiKey);
   })();
 
   const handleProviderChange = useCallback((provider: VoiceProvider) => {
