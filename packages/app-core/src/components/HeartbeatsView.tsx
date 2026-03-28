@@ -11,7 +11,7 @@ import {
   Switch,
   Textarea,
 } from "@miladyai/ui";
-import { Plus } from "lucide-react";
+import { Clock3, Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import type {
   CreateTriggerRequest,
@@ -25,6 +25,7 @@ import { confirmDesktopAction } from "../utils";
 import {
   DESKTOP_PADDED_SURFACE_PANEL_CLASSNAME,
   DESKTOP_RAIL_SUMMARY_CARD_CLASSNAME,
+  DesktopEmptyStatePanel,
   DesktopPageFrame,
 } from "./desktop-surface-primitives";
 import { formatDateTime, formatDurationMs } from "./format";
@@ -1365,25 +1366,21 @@ export function HeartbeatsView() {
                   </div>
                 );
               })()) || (
-              <div
-                className="flex h-full min-h-[22rem] flex-col items-center justify-center px-8 py-16 text-center"
-                data-testid="heartbeats-empty-state"
-              >
-                <div className="mx-auto flex max-w-xl flex-col items-center gap-3">
-                  <h2
-                    className="text-2xl font-semibold tracking-tight text-txt"
-                    data-testid="heartbeats-empty-state-title"
-                  >
-                    {showFirstRunEmptyState
+              <div className="flex h-full flex-col items-center justify-center bg-bg/5 p-8 text-center">
+                <DesktopEmptyStatePanel
+                  className="h-full min-h-[22rem]"
+                  description={
+                    showFirstRunEmptyState
+                      ? undefined
+                      : t("heartbeatsview.emptyStateDescription")
+                  }
+                  icon={<Clock3 className="h-7 w-7" />}
+                  title={
+                    showFirstRunEmptyState
                       ? t("heartbeatsview.createFirstHeartbeat")
-                      : t("heartbeatsview.selectAHeartbeat")}
-                  </h2>
-                  {!showFirstRunEmptyState && (
-                    <p className="max-w-md text-sm leading-relaxed text-muted">
-                      {t("heartbeatsview.emptyStateDescription")}
-                    </p>
-                  )}
-                </div>
+                      : t("heartbeatsview.selectAHeartbeat")
+                  }
+                />
               </div>
             )
           )}

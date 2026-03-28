@@ -67,11 +67,11 @@ describe("HeartbeatsView UI states", () => {
     expect(snapshot).toContain("New Heartbeat");
     expect(snapshot).toContain("Templates");
     expect(snapshot).toContain("Create your first heartbeat");
-    expect(snapshot).not.toContain("No heartbeats configured yet");
+    expect(snapshot).not.toContain("Select a Heartbeat");
     expect(snapshot).not.toContain(
       "Use the sidebar to create a new heartbeat or select an existing one to view and edit its details.",
     );
-    expect(tree?.root.findAllByType(DesktopEmptyStatePanel)).toHaveLength(0);
+    expect(tree?.root.findAllByType(DesktopEmptyStatePanel)).toHaveLength(1);
   });
 
   it("keeps a simplified selection state when heartbeats exist but none is selected", async () => {
@@ -103,10 +103,11 @@ describe("HeartbeatsView UI states", () => {
     const snapshot = JSON.stringify(tree?.toJSON());
     expect(snapshot).toContain("Daily Digest");
     expect(snapshot).toContain("Select a Heartbeat");
+    expect(snapshot).not.toContain("Create your first heartbeat");
     expect(snapshot).toContain(
       "Use the sidebar to create a new heartbeat or select an existing one to view and edit its details.",
     );
-    expect(tree?.root.findAllByType(DesktopEmptyStatePanel)).toHaveLength(0);
+    expect(tree?.root.findAllByType(DesktopEmptyStatePanel)).toHaveLength(1);
   });
 
   it("shows a rail loading state while heartbeats are being fetched", async () => {
