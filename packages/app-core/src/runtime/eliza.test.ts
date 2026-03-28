@@ -1081,18 +1081,18 @@ describe("applyCloudConfigToEnv", () => {
     expect(process.env.ELIZAOS_CLOUD_BASE_URL).toBe("https://cloud.test");
   });
 
-  it("overwrites stale env values with fresh config (hot-reload safety)", () => {
+  it("clears stale env values when cloud is not explicitly enabled", () => {
     process.env.ELIZAOS_CLOUD_API_KEY = "old-key";
     const config = { cloud: { apiKey: "new-key" } } as ElizaConfig;
     applyCloudConfigToEnv(config);
-    expect(process.env.ELIZAOS_CLOUD_API_KEY).toBe("new-key");
+    expect(process.env.ELIZAOS_CLOUD_API_KEY).toBeUndefined();
   });
 
-  it("does NOT enable cloud when apiKey present but enabled is not explicitly true", () => {
+  it("does NOT expose cloud credentials when enabled is not explicitly true", () => {
     const config = { cloud: { apiKey: "ck-123" } } as ElizaConfig;
     applyCloudConfigToEnv(config);
     expect(process.env.ELIZAOS_CLOUD_ENABLED).toBeUndefined();
-    expect(process.env.ELIZAOS_CLOUD_API_KEY).toBe("ck-123");
+    expect(process.env.ELIZAOS_CLOUD_API_KEY).toBeUndefined();
   });
 
   it("clears ELIZAOS_CLOUD_ENABLED when enabled is explicitly false", () => {

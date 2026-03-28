@@ -175,7 +175,7 @@ describe("cloud status routes", () => {
     });
   });
 
-  test("reports cloud as not enabled when explicitly disabled with api key", async () => {
+  test("reports cloud as disconnected when explicitly disabled with api key", async () => {
     const result = await invoke({
       method: "GET",
       pathname: "/api/cloud/status",
@@ -185,13 +185,10 @@ describe("cloud status routes", () => {
 
     expect(result.handled).toBe(true);
     expect(result.payload).toEqual({
-      connected: true,
+      connected: false,
       enabled: false,
-      hasApiKey: true,
-      userId: undefined,
-      organizationId: undefined,
-      topUpUrl: "https://www.elizacloud.ai/dashboard/settings?tab=billing",
-      reason: "api_key_present_runtime_not_started",
+      hasApiKey: false,
+      reason: "runtime_not_started",
     });
   });
 

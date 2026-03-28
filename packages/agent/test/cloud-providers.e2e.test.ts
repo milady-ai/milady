@@ -219,13 +219,13 @@ describe("Cloud config → env var propagation", () => {
     expect(process.env.ELIZAOS_CLOUD_ENABLED).toBe("true");
   });
 
-  it("keeps cloud disabled when enabled flag is explicitly false", () => {
+  it("clears cloud env when enabled flag is explicitly false", () => {
     const config = {
       cloud: { enabled: false, apiKey: "ck-still-valid" },
     } as ElizaConfig;
     applyCloudConfigToEnv(config);
     expect(process.env.ELIZAOS_CLOUD_ENABLED).toBeUndefined();
-    expect(process.env.ELIZAOS_CLOUD_API_KEY).toBe("ck-still-valid");
+    expect(process.env.ELIZAOS_CLOUD_API_KEY).toBeUndefined();
   });
 
   it("sets default model names when cloud is active", () => {
