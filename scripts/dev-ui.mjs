@@ -1353,6 +1353,7 @@ if (uiOnly) {
       ELIZA_PORT: String(API_PORT),
       MILADY_PORT: String(UI_PORT),
       ELIZA_HEADLESS: "1",
+      MILADY_DEV_AUTH_BYPASS: "1",
       LOG_LEVEL: devLogLevel,
     },
     stdio: ["inherit", "pipe", "pipe"],

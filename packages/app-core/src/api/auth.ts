@@ -40,8 +40,9 @@ export function tokenMatches(expected: string, provided: string): boolean {
   const bPadded = Buffer.alloc(maxLen);
   a.copy(aPadded);
   b.copy(bPadded);
-  // Both length match AND content match required
-  return a.length === b.length && crypto.timingSafeEqual(aPadded, bPadded);
+  // Always run timingSafeEqual regardless of length to prevent timing leakage
+  const contentMatch = crypto.timingSafeEqual(aPadded, bPadded);
+  return a.length === b.length && contentMatch;
 }
 
 /**
@@ -151,7 +152,7 @@ export function isDevEnvironment(): boolean {
  * In all other cases an API token is required.
  */
 export function ensureCompatSensitiveRouteAuthorized(
-  req: Pick<http.IncomingMessage, "headers">,
+  req: Pick<http.IncomingMessage, "headers" | "socket">,
   res: http.ServerResponse,
 ): boolean {
   if (!getCompatApiToken()) {
