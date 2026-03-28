@@ -221,8 +221,8 @@ function scheduleLabel(trigger: TriggerSummary, t: TranslateFn): string {
   if (trigger.triggerType === "once") {
     return trigger.scheduledAtIso
       ? t("heartbeatsview.onceAt", {
-        time: formatDateTime(trigger.scheduledAtIso),
-      })
+          time: formatDateTime(trigger.scheduledAtIso),
+        })
       : t("heartbeatsview.once");
   }
   if (trigger.triggerType === "cron") {
@@ -360,13 +360,13 @@ export function HeartbeatsView() {
     triggerRunsById = {},
     triggerHealth: _triggerHealth = null,
     triggerError = null,
-    loadTriggers = async () => { },
+    loadTriggers = async () => {},
     createTrigger = async () => null,
     updateTrigger = async () => null,
     deleteTrigger = async () => true,
     runTriggerNow = async () => true,
-    loadTriggerRuns = async () => { },
-    loadTriggerHealth = async () => { },
+    loadTriggerRuns = async () => {},
+    loadTriggerHealth = async () => {},
     t,
   } = useApp();
 
@@ -526,8 +526,8 @@ export function HeartbeatsView() {
 
   const modalTitle = editingId
     ? t("heartbeatsview.editTitle", {
-      name: form.displayName.trim() || t("heartbeatsview.heartbeatSingular"),
-    })
+        name: form.displayName.trim() || t("heartbeatsview.heartbeatSingular"),
+      })
     : t("heartbeatsview.newHeartbeat");
   const editorEnabled =
     editingId != null
@@ -586,10 +586,11 @@ export function HeartbeatsView() {
                     openEditEditor(trigger);
                     void loadTriggerRuns(trigger.id);
                   }}
-                  className={`${SIDEBAR_CARD_BASE_CLASS} h-auto ${isActive
-                    ? HEARTBEAT_SIDEBAR_CARD_ACTIVE_CLASS
-                    : HEARTBEAT_SIDEBAR_CARD_INACTIVE_CLASS
-                    }`}
+                  className={`${SIDEBAR_CARD_BASE_CLASS} h-auto ${
+                    isActive
+                      ? HEARTBEAT_SIDEBAR_CARD_ACTIVE_CLASS
+                      : HEARTBEAT_SIDEBAR_CARD_INACTIVE_CLASS
+                  }`}
                 >
                   <div className="flex min-w-0 flex-col gap-1.5">
                     <div className="flex items-center justify-between gap-1">
@@ -639,10 +640,11 @@ export function HeartbeatsView() {
                   <div key={template.id} className="relative mb-1.5 group">
                     <button
                       type="button"
-                      className={`${SIDEBAR_CARD_BASE_CLASS} ${isUserTemplate
-                        ? "border-accent/20 bg-accent/5 hover:border-accent/30 hover:bg-accent/10"
-                        : "border-dashed border-border/40 hover:border-border hover:bg-bg-hover"
-                        }`}
+                      className={`${SIDEBAR_CARD_BASE_CLASS} ${
+                        isUserTemplate
+                          ? "border-accent/20 bg-accent/5 hover:border-accent/30 hover:bg-accent/10"
+                          : "border-dashed border-border/40 hover:border-border hover:bg-bg-hover"
+                      }`}
                       onClick={() => {
                         setForm({
                           ...emptyForm,

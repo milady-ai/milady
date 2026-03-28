@@ -345,6 +345,16 @@ vi.mock("@miladyai/ui", async (importOriginal) => {
   const actual = (await importOriginal()) as Record<string, unknown>;
   return {
     ...actual,
+    Button: ({
+      children,
+      className,
+      ...props
+    }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
+      React.createElement(
+        "button",
+        { type: "button", className, ...props },
+        children,
+      ),
     ConfirmDelete: ({
       onConfirm,
       children,
@@ -363,7 +373,10 @@ vi.mock("@miladyai/ui", async (importOriginal) => {
     }: {
       open?: boolean;
       children: React.ReactNode;
-    }) => (open ? React.createElement("div", { "data-testid": "dialog" }, children) : null),
+    }) =>
+      open
+        ? React.createElement("div", { "data-testid": "dialog" }, children)
+        : null,
     DialogContent: ({ children }: { children: React.ReactNode }) =>
       React.createElement("div", { "data-testid": "dialog-content" }, children),
     DialogHeader: ({ children }: { children: React.ReactNode }) =>
@@ -552,22 +565,38 @@ describe("KnowledgeView UI", () => {
       tree = TestRenderer.create(React.createElement(KnowledgeView));
     });
 
-    const findButton = (label: string) =>
-      tree?.root
-        .findAllByType("button")
-        .find((node) => node.props.children === label);
-
-    const chooseFilesButton = findButton("knowledgeview.ChooseFiles");
-    const chooseFolderButton = findButton("knowledgeview.ChooseFolder");
-    const searchButton = findButton("knowledge.ui.search");
     const searchForm = tree?.root.findAllByType("form")[0];
+    const allText = JSON.stringify(tree?.toJSON());
+    const flattenText = (value: React.ReactNode): string => {
+      if (typeof value === "string" || typeof value === "number") {
+        return String(value);
+      }
+      if (Array.isArray(value)) {
+        return value.map(flattenText).join("");
+      }
+      if (React.isValidElement(value)) {
+        return flattenText(value.props.children);
+      }
+      return "";
+    };
+    const buttons = tree?.root.findAllByType("button") ?? [];
+    const searchButton = buttons.find(
+      (node) =>
+        flattenText(node.props.children) === "knowledge.ui.search" &&
+        typeof node.props.className === "string",
+    );
+    const refreshButton = buttons.find(
+      (node) =>
+        flattenText(node.props.children) === "Refresh" &&
+        typeof node.props.className === "string",
+    );
 
-    expect(chooseFolderButton).toBeUndefined();
+    expect(allText).not.toContain("knowledgeview.ChooseFolder");
+    expect(allText).toContain("knowledge.ui.search");
     expect(searchForm?.props.className).toContain("max-w-[500px]");
-    expect(chooseFilesButton?.props.className).toContain("h-10");
-    expect(chooseFilesButton?.props.className).toContain("text-txt");
     expect(searchButton?.props.className).toContain("h-10");
     expect(searchButton?.props.className).toContain("text-txt");
+    expect(refreshButton?.props.className).toContain("shadow-sm");
   });
 
   it("shows loading state when knowledgeLoading is true", async () => {

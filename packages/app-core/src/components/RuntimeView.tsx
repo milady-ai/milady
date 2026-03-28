@@ -43,7 +43,7 @@ import {
   APP_SIDEBAR_INNER_CLASSNAME,
   APP_SIDEBAR_PILL_CLASSNAME,
   APP_SIDEBAR_SCROLL_REGION_CLASSNAME,
-  APP_SIDEBAR_SECTION_HEADING_CLASSNAME
+  APP_SIDEBAR_SECTION_HEADING_CLASSNAME,
 } from "./sidebar-shell-styles";
 
 type RuntimeSectionKey =
@@ -69,42 +69,42 @@ const SECTION_TAB_KEYS: Array<{
   i18nKey: string;
   description: string;
 }> = [
-    {
-      key: "summary",
-      i18nKey: "runtimeview.Summary",
-      description: "Health, counts, and current load order.",
-    },
-    {
-      key: "runtime",
-      i18nKey: "runtimeview.tabRuntime",
-      description: "Full serialized runtime object.",
-    },
-    {
-      key: "actions",
-      i18nKey: "runtimeview.tabActions",
-      description: "Registered actions and order.",
-    },
-    {
-      key: "providers",
-      i18nKey: "runtimeview.tabProviders",
-      description: "Loaded providers and precedence.",
-    },
-    {
-      key: "plugins",
-      i18nKey: "runtimeview.tabPlugins",
-      description: "Plugin registration and order.",
-    },
-    {
-      key: "services",
-      i18nKey: "runtimeview.tabServices",
-      description: "Grouped service implementations.",
-    },
-    {
-      key: "evaluators",
-      i18nKey: "runtimeview.tabEvaluators",
-      description: "Evaluator registration and order.",
-    },
-  ];
+  {
+    key: "summary",
+    i18nKey: "runtimeview.Summary",
+    description: "Health, counts, and current load order.",
+  },
+  {
+    key: "runtime",
+    i18nKey: "runtimeview.tabRuntime",
+    description: "Full serialized runtime object.",
+  },
+  {
+    key: "actions",
+    i18nKey: "runtimeview.tabActions",
+    description: "Registered actions and order.",
+  },
+  {
+    key: "providers",
+    i18nKey: "runtimeview.tabProviders",
+    description: "Loaded providers and precedence.",
+  },
+  {
+    key: "plugins",
+    i18nKey: "runtimeview.tabPlugins",
+    description: "Plugin registration and order.",
+  },
+  {
+    key: "services",
+    i18nKey: "runtimeview.tabServices",
+    description: "Grouped service implementations.",
+  },
+  {
+    key: "evaluators",
+    i18nKey: "runtimeview.tabEvaluators",
+    description: "Evaluator registration and order.",
+  },
+];
 
 const SECTION_DESCRIPTIONS: Record<RuntimeSectionKey, string> = {
   summary:
@@ -149,8 +149,8 @@ function nodeSummary(value: unknown): string {
         typeof record.className === "string" ? record.className : "Object";
       const props =
         record.properties &&
-          typeof record.properties === "object" &&
-          !Array.isArray(record.properties)
+        typeof record.properties === "object" &&
+        !Array.isArray(record.properties)
           ? Object.keys(record.properties as Record<string, unknown>).length
           : 0;
       return `${className} {${props}}`;
@@ -518,8 +518,8 @@ export function RuntimeView() {
                   <div className="mt-0.5 text-[10px] text-muted">
                     {snapshot
                       ? formatDateTime(snapshot.generatedAt, {
-                        fallback: "n/a",
-                      })
+                          fallback: "n/a",
+                        })
                       : t("runtimeview.noSnapshotLoaded")}
                   </div>
                 </div>
@@ -657,10 +657,11 @@ export function RuntimeView() {
                       variant="ghost"
                       type="button"
                       onClick={() => setActiveSection(section.key)}
-                      className={`${RUNTIME_SECTION_BUTTON_CLASSNAME} ${active
-                        ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
-                        : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
-                        }`}
+                      className={`${RUNTIME_SECTION_BUTTON_CLASSNAME} ${
+                        active
+                          ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
+                          : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
+                      }`}
                       aria-current={active ? "page" : undefined}
                     >
                       <span

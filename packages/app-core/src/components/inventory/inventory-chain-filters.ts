@@ -16,33 +16,53 @@ export const DEFAULT_INVENTORY_CHAIN_FILTERS: InventoryChainFilters = {
   solana: true,
 };
 
-function isPrimaryInventoryChainKey(k: ChainKey): k is PrimaryInventoryChainKey {
+type InventoryChainFilterState =
+  | InventoryChainFilters
+  | Partial<InventoryChainFilters>
+  | null
+  | undefined;
+
+function isPrimaryInventoryChainKey(
+  k: ChainKey,
+): k is PrimaryInventoryChainKey {
   return (PRIMARY_CHAIN_KEYS as readonly ChainKey[]).includes(k);
 }
 
 export function matchesInventoryChainFilter(
   chainName: string,
-  filters: InventoryChainFilters,
+  filters: InventoryChainFilterState,
 ): boolean {
+  const normalizedFilters = normalizeInventoryChainFilters(filters);
   const k = resolveChainKey(chainName);
   if (!k || !isPrimaryInventoryChainKey(k)) return false;
-  return filters[k] === true;
+  return normalizedFilters[k] === true;
 }
 
 /** When exactly one chain is enabled, returns that key; otherwise null. */
 export function computeSingleChainFocus(
-  filters: InventoryChainFilters,
+  filters: InventoryChainFilterState,
 ): PrimaryInventoryChainKey | null {
+  const normalizedFilters = normalizeInventoryChainFilters(filters);
   const enabled = PRIMARY_CHAIN_KEYS.filter(
     (k): k is PrimaryInventoryChainKey =>
-      isPrimaryInventoryChainKey(k) && filters[k],
+      isPrimaryInventoryChainKey(k) && normalizedFilters[k],
   );
   return enabled.length === 1 ? enabled[0]! : null;
 }
 
+export function normalizeInventoryChainFilters(
+  filters: InventoryChainFilterState,
+): InventoryChainFilters {
+  return {
+    ...DEFAULT_INVENTORY_CHAIN_FILTERS,
+    ...(filters ?? {}),
+  };
+}
+
 export function toggleInventoryChainFilter(
-  filters: InventoryChainFilters,
+  filters: InventoryChainFilterState,
   key: PrimaryInventoryChainKey,
 ): InventoryChainFilters {
-  return { ...filters, [key]: !filters[key] };
+  const normalizedFilters = normalizeInventoryChainFilters(filters);
+  return { ...normalizedFilters, [key]: !normalizedFilters[key] };
 }

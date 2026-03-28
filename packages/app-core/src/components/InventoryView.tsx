@@ -84,11 +84,11 @@ function countVisibleAssetsForFocus(
   focus: ChainKey,
   rows:
     | Array<{
-      chain: string;
-      balanceRaw: number;
-      valueUsd: number;
-      isTracked?: boolean;
-    }>
+        chain: string;
+        balanceRaw: number;
+        valueUsd: number;
+        isTracked?: boolean;
+      }>
     | undefined,
 ): number {
   return (rows ?? []).filter((row) => {
@@ -222,48 +222,46 @@ export function InventoryView() {
   );
   const ethereumReady = Boolean(
     evmAddr &&
-    !evmChainErrors.get("ethereum") &&
-    (loadedEvmChainKeys.has("ethereum") ||
-      cfg?.ethereumBalanceReady ||
-      cfg?.alchemyKeySet ||
-      cloudManagedAccess),
+      !evmChainErrors.get("ethereum") &&
+      (loadedEvmChainKeys.has("ethereum") ||
+        cfg?.ethereumBalanceReady ||
+        cfg?.alchemyKeySet ||
+        cloudManagedAccess),
   );
   const baseReady = Boolean(
     evmAddr &&
-    !evmChainErrors.get("base") &&
-    (loadedEvmChainKeys.has("base") ||
-      cfg?.baseBalanceReady ||
-      cfg?.alchemyKeySet ||
-      cloudManagedAccess),
+      !evmChainErrors.get("base") &&
+      (loadedEvmChainKeys.has("base") ||
+        cfg?.baseBalanceReady ||
+        cfg?.alchemyKeySet ||
+        cloudManagedAccess),
   );
   const bscReady = Boolean(
     evmAddr &&
-    !evmChainErrors.get("bsc") &&
-    (loadedEvmChainKeys.has("bsc") ||
-      cfg?.bscBalanceReady ||
-      cfg?.ankrKeySet ||
-      hasManagedBscRpc),
+      !evmChainErrors.get("bsc") &&
+      (loadedEvmChainKeys.has("bsc") ||
+        cfg?.bscBalanceReady ||
+        cfg?.ankrKeySet ||
+        hasManagedBscRpc),
   );
   const avaxReady = Boolean(
     evmAddr &&
-    !evmChainErrors.get("avax") &&
-    (loadedEvmChainKeys.has("avax") ||
-      cfg?.avalancheBalanceReady ||
-      cfg?.alchemyKeySet ||
-      cloudManagedAccess),
+      !evmChainErrors.get("avax") &&
+      (loadedEvmChainKeys.has("avax") ||
+        cfg?.avalancheBalanceReady ||
+        cfg?.alchemyKeySet ||
+        cloudManagedAccess),
   );
   const solanaReady = Boolean(
     solAddr &&
-    (Boolean(walletBalances?.solana) ||
-      cfg?.solanaBalanceReady ||
-      cfg?.heliusKeySet ||
-      cloudManagedAccess),
+      (Boolean(walletBalances?.solana) ||
+        cfg?.solanaBalanceReady ||
+        cfg?.heliusKeySet ||
+        cloudManagedAccess),
   );
   const bnbBalance = Number.parseFloat(focusedNativeBalance ?? "0") || 0;
   const tradeReady =
-    singleChainFocus === "bsc"
-      ? bnbBalance >= BSC_GAS_READY_THRESHOLD
-      : true;
+    singleChainFocus === "bsc" ? bnbBalance >= BSC_GAS_READY_THRESHOLD : true;
   const addresses = [
     evmAddr ? { label: "EVM", address: evmAddr } : null,
     solAddr ? { label: "Solana", address: solAddr } : null,
@@ -340,9 +338,9 @@ export function InventoryView() {
   const inlineError =
     singleChainFocus && focusedChainError
       ? {
-        message: `${focusedChainLabel ?? "Chain"}: ${focusedChainError}`,
-        retryTitle: `Retry fetching ${focusedChainLabel ?? "chain"} balances`,
-      }
+          message: `${focusedChainLabel ?? "Chain"}: ${focusedChainError}`,
+          retryTitle: `Retry fetching ${focusedChainLabel ?? "chain"} balances`,
+        }
       : null;
 
   const legacyRpcChain = singleChainFocus
@@ -350,47 +348,48 @@ export function InventoryView() {
     : null;
   const headerWarning =
     singleChainFocus &&
-      legacyRpcChain !== null &&
-      cfg?.legacyCustomChains?.includes(legacyRpcChain)
+    legacyRpcChain !== null &&
+    cfg?.legacyCustomChains?.includes(legacyRpcChain)
       ? {
-        title: `${focusedChainLabel ??
-          (singleChainFocus === "bsc"
-            ? "BSC"
-            : singleChainFocus === "solana"
-              ? "Solana"
-              : "EVM")
+          title: `${
+            focusedChainLabel ??
+            (singleChainFocus === "bsc"
+              ? "BSC"
+              : singleChainFocus === "solana"
+                ? "Solana"
+                : "EVM")
           } is using legacy raw RPC config.`,
-        body: "Re-save a supported provider in Settings to migrate fully.",
-        actionLabel: t("wallet.setup.configureRpc"),
-      }
-      : singleChainFocus === "bsc" && evmAddr && !bscReady
-        ? {
-          title: t("wallet.setup.rpcNotConfigured"),
-          body: t("portfolioheader.ConnectViaElizaCl"),
+          body: "Re-save a supported provider in Settings to migrate fully.",
           actionLabel: t("wallet.setup.configureRpc"),
         }
-        : singleChainFocus === "solana" && solAddr && !solanaReady
-          ? {
-            title: "Solana RPC is not configured.",
-            body: "Connect via Eliza Cloud or configure HELIUS_API_KEY / SOLANA_RPC_URL in Settings to load Solana balances.",
+      : singleChainFocus === "bsc" && evmAddr && !bscReady
+        ? {
+            title: t("wallet.setup.rpcNotConfigured"),
+            body: t("portfolioheader.ConnectViaElizaCl"),
             actionLabel: t("wallet.setup.configureRpc"),
           }
-          : singleChainFocus &&
-            singleChainFocus !== "bsc" &&
-            singleChainFocus !== "solana" &&
-            evmAddr &&
-            !(singleChainFocus === "ethereum"
-              ? ethereumReady
-              : singleChainFocus === "base"
-                ? baseReady
-                : singleChainFocus === "avax"
-                  ? avaxReady
-                  : false)
-            ? {
-              title: `${focusedChainLabel ?? "Chain"} access is not configured.`,
-              body: `Connect via Eliza Cloud or configure ${focusedChainLabel ?? "this chain"} RPC access in Settings to load balances.`,
+        : singleChainFocus === "solana" && solAddr && !solanaReady
+          ? {
+              title: "Solana RPC is not configured.",
+              body: "Connect via Eliza Cloud or configure HELIUS_API_KEY / SOLANA_RPC_URL in Settings to load Solana balances.",
               actionLabel: t("wallet.setup.configureRpc"),
             }
+          : singleChainFocus &&
+              singleChainFocus !== "bsc" &&
+              singleChainFocus !== "solana" &&
+              evmAddr &&
+              !(singleChainFocus === "ethereum"
+                ? ethereumReady
+                : singleChainFocus === "base"
+                  ? baseReady
+                  : singleChainFocus === "avax"
+                    ? avaxReady
+                    : false)
+            ? {
+                title: `${focusedChainLabel ?? "Chain"} access is not configured.`,
+                body: `Connect via Eliza Cloud or configure ${focusedChainLabel ?? "this chain"} RPC access in Settings to load balances.`,
+                actionLabel: t("wallet.setup.configureRpc"),
+              }
             : null;
 
   // ── Tracked token handlers ────────────────────────────────────────
@@ -485,10 +484,11 @@ export function InventoryView() {
                 variant="ghost"
                 size="sm"
                 data-testid="wallet-view-tokens"
-                className={`h-10 rounded-xl border text-xs font-semibold ${inventoryView === "tokens"
-                  ? WALLET_SIDEBAR_ITEM_ACTIVE_CLASS
-                  : "border-border/45 bg-bg/20 text-muted hover:border-border/70 hover:bg-bg/35 hover:text-txt"
-                  }`}
+                className={`h-10 rounded-xl border text-xs font-semibold ${
+                  inventoryView === "tokens"
+                    ? WALLET_SIDEBAR_ITEM_ACTIVE_CLASS
+                    : "border-border/45 bg-bg/20 text-muted hover:border-border/70 hover:bg-bg/35 hover:text-txt"
+                }`}
                 onClick={() => {
                   setState("inventoryView", "tokens");
                   if (!walletBalances) void loadBalances();
@@ -501,10 +501,11 @@ export function InventoryView() {
                 variant="ghost"
                 size="sm"
                 data-testid="wallet-view-nfts"
-                className={`h-10 rounded-xl border text-xs font-semibold ${inventoryView === "nfts"
-                  ? WALLET_SIDEBAR_ITEM_ACTIVE_CLASS
-                  : "border-border/45 bg-bg/20 text-muted hover:border-border/70 hover:bg-bg/35 hover:text-txt"
-                  }`}
+                className={`h-10 rounded-xl border text-xs font-semibold ${
+                  inventoryView === "nfts"
+                    ? WALLET_SIDEBAR_ITEM_ACTIVE_CLASS
+                    : "border-border/45 bg-bg/20 text-muted hover:border-border/70 hover:bg-bg/35 hover:text-txt"
+                }`}
                 onClick={() => {
                   setState("inventoryView", "nfts");
                   if (!walletNfts) void loadNfts();
@@ -532,13 +533,13 @@ export function InventoryView() {
                               disabled
                                 ? undefined
                                 : () =>
-                                  setState(
-                                    "inventoryChainFilters",
-                                    toggleInventoryChainFilter(
-                                      inventoryChainFilters,
-                                      item.key,
-                                    ),
-                                  )
+                                    setState(
+                                      "inventoryChainFilters",
+                                      toggleInventoryChainFilter(
+                                        inventoryChainFilters,
+                                        item.key,
+                                      ),
+                                    )
                             }
                             aria-pressed={disabled ? undefined : isOn}
                             aria-label={
@@ -549,12 +550,13 @@ export function InventoryView() {
                                   : `${label} — hidden (click to show)`
                             }
                             aria-disabled={disabled}
-                            className={`flex aspect-square items-center justify-center rounded-2xl border transition-colors ${disabled
-                              ? "opacity-25 cursor-not-allowed border-border/20 bg-bg/10 text-muted"
-                              : isOn
-                                ? "border-accent/30 bg-accent/14 text-txt-strong"
-                                : "border-border/40 bg-bg/20 text-muted opacity-45 hover:border-border/60 hover:opacity-70 hover:text-txt"
-                              }`}
+                            className={`flex aspect-square items-center justify-center rounded-2xl border transition-colors ${
+                              disabled
+                                ? "opacity-25 cursor-not-allowed border-border/20 bg-bg/10 text-muted"
+                                : isOn
+                                  ? "border-accent/30 bg-accent/14 text-txt-strong"
+                                  : "border-border/40 bg-bg/20 text-muted opacity-45 hover:border-border/60 hover:opacity-70 hover:text-txt"
+                            }`}
                           >
                             <ChainIcon chain={item.key} size="lg" />
                           </button>
@@ -668,8 +670,6 @@ export function InventoryView() {
               )}
             </div>
 
-
-
             <div
               data-testid="wallet-overview-card"
               className="mt-4 flex flex-col gap-4 sm:gap-5"
@@ -739,74 +739,74 @@ export function InventoryView() {
                   </div>
                   <TooltipProvider delayDuration={200} skipDelayDuration={100}>
                     <div className="flex shrink-0 items-center gap-2">
-                    <div className="flex shrink-0 items-stretch overflow-hidden rounded-xl border border-border/60 bg-bg/24">
+                      <div className="flex shrink-0 items-stretch overflow-hidden rounded-xl border border-border/60 bg-bg/24">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className={`h-10 w-10 shrink-0 rounded-none ${inventorySortDirection === "asc" ? "bg-accent/14 text-txt-strong" : "text-muted"}`}
+                              aria-label={t("wallet.sortAscending")}
+                              aria-pressed={inventorySortDirection === "asc"}
+                              onClick={() =>
+                                setState("inventorySortDirection", "asc")
+                              }
+                            >
+                              <ArrowUp className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="text-xs">
+                            {t("wallet.sortAscending")}
+                          </TooltipContent>
+                        </Tooltip>
+                        <div
+                          className="w-px shrink-0 self-stretch bg-border/45"
+                          aria-hidden
+                        />
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className={`h-10 w-10 shrink-0 rounded-none ${inventorySortDirection === "desc" ? "bg-accent/14 text-txt-strong" : "text-muted"}`}
+                              aria-label={t("wallet.sortDescending")}
+                              aria-pressed={inventorySortDirection === "desc"}
+                              onClick={() =>
+                                setState("inventorySortDirection", "desc")
+                              }
+                            >
+                              <ArrowDown className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="text-xs">
+                            {t("wallet.sortDescending")}
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
                             type="button"
-                            variant="ghost"
+                            variant="outline"
                             size="icon"
-                            className={`h-10 w-10 shrink-0 rounded-none ${inventorySortDirection === "asc" ? "bg-accent/14 text-txt-strong" : "text-muted"}`}
-                            aria-label={t("wallet.sortAscending")}
-                            aria-pressed={inventorySortDirection === "asc"}
+                            data-testid="wallet-refresh-balances"
+                            className="h-10 w-10 shrink-0 rounded-xl border-border/60 bg-card/88 shadow-sm"
+                            aria-label={t("common.refresh")}
                             onClick={() =>
-                              setState("inventorySortDirection", "asc")
+                              inventoryView === "tokens"
+                                ? void loadBalances()
+                                : void loadNfts()
                             }
                           >
-                            <ArrowUp className="h-4 w-4" />
+                            <RefreshCw className="h-4 w-4" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent side="bottom" className="text-xs">
-                          {t("wallet.sortAscending")}
+                          {t("common.refresh")}
                         </TooltipContent>
                       </Tooltip>
-                      <div
-                        className="w-px shrink-0 self-stretch bg-border/45"
-                        aria-hidden
-                      />
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className={`h-10 w-10 shrink-0 rounded-none ${inventorySortDirection === "desc" ? "bg-accent/14 text-txt-strong" : "text-muted"}`}
-                            aria-label={t("wallet.sortDescending")}
-                            aria-pressed={inventorySortDirection === "desc"}
-                            onClick={() =>
-                              setState("inventorySortDirection", "desc")
-                            }
-                          >
-                            <ArrowDown className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom" className="text-xs">
-                          {t("wallet.sortDescending")}
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          data-testid="wallet-refresh-balances"
-                          className="h-10 w-10 shrink-0 rounded-xl border-border/60 bg-card/88 shadow-sm"
-                          aria-label={t("common.refresh")}
-                          onClick={() =>
-                            inventoryView === "tokens"
-                              ? void loadBalances()
-                              : void loadNfts()
-                          }
-                        >
-                          <RefreshCw className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom" className="text-xs">
-                        {t("common.refresh")}
-                      </TooltipContent>
-                    </Tooltip>
                     </div>
                   </TooltipProvider>
                 </div>

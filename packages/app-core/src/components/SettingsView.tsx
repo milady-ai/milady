@@ -43,7 +43,7 @@ import {
   APP_SIDEBAR_INNER_CLASSNAME,
   APP_SIDEBAR_KICKER_CLASSNAME,
   APP_SIDEBAR_SCROLL_REGION_CLASSNAME,
-  APP_SIDEBAR_SEARCH_INPUT_CLASSNAME
+  APP_SIDEBAR_SEARCH_INPUT_CLASSNAME,
 } from "./sidebar-shell-styles";
 
 interface SettingsSectionDef {
@@ -266,15 +266,14 @@ function SettingsSidebar({
       data-testid="settings-sidebar"
     >
       <div className={APP_SIDEBAR_INNER_CLASSNAME}>
-
-          <Input
-            type="search"
-            value={searchQuery}
-            onChange={(event) => onSearchChange(event.target.value)}
-            placeholder={searchLabel}
-            aria-label={searchLabel}
-            className={`w-full ${APP_SIDEBAR_SEARCH_INPUT_CLASSNAME}`}
-          />
+        <Input
+          type="search"
+          value={searchQuery}
+          onChange={(event) => onSearchChange(event.target.value)}
+          placeholder={searchLabel}
+          aria-label={searchLabel}
+          className={`w-full ${APP_SIDEBAR_SEARCH_INPUT_CLASSNAME}`}
+        />
 
         <nav
           className={`mt-4 space-y-1.5 ${APP_SIDEBAR_SCROLL_REGION_CLASSNAME}`}
@@ -290,10 +289,11 @@ function SettingsSidebar({
                 type="button"
                 onClick={() => onSectionChange(section.id)}
                 aria-current={isActive ? "page" : undefined}
-                className={`${APP_SIDEBAR_CARD_BASE_CLASSNAME} ${isActive
-                  ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
-                  : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
-                  }`}
+                className={`${APP_SIDEBAR_CARD_BASE_CLASSNAME} ${
+                  isActive
+                    ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
+                    : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
+                }`}
               >
                 <div className="min-w-0 flex-1 text-left">
                   <div

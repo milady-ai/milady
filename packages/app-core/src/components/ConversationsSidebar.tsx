@@ -144,12 +144,13 @@ export function ConversationsSidebar({
   const unreadCount = unreadConversations.size;
   const sidebarClassName = isGameModal
     ? GAME_MODAL_SIDEBAR_CLASS
-    : `${DEFAULT_SIDEBAR_CLASS} ${mobile
-      ? DEFAULT_SIDEBAR_MOBILE_CLASS
-      : isCollapsed
-        ? DEFAULT_SIDEBAR_DESKTOP_COLLAPSED_CLASS
-        : DEFAULT_SIDEBAR_DESKTOP_CLASS
-    }`;
+    : `${DEFAULT_SIDEBAR_CLASS} ${
+        mobile
+          ? DEFAULT_SIDEBAR_MOBILE_CLASS
+          : isCollapsed
+            ? DEFAULT_SIDEBAR_DESKTOP_COLLAPSED_CLASS
+            : DEFAULT_SIDEBAR_DESKTOP_CLASS
+      }`;
   const listRegionClassName = isGameModal
     ? GAME_MODAL_LIST_REGION_CLASS
     : DEFAULT_LIST_REGION_CLASS;
@@ -327,10 +328,11 @@ export function ConversationsSidebar({
               <div className={listPanelClassName}>
                 {sortedConversations.length === 0 ? (
                   <div
-                    className={`${EMPTY_STATE_CLASS} ${isGameModal
-                      ? "border-white/10 bg-black/15 font-medium italic text-[color:var(--onboarding-text-muted)]"
-                      : "border-border/50 bg-bg/35 text-muted"
-                      }`}
+                    className={`${EMPTY_STATE_CLASS} ${
+                      isGameModal
+                        ? "border-white/10 bg-black/15 font-medium italic text-[color:var(--onboarding-text-muted)]"
+                        : "border-border/50 bg-bg/35 text-muted"
+                    }`}
                   >
                     {t("conversations.none")}
                   </div>
