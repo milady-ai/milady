@@ -314,32 +314,48 @@ type CloudServiceKey = "inference" | "rpc" | "media" | "tts" | "embeddings";
 const CLOUD_SERVICE_DEFS: {
   key: CloudServiceKey;
   labelKey: string;
+  labelDefault: string;
   descriptionKey: string;
+  descriptionDefault: string;
 }[] = [
   {
     key: "inference",
     labelKey: "configpageview.ServiceInferenceLabel",
+    labelDefault: "Inference",
     descriptionKey: "configpageview.ServiceInferenceDesc",
+    descriptionDefault:
+      "Use cloud-hosted models for chat and completions. Disable to use your own API keys.",
   },
   {
     key: "rpc",
     labelKey: "configpageview.ServiceRpcLabel",
+    labelDefault: "RPC",
     descriptionKey: "configpageview.ServiceRpcDesc",
+    descriptionDefault:
+      "Remote procedure calls for agent coordination and messaging.",
   },
   {
     key: "media",
     labelKey: "configpageview.ServiceMediaLabel",
+    labelDefault: "Media",
     descriptionKey: "configpageview.ServiceMediaDesc",
+    descriptionDefault:
+      "Cloud media processing for images, video, and file conversion.",
   },
   {
     key: "tts",
     labelKey: "configpageview.ServiceTtsLabel",
+    labelDefault: "Text-to-Speech",
     descriptionKey: "configpageview.ServiceTtsDesc",
+    descriptionDefault: "Cloud-hosted voice synthesis for agent speech output.",
   },
   {
     key: "embeddings",
     labelKey: "configpageview.ServiceEmbeddingsLabel",
+    labelDefault: "Embeddings",
     descriptionKey: "configpageview.ServiceEmbeddingsDesc",
+    descriptionDefault:
+      "Cloud-hosted embedding models for knowledge search and memory.",
   },
 ];
 
@@ -432,32 +448,40 @@ function CloudServicesSection() {
         })}
       </p>
       <div className="flex flex-col gap-2">
-        {CLOUD_SERVICE_DEFS.map(({ key, labelKey, descriptionKey }) => (
-          <div
-            key={key}
-            className={`flex items-center justify-between p-3 border border-border rounded-lg transition-colors ${
-              services[key] ? "bg-accent/5" : ""
-            }`}
-          >
-            <div className="flex-1 min-w-0 mr-4">
-              <div
-                id={`cloud-service-${key}`}
-                className="text-[13px] font-medium text-txt"
-              >
-                {t(labelKey)}
+        {CLOUD_SERVICE_DEFS.map(
+          ({
+            key,
+            labelKey,
+            labelDefault,
+            descriptionKey,
+            descriptionDefault,
+          }) => (
+            <div
+              key={key}
+              className={`flex items-center justify-between p-3 border border-border rounded-lg transition-colors ${
+                services[key] ? "bg-accent/5" : ""
+              }`}
+            >
+              <div className="flex-1 min-w-0 mr-4">
+                <div
+                  id={`cloud-service-${key}`}
+                  className="text-[13px] font-medium text-txt"
+                >
+                  {t(labelKey, { defaultValue: labelDefault })}
+                </div>
+                <div className="text-[11px] text-muted mt-0.5">
+                  {t(descriptionKey, { defaultValue: descriptionDefault })}
+                </div>
               </div>
-              <div className="text-[11px] text-muted mt-0.5">
-                {t(descriptionKey)}
-              </div>
+              <Switch
+                checked={services[key]}
+                disabled={saving}
+                onCheckedChange={() => void handleToggle(key)}
+                aria-labelledby={`cloud-service-${key}`}
+              />
             </div>
-            <Switch
-              checked={services[key]}
-              disabled={saving}
-              onCheckedChange={() => void handleToggle(key)}
-              aria-labelledby={`cloud-service-${key}`}
-            />
-          </div>
-        ))}
+          ),
+        )}
       </div>
     </div>
   );
