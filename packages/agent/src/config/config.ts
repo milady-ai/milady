@@ -1,6 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import JSON5 from "json5";
+import {
+  isMiladySettingsDebugEnabled,
+  sanitizeForSettingsDebug,
+  settingsDebugCloudSummary,
+} from "@miladyai/shared";
 import { collectConfigEnvVars } from "./env-vars";
 import { resolveConfigIncludes } from "./includes";
 import { resolveConfigPath, resolveUserPath } from "./paths";
@@ -93,6 +98,17 @@ export function loadElizaConfig(): ElizaConfig {
     }
   }
 
+  if (isMiladySettingsDebugEnabled()) {
+    const cloud = resolved.cloud as Record<string, unknown> | undefined;
+    console.debug("[milady][settings][loadElizaConfig]", {
+      path: configPath,
+      topLevelKeys: Object.keys(resolved as object).sort(),
+      cloud: settingsDebugCloudSummary(cloud),
+      envVarKeysHydrated: Object.keys(envVars).sort(),
+      snapshot: sanitizeForSettingsDebug(resolved),
+    });
+  }
+
   return resolved;
 }
 
@@ -141,6 +157,18 @@ export function saveElizaConfig(config: ElizaConfig): void {
     throw new Error(
       `[eliza-config] Config file is empty after write: ${configPath}`,
     );
+  }
+
+  if (isMiladySettingsDebugEnabled()) {
+    const c = sanitized as Record<string, unknown>;
+    const cloud = c.cloud as Record<string, unknown> | undefined;
+    console.debug("[milady][settings][saveElizaConfig]", {
+      path: configPath,
+      bytes: stat.size,
+      topLevelKeys: Object.keys(c).sort(),
+      cloud: settingsDebugCloudSummary(cloud),
+      snapshot: sanitizeForSettingsDebug(sanitized),
+    });
   }
 }
 

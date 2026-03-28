@@ -1037,11 +1037,18 @@ export function MediaSettingsSection() {
     setSaving(true);
     setSaveError(null);
     setSaveSuccess(false);
-    await client.updateConfig({ media: mediaConfig });
-    setSaveSuccess(true);
-    setDirty(false);
-    setTimeout(() => setSaveSuccess(false), 2500);
-    setSaving(false);
+    try {
+      await client.updateConfig({ media: mediaConfig });
+      setSaveSuccess(true);
+      setDirty(false);
+      setTimeout(() => setSaveSuccess(false), 2500);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : String(err ?? "Save failed");
+      setSaveError(message);
+    } finally {
+      setSaving(false);
+    }
   }, [mediaConfig, setTimeout]);
 
   // Check if provider is configured

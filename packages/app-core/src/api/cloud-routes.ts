@@ -29,6 +29,13 @@ type CloudRuntimeSecrets = Record<string, string | number | boolean>;
 
 const CLOUD_LOGIN_POLL_TIMEOUT_MS = 10_000;
 
+/**
+ * Monotonic counter incremented on every cloud disconnect.
+ * Used to detect a disconnect that happened while a login poll was in-flight,
+ * without blocking fresh logins when cloud simply starts as disabled.
+ */
+let cloudDisconnectEpoch = 0;
+
 type TelemetrySpan = {
   success: (meta?: Record<string, unknown>) => void;
   failure: (meta?: Record<string, unknown>) => void;
@@ -69,7 +76,19 @@ async function fetchCloudLoginStatus(
 async function persistCloudLoginStatus(args: {
   apiKey: string;
   state: CloudRouteState;
+  /** Snapshot of cloudDisconnectEpoch taken before the poll started. */
+  epochAtPollStart?: number;
 }): Promise<void> {
+  if (
+    args.epochAtPollStart !== undefined &&
+    args.epochAtPollStart !== cloudDisconnectEpoch
+  ) {
+    logger.warn(
+      "[cloud-login] Skipping login persist: a disconnect occurred while the login poll was in-flight",
+    );
+    return;
+  }
+
   const cloud = { ...(args.state.config.cloud ?? {}) } as Record<
     string,
     unknown
@@ -145,6 +164,7 @@ export async function handleCloudRoute(
   state: CloudRouteState,
 ): Promise<boolean> {
   if (method === "POST" && pathname === "/api/cloud/disconnect") {
+    cloudDisconnectEpoch++;
     try {
       await disconnectUnifiedCloudConnection({
         cloudManager: state.cloudManager,
@@ -205,6 +225,8 @@ export async function handleCloudRoute(
       sendJsonError(res, 400, urlError);
       return true;
     }
+
+    const epochBeforePoll = cloudDisconnectEpoch;
 
     const loginPollSpan = getTelemetrySpan({
       boundary: "cloud",
@@ -290,6 +312,7 @@ export async function handleCloudRoute(
       await persistCloudLoginStatus({
         apiKey: data.apiKey,
         state,
+        epochAtPollStart: epochBeforePoll,
       });
       sendJson(res, 200, {
         status: "authenticated",

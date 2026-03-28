@@ -84,6 +84,11 @@ import {
   normalizeWalletRpcSelections,
   WALLET_RPC_PROVIDER_OPTIONS,
 } from "@miladyai/agent/contracts/wallet";
+import {
+  isMiladySettingsDebugEnabled,
+  sanitizeForSettingsDebug,
+  settingsDebugCloudSummary,
+} from "@miladyai/shared";
 import type { ConfigUiHint } from "../types";
 import { stripAssistantStageDirections } from "../utils/assistant-text";
 import { getElizaApiBase, getElizaApiToken } from "../utils/eliza-globals";
@@ -2028,6 +2033,27 @@ const DEFAULT_FETCH_TIMEOUT_MS = 10_000;
 const SESSION_STORAGE_API_BASE_KEY = "milady_api_base";
 const SESSION_STORAGE_API_TOKEN_KEY = "milady_api_token";
 
+function miladyClientSettingsDebug(): boolean {
+  let viteEnv: Record<string, unknown> | undefined;
+  try {
+    viteEnv = import.meta.env as Record<string, unknown>;
+  } catch {
+    viteEnv = undefined;
+  }
+  return isMiladySettingsDebugEnabled({
+    importMetaEnv: viteEnv,
+    env: typeof process !== "undefined" ? process.env : undefined,
+  });
+}
+
+function logSettingsClient(phase: string, detail: Record<string, unknown>): void {
+  if (!miladyClientSettingsDebug()) return;
+  console.debug(
+    `[milady][settings][client] ${phase}`,
+    sanitizeForSettingsDebug(detail),
+  );
+}
+
 export class MiladyClient {
   private _baseUrl: string;
   private _explicitBase: boolean;
@@ -2494,11 +2520,22 @@ export class MiladyClient {
     provider: string,
     apiKey?: string,
   ): Promise<{ success: boolean; provider: string; restarting: boolean }> {
-    return this.fetch("/api/provider/switch", {
+    logSettingsClient("POST /api/provider/switch → start", {
+      baseUrl: this.getBaseUrl(),
+      provider,
+      hasApiKey: Boolean(apiKey?.trim()),
+      apiKey,
+    });
+    const result = (await this.fetch("/api/provider/switch", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ provider, ...(apiKey ? { apiKey } : {}) }),
+    })) as { success: boolean; provider: string; restarting: boolean };
+    logSettingsClient("POST /api/provider/switch ← ok", {
+      baseUrl: this.getBaseUrl(),
+      result,
     });
+    return result;
   }
 
   async startOpenAILogin(): Promise<{
@@ -2671,7 +2708,17 @@ export class MiladyClient {
   }
 
   async getConfig(): Promise<Record<string, unknown>> {
-    return this.fetch("/api/config");
+    logSettingsClient("GET /api/config → start", {
+      baseUrl: this.getBaseUrl(),
+    });
+    const r = (await this.fetch("/api/config")) as Record<string, unknown>;
+    const cloud = r.cloud as Record<string, unknown> | undefined;
+    logSettingsClient("GET /api/config ← ok", {
+      baseUrl: this.getBaseUrl(),
+      topKeys: Object.keys(r).sort(),
+      cloud: settingsDebugCloudSummary(cloud),
+    });
+    return r;
   }
 
   async getConfigSchema(): Promise<ConfigSchemaResponse> {
@@ -2681,11 +2728,22 @@ export class MiladyClient {
   async updateConfig(
     patch: Record<string, unknown>,
   ): Promise<Record<string, unknown>> {
-    return this.fetch("/api/config", {
+    logSettingsClient("PUT /api/config → start", {
+      baseUrl: this.getBaseUrl(),
+      patch,
+    });
+    const out = (await this.fetch("/api/config", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(patch),
+    })) as Record<string, unknown>;
+    const cloud = out.cloud as Record<string, unknown> | undefined;
+    logSettingsClient("PUT /api/config ← ok", {
+      baseUrl: this.getBaseUrl(),
+      topKeys: Object.keys(out).sort(),
+      cloud: settingsDebugCloudSummary(cloud),
     });
+    return out;
   }
 
   // ── Custom VRM avatar ────────────────────────────────────────────────
@@ -2966,10 +3024,19 @@ export class MiladyClient {
     id: string,
     config: Record<string, unknown>,
   ): Promise<{ ok: boolean; restarting?: boolean }> {
-    return this.fetch(`/api/plugins/${id}`, {
+    logSettingsClient(`PUT /api/plugins/${id} → start`, {
+      baseUrl: this.getBaseUrl(),
+      body: config,
+    });
+    const result = (await this.fetch(`/api/plugins/${id}`, {
       method: "PUT",
       body: JSON.stringify(config),
+    })) as { ok: boolean; restarting?: boolean };
+    logSettingsClient(`PUT /api/plugins/${id} ← ok`, {
+      baseUrl: this.getBaseUrl(),
+      result,
     });
+    return result;
   }
 
   async getSecrets(): Promise<{ secrets: SecretInfo[] }> {
@@ -2979,10 +3046,20 @@ export class MiladyClient {
   async updateSecrets(
     secrets: Record<string, string>,
   ): Promise<{ ok: boolean; updated: string[] }> {
-    return this.fetch("/api/secrets", {
+    logSettingsClient("PUT /api/secrets → start", {
+      baseUrl: this.getBaseUrl(),
+      secretKeys: Object.keys(secrets).sort(),
+      secrets,
+    });
+    const out = (await this.fetch("/api/secrets", {
       method: "PUT",
       body: JSON.stringify({ secrets }),
+    })) as { ok: boolean; updated: string[] };
+    logSettingsClient("PUT /api/secrets ← ok", {
+      baseUrl: this.getBaseUrl(),
+      out,
     });
+    return out;
   }
 
   async testPluginConnection(id: string): Promise<{

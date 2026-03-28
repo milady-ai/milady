@@ -474,7 +474,10 @@ export const ConfigRenderer = forwardRef<
     const generalFields = visibleFields.filter((f) => !f.advanced);
     const advancedFields = visibleFields.filter((f) => f.advanced);
 
-    // Group general fields, sort required-unconfigured to the top within each group
+    // Group general fields, sort required-unconfigured to the top within each group.
+    // Use setKeys (server-persisted state) instead of live `values` to decide
+    // emptiness — otherwise typing into a field causes it to jump position
+    // mid-keystroke as it transitions from "empty required" to "filled required".
     const fieldGroups = new Map<string, ResolvedField[]>();
     for (const f of generalFields) {
       const g = fieldGroups.get(f.group) ?? [];
@@ -483,10 +486,8 @@ export const ConfigRenderer = forwardRef<
     }
     for (const [, fields] of fieldGroups) {
       fields.sort((a, b) => {
-        const aEmpty =
-          a.required && (values[a.key] == null || values[a.key] === "");
-        const bEmpty =
-          b.required && (values[b.key] == null || values[b.key] === "");
+        const aEmpty = a.required && !setKeys.has(a.key);
+        const bEmpty = b.required && !setKeys.has(b.key);
         if (aEmpty && !bEmpty) return -1;
         if (!aEmpty && bEmpty) return 1;
         return (a.hint.order ?? 999) - (b.hint.order ?? 999);
@@ -499,7 +500,7 @@ export const ConfigRenderer = forwardRef<
       showHeaders: fieldGroups.size > 1,
       allVisibleFields: visibleFields,
     };
-  }, [schema, hints, registry, isFieldVisible, values]);
+  }, [schema, hints, registry, isFieldVisible, setKeys]);
 
   // ── Field labels for validation summary ────────────────────────────
 

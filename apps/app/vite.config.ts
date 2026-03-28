@@ -431,21 +431,69 @@ function nativeModuleStubPlugin(): Plugin {
   };
 }
 
-function sparkWasmDataUrlPlugin(): Plugin {
+/**
+ * Absolute path to the workspace-root three package directory.
+ * Electrobun ships a nested three\@0.165 under its own node_modules; without
+ * pinning resolution, some deps may pick up that copy, creating a second
+ * THREE.ShaderChunk that never receives Spark's splatDefines registration.
+ */
+const threeRootDir = path.resolve(miladyRoot, "node_modules/three");
+
+function sparkPatchPlugin(): Plugin {
   return {
-    name: "spark-wasm-data-url",
+    name: "spark-patch",
     enforce: "pre",
+    resolveId: {
+      order: "pre",
+      async handler(source, importer, opts) {
+        if (opts.custom?.["spark-patch:skip"]) return null;
+        if (source !== "three" || !importer) return null;
+        // Only intercept imports from files outside the root three package
+        // (prevents infinite recursion and lets three's internal imports work).
+        if (importer.startsWith(threeRootDir)) return null;
+        const skipOpts = {
+          ...opts,
+          custom: { ...opts.custom, "spark-patch:skip": true },
+        };
+        const resolved = await this.resolve(source, importer, skipOpts);
+        if (!resolved) return null;
+        // If the resolved path is NOT under the root three dir (e.g. it
+        // resolved to electrobun's nested copy), redirect to the root copy.
+        if (!resolved.id.startsWith(threeRootDir)) {
+          return (
+            (await this.resolve(
+              source,
+              path.join(threeRootDir, "package.json"),
+              skipOpts,
+            )) ?? resolved
+          );
+        }
+        return null;
+      },
+    },
     transform(code, id) {
       if (!id.includes("@sparkjsdev/spark/dist/spark.module.js")) return null;
-      const patched = code.replace(
+      let patched = code;
+
+      // Inline data: WASM URLs that Vite can't handle.
+      patched = patched.replace(
         /new URL\(("(?:data:application\/wasm;base64,[^"]+)"),\s*import\.meta\.url\)/g,
         "$1",
       );
+
+      // Spark lazily registers THREE.ShaderChunk.splatDefines inside
+      // getShaders(), which only runs in the SparkRenderer constructor.
+      // Compute shaders (Readback / PackedSplats) may be compiled earlier
+      // via SplatMesh init and reference #include <splatDefines>, causing
+      // "Can not resolve #include <splatDefines>" in Three.js.
+      // Patch: hoist the ShaderChunk registration to module load time.
+      patched = patched.replace(
+        /function getShaders\(\)\s*\{\s*if\s*\(!shaders\)\s*\{/,
+        "THREE.ShaderChunk.splatDefines = splatDefines_default;\nfunction getShaders() {\n  if (!shaders) {",
+      );
+
       if (patched === code) return null;
-      return {
-        code: patched,
-        map: null,
-      };
+      return { code: patched, map: null };
     },
   };
 }
@@ -472,6 +520,9 @@ function watchWorkspacePackagesPlugin(): Plugin {
 export default defineConfig({
   root: here,
   base: "./",
+  // Keep pre-bundle cache under the app dir (not node_modules/.vite) so Bun
+  // installs don't fight Vite, and `bun run clean` / docs can target one path.
+  cacheDir: path.resolve(here, ".vite"),
   publicDir: path.resolve(here, "public"),
   define: {
     global: "globalThis",
@@ -479,10 +530,17 @@ export default defineConfig({
     "import.meta.env.MILADY_TTS_DEBUG": JSON.stringify(
       process.env.MILADY_TTS_DEBUG ?? "",
     ),
+    // Settings load/save trace (MiladyClient + shared isMiladySettingsDebugEnabled).
+    "import.meta.env.MILADY_SETTINGS_DEBUG": JSON.stringify(
+      process.env.MILADY_SETTINGS_DEBUG ?? "",
+    ),
+    "import.meta.env.VITE_MILADY_SETTINGS_DEBUG": JSON.stringify(
+      process.env.VITE_MILADY_SETTINGS_DEBUG ?? "",
+    ),
   },
   plugins: [
     nativeModuleStubPlugin(),
-    sparkWasmDataUrlPlugin(),
+    sparkPatchPlugin(),
     watchWorkspacePackagesPlugin(),
     tailwindcss(),
     react(),
@@ -641,7 +699,18 @@ export default defineConfig({
     include: [
       "react",
       "react-dom",
+      // Three.js core + all subpath imports must be pre-bundled together so
+      // esbuild shares a single module identity. Without this, Spark (excluded
+      // from pre-bundling) and the pre-bundled examples/jsm/* addons end up
+      // with different THREE.ShaderChunk objects, causing "Can not resolve
+      // #include <splatDefines>" at render time.
       "three",
+      "three/examples/jsm/controls/OrbitControls.js",
+      "three/examples/jsm/libs/meshopt_decoder.module.js",
+      "three/examples/jsm/loaders/DRACOLoader.js",
+      "three/examples/jsm/loaders/GLTFLoader.js",
+      "three/examples/jsm/loaders/FBXLoader.js",
+      "three/examples/jsm/webxr/VRButton.js",
       // CJS polyfills that browser deps import as ESM named exports —
       // pre-bundling converts them so Vite can serve named imports.
       "events",
@@ -833,6 +902,10 @@ export default defineConfig({
     watch: {
       // Polling is only needed in Docker/WSL where native fs events are unreliable
       usePolling: process.env.MILADY_DEV_POLLING === "1",
+      // Electrobun postBuild copies renderer HTML/assets into electrobun/build/.
+      // Watching those paths triggers full reloads while deps are still optimizing,
+      // which breaks with "chunk-*.js does not exist" in node_modules/.vite/deps.
+      ignored: ["**/electrobun/build/**", "**/electrobun/artifacts/**"],
     },
   },
 });

@@ -225,7 +225,11 @@ let teleportSparkleTexture: THREE.CanvasTexture | null = null;
 /** Module-level singleton: the polyfill overrides navigator.xr globally so
  *  multiple instances cause "attempted to assign baselayer twice" errors. */
 let sharedLkgPolyfill: unknown = null;
-const DRACO_DECODER_PATH = resolveAppAssetUrl("vrm-decoders/draco/");
+let _cachedDracoDecoderPath: string | null = null;
+function getDracoDecoderPath(): string {
+  _cachedDracoDecoderPath ??= resolveAppAssetUrl("vrm-decoders/draco/");
+  return _cachedDracoDecoderPath;
+}
 
 function getRendererPixelRatio(sparkOptimized = false): number {
   if (typeof window === "undefined") return 1;
@@ -310,7 +314,7 @@ function getSharedDracoLoader(): DRACOLoader {
   if (!sharedDracoLoader) {
     sharedDracoLoader = new DRACOLoader();
     sharedDracoLoader.setDecoderConfig({ type: "wasm" });
-    sharedDracoLoader.setDecoderPath(DRACO_DECODER_PATH);
+    sharedDracoLoader.setDecoderPath(getDracoDecoderPath());
     sharedDracoLoader.preload();
   }
   return sharedDracoLoader;
@@ -923,47 +927,55 @@ export class VrmEngine {
     return VrmEngine.sparkModulePromise;
   }
 
+  private sparkRendererFailed = false;
+
   private async ensureSparkRenderer(): Promise<void> {
-    if (this.sparkRenderer || this.rendererBackend !== "webgl") return;
+    if (this.sparkRenderer || this.sparkRendererFailed) return;
+    if (this.rendererBackend !== "webgl") return;
     if (!this.scene || !this.renderer) return;
 
-    const { SparkRenderer } = await this.loadSparkModule();
-    // Re-check after async import — the engine may have been disposed during
-    // the await (e.g. React StrictMode double-mount).
-    if (!this.scene || !this.renderer) return;
-    const sparkRenderer = new SparkRenderer({
-      renderer: this.renderer as THREE.WebGLRenderer,
-      apertureAngle: 0.0,
-      focalDistance: 5.0,
-      originDistance: 1,
-      clipXY: SPARK_CLIP_XY,
-      maxStdDev: SPARK_MAX_STD_DEV,
-      maxPixelRadius: SPARK_MAX_PIXEL_RADIUS,
-      minAlpha: SPARK_MIN_ALPHA,
-      view: {
-        depthBias: 1,
-        sortDistance: SPARK_SORT_DISTANCE,
-        sortRadial: true,
-        sort360: false,
-      },
-    });
-    sparkRenderer.renderOrder = 9998;
-    this.scene.add(sparkRenderer);
-    this.sparkRenderer = sparkRenderer;
-    if (this.minimalBackgroundMode) {
-      sparkRenderer.visible = false;
-    }
+    try {
+      const { SparkRenderer } = await this.loadSparkModule();
+      // Re-check after async import — the engine may have been disposed during
+      // the await (e.g. React StrictMode double-mount).
+      if (!this.scene || !this.renderer) return;
+      const sparkRenderer = new SparkRenderer({
+        renderer: this.renderer as THREE.WebGLRenderer,
+        apertureAngle: 0.0,
+        focalDistance: 5.0,
+        originDistance: 1,
+        clipXY: SPARK_CLIP_XY,
+        maxStdDev: SPARK_MAX_STD_DEV,
+        maxPixelRadius: SPARK_MAX_PIXEL_RADIUS,
+        minAlpha: SPARK_MIN_ALPHA,
+        view: {
+          depthBias: 1,
+          sortDistance: SPARK_SORT_DISTANCE,
+          sortRadial: true,
+          sort360: false,
+        },
+      });
+      sparkRenderer.renderOrder = 9998;
+      this.scene.add(sparkRenderer);
+      this.sparkRenderer = sparkRenderer;
+      if (this.minimalBackgroundMode) {
+        sparkRenderer.visible = false;
+      }
 
-    if (
-      sparkRenderer.material &&
-      typeof sparkRenderer.material.vertexShader === "string"
-    ) {
-      sparkRenderer.material.vertexShader =
-        sparkRenderer.material.vertexShader.replace(
-          "if (viewCenter.z >= 0.0) {",
-          "if (viewCenter.z > -6.0) {",
-        );
-      sparkRenderer.material.needsUpdate = true;
+      if (
+        sparkRenderer.material &&
+        typeof sparkRenderer.material.vertexShader === "string"
+      ) {
+        sparkRenderer.material.vertexShader =
+          sparkRenderer.material.vertexShader.replace(
+            "if (viewCenter.z >= 0.0) {",
+            "if (viewCenter.z > -6.0) {",
+          );
+        sparkRenderer.material.needsUpdate = true;
+      }
+    } catch (err) {
+      this.sparkRendererFailed = true;
+      console.warn("[VrmEngine] Spark renderer init failed (world background unavailable):", err);
     }
   }
 
@@ -1941,6 +1953,7 @@ export class VrmEngine {
       this.sparkRenderer.removeFromParent();
       this.sparkRenderer = null;
     }
+    this.sparkRendererFailed = false;
     if (this.renderer) {
       this.renderer.dispose();
     }
@@ -2315,6 +2328,7 @@ export class VrmEngine {
     }
 
     await this.ensureSparkRenderer();
+    if (this.sparkRendererFailed) return;
     // Re-check after async — the engine may have been disposed during the
     // await (e.g. React StrictMode double-mount or rapid navigation).
     if (
@@ -2342,16 +2356,21 @@ export class VrmEngine {
       worldRevealRadius = cached.worldRevealRadius;
       splat.visible = false;
     } else {
-      splat = new SplatMesh({
-        url: normalizedUrl,
-        constructSplats: (packedSplats) => {
-          worldAnchor = getRobustPackedSplatAnchor(packedSplats);
-          worldRevealRadius = getRobustPackedSplatRadialExtent(
-            packedSplats,
-            worldAnchor,
-          );
-        },
-      });
+      try {
+        splat = new SplatMesh({
+          url: normalizedUrl,
+          constructSplats: (packedSplats) => {
+            worldAnchor = getRobustPackedSplatAnchor(packedSplats);
+            worldRevealRadius = getRobustPackedSplatRadialExtent(
+              packedSplats,
+              worldAnchor,
+            );
+          },
+        });
+      } catch (splatErr) {
+        console.warn("[VrmEngine] SplatMesh construction failed:", splatErr);
+        return;
+      }
       splat.frustumCulled = false;
       splat.quaternion.identity();
       splat.position.set(0, 0, 0);
@@ -2361,7 +2380,14 @@ export class VrmEngine {
     }
 
     if (!cached) {
-      await splat.initialized;
+      try {
+        await splat.initialized;
+      } catch (initErr) {
+        console.warn("[VrmEngine] SplatMesh initialization failed:", initErr);
+        splat.parent?.remove(splat);
+        splat.dispose();
+        return;
+      }
     }
 
     if (

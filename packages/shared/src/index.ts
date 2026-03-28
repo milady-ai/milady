@@ -3,4 +3,9 @@
  * Use subpath imports for granular access (e.g. @miladyai/shared/contracts).
  */
 export * from "./restart.js";
+export {
+  isMiladySettingsDebugEnabled,
+  sanitizeForSettingsDebug,
+  settingsDebugCloudSummary,
+} from "./settings-debug.js";
 export { sanitizeSpeechText } from "./spoken-text.js";

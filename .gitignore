@@ -156,6 +156,7 @@ apps/app/ios/App/build*/
 # Ignored caches
 .ruff_cache/
 cache/voice/
+apps/app/.vite/
 
 # Dev workflow artifacts
 milady-*.html

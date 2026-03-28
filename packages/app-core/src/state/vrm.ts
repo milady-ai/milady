@@ -6,6 +6,9 @@ import type { UiTheme } from "./ui-preferences";
 // Bundled VRM asset roster
 // ---------------------------------------------------------------------------
 
+/** Shipped bundle uses `milady-1`…`milady-8`; there is no `default.*` on disk. */
+const BUNDLED_VRM_FALLBACK_SLUG = "milady-1";
+
 /**
  * Get the VRM asset roster from the boot config.
  * The host app passes its character roster via AppBootConfig.vrmAssets.
@@ -40,7 +43,8 @@ export function normalizeAvatarIndex(index: number): number {
 /** Resolve a bundled VRM index (1–N) to its public asset URL. */
 export function getVrmUrl(index: number): string {
   const assets = getAssets();
-  if (assets.length === 0) return resolveAppAssetUrl("vrms/default.vrm.gz");
+  if (assets.length === 0)
+    return resolveAppAssetUrl(`vrms/${BUNDLED_VRM_FALLBACK_SLUG}.vrm.gz`);
   const n = normalizeAvatarIndex(index);
   const safe = n > 0 ? n : 1;
   const slug = assets[safe - 1]?.slug ?? assets[0]?.slug ?? "default";
@@ -51,7 +55,9 @@ export function getVrmUrl(index: number): string {
 export function getVrmPreviewUrl(index: number): string {
   const assets = getAssets();
   if (assets.length === 0)
-    return resolveAppAssetUrl("vrms/previews/default.png");
+    return resolveAppAssetUrl(
+      `vrms/previews/${BUNDLED_VRM_FALLBACK_SLUG}.png`,
+    );
   const n = normalizeAvatarIndex(index);
   const safe = n > 0 ? n : 1;
   const slug = assets[safe - 1]?.slug ?? assets[0]?.slug ?? "default";
@@ -62,7 +68,9 @@ export function getVrmPreviewUrl(index: number): string {
 export function getVrmBackgroundUrl(index: number): string {
   const assets = getAssets();
   if (assets.length === 0)
-    return resolveAppAssetUrl("vrms/backgrounds/default.png");
+    return resolveAppAssetUrl(
+      `vrms/backgrounds/${BUNDLED_VRM_FALLBACK_SLUG}.png`,
+    );
   const n = normalizeAvatarIndex(index);
   const safe = n > 0 ? n : 1;
   const slug = assets[safe - 1]?.slug ?? assets[0]?.slug ?? "default";

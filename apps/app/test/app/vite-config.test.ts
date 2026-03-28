@@ -42,4 +42,31 @@ describe("app vite config", () => {
     const pluginNames = getPluginNames(loaded?.config.plugins ?? []);
     expect(pluginNames).toContain("desktop-cors");
   });
+
+  it("uses app-local Vite cache dir and ignores Electrobun native build output", async () => {
+    const loaded = await loadConfigFromFile(
+      { command: "serve", mode: "development" },
+      CONFIG_PATH,
+      APP_DIR,
+    );
+    expect(loaded?.config.cacheDir).toBe(path.join(APP_DIR, ".vite"));
+    const ignored = loaded?.config.server?.watch?.ignored;
+    expect(ignored).toEqual(
+      expect.arrayContaining([
+        "**/electrobun/build/**",
+        "**/electrobun/artifacts/**",
+      ]),
+    );
+  });
+
+  it("defines MILADY_SETTINGS_DEBUG for client settings trace", async () => {
+    const loaded = await loadConfigFromFile(
+      { command: "serve", mode: "development" },
+      CONFIG_PATH,
+      APP_DIR,
+    );
+    const define = loaded?.config.define as Record<string, string> | undefined;
+    expect(define?.["import.meta.env.MILADY_SETTINGS_DEBUG"]).toBeDefined();
+    expect(define?.["import.meta.env.VITE_MILADY_SETTINGS_DEBUG"]).toBeDefined();
+  });
 });

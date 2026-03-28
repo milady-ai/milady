@@ -27,7 +27,10 @@ import {
   VRM_DESKTOP_BATTERY_POLL_MS,
 } from "./vrm-desktop-energy";
 
-const DEFAULT_VRM_PATH = getVrmUrl(1);
+/** Resolved lazily — boot config may not be set at module-load time (bundled builds). */
+function getDefaultVrmPath(): string {
+  return getVrmUrl(1);
+}
 
 export type VrmViewerProps = {
   /** When false the loaded scene stays resident but the render loop is paused */
@@ -279,7 +282,7 @@ export function VrmViewer(props: VrmViewerProps) {
       ? {
           id,
           role: props.worldUrl ? "world-stage" : "chat-avatar",
-          vrmPath: props.vrmPath ?? DEFAULT_VRM_PATH,
+          vrmPath: props.vrmPath ?? getDefaultVrmPath(),
           worldUrl: props.worldUrl ?? null,
           engine,
           getDebugInfo: () => engine.getDebugInfo(),
@@ -467,7 +470,7 @@ export function VrmViewer(props: VrmViewerProps) {
     const engine = engineRef.current;
     if (!engine) return;
 
-    const vrmUrl = props.vrmPath ?? DEFAULT_VRM_PATH;
+    const vrmUrl = props.vrmPath ?? getDefaultVrmPath();
     if (vrmUrl === currentVrmPathRef.current) return;
     currentVrmPathRef.current = vrmUrl;
     revealStartedRef.current = false;
@@ -483,7 +486,11 @@ export function VrmViewer(props: VrmViewerProps) {
           if (worldUrl !== currentWorldPathRef.current) {
             currentWorldPathRef.current = worldUrl;
             const worldLoadPromise = (async () => {
-              await engine.setWorldUrl(worldUrl);
+              try {
+                await engine.setWorldUrl(worldUrl);
+              } catch (worldErr) {
+                console.warn("[VrmViewer] World load failed (avatar will still load):", worldErr);
+              }
             })();
             worldLoadPromiseRef.current = worldLoadPromise;
             try {

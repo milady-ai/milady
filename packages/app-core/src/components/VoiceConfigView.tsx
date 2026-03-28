@@ -701,12 +701,13 @@ export function VoiceConfigView() {
     : "own-key";
   const currentMode: VoiceMode = voiceConfig.mode ?? defaultVoiceMode;
   const providerInfo = VOICE_PROVIDERS.find((p) => p.id === currentProvider);
-  const isConfigured =
-    currentMode === "cloud"
-      ? cloudVoiceAvailable
-      : currentProvider !== "elevenlabs"
-        ? true
-        : Boolean(voiceConfig.elevenlabs?.apiKey);
+  // Cloud vs own-key only applies to providers that need credentials. Edge TTS
+  // has no API key — do not gate "Configured" on Eliza Cloud when Edge is selected.
+  const isConfigured = (() => {
+    if (!providerInfo?.needsKey) return true;
+    if (currentMode === "cloud") return cloudVoiceAvailable;
+    return Boolean(voiceConfig.elevenlabs?.apiKey);
+  })();
 
   const handleProviderChange = useCallback((provider: VoiceProvider) => {
     setVoiceConfig((prev) => ({ ...prev, provider }));

@@ -482,6 +482,7 @@ export async function applyOnboardingConnectionConfig(
 
   delete process.env.ELIZAOS_CLOUD_API_KEY;
   delete process.env.ELIZAOS_CLOUD_ENABLED;
+  delete process.env.ELIZAOS_CLOUD_BASE_URL;
   delete process.env.ELIZAOS_CLOUD_SMALL_MODEL;
   delete process.env.ELIZAOS_CLOUD_LARGE_MODEL;
 

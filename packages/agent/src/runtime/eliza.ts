@@ -63,6 +63,10 @@ import {
   type TargetInfo,
   type UUID,
 } from "@elizaos/core";
+import {
+  isMiladySettingsDebugEnabled,
+  settingsDebugCloudSummary,
+} from "@miladyai/shared";
 import * as pluginAgentOrchestrator from "@elizaos/plugin-agent-orchestrator";
 import * as pluginAgentSkills from "@elizaos/plugin-agent-skills";
 import * as pluginAnthropic from "@elizaos/plugin-anthropic";
@@ -1284,6 +1288,17 @@ export function isEnvKeyAllowedForForwarding(key: string): boolean {
   return true;
 }
 
+function isElizaCloudManagedProcessEnvKey(key: string): boolean {
+  const upper = key.toUpperCase();
+  return (
+    upper === "ELIZAOS_CLOUD_API_KEY" ||
+    upper === "ELIZAOS_CLOUD_ENABLED" ||
+    upper === "ELIZAOS_CLOUD_BASE_URL" ||
+    upper === "ELIZAOS_CLOUD_SMALL_MODEL" ||
+    upper === "ELIZAOS_CLOUD_LARGE_MODEL"
+  );
+}
+
 export function ensureBrowserServerLink(): boolean {
   try {
     // Resolve the plugin-browser package root via its package.json.
@@ -1964,6 +1979,13 @@ export function applyCloudConfigToEnv(config: ElizaConfig): void {
   // Require explicit cloud.enabled = true. Previously, undefined + apiKey
   // would count as enabled, causing the model to revert to cloud on restart.
   const effectivelyEnabled = cloudMode === true;
+
+  if (isMiladySettingsDebugEnabled()) {
+    const c = cloud as Record<string, unknown>;
+    logger.debug(
+      `[milady][settings][runtime] applyCloudConfigToEnv effectivelyEnabled=${effectivelyEnabled} cloud=${JSON.stringify(settingsDebugCloudSummary(c))} inferenceMode=${String(cloud.inferenceMode ?? "")} servicesInference=${String(cloud.services?.inference ?? "")}`,
+    );
+  }
 
   if (effectivelyEnabled) {
     process.env.ELIZAOS_CLOUD_ENABLED = "true";
@@ -3794,12 +3816,15 @@ export async function startEliza(
   // 2e. Propagate arbitrary env vars from config.env into process.env.
   // Eliza stores user-defined env vars (plugin settings, API URLs, etc.)
   // in config.env; elizaOS plugins read them via process.env / getSetting.
+  // Skip ELIZAOS_CLOUD_* — applyCloudConfigToEnv() owns those; otherwise a
+  // stale key in config.env refills process.env after disconnect cleared it.
   if (
     config.env &&
     typeof config.env === "object" &&
     !Array.isArray(config.env)
   ) {
     for (const [key, value] of Object.entries(config.env)) {
+      if (isElizaCloudManagedProcessEnvKey(key)) continue;
       if (typeof value === "string" && !process.env[key]) {
         process.env[key] = value;
       }

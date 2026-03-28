@@ -16,6 +16,7 @@
  * 3. **Long-lived children** (see `launch()`):
  *    - **API** — `bun --watch dev-server` unless `--no-api`.
  *    - **Watch + default** — Vite **dev** server + `MILADY_RENDERER_URL` for Electrobun (HMR).
+ *      Stale dep chunks: `MILADY_VITE_FORCE=1` (passes `vite --force`, same as dev-ui).
  *    - **Watch + `MILADY_DESKTOP_VITE_BUILD_WATCH=1`** — legacy `vite build --watch`
  *      (Rollup re-emits large chunks each save). **Why separate flag:** production watch is
  *      intentionally opt-in because it is much slower than the dev server on big graphs.
@@ -73,6 +74,8 @@ const forceRenderer =
   process.env.MILADY_DESKTOP_RENDERER_BUILD === "always" ||
   process.env.MILADY_DESKTOP_RENDERER_BUILD === "1";
 const viteWatch = process.env.MILADY_DESKTOP_VITE_WATCH === "1";
+const viteDepForce =
+  process.env.MILADY_VITE_FORCE === "1" || process.env.ELIZA_VITE_FORCE === "1";
 /** Legacy: Rollup `vite build --watch` (tens of seconds per edit on large graphs). */
 const viteRollupWatch =
   viteWatch && process.env.MILADY_DESKTOP_VITE_BUILD_WATCH === "1";
@@ -262,13 +265,24 @@ async function launch() {
       "\n[eliza] Vite dev server (HMR) for desktop — Electrobun loads MILADY_RENDERER_URL.\n" +
         `    (Slow Rollup watch: MILADY_DESKTOP_VITE_BUILD_WATCH=1 with MILADY_DESKTOP_VITE_WATCH=1)\n`,
     );
-    pushChild("vite", "bun", ["run", "vite"], appDir, {
-      NODE_ENV: "development",
-      MILADY_PORT: String(uiDevPort),
-      MILADY_API_PORT: apiPort,
-      ELIZA_API_PORT: apiPort,
-      ELIZA_NAMESPACE: process.env.ELIZA_NAMESPACE ?? "milady",
-    });
+    if (viteDepForce) {
+      console.log(
+        "[eliza] Vite --force (MILADY_VITE_FORCE=1): re-optimizing dependencies.\n",
+      );
+    }
+    pushChild(
+      "vite",
+      "bun",
+      viteDepForce ? ["run", "vite", "--", "--force"] : ["run", "vite"],
+      appDir,
+      {
+        NODE_ENV: "development",
+        MILADY_PORT: String(uiDevPort),
+        MILADY_API_PORT: apiPort,
+        ELIZA_API_PORT: apiPort,
+        ELIZA_NAMESPACE: process.env.ELIZA_NAMESPACE ?? "milady",
+      },
+    );
     await waitForPort(uiDevPort);
     console.log(`[eliza] Vite ready on ${rendererUrlForShell}\n`);
   }
