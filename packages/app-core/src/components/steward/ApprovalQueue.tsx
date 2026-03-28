@@ -33,7 +33,7 @@ interface ApprovalQueueProps {
   approveStewardTx: (txId: string) => Promise<StewardApprovalActionResponse>;
   rejectStewardTx: (txId: string, reason?: string) => Promise<StewardApprovalActionResponse>;
   copyToClipboard: (text: string) => Promise<void>;
-  setActionNotice: (msg: string, type: string, ms: number) => void;
+  setActionNotice: (text: string, tone?: "info" | "success" | "error", ttlMs?: number) => void;
   onPendingCountChange?: (count: number) => void;
 }
 

@@ -22,6 +22,7 @@ export { PairingView } from "./components/PairingView";
 export { SaveCommandModal } from "./components/SaveCommandModal";
 export { SettingsView } from "./components/SettingsView";
 export { ShellOverlays } from "./components/ShellOverlays";
+export { StewardView } from "./components/steward/StewardView";
 export { StartupFailureView } from "./components/StartupFailureView";
 export { StreamView } from "./components/StreamView";
 export { SystemWarningBanner } from "./components/SystemWarningBanner";

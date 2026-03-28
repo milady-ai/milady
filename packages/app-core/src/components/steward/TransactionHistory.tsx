@@ -29,7 +29,7 @@ interface TransactionHistoryProps {
     offset?: number;
   }) => Promise<{ records: StewardTxRecord[]; total: number; offset: number; limit: number }>;
   copyToClipboard: (text: string) => Promise<void>;
-  setActionNotice: (msg: string, type: string, ms: number) => void;
+  setActionNotice: (text: string, tone?: "info" | "success" | "error", ttlMs?: number) => void;
 }
 
 const STATUS_OPTIONS: Array<{ value: string; label: string }> = [

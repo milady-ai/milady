@@ -81,6 +81,11 @@ import type {
   WalletTradingProfileSourceFilter,
   WalletTradingProfileWindow,
 } from "@miladyai/agent/contracts/wallet";
+import type {
+  StewardPendingApproval,
+  StewardTxRecord,
+  StewardTxStatus,
+} from "@miladyai/shared/contracts/wallet";
 import {
   DEFAULT_WALLET_RPC_SELECTIONS,
   normalizeWalletRpcProviderId,

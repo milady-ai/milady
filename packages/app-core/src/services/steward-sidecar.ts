@@ -397,7 +397,7 @@ export class StewardSidecar {
         stderr: "pipe",
       });
 
-      this.process = proc;
+      this.process = proc as unknown as typeof this.process;
       this.updateStatus({ pid: proc.pid ?? null });
 
       // Stream output
@@ -491,12 +491,13 @@ export class StewardSidecar {
   }
 
   private async waitForHealthy(): Promise<void> {
-    this.healthCheckAbort = new AbortController();
+    const abort = new AbortController();
+    this.healthCheckAbort = abort;
     const startTime = Date.now();
     const apiBase = this.getApiBase();
 
     while (Date.now() - startTime < HEALTH_CHECK_TIMEOUT_MS) {
-      if (this.healthCheckAbort.signal.aborted) {
+      if (abort.signal.aborted) {
         throw new Error("Health check aborted");
       }
 
